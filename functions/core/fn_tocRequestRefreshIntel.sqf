@@ -7,7 +7,8 @@
 if (!isServer) exitWith {false};
 
 // Dedicated MP hardening:
-// If remotely requested, bind request to sender-owner and require an authorized ARC role.
+// If remotely requested, bind request to sender-owner and require the same
+// role family the Intel UI exposes for admin refresh tools (S2/CMD/OMNI).
 if (!isNil "remoteExecutedOwner") then
 {
     private _reo = remoteExecutedOwner;
@@ -19,7 +20,10 @@ if (!isNil "remoteExecutedOwner") then
         } forEach allPlayers;
 
         if (isNull _requestor) exitWith {false};
-        if (!([_requestor] call ARC_fnc_rolesIsAuthorized)) exitWith {false};
+
+        private _isOmni = [_requestor, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
+        private _canRefresh = _isOmni || { [_requestor] call ARC_fnc_rolesIsTocS2 } || { [_requestor] call ARC_fnc_rolesIsTocCommand };
+        if (!_canRefresh) exitWith {false};
     };
 };
 
