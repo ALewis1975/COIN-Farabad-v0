@@ -215,7 +215,8 @@ private _details = "";
 private _primaryLabel = "ACTION";
 private _primaryEnabled = false;
 
-private _secondaryLabel = "";
+private _followOnViaSitrepLabel = "FOLLOW-ON (SITREP)";
+private _secondaryLabel = _followOnViaSitrepLabel;
 private _secondaryEnabled = false; // Follow-on requests are part of the SITREP wizard; no standalone button.
 
 private _isAuth = [player] call ARC_fnc_rolesIsAuthorized;
@@ -223,7 +224,8 @@ private _isAuth = [player] call ARC_fnc_rolesIsAuthorized;
 if (_focusData isEqualTo "") then
 {
     _details = "<t size='1.1' font='PuristaMedium'>Operations</t><br/><br/>" +
-               "Select an incident, an order, or a lead to view details.";
+               "Select an incident, an order, or a lead to view details." +
+               "<br/><br/><t size='0.9' color='#BDBDBD'>Follow-on requests are captured inside the SITREP flow.</t>";
 }
 else
 {
