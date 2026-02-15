@@ -114,39 +114,41 @@ if (_reopenConsole) then
 hint "Map click to place the LEAD REQUEST (Esc to cancel).";
 openMap [true, false];
 
-onMapSingleClick "
-    params ['_units','_pos','_alt','_shift'];
+private _mapClickCode = [
+    "params ['_units','_pos','_alt','_shift'];",
+    "",
+    "private _leadType = missionNamespace getVariable ['ARC_lastLeadReqType','RECON'];",
+    "private _sum = missionNamespace getVariable ['ARC_lastLeadReqSummary','Lead: Unknown'];",
+    "private _det = missionNamespace getVariable ['ARC_lastLeadReqDetails',''];",
+    "private _conf = missionNamespace getVariable ['ARC_lastLeadReqConfidence','MED'];",
+    "private _strength = missionNamespace getVariable ['ARC_lastLeadReqStrength',0.55];",
+    "private _ttl = missionNamespace getVariable ['ARC_lastLeadReqTTL',3600];",
+    "",
+    "private _payload = [",
+    "    ['leadType', _leadType],",
+    "    ['displayName', _sum],",
+    "    ['strength', _strength],",
+    "    ['ttl', _ttl],",
+    "    ['confidence', _conf],",
+    "    ['tag', 'S2_REQUEST']",
+    "];",
+    "",
+    "[",
+    "    player,",
+    "    'LEAD_REQUEST',",
+    "    _payload,",
+    "    _sum,",
+    "    _det,",
+    "    _pos,",
+    "    [ ['source','S2_MAPCLICK'] ]",
+    "] remoteExec ['ARC_fnc_intelQueueSubmit', 2];",
+    "",
+    "hint 'Lead request submitted to TOC queue.';",
+    "openMap [false, false];",
+    "onMapSingleClick '';",
+    "true;"
+] joinString "\n";
 
-    private _leadType = missionNamespace getVariable ['ARC_lastLeadReqType','RECON'];
-    private _sum = missionNamespace getVariable ['ARC_lastLeadReqSummary','Lead: Unknown'];
-    private _det = missionNamespace getVariable ['ARC_lastLeadReqDetails',''];
-    private _conf = missionNamespace getVariable ['ARC_lastLeadReqConfidence','MED'];
-    private _strength = missionNamespace getVariable ['ARC_lastLeadReqStrength',0.55];
-    private _ttl = missionNamespace getVariable ['ARC_lastLeadReqTTL',3600];
-
-    private _payload = [
-        ['leadType', _leadType],
-        ['displayName', _sum],
-        ['strength', _strength],
-        ['ttl', _ttl],
-        ['confidence', _conf],
-        ['tag', 'S2_REQUEST']
-    ];
-
-    [
-        player,
-        'LEAD_REQUEST',
-        _payload,
-        _sum,
-        _det,
-        _pos,
-        [ ['source','S2_MAPCLICK'] ]
-    ] remoteExec ['ARC_fnc_intelQueueSubmit', 2];
-
-    hint 'Lead request submitted to TOC queue.';
-    openMap [false, false];
-    onMapSingleClick '';
-    true;
-";
+onMapSingleClick _mapClickCode;
 
 true

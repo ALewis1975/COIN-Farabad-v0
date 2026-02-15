@@ -140,8 +140,15 @@ _civ disableAI "PATH";
 _civ setVariable ["ARC_epw_stage", "SHERIFF_HOLDING", true];
 _civ setVariable ["ARC_epw_handedOffAt", serverTime, true];
 
-// Surrender animation (safe, best-effort)
-[_civ, "AmovPercMstpSsurWnonDnon"] remoteExecCall ["switchMove", 0];
+// Surrender animation (locality-safe): execute where the detainee is local.
+if (local _civ) then
+{
+    _civ switchMove "AmovPercMstpSsurWnonDnon";
+}
+else
+{
+    [_civ, "AmovPercMstpSsurWnonDnon"] remoteExecCall ["switchMove", owner _civ];
+};
 
 private _transferDelay = missionNamespace getVariable ["civsub_v1_detention_transfer_to_epw_delay_s", 300];
 if (!(_transferDelay isEqualType 0)) then { _transferDelay = 300; };
