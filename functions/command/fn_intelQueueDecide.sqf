@@ -24,7 +24,7 @@ params [
     ["_note", ""]
 ];
 
-if (!([_approver, "ARC_fnc_intelQueueDecide", "Queue decision rejected: sender verification failed.", "TOC_QUEUE_DECIDE_REJECTED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
+if (!([_approver, "ARC_fnc_intelQueueDecide", "Queue decision rejected: sender verification failed.", "TOC_QUEUE_DECIDE_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 if (!(_qid isEqualType "")) then { _qid = ""; };
 _qid = trim _qid;

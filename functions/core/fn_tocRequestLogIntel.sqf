@@ -24,7 +24,7 @@ params [
     ["_metaExtra", []]
 ];
 
-if (!([_caller, "ARC_fnc_tocRequestLogIntel", "Intel log rejected: sender verification failed.", "TOC_LOG_INTEL_REJECTED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
+if (!([_caller, "ARC_fnc_tocRequestLogIntel", "Intel log rejected: sender verification failed.", "TOC_LOG_INTEL_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 if (_reporter isEqualTo "") then { _reporter = "UNKNOWN"; };
 if (_category isEqualTo "") then { _category = "SIGHTING"; };

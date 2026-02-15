@@ -49,7 +49,7 @@ params [
     ["_foProceedIntent", ""]
 ];
 
-if (!([_unit, "ARC_fnc_tocReceiveSitrep", "SITREP rejected: sender verification failed.", "TOC_SITREP_REJECTED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
+if (!([_unit, "ARC_fnc_tocReceiveSitrep", "SITREP rejected: sender verification failed.", "TOC_SITREP_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
 if (_taskId isEqualTo "") exitWith {false};
