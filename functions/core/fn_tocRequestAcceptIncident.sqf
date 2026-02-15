@@ -26,7 +26,7 @@ params [
     ["_caller", objNull]
 ];
 
-if (!([_caller, "ARC_fnc_tocRequestAcceptIncident", "Incident acceptance rejected: sender verification failed.", "TOC_ACCEPT_INCIDENT_REJECTED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
+if (!([_caller, "ARC_fnc_tocRequestAcceptIncident", "Incident acceptance rejected: sender verification failed.", "TOC_ACCEPT_INCIDENT_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 // Role-gated task acceptance (RHSUSAF Officer / Squad Leader classnames).
 if (!isNull _caller && { !([_caller] call ARC_fnc_rolesIsAuthorized) }) exitWith

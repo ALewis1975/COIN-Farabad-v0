@@ -22,8 +22,10 @@ params [
     ["_event", "RPC_SENDER_REJECTED"]
 ];
 
-private _actualOwner = -1;
-if (!isNil "remoteExecutedOwner") then { _actualOwner = remoteExecutedOwner; };
+private _isRemoteRpc = !isNil "remoteExecutedOwner";
+if (!_isRemoteRpc) exitWith {true};
+
+private _actualOwner = remoteExecutedOwner;
 
 if (isNull _caller) exitWith
 {
@@ -44,11 +46,9 @@ if (isNull _caller) exitWith
     false
 };
 
-if (!isNil "remoteExecutedOwner") then
+private _expectedOwner = owner _caller;
+if (_expectedOwner != _actualOwner) exitWith
 {
-    private _expectedOwner = owner _caller;
-    if (_expectedOwner != _actualOwner) exitWith
-    {
         ["OPS", format ["SECURITY: %1 rejected (sender owner mismatch). expected=%2 actual=%3 caller=%4", _rpc, _expectedOwner, _actualOwner, name _caller], [0,0,0],
             [
                 ["event", _event],
@@ -67,7 +67,6 @@ if (!isNil "remoteExecutedOwner") then
         };
 
         false
-    };
 };
 
 true
