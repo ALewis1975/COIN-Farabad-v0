@@ -47,7 +47,9 @@ if (isNull _caller) exitWith
 };
 
 private _expectedOwner = owner _caller;
-if (_expectedOwner != _actualOwner) exitWith
+// In hosted/SP paths, remoteExecutedOwner may be -1 even for legitimate local invocations.
+// Only enforce strict owner matching when the remote owner resolves to a positive network owner id.
+if (_actualOwner > 0 && { _expectedOwner != _actualOwner }) exitWith
 {
         ["OPS", format ["SECURITY: %1 rejected (sender owner mismatch). expected=%2 actual=%3 caller=%4", _rpc, _expectedOwner, _actualOwner, name _caller], [0,0,0],
             [
