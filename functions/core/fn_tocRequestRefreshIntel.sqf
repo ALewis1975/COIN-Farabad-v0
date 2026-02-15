@@ -6,8 +6,18 @@
 
 if (!isServer) exitWith {false};
 
-[] call ARC_fnc_publicBroadcastState;
-[] call ARC_fnc_intelBroadcast;
-[] call ARC_fnc_leadBroadcast;
-[] call ARC_fnc_threadBroadcast;
+// Keep broadcast order explicit and stable:
+//  1) campaign/public headline state
+//  2) intel + ops feed slices
+//  3) lead pool snapshot
+//  4) thread/case summary snapshot
+{
+    [] call _x;
+} forEach [
+    ARC_fnc_publicBroadcastState,
+    ARC_fnc_intelBroadcast,
+    ARC_fnc_leadBroadcast,
+    ARC_fnc_threadBroadcast
+];
+
 true
