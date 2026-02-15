@@ -52,6 +52,7 @@ class CfgFunctions
             class rolesIsTocS3 {};
             class rolesIsTocCommand {};
             class rolesCanApproveQueue {};
+            class rpcValidateSender {};
 
             // Deferred cleanup (despawn when players leave area)
             class cleanupRegister {};

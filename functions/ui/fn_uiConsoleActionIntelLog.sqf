@@ -90,7 +90,7 @@ private _metaExtra = [
     ["event", "UI_INTEL_LOG"]
 ];
 
-[_reporter, _cat, _posATL, _summary, _details, _metaExtra] remoteExec ["ARC_fnc_tocRequestLogIntel", 2];
+[player, _reporter, _cat, _posATL, _summary, _details, _metaExtra] remoteExec ["ARC_fnc_tocRequestLogIntel", 2];
 
 ["Intel", "Submitted intel report."] call ARC_fnc_clientToast;
 

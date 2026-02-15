@@ -15,6 +15,8 @@
 
 if (!isServer) exitWith {false};
 
+if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\\core\\fn_rpcValidateSender.sqf"; };
+
 // Fail-safe: ensure role helper functions exist even if CfgFunctions.hpp was not updated.
 if (isNil "ARC_fnc_rolesIsAuthorized") then { ARC_fnc_rolesIsAuthorized = compile preprocessFileLineNumbers "functions\\core\\fn_rolesIsAuthorized.sqf"; };
 if (isNil "ARC_fnc_rolesGetTag") then { ARC_fnc_rolesGetTag = compile preprocessFileLineNumbers "functions\\core\\fn_rolesGetTag.sqf"; };
@@ -23,6 +25,8 @@ if (isNil "ARC_fnc_rolesFormatUnit") then { ARC_fnc_rolesFormatUnit = compile pr
 params [
     ["_caller", objNull]
 ];
+
+if (!([_caller, "ARC_fnc_tocRequestAcceptIncident", "Incident acceptance rejected: sender verification failed.", "TOC_ACCEPT_INCIDENT_REJECTED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 // Role-gated task acceptance (RHSUSAF Officer / Squad Leader classnames).
 if (!isNull _caller && { !([_caller] call ARC_fnc_rolesIsAuthorized) }) exitWith
