@@ -22,6 +22,26 @@ params [
 if (isNull _actor || {isNull _civ}) exitWith {false};
 if !(isPlayer _actor) exitWith {false};
 
+// Dedicated MP hardening:
+// If invoked via remoteExec, bind actor identity to network sender.
+if (!isNil "remoteExecutedOwner") then
+{
+    private _reo = remoteExecutedOwner;
+    if (_reo > 0) then
+    {
+        if ((owner _actor) != _reo) exitWith
+        {
+            diag_log format ["[CIVSUB][SEC] %1 denied: sender-owner mismatch reo=%2 actorOwner=%3 actor=%4",
+                "ARC_fnc_civsubInteractShowPapers",
+                _reo,
+                owner _actor,
+                name _actor
+            ];
+            false
+        };
+    };
+};
+
 private _did = _civ getVariable ["civsub_districtId", ""];
 if (_did isEqualTo "") exitWith {
     ["CIVSUB: This civilian has no district id.", "CHAT"] remoteExecCall ["ARC_fnc_civsubClientMessage", _actor];

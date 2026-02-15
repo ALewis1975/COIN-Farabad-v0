@@ -11,7 +11,11 @@
 
 if (!isServer) exitWith {false};
 
+if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\core\fn_rpcValidateSender.sqf"; };
+
 params [ ["_caller", objNull, [objNull]] ];
+
+if (!([_caller, "ARC_fnc_tocRequestNextIncident", "Incident generation rejected: sender verification failed.", "TOC_NEXT_INCIDENT_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
 
