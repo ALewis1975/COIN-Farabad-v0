@@ -29,6 +29,28 @@ if !(isPlayer _actor) exitWith {false};
 if (_actionId isEqualTo "") exitWith {false};
 if !(_civ getVariable ["civsub_v1_isCiv", false]) exitWith {false};
 
+// Dedicated MP hardening:
+// If this function was invoked via remoteExec, bind actor identity to the network sender.
+if (!isNil "remoteExecutedOwner") then
+{
+    private _reo = remoteExecutedOwner;
+    if (_reo > 0) then
+    {
+        if ((owner _actor) != _reo) exitWith {
+            diag_log format ["[CIVSUB][SEC] ACTION denied: sender-owner mismatch reo=%1 actorOwner=%2 action=%3 actor=%4 civ=%5",
+                _reo,
+                owner _actor,
+                _actionId,
+                name _actor,
+                _civ getVariable ["civ_uid", ""]
+            ];
+
+            ["<t size='0.9'>Action denied (authority mismatch).</t>"] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
+            false
+        };
+    };
+};
+
 // Basic proximity validation to reduce abuse/spam.
 if ((_actor distance _civ) > 6) exitWith {
     ["<t size='0.9'>Too far from civilian.</t>"] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
