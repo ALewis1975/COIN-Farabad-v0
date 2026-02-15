@@ -30,6 +30,26 @@ if (isNull _civ || {isNull _actor}) exitWith {false};
 if !(isPlayer _actor) exitWith {false};
 if !(_civ getVariable ["civsub_v1_isCiv", false]) exitWith {false};
 
+// Dedicated MP hardening:
+// If this function was invoked via remoteExec, bind actor identity to the network sender.
+if (!isNil "remoteExecutedOwner") then
+{
+    private _reo = remoteExecutedOwner;
+    if (_reo > 0) then
+    {
+        if ((owner _actor) != _reo) exitWith
+        {
+            diag_log format ["[CIVSUB][SEC] SNAPSHOT denied: sender-owner mismatch reo=%1 actorOwner=%2 actor=%3 civ=%4",
+                _reo,
+                owner _actor,
+                name _actor,
+                _civ getVariable ["civ_uid", ""]
+            ];
+            false
+        };
+    };
+};
+
 private _did = _civ getVariable ["civsub_districtId", ""];
 private _civUid = _civ getVariable ["civ_uid", ""]; // assigned at spawn
 
