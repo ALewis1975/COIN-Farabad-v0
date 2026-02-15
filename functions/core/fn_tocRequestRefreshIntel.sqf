@@ -6,23 +6,6 @@
 
 if (!isServer) exitWith {false};
 
-// Dedicated MP hardening:
-// If remotely requested, bind request to sender-owner and require an authorized ARC role.
-if (!isNil "remoteExecutedOwner") then
-{
-    private _reo = remoteExecutedOwner;
-    if (_reo > 0) then
-    {
-        private _requestor = objNull;
-        {
-            if (owner _x == _reo) exitWith { _requestor = _x; };
-        } forEach allPlayers;
-
-        if (isNull _requestor) exitWith {false};
-        if (!([_requestor] call ARC_fnc_rolesIsAuthorized)) exitWith {false};
-    };
-};
-
 // Keep broadcast order explicit and stable:
 //  1) campaign/public headline state
 //  2) intel + ops feed slices
