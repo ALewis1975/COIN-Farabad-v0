@@ -13,10 +13,14 @@
 
 if (!isServer) exitWith {false};
 
+if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\\core\\fn_rpcValidateSender.sqf"; };
+
 params [
     ["_acceptor", objNull],
     ["_orderId", ""]
 ];
+
+if (!([_acceptor, "ARC_fnc_intelOrderAccept", "Order acceptance rejected: sender verification failed.", "TOC_ORDER_ACCEPT_REJECTED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 if (isNull _acceptor) exitWith {false};
 _orderId = trim _orderId;

@@ -2,16 +2,20 @@
     Server-side handler: accept an intel point from a client and persist it.
 
     Params:
-        0: STRING - reporter name
-        1: STRING - category (e.g., "SIGHTING", "HUMINT")
-        2: ARRAY  - position (from map click)
+        0: OBJECT - caller (player)
+        1: STRING - reporter name
+        2: STRING - category (e.g., "SIGHTING", "HUMINT")
+        3: ARRAY  - position (from map click)
 
     This is called via remoteExec from clients.
 */
 
 if (!isServer) exitWith {false};
 
+if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\\core\\fn_rpcValidateSender.sqf"; };
+
 params [
+    ["_caller", objNull],
     "_reporter",
     "_category",
     "_pos",
@@ -19,6 +23,8 @@ params [
     ["_noteDetails", ""],
     ["_metaExtra", []]
 ];
+
+if (!([_caller, "ARC_fnc_tocRequestLogIntel", "Intel log rejected: sender verification failed.", "TOC_LOG_INTEL_REJECTED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 if (_reporter isEqualTo "") then { _reporter = "UNKNOWN"; };
 if (_category isEqualTo "") then { _category = "SIGHTING"; };
@@ -36,7 +42,8 @@ private _zone = [_posATL] call ARC_fnc_worldGetZoneForPos;
 if (_zone isEqualTo "") then { _zone = "Unzoned"; };
 
 // RPT trace (helps triage client map-click issues)
-diag_log format ["[ARC][INTEL][LOG] Request accepted | reporter=%1 | cat=%2 | grid=%3 | zone=%4 | sum=%5", _reporter, toUpper _category, _grid, _zone, _noteSummary];
+private _callerName = if (isNull _caller) then { "UNKNOWN" } else { name _caller };
+diag_log format ["[ARC][INTEL][LOG] Request accepted | reporter=%1 | caller=%2 | cat=%3 | grid=%4 | zone=%5 | sum=%6", _reporter, _callerName, toUpper _category, _grid, _zone, _noteSummary];
 
 private _catU = toUpper _category;
 private _summary = "";
@@ -64,7 +71,9 @@ private _meta = [
     ["category", _catU],
     ["grid", _grid],
     ["zone", _zone],
-    ["event", "PLAYER_INTEL"]
+    ["event", "PLAYER_INTEL"],
+    ["callerName", _callerName],
+    ["callerUID", if (isNull _caller) then { "" } else { getPlayerUID _caller }]
 ];
 
 if ((trim _noteDetails) isNotEqualTo "") then

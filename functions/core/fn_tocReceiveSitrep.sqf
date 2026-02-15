@@ -22,6 +22,8 @@
 
 if (!isServer) exitWith {false};
 
+if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\\core\\fn_rpcValidateSender.sqf"; };
+
 // Fail-safe: ensure role helper functions exist even if CfgFunctions.hpp was not updated.
 if (isNil "ARC_fnc_rolesIsAuthorized") then { ARC_fnc_rolesIsAuthorized = compile preprocessFileLineNumbers "functions\\core\\fn_rolesIsAuthorized.sqf"; };
 if (isNil "ARC_fnc_rolesGetTag") then { ARC_fnc_rolesGetTag = compile preprocessFileLineNumbers "functions\\core\\fn_rolesGetTag.sqf"; };
@@ -46,6 +48,8 @@ params [
     ["_foHoldMinutes", -1],
     ["_foProceedIntent", ""]
 ];
+
+if (!([_unit, "ARC_fnc_tocReceiveSitrep", "SITREP rejected: sender verification failed.", "TOC_SITREP_REJECTED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
 if (_taskId isEqualTo "") exitWith {false};

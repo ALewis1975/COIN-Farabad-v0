@@ -39,6 +39,6 @@ private _metaExtra = [
     ["heading", str _dir]
 ];
 
-[name player, "SIGHTING", _posATL, _sum, "", _metaExtra] remoteExec ["ARC_fnc_tocRequestLogIntel", 2];
+[player, name player, "SIGHTING", _posATL, _sum, "", _metaExtra] remoteExec ["ARC_fnc_tocRequestLogIntel", 2];
 hint format ["Submitted sighting: %1", _label];
 true

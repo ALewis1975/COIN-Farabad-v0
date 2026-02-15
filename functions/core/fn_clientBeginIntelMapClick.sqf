@@ -77,7 +77,7 @@ onMapSingleClick
 
     private _reporter = name player;
 
-    [_reporter, _cat, _pos, _sum, _det] remoteExec ["ARC_fnc_tocRequestLogIntel", 2];
+    [player, _reporter, _cat, _pos, _sum, _det] remoteExec ["ARC_fnc_tocRequestLogIntel", 2];
 
     openMap false;
 
