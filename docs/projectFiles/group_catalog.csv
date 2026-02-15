@@ -1,0 +1,85 @@
+item_index,side,entity_id,editor_groupID,group_name,callsign,unit_count,unit_types,leader_var,leader_desc,unit_vars,label
+0,Civilian,4545,,,,3,"Support, UK3CB_MEC_C_DOC",,,,Group 4545
+1,Civilian,4552,,,,3,"Support, UK3CB_MEC_C_DOC",,,,Group 4552
+2,Civilian,4556,,,,3,"Support, UK3CB_MEC_C_DOC",,,,Group 4556
+6,Civilian,4577,,,,4,"Support, UK3CB_MEC_C_DOC, UK3CB_TKC_C_PILOT",,,,Group 4577
+0,Civilian,4507,EPW-0001,EPW-0001,,1,UK3CB_TKC_C_CIV,,,,EPW-0001
+1,West,3184,43 EECS | COMPASS 81 (EC-130H),43 EECS,COMPASS 81 (EC-130H),2,B_Pilot_F,,,,43 EECS | COMPASS 81 (EC-130H)
+0,West,277,2-82 AHB | CORSAIR 31 (UH-60),2-82 AHB,CORSAIR 31 (UH-60),4,"rhsusf_army_ocp_helicrew, rhsusf_army_ocp_helipilot",,,,2-82 AHB | CORSAIR 31 (UH-60)
+0,West,4423,2 BSTB (ABN) EOD Team | EOD 11,2 BSTB (ABN) EOD Team,EOD 11,3,rhsusf_army_ocp_explosives,,,,2 BSTB (ABN) EOD Team | EOD 11
+0,West,3586,JTF Farabad | FARABAD 6,JTF Farabad,FARABAD 6,2,rhsusf_army_ocp_officer,farabad_5,Deputy JTF Commander / Chief of Staff,"farabad_5, farabad_6",JTF Farabad | FARABAD 6
+3,West,1581,332 EOSS | FARABAD APPROACH,332 EOSS,FARABAD APPROACH,4,rhsusf_army_ocp_officer,,,,332 EOSS | FARABAD APPROACH
+0,West,3590,JTF Farabad BDOC | FARABAD BDOC,JTF Farabad BDOC,FARABAD BDOC,3,rhsusf_airforce_security_force_rifleman,jtf_bdoc_oic,Base Defense Operations Center (Watch Desk),"jtf_bdoc_oic, jtf_bdoc_ncoic, jtf_bdoc_wo",JTF Farabad BDOC | FARABAD BDOC
+0,West,1571,332 EOSS | FARABAD GROUND,332 EOSS,FARABAD GROUND,2,rhsusf_army_ocp_officer,,,,332 EOSS | FARABAD GROUND
+4,West,4331,332 EOSS | FARABAD TOWER,332 EOSS,FARABAD TOWER,3,rhsusf_army_ocp_officer,FarabadTower_LA,Local Assist / Tower Assist (LA),"FarabadTower_LA, farabad_tower_ws_ccic, farabad_tower_lc",332 EOSS | FARABAD TOWER
+0,West,1545,407 BSB | GRIFFIN MAINT 01,407 BSB,GRIFFIN MAINT 01,2,"Support, rhsusf_army_ocp_engineer",,,,407 BSB | GRIFFIN MAINT 01
+1,West,1552,407 BSB | GRIFFIN MED 01,407 BSB,GRIFFIN MED 01,2,"Support, rhsusf_army_ocp_medic",,,,407 BSB | GRIFFIN MED 01
+2,West,1542,407 BSB | GRIFFIN SUPPORT 01,407 BSB,GRIFFIN SUPPORT 01,2,"Support, rhsusf_army_ocp_driver_armored",,,,407 BSB | GRIFFIN SUPPORT 01
+3,West,1548,407 BSB | GRIFFIN SUPPORT 02,407 BSB,GRIFFIN SUPPORT 02,2,"Support, rhsusf_army_ocp_driver_armored",,,,407 BSB | GRIFFIN SUPPORT 02
+1,West,104,75 EFS | HAWG 11 (A-10C),75 EFS,HAWG 11 (A-10C),1,rhsusf_airforce_jetpilot,,,,75 EFS | HAWG 11 (A-10C)
+3,West,4343,75 EFS | HAWG 12 (A-10C),75 EFS,HAWG 12 (A-10C),1,rhsusf_airforce_jetpilot,,,,75 EFS | HAWG 12 (A-10C)
+6,West,3626,JTF Farabad | JTF LIAISON,JTF Farabad,JTF LIAISON,1,rhsusf_airforce_security_force_rifleman,jtf_liaison,Joint Integration / Liaison Cell@JTF Farabad | JTF LIAISON,jtf_liaison,JTF Farabad | JTF LIAISON
+3,West,3621,332 MDG | LIFELINE LNO FARABAD,332 MDG,LIFELINE LNO FARABAD,1,rhsusf_army_ocp_officer,jtf_medical_lno,Medical / Emergency Coordination,jtf_medical_lno,332 MDG | LIFELINE LNO FARABAD
+1,West,3555,332 EMSG | MAYOR 5,332 EMSG,MAYOR 5,1,rhsusf_airforce_security_force_rifleman,mayor_rep,Base Mayor Rep@332 EMSG | MAYOR 5,mayor_rep,332 EMSG | MAYOR 5
+2,West,3559,332 EMSG | MAYOR 6,332 EMSG,MAYOR 6,1,rhsusf_army_ocp_officer,mayor_6,Base Mayor,mayor_6,332 EMSG | MAYOR 6
+0,West,3544,332 EMSG CIVENG | MAYOR CIVENG,332 EMSG CIVENG,MAYOR CIVENG,1,rhsusf_army_ocp_officer,mayor_civeng,Mayor CIVENG,mayor_civeng,332 EMSG CIVENG | MAYOR CIVENG
+0,West,3542,332 EMSG LRS | MAYOR LRS,332 EMSG LRS,MAYOR LRS,1,rhsusf_airforce_pilot,mayor_lrs,LRS Controller@332 EMSG LRS | MAYOR LRS,mayor_lrs,332 EMSG LRS | MAYOR LRS
+0,West,140,332 EMSG | MAYOR LRS FLM 11 (Aircraft Tug),332 EMSG,MAYOR LRS FLM 11 (Aircraft Tug),1,FIR_USAF_GroundCrew_1,,,,332 EMSG | MAYOR LRS FLM 11 (Aircraft Tug)
+1,West,142,332 EMSG | MAYOR LRS FLM 12 (Aircraft Tug),332 EMSG,MAYOR LRS FLM 12 (Aircraft Tug),1,FIR_USAF_GroundCrew_1,,,,332 EMSG | MAYOR LRS FLM 12 (Aircraft Tug)
+2,West,569,332 EMSG | MAYOR LRS FLM 13 (Aircraft Tug),332 EMSG,MAYOR LRS FLM 13 (Aircraft Tug),1,FIR_USAF_GroundCrew_1,,,,332 EMSG | MAYOR LRS FLM 13 (Aircraft Tug)
+7,West,2829,332 EMSG | MAYOR LRS FLM 14 (Aircraft Tug),332 EMSG,MAYOR LRS FLM 14 (Aircraft Tug),1,FIR_USAF_GroundCrew_1,,,,332 EMSG | MAYOR LRS FLM 14 (Aircraft Tug)
+9,West,3206,332 EMSG | MAYOR LRS FLM 15,332 EMSG,MAYOR LRS FLM 15,1,FIR_USAF_GroundCrew_1,,,,332 EMSG | MAYOR LRS FLM 15
+0,West,3540,332 EMSG OPS | MAYOR OPS,332 EMSG OPS,MAYOR OPS,1,rhsusf_army_ocp_officer,mayor_ops,Mayor Ops,mayor_ops,332 EMSG OPS | MAYOR OPS
+0,West,3548,332 EMSG | MAYOR SENTRY LNO,332 EMSG,MAYOR SENTRY LNO,1,rhsusf_airforce_security_force_rifleman,mayor_sentry_lno,Sentry LNO,mayor_sentry_lno,332 EMSG | MAYOR SENTRY LNO
+0,West,3546,332 EMSG SERVICES | MAYOR SERVICES,332 EMSG SERVICES,MAYOR SERVICES,1,FIR_USAF_GroundCrew_2_ABU,,,,332 EMSG SERVICES | MAYOR SERVICES
+1,West,3552,332 EMSG | MAYOR SHERIFF LNO,332 EMSG,MAYOR SHERIFF LNO,1,rhsusf_army_ocp_officer,sheriff_lno,Sheriff LNO,sheriff_lno,332 EMSG | MAYOR SHERIFF LNO
+2,West,3564,332 EMSG | MAYOR TNP LNO,332 EMSG,MAYOR TNP LNO,1,rhsusf_airforce_security_force_rifleman,mayor_tnp_lno,TNP LNO,mayor_tnp_lno,332 EMSG | MAYOR TNP LNO
+1,West,4338,14-ASOS | RAVEN-13,14-ASOS,RAVEN-13,2,rhsusf_airforce_security_force_rifleman,,,,14-ASOS | RAVEN-13
+0,West,109,816 EAS | REACH 101 (C-17A),816 EAS,REACH 101 (C-17A),2,B_Pilot_F,,,,816 EAS | REACH 101 (C-17A)
+2,West,2731,816 EAS | REACH 102 (C-17A),816 EAS,REACH 102 (C-17A),2,B_Pilot_F,,,,816 EAS | REACH 102 (C-17A)
+0,West,106,746 EAS | REACH 301 (C-130J),746 EAS,REACH 301 (C-130J),2,B_Pilot_F,,,,746 EAS | REACH 301 (C-130J)
+0,West,3338,B-2-325 AIR | REDFALCON 2,B-2-325 AIR,REDFALCON 2,6,"rhsusf_army_ocp_fso, rhsusf_army_ocp_medic, rhsusf_army_ocp_officer, rhsusf_army_ocp_rifleman, rhsusf_army_ocp_squadleader",,,,B-2-325 AIR | REDFALCON 2
+0,West,3354,1-B-2-325 AIR | REDFALCON 2-1,1-B-2-325 AIR,REDFALCON 2-1,5,"rhsusf_army_ocp_jfo, rhsusf_army_ocp_medic, rhsusf_army_ocp_officer, rhsusf_army_ocp_rifleman, rhsusf_army_ocp_squadleader",,,,1-B-2-325 AIR | REDFALCON 2-1
+0,West,3364,1-1-B-2-325 AIR | REDFALCON 2-1-1,1-1-B-2-325 AIR,REDFALCON 2-1-1,9,"rhsusf_army_ocp_autorifleman, rhsusf_army_ocp_grenadier, rhsusf_army_ocp_riflemanat, rhsusf_army_ocp_squadleader, rhsusf_army_ocp_teamleader",,,,1-1-B-2-325 AIR | REDFALCON 2-1-1
+0,West,3375,2-1-B-2-325 AIR | REDFALCON 2-1-2,2-1-B-2-325 AIR,REDFALCON 2-1-2,9,"rhsusf_army_ocp_autorifleman, rhsusf_army_ocp_grenadier, rhsusf_army_ocp_riflemanat, rhsusf_army_ocp_squadleader, rhsusf_army_ocp_teamleader",,,,2-1-B-2-325 AIR | REDFALCON 2-1-2
+0,West,3387,3-1-B-2-325 AIR | REDFALCON 2-1-3,3-1-B-2-325 AIR,REDFALCON 2-1-3,9,"rhsusf_army_ocp_autorifleman, rhsusf_army_ocp_grenadier, rhsusf_army_ocp_riflemanat, rhsusf_army_ocp_squadleader, rhsusf_army_ocp_teamleader",,,,3-1-B-2-325 AIR | REDFALCON 2-1-3
+0,West,3399,4-1-B-2-325 AIR | REDFALCON 2-1-4,4-1-B-2-325 AIR,REDFALCON 2-1-4,9,"rhsusf_army_ocp_javelin, rhsusf_army_ocp_javelin_assistant, rhsusf_army_ocp_machinegunner, rhsusf_army_ocp_machinegunnera, rhsusf_army_ocp_squadleader",,,,4-1-B-2-325 AIR | REDFALCON 2-1-4
+0,West,4370,C-2-325 AIR | REDFALCON 3,C-2-325 AIR,REDFALCON 3,6,"rhsusf_army_ocp_fso, rhsusf_army_ocp_medic, rhsusf_army_ocp_officer, rhsusf_army_ocp_rifleman, rhsusf_army_ocp_squadleader",charlie_co,Commanding Officer (CO) @C-2-325 AIR | REDFALCON 3,"charlie_co, charlie_xo, charlie_1sgt, charlie_medic, charlie_fo",C-2-325 AIR | REDFALCON 3
+4,West,4377,1-C-2-325 AIR | REDFALCON 3-1,1-C-2-325 AIR,REDFALCON 3-1,5,"rhsusf_army_ocp_jfo, rhsusf_army_ocp_medic, rhsusf_army_ocp_officer, rhsusf_army_ocp_rifleman, rhsusf_army_ocp_squadleader",,,,1-C-2-325 AIR | REDFALCON 3-1
+0,West,4383,1-1-C-2-325 AIR | REDFALCON 3-1-1,1-1-C-2-325 AIR,REDFALCON 3-1-1,9,"rhsusf_army_ocp_autorifleman, rhsusf_army_ocp_grenadier, rhsusf_army_ocp_riflemanat, rhsusf_army_ocp_squadleader, rhsusf_army_ocp_teamleader",,,,1-1-C-2-325 AIR | REDFALCON 3-1-1
+0,West,4393,2-1-C-2-325 AIR | REDFALCON 3-1-2,2-1-C-2-325 AIR,REDFALCON 3-1-2,9,"rhsusf_army_ocp_autorifleman, rhsusf_army_ocp_grenadier, rhsusf_army_ocp_riflemanat, rhsusf_army_ocp_squadleader, rhsusf_army_ocp_teamleader",,,,2-1-C-2-325 AIR | REDFALCON 3-1-2
+0,West,4403,3-1-C-2-325 AIR | REDFALCON 3-1-3,3-1-C-2-325 AIR,REDFALCON 3-1-3,9,"rhsusf_army_ocp_autorifleman, rhsusf_army_ocp_grenadier, rhsusf_army_ocp_riflemanat, rhsusf_army_ocp_squadleader, rhsusf_army_ocp_teamleader",,,,3-1-C-2-325 AIR | REDFALCON 3-1-3
+0,West,4413,4-1-C-2-325 AIR | REDFALCON 3-1-W,4-1-C-2-325 AIR,REDFALCON 3-1-W,9,"rhsusf_army_ocp_javelin, rhsusf_army_ocp_javelin_assistant, rhsusf_army_ocp_machinegunner, rhsusf_army_ocp_machinegunnera, rhsusf_army_ocp_squadleader",,,,4-1-C-2-325 AIR | REDFALCON 3-1-W
+0,West,4345,2-325 AIR | REDFALCON 6,2-325 AIR,REDFALCON 6,3,"rhsusf_army_ocp_officer, rhsusf_army_ocp_squadleader",tf_co,Commanding Officer @2-325 AIR | REDFALCON 6,"tf_co, tf_xo, tf_csm",2-325 AIR | REDFALCON 6
+0,West,4368,2-325 AIR | REDFALCON DOC,2-325 AIR,REDFALCON DOC,1,rhsusf_army_ocp_medic,tf_med_officer,Medical Officer @2-325 AIR | REFALCON DOC,tf_med_officer,2-325 AIR | REDFALCON DOC
+0,West,4359,2-325 AIR | REDFALCON S2,2-325 AIR,REDFALCON S2,1,rhsusf_army_ocp_officer,s2,Inteligence Officer @2-325 AIR | REDFALCON S2,s2,2-325 AIR | REDFALCON S2
+0,West,4361,2-325 AIR | REDFALCON S3,2-325 AIR,REDFALCON S3,1,rhsusf_army_ocp_officer,s3,Operations Rep @2-325 AIR | REDFALCON S3,s3,2-325 AIR | REDFALCON S3
+0,West,4363,2-325 AIR | REDFALCON S4,2-325 AIR,REDFALCON S4,1,rhsusf_army_ocp_officer,s4,Logistics Rep @2-325 AIR | REFALCON S4,s4,2-325 AIR | REDFALCON S4
+0,West,4365,2-325 AIR | REDFALCON S6,2-325 AIR,REDFALCON S6,2,"rhsusf_army_ocp_officer, rhsusf_army_ocp_rifleman",s6_oic,Signal Officer @2-325 AIR | REFALCON S6,"s6_oic, s6_rto",2-325 AIR | REDFALCON S6
+1,West,4349,2-325 AIR | REDFALCON TOC,2-325 AIR,REDFALCON TOC,9,"rhsusf_airforce_security_force_rifleman, rhsusf_army_ocp_officer, rhsusf_army_ocp_squadleader",mp_lno,MP / Detainee Ops LNO,"mp_lno, battle_captain, battle_nco, fse_nco, avn_lno, uas_lno, engineer_lno, civil_affairs_lno",2-325 AIR | REDFALCON TOC
+2,West,3648,1-17 CAV (Air Cav) | SABER XX,1-17 CAV (Air Cav),SABER XX,2,rhsusf_army_ocp_helipilot,,,,1-17 CAV (Air Cav) | SABER XX
+3,West,4427,2 BSTB (ABN) Engineer Team | SAPPER 11,2 BSTB (ABN) Engineer Team,SAPPER 11,4,"B_engineer_F, B_soldier_exp_F",eng_tl,Engineer Team Leader@2 BSTB (ABN) Engineer Team | SAPPER 11,eng_tl,2 BSTB (ABN) Engineer Team | SAPPER 11
+5,West,2142,332 ESFS | SENTRY 6,332 ESFS,SENTRY 6,1,rhsusf_airforce_security_force_rifleman,,,,332 ESFS | SENTRY 6
+0,West,117,532 ESFS | SENTRY GATE 1,532 ESFS,SENTRY GATE 1,10,rhsusf_airforce_security_force_rifleman,,,,532 ESFS | SENTRY GATE 1
+1,West,239,532 ESFS | SENTRY GATE 2,532 ESFS,SENTRY GATE 2,7,rhsusf_airforce_security_force_rifleman,,,,532 ESFS | SENTRY GATE 2
+2,West,251,532 ESFS | SENTRY GATE 3,532 ESFS,SENTRY GATE 3,4,rhsusf_airforce_security_force_rifleman,,,,532 ESFS | SENTRY GATE 3
+0,West,133,332 ESFS | SENTRY LAW 01,332 ESFS,SENTRY LAW 01,2,rhsusf_airforce_security_force_rifleman,,,,332 ESFS | SENTRY LAW 01
+1,West,137,332 ESFS | SENTRY LAW 02,332 ESFS,SENTRY LAW 02,1,rhsusf_airforce_security_force_rifleman,,,,332 ESFS | SENTRY LAW 02
+1,West,3605,332 SFG | SENTRY LNO FARABAD,332 SFG,SENTRY LNO FARABAD,2,rhsusf_airforce_security_force_rifleman,jtf_sfi_1,USAF Security Forces liaison to BDOC,"jtf_sfi_1, jtf_sfi_2",332 SFG | SENTRY LNO FARABAD
+1,West,3727,2 BSTB | SHERIFF HOLDING 01,2 BSTB,SHERIFF HOLDING 01,8,"MFR_B_GermanShepherd, rhsusf_army_ocp_riflemanl, rhsusf_army_ocp_squadleader",,,,2 BSTB | SHERIFF HOLDING 01
+2,West,4497,2 BSTB | SHERIFF HOLDING 02,2 BSTB,SHERIFF HOLDING 02,9,"Cycle, Move, rhsusf_army_ocp_riflemanl",,,,2 BSTB | SHERIFF HOLDING 02
+0,West,4335,2 BSTB | SHERIFF K-9 01,2 BSTB,SHERIFF K-9 01,2,"MFR_B_GermanShepherd, rhsusf_army_ocp_teamleader",,,,2 BSTB | SHERIFF K-9 01
+2,West,3613,2 BSTB (MP) | SHERIFF LNO FARABAD,2 BSTB (MP),SHERIFF LNO FARABAD,1,rhsusf_army_ocp_officer,jtf_sheriff_lno,Military Police / Detainee Coordination,jtf_sheriff_lno,2 BSTB (MP) | SHERIFF LNO FARABAD
+0,West,269,3-82 GSAB | TALON 71 (CH-47F),3-82 GSAB,TALON 71 (CH-47F),4,"rhsusf_army_ocp_helicrew, rhsusf_army_ocp_helipilot",,,,3-82 GSAB | TALON 71 (CH-47F)
+0,West,114,340 EARS | TEXACO 41 (KC-135R),340 EARS,TEXACO 41 (KC-135R),2,B_Pilot_F,,,,340 EARS | TEXACO 41 (KC-135R)
+0,West,112,97 EFS | TIGER 11 (F-16C),97 EFS,TIGER 11 (F-16C),1,rhsusf_airforce_jetpilot,,,,97 EFS | TIGER 11 (F-16C)
+3,West,4341,97 EFS | TIGER 12 (F-16C),97 EFS,TIGER 12 (F-16C),1,rhsusf_airforce_jetpilot,,,,97 EFS | TIGER 12 (F-16C)
+5,West,3635,Takistan National Army | TNA LNO FARABAD,Takistan National Army,TNA LNO FARABAD,1,UK3CB_TKA_B_OFF,tna_lno_farabad,Host-nation army liaison,tna_lno_farabad,Takistan National Army | TNA LNO FARABAD
+4,West,3632,Takistan Ministry of Interior | TNP LNO FARABAD,Takistan Ministry of Interior,TNP LNO FARABAD,1,UK3CB_TKP_B_OFF,tnp_lno_farabad,Host-nation police liaison,tnp_lno_farabad,Takistan Ministry of Interior | TNP LNO FARABAD
+0,West,265,1-82 ARB | WOLFPACK 21 (AH-64D),1-82 ARB,WOLFPACK 21 (AH-64D),2,rhsusf_army_ocp_ah64_pilot,,,,1-82 ARB | WOLFPACK 21 (AH-64D)
+23,West,3108,,,,1,MFR_B_GermanShepherd,,,,Group 3108
+24,West,3112,,,,1,MFR_B_GermanShepherd_Black,,,,Group 3112
+6,West,3701,,,,2,B_UAV_AI,,,,Group 3701
+7,West,3705,,,,2,B_UAV_AI,,,,Group 3705
+8,West,3709,,,,1,B_UAV_AI,,,,Group 3709
+9,West,4432,TEMP-M151-PATHING VIC,TEMP-M151-PATHING VIC,,1,B_Deck_Crew_F,,,,TEMP-M151-PATHING VIC
