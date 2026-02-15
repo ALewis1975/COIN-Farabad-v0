@@ -37,6 +37,8 @@
 
 if (!isServer) exitWith {false};
 
+if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\core\fn_rpcValidateSender.sqf"; };
+
 params [
     ["_closeResult", "", [""]],
     ["_req", "", [""]],
@@ -65,6 +67,8 @@ if (isNull _caller && { !isNil "remoteExecutedOwner" }) then
 };
 
 if (isNull _caller) exitWith {false};
+
+if (!([_caller, "ARC_fnc_tocRequestCloseoutAndOrder", "Closeout rejected: sender verification failed.", "TOC_CLOSEOUT_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 private _owner = 0;
 if (!isNull _caller) then { _owner = owner _caller; };

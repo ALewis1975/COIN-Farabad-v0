@@ -135,14 +135,8 @@ private _statusColor = {
     private _row = _lb lbAdd _line;
     _lb lbSetData [_row, _qid];
 
-    private _tip = format ["Status: %1
-Kind: %2
-From: %3
-Zone: %4
-Grid: %5
-
-%6
-%7", _stU, _kind, _who, _zone, _grid, _sum, _det];
+    private _tipFmt = "Status: %1\nKind: %2\nFrom: %3\nZone: %4\nGrid: %5\n\n%6\n%7";
+    private _tip = format [_tipFmt, _stU, _kind, _who, _zone, _grid, _sum, _det];
     _lb lbSetTooltip [_row, _tip];
 
     _lb lbSetColor [_row, [_stU] call _statusColor];

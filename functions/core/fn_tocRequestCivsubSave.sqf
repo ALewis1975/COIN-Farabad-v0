@@ -12,9 +12,31 @@
 
 if (!isServer) exitWith {false};
 
+if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\core\fn_rpcValidateSender.sqf"; };
+
 params [
     ["_requester", objNull, [objNull]]
 ];
+
+if (!isNil "remoteExecutedOwner") then
+{
+    private _reo = remoteExecutedOwner;
+    if (_reo > 0) then
+    {
+        if (isNull _requester) then
+        {
+            {
+                if (owner _x == _reo) exitWith { _requester = _x; };
+            } forEach allPlayers;
+        };
+
+        if (!([_requester, "ARC_fnc_tocRequestCivsubSave", "CIVSUB save rejected: sender verification failed.", "TOC_CIVSUB_SAVE_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
+
+        private _isOmni = [_requester, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
+        private _can = _isOmni || { [_requester] call ARC_fnc_rolesCanApproveQueue };
+        if (!_can) exitWith {false};
+    };
+};
 
 if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {false};
 
