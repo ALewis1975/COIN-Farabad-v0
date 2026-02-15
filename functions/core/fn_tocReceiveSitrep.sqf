@@ -206,7 +206,7 @@ if !((_pos # 0) isEqualTo 0 && {(_pos # 1) isEqualTo 0}) then
     _grid = mapGridPosition _pos;
 };
 
-// Phase 6: CIVSUB SITREP annex (best-effort; required for downstream reporting)
+// Phase 6: CIVSUB SITREP annex (contract: include for every SITREP when CIVSUB is enabled)
 private _civAnnex = "";
 if (missionNamespace getVariable ["civsub_v1_enabled", false]) then
 {
@@ -218,23 +218,47 @@ if (missionNamespace getVariable ["civsub_v1_enabled", false]) then
     if (isNil "ARC_fnc_civsubSitrepAnnexBuild") then { ARC_fnc_civsubSitrepAnnexBuild = compile preprocessFileLineNumbers "functions\civsub\fn_civsubSitrepAnnexBuild.sqf"; };
     if (isNil "ARC_fnc_civsubDistrictsFindByPos") then { ARC_fnc_civsubDistrictsFindByPos = compile preprocessFileLineNumbers "functions\civsub\fn_civsubDistrictsFindByPos.sqf"; };
 
+    // Resolution chain (server authoritative):
+    //  1) district by SITREP position
+    //  2) incident-owned district captured at acceptance
+    //  3) explicit UNKNOWN-district fallback annex (never empty)
     private _didC = [_pos] call ARC_fnc_civsubDistrictsFindByPos;
-    if (_didC isEqualType "" && { (trim _didC) isNotEqualTo "" }) then
+    if (!(_didC isEqualType "")) then { _didC = ""; };
+    _didC = toUpper (trim _didC);
+
+    if (_didC isEqualTo "") then
+    {
+        _didC = ["activeIncidentCivsubDistrictId", ""] call ARC_fnc_stateGet;
+        if (!(_didC isEqualType "")) then { _didC = ""; };
+        _didC = toUpper (trim _didC);
+    };
+
+    if (_didC isNotEqualTo "") then
     {
         _civAnnex = [_didC, _pos] call ARC_fnc_civsubSitrepAnnexBuild;
         if (!(_civAnnex isEqualType "")) then { _civAnnex = ""; };
         _civAnnex = trim _civAnnex;
-
-        if (_civAnnex isNotEqualTo "") then
-        {
-            // Store separately so UI can show it without parsing details blob
-            ["activeIncidentSitrepAnnexCivsub", _civAnnex] call ARC_fnc_stateSet;
-            missionNamespace setVariable ["ARC_activeIncidentSitrepAnnexCivsub", _civAnnex, true];
-
-            // Also append to details for archival
-            if (_details isEqualTo "") then { _details = _civAnnex; } else { _details = _details + "\n\n" + _civAnnex; };
-        };
     };
+
+    // Contract-safe fallback when district cannot be resolved or builder returns blank.
+    if (_civAnnex isEqualTo "") then
+    {
+        private _gridSafe = if (_grid isEqualTo "") then { "UNKNOWN" } else { _grid };
+        _civAnnex = [
+            "CIVSUB ANNEX",
+            "District: UNKNOWN",
+            format ["Reference grid: %1", _gridSafe],
+            "Influence delta dW/dR/dG: N/A (district unresolved)",
+            "Civilian casualties / Crime DB / Detentions / Aid: N/A (district unresolved)"
+        ] joinString "\n";
+    };
+
+    // Store separately so UI can show it without parsing details blob
+    ["activeIncidentSitrepAnnexCivsub", _civAnnex] call ARC_fnc_stateSet;
+    missionNamespace setVariable ["ARC_activeIncidentSitrepAnnexCivsub", _civAnnex, true];
+
+    // Also append to details for archival
+    if (_details isEqualTo "") then { _details = _civAnnex; } else { _details = _details + "\n\n" + _civAnnex; };
 };
 
 // Persist SITREP gating and capture sender + payload (useful for debugging / after restart)

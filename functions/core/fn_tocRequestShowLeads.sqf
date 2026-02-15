@@ -6,8 +6,30 @@
 
 if (!isServer) exitWith {false};
 
-// Optional: the calling unit can be passed in, which is more reliable than remoteExecutedOwner in hosted/SP.
-params [["_caller", objNull]];
+if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\core\fn_rpcValidateSender.sqf"; };
+
+// Optional: explicit calling unit (preferred). Fallback maps remote owner.
+params [ ["_caller", objNull, [objNull]] ];
+
+if (!isNil "remoteExecutedOwner") then
+{
+    private _reo = remoteExecutedOwner;
+    if (_reo > 0) then
+    {
+        if (isNull _caller) then
+        {
+            {
+                if (owner _x == _reo) exitWith { _caller = _x; };
+            } forEach allPlayers;
+        };
+
+        if (!([_caller, "ARC_fnc_tocRequestShowLeads", "Show leads rejected: sender verification failed.", "TOC_SHOW_LEADS_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
+
+        private _isOmni = [_caller, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
+        private _can = _isOmni || { [_caller] call ARC_fnc_rolesCanApproveQueue } || { [_caller] call ARC_fnc_rolesIsTocS2 } || { [_caller] call ARC_fnc_rolesIsTocCommand };
+        if (!_can) exitWith {false};
+    };
+};
 
 [] call ARC_fnc_leadPrune;
 

@@ -449,6 +449,7 @@ missionNamespace setVariable ["ARC_activeIncidentSitrepSent", ["activeIncidentSi
 missionNamespace setVariable ["ARC_activeIncidentSitrepFrom", ["activeIncidentSitrepFrom", ""] call ARC_fnc_stateGet, true];
 missionNamespace setVariable ["ARC_activeIncidentSitrepSummary", ["activeIncidentSitrepSummary", ""] call ARC_fnc_stateGet, true];
 missionNamespace setVariable ["ARC_activeIncidentSitrepDetails", ["activeIncidentSitrepDetails", ""] call ARC_fnc_stateGet, true];
+missionNamespace setVariable ["ARC_activeIncidentSitrepAnnexCivsub", ["activeIncidentSitrepAnnexCivsub", ""] call ARC_fnc_stateGet, true];
 
 
 // Recreate parent "case" tasks for any persisted threads (tasks don't persist across restarts).

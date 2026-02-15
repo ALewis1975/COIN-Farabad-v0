@@ -59,6 +59,7 @@
     ["activeIncidentSitrepFromRoleTag", ""],
     ["activeIncidentSitrepSummary", ""],
     ["activeIncidentSitrepDetails", ""],
+    ["activeIncidentSitrepAnnexCivsub", ""],
 
     // Last unit context (used for follow-on orders and dashboards)
     ["lastTaskingGroup", ""],
