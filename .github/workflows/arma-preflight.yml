@@ -25,54 +25,17 @@ jobs:
 
       - name: SQF static analysis (all *.sqf)
         run: |
-          python - <<'PY'
-          import sys
-          from pathlib import Path
-
-          # LordGolias/sqf installs as "sqflint" on pip, but the module is "sqf"
-          import sqf
-
-          sqf_files = sorted({p for p in Path(".").rglob("*.sqf") if p.is_file()})
-          if not sqf_files:
-            print("No .sqf files found.")
-            sys.exit(0)
-
-          total_errors = 0
-          total_warnings = 0
-
-          for p in sqf_files:
-            try:
-              code = p.read_text(encoding="utf-8", errors="replace")
-              ast = sqf.parser.parse(code)
-              errors = sqf.analyzer.analyze(ast)
-
-              # sqf.analyzer returns a list of exceptions/warnings (mixed types)
-              # We'll count anything with "Error" in class name as error, else warning.
-              file_errors = 0
-              file_warnings = 0
-              for e in errors:
-                name = e.__class__.__name__.lower()
-                if "error" in name:
-                  file_errors += 1
-                else:
-                  file_warnings += 1
-
-              if file_errors or file_warnings:
-                print(f"\n{p}: {file_errors} error(s), {file_warnings} warning(s)")
-                for e in errors[:50]:
-                  print(f"  - {e}")
-
-              total_errors += file_errors
-              total_warnings += file_warnings
-
-            except Exception as ex:
-              # Hard fail if parser crashes
-              print(f"\n{p}: parser/analyzer failed: {ex}")
-              total_errors += 1
-
-          print(f"\nTOTAL: {total_errors} error(s), {total_warnings} warning(s)")
-          sys.exit(1 if total_errors else 0)
-          PY
+          # Recursively lint the repo.
+          # Exit behavior:
+          #   -e w  => fail CI on warnings OR errors (strict)
+          #   -e e  => fail CI on errors only (less strict)
+          sqflint -d . -e w \
+            -x "/\.git(/|$)" \
+            -x "/\.github(/|$)" \
+            -x "/\.vscode(/|$)" \
+            -x "/node_modules(/|$)" \
+            -x "/dist(/|$)" \
+            -x "/build(/|$)"
 
       - name: Mission config sanity checks (description.ext, ui/**/*.hpp, etc.)
         run: |
@@ -98,8 +61,6 @@ jobs:
             sys.exit(0)
 
           def strip_strings_and_comments(text: str) -> str:
-            # Remove // and /* */ comments, but keep structure. Also remove strings to avoid braces inside quotes.
-            # This is a simple lexer, not perfect, but stable for CI.
             out = []
             i = 0
             n = len(text)
@@ -129,17 +90,14 @@ jobs:
 
               if in_str:
                 if ch == "\\":
-                  # skip escaped char
                   i += 2
                   continue
                 if ch == str_ch:
                   in_str = False
-                # replace string content with space to preserve positions/newlines
                 out.append(" " if ch != "\n" else "\n")
                 i += 1
                 continue
 
-              # entering comment?
               if ch == "/" and nxt == "/":
                 in_line_comment = True
                 i += 2
@@ -149,7 +107,6 @@ jobs:
                 i += 2
                 continue
 
-              # entering string?
               if ch in ("'", '"'):
                 in_str = True
                 str_ch = ch
@@ -166,7 +123,6 @@ jobs:
             issues = []
             stripped = strip_strings_and_comments(raw)
 
-            # Brace / paren / bracket balance
             pairs = { "{": "}", "(": ")", "[": "]" }
             stack = []
             for idx, ch in enumerate(stripped):
@@ -183,15 +139,9 @@ jobs:
             if stack:
               issues.append(f"Unclosed delimiter(s): {''.join(o for o, _ in stack)}")
 
-            # Heuristic: class blocks should often end with ';' in config-style syntax
-            # Detect "class X { ... }" not followed by ';'
-            # (This catches a classic mistake in description.ext / *.hpp configs.)
-            # We run on stripped text to ignore strings/comments.
             class_block = re.compile(r"\bclass\s+\w+\s*\{", re.IGNORECASE)
             for m in class_block.finditer(stripped):
               start = m.start()
-              # Find matching closing brace for this opening brace
-              # Simple scan from the first '{' after match
               brace_pos = stripped.find("{", m.end()-1)
               if brace_pos == -1:
                 continue
@@ -204,12 +154,10 @@ jobs:
                 elif stripped[i] == "}":
                   depth -= 1
                   if depth == 0:
-                    # Look ahead for ';' ignoring whitespace/newlines
                     j = i + 1
                     while j < n and stripped[j].isspace():
                       j += 1
                     if j >= n or stripped[j] != ";":
-                      # Provide a line hint
                       line = stripped.count("\n", 0, start) + 1
                       issues.append(f"Possible missing ';' after class block near line {line}")
                     break
