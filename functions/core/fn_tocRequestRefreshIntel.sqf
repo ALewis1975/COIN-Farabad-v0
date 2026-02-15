@@ -6,23 +6,32 @@
 
 if (!isServer) exitWith {false};
 
+if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\core\fn_rpcValidateSender.sqf"; };
+
+params [
+    ["_caller", objNull, [objNull]]
+];
+
 // Dedicated MP hardening:
 // If remotely requested, bind request to sender-owner and require the same
 // role family the Intel UI exposes for admin refresh tools (S2/CMD/OMNI).
-if (!isNil "remoteExecutedOwner") then
+private _isRemoteRpc = !isNil "remoteExecutedOwner";
+if (_isRemoteRpc) then
 {
     private _reo = remoteExecutedOwner;
     if (_reo > 0) then
     {
-        private _requestor = objNull;
+        if (isNull _caller) then
         {
-            if (owner _x == _reo) exitWith { _requestor = _x; };
-        } forEach allPlayers;
+            {
+                if (owner _x == _reo) exitWith { _caller = _x; };
+            } forEach allPlayers;
+        };
 
-        if (isNull _requestor) exitWith {false};
+        if (!([_caller, "ARC_fnc_tocRequestRefreshIntel", "Intel refresh rejected: sender verification failed.", "TOC_REFRESH_INTEL_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
-        private _isOmni = [_requestor, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
-        private _canRefresh = _isOmni || { [_requestor] call ARC_fnc_rolesIsTocS2 } || { [_requestor] call ARC_fnc_rolesIsTocCommand };
+        private _isOmni = [_caller, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
+        private _canRefresh = _isOmni || { [_caller] call ARC_fnc_rolesIsTocS2 } || { [_caller] call ARC_fnc_rolesIsTocCommand };
         if (!_canRefresh) exitWith {false};
     };
 };

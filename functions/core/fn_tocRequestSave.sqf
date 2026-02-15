@@ -8,19 +8,26 @@
 
 if (!isServer) exitWith {false};
 
+if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\core\fn_rpcValidateSender.sqf"; };
+
+params [["_caller", objNull, [objNull]]];
+
 // Dedicated MP hardening:
 // Resolve requestor from network sender and require TOC approver authority.
-private _requestor = objNull;
+private _requestor = _caller;
 if (!isNil "remoteExecutedOwner") then
 {
     private _reo = remoteExecutedOwner;
     if (_reo > 0) then
     {
+        if (isNull _requestor) then
         {
-            if (owner _x == _reo) exitWith { _requestor = _x; };
-        } forEach allPlayers;
+            {
+                if (owner _x == _reo) exitWith { _requestor = _x; };
+            } forEach allPlayers;
+        };
 
-        if (isNull _requestor) exitWith {false};
+        if (!([_requestor, "ARC_fnc_tocRequestSave", "Save rejected: sender verification failed.", "TOC_SAVE_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
         private _isOmni = [_requestor, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
         private _can = _isOmni || { [_requestor] call ARC_fnc_rolesCanApproveQueue };

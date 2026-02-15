@@ -6,16 +6,23 @@
 
 if (!isServer) exitWith {false};
 
-private _owner = remoteExecutedOwner;
-private _requestor = objNull;
+if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\core\fn_rpcValidateSender.sqf"; };
+
+params [["_caller", objNull, [objNull]]];
+
+private _owner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+private _requestor = _caller;
 
 if (!isNil "remoteExecutedOwner" && { _owner > 0 }) then
 {
+    if (isNull _requestor) then
     {
-        if (owner _x == _owner) exitWith { _requestor = _x; };
-    } forEach allPlayers;
+        {
+            if (owner _x == _owner) exitWith { _requestor = _x; };
+        } forEach allPlayers;
+    };
 
-    if (isNull _requestor) exitWith {false};
+    if (!([_requestor, "ARC_fnc_tocRequestResetAll", "Reset rejected: sender verification failed.", "TOC_RESET_ALL_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
     // Reset is a privileged command: TOC approver (S3/Command) or OMNI only.
     private _isOmni = [_requestor, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
