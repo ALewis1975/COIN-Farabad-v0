@@ -77,6 +77,8 @@ private _tab = uiNamespace getVariable ["ARC_console_activeTab", "DASH"];
 if (!(_tab isEqualType "")) then { _tab = "DASH"; };
 _tab = toUpper (trim _tab);
 
+private _opsSecondaryLabel = "FOLLOW-ON (SITREP)";
+
 switch (_tab) do
 {
     case "BOARDS":
@@ -120,7 +122,7 @@ case "DASH":
         { if (!isNull _x) then { _x ctrlShow true; }; } forEach _opsCtrls;
 
         if (!isNull _b1) then { _b1 ctrlShow true; _b1 ctrlEnable true; _b1 ctrlSetText "ACTION"; };
-        if (!isNull _b2) then { _b2 ctrlShow true; _b2 ctrlEnable true; _b2 ctrlSetText "FOLLOW-ON"; };
+        if (!isNull _b2) then { _b2 ctrlShow true; _b2 ctrlEnable false; _b2 ctrlSetText _opsSecondaryLabel; };
 
         [_display, true] call ARC_fnc_uiConsoleOpsPaint;
     };
