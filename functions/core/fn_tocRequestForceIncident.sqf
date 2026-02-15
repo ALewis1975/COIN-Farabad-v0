@@ -17,6 +17,8 @@
 
 if (!isServer) exitWith {false};
 
+if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\core\fn_rpcValidateSender.sqf"; };
+
 params [
     ["_caller", objNull, [objNull]],
     ["_markerRaw", "", [""]],
@@ -25,6 +27,8 @@ params [
 ];
 
 private _owner = remoteExecutedOwner;
+
+if (!([_caller, "ARC_fnc_tocRequestForceIncident", "Force incident rejected: sender verification failed.", "TOC_FORCE_INCIDENT_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 _markerRaw = trim _markerRaw;
 _displayName = trim _displayName;
