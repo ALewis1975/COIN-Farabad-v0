@@ -21,6 +21,8 @@
 
 if (!isServer) exitWith {false};
 
+if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\core\fn_rpcValidateSender.sqf"; };
+
 params [
     ["_result", "", [""]],
     // Optional:
@@ -54,6 +56,8 @@ if (isNull _caller && { !isNil "remoteExecutedOwner" }) then
 };
 
 private _callerName = if (isNull _caller) then {"<unknown>"} else { name _caller };
+
+if (!([_caller, "ARC_fnc_tocRequestCloseIncident", "Close incident rejected: sender verification failed.", "TOC_CLOSE_INCIDENT_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 // Authorization
 private _callerOk = false;
