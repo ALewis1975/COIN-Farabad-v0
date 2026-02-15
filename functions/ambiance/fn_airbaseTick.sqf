@@ -1,0 +1,526 @@
+/*
+    File: functions/ambiance/fn_airbaseTick.sqf
+    Author: ARC / Ambient Airbase Subsystem
+    Description:
+      Main tick loop. Schedules departures/arrivals, processes queue, handles player bubble simulation gating,
+      and queues "return arrivals" for departed aircraft once their turnaround timer expires.
+*/
+
+if (!isServer) exitWith {};
+
+private _rt = missionNamespace getVariable ["airbase_v1_rt", createHashMap];
+if (!(_rt getOrDefault ["initialized", false])) exitWith {};
+
+private _nowTs = serverTime;
+private _tickS = missionNamespace getVariable ["airbase_v1_tick_s", 2];
+
+private _center = _rt getOrDefault ["bubbleCenter", getMarkerPos "mkr_airbaseCenter"];
+private _radius = _rt getOrDefault ["bubbleRadius", 2500];
+
+// Player bubble check
+private _bubbleActive = false;
+{
+    if (isPlayer _x && { alive _x } && { (_x distance2D _center) < _radius }) exitWith { _bubbleActive = true; };
+} forEach allPlayers;
+
+private _wasActive = _rt getOrDefault ["bubbleActive", false];
+_rt set ["bubbleActive", _bubbleActive];
+missionNamespace setVariable ["airbase_v1_bubble_active", _bubbleActive, true];
+
+// Toggle simulation for parked assets when bubble changes
+if (_bubbleActive isNotEqualTo _wasActive) then {
+    private _assetsT = _rt getOrDefault ["assets", []];
+    {
+        private _state = _x getOrDefault ["state", "PARKED"];
+        if (_state == "PARKED") then {
+            private _veh = _x getOrDefault ["veh", objNull];
+            if (!isNull _veh) then { _veh enableSimulationGlobal _bubbleActive; };
+        };
+    } forEach _assetsT;
+
+    // NOTE: We no longer clear the exec lock on bubble deactivation.
+    // If a departure is in progress while players leave the bubble, clearing the
+    // lock can cause concurrent departures. If we ever need a watchdog, add a
+    // time-based safety release instead.
+
+    // OPS observability: bubble toggles are important to understand why the airbase is "frozen".
+    private _ops = missionNamespace getVariable ["airbase_v1_opsLogEnabled", true];
+    if (!(_ops isEqualType true) && !(_ops isEqualType false)) then { _ops = true; };
+    private _dbgOps = missionNamespace getVariable ["airbase_v1_debugOpsLog", false];
+    if ((_ops || _dbgOps)) then {
+        ["OPS", format ["AIRBASE: bubble %1", if (_bubbleActive) then {"ACTIVE"} else {"INACTIVE"}], _center, 0, [
+            ["radius_m", _radius]
+        ]] call ARC_fnc_intelLog;
+    };
+};
+
+// If bubble is inactive, freeze parked assets.
+// IMPORTANT: we still keep scheduling/execution running so airbase operations continue
+// even when no players are nearby (Ops Log remains active).
+if (!_bubbleActive) then {
+    private _assetsF = _rt getOrDefault ["assets", []];
+    {
+        private _state = _x getOrDefault ["state", "PARKED"];
+        if (_state == "PARKED") then {
+            private _veh = _x getOrDefault ["veh", objNull];
+            if (!isNull _veh) then { _veh enableSimulationGlobal false; };
+        };
+    } forEach _assetsF;
+
+    missionNamespace setVariable ["airbase_v1_rt", _rt, true];
+};
+
+// Load state store
+private _queue = ["airbase_v1_queue", []] call ARC_fnc_stateGet;
+private _recs  = ["airbase_v1_records", []] call ARC_fnc_stateGet;
+private _seq   = ["airbase_v1_seq", 0] call ARC_fnc_stateGet;
+
+private _fn_nextId = {
+    _seq = _seq + 1;
+    ["airbase_v1_seq", _seq] call ARC_fnc_stateSet;
+
+    // Local pad routine (keeps this subsystem independent of optional helper functions)
+    private _s = str _seq;
+    while { (count _s) < 4 } do { _s = "0" + _s; };
+    format ["FLT-%1", _s];
+};
+
+
+private _debug = missionNamespace getVariable ["airbase_v1_debug", false];
+private _debugOps = missionNamespace getVariable ["airbase_v1_debugOpsLog", false];
+
+private _opsLogEnabled = missionNamespace getVariable ["airbase_v1_opsLogEnabled", true];
+if (!(_opsLogEnabled isEqualType true) && !(_opsLogEnabled isEqualType false)) then { _opsLogEnabled = true; };
+
+private _opsStatusInterval = missionNamespace getVariable ["airbase_v1_opsStatusInterval_s", 120];
+if (!(_opsStatusInterval isEqualType 0) || { _opsStatusInterval < 30 }) then { _opsStatusInterval = 120; };
+
+// Return handling for departed assets:
+//  - With low probability, queue a RETURN arrival (same tail comes back in on the runway).
+//  - Otherwise, restock the parked aircraft off-screen (respawn at its startPos) so the ramp stays populated.
+private _pReturn = missionNamespace getVariable ["airbase_v1_p_return", 0.15];
+if (!(_pReturn isEqualType 0) || { _pReturn < 0 } || { _pReturn > 1 }) then { _pReturn = 0.15; };
+
+private _assets = _rt getOrDefault ["assets", []];
+{
+    private _a = _x;
+    private _state = _a getOrDefault ["state", "PARKED"];
+
+    if (_state == "COOLDOWN") then {
+        private _avail = _a getOrDefault ["availableAt", 0];
+
+        if (_avail > 0 && { _nowTs >= _avail }) then {
+            private _aid = _a getOrDefault ["id", ""];
+            private _cat = _a getOrDefault ["category", "FW"];
+            private _vehType = _a getOrDefault ["startVehType", ""];
+
+            private _doReturn = ((random 1) < _pReturn);
+
+            if (_doReturn) then {
+                private _fidA = call _fn_nextId;
+
+                private _recA = [
+                    _fidA, _nowTs,
+                    "ARR", _cat,
+                    _aid,
+                    "QUEUED",
+                    _nowTs,
+                    [
+                        ["mode","RETURN"],
+                        ["assetId", _aid],
+                        ["vehType", _vehType]
+                    ]
+                ];
+                _recs pushBack _recA;
+                _queue pushBack [_fidA, "ARR", _aid];
+
+                _a set ["state", "RETURN_QUEUED"];
+                _a set ["activeFlight", _fidA];
+                _a set ["availableAt", 0];
+
+                if (_opsLogEnabled || _debugOps) then {
+                    ["OPS", format ["AIRBASE: queued RETURN arrival %1 for %2", _fidA, _aid], _center, 0, [
+                        ["category", _cat],
+                        ["vehType", _vehType],
+                        ["pReturn", _pReturn]
+                    ]] call ARC_fnc_intelLog;
+                };
+            } else {
+                private _okRestock = [_a] call ARC_fnc_airbaseRestoreParkedAsset;
+
+                if (_okRestock) then {
+                    if (_opsLogEnabled || _debugOps) then {
+                        ["OPS", format ["AIRBASE: restocked %1 (no return flight)", _aid], _center, 0, [
+                            ["category", _cat],
+                            ["vehType", _vehType],
+                            ["pReturn", _pReturn]
+                        ]] call ARC_fnc_intelLog;
+                    };
+                } else {
+                    // If restock failed, try again shortly.
+                    _a set ["availableAt", _nowTs + 60];
+                };
+            };
+        };
+    };
+} forEach _assets;
+
+
+// Scheduler: departures + generic arrivals (existing behavior retained)
+private _cdDep = missionNamespace getVariable ["airbase_v1_depart_cooldown_s", 900];
+private _cdArr = missionNamespace getVariable ["airbase_v1_arrive_cooldown_s", 1200];
+private _sinceDep = _nowTs - (_rt getOrDefault ["lastDepartTs", -1e9]);
+private _sinceArr = _nowTs - (_rt getOrDefault ["lastArriveTs", -1e9]);
+private _canDep = (_sinceDep >= _cdDep);
+private _canArr = (_sinceArr >= _cdArr);
+
+private _sinceStart = _nowTs - (_rt getOrDefault ["startTs", _nowTs]);
+private _firstDelay = missionNamespace getVariable ["airbase_v1_firstDepartureDelayS", missionNamespace getVariable ["airbase_v1_firstDepartureDelay_s", 300]];
+missionNamespace setVariable ["airbase_v1_firstDepartureDelayS", _firstDelay, true];
+missionNamespace setVariable ["airbase_v1_firstDepartureDelay_s", _firstDelay, true];
+private _forceFirstDeparture = (_sinceStart >= _firstDelay) && { !(_rt getOrDefault ["firstDepartureDone", false]) };
+
+// Per-tick rolls
+private _pDepartFW = missionNamespace getVariable ["airbase_v1_p_depart_hour_fw", 0.25];
+private _pArriveFW = missionNamespace getVariable ["airbase_v1_p_arrive_hour_fw", 0.40];
+private _pDepartRW = missionNamespace getVariable ["airbase_v1_p_depart_hour_rw", 0.30];
+private _pArriveRW = missionNamespace getVariable ["airbase_v1_p_arrive_hour_rw", 0.45];
+
+private _pTickDepFW = (_pDepartFW / 3600) * _tickS;
+private _pTickDepRW = (_pDepartRW / 3600) * _tickS;
+private _pTickArrFW = (_pArriveFW / 3600) * _tickS;
+private _pTickArrRW = (_pArriveRW / 3600) * _tickS;
+
+private _pTickDep = _pTickDepFW + _pTickDepRW;
+private _pTickArr = _pTickArrFW + _pTickArrRW;
+
+private _rollDep = _forceFirstDeparture || ((_canDep) && ((random 1) < _pTickDep));
+private _rollArr = (_canArr) && ((random 1) < _pTickArr);
+
+// Build candidates (include FW + RW, exclude disabled)
+private _candidates = _assets select {
+    private _st = _x getOrDefault ["state", "PARKED"];
+    (_st == "PARKED")
+};
+
+if (_rollDep && { (count _candidates) > 0 }) then {
+    // Bias: for the very first departure, avoid tow assets + EC-130 (plane7) if possible.
+    if (_forceFirstDeparture) then {
+        private _prefer = _candidates select {
+            !(_x getOrDefault ["requiresTow", false]) && { !((_x getOrDefault ["vehVar",""]) isEqualTo "plane7") }
+        };
+        if ((count _prefer) > 0) then { _candidates = _prefer; };
+    };
+
+    private _asset = selectRandom _candidates;
+    private _fid = call _fn_nextId;
+    private _cat = _asset getOrDefault ["category", "FW"];
+    private _aid = _asset getOrDefault ["id", ""];
+
+    private _rec = [
+        _fid, _nowTs,
+        "DEP", _cat,
+        _aid,
+        "QUEUED",
+        _nowTs,
+        [
+            ["mode","DEPART"],
+            ["assetId", _aid],
+            ["vehType", (_asset getOrDefault ["startVehType",""])]
+        ]
+    ];
+    _recs pushBack _rec;
+    _queue pushBack [_fid, "DEP", _aid];
+
+    _rt set ["lastDepartTs", _nowTs];
+    if (_forceFirstDeparture) then { _rt set ["firstDepartureDone", true]; };
+
+    if (_opsLogEnabled || _debugOps) then {
+        ["OPS", format ["AIRBASE: queued departure %1 (%2)", _fid, _aid], _center, 0, [
+            ["category", _cat],
+            ["vehType", (_asset getOrDefault ["startVehType",""])]
+        ]] call ARC_fnc_intelLog;
+    };
+};
+
+if (_rollArr) then {
+    private _fidA = call _fn_nextId;
+
+    // Choose category for random inbound (FW/RW) based on configured per-hour rates.
+    private _catA = "FW";
+    private _hasRW = (count (_assets select { (_x getOrDefault ["category","FW"]) isEqualTo "RW" && { (_x getOrDefault ["state","PARKED"]) != "DISABLED" } }) ) > 0;
+    if (_hasRW && { (random _pTickArr) < _pTickArrRW }) then { _catA = "RW"; };
+
+    private _recA = [_fidA, _nowTs, "ARR", _catA, "INBOUND", "QUEUED", _nowTs, [["mode","RANDOM"]]];
+    _recs pushBack _recA;
+    _queue pushBack [_fidA, "ARR", "INBOUND"];
+    _rt set ["lastArriveTs", _nowTs];
+
+    if (_opsLogEnabled || _debugOps) then {
+        ["OPS", format ["AIRBASE: queued inbound arrival %1 (%2)", _fidA, _catA], _center, 0, []] call ARC_fnc_intelLog;
+    };
+};
+
+// Persist queue + records + rt
+["airbase_v1_queue", _queue] call ARC_fnc_stateSet;
+["airbase_v1_records", _recs] call ARC_fnc_stateSet;
+missionNamespace setVariable ["airbase_v1_rt", _rt, true];
+
+// Queue snapshot broadcast (OPS + Diary)
+// Purpose: give players a heads-up (pending departures/arrivals) even before a flight starts taxi/takeoff.
+private _diaryEnabled = missionNamespace getVariable ["airbase_v1_diaryEnabled", true];
+if (!(_diaryEnabled isEqualType true) && !(_diaryEnabled isEqualType false)) then { _diaryEnabled = true; };
+
+private _qDepNow = 0;
+private _qArrNow = 0;
+{
+    private _k = _x param [1, ""];
+    if (_k isEqualTo "DEP") then { _qDepNow = _qDepNow + 1; } else { if (_k isEqualTo "ARR") then { _qArrNow = _qArrNow + 1; }; };
+} forEach _queue;
+
+private _sigParts = [];
+private _nSig = 10 min (count _queue);
+for "_i" from 0 to (_nSig - 1) do {
+    private _it = _queue # _i;
+    _it params ["_sfid","_sk","_sdet"];
+    _sigParts pushBack format ["%1/%2/%3", _sfid, _sk, _sdet];
+};
+
+private _queueSig = format ["%1|%2|%3|%4", (count _queue), _qDepNow, _qArrNow, (_sigParts joinString ";")];
+private _lastSig = _rt getOrDefault ["queueSig",""];
+
+if (_queueSig isNotEqualTo _lastSig) then {
+    _rt set ["queueSig", _queueSig];
+    missionNamespace setVariable ["airbase_v1_rt", _rt, true];
+
+    private _execNow = missionNamespace getVariable ["airbase_v1_execActive", false];
+    private _execFid = missionNamespace getVariable ["airbase_v1_execFid", ""];
+    if (!(_execFid isEqualType "")) then { _execFid = ""; };
+
+    // Preview first few items (human-readable)
+    private _previewParts = [];
+    private _nPrev = 6 min (count _queue);
+    for "_i" from 0 to (_nPrev - 1) do {
+        private _it = _queue # _i;
+        _it params ["_pfid", "_pk", "_pdet"];
+        _previewParts pushBack format ["%1 %2 %3", _pfid, _pk, _pdet];
+    };
+
+    private _preview = if ((count _previewParts) > 0) then { _previewParts joinString "<br/>" } else { "(empty)" };
+
+    // Diary entry text (structured text)
+    private _st = systemTime;
+    private _stamp = format ["%1-%2-%3 %4:%5", _st # 0, _st # 1, _st # 2, _st # 3, _st # 4];
+
+    private _diaryText = format [
+        "<t size='1.05'>Airbase Queue Snapshot</t><br/>Time: %1<br/>Exec: %2%3<br/>Queued: DEP %4 | ARR %5 | TOTAL %6<br/><br/><t size='0.95'>Next:</t><br/>%7",
+        _stamp,
+        if (_execNow) then {"ON"} else {"OFF"},
+        if (_execFid isEqualTo "") then {""} else { format [" (%1)", _execFid] },
+        _qDepNow,
+        _qArrNow,
+        (count _queue),
+        _preview
+    ];
+
+    if (_diaryEnabled) then {
+        ["Queue Snapshot", _diaryText] remoteExecCall ["ARC_fnc_airbaseDiaryUpdate", 0];
+    };
+
+    if (_opsLogEnabled || _debugOps) then {
+        ["OPS", format ["AIRBASE: queue update dep=%1 arr=%2 total=%3", _qDepNow, _qArrNow, (count _queue)], _center, 0, [
+            ["execActive", _execNow],
+            ["execFid", _execFid],
+            ["preview", (_previewParts joinString " | ")]
+        ]] call ARC_fnc_intelLog;
+    };
+};
+
+
+
+// Periodic status snapshot into OPS log (normal operations + debug)
+private _snapEnabled = (_opsLogEnabled || _debugOps);
+private _interval = _opsStatusInterval;
+if (_debugOps && { _interval > 120 }) then { _interval = 120; };
+
+private _nextSnap = _rt getOrDefault ["nextOpsStatusTs", _rt getOrDefault ["nextDebugOpsTs", 0]];
+if (_snapEnabled && { _nowTs >= _nextSnap }) then {
+    private _execNow = missionNamespace getVariable ["airbase_v1_execActive", false];
+    private _qLen = count _queue;
+
+    private _parked = 0;
+    private _active = 0;
+    private _cooldown = 0;
+    private _returnQueued = 0;
+    private _disabled = 0;
+    private _soonestReturnAt = 1e9;
+
+    {
+        private _st = _x getOrDefault ["state","PARKED"];
+        switch (_st) do {
+            case "PARKED": { _parked = _parked + 1; };
+            case "ACTIVE": { _active = _active + 1; };
+            case "COOLDOWN": {
+                _cooldown = _cooldown + 1;
+                private _a = _x getOrDefault ["availableAt", 0];
+                if (_a > 0 && { _a < _soonestReturnAt }) then { _soonestReturnAt = _a; };
+            };
+            case "RETURN_QUEUED": { _returnQueued = _returnQueued + 1; };
+            case "DISABLED": { _disabled = _disabled + 1; };
+            default {};
+        };
+    } forEach _assets;
+
+    private _nextDepAt = (_rt getOrDefault ["lastDepartTs",-1e9]) + (missionNamespace getVariable ["airbase_v1_depart_cooldown_s", 900]);
+    private _nextArrAt = (_rt getOrDefault ["lastArriveTs",-1e9]) + (missionNamespace getVariable ["airbase_v1_arrive_cooldown_s", 1200]);
+
+    private _meta = [
+        ["bubbleActive", _bubbleActive],
+        ["execActive", _execNow],
+        ["queueLen", _qLen],
+        ["parked", _parked],
+        ["active", _active],
+        ["cooldown", _cooldown],
+        ["returnQueued", _returnQueued],
+        ["disabled", _disabled],
+        ["nextDepAt", _nextDepAt],
+        ["nextArrAt", _nextArrAt],
+        ["soonestReturnAt", if (_soonestReturnAt < 1e9) then { _soonestReturnAt } else { -1 }]
+    ];
+
+    private _n = 3 min _qLen;
+    for "_i" from 0 to (_n - 1) do {
+        private _it = _queue # _i;
+        _it params ["_qFid","_qKind","_qDet"];
+        _meta pushBack [format ["q%1", _i + 1], format ["%1 %2 %3", _qFid, _qKind, _qDet]];
+    };
+
+    // Build a player-visible one-line summary (the console list view primarily shows the summary string).
+    private _qDep = 0;
+    private _qArr = 0;
+    {
+        private _k = _x param [1, ""];
+        if (_k isEqualTo "DEP") then { _qDep = _qDep + 1; } else { if (_k isEqualTo "ARR") then { _qArr = _qArr + 1; }; };
+    } forEach _queue;
+
+    private _nextDepIn = round (_nextDepAt - _nowTs);
+    if (_nextDepIn < 0) then { _nextDepIn = 0; };
+    private _nextArrIn = round (_nextArrAt - _nowTs);
+    if (_nextArrIn < 0) then { _nextArrIn = 0; };
+
+    private _etaReturn = -1;
+    if (_soonestReturnAt < 1e9) then {
+        _etaReturn = round (_soonestReturnAt - _nowTs);
+        if (_etaReturn < 0) then { _etaReturn = 0; };
+    };
+    private _returnTxt = if (_etaReturn >= 0) then { format ["%1s", _etaReturn] } else { "n/a" };
+
+    private _preview = "";
+    private _nP = 3 min _qLen;
+    if (_nP > 0) then {
+        private _parts = [];
+        for "_i" from 0 to (_nP - 1) do {
+            private _it = _queue # _i;
+            _it params ["_pfid", "_pk", "_pdet"];
+            _parts pushBack format ["%1 %2 %3", _pfid, _pk, _pdet];
+        };
+        _preview = _parts joinString " | ";
+    };
+
+    private _msg = format [
+        "AIRBASE: status bubble=%1 exec=%2 q=%3(dep %4/arr %5) assets P=%6 A=%7 C=%8 RQ=%9 D=%10 cdDep=%11s cdArr=%12s nextReturn=%13%14",
+        if (_bubbleActive) then {"ON"} else {"OFF"},
+        if (_execNow) then {"ON"} else {"OFF"},
+        _qLen, _qDep, _qArr,
+        _parked, _active, _cooldown, _returnQueued, _disabled,
+        _nextDepIn, _nextArrIn,
+        _returnTxt,
+        if (_preview isEqualTo "") then {""} else { format [" | %1", _preview] }
+    ];
+
+    ["OPS", _msg, _center, 0, _meta] call ARC_fnc_intelLog;
+    _rt set ["nextOpsStatusTs", _nowTs + _interval];
+    _rt set ["nextDebugOpsTs", _nowTs + _interval];
+};
+
+// Execute queue if not busy
+private _exec = missionNamespace getVariable ["airbase_v1_execActive", false];
+if (_exec) exitWith {};
+
+if ((count _queue) == 0) exitWith {};
+
+private _item = _queue # 0;
+
+_item params ["_fid", "_kind", "_detail"];
+
+[_fid, _kind, _detail] spawn {
+    params ["_fid", "_kind", "_detail"];
+    missionNamespace setVariable ["airbase_v1_execActive", true, true];
+    missionNamespace setVariable ["airbase_v1_execFid", _fid, true];
+
+    private _rtL = missionNamespace getVariable ["airbase_v1_rt", createHashMap];
+    private _assetsL = _rtL getOrDefault ["assets", []];
+
+    // Mark record active
+    private _recsL = ["airbase_v1_records", []] call ARC_fnc_stateGet;
+    private _idx = _recsL findIf { (_x param [0,""]) isEqualTo _fid };
+    if (_idx >= 0) then {
+        private _r = _recsL # _idx;
+        _r set [5, "ACTIVE"];
+        _r set [6, serverTime];
+        _recsL set [_idx, _r];
+        ["airbase_v1_records", _recsL] call ARC_fnc_stateSet;
+    };
+
+    private _ok = false;
+
+    if (_kind isEqualTo "DEP") then {
+        private _aIdx = _assetsL findIf { (_x getOrDefault ["id",""]) isEqualTo _detail };
+        if (_aIdx >= 0) then {
+            private _asset = _assetsL # _aIdx;
+
+            // Skip disabled assets
+            if ((_asset getOrDefault ["state","PARKED"]) isEqualTo "DISABLED") exitWith {
+                _ok = false;
+            };
+
+            _asset set ["state", "ACTIVE"];
+            _asset set ["activeFlight", _fid];
+
+            if (_asset getOrDefault ["requiresTow", false]) then {
+                _ok = [_fid, _asset] call ARC_fnc_airbaseAttackTowDepart;
+            } else {
+                _ok = [_fid, _asset] call ARC_fnc_airbasePlaneDepart;
+            };
+
+            // Persist runtime changes
+            missionNamespace setVariable ["airbase_v1_rt", _rtL, true];
+        };
+    } else {
+        _ok = [_fid] call ARC_fnc_airbaseSpawnArrival;
+    };
+
+    // Mark record complete/failed
+    private _recs2 = ["airbase_v1_records", []] call ARC_fnc_stateGet;
+    private _idx2 = _recs2 findIf { (_x param [0,""]) isEqualTo _fid };
+    if (_idx2 >= 0) then {
+        private _r2 = _recs2 # _idx2;
+        _r2 set [5, if (_ok) then { "COMPLETE" } else { "FAILED" }];
+        _r2 set [6, serverTime];
+        _recs2 set [_idx2, _r2];
+        ["airbase_v1_records", _recs2] call ARC_fnc_stateSet;
+    };
+
+    
+    // Remove processed item from queue (keeps it visible while executing so players get a heads-up)
+    private _qNow = ["airbase_v1_queue", []] call ARC_fnc_stateGet;
+    private _qIdx = _qNow findIf { (_x param [0,""]) isEqualTo _fid };
+    if (_qIdx >= 0) then {
+        _qNow deleteAt _qIdx;
+        ["airbase_v1_queue", _qNow] call ARC_fnc_stateSet;
+    };
+
+    missionNamespace setVariable ["airbase_v1_execFid", "", true];
+
+    missionNamespace setVariable ["airbase_v1_execActive", false, true];
+};

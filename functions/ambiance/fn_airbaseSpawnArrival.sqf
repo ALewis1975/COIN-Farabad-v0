@@ -1,0 +1,184 @@
+/*
+    File: functions/ambiance/fn_airbaseSpawnArrival.sqf
+    Author: ARC / Ambient Airbase Subsystem
+    Description:
+      Spawns an inbound aircraft, lands it, taxis to the taxi-out point, and deletes it.
+      If the arrival is a RETURN for a specific assetId, it then respawns that parked aircraft + crew.
+*/
+
+if (!isServer) exitWith { false };
+
+params ["_fid"];
+
+private _debug = missionNamespace getVariable ["airbase_v1_debug", false];
+private _debugOps = missionNamespace getVariable ["airbase_v1_debugOpsLog", false];
+
+// Pull record
+private _recs = ["airbase_v1_records", []] call ARC_fnc_stateGet;
+private _idx = _recs findIf { (_x param [0,""]) isEqualTo _fid };
+private _rec = if (_idx >= 0) then { _recs # _idx } else { [] };
+
+private _category = _rec param [3, "FW"];
+private _detail   = _rec param [4, "INBOUND"]; // assetId for return, or "INBOUND"
+private _meta     = _rec param [7, []];
+
+private _rt = missionNamespace getVariable ["airbase_v1_rt", createHashMap];
+private _assets = _rt getOrDefault ["assets", []];
+
+private _asset = createHashMap;
+private _isReturn = false;
+private _vehType = "";
+
+if (_detail isNotEqualTo "INBOUND") then {
+    private _aIdx = _assets findIf { (_x getOrDefault ["id",""]) isEqualTo _detail };
+    if (_aIdx >= 0) then {
+        _asset = _assets # _aIdx;
+        _isReturn = true;
+        _vehType = _asset getOrDefault ["startVehType", ""];
+        _category = _asset getOrDefault ["category", _category];
+    };
+};
+
+if (_vehType isEqualTo "") then {
+    // Default to a random type derived from known assets in the same category
+    private _pool = [];
+    {
+        if ((_x getOrDefault ["category","FW"]) isEqualTo _category) then {
+            private _t = _x getOrDefault ["startVehType", ""];
+            if (_t != "") then { _pool pushBackUnique _t; };
+        };
+    } forEach _assets;
+
+    if ((count _pool) > 0) then {
+        _vehType = selectRandom _pool;
+    } else {
+        _vehType = if (_category isEqualTo "RW") then { "B_Heli_Transport_01_F" } else { "B_T_VTOL_01_vehicle_F" };
+    };
+};
+
+// Markers
+private _mSpawn = _rt getOrDefault ["arrivalSpawnMarker", "mkr_arrivalSpawn"];
+private _mRwyS  = _rt getOrDefault ["arrivalRunwayStartMarker", "mkr_arrivalRunwayStart"];
+private _mRwyE  = _rt getOrDefault ["arrivalRunwayStopMarker", "mkr_arrivalRunwayStop"];
+private _mTaxi  = _rt getOrDefault ["arrivalRunwayTaxiOutMarker", "mkr_arrivalRunwayTaxiOut"];
+
+private _spawnPos = getMarkerPos _mSpawn;
+private _rwyStart = getMarkerPos _mRwyS;
+private _rwyStop  = getMarkerPos _mRwyE;
+private _taxiOut  = getMarkerPos _mTaxi;
+private _runwayDir = markerDir _mRwyS;
+
+private _airportId = _rt getOrDefault ["airportId", 0];
+
+private _altSpawn = if (_category isEqualTo "RW") then { 250 } else { 3048 }; // 10,000 ft for fixed-wing arrivals
+
+// Spawn inbound vehicle
+private _veh = createVehicle [_vehType, _spawnPos, [], 0, "FLY"];
+if (isNull _veh) exitWith { false };
+
+_veh setDir _runwayDir;
+_veh setPosASL [_spawnPos # 0, _spawnPos # 1, _altSpawn];
+_veh allowDamage false;
+_veh engineOn true;
+if (_veh isKindOf "Air") then { _veh setCollisionLight true; _veh setPilotLight true; };
+
+// Crew (no moveIn*; spawn crew already inside the aircraft)
+createVehicleCrew _veh;
+private _pilot = driver _veh;
+private _grp = group _pilot;
+
+if (isNull _pilot) exitWith {
+    if (!isNull _veh) then { deleteVehicle _veh; };
+    false
+};
+
+_pilot setBehaviour "CARELESS";
+_pilot setCombatMode "BLUE";
+
+// Waypoints: approach -> runway stop -> taxi out
+private _wp0 = _grp addWaypoint [_rwyStart, 0];
+_wp0 setWaypointType "MOVE";
+_wp0 setWaypointSpeed "FULL";
+_wp0 setWaypointCompletionRadius 80;
+
+if (_veh isKindOf "Helicopter") then {
+    _wp0 setWaypointStatements ["true", "vehicle this land 'LAND';"];
+} else {
+    _wp0 setWaypointStatements ["true", format ["vehicle this landAt %1;", _airportId]];
+};
+
+// Direct descent controller: step the desired altitude down as the aircraft approaches the runway.
+if (!(_veh isKindOf "Helicopter")) then
+{
+    private _k = missionNamespace getVariable ["airbase_v1_arrivalDescentCoef", 0.12];
+    if (!(_k isEqualType 0) || { _k <= 0 }) then { _k = 0.12; };
+    private _minAlt = missionNamespace getVariable ["airbase_v1_arrivalMinAlt_m", 80];
+    if (!(_minAlt isEqualType 0) || { _minAlt < 30 }) then { _minAlt = 80; };
+
+    [_veh, _rwyStart, _altSpawn, _k, _minAlt] spawn
+    {
+        params ["_v", "_rwy", "_maxAlt", "_coef", "_minA"];
+        while { !isNull _v && { alive _v } } do
+        {
+            private _d = _v distance2D _rwy;
+            // Linear approximation: desired AGL is proportional to remaining distance.
+            private _alt = (_d * _coef) min _maxAlt;
+            _alt = _alt max _minA;
+            _v flyInHeight _alt;
+
+            if (_d < 1200) exitWith {};
+            sleep 4;
+        };
+    };
+};
+
+private _wp1 = _grp addWaypoint [_rwyStop, 0];
+_wp1 setWaypointType "MOVE";
+_wp1 setWaypointSpeed "LIMITED";
+_wp1 setWaypointCompletionRadius 200;
+
+private _wp2 = _grp addWaypoint [_taxiOut, 0];
+_wp2 setWaypointType "MOVE";
+_wp2 setWaypointSpeed "LIMITED";
+_wp2 setWaypointCompletionRadius 25;
+
+// Wait for taxi-out / timeout
+private _t0 = time;
+waitUntil {
+    sleep 1;
+    isNull _veh ||
+    !alive _veh ||
+    ((_veh distance2D _taxiOut) < 40) ||
+    ((time - _t0) > 1800)
+};
+
+// Cleanup inbound
+if (!isNull _veh) then {
+    { if (!isNull _x) then { deleteVehicle _x; }; } forEach (crew _veh);
+    deleteVehicle _veh;
+};
+if (!isNull _pilot) then { deleteVehicle _pilot; };
+if (!isNull _grp) then { deleteGroup _grp; };
+
+if (_debugOps) then {
+    ["OPS", format ["AIRBASE: arrival %1 complete (%2)", _fid, _vehType], _taxiOut, 0, [
+        ["mode", if (_isReturn) then {"RETURN"} else {"RANDOM"}],
+        ["category", _category],
+        ["vehType", _vehType],
+        ["assetId", if (_isReturn) then {_detail} else {"INBOUND"}]
+    ]] call ARC_fnc_intelLog;
+};
+
+// If this was a return, respawn the parked aircraft + crew back on the flightline
+if (_isReturn) then {
+    private _okRestore = [_asset] call ARC_fnc_airbaseRestoreParkedAsset;
+
+    if (_debugOps && {!_okRestore}) then {
+        ["OPS", format ["AIRBASE: restore parked asset FAILED (%1)", (_asset getOrDefault ["id",""])], _taxiOut, 0, []] call ARC_fnc_intelLog;
+    };
+
+    missionNamespace setVariable ["airbase_v1_rt", _rt, true];
+};
+
+
+true

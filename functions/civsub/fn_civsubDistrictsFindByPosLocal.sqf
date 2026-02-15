@@ -1,0 +1,48 @@
+/*
+    ARC_fnc_civsubDistrictsFindByPosLocal
+
+    Client-safe version of ARC_fnc_civsubDistrictsFindByPos.
+    Uses civsub_v1_districts (broadcast at init) and finds the closest district
+    whose centroid+radius contains the given position.
+
+    Params:
+      0: position [x,y,z]
+
+    Returns: districtId string or "".
+*/
+
+params [
+    ["_pos", [0,0,0], [[]]]
+];
+
+if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {""};
+
+private _districts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
+if !(_districts isEqualType createHashMap) exitWith {""};
+
+private _best = "";
+private _bestD = 1e12;
+
+{
+    private _rec = _districts get _x;
+    if (_rec isEqualType []) then {
+        _rec = createHashMapFromArray _rec;
+    };
+
+    if (_rec isEqualType createHashMap) then
+    {
+        private _c = _rec getOrDefault ["centroid", [0,0]];
+        private _r = _rec getOrDefault ["radius_m", 0];
+        if ((_c isEqualType []) && { _r > 0 }) then
+        {
+            private _d = (_pos distance2D _c);
+            if (_d <= _r && { _d < _bestD }) then
+            {
+                _bestD = _d;
+                _best = _x;
+            };
+        };
+    };
+} forEach (keys _districts);
+
+_best

@@ -1,0 +1,27 @@
+author = "[7CAV] MAJ.Lewis.A";
+onLoadName = "Farabad COIN (2011)";
+onLoadMission = "Persistent, Dynamic COIN Sandbox.";
+
+// Match multiplayer slot count to mission roles (prevents RPT warning spam).
+class Header
+{
+    gameType = COOP;
+    minPlayers = 1;
+    // RPT shows 79 roles in mission.sqm (slots). Keep this aligned to avoid lobby confusion and warnings.
+    maxPlayers = 79;
+};
+
+// Shared save file name for missionProfileNamespace persistence (server profile).
+missionGroup = "ARC_FARABAD_COIN";
+
+// Optional: set respawn here or via Eden (Attributes > Multiplayer).
+// respawn = 3;          // BASE
+// respawnDelay = 15;
+
+#include "config\CfgFunctions.hpp"
+
+// Minimal dialogs (used for free-text intel reporting)
+#include "config\CfgDialogs.hpp"
+
+// Lightweight HUD overlays
+#include "config\RscTitles.hpp"

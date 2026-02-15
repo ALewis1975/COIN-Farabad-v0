@@ -1,0 +1,91 @@
+/*
+    ARC_fnc_civsubDeltaApplyToDistrict
+
+    Applies bundle.influence_delta to district state immediately (locked v1).
+
+    Params:
+      0: bundle hashmap
+*/
+
+params [["_bundle", createHashMap, [createHashMap]]];
+if !(_bundle isEqualType createHashMap) exitWith {false};
+
+private _districtId = _bundle getOrDefault ["districtId", (_bundle getOrDefault ["district_id", ""])];
+if (_districtId isEqualTo "") exitWith {false};
+
+private _delta = _bundle getOrDefault ["influence_delta", createHashMap];
+if !(_delta isEqualType createHashMap) exitWith {false};
+
+// Support both legacy keys (dW/dR/dG) and contract keys (W/R/G)
+private _dW = _delta getOrDefault ["W", (_delta getOrDefault ["dW", 0])];
+private _dR = _delta getOrDefault ["R", (_delta getOrDefault ["dR", 0])];
+private _dG = _delta getOrDefault ["G", (_delta getOrDefault ["dG", 0])];
+
+private _d = [_districtId] call ARC_fnc_civsubDistrictsGetById;
+if !(_d isEqualType createHashMap) exitWith {false};
+
+_d set ["W_EFF_U", (_d getOrDefault ["W_EFF_U", 0]) + _dW];
+_d set ["R_EFF_U", (_d getOrDefault ["R_EFF_U", 0]) + _dR];
+_d set ["G_EFF_U", (_d getOrDefault ["G_EFF_U", 0]) + _dG];
+
+[_d] call ARC_fnc_civsubDistrictsClamp;
+
+// Phase 6 counters (best-effort). These are cumulative district totals.
+private _src = _bundle getOrDefault ["source", createHashMap];
+if (_src isEqualType []) then { _src = createHashMapFromArray _src; };
+private _ev = "";
+if (_src isEqualType createHashMap) then { _ev = toUpper (_src getOrDefault ["event", ""]); };
+
+if (_ev isNotEqualTo "") then
+{
+    switch (_ev) do
+    {
+        case "CRIME_DB_HIT": { _d set ["crime_db_hits", (_d getOrDefault ["crime_db_hits", 0]) + 1]; };
+        case "DETENTION_INIT": { _d set ["detentions_initiated", (_d getOrDefault ["detentions_initiated", 0]) + 1]; };
+        case "DETENTION_HANDOFF": { _d set ["detentions_handed_off", (_d getOrDefault ["detentions_handed_off", 0]) + 1]; };
+        case "AID_WATER";
+        case "AID_RATIONS";
+        case "MED_AID_CIV": { _d set ["aid_events", (_d getOrDefault ["aid_events", 0]) + 1]; };
+        case "CIV_KILLED": { _d set ["civ_cas_kia", (_d getOrDefault ["civ_cas_kia", 0]) + 1]; };
+        case "CIV_WIA": { _d set ["civ_cas_wia", (_d getOrDefault ["civ_cas_wia", 0]) + 1]; };
+        default {};
+    };
+};
+
+// Publish a lightweight client-readable snapshot for this district.
+// Reason: broadcasting a HashMap once does not replicate in-place mutations to nested HashMaps.
+// We keep a simple array-of-pairs per district that clients can read reliably.
+private _pub = [
+    ["G", _d getOrDefault ["G_EFF_U", 35]],
+    ["crime_db_hits", _d getOrDefault ["crime_db_hits", 0]],
+    ["detentions_initiated", _d getOrDefault ["detentions_initiated", 0]],
+    ["civ_cas_kia", _d getOrDefault ["civ_cas_kia", 0]],
+    ["districtId", _districtId],
+    ["detentions_handed_off", _d getOrDefault ["detentions_handed_off", 0]],
+    ["R", _d getOrDefault ["R_EFF_U", 55]],
+    ["civ_cas_wia", _d getOrDefault ["civ_cas_wia", 0]],
+    ["ts", serverTime],
+    ["aid_events", _d getOrDefault ["aid_events", 0]],
+    ["W", _d getOrDefault ["W_EFF_U", 45]]
+];
+missionNamespace setVariable [format ["civsub_v1_district_pub_%1", _districtId], _pub, true];
+
+// Minimal, low-noise instrumentation for the counters we care about.
+if (_ev in ["CRIME_DB_HIT","DETENTION_INIT","DETENTION_HANDOFF","CIV_KILLED","CIV_WIA","AID_WATER","AID_RATIONS","MED_AID_CIV"]) then
+{
+    diag_log format ["[CIVSUB][DELTA][%1] did=%2 W=%3 R=%4 G=%5 kia=%6 wia=%7 hits=%8 detI=%9 detH=%10 aid=%11",
+        _ev,
+        _districtId,
+        _d getOrDefault ["W_EFF_U", -1],
+        _d getOrDefault ["R_EFF_U", -1],
+        _d getOrDefault ["G_EFF_U", -1],
+        _d getOrDefault ["civ_cas_kia", -1],
+        _d getOrDefault ["civ_cas_wia", -1],
+        _d getOrDefault ["crime_db_hits", -1],
+        _d getOrDefault ["detentions_initiated", -1],
+        _d getOrDefault ["detentions_handed_off", -1],
+        _d getOrDefault ["aid_events", -1]
+    ];
+};
+
+true
