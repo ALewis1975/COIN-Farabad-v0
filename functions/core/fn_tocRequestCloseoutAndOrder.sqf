@@ -3,10 +3,19 @@
 
     Server: close the active incident.
 
-    Policy (Farabad mission spine - TOC-only tasking):
-      - Closeout does NOT issue follow-on orders.
-      - Closeout does NOT require unit acceptance.
-      - Closeout publishes follow-on candidates to the TOC Queue for explicit triage.
+    Policy / decision matrix:
+      - Immediate close path (policy gate ON):
+          ARC_policy_noAutoOrdersOnCloseout = true
+          -> close incident now via ARC_fnc_incidentClose
+          -> queue follow-on package for TOC triage (no order acceptance gate)
+      - Staged close path (policy gate OFF):
+          ARC_policy_noAutoOrdersOnCloseout = false
+          -> issue/reuse follow-on order for the SITREP group
+          -> set activeIncidentClosePending* + activeIncidentCloseReady
+          -> wait for acceptance before final close
+      - Acceptance hook tie-in:
+          functions/command/fn_intelOrderAccept.sqf checks activeIncidentClosePending*
+          and calls ARC_fnc_incidentClose once the matching order is accepted.
 
     Params (remoteExec from client):
       0: STRING closeResult       "SUCCEEDED" | "FAILED"
@@ -83,8 +92,8 @@ if !(_req in ["RTB","HOLD","PROCEED"]) then { _req = "HOLD"; };
 _purpose = toUpper (trim _purpose);
 if !(_purpose in ["REFIT","INTEL","EPW",""]) then { _purpose = "REFIT"; };
 
-// Legacy guard: old flow staged closeout and waited for unit acceptance.
-// New flow closes immediately, but we defensively clear any stale pending state.
+// Defensive reset: clear stale staged-close flags left over from a previous flow
+// before evaluating whether this request will run immediate-close or staged-close.
 private _pending = ["activeIncidentClosePending", false] call ARC_fnc_stateGet;
 if (!(_pending isEqualType true)) then { _pending = false; };
 if (_pending) then
@@ -100,6 +109,8 @@ if (_pending) then
     missionNamespace setVariable ["ARC_activeIncidentClosePendingResult", "", true];
     missionNamespace setVariable ["ARC_activeIncidentClosePendingOrderId", "", true];
     missionNamespace setVariable ["ARC_activeIncidentClosePendingGroup", "", true];
+
+    diag_log "[ARC][TOC] Closeout path preflight: cleared stale activeIncidentClosePending* state.";
 };
 
 // Require SITREP for the active incident
@@ -235,7 +246,7 @@ if (_noAutoOrders) exitWith
         };
     };
 
-    // Close the incident now (no staged acceptance, no follow-on order issuance).
+    // Immediate-close path: close now and publish queue package (no order acceptance gate).
     private _resFinal = _closeResult;
     [_resFinal] call ARC_fnc_incidentClose;
 
@@ -275,7 +286,13 @@ if (_noAutoOrders) exitWith
         [objNull, "FOLLOWON_PACKAGE", _payload, _summary, _details, _iposATL, [["closedBy", if (isNull _caller) then {"SYSTEM"} else { name _caller }], ["targetGroup", _gid]]] call ARC_fnc_intelQueueSubmit;
     };
 
-    ["TOC Ops", format ["Closed: %1 (%2). Follow-on package queued (%3 lead(s)).", _idisplay, _resFinal, (count _leadIds)]] call _toast;
+    private _whoDone = if (isNull _caller) then {"<unknown>"} else { name _caller };
+    diag_log format ["[ARC][TOC] Closeout IMMEDIATE path: by=%1 result=%2 gid=%3 task=%4 leads=%5", _whoDone, _resFinal, _gid, _taskId, (count _leadIds)];
+    ["OPS", format ["Closeout immediate by %1: %2. Follow-on package queued with %3 lead(s).", _whoDone, _resFinal, (count _leadIds)], _iposATL,
+        [["event","CLOSEOUT_IMMEDIATE"],["path","IMMEDIATE_TOC_QUEUE"],["taskId",_taskId],["result",_resFinal],["targetGroup",_gid],["leadCount",(count _leadIds)]]
+    ] call ARC_fnc_intelLog;
+
+    ["TOC Ops", format ["Closed immediately: %1 (%2). Follow-on package queued (%3 lead(s)).", _idisplay, _resFinal, (count _leadIds)]] call _toast;
     true
 };
 
@@ -321,7 +338,7 @@ if (_hasIssued) exitWith
         false
     };
 
-    // Stage closeout pending acceptance using the existing order.
+    // Staged-close path: reuse existing ISSUED order and wait for acceptance hook.
     ["activeIncidentClosePending", true] call ARC_fnc_stateSet;
     ["activeIncidentClosePendingAt", serverTime] call ARC_fnc_stateSet;
     ["activeIncidentClosePendingResult", _closeResult] call ARC_fnc_stateSet;
@@ -343,7 +360,10 @@ if (_hasIssued) exitWith
     ["DEFER"] call ARC_fnc_execCleanupActive;
 
     private _whoDone = if (isNull _caller) then {"<unknown>"} else { name _caller };
-    diag_log format ["[ARC][TOC] Closeout STAGED (reused order): by=%1 result=%2 gid=%3 task=%4 orderId=%5 orderType=%6", _whoDone, _closeResult, _gid, _taskId, _reuseId, _reuseType];
+    diag_log format ["[ARC][TOC] Closeout STAGED path (reused order): by=%1 result=%2 gid=%3 task=%4 orderId=%5 orderType=%6", _whoDone, _closeResult, _gid, _taskId, _reuseId, _reuseType];
+    ["OPS", format ["Closeout staged by %1: %2. Reusing ISSUED order %3 (%4) for %5 acceptance.", _whoDone, _closeResult, _reuseId, _reuseType, _gid], _posATL,
+        [["event","CLOSEOUT_STAGED"],["path","STAGED_REUSED_ORDER"],["taskId",_taskId],["result",_closeResult],["orderType",_reuseType],["orderId",_reuseId],["targetGroup",_gid]]
+    ] call ARC_fnc_intelLog;
 
     ["TOC Ops", format ["Closeout staged: %1. Reusing existing ISSUED order (%2). Awaiting unit acceptance.", _closeResult, _reuseType]] call _toast;
 
@@ -407,7 +427,7 @@ if (!(_leadsBefore isEqualType [])) then { _leadsBefore = []; };
     };
 } forEach _leadsBefore;
 
-// Generate follow-on leads NOW (incident closes on acceptance, but PROCEED needs a lead available).
+// Staged-close support: generate follow-on leads now so a PROCEED/LEAD order can reference one.
 private _createdLeads = [_closeResult, _type, _marker, _pos, _zone, _taskId, _display] call ARC_fnc_leadGenerateFromIncident;
 if (!(_createdLeads isEqualType 0)) then { _createdLeads = 0; };
 
@@ -548,7 +568,7 @@ private _bestAt = -1;
 if (!(_orderId isEqualType "")) then { _orderId = ""; };
 _orderId = trim _orderId;
 
-// Stage closeout pending acceptance
+// Staged-close path: order issued now, incident closes later via acceptance hook.
 ["activeIncidentClosePending", true] call ARC_fnc_stateSet;
 ["activeIncidentClosePendingAt", serverTime] call ARC_fnc_stateSet;
 ["activeIncidentClosePendingResult", _closeResult] call ARC_fnc_stateSet;
@@ -569,13 +589,13 @@ missionNamespace setVariable ["ARC_activeIncidentCloseReady", true, true];
 ["DEFER"] call ARC_fnc_execCleanupActive;
 
 private _whoDone = if (isNull _caller) then {"<unknown>"} else { name _caller };
-diag_log format ["[ARC][TOC] Closeout STAGED: by=%1 result=%2 orderType=%3 gid=%4 task=%5 orderId=%6", _whoDone, _closeResult, _orderType, _gid, _taskId, _orderId];
+diag_log format ["[ARC][TOC] Closeout STAGED path (new order): by=%1 result=%2 orderType=%3 gid=%4 task=%5 orderId=%6", _whoDone, _closeResult, _orderType, _gid, _taskId, _orderId];
 
 private _orderLine = if (_orderType isEqualTo "RTB") then { format ["RTB (%1)", _purpose] } else { if (_orderType isEqualTo "LEAD") then { "PROCEED" } else { _orderType } };
 ["TOC Ops", format ["Closeout staged: %1. Order issued: %2. Awaiting unit acceptance.", _closeResult, _orderLine]] call _toast;
 
 ["OPS", format ["Closeout staged by %1: %2. Awaiting %3 acceptance of order %4 (%5).", _whoDone, _closeResult, _gid, _orderId, _orderLine], _pos,
-    [["event","CLOSEOUT_STAGED"],["taskId",_taskId],["result",_closeResult],["orderType",_orderType],["orderId",_orderId],["targetGroup",_gid]]
+    [["event","CLOSEOUT_STAGED"],["path","STAGED_NEW_ORDER"],["taskId",_taskId],["result",_closeResult],["orderType",_orderType],["orderId",_orderId],["targetGroup",_gid]]
 ] call ARC_fnc_intelLog;
 
 [] call ARC_fnc_stateSave;
