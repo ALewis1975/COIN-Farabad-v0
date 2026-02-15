@@ -45,16 +45,32 @@ if (missionNamespace getVariable ["ARC_activeIncidentSitrepSent", false]) exitWi
     false
 };
 
-// Gate closure SITREPs until the incident is ready to close (timer expired or objective complete)
-// Exception: IED/VBIED incidents may require early SITREP for TOC permission/disposition.
+// Gate closure SITREPs until the incident is ready to close (timer expired or objective complete).
+// NOTE: IED incidents are allowed to submit earlier because TOC disposition/approval may be required
+// before the incident reaches close-ready state. This mirrors server-side validation in
+// ARC_fnc_tocReceiveSitrep and keeps client/server gating consistent.
 private _iTypU = missionNamespace getVariable ["ARC_activeIncidentType", ""]; if (!(_iTypU isEqualType "")) then { _iTypU = ""; }; _iTypU = toUpper (trim _iTypU);
 private _closeReady = missionNamespace getVariable ["ARC_activeIncidentCloseReady", false];
 if (!(_closeReady isEqualType true) && !(_closeReady isEqualType false)) then { _closeReady = false; };
 
-// IED stabilization: do not allow early SITREPs for IED. SITREPs submit only when incident is ready to close.
+private _recordClientGate = {
+    params ["_reason", "_typeU", "_closeReadyV", "_updateOnlyV"];
 
-if (!_updateOnly && { !_closeReady }) exitWith
+    // Lightweight breadcrumb for diagnostics tooling / quick console inspection.
+    missionNamespace setVariable ["ARC_sitrepClientLastGateReason", [_reason, _typeU, _closeReadyV, diag_tickTime]];
+
+    // Keep RPT noise controllable: only emit when ARC debug logging is enabled.
+    private _dbg = missionNamespace getVariable ["ARC_debugLogEnabled", false];
+    if (!(_dbg isEqualType true)) then { _dbg = false; };
+    if (_dbg) then
+    {
+        diag_log format ["[ARC][SITREP][CLIENT] Gate blocked: reason=%1 type=%2 closeReady=%3 updateOnly=%4", _reason, _typeU, _closeReadyV, _updateOnlyV];
+    };
+};
+
+if (!_updateOnly && { !_closeReady } && { _iTypU isNotEqualTo "IED" }) exitWith
 {
+    ["NOT_CLOSE_READY", _iTypU, _closeReady, _updateOnly] call _recordClientGate;
     hint "SITREP unavailable: incident still in progress. Complete the objective or wait for the incident timer to expire.";
     false
 };
