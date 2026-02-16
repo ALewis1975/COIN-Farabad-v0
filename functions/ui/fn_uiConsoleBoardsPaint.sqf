@@ -41,12 +41,12 @@ private _getPair = {
 
 private _fmtHdr = {
     params ["_t"];
-    format ["<t size='1.05' font='PuristaMedium'>%1</t><br/>", _t]
+    format ["<t size='1.05' font='PuristaMedium' color='#B89B6B'>%1</t><br/>", _t]
 };
 
 private _fmtKV = {
     params ["_k", "_v"];
-    format ["<t color='#A0A0A0'>%1:</t> %2<br/>", _k, _v]
+    private _vv = _v; if (!(_vv isEqualType "")) then { _vv = str _vv; }; if ((_vv find "<t") >= 0) then { format ["<t color='#B89B6B'>%1:</t> %2<br/>", _k, _vv ] } else { format ["<t color='#B89B6B'>%1:</t> <t color='#FFFFFF'>%2</t><br/>", _k, _vv ] }
 };
 
 // -------------------------------------------------------------------------
@@ -109,7 +109,7 @@ private _queueLines = [];
     {
         private _g = if (_qFromGrp isEqualType "" && { _qFromGrp isNotEqualTo "" }) then { _qFromGrp } else { "" };
         private _s = if (_qSummary isEqualType "" && { _qSummary isNotEqualTo "" }) then { _qSummary } else { "(no summary)" };
-        _queueLines pushBack format ["- <t color='#A0A0A0'>%1</t> %2 <t color='#BBBBBB'>(%3)</t>", _k, _s, if (_g isEqualTo "") then {"TOC"} else {_g}];
+        _queueLines pushBack format ["- <t color='#B89B6B'>%1</t> %2 <t color='#FFFFFF'>(%3)</t>", _k, _s, if (_g isEqualTo "") then {"TOC"} else {_g}];
     };
 } forEach _queue;
 
@@ -135,8 +135,8 @@ private _ordLines = [];
     _x params ["_oid", "_iat", "_st", "_ty", "_tg", "_data", "_meta"]; 
     private _note = [_meta, "note", ""] call _getPair;
     if (!(_note isEqualType "")) then { _note = ""; };
-    private _suffix = if (_note isEqualTo "") then { "" } else { format [" - <t color='#BBBBBB'>%1</t>", _note] };
-    _ordLines pushBack format ["- <t color='#A0A0A0'>%1</t> to <t color='#DDDDDD'>%2</t>%3", toUpper _ty, _tg, _suffix];
+    private _suffix = if (_note isEqualTo "") then { "" } else { format [" - <t color='#FFFFFF'>%1</t>", _note] };
+    _ordLines pushBack format ["- <t color='#B89B6B'>%1</t> to <t color='#DDDDDD'>%2</t>%3", toUpper _ty, _tg, _suffix];
     if ((count _ordLines) >= 10) exitWith {};
 } forEach _issued;
 
@@ -157,7 +157,7 @@ for "_i" from ((count _ops) - 1) to 0 step -1 do
     if (toUpper _evt isEqualTo "SITREP") exitWith { _sit = _e; };
 };
 
-private _sitTxt = "<t color='#BBBBBB'>(none)</t>";
+private _sitTxt = "<t color='#FFFFFF'>(none)</t>";
 if (_sit isNotEqualTo []) then
 {
     _sit params ["_id", "_ts", "_cat", "_summary", "_pos", "_meta"]; 
@@ -185,7 +185,7 @@ private _sub = "<t size='0.9' color='#DDDDDD'>Snapshot: Incident | Queue | Order
 private _incBlock = "";
 if (_taskId isEqualTo "") then
 {
-    _incBlock = (["Active Incident"] call _fmtHdr) + "<t color='#BBBBBB'>No active incident.</t><br/>";
+    _incBlock = (["Active Incident"] call _fmtHdr) + "<t color='#FFFFFF'>No active incident.</t><br/>";
 }
 else
 {
@@ -207,7 +207,7 @@ else
 
 private _qCount = count _queue;
 private _queueBlock = (["TOC Queue (Pending)"] call _fmtHdr) + format [
-    "<t color='#A0A0A0'>Count:</t> %1 <t color='#BBBBBB'>(INC %2 | FOL %3 | LEAD %4 | OTHER %5)</t><br/>",
+    "<t color='#A0A0A0'>Count:</t> %1 <t color='#FFFFFF'>(INC %2 | FOL %3 | LEAD %4 | OTHER %5)</t><br/>",
     _qCount, _qInc, _qFollow, _qLead, _qOther
 ];
 
@@ -217,7 +217,7 @@ if ((count _queueLines) > 0) then
 }
 else
 {
-    _queueBlock = _queueBlock + "<t color='#BBBBBB'>(none)</t><br/>";
+    _queueBlock = _queueBlock + "<t color='#FFFFFF'>(none)</t><br/>";
 };
 
 private _issuedCount = count _issued;
@@ -228,7 +228,7 @@ if ((count _ordLines) > 0) then
 }
 else
 {
-    _ordersBlock = _ordersBlock + "<t color='#BBBBBB'>(none)</t><br/>";
+    _ordersBlock = _ordersBlock + "<t color='#FFFFFF'>(none)</t><br/>";
 };
 
 private _sitBlock = (["Last SITREP"] call _fmtHdr) + _sitTxt + "<br/>";

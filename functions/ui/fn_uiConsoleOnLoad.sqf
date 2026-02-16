@@ -46,6 +46,12 @@ private _coyote = [0.722,0.608,0.420,1];
     _display displayCtrl 78023,   // Refresh
     _display displayCtrl 78024    // Close
 ];
+
+// Title font size (75% bigger)
+private _tTitle = _display displayCtrl 78091;
+if (!isNull _tTitle) then {
+    _tTitle ctrlSetFontHeight (0.05 * safeZoneH);
+};
 // Ops (S3) frame controls (UI09)
 private _opsCtrls = [
     _display displayCtrl 78030,

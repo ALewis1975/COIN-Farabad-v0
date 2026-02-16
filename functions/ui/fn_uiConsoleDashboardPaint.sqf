@@ -74,7 +74,7 @@ _foLeadGrid = trim _foLeadGrid;
 
 private _incLine = if (!_hasIncident) then
 {
-    "<t color='#BBBBBB'>No active incident.</t>"
+    "<t color='#FFFFFF'>No active incident.</t>"
 }
 else
 {
@@ -142,7 +142,7 @@ if (!(_qPendingArr isEqualType [])) then { _qPendingArr = []; };
 private _qPending = count _qPendingArr;
 
 private _accessLine = format [
-    "<t size='0.9' color='#AAAAAA'>Access: %1%2%3%4%5</t>",
+    "<t size='0.9'><t color='#B89B6B'>Access:</t> <t color='#FFFFFF'>%1%2%3%4%5</t></t>",
     if (_isAuth || _isS3 || _isS2 || _isCmd || _isOmni) then {"OPS "} else {""},
     if (_isAuth || _isS2 || _isCmd || _isOmni) then {"INTEL "} else {""},
     "HANDOFF ",
@@ -152,7 +152,7 @@ private _accessLine = format [
 
 private _hdr = format [
     "<t size='1.15' font='PuristaMedium'>COP / Dashboard</t><br/>" +
-    "<t size='0.9' color='#DDDDDD'>Role: %1 | Group: %2 | Tag: %3</t><br/>" +
+    "<t size='0.9'><t color='#B89B6B'>Role:</t> <t color='#FFFFFF'>%1</t> <t color='#B89B6B'>| Group:</t> <t color='#FFFFFF'>%2</t> <t color='#B89B6B'>| Tag:</t> <t color='#FFFFFF'>%3</t></t><br/>" +
     "<t size='0.85' color='#AAAAAA'>Your grid: %4 | Station: %5</t><br/><br/>",
     _roleCat,
     if (_gid isEqualTo "") then {"(none)"} else {_gid},

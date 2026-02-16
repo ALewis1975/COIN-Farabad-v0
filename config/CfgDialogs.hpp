@@ -650,16 +650,25 @@ class ARC_FarabadConsoleDialog
         };
 
         class TitleBar: RscText
-        {
-            idc = 78091;
-            
-            colorText[] = {0.722,0.608,0.420,1};
+{
+    idc = 78091;
+    text = "FARABAD CONSOLE";
+    x = safeZoneX;
+    y = safeZoneY;
+    w = safeZoneW;
+    h = (0.045 * safeZoneH);
+    sizeEx = (0.05 * safeZoneH); // ~75% larger than default
+    colorBackground[] = {0.04,0.06,0.06,0.95};
+    colorText[] = {0.722,0.608,0.420,1};
+};
 text = "FARABAD CONSOLE";
             x = safeZoneX;
             y = safeZoneY;
             w = safeZoneW;
             h = (0.045 * safeZoneH);
-            colorBackground[] = {0.04,0.06,0.06,0.95};
+                                    sizeEx = (0.05 * safeZoneH);
+sizeEx = (0.05 * safeZoneH);
+colorBackground[] = {0.04,0.06,0.06,0.95};
         };
 
         class StatusStripBG: RscText
@@ -759,7 +768,7 @@ text = "FARABAD CONSOLE";
                     w = 0.99;
                     h = 0.99;
                     colorBackground[] = {0.05,0.05,0.05,0.65};
-                    colorText[] = {0.722,0.608,0.420,1};
+                    colorText[] = {1,1,1,1};
                     tooltip = "Main content panel (scroll).";
                 };
             };
@@ -801,7 +810,7 @@ text = "FARABAD CONSOLE";
                     w = 0.99;
                     h = 0.99;
                     colorBackground[] = {0.05,0.05,0.05,0.65};
-                    colorText[] = {0.722,0.608,0.420,1};
+                    colorText[] = {1,1,1,1};
                     tooltip = "Details panel (scroll).";
                 };
             };
