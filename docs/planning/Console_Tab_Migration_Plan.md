@@ -153,6 +153,32 @@ Migrate console tabs from the legacy rendering path to the new tab framework in 
 
 ---
 
+## 5) Mandatory Sprint Ticket and PR Scope Declaration
+
+Every sprint ticket and every PR tied to tab migration work must include a dedicated section titled exactly:
+
+`## Scope of visible UI impact`
+
+This section is required even when there is no visible UI change.
+
+### Required content (ticket + PR)
+- **Visually affected tabs:** explicit list of tabs whose rendered UI changes in this work item (for example, `OPS only`).
+- **Visually unchanged tabs:** explicit list of tabs that remain visually unchanged (for example, `DASH`, `CMD`).
+- **Impact summary:** one sentence describing what a user will notice (or stating `No visible UI change`).
+
+### Copy/paste template
+```md
+## Scope of visible UI impact
+- Visually affected tabs: <list or "None">
+- Visually unchanged tabs: <list>
+- Impact summary: <one sentence>
+```
+
+### Review rule
+- If this section is missing or incomplete in either the sprint ticket or the PR body, the item is considered **not ready** and cannot proceed to merge review.
+
+---
+
 ## Appendix: Suggested Rollout Cadence
 - **Week 1:** Framework validation + Overview canary.
 - **Week 2:** Operations and Intel staged rollout.

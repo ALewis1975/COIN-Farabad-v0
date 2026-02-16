@@ -25,6 +25,15 @@ Run commands in repository root unless otherwise noted.
 9. Open console UI and execute the target regression scenario (task completion + SITREP submission).
 10. Review RPT output for layout-audit and self-test results.
 
+### PR metadata completeness gate
+
+11. Verify PR description includes a `Scope of visible UI impact` section that explicitly lists:
+   - visually affected tabs (for example: OPS-only), and
+   - visually unchanged tabs (for example: DASH, CMD).
+
+12. Apply merge checklist item: **Reject PR if scope statement is missing/incomplete.**
+
+
 ## 2) Expected pass criteria per command
 
 - `git fetch --all --prune`
@@ -45,6 +54,9 @@ Run commands in repository root unless otherwise noted.
   - Pass: no script error; subsequent flow emits audit lines.
 - Runtime verification flow
   - Pass: no persistent `CONSOLE_LAYOUT_AUDIT_FAIL`; no observed console overlap/cutoff regressions; SITREP path completes successfully.
+- PR metadata completeness gate
+  - Pass: PR description contains `Scope of visible UI impact` with both `Visually affected tabs` and `Visually unchanged tabs` explicitly listed.
+  - Fail: section is missing, uses placeholders, or omits either affected/unchanged tab scope declaration.
 
 ## 3) Fail handling and escalation path
 
@@ -77,3 +89,10 @@ All roles below must explicitly approve before merge:
 4. **Release Manager (or Duty Maintainer)** — final go/no-go based on risk and release timing.
 
 No self-approval substitutions are allowed for Code Owner + QA on console-upgrade PRs.
+
+## 5) Merge checklist (hard reject criteria)
+
+- [ ] PR body includes `Scope of visible UI impact`.
+- [ ] `Visually affected tabs` are explicitly listed (or `None`).
+- [ ] `Visually unchanged tabs` are explicitly listed.
+- [ ] Reviewer marks **Reject** if any item above is unchecked.
