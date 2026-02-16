@@ -30,8 +30,15 @@ Run commands in repository root unless otherwise noted.
 11. Verify PR description includes a `Scope of visible UI impact` section that explicitly lists:
    - visually affected tabs (for example: OPS-only), and
    - visually unchanged tabs (for example: DASH, CMD).
+12. For each UI-related ticket, require **before/after verification evidence for each impacted tab only**.
+13. For OPS-impacting tickets, require verification evidence captured from the **OPS tab** (DASH evidence is not accepted as substitute).
+14. Verify PR description includes a tab-level verification table with columns:
+   - `Tab`
+   - `Expected visible change`
+   - `Verification command/evidence`
+   - `Reviewer sign-off`
 
-12. Apply merge checklist item: **Reject PR if scope statement is missing/incomplete.**
+15. Apply merge checklist item: **Reject PR if scope statement, impacted-tab before/after evidence, OPS-tab evidence rule, or verification table is missing/incomplete.**
 
 
 ## 2) Expected pass criteria per command
@@ -56,7 +63,10 @@ Run commands in repository root unless otherwise noted.
   - Pass: no persistent `CONSOLE_LAYOUT_AUDIT_FAIL`; no observed console overlap/cutoff regressions; SITREP path completes successfully.
 - PR metadata completeness gate
   - Pass: PR description contains `Scope of visible UI impact` with both `Visually affected tabs` and `Visually unchanged tabs` explicitly listed.
-  - Fail: section is missing, uses placeholders, or omits either affected/unchanged tab scope declaration.
+  - Pass: each UI-related ticket includes before/after verification for every impacted tab and does not include unrelated tab evidence.
+  - Pass: OPS-impacting tickets include OPS-tab evidence (DASH-only evidence fails this gate).
+  - Pass: PR description includes a verification table with `Tab`, `Expected visible change`, `Verification command/evidence`, and `Reviewer sign-off`.
+  - Fail: section is missing, uses placeholders, omits affected/unchanged tab scope declaration, lacks impacted-tab before/after evidence, uses non-OPS evidence for OPS-impacting changes, or omits required table columns.
 
 ## 3) Fail handling and escalation path
 
@@ -95,4 +105,7 @@ No self-approval substitutions are allowed for Code Owner + QA on console-upgrad
 - [ ] PR body includes `Scope of visible UI impact`.
 - [ ] `Visually affected tabs` are explicitly listed (or `None`).
 - [ ] `Visually unchanged tabs` are explicitly listed.
+- [ ] Each UI-related ticket provides before/after verification for each impacted tab only.
+- [ ] OPS-impacting tickets include OPS-tab verification evidence (not DASH-only evidence).
+- [ ] PR body includes verification table with `Tab`, `Expected visible change`, `Verification command/evidence`, and `Reviewer sign-off`.
 - [ ] Reviewer marks **Reject** if any item above is unchecked.
