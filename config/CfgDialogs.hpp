@@ -684,7 +684,8 @@ text = "FARABAD CONSOLE";
             w = (0.16 * safeZoneW);
             h = (0.022 * safeZoneH);
             colorBackground[] = {0,0,0,0};
-        };
+                    colorText[] = {0.722,0.608,0.420,1};
+};
 
         class StatusCenter: RscText
         {
@@ -695,7 +696,8 @@ text = "FARABAD CONSOLE";
             w = (0.24 * safeZoneW);
             h = (0.022 * safeZoneH);
             colorBackground[] = {0,0,0,0};
-        };
+                    colorText[] = {0.722,0.608,0.420,1};
+};
 
         class StatusRight: RscText
         {
@@ -706,7 +708,8 @@ text = "FARABAD CONSOLE";
             w = (0.09 * safeZoneW);
             h = (0.022 * safeZoneH);
             colorBackground[] = {0,0,0,0};
-        };
+                    colorText[] = {0.722,0.608,0.420,1};
+};
 
         class StatusCtrlLink: RscButton
         {
@@ -718,7 +721,8 @@ text = "FARABAD CONSOLE";
             h = (0.024 * safeZoneH);
             tooltip = "Status strip control placeholder (first pass shell).";
             action = "true";
-        };
+                    colorText[] = {0.722,0.608,0.420,1};
+};
 
         class Tabs: RscListbox
         {
@@ -728,6 +732,11 @@ text = "FARABAD CONSOLE";
             w = (0.226 * safeZoneW);
             h = (0.826 * safeZoneH);
             tooltip = "Select a console tab.";
+            colorText[] = {0.722,0.608,0.420,1};
+            colorSelect[] = {0.722,0.608,0.420,1};
+            colorSelect2[] = {0.722,0.608,0.420,1};
+            colorSelectBackground[] = {0.2,0.2,0.2,0.9};
+            colorSelectBackground2[] = {0.2,0.2,0.2,0.9};
             onLBSelChanged = "_this call ARC_fnc_uiConsoleSelectTab;";
         };
 
@@ -750,6 +759,7 @@ text = "FARABAD CONSOLE";
                     w = 0.99;
                     h = 0.99;
                     colorBackground[] = {0.05,0.05,0.05,0.65};
+                    colorText[] = {0.722,0.608,0.420,1};
                     tooltip = "Main content panel (scroll).";
                 };
             };
@@ -763,6 +773,11 @@ text = "FARABAD CONSOLE";
             w = (0.266 * safeZoneW);
             h = (0.826 * safeZoneH);
             colorBackground[] = {0.05,0.05,0.05,0.65};
+            colorText[] = {0.722,0.608,0.420,1};
+            colorSelect[] = {0.722,0.608,0.420,1};
+            colorSelect2[] = {0.722,0.608,0.420,1};
+            colorSelectBackground[] = {0.2,0.2,0.2,0.9};
+            colorSelectBackground2[] = {0.2,0.2,0.2,0.9};
             tooltip = "Select an item. Details show on the right.";
             onLBSelChanged = "_this call ARC_fnc_uiConsoleMainListSelChanged;";
         };
@@ -786,6 +801,7 @@ text = "FARABAD CONSOLE";
                     w = 0.99;
                     h = 0.99;
                     colorBackground[] = {0.05,0.05,0.05,0.65};
+                    colorText[] = {0.722,0.608,0.420,1};
                     tooltip = "Details panel (scroll).";
                 };
             };
@@ -804,7 +820,8 @@ text = "FARABAD CONSOLE";
             w = (0.10 * safeZoneW);
             h = (0.03 * safeZoneH);
             colorBackground[] = {0,0,0,0};
-        };
+                    colorText[] = {0.722,0.608,0.420,1};
+};
         class S2_ComboMethod: RscCombo
         {
             idc = 78051;
@@ -822,7 +839,8 @@ text = "FARABAD CONSOLE";
             w = (0.10 * safeZoneW);
             h = (0.03 * safeZoneH);
             colorBackground[] = {0,0,0,0};
-        };
+                    colorText[] = {0.722,0.608,0.420,1};
+};
         class S2_ComboCategory: RscCombo
         {
             idc = 78053;
@@ -840,7 +858,8 @@ text = "FARABAD CONSOLE";
             w = (0.10 * safeZoneW);
             h = (0.03 * safeZoneH);
             colorBackground[] = {0,0,0,0};
-        };
+                    colorText[] = {0.722,0.608,0.420,1};
+};
         class S2_ComboLeadType: RscCombo
         {
             idc = 78055;

@@ -17,26 +17,6 @@ params [
     ["_display", displayNull, [displayNull]]
 ];
 
-// UI-SKIN-1b: Apply console theme (bezel + borders + default text)
-private _theme = [] call ARC_fnc_consoleThemeGet;
-private _coyoteText = _theme get "coyoteText";
-
-// Bezel frames
-{
-    private _ctrl = _display displayCtrl _x;
-    if (!isNull _ctrl) then {
-        // background is transparent, border is colorText in config; keep as-is unless you want runtime overrides later
-        _ctrl ctrlCommit 0;
-    };
-} forEach [78091,78092,78093,78094,78095];
-
-// Default typography (core labels)
-{
-    private _ctrl = _display displayCtrl _x;
-    if (!isNull _ctrl) then { _ctrl ctrlSetTextColor _coyoteText; };
-} forEach [78001,78002,78003,78004,78005,78006,78007,78008,78009];
-
-
 if (isNull _display) exitWith {false};
 
 private _ctrlTabs    = _display displayCtrl 78001;
@@ -46,6 +26,26 @@ private _ctrlList    = _display displayCtrl 78011;
 private _ctrlDetailsGrp = _display displayCtrl 78016;
 private _ctrlDetails = _display displayCtrl 78012;
 
+
+// ---------------------------------------------------------------------------
+// UI-SKIN: enforce default coyote text color for core console controls.
+// This prevents fallback to white when control classes omit colorText[].
+// ---------------------------------------------------------------------------
+private _coyote = [0.722,0.608,0.420,1];
+{ if (!isNull _x) then { _x ctrlSetTextColor _coyote; }; } forEach [
+    _display displayCtrl 78091,   // TitleBar
+    _display displayCtrl 78060,   // StatusLeft
+    _display displayCtrl 78061,   // StatusCenter
+    _display displayCtrl 78062,   // StatusRight
+    _display displayCtrl 78001,   // Tabs list
+    _display displayCtrl 78010,   // Main structured text
+    _display displayCtrl 78011,   // Main list
+    _display displayCtrl 78012,   // Details structured text
+    _display displayCtrl 78021,   // Primary
+    _display displayCtrl 78022,   // Secondary
+    _display displayCtrl 78023,   // Refresh
+    _display displayCtrl 78024    // Close
+];
 // Ops (S3) frame controls (UI09)
 private _opsCtrls = [
     _display displayCtrl 78030,
@@ -201,7 +201,7 @@ _ctrlTabs lbSetCurSel _sel;
 // Initial hint in the main panel (refresh overwrites this quickly)
 if (!isNull _ctrlMain) then
 {
-    _ctrlMain ctrlSetStructuredText parseText "<t size='1.05'>Loading...</t>";
+    _ctrlMain ctrlSetStructuredText parseText "<t size='1.05' color='#B89B6B'>Loading...</t>";
 };
 
 // Initial paint
