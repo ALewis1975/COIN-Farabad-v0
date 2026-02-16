@@ -582,37 +582,149 @@ class ARC_FarabadConsoleDialog
 
     class controlsBackground
     {
-        class BG: RscText
+        class Shell: RscText
         {
             idc = 78090;
+            x = 0.035;
+            y = 0.035;
+            w = 0.93;
+            h = 0.91;
+            colorBackground[] = {0.08,0.08,0.08,0.97};
+        };
+
+        class ShellBezel: RscText
+        {
+            idc = 78092;
             x = 0.05;
             y = 0.06;
             w = 0.90;
             h = 0.88;
-            colorBackground[] = {0,0,0,0.82};
+            colorBackground[] = {0.16,0.16,0.16,0.96};
+        };
+
+        class ScreenBG: RscText
+        {
+            idc = 78093;
+            x = 0.056;
+            y = 0.078;
+            w = 0.888;
+            h = 0.842;
+            colorBackground[] = {0.01,0.02,0.02,0.92};
+        };
+
+        class GripTL: RscText
+        {
+            idc = 78094;
+            x = 0.043;
+            y = 0.048;
+            w = 0.018;
+            h = 0.018;
+            colorBackground[] = {0.24,0.24,0.24,1};
+        };
+        class GripTR: RscText
+        {
+            idc = 78095;
+            x = 0.939;
+            y = 0.048;
+            w = 0.018;
+            h = 0.018;
+            colorBackground[] = {0.24,0.24,0.24,1};
+        };
+        class GripBL: RscText
+        {
+            idc = 78096;
+            x = 0.043;
+            y = 0.921;
+            w = 0.018;
+            h = 0.018;
+            colorBackground[] = {0.24,0.24,0.24,1};
+        };
+        class GripBR: RscText
+        {
+            idc = 78097;
+            x = 0.939;
+            y = 0.921;
+            w = 0.018;
+            h = 0.018;
+            colorBackground[] = {0.24,0.24,0.24,1};
         };
 
         class TitleBar: RscText
         {
             idc = 78091;
             text = "FARABAD CONSOLE";
-            x = 0.05;
-            y = 0.06;
-            w = 0.90;
-            h = 0.05;
-            colorBackground[] = {0.05,0.05,0.05,0.92};
+            x = 0.056;
+            y = 0.078;
+            w = 0.888;
+            h = 0.045;
+            colorBackground[] = {0.04,0.06,0.06,0.95};
+        };
+
+        class StatusStripBG: RscText
+        {
+            idc = 78098;
+            x = 0.056;
+            y = 0.123;
+            w = 0.888;
+            h = 0.03;
+            colorBackground[] = {0.03,0.08,0.08,0.90};
         };
     };
 
     class controls
     {
+        class StatusLeft: RscText
+        {
+            idc = 78060;
+            text = "NET: LINKED";
+            x = 0.065;
+            y = 0.127;
+            w = 0.16;
+            h = 0.022;
+            colorBackground[] = {0,0,0,0};
+        };
+
+        class StatusCenter: RscText
+        {
+            idc = 78061;
+            text = "MODE: FIELD-HARDENED";
+            x = 0.38;
+            y = 0.127;
+            w = 0.24;
+            h = 0.022;
+            colorBackground[] = {0,0,0,0};
+        };
+
+        class StatusRight: RscText
+        {
+            idc = 78062;
+            text = "PWR: 96%";
+            x = 0.79;
+            y = 0.127;
+            w = 0.09;
+            h = 0.022;
+            colorBackground[] = {0,0,0,0};
+        };
+
+        class StatusCtrlLink: RscButton
+        {
+            idc = 78063;
+            text = "LINK";
+            x = 0.89;
+            y = 0.126;
+            w = 0.05;
+            h = 0.024;
+            tooltip = "Status strip control placeholder (first pass shell).";
+            action = "true";
+        };
+
         class Tabs: RscListbox
         {
             idc = 78001;
             x = 0.06;
-            y = 0.12;
+            y = 0.16;
             w = 0.20;
-            h = 0.74;
+            h = 0.70;
             tooltip = "Select a console tab.";
             onLBSelChanged = "_this call ARC_fnc_uiConsoleSelectTab;";
         };
@@ -622,9 +734,9 @@ class ARC_FarabadConsoleDialog
         {
             idc = 78015;
             x = 0.28;
-            y = 0.12;
+            y = 0.16;
             w = 0.66;
-            h = 0.74;
+            h = 0.70;
 
             class controls
             {
@@ -634,7 +746,7 @@ class ARC_FarabadConsoleDialog
                     x = 0;
                     y = 0;
                     w = 0.66;
-                    h = 0.74;
+                    h = 0.70;
                     colorBackground[] = {0.05,0.05,0.05,0.65};
                     tooltip = "Main content panel (scroll).";
                 };
@@ -645,9 +757,9 @@ class ARC_FarabadConsoleDialog
         {
             idc = 78011;
             x = 0.28;
-            y = 0.12;
+            y = 0.16;
             w = 0.24;
-            h = 0.74;
+            h = 0.70;
             colorBackground[] = {0.05,0.05,0.05,0.65};
             tooltip = "Select an item. Details show on the right.";
             onLBSelChanged = "_this call ARC_fnc_uiConsoleMainListSelChanged;";
@@ -658,9 +770,9 @@ class ARC_FarabadConsoleDialog
         {
             idc = 78016;
             x = 0.53;
-            y = 0.12;
+            y = 0.16;
             w = 0.41;
-            h = 0.74;
+            h = 0.70;
 
             class controls
             {
@@ -670,7 +782,7 @@ class ARC_FarabadConsoleDialog
                     x = 0;
                     y = 0;
                     w = 0.41;
-                    h = 0.74;
+                    h = 0.70;
                     colorBackground[] = {0.05,0.05,0.05,0.65};
                     tooltip = "Details panel (scroll).";
                 };
@@ -686,7 +798,7 @@ class ARC_FarabadConsoleDialog
             idc = 78050;
             text = "Collection:";
             x = 0.54;
-            y = 0.13;
+            y = 0.17;
             w = 0.10;
             h = 0.03;
             colorBackground[] = {0,0,0,0};
@@ -695,7 +807,7 @@ class ARC_FarabadConsoleDialog
         {
             idc = 78051;
             x = 0.63;
-            y = 0.125;
+            y = 0.165;
             w = 0.30;
             h = 0.04;
         };
@@ -704,7 +816,7 @@ class ARC_FarabadConsoleDialog
             idc = 78052;
             text = "Category:";
             x = 0.54;
-            y = 0.18;
+            y = 0.22;
             w = 0.10;
             h = 0.03;
             colorBackground[] = {0,0,0,0};
@@ -713,7 +825,7 @@ class ARC_FarabadConsoleDialog
         {
             idc = 78053;
             x = 0.63;
-            y = 0.175;
+            y = 0.215;
             w = 0.30;
             h = 0.04;
         };
@@ -722,7 +834,7 @@ class ARC_FarabadConsoleDialog
             idc = 78054;
             text = "Lead Type:";
             x = 0.54;
-            y = 0.13;
+            y = 0.17;
             w = 0.10;
             h = 0.03;
             colorBackground[] = {0,0,0,0};
@@ -731,7 +843,7 @@ class ARC_FarabadConsoleDialog
         {
             idc = 78055;
             x = 0.63;
-            y = 0.125;
+            y = 0.165;
             w = 0.30;
             h = 0.04;
         };
@@ -744,7 +856,7 @@ class ARC_FarabadConsoleDialog
         {
             idc = 78030;
             x = 0.28;
-            y = 0.12;
+            y = 0.16;
             w = 0.24;
             h = 0.20;
             colorBackground[] = {0.05,0.05,0.05,0.65};
@@ -754,7 +866,7 @@ class ARC_FarabadConsoleDialog
             idc = 78031;
             text = "INCIDENTS / TASKS";
             x = 0.28;
-            y = 0.12;
+            y = 0.16;
             w = 0.24;
             h = 0.03;
             colorBackground[] = {0.05,0.05,0.05,0.92};
@@ -763,7 +875,7 @@ class ARC_FarabadConsoleDialog
         {
             idc = 78032;
             x = 0.28;
-            y = 0.15;
+            y = 0.19;
             w = 0.24;
             h = 0.17;
             colorBackground[] = {0.05,0.05,0.05,0.65};
@@ -775,7 +887,7 @@ class ARC_FarabadConsoleDialog
         {
             idc = 78033;
             x = 0.28;
-            y = 0.33;
+            y = 0.37;
             w = 0.24;
             h = 0.20;
             colorBackground[] = {0.05,0.05,0.05,0.65};
@@ -785,7 +897,7 @@ class ARC_FarabadConsoleDialog
             idc = 78034;
             text = "ORDERS / FRAGOS";
             x = 0.28;
-            y = 0.33;
+            y = 0.37;
             w = 0.24;
             h = 0.03;
             colorBackground[] = {0.05,0.05,0.05,0.92};
@@ -794,7 +906,7 @@ class ARC_FarabadConsoleDialog
         {
             idc = 78035;
             x = 0.28;
-            y = 0.36;
+            y = 0.40;
             w = 0.24;
             h = 0.17;
             colorBackground[] = {0.05,0.05,0.05,0.65};
@@ -806,9 +918,9 @@ class ARC_FarabadConsoleDialog
         {
             idc = 78036;
             x = 0.28;
-            y = 0.54;
+            y = 0.58;
             w = 0.24;
-            h = 0.32;
+            h = 0.28;
             colorBackground[] = {0.05,0.05,0.05,0.65};
         };
         class OpsFrameLead_Label: RscText
@@ -816,7 +928,7 @@ class ARC_FarabadConsoleDialog
             idc = 78037;
             text = "LEADS / TIPS";
             x = 0.28;
-            y = 0.54;
+            y = 0.58;
             w = 0.24;
             h = 0.03;
             colorBackground[] = {0.05,0.05,0.05,0.92};
@@ -825,9 +937,9 @@ class ARC_FarabadConsoleDialog
         {
             idc = 78038;
             x = 0.28;
-            y = 0.57;
+            y = 0.61;
             w = 0.24;
-            h = 0.29;
+            h = 0.25;
             colorBackground[] = {0.05,0.05,0.05,0.65};
             tooltip = "S2/S3 leads and follow-on targets.";
             onLBSelChanged = "_this call ARC_fnc_uiConsoleOpsSelChanged;";
