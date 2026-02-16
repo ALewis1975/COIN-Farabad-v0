@@ -34,8 +34,8 @@ The goal is deterministic behavior: the client should predict likely outcomes, b
 
 | Incident Type | Allowed States | Blocked States | Additional Conditions | Result on Allow |
 |---|---|---|---|---|
-| `UNIT_ACCEPT` | `OFFERED` | all others | caller has unit-write authority and is in authorized accepting role | state -> `ACCEPTED` |
-| `UNIT_NOTE` | `ACCEPTED`, `IN_PROGRESS`, `COMPLETE_PENDING_SITREP`, `SITREP_SUBMITTED_PENDING_TOC`, `FOLLOWON_ORDERED_PENDING_UNIT_ACK` | `OFFERED`, `CLOSED` | non-empty note text; if current state is `FOLLOWON_ORDERED_PENDING_UNIT_ACK` and reason category is `UNABLE`, reason is mandatory | may keep state unchanged; special UNABLE route may transition per rule below |
+| `UNIT_ACCEPT` | `OFFERED` | all others | caller has `SCOPE_TASK_ACCEPT` and is in authorized accepting role | state -> `ACCEPTED` |
+| `UNIT_NOTE` | `ACCEPTED`, `IN_PROGRESS`, `COMPLETE_PENDING_SITREP`, `SITREP_SUBMITTED_PENDING_TOC`, `FOLLOWON_ORDERED_PENDING_UNIT_ACK` | `OFFERED`, `CLOSED` | non-empty note text; if current state is `FOLLOWON_ORDERED_PENDING_UNIT_ACK` and reason category is `UNABLE`, reason is mandatory | `ACCEPTED` -> `IN_PROGRESS`; otherwise keep current state unless special UNABLE route transitions per rule below |
 | `UNIT_PROGRESS` | `ACCEPTED`, `IN_PROGRESS` | all others | caller has unit-write authority | `ACCEPTED` -> `IN_PROGRESS`; `IN_PROGRESS` idempotent |
 | `UNIT_COMPLETE` | `ACCEPTED`, `IN_PROGRESS` | all others | caller has unit-write authority | state -> `COMPLETE_PENDING_SITREP` |
 | `UNIT_SITREP_SUBMIT` | `COMPLETE_PENDING_SITREP` | all others | valid SITREP payload, required fields present, caller has SITREP authority | state -> `SITREP_SUBMITTED_PENDING_TOC` when TOC gate enabled; else `CLOSED` |
