@@ -54,10 +54,10 @@ Recommended envelope fields:
 ### 2.1 Envelope and section metadata
 | VM field | Source key(s) | Type | Notes |
 |---|---|---|---|
-| `meta.schema` | literal | `STRING` | `"Console_VM_v1"`. |
-| `meta.version` | literal | `ARRAY[3]` | `[major, minor, patch]`. |
-| `meta.builtAtServerTime` | `serverTime` at build | `SCALAR` | Server-authoritative build timestamp. |
-| `meta.sectionFreshness.state.updatedAt` | `ARC_pub_stateUpdatedAt` | `SCALAR` | Primary freshness anchor for state summary. |
+| `schema` | literal | `STRING` | `"Console_VM_v1"` (top-level envelope field). |
+| `version` | literal | `ARRAY[3]` | `[major, minor, patch]` (top-level envelope field). |
+| `builtAtServerTime` | `serverTime` at build | `SCALAR` | Server-authoritative build timestamp (top-level envelope field). |
+| `sections.stateSummary.freshness.updatedAt` | `ARC_pub_stateUpdatedAt` | `SCALAR` | Primary freshness anchor for state summary. |
 
 ### 2.2 Active incident section (`sections.incident`)
 | VM field | Source key(s) | Type | Default/fallback |
@@ -149,7 +149,7 @@ Example section wrapper:
 ### 3.2 Timestamp derivation precedence
 1. Use an explicit companion timestamp key when available (e.g., `ARC_pub_stateUpdatedAt`).
 2. Else use producer-local timestamp captured at publish/build time.
-3. Else fall back to VM `meta.builtAtServerTime` and mark `freshness.derived = true`.
+3. Else fall back to VM `builtAtServerTime` and mark `freshness.derived = true`.
 
 ### 3.3 Recommended TTL defaults (UI hint only)
 - `incident`: `5s`
@@ -214,9 +214,10 @@ Provide `ARC_fnc_consoleVmAdapterV1` that:
 ### 4.4 Rollback strategy
 If regression appears:
 1. Disable VM-read flags (`ARC_mig_uiSnapshotOnly = false`).
-2. Keep VM publishing enabled for diagnostics.
-3. Revert affected tab to legacy-read path only.
-4. Fix mapping/freshness issue, then re-enable by tab.
+2. Disable router/deprecation gates (`ARC_mig_useRequestRouter = false`, `ARC_mig_disableLegacyActions = false`) to fully restore legacy action flow.
+3. Keep VM publishing enabled for diagnostics.
+4. Revert affected tab to legacy-read path only.
+5. Fix mapping/freshness issue, then re-enable by tab.
 
 ### 4.5 Known edge cases to cover in adapter tests
 - No active incident (`ARC_activeTaskId == ""`).
@@ -233,4 +234,3 @@ If regression appears:
 - At least one tab (recommended: Dashboard) can run VM-first with no user-visible regression.
 - Feature flags allow immediate rollback to legacy read paths.
 - Debug logs show section freshness and stale-state decisions.
-
