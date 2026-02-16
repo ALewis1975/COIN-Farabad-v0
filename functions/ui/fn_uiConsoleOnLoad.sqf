@@ -17,38 +17,27 @@ params [
     ["_display", displayNull, [displayNull]]
 ];
 
-if (isNull _display) exitWith {false};
+// UI-SKIN-1b: Apply console theme (bezel + borders + default text)
+private _theme = [] call ARC_fnc_consoleThemeGet;
+private _coyoteText = _theme get "coyoteText";
 
-// ---------------------------------------------------------------------------
-// Theme (UI-SKIN-1): rugged tablet bezel + coyote typography
-// ---------------------------------------------------------------------------
-private _theme = call ARC_fnc_consoleThemeGet;
-if (_theme isEqualType createHashMap) then
+// Bezel frames
 {
-    private _cOuter  = _theme getOrDefault ["bezelOuter",  [0.16,0.16,0.16,1]];
-    private _cGreen  = _theme getOrDefault ["bezelGreen",  [0.18,0.24,0.18,1]];
-    private _cInner  = _theme getOrDefault ["bezelInner",  [0.12,0.13,0.15,1]];
-    private _cScreen = _theme getOrDefault ["screen",      [0.04,0.04,0.04,1]];
-    private _cText   = _theme getOrDefault ["text",        [0.72,0.61,0.42,1]];
+    private _ctrl = _display displayCtrl _x;
+    if (!isNull _ctrl) then {
+        // background is transparent, border is colorText in config; keep as-is unless you want runtime overrides later
+        _ctrl ctrlCommit 0;
+    };
+} forEach [78091,78092,78093,78094,78095];
 
-    // Bezel layers
-    {
-        private _ctrl = _display displayCtrl (_x # 0);
-        if (!isNull _ctrl) then { _ctrl ctrlSetBackgroundColor (_x # 1); };
-    } forEach [
-        [78090, _cOuter],   // outer gunmetal
-        [78092, _cGreen],   // green ring
-        [78100, _cInner],   // inner gunmetal
-        [78093, _cScreen]   // screen black
-    ];
+// Default typography (core labels)
+{
+    private _ctrl = _display displayCtrl _x;
+    if (!isNull _ctrl) then { _ctrl ctrlSetTextColor _coyoteText; };
+} forEach [78001,78002,78003,78004,78005,78006,78007,78008,78009];
 
-    // Typography defaults (safe, minimal set)
-    {
-        private _ctrl = _display displayCtrl _x;
-        if (!isNull _ctrl) then { _ctrl ctrlSetTextColor _cText; };
-    } forEach [78091, 78060, 78061, 78062, 78001, 78010, 78011, 78012];
-};
 
+if (isNull _display) exitWith {false};
 
 private _ctrlTabs    = _display displayCtrl 78001;
 private _ctrlMainGrp = _display displayCtrl 78015;

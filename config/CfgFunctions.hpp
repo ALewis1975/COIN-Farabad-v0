@@ -419,7 +419,6 @@ class CfgFunctions
             class uiConsoleCanOpen {};
             class uiConsoleOpen {};
             class uiConsoleOnLoad {};
-            class consoleThemeGet {};
             class uiConsoleOnUnload {};
             class uiConsoleSelectTab {};
             class uiConsoleRefresh {};
@@ -564,5 +563,17 @@ class Ops
             class airbaseSecurityPatrol {};
 
         };
+    };
+};
+
+
+// UI-SKIN-1b theme getter
+class ARC_UI_SKIN_THEME
+{
+    tag = "ARC";
+    class ui
+    {
+        file = "functions\ui\theme";
+        class consoleThemeGet {};
     };
 };
