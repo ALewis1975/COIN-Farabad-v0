@@ -28,30 +28,38 @@ private _ctrlDetails = _display displayCtrl 78012;
 
 
 // ---------------------------------------------------------------------------
-// UI-SKIN: enforce default coyote text color for core console controls.
-// This prevents fallback to white when control classes omit colorText[].
+// ---------------------------------------------------------------------------
+// UI-SKIN: enforce console typography defaults.
+// Labels/navigation stay COYOTE; body/value text defaults to WHITE.
 // ---------------------------------------------------------------------------
 private _coyote = [0.722,0.608,0.420,1];
+private _white  = [1,1,1,1];
+
+// Title bar: coyote + 75% larger font height
+private _ctrlTitle = _display displayCtrl 78091;
+if (!isNull _ctrlTitle) then {
+    _ctrlTitle ctrlSetTextColor _coyote;
+    _ctrlTitle ctrlSetFontHeight ((safeZoneH / 25) * 1.75);
+};
+
+// Status strip + nav + buttons: coyote
 { if (!isNull _x) then { _x ctrlSetTextColor _coyote; }; } forEach [
-    _display displayCtrl 78091,   // TitleBar
     _display displayCtrl 78060,   // StatusLeft
     _display displayCtrl 78061,   // StatusCenter
     _display displayCtrl 78062,   // StatusRight
     _display displayCtrl 78001,   // Tabs list
-    _display displayCtrl 78010,   // Main structured text
-    _display displayCtrl 78011,   // Main list
-    _display displayCtrl 78012,   // Details structured text
     _display displayCtrl 78021,   // Primary
     _display displayCtrl 78022,   // Secondary
     _display displayCtrl 78023,   // Refresh
     _display displayCtrl 78024    // Close
 ];
 
-// Title font size (75% bigger)
-private _tTitle = _display displayCtrl 78091;
-if (!isNull _tTitle) then {
-    _tTitle ctrlSetFontHeight (0.05 * safeZoneH);
-};
+// Main/value panes: white (structured text + list)
+{ if (!isNull _x) then { _x ctrlSetTextColor _white; }; } forEach [
+    _display displayCtrl 78010,   // Main structured text
+    _display displayCtrl 78011,   // Main list
+    _display displayCtrl 78012    // Details structured text
+];
 // Ops (S3) frame controls (UI09)
 private _opsCtrls = [
     _display displayCtrl 78030,
