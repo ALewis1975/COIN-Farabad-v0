@@ -38,6 +38,12 @@ private _ctrlDetails = _display displayCtrl 78012;
 private _b1 = _display displayCtrl 78021;
 private _b2 = _display displayCtrl 78022;
 
+
+private _statusLeft = _display displayCtrl 78060;
+private _statusCenter = _display displayCtrl 78061;
+private _statusRight = _display displayCtrl 78062;
+private _statusCtrl = _display displayCtrl 78063;
+
 // Ops frame controls
 private _opsCtrls = [
     _display displayCtrl 78030,
@@ -78,6 +84,15 @@ if (!(_tab isEqualType "")) then { _tab = "DASH"; };
 _tab = toUpper (trim _tab);
 
 private _opsSecondaryLabel = "FOLLOW-ON (SITREP)";
+
+
+private _atStation = [player] call ARC_fnc_uiConsoleIsAtStation;
+private _netText = if (_atStation) then {"NET: TOC-LINK"} else {"NET: FIELD"};
+if (!isNull _statusLeft) then { _statusLeft ctrlSetText _netText; };
+if (!isNull _statusCenter) then { _statusCenter ctrlSetText format ["MODE: %1", _tab]; };
+private _timeText = daytime call BIS_fnc_timeToString;
+if (!isNull _statusRight) then { _statusRight ctrlSetText format ["TIME: %1", _timeText]; };
+if (!isNull _statusCtrl) then { _statusCtrl ctrlEnable false; };
 
 switch (_tab) do
 {
