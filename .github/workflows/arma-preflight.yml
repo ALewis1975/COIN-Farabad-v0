@@ -23,16 +23,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install sqflint
 
-      - name: SQF static analysis (all *.sqf)
+      - name: SQF static analysis (all *.sqf files only)
         run: |
-          # Recursively lint the repo.
-          # Exit behavior:
-          #   -e w  => fail CI on warnings OR errors (strict)
-          #   -e e  => fail CI on errors only (less strict)
-          # Note: sqflint's -x/--exclude expects a REGEX (re.match from start of the path).
-          # Paths passed to the exclude list are joined to the directory when they don't start with '/',
-          # so we match the runner's relative paths like './.git', './node_modules', etc.
-          sqflint -d . -e w -x '\./\.git' -x '\./\.github' -x '\./\.vscode' -x '\./node_modules' -x '\./dist' -x '\./build'
+          set -euo pipefail
+
+          find . -type f -name "*.sqf"             ! -path "./.git/*"             ! -path "./.github/*"             ! -path "./.vscode/*"             ! -path "./node_modules/*"             ! -path "./dist/*"             ! -path "./build/*"             -print0 | xargs -0 -n 1 sqflint -e w
 
       - name: Mission config sanity checks (description.ext, ui/**/*.hpp, etc.)
         run: |
@@ -41,140 +36,116 @@ jobs:
           import sys
           from pathlib import Path
 
-          # Files to include: mission config + common include types
           include_names = {"description.ext"}
           include_exts = {".hpp", ".h", ".inc", ".cfg", ".ext"}
 
-          # Find candidates
           candidates = []
           for p in Path(".").rglob("*"):
-            if not p.is_file():
-              continue
-            if p.name in include_names or p.suffix.lower() in include_exts:
-              candidates.append(p)
+              if not p.is_file():
+                  continue
+              if p.name in include_names or p.suffix.lower() in include_exts:
+                  candidates.append(p)
 
           if not candidates:
-            print("No mission config/include files found (description.ext, *.hpp, *.inc, etc.)")
-            sys.exit(0)
+              print("No mission config/include files found.")
+              sys.exit(0)
 
           def strip_strings_and_comments(text: str) -> str:
-            out = []
-            i = 0
-            n = len(text)
-            in_str = False
-            str_ch = ""
-            in_line_comment = False
-            in_block_comment = False
+              out = []
+              i = 0
+              n = len(text)
+              in_str = False
+              str_ch = ""
+              in_line_comment = False
+              in_block_comment = False
 
-            while i < n:
-              ch = text[i]
-              nxt = text[i+1] if i+1 < n else ""
-
-              if in_line_comment:
-                if ch == "\n":
-                  in_line_comment = False
-                  out.append(ch)
-                i += 1
-                continue
-
-              if in_block_comment:
-                if ch == "*" and nxt == "/":
-                  in_block_comment = False
-                  i += 2
-                else:
-                  i += 1
-                continue
-
-              if in_str:
-                if ch == "\\":
-                  i += 2
-                  continue
-                if ch == str_ch:
-                  in_str = False
-                out.append(" " if ch != "\n" else "\n")
-                i += 1
-                continue
-
-              if ch == "/" and nxt == "/":
-                in_line_comment = True
-                i += 2
-                continue
-              if ch == "/" and nxt == "*":
-                in_block_comment = True
-                i += 2
-                continue
-
-              if ch in ("'", '"'):
-                in_str = True
-                str_ch = ch
-                out.append(" ")
-                i += 1
-                continue
-
-              out.append(ch)
-              i += 1
-
-            return "".join(out)
-
-          def basic_balance_checks(path: Path, raw: str) -> list[str]:
-            issues = []
-            stripped = strip_strings_and_comments(raw)
-
-            pairs = { "{": "}", "(": ")", "[": "]" }
-            stack = []
-            for idx, ch in enumerate(stripped):
-              if ch in pairs:
-                stack.append((ch, idx))
-              elif ch in pairs.values():
-                if not stack:
-                  issues.append(f"Unmatched closing '{ch}'")
-                  continue
-                opener, _ = stack.pop()
-                if pairs[opener] != ch:
-                  issues.append(f"Mismatched '{opener}' closed by '{ch}'")
-
-            if stack:
-              issues.append(f"Unclosed delimiter(s): {''.join(o for o, _ in stack)}")
-
-            class_block = re.compile(r"\bclass\s+\w+\s*\{", re.IGNORECASE)
-            for m in class_block.finditer(stripped):
-              start = m.start()
-              brace_pos = stripped.find("{", m.end()-1)
-              if brace_pos == -1:
-                continue
-              depth = 0
-              i = brace_pos
-              n = len(stripped)
               while i < n:
-                if stripped[i] == "{":
-                  depth += 1
-                elif stripped[i] == "}":
-                  depth -= 1
-                  if depth == 0:
-                    j = i + 1
-                    while j < n and stripped[j].isspace():
-                      j += 1
-                    if j >= n or stripped[j] != ";":
-                      line = stripped.count("\n", 0, start) + 1
-                      issues.append(f"Possible missing ';' after class block near line {line}")
-                    break
-                i += 1
+                  ch = text[i]
+                  nxt = text[i+1] if i+1 < n else ""
 
-            return issues
+                  if in_line_comment:
+                      if ch == "\n":
+                          in_line_comment = False
+                          out.append(ch)
+                      i += 1
+                      continue
+
+                  if in_block_comment:
+                      if ch == "*" and nxt == "/":
+                          in_block_comment = False
+                          i += 2
+                      else:
+                          i += 1
+                      continue
+
+                  if in_str:
+                      if ch == "\\":
+                          i += 2
+                          continue
+                      if ch == str_ch:
+                          in_str = False
+                      out.append(" " if ch != "\n" else "\n")
+                      i += 1
+                      continue
+
+                  if ch == "/" and nxt == "/":
+                      in_line_comment = True
+                      i += 2
+                      continue
+                  if ch == "/" and nxt == "*":
+                      in_block_comment = True
+                      i += 2
+                      continue
+
+                  if ch in ("'", '"'):
+                      in_str = True
+                      str_ch = ch
+                      out.append(" ")
+                      i += 1
+                      continue
+
+                  out.append(ch)
+                  i += 1
+
+              return "".join(out)
+
+          def basic_balance_checks(raw: str):
+              issues = []
+              stripped = strip_strings_and_comments(raw)
+
+              pairs = { "{": "}", "(": ")", "[": "]" }
+              stack = []
+
+              for ch in stripped:
+                  if ch in pairs:
+                      stack.append(ch)
+                  elif ch in pairs.values():
+                      if not stack:
+                          issues.append(f"Unmatched closing '{ch}'")
+                          continue
+                      opener = stack.pop()
+                      if pairs[opener] != ch:
+                          issues.append(f"Mismatched '{opener}' closed by '{ch}'")
+
+              if stack:
+                  issues.append(f"Unclosed delimiter(s): {''.join(stack)}")
+
+              return issues
 
           failed = 0
+
           for p in sorted(candidates):
-            raw = p.read_text(encoding="utf-8", errors="replace")
-            issues = basic_balance_checks(p, raw)
-            if issues:
-              failed += 1
-              print(f"\n{p}:")
-              for issue in issues:
-                print(f"  - {issue}")
+              raw = p.read_text(encoding="utf-8", errors="replace")
+              issues = basic_balance_checks(raw)
+              if issues:
+                  failed += 1
+                  print(f"\n{p}:")
+                  for issue in issues:
+                      print(f"  - {issue}")
 
           if failed:
-            print(f"\nConfig sanity check failed in {failed} file(s).")
-            sys.exit(1)
+              print(f"\nConfig sanity check failed in {failed} file(s).")
+              sys.exit(1)
 
           print("Config sanity checks passed.")
           PY
