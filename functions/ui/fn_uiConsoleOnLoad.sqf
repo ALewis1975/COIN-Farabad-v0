@@ -187,29 +187,139 @@ if (!isNull _ctrlMain) then
 // Initial paint
 [_display] call ARC_fnc_uiConsoleRefresh;
 
-// Refresh loop (lightweight)
+// Refresh loop (rev-driven with polling fallback)
+// Phase 2: stabilize UI repaint ordering by keying refresh off a monotonic server-published rev.
+// The legacy periodic paint remains as a safety fallback.
 uiNamespace setVariable ["ARC_console_refreshLoop", true];
-[_display] spawn {
-    params ["_display"];
-    while { !isNull _display && { dialog } && { uiNamespace getVariable ["ARC_console_refreshLoop", false] } } do
+
+// Lifecycle guard: ensure we never attach multiple refresh loops per dialog session.
+private _attached = uiNamespace getVariable ["ARC_consoleHandlersAttached", false];
+if (!(_attached isEqualType true)) then { _attached = false; };
+
+if (!_attached) then
+{
+    uiNamespace setVariable ["ARC_consoleHandlersAttached", true];
+
+    // Rev tracking (per-dialog session)
+    uiNamespace setVariable ["ARC_consoleVM_lastRev", -1];
+    uiNamespace setVariable ["ARC_consoleVM_pendingRev", -1];
+
+    // Fallback cadence (seconds)
+    uiNamespace setVariable ["ARC_consoleVM_fallbackIntervalS", 7];
+
+    uiNamespace setVariable ["ARC_consoleVM_lastPaintAt", diag_tickTime];
+    uiNamespace setVariable ["ARC_consoleVM_lastFallbackLogAt", -1000];
+    uiNamespace setVariable ["ARC_consoleVM_lastIgnoreLogAt", -1000];
+
+    diag_log format ["[FARABAD][v0][CONSOLE_VM][ATTACH][%1] handlers attached", diag_tickTime];
+
+    // Spawn a single refresh loop and retain a handle for unload diagnostics.
+    private _h = [_display] spawn
     {
-        // Prevent the periodic paint from collapsing open dropdowns and interrupting text input.
-        // Skip refresh while the user is focused on an Edit or Combo control.
-        private _skip = false;
-        private _fc = focusedCtrl _display;
-        if (!isNull _fc) then
-        {
-            private _ct = ctrlType _fc;
-            if (_ct in [2, 4]) then { _skip = true; }; // CT_EDIT=2, CT_COMBO=4
-        };
+        params ["_display"];
 
-        if (!_skip) then
+        while { !isNull _display && { dialog } && { uiNamespace getVariable ["ARC_console_refreshLoop", false] } } do
         {
-            [_display] call ARC_fnc_uiConsoleRefresh;
-        };
+            private _now = diag_tickTime;
 
-        uiSleep 1.2;
+            // Prevent the periodic paint from collapsing open dropdowns and interrupting text input.
+            // Skip refresh while the user is focused on an Edit or Combo control.
+            private _skip = false;
+            private _fc = focusedCtrl _display;
+            if (!isNull _fc) then
+            {
+                private _ct = ctrlType _fc;
+                if (_ct in [2, 4]) then { _skip = true; }; // CT_EDIT=2, CT_COMBO=4
+            };
+
+            // Read published console meta rev (server-published). Payload is an array of [key,value] pairs.
+            private _meta = missionNamespace getVariable ["ARC_consoleVM_meta", []];
+            private _rev = -1;
+
+            if (_meta isEqualType []) then
+            {
+                {
+                    if (_x isEqualType [] && { (count _x) >= 2 } && { (toLower (_x # 0)) isEqualTo "rev" }) exitWith
+                    {
+                        _rev = _x # 1;
+                    };
+                } forEach _meta;
+            };
+
+            private _lastRev = uiNamespace getVariable ["ARC_consoleVM_lastRev", -1];
+            if (!(_lastRev isEqualType 0)) then { _lastRev = -1; };
+
+            private _pending = uiNamespace getVariable ["ARC_consoleVM_pendingRev", -1];
+            if (!(_pending isEqualType 0)) then { _pending = -1; };
+
+            // If the user is typing, capture the newest rev but don't repaint yet.
+            if (_skip) then
+            {
+                if (_rev isEqualType 0 && { _rev > _pending }) then
+                {
+                    uiNamespace setVariable ["ARC_consoleVM_pendingRev", _rev];
+                };
+            }
+            else
+            {
+                // Repaint on rev change (or pending rev).
+                private _targetRev = _rev;
+                if (_pending isEqualType 0 && { _pending > _targetRev }) then { _targetRev = _pending; };
+
+                if (_targetRev isEqualType 0) then
+                {
+                    if (_targetRev > _lastRev) then
+                    {
+                        uiNamespace setVariable ["ARC_consoleVM_lastRev", _targetRev];
+                        uiNamespace setVariable ["ARC_consoleVM_pendingRev", -1];
+
+                        [_display] call ARC_fnc_uiConsoleRefresh;
+                        uiNamespace setVariable ["ARC_consoleVM_lastPaintAt", _now];
+                    }
+                    else
+                    {
+                        // Ignore out-of-order meta revs (debug log throttled).
+                        if (_targetRev >= 0 && { _targetRev < _lastRev }) then
+                        {
+                            private _lastLog = uiNamespace getVariable ["ARC_consoleVM_lastIgnoreLogAt", -1000];
+                            if (!(_lastLog isEqualType 0)) then { _lastLog = -1000; };
+                            if ((_now - _lastLog) > 2) then
+                            {
+                                uiNamespace setVariable ["ARC_consoleVM_lastIgnoreLogAt", _now];
+                                diag_log format ["[FARABAD][v0][CONSOLE_VM][IGNORE][%1] rev=%2 lastRev=%3", _now, _targetRev, _lastRev];
+                            };
+                        };
+                    };
+                };
+
+                // Safety fallback: repaint every N seconds even if rev meta isn't arriving.
+                private _fb = uiNamespace getVariable ["ARC_consoleVM_fallbackIntervalS", 7];
+                if (!(_fb isEqualType 0)) then { _fb = 7; };
+
+                private _lp = uiNamespace getVariable ["ARC_consoleVM_lastPaintAt", _now];
+                if (!(_lp isEqualType 0)) then { _lp = _now; };
+
+                if ((_now - _lp) > _fb) then
+                {
+                    [_display] call ARC_fnc_uiConsoleRefresh;
+                    uiNamespace setVariable ["ARC_consoleVM_lastPaintAt", _now];
+
+                    // Throttle fallback logs.
+                    private _lastFbLog = uiNamespace getVariable ["ARC_consoleVM_lastFallbackLogAt", -1000];
+                    if (!(_lastFbLog isEqualType 0)) then { _lastFbLog = -1000; };
+                    if ((_now - _lastFbLog) > _fb) then
+                    {
+                        uiNamespace setVariable ["ARC_consoleVM_lastFallbackLogAt", _now];
+                        diag_log format ["[FARABAD][v0][CONSOLE_VM][FALLBACK][%1] lastRev=%2", _now, (uiNamespace getVariable ['ARC_consoleVM_lastRev', -1])];
+                    };
+                };
+            };
+
+            uiSleep 0.25;
+        };
     };
+
+    uiNamespace setVariable ["ARC_console_refreshHandle", _h];
 };
 
 true

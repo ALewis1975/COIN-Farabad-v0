@@ -1,6 +1,6 @@
 # Farabad COIN Project Dictionary (Single-Source)
 
-**Version:** 1.0  
+**Version:** 1.1  
 **Status:** Authoritative reference for naming, concepts, and contracts across the Farabad COIN project
 
 ---
@@ -220,6 +220,17 @@ Helpers are reusable, context-sensitive UI components. They do not create new wo
 - **TIM:** Takistan Islamic Movement
 - Cell labels: COBRA (IED), VIPER (guerrilla)
 
+
+### Access Groups (RBAC)
+
+These groups are **authorization shortcuts** used by server-side permission checks and the Role and Permission Helper (RPH). They are **not** the deprecated “omni” design concept described in Section 10.
+
+- **OMNI (Battalion Command Group):** Battalion CO, XO, and SGM only.
+  - **Purpose:** Provide battalion-level administrative and command visibility across stations where appropriate.
+  - **Constraint:** This is the **only** OMNI group. Do not create additional “omni-style” global groups.
+  - **Testing convention:** Use **BN CO** as the primary test role for OMNI-gated console capabilities.
+
+
 ---
 
 ## 10. Deprecated and Retired Terms
@@ -227,6 +238,8 @@ Helpers are reusable, context-sensitive UI components. They do not create new wo
 This section captures legacy design language that appeared in early Farabad COIN discussions and prototypes. These terms are **intentionally deprecated** and must not be reintroduced into code, UI labels, logs, or formal documentation.
 
 ### Omni (Legacy Design Term)
+
+**Clarification:** This deprecated term refers to an early *design idea* (global, inferred, convenience access). It is **not** the same thing as the **OMNI access group** (Battalion Command Group) defined in Section 9.
 
 **Historical usage:**
 - Omni-console

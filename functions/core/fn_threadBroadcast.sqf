@@ -48,4 +48,20 @@ private _pub = [];
 missionNamespace setVariable ["ARC_threadsPublic", _pub, true];
 missionNamespace setVariable ["ARC_threadsPublicUpdatedAt", serverTime, true];
 
+
+// ---------------------------------------------------------------------------
+// Console VM meta (rev) publish: monotonic rev to stabilize UI refresh ordering
+// ---------------------------------------------------------------------------
+private _rev = missionNamespace getVariable ["ARC_consoleVM_rev", 0];
+if (!(_rev isEqualType 0)) then { _rev = 0; };
+_rev = _rev + 1;
+missionNamespace setVariable ["ARC_consoleVM_rev", _rev];
+missionNamespace setVariable ["ARC_consoleVM_meta", [
+    ["schema", "Console_VM_v1"],
+    ["schemaVersion", 1],
+    ["rev", _rev],
+    ["publishedAt", serverTime],
+    ["source", "threadBroadcast"]
+], true];
+
 true
