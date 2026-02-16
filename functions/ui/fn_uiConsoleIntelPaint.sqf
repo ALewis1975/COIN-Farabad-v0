@@ -766,7 +766,7 @@ if (!isNull _grp) then {
             private _b = (_pC # 1) + (_pC # 3);
             if (_b > _maxBottom) then { _maxBottom = _b; };
         };
-    } forEach [_lblMethod,_cmbMethod,_lblCategory,_cmbCategory,_lblLeadType,_cmbLeadType];
+    } forEach [_lblMethod,_cmbMethod,_lblCat,_cmbCat,_lblLead,_cmbLead];
 
     // Available rectangle for details text within the group.
     private _x = _xG + _padX;
