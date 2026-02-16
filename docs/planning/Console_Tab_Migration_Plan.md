@@ -180,9 +180,33 @@ This section is required even when there is no visible UI change.
 ---
 
 ## Appendix: Suggested Rollout Cadence
-- **Week 1:** Framework validation + Overview canary.
+- **Week 1 / Sprint 1:** **UI shell overhaul (visible)** + Overview canary.
+  - Run VM/spec hardening in parallel as a non-visible workstream so shell migration and architecture hardening advance together.
 - **Week 2:** Operations and Intel staged rollout.
 - **Week 3:** Logistics and Communications staged rollout.
 - **Week 4:** Admin/Settings rollout after security sign-off.
 
 Adjust cadence based on incident volume, operator feedback, and error-budget consumption.
+
+---
+
+## 6) Mandatory Player-Visible Deliverable Per Sprint
+
+Each sprint must include at least one player-visible console deliverable.
+
+### Sprint-level requirement
+- Every sprint plan must name at least one visible console change that a player can confirm in-game.
+- If a sprint is mostly architecture, VM, or spec hardening, pair it with a bounded visible UI increment in the same sprint.
+
+### Screenshot evidence requirement
+- Evidence must include at least one screenshot per impacted tab for the sprint deliverable.
+- Screenshots must be attached in both:
+  1. the sprint ticket, and
+  2. the PR description.
+- If multiple tabs are impacted, include one screenshot from each impacted tab state.
+
+### Evidence checklist (required)
+- Impacted tab list matches the `## Scope of visible UI impact` declaration.
+- Each impacted tab has screenshot proof captured from the updated build.
+- Caption each screenshot with tab name and short note of visible change.
+- If no screenshot is attached for an impacted tab, the sprint item is not ready for merge review.
