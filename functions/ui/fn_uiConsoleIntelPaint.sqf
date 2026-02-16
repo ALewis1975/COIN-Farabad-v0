@@ -792,6 +792,6 @@ if (!isNull _grp) then {
     private _pD = ctrlPosition _details;
     _details ctrlSetPosition _pD;
     _details ctrlCommit 0;
-}
+};
 
 true
