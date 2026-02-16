@@ -590,48 +590,6 @@ class ARC_FarabadConsoleDialog
             w = safeZoneW;
             h = safeZoneH;
             colorBackground[] = {0.08,0.08,0.08,0.97};
-
-        // --- Rugged tablet bezel frames (UI-SKIN-1b) ---------------------------
-        // Use RscText with ST_FRAME (64) to draw borders without covering content.
-        class BezelOuterFrame: RscText
-        {
-            idc = 78091;
-            style = 64;
-            x = safeZoneX;
-            y = safeZoneY;
-            w = safeZoneW;
-            h = safeZoneH;
-            colorBackground[] = {0,0,0,0};
-            colorText[] = {0.169,0.184,0.200,1};   // gunmetal outer
-            text = "";
-        };
-
-        class BezelGreenFrame: RscText
-        {
-            idc = 78092;
-            style = 64;
-            x = safeZoneX + (0.008 * safeZoneW);
-            y = safeZoneY + (0.010 * safeZoneH);
-            w = safeZoneW - (0.016 * safeZoneW);
-            h = safeZoneH - (0.020 * safeZoneH);
-            colorBackground[] = {0,0,0,0};
-            colorText[] = {0.184,0.243,0.184,1};   // OD/green ring
-            text = "";
-        };
-
-        class BezelInnerFrame: RscText
-        {
-            idc = 78093;
-            style = 64;
-            x = safeZoneX + (0.016 * safeZoneW);
-            y = safeZoneY + (0.020 * safeZoneH);
-            w = safeZoneW - (0.032 * safeZoneW);
-            h = safeZoneH - (0.040 * safeZoneH);
-            colorBackground[] = {0,0,0,0};
-            colorText[] = {0.118,0.133,0.149,1};   // gunmetal inner
-            text = "";
-        };
-
         };
 
         class ShellBezel: RscText
@@ -694,7 +652,9 @@ class ARC_FarabadConsoleDialog
         class TitleBar: RscText
         {
             idc = 78091;
-            text = "FARABAD CONSOLE";
+            
+            colorText[] = {0.722,0.608,0.420,1};
+text = "FARABAD CONSOLE";
             x = safeZoneX;
             y = safeZoneY;
             w = safeZoneW;
@@ -715,34 +675,7 @@ class ARC_FarabadConsoleDialog
 
     class controls
     {
-                // --- Coyote panel borders (UI-SKIN-1b) ---------------------------------
-        class TabsFrame: RscText
-        {
-            idc = 78094;
-            style = 64;
-            x = safeZoneX + (0.010 * safeZoneW);
-            y = safeZoneY + (0.090 * safeZoneH);
-            w = (0.20 * safeZoneW);
-            h = safeZoneH - (0.160 * safeZoneH);
-            colorBackground[] = {0,0,0,0};
-            colorText[] = {0.765,0.659,0.459,1};   // coyote border
-            text = "";
-        };
-
-        class MainFrame: RscText
-        {
-            idc = 78095;
-            style = 64;
-            x = safeZoneX + (0.220 * safeZoneW);
-            y = safeZoneY + (0.090 * safeZoneH);
-            w = safeZoneW - (0.240 * safeZoneW);
-            h = safeZoneH - (0.160 * safeZoneH);
-            colorBackground[] = {0,0,0,0};
-            colorText[] = {0.765,0.659,0.459,1};   // coyote border
-            text = "";
-        };
-
-class StatusLeft: RscText
+        class StatusLeft: RscText
         {
             idc = 78060;
             text = "NET: LINKED";
@@ -790,10 +723,10 @@ class StatusLeft: RscText
         class Tabs: RscListbox
         {
             idc = 78001;
-            x = safeZoneX + (0.01 * safeZoneW);
-            y = safeZoneY + (0.08 * safeZoneH);
-            w = (0.23 * safeZoneW);
-            h = (0.83 * safeZoneH);
+            x = safeZoneX + (0.012 * safeZoneW);
+            y = safeZoneY + (0.082 * safeZoneH);
+            w = (0.226 * safeZoneW);
+            h = (0.826 * safeZoneH);
             tooltip = "Select a console tab.";
             onLBSelChanged = "_this call ARC_fnc_uiConsoleSelectTab;";
         };
@@ -802,20 +735,20 @@ class StatusLeft: RscText
         class MainGroup: RscControlsGroup
         {
             idc = 78015;
-            x = safeZoneX + (0.24 * safeZoneW);
-            y = safeZoneY + (0.08 * safeZoneH);
-            w = (0.76 * safeZoneW);
-            h = (0.83 * safeZoneH);
+            x = safeZoneX + (0.242 * safeZoneW);
+            y = safeZoneY + (0.082 * safeZoneH);
+            w = (0.756 * safeZoneW);
+            h = (0.826 * safeZoneH);
 
             class controls
             {
                 class Main: RscStructuredText
                 {
                     idc = 78010;
-                    x = 0;
-                    y = 0;
-                    w = 1;
-                    h = 1;
+                    x = 0.005;
+                    y = 0.005;
+                    w = 0.99;
+                    h = 0.99;
                     colorBackground[] = {0.05,0.05,0.05,0.65};
                     tooltip = "Main content panel (scroll).";
                 };
@@ -825,10 +758,10 @@ class StatusLeft: RscText
         class MainList: RscListbox
         {
             idc = 78011;
-            x = safeZoneX + (0.24 * safeZoneW);
-            y = safeZoneY + (0.08 * safeZoneH);
-            w = (0.27 * safeZoneW);
-            h = (0.83 * safeZoneH);
+            x = safeZoneX + (0.242 * safeZoneW);
+            y = safeZoneY + (0.082 * safeZoneH);
+            w = (0.266 * safeZoneW);
+            h = (0.826 * safeZoneH);
             colorBackground[] = {0.05,0.05,0.05,0.65};
             tooltip = "Select an item. Details show on the right.";
             onLBSelChanged = "_this call ARC_fnc_uiConsoleMainListSelChanged;";
@@ -838,20 +771,20 @@ class StatusLeft: RscText
         class MainDetailsGroup: RscControlsGroup
         {
             idc = 78016;
-            x = safeZoneX + (0.52 * safeZoneW);
-            y = safeZoneY + (0.08 * safeZoneH);
-            w = (0.48 * safeZoneW);
-            h = (0.83 * safeZoneH);
+            x = safeZoneX + (0.516 * safeZoneW);
+            y = safeZoneY + (0.082 * safeZoneH);
+            w = (0.482 * safeZoneW);
+            h = (0.826 * safeZoneH);
 
             class controls
             {
                 class MainDetails: RscStructuredText
                 {
                     idc = 78012;
-                    x = 0;
-                    y = 0;
-                    w = 1;
-                    h = 1;
+                    x = 0.005;
+                    y = 0.005;
+                    w = 0.99;
+                    h = 0.99;
                     colorBackground[] = {0.05,0.05,0.05,0.65};
                     tooltip = "Details panel (scroll).";
                 };
