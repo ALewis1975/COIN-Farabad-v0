@@ -7,12 +7,6 @@ waitUntil { !isNull player };
 private _t0 = diag_tickTime;
 waitUntil {
     (missionNamespace getVariable ["ARC_serverReady", false]) || ((diag_tickTime - _t0) > 20)
-
-
-// ---------------------------------------------------------------------------
-// Police Extended: clear "Lightbar ON" toast on clients (startup)
-// ---------------------------------------------------------------------------
-[] execVM "ARC_clearLightbarToastClient.sqf";
 };
 if (!(missionNamespace getVariable ["ARC_serverReady", false])) then
 {
@@ -24,6 +18,8 @@ if (!(missionNamespace getVariable ["ARC_serverReady", false])) then
     uiSleep 2;
     diag_log format ["[ARC][BUILD][CLIENT] %1", missionNamespace getVariable ["ARC_buildStamp","UNKNOWN"]];
 };
+
+[] execVM "scripts\ARC_clearLightbarToastClient.sqf";
 
 // ---------------------------------------------------------------------------
 // Client init (keep this deterministic)
