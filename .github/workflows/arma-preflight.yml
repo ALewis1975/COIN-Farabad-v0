@@ -29,13 +29,10 @@ jobs:
           # Exit behavior:
           #   -e w  => fail CI on warnings OR errors (strict)
           #   -e e  => fail CI on errors only (less strict)
-          sqflint -d . -e w \
-            -x .git \
-            -x .github \
-            -x .vscode \
-            -x node_modules \
-            -x dist \
-            -x build
+          # Note: sqflint's -x/--exclude expects a REGEX (re.match from start of the path).
+          # Paths passed to the exclude list are joined to the directory when they don't start with '/',
+          # so we match the runner's relative paths like './.git', './node_modules', etc.
+          sqflint -d . -e w -x '\./\.git' -x '\./\.github' -x '\./\.vscode' -x '\./node_modules' -x '\./dist' -x '\./build'
 
       - name: Mission config sanity checks (description.ext, ui/**/*.hpp, etc.)
         run: |
