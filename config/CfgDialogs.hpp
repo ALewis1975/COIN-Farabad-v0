@@ -745,8 +745,8 @@ class ARC_FarabadConsoleDialog
                     idc = 78010;
                     x = 0;
                     y = 0;
-                    w = 1;
-                    h = 1;
+                    w = (0.76 * safeZoneW);
+                    h = (0.83 * safeZoneH);
                     colorBackground[] = {0.05,0.05,0.05,0.65};
                     tooltip = "Main content panel (scroll).";
                 };
@@ -781,8 +781,8 @@ class ARC_FarabadConsoleDialog
                     idc = 78012;
                     x = 0;
                     y = 0;
-                    w = 1;
-                    h = 1;
+                    w = (0.48 * safeZoneW);
+                    h = (0.83 * safeZoneH);
                     colorBackground[] = {0.05,0.05,0.05,0.65};
                     tooltip = "Details panel (scroll).";
                 };
