@@ -11,7 +11,7 @@ Run commands in repository root unless otherwise noted.
 1. `git fetch --all --prune`
 2. `git rebase origin/main`
 3. `git diff --check`
-4. `rg -n "^(<<<<<<<|=======|>>>>>>>)" functions ui config initPlayerLocal.sqf initServer.sqf description.ext`
+4. `rg -n "^(<<<<<<<|=======|>>>>>>>)" functions functions/ui config initPlayerLocal.sqf initServer.sqf description.ext`
 5. `git status --short`
 
 ### Console/runtime readiness gates
@@ -33,7 +33,7 @@ Run commands in repository root unless otherwise noted.
   - Pass: branch rebases cleanly with no unresolved conflicts and clean rebase state.
 - `git diff --check`
   - Pass: no output (no whitespace errors, conflict leftovers, or malformed patch hunks).
-- `rg -n "^(<<<<<<<|=======|>>>>>>>)" functions ui config initPlayerLocal.sqf initServer.sqf description.ext`
+- `rg -n "^(<<<<<<<|=======|>>>>>>>)" functions functions/ui config initPlayerLocal.sqf initServer.sqf description.ext`
   - Pass: no matches.
 - `git status --short`
   - Pass: only intended files are modified; no accidental scope expansion.
