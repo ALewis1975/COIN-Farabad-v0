@@ -65,6 +65,17 @@ if (!isNull _ctrlDetailsGrp) then { _ctrlDetailsGrp ctrlShow false; };
 if (!isNull _ctrlDetails) then { _ctrlDetails ctrlShow false; };
 { if (!isNull _x) then { _x ctrlShow false; }; } forEach _opsCtrls;
 
+// Baseline: restore details pane position (some tabs reserve top space for workflow controls).
+if (!isNull _ctrlDetailsGrp) then
+{
+    private _def = uiNamespace getVariable ["ARC_console_detailsGrpPosDefault", []];
+    if (_def isEqualType [] && { (count _def) isEqualTo 4 }) then
+    {
+        _ctrlDetailsGrp ctrlSetPosition _def;
+        _ctrlDetailsGrp ctrlCommit 0;
+    };
+};
+
 // Baseline: hide S2 workflow controls (shown only on Intelligence tab)
 private _s2Ctrls = [
     _display displayCtrl 78050,
