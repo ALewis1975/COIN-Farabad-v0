@@ -7,6 +7,12 @@ waitUntil { !isNull player };
 private _t0 = diag_tickTime;
 waitUntil {
     (missionNamespace getVariable ["ARC_serverReady", false]) || ((diag_tickTime - _t0) > 20)
+
+
+// ---------------------------------------------------------------------------
+// Police Extended: clear "Lightbar ON" toast on clients (startup)
+// ---------------------------------------------------------------------------
+[] execVM "ARC_clearLightbarToastClient.sqf";
 };
 if (!(missionNamespace getVariable ["ARC_serverReady", false])) then
 {

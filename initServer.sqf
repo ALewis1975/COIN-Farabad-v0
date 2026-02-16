@@ -485,4 +485,10 @@ private _unitsNeedingGuardPost = allUnits select { (faction _x) in _targetFactio
 // BOOTSTRAP (must remain last)
 // ============================================================================
 
+
+// ---------------------------------------------------------------------------
+// Police Extended lightbar startup (centralized; replaces per-object init)
+// ---------------------------------------------------------------------------
+[] execVM "ARC_lightbarStartupServer.sqf";
+
 [] call ARC_fnc_bootstrapServer;
