@@ -582,37 +582,149 @@ class ARC_FarabadConsoleDialog
 
     class controlsBackground
     {
-        class BG: RscText
+        class Shell: RscText
         {
             idc = 78090;
-            x = 0.05;
-            y = 0.06;
-            w = 0.90;
-            h = 0.88;
-            colorBackground[] = {0,0,0,0.82};
+            x = safeZoneX;
+            y = safeZoneY;
+            w = safeZoneW;
+            h = safeZoneH;
+            colorBackground[] = {0.08,0.08,0.08,0.97};
+        };
+
+        class ShellBezel: RscText
+        {
+            idc = 78092;
+            x = safeZoneX;
+            y = safeZoneY;
+            w = safeZoneW;
+            h = safeZoneH;
+            colorBackground[] = {0.16,0.16,0.16,0.96};
+        };
+
+        class ScreenBG: RscText
+        {
+            idc = 78093;
+            x = safeZoneX;
+            y = safeZoneY;
+            w = safeZoneW;
+            h = safeZoneH;
+            colorBackground[] = {0.01,0.02,0.02,0.92};
+        };
+
+        class GripTL: RscText
+        {
+            idc = 78094;
+            x = safeZoneX;
+            y = safeZoneY;
+            w = (0.018 * safeZoneW);
+            h = (0.018 * safeZoneH);
+            colorBackground[] = {0.24,0.24,0.24,1};
+        };
+        class GripTR: RscText
+        {
+            idc = 78095;
+            x = safeZoneX + (0.982 * safeZoneW);
+            y = safeZoneY;
+            w = (0.018 * safeZoneW);
+            h = (0.018 * safeZoneH);
+            colorBackground[] = {0.24,0.24,0.24,1};
+        };
+        class GripBL: RscText
+        {
+            idc = 78096;
+            x = safeZoneX;
+            y = safeZoneY + (0.982 * safeZoneH);
+            w = (0.018 * safeZoneW);
+            h = (0.018 * safeZoneH);
+            colorBackground[] = {0.24,0.24,0.24,1};
+        };
+        class GripBR: RscText
+        {
+            idc = 78097;
+            x = safeZoneX + (0.982 * safeZoneW);
+            y = safeZoneY + (0.982 * safeZoneH);
+            w = (0.018 * safeZoneW);
+            h = (0.018 * safeZoneH);
+            colorBackground[] = {0.24,0.24,0.24,1};
         };
 
         class TitleBar: RscText
         {
             idc = 78091;
             text = "FARABAD CONSOLE";
-            x = 0.05;
-            y = 0.06;
-            w = 0.90;
-            h = 0.05;
-            colorBackground[] = {0.05,0.05,0.05,0.92};
+            x = safeZoneX;
+            y = safeZoneY;
+            w = safeZoneW;
+            h = (0.045 * safeZoneH);
+            colorBackground[] = {0.04,0.06,0.06,0.95};
+        };
+
+        class StatusStripBG: RscText
+        {
+            idc = 78098;
+            x = safeZoneX;
+            y = safeZoneY + (0.045 * safeZoneH);
+            w = safeZoneW;
+            h = (0.03 * safeZoneH);
+            colorBackground[] = {0.03,0.08,0.08,0.90};
         };
     };
 
     class controls
     {
+        class StatusLeft: RscText
+        {
+            idc = 78060;
+            text = "NET: LINKED";
+            x = safeZoneX + (0.01 * safeZoneW);
+            y = safeZoneY + (0.049 * safeZoneH);
+            w = (0.16 * safeZoneW);
+            h = (0.022 * safeZoneH);
+            colorBackground[] = {0,0,0,0};
+        };
+
+        class StatusCenter: RscText
+        {
+            idc = 78061;
+            text = "MODE: FIELD-HARDENED";
+            x = safeZoneX + (0.39 * safeZoneW);
+            y = safeZoneY + (0.049 * safeZoneH);
+            w = (0.24 * safeZoneW);
+            h = (0.022 * safeZoneH);
+            colorBackground[] = {0,0,0,0};
+        };
+
+        class StatusRight: RscText
+        {
+            idc = 78062;
+            text = "PWR: 96%";
+            x = safeZoneX + (0.82 * safeZoneW);
+            y = safeZoneY + (0.049 * safeZoneH);
+            w = (0.09 * safeZoneW);
+            h = (0.022 * safeZoneH);
+            colorBackground[] = {0,0,0,0};
+        };
+
+        class StatusCtrlLink: RscButton
+        {
+            idc = 78063;
+            text = "LINK";
+            x = safeZoneX + (0.93 * safeZoneW);
+            y = safeZoneY + (0.048 * safeZoneH);
+            w = (0.05 * safeZoneW);
+            h = (0.024 * safeZoneH);
+            tooltip = "Status strip control placeholder (first pass shell).";
+            action = "true";
+        };
+
         class Tabs: RscListbox
         {
             idc = 78001;
-            x = 0.06;
-            y = 0.12;
-            w = 0.20;
-            h = 0.74;
+            x = safeZoneX + (0.01 * safeZoneW);
+            y = safeZoneY + (0.08 * safeZoneH);
+            w = (0.23 * safeZoneW);
+            h = (0.83 * safeZoneH);
             tooltip = "Select a console tab.";
             onLBSelChanged = "_this call ARC_fnc_uiConsoleSelectTab;";
         };
@@ -621,10 +733,10 @@ class ARC_FarabadConsoleDialog
         class MainGroup: RscControlsGroup
         {
             idc = 78015;
-            x = 0.28;
-            y = 0.12;
-            w = 0.66;
-            h = 0.74;
+            x = safeZoneX + (0.24 * safeZoneW);
+            y = safeZoneY + (0.08 * safeZoneH);
+            w = (0.76 * safeZoneW);
+            h = (0.83 * safeZoneH);
 
             class controls
             {
@@ -633,8 +745,8 @@ class ARC_FarabadConsoleDialog
                     idc = 78010;
                     x = 0;
                     y = 0;
-                    w = 0.66;
-                    h = 0.74;
+                    w = 0.76;
+                    h = 0.83;
                     colorBackground[] = {0.05,0.05,0.05,0.65};
                     tooltip = "Main content panel (scroll).";
                 };
@@ -644,10 +756,10 @@ class ARC_FarabadConsoleDialog
         class MainList: RscListbox
         {
             idc = 78011;
-            x = 0.28;
-            y = 0.12;
-            w = 0.24;
-            h = 0.74;
+            x = safeZoneX + (0.24 * safeZoneW);
+            y = safeZoneY + (0.08 * safeZoneH);
+            w = (0.27 * safeZoneW);
+            h = (0.83 * safeZoneH);
             colorBackground[] = {0.05,0.05,0.05,0.65};
             tooltip = "Select an item. Details show on the right.";
             onLBSelChanged = "_this call ARC_fnc_uiConsoleMainListSelChanged;";
@@ -657,10 +769,10 @@ class ARC_FarabadConsoleDialog
         class MainDetailsGroup: RscControlsGroup
         {
             idc = 78016;
-            x = 0.53;
-            y = 0.12;
-            w = 0.41;
-            h = 0.74;
+            x = safeZoneX + (0.52 * safeZoneW);
+            y = safeZoneY + (0.08 * safeZoneH);
+            w = (0.48 * safeZoneW);
+            h = (0.83 * safeZoneH);
 
             class controls
             {
@@ -669,8 +781,8 @@ class ARC_FarabadConsoleDialog
                     idc = 78012;
                     x = 0;
                     y = 0;
-                    w = 0.41;
-                    h = 0.74;
+                    w = 0.48;
+                    h = 0.83;
                     colorBackground[] = {0.05,0.05,0.05,0.65};
                     tooltip = "Details panel (scroll).";
                 };
@@ -685,55 +797,55 @@ class ARC_FarabadConsoleDialog
         {
             idc = 78050;
             text = "Collection:";
-            x = 0.54;
-            y = 0.13;
-            w = 0.10;
-            h = 0.03;
+            x = safeZoneX + (0.52 * safeZoneW);
+            y = safeZoneY + (0.085 * safeZoneH);
+            w = (0.10 * safeZoneW);
+            h = (0.03 * safeZoneH);
             colorBackground[] = {0,0,0,0};
         };
         class S2_ComboMethod: RscCombo
         {
             idc = 78051;
-            x = 0.63;
-            y = 0.125;
-            w = 0.30;
-            h = 0.04;
+            x = safeZoneX + (0.63 * safeZoneW);
+            y = safeZoneY + (0.085 * safeZoneH);
+            w = (0.30 * safeZoneW);
+            h = (0.04 * safeZoneH);
         };
         class S2_LabelCategory: RscText
         {
             idc = 78052;
             text = "Category:";
-            x = 0.54;
-            y = 0.18;
-            w = 0.10;
-            h = 0.03;
+            x = safeZoneX + (0.52 * safeZoneW);
+            y = safeZoneY + (0.135 * safeZoneH);
+            w = (0.10 * safeZoneW);
+            h = (0.03 * safeZoneH);
             colorBackground[] = {0,0,0,0};
         };
         class S2_ComboCategory: RscCombo
         {
             idc = 78053;
-            x = 0.63;
-            y = 0.175;
-            w = 0.30;
-            h = 0.04;
+            x = safeZoneX + (0.63 * safeZoneW);
+            y = safeZoneY + (0.135 * safeZoneH);
+            w = (0.30 * safeZoneW);
+            h = (0.04 * safeZoneH);
         };
         class S2_LabelLeadType: RscText
         {
             idc = 78054;
             text = "Lead Type:";
-            x = 0.54;
-            y = 0.13;
-            w = 0.10;
-            h = 0.03;
+            x = safeZoneX + (0.52 * safeZoneW);
+            y = safeZoneY + (0.085 * safeZoneH);
+            w = (0.10 * safeZoneW);
+            h = (0.03 * safeZoneH);
             colorBackground[] = {0,0,0,0};
         };
         class S2_ComboLeadType: RscCombo
         {
             idc = 78055;
-            x = 0.63;
-            y = 0.125;
-            w = 0.30;
-            h = 0.04;
+            x = safeZoneX + (0.63 * safeZoneW);
+            y = safeZoneY + (0.085 * safeZoneH);
+            w = (0.30 * safeZoneW);
+            h = (0.04 * safeZoneH);
         };
 
         // -------------------------------------------------------------------
@@ -743,29 +855,29 @@ class ARC_FarabadConsoleDialog
         class OpsFrameInc_BG: RscText
         {
             idc = 78030;
-            x = 0.28;
-            y = 0.12;
-            w = 0.24;
-            h = 0.20;
+            x = safeZoneX + (0.24 * safeZoneW);
+            y = safeZoneY + (0.08 * safeZoneH);
+            w = (0.27 * safeZoneW);
+            h = (0.20 * safeZoneH);
             colorBackground[] = {0.05,0.05,0.05,0.65};
         };
         class OpsFrameInc_Label: RscText
         {
             idc = 78031;
             text = "INCIDENTS / TASKS";
-            x = 0.28;
-            y = 0.12;
-            w = 0.24;
-            h = 0.03;
+            x = safeZoneX + (0.24 * safeZoneW);
+            y = safeZoneY + (0.08 * safeZoneH);
+            w = (0.27 * safeZoneW);
+            h = (0.03 * safeZoneH);
             colorBackground[] = {0.05,0.05,0.05,0.92};
         };
         class OpsListIncidents: RscListbox
         {
             idc = 78032;
-            x = 0.28;
-            y = 0.15;
-            w = 0.24;
-            h = 0.17;
+            x = safeZoneX + (0.24 * safeZoneW);
+            y = safeZoneY + (0.11 * safeZoneH);
+            w = (0.27 * safeZoneW);
+            h = (0.17 * safeZoneH);
             colorBackground[] = {0.05,0.05,0.05,0.65};
             tooltip = "Incidents (current + recent).";
             onLBSelChanged = "_this call ARC_fnc_uiConsoleOpsSelChanged;";
@@ -774,29 +886,29 @@ class ARC_FarabadConsoleDialog
         class OpsFrameOrd_BG: RscText
         {
             idc = 78033;
-            x = 0.28;
-            y = 0.33;
-            w = 0.24;
-            h = 0.20;
+            x = safeZoneX + (0.24 * safeZoneW);
+            y = safeZoneY + (0.305 * safeZoneH);
+            w = (0.27 * safeZoneW);
+            h = (0.20 * safeZoneH);
             colorBackground[] = {0.05,0.05,0.05,0.65};
         };
         class OpsFrameOrd_Label: RscText
         {
             idc = 78034;
             text = "ORDERS / FRAGOS";
-            x = 0.28;
-            y = 0.33;
-            w = 0.24;
-            h = 0.03;
+            x = safeZoneX + (0.24 * safeZoneW);
+            y = safeZoneY + (0.305 * safeZoneH);
+            w = (0.27 * safeZoneW);
+            h = (0.03 * safeZoneH);
             colorBackground[] = {0.05,0.05,0.05,0.92};
         };
         class OpsListOrders: RscListbox
         {
             idc = 78035;
-            x = 0.28;
-            y = 0.36;
-            w = 0.24;
-            h = 0.17;
+            x = safeZoneX + (0.24 * safeZoneW);
+            y = safeZoneY + (0.335 * safeZoneH);
+            w = (0.27 * safeZoneW);
+            h = (0.17 * safeZoneH);
             colorBackground[] = {0.05,0.05,0.05,0.65};
             tooltip = "TOC-issued orders for units.";
             onLBSelChanged = "_this call ARC_fnc_uiConsoleOpsSelChanged;";
@@ -805,29 +917,29 @@ class ARC_FarabadConsoleDialog
         class OpsFrameLead_BG: RscText
         {
             idc = 78036;
-            x = 0.28;
-            y = 0.54;
-            w = 0.24;
-            h = 0.32;
+            x = safeZoneX + (0.24 * safeZoneW);
+            y = safeZoneY + (0.525 * safeZoneH);
+            w = (0.27 * safeZoneW);
+            h = (0.385 * safeZoneH);
             colorBackground[] = {0.05,0.05,0.05,0.65};
         };
         class OpsFrameLead_Label: RscText
         {
             idc = 78037;
             text = "LEADS / TIPS";
-            x = 0.28;
-            y = 0.54;
-            w = 0.24;
-            h = 0.03;
+            x = safeZoneX + (0.24 * safeZoneW);
+            y = safeZoneY + (0.525 * safeZoneH);
+            w = (0.27 * safeZoneW);
+            h = (0.03 * safeZoneH);
             colorBackground[] = {0.05,0.05,0.05,0.92};
         };
         class OpsListLeads: RscListbox
         {
             idc = 78038;
-            x = 0.28;
-            y = 0.57;
-            w = 0.24;
-            h = 0.29;
+            x = safeZoneX + (0.24 * safeZoneW);
+            y = safeZoneY + (0.555 * safeZoneH);
+            w = (0.27 * safeZoneW);
+            h = (0.355 * safeZoneH);
             colorBackground[] = {0.05,0.05,0.05,0.65};
             tooltip = "S2/S3 leads and follow-on targets.";
             onLBSelChanged = "_this call ARC_fnc_uiConsoleOpsSelChanged;";
@@ -837,10 +949,10 @@ class ARC_FarabadConsoleDialog
         {
             idc = 78021;
             text = "ACTION";
-            x = 0.28;
-            y = 0.87;
-            w = 0.20;
-            h = 0.05;
+            x = safeZoneX + (0.24 * safeZoneW);
+            y = safeZoneY + (0.93 * safeZoneH);
+            w = (0.20 * safeZoneW);
+            h = (0.055 * safeZoneH);
             tooltip = "Primary action (context-sensitive).";
             // UI04+: button routing is tab-aware. Do not bind directly to a single action.
             // NOTE: UI event handlers are unscheduled; spawn to ensure scheduled context for dialogs/prompts.
@@ -851,10 +963,10 @@ class ARC_FarabadConsoleDialog
         {
             idc = 78022;
             text = "ALT";
-            x = 0.49;
-            y = 0.87;
-            w = 0.20;
-            h = 0.05;
+            x = safeZoneX + (0.49 * safeZoneW);
+            y = safeZoneY + (0.93 * safeZoneH);
+            w = (0.20 * safeZoneW);
+            h = (0.055 * safeZoneH);
             tooltip = "Secondary action (context-sensitive).";
             // NOTE: UI event handlers are unscheduled; spawn to ensure scheduled context for dialogs/prompts.
             action = "[] spawn ARC_fnc_uiConsoleClickSecondary;";
@@ -864,10 +976,10 @@ class ARC_FarabadConsoleDialog
         {
             idc = 78023;
             text = "REFRESH";
-            x = 0.71;
-            y = 0.87;
-            w = 0.10;
-            h = 0.05;
+            x = safeZoneX + (0.71 * safeZoneW);
+            y = safeZoneY + (0.93 * safeZoneH);
+            w = (0.10 * safeZoneW);
+            h = (0.055 * safeZoneH);
             tooltip = "Refresh the current view.";
             action = "[] call ARC_fnc_uiConsoleRefresh;";
         };
@@ -876,10 +988,10 @@ class ARC_FarabadConsoleDialog
         {
             idc = 78024;
             text = "CLOSE";
-            x = 0.82;
-            y = 0.87;
-            w = 0.12;
-            h = 0.05;
+            x = safeZoneX + (0.82 * safeZoneW);
+            y = safeZoneY + (0.93 * safeZoneH);
+            w = (0.12 * safeZoneW);
+            h = (0.055 * safeZoneH);
             tooltip = "Close the console.";
             action = "closeDialog 0;";
         };
