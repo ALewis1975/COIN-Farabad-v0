@@ -50,48 +50,6 @@ private _cmbCat    = _display displayCtrl 78053;
 private _lblLead   = _display displayCtrl 78054;
 private _cmbLead   = _display displayCtrl 78055;
 
-// Details group (used as the right pane). On the S2/INTEL tab we overlay workflow controls
-// at the top (method/category/type). To prevent visual overlap with the details text, we
-// reserve vertical space by shifting the details group down when those controls are shown.
-private _detailsGrp = _display displayCtrl 78016;
-if (!isNull _detailsGrp) then
-{
-    if (isNil { uiNamespace getVariable "ARC_console_detailsGrpPosDefault" }) then
-    {
-        uiNamespace setVariable ["ARC_console_detailsGrpPosDefault", ctrlPosition _detailsGrp];
-    };
-};
-
-private _reserveDetailsTop = {
-    params ["_enableReserve", ["_reserveY", -1]];
-    if (isNull _detailsGrp) exitWith {};
-
-    private _def = uiNamespace getVariable ["ARC_console_detailsGrpPosDefault", ctrlPosition _detailsGrp];
-    if (!(_def isEqualType [])) then { _def = ctrlPosition _detailsGrp; };
-
-    if (!_enableReserve) exitWith
-    {
-        _detailsGrp ctrlSetPosition _def;
-        _detailsGrp ctrlCommit 0;
-    };
-
-    // Default reserve line: place details pane below the second combo row (Category) + padding.
-    if (_reserveY < 0) then
-    {
-        _reserveY = safeZoneY + (0.185 * safeZoneH);
-    };
-
-    private _bottom = (_def # 1) + (_def # 3);
-    private _newH = _bottom - _reserveY;
-    if (_newH < (0.10 * safeZoneH)) then { _newH = (0.10 * safeZoneH); };
-
-    private _p = +_def;
-    _p set [1, _reserveY];
-    _p set [3, _newH];
-    _detailsGrp ctrlSetPosition _p;
-    _detailsGrp ctrlCommit 0;
-};
-
 if (isNull _list || { isNull _details }) exitWith {false};
 
 // If the list is empty (first entry to the S2 tab), force a one-time rebuild.
@@ -182,8 +140,8 @@ if (_rebuild) then
         params ["_t"];
         private _i = _list lbAdd format ["%1", _t];
         _list lbSetData [_i, "HDR"];
-        _list lbSetColor [_i, [0.85,0.85,0.85,1]];
-        _list lbSetSelectColor [_i, [0.85,0.85,0.85,1]];
+        _list lbSetColor [_i, [0.722,0.608,0.420,1]];
+        _list lbSetSelectColor [_i, [0.722,0.608,0.420,1]];
         _i
     };
 
@@ -637,11 +595,10 @@ else
             [_cmbMethod, "ARC_console_s2_intelMethod", "MAP"] call _restoreComboSel;
             [_cmbCat,    "ARC_console_s2_intelCategory", "SIGHTING"] call _restoreComboSel;
 
-            // Show controls + reserve top space so details text does not overlap.
+            // Show controls
             { if (!isNull _x) then { _x ctrlShow true; }; } forEach [_lblMethod,_cmbMethod,_lblCat,_cmbCat];
-            [true] call _reserveDetailsTop;
 
-	            _txt = "<t size='1.1' font='PuristaMedium'>Log Intel</t><br/><br/>" +
+	            _txt = "<br/><br/><br/><t size='1.1' font='PuristaMedium'>Log Intel / Sighting</t><br/><br/>" +
                    "Use the drop-downs above to select the reporting method and category.<br/><br/>" +
                    "Map Click: opens the map, click a point, then submit the report.<br/>" +
                    "Cursor Target: logs a sighting at cursor target (best effort).";
@@ -663,10 +620,8 @@ else
             [_cmbLead, "ARC_console_s2_leadType", "RECON"] call _restoreComboSel;
 
             { if (!isNull _x) then { _x ctrlShow true; }; } forEach [_lblLead,_cmbLead];
-            // Lead type combo lives on the top row; reserve a smaller top space.
-            [true, (safeZoneY + (0.135 * safeZoneH))] call _reserveDetailsTop;
 
-	            _txt = "<t size='1.1' font='PuristaMedium'>Create Lead Request</t><br/><br/>" +
+	            _txt = "<br/><br/><br/><t size='1.1' font='PuristaMedium'>Create Lead Request</t><br/><br/>" +
                    "Select a request type above, then EXECUTE to open the map and place a request marker.<br/><br/>" +
                    "The request enters the TOC queue for approval (S3/Command).";
 
@@ -675,7 +630,6 @@ else
 
         case "REFRESH_INTEL":
         {
-            [false] call _reserveDetailsTop;
             _txt = "<t size='1.1' font='PuristaMedium'>Refresh Intel/Lead Pool</t><br/><br/>" +
                    "Requests a refresh of S2 lead pools / intel state (server authoritative).";
             if (!isNull _b1) then { _b1 ctrlEnable _canAdmin; _b1 ctrlSetText "EXECUTE"; };
@@ -772,7 +726,6 @@ case "CIV_MDT_RUN":
 
         default
         {
-            [false] call _reserveDetailsTop;
             _txt = "<t color='#BBBBBB'>Select a tool or an intel log entry.</t>";
         };
     };
