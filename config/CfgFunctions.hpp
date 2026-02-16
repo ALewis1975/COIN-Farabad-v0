@@ -419,6 +419,7 @@ class CfgFunctions
             class uiConsoleCanOpen {};
             class uiConsoleOpen {};
             class uiConsoleOnLoad {};
+            class consoleThemeGet {};
             class uiConsoleOnUnload {};
             class uiConsoleSelectTab {};
             class uiConsoleRefresh {};
