@@ -743,82 +743,55 @@ if (!isNull _b2) then
 
 _details ctrlSetStructuredText parseText _txt;
 
-// Auto-fit text, then reserve space for S2 workflow controls (Method/Category or Lead Type)
-// and clamp details to the visible viewport so the group can scroll when needed.
+// Auto-fit + clamp to the DetailsGroup (78016) so the group scrolls vertically when needed,
+// but NEVER forces horizontal scrolling or overlaps the S2 workflow controls.
 [_details] call BIS_fnc_ctrlFitToTextHeight;
 
 private _grp = _display displayCtrl 78016;
-private _pGrp = if (!isNull _grp) then { ctrlPosition _grp } else { ctrlPosition _details };
+if (!isNull _grp) then {
+    private _pg = ctrlPosition _grp;
+    private _xG = _pg # 0;
+    private _yG = _pg # 1;
+    private _wG = _pg # 2;
+    private _hG = _pg # 3;
 
-// Workflow controls (defined in CfgDialogs.hpp)
-private _lblMethod = _display displayCtrl 78050;
-private _cmbMethod = _display displayCtrl 78051;
-private _lblCat    = _display displayCtrl 78052;
-private _cmbCat    = _display displayCtrl 78053;
-private _lblLead   = _display displayCtrl 78054;
-private _cmbLead   = _display displayCtrl 78055;
+    // Determine the lowest visible workflow control bottom edge inside the group.
+    private _padY = 0.006;
+    private _padX = 0.002;
 
-private _padX = 0.008;
-private _padY = 0.006;
-private _gapY = 0.006;
+    private _maxBottom = _yG;
+    {
+        if (!isNull _x && {ctrlShown _x}) then {
+            private _pC = ctrlPosition _x;
+            private _b = (_pC # 1) + (_pC # 3);
+            if (_b > _maxBottom) then { _maxBottom = _b; };
+        };
+    } forEach [_lblMethod,_cmbMethod,_lblCategory,_cmbCategory,_lblLeadType,_cmbLeadType];
 
-private _x0 = (_pGrp # 0) + _padX;
-private _y0 = (_pGrp # 1) + _padY;
-private _w  = (_pGrp # 2) - (2 * _padX);
+    // Available rectangle for details text within the group.
+    private _x = _xG + _padX;
+    private _y = (_maxBottom + _padY) max (_yG + _padY);
+    private _w = (_wG - (_padX * 2)) max 0.02;
+    private _availH = (_yG + _hG) - _y;
+    if (_availH < 0.02) then { _availH = 0.02; };
 
-// Row sizing is proportional to viewport so it survives UI scale differences
-private _rowH = 0.032 max (0.028 min (0.040 * safezoneH));
+    private _pD = ctrlPosition _details;
+    private _fitH = _pD # 3;
 
-private _rows = 0;
+    // Keep fit height if it exceeds available height so the group can scroll vertically,
+    // but constrain width strictly to avoid horizontal scrollbars.
+    _pD set [0, _x];
+    _pD set [1, _y];
+    _pD set [2, _w];
+    _pD set [3, _fitH max _availH];
 
-// Layout: Method + Category (2 rows)
-if (!isNull _lblMethod && { ctrlShown _lblMethod }) then
-{
-    _rows = 2;
-
-    private _lblW = 0.22 * _w;
-    private _cmbW = _w - _lblW;
-
-    { if (!isNull _x) then { _x ctrlSetTextColor [0.722,0.608,0.420,1]; }; } forEach [_lblMethod, _lblCat];
-
-    _lblMethod ctrlSetPosition [_x0, _y0, _lblW, _rowH];
-    _cmbMethod ctrlSetPosition [_x0 + _lblW, _y0, _cmbW, _rowH];
-
-    _lblCat ctrlSetPosition [_x0, _y0 + _rowH + _gapY, _lblW, _rowH];
-    _cmbCat ctrlSetPosition [_x0 + _lblW, _y0 + _rowH + _gapY, _cmbW, _rowH];
-
-    { if (!isNull _x) then { _x ctrlCommit 0; }; } forEach [_lblMethod, _cmbMethod, _lblCat, _cmbCat];
-};
-
-// Layout: Lead Type (1 row) when that tool is active
-if (!isNull _lblLead && { ctrlShown _lblLead }) then
-{
-    // If Method/Category is also showing, stack lead below (defensive).
-    private _yLead = _y0 + (_rows * (_rowH + _gapY));
-    _rows = _rows max 1;
-
-    private _lblW = 0.22 * _w;
-    private _cmbW = _w - _lblW;
-
-    _lblLead ctrlSetTextColor [0.722,0.608,0.420,1];
-
-    _lblLead ctrlSetPosition [_x0, _yLead, _lblW, _rowH];
-    _cmbLead ctrlSetPosition [_x0 + _lblW, _yLead, _cmbW, _rowH];
-
-    { if (!isNull _x) then { _x ctrlCommit 0; }; } forEach [_lblLead, _cmbLead];
-};
-
-// Push the details text below workflow controls (prevents overlap regression)
-private _yDetails = _y0 + (_rows * (_rowH + _gapY));
-private _minH = (_pGrp # 1) + (_pGrp # 3) - _yDetails;
-_minH = _minH max 0.10;
-
-private _p = ctrlPosition _details;
-_p set [0, (_pGrp # 0)];
-_p set [1, _yDetails];
-_p set [2, (_pGrp # 2)];
-_p set [3, (_p # 3) max _minH];
-_details ctrlSetPosition _p;
-_details ctrlCommit 0;
+    _details ctrlSetPosition _pD;
+    _details ctrlCommit 0;
+} else {
+    // Fallback: just commit the fitted height.
+    private _pD = ctrlPosition _details;
+    _details ctrlSetPosition _pD;
+    _details ctrlCommit 0;
+}
 
 true
