@@ -30,12 +30,12 @@ jobs:
           #   -e w  => fail CI on warnings OR errors (strict)
           #   -e e  => fail CI on errors only (less strict)
           sqflint -d . -e w \
-            -x "/\.git(/|$)" \
-            -x "/\.github(/|$)" \
-            -x "/\.vscode(/|$)" \
-            -x "/node_modules(/|$)" \
-            -x "/dist(/|$)" \
-            -x "/build(/|$)"
+            -x .git \
+            -x .github \
+            -x .vscode \
+            -x node_modules \
+            -x dist \
+            -x build
 
       - name: Mission config sanity checks (description.ext, ui/**/*.hpp, etc.)
         run: |
