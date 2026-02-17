@@ -2266,19 +2266,44 @@ for "_i" from 0 to (_rmCount - 1) do
             };
         };
 
+        private _ctxMarker = ["activeIncidentMarker", ""] call ARC_fnc_stateGet;
+        if (!(_ctxMarker isEqualType "")) then { _ctxMarker = ""; };
+
+        private _ctxName = ["activeIncidentName", ""] call ARC_fnc_stateGet;
+        if (!(_ctxName isEqualType "")) then { _ctxName = ""; };
+
+        private _incidentContext = toUpper (format ["%1 %2 %3", _ctxMarker, _ctxName, _disp]);
+
         private _roleBundleId = switch (_typeU) do
         {
             case "LOGISTICS":
             {
+                if ((_incidentContext find "HEADQUARTERS") >= 0 || { (_incidentContext find "TOC") >= 0 }) exitWith { "LOGI_HEADQUARTERS" };
+                if ((_incidentContext find "MP") >= 0 || { (_incidentContext find "MILITARY POLICE") >= 0 }) exitWith { "LOGI_MPS" };
+                if (((_incidentContext find "1-73") >= 0) || { ((_incidentContext find "173") >= 0) && { (_incidentContext find "CAV") >= 0 } }) exitWith { "LOGI_1_73_CAV" };
+                if ((_incidentContext find "CONVOY SECURITY") >= 0 || { (_incidentContext find "SHIPMENT SECURITY") >= 0 }) exitWith { "LOGI_CONVOY_SECURITY" };
+                if ((_incidentContext find "TRANSPORT") >= 0 || { (_incidentContext find "RESUPPLY") >= 0 }) exitWith { "LOGI_TRANSPORT" };
+                if ((_incidentContext find "MEDICAL") >= 0 || { (_incidentContext find "CASUALTY") >= 0 }) exitWith { "LOGI_MEDICAL" };
+                if ((_incidentContext find "AMMO") >= 0 || { (_incidentContext find "MUNITION") >= 0 }) exitWith { "LOGI_AMMO" };
+                if ((_incidentContext find "REPAIR") >= 0 || { (_incidentContext find "ENGINEERING") >= 0 }) exitWith { "LOGI_REPAIR" };
+                if ((_incidentContext find "FUEL") >= 0) exitWith { "LOGI_FUEL" };
+
                 switch (_supplyKind) do
                 {
-                    case "FUEL": { "LOGISTICS_FUEL" };
-                    case "AMMO": { "LOGISTICS_AMMO" };
-                    case "MED":  { "LOGISTICS_MED" };
-                    default        { "LOGISTICS_GENERAL" };
+                    case "FUEL": { "LOGI_FUEL" };
+                    case "AMMO": { "LOGI_AMMO" };
+                    case "MED":  { "LOGI_MEDICAL" };
+                    default        { "LOGI_TRANSPORT" };
                 };
             };
-            case "ESCORT": { if (_isVipEscort) then { "ESCORT_VIP" } else { "ESCORT_STANDARD" } };
+            case "ESCORT":
+            {
+                if ((_incidentContext find "MINE SECURITY CONTRACTOR") >= 0 || { (_incidentContext find "PRIVATE CONTRACTOR") >= 0 }) exitWith { "LOGI_CONTRACTOR_SECURITY" };
+                if ((_incidentContext find "PRIVATE SECURITY") >= 0 || { (_incidentContext find "PMC") >= 0 }) exitWith { "LOGI_PRIVATE_SECURITY" };
+                if ((_incidentContext find "GOVERNMENT") >= 0 || { (_incidentContext find "PRESIDENT") >= 0 } || { (_incidentContext find "DIPLOMATIC") >= 0 }) exitWith { "LOGI_GOVERNMENT" };
+                if (_isVipEscort) exitWith { "ESCORT_VIP" };
+                "ESCORT_STANDARD"
+            };
             default { "CONVOY_GENERIC" };
         };
 
