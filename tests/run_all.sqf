@@ -106,6 +106,66 @@ if (isServer) then {
     - convoy spawn preconditions
   */
 
+  // Regression: first progress update should prevent watchdog from immediately marking close-ready.
+  if (!(isNil "ARC_fnc_incidentWatchdog") && !(isNil "ARC_fnc_stateSet") && !(isNil "ARC_fnc_stateGet")) then {
+    private _wdKeys = [
+      "activeTaskId",
+      "activeIncidentCreatedAt",
+      "activeIncidentAccepted",
+      "activeIncidentAcceptedAt",
+      "activeIncidentCloseReady",
+      "activeExecLastProg",
+      "activeExecLastProgressAt"
+    ];
+
+    private _wdSaved = [];
+    {
+      _wdSaved pushBack [_x, missionNamespace getVariable [format ["ARC_state_%1", _x], nil]];
+    } forEach _wdKeys;
+
+    private _wdCfgSaved = [
+      ["ARC_wd_graceSeconds", missionNamespace getVariable ["ARC_wd_graceSeconds", nil]],
+      ["ARC_wd_acceptedTimeout", missionNamespace getVariable ["ARC_wd_acceptedTimeout", nil]]
+    ];
+
+    private _nowWd = serverTime;
+    ["activeTaskId", "UT-WD-INC-1"] call ARC_fnc_stateSet;
+    ["activeIncidentCreatedAt", _nowWd - 300] call ARC_fnc_stateSet;
+    ["activeIncidentAccepted", true] call ARC_fnc_stateSet;
+    ["activeIncidentAcceptedAt", _nowWd - 120] call ARC_fnc_stateSet;
+    ["activeIncidentCloseReady", false] call ARC_fnc_stateSet;
+    ["activeExecLastProg", 1] call ARC_fnc_stateSet;
+    ["activeExecLastProgressAt", _nowWd - 5] call ARC_fnc_stateSet;
+
+    missionNamespace setVariable ["ARC_wd_graceSeconds", 0];
+    missionNamespace setVariable ["ARC_wd_acceptedTimeout", 30];
+
+    private _wdMarked = [] call ARC_fnc_incidentWatchdog;
+    private _wdCloseReady = ["activeIncidentCloseReady", false] call ARC_fnc_stateGet;
+
+    [!_wdMarked, "UT-WD-001", "watchdog not marked immediately after fresh progress", ["marked", _wdMarked]] call ARC_TEST_fnc_assert;
+    [!_wdCloseReady, "UT-WD-002", "close-ready remains false after fresh progress", ["closeReady", _wdCloseReady]] call ARC_TEST_fnc_assert;
+
+    {
+      _x params ["_k", "_v"];
+      if (isNil "_v") then
+      {
+        missionNamespace setVariable [format ["ARC_state_%1", _k], nil];
+      }
+      else
+      {
+        [_k, _v] call ARC_fnc_stateSet;
+      };
+    } forEach _wdSaved;
+
+    {
+      _x params ["_k", "_v"];
+      if (isNil "_v") then { missionNamespace setVariable [_k, nil]; } else { missionNamespace setVariable [_k, _v]; };
+    } forEach _wdCfgSaved;
+  } else {
+    ["INFO", "UT-WD-SKIP", "watchdog regression prerequisites missing", []] call ARC_TEST_fnc_log;
+  };
+
 } else {
   ["INFO", "UT-SERVER-SKIP", "Skipping server-only tests (not running on server)", []] call ARC_TEST_fnc_log;
 };

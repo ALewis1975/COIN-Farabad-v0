@@ -979,6 +979,7 @@ case "IED":
     ["activeExecHoldReq", _holdReq] call ARC_fnc_stateSet;
     ["activeExecHoldAccum", 0] call ARC_fnc_stateSet;
     ["activeExecLastProg", -1] call ARC_fnc_stateSet;
+    ["activeExecLastProgressAt", -1] call ARC_fnc_stateSet;
 
     // Activation: treated like a server-side trigger.
     // Timers/progress begin when friendly players first enter the AO radius.
