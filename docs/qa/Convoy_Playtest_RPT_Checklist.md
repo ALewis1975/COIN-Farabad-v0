@@ -17,6 +17,15 @@ Use this short checklist before recording any convoy behavior conclusions from a
 - Confirm the task id in logs matches the playtest incident/task under review.
 - If breadcrumbs are missing, mark the run **invalid for behavior conclusions** and re-run.
 
+## How to upload an RPT for review
+1. Zip the `.rpt` file first (large plain-text uploads are often blocked/truncated).
+2. Open the target GitHub issue or PR comment box and drag/drop the `.zip` into the comment.
+3. If the file is still too large, upload it to a trusted share (OneDrive/Drive/Dropbox) and post a link with:
+   - mission build stamp
+   - UTC timestamp window to review
+   - repro steps
+4. Remove/redact any personal paths, usernames, or secrets before uploading.
+
 ## Record template (paste in test notes)
 - Build stamp:
 - Task id:
