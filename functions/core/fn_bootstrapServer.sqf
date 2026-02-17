@@ -426,33 +426,168 @@ if (isNil { missionNamespace getVariable "ARC_convoyBundleClassMatrix" }) then
 // These can be overridden by missionNamespace variables before/after bootstrap.
 // NOTE: At spawn time, vehicle class validity and side are still filtered with isClass/side checks.
 
-// Lead security element (US Army, desert)
-if (isNil { missionNamespace getVariable "ARC_convoyVehiclesLead" }) then
+if (isNil { missionNamespace getVariable "ARC_convoyPool_HQ" }) then
 {
-    missionNamespace setVariable ["ARC_convoyVehiclesLead", [
-        "rhsusf_M1232_M2_usarmy_d",
-        "rhsusf_M1232_MK19_usarmy_d"
+    missionNamespace setVariable ["ARC_convoyPool_HQ", [
+        "rhsusf_m1151_usarmy_d",
+        "rhsusf_m1151_mk19crows_usarmy_d",
+        "rhsusf_m1151_m2crows_usarmy_d",
+        "rhsusf_m1152_sicps_usarmy_d",
+        "rhsusf_m1152_usarmy_d",
+        "rhsusf_m1165_usarmy_d",
+        "rhsusf_m1240a1_usarmy_d",
+        "rhsusf_m1240a1_mk19crows_usarmy_d",
+        "rhsusf_m1240a1_m2crows_usarmy_d",
+        "rhsusf_m998_d_2dr_fulltop",
+        "rhsusf_m998_d_2dr_halftop",
+        "rhsusf_m998_d_2dr",
+        "rhsusf_m998_d_4dr_fulltop",
+        "rhsusf_m998_d_4dr_halftop",
+        "rhsusf_m998_d_4dr"
     ]];
 };
 
-// Generic escort pool (US Army, desert). Escort convoys may additionally inject SUV/Police vehicles.
-if (isNil { missionNamespace getVariable "ARC_convoyVehiclesEscort" }) then
+if (isNil { missionNamespace getVariable "ARC_convoyPool_MP" }) then
 {
-    missionNamespace setVariable ["ARC_convoyVehiclesEscort", [
-        "rhsusf_M1232_M2_usarmy_d",
-        "rhsusf_M1232_MK19_usarmy_d"
+    missionNamespace setVariable ["ARC_convoyPool_MP", [
+        "rhsusf_M1117_D",
+        "rhsusf_m1151_usarmy_d",
+        "rhsusf_m1151_mk19_v1_usarmy_d",
+        "rhsusf_m1151_m2_v1_usarmy_d"
     ]];
 };
 
-// Generic logistics pool (US Army, desert). LOGISTICS convoys will also pull from the role-specific pools.
-if (isNil { missionNamespace getVariable "ARC_convoyVehiclesLogistics" }) then
+if (isNil { missionNamespace getVariable "ARC_convoyPool_CAV" }) then
 {
-    missionNamespace setVariable ["ARC_convoyVehiclesLogistics", [
-        "rhsusf_m1083a1p2_d_fmtv_usarmy",
-        "rhsusf_m1083a1p2_d_open_fmtv_usarmy",
-        "rhsusf_m977a4_usarmy_d",
-        "rhsusf_m978a4_usarmy_d",
-        "rhsusf_m997_ambulance_usarmy_d"
+    missionNamespace setVariable ["ARC_convoyPool_CAV", [
+        "rhsusf_m1151_mk19_v2_usarmy_d",
+        "rhsusf_m1151_m2_v2_usarmy_d",
+        "rhsusf_m1045_d"
+    ]];
+};
+
+if (isNil { missionNamespace getVariable "ARC_convoyPool_Security" }) then
+{
+    missionNamespace setVariable ["ARC_convoyPool_Security", [
+        "rhsusf_m1151_mk19_v2_usarmy_d",
+        "rhsusf_m1151_m2_v2_usarmy_d",
+        "rhsusf_m1151_mk19_v1_usarmy_d",
+        "rhsusf_m1151_m2_v1_usarmy_d",
+        "rhsusf_m1240a1_m2_uik_usarmy_d",
+        "rhsusf_m1240a1_mk19_usarmy_d",
+        "rhsusf_m1240a1_m2_usarmy_d",
+        "rhsusf_m966_d"
+    ]];
+};
+
+if (isNil { missionNamespace getVariable "ARC_convoyPool_Transport" }) then
+{
+    missionNamespace setVariable ["ARC_convoyPool_Transport", [
+        "rhsusf_M1078A1P2_B_D_fmtv_usarmy",
+        "rhsusf_M1078A1P2_B_D_flatbed_fmtv_usarmy",
+        "rhsusf_M1078A1P2_B_D_CP_fmtv_usarmy",
+        "rhsusf_M1083A1P2_B_D_fmtv_usarmy",
+        "rhsusf_M1083A1P2_B_D_flatbed_fmtv_usarmy",
+        "rhsusf_M1084A1P2_B_D_fmtv_usarmy",
+        "rhsusf_M977A4_usarmy_d",
+        "B_Truck_01_mover_F",
+        "B_Truck_01_cargo_F",
+        "B_Truck_01_box_F",
+        "B_Truck_01_flatbed_F",
+        "B_Truck_01_transport_F",
+        "B_Truck_01_covered_F"
+    ]];
+};
+
+if (isNil { missionNamespace getVariable "ARC_convoyPool_Medical" }) then
+{
+    missionNamespace setVariable ["ARC_convoyPool_Medical", [
+        "B_Truck_01_medical_F",
+        "rhsusf_M1232_usarmy_d",
+        "rhsusf_M1085A1P2_B_D_Medical_fmtv_usarmy"
+    ]];
+};
+
+if (isNil { missionNamespace getVariable "ARC_convoyPool_Ammo" }) then
+{
+    missionNamespace setVariable ["ARC_convoyPool_Ammo", [
+        "rhsusf_M977A4_AMMO_BKIT_usarmy_d",
+        "rhsusf_m1152_rsv_usarmy_d",
+        "B_Truck_01_ammo_F"
+    ]];
+};
+
+if (isNil { missionNamespace getVariable "ARC_convoyPool_Repair" }) then
+{
+    missionNamespace setVariable ["ARC_convoyPool_Repair", [
+        "rhsusf_M977A4_REPAIR_BKIT_usarmy_d",
+        "B_Truck_01_Repair_F"
+    ]];
+};
+
+if (isNil { missionNamespace getVariable "ARC_convoyPool_Fuel" }) then
+{
+    missionNamespace setVariable ["ARC_convoyPool_Fuel", [
+        "rhsusf_M978A4_BKIT_usarmy_d",
+        "B_Truck_01_fuel_F"
+    ]];
+};
+
+if (isNil { missionNamespace getVariable "ARC_convoyPool_Government" }) then
+{
+    missionNamespace setVariable ["ARC_convoyPool_Government", [
+        "UK3CB_TKC_B_SUV",
+        "UK3CB_TKC_B_SUV_Armoured",
+        "UK3CB_TKA_B_SUV_Armoured",
+        "d3s_tundra_19_COP",
+        "d3s_escalade_20_FSB",
+        "d3s_escalade_16_cop"
+    ]];
+};
+
+if (isNil { missionNamespace getVariable "ARC_convoyPool_PrivateSecurity" }) then
+{
+    missionNamespace setVariable ["ARC_convoyPool_PrivateSecurity", [
+        "EM_Police_Raptor_UM",
+        "EM_Police_Explorer_UM",
+        "UK3CB_TKA_B_SUV_Armed"
+    ]];
+};
+
+if (isNil { missionNamespace getVariable "ARC_convoyPool_PrivateContractors" }) then
+{
+    missionNamespace setVariable ["ARC_convoyPool_PrivateContractors", [
+        "d3s_scania_16_30reef",
+        "d3s_scania_16_30",
+        "d3s_scania_16_t75",
+        "d3s_scania_16_t50",
+        "d3s_scania_16_t14",
+        "d3s_scania_16_t22",
+        "d3s_peterbilt_579_tank",
+        "d3s_peterbilt_579_dump",
+        "d3s_peterbilt_579_dryvan",
+        "d3s_peterbilt_579",
+        "d3s_SRmh_9500",
+        "d3s_SRmh_9500_fuel",
+        "d3s_SRmh_9500_cov",
+        "d3s_SRlonghorn_4520",
+        "d3s_SRlonghorn_4520_fuel",
+        "d3s_SRlonghorn_4520_cov",
+        "d3s_scania_16",
+        "d3s_escalade_16",
+        "d3s_raptor_17_3_BIG",
+        "d3s_h1_06_A",
+        "d3s_h1_06",
+        "d3s_h2_02",
+        "d3s_h2_02_Black",
+        "d3s_cherokee_18_LTD",
+        "d3s_cherokee_18",
+        "d3s_hiluxarctic_14",
+        "d3s_200_16_EX",
+        "d3s_200_VX_16",
+        "d3s_200_16",
+        "d3s_tundra_19",
+        "d3s_tundra_19_P"
     ]];
 };
 
@@ -461,9 +596,9 @@ if (isNil { missionNamespace getVariable "ARC_convoyVehiclesLogistics" }) then
 if (isNil { missionNamespace getVariable "ARC_convoyRoleMatrixPoolKeys" }) then
 {
     missionNamespace setVariable ["ARC_convoyRoleMatrixPoolKeys", [
-        ["lead", ["ARC_convoyVehiclesLead"]],
-        ["escort", ["ARC_convoyVehiclesEscort", "ARC_convoyVehiclesEscortSUV", "ARC_convoyVehiclesEscortVIP"]],
-        ["logistics", ["ARC_convoyVehiclesLogistics", "ARC_rhsConvoyCargoPool_general", "ARC_rhsConvoyCargoPool_fuel", "ARC_rhsConvoyCargoPool_ammo", "ARC_rhsConvoyCargoPool_med", "ARC_rhsConvoyCargoPool_hq", "ARC_rhsConvoyCargoPool_maint"]]
+        ["lead", ["ARC_convoyPool_CAV", "ARC_convoyPool_Security", "ARC_convoyPool_HQ"]],
+        ["escort", ["ARC_convoyPool_MP", "ARC_convoyPool_CAV", "ARC_convoyPool_Security", "ARC_convoyPool_PrivateSecurity", "ARC_convoyPool_PrivateContractors", "ARC_convoyPool_Government"]],
+        ["logistics", ["ARC_convoyPool_Transport", "ARC_convoyPool_Medical", "ARC_convoyPool_Ammo", "ARC_convoyPool_Repair", "ARC_convoyPool_Fuel", "ARC_convoyPool_HQ", "ARC_convoyPool_MP", "ARC_convoyPool_Government", "ARC_convoyPool_PrivateSecurity", "ARC_convoyPool_PrivateContractors"]]
     ]];
 };
 
