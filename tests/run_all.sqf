@@ -66,6 +66,44 @@ if (isNil "ARC_TEST_fnc_log") then {
     params [["_label", "RUN"]];
     ["INFO", _label, format ["Summary pass=%1 fail=%2", ARC_TEST_pass, ARC_TEST_fail], []] call ARC_TEST_fnc_log;
   };
+
+  ARC_TEST_fnc_stateSnapshot = {
+    params ["_keys"];
+    private _saved = [];
+    {
+      _saved pushBack [_x, missionNamespace getVariable [format ["ARC_state_%1", _x], nil]];
+    } forEach _keys;
+    _saved
+  };
+
+  ARC_TEST_fnc_stateRestore = {
+    params ["_saved"];
+    {
+      _x params ["_k", "_v"];
+      if (isNil "_v") then {
+        missionNamespace setVariable [format ["ARC_state_%1", _k], nil];
+      } else {
+        [_k, _v] call ARC_fnc_stateSet;
+      };
+    } forEach _saved;
+  };
+
+  ARC_TEST_fnc_varSnapshot = {
+    params ["_keys"];
+    private _saved = [];
+    {
+      _saved pushBack [_x, missionNamespace getVariable [_x, nil]];
+    } forEach _keys;
+    _saved
+  };
+
+  ARC_TEST_fnc_varRestore = {
+    params ["_saved"];
+    {
+      _x params ["_k", "_v"];
+      missionNamespace setVariable [_k, _v];
+    } forEach _saved;
+  };
 };
 
 // ---- Runner ----
@@ -112,10 +150,18 @@ if (!(isNil "ARC_fnc_consoleThemeGet")) then {
 
   if (_isThemeHashMap) then {
     {
+      private _v = _theme get _x;
       [
-        !isNil { _theme get _x },
+        !isNil { _v },
         format ["UT-THEME-%1", _forEachIndex + 1],
         format ["console theme contains key '%1'", _x]
+      ] call ARC_TEST_fnc_assert;
+
+      [
+        (_v isEqualType []) && { (count _v) isEqualTo 4 },
+        format ["UT-THEME-RGBA-%1", _forEachIndex + 1],
+        format ["console theme key '%1' is RGBA[4]", _x],
+        ["value", _v]
       ] call ARC_TEST_fnc_assert;
     } forEach _requiredThemeKeys;
   } else {
@@ -132,6 +178,149 @@ private _hasCBA = !(isNil "CBA_fnc_addPerFrameHandler");
 // Authoritative-only checks (server)
 if (isServer) then {
   ["INFO", "UT-SERVER-000", "Running server-only tests", []] call ARC_TEST_fnc_log;
+
+  if (!(isNil "ARC_fnc_rpcValidateSender")) then {
+    private _rpcVars = ["remoteExecutedOwner"];
+    private _rpcVarSaved = [_rpcVars] call ARC_TEST_fnc_varSnapshot;
+    private _rpcCaller = createVehicle ["Logic", [0, 0, 0], [], 0, "NONE"];
+
+    missionNamespace setVariable ["remoteExecutedOwner", nil];
+    private _rpcLocal = [_rpcCaller, "UT_RPC_LOCAL", "", "UT_RPC_EVENT"] call ARC_fnc_rpcValidateSender;
+    [_rpcLocal, "UT-RPC-001", "rpcValidateSender allows non-remote invocation", []] call ARC_TEST_fnc_assert;
+
+    missionNamespace setVariable ["remoteExecutedOwner", owner _rpcCaller];
+    private _rpcMatch = [_rpcCaller, "UT_RPC_MATCH", "", "UT_RPC_EVENT"] call ARC_fnc_rpcValidateSender;
+    [_rpcMatch, "UT-RPC-002", "rpcValidateSender accepts matching owner", ["owner", owner _rpcCaller]] call ARC_TEST_fnc_assert;
+
+    private _badOwner = (owner _rpcCaller) + 100;
+    missionNamespace setVariable ["remoteExecutedOwner", _badOwner];
+    private _rpcMismatch = [_rpcCaller, "UT_RPC_MISMATCH", "", "UT_RPC_EVENT"] call ARC_fnc_rpcValidateSender;
+    [!_rpcMismatch, "UT-RPC-003", "rpcValidateSender rejects owner mismatch", ["expected", owner _rpcCaller, "actual", _badOwner]] call ARC_TEST_fnc_assert;
+
+    private _rpcNull = [objNull, "UT_RPC_NULL", "", "UT_RPC_EVENT"] call ARC_fnc_rpcValidateSender;
+    [!_rpcNull, "UT-RPC-004", "rpcValidateSender rejects null caller on remote RPC", ["remoteOwner", _badOwner]] call ARC_TEST_fnc_assert;
+
+    deleteVehicle _rpcCaller;
+    [_rpcVarSaved] call ARC_TEST_fnc_varRestore;
+  } else {
+    ["INFO", "UT-RPC-SKIP", "rpcValidateSender tests skipped; function missing", []] call ARC_TEST_fnc_log;
+  };
+
+  if (!(isNil "ARC_fnc_tocRequestCloseIncident") && !(isNil "ARC_fnc_stateSet") && !(isNil "ARC_fnc_stateGet")) then {
+    private _closeKeys = [
+      "activeIncidentClosePending",
+      "activeIncidentSitrepSent",
+      "activeTaskId",
+      "activeIncidentSitrepFromGroup",
+      "activeIncidentAcceptedByGroup",
+      "lastTaskingGroup",
+      "tocOrders",
+      "activeIncidentClosePendingAt",
+      "activeIncidentClosePendingResult",
+      "activeIncidentClosePendingOrderId",
+      "activeIncidentClosePendingGroup",
+      "activeIncidentCloseReady"
+    ];
+    private _closeSaved = [_closeKeys] call ARC_TEST_fnc_stateSnapshot;
+
+    private _closeVars = ["ARC_activeIncidentClosePending", "ARC_activeIncidentCloseReady"];
+    private _closeVarsSaved = [_closeVars] call ARC_TEST_fnc_varSnapshot;
+
+    private _closeFnVars = [
+      "ARC_fnc_rolesHasGroupIdToken",
+      "ARC_fnc_rolesCanApproveQueue",
+      "ARC_fnc_rpcValidateSender"
+    ];
+    private _closeFnSaved = [_closeFnVars] call ARC_TEST_fnc_varSnapshot;
+
+    private _closeCaller = createVehicle ["Logic", [0, 0, 0], [], 0, "NONE"];
+
+    ARC_fnc_rpcValidateSender = { true };
+    ARC_fnc_rolesHasGroupIdToken = { false };
+    ARC_fnc_rolesCanApproveQueue = { true };
+
+    ["activeIncidentClosePending", false] call ARC_fnc_stateSet;
+    ["activeIncidentSitrepSent", false] call ARC_fnc_stateSet;
+    ["activeTaskId", "UT-CLOSE-TASK-1"] call ARC_fnc_stateSet;
+    ["activeIncidentSitrepFromGroup", "ALPHA"] call ARC_fnc_stateSet;
+    ["tocOrders", [["O1", 1, "ISSUED", "HOLD", "ALPHA", [], []]]] call ARC_fnc_stateSet;
+
+    private _closeNeedSitrep = ["SUCCEEDED", _closeCaller, _closeCaller] call ARC_fnc_tocRequestCloseIncident;
+    [!_closeNeedSitrep, "UT-CLOSE-001", "closeout denied before SITREP is sent", []] call ARC_TEST_fnc_assert;
+
+    ["activeIncidentSitrepSent", true] call ARC_fnc_stateSet;
+    ["activeIncidentClosePending", true] call ARC_fnc_stateSet;
+    private _closePendingDeny = ["SUCCEEDED", _closeCaller, _closeCaller] call ARC_fnc_tocRequestCloseIncident;
+    [!_closePendingDeny, "UT-CLOSE-002", "closeout denied when already pending", []] call ARC_TEST_fnc_assert;
+
+    ["activeIncidentClosePending", false] call ARC_fnc_stateSet;
+    ARC_fnc_rolesCanApproveQueue = { false };
+    private _closeUnauthorized = ["SUCCEEDED", _closeCaller, _closeCaller] call ARC_fnc_tocRequestCloseIncident;
+    [!_closeUnauthorized, "UT-CLOSE-003", "closeout denied for unauthorized caller", []] call ARC_TEST_fnc_assert;
+
+    deleteVehicle _closeCaller;
+    [_closeSaved] call ARC_TEST_fnc_stateRestore;
+    [_closeVarsSaved] call ARC_TEST_fnc_varRestore;
+    [_closeFnSaved] call ARC_TEST_fnc_varRestore;
+  } else {
+    ["INFO", "UT-CLOSE-SKIP", "closeout gate tests skipped; prerequisites missing", []] call ARC_TEST_fnc_log;
+  };
+
+  if (!(isNil "ARC_fnc_tocRequestSave") && !(isNil "ARC_fnc_tocRequestResetAll") && !(isNil "ARC_fnc_tocRequestRebuildActive")) then {
+    private _tocVars = [
+      "remoteExecutedOwner",
+      "ARC_fnc_rolesHasGroupIdToken",
+      "ARC_fnc_rolesCanApproveQueue",
+      "ARC_fnc_rpcValidateSender",
+      "ARC_fnc_stateSave",
+      "ARC_fnc_resetAll",
+      "ARC_fnc_taskRehydrateActive",
+      "civsub_v1_enabled"
+    ];
+    private _tocSaved = [_tocVars] call ARC_TEST_fnc_varSnapshot;
+
+    private _tocCaller = createVehicle ["Logic", [0, 0, 0], [], 0, "NONE"];
+    private _tocOwner = owner _tocCaller;
+
+    ARC_TEST_tocSaveCalls = 0;
+    ARC_TEST_tocResetCalls = 0;
+    ARC_TEST_tocRebuildCalls = 0;
+
+    ARC_fnc_stateSave = { ARC_TEST_tocSaveCalls = ARC_TEST_tocSaveCalls + 1; true };
+    ARC_fnc_resetAll = { ARC_TEST_tocResetCalls = ARC_TEST_tocResetCalls + 1; true };
+    ARC_fnc_taskRehydrateActive = { ARC_TEST_tocRebuildCalls = ARC_TEST_tocRebuildCalls + 1; true };
+    ARC_fnc_rpcValidateSender = { true };
+    ARC_fnc_rolesHasGroupIdToken = { false };
+    ARC_fnc_rolesCanApproveQueue = { false };
+
+    missionNamespace setVariable ["remoteExecutedOwner", _tocOwner];
+    missionNamespace setVariable ["civsub_v1_enabled", false];
+
+    private _saveDenied = [_tocCaller] call ARC_fnc_tocRequestSave;
+    [!_saveDenied && { ARC_TEST_tocSaveCalls isEqualTo 0 }, "UT-TOC-AUTH-001", "tocRequestSave denies unauthorized caller", ["saveCalls", ARC_TEST_tocSaveCalls]] call ARC_TEST_fnc_assert;
+
+    private _resetDenied = [_tocCaller] call ARC_fnc_tocRequestResetAll;
+    [!_resetDenied && { ARC_TEST_tocResetCalls isEqualTo 0 }, "UT-TOC-AUTH-002", "tocRequestResetAll denies unauthorized caller", ["resetCalls", ARC_TEST_tocResetCalls]] call ARC_TEST_fnc_assert;
+
+    private _rebuildDenied = [_tocCaller] call ARC_fnc_tocRequestRebuildActive;
+    [!_rebuildDenied && { ARC_TEST_tocRebuildCalls isEqualTo 0 }, "UT-TOC-AUTH-003", "tocRequestRebuildActive denies unauthorized caller", ["rebuildCalls", ARC_TEST_tocRebuildCalls]] call ARC_TEST_fnc_assert;
+
+    ARC_fnc_rolesCanApproveQueue = { true };
+
+    private _saveAllowed = [_tocCaller] call ARC_fnc_tocRequestSave;
+    [_saveAllowed && { ARC_TEST_tocSaveCalls isEqualTo 1 }, "UT-TOC-AUTH-004", "tocRequestSave allows authorized caller", ["saveCalls", ARC_TEST_tocSaveCalls]] call ARC_TEST_fnc_assert;
+
+    private _resetAllowed = [_tocCaller] call ARC_fnc_tocRequestResetAll;
+    [_resetAllowed && { ARC_TEST_tocResetCalls isEqualTo 1 }, "UT-TOC-AUTH-005", "tocRequestResetAll allows authorized caller", ["resetCalls", ARC_TEST_tocResetCalls]] call ARC_TEST_fnc_assert;
+
+    private _rebuildAllowed = [_tocCaller] call ARC_fnc_tocRequestRebuildActive;
+    [_rebuildAllowed && { ARC_TEST_tocRebuildCalls isEqualTo 1 }, "UT-TOC-AUTH-006", "tocRequestRebuildActive allows authorized caller", ["rebuildCalls", ARC_TEST_tocRebuildCalls]] call ARC_TEST_fnc_assert;
+
+    deleteVehicle _tocCaller;
+    [_tocSaved] call ARC_TEST_fnc_varRestore;
+  } else {
+    ["INFO", "UT-TOC-AUTH-SKIP", "TOC request auth tests skipped; prerequisites missing", []] call ARC_TEST_fnc_log;
+  };
 
   /*
     Place server-only contract tests here. Examples:
@@ -152,10 +341,7 @@ if (isServer) then {
       "activeExecLastProgressAt"
     ];
 
-    private _wdSaved = [];
-    {
-      _wdSaved pushBack [_x, missionNamespace getVariable [format ["ARC_state_%1", _x], nil]];
-    } forEach _wdKeys;
+    private _wdSaved = [_wdKeys] call ARC_TEST_fnc_stateSnapshot;
 
     private _wdCfgSaved = [
       ["ARC_wd_graceSeconds", missionNamespace getVariable ["ARC_wd_graceSeconds", nil]],
@@ -180,17 +366,7 @@ if (isServer) then {
     [!_wdMarked, "UT-WD-001", "watchdog not marked immediately after fresh progress", ["marked", _wdMarked]] call ARC_TEST_fnc_assert;
     [!_wdCloseReady, "UT-WD-002", "close-ready remains false after fresh progress", ["closeReady", _wdCloseReady]] call ARC_TEST_fnc_assert;
 
-    {
-      _x params ["_k", "_v"];
-      if (isNil "_v") then
-      {
-        missionNamespace setVariable [format ["ARC_state_%1", _k], nil];
-      }
-      else
-      {
-        [_k, _v] call ARC_fnc_stateSet;
-      };
-    } forEach _wdSaved;
+    [_wdSaved] call ARC_TEST_fnc_stateRestore;
 
     {
       _x params ["_k", "_v"];
