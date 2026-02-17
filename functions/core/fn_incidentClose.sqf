@@ -18,8 +18,16 @@ private _log = {
 };
 
 
-params ["_result"];
-if (_result isEqualTo "") exitWith {false};
+private _rawResult = if (_this isEqualType [] && { (count _this) > 0 }) then { _this # 0 } else { nil };
+params [["_result", "", [""]]];
+_result = toUpper (trim _result);
+
+private _validResults = ["SUCCEEDED", "FAILED", "CANCELED"];
+if !(_result in _validResults) exitWith
+{
+    ["incidentClose invalid _result (type=%1, value=%2)", [typeName _rawResult, str _rawResult]] call _log;
+    false
+};
 
 private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
 if (_taskId isEqualTo "") exitWith {false};
