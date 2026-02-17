@@ -163,12 +163,12 @@ switch (_kind) do
         {
             if (!_accepted) then
             {
-                _b1 ctrlSetText "Accept Incident";
+                _b1 ctrlSetText "ACCEPT INCIDENT";
                 _b1 ctrlEnable (([player] call ARC_fnc_rolesIsAuthorized) || { (missionNamespace getVariable ["ARC_consoleOmniTokens", ["OMNI"]]) findIf { [player, _x] call ARC_fnc_rolesHasGroupIdToken } >= 0 });
             }
             else
             {
-                _b1 ctrlSetText "Send SITREP";
+                _b1 ctrlSetText "SEND SITREP";
                 _b1 ctrlEnable ([player] call ARC_fnc_clientCanSendSitrep);
             };
         };
@@ -176,7 +176,7 @@ switch (_kind) do
         // Secondary: Request Follow-on (requires SITREP + no pending orders)
         if (!isNull _b2) then
         {
-            _b2 ctrlSetText "Request Follow-on";
+            _b2 ctrlSetText "FOLLOW-ON REQUEST";
             _b2 ctrlEnable (call ARC_fnc_intelClientCanRequestFollowOn);
         };
 
