@@ -226,12 +226,17 @@ if (!isNull _ctrlList) then
     private _hasRows = (lbSize _ctrlList) > 0;
 
     // Validate that the existing rows look like HQ-owned data.
-    // If not, force rebuild even when owner/mode appears unchanged.
-    private _hasHqRow = false;
-    for "_i" from 0 to ((lbSize _ctrlList) - 1) do
+    // Only run the TOOLS row sanity check in TOOLS mode; INCIDENTS mode
+    // uses marker|type|display payloads and HDR rows by design.
+    private _hasHqRow = true;
+    if (_mode isEqualTo "TOOLS") then
     {
-        private _d = _ctrlList lbData _i;
-        if (_d in ["ADMIN_SAVE","ADMIN_CIVSUB_SAVE","ADMIN_RESET","ADMIN_CIVSUB_RESET","ADMIN_FORCE_CLOSE_SUCC","ADMIN_FORCE_CLOSE_FAIL","ADMIN_REBUILD_ACTIVE","ADMIN_BROADCAST","ADMIN_INCIDENTS","ADMIN_COVERAGE","ADMIN_QA","ADMIN_COMPILE","ADMIN_DUMP_LEADS","ADMIN_DUMP_INTEL"]) exitWith { _hasHqRow = true; };
+        _hasHqRow = false;
+        for "_i" from 0 to ((lbSize _ctrlList) - 1) do
+        {
+            private _d = _ctrlList lbData _i;
+            if (_d in ["ADMIN_SAVE","ADMIN_CIVSUB_SAVE","ADMIN_RESET","ADMIN_CIVSUB_RESET","ADMIN_FORCE_CLOSE_SUCC","ADMIN_FORCE_CLOSE_FAIL","ADMIN_REBUILD_ACTIVE","ADMIN_BROADCAST","ADMIN_INCIDENTS","ADMIN_COVERAGE","ADMIN_QA","ADMIN_COMPILE","ADMIN_DUMP_LEADS","ADMIN_DUMP_INTEL"]) exitWith { _hasHqRow = true; };
+        };
     };
 
     // Always rebuild when entering HQ from another tab to replace any foreign rows
