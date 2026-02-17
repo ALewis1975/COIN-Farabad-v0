@@ -46,8 +46,11 @@ _sepDesired = (_sepDesired max 10) min 80;
 private _padClearR = missionNamespace getVariable ["ARC_convoySpawnPadClearRadiusM", 18];
 if (!(_padClearR isEqualType 0)) then { _padClearR = 18; };
 
-private _enforceCrewSide = missionNamespace getVariable ["ARC_convoyEnforceCrewSide", true];
-if (!(_enforceCrewSide isEqualType true) && !(_enforceCrewSide isEqualType false)) then { _enforceCrewSide = true; };
+private _enforceCrewSideRaw = missionNamespace getVariable [
+    "ARC_convoyEnforceCrewSide",
+    missionNamespace getVariable ["ARC_convoyEnforceCrewSideWest", true]
+];
+private _enforceCrewSide = if ((_enforceCrewSideRaw isEqualType true) || (_enforceCrewSideRaw isEqualType false)) then { _enforceCrewSideRaw } else { true };
 if (_debug) then
 {
     diag_log format ["[ARC][CONVOY][BOOT] enforceCrewSide=%1", _enforceCrewSide];
