@@ -161,7 +161,7 @@ private _ensureS2CatPanels = {
 
                 private _d = _ctrl lbData _idx;
                 if (!(_d isEqualType "")) exitWith {};
-                if (_d isEqualTo "" || { _d isEqualTo "HDR" }) exitWith {};
+                if (_d isEqualTo "" || { _d in ["HDR", "SEP"] }) exitWith {};
 
                 private _disp = ctrlParent _ctrl;
                 if (isNull _disp) exitWith {};
@@ -255,13 +255,14 @@ private _renderS2CatPanelsFromMaster = {
         private _d = _listMaster lbData _i;
         private _t = _listMaster lbText _i;
 
-        if (_d isEqualTo "HDR") then {
+        if (_d in ["HDR", "SEP"]) then {
             _section = toUpper (trim _t);
         } else {
             if (_section isEqualTo "") then { continue; };
             private _lb = _map getOrDefault [_section, controlNull];
             if (isNull _lb) then { continue; };
             if (!(_d isEqualType "")) then { continue; };
+            if (_d in ["", "HDR", "SEP"]) then { continue; };
 
             private _idx = _lb lbAdd _t;
             _lb lbSetData [_idx, _d];
@@ -356,6 +357,10 @@ if (!(_selDataPrev isEqualType "")) then { _selDataPrev = ""; };
 
 // Intel view mode
 private _mode = uiNamespace getVariable ["ARC_console_intelMode", "TOOLS"];
+
+private _civCtxTarget = uiNamespace getVariable ["ARC_civsubInteract_target", objNull];
+private _inCivCtx = !(isNull _civCtxTarget);
+
 
 // Apply the S2 split layout each paint. This keeps the workflow controls inside the middle pane
 // and prevents them from colliding with the right details pane.
@@ -507,10 +512,40 @@ if (_rebuild) then
             ["(S2/TOC only)", "HDR"] call _addTool;
         };
 
-        // CIVSUB MDT (run last shown ID card)
+        // CIVSUB MDT + contact context tools
         ["CIVSUB / MDT"] call _addHdr;
         ["Run Last Civ ID (MDT)", "CIV_MDT_RUN"] call _addTool;
         ["CIVSUB Census (District Stats)", "CIV_CENSUS_OPEN"] call _addTool;
+
+        if (_inCivCtx) then
+        {
+            ["CIVSUB INTERACTION (ACTIVE)", "HDR"] call _addTool;
+            ["Check ID", "CIV_CONTACT_CHECK_ID"] call _addTool;
+            ["Background Check", "CIV_CONTACT_BACKGROUND"] call _addTool;
+
+            private _detained = false;
+            private _snap = uiNamespace getVariable ["ARC_civsubInteract_snapshot", createHashMap];
+            if (_snap isEqualType createHashMap) then { _detained = _snap getOrDefault ["detained", false]; };
+
+            if (_detained) then {
+                ["Release", "CIV_CONTACT_RELEASE"] call _addTool;
+                ["Handoff to SHERIFF", "CIV_CONTACT_HANDOFF"] call _addTool;
+            } else {
+                ["Detain", "CIV_CONTACT_DETAIN"] call _addTool;
+            };
+
+            ["Ask: Where do you live?", "CIV_CONTACT_QUESTION|Q_LIVE"] call _addTool;
+            ["Ask: Where do you work?", "CIV_CONTACT_QUESTION|Q_WORK"] call _addTool;
+            ["Ask: Seen any IEDs?", "CIV_CONTACT_QUESTION|Q_IEDS"] call _addTool;
+            ["Ask: Seen insurgent activity?", "CIV_CONTACT_QUESTION|Q_INS"] call _addTool;
+            ["Ask: Opinion of us?", "CIV_CONTACT_QUESTION|Q_OP_US"] call _addTool;
+            ["Ask: Area opinion of us?", "CIV_CONTACT_QUESTION|Q_OP_AREA"] call _addTool;
+            ["End Interaction Mode", "CIV_CONTACT_END"] call _addTool;
+        }
+        else
+        {
+            ["(No active civ interaction target)", "HDR"] call _addTool;
+        };
 
         // Admin/tools
         ["ADMIN / TOOLS"] call _addHdr;
@@ -616,7 +651,7 @@ if (!isNull _b1) then { _b1 ctrlSetText "EXECUTE"; _b1 ctrlEnable false; };
 // Tool descriptions / intel details
 if (_mode isEqualTo "CENSUS") then
 {
-if (_data isEqualTo "HDR") then
+if (_data in ["HDR", "SEP"]) then
 {
     _txt = "<t size='1.05'>Select a district below.</t><br/><br/>" +
            "This view reads published district snapshots (refreshed each CIVSUB tick).<br/><br/>" +
@@ -801,7 +836,7 @@ else
 }
 else
 {
-if (_data isEqualTo "HDR") then
+if (_data in ["HDR", "SEP"]) then
 {
     _txt = "<t size='1.05'>Select a tool or an intel log entry.</t>";
 }
@@ -1015,6 +1050,71 @@ else
             if (!isNull _b1) then { _b1 ctrlEnable true; _b1 ctrlSetText "Open Map"; };
         };
 
+        case "CIV_CONTACT_CHECK_ID":
+        {
+            _txt = "<t size='1.1' font='PuristaMedium'>CIVSUB: Check ID</t><br/><br/>" +
+                   "Runs identity verification for the active civilian interaction target.<br/>" +
+                   "Result renders in-console via CIVSUB response handlers.";
+            if (!isNull _b1) then { _b1 ctrlEnable _inCivCtx; _b1 ctrlSetText "EXECUTE"; };
+        };
+
+        case "CIV_CONTACT_BACKGROUND":
+        {
+            _txt = "<t size='1.1' font='PuristaMedium'>CIVSUB: Background Check</t><br/><br/>" +
+                   "Runs wanted/flags background check for the active civilian target.";
+            if (!isNull _b1) then { _b1 ctrlEnable _inCivCtx; _b1 ctrlSetText "EXECUTE"; };
+        };
+
+        case "CIV_CONTACT_DETAIN":
+        {
+            _txt = "<t size='1.1' font='PuristaMedium'>CIVSUB: Detain</t><br/><br/>" +
+                   "Requests server-authoritative detention for the active civilian target.";
+            if (!isNull _b1) then { _b1 ctrlEnable _inCivCtx; _b1 ctrlSetText "EXECUTE"; };
+        };
+
+        case "CIV_CONTACT_RELEASE":
+        {
+            _txt = "<t size='1.1' font='PuristaMedium'>CIVSUB: Release</t><br/><br/>" +
+                   "Requests server-authoritative release for the active civilian target.";
+            if (!isNull _b1) then { _b1 ctrlEnable _inCivCtx; _b1 ctrlSetText "EXECUTE"; };
+        };
+
+        case "CIV_CONTACT_HANDOFF":
+        {
+            _txt = "<t size='1.1' font='PuristaMedium'>CIVSUB: Handoff to SHERIFF</t><br/><br/>" +
+                   "Use when detainee is ready for sheriff transfer and all handoff conditions are met.";
+            if (!isNull _b1) then { _b1 ctrlEnable _inCivCtx; _b1 ctrlSetText "EXECUTE"; };
+        };
+
+        case "CIV_CONTACT_QUESTION":
+        {
+            private _qid = _arg;
+            private _qMap = createHashMapFromArray [
+                ["Q_LIVE", "Where do you live?"],
+                ["Q_WORK", "Where do you work?"],
+                ["Q_IEDS", "Have you seen any IEDs?"],
+                ["Q_INS", "Have you seen any insurgent activity?"],
+                ["Q_OP_US", "What is your opinion of us?"],
+                ["Q_OP_AREA", "What is the overall opinion of us in the area?"]
+            ];
+            private _qlbl = _qMap getOrDefault [_qid, _qid];
+
+            _txt = format [
+                "<t size='1.1' font='PuristaMedium'>CIVSUB: Ask Question</t><br/><br/>" +
+                "Selected: <t color='#CFE8FF'>%1</t><br/><br/>" +
+                "Executes through server-authoritative CIVSUB action routing.",
+                _qlbl
+            ];
+            if (!isNull _b1) then { _b1 ctrlEnable (_inCivCtx && {_qid isNotEqualTo ""}); _b1 ctrlSetText "ASK"; };
+        };
+
+        case "CIV_CONTACT_END":
+        {
+            _txt = "<t size='1.1' font='PuristaMedium'>Exit CIVSUB Interaction Mode</t><br/><br/>" +
+                   "Ends the current interaction session and clears CIVSUB context from INTEL tools.";
+            if (!isNull _b1) then { _b1 ctrlEnable true; _b1 ctrlSetText "END"; };
+        };
+
         case "CIV_CENSUS_OPEN":
         {
             _txt = "<t size='1.1' font='PuristaMedium'>CIVSUB Census</t><br/><br/>" +
@@ -1029,7 +1129,8 @@ case "CIV_MDT_RUN":
            "<t size='0.95'>Workflow:</t><br/>" +
            "1) Show Papers on a civilian<br/>" +
            "2) Return here and Execute<br/>" +
-           "3) If hit: detain + transport for sheriff handoff<br/>";
+           "3) If hit: detain + transport for sheriff handoff<br/><br/>" +
+           (if (_inCivCtx) then {"<t color='#77FFAA'>CIVSUB interaction mode active.</t>"} else {"<t color='#AAAAAA'>No active CIVSUB interaction target.</t>"});
 
     if (!isNull _b1) then { _b1 ctrlEnable true; };
 };
