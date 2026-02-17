@@ -11,6 +11,10 @@ class CfgFunctions
             class bootstrapServer {};
 
             class log {};
+            class farabadLog {};
+            class farabadInfo {};
+            class farabadWarn {};
+            class farabadError {};
 
             class stateInit {};
             class stateLoad {};
