@@ -597,12 +597,17 @@ missionNamespace setVariable ["ARC_convoyPool_PrivateContractors", [
 ], true];
 
 // Convoy role matrix pools (explicit mission-level overrides).
+// Precedence note: fn_execSpawnConvoy resolves role pools first, then _bundleOrLegacy
+// substitutes ARC_convoyBundleClassMatrix when a bundle ID matches. These role lists are
+// therefore fallback coverage when no bundle-specific class list is found.
 missionNamespace setVariable ["ARC_convoyRoleMatrixPoolKeys", [
     ["lead", ["ARC_convoyPool_CAV", "ARC_convoyPool_Security", "ARC_convoyPool_HQ"]],
-    ["escort", ["ARC_convoyPool_MP", "ARC_convoyPool_CAV", "ARC_convoyPool_Security", "ARC_convoyPool_PrivateSecurity", "ARC_convoyPool_Government"]],
+    ["escort", ["ARC_convoyPool_MP", "ARC_convoyPool_CAV", "ARC_convoyPool_Security", "ARC_convoyPool_PrivateSecurity", "ARC_convoyPool_Government", "ARC_convoyPool_PrivateContractors"]],
     ["logistics", ["ARC_convoyPool_Transport", "ARC_convoyPool_Medical", "ARC_convoyPool_Ammo", "ARC_convoyPool_Repair", "ARC_convoyPool_Fuel", "ARC_convoyPool_HQ", "ARC_convoyPool_MP", "ARC_convoyPool_Government", "ARC_convoyPool_PrivateSecurity", "ARC_convoyPool_PrivateContractors"]]
 ], true];
 // Authoritative convoy bundle matrix overrides (exact classnames by bundle ID).
+// LOGI_* and ESCORT_* bundles intentionally provide narrower curated class lists that
+// override broader ARC_convoyPool_* role pools whenever bundle resolution succeeds.
 missionNamespace setVariable ["ARC_convoyBundleClassMatrix", [
     ["LOGI_HEADQUARTERS", [
         "rhsusf_m1085a1p2_b_d_fmtv_usarmy"

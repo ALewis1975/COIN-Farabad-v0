@@ -351,6 +351,8 @@ if (isNil { missionNamespace getVariable "ARC_rhsConvoyCargoPool_maint" }) then
 // Authoritative convoy bundle class matrix.
 // Structure: [[bundleId, [vehicle classnames...]], ...]
 // Bundle IDs are resolved in fn_execSpawnConvoy first; legacy role pools are fallback-only.
+// LOGI_* and ESCORT_* entries intentionally stay narrower than ARC_convoyPool_* so a
+// resolved bundle can override generic role pools with curated class selections.
 if (isNil { missionNamespace getVariable "ARC_convoyBundleClassMatrix" }) then
 {
     missionNamespace setVariable ["ARC_convoyBundleClassMatrix", [
@@ -621,11 +623,13 @@ if (isNil { missionNamespace getVariable "ARC_convoyPool_PrivateContractors" }) 
 
 // Convoy role matrix pools (normalized config mirrors for downstream selection logic).
 // Structure: [roleName, [missionNamespace pool keys in priority order]]
+// Precedence note: fn_execSpawnConvoy resolves these role pools, then _bundleOrLegacy
+// prefers ARC_convoyBundleClassMatrix for matching bundle IDs and falls back here otherwise.
 if (isNil { missionNamespace getVariable "ARC_convoyRoleMatrixPoolKeys" }) then
 {
     missionNamespace setVariable ["ARC_convoyRoleMatrixPoolKeys", [
         ["lead", ["ARC_convoyPool_CAV", "ARC_convoyPool_Security", "ARC_convoyPool_HQ"]],
-        ["escort", ["ARC_convoyPool_MP", "ARC_convoyPool_CAV", "ARC_convoyPool_Security", "ARC_convoyPool_PrivateSecurity", "ARC_convoyPool_PrivateContractors", "ARC_convoyPool_Government"]],
+        ["escort", ["ARC_convoyPool_MP", "ARC_convoyPool_CAV", "ARC_convoyPool_Security", "ARC_convoyPool_PrivateSecurity", "ARC_convoyPool_Government", "ARC_convoyPool_PrivateContractors"]],
         ["logistics", ["ARC_convoyPool_Transport", "ARC_convoyPool_Medical", "ARC_convoyPool_Ammo", "ARC_convoyPool_Repair", "ARC_convoyPool_Fuel", "ARC_convoyPool_HQ", "ARC_convoyPool_MP", "ARC_convoyPool_Government", "ARC_convoyPool_PrivateSecurity", "ARC_convoyPool_PrivateContractors"]]
     ]];
 };
