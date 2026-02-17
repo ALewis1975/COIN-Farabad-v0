@@ -348,6 +348,80 @@ if (isNil { missionNamespace getVariable "ARC_rhsConvoyCargoPool_maint" }) then
     ]];
 };
 
+// Authoritative convoy bundle class matrix.
+// Structure: [[bundleId, [vehicle classnames...]], ...]
+// Bundle IDs are resolved in fn_execSpawnConvoy first; legacy role pools are fallback-only.
+if (isNil { missionNamespace getVariable "ARC_convoyBundleClassMatrix" }) then
+{
+    missionNamespace setVariable ["ARC_convoyBundleClassMatrix", [
+        ["LOGI_HEADQUARTERS", [
+            "rhsusf_m1085a1p2_b_d_fmtv_usarmy"
+        ]],
+        ["LOGI_MPS", [
+            "UK3CB_TKP_B_Hilux_Open",
+            "UK3CB_TKP_B_Hilux_Closed",
+            "UK3CB_TKP_B_Offroad",
+            "UK3CB_TKP_B_Offroad_M2"
+        ]],
+        ["LOGI_1_73_CAV", [
+            "rhsusf_M1232_M2_usarmy_d",
+            "rhsusf_M1232_MK19_usarmy_d"
+        ]],
+        ["LOGI_CONVOY_SECURITY", [
+            "rhsusf_M1232_M2_usarmy_d",
+            "rhsusf_M1232_MK19_usarmy_d"
+        ]],
+        ["LOGI_TRANSPORT", [
+            "rhsusf_m1083a1p2_d_fmtv_usarmy",
+            "rhsusf_m1083a1p2_d_open_fmtv_usarmy",
+            "rhsusf_m977a4_usarmy_d"
+        ]],
+        ["LOGI_MEDICAL", [
+            "rhsusf_m997_ambulance_usarmy_d"
+        ]],
+        ["LOGI_AMMO", [
+            "rhsusf_m977a4_ammo_usarmy_d",
+            "rhsusf_m1078a1p2_d_flatbed_fmtv_usarmy"
+        ]],
+        ["LOGI_REPAIR", [
+            "rhsusf_m984a4_usarmy_d",
+            "rhsusf_m977a4_repair_bkit_usarmy_d"
+        ]],
+        ["LOGI_FUEL", [
+            "rhsusf_m978a4_usarmy_d",
+            "rhsusf_M978A4_BKIT_usarmy_d"
+        ]],
+        ["LOGI_GOVERNMENT", [
+            "UK3CB_TKC_B_SUV",
+            "UK3CB_TKC_B_SUV_Armoured"
+        ]],
+        ["LOGI_PRIVATE_SECURITY", [
+            "UK3CB_ION_B_Desert_SUV_Armed",
+            "UK3CB_ION_B_Desert_SUV_Armoured"
+        ]],
+        ["LOGI_CONTRACTOR_SECURITY", [
+            "UK3CB_ION_B_Desert_SUV",
+            "UK3CB_ION_B_Desert_SUV_Armed",
+            "UK3CB_ION_B_Desert_SUV_Armoured"
+        ]],
+        ["ESCORT_STANDARD", [
+            "rhsusf_M1232_M2_usarmy_d",
+            "rhsusf_M1232_MK19_usarmy_d",
+            "UK3CB_TKP_B_Hilux_Open",
+            "UK3CB_TKP_B_Offroad_M2"
+        ]],
+        ["ESCORT_VIP", [
+            "UK3CB_ION_B_Desert_SUV",
+            "UK3CB_ION_B_Desert_SUV_Armed",
+            "UK3CB_ION_B_Desert_SUV_Armoured"
+        ]],
+        ["CONVOY_GENERIC", [
+            "rhsusf_M1232_M2_usarmy_d",
+            "rhsusf_m1083a1p2_d_fmtv_usarmy"
+        ]]
+    ]];
+};
+
 // --- Convoy vehicle pools (default) ------------------------------------------
 // These can be overridden by missionNamespace variables before/after bootstrap.
 // NOTE: At spawn time, vehicle class validity and side are still filtered with isClass/side checks.
@@ -394,11 +468,11 @@ if (isNil { missionNamespace getVariable "ARC_convoyRoleMatrixPoolKeys" }) then
 };
 
 // Convoy class policy defaults (selection logic can consume these without changing call signatures).
-if (isNil { missionNamespace getVariable "ARC_convoyAllowedVehicleSides" }) then { missionNamespace setVariable ["ARC_convoyAllowedVehicleSides", [1]]; }; // WEST
-if (isNil { missionNamespace getVariable "ARC_convoyAllowedCrewSides" }) then { missionNamespace setVariable ["ARC_convoyAllowedCrewSides", [1]]; }; // WEST
-if (isNil { missionNamespace getVariable "ARC_convoyAllowedVehicleFactions" }) then { missionNamespace setVariable ["ARC_convoyAllowedVehicleFactions", []]; }; // empty = no extra faction gate
-if (isNil { missionNamespace getVariable "ARC_convoyAllowedCrewFactions" }) then { missionNamespace setVariable ["ARC_convoyAllowedCrewFactions", []]; }; // empty = no extra faction gate
-if (isNil { missionNamespace getVariable "ARC_convoyEnforceCrewSideWest" }) then { missionNamespace setVariable ["ARC_convoyEnforceCrewSideWest", true]; };
+if (isNil { missionNamespace getVariable "ARC_convoyAllowedVehicleSides" }) then { missionNamespace setVariable ["ARC_convoyAllowedVehicleSides", []]; }; // empty = allow any vehicle side
+if (isNil { missionNamespace getVariable "ARC_convoyAllowedCrewSides" }) then { missionNamespace setVariable ["ARC_convoyAllowedCrewSides", [1]]; }; // WEST crew default keeps legacy join behavior
+if (isNil { missionNamespace getVariable "ARC_convoyAllowedVehicleFactions" }) then { missionNamespace setVariable ["ARC_convoyAllowedVehicleFactions", []]; }; // empty = no faction gate
+if (isNil { missionNamespace getVariable "ARC_convoyAllowedCrewFactions" }) then { missionNamespace setVariable ["ARC_convoyAllowedCrewFactions", []]; }; // empty = no faction gate
+if (isNil { missionNamespace getVariable "ARC_convoyEnforceCrewSideWest" }) then { missionNamespace setVariable ["ARC_convoyEnforceCrewSideWest", true]; }; // deprecated compatibility toggle
 
 // Bridge fallback defaults (assist/recovery behavior; overridable in initServer).
 if (isNil { missionNamespace getVariable "ARC_convoyBridgeAssistEnabled" }) then { missionNamespace setVariable ["ARC_convoyBridgeAssistEnabled", true, true]; };
@@ -406,11 +480,18 @@ if (isNil { missionNamespace getVariable "ARC_convoyBridgeAssistFollowersEnabled
 if (isNil { missionNamespace getVariable "ARC_convoyBridgeAssistBypassSec" }) then { missionNamespace setVariable ["ARC_convoyBridgeAssistBypassSec", 14, true]; };
 if (isNil { missionNamespace getVariable "ARC_convoyBridgeAssistFollowerBypassSec" }) then { missionNamespace setVariable ["ARC_convoyBridgeAssistFollowerBypassSec", 10, true]; };
 if (isNil { missionNamespace getVariable "ARC_convoyBridgeAssistFollowerTtlSec" }) then { missionNamespace setVariable ["ARC_convoyBridgeAssistFollowerTtlSec", 90, true]; };
+if (isNil { missionNamespace getVariable "ARC_convoyBridgeFollowerRecoveryCooldownSec" }) then { missionNamespace setVariable ["ARC_convoyBridgeFollowerRecoveryCooldownSec", 25, true]; };
+if (isNil { missionNamespace getVariable "ARC_convoyBridgeFollowerGapTriggerMinM" }) then { missionNamespace setVariable ["ARC_convoyBridgeFollowerGapTriggerMinM", 140, true]; };
+if (isNil { missionNamespace getVariable "ARC_convoyBridgeFollowerDoMoveReissueSec" }) then { missionNamespace setVariable ["ARC_convoyBridgeFollowerDoMoveReissueSec", 4, true]; };
 if (isNil { missionNamespace getVariable "ARC_convoyBridgeStuckSec" }) then { missionNamespace setVariable ["ARC_convoyBridgeStuckSec", 22, true]; };
 if (isNil { missionNamespace getVariable "ARC_convoyBridgeBufferM" }) then { missionNamespace setVariable ["ARC_convoyBridgeBufferM", 22, true]; };
 if (isNil { missionNamespace getVariable "ARC_convoyBridgeAssistOutsideM" }) then { missionNamespace setVariable ["ARC_convoyBridgeAssistOutsideM", 18, true]; };
 if (isNil { missionNamespace getVariable "ARC_convoyBridgeAssistRoadSnapM" }) then { missionNamespace setVariable ["ARC_convoyBridgeAssistRoadSnapM", 10, true]; };
 if (isNil { missionNamespace getVariable "ARC_convoyBridgeAssistPointRadiusM" }) then { missionNamespace setVariable ["ARC_convoyBridgeAssistPointRadiusM", 16, true]; };
+if (isNil { missionNamespace getVariable "ARC_convoyFollowerGapTriggerMinM" }) then { missionNamespace setVariable ["ARC_convoyFollowerGapTriggerMinM", 180, true]; };
+if (isNil { missionNamespace getVariable "ARC_convoyFollowerDoMoveReissueSec" }) then { missionNamespace setVariable ["ARC_convoyFollowerDoMoveReissueSec", 6, true]; };
+if (isNil { missionNamespace getVariable "ARC_convoyFollowerRejoinOrderTtlSec" }) then { missionNamespace setVariable ["ARC_convoyFollowerRejoinOrderTtlSec", 45, true]; };
+if (isNil { missionNamespace getVariable "ARC_convoyFollowerRejoinPointRadiusM" }) then { missionNamespace setVariable ["ARC_convoyFollowerRejoinPointRadiusM", 28, true]; };
 
 if (isNil { missionNamespace getVariable "ARC_debugConvoyLinkup" }) then { missionNamespace setVariable ["ARC_debugConvoyLinkup", false]; };
 // Larger snap radius reduces last-segment offroad shortcuts near airbase/FOBs where objectives may sit off the road grid.

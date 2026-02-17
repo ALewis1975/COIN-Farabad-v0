@@ -24,6 +24,7 @@ private _ctx = uiNamespace getVariable ["ARC_mapClick_ctx", createHashMap];
 if !(_ctx isEqualType createHashMap) then { _ctx = createHashMap; };
 
 private _type = toUpper (_ctx getOrDefault ["type", ""]);
+diag_log format ["[FARABAD][MAPCLICK][SUBMIT] type=%1", _type];
 
 switch (_type) do
 {
