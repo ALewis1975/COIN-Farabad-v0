@@ -663,6 +663,60 @@ if !(_bridgeFallbackHoldSec isEqualType 0) then { _bridgeFallbackHoldSec = 70; }
 _bridgeFallbackHoldSec = (_bridgeFallbackHoldSec max 20) min 240;
 
 /*
+    Deterministic bridge/chokepoint fallback micro-route from authored road route points.
+    Used when marker-based bridge geometry is missing (e.g., fallback_chokepoint mode).
+
+    Returns: ARRAY of 3D positions, forward-biased from lead index.
+*/
+private _fn_bridgeFallbackRoutePoints = {
+    params [
+        ["_fromPos", []],
+        ["_toPos", []]
+    ];
+
+    if (!(_routePts isEqualType []) || { (count _routePts) < 2 }) exitWith { [] };
+
+    private _nearIdx = 0;
+    if (_fromPos isEqualType [] && { (count _fromPos) >= 2 }) then
+    {
+        _nearIdx = [_routePts, _fromPos, 0] call _fn_nearRouteIdx;
+    };
+
+    private _exitIdx = ((count _routePts) - 1) min (_nearIdx + 8);
+    if (_toPos isEqualType [] && { (count _toPos) >= 2 }) then
+    {
+        private _toIdx = [_routePts, _toPos, ((count _routePts) - 1)] call _fn_nearRouteIdx;
+        _exitIdx = (_toIdx max (_nearIdx + 2)) min ((count _routePts) - 1);
+    };
+
+    private _step = missionNamespace getVariable ["ARC_convoyBridgeFallbackStepPts", 2];
+    if !(_step isEqualType 0) then { _step = 2; };
+    _step = (_step max 1) min 4;
+
+    private _pts = [];
+    for "_i" from (_nearIdx + 1) to _exitIdx step _step do
+    {
+        private _p = +(_routePts # _i);
+        _p resize 3;
+        if ((count _pts) isEqualTo 0 || { (_p distance2D (_pts # ((count _pts) - 1))) > 18 }) then
+        {
+            _pts pushBack _p;
+        };
+    };
+
+    // Guarantee at least one forward target if spacing/step collapsed sampling.
+    if ((count _pts) isEqualTo 0) then
+    {
+        private _fIdx = (_nearIdx + 2) min ((count _routePts) - 1);
+        private _pF = +(_routePts # _fIdx);
+        _pF resize 3;
+        _pts pushBack _pF;
+    };
+
+    _pts
+};
+
+/*
     Bridge assist helper:
       Some terrain bridges (and mod bridges) produce AI deadlocks even when a road route exists.
       When a convoy vehicle stalls inside/near an arc_bridge_* marker, we can inject a short micro-route
@@ -678,6 +732,10 @@ private _fn_bridgeAssistPoints = {
     ];
 
     if (!(_mk isEqualType "") || { _mk isEqualTo "" }) exitWith { [] };
+    if (_mk isEqualTo "fallback_chokepoint") exitWith
+    {
+        [_fromPos, _toPos] call _fn_bridgeFallbackRoutePoints
+    };
     if !(_mk in allMapMarkers) exitWith { [] };
 
     private _c = getMarkerPos _mk;
@@ -1475,6 +1533,7 @@ if (!_bridgeMarkersAvailable && { _bridgeFallbackEnabled }) then
     {
         _bridgeLeadMode = true;
         _bridgeMode = true;
+        _bridgeMarkerLead = "fallback_chokepoint";
         _bridgeMarkerHere = "fallback_chokepoint";
     };
 };
@@ -2001,6 +2060,7 @@ else
         ["activeConvoyBridgeFallbackUntil", _now + _bridgeFallbackHoldSec] call ARC_fnc_stateSet;
         _bridgeLeadMode = true;
         _bridgeMode = true;
+        _bridgeMarkerLead = "fallback_chokepoint";
         _bridgeMarkerHere = "fallback_chokepoint";
     };
 
@@ -2085,6 +2145,22 @@ else
                 if (_assistEn && { _bridgeAssistReady }) then
                 {
                     private _ptsB = [_bridgeMarkerLead, _destWpPos, _curPos] call _fn_bridgeAssistPoints;
+                    private _usedFallbackPts = false;
+                    if ((count _ptsB) isEqualTo 0) then
+                    {
+                        [
+                            "ASSIST_SKIPPED_NO_POINTS",
+                            format ["Bridge assist skipped in %1: no valid assist points generated.", _bridgeMarkerLead],
+                            _bridgeMarkerLead,
+                            speed _lead,
+                            _stuckFor,
+                            count (waypoints _grpW)
+                        ] call _fn_logBridgeAssistOpsOnce;
+
+                        _ptsB = [_curPos, _destWpPos] call _fn_bridgeFallbackRoutePoints;
+                        _usedFallbackPts = ((count _ptsB) > 0);
+                    };
+
                     if ((count _ptsB) > 0) then
                     {
                         _didBridgeAssist = true;
@@ -2141,24 +2217,20 @@ else
 
                         [
                             "ASSIST_APPLIED",
-                            format ["Bridge assist applied in %1; injected micro-waypoints to clear the bridge.", _bridgeMarkerLead],
+                            if (_usedFallbackPts) then
+                            {
+                                format ["Bridge assist applied in %1; used deterministic route fallback micro-waypoints.", _bridgeMarkerLead]
+                            }
+                            else
+                            {
+                                format ["Bridge assist applied in %1; injected micro-waypoints to clear the bridge.", _bridgeMarkerLead]
+                            },
                             _bridgeMarkerLead,
                             speed _lead,
                             _stuckFor,
                             count _ptsB
                         ] call _fn_logBridgeAssistOpsOnce;
                     }
-                    else
-                    {
-                        [
-                            "ASSIST_SKIPPED_NO_POINTS",
-                            format ["Bridge assist skipped in %1: no valid assist points generated.", _bridgeMarkerLead],
-                            _bridgeMarkerLead,
-                            speed _lead,
-                            _stuckFor,
-                            count (waypoints _grpW)
-                        ] call _fn_logBridgeAssistOpsOnce;
-                    };
                 };
 
                 if (_assistEn && { !_bridgeAssistReady }) then
