@@ -582,6 +582,7 @@ private _aliveVeh = _vehicles select { alive _x };
 */
 private _bridgeMarkers = missionNamespace getVariable ["ARC_bridgeMarkers", []];
 if !(_bridgeMarkers isEqualType []) then { _bridgeMarkers = []; };
+private _bridgeMarkersAvailable = ((count _bridgeMarkers) > 0);
 
 private _bridgeSpeedKph = missionNamespace getVariable ["ARC_convoyBridgeSpeedKph", 18];
 if !(_bridgeSpeedKph isEqualType 0) then { _bridgeSpeedKph = 18; };
@@ -652,6 +653,14 @@ private _fn_isInBridgeZone = {
     params [["_pos", []]];
     !(([_pos] call _fn_bridgeMarkerAtPos) isEqualTo "")
 };
+
+// Fallback chokepoint mode (only used when bridge markers are unavailable).
+private _bridgeFallbackEnabled = missionNamespace getVariable ["ARC_convoyBridgeFallbackChokepointEnabled", true];
+if (!(_bridgeFallbackEnabled isEqualType true) && !(_bridgeFallbackEnabled isEqualType false)) then { _bridgeFallbackEnabled = true; };
+
+private _bridgeFallbackHoldSec = missionNamespace getVariable ["ARC_convoyBridgeFallbackHoldSec", 70];
+if !(_bridgeFallbackHoldSec isEqualType 0) then { _bridgeFallbackHoldSec = 70; };
+_bridgeFallbackHoldSec = (_bridgeFallbackHoldSec max 20) min 240;
 
 /*
     Bridge assist helper:
@@ -1426,7 +1435,7 @@ private _bridgeLeadMode = false;
 
 private _bridgeMarkerHere = "";
 private _bridgeMode = false;
-if ((count _bridgeMarkers) > 0) then
+if (_bridgeMarkersAvailable) then
 {
     private _pLeadB = getPosATL _lead;
     _pLeadB resize 3;
@@ -1454,6 +1463,19 @@ if ((count _bridgeMarkers) > 0) then
                 _bridgeMode = true;
             };
         } forEach _aliveVeh;
+    };
+};
+
+if (!_bridgeMarkersAvailable && { _bridgeFallbackEnabled }) then
+{
+    private _fbUntil = ["activeConvoyBridgeFallbackUntil", -1] call ARC_fnc_stateGet;
+    if (!(_fbUntil isEqualType 0)) then { _fbUntil = -1; };
+
+    if (_fbUntil > 0 && { _now < _fbUntil }) then
+    {
+        _bridgeLeadMode = true;
+        _bridgeMode = true;
+        _bridgeMarkerHere = "fallback_chokepoint";
     };
 };
 
@@ -1489,6 +1511,12 @@ if (_bridgeMode) then
         };
     } forEach _vehicles;
 };
+
+private _prevRecoveryStage = ["activeConvoyRecoveryLastStageLogged", -1] call ARC_fnc_stateGet;
+if (!(_prevRecoveryStage isEqualType 0)) then { _prevRecoveryStage = -1; };
+
+private _prevBridgeRecoverState = ["activeConvoyBridgeRecoverLogState", ""] call ARC_fnc_stateGet;
+if (!(_prevBridgeRecoverState isEqualType "")) then { _prevBridgeRecoverState = ""; };
 
 /*
     Per-vehicle bridge assist queue (followers):
@@ -1826,8 +1854,16 @@ if (_bridgeHereV) then
 }
 else
 {
-    _v setVariable ["ARC_convoyVehBypassUntil", _now + _bypassSecF];
-    _d forceFollowRoad false;
+    if (_bridgeMode) then
+    {
+        _v setVariable ["ARC_convoyVehBypassUntil", -1];
+        _d forceFollowRoad true;
+    }
+    else
+    {
+        _v setVariable ["ARC_convoyVehBypassUntil", _now + _bypassSecF];
+        _d forceFollowRoad false;
+    };
 };
 
 
@@ -1884,10 +1920,21 @@ if (_moved) then
 {
     ["activeConvoyLastMoveAt", _now] call ARC_fnc_stateSet;
     ["activeConvoyLastMovePos", _curPos] call ARC_fnc_stateSet;
+    ["activeConvoyRecoveryLastStageLogged", -1] call ARC_fnc_stateSet;
+    ["activeConvoyBridgeRecoverLogState", "off"] call ARC_fnc_stateSet;
 }
 else
 {
     private _stuckFor = _now - _lastMoveAt;
+
+    // Fallback bridge/chokepoint mode is only allowed when mission markers are unavailable.
+    if (!_bridgeMarkersAvailable && { _bridgeFallbackEnabled } && { _stuckFor >= _stuckSec } && { (speed _lead) < 2.5 }) then
+    {
+        ["activeConvoyBridgeFallbackUntil", _now + _bridgeFallbackHoldSec] call ARC_fnc_stateSet;
+        _bridgeLeadMode = true;
+        _bridgeMode = true;
+        _bridgeMarkerHere = "fallback_chokepoint";
+    };
 
     private _lastRec = ["activeConvoyLastRecoveryAt", -1] call ARC_fnc_stateGet;
     if (!(_lastRec isEqualType 0)) then { _lastRec = -1; };
@@ -1916,6 +1963,20 @@ else
         // Require the lead to be effectively stopped; tight corners can otherwise look like a stall.
         private _stage = if (_stuckFor >= (_stuckSec * 2) && { (speed _lead) < 2 }) then { 2 } else { 1 };
 
+        private _bridgeRecAttempts = ["activeConvoyBridgeRecoverAttempts", 0] call ARC_fnc_stateGet;
+        if (!(_bridgeRecAttempts isEqualType 0)) then { _bridgeRecAttempts = 0; };
+
+        private _bridgeRecCooldownUntil = ["activeConvoyBridgeRecoverCooldownUntil", -1] call ARC_fnc_stateGet;
+        if (!(_bridgeRecCooldownUntil isEqualType 0)) then { _bridgeRecCooldownUntil = -1; };
+
+        private _bridgeRecMax = missionNamespace getVariable ["ARC_convoyBridgeRecoverMaxAttempts", 3];
+        if (!(_bridgeRecMax isEqualType 0)) then { _bridgeRecMax = 3; };
+        _bridgeRecMax = (_bridgeRecMax max 1) min 10;
+
+        private _bridgeRecCooldownSec = missionNamespace getVariable ["ARC_convoyBridgeRecoverCooldownSec", 120];
+        if (!(_bridgeRecCooldownSec isEqualType 0)) then { _bridgeRecCooldownSec = 120; };
+        _bridgeRecCooldownSec = (_bridgeRecCooldownSec max 20) min 600;
+
         private _allowOffroad = missionNamespace getVariable ["ARC_convoyAllowOffroadRecovery", true];
         if (!(_allowOffroad isEqualType true) && !(_allowOffroad isEqualType false)) then { _allowOffroad = true; };
 
@@ -1927,8 +1988,8 @@ else
         private _zone = [_curPos] call ARC_fnc_worldGetZoneForPos;
         private _inAirbase = (_zone isEqualType "" && { (toUpper _zone) isEqualTo "AIRBASE" });
 
-        // Bridge zones: never attempt off-road bypass recovery on bridges/approaches.
-        if (_stage isEqualTo 2 && { [_curPos] call _fn_isInBridgeZone }) then
+        // Bridge zones (or fallback chokepoint mode): never attempt generic off-road bypass.
+        if (_stage isEqualTo 2 && { _bridgeMode }) then
         {
             _stage = 1;
         };
@@ -1952,12 +2013,22 @@ else
                 private _assistEn = missionNamespace getVariable ["ARC_convoyBridgeAssistEnabled", true];
                 if (!(_assistEn isEqualType true) && !(_assistEn isEqualType false)) then { _assistEn = true; };
 
-                if (_assistEn) then
+                private _bridgeAssistReady = (_bridgeRecCooldownUntil < 0) || { _now >= _bridgeRecCooldownUntil };
+                if (_assistEn && { _bridgeAssistReady }) then
                 {
                     private _ptsB = [_bridgeMarkerLead, _destWpPos, _curPos] call _fn_bridgeAssistPoints;
                     if ((count _ptsB) > 0) then
                     {
                         _didBridgeAssist = true;
+                        _bridgeRecAttempts = _bridgeRecAttempts + 1;
+                        ["activeConvoyBridgeRecoverAttempts", _bridgeRecAttempts] call ARC_fnc_stateSet;
+
+                        if (_bridgeRecAttempts >= _bridgeRecMax) then
+                        {
+                            _bridgeRecAttempts = 0;
+                            ["activeConvoyBridgeRecoverAttempts", 0] call ARC_fnc_stateSet;
+                            ["activeConvoyBridgeRecoverCooldownUntil", _now + _bridgeRecCooldownSec] call ARC_fnc_stateSet;
+                        };
 
                         // Allow the lead a brief non-road window to line up on awkward bridge geometry.
                         private _bypassSecB = missionNamespace getVariable ["ARC_convoyBridgeAssistBypassSec", 14];
@@ -2003,6 +2074,12 @@ else
                         ["OPS", format ["Bridge assist: stalled in %1; injecting micro-waypoints to clear the bridge.", _bridgeMarkerLead], _curPos, [["event", "CONVOY_BRIDGE_ASSIST"], ["marker", _bridgeMarkerLead], ["taskId", _taskId]]] call ARC_fnc_intelLog;
                     };
                 };
+            };
+
+            if (_bridgeMode && { !_didBridgeAssist }) then
+            {
+                // Bridge mode policy: micro-route + route reapply only; no generic bypass branch.
+                _stage = 1;
             };
 
             if (!_didBridgeAssist) then
@@ -2080,7 +2157,29 @@ else
         _grpW setCombatMode "YELLOW";
         _grpW setSpeedMode "LIMITED";
 
-        ["OPS", format ["Convoy recovery executed (stage %1) after %2s stall.", _stage, round _stuckFor], _curPos, [["event", "CONVOY_RECOVER"], ["stage", _stage], ["taskId", _taskId]]] call ARC_fnc_intelLog;
+        if (_stage isNotEqualTo _prevRecoveryStage) then
+        {
+            ["activeConvoyRecoveryLastStageLogged", _stage] call ARC_fnc_stateSet;
+            ["OPS", format ["Convoy recovery executed (stage %1) after %2s stall.", _stage, round _stuckFor], _curPos, [["event", "CONVOY_RECOVER"], ["stage", _stage], ["taskId", _taskId]]] call ARC_fnc_intelLog;
+        };
+
+        private _bridgeRecoverState = if (_bridgeMode) then
+        {
+            if (_bridgeRecCooldownUntil > 0 && { _now < _bridgeRecCooldownUntil }) then { "cooldown" } else { "active" }
+        }
+        else
+        {
+            "off"
+        };
+
+        if (_bridgeRecoverState isNotEqualTo _prevBridgeRecoverState) then
+        {
+            ["activeConvoyBridgeRecoverLogState", _bridgeRecoverState] call ARC_fnc_stateSet;
+            if (_bridgeRecoverState isEqualTo "cooldown") then
+            {
+                ["OPS", "Bridge recovery cooling down; reapplying planned route only until cooldown expires.", _curPos, [["event", "CONVOY_BRIDGE_RECOVER_COOLDOWN"], ["taskId", _taskId]]] call ARC_fnc_intelLog;
+            };
+        };
     };
 };
 
