@@ -351,6 +351,7 @@ class CfgFunctions
             class civsubTrafficTick {};
             class civsubTrafficBuildVehiclePool {};
             class civsubTrafficPickRoadsidePos {};
+            class civsubTrafficResolveSpawnCenter {};
             class civsubTrafficSpawnParked {};
             class civsubTrafficSpawnMoving {};
             class civsubTrafficDebugSnapshot {};
