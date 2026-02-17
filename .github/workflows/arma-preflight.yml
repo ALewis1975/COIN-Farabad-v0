@@ -49,15 +49,17 @@ jobs:
           config_files=()
 
           for f in "${changed_files[@]}"; do
-            case "$f" in
+            lower_f="${f,,}"
+
+            case "$lower_f" in
               *.sqf)
                 sqf_files+=("$f")
                 ;;
             esac
 
-            case "$f" in
+            case "$lower_f" in
               description.ext|*.hpp|*.h|*.inc|*.cfg|*.ext)
-                case "$f" in
+                case "$lower_f" in
                   .git/*|.github/*|.vscode/*|node_modules/*|dist/*|build/*|vendor/*|generated/*)
                     ;;
                   *)
