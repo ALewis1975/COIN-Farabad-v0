@@ -35,7 +35,7 @@ if (!(_mobileOpsVar in _tocVars)) then
     if (isNull _mob) then
     {
         private _nid = missionNamespace getVariable ["ARC_mobileOpsVehicleNetId", ""];
-        if (_nid isEqualType "" && { _nid isNotEqualTo "" }) then
+        if (_nid isEqualType "" && { _nid != "" }) then
         {
             _mob = objectFromNetId _nid;
             if (!isNull _mob) then { missionNamespace setVariable [_mobileOpsVar, _mob]; };
@@ -163,7 +163,7 @@ if (!(_mobileOpsVar in _tocVars)) then
                 true,
                 true,
                 "",
-                "([player] call ARC_fnc_rolesCanApproveQueue) && { (missionNamespace getVariable ['ARC_activeTaskId','']) isNotEqualTo '' && !(missionNamespace getVariable ['ARC_activeIncidentAccepted', false]) }"
+                "([player] call ARC_fnc_rolesCanApproveQueue) && { (missionNamespace getVariable ['ARC_activeTaskId','']) != '' && !(missionNamespace getVariable ['ARC_activeIncidentAccepted', false]) }"
             ];
 
             _obj addAction [
@@ -174,7 +174,7 @@ if (!(_mobileOpsVar in _tocVars)) then
                 true,
                 true,
                 "",
-                "([player] call ARC_fnc_rolesCanApproveQueue) && { (missionNamespace getVariable ['ARC_activeTaskId','']) isNotEqualTo '' }"
+                "([player] call ARC_fnc_rolesCanApproveQueue) && { (missionNamespace getVariable ['ARC_activeTaskId','']) != '' }"
             ];
 
             // Closure options (kept TOC-gated)
@@ -186,7 +186,7 @@ if (!(_mobileOpsVar in _tocVars)) then
                 true,
                 true,
                 "",
-                "([player] call ARC_fnc_rolesCanApproveQueue) && { (missionNamespace getVariable ['ARC_activeTaskId','']) isNotEqualTo '' && (missionNamespace getVariable ['ARC_activeIncidentCloseReady', false]) }"
+                "([player] call ARC_fnc_rolesCanApproveQueue) && { (missionNamespace getVariable ['ARC_activeTaskId','']) != '' && (missionNamespace getVariable ['ARC_activeIncidentCloseReady', false]) }"
             ];
 
             _obj addAction [
@@ -197,7 +197,7 @@ if (!(_mobileOpsVar in _tocVars)) then
                 true,
                 true,
                 "",
-                "([player] call ARC_fnc_rolesCanApproveQueue) && { (missionNamespace getVariable ['ARC_activeTaskId','']) isNotEqualTo '' && (missionNamespace getVariable ['ARC_activeIncidentCloseReady', false]) }"
+                "([player] call ARC_fnc_rolesCanApproveQueue) && { (missionNamespace getVariable ['ARC_activeTaskId','']) != '' && (missionNamespace getVariable ['ARC_activeIncidentCloseReady', false]) }"
             ];
 
             _obj addAction [
@@ -208,7 +208,7 @@ if (!(_mobileOpsVar in _tocVars)) then
                 true,
                 true,
                 "",
-                "([player] call ARC_fnc_rolesCanApproveQueue) && { (missionNamespace getVariable ['ARC_activeTaskId','']) isNotEqualTo '' }"
+                "([player] call ARC_fnc_rolesCanApproveQueue) && { (missionNamespace getVariable ['ARC_activeTaskId','']) != '' }"
             ];
 
             _obj addAction [
@@ -219,7 +219,7 @@ if (!(_mobileOpsVar in _tocVars)) then
                 true,
                 true,
                 "",
-                "([player] call ARC_fnc_rolesCanApproveQueue) && { (missionNamespace getVariable ['ARC_activeTaskId','']) isNotEqualTo '' }"
+                "([player] call ARC_fnc_rolesCanApproveQueue) && { (missionNamespace getVariable ['ARC_activeTaskId','']) != '' }"
             ];
 
             _obj addAction ["[TOC OPS] Save World State", {
@@ -427,7 +427,7 @@ _obj addAction ["[MOBILE OPS] Open Ops Screen", { [] call ARC_fnc_uiOpenOpsScree
                 true,
                 true,
                 "",
-                "([player] call ARC_fnc_rolesCanApproveQueue) && { (missionNamespace getVariable ['ARC_activeTaskId','']) isNotEqualTo '' && !(missionNamespace getVariable ['ARC_activeIncidentAccepted', false]) }"
+                "([player] call ARC_fnc_rolesCanApproveQueue) && { (missionNamespace getVariable ['ARC_activeTaskId','']) != '' && !(missionNamespace getVariable ['ARC_activeIncidentAccepted', false]) }"
             ];
 
             _obj addAction [
@@ -438,7 +438,7 @@ _obj addAction ["[MOBILE OPS] Open Ops Screen", { [] call ARC_fnc_uiOpenOpsScree
                 true,
                 true,
                 "",
-                "([player] call ARC_fnc_rolesCanApproveQueue) && { (missionNamespace getVariable ['ARC_activeTaskId','']) isNotEqualTo '' }"
+                "([player] call ARC_fnc_rolesCanApproveQueue) && { (missionNamespace getVariable ['ARC_activeTaskId','']) != '' }"
             ];
 
             _obj addAction [
@@ -449,7 +449,7 @@ _obj addAction ["[MOBILE OPS] Open Ops Screen", { [] call ARC_fnc_uiOpenOpsScree
                 true,
                 true,
                 "",
-                "([player] call ARC_fnc_rolesCanApproveQueue) && { (missionNamespace getVariable ['ARC_activeTaskId','']) isNotEqualTo '' && (missionNamespace getVariable ['ARC_activeIncidentCloseReady', false]) }"
+                "([player] call ARC_fnc_rolesCanApproveQueue) && { (missionNamespace getVariable ['ARC_activeTaskId','']) != '' && (missionNamespace getVariable ['ARC_activeIncidentCloseReady', false]) }"
             ];
 
             _obj addAction [
@@ -460,7 +460,7 @@ _obj addAction ["[MOBILE OPS] Open Ops Screen", { [] call ARC_fnc_uiOpenOpsScree
                 true,
                 true,
                 "",
-                "([player] call ARC_fnc_rolesCanApproveQueue) && { (missionNamespace getVariable ['ARC_activeTaskId','']) isNotEqualTo '' && (missionNamespace getVariable ['ARC_activeIncidentCloseReady', false]) }"
+                "([player] call ARC_fnc_rolesCanApproveQueue) && { (missionNamespace getVariable ['ARC_activeTaskId','']) != '' && (missionNamespace getVariable ['ARC_activeIncidentCloseReady', false]) }"
             ];
 
             _obj addAction [
@@ -471,7 +471,7 @@ _obj addAction ["[MOBILE OPS] Open Ops Screen", { [] call ARC_fnc_uiOpenOpsScree
                 true,
                 true,
                 "",
-                "([player] call ARC_fnc_rolesCanApproveQueue) && { (missionNamespace getVariable ['ARC_activeTaskId','']) isNotEqualTo '' }"
+                "([player] call ARC_fnc_rolesCanApproveQueue) && { (missionNamespace getVariable ['ARC_activeTaskId','']) != '' }"
             ];
 
             _obj addAction [
@@ -482,7 +482,7 @@ _obj addAction ["[MOBILE OPS] Open Ops Screen", { [] call ARC_fnc_uiOpenOpsScree
                 true,
                 true,
                 "",
-                "([player] call ARC_fnc_rolesCanApproveQueue) && { (missionNamespace getVariable ['ARC_activeTaskId','']) isNotEqualTo '' }"
+                "([player] call ARC_fnc_rolesCanApproveQueue) && { (missionNamespace getVariable ['ARC_activeTaskId','']) != '' }"
             ];
 
             _obj addAction ["[MOBILE OPS] Save World State", {
@@ -809,7 +809,7 @@ if (!(player getVariable ['ARC_fieldSitrepActionsAdded', false])) then
     private _condSitrep  = "[player] call ARC_fnc_clientCanSendSitrep";
     private _condFollow  = "[] call ARC_fnc_intelClientCanRequestFollowOn";
     private _condAccept  = "[] call ARC_fnc_intelClientCanAcceptOrder";
-    private _condIncAcc  = "([player] call ARC_fnc_rolesIsAuthorized) && { (missionNamespace getVariable ['ARC_activeTaskId','']) isNotEqualTo '' } && { !(missionNamespace getVariable ['ARC_activeIncidentAccepted', false]) }";
+    private _condIncAcc  = "([player] call ARC_fnc_rolesIsAuthorized) && { (missionNamespace getVariable ['ARC_activeTaskId','']) != '' } && { !(missionNamespace getVariable ['ARC_activeIncidentAccepted', false]) }";
 
     // Accept outstanding TOC order (if any)
     player addAction [
@@ -870,7 +870,7 @@ if (!(player getVariable ['ARC_fieldSitrepActionsAdded', false])) then
             {
                 params ["_target", "_player", "_params"];
                 ([_player] call ARC_fnc_rolesIsAuthorized)
-                && { (missionNamespace getVariable ["ARC_activeTaskId", ""]) isNotEqualTo "" }
+                && { (missionNamespace getVariable ["ARC_activeTaskId", ""]) != "" }
                 && { !(missionNamespace getVariable ["ARC_activeIncidentAccepted", false]) }
             }
         ] call ace_interact_menu_fnc_createAction;
