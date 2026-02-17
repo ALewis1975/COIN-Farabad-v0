@@ -15,10 +15,8 @@ params [
 ];
 
 private _d = uiNamespace getVariable ["ARC_civsubInteract_display", displayNull];
-if (isNull _d) exitWith { true };
-
-private _resp = _d displayCtrl 78320;
-if (isNull _resp) exitWith { true };
+private _resp = controlNull;
+if (!isNull _d) then { _resp = _d displayCtrl 78320; };
 
 private _html = "";
 private _type = "";
@@ -39,7 +37,7 @@ if (_in isEqualType "") then {
     };
 };
 
-if !(_html isEqualTo "") then {
+if (!isNull _resp && {!(_html isEqualTo "")}) then {
     _resp ctrlSetStructuredText parseText _html;
 };
 
@@ -66,8 +64,8 @@ if (_payload isEqualType createHashMap) then {
 
         uiNamespace setVariable ["ARC_civsubInteract_snapshot", _snap];
 
-        // refresh header with updated snapshot + supplies counts
-        [_d, _snap] call ARC_fnc_civsubInteractUpdateHeaderStats;
+        // refresh header with updated snapshot + supplies counts (dialog only)
+        if (!isNull _d) then { [_d, _snap] call ARC_fnc_civsubInteractUpdateHeaderStats; };
     };
 };
 
@@ -114,8 +112,19 @@ if (_type isEqualTo "CHECK_ID" && {_ok} && {_payload isEqualType createHashMap})
     private _cardHtml = format ["%1<br/><br/>%2<br/><br/>%3", _header, _body, _flagsLine];
     uiNamespace setVariable ["ARC_civsubInteract_idCardHtml", _cardHtml];
 
-    // If the player is currently on CHECK_ID, refresh the details pane.
-    ["CHECK_ID"] call ARC_fnc_civsubContactDialogUpdateRightPane;
+    // If the player is currently on CHECK_ID in the standalone dialog, refresh details there.
+    if (!isNull _d) then { ["CHECK_ID"] call ARC_fnc_civsubContactDialogUpdateRightPane; };
+};
+
+// Console-routed CIVSUB mode: repaint S2 details + user feedback.
+private _console = uiNamespace getVariable ["ARC_console_display", displayNull];
+private _ctxCiv = uiNamespace getVariable ["ARC_civsubInteract_target", objNull];
+if (!isNull _console && {!isNull _ctxCiv}) then {
+    [_console, false] call ARC_fnc_uiConsoleIntelPaint;
+    if !(_type isEqualTo "") then {
+        private _msg = if (_ok) then { format ["%1 complete.", _type] } else { format ["%1 returned a warning.", _type] };
+        ["CIVSUB", _msg] call ARC_fnc_clientToast;
+    };
 };
 
 true

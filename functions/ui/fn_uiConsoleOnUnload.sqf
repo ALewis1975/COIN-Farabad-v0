@@ -23,6 +23,18 @@ uiNamespace setVariable ["ARC_consoleVM_lastIgnoreLogAt", nil];
 diag_log format ["[FARABAD][v0][CONSOLE_VM][DETACH][%1] handlers detached", diag_tickTime];
 
 // Clear state so a fresh open rebuilds everything cleanly
+// Clear console-specific CIVSUB interaction context so INTEL returns to default tools mode.
+uiNamespace setVariable ["ARC_civsubInteract_target", objNull];
+uiNamespace setVariable ["ARC_civsubInteract_mode", "A"];
+uiNamespace setVariable ["ARC_civsubInteract_lastPane", "A"];
+uiNamespace setVariable ["ARC_civsubInteract_selectedQid", ""];
+uiNamespace setVariable ["ARC_civsubInteract_snapshot", createHashMap];
+uiNamespace setVariable ["ARC_civsubInteract_idCardHtml", ""];
+uiNamespace setVariable ["ARC_civsubInteract_actionInProgress", false];
+uiNamespace setVariable ["ARC_civsubInteract_hasUserOutput", false];
+uiNamespace setVariable ["ARC_console_intelMode", "TOOLS"];
+uiNamespace setVariable ["ARC_console_intelSelData", ""];
+
 uiNamespace setVariable ["ARC_console_activeTab", nil];
 uiNamespace setVariable ["ARC_console_tabIds", nil];
 
