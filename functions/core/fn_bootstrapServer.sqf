@@ -607,7 +607,15 @@ if (isNil { missionNamespace getVariable "ARC_convoyAllowedVehicleSides" }) then
 if (isNil { missionNamespace getVariable "ARC_convoyAllowedCrewSides" }) then { missionNamespace setVariable ["ARC_convoyAllowedCrewSides", [1]]; }; // WEST crew default keeps legacy join behavior
 if (isNil { missionNamespace getVariable "ARC_convoyAllowedVehicleFactions" }) then { missionNamespace setVariable ["ARC_convoyAllowedVehicleFactions", []]; }; // empty = no faction gate
 if (isNil { missionNamespace getVariable "ARC_convoyAllowedCrewFactions" }) then { missionNamespace setVariable ["ARC_convoyAllowedCrewFactions", []]; }; // empty = no faction gate
-if (isNil { missionNamespace getVariable "ARC_convoyEnforceCrewSideWest" }) then { missionNamespace setVariable ["ARC_convoyEnforceCrewSideWest", true]; }; // deprecated compatibility toggle
+if (isNil { missionNamespace getVariable "ARC_convoyEnforceCrewSideWest" }) then
+{
+    private _legacyEnforceCrewSide = missionNamespace getVariable ["ARC_convoyEnforceCrewSide", true];
+    missionNamespace setVariable ["ARC_convoyEnforceCrewSideWest", _legacyEnforceCrewSide];
+    missionNamespace setVariable ["ARC_convoyEnforceCrewSide", _legacyEnforceCrewSide]; // deprecated legacy mirror
+};
+
+private _effectiveEnforceCrewSide = missionNamespace getVariable ["ARC_convoyEnforceCrewSideWest", true];
+diag_log format ["[ARC][CONVOY][BOOT] enforceCrewSideWest=%1", _effectiveEnforceCrewSide];
 
 // Bridge fallback defaults (assist/recovery behavior; overridable in initServer).
 if (isNil { missionNamespace getVariable "ARC_convoyBridgeAssistEnabled" }) then { missionNamespace setVariable ["ARC_convoyBridgeAssistEnabled", true, true]; };

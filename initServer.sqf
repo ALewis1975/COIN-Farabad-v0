@@ -660,7 +660,8 @@ missionNamespace setVariable ["ARC_convoyAllowedVehicleSides", [], true];
 missionNamespace setVariable ["ARC_convoyAllowedCrewSides", [1], true];
 missionNamespace setVariable ["ARC_convoyAllowedVehicleFactions", [], true];
 missionNamespace setVariable ["ARC_convoyAllowedCrewFactions", [], true];
-missionNamespace setVariable ["ARC_convoyEnforceCrewSideWest", true, true]; // deprecated compatibility toggle
+missionNamespace setVariable ["ARC_convoyEnforceCrewSideWest", true, true];
+missionNamespace setVariable ["ARC_convoyEnforceCrewSide", missionNamespace getVariable ["ARC_convoyEnforceCrewSideWest", true], true]; // deprecated legacy mirror
 
 // Bridge handling (assist + stuck recovery)
 missionNamespace setVariable ["ARC_convoyBridgeAssistEnabled", true, true];
