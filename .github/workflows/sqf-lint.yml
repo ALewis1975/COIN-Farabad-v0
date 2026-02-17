@@ -1,0 +1,64 @@
+name: SQF Static Analysis
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - '**.sqf'
+      - '.github/workflows/sqf-lint.yml'
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - '**.sqf'
+
+jobs:
+  sqflint:
+    name: Lint SQF Scripts
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install sqflint
+        run: |
+          pip install --upgrade pip
+          pip install sqflint
+          echo "=== sqflint version ===" 
+          sqflint --version
+      
+      - name: Lint initServer.sqf
+        run: sqflint initServer.sqf
+      
+      - name: Lint initPlayerLocal.sqf
+        run: sqflint initPlayerLocal.sqf
+      
+      - name: Lint functions directory
+        run: |
+          if [ -d "functions" ]; then
+            echo "Linting functions/"
+            find functions -name "*.sqf" -type f | xargs -I {} sqflint {}
+          fi
+      
+      - name: Lint scripts directory
+        run: |
+          if [ -d "scripts" ]; then
+            echo "Linting scripts/"
+            find scripts -name "*.sqf" -type f | xargs -I {} sqflint {}
+          fi
+      
+      - name: Report summary
+        if: always()
+        run: echo "✓ SQF linting analysis complete"
