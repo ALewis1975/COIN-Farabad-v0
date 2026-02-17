@@ -10,6 +10,7 @@
         ARRAY [okBool, summaryText, detailsText]
 
     Notes:
+    - Synchronous-only API: must be called from scheduled environment (canSuspend == true).
     - Uses ARC_IntelReportDialog defined in config\CfgDialogs.hpp.
     - Returned details may contain newlines; callers should convert to <br/> when rendering structured text.
 */
@@ -17,24 +18,15 @@
 if (!hasInterface) exitWith {[false, "", ""]};
 
 if (!canSuspend) exitWith {
-    private _args = if (_this isEqualType []) then { +_this } else { [] };
-    _args spawn {
-        diag_log "[FARABAD][PROMPT][SPAWN] reentered scheduled";
-        _this call ARC_fnc_clientIntelPrompt;
-    };
+    diag_log "[FARABAD][PROMPT][WARN] ARC_fnc_clientIntelPrompt requires scheduled execution (canSuspend == true).";
     [false, "", ""]
 };
 
 params [
     ["_category", "INTEL"],
     ["_defaultSummary", ""],
-    ["_defaultDetails", ""],
-    ["_spawnReentry", false]
+    ["_defaultDetails", ""]
 ];
-
-if (_spawnReentry) then {
-    diag_log "[FARABAD][PROMPT][SPAWN] reentered scheduled";
-};
 
 uiNamespace setVariable ["ARC_intelDialog_category", toUpper _category];
 uiNamespace setVariable ["ARC_intelDialog_defaultSummary", _defaultSummary];

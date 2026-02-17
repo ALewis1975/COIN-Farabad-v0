@@ -18,6 +18,8 @@
 
 if (!hasInterface) exitWith {false};
 
+if (!canSuspend) exitWith { _this spawn ARC_fnc_intelClientProcessEpw; false };
+
 params [
     ["_station", objNull],
     ["_caller", player],

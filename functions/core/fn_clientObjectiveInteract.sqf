@@ -17,6 +17,8 @@
 
 if (!hasInterface) exitWith {false};
 
+if (!canSuspend) exitWith { _this spawn ARC_fnc_clientObjectiveInteract; false };
+
 params [
     ["_target", objNull],
     ["_caller", objNull],
