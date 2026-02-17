@@ -1745,11 +1745,28 @@ if (_fRec && { (count _aliveVeh) >= 2 }
     if (!(_cooldown isEqualType 0)) then { _cooldown = 60; };
     _cooldown = (_cooldown max 30) min 300;
 
+    // Bridge mode follower recovery tunables (kept separate so non-bridge behavior is unchanged).
+    if (_bridgeMode) then
+    {
+        private _bridgeCooldown = missionNamespace getVariable ["ARC_convoyBridgeFollowerRecoveryCooldownSec", 25];
+        if (!(_bridgeCooldown isEqualType 0)) then { _bridgeCooldown = 25; };
+        _bridgeCooldown = (_bridgeCooldown max 8) min 300;
+        _cooldown = _bridgeCooldown;
+    };
+
     private _bypassSecF = missionNamespace getVariable ["ARC_convoyFollowerBypassWindowSec", 12];
     if (!(_bypassSecF isEqualType 0)) then { _bypassSecF = 12; };
     _bypassSecF = (_bypassSecF max 6) min 30;
 
     private _gapTrigger = ((_spacing max 20) * 3.0) max 220;
+    if (_bridgeMode) then
+    {
+        private _bridgeGapFloor = missionNamespace getVariable ["ARC_convoyBridgeFollowerGapTriggerMinM", 140];
+        if (!(_bridgeGapFloor isEqualType 0)) then { _bridgeGapFloor = 140; };
+        _bridgeGapFloor = (_bridgeGapFloor max 80) min 219;
+
+        _gapTrigger = ((_spacing max 20) * 3.0) max _bridgeGapFloor;
+    };
 
     private _ldrU = leader _grpW;
 
