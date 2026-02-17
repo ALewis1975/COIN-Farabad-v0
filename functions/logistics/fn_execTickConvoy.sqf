@@ -1805,7 +1805,7 @@ if (_bridgeMode) then
     _capFinal = _capFinal min _bridgeSpeedKph;
 };
 
-private _spacingFinal = if (_bridgeMode) then { (_spacing max _bridgeSpacingM) } else { _spacing };
+private _spacingFinal = if (_bridgeMode) then { (_spacing min _bridgeSpacingM) } else { _spacing };
 
 {
     if (alive _x) then
