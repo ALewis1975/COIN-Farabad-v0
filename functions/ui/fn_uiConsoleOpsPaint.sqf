@@ -220,6 +220,11 @@ private _secondaryLabel = _followOnViaSitrepLabel;
 private _secondaryEnabled = false; // Follow-on requests are part of the SITREP wizard; no standalone button.
 
 private _isAuth = [player] call ARC_fnc_rolesIsAuthorized;
+private _gidSelf = groupId (group player);
+private _statusRows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
+if (!(_statusRows isEqualType [])) then { _statusRows = []; };
+private _statusIdx = _statusRows findIf { _x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _gidSelf } };
+private _unitStatus = if (_statusIdx < 0) then { "OFFLINE" } else { toUpper (trim ((_statusRows # _statusIdx) # 1)) };
 
 if (_focusData isEqualTo "") then
 {
@@ -253,13 +258,16 @@ else
             _details = _details + format ["<t color='#A0A0A0'>Accepted:</t> %1", if (_accepted) then {"YES"} else {"NO"}];
             if (_acceptedBy != "") then { _details = _details + format [" (by %1)", _acceptedBy]; };
             _details = _details + "<br/>";
+            _details = _details + format ["<t color='#A0A0A0'>Unit status (%1):</t> %2<br/>", if (_gidSelf isEqualTo "") then {"NO-CALLSIGN"} else {_gidSelf}, _unitStatus];
             _details = _details + format ["<t color='#A0A0A0'>Close-ready:</t> %1<br/>", if (_closeReady) then {"YES"} else {"NO"}];
             _details = _details + format ["<t color='#A0A0A0'>SITREP sent:</t> %1<br/><br/>", if (_sitrepSent) then {"YES"} else {"NO"}];
 
             if (!_accepted) then
             {
                 _primaryLabel = "Accept Incident";
-                _primaryEnabled = _isAuth;
+                _primaryEnabled = _isAuth && (_unitStatus isEqualTo "AVAILABLE");
+                _secondaryLabel = if (_unitStatus isEqualTo "AVAILABLE") then { "SET OFFLINE" } else { "SET AVAILABLE" };
+                _secondaryEnabled = _isAuth;
                 _details = _details + "Next: accept the incident to start execution.";
             }
             else

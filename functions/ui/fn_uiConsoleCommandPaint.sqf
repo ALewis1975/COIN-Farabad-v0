@@ -182,6 +182,24 @@ else
 };
 
 _lines pushBack "<br/>";
+_lines pushBack "<t size='1.05' font='PuristaMedium'>Unit Status Board</t>";
+private _statusRows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
+if (!(_statusRows isEqualType [])) then { _statusRows = []; };
+if ((count _statusRows) isEqualTo 0) then
+{
+    _lines pushBack "<t size='0.95' color='#BBBBBB'>No unit status reports.</t>";
+}
+else
+{
+    {
+        if (!(_x isEqualType []) || { (count _x) < 2 }) then { continue; };
+        private _gid = _x # 0;
+        private _st = toUpper (trim (_x # 1));
+        _lines pushBack format ["<t size='0.9' color='#BDBDBD'>%1:</t> <t size='0.9'>%2</t>", if (_gid isEqualTo "") then {"(UNKNOWN)"} else {_gid}, if (_st isEqualTo "") then {"OFFLINE"} else {_st}];
+    } forEach _statusRows;
+};
+
+_lines pushBack "<br/>";
 _lines pushBack "<t size='1.05' font='PuristaMedium'>TOC Queue</t>";
 _lines pushBack format ["<t size='0.95'>Pending:</t> <t size='0.95'>%1</t>", count _pending];
 _lines pushBack format ["<t size='0.9' color='#BDBDBD'>Incidents:</t> <t size='0.9'>%1</t>  <t size='0.9' color='#BDBDBD'>Leads:</t> <t size='0.9'>%2</t>  <t size='0.9' color='#BDBDBD'>Other:</t> <t size='0.9'>%3</t>", count _pendingInc, count _pendingLead, _pendingOther max 0];

@@ -161,7 +161,7 @@ private _ensureS2CatPanels = {
 
                 private _d = _ctrl lbData _idx;
                 if (!(_d isEqualType "")) exitWith {};
-                if (_d isEqualTo "" || { _d isEqualTo "HDR" }) exitWith {};
+                if (_d isEqualTo "" || { _d in ["HDR", "SEP"] }) exitWith {};
 
                 private _disp = ctrlParent _ctrl;
                 if (isNull _disp) exitWith {};
@@ -255,13 +255,14 @@ private _renderS2CatPanelsFromMaster = {
         private _d = _listMaster lbData _i;
         private _t = _listMaster lbText _i;
 
-        if (_d isEqualTo "HDR") then {
+        if (_d in ["HDR", "SEP"]) then {
             _section = toUpper (trim _t);
         } else {
             if (_section isEqualTo "") then { continue; };
             private _lb = _map getOrDefault [_section, controlNull];
             if (isNull _lb) then { continue; };
             if (!(_d isEqualType "")) then { continue; };
+            if (_d in ["", "HDR", "SEP"]) then { continue; };
 
             private _idx = _lb lbAdd _t;
             _lb lbSetData [_idx, _d];
@@ -650,7 +651,7 @@ if (!isNull _b1) then { _b1 ctrlSetText "EXECUTE"; _b1 ctrlEnable false; };
 // Tool descriptions / intel details
 if (_mode isEqualTo "CENSUS") then
 {
-if (_data isEqualTo "HDR") then
+if (_data in ["HDR", "SEP"]) then
 {
     _txt = "<t size='1.05'>Select a district below.</t><br/><br/>" +
            "This view reads published district snapshots (refreshed each CIVSUB tick).<br/><br/>" +
@@ -835,7 +836,7 @@ else
 }
 else
 {
-if (_data isEqualTo "HDR") then
+if (_data in ["HDR", "SEP"]) then
 {
     _txt = "<t size='1.05'>Select a tool or an intel log entry.</t>";
 }
