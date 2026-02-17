@@ -3,6 +3,44 @@
 - What changed:
 - Why:
 
+## Required PR Metadata (complete before requesting review)
+
+### Mode (select exactly one)
+
+- [ ] A — Bug Fix
+- [ ] B — Feature Delivery
+- [ ] C — Safe Refactor
+- [ ] D — Performance Optimization
+- [ ] E — Test-Only Changes
+- [ ] F — Documentation-Only Changes
+- [ ] G — Build/CI/Tooling
+- [ ] H — Dependency / Version Management
+- [ ] I — Security Hardening
+- [ ] J — Operations / Config / Data Maintenance
+
+### Scope (allowed files/dirs)
+
+- Allowed paths changed in this PR:
+  - 
+
+### Acceptance Criteria
+
+- [ ]
+- [ ]
+
+### Tests Run
+
+- `<command>` — `<result>`
+- OR: `Not run` — `<reason>`
+
+### Risk Notes
+
+- 
+
+### Rollback Procedure
+
+- 
+
 ## Scope Classification
 
 - [ ] UI render/layout
