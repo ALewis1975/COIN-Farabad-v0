@@ -33,7 +33,43 @@ switch (_tab) do
         };
     };
 
-    case "CMD":     { [] spawn ARC_fnc_uiConsoleActionTocSecondary; };
+    case "CMD":
+    {
+        private _cmdMode = uiNamespace getVariable ["ARC_console_cmdMode", "OVERVIEW"];
+        if (!(_cmdMode isEqualType "")) then { _cmdMode = "OVERVIEW"; };
+        _cmdMode = toUpper (trim _cmdMode);
+
+        if (_cmdMode isEqualTo "QUEUE") then
+        {
+            private _canDecide = [player] call ARC_fnc_rolesCanApproveQueue;
+            private _queuePending = uiNamespace getVariable ["ARC_console_cmdQueueSelectedPending", false];
+
+            if (_canDecide && _queuePending) then
+            {
+                [] spawn {
+                    private _qid = uiNamespace getVariable ["ARC_console_cmdQueueSelectedQid", ""];
+                    if (_qid isEqualTo "") exitWith { ["TOC Queue", "Select a queue item first."] call ARC_fnc_clientToast; };
+                    [player, _qid, false, ""] remoteExecCall ["ARC_fnc_intelQueueDecide", 2];
+                    ["TOC Queue", format ["REJECTED: %1", _qid]] call ARC_fnc_clientToast;
+                    uiNamespace setVariable ["ARC_console_cmdQueueForceRebuild", true];
+                    private _disp = findDisplay 78000;
+                    if (!isNull _disp) then { [_disp] call ARC_fnc_uiConsoleRefresh; };
+                };
+            }
+            else
+            {
+                uiNamespace setVariable ["ARC_console_cmdMode", "OVERVIEW"];
+                uiNamespace setVariable ["ARC_console_cmdQueueForceRebuild", true];
+                private _disp = findDisplay 78000;
+                if (!isNull _disp) then { [_disp] call ARC_fnc_uiConsoleRefresh; };
+                ["TOC Queue", "Returned to TOC overview."] call ARC_fnc_clientToast;
+            };
+        }
+        else
+        {
+            [] spawn ARC_fnc_uiConsoleActionTocSecondary;
+        };
+    };
 
     case "BOARDS":  { [] spawn ARC_fnc_uiConsoleActionTocSecondary; };
 

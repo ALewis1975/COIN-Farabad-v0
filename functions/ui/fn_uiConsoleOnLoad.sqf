@@ -98,6 +98,11 @@ private _s2Ctrls = [
 // ---------------------------------------------------------------------------
 // Access flags
 // ---------------------------------------------------------------------------
+uiNamespace setVariable ["ARC_console_cmdMode", "OVERVIEW"];
+uiNamespace setVariable ["ARC_console_cmdQueueForceRebuild", true];
+uiNamespace setVariable ["ARC_console_cmdQueueSelectedQid", ""];
+uiNamespace setVariable ["ARC_console_cmdQueueSelectedPending", false];
+
 private _omniTokens = missionNamespace getVariable ["ARC_consoleOmniTokens", ["OMNI"]];
 if (!(_omniTokens isEqualType [])) then { _omniTokens = ["OMNI"]; };
 if ((count _omniTokens) isEqualTo 0) then { _omniTokens = ["OMNI"]; };

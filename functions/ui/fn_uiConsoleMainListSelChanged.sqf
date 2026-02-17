@@ -25,6 +25,16 @@ switch (_tab) do
 {
     case "INTEL": { [_display, false] call ARC_fnc_uiConsoleIntelPaint; };
     case "HQ":    { [_display, false] call ARC_fnc_uiConsoleHQPaint; };
+    case "CMD":
+    {
+        private _cmdMode = uiNamespace getVariable ["ARC_console_cmdMode", "OVERVIEW"];
+        if ((_cmdMode isEqualType "") && { (toUpper (trim _cmdMode)) isEqualTo "QUEUE" }) then
+        {
+            uiNamespace setVariable ["ARC_console_cmdQueueForceRebuild", false];
+            [_display, false] call ARC_fnc_uiConsoleTocQueuePaint;
+            [_display] call ARC_fnc_uiConsoleRefresh;
+        };
+    };
     default
     {
         // no-op for other tabs
