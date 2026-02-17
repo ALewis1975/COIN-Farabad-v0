@@ -106,6 +106,53 @@ if (isNil "ARC_TEST_fnc_log") then {
   };
 };
 
+// Backfill helper funcs when testlib is already loaded from a prior run.
+if (isNil "ARC_TEST_fnc_stateSnapshot") then {
+  ARC_TEST_fnc_stateSnapshot = {
+    params ["_keys"];
+    private _saved = [];
+    {
+      _saved pushBack [_x, missionNamespace getVariable [format ["ARC_state_%1", _x], nil]];
+    } forEach _keys;
+    _saved
+  };
+};
+
+if (isNil "ARC_TEST_fnc_stateRestore") then {
+  ARC_TEST_fnc_stateRestore = {
+    params ["_saved"];
+    {
+      _x params ["_k", "_v"];
+      if (isNil "_v") then {
+        missionNamespace setVariable [format ["ARC_state_%1", _k], nil];
+      } else {
+        [_k, _v] call ARC_fnc_stateSet;
+      };
+    } forEach _saved;
+  };
+};
+
+if (isNil "ARC_TEST_fnc_varSnapshot") then {
+  ARC_TEST_fnc_varSnapshot = {
+    params ["_keys"];
+    private _saved = [];
+    {
+      _saved pushBack [_x, missionNamespace getVariable [_x, nil]];
+    } forEach _keys;
+    _saved
+  };
+};
+
+if (isNil "ARC_TEST_fnc_varRestore") then {
+  ARC_TEST_fnc_varRestore = {
+    params ["_saved"];
+    {
+      _x params ["_k", "_v"];
+      missionNamespace setVariable [_k, _v];
+    } forEach _saved;
+  };
+};
+
 // ---- Runner ----
 waitUntil { !isNil "ARC_TEST_fnc_log" };
 
