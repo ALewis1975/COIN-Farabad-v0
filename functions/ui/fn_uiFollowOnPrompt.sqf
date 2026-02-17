@@ -21,18 +21,11 @@
 if (!hasInterface) exitWith { [false] };
 
 if (!canSuspend) exitWith {
-    private _args = if (_this isEqualType []) then { +_this } else { [] };
-    _args pushBack true;
-    _args spawn ARC_fnc_uiFollowOnPrompt;
+    [] spawn {
+        diag_log "[FARABAD][PROMPT][SPAWN] reentered scheduled";
+        call ARC_fnc_uiFollowOnPrompt;
+    };
     [false]
-};
-
-params [
-    ["_spawnReentry", false]
-];
-
-if (_spawnReentry) then {
-    diag_log "[FARABAD][PROMPT][SPAWN] reentered scheduled";
 };
 
 uiNamespace setVariable ["ARC_followOn_result", nil];

@@ -18,8 +18,10 @@ if (!hasInterface) exitWith {[false, "", ""]};
 
 if (!canSuspend) exitWith {
     private _args = if (_this isEqualType []) then { +_this } else { [] };
-    _args pushBack true;
-    _args spawn ARC_fnc_clientIntelPrompt;
+    _args spawn {
+        diag_log "[FARABAD][PROMPT][SPAWN] reentered scheduled";
+        _this call ARC_fnc_clientIntelPrompt;
+    };
     [false, "", ""]
 };
 

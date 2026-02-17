@@ -13,18 +13,11 @@
 if (!hasInterface) exitWith { [false] };
 
 if (!canSuspend) exitWith {
-    private _args = if (_this isEqualType []) then { +_this } else { [] };
-    _args pushBack true;
-    _args spawn ARC_fnc_uiEodDispoPrompt;
+    [] spawn {
+        diag_log "[FARABAD][PROMPT][SPAWN] reentered scheduled";
+        call ARC_fnc_uiEodDispoPrompt;
+    };
     [false]
-};
-
-params [
-    ["_spawnReentry", false]
-];
-
-if (_spawnReentry) then {
-    diag_log "[FARABAD][PROMPT][SPAWN] reentered scheduled";
 };
 
 uiNamespace setVariable ["ARC_eodDispo_result", nil];
