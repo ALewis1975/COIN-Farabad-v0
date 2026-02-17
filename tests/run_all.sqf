@@ -91,6 +91,40 @@ private _expectedFunctions = [
   [_x, format ["UT-API-%1", _forEachIndex + 1], "expected function exists"] call ARC_TEST_fnc_assertNotNil;
 } forEach _expectedFunctions;
 
+
+// Unit: theme schema contract
+if (!(isNil "ARC_fnc_consoleThemeGet")) then {
+  private _theme = call ARC_fnc_consoleThemeGet;
+  private _requiredThemeKeys = [
+    "bezelOuter",
+    "bezelGreen",
+    "bezelInner",
+    "screen",
+    "text",
+    "border",
+    "statusGreen",
+    "statusAmber",
+    "statusRed"
+  ];
+
+  private _isThemeHashMap = _theme isEqualType createHashMap;
+  [_isThemeHashMap, "UT-THEME-000", "console theme returns HashMap", ["type", typeName _theme]] call ARC_TEST_fnc_assert;
+
+  if (_isThemeHashMap) then {
+    {
+      [
+        !isNil { _theme get _x },
+        format ["UT-THEME-%1", _forEachIndex + 1],
+        format ["console theme contains key '%1'", _x]
+      ] call ARC_TEST_fnc_assert;
+    } forEach _requiredThemeKeys;
+  } else {
+    ["INFO", "UT-THEME-SKIP", "theme key checks skipped because return type is not HashMap", ["type", typeName _theme]] call ARC_TEST_fnc_log;
+  };
+} else {
+  ["INFO", "UT-THEME-SKIP", "theme contract skipped; ARC_fnc_consoleThemeGet missing", []] call ARC_TEST_fnc_log;
+};
+
 // Unit: CBA availability (optional)
 private _hasCBA = !(isNil "CBA_fnc_addPerFrameHandler");
 [_hasCBA, "UT-ENV-001", "CBA per-frame handler available (optional)", []] call ARC_TEST_fnc_assert;
