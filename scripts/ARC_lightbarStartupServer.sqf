@@ -17,6 +17,20 @@
 
 if (!isServer) exitWith {};
 
+private _log = {
+  params [
+    ["_level", "INFO", [""]],
+    ["_message", "", [""]],
+    ["_meta", []]
+  ];
+
+  if (!isNil "ARC_fnc_farabadLog") then {
+    ["POLICE", _level, _message, _meta] call ARC_fnc_farabadLog;
+  } else {
+    diag_log format ["[FARABAD][POLICE][%1] msg=%2 meta=%3", _level, _message, _meta];
+  };
+};
+
 private _targets = [
   ["Patrol_01", false],
   ["Patrol_07", false],
@@ -29,7 +43,7 @@ private _targets = [
 
   private _veh = missionNamespace getVariable [_varName, objNull];
   if (isNull _veh) then {
-    diag_log format ["[FARABAD][POLICE][LIGHTBAR][WARN] Vehicle var '%1' not found (objNull).", _varName];
+    ["WARN", "LIGHTBAR vehicle variable not found.", [["vehicleVar", _varName], ["result", "objNull"]]] call _log;
   } else {
     _veh execVM "\Expansion_Mod_Police\Vehicles\Scripts\Lightbar\CODE2_On.sqf";
 
@@ -37,6 +51,6 @@ private _targets = [
       _veh disableAI "LIGHTS";
     };
 
-    diag_log format ["[FARABAD][POLICE][LIGHTBAR][OK] Enabled lightbar on '%1' (%2).", _varName, typeOf _veh];
+    ["INFO", "LIGHTBAR enabled.", [["vehicleVar", _varName], ["type", typeOf _veh], ["disableAILights", _disableAILights]]] call _log;
   };
 } forEach _targets;
