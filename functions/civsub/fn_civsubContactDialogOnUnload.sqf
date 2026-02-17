@@ -13,6 +13,13 @@ uiNamespace setVariable ["ARC_civsubInteract_watchStop", true];
 
 private _civ = uiNamespace getVariable ["ARC_civsubInteract_target", objNull];
 uiNamespace setVariable ["ARC_civsubInteract_target", objNull];
+uiNamespace setVariable ["ARC_civsubInteract_mode", "A"];
+uiNamespace setVariable ["ARC_civsubInteract_lastPane", "A"];
+uiNamespace setVariable ["ARC_civsubInteract_selectedQid", ""];
+uiNamespace setVariable ["ARC_civsubInteract_snapshot", createHashMap];
+uiNamespace setVariable ["ARC_civsubInteract_idCardHtml", ""];
+uiNamespace setVariable ["ARC_civsubInteract_actionInProgress", false];
+uiNamespace setVariable ["ARC_civsubInteract_hasUserOutput", false];
 
 if (!isNull _civ) then {
     // End-session for dialog use should be silent (no chat spam).
