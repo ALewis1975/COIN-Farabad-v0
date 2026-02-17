@@ -351,6 +351,7 @@ if (_cNids isEqualType [] && { (count _cNids) > 0 }) then
 };
 
 // --- Clear execution/convoy state (always) -----------------------------------
+["activeExecLastProgressAt", -1] call ARC_fnc_stateSet;
 ["activeConvoyNetIds", []] call ARC_fnc_stateSet;
 ["activeConvoyStartPos", []] call ARC_fnc_stateSet;
 ["activeConvoySpawnPos", []] call ARC_fnc_stateSet;

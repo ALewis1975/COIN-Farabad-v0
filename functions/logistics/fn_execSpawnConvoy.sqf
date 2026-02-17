@@ -29,6 +29,12 @@ if (!isServer) exitWith {[]};
 private _incidentTypeU = toUpper _incidentType;
 private _debug = missionNamespace getVariable ["ARC_convoyDebug", false];
 
+private _log = {
+    params [["_msg", "", [""]], ["_args", [], [[]]], ["_lvl", "WARN", [""]]];
+    if (!isNil "ARC_fnc_log") then { ["CONVOY", _msg, _args, _lvl] call ARC_fnc_log; }
+    else { diag_log (if ((count _args) > 0) then { format ([_msg] + _args) } else { _msg }); };
+};
+
 // Spawn vehicles with a conservative cadence so each one has time to clear the spawn marker.
 // Large convoys at tight spawn pads (ex: Airbase perimeter road) need this to avoid pileups.
 private _interval = missionNamespace getVariable ["ARC_convoySpawnIntervalSec", 10];
@@ -46,11 +52,14 @@ _sepDesired = (_sepDesired max 10) min 80;
 private _padClearR = missionNamespace getVariable ["ARC_convoySpawnPadClearRadiusM", 18];
 if (!(_padClearR isEqualType 0)) then { _padClearR = 18; };
 
-private _enforceCrewSide = missionNamespace getVariable ["ARC_convoyEnforceCrewSide", true];
+private _enforceCrewSide = missionNamespace getVariable [
+    "ARC_convoyEnforceCrewSideWest",
+    missionNamespace getVariable ["ARC_convoyEnforceCrewSide", true]
+];
 if (!(_enforceCrewSide isEqualType true) && !(_enforceCrewSide isEqualType false)) then { _enforceCrewSide = true; };
 if (_debug) then
 {
-    diag_log format ["[ARC][CONVOY][BOOT] enforceCrewSide=%1", _enforceCrewSide];
+    ["[ARC][CONVOY][BOOT] enforceCrewSide=%1", [_enforceCrewSide], "WARN"] call _log;
 };
 
 // If the pad-clear radius is too small, vehicles spawn too tightly and the convoy "blooms" into a blob
@@ -366,7 +375,7 @@ private _classesPreview = [
     ["escort", +_poolEscSelect],
     ["logistics", +_poolLogSelect]
 ];
-diag_log format ["[ARC][CONVOY][BOOT] task=%1 type=%2 bundle=%3 supply=%4 vip=%5 rolePools=%6", _taskId, _incidentTypeU, _roleBundleLog, _supplyKind, _isVIP, _classesPreview];
+["[ARC][CONVOY][BOOT] task=%1 type=%2 bundle=%3 supply=%4 vip=%5 rolePools=%6", [_taskId, _incidentTypeU, _roleBundleLog, _supplyKind, _isVIP, _classesPreview], "WARN"] call _log;
 
 // Build the convoy class list.
 switch (_incidentTypeU) do
@@ -487,12 +496,12 @@ switch (_incidentTypeU) do
 
 if ((count _classes) == 0) exitWith
 {
-    diag_log "[ARC][CONVOY] No convoy vehicle classes available.";
+    ["[ARC][CONVOY] No convoy vehicle classes available.", [], "WARN"] call _log;
     []
 };
 
-// Startup breadcrumbs (low-volume): final selected class list for this convoy spawn attempt.
-diag_log format ["[ARC][CONVOY][BOOT] task=%1 type=%2 selectedClasses=%3", _taskId, _incidentTypeU, _classes];
+// Startup breadcrumbs (low-volume): final selected class list after policy filtering.
+["[ARC][CONVOY][BOOT] task=%1 type=%2 selectedClassesAfterFiltering=%3 count=%4", [_taskId, _incidentTypeU, _classes, count _classes], "WARN"] call _log;
 
 // --- Sequential spawn --------------------------------------------------------
 private _vehicles = [];
@@ -504,7 +513,7 @@ private _wp = objNull;
 private _grp = createGroup [_grpSide, true];
 if (isNull _grp) then
 {
-    diag_log "[ARC][CONVOY] Failed to create convoy group. Falling back to WEST.";
+    ["[ARC][CONVOY] Failed to create convoy group. Falling back to WEST.", [], "WARN"] call _log;
     _grp = createGroup [west, true];
 };
 _grp setFormation "COLUMN";
@@ -667,7 +676,7 @@ if (_stageEnabled) then
 
     if (_debug) then
     {
-        diag_log format ["[ARC][CONVOY] Spawn staging enabled: n=%1, spacing=%2m, kph=%3.", count _classes, _spacing, _spawnKph];
+        ["[ARC][CONVOY] Spawn staging enabled: n=%1, spacing=%2m, kph=%3.", [count _classes, _spacing, _spawnKph], "WARN"] call _log;
     };
 };
 
@@ -678,18 +687,10 @@ if (_stageEnabled) then
     // Avoid 'continue' for broad compatibility.
     if !(isClass (configFile >> "CfgVehicles" >> _class)) then
     {
-        diag_log format ["[ARC][CONVOY] Invalid vehicle classname (CfgVehicles missing): %1", _class];
+        ["[ARC][CONVOY] Invalid vehicle classname (CfgVehicles missing): %1", [_class], "WARN"] call _log;
     }
     else
     {
-        private _sideNum = getNumber (configFile >> "CfgVehicles" >> _class >> "side");
-        if (!(_sideNum isEqualTo 1)) then
-        {
-            diag_log format ["[ARC][CONVOY] Skipping non-BLUFOR vehicle classname (side=%1): %2", _sideNum, _class];
-        }
-        else
-        {
-
         // Wait for spawn pad to clear (check once per interval).
         private _guard = 0;
         while { ([_spawnPos, _padClearR] call _isPadOccupied) && { _guard < 60 } } do
@@ -701,7 +702,7 @@ if (_stageEnabled) then
         private _veh = createVehicle [_class, _spawnPos, [], 0, "NONE"];
         if (isNull _veh) then
         {
-            diag_log format ["[ARC][CONVOY] Failed to create vehicle: %1", _class];
+            ["[ARC][CONVOY] Failed to create vehicle: %1", [_class], "WARN"] call _log;
         }
         else
         {
@@ -748,7 +749,7 @@ if (_stageEnabled) then
                 if (_debug) then
                 {
                     private _s = if (!isNull _drv) then { str (side _drv) } else { "NULL_DRIVER" };
-                    diag_log format ["[ARC][CONVOY] Skipping %1 due to crew side mismatch (%2).", _class, _s];
+                    ["[ARC][CONVOY] Skipping %1 due to crew side mismatch (%2).", [_class, _s], "WARN"] call _log;
                 };
 
                 { if (!isNull _x) then { deleteVehicle _x; }; } forEach _crew;
@@ -773,7 +774,7 @@ if (_stageEnabled) then
                 {
                     if (_debug) then
                     {
-                        diag_log format ["[ARC][CONVOY] Skipping %1 because crew could not join convoy group.", _class];
+                        ["[ARC][CONVOY] Skipping %1 because crew could not join convoy group.", [_class], "WARN"] call _log;
                     };
 
                     { if (!isNull _x) then { deleteVehicle _x; }; } forEach _crew;
@@ -851,7 +852,7 @@ if (_stageEnabled) then
 
                     if (_debug) then
                     {
-                        diag_log format ["[ARC][CONVOY] Spawned %1 at %2, crew %3, grp %4.", _class, mapGridPosition (getPosATL _veh), count _crew, groupId _grp];
+                        ["[ARC][CONVOY] Spawned %1 at %2, crew %3, grp %4.", [_class, mapGridPosition (getPosATL _veh), count _crew, groupId _grp], "WARN"] call _log;
                     };
 
                     _vehicles pushBack _veh;
@@ -861,7 +862,6 @@ if (_stageEnabled) then
 
         // Enforce minimum spacing between spawns
         sleep _interval;
-        };
     };
 } forEach _classes;
 

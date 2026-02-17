@@ -470,6 +470,7 @@ missionNamespace setVariable ["ARC_activeIncidentSitrepDetails", "", true];
 ["activeExecHoldReq", 0] call ARC_fnc_stateSet;
 ["activeExecHoldAccum", 0] call ARC_fnc_stateSet;
 ["activeExecLastProg", -1] call ARC_fnc_stateSet;
+["activeExecLastProgressAt", -1] call ARC_fnc_stateSet;
 ["activeObjectiveKind", ""] call ARC_fnc_stateSet;
 ["activeObjectiveClass", ""] call ARC_fnc_stateSet;
 ["activeObjectivePos", []] call ARC_fnc_stateSet;

@@ -83,6 +83,9 @@ private _tab = uiNamespace getVariable ["ARC_console_activeTab", "DASH"];
 if (!(_tab isEqualType "")) then { _tab = "DASH"; };
 _tab = toUpper (trim _tab);
 
+private _prevRefreshTab = uiNamespace getVariable ["ARC_console_prevRefreshTab", ""];
+if (!(_prevRefreshTab isEqualType "")) then { _prevRefreshTab = ""; };
+
 // ---------------------------------------------------------------------------
 
 // Hide S2 category panels (if present) when leaving INTEL to prevent cross-tab UI leak.
@@ -223,7 +226,9 @@ case "DASH":
         if (!isNull _ctrlDetailsGrp) then { _ctrlDetailsGrp ctrlShow true; };
         if (!isNull _ctrlDetails) then { _ctrlDetails ctrlShow true; };
 
-        if (!isNull _b1) then { _b1 ctrlShow true; _b1 ctrlEnable true; _b1 ctrlSetText "EXECUTE"; };
+        // HQ button label ownership lives in ARC_fnc_uiConsoleHQPaint
+        // so mode-specific text (EXECUTE/SPAWN) does not get stomped by refresh ticks.
+        if (!isNull _b1) then { _b1 ctrlShow true; _b1 ctrlEnable true; };
         // HQ normally uses the main list for admin actions.
         // Secondary is only shown when HQ is in INCIDENT PICKER mode.
         private _hqMode = uiNamespace getVariable ["ARC_console_hqMode", "TOOLS"];
@@ -232,7 +237,28 @@ case "DASH":
         private _showBack = (_hqMode isEqualTo "INCIDENTS");
         if (!isNull _b2) then { _b2 ctrlShow _showBack; _b2 ctrlEnable _showBack; _b2 ctrlSetText (if (_showBack) then {"BACK"} else {""}); };
 
-        [_display, true] call ARC_fnc_uiConsoleHQPaint;
+        private _rebuildHQ = false;
+        private _prevHqMode = uiNamespace getVariable ["ARC_console_prevRefreshHQMode", ""];
+        if (!(_prevHqMode isEqualType "")) then { _prevHqMode = ""; };
+
+        if (_prevRefreshTab isNotEqualTo _tab) then { _rebuildHQ = true; };
+        if (_prevHqMode isNotEqualTo _hqMode) then { _rebuildHQ = true; };
+
+        if (uiNamespace getVariable ["ARC_console_incidentCatalogInvalidate", false]) then
+        {
+            _rebuildHQ = true;
+            uiNamespace setVariable ["ARC_console_incidentCatalogInvalidate", false];
+        };
+
+        if (uiNamespace getVariable ["ARC_console_hqForceRebuild", false]) then
+        {
+            _rebuildHQ = true;
+            uiNamespace setVariable ["ARC_console_hqForceRebuild", false];
+        };
+
+        uiNamespace setVariable ["ARC_console_prevRefreshHQMode", _hqMode];
+
+        [_display, _rebuildHQ] call ARC_fnc_uiConsoleHQPaint;
     };
 
     default
@@ -240,5 +266,7 @@ case "DASH":
         [_display] call ARC_fnc_uiConsoleDashboardPaint;
     };
 };
+
+uiNamespace setVariable ["ARC_console_prevRefreshTab", _tab];
 
 true

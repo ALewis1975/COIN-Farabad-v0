@@ -21,6 +21,25 @@ missionNamespace setVariable ["ARC_debugLogEnabled", false, true];
 missionNamespace setVariable ["ARC_debugLogToChat", false, true];
 missionNamespace setVariable ["ARC_debugInspectorEnabled", false, true];
 
+// FARABAD logger rollout defaults (set only when not preconfigured)
+if (isNil { missionNamespace getVariable "FARABAD_log_enabled" }) then {
+    missionNamespace setVariable ["FARABAD_log_enabled", true, true];
+};
+
+if (isNil { missionNamespace getVariable "FARABAD_log_minLevel" }) then {
+    missionNamespace setVariable ["FARABAD_log_minLevel", "INFO", true];
+};
+
+// RPT sink is the baseline/fallback for all environments.
+if (isNil { missionNamespace getVariable "FARABAD_log_toRPT" }) then {
+    missionNamespace setVariable ["FARABAD_log_toRPT", true, true];
+};
+
+// Extension sink is optional and may be enabled when an extension is available.
+if (isNil { missionNamespace getVariable "FARABAD_log_toExtension" }) then {
+    missionNamespace setVariable ["FARABAD_log_toExtension", false, true];
+};
+
 
 // Optional patch breadcrumbs (keep these accurate; they’re your fastest sanity check)
 diag_log "FARABAD_MIG_S0_hotfix04_convoy_startup_breadcrumbs loaded";
@@ -641,7 +660,8 @@ missionNamespace setVariable ["ARC_convoyAllowedVehicleSides", [], true];
 missionNamespace setVariable ["ARC_convoyAllowedCrewSides", [1], true];
 missionNamespace setVariable ["ARC_convoyAllowedVehicleFactions", [], true];
 missionNamespace setVariable ["ARC_convoyAllowedCrewFactions", [], true];
-missionNamespace setVariable ["ARC_convoyEnforceCrewSideWest", true, true]; // deprecated compatibility toggle
+missionNamespace setVariable ["ARC_convoyEnforceCrewSideWest", true, true];
+missionNamespace setVariable ["ARC_convoyEnforceCrewSide", missionNamespace getVariable ["ARC_convoyEnforceCrewSideWest", true], true]; // deprecated legacy mirror
 
 // Bridge handling (assist + stuck recovery)
 missionNamespace setVariable ["ARC_convoyBridgeAssistEnabled", true, true];
