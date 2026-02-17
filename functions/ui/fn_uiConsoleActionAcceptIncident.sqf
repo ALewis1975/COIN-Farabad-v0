@@ -49,6 +49,17 @@ if (_accepted) exitWith
     false
 };
 
+private _gid = groupId group player;
+private _rows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
+if (!(_rows isEqualType [])) then { _rows = []; };
+private _idx = _rows findIf { _x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _gid } };
+private _status = if (_idx < 0) then { "OFFLINE" } else { toUpper (trim ((_rows # _idx) # 1)) };
+if (_status isNotEqualTo "AVAILABLE") exitWith
+{
+    ["Incident", format ["Set group status to AVAILABLE before accepting incidents. Current: %1", _status]] call ARC_fnc_clientToast;
+    false
+};
+
 // Request acceptance server-side (server validates role again)
 [player] remoteExec ["ARC_fnc_tocRequestAcceptIncident", 2];
 

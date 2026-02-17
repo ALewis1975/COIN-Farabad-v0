@@ -23,7 +23,8 @@ if (isNil "ARC_fnc_rolesGetTag") then { ARC_fnc_rolesGetTag = compile preprocess
 if (isNil "ARC_fnc_rolesFormatUnit") then { ARC_fnc_rolesFormatUnit = compile preprocessFileLineNumbers "functions\\core\\fn_rolesFormatUnit.sqf"; };
 
 params [
-    ["_caller", objNull]
+    ["_caller", objNull],
+    ["_statusRequest", ""]
 ];
 
 if (!([_caller, "ARC_fnc_tocRequestAcceptIncident", "Incident acceptance rejected: sender verification failed.", "TOC_ACCEPT_INCIDENT_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
@@ -37,11 +38,49 @@ if (!isNull _caller && { !([_caller] call ARC_fnc_rolesIsAuthorized) }) exitWith
     false
 };
 
+if (!(_statusRequest isEqualType "")) then { _statusRequest = ""; };
+_statusRequest = toUpper (trim _statusRequest);
+private _statusCatalog = ["OFFLINE", "AVAILABLE", "IN TRANSIT", "ON SCENE"];
+private _setGroupStatus = {
+    params ["_gid", "_status", ["_who", ""]];
+    if (!(_gid isEqualType "") || { _gid isEqualTo "" }) exitWith { false };
+    if (!(_status isEqualType "") || { !(_status in _statusCatalog) }) exitWith { false };
+
+    private _rows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
+    if (!(_rows isEqualType [])) then { _rows = []; };
+
+    private _idx = _rows findIf { _x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _gid } };
+    private _row = [_gid, _status, serverTime, _who];
+    if (_idx < 0) then { _rows pushBack _row; } else { _rows set [_idx, _row]; };
+    missionNamespace setVariable ["ARC_pub_unitStatuses", _rows, true];
+    true
+};
+
+if (_statusRequest in ["OFFLINE", "AVAILABLE"]) exitWith
+{
+    private _gidReq = if (isNull _caller) then {""} else { groupId (group _caller) };
+    if (_gidReq isEqualTo "") exitWith {false};
+    private _whoReq = if (isNull _caller) then {"TOC"} else { [_caller] call ARC_fnc_rolesFormatUnit };
+    [_gidReq, _statusRequest, _whoReq] call _setGroupStatus
+};
+
 private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
 if (_taskId isEqualTo "") exitWith {false};
 
 private _already = ["activeIncidentAccepted", false] call ARC_fnc_stateGet;
 if (_already isEqualType true && { _already }) exitWith {false};
+
+private _callerGroup = if (isNull _caller) then {""} else { groupId (group _caller) };
+if (_callerGroup isEqualTo "") exitWith {false};
+private _unitStatuses = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
+if (!(_unitStatuses isEqualType [])) then { _unitStatuses = []; };
+private _statusIdx = _unitStatuses findIf { _x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _callerGroup } };
+private _statusNow = if (_statusIdx < 0) then { "OFFLINE" } else { toUpper (trim ((_unitStatuses # _statusIdx) # 1)) };
+if (_statusNow isNotEqualTo "AVAILABLE") exitWith
+{
+    ["Incident acceptance denied: your group must set status to AVAILABLE first."] remoteExec ["ARC_fnc_clientHint", owner _caller];
+    false
+};
 
 // Mark accepted
 ["activeIncidentAccepted", true] call ARC_fnc_stateSet;
@@ -103,6 +142,7 @@ private _acceptedBy = if (isNull _caller) then {"TOC"} else { [_caller] call ARC
 private _lastG = if (isNull _caller) then {""} else { groupId (group _caller) };
 if (_lastG isNotEqualTo "") then
 {
+    [_lastG, "IN TRANSIT", _acceptedBy] call _setGroupStatus;
     ["lastTaskingGroup", _lastG] call ARC_fnc_stateSet;
     ["lastTaskingGroupAt", serverTime] call ARC_fnc_stateSet;
 };
