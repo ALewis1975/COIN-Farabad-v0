@@ -131,6 +131,10 @@ if (
                 if (_consoleFastRetriesLeft > 0) then
                 {
                     _consoleFastRetriesLeft = _consoleFastRetriesLeft - 1;
+                };
+
+                if (_consoleFastRetriesLeft > 0) then
+                {
                     _nextConsoleAt = _now + 5;
                 }
                 else
@@ -146,6 +150,10 @@ if (
                 if (_tocFastRetriesLeft > 0) then
                 {
                     _tocFastRetriesLeft = _tocFastRetriesLeft - 1;
+                };
+
+                if (_tocFastRetriesLeft > 0) then
+                {
                     _nextTocAt = _now + 5;
                 }
                 else
