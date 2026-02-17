@@ -16,11 +16,23 @@
 
 if (!hasInterface) exitWith {[false, "", ""]};
 
+if (!canSuspend) exitWith {
+    private _args = if (_this isEqualType []) then { +_this } else { [] };
+    _args pushBack true;
+    _args spawn ARC_fnc_clientIntelPrompt;
+    [false, "", ""]
+};
+
 params [
     ["_category", "INTEL"],
     ["_defaultSummary", ""],
-    ["_defaultDetails", ""]
+    ["_defaultDetails", ""],
+    ["_spawnReentry", false]
 ];
+
+if (_spawnReentry) then {
+    diag_log "[FARABAD][PROMPT][SPAWN] reentered scheduled";
+};
 
 uiNamespace setVariable ["ARC_intelDialog_category", toUpper _category];
 uiNamespace setVariable ["ARC_intelDialog_defaultSummary", _defaultSummary];
@@ -47,5 +59,7 @@ if (!(_det isEqualType "")) then { _det = ""; };
 
 _sum = trim _sum;
 _det = trim _det;
+
+diag_log format ["[FARABAD][PROMPT][DONE] ok=%1", _ok];
 
 [_ok, _sum, _det]
