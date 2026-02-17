@@ -52,15 +52,47 @@ _payload params [
     ["_metaExtra", [], [[]]]
 ];
 
+private _callerName = if (isNull _caller) then { "UNKNOWN" } else { name _caller };
+private _callerUID = if (isNull _caller) then { "" } else { getPlayerUID _caller };
+
 private _posATL = [0,0,0];
-if (_pos isEqualType [] && {(count _pos) >= 2}) then
+private _posIsRecoverable = true;
+if (_pos isEqualType []) then
 {
-    _posATL set [0, if ((_pos # 0) isEqualType 0) then { _pos # 0 } else { 0 }];
-    _posATL set [1, if ((_pos # 1) isEqualType 0) then { _pos # 1 } else { 0 }];
-    _posATL set [2, if ((count _pos) > 2 && {(_pos # 2) isEqualType 0}) then { _pos # 2 } else { 0 }];
+    if ((count _pos) >= 2) then
+    {
+        _posATL set [0, if ((_pos # 0) isEqualType 0) then { _pos # 0 } else { 0 }];
+        _posATL set [1, if ((_pos # 1) isEqualType 0) then { _pos # 1 } else { 0 }];
+        _posATL set [2, if ((count _pos) > 2 && {(_pos # 2) isEqualType 0}) then { _pos # 2 } else { 0 }];
+
+        if (!((_pos # 0) isEqualType 0) || {!((_pos # 1) isEqualType 0)} || {((count _pos) > 2) && {!((_pos # 2) isEqualType 0)}}) then
+        {
+            diag_log format ["[ARC][INTEL][LOG] Invalid numeric position payload normalized to [0,0,0] | caller=%1 | uid=%2 | rawPos=%3", _callerName, _callerUID, str _pos];
+        };
+    }
+    else
+    {
+        _posIsRecoverable = false;
+    };
+}
+else
+{
+    _posIsRecoverable = false;
+};
+
+if (!_posIsRecoverable) then
+{
+    _posATL = [0,0,0];
+    diag_log format ["[ARC][INTEL][LOG] Invalid position payload normalized to safe default | caller=%1 | uid=%2 | rawPos=%3", _callerName, _callerUID, str _pos];
 };
 
 if (!([_caller, "ARC_fnc_tocRequestLogIntel", "Intel log rejected: sender verification failed.", "TOC_LOG_INTEL_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
+
+if (!_posIsRecoverable && {_callerName isEqualTo "UNKNOWN" && {_callerUID isEqualTo ""}}) exitWith
+{
+    diag_log "[ARC][INTEL][LOG] Rejecting irrecoverable intel payload: invalid caller context and position payload.";
+    false
+};
 
 if (_reporter isEqualTo "") then { _reporter = "UNKNOWN"; };
 if (_category isEqualTo "") then { _category = "SIGHTING"; };
@@ -74,7 +106,6 @@ private _zone = [_posATL] call ARC_fnc_worldGetZoneForPos;
 if (_zone isEqualTo "") then { _zone = "Unzoned"; };
 
 // RPT trace (helps triage client map-click issues)
-private _callerName = if (isNull _caller) then { "UNKNOWN" } else { name _caller };
 diag_log format ["[ARC][INTEL][LOG] Request accepted | reporter=%1 | caller=%2 | cat=%3 | grid=%4 | zone=%5 | sum=%6", _reporter, _callerName, toUpper _category, _grid, _zone, _noteSummary];
 
 private _catU = toUpper _category;
@@ -105,7 +136,7 @@ private _meta = [
     ["zone", _zone],
     ["event", "PLAYER_INTEL"],
     ["callerName", _callerName],
-    ["callerUID", if (isNull _caller) then { "" } else { getPlayerUID _caller }]
+    ["callerUID", _callerUID]
 ];
 
 if ((trim _noteDetails) isNotEqualTo "") then
