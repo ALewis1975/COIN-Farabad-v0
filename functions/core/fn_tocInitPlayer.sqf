@@ -324,14 +324,14 @@ if (!(_mobileOpsVar in _tocVars)) then
             // TOC tasking queue (S3 approval workflow)
             // Moved from hint/id-entry to a dialog-driven workflow to reduce addAction clutter.
             _obj addAction [
-                "[TOC QUEUE] Open Queue Manager",
+                "[TOC QUEUE] Open Queue Manager (View/Approve)",
                 { [] call ARC_fnc_intelUiOpenQueueManager; },
                 [],
                 0.95,
                 true,
                 true,
                 "",
-                "([player] call ARC_fnc_rolesCanApproveQueue)"
+                "[player] call ARC_fnc_rolesIsAuthorized"
             ];
 
             // Follow-on orders (unit must accept)
@@ -586,7 +586,7 @@ _obj addAction ["[MOBILE OPS] Open Ops Screen", { [] call ARC_fnc_uiOpenOpsScree
             }];
             // TOC tasking queue (mobile ops)
             _obj addAction [
-                "[MOBILE QUEUE] Open Queue",
+                "[MOBILE QUEUE] Open Queue (View/Approve)",
                 { [] call ARC_fnc_intelUiOpenQueueManager; },
                 [],
                 0.95,
@@ -698,7 +698,7 @@ _obj addAction ["[MOBILE OPS] Open Ops Screen", { [] call ARC_fnc_uiOpenOpsScree
 
             // TOC tasking queue visibility + S2 lead requests (approval workflow)
             _obj addAction [
-                "[TOC QUEUE] Open Queue",
+                "[TOC QUEUE] Open Queue (View/Approve)",
                 { [] call ARC_fnc_intelUiOpenQueueManager; },
                 [],
                 0.95,
