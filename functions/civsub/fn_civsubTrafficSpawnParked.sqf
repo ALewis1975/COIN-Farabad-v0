@@ -7,6 +7,7 @@
       0: districtId (string)
       1: districtState (HashMap)
       2: vehiclePool (array of classnames)
+      3: spawnCenter (array [x,y,z], optional)
 
     Returns: vehicle object or objNull
 */
@@ -16,7 +17,8 @@ if (!isServer) exitWith {objNull};
 params [
     ["_districtId", "", [""]],
     ["_d", createHashMap, [createHashMap]],
-    ["_pool", [], [[]]]
+    ["_pool", [], [[]]],
+    ["_spawnCenter", [], [[]]]
 ];
 
 if (_districtId isEqualTo "") exitWith {objNull};
@@ -46,29 +48,13 @@ private _r = _d getOrDefault ["radius_m", 400];
 if !(_c isEqualType []) exitWith {objNull};
 if ((count _c) < 2) exitWith {objNull};
 
-// Operating center: average of players within the district (or fallback to centroid).
 private _center = [_c # 0, _c # 1, 0];
-private _players = allPlayers;
-if ((count _players) > 0) then
+if (_spawnCenter isEqualType [] && { (count _spawnCenter) >= 2 }) then
 {
-    private _sumX = 0;
-    private _sumY = 0;
-    private _n = 0;
-    {
-        private _p = getPosATL _x;
-        if ((_p distance2D _center) <= (_r + 200)) then
-        {
-            _sumX = _sumX + (_p # 0);
-            _sumY = _sumY + (_p # 1);
-            _n = _n + 1;
-        };
-    } forEach _players;
-
-    if (_n > 0) then
-    {
-        _center = [_sumX / _n, _sumY / _n, 0];
-    };
+    _center = [_spawnCenter # 0, _spawnCenter # 1, 0];
 };
+
+private _players = allPlayers;
 
 private _spawnR = missionNamespace getVariable ["civsub_v1_traffic_spawnRadius_m", 600];
 if (!(_spawnR isEqualType 0)) then { _spawnR = 600; };
@@ -81,7 +67,7 @@ if (!(_minSep isEqualType 0)) then { _minSep = 35; };
 
 private _pMin = missionNamespace getVariable ["civsub_v1_traffic_playerMinDistance_m", 60];
 if (!(_pMin isEqualType 0)) then { _pMin = 60; };
-_pMin = (_pMin max 0) min 200;
+_pMin = (_pMin max 50) min 300;
 
 // Failure counters (only logged when debug enabled)
 private _fail_noPos = 0;
