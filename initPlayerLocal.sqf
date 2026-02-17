@@ -38,27 +38,9 @@ if (!(missionNamespace getVariable ["ARC_serverReady", false])) then
 // Console resilience: rebind/reinit a few times in case actions/keybinds get cleared
 // by locality swaps, mods, or UI rebuilds.
 // ---------------------------------------------------------------------------
-if (isNil { missionNamespace getVariable "ARC_consoleKeepaliveRunning" }) then
+if (!(missionNamespace getVariable ["ARC_consoleKeepaliveRunning", false])) then
 {
     missionNamespace setVariable ["ARC_consoleKeepaliveRunning", true];
-
-    [] spawn {
-        // Retry window: first minute after join
-        for "_i" from 0 to 11 do
-        {
-            uiSleep 5;
-
-            if (!isNil "ARC_fnc_uiConsoleInitClient") then { [] call ARC_fnc_uiConsoleInitClient; };
-            if (!isNil "ARC_fnc_tocInitPlayer") then { [] call ARC_fnc_tocInitPlayer; };
-        };
-
-        // Slow keepalive thereafter
-        while {true} do
-        {
-            uiSleep 30;
-            if (!isNil "ARC_fnc_uiConsoleInitClient") then { [] call ARC_fnc_uiConsoleInitClient; };
-        };
-    };
 };
 
 // ---------------------------------------------------------------------------
@@ -67,7 +49,7 @@ if (isNil { missionNamespace getVariable "ARC_consoleKeepaliveRunning" }) then
 // - Refreshes briefing/TOC once on join
 // - Refreshes again whenever ARC_pub_stateUpdatedAt changes
 // ---------------------------------------------------------------------------
-if (isNil { missionNamespace getVariable "ARC_clientSnapshotWatcherRunning" }) then
+if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false])) then
 {
     missionNamespace setVariable ["ARC_clientSnapshotWatcherRunning", true];
 
@@ -104,23 +86,75 @@ if (isNil { missionNamespace getVariable "ARC_clientSnapshotWatcherRunning" }) t
 // Ensures mobile TOC vehicles and late-spawned TOC stations always get menus,
 // and recovers if another script clears actions.
 // ---------------------------------------------------------------------------
-player addEventHandler ["GetInMan", { [] call ARC_fnc_tocInitPlayer; }];
-player addEventHandler ["GetOutMan", { [] call ARC_fnc_tocInitPlayer; }];
+if (!(missionNamespace getVariable ["ARC_tocKeepaliveRunning", false])) then
+{
+    missionNamespace setVariable ["ARC_tocKeepaliveRunning", true];
+};
 
-[] spawn {
-    uiSleep 5;
+private _getInEhId = player getVariable ["ARC_tocGetInEhId", -1];
+if (_getInEhId < 0) then
+{
+    _getInEhId = player addEventHandler ["GetInMan", { [] call ARC_fnc_tocInitPlayer; }];
+    player setVariable ["ARC_tocGetInEhId", _getInEhId];
+};
 
-    // Fast retries during early init / JIP timing
-    for "_i" from 0 to 11 do
-    {
-        [] call ARC_fnc_tocInitPlayer;
-        uiSleep 5;
-    };
+private _getOutEhId = player getVariable ["ARC_tocGetOutEhId", -1];
+if (_getOutEhId < 0) then
+{
+    _getOutEhId = player addEventHandler ["GetOutMan", { [] call ARC_fnc_tocInitPlayer; }];
+    player setVariable ["ARC_tocGetOutEhId", _getOutEhId];
+};
 
-    // Keepalive thereafter:
-    while {true} do
-    {
-        [] call ARC_fnc_tocInitPlayer;
-        uiSleep 30;
+// Consolidated scheduler loop for console + TOC safety keepalives.
+if (
+    (missionNamespace getVariable ["ARC_consoleKeepaliveRunning", false]) &&
+    (missionNamespace getVariable ["ARC_tocKeepaliveRunning", false]) &&
+    !(missionNamespace getVariable ["ARC_clientKeepaliveSchedulerRunning", false])
+) then
+{
+    missionNamespace setVariable ["ARC_clientKeepaliveSchedulerRunning", true];
+
+    [] spawn {
+        private _nextConsoleAt = diag_tickTime + 5;
+        private _nextTocAt = diag_tickTime + 5;
+        private _consoleFastRetriesLeft = 12;
+        private _tocFastRetriesLeft = 12;
+
+        while {true} do
+        {
+            private _now = diag_tickTime;
+
+            if (_now >= _nextConsoleAt) then
+            {
+                if (!isNil "ARC_fnc_uiConsoleInitClient") then { [] call ARC_fnc_uiConsoleInitClient; };
+
+                if (_consoleFastRetriesLeft > 0) then
+                {
+                    _consoleFastRetriesLeft = _consoleFastRetriesLeft - 1;
+                    _nextConsoleAt = _now + 5;
+                }
+                else
+                {
+                    _nextConsoleAt = _now + 30;
+                };
+            };
+
+            if (_now >= _nextTocAt) then
+            {
+                if (!isNil "ARC_fnc_tocInitPlayer") then { [] call ARC_fnc_tocInitPlayer; };
+
+                if (_tocFastRetriesLeft > 0) then
+                {
+                    _tocFastRetriesLeft = _tocFastRetriesLeft - 1;
+                    _nextTocAt = _now + 5;
+                }
+                else
+                {
+                    _nextTocAt = _now + 30;
+                };
+            };
+
+            uiSleep 0.25;
+        };
     };
 };
