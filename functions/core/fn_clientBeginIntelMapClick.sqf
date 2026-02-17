@@ -7,6 +7,10 @@
 
 if (!hasInterface) exitWith {false};
 
+
+// If called from an unscheduled UI/event context, re-run scheduled to allow uiSleep/waitUntil.
+if (!canSuspend) exitWith { _this spawn ARC_fnc_clientBeginIntelMapClick; true };
+
 params ["_category"];
 if (_category isEqualTo "") then { _category = "SIGHTING"; };
 
@@ -64,21 +68,6 @@ hint format ["Intel Logging: %1\nClick a position on the map to submit.", toUppe
 
 onMapSingleClick
 {
-    // Derive click position from handler args (onMapSingleClick with CODE uses _this).
-    private _args = _this;
-    private _pos = [];
-    if (_args isEqualType [] && { (count _args) >= 2 }) then { _pos = _args # 1; };
-    if (!(_pos isEqualType []) || { (count _pos) < 2 }) exitWith
-    {
-        // Cleanup and abort (prevents persistent handler).
-        onMapSingleClick "";
-        openMap false;
-        missionNamespace setVariable ["ARC_pendingIntelCategory", nil];
-        missionNamespace setVariable ["ARC_pendingIntelSummary", nil];
-        missionNamespace setVariable ["ARC_pendingIntelDetails", nil];
-        hint "Intel Logging failed: invalid map click position.";
-        false
-    };
     private _cat = missionNamespace getVariable ["ARC_pendingIntelCategory", "SIGHTING"];
     missionNamespace setVariable ["ARC_pendingIntelCategory", nil];
 
