@@ -16,6 +16,15 @@
 
 if (!hasInterface) exitWith {[false, "", ""]};
 
+if (!canSuspend) exitWith {
+    private _args = if (_this isEqualType []) then { +_this } else { [] };
+    _args spawn {
+        diag_log "[FARABAD][PROMPT][SPAWN] reentered scheduled";
+        _this call ARC_fnc_clientIntelPrompt;
+    };
+    [false, "", ""]
+};
+
 params [
     ["_category", "INTEL"],
     ["_defaultSummary", ""],
@@ -47,5 +56,7 @@ if (!(_det isEqualType "")) then { _det = ""; };
 
 _sum = trim _sum;
 _det = trim _det;
+
+diag_log format ["[FARABAD][PROMPT][DONE] ok=%1", _ok];
 
 [_ok, _sum, _det]

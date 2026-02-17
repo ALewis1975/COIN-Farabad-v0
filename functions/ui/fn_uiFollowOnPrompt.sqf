@@ -20,6 +20,14 @@
 
 if (!hasInterface) exitWith { [false] };
 
+if (!canSuspend) exitWith {
+    [] spawn {
+        diag_log "[FARABAD][PROMPT][SPAWN] reentered scheduled";
+        call ARC_fnc_uiFollowOnPrompt;
+    };
+    [false]
+};
+
 uiNamespace setVariable ["ARC_followOn_result", nil];
 
 // Open dialog (defined in config/CfgDialogs.hpp)
@@ -34,9 +42,17 @@ waitUntil {
 private _res = uiNamespace getVariable ["ARC_followOn_result", [false]];
 uiNamespace setVariable ["ARC_followOn_result", nil];
 
-if (!(_res isEqualType [])) exitWith { [false] };
+if (!(_res isEqualType [])) exitWith {
+    diag_log "[FARABAD][PROMPT][DONE] ok=false";
+    [false]
+};
 
 private _ok = _res param [0, false, [true]];
-if (!_ok) exitWith { [false] };
+if (!_ok) exitWith {
+    diag_log format ["[FARABAD][PROMPT][DONE] ok=%1", _ok];
+    [false]
+};
+
+diag_log format ["[FARABAD][PROMPT][DONE] ok=%1", _ok];
 
 _res
