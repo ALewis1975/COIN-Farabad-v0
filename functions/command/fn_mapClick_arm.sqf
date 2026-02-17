@@ -43,7 +43,8 @@ uiNamespace setVariable ["ARC_mapClick_debug", _debug];
 
 onMapSingleClick
 {
-    _this call ARC_fnc_mapClick_onClick;
+    private _payload = [_pos, _units, _shift, _alt];
+    _payload call ARC_fnc_mapClick_onClick;
 };
 
 openMap [true, false];
