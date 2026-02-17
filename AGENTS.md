@@ -1,5 +1,8 @@
 # AGENTS.md — Project Agent Operating Doctrine (AOD)
 
+## Scripting Language
+SQF a/k/a Real Virtuality 4 by Bohemia Interactive. Additionally known as Poseidon. "Poseidon" is the internally used name of the Real Virtuality engine, used to drive all Bohemia Interactive games from Operation Flashpoint to Arma 3.
+
 ## Required PR metadata
 Every PR description MUST include:
 - Mode: A | B | C | D | E | F | G | H | I | J
