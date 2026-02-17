@@ -224,6 +224,42 @@ if (!(isNil "ARC_fnc_consoleThemeGet")) then {
 private _hasCBA = !(isNil "CBA_fnc_addPerFrameHandler");
 [_hasCBA, "UT-ENV-001", "CBA per-frame handler available (optional)", []] call ARC_TEST_fnc_assert;
 
+// Unit: convoy bridge spacing clamp contract
+private _convoyBridgeSpacingFinal = {
+  params ["_bridgeMode", "_spacing", "_bridgeSpacingM"];
+  if (_bridgeMode) then { _spacing min _bridgeSpacingM } else { _spacing };
+};
+[
+  ([true, 59, 35] call _convoyBridgeSpacingFinal) isEqualTo 35,
+  "UT-CONVOY-BRIDGE-001",
+  "bridge mode clamps spacing to tighter bridge spacing"
+] call ARC_TEST_fnc_assert;
+[
+  ([false, 59, 35] call _convoyBridgeSpacingFinal) isEqualTo 59,
+  "UT-CONVOY-BRIDGE-002",
+  "non-bridge mode keeps planned convoy spacing"
+] call ARC_TEST_fnc_assert;
+
+// Unit: non-bridge catch-up thresholds should react before gaps become extreme.
+private _convoyCatchupCap = {
+  params ["_spacing", "_speedKph", "_minKph", "_holdKph", "_slowF", "_holdF", "_maxGap"];
+  private _gapSlow = ((_spacing max 20) * _slowF) max 120;
+  private _gapHold = ((_spacing max 20) * _holdF) max 220;
+  if (_maxGap > _gapHold) exitWith { _holdKph };
+  if (_maxGap > _gapSlow) exitWith { ((_speedKph * 0.60) max _minKph) min _speedKph };
+  _speedKph
+};
+[
+  ([59, 35, 10, 8, 2.2, 3.4, 150] call _convoyCatchupCap) < 35,
+  "UT-CONVOY-CATCHUP-001",
+  "non-bridge moderate tail gap triggers slowdown for cohesion"
+] call ARC_TEST_fnc_assert;
+[
+  ([59, 35, 10, 8, 2.2, 3.4, 230] call _convoyCatchupCap) isEqualTo 8,
+  "UT-CONVOY-CATCHUP-002",
+  "non-bridge large tail gap triggers hold-speed catch-up"
+] call ARC_TEST_fnc_assert;
+
 // Authoritative-only checks (server)
 if (isServer) then {
   ["INFO", "UT-SERVER-000", "Running server-only tests", []] call ARC_TEST_fnc_log;

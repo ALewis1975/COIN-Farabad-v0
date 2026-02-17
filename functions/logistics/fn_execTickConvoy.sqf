@@ -1765,8 +1765,8 @@ if (_catchup && { (count _aliveVeh) >= 2 }
     if (!(_holdF isEqualType 0)) then { _holdF = 3.4; };
     _holdF = (_holdF max 1.8) min 8;
 
-    private _gapSlow = ((_spacing max 20) * _slowF) max 180;
-    private _gapHold = ((_spacing max 20) * _holdF) max 320;
+    private _gapSlow = ((_spacing max 20) * _slowF) max 120;
+    private _gapHold = ((_spacing max 20) * _holdF) max 220;
 
     private _minKph = missionNamespace getVariable ["ARC_convoyCatchupMinSpeedKph", 12];
     if (!(_minKph isEqualType 0)) then { _minKph = 12; };
@@ -1805,7 +1805,7 @@ if (_bridgeMode) then
     _capFinal = _capFinal min _bridgeSpeedKph;
 };
 
-private _spacingFinal = if (_bridgeMode) then { (_spacing max _bridgeSpacingM) } else { _spacing };
+private _spacingFinal = if (_bridgeMode) then { (_spacing min _bridgeSpacingM) } else { _spacing };
 
 {
     if (alive _x) then
