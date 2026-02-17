@@ -382,6 +382,36 @@ if (isNil { missionNamespace getVariable "ARC_convoyVehiclesLogistics" }) then
     ]];
 };
 
+// Convoy role matrix pools (normalized config mirrors for downstream selection logic).
+// Structure: [roleName, [missionNamespace pool keys in priority order]]
+if (isNil { missionNamespace getVariable "ARC_convoyRoleMatrixPoolKeys" }) then
+{
+    missionNamespace setVariable ["ARC_convoyRoleMatrixPoolKeys", [
+        ["lead", ["ARC_convoyVehiclesLead"]],
+        ["escort", ["ARC_convoyVehiclesEscort", "ARC_convoyVehiclesEscortSUV", "ARC_convoyVehiclesEscortVIP"]],
+        ["logistics", ["ARC_convoyVehiclesLogistics", "ARC_rhsConvoyCargoPool_general", "ARC_rhsConvoyCargoPool_fuel", "ARC_rhsConvoyCargoPool_ammo", "ARC_rhsConvoyCargoPool_med", "ARC_rhsConvoyCargoPool_hq", "ARC_rhsConvoyCargoPool_maint"]]
+    ]];
+};
+
+// Convoy class policy defaults (selection logic can consume these without changing call signatures).
+if (isNil { missionNamespace getVariable "ARC_convoyAllowedVehicleSides" }) then { missionNamespace setVariable ["ARC_convoyAllowedVehicleSides", [1]]; }; // WEST
+if (isNil { missionNamespace getVariable "ARC_convoyAllowedCrewSides" }) then { missionNamespace setVariable ["ARC_convoyAllowedCrewSides", [1]]; }; // WEST
+if (isNil { missionNamespace getVariable "ARC_convoyAllowedVehicleFactions" }) then { missionNamespace setVariable ["ARC_convoyAllowedVehicleFactions", []]; }; // empty = no extra faction gate
+if (isNil { missionNamespace getVariable "ARC_convoyAllowedCrewFactions" }) then { missionNamespace setVariable ["ARC_convoyAllowedCrewFactions", []]; }; // empty = no extra faction gate
+if (isNil { missionNamespace getVariable "ARC_convoyEnforceCrewSideWest" }) then { missionNamespace setVariable ["ARC_convoyEnforceCrewSideWest", true]; };
+
+// Bridge fallback defaults (assist/recovery behavior; overridable in initServer).
+if (isNil { missionNamespace getVariable "ARC_convoyBridgeAssistEnabled" }) then { missionNamespace setVariable ["ARC_convoyBridgeAssistEnabled", true, true]; };
+if (isNil { missionNamespace getVariable "ARC_convoyBridgeAssistFollowersEnabled" }) then { missionNamespace setVariable ["ARC_convoyBridgeAssistFollowersEnabled", true, true]; };
+if (isNil { missionNamespace getVariable "ARC_convoyBridgeAssistBypassSec" }) then { missionNamespace setVariable ["ARC_convoyBridgeAssistBypassSec", 14, true]; };
+if (isNil { missionNamespace getVariable "ARC_convoyBridgeAssistFollowerBypassSec" }) then { missionNamespace setVariable ["ARC_convoyBridgeAssistFollowerBypassSec", 10, true]; };
+if (isNil { missionNamespace getVariable "ARC_convoyBridgeAssistFollowerTtlSec" }) then { missionNamespace setVariable ["ARC_convoyBridgeAssistFollowerTtlSec", 90, true]; };
+if (isNil { missionNamespace getVariable "ARC_convoyBridgeStuckSec" }) then { missionNamespace setVariable ["ARC_convoyBridgeStuckSec", 22, true]; };
+if (isNil { missionNamespace getVariable "ARC_convoyBridgeBufferM" }) then { missionNamespace setVariable ["ARC_convoyBridgeBufferM", 22, true]; };
+if (isNil { missionNamespace getVariable "ARC_convoyBridgeAssistOutsideM" }) then { missionNamespace setVariable ["ARC_convoyBridgeAssistOutsideM", 18, true]; };
+if (isNil { missionNamespace getVariable "ARC_convoyBridgeAssistRoadSnapM" }) then { missionNamespace setVariable ["ARC_convoyBridgeAssistRoadSnapM", 10, true]; };
+if (isNil { missionNamespace getVariable "ARC_convoyBridgeAssistPointRadiusM" }) then { missionNamespace setVariable ["ARC_convoyBridgeAssistPointRadiusM", 16, true]; };
+
 if (isNil { missionNamespace getVariable "ARC_debugConvoyLinkup" }) then { missionNamespace setVariable ["ARC_debugConvoyLinkup", false]; };
 // Larger snap radius reduces last-segment offroad shortcuts near airbase/FOBs where objectives may sit off the road grid.
 if (isNil { missionNamespace getVariable "ARC_convoyDestSnapM" }) then { missionNamespace setVariable ["ARC_convoyDestSnapM", 250]; };

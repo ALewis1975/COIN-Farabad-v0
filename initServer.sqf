@@ -446,6 +446,20 @@ missionNamespace setVariable ["ARC_cacheContainerClassPool", [
 missionNamespace setVariable ["ARC_convoyVipPassengersEnabled", true, true];
 missionNamespace setVariable ["ARC_convoyVipGuardCount", 4, true];
 
+// Convoy role matrix pools (explicit overrides; keep current class behavior).
+missionNamespace setVariable ["ARC_convoyRoleMatrixPoolKeys", [
+    ["lead", ["ARC_convoyVehiclesLead"]],
+    ["escort", ["ARC_convoyVehiclesEscort", "ARC_convoyVehiclesEscortSUV", "ARC_convoyVehiclesEscortVIP"]],
+    ["logistics", ["ARC_convoyVehiclesLogistics", "ARC_rhsConvoyCargoPool_general", "ARC_rhsConvoyCargoPool_fuel", "ARC_rhsConvoyCargoPool_ammo", "ARC_rhsConvoyCargoPool_med", "ARC_rhsConvoyCargoPool_hq", "ARC_rhsConvoyCargoPool_maint"]]
+], true];
+
+// Side/faction policy for allowed convoy classes (defaults preserve current WEST-first behavior).
+missionNamespace setVariable ["ARC_convoyAllowedVehicleSides", [1], true];
+missionNamespace setVariable ["ARC_convoyAllowedCrewSides", [1], true];
+missionNamespace setVariable ["ARC_convoyAllowedVehicleFactions", [], true];
+missionNamespace setVariable ["ARC_convoyAllowedCrewFactions", [], true];
+missionNamespace setVariable ["ARC_convoyEnforceCrewSideWest", true, true];
+
 // Bridge handling (assist + stuck recovery)
 missionNamespace setVariable ["ARC_convoyBridgeAssistEnabled", true, true];
 missionNamespace setVariable ["ARC_convoyBridgeAssistBypassSec", 14, true];
