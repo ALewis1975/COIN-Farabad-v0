@@ -28,6 +28,9 @@ private _armedAt = diag_tickTime;
 private _timeout = _ctx getOrDefault ["timeoutSec", 45];
 _timeout = (_timeout max 30) min 60;
 private _deadline = _armedAt + _timeout;
+private _type = toUpper (_ctx getOrDefault ["type", ""]);
+
+diag_log format ["[FARABAD][MAPCLICK][ARM] type=%1 timeoutSec=%2", _type, _timeout];
 
 uiNamespace setVariable ["ARC_mapClick_state", "ARMED"];
 uiNamespace setVariable ["ARC_mapClick_ctx", _ctx];
@@ -72,7 +75,7 @@ waitUntil { uiSleep 0.05; visibleMap };
 
     if (diag_tickTime >= _expireAt) exitWith
     {
-        diag_log format ["[ARC][MAPCLICK][TIMEOUT] token=%1 timeoutSec=%2", _token, _expireAt - _token];
+        diag_log "[FARABAD][MAPCLICK][TIMEOUT]";
         ["TIMEOUT"] call ARC_fnc_mapClick_disarm;
     };
 

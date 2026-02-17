@@ -30,6 +30,7 @@ if (!(_pos isEqualType []) || {count _pos < 2}) exitWith
 };
 
 uiNamespace setVariable ["ARC_mapClick_lastPos", _pos];
+diag_log format ["[FARABAD][MAPCLICK][CLICK] pos=%1", _pos];
 
 private _ok = [_pos] call ARC_fnc_mapClick_submit;
 private _ctx = uiNamespace getVariable ["ARC_mapClick_ctx", createHashMap];
