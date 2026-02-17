@@ -224,6 +224,22 @@ if (!(isNil "ARC_fnc_consoleThemeGet")) then {
 private _hasCBA = !(isNil "CBA_fnc_addPerFrameHandler");
 [_hasCBA, "UT-ENV-001", "CBA per-frame handler available (optional)", []] call ARC_TEST_fnc_assert;
 
+// Unit: convoy bridge spacing clamp contract
+private _convoyBridgeSpacingFinal = {
+  params ["_bridgeMode", "_spacing", "_bridgeSpacingM"];
+  if (_bridgeMode) then { _spacing min _bridgeSpacingM } else { _spacing };
+};
+[
+  ([true, 59, 35] call _convoyBridgeSpacingFinal) isEqualTo 35,
+  "UT-CONVOY-BRIDGE-001",
+  "bridge mode clamps spacing to tighter bridge spacing"
+] call ARC_TEST_fnc_assert;
+[
+  ([false, 59, 35] call _convoyBridgeSpacingFinal) isEqualTo 59,
+  "UT-CONVOY-BRIDGE-002",
+  "non-bridge mode keeps planned convoy spacing"
+] call ARC_TEST_fnc_assert;
+
 // Authoritative-only checks (server)
 if (isServer) then {
   ["INFO", "UT-SERVER-000", "Running server-only tests", []] call ARC_TEST_fnc_log;
