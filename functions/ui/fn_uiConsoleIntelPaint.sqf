@@ -37,6 +37,13 @@ params [
 
 if (isNull _display) exitWith {false};
 
+// Own MainList while INTEL is active so cross-tab rebuild logic can detect transitions.
+private _owner = uiNamespace getVariable ["ARC_console_mainListOwner", ""];
+if (!(_owner isEqualType "")) then { _owner = ""; };
+_owner = toUpper (trim _owner);
+if (_owner isNotEqualTo "INTEL") then { _rebuild = true; };
+uiNamespace setVariable ["ARC_console_mainListOwner", "INTEL"];
+
 private _list    = _display displayCtrl 78011;
 private _details = _display displayCtrl 78012;
 private _b1      = _display displayCtrl 78021;
@@ -1081,6 +1088,16 @@ _details ctrlSetStructuredText parseText _txt;
 
 // Auto-fit + clamp to the DetailsGroup (78016) so the group scrolls vertically when needed,
 // but NEVER forces horizontal scrolling or overlaps the S2 workflow controls.
+// IMPORTANT: 78012 is a child control of 78016, so x/y/w must remain in group-local
+// coordinates (not absolute safeZone/display coordinates), otherwise the text pane drifts
+// to the far right/off-screen on repeated paints.
+private _defaultPos = uiNamespace getVariable ["ARC_console_intelDetailsDefaultPos", []];
+if (!(_defaultPos isEqualType []) || { (count _defaultPos) < 4 }) then
+{
+    _defaultPos = ctrlPosition _details;
+    uiNamespace setVariable ["ARC_console_intelDetailsDefaultPos", +_defaultPos];
+};
+
 [_details] call BIS_fnc_ctrlFitToTextHeight;
 
 private _grp = _display displayCtrl 78016;
@@ -1088,12 +1105,11 @@ if (!isNull _grp) then {
     private _pg = ctrlPosition _grp;
     private _xG = _pg # 0;
     private _yG = _pg # 1;
-    private _wG = _pg # 2;
     private _hG = _pg # 3;
 
-    // Determine the lowest visible workflow control bottom edge inside the group.
+    // Determine the lowest visible workflow control bottom edge that intersects
+    // the details group horizontally.
     private _padY = 0.006;
-    private _padX = 0.002;
 
     private _maxBottom = _yG;
     {
@@ -1107,28 +1123,26 @@ if (!isNull _grp) then {
         };
     } forEach [_lblMethod,_cmbMethod,_lblCat,_cmbCat,_lblLead,_cmbLead];
 
-    // Available rectangle for details text within the group.
-    private _x = _xG + _padX;
-    private _y = (_maxBottom + _padY) max (_yG + _padY);
-    private _w = (_wG - (_padX * 2)) max 0.02;
-    private _availH = (_yG + _hG) - _y;
-    if (_availH < 0.02) then { _availH = 0.02; };
+    // Convert absolute y into group-local y and pin x/w to the designed defaults.
+    private _yLocal = ((_maxBottom + _padY) - _yG) max (_defaultPos # 1);
+    private _availH = (_hG - _yLocal) max 0.02;
 
     private _pD = ctrlPosition _details;
     private _fitH = _pD # 3;
 
-    // Keep fit height if it exceeds available height so the group can scroll vertically,
-    // but constrain width strictly to avoid horizontal scrollbars.
-    _pD set [0, _x];
-    _pD set [1, _y];
-    _pD set [2, _w];
+    _pD set [0, _defaultPos # 0];
+    _pD set [1, _yLocal];
+    _pD set [2, _defaultPos # 2];
     _pD set [3, _fitH max _availH];
 
     _details ctrlSetPosition _pD;
     _details ctrlCommit 0;
 } else {
-    // Fallback: just commit the fitted height.
+    // Fallback: keep inset x/y/w stable and apply fitted height.
     private _pD = ctrlPosition _details;
+    _pD set [0, _defaultPos # 0];
+    _pD set [1, _defaultPos # 1];
+    _pD set [2, _defaultPos # 2];
     _details ctrlSetPosition _pD;
     _details ctrlCommit 0;
 };

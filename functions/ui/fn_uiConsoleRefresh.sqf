@@ -95,6 +95,16 @@ if (_tab != "INTEL" && { _s2CatPanels isEqualType [] }) then {
     } forEach _s2CatPanels;
 };
 
+// Hide HQ stacked sub-panels (if present) unless HQ tab is active.
+private _hqSubPanels = uiNamespace getVariable ["ARC_hq_subPanels", []];
+if (_tab != "HQ" && { _hqSubPanels isEqualType [] }) then {
+    {
+        if (_x isEqualType [] && { (count _x) == 3 }) then {
+            { if (!isNull _x) then { _x ctrlShow false; _x ctrlEnable false; }; } forEach _x;
+        };
+    } forEach _hqSubPanels;
+};
+
 // Regression guard: restore shared control positions when leaving S2/INTEL.
 // S2 Intel paint may temporarily resize/reposition MainList and workflow controls.
 // Other tabs must not inherit that layout.
