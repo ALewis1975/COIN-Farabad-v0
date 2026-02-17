@@ -3,7 +3,7 @@ name: Arma SQF + Mission Config Preflight
 on:
   pull_request:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
 
 jobs:
   preflight:
@@ -27,21 +27,43 @@ jobs:
         run: |
           set -euo pipefail
 
-          find . -type f -name "*.sqf"             ! -path "./.git/*"             ! -path "./.github/*"             ! -path "./.vscode/*"             ! -path "./node_modules/*"             ! -path "./dist/*"             ! -path "./build/*"             -print0 | xargs -0 -n 1 sqflint -e w
+          mapfile -d '' sqf_files < <(
+            find . -type f -name "*.sqf" \
+              ! -path "./.git/*" \
+              ! -path "./.github/*" \
+              ! -path "./.vscode/*" \
+              ! -path "./node_modules/*" \
+              ! -path "./dist/*" \
+              ! -path "./build/*" \
+              -print0
+          )
+
+          if [ ${#sqf_files[@]} -eq 0 ]; then
+            echo "No SQF files found."
+            exit 0
+          fi
+
+          printf '%s\0' "${sqf_files[@]}" | xargs -0 -n 1 sqflint -e w
 
       - name: Mission config sanity checks (description.ext, ui/**/*.hpp, etc.)
         run: |
           python - <<'PY'
-          import re
           import sys
           from pathlib import Path
 
           include_names = {"description.ext"}
           include_exts = {".hpp", ".h", ".inc", ".cfg", ".ext"}
+          excluded_path_parts = {
+              ".git", ".github", ".vscode", "node_modules", "dist", "build", "vendor", "generated"
+          }
 
           candidates = []
-          for p in Path(".").rglob("*"):
+          root = Path(".")
+          for p in root.rglob("*"):
               if not p.is_file():
+                  continue
+              rel_parts = set(p.relative_to(root).parts)
+              if rel_parts & excluded_path_parts:
                   continue
               if p.name in include_names or p.suffix.lower() in include_exts:
                   candidates.append(p)
@@ -61,7 +83,7 @@ jobs:
 
               while i < n:
                   ch = text[i]
-                  nxt = text[i+1] if i+1 < n else ""
+                  nxt = text[i + 1] if i + 1 < n else ""
 
                   if in_line_comment:
                       if ch == "\n":
@@ -113,7 +135,7 @@ jobs:
               issues = []
               stripped = strip_strings_and_comments(raw)
 
-              pairs = { "{": "}", "(": ")", "[": "]" }
+              pairs = {"{": "}", "(": ")", "[": "]"}
               stack = []
 
               for ch in stripped:
