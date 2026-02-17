@@ -66,27 +66,17 @@ openMap true;
 waitUntil { uiSleep 0.05; visibleMap };
 hint format ["Intel Logging: %1\nClick a position on the map to submit.", toUpper _category];
 
-onMapSingleClick
-{
-    private _cat = missionNamespace getVariable ["ARC_pendingIntelCategory", "SIGHTING"];
-    missionNamespace setVariable ["ARC_pendingIntelCategory", nil];
+private _ctx = createHashMapFromArray [
+    ["type", "INTEL_LOG"],
+    ["category", missionNamespace getVariable ["ARC_pendingIntelCategory", "SIGHTING"]],
+    ["summary", missionNamespace getVariable ["ARC_pendingIntelSummary", "No details provided."]],
+    ["details", missionNamespace getVariable ["ARC_pendingIntelDetails", ""]]
+];
 
-    private _sum = missionNamespace getVariable ["ARC_pendingIntelSummary", "No details provided."];
-    private _det = missionNamespace getVariable ["ARC_pendingIntelDetails", ""];
-    missionNamespace setVariable ["ARC_pendingIntelSummary", nil];
-    missionNamespace setVariable ["ARC_pendingIntelDetails", nil];
+[_ctx] call ARC_fnc_mapClick_arm;
 
-    // Cleanup first (prevents double-submits)
-    onMapSingleClick "";
-
-    private _reporter = name player;
-
-    [player, _reporter, _cat, _pos, _sum, _det] remoteExec ["ARC_fnc_tocRequestLogIntel", 2];
-
-    openMap false;
-
-    hint format ["Submitted intel (%1) at %2.", _cat, mapGridPosition _pos];
-    true
-};
+missionNamespace setVariable ["ARC_pendingIntelCategory", nil];
+missionNamespace setVariable ["ARC_pendingIntelSummary", nil];
+missionNamespace setVariable ["ARC_pendingIntelDetails", nil];
 
 true

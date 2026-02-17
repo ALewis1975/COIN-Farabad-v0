@@ -400,6 +400,12 @@ class CfgFunctions
             class intelOrderCompleteRtbEpw {};
 
             class intelClientBeginLeadRequestMapClick {};
+
+            class mapClick_arm {};
+            class mapClick_disarm {};
+            class mapClick_onClick {};
+            class mapClick_submit {};
+
             class intelClientTocIssueOrderPrompt {};
 
             // UI helpers (TOC queue manager)

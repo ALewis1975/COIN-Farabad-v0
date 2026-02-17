@@ -116,45 +116,24 @@ if (_reopenConsole) then
 };
 
 hint "Map click to place the LEAD REQUEST (Esc to cancel).";
-openMap [true, false];
 
-private _mapClickCode = [
-    "private _p = _pos;",
-"if (!(_p isEqualType []) || { (count _p) < 2 }) exitWith { hint 'Map click failed: invalid position.'; onMapSingleClick '' ; openMap [false,false]; false; };",
-"_pos = _p;",
-    "",
-    "private _leadType = missionNamespace getVariable ['ARC_lastLeadReqType','RECON'];",
-    "private _sum = missionNamespace getVariable ['ARC_lastLeadReqSummary','Lead: Unknown'];",
-    "private _det = missionNamespace getVariable ['ARC_lastLeadReqDetails',''];",
-    "private _conf = missionNamespace getVariable ['ARC_lastLeadReqConfidence','MED'];",
-    "private _strength = missionNamespace getVariable ['ARC_lastLeadReqStrength',0.55];",
-    "private _ttl = missionNamespace getVariable ['ARC_lastLeadReqTTL',3600];",
-    "",
-    "private _payload = [",
-    "    ['leadType', _leadType],",
-    "    ['displayName', _sum],",
-    "    ['strength', _strength],",
-    "    ['ttl', _ttl],",
-    "    ['confidence', _conf],",
-    "    ['tag', 'S2_REQUEST']",
-    "];",
-    "",
-    "[",
-    "    player,",
-    "    'LEAD_REQUEST',",
-    "    _payload,",
-    "    _sum,",
-    "    _det,",
-    "    _pos,",
-    "    [ ['source','S2_MAPCLICK'] ]",
-    "] remoteExec ['ARC_fnc_intelQueueSubmit', 2];",
-    "",
-    "hint 'Lead request submitted to TOC queue.';",
-    "openMap [false, false];",
-    "onMapSingleClick '';",
-    "true;"
-] joinString "\n";
+private _ctx = createHashMapFromArray [
+    ["type", "LEAD_REQ"],
+    ["leadType", missionNamespace getVariable ["ARC_lastLeadReqType", "RECON"]],
+    ["summary", missionNamespace getVariable ["ARC_lastLeadReqSummary", "Lead: Unknown"]],
+    ["details", missionNamespace getVariable ["ARC_lastLeadReqDetails", ""]],
+    ["confidence", missionNamespace getVariable ["ARC_lastLeadReqConfidence", "MED"]],
+    ["strength", missionNamespace getVariable ["ARC_lastLeadReqStrength", 0.55]],
+    ["ttl", missionNamespace getVariable ["ARC_lastLeadReqTTL", 3600]]
+];
 
-onMapSingleClick _mapClickCode;
+[_ctx] call ARC_fnc_mapClick_arm;
+
+missionNamespace setVariable ["ARC_lastLeadReqType", nil];
+missionNamespace setVariable ["ARC_lastLeadReqSummary", nil];
+missionNamespace setVariable ["ARC_lastLeadReqDetails", nil];
+missionNamespace setVariable ["ARC_lastLeadReqConfidence", nil];
+missionNamespace setVariable ["ARC_lastLeadReqStrength", nil];
+missionNamespace setVariable ["ARC_lastLeadReqTTL", nil];
 
 true
