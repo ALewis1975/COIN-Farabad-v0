@@ -1018,6 +1018,7 @@ case "IED":
     ["activeConvoyLastRecoveryAt", -1] call ARC_fnc_stateSet;
     ["activeConvoyBypassUntil", -1] call ARC_fnc_stateSet;
     ["activeConvoyIngressPos", []] call ARC_fnc_stateSet;
+    ["activeConvoyRolePlan", []] call ARC_fnc_stateSet;
 
     // Clear route recon fields (RECON route variant)
     ["activeReconRouteEnabled", false] call ARC_fnc_stateSet;
@@ -2127,7 +2128,59 @@ for "_i" from 0 to (_rmCount - 1) do
             private _min = (_f min _a) min _m;
             _supplyKind = if (_min isEqualTo _f) then {"FUEL"} else { if (_min isEqualTo _a) then {"AMMO"} else {"MED"} };
         };
+
+        // Convoy role-bundle plan: map incident context to stable role identifiers for spawn-time consumption.
+        // Stored as key/value pairs for broad SQF compatibility (no hashMap dependency).
+        private _isVipEscort = false;
+        if (_typeU isEqualTo "ESCORT") then
+        {
+            private _incidentMarker = ["activeIncidentMarker", ""] call ARC_fnc_stateGet;
+            if (!(_incidentMarker isEqualType "")) then { _incidentMarker = ""; };
+
+            private _incidentName = ["activeIncidentName", ""] call ARC_fnc_stateGet;
+            if (!(_incidentName isEqualType "")) then { _incidentName = ""; };
+
+            if (_incidentMarker in ["ARC_loc_PresidentialPalace", "ARC_loc_EmbassyCompound"]) then
+            {
+                _isVipEscort = true;
+            }
+            else
+            {
+                private _nU = toUpper _incidentName;
+                _isVipEscort = ((_nU find "MOTORCADE") >= 0)
+                    || { (_nU find "DIPLOMATIC") >= 0 }
+                    || { (_nU find "VIP") >= 0 };
+            };
+        };
+
+        private _roleBundleId = switch (_typeU) do
+        {
+            case "LOGISTICS":
+            {
+                switch (_supplyKind) do
+                {
+                    case "FUEL": { "LOGISTICS_FUEL" };
+                    case "AMMO": { "LOGISTICS_AMMO" };
+                    case "MED":  { "LOGISTICS_MED" };
+                    default        { "LOGISTICS_GENERAL" };
+                };
+            };
+            case "ESCORT": { if (_isVipEscort) then { "ESCORT_VIP" } else { "ESCORT_STANDARD" } };
+            default { "CONVOY_GENERIC" };
+        };
+
+        private _rolePlan = [
+            ["incidentType", _typeU],
+            ["bundleId", _roleBundleId],
+            ["supplyKind", _supplyKind],
+            ["vipEscort", _isVipEscort],
+            ["leadRole", "lead"],
+            ["escortRole", "escort"],
+            ["logisticsRole", "logistics"]
+        ];
+
         ["activeConvoySupplyKind", _supplyKind] call ARC_fnc_stateSet;
+        ["activeConvoyRolePlan", _rolePlan] call ARC_fnc_stateSet;
 
         // Convoy spawn is handled by execTickConvoy (async) so we can spawn sequentially
         // without stalling the exec loop (and to prevent duplicate spawns).
