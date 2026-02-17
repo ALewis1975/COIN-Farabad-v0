@@ -8,6 +8,13 @@
 
 if (!hasInterface) exitWith {false};
 
+private _state = uiNamespace getVariable ["ARC_mapClick_state", "IDLE"];
+private _cleanupDone = uiNamespace getVariable ["ARC_mapClick_cleanupDone", false];
+if (_cleanupDone || {!(_state isEqualTo "ARMED")}) exitWith {false};
+
+uiNamespace setVariable ["ARC_mapClick_state", "CAPTURED"];
+onMapSingleClick "";
+
 private _evt = _this;
 private _pos = [];
 if ((_evt isEqualType []) && {count _evt > 1}) then
@@ -18,7 +25,7 @@ if ((_evt isEqualType []) && {count _evt > 1}) then
 if (!(_pos isEqualType []) || {count _pos < 2}) exitWith
 {
     hint "Map click failed: invalid position.";
-    ["invalid_pos"] call ARC_fnc_mapClick_disarm;
+    ["CANCELLED"] call ARC_fnc_mapClick_disarm;
     false
 };
 
@@ -49,12 +56,12 @@ if (_ok) then
         };
     };
 
-    ["submitted"] call ARC_fnc_mapClick_disarm;
+    ["SUBMITTED"] call ARC_fnc_mapClick_disarm;
     true
 }
 else
 {
     hint "Map click submit failed.";
-    ["submit_failed"] call ARC_fnc_mapClick_disarm;
+    ["CANCELLED"] call ARC_fnc_mapClick_disarm;
     false
 };

@@ -17,19 +17,25 @@ if (!canSuspend) exitWith { _this spawn ARC_fnc_mapClick_arm; true };
 params [["_ctx", createHashMap]];
 if !(_ctx isEqualType createHashMap) then { _ctx = createHashMap; };
 
-if ((uiNamespace getVariable ["ARC_mapClick_state", "IDLE"]) isEqualTo "ARMED") then
+private _state = uiNamespace getVariable ["ARC_mapClick_state", "IDLE"];
+if (_state in ["ARMED", "CAPTURED"]) then
 {
-    ["rearm"] call ARC_fnc_mapClick_disarm;
+    ["REARM"] call ARC_fnc_mapClick_disarm;
 };
 
 private _debug = uiNamespace getVariable ["ARC_mapClick_debug", false];
 private _armedAt = diag_tickTime;
+private _timeout = _ctx getOrDefault ["timeoutSec", 45];
+_timeout = (_timeout max 30) min 60;
+private _deadline = _armedAt + _timeout;
 
 uiNamespace setVariable ["ARC_mapClick_state", "ARMED"];
 uiNamespace setVariable ["ARC_mapClick_ctx", _ctx];
 uiNamespace setVariable ["ARC_mapClick_armedAt", _armedAt];
+uiNamespace setVariable ["ARC_mapClick_deadline", _deadline];
 uiNamespace setVariable ["ARC_mapClick_lastPos", nil];
 uiNamespace setVariable ["ARC_mapClick_lastErr", ""];
+uiNamespace setVariable ["ARC_mapClick_cleanupDone", false];
 uiNamespace setVariable ["ARC_mapClick_debug", _debug];
 
 onMapSingleClick
@@ -40,24 +46,39 @@ onMapSingleClick
 openMap [true, false];
 waitUntil { uiSleep 0.05; visibleMap };
 
-[_armedAt] spawn
+[_armedAt, _deadline] spawn
 {
-    params ["_token"];
+    params ["_token", "_expireAt"];
 
     waitUntil
     {
         uiSleep 0.05;
 
-        private _state = uiNamespace getVariable ["ARC_mapClick_state", "IDLE"];
-        (_state != "ARMED") || {!visibleMap}
+        private _stateNow = uiNamespace getVariable ["ARC_mapClick_state", "IDLE"];
+        private _armedAtNow = uiNamespace getVariable ["ARC_mapClick_armedAt", nil];
+        private _cleanupDone = uiNamespace getVariable ["ARC_mapClick_cleanupDone", true];
+
+        _cleanupDone
+        || {!(_armedAtNow isEqualTo _token)}
+        || {(_stateNow != "ARMED")}
+        || {!visibleMap}
+        || {diag_tickTime >= _expireAt}
     };
 
     private _stateNow = uiNamespace getVariable ["ARC_mapClick_state", "IDLE"];
     private _armedAtNow = uiNamespace getVariable ["ARC_mapClick_armedAt", nil];
-    if ((_stateNow isEqualTo "ARMED") && {!visibleMap} && {_armedAtNow isEqualTo _token}) then
+    private _cleanupDone = uiNamespace getVariable ["ARC_mapClick_cleanupDone", true];
+    if (_cleanupDone || {!(_armedAtNow isEqualTo _token)} || {!(_stateNow isEqualTo "ARMED")}) exitWith {};
+
+    if (diag_tickTime >= _expireAt) exitWith
     {
-        hint "Map click canceled.";
-        ["map_closed"] call ARC_fnc_mapClick_disarm;
+        diag_log format ["[ARC][MAPCLICK][TIMEOUT] token=%1 timeoutSec=%2", _token, _expireAt - _token];
+        ["TIMEOUT"] call ARC_fnc_mapClick_disarm;
+    };
+
+    if (!visibleMap) then
+    {
+        ["CANCELLED"] call ARC_fnc_mapClick_disarm;
     };
 };
 
