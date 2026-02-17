@@ -27,7 +27,8 @@ private _ctrlList = _display displayCtrl 78011;
 private _owner = uiNamespace getVariable ["ARC_console_mainListOwner", ""];
 if (!(_owner isEqualType "")) then { _owner = ""; };
 _owner = toUpper (trim _owner);
-if (_owner isNotEqualTo "HQ") then { _rebuild = true; };
+private _ownerChanged = (_owner isNotEqualTo "HQ");
+if (_ownerChanged) then { _rebuild = true; };
 uiNamespace setVariable ["ARC_console_mainListOwner", "HQ"];
 private _ctrlDetails = _display displayCtrl 78012;
 private _b1 = _display displayCtrl 78021;
@@ -224,14 +225,23 @@ if (!isNull _ctrlList) then
 {
     private _hasRows = (lbSize _ctrlList) > 0;
 
-    if (_lastMode isNotEqualTo _mode) then
+    // Always rebuild when entering HQ from another tab to replace any foreign rows
+    // (e.g., INTEL/S2 data) with HQ data before projecting into sub-panels.
+    if (_ownerChanged) then
     {
         _needRebuild = true;
     }
     else
     {
-        // Same mode as last paint: only rebuild if the list is empty.
-        if (_hasRows) then { _needRebuild = false; };
+        if (_lastMode isNotEqualTo _mode) then
+        {
+            _needRebuild = true;
+        }
+        else
+        {
+            // Same mode as last paint: only rebuild if the list is empty.
+            if (_hasRows) then { _needRebuild = false; };
+        };
     };
 };
 
