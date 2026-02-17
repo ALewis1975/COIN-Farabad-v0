@@ -1911,6 +1911,29 @@ _lastMovePos = +_lastMovePos; _lastMovePos resize 3;
 private _curPos = getPosATL _lead;
 _curPos = +_curPos; _curPos resize 3;
 
+private _fn_logBridgeAssistOpsOnce = {
+    params ["_eventName", "_msg", "_markerName", "_leadSpeedKph", "_stuckSecs", "_wpCount"];
+
+    private _prev = ["activeConvoyBridgeAssistOpsState", ""] call ARC_fnc_stateGet;
+    if !(_prev isEqualType "") then { _prev = ""; };
+    if (_prev isEqualTo _eventName) exitWith {};
+
+    ["activeConvoyBridgeAssistOpsState", _eventName] call ARC_fnc_stateSet;
+    [
+        "OPS",
+        _msg,
+        _curPos,
+        [
+            ["event", _eventName],
+            ["marker", _markerName],
+            ["leadSpeed", round _leadSpeedKph],
+            ["stuckDuration", round _stuckSecs],
+            ["waypointCount", _wpCount],
+            ["taskId", _taskId]
+        ]
+    ] call ARC_fnc_intelLog;
+};
+
 // Treat the convoy as "moving" if it has displaced meaningfully, or it is still rolling.
 private _moveDist = if (_bridgeLeadMode) then { 4 } else { 8 };
 private _moveSpd  = if (_bridgeLeadMode) then { 2 } else { 6 };
@@ -1922,10 +1945,38 @@ if (_moved) then
     ["activeConvoyLastMovePos", _curPos] call ARC_fnc_stateSet;
     ["activeConvoyRecoveryLastStageLogged", -1] call ARC_fnc_stateSet;
     ["activeConvoyBridgeRecoverLogState", "off"] call ARC_fnc_stateSet;
+
+    if (_bridgeMode) then
+    {
+        [
+            "ASSIST_SKIPPED_NOT_STUCK",
+            "Bridge assist skipped: lead has resumed movement.",
+            _bridgeMarkerLead,
+            speed _lead,
+            0,
+            count (waypoints _grpW)
+        ] call _fn_logBridgeAssistOpsOnce;
+    }
+    else
+    {
+        ["activeConvoyBridgeAssistOpsState", ""] call ARC_fnc_stateSet;
+    };
 }
 else
 {
     private _stuckFor = _now - _lastMoveAt;
+
+    if (_bridgeMode && { _stuckFor < _stuckSec }) then
+    {
+        [
+            "ASSIST_SKIPPED_NOT_STUCK",
+            "Bridge assist skipped: stall duration has not reached threshold.",
+            _bridgeMarkerLead,
+            speed _lead,
+            _stuckFor,
+            count (waypoints _grpW)
+        ] call _fn_logBridgeAssistOpsOnce;
+    };
 
     // Fallback bridge/chokepoint mode is only allowed when mission markers are unavailable.
     if (!_bridgeMarkersAvailable && { _bridgeFallbackEnabled } && { _stuckFor >= _stuckSec } && { (speed _lead) < 2.5 }) then
@@ -2071,8 +2122,38 @@ else
                             _grpW setCurrentWaypoint ((waypoints _grpW) select 0);
                         };
 
-                        ["OPS", format ["Bridge assist: stalled in %1; injecting micro-waypoints to clear the bridge.", _bridgeMarkerLead], _curPos, [["event", "CONVOY_BRIDGE_ASSIST"], ["marker", _bridgeMarkerLead], ["taskId", _taskId]]] call ARC_fnc_intelLog;
+                        [
+                            "ASSIST_APPLIED",
+                            format ["Bridge assist applied in %1; injected micro-waypoints to clear the bridge.", _bridgeMarkerLead],
+                            _bridgeMarkerLead,
+                            speed _lead,
+                            _stuckFor,
+                            count _ptsB
+                        ] call _fn_logBridgeAssistOpsOnce;
+                    }
+                    else
+                    {
+                        [
+                            "ASSIST_SKIPPED_NO_POINTS",
+                            format ["Bridge assist skipped in %1: no valid assist points generated.", _bridgeMarkerLead],
+                            _bridgeMarkerLead,
+                            speed _lead,
+                            _stuckFor,
+                            count (waypoints _grpW)
+                        ] call _fn_logBridgeAssistOpsOnce;
                     };
+                };
+
+                if (_assistEn && { !_bridgeAssistReady }) then
+                {
+                    [
+                        "ASSIST_SKIPPED_COOLDOWN",
+                        format ["Bridge assist skipped in %1: recovery cooldown is active.", _bridgeMarkerLead],
+                        _bridgeMarkerLead,
+                        speed _lead,
+                        _stuckFor,
+                        count (waypoints _grpW)
+                    ] call _fn_logBridgeAssistOpsOnce;
                 };
             };
 
