@@ -1774,6 +1774,25 @@ if (_showSpawnMarker) then
             private _diagAStarSucceeded = false;
             private _diagFallbackUsed = false;
 
+            private _fn_logRouteResult = {
+                params ["_aStarOk", "_fallbackUsed", "_pts", ["_reason", ""]];
+
+                private _lenM = [_pts] call _fn_routeLen;
+                private _nPts = if (_pts isEqualType []) then { count _pts } else { 0 };
+
+                _routeBuildDiag pushBack [_aStarOk, _fallbackUsed, _nPts, _lenM];
+                if (_fallbackUsed) then { _routeUsedFallbackAny = true; };
+
+                diag_log format [
+                    "[ARC][ConvoyRoute] A* success=%1 fallback=%2 points=%3 lenM=%4 reason=%5",
+                    _aStarOk,
+                    _fallbackUsed,
+                    _nPts,
+                    round _lenM,
+                    _reason
+                ];
+            };
+
             private _fn_routeLen = {
                 params ["_pts"];
 
@@ -1796,41 +1815,84 @@ if (_showSpawnMarker) then
                 if (!(_hardSnap isEqualType 0)) then { _hardSnap = (_snapLocal * 4); };
                 _hardSnap = (_hardSnap max (_snapLocal + 80)) min 1400;
 
-                private _probe = [_s, _e];
-                _probe pushBack [(_s # 0) + ((_e # 0) - (_s # 0)) * 0.25, (_s # 1) + ((_e # 1) - (_s # 1)) * 0.25, 0];
-                _probe pushBack [(_s # 0) + ((_e # 0) - (_s # 0)) * 0.50, (_s # 1) + ((_e # 1) - (_s # 1)) * 0.50, 0];
-                _probe pushBack [(_s # 0) + ((_e # 0) - (_s # 0)) * 0.75, (_s # 1) + ((_e # 1) - (_s # 1)) * 0.75, 0];
+                private _sampleStep = missionNamespace getVariable ["ARC_convoyFallbackSampleStepM", 180];
+                if (!(_sampleStep isEqualType 0)) then { _sampleStep = 180; };
+                _sampleStep = (_sampleStep max 80) min 500;
 
-                private _roadPts = [];
+                private _distSE = _s distance2D _e;
+                private _sampleCount = ceil (_distSE / _sampleStep);
+                _sampleCount = (_sampleCount max 2) min 32;
+
+                private _fallback = [];
+                for "_si" from 0 to _sampleCount do
                 {
+                    private _t = _si / _sampleCount;
+                    private _probe = [
+                        (_s # 0) + ((_e # 0) - (_s # 0)) * _t,
+                        (_s # 1) + ((_e # 1) - (_s # 1)) * _t,
+                        0
+                    ];
+
                     private _r = if (_avoidZoneLocal isNotEqualTo "") then
                     {
-                        [_x, _hardSnap, _avoidZoneLocal, _avoidNearLocal, _avoidNearRLocal] call _fn_nearestRoad
+                        [_probe, _hardSnap, _avoidZoneLocal, _avoidNearLocal, _avoidNearRLocal] call _fn_nearestRoad
                     }
                     else
                     {
-                        [_x, _hardSnap] call _fn_nearestRoad
+                        [_probe, _hardSnap] call _fn_nearestRoad
                     };
 
+                    private _pt = +_probe;
                     if (!isNull _r) then
                     {
-                        private _rp = getPosATL _r;
-                        _rp resize 3;
-                        if ((count _roadPts) isEqualTo 0 || { (_rp distance2D (_roadPts # ((count _roadPts) - 1))) > 20 }) then
-                        {
-                            _roadPts pushBack _rp;
-                        };
+                        _pt = getPosATL _r;
+                        _pt resize 3;
                     };
-                } forEach _probe;
 
-                private _fallback = [+_s];
-                _fallback append _roadPts;
-                _fallback pushBack (+_e);
+                    if ((count _fallback) isEqualTo 0 || { _pt distance2D (_fallback # ((count _fallback) - 1)) > 20 }) then
+                    {
+                        _fallback pushBack _pt;
+                    };
+                };
 
                 if ((count _fallback) < 3) then
                 {
                     private _mid = [(_s # 0) + ((_e # 0) - (_s # 0)) * 0.50, (_s # 1) + ((_e # 1) - (_s # 1)) * 0.50, 0];
-                    _fallback insert [1, [_mid]];
+                    _fallback = [+_s, _mid, +_e];
+                };
+
+                // Snap endpoints to nearby roads (if available) so fallback remains road-biased.
+                private _rStart = if (_avoidZoneLocal isNotEqualTo "") then
+                {
+                    [_s, _hardSnap, _avoidZoneLocal, _avoidNearLocal, _avoidNearRLocal] call _fn_nearestRoad
+                }
+                else
+                {
+                    [_s, _hardSnap] call _fn_nearestRoad
+                };
+
+                private _rEnd = if (_avoidZoneLocal isNotEqualTo "") then
+                {
+                    [_e, _hardSnap, _avoidZoneLocal, _avoidNearLocal, _avoidNearRLocal] call _fn_nearestRoad
+                }
+                else
+                {
+                    [_e, _hardSnap] call _fn_nearestRoad
+                };
+
+                if ((count _fallback) > 0) then
+                {
+                    if (!isNull _rStart) then
+                    {
+                        private _ps = getPosATL _rStart; _ps resize 3;
+                        _fallback set [0, _ps];
+                    };
+
+                    if (!isNull _rEnd) then
+                    {
+                        private _pe = getPosATL _rEnd; _pe resize 3;
+                        _fallback set [((count _fallback) - 1), _pe];
+                    };
                 };
 
                 _fallback
@@ -1859,10 +1921,7 @@ if (_showSpawnMarker) then
             {
                 _diagFallbackUsed = true;
                 private _fb = [_pStart, _pEnd, _snap, _avoidZone, _avoidNear, _avoidNearR] call _fn_fallbackRoute;
-                private _fbLen = [_fb] call _fn_routeLen;
-                _routeBuildDiag pushBack [false, _diagFallbackUsed, count _fb, _fbLen];
-                _routeUsedFallbackAny = true;
-                diag_log format ["[ARC][ConvoyRoute] A* success=%1 fallback=%2 points=%3 lenM=%4", false, _diagFallbackUsed, count _fb, round _fbLen];
+                [false, _diagFallbackUsed, _fb, "snap_failed"] call _fn_logRouteResult;
                 _fb
             };
 
@@ -1967,10 +2026,7 @@ if (_showSpawnMarker) then
             {
                 _diagFallbackUsed = true;
                 private _fb = [_pStart, _pEnd, _snap, _avoidZone, _avoidNear, _avoidNearR] call _fn_fallbackRoute;
-                private _fbLen = [_fb] call _fn_routeLen;
-                _routeBuildDiag pushBack [false, _diagFallbackUsed, count _fb, _fbLen];
-                _routeUsedFallbackAny = true;
-                diag_log format ["[ARC][ConvoyRoute] A* success=%1 fallback=%2 points=%3 lenM=%4", false, _diagFallbackUsed, count _fb, round _fbLen];
+                [false, _diagFallbackUsed, _fb, "astar_no_path"] call _fn_logRouteResult;
                 _fb
             };
 
@@ -1993,10 +2049,7 @@ if (_showSpawnMarker) then
             {
                 _diagFallbackUsed = true;
                 private _fb = [_pStart, _pEnd, _snap, _avoidZone, _avoidNear, _avoidNearR] call _fn_fallbackRoute;
-                private _fbLen = [_fb] call _fn_routeLen;
-                _routeBuildDiag pushBack [false, _diagFallbackUsed, count _fb, _fbLen];
-                _routeUsedFallbackAny = true;
-                diag_log format ["[ARC][ConvoyRoute] A* success=%1 fallback=%2 points=%3 lenM=%4", false, _diagFallbackUsed, count _fb, round _fbLen];
+                [false, _diagFallbackUsed, _fb, "astar_reconstruct_failed"] call _fn_logRouteResult;
                 _fb
             };
 
@@ -2025,9 +2078,7 @@ if (_showSpawnMarker) then
             };
 
             _diagAStarSucceeded = true;
-            private _routeLenM = [_pts] call _fn_routeLen;
-            _routeBuildDiag pushBack [_diagAStarSucceeded, _diagFallbackUsed, count _pts, _routeLenM];
-            diag_log format ["[ARC][ConvoyRoute] A* success=%1 fallback=%2 points=%3 lenM=%4", _diagAStarSucceeded, _diagFallbackUsed, count _pts, round _routeLenM];
+            [_diagAStarSucceeded, _diagFallbackUsed, _pts, "astar_path"] call _fn_logRouteResult;
 
             _pts
         };
