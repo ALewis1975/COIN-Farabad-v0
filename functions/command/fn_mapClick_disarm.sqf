@@ -13,14 +13,29 @@
 if (!hasInterface) exitWith {false};
 
 params [["_reason", ""]];
+private _reasonUp = toUpper _reason;
+private _alreadyCleaned = uiNamespace getVariable ["ARC_mapClick_cleanupDone", false];
+if (_alreadyCleaned) exitWith {true};
 
+private _terminalState = switch (_reasonUp) do
+{
+    case "SUBMITTED": {"SUBMITTED"};
+    case "TIMEOUT": {"TIMEOUT"};
+    case "CANCELLED": {"CANCELLED"};
+    case "MAP_CLOSED": {"CANCELLED"};
+    case "REARM": {"CANCELLED"};
+    default {"CANCELLED"};
+};
+
+uiNamespace setVariable ["ARC_mapClick_cleanupDone", true];
 onMapSingleClick "";
 openMap [false, false];
 
-uiNamespace setVariable ["ARC_mapClick_state", "IDLE"];
+uiNamespace setVariable ["ARC_mapClick_state", _terminalState];
 uiNamespace setVariable ["ARC_mapClick_ctx", nil];
 uiNamespace setVariable ["ARC_mapClick_armedAt", nil];
+uiNamespace setVariable ["ARC_mapClick_deadline", nil];
 uiNamespace setVariable ["ARC_mapClick_lastPos", nil];
-uiNamespace setVariable ["ARC_mapClick_lastErr", _reason];
+uiNamespace setVariable ["ARC_mapClick_lastErr", _reasonUp];
 
 true
