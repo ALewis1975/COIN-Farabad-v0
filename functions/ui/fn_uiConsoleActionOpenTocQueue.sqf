@@ -17,13 +17,22 @@ if !([player] call ARC_fnc_rolesIsAuthorized) exitWith
 };
 
 uiNamespace setVariable ["ARC_console_cmdMode", "QUEUE"];
-uiNamespace setVariable ["ARC_console_activeTab", "CMD"];
 uiNamespace setVariable ["ARC_console_forceTab", "CMD"];
 uiNamespace setVariable ["ARC_console_cmdQueueForceRebuild", true];
 
 private _display = uiNamespace getVariable ["ARC_console_display", displayNull];
 if (isNull _display) then { _display = findDisplay 78000; };
-if (!isNull _display) then { [_display] call ARC_fnc_uiConsoleRefresh; };
+if (!isNull _display) then
+{
+    // Keep the visible tabs listbox in sync when forcing CMD programmatically.
+    // This triggers the normal selection-change path (active tab + refresh).
+    ["CMD", _display] call ARC_fnc_uiConsoleSelectTab;
+}
+else
+{
+    // Fallback state for opens before the console display exists.
+    uiNamespace setVariable ["ARC_console_activeTab", "CMD"];
+};
 
 private _canDecide = [player] call ARC_fnc_rolesCanApproveQueue;
 private _msg = if (_canDecide) then
