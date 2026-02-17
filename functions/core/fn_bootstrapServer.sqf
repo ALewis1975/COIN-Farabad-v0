@@ -468,11 +468,11 @@ if (isNil { missionNamespace getVariable "ARC_convoyRoleMatrixPoolKeys" }) then
 };
 
 // Convoy class policy defaults (selection logic can consume these without changing call signatures).
-if (isNil { missionNamespace getVariable "ARC_convoyAllowedVehicleSides" }) then { missionNamespace setVariable ["ARC_convoyAllowedVehicleSides", [1]]; }; // WEST
-if (isNil { missionNamespace getVariable "ARC_convoyAllowedCrewSides" }) then { missionNamespace setVariable ["ARC_convoyAllowedCrewSides", [1]]; }; // WEST
-if (isNil { missionNamespace getVariable "ARC_convoyAllowedVehicleFactions" }) then { missionNamespace setVariable ["ARC_convoyAllowedVehicleFactions", []]; }; // empty = no extra faction gate
-if (isNil { missionNamespace getVariable "ARC_convoyAllowedCrewFactions" }) then { missionNamespace setVariable ["ARC_convoyAllowedCrewFactions", []]; }; // empty = no extra faction gate
-if (isNil { missionNamespace getVariable "ARC_convoyEnforceCrewSideWest" }) then { missionNamespace setVariable ["ARC_convoyEnforceCrewSideWest", true]; };
+if (isNil { missionNamespace getVariable "ARC_convoyAllowedVehicleSides" }) then { missionNamespace setVariable ["ARC_convoyAllowedVehicleSides", []]; }; // empty = allow any vehicle side
+if (isNil { missionNamespace getVariable "ARC_convoyAllowedCrewSides" }) then { missionNamespace setVariable ["ARC_convoyAllowedCrewSides", [1]]; }; // WEST crew default keeps legacy join behavior
+if (isNil { missionNamespace getVariable "ARC_convoyAllowedVehicleFactions" }) then { missionNamespace setVariable ["ARC_convoyAllowedVehicleFactions", []]; }; // empty = no faction gate
+if (isNil { missionNamespace getVariable "ARC_convoyAllowedCrewFactions" }) then { missionNamespace setVariable ["ARC_convoyAllowedCrewFactions", []]; }; // empty = no faction gate
+if (isNil { missionNamespace getVariable "ARC_convoyEnforceCrewSideWest" }) then { missionNamespace setVariable ["ARC_convoyEnforceCrewSideWest", true]; }; // deprecated compatibility toggle
 
 // Bridge fallback defaults (assist/recovery behavior; overridable in initServer).
 if (isNil { missionNamespace getVariable "ARC_convoyBridgeAssistEnabled" }) then { missionNamespace setVariable ["ARC_convoyBridgeAssistEnabled", true, true]; };
