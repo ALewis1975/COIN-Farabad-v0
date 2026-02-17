@@ -342,7 +342,7 @@ switch (_incidentTypeU) do
         private _poolMaint = +_poolLogSelect;
 
         private _logRoleKeys = ["logistics"] call _getRoleKeyList;
-        if ((count _logRoleKeys) > 0) then
+        if ((count _bundleClassPool) == 0 && { (count _logRoleKeys) > 0 }) then
         {
             private _fromKey = {
                 params ["_key", "_fallback"];
@@ -415,7 +415,7 @@ switch (_incidentTypeU) do
 
             private _useSUV = _forceSUV || { (random 1) < _pSUV };
 
-            private _poolUse = _poolEscRole;
+            private _poolUse = _poolEscSelect;
             if (_useSUV) then
             {
                 // VIP: bias toward ION SUVs (PMC crews). Otherwise use the broader SUV/Police pool.
