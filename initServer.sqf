@@ -19,7 +19,17 @@ diag_log format ["[ARC][BUILD] %1", missionNamespace getVariable ["ARC_buildStam
 // Debug toggles (server authoritative)
 missionNamespace setVariable ["ARC_debugLogEnabled", false, true];
 missionNamespace setVariable ["ARC_debugLogToChat", false, true];
-missionNamespace setVariable ["ARC_debugInspectorEnabled", false, true];
+
+// Optional dev gate for inspector diary (set true explicitly in dev environments)
+if (isNil { missionNamespace getVariable "ARC_devDebugInspectorEnabled" }) then {
+    missionNamespace setVariable ["ARC_devDebugInspectorEnabled", false, true];
+};
+
+missionNamespace setVariable [
+    "ARC_debugInspectorEnabled",
+    missionNamespace getVariable ["ARC_devDebugInspectorEnabled", false],
+    true
+];
 
 // FARABAD logger rollout defaults (set only when not preconfigured)
 if (isNil { missionNamespace getVariable "FARABAD_log_enabled" }) then {
@@ -58,8 +68,7 @@ missionNamespace setVariable ["ARC_mig_disableLegacyActions", false, true];
 // Scaffold core objectives first (object-first posture)
 missionNamespace setVariable ["ARC_objectiveScaffoldEnabled", true, true];
 
-// Debug inspector diary (DEV): expose internal state summaries to all clients
-missionNamespace setVariable ["ARC_debugInspectorEnabled", true, true];
+// Debug inspector diary is controlled by ARC_devDebugInspectorEnabled (see debug toggles above)
 
 // Meetings: enable the liaison NPC so the meeting marker can track them
 missionNamespace setVariable ["ARC_objectiveMeetUseAI", true, true];
@@ -717,5 +726,12 @@ private _unitsNeedingGuardPost = allUnits select { (faction _x) in _targetFactio
 // Police Extended lightbar startup (centralized; replaces per-object init)
 // ---------------------------------------------------------------------------
 [] execVM "scripts\ARC_lightbarStartupServer.sqf";
+
+diag_log format [
+    "[ARC][DEBUG] Effective toggles | ARC_debugLogEnabled=%1 | ARC_debugLogToChat=%2 | ARC_debugInspectorEnabled=%3",
+    missionNamespace getVariable ["ARC_debugLogEnabled", false],
+    missionNamespace getVariable ["ARC_debugLogToChat", false],
+    missionNamespace getVariable ["ARC_debugInspectorEnabled", false]
+];
 
 [] call ARC_fnc_bootstrapServer;
