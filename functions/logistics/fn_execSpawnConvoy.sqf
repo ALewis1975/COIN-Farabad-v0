@@ -84,6 +84,22 @@ if (!(_poolLead isEqualType []) || { (count _poolLead) == 0 }) then { _poolLead 
 private _roleMatrix = missionNamespace getVariable ["ARC_convoyRoleMatrixPoolKeys", []];
 if (!(_roleMatrix isEqualType [])) then { _roleMatrix = []; };
 
+// Convoy role plan (prepared by execInitActive): stable identifiers describing bundle/context.
+private _rolePlan = ["activeConvoyRolePlan", []] call ARC_fnc_stateGet;
+if (!(_rolePlan isEqualType [])) then { _rolePlan = []; };
+
+private _rolePlanGet = {
+    params ["_pairs", "_key", "_default"];
+    if !(_pairs isEqualType []) exitWith {_default};
+    private _idx = _pairs findIf { (_x isEqualType []) && { (count _x) >= 2 } && { ((_x # 0) isEqualType "") && { (toLower (_x # 0)) isEqualTo (toLower _key) } } };
+    if (_idx < 0) exitWith {_default};
+    (_pairs # _idx) # 1
+};
+
+private _roleBundleId = [_rolePlan, "bundleId", ""] call _rolePlanGet;
+if (!(_roleBundleId isEqualType "")) then { _roleBundleId = ""; };
+_roleBundleId = toUpper _roleBundleId;
+
 // Incident metadata (used for VIP motorcades, supply-kind selection, etc.)
 private _incidentMarker = ["activeIncidentMarker", ""] call ARC_fnc_stateGet;
 if (!(_incidentMarker isEqualType "")) then { _incidentMarker = ""; };
@@ -94,17 +110,25 @@ if (!(_incidentName isEqualType "")) then { _incidentName = ""; };
 private _isVIP = false;
 if (_incidentTypeU isEqualTo "ESCORT") then
 {
-    // VIP escort convoys are only generated for select escort incidents (option A).
-    if (_incidentMarker in ["ARC_loc_PresidentialPalace", "ARC_loc_EmbassyCompound"]) then
+    // Prefer explicit role plan flag when available; keep legacy detection as fallback.
+    private _vipFromPlan = [_rolePlan, "vipEscort", false] call _rolePlanGet;
+    if (!(_vipFromPlan isEqualType true) && !(_vipFromPlan isEqualType false)) then { _vipFromPlan = false; };
+    _isVIP = _vipFromPlan;
+
+    if (!_isVIP) then
     {
-        _isVIP = true;
-    }
-    else
-    {
-        private _nU = toUpper _incidentName;
-        if ((_nU find "MOTORCADE") >= 0 || { (_nU find "DIPLOMATIC") >= 0 } || { (_nU find "VIP") >= 0 }) then
+        // VIP escort convoys are only generated for select escort incidents (option A).
+        if (_incidentMarker in ["ARC_loc_PresidentialPalace", "ARC_loc_EmbassyCompound"]) then
         {
             _isVIP = true;
+        }
+        else
+        {
+            private _nU = toUpper _incidentName;
+            if ((_nU find "MOTORCADE") >= 0 || { (_nU find "DIPLOMATIC") >= 0 } || { (_nU find "VIP") >= 0 }) then
+            {
+                _isVIP = true;
+            };
         };
     };
 };
@@ -113,6 +137,11 @@ if (_incidentTypeU isEqualTo "ESCORT") then
 private _supplyKind = ["activeConvoySupplyKind", ""] call ARC_fnc_stateGet;
 if (!(_supplyKind isEqualType "")) then { _supplyKind = ""; };
 _supplyKind = toUpper _supplyKind;
+if (_supplyKind isEqualTo "") then
+{
+    private _supplyFromPlan = [_rolePlan, "supplyKind", ""] call _rolePlanGet;
+    if (_supplyFromPlan isEqualType "") then { _supplyKind = toUpper _supplyFromPlan; };
+};
 
 // SUV / Police pools for ESCORT convoys (BLUFOR-only vehicles; crews come from the vehicle's native faction)
 private _poolSUV = missionNamespace getVariable ["ARC_convoyVehiclesEscortSUV", [
@@ -428,11 +457,15 @@ if (_incidentTypeU isEqualTo "LOGISTICS") then
         case "MED":  { _profile = [_profiles, "ANGEL"] call _pickProfileByCallsign; };
         default { /* fall back to random below */ };
     };
+
+    if (_roleBundleId isEqualTo "LOGISTICS_FUEL") then { _profile = [_profiles, "PROVIDER"] call _pickProfileByCallsign; };
+    if (_roleBundleId isEqualTo "LOGISTICS_AMMO") then { _profile = [_profiles, "LONGHAUL"] call _pickProfileByCallsign; };
+    if (_roleBundleId isEqualTo "LOGISTICS_MED") then { _profile = [_profiles, "ANGEL"] call _pickProfileByCallsign; };
 };
 
 if (_incidentTypeU isEqualTo "ESCORT") then
 {
-    if (_isVIP) then
+    if (_isVIP || { _roleBundleId isEqualTo "ESCORT_VIP" }) then
     {
         _profile = [_profiles, "LAWDAWG"] call _pickProfileByCallsign;
     }
