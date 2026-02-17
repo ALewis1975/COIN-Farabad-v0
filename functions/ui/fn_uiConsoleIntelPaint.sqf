@@ -37,6 +37,13 @@ params [
 
 if (isNull _display) exitWith {false};
 
+// Own MainList while INTEL is active so cross-tab rebuild logic can detect transitions.
+private _owner = uiNamespace getVariable ["ARC_console_mainListOwner", ""];
+if (!(_owner isEqualType "")) then { _owner = ""; };
+_owner = toUpper (trim _owner);
+if (_owner isNotEqualTo "INTEL") then { _rebuild = true; };
+uiNamespace setVariable ["ARC_console_mainListOwner", "INTEL"];
+
 private _list    = _display displayCtrl 78011;
 private _details = _display displayCtrl 78012;
 private _b1      = _display displayCtrl 78021;
