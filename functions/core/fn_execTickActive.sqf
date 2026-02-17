@@ -613,6 +613,7 @@ if (_execKind isEqualTo "ROUTE_RECON") exitWith
         {
             _startReached = true;
             ["activeReconRouteStartReached", true] call ARC_fnc_stateSet;
+            ["activeExecLastProgressAt", _now] call ARC_fnc_stateSet;
 
             if (_startTaskId isNotEqualTo "") then { [_startTaskId, "SUCCEEDED", true] call BIS_fnc_taskSetState; };
             if (_endTaskId isNotEqualTo "") then { [_endTaskId, "ASSIGNED", true] call BIS_fnc_taskSetState; };
@@ -635,6 +636,7 @@ if (_execKind isEqualTo "ROUTE_RECON") exitWith
         {
             _endReached = true;
             ["activeReconRouteEndReached", true] call ARC_fnc_stateSet;
+            ["activeExecLastProgressAt", _now] call ARC_fnc_stateSet;
 
             if (_endTaskId isNotEqualTo "") then { [_endTaskId, "SUCCEEDED", true] call BIS_fnc_taskSetState; };
 
@@ -658,6 +660,7 @@ if (_execKind isEqualTo "ARRIVE_HOLD" && { !_arrived }) exitWith
         ["activeExecArrived", true] call ARC_fnc_stateSet;
         ["activeExecHoldAccum", 0] call ARC_fnc_stateSet;
         ["activeExecLastProg", -1] call ARC_fnc_stateSet;
+        ["activeExecLastProgressAt", _now] call ARC_fnc_stateSet;
 
     }
     else
@@ -682,14 +685,16 @@ if (_execKind in ["HOLD", "ARRIVE_HOLD"]) then
         _holdAccum = _holdAccum + _dt;
         if (_holdAccum > _holdReq) then { _holdAccum = _holdReq; };
         ["activeExecHoldAccum", _holdAccum] call ARC_fnc_stateSet;
+        ["activeExecLastProgressAt", _now] call ARC_fnc_stateSet;
 
-        // Progress SITREPs at 25/50/75%
+        // Progress SITREPs at 25/50/75%; activeExecLastProg remains a bucket index (not a timestamp).
         private _bucket     = floor ((_holdAccum / _holdReq) * 4);
         private _lastBucket = ["activeExecLastProg", -1] call ARC_fnc_stateGet;
 
         if (_bucket > _lastBucket && { _bucket in [1, 2, 3] }) then
         {
             ["activeExecLastProg", _bucket] call ARC_fnc_stateSet;
+            ["activeExecLastProgressAt", _now] call ARC_fnc_stateSet;
 
             private _pct  = _bucket * 25;
             private _grid = mapGridPosition _pos;

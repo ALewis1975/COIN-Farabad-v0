@@ -12,7 +12,7 @@
       ARC_wd_enabled            BOOL   (default true)
       ARC_wd_graceSeconds       NUMBER (default 120)  // don't evaluate immediately after creation
       ARC_wd_unacceptedTimeout  NUMBER (default 900)  // seconds since created
-      ARC_wd_acceptedTimeout    NUMBER (default 1800) // seconds since last progress / accepted
+      ARC_wd_acceptedTimeout    NUMBER (default 1800) // seconds since activeExecLastProgressAt / accepted
       ARC_wd_suggestResult      STRING (default "FAILED") // suggested close result
       ARC_wd_debugLog           BOOL   (default false) // extra diag_log noise
 
@@ -86,15 +86,16 @@ if (!_accepted) then
 }
 else
 {
-    // Prefer progress marker if available; fall back to acceptedAt/createdAt.
-    private _lastProg = ["activeExecLastProg", -1] call ARC_fnc_stateGet;
-    if !(_lastProg isEqualType 0) then { _lastProg = -1; };
+    // Prefer progress timestamp if available; fall back to acceptedAt/createdAt.
+    // activeExecLastProg is a hold milestone bucket, not a time source for stall math.
+    private _lastProgressAt = ["activeExecLastProgressAt", -1] call ARC_fnc_stateGet;
+    if !(_lastProgressAt isEqualType 0) then { _lastProgressAt = -1; };
 
     private _acceptedAt = ["activeIncidentAcceptedAt", -1] call ARC_fnc_stateGet;
     if !(_acceptedAt isEqualType 0) then { _acceptedAt = -1; };
 
     private _stallAge = -1;
-    if (_lastProg >= 0) then { _stallAge = _now - _lastProg; }
+    if (_lastProgressAt >= 0) then { _stallAge = _now - _lastProgressAt; }
     else
     {
         if (_acceptedAt >= 0) then { _stallAge = _now - _acceptedAt; }
