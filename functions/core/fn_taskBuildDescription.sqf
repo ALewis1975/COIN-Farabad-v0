@@ -405,7 +405,7 @@ if (!(_intelLog isEqualType [])) then { _intelLog = []; };
 
 private _near = [];
 {
-    if (!(_x isEqualType []) || { (count _x) < 5 }) then { continue; };
+    if (!(_x isEqualType []) || { (count _x) < 6 }) then { continue; };
     _x params ["_iid", "_t", "_cat", "_sum", "_pATL", "_meta"];
     if (toUpper _cat isEqualTo "OPS") then { continue; };
     if (!(_pATL isEqualType [])) then { continue; };
