@@ -17,11 +17,12 @@ onMapSingleClick "";
 
 private _evt = _this;
 private _debug = uiNamespace getVariable ["ARC_mapClick_debug", false];
+private _payloadType = typeName _evt;
 private _payloadShape = if (_evt isEqualType []) then {count _evt} else {-1};
 
 if (_debug) then
 {
-    diag_log format ["[FARABAD][MAPCLICK][CLICK][DEBUG] payloadType=%1 payloadShape=%2 payload=%3", typeName _evt, _payloadShape, _evt];
+    diag_log format ["[FARABAD][MAPCLICK][CLICK][DEBUG] payloadType=%1 payloadShape=%2 payload=%3", _payloadType, _payloadShape, _evt];
 };
 
 private _a = nil;
@@ -33,33 +34,57 @@ if (_evt isEqualType []) then
     _evt params ["_a", "_b", "_c", "_d"];
 };
 
-private _pos = [];
+private _isNumericPos =
 {
-    private _cand = _x;
-    if (!(_cand isEqualType [])) then { continue; };
+    params ["_cand"];
 
+    if (!(_cand isEqualType [])) exitWith {false};
     private _n = count _cand;
-    if !(_n in [2, 3]) then { continue; };
+    if !(_n in [2, 3]) exitWith {false};
 
     private _nums = true;
     {
         if !(_x isEqualType 0) exitWith { _nums = false; };
     } forEach _cand;
 
-    if (_nums) exitWith { _pos = +_cand; };
-} forEach [_b, _a, _c, _d];
+    _nums
+};
 
-if (!(_pos isEqualType []) || {!(count _pos in [2, 3])}) exitWith
+private _pos = [];
+private _shapeSource = "none";
+if ([_a] call _isNumericPos) then
+{
+    _pos = +_a;
+    _shapeSource = "deterministic[0]";
+}
+else
+{
+    {
+        private _cand = _x;
+        if ([_cand] call _isNumericPos) exitWith
+        {
+            _pos = +_cand;
+            _shapeSource = _forEachIndex;
+        };
+    } forEach [_b, _a, _c, _d];
+
+    if (_shapeSource isEqualType 0) then
+    {
+        _shapeSource = format ["fallback[%1]", _shapeSource];
+    };
+};
+
+if (!([_pos] call _isNumericPos)) exitWith
 {
     uiNamespace setVariable ["ARC_mapClick_lastErr", "invalid_click_payload"];
-    diag_log format ["[FARABAD][MAPCLICK][CLICK][ERR] invalid_click_payload payloadType=%1 payloadShape=%2 payload=%3", typeName _evt, _payloadShape, _evt];
+    diag_log format ["[FARABAD][MAPCLICK][CLICK][ERR] invalid_click_payload payloadType=%1 payloadShape=%2 payload=%3", _payloadType, _payloadShape, _evt];
     hint "Map click failed: invalid position.";
     ["INVALID_CLICK_PAYLOAD"] call ARC_fnc_mapClick_disarm;
     false
 };
 
 uiNamespace setVariable ["ARC_mapClick_lastPos", _pos];
-diag_log format ["[FARABAD][MAPCLICK][CLICK] pos=%1", _pos];
+diag_log format ["[FARABAD][MAPCLICK][CLICK] pos=%1 source=%2 payloadType=%3 payloadShape=%4", _pos, _shapeSource, _payloadType, _payloadShape];
 
 private _ok = [_pos] call ARC_fnc_mapClick_submit;
 private _ctx = uiNamespace getVariable ["ARC_mapClick_ctx", createHashMap];
