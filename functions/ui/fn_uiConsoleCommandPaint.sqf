@@ -187,7 +187,7 @@ _lines pushBack format ["<t size='0.95'>Pending:</t> <t size='0.95'>%1</t>", cou
 _lines pushBack format ["<t size='0.9' color='#BDBDBD'>Incidents:</t> <t size='0.9'>%1</t>  <t size='0.9' color='#BDBDBD'>Leads:</t> <t size='0.9'>%2</t>  <t size='0.9' color='#BDBDBD'>Other:</t> <t size='0.9'>%3</t>", count _pendingInc, count _pendingLead, _pendingOther max 0];
 
 _lines pushBack "<br/>";
-_lines pushBack "<t size='0.95' color='#BDBDBD'>Use QUEUE MGR to review/approve items. Use CLOSEOUT to finalize an incident once close-ready.</t>";
+_lines pushBack "<t size='0.95' color='#BDBDBD'>Use TOC QUEUE to review/approve items. Use CLOSEOUT to finalize an incident once close-ready.</t>";
 
 _ctrlMain ctrlSetStructuredText parseText (_lines joinString "<br/>");
 

@@ -436,12 +436,9 @@ class ARC_EodDispoDialog
 };
 
 /*
-    TOC Queue Manager
-    - Lists pending queue items (intel lead requests + follow-on requests)
-    - Allows S3/Command to approve/reject with an optional note
-
-    NOTE: This is intentionally minimal. We can extend later into a unified TOC UI
-    layer (S2 leads, S3 tasking, S4 sustainment) once the interaction model stabilizes.
+    TOC Queue Manager (DEPRECATED)
+    - Legacy standalone dialog retained only for compatibility fallback.
+    - Primary user flow now stays inside ARC_FarabadConsoleDialog CMD/QUEUE mode.
 */
 class ARC_TOCQueueManagerDialog
 {
@@ -449,7 +446,7 @@ class ARC_TOCQueueManagerDialog
     movingEnable = 1;
     enableSimulation = 1;
 
-    onLoad = "uiNamespace setVariable ['ARC_queueMgr_display', _this # 0]; [_this # 0] call ARC_fnc_intelUiQueueManagerOnLoad;";
+    onLoad = "uiNamespace setVariable ['ARC_queueMgr_display', _this # 0]; ['TOC Queue','Standalone queue dialog is deprecated; use Console -> TOC/CMD -> TOC QUEUE.'] call ARC_fnc_clientHint; closeDialog 0;";
     onUnload = "uiNamespace setVariable ['ARC_queueMgr_display', displayNull];";
 
     class controlsBackground

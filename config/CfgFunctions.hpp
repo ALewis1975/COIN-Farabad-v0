@@ -442,6 +442,7 @@ class CfgFunctions
             class uiConsoleOpsPaint {};
             class uiConsoleHandoffPaint {};
             class uiConsoleCommandPaint {};
+            class uiConsoleTocQueuePaint {};
             class uiConsoleHQPaint {};
             class uiConsoleOpsSelChanged {};
 

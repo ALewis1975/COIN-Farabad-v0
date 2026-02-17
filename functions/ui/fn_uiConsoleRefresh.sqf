@@ -142,7 +142,11 @@ private _opsSecondaryLabel = "FOLLOW-ON (SITREP)";
 private _atStation = [player] call ARC_fnc_uiConsoleIsAtStation;
 private _netText = if (_atStation) then {"NET: TOC-LINK"} else {"NET: FIELD"};
 if (!isNull _statusLeft) then { _statusLeft ctrlSetText _netText; };
-if (!isNull _statusCenter) then { _statusCenter ctrlSetText format ["MODE: %1", _tab]; };
+private _cmdMode = uiNamespace getVariable ["ARC_console_cmdMode", "OVERVIEW"];
+if (!(_cmdMode isEqualType "")) then { _cmdMode = "OVERVIEW"; };
+_cmdMode = toUpper (trim _cmdMode);
+private _modeText = if (_tab isEqualTo "CMD" && { _cmdMode isEqualTo "QUEUE" }) then { "MODE: CMD / QUEUE" } else { format ["MODE: %1", _tab] };
+if (!isNull _statusCenter) then { _statusCenter ctrlSetText _modeText; };
 private _timeText = daytime call BIS_fnc_timeToString;
 if (!isNull _statusRight) then { _statusRight ctrlSetText format ["TIME: %1", _timeText]; };
 if (!isNull _statusCtrl) then { _statusCtrl ctrlEnable false; };
@@ -204,17 +208,59 @@ case "DASH":
 
     case "CMD":
     {
-        if (!isNull _b1) then { _b1 ctrlShow true; _b1 ctrlEnable true; _b1 ctrlSetText "QUEUE MGR"; };
-        if (!isNull _b2) then
+        private _cmdMode = uiNamespace getVariable ["ARC_console_cmdMode", "OVERVIEW"];
+        if (!(_cmdMode isEqualType "")) then { _cmdMode = "OVERVIEW"; };
+        _cmdMode = toUpper (trim _cmdMode);
+
+        if (_cmdMode isEqualTo "QUEUE") then
         {
-            private _taskId = missionNamespace getVariable ["ARC_activeTaskId", ""]; 
-            if (!(_taskId isEqualType "")) then { _taskId = ""; };
-            private _acc = missionNamespace getVariable ["ARC_activeIncidentAccepted", false];
-            if (!(_acc isEqualType true) && !(_acc isEqualType false)) then { _acc = false; };
-            private _lbl = if (_taskId isEqualTo "") then {"GENERATE"} else { if (!_acc) then {"ACCEPT"} else {"CLOSEOUT"} };
-            _b2 ctrlShow true; _b2 ctrlEnable true; _b2 ctrlSetText _lbl;
+            // Queue mode uses list/details layout in-console (no standalone dialog).
+            if (!isNull _ctrlMainGrp) then { _ctrlMainGrp ctrlShow false; };
+            if (!isNull _ctrlMain) then { _ctrlMain ctrlShow false; };
+            if (!isNull _ctrlList) then { _ctrlList ctrlShow true; };
+            if (!isNull _ctrlDetailsGrp) then { _ctrlDetailsGrp ctrlShow true; };
+            if (!isNull _ctrlDetails) then { _ctrlDetails ctrlShow true; };
+
+            private _forceQueueRebuild = (_prevRefreshTab isNotEqualTo _tab) || { uiNamespace getVariable ["ARC_console_cmdQueueForceRebuild", false] };
+            uiNamespace setVariable ["ARC_console_cmdQueueForceRebuild", false];
+
+            private _queueState = [_display, _forceQueueRebuild] call ARC_fnc_uiConsoleTocQueuePaint;
+            private _selectedQid = "";
+            private _selectedPending = false;
+            if (_queueState isEqualType [] && { (count _queueState) >= 2 }) then
+            {
+                _selectedQid = _queueState # 0;
+                _selectedPending = _queueState # 1;
+            };
+            uiNamespace setVariable ["ARC_console_cmdQueueSelectedQid", _selectedQid];
+            uiNamespace setVariable ["ARC_console_cmdQueueSelectedPending", _selectedPending];
+
+            private _canDecide = [player] call ARC_fnc_rolesCanApproveQueue;
+            if (_canDecide && _selectedPending) then
+            {
+                if (!isNull _b1) then { _b1 ctrlShow true; _b1 ctrlEnable true; _b1 ctrlSetText "APPROVE"; };
+                if (!isNull _b2) then { _b2 ctrlShow true; _b2 ctrlEnable true; _b2 ctrlSetText "REJECT"; };
+            }
+            else
+            {
+                if (!isNull _b1) then { _b1 ctrlShow true; _b1 ctrlEnable true; _b1 ctrlSetText "REFRESH"; };
+                if (!isNull _b2) then { _b2 ctrlShow true; _b2 ctrlEnable true; _b2 ctrlSetText "BACK"; };
+            };
+        }
+        else
+        {
+            if (!isNull _b1) then { _b1 ctrlShow true; _b1 ctrlEnable true; _b1 ctrlSetText "TOC QUEUE"; };
+            if (!isNull _b2) then
+            {
+                private _taskId = missionNamespace getVariable ["ARC_activeTaskId", ""];
+                if (!(_taskId isEqualType "")) then { _taskId = ""; };
+                private _acc = missionNamespace getVariable ["ARC_activeIncidentAccepted", false];
+                if (!(_acc isEqualType true) && !(_acc isEqualType false)) then { _acc = false; };
+                private _lbl = if (_taskId isEqualTo "") then {"GENERATE"} else { if (!_acc) then {"ACCEPT"} else {"CLOSEOUT"} };
+                _b2 ctrlShow true; _b2 ctrlEnable true; _b2 ctrlSetText _lbl;
+            };
+            [_display] call ARC_fnc_uiConsoleCommandPaint;
         };
-        [_display] call ARC_fnc_uiConsoleCommandPaint;
     };
 
     case "HQ":
