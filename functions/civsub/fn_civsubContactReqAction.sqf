@@ -173,6 +173,26 @@ switch (_actionId) do {
         true
     };
 
+    case "HANDOFF_SHERIFF": {
+        private _ok = [_actor, _civ] call ARC_fnc_civsubInteractHandoffSheriff;
+        private _html = if (_ok) then {
+            "<t size='0.95' color='#CFE8FF'>HANDOFF</t><br/><t size='0.9'>Sheriff handoff accepted.</t>"
+        } else {
+            "<t size='0.95' color='#CFE8FF'>HANDOFF</t><br/><t size='0.9'>Sheriff handoff failed. Check distance/custody/cuffs requirements.</t>"
+        };
+
+        private _out = createHashMapFromArray [
+            ["ok", _ok],
+            ["type", "HANDOFF_SHERIFF"],
+            ["html", _html],
+            ["payload", createHashMap]
+        ];
+        [_out] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
+
+        if (_ok) then { [_civ, _actor] call ARC_fnc_civsubContactReqSnapshot; };
+        true
+    };
+
     case "RELEASE": {
         private _res = [_actor, _civ] call ARC_fnc_civsubContactActionRelease;
         private _ok = false;

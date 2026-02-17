@@ -115,6 +115,15 @@ private _act = [];
 _act sort true;
 if ((count _act) > _maxAD) then { _act resize _maxAD; };
 
+private _opCenters = createHashMap;
+{
+    private _did = _x # 1;
+    private _d = _x # 2;
+    private _op = [_did, _d] call ARC_fnc_civsubTrafficResolveSpawnCenter;
+    _opCenters set [_did, _op];
+} forEach _act;
+missionNamespace setVariable ["civsub_v1_traffic_opCenters", _opCenters, true];
+
 // Global caps
 private _capG = missionNamespace getVariable ["civsub_v1_traffic_cap_global", 18];
 if (!(_capG isEqualType 0)) then { _capG = 18; };
@@ -173,7 +182,8 @@ if ((_tod >= 7 && { _tod <= 9 }) || (_tod >= 16 && { _tod <= 18 })) then { _mTod
 
     while { _cur < _desired && { (count _parked) < _capG } && { _budget > 0 } && { _budgetG > 0 } } do
     {
-        private _veh = [_did, _d, _pool] call ARC_fnc_civsubTrafficSpawnParked;
+        private _op = _opCenters getOrDefault [_did, []];
+        private _veh = [_did, _d, _pool, _op] call ARC_fnc_civsubTrafficSpawnParked;
         if (isNull _veh) exitWith { _budget = 0; };
 
         _parked pushBack _veh;
@@ -204,7 +214,8 @@ if (_allowMoving) then
         private _drvCls = missionNamespace getVariable ["civsub_v1_traffic_driverClass", "C_man_1"];
         if (!(_drvCls isEqualType "")) then { _drvCls = "C_man_1"; };
 
-        private _pair = [_did, _d, _pool, _drvCls] call ARC_fnc_civsubTrafficSpawnMoving;
+        private _op = _opCenters getOrDefault [_did, []];
+        private _pair = [_did, _d, _pool, _drvCls, _op] call ARC_fnc_civsubTrafficSpawnMoving;
         private _veh = _pair # 0;
         if (!isNull _veh) then { _moving pushBack _veh; };
     };

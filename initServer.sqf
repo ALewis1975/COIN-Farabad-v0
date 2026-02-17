@@ -164,8 +164,11 @@ missionNamespace setVariable ["civsub_v1_traffic_cap_perDistrict", 10, true];
 // Placement / separation
 missionNamespace setVariable ["civsub_v1_traffic_minSeparation_m", 35, true];
 missionNamespace setVariable ["civsub_v1_traffic_spawnRadius_m", 250, true];
-missionNamespace setVariable ["civsub_v1_traffic_playerMinDistance_m", 25, true];
+missionNamespace setVariable ["civsub_v1_traffic_playerMinDistance_m", 90, true];
 missionNamespace setVariable ["civsub_v1_traffic_roadside_offset_m", 4, true];            // shoulder offset baseline
+
+// Optional district traffic spawn anchors (districtId -> [x,y,z]); keep empty to use district centroids.
+missionNamespace setVariable ["civsub_v1_traffic_spawnAnchors", createHashMapFromArray [], true];
 missionNamespace setVariable ["civsub_v1_traffic_preferWeight", 0.90, true];              // bias toward 3CB
 
 // Cleanup posture
