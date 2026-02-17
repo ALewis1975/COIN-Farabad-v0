@@ -15,6 +15,9 @@ if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compil
 
 params [ ["_caller", objNull, [objNull]] ];
 
+private _owner = -1;
+if (!isNil "remoteExecutedOwner") then { _owner = remoteExecutedOwner; };
+
 if (!([_caller, "ARC_fnc_tocRequestNextIncident", "Incident generation rejected: sender verification failed.", "TOC_NEXT_INCIDENT_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
@@ -73,8 +76,6 @@ if (_taskId isEqualTo "") then
                 [["event", "INCIDENT_GEN_BLOCKED"], ["reason", "ORDER_PENDING_ACCEPT"], ["group", _lastG]]
             ] call ARC_fnc_intelLog;
 
-            private _owner = -1;
-            if (!isNil "remoteExecutedOwner") then { _owner = remoteExecutedOwner; };
             if (_owner > 0) then
             {
                 ["Incident generation blocked", format ["%1 has an order pending acceptance.", _lastG], 7] remoteExec ["ARC_fnc_clientToast", _owner];
@@ -100,8 +101,6 @@ if (_taskId isEqualTo "") then
             ] call ARC_fnc_intelLog;
 
             // Best-effort feedback to the requestor.
-            private _owner = -1;
-            if (!isNil "remoteExecutedOwner") then { _owner = remoteExecutedOwner; };
             if (_owner > 0) then
             {
                 _msg remoteExec ["systemChat", _owner];
