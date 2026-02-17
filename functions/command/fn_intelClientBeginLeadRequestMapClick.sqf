@@ -116,6 +116,10 @@ openMap [true, false];
 
 private _mapClickCode = [
     "params ['_units','_pos','_alt','_shift'];",
+    "private _p = _pos;",
+    "if (!(_p isEqualType [])) then { _p = _this param [1, []]; };",
+    "if (!(_p isEqualType []) || { (count _p) < 2 }) exitWith { hint 'Map click failed: invalid position.'; onMapSingleClick ''; openMap [false,false]; false; };",
+    "_pos = _p;",
     "",
     "private _leadType = missionNamespace getVariable ['ARC_lastLeadReqType','RECON'];",
     "private _sum = missionNamespace getVariable ['ARC_lastLeadReqSummary','Lead: Unknown'];",
