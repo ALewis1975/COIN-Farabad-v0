@@ -107,7 +107,44 @@ if (_ok) then
         case "INTEL_LOG":
         {
             private _cat = _ctx getOrDefault ["category", "SIGHTING"];
-            private _grid = if ([_pos] call _isNumericPos) then {mapGridPosition _pos} else {"UNKNOWN"};
+            private _safeGridPos = [];
+            if (_pos isEqualType []) then
+            {
+                private _n = count _pos;
+                if (_n >= 2) then
+                {
+                    private _x = _pos # 0;
+                    private _y = _pos # 1;
+                    private _validX = (_x isEqualType 0) && {finite _x} && {_x isEqualTo _x};
+                    private _validY = (_y isEqualType 0) && {finite _y} && {_y isEqualTo _y};
+
+                    if (_validX && {_validY}) then
+                    {
+                        _safeGridPos = [_x, _y];
+
+                        if (_n >= 3) then
+                        {
+                            private _z = _pos # 2;
+                            private _validZ = (_z isEqualType 0) && {finite _z} && {_z isEqualTo _z};
+                            if (_validZ) then
+                            {
+                                _safeGridPos pushBack _z;
+                            };
+                        };
+                    };
+                };
+            };
+
+            private _grid = if ((count _safeGridPos) >= 2) then
+            {
+                mapGridPosition _safeGridPos
+            }
+            else
+            {
+                diag_log format ["[FARABAD][MAPCLICK][CLICK][WARN] intel_grid_unknown rawPos=%1", _pos];
+                "UNKNOWN"
+            };
+
             hint format ["Submitted intel (%1) at %2.", _cat, _grid];
         };
 
