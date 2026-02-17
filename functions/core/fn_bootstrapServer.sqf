@@ -480,11 +480,18 @@ if (isNil { missionNamespace getVariable "ARC_convoyBridgeAssistFollowersEnabled
 if (isNil { missionNamespace getVariable "ARC_convoyBridgeAssistBypassSec" }) then { missionNamespace setVariable ["ARC_convoyBridgeAssistBypassSec", 14, true]; };
 if (isNil { missionNamespace getVariable "ARC_convoyBridgeAssistFollowerBypassSec" }) then { missionNamespace setVariable ["ARC_convoyBridgeAssistFollowerBypassSec", 10, true]; };
 if (isNil { missionNamespace getVariable "ARC_convoyBridgeAssistFollowerTtlSec" }) then { missionNamespace setVariable ["ARC_convoyBridgeAssistFollowerTtlSec", 90, true]; };
+if (isNil { missionNamespace getVariable "ARC_convoyBridgeFollowerRecoveryCooldownSec" }) then { missionNamespace setVariable ["ARC_convoyBridgeFollowerRecoveryCooldownSec", 25, true]; };
+if (isNil { missionNamespace getVariable "ARC_convoyBridgeFollowerGapTriggerMinM" }) then { missionNamespace setVariable ["ARC_convoyBridgeFollowerGapTriggerMinM", 140, true]; };
+if (isNil { missionNamespace getVariable "ARC_convoyBridgeFollowerDoMoveReissueSec" }) then { missionNamespace setVariable ["ARC_convoyBridgeFollowerDoMoveReissueSec", 4, true]; };
 if (isNil { missionNamespace getVariable "ARC_convoyBridgeStuckSec" }) then { missionNamespace setVariable ["ARC_convoyBridgeStuckSec", 22, true]; };
 if (isNil { missionNamespace getVariable "ARC_convoyBridgeBufferM" }) then { missionNamespace setVariable ["ARC_convoyBridgeBufferM", 22, true]; };
 if (isNil { missionNamespace getVariable "ARC_convoyBridgeAssistOutsideM" }) then { missionNamespace setVariable ["ARC_convoyBridgeAssistOutsideM", 18, true]; };
 if (isNil { missionNamespace getVariable "ARC_convoyBridgeAssistRoadSnapM" }) then { missionNamespace setVariable ["ARC_convoyBridgeAssistRoadSnapM", 10, true]; };
 if (isNil { missionNamespace getVariable "ARC_convoyBridgeAssistPointRadiusM" }) then { missionNamespace setVariable ["ARC_convoyBridgeAssistPointRadiusM", 16, true]; };
+if (isNil { missionNamespace getVariable "ARC_convoyFollowerGapTriggerMinM" }) then { missionNamespace setVariable ["ARC_convoyFollowerGapTriggerMinM", 180, true]; };
+if (isNil { missionNamespace getVariable "ARC_convoyFollowerDoMoveReissueSec" }) then { missionNamespace setVariable ["ARC_convoyFollowerDoMoveReissueSec", 6, true]; };
+if (isNil { missionNamespace getVariable "ARC_convoyFollowerRejoinOrderTtlSec" }) then { missionNamespace setVariable ["ARC_convoyFollowerRejoinOrderTtlSec", 45, true]; };
+if (isNil { missionNamespace getVariable "ARC_convoyFollowerRejoinPointRadiusM" }) then { missionNamespace setVariable ["ARC_convoyFollowerRejoinPointRadiusM", 28, true]; };
 
 if (isNil { missionNamespace getVariable "ARC_debugConvoyLinkup" }) then { missionNamespace setVariable ["ARC_debugConvoyLinkup", false]; };
 // Larger snap radius reduces last-segment offroad shortcuts near airbase/FOBs where objectives may sit off the road grid.

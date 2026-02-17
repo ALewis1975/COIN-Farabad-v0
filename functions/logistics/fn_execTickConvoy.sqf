@@ -1666,7 +1666,11 @@ if (!(_assistFQ isEqualType true) && !(_assistFQ isEqualType false)) then { _ass
     private _lastOrderQ = _x getVariable ["ARC_convoyBridgeAssistLastOrderAt", -1];
     if (!(_lastOrderQ isEqualType 0)) then { _lastOrderQ = -1; };
 
-    if (_lastOrderQ < 0 || { (_now - _lastOrderQ) > 5 }) then
+    private _reissueSecQ = missionNamespace getVariable ["ARC_convoyBridgeFollowerDoMoveReissueSec", 4];
+    if (!(_reissueSecQ isEqualType 0)) then { _reissueSecQ = 4; };
+    _reissueSecQ = (_reissueSecQ max 1) min 20;
+
+    if (_lastOrderQ < 0 || { (_now - _lastOrderQ) > _reissueSecQ }) then
     {
         private _dQ = driver _x;
         if (!isNull _dQ && { !isPlayer _dQ }) then
@@ -1791,6 +1795,52 @@ if (_bridgeMode) then
 };
 
 
+// Follower rejoin order watchdog:
+// If a follower was given a rejoin target after a disruption, keep re-issuing doMove for a short
+// bounded window so temporary pathing interruptions (not only bridge stalls) do not strand vehicle 3+.
+private _rejoinRad = missionNamespace getVariable ["ARC_convoyFollowerRejoinPointRadiusM", 28];
+if (!(_rejoinRad isEqualType 0)) then { _rejoinRad = 28; };
+_rejoinRad = (_rejoinRad max 8) min 60;
+
+private _rejoinReissueSec = missionNamespace getVariable ["ARC_convoyFollowerDoMoveReissueSec", 6];
+if (!(_rejoinReissueSec isEqualType 0)) then { _rejoinReissueSec = 6; };
+_rejoinReissueSec = (_rejoinReissueSec max 1) min 20;
+
+{
+    if (isNull _x || { !alive _x }) then { continue; };
+
+    private _rTgt = _x getVariable ["ARC_convoyFollowerRejoinTarget", []];
+    if (!(_rTgt isEqualType []) || { (count _rTgt) < 2 }) then { continue; };
+    _rTgt = +_rTgt; _rTgt resize 3;
+
+    private _rUntil = _x getVariable ["ARC_convoyFollowerRejoinUntil", -1];
+    if (!(_rUntil isEqualType 0)) then { _rUntil = -1; };
+
+    private _vPosR = getPosATL _x;
+    _vPosR resize 3;
+
+    if ((_rUntil > 0 && { _now >= _rUntil }) || { (_vPosR distance2D _rTgt) <= _rejoinRad }) then
+    {
+        _x setVariable ["ARC_convoyFollowerRejoinTarget", nil];
+        _x setVariable ["ARC_convoyFollowerRejoinUntil", nil];
+        _x setVariable ["ARC_convoyFollowerRejoinLastOrderAt", nil];
+        continue;
+    };
+
+    private _lastOrderR = _x getVariable ["ARC_convoyFollowerRejoinLastOrderAt", -1];
+    if (!(_lastOrderR isEqualType 0)) then { _lastOrderR = -1; };
+
+    if (_lastOrderR < 0 || { (_now - _lastOrderR) >= _rejoinReissueSec }) then
+    {
+        private _dR = driver _x;
+        if (!isNull _dR && { !isPlayer _dR }) then
+        {
+            _dR doMove _rTgt;
+            _x setVariable ["ARC_convoyFollowerRejoinLastOrderAt", _now];
+        };
+    };
+} forEach _aliveVeh;
+
 // Follower recovery: if a trailing vehicle is stalled far behind, nudge it to rejoin.
 // This targets the common failure mode where the lead continues (slowly) while a follower is deadlocked.
 private _fRec = missionNamespace getVariable ["ARC_convoyFollowerRecoveryEnabled", true];
@@ -1800,6 +1850,10 @@ if (_fRec && { (count _aliveVeh) >= 2 }
     && { !(_bypassUntil isEqualType 0 && { _bypassUntil > 0 } && { _now < _bypassUntil }) }
 ) then
 {
+    private _followerStage = "monitor";
+    private _didFollowerRecover = false;
+    private _didFollowerBridgeAssist = false;
+
     private _cooldown = missionNamespace getVariable ["ARC_convoyFollowerRecoveryCooldownSec", 60];
     if (!(_cooldown isEqualType 0)) then { _cooldown = 60; };
     _cooldown = (_cooldown max 30) min 300;
@@ -1817,7 +1871,11 @@ if (_fRec && { (count _aliveVeh) >= 2 }
     if (!(_bypassSecF isEqualType 0)) then { _bypassSecF = 12; };
     _bypassSecF = (_bypassSecF max 6) min 30;
 
-    private _gapTrigger = ((_spacing max 20) * 3.0) max 220;
+    private _gapMin = missionNamespace getVariable ["ARC_convoyFollowerGapTriggerMinM", 180];
+    if (!(_gapMin isEqualType 0)) then { _gapMin = 180; };
+    _gapMin = (_gapMin max 120) min 280;
+
+    private _gapTrigger = ((_spacing max 20) * 3.0) max _gapMin;
     if (_bridgeMode) then
     {
         private _bridgeGapFloor = missionNamespace getVariable ["ARC_convoyBridgeFollowerGapTriggerMinM", 140];
@@ -1867,6 +1925,7 @@ if (_fRec && { (count _aliveVeh) >= 2 }
 
             if (_stuckForV >= _stuckSec && { (_lastRecV < 0) || { (_now - _lastRecV) >= _cooldown } }) then
             {
+                _didFollowerRecover = true;
                 _v setVariable ["ARC_convoyLastRecoverAt", _now];
 
                 // Ensure it can move.
@@ -1898,6 +1957,7 @@ if (_bridgeHereV) then
         if ((count _ptsV) > 0) then
         {
             _didBridgeAssistV = true;
+            _didFollowerBridgeAssist = true;
 
             _v setVariable ["ARC_convoyBridgeAssistPts", _ptsV];
             _v setVariable ["ARC_convoyBridgeAssistIdx", 0];
@@ -1918,7 +1978,10 @@ if (_bridgeHereV) then
 
             _d doMove (_ptsV # 0);
 
-            ["OPS", format ["Bridge assist (follower): vehicle %1 stalled in %2; nudging it across.", (_i + 1), _bridgeMkV], _vPos, [["event", "CONVOY_BRIDGE_ASSIST_FOLLOWER"], ["marker", _bridgeMkV], ["idx", _i], ["taskId", _taskId]]] call ARC_fnc_intelLog;
+            _v setVariable ["ARC_convoyFollowerRejoinTarget", nil];
+            _v setVariable ["ARC_convoyFollowerRejoinUntil", nil];
+            _v setVariable ["ARC_convoyFollowerRejoinLastOrderAt", nil];
+
         };
     };
 
@@ -1941,9 +2004,6 @@ else
         _d forceFollowRoad false;
     };
 };
-
-
-
                     // Nudge toward a sensible rejoin target.
                     // If the predecessor is behind us along the planned road route (u-turn cases),
                     // push toward a forward route point instead to prevent tail vehicles deadlocking.
@@ -1968,12 +2028,53 @@ else
                     {
                         _target resize 3;
                         _d doMove _target;
+
+                        private _rejoinTtl = missionNamespace getVariable ["ARC_convoyFollowerRejoinOrderTtlSec", 45];
+                        if (!(_rejoinTtl isEqualType 0)) then { _rejoinTtl = 45; };
+                        _rejoinTtl = (_rejoinTtl max 10) min 180;
+
+                        _v setVariable ["ARC_convoyFollowerRejoinTarget", _target];
+                        _v setVariable ["ARC_convoyFollowerRejoinUntil", _now + _rejoinTtl];
+                        _v setVariable ["ARC_convoyFollowerRejoinLastOrderAt", _now];
                     };
                 };
 
-                ["OPS", format ["Convoy follower recovery: vehicle %1 stalled (%2m gap).", (_i + 1), round _gap], _vPos, [["event", "CONVOY_FOLLOWER_RECOVER"], ["idx", _i], ["taskId", _taskId]]] call ARC_fnc_intelLog;
             };
         };
+    };
+
+    if (_didFollowerRecover) then
+    {
+        _followerStage = if (_didFollowerBridgeAssist) then { "recover_bridge_assist" } else { "recover" };
+    };
+
+    private _prevFollowerStage = ["activeConvoyFollowerRecoverStage", "off"] call ARC_fnc_stateGet;
+    if !(_prevFollowerStage isEqualType "") then { _prevFollowerStage = "off"; };
+
+    if (_followerStage isNotEqualTo _prevFollowerStage) then
+    {
+        ["activeConvoyFollowerRecoverStage", _followerStage] call ARC_fnc_stateSet;
+
+        private _evt = "CONVOY_FOLLOWER_RECOVERY_STAGE";
+        private _msg = switch (_followerStage) do
+        {
+            case "recover_bridge_assist": { "Follower recovery stage: bridge assist active." };
+            case "recover": { "Follower recovery stage: recovery active." };
+            case "monitor": { "Follower recovery stage: monitoring." };
+            default { "Follower recovery stage: off." };
+        };
+
+        ["OPS", _msg, getPosATL _lead, [["event", _evt], ["stage", _followerStage], ["taskId", _taskId]]] call ARC_fnc_intelLog;
+    };
+}
+else
+{
+    private _prevFollowerStage = ["activeConvoyFollowerRecoverStage", "off"] call ARC_fnc_stateGet;
+    if !(_prevFollowerStage isEqualType "") then { _prevFollowerStage = "off"; };
+    if (_prevFollowerStage isNotEqualTo "off") then
+    {
+        ["activeConvoyFollowerRecoverStage", "off"] call ARC_fnc_stateSet;
+        ["OPS", "Follower recovery stage: off.", getPosATL _lead, [["event", "CONVOY_FOLLOWER_RECOVERY_STAGE"], ["stage", "off"], ["taskId", _taskId]]] call ARC_fnc_intelLog;
     };
 };
 
