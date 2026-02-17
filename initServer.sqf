@@ -453,6 +453,75 @@ missionNamespace setVariable ["ARC_convoyRoleMatrixPoolKeys", [
     ["logistics", ["ARC_convoyVehiclesLogistics", "ARC_rhsConvoyCargoPool_general", "ARC_rhsConvoyCargoPool_fuel", "ARC_rhsConvoyCargoPool_ammo", "ARC_rhsConvoyCargoPool_med", "ARC_rhsConvoyCargoPool_hq", "ARC_rhsConvoyCargoPool_maint"]]
 ], true];
 
+// Authoritative convoy bundle matrix overrides (exact classnames by bundle ID).
+missionNamespace setVariable ["ARC_convoyBundleClassMatrix", [
+    ["LOGI_HEADQUARTERS", [
+        "rhsusf_m1085a1p2_b_d_fmtv_usarmy"
+    ]],
+    ["LOGI_MPS", [
+        "UK3CB_TKP_B_Hilux_Open",
+        "UK3CB_TKP_B_Hilux_Closed",
+        "UK3CB_TKP_B_Offroad",
+        "UK3CB_TKP_B_Offroad_M2"
+    ]],
+    ["LOGI_1_73_CAV", [
+        "rhsusf_M1232_M2_usarmy_d",
+        "rhsusf_M1232_MK19_usarmy_d"
+    ]],
+    ["LOGI_CONVOY_SECURITY", [
+        "rhsusf_M1232_M2_usarmy_d",
+        "rhsusf_M1232_MK19_usarmy_d"
+    ]],
+    ["LOGI_TRANSPORT", [
+        "rhsusf_m1083a1p2_d_fmtv_usarmy",
+        "rhsusf_m1083a1p2_d_open_fmtv_usarmy",
+        "rhsusf_m977a4_usarmy_d"
+    ]],
+    ["LOGI_MEDICAL", [
+        "rhsusf_m997_ambulance_usarmy_d"
+    ]],
+    ["LOGI_AMMO", [
+        "rhsusf_m977a4_ammo_usarmy_d",
+        "rhsusf_m1078a1p2_d_flatbed_fmtv_usarmy"
+    ]],
+    ["LOGI_REPAIR", [
+        "rhsusf_m984a4_usarmy_d",
+        "rhsusf_m977a4_repair_bkit_usarmy_d"
+    ]],
+    ["LOGI_FUEL", [
+        "rhsusf_m978a4_usarmy_d",
+        "rhsusf_M978A4_BKIT_usarmy_d"
+    ]],
+    ["LOGI_GOVERNMENT", [
+        "UK3CB_TKC_B_SUV",
+        "UK3CB_TKC_B_SUV_Armoured"
+    ]],
+    ["LOGI_PRIVATE_SECURITY", [
+        "UK3CB_ION_B_Desert_SUV_Armed",
+        "UK3CB_ION_B_Desert_SUV_Armoured"
+    ]],
+    ["LOGI_CONTRACTOR_SECURITY", [
+        "UK3CB_ION_B_Desert_SUV",
+        "UK3CB_ION_B_Desert_SUV_Armed",
+        "UK3CB_ION_B_Desert_SUV_Armoured"
+    ]],
+    ["ESCORT_STANDARD", [
+        "rhsusf_M1232_M2_usarmy_d",
+        "rhsusf_M1232_MK19_usarmy_d",
+        "UK3CB_TKP_B_Hilux_Open",
+        "UK3CB_TKP_B_Offroad_M2"
+    ]],
+    ["ESCORT_VIP", [
+        "UK3CB_ION_B_Desert_SUV",
+        "UK3CB_ION_B_Desert_SUV_Armed",
+        "UK3CB_ION_B_Desert_SUV_Armoured"
+    ]],
+    ["CONVOY_GENERIC", [
+        "rhsusf_M1232_M2_usarmy_d",
+        "rhsusf_m1083a1p2_d_fmtv_usarmy"
+    ]]
+], true];
+
 // Side/faction policy for allowed convoy classes (defaults preserve current WEST-first behavior).
 missionNamespace setVariable ["ARC_convoyAllowedVehicleSides", [1], true];
 missionNamespace setVariable ["ARC_convoyAllowedCrewSides", [1], true];
