@@ -33,11 +33,18 @@ _t set ["statusAmber", [0.851,0.643,0.255,1]];
 _t set ["statusRed",   [0.784,0.298,0.298,1]];
 
 // Legacy aliases kept for migration compatibility.
-_t set ["gunmetalOuter", _t get "bezelOuter"];
-_t set ["greenRing",     _t get "bezelGreen"];
-_t set ["gunmetalInner", _t get "bezelInner"];
-_t set ["screenBlack",   _t get "screen"];
-_t set ["coyoteText",    _t get "text"];
-_t set ["coyoteBorder",  _t get "border"];
+private _bezelOuter = _t get "bezelOuter";
+private _bezelGreen = _t get "bezelGreen";
+private _bezelInner = _t get "bezelInner";
+private _screen = _t get "screen";
+private _text = _t get "text";
+private _border = _t get "border";
+
+_t set ["gunmetalOuter", _bezelOuter];
+_t set ["greenRing",     _bezelGreen];
+_t set ["gunmetalInner", _bezelInner];
+_t set ["screenBlack",   _screen];
+_t set ["coyoteText",    _text];
+_t set ["coyoteBorder",  _border];
 
 _t
