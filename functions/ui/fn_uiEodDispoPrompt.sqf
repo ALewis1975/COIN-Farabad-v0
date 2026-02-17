@@ -8,15 +8,15 @@
 
     requestType:
       DET_IN_PLACE | RTB_IED | TOW_VBIED
+
+    Notes:
+      - Synchronous-only API: must be called from scheduled environment (canSuspend == true).
 */
 
 if (!hasInterface) exitWith { [false] };
 
 if (!canSuspend) exitWith {
-    [] spawn {
-        diag_log "[FARABAD][PROMPT][SPAWN] reentered scheduled";
-        call ARC_fnc_uiEodDispoPrompt;
-    };
+    diag_log "[FARABAD][PROMPT][WARN] ARC_fnc_uiEodDispoPrompt requires scheduled execution (canSuspend == true).";
     [false]
 };
 

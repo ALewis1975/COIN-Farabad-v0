@@ -14,6 +14,8 @@
 
 if (!hasInterface) exitWith {false};
 
+if (!canSuspend) exitWith { _this spawn ARC_fnc_intelClientTocIssueOrderPrompt; false };
+
 params [
     ["_order", "RTB"],
     ["_purpose", "REFIT"]

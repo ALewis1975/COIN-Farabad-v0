@@ -12,6 +12,8 @@
 
 if (!hasInterface) exitWith {false};
 
+if (!canSuspend) exitWith { _this spawn ARC_fnc_intelQueuePromptDecision; false };
+
 params [["_approve", true]];
 if (!(_approve isEqualType true)) then { _approve = true; };
 

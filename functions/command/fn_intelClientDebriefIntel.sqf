@@ -15,6 +15,8 @@
 
 if (!hasInterface) exitWith {false};
 
+if (!canSuspend) exitWith { _this spawn ARC_fnc_intelClientDebriefIntel; false };
+
 params [
     ["_station", objNull],
     ["_caller", player],

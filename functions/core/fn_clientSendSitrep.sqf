@@ -15,6 +15,8 @@
 
 if (!hasInterface) exitWith {false};
 
+if (!canSuspend) exitWith { _this spawn ARC_fnc_clientSendSitrep; false };
+
 // Fail-safe: ensure role helper functions exist even if CfgFunctions.hpp was not updated.
 if (isNil "ARC_fnc_rolesIsAuthorized") then { ARC_fnc_rolesIsAuthorized = compile preprocessFileLineNumbers "functions\\core\\fn_rolesIsAuthorized.sqf"; };
 
