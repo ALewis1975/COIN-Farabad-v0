@@ -197,31 +197,57 @@ private _poolVIP = missionNamespace getVariable ["ARC_convoyVehiclesEscortVIP", 
     "UK3CB_ION_B_Desert_SUV_Armoured"
 ]];
 
-// Some mod vehicles are configured as WEST but use non-WEST (or even CIV) default crews.
-// That can leave convoy vehicles in multiple AI groups (joinSilent fails cross-side).
-// Enable this filter by default; disable by setting ARC_convoyEnforceCrewSideWest = false.
-private _enforceCrewSide = missionNamespace getVariable ["ARC_convoyEnforceCrewSideWest", true];
-if (!(_enforceCrewSide isEqualType true)) then { _enforceCrewSide = true; };
+// Convoy group side is also used as a class policy gate (vehicle crew must be join-compatible).
+private _grpSide = missionNamespace getVariable ["ARC_convoySide", west];
+if !(typeName _grpSide isEqualTo "SIDE") then { _grpSide = west; };
 
-// Filter: only allow BLUFOR (WEST) vehicles, so createVehicleCrew produces joinable WEST crews.
-// Also exclude Strykers and all tracked vehicles (per design).
-private _isValidWestVehicle = {
+private _sideToNumber = {
+    params ["_s"];
+    if (_s isEqualTo west) exitWith {1};
+    if (_s isEqualTo east) exitWith {0};
+    if (_s isEqualTo resistance) exitWith {2};
+    if (_s isEqualTo civilian) exitWith {3};
+    -1
+};
+
+private _allowedVehicleSides = missionNamespace getVariable ["ARC_convoyAllowedVehicleSides", []];
+private _allowedCrewSides = missionNamespace getVariable ["ARC_convoyAllowedCrewSides", [1]];
+private _allowedVehicleFactions = missionNamespace getVariable ["ARC_convoyAllowedVehicleFactions", []];
+private _allowedCrewFactions = missionNamespace getVariable ["ARC_convoyAllowedCrewFactions", []];
+
+if !(_allowedVehicleSides isEqualType []) then { _allowedVehicleSides = [1]; };
+if !(_allowedCrewSides isEqualType []) then { _allowedCrewSides = [1]; };
+if !(_allowedVehicleFactions isEqualType []) then { _allowedVehicleFactions = []; };
+if !(_allowedCrewFactions isEqualType []) then { _allowedCrewFactions = []; };
+
+private _groupSideNum = [_grpSide] call _sideToNumber;
+
+// Policy validator for convoy classes.
+private _isValidPolicyVehicle = {
     params ["_cls"];
     if !(_cls isEqualType "") exitWith {false};
-    if !(isClass (configFile >> "CfgVehicles" >> _cls)) exitWith {false};
+    private _cfgVeh = configFile >> "CfgVehicles" >> _cls;
+    if !(isClass _cfgVeh) exitWith {false};
 
-    // Side must be BLUFOR/WEST (CfgVehicles >> side == 1).
-    private _sideNum = getNumber (configFile >> "CfgVehicles" >> _cls >> "side");
-    if !(_sideNum isEqualTo 1) exitWith {false};
+    private _vehSide = getNumber (_cfgVeh >> "side");
+    if ((count _allowedVehicleSides) > 0 && { !(_vehSide in _allowedVehicleSides) }) exitWith {false};
 
-    // Optional: ensure the default crew class is also WEST, otherwise crews may not join the convoy group.
-    if (_enforceCrewSide) then
-    {
-        private _crewCls = getText (configFile >> "CfgVehicles" >> _cls >> "crew");
-        if (_crewCls isEqualTo "" || { !(isClass (configFile >> "CfgVehicles" >> _crewCls)) }) exitWith {false};
-        private _crewSide = getNumber (configFile >> "CfgVehicles" >> _crewCls >> "side");
-        if !(_crewSide isEqualTo 1) exitWith {false};
-    };
+    private _vehFaction = getText (_cfgVeh >> "faction");
+    if ((count _allowedVehicleFactions) > 0 && { !(_vehFaction in _allowedVehicleFactions) }) exitWith {false};
+
+    private _crewCls = getText (_cfgVeh >> "crew");
+    if (_crewCls isEqualTo "") exitWith {false};
+    private _cfgCrew = configFile >> "CfgVehicles" >> _crewCls;
+    if !(isClass _cfgCrew) exitWith {false};
+
+    private _crewSide = getNumber (_cfgCrew >> "side");
+    if ((count _allowedCrewSides) > 0 && { !(_crewSide in _allowedCrewSides) }) exitWith {false};
+
+    private _crewFaction = getText (_cfgCrew >> "faction");
+    if ((count _allowedCrewFactions) > 0 && { !(_crewFaction in _allowedCrewFactions) }) exitWith {false};
+
+    // Crew must be side-compatible with the convoy group for joinSilent to work reliably.
+    if (_groupSideNum >= 0 && { !(_crewSide isEqualTo _groupSideNum) }) exitWith {false};
 
     private _c = toLower _cls;
 
@@ -242,7 +268,7 @@ private _isValidWestVehicle = {
 private _filterPool = {
     params ["_poolIn"];
     if !(_poolIn isEqualType []) exitWith {[]};
-    _poolIn select { [_x] call _isValidWestVehicle }
+    _poolIn select { [_x] call _isValidPolicyVehicle }
 };
 
 private _pickFrom = {
@@ -456,9 +482,6 @@ private _wp = objNull;
 // Create a dedicated convoy group up-front.
 // Relying on the first vehicle's auto-created crew group is fragile (it can leave
 // each vehicle in its own separate group if any join step fails).
-private _grpSide = missionNamespace getVariable ["ARC_convoySide", west];
-if !(typeName _grpSide isEqualTo "SIDE") then { _grpSide = west; };
-
 private _grp = createGroup [_grpSide, true];
 if (isNull _grp) then
 {

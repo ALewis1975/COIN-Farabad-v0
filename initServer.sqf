@@ -522,12 +522,12 @@ missionNamespace setVariable ["ARC_convoyBundleClassMatrix", [
     ]]
 ], true];
 
-// Side/faction policy for allowed convoy classes (defaults preserve current WEST-first behavior).
-missionNamespace setVariable ["ARC_convoyAllowedVehicleSides", [1], true];
+// Side/faction policy for allowed convoy classes (crew defaults preserve WEST join safety; vehicle side is open for contractor/government bundles).
+missionNamespace setVariable ["ARC_convoyAllowedVehicleSides", [], true];
 missionNamespace setVariable ["ARC_convoyAllowedCrewSides", [1], true];
 missionNamespace setVariable ["ARC_convoyAllowedVehicleFactions", [], true];
 missionNamespace setVariable ["ARC_convoyAllowedCrewFactions", [], true];
-missionNamespace setVariable ["ARC_convoyEnforceCrewSideWest", true, true];
+missionNamespace setVariable ["ARC_convoyEnforceCrewSideWest", true, true]; // deprecated compatibility toggle
 
 // Bridge handling (assist + stuck recovery)
 missionNamespace setVariable ["ARC_convoyBridgeAssistEnabled", true, true];
