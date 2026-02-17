@@ -46,6 +46,13 @@ _sepDesired = (_sepDesired max 10) min 80;
 private _padClearR = missionNamespace getVariable ["ARC_convoySpawnPadClearRadiusM", 18];
 if (!(_padClearR isEqualType 0)) then { _padClearR = 18; };
 
+private _enforceCrewSide = missionNamespace getVariable ["ARC_convoyEnforceCrewSide", true];
+if (!(_enforceCrewSide isEqualType true) && !(_enforceCrewSide isEqualType false)) then { _enforceCrewSide = true; };
+if (_debug) then
+{
+    diag_log format ["[ARC][CONVOY][BOOT] enforceCrewSide=%1", _enforceCrewSide];
+};
+
 // If the pad-clear radius is too small, vehicles spawn too tightly and the convoy "blooms" into a blob
 // before it settles into formation. Nudge the radius toward the desired convoy spacing.
 private _minClear = ((_sepDesired * 0.65) max 18) min 90;
