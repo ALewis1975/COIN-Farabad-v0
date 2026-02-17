@@ -209,9 +209,9 @@ missionNamespace setVariable ["civsub_v1_traffic_vehiclePool_fallback", [
     "C_Hatchback_01_F"
 ], true];
 
-// Minimal moving (disabled until you explicitly enable it)
-missionNamespace setVariable ["civsub_v1_traffic_allow_moving", false, true];
-missionNamespace setVariable ["civsub_v1_traffic_cap_moving_global", 0, true];
+// Minimal moving (enabled with conservative cap/probability)
+missionNamespace setVariable ["civsub_v1_traffic_allow_moving", true, true];
+missionNamespace setVariable ["civsub_v1_traffic_cap_moving_global", 2, true];
 missionNamespace setVariable ["civsub_v1_traffic_prob_moving", 0.10, true];
 missionNamespace setVariable ["civsub_v1_traffic_moving_maxSpeed", 35, true];
 missionNamespace setVariable ["civsub_v1_traffic_driverClass", "C_man_1", true];
