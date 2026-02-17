@@ -543,7 +543,17 @@ missionNamespace setVariable ["ARC_convoyBridgeAssistRoadSnapM", 10, true];
 missionNamespace setVariable ["ARC_convoyBridgeAssistFollowersEnabled", true, true];
 missionNamespace setVariable ["ARC_convoyBridgeAssistFollowerBypassSec", 10, true];
 missionNamespace setVariable ["ARC_convoyBridgeAssistFollowerTtlSec", 90, true];
+missionNamespace setVariable ["ARC_convoyBridgeFollowerRecoveryCooldownSec", 28, true];
+missionNamespace setVariable ["ARC_convoyBridgeFollowerGapTriggerMinM", 160, true];
+missionNamespace setVariable ["ARC_convoyBridgeFollowerDoMoveReissueSec", 3.5, true];
 missionNamespace setVariable ["ARC_convoyBridgeAssistPointRadiusM", 16, true];
+
+// General follower rejoin tightening (all disruptions, not bridge-only)
+missionNamespace setVariable ["ARC_convoyFollowerRecoveryCooldownSec", 50, true];
+missionNamespace setVariable ["ARC_convoyFollowerGapTriggerMinM", 180, true];
+missionNamespace setVariable ["ARC_convoyFollowerDoMoveReissueSec", 5, true];
+missionNamespace setVariable ["ARC_convoyFollowerRejoinOrderTtlSec", 50, true];
+missionNamespace setVariable ["ARC_convoyFollowerRejoinPointRadiusM", 26, true];
 
 // Route recon parameters
 missionNamespace setVariable ["ARC_routeReconStartOffsetM", 450, true];
