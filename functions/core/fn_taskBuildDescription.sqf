@@ -405,7 +405,7 @@ if (!(_intelLog isEqualType [])) then { _intelLog = []; };
 
 private _near = [];
 {
-    if (!(_x isEqualType []) || { (count _x) < 6 }) then { continue; };
+    if (!(_x isEqualType []) || { (count _x) < 5 }) then { continue; };
     _x params ["_iid", "_t", ["_cat", ""], ["_sum", ""], ["_pATL", []], ["_meta", []]];
     if (!(_cat isEqualType "")) then { _cat = str _cat; };
     if (toUpper _cat isEqualTo "OPS") then { continue; };
@@ -424,7 +424,8 @@ if ((count _near) > 0) then
     private _slice = _near select [_start, (count _near) - _start];
 
     _intelText = (_slice apply {
-        _x params ["_iid", "_t", "_cat", "_sum", "_pATL", "_meta"];
+        _x params ["_iid", "_t", ["_cat", ""], ["_sum", ""], ["_pATL", []], ["_meta", []]];
+        if (!(_cat isEqualType "")) then { _cat = str _cat; };
         private _mins = round (_t / 60);
         format ["- %1 (%2, T+%3m): %4", _iid, _cat, _mins, _sum]
     }) joinString _BR;
