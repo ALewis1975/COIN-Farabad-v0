@@ -499,6 +499,7 @@ class CfgFunctions
             class uiConsoleActionS2Secondary {};
 
             class uiIncidentGetNextActions {};
+            class consoleThemeGet {};
 
         };
 
@@ -576,14 +577,3 @@ class Ops
     };
 };
 
-
-// UI-SKIN-1b theme getter
-class ARC_UI_SKIN_THEME
-{
-    tag = "ARC";
-    class ui
-    {
-        file = "functions\ui\theme";
-        class consoleThemeGet {};
-    };
-};
