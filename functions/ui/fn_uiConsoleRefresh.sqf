@@ -223,7 +223,9 @@ case "DASH":
         if (!isNull _ctrlDetailsGrp) then { _ctrlDetailsGrp ctrlShow true; };
         if (!isNull _ctrlDetails) then { _ctrlDetails ctrlShow true; };
 
-        if (!isNull _b1) then { _b1 ctrlShow true; _b1 ctrlEnable true; _b1 ctrlSetText "EXECUTE"; };
+        // HQ button label ownership lives in ARC_fnc_uiConsoleHQPaint
+        // so mode-specific text (EXECUTE/SPAWN) does not get stomped by refresh ticks.
+        if (!isNull _b1) then { _b1 ctrlShow true; _b1 ctrlEnable true; };
         // HQ normally uses the main list for admin actions.
         // Secondary is only shown when HQ is in INCIDENT PICKER mode.
         private _hqMode = uiNamespace getVariable ["ARC_console_hqMode", "TOOLS"];
