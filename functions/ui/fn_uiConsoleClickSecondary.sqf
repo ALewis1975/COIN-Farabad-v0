@@ -21,15 +21,49 @@ switch (_tab) do
 
     case "OPS":
     {
-        private _typ = missionNamespace getVariable ["ARC_activeIncidentType", ""]; if (!(_typ isEqualType "")) then { _typ = ""; };
-        private _sit = missionNamespace getVariable ["ARC_activeIncidentSitrepSent", false]; if (!(_sit isEqualType true) && !(_sit isEqualType false)) then { _sit = false; };
-        if ((toUpper (trim _typ)) isEqualTo "IED" && { !_sit }) then
+        private _accepted = missionNamespace getVariable ["ARC_activeIncidentAccepted", false];
+        if (!(_accepted isEqualType true) && !(_accepted isEqualType false)) then { _accepted = false; };
+
+        if (!_accepted) then
         {
-            [] spawn ARC_fnc_uiConsoleActionRequestEodDispo;
+            [] spawn
+            {
+                private _omniTokens = missionNamespace getVariable ["ARC_consoleOmniTokens", ["OMNI"]];
+                if (!(_omniTokens isEqualType [])) then { _omniTokens = ["OMNI"]; };
+                private _isOmni = false;
+                {
+                    if (_x isEqualType "" && { [player, _x] call ARC_fnc_rolesHasGroupIdToken }) exitWith { _isOmni = true; };
+                } forEach _omniTokens;
+
+                if (!(([player] call ARC_fnc_rolesIsAuthorized) || _isOmni)) exitWith
+                {
+                    ["Status", "A leader (SL/PL/CO) must set group availability (unless OMNI)."] call ARC_fnc_clientToast;
+                };
+
+                private _gid = groupId group player;
+                if (_gid isEqualTo "") exitWith { ["Status", "Your group has no callsign; cannot update status."] call ARC_fnc_clientToast; };
+                private _rows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
+                if (!(_rows isEqualType [])) then { _rows = []; };
+                private _idx = _rows findIf { _x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _gid } };
+                private _cur = if (_idx < 0) then { "OFFLINE" } else { toUpper (trim ((_rows # _idx) # 1)) };
+                private _next = if (_cur isEqualTo "AVAILABLE") then { "OFFLINE" } else { "AVAILABLE" };
+
+                [player, _next] remoteExec ["ARC_fnc_tocRequestAcceptIncident", 2];
+                ["Status", format ["Status request sent: %1", _next]] call ARC_fnc_clientToast;
+            };
         }
         else
         {
-            [] spawn ARC_fnc_uiConsoleActionRequestFollowOn;
+            private _typ = missionNamespace getVariable ["ARC_activeIncidentType", ""]; if (!(_typ isEqualType "")) then { _typ = ""; };
+            private _sit = missionNamespace getVariable ["ARC_activeIncidentSitrepSent", false]; if (!(_sit isEqualType true) && !(_sit isEqualType false)) then { _sit = false; };
+            if ((toUpper (trim _typ)) isEqualTo "IED" && { !_sit }) then
+            {
+                [] spawn ARC_fnc_uiConsoleActionRequestEodDispo;
+            }
+            else
+            {
+                [] spawn ARC_fnc_uiConsoleActionRequestFollowOn;
+            };
         };
     };
 

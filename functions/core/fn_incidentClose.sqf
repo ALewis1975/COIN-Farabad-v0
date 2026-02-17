@@ -381,6 +381,17 @@ private _thrCtx = [
 ["activeIncidentPos", []] call ARC_fnc_stateSet;
 
 // Assignment/acceptance workflow
+private _prevAcceptedGroup = ["activeIncidentAcceptedByGroup", ""] call ARC_fnc_stateGet;
+if (_prevAcceptedGroup isEqualType "" && { _prevAcceptedGroup isNotEqualTo "" }) then
+{
+    private _rows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
+    if (!(_rows isEqualType [])) then { _rows = []; };
+    private _idx = _rows findIf { _x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _prevAcceptedGroup } };
+    private _row = [_prevAcceptedGroup, "AVAILABLE", serverTime, "SYSTEM"];
+    if (_idx < 0) then { _rows pushBack _row; } else { _rows set [_idx, _row]; };
+    missionNamespace setVariable ["ARC_pub_unitStatuses", _rows, true];
+};
+
 ["activeIncidentAccepted", false] call ARC_fnc_stateSet;
 ["activeIncidentAcceptedAt", -1] call ARC_fnc_stateSet;
 ["activeIncidentAcceptedBy", ""] call ARC_fnc_stateSet;
