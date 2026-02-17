@@ -17,6 +17,8 @@ if !([player] call ARC_fnc_rolesIsAuthorized) exitWith
 };
 
 uiNamespace setVariable ["ARC_console_cmdMode", "QUEUE"];
+uiNamespace setVariable ["ARC_console_activeTab", "CMD"];
+uiNamespace setVariable ["ARC_console_forceTab", "CMD"];
 uiNamespace setVariable ["ARC_console_cmdQueueForceRebuild", true];
 
 private _display = uiNamespace getVariable ["ARC_console_display", displayNull];
