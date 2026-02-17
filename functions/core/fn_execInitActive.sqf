@@ -1739,6 +1739,8 @@ if (_showSpawnMarker) then
         };
 
         private _routePts = [];
+        private _routeBuildDiag = [];
+        private _routeUsedFallbackAny = false;
         private _snapM = missionNamespace getVariable ["ARC_convoyRoadSnapM", 120];
         if (!(_snapM isEqualType 0)) then { _snapM = 120; };
         _snapM = (_snapM max 40) min 400;
@@ -1769,6 +1771,71 @@ if (_showSpawnMarker) then
                 ["_avoidNearR", 180]
             ];
 
+            private _diagAStarSucceeded = false;
+            private _diagFallbackUsed = false;
+
+            private _fn_routeLen = {
+                params ["_pts"];
+
+                private _len = 0;
+                if (_pts isEqualType [] && { (count _pts) >= 2 }) then
+                {
+                    for "_li" from 1 to ((count _pts) - 1) do
+                    {
+                        _len = _len + ((_pts # (_li - 1)) distance2D (_pts # _li));
+                    };
+                };
+
+                _len
+            };
+
+            private _fn_fallbackRoute = {
+                params ["_s", "_e", "_snapLocal", "_avoidZoneLocal", "_avoidNearLocal", "_avoidNearRLocal"];
+
+                private _hardSnap = missionNamespace getVariable ["ARC_convoyRoadSnapHardM", (_snapLocal * 4)];
+                if (!(_hardSnap isEqualType 0)) then { _hardSnap = (_snapLocal * 4); };
+                _hardSnap = (_hardSnap max (_snapLocal + 80)) min 1400;
+
+                private _probe = [_s, _e];
+                _probe pushBack [(_s # 0) + ((_e # 0) - (_s # 0)) * 0.25, (_s # 1) + ((_e # 1) - (_s # 1)) * 0.25, 0];
+                _probe pushBack [(_s # 0) + ((_e # 0) - (_s # 0)) * 0.50, (_s # 1) + ((_e # 1) - (_s # 1)) * 0.50, 0];
+                _probe pushBack [(_s # 0) + ((_e # 0) - (_s # 0)) * 0.75, (_s # 1) + ((_e # 1) - (_s # 1)) * 0.75, 0];
+
+                private _roadPts = [];
+                {
+                    private _r = if (_avoidZoneLocal isNotEqualTo "") then
+                    {
+                        [_x, _hardSnap, _avoidZoneLocal, _avoidNearLocal, _avoidNearRLocal] call _fn_nearestRoad
+                    }
+                    else
+                    {
+                        [_x, _hardSnap] call _fn_nearestRoad
+                    };
+
+                    if (!isNull _r) then
+                    {
+                        private _rp = getPosATL _r;
+                        _rp resize 3;
+                        if ((count _roadPts) isEqualTo 0 || { (_rp distance2D (_roadPts # ((count _roadPts) - 1))) > 20 }) then
+                        {
+                            _roadPts pushBack _rp;
+                        };
+                    };
+                } forEach _probe;
+
+                private _fallback = [+_s];
+                _fallback append _roadPts;
+                _fallback pushBack (+_e);
+
+                if ((count _fallback) < 3) then
+                {
+                    private _mid = [(_s # 0) + ((_e # 0) - (_s # 0)) * 0.50, (_s # 1) + ((_e # 1) - (_s # 1)) * 0.50, 0];
+                    _fallback insert [1, [_mid]];
+                };
+
+                _fallback
+            };
+
             // When we're avoiding a zone (ex: Airbase), also avoid snapping the start/end to a road inside that zone.
             private _r0 = if (_avoidZone isNotEqualTo "") then
             {
@@ -1788,7 +1855,16 @@ if (_showSpawnMarker) then
                 [_pEnd, _snap] call _fn_nearestRoad
             };
 
-            if (isNull _r0 || { isNull _r1 }) exitWith { [_pStart, _pEnd] };
+            if (isNull _r0 || { isNull _r1 }) exitWith
+            {
+                _diagFallbackUsed = true;
+                private _fb = [_pStart, _pEnd, _snap, _avoidZone, _avoidNear, _avoidNearR] call _fn_fallbackRoute;
+                private _fbLen = [_fb] call _fn_routeLen;
+                _routeBuildDiag pushBack [false, _diagFallbackUsed, count _fb, _fbLen];
+                _routeUsedFallbackAny = true;
+                diag_log format ["[ARC][ConvoyRoute] A* success=%1 fallback=%2 points=%3 lenM=%4", false, _diagFallbackUsed, count _fb, round _fbLen];
+                _fb
+            };
 
             private _k0 = str _r0;
             private _k1 = str _r1;
@@ -1887,7 +1963,16 @@ if (_showSpawnMarker) then
                 } forEach (roadsConnectedTo _best);
             };
 
-            if (!_found) exitWith { [_pStart, _pEnd] };
+            if (!_found) exitWith
+            {
+                _diagFallbackUsed = true;
+                private _fb = [_pStart, _pEnd, _snap, _avoidZone, _avoidNear, _avoidNearR] call _fn_fallbackRoute;
+                private _fbLen = [_fb] call _fn_routeLen;
+                _routeBuildDiag pushBack [false, _diagFallbackUsed, count _fb, _fbLen];
+                _routeUsedFallbackAny = true;
+                diag_log format ["[ARC][ConvoyRoute] A* success=%1 fallback=%2 points=%3 lenM=%4", false, _diagFallbackUsed, count _fb, round _fbLen];
+                _fb
+            };
 
             // Reconstruct path keys from goal back to start.
             private _keys = [];
@@ -1904,7 +1989,16 @@ if (_showSpawnMarker) then
                 _ck = _prev;
             };
 
-            if ((count _keys) == 0) exitWith { [_pStart, _pEnd] };
+            if ((count _keys) == 0) exitWith
+            {
+                _diagFallbackUsed = true;
+                private _fb = [_pStart, _pEnd, _snap, _avoidZone, _avoidNear, _avoidNearR] call _fn_fallbackRoute;
+                private _fbLen = [_fb] call _fn_routeLen;
+                _routeBuildDiag pushBack [false, _diagFallbackUsed, count _fb, _fbLen];
+                _routeUsedFallbackAny = true;
+                diag_log format ["[ARC][ConvoyRoute] A* success=%1 fallback=%2 points=%3 lenM=%4", false, _diagFallbackUsed, count _fb, round _fbLen];
+                _fb
+            };
 
             reverse _keys;
 
@@ -1929,6 +2023,11 @@ if (_showSpawnMarker) then
             {
                 _pts pushBack _pEndRoad;
             };
+
+            _diagAStarSucceeded = true;
+            private _routeLenM = [_pts] call _fn_routeLen;
+            _routeBuildDiag pushBack [_diagAStarSucceeded, _diagFallbackUsed, count _pts, _routeLenM];
+            diag_log format ["[ARC][ConvoyRoute] A* success=%1 fallback=%2 points=%3 lenM=%4", _diagAStarSucceeded, _diagFallbackUsed, count _pts, round _routeLenM];
 
             _pts
         };
@@ -1979,6 +2078,12 @@ if (_showSpawnMarker) then
             _routePts = [_routeStart, _routeEnd, _snapM, _avoidZone, _avoidNear, _avoidNearR] call _fn_buildRoadRoute;
             ["activeConvoyIngressPos", []] call ARC_fnc_stateSet;
         };
+
+        if (_routeUsedFallbackAny && { (count _routePts) < 3 } && { (count _routePts) >= 2 }) then
+        {
+            _routePts = [_routePts # 0, _routePts # 1, _snapM, "", [], 0] call _fn_buildRoadRoute;
+        };
+
         // Store route points for the convoy tick (waypoint build) and compute an approximate road-distance.
         private _routeLen = 0;
         if ((count _routePts) >= 2) then
@@ -1988,6 +2093,14 @@ if (_showSpawnMarker) then
                 _routeLen = _routeLen + ((_routePts # (_i - 1)) distance2D (_routePts # _i));
             };
         };
+
+        diag_log format [
+            "[ARC][ConvoyRoute] Summary: calls=%1 fallbackAny=%2 finalPoints=%3 finalLenM=%4",
+            count _routeBuildDiag,
+            _routeUsedFallbackAny,
+            count _routePts,
+            round _routeLen
+        ];
         ["activeConvoyRoutePoints", _routePts] call ARC_fnc_stateSet;
         ["activeConvoyRouteLenM", _routeLen] call ARC_fnc_stateSet;
 
