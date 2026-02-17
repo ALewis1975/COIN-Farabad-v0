@@ -586,10 +586,6 @@ missionNamespace setVariable ["ARC_convoyBundleClassMatrix", [
         "rhsusf_M1232_M2_usarmy_d",
         "rhsusf_M1232_MK19_usarmy_d"
     ]],
-    ["LOGI_CONVOY_SECURITY", [
-        "rhsusf_M1232_M2_usarmy_d",
-        "rhsusf_M1232_MK19_usarmy_d"
-    ]],
     ["LOGI_TRANSPORT", [
         "rhsusf_m1083a1p2_d_fmtv_usarmy",
         "rhsusf_m1083a1p2_d_open_fmtv_usarmy",
