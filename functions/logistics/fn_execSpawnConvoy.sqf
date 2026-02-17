@@ -491,8 +491,8 @@ if ((count _classes) == 0) exitWith
     []
 };
 
-// Startup breadcrumbs (low-volume): final selected class list for this convoy spawn attempt.
-diag_log format ["[ARC][CONVOY][BOOT] task=%1 type=%2 selectedClasses=%3", _taskId, _incidentTypeU, _classes];
+// Startup breadcrumbs (low-volume): final selected class list after policy filtering.
+diag_log format ["[ARC][CONVOY][BOOT] task=%1 type=%2 selectedClassesAfterFiltering=%3 count=%4", _taskId, _incidentTypeU, _classes, count _classes];
 
 // --- Sequential spawn --------------------------------------------------------
 private _vehicles = [];
@@ -682,14 +682,6 @@ if (_stageEnabled) then
     }
     else
     {
-        private _sideNum = getNumber (configFile >> "CfgVehicles" >> _class >> "side");
-        if (!(_sideNum isEqualTo 1)) then
-        {
-            diag_log format ["[ARC][CONVOY] Skipping non-BLUFOR vehicle classname (side=%1): %2", _sideNum, _class];
-        }
-        else
-        {
-
         // Wait for spawn pad to clear (check once per interval).
         private _guard = 0;
         while { ([_spawnPos, _padClearR] call _isPadOccupied) && { _guard < 60 } } do
@@ -861,7 +853,6 @@ if (_stageEnabled) then
 
         // Enforce minimum spacing between spawns
         sleep _interval;
-        };
     };
 } forEach _classes;
 
