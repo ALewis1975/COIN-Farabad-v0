@@ -13,7 +13,7 @@ if (!isServer) exitWith {};
 // ============================================================================
 
 // Update this stamp to match the mission folder you’re running.
-missionNamespace setVariable ["ARC_buildStamp", "COIN_Farabad_v0.Farabad-20260129-2145", true];
+missionNamespace setVariable ["ARC_buildStamp", "COIN_Farabad_v0.Farabad-20260217-0001", true];
 diag_log format ["[ARC][BUILD] %1", missionNamespace getVariable ["ARC_buildStamp","UNKNOWN"]];
 
 // Debug toggles (server authoritative)
@@ -23,7 +23,7 @@ missionNamespace setVariable ["ARC_debugInspectorEnabled", false, true];
 
 
 // Optional patch breadcrumbs (keep these accurate; they’re your fastest sanity check)
-diag_log "FARABAD_MIG_S0_hotfix03_compile_audit_sqf_syntaxfix loaded";
+diag_log "FARABAD_MIG_S0_hotfix04_convoy_startup_breadcrumbs loaded";
 
 // ============================================================================
 // CORE DEV POSTURE (scaffolding + debug)
