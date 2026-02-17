@@ -27,6 +27,12 @@ private _terminalState = switch (_reasonUp) do
     default {"CANCELLED"};
 };
 
+if (_terminalState isEqualTo "CANCELLED") then
+{
+    private _cancelReason = if (_reasonUp isEqualTo "") then {"UNKNOWN"} else {_reasonUp};
+    diag_log format ["[FARABAD][MAPCLICK][CANCEL] reason=%1", _cancelReason];
+};
+
 uiNamespace setVariable ["ARC_mapClick_cleanupDone", true];
 onMapSingleClick "";
 openMap [false, false];
