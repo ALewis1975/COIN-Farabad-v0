@@ -389,10 +389,23 @@ if (!isNull _ctrlDetails) then
     _ctrlDetails ctrlSetStructuredText parseText _details;
 
     // Auto-fit + clamp to viewport so the controls group can scroll when needed.
+    // Keep x/y/w pinned to the designed inset; BIS_fnc_ctrlFitToTextHeight can
+    // inherit stretched width from prior states, which causes horizontal overflow
+    // and makes S3 right-panel text render off-screen.
+    private _defaultPos = uiNamespace getVariable ["ARC_console_opsDetailsDefaultPos", []];
+    if (!(_defaultPos isEqualType []) || { (count _defaultPos) < 4 }) then
+    {
+        _defaultPos = ctrlPosition _ctrlDetails;
+        uiNamespace setVariable ["ARC_console_opsDetailsDefaultPos", +_defaultPos];
+    };
+
     [_ctrlDetails] call BIS_fnc_ctrlFitToTextHeight;
     private _grp = _display displayCtrl 78016;
     private _minH = if (!isNull _grp) then { (ctrlPosition _grp) # 3 } else { 0.74 };
     private _p = ctrlPosition _ctrlDetails;
+    _p set [0, _defaultPos # 0];
+    _p set [1, _defaultPos # 1];
+    _p set [2, _defaultPos # 2];
     _p set [3, (_p # 3) max _minH];
     _ctrlDetails ctrlSetPosition _p;
     _ctrlDetails ctrlCommit 0;
