@@ -84,6 +84,17 @@ if (!(_tab isEqualType "")) then { _tab = "DASH"; };
 _tab = toUpper (trim _tab);
 
 // ---------------------------------------------------------------------------
+
+// Hide S2 category panels (if present) when leaving INTEL to prevent cross-tab UI leak.
+private _s2CatPanels = uiNamespace getVariable ["ARC_s2_catPanels", []];
+if (_tab != "INTEL" && { _s2CatPanels isEqualType [] }) then {
+    {
+        if (_x isEqualType [] && { (count _x) == 3 }) then {
+            { if (!isNull _x) then { _x ctrlShow false; }; } forEach _x;
+        };
+    } forEach _s2CatPanels;
+};
+
 // Regression guard: restore shared control positions when leaving S2/INTEL.
 // S2 Intel paint may temporarily resize/reposition MainList and workflow controls.
 // Other tabs must not inherit that layout.

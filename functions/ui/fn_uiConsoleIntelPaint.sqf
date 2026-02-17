@@ -107,6 +107,175 @@ private _ensureS2Split = {
     [_xCtl, _wCtl, _xR]
 };
 
+
+// ---------------------------------------------------------------------------
+// S2 category panels (TOOLS mode):
+// Break the long mixed list into stacked sub-panels (similar to OPS frames).
+// We keep MainList (78011) as a hidden master list for data + selection logic,
+// and render 5 visible panel listboxes as UI-only projections.
+// ---------------------------------------------------------------------------
+
+private _ensureS2CatPanels = {
+    params ["_display"];
+
+    private _k = "ARC_s2_catPanels";
+    private _panels = uiNamespace getVariable [_k, []];
+
+    private _ok = (_panels isEqualType [] && { (count _panels) == 5 });
+    if (_ok) then {
+        {
+            if !(_x isEqualType [] && { (count _x) == 3 }) exitWith { _ok = false; };
+            if (_ok) then {
+                if (isNull (_x # 0) || { isNull (_x # 1) } || { isNull (_x # 2) }) exitWith { _ok = false; };
+            };
+        } forEach _panels;
+    };
+    if (!_ok) then { _panels = []; };
+
+    if (_panels isEqualTo []) then {
+        private _mkPanel = {
+            params ["_title"];
+
+            private _bg  = _display ctrlCreate ["RscText", -1];
+            private _lbl = _display ctrlCreate ["RscText", -1];
+            private _lb  = _display ctrlCreate ["RscListbox", -1];
+
+            _lbl ctrlSetText _title;
+
+            _bg  ctrlSetBackgroundColor [0.05,0.05,0.05,0.65];
+            _lbl ctrlSetBackgroundColor [0.05,0.05,0.05,0.92];
+            _lbl ctrlSetTextColor [0.722,0.608,0.420,1];
+            _lb  ctrlSetBackgroundColor [0.05,0.05,0.05,0.65];
+
+            _lb ctrlAddEventHandler ["LBSelChanged", {
+                params ["_ctrl", "_idx"];
+                if (_idx < 0) exitWith {};
+                if (uiNamespace getVariable ["ARC_s2_catPanels_suppressSel", false]) exitWith {};
+
+                private _d = _ctrl lbData _idx;
+                if (!(_d isEqualType "")) exitWith {};
+                if (_d isEqualTo "" || { _d isEqualTo "HDR" }) exitWith {};
+
+                private _disp = ctrlParent _ctrl;
+                if (isNull _disp) exitWith {};
+
+                private _master = _disp displayCtrl 78011;
+                if (isNull _master) exitWith {};
+
+                private _found = -1;
+                for "_i" from 0 to ((lbSize _master) - 1) do {
+                    if ((_master lbData _i) isEqualTo _d) exitWith { _found = _i; };
+                };
+                if (_found >= 0) then {
+                    uiNamespace setVariable ["ARC_s2_catPanels_suppressSel", true];
+                    _master lbSetCurSel _found;
+                    uiNamespace setVariable ["ARC_s2_catPanels_suppressSel", false];
+                };
+            }];
+
+            [_bg, _lbl, _lb]
+        };
+
+        _panels pushBack (["INTEL LOGGING"] call _mkPanel);
+        _panels pushBack (["LEAD REQUESTS (S2)"] call _mkPanel);
+        _panels pushBack (["CIVSUB / MDT"] call _mkPanel);
+        _panels pushBack (["ADMIN / TOOLS"] call _mkPanel);
+        _panels pushBack (["INTEL FEED"] call _mkPanel);
+
+        uiNamespace setVariable [_k, _panels];
+    };
+
+    uiNamespace getVariable [_k, _panels]
+};
+
+private _layoutS2CatPanels = {
+    params ["_display", "_listMaster", "_panels"];
+
+    private _pL = ctrlPosition _listMaster;
+    private _x = _pL # 0;
+    private _y = _pL # 1;
+    private _w = _pL # 2;
+    private _h = _pL # 3;
+
+    private _hHdr = 0.03 * safeZoneH;
+    private _probe = _display displayCtrl 78031;
+    if (!isNull _probe) then {
+        private _pp = ctrlPosition _probe;
+        if ((_pp # 3) > 0) then { _hHdr = _pp # 3; };
+    };
+
+    private _gap = 0.006;
+    private _avail = _h - (_gap * 4);
+    if (_avail < 0.20) then { _avail = _h; _gap = 0; };
+
+    private _weights = [0.16, 0.16, 0.18, 0.22, 0.28];
+
+    private _yCur = _y;
+    for "_pi" from 0 to 4 do {
+        private _p = _panels # _pi;
+        _p params ["_bg","_lbl","_lb"];
+
+        private _ph = _avail * (_weights # _pi);
+        if (_pi == 4) then { _ph = (_y + _h) - _yCur; };
+
+        _bg  ctrlSetPosition [_x, _yCur, _w, _ph];
+        _lbl ctrlSetPosition [_x, _yCur, _w, _hHdr];
+
+        private _hLB = (_ph - _hHdr) max 0.02;
+        _lb  ctrlSetPosition [_x, _yCur + _hHdr, _w, _hLB];
+
+        { _x ctrlCommit 0; } forEach [_bg,_lbl,_lb];
+
+        _yCur = _yCur + _ph + _gap;
+    };
+};
+
+private _renderS2CatPanelsFromMaster = {
+    params ["_display", "_listMaster", "_panels"];
+
+    { lbClear (_x # 2); } forEach _panels;
+
+    private _map = createHashMapFromArray [
+        ["INTEL LOGGING",      (_panels # 0) # 2],
+        ["LEAD REQUESTS (S2)", (_panels # 1) # 2],
+        ["CIVSUB / MDT",       (_panels # 2) # 2],
+        ["ADMIN / TOOLS",      (_panels # 3) # 2],
+        ["INTEL FEED",         (_panels # 4) # 2]
+    ];
+
+    private _section = "";
+    for "_i" from 0 to ((lbSize _listMaster) - 1) do {
+        private _d = _listMaster lbData _i;
+        private _t = _listMaster lbText _i;
+
+        if (_d isEqualTo "HDR") then {
+            _section = toUpper (trim _t);
+        } else {
+            if (_section isEqualTo "") then { continue; };
+            private _lb = _map getOrDefault [_section, controlNull];
+            if (isNull _lb) then { continue; };
+            if (!(_d isEqualType "")) then { continue; };
+
+            private _idx = _lb lbAdd _t;
+            _lb lbSetData [_idx, _d];
+        };
+    };
+
+    private _sel = uiNamespace getVariable ["ARC_console_intelSelData", ""];
+    if (!(_sel isEqualType "")) then { _sel = ""; };
+
+    uiNamespace setVariable ["ARC_s2_catPanels_suppressSel", true];
+    {
+        private _lb = (_x # 2);
+        private _found = -1;
+        for "_j" from 0 to ((lbSize _lb) - 1) do {
+            if ((_lb lbData _j) isEqualTo _sel) exitWith { _found = _j; };
+        };
+        _lb lbSetCurSel (if (_found >= 0) then {_found} else {-1});
+    } forEach _panels;
+    uiNamespace setVariable ["ARC_s2_catPanels_suppressSel", false];
+};
+
 // If the list is empty (first entry to the S2 tab), force a one-time rebuild.
 if (!_rebuild) then {
     if ((lbSize _list) == 0) then { _rebuild = true; };
@@ -870,6 +1039,37 @@ case "CIV_MDT_RUN":
 
 };
 
+
+
+// ---------------------------------------------------------------------------
+// S2 category panels integration:
+// In TOOLS mode, show stacked sub-panels and keep MainList hidden as master.
+// In CENSUS mode, hide panels and use MainList normally.
+// ---------------------------------------------------------------------------
+private _useCatPanels = (_mode != "CENSUS");
+
+if (_useCatPanels) then {
+    if (!isNull _list) then {
+        _list ctrlShow false;
+        _list ctrlEnable false;
+
+        private _panels = [_display] call _ensureS2CatPanels;
+        [_display, _list, _panels] call _layoutS2CatPanels;
+        [_display, _list, _panels] call _renderS2CatPanelsFromMaster;
+
+        { (_x # 0) ctrlShow true; (_x # 1) ctrlShow true; (_x # 2) ctrlShow true; } forEach _panels;
+    };
+} else {
+    private _panels = uiNamespace getVariable ["ARC_s2_catPanels", []];
+    if (_panels isEqualType []) then {
+        { 
+            if (_x isEqualType [] && { (count _x) == 3 }) then {
+                { if (!isNull _x) then { _x ctrlShow false; }; } forEach _x;
+            };
+        } forEach _panels;
+    };
+    if (!isNull _list) then { _list ctrlShow true; _list ctrlEnable true; };
+};
 
 // Queue button gating
 if (!isNull _b2) then
