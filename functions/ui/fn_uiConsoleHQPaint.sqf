@@ -231,7 +231,21 @@ if (!isNull _ctrlList) then
     for "_i" from 0 to ((lbSize _ctrlList) - 1) do
     {
         private _d = _ctrlList lbData _i;
-        if (_d in ["ADMIN_SAVE","ADMIN_CIVSUB_SAVE","ADMIN_RESET","ADMIN_CIVSUB_RESET","ADMIN_FORCE_CLOSE_SUCC","ADMIN_FORCE_CLOSE_FAIL","ADMIN_REBUILD_ACTIVE","ADMIN_BROADCAST","ADMIN_INCIDENTS","ADMIN_COVERAGE","ADMIN_QA","ADMIN_COMPILE","ADMIN_DUMP_LEADS","ADMIN_DUMP_INTEL"]) exitWith { _hasHqRow = true; };
+
+        if (_mode isEqualTo "INCIDENTS") then
+        {
+            // Incident picker rows are grouped with HDR rows and marker|type|display payload rows.
+            if (_d isEqualTo "HDR") exitWith { _hasHqRow = true; };
+            if (_d isEqualType "") then
+            {
+                private _parts = _d splitString "|";
+                if ((count _parts) >= 3) exitWith { _hasHqRow = true; };
+            };
+        }
+        else
+        {
+            if (_d in ["ADMIN_SAVE","ADMIN_CIVSUB_SAVE","ADMIN_RESET","ADMIN_CIVSUB_RESET","ADMIN_FORCE_CLOSE_SUCC","ADMIN_FORCE_CLOSE_FAIL","ADMIN_REBUILD_ACTIVE","ADMIN_BROADCAST","ADMIN_INCIDENTS","ADMIN_COVERAGE","ADMIN_QA","ADMIN_COMPILE","ADMIN_DUMP_LEADS","ADMIN_DUMP_INTEL"]) exitWith { _hasHqRow = true; };
+        };
     };
 
     // Always rebuild when entering HQ from another tab to replace any foreign rows
