@@ -33,6 +33,178 @@ private _ctrlDetails = _display displayCtrl 78012;
 private _b1 = _display displayCtrl 78021;
 private _b2 = _display displayCtrl 78022;
 
+// HQ sub-panel layout (TOOLS mode): mirror S2 stacked panes.
+// Keep MainList as hidden master data source so existing execution routing remains unchanged.
+private _ensureHQSubPanels = {
+    params ["_display"];
+
+    private _k = "ARC_hq_subPanels";
+    private _panels = uiNamespace getVariable [_k, []];
+
+    private _ok = (_panels isEqualType [] && { (count _panels) == 3 });
+    if (_ok) then {
+        {
+            if !(_x isEqualType [] && { (count _x) == 3 }) exitWith { _ok = false; };
+            if (_ok) then {
+                if (isNull (_x # 0) || { isNull (_x # 1) } || { isNull (_x # 2) }) exitWith { _ok = false; };
+            };
+        } forEach _panels;
+    };
+    if (!_ok) then { _panels = []; };
+
+    if (_panels isEqualTo []) then {
+        private _mkPanel = {
+            params ["_title"];
+
+            private _bg  = _display ctrlCreate ["RscText", -1];
+            private _lbl = _display ctrlCreate ["RscText", -1];
+            private _lb  = _display ctrlCreate ["RscListbox", -1];
+
+            _lbl ctrlSetText _title;
+            _bg  ctrlSetBackgroundColor [0.05,0.05,0.05,0.65];
+            _lbl ctrlSetBackgroundColor [0.05,0.05,0.05,0.92];
+            _lbl ctrlSetTextColor [0.722,0.608,0.420,1];
+            _lb  ctrlSetBackgroundColor [0.05,0.05,0.05,0.65];
+
+            _lb ctrlAddEventHandler ["LBSelChanged", {
+                params ["_ctrl", "_idx"];
+                if (_idx < 0) exitWith {};
+                if (uiNamespace getVariable ["ARC_hq_subPanels_suppressSel", false]) exitWith {};
+
+                private _d = _ctrl lbData _idx;
+                if (!(_d isEqualType "") || { _d isEqualTo "" || { _d isEqualTo "HDR" } }) exitWith {};
+
+                private _disp = ctrlParent _ctrl;
+                if (isNull _disp) exitWith {};
+
+                private _master = _disp displayCtrl 78011;
+                if (isNull _master) exitWith {};
+
+                private _found = -1;
+                for "_i" from 0 to ((lbSize _master) - 1) do {
+                    if ((_master lbData _i) isEqualTo _d) exitWith { _found = _i; };
+                };
+
+                if (_found >= 0) then {
+                    _master lbSetCurSel _found;
+                    [_disp, false] call ARC_fnc_uiConsoleHQPaint;
+                };
+            }];
+
+            [_bg, _lbl, _lb]
+        };
+
+        _panels = [
+            ["ADMIN TOOLS"] call _mkPanel,
+            ["INCIDENTS"] call _mkPanel,
+            ["DIAGNOSTICS"] call _mkPanel
+        ];
+
+        uiNamespace setVariable [_k, _panels];
+    };
+
+    _panels
+};
+
+private _layoutHQSubPanels = {
+    params ["_ctrlList", "_panels"];
+    if (isNull _ctrlList) exitWith {};
+
+    private _pL = ctrlPosition _ctrlList;
+    private _xPos = _pL # 0;
+    private _y = _pL # 1;
+    private _w = _pL # 2;
+    private _h = _pL # 3;
+
+    private _gap = 0.004;
+    private _hHdr = 0.03;
+    private _hTotalGap = _gap * 2;
+    private _hLB = ((_h - _hTotalGap) / 3) - _hHdr;
+    if (_hLB < 0.04) then { _hLB = 0.04; };
+
+    private _yCur = _y;
+    {
+        _x params ["_bg", "_lbl", "_lb"];
+        private _ph = _hHdr + _hLB;
+
+        _bg  ctrlSetPosition [_xPos, _yCur, _w, _ph];
+        _lbl ctrlSetPosition [_xPos, _yCur, _w, _hHdr];
+        _bg ctrlCommit 0;
+        _lbl ctrlCommit 0;
+
+        _lb  ctrlSetPosition [_xPos, _yCur + _hHdr, _w, _hLB];
+        _lb ctrlCommit 0;
+
+        _yCur = _yCur + _ph + _gap;
+    } forEach _panels;
+};
+
+private _renderHQSubPanelsFromMaster = {
+    params ["_display", "_master", "_panels"];
+    if (isNull _master) exitWith {};
+
+    _panels params ["_pAdmin", "_pInc", "_pDiag"];
+    private _lbAdmin = _pAdmin # 2;
+    private _lbInc   = _pInc # 2;
+    private _lbDiag  = _pDiag # 2;
+
+    { lbClear _x; } forEach [_lbAdmin, _lbInc, _lbDiag];
+
+    private _in = {
+        params ["_needle", "_arr"];
+        (_arr find _needle) >= 0
+    };
+
+    private _adminRows = [
+        "ADMIN_SAVE", "ADMIN_CIVSUB_SAVE", "ADMIN_RESET", "ADMIN_CIVSUB_RESET",
+        "ADMIN_FORCE_CLOSE_SUCC", "ADMIN_FORCE_CLOSE_FAIL", "ADMIN_REBUILD_ACTIVE", "ADMIN_BROADCAST"
+    ];
+    private _incRows = ["ADMIN_INCIDENTS"];
+    private _diagRows = ["ADMIN_COVERAGE", "ADMIN_QA", "ADMIN_COMPILE", "ADMIN_DUMP_LEADS", "ADMIN_DUMP_INTEL"];
+
+    for "_i" from 0 to ((lbSize _master) - 1) do {
+        private _d = _master lbData _i;
+        if (!(_d isEqualType "") || { _d isEqualTo "" || { toUpper _d isEqualTo "HDR" } }) then { continue; };
+
+        private _lbl = _master lbText _i;
+        private _target = controlNull;
+
+        if ([_d, _adminRows] call _in) then { _target = _lbAdmin; };
+        if ([_d, _incRows] call _in) then { _target = _lbInc; };
+        if ([_d, _diagRows] call _in) then { _target = _lbDiag; };
+
+        if (!isNull _target) then {
+            private _j = _target lbAdd _lbl;
+            _target lbSetData [_j, _d];
+        };
+    };
+
+    {
+        if ((lbSize _x) <= 0) then {
+            private _j = _x lbAdd "(No items)";
+            _x lbSetData [_j, "HDR"];
+            _x lbSetColor [_j, [0.70,0.70,0.70,1]];
+            _x lbSetSelectColor [_j, [0.70,0.70,0.70,1]];
+        };
+    } forEach [_lbAdmin, _lbInc, _lbDiag];
+
+    // Sync panel selection from master selected item.
+    private _sel = lbCurSel _master;
+    private _selData = if (_sel < 0) then { "" } else { _master lbData _sel };
+
+    uiNamespace setVariable ["ARC_hq_subPanels_suppressSel", true];
+    {
+        private _lb = _x # 2;
+        _lb lbSetCurSel -1;
+        if (_selData isNotEqualTo "") then {
+            for "_k" from 0 to ((lbSize _lb) - 1) do {
+                if ((_lb lbData _k) isEqualTo _selData) exitWith { _lb lbSetCurSel _k; };
+            };
+        };
+    } forEach _panels;
+    uiNamespace setVariable ["ARC_hq_subPanels_suppressSel", false];
+};
+
 // HQ mode: TOOLS (default) or INCIDENTS (incident picker)
 private _mode = uiNamespace getVariable ["ARC_console_hqMode", "TOOLS"];
 if (!(_mode isEqualType "")) then { _mode = "TOOLS"; };
@@ -83,6 +255,15 @@ private _canHQ = _isOmni || _isCmd || _isTocS3 || _isBnCmd;
 
 if (!_canHQ) exitWith
 {
+    private _hqPanels = uiNamespace getVariable ["ARC_hq_subPanels", []];
+    if (_hqPanels isEqualType []) then {
+        {
+            if (_x isEqualType [] && { (count _x) == 3 }) then {
+                { if (!isNull _x) then { _x ctrlShow false; _x ctrlEnable false; }; } forEach _x;
+            };
+        } forEach _hqPanels;
+    };
+
     if (!isNull _ctrlDetails) then
     {
         _ctrlDetails ctrlSetStructuredText parseText (
@@ -217,6 +398,40 @@ if (_needRebuild && {!isNull _ctrlList}) then
         {
             if ((_ctrlList lbData _i) isEqualTo _remember) exitWith { _ctrlList lbSetCurSel _i; };
         };
+    };
+};
+
+// TOOLS mode uses S2-style stacked sub-panels; INCIDENTS keeps the classic list.
+if (!isNull _ctrlList) then
+{
+    if (_mode isEqualTo "TOOLS") then
+    {
+        _ctrlList ctrlShow false;
+        _ctrlList ctrlEnable false;
+
+        private _hqPanels = [_display] call _ensureHQSubPanels;
+        [_ctrlList, _hqPanels] call _layoutHQSubPanels;
+        [_display, _ctrlList, _hqPanels] call _renderHQSubPanelsFromMaster;
+
+        {
+            (_x # 0) ctrlShow true;
+            (_x # 1) ctrlShow true;
+            (_x # 2) ctrlShow true;
+            (_x # 2) ctrlEnable true;
+        } forEach _hqPanels;
+    }
+    else
+    {
+        private _hqPanels = uiNamespace getVariable ["ARC_hq_subPanels", []];
+        if (_hqPanels isEqualType []) then {
+            {
+                if (_x isEqualType [] && { (count _x) == 3 }) then {
+                    { if (!isNull _x) then { _x ctrlShow false; _x ctrlEnable false; }; } forEach _x;
+                };
+            } forEach _hqPanels;
+        };
+        _ctrlList ctrlShow true;
+        _ctrlList ctrlEnable true;
     };
 };
 
