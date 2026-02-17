@@ -54,6 +54,18 @@ if ((count _pick) < 2) exitWith {[objNull, objNull]};
 private _pos = _pick # 0;
 private _dir = _pick # 1;
 
+private _pMin = missionNamespace getVariable ["civsub_v1_traffic_playerMinDistance_m", 60];
+if (!(_pMin isEqualType 0)) then { _pMin = 60; };
+_pMin = (_pMin max 50) min 300;
+if (_pMin > 0) then
+{
+    private _nearP = false;
+    {
+        if ((getPosATL _x) distance2D _pos <= _pMin) exitWith { _nearP = true; };
+    } forEach allPlayers;
+    if (_nearP) exitWith {[objNull, objNull]};
+};
+
 private _cls = selectRandom _pool;
 private _veh = createVehicle [_cls, _pos, [], 0, "NONE"];
 if (isNull _veh) exitWith {[objNull, objNull]};
