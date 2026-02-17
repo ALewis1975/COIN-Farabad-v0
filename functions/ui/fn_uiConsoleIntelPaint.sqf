@@ -597,6 +597,40 @@ else
 
             // Show controls
             { if (!isNull _x) then { _x ctrlShow true; }; } forEach [_lblMethod,_cmbMethod,_lblCat,_cmbCat];
+            // Layout: stack combos under labels and constrain to the LEFT of the details pane.
+            // This prevents overlap with the right-pane details and eliminates horizontal scroll regression.
+            private _grpDetails = _display displayCtrl 78016; // right-pane details group
+            if (!isNull _grpDetails) then {
+                private _pG = ctrlPosition _grpDetails;
+                private _xR = _pG # 0; // left edge of details pane
+
+                // Left edge is the right edge of the middle list + small gap.
+                private _pList = ctrlPosition _list;
+                private _xL = (_pList # 0) + (_pList # 2) + 0.006;
+
+                private _padX = 0.004;
+                private _wCtl = (_xR - _padX) - _xL;
+                if (_wCtl < 0.10) then { _wCtl = 0.10; };
+
+                private _pLM = ctrlPosition _lblMethod;
+                private _pCM = ctrlPosition _cmbMethod;
+                private _hLbl = (_pLM # 3) max 0.02;
+                private _hCmb = (_pCM # 3) max 0.03;
+
+                private _y0 = _pLM # 1;
+                private _gap = 0.002;
+                private _gapBlk = 0.006;
+
+                _lblMethod ctrlSetPosition [_xL, _y0, _wCtl, _hLbl];
+                _cmbMethod ctrlSetPosition [_xL, _y0 + _hLbl + _gap, _wCtl, _hCmb];
+
+                private _y1 = _y0 + _hLbl + _hCmb + _gapBlk;
+                _lblCat ctrlSetPosition [_xL, _y1, _wCtl, _hLbl];
+                _cmbCat ctrlSetPosition [_xL, _y1 + _hLbl + _gap, _wCtl, _hCmb];
+
+                { if (!isNull _x) then { _x ctrlCommit 0; }; } forEach [_lblMethod,_cmbMethod,_lblCat,_cmbCat];
+            };
+
 
 	            _txt = "<br/><br/><br/><t size='1.1' font='PuristaMedium'>Log Intel / Sighting</t><br/><br/>" +
                    "Use the drop-downs above to select the reporting method and category.<br/><br/>" +
@@ -620,6 +654,33 @@ else
             [_cmbLead, "ARC_console_s2_leadType", "RECON"] call _restoreComboSel;
 
             { if (!isNull _x) then { _x ctrlShow true; }; } forEach [_lblLead,_cmbLead];
+            // Layout: stack lead request dropdown under its label and constrain left of details pane.
+            private _grpDetails = _display displayCtrl 78016;
+            if (!isNull _grpDetails) then {
+                private _pG = ctrlPosition _grpDetails;
+                private _xR = _pG # 0;
+
+                private _pList = ctrlPosition _list;
+                private _xL = (_pList # 0) + (_pList # 2) + 0.006;
+
+                private _padX = 0.004;
+                private _wCtl = (_xR - _padX) - _xL;
+                if (_wCtl < 0.10) then { _wCtl = 0.10; };
+
+                private _pLL = ctrlPosition _lblLead;
+                private _pCL = ctrlPosition _cmbLead;
+                private _hLbl = (_pLL # 3) max 0.02;
+                private _hCmb = (_pCL # 3) max 0.03;
+
+                private _y0 = _pLL # 1;
+                private _gap = 0.002;
+
+                _lblLead ctrlSetPosition [_xL, _y0, _wCtl, _hLbl];
+                _cmbLead ctrlSetPosition [_xL, _y0 + _hLbl + _gap, _wCtl, _hCmb];
+
+                { if (!isNull _x) then { _x ctrlCommit 0; }; } forEach [_lblLead,_cmbLead];
+            };
+
 
 	            _txt = "<br/><br/><br/><t size='1.1' font='PuristaMedium'>Create Lead Request</t><br/><br/>" +
                    "Select a request type above, then EXECUTE to open the map and place a request marker.<br/><br/>" +
@@ -763,8 +824,11 @@ if (!isNull _grp) then {
     {
         if (!isNull _x && {ctrlShown _x}) then {
             private _pC = ctrlPosition _x;
-            private _b = (_pC # 1) + (_pC # 3);
-            if (_b > _maxBottom) then { _maxBottom = _b; };
+            private _r = (_pC # 0) + (_pC # 2);
+            if (_r > _xG) then {
+                private _b = (_pC # 1) + (_pC # 3);
+                if (_b > _maxBottom) then { _maxBottom = _b; };
+            };
         };
     } forEach [_lblMethod,_cmbMethod,_lblCat,_cmbCat,_lblLead,_cmbLead];
 
