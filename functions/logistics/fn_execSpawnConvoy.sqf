@@ -352,6 +352,15 @@ private _poolLeadSelect = [_poolLeadRole] call _bundleOrLegacy;
 private _poolEscSelect = [_poolEscRole] call _bundleOrLegacy;
 private _poolLogSelect = [_poolLogRole] call _bundleOrLegacy;
 
+// Startup breadcrumbs (low-volume): capture role bundle + resolved class pools used for this spawn pass.
+private _roleBundleLog = if (_roleBundleId isEqualTo "") then {"<none>"} else {_roleBundleId};
+private _classesPreview = [
+    ["lead", +_poolLeadSelect],
+    ["escort", +_poolEscSelect],
+    ["logistics", +_poolLogSelect]
+];
+diag_log format ["[ARC][CONVOY][BOOT] task=%1 type=%2 bundle=%3 supply=%4 vip=%5 rolePools=%6", _taskId, _incidentTypeU, _roleBundleLog, _supplyKind, _isVIP, _classesPreview];
+
 // Build the convoy class list.
 switch (_incidentTypeU) do
 {
@@ -474,6 +483,9 @@ if ((count _classes) == 0) exitWith
     diag_log "[ARC][CONVOY] No convoy vehicle classes available.";
     []
 };
+
+// Startup breadcrumbs (low-volume): final selected class list for this convoy spawn attempt.
+diag_log format ["[ARC][CONVOY][BOOT] task=%1 type=%2 selectedClasses=%3", _taskId, _incidentTypeU, _classes];
 
 // --- Sequential spawn --------------------------------------------------------
 private _vehicles = [];

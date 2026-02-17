@@ -257,6 +257,23 @@ private _hasLinkup = ((count _linkupPos) >= 2);
 
 // A "real" link-up leg exists only when the link-up point is meaningfully separated from the spawn/start.
 private _useLinkupLeg = (_hasLinkup && { (_startPos distance2D _linkupPos) > 80 });
+
+// Convoy role plan metadata (for startup breadcrumbs / RPT sanity checks).
+private _rolePlan = ["activeConvoyRolePlan", []] call ARC_fnc_stateGet;
+if (!(_rolePlan isEqualType [])) then { _rolePlan = []; };
+
+private _rolePlanGet = {
+    params ["_pairs", "_key", "_default"];
+    if !(_pairs isEqualType []) exitWith {_default};
+    private _idx = _pairs findIf { (_x isEqualType []) && { (count _x) >= 2 } && { ((_x # 0) isEqualType "") && { (toLower (_x # 0)) isEqualTo (toLower _key) } } };
+    if (_idx < 0) exitWith {_default};
+    (_pairs # _idx) # 1
+};
+
+private _roleBundleId = [_rolePlan, "bundleId", ""] call _rolePlanGet;
+if (!(_roleBundleId isEqualType "")) then { _roleBundleId = ""; };
+_roleBundleId = toUpper _roleBundleId;
+
 // Optional link-up subtask (created in execInitActive for edge-start convoys)
 private _linkTaskId = ["activeConvoyLinkupTaskId", ""] call ARC_fnc_stateGet;
 if (!(_linkTaskId isEqualType "")) then { _linkTaskId = ""; };
@@ -549,7 +566,11 @@ if ((count _nids) isEqualTo 0) then
     };
 };
 
-if ((count _nids) isEqualTo 0) exitWith { true }; // nothing to tick yet
+if ((count _nids) isEqualTo 0) exitWith
+{
+    ["activeConvoyStartupBreadcrumbsLogged", false] call ARC_fnc_stateSet;
+    true
+}; // nothing to tick yet
 
 private _vehicles = [];
 {
@@ -565,6 +586,7 @@ if ((count _vehicles) isEqualTo 0) exitWith
     ["activeConvoyNextSpawnAttemptAt", -1] call ARC_fnc_stateSet;
     ["activeConvoySpawning", false] call ARC_fnc_stateSet;
     ["activeConvoySpawningSince", -1] call ARC_fnc_stateSet;
+    ["activeConvoyStartupBreadcrumbsLogged", false] call ARC_fnc_stateSet;
     true
 };
 
@@ -1538,6 +1560,34 @@ if (!_bridgeMarkersAvailable && { _bridgeFallbackEnabled }) then
     };
 };
 
+private _assistFollowersEnabled = missionNamespace getVariable ["ARC_convoyBridgeAssistFollowersEnabled", true];
+if (!(_assistFollowersEnabled isEqualType true) && !(_assistFollowersEnabled isEqualType false)) then { _assistFollowersEnabled = true; };
+
+private _assistLeadEnabled = missionNamespace getVariable ["ARC_convoyBridgeAssistEnabled", true];
+if (!(_assistLeadEnabled isEqualType true) && !(_assistLeadEnabled isEqualType false)) then { _assistLeadEnabled = true; };
+
+private _startupBreadcrumbsLogged = ["activeConvoyStartupBreadcrumbsLogged", false] call ARC_fnc_stateGet;
+if (!(_startupBreadcrumbsLogged isEqualType true) && !(_startupBreadcrumbsLogged isEqualType false)) then { _startupBreadcrumbsLogged = false; };
+if (!_startupBreadcrumbsLogged) then
+{
+    private _roleBundleLog = if (_roleBundleId isEqualTo "") then {"<none>"} else {_roleBundleId};
+    private _classList = _vehicles apply { typeOf _x };
+
+    diag_log format [
+        "[ARC][CONVOY][BOOT] task=%1 bundle=%2 classList=%3 bridgeMode=%4 bridgeLeadMode=%5 bridgeFallback=%6 bridgeAssistLead=%7 bridgeAssistFollowers=%8 bridgeMarkersAvailable=%9",
+        _taskId,
+        _roleBundleLog,
+        _classList,
+        _bridgeMode,
+        _bridgeLeadMode,
+        _bridgeFallbackEnabled,
+        _assistLeadEnabled,
+        _assistFollowersEnabled,
+        _bridgeMarkersAvailable
+    ];
+
+    ["activeConvoyStartupBreadcrumbsLogged", true] call ARC_fnc_stateSet;
+};
 
 private _prevBridgeMarker = missionNamespace getVariable ["ARC_convoy_prevBridgeMarker", ""];
 if !(_prevBridgeMarker isEqualType "") then { _prevBridgeMarker = ""; };
@@ -1582,8 +1632,7 @@ if (!(_prevBridgeRecoverState isEqualType "")) then { _prevBridgeRecoverState = 
       When follower recovery seeds ARC_convoyBridgeAssistPts/Idx on a vehicle, progress that
       queue each tick until the vehicle exits the bridge marker or the assist TTL expires.
 */
-private _assistFQ = missionNamespace getVariable ["ARC_convoyBridgeAssistFollowersEnabled", true];
-if (!(_assistFQ isEqualType true) && !(_assistFQ isEqualType false)) then { _assistFQ = true; };
+private _assistFQ = _assistFollowersEnabled;
 
 {
     if (isNull _x || { !alive _x }) then { continue; };
