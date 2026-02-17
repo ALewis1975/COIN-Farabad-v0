@@ -101,3 +101,10 @@ When reviewing, prioritize:
 - P0: data loss, security, crash, broken build
 - P1: incorrect behavior, likely regression, missing tests for changed logic
 - P2: maintainability, style, low-risk improvements
+
+## Project Execution Context
+- **Core entry points:** `initServer.sqf` (server bootstrap/config), `initPlayerLocal.sqf` (client bootstrap/watchers), and `config/CfgFunctions.hpp` (ARC function registry).
+- **Current test environment constraint:** container/CI validation is limited to static review; gameplay/network behavior can be smoke-checked in local MP preview/hosted MP, but authoritative persistence/JIP behavior still requires a true dedicated server run.
+- **Canonical test log:** update `tests/TEST-LOG.md` after each validation pass with command/step, result (`PASS`/`FAIL`/`BLOCKED`), and context.
+- **Authority reminder:** keep server as single writer for shared state (`ARC_STATE`, `ARC_pub_state`, `ARC_pub_stateUpdatedAt`); clients request actions and render replicated state.
+- **Deferred until dedicated server is available:** persistence durability across restarts, JIP snapshot correctness, late-client recovery for in-flight events, and reconnect/respawn ownership edge cases.
