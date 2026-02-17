@@ -45,6 +45,7 @@ private _isNumericPos =
     private _nums = true;
     {
         if !(_x isEqualType 0) exitWith { _nums = false; };
+        if (!(finite _x) || {!(_x isEqualTo _x)}) exitWith { _nums = false; };
     } forEach _cand;
 
     _nums
@@ -77,7 +78,16 @@ else
 if (!([_pos] call _isNumericPos)) exitWith
 {
     uiNamespace setVariable ["ARC_mapClick_lastErr", "invalid_click_payload"];
-    diag_log format ["[FARABAD][MAPCLICK][CLICK][ERR] invalid_click_payload payloadType=%1 payloadShape=%2 payload=%3", _payloadType, _payloadShape, _evt];
+    diag_log format [
+        "[FARABAD][MAPCLICK][CLICK][ERR] invalid_click_payload payloadType=%1 payloadShape=%2 a=%3 b=%4 c=%5 d=%6 payload=%7",
+        _payloadType,
+        _payloadShape,
+        _a,
+        _b,
+        _c,
+        _d,
+        _evt
+    ];
     hint "Map click failed: invalid position.";
     ["INVALID_CLICK_PAYLOAD"] call ARC_fnc_mapClick_disarm;
     false
@@ -97,7 +107,8 @@ if (_ok) then
         case "INTEL_LOG":
         {
             private _cat = _ctx getOrDefault ["category", "SIGHTING"];
-            hint format ["Submitted intel (%1) at %2.", _cat, mapGridPosition _pos];
+            private _grid = if ([_pos] call _isNumericPos) then {mapGridPosition _pos} else {"UNKNOWN"};
+            hint format ["Submitted intel (%1) at %2.", _cat, _grid];
         };
 
         case "LEAD_REQ":

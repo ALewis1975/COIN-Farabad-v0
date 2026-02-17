@@ -118,7 +118,8 @@
     ["activeExecArrived", false],
     ["activeExecHoldReq", 0],
     ["activeExecHoldAccum", 0],
-    ["activeExecLastProg", -1],
+    ["activeExecLastProg", -1],     // HOLD progress bucket milestone (1=25%,2=50%,3=75%)
+    ["activeExecLastProgressAt", -1], // serverTime of last meaningful execution progress
     ["activeObjectiveKind", ""],     // RAID_INTEL | IED_DEVICE | CIV_MEET | LOG_DROP | ESCORT_END
     ["activeObjectiveClass", ""],
     ["activeObjectivePos", []],
@@ -297,4 +298,3 @@
     ["tocLeadApprovals", []]
 
 ]
-
