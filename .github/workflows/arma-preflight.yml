@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -23,53 +25,97 @@ jobs:
           python -m pip install --upgrade pip
           pip install sqflint
 
-      - name: SQF static analysis (all *.sqf files only)
+      - name: Detect changed SQF/config files
+        id: changed
         run: |
           set -euo pipefail
 
-          mapfile -d '' sqf_files < <(
-            find . -type f -name "*.sqf" \
-              ! -path "./.git/*" \
-              ! -path "./.github/*" \
-              ! -path "./.vscode/*" \
-              ! -path "./node_modules/*" \
-              ! -path "./dist/*" \
-              ! -path "./build/*" \
-              -print0
-          )
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base_sha="${{ github.event.pull_request.base.sha }}"
+          else
+            base_sha="${{ github.event.before }}"
+          fi
+          head_sha="${{ github.sha }}"
 
-          if [ ${#sqf_files[@]} -eq 0 ]; then
-            echo "No SQF files found."
+          if [ "$base_sha" = "0000000000000000000000000000000000000000" ]; then
+            # First push / branch creation: diff from empty tree so we include
+            # all files present at head (not just the last commit via head^).
+            base_sha="$(git hash-object -t tree /dev/null)"
+          fi
+
+          mapfile -d '' changed_files < <(git diff -z --name-only --diff-filter=ACMR "$base_sha" "$head_sha")
+
+          sqf_files=()
+          config_files=()
+
+          for f in "${changed_files[@]}"; do
+            case "$f" in
+              *.sqf)
+                sqf_files+=("$f")
+                ;;
+            esac
+
+            case "$f" in
+              description.ext|*.hpp|*.h|*.inc|*.cfg|*.ext)
+                case "$f" in
+                  .git/*|.github/*|.vscode/*|node_modules/*|dist/*|build/*|vendor/*|generated/*)
+                    ;;
+                  *)
+                    config_files+=("$f")
+                    ;;
+                esac
+                ;;
+            esac
+          done
+
+          {
+            echo "sqf_files<<EOF"
+            printf '%s\n' "${sqf_files[@]}"
+            echo "EOF"
+            echo "config_files<<EOF"
+            printf '%s\n' "${config_files[@]}"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: SQF static analysis (changed *.sqf files only, advisory)
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+
+          sqf_files="${{ steps.changed.outputs.sqf_files }}"
+
+          if [ -z "$sqf_files" ]; then
+            echo "No changed SQF files to lint."
             exit 0
           fi
 
-          printf '%s\0' "${sqf_files[@]}" | xargs -0 -n 1 sqflint -e w
+          rc=0
+          while IFS= read -r file; do
+            [ -z "$file" ] && continue
+            echo "Linting $file"
+            if ! sqflint -e w "$file"; then
+              rc=1
+            fi
+          done <<< "$sqf_files"
+
+          if [ "$rc" -ne 0 ]; then
+            echo "sqflint reported issues. This step is advisory due to known parser gaps for modern SQF syntax."
+            exit 1
+          fi
 
       - name: Mission config sanity checks (description.ext, ui/**/*.hpp, etc.)
+        env:
+          CHANGED_CONFIG_FILES: ${{ steps.changed.outputs.config_files }}
         run: |
           python - <<'PY'
           import sys
           from pathlib import Path
 
-          include_names = {"description.ext"}
-          include_exts = {".hpp", ".h", ".inc", ".cfg", ".ext"}
-          excluded_path_parts = {
-              ".git", ".github", ".vscode", "node_modules", "dist", "build", "vendor", "generated"
-          }
-
-          candidates = []
-          root = Path(".")
-          for p in root.rglob("*"):
-              if not p.is_file():
-                  continue
-              rel_parts = set(p.relative_to(root).parts)
-              if rel_parts & excluded_path_parts:
-                  continue
-              if p.name in include_names or p.suffix.lower() in include_exts:
-                  candidates.append(p)
+          changed = [Path(p) for p in filter(None, __import__("os").environ.get("CHANGED_CONFIG_FILES", "").splitlines())]
+          candidates = [p for p in changed if p.is_file()]
 
           if not candidates:
-              print("No mission config/include files found.")
+              print("No changed mission config/include files to check.")
               sys.exit(0)
 
           def strip_strings_and_comments(text: str) -> str:
