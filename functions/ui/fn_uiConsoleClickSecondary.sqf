@@ -35,7 +35,7 @@ switch (_tab) do
 
     case "CMD":     { [] spawn ARC_fnc_uiConsoleActionTocSecondary; };
 
-    case "BOARDS":  { [] spawn ARC_fnc_uiConsoleActionOpenTocQueue; };
+    case "BOARDS":  { [] spawn ARC_fnc_uiConsoleActionTocSecondary; };
 
     case "HQ":
     {

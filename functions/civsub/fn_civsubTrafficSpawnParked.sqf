@@ -79,9 +79,9 @@ private _searchR = (_spawnR min ((_r max 250) min 950));
 private _minSep = missionNamespace getVariable ["civsub_v1_traffic_minSeparation_m", 35];
 if (!(_minSep isEqualType 0)) then { _minSep = 35; };
 
-private _pMin = missionNamespace getVariable ["civsub_v1_traffic_playerMinDistance_m", 120];
-if (!(_pMin isEqualType 0)) then { _pMin = 120; };
-_pMin = (_pMin max 0) min 400;
+private _pMin = missionNamespace getVariable ["civsub_v1_traffic_playerMinDistance_m", 60];
+if (!(_pMin isEqualType 0)) then { _pMin = 60; };
+_pMin = (_pMin max 0) min 200;
 
 // Failure counters (only logged when debug enabled)
 private _fail_noPos = 0;

@@ -203,8 +203,8 @@ if (!_boardOk) exitWith {
     false
 };
 
-// Prep delay (quick default; missionNamespace may override for longer startup choreography)
-private _prepDelay = missionNamespace getVariable ["airbase_v1_prepDelay_s", 15];
+// Prep delay (simulate checks / engine spool)
+private _prepDelay = missionNamespace getVariable ["airbase_v1_prepDelay_s", 300];
 if (!(_prepDelay isEqualType 0) || { _prepDelay < 0 }) then { _prepDelay = 15; };
 if (_prepDelay > 0) then { sleep _prepDelay; };
 
@@ -494,8 +494,8 @@ private _kickTimeout = missionNamespace getVariable ["airbase_v1_takeoffKickTime
 if (!(_kickTimeout isEqualType 0) || { _kickTimeout < 10 }) then { _kickTimeout = 45; };
 
 if (_kickEnabled) then {
-    [_fid, _veh, _pilot, _grp, _kickPos, _isHeli, _kickTimeout, _debugOps, _cruiseAlt] spawn {
-        params ["_fidL", "_vehL", "_pilotL", "_grpL", "_kickPosL", "_isHeliL", "_timeoutS", "_debugOpsL", "_cruiseAltL"];
+    [_fid, _veh, _pilot, _grp, _kickPos, _isHeli, _kickTimeout, _debugOps] spawn {
+        params ["_fidL", "_vehL", "_pilotL", "_grpL", "_kickPosL", "_isHeliL", "_timeoutS", "_debugOpsL"];
         if (isNull _vehL || {!alive _vehL}) exitWith {};
         private _tStart = time;
         private _d0 = _vehL distance2D _kickPosL;
@@ -516,9 +516,8 @@ if (_kickEnabled) then {
 
             if (_isHeliL) then {
                 _vehL land "NONE";
-                _vehL flyInHeight (20 max _cruiseAltL);
-                // Forward + vertical nudge to break runway-skim deadlock after unitPlay taxi.
-                _vehL setVelocityModelSpace [0, 14, 12];
+                _vehL flyInHeight 5;
+                _vehL setVelocityModelSpace [0, 10, 10];
                 _pilotL doMove _kickPosL;
             } else {
                 _vehL land "NONE";
