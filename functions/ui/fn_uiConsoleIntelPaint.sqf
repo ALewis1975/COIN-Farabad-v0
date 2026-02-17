@@ -52,6 +52,61 @@ private _cmbLead   = _display displayCtrl 78055;
 
 if (isNull _list || { isNull _details }) exitWith {false};
 
+// ---------------------------------------------------------------------------
+// S2 layout support: split the middle pane into two sub-panels (like OPS):
+//   - Left: tool/feed list (MainList)
+//   - Right: workflow controls (Method/Category/Lead Type)
+// This prevents overlap and keeps the right details pane clean.
+// ---------------------------------------------------------------------------
+
+private _ensureS2Split = {
+    params ["_display", "_listCtrl"];
+
+    private _grpDetails = _display displayCtrl 78016; // right-pane details group
+    if (isNull _grpDetails) exitWith { [0, 0, 0] };
+
+    // Capture default list position once (for restoration by the refresh loop).
+    private _k = "ARC_ui_mainListPosDefault";
+    private _p0 = uiNamespace getVariable [_k, []];
+    if (_p0 isEqualTo []) then {
+        uiNamespace setVariable [_k, ctrlPosition _listCtrl];
+        _p0 = uiNamespace getVariable [_k, ctrlPosition _listCtrl];
+    };
+
+    private _pG = ctrlPosition _grpDetails;
+    private _xR = _pG # 0;         // left edge of details pane (absolute)
+    private _pL = _p0;             // start from default each paint
+
+    private _xL = _pL # 0;
+    private _yL = _pL # 1;
+    private _hL = _pL # 3;
+
+    private _padOuter = 0.006;
+    private _gap = 0.006;
+
+    private _midW = (_xR - _padOuter) - _xL;
+    if (_midW < 0.18) exitWith { [(_xL + (_pL # 2) + _gap), 0.10, _xR] };
+
+    // Reserve ~32% for the workflow control column.
+    private _listW = (_midW * 0.68) max 0.14;
+    private _ctlW  = (_midW - _listW - _gap) max 0.10;
+
+    // Ensure the widths don't exceed the available middle pane width.
+    if ((_listW + _ctlW + _gap) > _midW) then {
+        _listW = _midW - _ctlW - _gap;
+    };
+    if (_listW < 0.12) then { _listW = 0.12; };
+
+    _listCtrl ctrlSetPosition [_xL, _yL, _listW, _hL];
+    _listCtrl ctrlCommit 0;
+
+    private _xCtl = _xL + _listW + _gap;
+    private _wCtl = (_xR - _padOuter) - _xCtl;
+    if (_wCtl < 0.10) then { _wCtl = 0.10; };
+
+    [_xCtl, _wCtl, _xR]
+};
+
 // If the list is empty (first entry to the S2 tab), force a one-time rebuild.
 if (!_rebuild) then {
     if ((lbSize _list) == 0) then { _rebuild = true; };
@@ -125,6 +180,13 @@ if (!(_selDataPrev isEqualType "")) then { _selDataPrev = ""; };
 
 // Intel view mode
 private _mode = uiNamespace getVariable ["ARC_console_intelMode", "TOOLS"];
+
+// Apply the S2 split layout each paint. This keeps the workflow controls inside the middle pane
+// and prevents them from colliding with the right details pane.
+private _s2Split = [_display, _list] call _ensureS2Split;
+private _xCtlBase = _s2Split # 0;
+private _wCtlBase = _s2Split # 1;
+private _xRBase   = _s2Split # 2;
 if (!(_mode isEqualType "")) then { _mode = "TOOLS"; };
 _mode = toUpper (trim _mode);
 
@@ -604,12 +666,18 @@ else
                 private _pG = ctrlPosition _grpDetails;
                 private _xR = _pG # 0; // left edge of details pane
 
-                // Left edge is the right edge of the middle list + small gap.
-                private _pList = ctrlPosition _list;
-                private _xL = (_pList # 0) + (_pList # 2) + 0.006;
+                                // Control column anchor comes from the S2 split layout.
+                private _xL = _xCtlBase;
+                private _wCtl = _wCtlBase;
 
-                private _padX = 0.004;
-                private _wCtl = (_xR - _padX) - _xL;
+                // Fallback if split data is unavailable.
+                if (_wCtl <= 0) then {
+                    private _pList = ctrlPosition _list;
+                    private _xL2 = (_pList # 0) + (_pList # 2) + 0.006;
+                    private _padX = 0.004;
+                    _wCtl = (_xR - _padX) - _xL2;
+                    _xL = _xL2;
+                };
                 if (_wCtl < 0.10) then { _wCtl = 0.10; };
 
                 private _pLM = ctrlPosition _lblMethod;
@@ -660,11 +728,18 @@ else
                 private _pG = ctrlPosition _grpDetails;
                 private _xR = _pG # 0;
 
-                private _pList = ctrlPosition _list;
-                private _xL = (_pList # 0) + (_pList # 2) + 0.006;
+                                // Control column anchor comes from the S2 split layout.
+                private _xL = _xCtlBase;
+                private _wCtl = _wCtlBase;
 
-                private _padX = 0.004;
-                private _wCtl = (_xR - _padX) - _xL;
+                // Fallback if split data is unavailable.
+                if (_wCtl <= 0) then {
+                    private _pList = ctrlPosition _list;
+                    private _xL2 = (_pList # 0) + (_pList # 2) + 0.006;
+                    private _padX = 0.004;
+                    _wCtl = (_xR - _padX) - _xL2;
+                    _xL = _xL2;
+                };
                 if (_wCtl < 0.10) then { _wCtl = 0.10; };
 
                 private _pLL = ctrlPosition _lblLead;

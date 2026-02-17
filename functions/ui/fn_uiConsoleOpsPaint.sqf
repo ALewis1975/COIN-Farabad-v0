@@ -223,9 +223,9 @@ private _isAuth = [player] call ARC_fnc_rolesIsAuthorized;
 
 if (_focusData isEqualTo "") then
 {
-    _details = "<t size='1.1' font='PuristaMedium'>Operations</t><br/><br/>" +
+    _details = "<t align='left' size='1.1' font='PuristaMedium'>Operations</t><br/><br/>" +
                "Select an incident, an order, or a lead to view details." +
-               "<br/><br/><t size='0.9' color='#BDBDBD'>Follow-on requests are captured inside the SITREP flow.</t>";
+               "<br/><br/><t align='left' size='0.9' color='#BDBDBD'>Follow-on requests are captured inside the SITREP flow.</t>";
 }
 else
 {
@@ -314,7 +314,7 @@ else
             private _o = _orders findIf { _x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _id } };
             if (_o < 0) then
             {
-                _details = "<t size='1.1' font='PuristaMedium'>Order</t><br/><br/>Order not found (stale UI).";
+                _details = "<t align='left' size='1.1' font='PuristaMedium'>Order</t><br/><br/>Order not found (stale UI).";
             }
             else
             {
@@ -359,7 +359,7 @@ else
             private _idx = _leads findIf { _x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _id } };
             if (_idx < 0) then
             {
-                _details = "<t size='1.1' font='PuristaMedium'>Lead</t><br/><br/>Lead not found (stale UI).";
+                _details = "<t align='left' size='1.1' font='PuristaMedium'>Lead</t><br/><br/>Lead not found (stale UI).";
             }
             else
             {

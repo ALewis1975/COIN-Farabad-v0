@@ -65,17 +65,6 @@ if (!isNull _ctrlDetailsGrp) then { _ctrlDetailsGrp ctrlShow false; };
 if (!isNull _ctrlDetails) then { _ctrlDetails ctrlShow false; };
 { if (!isNull _x) then { _x ctrlShow false; }; } forEach _opsCtrls;
 
-// Baseline: restore details pane position (some tabs reserve top space for workflow controls).
-if (!isNull _ctrlDetailsGrp) then
-{
-    private _def = uiNamespace getVariable ["ARC_console_detailsGrpPosDefault", []];
-    if (_def isEqualType [] && { (count _def) isEqualTo 4 }) then
-    {
-        _ctrlDetailsGrp ctrlSetPosition _def;
-        _ctrlDetailsGrp ctrlCommit 0;
-    };
-};
-
 // Baseline: hide S2 workflow controls (shown only on Intelligence tab)
 private _s2Ctrls = [
     _display displayCtrl 78050,
@@ -93,6 +82,35 @@ private _s2Ctrls = [
 private _tab = uiNamespace getVariable ["ARC_console_activeTab", "DASH"];
 if (!(_tab isEqualType "")) then { _tab = "DASH"; };
 _tab = toUpper (trim _tab);
+
+// ---------------------------------------------------------------------------
+// Regression guard: restore shared control positions when leaving S2/INTEL.
+// S2 Intel paint may temporarily resize/reposition MainList and workflow controls.
+// Other tabs must not inherit that layout.
+// ---------------------------------------------------------------------------
+private _s2Ctrls = [
+    _display displayCtrl 78050,
+    _display displayCtrl 78051,
+    _display displayCtrl 78052,
+    _display displayCtrl 78053,
+    _display displayCtrl 78054,
+    _display displayCtrl 78055
+];
+
+if (!isNull _ctrlList) then {
+    private _kList = "ARC_ui_mainListPosDefault";
+    private _p0 = uiNamespace getVariable [_kList, []];
+    if (_p0 isEqualTo []) then {
+        uiNamespace setVariable [_kList, ctrlPosition _ctrlList];
+        _p0 = uiNamespace getVariable [_kList, ctrlPosition _ctrlList];
+    };
+
+    if (_tab != "INTEL") then {
+        _ctrlList ctrlSetPosition _p0;
+        _ctrlList ctrlCommit 0;
+        { if (!isNull _x) then { _x ctrlShow false; }; } forEach _s2Ctrls;
+    };
+};
 
 private _opsSecondaryLabel = "FOLLOW-ON (SITREP)";
 
