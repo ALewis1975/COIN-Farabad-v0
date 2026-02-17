@@ -264,22 +264,37 @@ switch (_incidentTypeU) do
         private _logRoleKeys = ["logistics"] call _getRoleKeyList;
         if ((count _logRoleKeys) > 0) then
         {
-            private _fromKey = {
-                params ["_key", "_fallback"];
-                private _resolved = [[_key]] call _collectPoolsByKeys;
+            private _fromTaggedKeys = {
+                params ["_tags", "_fallback"];
+                private _matchedKeys = [];
+
+                {
+                    if (_x isEqualType "") then
+                    {
+                        private _kLower = toLower _x;
+                        if ((_tags findIf { (_kLower find _x) >= 0 }) >= 0) then
+                        {
+                            _matchedKeys pushBack _x;
+                        };
+                    };
+                } forEach _logRoleKeys;
+
+                if ((count _matchedKeys) == 0) exitWith { +_fallback };
+
+                private _resolved = [_matchedKeys] call _collectPoolsByKeys;
                 if ((count _resolved) == 0) exitWith { +_fallback };
                 _resolved
             };
 
-            _poolGen = ["ARC_rhsConvoyCargoPool_general", _poolLogRole] call _fromKey;
-            _poolHQ = ["ARC_rhsConvoyCargoPool_hq", _poolLogRole] call _fromKey;
-            _poolMaint = ["ARC_rhsConvoyCargoPool_maint", _poolLogRole] call _fromKey;
+            _poolGen = [["general", "cargo", "logistics"], _poolLogRole] call _fromTaggedKeys;
+            _poolHQ = [["hq", "command", "cp"], _poolLogRole] call _fromTaggedKeys;
+            _poolMaint = [["maint", "maintenance", "repair"], _poolLogRole] call _fromTaggedKeys;
 
             _poolSup = switch (_supplyKind) do
             {
-                case "FUEL": { ["ARC_rhsConvoyCargoPool_fuel", _poolLogRole] call _fromKey };
-                case "AMMO": { ["ARC_rhsConvoyCargoPool_ammo", _poolLogRole] call _fromKey };
-                case "MED":  { ["ARC_rhsConvoyCargoPool_med", _poolLogRole] call _fromKey };
+                case "FUEL": { [["fuel", "petrol", "gas"], _poolLogRole] call _fromTaggedKeys };
+                case "AMMO": { [["ammo", "muni", "ordnance"], _poolLogRole] call _fromTaggedKeys };
+                case "MED":  { [["med", "medical", "cas"], _poolLogRole] call _fromTaggedKeys };
                 default        { +_poolLogRole };
             };
         };
