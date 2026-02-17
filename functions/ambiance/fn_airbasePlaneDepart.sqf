@@ -517,7 +517,7 @@ if (_kickEnabled) then {
             if (_isHeliL) then {
                 _vehL land "NONE";
                 _vehL flyInHeight (20 max _cruiseAltL);
-                // Forward + vertical nudge to break runway-skim deadlocks after unitPlay taxi.
+                // Forward + vertical nudge to break runway-skim deadlock after unitPlay taxi.
                 _vehL setVelocityModelSpace [0, 14, 12];
                 _pilotL doMove _kickPosL;
             } else {
