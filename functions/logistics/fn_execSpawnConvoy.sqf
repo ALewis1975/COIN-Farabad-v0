@@ -80,6 +80,10 @@ if (!(_poolLog isEqualType []) || { (count _poolLog) == 0 }) then { _poolLog = [
 if (!(_poolEsc isEqualType []) || { (count _poolEsc) == 0 }) then { _poolEsc = ["rhsusf_M1232_M2_usarmy_d", "rhsusf_M1232_MK19_usarmy_d"]; };
 if (!(_poolLead isEqualType []) || { (count _poolLead) == 0 }) then { _poolLead = ["rhsusf_M1232_M2_usarmy_d", "rhsusf_M1232_MK19_usarmy_d"]; };
 
+// Role matrix pool resolution (allows missionNamespace to redirect role->pool keys).
+private _roleMatrix = missionNamespace getVariable ["ARC_convoyRoleMatrixPoolKeys", []];
+if (!(_roleMatrix isEqualType [])) then { _roleMatrix = []; };
+
 // Incident metadata (used for VIP motorcades, supply-kind selection, etc.)
 private _incidentMarker = ["activeIncidentMarker", ""] call ARC_fnc_stateGet;
 if (!(_incidentMarker isEqualType "")) then { _incidentMarker = ""; };
@@ -189,33 +193,96 @@ private _pickFrom = {
     _pool select (floor (random (count _pool)))
 };
 
+private _getRoleKeyList = {
+    params ["_roleName"];
+    private _r = toLower _roleName;
+    private _idx = _roleMatrix findIf { (_x isEqualType []) && { (count _x) >= 2 } && { ((_x # 0) isEqualType "") && { (toLower (_x # 0)) isEqualTo _r } } };
+    if (_idx < 0) exitWith {[]};
+    private _keys = (_roleMatrix # _idx) # 1;
+    if !(_keys isEqualType []) exitWith {[]};
+    _keys select { _x isEqualType "" }
+};
+
+private _collectPoolsByKeys = {
+    params ["_keys"];
+    private _out = [];
+    {
+        if (_x isEqualType "") then
+        {
+            private _pool = missionNamespace getVariable [_x, []];
+            if (_pool isEqualType []) then
+            {
+                {
+                    if (_x isEqualType "" && { isClass (configFile >> "CfgVehicles" >> _x) }) then
+                    {
+                        _out pushBackUnique _x;
+                    };
+                } forEach _pool;
+            };
+        };
+    } forEach _keys;
+    _out
+};
+
+private _resolveRolePool = {
+    params ["_roleName", "_legacyPool"];
+    private _keys = [_roleName] call _getRoleKeyList;
+    private _resolved = [_keys] call _collectPoolsByKeys;
+
+    // Hard fallback: if matrix role resolves empty, keep legacy behavior.
+    if ((count _resolved) == 0 && { _legacyPool isEqualType [] }) then
+    {
+        {
+            if (_x isEqualType "" && { isClass (configFile >> "CfgVehicles" >> _x) }) then
+            {
+                _resolved pushBackUnique _x;
+            };
+        } forEach _legacyPool;
+    };
+    _resolved
+};
+
+private _poolLeadRole = ["lead", _poolLead] call _resolveRolePool;
+private _poolEscRole = ["escort", _poolEsc] call _resolveRolePool;
+private _poolLogRole = ["logistics", _poolLog] call _resolveRolePool;
+
 // Build the convoy class list.
 switch (_incidentTypeU) do
 {
     case "LOGISTICS":
     {
         // Lead + 3-5 logistics + tail escort
-        private _lead = [_poolLead] call _pickFrom;
+        private _lead = [_poolLeadRole] call _pickFrom;
         if (_lead isNotEqualTo "") then { _classes pushBack _lead; };
 
-        private _poolGen  = missionNamespace getVariable ["ARC_rhsConvoyCargoPool_general", []];
-        private _poolFuel = missionNamespace getVariable ["ARC_rhsConvoyCargoPool_fuel", []];
-        private _poolAmmo = missionNamespace getVariable ["ARC_rhsConvoyCargoPool_ammo", []];
-        private _poolMed  = missionNamespace getVariable ["ARC_rhsConvoyCargoPool_med", []];
-        private _poolHQ   = missionNamespace getVariable ["ARC_rhsConvoyCargoPool_hq", []];
-        private _poolMaint= missionNamespace getVariable ["ARC_rhsConvoyCargoPool_maint", []];
+        // Role-based selection from the matrix pool keys, with legacy fallbacks preserved.
+        private _poolGen = +_poolLogRole;
+        private _poolSup = +_poolLogRole;
+        private _poolHQ = +_poolLogRole;
+        private _poolMaint = +_poolLogRole;
 
-        // If the role-specific pools are missing (shouldn't happen), fall back to the generic logistics pool.
-        if (!(_poolGen isEqualType []) || { (count _poolGen) == 0 }) then { _poolGen = +_poolLog; };
-
-        private _poolSup = switch (_supplyKind) do
+        private _logRoleKeys = ["logistics"] call _getRoleKeyList;
+        if ((count _logRoleKeys) > 0) then
         {
-            case "FUEL": { _poolFuel };
-            case "AMMO": { _poolAmmo };
-            case "MED":  { _poolMed  };
-            default      { [] };
+            private _fromKey = {
+                params ["_key", "_fallback"];
+                private _resolved = [[_key]] call _collectPoolsByKeys;
+                if ((count _resolved) == 0) exitWith { +_fallback };
+                _resolved
+            };
+
+            _poolGen = ["ARC_rhsConvoyCargoPool_general", _poolLogRole] call _fromKey;
+            _poolHQ = ["ARC_rhsConvoyCargoPool_hq", _poolLogRole] call _fromKey;
+            _poolMaint = ["ARC_rhsConvoyCargoPool_maint", _poolLogRole] call _fromKey;
+
+            _poolSup = switch (_supplyKind) do
+            {
+                case "FUEL": { ["ARC_rhsConvoyCargoPool_fuel", _poolLogRole] call _fromKey };
+                case "AMMO": { ["ARC_rhsConvoyCargoPool_ammo", _poolLogRole] call _fromKey };
+                case "MED":  { ["ARC_rhsConvoyCargoPool_med", _poolLogRole] call _fromKey };
+                default        { +_poolLogRole };
+            };
         };
-        if (!(_poolSup isEqualType []) || { (count _poolSup) == 0 }) then { _poolSup = +_poolLog; };
 
         private _count = 3 + floor (random 3); // 3..5
         for "_i" from 1 to _count do
@@ -245,14 +312,14 @@ switch (_incidentTypeU) do
             if (_c isNotEqualTo "") then { _classes pushBack _c; };
         };
 
-        private _tail = [_poolEsc] call _pickFrom;
+        private _tail = [_poolEscRole] call _pickFrom;
         if (_tail isNotEqualTo "") then { _classes pushBack _tail; };
     };
 
     case "ESCORT":
     {
         // Lead + 2-4 escort vehicles (VIP variants bias toward SUVs/PMCs)
-        private _lead = [_poolLead] call _pickFrom;
+        private _lead = [_poolLeadRole] call _pickFrom;
         if (_lead isNotEqualTo "") then { _classes pushBack _lead; };
 
         private _count = if (_isVIP) then { 3 + floor (random 3) } else { 2 + floor (random 3) }; // VIP 3..5, normal 2..4
@@ -268,7 +335,7 @@ switch (_incidentTypeU) do
 
             private _useSUV = _forceSUV || { (random 1) < _pSUV };
 
-            private _poolUse = _poolEsc;
+            private _poolUse = _poolEscRole;
             if (_useSUV) then
             {
                 // VIP: bias toward ION SUVs (PMC crews). Otherwise use the broader SUV/Police pool.
@@ -287,11 +354,11 @@ switch (_incidentTypeU) do
     default
     {
         // Safe fallback: escort style
-        private _lead = [_poolLead] call _pickFrom;
+        private _lead = [_poolLeadRole] call _pickFrom;
         if (_lead isNotEqualTo "") then { _classes pushBack _lead; };
-        private _c = [_poolEsc] call _pickFrom;
+        private _c = [_poolEscRole] call _pickFrom;
         if (_c isNotEqualTo "") then { _classes pushBack _c; };
-        private _c2 = [_poolEsc] call _pickFrom;
+        private _c2 = [_poolEscRole] call _pickFrom;
         if (_c2 isNotEqualTo "") then { _classes pushBack _c2; };
     };
 };
