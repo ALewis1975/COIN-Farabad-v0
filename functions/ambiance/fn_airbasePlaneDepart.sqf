@@ -203,7 +203,7 @@ if (!_boardOk) exitWith {
     false
 };
 
-// Prep delay (simulate checks / engine spool)
+// Prep delay (quick default; missionNamespace may override for longer startup choreography)
 private _prepDelay = missionNamespace getVariable ["airbase_v1_prepDelay_s", 15];
 if (!(_prepDelay isEqualType 0) || { _prepDelay < 0 }) then { _prepDelay = 15; };
 if (_prepDelay > 0) then { sleep _prepDelay; };
