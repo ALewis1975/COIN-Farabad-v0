@@ -28,8 +28,13 @@ if (!canSuspend) exitWith {
 params [
     ["_category", "INTEL"],
     ["_defaultSummary", ""],
-    ["_defaultDetails", ""]
+    ["_defaultDetails", ""],
+    ["_spawnReentry", false]
 ];
+
+if (_spawnReentry) then {
+    diag_log "[FARABAD][PROMPT][SPAWN] reentered scheduled";
+};
 
 uiNamespace setVariable ["ARC_intelDialog_category", toUpper _category];
 uiNamespace setVariable ["ARC_intelDialog_defaultSummary", _defaultSummary];

@@ -1,5 +1,8 @@
 # AGENTS.md — Project Agent Operating Doctrine (AOD)
 
+## Scripting Language
+SQF a/k/a Real Virtuality 4 by Bohemia Interactive. Additionally known as Poseidon. "Poseidon" is the internally used name of the Real Virtuality engine, used to drive all Bohemia Interactive games from Operation Flashpoint to Arma 3.
+
 ## Required PR metadata
 Every PR description MUST include:
 - Mode: A | B | C | D | E | F | G | H | I | J
@@ -8,6 +11,69 @@ Every PR description MUST include:
 - Tests Run: commands + results (or "Not run" + why)
 - Risk Notes: what could break
 - Rollback: how to revert safely
+
+## Mode legend (enforceable definition)
+Choose exactly one primary mode per PR. If work spans multiple modes, split into multiple PRs.
+
+### Mode A — Bug Fix (behavior correction)
+- Purpose: fix incorrect behavior without changing intended product scope.
+- Allowed: minimal code changes to correct logic defects; targeted tests.
+- Disallowed: feature additions, broad refactors, schema redesign.
+
+### Mode B — Feature Delivery (new capability)
+- Purpose: introduce user-visible or system-visible functionality.
+- Allowed: implementation + tests + required docs for the feature.
+- Disallowed: unrelated cleanups or incidental architecture rewrites.
+
+### Mode C — Safe Refactor (no behavior change)
+- Purpose: improve code structure/readability/maintainability only.
+- Allowed: internal code motion/renaming/extraction with behavior parity.
+- Required: parity checks proving no intended behavior change.
+- Disallowed: opportunistic refactors outside declared scope.
+
+### Mode D — Performance Optimization
+- Purpose: improve latency, throughput, memory, or operational cost.
+- Allowed: targeted performance changes with before/after evidence.
+- Required: benchmark or profiling output in PR notes.
+- Disallowed: opportunistic refactors unrelated to the optimization.
+
+### Mode E — Test-Only Changes
+- Purpose: add/fix/improve automated tests only.
+- Allowed: test files, fixtures, and test harness updates.
+- Disallowed: production logic changes except test seams explicitly listed.
+
+### Mode F — Documentation-Only Changes
+- Purpose: clarify or update written guidance/specs/runbooks.
+- Allowed: docs, diagrams, comments (non-functional).
+- Disallowed: executable behavior changes.
+
+### Mode G — Build/CI/Tooling
+- Purpose: adjust pipelines, scripts, linting, formatting, or dev tooling.
+- Allowed: CI config and tooling scripts needed for reliability.
+- Disallowed: product feature work mixed into tooling PRs.
+
+### Mode H — Dependency / Version Management
+- Purpose: add, remove, pin, or upgrade dependencies/runtime versions.
+- Allowed: manifest/config updates and compatibility fixes directly required.
+- Required: compatibility/risk notes for major upgrades.
+- Disallowed: unrelated feature or refactor work.
+
+### Mode I — Security Hardening
+- Purpose: remediate vulnerabilities or reduce attack surface.
+- Allowed: authz/authn hardening, input validation, secret handling, policy fixes.
+- Required: threat/risk summary and verification steps.
+- Disallowed: unrelated non-security improvements.
+
+### Mode J — Operations / Config / Data Maintenance
+- Purpose: environment configuration, migrations, or operational reliability tasks.
+- Allowed: config defaults, migration scripts, rollout/rollback mechanics.
+- Required: explicit deployment/rollback procedure.
+- Disallowed: unrelated product development.
+
+## Mode selection rules
+- If the PR changes runtime behavior for users/operators, default to A or B unless it is explicitly a security item (I).
+- If the PR changes only tests/docs/tooling/dependencies, use E/F/G/H respectively.
+- If a change could reasonably fit multiple modes, pick the mode that represents the highest risk surface and explain why in PR notes.
 
 ## Global constraints
 - Do not perform opportunistic refactors in Modes C or D.
