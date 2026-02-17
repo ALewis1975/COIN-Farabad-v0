@@ -379,22 +379,22 @@ switch (_incidentTypeU) do
         private _logRoleKeys = ["logistics"] call _getRoleKeyList;
         if ((count _logRoleKeys) > 0) then
         {
-            private _fromKey = {
-                params ["_key", "_fallback"];
-                private _resolved = [[_key]] call _collectPoolsByKeys;
+            private _fromKeys = {
+                params ["_keys", "_fallback"];
+                private _resolved = [_keys] call _collectPoolsByKeys;
                 if ((count _resolved) == 0) exitWith { +_fallback };
                 _resolved
             };
 
-            _poolGen = ["ARC_rhsConvoyCargoPool_general", _poolLogSelect] call _fromKey;
-            _poolHQ = ["ARC_rhsConvoyCargoPool_hq", _poolLogSelect] call _fromKey;
-            _poolMaint = ["ARC_rhsConvoyCargoPool_maint", _poolLogSelect] call _fromKey;
+            _poolGen = [["ARC_convoyPool_Transport", "ARC_rhsConvoyCargoPool_general"], _poolLogSelect] call _fromKeys;
+            _poolHQ = [["ARC_convoyPool_HQ", "ARC_rhsConvoyCargoPool_hq"], _poolLogSelect] call _fromKeys;
+            _poolMaint = [["ARC_convoyPool_Repair", "ARC_rhsConvoyCargoPool_maint"], _poolLogSelect] call _fromKeys;
 
             _poolSup = switch (_supplyKind) do
             {
-                case "FUEL": { ["ARC_rhsConvoyCargoPool_fuel", _poolLogSelect] call _fromKey };
-                case "AMMO": { ["ARC_rhsConvoyCargoPool_ammo", _poolLogSelect] call _fromKey };
-                case "MED":  { ["ARC_rhsConvoyCargoPool_med", _poolLogSelect] call _fromKey };
+                case "FUEL": { [["ARC_convoyPool_Fuel", "ARC_rhsConvoyCargoPool_fuel"], _poolLogSelect] call _fromKeys };
+                case "AMMO": { [["ARC_convoyPool_Ammo", "ARC_rhsConvoyCargoPool_ammo"], _poolLogSelect] call _fromKeys };
+                case "MED":  { [["ARC_convoyPool_Medical", "ARC_rhsConvoyCargoPool_med"], _poolLogSelect] call _fromKeys };
                 default        { +_poolLogSelect };
             };
         };
