@@ -164,8 +164,11 @@ missionNamespace setVariable ["civsub_v1_traffic_cap_perDistrict", 10, true];
 // Placement / separation
 missionNamespace setVariable ["civsub_v1_traffic_minSeparation_m", 35, true];
 missionNamespace setVariable ["civsub_v1_traffic_spawnRadius_m", 250, true];
-missionNamespace setVariable ["civsub_v1_traffic_playerMinDistance_m", 25, true];
+missionNamespace setVariable ["civsub_v1_traffic_playerMinDistance_m", 90, true];
 missionNamespace setVariable ["civsub_v1_traffic_roadside_offset_m", 4, true];            // shoulder offset baseline
+
+// Optional district traffic spawn anchors (districtId -> [x,y,z]); keep empty to use district centroids.
+missionNamespace setVariable ["civsub_v1_traffic_spawnAnchors", createHashMapFromArray [], true];
 missionNamespace setVariable ["civsub_v1_traffic_preferWeight", 0.90, true];              // bias toward 3CB
 
 // Cleanup posture
@@ -643,9 +646,37 @@ missionNamespace setVariable ["ARC_convoyBundleClassMatrix", [
         "UK3CB_ION_B_Desert_SUV_Armoured"
     ]],
     ["LOGI_CONTRACTOR_SECURITY", [
-        "UK3CB_ION_B_Desert_SUV",
-        "UK3CB_ION_B_Desert_SUV_Armed",
-        "UK3CB_ION_B_Desert_SUV_Armoured"
+        "d3s_scania_16_30reef",
+        "d3s_scania_16_30",
+        "d3s_scania_16_t75",
+        "d3s_scania_16_t50",
+        "d3s_scania_16_t14",
+        "d3s_scania_16_t22",
+        "d3s_peterbilt_579_tank",
+        "d3s_peterbilt_579_dump",
+        "d3s_peterbilt_579_dryvan",
+        "d3s_peterbilt_579",
+        "d3s_SRmh_9500",
+        "d3s_SRmh_9500_fuel",
+        "d3s_SRmh_9500_cov",
+        "d3s_SRlonghorn_4520",
+        "d3s_SRlonghorn_4520_fuel",
+        "d3s_SRlonghorn_4520_cov",
+        "d3s_scania_16",
+        "d3s_escalade_16",
+        "d3s_raptor_17_3_BIG",
+        "d3s_h1_06_A",
+        "d3s_h1_06",
+        "d3s_h2_02",
+        "d3s_h2_02_Black",
+        "d3s_cherokee_18_LTD",
+        "d3s_cherokee_18",
+        "d3s_hiluxarctic_14",
+        "d3s_200_16_EX",
+        "d3s_200_VX_16",
+        "d3s_200_16",
+        "d3s_tundra_19",
+        "d3s_tundra_19_P"
     ]],
     ["ESCORT_STANDARD", [
         "rhsusf_M1232_M2_usarmy_d",
