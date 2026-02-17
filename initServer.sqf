@@ -571,6 +571,67 @@ missionNamespace setVariable ["ARC_convoyRoleMatrixPoolKeys", [
     ["escort", ["ARC_convoyPool_MP", "ARC_convoyPool_CAV", "ARC_convoyPool_Security", "ARC_convoyPool_PrivateSecurity", "ARC_convoyPool_PrivateContractors", "ARC_convoyPool_Government"]],
     ["logistics", ["ARC_convoyPool_Transport", "ARC_convoyPool_Medical", "ARC_convoyPool_Ammo", "ARC_convoyPool_Repair", "ARC_convoyPool_Fuel", "ARC_convoyPool_HQ", "ARC_convoyPool_MP", "ARC_convoyPool_Government", "ARC_convoyPool_PrivateSecurity", "ARC_convoyPool_PrivateContractors"]]
 ], true];
+missionNamespace setVariable ["ARC_convoyPool_Repair", [
+    "rhsusf_M977A4_REPAIR_BKIT_usarmy_d",
+    "B_Truck_01_Repair_F"
+], true];
+missionNamespace setVariable ["ARC_convoyPool_Fuel", [
+    "rhsusf_M978A4_BKIT_usarmy_d",
+    "B_Truck_01_fuel_F"
+], true];
+missionNamespace setVariable ["ARC_convoyPool_Government", [
+    "UK3CB_TKC_B_SUV",
+    "UK3CB_TKC_B_SUV_Armoured",
+    "UK3CB_TKA_B_SUV_Armoured",
+    "d3s_tundra_19_COP",
+    "d3s_escalade_20_FSB",
+    "d3s_escalade_16_cop"
+], true];
+missionNamespace setVariable ["ARC_convoyPool_PrivateSecurity", [
+    "EM_Police_Raptor_UM",
+    "EM_Police_Explorer_UM",
+    "UK3CB_TKA_B_SUV_Armed"
+], true];
+missionNamespace setVariable ["ARC_convoyPool_PrivateContractors", [
+    "d3s_scania_16_30reef",
+    "d3s_scania_16_30",
+    "d3s_scania_16_t75",
+    "d3s_scania_16_t50",
+    "d3s_scania_16_t14",
+    "d3s_scania_16_t22",
+    "d3s_peterbilt_579_tank",
+    "d3s_peterbilt_579_dump",
+    "d3s_peterbilt_579_dryvan",
+    "d3s_peterbilt_579",
+    "d3s_SRmh_9500",
+    "d3s_SRmh_9500_fuel",
+    "d3s_SRmh_9500_cov",
+    "d3s_SRlonghorn_4520",
+    "d3s_SRlonghorn_4520_fuel",
+    "d3s_SRlonghorn_4520_cov",
+    "d3s_scania_16",
+    "d3s_escalade_16",
+    "d3s_raptor_17_3_BIG",
+    "d3s_h1_06_A",
+    "d3s_h1_06",
+    "d3s_h2_02",
+    "d3s_h2_02_Black",
+    "d3s_cherokee_18_LTD",
+    "d3s_cherokee_18",
+    "d3s_hiluxarctic_14",
+    "d3s_200_16_EX",
+    "d3s_200_VX_16",
+    "d3s_200_16",
+    "d3s_tundra_19",
+    "d3s_tundra_19_P"
+], true];
+
+// Convoy role matrix pools (explicit mission-level overrides).
+missionNamespace setVariable ["ARC_convoyRoleMatrixPoolKeys", [
+    ["lead", ["ARC_convoyPool_CAV", "ARC_convoyPool_Security", "ARC_convoyPool_HQ"]],
+    ["escort", ["ARC_convoyPool_MP", "ARC_convoyPool_CAV", "ARC_convoyPool_Security", "ARC_convoyPool_PrivateSecurity", "ARC_convoyPool_PrivateContractors", "ARC_convoyPool_Government"]],
+    ["logistics", ["ARC_convoyPool_Transport", "ARC_convoyPool_Medical", "ARC_convoyPool_Ammo", "ARC_convoyPool_Repair", "ARC_convoyPool_Fuel", "ARC_convoyPool_HQ", "ARC_convoyPool_MP", "ARC_convoyPool_Government", "ARC_convoyPool_PrivateSecurity", "ARC_convoyPool_PrivateContractors"]]
+], true);
 
 // Authoritative convoy bundle matrix overrides (exact classnames by bundle ID).
 missionNamespace setVariable ["ARC_convoyBundleClassMatrix", [
