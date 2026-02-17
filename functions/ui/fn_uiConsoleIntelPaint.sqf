@@ -518,7 +518,10 @@ if (_rebuild) then
 
         if (_inCivCtx) then
         {
-            ["CIVSUB INTERACTION (ACTIVE)", "HDR"] call _addTool;
+            private _ctxRow = _list lbAdd "--- CIVSUB INTERACTION (ACTIVE) ---";
+            _list lbSetData [_ctxRow, "SEP"];
+            _list lbSetColor [_ctxRow, [0.80,0.80,0.80,1]];
+            _list lbSetSelectColor [_ctxRow, [0.80,0.80,0.80,1]];
             ["Check ID", "CIV_CONTACT_CHECK_ID"] call _addTool;
             ["Background Check", "CIV_CONTACT_BACKGROUND"] call _addTool;
 

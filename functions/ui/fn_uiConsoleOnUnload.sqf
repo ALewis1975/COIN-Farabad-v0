@@ -23,6 +23,12 @@ uiNamespace setVariable ["ARC_consoleVM_lastIgnoreLogAt", nil];
 diag_log format ["[FARABAD][v0][CONSOLE_VM][DETACH][%1] handlers detached", diag_tickTime];
 
 // Clear state so a fresh open rebuilds everything cleanly
+// End any active CIVSUB interaction first so the server can restore movement/ownership.
+private _civCtxTarget = uiNamespace getVariable ["ARC_civsubInteract_target", objNull];
+if (!isNull _civCtxTarget) then {
+    [_civCtxTarget, player, true] remoteExecCall ["ARC_fnc_civsubInteractEndSession", 2];
+};
+
 // Clear console-specific CIVSUB interaction context so INTEL returns to default tools mode.
 uiNamespace setVariable ["ARC_civsubInteract_target", objNull];
 uiNamespace setVariable ["ARC_civsubInteract_mode", "A"];
