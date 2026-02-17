@@ -73,6 +73,16 @@ if (!(_acc isEqualType true) && !(_acc isEqualType false)) then { _acc = false; 
 private _accBy = missionNamespace getVariable ["ARC_activeIncidentAcceptedByGroup", ""]; 
 if (!(_accBy isEqualType "")) then { _accBy = ""; };
 
+private _gidSelf = groupId (group player);
+private _availRows = missionNamespace getVariable ["ARC_pub_groupTaskingAvailability", []];
+if (!(_availRows isEqualType [])) then { _availRows = []; };
+private _idxAvail = _availRows findIf {
+    (_x isEqualType []) && { (count _x) >= 2 } &&
+    { ((_x # 0) isEqualType "") && { (toUpper (_x # 0)) isEqualTo (toUpper _gidSelf) } }
+};
+private _isTaskingAvailable = true;
+if (_idxAvail >= 0) then { _isTaskingAvailable = (_availRows # _idxAvail) param [1, true]; };
+
 private _closeReady = missionNamespace getVariable ["ARC_activeIncidentCloseReady", false];
 if (!(_closeReady isEqualType true) && !(_closeReady isEqualType false)) then { _closeReady = false; };
 
@@ -181,6 +191,11 @@ if (_sit isNotEqualTo []) then
 // -------------------------------------------------------------------------
 private _title = "<t size='1.15' font='PuristaMedium'>TOC BOARDS</t>";
 private _sub = "<t size='0.9' color='#DDDDDD'>Snapshot: Incident | Queue | Orders | SITREP</t><br/><br/>";
+private _taskingLine = format [
+    "<t size='0.9' color='#A0A0A0'>Tasking Status (%1):</t> <t color='#FFFFFF'>%2</t><br/><br/>",
+    if (_gidSelf isEqualTo "") then {"UNASSIGNED"} else {_gidSelf},
+    if (_isTaskingAvailable) then {"AVAILABLE"} else {"OFFLINE"}
+];
 
 private _incBlock = "";
 if (_taskId isEqualTo "") then
@@ -233,9 +248,9 @@ else
 
 private _sitBlock = (["Last SITREP"] call _fmtHdr) + _sitTxt + "<br/>";
 
-private _tip = "<br/><t size='0.85' color='#AAAAAA'>Tip: Use TOC / CMD for approvals and incident actions. BOARDS is read-only.</t>";
+private _tip = "<br/><t size='0.85' color='#AAAAAA'>Tip: Primary toggles tasking availability. Secondary opens TOC queue/CMD actions.</t>";
 
-private _txt = _title + "<br/>" + _sub + _incBlock + "<br/>" + _queueBlock + "<br/>" + _ordersBlock + "<br/>" + _sitBlock + _tip;
+private _txt = _title + "<br/>" + _sub + _taskingLine + _incBlock + "<br/>" + _queueBlock + "<br/>" + _ordersBlock + "<br/>" + _sitBlock + _tip;
 
 _ctrlMain ctrlSetStructuredText parseText _txt;
 

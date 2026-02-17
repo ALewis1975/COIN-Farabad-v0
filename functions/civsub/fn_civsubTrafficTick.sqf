@@ -133,11 +133,24 @@ private _budgetG = missionNamespace getVariable ["civsub_v1_traffic_spawn_budget
 if (!(_budgetG isEqualType 0)) then { _budgetG = 1; };
 if (_budgetG < 0) then { _budgetG = 0; };
 
-// Time-of-day multiplier (lightweight heuristic until TOD system exists)
-private _tod = dayTime; // 0..24
+// Time-of-day multiplier (prefer world-time phase when available)
+private _tod = dayTime; // 0..24 fallback
+private _wtPhase = missionNamespace getVariable ["ARC_worldTime_dayPhase", ""];
+if (_wtPhase isEqualType "") then { _wtPhase = toUpper (trim _wtPhase); };
+
 private _mTod = 1.0;
-if (_tod < 5 || { _tod > 21 }) then { _mTod = 0.35; };
-if ((_tod >= 7 && { _tod <= 9 }) || (_tod >= 16 && { _tod <= 18 })) then { _mTod = 1.15; };
+switch (_wtPhase) do
+{
+    case "NIGHT":   { _mTod = 0.35; };
+    case "MORNING": { _mTod = 1.15; };
+    case "WORK":    { _mTod = 1.00; };
+    case "EVENING": { _mTod = 0.75; };
+    default
+    {
+        if (_tod < 5 || { _tod > 21 }) then { _mTod = 0.35; };
+        if ((_tod >= 7 && { _tod <= 9 }) || (_tod >= 16 && { _tod <= 18 })) then { _mTod = 1.15; };
+    };
+};
 
 // Spawn parked vehicles per active district (mostly parked)
 {

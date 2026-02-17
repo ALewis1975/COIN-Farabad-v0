@@ -151,9 +151,26 @@ switch (_tab) do
 {
     case "BOARDS":
     {
-        // Snapshot view (read-only)
-        if (!isNull _b1) then { _b1 ctrlShow false; _b1 ctrlEnable false; _b1 ctrlSetText ""; };
-        if (!isNull _b2) then { _b2 ctrlShow false; _b2 ctrlEnable false; _b2 ctrlSetText ""; };
+        private _gidSelf = groupId (group player);
+        private _availRows = missionNamespace getVariable ["ARC_pub_groupTaskingAvailability", []];
+        if (!(_availRows isEqualType [])) then { _availRows = []; };
+        private _idxAvail = _availRows findIf {
+            (_x isEqualType []) && { (count _x) >= 2 } &&
+            { ((_x # 0) isEqualType "") && { (toUpper (_x # 0)) isEqualTo (toUpper _gidSelf) } }
+        };
+        private _isAvail = true;
+        if (_idxAvail >= 0) then { _isAvail = (_availRows # _idxAvail) param [1, true]; };
+
+        if (!isNull _b1) then {
+            _b1 ctrlShow true;
+            _b1 ctrlEnable ([player] call ARC_fnc_rolesIsAuthorized);
+            _b1 ctrlSetText (if (_isAvail) then {"SET OFFLINE"} else {"SET AVAILABLE"});
+        };
+        if (!isNull _b2) then {
+            _b2 ctrlShow true;
+            _b2 ctrlEnable true;
+            _b2 ctrlSetText "TOC QUEUE";
+        };
 
         [_display] call ARC_fnc_uiConsoleBoardsPaint;
     };

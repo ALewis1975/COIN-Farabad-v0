@@ -392,6 +392,7 @@ class CfgFunctions
             class intelClientRequestFollowOn {};
             class intelClientCanAcceptOrder {};
             class intelClientAcceptOrder {};
+            class intelSetGroupTaskingAvailability {};
 
             class intelClientHasAcceptedRtbIntel {};
             class intelClientHasAcceptedRtbEpw {};
@@ -480,6 +481,7 @@ class CfgFunctions
             class uiConsoleActionAcceptIncident {};
             class uiConsoleActionAcceptOrder {};
             class uiConsoleActionOpenTocQueue {};
+            class uiConsoleActionToggleTaskingAvailability {};
             class uiConsoleActionHQPrimary {};
 
             // Structured SITREP dialog helpers (UI09)
@@ -576,4 +578,3 @@ class Ops
         };
     };
 };
-

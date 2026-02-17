@@ -86,6 +86,7 @@ if !(_d isEqualType createHashMap) exitWith {
 // Scores (guarded)
 ["SCORES"] call _setStep;
 private _scores = createHashMapFromArray [["S_COOP",0],["S_THREAT",0]];
+private _nil = false;
 _nil = isNil { private _tmp = [_d] call ARC_fnc_civsubScoresCompute; if (_tmp isEqualType createHashMap) then { _scores = _tmp; }; };
 private _Sthreat = _scores getOrDefault ["S_THREAT", 0];
 private _Scoop   = _scores getOrDefault ["S_COOP", 0];
