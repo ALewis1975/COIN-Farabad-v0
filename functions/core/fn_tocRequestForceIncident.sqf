@@ -26,7 +26,8 @@ params [
     ["_incidentType", "", [""]]
 ];
 
-private _owner = remoteExecutedOwner;
+private _owner = -1;
+if (!isNil "remoteExecutedOwner") then { _owner = remoteExecutedOwner; };
 
 if (!([_caller, "ARC_fnc_tocRequestForceIncident", "Force incident rejected: sender verification failed.", "TOC_FORCE_INCIDENT_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
