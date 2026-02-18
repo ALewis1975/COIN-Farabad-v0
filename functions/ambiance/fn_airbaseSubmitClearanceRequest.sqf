@@ -30,6 +30,34 @@ if (isNull _aircraft) exitWith {
     false
 };
 
+if !(_aircraft isKindOf "Air") exitWith {
+    private _owner = owner _caller;
+    if (_owner > 0) then { ["Clearance request rejected: target is not an aircraft."] remoteExec ["ARC_fnc_clientHint", _owner]; };
+
+    ["OPS", format ["AIRBASE CLEARANCE DENIED: non-air submit by %1", name _caller], getPosATL _caller, [
+        ["event", "AIRBASE_CLEARANCE_SUBMIT_NON_AIR"],
+        ["caller", name _caller],
+        ["uid", getPlayerUID _caller],
+        ["aircraftType", typeOf _aircraft]
+    ]] call ARC_fnc_intelLog;
+
+    false
+};
+
+if !(_caller in (crew _aircraft)) exitWith {
+    private _owner = owner _caller;
+    if (_owner > 0) then { ["Clearance request rejected: caller must be crew in aircraft."] remoteExec ["ARC_fnc_clientHint", _owner]; };
+
+    ["OPS", format ["AIRBASE CLEARANCE DENIED: non-crew submit by %1", name _caller], getPosATL _caller, [
+        ["event", "AIRBASE_CLEARANCE_SUBMIT_NON_CREW"],
+        ["caller", name _caller],
+        ["uid", getPlayerUID _caller],
+        ["aircraftNetId", netId _aircraft]
+    ]] call ARC_fnc_intelLog;
+
+    false
+};
+
 private _vehOwner = owner _aircraft;
 private _callerOwner = owner _caller;
 if ((_vehOwner > 0) && { _vehOwner != _callerOwner }) exitWith {
