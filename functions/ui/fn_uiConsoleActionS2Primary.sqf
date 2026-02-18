@@ -220,11 +220,6 @@ switch (_kind) do
         mapAnimCommit;
     };
 
-case "CIV_MDT_RUN":
-	{
-		[] call ARC_fnc_uiConsoleActionCivRunLastId;
-	};
-
 	case "LEAD_REQ":
 	{
 		// Consolidated lead request (UI09-HF)

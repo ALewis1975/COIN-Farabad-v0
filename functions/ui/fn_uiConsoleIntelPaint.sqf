@@ -517,7 +517,6 @@ if (_rebuild) then
 
         // CIVSUB MDT + contact context tools
         ["CIVSUB / MDT"] call _addHdr;
-        ["Run Last Civ ID (MDT)", "CIV_MDT_RUN"] call _addTool;
         ["CIVSUB Census (District Stats)", "CIV_CENSUS_OPEN"] call _addTool;
         ["AO Threat Summary", "CIV_THREAT_SUMMARY"] call _addTool;
 
@@ -1131,18 +1130,6 @@ else
                    "Select a district to view details. EXECUTE opens the map at the district center.";
             if (!isNull _b1) then { _b1 ctrlEnable true; _b1 ctrlSetText "OPEN"; };
         };
-
-case "CIV_MDT_RUN":
-{
-    _txt = "<t size='1.05'>MDT: Run the most recently shown civilian ID card against the Crime DB.</t><br/>" +
-           "<t size='0.95'>Workflow:</t><br/>" +
-           "1) Show Papers on a civilian<br/>" +
-           "2) Return here and Execute<br/>" +
-           "3) If hit: detain + transport for sheriff handoff<br/>" +
-           (if (_inCivCtx) then {"<t color='#77FFAA'>CIVSUB interaction mode active.</t>"} else {"<t color='#AAAAAA'>No active CIVSUB interaction target.</t>"});
-
-    if (!isNull _b1) then { _b1 ctrlEnable true; };
-};
 
         case "CIV_THREAT_SUMMARY":
         {
