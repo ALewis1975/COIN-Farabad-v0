@@ -60,9 +60,9 @@ if (!(_runwayState isEqualType "")) then { _runwayState = "UNKNOWN"; };
 private _runwayOwner = [_air, "runwayOwner", ""] call _getPub;
 if (!(_runwayOwner isEqualType "")) then { _runwayOwner = ""; };
 
-private _hold = missionNamespace getVariable ["airbase_v1_holdDepartures", false];
-if (!(_hold isEqualType true) && !(_hold isEqualType false)) then { _hold = false; };
-uiNamespace setVariable ["ARC_console_airHoldDepartures", _hold];
+private _holdDepartures = [_air, "holdDepartures", false] call _getPub;
+if (!(_holdDepartures isEqualType true) && !(_holdDepartures isEqualType false)) then { _holdDepartures = false; };
+uiNamespace setVariable ["ARC_console_airHoldDepartures", _holdDepartures];
 
 private _nextItems = [_air, "nextItems", []] call _getPub;
 if (!(_nextItems isEqualType [])) then { _nextItems = []; };
@@ -107,7 +107,7 @@ uiNamespace setVariable ["ARC_console_airSelectedFid", _selectedFid];
 
 private _canAirControl = ["ARC_console_airCanControl", false] call ARC_fnc_uiNsGetBool;
 private _canText = if (_canAirControl) then { "TOWER CONTROL: ENABLED" } else { "TOWER CONTROL: READ-ONLY" };
-private _holdText = if (_hold) then { "HOLD ACTIVE" } else { "DEPARTURES OPEN" };
+private _holdText = if (_holdDepartures) then { "HOLD ACTIVE" } else { "DEPARTURES OPEN" };
 private _execText = if (_execActive) then { format ["EXEC ACTIVE: %1", _execFid] } else { "EXEC ACTIVE: none" };
 private _rwOwnerText = if (_runwayOwner isEqualTo "") then { "-" } else { _runwayOwner };
 

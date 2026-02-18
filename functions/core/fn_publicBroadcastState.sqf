@@ -70,6 +70,9 @@ if (!(_execActive isEqualType true) && !(_execActive isEqualType false)) then { 
 private _execFid = missionNamespace getVariable ["airbase_v1_execFid", ""];
 if (!(_execFid isEqualType "")) then { _execFid = ""; };
 
+private _holdDepartures = ["airbase_v1_holdDepartures", false] call ARC_fnc_stateGet;
+if (!(_holdDepartures isEqualType true) && !(_holdDepartures isEqualType false)) then { _holdDepartures = false; };
+
 private _runwayState = missionNamespace getVariable ["airbase_v1_runwayState", "UNKNOWN"];
 if (!(_runwayState isEqualType "")) then { _runwayState = "UNKNOWN"; };
 
@@ -100,6 +103,7 @@ private _airbasePub = [
     ["totalQueued", count _airQueue],
     ["execActive", _execActive],
     ["execFid", _execFid],
+    ["holdDepartures", _holdDepartures],
     ["runwayState", _runwayState],
     ["runwayOwner", _runwayOwner],
     ["runwayUntil", _runwayUntil],
