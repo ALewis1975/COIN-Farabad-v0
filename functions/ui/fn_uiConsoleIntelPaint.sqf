@@ -648,6 +648,20 @@ uiNamespace setVariable ["ARC_console_intelSelData", _data];
 
 private _txt = "";
 
+private _getCivsubResultForCurrentTarget = {
+    private _rs = uiNamespace getVariable ["ARC_console_civsubLastResult", createHashMap];
+    if !(_rs isEqualType createHashMap) exitWith { createHashMap };
+
+    private _rsTargetNetId = _rs getOrDefault ["targetNetId", ""];
+    if !(_rsTargetNetId isEqualType "") then { _rsTargetNetId = ""; };
+
+    private _ctxTarget = uiNamespace getVariable ["ARC_civsubInteract_target", objNull];
+    private _ctxTargetNetId = if (isNull _ctxTarget) then { "" } else { netId _ctxTarget };
+
+    if (_rsTargetNetId isNotEqualTo "" && {_ctxTargetNetId isNotEqualTo _rsTargetNetId}) exitWith { createHashMap };
+    _rs
+};
+
 private _appendCivsubResult = {
     params ["_txtIn", "_expectType"];
 
@@ -656,7 +670,7 @@ private _appendCivsubResult = {
     if !(_typeExpect isEqualType "") then { _typeExpect = ""; };
     _typeExpect = toUpper (trim _typeExpect);
 
-    private _rs = uiNamespace getVariable ["ARC_console_civsubLastResult", createHashMap];
+    private _rs = call _getCivsubResultForCurrentTarget;
     if !(_rs isEqualType createHashMap) exitWith { _txtOut };
 
     private _type = _rs getOrDefault ["type", ""];
@@ -1108,8 +1122,21 @@ else
                    "Runs identity verification for the active civilian interaction target.<br/>" +
                    "Result renders in-console via CIVSUB response handlers.";
 
+            private _rs = call _getCivsubResultForCurrentTarget;
+            private _showIdCard = false;
+            if (_rs isEqualType createHashMap) then {
+                private _type = _rs getOrDefault ["type", ""];
+                if !(_type isEqualType "") then { _type = ""; };
+                _type = toUpper (trim _type);
+
+                private _ok = _rs getOrDefault ["ok", false];
+                if !(_ok isEqualType true) then { _ok = false; };
+
+                _showIdCard = (_type isEqualTo "CHECK_ID") && {_ok};
+            };
+
             private _idCardHtml = uiNamespace getVariable ["ARC_civsubInteract_idCardHtml", ""];
-            if (_idCardHtml isEqualType "" && {!(_idCardHtml isEqualTo "")}) then {
+            if (_showIdCard && {_idCardHtml isEqualType ""} && {!(_idCardHtml isEqualTo "")}) then {
                 _txt = _txt + "<br/><br/>" + _idCardHtml;
             };
 
