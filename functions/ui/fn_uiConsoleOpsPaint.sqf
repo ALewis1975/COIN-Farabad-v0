@@ -310,7 +310,7 @@ else
                     // Secondary: EOD disposition request (IED incidents only, pre-closeout)
                     if (_typU isEqualTo "IED") then
                     {
-                        _secondaryLabel = "EOD DISPO";
+                        _secondaryLabel = "EOD DISPOSITION";
                         _secondaryEnabled = _isAuth;
                     };
                 };

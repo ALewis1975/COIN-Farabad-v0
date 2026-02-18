@@ -100,7 +100,7 @@ if (!(_taskId isEqualTo "")) then
 {
     if (_closeReady) then
     {
-        _secText = "CLOSEOUT / F-O";
+        _secText = "CLOSEOUT / FOLLOW-ON";
         _secEnable = true;
     }
     else
@@ -135,8 +135,10 @@ private _lines = [];
 _lines pushBack "<t size='1.2' font='PuristaMedium'>TOC / CMD</t>";
 _lines pushBack format ["<t size='0.95' color='#BDBDBD'>Access:</t> <t size='0.95'>%1</t>", _role];
 _lines pushBack "<br/>";
+_lines pushBack "<br/>";
 
 _lines pushBack "<t size='1.05' font='PuristaMedium'>Active Incident</t>";
+_lines pushBack "<br/>";
 if (_taskId isEqualTo "") then
 {
     _lines pushBack "<t color='#BBBBBB' size='0.95'>No active incident.</t>";
@@ -153,6 +155,7 @@ else
     };
     _lines pushBack format ["<t size='0.9' color='#BDBDBD'>Closeout Ready:</t> <t size='0.9'>%1</t>", if (_closeReady) then {"YES"} else {"NO"}];
     _lines pushBack format ["<t size='0.9' color='#BDBDBD'>SITREP:</t> <t size='0.9'>%1</t>", if (_sitrepSent) then {"SENT"} else {"NOT SENT"}];
+    _lines pushBack "<br/>";
     private _nextStep = if (!_accepted) then {"AWAITING: INCIDENT ACCEPTANCE"} else { if (!_sitrepSent) then {"AWAITING: FIELD SITREP"} else { if (!_closeReady) then {"AWAITING: CLOSEOUT CONDITIONS"} else {"READY: ISSUE CLOSEOUT + FOLLOW-ON"} } };
     private _nextColor = if ((_nextStep find "READY:") isEqualTo 0) then {"#9FE870"} else { if ((_nextStep find "CLOSEOUT CONDITIONS") > -1) then {"#FF7A7A"} else {"#FFD166"} };
     _lines pushBack format ["<t size='0.92' color='%1' font='PuristaMedium'>%2</t>", _nextColor, _nextStep];
@@ -177,9 +180,14 @@ else
                 _o params ["_oid","_iat","_st","_ot","_tg","_data","_meta"];
                 if (!(_tg isEqualTo _acceptedBy)) then { continue; };
                 private _stU = toUpper _st;
-                if (_stU in ["ISSUED","ACCEPTED"]) exitWith
+                if (_stU in ["ISSUED","ACCEPTED","COMPLETED","FAILED"]) exitWith
                 {
-                    _ordLine = format ["%1 (%2)", _ot, _stU];
+                    private _stColor = "#FFFFFF";
+                    if (_stU isEqualTo "ISSUED") then { _stColor = "#FFD166"; };
+                    if (_stU isEqualTo "ACCEPTED") then { _stColor = "#9FE870"; };
+                    if (_stU isEqualTo "COMPLETED") then { _stColor = "#AAAAAA"; };
+                    if (_stU isEqualTo "FAILED") then { _stColor = "#FF7A7A"; };
+                    _ordLine = format ["%1 (<t color='%2'>%3</t>)", _ot, _stColor, _stU];
                 };
             };
         };
@@ -204,7 +212,9 @@ else
 };
 
 _lines pushBack "<br/>";
+_lines pushBack "<br/>";
 _lines pushBack "<t size='1.05' font='PuristaMedium'>Unit Status Board</t>";
+_lines pushBack "<br/>";
 private _statusRows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
 if (!(_statusRows isEqualType [])) then { _statusRows = []; };
 if ((count _statusRows) isEqualTo 0) then
@@ -238,7 +248,9 @@ else
 };
 
 _lines pushBack "<br/>";
+_lines pushBack "<br/>";
 _lines pushBack "<t size='1.05' font='PuristaMedium'>TOC Queue</t>";
+_lines pushBack "<br/>";
 _lines pushBack format ["<t size='0.95'>Pending:</t> <t size='0.95'>%1</t>", count _pending];
 _lines pushBack format ["<t size='0.9' color='#BDBDBD'>Incidents:</t> <t size='0.9'>%1</t>  <t size='0.9' color='#BDBDBD'>Leads:</t> <t size='0.9'>%2</t>  <t size='0.9' color='#BDBDBD'>Other:</t> <t size='0.9'>%3</t>", count _pendingInc, count _pendingLead, _pendingOther max 0];
 
