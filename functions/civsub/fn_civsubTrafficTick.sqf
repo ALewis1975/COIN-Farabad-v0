@@ -104,12 +104,23 @@ private _playerDistrictCounts = []; // [[districtId, count], ...]
     private _did = [getPosATL _x] call ARC_fnc_civsubDistrictsFindByPos;
     if (_did isEqualTo "") then { continue; };
 
-    private _idx = _playerDistrictCounts findIf { (_x select 0) isEqualTo _did };
+    private _idx = -1;
+    for "_i" from 0 to ((count _playerDistrictCounts) - 1) do
+    {
+        private _row = _playerDistrictCounts select _i;
+        if (_row isEqualType [] && { (count _row) >= 2 } && { (_row select 0) isEqualTo _did }) exitWith
+        {
+            _idx = _i;
+        };
+    };
+
     if (_idx < 0) then {
         _playerDistrictCounts pushBack [_did, 1];
     } else {
         private _row = _playerDistrictCounts select _idx;
-        _row set [1, (_row select 1) + 1];
+        private _cnt = _row select 1;
+        if !(_cnt isEqualType 0) then { _cnt = 0; };
+        _row set [1, _cnt + 1];
         _playerDistrictCounts set [_idx, _row];
     };
 } forEach _players;
@@ -125,8 +136,15 @@ if ((count _playerDistrictKeys) > 0) then
         if !([_d] call ARC_fnc_civsubIsDistrictActive) then { continue; };
 
         private _n = 0;
-        private _idx = _playerDistrictCounts findIf { (_x select 0) isEqualTo _did };
-        if (_idx >= 0) then { _n = (_playerDistrictCounts select _idx) select 1; };
+        for "_i" from 0 to ((count _playerDistrictCounts) - 1) do
+        {
+            private _row = _playerDistrictCounts select _i;
+            if (_row isEqualType [] && { (count _row) >= 2 } && { (_row select 0) isEqualTo _did }) exitWith
+            {
+                _n = _row select 1;
+            };
+        };
+        if !(_n isEqualType 0) then { _n = 0; };
         // Sort by descending player count, then stable district id.
         _rows pushBack [0 - _n, _did, _d];
     } forEach _playerDistrictKeys;
@@ -149,7 +167,10 @@ if ((count _act) == 0) then
         if ([_d] call ARC_fnc_civsubIsDistrictActive) then
         {
             // sort key: distance to nearest player (from district centroid)
-            private _c = _d getOrDefault ["centroid", [0,0]];
+            private _c = _d get "centroid";
+            if (isNil "_c") then { _c = [0,0]; };
+            if !(_c isEqualType []) then { _c = [0,0]; };
+            if ((count _c) < 2) then { _c = [0,0]; };
             private _min = 1e12;
             {
                 private _p = getPosATL _x;
@@ -212,9 +233,12 @@ if ((_tod >= 7 && { _tod <= 9 }) || (_tod >= 16 && { _tod <= 18 })) then { _mTod
     private _d = _x select 2;
 
     // Compute S_THREAT (consistent with CIVSUB baseline)
-    private _W = _d getOrDefault ["W_EFF_U", 45];
-    private _R = _d getOrDefault ["R_EFF_U", 55];
-    private _G = _d getOrDefault ["G_EFF_U", 35];
+    private _W = _d get "W_EFF_U";
+    private _R = _d get "R_EFF_U";
+    private _G = _d get "G_EFF_U";
+    if (isNil "_W" || { !(_W isEqualType 0) }) then { _W = 45; };
+    if (isNil "_R" || { !(_R isEqualType 0) }) then { _R = 55; };
+    if (isNil "_G" || { !(_G isEqualType 0) }) then { _G = 35; };
 
     private _sThreat = ((_R) - (0.35 * _W) - (0.25 * _G));
     _sThreat = (_sThreat max 0) min 100;
@@ -224,8 +248,8 @@ if ((_tod >= 7 && { _tod <= 9 }) || (_tod >= 16 && { _tod <= 18 })) then { _mTod
     _mThreat = (_mThreat max 0.25) min 1.0;
 
     // Pop multiplier: bigger towns get more traffic (normalized via pop_total)
-    private _pop = _d getOrDefault ["pop_total", 100];
-    if (!(_pop isEqualType 0)) then { _pop = 100; };
+    private _pop = _d get "pop_total";
+    if (isNil "_pop" || { !(_pop isEqualType 0) }) then { _pop = 100; };
     private _mPop = 0.6 + (0.00025 * _pop); // 100 -> 0.625, 2000 -> 1.1
     _mPop = (_mPop max 0.5) min 1.2;
 
@@ -239,7 +263,8 @@ if ((_tod >= 7 && { _tod <= 9 }) || (_tod >= 16 && { _tod <= 18 })) then { _mTod
 
     while { _cur < _desired && { (count _parked) < _capG } && { _budget > 0 } && { _budgetG > 0 } } do
     {
-        private _op = _opCenters getOrDefault [_did, []];
+        private _op = _opCenters get _did;
+        if (isNil "_op" || { !(_op isEqualType []) }) then { _op = []; };
         private _veh = [_did, _d, _pool, _op] call ARC_fnc_civsubTrafficSpawnParked;
         if (isNull _veh) exitWith { _budget = 0; };
 
@@ -271,7 +296,8 @@ if (_allowMoving) then
         private _drvCls = missionNamespace getVariable ["civsub_v1_traffic_driverClass", "C_man_1"];
         if (!(_drvCls isEqualType "")) then { _drvCls = "C_man_1"; };
 
-        private _op = _opCenters getOrDefault [_did, []];
+        private _op = _opCenters get _did;
+        if (isNil "_op" || { !(_op isEqualType []) }) then { _op = []; };
         private _pair = [_did, _d, _pool, _drvCls, _op] call ARC_fnc_civsubTrafficSpawnMoving;
         private _veh = _pair select 0;
         if (!isNull _veh) then { _moving pushBack _veh; };
