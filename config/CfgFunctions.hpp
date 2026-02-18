@@ -593,6 +593,11 @@ class Ops
             class airbaseRequestPrioritizeFlight {};
             class airbaseRequestCancelQueuedFlight {};
 
+            // Queue/record mutation helpers
+            class airbaseQueueMoveToFront {};
+            class airbaseQueueRemoveByFid {};
+            class airbaseRecordSetQueuedStatus {};
+
             class airbaseClientRequestHoldDepartures {};
             class airbaseClientRequestReleaseDepartures {};
             class airbaseClientRequestPrioritizeFlight {};
