@@ -153,6 +153,7 @@ class CfgFunctions
             class tocShowThreadsLocal {};
             class resetAll {};
             class tocRequestResetAll {};
+            class tocRequestAirbaseResetControlState {};
             class clientPurgeArcTasks {};
 
             // Guardpost Script
@@ -592,6 +593,7 @@ class Ops
             class airbaseRequestReleaseDepartures {};
             class airbaseRequestPrioritizeFlight {};
             class airbaseRequestCancelQueuedFlight {};
+            class airbaseAdminResetControlState {};
 
             // Queue/record mutation helpers
             class airbaseQueueMoveToFront {};
