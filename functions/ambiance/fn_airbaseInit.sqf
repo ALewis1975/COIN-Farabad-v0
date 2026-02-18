@@ -153,7 +153,7 @@ private _assetDefs = [
 private _assets = [];
 
 {
-    _x params ["_id", "_category", "_vehVar", "_crewVars", "_taxiPathVar", "_pathFile", "_requiresTow", "_towVehVar", "_towCrewVar", "_towPathVar", "_towReleaseMarker", "_towReturnMarker"];
+    _x params ["_id", "_category", "_vehVar", "_crewVars", "_taxiPathVar", "_", "_requiresTow", "_towVehVar", "_towCrewVar", "_towPathVar", "_towReleaseMarker", "_towReturnMarker"];
 
     private _veh = missionNamespace getVariable [_vehVar, objNull];
     if (isNull _veh) then {
@@ -293,6 +293,8 @@ missionNamespace setVariable ["airbase_v1_execActive", false, true];
 ["airbase_v1_records", []] call ARC_fnc_stateSet;
 ["airbase_v1_queue", []] call ARC_fnc_stateSet;
 ["airbase_v1_seq", 0] call ARC_fnc_stateSet;
+["airbase_v1_holdDepartures", false] call ARC_fnc_stateSet;
+["airbase_v1_manualPriority", []] call ARC_fnc_stateSet;
 
 if (_opsLogEnabled || _debugOps) then {
     ["OPS", format ["AIRBASE: init complete (%1 assets)", count _assets], getMarkerPos "mkr_airbaseCenter", 0, [
