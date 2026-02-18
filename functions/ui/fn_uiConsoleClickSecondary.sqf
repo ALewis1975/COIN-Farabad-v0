@@ -9,6 +9,31 @@
 
 if (!hasInterface) exitWith {false};
 
+private _lockKey = format ["ARC_console_secondaryClickLockUntil_%1", getPlayerUID player];
+private _now = diag_tickTime;
+private _lockedUntil = uiNamespace getVariable [_lockKey, -1];
+if (!(_lockedUntil isEqualType 0)) then { _lockedUntil = -1; };
+
+if (_lockedUntil > _now) exitWith
+{
+    ["Console", "Secondary action already processing."] call ARC_fnc_clientToast;
+    true
+};
+
+private _cooldownSeconds = 0.75;
+private _unlockAt = _now + _cooldownSeconds;
+uiNamespace setVariable [_lockKey, _unlockAt];
+
+[_lockKey, _unlockAt, _cooldownSeconds] spawn
+{
+    params ["_key", "_expectedUnlockAt", "_cooldown"];
+    sleep _cooldown;
+    if ((uiNamespace getVariable [_key, -1]) isEqualTo _expectedUnlockAt) then
+    {
+        uiNamespace setVariable [_key, -1];
+    };
+};
+
 private _tab = ["ARC_console_activeTab", "HANDOFF"] call ARC_fnc_uiNsGetString;
 _tab = toUpper _tab;
 
