@@ -62,6 +62,8 @@ private _pub = [
 ];
 
 missionNamespace setVariable ["ARC_pub_state", _pub, true];
+// Keep serverTime (not time): this value is replicated as server-authoritative mission elapsed time,
+// and clients consume it as a change token (inequality checks), not as a local-age clock.
 missionNamespace setVariable ["ARC_pub_stateUpdatedAt", serverTime, true];
 // Optional debug snapshot for the in-game inspector diary.
 private _dbgEnabled = missionNamespace getVariable ["ARC_debugInspectorEnabled", false];
@@ -70,6 +72,7 @@ if (!(_dbgEnabled isEqualType true)) then { _dbgEnabled = false; };
 if (_dbgEnabled) then
 {
     // Throttle to avoid rebuilding summaries too frequently (public state can publish often).
+    // Uses serverTime for the same reason as ARC_pub_stateUpdatedAt: one authoritative mission clock.
     private _lastDbg = missionNamespace getVariable ["ARC_pub_debugUpdatedAt", -1];
     if (!(_lastDbg isEqualType 0)) then { _lastDbg = -1; };
 
@@ -193,6 +196,7 @@ if (_dbgEnabled) then
 
 
         missionNamespace setVariable ["ARC_pub_debug", _dbg, true];
+        // Replicated as serverTime so clients can display/compare against a single server clock.
         missionNamespace setVariable ["ARC_pub_debugUpdatedAt", serverTime, true];
     };
 };
