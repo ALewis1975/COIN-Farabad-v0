@@ -22,9 +22,8 @@ if (_sel < 0) exitWith {false};
 private _data = toUpper (_list lbData _sel);
 if (_data isEqualTo "" || { _data isEqualTo "HDR" }) exitWith {false};
 
-private _hqMode = uiNamespace getVariable ["ARC_console_hqMode", "TOOLS"];
-if (!(_hqMode isEqualType "")) then { _hqMode = "TOOLS"; };
-_hqMode = toUpper (trim _hqMode);
+private _hqMode = ["ARC_console_hqMode", "TOOLS"] call ARC_fnc_uiNsGetString;
+_hqMode = toUpper _hqMode;
 
 // INCIDENT PICKER mode: spawn selected catalog incident.
 if (_hqMode isEqualTo "INCIDENTS") exitWith

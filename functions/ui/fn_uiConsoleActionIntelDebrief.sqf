@@ -21,8 +21,8 @@ private _orderId = "";
 private _orderTg = "";
 
 if (_isToc) then {
-    _orderId = uiNamespace getVariable ["ARC_console_handoff_intelOrderId", ""];
-    _orderTg = uiNamespace getVariable ["ARC_console_handoff_intelTargetGroup", ""];
+    _orderId = ["ARC_console_handoff_intelOrderId", ""] call ARC_fnc_uiNsGetString;
+    _orderTg = ["ARC_console_handoff_intelTargetGroup", ""] call ARC_fnc_uiNsGetString;
     if (!(_orderId isEqualType "")) then { _orderId = ""; };
     if (!(_orderTg isEqualType "")) then { _orderTg = ""; };
     _orderId = trim _orderId;

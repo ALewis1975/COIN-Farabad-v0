@@ -79,17 +79,15 @@ private _s2Ctrls = [
 // Baseline: hide action buttons
 { if (!isNull _x) then { _x ctrlShow false; _x ctrlEnable false; }; } forEach [_b1, _b2];
 
-private _tab = uiNamespace getVariable ["ARC_console_activeTab", "DASH"];
-if (!(_tab isEqualType "")) then { _tab = "DASH"; };
-_tab = toUpper (trim _tab);
+private _tab = ["ARC_console_activeTab", "DASH"] call ARC_fnc_uiNsGetString;
+_tab = toUpper _tab;
 
-private _prevRefreshTab = uiNamespace getVariable ["ARC_console_prevRefreshTab", ""];
-if (!(_prevRefreshTab isEqualType "")) then { _prevRefreshTab = ""; };
+private _prevRefreshTab = ["ARC_console_prevRefreshTab", "", false] call ARC_fnc_uiNsGetString;
 
 // ---------------------------------------------------------------------------
 
 // Hide S2 category panels (if present) when leaving INTEL to prevent cross-tab UI leak.
-private _s2CatPanels = uiNamespace getVariable ["ARC_s2_catPanels", []];
+private _s2CatPanels = ["ARC_s2_catPanels", []] call ARC_fnc_uiNsGetArray;
 if (_tab != "INTEL" && { _s2CatPanels isEqualType [] }) then {
     {
         if (_x isEqualType [] && { (count _x) == 3 }) then {
@@ -99,7 +97,7 @@ if (_tab != "INTEL" && { _s2CatPanels isEqualType [] }) then {
 };
 
 // Hide HQ stacked sub-panels (if present) unless HQ tab is active.
-private _hqSubPanels = uiNamespace getVariable ["ARC_hq_subPanels", []];
+private _hqSubPanels = ["ARC_hq_subPanels", []] call ARC_fnc_uiNsGetArray;
 if (_tab != "HQ" && { _hqSubPanels isEqualType [] }) then {
     {
         if (_x isEqualType [] && { (count _x) == 3 }) then {
@@ -123,7 +121,7 @@ private _s2Ctrls = [
 
 if (!isNull _ctrlList) then {
     private _kList = "ARC_ui_mainListPosDefault";
-    private _p0 = uiNamespace getVariable [_kList, []];
+    private _p0 = [_kList, []] call ARC_fnc_uiNsGetArray;
     if (_p0 isEqualTo []) then {
         uiNamespace setVariable [_kList, ctrlPosition _ctrlList];
         _p0 = uiNamespace getVariable [_kList, ctrlPosition _ctrlList];
@@ -142,9 +140,8 @@ private _opsSecondaryLabel = "FOLLOW-ON (SITREP)";
 private _atStation = [player] call ARC_fnc_uiConsoleIsAtStation;
 private _netText = if (_atStation) then {"NET: TOC-LINK"} else {"NET: FIELD"};
 if (!isNull _statusLeft) then { _statusLeft ctrlSetText _netText; };
-private _cmdMode = uiNamespace getVariable ["ARC_console_cmdMode", "OVERVIEW"];
-if (!(_cmdMode isEqualType "")) then { _cmdMode = "OVERVIEW"; };
-_cmdMode = toUpper (trim _cmdMode);
+private _cmdMode = ["ARC_console_cmdMode", "OVERVIEW"] call ARC_fnc_uiNsGetString;
+_cmdMode = toUpper _cmdMode;
 private _modeText = if (_tab isEqualTo "CMD" && { _cmdMode isEqualTo "QUEUE" }) then { "MODE: CMD / QUEUE" } else { format ["MODE: %1", _tab] };
 if (!isNull _statusCenter) then { _statusCenter ctrlSetText _modeText; };
 private _timeText = daytime call BIS_fnc_timeToString;
@@ -208,9 +205,8 @@ case "DASH":
 
     case "CMD":
     {
-        private _cmdMode = uiNamespace getVariable ["ARC_console_cmdMode", "OVERVIEW"];
-        if (!(_cmdMode isEqualType "")) then { _cmdMode = "OVERVIEW"; };
-        _cmdMode = toUpper (trim _cmdMode);
+        private _cmdMode = ["ARC_console_cmdMode", "OVERVIEW"] call ARC_fnc_uiNsGetString;
+        _cmdMode = toUpper _cmdMode;
 
         if (_cmdMode isEqualTo "QUEUE") then
         {
@@ -221,7 +217,7 @@ case "DASH":
             if (!isNull _ctrlDetailsGrp) then { _ctrlDetailsGrp ctrlShow true; };
             if (!isNull _ctrlDetails) then { _ctrlDetails ctrlShow true; };
 
-            private _forceQueueRebuild = (_prevRefreshTab isNotEqualTo _tab) || { uiNamespace getVariable ["ARC_console_cmdQueueForceRebuild", false] };
+            private _forceQueueRebuild = (_prevRefreshTab isNotEqualTo _tab) || { ["ARC_console_cmdQueueForceRebuild", false] call ARC_fnc_uiNsGetBool };
             uiNamespace setVariable ["ARC_console_cmdQueueForceRebuild", false];
 
             private _queueState = [_display, _forceQueueRebuild] call ARC_fnc_uiConsoleTocQueuePaint;
@@ -277,26 +273,24 @@ case "DASH":
         if (!isNull _b1) then { _b1 ctrlShow true; _b1 ctrlEnable true; };
         // HQ normally uses the main list for admin actions.
         // Secondary is only shown when HQ is in INCIDENT PICKER mode.
-        private _hqMode = uiNamespace getVariable ["ARC_console_hqMode", "TOOLS"];
-        if (!(_hqMode isEqualType "")) then { _hqMode = "TOOLS"; };
-        _hqMode = toUpper (trim _hqMode);
+        private _hqMode = ["ARC_console_hqMode", "TOOLS"] call ARC_fnc_uiNsGetString;
+        _hqMode = toUpper _hqMode;
         private _showBack = (_hqMode isEqualTo "INCIDENTS");
         if (!isNull _b2) then { _b2 ctrlShow _showBack; _b2 ctrlEnable _showBack; _b2 ctrlSetText (if (_showBack) then {"BACK"} else {""}); };
 
         private _rebuildHQ = false;
-        private _prevHqMode = uiNamespace getVariable ["ARC_console_prevRefreshHQMode", ""];
-        if (!(_prevHqMode isEqualType "")) then { _prevHqMode = ""; };
+        private _prevHqMode = ["ARC_console_prevRefreshHQMode", "", false] call ARC_fnc_uiNsGetString;
 
         if (_prevRefreshTab isNotEqualTo _tab) then { _rebuildHQ = true; };
         if (_prevHqMode isNotEqualTo _hqMode) then { _rebuildHQ = true; };
 
-        if (uiNamespace getVariable ["ARC_console_incidentCatalogInvalidate", false]) then
+        if (["ARC_console_incidentCatalogInvalidate", false] call ARC_fnc_uiNsGetBool) then
         {
             _rebuildHQ = true;
             uiNamespace setVariable ["ARC_console_incidentCatalogInvalidate", false];
         };
 
-        if (uiNamespace getVariable ["ARC_console_hqForceRebuild", false]) then
+        if (["ARC_console_hqForceRebuild", false] call ARC_fnc_uiNsGetBool) then
         {
             _rebuildHQ = true;
             uiNamespace setVariable ["ARC_console_hqForceRebuild", false];

@@ -59,7 +59,7 @@ waitUntil
         || { isNull (uiNamespace getVariable ["ARC_intelDialog_display", displayNull]) }
 };
 
-private _res = uiNamespace getVariable ["ARC_intelDialog_result", [false, "", ""]];
+private _res = ["ARC_intelDialog_result", [false, "", ""]] call ARC_fnc_uiNsGetArray;
 uiNamespace setVariable ["ARC_intelDialog_result", nil];
 
 if (!(_res isEqualType [] && { (count _res) >= 3 })) exitWith

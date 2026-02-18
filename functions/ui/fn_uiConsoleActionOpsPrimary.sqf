@@ -16,7 +16,7 @@
 
 if (!hasInterface) exitWith {false};
 
-private _focus = uiNamespace getVariable ["ARC_console_opsFocus", "INCIDENT"];
+private _focus = ["ARC_console_opsFocus", "INCIDENT"] call ARC_fnc_uiNsGetString;
 _focus = toUpper _focus;
 
 switch (_focus) do

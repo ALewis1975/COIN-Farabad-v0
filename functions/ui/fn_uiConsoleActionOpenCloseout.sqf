@@ -126,7 +126,7 @@ waitUntil {
     (!isNil { uiNamespace getVariable "ARC_closeout_result" }) || { isNull (findDisplay 78200) }
 };
 
-private _res = uiNamespace getVariable ["ARC_closeout_result", [false, -1]];
+private _res = ["ARC_closeout_result", [false, -1]] call ARC_fnc_uiNsGetArray;
 uiNamespace setVariable ["ARC_closeout_result", nil];
 
 _res params ["_ok", "_idx"]; 
