@@ -22,9 +22,9 @@ if (isNull _ctrlList || { isNull _ctrlDetails }) exitWith {false};
 
 private _owner = uiNamespace getVariable ["ARC_console_mainListOwner", ""];
 if (!(_owner isEqualType "")) then { _owner = ""; };
-_owner = toUpper (trim _owner);
-private _preserveSelection = _owner isEqualTo "AIR";
-if (_owner isNotEqualTo "AIR") then { _rebuild = true; };
+_owner = toUpper _owner;
+private _preserveSelection = (_owner == "AIR");
+if (_owner != "AIR") then { _rebuild = true; };
 uiNamespace setVariable ["ARC_console_mainListOwner", "AIR"];
 
 private _pub = missionNamespace getVariable ["ARC_pub_state", []];
@@ -32,9 +32,9 @@ if (!(_pub isEqualType [])) then { _pub = []; };
 
 private _getPub = {
     params ["_pairs", "_k", "_def"];
-    private _idx = _pairs findIf { _x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k } };
+    private _idx = _pairs findIf { (_x isEqualType []) && { (count _x) >= 2 } && { ((_x select 0) == _k) } };
     if (_idx < 0) exitWith { _def };
-    (_pairs # _idx) # 1
+    (_pairs select _idx) select 1
 };
 
 private _air = [_pub, "airbase", []] call _getPub;
@@ -104,11 +104,11 @@ if (_rebuild) then
     {
         private _restoreSel = -1;
 
-        if (_preserveSelection && { _prevSelData isNotEqualTo "" }) then
+        if (_preserveSelection && { _prevSelData != "" }) then
         {
-            _restoreSel = _ctrlList lbFind _prevSelData;
+            _restoreSel = lbFind [_ctrlList, _prevSelData];
 
-            if (_restoreSel < 0 && { (_prevSelData find "AIR_FID|") isEqualTo 0 } && { (lbSize _ctrlList) > 1 }) then
+            if (_restoreSel < 0 && { (_prevSelData find "AIR_FID|") == 0 } && { (lbSize _ctrlList) > 1 }) then
             {
                 // Preserve flight-row intent when the exact FID disappeared between refresh ticks.
                 _restoreSel = 1;
@@ -127,10 +127,10 @@ private _selData = if (_sel >= 0) then { _ctrlList lbData _sel } else { "" };
 if (!(_selData isEqualType "")) then { _selData = ""; };
 
 private _selectedFid = "";
-if ((_selData find "AIR_FID|") isEqualTo 0) then
+if ((_selData find "AIR_FID|") == 0) then
 {
     private _parts = _selData splitString "|";
-    if ((count _parts) >= 2) then { _selectedFid = _parts # 1; };
+    if ((count _parts) >= 2) then { _selectedFid = _parts select 1; };
 };
 uiNamespace setVariable ["ARC_console_airSelectedFid", _selectedFid];
 
@@ -138,10 +138,10 @@ private _canAirControl = ["ARC_console_airCanControl", false] call ARC_fnc_uiNsG
 private _canText = if (_canAirControl) then { "TOWER CONTROL: ENABLED" } else { "TOWER CONTROL: READ-ONLY" };
 private _holdText = if (_hold) then { "HOLD ACTIVE" } else { "DEPARTURES OPEN" };
 private _execText = if (_execActive) then { format ["EXEC ACTIVE: %1", _execFid] } else { "EXEC ACTIVE: none" };
-private _rwOwnerText = if (_runwayOwner isEqualTo "") then { "-" } else { _runwayOwner };
+private _rwOwnerText = if (_runwayOwner == "") then { "-" } else { _runwayOwner };
 
 private _actionHint = if (_canAirControl) then {
-    if (_selectedFid isEqualTo "") then {
+    if (_selectedFid == "") then {
         "Select a queued flight to use EXPEDITE/CANCEL."
     } else {
         if (_sel == 1) then {
