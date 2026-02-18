@@ -764,6 +764,10 @@ if (!(_reserveS isEqualType 0) || { _reserveS < 30 }) then { _reserveS = 120; };
 private _reserved = [_fid, _kind, _detail, _reserveS, _policyReason] call ARC_fnc_airbaseRunwayLockReserve;
 if (_reserved) then {
     ["LOCK_ACQUIRE", _fid, "SYSTEM", "", [_kind, _detail, _policyReason]] call _fnEventPush;
+    if (_eventsDirty) then {
+        ["airbase_v1_events", _events] call ARC_fnc_stateSet;
+        _eventsDirty = false;
+    };
 };
 if (!_reserved) exitWith {
     _queue insert [_policyIdx, [[_fid, _kind, _detail]]];
