@@ -256,7 +256,10 @@ private _renderS2CatPanelsFromMaster = {
         private _t = _listMaster lbText _i;
 
         if (_d in ["HDR", "SEP"]) then {
-            _section = toUpper (trim _t);
+            private _sectionCandidate = toUpper (trim _t);
+            if (!isNull (_map getOrDefault [_sectionCandidate, controlNull])) then {
+                _section = _sectionCandidate;
+            };
         } else {
             if (_section isEqualTo "") then { continue; };
             private _lb = _map getOrDefault [_section, controlNull];
@@ -516,6 +519,7 @@ if (_rebuild) then
         ["CIVSUB / MDT"] call _addHdr;
         ["Run Last Civ ID (MDT)", "CIV_MDT_RUN"] call _addTool;
         ["CIVSUB Census (District Stats)", "CIV_CENSUS_OPEN"] call _addTool;
+        ["AO Threat Summary", "CIV_THREAT_SUMMARY"] call _addTool;
 
         if (_inCivCtx) then
         {
@@ -793,7 +797,7 @@ else
 
             _txt =
                 format ["<t size='1.25' font='PuristaMedium'>CIVSUB Census: %1</t><br/><br/>", _did] +
-                "<t size='1.05' font='PuristaMedium'>District Readout</t><br/>" +
+                "<t size='1.05' font='PuristaMedium'>District Readout</t><br/><br/>" +
                 format ["<t color='#AAAAAA'>Environment:</t> %1<br/>", _env] +
                 format ["<t color='#AAAAAA'>Assessment:</t> %1<br/>", _assess] +
                 format ["<t color='#AAAAAA'>Key settlements:</t> %1<br/>", _settLine] +
@@ -804,7 +808,7 @@ else
                         ((100 * _harmRate) toFixed 2) + "%", _harmLbl
                 ] +
                 "<t color='#AAAAAA'>What this means</t><br/>" + _what +
-                "<br/><t size='1.05' font='PuristaMedium'>Raw Metrics</t><br/><br/>" +
+                "<br/><br/><t size='1.05' font='PuristaMedium'>Raw Metrics</t><br/><br/>" +
                 format ["<t color='#AAAAAA'>Centroid:</t> %1  <t color='#AAAAAA'>Grid:</t> %2  <t color='#AAAAAA'>Radius:</t> %3m<br/>",
                         if (_centroid isEqualType [] && { (count _centroid) >= 2 }) then { format ['[%1,%2]', (_centroid#0) toFixed 0, (_centroid#1) toFixed 0] } else { "(n/a)" },
                         if (_grid isEqualTo "") then {"(n/a)"} else {_grid},
@@ -812,12 +816,17 @@ else
                 ] +
                 "<br/>" +
                 format ["<t color='#AAAAAA'>Population:</t> %1  <t color='#AAAAAA'>Alive est:</t> %2<br/>", _popS, _aliveS] +
+                "<br/>" +
                 format ["<t color='#AAAAAA'>W / R / G:</t> %1 / %2 / %3<br/>", (round _W), (round _R), (round _G)] +
+                "<br/>" +
                 format ["<t color='#AAAAAA'>S_COOP:</t> %1  <t color='#AAAAAA'>S_THREAT:</t> %2<br/>", (_Scoop toFixed 1), (_Sthreat toFixed 1)] +
                 "<br/>" +
                 format ["<t color='#AAAAAA'>CIV KIA:</t> %1  <t color='#AAAAAA'>CIV WIA:</t> %2<br/>", _kia, _wia] +
+                "<br/>" +
                 format ["<t color='#AAAAAA'>Crime DB hits:</t> %1<br/>", _hits] +
+                "<br/>" +
                 format ["<t color='#AAAAAA'>Detentions:</t> %1 initiated, %2 handed off<br/>", _detI, _detH] +
+                "<br/>" +
                 format ["<t color='#AAAAAA'>Aid events:</t> %1<br/>", _aid] +
                 (if (_ts > 0) then { format ["<br/><t color='#666666'>Last update ts:</t> %1", _ts] } else { "<br/><t color='#666666'>Last update:</t> (not published yet)" }) +
                 "<br/><br/><t color='#BBBBBB'>EXECUTE opens the map at the district center.</t>";
@@ -1047,7 +1056,7 @@ else
                 ];
             };
 
-            if (!isNull _b1) then { _b1 ctrlEnable true; _b1 ctrlSetText "Open Map"; };
+            if (!isNull _b1) then { _b1 ctrlEnable true; _b1 ctrlSetText "OPEN MAP"; };
         };
 
         case "CIV_CONTACT_CHECK_ID":
@@ -1125,15 +1134,117 @@ else
 
 case "CIV_MDT_RUN":
 {
-    _txt = "<t size='1.05'>MDT: Run the most recently shown civilian ID card against the Crime DB.</t><br/><br/>" +
+    _txt = "<t size='1.05'>MDT: Run the most recently shown civilian ID card against the Crime DB.</t><br/>" +
            "<t size='0.95'>Workflow:</t><br/>" +
            "1) Show Papers on a civilian<br/>" +
            "2) Return here and Execute<br/>" +
-           "3) If hit: detain + transport for sheriff handoff<br/><br/>" +
+           "3) If hit: detain + transport for sheriff handoff<br/>" +
            (if (_inCivCtx) then {"<t color='#77FFAA'>CIVSUB interaction mode active.</t>"} else {"<t color='#AAAAAA'>No active CIVSUB interaction target.</t>"});
 
     if (!isNull _b1) then { _b1 ctrlEnable true; };
 };
+
+        case "CIV_THREAT_SUMMARY":
+        {
+            // AO-wide CIVSUB threat summary
+            private _allDistricts = [];
+            {
+                private _vn = _x;
+                if ((_vn find "civsub_v1_district_pub_") isEqualTo 0) then {
+                    private _d = missionNamespace getVariable [_vn, createHashMap];
+                    if (_d isEqualType createHashMap && { !(_d isEqualTo createHashMap) }) then {
+                        _allDistricts pushBack _d;
+                    };
+                };
+            } forEach (allVariables missionNamespace);
+
+            private _districtRows = [];
+            private _contestedCnt = 0;
+            private _stableCnt = 0;
+            private _mixedCnt = 0;
+
+            {
+                private _did = _x getOrDefault ["districtId", ""];
+                if (_did isEqualTo "") then { continue; };
+
+                private _W = _x getOrDefault ["W", 0];
+                private _R = _x getOrDefault ["R", 0];
+                private _G = _x getOrDefault ["G", 0];
+                private _pop = _x getOrDefault ["population", 0];
+                private _alive = _x getOrDefault ["alive", 0];
+
+                // Locked v1 math
+                private _Scoop = 0;
+                private _Sthreat = 0;
+                if (_pop > 0 && { _alive > 0 }) then {
+                    private _Wcap = (_W min _alive);
+                    private _Rcap = (_R min _alive);
+                    private _Gcap = (_G min _alive);
+                    private _sum = _Wcap + _Rcap + _Gcap;
+                    if (_sum > 0) then {
+                        _Scoop = 100.0 * (_Gcap / _sum);
+                        _Sthreat = 100.0 * (_Wcap / _sum);
+                    };
+                };
+
+                private _coopLbl = "Moderate";
+                if (_Scoop >= 75) then { _coopLbl = "High"; } else {
+                    if (_Scoop <= 35) then { _coopLbl = "Low"; };
+                };
+                private _coopColor = "#FFD166";
+                if (_Scoop >= 75) then { _coopColor = "#9FE870"; } else {
+                    if (_Scoop <= 35) then { _coopColor = "#FF7A7A"; };
+                };
+
+                private _threatLbl = "Moderate";
+                if (_Sthreat >= 70) then { _threatLbl = "High"; } else {
+                    if (_Sthreat <= 30) then { _threatLbl = "Low"; };
+                };
+                private _threatColor = "#FFD166";
+                if (_Sthreat >= 70) then { _threatColor = "#FF7A7A"; } else {
+                    if (_Sthreat <= 30) then { _threatColor = "#9FE870"; };
+                };
+
+                private _env = "Mixed";
+                if (_Scoop >= 60 && { _Sthreat <= 40 }) then { _env = "Stable"; _stableCnt = _stableCnt + 1; } else {
+                    if (_Scoop <= 40 && { _Sthreat >= 60 }) then { _env = "Contested"; _contestedCnt = _contestedCnt + 1; } else {
+                        _mixedCnt = _mixedCnt + 1;
+                    };
+                };
+
+                _districtRows pushBack format [
+                    "<t color='#BDBDBD'>%1:</t> Coop <t color='%2'>%3</t> (%4) | Threat <t color='%5'>%6</t> (%7) | %8",
+                    _did,
+                    _coopColor, (_Scoop toFixed 1), _coopLbl,
+                    _threatColor, (_Sthreat toFixed 1), _threatLbl,
+                    _env
+                ];
+            } forEach _allDistricts;
+
+            private _summary = format [
+                "<t size='1.0' font='PuristaMedium' color='#B89B6B'>AO Summary</t><br/>" +
+                "<t color='#BDBDBD'>Districts:</t> %1 total<br/>" +
+                "<t color='#9FE870'>Stable:</t> %2  <t color='#FFD166'>Mixed:</t> %3  <t color='#FF7A7A'>Contested:</t> %4<br/><br/>",
+                count _allDistricts,
+                _stableCnt,
+                _mixedCnt,
+                _contestedCnt
+            ];
+
+            _txt = "<t size='1.25' font='PuristaMedium'>AO Threat Summary</t><br/><br/>" +
+                   _summary;
+
+            if ((count _districtRows) > 0) then {
+                _txt = _txt + "<t size='1.0' font='PuristaMedium' color='#B89B6B'>District Breakdown</t><br/><br/>" +
+                       (_districtRows joinString "<br/>") + "<br/><br/>";
+            } else {
+                _txt = _txt + "<t color='#BBBBBB'>No district data published yet.</t><br/><br/>";
+            };
+
+            _txt = _txt + "<t size='0.9' color='#AAAAAA'>This is a read-only summary. Use CIVSUB Census for detailed per-district stats.</t>";
+
+            if (!isNull _b1) then { _b1 ctrlEnable false; };
+        };
 
 
 
@@ -1185,7 +1296,7 @@ if (!isNull _b2) then
     _b2 ctrlEnable _isAuth;
 };
 
-_details ctrlSetStructuredText parseText _txt;
+_details ctrlSetStructuredText parseText format ["<t lineSpacing='1.15'>%1</t>", _txt];
 
 // Auto-fit + clamp to the DetailsGroup (78016) so the group scrolls vertically when needed,
 // but NEVER forces horizontal scrolling or overlaps the S2 workflow controls.

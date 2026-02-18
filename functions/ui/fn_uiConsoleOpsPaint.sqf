@@ -264,7 +264,7 @@ else
 
             if (!_accepted) then
             {
-                _primaryLabel = "Accept Incident";
+                _primaryLabel = "ACCEPT INCIDENT";
                 _primaryEnabled = _isAuth && (_unitStatus isEqualTo "AVAILABLE");
                 _secondaryLabel = if (_unitStatus isEqualTo "AVAILABLE") then { "SET OFFLINE" } else { "SET AVAILABLE" };
                 _secondaryEnabled = _isAuth;
@@ -293,8 +293,10 @@ else
                 else
                 {
                     // Primary: SITREP (enabled if allowed)
-                    _primaryLabel = "Send SITREP";
+                    _primaryLabel = "SEND SITREP";
                     _primaryEnabled = _canSit;
+                    _secondaryLabel = "FOLLOW-ON REQUEST";
+                    _secondaryEnabled = _isAuth;
 
                     if (_canSit) then
                     {
@@ -308,7 +310,7 @@ else
                     // Secondary: EOD disposition request (IED incidents only, pre-closeout)
                     if (_typU isEqualTo "IED") then
                     {
-                        _secondaryLabel = "EOD DISPO";
+                        _secondaryLabel = "EOD DISPOSITION";
                         _secondaryEnabled = _isAuth;
                     };
                 };
@@ -348,7 +350,7 @@ else
 
                 if (_status isEqualTo "ISSUED") then
                 {
-                    _primaryLabel = "Accept Order";
+                    _primaryLabel = "ACCEPT ORDER";
                     _primaryEnabled = _isAuth;
                     _details = _details + "Next: accept the order to proceed.";
                 }

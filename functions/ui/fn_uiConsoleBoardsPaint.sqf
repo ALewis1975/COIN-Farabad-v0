@@ -41,7 +41,7 @@ private _getPair = {
 
 private _fmtHdr = {
     params ["_t"];
-    format ["<t size='1.05' font='PuristaMedium' color='#B89B6B'>%1</t><br/>", _t]
+    format ["<t size='1.05' font='PuristaMedium' color='#B89B6B'>%1</t><br/><br/>", _t]
 };
 
 private _fmtKV = {
@@ -78,6 +78,8 @@ if (!(_closeReady isEqualType true) && !(_closeReady isEqualType false)) then { 
 
 private _sitrepSent = missionNamespace getVariable ["ARC_activeIncidentSitrepSent", false];
 if (!(_sitrepSent isEqualType true) && !(_sitrepSent isEqualType false)) then { _sitrepSent = false; };
+private _statusRows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
+if (!(_statusRows isEqualType [])) then { _statusRows = []; };
 
 // -------------------------------------------------------------------------
 // Queue snapshot (published pending)
@@ -190,18 +192,35 @@ if (_taskId isEqualTo "") then
 else
 {
     private _st = if (!_acc) then {"PENDING ACK"} else {"ASSIGNED"};
+    private _stColor = if (_st isEqualTo "ASSIGNED") then {"#9FE870"} else {"#FFD166"};
+    private _crColor = if (_closeReady) then {"#9FE870"} else {"#FF7A7A"};
     private _cr = if (_closeReady) then {"YES"} else {"NO"};
     private _sr = if (_sitrepSent) then {"SENT"} else {"NOT SENT"};
+    private _nextStep = if (!_acc) then {"AWAITING UNIT ACCEPTANCE"} else { if (!_sitrepSent) then {"AWAITING SITREP"} else { if (!_closeReady) then {"AWAITING CLOSEOUT CONDITIONS"} else {"READY FOR CLOSEOUT + FOLLOW-ON"} } };
+    private _nextColor = if ((_nextStep find "READY") isEqualTo 0) then {"#9FE870"} else { if ((_nextStep find "CLOSEOUT CONDITIONS") > -1) then {"#FF7A7A"} else {"#FFD166"} };
+    private _support = [];
+    {
+        if (!(_x isEqualType []) || { (count _x) < 2 }) then { continue; };
+        private _g = _x # 0;
+        private _s = toUpper (trim (_x # 1));
+        if (_s isEqualTo "OFFLINE") then { _s = "UNAVAILABLE"; };
+        if (_accBy isNotEqualTo "" && { _g isNotEqualTo _accBy } && { _s in ["IN TRANSIT", "ON SCENE"] }) then { _support pushBack _g; };
+    } forEach _statusRows;
+
+    private _supportColor = "#AAAAAA";
+    if ((count _support) > 0) then { _supportColor = "#9FE870"; };
 
     _incBlock = (["Active Incident"] call _fmtHdr) + (
         (["Title", if (_incName isEqualTo "") then {"(unnamed)"} else {_incName}] call _fmtKV) +
         (["Type", if (_incType isEqualTo "") then {"(n/a)"} else {_incType}] call _fmtKV) +
-        (["Status", _st] call _fmtKV) +
+        (["Status", format ["<t color='%1'>%2</t>", _stColor, _st]] call _fmtKV) +
         (["Assigned", if (_accBy isEqualTo "") then {"(unassigned)"} else {_accBy}] call _fmtKV) +
+        (["Supporting Units", format ["<t color='%1'>%2</t>", _supportColor, if ((count _support) > 0) then { _support joinString ", " } else {"(none)"}]] call _fmtKV) +
         (["Grid", if (_grid isEqualTo "") then {"(n/a)"} else {_grid}] call _fmtKV) +
         (["AO", if (_zone isEqualTo "") then {"(n/a)"} else {_zone}] call _fmtKV) +
-        (["Closeout Ready", _cr] call _fmtKV) +
-        (["SITREP", _sr] call _fmtKV)
+        (["Closeout Ready", format ["<t color='%1'>%2</t>", _crColor, _cr]] call _fmtKV) +
+        (["SITREP", _sr] call _fmtKV) +
+        (["NEXT STEP", format ["<t color='%1'>%2</t>", _nextColor, _nextStep]] call _fmtKV)
     );
 };
 
@@ -235,7 +254,7 @@ private _sitBlock = (["Last SITREP"] call _fmtHdr) + _sitTxt + "<br/>";
 
 private _tip = "<br/><t size='0.85' color='#AAAAAA'>Tip: Use TOC / CMD for approvals and incident actions. BOARDS is read-only.</t>";
 
-private _txt = _title + "<br/>" + _sub + _incBlock + "<br/>" + _queueBlock + "<br/>" + _ordersBlock + "<br/>" + _sitBlock + _tip;
+private _txt = _title + "<br/>" + _sub + _incBlock + "<br/><br/>" + _queueBlock + "<br/><br/>" + _ordersBlock + "<br/><br/>" + _sitBlock + _tip;
 
 _ctrlMain ctrlSetStructuredText parseText _txt;
 

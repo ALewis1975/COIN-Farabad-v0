@@ -92,7 +92,7 @@ if (_rebuild) then
 
 // Buttons
 if (!isNull _b1) then { _b1 ctrlShow true; _b1 ctrlSetText "EXECUTE"; _b1 ctrlEnable true; };
-if (!isNull _b2) then { _b2 ctrlShow true; _b2 ctrlSetText "Open Queue"; _b2 ctrlEnable true; };
+if (!isNull _b2) then { _b2 ctrlShow true; _b2 ctrlSetText "TOC QUEUE"; _b2 ctrlEnable true; };
 
 // Details
 private _sel = lbCurSel _ctrlList;
@@ -103,7 +103,30 @@ private _parts = _data splitString "|";
 private _kind = if ((count _parts) > 0) then { toUpper (_parts # 0) } else { "NONE" };
 private _arg  = if ((count _parts) > 1) then { toUpper (_parts # 1) } else { "" };
 
-private _txt = "<t size='1.15' font='PuristaMedium'>S2 Ops</t><br/><t size='0.9' color='#DDDDDD'>Intel logging + lead generation</t><br/><br/>";
+private _civsubEnabled = missionNamespace getVariable ["civsub_v1_enabled", false];
+if (!(_civsubEnabled isEqualType true) && !(_civsubEnabled isEqualType false)) then { _civsubEnabled = false; };
+private _intelLog = missionNamespace getVariable ["ARC_pub_intelLog", []];
+if (!(_intelLog isEqualType [])) then { _intelLog = []; };
+private _threatHits = 0;
+{
+    if (!(_x isEqualType []) || { (count _x) < 4 }) then { continue; };
+    private _cat = toUpper (trim (_x # 2));
+    private _sum = toUpper (trim (_x # 3));
+    if (_cat in ["THREAT", "OPS"] && { (_sum find "THREAT") >= 0 || { (_sum find "IED") >= 0 } }) then
+    {
+        _threatHits = _threatHits + 1;
+    };
+} forEach _intelLog;
+private _threatTxt = if (_threatHits >= 6) then {"HIGH"} else { if (_threatHits >= 3) then {"MEDIUM"} else {"LOW"} };
+private _threatColor = if (_threatTxt isEqualTo "HIGH") then {"#FF7A7A"} else { if (_threatTxt isEqualTo "MEDIUM") then {"#FFD166"} else {"#9FE870"} };
+
+private _txt = "<t size='1.15' font='PuristaMedium'>S2 OPS</t><br/><t size='0.9' color='#DDDDDD'>INTEL LOGGING + LEAD GENERATION</t><br/><br/>" +
+    format ["<t size='0.9' color='#B89B6B'>CIVSUB:</t> <t size='0.9' color='%1'>%2</t>  <t size='0.9' color='#B89B6B'>THREAT:</t> <t size='0.9' color='%3'>%4</t><br/><br/>",
+        if (_civsubEnabled) then {"#9FE870"} else {"#FF7A7A"},
+        if (_civsubEnabled) then {"ENABLED"} else {"OFFLINE"},
+        _threatColor,
+        _threatTxt
+    ];
 
 switch (_kind) do
 {
