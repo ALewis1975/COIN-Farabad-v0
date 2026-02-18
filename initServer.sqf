@@ -166,6 +166,11 @@ missionNamespace setVariable ["civsub_v1_traffic_minSeparation_m", 35, true];
 missionNamespace setVariable ["civsub_v1_traffic_spawnRadius_m", 250, true];
 missionNamespace setVariable ["civsub_v1_traffic_playerMinDistance_m", 90, true];
 missionNamespace setVariable ["civsub_v1_traffic_roadside_offset_m", 4, true];            // shoulder offset baseline
+missionNamespace setVariable ["civsub_v1_traffic_fallback_roadsideMin_m", 8, true];      // fallback: nearest-road shoulder band min
+missionNamespace setVariable ["civsub_v1_traffic_fallback_roadsideMax_m", 20, true];     // fallback: nearest-road shoulder band max
+missionNamespace setVariable ["civsub_v1_traffic_fallback_buildingMin_m", 4, true];      // fallback: nearest settlement/building min
+missionNamespace setVariable ["civsub_v1_traffic_fallback_buildingMax_m", 45, true];     // fallback: nearest settlement/building max
+missionNamespace setVariable ["civsub_v1_traffic_fallback_waterEdgeReject_m", 12, true]; // reject fallback positions near water edges/banks
 
 // Optional district traffic spawn anchors (districtId -> [x,y,z]); keep empty to use district centroids.
 missionNamespace setVariable ["civsub_v1_traffic_spawnAnchors", createHashMapFromArray [], true];
