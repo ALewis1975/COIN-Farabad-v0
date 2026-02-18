@@ -69,12 +69,34 @@ private _pMin = missionNamespace getVariable ["civsub_v1_traffic_playerMinDistan
 if (!(_pMin isEqualType 0)) then { _pMin = 60; };
 _pMin = (_pMin max 50) min 300;
 
+private _fallbackRoadMin = missionNamespace getVariable ["civsub_v1_traffic_fallback_roadsideMin_m", 8];
+if (!(_fallbackRoadMin isEqualType 0)) then { _fallbackRoadMin = 8; };
+_fallbackRoadMin = (_fallbackRoadMin max 4) min 28;
+
+private _fallbackRoadMax = missionNamespace getVariable ["civsub_v1_traffic_fallback_roadsideMax_m", 20];
+if (!(_fallbackRoadMax isEqualType 0)) then { _fallbackRoadMax = 20; };
+_fallbackRoadMax = (_fallbackRoadMax max (_fallbackRoadMin + 1)) min 60;
+
+private _fallbackBldMin = missionNamespace getVariable ["civsub_v1_traffic_fallback_buildingMin_m", 4];
+if (!(_fallbackBldMin isEqualType 0)) then { _fallbackBldMin = 4; };
+_fallbackBldMin = (_fallbackBldMin max 0) min 40;
+
+private _fallbackBldMax = missionNamespace getVariable ["civsub_v1_traffic_fallback_buildingMax_m", 45];
+if (!(_fallbackBldMax isEqualType 0)) then { _fallbackBldMax = 45; };
+_fallbackBldMax = (_fallbackBldMax max (_fallbackBldMin + 1)) min 140;
+
+private _fallbackWaterEdgeReject = missionNamespace getVariable ["civsub_v1_traffic_fallback_waterEdgeReject_m", 12];
+if (!(_fallbackWaterEdgeReject isEqualType 0)) then { _fallbackWaterEdgeReject = 12; };
+_fallbackWaterEdgeReject = (_fallbackWaterEdgeReject max 4) min 40;
+
 // Failure counters (only logged when debug enabled)
 private _fail_noPos = 0;
 private _fail_excl = 0;
 private _fail_playerNear = 0;
 private _fail_createNull = 0;
 private _fail_emptyPos = 0;
+private _fail_fallbackContext = 0;
+private _fail_waterEdge = 0;
 
 private _veh = objNull;
 private _attempts = 10;
@@ -100,7 +122,7 @@ for "_k" from 1 to _attempts do
         _roadDir = _pick # 1;
     };
 
-    // 2) Fallback: any safe empty position near the operating center
+    // 2) Fallback: find safe empty position that still feels roadside/settlement-adjacent.
     if ((count _pos) == 0) then
     {
         _fail_noPos = _fail_noPos + 1;
@@ -110,7 +132,40 @@ for "_k" from 1 to _attempts do
 
         private _ep = _probe findEmptyPosition [2, 20, _cls];
         if ((count _ep) < 2) then { _fail_emptyPos = _fail_emptyPos + 1; continue; };
-        _pos = [_ep # 0, _ep # 1, 0];
+
+        private _candPos = [_ep # 0, _ep # 1, 0];
+        if (surfaceIsWater _candPos) then { _fail_waterEdge = _fail_waterEdge + 1; continue; };
+
+        // Reject bank/edge candidates by probing nearby ring points for water transition.
+        private _nearWaterEdge = false;
+        private _stepDeg = 45;
+        for "_a" from 0 to 315 step _stepDeg do
+        {
+            private _ring = _candPos getPos [_fallbackWaterEdgeReject, _a];
+            _ring set [2, 0];
+            if (surfaceIsWater _ring) exitWith { _nearWaterEdge = true; };
+        };
+        if (_nearWaterEdge) then { _fail_waterEdge = _fail_waterEdge + 1; continue; };
+
+        // Fallback must still read as roadside OR settlement-adjacent.
+        private _nearRoadsFb = _candPos nearRoads (_fallbackRoadMax + 8);
+        private _roadBandOk = false;
+        {
+            private _rp = getPosATL _x;
+            private _dr = _candPos distance2D _rp;
+            if (_dr >= _fallbackRoadMin && { _dr <= _fallbackRoadMax }) exitWith { _roadBandOk = true; };
+        } forEach _nearRoadsFb;
+
+        private _nearBuildings = nearestObjects [_candPos, ["House", "Building"], _fallbackBldMax, true];
+        private _buildingBandOk = false;
+        {
+            private _db = _candPos distance2D (getPosATL _x);
+            if (_db >= _fallbackBldMin && { _db <= _fallbackBldMax }) exitWith { _buildingBandOk = true; };
+        } forEach _nearBuildings;
+
+        if (!(_roadBandOk || _buildingBandOk)) then { _fail_fallbackContext = _fail_fallbackContext + 1; continue; };
+
+        _pos = _candPos;
         _roadDir = random 360;
     };
 
@@ -121,6 +176,11 @@ for "_k" from 1 to _attempts do
         if (_fixed isEqualTo [0,0,0]) then { _fail_noPos = _fail_noPos + 1; continue; };
         _pos = _fixed;
     };
+
+    // Keep parked placements on reasonably flat ground.
+    private _nSpawn = surfaceNormal _pos;
+    private _slopeSpawn = acos ((_nSpawn vectorDotProduct [0,0,1]) max -1 min 1);
+    if (_slopeSpawn > 0.35) then { _fail_noPos = _fail_noPos + 1; continue; }; // ~20 degrees
 
     // If we spawned near a road (including fallback), align to the nearest road direction.
     // This prevents parked cars from blocking lanes.
@@ -201,7 +261,7 @@ if (isNull _veh) then
 {
     if (_dbg) then
     {
-        diag_log format ["[CIVTRAF][SPAWN_FAIL] did=%1 noPos=%2 emptyPos=%3 excl=%4 playerNear=%5 createNull=%6 preferW=%7 preferN=%8 fallN=%9", _districtId, _fail_noPos, _fail_emptyPos, _fail_excl, _fail_playerNear, _fail_createNull, _preferW, count _poolPrefer, count _poolFallback];
+        diag_log format ["[CIVTRAF][SPAWN_FAIL] did=%1 noPos=%2 emptyPos=%3 fbCtx=%4 waterEdge=%5 excl=%6 playerNear=%7 createNull=%8 preferW=%9 preferN=%10 fallN=%11", _districtId, _fail_noPos, _fail_emptyPos, _fail_fallbackContext, _fail_waterEdge, _fail_excl, _fail_playerNear, _fail_createNull, _preferW, count _poolPrefer, count _poolFallback];
     };
 };
 
