@@ -15,7 +15,21 @@
         BOOL
 */
 
-if (!isServer) exitWith {false};
+private _callerOwner = remoteExecutedOwner;
+if (!isServer) exitWith
+{
+    private _clientOwner = clientOwner;
+    private _ownerTxt = if (_clientOwner isEqualType 0) then { str _clientOwner } else {"local"};
+    diag_log format ["[ARC][CONVOY][AUTH] Rejected non-server call to execTickConvoy (clientOwner=%1).", _ownerTxt];
+    false
+};
+
+if (!(_callerOwner isEqualType 0)) then { _callerOwner = -1; };
+if (_callerOwner > 2) exitWith
+{
+    diag_log format ["[ARC][CONVOY][AUTH] Rejected remote client-owner execTickConvoy mutation on server (owner=%1).", _callerOwner];
+    false
+};
 
 params [
     ["_now", 0],
