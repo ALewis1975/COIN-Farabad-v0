@@ -25,6 +25,21 @@ params [
 
 if (!([_caller, "ARC_fnc_airbaseSubmitClearanceRequest", "Airbase clearance request rejected: sender verification failed.", "AIRBASE_CLEARANCE_SUBMIT_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
+if !([_caller] call ARC_fnc_rolesIsTocS2) exitWith {
+    private _owner = owner _caller;
+    private _callerUidDenied = getPlayerUID _caller;
+    private _callerNameDenied = name _caller;
+    if (_owner > 0) then { ["Airbase clearance request denied: TOC S2 authorization required."] remoteExec ["ARC_fnc_clientHint", _owner]; };
+
+    ["OPS", format ["AIRBASE CLEARANCE DENIED: submit by %1 (TOC S2 required)", _callerNameDenied], getPosATL _caller, [
+        ["event", "AIRBASE_CLEARANCE_SUBMIT_AUTH_DENIED"],
+        ["caller", _callerNameDenied],
+        ["uid", _callerUidDenied]
+    ]] call ARC_fnc_intelLog;
+
+    false
+};
+
 if (isNull _aircraft) exitWith {
     private _owner = owner _caller;
     if (_owner > 0) then { ["Clearance request rejected: invalid aircraft."] remoteExec ["ARC_fnc_clientHint", _owner]; };
