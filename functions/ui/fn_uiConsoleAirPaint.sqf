@@ -22,8 +22,8 @@ if (isNull _ctrlList || { isNull _ctrlDetails }) exitWith {false};
 
 private _owner = uiNamespace getVariable ["ARC_console_mainListOwner", ""];
 if (!(_owner isEqualType "")) then { _owner = ""; };
-_owner = toUpper (trim _owner);
-if (_owner isNotEqualTo "AIR") then { _rebuild = true; };
+_owner = toUpper trim _owner;
+if !(_owner isEqualTo "AIR") then { _rebuild = true; };
 uiNamespace setVariable ["ARC_console_mainListOwner", "AIR"];
 
 private _pub = missionNamespace getVariable ["ARC_pub_state", []];
@@ -31,9 +31,17 @@ if (!(_pub isEqualType [])) then { _pub = []; };
 
 private _getPub = {
     params ["_pairs", "_k", "_def"];
-    private _idx = _pairs findIf { _x isEqualType [] && { (count _x) >= 2 } && { ((_x select 0)) isEqualTo _k } };
-    if (_idx < 0) exitWith { _def };
-    ((_pairs select _idx) select 1)
+
+    private _val = _def;
+    {
+        if ((_x isEqualType []) && { (count _x) >= 2 }) then {
+            if (((_x select 0)) isEqualTo _k) exitWith {
+                _val = (_x select 1);
+            };
+        };
+    } forEach _pairs;
+
+    _val
 };
 
 private _air = [_pub, "airbase", []] call _getPub;
