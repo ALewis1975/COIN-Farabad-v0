@@ -648,6 +648,50 @@ uiNamespace setVariable ["ARC_console_intelSelData", _data];
 
 private _txt = "";
 
+private _appendCivsubResult = {
+    params ["_txtIn", "_expectType"];
+
+    private _txtOut = _txtIn;
+    private _typeExpect = _expectType;
+    if !(_typeExpect isEqualType "") then { _typeExpect = ""; };
+    _typeExpect = toUpper (trim _typeExpect);
+
+    private _rs = uiNamespace getVariable ["ARC_console_civsubLastResult", createHashMap];
+    if !(_rs isEqualType createHashMap) exitWith { _txtOut };
+
+    private _type = _rs getOrDefault ["type", ""];
+    if !(_type isEqualType "") then { _type = ""; };
+    _type = toUpper (trim _type);
+    if (_type isEqualTo "" || {_typeExpect isEqualTo ""} || {_type isNotEqualTo _typeExpect}) exitWith { _txtOut };
+
+    private _html = _rs getOrDefault ["html", ""];
+    if !(_html isEqualType "") then { _html = ""; };
+
+    private _ok = _rs getOrDefault ["ok", false];
+    if !(_ok isEqualType true) then { _ok = false; };
+
+    private _updatedAt = _rs getOrDefault ["updatedAtText", "--:--:--"];
+    if !(_updatedAt isEqualType "") then { _updatedAt = "--:--:--"; };
+
+    private _statusLbl = if (_ok) then { "COMPLETE" } else { "WARNING" };
+    private _statusColor = if (_ok) then { "#9FD39F" } else { "#FFB0B0" };
+
+    private _resultBlock = format [
+        "<br/><br/><t size='0.96' font='PuristaMedium' color='#CFE8FF'>Latest Result</t><br/>" +
+        "<t size='0.85' color='#AAAAAA'>Last updated:</t> <t size='0.85' color='#DDDDDD'>%1</t>  " +
+        "<t size='0.85' color='#AAAAAA'>Status:</t> <t size='0.85' color='%2'>%3</t>",
+        _updatedAt,
+        _statusColor,
+        _statusLbl
+    ];
+
+    if (!(_html isEqualTo "")) then {
+        _resultBlock = _resultBlock + format ["<br/><br/>%1", _html];
+    };
+
+    _txtOut + _resultBlock
+};
+
 // Default action button state
 if (!isNull _b1) then { _b1 ctrlSetText "EXECUTE"; _b1 ctrlEnable false; };
 
@@ -1063,6 +1107,13 @@ else
             _txt = "<t size='1.1' font='PuristaMedium'>CIVSUB: Check ID</t><br/><br/>" +
                    "Runs identity verification for the active civilian interaction target.<br/>" +
                    "Result renders in-console via CIVSUB response handlers.";
+
+            private _idCardHtml = uiNamespace getVariable ["ARC_civsubInteract_idCardHtml", ""];
+            if (_idCardHtml isEqualType "" && {!(_idCardHtml isEqualTo "")}) then {
+                _txt = _txt + "<br/><br/>" + _idCardHtml;
+            };
+
+            _txt = [_txt, "CHECK_ID"] call _appendCivsubResult;
             if (!isNull _b1) then { _b1 ctrlEnable _inCivCtx; _b1 ctrlSetText "EXECUTE"; };
         };
 
@@ -1070,6 +1121,7 @@ else
         {
             _txt = "<t size='1.1' font='PuristaMedium'>CIVSUB: Background Check</t><br/><br/>" +
                    "Runs wanted/flags background check for the active civilian target.";
+            _txt = [_txt, "BACKGROUND_CHECK"] call _appendCivsubResult;
             if (!isNull _b1) then { _b1 ctrlEnable _inCivCtx; _b1 ctrlSetText "EXECUTE"; };
         };
 
@@ -1077,6 +1129,7 @@ else
         {
             _txt = "<t size='1.1' font='PuristaMedium'>CIVSUB: Detain</t><br/><br/>" +
                    "Requests server-authoritative detention for the active civilian target.";
+            _txt = [_txt, "DETAIN"] call _appendCivsubResult;
             if (!isNull _b1) then { _b1 ctrlEnable _inCivCtx; _b1 ctrlSetText "EXECUTE"; };
         };
 
@@ -1084,6 +1137,7 @@ else
         {
             _txt = "<t size='1.1' font='PuristaMedium'>CIVSUB: Release</t><br/><br/>" +
                    "Requests server-authoritative release for the active civilian target.";
+            _txt = [_txt, "RELEASE"] call _appendCivsubResult;
             if (!isNull _b1) then { _b1 ctrlEnable _inCivCtx; _b1 ctrlSetText "EXECUTE"; };
         };
 
@@ -1091,6 +1145,7 @@ else
         {
             _txt = "<t size='1.1' font='PuristaMedium'>CIVSUB: Handoff to SHERIFF</t><br/><br/>" +
                    "Use when detainee is ready for sheriff transfer and all handoff conditions are met.";
+            _txt = [_txt, "HANDOFF_SHERIFF"] call _appendCivsubResult;
             if (!isNull _b1) then { _b1 ctrlEnable _inCivCtx; _b1 ctrlSetText "EXECUTE"; };
         };
 
@@ -1113,6 +1168,7 @@ else
                 "Executes through server-authoritative CIVSUB action routing.",
                 _qlbl
             ];
+            _txt = [_txt, "QUESTION"] call _appendCivsubResult;
             if (!isNull _b1) then { _b1 ctrlEnable (_inCivCtx && {_qid isNotEqualTo ""}); _b1 ctrlSetText "ASK"; };
         };
 
