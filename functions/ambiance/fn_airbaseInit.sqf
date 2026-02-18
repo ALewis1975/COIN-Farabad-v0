@@ -26,6 +26,20 @@ private _opsStatusInterval = missionNamespace getVariable ["airbase_v1_opsStatus
 if (!(_opsStatusInterval isEqualType 0) || { _opsStatusInterval < 30 }) then { _opsStatusInterval = 120; };
 missionNamespace setVariable ["airbase_v1_opsStatusInterval_s", _opsStatusInterval, true];
 
+// Clearance arbitration tuning
+private _controllerTimeoutS = missionNamespace getVariable ["airbase_v1_controller_timeout_s", 90];
+if (!(_controllerTimeoutS isEqualType 0) || { _controllerTimeoutS < 5 }) then { _controllerTimeoutS = 90; };
+missionNamespace setVariable ["airbase_v1_controller_timeout_s", _controllerTimeoutS, true];
+
+private _controllerFallbackEnabled = missionNamespace getVariable ["airbase_v1_controller_fallback_enabled", true];
+if (!(_controllerFallbackEnabled isEqualType true) && !(_controllerFallbackEnabled isEqualType false)) then { _controllerFallbackEnabled = true; };
+missionNamespace setVariable ["airbase_v1_controller_fallback_enabled", _controllerFallbackEnabled, true];
+
+// Debug-only test mode: bypass tower-controller detection and force AI arbitration.
+private _forceAiOnly = missionNamespace getVariable ["airbase_v1_debug_forceAiOnly", false];
+if (!(_forceAiOnly isEqualType true) && !(_forceAiOnly isEqualType false)) then { _forceAiOnly = false; };
+missionNamespace setVariable ["airbase_v1_debug_forceAiOnly", _forceAiOnly, true];
+
 // Departure runway markers (fixed-wing)
 // RW departures already use airbase_v1_rw_depart_outbound_marker / _clear_marker.
 // FW uses its own vars so we can split later if needed.
