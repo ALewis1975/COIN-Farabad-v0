@@ -84,7 +84,7 @@ if ((count _pool) == 0) exitWith
 private _districts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
 if !(_districts isEqualType createHashMap) exitWith {false};
 
-private _players = allPlayers;
+private _players = [] call ARC_fnc_civsubBubbleGetPlayers;
 if ((count _players) == 0) exitWith {false};
 
 private _maxAD = missionNamespace getVariable ["civsub_v1_traffic_activeDistrictsMax", 3];
@@ -92,28 +92,73 @@ if (!(_maxAD isEqualType 0)) then { _maxAD = 3; };
 if (_maxAD < 1) then { _maxAD = 1; };
 
 private _act = [];
+private _trafficDistrictSource = "PLAYER_BUBBLE";
+
+// Primary source: districts derived directly from player positions.
+private _playerDistrictCounts = createHashMap;
 {
-    private _did = _x;
-    private _d = _districts getOrDefault [_did, createHashMap];
-    if !(_d isEqualType createHashMap) then { continue; };
+    if (isNull _x) then { continue; };
 
-    if ([_d] call ARC_fnc_civsubIsDistrictActive) then
+    private _did = [getPosATL _x] call ARC_fnc_civsubDistrictsFindByPos;
+    if (_did isEqualTo "") then { continue; };
+
+    private _n = _playerDistrictCounts getOrDefault [_did, 0];
+    _playerDistrictCounts set [_did, _n + 1];
+} forEach _players;
+
+if ((count (keys _playerDistrictCounts)) > 0) then
+{
+    private _rows = [];
     {
-        // sort key: distance to nearest player (from district centroid)
-        private _c = _d getOrDefault ["centroid", [0,0]];
-        private _min = 1e12;
+        private _did = _x;
+        private _d = _districts getOrDefault [_did, createHashMap];
+        if !(_d isEqualType createHashMap) then { continue; };
+        if !([_d] call ARC_fnc_civsubIsDistrictActive) then { continue; };
+
+        private _n = _playerDistrictCounts getOrDefault [_did, 0];
+        // Sort by descending player count, then stable district id.
+        _rows pushBack [0 - _n, _did, _d];
+    } forEach (keys _playerDistrictCounts);
+
+    _rows sort true;
+    if ((count _rows) > _maxAD) then { _rows resize _maxAD; };
+    _act = _rows;
+};
+
+// Fallback: previous centroid-nearest district ordering.
+if ((count _act) == 0) then
+{
+    _trafficDistrictSource = "FALLBACK_CENTROID";
+
+    {
+        private _did = _x;
+        private _d = _districts getOrDefault [_did, createHashMap];
+        if !(_d isEqualType createHashMap) then { continue; };
+
+        if ([_d] call ARC_fnc_civsubIsDistrictActive) then
         {
-            private _p = getPosATL _x;
-            private _d2 = (_p distance2D [_c # 0, _c # 1, 0]);
-            if (_d2 < _min) then { _min = _d2; };
-        } forEach _players;
+            // sort key: distance to nearest player (from district centroid)
+            private _c = _d getOrDefault ["centroid", [0,0]];
+            private _min = 1e12;
+            {
+                private _p = getPosATL _x;
+                private _d2 = (_p distance2D [_c # 0, _c # 1, 0]);
+                if (_d2 < _min) then { _min = _d2; };
+            } forEach _players;
 
-        _act pushBack [_min, _did, _d];
-    };
-} forEach (keys _districts);
+            _act pushBack [_min, _did, _d];
+        };
+    } forEach (keys _districts);
 
-_act sort true;
-if ((count _act) > _maxAD) then { _act resize _maxAD; };
+    _act sort true;
+    if ((count _act) > _maxAD) then { _act resize _maxAD; };
+};
+
+if (_debug) then
+{
+    private _selected = _act apply { _x # 1 };
+    diag_log format ["[CIVTRAF][TICK] activeDistricts=%1 source=%2", _selected, _trafficDistrictSource];
+};
 
 private _opCenters = createHashMap;
 {
