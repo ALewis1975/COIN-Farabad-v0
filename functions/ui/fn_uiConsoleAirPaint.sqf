@@ -22,8 +22,8 @@ if (isNull _ctrlList || { isNull _ctrlDetails }) exitWith {false};
 
 private _owner = uiNamespace getVariable ["ARC_console_mainListOwner", ""];
 if (!(_owner isEqualType "")) then { _owner = ""; };
-_owner = toUpper (trim _owner);
-if (_owner isNotEqualTo "AIR") then { _rebuild = true; };
+_owner = toUpper _owner;
+if (!(_owner isEqualTo "AIR")) then { _rebuild = true; };
 uiNamespace setVariable ["ARC_console_mainListOwner", "AIR"];
 
 private _pub = missionNamespace getVariable ["ARC_pub_state", []];
@@ -31,9 +31,17 @@ if (!(_pub isEqualType [])) then { _pub = []; };
 
 private _getPub = {
     params ["_pairs", "_k", "_def"];
-    private _idx = _pairs findIf { _x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k } };
-    if (_idx < 0) exitWith { _def };
-    (_pairs # _idx) # 1
+
+    private _val = _def;
+    {
+        if ((_x isEqualType []) && { (count _x) >= 2 }) then {
+            if (((_x select 0)) isEqualTo _k) exitWith {
+                _val = (_x select 1);
+            };
+        };
+    } forEach _pairs;
+
+    _val
 };
 
 private _air = [_pub, "airbase", []] call _getPub;
@@ -60,9 +68,9 @@ if (!(_runwayState isEqualType "")) then { _runwayState = "UNKNOWN"; };
 private _runwayOwner = [_air, "runwayOwner", ""] call _getPub;
 if (!(_runwayOwner isEqualType "")) then { _runwayOwner = ""; };
 
-private _hold = missionNamespace getVariable ["airbase_v1_holdDepartures", false];
-if (!(_hold isEqualType true) && !(_hold isEqualType false)) then { _hold = false; };
-uiNamespace setVariable ["ARC_console_airHoldDepartures", _hold];
+private _holdDepartures = [_air, "holdDepartures", false] call _getPub;
+if (!(_holdDepartures isEqualType true) && !(_holdDepartures isEqualType false)) then { _holdDepartures = false; };
+uiNamespace setVariable ["ARC_console_airHoldDepartures", _holdDepartures];
 
 private _nextItems = [_air, "nextItems", []] call _getPub;
 if (!(_nextItems isEqualType [])) then { _nextItems = []; };
@@ -101,13 +109,13 @@ private _selectedFid = "";
 if ((_selData find "AIR_FID|") isEqualTo 0) then
 {
     private _parts = _selData splitString "|";
-    if ((count _parts) >= 2) then { _selectedFid = _parts # 1; };
+    if ((count _parts) >= 2) then { _selectedFid = _parts select 1; };
 };
 uiNamespace setVariable ["ARC_console_airSelectedFid", _selectedFid];
 
 private _canAirControl = ["ARC_console_airCanControl", false] call ARC_fnc_uiNsGetBool;
 private _canText = if (_canAirControl) then { "TOWER CONTROL: ENABLED" } else { "TOWER CONTROL: READ-ONLY" };
-private _holdText = if (_hold) then { "HOLD ACTIVE" } else { "DEPARTURES OPEN" };
+private _holdText = if (_holdDepartures) then { "HOLD ACTIVE" } else { "DEPARTURES OPEN" };
 private _execText = if (_execActive) then { format ["EXEC ACTIVE: %1", _execFid] } else { "EXEC ACTIVE: none" };
 private _rwOwnerText = if (_runwayOwner isEqualTo "") then { "-" } else { _runwayOwner };
 

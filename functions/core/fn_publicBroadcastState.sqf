@@ -25,8 +25,8 @@ private _med  = ["baseMed",  0.40] call ARC_fnc_stateGet;
 private _log = ["intelLog", []] call ARC_fnc_stateGet;
 if (!(_log isEqualType [])) then { _log = []; };
 
-private _intelCount = count (_log select { (_x isEqualType [] && { (count _x) >= 3 } && { toUpper (((_x) # 2)) != "OPS" }) });
-private _opsCount   = count (_log select { (_x isEqualType [] && { (count _x) >= 3 } && { toUpper (((_x) # 2)) == "OPS" }) });
+private _intelCount = count (_log select { (_x isEqualType [] && { (count _x) >= 3 } && { toUpper ((_x select 2)) != "OPS" }) });
+private _opsCount   = count (_log select { (_x isEqualType [] && { (count _x) >= 3 } && { toUpper ((_x select 2)) == "OPS" }) });
 
 // Recent incident history tail (for dashboards)
 private _hist = ["incidentHistory", []] call ARC_fnc_stateGet;
@@ -70,6 +70,9 @@ if (!(_execActive isEqualType true) && !(_execActive isEqualType false)) then { 
 private _execFid = missionNamespace getVariable ["airbase_v1_execFid", ""];
 if (!(_execFid isEqualType "")) then { _execFid = ""; };
 
+private _holdDepartures = ["airbase_v1_holdDepartures", false] call ARC_fnc_stateGet;
+if (!(_holdDepartures isEqualType true) && !(_holdDepartures isEqualType false)) then { _holdDepartures = false; };
+
 private _runwayState = missionNamespace getVariable ["airbase_v1_runwayState", "UNKNOWN"];
 if (!(_runwayState isEqualType "")) then { _runwayState = "UNKNOWN"; };
 
@@ -100,6 +103,7 @@ private _airbasePub = [
     ["totalQueued", count _airQueue],
     ["execActive", _execActive],
     ["execFid", _execFid],
+    ["holdDepartures", _holdDepartures],
     ["runwayState", _runwayState],
     ["runwayOwner", _runwayOwner],
     ["runwayUntil", _runwayUntil],
@@ -145,7 +149,7 @@ if (_dbgEnabled) then
         private _cleanupQueue = ["cleanupQueue", []] call ARC_fnc_stateGet;
         if (!(_cleanupQueue isEqualType [])) then { _cleanupQueue = []; };
 
-        private _labelCounts = createHashMap;
+        private _labelCounts = [];
         {
             private _label = _x param [4, ""];
             if (!(_label isEqualType "")) then { _label = ""; };
@@ -156,14 +160,28 @@ if (_dbgEnabled) then
             if (_p > 0) then { _key = _label select [0, _p]; };
             if (_key isEqualTo "") then { _key = "(none)"; };
 
-            _labelCounts set [_key, 1 + (_labelCounts getOrDefault [_key, 0])];
+            private _idx = _labelCounts findIf {
+                (_x isEqualType []) &&
+                { (count _x) >= 2 } &&
+                { ((_x select 0)) isEqualTo _key }
+            };
+
+            if (_idx < 0) then {
+                _labelCounts pushBack [_key, 1];
+            } else {
+                private _pair = _labelCounts select _idx;
+                _pair set [1, (_pair select 1) + 1];
+                _labelCounts set [_idx, _pair];
+            };
         } forEach _cleanupQueue;
 
         private _tmp = [];
-        { _tmp pushBack [_y, _x]; } forEach _labelCounts;  // [count,label]
+        {
+            _tmp pushBack [(_x select 1), (_x select 0)];
+        } forEach _labelCounts;  // [count,label]
         _tmp sort false;
 
-        private _cleanupByLabel = _tmp apply { [_x # 1, _x # 0] };
+        private _cleanupByLabel = _tmp apply { [_x select 1, _x select 0] };
 
         private _convoyNids = ["activeConvoyNetIds", []] call ARC_fnc_stateGet;
         if (!(_convoyNids isEqualType [])) then { _convoyNids = []; };
