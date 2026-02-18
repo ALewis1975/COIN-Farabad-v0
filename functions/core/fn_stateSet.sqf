@@ -7,6 +7,11 @@
       ["key", value] call ARC_fnc_stateSet;
 
     This function is defensive and will not throw on malformed inputs.
+
+    Persisted-value policy:
+      - `nil` is unsupported as a stored state value. Passing nil clears/removes the key.
+      - Use explicit empty substitutes when a key should stay defined (`false`, "", [], 0,
+        createHashMap, etc.).
 */
 
 if !(_this isEqualType []) exitWith { false };

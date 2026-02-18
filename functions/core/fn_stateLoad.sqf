@@ -6,7 +6,12 @@
     Defensive/sanitizing loader:
       - Accepts only entries shaped like ["key", value]
       - Discards invalid entries silently
+      - Drops nil-valued entries (nil is unsupported for persisted state)
       - Never indexes into unknown types
+
+    Nil policy:
+      - `nil` is never persisted. Use empty substitutes instead (`false`, "", [], 0,
+        createHashMap, etc.) when a key should remain defined.
 
     Storage key: missionProfileNamespace getVariable ["ARC_state", ...]
 
@@ -26,20 +31,31 @@ if !(_raw isEqualType []) then { _raw = []; };
 	private _clean = [];
 	private _droppedNil = false;
 	{
-	    if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualType "" }) then
+	    if !(_x isEqualType []) then { continue; };
+
+	    private _entryCount = count _x;
+	    if (_entryCount < 2) then { continue; };
+
+	    private _k = _x param [0, "", [""]];
+	    if (_k isEqualTo "") then { continue; };
+
+	    // NOTE: A stored value can be `nil` (e.g., due to earlier script errors or
+	    // legacy code using nil as a "clear" signal). Assigning nil to a variable
+	    // *undefines* it in SQF, which can cascade into "Undefined variable" errors.
+	    // We treat nil as "drop this entry" during load.
+	    if (isNil { _x select 1 }) then
 	    {
-	        // NOTE: A stored value can be `nil` (e.g., due to earlier script errors or
-	        // legacy code using nil as a "clear" signal). Assigning nil to a variable
-	        // *undefines* it in SQF, which can cascade into "Undefined variable" errors.
-	        // We treat nil as "drop this entry" during load.
-	        if (isNil { _x select 1 }) then
-	        {
-	            _droppedNil = true;
-	        }
-	        else
-	        {
-	            _clean pushBack [ _x select 0, _x select 1 ];
-	        };
+	        _droppedNil = true;
+	        [
+	            "STATE",
+	            format ["stateLoad dropped nil persisted value for key '%1'", _k],
+	            ["key", _k]
+	        ] call ARC_fnc_farabadWarn;
+	    }
+	    else
+	    {
+	        private _v = _x select 1;
+	        _clean pushBack [_k, _v];
 	    };
 	} forEach _raw;
 
@@ -75,6 +91,12 @@ missionNamespace setVariable ["ARC_state", _merged];
 	// load-time errors from recurring across restarts.
 	if (_droppedNil) then
 	{
+	    [
+	        "STATE",
+	        "stateLoad detected nil persisted values; rewriting sanitized ARC_state profile payload",
+	        ["storageKey", "ARC_state"]
+	    ] call ARC_fnc_farabadWarn;
+
 	    missionProfileNamespace setVariable ["ARC_state", _merged];
 	    saveMissionProfileNamespace;
 	};
