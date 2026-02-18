@@ -75,6 +75,30 @@ uiNamespace setVariable ["ARC_console_airHoldDepartures", _holdDepartures];
 private _nextItems = [_air, "nextItems", []] call _getPub;
 if (!(_nextItems isEqualType [])) then { _nextItems = []; };
 
+private _clearancePending = [_air, "clearanceControllerPending", []] call _getPub;
+if (!(_clearancePending isEqualType [])) then { _clearancePending = []; };
+
+private _awaitingCount = [_air, "clearanceAwaitingTowerCount", 0] call _getPub;
+if (!(_awaitingCount isEqualType 0)) then { _awaitingCount = 0; };
+
+private _clrPreview = [];
+private _clrN = 3 min (count _clearancePending);
+for "_iClr" from 0 to (_clrN - 1) do
+{
+    private _row = _clearancePending select _iClr;
+    if !(_row isEqualType []) then { continue; };
+
+    private _rid = _row param [0, ""];
+    private _rtype = _row param [1, ""];
+    private _pilot = _row param [2, ""];
+    private _st = toUpperANSI (_row param [5, ""]);
+    private _label = if (_st isEqualTo "AWAITING_TOWER_DECISION") then { "awaiting decision" } else { "pending" };
+
+    _clrPreview pushBack format ["%1 %2 (%3) - %4", _rid, _rtype, _pilot, _label];
+};
+
+private _clrPreviewText = if ((count _clrPreview) > 0) then { _clrPreview joinString "<br/>" } else { "(none)" };
+
 if (_rebuild) then
 {
     lbClear _ctrlList;
@@ -180,8 +204,11 @@ private _details = format [
     + "<br/>State: <t color='#FFFFFF'>%6</t>"
     + "<br/>Owner: <t color='#FFFFFF'>%7</t>"
     + "<br/>Execution: <t color='#FFFFFF'>%8</t>"
+    + "<br/><br/><t color='#B89B6B'>Clearance</t>"
+    + "<br/>Awaiting tower decision: <t color='#FFFFFF'>%9</t>"
+    + "<br/><t color='#CFCFCF'>%10</t>"
     + "<br/><br/><t color='#B89B6B'>Action Hint</t>"
-    + "<br/><t color='#CFCFCF'>%9</t>",
+    + "<br/><t color='#CFCFCF'>%11</t>",
     _canText,
     _holdText,
     _depQueued,
@@ -190,6 +217,8 @@ private _details = format [
     _runwayState,
     _rwOwnerText,
     _execText,
+    _awaitingCount,
+    _clrPreviewText,
     _actionHint
 ];
 

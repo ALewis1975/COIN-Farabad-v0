@@ -109,6 +109,136 @@ if (!(_opsLogEnabled isEqualType true) && !(_opsLogEnabled isEqualType false)) t
 private _opsStatusInterval = missionNamespace getVariable ["airbase_v1_opsStatusInterval_s", 120];
 if (!(_opsStatusInterval isEqualType 0) || { _opsStatusInterval < 30 }) then { _opsStatusInterval = 120; };
 
+private _controllerTimeoutS = missionNamespace getVariable ["airbase_v1_controller_timeout_s", 90];
+if (!(_controllerTimeoutS isEqualType 0) || { _controllerTimeoutS < 5 }) then { _controllerTimeoutS = 90; };
+
+private _controllerFallbackEnabled = missionNamespace getVariable ["airbase_v1_controller_fallback_enabled", true];
+if (!(_controllerFallbackEnabled isEqualType true) && !(_controllerFallbackEnabled isEqualType false)) then { _controllerFallbackEnabled = true; };
+
+private _forceAiOnly = missionNamespace getVariable ["airbase_v1_debug_forceAiOnly", false];
+if (!(_forceAiOnly isEqualType true) && !(_forceAiOnly isEqualType false)) then { _forceAiOnly = false; };
+
+private _clearanceRequests = ["airbase_v1_clearanceRequests", []] call ARC_fnc_stateGet;
+if (!(_clearanceRequests isEqualType [])) then { _clearanceRequests = []; };
+
+private _clearanceHistory = ["airbase_v1_clearanceHistory", []] call ARC_fnc_stateGet;
+if (!(_clearanceHistory isEqualType [])) then { _clearanceHistory = []; };
+
+private _towerControllers = [];
+if (!_forceAiOnly) then {
+    {
+        if !(isPlayer _x) then { continue; };
+        if !(alive _x) then { continue; };
+
+        private _authApprove = [_x, "APPROVE"] call ARC_fnc_airbaseTowerAuthorize;
+        private _okApprove = _authApprove param [0, false];
+        private _level = _authApprove param [1, ""];
+
+        if (!_okApprove) then {
+            private _authFallback = [_x, "PRIORITIZE"] call ARC_fnc_airbaseTowerAuthorize;
+            private _okFallback = _authFallback param [0, false];
+            if (_okFallback) then { _level = _authFallback param [1, ""]; };
+            if (_okFallback && (_level isEqualTo "")) then { _level = "LC"; };
+            if (!_okFallback) then { continue; };
+        };
+
+        _towerControllers pushBack [name _x, getPlayerUID _x, _level];
+    } forEach allPlayers;
+};
+
+private _hasTowerController = (count _towerControllers) > 0;
+private _clearanceStateDirty = false;
+
+for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
+    private _rec = _clearanceRequests # _iClr;
+    if !(_rec isEqualType []) then { continue; };
+
+    private _status = toUpperANSI (_rec param [6, ""]);
+    if (_status in ["APPROVED", "DENIED", "CANCELED"]) then { continue; };
+
+    private _createdAt = _rec param [7, _nowTs];
+    if (!(_createdAt isEqualType 0)) then { _createdAt = _nowTs; };
+
+    private _ageS = _nowTs - _createdAt;
+
+    if (_hasTowerController && {_status isEqualTo "PENDING"}) then {
+        _rec set [6, "AWAITING_TOWER_DECISION"];
+        _rec set [8, _nowTs];
+        _rec set [9, ["", "", -1, "", "AWAITING_TOWER"]];
+        private _metaAwait = _rec param [10, []];
+        if (!(_metaAwait isEqualType [])) then { _metaAwait = []; };
+        _metaAwait pushBack ["awaitingTowerDecision", true];
+        _metaAwait pushBack ["towerControllersPresent", count _towerControllers];
+        _rec set [10, _metaAwait];
+        _clearanceRequests set [_iClr, _rec];
+        _clearanceStateDirty = true;
+
+        if (_opsLogEnabled || _debugOps) then {
+            ["OPS", format ["AIRBASE CLEARANCE: %1 moved to awaiting tower decision", _rec param [0, ""]], _center, 0, [
+                ["event", "AIRBASE_CLEARANCE_AWAITING_TOWER"],
+                ["requestId", _rec param [0, ""]],
+                ["controllers", count _towerControllers]
+            ]] call ARC_fnc_intelLog;
+        };
+
+        continue;
+    };
+
+    if (!_controllerFallbackEnabled) then { continue; };
+
+    if (_status in ["PENDING", "AWAITING_TOWER_DECISION"] && { _ageS >= _controllerTimeoutS }) then {
+        _rec set [6, "APPROVED"];
+        _rec set [8, _nowTs];
+        _rec set [9, ["AI", "AI", _nowTs, "APPROVE", "TIMEOUT"]];
+
+        private _meta = _rec param [10, []];
+        if (!(_meta isEqualType [])) then { _meta = []; };
+        _meta pushBack ["decidedBy", "AI"];
+        _meta pushBack ["reason", "timeout"];
+        _meta pushBack ["timedOutAfterS", _ageS];
+        _meta pushBack ["forceAiOnly", _forceAiOnly];
+        _rec set [10, _meta];
+
+        _clearanceRequests set [_iClr, _rec];
+        _clearanceStateDirty = true;
+
+        if (_opsLogEnabled || _debugOps) then {
+            ["OPS", format ["AIRBASE CLEARANCE: %1 auto-approved by AI timeout", _rec param [0, ""]], _center, 0, [
+                ["event", "AIRBASE_CLEARANCE_AI_TIMEOUT"],
+                ["requestId", _rec param [0, ""]],
+                ["timeout_s", _controllerTimeoutS],
+                ["age_s", _ageS],
+                ["forceAiOnly", _forceAiOnly]
+            ]] call ARC_fnc_intelLog;
+        };
+    };
+};
+
+if (_clearanceStateDirty) then {
+    ["airbase_v1_clearanceRequests", _clearanceRequests] call ARC_fnc_stateSet;
+
+    private _historyById = createHashMap;
+    {
+        if (_x isEqualType []) then {
+            _historyById set [_x param [0, ""], _forEachIndex];
+        };
+    } forEach _clearanceHistory;
+
+    {
+        if !(_x isEqualType []) then { continue; };
+        private _rid = _x param [0, ""];
+        private _hIdx = _historyById get _rid;
+        if (isNil "_hIdx") then { _hIdx = -1; };
+        if (_hIdx >= 0) then {
+            _clearanceHistory set [_hIdx, _x];
+        } else {
+            _clearanceHistory pushBack _x;
+        };
+    } forEach _clearanceRequests;
+
+    ["airbase_v1_clearanceHistory", _clearanceHistory] call ARC_fnc_stateSet;
+};
+
 // Return handling for departed assets:
 //  - With low probability, queue a RETURN arrival (same tail comes back in on the runway).
 //  - Otherwise, restock the parked aircraft off-screen (respawn at its startPos) so the ramp stays populated.
