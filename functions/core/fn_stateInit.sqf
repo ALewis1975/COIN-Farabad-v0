@@ -300,6 +300,9 @@
     // Airbase clearance request workflow (server authoritative queue + audit trail)
     ["airbase_v1_clearanceRequests", []],
     ["airbase_v1_clearanceSeq", 0],
-    ["airbase_v1_clearanceHistory", []]
+    ["airbase_v1_clearanceHistory", []],
+
+    // Airbase compact event stream (bounded, UI-facing tail in ARC_pub_state.airbase)
+    ["airbase_v1_events", []]
 
 ]

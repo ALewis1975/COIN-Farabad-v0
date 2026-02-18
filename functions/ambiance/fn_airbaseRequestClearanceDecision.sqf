@@ -44,10 +44,23 @@ if (!(_requests isEqualType [])) then { _requests = []; };
 private _history = ["airbase_v1_clearanceHistory", []] call ARC_fnc_stateGet;
 if (!(_history isEqualType [])) then { _history = []; };
 
+
+private _events = ["airbase_v1_events", []] call ARC_fnc_stateGet;
+if (!(_events isEqualType [])) then { _events = []; };
+private _eventsMax = missionNamespace getVariable ["airbase_v1_eventsMax", 60];
+if (!(_eventsMax isEqualType 0) || { _eventsMax < 10 }) then { _eventsMax = 60; };
+
 private _idx = _requests findIf { ((_x param [0, ""]) isEqualTo _requestId) };
 if (_idx < 0) exitWith {false};
 
 private _rec = _requests # _idx;
+private _requesterUid = _rec param [2, ""];
+private _requesterOwner = -1;
+if (_requesterUid isNotEqualTo "") then {
+    {
+        if ((getPlayerUID _x) isEqualTo _requesterUid) exitWith { _requesterOwner = owner _x; };
+    } forEach allPlayers;
+};
 private _status = toUpperANSI (_rec param [6, ""]);
 if !(_status in ["PENDING", "AWAITING_TOWER_DECISION"]) exitWith {
     private _owner = owner _caller;
@@ -76,8 +89,32 @@ _requests set [_idx, _rec];
 private _hIdx = _history findIf { ((_x param [0, ""]) isEqualTo _requestId) };
 if (_hIdx >= 0) then { _history set [_hIdx, _rec]; } else { _history pushBack _rec; };
 
+
+_events pushBack [
+    _now,
+    _actionToken,
+    _requestId,
+    _uid,
+    _requesterUid,
+    [_reason]
+];
+if ((count _events) > _eventsMax) then {
+    _events deleteRange [0, (count _events) - _eventsMax];
+};
+
 ["airbase_v1_clearanceRequests", _requests] call ARC_fnc_stateSet;
 ["airbase_v1_clearanceHistory", _history] call ARC_fnc_stateSet;
+["airbase_v1_events", _events] call ARC_fnc_stateSet;
+
+
+private _decisionWord = if (_approve) then {"approved"} else {"denied"};
+if (_requesterOwner > 0) then {
+    ["Airbase Clearance", format ["%1 %2 by %3", _requestId, _decisionWord, _name], 6] remoteExec ["ARC_fnc_clientToast", _requesterOwner];
+};
+private _controllerOwner = owner _caller;
+if (_controllerOwner > 0) then {
+    [format ["Decision recorded: %1", _requestId]] remoteExec ["ARC_fnc_clientHint", _controllerOwner];
+};
 
 ["OPS", format ["AIRBASE CLEARANCE: %1 %2 by %3", _requestId, toLower _actionToken, _name], getPosATL _caller, [
     ["event", "AIRBASE_CLEARANCE_TOWER_DECISION"],

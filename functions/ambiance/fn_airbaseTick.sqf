@@ -124,6 +124,44 @@ if (!(_clearanceRequests isEqualType [])) then { _clearanceRequests = []; };
 private _clearanceHistory = ["airbase_v1_clearanceHistory", []] call ARC_fnc_stateGet;
 if (!(_clearanceHistory isEqualType [])) then { _clearanceHistory = []; };
 
+private _events = ["airbase_v1_events", []] call ARC_fnc_stateGet;
+if (!(_events isEqualType [])) then { _events = []; };
+private _eventsMax = missionNamespace getVariable ["airbase_v1_eventsMax", 60];
+if (!(_eventsMax isEqualType 0) || { _eventsMax < 10 }) then { _eventsMax = 60; };
+private _eventsDirty = false;
+
+private _notifyThrottleS = missionNamespace getVariable ["airbase_v1_notifyThrottle_s", 8];
+if (!(_notifyThrottleS isEqualType 0) || { _notifyThrottleS < 1 }) then { _notifyThrottleS = 8; };
+private _notifyState = missionNamespace getVariable ["airbase_v1_notifyState", createHashMap];
+if !(_notifyState isEqualType createHashMap) then { _notifyState = createHashMap; };
+private _notifyDirty = false;
+
+private _fnEventPush = {
+    params ["_kind", "_rid", "_actorUid", "_targetUid", ["_meta", []]];
+    _events pushBack [_nowTs, _kind, _rid, _actorUid, _targetUid, _meta];
+    if ((count _events) > _eventsMax) then {
+        _events deleteRange [0, (count _events) - _eventsMax];
+    };
+    _eventsDirty = true;
+};
+
+private _fnNotifyMaybe = {
+    params ["_owner", "_method", "_title", "_body", "_dedupeKey"];
+    if (_owner <= 0) exitWith {};
+    if (!(_dedupeKey isEqualType "")) then { _dedupeKey = str _dedupeKey; };
+    private _lastAt = _notifyState get _dedupeKey;
+    if (isNil "_lastAt") then { _lastAt = -1000; };
+    if ((_nowTs - _lastAt) < _notifyThrottleS) exitWith {};
+    _notifyState set [_dedupeKey, _nowTs];
+    _notifyDirty = true;
+
+    if (_method isEqualTo "HINT") then {
+        [_body] remoteExec ["ARC_fnc_clientHint", _owner];
+    } else {
+        [_title, _body, 5] remoteExec ["ARC_fnc_clientToast", _owner];
+    };
+};
+
 private _towerControllers = [];
 if (!_forceAiOnly) then {
     {
@@ -173,6 +211,20 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
         _clearanceRequests set [_iClr, _rec];
         _clearanceStateDirty = true;
 
+        private _ridAwait = _rec param [0, ""];
+        private _requesterUidAwait = _rec param [2, ""];
+        ["LOCK_ACQUIRE", _ridAwait, "SYSTEM", _requesterUidAwait, [count _towerControllers]] call _fnEventPush;
+
+        private _requesterOwnerAwait = -1;
+        { if ((getPlayerUID _x) isEqualTo _requesterUidAwait) exitWith { _requesterOwnerAwait = owner _x; }; } forEach allPlayers;
+        [_requesterOwnerAwait, "TOAST", "Airbase Clearance", format ["%1 awaiting tower decision", _ridAwait], format ["AIR_REQ_AWAIT:%1", _ridAwait]] call _fnNotifyMaybe;
+        {
+            private _towUid = _x param [1, ""];
+            private _towOwner = -1;
+            { if ((getPlayerUID _x) isEqualTo _towUid) exitWith { _towOwner = owner _x; }; } forEach allPlayers;
+            [_towOwner, "TOAST", "Airbase Tower", format ["Decision required: %1", _ridAwait], format ["AIR_CTRL_PENDING:%1:%2", _ridAwait, _towUid]] call _fnNotifyMaybe;
+        } forEach _towerControllers;
+
         if (_opsLogEnabled || _debugOps) then {
             ["OPS", format ["AIRBASE CLEARANCE: %1 moved to awaiting tower decision", _rec param [0, ""]], _center, 0, [
                 ["event", "AIRBASE_CLEARANCE_AWAITING_TOWER"],
@@ -201,6 +253,14 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
 
         _clearanceRequests set [_iClr, _rec];
         _clearanceStateDirty = true;
+
+        private _ridAi = _rec param [0, ""];
+        private _requesterUidAi = _rec param [2, ""];
+        ["APPROVE", _ridAi, "AI", _requesterUidAi, ["TIMEOUT"]] call _fnEventPush;
+
+        private _requesterOwnerAi = -1;
+        { if ((getPlayerUID _x) isEqualTo _requesterUidAi) exitWith { _requesterOwnerAi = owner _x; }; } forEach allPlayers;
+        [_requesterOwnerAi, "TOAST", "Airbase Clearance", format ["%1 auto-approved (timeout)", _ridAi], format ["AIR_REQ_APPROVE_AI:%1", _ridAi]] call _fnNotifyMaybe;
 
         if (_opsLogEnabled || _debugOps) then {
             ["OPS", format ["AIRBASE CLEARANCE: %1 auto-approved by AI timeout", _rec param [0, ""]], _center, 0, [
@@ -237,6 +297,13 @@ if (_clearanceStateDirty) then {
     } forEach _clearanceRequests;
 
     ["airbase_v1_clearanceHistory", _clearanceHistory] call ARC_fnc_stateSet;
+};
+
+if (_eventsDirty) then {
+    ["airbase_v1_events", _events] call ARC_fnc_stateSet;
+};
+if (_notifyDirty) then {
+    missionNamespace setVariable ["airbase_v1_notifyState", _notifyState, false];
 };
 
 // Return handling for departed assets:
@@ -695,6 +762,13 @@ _item params ["_fid", "_kind", "_detail"];
 private _reserveS = missionNamespace getVariable ["airbase_v1_runwayReserveWindow_s", 120];
 if (!(_reserveS isEqualType 0) || { _reserveS < 30 }) then { _reserveS = 120; };
 private _reserved = [_fid, _kind, _detail, _reserveS, _policyReason] call ARC_fnc_airbaseRunwayLockReserve;
+if (_reserved) then {
+    ["LOCK_ACQUIRE", _fid, "SYSTEM", "", [_kind, _detail, _policyReason]] call _fnEventPush;
+    if (_eventsDirty) then {
+        ["airbase_v1_events", _events] call ARC_fnc_stateSet;
+        _eventsDirty = false;
+    };
+};
 if (!_reserved) exitWith {
     _queue insert [_policyIdx, [[_fid, _kind, _detail]]];
     ["airbase_v1_queue", _queue] call ARC_fnc_stateSet;
@@ -721,6 +795,14 @@ if (_idxRecActive >= 0) then {
     params ["_fid", "_kind", "_detail"];
     missionNamespace setVariable ["airbase_v1_execActive", true, true];
     missionNamespace setVariable ["airbase_v1_execFid", _fid, true];
+
+    private _evExec = ["airbase_v1_events", []] call ARC_fnc_stateGet;
+    if (!(_evExec isEqualType [])) then { _evExec = []; };
+    private _evExecMax = missionNamespace getVariable ["airbase_v1_eventsMax", 60];
+    if (!(_evExecMax isEqualType 0) || { _evExecMax < 10 }) then { _evExecMax = 60; };
+    _evExec pushBack [serverTime, "EXEC_START", _fid, "SYSTEM", "", [_kind, _detail]];
+    if ((count _evExec) > _evExecMax) then { _evExec deleteRange [0, (count _evExec) - _evExecMax]; };
+    ["airbase_v1_events", _evExec] call ARC_fnc_stateSet;
 
     private _occupyTimeoutS = missionNamespace getVariable ["airbase_v1_runwayOccupyTimeout_s", 900];
     if (!(_occupyTimeoutS isEqualType 0) || { _occupyTimeoutS < 60 }) then { _occupyTimeoutS = 900; };
@@ -792,6 +874,15 @@ if (_idxRecActive >= 0) then {
 
     [_fid, _kind, _detail, if (_ok) then {"COMPLETE"} else {"FAILED"}, false, "EXEC_FINISH"] call ARC_fnc_airbaseRunwayLockRelease;
     ["exec-end", false] call ARC_fnc_airbaseRunwayLockSweep;
+
+    private _evExecEnd = ["airbase_v1_events", []] call ARC_fnc_stateGet;
+    if (!(_evExecEnd isEqualType [])) then { _evExecEnd = []; };
+    private _evExecEndMax = missionNamespace getVariable ["airbase_v1_eventsMax", 60];
+    if (!(_evExecEndMax isEqualType 0) || { _evExecEndMax < 10 }) then { _evExecEndMax = 60; };
+    _evExecEnd pushBack [serverTime, "EXEC_END", _fid, "SYSTEM", "", [if (_ok) then {"COMPLETE"} else {"FAILED"}]];
+    _evExecEnd pushBack [serverTime, "LOCK_RELEASE", _fid, "SYSTEM", "", [if (_ok) then {"COMPLETE"} else {"FAILED"}]];
+    if ((count _evExecEnd) > _evExecEndMax) then { _evExecEnd deleteRange [0, (count _evExecEnd) - _evExecEndMax]; };
+    ["airbase_v1_events", _evExecEnd] call ARC_fnc_stateSet;
 
     missionNamespace setVariable ["airbase_v1_execActive", false, true];
 };
