@@ -30,7 +30,8 @@ if (!isNil "remoteExecutedOwner") then
             } forEach allPlayers;
         };
 
-        if (!([_requester, "ARC_fnc_tocRequestCivsubSave", "CIVSUB save rejected: sender verification failed.", "TOC_CIVSUB_SAVE_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
+        // RemoteExec-only validation path: requires remoteExecutedOwner context.
+        if (!([_requester, "ARC_fnc_tocRequestCivsubSave", "CIVSUB save rejected: sender verification failed.", "TOC_CIVSUB_SAVE_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
         private _isOmni = [_requester, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
         private _can = _isOmni || { [_requester] call ARC_fnc_rolesCanApproveQueue };
