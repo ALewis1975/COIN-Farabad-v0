@@ -123,6 +123,26 @@ switch (_data) do
         };
     };
 
+    case "ADMIN_AIRBASE_RESET_CTRL":
+    {
+        [] spawn {
+            private _ok = [
+                "Reset AIRBASE control state?\n\nThis clears runway lock state, queue, pending clearance requests, and hold/manual-priority controls while preserving history/events by default.",
+                "Confirm AIRBASE Control Reset",
+                true,
+                true
+            ] call BIS_fnc_guiMessage;
+
+            if (_ok) then
+            {
+                [player, true] remoteExec ["ARC_fnc_tocRequestAirbaseResetControlState", 2];
+                ["HQ", "AIRBASE control reset requested (server)."] call ARC_fnc_clientToast;
+            } else {
+                ["HQ", "AIRBASE control reset cancelled."] call ARC_fnc_clientToast;
+            };
+        };
+    };
+
     case "ADMIN_CIVSUB_RESET":
     {
         [] spawn {
