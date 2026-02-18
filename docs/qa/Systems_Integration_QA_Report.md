@@ -380,13 +380,13 @@ while {true} do {
 - **Status:** Working (known parser false positives documented)
 - **Scope:** Only changed files (efficient)
 
-#### sqf-lint.yml ⚠️
-- **Purpose:** Full parse validation with sqfvm
-- **Tools:** sqfvm (VM-based parser)
-- **Status:** **BROKEN** - `pip install sqfvm` fails (package not available)
-- **Impact:** Non-blocking (preflight is primary gate)
+#### sqf-lint.yml (decommission notice) ✅
+- **Purpose:** Explicitly communicate that legacy `sqfvm` lint is retired
+- **Tools:** none (deterministic no-op notice)
+- **Status:** Active as documentation-only workflow stub
+- **Impact:** Prevents flaky/non-deterministic `pip install sqfvm` failures in CI
 
-**Recommendation:** Remove or replace sqf-lint.yml workflow with alternative
+**Normative lint gate:** `arma-preflight.yml` is the required and authoritative lint/config preflight check for contributors and reviewers.
 
 ---
 
@@ -502,7 +502,7 @@ Per `.github/copilot-instructions.md` Section 3:
 3. Document `serverTime` semantics or switch to `time` in `fn_publicBroadcastState.sqf`
 4. Add type guards on high-frequency `uiNamespace` reads
 5. Add warning comment to `fn_rpcValidateSender.sqf` about remote-only usage
-6. Remove or replace broken `sqf-lint.yml` workflow
+6. Keep `sqf-lint.yml` as a decommission notice only; enforce `arma-preflight.yml` as required lint gate
 
 ### Long-Term Enhancements
 7. Consider event-driven state updates instead of polling (P2-4)
