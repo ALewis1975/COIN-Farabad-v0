@@ -61,9 +61,9 @@ private _threads = ["threads", []] call ARC_fnc_stateGet;
 if (_threads isEqualType []) then
 {
     {
-        if !(_x isEqualType []) then { continue; };
-        if ((count _x) < 14) then { continue; };
-        private _parent = _x # 13;
+        private _thr = [_x] call ARC_fnc_threadNormalizeRecord;
+        if (_thr isEqualTo []) then { continue; };
+        private _parent = _thr # 13;
         [_parent] call _pushId;
     } forEach _threads;
 };

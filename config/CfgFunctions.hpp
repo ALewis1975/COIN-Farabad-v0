@@ -95,8 +95,11 @@ class CfgFunctions
             // Threads / cases
             class taskEnsureThreadParent {};
             class threadFindOrCreate {};
+            class threadResolveDistrictId {};
+            class threadNormalizeRecord {};
             class threadOnIncidentClosed {};
             class threadTickAll {};
+            class threadEmitDistrictPressure {};
             class threadMaybeCreateCommandNodeLead {};
             class threadBroadcast {};
             class threadRehydrateParents {};
@@ -579,4 +582,3 @@ class Ops
         };
     };
 };
-

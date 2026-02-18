@@ -24,10 +24,10 @@ if (_threadId isEqualTo "") exitWith {false};
 private _threads = ["threads", []] call ARC_fnc_stateGet;
 if (!(_threads isEqualType [])) then { _threads = []; };
 
-private _idx = _threads findIf { _x isEqualType [] && { (count _x) >= 14 } && { (_x # 0) isEqualTo _threadId } };
+private _idx = _threads findIf { ([_x] call ARC_fnc_threadNormalizeRecord) isNotEqualTo [] && { ((_x # 0) isEqualTo _threadId) } };
 if (_idx < 0) exitWith {false};
 
-private _thr = _threads # _idx;
+private _thr = [(_threads # _idx)] call ARC_fnc_threadNormalizeRecord;
 
 private _now = serverTime;
 
