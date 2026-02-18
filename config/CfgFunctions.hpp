@@ -613,9 +613,11 @@ class Ops
             class airbaseSubmitClearanceRequest {};
             class airbaseCancelClearanceRequest {};
             class airbaseMarkClearanceEmergency {};
+            class airbaseRequestClearanceDecision {};
             class airbaseClientSubmitClearanceRequest {};
             class airbaseClientCancelClearanceRequest {};
             class airbaseClientMarkClearanceEmergency {};
+            class airbaseClientRequestClearanceDecision {};
 
         };
     };

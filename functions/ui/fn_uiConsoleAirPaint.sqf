@@ -18,6 +18,8 @@ if (isNull _display) exitWith {false};
 
 private _ctrlList = _display displayCtrl 78011;
 private _ctrlDetails = _display displayCtrl 78012;
+private _btnPrimary = _display displayCtrl 78002;
+private _btnSecondary = _display displayCtrl 78003;
 if (isNull _ctrlList || { isNull _ctrlDetails }) exitWith {false};
 
 private _owner = uiNamespace getVariable ["ARC_console_mainListOwner", ""];
@@ -44,6 +46,16 @@ private _getPub = {
     _val
 };
 
+private _fmtTime = {
+    params ["_t"];
+    if (!(_t isEqualType 0) || { _t < 0 }) exitWith {"-"};
+
+    private _v = floor _t;
+    private _m = floor (_v / 60);
+    private _s = _v mod 60;
+    format ["%1m %2s", _m, _s]
+};
+
 private _air = [_pub, "airbase", []] call _getPub;
 if (!(_air isEqualType [])) then { _air = []; };
 
@@ -68,6 +80,9 @@ if (!(_runwayState isEqualType "")) then { _runwayState = "UNKNOWN"; };
 private _runwayOwner = [_air, "runwayOwner", ""] call _getPub;
 if (!(_runwayOwner isEqualType "")) then { _runwayOwner = ""; };
 
+private _runwayUntil = [_air, "runwayUntil", -1] call _getPub;
+if (!(_runwayUntil isEqualType 0)) then { _runwayUntil = -1; };
+
 private _holdDepartures = [_air, "holdDepartures", false] call _getPub;
 if (!(_holdDepartures isEqualType true) && !(_holdDepartures isEqualType false)) then { _holdDepartures = false; };
 uiNamespace setVariable ["ARC_console_airHoldDepartures", _holdDepartures];
@@ -78,47 +93,97 @@ if (!(_nextItems isEqualType [])) then { _nextItems = []; };
 private _clearancePending = [_air, "clearanceControllerPending", []] call _getPub;
 if (!(_clearancePending isEqualType [])) then { _clearancePending = []; };
 
+private _clearanceHistoryTail = [_air, "clearanceHistoryTail", []] call _getPub;
+if (!(_clearanceHistoryTail isEqualType [])) then { _clearanceHistoryTail = []; };
+
 private _awaitingCount = [_air, "clearanceAwaitingTowerCount", 0] call _getPub;
 if (!(_awaitingCount isEqualType 0)) then { _awaitingCount = 0; };
 
-private _clrPreview = [];
-private _clrN = 3 min (count _clearancePending);
-for "_iClr" from 0 to (_clrN - 1) do
-{
-    private _row = _clearancePending select _iClr;
-    if !(_row isEqualType []) then { continue; };
+private _stateUpdatedAt = missionNamespace getVariable ["ARC_pub_stateUpdatedAt", -1];
+if (!(_stateUpdatedAt isEqualType 0)) then { _stateUpdatedAt = -1; };
 
-    private _rid = _row param [0, ""];
-    private _rtype = _row param [1, ""];
-    private _pilot = _row param [2, ""];
-    private _st = toUpperANSI (_row param [5, ""]);
-    private _label = if (_st isEqualTo "AWAITING_TOWER_DECISION") then { "awaiting decision" } else { "pending" };
-
-    _clrPreview pushBack format ["%1 %2 (%3) - %4", _rid, _rtype, _pilot, _label];
-};
-
-private _clrPreviewText = if ((count _clrPreview) > 0) then { _clrPreview joinString "<br/>" } else { "(none)" };
-
-if (_rebuild) then
-{
+if (_rebuild) then {
     lbClear _ctrlList;
 
-    private _i = _ctrlList lbAdd format ["SUMMARY  DEP:%1 ARR:%2 TOTAL:%3", _depQueued, _arrQueued, _totalQueued];
-    _ctrlList lbSetData [_i, "AIR_SUMMARY"];
+    private _hdrReq = _ctrlList lbAdd "-- PENDING CLEARANCES --";
+    _ctrlList lbSetData [_hdrReq, "HDR|REQ"];
 
-    {
-        if !(_x isEqualType []) then { continue; };
-        private _fid = _x param [0, ""];
-        private _kind = _x param [1, ""];
-        private _asset = _x param [2, ""];
-        if (!(_fid isEqualType "")) then { _fid = ""; };
-        if (!(_kind isEqualType "")) then { _kind = ""; };
-        if (!(_asset isEqualType "")) then { _asset = ""; };
+    if ((count _clearancePending) == 0) then {
+        private _noneReq = _ctrlList lbAdd "(none)";
+        _ctrlList lbSetData [_noneReq, "REQ|NONE"];
+    } else {
+        {
+            if !(_x isEqualType []) then { continue; };
 
-        private _lbl = format ["%1  [%2] %3", _fid, _kind, _asset];
-        private _row = _ctrlList lbAdd _lbl;
-        _ctrlList lbSetData [_row, format ["AIR_FID|%1|%2|%3", _fid, _kind, _asset]];
-    } forEach _nextItems;
+            private _rid = _x param [0, ""];
+            private _rtype = _x param [1, ""];
+            private _pilot = _x param [2, ""];
+            private _prio = _x param [4, 0];
+            private _status = toUpperANSI (_x param [5, ""]);
+            private _updated = _x param [7, -1];
+            private _decision = _x param [8, []];
+            private _decBy = "";
+            if (_decision isEqualType [] && { (count _decision) >= 1 }) then { _decBy = _decision param [0, ""]; };
+
+            private _lbl = format ["%1 [%2] %3 (%4)", _rid, _rtype, _pilot, _status];
+            if ((_prio isEqualType 0) && { _prio >= 100 }) then { _lbl = format ["%1 !EMERGENCY!", _lbl]; };
+
+            private _row = _ctrlList lbAdd _lbl;
+            _ctrlList lbSetData [_row, format ["REQ|%1|%2|%3|%4|%5|%6", _rid, _rtype, _pilot, _status, _updated, _decBy]];
+        } forEach _clearancePending;
+    };
+
+    private _hdrFlt = _ctrlList lbAdd "-- SCHEDULED FLIGHTS --";
+    _ctrlList lbSetData [_hdrFlt, "HDR|FLT"];
+
+    if ((count _nextItems) == 0) then {
+        private _noneF = _ctrlList lbAdd "(none)";
+        _ctrlList lbSetData [_noneF, "FLT|NONE"];
+    } else {
+        {
+            if !(_x isEqualType []) then { continue; };
+            private _fid = _x param [0, ""];
+            private _kind = _x param [1, ""];
+            private _asset = _x param [2, ""];
+
+            private _lbl = format ["%1  [%2] %3", _fid, _kind, _asset];
+            private _row = _ctrlList lbAdd _lbl;
+            _ctrlList lbSetData [_row, format ["FLT|%1|%2|%3", _fid, _kind, _asset]];
+        } forEach _nextItems;
+    };
+
+    private _hdrRwy = _ctrlList lbAdd "-- RUNWAY LOCK STATUS --";
+    _ctrlList lbSetData [_hdrRwy, "HDR|RWY"];
+    private _runwayLbl = format ["State %1 | Owner %2", _runwayState, if (_runwayOwner isEqualTo "") then {"-"} else {_runwayOwner}];
+    private _runwayRow = _ctrlList lbAdd _runwayLbl;
+    _ctrlList lbSetData [_runwayRow, format ["RWY|%1|%2|%3", _runwayState, _runwayOwner, _runwayUntil]];
+
+    private _hdrDec = _ctrlList lbAdd "-- RECENT DECISIONS --";
+    _ctrlList lbSetData [_hdrDec, "HDR|DEC"];
+
+    private _decisions = _clearanceHistoryTail select {
+        private _s = toUpperANSI (_x param [6, ""]);
+        _s in ["APPROVED", "DENIED", "CANCELED"]
+    };
+
+    if ((count _decisions) == 0) then {
+        private _noneD = _ctrlList lbAdd "(none)";
+        _ctrlList lbSetData [_noneD, "DEC|NONE"];
+    } else {
+        private _take = 5 min (count _decisions);
+        for "_i" from 0 to (_take - 1) do {
+            private _rec = _decisions select ((count _decisions) - 1 - _i);
+            private _rid = _rec param [0, ""];
+            private _status = toUpperANSI (_rec param [6, ""]);
+            private _upd = _rec param [8, -1];
+            private _dec = _rec param [9, []];
+            private _by = if (_dec isEqualType []) then { _dec param [0, ""] } else { "" };
+            private _action = if (_dec isEqualType []) then { _dec param [3, ""] } else { "" };
+
+            private _row = _ctrlList lbAdd format ["%1 %2 by %3", _rid, _status, if (_by isEqualTo "") then {"UNKNOWN"} else {_by}];
+            _ctrlList lbSetData [_row, format ["DEC|%1|%2|%3|%4", _rid, _status, _upd, _action]];
+        };
+    };
 
     if ((lbSize _ctrlList) > 0) then { _ctrlList lbSetCurSel 0; };
 };
@@ -129,13 +194,12 @@ if (_sel < 0 && { (lbSize _ctrlList) > 0 }) then { _sel = 0; _ctrlList lbSetCurS
 private _selData = if (_sel >= 0) then { _ctrlList lbData _sel } else { "" };
 if (!(_selData isEqualType "")) then { _selData = ""; };
 
-private _selectedFid = "";
-if ((_selData find "AIR_FID|") isEqualTo 0) then
-{
-    private _parts = _selData splitString "|";
-    if ((count _parts) >= 2) then { _selectedFid = _parts select 1; };
-};
+private _parts = _selData splitString "|";
+private _rowType = if ((count _parts) > 0) then { _parts select 0 } else { "" };
+private _selectedFid = if (_rowType isEqualTo "FLT") then { _parts param [1, ""] } else { "" };
 uiNamespace setVariable ["ARC_console_airSelectedFid", _selectedFid];
+uiNamespace setVariable ["ARC_console_airSelectedRow", _parts];
+uiNamespace setVariable ["ARC_console_airSelectedRowType", _rowType];
 
 private _canAirHoldRelease = ["ARC_console_airCanHoldRelease", false] call ARC_fnc_uiNsGetBool;
 private _canAirQueueManage = ["ARC_console_airCanQueueManage", false] call ARC_fnc_uiNsGetBool;
@@ -151,75 +215,163 @@ private _canText = if (_canAirControl) then {
 } else {
     if (_canAirRead) then { "TOWER AUTH: READ-ONLY" } else { "TOWER AUTH: NO ACCESS" }
 };
-private _holdText = if (_holdDepartures) then { "HOLD ACTIVE" } else { "DEPARTURES OPEN" };
-private _execText = if (_execActive) then { format ["EXEC ACTIVE: %1", _execFid] } else { "EXEC ACTIVE: none" };
-private _rwOwnerText = if (_runwayOwner isEqualTo "") then { "-" } else { _runwayOwner };
 
-private _actionHint = "";
-if (!_canAirRead && !_canAirControl) then
-{
-    _actionHint = "No AIR permissions: tab visibility should be restricted to authorized observers/controllers.";
-}
-else
-{
-    private _hintParts = [];
+private _nextActionOwner = "TOWER";
+private _selectedState = "NONE";
+private _selectedUpdated = -1;
+private _selectedDetail = "Select a row.";
 
-    if (_canAirHoldRelease) then
-    {
-        _hintParts pushBack "Primary: toggle HOLD/RELEASE departures.";
-    }
-    else
-    {
-        _hintParts pushBack "Primary unavailable: no HOLD/RELEASE permission.";
-    };
+private _primaryLabel = "HOLD";
+private _secondaryLabel = "RELEASE";
+private _primaryTooltip = "Global control: HOLD departures.";
+private _secondaryTooltip = "Global control: RELEASE departures.";
+private _primaryEnabled = _canAirHoldRelease;
+private _secondaryEnabled = _canAirHoldRelease;
 
-    if (_canAirQueueManage) then
-    {
-        if (_selectedFid isEqualTo "") then {
-            _hintParts pushBack "Select a queued flight to use EXPEDITE/CANCEL.";
+switch (_rowType) do {
+    case "REQ": {
+        private _rid = _parts param [1, ""];
+        if (_rid isEqualTo "NONE") then {
+            _selectedState = "NO_PENDING_REQUESTS";
+            _nextActionOwner = "SYSTEM";
+            _selectedDetail = "No pending clearance requests.";
+            _primaryLabel = "APPROVE (N/A)";
+            _secondaryLabel = "DENY (N/A)";
+            _primaryEnabled = false;
+            _secondaryEnabled = false;
+            _primaryTooltip = "No request selected.";
+            _secondaryTooltip = "No request selected.";
         } else {
-            if (_sel == 1) then {
-                _hintParts pushBack "Secondary will CANCEL the first queued flight.";
-            } else {
-                _hintParts pushBack "Secondary will EXPEDITE selected flight to front of queue.";
-            };
+            _selectedState = _parts param [4, "PENDING"];
+            _selectedUpdated = parseNumber (_parts param [5, "-1"]);
+            _nextActionOwner = "TOWER_CONTROLLER";
+            _selectedDetail = format ["Request %1 (%2) from %3", _rid, _parts param [2, ""], _parts param [3, ""]];
+            _primaryLabel = "APPROVE";
+            _secondaryLabel = "DENY";
+            _primaryEnabled = _canAirQueueManage;
+            _secondaryEnabled = _canAirQueueManage;
+            _primaryTooltip = if (_canAirQueueManage) then { "Approve selected clearance request." } else { "Disabled: no queue authorization." };
+            _secondaryTooltip = if (_canAirQueueManage) then { "Deny selected clearance request." } else { "Disabled: no queue authorization." };
         };
-    }
-    else
-    {
-        _hintParts pushBack "Secondary unavailable: no EXPEDITE/CANCEL permission.";
     };
 
-    _actionHint = _hintParts joinString " ";
+    case "FLT": {
+        private _fid = _parts param [1, ""];
+        if (_fid isEqualTo "NONE") then {
+            _selectedState = "NO_QUEUED_FLIGHTS";
+            _nextActionOwner = "SYSTEM";
+            _selectedDetail = "No queued flights available.";
+            _primaryLabel = "EXPEDITE (N/A)";
+            _secondaryLabel = "CANCEL (N/A)";
+            _primaryEnabled = false;
+            _secondaryEnabled = false;
+            _primaryTooltip = "No flight selected.";
+            _secondaryTooltip = "No flight selected.";
+        } else {
+            _selectedState = "QUEUED";
+            _selectedUpdated = _stateUpdatedAt;
+            _nextActionOwner = "TOWER_CONTROLLER";
+            _selectedDetail = format ["Flight %1 [%2] %3", _fid, _parts param [2, ""], _parts param [3, ""]];
+            _primaryLabel = "EXPEDITE";
+            _secondaryLabel = "CANCEL";
+            _primaryEnabled = _canAirQueueManage;
+            _secondaryEnabled = _canAirQueueManage;
+            _primaryTooltip = if (_canAirQueueManage) then { "Expedite selected queued flight." } else { "Disabled: no queue authorization." };
+            _secondaryTooltip = if (_canAirQueueManage) then { "Cancel selected queued flight." } else { "Disabled: no queue authorization." };
+        };
+    };
+
+    case "RWY": {
+        _selectedState = _parts param [1, "UNKNOWN"];
+        _selectedUpdated = _stateUpdatedAt;
+        _nextActionOwner = "TOWER_CONTROLLER";
+        _selectedDetail = format ["Runway lock state %1 (owner %2)", _parts param [1, ""], if ((_parts param [2, ""]) isEqualTo "") then {"-"} else {_parts param [2, ""]}];
+        _primaryLabel = "HOLD";
+        _secondaryLabel = "RELEASE";
+        _primaryEnabled = _canAirHoldRelease;
+        _secondaryEnabled = _canAirHoldRelease;
+        _primaryTooltip = if (_canAirHoldRelease) then { "Global hold on departures." } else { "Disabled: no hold/release authorization." };
+        _secondaryTooltip = if (_canAirHoldRelease) then { "Global release departures." } else { "Disabled: no hold/release authorization." };
+    };
+
+    case "DEC": {
+        _selectedState = _parts param [2, "UNKNOWN"];
+        _selectedUpdated = parseNumber (_parts param [3, "-1"]);
+        _nextActionOwner = "AUDIT";
+        _selectedDetail = format ["Decision record %1 (%2)", _parts param [1, ""], _parts param [4, ""]];
+        _primaryLabel = "HOLD";
+        _secondaryLabel = "RELEASE";
+        _primaryEnabled = _canAirHoldRelease;
+        _secondaryEnabled = _canAirHoldRelease;
+        _primaryTooltip = if (_canAirHoldRelease) then { "Global hold on departures." } else { "Disabled: no hold/release authorization." };
+        _secondaryTooltip = if (_canAirHoldRelease) then { "Global release departures." } else { "Disabled: no hold/release authorization." };
+    };
+
+    default {
+        _selectedState = "OVERVIEW";
+        _selectedUpdated = _stateUpdatedAt;
+        _nextActionOwner = "TOWER_CONTROLLER";
+        _selectedDetail = "AIR overview.";
+        _primaryLabel = "HOLD";
+        _secondaryLabel = "RELEASE";
+        _primaryEnabled = _canAirHoldRelease;
+        _secondaryEnabled = _canAirHoldRelease;
+        _primaryTooltip = if (_canAirHoldRelease) then { "Global hold on departures." } else { "Disabled: no hold/release authorization." };
+        _secondaryTooltip = if (_canAirHoldRelease) then { "Global release departures." } else { "Disabled: no hold/release authorization." };
+    };
+};
+
+if (!_canAirRead && !_canAirControl) then {
+    _primaryEnabled = false;
+    _secondaryEnabled = false;
+    _primaryLabel = "NO ACCESS";
+    _secondaryLabel = "NO ACCESS";
+    _primaryTooltip = "No AIR permissions.";
+    _secondaryTooltip = "No AIR permissions.";
+};
+
+if (!isNull _btnPrimary) then {
+    _btnPrimary ctrlSetText _primaryLabel;
+    _btnPrimary ctrlEnable _primaryEnabled;
+    _btnPrimary ctrlSetTooltip _primaryTooltip;
+};
+if (!isNull _btnSecondary) then {
+    _btnSecondary ctrlSetText _secondaryLabel;
+    _btnSecondary ctrlEnable _secondaryEnabled;
+    _btnSecondary ctrlSetTooltip _secondaryTooltip;
 };
 
 private _details = format [
     "<t size='1.05' color='#B89B6B'>AIRBASE SNAPSHOT</t>"
-    + "<br/><t color='#CFCFCF'>%1 | %2</t>"
-    + "<br/><br/><t color='#B89B6B'>Queue</t>"
-    + "<br/>Departures queued: <t color='#FFFFFF'>%3</t>"
-    + "<br/>Arrivals queued: <t color='#FFFFFF'>%4</t>"
-    + "<br/>Total queued: <t color='#FFFFFF'>%5</t>"
+    + "<br/><t color='#CFCFCF'>%1</t>"
+    + "<br/><br/><t color='#B89B6B'>Queue Summary</t>"
+    + "<br/>Departures queued: <t color='#FFFFFF'>%2</t>"
+    + "<br/>Arrivals queued: <t color='#FFFFFF'>%3</t>"
+    + "<br/>Total queued: <t color='#FFFFFF'>%4</t>"
     + "<br/><br/><t color='#B89B6B'>Runway</t>"
-    + "<br/>State: <t color='#FFFFFF'>%6</t>"
-    + "<br/>Owner: <t color='#FFFFFF'>%7</t>"
+    + "<br/>State: <t color='#FFFFFF'>%5</t> | Owner: <t color='#FFFFFF'>%6</t>"
+    + "<br/>Hold departures: <t color='#FFFFFF'>%7</t>"
     + "<br/>Execution: <t color='#FFFFFF'>%8</t>"
-    + "<br/><br/><t color='#B89B6B'>Clearance</t>"
-    + "<br/>Awaiting tower decision: <t color='#FFFFFF'>%9</t>"
-    + "<br/><t color='#CFCFCF'>%10</t>"
-    + "<br/><br/><t color='#B89B6B'>Action Hint</t>"
-    + "<br/><t color='#CFCFCF'>%11</t>",
+    + "<br/><br/><t color='#B89B6B'>Selection</t>"
+    + "<br/>State: <t color='#FFFFFF'>%9</t>"
+    + "<br/>Last update: <t color='#FFFFFF'>%10</t>"
+    + "<br/>Next action owner: <t color='#FFFFFF'>%11</t>"
+    + "<br/><t color='#CFCFCF'>%12</t>"
+    + "<br/><br/><t color='#B89B6B'>Pending/Awaiting</t>"
+    + "<br/>Awaiting tower decision: <t color='#FFFFFF'>%13</t>",
     _canText,
-    _holdText,
     _depQueued,
     _arrQueued,
     _totalQueued,
     _runwayState,
-    _rwOwnerText,
-    _execText,
-    _awaitingCount,
-    _clrPreviewText,
-    _actionHint
+    if (_runwayOwner isEqualTo "") then {"-"} else {_runwayOwner},
+    if (_holdDepartures) then {"HOLD ACTIVE"} else {"OPEN"},
+    if (_execActive) then { format ["%1", _execFid] } else { "none" },
+    _selectedState,
+    [_selectedUpdated] call _fmtTime,
+    _nextActionOwner,
+    _selectedDetail,
+    _awaitingCount
 ];
 
 _ctrlDetails ctrlSetStructuredText parseText _details;
