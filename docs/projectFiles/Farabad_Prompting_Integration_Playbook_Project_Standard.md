@@ -231,11 +231,11 @@ Every patch must ship with pass/fail checks for:
 
 ## Prompt templates (use these verbatim)
 
-### Template A — AUDIT MODE (stop duplicates before coding)
+### Template A — QA/AUDIT MODE (stop duplicates before coding)
 Use when you suspect you’ve built the same thing twice.
 
 ```text
-AUDIT MODE. No new code.
+QA/AUDIT MODE. No new code.
 Goal: detect duplication/regression risk before coding.
 Context: Dedicated MP; JIP required; server single-writer; UI snapshot-driven.
 
@@ -343,4 +343,3 @@ If you feel “we keep redoing the same work,” it’s almost always one of:
 - OneDrive sync conflicts (silent regressions)
 
 Use this playbook to force clarity and stop the loop.
-
