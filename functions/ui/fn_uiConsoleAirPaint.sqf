@@ -23,6 +23,7 @@ if (isNull _ctrlList || { isNull _ctrlDetails }) exitWith {false};
 private _owner = uiNamespace getVariable ["ARC_console_mainListOwner", ""];
 if (!(_owner isEqualType "")) then { _owner = ""; };
 _owner = toUpper (trim _owner);
+private _preserveSelection = _owner isEqualTo "AIR";
 if (_owner isNotEqualTo "AIR") then { _rebuild = true; };
 uiNamespace setVariable ["ARC_console_mainListOwner", "AIR"];
 
@@ -69,6 +70,17 @@ if (!(_nextItems isEqualType [])) then { _nextItems = []; };
 
 if (_rebuild) then
 {
+    private _prevSelData = "";
+    if (_preserveSelection) then
+    {
+        private _prevSel = lbCurSel _ctrlList;
+        if (_prevSel >= 0) then
+        {
+            _prevSelData = _ctrlList lbData _prevSel;
+            if (!(_prevSelData isEqualType "")) then { _prevSelData = ""; };
+        };
+    };
+
     lbClear _ctrlList;
 
     private _i = _ctrlList lbAdd format ["SUMMARY  DEP:%1 ARR:%2 TOTAL:%3", _depQueued, _arrQueued, _totalQueued];
@@ -88,7 +100,24 @@ if (_rebuild) then
         _ctrlList lbSetData [_row, format ["AIR_FID|%1|%2|%3", _fid, _kind, _asset]];
     } forEach _nextItems;
 
-    if ((lbSize _ctrlList) > 0) then { _ctrlList lbSetCurSel 0; };
+    if ((lbSize _ctrlList) > 0) then
+    {
+        private _restoreSel = -1;
+
+        if (_preserveSelection && { _prevSelData isNotEqualTo "" }) then
+        {
+            _restoreSel = _ctrlList lbFind _prevSelData;
+
+            if (_restoreSel < 0 && { (_prevSelData find "AIR_FID|") isEqualTo 0 } && { (lbSize _ctrlList) > 1 }) then
+            {
+                // Preserve flight-row intent when the exact FID disappeared between refresh ticks.
+                _restoreSel = 1;
+            };
+        };
+
+        if (_restoreSel < 0) then { _restoreSel = 0; };
+        _ctrlList lbSetCurSel _restoreSel;
+    };
 };
 
 private _sel = lbCurSel _ctrlList;
