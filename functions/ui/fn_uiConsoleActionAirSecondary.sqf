@@ -11,11 +11,11 @@ if (!hasInterface) exitWith {false};
 private _disp = findDisplay 78000;
 if (isNull _disp) exitWith {false};
 
-private _canAirControl = ["ARC_console_airCanControl", false] call ARC_fnc_uiNsGetBool;
-if (!_canAirControl) exitWith
+private _canAirQueueManage = ["ARC_console_airCanQueueManage", false] call ARC_fnc_uiNsGetBool;
+if (!_canAirQueueManage) exitWith
 {
     [_disp, false] call ARC_fnc_uiConsoleAirPaint;
-    ["AIR", "Read-only details refreshed."] call ARC_fnc_clientToast;
+    ["AIR", "No EXPEDITE/CANCEL permission."] call ARC_fnc_clientToast;
     true
 };
 
@@ -35,10 +35,19 @@ if (!(_data isEqualType "") || { (_data find "AIR_FID|") != 0 }) exitWith
 private _parts = _data splitString "|";
 if ((count _parts) < 2) exitWith { ["AIR", "Invalid queue selection."] call ARC_fnc_clientToast; false };
 
-private _fid = _parts # 1;
+private _fid = _parts select 1;
 if (_fid isEqualTo "") exitWith { ["AIR", "Invalid queue selection."] call ARC_fnc_clientToast; false };
 
-if (_sel == 1) then
+private _requestAction = if (_sel == 1) then {"CANCEL"} else {"PRIORITIZE"};
+private _canRequestAction = [format ["ARC_console_airCan%1", _requestAction], false] call ARC_fnc_uiNsGetBool;
+if (!_canRequestAction) exitWith
+{
+    [_disp, false] call ARC_fnc_uiConsoleAirPaint;
+    ["AIR", format ["No %1 permission for selected queue action.", _requestAction]] call ARC_fnc_clientToast;
+    true
+};
+
+if (_requestAction isEqualTo "CANCEL") then
 {
     [_fid] call ARC_fnc_airbaseClientRequestCancelQueuedFlight;
     ["AIR", format ["Cancel request sent: %1", _fid]] call ARC_fnc_clientToast;
