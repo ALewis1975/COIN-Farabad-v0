@@ -58,6 +58,7 @@ private _clearCivContext = {
     uiNamespace setVariable ["ARC_civsubInteract_actionInProgress", false];
     uiNamespace setVariable ["ARC_civsubInteract_hasUserOutput", false];
     uiNamespace setVariable ["ARC_civsubInteract_lastResultType", ""];
+    uiNamespace setVariable ["ARC_console_civsubLastResult", createHashMap];
 };
 
 switch (_kind) do

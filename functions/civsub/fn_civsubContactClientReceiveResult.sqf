@@ -17,6 +17,8 @@ params [
 private _d = uiNamespace getVariable ["ARC_civsubInteract_display", displayNull];
 private _resp = controlNull;
 if (!isNull _d) then { _resp = _d displayCtrl 78320; };
+private _ctxTarget = uiNamespace getVariable ["ARC_civsubInteract_target", objNull];
+private _ctxTargetNetId = if (isNull _ctxTarget) then { "" } else { netId _ctxTarget };
 
 private _html = "";
 private _type = "";
@@ -60,6 +62,7 @@ uiNamespace setVariable ["ARC_console_civsubLastResult", createHashMapFromArray 
     ["type", _type],
     ["ok", _ok],
     ["payload", _payload],
+    ["targetNetId", _ctxTargetNetId],
     ["updatedAtText", _stamp],
     ["updatedAtTick", diag_tickTime]
 ]];
@@ -141,6 +144,8 @@ if (_type isEqualTo "CHECK_ID" && {_ok} && {_payload isEqualType createHashMap})
 
     // If the player is currently on CHECK_ID in the standalone dialog, refresh details there.
     if (!isNull _d) then { ["CHECK_ID"] call ARC_fnc_civsubContactDialogUpdateRightPane; };
+} else {
+    uiNamespace setVariable ["ARC_civsubInteract_idCardHtml", ""];
 };
 
 // Console-routed CIVSUB mode: repaint S2 details + user feedback.

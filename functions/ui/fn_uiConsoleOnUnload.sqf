@@ -32,6 +32,7 @@ uiNamespace setVariable ["ARC_civsubInteract_snapshot", createHashMap];
 uiNamespace setVariable ["ARC_civsubInteract_idCardHtml", ""];
 uiNamespace setVariable ["ARC_civsubInteract_actionInProgress", false];
 uiNamespace setVariable ["ARC_civsubInteract_hasUserOutput", false];
+uiNamespace setVariable ["ARC_console_civsubLastResult", createHashMap];
 uiNamespace setVariable ["ARC_console_intelMode", "TOOLS"];
 uiNamespace setVariable ["ARC_console_intelSelData", ""];
 
