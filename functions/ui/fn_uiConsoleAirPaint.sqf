@@ -31,9 +31,9 @@ if (!(_pub isEqualType [])) then { _pub = []; };
 
 private _getPub = {
     params ["_pairs", "_k", "_def"];
-    private _idx = _pairs findIf { _x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k } };
+    private _idx = _pairs findIf { _x isEqualType [] && { (count _x) >= 2 } && { ((_x select 0)) isEqualTo _k } };
     if (_idx < 0) exitWith { _def };
-    (_pairs # _idx) # 1
+    ((_pairs select _idx) select 1)
 };
 
 private _air = [_pub, "airbase", []] call _getPub;
@@ -101,7 +101,7 @@ private _selectedFid = "";
 if ((_selData find "AIR_FID|") isEqualTo 0) then
 {
     private _parts = _selData splitString "|";
-    if ((count _parts) >= 2) then { _selectedFid = _parts # 1; };
+    if ((count _parts) >= 2) then { _selectedFid = _parts select 1; };
 };
 uiNamespace setVariable ["ARC_console_airSelectedFid", _selectedFid];
 
