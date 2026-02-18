@@ -39,7 +39,13 @@ private _fid = _parts select 1;
 if (_fid isEqualTo "") exitWith { ["AIR", "Invalid queue selection."] call ARC_fnc_clientToast; false };
 
 private _requestAction = if (_sel == 1) then {"CANCEL"} else {"PRIORITIZE"};
-private _canRequestAction = [format ["ARC_console_airCan%1", _requestAction], false] call ARC_fnc_uiNsGetBool;
+private _permAction = switch (_requestAction) do
+{
+    case "CANCEL": {"Cancel"};
+    case "PRIORITIZE": {"Prioritize"};
+    default {""};
+};
+private _canRequestAction = [format ["ARC_console_airCan%1", _permAction], false] call ARC_fnc_uiNsGetBool;
 if (!_canRequestAction) exitWith
 {
     [_disp, false] call ARC_fnc_uiConsoleAirPaint;
