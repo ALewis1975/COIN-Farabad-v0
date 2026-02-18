@@ -73,8 +73,9 @@ if (!(_execFid isEqualType "")) then { _execFid = ""; };
 private _holdDepartures = ["airbase_v1_holdDepartures", false] call ARC_fnc_stateGet;
 if (!(_holdDepartures isEqualType true) && !(_holdDepartures isEqualType false)) then { _holdDepartures = false; };
 
-private _runwayState = missionNamespace getVariable ["airbase_v1_runwayState", "UNKNOWN"];
-if (!(_runwayState isEqualType "")) then { _runwayState = "UNKNOWN"; };
+private _runwayState = missionNamespace getVariable ["airbase_v1_runwayState", "OPEN"];
+if (!(_runwayState isEqualType "")) then { _runwayState = "OPEN"; };
+if !(_runwayState in ["OPEN", "RESERVED", "OCCUPIED"]) then { _runwayState = "OPEN"; };
 
 private _runwayOwner = missionNamespace getVariable ["airbase_v1_runwayOwner", ""];
 if (!(_runwayOwner isEqualType "")) then { _runwayOwner = ""; };
