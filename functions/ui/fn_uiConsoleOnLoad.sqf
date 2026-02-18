@@ -191,9 +191,8 @@ uiNamespace setVariable ["ARC_console_tabIds", _tabIds];
 // ---------------------------------------------------------------------------
 // Select default tab (supports "forced tab" open requests from station addActions)
 // ---------------------------------------------------------------------------
-private _forceTab = uiNamespace getVariable ["ARC_console_forceTab", ""];
-if (!(_forceTab isEqualType "")) then { _forceTab = ""; };
-_forceTab = toUpper (trim _forceTab);
+private _forceTab = ["ARC_console_forceTab", ""] call ARC_fnc_uiNsGetString;
+_forceTab = toUpper _forceTab;
 
 // Clear after consumption to avoid "sticky" tab forcing
 uiNamespace setVariable ["ARC_console_forceTab", nil];
@@ -240,7 +239,7 @@ else
 uiNamespace setVariable ["ARC_console_refreshLoop", true];
 [_display] spawn {
     params ["_display"];
-    while { !isNull _display && { dialog } && { uiNamespace getVariable ["ARC_console_refreshLoop", false] } } do
+    while { !isNull _display && { dialog } && { ["ARC_console_refreshLoop", false] call ARC_fnc_uiNsGetBool } } do
     {
         // Prevent the periodic paint from collapsing open dropdowns and interrupting text input.
         // Skip refresh while the user is focused on an Edit or Combo control.

@@ -439,6 +439,10 @@ class CfgFunctions
             class uiConsoleRefresh {};
             class uiConsoleQAAuditClientReceive {};
             class uiConsoleCompileAuditClientReceive {};
+            class uiNsWarnTypeMismatchOnce {};
+            class uiNsGetString {};
+            class uiNsGetArray {};
+            class uiNsGetBool {};
 
             // UI09 tab painters
             class uiConsoleDashboardPaint {};

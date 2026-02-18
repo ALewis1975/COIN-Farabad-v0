@@ -12,8 +12,7 @@
 
 if (!hasInterface) exitWith {false};
 
-private _tab = uiNamespace getVariable ["ARC_console_activeTab", "HANDOFF"];
-if (!(_tab isEqualType "")) then { _tab = "HANDOFF"; };
+private _tab = ["ARC_console_activeTab", "HANDOFF"] call ARC_fnc_uiNsGetString;
 _tab = toUpper _tab;
 
 switch (_tab) do
@@ -30,19 +29,18 @@ switch (_tab) do
 
     case "CMD":
     {
-        private _cmdMode = uiNamespace getVariable ["ARC_console_cmdMode", "OVERVIEW"];
-        if (!(_cmdMode isEqualType "")) then { _cmdMode = "OVERVIEW"; };
-        _cmdMode = toUpper (trim _cmdMode);
+        private _cmdMode = ["ARC_console_cmdMode", "OVERVIEW"] call ARC_fnc_uiNsGetString;
+        _cmdMode = toUpper _cmdMode;
 
         if (_cmdMode isEqualTo "QUEUE") then
         {
             private _canDecide = [player] call ARC_fnc_rolesCanApproveQueue;
-            private _queuePending = uiNamespace getVariable ["ARC_console_cmdQueueSelectedPending", false];
+            private _queuePending = ["ARC_console_cmdQueueSelectedPending", false] call ARC_fnc_uiNsGetBool;
 
             if (_canDecide && _queuePending) then
             {
                 [] spawn {
-                    private _qid = uiNamespace getVariable ["ARC_console_cmdQueueSelectedQid", ""];
+                    private _qid = ["ARC_console_cmdQueueSelectedQid", ""] call ARC_fnc_uiNsGetString;
                     if (_qid isEqualTo "") exitWith { ["TOC Queue", "Select a queue item first."] call ARC_fnc_clientToast; };
                     [player, _qid, true, ""] remoteExecCall ["ARC_fnc_intelQueueDecide", 2];
                     ["TOC Queue", format ["APPROVED: %1", _qid]] call ARC_fnc_clientToast;
