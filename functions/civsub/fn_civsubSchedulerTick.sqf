@@ -16,6 +16,40 @@ if (!isServer) exitWith {false};
 if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {false};
 if !(missionNamespace getVariable ["civsub_v1_scheduler_enabled", false]) exitWith {false};
 
+private _requiredFnNames = [
+    "ARC_fnc_civsubIsDistrictActive",
+    "ARC_fnc_civsubScoresCompute",
+    "ARC_fnc_civsubProbLeadHour",
+    "ARC_fnc_civsubProbAttackHour",
+    "ARC_fnc_civsubProbHourToTick",
+    "ARC_fnc_civsubIntelConfidence",
+    "ARC_fnc_civsubSchedulerEmitAmbientLead",
+    "ARC_fnc_civsubSchedulerEmitReactiveContact",
+    "ARC_fnc_civsubBundleToPairs"
+];
+private _missingFns = _requiredFnNames select {
+    private _fn = missionNamespace getVariable [_x, objNull];
+    !(_fn isEqualType {})
+};
+
+private _hasDistrictsState = !(isNil { missionNamespace getVariable "civsub_v1_districts" });
+private _hasSchedulerState = !(isNil { missionNamespace getVariable "civsub_v1_scheduler_s" });
+
+if ((count _missingFns) > 0 || {!_hasDistrictsState} || {!_hasSchedulerState}) exitWith {
+    if (
+        missionNamespace getVariable ["civsub_v1_debug", false]
+        && {((floor serverTime) mod 300) isEqualTo 0}
+    ) then {
+        diag_log format [
+            "[CIVSUB][SCHED][GUARD] missing prerequisites fn=%1 districts=%2 scheduler=%3",
+            _missingFns,
+            _hasDistrictsState,
+            _hasSchedulerState
+        ];
+    };
+    false
+};
+
 // Test/diagnostics (server only)
 // - civsub_v1_scheduler_force_emit: "" | "LEAD" | "ATTACK" | "BOTH"
 // - civsub_v1_scheduler_force_district: "" (all) or "Dxx"
