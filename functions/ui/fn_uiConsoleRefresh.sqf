@@ -111,15 +111,6 @@ if (_tab != "HQ" && { _hqSubPanels isEqualType [] }) then {
 // S2 Intel paint may temporarily resize/reposition MainList and workflow controls.
 // Other tabs must not inherit that layout.
 // ---------------------------------------------------------------------------
-private _s2Ctrls = [
-    _display displayCtrl 78050,
-    _display displayCtrl 78051,
-    _display displayCtrl 78052,
-    _display displayCtrl 78053,
-    _display displayCtrl 78054,
-    _display displayCtrl 78055
-];
-
 if (!isNull _ctrlList) then {
     private _kList = "ARC_ui_mainListPosDefault";
     private _p0 = [_kList, []] call ARC_fnc_uiNsGetArray;
@@ -207,17 +198,26 @@ case "DASH":
         if (!isNull _ctrlDetailsGrp) then { _ctrlDetailsGrp ctrlShow true; };
         if (!isNull _ctrlDetails) then { _ctrlDetails ctrlShow true; };
 
-        private _canAirControl = ["ARC_console_airCanControl", false] call ARC_fnc_uiNsGetBool;
+        private _canAirHoldRelease = ["ARC_console_airCanHoldRelease", false] call ARC_fnc_uiNsGetBool;
+        private _canAirQueueManage = ["ARC_console_airCanQueueManage", false] call ARC_fnc_uiNsGetBool;
+        private _canAirRead = ["ARC_console_airCanRead", false] call ARC_fnc_uiNsGetBool;
+        private _canAirControl = _canAirHoldRelease || _canAirQueueManage;
 
         if (!isNull _b1) then {
             _b1 ctrlShow true;
-            _b1 ctrlEnable true;
-            _b1 ctrlSetText (if (_canAirControl) then {"HOLD/RELEASE"} else {"REFRESH"});
+            _b1 ctrlEnable _canAirHoldRelease;
+            _b1 ctrlSetText (if (_canAirHoldRelease) then {"HOLD/RELEASE"} else {"NO HOLD AUTH"});
         };
         if (!isNull _b2) then {
             _b2 ctrlShow true;
-            _b2 ctrlEnable true;
-            _b2 ctrlSetText (if (_canAirControl) then {"EXPEDITE/CANCEL"} else {"DETAILS"});
+            _b2 ctrlEnable _canAirQueueManage;
+            _b2 ctrlSetText (if (_canAirQueueManage) then {"EXPEDITE/CANCEL"} else {"NO QUEUE AUTH"});
+        };
+
+        if (!_canAirRead && !_canAirControl) then
+        {
+            if (!isNull _b1) then { _b1 ctrlEnable false; _b1 ctrlSetText "NO ACCESS"; };
+            if (!isNull _b2) then { _b2 ctrlEnable false; _b2 ctrlSetText "NO ACCESS"; };
         };
 
         [_display, false] call ARC_fnc_uiConsoleAirPaint;
@@ -251,8 +251,8 @@ case "DASH":
             private _selectedPending = false;
             if (_queueState isEqualType [] && { (count _queueState) >= 2 }) then
             {
-                _selectedQid = _queueState # 0;
-                _selectedPending = _queueState # 1;
+                _selectedQid = _queueState select 0;
+                _selectedPending = _queueState select 1;
             };
             uiNamespace setVariable ["ARC_console_cmdQueueSelectedQid", _selectedQid];
             uiNamespace setVariable ["ARC_console_cmdQueueSelectedPending", _selectedPending];

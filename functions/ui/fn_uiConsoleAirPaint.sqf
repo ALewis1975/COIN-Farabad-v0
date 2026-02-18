@@ -113,24 +113,60 @@ if ((_selData find "AIR_FID|") isEqualTo 0) then
 };
 uiNamespace setVariable ["ARC_console_airSelectedFid", _selectedFid];
 
-private _canAirControl = ["ARC_console_airCanControl", false] call ARC_fnc_uiNsGetBool;
-private _canText = if (_canAirControl) then { "TOWER CONTROL: ENABLED" } else { "TOWER CONTROL: READ-ONLY" };
+private _canAirHoldRelease = ["ARC_console_airCanHoldRelease", false] call ARC_fnc_uiNsGetBool;
+private _canAirQueueManage = ["ARC_console_airCanQueueManage", false] call ARC_fnc_uiNsGetBool;
+private _canAirRead = ["ARC_console_airCanRead", false] call ARC_fnc_uiNsGetBool;
+private _canAirControl = _canAirHoldRelease || _canAirQueueManage;
+
+private _canText = if (_canAirControl) then {
+    format [
+        "TOWER AUTH: HOLD/RELEASE %1 | EXPEDITE/CANCEL %2",
+        if (_canAirHoldRelease) then {"YES"} else {"NO"},
+        if (_canAirQueueManage) then {"YES"} else {"NO"}
+    ]
+} else {
+    if (_canAirRead) then { "TOWER AUTH: READ-ONLY" } else { "TOWER AUTH: NO ACCESS" }
+};
 private _holdText = if (_holdDepartures) then { "HOLD ACTIVE" } else { "DEPARTURES OPEN" };
 private _execText = if (_execActive) then { format ["EXEC ACTIVE: %1", _execFid] } else { "EXEC ACTIVE: none" };
 private _rwOwnerText = if (_runwayOwner isEqualTo "") then { "-" } else { _runwayOwner };
 
-private _actionHint = if (_canAirControl) then {
-    if (_selectedFid isEqualTo "") then {
-        "Select a queued flight to use EXPEDITE/CANCEL."
-    } else {
-        if (_sel == 1) then {
-            "Secondary will CANCEL the first queued flight."
-        } else {
-            "Secondary will EXPEDITE selected flight to front of queue."
-        };
+private _actionHint = "";
+if (!_canAirRead && !_canAirControl) then
+{
+    _actionHint = "No AIR permissions: tab visibility should be restricted to authorized observers/controllers.";
+}
+else
+{
+    private _hintParts = [];
+
+    if (_canAirHoldRelease) then
+    {
+        _hintParts pushBack "Primary: toggle HOLD/RELEASE departures.";
+    }
+    else
+    {
+        _hintParts pushBack "Primary unavailable: no HOLD/RELEASE permission.";
     };
-} else {
-    "Read-only mode: tower-designated roles can HOLD/RELEASE or EXPEDITE/CANCEL."
+
+    if (_canAirQueueManage) then
+    {
+        if (_selectedFid isEqualTo "") then {
+            _hintParts pushBack "Select a queued flight to use EXPEDITE/CANCEL.";
+        } else {
+            if (_sel == 1) then {
+                _hintParts pushBack "Secondary will CANCEL the first queued flight.";
+            } else {
+                _hintParts pushBack "Secondary will EXPEDITE selected flight to front of queue.";
+            };
+        };
+    }
+    else
+    {
+        _hintParts pushBack "Secondary unavailable: no EXPEDITE/CANCEL permission.";
+    };
+
+    _actionHint = _hintParts joinString " ";
 };
 
 private _details = format [

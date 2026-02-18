@@ -143,17 +143,39 @@ private _canHQ = _isOmni || _isCmd || _isTocS3 || _isBnCmd;
 private _canOps = _isOmni || _isCmd || _isTocS3 || _isAuth;
 
 // Air tab access:
-// - Control access: tower-designated roles (CCIC/LC permissions from airbase auth helper)
+// - Action permissions are per capability (HOLD/RELEASE vs PRIORITIZE/CANCEL)
 // - Read-only access: TOC staff + OMNI (situational awareness)
-private _towerAuth = [player, "PRIORITIZE"] call ARC_fnc_airbaseTowerAuthorize;
-private _canAirControl = false;
-if (_towerAuth isEqualType [] && { (count _towerAuth) > 0 }) then
-{
-    _canAirControl = _towerAuth # 0;
-    if (!(_canAirControl isEqualType true) && !(_canAirControl isEqualType false)) then { _canAirControl = false; };
+private _towerAllowsAction = {
+    params ["_action"];
+
+    private _ok = false;
+    private _auth = [player, _action] call ARC_fnc_airbaseTowerAuthorize;
+    if (_auth isEqualType [] && { (count _auth) > 0 }) then
+    {
+        _ok = _auth select 0;
+        if (!(_ok isEqualType true) && !(_ok isEqualType false)) then { _ok = false; };
+    };
+
+    _ok
 };
 
+private _canAirHold = ["HOLD"] call _towerAllowsAction;
+private _canAirRelease = ["RELEASE"] call _towerAllowsAction;
+private _canAirPrioritize = ["PRIORITIZE"] call _towerAllowsAction;
+private _canAirCancel = ["CANCEL"] call _towerAllowsAction;
+
+private _canAirHoldRelease = _canAirHold || _canAirRelease;
+private _canAirQueueManage = _canAirPrioritize || _canAirCancel;
+private _canAirControl = _canAirHoldRelease || _canAirQueueManage;
+
 private _canAirRead = _canAirControl || _isOmni || _canTocFull;
+uiNamespace setVariable ["ARC_console_airCanHold", _canAirHold];
+uiNamespace setVariable ["ARC_console_airCanRelease", _canAirRelease];
+uiNamespace setVariable ["ARC_console_airCanPrioritize", _canAirPrioritize];
+uiNamespace setVariable ["ARC_console_airCanCancel", _canAirCancel];
+uiNamespace setVariable ["ARC_console_airCanHoldRelease", _canAirHoldRelease];
+uiNamespace setVariable ["ARC_console_airCanQueueManage", _canAirQueueManage];
+uiNamespace setVariable ["ARC_console_airCanRead", _canAirRead];
 uiNamespace setVariable ["ARC_console_airCanControl", _canAirControl];
 
 // ---------------------------------------------------------------------------
