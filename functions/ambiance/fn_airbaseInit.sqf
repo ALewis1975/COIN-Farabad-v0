@@ -283,11 +283,18 @@ _rt set ["arrivalSpawnMarker", "mkr_arrivalSpawn"];
 _rt set ["arrivalRunwayStartMarker", "mkr_arrivalRunwayStart"];
 _rt set ["arrivalRunwayStopMarker", "mkr_arrivalRunwayStop"];
 _rt set ["arrivalRunwayTaxiOutMarker", "mkr_arrivalRunwayTaxiOut"];
+_rt set ["runwayStateContract", ["OPEN", "RESERVED", "OCCUPIED"]];
 
 _rt set ["assets", _assets];
 
 missionNamespace setVariable ["airbase_v1_rt", _rt, true];
 missionNamespace setVariable ["airbase_v1_execActive", false, true];
+missionNamespace setVariable ["airbase_v1_execFid", "", true];
+
+// Server-authored runway lock state.
+missionNamespace setVariable ["airbase_v1_runwayState", "OPEN", true];
+missionNamespace setVariable ["airbase_v1_runwayOwner", "", true];
+missionNamespace setVariable ["airbase_v1_runwayUntil", -1, true];
 
 // State store init (records/queue/seq)
 ["airbase_v1_records", []] call ARC_fnc_stateSet;
