@@ -35,18 +35,18 @@ private _eviTTL = 4 * 60 * 60;
 private _changed = false;
 
 {
-    if !(_x isEqualType []) then { continue; };
-    if ((count _x) < 14) then { continue; };
+    private _thr = [_x] call ARC_fnc_threadNormalizeRecord;
+    if (_thr isEqualTo []) then { continue; };
 
-    private _id     = _x # 0;
-    private _type   = _x # 1;
-    private _zone   = _x # 2;
-    private _base   = _x # 3;
-    private _conf   = (_x # 4) max 0 min 1;
-    private _heat   = (_x # 5) max 0 min 1;
-    private _state  = _x # 6;
-    private _evi    = _x # 7;
-    private _touch  = _x # 10;
+    private _id     = _thr # 0;
+    private _type   = _thr # 1;
+    private _zone   = _thr # 2;
+    private _base   = _thr # 3;
+    private _conf   = (_thr # 4) max 0 min 1;
+    private _heat   = (_thr # 5) max 0 min 1;
+    private _state  = _thr # 6;
+    private _evi    = _thr # 7;
+    private _touch  = _thr # 10;
 
     if (!(_evi isEqualType [])) then { _evi = []; };
 
@@ -99,11 +99,11 @@ private _changed = false;
 
     if (_newHeat != _heat || { _newConf != _conf } || { _newState != _state } || { !(_newEvi isEqualTo _evi) }) then
     {
-        _x set [4, _newConf];
-        _x set [5, _newHeat];
-        _x set [6, _newState];
-        _x set [7, _newEvi];
-        _threads set [_forEachIndex, _x];
+        _thr set [4, _newConf];
+        _thr set [5, _newHeat];
+        _thr set [6, _newState];
+        _thr set [7, _newEvi];
+        _threads set [_forEachIndex, _thr];
         _changed = true;
     };
 
@@ -113,6 +113,8 @@ if (_changed) then
 {
     ["threads", _threads] call ARC_fnc_stateSet;
 };
+
+[] call ARC_fnc_threadEmitDistrictPressure;
 
 [] call ARC_fnc_threadBroadcast;
 true

@@ -8,7 +8,7 @@
       - ARC_threadsPublicUpdatedAt (NUMBER, serverTime)
 
     Thread summary format (per entry):
-      [id, type, zoneBias, grid, confidence, heat, commanderState, fuSuccess, fuFail, lastTouchedAt, cooldownUntil, lastCommandNodeAt, parentTaskId]
+      [id, type, zoneBias, grid, confidence, heat, commanderState, fuSuccess, fuFail, lastTouchedAt, cooldownUntil, lastCommandNodeAt, parentTaskId, districtId]
 
     Returns:
       BOOL
@@ -22,26 +22,27 @@ if (!(_threads isEqualType [])) then { _threads = []; };
 private _pub = [];
 
 {
-    if !(_x isEqualType []) then { continue; };
-    if ((count _x) < 14) then { continue; };
+    private _thr = [_x] call ARC_fnc_threadNormalizeRecord;
+    if (_thr isEqualTo []) then { continue; };
 
-    private _id   = _x # 0;
-    private _type = _x # 1;
-    private _zone = _x # 2;
-    private _base = _x # 3;
-    private _conf = _x # 4;
-    private _heat = _x # 5;
-    private _st   = _x # 6;
-    private _suc  = _x # 8;
-    private _fail = _x # 9;
-    private _touch= _x # 10;
-    private _cd   = _x # 11;
-    private _last = _x # 12;
-    private _parent = _x # 13;
+    private _id   = _thr # 0;
+    private _type = _thr # 1;
+    private _zone = _thr # 2;
+    private _base = _thr # 3;
+    private _conf = _thr # 4;
+    private _heat = _thr # 5;
+    private _st   = _thr # 6;
+    private _suc  = _thr # 8;
+    private _fail = _thr # 9;
+    private _touch= _thr # 10;
+    private _cd   = _thr # 11;
+    private _last = _thr # 12;
+    private _parent = _thr # 13;
+    private _districtId = _thr # 14;
 
     private _grid = if (_base isEqualType [] && { (count _base) >= 2 }) then { mapGridPosition _base } else { "????" };
 
-    _pub pushBack [_id, _type, _zone, _grid, _conf, _heat, _st, _suc, _fail, _touch, _cd, _last, _parent];
+    _pub pushBack [_id, _type, _zone, _grid, _conf, _heat, _st, _suc, _fail, _touch, _cd, _last, _parent, _districtId];
 
 } forEach _threads;
 

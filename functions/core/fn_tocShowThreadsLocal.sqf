@@ -7,7 +7,7 @@
       - ARC_activeThreadId (optional)
 
     Thread summary format:
-      [id, type, zoneBias, grid, confidence, heat, commanderState, fuSuccess, fuFail, lastTouchedAt, cooldownUntil, lastCommandNodeAt, parentTaskId]
+      [id, type, zoneBias, grid, confidence, heat, commanderState, fuSuccess, fuFail, lastTouchedAt, cooldownUntil, lastCommandNodeAt, parentTaskId, districtId]
 
     Returns:
       BOOL
@@ -66,7 +66,9 @@ private _fmtType = {
         ["_fail", 0],
         ["_touch", -1],
         ["_cd", -1],
-        ["_last", -1]
+        ["_last", -1],
+        ["_parent", ""],
+        ["_districtId", ""]
     ];
 
     private _star = if (_active isEqualType "" && { _active isNotEqualTo "" } && { _id isEqualTo _active }) then {"> "} else {"- "};
@@ -81,7 +83,7 @@ private _fmtType = {
     };
 
     _txt = _txt + format [
-        "%1%2 | %3 | %4 | CONF %5 | HEAT %6 | FU %7/%8 | %9%10\n",
+        "%1%2 | %3 | %4 | CONF %5 | HEAT %6 | FU %7/%8 | %9%10%11\n",
         _star,
         _id,
         _type call _fmtType,
@@ -91,7 +93,8 @@ private _fmtType = {
         _suc,
         _fail,
         toUpper _state,
-        _cdTxt
+        _cdTxt,
+        if (_districtId isEqualTo "") then { "" } else { format [" | DIST %1", _districtId] }
     ];
 
 } forEach _threads;

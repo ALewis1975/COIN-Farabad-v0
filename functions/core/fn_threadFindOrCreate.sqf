@@ -39,15 +39,15 @@ private _bestScore = -1;
 private _radius = 2500;
 
 {
-    if !(_x isEqualType []) then { continue; };
-    if ((count _x) < 14) then { continue; };
+    private _thrN = [_x] call ARC_fnc_threadNormalizeRecord;
+    if (_thrN isEqualTo []) then { continue; };
 
-    private _id   = _x # 0;
-    private _t    = toUpper (_x # 1);
-    private _base = _x # 3;
-    private _conf = _x # 4;
-    private _heat = _x # 5;
-    private _st   = toUpper (_x # 6);
+    private _id   = _thrN # 0;
+    private _t    = toUpper (_thrN # 1);
+    private _base = _thrN # 3;
+    private _conf = _thrN # 4;
+    private _heat = _thrN # 5;
+    private _st   = toUpper (_thrN # 6);
 
     if (_t isNotEqualTo _typeU) then { continue; };
     if (_st isEqualTo "DORMANT") then { continue; };
@@ -70,7 +70,7 @@ private _radius = 2500;
 
 if (_bestIdx >= 0) exitWith
 {
-    private _thr = _threads # _bestIdx;
+    private _thr = [(_threads # _bestIdx)] call ARC_fnc_threadNormalizeRecord;
     private _id = _thr # 0;
 
     // Lightly pull the thread base toward the new activity.
@@ -83,6 +83,10 @@ if (_bestIdx >= 0) exitWith
             0
         ];
         _thr set [3, _newBase];
+        if ((_thr # 14) isEqualTo "") then
+        {
+            _thr set [14, ([_newBase] call ARC_fnc_threadResolveDistrictId)];
+        };
         _threads set [_bestIdx, _thr];
         ["threads", _threads] call ARC_fnc_stateSet;
     };
@@ -107,6 +111,7 @@ _counter = _counter + 1;
 
 private _id = format ["ARC_thr_%1", _counter];
 private _parentTaskId = [_id, _threadType, _zoneBias, _center] call ARC_fnc_taskEnsureThreadParent;
+private _districtId = [_center] call ARC_fnc_threadResolveDistrictId;
 
 private _now = serverTime;
 
@@ -124,7 +129,8 @@ private _thread = [
     _now,               // 10 last touched
     -1,                 // 11 cooldown until
     -1,                 // 12 last command node
-    _parentTaskId       // 13 parent task id
+    _parentTaskId,      // 13 parent task id
+    _districtId         // 14 district id ("" when unavailable)
 ];
 
 _threads pushBack _thread;

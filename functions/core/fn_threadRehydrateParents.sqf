@@ -19,19 +19,27 @@ if (_threads isEqualTo []) exitWith { [] call ARC_fnc_threadBroadcast; true };
 private _changed = false;
 
 {
-    if !(_x isEqualType []) then { continue; };
-    if ((count _x) < 14) then { continue; };
+    private _thr = [_x] call ARC_fnc_threadNormalizeRecord;
+    if (_thr isEqualTo []) then { continue; };
 
-    private _id = _x # 0;
-    private _type = _x # 1;
-    private _zone = _x # 2;
-    private _base = _x # 3;
+    private _id = _thr # 0;
+    private _type = _thr # 1;
+    private _zone = _thr # 2;
+    private _base = _thr # 3;
+    private _districtId = _thr # 14;
+    if (_districtId isEqualTo "") then
+    {
+        _districtId = [_base] call ARC_fnc_threadResolveDistrictId;
+        _thr set [14, _districtId];
+        _threads set [_forEachIndex, _thr];
+        _changed = true;
+    };
 
     private _parent = [_id, _type, _zone, _base] call ARC_fnc_taskEnsureThreadParent;
-    if (_parent isNotEqualTo "" && { (_x # 13) isNotEqualTo _parent }) then
+    if (_parent isNotEqualTo "" && { (_thr # 13) isNotEqualTo _parent }) then
     {
-        _x set [13, _parent];
-        _threads set [_forEachIndex, _x];
+        _thr set [13, _parent];
+        _threads set [_forEachIndex, _thr];
         _changed = true;
     };
 
