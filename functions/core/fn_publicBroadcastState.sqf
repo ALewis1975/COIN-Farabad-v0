@@ -107,7 +107,11 @@ for "_i" from 0 to (_nextN - 1) do
     ];
 };
 
-private _clearancePending = _clrReqs select { ((_x param [6, ""]) isEqualTo "PENDING") };
+private _clearancePending = _clrReqs select {
+    private _st = toUpperANSI (_x param [6, ""]);
+    (_st isEqualTo "PENDING") || (_st isEqualTo "AWAITING_TOWER_DECISION")
+};
+private _clearanceAwaitingTower = _clearancePending select { (toUpperANSI (_x param [6, ""])) isEqualTo "AWAITING_TOWER_DECISION" };
 private _clearanceEmergency = _clearancePending select { ((_x param [5, 0]) >= 100) };
 
 private _clearancePendingView = _clearancePending apply {
@@ -146,7 +150,9 @@ private _airbasePub = [
     ["clearanceSeq", _clrSeq],
     ["clearancePendingCount", count _clearancePending],
     ["clearanceEmergencyCount", count _clearanceEmergency],
+    ["clearanceAwaitingTowerCount", count _clearanceAwaitingTower],
     ["clearancePending", _clearancePendingView],
+    ["clearanceControllerPending", _clearancePendingView],
     ["clearanceHistoryTail", _clearanceHistoryTail]
 ];
 

@@ -32,7 +32,7 @@ private _status = toUpperANSI (_rec param [6, ""]);
 private _uid = _rec param [2, ""];
 private _callerUid = getPlayerUID _caller;
 
-if (_status isNotEqualTo "PENDING") exitWith {
+if !(_status in ["PENDING", "AWAITING_TOWER_DECISION"]) exitWith {
     private _owner = owner _caller;
     if (_owner > 0) then { ["Only pending clearance requests can be escalated."] remoteExec ["ARC_fnc_clientHint", _owner]; };
     false
