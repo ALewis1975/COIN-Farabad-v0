@@ -149,7 +149,8 @@ private _fnNotifyMaybe = {
     params ["_owner", "_method", "_title", "_body", "_dedupeKey"];
     if (_owner <= 0) exitWith {};
     if (!(_dedupeKey isEqualType "")) then { _dedupeKey = str _dedupeKey; };
-    private _lastAt = _notifyState getOrDefault [_dedupeKey, -1000];
+    private _lastAt = _notifyState get _dedupeKey;
+    if (isNil "_lastAt") then { _lastAt = -1000; };
     if ((_nowTs - _lastAt) < _notifyThrottleS) exitWith {};
     _notifyState set [_dedupeKey, _nowTs];
     _notifyDirty = true;
