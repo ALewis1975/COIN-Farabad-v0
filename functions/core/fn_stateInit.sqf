@@ -295,6 +295,11 @@
 
     // TOC backlog (approved leads awaiting incident generation)
     ["tocBacklog", []],
-    ["tocLeadApprovals", []]
+    ["tocLeadApprovals", []],
+
+    // Airbase clearance request workflow (server authoritative queue + audit trail)
+    ["airbase_v1_clearanceRequests", []],
+    ["airbase_v1_clearanceSeq", 0],
+    ["airbase_v1_clearanceHistory", []]
 
 ]

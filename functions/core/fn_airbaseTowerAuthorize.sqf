@@ -5,7 +5,7 @@
 
     Params:
       0: OBJECT unit
-      1: STRING action token (HOLD|RELEASE|PRIORITIZE|CANCEL)
+      1: STRING action token (HOLD|RELEASE|PRIORITIZE|CANCEL|APPROVE|DENY|OVERRIDE)
 
     Returns:
       ARRAY [BOOL authorized, STRING level, STRING reason]
@@ -44,6 +44,13 @@ if ((_hayU find "FARABAD_TOWER_WS_CCIC") >= 0) exitWith {[true, "CCIC", "TOKEN_C
 if ((_hayU find "FARABAD_TOWER_LC") >= 0) then {
     private _allowed = missionNamespace getVariable ["airbase_v1_tower_lc_allowedActions", ["PRIORITIZE", "CANCEL"]];
     if (!(_allowed isEqualType [])) then { _allowed = ["PRIORITIZE", "CANCEL"]; };
+
+    private _allowedDecision = missionNamespace getVariable ["airbase_v1_tower_lc_allowedDecisionActions", []];
+    if (!(_allowedDecision isEqualType [])) then { _allowedDecision = []; };
+
+    {
+        _allowed pushBack _x;
+    } forEach _allowedDecision;
 
     private _allowedU = _allowed apply {
         private _v = _x;
