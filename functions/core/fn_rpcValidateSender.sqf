@@ -8,6 +8,7 @@
       1: STRING rpc name (for logging context).
       2: STRING notify message (optional; sent only to requesting owner when available).
       3: STRING security event code (optional).
+      4: BOOL requireRemoteContext (optional; when true, reject non-RemoteExec invocation).
 
     Returns:
       BOOL true when sender/object binding is valid; false when rejected.
@@ -19,11 +20,25 @@ params [
     ["_caller", objNull],
     ["_rpc", "RPC"],
     ["_notify", ""],
-    ["_event", "RPC_SENDER_REJECTED"]
+    ["_event", "RPC_SENDER_REJECTED"],
+    ["_requireRemoteContext", false]
 ];
 
 private _isRemoteRpc = !isNil "remoteExecutedOwner";
-if (!_isRemoteRpc) exitWith {true};
+if (!_isRemoteRpc) exitWith
+{
+    ["OPS", format ["SECURITY: %1 invoked without RemoteExec context (remoteExecutedOwner missing).", _rpc], [0,0,0],
+        [
+            ["event", _event],
+            ["rpc", _rpc],
+            ["reason", "MISSING_REMOTE_CONTEXT"],
+            ["strictMode", _requireRemoteContext]
+        ]
+    ] call ARC_fnc_intelLog;
+
+    if (_requireRemoteContext) exitWith {false};
+    true
+};
 
 private _actualOwner = remoteExecutedOwner;
 

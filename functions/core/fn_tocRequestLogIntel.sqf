@@ -86,7 +86,8 @@ if (!_posIsRecoverable) then
     diag_log format ["[ARC][INTEL][LOG] Invalid position payload normalized to safe default | caller=%1 | uid=%2 | rawPos=%3", _callerName, _callerUID, str _pos];
 };
 
-if (!([_caller, "ARC_fnc_tocRequestLogIntel", "Intel log rejected: sender verification failed.", "TOC_LOG_INTEL_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
+// RemoteExec-only validation path: requires remoteExecutedOwner context.
+if (!([_caller, "ARC_fnc_tocRequestLogIntel", "Intel log rejected: sender verification failed.", "TOC_LOG_INTEL_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 if (!_posIsRecoverable && {_callerName isEqualTo "UNKNOWN" && {_callerUID isEqualTo ""}}) exitWith
 {

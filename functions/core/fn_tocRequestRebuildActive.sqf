@@ -25,7 +25,8 @@ if (!isNil "remoteExecutedOwner" && { _owner > 0 }) then
         } forEach allPlayers;
     };
 
-    if (!([_requestor, "ARC_fnc_tocRequestRebuildActive", "Rebuild active incident rejected: sender verification failed.", "TOC_REBUILD_ACTIVE_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
+    // RemoteExec-only validation path: requires remoteExecutedOwner context.
+    if (!([_requestor, "ARC_fnc_tocRequestRebuildActive", "Rebuild active incident rejected: sender verification failed.", "TOC_REBUILD_ACTIVE_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
     private _isOmni = [_requestor, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
     private _can = _isOmni || { [_requestor] call ARC_fnc_rolesCanApproveQueue };
