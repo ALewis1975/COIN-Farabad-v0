@@ -434,6 +434,7 @@ class CfgFunctions
             class uiConsoleInitClient {};
             class uiConsoleCanOpen {};
             class uiConsoleOpen {};
+            class uiConsoleApplyLayout {};
             class uiConsoleOnLoad {};
             class uiConsoleOnUnload {};
             class uiConsoleSelectTab {};

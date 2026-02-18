@@ -574,7 +574,7 @@ class ARC_FarabadConsoleDialog
     movingEnable = 0;
     enableSimulation = 1;
 
-    onLoad = "uiNamespace setVariable ['ARC_console_display', _this # 0]; [_this # 0] call ARC_fnc_uiConsoleOnLoad;";
+    onLoad = "uiNamespace setVariable ['ARC_console_display', _this # 0]; [_this # 0] call ARC_fnc_uiConsoleApplyLayout; [_this # 0] call ARC_fnc_uiConsoleOnLoad;";
     onUnload = "[] call ARC_fnc_uiConsoleOnUnload; uiNamespace setVariable ['ARC_console_display', displayNull];";
 
     class controlsBackground
@@ -668,6 +668,19 @@ text = "FARABAD CONSOLE";
             h = (0.03 * safeZoneH);
             colorBackground[] = {0.03,0.08,0.08,0.90};
         };
+
+        // Dock layout anchor (UI runtime may switch to this frame when
+        // ARC_console_layoutMode is set to "DOCK_RIGHT").
+        class DockFrameAnchor: RscText
+        {
+            idc = 78099;
+            x = safeZoneX + (0.66 * safeZoneW);
+            y = safeZoneY + (0.01 * safeZoneH);
+            w = (0.34 * safeZoneW);
+            h = (0.98 * safeZoneH);
+            colorBackground[] = {0,0,0,0};
+        };
+
     };
 
     class controls
