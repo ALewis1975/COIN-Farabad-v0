@@ -25,8 +25,8 @@ private _med  = ["baseMed",  0.40] call ARC_fnc_stateGet;
 private _log = ["intelLog", []] call ARC_fnc_stateGet;
 if (!(_log isEqualType [])) then { _log = []; };
 
-private _intelCount = count (_log select { _x isEqualType [] && { (count _x) >= 3 } && { toUpper (_x # 2) isNotEqualTo "OPS" } });
-private _opsCount   = count (_log select { _x isEqualType [] && { (count _x) >= 3 } && { toUpper (_x # 2) isEqualTo "OPS" } });
+private _intelCount = count (_log select { (_x isEqualType [] && { (count _x) >= 3 } && { toUpper (((_x) # 2)) != "OPS" }) });
+private _opsCount   = count (_log select { (_x isEqualType [] && { (count _x) >= 3 } && { toUpper (((_x) # 2)) == "OPS" }) });
 
 // Recent incident history tail (for dashboards)
 private _hist = ["incidentHistory", []] call ARC_fnc_stateGet;
@@ -44,6 +44,69 @@ if (!(_sMax isEqualType 0)) then { _sMax = 8; };
 private _sStart = (_sCount - _sMax) max 0;
 private _sTail = _snaps select [_sStart, _sCount - _sStart];
 
+// Airbase v1 summary (compact primitives for low-cost UI polling)
+private _airQueue = ["airbase_v1_queue", []] call ARC_fnc_stateGet;
+if (!(_airQueue isEqualType [])) then { _airQueue = []; };
+
+private _airRecs = ["airbase_v1_records", []] call ARC_fnc_stateGet;
+if (!(_airRecs isEqualType [])) then { _airRecs = []; };
+
+private _depQueued = 0;
+private _arrQueued = 0;
+{
+    private _kind = _x param [1, ""];
+    if (!(_kind isEqualType "")) then { _kind = ""; };
+
+    if (_kind isEqualTo "DEP") then {
+        _depQueued = _depQueued + 1;
+    } else {
+        if (_kind isEqualTo "ARR") then { _arrQueued = _arrQueued + 1; };
+    };
+} forEach _airQueue;
+
+private _execActive = missionNamespace getVariable ["airbase_v1_execActive", false];
+if (!(_execActive isEqualType true) && !(_execActive isEqualType false)) then { _execActive = false; };
+
+private _execFid = missionNamespace getVariable ["airbase_v1_execFid", ""];
+if (!(_execFid isEqualType "")) then { _execFid = ""; };
+
+private _runwayState = missionNamespace getVariable ["airbase_v1_runwayState", "UNKNOWN"];
+if (!(_runwayState isEqualType "")) then { _runwayState = "UNKNOWN"; };
+
+private _runwayOwner = missionNamespace getVariable ["airbase_v1_runwayOwner", ""];
+if (!(_runwayOwner isEqualType "")) then { _runwayOwner = ""; };
+
+private _runwayUntil = missionNamespace getVariable ["airbase_v1_runwayUntil", -1];
+if (!(_runwayUntil isEqualType 0)) then { _runwayUntil = -1; };
+
+private _nextCap = missionNamespace getVariable ["airbase_v1_publicPreviewMax", 5];
+if (!(_nextCap isEqualType 0) || { _nextCap < 0 }) then { _nextCap = 5; };
+
+private _nextN = _nextCap min (count _airQueue);
+private _nextItems = [];
+for "_i" from 0 to (_nextN - 1) do
+{
+    private _it = _airQueue # _i;
+    _nextItems pushBack [
+        _it param [0, ""],
+        _it param [1, ""],
+        _it param [2, ""]
+    ];
+};
+
+private _airbasePub = [
+    ["depQueued", _depQueued],
+    ["arrQueued", _arrQueued],
+    ["totalQueued", count _airQueue],
+    ["execActive", _execActive],
+    ["execFid", _execFid],
+    ["runwayState", _runwayState],
+    ["runwayOwner", _runwayOwner],
+    ["runwayUntil", _runwayUntil],
+    ["nextItems", _nextItems],
+    ["recordsCount", count _airRecs]
+];
+
 private _pub = [
     ["insurgentPressure", _p],
     ["corruption", _c],
@@ -58,7 +121,8 @@ private _pub = [
     ["opsCount", _opsCount],
     ["incidentCount", _hCount],
     ["incidentHistoryTail", _hTail],
-    ["metricsSnapshotsTail", _sTail]
+    ["metricsSnapshotsTail", _sTail],
+    ["airbase", _airbasePub]
 ];
 
 missionNamespace setVariable ["ARC_pub_state", _pub, true];
@@ -208,9 +272,12 @@ private _rev = missionNamespace getVariable ["ARC_consoleVM_rev", 0];
 if (!(_rev isEqualType 0)) then { _rev = 0; };
 _rev = _rev + 1;
 missionNamespace setVariable ["ARC_consoleVM_rev", _rev];
+missionNamespace setVariable ["ARC_pub_stateSchema", ["ARC_pub_state_v2", 2], true];
 missionNamespace setVariable ["ARC_consoleVM_meta", [
     ["schema", "Console_VM_v1"],
     ["schemaVersion", 1],
+    ["publicStateSchema", "ARC_pub_state_v2"],
+    ["publicStateSchemaVersion", 2],
     ["rev", _rev],
     ["publishedAt", serverTime],
     ["source", "publicBroadcastState"]
