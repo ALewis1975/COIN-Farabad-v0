@@ -29,6 +29,8 @@ if !(isPlayer _actor) exitWith {false};
 if (_actionId isEqualTo "") exitWith {false};
 if !(_civ getVariable ["civsub_v1_isCiv", false]) exitWith {false};
 
+private _requestTargetNetId = netId _civ;
+
 // Dedicated MP hardening:
 // If this function was invoked via remoteExec, bind actor identity to the network sender.
 if (!isNil "remoteExecutedOwner") then
@@ -45,7 +47,13 @@ if (!isNil "remoteExecutedOwner") then
                 _civ getVariable ["civ_uid", ""]
             ];
 
-            ["<t size='0.9'>Action denied (authority mismatch).</t>"] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
+            [createHashMapFromArray [
+                ["ok", false],
+                ["type", ""],
+                ["html", "<t size='0.9'>Action denied (authority mismatch).</t>"],
+                ["payload", createHashMap],
+                ["targetNetId", _requestTargetNetId]
+            ]] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
             false
         };
     };
@@ -53,7 +61,13 @@ if (!isNil "remoteExecutedOwner") then
 
 // Basic proximity validation to reduce abuse/spam.
 if ((_actor distance _civ) > 6) exitWith {
-    ["<t size='0.9'>Too far from civilian.</t>"] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
+    [createHashMapFromArray [
+        ["ok", false],
+        ["type", ""],
+        ["html", "<t size='0.9'>Too far from civilian.</t>"],
+        ["payload", createHashMap],
+        ["targetNetId", _requestTargetNetId]
+    ]] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
     false
 };
 
@@ -97,7 +111,8 @@ switch (_actionId) do {
                 ["ok", _ok],
                 ["type", "CHECK_ID"],
                 ["html", _html],
-                ["payload", _payload]
+                ["payload", _payload],
+                ["targetNetId", _requestTargetNetId]
             ];
 
             [_out] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
@@ -139,7 +154,8 @@ switch (_actionId) do {
             ["ok", _ok],
             ["type", "BACKGROUND_CHECK"],
             ["html", _html],
-            ["payload", createHashMap]
+            ["payload", createHashMap],
+            ["targetNetId", _requestTargetNetId]
         ];
         [_out] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
 
@@ -164,7 +180,8 @@ switch (_actionId) do {
             ["ok", _ok],
             ["type", "DETAIN"],
             ["html", _html],
-            ["payload", createHashMap]
+            ["payload", createHashMap],
+            ["targetNetId", _requestTargetNetId]
         ];
         [_out] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
 
@@ -185,7 +202,8 @@ switch (_actionId) do {
             ["ok", _ok],
             ["type", "HANDOFF_SHERIFF"],
             ["html", _html],
-            ["payload", createHashMap]
+            ["payload", createHashMap],
+            ["targetNetId", _requestTargetNetId]
         ];
         [_out] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
 
@@ -206,7 +224,8 @@ switch (_actionId) do {
             ["ok", _ok],
             ["type", "RELEASE"],
             ["html", _html],
-            ["payload", createHashMap]
+            ["payload", createHashMap],
+            ["targetNetId", _requestTargetNetId]
         ];
         [_out] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
 
@@ -228,7 +247,8 @@ switch (_actionId) do {
             ["ok", _ok],
             ["type", "AID_RATIONS"],
             ["html", _html],
-            ["payload", createHashMap]
+            ["payload", createHashMap],
+            ["targetNetId", _requestTargetNetId]
         ];
         [_out] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
 
@@ -249,7 +269,8 @@ switch (_actionId) do {
             ["ok", _ok],
             ["type", "AID_WATER"],
             ["html", _html],
-            ["payload", createHashMap]
+            ["payload", createHashMap],
+            ["targetNetId", _requestTargetNetId]
         ];
         [_out] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
 
@@ -277,14 +298,21 @@ switch (_actionId) do {
             ["ok", _ok],
             ["type", "QUESTION"],
             ["html", _html],
-            ["payload", _pl]
+            ["payload", _pl],
+            ["targetNetId", _requestTargetNetId]
         ];
         [_out] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
         true
     };
 
     default {
-        [format ["<t size='0.9'>%1</t><br/><t size='0.85'>Not wired yet.</t>", _actionId]] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
+        [createHashMapFromArray [
+            ["ok", false],
+            ["type", _actionId],
+            ["html", format ["<t size='0.9'>%1</t><br/><t size='0.85'>Not wired yet.</t>", _actionId]],
+            ["payload", createHashMap],
+            ["targetNetId", _requestTargetNetId]
+        ]] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
         false
     };
 };

@@ -24,6 +24,7 @@ private _html = "";
 private _type = "";
 private _ok = false;
 private _payload = createHashMap;
+private _resultTargetNetId = "";
 private _raw = _in;
 
 if (_in isEqualType "") then {
@@ -37,8 +38,12 @@ if (_in isEqualType "") then {
         _ok = _hm getOrDefault ["ok", false];
         _payload = _hm getOrDefault ["payload", createHashMap];
         if (_payload isEqualType []) then { _payload = createHashMapFromArray _payload; };
+        _resultTargetNetId = _hm getOrDefault ["targetNetId", ""];
+        if !(_resultTargetNetId isEqualType "") then { _resultTargetNetId = ""; };
     };
 };
+
+if (_resultTargetNetId isEqualTo "") then { _resultTargetNetId = _ctxTargetNetId; };
 
 if (_type isEqualType "") then { _type = toUpper (trim _type); };
 
@@ -62,7 +67,7 @@ uiNamespace setVariable ["ARC_console_civsubLastResult", createHashMapFromArray 
     ["type", _type],
     ["ok", _ok],
     ["payload", _payload],
-    ["targetNetId", _ctxTargetNetId],
+    ["targetNetId", _resultTargetNetId],
     ["updatedAtText", _stamp],
     ["updatedAtTick", diag_tickTime]
 ]];
