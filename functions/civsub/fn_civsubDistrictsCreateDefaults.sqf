@@ -7,10 +7,8 @@
 
 private _districts = createHashMap;
 
-// Locked baselines (v1)
-private _wBase = 45;
-private _rBase = 55;
-private _gBase = 35;
+private _seed = missionNamespace getVariable ["civsub_v1_seed", 1337];
+if !(_seed isEqualType 0) then { _seed = 1337; };
 
 // [id, planPop_5800, centroidX, centroidY, radius_m]
 private _rows = [
@@ -43,6 +41,16 @@ private _rows = [
     private _cy = _x # 3;
     private _rad = _x # 4;
 
+    private _profile = [_id, _pop, [_cx, _cy], _seed] call ARC_fnc_civsubDistrictSeedProfile;
+
+    private _wBase = _profile getOrDefault ["W_BASE_U", 45];
+    private _rBase = _profile getOrDefault ["R_BASE_U", 55];
+    private _gBase = _profile getOrDefault ["G_BASE_U", 35];
+
+    private _wEff = _profile getOrDefault ["W_EFF_U", _wBase];
+    private _rEff = _profile getOrDefault ["R_EFF_U", _rBase];
+    private _gEff = _profile getOrDefault ["G_EFF_U", _gBase];
+
     private _d = createHashMapFromArray [
         ["id", _id],
         ["centroid", [_cx, _cy]],
@@ -53,9 +61,9 @@ private _rows = [
         ["R_BASE_U", _rBase],
         ["G_BASE_U", _gBase],
 
-        ["W_EFF_U", _wBase],
-        ["R_EFF_U", _rBase],
-        ["G_EFF_U", _gBase],
+        ["W_EFF_U", _wEff],
+        ["R_EFF_U", _rEff],
+        ["G_EFF_U", _gEff],
 
         // Abstract indices (v1)
         ["food_idx", 50],

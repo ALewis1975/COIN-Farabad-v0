@@ -221,6 +221,7 @@ class CfgFunctions
             class civsubEmitDelta {};
 
             class civsubDistrictsCreateDefaults {};
+            class civsubDistrictSeedProfile {};
             class civsubDistrictsApplyDecay {};
             class civsubDistrictsClamp {};
             class civsubDistrictsGetById {};
