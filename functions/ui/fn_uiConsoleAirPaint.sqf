@@ -23,7 +23,7 @@ if (isNull _ctrlList || { isNull _ctrlDetails }) exitWith {false};
 private _owner = uiNamespace getVariable ["ARC_console_mainListOwner", ""];
 if (!(_owner isEqualType "")) then { _owner = ""; };
 _owner = toUpper _owner;
-if !(_owner isEqualTo "AIR") then { _rebuild = true; };
+if (!(_owner isEqualTo "AIR")) then { _rebuild = true; };
 uiNamespace setVariable ["ARC_console_mainListOwner", "AIR"];
 
 private _pub = missionNamespace getVariable ["ARC_pub_state", []];

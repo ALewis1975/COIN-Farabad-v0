@@ -149,7 +149,7 @@ if (_dbgEnabled) then
         private _cleanupQueue = ["cleanupQueue", []] call ARC_fnc_stateGet;
         if (!(_cleanupQueue isEqualType [])) then { _cleanupQueue = []; };
 
-        private _labelCounts = createHashMap;
+        private _labelCounts = [];
         {
             private _label = _x param [4, ""];
             if (!(_label isEqualType "")) then { _label = ""; };
@@ -160,18 +160,25 @@ if (_dbgEnabled) then
             if (_p > 0) then { _key = _label select [0, _p]; };
             if (_key isEqualTo "") then { _key = "(none)"; };
 
-            private _labelCount = _labelCounts get _key;
-            if (isNil "_labelCount") then { _labelCount = 0; };
-            _labelCounts set [_key, 1 + _labelCount];
+            private _idx = _labelCounts findIf {
+                (_x isEqualType []) &&
+                { (count _x) >= 2 } &&
+                { ((_x select 0)) isEqualTo _key }
+            };
+
+            if (_idx < 0) then {
+                _labelCounts pushBack [_key, 1];
+            } else {
+                private _pair = _labelCounts select _idx;
+                _pair set [1, (_pair select 1) + 1];
+                _labelCounts set [_idx, _pair];
+            };
         } forEach _cleanupQueue;
 
         private _tmp = [];
         {
-            private _labelKey = _x;
-            private _labelCount = _labelCounts get _labelKey;
-            if (isNil "_labelCount") then { _labelCount = 0; };
-            _tmp pushBack [_labelCount, _labelKey];
-        } forEach (keys _labelCounts);  // [count,label]
+            _tmp pushBack [(_x select 1), (_x select 0)];
+        } forEach _labelCounts;  // [count,label]
         _tmp sort false;
 
         private _cleanupByLabel = _tmp apply { [_x select 1, _x select 0] };
