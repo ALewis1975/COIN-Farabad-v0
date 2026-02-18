@@ -7,6 +7,7 @@ if (!isServer) exitWith {false};
 
 if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\\core\\fn_rpcValidateSender.sqf"; };
 if (isNil "ARC_fnc_airbaseTowerAuthorize") then { ARC_fnc_airbaseTowerAuthorize = compile preprocessFileLineNumbers "functions\\core\\fn_airbaseTowerAuthorize.sqf"; };
+if (isNil "ARC_fnc_airbaseRestoreParkedAsset") then { ARC_fnc_airbaseRestoreParkedAsset = compile preprocessFileLineNumbers "functions\\ambiance\\fn_airbaseRestoreParkedAsset.sqf"; };
 
 params [
     ["_caller", objNull, [objNull]],
@@ -46,20 +47,129 @@ if (_idx < 0) exitWith {
     false
 };
 
-private _removed = [_queue, _flightId] call ARC_fnc_airbaseQueueRemoveByFid;
-_queue = _removed param [0, []];
-
 private _recs = ["airbase_v1_records", []] call ARC_fnc_stateGet;
 if (!(_recs isEqualType [])) then { _recs = []; };
-private _updated = [_recs, _flightId, "CANCELED", [["cancelledBy", name _caller], ["cancelledByUid", getPlayerUID _caller]]] call ARC_fnc_airbaseRecordSetQueuedStatus;
-_recs = _updated param [0, []];
+private _rIdx = _recs findIf { ((_x param [0, ""]) isEqualTo _flightId) };
 
+// Prevent cancellation of currently executing flights.
+private _execFid = missionNamespace getVariable ["airbase_v1_execFid", ""];
+if (_execFid isEqualTo _flightId) exitWith {
+    private _owner = owner _caller;
+    if (_owner > 0) then { [format ["Flight %1 is currently executing and cannot be canceled.", _flightId]] remoteExec ["ARC_fnc_clientHint", _owner]; };
+
+    ["OPS", format ["AIRBASE CONTROL DENIED: cancel blocked for active flight %1", _flightId], getPosATL _caller, 0, [
+        ["event", "AIRBASE_CANCEL_ACTIVE_DENIED"],
+        ["caller", name _caller],
+        ["uid", getPlayerUID _caller],
+        ["authLevel", _level],
+        ["flightId", _flightId]
+    ]] call ARC_fnc_intelLog;
+    false
+};
+
+if (_rIdx >= 0) then {
+    private _status = (_recs # _rIdx) param [5, ""];
+    if (_status isEqualTo "ACTIVE") exitWith {
+        private _owner = owner _caller;
+        if (_owner > 0) then { [format ["Flight %1 is currently executing and cannot be canceled.", _flightId]] remoteExec ["ARC_fnc_clientHint", _owner]; };
+
+        ["OPS", format ["AIRBASE CONTROL DENIED: cancel blocked for ACTIVE record %1", _flightId], getPosATL _caller, 0, [
+            ["event", "AIRBASE_CANCEL_ACTIVE_RECORD_DENIED"],
+            ["caller", name _caller],
+            ["uid", getPlayerUID _caller],
+            ["authLevel", _level],
+            ["flightId", _flightId]
+        ]] call ARC_fnc_intelLog;
+        false
+    };
+};
+
+private _qItem = _queue # _idx;
+private _qKind = _qItem param [1, ""];
+private _qDetail = _qItem param [2, ""];
+
+// RETURN arrivals leave their source asset in RETURN_QUEUED; restore asset state before reporting success.
+if (_qKind isEqualTo "ARR" && { _qDetail isEqualType "" && { !(_qDetail isEqualTo "INBOUND") } }) then {
+    private _isReturn = false;
+
+    if (_rIdx >= 0) then {
+        private _rec = _recs # _rIdx;
+        private _meta = _rec param [7, []];
+        if (_meta isEqualType []) then {
+            private _modeIdx = _meta findIf { (_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo "mode" } && { (_x # 1) isEqualTo "RETURN" } };
+            _isReturn = (_modeIdx >= 0);
+        };
+    };
+
+    if (_isReturn) then {
+        private _rt = missionNamespace getVariable ["airbase_v1_rt", createHashMap];
+        private _assets = [];
+        if (_rt isEqualType createHashMap) then {
+            _assets = _rt get "assets";
+            if (isNil "_assets" || {!(_assets isEqualType [])}) then { _assets = []; };
+        };
+
+        private _aIdx = _assets findIf {
+            private _assetId = "";
+            if (_x isEqualType createHashMap) then {
+                _assetId = _x get "id";
+                if (isNil "_assetId" || {!(_assetId isEqualType "")}) then { _assetId = ""; };
+            };
+            _assetId isEqualTo _qDetail
+        };
+
+        if (_aIdx < 0) exitWith {
+            private _owner = owner _caller;
+            if (_owner > 0) then { [format ["Flight %1 could not be canceled safely (return asset missing).", _flightId]] remoteExec ["ARC_fnc_clientHint", _owner]; };
+
+            ["OPS", format ["AIRBASE CONTROL DENIED: cancel aborted for RETURN flight %1 (asset missing)", _flightId], getPosATL _caller, 0, [
+                ["event", "AIRBASE_CANCEL_RETURN_ASSET_MISSING"],
+                ["caller", name _caller],
+                ["uid", getPlayerUID _caller],
+                ["authLevel", _level],
+                ["flightId", _flightId],
+                ["assetId", _qDetail]
+            ]] call ARC_fnc_intelLog;
+            false
+        };
+
+        private _asset = _assets # _aIdx;
+        private _okRestore = [_asset] call ARC_fnc_airbaseRestoreParkedAsset;
+        if (!_okRestore) exitWith {
+            private _owner = owner _caller;
+            if (_owner > 0) then { [format ["Flight %1 could not be canceled safely (return asset restore failed).", _flightId]] remoteExec ["ARC_fnc_clientHint", _owner]; };
+
+            ["OPS", format ["AIRBASE CONTROL DENIED: cancel aborted for RETURN flight %1 (restore failed)", _flightId], getPosATL _caller, 0, [
+                ["event", "AIRBASE_CANCEL_RETURN_RESTORE_FAILED"],
+                ["caller", name _caller],
+                ["uid", getPlayerUID _caller],
+                ["authLevel", _level],
+                ["flightId", _flightId],
+                ["assetId", _qDetail]
+            ]] call ARC_fnc_intelLog;
+            false
+        };
+    };
+};
+
+_queue deleteAt _idx;
 ["airbase_v1_queue", _queue] call ARC_fnc_stateSet;
-["airbase_v1_records", _recs] call ARC_fnc_stateSet;
+if (_rIdx >= 0) then {
+    private _r = _recs # _rIdx;
+    _r set [5, "CANCELLED"];
+    _r set [6, serverTime];
+    private _meta = _r param [7, []];
+    if (!(_meta isEqualType [])) then { _meta = []; };
+    _meta pushBack ["cancelledBy", name _caller];
+    _meta pushBack ["cancelledByUid", getPlayerUID _caller];
+    _r set [7, _meta];
+    _recs set [_rIdx, _r];
+    ["airbase_v1_records", _recs] call ARC_fnc_stateSet;
+};
 
 private _manualPriority = ["airbase_v1_manualPriority", []] call ARC_fnc_stateGet;
 if (!(_manualPriority isEqualType [])) then { _manualPriority = []; };
-_manualPriority = _manualPriority select { _x isEqualType "" && { _x isNotEqualTo _flightId } };
+_manualPriority = _manualPriority select { _x isEqualType "" && { !(_x isEqualTo _flightId) } };
 ["airbase_v1_manualPriority", _manualPriority] call ARC_fnc_stateSet;
 
 ["OPS", format ["AIRBASE CONTROL: cancelled flight %1 by %2", _flightId, name _caller], getPosATL _caller, 0, [
