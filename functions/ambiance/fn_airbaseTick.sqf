@@ -566,8 +566,8 @@ if (_opsLogEnabled || _debugOps) then {
     ]] call ARC_fnc_intelLog;
 };
 
-[_fid, _kind, _detail] spawn {
-    params ["_fid", "_kind", "_detail"];
+[_fid, _kind, _detail, _fnHmGet] spawn {
+    params ["_fid", "_kind", "_detail", "_fnHmGet"];
     missionNamespace setVariable ["airbase_v1_execActive", true, true];
     missionNamespace setVariable ["airbase_v1_execFid", _fid, true];
 
