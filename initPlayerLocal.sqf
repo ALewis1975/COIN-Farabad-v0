@@ -3,14 +3,52 @@ if (!hasInterface) exitWith {};
 waitUntil { !isNull player };
 
 // Avoid init races: wait for server bootstrap + state snapshots.
-// In hosted MP / dev environments this can occasionally fail to publish; use a timeout fallback so UI doesn't deadlock.
-private _t0 = diag_tickTime;
+// In hosted MP / dev environments this can occasionally fail to publish; use a bounded timeout + adaptive fallback.
+private _readyTimeoutSec = 35;
+private _readyWaitStartedAt = diag_tickTime;
+missionNamespace setVariable ["ARC_clientStateRefreshEnabled", false];
+
+diag_log format [
+    "[ARC][INFO] initPlayerLocal: waiting for ARC_serverReady (timeout=%1s).",
+    _readyTimeoutSec
+];
+
 waitUntil {
-    (missionNamespace getVariable ["ARC_serverReady", false]) || ((diag_tickTime - _t0) > 20)
+    (missionNamespace getVariable ["ARC_serverReady", false]) || ((diag_tickTime - _readyWaitStartedAt) > _readyTimeoutSec)
 };
-if (!(missionNamespace getVariable ["ARC_serverReady", false])) then
+
+private _serverReadyAtGate = missionNamespace getVariable ["ARC_serverReady", false];
+if (_serverReadyAtGate) then
 {
-    diag_log "[ARC][WARN] initPlayerLocal: ARC_serverReady timeout; continuing with client init (dev fallback).";
+    missionNamespace setVariable ["ARC_clientStateRefreshEnabled", true];
+    diag_log format [
+        "[ARC][INFO] initPlayerLocal: ARC_serverReady observed after %1s; enabling client state refresh.",
+        round (diag_tickTime - _readyWaitStartedAt)
+    ];
+}
+else
+{
+    diag_log format [
+        "[ARC][WARN] initPlayerLocal: ARC_serverReady timeout threshold reached (%1s); continuing with client init fallback and keeping state refresh gated.",
+        _readyTimeoutSec
+    ];
+
+    [] spawn {
+        private _fallbackWaitStart = diag_tickTime;
+        waitUntil { missionNamespace getVariable ["ARC_serverReady", false] };
+
+        missionNamespace setVariable ["ARC_clientStateRefreshEnabled", true];
+        diag_log format [
+            "[ARC][INFO] initPlayerLocal: ARC_serverReady observed after fallback (+%1s post-timeout); enabling delayed client refresh.",
+            round (diag_tickTime - _fallbackWaitStart)
+        ];
+
+        if (!isNil { missionNamespace getVariable "ARC_pub_state" }) then
+        {
+            [] call ARC_fnc_briefingUpdateClient;
+            if (!isNil "ARC_fnc_tocRefreshClient") then { [] call ARC_fnc_tocRefreshClient; };
+        };
+    };
 };
 
 // Build stamp breadcrumb (client)
@@ -54,8 +92,11 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
     missionNamespace setVariable ["ARC_clientSnapshotWatcherRunning", true];
 
     [] spawn {
-        // Wait for first snapshot
-        waitUntil { !isNil { missionNamespace getVariable "ARC_pub_state" } };
+        // Wait for server readiness gate + first snapshot
+        waitUntil {
+            (missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false]) &&
+            { !isNil { missionNamespace getVariable "ARC_pub_state" } }
+        };
 
         private _refresh = {
             [] call ARC_fnc_briefingUpdateClient;

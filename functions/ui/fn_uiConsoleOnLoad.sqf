@@ -223,8 +223,18 @@ if (!isNull _ctrlMain) then
     _ctrlMain ctrlSetStructuredText parseText "<t size='1.05' color='#B89B6B'>Loading...</t>";
 };
 
-// Initial paint
-[_display] call ARC_fnc_uiConsoleRefresh;
+private _clientRefreshEnabled = missionNamespace getVariable ["ARC_clientStateRefreshEnabled", true];
+private _pubStateAvailable = !isNil { missionNamespace getVariable "ARC_pub_state" };
+
+// Initial paint (guard against pre-snapshot refresh noise when client init is in timeout fallback mode)
+if (_clientRefreshEnabled || _pubStateAvailable) then
+{
+    [_display] call ARC_fnc_uiConsoleRefresh;
+}
+else
+{
+    diag_log "[ARC][INFO] uiConsoleOnLoad: deferring initial refresh until ARC_serverReady/ARC_pub_state are available.";
+};
 
 // Refresh loop (lightweight)
 uiNamespace setVariable ["ARC_console_refreshLoop", true];
@@ -244,7 +254,13 @@ uiNamespace setVariable ["ARC_console_refreshLoop", true];
 
         if (!_skip) then
         {
-            [_display] call ARC_fnc_uiConsoleRefresh;
+            private _refreshEnabled = missionNamespace getVariable ["ARC_clientStateRefreshEnabled", true];
+            private _hasPubState = !isNil { missionNamespace getVariable "ARC_pub_state" };
+
+            if (_refreshEnabled || _hasPubState) then
+            {
+                [_display] call ARC_fnc_uiConsoleRefresh;
+            };
         };
 
         uiSleep 1.2;
