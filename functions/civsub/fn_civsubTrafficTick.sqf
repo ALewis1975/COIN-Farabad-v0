@@ -137,7 +137,8 @@ private _budgetD = missionNamespace getVariable ["civsub_v1_traffic_spawn_budget
 if (!(_budgetD isEqualType 0)) then { _budgetD = 1; };
 if (_budgetD < 0) then { _budgetD = 0; };
 
-// Global spawn budget prevents burst spawning when multiple districts are active.
+// Spawn budgets are enforced per tick; keep defaults conservative for 1-2s cadence.
+// Global budget prevents multi-district burst spawning inside a single tick.
 private _budgetG = missionNamespace getVariable ["civsub_v1_traffic_spawn_budget_globalPerTick", 1];
 if (!(_budgetG isEqualType 0)) then { _budgetG = 1; };
 if (_budgetG < 0) then { _budgetG = 0; };

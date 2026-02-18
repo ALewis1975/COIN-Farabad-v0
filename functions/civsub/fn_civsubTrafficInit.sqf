@@ -40,7 +40,9 @@ missionNamespace setVariable ["civsub_v1_traffic_vehiclePool_valid", _pool, true
 
 private _tickS = missionNamespace getVariable ["civsub_v1_traffic_tick_s", 30];
 if (!(_tickS isEqualType 0)) then { _tickS = 30; };
-if (_tickS < 10) then { _tickS = 10; };
+// Enforce 1s minimum cadence to align with initServer guidance (1-2s recommended).
+if (_tickS < 1) then { _tickS = 1; };
+missionNamespace setVariable ["civsub_v1_traffic_tick_s", _tickS, true];
 
 // One-time init log for RPT validation
 private _capG = missionNamespace getVariable ["civsub_v1_traffic_cap_global", 18];
@@ -53,7 +55,11 @@ diag_log format ["[CIVTRAF][INIT] enabled=YES tickS=%1 pool=%2 capG=%3 capD=%4 s
     while { isServer && { missionNamespace getVariable ["civsub_v1_enabled", false] } && { missionNamespace getVariable ["civsub_v1_traffic_enabled", false] } } do
     {
         [] call ARC_fnc_civsubTrafficTick;
-        uiSleep (missionNamespace getVariable ["civsub_v1_traffic_tick_s", 30]);
+
+        private _tickSLoop = missionNamespace getVariable ["civsub_v1_traffic_tick_s", 30];
+        if (!(_tickSLoop isEqualType 0)) then { _tickSLoop = 30; };
+        if (_tickSLoop < 1) then { _tickSLoop = 1; };
+        uiSleep _tickSLoop;
     };
 
     missionNamespace setVariable ["civsub_v1_traffic_threadRunning", false, true];
