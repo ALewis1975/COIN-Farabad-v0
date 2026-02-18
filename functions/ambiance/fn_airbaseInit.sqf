@@ -153,7 +153,7 @@ private _assetDefs = [
 private _assets = [];
 
 {
-    _x params ["_id", "_category", "_vehVar", "_crewVars", "_taxiPathVar", "_pathFile", "_requiresTow", "_towVehVar", "_towCrewVar", "_towPathVar", "_towReleaseMarker", "_towReturnMarker"];
+    _x params ["_id", "_category", "_vehVar", "_crewVars", "_taxiPathVar", "_", "_requiresTow", "_towVehVar", "_towCrewVar", "_towPathVar", "_towReleaseMarker", "_towReturnMarker"];
 
     private _veh = missionNamespace getVariable [_vehVar, objNull];
     if (isNull _veh) then {
