@@ -542,10 +542,46 @@ if (_idxRecActive >= 0) then {
 ["airbase_v1_queue", _queue] call ARC_fnc_stateSet;
 ["airbase_v1_records", _recs] call ARC_fnc_stateSet;
 
+private _runwayPrev = missionNamespace getVariable ["airbase_v1_runwayState", "OPEN"];
+missionNamespace setVariable ["airbase_v1_runwayState", "RESERVED", true];
+missionNamespace setVariable ["airbase_v1_runwayOwner", _fid, true];
+missionNamespace setVariable ["airbase_v1_runwayUntil", (_nowTs + 120), true];
+
+if (_opsLogEnabled || _debugOps) then {
+    ["OPS", format ["AIRBASE RUNWAY: %1 -> RESERVED (%2 %3 %4)", _runwayPrev, _fid, _kind, _detail], _center, [
+        ["flightId", _fid],
+        ["kind", _kind],
+        ["detail", _detail],
+        ["owner", _fid],
+        ["until", (_nowTs + 120)]
+    ]] call ARC_fnc_intelLog;
+};
+
 [_fid, _kind, _detail] spawn {
     params ["_fid", "_kind", "_detail"];
     missionNamespace setVariable ["airbase_v1_execActive", true, true];
     missionNamespace setVariable ["airbase_v1_execFid", _fid, true];
+
+    private _runwayPrevExec = missionNamespace getVariable ["airbase_v1_runwayState", "OPEN"];
+    missionNamespace setVariable ["airbase_v1_runwayState", "OCCUPIED", true];
+    missionNamespace setVariable ["airbase_v1_runwayOwner", _fid, true];
+    missionNamespace setVariable ["airbase_v1_runwayUntil", -1, true];
+
+    private _opsEnabledExec = missionNamespace getVariable ["airbase_v1_opsLogEnabled", true];
+    if (!(_opsEnabledExec isEqualType true) && !(_opsEnabledExec isEqualType false)) then { _opsEnabledExec = true; };
+    private _dbgOpsExec = missionNamespace getVariable ["airbase_v1_debugOpsLog", false];
+    private _rtCenterExec = missionNamespace getVariable ["airbase_v1_rt", createHashMap];
+    private _opsPosExec = _rtCenterExec getOrDefault ["bubbleCenter", getMarkerPos "mkr_airbaseCenter"];
+
+    if (_opsEnabledExec || _dbgOpsExec) then {
+        ["OPS", format ["AIRBASE RUNWAY: %1 -> OCCUPIED (%2 %3 %4)", _runwayPrevExec, _fid, _kind, _detail], _opsPosExec, [
+            ["flightId", _fid],
+            ["kind", _kind],
+            ["detail", _detail],
+            ["owner", _fid],
+            ["until", -1]
+        ]] call ARC_fnc_intelLog;
+    };
 
     private _rtL = missionNamespace getVariable ["airbase_v1_rt", createHashMap];
     private _assetsL = _rtL getOrDefault ["assets", []];
@@ -590,6 +626,20 @@ if (_idxRecActive >= 0) then {
     };
 
     missionNamespace setVariable ["airbase_v1_execFid", "", true];
+
+    private _runwayPrevRelease = missionNamespace getVariable ["airbase_v1_runwayState", "OPEN"];
+    missionNamespace setVariable ["airbase_v1_runwayState", "OPEN", true];
+    missionNamespace setVariable ["airbase_v1_runwayOwner", "", true];
+    missionNamespace setVariable ["airbase_v1_runwayUntil", -1, true];
+
+    if (_opsEnabledExec || _dbgOpsExec) then {
+        ["OPS", format ["AIRBASE RUNWAY: %1 -> OPEN (%2 result=%3)", _runwayPrevRelease, _fid, if (_ok) then {"COMPLETE"} else {"FAILED"}], _opsPosExec, [
+            ["flightId", _fid],
+            ["result", if (_ok) then {"COMPLETE"} else {"FAILED"}],
+            ["owner", ""],
+            ["until", -1]
+        ]] call ARC_fnc_intelLog;
+    };
 
     missionNamespace setVariable ["airbase_v1_execActive", false, true];
 };
