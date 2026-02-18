@@ -91,6 +91,14 @@ private _maxAD = missionNamespace getVariable ["civsub_v1_traffic_activeDistrict
 if (!(_maxAD isEqualType 0)) then { _maxAD = 3; };
 if (_maxAD < 1) then { _maxAD = 1; };
 
+private _fnHmGet = {
+    params ["_hm", "_k", "_def"];
+    if (isNil "_hm" || { !(_hm isEqualType createHashMap) }) exitWith { _def };
+    private _v = _hm get _k;
+    if (isNil "_v") exitWith { _def };
+    _v
+};
+
 private _act = [];
 private _trafficDistrictSource = "PLAYER_BUBBLE";
 
@@ -102,23 +110,24 @@ private _playerDistrictCounts = createHashMap;
     private _did = [getPosATL _x] call ARC_fnc_civsubDistrictsFindByPos;
     if (_did isEqualTo "") then { continue; };
 
-    private _n = _playerDistrictCounts getOrDefault [_did, 0];
+    private _n = [_playerDistrictCounts, _did, 0] call _fnHmGet;
     _playerDistrictCounts set [_did, _n + 1];
 } forEach _players;
 
-if ((count (keys _playerDistrictCounts)) > 0) then
+private _playerDistrictKeys = keys _playerDistrictCounts;
+if ((count _playerDistrictKeys) > 0) then
 {
     private _rows = [];
     {
         private _did = _x;
-        private _d = _districts getOrDefault [_did, createHashMap];
+        private _d = [_districts, _did, createHashMap] call _fnHmGet;
         if !(_d isEqualType createHashMap) then { continue; };
         if !([_d] call ARC_fnc_civsubIsDistrictActive) then { continue; };
 
-        private _n = _playerDistrictCounts getOrDefault [_did, 0];
+        private _n = [_playerDistrictCounts, _did, 0] call _fnHmGet;
         // Sort by descending player count, then stable district id.
         _rows pushBack [0 - _n, _did, _d];
-    } forEach (keys _playerDistrictCounts);
+    } forEach _playerDistrictKeys;
 
     _rows sort true;
     if ((count _rows) > _maxAD) then { _rows resize _maxAD; };
@@ -132,17 +141,17 @@ if ((count _act) == 0) then
 
     {
         private _did = _x;
-        private _d = _districts getOrDefault [_did, createHashMap];
+        private _d = [_districts, _did, createHashMap] call _fnHmGet;
         if !(_d isEqualType createHashMap) then { continue; };
 
         if ([_d] call ARC_fnc_civsubIsDistrictActive) then
         {
             // sort key: distance to nearest player (from district centroid)
-            private _c = _d getOrDefault ["centroid", [0,0]];
+            private _c = [_d, "centroid", [0,0]] call _fnHmGet;
             private _min = 1e12;
             {
                 private _p = getPosATL _x;
-                private _d2 = (_p distance2D [_c # 0, _c # 1, 0]);
+                private _d2 = (_p distance2D [_c select 0, _c select 1, 0]);
                 if (_d2 < _min) then { _min = _d2; };
             } forEach _players;
 
@@ -156,14 +165,14 @@ if ((count _act) == 0) then
 
 if (_debug) then
 {
-    private _selected = _act apply { _x # 1 };
+    private _selected = _act apply { _x select 1 };
     diag_log format ["[CIVTRAF][TICK] activeDistricts=%1 source=%2", _selected, _trafficDistrictSource];
 };
 
 private _opCenters = createHashMap;
 {
-    private _did = _x # 1;
-    private _d = _x # 2;
+    private _did = _x select 1;
+    private _d = _x select 2;
     private _op = [_did, _d] call ARC_fnc_civsubTrafficResolveSpawnCenter;
     _opCenters set [_did, _op];
 } forEach _act;
@@ -197,13 +206,13 @@ if ((_tod >= 7 && { _tod <= 9 }) || (_tod >= 16 && { _tod <= 18 })) then { _mTod
 // Spawn parked vehicles per active district (mostly parked)
 {
     if (_budgetG <= 0) exitWith {};
-    private _did = _x # 1;
-    private _d = _x # 2;
+    private _did = _x select 1;
+    private _d = _x select 2;
 
     // Compute S_THREAT (consistent with CIVSUB baseline)
-    private _W = _d getOrDefault ["W_EFF_U", 45];
-    private _R = _d getOrDefault ["R_EFF_U", 55];
-    private _G = _d getOrDefault ["G_EFF_U", 35];
+    private _W = [_d, "W_EFF_U", 45] call _fnHmGet;
+    private _R = [_d, "R_EFF_U", 55] call _fnHmGet;
+    private _G = [_d, "G_EFF_U", 35] call _fnHmGet;
 
     private _sThreat = ((_R) - (0.35 * _W) - (0.25 * _G));
     _sThreat = (_sThreat max 0) min 100;
@@ -213,7 +222,7 @@ if ((_tod >= 7 && { _tod <= 9 }) || (_tod >= 16 && { _tod <= 18 })) then { _mTod
     _mThreat = (_mThreat max 0.25) min 1.0;
 
     // Pop multiplier: bigger towns get more traffic (normalized via pop_total)
-    private _pop = _d getOrDefault ["pop_total", 100];
+    private _pop = [_d, "pop_total", 100] call _fnHmGet;
     if (!(_pop isEqualType 0)) then { _pop = 100; };
     private _mPop = 0.6 + (0.00025 * _pop); // 100 -> 0.625, 2000 -> 1.1
     _mPop = (_mPop max 0.5) min 1.2;
@@ -228,7 +237,7 @@ if ((_tod >= 7 && { _tod <= 9 }) || (_tod >= 16 && { _tod <= 18 })) then { _mTod
 
     while { _cur < _desired && { (count _parked) < _capG } && { _budget > 0 } && { _budgetG > 0 } } do
     {
-        private _op = _opCenters getOrDefault [_did, []];
+        private _op = [_opCenters, _did, []] call _fnHmGet;
         private _veh = [_did, _d, _pool, _op] call ARC_fnc_civsubTrafficSpawnParked;
         if (isNull _veh) exitWith { _budget = 0; };
 
@@ -254,15 +263,15 @@ if (_allowMoving) then
     if ((count _moving) < _capMG && { (count _act) > 0 } && { (random 1) < _probM }) then
     {
         private _row = selectRandom _act;
-        private _did = _row # 1;
-        private _d = _row # 2;
+        private _did = _row select 1;
+        private _d = _row select 2;
 
         private _drvCls = missionNamespace getVariable ["civsub_v1_traffic_driverClass", "C_man_1"];
         if (!(_drvCls isEqualType "")) then { _drvCls = "C_man_1"; };
 
-        private _op = _opCenters getOrDefault [_did, []];
+        private _op = [_opCenters, _did, []] call _fnHmGet;
         private _pair = [_did, _d, _pool, _drvCls, _op] call ARC_fnc_civsubTrafficSpawnMoving;
-        private _veh = _pair # 0;
+        private _veh = _pair select 0;
         if (!isNull _veh) then { _moving pushBack _veh; };
     };
 
@@ -311,7 +320,7 @@ missionNamespace setVariable ["civsub_v1_traffic_tick_i", _ti, false];
 
 if (_debug && { (_ti mod 10) == 0 }) then
 {
-    private _actIds = _act apply { _x # 1 };
+    private _actIds = _act apply { _x select 1 };
     diag_log format ["[CIVTRAF][TICK] i=%1 active=%2 parked=%3 moving=%4 pool=%5 prefer=%6 fallback=%7 budgetG=%8",
         _ti, _actIds, count _parked, count _moving, count _pool, count _poolPrefer, count _poolFallback, (missionNamespace getVariable ["civsub_v1_traffic_spawn_budget_globalPerTick", 1])
     ];
