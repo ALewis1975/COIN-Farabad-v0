@@ -22,6 +22,7 @@ private _html = "";
 private _type = "";
 private _ok = false;
 private _payload = createHashMap;
+private _raw = _in;
 
 if (_in isEqualType "") then {
     _html = _in;
@@ -36,6 +37,32 @@ if (_in isEqualType "") then {
         if (_payload isEqualType []) then { _payload = createHashMapFromArray _payload; };
     };
 };
+
+if (_type isEqualType "") then { _type = toUpper (trim _type); };
+
+private _st = systemTime;
+private _pad2 = {
+    params ["_n"];
+    private _v = _n;
+    if !(_v isEqualType 0) then { _v = 0; };
+    if (_v < 10) exitWith { format ["0%1", _v] };
+    str _v
+};
+private _stamp = if (_st isEqualType [] && {(count _st) >= 6}) then {
+    format ["%1:%2:%3", [(_st # 3)] call _pad2, [(_st # 4)] call _pad2, [(_st # 5)] call _pad2]
+} else {
+    "--:--:--"
+};
+
+uiNamespace setVariable ["ARC_console_civsubLastResult", createHashMapFromArray [
+    ["raw", _raw],
+    ["html", _html],
+    ["type", _type],
+    ["ok", _ok],
+    ["payload", _payload],
+    ["updatedAtText", _stamp],
+    ["updatedAtTick", diag_tickTime]
+]];
 
 if (!isNull _resp && {!(_html isEqualTo "")}) then {
     _resp ctrlSetStructuredText parseText _html;
