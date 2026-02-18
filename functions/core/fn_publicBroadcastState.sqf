@@ -60,6 +60,10 @@ if (!(_clrHist isEqualType [])) then { _clrHist = []; };
 private _clrSeq = ["airbase_v1_clearanceSeq", 0] call ARC_fnc_stateGet;
 if (!(_clrSeq isEqualType 0) || { _clrSeq < 0 }) then { _clrSeq = 0; };
 
+
+private _airEvents = ["airbase_v1_events", []] call ARC_fnc_stateGet;
+if (!(_airEvents isEqualType [])) then { _airEvents = []; };
+
 private _depQueued = 0;
 private _arrQueued = 0;
 {
@@ -135,6 +139,25 @@ if ((count _clearanceHistoryTail) > _clrTailN) then {
     _clearanceHistoryTail = _clearanceHistoryTail select [(count _clearanceHistoryTail) - _clrTailN, _clrTailN];
 };
 
+
+private _eventsTail = +_airEvents;
+private _eventsTailN = missionNamespace getVariable ["airbase_v1_publicEventsMax", 8];
+if (!(_eventsTailN isEqualType 0) || { _eventsTailN < 0 }) then { _eventsTailN = 8; };
+if ((count _eventsTail) > _eventsTailN) then {
+    _eventsTail = _eventsTail select [(count _eventsTail) - _eventsTailN, _eventsTailN];
+};
+
+private _eventsView = _eventsTail apply {
+    [
+        _x param [0, -1],
+        _x param [1, ""],
+        _x param [2, ""],
+        _x param [3, ""],
+        _x param [4, ""],
+        _x param [5, []]
+    ]
+};
+
 private _airbasePub = [
     ["depQueued", _depQueued],
     ["arrQueued", _arrQueued],
@@ -153,7 +176,8 @@ private _airbasePub = [
     ["clearanceAwaitingTowerCount", count _clearanceAwaitingTower],
     ["clearancePending", _clearancePendingView],
     ["clearanceControllerPending", _clearancePendingView],
-    ["clearanceHistoryTail", _clearanceHistoryTail]
+    ["clearanceHistoryTail", _clearanceHistoryTail],
+    ["recentEvents", _eventsView]
 ];
 
 private _pub = [
