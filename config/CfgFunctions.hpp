@@ -598,6 +598,12 @@ class Ops
             class airbaseQueueRemoveByFid {};
             class airbaseRecordSetQueuedStatus {};
 
+            // Runway lock helpers
+            class airbaseRunwayLockSweep {};
+            class airbaseRunwayLockReserve {};
+            class airbaseRunwayLockOccupy {};
+            class airbaseRunwayLockRelease {};
+
             class airbaseClientRequestHoldDepartures {};
             class airbaseClientRequestReleaseDepartures {};
             class airbaseClientRequestPrioritizeFlight {};

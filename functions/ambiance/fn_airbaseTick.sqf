@@ -20,6 +20,9 @@ private _fnHmGet = {
 
 if (!([_rt, "initialized", false] call _fnHmGet)) exitWith {};
 
+// Fail-safe runway cleanup in case previous movement aborted or lock metadata went stale.
+["tick", false] call ARC_fnc_airbaseRunwayLockSweep;
+
 private _nowTs = serverTime;
 private _tickS = missionNamespace getVariable ["airbase_v1_tick_s", 2];
 
@@ -467,6 +470,25 @@ private _policyReason = "NO_ELIGIBLE";
 private _policyMeta = [];
 private _loggedDepHoldSkip = false;
 
+private _runwayState = missionNamespace getVariable ["airbase_v1_runwayState", "OPEN"];
+if (!(_runwayState isEqualType "") || !(_runwayState in ["OPEN", "RESERVED", "OCCUPIED"])) then { _runwayState = "OPEN"; };
+private _runwayOwner = missionNamespace getVariable ["airbase_v1_runwayOwner", ""];
+if (!(_runwayOwner isEqualType "")) then { _runwayOwner = ""; };
+private _runwayUntil = missionNamespace getVariable ["airbase_v1_runwayUntil", -1];
+if (!(_runwayUntil isEqualType 0)) then { _runwayUntil = -1; };
+
+private _runwayFree = (_runwayState isEqualTo "OPEN") || { (_runwayState isEqualTo "RESERVED") && { _runwayOwner isEqualTo "" } };
+if (!_runwayFree) exitWith {
+    if (_opsLogEnabled || _debugOps) then {
+        ["OPS", format ["AIRBASE POLICY: dequeue blocked by runway lock (%1 owner=%2)", _runwayState, _runwayOwner], _center, 0, [
+            ["runwayState", _runwayState],
+            ["runwayOwner", _runwayOwner],
+            ["runwayUntil", _runwayUntil],
+            ["queueLen", count _queue]
+        ]] call ARC_fnc_intelLog;
+    };
+};
+
 for "_i" from 0 to ((count _queue) - 1) do {
     private _qItem = _queue # _i;
     _qItem params ["_qFid", "_qKind", "_qDetail"];
@@ -540,6 +562,20 @@ if (_policyIdx < 0) exitWith {
 private _item = _queue deleteAt _policyIdx;
 _item params ["_fid", "_kind", "_detail"];
 
+private _reserveS = missionNamespace getVariable ["airbase_v1_runwayReserveWindow_s", 120];
+if (!(_reserveS isEqualType 0) || { _reserveS < 30 }) then { _reserveS = 120; };
+private _reserved = [_fid, _kind, _detail, _reserveS, _policyReason] call ARC_fnc_airbaseRunwayLockReserve;
+if (!_reserved) exitWith {
+    _queue insert [_policyIdx, [[_fid, _kind, _detail]]];
+    ["airbase_v1_queue", _queue] call ARC_fnc_stateSet;
+    if (_opsLogEnabled || _debugOps) then {
+        ["OPS", format ["AIRBASE POLICY: reserve failed; re-queued %1 (%2 %3)", _fid, _kind, _detail], _center, 0, [
+            ["policyReason", _policyReason],
+            ["queueLen", count _queue]
+        ]] call ARC_fnc_intelLog;
+    };
+};
+
 private _idxRecActive = _recs findIf { (_x param [0,""]) isEqualTo _fid };
 if (_idxRecActive >= 0) then {
     private _rActive = _recs # _idxRecActive;
@@ -551,45 +587,33 @@ if (_idxRecActive >= 0) then {
 ["airbase_v1_queue", _queue] call ARC_fnc_stateSet;
 ["airbase_v1_records", _recs] call ARC_fnc_stateSet;
 
-private _runwayPrev = missionNamespace getVariable ["airbase_v1_runwayState", "OPEN"];
-missionNamespace setVariable ["airbase_v1_runwayState", "RESERVED", true];
-missionNamespace setVariable ["airbase_v1_runwayOwner", _fid, true];
-missionNamespace setVariable ["airbase_v1_runwayUntil", (_nowTs + 120), true];
-
-if (_opsLogEnabled || _debugOps) then {
-    ["OPS", format ["AIRBASE RUNWAY: %1 -> RESERVED (%2 %3 %4)", _runwayPrev, _fid, _kind, _detail], _center, [
-        ["flightId", _fid],
-        ["kind", _kind],
-        ["detail", _detail],
-        ["owner", _fid],
-        ["until", (_nowTs + 120)]
-    ]] call ARC_fnc_intelLog;
-};
-
 [_fid, _kind, _detail] spawn {
     params ["_fid", "_kind", "_detail"];
     missionNamespace setVariable ["airbase_v1_execActive", true, true];
     missionNamespace setVariable ["airbase_v1_execFid", _fid, true];
 
-    private _runwayPrevExec = missionNamespace getVariable ["airbase_v1_runwayState", "OPEN"];
-    missionNamespace setVariable ["airbase_v1_runwayState", "OCCUPIED", true];
-    missionNamespace setVariable ["airbase_v1_runwayOwner", _fid, true];
-    missionNamespace setVariable ["airbase_v1_runwayUntil", -1, true];
+    private _occupyTimeoutS = missionNamespace getVariable ["airbase_v1_runwayOccupyTimeout_s", 900];
+    if (!(_occupyTimeoutS isEqualType 0) || { _occupyTimeoutS < 60 }) then { _occupyTimeoutS = 900; };
+    private _occupied = [_fid, _kind, _detail, _occupyTimeoutS, "EXEC_START"] call ARC_fnc_airbaseRunwayLockOccupy;
+    if (!_occupied) exitWith {
+        private _recsBlock = ["airbase_v1_records", []] call ARC_fnc_stateGet;
+        private _idxBlock = _recsBlock findIf { (_x param [0,""]) isEqualTo _fid };
+        if (_idxBlock >= 0) then {
+            private _rBlock = _recsBlock # _idxBlock;
+            _rBlock set [5, "FAILED"];
+            _rBlock set [6, serverTime];
+            _recsBlock set [_idxBlock, _rBlock];
+            ["airbase_v1_records", _recsBlock] call ARC_fnc_stateSet;
+        };
 
-    private _opsEnabledExec = missionNamespace getVariable ["airbase_v1_opsLogEnabled", true];
-    if (!(_opsEnabledExec isEqualType true) && !(_opsEnabledExec isEqualType false)) then { _opsEnabledExec = true; };
-    private _dbgOpsExec = missionNamespace getVariable ["airbase_v1_debugOpsLog", false];
-    private _rtCenterExec = missionNamespace getVariable ["airbase_v1_rt", createHashMap];
-    private _opsPosExec = [_rtCenterExec, "bubbleCenter", getMarkerPos "mkr_airbaseCenter"] call _fnHmGet;
-
-    if (_opsEnabledExec || _dbgOpsExec) then {
-        ["OPS", format ["AIRBASE RUNWAY: %1 -> OCCUPIED (%2 %3 %4)", _runwayPrevExec, _fid, _kind, _detail], _opsPosExec, [
-            ["flightId", _fid],
+        ["OPS", format ["AIRBASE: execution aborted, runway occupy denied for %1", _fid], getMarkerPos "mkr_airbaseCenter", 0, [
             ["kind", _kind],
-            ["detail", _detail],
-            ["owner", _fid],
-            ["until", -1]
+            ["detail", _detail]
         ]] call ARC_fnc_intelLog;
+
+        [_fid, _kind, _detail, "FAILED", true, "EXEC_ABORT_OCCUPY_DENIED"] call ARC_fnc_airbaseRunwayLockRelease;
+        missionNamespace setVariable ["airbase_v1_execFid", "", true];
+        missionNamespace setVariable ["airbase_v1_execActive", false, true];
     };
 
     private _rtL = missionNamespace getVariable ["airbase_v1_rt", createHashMap];
@@ -636,19 +660,8 @@ if (_opsLogEnabled || _debugOps) then {
 
     missionNamespace setVariable ["airbase_v1_execFid", "", true];
 
-    private _runwayPrevRelease = missionNamespace getVariable ["airbase_v1_runwayState", "OPEN"];
-    missionNamespace setVariable ["airbase_v1_runwayState", "OPEN", true];
-    missionNamespace setVariable ["airbase_v1_runwayOwner", "", true];
-    missionNamespace setVariable ["airbase_v1_runwayUntil", -1, true];
-
-    if (_opsEnabledExec || _dbgOpsExec) then {
-        ["OPS", format ["AIRBASE RUNWAY: %1 -> OPEN (%2 result=%3)", _runwayPrevRelease, _fid, if (_ok) then {"COMPLETE"} else {"FAILED"}], _opsPosExec, [
-            ["flightId", _fid],
-            ["result", if (_ok) then {"COMPLETE"} else {"FAILED"}],
-            ["owner", ""],
-            ["until", -1]
-        ]] call ARC_fnc_intelLog;
-    };
+    [_fid, _kind, _detail, if (_ok) then {"COMPLETE"} else {"FAILED"}, false, "EXEC_FINISH"] call ARC_fnc_airbaseRunwayLockRelease;
+    ["exec-end", false] call ARC_fnc_airbaseRunwayLockSweep;
 
     missionNamespace setVariable ["airbase_v1_execActive", false, true];
 };
