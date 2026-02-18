@@ -18,7 +18,8 @@ params [ ["_caller", objNull, [objNull]] ];
 private _owner = -1;
 if (!isNil "remoteExecutedOwner") then { _owner = remoteExecutedOwner; };
 
-if (!([_caller, "ARC_fnc_tocRequestNextIncident", "Incident generation rejected: sender verification failed.", "TOC_NEXT_INCIDENT_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
+// RemoteExec-only validation path: requires remoteExecutedOwner context.
+if (!([_caller, "ARC_fnc_tocRequestNextIncident", "Incident generation rejected: sender verification failed.", "TOC_NEXT_INCIDENT_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
 

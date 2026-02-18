@@ -28,7 +28,8 @@ if (_isRemoteRpc) then
             } forEach allPlayers;
         };
 
-        if (!([_caller, "ARC_fnc_tocRequestRefreshIntel", "Intel refresh rejected: sender verification failed.", "TOC_REFRESH_INTEL_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
+        // RemoteExec-only validation path: requires remoteExecutedOwner context.
+        if (!([_caller, "ARC_fnc_tocRequestRefreshIntel", "Intel refresh rejected: sender verification failed.", "TOC_REFRESH_INTEL_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
         private _isOmni = [_caller, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
         private _canRefresh = _isOmni || { [_caller] call ARC_fnc_rolesIsTocS2 } || { [_caller] call ARC_fnc_rolesIsTocCommand };

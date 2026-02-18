@@ -453,9 +453,94 @@ if (_exec) exitWith {};
 
 if ((count _queue) == 0) exitWith {};
 
-private _item = _queue # 0;
+private _policyIdx = -1;
+private _policyReason = "NO_ELIGIBLE";
+private _policyMeta = [];
+private _loggedDepHoldSkip = false;
 
+for "_i" from 0 to ((count _queue) - 1) do {
+    private _qItem = _queue # _i;
+    _qItem params ["_qFid", "_qKind", "_qDetail"];
+
+    if (_qKind isEqualTo "ARR") exitWith {
+        _policyIdx = _i;
+        _policyReason = "ALLOW_ARR";
+        _policyMeta = [["holdDepartures", _holdDepartures], ["reason", "ARR_EXECUTES_DURING_HOLD"]];
+    };
+
+    if (_qKind isEqualTo "DEP") then {
+        if (!_holdDepartures) exitWith {
+            _policyIdx = _i;
+            _policyReason = "ALLOW_DEP_HOLD_OFF";
+            _policyMeta = [["holdDepartures", false]];
+        };
+
+        private _isOverride = false;
+        private _isEmergency = false;
+        private _rIdx = _recs findIf { (_x param [0, ""]) isEqualTo _qFid };
+        if (_rIdx >= 0) then {
+            private _rec = _recs # _rIdx;
+            private _meta = _rec param [7, []];
+            if (!(_meta isEqualType [])) then { _meta = []; };
+
+            {
+                private _k = _x param [0, ""];
+                private _v = _x param [1, false];
+                if ((_k isEqualTo "overrideHold") && { _v isEqualTo true }) then { _isOverride = true; };
+                if ((_k isEqualTo "manualOverride") && { _v isEqualTo true }) then { _isOverride = true; };
+                if ((_k isEqualTo "emergency") && { _v isEqualTo true }) then { _isEmergency = true; };
+            } forEach _meta;
+
+            if ((_rec param [5, ""]) isEqualTo "PRIORITIZED") then { _isOverride = true; };
+        };
+
+        if (_isOverride || _isEmergency) exitWith {
+            _policyIdx = _i;
+            _policyReason = "ALLOW_DEP_OVERRIDE";
+            _policyMeta = [["holdDepartures", true], ["override", _isOverride], ["emergency", _isEmergency]];
+        };
+
+        if (!_loggedDepHoldSkip && (_opsLogEnabled || _debugOps)) then {
+            _loggedDepHoldSkip = true;
+            ["OPS", format ["AIRBASE POLICY: hold blocked departure %1", _qFid], _center, 0, [
+                ["holdDepartures", true],
+                ["override", false],
+                ["emergency", false]
+            ]] call ARC_fnc_intelLog;
+        };
+    };
+};
+
+if ((_opsLogEnabled || _debugOps) && { _policyReason isNotEqualTo "NO_ELIGIBLE" }) then {
+    private _picked = _queue # _policyIdx;
+    _picked params ["_pfid", "_pk", "_pd"];
+    ["OPS", format ["AIRBASE POLICY: %1 selected %2 (%3 %4)", _policyReason, _pfid, _pk, _pd], _center, 0, _policyMeta] call ARC_fnc_intelLog;
+};
+
+if (_policyIdx < 0) exitWith {
+    if (_opsLogEnabled || _debugOps) then {
+        private _headKind = (_queue # 0) param [1, ""];
+        private _headFid = (_queue # 0) param [0, ""];
+        ["OPS", format ["AIRBASE POLICY: dequeue blocked (hold=%1, head=%2 %3)", _holdDepartures, _headFid, _headKind], _center, 0, [
+            ["holdDepartures", _holdDepartures],
+            ["queueLen", count _queue]
+        ]] call ARC_fnc_intelLog;
+    };
+};
+
+private _item = _queue deleteAt _policyIdx;
 _item params ["_fid", "_kind", "_detail"];
+
+private _idxRecActive = _recs findIf { (_x param [0,""]) isEqualTo _fid };
+if (_idxRecActive >= 0) then {
+    private _rActive = _recs # _idxRecActive;
+    _rActive set [5, "ACTIVE"];
+    _rActive set [6, _nowTs];
+    _recs set [_idxRecActive, _rActive];
+};
+
+["airbase_v1_queue", _queue] call ARC_fnc_stateSet;
+["airbase_v1_records", _recs] call ARC_fnc_stateSet;
 
 [_fid, _kind, _detail] spawn {
     params ["_fid", "_kind", "_detail"];
@@ -464,17 +549,6 @@ _item params ["_fid", "_kind", "_detail"];
 
     private _rtL = missionNamespace getVariable ["airbase_v1_rt", createHashMap];
     private _assetsL = _rtL getOrDefault ["assets", []];
-
-    // Mark record active
-    private _recsL = ["airbase_v1_records", []] call ARC_fnc_stateGet;
-    private _idx = _recsL findIf { (_x param [0,""]) isEqualTo _fid };
-    if (_idx >= 0) then {
-        private _r = _recsL # _idx;
-        _r set [5, "ACTIVE"];
-        _r set [6, serverTime];
-        _recsL set [_idx, _r];
-        ["airbase_v1_records", _recsL] call ARC_fnc_stateSet;
-    };
 
     private _ok = false;
 
@@ -513,15 +587,6 @@ _item params ["_fid", "_kind", "_detail"];
         _r2 set [6, serverTime];
         _recs2 set [_idx2, _r2];
         ["airbase_v1_records", _recs2] call ARC_fnc_stateSet;
-    };
-
-    
-    // Remove processed item from queue (keeps it visible while executing so players get a heads-up)
-    private _qNow = ["airbase_v1_queue", []] call ARC_fnc_stateGet;
-    private _qIdx = _qNow findIf { (_x param [0,""]) isEqualTo _fid };
-    if (_qIdx >= 0) then {
-        _qNow deleteAt _qIdx;
-        ["airbase_v1_queue", _qNow] call ARC_fnc_stateSet;
     };
 
     missionNamespace setVariable ["airbase_v1_execFid", "", true];

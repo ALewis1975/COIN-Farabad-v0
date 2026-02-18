@@ -454,6 +454,7 @@ class CfgFunctions
             class uiConsoleCommandPaint {};
             class uiConsoleTocQueuePaint {};
             class uiConsoleHQPaint {};
+            class uiConsoleAirPaint {};
             class uiConsoleOpsSelChanged {};
 
             // Tab-aware button routing
@@ -492,6 +493,8 @@ class CfgFunctions
             class uiConsoleActionAcceptOrder {};
             class uiConsoleActionOpenTocQueue {};
             class uiConsoleActionHQPrimary {};
+            class uiConsoleActionAirPrimary {};
+            class uiConsoleActionAirSecondary {};
 
             // Structured SITREP dialog helpers (UI09)
             class uiSitrepDialogOnLoad {};
@@ -589,6 +592,11 @@ class Ops
             class airbaseRequestReleaseDepartures {};
             class airbaseRequestPrioritizeFlight {};
             class airbaseRequestCancelQueuedFlight {};
+
+            // Queue/record mutation helpers
+            class airbaseQueueMoveToFront {};
+            class airbaseQueueRemoveByFid {};
+            class airbaseRecordSetQueuedStatus {};
 
             class airbaseClientRequestHoldDepartures {};
             class airbaseClientRequestReleaseDepartures {};

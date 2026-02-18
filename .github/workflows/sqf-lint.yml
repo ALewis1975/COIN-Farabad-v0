@@ -1,0 +1,15 @@
+name: SQF Lint (Deprecated)
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  deprecated:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deprecation notice
+        run: |
+          echo "sqf-lint.yml is intentionally decommissioned."
+          echo "Reason: previous sqfvm install path was non-deterministic and failed in CI."
+          echo "Authoritative lint gate: .github/workflows/arma-preflight.yml"

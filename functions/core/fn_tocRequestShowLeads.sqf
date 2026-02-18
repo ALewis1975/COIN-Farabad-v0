@@ -23,7 +23,8 @@ if (!isNil "remoteExecutedOwner") then
             } forEach allPlayers;
         };
 
-        if (!([_caller, "ARC_fnc_tocRequestShowLeads", "Show leads rejected: sender verification failed.", "TOC_SHOW_LEADS_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
+        // RemoteExec-only validation path: requires remoteExecutedOwner context.
+        if (!([_caller, "ARC_fnc_tocRequestShowLeads", "Show leads rejected: sender verification failed.", "TOC_SHOW_LEADS_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
         private _isOmni = [_caller, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
         private _can = _isOmni || { [_caller] call ARC_fnc_rolesCanApproveQueue } || { [_caller] call ARC_fnc_rolesIsTocS2 } || { [_caller] call ARC_fnc_rolesIsTocCommand };

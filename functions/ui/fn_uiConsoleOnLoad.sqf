@@ -142,6 +142,20 @@ private _canHQ = _isOmni || _isCmd || _isTocS3 || _isBnCmd;
 // Operations tab access: field leadership + TOC staff
 private _canOps = _isOmni || _isCmd || _isTocS3 || _isAuth;
 
+// Air tab access:
+// - Control access: tower-designated roles (CCIC/LC permissions from airbase auth helper)
+// - Read-only access: TOC staff + OMNI (situational awareness)
+private _towerAuth = [player, "PRIORITIZE"] call ARC_fnc_airbaseTowerAuthorize;
+private _canAirControl = false;
+if (_towerAuth isEqualType [] && { (count _towerAuth) > 0 }) then
+{
+    _canAirControl = _towerAuth # 0;
+    if (!(_canAirControl isEqualType true) && !(_canAirControl isEqualType false)) then { _canAirControl = false; };
+};
+
+private _canAirRead = _canAirControl || _isOmni || _canTocFull;
+uiNamespace setVariable ["ARC_console_airCanControl", _canAirControl];
+
 // ---------------------------------------------------------------------------
 // Build tab list (store ids so selection events map to stable strings)
 // ---------------------------------------------------------------------------
@@ -169,6 +183,12 @@ if (_canOps) then
 {
     _tabIds pushBack "OPS";
     _ctrlTabs lbAdd "S3 / OPS";
+};
+
+if (_canAirRead) then
+{
+    _tabIds pushBack "AIR";
+    _ctrlTabs lbAdd "AIR / TOWER";
 };
 
 _tabIds pushBack "HANDOFF";

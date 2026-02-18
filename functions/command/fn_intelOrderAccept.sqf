@@ -20,7 +20,8 @@ params [
     ["_orderId", ""]
 ];
 
-if (!([_acceptor, "ARC_fnc_intelOrderAccept", "Order acceptance rejected: sender verification failed.", "TOC_ORDER_ACCEPT_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
+// RemoteExec-only validation path: requires remoteExecutedOwner context.
+if (!([_acceptor, "ARC_fnc_intelOrderAccept", "Order acceptance rejected: sender verification failed.", "TOC_ORDER_ACCEPT_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 if (isNull _acceptor) exitWith {false};
 _orderId = trim _orderId;

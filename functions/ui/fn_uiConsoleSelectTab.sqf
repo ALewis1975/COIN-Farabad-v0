@@ -9,7 +9,7 @@
         1: NUMBER selected index
 
       Pattern B (scripted):
-        0: STRING tab id ("DASH" | "INTEL" | "OPS" | "HANDOFF" | "CMD" | "HQ")
+        0: STRING tab id ("DASH" | "INTEL" | "OPS" | "AIR" | "HANDOFF" | "CMD" | "HQ")
         1: (optional) DISPLAY (defaults to current console display)
 
     Returns:

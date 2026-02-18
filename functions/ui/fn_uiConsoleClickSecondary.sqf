@@ -66,6 +66,9 @@ switch (_tab) do
         };
     };
 
+
+    case "AIR":   { [] spawn ARC_fnc_uiConsoleActionAirSecondary; };
+
     case "CMD":
     {
         private _cmdMode = ["ARC_console_cmdMode", "OVERVIEW"] call ARC_fnc_uiNsGetString;
