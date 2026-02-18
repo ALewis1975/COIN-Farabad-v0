@@ -14,6 +14,7 @@
 if (!isServer) exitWith {false};
 
 if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\\core\\fn_rpcValidateSender.sqf"; };
+if (isNil "ARC_fnc_airbaseTowerAuthorize") then { ARC_fnc_airbaseTowerAuthorize = compile preprocessFileLineNumbers "functions\\core\\fn_airbaseTowerAuthorize.sqf"; };
 
 params [
     ["_caller", objNull, [objNull]],
@@ -65,6 +66,12 @@ if (!(_requests isEqualType [])) then { _requests = []; };
 private _history = ["airbase_v1_clearanceHistory", []] call ARC_fnc_stateGet;
 if (!(_history isEqualType [])) then { _history = []; };
 
+
+private _events = ["airbase_v1_events", []] call ARC_fnc_stateGet;
+if (!(_events isEqualType [])) then { _events = []; };
+private _eventsMax = missionNamespace getVariable ["airbase_v1_eventsMax", 60];
+if (!(_eventsMax isEqualType 0) || { _eventsMax < 10 }) then { _eventsMax = 60; };
+
 private _seq = ["airbase_v1_clearanceSeq", 0] call ARC_fnc_stateGet;
 if (!(_seq isEqualType 0)) then { _seq = 0; };
 _seq = _seq + 1;
@@ -97,6 +104,22 @@ private _record = [
 _requests pushBack _record;
 _history pushBack _record;
 
+
+_events pushBack [
+    _nowTs,
+    "SUBMIT",
+    _requestId,
+    _callerUid,
+    "",
+    [
+        _requestType,
+        _priority
+    ]
+];
+if ((count _events) > _eventsMax) then {
+    _events deleteRange [0, (count _events) - _eventsMax];
+};
+
 private _historyMax = missionNamespace getVariable ["airbase_v1_clearanceHistoryMax", 100];
 if (!(_historyMax isEqualType 0) || { _historyMax < 10 }) then { _historyMax = 100; };
 if ((count _history) > _historyMax) then {
@@ -106,6 +129,35 @@ if ((count _history) > _historyMax) then {
 ["airbase_v1_clearanceSeq", _seq] call ARC_fnc_stateSet;
 ["airbase_v1_clearanceRequests", _requests] call ARC_fnc_stateSet;
 ["airbase_v1_clearanceHistory", _history] call ARC_fnc_stateSet;
+["airbase_v1_events", _events] call ARC_fnc_stateSet;
+
+
+private _controllerOwners = [];
+{
+    if !(isPlayer _x) then { continue; };
+    if !(alive _x) then { continue; };
+    private _authApprove = [_x, "APPROVE"] call ARC_fnc_airbaseTowerAuthorize;
+    private _okApprove = _authApprove param [0, false];
+    if (_okApprove) then {
+        private _ow = owner _x;
+        if (_ow > 0) then { _controllerOwners pushBackUnique _ow; };
+        continue;
+    };
+
+    private _authFallback = [_x, "PRIORITIZE"] call ARC_fnc_airbaseTowerAuthorize;
+    if ((_authFallback param [0, false])) then {
+        private _ow2 = owner _x;
+        if (_ow2 > 0) then { _controllerOwners pushBackUnique _ow2; };
+    };
+} forEach allPlayers;
+
+private _toastBody = format ["%1 %2 (priority %3)", _requestId, toLower _requestType, _priority];
+if (_callerOwner > 0) then {
+    ["Airbase Clearance", format ["Submitted %1", _toastBody], 5] remoteExec ["ARC_fnc_clientToast", _callerOwner];
+};
+{
+    ["Airbase Tower", format ["Pending: %1", _toastBody], 5] remoteExec ["ARC_fnc_clientToast", _x];
+} forEach _controllerOwners;
 
 ["OPS", format ["AIRBASE CLEARANCE: %1 submitted by %2", _requestId, _callerName], getPosATL _caller, [
     ["event", "AIRBASE_CLEARANCE_SUBMITTED"],
