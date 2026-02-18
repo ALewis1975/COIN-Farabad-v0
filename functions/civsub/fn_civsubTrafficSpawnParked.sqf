@@ -43,15 +43,22 @@ private _poolFallback = missionNamespace getVariable ["civsub_v1_traffic_vehicle
 if (!(_poolPrefer isEqualType [])) then { _poolPrefer = []; };
 if (!(_poolFallback isEqualType [])) then { _poolFallback = []; };
 
-private _c = _d getOrDefault ["centroid", [0,0]];
-private _r = _d getOrDefault ["radius_m", 400];
+private _fnHmGet = {
+    params ["_hm", "_key", "_fallback"];
+    private _v = _hm get _key;
+    if (isNil "_v") exitWith { _fallback };
+    _v
+};
+
+private _c = [_d, "centroid", [0,0]] call _fnHmGet;
+private _r = [_d, "radius_m", 400] call _fnHmGet;
 if !(_c isEqualType []) exitWith {objNull};
 if ((count _c) < 2) exitWith {objNull};
 
-private _center = [_c # 0, _c # 1, 0];
+private _center = [_c select 0, _c select 1, 0];
 if (_spawnCenter isEqualType [] && { (count _spawnCenter) >= 2 }) then
 {
-    _center = [_spawnCenter # 0, _spawnCenter # 1, 0];
+    _center = [_spawnCenter select 0, _spawnCenter select 1, 0];
 };
 
 private _players = allPlayers;
@@ -118,8 +125,8 @@ for "_k" from 1 to _attempts do
     private _roadDir = random 360;
     if ((count _pick) >= 2) then
     {
-        _pos = _pick # 0;
-        _roadDir = _pick # 1;
+        _pos = _pick select 0;
+        _roadDir = _pick select 1;
     };
 
     // 2) Fallback: find safe empty position that still feels roadside/settlement-adjacent.
@@ -133,7 +140,7 @@ for "_k" from 1 to _attempts do
         private _ep = _probe findEmptyPosition [2, 20, _cls];
         if ((count _ep) < 2) then { _fail_emptyPos = _fail_emptyPos + 1; continue; };
 
-        private _candPos = [_ep # 0, _ep # 1, 0];
+        private _candPos = [_ep select 0, _ep select 1, 0];
         if (surfaceIsWater _candPos) then { _fail_waterEdge = _fail_waterEdge + 1; continue; };
 
         // Reject bank/edge candidates by probing nearby ring points for water transition.
@@ -187,7 +194,7 @@ for "_k" from 1 to _attempts do
     private _nearRoads = _pos nearRoads 60;
     if ((count _nearRoads) > 0) then
     {
-        private _nr = _nearRoads # 0;
+        private _nr = _nearRoads select 0;
         if (!isNull _nr) then
         {
             private _conn = roadsConnectedTo _nr;
@@ -220,8 +227,8 @@ for "_k" from 1 to _attempts do
         {
             private _row = _x;
             if (!(_row isEqualType []) || { (count _row) < 2 }) then { continue; };
-            private _m = _row # 0;
-            private _rad = _row # 1;
+            private _m = _row select 0;
+            private _rad = _row select 1;
             if !(_m isEqualType "") then { continue; };
             if !(_rad isEqualType 0) then { continue; };
             if (markerPos _m distance2D _pos <= _rad) exitWith { _blocked = true; };
