@@ -20,6 +20,17 @@ if (isNull _display) exitWith {false};
 private _tab = ["ARC_console_activeTab", "HANDOFF"] call ARC_fnc_uiNsGetString;
 _tab = toUpper _tab;
 
+if (_tab isEqualTo "AIR") then
+{
+    private _data = _ctrl lbData _index;
+    if (!(_data isEqualType "")) then { _data = ""; };
+    private _parts = _data splitString "|";
+    private _kind = if ((count _parts) > 0) then { _parts select 0 } else { "" };
+
+    uiNamespace setVariable ["ARC_console_airSelectedRow", _parts];
+    uiNamespace setVariable ["ARC_console_airSelectedRowType", _kind];
+};
+
 switch (_tab) do
 {
     case "INTEL": { [_display, false] call ARC_fnc_uiConsoleIntelPaint; };

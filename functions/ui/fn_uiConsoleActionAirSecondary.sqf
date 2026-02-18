@@ -1,9 +1,10 @@
 /*
     ARC_fnc_uiConsoleActionAirSecondary
 
-    AIR secondary action:
-      - Control roles: Expedite selected queued flight (non-first) or cancel first queued flight.
-      - Read-only roles: refresh details.
+    AIR secondary action (row-aware):
+      - REQ row: DENY selected clearance request
+      - FLT row: CANCEL selected queued flight
+      - Other rows: global RELEASE departures
 */
 
 if (!hasInterface) exitWith {false};
@@ -11,51 +12,79 @@ if (!hasInterface) exitWith {false};
 private _disp = findDisplay 78000;
 if (isNull _disp) exitWith {false};
 
-private _canAirQueueManage = ["ARC_console_airCanQueueManage", false] call ARC_fnc_uiNsGetBool;
-if (!_canAirQueueManage) exitWith
-{
-    [_disp, false] call ARC_fnc_uiConsoleAirPaint;
-    ["AIR", "No EXPEDITE/CANCEL permission."] call ARC_fnc_clientToast;
-    true
-};
-
 private _ctrlList = _disp displayCtrl 78011;
 if (isNull _ctrlList) exitWith {false};
 
 private _sel = lbCurSel _ctrlList;
-if (_sel < 0) exitWith { ["AIR", "Select a queued flight first."] call ARC_fnc_clientToast; false };
-
-private _data = _ctrlList lbData _sel;
-if (!(_data isEqualType "") || { (_data find "AIR_FID|") != 0 }) exitWith
-{
-    ["AIR", "Select a queue row (not summary)."] call ARC_fnc_clientToast;
-    false
-};
-
+private _data = if (_sel >= 0) then { _ctrlList lbData _sel } else { "" };
+if (!(_data isEqualType "")) then { _data = ""; };
 private _parts = _data splitString "|";
-if ((count _parts) < 2) exitWith { ["AIR", "Invalid queue selection."] call ARC_fnc_clientToast; false };
+private _rowType = if ((count _parts) > 0) then { _parts select 0 } else { "" };
 
-private _fid = _parts select 1;
-if (_fid isEqualTo "") exitWith { ["AIR", "Invalid queue selection."] call ARC_fnc_clientToast; false };
+switch (_rowType) do
+{
+    case "REQ":
+    {
+        private _rid = _parts param [1, ""];
+        if (_rid isEqualTo "" || { _rid isEqualTo "NONE" }) exitWith {
+            ["AIR", "Select a pending clearance request first."] call ARC_fnc_clientToast;
+            false
+        };
 
-private _requestAction = if (_sel == 1) then {"CANCEL"} else {"PRIORITIZE"};
-private _canRequestAction = [format ["ARC_console_airCan%1", _requestAction], false] call ARC_fnc_uiNsGetBool;
-if (!_canRequestAction) exitWith
-{
-    [_disp, false] call ARC_fnc_uiConsoleAirPaint;
-    ["AIR", format ["No %1 permission for selected queue action.", _requestAction]] call ARC_fnc_clientToast;
-    true
-};
+        private _canAirQueueManage = ["ARC_console_airCanQueueManage", false] call ARC_fnc_uiNsGetBool;
+        if (!_canAirQueueManage) exitWith
+        {
+            [_disp, false] call ARC_fnc_uiConsoleAirPaint;
+            ["AIR", "No queue authorization for clearance denials."] call ARC_fnc_clientToast;
+            true
+        };
 
-if (_requestAction isEqualTo "CANCEL") then
-{
-    [_fid] call ARC_fnc_airbaseClientRequestCancelQueuedFlight;
-    ["AIR", format ["Cancel request sent: %1", _fid]] call ARC_fnc_clientToast;
-}
-else
-{
-    [_fid] call ARC_fnc_airbaseClientRequestPrioritizeFlight;
-    ["AIR", format ["Expedite request sent: %1", _fid]] call ARC_fnc_clientToast;
+        [_rid, false, "UI_SECONDARY_DENY"] call ARC_fnc_airbaseClientRequestClearanceDecision;
+        ["AIR", format ["Deny request sent: %1", _rid]] call ARC_fnc_clientToast;
+    };
+
+    case "FLT":
+    {
+        private _fid = _parts param [1, ""];
+        if (_fid isEqualTo "" || { _fid isEqualTo "NONE" }) exitWith {
+            ["AIR", "Select a queued flight first."] call ARC_fnc_clientToast;
+            false
+        };
+
+        private _canAirQueueManage = ["ARC_console_airCanQueueManage", false] call ARC_fnc_uiNsGetBool;
+        private _canCancel = ["ARC_console_airCanCancel", false] call ARC_fnc_uiNsGetBool;
+        if (!_canAirQueueManage || !_canCancel) exitWith
+        {
+            [_disp, false] call ARC_fnc_uiConsoleAirPaint;
+            ["AIR", "No permission to cancel queued flights."] call ARC_fnc_clientToast;
+            true
+        };
+
+        [_fid] call ARC_fnc_airbaseClientRequestCancelQueuedFlight;
+        ["AIR", format ["Cancel request sent: %1", _fid]] call ARC_fnc_clientToast;
+    };
+
+    default
+    {
+        private _canAirHoldRelease = ["ARC_console_airCanHoldRelease", false] call ARC_fnc_uiNsGetBool;
+        if (!_canAirHoldRelease) exitWith
+        {
+            [_disp, false] call ARC_fnc_uiConsoleAirPaint;
+            ["AIR", "No RELEASE permission."] call ARC_fnc_clientToast;
+            true
+        };
+
+        private _canRelease = ["ARC_console_airCanRelease", false] call ARC_fnc_uiNsGetBool;
+        if (!_canRelease) exitWith
+        {
+            [_disp, false] call ARC_fnc_uiConsoleAirPaint;
+            ["AIR", "No RELEASE permission."] call ARC_fnc_clientToast;
+            true
+        };
+
+        [] call ARC_fnc_airbaseClientRequestReleaseDepartures;
+        ["AIR", "Release request sent to tower control."] call ARC_fnc_clientToast;
+    };
 };
 
 [_disp] call ARC_fnc_uiConsoleRefresh;
