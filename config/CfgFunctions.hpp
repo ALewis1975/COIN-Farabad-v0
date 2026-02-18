@@ -603,6 +603,14 @@ class Ops
             class airbaseClientRequestPrioritizeFlight {};
             class airbaseClientRequestCancelQueuedFlight {};
 
+            // Clearance request RPCs (server authority + client wrappers)
+            class airbaseSubmitClearanceRequest {};
+            class airbaseCancelClearanceRequest {};
+            class airbaseMarkClearanceEmergency {};
+            class airbaseClientSubmitClearanceRequest {};
+            class airbaseClientCancelClearanceRequest {};
+            class airbaseClientMarkClearanceEmergency {};
+
         };
     };
 };

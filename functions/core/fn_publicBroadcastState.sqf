@@ -51,6 +51,15 @@ if (!(_airQueue isEqualType [])) then { _airQueue = []; };
 private _airRecs = ["airbase_v1_records", []] call ARC_fnc_stateGet;
 if (!(_airRecs isEqualType [])) then { _airRecs = []; };
 
+private _clrReqs = ["airbase_v1_clearanceRequests", []] call ARC_fnc_stateGet;
+if (!(_clrReqs isEqualType [])) then { _clrReqs = []; };
+
+private _clrHist = ["airbase_v1_clearanceHistory", []] call ARC_fnc_stateGet;
+if (!(_clrHist isEqualType [])) then { _clrHist = []; };
+
+private _clrSeq = ["airbase_v1_clearanceSeq", 0] call ARC_fnc_stateGet;
+if (!(_clrSeq isEqualType 0) || { _clrSeq < 0 }) then { _clrSeq = 0; };
+
 private _depQueued = 0;
 private _arrQueued = 0;
 {
@@ -98,6 +107,30 @@ for "_i" from 0 to (_nextN - 1) do
     ];
 };
 
+private _clearancePending = _clrReqs select { ((_x param [6, ""]) isEqualTo "PENDING") };
+private _clearanceEmergency = _clearancePending select { ((_x param [5, 0]) >= 100) };
+
+private _clearancePendingView = _clearancePending apply {
+    [
+        _x param [0, ""],
+        _x param [1, ""],
+        _x param [3, ""],
+        _x param [4, ""],
+        _x param [5, 0],
+        _x param [6, ""],
+        _x param [7, -1],
+        _x param [8, -1],
+        _x param [9, []]
+    ]
+};
+
+private _clearanceHistoryTail = +_clrHist;
+private _clrTailN = missionNamespace getVariable ["airbase_v1_publicClearanceHistoryMax", 10];
+if (!(_clrTailN isEqualType 0) || { _clrTailN < 0 }) then { _clrTailN = 10; };
+if ((count _clearanceHistoryTail) > _clrTailN) then {
+    _clearanceHistoryTail = _clearanceHistoryTail select [(count _clearanceHistoryTail) - _clrTailN, _clrTailN];
+};
+
 private _airbasePub = [
     ["depQueued", _depQueued],
     ["arrQueued", _arrQueued],
@@ -109,7 +142,12 @@ private _airbasePub = [
     ["runwayOwner", _runwayOwner],
     ["runwayUntil", _runwayUntil],
     ["nextItems", _nextItems],
-    ["recordsCount", count _airRecs]
+    ["recordsCount", count _airRecs],
+    ["clearanceSeq", _clrSeq],
+    ["clearancePendingCount", count _clearancePending],
+    ["clearanceEmergencyCount", count _clearanceEmergency],
+    ["clearancePending", _clearancePendingView],
+    ["clearanceHistoryTail", _clearanceHistoryTail]
 ];
 
 private _pub = [
