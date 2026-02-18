@@ -79,6 +79,9 @@ if (!(_runwayOwner isEqualType "")) then { _runwayOwner = ""; };
 private _runwayUntil = missionNamespace getVariable ["airbase_v1_runwayUntil", -1];
 if (!(_runwayUntil isEqualType 0)) then { _runwayUntil = -1; };
 
+private _holdDepartures = ["airbase_v1_holdDepartures", false] call ARC_fnc_stateGet;
+if (!(_holdDepartures isEqualType true) && !(_holdDepartures isEqualType false)) then { _holdDepartures = false; };
+
 private _nextCap = missionNamespace getVariable ["airbase_v1_publicPreviewMax", 5];
 if (!(_nextCap isEqualType 0) || { _nextCap < 0 }) then { _nextCap = 5; };
 
@@ -103,6 +106,7 @@ private _airbasePub = [
     ["runwayState", _runwayState],
     ["runwayOwner", _runwayOwner],
     ["runwayUntil", _runwayUntil],
+    ["holdDepartures", _holdDepartures],
     ["nextItems", _nextItems],
     ["recordsCount", count _airRecs]
 ];

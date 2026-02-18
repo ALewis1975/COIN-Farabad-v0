@@ -60,7 +60,7 @@ if (!(_runwayState isEqualType "")) then { _runwayState = "UNKNOWN"; };
 private _runwayOwner = [_air, "runwayOwner", ""] call _getPub;
 if (!(_runwayOwner isEqualType "")) then { _runwayOwner = ""; };
 
-private _hold = missionNamespace getVariable ["airbase_v1_holdDepartures", false];
+private _hold = [_air, "holdDepartures", false] call _getPub;
 if (!(_hold isEqualType true) && !(_hold isEqualType false)) then { _hold = false; };
 uiNamespace setVariable ["ARC_console_airHoldDepartures", _hold];
 

@@ -220,7 +220,9 @@ case "DASH":
             _b2 ctrlSetText (if (_canAirControl) then {"EXPEDITE/CANCEL"} else {"DETAILS"});
         };
 
-        [_display, false] call ARC_fnc_uiConsoleAirPaint;
+        // AIR queue content is driven by replicated ARC_pub_state and can change while
+        // the operator remains on this tab, so rebuild rows on each refresh tick.
+        [_display, true] call ARC_fnc_uiConsoleAirPaint;
     };
     case "HANDOFF":
     {
