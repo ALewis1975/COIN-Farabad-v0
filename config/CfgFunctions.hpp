@@ -153,6 +153,7 @@ class CfgFunctions
             class tocShowThreadsLocal {};
             class resetAll {};
             class tocRequestResetAll {};
+            class tocRequestAirbaseResetControlState {};
             class clientPurgeArcTasks {};
 
             // Guardpost Script
@@ -280,6 +281,7 @@ class CfgFunctions
 
             class civsubCivSpawnInDistrict {};
             class civsubCivAssignIdentity {};
+            class civsubRegisterEditorCivs {};
 
             // Phase 7.0: ALiVE-style contact actions (client + server)
             class civsubContactInitClient {};
@@ -593,6 +595,7 @@ class Ops
             class airbaseRequestReleaseDepartures {};
             class airbaseRequestPrioritizeFlight {};
             class airbaseRequestCancelQueuedFlight {};
+            class airbaseAdminResetControlState {};
 
             // Queue/record mutation helpers
             class airbaseQueueMoveToFront {};

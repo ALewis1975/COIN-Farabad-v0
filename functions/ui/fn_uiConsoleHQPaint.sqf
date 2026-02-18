@@ -244,7 +244,7 @@ if (!isNull _ctrlList) then
         }
         else
         {
-            if (_d in ["ADMIN_SAVE","ADMIN_CIVSUB_SAVE","ADMIN_RESET","ADMIN_CIVSUB_RESET","ADMIN_FORCE_CLOSE_SUCC","ADMIN_FORCE_CLOSE_FAIL","ADMIN_REBUILD_ACTIVE","ADMIN_BROADCAST","ADMIN_INCIDENTS","ADMIN_COVERAGE","ADMIN_QA","ADMIN_COMPILE","ADMIN_DUMP_LEADS","ADMIN_DUMP_INTEL"]) exitWith { _hasHqRow = true; };
+            if (_d in ["ADMIN_SAVE","ADMIN_CIVSUB_SAVE","ADMIN_RESET","ADMIN_AIRBASE_RESET_CTRL","ADMIN_CIVSUB_RESET","ADMIN_FORCE_CLOSE_SUCC","ADMIN_FORCE_CLOSE_FAIL","ADMIN_REBUILD_ACTIVE","ADMIN_BROADCAST","ADMIN_INCIDENTS","ADMIN_COVERAGE","ADMIN_QA","ADMIN_COMPILE","ADMIN_DUMP_LEADS","ADMIN_DUMP_INTEL"]) exitWith { _hasHqRow = true; };
         };
     };
 
@@ -407,6 +407,7 @@ if (_needRebuild && {!isNull _ctrlList}) then
         ["Save World State (Persistence)", "ADMIN_SAVE"] call _addRow;
         ["Save CIVSUB (Campaign)", "ADMIN_CIVSUB_SAVE"] call _addRow;
         ["Reset All (CAUTION)", "ADMIN_RESET"] call _addRow;
+        ["Reset AIRBASE Control State", "ADMIN_AIRBASE_RESET_CTRL"] call _addRow;
         ["Reset CIVSUB Campaign (CAUTION)", "ADMIN_CIVSUB_RESET"] call _addRow;
         ["Force Close Incident (SUCCEEDED)", "ADMIN_FORCE_CLOSE_SUCC"] call _addRow;
         ["Force Close Incident (FAILED)", "ADMIN_FORCE_CLOSE_FAIL"] call _addRow;
@@ -507,6 +508,12 @@ switch (toUpper _data) do
     {
         _txt = _txt + "<t color='#FF6666'>Reset all persistent state and clear active tasks.</t><br/><br/>" +
                "Use only for testing. This is destructive.";
+    };
+
+    case "ADMIN_AIRBASE_RESET_CTRL":
+    {
+        _txt = _txt + "Reset AIRBASE control state (runway lock, queue, pending clearances).<br/>" +
+               "Keeps clearance history/events by default for audit continuity.";
     };
 
     case "ADMIN_CIVSUB_RESET":
