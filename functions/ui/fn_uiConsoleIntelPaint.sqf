@@ -119,7 +119,7 @@ private _ensureS2Split = {
 // S2 category panels (TOOLS mode):
 // Break the long mixed list into stacked sub-panels (similar to OPS frames).
 // We keep MainList (78011) as a hidden master list for data + selection logic,
-// and render 5 visible panel listboxes as UI-only projections.
+// and render 4 visible panel listboxes as UI-only projections.
 // ---------------------------------------------------------------------------
 
 private _ensureS2CatPanels = {
@@ -128,7 +128,7 @@ private _ensureS2CatPanels = {
     private _k = "ARC_s2_catPanels";
     private _panels = uiNamespace getVariable [_k, []];
 
-    private _ok = (_panels isEqualType [] && { (count _panels) == 5 });
+    private _ok = (_panels isEqualType [] && { (count _panels) == 4 });
     if (_ok) then {
         {
             if !(_x isEqualType [] && { (count _x) == 3 }) exitWith { _ok = false; };
@@ -183,8 +183,7 @@ private _ensureS2CatPanels = {
             [_bg, _lbl, _lb]
         };
 
-        _panels pushBack (["INTEL LOGGING"] call _mkPanel);
-        _panels pushBack (["LEAD REQUESTS (S2)"] call _mkPanel);
+        _panels pushBack (["INTEL / LEADS"] call _mkPanel);
         _panels pushBack (["CIVSUB / MDT"] call _mkPanel);
         _panels pushBack (["ADMIN / TOOLS"] call _mkPanel);
         _panels pushBack (["INTEL FEED"] call _mkPanel);
@@ -212,18 +211,20 @@ private _layoutS2CatPanels = {
     };
 
     private _gap = 0.006;
-    private _avail = _h - (_gap * 4);
+    private _avail = _h - (_gap * 3);
     if (_avail < 0.20) then { _avail = _h; _gap = 0; };
 
-    private _weights = [0.16, 0.16, 0.18, 0.22, 0.28];
+    // Combined Intel/Lead panel keeps the top footprint compact so CIVSUB starts higher.
+    // CIVSUB receives a larger ratio for better in-pane browsing.
+    private _weights = [0.19, 0.31, 0.20, 0.30];
 
     private _yCur = _y;
-    for "_pi" from 0 to 4 do {
+    for "_pi" from 0 to 3 do {
         private _p = _panels # _pi;
         _p params ["_bg","_lbl","_lb"];
 
         private _ph = _avail * (_weights # _pi);
-        if (_pi == 4) then { _ph = (_y + _h) - _yCur; };
+        if (_pi == 3) then { _ph = (_y + _h) - _yCur; };
 
         _bg  ctrlSetPosition [_x, _yCur, _w, _ph];
         _lbl ctrlSetPosition [_x, _yCur, _w, _hHdr];
@@ -243,11 +244,10 @@ private _renderS2CatPanelsFromMaster = {
     { lbClear (_x # 2); } forEach _panels;
 
     private _map = createHashMapFromArray [
-        ["INTEL LOGGING",      (_panels # 0) # 2],
-        ["LEAD REQUESTS (S2)", (_panels # 1) # 2],
-        ["CIVSUB / MDT",       (_panels # 2) # 2],
-        ["ADMIN / TOOLS",      (_panels # 3) # 2],
-        ["INTEL FEED",         (_panels # 4) # 2]
+        ["INTEL / LEADS",      (_panels # 0) # 2],
+        ["CIVSUB / MDT",       (_panels # 1) # 2],
+        ["ADMIN / TOOLS",      (_panels # 2) # 2],
+        ["INTEL FEED",         (_panels # 3) # 2]
     ];
 
     private _section = "";
@@ -257,6 +257,10 @@ private _renderS2CatPanelsFromMaster = {
 
         if (_d in ["HDR", "SEP"]) then {
             private _sectionCandidate = toUpper (trim _t);
+            if (_sectionCandidate in ["INTEL LOGGING", "LEAD REQUESTS (S2)"]) then {
+                _sectionCandidate = "INTEL / LEADS";
+            };
+
             if (!isNull (_map getOrDefault [_sectionCandidate, controlNull])) then {
                 _section = _sectionCandidate;
             };
@@ -493,8 +497,8 @@ if (_rebuild) then
     }
     else
     {
-        // Intel logging (consolidated)
-        ["INTEL LOGGING"] call _addHdr;
+        // Intel logging + lead requests (consolidated into one panel/menu)
+        ["INTEL / LEADS"] call _addHdr;
         if (_canLog) then
         {
             ["Log Intel / Sighting", "INTEL_LOG"] call _addTool;
@@ -504,8 +508,6 @@ if (_rebuild) then
             ["(Access denied)", "HDR"] call _addTool;
         };
 
-        // Lead requests (consolidated)
-        ["LEAD REQUESTS (S2)"] call _addHdr;
         if (_canLeadReq) then
         {
             ["Create Lead Request", "LEAD_REQ"] call _addTool;
