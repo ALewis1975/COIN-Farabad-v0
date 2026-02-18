@@ -57,6 +57,7 @@ class CfgFunctions
             class rolesIsTocCommand {};
             class rolesCanApproveQueue {};
             class rpcValidateSender {};
+            class airbaseTowerAuthorize {};
 
             // Deferred cleanup (despawn when players leave area)
             class cleanupRegister {};
@@ -582,6 +583,17 @@ class Ops
             // Perimeter patrol ambience
             class airbaseSecurityInit {};
             class airbaseSecurityPatrol {};
+
+            // Airbase tower control RPCs (server authority + client wrappers)
+            class airbaseRequestHoldDepartures {};
+            class airbaseRequestReleaseDepartures {};
+            class airbaseRequestPrioritizeFlight {};
+            class airbaseRequestCancelQueuedFlight {};
+
+            class airbaseClientRequestHoldDepartures {};
+            class airbaseClientRequestReleaseDepartures {};
+            class airbaseClientRequestPrioritizeFlight {};
+            class airbaseClientRequestCancelQueuedFlight {};
 
         };
     };

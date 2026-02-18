@@ -293,6 +293,8 @@ missionNamespace setVariable ["airbase_v1_execActive", false, true];
 ["airbase_v1_records", []] call ARC_fnc_stateSet;
 ["airbase_v1_queue", []] call ARC_fnc_stateSet;
 ["airbase_v1_seq", 0] call ARC_fnc_stateSet;
+["airbase_v1_holdDepartures", false] call ARC_fnc_stateSet;
+["airbase_v1_manualPriority", []] call ARC_fnc_stateSet;
 
 if (_opsLogEnabled || _debugOps) then {
     ["OPS", format ["AIRBASE: init complete (%1 assets)", count _assets], getMarkerPos "mkr_airbaseCenter", 0, [

@@ -74,6 +74,8 @@ if (!_bubbleActive) then {
 private _queue = ["airbase_v1_queue", []] call ARC_fnc_stateGet;
 private _recs  = ["airbase_v1_records", []] call ARC_fnc_stateGet;
 private _seq   = ["airbase_v1_seq", 0] call ARC_fnc_stateGet;
+private _holdDepartures = ["airbase_v1_holdDepartures", false] call ARC_fnc_stateGet;
+if (!(_holdDepartures isEqualType true) && !(_holdDepartures isEqualType false)) then { _holdDepartures = false; };
 
 private _fn_nextId = {
     _seq = _seq + 1;
@@ -203,7 +205,7 @@ private _candidates = _assets select {
     (_st == "PARKED")
 };
 
-if (_rollDep && { (count _candidates) > 0 }) then {
+if (!_holdDepartures && { _rollDep } && { (count _candidates) > 0 }) then {
     // Bias: for the very first departure, avoid tow assets + EC-130 (plane7) if possible.
     if (_forceFirstDeparture) then {
         private _prefer = _candidates select {
@@ -384,6 +386,7 @@ if (_snapEnabled && { _nowTs >= _nextSnap }) then {
         ["returnQueued", _returnQueued],
         ["disabled", _disabled],
         ["nextDepAt", _nextDepAt],
+        ["holdDepartures", _holdDepartures],
         ["nextArrAt", _nextArrAt],
         ["soonestReturnAt", if (_soonestReturnAt < 1e9) then { _soonestReturnAt } else { -1 }]
     ];
@@ -428,9 +431,10 @@ if (_snapEnabled && { _nowTs >= _nextSnap }) then {
     };
 
     private _msg = format [
-        "AIRBASE: status bubble=%1 exec=%2 q=%3(dep %4/arr %5) assets P=%6 A=%7 C=%8 RQ=%9 D=%10 cdDep=%11s cdArr=%12s nextReturn=%13%14",
+        "AIRBASE: status bubble=%1 exec=%2 holdDep=%3 q=%4(dep %5/arr %6) assets P=%7 A=%8 C=%9 RQ=%10 D=%11 cdDep=%12s cdArr=%13s nextReturn=%14%15",
         if (_bubbleActive) then {"ON"} else {"OFF"},
         if (_execNow) then {"ON"} else {"OFF"},
+        if (_holdDepartures) then {"ON"} else {"OFF"},
         _qLen, _qDep, _qArr,
         _parked, _active, _cooldown, _returnQueued, _disabled,
         _nextDepIn, _nextArrIn,
