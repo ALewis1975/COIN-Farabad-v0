@@ -256,7 +256,10 @@ private _renderS2CatPanelsFromMaster = {
         private _t = _listMaster lbText _i;
 
         if (_d in ["HDR", "SEP"]) then {
-            _section = toUpper (trim _t);
+            private _sectionCandidate = toUpper (trim _t);
+            if (!isNull (_map getOrDefault [_sectionCandidate, controlNull])) then {
+                _section = _sectionCandidate;
+            };
         } else {
             if (_section isEqualTo "") then { continue; };
             private _lb = _map getOrDefault [_section, controlNull];
@@ -1131,11 +1134,11 @@ else
 
 case "CIV_MDT_RUN":
 {
-    _txt = "<t size='1.05'>MDT: Run the most recently shown civilian ID card against the Crime DB.</t><br/><br/>" +
+    _txt = "<t size='1.05'>MDT: Run the most recently shown civilian ID card against the Crime DB.</t><br/>" +
            "<t size='0.95'>Workflow:</t><br/>" +
            "1) Show Papers on a civilian<br/>" +
            "2) Return here and Execute<br/>" +
-           "3) If hit: detain + transport for sheriff handoff<br/><br/>" +
+           "3) If hit: detain + transport for sheriff handoff<br/>" +
            (if (_inCivCtx) then {"<t color='#77FFAA'>CIVSUB interaction mode active.</t>"} else {"<t color='#AAAAAA'>No active CIVSUB interaction target.</t>"});
 
     if (!isNull _b1) then { _b1 ctrlEnable true; };
@@ -1293,7 +1296,7 @@ if (!isNull _b2) then
     _b2 ctrlEnable _isAuth;
 };
 
-_details ctrlSetStructuredText parseText _txt;
+_details ctrlSetStructuredText parseText format ["<t lineSpacing='1.15'>%1</t>", _txt];
 
 // Auto-fit + clamp to the DetailsGroup (78016) so the group scrolls vertically when needed,
 // but NEVER forces horizontal scrolling or overlaps the S2 workflow controls.
