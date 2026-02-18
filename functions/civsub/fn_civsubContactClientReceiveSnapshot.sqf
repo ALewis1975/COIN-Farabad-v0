@@ -73,7 +73,7 @@ if (_inInit && {!_hasOutput} && {!_inProg} && {!isNull _resp}) then {
 private _console = uiNamespace getVariable ["ARC_console_display", displayNull];
 private _ctxCiv = uiNamespace getVariable ["ARC_civsubInteract_target", objNull];
 if (!isNull _console && {!isNull _ctxCiv}) then {
-    [_console, false] call ARC_fnc_uiConsoleIntelPaint;
+    [_console, true] call ARC_fnc_uiConsoleIntelPaint;
 };
 
 true

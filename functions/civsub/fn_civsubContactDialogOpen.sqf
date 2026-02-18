@@ -13,6 +13,7 @@ params [
 ];
 if (isNull _civ) exitWith {false};
 
+uiNamespace setVariable ["ARC_civsubInteract_target", _civ];
 uiNamespace setVariable ["ARC_console_forceTab", "INTEL"];
 private _console = findDisplay 78000;
 if (isNull _console) then
@@ -25,8 +26,6 @@ else
     uiNamespace setVariable ["ARC_console_activeTab", "INTEL"];
     [_console] call ARC_fnc_uiConsoleRefresh;
 };
-
-uiNamespace setVariable ["ARC_civsubInteract_target", _civ];
 
 // Request authoritative snapshot from server to populate header + enable/disable actions
 [_civ, player] remoteExecCall ["ARC_fnc_civsubContactReqSnapshot", 2];

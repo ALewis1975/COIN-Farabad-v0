@@ -85,11 +85,13 @@ else
         _incDisp,
         if (_incType isEqualTo "") then {""} else { format [" <t color='#AAAAAA'>(%1)</t>", toUpper _incType] },
         if (_incGrid isEqualTo "") then {""} else { format [" <t color='#AAAAAA'>@ %1</t>", _incGrid] },
-        format ["<t color='#AAAAAA'>| Accepted: %1 | Unit: %2 | Close-ready: %3 | SITREP: %4</t>",
+        format ["<t color='#AAAAAA'>| Accepted:</t> <t color='%1'>%2</t> <t color='#AAAAAA'>| Unit: %3 | Close-ready: %4 | SITREP:</t> <t color='%5'>%6</t>",
+            if (_acc) then {"#9FE870"} else {"#FF7A7A"},
             if (_acc) then {"YES"} else {"NO"},
             if (_accBy isEqualTo "") then {"UNASSIGNED"} else {_accBy},
             if (_closeReady) then {"YES"} else {"NO"},
-            if (_sitrepSent) then {"SENT"} else {"PENDING"}
+            if (_sitrepSent) then {"#9FE870"} else {"#FFD166"},
+            if (_sitrepSent) then {"SENT"} else {"NOT SENT"}
         ]
     ]
 };
@@ -141,7 +143,12 @@ if ((count _intelLog) > 0) then
 // Queue summary
 private _qPendingArr = missionNamespace getVariable ["ARC_pub_queuePending", []];
 if (!(_qPendingArr isEqualType [])) then { _qPendingArr = []; };
-private _qPending = count _qPendingArr;
+private _qPendingCnt = count _qPendingArr;
+private _qPendingColor = "#FFFFFF";
+if (_qPendingCnt >= 5) then { _qPendingColor = "#FF7A7A"; } else {
+    if (_qPendingCnt >= 3) then { _qPendingColor = "#FFD166"; };
+};
+private _qPending = format ["<t color='%1'>%2</t>", _qPendingColor, _qPendingCnt];
 private _statusRows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
 if (!(_statusRows isEqualType [])) then { _statusRows = []; };
 
@@ -195,10 +202,10 @@ if (_foLeadName isNotEqualTo "") then
 };
 if (_foLine isNotEqualTo "") then { _foLine = _foLine + "<br/>"; };
 
-private _secIncident = "<t size='1.0' font='PuristaMedium'>Current Incident</t><br/>" + _incLine + "<br/>" + _foLine + "<br/><br/>";
-private _secOrders   = "<t size='1.0' font='PuristaMedium'>Orders</t><br/>" + _ordLine + "<br/><br/>";
+private _secIncident = "<t size='1.0' font='PuristaMedium'>Current Incident</t><br/><br/>" + _incLine + "<br/>" + _foLine + "<br/><br/>";
+private _secOrders   = "<t size='1.0' font='PuristaMedium'>Orders</t><br/><br/>" + _ordLine + "<br/><br/>";
 private _secIntel    = format [
-    "<t size='1.0' font='PuristaMedium'>Intel / Leads</t><br/>" +
+    "<t size='1.0' font='PuristaMedium'>Intel / Leads</t><br/><br/>" +
     "<t color='#DDDDDD'>Lead pool:</t> %1<br/>" +
     "<t color='#DDDDDD'>Queue pending:</t> %2<br/>" +
     "<t color='#DDDDDD'>Latest intel:</t> %3<br/><br/>",
@@ -206,7 +213,7 @@ private _secIntel    = format [
     _qPending,
     _lastIntel
 ];
-private _secUnits = "<t size='1.0' font='PuristaMedium'>Unit Availability</t><br/>" + _unitsBlock + "<br/><br/>";
+private _secUnits = "<t size='1.0' font='PuristaMedium'>Unit Availability</t><br/><br/>" + _unitsBlock + "<br/><br/>";
 
 // Next Actions: workflow coaching / blocker visibility
 private _secNext = "";
