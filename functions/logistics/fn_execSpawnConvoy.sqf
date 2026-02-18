@@ -24,7 +24,22 @@ params [
     ["_taskId", "", [""]]
 ];
 
-if (!isServer) exitWith {[]};
+private _callerOwner = remoteExecutedOwner;
+if (!isServer) exitWith
+{
+    private _clientOwner = clientOwner;
+    private _ownerTxt = if (_clientOwner isEqualType 0) then { str _clientOwner } else { "local" };
+    private _ctxTaskId = if (_taskId isEqualType "") then { _taskId } else { "" };
+
+    diag_log format ["[ARC][CONVOY][AUTH] Rejected non-server call to execSpawnConvoy (task=%1, clientOwner=%2). Relaying request to server.", _ctxTaskId, _ownerTxt];
+
+    // Non-authoritative callers must never mutate shared convoy state directly.
+    // Relay to the server path; return value is intentionally empty because remoteExecCall is async.
+    [_incidentType, _spawnPos, _destPos, _speedKph, _spawnDir, _taskId] remoteExecCall ["ARC_fnc_execSpawnConvoy", 2];
+    []
+};
+
+if (!(_callerOwner isEqualType 0)) then { _callerOwner = -1; };
 
 private _incidentTypeU = toUpper _incidentType;
 private _debug = missionNamespace getVariable ["ARC_convoyDebug", false];
