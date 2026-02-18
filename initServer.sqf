@@ -111,6 +111,14 @@ missionNamespace setVariable ["civsub_v1_showPapers_forceCoop", true, true];
 missionNamespace setVariable ["civsub_v1_civs_enabled", true, true];
 missionNamespace setVariable ["civsub_v1_civ_tick_s", 20, true];
 
+// Optional editor-placed CIVSUB test civilians (3DEN variable names)
+// Accepted entry forms:
+//   "civsub_test_01"
+//   ["civsub_test_01", "D14"]
+//   ["civsub_test_01", "D14", true]
+missionNamespace setVariable ["civsub_v1_editorTestCivs", [], true];
+missionNamespace setVariable ["civsub_v1_editorTestCivs_pin", true, true];
+
 missionNamespace setVariable ["civsub_v1_civ_cap_activeDistrictsMax", 1, true];
 missionNamespace setVariable ["civsub_v1_civ_cap_global", 24, true];
 missionNamespace setVariable ["civsub_v1_civ_cap_perDistrict", 16, true];

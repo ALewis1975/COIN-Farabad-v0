@@ -280,6 +280,7 @@ class CfgFunctions
 
             class civsubCivSpawnInDistrict {};
             class civsubCivAssignIdentity {};
+            class civsubRegisterEditorCivs {};
 
             // Phase 7.0: ALiVE-style contact actions (client + server)
             class civsubContactInitClient {};

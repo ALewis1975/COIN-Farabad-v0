@@ -206,6 +206,9 @@ if (isNil { missionNamespace getVariable "civsub_v1_civ_cap_global" }) then { mi
 if (isNil { missionNamespace getVariable "civsub_v1_civ_cap_perDistrict" }) then { missionNamespace setVariable ["civsub_v1_civ_cap_perDistrict", 8, true]; };
 if (isNil { missionNamespace getVariable "civsub_v1_civ_cap_activeDistrictsMax" }) then { missionNamespace setVariable ["civsub_v1_civ_cap_activeDistrictsMax", 3, true]; };
 
+// Register optional editor-placed CIVSUB test civilians (after identity init and before runtime ticks rely on registry).
+[] call ARC_fnc_civsubRegisterEditorCivs;
+
 if (missionNamespace getVariable ["civsub_v1_civs_enabled", false]) then {
     [] call ARC_fnc_civsubCivSamplerInit;
 };
