@@ -160,14 +160,21 @@ if (_dbgEnabled) then
             if (_p > 0) then { _key = _label select [0, _p]; };
             if (_key isEqualTo "") then { _key = "(none)"; };
 
-            _labelCounts set [_key, 1 + (_labelCounts getOrDefault [_key, 0])];
+            private _labelCount = _labelCounts get _key;
+            if (isNil "_labelCount") then { _labelCount = 0; };
+            _labelCounts set [_key, 1 + _labelCount];
         } forEach _cleanupQueue;
 
         private _tmp = [];
-        { _tmp pushBack [_y, _x]; } forEach _labelCounts;  // [count,label]
+        {
+            private _labelKey = _x;
+            private _labelCount = _labelCounts get _labelKey;
+            if (isNil "_labelCount") then { _labelCount = 0; };
+            _tmp pushBack [_labelCount, _labelKey];
+        } forEach (keys _labelCounts);  // [count,label]
         _tmp sort false;
 
-        private _cleanupByLabel = _tmp apply { [_x # 1, _x # 0] };
+        private _cleanupByLabel = _tmp apply { [_x select 1, _x select 0] };
 
         private _convoyNids = ["activeConvoyNetIds", []] call ARC_fnc_stateGet;
         if (!(_convoyNids isEqualType [])) then { _convoyNids = []; };
