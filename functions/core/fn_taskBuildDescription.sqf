@@ -406,7 +406,12 @@ if (!(_intelLog isEqualType [])) then { _intelLog = []; };
 private _near = [];
 {
     if (!(_x isEqualType []) || { (count _x) < 6 }) then { continue; };
-    _x params ["_iid", "_t", ["_cat", ""], ["_sum", ""], ["_pATL", []], ["_meta", []]];
+    private _iid = _x param [0, ""];
+    private _t = _x param [1, 0];
+    private _cat = _x param [2, ""];
+    private _sum = _x param [3, ""];
+    private _pATL = _x param [4, []];
+    private _meta = _x param [5, []];
     if (!(_cat isEqualType "")) then { _cat = str _cat; };
     if (toUpper _cat isEqualTo "OPS") then { continue; };
     if (!(_pATL isEqualType [])) then { continue; };
