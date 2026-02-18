@@ -454,6 +454,7 @@ class CfgFunctions
             class uiConsoleCommandPaint {};
             class uiConsoleTocQueuePaint {};
             class uiConsoleHQPaint {};
+            class uiConsoleAirPaint {};
             class uiConsoleOpsSelChanged {};
 
             // Tab-aware button routing
@@ -492,6 +493,8 @@ class CfgFunctions
             class uiConsoleActionAcceptOrder {};
             class uiConsoleActionOpenTocQueue {};
             class uiConsoleActionHQPrimary {};
+            class uiConsoleActionAirPrimary {};
+            class uiConsoleActionAirSecondary {};
 
             // Structured SITREP dialog helpers (UI09)
             class uiSitrepDialogOnLoad {};

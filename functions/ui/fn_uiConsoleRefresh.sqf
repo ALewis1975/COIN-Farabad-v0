@@ -7,6 +7,7 @@
       DASH      - Dashboard
       INTEL     - Intelligence (S2)
       OPS       - Operations (S3)
+      AIR       - Airbase snapshot + tower controls
       HANDOFF   - Handoff (Intel/EPW)
       CMD       - Command (TOC)
       HQ        - Headquarters (Admin)
@@ -196,6 +197,31 @@ case "DASH":
         [_display, true] call ARC_fnc_uiConsoleOpsPaint;
     };
 
+
+    case "AIR":
+    {
+        // List/details layout
+        if (!isNull _ctrlMainGrp) then { _ctrlMainGrp ctrlShow false; };
+        if (!isNull _ctrlMain) then { _ctrlMain ctrlShow false; };
+        if (!isNull _ctrlList) then { _ctrlList ctrlShow true; };
+        if (!isNull _ctrlDetailsGrp) then { _ctrlDetailsGrp ctrlShow true; };
+        if (!isNull _ctrlDetails) then { _ctrlDetails ctrlShow true; };
+
+        private _canAirControl = ["ARC_console_airCanControl", false] call ARC_fnc_uiNsGetBool;
+
+        if (!isNull _b1) then {
+            _b1 ctrlShow true;
+            _b1 ctrlEnable true;
+            _b1 ctrlSetText (if (_canAirControl) then {"HOLD/RELEASE"} else {"REFRESH"});
+        };
+        if (!isNull _b2) then {
+            _b2 ctrlShow true;
+            _b2 ctrlEnable true;
+            _b2 ctrlSetText (if (_canAirControl) then {"EXPEDITE/CANCEL"} else {"DETAILS"});
+        };
+
+        [_display, false] call ARC_fnc_uiConsoleAirPaint;
+    };
     case "HANDOFF":
     {
         if (!isNull _b1) then { _b1 ctrlShow true; _b1 ctrlSetText "INTEL DEBRIEF"; };
