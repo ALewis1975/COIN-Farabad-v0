@@ -111,15 +111,6 @@ if (_tab != "HQ" && { _hqSubPanels isEqualType [] }) then {
 // S2 Intel paint may temporarily resize/reposition MainList and workflow controls.
 // Other tabs must not inherit that layout.
 // ---------------------------------------------------------------------------
-private _s2Ctrls = [
-    _display displayCtrl 78050,
-    _display displayCtrl 78051,
-    _display displayCtrl 78052,
-    _display displayCtrl 78053,
-    _display displayCtrl 78054,
-    _display displayCtrl 78055
-];
-
 if (!isNull _ctrlList) then {
     private _kList = "ARC_ui_mainListPosDefault";
     private _p0 = [_kList, []] call ARC_fnc_uiNsGetArray;
@@ -260,8 +251,8 @@ case "DASH":
             private _selectedPending = false;
             if (_queueState isEqualType [] && { (count _queueState) >= 2 }) then
             {
-                _selectedQid = _queueState # 0;
-                _selectedPending = _queueState # 1;
+                _selectedQid = _queueState select 0;
+                _selectedPending = _queueState select 1;
             };
             uiNamespace setVariable ["ARC_console_cmdQueueSelectedQid", _selectedQid];
             uiNamespace setVariable ["ARC_console_cmdQueueSelectedPending", _selectedPending];
