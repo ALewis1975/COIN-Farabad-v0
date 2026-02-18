@@ -17,6 +17,8 @@
 
 if (!isServer) exitWith {[objNull, objNull]};
 
+missionNamespace setVariable ["civsub_v1_traffic_lastMovingSpawnFail", "", false];
+
 params [
     ["_districtId", "", [""]],
     ["_d", createHashMap, [createHashMap]],
@@ -49,7 +51,11 @@ _spawnR = (_spawnR max 250) min 1100;
 private _searchR = (_spawnR min ((_r + 200) max 450)) min 1100;
 
 private _pick = [_center, _searchR, (missionNamespace getVariable ["civsub_v1_traffic_minSeparation_m", 35])] call ARC_fnc_civsubTrafficPickRoadsidePos;
-if ((count _pick) < 2) exitWith {[objNull, objNull]};
+if ((count _pick) < 2) exitWith
+{
+    missionNamespace setVariable ["civsub_v1_traffic_lastMovingSpawnFail", "noRoadsidePos", false];
+    [objNull, objNull]
+};
 
 private _pos = _pick # 0;
 private _dir = _pick # 1;
@@ -63,12 +69,20 @@ if (_pMin > 0) then
     {
         if ((getPosATL _x) distance2D _pos <= _pMin) exitWith { _nearP = true; };
     } forEach allPlayers;
-    if (_nearP) exitWith {[objNull, objNull]};
+    if (_nearP) exitWith
+    {
+        missionNamespace setVariable ["civsub_v1_traffic_lastMovingSpawnFail", "playerTooNear", false];
+        [objNull, objNull]
+    };
 };
 
 private _cls = selectRandom _pool;
 private _veh = createVehicle [_cls, _pos, [], 0, "NONE"];
-if (isNull _veh) exitWith {[objNull, objNull]};
+if (isNull _veh) exitWith
+{
+    missionNamespace setVariable ["civsub_v1_traffic_lastMovingSpawnFail", "createFail", false];
+    [objNull, objNull]
+};
 
 _veh setDir _dir;
 _veh setPosATL _pos;
@@ -78,7 +92,12 @@ _veh lock 0;
 // Civilian driver
 private _grp = createGroup [civilian, true];
 private _drv = _grp createUnit [_driverCls, _pos, [], 0, "NONE"];
-if (isNull _drv) exitWith { deleteVehicle _veh; [objNull, objNull] };
+if (isNull _drv) exitWith
+{
+    deleteVehicle _veh;
+    missionNamespace setVariable ["civsub_v1_traffic_lastMovingSpawnFail", "createFail", false];
+    [objNull, objNull]
+};
 
 _drv moveInDriver _veh;
 
