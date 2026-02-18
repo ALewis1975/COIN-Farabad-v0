@@ -883,6 +883,7 @@ if (_dbgEnabled) then
         (_dbgPub # _idx) # 1
     };
 
+    // Server publishes this using serverTime; treat as display/change token, not wall-clock age.
     private _dbgAt = missionNamespace getVariable ["ARC_pub_debugUpdatedAt", -1];
     if (!(_dbgAt isEqualType 0)) then { _dbgAt = -1; };
 

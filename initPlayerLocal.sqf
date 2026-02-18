@@ -86,6 +86,7 @@ if (!(missionNamespace getVariable ["ARC_consoleKeepaliveRunning", false])) then
 // - Waits for ARC_pub_state to exist
 // - Refreshes briefing/TOC once on join
 // - Refreshes again whenever ARC_pub_stateUpdatedAt changes
+//   (serverTime token from server publish; watcher only does inequality checks).
 // ---------------------------------------------------------------------------
 if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false])) then
 {
