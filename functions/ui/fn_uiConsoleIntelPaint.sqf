@@ -1047,7 +1047,7 @@ else
                 ];
             };
 
-            if (!isNull _b1) then { _b1 ctrlEnable true; _b1 ctrlSetText "Open Map"; };
+            if (!isNull _b1) then { _b1 ctrlEnable true; _b1 ctrlSetText "OPEN MAP"; };
         };
 
         case "CIV_CONTACT_CHECK_ID":

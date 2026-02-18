@@ -58,6 +58,7 @@ private _incType = missionNamespace getVariable ["ARC_activeIncidentType", ""]; 
 private _incPos  = missionNamespace getVariable ["ARC_activeIncidentPos", []]; if (!(_incPos isEqualType [])) then { _incPos = []; };
 private _incGrid = if (_incPos isEqualType [] && { (count _incPos) >= 2 }) then { mapGridPosition _incPos } else { "" };
 private _acc = missionNamespace getVariable ["ARC_activeIncidentAccepted", false]; if (!(_acc isEqualType true) && !(_acc isEqualType false)) then { _acc = false; };
+private _accBy = missionNamespace getVariable ["ARC_activeIncidentAcceptedByGroup", ""]; if (!(_accBy isEqualType "")) then { _accBy = ""; };
 private _closeReady = missionNamespace getVariable ["ARC_activeIncidentCloseReady", false]; if (!(_closeReady isEqualType true) && !(_closeReady isEqualType false)) then { _closeReady = false; };
 private _sitrepSent = missionNamespace getVariable ["ARC_activeIncidentSitrepSent", false]; if (!(_sitrepSent isEqualType true) && !(_sitrepSent isEqualType false)) then { _sitrepSent = false; };
 
@@ -84,8 +85,9 @@ else
         _incDisp,
         if (_incType isEqualTo "") then {""} else { format [" <t color='#AAAAAA'>(%1)</t>", toUpper _incType] },
         if (_incGrid isEqualTo "") then {""} else { format [" <t color='#AAAAAA'>@ %1</t>", _incGrid] },
-        format ["<t color='#AAAAAA'>| Accepted: %1 | Close-ready: %2 | SITREP: %3</t>",
+        format ["<t color='#AAAAAA'>| Accepted: %1 | Unit: %2 | Close-ready: %3 | SITREP: %4</t>",
             if (_acc) then {"YES"} else {"NO"},
+            if (_accBy isEqualTo "") then {"UNASSIGNED"} else {_accBy},
             if (_closeReady) then {"YES"} else {"NO"},
             if (_sitrepSent) then {"SENT"} else {"PENDING"}
         ]
@@ -140,6 +142,27 @@ if ((count _intelLog) > 0) then
 private _qPendingArr = missionNamespace getVariable ["ARC_pub_queuePending", []];
 if (!(_qPendingArr isEqualType [])) then { _qPendingArr = []; };
 private _qPending = count _qPendingArr;
+private _statusRows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
+if (!(_statusRows isEqualType [])) then { _statusRows = []; };
+
+private _unitLines = [];
+{
+    if (!(_x isEqualType []) || { (count _x) < 2 }) then { continue; };
+    private _gidU = _x # 0;
+    private _stRaw = if ((_x # 1) isEqualType "") then { toUpper (trim (_x # 1)) } else { "UNAVAILABLE" };
+    if (_stRaw isEqualTo "OFFLINE") then { _stRaw = "UNAVAILABLE"; };
+    private _why = if ((count _x) >= 5 && { (_x # 4) isEqualType "" }) then { trim (_x # 4) } else { "" };
+    private _stColor = "#FFD166";
+    if (_stRaw in ["AVAILABLE", "ON SCENE"]) then { _stColor = "#9FE870"; };
+    if (_stRaw in ["UNAVAILABLE", "FAILED"]) then { _stColor = "#FF7A7A"; };
+    _unitLines pushBack format ["<t color='#BDBDBD'>%1:</t> <t color='%2'>%3</t>%4",
+        if (_gidU isEqualTo "") then {"(UNKNOWN)"} else {_gidU},
+        _stColor,
+        _stRaw,
+        if (_why isEqualTo "") then {""} else { format [" <t color='#AAAAAA'>(%1)</t>", _why] }
+    ];
+} forEach _statusRows;
+private _unitsBlock = if ((count _unitLines) > 0) then { _unitLines joinString "<br/>" } else { "<t color='#BBBBBB'>No unit status reports.</t>" };
 
 private _accessLine = format [
     "<t size='0.9'><t color='#B89B6B'>Access:</t> <t color='#FFFFFF'>%1%2%3%4%5</t></t>",
@@ -183,6 +206,7 @@ private _secIntel    = format [
     _qPending,
     _lastIntel
 ];
+private _secUnits = "<t size='1.0' font='PuristaMedium'>Unit Availability</t><br/>" + _unitsBlock + "<br/><br/>";
 
 // Next Actions: workflow coaching / blocker visibility
 private _secNext = "";
@@ -214,22 +238,26 @@ switch (_roleCat) do
         _sections pushBack _secIntel;
         _sections pushBack _secIncident;
         _sections pushBack _secOrders;
+        _sections pushBack _secUnits;
     };
     case "TOC-S3":
     {
         _sections pushBack _secIncident;
         _sections pushBack _secOrders;
+        _sections pushBack _secUnits;
         _sections pushBack _secIntel;
     };
     case "TOC-S2":
     {
         _sections pushBack _secIntel;
         _sections pushBack _secIncident;
+        _sections pushBack _secUnits;
     };
     case "FIELD":
     {
         _sections pushBack _secIncident;
         _sections pushBack _secOrders;
+        _sections pushBack _secUnits;
         _sections pushBack _secIntel;
     };
     default

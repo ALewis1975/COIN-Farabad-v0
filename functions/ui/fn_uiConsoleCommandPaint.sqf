@@ -39,6 +39,25 @@ private _isOmni = false;
 
 private _canApprove = [player] call ARC_fnc_rolesCanApproveQueue;
 private _isAuth = [player] call ARC_fnc_rolesIsAuthorized;
+private _statusFmt = {
+    params ["_statusRaw", ["_reasonRaw", ""]];
+    private _s = if (_statusRaw isEqualType "") then { toUpper (trim _statusRaw) } else { "OFFLINE" };
+    private _reason = if (_reasonRaw isEqualType "") then { trim _reasonRaw } else { "" };
+    if ((_reason isEqualTo "") && { (_s find ":") > -1 }) then
+    {
+        private _p = _s splitString ":";
+        if ((count _p) >= 2) then
+        {
+            _s = toUpper (trim (_p # 0));
+            _reason = trim ((_p select [1, (count _p) - 1]) joinString ":");
+        };
+    };
+    if (_s isEqualTo "OFFLINE") then { _s = "UNAVAILABLE"; };
+    private _c = "#FFD166";
+    if (_s in ["AVAILABLE", "ON SCENE"]) then { _c = "#9FE870"; };
+    if (_s in ["UNAVAILABLE", "FAILED"]) then { _c = "#FF7A7A"; };
+    [if (_s isEqualTo "") then {"UNAVAILABLE"} else {_s}, _c, _reason]
+};
 
 private _taskId = missionNamespace getVariable ["ARC_activeTaskId", ""];
 private _dispName = missionNamespace getVariable ["ARC_activeIncidentDisplayName", "(none)"];
@@ -81,7 +100,7 @@ if (!(_taskId isEqualTo "")) then
 {
     if (_closeReady) then
     {
-        _secText = "CLOSEOUT";
+        _secText = "CLOSEOUT / F-O";
         _secEnable = true;
     }
     else
@@ -134,6 +153,9 @@ else
     };
     _lines pushBack format ["<t size='0.9' color='#BDBDBD'>Closeout Ready:</t> <t size='0.9'>%1</t>", if (_closeReady) then {"YES"} else {"NO"}];
     _lines pushBack format ["<t size='0.9' color='#BDBDBD'>SITREP:</t> <t size='0.9'>%1</t>", if (_sitrepSent) then {"SENT"} else {"NOT SENT"}];
+    private _nextStep = if (!_accepted) then {"AWAITING: INCIDENT ACCEPTANCE"} else { if (!_sitrepSent) then {"AWAITING: FIELD SITREP"} else { if (!_closeReady) then {"AWAITING: CLOSEOUT CONDITIONS"} else {"READY: ISSUE CLOSEOUT + FOLLOW-ON"} } };
+    private _nextColor = if ((_nextStep find "READY:") isEqualTo 0) then {"#9FE870"} else { if ((_nextStep find "CLOSEOUT CONDITIONS") > -1) then {"#FF7A7A"} else {"#FFD166"} };
+    _lines pushBack format ["<t size='0.92' color='%1' font='PuristaMedium'>%2</t>", _nextColor, _nextStep];
 
     // Field follow-on request (captured via SITREP wizard)
     if (_foSummary isNotEqualTo "") then
@@ -191,12 +213,28 @@ if ((count _statusRows) isEqualTo 0) then
 }
 else
 {
+    private _support = [];
     {
         if (!(_x isEqualType []) || { (count _x) < 2 }) then { continue; };
         private _gid = _x # 0;
-        private _st = toUpper (trim (_x # 1));
-        _lines pushBack format ["<t size='0.9' color='#BDBDBD'>%1:</t> <t size='0.9'>%2</t>", if (_gid isEqualTo "") then {"(UNKNOWN)"} else {_gid}, if (_st isEqualTo "") then {"OFFLINE"} else {_st}];
+        private _stRaw = _x # 1;
+        private _reason = if ((count _x) >= 5 && { (_x # 4) isEqualType "" }) then { _x # 4 } else { "" };
+        private _fmt = [_stRaw, _reason] call _statusFmt;
+        private _st = _fmt # 0;
+        private _stColor = _fmt # 1;
+        private _why = _fmt # 2;
+        if (_acceptedBy isNotEqualTo "" && { _gid isNotEqualTo _acceptedBy } && { _st in ["IN TRANSIT", "ON SCENE"] }) then { _support pushBack _gid; };
+        _lines pushBack format ["<t size='0.9' color='#BDBDBD'>%1:</t> <t size='0.9' color='%2'>%3</t>%4",
+            if (_gid isEqualTo "") then {"(UNKNOWN)"} else {_gid},
+            _stColor,
+            _st,
+            if (_why isEqualTo "") then {""} else { format [" <t size='0.85' color='#AAAAAA'>(%1)</t>", _why] }
+        ];
     } forEach _statusRows;
+    if ((count _support) > 0) then
+    {
+        _lines pushBack format ["<t size='0.9' color='#FFD166'>Supporting Units:</t> <t size='0.9'>%1</t>", _support joinString ", "];
+    };
 };
 
 _lines pushBack "<br/>";
