@@ -76,6 +76,8 @@ If any checked:
 
 ## Required Checks (must be run on latest head SHA)
 
+> CI note: `.github/workflows/arma-preflight.yml` is the authoritative SQF/config lint gate. `sqf-lint.yml` is decommissioned and non-normative.
+
 - [ ] `git fetch origin && git rebase origin/main`
 - [ ] `git diff --check`
 - [ ] `scripts/dev/check_console_conflicts.sh`
