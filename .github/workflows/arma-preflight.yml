@@ -3,7 +3,6 @@ name: Arma SQF + Mission Config Preflight
 on:
   pull_request:
   push:
-    branches: [main, master]
 
 jobs:
   preflight:
@@ -20,10 +19,10 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install SQF linter (sqflint)
+      - name: Install SQF linters (sqflint and sqfvm)
         run: |
           python -m pip install --upgrade pip
-          pip install sqflint
+          pip install sqflint sqfvm
 
       - name: Detect changed SQF/config files
         id: changed
@@ -93,6 +92,23 @@ jobs:
           while IFS= read -r file; do
             [ -z "$file" ] && continue
             sqflint -e w "$file"
+          done <<< "$sqf_files"
+
+      - name: SQF parse check (changed *.sqf files only)
+        run: |
+          set -euo pipefail
+
+          sqf_files="${{ steps.changed.outputs.sqf_files }}"
+
+          if [ -z "$sqf_files" ]; then
+            echo "No changed SQF files to parse."
+            exit 0
+          fi
+
+          while IFS= read -r file; do
+            [ -z "$file" ] && continue
+            echo "Parsing $file"
+            python -m sqfvm --parse-only "$file"
           done <<< "$sqf_files"
 
       - name: Mission config sanity checks (description.ext, ui/**/*.hpp, etc.)
