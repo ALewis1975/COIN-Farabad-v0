@@ -46,24 +46,16 @@ if (_idx < 0) exitWith {
     false
 };
 
-_queue deleteAt _idx;
-["airbase_v1_queue", _queue] call ARC_fnc_stateSet;
+private _removed = [_queue, _flightId] call ARC_fnc_airbaseQueueRemoveByFid;
+_queue = _removed param [0, []];
 
 private _recs = ["airbase_v1_records", []] call ARC_fnc_stateGet;
 if (!(_recs isEqualType [])) then { _recs = []; };
-private _rIdx = _recs findIf { ((_x param [0, ""]) isEqualTo _flightId) };
-if (_rIdx >= 0) then {
-    private _r = _recs # _rIdx;
-    _r set [5, "CANCELLED"];
-    _r set [6, serverTime];
-    private _meta = _r param [7, []];
-    if (!(_meta isEqualType [])) then { _meta = []; };
-    _meta pushBack ["cancelledBy", name _caller];
-    _meta pushBack ["cancelledByUid", getPlayerUID _caller];
-    _r set [7, _meta];
-    _recs set [_rIdx, _r];
-    ["airbase_v1_records", _recs] call ARC_fnc_stateSet;
-};
+private _updated = [_recs, _flightId, "CANCELED", [["cancelledBy", name _caller], ["cancelledByUid", getPlayerUID _caller]]] call ARC_fnc_airbaseRecordSetQueuedStatus;
+_recs = _updated param [0, []];
+
+["airbase_v1_queue", _queue] call ARC_fnc_stateSet;
+["airbase_v1_records", _recs] call ARC_fnc_stateSet;
 
 private _manualPriority = ["airbase_v1_manualPriority", []] call ARC_fnc_stateGet;
 if (!(_manualPriority isEqualType [])) then { _manualPriority = []; };

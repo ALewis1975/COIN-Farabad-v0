@@ -46,9 +46,16 @@ if (_idx < 0) exitWith {
     false
 };
 
-private _item = _queue deleteAt _idx;
-_queue insert [0, [_item]];
+private _moved = [_queue, _flightId] call ARC_fnc_airbaseQueueMoveToFront;
+_queue = _moved param [0, []];
+
+private _recs = ["airbase_v1_records", []] call ARC_fnc_stateGet;
+if (!(_recs isEqualType [])) then { _recs = []; };
+private _updated = [_recs, _flightId, "PRIORITIZED", [["prioritizedBy", name _caller], ["prioritizedByUid", getPlayerUID _caller], ["manualOverride", true]]] call ARC_fnc_airbaseRecordSetQueuedStatus;
+_recs = _updated param [0, []];
+
 ["airbase_v1_queue", _queue] call ARC_fnc_stateSet;
+["airbase_v1_records", _recs] call ARC_fnc_stateSet;
 
 private _manualPriority = ["airbase_v1_manualPriority", []] call ARC_fnc_stateGet;
 if (!(_manualPriority isEqualType [])) then { _manualPriority = []; };
