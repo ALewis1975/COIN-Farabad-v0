@@ -218,8 +218,16 @@ missionNamespace setVariable ["civsub_v1_traffic_vehiclePool_fallback", [
 missionNamespace setVariable ["civsub_v1_traffic_allow_moving", true, true];
 missionNamespace setVariable ["civsub_v1_traffic_cap_moving_global", 2, true];
 missionNamespace setVariable ["civsub_v1_traffic_prob_moving", 0.10, true];
+missionNamespace setVariable ["civsub_v1_traffic_moving_spawnMaxDistrictAttempts", 3, true];
 missionNamespace setVariable ["civsub_v1_traffic_moving_maxSpeed", 35, true];
 missionNamespace setVariable ["civsub_v1_traffic_driverClass", "C_man_1", true];
+
+// Moving spawn diagnostics (cumulative counters)
+missionNamespace setVariable ["civsub_v1_traffic_dbg_moving_spawnAttempts", 0, true];
+missionNamespace setVariable ["civsub_v1_traffic_dbg_moving_spawnFail_noRoadsidePos", 0, true];
+missionNamespace setVariable ["civsub_v1_traffic_dbg_moving_spawnFail_playerTooNear", 0, true];
+missionNamespace setVariable ["civsub_v1_traffic_dbg_moving_spawnFail_createFail", 0, true];
+missionNamespace setVariable ["civsub_v1_traffic_lastMovingSpawnFail", "", true];
 
 
 // ============================================================================

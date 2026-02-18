@@ -286,22 +286,61 @@ if (_allowMoving) then
     private _probM = missionNamespace getVariable ["civsub_v1_traffic_prob_moving", 0.10];
     if (!(_probM isEqualType 0)) then { _probM = 0.10; };
 
+    private _attemptsMax = missionNamespace getVariable ["civsub_v1_traffic_moving_spawnMaxDistrictAttempts", 3];
+    if (!(_attemptsMax isEqualType 0)) then { _attemptsMax = 3; };
+    if (_attemptsMax < 1) then { _attemptsMax = 1; };
+
+    private _spawnAttempts = missionNamespace getVariable ["civsub_v1_traffic_dbg_moving_spawnAttempts", 0];
+    if (!(_spawnAttempts isEqualType 0)) then { _spawnAttempts = 0; };
+    private _spawnNoRoadside = missionNamespace getVariable ["civsub_v1_traffic_dbg_moving_spawnFail_noRoadsidePos", 0];
+    if (!(_spawnNoRoadside isEqualType 0)) then { _spawnNoRoadside = 0; };
+    private _spawnPlayerNear = missionNamespace getVariable ["civsub_v1_traffic_dbg_moving_spawnFail_playerTooNear", 0];
+    if (!(_spawnPlayerNear isEqualType 0)) then { _spawnPlayerNear = 0; };
+    private _spawnCreateFail = missionNamespace getVariable ["civsub_v1_traffic_dbg_moving_spawnFail_createFail", 0];
+    if (!(_spawnCreateFail isEqualType 0)) then { _spawnCreateFail = 0; };
+
     // spawn one moving vehicle at most per tick, with probability
+    // try each selected active district (bounded) until one succeeds
     if ((count _moving) < _capMG && { (count _act) > 0 } && { (random 1) < _probM }) then
     {
-        private _row = selectRandom _act;
-        private _did = _row select 1;
-        private _d = _row select 2;
-
         private _drvCls = missionNamespace getVariable ["civsub_v1_traffic_driverClass", "C_man_1"];
         if (!(_drvCls isEqualType "")) then { _drvCls = "C_man_1"; };
 
-        private _op = _opCenters get _did;
-        if (isNil "_op" || { !(_op isEqualType []) }) then { _op = []; };
-        private _pair = [_did, _d, _pool, _drvCls, _op] call ARC_fnc_civsubTrafficSpawnMoving;
-        private _veh = _pair select 0;
-        if (!isNull _veh) then { _moving pushBack _veh; };
+        private _rows = +_act;
+        private _attempts = _attemptsMax min (count _rows);
+        for "_i" from 1 to _attempts do
+        {
+            if ((count _rows) == 0) exitWith {};
+
+            private _row = selectRandom _rows;
+            _rows deleteAt (_rows find _row);
+
+            private _did = _row select 1;
+            private _d = _row select 2;
+            private _op = _opCenters get _did;
+            if (isNil "_op" || { !(_op isEqualType []) }) then { _op = []; };
+
+            missionNamespace setVariable ["civsub_v1_traffic_lastMovingSpawnFail", "", false];
+            private _pair = [_did, _d, _pool, _drvCls, _op] call ARC_fnc_civsubTrafficSpawnMoving;
+
+            _spawnAttempts = _spawnAttempts + 1;
+            private _veh = _pair select 0;
+            if (!isNull _veh) exitWith
+            {
+                _moving pushBack _veh;
+            };
+
+            private _reason = missionNamespace getVariable ["civsub_v1_traffic_lastMovingSpawnFail", ""];
+            if (_reason isEqualTo "noRoadsidePos") then { _spawnNoRoadside = _spawnNoRoadside + 1; };
+            if (_reason isEqualTo "playerTooNear") then { _spawnPlayerNear = _spawnPlayerNear + 1; };
+            if (_reason isEqualTo "createFail") then { _spawnCreateFail = _spawnCreateFail + 1; };
+        };
     };
+
+    missionNamespace setVariable ["civsub_v1_traffic_dbg_moving_spawnAttempts", _spawnAttempts, false];
+    missionNamespace setVariable ["civsub_v1_traffic_dbg_moving_spawnFail_noRoadsidePos", _spawnNoRoadside, false];
+    missionNamespace setVariable ["civsub_v1_traffic_dbg_moving_spawnFail_playerTooNear", _spawnPlayerNear, false];
+    missionNamespace setVariable ["civsub_v1_traffic_dbg_moving_spawnFail_createFail", _spawnCreateFail, false];
 
     // maintain moving destinations (simple hop between roads)
     {
@@ -349,8 +388,19 @@ missionNamespace setVariable ["civsub_v1_traffic_tick_i", _ti, false];
 if (_debug && { (_ti mod 10) == 0 }) then
 {
     private _actIds = _act apply { _x select 1 };
-    diag_log format ["[CIVTRAF][TICK] i=%1 active=%2 parked=%3 moving=%4 pool=%5 prefer=%6 fallback=%7 budgetG=%8",
-        _ti, _actIds, count _parked, count _moving, count _pool, count _poolPrefer, count _poolFallback, (missionNamespace getVariable ["civsub_v1_traffic_spawn_budget_globalPerTick", 1])
+    diag_log format ["[CIVTRAF][TICK] i=%1 active=%2 parked=%3 moving=%4 pool=%5 prefer=%6 fallback=%7 budgetG=%8 mSpawnAttempts=%9 mFailNoRoad=%10 mFailPlayerNear=%11 mFailCreate=%12",
+        _ti,
+        _actIds,
+        count _parked,
+        count _moving,
+        count _pool,
+        count _poolPrefer,
+        count _poolFallback,
+        (missionNamespace getVariable ["civsub_v1_traffic_spawn_budget_globalPerTick", 1]),
+        (missionNamespace getVariable ["civsub_v1_traffic_dbg_moving_spawnAttempts", 0]),
+        (missionNamespace getVariable ["civsub_v1_traffic_dbg_moving_spawnFail_noRoadsidePos", 0]),
+        (missionNamespace getVariable ["civsub_v1_traffic_dbg_moving_spawnFail_playerTooNear", 0]),
+        (missionNamespace getVariable ["civsub_v1_traffic_dbg_moving_spawnFail_createFail", 0])
     ];
 };
 
