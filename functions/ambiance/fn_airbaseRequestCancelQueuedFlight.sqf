@@ -89,7 +89,7 @@ private _qKind = _qItem param [1, ""];
 private _qDetail = _qItem param [2, ""];
 
 // RETURN arrivals leave their source asset in RETURN_QUEUED; restore asset state before reporting success.
-if (_qKind isEqualTo "ARR" && { _qDetail isEqualType "" && { _qDetail isNotEqualTo "INBOUND" } }) then {
+if (_qKind isEqualTo "ARR" && { _qDetail isEqualType "" && { !(_qDetail isEqualTo "INBOUND") } }) then {
     private _isReturn = false;
 
     if (_rIdx >= 0) then {
@@ -103,8 +103,20 @@ if (_qKind isEqualTo "ARR" && { _qDetail isEqualType "" && { _qDetail isNotEqual
 
     if (_isReturn) then {
         private _rt = missionNamespace getVariable ["airbase_v1_rt", createHashMap];
-        private _assets = _rt getOrDefault ["assets", []];
-        private _aIdx = _assets findIf { (_x getOrDefault ["id", ""]) isEqualTo _qDetail };
+        private _assets = [];
+        if (_rt isEqualType createHashMap) then {
+            _assets = _rt get "assets";
+            if (isNil "_assets" || {!(_assets isEqualType [])}) then { _assets = []; };
+        };
+
+        private _aIdx = _assets findIf {
+            private _assetId = "";
+            if (_x isEqualType createHashMap) then {
+                _assetId = _x get "id";
+                if (isNil "_assetId" || {!(_assetId isEqualType "")}) then { _assetId = ""; };
+            };
+            _assetId isEqualTo _qDetail
+        };
 
         if (_aIdx < 0) exitWith {
             private _owner = owner _caller;
@@ -157,7 +169,7 @@ if (_rIdx >= 0) then {
 
 private _manualPriority = ["airbase_v1_manualPriority", []] call ARC_fnc_stateGet;
 if (!(_manualPriority isEqualType [])) then { _manualPriority = []; };
-_manualPriority = _manualPriority select { _x isEqualType "" && { _x isNotEqualTo _flightId } };
+_manualPriority = _manualPriority select { _x isEqualType "" && { !(_x isEqualTo _flightId) } };
 ["airbase_v1_manualPriority", _manualPriority] call ARC_fnc_stateSet;
 
 ["OPS", format ["AIRBASE CONTROL: cancelled flight %1 by %2", _flightId, name _caller], getPosATL _caller, 0, [
