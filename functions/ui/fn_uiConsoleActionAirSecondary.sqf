@@ -11,11 +11,11 @@ if (!hasInterface) exitWith {false};
 private _disp = findDisplay 78000;
 if (isNull _disp) exitWith {false};
 
-private _canAirControl = ["ARC_console_airCanControl", false] call ARC_fnc_uiNsGetBool;
-if (!_canAirControl) exitWith
+private _canAirQueueManage = ["ARC_console_airCanQueueManage", false] call ARC_fnc_uiNsGetBool;
+if (!_canAirQueueManage) exitWith
 {
     [_disp, false] call ARC_fnc_uiConsoleAirPaint;
-    ["AIR", "Read-only details refreshed."] call ARC_fnc_clientToast;
+    ["AIR", "No EXPEDITE/CANCEL permission."] call ARC_fnc_clientToast;
     true
 };
 

@@ -11,11 +11,11 @@ if (!hasInterface) exitWith {false};
 private _disp = findDisplay 78000;
 if (isNull _disp) exitWith {false};
 
-private _canAirControl = ["ARC_console_airCanControl", false] call ARC_fnc_uiNsGetBool;
-if (!_canAirControl) exitWith
+private _canAirHoldRelease = ["ARC_console_airCanHoldRelease", false] call ARC_fnc_uiNsGetBool;
+if (!_canAirHoldRelease) exitWith
 {
     [_disp, false] call ARC_fnc_uiConsoleAirPaint;
-    ["AIR", "Read-only snapshot refreshed."] call ARC_fnc_clientToast;
+    ["AIR", "No HOLD/RELEASE permission."] call ARC_fnc_clientToast;
     true
 };
 
