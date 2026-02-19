@@ -31,6 +31,30 @@ private _controllerTimeoutS = missionNamespace getVariable ["airbase_v1_controll
 if (!(_controllerTimeoutS isEqualType 0) || { _controllerTimeoutS < 5 }) then { _controllerTimeoutS = 90; };
 missionNamespace setVariable ["airbase_v1_controller_timeout_s", _controllerTimeoutS, true];
 
+private _controllerTimeoutTowerS = missionNamespace getVariable ["airbase_v1_controller_timeout_tower_s", _controllerTimeoutS];
+if (!(_controllerTimeoutTowerS isEqualType 0) || { _controllerTimeoutTowerS < 5 }) then { _controllerTimeoutTowerS = _controllerTimeoutS; };
+missionNamespace setVariable ["airbase_v1_controller_timeout_tower_s", _controllerTimeoutTowerS, true];
+
+private _controllerTimeoutGroundS = missionNamespace getVariable ["airbase_v1_controller_timeout_ground_s", _controllerTimeoutS];
+if (!(_controllerTimeoutGroundS isEqualType 0) || { _controllerTimeoutGroundS < 5 }) then { _controllerTimeoutGroundS = _controllerTimeoutS; };
+missionNamespace setVariable ["airbase_v1_controller_timeout_ground_s", _controllerTimeoutGroundS, true];
+
+private _controllerTimeoutArrivalS = missionNamespace getVariable ["airbase_v1_controller_timeout_arrival_s", _controllerTimeoutS];
+if (!(_controllerTimeoutArrivalS isEqualType 0) || { _controllerTimeoutArrivalS < 5 }) then { _controllerTimeoutArrivalS = _controllerTimeoutS; };
+missionNamespace setVariable ["airbase_v1_controller_timeout_arrival_s", _controllerTimeoutArrivalS, true];
+
+private _autoDelayTowerS = missionNamespace getVariable ["airbase_v1_automation_delay_tower_s", 8];
+if (!(_autoDelayTowerS isEqualType 0) || { _autoDelayTowerS < 1 }) then { _autoDelayTowerS = 8; };
+missionNamespace setVariable ["airbase_v1_automation_delay_tower_s", _autoDelayTowerS, true];
+
+private _autoDelayGroundS = missionNamespace getVariable ["airbase_v1_automation_delay_ground_s", 10];
+if (!(_autoDelayGroundS isEqualType 0) || { _autoDelayGroundS < 1 }) then { _autoDelayGroundS = 10; };
+missionNamespace setVariable ["airbase_v1_automation_delay_ground_s", _autoDelayGroundS, true];
+
+private _autoDelayArrivalS = missionNamespace getVariable ["airbase_v1_automation_delay_arrival_s", 6];
+if (!(_autoDelayArrivalS isEqualType 0) || { _autoDelayArrivalS < 1 }) then { _autoDelayArrivalS = 6; };
+missionNamespace setVariable ["airbase_v1_automation_delay_arrival_s", _autoDelayArrivalS, true];
+
 private _controllerFallbackEnabled = missionNamespace getVariable ["airbase_v1_controller_fallback_enabled", true];
 if (!(_controllerFallbackEnabled isEqualType true) && !(_controllerFallbackEnabled isEqualType false)) then { _controllerFallbackEnabled = true; };
 missionNamespace setVariable ["airbase_v1_controller_fallback_enabled", _controllerFallbackEnabled, true];

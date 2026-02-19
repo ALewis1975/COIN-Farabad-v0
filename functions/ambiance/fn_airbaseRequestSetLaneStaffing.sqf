@@ -70,8 +70,20 @@ private _name = name _caller;
 private _uid = getPlayerUID _caller;
 private _event = "";
 
-if (_claim) then {
-    _rec set [1, "MANNED"];
+private _queue = ["airbase_v1_clearanceRequests", []] call ARC_fnc_stateGet;
+if (!(_queue isEqualType [])) then { _queue = []; };
+private _laneReqTypes = switch (_laneId) do {
+    case "arrival": { ["REQ_INBOUND", "REQ_LAND", "REQ_EMERGENCY"] };
+    case "ground": { ["REQ_TAXI"] };
+    default { ["REQ_TAKEOFF"] };
+};
+private _lanePending = count (_queue select {
+    private _rtype = toUpperANSI (_x param [1, ""]);
+    private _st = toUpperANSI (_x param [6, ""]);
+    (_rtype in _laneReqTypes) && { _st in ["QUEUED", "PENDING", "AWAITING_TOWER_DECISION"] }
+});
+
+if (_claim) then {    _rec set [1, "MANNED"];
     _rec set [2, _name];
     _rec set [3, _uid];
     _rec set [4, _now];
@@ -89,7 +101,7 @@ _staffing set [_idx, _rec];
 
 private _owner = owner _caller;
 if (_owner > 0) then {
-    [format ["%1 lane %2 set to %3.", toUpperANSI _laneId, if (_claim) then {"staffing"} else {"AUTO"}, if (_claim) then {_name} else {"AUTO"}]] remoteExec ["ARC_fnc_clientHint", _owner];
+    [format ["%1 lane %2 set to %3 (pending handoff queue: %4).", toUpperANSI _laneId, if (_claim) then {"staffing"} else {"AUTO"}, if (_claim) then {_name} else {"AUTO"}, _lanePending]] remoteExec ["ARC_fnc_clientHint", _owner];
 };
 
 ["OPS", format ["AIRBASE STAFFING: %1 lane %2 by %3", if (_claim) then {"claimed"} else {"released"}, toUpperANSI _laneId, _name], getPosATL _caller, 0, [
@@ -101,7 +113,8 @@ if (_owner > 0) then {
     ["claim", _claim],
     ["status", _rec param [1, "AUTO"]],
     ["operator", _rec param [2, ""]],
-    ["operatorUid", _rec param [3, ""]]
+    ["operatorUid", _rec param [3, ""]],
+    ["pendingQueueHandoff", _lanePending]
 ]] call ARC_fnc_intelLog;
 
 true
