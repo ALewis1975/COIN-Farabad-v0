@@ -32,7 +32,7 @@ private _status = toUpperANSI (_rec param [6, ""]);
 private _uid = _rec param [2, ""];
 private _callerUid = getPlayerUID _caller;
 
-if !(_status in ["PENDING", "AWAITING_TOWER_DECISION"]) exitWith {
+if !(_status in ["QUEUED", "PENDING", "AWAITING_TOWER_DECISION"]) exitWith {
     private _owner = owner _caller;
     if (_owner > 0) then { ["Only pending clearance requests can be escalated."] remoteExec ["ARC_fnc_clientHint", _owner]; };
     false
@@ -56,12 +56,16 @@ if (!(_meta isEqualType [])) then { _meta = []; };
 _meta pushBack ["emergency", true];
 _meta pushBack ["escalatedBy", name _caller];
 _meta pushBack ["escalatedByUid", _callerUid];
+_meta pushBack ["priorityClass", "PRIORITY"];
+_meta pushBack ["lane", "ARRIVAL"];
 _rec set [10, _meta];
 
 _requests set [_idx, _rec];
 
 private _hIdx = _history findIf { ((_x param [0, ""]) isEqualTo _requestId) };
 if (_hIdx >= 0) then { _history set [_hIdx, _rec]; } else { _history pushBack _rec; };
+
+_requests = [_requests] call ARC_fnc_airbaseClearanceSortRequests;
 
 ["airbase_v1_clearanceRequests", _requests] call ARC_fnc_stateSet;
 ["airbase_v1_clearanceHistory", _history] call ARC_fnc_stateSet;

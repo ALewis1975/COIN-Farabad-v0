@@ -22,7 +22,7 @@ if (!(_preserveHistory isEqualType true) && !(_preserveHistory isEqualType false
 private _requests = ["airbase_v1_clearanceRequests", []] call ARC_fnc_stateGet;
 if (!(_requests isEqualType [])) then { _requests = []; };
 private _pendingBefore = count (_requests select {
-    _x isEqualType [] && { (count _x) > 6 } && { (_x select 6) in ["PENDING", "AWAITING_TOWER_DECISION"] }
+    _x isEqualType [] && { (count _x) > 6 } && { (_x select 6) in ["QUEUED", "PENDING", "AWAITING_TOWER_DECISION"] }
 });
 
 private _queue = ["airbase_v1_queue", []] call ARC_fnc_stateGet;
@@ -41,6 +41,11 @@ private _historyBefore = count _history;
 ["airbase_v1_queue", []] call ARC_fnc_stateSet;
 ["airbase_v1_manualPriority", []] call ARC_fnc_stateSet;
 ["airbase_v1_holdDepartures", false] call ARC_fnc_stateSet;
+["airbase_v1_towerStaffing", [
+    ["tower", "AUTO", "", "", -1],
+    ["ground", "AUTO", "", "", -1],
+    ["arrival", "AUTO", "", "", -1]
+]] call ARC_fnc_stateSet;
 
 if (!_preserveHistory) then {
     ["airbase_v1_clearanceHistory", []] call ARC_fnc_stateSet;

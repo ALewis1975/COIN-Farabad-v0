@@ -192,14 +192,14 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
     if !(_rec isEqualType []) then { continue; };
 
     private _status = toUpperANSI (_rec param [6, ""]);
-    if (_status in ["APPROVED", "DENIED", "CANCELED"]) then { continue; };
+    if (_status in ["APPROVED", "DENIED", "CANCELED", "COMPLETE"]) then { continue; };
 
     private _createdAt = _rec param [7, _nowTs];
     if (!(_createdAt isEqualType 0)) then { _createdAt = _nowTs; };
 
     private _ageS = _nowTs - _createdAt;
 
-    if (_hasTowerController && {_status isEqualTo "PENDING"}) then {
+    if (_hasTowerController && {_status in ["QUEUED", "PENDING"]}) then {
         _rec set [6, "AWAITING_TOWER_DECISION"];
         _rec set [8, _nowTs];
         _rec set [9, ["", "", -1, "", "AWAITING_TOWER"]];
@@ -238,7 +238,7 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
 
     if (!_controllerFallbackEnabled) then { continue; };
 
-    if (_status in ["PENDING", "AWAITING_TOWER_DECISION"] && { _ageS >= _controllerTimeoutS }) then {
+    if (_status in ["QUEUED", "PENDING", "AWAITING_TOWER_DECISION"] && { _ageS >= _controllerTimeoutS }) then {
         _rec set [6, "APPROVED"];
         _rec set [8, _nowTs];
         _rec set [9, ["AI", "AI", _nowTs, "APPROVE", "TIMEOUT"]];
@@ -275,6 +275,7 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
 };
 
 if (_clearanceStateDirty) then {
+    _clearanceRequests = [_clearanceRequests] call ARC_fnc_airbaseClearanceSortRequests;
     ["airbase_v1_clearanceRequests", _clearanceRequests] call ARC_fnc_stateSet;
 
     private _historyById = createHashMap;
@@ -789,6 +790,15 @@ if (_idxRecActive >= 0) then {
 
 [_fid, _kind, _detail] spawn {
     params ["_fid", "_kind", "_detail"];
+
+    private _fnHmGetLocal = {
+        params ["_hm", "_key", "_fallback"];
+        if (!(_hm isEqualType createHashMap)) exitWith { _fallback };
+        private _value = _hm get _key;
+        if (isNil "_value") exitWith { _fallback };
+        _value
+    };
+
     missionNamespace setVariable ["airbase_v1_execActive", true, true];
     missionNamespace setVariable ["airbase_v1_execFid", _fid, true];
 
@@ -825,24 +835,24 @@ if (_idxRecActive >= 0) then {
     };
 
     private _rtL = missionNamespace getVariable ["airbase_v1_rt", createHashMap];
-    private _assetsL = [_rtL, "assets", []] call _fnHmGet;
+    private _assetsL = [_rtL, "assets", []] call _fnHmGetLocal;
 
     private _ok = false;
 
     if (_kind isEqualTo "DEP") then {
-        private _aIdx = _assetsL findIf { ([_x, "id", ""] call _fnHmGet) isEqualTo _detail };
+        private _aIdx = _assetsL findIf { ([_x, "id", ""] call _fnHmGetLocal) isEqualTo _detail };
         if (_aIdx >= 0) then {
             private _asset = _assetsL # _aIdx;
 
             // Skip disabled assets
-            if (([_asset, "state", "PARKED"] call _fnHmGet) isEqualTo "DISABLED") exitWith {
+            if (([_asset, "state", "PARKED"] call _fnHmGetLocal) isEqualTo "DISABLED") exitWith {
                 _ok = false;
             };
 
             _asset set ["state", "ACTIVE"];
             _asset set ["activeFlight", _fid];
 
-            if ([_asset, "requiresTow", false] call _fnHmGet) then {
+            if ([_asset, "requiresTow", false] call _fnHmGetLocal) then {
                 _ok = [_fid, _asset] call ARC_fnc_airbaseAttackTowDepart;
             } else {
                 _ok = [_fid, _asset] call ARC_fnc_airbasePlaneDepart;

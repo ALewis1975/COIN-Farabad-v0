@@ -64,6 +64,33 @@ if (!(_clrSeq isEqualType 0) || { _clrSeq < 0 }) then { _clrSeq = 0; };
 private _airEvents = ["airbase_v1_events", []] call ARC_fnc_stateGet;
 if (!(_airEvents isEqualType [])) then { _airEvents = []; };
 
+private _towerStaffing = ["airbase_v1_towerStaffing", []] call ARC_fnc_stateGet;
+if (!(_towerStaffing isEqualType [])) then { _towerStaffing = []; };
+
+private _normalizeStaffingLane = {
+    params ["_rows", "_laneId"];
+
+    private _idx = _rows findIf {
+        (_x isEqualType []) &&
+        { (count _x) >= 5 } &&
+        { ((_x param [0, ""]) isEqualTo _laneId) }
+    };
+
+    private _base = if (_idx >= 0) then { _rows # _idx } else { [_laneId, "AUTO", "", "", -1] };
+    [
+        _laneId,
+        toUpperANSI (_base param [1, "AUTO"]),
+        _base param [2, ""],
+        _base param [3, ""],
+        _base param [4, -1]
+    ]
+};
+
+private _towerLane = [_towerStaffing, "tower"] call _normalizeStaffingLane;
+private _groundLane = [_towerStaffing, "ground"] call _normalizeStaffingLane;
+private _arrivalLane = [_towerStaffing, "arrival"] call _normalizeStaffingLane;
+private _staffingView = [_towerLane, _groundLane, _arrivalLane];
+
 private _depQueued = 0;
 private _arrQueued = 0;
 {
@@ -113,7 +140,7 @@ for "_i" from 0 to (_nextN - 1) do
 
 private _clearancePending = _clrReqs select {
     private _st = toUpperANSI (_x param [6, ""]);
-    (_st isEqualTo "PENDING") || (_st isEqualTo "AWAITING_TOWER_DECISION")
+    (_st in ["QUEUED", "PENDING", "AWAITING_TOWER_DECISION"])
 };
 private _clearanceAwaitingTower = _clearancePending select { (toUpperANSI (_x param [6, ""])) isEqualTo "AWAITING_TOWER_DECISION" };
 private _clearanceEmergency = _clearancePending select { ((_x param [5, 0]) >= 100) };
@@ -128,7 +155,8 @@ private _clearancePendingView = _clearancePending apply {
         _x param [6, ""],
         _x param [7, -1],
         _x param [8, -1],
-        _x param [9, []]
+        _x param [9, []],
+        (_x param [10, []])
     ]
 };
 
@@ -177,6 +205,7 @@ private _airbasePub = [
     ["clearancePending", _clearancePendingView],
     ["clearanceControllerPending", _clearancePendingView],
     ["clearanceHistoryTail", _clearanceHistoryTail],
+    ["towerStaffing", _staffingView],
     ["recentEvents", _eventsView]
 ];
 
