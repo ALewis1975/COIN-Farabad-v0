@@ -29,27 +29,34 @@ params [
 
 if (!([_caller, "ARC_fnc_airbaseSubmitClearanceRequest", "Airbase clearance request rejected: sender verification failed.", "AIRBASE_CLEARANCE_SUBMIT_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
-if !([_caller] call ARC_fnc_rolesIsTocS2) exitWith {
+private _pilotTokens = missionNamespace getVariable ["airbase_v1_pilotGroupTokens", ["EFS", "HAWG", "VIPER", "PILOT"]];
+if (!(_pilotTokens isEqualType [])) then { _pilotTokens = ["EFS", "HAWG", "VIPER", "PILOT"]; };
+
+private _pilotGroup = group _caller;
+private _pilotGroupName = if (isNull _pilotGroup) then {""} else { groupId _pilotGroup };
+private _pilotRoleDesc = roleDescription _caller;
+private _pilotAllowed = false;
+{
+    if (_x isEqualType "" && { [ _caller, _x ] call ARC_fnc_rolesHasGroupIdToken }) exitWith { _pilotAllowed = true; };
+} forEach _pilotTokens;
+
+if !_pilotAllowed exitWith {
     private _owner = owner _caller;
-    private _callerUidDenied = getPlayerUID _caller;
-    private _callerNameDenied = name _caller;
-    if (_owner > 0) then { ["Airbase clearance request denied: TOC S2 authorization required."] remoteExec ["ARC_fnc_clientHint", _owner]; };
-
-    ["OPS", format ["AIRBASE CLEARANCE DENIED: submit by %1 (TOC S2 required)", _callerNameDenied], getPosATL _caller, [
-        ["event", "AIRBASE_CLEARANCE_SUBMIT_AUTH_DENIED"],
-        ["caller", _callerNameDenied],
-        ["uid", _callerUidDenied]
-    ]] call ARC_fnc_intelLog;
-
+    if (_owner > 0) then { ["Clearance request rejected: pilot group authorization required."] remoteExec ["ARC_fnc_clientHint", _owner]; };
     false
 };
 
 if (isNull _aircraft) exitWith {
     private _owner = owner _caller;
-    if (_owner > 0) then { ["Clearance request rejected: invalid aircraft."] remoteExec ["ARC_fnc_clientHint", _owner]; };
+    if (_owner > 0) then { ["Clearance request rejected: invalid aircraft context."] remoteExec ["ARC_fnc_clientHint", _owner]; };
     false
 };
 
+if ((_caller distance _aircraft) > 15) exitWith {
+    private _owner = owner _caller;
+    if (_owner > 0) then { ["Clearance request rejected: you must be in aircraft context."] remoteExec ["ARC_fnc_clientHint", _owner]; };
+    false
+};
 private _vehOwner = owner _aircraft;
 private _callerOwner = owner _caller;
 if ((_vehOwner > 0) && { _vehOwner != _callerOwner }) exitWith {
@@ -82,6 +89,21 @@ if (!isNil "_mappedType") then { _requestType = _mappedType; };
 if !(_requestType in ["REQ_TAXI", "REQ_TAKEOFF", "REQ_INBOUND", "REQ_LAND", "REQ_EMERGENCY"]) exitWith {
     private _owner = owner _caller;
     if (_owner > 0) then { ["Clearance request rejected: unsupported request type."] remoteExec ["ARC_fnc_clientHint", _owner]; };
+    false
+};
+
+private _callerVehicle = vehicle _caller;
+private _isCrewContext = !isNull _callerVehicle && { _callerVehicle isEqualTo _aircraft };
+if !_isCrewContext exitWith {
+    private _owner = owner _caller;
+    if (_owner > 0) then { ["Clearance request rejected: caller must be in the selected aircraft."] remoteExec ["ARC_fnc_clientHint", _owner]; };
+    false
+};
+
+private _isPilotSeat = (driver _aircraft) isEqualTo _caller;
+if ((_requestType in ["REQ_TAXI", "REQ_TAKEOFF", "REQ_INBOUND", "REQ_EMERGENCY"]) && {!_isPilotSeat}) exitWith {
+    private _owner = owner _caller;
+    if (_owner > 0) then { ["Clearance request rejected: pilot seat required for this request type."] remoteExec ["ARC_fnc_clientHint", _owner]; };
     false
 };
 
@@ -174,6 +196,8 @@ private _record = [
         ["callerUnitNetId", netId _caller],
         ["pilotUid", _callerUid],
         ["pilotName", _callerName],
+        ["pilotCallsign", _pilotRoleDesc],
+        ["pilotGroupName", _pilotGroupName],
         ["aircraftNetId", _aircraftNetId],
         ["aircraftType", typeOf _aircraft],
         ["source", _source],
@@ -245,7 +269,7 @@ private _controllerOwners = [];
 
 private _toastBody = format ["%1 %2 (priority %3)", _requestId, toLower _requestType, _priority];
 if (_callerOwner > 0) then {
-    ["Airbase Clearance", format ["Submitted %1", _toastBody], 5] remoteExec ["ARC_fnc_clientToast", _callerOwner];
+    ["Airbase Clearance", format ["Request accepted and queued: %1", _toastBody], 5] remoteExec ["ARC_fnc_clientToast", _callerOwner];
 };
 {
     ["Airbase Tower", format ["Pending: %1", _toastBody], 5] remoteExec ["ARC_fnc_clientToast", _x];

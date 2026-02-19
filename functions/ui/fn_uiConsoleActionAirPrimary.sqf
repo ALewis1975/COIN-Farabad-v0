@@ -21,6 +21,64 @@ if (!(_data isEqualType "")) then { _data = ""; };
 private _parts = _data splitString "|";
 private _rowType = if ((count _parts) > 0) then { _parts select 0 } else { "" };
 
+private _airMode = ["ARC_console_airMode", "TOWER"] call ARC_fnc_uiNsGetString;
+_airMode = toUpperANSI (trim _airMode);
+
+if (_airMode isEqualTo "PILOT") exitWith {
+    private _canAirPilot = ["ARC_console_airCanPilot", false] call ARC_fnc_uiNsGetBool;
+    if (!_canAirPilot) then {
+        ["AIR", "Pilot submode is not authorized for your callsign."] call ARC_fnc_clientToast;
+        [_disp] call ARC_fnc_uiConsoleRefresh;
+        false
+    } else {
+        private _requestType = switch (_rowType) do {
+            case "PACT": { _parts param [1, ""] };
+            default { "" };
+        };
+
+        if (_requestType isEqualTo "") then {
+            ["AIR", "Select a pilot action first."] call ARC_fnc_clientToast;
+        } else {
+            if (_requestType isEqualTo "CANCEL") then {
+                private _pub = missionNamespace getVariable ["ARC_pub_state", []];
+                private _air = [_pub, "airbase", []] call {
+                    params ["_pairs", "_k", "_def"]; private _v=_def; { if (_x isEqualType [] && {(count _x)>=2} && {(_x#0) isEqualTo _k}) exitWith {_v=_x#1}; } forEach _pairs; _v
+                };
+                private _pending = [_air, "clearancePending", []] call {
+                    params ["_pairs", "_k", "_def"]; private _v=_def; { if (_x isEqualType [] && {(count _x)>=2} && {(_x#0) isEqualTo _k}) exitWith {_v=_x#1}; } forEach _pairs; _v
+                };
+                private _uid = getPlayerUID player;
+                private _rid = "";
+                {
+                    if (!(_x isEqualType [])) then { continue; };
+                    private _meta = _x param [9, []];
+                    private _pilotUid = "";
+                    { if (_x isEqualType [] && {(count _x)>=2} && {(_x#0) isEqualTo "pilotUid"}) exitWith { _pilotUid = _x#1; }; } forEach _meta;
+                    if (_pilotUid isEqualTo _uid) exitWith { _rid = _x param [0, ""]; };
+                } forEach _pending;
+
+                if (_rid isEqualTo "") then {
+                    ["AIR", "No pending pilot request to cancel."] call ARC_fnc_clientToast;
+                } else {
+                    [_rid] call ARC_fnc_airbaseClientCancelClearanceRequest;
+                    ["AIR", format ["Cancel request sent: %1", _rid]] call ARC_fnc_clientToast;
+                };
+            } else {
+                private _veh = vehicle player;
+                if (isNull _veh || {_veh isEqualTo player}) then {
+                    ["AIR", "Pilot actions require being in an aircraft."] call ARC_fnc_clientToast;
+                } else {
+                    [_requestType, _veh, if (_requestType isEqualTo "REQ_EMERGENCY") then {100} else {20}, "PLAYER", "", "", ""] call ARC_fnc_airbaseClientSubmitClearanceRequest;
+                    ["AIR", format ["Request queued: %1", _requestType]] call ARC_fnc_clientToast;
+                };
+            };
+        };
+
+        [_disp] call ARC_fnc_uiConsoleRefresh;
+        true
+    };
+};
+
 switch (_rowType) do
 {
     case "REQ":

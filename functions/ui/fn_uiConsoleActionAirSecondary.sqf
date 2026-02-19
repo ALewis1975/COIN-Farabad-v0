@@ -21,6 +21,20 @@ if (!(_data isEqualType "")) then { _data = ""; };
 private _parts = _data splitString "|";
 private _rowType = if ((count _parts) > 0) then { _parts select 0 } else { "" };
 
+private _airMode = ["ARC_console_airMode", "TOWER"] call ARC_fnc_uiNsGetString;
+_airMode = toUpperANSI (trim _airMode);
+if (_airMode isEqualTo "PILOT") exitWith {
+    private _canAirControl = ["ARC_console_airCanControl", false] call ARC_fnc_uiNsGetBool;
+    if (_canAirControl) then {
+        uiNamespace setVariable ["ARC_console_airMode", "TOWER"];
+        ["AIR", "Switched AIR submode to TOWER."] call ARC_fnc_clientToast;
+    } else {
+        ["AIR", "Pilot submode refreshed."] call ARC_fnc_clientToast;
+    };
+    [_disp] call ARC_fnc_uiConsoleRefresh;
+    true
+};
+
 switch (_rowType) do
 {
     case "REQ":
