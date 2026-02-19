@@ -15,6 +15,12 @@ params [
     ["_pos", [0,0,0], [[]]]
 ];
 
+
+private _zone = "";
+if (!isNil "ARC_fnc_worldGetZoneForPos") then {
+    _zone = toUpper ([_pos] call ARC_fnc_worldGetZoneForPos);
+};
+if (_zone isEqualTo "AIRBASE") exitWith {""};
 if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {""};
 
 private _districts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
