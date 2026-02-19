@@ -40,6 +40,26 @@ private _forceAiOnly = missionNamespace getVariable ["airbase_v1_debug_forceAiOn
 if (!(_forceAiOnly isEqualType true) && !(_forceAiOnly isEqualType false)) then { _forceAiOnly = false; };
 missionNamespace setVariable ["airbase_v1_debug_forceAiOnly", _forceAiOnly, true];
 
+private _towerStaffing = ["airbase_v1_towerStaffing", []] call ARC_fnc_stateGet;
+if (!(_towerStaffing isEqualType [])) then { _towerStaffing = []; };
+
+private _normalizeLane = {
+    params ["_rows", "_lane"];
+    private _idx = _rows findIf {
+        (_x isEqualType []) &&
+        { (count _x) >= 5 } &&
+        { ((_x param [0, ""]) isEqualTo _lane) }
+    };
+    if (_idx < 0) then {
+        _rows pushBack [_lane, "AUTO", "", "", -1];
+    };
+};
+
+[_towerStaffing, "tower"] call _normalizeLane;
+[_towerStaffing, "ground"] call _normalizeLane;
+[_towerStaffing, "arrival"] call _normalizeLane;
+["airbase_v1_towerStaffing", _towerStaffing] call ARC_fnc_stateSet;
+
 // Departure runway markers (fixed-wing)
 // RW departures already use airbase_v1_rw_depart_outbound_marker / _clear_marker.
 // FW uses its own vars so we can split later if needed.

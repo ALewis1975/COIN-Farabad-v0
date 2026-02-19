@@ -41,6 +41,11 @@ private _historyBefore = count _history;
 ["airbase_v1_queue", []] call ARC_fnc_stateSet;
 ["airbase_v1_manualPriority", []] call ARC_fnc_stateSet;
 ["airbase_v1_holdDepartures", false] call ARC_fnc_stateSet;
+["airbase_v1_towerStaffing", [
+    ["tower", "AUTO", "", "", -1],
+    ["ground", "AUTO", "", "", -1],
+    ["arrival", "AUTO", "", "", -1]
+]] call ARC_fnc_stateSet;
 
 if (!_preserveHistory) then {
     ["airbase_v1_clearanceHistory", []] call ARC_fnc_stateSet;

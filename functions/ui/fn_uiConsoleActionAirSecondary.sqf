@@ -43,6 +43,26 @@ switch (_rowType) do
         ["AIR", format ["Deny request sent: %1", _rid]] call ARC_fnc_clientToast;
     };
 
+    case "LANE":
+    {
+        private _lane = _parts param [1, ""];
+        if (_lane isEqualTo "") exitWith {
+            ["AIR", "Select an ATC lane first."] call ARC_fnc_clientToast;
+            false
+        };
+
+        private _canAirStaff = ["ARC_console_airCanStaff", false] call ARC_fnc_uiNsGetBool;
+        if (!_canAirStaff) exitWith
+        {
+            [_disp, false] call ARC_fnc_uiConsoleAirPaint;
+            ["AIR", "No permission to release lane staffing."] call ARC_fnc_clientToast;
+            true
+        };
+
+        [_lane, false] call ARC_fnc_airbaseClientRequestSetLaneStaffing;
+        ["AIR", format ["Release request sent for %1 lane.", toUpperANSI _lane]] call ARC_fnc_clientToast;
+    };
+
     case "FLT":
     {
         private _fid = _parts param [1, ""];
