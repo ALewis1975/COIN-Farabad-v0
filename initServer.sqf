@@ -90,6 +90,10 @@ missionNamespace setVariable ["ARC_sitrepInWorldActionsEnabled", false, true];
 // Intel props spawn radius (meters)
 missionNamespace setVariable ["ARC_intelPropSpawnRadiusM", 10, true];
 
+// Incident-generation policy (test posture): when false, TOC generation is blocked
+// while the last tasked group still has pending order acceptance or accepted RTB.
+missionNamespace setVariable ["ARC_allowIncidentDuringAcceptedRtb", false, true];
+
 
 // ============================================================================
 // CIVSUB v1 (district influence + identity + physical civ sampling)
