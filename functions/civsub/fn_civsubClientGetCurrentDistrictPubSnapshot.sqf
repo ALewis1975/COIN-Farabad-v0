@@ -13,6 +13,12 @@
 if (!hasInterface) exitWith {["", []]};
 if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {["", []]};
 
+private _zone = "";
+if (!isNil "ARC_fnc_worldGetZoneForPos") then {
+    _zone = toUpper ([getPosATL player] call ARC_fnc_worldGetZoneForPos);
+};
+if (_zone isEqualTo "AIRBASE") exitWith {["", []]};
+
 private _did = [getPosATL player] call ARC_fnc_civsubDistrictsFindByPosLocal;
 if (_did isEqualTo "") exitWith {["", []]};
 
