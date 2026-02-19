@@ -18,29 +18,52 @@ params [
     ["_requester", objNull, [objNull]]
 ];
 
-if (!isNil "remoteExecutedOwner") then
+private _rpc = "ARC_fnc_tocRequestCivsubReset";
+private _owner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+
+if (!(_requester isEqualType objNull)) then {
+    _requester = objNull;
+};
+
+private _deny = {
+    params ["_reason", ["_details", []], ["_notify", ""]];
+
+    private _who = if (isNull _requester) then {"<unknown>"} else {name _requester};
+    private _uid = if (isNull _requester) then {""} else {getPlayerUID _requester};
+
+    ["OPS", format ["SECURITY: %1 denied (%2) owner=%3 caller=%4", _rpc, _reason, _owner, _who], [0,0,0],
+        [["event", "TOC_CIVSUB_RESET_SECURITY_DENIED"], ["rpc", _rpc], ["reason", _reason], ["remoteOwner", _owner], ["callerName", _who], ["callerUID", _uid]] + _details
+    ] call ARC_fnc_intelLog;
+
+    if (_notify isNotEqualTo "" && { !isNull _requester }) then {
+        private _requestOwner = owner _requester;
+        if (_requestOwner > 0) then { [_notify] remoteExec ["ARC_fnc_clientHint", _requestOwner]; };
+    };
+};
+
+if (!isNil "remoteExecutedOwner" && { _owner > 0 }) then
 {
-    private _reo = remoteExecutedOwner;
-    if (_reo > 0) then
+    if (isNull _requester) then
     {
-        if (isNull _requester) then
         {
-            {
-                if (owner _x == _reo) exitWith { _requester = _x; };
-            } forEach allPlayers;
-        };
+            if (owner _x == _owner) exitWith { _requester = _x; };
+        } forEach allPlayers;
+    };
 
-        // RemoteExec-only validation path: requires remoteExecutedOwner context.
-        if (!([_requester, "ARC_fnc_tocRequestCivsubReset", "CIVSUB reset rejected: sender verification failed.", "TOC_CIVSUB_RESET_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
+    if (!([_requester, _rpc, "CIVSUB reset rejected: sender verification failed.", "TOC_CIVSUB_RESET_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
-        private _isOmni = [_requester, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
-        private _can = _isOmni || { [_requester] call ARC_fnc_rolesCanApproveQueue };
-        if (!_can) exitWith {false};
+    private _isOmni = [_requester, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
+    private _can = _isOmni || { [_requester] call ARC_fnc_rolesCanApproveQueue };
+    if (!_can) exitWith {
+        ["ROLE_DENIED", [], "CIVSUB reset denied: TOC approver or OMNI role required."] call _deny;
+        false
     };
 };
 
 if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith
 {
+    ["DOMAIN_DISABLED", [["domain", "civsub_v1_enabled"]], "CIVSUB is disabled (civsub_v1_enabled=false)."] call _deny;
+
     if (!isNull _requester) then
     {
         ["CIVSUB is disabled (civsub_v1_enabled=false)."] remoteExec ["ARC_fnc_clientToast", owner _requester];

@@ -75,6 +75,21 @@ private _owner = 0;
 if (!isNull _caller) then { _owner = owner _caller; };
 if (_owner <= 0 && { !isNil "remoteExecutedOwner" }) then { _owner = remoteExecutedOwner; };
 
+private _rpc = "ARC_fnc_tocRequestCloseoutAndOrder";
+private _deny = {
+    params ["_reason", ["_details", []], ["_toastMsg", ""]];
+
+    private _who = if (isNull _caller) then {"<unknown>"} else {name _caller};
+    private _uid = if (isNull _caller) then {""} else {getPlayerUID _caller};
+    ["OPS", format ["SECURITY: %1 denied (%2) owner=%3 caller=%4", _rpc, _reason, _owner, _who], [0,0,0],
+        [["event", "TOC_CLOSEOUT_SECURITY_DENIED"], ["rpc", _rpc], ["reason", _reason], ["remoteOwner", _owner], ["callerName", _who], ["callerUID", _uid]] + _details
+    ] call ARC_fnc_intelLog;
+
+    if (_toastMsg isNotEqualTo "") then {
+        ["TOC Ops", _toastMsg] call _toast;
+    };
+};
+
 // Helper: send a toast back to the originating client (best-effort)
 private _toast = {
     params ["_title", "_msg"];
@@ -84,14 +99,15 @@ private _toast = {
 // Authorization: reuse TOC/Command approval gate
 if (!([_caller] call ARC_fnc_rolesCanApproveQueue)) exitWith
 {
-    private _who = if (isNull _caller) then {"<unknown>"} else { name _caller };
-    diag_log format ["[ARC][TOC] tocRequestCloseoutAndOrder denied (no approve perms): %1", _who];
-    ["TOC Ops", "Closeout denied: you are not authorized to close incidents."] call _toast;
+    ["ROLE_DENIED", [], "Closeout denied: you are not authorized to close incidents."] call _deny;
     false
 };
 
 _closeResult = toUpper (trim _closeResult);
-if !(_closeResult in ["SUCCEEDED", "FAILED"]) exitWith {false};
+if !(_closeResult in ["SUCCEEDED", "FAILED"]) exitWith {
+    ["INVALID_PARAM_VALUE", [["param", "_closeResult"], ["received", _closeResult]], ""] call _deny;
+    false
+};
 
 _req = toUpper (trim _req);
 if !(_req in ["RTB","HOLD","PROCEED"]) then { _req = "HOLD"; };
@@ -125,7 +141,7 @@ private _sitrepSent = ["activeIncidentSitrepSent", false] call ARC_fnc_stateGet;
 if (!(_sitrepSent isEqualType true)) then { _sitrepSent = false; };
 if (!_sitrepSent) exitWith
 {
-    ["TOC Ops", "Closeout denied: SITREP not received yet for the active incident."] call _toast;
+    ["MISSING_SITREP", [], "Closeout denied: SITREP not received yet for the active incident."] call _deny;
     false
 };
 
@@ -165,8 +181,8 @@ diag_log format ["[ARC][TOC] Closeout target group resolve: sitrep=%1 accepted=%
 
 if (_gid isEqualTo "" || { _taskId isEqualTo "" }) exitWith
 {
+    ["MISSING_CONTEXT", [["gid", _gid], ["taskId", _taskId]], "Closeout failed: server is missing active incident context. (Try: Rebuild Active Incident Task)."] call _deny;
     diag_log format ["[ARC][TOC] tocRequestCloseoutAndOrder aborted: missing context (gid=%1 taskId=%2).", _gid, _taskId];
-    ["TOC Ops", "Closeout failed: server is missing active incident context. (Try: Rebuild Active Incident Task)."] call _toast;
     false
 };
 
