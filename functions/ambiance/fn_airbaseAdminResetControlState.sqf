@@ -22,7 +22,7 @@ if (!(_preserveHistory isEqualType true) && !(_preserveHistory isEqualType false
 private _requests = ["airbase_v1_clearanceRequests", []] call ARC_fnc_stateGet;
 if (!(_requests isEqualType [])) then { _requests = []; };
 private _pendingBefore = count (_requests select {
-    _x isEqualType [] && { (count _x) > 6 } && { (_x select 6) in ["PENDING", "AWAITING_TOWER_DECISION"] }
+    _x isEqualType [] && { (count _x) > 6 } && { (_x select 6) in ["QUEUED", "PENDING", "AWAITING_TOWER_DECISION"] }
 });
 
 private _queue = ["airbase_v1_queue", []] call ARC_fnc_stateGet;

@@ -619,6 +619,7 @@ class Ops
             class airbaseClientRequestSetLaneStaffing {};
 
             // Clearance request RPCs (server authority + client wrappers)
+            class airbaseClearanceSortRequests {};
             class airbaseSubmitClearanceRequest {};
             class airbaseCancelClearanceRequest {};
             class airbaseMarkClearanceEmergency {};
