@@ -168,7 +168,7 @@ private _canAirHoldRelease = _canAirHold || _canAirRelease;
 private _canAirQueueManage = _canAirPrioritize || _canAirCancel;
 private _canAirControl = _canAirHoldRelease || _canAirQueueManage;
 
-private _canAirRead = _canAirControl || _isOmni || _canTocFull || _isBnCmd;
+private _canAirRead = _canAirControl || _isOmni || _canTocFull;
 uiNamespace setVariable ["ARC_console_airCanHold", _canAirHold];
 uiNamespace setVariable ["ARC_console_airCanRelease", _canAirRelease];
 uiNamespace setVariable ["ARC_console_airCanPrioritize", _canAirPrioritize];
