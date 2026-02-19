@@ -199,6 +199,81 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
 
     private _ageS = _nowTs - _createdAt;
 
+    private _meta = _rec param [10, []];
+    if (!(_meta isEqualType [])) then { _meta = []; };
+
+    private _metaGet = {
+        params ["_rows", "_k", "_def"];
+        private _v = _def;
+        {
+            if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x # 0)) isEqualTo _k }) exitWith { _v = _x # 1; };
+        } forEach _rows;
+        _v
+    };
+    private _metaSet = {
+        params ["_rows", "_k", "_v"];
+        private _idx = _rows findIf { _x isEqualType [] && { (count _x) >= 2 } && { ((_x # 0)) isEqualTo _k } };
+        if (_idx < 0) then { _rows pushBack [_k, _v]; } else { _rows set [_idx, [_k, _v]]; };
+        _rows
+    };
+
+    private _warnGateAdv = missionNamespace getVariable ["airbase_v1_arrival_warn_advisory_m", 7000];
+    private _warnGateCau = missionNamespace getVariable ["airbase_v1_arrival_warn_caution_m", 4500];
+    private _warnGateUrg = missionNamespace getVariable ["airbase_v1_arrival_warn_urgent_m", 2600];
+    private _landGateM = missionNamespace getVariable ["airbase_v1_arrival_land_gate_m", 2200];
+    private _staleEscalateS = missionNamespace getVariable ["airbase_v1_inbound_stale_escalate_s", 45];
+
+    private _distM = -1;
+    private _rtypeNow = toUpperANSI (_rec param [1, ""]);
+    if (_rtypeNow in ["REQ_INBOUND", "REQ_LAND"]) then {
+        private _airNid = _rec param [4, ""];
+        private _veh = objectFromNetId _airNid;
+        if (!isNull _veh) then {
+            private _runwayMarker = missionNamespace getVariable ["airbase_v1_arrival_runway_marker", "L-270 Inbound"];
+            private _runwayPos = getMarkerPos _runwayMarker;
+            if ((_runwayPos select 0) != 0 || {(_runwayPos select 1) != 0}) then {
+                _distM = _veh distance2D _runwayPos;
+            };
+        };
+
+        private _warnLevel = "NONE";
+        if (_distM >= 0) then {
+            if (_distM <= _warnGateUrg) then { _warnLevel = "URGENT"; } else {
+                if (_distM <= _warnGateCau) then { _warnLevel = "CAUTION"; } else {
+                    if (_distM <= _warnGateAdv) then { _warnLevel = "ADVISORY"; };
+                };
+            };
+        };
+
+        _meta = [_meta, "arrivalDistanceM", _distM] call _metaSet;
+        _meta = [_meta, "arrivalWarnLevel", _warnLevel] call _metaSet;
+        _meta = [_meta, "arrivalWarnAdvisoryM", _warnGateAdv] call _metaSet;
+        _meta = [_meta, "arrivalWarnCautionM", _warnGateCau] call _metaSet;
+        _meta = [_meta, "arrivalWarnUrgentM", _warnGateUrg] call _metaSet;
+
+        if (_rtypeNow isEqualTo "REQ_INBOUND" && { _distM >= 0 } && { _distM <= _landGateM }) then {
+            _rec set [1, "REQ_LAND"];
+            _meta = [_meta, "lifecycle_land_gate_at", _nowTs] call _metaSet;
+            _meta = [_meta, "lifecycle_auto_land", true] call _metaSet;
+            _clearanceStateDirty = true;
+            ["LIFECYCLE_LAND_GATE", _rec param [0, ""], "SYSTEM", _rec param [2, ""], [_distM, _landGateM]] call _fnEventPush;
+        };
+
+        if (_rtypeNow isEqualTo "REQ_INBOUND" && { _status in ["QUEUED", "PENDING", "AWAITING_TOWER_DECISION"] } && { _distM >= 0 } && { _distM <= _warnGateUrg } && { _ageS >= _staleEscalateS }) then {
+            _rec set [6, "AWAITING_TOWER_DECISION"];
+            _rec set [8, _nowTs];
+            _rec set [9, ["SYSTEM", "SYSTEM", _nowTs, "ESCALATE", "STALE_INBOUND_NEAR_RUNWAY"]];
+            _meta = [_meta, "staleInboundEscalated", true] call _metaSet;
+            _meta = [_meta, "staleInboundEscalatedAt", _nowTs] call _metaSet;
+            _meta = [_meta, "staleInboundEscalateAfterS", _staleEscalateS] call _metaSet;
+            _clearanceStateDirty = true;
+            ["ESCALATE", _rec param [0, ""], "SYSTEM", _rec param [2, ""], ["STALE_INBOUND_NEAR_RUNWAY", _distM, _ageS]] call _fnEventPush;
+        };
+    };
+
+    _rec set [10, _meta];
+    _clearanceRequests set [_iClr, _rec];
+
     if (_hasTowerController && {_status in ["QUEUED", "PENDING"]}) then {
         _rec set [6, "AWAITING_TOWER_DECISION"];
         _rec set [8, _nowTs];

@@ -35,6 +35,40 @@ private _controllerFallbackEnabled = missionNamespace getVariable ["airbase_v1_c
 if (!(_controllerFallbackEnabled isEqualType true) && !(_controllerFallbackEnabled isEqualType false)) then { _controllerFallbackEnabled = true; };
 missionNamespace setVariable ["airbase_v1_controller_fallback_enabled", _controllerFallbackEnabled, true];
 
+// Arrival request lifecycle + warning gates (distance to runway marker, meters)
+private _arrivalRunwayMarker = missionNamespace getVariable ["airbase_v1_arrival_runway_marker", "L-270 Inbound"];
+if (!(_arrivalRunwayMarker isEqualType "") || { _arrivalRunwayMarker isEqualTo "" }) then { _arrivalRunwayMarker = "L-270 Inbound"; };
+missionNamespace setVariable ["airbase_v1_arrival_runway_marker", _arrivalRunwayMarker, true];
+
+private _arrivalLandGateM = missionNamespace getVariable ["airbase_v1_arrival_land_gate_m", 2200];
+if (!(_arrivalLandGateM isEqualType 0) || { _arrivalLandGateM < 200 }) then { _arrivalLandGateM = 2200; };
+missionNamespace setVariable ["airbase_v1_arrival_land_gate_m", _arrivalLandGateM, true];
+
+private _inboundStaleEscalateS = missionNamespace getVariable ["airbase_v1_inbound_stale_escalate_s", 45];
+if (!(_inboundStaleEscalateS isEqualType 0) || { _inboundStaleEscalateS < 10 }) then { _inboundStaleEscalateS = 45; };
+missionNamespace setVariable ["airbase_v1_inbound_stale_escalate_s", _inboundStaleEscalateS, true];
+
+private _warnAdvisoryM = missionNamespace getVariable ["airbase_v1_arrival_warn_advisory_m", 7000];
+if (!(_warnAdvisoryM isEqualType 0) || { _warnAdvisoryM < 500 }) then { _warnAdvisoryM = 7000; };
+private _warnCautionM = missionNamespace getVariable ["airbase_v1_arrival_warn_caution_m", 4500];
+if (!(_warnCautionM isEqualType 0) || { _warnCautionM < 300 }) then { _warnCautionM = 4500; };
+private _warnUrgentM = missionNamespace getVariable ["airbase_v1_arrival_warn_urgent_m", 2600];
+if (!(_warnUrgentM isEqualType 0) || { _warnUrgentM < 200 }) then { _warnUrgentM = 2600; };
+if (_warnAdvisoryM < _warnCautionM) then { _warnAdvisoryM = _warnCautionM + 1000; };
+if (_warnCautionM < _warnUrgentM) then { _warnCautionM = _warnUrgentM + 500; };
+missionNamespace setVariable ["airbase_v1_arrival_warn_advisory_m", _warnAdvisoryM, true];
+missionNamespace setVariable ["airbase_v1_arrival_warn_caution_m", _warnCautionM, true];
+missionNamespace setVariable ["airbase_v1_arrival_warn_urgent_m", _warnUrgentM, true];
+
+private _inboundTaxiMarkers = missionNamespace getVariable ["airbase_v1_inbound_taxi_markers", ["L-270 Inbound", "T-L Egress", "T-L Ingress"]];
+if !(_inboundTaxiMarkers isEqualType []) then { _inboundTaxiMarkers = ["L-270 Inbound", "T-L Egress", "T-L Ingress"]; };
+private _inboundTaxiMarkersNorm = [];
+{
+    if (_x isEqualType "" && { _x isNotEqualTo "" }) then { _inboundTaxiMarkersNorm pushBackUnique _x; };
+} forEach _inboundTaxiMarkers;
+if ((count _inboundTaxiMarkersNorm) == 0) then { _inboundTaxiMarkersNorm = ["L-270 Inbound", "T-L Egress", "T-L Ingress"]; };
+missionNamespace setVariable ["airbase_v1_inbound_taxi_markers", _inboundTaxiMarkersNorm, true];
+
 // Debug-only test mode: bypass tower-controller detection and force AI arbitration.
 private _forceAiOnly = missionNamespace getVariable ["airbase_v1_debug_forceAiOnly", false];
 if (!(_forceAiOnly isEqualType true) && !(_forceAiOnly isEqualType false)) then { _forceAiOnly = false; };
@@ -317,6 +351,8 @@ _rt set ["arrivalSpawnMarker", "mkr_arrivalSpawn"];
 _rt set ["arrivalRunwayStartMarker", "mkr_arrivalRunwayStart"];
 _rt set ["arrivalRunwayStopMarker", "mkr_arrivalRunwayStop"];
 _rt set ["arrivalRunwayTaxiOutMarker", "mkr_arrivalRunwayTaxiOut"];
+_rt set ["inboundTaxiMarkers", missionNamespace getVariable ["airbase_v1_inbound_taxi_markers", ["L-270 Inbound", "T-L Egress", "T-L Ingress"]]];
+_rt set ["arrivalRunwayMarker", missionNamespace getVariable ["airbase_v1_arrival_runway_marker", "L-270 Inbound"]];
 _rt set ["runwayStateContract", ["OPEN", "RESERVED", "OCCUPIED"]];
 
 _rt set ["assets", _assets];
