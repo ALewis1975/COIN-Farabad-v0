@@ -113,7 +113,7 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
         private _pvEhId = missionNamespace getVariable ["ARC_clientSnapshotPvEhId", -1];
         if (_pvEhId < 0) then
         {
-            _pvEhId = addPublicVariableEventHandler ["ARC_pub_stateUpdatedAt", {
+            _pvEhId = "ARC_pub_stateUpdatedAt" addPublicVariableEventHandler {
                 uiNamespace setVariable ["ARC_console_dirty", true];
 
                 private _refreshEnabled = missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false];
@@ -123,7 +123,7 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
                     [] call ARC_fnc_briefingUpdateClient;
                     if (!isNil "ARC_fnc_tocRefreshClient") then { [] call ARC_fnc_tocRefreshClient; };
                 };
-            }];
+            };
 
             missionNamespace setVariable ["ARC_clientSnapshotPvEhId", _pvEhId];
         };
