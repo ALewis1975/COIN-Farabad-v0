@@ -680,16 +680,16 @@ if (!_holdDepartures && { _rollDep } && { (count _candidates) > 0 }) then {
         if (_forceFirstDeparture) then { _rt set ["firstDepartureDone", false]; };
     } else {
         _queue pushBack [_fid, "DEP", _aid, _routeMetaDep];
-    };
 
-    _rt set ["lastDepartTs", _nowTs];
-    if (_forceFirstDeparture) then { _rt set ["firstDepartureDone", true]; };
+        _rt set ["lastDepartTs", _nowTs];
+        if (_forceFirstDeparture) then { _rt set ["firstDepartureDone", true]; };
 
-    if (_opsLogEnabled || _debugOps) then {
-        ["OPS", format ["AIRBASE: queued departure %1 (%2)", _fid, _aid], _center, 0, [
-            ["category", _cat],
-            ["vehType", ([_asset, "startVehType", ""] call _fnHmGet)]
-        ]] call ARC_fnc_intelLog;
+        if (_opsLogEnabled || _debugOps) then {
+            ["OPS", format ["AIRBASE: queued departure %1 (%2)", _fid, _aid], _center, 0, [
+                ["category", _cat],
+                ["vehType", ([_asset, "startVehType", ""] call _fnHmGet)]
+            ]] call ARC_fnc_intelLog;
+        };
     };
 };
 
@@ -710,6 +710,10 @@ if (_rollArr) then {
     if (_routeOkArr) then {
         _queue pushBack [_fidA, "ARR", "INBOUND", _routeMetaArr];
         _rt set ["lastArriveTs", _nowTs];
+
+        if (_opsLogEnabled || _debugOps) then {
+            ["OPS", format ["AIRBASE: queued inbound arrival %1 (%2)", _fidA, _catA], _center, 0, []] call ARC_fnc_intelLog;
+        };
     } else {
         _recs deleteAt ((count _recs) - 1);
         _rt set ["lastArriveTs", _nowTs - (_cdArr * 0.8)];
@@ -719,10 +723,6 @@ if (_rollArr) then {
                 ["reason", _routeReasonArr]
             ]] call ARC_fnc_intelLog;
         };
-    };
-
-    if (_opsLogEnabled || _debugOps) then {
-        ["OPS", format ["AIRBASE: queued inbound arrival %1 (%2)", _fidA, _catA], _center, 0, []] call ARC_fnc_intelLog;
     };
 };
 
