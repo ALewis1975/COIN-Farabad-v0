@@ -103,6 +103,10 @@ _meta pushBack ["decidedBy", _name];
 _meta pushBack ["decidedByUid", _uid];
 _meta pushBack ["decisionAction", _actionToken];
 _meta pushBack ["decisionReason", _reason];
+_meta pushBack ["decisionMeta", "HUMAN_DECIDED"];
+_meta pushBack ["autoDecided", false];
+_meta pushBack ["automationEtaS", -1];
+_meta pushBack ["automationStatus", "Decision handled by staffed controller"];
 if (_approve) then {
     _meta pushBack ["lifecycle_approved_at", _now];
 } else {
@@ -165,7 +169,7 @@ _requests = [_requests] call ARC_fnc_airbaseClearanceSortRequests;
 
 private _decisionWord = if (_approve) then {"approved"} else {"denied"};
 if (_requesterOwner > 0) then {
-    ["Airbase Clearance", format ["Request %1 %2 by tower (%3)", _requestId, _decisionWord, _name], 6] remoteExec ["ARC_fnc_clientToast", _requesterOwner];
+    ["Airbase Clearance", format ["Request %1 %2 by tower (%3) [HUMAN DECIDED]", _requestId, _decisionWord, _name], 6] remoteExec ["ARC_fnc_clientToast", _requesterOwner];
 };
 private _controllerOwner = owner _caller;
 if (_controllerOwner > 0) then {

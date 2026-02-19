@@ -136,6 +136,19 @@ if (!(_arrivalRunwayMarker isEqualType "")) then { _arrivalRunwayMarker = "L-270
 private _inboundTaxiMarkers = missionNamespace getVariable ["airbase_v1_inbound_taxi_markers", ["L-270 Inbound", "T-L Egress", "T-L Ingress"]];
 if !(_inboundTaxiMarkers isEqualType []) then { _inboundTaxiMarkers = ["L-270 Inbound", "T-L Egress", "T-L Ingress"]; };
 
+private _controllerTimeoutTowerS = missionNamespace getVariable ["airbase_v1_controller_timeout_tower_s", missionNamespace getVariable ["airbase_v1_controller_timeout_s", 90]];
+if (!(_controllerTimeoutTowerS isEqualType 0)) then { _controllerTimeoutTowerS = 90; };
+private _controllerTimeoutGroundS = missionNamespace getVariable ["airbase_v1_controller_timeout_ground_s", missionNamespace getVariable ["airbase_v1_controller_timeout_s", 90]];
+if (!(_controllerTimeoutGroundS isEqualType 0)) then { _controllerTimeoutGroundS = 90; };
+private _controllerTimeoutArrivalS = missionNamespace getVariable ["airbase_v1_controller_timeout_arrival_s", missionNamespace getVariable ["airbase_v1_controller_timeout_s", 90]];
+if (!(_controllerTimeoutArrivalS isEqualType 0)) then { _controllerTimeoutArrivalS = 90; };
+private _autoDelayTowerS = missionNamespace getVariable ["airbase_v1_automation_delay_tower_s", 8];
+if (!(_autoDelayTowerS isEqualType 0)) then { _autoDelayTowerS = 8; };
+private _autoDelayGroundS = missionNamespace getVariable ["airbase_v1_automation_delay_ground_s", 10];
+if (!(_autoDelayGroundS isEqualType 0)) then { _autoDelayGroundS = 10; };
+private _autoDelayArrivalS = missionNamespace getVariable ["airbase_v1_automation_delay_arrival_s", 6];
+if (!(_autoDelayArrivalS isEqualType 0)) then { _autoDelayArrivalS = 6; };
+
 private _nextCap = missionNamespace getVariable ["airbase_v1_publicPreviewMax", 5];
 if (!(_nextCap isEqualType 0) || { _nextCap < 0 }) then { _nextCap = 5; };
 
@@ -228,7 +241,13 @@ private _airbasePub = [
     ["arrivalWarnAdvisoryM", _arrivalWarnAdvisoryM],
     ["arrivalWarnCautionM", _arrivalWarnCautionM],
     ["arrivalWarnUrgentM", _arrivalWarnUrgentM],
-    ["inboundTaxiMarkers", _inboundTaxiMarkers]
+    ["inboundTaxiMarkers", _inboundTaxiMarkers],
+    ["controllerTimeoutTowerS", _controllerTimeoutTowerS],
+    ["controllerTimeoutGroundS", _controllerTimeoutGroundS],
+    ["controllerTimeoutArrivalS", _controllerTimeoutArrivalS],
+    ["automationDelayTowerS", _autoDelayTowerS],
+    ["automationDelayGroundS", _autoDelayGroundS],
+    ["automationDelayArrivalS", _autoDelayArrivalS]
 ];
 
 private _pub = [

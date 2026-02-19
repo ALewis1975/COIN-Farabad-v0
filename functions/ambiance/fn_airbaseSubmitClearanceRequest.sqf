@@ -226,6 +226,13 @@ private _callerName = name _caller;
 private _aircraftNetId = netId _aircraft;
 if (!(_aircraftNetId isEqualType "")) then { _aircraftNetId = ""; };
 
+private _laneAuto = toLowerANSI _lane;
+if (!(_laneAuto in ["tower", "ground", "arrival"])) then {
+    if (_requestType in ["REQ_INBOUND", "REQ_LAND", "REQ_EMERGENCY"]) then { _laneAuto = "arrival"; } else {
+        if (_requestType isEqualTo "REQ_TAXI") then { _laneAuto = "ground"; } else { _laneAuto = "tower"; };
+    };
+};
+
 private _record = [
     _requestId,
     _requestType,
@@ -247,7 +254,12 @@ private _record = [
         ["aircraftNetId", _aircraftNetId],
         ["aircraftType", typeOf _aircraft],
         ["source", _source],
-        ["lane", _lane],
+        ["lane", _laneAuto],
+        ["decisionLane", _laneAuto],
+        ["decisionMeta", "PENDING"],
+        ["automationStatus", "Awaiting controller/automation triage"],
+        ["automationEtaS", -1],
+        ["automationDecisionAt", -1],
         ["incidentType", _incidentType],
         ["priorityClassAuto", _autoPriorityClass],
         ["priorityClass", _priorityClass],

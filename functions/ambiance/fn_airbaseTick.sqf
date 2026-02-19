@@ -112,6 +112,20 @@ if (!(_opsStatusInterval isEqualType 0) || { _opsStatusInterval < 30 }) then { _
 private _controllerTimeoutS = missionNamespace getVariable ["airbase_v1_controller_timeout_s", 90];
 if (!(_controllerTimeoutS isEqualType 0) || { _controllerTimeoutS < 5 }) then { _controllerTimeoutS = 90; };
 
+private _controllerTimeoutTowerS = missionNamespace getVariable ["airbase_v1_controller_timeout_tower_s", _controllerTimeoutS];
+if (!(_controllerTimeoutTowerS isEqualType 0) || { _controllerTimeoutTowerS < 5 }) then { _controllerTimeoutTowerS = _controllerTimeoutS; };
+private _controllerTimeoutGroundS = missionNamespace getVariable ["airbase_v1_controller_timeout_ground_s", _controllerTimeoutS];
+if (!(_controllerTimeoutGroundS isEqualType 0) || { _controllerTimeoutGroundS < 5 }) then { _controllerTimeoutGroundS = _controllerTimeoutS; };
+private _controllerTimeoutArrivalS = missionNamespace getVariable ["airbase_v1_controller_timeout_arrival_s", _controllerTimeoutS];
+if (!(_controllerTimeoutArrivalS isEqualType 0) || { _controllerTimeoutArrivalS < 5 }) then { _controllerTimeoutArrivalS = _controllerTimeoutS; };
+
+private _autoDelayTowerS = missionNamespace getVariable ["airbase_v1_automation_delay_tower_s", 8];
+if (!(_autoDelayTowerS isEqualType 0) || { _autoDelayTowerS < 1 }) then { _autoDelayTowerS = 8; };
+private _autoDelayGroundS = missionNamespace getVariable ["airbase_v1_automation_delay_ground_s", 10];
+if (!(_autoDelayGroundS isEqualType 0) || { _autoDelayGroundS < 1 }) then { _autoDelayGroundS = 10; };
+private _autoDelayArrivalS = missionNamespace getVariable ["airbase_v1_automation_delay_arrival_s", 6];
+if (!(_autoDelayArrivalS isEqualType 0) || { _autoDelayArrivalS < 1 }) then { _autoDelayArrivalS = 6; };
+
 private _controllerFallbackEnabled = missionNamespace getVariable ["airbase_v1_controller_fallback_enabled", true];
 if (!(_controllerFallbackEnabled isEqualType true) && !(_controllerFallbackEnabled isEqualType false)) then { _controllerFallbackEnabled = true; };
 
@@ -200,7 +214,53 @@ if (!_forceAiOnly) then {
     } forEach allPlayers;
 };
 
-private _hasTowerController = (count _towerControllers) > 0;
+private _towerStaffing = ["airbase_v1_towerStaffing", []] call ARC_fnc_stateGet;
+if (!(_towerStaffing isEqualType [])) then { _towerStaffing = []; };
+
+private _staffLaneRec = {
+    params ["_rows", "_lane"];
+    private _idx = _rows findIf {
+        (_x isEqualType []) &&
+        { (count _x) >= 5 } &&
+        { ((_x param [0, ""]) isEqualTo _lane) }
+    };
+    if (_idx < 0) exitWith { [_lane, "AUTO", "", "", -1] };
+    _rows # _idx
+};
+
+private _laneControllerCount = {
+    params ["_lane"];
+    private _rec = [_towerStaffing, _lane] call _staffLaneRec;
+    private _status = toUpperANSI (_rec param [1, "AUTO"]);
+    if (_status isEqualTo "MANNED") then { 1 } else { 0 }
+};
+
+private _laneForRequest = {
+    params ["_reqType"];
+    private _rt = toUpperANSI _reqType;
+    if (_rt in ["REQ_INBOUND", "REQ_LAND", "REQ_EMERGENCY"]) exitWith { "arrival" };
+    if (_rt isEqualTo "REQ_TAXI") exitWith { "ground" };
+    "tower"
+};
+
+private _laneTimeoutFor = {
+    params ["_lane"];
+    switch (toLowerANSI _lane) do {
+        case "arrival": { _controllerTimeoutArrivalS };
+        case "ground": { _controllerTimeoutGroundS };
+        default { _controllerTimeoutTowerS };
+    }
+};
+
+private _laneAutoDelayFor = {
+    params ["_lane"];
+    switch (toLowerANSI _lane) do {
+        case "arrival": { _autoDelayArrivalS };
+        case "ground": { _autoDelayGroundS };
+        default { _autoDelayTowerS };
+    }
+};
+
 private _clearanceStateDirty = false;
 
 for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
@@ -275,38 +335,65 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
     _rec set [10, _meta];
     _clearanceRequests set [_iClr, _rec];
 
-    if (_hasTowerController && {_status in ["QUEUED", "PENDING"]}) then {
-        _rec set [6, "AWAITING_TOWER_DECISION"];
-        _rec set [8, _nowTs];
-        _rec set [9, ["", "", -1, "", "AWAITING_TOWER"]];
-        private _metaAwait = _rec param [10, []];
-        if (!(_metaAwait isEqualType [])) then { _metaAwait = []; };
-        _metaAwait pushBack ["awaitingTowerDecision", true];
-        _metaAwait pushBack ["towerControllersPresent", count _towerControllers];
-        _rec set [10, _metaAwait];
-        _clearanceRequests set [_iClr, _rec];
-        _clearanceStateDirty = true;
+    private _laneId = [_rec param [1, ""]] call _laneForRequest;
+    _meta = [_meta, "decisionLane", _laneId] call _metaSet;
 
-        private _ridAwait = _rec param [0, ""];
-        private _requesterUidAwait = _rec param [2, ""];
-        ["LOCK_ACQUIRE", _ridAwait, "SYSTEM", _requesterUidAwait, [count _towerControllers]] call _fnEventPush;
+    private _laneControllers = [_laneId] call _laneControllerCount;
+    private _laneTimeoutS = [_laneId] call _laneTimeoutFor;
+    private _laneAutoDelayS = [_laneId] call _laneAutoDelayFor;
 
-        private _requesterOwnerAwait = -1;
-        { if ((getPlayerUID _x) isEqualTo _requesterUidAwait) exitWith { _requesterOwnerAwait = owner _x; }; } forEach allPlayers;
-        [_requesterOwnerAwait, "TOAST", "Airbase Clearance", format ["Request queued: %1 awaiting tower decision", _ridAwait], format ["AIR_REQ_AWAIT:%1", _ridAwait]] call _fnNotifyMaybe;
-        {
-            private _towUid = _x param [1, ""];
-            private _towOwner = -1;
-            { if ((getPlayerUID _x) isEqualTo _towUid) exitWith { _towOwner = owner _x; }; } forEach allPlayers;
-            [_towOwner, "TOAST", "Airbase Tower", format ["Decision required: %1", _ridAwait], format ["AIR_CTRL_PENDING:%1:%2", _ridAwait, _towUid]] call _fnNotifyMaybe;
-        } forEach _towerControllers;
+    private _isAwaiting = _status isEqualTo "AWAITING_TOWER_DECISION";
+    private _autoDecisionAtExisting = [_meta, "automationDecisionAt", -1] call _metaGet;
+    if (!(_autoDecisionAtExisting isEqualType 0)) then { _autoDecisionAtExisting = -1; };
+    private _autoInProgress = (_autoDecisionAtExisting >= 0) && { _nowTs < _autoDecisionAtExisting };
 
-        if (_opsLogEnabled || _debugOps) then {
-            ["OPS", format ["AIRBASE CLEARANCE: %1 moved to awaiting tower decision", _rec param [0, ""]], _center, 0, [
-                ["event", "AIRBASE_CLEARANCE_AWAITING_TOWER"],
-                ["requestId", _rec param [0, ""]],
-                ["controllers", count _towerControllers]
-            ]] call ARC_fnc_intelLog;
+    if (_laneControllers > 0) then {
+        if (_autoInProgress) then {
+            _meta = [_meta, "automationStatus", format ["AUTO decision in progress (%1 lane). ETA %2s", toUpperANSI _laneId, (_autoDecisionAtExisting - _nowTs) max 0]] call _metaSet;
+            _meta = [_meta, "automationEtaS", (_autoDecisionAtExisting - _nowTs) max 0] call _metaSet;
+            _meta = [_meta, "automationSource", "AUTO_IN_PROGRESS_LOCKED"] call _metaSet;
+            _rec set [10, _meta];
+            _clearanceRequests set [_iClr, _rec];
+            continue;
+        };
+
+        if (_status in ["QUEUED", "PENDING"]) then {
+            _rec set [6, "AWAITING_TOWER_DECISION"];
+            _rec set [8, _nowTs];
+            _rec set [9, ["", "", -1, "", "AWAITING_TOWER"]];
+            _meta = [_meta, "awaitingTowerDecision", true] call _metaSet;
+            _meta = [_meta, "towerControllersPresent", _laneControllers] call _metaSet;
+            _meta = [_meta, "automationStatus", format ["Awaiting %1 controller decision", toUpperANSI _laneId]] call _metaSet;
+            _meta = [_meta, "automationEtaS", -1] call _metaSet;
+            _meta = [_meta, "automationDecisionAt", -1] call _metaSet;
+            _meta = [_meta, "automationSource", "MANNED_LANE"] call _metaSet;
+
+            _rec set [10, _meta];
+            _clearanceRequests set [_iClr, _rec];
+            _clearanceStateDirty = true;
+
+            private _ridAwait = _rec param [0, ""];
+            private _requesterUidAwait = _rec param [2, ""];
+            ["LOCK_ACQUIRE", _ridAwait, "SYSTEM", _requesterUidAwait, [_laneId, _laneControllers]] call _fnEventPush;
+
+            private _requesterOwnerAwait = -1;
+            { if ((getPlayerUID _x) isEqualTo _requesterUidAwait) exitWith { _requesterOwnerAwait = owner _x; }; } forEach allPlayers;
+            [_requesterOwnerAwait, "TOAST", "Airbase Clearance", format ["Request queued: %1 awaiting %2 controller", _ridAwait, toUpperANSI _laneId], format ["AIR_REQ_AWAIT:%1", _ridAwait]] call _fnNotifyMaybe;
+            {
+                private _towUid = _x param [1, ""];
+                private _towOwner = -1;
+                { if ((getPlayerUID _x) isEqualTo _towUid) exitWith { _towOwner = owner _x; }; } forEach allPlayers;
+                [_towOwner, "TOAST", "Airbase Tower", format ["Decision required (%1): %2", toUpperANSI _laneId, _ridAwait], format ["AIR_CTRL_PENDING:%1:%2", _ridAwait, _towUid]] call _fnNotifyMaybe;
+            } forEach _towerControllers;
+
+            if (_opsLogEnabled || _debugOps) then {
+                ["OPS", format ["AIRBASE CLEARANCE: %1 moved to awaiting %2 controller", _rec param [0, ""], _laneId], _center, 0, [
+                    ["event", "AIRBASE_CLEARANCE_AWAITING_TOWER"],
+                    ["requestId", _rec param [0, ""]],
+                    ["lane", _laneId],
+                    ["controllers", _laneControllers]
+                ]] call ARC_fnc_intelLog;
+            };
         };
 
         continue;
@@ -314,39 +401,84 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
 
     if (!_controllerFallbackEnabled) then { continue; };
 
-    if (_status in ["QUEUED", "PENDING", "AWAITING_TOWER_DECISION"] && { _ageS >= _controllerTimeoutS }) then {
-        _rec set [6, "APPROVED"];
-        _rec set [8, _nowTs];
-        _rec set [9, ["AI", "AI", _nowTs, "APPROVE", "TIMEOUT"]];
+    if !(_status in ["QUEUED", "PENDING", "AWAITING_TOWER_DECISION"]) then { continue; };
 
-        private _meta = _rec param [10, []];
-        if (!(_meta isEqualType [])) then { _meta = []; };
-        _meta pushBack ["decidedBy", "AI"];
-        _meta pushBack ["reason", "timeout"];
-        _meta pushBack ["timedOutAfterS", _ageS];
-        _meta pushBack ["forceAiOnly", _forceAiOnly];
+    private _autoDecisionAt = [_meta, "automationDecisionAt", -1] call _metaGet;
+    if (!(_autoDecisionAt isEqualType 0)) then { _autoDecisionAt = -1; };
+
+    if (_autoDecisionAt < 0) then {
+        private _autoDueAt = _createdAt + _laneTimeoutS + _laneAutoDelayS;
+        _meta = [_meta, "automationTimeoutS", _laneTimeoutS] call _metaSet;
+        _meta = [_meta, "automationDelayS", _laneAutoDelayS] call _metaSet;
+        _meta = [_meta, "automationDecisionAt", _autoDueAt] call _metaSet;
+        _meta = [_meta, "automationStatus", format ["AUTO queue active (%1 lane). ETA %2s", toUpperANSI _laneId, _laneTimeoutS + _laneAutoDelayS]] call _metaSet;
+        _meta = [_meta, "automationEtaS", (_autoDueAt - _nowTs) max 0] call _metaSet;
+        _meta = [_meta, "automationSource", "UNMANNED_LANE"] call _metaSet;
+
+        if (_isAwaiting) then {
+            _rec set [6, "QUEUED"];
+            _rec set [8, _nowTs];
+            _rec set [9, ["SYSTEM", "SYSTEM", _nowTs, "AUTO_HANDOFF", "LANE_UNMANNED"]];
+        };
+
         _rec set [10, _meta];
-
         _clearanceRequests set [_iClr, _rec];
         _clearanceStateDirty = true;
 
-        private _ridAi = _rec param [0, ""];
-        private _requesterUidAi = _rec param [2, ""];
-        ["APPROVE", _ridAi, "AI", _requesterUidAi, ["TIMEOUT"]] call _fnEventPush;
+        private _ridAutoQueue = _rec param [0, ""];
+        private _requesterUidAutoQueue = _rec param [2, ""];
+        ["AUTO_QUEUE", _ridAutoQueue, "SYSTEM", _requesterUidAutoQueue, [_laneId, _autoDueAt]] call _fnEventPush;
 
-        private _requesterOwnerAi = -1;
-        { if ((getPlayerUID _x) isEqualTo _requesterUidAi) exitWith { _requesterOwnerAi = owner _x; }; } forEach allPlayers;
-        [_requesterOwnerAi, "TOAST", "Airbase Clearance", format ["Request approved by timeout: %1", _ridAi], format ["AIR_REQ_APPROVE_AI:%1", _ridAi]] call _fnNotifyMaybe;
+        private _requesterOwnerAutoQueue = -1;
+        { if ((getPlayerUID _x) isEqualTo _requesterUidAutoQueue) exitWith { _requesterOwnerAutoQueue = owner _x; }; } forEach allPlayers;
+        [_requesterOwnerAutoQueue, "TOAST", "Airbase Clearance", format ["%1 in AUTO queue (%2). ETA %3s", _ridAutoQueue, toUpperANSI _laneId, (_autoDueAt - _nowTs) max 0], format ["AIR_REQ_AUTOQ:%1", _ridAutoQueue]] call _fnNotifyMaybe;
+        continue;
+    };
 
-        if (_opsLogEnabled || _debugOps) then {
-            ["OPS", format ["AIRBASE CLEARANCE: %1 auto-approved by AI timeout", _rec param [0, ""]], _center, 0, [
-                ["event", "AIRBASE_CLEARANCE_AI_TIMEOUT"],
-                ["requestId", _rec param [0, ""]],
-                ["timeout_s", _controllerTimeoutS],
-                ["age_s", _ageS],
-                ["forceAiOnly", _forceAiOnly]
-            ]] call ARC_fnc_intelLog;
-        };
+    _meta = [_meta, "automationEtaS", (_autoDecisionAt - _nowTs) max 0] call _metaSet;
+    _meta = [_meta, "automationStatus", format ["AUTO decision pending (%1 lane). ETA %2s", toUpperANSI _laneId, (_autoDecisionAt - _nowTs) max 0]] call _metaSet;
+    _rec set [10, _meta];
+    _clearanceRequests set [_iClr, _rec];
+
+    if (_nowTs < _autoDecisionAt) then { continue; };
+
+    _rec set [6, "APPROVED"];
+    _rec set [8, _nowTs];
+    _rec set [9, ["AI", "AI", _nowTs, "APPROVE", "AUTO_DECIDED"]];
+
+    _meta = [_meta, "decidedBy", "AI"] call _metaSet;
+    _meta = [_meta, "reason", "auto_decided_unmanned_lane"] call _metaSet;
+    _meta = [_meta, "timedOutAfterS", _ageS] call _metaSet;
+    _meta = [_meta, "forceAiOnly", _forceAiOnly] call _metaSet;
+    _meta = [_meta, "decisionMeta", "AUTO DECIDED"] call _metaSet;
+    _meta = [_meta, "autoDecided", true] call _metaSet;
+    _meta = [_meta, "autoDecidedLane", _laneId] call _metaSet;
+    _meta = [_meta, "autoDecidedAt", _nowTs] call _metaSet;
+    _meta = [_meta, "automationEtaS", 0] call _metaSet;
+    _meta = [_meta, "automationStatus", format ["AUTO DECIDED by %1 lane automation", toUpperANSI _laneId]] call _metaSet;
+    _rec set [10, _meta];
+
+    _clearanceRequests set [_iClr, _rec];
+    _clearanceStateDirty = true;
+
+    private _ridAi = _rec param [0, ""];
+    private _requesterUidAi = _rec param [2, ""];
+    ["APPROVE", _ridAi, "AI", _requesterUidAi, ["AUTO_DECIDED", _laneId]] call _fnEventPush;
+
+    private _requesterOwnerAi = -1;
+    { if ((getPlayerUID _x) isEqualTo _requesterUidAi) exitWith { _requesterOwnerAi = owner _x; }; } forEach allPlayers;
+    [_requesterOwnerAi, "TOAST", "Airbase Clearance", format ["AUTO DECIDED: %1 approved by %2 lane automation", _ridAi, toUpperANSI _laneId], format ["AIR_REQ_APPROVE_AI:%1", _ridAi]] call _fnNotifyMaybe;
+
+    if (_opsLogEnabled || _debugOps) then {
+        ["OPS", format ["AIRBASE CLEARANCE: %1 AUTO DECIDED by %2 lane automation", _rec param [0, ""], _laneId], _center, 0, [
+            ["event", "AIRBASE_CLEARANCE_AI_TIMEOUT"],
+            ["requestId", _rec param [0, ""]],
+            ["lane", _laneId],
+            ["timeout_s", _laneTimeoutS],
+            ["automation_delay_s", _laneAutoDelayS],
+            ["age_s", _ageS],
+            ["forceAiOnly", _forceAiOnly]
+        ]] call ARC_fnc_intelLog;
     };
 };
 
