@@ -119,7 +119,6 @@ private _msg = _lines joinString "\n";
 private _ok = [_msg, "Accept TOC Order", true, true] call BIS_fnc_guiMessage;
 if (!_ok) exitWith { false };
 
+["ORDER_ACCEPT", "SUBMITTING", format ["Order %1", _orderId], 8] call ARC_fnc_uiConsoleOpsActionStatus;
 [player, _orderId] remoteExec ["ARC_fnc_intelOrderAccept", 2];
-
-["Orders", format ["Order accepted: %1", _orderId]] call ARC_fnc_clientToast;
 true

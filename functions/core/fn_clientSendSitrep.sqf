@@ -246,5 +246,5 @@ if (!_updateOnly) then
 missionNamespace setVariable ["ARC_activeIncidentSitrepSentPending", true];
 missionNamespace setVariable ["ARC_activeIncidentSitrepSentPendingAt", diag_tickTime];
 
-hint "SITREP sent to TOC.";
+["SITREP", "SUBMITTING", "", 10] call ARC_fnc_uiConsoleOpsActionStatus;
 true

@@ -475,6 +475,7 @@ class CfgFunctions
             // SITREP + Follow-on
             class uiConsoleActionSendSitrep {};
             class uiConsoleActionOpsPrimary {};
+            class uiConsoleOpsActionStatus {};
             class uiConsoleActionRequestFollowOn {};
             class uiConsoleActionRequestEodDispo {};
             class uiFollowOnPrompt {};

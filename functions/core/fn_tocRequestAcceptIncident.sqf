@@ -36,6 +36,7 @@ if (!isNull _caller && { !([_caller] call ARC_fnc_rolesIsAuthorized) }) exitWith
     private _whoBad = [_caller] call ARC_fnc_rolesFormatUnit;
     diag_log format ["[ARC][TOC] Rejecting task acceptance from unauthorized role: %1", _whoBad];
     ["You are not authorized to accept ARC tasks. Authorized: RHSUSAF Officer / Squad Leader classnames."] remoteExec ["ARC_fnc_clientHint", owner _caller];
+    ["INCIDENT_ACCEPT", "REJECTED", "You are not authorized for incident acceptance."] remoteExec ["ARC_fnc_uiConsoleOpsActionStatus", owner _caller];
     false
 };
 
@@ -66,10 +67,24 @@ if (_statusRequest in ["OFFLINE", "AVAILABLE"]) exitWith
 };
 
 private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
-if (_taskId isEqualTo "") exitWith {false};
+if (_taskId isEqualTo "") exitWith
+{
+    if (!isNull _caller) then
+    {
+        ["INCIDENT_ACCEPT", "REJECTED", "No active incident is pending acceptance."] remoteExec ["ARC_fnc_uiConsoleOpsActionStatus", owner _caller];
+    };
+    false
+};
 
 private _already = ["activeIncidentAccepted", false] call ARC_fnc_stateGet;
-if (_already isEqualType true && { _already }) exitWith {false};
+if (_already isEqualType true && { _already }) exitWith
+{
+    if (!isNull _caller) then
+    {
+        ["INCIDENT_ACCEPT", "REJECTED", "Incident already accepted."] remoteExec ["ARC_fnc_uiConsoleOpsActionStatus", owner _caller];
+    };
+    false
+};
 
 private _callerGroup = if (isNull _caller) then {""} else { groupId (group _caller) };
 if (_callerGroup isEqualTo "") exitWith {false};
@@ -80,6 +95,7 @@ private _statusNow = if (_statusIdx < 0) then { "OFFLINE" } else { toUpper (trim
 if (_statusNow isNotEqualTo "AVAILABLE") exitWith
 {
     ["Incident acceptance denied: your group must set status to AVAILABLE first."] remoteExec ["ARC_fnc_clientHint", owner _caller];
+    ["INCIDENT_ACCEPT", "REJECTED", "Set group status to AVAILABLE, then retry."] remoteExec ["ARC_fnc_uiConsoleOpsActionStatus", owner _caller];
     false
 };
 
@@ -306,5 +322,10 @@ if (_pos isEqualType [] && { (count _pos) >= 2 }) then { _gridTxt = mapGridPosit
     format ["%1 (%2) active. Accepted by %3%4", _disp, _typeU, _who, if (_gridTxt isEqualTo "") then {""} else {format [" at %1", _gridTxt]}],
     8
 ] remoteExec ["ARC_fnc_clientToast", 0];
+
+if (!isNull _caller) then
+{
+    ["INCIDENT_ACCEPT", "ACCEPTED", "Incident accepted and moved to active execution."] remoteExec ["ARC_fnc_uiConsoleOpsActionStatus", owner _caller];
+};
 
 true

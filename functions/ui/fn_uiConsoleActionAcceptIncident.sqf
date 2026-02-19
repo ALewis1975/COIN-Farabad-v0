@@ -61,7 +61,6 @@ if (_status isNotEqualTo "AVAILABLE") exitWith
 };
 
 // Request acceptance server-side (server validates role again)
+["INCIDENT_ACCEPT", "SUBMITTING", "", 8] call ARC_fnc_uiConsoleOpsActionStatus;
 [player] remoteExec ["ARC_fnc_tocRequestAcceptIncident", 2];
-
-["Incident", "Acceptance request sent."] call ARC_fnc_clientToast;
 true

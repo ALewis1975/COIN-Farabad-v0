@@ -55,7 +55,11 @@ private _orders = ["tocOrders", []] call ARC_fnc_stateGet;
 if (!(_orders isEqualType [])) then { _orders = []; };
 
 private _idx = _orders findIf { (_x isEqualType []) && { (count _x) >= 7 } && { (_x # 0) isEqualTo _orderId } };
-if (_idx < 0) exitWith {false};
+if (_idx < 0) exitWith
+{
+    ["ORDER_ACCEPT", "REJECTED", "Order is no longer available."] remoteExec ["ARC_fnc_uiConsoleOpsActionStatus", owner _acceptor];
+    false
+};
 
 private _ord = _orders # _idx;
 private _status = toUpper (_ord # 2);
@@ -74,10 +78,15 @@ if (!(_target isEqualTo _gid)) exitWith
             ["attemptGroup", _gid]
         ]
     ] call ARC_fnc_intelLog;
+    ["ORDER_ACCEPT", "REJECTED", "Order is assigned to a different group."] remoteExec ["ARC_fnc_uiConsoleOpsActionStatus", owner _acceptor];
     false
 };
 
-if (!(_status isEqualTo "ISSUED")) exitWith {false};
+if (!(_status isEqualTo "ISSUED")) exitWith
+{
+    ["ORDER_ACCEPT", "REJECTED", "Order is no longer in ISSUED state."] remoteExec ["ARC_fnc_uiConsoleOpsActionStatus", owner _acceptor];
+    false
+};
 
 // Mark accepted
 _meta = [_meta, "acceptedAt", serverTime] call _setPair;
@@ -412,5 +421,7 @@ if (_pend) then
         [_res] call ARC_fnc_incidentClose;
     };
 };
+
+["ORDER_ACCEPT", "ACCEPTED", format ["Order accepted: %1", _orderId]] remoteExec ["ARC_fnc_uiConsoleOpsActionStatus", owner _acceptor];
 
 true
