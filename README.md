@@ -10,7 +10,7 @@
 
 Farabad COIN is a persistent multiplayer counterinsurgency mission set in a fictionalized Takistan area of operations (AO) during the 2011 Operation New Dawn era. The mission centers on a realistic command cycle where players must plan, execute, report, and receive follow-on orders—mirroring real military operations.
 
-**Mission Spine:**  
+**Mission Spine:**
 Task → Execute → Report → Follow-on Decision
 
 Players experience a living joint operational environment where their actions have lasting consequences, influence drives intelligence quality, and disciplined presence creates positive feedback loops in the population.
@@ -315,16 +315,16 @@ COIN-Farabad-v0/
 
 ### The Command Cycle
 
-1. **TOC Issues Task/Lead**  
+1. **TOC Issues Task/Lead**
    The Tactical Operations Center publishes mission orders or actionable intelligence
 
-2. **Leader Accepts Mission**  
+2. **Leader Accepts Mission**
    Company commanders, XOs, 1SGs, platoon leaders, or squad leaders accept via Farabad Console
 
-3. **Unit Executes Objective**  
+3. **Unit Executes Objective**
    Maneuver to objective, execute mission, establish security, consolidate
 
-4. **Submit SITREP**  
+4. **Submit SITREP**
    Structured situation report with:
    - Location and timestamp
    - Task outcome
@@ -334,7 +334,7 @@ COIN-Farabad-v0/
    - Resource requests
    - Recommendation (RTB, Hold, Proceed)
 
-5. **TOC Issues Follow-On**  
+5. **TOC Issues Follow-On**
    Based on unit status and METT-TC:
    - **RTB** — Return to base for refit
    - **Hold** — Maintain position/security
@@ -349,10 +349,10 @@ COIN-Farabad-v0/
 
 ### COIN Feedback Loops
 
-**Positive Loop (Success Path):**  
+**Positive Loop (Success Path):**
 Disciplined presence → Improved security → More cooperation → Better intel → Precise operations → Reduced insurgent freedom → Improved governance
 
-**Negative Loop (Heavy-Handed Operations):**  
+**Negative Loop (Heavy-Handed Operations):**
 Excessive force → Grievances → Less cooperation → Worse intel → Broader sweeps → More attacks → Harder AO
 
 ---
@@ -531,7 +531,7 @@ This mission is a community project for Arma 3. Check repository for specific li
 
 **Mission Author:** [7CAV] MAJ.Lewis.A
 
-**Development Approach:**  
+**Development Approach:**
 Contract-driven architecture with AI-assisted development following strict governance and validation standards.
 
 **Doctrinal Foundation:**
@@ -566,8 +566,8 @@ See `tests/TEST-LOG.md` for detailed validation history.
 
 ---
 
-**Last Updated:** 2026-02-19  
-**Mission Type:** Persistent Multiplayer COIN Sandbox  
-**Max Players:** 79  
-**Map:** Takistan (CUP Terrains)  
+**Last Updated:** 2026-02-19
+**Mission Type:** Persistent Multiplayer COIN Sandbox
+**Max Players:** 79
+**Map:** Takistan (CUP Terrains)
 **Era:** 2011 Operation New Dawn
