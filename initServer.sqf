@@ -116,7 +116,7 @@ missionNamespace setVariable ["civsub_v1_civ_tick_s", 20, true];
 //   "civsub_test_01"
 //   ["civsub_test_01", "D14"]
 //   ["civsub_test_01", "D14", true]
-missionNamespace setVariable ["civsub_v1_editorTestCivs", [], true];
+missionNamespace setVariable ["civsub_v1_editorTestCivs", ["civsub_test_01"], true];
 missionNamespace setVariable ["civsub_v1_editorTestCivs_pin", true, true];
 
 missionNamespace setVariable ["civsub_v1_civ_cap_activeDistrictsMax", 1, true];
