@@ -563,6 +563,7 @@ private _assets = [_rt, "assets", []] call _fnHmGet;
                             ["reason", _routeReasonA]
                         ]] call ARC_fnc_intelLog;
                     };
+                    _recs deleteAt ((count _recs) - 1);
                     continue;
                 };
                 _queue pushBack [_fidA, "ARR", _aid, _routeMetaA];
