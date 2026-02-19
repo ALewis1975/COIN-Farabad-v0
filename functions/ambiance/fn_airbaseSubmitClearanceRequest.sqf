@@ -110,6 +110,42 @@ if !_isCrewContext exitWith {
     false
 };
 
+
+private _metaDistGet = {
+    params ["_rows", "_k", "_def"];
+    private _v = _def;
+    {
+        if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x # 0)) isEqualTo _k }) exitWith { _v = _x # 1; };
+    } forEach _rows;
+    _v
+};
+
+if (_requestType isEqualTo "REQ_LAND") then {
+    private _requestsExisting = ["airbase_v1_clearanceRequests", []] call ARC_fnc_stateGet;
+    if !(_requestsExisting isEqualType []) then { _requestsExisting = []; };
+
+    private _pilotUid = getPlayerUID _caller;
+    private _aircraftNid = netId _aircraft;
+    private _hasInbound = false;
+    {
+        if !(_x isEqualType []) then { continue; };
+        private _rtype = toUpperANSI (_x param [1, ""]);
+        if !(_rtype isEqualTo "REQ_INBOUND") then { continue; };
+        private _statusChk = toUpperANSI (_x param [6, ""]);
+        if (_statusChk in ["DENIED", "CANCELED", "COMPLETE"]) then { continue; };
+        private _metaChk = _x param [10, []];
+        if !(_metaChk isEqualType []) then { _metaChk = []; };
+        private _metaPilotUid = [_metaChk, "pilotUid", ""] call _metaDistGet;
+        private _metaAircraftNid = [_metaChk, "aircraftNetId", ""] call _metaDistGet;
+        if ((_metaPilotUid isEqualTo _pilotUid) || {(_metaAircraftNid isNotEqualTo "") && {_metaAircraftNid isEqualTo _aircraftNid}}) exitWith { _hasInbound = true; };
+    } forEach _requestsExisting;
+
+    if (!_hasInbound) exitWith {
+        private _owner = owner _caller;
+        if (_owner > 0) then { ["Landing clearance requires an active inbound request first."] remoteExec ["ARC_fnc_clientHint", _owner]; };
+        false
+    };
+};
 private _isPilotSeat = (driver _aircraft) isEqualTo _caller;
 if ((_requestType in ["REQ_TAXI", "REQ_TAKEOFF", "REQ_INBOUND", "REQ_EMERGENCY"]) && {!_isPilotSeat}) exitWith {
     private _owner = owner _caller;

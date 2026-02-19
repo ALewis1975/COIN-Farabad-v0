@@ -123,6 +123,19 @@ if (!(_runwayOwner isEqualType "")) then { _runwayOwner = ""; };
 private _runwayUntil = missionNamespace getVariable ["airbase_v1_runwayUntil", -1];
 if (!(_runwayUntil isEqualType 0)) then { _runwayUntil = -1; };
 
+private _arrivalWarnAdvisoryM = missionNamespace getVariable ["airbase_v1_arrival_warn_advisory_m", 7000];
+if (!(_arrivalWarnAdvisoryM isEqualType 0)) then { _arrivalWarnAdvisoryM = 7000; };
+private _arrivalWarnCautionM = missionNamespace getVariable ["airbase_v1_arrival_warn_caution_m", 4500];
+if (!(_arrivalWarnCautionM isEqualType 0)) then { _arrivalWarnCautionM = 4500; };
+private _arrivalWarnUrgentM = missionNamespace getVariable ["airbase_v1_arrival_warn_urgent_m", 2600];
+if (!(_arrivalWarnUrgentM isEqualType 0)) then { _arrivalWarnUrgentM = 2600; };
+private _arrivalLandGateM = missionNamespace getVariable ["airbase_v1_arrival_land_gate_m", 2200];
+if (!(_arrivalLandGateM isEqualType 0)) then { _arrivalLandGateM = 2200; };
+private _arrivalRunwayMarker = missionNamespace getVariable ["airbase_v1_arrival_runway_marker", "L-270 Inbound"];
+if (!(_arrivalRunwayMarker isEqualType "")) then { _arrivalRunwayMarker = "L-270 Inbound"; };
+private _inboundTaxiMarkers = missionNamespace getVariable ["airbase_v1_inbound_taxi_markers", ["L-270 Inbound", "T-L Egress", "T-L Ingress"]];
+if !(_inboundTaxiMarkers isEqualType []) then { _inboundTaxiMarkers = ["L-270 Inbound", "T-L Egress", "T-L Ingress"]; };
+
 private _nextCap = missionNamespace getVariable ["airbase_v1_publicPreviewMax", 5];
 if (!(_nextCap isEqualType 0) || { _nextCap < 0 }) then { _nextCap = 5; };
 
@@ -206,7 +219,13 @@ private _airbasePub = [
     ["clearanceControllerPending", _clearancePendingView],
     ["clearanceHistoryTail", _clearanceHistoryTail],
     ["towerStaffing", _staffingView],
-    ["recentEvents", _eventsView]
+    ["recentEvents", _eventsView],
+    ["arrivalRunwayMarker", _arrivalRunwayMarker],
+    ["arrivalLandGateM", _arrivalLandGateM],
+    ["arrivalWarnAdvisoryM", _arrivalWarnAdvisoryM],
+    ["arrivalWarnCautionM", _arrivalWarnCautionM],
+    ["arrivalWarnUrgentM", _arrivalWarnUrgentM],
+    ["inboundTaxiMarkers", _inboundTaxiMarkers]
 ];
 
 private _pub = [

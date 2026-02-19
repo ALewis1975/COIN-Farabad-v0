@@ -46,6 +46,28 @@ private _getPub = {
     _val
 };
 
+private _metaGet = {
+    params ["_rows", "_k", "_def"];
+    private _v = _def;
+    {
+        if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x # 0)) isEqualTo _k }) exitWith { _v = _x # 1; };
+    } forEach _rows;
+    _v
+};
+
+private _warnBadgeMeta = {
+    params ["_meta"];
+    private _wl = toUpperANSI ([_meta, "arrivalWarnLevel", "NONE"] call _metaGet);
+    private _dist = [_meta, "arrivalDistanceM", -1] call _metaGet;
+    private _distTxt = if (_dist isEqualType 0 && { _dist >= 0 }) then { format ["%1m", round _dist] } else { "-" };
+    switch (_wl) do {
+        case "URGENT": { format ["[URGENT %1]", _distTxt] };
+        case "CAUTION": { format ["[CAUTION %1]", _distTxt] };
+        case "ADVISORY": { format ["[ADVISORY %1]", _distTxt] };
+        default { "" };
+    }
+};
+
 private _fmtTime = {
     params ["_t"];
     if (!(_t isEqualType 0) || { _t < 0 }) exitWith {"-"};
@@ -140,6 +162,29 @@ if (_rebuild) then {
             ["Declare Emergency", "REQ_EMERGENCY"],
             ["Cancel Request", "CANCEL"]
         ];
+
+        private _uidPilot = getPlayerUID player;
+        private _myArrivals = _clearancePending select {
+            private _meta = _x param [9, []];
+            private _pid = [_meta, "pilotUid", ""] call _metaGet;
+            private _rtype = toUpperANSI (_x param [1, ""]);
+            (_pid isEqualTo _uidPilot) && (_rtype in ["REQ_INBOUND", "REQ_LAND"])
+        };
+        if ((count _myArrivals) > 0) then {
+            private _hdrWarn = _ctrlList lbAdd "-- PILOT ATC WARNINGS --";
+            _ctrlList lbSetData [_hdrWarn, "HDR|PWARN"];
+            {
+                private _rid = _x param [0, ""];
+                private _rtype = _x param [1, ""];
+                private _status = toUpperANSI (_x param [5, ""]);
+                private _meta = _x param [9, []];
+                private _badge = [_meta] call _warnBadgeMeta;
+                if (_badge isEqualTo "") then { _badge = "[NONE]"; };
+                private _row = _ctrlList lbAdd format ["%1 %2 %3 (%4)", _rid, _rtype, _badge, _status];
+                _ctrlList lbSetData [_row, format ["PWRN|%1", _rid]];
+            } forEach _myArrivals;
+        };
+
         if ((lbSize _ctrlList) > 1) then { _ctrlList lbSetCurSel 1; };
     } else {
 
@@ -161,12 +206,6 @@ if (_rebuild) then {
             private _updated = _x param [7, -1];
             private _decision = _x param [8, []];
             private _meta = _x param [9, []];
-            private _metaGet = {
-                params ["_rows", "_k", "_def"];
-                private _v = _def;
-                { if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x # 0)) isEqualTo _k }) exitWith { _v = _x # 1; }; } forEach _rows;
-                _v
-            };
             private _groupName = [_meta, "pilotGroupName", ""] call _metaGet;
             private _callsign = [_meta, "pilotCallsign", ""] call _metaGet;
             private _acType = [_meta, "aircraftType", ""] call _metaGet;
@@ -175,7 +214,9 @@ if (_rebuild) then {
 
             private _pilotLabel = if (_callsign isEqualTo "") then { _pilot } else { _callsign };
             if (_groupName isNotEqualTo "") then { _pilotLabel = format ["%1 | %2", _pilotLabel, _groupName]; };
+            private _warnBadge = [_meta] call _warnBadgeMeta;
             private _lbl = format ["%1 [%2] %3 (%4)", _rid, _rtype, _pilotLabel, _status];
+            if (_warnBadge isNotEqualTo "") then { _lbl = format ["%1 %2", _lbl, _warnBadge]; };
             if (_acType isNotEqualTo "") then { _lbl = format ["%1 <%2>", _lbl, _acType]; };
             if ((_prio isEqualType 0) && { _prio >= 100 }) then { _lbl = format ["%1 !EMERGENCY!", _lbl]; };
 
@@ -466,7 +507,8 @@ private _details = format [
     + "<br/>Next action owner: <t color='#FFFFFF'>%14</t>"
     + "<br/><t color='#CFCFCF'>%15</t>"
     + "<br/><br/><t color='#B89B6B'>Pending/Awaiting</t>"
-    + "<br/>Awaiting tower decision: <t color='#FFFFFF'>%16</t>",
+    + "<br/>Awaiting tower decision: <t color='#FFFFFF'>%16</t>"
+    + "<br/>Arrival warnings (A/C/U): <t color='#FFFFFF'>%17/%18/%19m</t>",
     _canText,
     _depQueued,
     _arrQueued,
@@ -482,7 +524,10 @@ private _details = format [
     [_selectedUpdated] call _fmtTime,
     _nextActionOwner,
     _selectedDetail,
-    _awaitingCount
+    _awaitingCount,
+    [_air, "arrivalWarnAdvisoryM", 7000] call _getPub,
+    [_air, "arrivalWarnCautionM", 4500] call _getPub,
+    [_air, "arrivalWarnUrgentM", 2600] call _getPub
 ];
 
 _ctrlDetails ctrlSetStructuredText parseText _details;
