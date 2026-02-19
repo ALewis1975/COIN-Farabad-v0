@@ -112,6 +112,16 @@ switch (_kind) do
         ["BACKGROUND_CHECK", createHashMap, "Background check"] call _civReqAction;
     };
 
+    case "CIV_CONTACT_GIVE_FOOD":
+    {
+        ["AID_RATIONS", createHashMap, "Give Food"] call _civReqAction;
+    };
+
+    case "CIV_CONTACT_GIVE_WATER":
+    {
+        ["AID_WATER", createHashMap, "Give Water"] call _civReqAction;
+    };
+
     case "CIV_CONTACT_DETAIN":
     {
         ["DETAIN", createHashMap, "Detain"] call _civReqAction;

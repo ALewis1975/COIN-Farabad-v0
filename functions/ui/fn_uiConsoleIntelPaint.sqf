@@ -231,7 +231,7 @@ private _layoutS2CatPanels = {
 
     // Combined Intel/Lead panel keeps the top footprint compact so CIVSUB starts higher.
     // CIVSUB receives a larger ratio for better in-pane browsing.
-    private _weights = [0.19, 0.31, 0.20, 0.30];
+    private _weights = [0.14, 0.36, 0.20, 0.30];
 
     private _yCur = _y;
     for "_pi" from 0 to 3 do {
@@ -542,6 +542,8 @@ if (_rebuild) then
             ["CIVSUB INTERACTION (ACTIVE)", "HDR"] call _addTool;
             ["Check ID", "CIV_CONTACT_CHECK_ID"] call _addTool;
             ["Background Check", "CIV_CONTACT_BACKGROUND"] call _addTool;
+            ["Give Food", "CIV_CONTACT_GIVE_FOOD"] call _addTool;
+            ["Give Water", "CIV_CONTACT_GIVE_WATER"] call _addTool;
 
             private _detained = false;
             private _snap = uiNamespace getVariable ["ARC_civsubInteract_snapshot", createHashMap];
@@ -1146,6 +1148,22 @@ else
             _txt = "<t size='1.1' font='PuristaMedium'>CIVSUB: Background Check</t><br/><br/>" +
                    "Runs wanted/flags background check for the active civilian target.";
             _txt = [_txt, "BACKGROUND_CHECK"] call _appendCivsubResult;
+            if (!isNull _b1) then { _b1 ctrlEnable _inCivCtx; _b1 ctrlSetText "EXECUTE"; };
+        };
+
+        case "CIV_CONTACT_GIVE_FOOD":
+        {
+            _txt = "<t size='1.1' font='PuristaMedium'>CIVSUB: Give Food</t><br/><br/>" +
+                   "Provides rations to the active civilian target and records a CIVSUB aid event.";
+            _txt = [_txt, "AID_RATIONS"] call _appendCivsubResult;
+            if (!isNull _b1) then { _b1 ctrlEnable _inCivCtx; _b1 ctrlSetText "EXECUTE"; };
+        };
+
+        case "CIV_CONTACT_GIVE_WATER":
+        {
+            _txt = "<t size='1.1' font='PuristaMedium'>CIVSUB: Give Water</t><br/><br/>" +
+                   "Provides drinking water to the active civilian target and records a CIVSUB aid event.";
+            _txt = [_txt, "AID_WATER"] call _appendCivsubResult;
             if (!isNull _b1) then { _b1 ctrlEnable _inCivCtx; _b1 ctrlSetText "EXECUTE"; };
         };
 
