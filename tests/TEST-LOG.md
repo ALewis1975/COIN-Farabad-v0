@@ -7,8 +7,18 @@ Append one dated entry per validation pass using:
 - Result: `PASS`, `FAIL`, or `BLOCKED`
 - Notes (environment limits, follow-ups)
 
+
+## Entry Template
+
+- `<UTC timestamp>` | commit: `<sha|pending>` | branch: `<branch>` | Scenario: `<what was validated>` | Result: `PASS`/`FAIL`/`BLOCKED` | Notes: `<summary>`
+  - Migration Checks: Required keys `<PASS|FAIL|N/A>`; Defaulting `<PASS|FAIL|N/A>`; Unknown-field preservation `<PASS|FAIL|N/A>`
+  - Runtime-only Validation: `<PASS|FAIL|BLOCKED|N/A>` (reason)
+
 ## Entries
 
+- 2026-02-19T02:25Z | commit: <pending> | branch: copilot/create-readme-file | Scenario: migration-schema static harness + CI wiring (`python3 scripts/dev/validate_state_migrations.py`, `python3 -m py_compile scripts/dev/validate_state_migrations.py`, `git diff --check`) | Result: PASS | Notes: Added migration scenario matrix and static validator for required keys/defaulting/unknown-field preservation; wired check into preflight CI and documented runtime-only blocked validations.
+  - Migration Checks: Required keys PASS; Defaulting PASS; Unknown-field preservation PASS
+  - Runtime-only Validation: BLOCKED (requires Arma hosted MP/dedicated server for persistence/JIP/reconnect behaviors)
 - 2026-02-19T02:10Z | commit: 6f36ea5 | branch: copilot/create-readme-file | Scenario: Create comprehensive README.md by synthesizing all project documentation | Result: PASS | Notes: Documentation-only change. Created 573-line README.md synthesizing Mission Design Guide v0.4, Project Dictionary v1.1, ORBAT, subsystem baselines (CIVSUBv1, CASREQ v1, Threat v0+IED P1), QA reports (7.6/10 score), AGENTS.md workflow, and copilot instructions. Includes: project overview, features (6 major systems), architecture (authority model, state management), getting started guide, development workflow, complete ORBAT summary, documentation roadmap, quality metrics, and security standards. Validated: git diff --check passed (no whitespace issues), markdown formatting correct, content accuracy verified against source documents. No runtime validation required for docs-only change.
 - 2026-02-17 | commit: <pending> | Scenario: container static/docs checks | Result: BLOCKED | Notes: Arma runtime + dedicated/JIP environment unavailable in container; dedicated-server validations deferred.
 - 2026-02-17T17:20Z | commit: <pending> | Scenario: CI workflow failure triage (`list_workflow_runs`, failed job logs for runs `22108090044` and `22108056725`) | Result: PASS | Notes: SQF Lint failure is upstream tooling (`pip install sqfvm` package missing); preflight failures are existing sqflint parser incompatibilities, not introduced by this change.

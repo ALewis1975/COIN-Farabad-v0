@@ -82,6 +82,7 @@ If any checked:
 - [ ] `git diff --check`
 - [ ] `scripts/dev/check_console_conflicts.sh`
 - [ ] `scripts/dev/check_remoteexec_contract.sh`
+- [ ] `python3 scripts/dev/validate_state_migrations.py`
 
 ## Audit Gate Checklist
 

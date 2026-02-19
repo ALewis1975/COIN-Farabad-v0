@@ -1,0 +1,145 @@
+{
+  "schema_version": "vCurrent",
+  "description": "Static migration scenarios for ARC_pub_state payload contract.",
+  "required_keys": [
+    "insurgentPressure",
+    "corruption",
+    "infiltration",
+    "civSentiment",
+    "govLegitimacy",
+    "civCasualties",
+    "baseFuel",
+    "baseAmmo",
+    "baseMed",
+    "intelCount",
+    "opsCount",
+    "incidentCount",
+    "incidentHistoryTail",
+    "metricsSnapshotsTail",
+    "airbase"
+  ],
+  "defaults": {
+    "insurgentPressure": 0.35,
+    "corruption": 0.55,
+    "infiltration": 0.35,
+    "civSentiment": 0.55,
+    "govLegitimacy": 0.45,
+    "civCasualties": 0,
+    "baseFuel": 0.38,
+    "baseAmmo": 0.32,
+    "baseMed": 0.4,
+    "intelCount": 0,
+    "opsCount": 0,
+    "incidentCount": 0,
+    "incidentHistoryTail": [],
+    "metricsSnapshotsTail": [],
+    "airbase": {}
+  },
+  "scenarios": [
+    {
+      "id": "MIG-001-vLegacy-minimal",
+      "from_version": "vLegacy",
+      "to_version": "vCurrent",
+      "source": {
+        "insurgentPressure": 0.61,
+        "corruption": 0.42,
+        "intelCount": 7
+      },
+      "expected_preserved": {
+        "insurgentPressure": 0.61,
+        "corruption": 0.42,
+        "intelCount": 7
+      },
+      "expected_defaulted": [
+        "infiltration",
+        "civSentiment",
+        "govLegitimacy",
+        "civCasualties",
+        "baseFuel",
+        "baseAmmo",
+        "baseMed",
+        "opsCount",
+        "incidentCount",
+        "incidentHistoryTail",
+        "metricsSnapshotsTail",
+        "airbase"
+      ]
+    },
+    {
+      "id": "MIG-002-vLegacy-with-unknown",
+      "from_version": "vLegacy",
+      "to_version": "vCurrent",
+      "source": {
+        "civSentiment": 0.77,
+        "baseFuel": 0.22,
+        "legacyMarker": "keep-me",
+        "legacyNested": {
+          "enabled": true,
+          "sample": [1, 2, 3]
+        }
+      },
+      "expected_preserved": {
+        "civSentiment": 0.77,
+        "baseFuel": 0.22,
+        "legacyMarker": "keep-me",
+        "legacyNested": {
+          "enabled": true,
+          "sample": [1, 2, 3]
+        }
+      },
+      "expected_defaulted": [
+        "insurgentPressure",
+        "corruption",
+        "infiltration",
+        "govLegitimacy",
+        "civCasualties",
+        "baseAmmo",
+        "baseMed",
+        "intelCount",
+        "opsCount",
+        "incidentCount",
+        "incidentHistoryTail",
+        "metricsSnapshotsTail",
+        "airbase"
+      ]
+    },
+    {
+      "id": "MIG-003-vCurrent-noop",
+      "from_version": "vCurrent",
+      "to_version": "vCurrent",
+      "source": {
+        "insurgentPressure": 0.25,
+        "corruption": 0.35,
+        "infiltration": 0.3,
+        "civSentiment": 0.52,
+        "govLegitimacy": 0.57,
+        "civCasualties": 3,
+        "baseFuel": 0.4,
+        "baseAmmo": 0.45,
+        "baseMed": 0.5,
+        "intelCount": 12,
+        "opsCount": 4,
+        "incidentCount": 8,
+        "incidentHistoryTail": [
+          {"id": "inc-1"}
+        ],
+        "metricsSnapshotsTail": [
+          {"t": 102, "sent": 0.52}
+        ],
+        "airbase": {
+          "runwayState": "OPEN",
+          "queueCount": 2
+        },
+        "futureField": "preserve"
+      },
+      "expected_preserved": {
+        "futureField": "preserve",
+        "airbase": {
+          "runwayState": "OPEN",
+          "queueCount": 2
+        }
+      },
+      "expected_defaulted": []
+    }
+  ]
+}

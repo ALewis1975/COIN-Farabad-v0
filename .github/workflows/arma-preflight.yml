@@ -208,3 +208,6 @@ jobs:
 
           print("Config sanity checks passed.")
           PY
+      - name: State migration static validation
+        run: |
+          python3 scripts/dev/validate_state_migrations.py
