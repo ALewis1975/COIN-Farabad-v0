@@ -201,20 +201,36 @@ case "DASH":
         private _canAirHoldRelease = ["ARC_console_airCanHoldRelease", false] call ARC_fnc_uiNsGetBool;
         private _canAirQueueManage = ["ARC_console_airCanQueueManage", false] call ARC_fnc_uiNsGetBool;
         private _canAirRead = ["ARC_console_airCanRead", false] call ARC_fnc_uiNsGetBool;
+        private _canAirPilot = ["ARC_console_airCanPilot", false] call ARC_fnc_uiNsGetBool;
         private _canAirControl = _canAirHoldRelease || _canAirQueueManage;
+
+        private _airMode = ["ARC_console_airMode", if (_canAirPilot && !_canAirControl) then {"PILOT"} else {"TOWER"}] call ARC_fnc_uiNsGetString;
+        _airMode = toUpperANSI (trim _airMode);
+        if !(_airMode in ["TOWER", "PILOT"]) then { _airMode = if (_canAirPilot && !_canAirControl) then {"PILOT"} else {"TOWER"}; };
+        uiNamespace setVariable ["ARC_console_airMode", _airMode];
 
         if (!isNull _b1) then {
             _b1 ctrlShow true;
-            _b1 ctrlEnable _canAirHoldRelease;
-            _b1 ctrlSetText (if (_canAirHoldRelease) then {"HOLD/RELEASE"} else {"NO HOLD AUTH"});
+            if (_airMode isEqualTo "PILOT") then {
+                _b1 ctrlEnable _canAirPilot;
+                _b1 ctrlSetText (if (_canAirPilot) then {"SEND REQUEST"} else {"NO PILOT AUTH"});
+            } else {
+                _b1 ctrlEnable _canAirHoldRelease;
+                _b1 ctrlSetText (if (_canAirHoldRelease) then {"HOLD/RELEASE"} else {"NO HOLD AUTH"});
+            };
         };
         if (!isNull _b2) then {
             _b2 ctrlShow true;
-            _b2 ctrlEnable _canAirQueueManage;
-            _b2 ctrlSetText (if (_canAirQueueManage) then {"EXPEDITE/CANCEL"} else {"NO QUEUE AUTH"});
+            if (_airMode isEqualTo "PILOT") then {
+                _b2 ctrlEnable (_canAirPilot || _canAirControl);
+                _b2 ctrlSetText (if (_canAirControl) then {"MODE: TOWER"} else {"REFRESH"});
+            } else {
+                _b2 ctrlEnable _canAirQueueManage;
+                _b2 ctrlSetText (if (_canAirQueueManage) then {"EXPEDITE/CANCEL"} else {"NO QUEUE AUTH"});
+            };
         };
 
-        if (!_canAirRead && !_canAirControl) then
+        if (!_canAirRead && !_canAirControl && !_canAirPilot) then
         {
             if (!isNull _b1) then { _b1 ctrlEnable false; _b1 ctrlSetText "NO ACCESS"; };
             if (!isNull _b2) then { _b2 ctrlEnable false; _b2 ctrlSetText "NO ACCESS"; };

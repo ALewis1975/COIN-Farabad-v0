@@ -97,7 +97,7 @@ _requests = [_requests] call ARC_fnc_airbaseClearanceSortRequests;
 
 private _controllerOwner = owner _caller;
 if (_requesterOwner > 0) then {
-    ["Airbase Clearance", format ["%1 canceled", _requestId], 5] remoteExec ["ARC_fnc_clientToast", _requesterOwner];
+    ["Airbase Clearance", format ["Request canceled: %1", _requestId], 5] remoteExec ["ARC_fnc_clientToast", _requesterOwner];
 };
 if (_controllerOwner > 0 && { _controllerOwner != _requesterOwner }) then {
     [format ["Cancellation recorded: %1", _requestId]] remoteExec ["ARC_fnc_clientHint", _controllerOwner];

@@ -120,8 +120,28 @@ private _arrivalLane = [_towerStaffing, "arrival"] call _staffLaneRec;
 private _stateUpdatedAt = missionNamespace getVariable ["ARC_pub_stateUpdatedAt", -1];
 if (!(_stateUpdatedAt isEqualType 0)) then { _stateUpdatedAt = -1; };
 
+private _airModeList = ["ARC_console_airMode", "TOWER"] call ARC_fnc_uiNsGetString;
+_airModeList = toUpperANSI (trim _airModeList);
+if !(_airModeList in ["TOWER", "PILOT"]) then { _airModeList = "TOWER"; };
+
 if (_rebuild) then {
     lbClear _ctrlList;
+
+    if (_airModeList isEqualTo "PILOT") then {
+        private _hdrPilot = _ctrlList lbAdd "-- PILOT ACTIONS --";
+        _ctrlList lbSetData [_hdrPilot, "HDR|PACT"];
+        {
+            private _row = _ctrlList lbAdd (_x # 0);
+            _ctrlList lbSetData [_row, format ["PACT|%1", _x # 1]];
+        } forEach [
+            ["Request Taxi", "REQ_TAXI"],
+            ["Request Takeoff", "REQ_TAKEOFF"],
+            ["Request Inbound", "REQ_INBOUND"],
+            ["Declare Emergency", "REQ_EMERGENCY"],
+            ["Cancel Request", "CANCEL"]
+        ];
+        if ((lbSize _ctrlList) > 1) then { _ctrlList lbSetCurSel 1; };
+    } else {
 
     private _hdrReq = _ctrlList lbAdd "-- PENDING CLEARANCES --";
     _ctrlList lbSetData [_hdrReq, "HDR|REQ"];
@@ -140,10 +160,23 @@ if (_rebuild) then {
             private _status = toUpperANSI (_x param [5, ""]);
             private _updated = _x param [7, -1];
             private _decision = _x param [8, []];
+            private _meta = _x param [9, []];
+            private _metaGet = {
+                params ["_rows", "_k", "_def"];
+                private _v = _def;
+                { if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x # 0)) isEqualTo _k }) exitWith { _v = _x # 1; }; } forEach _rows;
+                _v
+            };
+            private _groupName = [_meta, "pilotGroupName", ""] call _metaGet;
+            private _callsign = [_meta, "pilotCallsign", ""] call _metaGet;
+            private _acType = [_meta, "aircraftType", ""] call _metaGet;
             private _decBy = "";
             if (_decision isEqualType [] && { (count _decision) >= 1 }) then { _decBy = _decision param [0, ""]; };
 
-            private _lbl = format ["%1 [%2] %3 (%4)", _rid, _rtype, _pilot, _status];
+            private _pilotLabel = if (_callsign isEqualTo "") then { _pilot } else { _callsign };
+            if (_groupName isNotEqualTo "") then { _pilotLabel = format ["%1 | %2", _pilotLabel, _groupName]; };
+            private _lbl = format ["%1 [%2] %3 (%4)", _rid, _rtype, _pilotLabel, _status];
+            if (_acType isNotEqualTo "") then { _lbl = format ["%1 <%2>", _lbl, _acType]; };
             if ((_prio isEqualType 0) && { _prio >= 100 }) then { _lbl = format ["%1 !EMERGENCY!", _lbl]; };
 
             private _row = _ctrlList lbAdd _lbl;
@@ -219,6 +252,7 @@ if (_rebuild) then {
     };
 
     if ((lbSize _ctrlList) > 0) then { _ctrlList lbSetCurSel 0; };
+    };
 };
 
 private _sel = lbCurSel _ctrlList;
@@ -239,15 +273,25 @@ private _canAirQueueManage = ["ARC_console_airCanQueueManage", false] call ARC_f
 private _canAirStaff = ["ARC_console_airCanStaff", false] call ARC_fnc_uiNsGetBool;
 private _canAirRead = ["ARC_console_airCanRead", false] call ARC_fnc_uiNsGetBool;
 private _canAirControl = _canAirHoldRelease || _canAirQueueManage || _canAirStaff;
+private _canAirPilot = ["ARC_console_airCanPilot", false] call ARC_fnc_uiNsGetBool;
+private _airMode = ["ARC_console_airMode", if (_canAirPilot && !_canAirControl) then {"PILOT"} else {"TOWER"}] call ARC_fnc_uiNsGetString;
+_airMode = toUpperANSI (trim _airMode);
+if !(_airMode in ["TOWER", "PILOT"]) then { _airMode = "TOWER"; };
+if ((_airMode isEqualTo "PILOT") && !_canAirPilot) then { _airMode = "TOWER"; };
+uiNamespace setVariable ["ARC_console_airMode", _airMode];
 
-private _canText = if (_canAirControl) then {
-    format [
-        "TOWER AUTH: HOLD/RELEASE %1 | EXPEDITE/CANCEL %2",
-        if (_canAirHoldRelease) then {"YES"} else {"NO"},
-        if (_canAirQueueManage) then {"YES"} else {"NO"}
-    ]
+private _canText = if (_airMode isEqualTo "PILOT") then {
+    format ["SUBMODE: PILOT | REQUEST PERMISSION %1", if (_canAirPilot) then {"YES"} else {"NO"}]
 } else {
-    if (_canAirRead) then { "TOWER AUTH: READ-ONLY" } else { "TOWER AUTH: NO ACCESS" }
+    if (_canAirControl) then {
+        format [
+            "SUBMODE: TOWER | HOLD/RELEASE %1 | EXPEDITE/CANCEL %2",
+            if (_canAirHoldRelease) then {"YES"} else {"NO"},
+            if (_canAirQueueManage) then {"YES"} else {"NO"}
+        ]
+    } else {
+        if (_canAirRead) then { "SUBMODE: TOWER | READ-ONLY" } else { "SUBMODE: TOWER | NO ACCESS" }
+    }
 };
 
 private _nextActionOwner = "TOWER";
@@ -344,6 +388,19 @@ switch (_rowType) do {
         _secondaryTooltip = if (_canAirHoldRelease) then { "Global release departures." } else { "Disabled: no hold/release authorization." };
     };
 
+    case "PACT": {
+        _selectedState = "PILOT_ACTION";
+        _nextActionOwner = "PILOT";
+        _selectedUpdated = _stateUpdatedAt;
+        _selectedDetail = format ["Pilot action selected: %1", _parts param [1, ""]];
+        _primaryLabel = "SEND REQUEST";
+        _secondaryLabel = if (_canAirControl) then {"MODE: TOWER"} else {"REFRESH"};
+        _primaryEnabled = _canAirPilot;
+        _secondaryEnabled = _canAirPilot || _canAirControl;
+        _primaryTooltip = "Submit selected pilot request to tower queue.";
+        _secondaryTooltip = if (_canAirControl) then {"Switch to tower control submode."} else {"Refresh pilot queue snapshot."};
+    };
+
     case "DEC": {
         _selectedState = _parts param [2, "UNKNOWN"];
         _selectedUpdated = parseNumber (_parts param [3, "-1"]);
@@ -371,7 +428,7 @@ switch (_rowType) do {
     };
 };
 
-if (!_canAirRead && !_canAirControl) then {
+if (!_canAirRead && !_canAirControl && !_canAirPilot) then {
     _primaryEnabled = false;
     _secondaryEnabled = false;
     _primaryLabel = "NO ACCESS";
