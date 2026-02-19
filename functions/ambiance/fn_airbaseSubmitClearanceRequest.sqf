@@ -1,6 +1,6 @@
 /*
     Server RPC: submit an airbase clearance request.
-    Params: [OBJECT caller, STRING requestType, OBJECT aircraft, NUMBER priority]
+    Params: [OBJECT caller, STRING requestType, OBJECT aircraft, NUMBER priority, STRING source, STRING lane, STRING incidentType, STRING priorityClassOverride]
 
     Record shape:
     [
@@ -20,7 +20,11 @@ params [
     ["_caller", objNull, [objNull]],
     ["_requestType", "", [""]],
     ["_aircraft", objNull, [objNull]],
-    ["_priority", 0, [0]]
+    ["_priority", 0, [0]],
+    ["_source", "PLAYER", [""]],
+    ["_lane", "", [""]],
+    ["_incidentType", "", [""]],
+    ["_priorityClassOverride", "", [""]]
 ];
 
 if (!([_caller, "ARC_fnc_airbaseSubmitClearanceRequest", "Airbase clearance request rejected: sender verification failed.", "AIRBASE_CLEARANCE_SUBMIT_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
@@ -65,7 +69,17 @@ if ((_vehOwner > 0) && { _vehOwner != _callerOwner }) exitWith {
 
 if (!(_requestType isEqualType "")) then { _requestType = ""; };
 _requestType = toUpperANSI (trim _requestType);
-if !(_requestType in ["TAKEOFF", "LANDING", "TAXI", "RUNWAY_CROSS", "PARKING"]) exitWith {
+private _legacyTypeMap = createHashMapFromArray [
+    ["TAKEOFF", "REQ_TAKEOFF"],
+    ["LANDING", "REQ_LAND"],
+    ["TAXI", "REQ_TAXI"],
+    ["RUNWAY_CROSS", "REQ_TAXI"],
+    ["PARKING", "REQ_TAXI"]
+];
+private _mappedType = _legacyTypeMap get _requestType;
+if (!isNil "_mappedType") then { _requestType = _mappedType; };
+
+if !(_requestType in ["REQ_TAXI", "REQ_TAKEOFF", "REQ_INBOUND", "REQ_LAND", "REQ_EMERGENCY"]) exitWith {
     private _owner = owner _caller;
     if (_owner > 0) then { ["Clearance request rejected: unsupported request type."] remoteExec ["ARC_fnc_clientHint", _owner]; };
     false
@@ -74,6 +88,52 @@ if !(_requestType in ["TAKEOFF", "LANDING", "TAXI", "RUNWAY_CROSS", "PARKING"]) 
 if (!(_priority isEqualType 0)) then { _priority = 0; };
 if (_priority < 0) then { _priority = 0; };
 if (_priority > 100) then { _priority = 100; };
+
+if (!(_source isEqualType "")) then { _source = "PLAYER"; };
+_source = toUpperANSI (trim _source);
+if !(_source in ["PLAYER", "AMBIENT"]) then { _source = "PLAYER"; };
+
+if (!(_lane isEqualType "")) then { _lane = ""; };
+_lane = toUpperANSI (trim _lane);
+if (_lane isEqualTo "") then {
+    _lane = switch (_requestType) do {
+        case "REQ_TAXI": { "GROUND" };
+        case "REQ_TAKEOFF": { "TOWER" };
+        default { "ARRIVAL" };
+    };
+};
+if !(_lane in ["GROUND", "TOWER", "ARRIVAL"]) then { _lane = "TOWER"; };
+
+if (!(_incidentType isEqualType "")) then { _incidentType = ""; };
+_incidentType = toUpperANSI (trim _incidentType);
+
+if (!(_priorityClassOverride isEqualType "")) then { _priorityClassOverride = ""; };
+_priorityClassOverride = toUpperANSI (trim _priorityClassOverride);
+
+private _incidentPriorityMap = missionNamespace getVariable ["airbase_v1_incidentPriorityMap", [
+    ["MASSCAS", "PRIORITY"],
+    ["MEDEVAC", "PRIORITY"],
+    ["QRF", "PRIORITY"],
+    ["IED", "PRIORITY"]
+]];
+if (!(_incidentPriorityMap isEqualType [])) then { _incidentPriorityMap = []; };
+
+private _autoPriorityClass = "ROUTINE";
+if ((_requestType isEqualTo "REQ_EMERGENCY") || {_priority >= 100}) then {
+    _autoPriorityClass = "PRIORITY";
+} else {
+    private _rowIdx = _incidentPriorityMap findIf {
+        (_x isEqualType []) && { (count _x) >= 2 } && { ((_x param [0, ""]) isEqualTo _incidentType) }
+    };
+    if (_rowIdx >= 0) then {
+        _autoPriorityClass = toUpperANSI str ((_incidentPriorityMap # _rowIdx) param [1, "ROUTINE"]);
+    };
+};
+
+private _priorityClass = _autoPriorityClass;
+if (_priorityClassOverride in ["ROUTINE", "PRIORITY"]) then {
+    _priorityClass = _priorityClassOverride;
+};
 
 private _requests = ["airbase_v1_clearanceRequests", []] call ARC_fnc_stateGet;
 if (!(_requests isEqualType [])) then { _requests = []; };
@@ -105,18 +165,35 @@ private _record = [
     _callerName,
     _aircraftNetId,
     _priority,
-    "PENDING",
+    "QUEUED",
     _nowTs,
     _nowTs,
     ["", "", -1, "", ""],
     [
         ["callerOwner", _callerOwner],
+        ["callerUnitNetId", netId _caller],
+        ["pilotUid", _callerUid],
+        ["pilotName", _callerName],
+        ["aircraftNetId", _aircraftNetId],
         ["aircraftType", typeOf _aircraft],
+        ["source", _source],
+        ["lane", _lane],
+        ["incidentType", _incidentType],
+        ["priorityClassAuto", _autoPriorityClass],
+        ["priorityClass", _priorityClass],
+        ["towerPriorityOverride", (_priorityClassOverride in ["ROUTINE", "PRIORITY"])],
+        ["lifecycle_submit_at", _nowTs],
+        ["lifecycle_queued_at", _nowTs],
+        ["lifecycle_approved_at", -1],
+        ["lifecycle_denied_at", -1],
+        ["lifecycle_active_at", -1],
+        ["lifecycle_complete_at", -1],
         ["submittedAt", _nowTs]
     ]
 ];
 
 _requests pushBack _record;
+_requests = [_requests] call ARC_fnc_airbaseClearanceSortRequests;
 _history pushBack _record;
 
 

@@ -140,7 +140,7 @@ for "_i" from 0 to (_nextN - 1) do
 
 private _clearancePending = _clrReqs select {
     private _st = toUpperANSI (_x param [6, ""]);
-    (_st isEqualTo "PENDING") || (_st isEqualTo "AWAITING_TOWER_DECISION")
+    (_st in ["QUEUED", "PENDING", "AWAITING_TOWER_DECISION"])
 };
 private _clearanceAwaitingTower = _clearancePending select { (toUpperANSI (_x param [6, ""])) isEqualTo "AWAITING_TOWER_DECISION" };
 private _clearanceEmergency = _clearancePending select { ((_x param [5, 0]) >= 100) };
@@ -155,7 +155,8 @@ private _clearancePendingView = _clearancePending apply {
         _x param [6, ""],
         _x param [7, -1],
         _x param [8, -1],
-        _x param [9, []]
+        _x param [9, []],
+        (_x param [10, []])
     ]
 };
 

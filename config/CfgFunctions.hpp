@@ -236,6 +236,7 @@ class CfgFunctions
             class civsubDeltaBuildEnvelope {};
             class civsubDeltaApplyToDistrict {};
             class civsubDeltaValidate {};
+            class civsubLeadEmitBridge {};
 
             // Phase 5.5: bundle normalization helpers
             class civsubBundleMake {};
@@ -619,6 +620,7 @@ class Ops
             class airbaseClientRequestSetLaneStaffing {};
 
             // Clearance request RPCs (server authority + client wrappers)
+            class airbaseClearanceSortRequests {};
             class airbaseSubmitClearanceRequest {};
             class airbaseCancelClearanceRequest {};
             class airbaseMarkClearanceEmergency {};
