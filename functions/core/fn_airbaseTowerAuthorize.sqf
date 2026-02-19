@@ -5,7 +5,7 @@
 
     Params:
       0: OBJECT unit
-      1: STRING action token (HOLD|RELEASE|PRIORITIZE|CANCEL|APPROVE|DENY|OVERRIDE)
+      1: STRING action token (HOLD|RELEASE|PRIORITIZE|CANCEL|APPROVE|DENY|OVERRIDE|STAFF)
 
     Returns:
       ARRAY [BOOL authorized, STRING level, STRING reason]
@@ -41,26 +41,9 @@ private _hayU = toUpper _hay;
 
 if ((_hayU find "FARABAD_TOWER_WS_CCIC") >= 0) exitWith {[true, "CCIC", "TOKEN_CCIC"]};
 
-private _allowBnCmd = missionNamespace getVariable ["airbase_v1_tower_allowBnCmd", true];
-if (!(_allowBnCmd isEqualType true) && !(_allowBnCmd isEqualType false)) then { _allowBnCmd = true; };
-if (_allowBnCmd) then {
-    private _bnTokens = missionNamespace getVariable [
-        "airbase_v1_tower_bnCommandTokens",
-        ["BNCMD", "BN COMMAND", "BNHQ", "BN CO", "BNCO", "BN CDR", "REDFALCON 6", "REDFALCON6", "FALCON 6", "FALCON6"]
-    ];
-    if (!(_bnTokens isEqualType [])) then { _bnTokens = ["BNCMD", "BN COMMAND", "BNHQ"]; };
-
-    private _isBnCmd = false;
-    {
-        if (_x isEqualType "" && {!(_x isEqualTo "")} && {(_hayU find (toUpper _x)) >= 0}) exitWith { _isBnCmd = true; };
-    } forEach _bnTokens;
-
-    if (_isBnCmd) exitWith {[true, "CCIC", "TOKEN_BN_COMMAND"]};
-};
-
 if ((_hayU find "FARABAD_TOWER_LC") >= 0) then {
-    private _allowed = missionNamespace getVariable ["airbase_v1_tower_lc_allowedActions", ["PRIORITIZE", "CANCEL"]];
-    if (!(_allowed isEqualType [])) then { _allowed = ["PRIORITIZE", "CANCEL"]; };
+    private _allowed = missionNamespace getVariable ["airbase_v1_tower_lc_allowedActions", ["PRIORITIZE", "CANCEL", "STAFF"]];
+    if (!(_allowed isEqualType [])) then { _allowed = ["PRIORITIZE", "CANCEL", "STAFF"]; };
 
     private _allowedDecision = missionNamespace getVariable ["airbase_v1_tower_lc_allowedDecisionActions", []];
     if (!(_allowedDecision isEqualType [])) then { _allowedDecision = []; };

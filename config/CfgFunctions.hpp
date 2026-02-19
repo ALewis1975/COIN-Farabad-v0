@@ -615,6 +615,8 @@ class Ops
             class airbaseClientRequestReleaseDepartures {};
             class airbaseClientRequestPrioritizeFlight {};
             class airbaseClientRequestCancelQueuedFlight {};
+            class airbaseRequestSetLaneStaffing {};
+            class airbaseClientRequestSetLaneStaffing {};
 
             // Clearance request RPCs (server authority + client wrappers)
             class airbaseSubmitClearanceRequest {};

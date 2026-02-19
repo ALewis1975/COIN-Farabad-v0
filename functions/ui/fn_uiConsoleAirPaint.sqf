@@ -99,6 +99,24 @@ if (!(_clearanceHistoryTail isEqualType [])) then { _clearanceHistoryTail = []; 
 private _awaitingCount = [_air, "clearanceAwaitingTowerCount", 0] call _getPub;
 if (!(_awaitingCount isEqualType 0)) then { _awaitingCount = 0; };
 
+private _towerStaffing = [_air, "towerStaffing", []] call _getPub;
+if (!(_towerStaffing isEqualType [])) then { _towerStaffing = []; };
+
+private _staffLaneRec = {
+    params ["_rows", "_lane"];
+    private _idx = _rows findIf {
+        (_x isEqualType []) &&
+        { (count _x) >= 5 } &&
+        { ((_x param [0, ""]) isEqualTo _lane) }
+    };
+    if (_idx < 0) exitWith { [_lane, "AUTO", "", "", -1] };
+    _rows # _idx
+};
+
+private _towerLane = [_towerStaffing, "tower"] call _staffLaneRec;
+private _groundLane = [_towerStaffing, "ground"] call _staffLaneRec;
+private _arrivalLane = [_towerStaffing, "arrival"] call _staffLaneRec;
+
 private _stateUpdatedAt = missionNamespace getVariable ["ARC_pub_stateUpdatedAt", -1];
 if (!(_stateUpdatedAt isEqualType 0)) then { _stateUpdatedAt = -1; };
 
@@ -152,6 +170,21 @@ if (_rebuild) then {
         } forEach _nextItems;
     };
 
+    private _hdrLane = _ctrlList lbAdd "-- ATC STAFFING --";
+    _ctrlList lbSetData [_hdrLane, "HDR|LANE"];
+
+    {
+        private _lane = _x param [0, ""];
+        private _status = toUpperANSI (_x param [1, "AUTO"]);
+        private _op = _x param [2, ""];
+        private _uid = _x param [3, ""];
+        private _ts = _x param [4, -1];
+        private _who = if (_status isEqualTo "MANNED" && { _op isNotEqualTo "" }) then { _op } else { "AUTO" };
+        private _lbl = format ["%1: %2", toUpperANSI _lane, _who];
+        private _row = _ctrlList lbAdd _lbl;
+        _ctrlList lbSetData [_row, format ["LANE|%1|%2|%3|%4|%5", _lane, _status, _op, _uid, _ts]];
+    } forEach [_towerLane, _groundLane, _arrivalLane];
+
     private _hdrRwy = _ctrlList lbAdd "-- RUNWAY LOCK STATUS --";
     _ctrlList lbSetData [_hdrRwy, "HDR|RWY"];
     private _runwayLbl = format ["State %1 | Owner %2", _runwayState, if (_runwayOwner isEqualTo "") then {"-"} else {_runwayOwner}];
@@ -203,8 +236,9 @@ uiNamespace setVariable ["ARC_console_airSelectedRowType", _rowType];
 
 private _canAirHoldRelease = ["ARC_console_airCanHoldRelease", false] call ARC_fnc_uiNsGetBool;
 private _canAirQueueManage = ["ARC_console_airCanQueueManage", false] call ARC_fnc_uiNsGetBool;
+private _canAirStaff = ["ARC_console_airCanStaff", false] call ARC_fnc_uiNsGetBool;
 private _canAirRead = ["ARC_console_airCanRead", false] call ARC_fnc_uiNsGetBool;
-private _canAirControl = _canAirHoldRelease || _canAirQueueManage;
+private _canAirControl = _canAirHoldRelease || _canAirQueueManage || _canAirStaff;
 
 private _canText = if (_canAirControl) then {
     format [
@@ -281,6 +315,22 @@ switch (_rowType) do {
         };
     };
 
+    case "LANE": {
+        private _lane = _parts param [1, "tower"];
+        private _status = toUpperANSI (_parts param [2, "AUTO"]);
+        private _op = _parts param [3, ""];
+        _selectedState = format ["LANE_%1_%2", toUpperANSI _lane, _status];
+        _selectedUpdated = parseNumber (_parts param [5, "-1"]);
+        _nextActionOwner = "TOWER_CONTROLLER";
+        _selectedDetail = format ["%1 lane controller: %2", toUpperANSI _lane, if (_op isEqualTo "") then {"AUTO"} else {_op}];
+        _primaryLabel = "CLAIM";
+        _secondaryLabel = "RELEASE";
+        _primaryEnabled = _canAirStaff;
+        _secondaryEnabled = _canAirStaff;
+        _primaryTooltip = if (_canAirStaff) then { "Assign selected lane to yourself." } else { "Disabled: no staffing authorization." };
+        _secondaryTooltip = if (_canAirStaff) then { "Release selected lane back to AUTO." } else { "Disabled: no staffing authorization." };
+    };
+
     case "RWY": {
         _selectedState = _parts param [1, "UNKNOWN"];
         _selectedUpdated = _stateUpdatedAt;
@@ -351,14 +401,15 @@ private _details = format [
     + "<br/><br/><t color='#B89B6B'>Runway</t>"
     + "<br/>State: <t color='#FFFFFF'>%5</t> | Owner: <t color='#FFFFFF'>%6</t>"
     + "<br/>Hold departures: <t color='#FFFFFF'>%7</t>"
-    + "<br/>Execution: <t color='#FFFFFF'>%8</t>"
+    + "<br/>Tower: <t color='#FFFFFF'>%8</t> | Ground: <t color='#FFFFFF'>%9</t> | Arrival: <t color='#FFFFFF'>%10</t>"
+    + "<br/>Execution: <t color='#FFFFFF'>%11</t>"
     + "<br/><br/><t color='#B89B6B'>Selection</t>"
-    + "<br/>State: <t color='#FFFFFF'>%9</t>"
-    + "<br/>Last update: <t color='#FFFFFF'>%10</t>"
-    + "<br/>Next action owner: <t color='#FFFFFF'>%11</t>"
-    + "<br/><t color='#CFCFCF'>%12</t>"
+    + "<br/>State: <t color='#FFFFFF'>%12</t>"
+    + "<br/>Last update: <t color='#FFFFFF'>%13</t>"
+    + "<br/>Next action owner: <t color='#FFFFFF'>%14</t>"
+    + "<br/><t color='#CFCFCF'>%15</t>"
     + "<br/><br/><t color='#B89B6B'>Pending/Awaiting</t>"
-    + "<br/>Awaiting tower decision: <t color='#FFFFFF'>%13</t>",
+    + "<br/>Awaiting tower decision: <t color='#FFFFFF'>%16</t>",
     _canText,
     _depQueued,
     _arrQueued,
@@ -366,6 +417,9 @@ private _details = format [
     _runwayState,
     if (_runwayOwner isEqualTo "") then {"-"} else {_runwayOwner},
     if (_holdDepartures) then {"HOLD ACTIVE"} else {"OPEN"},
+    if ((toUpperANSI (_towerLane param [1, "AUTO"])) isEqualTo "MANNED") then { _towerLane param [2, "AUTO"] } else { "AUTO" },
+    if ((toUpperANSI (_groundLane param [1, "AUTO"])) isEqualTo "MANNED") then { _groundLane param [2, "AUTO"] } else { "AUTO" },
+    if ((toUpperANSI (_arrivalLane param [1, "AUTO"])) isEqualTo "MANNED") then { _arrivalLane param [2, "AUTO"] } else { "AUTO" },
     if (_execActive) then { format ["%1", _execFid] } else { "none" },
     _selectedState,
     [_selectedUpdated] call _fmtTime,
