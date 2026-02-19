@@ -113,7 +113,7 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
         private _pvEhId = missionNamespace getVariable ["ARC_clientSnapshotPvEhId", -1];
         if (_pvEhId < 0) then
         {
-            _pvEhId = missionNamespace addPublicVariableEventHandler ["ARC_pub_stateUpdatedAt", {
+            _pvEhId = addPublicVariableEventHandler ["ARC_pub_stateUpdatedAt", {
                 uiNamespace setVariable ["ARC_console_dirty", true];
 
                 private _refreshEnabled = missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false];

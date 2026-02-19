@@ -139,7 +139,11 @@ if (isNull _loc) then { _loc = nearestLocation [getPosATL _civ, "NameCity"]; };
 if (isNull _loc) then { _loc = nearestLocation [getPosATL _civ, "NameCityCapital"]; };
 if (!isNull _loc) then {
     private _t = text _loc;
-    if (_t isEqualType "" && {!(_t isEqualTo "")}) then { _locName = _t; };
+    private _dist = _civ distance2D (locationPosition _loc);
+    if (_t isEqualType "" && {!(_t isEqualTo "")} && {_dist <= 750}) then { _locName = _t; };
+};
+if (_locName isEqualTo "around here" && {!(_did isEqualTo "")}) then {
+    _locName = _did;
 };
 
 // Tone gates

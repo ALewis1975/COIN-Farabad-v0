@@ -149,6 +149,10 @@ missionNamespace setVariable ["civsub_v1_scheduler_s", 120, true];        // bas
 missionNamespace setVariable ["civsub_v1_rumor_enabled", true, true];     // set false to disable rumors
 missionNamespace setVariable ["civsub_v1_debug", true, true];            // enables scheduler/diag logs (if present)
 
+// AIRBASE tower authorization test posture (BN Command group access enabled for validation drills)
+missionNamespace setVariable ["airbase_v1_tower_allowBnCmd", true, true];
+missionNamespace setVariable ["airbase_v1_tower_bnCommandTokens", ["BNCMD", "BN COMMAND", "BNHQ", "BN CO", "BNCO", "BN CDR", "REDFALCON 6", "REDFALCON6", "FALCON 6", "FALCON6"], true];
+
 
 // ============================================================================
 // CIVTRAF (ambient civilian traffic) — mostly parked, minimal moving
@@ -791,10 +795,10 @@ diag_log format [
     missionNamespace getVariable ["ARC_debugInspectorEnabled", false]
 ];
 
-// World time controls (explicit startup override posture)
+// World time controls (force reset to mission-editor baseline date/time + multiplier)
 missionNamespace setVariable ["ARC_worldTime_enabled", true, true];
 missionNamespace setVariable ["ARC_worldTime_forceDate", true, true];
-missionNamespace setVariable ["ARC_worldTime_startDate", [2012,6,15,5,30], true];
+missionNamespace setVariable ["ARC_worldTime_startDate", +date, true];
 missionNamespace setVariable ["ARC_worldTime_forceMultiplier", true, true];
 missionNamespace setVariable ["ARC_worldTime_timeMultiplier", 6, true];
 missionNamespace setVariable ["ARC_worldTime_broadcastIntervalSec", 30, true];

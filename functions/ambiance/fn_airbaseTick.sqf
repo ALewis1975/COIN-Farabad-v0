@@ -789,6 +789,15 @@ if (_idxRecActive >= 0) then {
 
 [_fid, _kind, _detail] spawn {
     params ["_fid", "_kind", "_detail"];
+
+    private _fnHmGetLocal = {
+        params ["_hm", "_key", "_fallback"];
+        if (!(_hm isEqualType createHashMap)) exitWith { _fallback };
+        private _value = _hm get _key;
+        if (isNil "_value") exitWith { _fallback };
+        _value
+    };
+
     missionNamespace setVariable ["airbase_v1_execActive", true, true];
     missionNamespace setVariable ["airbase_v1_execFid", _fid, true];
 
@@ -825,24 +834,24 @@ if (_idxRecActive >= 0) then {
     };
 
     private _rtL = missionNamespace getVariable ["airbase_v1_rt", createHashMap];
-    private _assetsL = [_rtL, "assets", []] call _fnHmGet;
+    private _assetsL = [_rtL, "assets", []] call _fnHmGetLocal;
 
     private _ok = false;
 
     if (_kind isEqualTo "DEP") then {
-        private _aIdx = _assetsL findIf { ([_x, "id", ""] call _fnHmGet) isEqualTo _detail };
+        private _aIdx = _assetsL findIf { ([_x, "id", ""] call _fnHmGetLocal) isEqualTo _detail };
         if (_aIdx >= 0) then {
             private _asset = _assetsL # _aIdx;
 
             // Skip disabled assets
-            if (([_asset, "state", "PARKED"] call _fnHmGet) isEqualTo "DISABLED") exitWith {
+            if (([_asset, "state", "PARKED"] call _fnHmGetLocal) isEqualTo "DISABLED") exitWith {
                 _ok = false;
             };
 
             _asset set ["state", "ACTIVE"];
             _asset set ["activeFlight", _fid];
 
-            if ([_asset, "requiresTow", false] call _fnHmGet) then {
+            if ([_asset, "requiresTow", false] call _fnHmGetLocal) then {
                 _ok = [_fid, _asset] call ARC_fnc_airbaseAttackTowDepart;
             } else {
                 _ok = [_fid, _asset] call ARC_fnc_airbasePlaneDepart;
