@@ -25,3 +25,28 @@ This review inventories recurring loops that directly power the Farabad Console 
 - Snapshot watcher: **0.5s → 1.0–2.0s** until event-driven replacement lands.
 - Keepalive loops: **30s → 60–120s** after first stable minute, with on-demand reinit events.
 - Server exec loop: **adaptive 5s active / 10–15s idle**.
+
+
+## 2026-02-19 migration pass (event-first with polling fallback)
+
+### Scope applied
+- `initPlayerLocal.sqf`: Snapshot watcher now subscribes to `ARC_pub_stateUpdatedAt` via `addPublicVariableEventHandler` and triggers briefing/TOC refresh on event.
+- `functions/ui/fn_uiConsoleOnLoad.sqf`: Console repaint loop now uses an event-driven dirty flag (`ARC_console_dirty`) with low-frequency fallback repaint.
+
+### Unchanged behavior claims
+- JIP initial refresh still runs once after readiness + first snapshot gate.
+- Briefing/TOC update calls remain the same functions and are still guarded by readiness/public-state availability checks.
+- Console repaint still pauses while edit/combo controls are focused to preserve current UX.
+
+### Fallback resilience retained
+- Snapshot watcher keeps a 2s polling check as a backstop if PV events are missed.
+- Console repaint keeps a 3s fallback refresh even with no dirty event, to recover from missed signal delivery.
+
+### Qualitative workload comparison
+- **Before:**
+  - Snapshot watcher: fixed 0.5s polling (`~2 checks/sec/client`, continuous mission lifetime).
+  - Console repaint loop: fixed 1.2s repaint eligibility check (`~0.83 checks/sec` while dialog open).
+- **After:**
+  - Snapshot watcher: event-driven refresh on publish + 2s fallback (`~0.5 checks/sec/client` fallback path, most updates now event-triggered).
+  - Console repaint loop: event-driven dirty refresh + 3s fallback (`~0.33 fallback refresh windows/sec` while open, with lightweight 0.2s gate checks but no paint unless dirty/fallback).
+- **Expected impact:** Lower full refresh/paint frequency during quiet periods and improved responsiveness on real state changes.

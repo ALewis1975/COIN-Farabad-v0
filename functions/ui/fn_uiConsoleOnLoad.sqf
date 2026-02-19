@@ -277,13 +277,18 @@ else
     diag_log "[ARC][INFO] uiConsoleOnLoad: deferring initial refresh until ARC_serverReady/ARC_pub_state are available.";
 };
 
-// Refresh loop (lightweight)
+// Refresh loop (event-first + fallback polling)
 uiNamespace setVariable ["ARC_console_refreshLoop", true];
+uiNamespace setVariable ["ARC_console_dirty", false];
 [_display] spawn {
     params ["_display"];
+
+    private _fallbackCadenceSec = 3;
+    private _nextFallbackAt = diag_tickTime + _fallbackCadenceSec;
+
     while { !isNull _display && { dialog } && { ["ARC_console_refreshLoop", false] call ARC_fnc_uiNsGetBool } } do
     {
-        // Prevent the periodic paint from collapsing open dropdowns and interrupting text input.
+        // Prevent repaint from collapsing open dropdowns and interrupting text input.
         // Skip refresh while the user is focused on an Edit or Combo control.
         private _skip = false;
         private _fc = focusedCtrl _display;
@@ -297,14 +302,22 @@ uiNamespace setVariable ["ARC_console_refreshLoop", true];
         {
             private _refreshEnabled = missionNamespace getVariable ["ARC_clientStateRefreshEnabled", true];
             private _hasPubState = !isNil { missionNamespace getVariable "ARC_pub_state" };
+            private _isDirty = ["ARC_console_dirty", false] call ARC_fnc_uiNsGetBool;
+            private _now = diag_tickTime;
+            private _runFallback = _now >= _nextFallbackAt;
 
             if (_refreshEnabled || _hasPubState) then
             {
-                [_display] call ARC_fnc_uiConsoleRefresh;
+                if (_isDirty || _runFallback) then
+                {
+                    [_display] call ARC_fnc_uiConsoleRefresh;
+                    uiNamespace setVariable ["ARC_console_dirty", false];
+                    _nextFallbackAt = _now + _fallbackCadenceSec;
+                };
             };
         };
 
-        uiSleep 1.2;
+        uiSleep 0.2;
     };
 };
 
