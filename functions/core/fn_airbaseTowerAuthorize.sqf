@@ -17,10 +17,47 @@ params [
     ["_action", "", [""]]
 ];
 
-if (isNull _unit) exitWith {[false, "", "NULL_UNIT"]};
+private _towerAuthDebug = missionNamespace getVariable ["airbase_v1_tower_authDebug", false];
+if (!(_towerAuthDebug isEqualType true) && !(_towerAuthDebug isEqualType false)) then { _towerAuthDebug = false; };
+
+private _normalizeAuthText = {
+    params [["_text", "", [""]]];
+
+    if (!(_text isEqualType "")) then { _text = ""; };
+
+    private _parts = ((toUpperANSI (trim _text)) splitString (" .:-_/" + toString [9,10,13])) select {
+        _x isNotEqualTo ""
+    };
+    _parts joinString " "
+};
+
+private _logAuthDeny = {
+    params ["_reason", "_level", "_unitRef", "_actionRef", "_hayRawRef", "_hayNormRef"];
+
+    if (_towerAuthDebug) then {
+        diag_log format [
+            "[ARC][AIRBASE][AUTH][DENY] unit=%1 uid=%2 action=%3 level=%4 reason=%5 sourceRaw='%6' sourceNorm='%7'",
+            name _unitRef,
+            getPlayerUID _unitRef,
+            _actionRef,
+            _level,
+            _reason,
+            _hayRawRef,
+            _hayNormRef
+        ];
+    };
+};
+
+if (isNull _unit) exitWith {
+    ["NULL_UNIT", "", _unit, _action, "", ""] call _logAuthDeny;
+    [false, "", "NULL_UNIT"]
+};
 
 private _actionU = toUpper (trim _action);
-if (_actionU isEqualTo "") exitWith {[false, "", "INVALID_ACTION"]};
+if (_actionU isEqualTo "") exitWith {
+    ["INVALID_ACTION", "", _unit, _actionU, "", ""] call _logAuthDeny;
+    [false, "", "INVALID_ACTION"]
+};
 
 private _hay = "";
 private _grp = group _unit;
@@ -35,31 +72,53 @@ if (_role isNotEqualTo "") then {
     if (_hay isEqualTo "") then { _hay = _role; } else { _hay = _hay + " " + _role; };
 };
 
-if (_hay isEqualTo "") exitWith {[false, "", "NO_ROLE_BINDING"]};
+private _hayNorm = [_hay] call _normalizeAuthText;
+if (_hayNorm isEqualTo "") exitWith {
+    ["NO_ROLE_BINDING", "", _unit, _actionU, _hay, _hayNorm] call _logAuthDeny;
+    [false, "", "NO_ROLE_BINDING"]
+};
 
-private _hayU = toUpper _hay;
-
-if ((_hayU find "FARABAD_TOWER_WS_CCIC") >= 0) exitWith {[true, "CCIC", "TOKEN_CCIC"]};
-
+if ((_hayNorm find "FARABAD TOWER WS CCIC") >= 0) exitWith {[true, "CCIC", "TOKEN_CCIC"]};
 
 private _allowBnCmd = missionNamespace getVariable ["airbase_v1_tower_allowBnCmd", false];
 if (!(_allowBnCmd isEqualType true) && !(_allowBnCmd isEqualType false)) then { _allowBnCmd = false; };
 if (_allowBnCmd) then {
-    private _bnTokens = missionNamespace getVariable ["airbase_v1_tower_bnCommandTokens", ["BNCMD", "BN COMMAND", "BNHQ", "BN CO", "BNCO", "BN CDR", "REDFALCON 6", "REDFALCON6", "FALCON 6", "FALCON6"]];
+    private _bnTokens = missionNamespace getVariable [
+        "airbase_v1_tower_bnCommandTokens",
+        [
+            "BNCMD",
+            "BN COMMAND",
+            "BNHQ",
+            "BN HQ",
+            "BN CO",
+            "BNCO",
+            "BN CDR",
+            "BNCDR",
+            "BN CMDR",
+            "BATTALION CO",
+            "BATTALION CDR",
+            "REDFALCON 6",
+            "REDFALCON6",
+            "RED FALCON 6",
+            "RED-FALCON-6",
+            "FALCON 6",
+            "FALCON6",
+            "FALCON-6"
+        ]
+    ];
     if (!(_bnTokens isEqualType [])) then { _bnTokens = ["BNCMD", "BN COMMAND", "BNHQ"]; };
 
     private _isBnCmd = false;
     {
-        private _tok = _x;
-        if (!(_tok isEqualType "")) then { _tok = ""; };
-        _tok = toUpperANSI (trim _tok);
+        private _tok = [_x] call _normalizeAuthText;
         if (_tok isEqualTo "") then { continue; };
-        if ((_hayU find _tok) >= 0) exitWith { _isBnCmd = true; };
+        if ((_hayNorm find _tok) >= 0) exitWith { _isBnCmd = true; };
     } forEach _bnTokens;
 
     if (_isBnCmd) exitWith {[true, "BNCMD", "TOKEN_BN_COMMAND"]};
 };
-if ((_hayU find "FARABAD_TOWER_LC") >= 0) then {
+
+if ((_hayNorm find "FARABAD TOWER LC") >= 0) then {
     private _allowed = missionNamespace getVariable ["airbase_v1_tower_lc_allowedActions", ["PRIORITIZE", "CANCEL", "STAFF"]];
     if (!(_allowed isEqualType [])) then { _allowed = ["PRIORITIZE", "CANCEL", "STAFF"]; };
 
@@ -77,7 +136,9 @@ if ((_hayU find "FARABAD_TOWER_LC") >= 0) then {
     };
 
     if (_actionU in _allowedU) exitWith {[true, "LC", "TOKEN_LC"]};
+    ["ACTION_NOT_ALLOWED_FOR_LC", "LC", _unit, _actionU, _hay, _hayNorm] call _logAuthDeny;
     [false, "LC", "ACTION_NOT_ALLOWED_FOR_LC"]
 } else {
+    ["TOKEN_MISSING", "", _unit, _actionU, _hay, _hayNorm] call _logAuthDeny;
     [false, "", "TOKEN_MISSING"]
 };
