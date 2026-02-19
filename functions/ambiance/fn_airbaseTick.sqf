@@ -192,14 +192,14 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
     if !(_rec isEqualType []) then { continue; };
 
     private _status = toUpperANSI (_rec param [6, ""]);
-    if (_status in ["APPROVED", "DENIED", "CANCELED"]) then { continue; };
+    if (_status in ["APPROVED", "DENIED", "CANCELED", "COMPLETE"]) then { continue; };
 
     private _createdAt = _rec param [7, _nowTs];
     if (!(_createdAt isEqualType 0)) then { _createdAt = _nowTs; };
 
     private _ageS = _nowTs - _createdAt;
 
-    if (_hasTowerController && {_status isEqualTo "PENDING"}) then {
+    if (_hasTowerController && {_status in ["QUEUED", "PENDING"]}) then {
         _rec set [6, "AWAITING_TOWER_DECISION"];
         _rec set [8, _nowTs];
         _rec set [9, ["", "", -1, "", "AWAITING_TOWER"]];
@@ -238,7 +238,7 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
 
     if (!_controllerFallbackEnabled) then { continue; };
 
-    if (_status in ["PENDING", "AWAITING_TOWER_DECISION"] && { _ageS >= _controllerTimeoutS }) then {
+    if (_status in ["QUEUED", "PENDING", "AWAITING_TOWER_DECISION"] && { _ageS >= _controllerTimeoutS }) then {
         _rec set [6, "APPROVED"];
         _rec set [8, _nowTs];
         _rec set [9, ["AI", "AI", _nowTs, "APPROVE", "TIMEOUT"]];
@@ -275,6 +275,7 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
 };
 
 if (_clearanceStateDirty) then {
+    _clearanceRequests = [_clearanceRequests] call ARC_fnc_airbaseClearanceSortRequests;
     ["airbase_v1_clearanceRequests", _clearanceRequests] call ARC_fnc_stateSet;
 
     private _historyById = createHashMap;

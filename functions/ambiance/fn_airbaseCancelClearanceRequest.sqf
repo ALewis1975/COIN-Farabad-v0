@@ -44,7 +44,7 @@ if (_uid isNotEqualTo "") then {
 };
 private _callerUid = getPlayerUID _caller;
 
-if !(_status in ["PENDING", "AWAITING_TOWER_DECISION"]) exitWith {
+if !(_status in ["QUEUED", "PENDING", "AWAITING_TOWER_DECISION"]) exitWith {
     private _owner = owner _caller;
     if (_owner > 0) then { ["Clearance request cannot be canceled in current state."] remoteExec ["ARC_fnc_clientHint", _owner]; };
     false
@@ -67,6 +67,7 @@ private _meta = _rec param [10, []];
 if (!(_meta isEqualType [])) then { _meta = []; };
 _meta pushBack ["cancelledBy", name _caller];
 _meta pushBack ["cancelledByUid", _callerUid];
+_meta pushBack ["lifecycle_complete_at", serverTime];
 _rec set [10, _meta];
 
 _requests set [_idx, _rec];
@@ -86,6 +87,8 @@ _events pushBack [
 if ((count _events) > _eventsMax) then {
     _events deleteRange [0, (count _events) - _eventsMax];
 };
+
+_requests = [_requests] call ARC_fnc_airbaseClearanceSortRequests;
 
 ["airbase_v1_clearanceRequests", _requests] call ARC_fnc_stateSet;
 ["airbase_v1_clearanceHistory", _history] call ARC_fnc_stateSet;

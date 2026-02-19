@@ -83,7 +83,7 @@ if (_requesterUid isNotEqualTo "") then {
     } forEach allPlayers;
 };
 private _status = toUpperANSI (_rec param [6, ""]);
-if !(_status in ["PENDING", "AWAITING_TOWER_DECISION"]) exitWith {
+if !(_status in ["QUEUED", "PENDING", "AWAITING_TOWER_DECISION"]) exitWith {
     private _owner = owner _caller;
     if (_owner > 0) then { ["Clearance request is no longer pending decision."] remoteExec ["ARC_fnc_clientHint", _owner]; };
     false
@@ -103,6 +103,11 @@ _meta pushBack ["decidedBy", _name];
 _meta pushBack ["decidedByUid", _uid];
 _meta pushBack ["decisionAction", _actionToken];
 _meta pushBack ["decisionReason", _reason];
+if (_approve) then {
+    _meta pushBack ["lifecycle_approved_at", _now];
+} else {
+    _meta pushBack ["lifecycle_denied_at", _now];
+};
 _rec set [10, _meta];
 
 _requests set [_idx, _rec];
@@ -122,6 +127,8 @@ _events pushBack [
 if ((count _events) > _eventsMax) then {
     _events deleteRange [0, (count _events) - _eventsMax];
 };
+
+_requests = [_requests] call ARC_fnc_airbaseClearanceSortRequests;
 
 ["airbase_v1_clearanceRequests", _requests] call ARC_fnc_stateSet;
 ["airbase_v1_clearanceHistory", _history] call ARC_fnc_stateSet;
