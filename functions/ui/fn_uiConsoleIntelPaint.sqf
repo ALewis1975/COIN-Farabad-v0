@@ -37,6 +37,21 @@ params [
 
 if (isNull _display) exitWith {false};
 
+private _rxMaxItems = missionNamespace getVariable ["ARC_consoleRxMaxItems", 80];
+if (!(_rxMaxItems isEqualType 0) || { _rxMaxItems < 10 }) then { _rxMaxItems = 80; };
+_rxMaxItems = (_rxMaxItems min 160) max 10;
+
+private _rxMaxText = missionNamespace getVariable ["ARC_consoleRxMaxTextLen", 220];
+if (!(_rxMaxText isEqualType 0) || { _rxMaxText < 40 }) then { _rxMaxText = 220; };
+_rxMaxText = (_rxMaxText min 500) max 40;
+
+private _trimRxText = {
+    params ["_v", ["_fallback", ""]];
+    private _s = if (_v isEqualType "") then { trim _v } else { _fallback };
+    if ((count _s) > _rxMaxText) then { _s = _s select [0, _rxMaxText]; };
+    _s
+};
+
 // Own MainList while INTEL is active so cross-tab rebuild logic can detect transitions.
 private _owner = uiNamespace getVariable ["ARC_console_mainListOwner", ""];
 if (!(_owner isEqualType "")) then { _owner = ""; };
@@ -571,6 +586,7 @@ if (_rebuild) then
 
         private _intelLog = missionNamespace getVariable ["ARC_pub_intelLog", []];
         if (!(_intelLog isEqualType [])) then { _intelLog = []; };
+        if ((count _intelLog) > _rxMaxItems) then { _intelLog = _intelLog select [((count _intelLog) - _rxMaxItems) max 0, _rxMaxItems]; };
 
         // Show last 25
         private _start = ((count _intelLog) - 25) max 0;
@@ -579,6 +595,7 @@ if (_rebuild) then
             private _e = _intelLog # _i;
             if (!(_e isEqualType [] && { (count _e) >= 6 })) then { continue; };
             _e params ["_id", "_t", "_cat", "_sum", "_p", "_meta"];
+            _sum = [_sum, ""] call _trimRxText;
             private _g = if (_p isEqualType [] && { (count _p) >= 2 }) then { mapGridPosition _p } else { "" };
             private _label = format ["[%1] %2%3", toUpper _cat, _sum, if (_g isEqualTo "") then {""} else {format [" @ %1", _g]}];
             private _idx = _list lbAdd _label;
@@ -1059,6 +1076,7 @@ else
             private _id = _arg;
             private _intelLog = missionNamespace getVariable ["ARC_pub_intelLog", []];
             if (!(_intelLog isEqualType [])) then { _intelLog = []; };
+            if ((count _intelLog) > _rxMaxItems) then { _intelLog = _intelLog select [((count _intelLog) - _rxMaxItems) max 0, _rxMaxItems]; };
 
             private _match = [];
             {
@@ -1072,6 +1090,7 @@ else
             else
             {
                 _match params ["_iid", "_t", "_cat", "_sum", "_p", "_meta"];
+                _sum = [_sum, ""] call _trimRxText;
                 private _g = if (_p isEqualType [] && { (count _p) >= 2 }) then { mapGridPosition _p } else { "" };
 
                 private _detailsTxt = "";
@@ -1082,6 +1101,9 @@ else
                         {
                             private _k = _x # 0;
                             private _v = _x # 1;
+                            _k = [_k, ""] call _trimRxText;
+                            if !(_v isEqualType "") then { _v = str _v; };
+                            _v = [_v, ""] call _trimRxText;
                             _detailsTxt = _detailsTxt + format ["<br/><t color='#AAAAAA'>%1:</t> %2", _k, _v];
                         };
                     } forEach _meta;

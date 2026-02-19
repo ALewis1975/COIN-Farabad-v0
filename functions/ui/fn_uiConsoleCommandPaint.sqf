@@ -26,6 +26,21 @@ params [
 
 if (isNull _display) exitWith {false};
 
+private _rxMaxItems = missionNamespace getVariable ["ARC_consoleRxMaxItems", 80];
+if (!(_rxMaxItems isEqualType 0) || { _rxMaxItems < 10 }) then { _rxMaxItems = 80; };
+_rxMaxItems = (_rxMaxItems min 160) max 10;
+
+private _rxMaxText = missionNamespace getVariable ["ARC_consoleRxMaxTextLen", 220];
+if (!(_rxMaxText isEqualType 0) || { _rxMaxText < 40 }) then { _rxMaxText = 220; };
+_rxMaxText = (_rxMaxText min 500) max 40;
+
+private _trimText = {
+    params ["_v", ["_fallback", ""]];
+    private _s = if (_v isEqualType "") then { trim _v } else { _fallback };
+    if ((count _s) > _rxMaxText) then { _s = _s select [0, _rxMaxText]; };
+    _s
+};
+
 private _ctrlMain = _display displayCtrl 78010;
 private _b2 = _display displayCtrl 78022;
 
@@ -73,10 +88,12 @@ private _holdMain = missionNamespace getVariable ["ARC_activeIncidentHoldMain", 
 private _foSummary = missionNamespace getVariable ["ARC_activeIncidentFollowOnSummary", ""];
 if (!(_foSummary isEqualType "")) then { _foSummary = ""; };
 _foSummary = trim _foSummary;
+_foSummary = [_foSummary, ""] call _trimText;
 
 private _sysFoLeadName = missionNamespace getVariable ["ARC_activeIncidentFollowOnLeadName", ""];
 if (!(_sysFoLeadName isEqualType "")) then { _sysFoLeadName = ""; };
 _sysFoLeadName = trim _sysFoLeadName;
+_sysFoLeadName = [_sysFoLeadName, ""] call _trimText;
 
 private _sysFoLeadPos = missionNamespace getVariable ["ARC_activeIncidentFollowOnLeadPos", []];
 
@@ -84,6 +101,7 @@ private _sysFoLeadPos = missionNamespace getVariable ["ARC_activeIncidentFollowO
 // Queue stats
 private _qTail = missionNamespace getVariable ["ARC_pub_queueTail", []];
 if (!(_qTail isEqualType [])) then { _qTail = []; };
+if ((count _qTail) > _rxMaxItems) then { _qTail = _qTail select [((count _qTail) - _rxMaxItems) max 0, _rxMaxItems]; };
 
 private _items = _qTail select { (_x isEqualType []) && { (count _x) >= 12 } };
 private _pending = _items select { (toUpper (_x param [2, "", [""]])) isEqualTo "PENDING" };
@@ -171,6 +189,8 @@ else
     if (_acceptedBy isNotEqualTo "") then
     {
         private _orders = missionNamespace getVariable ["ARC_pub_orders", []];
+        if (!(_orders isEqualType [])) then { _orders = []; };
+        if ((count _orders) > _rxMaxItems) then { _orders = _orders select [((count _orders) - _rxMaxItems) max 0, _rxMaxItems]; };
         if (_orders isEqualType []) then
         {
             for "_i" from ((count _orders) - 1) to 0 step -1 do
@@ -217,6 +237,7 @@ _lines pushBack "<t size='1.05' font='PuristaMedium'>Unit Status Board</t>";
 _lines pushBack "<br/>";
 private _statusRows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
 if (!(_statusRows isEqualType [])) then { _statusRows = []; };
+if ((count _statusRows) > _rxMaxItems) then { _statusRows = _statusRows select [0, _rxMaxItems]; };
 if ((count _statusRows) isEqualTo 0) then
 {
     _lines pushBack "<t size='0.95' color='#BBBBBB'>No unit status reports.</t>";
@@ -228,7 +249,7 @@ else
         if (!(_x isEqualType []) || { (count _x) < 2 }) then { continue; };
         private _gid = _x # 0;
         private _stRaw = _x # 1;
-        private _reason = if ((count _x) >= 5 && { (_x # 4) isEqualType "" }) then { _x # 4 } else { "" };
+        private _reason = if ((count _x) >= 5 && { (_x # 4) isEqualType "" }) then { [(_x # 4), ""] call _trimText } else { "" };
         private _fmt = [_stRaw, _reason] call _statusFmt;
         private _st = _fmt # 0;
         private _stColor = _fmt # 1;
