@@ -137,7 +137,7 @@ _requests = [_requests] call ARC_fnc_airbaseClearanceSortRequests;
 
 private _decisionWord = if (_approve) then {"approved"} else {"denied"};
 if (_requesterOwner > 0) then {
-    ["Airbase Clearance", format ["%1 %2 by %3", _requestId, _decisionWord, _name], 6] remoteExec ["ARC_fnc_clientToast", _requesterOwner];
+    ["Airbase Clearance", format ["Request %1 %2 by tower (%3)", _requestId, _decisionWord, _name], 6] remoteExec ["ARC_fnc_clientToast", _requesterOwner];
 };
 private _controllerOwner = owner _caller;
 if (_controllerOwner > 0) then {

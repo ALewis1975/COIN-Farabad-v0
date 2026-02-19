@@ -170,6 +170,14 @@ private _canAirQueueManage = _canAirPrioritize || _canAirCancel;
 private _canAirControl = _canAirHoldRelease || _canAirQueueManage || _canAirStaff;
 
 private _canAirRead = _canAirControl || _isOmni || _canTocFull || _isBnCmd;
+private _pilotTokens = missionNamespace getVariable ["airbase_v1_pilotGroupTokens", ["EFS", "HAWG", "VIPER", "PILOT"]];
+if (!(_pilotTokens isEqualType [])) then { _pilotTokens = ["EFS", "HAWG", "VIPER", "PILOT"]; };
+private _canAirPilot = false;
+{
+    if (_x isEqualType "" && { [player, _x] call ARC_fnc_rolesHasGroupIdToken }) exitWith { _canAirPilot = true; };
+} forEach _pilotTokens;
+if (!_canAirPilot && _isBnCmd) then { _canAirPilot = true; };
+
 uiNamespace setVariable ["ARC_console_airCanHold", _canAirHold];
 uiNamespace setVariable ["ARC_console_airCanRelease", _canAirRelease];
 uiNamespace setVariable ["ARC_console_airCanPrioritize", _canAirPrioritize];
@@ -179,6 +187,8 @@ uiNamespace setVariable ["ARC_console_airCanQueueManage", _canAirQueueManage];
 uiNamespace setVariable ["ARC_console_airCanStaff", _canAirStaff];
 uiNamespace setVariable ["ARC_console_airCanRead", _canAirRead];
 uiNamespace setVariable ["ARC_console_airCanControl", _canAirControl];
+uiNamespace setVariable ["ARC_console_airCanPilot", _canAirPilot];
+uiNamespace setVariable ["ARC_console_airMode", if (_canAirPilot && !_canAirControl) then {"PILOT"} else {"TOWER"}];
 
 // ---------------------------------------------------------------------------
 // Build tab list (store ids so selection events map to stable strings)

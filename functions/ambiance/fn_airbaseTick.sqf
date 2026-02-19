@@ -217,7 +217,7 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
 
         private _requesterOwnerAwait = -1;
         { if ((getPlayerUID _x) isEqualTo _requesterUidAwait) exitWith { _requesterOwnerAwait = owner _x; }; } forEach allPlayers;
-        [_requesterOwnerAwait, "TOAST", "Airbase Clearance", format ["%1 awaiting tower decision", _ridAwait], format ["AIR_REQ_AWAIT:%1", _ridAwait]] call _fnNotifyMaybe;
+        [_requesterOwnerAwait, "TOAST", "Airbase Clearance", format ["Request queued: %1 awaiting tower decision", _ridAwait], format ["AIR_REQ_AWAIT:%1", _ridAwait]] call _fnNotifyMaybe;
         {
             private _towUid = _x param [1, ""];
             private _towOwner = -1;
@@ -260,7 +260,7 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
 
         private _requesterOwnerAi = -1;
         { if ((getPlayerUID _x) isEqualTo _requesterUidAi) exitWith { _requesterOwnerAi = owner _x; }; } forEach allPlayers;
-        [_requesterOwnerAi, "TOAST", "Airbase Clearance", format ["%1 auto-approved (timeout)", _ridAi], format ["AIR_REQ_APPROVE_AI:%1", _ridAi]] call _fnNotifyMaybe;
+        [_requesterOwnerAi, "TOAST", "Airbase Clearance", format ["Request approved by timeout: %1", _ridAi], format ["AIR_REQ_APPROVE_AI:%1", _ridAi]] call _fnNotifyMaybe;
 
         if (_opsLogEnabled || _debugOps) then {
             ["OPS", format ["AIRBASE CLEARANCE: %1 auto-approved by AI timeout", _rec param [0, ""]], _center, 0, [

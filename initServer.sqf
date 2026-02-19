@@ -152,6 +152,7 @@ missionNamespace setVariable ["civsub_v1_debug", true, true];            // enab
 // AIRBASE tower authorization test posture (BN Command group access enabled for validation drills)
 missionNamespace setVariable ["airbase_v1_tower_allowBnCmd", true, true];
 missionNamespace setVariable ["airbase_v1_tower_bnCommandTokens", ["BNCMD", "BN COMMAND", "BNHQ", "BN CO", "BNCO", "BN CDR", "REDFALCON 6", "REDFALCON6", "FALCON 6", "FALCON6"], true];
+missionNamespace setVariable ["airbase_v1_pilotGroupTokens", ["EFS", "HAWG", "VIPER", "PILOT"], true];
 
 
 // ============================================================================
