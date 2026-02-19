@@ -109,9 +109,29 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
 
         private _last = missionNamespace getVariable ["ARC_pub_stateUpdatedAt", -1];
 
+        // Preferred path: react immediately to server snapshot publish events.
+        private _pvEhId = missionNamespace getVariable ["ARC_clientSnapshotPvEhId", -1];
+        if (_pvEhId < 0) then
+        {
+            _pvEhId = missionNamespace addPublicVariableEventHandler ["ARC_pub_stateUpdatedAt", {
+                uiNamespace setVariable ["ARC_console_dirty", true];
+
+                private _refreshEnabled = missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false];
+                private _hasPubState = !isNil { missionNamespace getVariable "ARC_pub_state" };
+                if (_refreshEnabled || _hasPubState) then
+                {
+                    [] call ARC_fnc_briefingUpdateClient;
+                    if (!isNil "ARC_fnc_tocRefreshClient") then { [] call ARC_fnc_tocRefreshClient; };
+                };
+            }];
+
+            missionNamespace setVariable ["ARC_clientSnapshotPvEhId", _pvEhId];
+        };
+
+        // Fallback resilience path: if PV events are missed in edge cases, poll less frequently.
         while {true} do
         {
-            uiSleep 0.5;
+            uiSleep 2;
             private _now = missionNamespace getVariable ["ARC_pub_stateUpdatedAt", _last];
             if (_now isEqualType 0 && { _now != _last }) then
             {
