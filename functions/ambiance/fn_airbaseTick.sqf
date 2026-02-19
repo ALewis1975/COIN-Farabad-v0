@@ -419,7 +419,6 @@ private _assets = [_rt, "assets", []] call _fnHmGet;
                         ["vehType", _vehType]
                     ]
                 ];
-                _recs pushBack _recA;
                 private _routeDecisionA = ["ARR", "AMBIENT", _fidA] call ARC_fnc_airbaseBuildRouteDecision;
                 private _routeOkA = _routeDecisionA param [0, false];
                 private _routeMetaA = _routeDecisionA param [1, []];
@@ -433,6 +432,7 @@ private _assets = [_rt, "assets", []] call _fnHmGet;
                     };
                     continue;
                 };
+                _recs pushBack _recA;
                 _queue pushBack [_fidA, "ARR", _aid, _routeMetaA];
 
                 _a set ["state", "RETURN_QUEUED"];
@@ -548,16 +548,16 @@ if (!_holdDepartures && { _rollDep } && { (count _candidates) > 0 }) then {
         if (_forceFirstDeparture) then { _rt set ["firstDepartureDone", false]; };
     } else {
         _queue pushBack [_fid, "DEP", _aid, _routeMetaDep];
-    };
 
-    _rt set ["lastDepartTs", _nowTs];
-    if (_forceFirstDeparture) then { _rt set ["firstDepartureDone", true]; };
+        _rt set ["lastDepartTs", _nowTs];
+        if (_forceFirstDeparture) then { _rt set ["firstDepartureDone", true]; };
 
-    if (_opsLogEnabled || _debugOps) then {
-        ["OPS", format ["AIRBASE: queued departure %1 (%2)", _fid, _aid], _center, 0, [
-            ["category", _cat],
-            ["vehType", ([_asset, "startVehType", ""] call _fnHmGet)]
-        ]] call ARC_fnc_intelLog;
+        if (_opsLogEnabled || _debugOps) then {
+            ["OPS", format ["AIRBASE: queued departure %1 (%2)", _fid, _aid], _center, 0, [
+                ["category", _cat],
+                ["vehType", ([_asset, "startVehType", ""] call _fnHmGet)]
+            ]] call ARC_fnc_intelLog;
+        };
     };
 };
 
