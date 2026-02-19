@@ -72,6 +72,7 @@ class CfgFunctions
 
             // User-friendly tasks + intel feed
             class publicBroadcastState {};
+            class statePublishPublic {};
             class intelLog {};
             class intelCreateMarker {};
             class intelBroadcast {};
