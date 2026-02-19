@@ -136,6 +136,22 @@ private _notifyState = missionNamespace getVariable ["airbase_v1_notifyState", c
 if !(_notifyState isEqualType createHashMap) then { _notifyState = createHashMap; };
 private _notifyDirty = false;
 
+private _metaGet = {
+    params ["_rows", "_k", "_def"];
+    private _v = _def;
+    {
+        if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x # 0)) isEqualTo _k }) exitWith { _v = _x # 1; };
+    } forEach _rows;
+    _v
+};
+
+private _metaSet = {
+    params ["_rows", "_k", "_v"];
+    private _idx = _rows findIf { _x isEqualType [] && { (count _x) >= 2 } && { ((_x # 0)) isEqualTo _k } };
+    if (_idx < 0) then { _rows pushBack [_k, _v]; } else { _rows set [_idx, [_k, _v]]; };
+    _rows
+};
+
 private _fnEventPush = {
     params ["_kind", "_rid", "_actorUid", "_targetUid", ["_meta", []]];
     _events pushBack [_nowTs, _kind, _rid, _actorUid, _targetUid, _meta];
@@ -201,21 +217,6 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
 
     private _meta = _rec param [10, []];
     if (!(_meta isEqualType [])) then { _meta = []; };
-
-    private _metaGet = {
-        params ["_rows", "_k", "_def"];
-        private _v = _def;
-        {
-            if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x # 0)) isEqualTo _k }) exitWith { _v = _x # 1; };
-        } forEach _rows;
-        _v
-    };
-    private _metaSet = {
-        params ["_rows", "_k", "_v"];
-        private _idx = _rows findIf { _x isEqualType [] && { (count _x) >= 2 } && { ((_x # 0)) isEqualTo _k } };
-        if (_idx < 0) then { _rows pushBack [_k, _v]; } else { _rows set [_idx, [_k, _v]]; };
-        _rows
-    };
 
     private _warnGateAdv = missionNamespace getVariable ["airbase_v1_arrival_warn_advisory_m", 7000];
     private _warnGateCau = missionNamespace getVariable ["airbase_v1_arrival_warn_caution_m", 4500];
@@ -419,7 +420,20 @@ private _assets = [_rt, "assets", []] call _fnHmGet;
                     ]
                 ];
                 _recs pushBack _recA;
-                _queue pushBack [_fidA, "ARR", _aid];
+                private _routeDecisionA = ["ARR", "AMBIENT", _fidA] call ARC_fnc_airbaseBuildRouteDecision;
+                private _routeOkA = _routeDecisionA param [0, false];
+                private _routeMetaA = _routeDecisionA param [1, []];
+                private _routeReasonA = _routeDecisionA param [2, "ROUTE_DECISION_FAILED"];
+                if (!_routeOkA) then {
+                    if (_opsLogEnabled || _debugOps) then {
+                        ["OPS", format ["AIRBASE ROUTE: blocked ambient arrival %1 (%2)", _fidA, _routeReasonA], _center, 0, [
+                            ["flightId", _fidA],
+                            ["reason", _routeReasonA]
+                        ]] call ARC_fnc_intelLog;
+                    };
+                    continue;
+                };
+                _queue pushBack [_fidA, "ARR", _aid, _routeMetaA];
 
                 _a set ["state", "RETURN_QUEUED"];
                 _a set ["activeFlight", _fidA];
@@ -517,7 +531,24 @@ if (!_holdDepartures && { _rollDep } && { (count _candidates) > 0 }) then {
         ]
     ];
     _recs pushBack _rec;
-    _queue pushBack [_fid, "DEP", _aid];
+    private _routeDecisionDep = ["DEP", "AMBIENT", _fid] call ARC_fnc_airbaseBuildRouteDecision;
+    private _routeOkDep = _routeDecisionDep param [0, false];
+    private _routeMetaDep = _routeDecisionDep param [1, []];
+    private _routeReasonDep = _routeDecisionDep param [2, "ROUTE_DECISION_FAILED"];
+    if (!_routeOkDep) then {
+        if (_opsLogEnabled || _debugOps) then {
+            ["OPS", format ["AIRBASE ROUTE: blocked ambient departure %1 (%2)", _fid, _routeReasonDep], _center, 0, [
+                ["flightId", _fid],
+                ["assetId", _aid],
+                ["reason", _routeReasonDep]
+            ]] call ARC_fnc_intelLog;
+        };
+        _recs deleteAt ((count _recs) - 1);
+        _rt set ["lastDepartTs", _nowTs - (_cdDep * 0.8)];
+        if (_forceFirstDeparture) then { _rt set ["firstDepartureDone", false]; };
+    } else {
+        _queue pushBack [_fid, "DEP", _aid, _routeMetaDep];
+    };
 
     _rt set ["lastDepartTs", _nowTs];
     if (_forceFirstDeparture) then { _rt set ["firstDepartureDone", true]; };
@@ -540,8 +571,23 @@ if (_rollArr) then {
 
     private _recA = [_fidA, _nowTs, "ARR", _catA, "INBOUND", "QUEUED", _nowTs, [["mode","RANDOM"]]];
     _recs pushBack _recA;
-    _queue pushBack [_fidA, "ARR", "INBOUND"];
-    _rt set ["lastArriveTs", _nowTs];
+    private _routeDecisionArr = ["ARR", "AMBIENT", _fidA] call ARC_fnc_airbaseBuildRouteDecision;
+    private _routeOkArr = _routeDecisionArr param [0, false];
+    private _routeMetaArr = _routeDecisionArr param [1, []];
+    private _routeReasonArr = _routeDecisionArr param [2, "ROUTE_DECISION_FAILED"];
+    if (_routeOkArr) then {
+        _queue pushBack [_fidA, "ARR", "INBOUND", _routeMetaArr];
+        _rt set ["lastArriveTs", _nowTs];
+    } else {
+        _recs deleteAt ((count _recs) - 1);
+        _rt set ["lastArriveTs", _nowTs - (_cdArr * 0.8)];
+        if (_opsLogEnabled || _debugOps) then {
+            ["OPS", format ["AIRBASE ROUTE: blocked ambient inbound %1 (%2)", _fidA, _routeReasonArr], _center, 0, [
+                ["flightId", _fidA],
+                ["reason", _routeReasonArr]
+            ]] call ARC_fnc_intelLog;
+        };
+    };
 
     if (_opsLogEnabled || _debugOps) then {
         ["OPS", format ["AIRBASE: queued inbound arrival %1 (%2)", _fidA, _catA], _center, 0, []] call ARC_fnc_intelLog;
@@ -817,8 +863,14 @@ for "_i" from 0 to ((count _queue) - 1) do {
 
 if ((_opsLogEnabled || _debugOps) && { _policyReason isNotEqualTo "NO_ELIGIBLE" }) then {
     private _picked = _queue # _policyIdx;
-    _picked params ["_pfid", "_pk", "_pd"];
-    ["OPS", format ["AIRBASE POLICY: %1 selected %2 (%3 %4)", _policyReason, _pfid, _pk, _pd], _center, 0, _policyMeta] call ARC_fnc_intelLog;
+    _picked params ["_pfid", "_pk", "_pd", ["_prouteMeta", []]];
+    if !(_prouteMeta isEqualType []) then { _prouteMeta = []; };
+    private _laneDecision = [_prouteMeta, "runwayLaneDecision", "-"] call _metaGet;
+    private _runwayMarker = [_prouteMeta, "runwayMarker", "-"] call _metaGet;
+    private _policyMetaExt = +_policyMeta;
+    _policyMetaExt pushBack ["laneDecision", _laneDecision];
+    _policyMetaExt pushBack ["runwayMarker", _runwayMarker];
+    ["OPS", format ["AIRBASE POLICY: %1 selected %2 (%3 %4 lane=%5 rwy=%6)", _policyReason, _pfid, _pk, _pd, _laneDecision, _runwayMarker], _center, 0, _policyMetaExt] call ARC_fnc_intelLog;
 };
 
 if (_policyIdx < 0) exitWith {
@@ -833,16 +885,17 @@ if (_policyIdx < 0) exitWith {
 };
 
 private _item = _queue deleteAt _policyIdx;
-_item params ["_fid", "_kind", "_detail"];
+_item params ["_fid", "_kind", "_detail", ["_routeMeta", []]];
+if !(_routeMeta isEqualType []) then { _routeMeta = []; };
 
-private _reserveS = missionNamespace getVariable ["airbase_v1_runwayReserveWindow_s", 120];
+private _reserveS = [_routeMeta, "runwayReserveWindowS", missionNamespace getVariable ["airbase_v1_runwayReserveWindow_s", 120]] call _metaGet;
 if (!(_reserveS isEqualType 0) || { _reserveS < 30 }) then { _reserveS = 120; };
 private _reserved = [_fid, _kind, _detail, _reserveS, _policyReason] call ARC_fnc_airbaseRunwayLockReserve;
 if (_reserved) then {
     ["LOCK_ACQUIRE", _fid, "SYSTEM", "", [_kind, _detail, _policyReason]] call _fnEventPush;
 };
 if (!_reserved) exitWith {
-    _queue insert [_policyIdx, [[_fid, _kind, _detail]]];
+    _queue insert [_policyIdx, [[_fid, _kind, _detail, _routeMeta]]];
     ["airbase_v1_queue", _queue] call ARC_fnc_stateSet;
     if (_opsLogEnabled || _debugOps) then {
         ["OPS", format ["AIRBASE POLICY: reserve failed; re-queued %1 (%2 %3)", _fid, _kind, _detail], _center, 0, [
@@ -863,8 +916,9 @@ if (_idxRecActive >= 0) then {
 ["airbase_v1_queue", _queue] call ARC_fnc_stateSet;
 ["airbase_v1_records", _recs] call ARC_fnc_stateSet;
 
-[_fid, _kind, _detail] spawn {
-    params ["_fid", "_kind", "_detail"];
+[_fid, _kind, _detail, _routeMeta] spawn {
+    params ["_fid", "_kind", "_detail", ["_routeMeta", []]];
+    if !(_routeMeta isEqualType []) then { _routeMeta = []; };
 
     private _fnHmGetLocal = {
         params ["_hm", "_key", "_fallback"];
@@ -885,7 +939,14 @@ if (_idxRecActive >= 0) then {
     if ((count _evExec) > _evExecMax) then { _evExec deleteRange [0, (count _evExec) - _evExecMax]; };
     ["airbase_v1_events", _evExec] call ARC_fnc_stateSet;
 
-    private _occupyTimeoutS = missionNamespace getVariable ["airbase_v1_runwayOccupyTimeout_s", 900];
+    private _occupyTimeoutS = [_routeMeta, "runwayOccupyWindowS", missionNamespace getVariable ["airbase_v1_runwayOccupyTimeout_s", 900]] call {
+        params ["_rows", "_k", "_def"];
+        private _v = _def;
+        {
+            if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x # 0)) isEqualTo _k }) exitWith { _v = _x # 1; };
+        } forEach _rows;
+        _v
+    };
     if (!(_occupyTimeoutS isEqualType 0) || { _occupyTimeoutS < 60 }) then { _occupyTimeoutS = 900; };
     private _occupied = [_fid, _kind, _detail, _occupyTimeoutS, "EXEC_START"] call ARC_fnc_airbaseRunwayLockOccupy;
     if (!_occupied) exitWith {

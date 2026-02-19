@@ -60,6 +60,51 @@ missionNamespace setVariable ["airbase_v1_arrival_warn_advisory_m", _warnAdvisor
 missionNamespace setVariable ["airbase_v1_arrival_warn_caution_m", _warnCautionM, true];
 missionNamespace setVariable ["airbase_v1_arrival_warn_urgent_m", _warnUrgentM, true];
 
+private _departRunwayMarker = missionNamespace getVariable ["airbase_v1_depart_runway_marker", "R-270 Outbound"];
+if (!(_departRunwayMarker isEqualType "") || { _departRunwayMarker isEqualTo "" }) then { _departRunwayMarker = "R-270 Outbound"; };
+missionNamespace setVariable ["airbase_v1_depart_runway_marker", _departRunwayMarker, true];
+
+private _departTaxiEgress = missionNamespace getVariable ["airbase_v1_depart_taxi_egress_marker", "T-R Egress"];
+if (!(_departTaxiEgress isEqualType "") || { _departTaxiEgress isEqualTo "" }) then { _departTaxiEgress = "T-R Egress"; };
+missionNamespace setVariable ["airbase_v1_depart_taxi_egress_marker", _departTaxiEgress, true];
+
+private _departTaxiIngress = missionNamespace getVariable ["airbase_v1_depart_taxi_ingress_marker", "T-R Ingress"];
+if (!(_departTaxiIngress isEqualType "") || { _departTaxiIngress isEqualTo "" }) then { _departTaxiIngress = "T-R Ingress"; };
+missionNamespace setVariable ["airbase_v1_depart_taxi_ingress_marker", _departTaxiIngress, true];
+
+private _arrivalTaxiEgress = missionNamespace getVariable ["airbase_v1_arrival_taxi_egress_marker", "T-L Egress"];
+if (!(_arrivalTaxiEgress isEqualType "") || { _arrivalTaxiEgress isEqualTo "" }) then { _arrivalTaxiEgress = "T-L Egress"; };
+missionNamespace setVariable ["airbase_v1_arrival_taxi_egress_marker", _arrivalTaxiEgress, true];
+
+private _arrivalTaxiIngress = missionNamespace getVariable ["airbase_v1_arrival_taxi_ingress_marker", "T-L Ingress"];
+if (!(_arrivalTaxiIngress isEqualType "") || { _arrivalTaxiIngress isEqualTo "" }) then { _arrivalTaxiIngress = "T-L Ingress"; };
+missionNamespace setVariable ["airbase_v1_arrival_taxi_ingress_marker", _arrivalTaxiIngress, true];
+
+private _taxiConnectors = missionNamespace getVariable ["airbase_v1_taxi_center_connectors", ["mkr_airbaseCenter"]];
+if !(_taxiConnectors isEqualType []) then { _taxiConnectors = ["mkr_airbaseCenter"]; };
+private _taxiConnectorsNorm = [];
+{
+    if (_x isEqualType "" && { _x isNotEqualTo "" }) then { _taxiConnectorsNorm pushBackUnique _x; };
+} forEach _taxiConnectors;
+if ((count _taxiConnectorsNorm) == 0) then { _taxiConnectorsNorm = ["mkr_airbaseCenter"]; };
+missionNamespace setVariable ["airbase_v1_taxi_center_connectors", _taxiConnectorsNorm, true];
+
+private _reserveDepS = missionNamespace getVariable ["airbase_v1_runwayReserveWindow_dep_s", missionNamespace getVariable ["airbase_v1_runwayReserveWindow_s", 120]];
+if (!(_reserveDepS isEqualType 0) || { _reserveDepS < 30 }) then { _reserveDepS = 120; };
+missionNamespace setVariable ["airbase_v1_runwayReserveWindow_dep_s", _reserveDepS, true];
+
+private _reserveArrS = missionNamespace getVariable ["airbase_v1_runwayReserveWindow_arr_s", missionNamespace getVariable ["airbase_v1_runwayReserveWindow_s", 120]];
+if (!(_reserveArrS isEqualType 0) || { _reserveArrS < 30 }) then { _reserveArrS = 120; };
+missionNamespace setVariable ["airbase_v1_runwayReserveWindow_arr_s", _reserveArrS, true];
+
+private _occupyDepS = missionNamespace getVariable ["airbase_v1_runwayOccupyTimeout_dep_s", missionNamespace getVariable ["airbase_v1_runwayOccupyTimeout_s", 900]];
+if (!(_occupyDepS isEqualType 0) || { _occupyDepS < 60 }) then { _occupyDepS = 900; };
+missionNamespace setVariable ["airbase_v1_runwayOccupyTimeout_dep_s", _occupyDepS, true];
+
+private _occupyArrS = missionNamespace getVariable ["airbase_v1_runwayOccupyTimeout_arr_s", missionNamespace getVariable ["airbase_v1_runwayOccupyTimeout_s", 900]];
+if (!(_occupyArrS isEqualType 0) || { _occupyArrS < 60 }) then { _occupyArrS = 900; };
+missionNamespace setVariable ["airbase_v1_runwayOccupyTimeout_arr_s", _occupyArrS, true];
+
 private _inboundTaxiMarkers = missionNamespace getVariable ["airbase_v1_inbound_taxi_markers", ["L-270 Inbound", "T-L Egress", "T-L Ingress"]];
 if !(_inboundTaxiMarkers isEqualType []) then { _inboundTaxiMarkers = ["L-270 Inbound", "T-L Egress", "T-L Ingress"]; };
 private _inboundTaxiMarkersNorm = [];
