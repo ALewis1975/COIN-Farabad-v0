@@ -20,6 +20,21 @@ params [
 
 if (isNull _display) exitWith {false};
 
+private _rxMaxItems = missionNamespace getVariable ["ARC_consoleRxMaxItems", 80];
+if (!(_rxMaxItems isEqualType 0) || { _rxMaxItems < 10 }) then { _rxMaxItems = 80; };
+_rxMaxItems = (_rxMaxItems min 160) max 10;
+
+private _rxMaxText = missionNamespace getVariable ["ARC_consoleRxMaxTextLen", 220];
+if (!(_rxMaxText isEqualType 0) || { _rxMaxText < 40 }) then { _rxMaxText = 220; };
+_rxMaxText = (_rxMaxText min 500) max 40;
+
+private _trimText = {
+    params ["_v", ["_fallback", ""]];
+    private _s = if (_v isEqualType "") then { trim _v } else { _fallback };
+    if ((count _s) > _rxMaxText) then { _s = _s select [0, _rxMaxText]; };
+    _s
+};
+
 private _ctrlMain = _display displayCtrl 78010;
 if (isNull _ctrlMain) exitWith {false};
 
@@ -99,6 +114,7 @@ else
 // Group orders summary
 private _orders = missionNamespace getVariable ["ARC_pub_orders", []];
 if (!(_orders isEqualType [])) then { _orders = []; };
+if ((count _orders) > _rxMaxItems) then { _orders = _orders select [0, _rxMaxItems]; };
 private _issued = [];
 private _accepted = [];
 {
@@ -125,8 +141,10 @@ else
 // Lead pool / intel feed summary
 private _leadPool = missionNamespace getVariable ["ARC_leadPoolPublic", []];
 if (!(_leadPool isEqualType [])) then { _leadPool = []; };
+if ((count _leadPool) > _rxMaxItems) then { _leadPool = _leadPool select [0, _rxMaxItems]; };
 private _intelLog = missionNamespace getVariable ["ARC_pub_intelLog", []];
 if (!(_intelLog isEqualType [])) then { _intelLog = []; };
+if ((count _intelLog) > _rxMaxItems) then { _intelLog = _intelLog select [((count _intelLog) - _rxMaxItems) max 0, _rxMaxItems]; };
 
 private _lastIntel = "<t color='#BBBBBB'>No intel logged yet.</t>";
 if ((count _intelLog) > 0) then
@@ -136,6 +154,7 @@ if ((count _intelLog) > 0) then
     {
         _last params ["_id", "_t", "_cat", "_sum", "_p", "_meta"]; 
         private _g = if (_p isEqualType [] && { (count _p) >= 2 }) then { mapGridPosition _p } else { "" };
+        _sum = [_sum, ""] call _trimText;
         _lastIntel = format ["<t color='#DDDDDD'>[%1] %2</t><t color='#AAAAAA'> %3</t>", toUpper _cat, _sum, if (_g isEqualTo "") then {""} else { format ["@ %1", _g] }];
     };
 };
@@ -143,6 +162,7 @@ if ((count _intelLog) > 0) then
 // Queue summary
 private _qPendingArr = missionNamespace getVariable ["ARC_pub_queuePending", []];
 if (!(_qPendingArr isEqualType [])) then { _qPendingArr = []; };
+if ((count _qPendingArr) > _rxMaxItems) then { _qPendingArr = _qPendingArr select [0, _rxMaxItems]; };
 private _qPendingCnt = count _qPendingArr;
 private _qPendingColor = "#FFFFFF";
 if (_qPendingCnt >= 5) then { _qPendingColor = "#FF7A7A"; } else {
@@ -151,6 +171,7 @@ if (_qPendingCnt >= 5) then { _qPendingColor = "#FF7A7A"; } else {
 private _qPending = format ["<t color='%1'>%2</t>", _qPendingColor, _qPendingCnt];
 private _statusRows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
 if (!(_statusRows isEqualType [])) then { _statusRows = []; };
+if ((count _statusRows) > _rxMaxItems) then { _statusRows = _statusRows select [0, _rxMaxItems]; };
 
 private _unitLines = [];
 {
@@ -158,7 +179,7 @@ private _unitLines = [];
     private _gidU = _x # 0;
     private _stRaw = if ((_x # 1) isEqualType "") then { toUpper (trim (_x # 1)) } else { "UNAVAILABLE" };
     if (_stRaw isEqualTo "OFFLINE") then { _stRaw = "UNAVAILABLE"; };
-    private _why = if ((count _x) >= 5 && { (_x # 4) isEqualType "" }) then { trim (_x # 4) } else { "" };
+    private _why = if ((count _x) >= 5 && { (_x # 4) isEqualType "" }) then { [(_x # 4), ""] call _trimText } else { "" };
     private _stColor = "#FFD166";
     if (_stRaw in ["AVAILABLE", "ON SCENE"]) then { _stColor = "#9FE870"; };
     if (_stRaw in ["UNAVAILABLE", "FAILED"]) then { _stColor = "#FF7A7A"; };

@@ -25,6 +25,14 @@ params [
 
 if (isNull _display) exitWith {false};
 
+private _rxMaxItems = missionNamespace getVariable ["ARC_consoleRxMaxItems", 80];
+if (!(_rxMaxItems isEqualType 0) || { _rxMaxItems < 10 }) then { _rxMaxItems = 80; };
+_rxMaxItems = (_rxMaxItems min 160) max 10;
+
+private _rxMaxText = missionNamespace getVariable ["ARC_consoleRxMaxTextLen", 220];
+if (!(_rxMaxText isEqualType 0) || { _rxMaxText < 40 }) then { _rxMaxText = 220; };
+_rxMaxText = (_rxMaxText min 500) max 40;
+
 private _ctrlMain = _display displayCtrl 78010;
 private _ctrlList = _display displayCtrl 78011;
 private _ctrlDetails = _display displayCtrl 78012;
@@ -57,6 +65,7 @@ private _safeStr = {
     params ["_s", ["_fallback", "N/A"]];
     if (!(_s isEqualType "")) exitWith {_fallback};
     _s = trim _s;
+    if ((count _s) > _rxMaxText) then { _s = _s select [0, _rxMaxText]; };
     if (_s isEqualTo "") then {_fallback} else {_s};
 };
 
@@ -122,6 +131,7 @@ if (_rebuild) then
     lbClear _cOrd;
     private _orders = missionNamespace getVariable ["ARC_pub_orders", []];
     if (!(_orders isEqualType [])) then { _orders = []; };
+    if ((count _orders) > _rxMaxItems) then { _orders = _orders select [((count _orders) - _rxMaxItems) max 0, _rxMaxItems]; };
     private _gid = groupId group player;
     private _mine = _orders select {
         _x isEqualType [] && { (count _x) >= 5 } && { (_x # 4) isEqualTo _gid }
@@ -158,6 +168,7 @@ if (_rebuild) then
     lbClear _cLead;
     private _leads = missionNamespace getVariable ["ARC_leadPoolPublic", []];
     if (!(_leads isEqualType [])) then { _leads = []; };
+    if ((count _leads) > _rxMaxItems) then { _leads = _leads select [0, _rxMaxItems]; };
 
     if ((count _leads) isEqualTo 0) then
     {
@@ -223,6 +234,7 @@ private _isAuth = [player] call ARC_fnc_rolesIsAuthorized;
 private _gidSelf = groupId (group player);
 private _statusRows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
 if (!(_statusRows isEqualType [])) then { _statusRows = []; };
+if ((count _statusRows) > _rxMaxItems) then { _statusRows = _statusRows select [0, _rxMaxItems]; };
 private _statusIdx = _statusRows findIf { _x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _gidSelf } };
 private _unitStatus = if (_statusIdx < 0) then { "OFFLINE" } else { toUpper (trim ((_statusRows # _statusIdx) # 1)) };
 
@@ -251,6 +263,7 @@ else
             private _closeReady = missionNamespace getVariable ["ARC_activeIncidentCloseReady", false]; if (!(_closeReady isEqualType true) && !(_closeReady isEqualType false)) then { _closeReady = false; };
             private _sitrepSent = missionNamespace getVariable ["ARC_activeIncidentSitrepSent", false]; if (!(_sitrepSent isEqualType true) && !(_sitrepSent isEqualType false)) then { _sitrepSent = false; };
             private _sitrepDetails = missionNamespace getVariable ["ARC_activeIncidentSitrepDetails", ""]; if (!(_sitrepDetails isEqualType "")) then { _sitrepDetails = ""; };
+            _sitrepDetails = [_sitrepDetails, ""] call _safeStr;
 
             _details = format ["<t size='1.2' font='PuristaMedium'>%1</t><br/>", _dispName];
             if ((trim _typ) != "") then { _details = _details + format ["<t color='#A0A0A0'>Type:</t> %1<br/>", toUpper (trim _typ)]; };
@@ -321,6 +334,7 @@ else
         case "ORDER":
         {
             private _orders = missionNamespace getVariable ["ARC_pub_orders", []]; if (!(_orders isEqualType [])) then { _orders = []; };
+            if ((count _orders) > _rxMaxItems) then { _orders = _orders select [((count _orders) - _rxMaxItems) max 0, _rxMaxItems]; };
             private _o = _orders findIf { _x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _id } };
             if (_o < 0) then
             {
@@ -366,6 +380,7 @@ else
         case "LEAD":
         {
             private _leads = missionNamespace getVariable ["ARC_leadPoolPublic", []]; if (!(_leads isEqualType [])) then { _leads = []; };
+            if ((count _leads) > _rxMaxItems) then { _leads = _leads select [0, _rxMaxItems]; };
             private _idx = _leads findIf { _x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _id } };
             if (_idx < 0) then
             {
