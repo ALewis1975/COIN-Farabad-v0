@@ -53,11 +53,19 @@ params [
 if (!([_unit, "ARC_fnc_tocReceiveSitrep", "SITREP rejected: sender verification failed.", "TOC_SITREP_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
-if (_taskId isEqualTo "") exitWith {false};
+if (_taskId isEqualTo "") exitWith
+{
+    if (!isNull _unit) then { ["SITREP", "REJECTED", "No active incident is available for SITREP."] remoteExec ["ARC_fnc_uiConsoleOpsActionStatus", owner _unit]; };
+    false
+};
 
 private _accepted = ["activeIncidentAccepted", false] call ARC_fnc_stateGet;
 if (!(_accepted isEqualType true)) then { _accepted = false; };
-if (!_accepted) exitWith {false};
+if (!_accepted) exitWith
+{
+    if (!isNull _unit) then { ["SITREP", "REJECTED", "Incident has not been accepted yet."] remoteExec ["ARC_fnc_uiConsoleOpsActionStatus", owner _unit]; };
+    false
+};
 
 // Role-gated SITREPs (RHSUSAF Officer / Squad Leader classnames).
 if (!isNull _unit && { !([_unit] call ARC_fnc_rolesIsAuthorized) }) exitWith
@@ -65,6 +73,7 @@ if (!isNull _unit && { !([_unit] call ARC_fnc_rolesIsAuthorized) }) exitWith
     private _whoBad = [_unit] call ARC_fnc_rolesFormatUnit;
     diag_log format ["[ARC][SITREP] Rejecting SITREP from unauthorized role: %1", _whoBad];
     ["You are not authorized to send ARC SITREPs. Authorized: RHSUSAF Officer / Squad Leader classnames."] remoteExec ["ARC_fnc_clientHint", owner _unit];
+    ["SITREP", "REJECTED", "You are not authorized to submit SITREPs."] remoteExec ["ARC_fnc_uiConsoleOpsActionStatus", owner _unit];
     false
 };
 
@@ -78,6 +87,7 @@ if (!_updateOnly && { !_closeReady } && { _tU isNotEqualTo "IED" }) exitWith
 {
     private _msg = "SITREP rejected: incident still in progress. Complete the objective or wait for the incident timer to expire.";
     if (!isNull _unit) then { [_msg] remoteExec ["ARC_fnc_clientHint", owner _unit]; };
+    if (!isNull _unit) then { ["SITREP", "REJECTED", "Incident still in progress; wait for close-ready."] remoteExec ["ARC_fnc_uiConsoleOpsActionStatus", owner _unit]; };
     false
 };
 
@@ -87,7 +97,7 @@ private _alreadySent = ["activeIncidentSitrepSent", false] call ARC_fnc_stateGet
 if (!(_alreadySent isEqualType true)) then { _alreadySent = false; };
 if (_alreadySent) exitWith
 {
-    // Silently reject duplicates to avoid spam/race conditions.
+    if (!isNull _unit) then { ["SITREP", "REJECTED", "SITREP already submitted for this incident."] remoteExec ["ARC_fnc_uiConsoleOpsActionStatus", owner _unit]; };
     false
 };
 
@@ -198,6 +208,7 @@ if (!_nearOk) exitWith
 {
     private _msg = format ["SITREP rejected: you must be within %1m of the active task / objective / convoy to send a SITREP.", round _prox];
     if (!isNull _unit) then { [_msg] remoteExec ["ARC_fnc_clientHint", owner _unit]; };
+    if (!isNull _unit) then { ["SITREP", "REJECTED", format ["Move within %1m and retry.", round _prox]] remoteExec ["ARC_fnc_uiConsoleOpsActionStatus", owner _unit]; };
     false
 };
 
@@ -429,6 +440,11 @@ if (!_updateOnly && { _recU in ["SUCCEEDED", "FAILED"] }) then
 
 // Persist after SITREP so restarts preserve the gating and the audit trail
 [] call ARC_fnc_stateSave;
+
+if (!isNull _unit) then
+{
+    ["SITREP", "ACCEPTED", "SITREP received by TOC."] remoteExec ["ARC_fnc_uiConsoleOpsActionStatus", owner _unit];
+};
 
 // Phase 6: force-save CIVSUB on SITREP submission (best-effort)
 if (missionNamespace getVariable ["civsub_v1_enabled", false]) then
