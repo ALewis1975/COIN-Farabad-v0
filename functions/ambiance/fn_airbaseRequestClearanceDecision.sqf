@@ -110,6 +110,34 @@ if (_approve) then {
 };
 _rec set [10, _meta];
 
+if (_approve) then {
+    private _flowKind = if ((toUpperANSI (_rec param [1, ""])) in ["REQ_INBOUND", "REQ_LAND"]) then { "ARR" } else { "DEP" };
+    private _decisionRoute = [_flowKind, "PLAYER", _requestId] call ARC_fnc_airbaseBuildRouteDecision;
+    private _routeOk = _decisionRoute param [0, false];
+    private _routeMeta = _decisionRoute param [1, []];
+    private _routeReason = _decisionRoute param [2, "ROUTE_DECISION_FAILED"];
+
+    if (!_routeOk) exitWith {
+        private _owner = owner _caller;
+        if (_owner > 0) then { [format ["Decision rejected: route invalid (%1).", _routeReason]] remoteExec ["ARC_fnc_clientHint", _owner]; };
+        false
+    };
+
+    private _runwayState = missionNamespace getVariable ["airbase_v1_runwayState", "OPEN"];
+    if (!(_runwayState isEqualType "")) then { _runwayState = "OPEN"; };
+    private _runwayOwner = missionNamespace getVariable ["airbase_v1_runwayOwner", ""];
+    if (!(_runwayOwner isEqualType "")) then { _runwayOwner = ""; };
+    if (_runwayState in ["RESERVED", "OCCUPIED"] && { _runwayOwner isNotEqualTo "" }) exitWith {
+        private _owner = owner _caller;
+        if (_owner > 0) then { [format ["Decision rejected: runway locked (%1 by %2).", _runwayState, _runwayOwner]] remoteExec ["ARC_fnc_clientHint", _owner]; };
+        false
+    };
+
+    { _meta pushBack _x; } forEach _routeMeta;
+    _meta pushBack ["routeValidatedAtDecision", _now];
+    _rec set [10, _meta];
+};
+
 _requests set [_idx, _rec];
 
 private _hIdx = _history findIf { ((_x param [0, ""]) isEqualTo _requestId) };

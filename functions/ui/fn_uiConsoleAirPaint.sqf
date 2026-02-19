@@ -237,8 +237,11 @@ if (_rebuild) then {
             private _fid = _x param [0, ""];
             private _kind = _x param [1, ""];
             private _asset = _x param [2, ""];
+            private _routeMeta = _x param [3, []];
+            if !(_routeMeta isEqualType []) then { _routeMeta = []; };
+            private _laneDecision = [_routeMeta, "runwayLaneDecision", "-"] call _metaGet;
 
-            private _lbl = format ["%1  [%2] %3", _fid, _kind, _asset];
+            private _lbl = format ["%1  [%2] %3 lane=%4", _fid, _kind, _asset, _laneDecision];
             private _row = _ctrlList lbAdd _lbl;
             _ctrlList lbSetData [_row, format ["FLT|%1|%2|%3", _fid, _kind, _asset]];
         } forEach _nextItems;
@@ -339,6 +342,7 @@ private _nextActionOwner = "TOWER";
 private _selectedState = "NONE";
 private _selectedUpdated = -1;
 private _selectedDetail = "Select a row.";
+private _selectedRouteDetail = "-";
 
 private _primaryLabel = "HOLD";
 private _secondaryLabel = "RELEASE";
@@ -365,6 +369,16 @@ switch (_rowType) do {
             _selectedUpdated = parseNumber (_parts param [5, "-1"]);
             _nextActionOwner = "TOWER_CONTROLLER";
             _selectedDetail = format ["Request %1 (%2) from %3", _rid, _parts param [2, ""], _parts param [3, ""]];
+            private _reqIdx = _clearancePending findIf { (_x param [0, ""]) isEqualTo _rid };
+            if (_reqIdx >= 0) then {
+                private _reqRec = _clearancePending # _reqIdx;
+                private _reqMeta = _reqRec param [9, []];
+                private _laneDecision = [_reqMeta, "runwayLaneDecision", "-"] call _metaGet;
+                private _runwayMarker = [_reqMeta, "runwayMarker", "-"] call _metaGet;
+                private _chain = [_reqMeta, "routeMarkerChain", []] call _metaGet;
+                if !(_chain isEqualType []) then { _chain = []; };
+                _selectedRouteDetail = format ["%1 via %2 (%3)", _laneDecision, _runwayMarker, if ((count _chain) > 0) then { _chain joinString " -> " } else { "no-chain" }];
+            };
             _primaryLabel = "APPROVE";
             _secondaryLabel = "DENY";
             _primaryEnabled = _canAirQueueManage;
@@ -391,6 +405,16 @@ switch (_rowType) do {
             _selectedUpdated = _stateUpdatedAt;
             _nextActionOwner = "TOWER_CONTROLLER";
             _selectedDetail = format ["Flight %1 [%2] %3", _fid, _parts param [2, ""], _parts param [3, ""]];
+            private _fltIdx = _nextItems findIf { (_x param [0, ""]) isEqualTo _fid };
+            if (_fltIdx >= 0) then {
+                private _fltMeta = (_nextItems # _fltIdx) param [3, []];
+                if !(_fltMeta isEqualType []) then { _fltMeta = []; };
+                private _laneDecision = [_fltMeta, "runwayLaneDecision", "-"] call _metaGet;
+                private _runwayMarker = [_fltMeta, "runwayMarker", "-"] call _metaGet;
+                private _chain = [_fltMeta, "routeMarkerChain", []] call _metaGet;
+                if !(_chain isEqualType []) then { _chain = []; };
+                _selectedRouteDetail = format ["%1 via %2 (%3)", _laneDecision, _runwayMarker, if ((count _chain) > 0) then { _chain joinString " -> " } else { "no-chain" }];
+            };
             _primaryLabel = "EXPEDITE";
             _secondaryLabel = "CANCEL";
             _primaryEnabled = _canAirQueueManage;
@@ -506,9 +530,10 @@ private _details = format [
     + "<br/>Last update: <t color='#FFFFFF'>%13</t>"
     + "<br/>Next action owner: <t color='#FFFFFF'>%14</t>"
     + "<br/><t color='#CFCFCF'>%15</t>"
+    + "<br/>Route decision: <t color='#FFFFFF'>%16</t>"
     + "<br/><br/><t color='#B89B6B'>Pending/Awaiting</t>"
-    + "<br/>Awaiting tower decision: <t color='#FFFFFF'>%16</t>"
-    + "<br/>Arrival warnings (A/C/U): <t color='#FFFFFF'>%17/%18/%19m</t>",
+    + "<br/>Awaiting tower decision: <t color='#FFFFFF'>%17</t>"
+    + "<br/>Arrival warnings (A/C/U): <t color='#FFFFFF'>%18/%19/%20m</t>",
     _canText,
     _depQueued,
     _arrQueued,
@@ -524,6 +549,7 @@ private _details = format [
     [_selectedUpdated] call _fmtTime,
     _nextActionOwner,
     _selectedDetail,
+    _selectedRouteDetail,
     _awaitingCount,
     [_air, "arrivalWarnAdvisoryM", 7000] call _getPub,
     [_air, "arrivalWarnCautionM", 4500] call _getPub,

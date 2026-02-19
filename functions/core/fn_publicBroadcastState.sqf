@@ -144,10 +144,13 @@ private _nextItems = [];
 for "_i" from 0 to (_nextN - 1) do
 {
     private _it = _airQueue # _i;
+    private _routeMeta = _it param [3, []];
+    if !(_routeMeta isEqualType []) then { _routeMeta = []; };
     _nextItems pushBack [
         _it param [0, ""],
         _it param [1, ""],
-        _it param [2, ""]
+        _it param [2, ""],
+        _routeMeta
     ];
 };
 

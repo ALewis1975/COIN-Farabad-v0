@@ -621,6 +621,7 @@ class Ops
 
             // Clearance request RPCs (server authority + client wrappers)
             class airbaseClearanceSortRequests {};
+            class airbaseBuildRouteDecision {};
             class airbaseSubmitClearanceRequest {};
             class airbaseCancelClearanceRequest {};
             class airbaseMarkClearanceEmergency {};

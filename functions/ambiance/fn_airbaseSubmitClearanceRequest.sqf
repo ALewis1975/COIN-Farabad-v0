@@ -262,6 +262,29 @@ private _record = [
     ]
 ];
 
+private _flowKind = if (_requestType in ["REQ_INBOUND", "REQ_LAND"]) then { "ARR" } else { "DEP" };
+private _routeDecision = [_flowKind, "PLAYER", _requestId] call ARC_fnc_airbaseBuildRouteDecision;
+private _routeOk = _routeDecision param [0, false];
+private _routeMeta = _routeDecision param [1, []];
+private _routeReason = _routeDecision param [2, "ROUTE_DECISION_FAILED"];
+if (!_routeOk) exitWith {
+    if (_callerOwner > 0) then { [format ["Clearance request rejected: invalid route (%1).", _routeReason]] remoteExec ["ARC_fnc_clientHint", _callerOwner]; };
+    ["OPS", format ["AIRBASE CLEARANCE DENIED: %1 route invalid (%2)", _requestId, _routeReason], getPosATL _caller, [
+        ["event", "AIRBASE_CLEARANCE_ROUTE_INVALID"],
+        ["requestId", _requestId],
+        ["requestType", _requestType],
+        ["caller", _callerName],
+        ["uid", _callerUid],
+        ["reason", _routeReason]
+    ]] call ARC_fnc_intelLog;
+    false
+};
+
+private _meta = _record param [10, []];
+if (!(_meta isEqualType [])) then { _meta = []; };
+{ _meta pushBack _x; } forEach _routeMeta;
+_record set [10, _meta];
+
 _requests pushBack _record;
 _requests = [_requests] call ARC_fnc_airbaseClearanceSortRequests;
 _history pushBack _record;
