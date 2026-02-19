@@ -215,6 +215,150 @@ private _eventsView = _eventsTail apply {
     ]
 };
 
+private _blockedRouteWindow = missionNamespace getVariable ["airbase_v1_publicBlockedRouteWindow", 25];
+if (!(_blockedRouteWindow isEqualType 0) || { _blockedRouteWindow < 1 }) then { _blockedRouteWindow = 25; };
+
+private _readReasonFromMeta = {
+    params ["_meta"];
+    private _reason = "";
+    if !(_meta isEqualType []) exitWith { _reason };
+
+    if ((count _meta) > 0) then {
+        private _first = _meta # 0;
+        if (_first isEqualType "") then {
+            _reason = _first;
+        } else {
+            if (_first isEqualType [] && { (count _first) >= 2 } && { ((_first # 0) isEqualType "") }) then {
+                _reason = _first # 1;
+            };
+        };
+    };
+
+    if (_reason isEqualTo "") then {
+        private _idxReason = _meta findIf { _x isEqualType [] && { (count _x) >= 2 } && { toUpperANSI (_x # 0) in ["REASON", "ROUTEVALIDATIONREASON"] } };
+        if (_idxReason >= 0) then { _reason = (_meta # _idxReason) # 1; };
+    };
+
+    if !(_reason isEqualType "") then { _reason = str _reason; };
+    toUpperANSI (trim _reason)
+};
+
+private _extractBlockedReason = {
+    params ["_txt"];
+    if !(_txt isEqualType "") exitWith { "" };
+    private _t = trim _txt;
+    private _open = _t find "(";
+    if (_open < 0) exitWith { "" };
+    private _out = "";
+    private _close = _t find ")";
+    if (_close > _open) then { _out = _t select [_open + 1, _close - _open - 1]; };
+    toUpperANSI (trim _out)
+};
+
+private _extractBlockedSourceId = {
+    params ["_txt"];
+    if !(_txt isEqualType "") exitWith { "" };
+    private _tokens = _txt splitString " :()[]|,.;\t\n\r";
+    private _found = "";
+    {
+        private _t = toUpperANSI (trim _x);
+        if (_t isEqualTo "") then { continue; };
+        if ((_t find "FLT-") == 0 || { (_t find "CLR-") == 0 } || { (_t find "REQ-") == 0 }) exitWith {
+            _found = _t;
+        };
+    } forEach _tokens;
+    _found
+};
+
+private _metaValue = {
+    params ["_meta", "_key", ["_def", ""]];
+    if !(_meta isEqualType []) exitWith { _def };
+    private _idx = _meta findIf {
+        _x isEqualType [] &&
+        { (count _x) >= 2 } &&
+        { ((_x # 0) isEqualType "") } &&
+        { (toUpperANSI (_x # 0)) isEqualTo (toUpperANSI _key) }
+    };
+    if (_idx < 0) exitWith { _def };
+    (_meta # _idx) # 1
+};
+
+private _blockedRouteTail = [];
+
+{
+    if !(_x isEqualType []) then { continue; };
+    private _kind = toUpperANSI (_x param [1, ""]);
+    private _reason = [(_x param [5, []])] call _readReasonFromMeta;
+    if ((_kind in ["DENY", "REJECT", "ROUTE_BLOCK"]) && { (_reason find "ROUTE") >= 0 || { (_reason find "MARKER") >= 0 } }) then {
+        _blockedRouteTail pushBack [
+            _x param [0, -1],
+            _reason,
+            _x param [2, ""]
+        ];
+    };
+} forEach _airEvents;
+
+{
+    if !(_x isEqualType []) then { continue; };
+    if ((count _x) < 4) then { continue; };
+    private _cat = toUpperANSI (_x param [2, ""]);
+    if (_cat isNotEqualTo "OPS") then { continue; };
+
+    private _summary = _x param [3, ""];
+    if !(_summary isEqualType "") then { _summary = str _summary; };
+    private _summaryU = toUpperANSI _summary;
+
+    private _meta = _x param [5, []];
+    if !(_meta isEqualType []) then { _meta = []; };
+    private _eventCode = toUpperANSI ([_meta, "event", ""] call _metaValue);
+    private _metaReason = toUpperANSI ([_meta, "reason", ""] call _metaValue);
+
+    private _isRouteBlockedSummary = (_summaryU find "AIRBASE ROUTE: BLOCKED") >= 0;
+    private _isRouteInvalidClearance =
+        (_eventCode isEqualTo "AIRBASE_CLEARANCE_ROUTE_INVALID") ||
+        {
+            (_summaryU find "AIRBASE CLEARANCE DENIED") >= 0 &&
+            {
+                (_summaryU find "ROUTE INVALID") >= 0 ||
+                { (_metaReason find "ROUTE") >= 0 || { (_metaReason find "MARKER") >= 0 } }
+            }
+        };
+    if !(_isRouteBlockedSummary || _isRouteInvalidClearance) then { continue; };
+
+    private _reason = if (_metaReason isEqualTo "") then { [_summaryU] call _extractBlockedReason } else { _metaReason };
+    if (_reason isEqualTo "") then { _reason = "ROUTE_DENIED"; };
+    private _sourceId = toUpperANSI ([_meta, "flightId", ""] call _metaValue);
+    if (_sourceId isEqualTo "") then { _sourceId = toUpperANSI ([_meta, "requestId", ""] call _metaValue); };
+    if (_sourceId isEqualTo "") then { _sourceId = [_summaryU] call _extractBlockedSourceId; };
+
+    _blockedRouteTail pushBack [
+        _x param [1, -1],
+        _reason,
+        _sourceId
+    ];
+} forEach _log;
+
+if ((count _blockedRouteTail) > _blockedRouteWindow) then {
+    _blockedRouteTail = _blockedRouteTail select [(count _blockedRouteTail) - _blockedRouteWindow, _blockedRouteWindow];
+};
+
+private _blockedRouteLatestReason = "-";
+private _blockedRouteLatestSourceId = "-";
+if ((count _blockedRouteTail) > 0) then {
+    private _lastBlocked = _blockedRouteTail # ((count _blockedRouteTail) - 1);
+    _blockedRouteLatestReason = _lastBlocked param [1, "-"];
+    _blockedRouteLatestSourceId = _lastBlocked param [2, "-"];
+    if (_blockedRouteLatestReason isEqualTo "") then { _blockedRouteLatestReason = "-"; };
+    if (_blockedRouteLatestSourceId isEqualTo "") then { _blockedRouteLatestSourceId = "-"; };
+};
+
+private _blockedTailN = missionNamespace getVariable ["airbase_v1_publicBlockedRouteTailMax", 3];
+if (!(_blockedTailN isEqualType 0) || { _blockedTailN < 1 }) then { _blockedTailN = 3; };
+private _blockedRouteTailView = +_blockedRouteTail;
+if ((count _blockedRouteTailView) > _blockedTailN) then {
+    _blockedRouteTailView = _blockedRouteTailView select [(count _blockedRouteTailView) - _blockedTailN, _blockedTailN];
+};
+
 private _airbasePub = [
     ["depQueued", _depQueued],
     ["arrQueued", _arrQueued],
@@ -236,6 +380,10 @@ private _airbasePub = [
     ["clearanceHistoryTail", _clearanceHistoryTail],
     ["towerStaffing", _staffingView],
     ["recentEvents", _eventsView],
+    ["blockedRouteAttemptsRecent", count _blockedRouteTail],
+    ["blockedRouteLatestReason", _blockedRouteLatestReason],
+    ["blockedRouteLatestSourceId", _blockedRouteLatestSourceId],
+    ["blockedRouteTail", _blockedRouteTailView],
     ["arrivalRunwayMarker", _arrivalRunwayMarker],
     ["arrivalLandGateM", _arrivalLandGateM],
     ["arrivalWarnAdvisoryM", _arrivalWarnAdvisoryM],
