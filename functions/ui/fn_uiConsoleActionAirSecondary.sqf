@@ -35,6 +35,14 @@ if (_airMode isEqualTo "PILOT") exitWith {
     true
 };
 
+private _canAirPilot = ["ARC_console_airCanPilot", false] call ARC_fnc_uiNsGetBool;
+if (_canAirPilot && { _rowType isEqualTo "HDR" }) exitWith {
+    uiNamespace setVariable ["ARC_console_airMode", "PILOT"];
+    ["AIR", "Switched AIR submode to PILOT."] call ARC_fnc_clientToast;
+    [_disp] call ARC_fnc_uiConsoleRefresh;
+    true
+};
+
 switch (_rowType) do
 {
     case "REQ":

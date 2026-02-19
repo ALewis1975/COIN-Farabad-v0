@@ -40,6 +40,16 @@ private _pilotAllowed = false;
     if (_x isEqualType "" && { [ _caller, _x ] call ARC_fnc_rolesHasGroupIdToken }) exitWith { _pilotAllowed = true; };
 } forEach _pilotTokens;
 
+private _allowBnCmd = missionNamespace getVariable ["airbase_v1_tower_allowBnCmd", false];
+if (!(_allowBnCmd isEqualType true) && !(_allowBnCmd isEqualType false)) then { _allowBnCmd = false; };
+if (!_pilotAllowed && _allowBnCmd) then {
+    private _bnTokens = missionNamespace getVariable ["airbase_v1_tower_bnCommandTokens", ["BNCMD", "BN COMMAND", "BNHQ", "BN CO", "BNCO", "BN CDR", "REDFALCON 6", "REDFALCON6", "FALCON 6", "FALCON6"]];
+    if (!(_bnTokens isEqualType [])) then { _bnTokens = ["BNCMD", "BN COMMAND", "BNHQ"]; };
+    {
+        if (_x isEqualType "" && { [_caller, _x] call ARC_fnc_rolesHasGroupIdToken }) exitWith { _pilotAllowed = true; };
+    } forEach _bnTokens;
+};
+
 if !_pilotAllowed exitWith {
     private _owner = owner _caller;
     if (_owner > 0) then { ["Clearance request rejected: pilot group authorization required."] remoteExec ["ARC_fnc_clientHint", _owner]; };
