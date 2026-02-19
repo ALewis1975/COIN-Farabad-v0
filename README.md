@@ -1,3 +1,5 @@
+![Task Force Redfalcon Banner](pics/tf_redfalcon_banner.jpg)
+
 # Farabad COIN (2011)
 
 **A persistent, multiplayer counterinsurgency mission for Arma 3**
