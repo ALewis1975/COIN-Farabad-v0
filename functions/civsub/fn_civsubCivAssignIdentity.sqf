@@ -38,6 +38,8 @@ if (missionNamespace getVariable ["civsub_v1_interactions_enabled", true]) then 
 
     // Legacy ACE interactions (kept for now; trimmed to SHERIFF-only in Step 5)
     [_unit] remoteExecCall ["ARC_fnc_civsubCivAddAceActions", 0, _unit];
+
+    diag_log format ["[CIVSUB][IDENTITY] Queued client actions for unit netId=%1 district=%2", netId _unit, _districtId];
 };
 
 true
