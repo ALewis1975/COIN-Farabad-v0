@@ -163,18 +163,20 @@ private _canAirHold = ["HOLD"] call _towerAllowsAction;
 private _canAirRelease = ["RELEASE"] call _towerAllowsAction;
 private _canAirPrioritize = ["PRIORITIZE"] call _towerAllowsAction;
 private _canAirCancel = ["CANCEL"] call _towerAllowsAction;
+private _canAirStaff = ["STAFF"] call _towerAllowsAction;
 
 private _canAirHoldRelease = _canAirHold || _canAirRelease;
 private _canAirQueueManage = _canAirPrioritize || _canAirCancel;
-private _canAirControl = _canAirHoldRelease || _canAirQueueManage;
+private _canAirControl = _canAirHoldRelease || _canAirQueueManage || _canAirStaff;
 
-private _canAirRead = _canAirControl || _isOmni || _canTocFull;
+private _canAirRead = _canAirControl || _isOmni || _canTocFull || _isBnCmd;
 uiNamespace setVariable ["ARC_console_airCanHold", _canAirHold];
 uiNamespace setVariable ["ARC_console_airCanRelease", _canAirRelease];
 uiNamespace setVariable ["ARC_console_airCanPrioritize", _canAirPrioritize];
 uiNamespace setVariable ["ARC_console_airCanCancel", _canAirCancel];
 uiNamespace setVariable ["ARC_console_airCanHoldRelease", _canAirHoldRelease];
 uiNamespace setVariable ["ARC_console_airCanQueueManage", _canAirQueueManage];
+uiNamespace setVariable ["ARC_console_airCanStaff", _canAirStaff];
 uiNamespace setVariable ["ARC_console_airCanRead", _canAirRead];
 uiNamespace setVariable ["ARC_console_airCanControl", _canAirControl];
 

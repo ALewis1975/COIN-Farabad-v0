@@ -20,6 +20,12 @@ if (isNull _actor || {isNull _civ}) exitWith {[false, "<t size='0.9'>Invalid tar
 if !(isPlayer _actor) exitWith {[false, "<t size='0.9'>Invalid actor.</t>"]};
 if !(_civ getVariable ["civsub_v1_isCiv", false]) exitWith {[false, "<t size='0.9'>Not a CIVSUB civilian.</t>"]};
 
+if (isNil "ARC_fnc_civsubIdentityTouch") then { ARC_fnc_civsubIdentityTouch = compile preprocessFileLineNumbers "functions\civsub\fn_civsubIdentityTouch.sqf"; };
+if (isNil "ARC_fnc_civsubIdentityGenerateUid") then { ARC_fnc_civsubIdentityGenerateUid = compile preprocessFileLineNumbers "functions\civsub\fn_civsubIdentityGenerateUid.sqf"; };
+if (isNil "ARC_fnc_civsubCrimeDbPickPoiForDistrict") then { ARC_fnc_civsubCrimeDbPickPoiForDistrict = compile preprocessFileLineNumbers "functions\civsub\fn_civsubCrimeDbPickPoiForDistrict.sqf"; };
+if (isNil "ARC_fnc_civsubCrimeDbGetById") then { ARC_fnc_civsubCrimeDbGetById = compile preprocessFileLineNumbers "functions\civsub\fn_civsubCrimeDbGetById.sqf"; };
+if (isNil "ARC_fnc_civsubEmitDelta") then { ARC_fnc_civsubEmitDelta = compile preprocessFileLineNumbers "functions\civsub\fn_civsubEmitDelta.sqf"; };
+
 private _setStep = {
     params ["_step"];
     _civ setVariable ["civsub_bg_lastStep", _step, false];
