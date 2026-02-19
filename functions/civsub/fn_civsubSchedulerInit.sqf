@@ -14,15 +14,20 @@ if !(missionNamespace getVariable ["civsub_v1_scheduler_enabled", false]) exitWi
 if (missionNamespace getVariable ["civsub_v1_schedulerThreadRunning", false]) exitWith {true};
 missionNamespace setVariable ["civsub_v1_schedulerThreadRunning", true, true];
 
-private _schedS = missionNamespace getVariable ["civsub_v1_scheduler_s", 300];
-if (!(_schedS isEqualType 0)) then { _schedS = 300; };
-if (_schedS < 30) then { _schedS = 30; };
+private _schedRaw = missionNamespace getVariable ["civsub_v1_scheduler_s", 300];
+private _schedCheck = [_schedRaw, "SCALAR_BOUNDS", "civsub_v1_scheduler_s", [300, 30, 86400]] call ARC_fnc_paramAssert;
+private _schedS = _schedCheck param [1, 300];
+if !(_schedCheck param [0, false]) then {
+    ["CIVSUB", format ["scheduler init guard: code=%1 msg=%2", _schedCheck param [2, "ARC_ASSERT_UNKNOWN"], _schedCheck param [3, "scheduler interval invalid"]], [["code", _schedCheck param [2, "ARC_ASSERT_UNKNOWN"]], ["guard", "civsubSchedulerInit"], ["key", "civsub_v1_scheduler_s"]]] call ARC_fnc_farabadWarn;
+};
 
 missionNamespace setVariable ["civsub_v1_scheduler_lastTick_ts", serverTime, true];
 
-[] spawn {
+[_schedS] spawn {
+    params [["_sleepS", 300, [0]]];
+
     while { isServer && { missionNamespace getVariable ["civsub_v1_enabled", false] } && { missionNamespace getVariable ["civsub_v1_scheduler_enabled", false] } } do {
-        uiSleep (missionNamespace getVariable ["civsub_v1_scheduler_s", 300]);
+        uiSleep _sleepS;
         [] call ARC_fnc_civsubSchedulerTick;
     };
 

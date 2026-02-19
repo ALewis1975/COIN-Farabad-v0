@@ -25,7 +25,12 @@ private _defaults = [] call ARC_fnc_stateInit;
 if !(_defaults isEqualType []) then { _defaults = []; };
 
 private _raw = missionProfileNamespace getVariable ["ARC_state", []];
-if !(_raw isEqualType []) then { _raw = []; };
+private _rawCheck = [_raw, "ARRAY_SHAPE", "ARC_state(profile)", [[], 0, -1, true]] call ARC_fnc_paramAssert;
+private _rawOk = _rawCheck param [0, false];
+_raw = _rawCheck param [1, []];
+if (!_rawOk) then {
+    ["STATE", format ["stateLoad guard: code=%1 msg=%2", _rawCheck param [2, "ARC_ASSERT_UNKNOWN"], _rawCheck param [3, "ARC_state(profile) invalid"]], ["code", _rawCheck param [2, "ARC_ASSERT_UNKNOWN"], "guard", "stateLoad", "key", "ARC_state"]] call ARC_fnc_farabadWarn;
+};
 
 // Sanitize raw persisted entries
 	private _clean = [];

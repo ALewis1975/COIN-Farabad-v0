@@ -15,6 +15,7 @@ class CfgFunctions
             class farabadInfo {};
             class farabadWarn {};
             class farabadError {};
+            class paramAssert {};
 
             class stateInit {};
             class stateLoad {};
