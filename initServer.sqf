@@ -149,6 +149,10 @@ missionNamespace setVariable ["civsub_v1_scheduler_s", 120, true];        // bas
 missionNamespace setVariable ["civsub_v1_rumor_enabled", true, true];     // set false to disable rumors
 missionNamespace setVariable ["civsub_v1_debug", true, true];            // enables scheduler/diag logs (if present)
 
+// AIRBASE tower authorization test posture (BN Command group access enabled for validation drills)
+missionNamespace setVariable ["airbase_v1_tower_allowBnCmd", true, true];
+missionNamespace setVariable ["airbase_v1_tower_bnCommandTokens", ["BNCMD", "BN COMMAND", "BNHQ", "BN CO", "BNCO", "BN CDR", "REDFALCON 6", "REDFALCON6", "FALCON 6", "FALCON6"], true];
+
 
 // ============================================================================
 // CIVTRAF (ambient civilian traffic) — mostly parked, minimal moving
