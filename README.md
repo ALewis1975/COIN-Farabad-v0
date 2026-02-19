@@ -2,8 +2,6 @@
 
 **A persistent, multiplayer counterinsurgency mission for Arma 3**
 
-[![Arma SQF + Mission Config Preflight](https://github.com/ALewis1975/COIN-Farabad-v0/actions/workflows/arma-preflight.yml/badge.svg)](https://github.com/ALewis1975/COIN-Farabad-v0/actions/workflows/arma-preflight.yml)
-
 ---
 
 ## Overview
