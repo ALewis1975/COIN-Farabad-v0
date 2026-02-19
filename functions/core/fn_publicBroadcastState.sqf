@@ -198,10 +198,8 @@ private _pub = [
     ["airbase", _airbasePub]
 ];
 
-missionNamespace setVariable ["ARC_pub_state", _pub, true];
-// Keep serverTime (not time): this value is replicated as server-authoritative mission elapsed time,
-// and clients consume it as a change token (inequality checks), not as a local-age clock.
-missionNamespace setVariable ["ARC_pub_stateUpdatedAt", serverTime, true];
+private _didPublish = [_pub, "publicBroadcastState", false, 0.25] call ARC_fnc_statePublishPublic;
+if (!_didPublish) exitWith { false };
 // Optional debug snapshot for the in-game inspector diary.
 private _dbgEnabled = missionNamespace getVariable ["ARC_debugInspectorEnabled", false];
 if (!(_dbgEnabled isEqualType true)) then { _dbgEnabled = false; };
