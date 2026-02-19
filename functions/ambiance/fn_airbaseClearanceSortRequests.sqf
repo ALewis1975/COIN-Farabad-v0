@@ -20,7 +20,7 @@ private _rankFor = {
 
     private _priorityClass = "ROUTINE";
     {
-        if ((_x param [0, ""]) isEqualTo "priorityClass") exitWith {
+        if ((toLowerANSI str (_x param [0, ""])) isEqualTo "priorityclass") then {
             _priorityClass = toUpperANSI str (_x param [1, "ROUTINE"]);
         };
     } forEach _meta;
