@@ -795,10 +795,10 @@ diag_log format [
     missionNamespace getVariable ["ARC_debugInspectorEnabled", false]
 ];
 
-// World time controls (explicit startup override posture)
+// World time controls (force reset to mission-editor baseline date/time + multiplier)
 missionNamespace setVariable ["ARC_worldTime_enabled", true, true];
 missionNamespace setVariable ["ARC_worldTime_forceDate", true, true];
-missionNamespace setVariable ["ARC_worldTime_startDate", [2012,6,15,5,30], true];
+missionNamespace setVariable ["ARC_worldTime_startDate", +date, true];
 missionNamespace setVariable ["ARC_worldTime_forceMultiplier", true, true];
 missionNamespace setVariable ["ARC_worldTime_timeMultiplier", 6, true];
 missionNamespace setVariable ["ARC_worldTime_broadcastIntervalSec", 30, true];
