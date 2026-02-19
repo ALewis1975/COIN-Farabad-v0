@@ -185,6 +185,17 @@ _bundle set ["lead_emit", createHashMapFromArray [
 
 // Apply to district + update lastDelta probes (mirrors ARC_fnc_civsubEmitDelta).
 [_bundle] call ARC_fnc_civsubDeltaApplyToDistrict;
+
+// Materialize lead_emit into core lead pool (when bridge is available).
+if (!isNil "ARC_fnc_civsubLeadEmitBridge") then
+{
+    private _bridgedLeadId = [_bundle] call ARC_fnc_civsubLeadEmitBridge;
+    if (_bridgedLeadId isEqualType "" && { _bridgedLeadId isNotEqualTo "" }) then
+    {
+        missionNamespace setVariable ["civsub_v1_lastDelta_leadId", _bridgedLeadId, true];
+    };
+};
+
 missionNamespace setVariable ["civsub_v1_lastDelta_id", _bundle getOrDefault ["bundle_id", ""], true];
 missionNamespace setVariable ["civsub_v1_lastDelta_ts", serverTime, true];
 
