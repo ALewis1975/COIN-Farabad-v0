@@ -95,3 +95,98 @@ The following rows cover the specific CIVIL scenarios requested, with static-ana
 - All seven scenarios should remain under the existing `CIVIL` incident-type umbrella in core incident generation unless/until a new public incident taxonomy is explicitly approved.
 - CIVSUB should remain the authoritative source for civilian-facing interaction effects and counters; THREAT should consume those signals as context, not overwrite them.
 - Server single-writer ownership remains unchanged: CORE writes incident lifecycle, CIVSUB writes civilian district/identity state, and Task/Lead owns lead/task lifecycle.
+
+## Planning and task decomposition mode (implementation wiring plan)
+
+This section translates the matrix into an execution backlog for wiring CIVSUB/THREAT/CORE/Task-Lead with minimal interface churn.
+
+### Workstream 1 — CIVSUB lead bridge into core lead pool (P1)
+
+**Goal:** materialize CIVSUB `lead_emit` envelopes into real leads (`leadPool`) while preserving server authority.
+
+**Primary modules/files:**
+- `functions/civsub/fn_civsubEmitDelta.sqf`
+- `functions/civsub/fn_civsubDeltaApplyToDistrict.sqf`
+- `functions/civsub/fn_civsubInteractCheckPapers.sqf`
+- `functions/civsub/fn_civsubSchedulerEmitAmbientLead.sqf`
+- `functions/core/fn_leadCreate.sqf` (consumer API)
+
+**Tasks:**
+1. Add a server-only CIVSUB bridge helper that inspects bundle `lead_emit` after validation.
+2. Define a deterministic mapping from CIVSUB lead types (`LEAD_DETAIN_SUSPECT`, `HUMINT`, `TIP`, `SUSPICIOUS_ACTIVITY`) to core incident lead types.
+3. Call `ARC_fnc_leadCreate` from the bridge and write created `lead_id` back into bundle metadata for SITREP/debug traceability.
+4. Add caps: per-district hourly max + global hourly max for CIVSUB-originated leads.
+
+**Exit criteria:**
+- Crime DB hits and ambient leads can appear in `ARC_leadPoolPublic` through core lead pipeline.
+- No client-side writes to shared state.
+
+### Workstream 2 — CIVIL incident district binding hardening (P1)
+
+**Goal:** guarantee every civilian-facing incident has a deterministic CIVSUB district context from accept through closeout.
+
+**Primary modules/files:**
+- `functions/core/fn_tocRequestAcceptIncident.sqf`
+- `functions/core/fn_tocReceiveSitrep.sqf`
+- `functions/civsub/fn_civsubSitrepAnnexBuild.sqf`
+
+**Tasks:**
+1. Normalize `activeIncidentCivsubDistrictId` assignment path (accept-time fallback by incident position).
+2. Standardize start snapshot key usage (`activeIncidentCivsubStart` shape) and ensure annex builder reads the same key path.
+3. For named CIVIL incidents, require annex generation to include district counters/deltas at SITREP submission.
+
+**Exit criteria:**
+- No accepted CIVIL incident reaches SITREP without district ID + annex baseline/end data.
+
+### Workstream 3 — Named CIVIL scenario policy hooks (P2)
+
+**Goal:** wire the seven named CIVIL scenarios into consistent, auditable effect policy without new public incident types.
+
+**Primary modules/files:**
+- `functions/civsub/fn_civsubDeltaValidate.sqf`
+- `functions/civsub/fn_civsubDeltaApplyToDistrict.sqf`
+- `functions/civsub/fn_civsubContactActionQuestion.sqf`
+- `functions/civsub/fn_civsubInteractCheckPapers.sqf`
+- `functions/core/fn_tocReceiveSitrep.sqf`
+
+**Tasks:**
+1. Encode scenario guidance as annex interpretation rules (e.g., medical outreach emphasizes `MED_AID_CIV`, crowd-control emphasizes fear/casualty handling quality).
+2. Ensure coercive actions require compliance checks and generate auditable deltas for high-sensitivity scenarios (embassy/VIP).
+3. Add mitigation hints in SITREP annex text for failure outcomes (aid follow-up, detention handoff quality, de-escalation actions).
+
+**Exit criteria:**
+- Each named CIVIL scenario has deterministic annex interpretation and closeout guidance path.
+
+### Workstream 4 — THREAT coupling and guardrails (P2)
+
+**Goal:** let THREAT consume CIVSUB context without taking ownership of CIVSUB state.
+
+**Primary modules/files:**
+- `functions/threat/*` (consumer side)
+- `functions/civsub/fn_civsubSitrepAnnexBuild.sqf`
+- `functions/core/fn_threadOnIncidentClosed.sqf` (for follow-on coupling checks)
+
+**Tasks:**
+1. Consume CIVSUB-derived signals (fear/trust/legitimacy deltas and relevant counters) as threat modifiers, not direct state mutations.
+2. Keep attribution evidence-based: avoid broad district punishments for isolated incidents.
+3. Verify follow-on generation remains owned by core lead/task pipeline.
+
+**Exit criteria:**
+- THREAT reads CIVSUB outputs and adjusts behavior probabilities; CIVSUB remains sole writer of district social state.
+
+### Recommended implementation order
+
+1. Workstream 1 (lead bridge)
+2. Workstream 2 (district binding)
+3. Workstream 3 (named CIVIL policy hooks)
+4. Workstream 4 (THREAT coupling)
+
+### Validation checklist (static + runtime-later)
+
+- Static now:
+  - Symbol/path checks for new bridge wiring and key usage.
+  - `git --no-pager diff --check` on changed files.
+- Runtime later (dedicated server required):
+  - JIP correctness for lead bridge and annex snapshots.
+  - Reconnect/respawn ownership behavior.
+  - Throughput/cap behavior under dense civilian interactions.
