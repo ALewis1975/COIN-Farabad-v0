@@ -142,6 +142,16 @@ missionNamespace setVariable ["civsub_v1_scheduler_lastTick_ts", serverTime, tru
     if (serverTime >= _nextLead) then {
         if (_forceLead || {(random 1) < _pLeadTick}) then {
             private _b = [_did, _d, _intelConf] call ARC_fnc_civsubSchedulerEmitAmbientLead;
+
+            if (!isNil "ARC_fnc_civsubLeadEmitBridge") then
+            {
+                private _bridgedLeadId = [_b] call ARC_fnc_civsubLeadEmitBridge;
+                if (_bridgedLeadId isEqualType "" && { _bridgedLeadId isNotEqualTo "" }) then
+                {
+                    missionNamespace setVariable ["civsub_v1_lastScheduler_leadId", _bridgedLeadId, true];
+                };
+            };
+
             missionNamespace setVariable ["civsub_v1_lastScheduler_bundle", _b, true];
             missionNamespace setVariable ["civsub_v1_lastScheduler_bundle_pairs", [_b] call ARC_fnc_civsubBundleToPairs, true];
 

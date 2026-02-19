@@ -49,6 +49,16 @@ if !(_bundle isEqualType createHashMap) exitWith {createHashMap};
 // Apply influence delta to district
 [_bundle] call ARC_fnc_civsubDeltaApplyToDistrict;
 
+// Optional lead bridge: materialize CIVSUB lead_emit into core leadPool.
+if (!isNil "ARC_fnc_civsubLeadEmitBridge") then
+{
+    private _bridgedLeadId = [_bundle] call ARC_fnc_civsubLeadEmitBridge;
+    if (_bridgedLeadId isEqualType "" && { _bridgedLeadId isNotEqualTo "" }) then
+    {
+        missionNamespace setVariable ["civsub_v1_lastDelta_leadId", _bridgedLeadId, true];
+    };
+};
+
 // Track last emission for debug inspector
 missionNamespace setVariable ["civsub_v1_lastDelta_id", _bundle getOrDefault ["bundle_id", ""], true];
 missionNamespace setVariable ["civsub_v1_lastDelta_ts", serverTime, true];
