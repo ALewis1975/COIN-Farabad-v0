@@ -90,6 +90,17 @@ if (!(_arrQueued isEqualType 0)) then { _arrQueued = 0; };
 private _totalQueued = [_air, "totalQueued", 0] call _getPub;
 if (!(_totalQueued isEqualType 0)) then { _totalQueued = 0; };
 
+private _blockedRouteAttemptsRecent = [_air, "blockedRouteAttemptsRecent", 0] call _getPub;
+if (!(_blockedRouteAttemptsRecent isEqualType 0) || { _blockedRouteAttemptsRecent < 0 }) then { _blockedRouteAttemptsRecent = 0; };
+
+private _blockedRouteLatestReason = [_air, "blockedRouteLatestReason", "-"] call _getPub;
+if (!(_blockedRouteLatestReason isEqualType "")) then { _blockedRouteLatestReason = "-"; };
+if (_blockedRouteLatestReason isEqualTo "") then { _blockedRouteLatestReason = "-"; };
+
+private _blockedRouteLatestSourceId = [_air, "blockedRouteLatestSourceId", "-"] call _getPub;
+if (!(_blockedRouteLatestSourceId isEqualType "")) then { _blockedRouteLatestSourceId = "-"; };
+if (_blockedRouteLatestSourceId isEqualTo "") then { _blockedRouteLatestSourceId = "-"; };
+
 private _execActive = [_air, "execActive", false] call _getPub;
 if (!(_execActive isEqualType true) && !(_execActive isEqualType false)) then { _execActive = false; };
 
@@ -520,24 +531,32 @@ private _details = format [
     + "<br/>Departures queued: <t color='#FFFFFF'>%2</t>"
     + "<br/>Arrivals queued: <t color='#FFFFFF'>%3</t>"
     + "<br/>Total queued: <t color='#FFFFFF'>%4</t>"
+    + "<br/><br/><t color='#B89B6B'>Route Validation</t>"
+    + "<br/>Blocked-route attempts (recent): <t color='#FFFFFF'>%5</t> <t color='#CFCFCF'>(non-queued telemetry)</t>"
+    + "<br/>Latest reason: <t color='#FFFFFF'>%6</t>"
+    + "<br/>Latest source id: <t color='#FFFFFF'>%7</t>"
+    + "<br/><t color='#CFCFCF'>Blocked-route events do not enter queue.</t>"
     + "<br/><br/><t color='#B89B6B'>Runway</t>"
-    + "<br/>State: <t color='#FFFFFF'>%5</t> | Owner: <t color='#FFFFFF'>%6</t>"
-    + "<br/>Hold departures: <t color='#FFFFFF'>%7</t>"
-    + "<br/>Tower: <t color='#FFFFFF'>%8</t> | Ground: <t color='#FFFFFF'>%9</t> | Arrival: <t color='#FFFFFF'>%10</t>"
-    + "<br/>Execution: <t color='#FFFFFF'>%11</t>"
+    + "<br/>State: <t color='#FFFFFF'>%8</t> | Owner: <t color='#FFFFFF'>%9</t>"
+    + "<br/>Hold departures: <t color='#FFFFFF'>%10</t>"
+    + "<br/>Tower: <t color='#FFFFFF'>%11</t> | Ground: <t color='#FFFFFF'>%12</t> | Arrival: <t color='#FFFFFF'>%13</t>"
+    + "<br/>Execution: <t color='#FFFFFF'>%14</t>"
     + "<br/><br/><t color='#B89B6B'>Selection</t>"
-    + "<br/>State: <t color='#FFFFFF'>%12</t>"
-    + "<br/>Last update: <t color='#FFFFFF'>%13</t>"
-    + "<br/>Next action owner: <t color='#FFFFFF'>%14</t>"
-    + "<br/><t color='#CFCFCF'>%15</t>"
-    + "<br/>Route decision: <t color='#FFFFFF'>%16</t>"
+    + "<br/>State: <t color='#FFFFFF'>%15</t>"
+    + "<br/>Last update: <t color='#FFFFFF'>%16</t>"
+    + "<br/>Next action owner: <t color='#FFFFFF'>%17</t>"
+    + "<br/><t color='#CFCFCF'>%18</t>"
+    + "<br/>Route decision: <t color='#FFFFFF'>%19</t>"
     + "<br/><br/><t color='#B89B6B'>Pending/Awaiting</t>"
-    + "<br/>Awaiting tower decision: <t color='#FFFFFF'>%17</t>"
-    + "<br/>Arrival warnings (A/C/U): <t color='#FFFFFF'>%18/%19/%20m</t>",
+    + "<br/>Awaiting tower decision: <t color='#FFFFFF'>%20</t>"
+    + "<br/>Arrival warnings (A/C/U): <t color='#FFFFFF'>%21/%22/%23m</t>",
     _canText,
     _depQueued,
     _arrQueued,
     _totalQueued,
+    _blockedRouteAttemptsRecent,
+    _blockedRouteLatestReason,
+    _blockedRouteLatestSourceId,
     _runwayState,
     if (_runwayOwner isEqualTo "") then {"-"} else {_runwayOwner},
     if (_holdDepartures) then {"HOLD ACTIVE"} else {"OPEN"},
