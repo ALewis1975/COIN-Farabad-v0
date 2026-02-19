@@ -18,8 +18,49 @@ params [ ["_caller", objNull, [objNull]] ];
 private _owner = -1;
 if (!isNil "remoteExecutedOwner") then { _owner = remoteExecutedOwner; };
 
+private _publishResult = {
+    params [
+        ["_ownerId", -1, [0]],
+        ["_resultCode", "UNKNOWN", [""]],
+        ["_title", "TOC", [""]],
+        ["_detail", "", [""]],
+        ["_allowed", false, [true]]
+    ];
+
+    private _stamp = diag_tickTime;
+    missionNamespace setVariable [
+        "ARC_pub_nextIncidentResult",
+        [_stamp, _ownerId, toUpper (trim _resultCode), _title, _detail, _allowed],
+        true
+    ];
+
+    if (!_allowed) then
+    {
+        missionNamespace setVariable [
+            "ARC_pub_nextIncidentLastDenied",
+            [_stamp, toUpper (trim _resultCode), _detail],
+            true
+        ];
+    };
+};
+
 // RemoteExec-only validation path: requires remoteExecutedOwner context.
-if (!([_caller, "ARC_fnc_tocRequestNextIncident", "Incident generation rejected: sender verification failed.", "TOC_NEXT_INCIDENT_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
+if (!([_caller, "ARC_fnc_tocRequestNextIncident", "Incident generation rejected: sender verification failed.", "TOC_NEXT_INCIDENT_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith
+{
+    if (_owner > 0) then
+    {
+        ["Incident generation blocked", "Security validation failed for this request.", 7] remoteExec ["ARC_fnc_clientToast", _owner];
+        [
+            _owner,
+            "SECURITY_DENIED",
+            "Incident generation blocked",
+            "Security validation failed for this request.",
+            false
+        ] call _publishResult;
+    };
+
+    false
+};
 
 private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
 
@@ -81,6 +122,13 @@ if (_taskId isEqualTo "") then
             {
                 ["Incident generation blocked", format ["%1 has an order pending acceptance.", _lastG], 7] remoteExec ["ARC_fnc_clientToast", _owner];
                 _msg remoteExec ["systemChat", _owner];
+                [
+                    _owner,
+                    "ORDER_PENDING_ACCEPT",
+                    "Incident generation blocked",
+                    format ["%1 has an order pending acceptance.", _lastG],
+                    false
+                ] call _publishResult;
             };
 
             false
@@ -104,7 +152,15 @@ if (_taskId isEqualTo "") then
             // Best-effort feedback to the requestor.
             if (_owner > 0) then
             {
+                ["Incident generation blocked", format ["%1 has an accepted RTB order in progress.", _lastG], 7] remoteExec ["ARC_fnc_clientToast", _owner];
                 _msg remoteExec ["systemChat", _owner];
+                [
+                    _owner,
+                    "RTB_ACTIVE",
+                    "Incident generation blocked",
+                    format ["%1 has an accepted RTB order in progress.", _lastG],
+                    false
+                ] call _publishResult;
             };
 
             false
@@ -112,11 +168,35 @@ if (_taskId isEqualTo "") then
     };
 
     [] call ARC_fnc_incidentCreate;
+
+    if (_owner > 0) then
+    {
+        [
+            _owner,
+            "OK_GENERATED",
+            "Incident generation",
+            "Server approved your request and generated the next incident.",
+            true
+        ] call _publishResult;
+    };
+
     true
 }
 else
 {
     // Active exists; ensure the task framework still has it.
     [] call ARC_fnc_taskRehydrateActive;
+
+    if (_owner > 0) then
+    {
+        [
+            _owner,
+            "OK_REHYDRATED",
+            "Incident generation",
+            "An incident is already active. Server rehydrated the active task state.",
+            true
+        ] call _publishResult;
+    };
+
     true
 }

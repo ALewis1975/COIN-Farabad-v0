@@ -41,7 +41,53 @@ if (_taskId isNotEqualTo "") exitWith
 private _ok = ["Generate the next incident now?", "TOC", true, true] call BIS_fnc_guiMessage;
 if (!_ok) exitWith {false};
 
+private _requestStamp = diag_tickTime;
+private _myOwner = clientOwner;
+
 [player] remoteExec ["ARC_fnc_tocRequestNextIncident", 2];
-["TOC", "Requested next incident."] call ARC_fnc_clientToast;
+["TOC", "Requested next incident: pending server decision."] call ARC_fnc_clientToast;
+
+[_requestStamp, _myOwner] spawn
+{
+    params ["_stamp", "_ownerId"];
+
+    private _timeoutAt = time + 8;
+    private _found = false;
+
+    waitUntil
+    {
+        uiSleep 0.15;
+
+        private _res = missionNamespace getVariable ["ARC_pub_nextIncidentResult", []];
+        if (_res isEqualType [] && { (count _res) >= 6 }) then
+        {
+            _res params ["_resStamp", "_resOwner", "_code", "_title", "_detail", "_allowed"];
+            if ((_resStamp isEqualType 0) && { _resStamp >= _stamp } && { _resOwner isEqualTo _ownerId }) then
+            {
+                _found = true;
+                uiNamespace setVariable ["ARC_console_lastNextIncidentResult", _res];
+
+                private _msg = if (_detail isEqualType "" && { trim _detail isNotEqualTo "" }) then { trim _detail } else { "Server returned no detail." };
+                private _hdr = if (_title isEqualType "" && { trim _title isNotEqualTo "" }) then { trim _title } else { "TOC" };
+
+                if (_allowed isEqualType true && { _allowed }) then
+                {
+                    [_hdr, _msg, 5] call ARC_fnc_clientToast;
+                }
+                else
+                {
+                    [_hdr, _msg, 7] call ARC_fnc_clientToast;
+                };
+            };
+        };
+
+        _found || { time >= _timeoutAt }
+    };
+
+    if (!_found) then
+    {
+        ["TOC", "No server decision received yet. Check TOC/OPS panel for latest incident-generation status.", 6] call ARC_fnc_clientToast;
+    };
+};
 
 true
