@@ -21,7 +21,12 @@ params [
     ["_intelConf", 0.20, [0]]
 ];
 
-if (_districtId isEqualTo "") exitWith {createHashMap};
+private _districtIdCheck = [_districtId, "NON_EMPTY_STRING", "districtId", [""]] call ARC_fnc_paramAssert;
+_districtId = _districtIdCheck param [1, ""];
+if !(_districtIdCheck param [0, false]) exitWith {
+    ["CIVSUB", format ["scheduler emit lead guard: code=%1 msg=%2", _districtIdCheck param [2, "ARC_ASSERT_UNKNOWN"], _districtIdCheck param [3, "districtId invalid"]], [["code", _districtIdCheck param [2, "ARC_ASSERT_UNKNOWN"]], ["guard", "civsubSchedulerEmitAmbientLead"]]] call ARC_fnc_farabadWarn;
+    createHashMap
+};
 
 // Pick a POI seed (optional). Prefer POIs that belong to the emitting district.
 // Note: with 30 POIs across 20 districts, some districts will have no POIs. In that case we emit with an empty POI seed rather than cross-district mismatch.

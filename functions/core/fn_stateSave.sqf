@@ -6,6 +6,12 @@
 if (!isServer) exitWith {false};
 
 private _state = missionNamespace getVariable ["ARC_state", []];
+private _stateCheck = [_state, "ARRAY_SHAPE", "ARC_state", [[], 0, -1, true]] call ARC_fnc_paramAssert;
+private _stateOk = _stateCheck param [0, false];
+_state = _stateCheck param [1, []];
+if (!_stateOk) then {
+    ["STATE", format ["stateSave guard: code=%1 msg=%2", _stateCheck param [2, "ARC_ASSERT_UNKNOWN"], _stateCheck param [3, "ARC_state invalid"]], ["code", _stateCheck param [2, "ARC_ASSERT_UNKNOWN"], "guard", "stateSave", "key", "ARC_state"]] call ARC_fnc_farabadWarn;
+};
 missionProfileNamespace setVariable ["ARC_state", _state];
 
 private _op = "stateSave";

@@ -56,7 +56,13 @@ if ((count _missingFns) > 0 || {!_hasDistrictsState} || {!_hasSchedulerState}) e
 // - civsub_v1_scheduler_diag_enabled: bool (store last computed values per district)
 
 private _forceMode = missionNamespace getVariable ["civsub_v1_scheduler_force_emit", ""]; // "" | "LEAD" | "ATTACK" | "BOTH"
-private _forceDid = missionNamespace getVariable ["civsub_v1_scheduler_force_district", ""]; // "" (all) or "Dxx"
+private _forceDidRaw = missionNamespace getVariable ["civsub_v1_scheduler_force_district", ""]; // "" (all) or "Dxx"
+private _forceDid = _forceDidRaw;
+if (_forceDid isEqualType "") then {
+    _forceDid = toUpperANSI (trim _forceDid);
+} else {
+    _forceDid = "";
+};
 private _diagEnabled = missionNamespace getVariable ["civsub_v1_scheduler_diag_enabled", false];
 private _diagMap = missionNamespace getVariable ["civsub_v1_scheduler_diag", createHashMap];
 if !(_diagMap isEqualType createHashMap) then { _diagMap = createHashMap; };
@@ -64,9 +70,12 @@ if !(_diagMap isEqualType createHashMap) then { _diagMap = createHashMap; };
 private _districts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
 if !(_districts isEqualType createHashMap) exitWith {false};
 
-private _schedS = missionNamespace getVariable ["civsub_v1_scheduler_s", 300];
-if (!(_schedS isEqualType 0)) then { _schedS = 300; };
-if (_schedS < 30) then { _schedS = 30; };
+private _schedRaw = missionNamespace getVariable ["civsub_v1_scheduler_s", 300];
+private _schedCheck = [_schedRaw, "SCALAR_BOUNDS", "civsub_v1_scheduler_s", [300, 30, 86400]] call ARC_fnc_paramAssert;
+private _schedS = _schedCheck param [1, 300];
+if !(_schedCheck param [0, false]) then {
+    ["CIVSUB", format ["scheduler tick guard: code=%1 msg=%2", _schedCheck param [2, "ARC_ASSERT_UNKNOWN"], _schedCheck param [3, "scheduler interval invalid"]], [["code", _schedCheck param [2, "ARC_ASSERT_UNKNOWN"]], ["guard", "civsubSchedulerTick"], ["key", "civsub_v1_scheduler_s"]]] call ARC_fnc_farabadWarn;
+};
 
 missionNamespace setVariable ["civsub_v1_scheduler_lastTick_ts", serverTime, true];
 

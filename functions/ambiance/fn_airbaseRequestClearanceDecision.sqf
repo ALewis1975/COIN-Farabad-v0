@@ -16,9 +16,19 @@ params [
 
 if (!([_caller, "ARC_fnc_airbaseRequestClearanceDecision", "Airbase clearance decision rejected: sender verification failed.", "AIRBASE_CLEARANCE_DECISION_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
-if (!(_requestId isEqualType "")) then { _requestId = ""; };
-_requestId = trim _requestId;
-if (_requestId isEqualTo "") exitWith {false};
+
+private _callerCheck = [_caller, "OBJECT_NOT_NULL", "caller", [objNull]] call ARC_fnc_paramAssert;
+if !(_callerCheck param [0, false]) exitWith {
+    ["AIRBASE", format ["clearance decision guard: code=%1 msg=%2", _callerCheck param [2, "ARC_ASSERT_UNKNOWN"], _callerCheck param [3, "caller invalid"]], [["code", _callerCheck param [2, "ARC_ASSERT_UNKNOWN"]], ["rpc", "ARC_fnc_airbaseRequestClearanceDecision"]]] call ARC_fnc_farabadWarn;
+    false
+};
+
+private _requestIdCheck = [_requestId, "NON_EMPTY_STRING", "requestId", [""]] call ARC_fnc_paramAssert;
+_requestId = _requestIdCheck param [1, ""];
+if !(_requestIdCheck param [0, false]) exitWith {
+    ["AIRBASE", format ["clearance decision guard: code=%1 msg=%2", _requestIdCheck param [2, "ARC_ASSERT_UNKNOWN"], _requestIdCheck param [3, "requestId invalid"]], [["code", _requestIdCheck param [2, "ARC_ASSERT_UNKNOWN"]], ["rpc", "ARC_fnc_airbaseRequestClearanceDecision"]]] call ARC_fnc_farabadWarn;
+    false
+};
 
 if (!(_approve isEqualType true) && !(_approve isEqualType false)) then { _approve = false; };
 if (!(_reason isEqualType "")) then { _reason = ""; };
@@ -39,14 +49,25 @@ if (!_ok) exitWith {
 };
 
 private _requests = ["airbase_v1_clearanceRequests", []] call ARC_fnc_stateGet;
-if (!(_requests isEqualType [])) then { _requests = []; };
+private _reqCheck = [_requests, "ARRAY_SHAPE", "airbase_v1_clearanceRequests", [[], 0, -1, false]] call ARC_fnc_paramAssert;
+_requests = _reqCheck param [1, []];
+if !(_reqCheck param [0, false]) then {
+    ["AIRBASE", format ["clearance decision guard: code=%1 msg=%2", _reqCheck param [2, "ARC_ASSERT_UNKNOWN"], _reqCheck param [3, "requests invalid"]], [["code", _reqCheck param [2, "ARC_ASSERT_UNKNOWN"]], ["stateKey", "airbase_v1_clearanceRequests"]]] call ARC_fnc_farabadWarn;
+};
 
 private _history = ["airbase_v1_clearanceHistory", []] call ARC_fnc_stateGet;
-if (!(_history isEqualType [])) then { _history = []; };
-
+private _histCheck = [_history, "ARRAY_SHAPE", "airbase_v1_clearanceHistory", [[], 0, -1, false]] call ARC_fnc_paramAssert;
+_history = _histCheck param [1, []];
+if !(_histCheck param [0, false]) then {
+    ["AIRBASE", format ["clearance decision guard: code=%1 msg=%2", _histCheck param [2, "ARC_ASSERT_UNKNOWN"], _histCheck param [3, "history invalid"]], [["code", _histCheck param [2, "ARC_ASSERT_UNKNOWN"]], ["stateKey", "airbase_v1_clearanceHistory"]]] call ARC_fnc_farabadWarn;
+};
 
 private _events = ["airbase_v1_events", []] call ARC_fnc_stateGet;
-if (!(_events isEqualType [])) then { _events = []; };
+private _eventsCheck = [_events, "ARRAY_SHAPE", "airbase_v1_events", [[], 0, -1, false]] call ARC_fnc_paramAssert;
+_events = _eventsCheck param [1, []];
+if !(_eventsCheck param [0, false]) then {
+    ["AIRBASE", format ["clearance decision guard: code=%1 msg=%2", _eventsCheck param [2, "ARC_ASSERT_UNKNOWN"], _eventsCheck param [3, "events invalid"]], [["code", _eventsCheck param [2, "ARC_ASSERT_UNKNOWN"]], ["stateKey", "airbase_v1_events"]]] call ARC_fnc_farabadWarn;
+};
 private _eventsMax = missionNamespace getVariable ["airbase_v1_eventsMax", 60];
 if (!(_eventsMax isEqualType 0) || { _eventsMax < 10 }) then { _eventsMax = 60; };
 
