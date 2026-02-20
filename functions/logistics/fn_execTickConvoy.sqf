@@ -15,6 +15,11 @@
         BOOL
 */
 
+// Notification cooldown keys (ARC_fnc_clientNotifyGate via ARC_fnc_clientHint):
+// - ARC_convoy_linkup_detected: link-up/staging detection hint dedupe (12s)
+// - ARC_convoy_departing_now: departure hint dedupe (10s)
+// - ARC_convoy_autolaunch_now: auto-launch hint dedupe (15s)
+
 private _callerOwner = remoteExecutedOwner;
 if (!isServer) exitWith
 {
@@ -1311,7 +1316,7 @@ if (!_started) exitWith
                 format ["Convoy staged. Departing in %1 seconds.", round _delay]
             };
 
-            { [_msg] remoteExec ["ARC_fnc_clientHint", owner _x]; } forEach _targets;
+            { [_msg, "ARC_convoy_linkup_detected", 12] remoteExec ["ARC_fnc_clientHint", owner _x]; } forEach _targets;
         };
 
         private _logPos = _detectPos;
@@ -1426,7 +1431,11 @@ if (!_started) exitWith
                 format ["Convoy auto-launched (timeout). Speed cap: %1 kph.", round _speedKph]
             };
 
-            { [_hintMsg] remoteExec ["ARC_fnc_clientHint", owner _x]; } forEach _hintTargets;
+            {
+                private _hintKey = if (_near) then { "ARC_convoy_departing_now" } else { "ARC_convoy_autolaunch_now" };
+                private _hintCooldown = if (_near) then { 10 } else { 15 };
+                [_hintMsg, _hintKey, _hintCooldown] remoteExec ["ARC_fnc_clientHint", owner _x];
+            } forEach _hintTargets;
         };
 
         if ("ARC_convoy_linkup_active" in allMapMarkers) then
