@@ -260,7 +260,7 @@ case "DASH":
             if (!isNull _ctrlDetailsGrp) then { _ctrlDetailsGrp ctrlShow true; };
             if (!isNull _ctrlDetails) then { _ctrlDetails ctrlShow true; };
 
-            private _forceQueueRebuild = (_prevRefreshTab isNotEqualTo _tab) || { ["ARC_console_cmdQueueForceRebuild", false] call ARC_fnc_uiNsGetBool };
+            private _forceQueueRebuild = (_prevRefreshTab != _tab) || { ["ARC_console_cmdQueueForceRebuild", false] call ARC_fnc_uiNsGetBool };
             uiNamespace setVariable ["ARC_console_cmdQueueForceRebuild", false];
 
             private _queueState = [_display, _forceQueueRebuild] call ARC_fnc_uiConsoleTocQueuePaint;
@@ -324,8 +324,8 @@ case "DASH":
         private _rebuildHQ = false;
         private _prevHqMode = ["ARC_console_prevRefreshHQMode", "", false] call ARC_fnc_uiNsGetString;
 
-        if (_prevRefreshTab isNotEqualTo _tab) then { _rebuildHQ = true; };
-        if (_prevHqMode isNotEqualTo _hqMode) then { _rebuildHQ = true; };
+        if (_prevRefreshTab != _tab) then { _rebuildHQ = true; };
+        if (_prevHqMode != _hqMode) then { _rebuildHQ = true; };
 
         if (["ARC_console_incidentCatalogInvalidate", false] call ARC_fnc_uiNsGetBool) then
         {

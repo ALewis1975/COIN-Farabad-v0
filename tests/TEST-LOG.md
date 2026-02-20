@@ -16,6 +16,9 @@ Append one dated entry per validation pass using:
 
 ## Entries
 
+- 2026-02-20T18:02Z | commit: <pending> | branch: copilot/fix-air-traffic-control-functions | Scenario: CI preflight syntax failure remediation for `fn_uiConsoleRefresh.sqf` job `64325078205` (`get_job_logs` + `python` log parse for line IDs, `git --no-pager diff --check`, `python3 scripts/dev/validate_state_migrations.py`, `python3 scripts/dev/validate_marker_index.py`, `~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleRefresh.sqf`) | Result: PASS (targeted fix), BLOCKED (known parser noise) | Notes: Replaced `isNotEqualTo` operators with `!=` at reported queue/HQ refresh lines to clear the CI-reported syntax errors; local `sqflint` still reports known false positives on `trim` usage in this repository.
+  - Migration Checks: Required keys PASS; Defaulting PASS; Unknown-field preservation PASS
+  - Runtime-only Validation: BLOCKED (Arma runtime/display unavailable in container for in-engine UI/screenshot validation)
 - 2026-02-20T17:55Z | commit: <pending> | branch: copilot/fix-air-traffic-control-functions | Scenario: pilot AIR tab visibility gate static verification (`python3 scripts/dev/validate_state_migrations.py`, `python3 scripts/dev/validate_marker_index.py`, `git --no-pager diff --check`, and `git --no-pager diff -- functions/ui/fn_uiConsoleOnLoad.sqf`) | Result: PASS | Notes: AIR tab inclusion now allows pilot-authorized users (`_canAirPilot`) in addition to read/control roles so pilot console users can reach AIR/PILOT functions.
   - Migration Checks: Required keys PASS; Defaulting PASS; Unknown-field preservation PASS
   - Runtime-only Validation: BLOCKED (Arma runtime/display unavailable in container for in-engine pilot console validation and screenshot capture)
