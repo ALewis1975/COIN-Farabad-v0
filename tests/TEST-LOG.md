@@ -16,6 +16,9 @@ Append one dated entry per validation pass using:
 
 ## Entries
 
+- 2026-02-20T18:16Z | commit: <pending> | branch: copilot/fix-air-traffic-control-functions | Scenario: initServer sqflint parse compatibility remediation for preflight job `64326658386` (`list_workflow_runs`, `get_workflow_job`, `get_job_logs`, `~/.local/bin/sqflint -e w initServer.sqf`, `git --no-pager diff --check`, `python3 scripts/dev/validate_state_migrations.py`, `python3 scripts/dev/validate_marker_index.py`) | Result: PASS | Notes: Replaced parser-sensitive `createHashMapFromArray []` with `createHashMap` for empty anchors and converted toggle-consumer registry from HashMap+`getOrDefault` to array pair scan so sqflint parses initServer cleanly.
+  - Migration Checks: Required keys PASS; Defaulting PASS; Unknown-field preservation PASS
+  - Runtime-only Validation: BLOCKED (Arma runtime/display unavailable in container for in-engine verification and screenshot capture)
 - 2026-02-20T18:09Z | commit: <pending> | branch: copilot/fix-air-traffic-control-functions | Scenario: preflight sqflint parse remediation for AIR refresh normalization (job `64325808221`) (`get_workflow_run`/`get_job_logs`, `/home/runner/.local/bin/sqflint -e w functions/ui/fn_uiConsoleRefresh.sqf`, `git --no-pager diff --check`, `python3 scripts/dev/validate_state_migrations.py`, `python3 scripts/dev/validate_marker_index.py`) | Result: PASS | Notes: Replaced parser-sensitive AIR mode normalization (`toUpperANSI (trim ...)`) with sqflint-compatible `toUpper` + space-stripping normalization in `fn_uiConsoleRefresh.sqf` line 209 so padded values still normalize; targeted local sqflint now passes cleanly.
   - Migration Checks: Required keys PASS; Defaulting PASS; Unknown-field preservation PASS
   - Runtime-only Validation: BLOCKED (Arma runtime/display unavailable in container for in-engine console verification and screenshot capture)
