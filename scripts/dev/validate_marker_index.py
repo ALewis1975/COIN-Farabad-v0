@@ -23,15 +23,32 @@ def _count_markdown_markers(markdown_text: str) -> int:
             break
         if not in_table:
             continue
-        if re.match(r"^\|\s*`[^`]+`\s*\|", line):
+        if line.strip().lower().startswith("| name |"):
+            continue
+        if re.match(r"^\|\s*[^|]+\s*\|", line) and not re.match(r"^\|\s*-+\s*\|", line):
             count += 1
     return count
+
+
+def _contains_legacy_marker(value: object, legacy_markers: list[str]) -> str | None:
+    if not isinstance(value, str):
+        return None
+    for legacy in legacy_markers:
+        if re.search(rf"\b{re.escape(legacy)}\b", value):
+            return legacy
+    return None
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate marker index generation outputs")
     parser.add_argument("--sqm", default="mission.sqm", type=Path)
     parser.add_argument("--generator", default="tools/generate_marker_index.py", type=Path)
+    parser.add_argument(
+        "--legacy-markers",
+        nargs="+",
+        default=["EPW_Holding", "epw_holding_1"],
+        help="Legacy marker names that must not appear in primary output fields.",
+    )
     args = parser.parse_args()
 
     with tempfile.TemporaryDirectory(prefix="marker-index-validate-") as tmpdir:
@@ -91,9 +108,19 @@ def main() -> int:
             )
             return 1
 
+        primary_fields = ("name", "text")
+        for index, marker in enumerate(markers):
+            for field in primary_fields:
+                legacy = _contains_legacy_marker(marker.get(field), args.legacy_markers)
+                if legacy:
+                    sys.stderr.write(
+                        f"Legacy marker '{legacy}' found in marker[{index}].{field}: {marker.get(field)!r}\n"
+                    )
+                    return 1
+
         print(
-            "PASS: generator executed, JSON parsed, marker counts match "
-            f"(json={json_marker_count}, md-summary={md_summary_total}, md-table={md_table_count})"
+            "PASS: generator executed, JSON parsed, marker counts match, and no legacy markers "
+            f"in primary fields (json={json_marker_count}, md-summary={md_summary_total}, md-table={md_table_count})"
         )
     return 0
 
