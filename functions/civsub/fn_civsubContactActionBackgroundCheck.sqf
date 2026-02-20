@@ -23,9 +23,11 @@ if !(_civ getVariable ["civsub_v1_isCiv", false]) exitWith {[false, "<t size='0.
 private _ensureFn = {
     params ["_name", "_path"];
     if (isNil _name) then {
-        missionNamespace setVariable [_name, compile preprocessFileLineNumbers _path];
+        _nil = isNil { call compile format ["%1 = compile preprocessFileLineNumbers '%2';", _name, _path]; };
     };
-    missionNamespace getVariable [_name, objNull]
+    private _resolved = objNull;
+    _nil = isNil { _resolved = call compile _name; };
+    _resolved
 };
 
 if (isNil "ARC_fnc_civsubIdentityTouch") then { ARC_fnc_civsubIdentityTouch = compile preprocessFileLineNumbers "functions\civsub\fn_civsubIdentityTouch.sqf"; };
