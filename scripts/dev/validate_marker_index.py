@@ -108,19 +108,32 @@ def main() -> int:
             )
             return 1
 
-        primary_fields = ("name", "text")
+        seen_names: set[str] = set()
         for index, marker in enumerate(markers):
-            for field in primary_fields:
-                legacy = _contains_legacy_marker(marker.get(field), args.legacy_markers)
-                if legacy:
-                    sys.stderr.write(
-                        f"Legacy marker '{legacy}' found in marker[{index}].{field}: {marker.get(field)!r}\n"
-                    )
-                    return 1
+            name = marker.get("name")
+            if not isinstance(name, str) or not name:
+                sys.stderr.write(f"marker[{index}].name must be a non-empty string.\n")
+                return 1
+            if name in seen_names:
+                sys.stderr.write(f"Duplicate marker name detected: {name!r}\n")
+                return 1
+            seen_names.add(name)
+
+            canonical_name = marker.get("canonicalName")
+            if not isinstance(canonical_name, str) or not canonical_name:
+                sys.stderr.write(f"marker[{index}].canonicalName must be a non-empty string.\n")
+                return 1
+
+            legacy = _contains_legacy_marker(marker.get("text"), args.legacy_markers)
+            if legacy:
+                sys.stderr.write(
+                    f"Legacy marker '{legacy}' found in marker[{index}].text: {marker.get('text')!r}\n"
+                )
+                return 1
 
         print(
-            "PASS: generator executed, JSON parsed, marker counts match, and no legacy markers "
-            f"in primary fields (json={json_marker_count}, md-summary={md_summary_total}, md-table={md_table_count})"
+            "PASS: generator executed, JSON parsed, marker counts match, unique raw names retained, "
+            f"and canonical fields populated (json={json_marker_count}, md-summary={md_summary_total}, md-table={md_table_count})"
         )
     return 0
 

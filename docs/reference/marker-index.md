@@ -32,16 +32,6 @@ Published under `docs/reference/`.
 | ARC_convoy_start_2 | Empty |  | [9328.8184,110.91885,10743.677] |  |  | 1 |  |  | unresolved |  |
 | ARC_convoy_start_3 | Empty |  | [10581.282,25.944239,917.58618] |  |  | 1 |  |  | unresolved |  |
 | ARC_convoy_start_4 | Empty |  | [187.0,4.4299998,1409.5] |  |  | 1 |  |  | unresolved |  |
-| ARC_loc_BelleFoilleHotel |  | RECTANGLE | [5349.7939,179.886,11000.318] |  |  | 1 | marker_3 | data/farabad_marker_aliases.sqf, data/incident_markers.sqf, functions/ops/fn_opsSpawnLocalSupport.sqf | unresolved |  |
-| ARC_loc_FortKelati | loc_mission |  | [6292.2148,8.4899998,1605.1696] |  EPW Holding |  | 0.5 | marker_22 | data/farabad_marker_aliases.sqf, data/incident_markers.sqf | unresolved |  |
-| ARC_loc_JaziraOilField | loc_defend |  | [6220.3008,7.2160001,1335.816] |  South Gate |  | 0.5 | marker_15 | data/farabad_marker_aliases.sqf, data/incident_markers.sqf, functions/ops/fn_opsSpawnLocalSupport.sqf | unresolved |  |
-| ARC_loc_JaziraOilRefinery | loc_defend |  | [6737.1758,9.7045679,3238.6482] |  North Gate |  | 0.5 | marker_12 | data/farabad_marker_aliases.sqf, data/incident_markers.sqf, functions/ops/fn_opsSpawnLocalSupport.sqf | unresolved |  |
-| ARC_loc_Junkyard | loc_defend |  | [5209.2402,8.6000004,2679.394] |  Main Gate |  | 0.5 | marker_13 | data/farabad_marker_aliases.sqf, data/incident_markers.sqf | unresolved |  |
-| ARC_loc_KarkanakPrison |  | RECTANGLE | [10949.0,98.934288,5500.75] |  |  | 1 | marker_6 | data/farabad_marker_aliases.sqf, data/incident_markers.sqf, functions/ops/fn_opsSpawnLocalSupport.sqf | unresolved |  |
-| ARC_loc_hospital |  | RECTANGLE | [5350.0811,0.0,-0.8369751] |  |  | 1 | marker_4 | data/farabad_marker_aliases.sqf, data/incident_markers.sqf, functions/ops/fn_opsSpawnLocalSupport.sqf | unresolved |  |
-| ARC_loc_industrial022 |  | RECTANGLE | [-249.2251,47.273209,5499.5889] |  |  | 1 | marker_5 | data/farabad_marker_aliases.sqf, data/incident_markers.sqf, functions/ops/fn_opsSpawnLocalSupport.sqf | unresolved |  |
-| ARC_loc_military | loc_mission |  | [6236.9531,8.4899998,1589.866] |  TOC |  | 0.5 | ARC_m_logistics_01, marker_17 | data/farabad_marker_aliases.sqf, data/incident_markers.sqf, docs/projectFiles/Farabad_ORBAT.md, functions/ops/fn_opsSpawnRouteSupport.sqf | unresolved |  |
-| ARC_loc_military | Empty |  | [7703.9258,73.036575,7521.1558] |  Logistics 01 |  | 1 | ARC_m_logistics_01, marker_17 | data/farabad_marker_aliases.sqf, data/incident_markers.sqf, docs/projectFiles/Farabad_ORBAT.md, functions/ops/fn_opsSpawnRouteSupport.sqf | unresolved |  |
 | ARC_m_Fort Kelati | Empty |  | [7962.8252,70.329002,3557.7019] |  Fort Kelati |  | 1 |  |  | unresolved |  |
 | ARC_m_base_avn_hq | Empty |  | [6690.438,8.5310001,1553.615] | Joint Aviation HQ |  | 1 |  |  | unresolved |  |
 | ARC_m_base_c130_parking | Empty |  | [6609.4419,8.4899998,1660.5601] | C-130J Parking |  | 1 |  |  | unresolved |  |
@@ -56,6 +46,7 @@ Published under `docs/reference/`.
 | ARC_m_charlie_2_325AIR | Empty |  | [5894.0,6.4699998,1330.0] |  C-2-325 AIR HQ |  | 1 |  | functions/command/fn_intelResolveRtbDestination.sqf, functions/ops/fn_opsSpawnRouteSupport.sqf | unresolved |  |
 | ARC_m_civil_01 | Empty |  | [8120.0439,5.2690001,1269.457] |  Civil 01 |  | 1 |  | data/incident_markers.sqf | unresolved |  |
 | ARC_m_ied_01 | Empty |  | [5118.0,220.42763,8908.0] |  IED 01 |  | 1 |  | data/incident_markers.sqf | unresolved |  |
+| ARC_m_logistics_01 | Empty |  | [7703.9258,73.036575,7521.1558] |  Logistics 01 |  | 1 | ARC_m_logistics_01, marker_17 | data/farabad_marker_aliases.sqf, data/incident_markers.sqf, docs/projectFiles/Farabad_ORBAT.md, functions/ops/fn_opsSpawnRouteSupport.sqf | unresolved |  |
 | ARC_m_patrol_01 | Empty |  | [8970.6133,22.384657,3704.8755] |  Patrol 01 |  | 1 |  | data/incident_markers.sqf | unresolved |  |
 | ARC_m_patrol_02 | Empty |  | [514.91968,34.850628,3942.9153] |  Patrol 02 |  | 1 |  | data/incident_markers.sqf | unresolved |  |
 | ARC_m_patrol_03 | Empty |  | [8914.458,74.589996,6032.0649] |  Patrol 03 |  | 1 |  | data/incident_markers.sqf | unresolved |  |
@@ -122,12 +113,17 @@ Published under `docs/reference/`.
 | attack4_tow_release | Empty |  | [6234.4126,8.4899998,1686.1123] |  |  | 1 |  |  | unresolved |  |
 | attack5_tow_release | Empty |  | [6124.3486,8.4899998,1691.5256] |  |  | 1 |  |  | unresolved |  |
 | epw_holding | Empty |  | [6292.145,8.4899998,1601.7975] |  epw_holding |  | 1 | EPW_Holding, epw_holding_1 | data/farabad_marker_aliases.sqf, functions/civsub/fn_civsubInteractHandoffSheriff.sqf, functions/command/fn_intelClientCanProcessEpwHere.sqf, functions/command/fn_intelOrderCompleteRtbEpw.sqf, functions/command/fn_intelResolveRtbDestination.sqf, scripts/dev/validate_marker_index.py, tests/TEST-LOG.md | unresolved |  |
+| marker_12 | loc_defend |  | [6737.1758,9.7045679,3238.6482] |  North Gate |  | 0.5 | marker_12 | data/farabad_marker_aliases.sqf, data/incident_markers.sqf, functions/ops/fn_opsSpawnLocalSupport.sqf | unresolved |  |
+| marker_13 | loc_defend |  | [5209.2402,8.6000004,2679.394] |  Main Gate |  | 0.5 | marker_13 | data/farabad_marker_aliases.sqf, data/incident_markers.sqf | unresolved |  |
 | marker_14 | Empty |  | [2468.0039,27.848,7012.0952] |  Oil Processing |  | 1 |  | data/incident_markers.sqf, functions/ops/fn_opsSpawnLocalSupport.sqf | unresolved |  |
+| marker_15 | loc_defend |  | [6220.3008,7.2160001,1335.816] |  South Gate |  | 0.5 | marker_15 | data/farabad_marker_aliases.sqf, data/incident_markers.sqf, functions/ops/fn_opsSpawnLocalSupport.sqf | unresolved |  |
 | marker_16 | Empty |  | [5974.5332,79.068001,7771.583] |  Mine |  | 1 |  | data/incident_markers.sqf | unresolved |  |
+| marker_17 | loc_mission |  | [6236.9531,8.4899998,1589.866] |  TOC |  | 0.5 | ARC_m_logistics_01, marker_17 | data/farabad_marker_aliases.sqf, data/incident_markers.sqf, docs/projectFiles/Farabad_ORBAT.md, functions/ops/fn_opsSpawnRouteSupport.sqf | unresolved |  |
 | marker_18 | Empty |  | [3660.427,47.099731,8608.7529] |  Mine |  | 1 |  | data/incident_markers.sqf | unresolved |  |
 | marker_19 | Empty |  | [3021.792,56.458,8775.3633] |  Mine |  | 1 |  | data/incident_markers.sqf | unresolved |  |
 | marker_20 | Empty |  | [5468.5742,122.488,10089.154] |  Mine |  | 1 |  | data/incident_markers.sqf | unresolved |  |
 | marker_21 | Empty |  | [3131.905,114.38284,9926.2334] |  Mine |  | 1 |  | data/incident_markers.sqf, docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt | unresolved |  |
+| marker_22 | loc_mission |  | [6292.2148,8.4899998,1605.1696] |  EPW Holding |  | 0.5 | marker_22 | data/farabad_marker_aliases.sqf, data/incident_markers.sqf | unresolved |  |
 | marker_23 | loc_mission |  | [6297.0264,8.7650003,1642.1555] |  EPW Processing |  | 0.5 |  |  | unresolved |  |
 | marker_24 | loc_mission |  | [6457.5601,8.4899998,1696.594] |  Farabad Tower |  | 0.5 |  |  | unresolved |  |
 | marker_25 | loc_mission |  | [6179.1602,8.54,1655.892] |  Fixed Wing Hangars |  | 0.5 |  |  | unresolved |  |
@@ -135,10 +131,14 @@ Published under `docs/reference/`.
 | marker_27 | loc_mission |  | [6409.1514,8.5310307,1584.8823] |  Joint Base HQ |  | 0.5 |  |  | unresolved |  |
 | marker_28 | loc_mission |  | [6293.3188,8.7930002,1556.349] |  Base Mayor |  | 0.5 |  |  | unresolved |  |
 | marker_29 | loc_mission |  | [5281.1631,8.5,2628.0498] |  USAF Security HQ |  | 0.5 |  |  | unresolved |  |
+| marker_3 |  | RECTANGLE | [5349.7939,179.886,11000.318] |  |  | 1 | marker_3 | data/farabad_marker_aliases.sqf, data/incident_markers.sqf, functions/ops/fn_opsSpawnLocalSupport.sqf | unresolved |  |
 | marker_30 | loc_mission |  | [6213.8481,8.4899998,1604.0792] |  Kennel |  | 0.5 |  |  | unresolved |  |
 | marker_31 | loc_mission |  | [6690.438,8.5310001,1555.176] |  Joint Aviation HQ (332 AEW / 82 CAB) |  | 0.5 |  |  | unresolved |  |
 | marker_32 | loc_mission |  | [6559.1079,8.4899998,1587.7531] |  USAF Pilot Hangar |  | 0.5 |  |  | unresolved |  |
 | marker_35 | loc_Bunker |  | [4714.2681,4.1399999,4629.8618] |  TNA Checkpoint |  | 1 |  |  | unresolved |  |
+| marker_4 |  | RECTANGLE | [5350.0811,0.0,-0.8369751] |  |  | 1 | marker_4 | data/farabad_marker_aliases.sqf, data/incident_markers.sqf, functions/ops/fn_opsSpawnLocalSupport.sqf | unresolved |  |
+| marker_5 |  | RECTANGLE | [-249.2251,47.273209,5499.5889] |  |  | 1 | marker_5 | data/farabad_marker_aliases.sqf, data/incident_markers.sqf, functions/ops/fn_opsSpawnLocalSupport.sqf | unresolved |  |
+| marker_6 |  | RECTANGLE | [10949.0,98.934288,5500.75] |  |  | 1 | marker_6 | data/farabad_marker_aliases.sqf, data/incident_markers.sqf, functions/ops/fn_opsSpawnLocalSupport.sqf | unresolved |  |
 | mkr_SHERIFF_HOLDING | Empty |  | [6299.4312,8.7650003,1636.3142] | Sheriff Holding |  | 1 |  | docs/projectFiles/Farabad_CIVSUBv1_Development_Baseline (1).md, docs/projectFiles/farabad_project_dictionary_v_1.1.md, functions/civsub/fn_civsubInteractHandoffSheriff.sqf, functions/command/fn_intelClientCanProcessEpwHere.sqf, functions/command/fn_intelOrderCompleteRtbEpw.sqf, functions/command/fn_intelResolveRtbDestination.sqf | unresolved |  |
 | mkr_airbaseCenter | Empty |  | [6117.9551,8.4899998,2280.71] |  1,500 Meters Radius |  | 1 | marker_0 | data/farabad_marker_aliases.sqf, data/incident_markers.sqf, docs/projectFiles/Farabad_AIRBASESUB_Airbase_Ambience_Planning_Spec.md, docs/projectFiles/Farabad_COIN_Mission_Design_Guide_v0.4_2026-01-27.md, docs/projectFiles/farabad_project_dictionary_v_1.1.md, functions/ambiance/fn_airbaseAdminResetControlState.sqf, functions/ambiance/fn_airbaseBuildRouteDecision.sqf, functions/ambiance/fn_airbaseInit.sqf, functions/ambiance/fn_airbaseRunwayLockOccupy.sqf, functions/ambiance/fn_airbaseRunwayLockRelease.sqf, functions/ambiance/fn_airbaseRunwayLockReserve.sqf, functions/ambiance/fn_airbaseRunwayLockSweep.sqf, functions/ambiance/fn_airbaseTick.sqf, functions/civsub/fn_civsubCivFindSpawnPos.sqf, functions/civsub/fn_civsubSpawnCacheEnsure.sqf, functions/command/fn_intelOrderCompleteRtbEpw.sqf, functions/command/fn_intelResolveRtbDestination.sqf, functions/core/fn_execInitActive.sqf, functions/ops/fn_opsSpawnLocalSupport.sqf, initServer.sqf | unresolved |  |
 | mkr_arrivalRunwayStart | Empty |  | [5168.8018,8.4899998,2921.6489] |  |  | 1 |  | functions/ambiance/fn_airbaseInit.sqf, functions/ambiance/fn_airbaseSpawnArrival.sqf | unresolved |  |

@@ -149,7 +149,7 @@ def normalize_entry(
     marker: dict[str, Any], aliases: dict[str, str], aliases_by_canonical: dict[str, list[str]]
 ) -> dict[str, Any]:
     raw_name = str(marker.get("name", ""))
-    name = aliases.get(raw_name, raw_name)
+    canonical_name = aliases.get(raw_name, raw_name)
     pos = marker.get("position", marker.get("pos", []))
     if not isinstance(pos, list):
         pos = []
@@ -157,14 +157,16 @@ def normalize_entry(
     while pos_norm and abs(pos_norm[-1]) < 1e-9:
         pos_norm.pop()
 
-    consumers = set(rg_consumers(name))
-    for alias in aliases_by_canonical.get(name, []):
+    consumers = set(rg_consumers(raw_name))
+    consumers.update(rg_consumers(canonical_name))
+    for alias in aliases_by_canonical.get(canonical_name, []):
         consumers.update(rg_consumers(alias))
 
     raw_shape = marker.get("shape", marker.get("markerShape", marker.get("markerType", "")))
 
     entry: dict[str, Any] = {
-        "name": name,
+        "name": raw_name,
+        "canonicalName": canonical_name,
         "type": str(marker.get("type", "")),
         "shape": str(raw_shape),
         "pos": pos_norm,
@@ -173,7 +175,7 @@ def normalize_entry(
         "alpha": clamp_alpha(marker.get("alpha", marker.get("a", 1))),
         "usageNotes": "",
         "source": f"mission.sqm{(':' + marker.get('_layer')) if marker.get('_layer') else ''}",
-        "aliases": sorted(aliases_by_canonical.get(name, [])),
+        "aliases": sorted(aliases_by_canonical.get(canonical_name, [])),
         "consumers": sorted(consumers),
         "status": "unresolved",
     }
