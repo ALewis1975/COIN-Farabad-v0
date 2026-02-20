@@ -35,5 +35,5 @@ if (!_ok) exitWith {false};
 
 [player, _order, _purpose, _d] remoteExec ["ARC_fnc_intelTocIssueOrder", 2];
 
-hint "Order sent to server.";
+["Order sent to server.", "INFO", "TOAST"] call ARC_fnc_clientHint;
 true
