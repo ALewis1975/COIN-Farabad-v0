@@ -207,6 +207,7 @@ case "DASH":
 
         private _airMode = ["ARC_console_airMode", if (_canAirPilot && !_canAirControl) then {"PILOT"} else {"TOWER"}] call ARC_fnc_uiNsGetString;
         _airMode = toUpper _airMode;
+        _airMode = (_airMode splitString " ") joinString "";
         if !(_airMode in ["TOWER", "PILOT"]) then { _airMode = if (_canAirPilot && !_canAirControl) then {"PILOT"} else {"TOWER"}; };
         uiNamespace setVariable ["ARC_console_airMode", _airMode];
 
