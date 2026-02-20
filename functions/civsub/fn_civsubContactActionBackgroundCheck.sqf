@@ -22,10 +22,38 @@ if !(_civ getVariable ["civsub_v1_isCiv", false]) exitWith {[false, "<t size='0.
 
 private _ensureFn = {
     params ["_name", "_path"];
-    if (isNil _name) then {
-        missionNamespace setVariable [_name, compile preprocessFileLineNumbers _path];
+    private _resolved = objNull;
+    switch (_name) do {
+        case "ARC_fnc_civsubIdentityTouch": {
+            private _file = "functions\civsub\fn_civsubIdentityTouch.sqf";
+            if (_path isEqualTo _file) then {
+                if (isNil "ARC_fnc_civsubIdentityTouch") then { ARC_fnc_civsubIdentityTouch = compile preprocessFileLineNumbers _file; };
+                _resolved = ARC_fnc_civsubIdentityTouch;
+            };
+        };
+        case "ARC_fnc_civsubIdentityGenerateProfile": {
+            private _file = "functions\civsub\fn_civsubIdentityGenerateProfile.sqf";
+            if (_path isEqualTo _file) then {
+                if (isNil "ARC_fnc_civsubIdentityGenerateProfile") then { ARC_fnc_civsubIdentityGenerateProfile = compile preprocessFileLineNumbers _file; };
+                _resolved = ARC_fnc_civsubIdentityGenerateProfile;
+            };
+        };
+        case "ARC_fnc_civsubIdentitySet": {
+            private _file = "functions\civsub\fn_civsubIdentitySet.sqf";
+            if (_path isEqualTo _file) then {
+                if (isNil "ARC_fnc_civsubIdentitySet") then { ARC_fnc_civsubIdentitySet = compile preprocessFileLineNumbers _file; };
+                _resolved = ARC_fnc_civsubIdentitySet;
+            };
+        };
+        case "ARC_fnc_civsubIdentityEvictIfNeeded": {
+            private _file = "functions\civsub\fn_civsubIdentityEvictIfNeeded.sqf";
+            if (_path isEqualTo _file) then {
+                if (isNil "ARC_fnc_civsubIdentityEvictIfNeeded") then { ARC_fnc_civsubIdentityEvictIfNeeded = compile preprocessFileLineNumbers _file; };
+                _resolved = ARC_fnc_civsubIdentityEvictIfNeeded;
+            };
+        };
     };
-    missionNamespace getVariable [_name, objNull]
+    _resolved
 };
 
 if (isNil "ARC_fnc_civsubIdentityTouch") then { ARC_fnc_civsubIdentityTouch = compile preprocessFileLineNumbers "functions\civsub\fn_civsubIdentityTouch.sqf"; };
