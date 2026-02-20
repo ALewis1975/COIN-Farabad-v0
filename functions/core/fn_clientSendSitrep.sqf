@@ -28,7 +28,7 @@ params [
 private _taskId = missionNamespace getVariable ["ARC_activeTaskId", ""];
 if (_taskId isEqualTo "") exitWith
 {
-    hint "No active incident to SITREP.";
+    ["No active incident to SITREP.", "WARN", "TOAST"] call ARC_fnc_clientHint;
     false
 };
 
@@ -36,14 +36,14 @@ if (_taskId isEqualTo "") exitWith
 // Gate SITREPs until the active incident has been accepted
 if (!(missionNamespace getVariable ["ARC_activeIncidentAccepted", false])) exitWith
 {
-    hint "Active incident has not been accepted yet.";
+    ["Active incident has not been accepted yet.", "WARN", "TOAST"] call ARC_fnc_clientHint;
     false
 };
 
 // Prevent duplicate SITREPs for this incident
 if (missionNamespace getVariable ["ARC_activeIncidentSitrepSent", false]) exitWith
 {
-    hint "SITREP already submitted for this incident.";
+    ["SITREP already submitted for this incident.", "INFO", "TOAST"] call ARC_fnc_clientHint;
     false
 };
 
@@ -73,14 +73,14 @@ private _recordClientGate = {
 if (!_updateOnly && { !_closeReady } && { _iTypU isNotEqualTo "IED" }) exitWith
 {
     ["NOT_CLOSE_READY", _iTypU, _closeReady, _updateOnly] call _recordClientGate;
-    hint "SITREP unavailable: incident still in progress. Complete the objective or wait for the incident timer to expire.";
+    ["SITREP unavailable: incident still in progress. Complete the objective or wait for the incident timer to expire.", "WARN", "TOAST"] call ARC_fnc_clientHint;
     false
 };
 
 // Role + proximity gating (server re-checks; this is UX).
 if !([player] call ARC_fnc_rolesIsAuthorized) exitWith
 {
-    hint "You are not authorized to send ARC SITREPs. Authorized: RHSUSAF Officer / Squad Leader classnames.";
+    ["You are not authorized to send SITREPs.", "ERROR", "BOTH"] call ARC_fnc_clientHint;
     false
 };
 
@@ -88,7 +88,7 @@ if !([player] call ARC_fnc_clientCanSendSitrep) exitWith
 {
     private _prox = missionNamespace getVariable ["ARC_sitrepProximityM", 350];
     if (!(_prox isEqualType 0)) then { _prox = 350; };
-    hint format ["SITREP unavailable: move within %1m of the active task / objective / convoy.", round _prox];
+    [format ["SITREP unavailable: move within %1m of the active task / objective / convoy.", round _prox], "WARN", "TOAST"] call ARC_fnc_clientHint;
     false
 };
 
@@ -219,7 +219,7 @@ if (!_updateOnly) then
         _fo params ["_okFo", "_r", "_p", "_rat", "_con", "_sup", "_n", "_hIntent", "_hMin", "_pIntent"];
         if (!_okFo) exitWith {
             diag_log format ["[ARC][SITREP][CLIENT] Follow-on cancelled -> SITREP aborted | taskId=%1", missionNamespace getVariable ["ARC_activeTaskId", ""]];
-            hint "SITREP cancelled.";
+            ["SITREP cancelled.", "INFO", "TOAST"] call ARC_fnc_clientHint;
             false
         };
         if (_okFo) then

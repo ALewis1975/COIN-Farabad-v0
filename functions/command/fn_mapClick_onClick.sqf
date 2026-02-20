@@ -88,7 +88,7 @@ if (!([_pos] call _isNumericPos)) exitWith
         _d,
         _evt
     ];
-    hint "Map click failed: invalid position.";
+    ["Map click failed: invalid position.", "WARN", "TOAST"] call ARC_fnc_clientHint;
     ["INVALID_CLICK_PAYLOAD"] call ARC_fnc_mapClick_disarm;
     false
 };
@@ -145,17 +145,17 @@ if (_ok) then
                 "UNKNOWN"
             };
 
-            hint format ["Submitted intel (%1) at %2.", _cat, _grid];
+            [format ["Submitted intel (%1) at %2.", _cat, _grid], "INFO", "TOAST"] call ARC_fnc_clientHint;
         };
 
         case "LEAD_REQ":
         {
-            hint "Lead request submitted to TOC queue.";
+            ["Lead request submitted to TOC queue.", "INFO", "TOAST"] call ARC_fnc_clientHint;
         };
 
         default
         {
-            hint "Map click submitted.";
+            ["Map click submitted.", "INFO", "TOAST"] call ARC_fnc_clientHint;
         };
     };
 
@@ -164,7 +164,7 @@ if (_ok) then
 }
 else
 {
-    hint "Map click submit failed.";
+    ["Map click submit failed.", "ERROR", "BOTH"] call ARC_fnc_clientHint;
     ["CANCELLED"] call ARC_fnc_mapClick_disarm;
     false
 };
