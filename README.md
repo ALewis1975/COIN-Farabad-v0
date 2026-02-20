@@ -305,6 +305,13 @@ COIN-Farabad-v0/
 - `docs/qa/Comprehensive_QA_Audit_2026-02-18.md` — Full audit report (425 files, ~57k LOC)
 - `tests/TEST-LOG.md` — Canonical validation log
 
+### Marker Index
+
+- **Purpose:** Keep a single reference of Eden/editor markers, alias mappings, and unresolved code references so mission data and scripted consumers stay aligned.
+- **Regenerate command:** `python3 tools/generate_marker_index.py --sqm mission.sqm --out-md docs/reference/marker-index.md --out-json docs/reference/marker-index.json`
+- **When to regenerate:** Rebuild the marker index after marker edits in Eden and after any direct `mission.sqm` marker changes.
+- **Review guidance:** Treat unresolved references as follow-up work items unless they are explicitly documented as intentional legacy mappings.
+
 **Development Resources:**
 - `docs/projectFiles/Farabad_Prompting_Integration_Playbook_Project_Standard.md` — Prompting standards for AI-assisted development
 - `docs/projectFiles/US_Army_Doctrine_References.md` — Doctrinal basis for mission design
