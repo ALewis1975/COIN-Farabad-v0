@@ -871,7 +871,7 @@
         -0.006000042,
         1176.199
       ],
-      "shape": "",
+      "shape": "RECTANGLE",
       "source": "mission.sqm:Bridges",
       "status": "unresolved",
       "text": "",
@@ -892,7 +892,7 @@
         3.2839999,
         6196.9434
       ],
-      "shape": "",
+      "shape": "RECTANGLE",
       "source": "mission.sqm:Bridges",
       "status": "unresolved",
       "text": "",
@@ -912,7 +912,7 @@
         -0.085999966,
         5664.8892
       ],
-      "shape": "",
+      "shape": "RECTANGLE",
       "source": "mission.sqm:Bridges",
       "status": "unresolved",
       "text": "",
@@ -932,7 +932,7 @@
         -0.43913937,
         991.36316
       ],
-      "shape": "",
+      "shape": "RECTANGLE",
       "source": "mission.sqm:Bridges",
       "status": "unresolved",
       "text": "",
@@ -952,7 +952,7 @@
         7.457777,
         1052.0198
       ],
-      "shape": "",
+      "shape": "RECTANGLE",
       "source": "mission.sqm:Bridges",
       "status": "unresolved",
       "text": "",
@@ -972,7 +972,7 @@
         6.7000742,
         2679.0413
       ],
-      "shape": "",
+      "shape": "RECTANGLE",
       "source": "mission.sqm:Bridges",
       "status": "unresolved",
       "text": "",
@@ -992,7 +992,7 @@
         5.9239998,
         1172.4194
       ],
-      "shape": "",
+      "shape": "RECTANGLE",
       "source": "mission.sqm:Bridges",
       "status": "unresolved",
       "text": "",
@@ -1012,7 +1012,7 @@
         7.6423988,
         4382.7573
       ],
-      "shape": "",
+      "shape": "RECTANGLE",
       "source": "mission.sqm:Bridges",
       "status": "unresolved",
       "text": "",
@@ -1032,7 +1032,7 @@
         12.851498,
         4638.021
       ],
-      "shape": "",
+      "shape": "RECTANGLE",
       "source": "mission.sqm:Bridges",
       "status": "unresolved",
       "text": "",
@@ -1052,7 +1052,7 @@
         -0.049523115,
         4718.1797
       ],
-      "shape": "",
+      "shape": "RECTANGLE",
       "source": "mission.sqm:Bridges",
       "status": "unresolved",
       "text": "",
@@ -1072,7 +1072,7 @@
         -0.053917646,
         4351.1343
       ],
-      "shape": "",
+      "shape": "RECTANGLE",
       "source": "mission.sqm:Bridges",
       "status": "unresolved",
       "text": "",
@@ -1092,7 +1092,7 @@
         2.6981001,
         3978.5984
       ],
-      "shape": "",
+      "shape": "RECTANGLE",
       "source": "mission.sqm:Bridges",
       "status": "unresolved",
       "text": "",
@@ -1112,7 +1112,7 @@
         0.78098464,
         3001.9246
       ],
-      "shape": "",
+      "shape": "RECTANGLE",
       "source": "mission.sqm:Bridges",
       "status": "unresolved",
       "text": "",
@@ -1132,7 +1132,7 @@
         1.0030847,
         2599.4351
       ],
-      "shape": "",
+      "shape": "RECTANGLE",
       "source": "mission.sqm:Bridges",
       "status": "unresolved",
       "text": "",
@@ -1152,7 +1152,7 @@
         0.0,
         5232.9473
       ],
-      "shape": "",
+      "shape": "RECTANGLE",
       "source": "mission.sqm:Bridges",
       "status": "unresolved",
       "text": "",
@@ -1172,7 +1172,7 @@
         13.606083,
         6047.7954
       ],
-      "shape": "",
+      "shape": "RECTANGLE",
       "source": "mission.sqm:Bridges",
       "status": "unresolved",
       "text": "",
@@ -1192,7 +1192,7 @@
         4.052309,
         3074.1841
       ],
-      "shape": "",
+      "shape": "RECTANGLE",
       "source": "mission.sqm:Bridges",
       "status": "unresolved",
       "text": "",
@@ -1212,7 +1212,7 @@
         63.324509,
         7586.4092
       ],
-      "shape": "",
+      "shape": "RECTANGLE",
       "source": "mission.sqm:Bridges",
       "status": "unresolved",
       "text": "",
@@ -1232,7 +1232,7 @@
         83.946259,
         9429.3574
       ],
-      "shape": "",
+      "shape": "RECTANGLE",
       "source": "mission.sqm:Bridges",
       "status": "unresolved",
       "text": "",
@@ -1252,7 +1252,7 @@
         5.3800001,
         523.78174
       ],
-      "shape": "",
+      "shape": "RECTANGLE",
       "source": "mission.sqm:Bridges",
       "status": "unresolved",
       "text": "",
@@ -1794,7 +1794,7 @@
         192.0,
         8128.0
       ],
-      "shape": "",
+      "shape": "RECTANGLE",
       "source": "mission.sqm:Zone Markers",
       "status": "unresolved",
       "text": "",
@@ -1814,7 +1814,7 @@
         108.348,
         8130.2041
       ],
-      "shape": "",
+      "shape": "RECTANGLE",
       "source": "mission.sqm:Zone Markers",
       "status": "unresolved",
       "text": "",
@@ -1834,7 +1834,7 @@
         64.0,
         2880.0
       ],
-      "shape": "",
+      "shape": "RECTANGLE",
       "source": "mission.sqm:Zone Markers",
       "status": "unresolved",
       "text": "",
@@ -1854,7 +1854,7 @@
         64.0,
         2880.0
       ],
-      "shape": "",
+      "shape": "RECTANGLE",
       "source": "mission.sqm:Zone Markers",
       "status": "unresolved",
       "text": "",
@@ -2281,7 +2281,7 @@
         179.886,
         11000.318
       ],
-      "shape": "",
+      "shape": "RECTANGLE",
       "source": "mission.sqm:Outer Borders",
       "status": "unresolved",
       "text": "",
@@ -2373,7 +2373,7 @@
         0.0,
         -0.8369751
       ],
-      "shape": "",
+      "shape": "RECTANGLE",
       "source": "mission.sqm:Outer Borders",
       "status": "unresolved",
       "text": "",
@@ -2393,7 +2393,7 @@
         47.273209,
         5499.5889
       ],
-      "shape": "",
+      "shape": "RECTANGLE",
       "source": "mission.sqm:Outer Borders",
       "status": "unresolved",
       "text": "",
@@ -2413,7 +2413,7 @@
         98.934288,
         5500.75
       ],
-      "shape": "",
+      "shape": "RECTANGLE",
       "source": "mission.sqm:Outer Borders",
       "status": "unresolved",
       "text": "",

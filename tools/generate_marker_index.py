@@ -150,10 +150,12 @@ def normalize_entry(marker: dict[str, Any], aliases_by_canonical: dict[str, list
     for alias in aliases_by_canonical.get(name, []):
         consumers.update(rg_consumers(alias))
 
+    raw_shape = marker.get("shape", marker.get("markerShape", marker.get("markerType", "")))
+
     entry: dict[str, Any] = {
         "name": name,
         "type": str(marker.get("type", "")),
-        "shape": str(marker.get("shape", marker.get("markerShape", ""))),
+        "shape": str(raw_shape),
         "pos": pos_norm,
         "text": str(marker.get("text", "")),
         "color": str(marker.get("colorName", marker.get("color", ""))),
