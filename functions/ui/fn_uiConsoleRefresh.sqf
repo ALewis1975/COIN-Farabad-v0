@@ -200,12 +200,14 @@ case "DASH":
 
         private _canAirHoldRelease = ["ARC_console_airCanHoldRelease", false] call ARC_fnc_uiNsGetBool;
         private _canAirQueueManage = ["ARC_console_airCanQueueManage", false] call ARC_fnc_uiNsGetBool;
+        private _canAirStaff = ["ARC_console_airCanStaff", false] call ARC_fnc_uiNsGetBool;
         private _canAirRead = ["ARC_console_airCanRead", false] call ARC_fnc_uiNsGetBool;
         private _canAirPilot = ["ARC_console_airCanPilot", false] call ARC_fnc_uiNsGetBool;
-        private _canAirControl = _canAirHoldRelease || _canAirQueueManage;
+        private _canAirControl = _canAirHoldRelease || _canAirQueueManage || _canAirStaff;
 
         private _airMode = ["ARC_console_airMode", if (_canAirPilot && !_canAirControl) then {"PILOT"} else {"TOWER"}] call ARC_fnc_uiNsGetString;
-        _airMode = toUpperANSI (trim _airMode);
+        _airMode = toUpper _airMode;
+        _airMode = (_airMode splitString " ") joinString "";
         if !(_airMode in ["TOWER", "PILOT"]) then { _airMode = if (_canAirPilot && !_canAirControl) then {"PILOT"} else {"TOWER"}; };
         uiNamespace setVariable ["ARC_console_airMode", _airMode];
 
@@ -259,7 +261,7 @@ case "DASH":
             if (!isNull _ctrlDetailsGrp) then { _ctrlDetailsGrp ctrlShow true; };
             if (!isNull _ctrlDetails) then { _ctrlDetails ctrlShow true; };
 
-            private _forceQueueRebuild = (_prevRefreshTab isNotEqualTo _tab) || { ["ARC_console_cmdQueueForceRebuild", false] call ARC_fnc_uiNsGetBool };
+            private _forceQueueRebuild = (_prevRefreshTab != _tab) || { ["ARC_console_cmdQueueForceRebuild", false] call ARC_fnc_uiNsGetBool };
             uiNamespace setVariable ["ARC_console_cmdQueueForceRebuild", false];
 
             private _queueState = [_display, _forceQueueRebuild] call ARC_fnc_uiConsoleTocQueuePaint;
@@ -323,8 +325,8 @@ case "DASH":
         private _rebuildHQ = false;
         private _prevHqMode = ["ARC_console_prevRefreshHQMode", "", false] call ARC_fnc_uiNsGetString;
 
-        if (_prevRefreshTab isNotEqualTo _tab) then { _rebuildHQ = true; };
-        if (_prevHqMode isNotEqualTo _hqMode) then { _rebuildHQ = true; };
+        if (_prevRefreshTab != _tab) then { _rebuildHQ = true; };
+        if (_prevHqMode != _hqMode) then { _rebuildHQ = true; };
 
         if (["ARC_console_incidentCatalogInvalidate", false] call ARC_fnc_uiNsGetBool) then
         {

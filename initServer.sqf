@@ -213,7 +213,7 @@ missionNamespace setVariable ["civsub_v1_traffic_fallback_buildingMax_m", 45, tr
 missionNamespace setVariable ["civsub_v1_traffic_fallback_waterEdgeReject_m", 12, true]; // reject fallback positions near water edges/banks
 
 // Optional district traffic spawn anchors (districtId -> [x,y,z]); keep empty to use district centroids.
-missionNamespace setVariable ["civsub_v1_traffic_spawnAnchors", createHashMapFromArray [], true];
+missionNamespace setVariable ["civsub_v1_traffic_spawnAnchors", createHashMap, true];
 missionNamespace setVariable ["civsub_v1_traffic_preferWeight", 0.90, true];              // bias toward 3CB
 
 // Cleanup posture
@@ -933,7 +933,7 @@ private _arcDeclaredServerToggles = [
     "ARC_worldTime_broadcastIntervalSec"
 ];
 
-private _arcKnownToggleConsumers = createHashMapFromArray [
+private _arcKnownToggleConsumers = [
     ["ARC_debugLogEnabled", "functions/core/fn_debugLog.sqf"],
     ["ARC_debugLogToChat", "functions/core/fn_debugLog.sqf"],
     ["ARC_devDebugInspectorEnabled", "initServer.sqf -> ARC_debugInspectorEnabled mirror"],
@@ -954,8 +954,18 @@ private _arcKnownToggleConsumers = createHashMapFromArray [
 ];
 
 {
-    if (isNil { _arcKnownToggleConsumers getOrDefault [_x, nil] }) then {
-        diag_log format ["[ARC][CONFIG][WARN] Toggle '%1' is declared in initServer.sqf but missing from the known-consumer registry.", _x];
+    private _toggle = _x;
+    private _hasConsumer = false;
+    {
+        if (_x isEqualType [] && { (count _x) > 0 }) then
+        {
+            private _key = _x select 0;
+            if (_key isEqualType "" && { _key isEqualTo _toggle }) exitWith { _hasConsumer = true; };
+        };
+    } forEach _arcKnownToggleConsumers;
+
+    if (!_hasConsumer) then {
+        diag_log format ["[ARC][CONFIG][WARN] Toggle '%1' is declared in initServer.sqf but missing from the known-consumer registry.", _toggle];
     };
 } forEach _arcDeclaredServerToggles;
 
