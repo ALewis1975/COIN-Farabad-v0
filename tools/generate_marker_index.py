@@ -6,7 +6,9 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import shutil
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -15,6 +17,9 @@ MISSION_PATH = ROOT / "mission.sqm"
 ALIASES_PATH = ROOT / "data" / "farabad_marker_aliases.sqf"
 JSON_OUT = ROOT / "docs" / "reference" / "marker-index.json"
 MD_OUT = ROOT / "docs" / "reference" / "marker-index.md"
+
+if shutil.which("rg") is None:
+    raise SystemExit("Missing dependency: ripgrep (rg). Install ripgrep to run marker index generation.")
 
 TEXT_FIELDS = ("name", "type", "shape", "text", "color", "usageNotes", "source", "status")
 

@@ -16,9 +16,14 @@ Append one dated entry per validation pass using:
 
 ## Entries
 
-- 2026-02-20T23:33Z | commit: <pending> | branch: work | Scenario: PR template mode quick-chooser guidance for docs/tooling routing (`git --no-pager diff --check`, `rg -n "Quick chooser: use \*\*G\*\*|Mode \(select exactly one\)" .github/pull_request_template.md`) | Result: PASS | Notes: Added explicit one-line chooser to direct contributors to Mode G for tooling scripts and Mode F for docs/spec-only PRs; no runtime code touched.
+- 2026-02-20T23:39Z | commit: pending | branch: copilot/fix-ui-console-on-load-error | Scenario: Fix CI FileNotFoundError for ripgrep in marker index validation (python3 -m py_compile tools/generate_marker_index.py) | Result: PASS | Notes: Added ripgrep install step to arma-preflight.yml before Marker index generator static validation step. Added shutil.which("rg") guard in tools/generate_marker_index.py for a clear error message. Python compile check passed.
   - Migration Checks: Required keys N/A; Defaulting N/A; Unknown-field preservation N/A
-  - Runtime-only Validation: N/A (documentation/process template change)
+  - Runtime-only Validation: N/A (CI tooling-only change)
+
+- 2026-02-20T23:25Z | commit: pending | branch: copilot/fix-ui-console-on-load-error | Scenario: Fix "Invalid number in expression" in fn_uiConsoleOnLoad.sqf refresh loop (sqflint -e w functions/ui/fn_uiConsoleOnLoad.sqf) | Result: PASS | Notes: focusedCtrl (nullary) can return a non-Control value in spawned context when display is closing; isNull on a non-Control threw "Invalid number in expression". Added isEqualType controlNull type guard before isNull check. sqflint -e w passes with no errors or warnings.
+  - Migration Checks: Required keys N/A; Defaulting N/A; Unknown-field preservation N/A
+  - Runtime-only Validation: BLOCKED (requires dedicated server + MP session to reproduce original RPT error and confirm fix)
+
 - 2026-02-20T18:31Z | commit: <pending> | branch: work | Scenario: shared workflow conventions for marker/unit index generators (`python3 tools/generate_marker_index.py`, `python3 tools/generate_unit_index.py`, `before=$(sha256sum docs/reference/marker-index.json docs/reference/marker-index.md docs/reference/unit-index.json docs/reference/unit-index.md); python3 tools/generate_marker_index.py && python3 tools/generate_unit_index.py >/dev/null; after=$(sha256sum docs/reference/marker-index.json docs/reference/marker-index.md docs/reference/unit-index.json docs/reference/unit-index.md); [ "$before" = "$after" ]`, `git --no-pager diff --check`) | Result: PASS | Notes: Aligned marker/unit generator headers and specifications around deterministic output, no timestamps, shared `docs/reference/` destination, and consistent `python3 tools/<generator>.py` regeneration style for contributors.
   - Migration Checks: Required keys N/A; Defaulting N/A; Unknown-field preservation N/A
   - Runtime-only Validation: N/A (static tooling/documentation artifact generation)

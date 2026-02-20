@@ -212,6 +212,11 @@ jobs:
         run: |
           python3 scripts/dev/validate_state_migrations.py
 
+      - name: Install ripgrep (required by marker index tooling)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ripgrep
+
       - name: Marker index generator static validation
         run: |
           python3 scripts/dev/validate_marker_index.py
