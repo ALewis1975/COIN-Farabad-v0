@@ -828,6 +828,54 @@ missionNamespace setVariable ["ARC_worldTime_forceMultiplier", true, true];
 missionNamespace setVariable ["ARC_worldTime_timeMultiplier", 6, true];
 missionNamespace setVariable ["ARC_worldTime_broadcastIntervalSec", 30, true];
 
+// Operator startup audit catalog (curated, operator-facing controls only)
+missionNamespace setVariable ["ARC_operatorToggleAuditCatalog", [
+    ["MIG", [
+        ["ARC_allowIncidentDuringAcceptedRtb", "bool"],
+        ["ARC_patrolSpawnContactsEnabled", "bool"]
+    ]],
+    ["CIVSUB", [
+        ["civsub_v1_enabled", "bool"],
+        ["civsub_v1_civs_enabled", "bool"],
+        ["civsub_v1_tick_s", "number"],
+        ["civsub_v1_scheduler_enabled", "bool"],
+        ["civsub_v1_scheduler_s", "number"],
+        ["civsub_v1_traffic_enabled", "bool"],
+        ["civsub_v1_traffic_cap_global", "number"],
+        ["civsub_v1_traffic_cap_perDistrict", "number"]
+    ]],
+    ["IED", [
+        ["ARC_iedPhase1_siteSelectionEnabled", "bool"],
+        ["ARC_iedPassiveDetectEnabled", "bool"],
+        ["ARC_iedPassiveDetectRadiusM", "number"],
+        ["ARC_iedProxRadiusM", "number"],
+        ["ARC_eodDispoApprovalTTLsec", "number"]
+    ]],
+    ["VBIED", [
+        ["ARC_vbiedPhase3_enabled", "bool"],
+        ["ARC_vbiedDefuseActionEnabled", "bool"],
+        ["ARC_vbiedDefuseWindowSeconds", "number"],
+        ["ARC_vbiedCooldownSeconds", "number"],
+        ["ARC_vbiedProxRadiusM", "number"]
+    ]],
+    ["Airbase", [
+        ["airbase_v1_tower_allowBnCmd", "bool"],
+        ["airbase_v1_tower_authDebug", "bool"]
+    ]],
+    ["WorldTime", [
+        ["ARC_worldTime_enabled", "bool"],
+        ["ARC_worldTime_forceDate", "bool"],
+        ["ARC_worldTime_forceMultiplier", "bool"],
+        ["ARC_worldTime_timeMultiplier", "number"],
+        ["ARC_worldTime_broadcastIntervalSec", "number"]
+    ]],
+    ["UI/actions", [
+        ["ARC_rtbInWorldActionsEnabled", "bool"],
+        ["ARC_sitrepInWorldActionsEnabled", "bool"],
+        ["ARC_intelPropSpawnRadiusM", "number"]
+    ]]
+], true];
+
 // Runtime config hygiene: warn when toggles declared here are not mapped to a known consumer.
 private _arcDeclaredServerToggles = [
     "ARC_debugLogEnabled",

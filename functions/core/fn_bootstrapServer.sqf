@@ -715,6 +715,9 @@ if (isNil { missionNamespace getVariable "ARC_debugShowConvoySpawnMarker" }) the
 // Reset behavior: suppress auto incident creation briefly after ResetAll
 if (isNil { missionNamespace getVariable "ARC_resetAutoIncidentHoldSec" }) then { missionNamespace setVariable ["ARC_resetAutoIncidentHoldSec", 300]; };
 
+// Startup config audit: operator-facing toggles and tuning values (pre-init snapshot).
+[] call ARC_fnc_operatorToggleAuditStartup;
+
 // Build world reference layer first (so incidents can safely use ARC_loc_* markers)
 [] call ARC_fnc_worldInit;
 
