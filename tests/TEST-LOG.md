@@ -16,6 +16,9 @@ Append one dated entry per validation pass using:
 
 ## Entries
 
+- 2026-02-20T17:55Z | commit: <pending> | branch: copilot/fix-air-traffic-control-functions | Scenario: pilot AIR tab visibility gate static verification (`python3 scripts/dev/validate_state_migrations.py`, `python3 scripts/dev/validate_marker_index.py`, `git --no-pager diff --check`, and `git --no-pager diff -- functions/ui/fn_uiConsoleOnLoad.sqf`) | Result: PASS | Notes: AIR tab inclusion now allows pilot-authorized users (`_canAirPilot`) in addition to read/control roles so pilot console users can reach AIR/PILOT functions.
+  - Migration Checks: Required keys PASS; Defaulting PASS; Unknown-field preservation PASS
+  - Runtime-only Validation: BLOCKED (Arma runtime/display unavailable in container for in-engine pilot console validation and screenshot capture)
 - 2026-02-20T17:35Z | commit: <pending> | branch: copilot/fix-air-traffic-control-functions | Scenario: AIR console role/submode visibility regression static verification (`python3 scripts/dev/validate_state_migrations.py`, `python3 scripts/dev/validate_marker_index.py`, `git --no-pager diff --check`, and `git --no-pager diff -- functions/ui/fn_uiConsoleOnLoad.sqf functions/ui/fn_uiConsoleRefresh.sqf`) | Result: PASS | Notes: Removed BN command forced pilot-mode eligibility from AIR console load and aligned refresh-time control detection with staffing authorization (`ARC_console_airCanStaff`) so tower-capable users remain in TOWER submode/UI controls.
   - Migration Checks: Required keys PASS; Defaulting PASS; Unknown-field preservation PASS
   - Runtime-only Validation: BLOCKED (Arma local MP/dedicated runtime unavailable in container for in-engine AIR tab role checks and screenshot capture)

@@ -217,7 +217,7 @@ if (_canOps) then
     _ctrlTabs lbAdd "S3 / OPS";
 };
 
-if (_canAirRead) then
+if (_canAirRead || _canAirPilot) then
 {
     _tabIds pushBack "AIR";
     _ctrlTabs lbAdd "AIR / TOWER";
