@@ -58,19 +58,14 @@ diag_log "FARABAD_MIG_S0_hotfix04_convoy_startup_breadcrumbs loaded";
 // CORE DEV POSTURE (scaffolding + debug)
 // ============================================================================
 
-// Migration harness ("rebuild without restart")
-// Keep these toggles server-authoritative. Default posture is safe/off until a migration step is verified.
-missionNamespace setVariable ["ARC_mig_enabled", true, true];
-missionNamespace setVariable ["ARC_mig_uiSnapshotOnly", false, true];
-missionNamespace setVariable ["ARC_mig_useRequestRouter", false, true];
-missionNamespace setVariable ["ARC_mig_disableLegacyActions", false, true];
-
 // Scaffold core objectives first (object-first posture)
+// declared for future feature; currently not consumed
 missionNamespace setVariable ["ARC_objectiveScaffoldEnabled", true, true];
 
 // Debug inspector diary is controlled by ARC_devDebugInspectorEnabled (see debug toggles above)
 
 // Meetings: enable the liaison NPC so the meeting marker can track them
+// declared for future feature; currently not consumed
 missionNamespace setVariable ["ARC_objectiveMeetUseAI", true, true];
 
 // Hold off on hostile contact AI while object systems and markers stabilize
@@ -808,5 +803,48 @@ missionNamespace setVariable ["ARC_worldTime_startDate", +date, true];
 missionNamespace setVariable ["ARC_worldTime_forceMultiplier", true, true];
 missionNamespace setVariable ["ARC_worldTime_timeMultiplier", 6, true];
 missionNamespace setVariable ["ARC_worldTime_broadcastIntervalSec", 30, true];
+
+// Runtime config hygiene: warn when toggles declared here are not mapped to a known consumer.
+private _arcDeclaredServerToggles = [
+    "ARC_debugLogEnabled",
+    "ARC_debugLogToChat",
+    "ARC_devDebugInspectorEnabled",
+    "ARC_debugInspectorEnabled",
+    "ARC_objectiveScaffoldEnabled",
+    "ARC_objectiveMeetUseAI",
+    "ARC_patrolSpawnContactsEnabled",
+    "ARC_rtbInWorldActionsEnabled",
+    "ARC_sitrepInWorldActionsEnabled",
+    "ARC_allowIncidentDuringAcceptedRtb",
+    "ARC_worldTime_enabled",
+    "ARC_worldTime_forceDate",
+    "ARC_worldTime_startDate",
+    "ARC_worldTime_forceMultiplier",
+    "ARC_worldTime_timeMultiplier",
+    "ARC_worldTime_broadcastIntervalSec"
+];
+
+private _arcKnownToggleConsumers = createHashMapFromArray [
+    ["ARC_debugLogEnabled", "functions/core/fn_debugLog.sqf"],
+    ["ARC_debugLogToChat", "functions/core/fn_debugLog.sqf"],
+    ["ARC_devDebugInspectorEnabled", "initServer.sqf -> ARC_debugInspectorEnabled mirror"],
+    ["ARC_debugInspectorEnabled", "functions/core/fn_tocInitPlayer.sqf"],
+    ["ARC_patrolSpawnContactsEnabled", "functions/ops/fn_opsPatrolOnActivate.sqf"],
+    ["ARC_rtbInWorldActionsEnabled", "functions/core/fn_tocInitPlayer.sqf"],
+    ["ARC_sitrepInWorldActionsEnabled", "functions/core/fn_tocInitPlayer.sqf"],
+    ["ARC_allowIncidentDuringAcceptedRtb", "functions/core/fn_tocRequestNextIncident.sqf"],
+    ["ARC_worldTime_enabled", "scripts/worldtime/worldtime_server.sqf"],
+    ["ARC_worldTime_forceDate", "scripts/worldtime/worldtime_server.sqf"],
+    ["ARC_worldTime_startDate", "scripts/worldtime/worldtime_server.sqf"],
+    ["ARC_worldTime_forceMultiplier", "scripts/worldtime/worldtime_server.sqf"],
+    ["ARC_worldTime_timeMultiplier", "scripts/worldtime/worldtime_server.sqf"],
+    ["ARC_worldTime_broadcastIntervalSec", "scripts/worldtime/worldtime_server.sqf"]
+];
+
+{
+    if (isNil { _arcKnownToggleConsumers getOrDefault [_x, nil] }) then {
+        diag_log format ["[ARC][CONFIG][WARN] Toggle '%1' is declared in initServer.sqf but missing from the known-consumer registry.", _x];
+    };
+} forEach _arcDeclaredServerToggles;
 
 [] call ARC_fnc_bootstrapServer;
