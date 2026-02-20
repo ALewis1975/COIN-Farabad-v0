@@ -103,7 +103,7 @@ Generated from `mission.sqm`, alias mappings, and static repository search hints
 | arc_zone_SouthWest |  | RECTANGLE | [2688.0,64.0,2880.0] |  |  | 0 |  | data/farabad_world_zones.sqf | unresolved |  |
 | attack4_tow_release | Empty |  | [6234.4126,8.4899998,1686.1123] |  |  | 1 |  |  | unresolved |  |
 | attack5_tow_release | Empty |  | [6124.3486,8.4899998,1691.5256] |  |  | 1 |  |  | unresolved |  |
-| epw_holding | Empty |  | [6292.145,8.4899998,1601.7975] |  EPW_Holding |  | 1 |  | functions/civsub/fn_civsubInteractHandoffSheriff.sqf, functions/command/fn_intelClientCanProcessEpwHere.sqf, functions/command/fn_intelOrderCompleteRtbEpw.sqf, functions/command/fn_intelResolveRtbDestination.sqf | unresolved |  |
+| epw_holding | Empty |  | [6292.145,8.4899998,1601.7975] | epw_holding |  | 1 |  | functions/civsub/fn_civsubInteractHandoffSheriff.sqf, functions/command/fn_intelClientCanProcessEpwHere.sqf, functions/command/fn_intelOrderCompleteRtbEpw.sqf, functions/command/fn_intelResolveRtbDestination.sqf | unresolved |  |
 | marker_12 | loc_defend |  | [6737.1758,9.7045679,3238.6482] |  North Gate |  | 0.5 |  | data/farabad_marker_aliases.sqf | unresolved |  |
 | marker_13 | loc_defend |  | [5209.2402,8.6000004,2679.394] |  Main Gate |  | 0.5 |  | data/farabad_marker_aliases.sqf | unresolved |  |
 | marker_14 | Empty |  | [2468.0039,27.848,7012.0952] |  Oil Processing |  | 1 |  | data/incident_markers.sqf, functions/ops/fn_opsSpawnLocalSupport.sqf | unresolved |  |

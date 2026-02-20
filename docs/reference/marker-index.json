@@ -1916,7 +1916,7 @@
       "shape": "",
       "source": "mission.sqm:Empty / System",
       "status": "unresolved",
-      "text": " EPW_Holding",
+      "text": "epw_holding",
       "type": "Empty",
       "usageNotes": ""
     },
