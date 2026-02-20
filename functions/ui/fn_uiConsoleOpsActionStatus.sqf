@@ -13,6 +13,10 @@
       BOOL
 */
 
+// Notification cooldown keys (ARC_fnc_clientNotifyGate):
+// - ARC_console_ops_submit_<ACTION>: SUBMITTING toast dedupe (5s)
+// - ARC_console_ops_timeout_<ACTION>: TIMEOUT toast dedupe (10s)
+
 if (!hasInterface) exitWith {false};
 
 params [
@@ -45,7 +49,11 @@ switch (_stage) do
         private _token = diag_tickTime;
         uiNamespace setVariable [_pendingKey, _token];
 
-        [_title, "Submitting to server..."] call ARC_fnc_clientToast;
+        private _submitMsg = "Submitting to server...";
+        if ([format ["ARC_console_ops_submit_%1", _action], 5, _submitMsg] call ARC_fnc_clientNotifyGate) then
+        {
+            [_title, _submitMsg] call ARC_fnc_clientToast;
+        };
 
         [_action, _pendingKey, _token, _timeoutS] spawn
         {
@@ -77,7 +85,10 @@ switch (_stage) do
     case "TIMEOUT":
     {
         private _msg = if (_detail isEqualTo "") then { "No server acknowledgement yet. Retry if needed." } else { _detail };
-        [_title, _msg] call ARC_fnc_clientToast;
+        if ([format ["ARC_console_ops_timeout_%1", _action], 10, _msg] call ARC_fnc_clientNotifyGate) then
+        {
+            [_title, _msg] call ARC_fnc_clientToast;
+        };
     };
 
     default { false };
