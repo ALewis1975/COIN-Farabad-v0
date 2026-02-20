@@ -20,6 +20,14 @@ if (isNull _actor || {isNull _civ}) exitWith {[false, "<t size='0.9'>Invalid tar
 if !(isPlayer _actor) exitWith {[false, "<t size='0.9'>Invalid actor.</t>"]};
 if !(_civ getVariable ["civsub_v1_isCiv", false]) exitWith {[false, "<t size='0.9'>Not a CIVSUB civilian.</t>"]};
 
+private _ensureFn = {
+    params ["_name", "_path"];
+    if (isNil _name) then {
+        missionNamespace setVariable [_name, compile preprocessFileLineNumbers _path];
+    };
+    missionNamespace getVariable [_name, objNull]
+};
+
 if (isNil "ARC_fnc_civsubIdentityTouch") then { ARC_fnc_civsubIdentityTouch = compile preprocessFileLineNumbers "functions\civsub\fn_civsubIdentityTouch.sqf"; };
 if (isNil "ARC_fnc_civsubIdentityGenerateUid") then { ARC_fnc_civsubIdentityGenerateUid = compile preprocessFileLineNumbers "functions\civsub\fn_civsubIdentityGenerateUid.sqf"; };
 if (isNil "ARC_fnc_civsubCrimeDbPickPoiForDistrict") then { ARC_fnc_civsubCrimeDbPickPoiForDistrict = compile preprocessFileLineNumbers "functions\civsub\fn_civsubCrimeDbPickPoiForDistrict.sqf"; };
@@ -107,6 +115,22 @@ if (_civUid isEqualTo "") then {
 
 // Touch identity (guarded)
 ["IDENTITY_TOUCH"] call _setStep;
+private _identityDepsOk = true;
+{
+    private _fn = [_x select 0, _x select 1] call _ensureFn;
+    if !(_fn isEqualType {}) then {
+        _identityDepsOk = false;
+        diag_log format ["[CIVSUB][BG] Missing dependency for IDENTITY_TOUCH fn=%1", _x select 0];
+    };
+} forEach [
+    ["ARC_fnc_civsubIdentityTouch", "functions\\civsub\\fn_civsubIdentityTouch.sqf"],
+    ["ARC_fnc_civsubIdentityGenerateProfile", "functions\\civsub\\fn_civsubIdentityGenerateProfile.sqf"],
+    ["ARC_fnc_civsubIdentitySet", "functions\\civsub\\fn_civsubIdentitySet.sqf"],
+    ["ARC_fnc_civsubIdentityEvictIfNeeded", "functions\\civsub\\fn_civsubIdentityEvictIfNeeded.sqf"]
+];
+
+if !_identityDepsOk exitWith { ["", "Identity record unavailable."] call _inconclusive };
+
 private _rec = createHashMap;
 _nil = isNil { _rec = [_did, _actorUid, _civUid, getPosATL _civ] call ARC_fnc_civsubIdentityTouch; };
 if (_nil || {!(_rec isEqualType createHashMap)} || {(count _rec) == 0}) exitWith { ["", "Identity record unavailable."] call _inconclusive };
