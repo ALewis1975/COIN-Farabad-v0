@@ -251,7 +251,6 @@ switch (_type) do
             if (isPlayer _x) then
             {
                 private _m = format ["ORDER ACCEPTED: %1. Move to %2.", _title, _destLbl];
-                [_m] remoteExec ["ARC_fnc_intelClientNotify", _x];
                 ["Order Accepted", _m, 6] remoteExec ["ARC_fnc_clientToast", _x];
             };
         } forEach (units (group _acceptor));
@@ -293,7 +292,6 @@ switch (_type) do
             if (isPlayer _x) then
             {
                 private _m = "ORDER ACCEPTED: HOLD.";
-                [_m] remoteExec ["ARC_fnc_intelClientNotify", _x];
                 ["Order Accepted", _m, 6] remoteExec ["ARC_fnc_clientToast", _x];
             };
         } forEach (units (group _acceptor));
@@ -338,7 +336,6 @@ switch (_type) do
                 [_taskId, [["kind","LEAD"],["title",_title],["pos",_leadPos]]] remoteExec ["ARC_fnc_clientSetCurrentTask", _x];
 
                 private _m = format ["ORDER ACCEPTED: %1.", _title];
-                [_m] remoteExec ["ARC_fnc_intelClientNotify", _x];
                 ["Order Accepted", _m, 6] remoteExec ["ARC_fnc_clientToast", _x];
             };
         } forEach (units (group _acceptor));
@@ -354,7 +351,6 @@ switch (_type) do
             if (isPlayer _x) then
             {
                 private _m = format ["ORDER ACCEPTED: %1.", _type];
-                [_m] remoteExec ["ARC_fnc_intelClientNotify", _x];
                 ["Order Accepted", _m, 6] remoteExec ["ARC_fnc_clientToast", _x];
             };
         } forEach (units (group _acceptor));
