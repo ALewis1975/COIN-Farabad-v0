@@ -16,6 +16,9 @@ Append one dated entry per validation pass using:
 
 ## Entries
 
+- 2026-02-20T17:35Z | commit: <pending> | branch: copilot/fix-air-traffic-control-functions | Scenario: AIR console role/submode visibility regression static verification (`python3 scripts/dev/validate_state_migrations.py`, `python3 scripts/dev/validate_marker_index.py`, `git --no-pager diff --check`, and `git --no-pager diff -- functions/ui/fn_uiConsoleOnLoad.sqf functions/ui/fn_uiConsoleRefresh.sqf`) | Result: PASS | Notes: Removed BN command forced pilot-mode eligibility from AIR console load and aligned refresh-time control detection with staffing authorization (`ARC_console_airCanStaff`) so tower-capable users remain in TOWER submode/UI controls.
+  - Migration Checks: Required keys PASS; Defaulting PASS; Unknown-field preservation PASS
+  - Runtime-only Validation: BLOCKED (Arma local MP/dedicated runtime unavailable in container for in-engine AIR tab role checks and screenshot capture)
 - 2026-02-20T05:24Z | commit: <pending> | branch: work | Scenario: preflight CI tooling adds marker-index generator validation (`python3 scripts/dev/validate_state_migrations.py`, `python3 scripts/dev/validate_marker_index.py`, `git --no-pager diff --check`) | Result: PASS | Notes: Added dedicated preflight step to execute marker-index static validator so generator output/schema parity is checked on every push/PR; local static validations passed in container.
   - Migration Checks: Required keys PASS; Defaulting PASS; Unknown-field preservation PASS
   - Runtime-only Validation: N/A (tooling-only workflow change)

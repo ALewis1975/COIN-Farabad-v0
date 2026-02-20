@@ -176,8 +176,6 @@ private _canAirPilot = false;
 {
     if (_x isEqualType "" && { [player, _x] call ARC_fnc_rolesHasGroupIdToken }) exitWith { _canAirPilot = true; };
 } forEach _pilotTokens;
-if (!_canAirPilot && _isBnCmd) then { _canAirPilot = true; };
-
 uiNamespace setVariable ["ARC_console_airCanHold", _canAirHold];
 uiNamespace setVariable ["ARC_console_airCanRelease", _canAirRelease];
 uiNamespace setVariable ["ARC_console_airCanPrioritize", _canAirPrioritize];

@@ -200,9 +200,10 @@ case "DASH":
 
         private _canAirHoldRelease = ["ARC_console_airCanHoldRelease", false] call ARC_fnc_uiNsGetBool;
         private _canAirQueueManage = ["ARC_console_airCanQueueManage", false] call ARC_fnc_uiNsGetBool;
+        private _canAirStaff = ["ARC_console_airCanStaff", false] call ARC_fnc_uiNsGetBool;
         private _canAirRead = ["ARC_console_airCanRead", false] call ARC_fnc_uiNsGetBool;
         private _canAirPilot = ["ARC_console_airCanPilot", false] call ARC_fnc_uiNsGetBool;
-        private _canAirControl = _canAirHoldRelease || _canAirQueueManage;
+        private _canAirControl = _canAirHoldRelease || _canAirQueueManage || _canAirStaff;
 
         private _airMode = ["ARC_console_airMode", if (_canAirPilot && !_canAirControl) then {"PILOT"} else {"TOWER"}] call ARC_fnc_uiNsGetString;
         _airMode = toUpperANSI (trim _airMode);
