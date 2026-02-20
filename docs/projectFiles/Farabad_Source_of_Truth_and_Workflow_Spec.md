@@ -171,3 +171,24 @@ Use `ARC_profile_devMode` in `initServer.sqf` as the single switch for startup d
 | Live (default) | `false` | Keep debug toggles OFF (`ARC_debugLogEnabled`, `ARC_debugLogToChat`, `ARC_debugInspectorEnabled`, `civsub_v1_debug`, `civsub_v1_traffic_debug`, `airbase_v1_tower_authDebug`). |
 | Dev | `true` | Enable grouped debug toggles explicitly for diagnostics and validation runs. |
 
+### Startup operator toggle audit (RPT runbook)
+
+At mission start, `ARC_fnc_bootstrapServer` now runs `ARC_fnc_operatorToggleAuditStartup` **before subsystem initialization** and emits a curated operator-facing startup audit in this format:
+
+`[ARC][CONFIG][AUDIT][<Subsystem>] <variableName> | expected=<BOOL|NUMBER> | effective=<value>`
+
+Subsystem groups covered in the audit:
+- `MIG`
+- `CIVSUB`
+- `IED`
+- `VBIED`
+- `Airbase`
+- `WorldTime`
+- `UI/actions`
+
+Operator validation steps after mission start:
+1. Open the server RPT and search for `"[ARC][CONFIG][AUDIT] Startup operator toggle audit begin."`.
+2. Confirm each audited line shows the expected subsystem tag and variable name.
+3. Verify boolean controls appear as `expected=BOOL` and numeric tunables appear as `expected=NUMBER`.
+4. Confirm there are no `effective=MISSING` entries and no type-mismatch suffixes like `(type=STRING)`.
+5. Treat any mismatch as startup-config drift and correct the corresponding `initServer.sqf` override before next run.

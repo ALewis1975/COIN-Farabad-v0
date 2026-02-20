@@ -9,6 +9,7 @@ class CfgFunctions
             file = "functions\core";
 
             class bootstrapServer {};
+            class operatorToggleAuditStartup {};
 
             class log {};
             class farabadLog {};
