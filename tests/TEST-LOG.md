@@ -16,6 +16,9 @@ Append one dated entry per validation pass using:
 
 ## Entries
 
+- 2026-02-20T18:19Z | commit: <pending> | branch: work | Scenario: unit-index spec documentation static validation (`git --no-pager diff --check` and `rg -n "Unit Index Specification|Canonical output files|Stable ordering|Boolean normalization|Empty string vs null policy" docs/reference/unit-index-spec.md`) | Result: PASS | Notes: Added canonical unit-index specification with required/optional schema fields, output target definitions, and normalization rules for ordering, booleans, and empty-string/null handling.
+  - Migration Checks: Required keys N/A; Defaulting N/A; Unknown-field preservation N/A
+  - Runtime-only Validation: N/A (documentation-only update)
 - 2026-02-20T05:24Z | commit: <pending> | branch: work | Scenario: preflight CI tooling adds marker-index generator validation (`python3 scripts/dev/validate_state_migrations.py`, `python3 scripts/dev/validate_marker_index.py`, `git --no-pager diff --check`) | Result: PASS | Notes: Added dedicated preflight step to execute marker-index static validator so generator output/schema parity is checked on every push/PR; local static validations passed in container.
   - Migration Checks: Required keys PASS; Defaulting PASS; Unknown-field preservation PASS
   - Runtime-only Validation: N/A (tooling-only workflow change)
