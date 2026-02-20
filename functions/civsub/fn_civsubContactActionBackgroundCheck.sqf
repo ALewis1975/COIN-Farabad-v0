@@ -117,10 +117,13 @@ if (_civUid isEqualTo "") then {
 ["IDENTITY_TOUCH"] call _setStep;
 private _identityDepsOk = true;
 {
-    private _fn = [_x select 0, _x select 1] call _ensureFn;
-    if !(_fn isEqualType {}) then {
+    private _depName = _x select 0;
+    private _depPath = _x select 1;
+    private _fn = objNull;
+    private _nilDep = isNil { _fn = [_depName, _depPath] call _ensureFn; };
+    if (_nilDep || {!(_fn isEqualType {})}) then {
         _identityDepsOk = false;
-        diag_log format ["[CIVSUB][BG] Missing dependency for IDENTITY_TOUCH fn=%1", _x select 0];
+        diag_log format ["[CIVSUB][BG] Missing dependency for IDENTITY_TOUCH fn=%1", _depName];
     };
 } forEach [
     ["ARC_fnc_civsubIdentityTouch", "functions\\civsub\\fn_civsubIdentityTouch.sqf"],

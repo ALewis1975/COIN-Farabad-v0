@@ -901,6 +901,8 @@ private _arcKnownToggleConsumers = createHashMapFromArray [
     ["ARC_debugLogToChat", "functions/core/fn_debugLog.sqf"],
     ["ARC_devDebugInspectorEnabled", "initServer.sqf -> ARC_debugInspectorEnabled mirror"],
     ["ARC_debugInspectorEnabled", "functions/core/fn_tocInitPlayer.sqf"],
+    ["ARC_objectiveScaffoldEnabled", "initServer.sqf (declared for future feature; not yet consumed)"],
+    ["ARC_objectiveMeetUseAI", "initServer.sqf (declared for future feature; not yet consumed)"],
     ["ARC_patrolSpawnContactsEnabled", "functions/ops/fn_opsPatrolOnActivate.sqf"],
     ["ARC_rtbInWorldActionsEnabled", "functions/core/fn_tocInitPlayer.sqf"],
     ["ARC_sitrepInWorldActionsEnabled", "functions/core/fn_tocInitPlayer.sqf"],
