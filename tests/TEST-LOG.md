@@ -16,6 +16,10 @@ Append one dated entry per validation pass using:
 
 ## Entries
 
+- 2026-02-20T23:39Z | commit: pending | branch: copilot/fix-ui-console-on-load-error | Scenario: Fix CI FileNotFoundError for ripgrep in marker index validation (python3 -m py_compile tools/generate_marker_index.py) | Result: PASS | Notes: Added ripgrep install step to arma-preflight.yml before Marker index generator static validation step. Added shutil.which("rg") guard in tools/generate_marker_index.py for a clear error message. Python compile check passed.
+  - Migration Checks: Required keys N/A; Defaulting N/A; Unknown-field preservation N/A
+  - Runtime-only Validation: N/A (CI tooling-only change)
+
 - 2026-02-20T23:25Z | commit: pending | branch: copilot/fix-ui-console-on-load-error | Scenario: Fix "Invalid number in expression" in fn_uiConsoleOnLoad.sqf refresh loop (sqflint -e w functions/ui/fn_uiConsoleOnLoad.sqf) | Result: PASS | Notes: focusedCtrl (nullary) can return a non-Control value in spawned context when display is closing; isNull on a non-Control threw "Invalid number in expression". Added isEqualType controlNull type guard before isNull check. sqflint -e w passes with no errors or warnings.
   - Migration Checks: Required keys N/A; Defaulting N/A; Unknown-field preservation N/A
   - Runtime-only Validation: BLOCKED (requires dedicated server + MP session to reproduce original RPT error and confirm fix)
