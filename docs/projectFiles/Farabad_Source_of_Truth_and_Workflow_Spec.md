@@ -162,3 +162,12 @@ Before merging:
 - [ ] Required static checks run
 - [ ] Release checklist impact reviewed
 
+### Server profile defaults (live vs dev)
+
+Use `ARC_profile_devMode` in `initServer.sqf` as the single switch for startup debug posture.
+
+| Profile | `ARC_profile_devMode` | Defaults at startup |
+|---|---:|---|
+| Live (default) | `false` | Keep debug toggles OFF (`ARC_debugLogEnabled`, `ARC_debugLogToChat`, `ARC_debugInspectorEnabled`, `civsub_v1_debug`, `civsub_v1_traffic_debug`, `airbase_v1_tower_authDebug`). |
+| Dev | `true` | Enable grouped debug toggles explicitly for diagnostics and validation runs. |
+
