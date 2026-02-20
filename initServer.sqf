@@ -24,6 +24,25 @@ if (isNil { missionNamespace getVariable "ARC_profile_devMode" }) then {
 private _arcProfileDevMode = missionNamespace getVariable ["ARC_profile_devMode", false];
 diag_log format ["[ARC][PROFILE] ARC_profile_devMode=%1", _arcProfileDevMode];
 
+// Safe mode (operator kill-switch): keep command/control alive while pausing nonessential runtime spawners.
+if (isNil { missionNamespace getVariable "ARC_safeModeEnabled" }) then {
+    missionNamespace setVariable ["ARC_safeModeEnabled", false, true];
+};
+
+private _arcSafeModeEnabled = missionNamespace getVariable ["ARC_safeModeEnabled", false];
+if (!(_arcSafeModeEnabled isEqualType true) && !(_arcSafeModeEnabled isEqualType false)) then {
+    _arcSafeModeEnabled = false;
+    missionNamespace setVariable ["ARC_safeModeEnabled", false, true];
+};
+
+if (_arcSafeModeEnabled) then {
+    diag_log "[ARC][SAFE MODE] ==================================================";
+    diag_log "[ARC][SAFE MODE] SAFE MODE ACTIVE: nonessential subsystem spawning is paused.";
+    diag_log "[ARC][SAFE MODE] Essentials remain online: state publish, TOC console, SITREP workflow.";
+    diag_log "[ARC][SAFE MODE] Operator procedure: observe stability, then disable ARC_safeModeEnabled and re-enable traffic -> IED/VBIED -> ambiance in stages.";
+    diag_log "[ARC][SAFE MODE] ==================================================";
+};
+
 // Debug toggles (server authoritative)
 missionNamespace setVariable ["ARC_debugLogEnabled", false, true];
 missionNamespace setVariable ["ARC_debugLogToChat", false, true];
@@ -300,6 +319,15 @@ missionNamespace setVariable ["ARC_vbiedTelegraphIntelLog", true, true];
 
 // VBIED scaffolding (object-first)
 missionNamespace setVariable ["ARC_vbiedScaffoldEnabled", true, true];
+missionNamespace setVariable ["airbase_v1_ambiance_enabled", true, true];
+
+if (_arcSafeModeEnabled) then {
+    missionNamespace setVariable ["civsub_v1_traffic_enabled", false, true];
+    missionNamespace setVariable ["ARC_iedPhase1_siteSelectionEnabled", false, true];
+    missionNamespace setVariable ["ARC_vbiedPhase3_enabled", false, true];
+    missionNamespace setVariable ["ARC_vbiedScaffoldEnabled", false, true];
+    missionNamespace setVariable ["airbase_v1_ambiance_enabled", false, true];
+};
 
 // VBIED defuse window (Phase 3.1)
 missionNamespace setVariable ["ARC_vbiedDefuseActionEnabled", true, true];
@@ -860,7 +888,15 @@ missionNamespace setVariable ["ARC_operatorToggleAuditCatalog", [
     ]],
     ["Airbase", [
         ["airbase_v1_tower_allowBnCmd", "bool"],
-        ["airbase_v1_tower_authDebug", "bool"]
+        ["airbase_v1_tower_authDebug", "bool"],
+        ["airbase_v1_ambiance_enabled", "bool"]
+    ]],
+    ["SafeMode", [
+        ["ARC_safeModeEnabled", "bool"],
+        ["civsub_v1_traffic_enabled", "bool"],
+        ["ARC_iedPhase1_siteSelectionEnabled", "bool"],
+        ["ARC_vbiedPhase3_enabled", "bool"],
+        ["airbase_v1_ambiance_enabled", "bool"]
     ]],
     ["WorldTime", [
         ["ARC_worldTime_enabled", "bool"],
@@ -888,6 +924,7 @@ private _arcDeclaredServerToggles = [
     "ARC_rtbInWorldActionsEnabled",
     "ARC_sitrepInWorldActionsEnabled",
     "ARC_allowIncidentDuringAcceptedRtb",
+    "ARC_safeModeEnabled",
     "ARC_worldTime_enabled",
     "ARC_worldTime_forceDate",
     "ARC_worldTime_startDate",
@@ -905,6 +942,7 @@ private _arcKnownToggleConsumers = createHashMapFromArray [
     ["ARC_rtbInWorldActionsEnabled", "functions/core/fn_tocInitPlayer.sqf"],
     ["ARC_sitrepInWorldActionsEnabled", "functions/core/fn_tocInitPlayer.sqf"],
     ["ARC_allowIncidentDuringAcceptedRtb", "functions/core/fn_tocRequestNextIncident.sqf"],
+    ["ARC_safeModeEnabled", "initServer.sqf + functions/core/fn_bootstrapServer.sqf + functions/core/fn_incidentCreate.sqf"],
     ["ARC_worldTime_enabled", "scripts/worldtime/worldtime_server.sqf"],
     ["ARC_worldTime_forceDate", "scripts/worldtime/worldtime_server.sqf"],
     ["ARC_worldTime_startDate", "scripts/worldtime/worldtime_server.sqf"],

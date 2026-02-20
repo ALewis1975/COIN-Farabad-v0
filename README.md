@@ -189,6 +189,21 @@ These checks require a true dedicated server environment:
 
 Update `tests/TEST-LOG.md` after each validation pass.
 
+### Safe Mode Operations (Operator Procedure)
+
+Use safe mode when runtime stability is degraded and you need a controlled recovery posture.
+
+1. Set `ARC_safeModeEnabled = true` in `initServer.sqf` (or mission override) before mission start.
+2. Restart/initialize the server and confirm RPT entries tagged `[ARC][SAFE MODE]`.
+3. Observe stabilization while essentials remain active (state publish, TOC console, SITREP workflow).
+4. Re-enable subsystems incrementally in this order:
+   - `civsub_v1_traffic_enabled = true`
+   - `ARC_iedPhase1_siteSelectionEnabled = true` and `ARC_vbiedPhase3_enabled = true`
+   - `airbase_v1_ambiance_enabled = true`
+5. Set `ARC_safeModeEnabled = false` once the mission is stable.
+
+This staged return-to-service keeps command/control online while reducing nonessential spawning pressure.
+
 ### Coding Standards
 
 **Authority Model (Hard Requirements):**
