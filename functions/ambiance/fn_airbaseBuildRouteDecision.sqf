@@ -26,13 +26,27 @@ _context = toUpperANSI (trim _context);
 if !(_opKind in ["DEP", "ARR"]) exitWith {[false, [], "UNSUPPORTED_OP_KIND"]};
 if (_context isEqualTo "") then { _context = "AMBIENT"; };
 
+private _resolveMarker = {
+    params ["_primary", "_fallbacks", "_default"];
+
+    private _chosen = _primary;
+    if (!(_chosen isEqualType "") || { _chosen isEqualTo "" }) then { _chosen = _default; };
+
+    if ((markerShape _chosen) isEqualTo "") then {
+        {
+            if (_x isEqualType "" && { _x isNotEqualTo "" } && { (markerShape _x) isNotEqualTo "" }) exitWith {
+                _chosen = _x;
+            };
+        } forEach _fallbacks;
+    };
+
+    _chosen
+};
+
 private _runwayMarker = if (_opKind isEqualTo "DEP") then {
     missionNamespace getVariable ["airbase_v1_depart_runway_marker", "R-270 Outbound"]
 } else {
     missionNamespace getVariable ["airbase_v1_arrival_runway_marker", "L-270 Inbound"]
-};
-if (!(_runwayMarker isEqualType "") || { _runwayMarker isEqualTo "" }) then {
-    _runwayMarker = if (_opKind isEqualTo "DEP") then { "R-270 Outbound" } else { "L-270 Inbound" };
 };
 
 private _ingressMarker = if (_opKind isEqualTo "DEP") then {
@@ -40,17 +54,29 @@ private _ingressMarker = if (_opKind isEqualTo "DEP") then {
 } else {
     missionNamespace getVariable ["airbase_v1_arrival_taxi_ingress_marker", "T-L Ingress"]
 };
+
 private _egressMarker = if (_opKind isEqualTo "DEP") then {
     missionNamespace getVariable ["airbase_v1_depart_taxi_egress_marker", "T-R Egress"]
 } else {
     missionNamespace getVariable ["airbase_v1_arrival_taxi_egress_marker", "T-L Egress"]
 };
 
+if (_opKind isEqualTo "DEP") then {
+    _runwayMarker = [_runwayMarker, ["AEON_Right_270_Outbound", "R-270 Outbound"], "R-270 Outbound"] call _resolveMarker;
+    _ingressMarker = [_ingressMarker, ["AEON_Taxi_Right_Ingress", "T-R Ingress"], "T-R Ingress"] call _resolveMarker;
+    _egressMarker = [_egressMarker, ["AEON_Taxi_Right_Egress", "T-R Egress"], "T-R Egress"] call _resolveMarker;
+} else {
+    _runwayMarker = [_runwayMarker, ["L-270 Inbound"], "L-270 Inbound"] call _resolveMarker;
+    _ingressMarker = [_ingressMarker, ["T-L Ingress"], "T-L Ingress"] call _resolveMarker;
+    _egressMarker = [_egressMarker, ["T-L Egress"], "T-L Egress"] call _resolveMarker;
+};
+
 private _connectors = missionNamespace getVariable ["airbase_v1_taxi_center_connectors", ["mkr_airbaseCenter"]];
 if !(_connectors isEqualType []) then { _connectors = ["mkr_airbaseCenter"]; };
 private _connectorValid = _connectors select { (_x isEqualType "") && { _x isNotEqualTo "" } && { (markerShape _x) isNotEqualTo "" } };
 if ((count _connectorValid) == 0) then {
-    _connectorValid = ["mkr_airbaseCenter"];
+    private _fallbackCenter = ["mkr_airbaseCenter", ["mkr_airbaseCenter"], "mkr_airbaseCenter"] call _resolveMarker;
+    _connectorValid = [_fallbackCenter];
 };
 
 private _pathMarkers = if (_opKind isEqualTo "DEP") then {
@@ -94,4 +120,3 @@ if (!(_occupyWindow isEqualType 0) || { _occupyWindow < 60 }) then { _occupyWind
     ["runwayReserveWindowS", _reserveWindow],
     ["runwayOccupyWindowS", _occupyWindow]
 ], "OK"]
-

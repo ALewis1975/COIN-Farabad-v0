@@ -80,7 +80,7 @@ if (_hayNorm isEqualTo "") exitWith {
 
 if ((_hayNorm find "FARABAD TOWER WS CCIC") >= 0) exitWith {[true, "CCIC", "TOKEN_CCIC"]};
 
-private _allowBnCmd = missionNamespace getVariable ["airbase_v1_tower_allowBnCmd", false];
+private _allowBnCmd = missionNamespace getVariable ["airbase_v1_tower_allowBnCmd", true];
 if (!(_allowBnCmd isEqualType true) && !(_allowBnCmd isEqualType false)) then { _allowBnCmd = false; };
 if (_allowBnCmd) then {
     private _bnTokens = missionNamespace getVariable [
