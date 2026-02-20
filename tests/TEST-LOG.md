@@ -16,6 +16,9 @@ Append one dated entry per validation pass using:
 
 ## Entries
 
+- 2026-02-20T05:24Z | commit: <pending> | branch: work | Scenario: preflight CI tooling adds marker-index generator validation (`python3 scripts/dev/validate_state_migrations.py`, `python3 scripts/dev/validate_marker_index.py`, `git --no-pager diff --check`) | Result: PASS | Notes: Added dedicated preflight step to execute marker-index static validator so generator output/schema parity is checked on every push/PR; local static validations passed in container.
+  - Migration Checks: Required keys PASS; Defaulting PASS; Unknown-field preservation PASS
+  - Runtime-only Validation: N/A (tooling-only workflow change)
 - 2026-02-20T05:19Z | commit: <pending> | branch: work | Scenario: tower authorization identity-token broadening static validation (`git --no-pager diff --check` and `rg -n "airbase_v1_tower_ccicTokens|airbase_v1_tower_lcTokens|FARABAD TOWER WSCIC|FARABAD TOWER WS LC|TOKEN_CCIC|TOKEN_LC" functions/core/fn_airbaseTowerAuthorize.sqf`) | Result: PASS | Notes: Replaced single hardcoded CCIC/LC string checks with missionNamespace-configurable token arrays, including CCIC WSCIC/WS CCIC punctuation-spacing variants and LC variants with optional WS token, while leaving LC action allowlist enforcement unchanged.
   - Migration Checks: Required keys N/A; Defaulting N/A; Unknown-field preservation N/A
   - Runtime-only Validation: BLOCKED (container static review only; dedicated/local MP runtime needed for authoritative role-binding behavior)
