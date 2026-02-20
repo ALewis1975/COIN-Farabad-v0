@@ -110,6 +110,20 @@ if (!(_execActive isEqualType true) && !(_execActive isEqualType false)) then { 
 private _execFid = missionNamespace getVariable ["airbase_v1_execFid", ""];
 if (!(_execFid isEqualType "")) then { _execFid = ""; };
 
+private _depInProgress = 0;
+if (_execActive && { _execFid isNotEqualTo "" }) then {
+    private _execRecIdx = _airRecs findIf {
+        (_x isEqualType []) &&
+        { (count _x) >= 3 } &&
+        { ((_x param [0, ""]) isEqualTo _execFid) }
+    };
+
+    if (_execRecIdx >= 0) then {
+        private _execKind = (_airRecs # _execRecIdx) param [2, ""];
+        if (_execKind isEqualTo "DEP") then { _depInProgress = 1; };
+    };
+};
+
 private _holdDepartures = ["airbase_v1_holdDepartures", false] call ARC_fnc_stateGet;
 if (!(_holdDepartures isEqualType true) && !(_holdDepartures isEqualType false)) then { _holdDepartures = false; };
 
@@ -270,6 +284,19 @@ private _extractBlockedSourceId = {
     _found
 };
 
+private _metaValue = {
+    params ["_meta", "_key", ["_def", ""]];
+    if !(_meta isEqualType []) exitWith { _def };
+    private _idx = _meta findIf {
+        _x isEqualType [] &&
+        { (count _x) >= 2 } &&
+        { ((_x # 0) isEqualType "") } &&
+        { (toUpperANSI (_x # 0)) isEqualTo (toUpperANSI _key) }
+    };
+    if (_idx < 0) exitWith { _def };
+    (_meta # _idx) # 1
+};
+
 private _blockedRouteTail = [];
 
 {
@@ -290,14 +317,33 @@ private _blockedRouteTail = [];
     if ((count _x) < 4) then { continue; };
     private _cat = toUpperANSI (_x param [2, ""]);
     if (_cat isNotEqualTo "OPS") then { continue; };
+
     private _summary = _x param [3, ""];
     if !(_summary isEqualType "") then { _summary = str _summary; };
     private _summaryU = toUpperANSI _summary;
-    if ((_summaryU find "AIRBASE ROUTE: BLOCKED") < 0 && { (_summaryU find "AIRBASE CLEARANCE DENIED") < 0 }) then { continue; };
 
-    private _reason = [_summaryU] call _extractBlockedReason;
+    private _meta = _x param [5, []];
+    if !(_meta isEqualType []) then { _meta = []; };
+    private _eventCode = toUpperANSI ([_meta, "event", ""] call _metaValue);
+    private _metaReason = toUpperANSI ([_meta, "reason", ""] call _metaValue);
+
+    private _isRouteBlockedSummary = (_summaryU find "AIRBASE ROUTE: BLOCKED") >= 0;
+    private _isRouteInvalidClearance =
+        (_eventCode isEqualTo "AIRBASE_CLEARANCE_ROUTE_INVALID") ||
+        {
+            (_summaryU find "AIRBASE CLEARANCE DENIED") >= 0 &&
+            {
+                (_summaryU find "ROUTE INVALID") >= 0 ||
+                { (_metaReason find "ROUTE") >= 0 || { (_metaReason find "MARKER") >= 0 } }
+            }
+        };
+    if !(_isRouteBlockedSummary || _isRouteInvalidClearance) then { continue; };
+
+    private _reason = if (_metaReason isEqualTo "") then { [_summaryU] call _extractBlockedReason } else { _metaReason };
     if (_reason isEqualTo "") then { _reason = "ROUTE_DENIED"; };
-    private _sourceId = [_summaryU] call _extractBlockedSourceId;
+    private _sourceId = toUpperANSI ([_meta, "flightId", ""] call _metaValue);
+    if (_sourceId isEqualTo "") then { _sourceId = toUpperANSI ([_meta, "requestId", ""] call _metaValue); };
+    if (_sourceId isEqualTo "") then { _sourceId = [_summaryU] call _extractBlockedSourceId; };
 
     _blockedRouteTail pushBack [
         _x param [1, -1],
@@ -305,6 +351,19 @@ private _blockedRouteTail = [];
         _sourceId
     ];
 } forEach _log;
+
+// AIR/OPS matches are appended in source order; normalize by timestamp so
+// recent-window slicing and latest-reason/source always reflect true recency.
+if ((count _blockedRouteTail) > 1) then {
+    private _blockedSort = _blockedRouteTail apply {
+        [
+            _x param [0, -1],
+            _x
+        ]
+    };
+    _blockedSort sort true;
+    _blockedRouteTail = _blockedSort apply { _x param [1, []] };
+};
 
 if ((count _blockedRouteTail) > _blockedRouteWindow) then {
     _blockedRouteTail = _blockedRouteTail select [(count _blockedRouteTail) - _blockedRouteWindow, _blockedRouteWindow];
@@ -329,6 +388,7 @@ if ((count _blockedRouteTailView) > _blockedTailN) then {
 
 private _airbasePub = [
     ["depQueued", _depQueued],
+    ["depInProgress", _depInProgress],
     ["arrQueued", _arrQueued],
     ["totalQueued", count _airQueue],
     ["execActive", _execActive],
