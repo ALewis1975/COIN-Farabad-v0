@@ -3,6 +3,7 @@
     {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "AEON_Left_270_Inbound",
       "color": "",
       "consumers": [],
       "name": "AEON_Left_270_Inbound",
@@ -21,6 +22,7 @@
     {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "AEON_Right_270_Outbound",
       "color": "",
       "consumers": [
         "functions/ambiance/fn_airbaseBuildRouteDecision.sqf",
@@ -44,6 +46,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "AEON_Right_270_Outbound_Clear",
       "color": "",
       "consumers": [
         "functions/ambiance/fn_airbaseInit.sqf",
@@ -65,6 +68,7 @@
     {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "AEON_Taxi_Centr_Egress",
       "color": "",
       "consumers": [],
       "name": "AEON_Taxi_Centr_Egress",
@@ -83,6 +87,7 @@
     {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "AEON_Taxi_Centr_Ingress",
       "color": "",
       "consumers": [],
       "name": "AEON_Taxi_Centr_Ingress",
@@ -101,6 +106,7 @@
     {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "AEON_Taxi_Left_Egress",
       "color": "",
       "consumers": [],
       "name": "AEON_Taxi_Left_Egress",
@@ -119,6 +125,7 @@
     {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "AEON_Taxi_Left_Ingress",
       "color": "",
       "consumers": [],
       "name": "AEON_Taxi_Left_Ingress",
@@ -137,6 +144,7 @@
     {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "AEON_Taxi_Right_Egress",
       "color": "",
       "consumers": [
         "functions/ambiance/fn_airbaseBuildRouteDecision.sqf",
@@ -158,6 +166,7 @@
     {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "AEON_Taxi_Right_Ingress",
       "color": "",
       "consumers": [
         "functions/ambiance/fn_airbaseBuildRouteDecision.sqf",
@@ -179,6 +188,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "ARC_convoy_linkup_1",
       "color": "",
       "consumers": [],
       "name": "ARC_convoy_linkup_1",
@@ -197,6 +207,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "ARC_convoy_linkup_2",
       "color": "",
       "consumers": [],
       "name": "ARC_convoy_linkup_2",
@@ -215,6 +226,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "ARC_convoy_linkup_3",
       "color": "",
       "consumers": [],
       "name": "ARC_convoy_linkup_3",
@@ -233,6 +245,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "ARC_convoy_linkup_4",
       "color": "",
       "consumers": [],
       "name": "ARC_convoy_linkup_4",
@@ -251,6 +264,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "ARC_convoy_linkup_airbase",
       "color": "",
       "consumers": [
         "functions/core/fn_execInitActive.sqf"
@@ -271,6 +285,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "ARC_convoy_start",
       "color": "",
       "consumers": [
         "functions/core/fn_execCleanupActive.sqf",
@@ -294,6 +309,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "ARC_convoy_start_1",
       "color": "",
       "consumers": [],
       "name": "ARC_convoy_start_1",
@@ -312,6 +328,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "ARC_convoy_start_2",
       "color": "",
       "consumers": [],
       "name": "ARC_convoy_start_2",
@@ -330,6 +347,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "ARC_convoy_start_3",
       "color": "",
       "consumers": [],
       "name": "ARC_convoy_start_3",
@@ -348,6 +366,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "ARC_convoy_start_4",
       "color": "",
       "consumers": [],
       "name": "ARC_convoy_start_4",
@@ -364,250 +383,9 @@
       "usageNotes": ""
     },
     {
-      "aliases": [
-        "marker_3"
-      ],
-      "alpha": 1.0,
-      "color": "",
-      "consumers": [
-        "data/farabad_marker_aliases.sqf",
-        "data/incident_markers.sqf",
-        "functions/ops/fn_opsSpawnLocalSupport.sqf"
-      ],
-      "name": "ARC_loc_BelleFoilleHotel",
-      "pos": [
-        5349.7939,
-        179.886,
-        11000.318
-      ],
-      "shape": "RECTANGLE",
-      "source": "mission.sqm:Outer Borders",
-      "status": "unresolved",
-      "text": "",
-      "type": "",
-      "usageNotes": ""
-    },
-    {
-      "aliases": [
-        "marker_22"
-      ],
-      "alpha": 0.5,
-      "color": "",
-      "consumers": [
-        "data/farabad_marker_aliases.sqf",
-        "data/incident_markers.sqf"
-      ],
-      "name": "ARC_loc_FortKelati",
-      "pos": [
-        6292.2148,
-        8.4899998,
-        1605.1696
-      ],
-      "shape": "",
-      "source": "mission.sqm:Map / Mission",
-      "status": "unresolved",
-      "text": " EPW Holding",
-      "type": "loc_mission",
-      "usageNotes": ""
-    },
-    {
-      "aliases": [
-        "marker_15"
-      ],
-      "alpha": 0.5,
-      "color": "",
-      "consumers": [
-        "data/farabad_marker_aliases.sqf",
-        "data/incident_markers.sqf",
-        "functions/ops/fn_opsSpawnLocalSupport.sqf"
-      ],
-      "name": "ARC_loc_JaziraOilField",
-      "pos": [
-        6220.3008,
-        7.2160001,
-        1335.816
-      ],
-      "shape": "",
-      "source": "mission.sqm:Map / Mission",
-      "status": "unresolved",
-      "text": " South Gate",
-      "type": "loc_defend",
-      "usageNotes": ""
-    },
-    {
-      "aliases": [
-        "marker_12"
-      ],
-      "alpha": 0.5,
-      "color": "",
-      "consumers": [
-        "data/farabad_marker_aliases.sqf",
-        "data/incident_markers.sqf",
-        "functions/ops/fn_opsSpawnLocalSupport.sqf"
-      ],
-      "name": "ARC_loc_JaziraOilRefinery",
-      "pos": [
-        6737.1758,
-        9.7045679,
-        3238.6482
-      ],
-      "shape": "",
-      "source": "mission.sqm:Map / Mission",
-      "status": "unresolved",
-      "text": " North Gate",
-      "type": "loc_defend",
-      "usageNotes": ""
-    },
-    {
-      "aliases": [
-        "marker_13"
-      ],
-      "alpha": 0.5,
-      "color": "",
-      "consumers": [
-        "data/farabad_marker_aliases.sqf",
-        "data/incident_markers.sqf"
-      ],
-      "name": "ARC_loc_Junkyard",
-      "pos": [
-        5209.2402,
-        8.6000004,
-        2679.394
-      ],
-      "shape": "",
-      "source": "mission.sqm:Map / Mission",
-      "status": "unresolved",
-      "text": " Main Gate",
-      "type": "loc_defend",
-      "usageNotes": ""
-    },
-    {
-      "aliases": [
-        "marker_6"
-      ],
-      "alpha": 1.0,
-      "color": "",
-      "consumers": [
-        "data/farabad_marker_aliases.sqf",
-        "data/incident_markers.sqf",
-        "functions/ops/fn_opsSpawnLocalSupport.sqf"
-      ],
-      "name": "ARC_loc_KarkanakPrison",
-      "pos": [
-        10949.0,
-        98.934288,
-        5500.75
-      ],
-      "shape": "RECTANGLE",
-      "source": "mission.sqm:Outer Borders",
-      "status": "unresolved",
-      "text": "",
-      "type": "",
-      "usageNotes": ""
-    },
-    {
-      "aliases": [
-        "marker_4"
-      ],
-      "alpha": 1.0,
-      "color": "",
-      "consumers": [
-        "data/farabad_marker_aliases.sqf",
-        "data/incident_markers.sqf",
-        "functions/ops/fn_opsSpawnLocalSupport.sqf"
-      ],
-      "name": "ARC_loc_hospital",
-      "pos": [
-        5350.0811,
-        0.0,
-        -0.8369751
-      ],
-      "shape": "RECTANGLE",
-      "source": "mission.sqm:Outer Borders",
-      "status": "unresolved",
-      "text": "",
-      "type": "",
-      "usageNotes": ""
-    },
-    {
-      "aliases": [
-        "marker_5"
-      ],
-      "alpha": 1.0,
-      "color": "",
-      "consumers": [
-        "data/farabad_marker_aliases.sqf",
-        "data/incident_markers.sqf",
-        "functions/ops/fn_opsSpawnLocalSupport.sqf"
-      ],
-      "name": "ARC_loc_industrial022",
-      "pos": [
-        -249.2251,
-        47.273209,
-        5499.5889
-      ],
-      "shape": "RECTANGLE",
-      "source": "mission.sqm:Outer Borders",
-      "status": "unresolved",
-      "text": "",
-      "type": "",
-      "usageNotes": ""
-    },
-    {
-      "aliases": [
-        "ARC_m_logistics_01",
-        "marker_17"
-      ],
-      "alpha": 0.5,
-      "color": "",
-      "consumers": [
-        "data/farabad_marker_aliases.sqf",
-        "data/incident_markers.sqf",
-        "docs/projectFiles/Farabad_ORBAT.md",
-        "functions/ops/fn_opsSpawnRouteSupport.sqf"
-      ],
-      "name": "ARC_loc_military",
-      "pos": [
-        6236.9531,
-        8.4899998,
-        1589.866
-      ],
-      "shape": "",
-      "source": "mission.sqm:Map / Mission",
-      "status": "unresolved",
-      "text": " TOC",
-      "type": "loc_mission",
-      "usageNotes": ""
-    },
-    {
-      "aliases": [
-        "ARC_m_logistics_01",
-        "marker_17"
-      ],
-      "alpha": 1.0,
-      "color": "",
-      "consumers": [
-        "data/farabad_marker_aliases.sqf",
-        "data/incident_markers.sqf",
-        "docs/projectFiles/Farabad_ORBAT.md",
-        "functions/ops/fn_opsSpawnRouteSupport.sqf"
-      ],
-      "name": "ARC_loc_military",
-      "pos": [
-        7703.9258,
-        73.036575,
-        7521.1558
-      ],
-      "shape": "",
-      "source": "mission.sqm:Task Markers (Defunct?)",
-      "status": "unresolved",
-      "text": " Logistics 01",
-      "type": "Empty",
-      "usageNotes": ""
-    },
-    {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "ARC_m_Fort Kelati",
       "color": "",
       "consumers": [],
       "name": "ARC_m_Fort Kelati",
@@ -626,6 +404,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "ARC_m_base_avn_hq",
       "color": "",
       "consumers": [],
       "name": "ARC_m_base_avn_hq",
@@ -644,6 +423,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "ARC_m_base_c130_parking",
       "color": "",
       "consumers": [],
       "name": "ARC_m_base_c130_parking",
@@ -662,6 +442,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "ARC_m_base_c17_parking",
       "color": "",
       "consumers": [],
       "name": "ARC_m_base_c17_parking",
@@ -680,6 +461,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "ARC_m_base_cargo_hangar",
       "color": "",
       "consumers": [],
       "name": "ARC_m_base_cargo_hangar",
@@ -698,6 +480,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "ARC_m_base_hq_1",
       "color": "",
       "consumers": [
         "functions/ops/fn_opsSpawnRouteSupport.sqf"
@@ -718,6 +501,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "ARC_m_base_k135_parking",
       "color": "",
       "consumers": [],
       "name": "ARC_m_base_k135_parking",
@@ -736,6 +520,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "ARC_m_base_mayor_1",
       "color": "",
       "consumers": [],
       "name": "ARC_m_base_mayor_1",
@@ -754,6 +539,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "ARC_m_base_toc",
       "color": "",
       "consumers": [
         "data/incident_markers.sqf",
@@ -776,6 +562,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "ARC_m_base_uas_hangar",
       "color": "",
       "consumers": [],
       "name": "ARC_m_base_uas_hangar",
@@ -794,6 +581,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "ARC_m_base_usaf_pilot_hangar",
       "color": "",
       "consumers": [],
       "name": "ARC_m_base_usaf_pilot_hangar",
@@ -812,6 +600,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "ARC_m_charlie_2_325AIR",
       "color": "",
       "consumers": [
         "functions/command/fn_intelResolveRtbDestination.sqf",
@@ -833,6 +622,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "ARC_m_civil_01",
       "color": "",
       "consumers": [
         "data/incident_markers.sqf"
@@ -853,6 +643,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "ARC_m_ied_01",
       "color": "",
       "consumers": [
         "data/incident_markers.sqf"
@@ -871,8 +662,36 @@
       "usageNotes": ""
     },
     {
+      "aliases": [
+        "ARC_m_logistics_01",
+        "marker_17"
+      ],
+      "alpha": 1.0,
+      "canonicalName": "ARC_loc_military",
+      "color": "",
+      "consumers": [
+        "data/farabad_marker_aliases.sqf",
+        "data/incident_markers.sqf",
+        "docs/projectFiles/Farabad_ORBAT.md",
+        "functions/ops/fn_opsSpawnRouteSupport.sqf"
+      ],
+      "name": "ARC_m_logistics_01",
+      "pos": [
+        7703.9258,
+        73.036575,
+        7521.1558
+      ],
+      "shape": "",
+      "source": "mission.sqm:Task Markers (Defunct?)",
+      "status": "unresolved",
+      "text": " Logistics 01",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "ARC_m_patrol_01",
       "color": "",
       "consumers": [
         "data/incident_markers.sqf"
@@ -893,6 +712,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "ARC_m_patrol_02",
       "color": "",
       "consumers": [
         "data/incident_markers.sqf"
@@ -913,6 +733,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "ARC_m_patrol_03",
       "color": "",
       "consumers": [
         "data/incident_markers.sqf"
@@ -933,6 +754,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "Main_Gate",
       "color": "",
       "consumers": [
         "data/incident_markers.sqf",
@@ -954,6 +776,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "NE_Corner",
       "color": "",
       "consumers": [
         "functions/ambiance/fn_airbaseSecurityInit.sqf"
@@ -974,6 +797,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "NW_Corner",
       "color": "",
       "consumers": [
         "functions/ambiance/fn_airbaseSecurityInit.sqf"
@@ -994,6 +818,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "North_Gate",
       "color": "",
       "consumers": [
         "data/incident_markers.sqf",
@@ -1020,6 +845,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "SE_Corner",
       "color": "",
       "consumers": [
         "functions/ambiance/fn_airbaseSecurityInit.sqf"
@@ -1040,6 +866,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "SW_Corner",
       "color": "",
       "consumers": [
         "functions/ambiance/fn_airbaseSecurityInit.sqf"
@@ -1060,6 +887,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "South_Gate",
       "color": "",
       "consumers": [
         "data/incident_markers.sqf",
@@ -1081,6 +909,7 @@
     {
       "aliases": [],
       "alpha": 0.0,
+      "canonicalName": "arc_bridge_01",
       "color": "",
       "consumers": [
         "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
@@ -1103,6 +932,7 @@
     {
       "aliases": [],
       "alpha": 0.0,
+      "canonicalName": "arc_bridge_02",
       "color": "",
       "consumers": [
         "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
@@ -1125,6 +955,7 @@
     {
       "aliases": [],
       "alpha": 0.0,
+      "canonicalName": "arc_bridge_03",
       "color": "",
       "consumers": [
         "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
@@ -1146,6 +977,7 @@
     {
       "aliases": [],
       "alpha": 0.0,
+      "canonicalName": "arc_bridge_04",
       "color": "",
       "consumers": [
         "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
@@ -1167,6 +999,7 @@
     {
       "aliases": [],
       "alpha": 0.0,
+      "canonicalName": "arc_bridge_05",
       "color": "",
       "consumers": [
         "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
@@ -1188,6 +1021,7 @@
     {
       "aliases": [],
       "alpha": 0.0,
+      "canonicalName": "arc_bridge_06",
       "color": "",
       "consumers": [
         "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
@@ -1209,6 +1043,7 @@
     {
       "aliases": [],
       "alpha": 0.0,
+      "canonicalName": "arc_bridge_07",
       "color": "",
       "consumers": [
         "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
@@ -1230,6 +1065,7 @@
     {
       "aliases": [],
       "alpha": 0.0,
+      "canonicalName": "arc_bridge_08",
       "color": "",
       "consumers": [
         "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
@@ -1251,6 +1087,7 @@
     {
       "aliases": [],
       "alpha": 0.0,
+      "canonicalName": "arc_bridge_09",
       "color": "",
       "consumers": [
         "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
@@ -1272,6 +1109,7 @@
     {
       "aliases": [],
       "alpha": 0.0,
+      "canonicalName": "arc_bridge_10",
       "color": "",
       "consumers": [
         "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
@@ -1293,6 +1131,7 @@
     {
       "aliases": [],
       "alpha": 0.0,
+      "canonicalName": "arc_bridge_11",
       "color": "",
       "consumers": [
         "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
@@ -1314,6 +1153,7 @@
     {
       "aliases": [],
       "alpha": 0.0,
+      "canonicalName": "arc_bridge_12",
       "color": "",
       "consumers": [
         "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
@@ -1335,6 +1175,7 @@
     {
       "aliases": [],
       "alpha": 0.0,
+      "canonicalName": "arc_bridge_13",
       "color": "",
       "consumers": [
         "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
@@ -1356,6 +1197,7 @@
     {
       "aliases": [],
       "alpha": 0.0,
+      "canonicalName": "arc_bridge_14",
       "color": "",
       "consumers": [
         "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
@@ -1377,6 +1219,7 @@
     {
       "aliases": [],
       "alpha": 0.0,
+      "canonicalName": "arc_bridge_15",
       "color": "",
       "consumers": [
         "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
@@ -1398,6 +1241,7 @@
     {
       "aliases": [],
       "alpha": 0.0,
+      "canonicalName": "arc_bridge_16",
       "color": "",
       "consumers": [
         "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
@@ -1419,6 +1263,7 @@
     {
       "aliases": [],
       "alpha": 0.0,
+      "canonicalName": "arc_bridge_17",
       "color": "",
       "consumers": [
         "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
@@ -1440,6 +1285,7 @@
     {
       "aliases": [],
       "alpha": 0.0,
+      "canonicalName": "arc_bridge_18",
       "color": "",
       "consumers": [
         "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
@@ -1461,6 +1307,7 @@
     {
       "aliases": [],
       "alpha": 0.0,
+      "canonicalName": "arc_bridge_19",
       "color": "",
       "consumers": [
         "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
@@ -1482,6 +1329,7 @@
     {
       "aliases": [],
       "alpha": 0.0,
+      "canonicalName": "arc_bridge_20",
       "color": "",
       "consumers": [
         "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
@@ -1503,6 +1351,7 @@
     {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "arc_hq_1_73_CAV",
       "color": "",
       "consumers": [],
       "name": "arc_hq_1_73_CAV",
@@ -1521,6 +1370,7 @@
     {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "arc_hq_1_73_CAV_1",
       "color": "",
       "consumers": [],
       "name": "arc_hq_1_73_CAV_1",
@@ -1539,6 +1389,7 @@
     {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "arc_hq_2_325_AIR",
       "color": "",
       "consumers": [],
       "name": "arc_hq_2_325_AIR",
@@ -1557,6 +1408,7 @@
     {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "arc_hq_A_2_325_AIR",
       "color": "",
       "consumers": [],
       "name": "arc_hq_A_2_325_AIR",
@@ -1575,6 +1427,7 @@
     {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "arc_hq_B_2_325_AIR",
       "color": "",
       "consumers": [],
       "name": "arc_hq_B_2_325_AIR",
@@ -1593,6 +1446,7 @@
     {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "arc_hq_C_2_325_AIR",
       "color": "",
       "consumers": [],
       "name": "arc_hq_C_2_325_AIR",
@@ -1611,6 +1465,7 @@
     {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "arc_hq_TNA",
       "color": "",
       "consumers": [],
       "name": "arc_hq_TNA",
@@ -1629,6 +1484,7 @@
     {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "arc_hq_TNP",
       "color": "",
       "consumers": [],
       "name": "arc_hq_TNP",
@@ -1647,6 +1503,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "arc_m_base_1_73_CAV_hq",
       "color": "",
       "consumers": [],
       "name": "arc_m_base_1_73_CAV_hq",
@@ -1665,6 +1522,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "arc_m_base_atc_approach",
       "color": "",
       "consumers": [],
       "name": "arc_m_base_atc_approach",
@@ -1683,6 +1541,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "arc_m_base_atc_ground",
       "color": "",
       "consumers": [],
       "name": "arc_m_base_atc_ground",
@@ -1701,6 +1560,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "arc_m_base_atc_tower",
       "color": "",
       "consumers": [],
       "name": "arc_m_base_atc_tower",
@@ -1719,6 +1579,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "arc_m_base_barracks_01",
       "color": "",
       "consumers": [],
       "name": "arc_m_base_barracks_01",
@@ -1737,6 +1598,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "arc_m_base_civilian_terminal_01",
       "color": "",
       "consumers": [],
       "name": "arc_m_base_civilian_terminal_01",
@@ -1755,6 +1617,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "arc_m_base_convoy_staging",
       "color": "",
       "consumers": [],
       "name": "arc_m_base_convoy_staging",
@@ -1773,6 +1636,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "arc_m_base_fire_station",
       "color": "",
       "consumers": [],
       "name": "arc_m_base_fire_station",
@@ -1791,6 +1655,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "arc_m_base_fuel_depot",
       "color": "",
       "consumers": [],
       "name": "arc_m_base_fuel_depot",
@@ -1809,6 +1674,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "arc_m_base_maintenance",
       "color": "",
       "consumers": [],
       "name": "arc_m_base_maintenance",
@@ -1827,6 +1693,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "arc_m_base_morgue",
       "color": "",
       "consumers": [],
       "name": "arc_m_base_morgue",
@@ -1845,6 +1712,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "arc_m_base_police_hq",
       "color": "",
       "consumers": [],
       "name": "arc_m_base_police_hq",
@@ -1863,6 +1731,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "arc_m_base_supply_depot",
       "color": "",
       "consumers": [],
       "name": "arc_m_base_supply_depot",
@@ -1881,6 +1750,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "arc_m_base_theater_hospital",
       "color": "",
       "consumers": [],
       "name": "arc_m_base_theater_hospital",
@@ -1899,6 +1769,7 @@
     {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "arc_rotary_pad_1",
       "color": "ColorWEST",
       "consumers": [],
       "name": "arc_rotary_pad_1",
@@ -1917,6 +1788,7 @@
     {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "arc_rotary_pad_2",
       "color": "ColorWEST",
       "consumers": [],
       "name": "arc_rotary_pad_2",
@@ -1935,6 +1807,7 @@
     {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "arc_rotary_pad_3",
       "color": "ColorWEST",
       "consumers": [],
       "name": "arc_rotary_pad_3",
@@ -1953,6 +1826,7 @@
     {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "arc_rotary_pad_4",
       "color": "ColorWEST",
       "consumers": [],
       "name": "arc_rotary_pad_4",
@@ -1971,6 +1845,7 @@
     {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "arc_rotary_pad_5",
       "color": "ColorWEST",
       "consumers": [],
       "name": "arc_rotary_pad_5",
@@ -1989,6 +1864,7 @@
     {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "arc_rotary_pad_6",
       "color": "ColorWEST",
       "consumers": [],
       "name": "arc_rotary_pad_6",
@@ -2007,6 +1883,7 @@
     {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "arc_rotary_pad_7",
       "color": "ColorWEST",
       "consumers": [],
       "name": "arc_rotary_pad_7",
@@ -2025,6 +1902,7 @@
     {
       "aliases": [],
       "alpha": 0.0,
+      "canonicalName": "arc_zone_NorthEast",
       "color": "",
       "consumers": [
         "data/farabad_world_zones.sqf"
@@ -2045,6 +1923,7 @@
     {
       "aliases": [],
       "alpha": 0.0,
+      "canonicalName": "arc_zone_NorthWest",
       "color": "",
       "consumers": [
         "data/farabad_world_zones.sqf"
@@ -2065,6 +1944,7 @@
     {
       "aliases": [],
       "alpha": 0.0,
+      "canonicalName": "arc_zone_SouthEast",
       "color": "",
       "consumers": [
         "data/farabad_world_zones.sqf"
@@ -2085,6 +1965,7 @@
     {
       "aliases": [],
       "alpha": 0.0,
+      "canonicalName": "arc_zone_SouthWest",
       "color": "",
       "consumers": [
         "data/farabad_world_zones.sqf"
@@ -2105,6 +1986,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "attack4_tow_release",
       "color": "",
       "consumers": [],
       "name": "attack4_tow_release",
@@ -2123,6 +2005,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "attack5_tow_release",
       "color": "",
       "consumers": [],
       "name": "attack5_tow_release",
@@ -2144,6 +2027,7 @@
         "epw_holding_1"
       ],
       "alpha": 1.0,
+      "canonicalName": "epw_holding",
       "color": "",
       "consumers": [
         "data/farabad_marker_aliases.sqf",
@@ -2168,8 +2052,58 @@
       "usageNotes": ""
     },
     {
+      "aliases": [
+        "marker_12"
+      ],
+      "alpha": 0.5,
+      "canonicalName": "ARC_loc_JaziraOilRefinery",
+      "color": "",
+      "consumers": [
+        "data/farabad_marker_aliases.sqf",
+        "data/incident_markers.sqf",
+        "functions/ops/fn_opsSpawnLocalSupport.sqf"
+      ],
+      "name": "marker_12",
+      "pos": [
+        6737.1758,
+        9.7045679,
+        3238.6482
+      ],
+      "shape": "",
+      "source": "mission.sqm:Map / Mission",
+      "status": "unresolved",
+      "text": " North Gate",
+      "type": "loc_defend",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [
+        "marker_13"
+      ],
+      "alpha": 0.5,
+      "canonicalName": "ARC_loc_Junkyard",
+      "color": "",
+      "consumers": [
+        "data/farabad_marker_aliases.sqf",
+        "data/incident_markers.sqf"
+      ],
+      "name": "marker_13",
+      "pos": [
+        5209.2402,
+        8.6000004,
+        2679.394
+      ],
+      "shape": "",
+      "source": "mission.sqm:Map / Mission",
+      "status": "unresolved",
+      "text": " Main Gate",
+      "type": "loc_defend",
+      "usageNotes": ""
+    },
+    {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "marker_14",
       "color": "",
       "consumers": [
         "data/incident_markers.sqf",
@@ -2189,8 +2123,34 @@
       "usageNotes": ""
     },
     {
+      "aliases": [
+        "marker_15"
+      ],
+      "alpha": 0.5,
+      "canonicalName": "ARC_loc_JaziraOilField",
+      "color": "",
+      "consumers": [
+        "data/farabad_marker_aliases.sqf",
+        "data/incident_markers.sqf",
+        "functions/ops/fn_opsSpawnLocalSupport.sqf"
+      ],
+      "name": "marker_15",
+      "pos": [
+        6220.3008,
+        7.2160001,
+        1335.816
+      ],
+      "shape": "",
+      "source": "mission.sqm:Map / Mission",
+      "status": "unresolved",
+      "text": " South Gate",
+      "type": "loc_defend",
+      "usageNotes": ""
+    },
+    {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "marker_16",
       "color": "",
       "consumers": [
         "data/incident_markers.sqf"
@@ -2209,8 +2169,36 @@
       "usageNotes": ""
     },
     {
+      "aliases": [
+        "ARC_m_logistics_01",
+        "marker_17"
+      ],
+      "alpha": 0.5,
+      "canonicalName": "ARC_loc_military",
+      "color": "",
+      "consumers": [
+        "data/farabad_marker_aliases.sqf",
+        "data/incident_markers.sqf",
+        "docs/projectFiles/Farabad_ORBAT.md",
+        "functions/ops/fn_opsSpawnRouteSupport.sqf"
+      ],
+      "name": "marker_17",
+      "pos": [
+        6236.9531,
+        8.4899998,
+        1589.866
+      ],
+      "shape": "",
+      "source": "mission.sqm:Map / Mission",
+      "status": "unresolved",
+      "text": " TOC",
+      "type": "loc_mission",
+      "usageNotes": ""
+    },
+    {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "marker_18",
       "color": "",
       "consumers": [
         "data/incident_markers.sqf"
@@ -2231,6 +2219,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "marker_19",
       "color": "",
       "consumers": [
         "data/incident_markers.sqf"
@@ -2251,6 +2240,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "marker_20",
       "color": "",
       "consumers": [
         "data/incident_markers.sqf"
@@ -2271,6 +2261,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "marker_21",
       "color": "",
       "consumers": [
         "data/incident_markers.sqf",
@@ -2290,8 +2281,33 @@
       "usageNotes": ""
     },
     {
+      "aliases": [
+        "marker_22"
+      ],
+      "alpha": 0.5,
+      "canonicalName": "ARC_loc_FortKelati",
+      "color": "",
+      "consumers": [
+        "data/farabad_marker_aliases.sqf",
+        "data/incident_markers.sqf"
+      ],
+      "name": "marker_22",
+      "pos": [
+        6292.2148,
+        8.4899998,
+        1605.1696
+      ],
+      "shape": "",
+      "source": "mission.sqm:Map / Mission",
+      "status": "unresolved",
+      "text": " EPW Holding",
+      "type": "loc_mission",
+      "usageNotes": ""
+    },
+    {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "marker_23",
       "color": "",
       "consumers": [],
       "name": "marker_23",
@@ -2310,6 +2326,7 @@
     {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "marker_24",
       "color": "",
       "consumers": [],
       "name": "marker_24",
@@ -2328,6 +2345,7 @@
     {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "marker_25",
       "color": "",
       "consumers": [],
       "name": "marker_25",
@@ -2346,6 +2364,7 @@
     {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "marker_26",
       "color": "",
       "consumers": [],
       "name": "marker_26",
@@ -2364,6 +2383,7 @@
     {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "marker_27",
       "color": "",
       "consumers": [],
       "name": "marker_27",
@@ -2382,6 +2402,7 @@
     {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "marker_28",
       "color": "",
       "consumers": [],
       "name": "marker_28",
@@ -2400,6 +2421,7 @@
     {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "marker_29",
       "color": "",
       "consumers": [],
       "name": "marker_29",
@@ -2416,8 +2438,34 @@
       "usageNotes": ""
     },
     {
+      "aliases": [
+        "marker_3"
+      ],
+      "alpha": 1.0,
+      "canonicalName": "ARC_loc_BelleFoilleHotel",
+      "color": "",
+      "consumers": [
+        "data/farabad_marker_aliases.sqf",
+        "data/incident_markers.sqf",
+        "functions/ops/fn_opsSpawnLocalSupport.sqf"
+      ],
+      "name": "marker_3",
+      "pos": [
+        5349.7939,
+        179.886,
+        11000.318
+      ],
+      "shape": "RECTANGLE",
+      "source": "mission.sqm:Outer Borders",
+      "status": "unresolved",
+      "text": "",
+      "type": "",
+      "usageNotes": ""
+    },
+    {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "marker_30",
       "color": "",
       "consumers": [],
       "name": "marker_30",
@@ -2436,6 +2484,7 @@
     {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "marker_31",
       "color": "",
       "consumers": [],
       "name": "marker_31",
@@ -2454,6 +2503,7 @@
     {
       "aliases": [],
       "alpha": 0.5,
+      "canonicalName": "marker_32",
       "color": "",
       "consumers": [],
       "name": "marker_32",
@@ -2472,6 +2522,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "marker_35",
       "color": "",
       "consumers": [],
       "name": "marker_35",
@@ -2488,8 +2539,84 @@
       "usageNotes": ""
     },
     {
+      "aliases": [
+        "marker_4"
+      ],
+      "alpha": 1.0,
+      "canonicalName": "ARC_loc_hospital",
+      "color": "",
+      "consumers": [
+        "data/farabad_marker_aliases.sqf",
+        "data/incident_markers.sqf",
+        "functions/ops/fn_opsSpawnLocalSupport.sqf"
+      ],
+      "name": "marker_4",
+      "pos": [
+        5350.0811,
+        0.0,
+        -0.8369751
+      ],
+      "shape": "RECTANGLE",
+      "source": "mission.sqm:Outer Borders",
+      "status": "unresolved",
+      "text": "",
+      "type": "",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [
+        "marker_5"
+      ],
+      "alpha": 1.0,
+      "canonicalName": "ARC_loc_industrial022",
+      "color": "",
+      "consumers": [
+        "data/farabad_marker_aliases.sqf",
+        "data/incident_markers.sqf",
+        "functions/ops/fn_opsSpawnLocalSupport.sqf"
+      ],
+      "name": "marker_5",
+      "pos": [
+        -249.2251,
+        47.273209,
+        5499.5889
+      ],
+      "shape": "RECTANGLE",
+      "source": "mission.sqm:Outer Borders",
+      "status": "unresolved",
+      "text": "",
+      "type": "",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [
+        "marker_6"
+      ],
+      "alpha": 1.0,
+      "canonicalName": "ARC_loc_KarkanakPrison",
+      "color": "",
+      "consumers": [
+        "data/farabad_marker_aliases.sqf",
+        "data/incident_markers.sqf",
+        "functions/ops/fn_opsSpawnLocalSupport.sqf"
+      ],
+      "name": "marker_6",
+      "pos": [
+        10949.0,
+        98.934288,
+        5500.75
+      ],
+      "shape": "RECTANGLE",
+      "source": "mission.sqm:Outer Borders",
+      "status": "unresolved",
+      "text": "",
+      "type": "",
+      "usageNotes": ""
+    },
+    {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "mkr_SHERIFF_HOLDING",
       "color": "",
       "consumers": [
         "docs/projectFiles/Farabad_CIVSUBv1_Development_Baseline (1).md",
@@ -2517,6 +2644,7 @@
         "marker_0"
       ],
       "alpha": 1.0,
+      "canonicalName": "mkr_airbaseCenter",
       "color": "",
       "consumers": [
         "data/farabad_marker_aliases.sqf",
@@ -2556,6 +2684,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "mkr_arrivalRunwayStart",
       "color": "",
       "consumers": [
         "functions/ambiance/fn_airbaseInit.sqf",
@@ -2577,6 +2706,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "mkr_arrivalRunwayStop",
       "color": "",
       "consumers": [
         "functions/ambiance/fn_airbaseInit.sqf",
@@ -2598,6 +2728,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "mkr_arrivalRunwayTaxiOut",
       "color": "",
       "consumers": [
         "functions/ambiance/fn_airbaseInit.sqf",
@@ -2619,6 +2750,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "mkr_arrivalSpawn",
       "color": "",
       "consumers": [
         "functions/ambiance/fn_airbaseInit.sqf",
@@ -2640,6 +2772,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "mkr_eod_disposal",
       "color": "",
       "consumers": [
         "functions/ied/fn_iedServerCheckDisposal.sqf",
@@ -2663,6 +2796,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "plane_despawn",
       "color": "",
       "consumers": [
         "functions/ambiance/fn_airbaseInit.sqf",
@@ -2684,6 +2818,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "respawn_west",
       "color": "",
       "consumers": [
         "functions/core/fn_execInitActive.sqf"
@@ -2704,6 +2839,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "tug4_return",
       "color": "",
       "consumers": [],
       "name": "tug4_return",
@@ -2722,6 +2858,7 @@
     {
       "aliases": [],
       "alpha": 1.0,
+      "canonicalName": "tug5_return",
       "color": "",
       "consumers": [],
       "name": "tug5_return",

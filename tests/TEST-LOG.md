@@ -16,6 +16,9 @@ Append one dated entry per validation pass using:
 
 ## Entries
 
+- 2026-02-20T23:28Z | commit: <pending> | branch: work | Scenario: marker-index raw-name uniqueness fix + canonical-name field validation (`python3 tools/generate_marker_index.py`, `python3 scripts/dev/validate_marker_index.py --sqm mission.sqm`, `python3 -m py_compile tools/generate_marker_index.py scripts/dev/validate_marker_index.py`, `git --no-pager diff --check`) | Result: PASS | Notes: Restored raw mission marker IDs in `name`, added explicit `canonicalName`, and tightened validator checks for unique names/canonical field presence while preserving text legacy-name guardrails.
+  - Migration Checks: Required keys N/A; Defaulting N/A; Unknown-field preservation N/A
+  - Runtime-only Validation: N/A (static tooling/documentation artifact generation)
 - 2026-02-20T18:31Z | commit: <pending> | branch: work | Scenario: shared workflow conventions for marker/unit index generators (`python3 tools/generate_marker_index.py`, `python3 tools/generate_unit_index.py`, `before=$(sha256sum docs/reference/marker-index.json docs/reference/marker-index.md docs/reference/unit-index.json docs/reference/unit-index.md); python3 tools/generate_marker_index.py && python3 tools/generate_unit_index.py >/dev/null; after=$(sha256sum docs/reference/marker-index.json docs/reference/marker-index.md docs/reference/unit-index.json docs/reference/unit-index.md); [ "$before" = "$after" ]`, `git --no-pager diff --check`) | Result: PASS | Notes: Aligned marker/unit generator headers and specifications around deterministic output, no timestamps, shared `docs/reference/` destination, and consistent `python3 tools/<generator>.py` regeneration style for contributors.
   - Migration Checks: Required keys N/A; Defaulting N/A; Unknown-field preservation N/A
   - Runtime-only Validation: N/A (static tooling/documentation artifact generation)
