@@ -21,5 +21,7 @@ createHashMapFromArray [
     ["marker_22", "ARC_loc_FortKelati"],
     ["marker_0", "mkr_airbaseCenter"],
     ["marker_1", "ARC_loc_GreenZone"],
-    ["ARC_m_logistics_01", "ARC_loc_military"]
+    ["ARC_m_logistics_01", "ARC_loc_military"],
+    ["EPW_Holding", "epw_holding"],
+    ["epw_holding_1", "epw_holding"]
 ];

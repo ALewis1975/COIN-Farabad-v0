@@ -124,6 +124,31 @@ switch (_actionId) do {
         if (!_nil && {_res isEqualType [] && {(count _res) >= 2}}) then {
             _ok = _res select 0;
             _html = _res select 1;
+
+            if !(_html isEqualType "") then {
+                _step = _civ getVariable ["civsub_bg_lastStep", _step];
+                diag_log format ["[CIVSUB][ERR] BACKGROUND_CHECK invalid payload civ=%1 actor=%2 step=%3 did=%4 payloadType=%5",
+                    name _civ,
+                    getPlayerUID _actor,
+                    _step,
+                    _civ getVariable ["civsub_districtId",""],
+                    typeName _html
+                ];
+                _ok = false;
+                _html = format ["<t size='0.9'>Background Check failed (server error at %1). Try again.</t>", _step];
+            } else {
+                if ((count _html) == 0) then {
+                    _step = _civ getVariable ["civsub_bg_lastStep", _step];
+                    diag_log format ["[CIVSUB][ERR] BACKGROUND_CHECK empty html civ=%1 actor=%2 step=%3 did=%4",
+                        name _civ,
+                        getPlayerUID _actor,
+                        _step,
+                        _civ getVariable ["civsub_districtId",""]
+                    ];
+                    _ok = false;
+                    _html = format ["<t size='0.9'>Background Check failed (server error at %1). Try again.</t>", _step];
+                };
+            };
         } else {
             _step = _civ getVariable ["civsub_bg_lastStep", _step];
             diag_log format ["[CIVSUB][ERR] BACKGROUND_CHECK action script error civ=%1 actor=%2 step=%3 did=%4",

@@ -852,7 +852,7 @@ diag_log format [
 missionNamespace setVariable ["ARC_worldTime_enabled", true, true];
 missionNamespace setVariable ["ARC_worldTime_forceDate", true, true];
 missionNamespace setVariable ["ARC_worldTime_startDate", +date, true];
-missionNamespace setVariable ["ARC_worldTime_forceMultiplier", true, true];
+missionNamespace setVariable ["ARC_worldTime_forceMultiplier", false, true];
 missionNamespace setVariable ["ARC_worldTime_timeMultiplier", 6, true];
 missionNamespace setVariable ["ARC_worldTime_broadcastIntervalSec", 30, true];
 
@@ -938,6 +938,8 @@ private _arcKnownToggleConsumers = createHashMapFromArray [
     ["ARC_debugLogToChat", "functions/core/fn_debugLog.sqf"],
     ["ARC_devDebugInspectorEnabled", "initServer.sqf -> ARC_debugInspectorEnabled mirror"],
     ["ARC_debugInspectorEnabled", "functions/core/fn_tocInitPlayer.sqf"],
+    ["ARC_objectiveScaffoldEnabled", "initServer.sqf (declared for future feature; not yet consumed)"],
+    ["ARC_objectiveMeetUseAI", "initServer.sqf (declared for future feature; not yet consumed)"],
     ["ARC_patrolSpawnContactsEnabled", "functions/ops/fn_opsPatrolOnActivate.sqf"],
     ["ARC_rtbInWorldActionsEnabled", "functions/core/fn_tocInitPlayer.sqf"],
     ["ARC_sitrepInWorldActionsEnabled", "functions/core/fn_tocInitPlayer.sqf"],

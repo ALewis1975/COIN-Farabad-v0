@@ -169,7 +169,7 @@ private _resolveHolding = {
     {
         private _cand = [_x] call ARC_fnc_worldResolveMarker;
         if (!((markerType _cand) isEqualTo "")) exitWith { _mHold = _cand; };
-    } forEach ["mkr_SHERIFF_HOLDING", "epw_holding", "EPW_Holding", "epw_holding_1"];
+    } forEach ["epw_holding", "mkr_SHERIFF_HOLDING"];
 
     if (_mHold isNotEqualTo "") exitWith
     {

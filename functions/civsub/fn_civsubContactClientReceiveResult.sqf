@@ -100,7 +100,7 @@ if (_payload isEqualType createHashMap) then {
 // CHECK_ID: build an ID card panel string and keep it in the right DETAILS pane.
 // We intentionally do NOT use a full-screen overlay; this avoids z-order/"Back" regressions.
 if (_type isEqualTo "CHECK_ID" && {_ok} && {_payload isEqualType createHashMap}) then {
-    private _name = _payload getOrDefault ["name", "Unknown"];
+    private _name = _payload getOrDefault ["name", ""];
     private _serial = _payload getOrDefault ["passport_serial", ""];
     private _age = _payload getOrDefault ["age", -1];
     private _occ = _payload getOrDefault ["occupation", ""];
@@ -109,12 +109,14 @@ if (_type isEqualTo "CHECK_ID" && {_ok} && {_payload isEqualType createHashMap})
     private _did = _payload getOrDefault ["districtId", ""];
     private _flags = _payload getOrDefault ["flags", []];
 
+    private _didS = if (_did isEqualTo "") then { "--" } else { _did };
+    private _nameParts = if (_name isEqualType "") then { (trim _name) splitString " \t\r\n" } else { [] };
+    private _nameS = if ((count _nameParts) > 0) then { _nameParts joinString " " } else { format ["Unknown (%1)", _didS] };
+
     private _ageS = if (_age isEqualType 0 && {_age >= 0}) then { str _age } else { "N/A" };
     private _occS = if (_occ isEqualType "" && {!(_occ isEqualTo "")}) then { _occ } else { "N/A" };
     private _homeS = if (_home isEqualType "" && {!(_home isEqualTo "")}) then { _home } else { "Unknown" };
     private _gridS = if (_grid isEqualType "" && {!(_grid isEqualTo "")}) then { _grid } else { "----" };
-    private _didS = if (_did isEqualTo "") then { "--" } else { _did };
-
     private _flagsS = "";
     if (_flags isEqualType [] && {(count _flags) > 0}) then { _flagsS = _flags joinString ", "; };
 
@@ -127,7 +129,7 @@ if (_type isEqualTo "CHECK_ID" && {_ok} && {_payload isEqualType createHashMap})
         "<t size='0.86' color='#B8B8B8'>HOME</t> <t size='0.90' color='#FFFFFF'>%5</t><br/>" +
         "<t size='0.86' color='#B8B8B8'>GRID</t> <t size='0.90' color='#FFFFFF'>%6</t><br/>" +
         "<t size='0.86' color='#B8B8B8'>DIST</t> <t size='0.90' color='#FFFFFF'>%7</t>",
-        _name, _serial, _ageS, _occS, _homeS, _gridS, _didS
+        _nameS, _serial, _ageS, _occS, _homeS, _gridS, _didS
     ];
 
     private _flagsLine = if (_flagsS isEqualTo "") then {

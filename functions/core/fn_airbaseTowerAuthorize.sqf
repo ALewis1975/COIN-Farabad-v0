@@ -78,7 +78,27 @@ if (_hayNorm isEqualTo "") exitWith {
     [false, "", "NO_ROLE_BINDING"]
 };
 
-if ((_hayNorm find "FARABAD TOWER WS CCIC") >= 0) exitWith {[true, "CCIC", "TOKEN_CCIC"]};
+private _ccicTokens = missionNamespace getVariable [
+    "airbase_v1_tower_ccicTokens",
+    [
+        "FARABAD TOWER WSCIC",
+        "FARABAD TOWER WS CCIC",
+        "FARABAD TOWER WS-CIC",
+        "FARABAD TOWER W/S CCIC",
+        "FARABAD-TOWER-WS-CCIC",
+        "FARABAD TOWER WS.CCIC"
+    ]
+];
+if (!(_ccicTokens isEqualType [])) then { _ccicTokens = ["FARABAD TOWER WS CCIC", "FARABAD TOWER WSCIC"]; };
+
+private _hasCcicToken = false;
+{
+    private _tok = [_x] call _normalizeAuthText;
+    if (_tok isEqualTo "") then { continue; };
+    if ((_hayNorm find _tok) >= 0) exitWith { _hasCcicToken = true; };
+} forEach _ccicTokens;
+
+if (_hasCcicToken) exitWith {[true, "CCIC", "TOKEN_CCIC"]};
 
 private _allowBnCmd = missionNamespace getVariable ["airbase_v1_tower_allowBnCmd", true];
 if (!(_allowBnCmd isEqualType true) && !(_allowBnCmd isEqualType false)) then { _allowBnCmd = false; };
@@ -118,7 +138,25 @@ if (_allowBnCmd) then {
     if (_isBnCmd) exitWith {[true, "BNCMD", "TOKEN_BN_COMMAND"]};
 };
 
-if ((_hayNorm find "FARABAD TOWER LC") >= 0) then {
+private _lcTokens = missionNamespace getVariable [
+    "airbase_v1_tower_lcTokens",
+    [
+        "FARABAD TOWER LC",
+        "FARABAD TOWER WS LC",
+        "FARABAD-TOWER-LC",
+        "FARABAD TOWER W/S LC"
+    ]
+];
+if (!(_lcTokens isEqualType [])) then { _lcTokens = ["FARABAD TOWER LC", "FARABAD TOWER WS LC"]; };
+
+private _hasLcToken = false;
+{
+    private _tok = [_x] call _normalizeAuthText;
+    if (_tok isEqualTo "") then { continue; };
+    if ((_hayNorm find _tok) >= 0) exitWith { _hasLcToken = true; };
+} forEach _lcTokens;
+
+if (_hasLcToken) then {
     private _allowed = missionNamespace getVariable ["airbase_v1_tower_lc_allowedActions", ["PRIORITIZE", "CANCEL", "STAFF"]];
     if (!(_allowed isEqualType [])) then { _allowed = ["PRIORITIZE", "CANCEL", "STAFF"]; };
 
