@@ -16,6 +16,9 @@ Append one dated entry per validation pass using:
 
 ## Entries
 
+- 2026-02-20T05:19Z | commit: <pending> | branch: work | Scenario: tower authorization identity-token broadening static validation (`git --no-pager diff --check` and `rg -n "airbase_v1_tower_ccicTokens|airbase_v1_tower_lcTokens|FARABAD TOWER WSCIC|FARABAD TOWER WS LC|TOKEN_CCIC|TOKEN_LC" functions/core/fn_airbaseTowerAuthorize.sqf`) | Result: PASS | Notes: Replaced single hardcoded CCIC/LC string checks with missionNamespace-configurable token arrays, including CCIC WSCIC/WS CCIC punctuation-spacing variants and LC variants with optional WS token, while leaving LC action allowlist enforcement unchanged.
+  - Migration Checks: Required keys N/A; Defaulting N/A; Unknown-field preservation N/A
+  - Runtime-only Validation: BLOCKED (container static review only; dedicated/local MP runtime needed for authoritative role-binding behavior)
 - 2026-02-20T05:12Z | commit: <pending> | branch: work | Scenario: world-time default multiplier force toggle for normal playtest/debug (`git --no-pager diff --check` and `rg -n "ARC_worldTime_forceMultiplier|ARC_worldTime_timeMultiplier" initServer.sqf scripts/worldtime/worldtime_server.sqf`) | Result: PASS | Notes: Set `ARC_worldTime_forceMultiplier` mission default to `false` while retaining `ARC_worldTime_timeMultiplier` for admin-controlled re-enable; confirmed `scripts/worldtime/worldtime_server.sqf` already gates multiplier application on force flag so no logic changes required.
   - Migration Checks: Required keys N/A; Defaulting N/A; Unknown-field preservation N/A
   - Runtime-only Validation: BLOCKED (container static review only; dedicated/local MP runtime needed for live timeflow verification)
