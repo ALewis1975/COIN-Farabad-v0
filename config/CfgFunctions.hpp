@@ -121,6 +121,7 @@ class CfgFunctions
             class clientLogCursorSighting {};
             class clientHint {};
             class clientToast {};
+            class clientNotifyGate {};
             class clientSetCurrentTask {};
 
             // UI coverage audit (server)

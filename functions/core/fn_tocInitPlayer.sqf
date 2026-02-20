@@ -239,7 +239,7 @@ if (!(_mobileOpsVar in _tocVars)) then
 
             _obj addAction ["[TOC OPS] Show Current Incident", {
                 private _taskId = missionNamespace getVariable ["ARC_activeTaskId", ""];
-                if (_taskId isEqualTo "") exitWith { hint "No active incident."; };
+                if (_taskId isEqualTo "") exitWith { ["No active incident.", "INFO", "TOAST"] call ARC_fnc_clientHint; };
 
                 private _disp  = missionNamespace getVariable ["ARC_activeIncidentDisplayName", ""]; 
                 private _type  = missionNamespace getVariable ["ARC_activeIncidentType", ""]; 
@@ -319,7 +319,7 @@ if (!(_mobileOpsVar in _tocVars)) then
                     _txt = _txt + _e;
                 };
 
-                hint _txt;
+                [_txt, "INFO", "HINT"] call ARC_fnc_clientHint;
             }];
             // TOC tasking queue (S3 approval workflow)
             // Moved from hint/id-entry to a dialog-driven workflow to reduce addAction clutter.
@@ -502,7 +502,7 @@ _obj addAction ["[MOBILE OPS] Open Ops Screen", { [] call ARC_fnc_uiOpenOpsScree
 
             _obj addAction ["[MOBILE OPS] Show Current Incident", {
                 private _taskId = missionNamespace getVariable ["ARC_activeTaskId", ""];
-                if (_taskId isEqualTo "") exitWith { hint "No active incident."; };
+                if (_taskId isEqualTo "") exitWith { ["No active incident.", "INFO", "TOAST"] call ARC_fnc_clientHint; };
 
                 private _disp  = missionNamespace getVariable ["ARC_activeIncidentDisplayName", ""]; 
                 private _type  = missionNamespace getVariable ["ARC_activeIncidentType", ""]; 
@@ -582,7 +582,7 @@ _obj addAction ["[MOBILE OPS] Open Ops Screen", { [] call ARC_fnc_uiOpenOpsScree
                     _txt = _txt + _e;
                 };
 
-                hint _txt;
+                [_txt, "INFO", "HINT"] call ARC_fnc_clientHint;
             }];
             // TOC tasking queue (mobile ops)
             _obj addAction [
@@ -689,11 +689,11 @@ _obj addAction ["[MOBILE OPS] Open Ops Screen", { [] call ARC_fnc_uiOpenOpsScree
 
             _obj addAction ["[TOC INTEL] Show Latest Intel (Hint)", {
                 private _log = missionNamespace getVariable ["ARC_pub_intelLog", []];
-                if (!(_log isEqualType []) || {(count _log) isEqualTo 0}) exitWith { hint "No intel entries yet."; };
+                if (!(_log isEqualType []) || {(count _log) isEqualTo 0}) exitWith { ["No intel entries yet.", "INFO", "TOAST"] call ARC_fnc_clientHint; };
 
                 private _last = _log select ((count _log) - 1);
                 _last params ["_iid", "_t", "_cat", "_sum", "_p", "_meta"];
-                hint format ["%1 (%2)\n%3", _iid, _cat, _sum];
+                [format ["%1 (%2)\n%3", _iid, _cat, _sum], "INFO", "HINT"] call ARC_fnc_clientHint;
             }];
 
             // TOC tasking queue visibility + S2 lead requests (approval workflow)
@@ -772,7 +772,7 @@ _obj addAction ["[MOBILE OPS] Open Ops Screen", { [] call ARC_fnc_uiOpenOpsScree
             _obj addAction ["AIR: Open Ops Screen", { [] call ARC_fnc_uiOpenOpsScreen; }];
             _obj addAction ["AIR: Open SITREP Screen", { [] call ARC_fnc_uiOpenSitrepScreen; }];
             _obj addAction ["AIR: (Placeholder) Air tasking not implemented yet", {
-                hint "Air tasking screen is reserved for a later iteration (AFCENT / CAOC hooks, CAS requests, etc.).";
+                ["Air tasking screen is reserved for a later iteration (AFCENT / CAOC hooks, CAS requests, etc.).", "INFO", "TOAST"] call ARC_fnc_clientHint;
             }];
         };
 

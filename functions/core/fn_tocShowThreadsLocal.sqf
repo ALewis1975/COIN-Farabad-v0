@@ -11,6 +11,8 @@
 
     Returns:
       BOOL
+
+    Debug-only operator helper: keeps local HINT channel output for quick thread triage.
 */
 
 if (!hasInterface) exitWith {false};
@@ -27,7 +29,7 @@ private _txt = format ["Intel Threads %1\n", _ageTxt];
 
 if (_threads isEqualTo []) exitWith
 {
-    hint (_txt + "(none yet)\n\nThreads appear after follow-up leads are generated.");
+    [(_txt + "(none yet)\n\nThreads appear after follow-up leads are generated."), "INFO", "HINT"] call ARC_fnc_clientHint;
     true
 };
 
@@ -101,5 +103,5 @@ private _fmtType = {
 
 _txt = _txt + "\nTip: Command node opportunities surface when confidence is high and heat stays manageable.";
 
-hint _txt;
+[_txt, "INFO", "HINT"] call ARC_fnc_clientHint;
 true
