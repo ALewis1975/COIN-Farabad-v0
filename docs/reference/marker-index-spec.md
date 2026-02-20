@@ -1,0 +1,54 @@
+# Marker Index Specification
+
+This document defines the canonical schema and normalization rules for marker index generation outputs.
+
+## Canonical output files
+
+- Human-readable output: `docs/reference/marker-index.md`
+- Machine-readable output: `docs/reference/marker-index.json`
+
+## Canonical schema
+
+### Required fields
+
+Each marker entry MUST provide all required fields:
+
+- `name`
+- `type`
+- `shape`
+- `pos`
+- `text`
+- `color`
+- `alpha`
+- `usageNotes`
+
+### Recommended fields
+
+Each marker entry SHOULD provide these optional-but-recommended fields:
+
+- `source`
+- `aliases`
+- `consumers`
+- `status`
+
+## Field normalization rules
+
+Apply these normalization rules before writing either canonical output file:
+
+1. **Position shape (`pos`)**
+   - Encode `pos` as `[x, y, z]` when altitude is present.
+   - Encode `pos` as `[x, y]` when altitude is not present.
+
+2. **Stable ordering**
+   - Sort entries by `name` using a stable sort.
+
+3. **Missing textual fields**
+   - Use empty strings (`""`) instead of `null` for missing textual values.
+
+4. **Alpha bounds (`alpha`)**
+   - Clamp `alpha` to the inclusive range `0..1`.
+
+5. **Status enum (`status`)**
+   - `active`: marker is current and expected to be used by live systems.
+   - `legacy`: marker remains for backward compatibility or migration support.
+   - `unresolved`: marker is discovered but not yet fully classified/validated.
