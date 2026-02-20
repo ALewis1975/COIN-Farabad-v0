@@ -58,7 +58,8 @@ if (isNil "ARC_consoleTerminalClasses") then {
         "Land_Laptop_03_olive_F",
         "Land_Laptop_03_closed_black_F",
         "Land_Laptop_03_closed_olive_F",
-        "Land_Laptop_02_F"
+        "Land_Laptop_02_F",
+        "Land_FlatTV_01_F"
     ], true];
 };
 
