@@ -189,6 +189,21 @@ These checks require a true dedicated server environment:
 
 Update `tests/TEST-LOG.md` after each validation pass.
 
+### Safe Mode Operations (Operator Procedure)
+
+Use safe mode when runtime stability is degraded and you need a controlled recovery posture.
+
+1. Set `ARC_safeModeEnabled = true` in `initServer.sqf` (or mission override) before mission start.
+2. Restart/initialize the server and confirm RPT entries tagged `[ARC][SAFE MODE]`.
+3. Observe stabilization while essentials remain active (state publish, TOC console, SITREP workflow).
+4. Re-enable subsystems incrementally in this order:
+   - `civsub_v1_traffic_enabled = true`
+   - `ARC_iedPhase1_siteSelectionEnabled = true` and `ARC_vbiedPhase3_enabled = true`
+   - `airbase_v1_ambiance_enabled = true`
+5. Set `ARC_safeModeEnabled = false` once the mission is stable.
+
+This staged return-to-service keeps command/control online while reducing nonessential spawning pressure.
+
 ### Coding Standards
 
 **Authority Model (Hard Requirements):**
@@ -304,6 +319,13 @@ COIN-Farabad-v0/
 - `docs/qa/QA_Audit_Executive_Summary.md` — Latest QA status (Score: 7.6/10, Production Ready)
 - `docs/qa/Comprehensive_QA_Audit_2026-02-18.md` — Full audit report (425 files, ~57k LOC)
 - `tests/TEST-LOG.md` — Canonical validation log
+
+### Marker Index
+
+- **Purpose:** Keep a single reference of Eden/editor markers, alias mappings, and unresolved code references so mission data and scripted consumers stay aligned.
+- **Regenerate command:** `python3 tools/generate_marker_index.py --sqm mission.sqm --out-md docs/reference/marker-index.md --out-json docs/reference/marker-index.json`
+- **When to regenerate:** Rebuild the marker index after marker edits in Eden and after any direct `mission.sqm` marker changes.
+- **Review guidance:** Treat unresolved references as follow-up work items unless they are explicitly documented as intentional legacy mappings.
 
 **Development Resources:**
 - `docs/projectFiles/Farabad_Prompting_Integration_Playbook_Project_Standard.md` — Prompting standards for AI-assisted development

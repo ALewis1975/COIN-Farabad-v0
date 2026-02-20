@@ -14,7 +14,7 @@ if (!canSuspend) exitWith { _this spawn ARC_fnc_intelClientAcceptOrder; false };
 
 if (!([] call ARC_fnc_intelClientCanAcceptOrder)) exitWith
 {
-    hint "No TOC order pending acceptance.";
+    ["No TOC order pending acceptance.", "WARN", "TOAST"] call ARC_fnc_clientHint;
     false
 };
 
@@ -32,7 +32,7 @@ private _o = [];
     };
 } forEach _orders;
 
-if (_o isEqualTo []) exitWith { hint "No TOC order found."; false };
+if (_o isEqualTo []) exitWith { ["No TOC order found.", "WARN", "TOAST"] call ARC_fnc_clientHint; false };
 
 _o params ["_orderId", "_issuedAt", "_status", "_orderType", "_targetGroup", "_data", "_meta"];
 _orderType = toUpper _orderType;
@@ -93,5 +93,5 @@ if (!_ok) exitWith { false };
 
 [player, _orderId] remoteExec ["ARC_fnc_intelOrderAccept", 2];
 
-hint format ["Order accepted: %1", _orderId];
+[format ["Order accepted: %1", _orderId], "INFO", "TOAST"] call ARC_fnc_clientHint;
 true

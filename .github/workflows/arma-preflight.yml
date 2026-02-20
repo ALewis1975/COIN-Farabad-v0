@@ -211,3 +211,7 @@ jobs:
       - name: State migration static validation
         run: |
           python3 scripts/dev/validate_state_migrations.py
+
+      - name: Marker index generator static validation
+        run: |
+          python3 scripts/dev/validate_marker_index.py

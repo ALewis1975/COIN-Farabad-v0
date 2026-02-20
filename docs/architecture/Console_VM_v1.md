@@ -41,11 +41,9 @@ Recommended envelope fields:
 - Clients must treat missing optional fields as default-safe values.
 - Server keeps a compatibility adapter until all console tabs consume VM-only inputs.
 
-### 1.4 Suggested flags for rollout
-- `ARC_mig_enabled` = master migration gate.
-- `ARC_mig_uiSnapshotOnly` = UI reads VM snapshots, writes still legacy routes.
-- `ARC_mig_useRequestRouter` = actions routed through VM-aware request paths.
-- `ARC_mig_disableLegacyActions` = legacy direct-action paths blocked after cutover.
+### 1.4 Rollout status note
+- Legacy migration toggles (`ARC_mig_enabled`, `ARC_mig_uiSnapshotOnly`, `ARC_mig_useRequestRouter`, `ARC_mig_disableLegacyActions`) were removed from active server bootstrap config because they are no longer consumed.
+- VM migration now follows code-path rollout and review gates rather than runtime toggle flips in `initServer.sqf`.
 
 ---
 
@@ -201,7 +199,7 @@ Provide `ARC_fnc_consoleVmAdapterV1` that:
 - Legacy action entry points call router shim (no behavior divergence).
 
 #### Phase D — Legacy deprecation
-- Enable `ARC_mig_disableLegacyActions` once all tabs/actions are VM-backed.
+- Confirm all tabs/actions are VM-backed before removing legacy shims.
 - Remove direct missionNamespace reads from UI paint/action functions.
 - Keep a short-lived rollback toggle to re-enable adapter fallback.
 
@@ -213,9 +211,9 @@ Provide `ARC_fnc_consoleVmAdapterV1` that:
 
 ### 4.4 Rollback strategy
 If regression appears:
-1. Disable VM-read flags (`ARC_mig_uiSnapshotOnly = false`).
+1. Revert affected tab to legacy-read path in code (no runtime migration toggle is available).
 2. Keep VM publishing enabled for diagnostics.
-3. Revert affected tab to legacy-read path only.
+3. Capture VM payload + freshness logs for the failing tab.
 4. Fix mapping/freshness issue, then re-enable by tab.
 
 ### 4.5 Known edge cases to cover in adapter tests

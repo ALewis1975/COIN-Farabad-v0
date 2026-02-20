@@ -9,6 +9,7 @@ class CfgFunctions
             file = "functions\core";
 
             class bootstrapServer {};
+            class operatorToggleAuditStartup {};
 
             class log {};
             class farabadLog {};
@@ -121,6 +122,7 @@ class CfgFunctions
             class clientLogCursorSighting {};
             class clientHint {};
             class clientToast {};
+            class clientNotifyGate {};
             class clientSetCurrentTask {};
 
             // UI coverage audit (server)

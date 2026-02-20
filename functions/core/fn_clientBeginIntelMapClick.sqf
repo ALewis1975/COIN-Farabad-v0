@@ -17,7 +17,7 @@ if (_category isEqualTo "") then { _category = "SIGHTING"; };
 // Prompt for human-readable text first (prevents generic "reported HUMINT" entries)
 private _p = [_category, "", ""] call ARC_fnc_clientIntelPrompt;
 _p params ["_ok", "_sum", "_det"];
-if (!_ok) exitWith { hint "Intel report canceled."; false };
+if (!_ok) exitWith { ["Intel report canceled.", "INFO", "TOAST"] call ARC_fnc_clientHint; false };
 
 if (_sum isEqualTo "") then
 {
@@ -64,7 +64,7 @@ if (_reopenConsole) then
 
 openMap true;
 waitUntil { uiSleep 0.05; visibleMap };
-hint format ["Intel Logging: %1\nClick a position on the map to submit.", toUpper _category];
+[format ["Intel Logging: %1\nClick a position on the map to submit.", toUpper _category], "ACTION_REQUIRED", "HINT"] call ARC_fnc_clientHint;
 
 private _ctx = createHashMapFromArray [
     ["type", "INTEL_LOG"],

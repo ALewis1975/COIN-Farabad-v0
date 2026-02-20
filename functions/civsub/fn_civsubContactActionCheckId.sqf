@@ -66,6 +66,22 @@ private _first = _rec getOrDefault ["first_name", ""];
 private _last  = _rec getOrDefault ["last_name", ""];
 private _serial = _rec getOrDefault ["passport_serial", ""];
 
+private _normalizeNamePart = {
+    params ["_v"];
+    if !(_v isEqualType "") exitWith { "" };
+    private _parts = (trim _v) splitString " \t\r\n";
+    if ((count _parts) <= 0) exitWith { "" };
+    _parts joinString " "
+};
+
+_first = [_first] call _normalizeNamePart;
+_last = [_last] call _normalizeNamePart;
+
+private _name = [_first, _last] select {!(_x isEqualTo "")} joinString " ";
+if (_name isEqualTo "") then {
+    _name = format ["Unknown (%1)", _did];
+};
+
 private _dob = _rec getOrDefault ["dob_iso", ""];
 private _job = _rec getOrDefault ["occupation", ""];
 private _homePos = _rec getOrDefault ["home_pos", getPosATL _civ];
@@ -119,7 +135,7 @@ private _payload = createHashMapFromArray [
     ["shown", "ID"],
     ["passport_serial", _serial],
     ["civ_netId", netId _civ],
-    ["name", format ["%1 %2", _first, _last]],
+    ["name", _name],
     ["age", _age],
     ["occupation", _job],
     ["home", _homeName],

@@ -13,6 +13,8 @@
 
     Returns:
       BOOL
+
+    Debug-only operator helper: prefers local HINT channel output for dense snapshots.
 */
 
 if (!hasInterface) exitWith {false};
@@ -68,5 +70,5 @@ if (_lastX isEqualType [] && { (count _lastX) >= 4 }) then
     _txt = _txt + "\n\nLast Consumed:\n" + ([_lastX, "* "] call _fmtLead);
 };
 
-hint _txt;
+[_txt, "INFO", "HINT"] call ARC_fnc_clientHint;
 true
