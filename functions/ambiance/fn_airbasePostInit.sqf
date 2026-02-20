@@ -15,6 +15,15 @@ if (!isServer) exitWith {false};
 if (missionNamespace getVariable ["airbase_v1_postInit_ran", false]) exitWith {true};
 missionNamespace setVariable ["airbase_v1_postInit_ran", true];
 
+private _ambianceEnabled = missionNamespace getVariable ["airbase_v1_ambiance_enabled", true];
+if (!(_ambianceEnabled isEqualType true) && !(_ambianceEnabled isEqualType false)) then { _ambianceEnabled = true; };
+
+if (!_ambianceEnabled) exitWith
+{
+    diag_log "[ARC][SAFE MODE] AIRBASESUB ambiance init skipped (airbase_v1_ambiance_enabled=false).";
+    true
+};
+
 [] spawn
 {
     // Wait until mission time has started and ARC has loaded state.

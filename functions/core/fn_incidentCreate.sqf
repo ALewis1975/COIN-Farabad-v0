@@ -212,6 +212,9 @@ private _stage = (_nHist / _stageDen) min 1;
 if (_stage < 0) then { _stage = 0; };
 private _early = 1 - _stage;
 
+private _safeModeEnabled = missionNamespace getVariable ["ARC_safeModeEnabled", false];
+if (!(_safeModeEnabled isEqualType true) && !(_safeModeEnabled isEqualType false)) then { _safeModeEnabled = false; };
+
 // Avoid immediate repeats (last closed incident)
 private _hist = ["incidentHistory", []] call ARC_fnc_stateGet;
 private _lastMarker = "";
@@ -240,6 +243,7 @@ private _weights = [];
 
     private _typeU = toUpper _incidentType;
 
+    if (_safeModeEnabled && { _typeU isEqualTo "IED" }) then { continue; };
 
 // When supplies are critical, only generate sustainment incidents (unless a lead forced something else).
 if (_forceLogistics && { !_useLead } && { !(_typeU in ["LOGISTICS","ESCORT"]) }) then { continue; };
