@@ -16,6 +16,9 @@ Append one dated entry per validation pass using:
 
 ## Entries
 
+- 2026-02-20T18:25Z | commit: <pending> | branch: work | Scenario: unit-index generator implementation + artifact determinism validation (`python3 tools/generate_unit_index.py`, `python3 tools/generate_unit_index.py && git diff -- docs/reference/unit-index.json docs/reference/unit-index.md | wc -l`, `python3 -m py_compile tools/generate_unit_index.py`, `git --no-pager diff --check`) | Result: PASS | Notes: Added mission.sqm parser for Group/Object entities, extracted per-group unit records (class/type, varName, side, playability flags), and emitted deterministic JSON/Markdown outputs sorted by group key then playable status then varName.
+  - Migration Checks: Required keys N/A; Defaulting N/A; Unknown-field preservation N/A
+  - Runtime-only Validation: N/A (static tooling/documentation artifact generation)
 - 2026-02-20T18:19Z | commit: <pending> | branch: work | Scenario: unit-index spec documentation static validation (`git --no-pager diff --check` and `rg -n "Unit Index Specification|Canonical output files|Stable ordering|Boolean normalization|Empty string vs null policy" docs/reference/unit-index-spec.md`) | Result: PASS | Notes: Added canonical unit-index specification with required/optional schema fields, output target definitions, and normalization rules for ordering, booleans, and empty-string/null handling.
   - Migration Checks: Required keys N/A; Defaulting N/A; Unknown-field preservation N/A
   - Runtime-only Validation: N/A (documentation-only update)

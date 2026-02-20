@@ -1,0 +1,5421 @@
+{
+  "groups": [
+    {
+      "groupKey": "1-1-B-2-325 AIR | REDFALCON 2-1-1",
+      "id": "3364",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_autorifleman",
+          "groupId": "1-1-B-2-325 AIR | REDFALCON 2-1-1",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_autorifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_autorifleman",
+          "groupId": "1-1-B-2-325 AIR | REDFALCON 2-1-1",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_autorifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_grenadier",
+          "groupId": "1-1-B-2-325 AIR | REDFALCON 2-1-1",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_grenadier",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_grenadier",
+          "groupId": "1-1-B-2-325 AIR | REDFALCON 2-1-1",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_grenadier",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_riflemanat",
+          "groupId": "1-1-B-2-325 AIR | REDFALCON 2-1-1",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_riflemanat",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_riflemanat",
+          "groupId": "1-1-B-2-325 AIR | REDFALCON 2-1-1",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_riflemanat",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_squadleader",
+          "groupId": "1-1-B-2-325 AIR | REDFALCON 2-1-1",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_squadleader",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_teamleader",
+          "groupId": "1-1-B-2-325 AIR | REDFALCON 2-1-1",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_teamleader",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_teamleader",
+          "groupId": "1-1-B-2-325 AIR | REDFALCON 2-1-1",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_teamleader",
+          "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "1-1-C-2-325 AIR | REDFALCON 3-1-1",
+      "id": "4383",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_autorifleman",
+          "groupId": "1-1-C-2-325 AIR | REDFALCON 3-1-1",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_autorifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_autorifleman",
+          "groupId": "1-1-C-2-325 AIR | REDFALCON 3-1-1",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_autorifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_grenadier",
+          "groupId": "1-1-C-2-325 AIR | REDFALCON 3-1-1",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_grenadier",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_grenadier",
+          "groupId": "1-1-C-2-325 AIR | REDFALCON 3-1-1",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_grenadier",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_riflemanat",
+          "groupId": "1-1-C-2-325 AIR | REDFALCON 3-1-1",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_riflemanat",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_riflemanat",
+          "groupId": "1-1-C-2-325 AIR | REDFALCON 3-1-1",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_riflemanat",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_squadleader",
+          "groupId": "1-1-C-2-325 AIR | REDFALCON 3-1-1",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_squadleader",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_teamleader",
+          "groupId": "1-1-C-2-325 AIR | REDFALCON 3-1-1",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_teamleader",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_teamleader",
+          "groupId": "1-1-C-2-325 AIR | REDFALCON 3-1-1",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_teamleader",
+          "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "1-17 CAV (Air Cav) | SABER XX",
+      "id": "3648",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_helipilot",
+          "groupId": "1-17 CAV (Air Cav) | SABER XX",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_helipilot",
+          "varName": "OH_58D_01D"
+        },
+        {
+          "className": "rhsusf_army_ocp_helipilot",
+          "groupId": "1-17 CAV (Air Cav) | SABER XX",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_helipilot",
+          "varName": "OH_58D_01G"
+        }
+      ]
+    },
+    {
+      "groupKey": "1-82 ARB | WOLFPACK 21 (AH-64D)",
+      "id": "265",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_ah64_pilot",
+          "groupId": "1-82 ARB | WOLFPACK 21 (AH-64D)",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_ah64_pilot",
+          "varName": "AH_64D_01D"
+        },
+        {
+          "className": "rhsusf_army_ocp_ah64_pilot",
+          "groupId": "1-82 ARB | WOLFPACK 21 (AH-64D)",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_ah64_pilot",
+          "varName": "AH_64D_01G"
+        }
+      ]
+    },
+    {
+      "groupKey": "1-B-2-325 AIR | REDFALCON 2-1",
+      "id": "3354",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_jfo",
+          "groupId": "1-B-2-325 AIR | REDFALCON 2-1",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_jfo",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_medic",
+          "groupId": "1-B-2-325 AIR | REDFALCON 2-1",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_medic",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_officer",
+          "groupId": "1-B-2-325 AIR | REDFALCON 2-1",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_officer",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_rifleman",
+          "groupId": "1-B-2-325 AIR | REDFALCON 2-1",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_rifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_squadleader",
+          "groupId": "1-B-2-325 AIR | REDFALCON 2-1",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_squadleader",
+          "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "1-C-2-325 AIR | REDFALCON 3-1",
+      "id": "4377",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_jfo",
+          "groupId": "1-C-2-325 AIR | REDFALCON 3-1",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_jfo",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_medic",
+          "groupId": "1-C-2-325 AIR | REDFALCON 3-1",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_medic",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_officer",
+          "groupId": "1-C-2-325 AIR | REDFALCON 3-1",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_officer",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_rifleman",
+          "groupId": "1-C-2-325 AIR | REDFALCON 3-1",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_rifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_squadleader",
+          "groupId": "1-C-2-325 AIR | REDFALCON 3-1",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_squadleader",
+          "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "14-ASOS | RAVEN-13",
+      "id": "4338",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "14-ASOS | RAVEN-13",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": "jtac"
+        },
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "14-ASOS | RAVEN-13",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": "jtac_rto"
+        }
+      ]
+    },
+    {
+      "groupKey": "2 BSTB (ABN) EOD Team | EOD 11",
+      "id": "4423",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_explosives",
+          "groupId": "2 BSTB (ABN) EOD Team | EOD 11",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_explosives",
+          "varName": "eod_sec"
+        },
+        {
+          "className": "rhsusf_army_ocp_explosives",
+          "groupId": "2 BSTB (ABN) EOD Team | EOD 11",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_explosives",
+          "varName": "eod_tech"
+        },
+        {
+          "className": "rhsusf_army_ocp_explosives",
+          "groupId": "2 BSTB (ABN) EOD Team | EOD 11",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_explosives",
+          "varName": "eod_tl"
+        }
+      ]
+    },
+    {
+      "groupKey": "2 BSTB (ABN) Engineer Team | SAPPER 11",
+      "id": "4427",
+      "side": "West",
+      "units": [
+        {
+          "className": "B_soldier_exp_F",
+          "groupId": "2 BSTB (ABN) Engineer Team | SAPPER 11",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "B_soldier_exp_F",
+          "varName": "eng_demo"
+        },
+        {
+          "className": "B_engineer_F",
+          "groupId": "2 BSTB (ABN) Engineer Team | SAPPER 11",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "B_engineer_F",
+          "varName": "eng_rf_1"
+        },
+        {
+          "className": "B_engineer_F",
+          "groupId": "2 BSTB (ABN) Engineer Team | SAPPER 11",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "B_engineer_F",
+          "varName": "eng_rf_2"
+        },
+        {
+          "className": "B_engineer_F",
+          "groupId": "2 BSTB (ABN) Engineer Team | SAPPER 11",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "B_engineer_F",
+          "varName": "eng_tl"
+        }
+      ]
+    },
+    {
+      "groupKey": "2 BSTB (MP) | SHERIFF LNO FARABAD",
+      "id": "3613",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_officer",
+          "groupId": "2 BSTB (MP) | SHERIFF LNO FARABAD",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_officer",
+          "varName": "jtf_sheriff_lno"
+        }
+      ]
+    },
+    {
+      "groupKey": "2 BSTB | SHERIFF HOLDING 01",
+      "id": "3727",
+      "side": "West",
+      "units": [
+        {
+          "className": "MFR_B_GermanShepherd",
+          "groupId": "2 BSTB | SHERIFF HOLDING 01",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "MFR_B_GermanShepherd",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_squadleader",
+          "groupId": "2 BSTB | SHERIFF HOLDING 01",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_squadleader",
+          "varName": "sheriff_holding"
+        },
+        {
+          "className": "rhsusf_army_ocp_riflemanl",
+          "groupId": "2 BSTB | SHERIFF HOLDING 01",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_riflemanl",
+          "varName": "sheriff_holding_1"
+        },
+        {
+          "className": "rhsusf_army_ocp_riflemanl",
+          "groupId": "2 BSTB | SHERIFF HOLDING 01",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_riflemanl",
+          "varName": "sheriff_holding_2"
+        },
+        {
+          "className": "rhsusf_army_ocp_riflemanl",
+          "groupId": "2 BSTB | SHERIFF HOLDING 01",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_riflemanl",
+          "varName": "sheriff_holding_3"
+        },
+        {
+          "className": "rhsusf_army_ocp_riflemanl",
+          "groupId": "2 BSTB | SHERIFF HOLDING 01",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_riflemanl",
+          "varName": "sheriff_holding_4"
+        },
+        {
+          "className": "rhsusf_army_ocp_riflemanl",
+          "groupId": "2 BSTB | SHERIFF HOLDING 01",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_riflemanl",
+          "varName": "sheriff_holding_6"
+        },
+        {
+          "className": "rhsusf_army_ocp_riflemanl",
+          "groupId": "2 BSTB | SHERIFF HOLDING 01",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_riflemanl",
+          "varName": "sheriff_holding_7"
+        }
+      ]
+    },
+    {
+      "groupKey": "2 BSTB | SHERIFF HOLDING 02",
+      "id": "4497",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_riflemanl",
+          "groupId": "2 BSTB | SHERIFF HOLDING 02",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_riflemanl",
+          "varName": "sheriff_holding_5"
+        }
+      ]
+    },
+    {
+      "groupKey": "2 BSTB | SHERIFF K-9 01",
+      "id": "4335",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_teamleader",
+          "groupId": "2 BSTB | SHERIFF K-9 01",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_teamleader",
+          "varName": ""
+        },
+        {
+          "className": "MFR_B_GermanShepherd",
+          "groupId": "2 BSTB | SHERIFF K-9 01",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "MFR_B_GermanShepherd",
+          "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "2-1-B-2-325 AIR | REDFALCON 2-1-2",
+      "id": "3375",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_autorifleman",
+          "groupId": "2-1-B-2-325 AIR | REDFALCON 2-1-2",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_autorifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_autorifleman",
+          "groupId": "2-1-B-2-325 AIR | REDFALCON 2-1-2",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_autorifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_grenadier",
+          "groupId": "2-1-B-2-325 AIR | REDFALCON 2-1-2",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_grenadier",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_grenadier",
+          "groupId": "2-1-B-2-325 AIR | REDFALCON 2-1-2",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_grenadier",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_riflemanat",
+          "groupId": "2-1-B-2-325 AIR | REDFALCON 2-1-2",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_riflemanat",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_riflemanat",
+          "groupId": "2-1-B-2-325 AIR | REDFALCON 2-1-2",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_riflemanat",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_squadleader",
+          "groupId": "2-1-B-2-325 AIR | REDFALCON 2-1-2",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_squadleader",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_teamleader",
+          "groupId": "2-1-B-2-325 AIR | REDFALCON 2-1-2",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_teamleader",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_teamleader",
+          "groupId": "2-1-B-2-325 AIR | REDFALCON 2-1-2",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_teamleader",
+          "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "2-1-C-2-325 AIR | REDFALCON 3-1-2",
+      "id": "4393",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_autorifleman",
+          "groupId": "2-1-C-2-325 AIR | REDFALCON 3-1-2",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_autorifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_autorifleman",
+          "groupId": "2-1-C-2-325 AIR | REDFALCON 3-1-2",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_autorifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_grenadier",
+          "groupId": "2-1-C-2-325 AIR | REDFALCON 3-1-2",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_grenadier",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_grenadier",
+          "groupId": "2-1-C-2-325 AIR | REDFALCON 3-1-2",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_grenadier",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_riflemanat",
+          "groupId": "2-1-C-2-325 AIR | REDFALCON 3-1-2",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_riflemanat",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_riflemanat",
+          "groupId": "2-1-C-2-325 AIR | REDFALCON 3-1-2",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_riflemanat",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_squadleader",
+          "groupId": "2-1-C-2-325 AIR | REDFALCON 3-1-2",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_squadleader",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_teamleader",
+          "groupId": "2-1-C-2-325 AIR | REDFALCON 3-1-2",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_teamleader",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_teamleader",
+          "groupId": "2-1-C-2-325 AIR | REDFALCON 3-1-2",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_teamleader",
+          "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "2-325 AIR | REDFALCON 6",
+      "id": "4345",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_officer",
+          "groupId": "2-325 AIR | REDFALCON 6",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_officer",
+          "varName": "tf_co"
+        },
+        {
+          "className": "rhsusf_army_ocp_squadleader",
+          "groupId": "2-325 AIR | REDFALCON 6",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_squadleader",
+          "varName": "tf_csm"
+        },
+        {
+          "className": "rhsusf_army_ocp_officer",
+          "groupId": "2-325 AIR | REDFALCON 6",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_officer",
+          "varName": "tf_xo"
+        }
+      ]
+    },
+    {
+      "groupKey": "2-325 AIR | REDFALCON DOC",
+      "id": "4368",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_medic",
+          "groupId": "2-325 AIR | REDFALCON DOC",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_medic",
+          "varName": "tf_med_officer"
+        }
+      ]
+    },
+    {
+      "groupKey": "2-325 AIR | REDFALCON S2",
+      "id": "4359",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_officer",
+          "groupId": "2-325 AIR | REDFALCON S2",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_officer",
+          "varName": "s2"
+        }
+      ]
+    },
+    {
+      "groupKey": "2-325 AIR | REDFALCON S3",
+      "id": "4361",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_officer",
+          "groupId": "2-325 AIR | REDFALCON S3",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_officer",
+          "varName": "s3"
+        }
+      ]
+    },
+    {
+      "groupKey": "2-325 AIR | REDFALCON S4",
+      "id": "4363",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_officer",
+          "groupId": "2-325 AIR | REDFALCON S4",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_officer",
+          "varName": "s4"
+        }
+      ]
+    },
+    {
+      "groupKey": "2-325 AIR | REDFALCON S6",
+      "id": "4365",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_officer",
+          "groupId": "2-325 AIR | REDFALCON S6",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_officer",
+          "varName": "s6_oic"
+        },
+        {
+          "className": "rhsusf_army_ocp_rifleman",
+          "groupId": "2-325 AIR | REDFALCON S6",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_rifleman",
+          "varName": "s6_rto"
+        }
+      ]
+    },
+    {
+      "groupKey": "2-325 AIR | REDFALCON TOC",
+      "id": "4349",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_officer",
+          "groupId": "2-325 AIR | REDFALCON TOC",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_officer",
+          "varName": "avn_lno"
+        },
+        {
+          "className": "rhsusf_army_ocp_officer",
+          "groupId": "2-325 AIR | REDFALCON TOC",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_officer",
+          "varName": "battle_captain"
+        },
+        {
+          "className": "rhsusf_army_ocp_squadleader",
+          "groupId": "2-325 AIR | REDFALCON TOC",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_squadleader",
+          "varName": "battle_nco"
+        },
+        {
+          "className": "rhsusf_army_ocp_officer",
+          "groupId": "2-325 AIR | REDFALCON TOC",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_officer",
+          "varName": "civil_affairs_lno"
+        },
+        {
+          "className": "rhsusf_army_ocp_squadleader",
+          "groupId": "2-325 AIR | REDFALCON TOC",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_squadleader",
+          "varName": "engineer_lno"
+        },
+        {
+          "className": "rhsusf_army_ocp_squadleader",
+          "groupId": "2-325 AIR | REDFALCON TOC",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_squadleader",
+          "varName": "fse_nco"
+        },
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "2-325 AIR | REDFALCON TOC",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": "tacp"
+        },
+        {
+          "className": "rhsusf_army_ocp_squadleader",
+          "groupId": "2-325 AIR | REDFALCON TOC",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_squadleader",
+          "varName": "uas_lno"
+        },
+        {
+          "className": "rhsusf_army_ocp_squadleader",
+          "groupId": "2-325 AIR | REDFALCON TOC",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_squadleader",
+          "varName": "mp_lno"
+        }
+      ]
+    },
+    {
+      "groupKey": "2-82 AHB | CORSAIR 31 (UH-60)",
+      "id": "277",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_helicrew",
+          "groupId": "2-82 AHB | CORSAIR 31 (UH-60)",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_helicrew",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_helipilot",
+          "groupId": "2-82 AHB | CORSAIR 31 (UH-60)",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_helipilot",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_helipilot",
+          "groupId": "2-82 AHB | CORSAIR 31 (UH-60)",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_helipilot",
+          "varName": "UH_60M_01D"
+        },
+        {
+          "className": "rhsusf_army_ocp_helicrew",
+          "groupId": "2-82 AHB | CORSAIR 31 (UH-60)",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_helicrew",
+          "varName": "UH_60M_01G"
+        }
+      ]
+    },
+    {
+      "groupKey": "3-1-B-2-325 AIR | REDFALCON 2-1-3",
+      "id": "3387",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_autorifleman",
+          "groupId": "3-1-B-2-325 AIR | REDFALCON 2-1-3",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_autorifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_autorifleman",
+          "groupId": "3-1-B-2-325 AIR | REDFALCON 2-1-3",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_autorifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_grenadier",
+          "groupId": "3-1-B-2-325 AIR | REDFALCON 2-1-3",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_grenadier",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_grenadier",
+          "groupId": "3-1-B-2-325 AIR | REDFALCON 2-1-3",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_grenadier",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_riflemanat",
+          "groupId": "3-1-B-2-325 AIR | REDFALCON 2-1-3",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_riflemanat",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_riflemanat",
+          "groupId": "3-1-B-2-325 AIR | REDFALCON 2-1-3",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_riflemanat",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_squadleader",
+          "groupId": "3-1-B-2-325 AIR | REDFALCON 2-1-3",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_squadleader",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_teamleader",
+          "groupId": "3-1-B-2-325 AIR | REDFALCON 2-1-3",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_teamleader",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_teamleader",
+          "groupId": "3-1-B-2-325 AIR | REDFALCON 2-1-3",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_teamleader",
+          "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "3-1-C-2-325 AIR | REDFALCON 3-1-3",
+      "id": "4403",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_autorifleman",
+          "groupId": "3-1-C-2-325 AIR | REDFALCON 3-1-3",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_autorifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_autorifleman",
+          "groupId": "3-1-C-2-325 AIR | REDFALCON 3-1-3",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_autorifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_grenadier",
+          "groupId": "3-1-C-2-325 AIR | REDFALCON 3-1-3",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_grenadier",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_grenadier",
+          "groupId": "3-1-C-2-325 AIR | REDFALCON 3-1-3",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_grenadier",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_riflemanat",
+          "groupId": "3-1-C-2-325 AIR | REDFALCON 3-1-3",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_riflemanat",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_riflemanat",
+          "groupId": "3-1-C-2-325 AIR | REDFALCON 3-1-3",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_riflemanat",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_squadleader",
+          "groupId": "3-1-C-2-325 AIR | REDFALCON 3-1-3",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_squadleader",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_teamleader",
+          "groupId": "3-1-C-2-325 AIR | REDFALCON 3-1-3",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_teamleader",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_teamleader",
+          "groupId": "3-1-C-2-325 AIR | REDFALCON 3-1-3",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_teamleader",
+          "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "3-82 GSAB | TALON 71 (CH-47F)",
+      "id": "269",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_helicrew",
+          "groupId": "3-82 GSAB | TALON 71 (CH-47F)",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_helicrew",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_helicrew",
+          "groupId": "3-82 GSAB | TALON 71 (CH-47F)",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_helicrew",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_helipilot",
+          "groupId": "3-82 GSAB | TALON 71 (CH-47F)",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_helipilot",
+          "varName": "CH_47F_01D"
+        },
+        {
+          "className": "rhsusf_army_ocp_helipilot",
+          "groupId": "3-82 GSAB | TALON 71 (CH-47F)",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_helipilot",
+          "varName": "CH_47F_01G"
+        }
+      ]
+    },
+    {
+      "groupKey": "332 EMSG CIVENG | MAYOR CIVENG",
+      "id": "3544",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_officer",
+          "groupId": "332 EMSG CIVENG | MAYOR CIVENG",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_officer",
+          "varName": "mayor_civeng"
+        }
+      ]
+    },
+    {
+      "groupKey": "332 EMSG LRS | MAYOR LRS",
+      "id": "3542",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_airforce_pilot",
+          "groupId": "332 EMSG LRS | MAYOR LRS",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_pilot",
+          "varName": "mayor_lrs"
+        }
+      ]
+    },
+    {
+      "groupKey": "332 EMSG OPS | MAYOR OPS",
+      "id": "3540",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_officer",
+          "groupId": "332 EMSG OPS | MAYOR OPS",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_officer",
+          "varName": "mayor_ops"
+        }
+      ]
+    },
+    {
+      "groupKey": "332 EMSG SERVICES | MAYOR SERVICES",
+      "id": "3546",
+      "side": "West",
+      "units": [
+        {
+          "className": "FIR_USAF_GroundCrew_2_ABU",
+          "groupId": "332 EMSG SERVICES | MAYOR SERVICES",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "FIR_USAF_GroundCrew_2_ABU",
+          "varName": "mayor_services"
+        }
+      ]
+    },
+    {
+      "groupKey": "332 EMSG | MAYOR 5",
+      "id": "3555",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "332 EMSG | MAYOR 5",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": "mayor_rep"
+        }
+      ]
+    },
+    {
+      "groupKey": "332 EMSG | MAYOR 6",
+      "id": "3559",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_officer",
+          "groupId": "332 EMSG | MAYOR 6",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_officer",
+          "varName": "mayor_6"
+        }
+      ]
+    },
+    {
+      "groupKey": "332 EMSG | MAYOR LRS FLM 11 (Aircraft Tug)",
+      "id": "140",
+      "side": "West",
+      "units": [
+        {
+          "className": "FIR_USAF_GroundCrew_1",
+          "groupId": "332 EMSG | MAYOR LRS FLM 11 (Aircraft Tug)",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "FIR_USAF_GroundCrew_1",
+          "varName": "tug4D"
+        }
+      ]
+    },
+    {
+      "groupKey": "332 EMSG | MAYOR LRS FLM 12 (Aircraft Tug)",
+      "id": "142",
+      "side": "West",
+      "units": [
+        {
+          "className": "FIR_USAF_GroundCrew_1",
+          "groupId": "332 EMSG | MAYOR LRS FLM 12 (Aircraft Tug)",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "FIR_USAF_GroundCrew_1",
+          "varName": "tug5D"
+        }
+      ]
+    },
+    {
+      "groupKey": "332 EMSG | MAYOR LRS FLM 13 (Aircraft Tug)",
+      "id": "569",
+      "side": "West",
+      "units": [
+        {
+          "className": "FIR_USAF_GroundCrew_1",
+          "groupId": "332 EMSG | MAYOR LRS FLM 13 (Aircraft Tug)",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "FIR_USAF_GroundCrew_1",
+          "varName": "tug6D"
+        }
+      ]
+    },
+    {
+      "groupKey": "332 EMSG | MAYOR LRS FLM 14 (Aircraft Tug)",
+      "id": "2829",
+      "side": "West",
+      "units": [
+        {
+          "className": "FIR_USAF_GroundCrew_1",
+          "groupId": "332 EMSG | MAYOR LRS FLM 14 (Aircraft Tug)",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "FIR_USAF_GroundCrew_1",
+          "varName": "tug7D"
+        }
+      ]
+    },
+    {
+      "groupKey": "332 EMSG | MAYOR LRS FLM 15",
+      "id": "3206",
+      "side": "West",
+      "units": [
+        {
+          "className": "FIR_USAF_GroundCrew_1",
+          "groupId": "332 EMSG | MAYOR LRS FLM 15",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "FIR_USAF_GroundCrew_1",
+          "varName": "tug8D"
+        }
+      ]
+    },
+    {
+      "groupKey": "332 EMSG | MAYOR SENTRY LNO",
+      "id": "3548",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "332 EMSG | MAYOR SENTRY LNO",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": "mayor_sentry_lno"
+        }
+      ]
+    },
+    {
+      "groupKey": "332 EMSG | MAYOR SHERIFF LNO",
+      "id": "3552",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_officer",
+          "groupId": "332 EMSG | MAYOR SHERIFF LNO",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_officer",
+          "varName": "sheriff_lno"
+        }
+      ]
+    },
+    {
+      "groupKey": "332 EMSG | MAYOR TNP LNO",
+      "id": "3564",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "332 EMSG | MAYOR TNP LNO",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": "mayor_tnp_lno"
+        }
+      ]
+    },
+    {
+      "groupKey": "332 EOSS | FARABAD APPROACH",
+      "id": "1581",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_officer",
+          "groupId": "332 EOSS | FARABAD APPROACH",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_officer",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_officer",
+          "groupId": "332 EOSS | FARABAD APPROACH",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_officer",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_officer",
+          "groupId": "332 EOSS | FARABAD APPROACH",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_officer",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_officer",
+          "groupId": "332 EOSS | FARABAD APPROACH",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_officer",
+          "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "332 EOSS | FARABAD GROUND",
+      "id": "1571",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_officer",
+          "groupId": "332 EOSS | FARABAD GROUND",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_officer",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_officer",
+          "groupId": "332 EOSS | FARABAD GROUND",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_officer",
+          "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "332 EOSS | FARABAD TOWER",
+      "id": "4331",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_officer",
+          "groupId": "332 EOSS | FARABAD TOWER",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_officer",
+          "varName": "farabad_tower_lc"
+        },
+        {
+          "className": "rhsusf_army_ocp_officer",
+          "groupId": "332 EOSS | FARABAD TOWER",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_officer",
+          "varName": "farabad_tower_ws_ccic"
+        },
+        {
+          "className": "rhsusf_army_ocp_officer",
+          "groupId": "332 EOSS | FARABAD TOWER",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_officer",
+          "varName": "FarabadTower_LA"
+        }
+      ]
+    },
+    {
+      "groupKey": "332 ESFS | SENTRY 6",
+      "id": "2142",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "332 ESFS | SENTRY 6",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "332 ESFS | SENTRY LAW 01",
+      "id": "133",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "332 ESFS | SENTRY LAW 01",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": "Patrol_02D"
+        },
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "332 ESFS | SENTRY LAW 01",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": "Patrol_02G"
+        }
+      ]
+    },
+    {
+      "groupKey": "332 ESFS | SENTRY LAW 02",
+      "id": "137",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "332 ESFS | SENTRY LAW 02",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": "Patrol_01D"
+        }
+      ]
+    },
+    {
+      "groupKey": "332 MDG | LIFELINE LNO FARABAD",
+      "id": "3621",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_officer",
+          "groupId": "332 MDG | LIFELINE LNO FARABAD",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_officer",
+          "varName": "jtf_medical_lno"
+        }
+      ]
+    },
+    {
+      "groupKey": "332 SFG | SENTRY LNO FARABAD",
+      "id": "3605",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "332 SFG | SENTRY LNO FARABAD",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": "jtf_sfi_1"
+        },
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "332 SFG | SENTRY LNO FARABAD",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": "jtf_sfi_2"
+        }
+      ]
+    },
+    {
+      "groupKey": "340 EARS | TEXACO 41 (KC-135R)",
+      "id": "114",
+      "side": "West",
+      "units": [
+        {
+          "className": "B_Pilot_F",
+          "groupId": "340 EARS | TEXACO 41 (KC-135R)",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "B_Pilot_F",
+          "varName": "plane2D"
+        },
+        {
+          "className": "B_Pilot_F",
+          "groupId": "340 EARS | TEXACO 41 (KC-135R)",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "B_Pilot_F",
+          "varName": "plane2G"
+        }
+      ]
+    },
+    {
+      "groupKey": "4-1-B-2-325 AIR | REDFALCON 2-1-4",
+      "id": "3399",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_javelin",
+          "groupId": "4-1-B-2-325 AIR | REDFALCON 2-1-4",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_javelin",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_javelin",
+          "groupId": "4-1-B-2-325 AIR | REDFALCON 2-1-4",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_javelin",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_javelin_assistant",
+          "groupId": "4-1-B-2-325 AIR | REDFALCON 2-1-4",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_javelin_assistant",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_javelin_assistant",
+          "groupId": "4-1-B-2-325 AIR | REDFALCON 2-1-4",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_javelin_assistant",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_machinegunner",
+          "groupId": "4-1-B-2-325 AIR | REDFALCON 2-1-4",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_machinegunner",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_machinegunner",
+          "groupId": "4-1-B-2-325 AIR | REDFALCON 2-1-4",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_machinegunner",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_machinegunnera",
+          "groupId": "4-1-B-2-325 AIR | REDFALCON 2-1-4",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_machinegunnera",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_machinegunnera",
+          "groupId": "4-1-B-2-325 AIR | REDFALCON 2-1-4",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_machinegunnera",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_squadleader",
+          "groupId": "4-1-B-2-325 AIR | REDFALCON 2-1-4",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_squadleader",
+          "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "4-1-C-2-325 AIR | REDFALCON 3-1-W",
+      "id": "4413",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_javelin",
+          "groupId": "4-1-C-2-325 AIR | REDFALCON 3-1-W",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_javelin",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_javelin",
+          "groupId": "4-1-C-2-325 AIR | REDFALCON 3-1-W",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_javelin",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_javelin_assistant",
+          "groupId": "4-1-C-2-325 AIR | REDFALCON 3-1-W",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_javelin_assistant",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_javelin_assistant",
+          "groupId": "4-1-C-2-325 AIR | REDFALCON 3-1-W",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_javelin_assistant",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_machinegunner",
+          "groupId": "4-1-C-2-325 AIR | REDFALCON 3-1-W",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_machinegunner",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_machinegunner",
+          "groupId": "4-1-C-2-325 AIR | REDFALCON 3-1-W",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_machinegunner",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_machinegunnera",
+          "groupId": "4-1-C-2-325 AIR | REDFALCON 3-1-W",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_machinegunnera",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_machinegunnera",
+          "groupId": "4-1-C-2-325 AIR | REDFALCON 3-1-W",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_machinegunnera",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_squadleader",
+          "groupId": "4-1-C-2-325 AIR | REDFALCON 3-1-W",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_squadleader",
+          "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "407 BSB | GRIFFIN MAINT 01",
+      "id": "1545",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_engineer",
+          "groupId": "407 BSB | GRIFFIN MAINT 01",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_engineer",
+          "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "407 BSB | GRIFFIN MED 01",
+      "id": "1552",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_medic",
+          "groupId": "407 BSB | GRIFFIN MED 01",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_medic",
+          "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "407 BSB | GRIFFIN SUPPORT 01",
+      "id": "1542",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_driver_armored",
+          "groupId": "407 BSB | GRIFFIN SUPPORT 01",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_driver_armored",
+          "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "407 BSB | GRIFFIN SUPPORT 02",
+      "id": "1548",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_driver_armored",
+          "groupId": "407 BSB | GRIFFIN SUPPORT 02",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_driver_armored",
+          "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "43 EECS | COMPASS 81 (EC-130H)",
+      "id": "3184",
+      "side": "West",
+      "units": [
+        {
+          "className": "B_Pilot_F",
+          "groupId": "43 EECS | COMPASS 81 (EC-130H)",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "B_Pilot_F",
+          "varName": "plane7D"
+        },
+        {
+          "className": "B_Pilot_F",
+          "groupId": "43 EECS | COMPASS 81 (EC-130H)",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "B_Pilot_F",
+          "varName": "plane7G"
+        }
+      ]
+    },
+    {
+      "groupKey": "532 ESFS | SENTRY GATE 1",
+      "id": "117",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "532 ESFS | SENTRY GATE 1",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "532 ESFS | SENTRY GATE 1",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "532 ESFS | SENTRY GATE 1",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "532 ESFS | SENTRY GATE 1",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "532 ESFS | SENTRY GATE 1",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "532 ESFS | SENTRY GATE 1",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "532 ESFS | SENTRY GATE 1",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "532 ESFS | SENTRY GATE 1",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "532 ESFS | SENTRY GATE 1",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "532 ESFS | SENTRY GATE 1",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "532 ESFS | SENTRY GATE 2",
+      "id": "239",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "532 ESFS | SENTRY GATE 2",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "532 ESFS | SENTRY GATE 2",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "532 ESFS | SENTRY GATE 2",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "532 ESFS | SENTRY GATE 2",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "532 ESFS | SENTRY GATE 2",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "532 ESFS | SENTRY GATE 2",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "532 ESFS | SENTRY GATE 2",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "532 ESFS | SENTRY GATE 3",
+      "id": "251",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "532 ESFS | SENTRY GATE 3",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "532 ESFS | SENTRY GATE 3",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "532 ESFS | SENTRY GATE 3",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "532 ESFS | SENTRY GATE 3",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "746 EAS | REACH 301 (C-130J)",
+      "id": "106",
+      "side": "West",
+      "units": [
+        {
+          "className": "B_Pilot_F",
+          "groupId": "746 EAS | REACH 301 (C-130J)",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "B_Pilot_F",
+          "varName": "plane3D"
+        },
+        {
+          "className": "B_Pilot_F",
+          "groupId": "746 EAS | REACH 301 (C-130J)",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "B_Pilot_F",
+          "varName": "plane3G"
+        }
+      ]
+    },
+    {
+      "groupKey": "75 EFS | HAWG 11 (A-10C)",
+      "id": "104",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_airforce_jetpilot",
+          "groupId": "75 EFS | HAWG 11 (A-10C)",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_jetpilot",
+          "varName": "plane4D"
+        }
+      ]
+    },
+    {
+      "groupKey": "75 EFS | HAWG 12 (A-10C)",
+      "id": "4343",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_airforce_jetpilot",
+          "groupId": "75 EFS | HAWG 12 (A-10C)",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_jetpilot",
+          "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "816 EAS | REACH 101 (C-17A)",
+      "id": "109",
+      "side": "West",
+      "units": [
+        {
+          "className": "B_Pilot_F",
+          "groupId": "816 EAS | REACH 101 (C-17A)",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "B_Pilot_F",
+          "varName": "plane1D"
+        },
+        {
+          "className": "B_Pilot_F",
+          "groupId": "816 EAS | REACH 101 (C-17A)",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "B_Pilot_F",
+          "varName": "plane1G"
+        }
+      ]
+    },
+    {
+      "groupKey": "816 EAS | REACH 102 (C-17A)",
+      "id": "2731",
+      "side": "West",
+      "units": [
+        {
+          "className": "B_Pilot_F",
+          "groupId": "816 EAS | REACH 102 (C-17A)",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "B_Pilot_F",
+          "varName": "plane1D_1"
+        },
+        {
+          "className": "B_Pilot_F",
+          "groupId": "816 EAS | REACH 102 (C-17A)",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "B_Pilot_F",
+          "varName": "plane1G_1"
+        }
+      ]
+    },
+    {
+      "groupKey": "97 EFS | TIGER 11 (F-16C)",
+      "id": "112",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_airforce_jetpilot",
+          "groupId": "97 EFS | TIGER 11 (F-16C)",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_jetpilot",
+          "varName": "plane5D"
+        }
+      ]
+    },
+    {
+      "groupKey": "97 EFS | TIGER 12 (F-16C)",
+      "id": "4341",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_airforce_jetpilot",
+          "groupId": "97 EFS | TIGER 12 (F-16C)",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_jetpilot",
+          "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "B-2-325 AIR | REDFALCON 2",
+      "id": "3338",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_fso",
+          "groupId": "B-2-325 AIR | REDFALCON 2",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_fso",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_medic",
+          "groupId": "B-2-325 AIR | REDFALCON 2",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_medic",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_officer",
+          "groupId": "B-2-325 AIR | REDFALCON 2",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_officer",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_officer",
+          "groupId": "B-2-325 AIR | REDFALCON 2",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_officer",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_rifleman",
+          "groupId": "B-2-325 AIR | REDFALCON 2",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_rifleman",
+          "varName": ""
+        },
+        {
+          "className": "rhsusf_army_ocp_squadleader",
+          "groupId": "B-2-325 AIR | REDFALCON 2",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_squadleader",
+          "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "C-2-325 AIR | REDFALCON 3",
+      "id": "4370",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_squadleader",
+          "groupId": "C-2-325 AIR | REDFALCON 3",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_squadleader",
+          "varName": "charlie_1sgt"
+        },
+        {
+          "className": "rhsusf_army_ocp_officer",
+          "groupId": "C-2-325 AIR | REDFALCON 3",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_officer",
+          "varName": "charlie_co"
+        },
+        {
+          "className": "rhsusf_army_ocp_fso",
+          "groupId": "C-2-325 AIR | REDFALCON 3",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_fso",
+          "varName": "charlie_fo"
+        },
+        {
+          "className": "rhsusf_army_ocp_medic",
+          "groupId": "C-2-325 AIR | REDFALCON 3",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_medic",
+          "varName": "charlie_medic"
+        },
+        {
+          "className": "rhsusf_army_ocp_rifleman",
+          "groupId": "C-2-325 AIR | REDFALCON 3",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_rifleman",
+          "varName": "charlie_rto"
+        },
+        {
+          "className": "rhsusf_army_ocp_officer",
+          "groupId": "C-2-325 AIR | REDFALCON 3",
+          "isPlayable": true,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_officer",
+          "varName": "charlie_xo"
+        }
+      ]
+    },
+    {
+      "groupKey": "Civilian:4545",
+      "id": "4545",
+      "side": "Civilian",
+      "units": [
+        {
+          "className": "UK3CB_MEC_C_DOC",
+          "groupId": "Civilian:4545",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "Civilian",
+          "source": "mission.sqm",
+          "unitType": "UK3CB_MEC_C_DOC",
+          "varName": ""
+        },
+        {
+          "className": "UK3CB_MEC_C_DOC",
+          "groupId": "Civilian:4545",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "Civilian",
+          "source": "mission.sqm",
+          "unitType": "UK3CB_MEC_C_DOC",
+          "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "Civilian:4552",
+      "id": "4552",
+      "side": "Civilian",
+      "units": [
+        {
+          "className": "UK3CB_MEC_C_DOC",
+          "groupId": "Civilian:4552",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "Civilian",
+          "source": "mission.sqm",
+          "unitType": "UK3CB_MEC_C_DOC",
+          "varName": ""
+        },
+        {
+          "className": "UK3CB_MEC_C_DOC",
+          "groupId": "Civilian:4552",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "Civilian",
+          "source": "mission.sqm",
+          "unitType": "UK3CB_MEC_C_DOC",
+          "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "Civilian:4556",
+      "id": "4556",
+      "side": "Civilian",
+      "units": [
+        {
+          "className": "UK3CB_MEC_C_DOC",
+          "groupId": "Civilian:4556",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "Civilian",
+          "source": "mission.sqm",
+          "unitType": "UK3CB_MEC_C_DOC",
+          "varName": ""
+        },
+        {
+          "className": "UK3CB_MEC_C_DOC",
+          "groupId": "Civilian:4556",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "Civilian",
+          "source": "mission.sqm",
+          "unitType": "UK3CB_MEC_C_DOC",
+          "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "Civilian:4577",
+      "id": "4577",
+      "side": "Civilian",
+      "units": [
+        {
+          "className": "UK3CB_MEC_C_DOC",
+          "groupId": "Civilian:4577",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "Civilian",
+          "source": "mission.sqm",
+          "unitType": "UK3CB_MEC_C_DOC",
+          "varName": ""
+        },
+        {
+          "className": "UK3CB_TKC_C_PILOT",
+          "groupId": "Civilian:4577",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "Civilian",
+          "source": "mission.sqm",
+          "unitType": "UK3CB_TKC_C_PILOT",
+          "varName": ""
+        },
+        {
+          "className": "UK3CB_TKC_C_PILOT",
+          "groupId": "Civilian:4577",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "Civilian",
+          "source": "mission.sqm",
+          "unitType": "UK3CB_TKC_C_PILOT",
+          "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "Civilian:4607",
+      "id": "4607",
+      "side": "Civilian",
+      "units": [
+        {
+          "className": "UK3CB_TKC_C_CIV",
+          "groupId": "Civilian:4607",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "Civilian",
+          "source": "mission.sqm",
+          "unitType": "UK3CB_TKC_C_CIV",
+          "varName": "civsub_test_01"
+        }
+      ]
+    },
+    {
+      "groupKey": "EPW-0001",
+      "id": "4507",
+      "side": "Civilian",
+      "units": [
+        {
+          "className": "UK3CB_TKC_C_CIV",
+          "groupId": "EPW-0001",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "Civilian",
+          "source": "mission.sqm",
+          "unitType": "UK3CB_TKC_C_CIV",
+          "varName": "civsub_test_02"
+        }
+      ]
+    },
+    {
+      "groupKey": "JTF Farabad BDOC | FARABAD BDOC",
+      "id": "3590",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "JTF Farabad BDOC | FARABAD BDOC",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": "jtf_bdoc_ncoic"
+        },
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "JTF Farabad BDOC | FARABAD BDOC",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": "jtf_bdoc_oic"
+        },
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "JTF Farabad BDOC | FARABAD BDOC",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": "jtf_bdoc_wo"
+        }
+      ]
+    },
+    {
+      "groupKey": "JTF Farabad | FARABAD 6",
+      "id": "3586",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_army_ocp_officer",
+          "groupId": "JTF Farabad | FARABAD 6",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_officer",
+          "varName": "farabad_5"
+        },
+        {
+          "className": "rhsusf_army_ocp_officer",
+          "groupId": "JTF Farabad | FARABAD 6",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_army_ocp_officer",
+          "varName": "farabad_6"
+        }
+      ]
+    },
+    {
+      "groupKey": "JTF Farabad | JTF LIAISON",
+      "id": "3626",
+      "side": "West",
+      "units": [
+        {
+          "className": "rhsusf_airforce_security_force_rifleman",
+          "groupId": "JTF Farabad | JTF LIAISON",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "rhsusf_airforce_security_force_rifleman",
+          "varName": "jtf_liaison"
+        }
+      ]
+    },
+    {
+      "groupKey": "TEMP-M151-PATHING VIC",
+      "id": "4432",
+      "side": "West",
+      "units": [
+        {
+          "className": "B_Deck_Crew_F",
+          "groupId": "TEMP-M151-PATHING VIC",
+          "isPlayable": false,
+          "isPlayer": true,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "B_Deck_Crew_F",
+          "varName": "m151D"
+        }
+      ]
+    },
+    {
+      "groupKey": "Takistan Ministry of Interior | TNP LNO FARABAD",
+      "id": "3632",
+      "side": "West",
+      "units": [
+        {
+          "className": "UK3CB_TKP_B_OFF",
+          "groupId": "Takistan Ministry of Interior | TNP LNO FARABAD",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "UK3CB_TKP_B_OFF",
+          "varName": "tnp_lno_farabad"
+        }
+      ]
+    },
+    {
+      "groupKey": "Takistan National Army | TNA LNO FARABAD",
+      "id": "3635",
+      "side": "West",
+      "units": [
+        {
+          "className": "UK3CB_TKA_B_OFF",
+          "groupId": "Takistan National Army | TNA LNO FARABAD",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "UK3CB_TKA_B_OFF",
+          "varName": "tna_lno_farabad"
+        }
+      ]
+    },
+    {
+      "groupKey": "West:3108",
+      "id": "3108",
+      "side": "West",
+      "units": [
+        {
+          "className": "MFR_B_GermanShepherd",
+          "groupId": "West:3108",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "MFR_B_GermanShepherd",
+          "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "West:3112",
+      "id": "3112",
+      "side": "West",
+      "units": [
+        {
+          "className": "MFR_B_GermanShepherd_Black",
+          "groupId": "West:3112",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "MFR_B_GermanShepherd_Black",
+          "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "West:3701",
+      "id": "3701",
+      "side": "West",
+      "units": [
+        {
+          "className": "B_UAV_AI",
+          "groupId": "West:3701",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "B_UAV_AI",
+          "varName": ""
+        },
+        {
+          "className": "B_UAV_AI",
+          "groupId": "West:3701",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "B_UAV_AI",
+          "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "West:3705",
+      "id": "3705",
+      "side": "West",
+      "units": [
+        {
+          "className": "B_UAV_AI",
+          "groupId": "West:3705",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "B_UAV_AI",
+          "varName": ""
+        },
+        {
+          "className": "B_UAV_AI",
+          "groupId": "West:3705",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "B_UAV_AI",
+          "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "West:3709",
+      "id": "3709",
+      "side": "West",
+      "units": [
+        {
+          "className": "B_UAV_AI",
+          "groupId": "West:3709",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "B_UAV_AI",
+          "varName": ""
+        }
+      ]
+    }
+  ],
+  "units": [
+    {
+      "className": "rhsusf_army_ocp_autorifleman",
+      "groupId": "1-1-B-2-325 AIR | REDFALCON 2-1-1",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_autorifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_autorifleman",
+      "groupId": "1-1-B-2-325 AIR | REDFALCON 2-1-1",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_autorifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_grenadier",
+      "groupId": "1-1-B-2-325 AIR | REDFALCON 2-1-1",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_grenadier",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_grenadier",
+      "groupId": "1-1-B-2-325 AIR | REDFALCON 2-1-1",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_grenadier",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_riflemanat",
+      "groupId": "1-1-B-2-325 AIR | REDFALCON 2-1-1",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_riflemanat",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_riflemanat",
+      "groupId": "1-1-B-2-325 AIR | REDFALCON 2-1-1",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_riflemanat",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_squadleader",
+      "groupId": "1-1-B-2-325 AIR | REDFALCON 2-1-1",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_squadleader",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_teamleader",
+      "groupId": "1-1-B-2-325 AIR | REDFALCON 2-1-1",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_teamleader",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_teamleader",
+      "groupId": "1-1-B-2-325 AIR | REDFALCON 2-1-1",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_teamleader",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_autorifleman",
+      "groupId": "1-1-C-2-325 AIR | REDFALCON 3-1-1",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_autorifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_autorifleman",
+      "groupId": "1-1-C-2-325 AIR | REDFALCON 3-1-1",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_autorifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_grenadier",
+      "groupId": "1-1-C-2-325 AIR | REDFALCON 3-1-1",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_grenadier",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_grenadier",
+      "groupId": "1-1-C-2-325 AIR | REDFALCON 3-1-1",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_grenadier",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_riflemanat",
+      "groupId": "1-1-C-2-325 AIR | REDFALCON 3-1-1",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_riflemanat",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_riflemanat",
+      "groupId": "1-1-C-2-325 AIR | REDFALCON 3-1-1",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_riflemanat",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_squadleader",
+      "groupId": "1-1-C-2-325 AIR | REDFALCON 3-1-1",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_squadleader",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_teamleader",
+      "groupId": "1-1-C-2-325 AIR | REDFALCON 3-1-1",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_teamleader",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_teamleader",
+      "groupId": "1-1-C-2-325 AIR | REDFALCON 3-1-1",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_teamleader",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_helipilot",
+      "groupId": "1-17 CAV (Air Cav) | SABER XX",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_helipilot",
+      "varName": "OH_58D_01D"
+    },
+    {
+      "className": "rhsusf_army_ocp_helipilot",
+      "groupId": "1-17 CAV (Air Cav) | SABER XX",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_helipilot",
+      "varName": "OH_58D_01G"
+    },
+    {
+      "className": "rhsusf_army_ocp_ah64_pilot",
+      "groupId": "1-82 ARB | WOLFPACK 21 (AH-64D)",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_ah64_pilot",
+      "varName": "AH_64D_01D"
+    },
+    {
+      "className": "rhsusf_army_ocp_ah64_pilot",
+      "groupId": "1-82 ARB | WOLFPACK 21 (AH-64D)",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_ah64_pilot",
+      "varName": "AH_64D_01G"
+    },
+    {
+      "className": "rhsusf_army_ocp_jfo",
+      "groupId": "1-B-2-325 AIR | REDFALCON 2-1",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_jfo",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_medic",
+      "groupId": "1-B-2-325 AIR | REDFALCON 2-1",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_medic",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_officer",
+      "groupId": "1-B-2-325 AIR | REDFALCON 2-1",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_officer",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_rifleman",
+      "groupId": "1-B-2-325 AIR | REDFALCON 2-1",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_rifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_squadleader",
+      "groupId": "1-B-2-325 AIR | REDFALCON 2-1",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_squadleader",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_jfo",
+      "groupId": "1-C-2-325 AIR | REDFALCON 3-1",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_jfo",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_medic",
+      "groupId": "1-C-2-325 AIR | REDFALCON 3-1",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_medic",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_officer",
+      "groupId": "1-C-2-325 AIR | REDFALCON 3-1",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_officer",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_rifleman",
+      "groupId": "1-C-2-325 AIR | REDFALCON 3-1",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_rifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_squadleader",
+      "groupId": "1-C-2-325 AIR | REDFALCON 3-1",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_squadleader",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "14-ASOS | RAVEN-13",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": "jtac"
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "14-ASOS | RAVEN-13",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": "jtac_rto"
+    },
+    {
+      "className": "rhsusf_army_ocp_explosives",
+      "groupId": "2 BSTB (ABN) EOD Team | EOD 11",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_explosives",
+      "varName": "eod_sec"
+    },
+    {
+      "className": "rhsusf_army_ocp_explosives",
+      "groupId": "2 BSTB (ABN) EOD Team | EOD 11",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_explosives",
+      "varName": "eod_tech"
+    },
+    {
+      "className": "rhsusf_army_ocp_explosives",
+      "groupId": "2 BSTB (ABN) EOD Team | EOD 11",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_explosives",
+      "varName": "eod_tl"
+    },
+    {
+      "className": "B_soldier_exp_F",
+      "groupId": "2 BSTB (ABN) Engineer Team | SAPPER 11",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "B_soldier_exp_F",
+      "varName": "eng_demo"
+    },
+    {
+      "className": "B_engineer_F",
+      "groupId": "2 BSTB (ABN) Engineer Team | SAPPER 11",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "B_engineer_F",
+      "varName": "eng_rf_1"
+    },
+    {
+      "className": "B_engineer_F",
+      "groupId": "2 BSTB (ABN) Engineer Team | SAPPER 11",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "B_engineer_F",
+      "varName": "eng_rf_2"
+    },
+    {
+      "className": "B_engineer_F",
+      "groupId": "2 BSTB (ABN) Engineer Team | SAPPER 11",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "B_engineer_F",
+      "varName": "eng_tl"
+    },
+    {
+      "className": "rhsusf_army_ocp_officer",
+      "groupId": "2 BSTB (MP) | SHERIFF LNO FARABAD",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_officer",
+      "varName": "jtf_sheriff_lno"
+    },
+    {
+      "className": "MFR_B_GermanShepherd",
+      "groupId": "2 BSTB | SHERIFF HOLDING 01",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "MFR_B_GermanShepherd",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_squadleader",
+      "groupId": "2 BSTB | SHERIFF HOLDING 01",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_squadleader",
+      "varName": "sheriff_holding"
+    },
+    {
+      "className": "rhsusf_army_ocp_riflemanl",
+      "groupId": "2 BSTB | SHERIFF HOLDING 01",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_riflemanl",
+      "varName": "sheriff_holding_1"
+    },
+    {
+      "className": "rhsusf_army_ocp_riflemanl",
+      "groupId": "2 BSTB | SHERIFF HOLDING 01",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_riflemanl",
+      "varName": "sheriff_holding_2"
+    },
+    {
+      "className": "rhsusf_army_ocp_riflemanl",
+      "groupId": "2 BSTB | SHERIFF HOLDING 01",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_riflemanl",
+      "varName": "sheriff_holding_3"
+    },
+    {
+      "className": "rhsusf_army_ocp_riflemanl",
+      "groupId": "2 BSTB | SHERIFF HOLDING 01",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_riflemanl",
+      "varName": "sheriff_holding_4"
+    },
+    {
+      "className": "rhsusf_army_ocp_riflemanl",
+      "groupId": "2 BSTB | SHERIFF HOLDING 01",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_riflemanl",
+      "varName": "sheriff_holding_6"
+    },
+    {
+      "className": "rhsusf_army_ocp_riflemanl",
+      "groupId": "2 BSTB | SHERIFF HOLDING 01",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_riflemanl",
+      "varName": "sheriff_holding_7"
+    },
+    {
+      "className": "rhsusf_army_ocp_riflemanl",
+      "groupId": "2 BSTB | SHERIFF HOLDING 02",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_riflemanl",
+      "varName": "sheriff_holding_5"
+    },
+    {
+      "className": "rhsusf_army_ocp_teamleader",
+      "groupId": "2 BSTB | SHERIFF K-9 01",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_teamleader",
+      "varName": ""
+    },
+    {
+      "className": "MFR_B_GermanShepherd",
+      "groupId": "2 BSTB | SHERIFF K-9 01",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "MFR_B_GermanShepherd",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_autorifleman",
+      "groupId": "2-1-B-2-325 AIR | REDFALCON 2-1-2",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_autorifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_autorifleman",
+      "groupId": "2-1-B-2-325 AIR | REDFALCON 2-1-2",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_autorifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_grenadier",
+      "groupId": "2-1-B-2-325 AIR | REDFALCON 2-1-2",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_grenadier",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_grenadier",
+      "groupId": "2-1-B-2-325 AIR | REDFALCON 2-1-2",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_grenadier",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_riflemanat",
+      "groupId": "2-1-B-2-325 AIR | REDFALCON 2-1-2",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_riflemanat",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_riflemanat",
+      "groupId": "2-1-B-2-325 AIR | REDFALCON 2-1-2",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_riflemanat",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_squadleader",
+      "groupId": "2-1-B-2-325 AIR | REDFALCON 2-1-2",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_squadleader",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_teamleader",
+      "groupId": "2-1-B-2-325 AIR | REDFALCON 2-1-2",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_teamleader",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_teamleader",
+      "groupId": "2-1-B-2-325 AIR | REDFALCON 2-1-2",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_teamleader",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_autorifleman",
+      "groupId": "2-1-C-2-325 AIR | REDFALCON 3-1-2",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_autorifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_autorifleman",
+      "groupId": "2-1-C-2-325 AIR | REDFALCON 3-1-2",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_autorifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_grenadier",
+      "groupId": "2-1-C-2-325 AIR | REDFALCON 3-1-2",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_grenadier",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_grenadier",
+      "groupId": "2-1-C-2-325 AIR | REDFALCON 3-1-2",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_grenadier",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_riflemanat",
+      "groupId": "2-1-C-2-325 AIR | REDFALCON 3-1-2",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_riflemanat",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_riflemanat",
+      "groupId": "2-1-C-2-325 AIR | REDFALCON 3-1-2",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_riflemanat",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_squadleader",
+      "groupId": "2-1-C-2-325 AIR | REDFALCON 3-1-2",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_squadleader",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_teamleader",
+      "groupId": "2-1-C-2-325 AIR | REDFALCON 3-1-2",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_teamleader",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_teamleader",
+      "groupId": "2-1-C-2-325 AIR | REDFALCON 3-1-2",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_teamleader",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_officer",
+      "groupId": "2-325 AIR | REDFALCON 6",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_officer",
+      "varName": "tf_co"
+    },
+    {
+      "className": "rhsusf_army_ocp_squadleader",
+      "groupId": "2-325 AIR | REDFALCON 6",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_squadleader",
+      "varName": "tf_csm"
+    },
+    {
+      "className": "rhsusf_army_ocp_officer",
+      "groupId": "2-325 AIR | REDFALCON 6",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_officer",
+      "varName": "tf_xo"
+    },
+    {
+      "className": "rhsusf_army_ocp_medic",
+      "groupId": "2-325 AIR | REDFALCON DOC",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_medic",
+      "varName": "tf_med_officer"
+    },
+    {
+      "className": "rhsusf_army_ocp_officer",
+      "groupId": "2-325 AIR | REDFALCON S2",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_officer",
+      "varName": "s2"
+    },
+    {
+      "className": "rhsusf_army_ocp_officer",
+      "groupId": "2-325 AIR | REDFALCON S3",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_officer",
+      "varName": "s3"
+    },
+    {
+      "className": "rhsusf_army_ocp_officer",
+      "groupId": "2-325 AIR | REDFALCON S4",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_officer",
+      "varName": "s4"
+    },
+    {
+      "className": "rhsusf_army_ocp_officer",
+      "groupId": "2-325 AIR | REDFALCON S6",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_officer",
+      "varName": "s6_oic"
+    },
+    {
+      "className": "rhsusf_army_ocp_rifleman",
+      "groupId": "2-325 AIR | REDFALCON S6",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_rifleman",
+      "varName": "s6_rto"
+    },
+    {
+      "className": "rhsusf_army_ocp_officer",
+      "groupId": "2-325 AIR | REDFALCON TOC",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_officer",
+      "varName": "avn_lno"
+    },
+    {
+      "className": "rhsusf_army_ocp_officer",
+      "groupId": "2-325 AIR | REDFALCON TOC",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_officer",
+      "varName": "battle_captain"
+    },
+    {
+      "className": "rhsusf_army_ocp_squadleader",
+      "groupId": "2-325 AIR | REDFALCON TOC",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_squadleader",
+      "varName": "battle_nco"
+    },
+    {
+      "className": "rhsusf_army_ocp_officer",
+      "groupId": "2-325 AIR | REDFALCON TOC",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_officer",
+      "varName": "civil_affairs_lno"
+    },
+    {
+      "className": "rhsusf_army_ocp_squadleader",
+      "groupId": "2-325 AIR | REDFALCON TOC",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_squadleader",
+      "varName": "engineer_lno"
+    },
+    {
+      "className": "rhsusf_army_ocp_squadleader",
+      "groupId": "2-325 AIR | REDFALCON TOC",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_squadleader",
+      "varName": "fse_nco"
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "2-325 AIR | REDFALCON TOC",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": "tacp"
+    },
+    {
+      "className": "rhsusf_army_ocp_squadleader",
+      "groupId": "2-325 AIR | REDFALCON TOC",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_squadleader",
+      "varName": "uas_lno"
+    },
+    {
+      "className": "rhsusf_army_ocp_squadleader",
+      "groupId": "2-325 AIR | REDFALCON TOC",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_squadleader",
+      "varName": "mp_lno"
+    },
+    {
+      "className": "rhsusf_army_ocp_helicrew",
+      "groupId": "2-82 AHB | CORSAIR 31 (UH-60)",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_helicrew",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_helipilot",
+      "groupId": "2-82 AHB | CORSAIR 31 (UH-60)",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_helipilot",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_helipilot",
+      "groupId": "2-82 AHB | CORSAIR 31 (UH-60)",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_helipilot",
+      "varName": "UH_60M_01D"
+    },
+    {
+      "className": "rhsusf_army_ocp_helicrew",
+      "groupId": "2-82 AHB | CORSAIR 31 (UH-60)",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_helicrew",
+      "varName": "UH_60M_01G"
+    },
+    {
+      "className": "rhsusf_army_ocp_autorifleman",
+      "groupId": "3-1-B-2-325 AIR | REDFALCON 2-1-3",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_autorifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_autorifleman",
+      "groupId": "3-1-B-2-325 AIR | REDFALCON 2-1-3",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_autorifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_grenadier",
+      "groupId": "3-1-B-2-325 AIR | REDFALCON 2-1-3",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_grenadier",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_grenadier",
+      "groupId": "3-1-B-2-325 AIR | REDFALCON 2-1-3",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_grenadier",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_riflemanat",
+      "groupId": "3-1-B-2-325 AIR | REDFALCON 2-1-3",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_riflemanat",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_riflemanat",
+      "groupId": "3-1-B-2-325 AIR | REDFALCON 2-1-3",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_riflemanat",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_squadleader",
+      "groupId": "3-1-B-2-325 AIR | REDFALCON 2-1-3",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_squadleader",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_teamleader",
+      "groupId": "3-1-B-2-325 AIR | REDFALCON 2-1-3",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_teamleader",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_teamleader",
+      "groupId": "3-1-B-2-325 AIR | REDFALCON 2-1-3",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_teamleader",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_autorifleman",
+      "groupId": "3-1-C-2-325 AIR | REDFALCON 3-1-3",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_autorifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_autorifleman",
+      "groupId": "3-1-C-2-325 AIR | REDFALCON 3-1-3",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_autorifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_grenadier",
+      "groupId": "3-1-C-2-325 AIR | REDFALCON 3-1-3",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_grenadier",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_grenadier",
+      "groupId": "3-1-C-2-325 AIR | REDFALCON 3-1-3",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_grenadier",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_riflemanat",
+      "groupId": "3-1-C-2-325 AIR | REDFALCON 3-1-3",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_riflemanat",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_riflemanat",
+      "groupId": "3-1-C-2-325 AIR | REDFALCON 3-1-3",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_riflemanat",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_squadleader",
+      "groupId": "3-1-C-2-325 AIR | REDFALCON 3-1-3",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_squadleader",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_teamleader",
+      "groupId": "3-1-C-2-325 AIR | REDFALCON 3-1-3",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_teamleader",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_teamleader",
+      "groupId": "3-1-C-2-325 AIR | REDFALCON 3-1-3",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_teamleader",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_helicrew",
+      "groupId": "3-82 GSAB | TALON 71 (CH-47F)",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_helicrew",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_helicrew",
+      "groupId": "3-82 GSAB | TALON 71 (CH-47F)",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_helicrew",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_helipilot",
+      "groupId": "3-82 GSAB | TALON 71 (CH-47F)",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_helipilot",
+      "varName": "CH_47F_01D"
+    },
+    {
+      "className": "rhsusf_army_ocp_helipilot",
+      "groupId": "3-82 GSAB | TALON 71 (CH-47F)",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_helipilot",
+      "varName": "CH_47F_01G"
+    },
+    {
+      "className": "rhsusf_army_ocp_officer",
+      "groupId": "332 EMSG CIVENG | MAYOR CIVENG",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_officer",
+      "varName": "mayor_civeng"
+    },
+    {
+      "className": "rhsusf_airforce_pilot",
+      "groupId": "332 EMSG LRS | MAYOR LRS",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_pilot",
+      "varName": "mayor_lrs"
+    },
+    {
+      "className": "rhsusf_army_ocp_officer",
+      "groupId": "332 EMSG OPS | MAYOR OPS",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_officer",
+      "varName": "mayor_ops"
+    },
+    {
+      "className": "FIR_USAF_GroundCrew_2_ABU",
+      "groupId": "332 EMSG SERVICES | MAYOR SERVICES",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "FIR_USAF_GroundCrew_2_ABU",
+      "varName": "mayor_services"
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "332 EMSG | MAYOR 5",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": "mayor_rep"
+    },
+    {
+      "className": "rhsusf_army_ocp_officer",
+      "groupId": "332 EMSG | MAYOR 6",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_officer",
+      "varName": "mayor_6"
+    },
+    {
+      "className": "FIR_USAF_GroundCrew_1",
+      "groupId": "332 EMSG | MAYOR LRS FLM 11 (Aircraft Tug)",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "FIR_USAF_GroundCrew_1",
+      "varName": "tug4D"
+    },
+    {
+      "className": "FIR_USAF_GroundCrew_1",
+      "groupId": "332 EMSG | MAYOR LRS FLM 12 (Aircraft Tug)",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "FIR_USAF_GroundCrew_1",
+      "varName": "tug5D"
+    },
+    {
+      "className": "FIR_USAF_GroundCrew_1",
+      "groupId": "332 EMSG | MAYOR LRS FLM 13 (Aircraft Tug)",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "FIR_USAF_GroundCrew_1",
+      "varName": "tug6D"
+    },
+    {
+      "className": "FIR_USAF_GroundCrew_1",
+      "groupId": "332 EMSG | MAYOR LRS FLM 14 (Aircraft Tug)",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "FIR_USAF_GroundCrew_1",
+      "varName": "tug7D"
+    },
+    {
+      "className": "FIR_USAF_GroundCrew_1",
+      "groupId": "332 EMSG | MAYOR LRS FLM 15",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "FIR_USAF_GroundCrew_1",
+      "varName": "tug8D"
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "332 EMSG | MAYOR SENTRY LNO",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": "mayor_sentry_lno"
+    },
+    {
+      "className": "rhsusf_army_ocp_officer",
+      "groupId": "332 EMSG | MAYOR SHERIFF LNO",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_officer",
+      "varName": "sheriff_lno"
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "332 EMSG | MAYOR TNP LNO",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": "mayor_tnp_lno"
+    },
+    {
+      "className": "rhsusf_army_ocp_officer",
+      "groupId": "332 EOSS | FARABAD APPROACH",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_officer",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_officer",
+      "groupId": "332 EOSS | FARABAD APPROACH",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_officer",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_officer",
+      "groupId": "332 EOSS | FARABAD APPROACH",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_officer",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_officer",
+      "groupId": "332 EOSS | FARABAD APPROACH",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_officer",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_officer",
+      "groupId": "332 EOSS | FARABAD GROUND",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_officer",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_officer",
+      "groupId": "332 EOSS | FARABAD GROUND",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_officer",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_officer",
+      "groupId": "332 EOSS | FARABAD TOWER",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_officer",
+      "varName": "farabad_tower_lc"
+    },
+    {
+      "className": "rhsusf_army_ocp_officer",
+      "groupId": "332 EOSS | FARABAD TOWER",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_officer",
+      "varName": "farabad_tower_ws_ccic"
+    },
+    {
+      "className": "rhsusf_army_ocp_officer",
+      "groupId": "332 EOSS | FARABAD TOWER",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_officer",
+      "varName": "FarabadTower_LA"
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "332 ESFS | SENTRY 6",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "332 ESFS | SENTRY LAW 01",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": "Patrol_02D"
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "332 ESFS | SENTRY LAW 01",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": "Patrol_02G"
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "332 ESFS | SENTRY LAW 02",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": "Patrol_01D"
+    },
+    {
+      "className": "rhsusf_army_ocp_officer",
+      "groupId": "332 MDG | LIFELINE LNO FARABAD",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_officer",
+      "varName": "jtf_medical_lno"
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "332 SFG | SENTRY LNO FARABAD",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": "jtf_sfi_1"
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "332 SFG | SENTRY LNO FARABAD",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": "jtf_sfi_2"
+    },
+    {
+      "className": "B_Pilot_F",
+      "groupId": "340 EARS | TEXACO 41 (KC-135R)",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "B_Pilot_F",
+      "varName": "plane2D"
+    },
+    {
+      "className": "B_Pilot_F",
+      "groupId": "340 EARS | TEXACO 41 (KC-135R)",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "B_Pilot_F",
+      "varName": "plane2G"
+    },
+    {
+      "className": "rhsusf_army_ocp_javelin",
+      "groupId": "4-1-B-2-325 AIR | REDFALCON 2-1-4",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_javelin",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_javelin",
+      "groupId": "4-1-B-2-325 AIR | REDFALCON 2-1-4",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_javelin",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_javelin_assistant",
+      "groupId": "4-1-B-2-325 AIR | REDFALCON 2-1-4",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_javelin_assistant",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_javelin_assistant",
+      "groupId": "4-1-B-2-325 AIR | REDFALCON 2-1-4",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_javelin_assistant",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_machinegunner",
+      "groupId": "4-1-B-2-325 AIR | REDFALCON 2-1-4",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_machinegunner",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_machinegunner",
+      "groupId": "4-1-B-2-325 AIR | REDFALCON 2-1-4",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_machinegunner",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_machinegunnera",
+      "groupId": "4-1-B-2-325 AIR | REDFALCON 2-1-4",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_machinegunnera",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_machinegunnera",
+      "groupId": "4-1-B-2-325 AIR | REDFALCON 2-1-4",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_machinegunnera",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_squadleader",
+      "groupId": "4-1-B-2-325 AIR | REDFALCON 2-1-4",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_squadleader",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_javelin",
+      "groupId": "4-1-C-2-325 AIR | REDFALCON 3-1-W",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_javelin",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_javelin",
+      "groupId": "4-1-C-2-325 AIR | REDFALCON 3-1-W",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_javelin",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_javelin_assistant",
+      "groupId": "4-1-C-2-325 AIR | REDFALCON 3-1-W",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_javelin_assistant",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_javelin_assistant",
+      "groupId": "4-1-C-2-325 AIR | REDFALCON 3-1-W",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_javelin_assistant",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_machinegunner",
+      "groupId": "4-1-C-2-325 AIR | REDFALCON 3-1-W",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_machinegunner",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_machinegunner",
+      "groupId": "4-1-C-2-325 AIR | REDFALCON 3-1-W",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_machinegunner",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_machinegunnera",
+      "groupId": "4-1-C-2-325 AIR | REDFALCON 3-1-W",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_machinegunnera",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_machinegunnera",
+      "groupId": "4-1-C-2-325 AIR | REDFALCON 3-1-W",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_machinegunnera",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_squadleader",
+      "groupId": "4-1-C-2-325 AIR | REDFALCON 3-1-W",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_squadleader",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_engineer",
+      "groupId": "407 BSB | GRIFFIN MAINT 01",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_engineer",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_medic",
+      "groupId": "407 BSB | GRIFFIN MED 01",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_medic",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_driver_armored",
+      "groupId": "407 BSB | GRIFFIN SUPPORT 01",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_driver_armored",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_driver_armored",
+      "groupId": "407 BSB | GRIFFIN SUPPORT 02",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_driver_armored",
+      "varName": ""
+    },
+    {
+      "className": "B_Pilot_F",
+      "groupId": "43 EECS | COMPASS 81 (EC-130H)",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "B_Pilot_F",
+      "varName": "plane7D"
+    },
+    {
+      "className": "B_Pilot_F",
+      "groupId": "43 EECS | COMPASS 81 (EC-130H)",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "B_Pilot_F",
+      "varName": "plane7G"
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "532 ESFS | SENTRY GATE 1",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "532 ESFS | SENTRY GATE 1",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "532 ESFS | SENTRY GATE 1",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "532 ESFS | SENTRY GATE 1",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "532 ESFS | SENTRY GATE 1",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "532 ESFS | SENTRY GATE 1",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "532 ESFS | SENTRY GATE 1",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "532 ESFS | SENTRY GATE 1",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "532 ESFS | SENTRY GATE 1",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "532 ESFS | SENTRY GATE 1",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "532 ESFS | SENTRY GATE 2",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "532 ESFS | SENTRY GATE 2",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "532 ESFS | SENTRY GATE 2",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "532 ESFS | SENTRY GATE 2",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "532 ESFS | SENTRY GATE 2",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "532 ESFS | SENTRY GATE 2",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "532 ESFS | SENTRY GATE 2",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "532 ESFS | SENTRY GATE 3",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "532 ESFS | SENTRY GATE 3",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "532 ESFS | SENTRY GATE 3",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "532 ESFS | SENTRY GATE 3",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": ""
+    },
+    {
+      "className": "B_Pilot_F",
+      "groupId": "746 EAS | REACH 301 (C-130J)",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "B_Pilot_F",
+      "varName": "plane3D"
+    },
+    {
+      "className": "B_Pilot_F",
+      "groupId": "746 EAS | REACH 301 (C-130J)",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "B_Pilot_F",
+      "varName": "plane3G"
+    },
+    {
+      "className": "rhsusf_airforce_jetpilot",
+      "groupId": "75 EFS | HAWG 11 (A-10C)",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_jetpilot",
+      "varName": "plane4D"
+    },
+    {
+      "className": "rhsusf_airforce_jetpilot",
+      "groupId": "75 EFS | HAWG 12 (A-10C)",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_jetpilot",
+      "varName": ""
+    },
+    {
+      "className": "B_Pilot_F",
+      "groupId": "816 EAS | REACH 101 (C-17A)",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "B_Pilot_F",
+      "varName": "plane1D"
+    },
+    {
+      "className": "B_Pilot_F",
+      "groupId": "816 EAS | REACH 101 (C-17A)",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "B_Pilot_F",
+      "varName": "plane1G"
+    },
+    {
+      "className": "B_Pilot_F",
+      "groupId": "816 EAS | REACH 102 (C-17A)",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "B_Pilot_F",
+      "varName": "plane1D_1"
+    },
+    {
+      "className": "B_Pilot_F",
+      "groupId": "816 EAS | REACH 102 (C-17A)",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "B_Pilot_F",
+      "varName": "plane1G_1"
+    },
+    {
+      "className": "rhsusf_airforce_jetpilot",
+      "groupId": "97 EFS | TIGER 11 (F-16C)",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_jetpilot",
+      "varName": "plane5D"
+    },
+    {
+      "className": "rhsusf_airforce_jetpilot",
+      "groupId": "97 EFS | TIGER 12 (F-16C)",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_jetpilot",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_fso",
+      "groupId": "B-2-325 AIR | REDFALCON 2",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_fso",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_medic",
+      "groupId": "B-2-325 AIR | REDFALCON 2",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_medic",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_officer",
+      "groupId": "B-2-325 AIR | REDFALCON 2",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_officer",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_officer",
+      "groupId": "B-2-325 AIR | REDFALCON 2",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_officer",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_rifleman",
+      "groupId": "B-2-325 AIR | REDFALCON 2",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_rifleman",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_squadleader",
+      "groupId": "B-2-325 AIR | REDFALCON 2",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_squadleader",
+      "varName": ""
+    },
+    {
+      "className": "rhsusf_army_ocp_squadleader",
+      "groupId": "C-2-325 AIR | REDFALCON 3",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_squadleader",
+      "varName": "charlie_1sgt"
+    },
+    {
+      "className": "rhsusf_army_ocp_officer",
+      "groupId": "C-2-325 AIR | REDFALCON 3",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_officer",
+      "varName": "charlie_co"
+    },
+    {
+      "className": "rhsusf_army_ocp_fso",
+      "groupId": "C-2-325 AIR | REDFALCON 3",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_fso",
+      "varName": "charlie_fo"
+    },
+    {
+      "className": "rhsusf_army_ocp_medic",
+      "groupId": "C-2-325 AIR | REDFALCON 3",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_medic",
+      "varName": "charlie_medic"
+    },
+    {
+      "className": "rhsusf_army_ocp_rifleman",
+      "groupId": "C-2-325 AIR | REDFALCON 3",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_rifleman",
+      "varName": "charlie_rto"
+    },
+    {
+      "className": "rhsusf_army_ocp_officer",
+      "groupId": "C-2-325 AIR | REDFALCON 3",
+      "isPlayable": true,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_officer",
+      "varName": "charlie_xo"
+    },
+    {
+      "className": "UK3CB_MEC_C_DOC",
+      "groupId": "Civilian:4545",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "Civilian",
+      "source": "mission.sqm",
+      "unitType": "UK3CB_MEC_C_DOC",
+      "varName": ""
+    },
+    {
+      "className": "UK3CB_MEC_C_DOC",
+      "groupId": "Civilian:4545",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "Civilian",
+      "source": "mission.sqm",
+      "unitType": "UK3CB_MEC_C_DOC",
+      "varName": ""
+    },
+    {
+      "className": "UK3CB_MEC_C_DOC",
+      "groupId": "Civilian:4552",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "Civilian",
+      "source": "mission.sqm",
+      "unitType": "UK3CB_MEC_C_DOC",
+      "varName": ""
+    },
+    {
+      "className": "UK3CB_MEC_C_DOC",
+      "groupId": "Civilian:4552",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "Civilian",
+      "source": "mission.sqm",
+      "unitType": "UK3CB_MEC_C_DOC",
+      "varName": ""
+    },
+    {
+      "className": "UK3CB_MEC_C_DOC",
+      "groupId": "Civilian:4556",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "Civilian",
+      "source": "mission.sqm",
+      "unitType": "UK3CB_MEC_C_DOC",
+      "varName": ""
+    },
+    {
+      "className": "UK3CB_MEC_C_DOC",
+      "groupId": "Civilian:4556",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "Civilian",
+      "source": "mission.sqm",
+      "unitType": "UK3CB_MEC_C_DOC",
+      "varName": ""
+    },
+    {
+      "className": "UK3CB_MEC_C_DOC",
+      "groupId": "Civilian:4577",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "Civilian",
+      "source": "mission.sqm",
+      "unitType": "UK3CB_MEC_C_DOC",
+      "varName": ""
+    },
+    {
+      "className": "UK3CB_TKC_C_PILOT",
+      "groupId": "Civilian:4577",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "Civilian",
+      "source": "mission.sqm",
+      "unitType": "UK3CB_TKC_C_PILOT",
+      "varName": ""
+    },
+    {
+      "className": "UK3CB_TKC_C_PILOT",
+      "groupId": "Civilian:4577",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "Civilian",
+      "source": "mission.sqm",
+      "unitType": "UK3CB_TKC_C_PILOT",
+      "varName": ""
+    },
+    {
+      "className": "UK3CB_TKC_C_CIV",
+      "groupId": "Civilian:4607",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "Civilian",
+      "source": "mission.sqm",
+      "unitType": "UK3CB_TKC_C_CIV",
+      "varName": "civsub_test_01"
+    },
+    {
+      "className": "UK3CB_TKC_C_CIV",
+      "groupId": "EPW-0001",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "Civilian",
+      "source": "mission.sqm",
+      "unitType": "UK3CB_TKC_C_CIV",
+      "varName": "civsub_test_02"
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "JTF Farabad BDOC | FARABAD BDOC",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": "jtf_bdoc_ncoic"
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "JTF Farabad BDOC | FARABAD BDOC",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": "jtf_bdoc_oic"
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "JTF Farabad BDOC | FARABAD BDOC",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": "jtf_bdoc_wo"
+    },
+    {
+      "className": "rhsusf_army_ocp_officer",
+      "groupId": "JTF Farabad | FARABAD 6",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_officer",
+      "varName": "farabad_5"
+    },
+    {
+      "className": "rhsusf_army_ocp_officer",
+      "groupId": "JTF Farabad | FARABAD 6",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_army_ocp_officer",
+      "varName": "farabad_6"
+    },
+    {
+      "className": "rhsusf_airforce_security_force_rifleman",
+      "groupId": "JTF Farabad | JTF LIAISON",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "rhsusf_airforce_security_force_rifleman",
+      "varName": "jtf_liaison"
+    },
+    {
+      "className": "B_Deck_Crew_F",
+      "groupId": "TEMP-M151-PATHING VIC",
+      "isPlayable": false,
+      "isPlayer": true,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "B_Deck_Crew_F",
+      "varName": "m151D"
+    },
+    {
+      "className": "UK3CB_TKP_B_OFF",
+      "groupId": "Takistan Ministry of Interior | TNP LNO FARABAD",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "UK3CB_TKP_B_OFF",
+      "varName": "tnp_lno_farabad"
+    },
+    {
+      "className": "UK3CB_TKA_B_OFF",
+      "groupId": "Takistan National Army | TNA LNO FARABAD",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "UK3CB_TKA_B_OFF",
+      "varName": "tna_lno_farabad"
+    },
+    {
+      "className": "MFR_B_GermanShepherd",
+      "groupId": "West:3108",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "MFR_B_GermanShepherd",
+      "varName": ""
+    },
+    {
+      "className": "MFR_B_GermanShepherd_Black",
+      "groupId": "West:3112",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "MFR_B_GermanShepherd_Black",
+      "varName": ""
+    },
+    {
+      "className": "B_UAV_AI",
+      "groupId": "West:3701",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "B_UAV_AI",
+      "varName": ""
+    },
+    {
+      "className": "B_UAV_AI",
+      "groupId": "West:3701",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "B_UAV_AI",
+      "varName": ""
+    },
+    {
+      "className": "B_UAV_AI",
+      "groupId": "West:3705",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "B_UAV_AI",
+      "varName": ""
+    },
+    {
+      "className": "B_UAV_AI",
+      "groupId": "West:3705",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "B_UAV_AI",
+      "varName": ""
+    },
+    {
+      "className": "B_UAV_AI",
+      "groupId": "West:3709",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "B_UAV_AI",
+      "varName": ""
+    }
+  ]
+}
