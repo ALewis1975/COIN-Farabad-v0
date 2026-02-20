@@ -238,11 +238,46 @@ if ((count _statusRows) > _rxMaxItems) then { _statusRows = _statusRows select [
 private _statusIdx = _statusRows findIf { _x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _gidSelf } };
 private _unitStatus = if (_statusIdx < 0) then { "OFFLINE" } else { toUpper (trim ((_statusRows # _statusIdx) # 1)) };
 
+private _allowDuringRtb = missionNamespace getVariable ["ARC_allowIncidentDuringAcceptedRtb", false];
+private _policyText = if (_allowDuringRtb) then
+{
+    "Generation policy: Allowed during accepted RTB."
+}
+else
+{
+    "Generation policy: Blocked while pending acceptance or accepted RTB is active for the last tasked group."
+};
+
+private _denialText = "";
+private _deny = missionNamespace getVariable ["ARC_pub_nextIncidentLastDenied", []];
+if (_deny isEqualType [] && { (count _deny) >= 3 }) then
+{
+    _deny params ["_denyStamp", "_denyCode", "_denyDetail"];
+    if (_denyStamp isEqualType 0 && { (diag_tickTime - _denyStamp) <= 120 }) then
+    {
+        private _code = if (_denyCode isEqualType "") then { toUpper (trim _denyCode) } else { "UNKNOWN" };
+        private _detail = if (_denyDetail isEqualType "") then { trim _denyDetail } else { "" };
+        _denialText = if (_detail isEqualTo "") then
+        {
+            format ["Latest generation denial: %1", _code]
+        }
+        else
+        {
+            format ["Latest generation denial: %1 - %2", _code, _detail]
+        };
+    };
+};
+
+private _genInfo = format ["<br/><br/><t size='0.9' color='#BDBDBD'>%1</t>%2",
+    _policyText,
+    if (_denialText isEqualTo "") then { "" } else { format ["<br/><t size='0.9' color='#FF7A7A'>%1</t>", _denialText] }
+];
+
 if (_focusData isEqualTo "") then
 {
     _details = "<t align='left' size='1.1' font='PuristaMedium'>Operations</t><br/><br/>" +
                "Select an incident, an order, or a lead to view details." +
-               "<br/><br/><t align='left' size='0.9' color='#BDBDBD'>Follow-on requests are captured inside the SITREP flow.</t>";
+               "<br/><br/><t align='left' size='0.9' color='#BDBDBD'>Follow-on requests are captured inside the SITREP flow.</t>" + _genInfo;
 }
 else
 {
@@ -375,6 +410,8 @@ else
                     _details = _details + "No action available for this order in UI09 (view only).";
                 };
             };
+
+            _details = _details + _genInfo;
         };
 
         case "LEAD":

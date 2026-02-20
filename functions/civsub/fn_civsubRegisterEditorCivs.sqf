@@ -51,32 +51,32 @@ private _skipped = 0;
 
     if !(_varName isEqualType "") then {
         _skipped = _skipped + 1;
-        diag_log format ["[CIVSUB][EDITOR] Skipping invalid entry (bad var name type): %1", _entry];
+        diag_log format ["[CIVSUB][EDITOR] Registration failed (var='<unknown>', reason=invalid var name type, entry=%1)", _entry];
         continue;
     };
 
     if (_varName isEqualTo "") then {
         _skipped = _skipped + 1;
-        diag_log format ["[CIVSUB][EDITOR] Skipping invalid entry (empty var name): %1", _entry];
+        diag_log format ["[CIVSUB][EDITOR] Registration failed (var='<empty>', reason=empty var name, entry=%1)", _entry];
         continue;
     };
 
     private _unit = missionNamespace getVariable [_varName, objNull];
     if (isNull _unit) then {
         _skipped = _skipped + 1;
-        diag_log format ["[CIVSUB][EDITOR] Unit not found for variable '%1'", _varName];
+        diag_log format ["[CIVSUB][EDITOR] Registration failed (var='%1', reason=unit not found in missionNamespace)", _varName];
         continue;
     };
 
     if !(alive _unit) then {
         _skipped = _skipped + 1;
-        diag_log format ["[CIVSUB][EDITOR] Unit '%1' is not alive; skipping", _varName];
+        diag_log format ["[CIVSUB][EDITOR] Registration failed (var='%1', reason=unit not alive)", _varName];
         continue;
     };
 
     if !(side _unit isEqualTo civilian) then {
         _skipped = _skipped + 1;
-        diag_log format ["[CIVSUB][EDITOR] Unit '%1' is not civilian side; skipping", _varName];
+        diag_log format ["[CIVSUB][EDITOR] Registration failed (var='%1', reason=unit side is not civilian)", _varName];
         continue;
     };
 
@@ -89,7 +89,7 @@ private _skipped = 0;
 
     if (_districtId isEqualTo "") then {
         _skipped = _skipped + 1;
-        diag_log format ["[CIVSUB][EDITOR] Unit '%1' has no district; skipping", _varName];
+        diag_log format ["[CIVSUB][EDITOR] Registration failed (var='%1', reason=no district resolved)", _varName];
         continue;
     };
 
@@ -110,20 +110,20 @@ private _skipped = 0;
 
     if (_already) then {
         _skipped = _skipped + 1;
-        diag_log format ["[CIVSUB][EDITOR] Unit '%1' already registered; skipping duplicate", _varName];
+        diag_log format ["[CIVSUB][EDITOR] Registration failed (var='%1', reason=duplicate already registered)", _varName];
         continue;
     };
 
     if (!([_unit, _districtId] call ARC_fnc_civsubCivAssignIdentity)) then {
         _skipped = _skipped + 1;
-        diag_log format ["[CIVSUB][EDITOR] Failed identity assignment for '%1'", _varName];
+        diag_log format ["[CIVSUB][EDITOR] Registration failed (var='%1', reason=identity assignment failed)", _varName];
         continue;
     };
 
     private _regKey = [_unit, _districtId] call ARC_fnc_civsubCivRegisterSpawn;
     if (_regKey isEqualTo "") then {
         _skipped = _skipped + 1;
-        diag_log format ["[CIVSUB][EDITOR] Failed registry insert for '%1'", _varName];
+        diag_log format ["[CIVSUB][EDITOR] Registration failed (var='%1', reason=registry insert failed)", _varName];
         continue;
     };
 
@@ -140,5 +140,12 @@ private _skipped = 0;
 } forEach _entries;
 
 diag_log format ["[CIVSUB][EDITOR] Registration pass complete (registered=%1 skipped=%2 entries=%3)", _registered, _skipped, count _entries];
+
+private _finalRegistry = missionNamespace getVariable ["civsub_v1_civ_registry", createHashMap];
+private _finalKeys = [];
+if (_finalRegistry isEqualType createHashMap) then {
+    _finalKeys = keys _finalRegistry;
+};
+diag_log format ["[CIVSUB][EDITOR] Final registered unit keys: %1", _finalKeys];
 
 [_registered, _skipped]

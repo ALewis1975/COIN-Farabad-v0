@@ -275,6 +275,38 @@ _lines pushBack "<br/>";
 _lines pushBack format ["<t size='0.95'>Pending:</t> <t size='0.95'>%1</t>", count _pending];
 _lines pushBack format ["<t size='0.9' color='#BDBDBD'>Incidents:</t> <t size='0.9'>%1</t>  <t size='0.9' color='#BDBDBD'>Leads:</t> <t size='0.9'>%2</t>  <t size='0.9' color='#BDBDBD'>Other:</t> <t size='0.9'>%3</t>", count _pendingInc, count _pendingLead, _pendingOther max 0];
 
+private _allowDuringRtb = missionNamespace getVariable ["ARC_allowIncidentDuringAcceptedRtb", false];
+private _policyText = if (_allowDuringRtb) then
+{
+    "Policy: Incident generation is allowed even while accepted RTB is active."
+}
+else
+{
+    "Policy: Incident generation is blocked while the last tasked group has accepted RTB or pending order acceptance."
+};
+_lines pushBack format ["<t size='0.9' color='#BDBDBD'>%1</t>", _policyText];
+
+private _deny = missionNamespace getVariable ["ARC_pub_nextIncidentLastDenied", []];
+if (_deny isEqualType [] && { (count _deny) >= 3 }) then
+{
+    _deny params ["_denyStamp", "_denyCode", "_denyDetail"];
+    private _stampOk = _denyStamp isEqualType 0;
+    if (_stampOk && { (diag_tickTime - _denyStamp) <= 120 }) then
+    {
+        private _detail = if (_denyDetail isEqualType "") then { trim _denyDetail } else { "" };
+        private _code = if (_denyCode isEqualType "") then { toUpper (trim _denyCode) } else { "UNKNOWN" };
+        private _line = if (_detail isEqualTo "") then
+        {
+            format ["Latest generation denial: %1", _code]
+        }
+        else
+        {
+            format ["Latest generation denial: %1 — %2", _code, _detail]
+        };
+        _lines pushBack format ["<t size='0.9' color='#FF7A7A'>%1</t>", _line];
+    };
+};
+
 _lines pushBack "<br/>";
 _lines pushBack "<t size='0.95' color='#BDBDBD'>Use TOC QUEUE to review/approve items. Use CLOSEOUT to finalize an incident once close-ready.</t>";
 

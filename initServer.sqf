@@ -90,6 +90,10 @@ missionNamespace setVariable ["ARC_sitrepInWorldActionsEnabled", false, true];
 // Intel props spawn radius (meters)
 missionNamespace setVariable ["ARC_intelPropSpawnRadiusM", 10, true];
 
+// Incident-generation policy (test posture): when false, TOC generation is blocked
+// while the last tasked group still has pending order acceptance or accepted RTB.
+missionNamespace setVariable ["ARC_allowIncidentDuringAcceptedRtb", false, true];
+
 
 // ============================================================================
 // CIVSUB v1 (district influence + identity + physical civ sampling)
@@ -116,7 +120,7 @@ missionNamespace setVariable ["civsub_v1_civ_tick_s", 20, true];
 //   "civsub_test_01"
 //   ["civsub_test_01", "D14"]
 //   ["civsub_test_01", "D14", true]
-missionNamespace setVariable ["civsub_v1_editorTestCivs", [], true];
+missionNamespace setVariable ["civsub_v1_editorTestCivs", ["civsub_test_01"], true];
 missionNamespace setVariable ["civsub_v1_editorTestCivs_pin", true, true];
 
 missionNamespace setVariable ["civsub_v1_civ_cap_activeDistrictsMax", 1, true];
@@ -151,7 +155,8 @@ missionNamespace setVariable ["civsub_v1_debug", true, true];            // enab
 
 // AIRBASE tower authorization test posture (BN Command group access enabled for validation drills)
 missionNamespace setVariable ["airbase_v1_tower_allowBnCmd", true, true];
-missionNamespace setVariable ["airbase_v1_tower_bnCommandTokens", ["BNCMD", "BN COMMAND", "BNHQ", "BN CO", "BNCO", "BN CDR", "REDFALCON 6", "REDFALCON6", "FALCON 6", "FALCON6"], true];
+missionNamespace setVariable ["airbase_v1_tower_bnCommandTokens", ["BNCMD", "BN COMMAND", "BNHQ", "BN HQ", "BN CO", "BNCO", "BN CDR", "BNCDR", "BN CMDR", "BATTALION CO", "BATTALION CDR", "REDFALCON 6", "REDFALCON6", "RED FALCON 6", "RED-FALCON-6", "FALCON 6", "FALCON6", "FALCON-6"], true];
+missionNamespace setVariable ["airbase_v1_tower_authDebug", false, true];
 missionNamespace setVariable ["airbase_v1_pilotGroupTokens", ["EFS", "HAWG", "VIPER", "PILOT"], true];
 
 
