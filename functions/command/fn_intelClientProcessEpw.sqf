@@ -45,7 +45,7 @@ if (_orderIdO isNotEqualTo "") then
     // Override requires TOC authority and forceConsole mode (used by the Farabad Console).
     if (!_forceConsole) exitWith
     {
-        hint "Cannot process EPW for another unit without TOC console override.";
+        ["Use the TOC console override to process EPW for another unit.", "ACTION_REQUIRED", "HINT"] call ARC_fnc_clientHint;
         false
     };
 
@@ -54,7 +54,7 @@ if (_orderIdO isNotEqualTo "") then
 
     if (!_canForce) exitWith
     {
-        hint "TOC authorization required to process EPW for another unit.";
+        ["TOC authorization required to process EPW for another unit.", "WARN", "TOAST"] call ARC_fnc_clientHint;
         false
     };
 
@@ -65,7 +65,7 @@ else
     // Standard group-scoped processing.
     if (!([_caller] call ARC_fnc_intelClientHasAcceptedRtbEpw)) exitWith
     {
-        hint "No accepted RTB (EPW) order for your group.";
+        ["No accepted RTB (EPW) order for your group.", "WARN", "TOAST"] call ARC_fnc_clientHint;
         false
     };
 };
@@ -78,5 +78,5 @@ _resp params ["_ok", "_sum", "_det"];
 if (!_ok) exitWith {false};
 
 [_caller, _sum, _det, _forceConsole, _orderIdO] remoteExec ["ARC_fnc_intelOrderCompleteRtbEpw", 2];
-hint "EPW processing submitted.";
+["EPW processing submitted.", "INFO", "TOAST"] call ARC_fnc_clientHint;
 true

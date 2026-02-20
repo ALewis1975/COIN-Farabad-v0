@@ -257,7 +257,6 @@ if (!isNull _targetGroup) then
     {
         if (isPlayer _x) then
         {
-            [_msg] remoteExec ["ARC_fnc_intelClientNotify", _x];
             [_toastTitle, _toastBody, 6] remoteExec ["ARC_fnc_clientToast", _x];
         };
     } forEach (units _targetGroup);

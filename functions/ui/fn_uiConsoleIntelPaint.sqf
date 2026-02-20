@@ -1381,7 +1381,7 @@ if (!isNull _b2) then
     _b2 ctrlEnable _isAuth;
 };
 
-_details ctrlSetStructuredText parseText format ["<t lineSpacing='1.15'>%1</t>", _txt];
+_details ctrlSetStructuredText parseText _txt;
 
 // Auto-fit + clamp to the DetailsGroup (78016) so the group scrolls vertically when needed,
 // but NEVER forces horizontal scrolling or overlaps the S2 workflow controls.

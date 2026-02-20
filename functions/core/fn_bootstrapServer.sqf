@@ -715,6 +715,26 @@ if (isNil { missionNamespace getVariable "ARC_debugShowConvoySpawnMarker" }) the
 // Reset behavior: suppress auto incident creation briefly after ResetAll
 if (isNil { missionNamespace getVariable "ARC_resetAutoIncidentHoldSec" }) then { missionNamespace setVariable ["ARC_resetAutoIncidentHoldSec", 300]; };
 
+// Startup config audit: operator-facing toggles and tuning values (pre-init snapshot).
+[] call ARC_fnc_operatorToggleAuditStartup;
+
+private _safeModeEnabled = missionNamespace getVariable ["ARC_safeModeEnabled", false];
+if (!(_safeModeEnabled isEqualType true) && !(_safeModeEnabled isEqualType false)) then { _safeModeEnabled = false; };
+
+if (_safeModeEnabled) then
+{
+    diag_log "[ARC][SAFE MODE] Bootstrap guard active: suppressing nonessential subsystem startup loops.";
+
+    [] spawn
+    {
+        while { isServer && { missionNamespace getVariable ["ARC_safeModeEnabled", false] } } do
+        {
+            diag_log "[ARC][SAFE MODE] Runtime guard active: traffic/IED/VBIED/optional ambiance remain paused.";
+            uiSleep 300;
+        };
+    };
+};
+
 // Build world reference layer first (so incidents can safely use ARC_loc_* markers)
 [] call ARC_fnc_worldInit;
 
@@ -722,7 +742,14 @@ if (isNil { missionNamespace getVariable "ARC_resetAutoIncidentHoldSec" }) then 
 [] call ARC_fnc_stateLoad;
 
 // Threat v0 + IED P1 (server-only)
-[] call ARC_fnc_threatInit;
+if (_safeModeEnabled) then
+{
+    diag_log "[ARC][SAFE MODE] Skipping threat init to suppress IED/VBIED runtime spawning.";
+}
+else
+{
+    [] call ARC_fnc_threatInit;
+};
 
 // CIVSUB v1 (district influence + identity plumbing)
 if (missionNamespace getVariable ["civsub_v1_enabled", false]) then

@@ -96,3 +96,31 @@ If any checked:
 - Risk areas:
 - Rollback plan:
 - Follow-ups (if any):
+
+## Notification Policy Gate (required when notification-capable files change)
+
+Policy reference: `docs/ui/Notification_Policy.md` and `docs/qa/Notification_Message_Noise_Checklist.md`.
+
+- [ ] Message channels reviewed against policy (toast/chat/hint)
+- [ ] No dual-channel duplicates introduced
+- [ ] Cooldown/dedupe rationale documented for repeated notifications
+
+### Notification Static Review (paste command outputs in PR)
+
+```bash
+CHANGED_FILES="$(git diff --name-only -- '*.sqf' '*.hpp' '*.ext')"
+for p in "\\bhint\\b" "systemChat" "ARC_fnc_clientToast" "ARC_fnc_clientHint"; do
+  echo "=== pattern: $p ==="
+  rg -n "$p" $CHANGED_FILES || true
+done
+for p in "hint" "systemChat" "ARC_fnc_clientToast"; do
+  echo "=== added lines containing: $p ==="
+  git diff -U0 -- '*.sqf' '*.hpp' '*.ext' | rg '^\\+.*'"$p" || true
+done
+```
+
+### Notification Additions Rationale
+
+- Added `hint` callsites (count + why):
+- Added `systemChat` callsites (count + why):
+- Added `ARC_fnc_clientToast` callsites (count + why):

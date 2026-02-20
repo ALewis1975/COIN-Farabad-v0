@@ -35,7 +35,7 @@ private _resolveMarker = {
 };
 
 // Validate proximity to SHERIFF holding (or legacy EPW holding markers)
-private _holdingCandidates = ["mkr_SHERIFF_HOLDING", "epw_holding", "EPW_Holding", "epw_holding_1"];
+private _holdingCandidates = ["epw_holding", "mkr_SHERIFF_HOLDING"];
 private _posList = [];
 {
     private _m = [_x] call _resolveMarker;
@@ -177,7 +177,7 @@ _transferDelay = (_transferDelay max 30) min 3600;
     {
         private _m = [_x] call _resolveMarker;
         if !((markerType _m) isEqualTo "") exitWith { _mHold = _m; };
-    } forEach ["epw_holding", "EPW_Holding", "epw_holding_1", "mkr_SHERIFF_HOLDING"]; 
+    } forEach ["epw_holding", "mkr_SHERIFF_HOLDING"];
 
     private _holdPos = getPosATL _u;
     if (_mHold isNotEqualTo "") then { _holdPos = getMarkerPos _mHold; };

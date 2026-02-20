@@ -27,7 +27,7 @@ if (!(_intelLog isEqualType [])) then { _intelLog = []; };
 if (_intelLog isEqualTo []) exitWith
 {
     ["Intel", "No intel entries yet."] call ARC_fnc_clientToast;
-    hint "Latest Intel\n\n(no entries yet)";
+    ["Latest Intel\n\n(no entries yet)", "INFO", "HINT"] call ARC_fnc_clientHint;
     false
 };
 
@@ -82,12 +82,12 @@ if (!isNull _disp) then
     }
     else
     {
-        hint ("Latest Intel\n\n" + _sum);
+        [("Latest Intel\n\n" + _sum), "INFO", "HINT"] call ARC_fnc_clientHint;
         true
     };
 }
 else
 {
-    hint ("Latest Intel\n\n" + _sum);
+    [("Latest Intel\n\n" + _sum), "INFO", "HINT"] call ARC_fnc_clientHint;
     true
 };

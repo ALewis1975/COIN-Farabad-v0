@@ -16,6 +16,33 @@ if (!isServer) exitWith {};
 missionNamespace setVariable ["ARC_buildStamp", "COIN_Farabad_v0.Farabad-20260217-0001", true];
 diag_log format ["[ARC][BUILD] %1", missionNamespace getVariable ["ARC_buildStamp","UNKNOWN"]];
 
+// Profile switch (live-safe defaults; dev profile explicitly opts into debug posture)
+if (isNil { missionNamespace getVariable "ARC_profile_devMode" }) then {
+    missionNamespace setVariable ["ARC_profile_devMode", false, true];
+};
+
+private _arcProfileDevMode = missionNamespace getVariable ["ARC_profile_devMode", false];
+diag_log format ["[ARC][PROFILE] ARC_profile_devMode=%1", _arcProfileDevMode];
+
+// Safe mode (operator kill-switch): keep command/control alive while pausing nonessential runtime spawners.
+if (isNil { missionNamespace getVariable "ARC_safeModeEnabled" }) then {
+    missionNamespace setVariable ["ARC_safeModeEnabled", false, true];
+};
+
+private _arcSafeModeEnabled = missionNamespace getVariable ["ARC_safeModeEnabled", false];
+if (!(_arcSafeModeEnabled isEqualType true) && !(_arcSafeModeEnabled isEqualType false)) then {
+    _arcSafeModeEnabled = false;
+    missionNamespace setVariable ["ARC_safeModeEnabled", false, true];
+};
+
+if (_arcSafeModeEnabled) then {
+    diag_log "[ARC][SAFE MODE] ==================================================";
+    diag_log "[ARC][SAFE MODE] SAFE MODE ACTIVE: nonessential subsystem spawning is paused.";
+    diag_log "[ARC][SAFE MODE] Essentials remain online: state publish, TOC console, SITREP workflow.";
+    diag_log "[ARC][SAFE MODE] Operator procedure: observe stability, then disable ARC_safeModeEnabled and re-enable traffic -> IED/VBIED -> ambiance in stages.";
+    diag_log "[ARC][SAFE MODE] ==================================================";
+};
+
 // Debug toggles (server authoritative)
 missionNamespace setVariable ["ARC_debugLogEnabled", false, true];
 missionNamespace setVariable ["ARC_debugLogToChat", false, true];
@@ -58,19 +85,14 @@ diag_log "FARABAD_MIG_S0_hotfix04_convoy_startup_breadcrumbs loaded";
 // CORE DEV POSTURE (scaffolding + debug)
 // ============================================================================
 
-// Migration harness ("rebuild without restart")
-// Keep these toggles server-authoritative. Default posture is safe/off until a migration step is verified.
-missionNamespace setVariable ["ARC_mig_enabled", true, true];
-missionNamespace setVariable ["ARC_mig_uiSnapshotOnly", false, true];
-missionNamespace setVariable ["ARC_mig_useRequestRouter", false, true];
-missionNamespace setVariable ["ARC_mig_disableLegacyActions", false, true];
-
 // Scaffold core objectives first (object-first posture)
+// declared for future feature; currently not consumed
 missionNamespace setVariable ["ARC_objectiveScaffoldEnabled", true, true];
 
 // Debug inspector diary is controlled by ARC_devDebugInspectorEnabled (see debug toggles above)
 
 // Meetings: enable the liaison NPC so the meeting marker can track them
+// declared for future feature; currently not consumed
 missionNamespace setVariable ["ARC_objectiveMeetUseAI", true, true];
 
 // Hold off on hostile contact AI while object systems and markers stabilize
@@ -151,7 +173,7 @@ missionNamespace setVariable ["civsub_v1_civ_classPool", [
 missionNamespace setVariable ["civsub_v1_scheduler_enabled", true, true];
 missionNamespace setVariable ["civsub_v1_scheduler_s", 120, true];        // baseline cadence (set to 30 for rapid testing)
 missionNamespace setVariable ["civsub_v1_rumor_enabled", true, true];     // set false to disable rumors
-missionNamespace setVariable ["civsub_v1_debug", true, true];            // enables scheduler/diag logs (if present)
+missionNamespace setVariable ["civsub_v1_debug", false, true];           // enables scheduler/diag logs (if present)
 
 // AIRBASE tower authorization test posture (BN Command group access enabled for validation drills)
 missionNamespace setVariable ["airbase_v1_tower_allowBnCmd", true, true];
@@ -297,6 +319,15 @@ missionNamespace setVariable ["ARC_vbiedTelegraphIntelLog", true, true];
 
 // VBIED scaffolding (object-first)
 missionNamespace setVariable ["ARC_vbiedScaffoldEnabled", true, true];
+missionNamespace setVariable ["airbase_v1_ambiance_enabled", true, true];
+
+if (_arcSafeModeEnabled) then {
+    missionNamespace setVariable ["civsub_v1_traffic_enabled", false, true];
+    missionNamespace setVariable ["ARC_iedPhase1_siteSelectionEnabled", false, true];
+    missionNamespace setVariable ["ARC_vbiedPhase3_enabled", false, true];
+    missionNamespace setVariable ["ARC_vbiedScaffoldEnabled", false, true];
+    missionNamespace setVariable ["airbase_v1_ambiance_enabled", false, true];
+};
 
 // VBIED defuse window (Phase 3.1)
 missionNamespace setVariable ["ARC_vbiedDefuseActionEnabled", true, true];
@@ -773,6 +804,22 @@ missionNamespace setVariable ["ARC_routeReconRoadSnapM", 140, true];
 missionNamespace setVariable ["ARC_routeReconStartRadiusM", 75, true];
 missionNamespace setVariable ["ARC_routeReconEndRadiusM", 75, true];
 
+// ============================================================================
+// PROFILE-DRIVEN DEBUG OVERRIDES (single block)
+// ============================================================================
+
+if (_arcProfileDevMode) then {
+    missionNamespace setVariable ["ARC_debugLogEnabled", true, true];
+    missionNamespace setVariable ["ARC_debugLogToChat", true, true];
+    missionNamespace setVariable ["ARC_devDebugInspectorEnabled", true, true];
+    missionNamespace setVariable ["ARC_debugInspectorEnabled", true, true];
+    missionNamespace setVariable ["civsub_v1_debug", true, true];
+    missionNamespace setVariable ["civsub_v1_traffic_debug", true, true];
+    missionNamespace setVariable ["airbase_v1_tower_authDebug", true, true];
+
+    diag_log "[ARC][PROFILE] Dev profile active: debug overrides enabled.";
+};
+
 
 // ============================================================================
 // POST-OVERRIDE SERVER STARTUP SCRIPTS (keep above bootstrap call if they depend on vars)
@@ -805,8 +852,111 @@ diag_log format [
 missionNamespace setVariable ["ARC_worldTime_enabled", true, true];
 missionNamespace setVariable ["ARC_worldTime_forceDate", true, true];
 missionNamespace setVariable ["ARC_worldTime_startDate", +date, true];
-missionNamespace setVariable ["ARC_worldTime_forceMultiplier", true, true];
+missionNamespace setVariable ["ARC_worldTime_forceMultiplier", false, true];
 missionNamespace setVariable ["ARC_worldTime_timeMultiplier", 6, true];
 missionNamespace setVariable ["ARC_worldTime_broadcastIntervalSec", 30, true];
+
+// Operator startup audit catalog (curated, operator-facing controls only)
+missionNamespace setVariable ["ARC_operatorToggleAuditCatalog", [
+    ["MIG", [
+        ["ARC_allowIncidentDuringAcceptedRtb", "bool"],
+        ["ARC_patrolSpawnContactsEnabled", "bool"]
+    ]],
+    ["CIVSUB", [
+        ["civsub_v1_enabled", "bool"],
+        ["civsub_v1_civs_enabled", "bool"],
+        ["civsub_v1_tick_s", "number"],
+        ["civsub_v1_scheduler_enabled", "bool"],
+        ["civsub_v1_scheduler_s", "number"],
+        ["civsub_v1_traffic_enabled", "bool"],
+        ["civsub_v1_traffic_cap_global", "number"],
+        ["civsub_v1_traffic_cap_perDistrict", "number"]
+    ]],
+    ["IED", [
+        ["ARC_iedPhase1_siteSelectionEnabled", "bool"],
+        ["ARC_iedPassiveDetectEnabled", "bool"],
+        ["ARC_iedPassiveDetectRadiusM", "number"],
+        ["ARC_iedProxRadiusM", "number"],
+        ["ARC_eodDispoApprovalTTLsec", "number"]
+    ]],
+    ["VBIED", [
+        ["ARC_vbiedPhase3_enabled", "bool"],
+        ["ARC_vbiedDefuseActionEnabled", "bool"],
+        ["ARC_vbiedDefuseWindowSeconds", "number"],
+        ["ARC_vbiedCooldownSeconds", "number"],
+        ["ARC_vbiedProxRadiusM", "number"]
+    ]],
+    ["Airbase", [
+        ["airbase_v1_tower_allowBnCmd", "bool"],
+        ["airbase_v1_tower_authDebug", "bool"],
+        ["airbase_v1_ambiance_enabled", "bool"]
+    ]],
+    ["SafeMode", [
+        ["ARC_safeModeEnabled", "bool"],
+        ["civsub_v1_traffic_enabled", "bool"],
+        ["ARC_iedPhase1_siteSelectionEnabled", "bool"],
+        ["ARC_vbiedPhase3_enabled", "bool"],
+        ["airbase_v1_ambiance_enabled", "bool"]
+    ]],
+    ["WorldTime", [
+        ["ARC_worldTime_enabled", "bool"],
+        ["ARC_worldTime_forceDate", "bool"],
+        ["ARC_worldTime_forceMultiplier", "bool"],
+        ["ARC_worldTime_timeMultiplier", "number"],
+        ["ARC_worldTime_broadcastIntervalSec", "number"]
+    ]],
+    ["UI/actions", [
+        ["ARC_rtbInWorldActionsEnabled", "bool"],
+        ["ARC_sitrepInWorldActionsEnabled", "bool"],
+        ["ARC_intelPropSpawnRadiusM", "number"]
+    ]]
+], true];
+
+// Runtime config hygiene: warn when toggles declared here are not mapped to a known consumer.
+private _arcDeclaredServerToggles = [
+    "ARC_debugLogEnabled",
+    "ARC_debugLogToChat",
+    "ARC_devDebugInspectorEnabled",
+    "ARC_debugInspectorEnabled",
+    "ARC_objectiveScaffoldEnabled",
+    "ARC_objectiveMeetUseAI",
+    "ARC_patrolSpawnContactsEnabled",
+    "ARC_rtbInWorldActionsEnabled",
+    "ARC_sitrepInWorldActionsEnabled",
+    "ARC_allowIncidentDuringAcceptedRtb",
+    "ARC_safeModeEnabled",
+    "ARC_worldTime_enabled",
+    "ARC_worldTime_forceDate",
+    "ARC_worldTime_startDate",
+    "ARC_worldTime_forceMultiplier",
+    "ARC_worldTime_timeMultiplier",
+    "ARC_worldTime_broadcastIntervalSec"
+];
+
+private _arcKnownToggleConsumers = createHashMapFromArray [
+    ["ARC_debugLogEnabled", "functions/core/fn_debugLog.sqf"],
+    ["ARC_debugLogToChat", "functions/core/fn_debugLog.sqf"],
+    ["ARC_devDebugInspectorEnabled", "initServer.sqf -> ARC_debugInspectorEnabled mirror"],
+    ["ARC_debugInspectorEnabled", "functions/core/fn_tocInitPlayer.sqf"],
+    ["ARC_objectiveScaffoldEnabled", "initServer.sqf (declared for future feature; not yet consumed)"],
+    ["ARC_objectiveMeetUseAI", "initServer.sqf (declared for future feature; not yet consumed)"],
+    ["ARC_patrolSpawnContactsEnabled", "functions/ops/fn_opsPatrolOnActivate.sqf"],
+    ["ARC_rtbInWorldActionsEnabled", "functions/core/fn_tocInitPlayer.sqf"],
+    ["ARC_sitrepInWorldActionsEnabled", "functions/core/fn_tocInitPlayer.sqf"],
+    ["ARC_allowIncidentDuringAcceptedRtb", "functions/core/fn_tocRequestNextIncident.sqf"],
+    ["ARC_safeModeEnabled", "initServer.sqf + functions/core/fn_bootstrapServer.sqf + functions/core/fn_incidentCreate.sqf"],
+    ["ARC_worldTime_enabled", "scripts/worldtime/worldtime_server.sqf"],
+    ["ARC_worldTime_forceDate", "scripts/worldtime/worldtime_server.sqf"],
+    ["ARC_worldTime_startDate", "scripts/worldtime/worldtime_server.sqf"],
+    ["ARC_worldTime_forceMultiplier", "scripts/worldtime/worldtime_server.sqf"],
+    ["ARC_worldTime_timeMultiplier", "scripts/worldtime/worldtime_server.sqf"],
+    ["ARC_worldTime_broadcastIntervalSec", "scripts/worldtime/worldtime_server.sqf"]
+];
+
+{
+    if (isNil { _arcKnownToggleConsumers getOrDefault [_x, nil] }) then {
+        diag_log format ["[ARC][CONFIG][WARN] Toggle '%1' is declared in initServer.sqf but missing from the known-consumer registry.", _x];
+    };
+} forEach _arcDeclaredServerToggles;
 
 [] call ARC_fnc_bootstrapServer;

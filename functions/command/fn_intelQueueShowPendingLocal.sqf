@@ -7,6 +7,8 @@
 
     Returns:
       BOOL
+
+    Debug-only operator helper: keeps local HINT channel output for queue snapshots.
 */
 
 if (!hasInterface) exitWith {false};
@@ -14,7 +16,7 @@ if (!hasInterface) exitWith {false};
 private _q = missionNamespace getVariable ["ARC_pub_queuePending", (missionNamespace getVariable ["ARC_pub_queue", []])];
 if (!(_q isEqualType []) || { (count _q) isEqualTo 0 }) exitWith
 {
-    hint "No pending TOC queue requests.";
+    ["No pending TOC queue requests.", "INFO", "HINT"] call ARC_fnc_clientHint;
     false
 };
 
@@ -79,5 +81,5 @@ if (_updatedAt isEqualType 0 && { _updatedAt > 0 }) then
     if (_s isNotEqualTo "") then { _lines pushBack (format ["  %1", _s]); };
 } forEach _q;
 
-hint (_lines joinString "\n");
+[(_lines joinString "\n"), "INFO", "HINT"] call ARC_fnc_clientHint;
 true

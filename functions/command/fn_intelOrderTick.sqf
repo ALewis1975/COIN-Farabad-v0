@@ -146,16 +146,12 @@ for "_i" from 0 to ((count _orders) - 1) do
                             if (_purpose isEqualTo "INTEL") then
                             {
                                 private _grid = mapGridPosition _destPos;
-                                private _m = format ["Arrived at Intel Debrief (%1). Use the Intel Debrief action to complete RTB (INTEL).", _grid];
-                                [_m] remoteExec ["ARC_fnc_intelClientNotify", _x];
-                                ["RTB Arrived: Intel Debrief", format ["At %1. Use Intel Debrief (station or ARC self-interact).", _grid], 8] remoteExec ["ARC_fnc_clientToast", _x];
+                                ["RTB Arrived: Intel Debrief", format ["Arrived at %1. Use Intel Debrief (station or ARC self-interact) to complete RTB (INTEL).", _grid], 8] remoteExec ["ARC_fnc_clientToast", _x];
                             }
                             else
                             {
                                 private _grid = mapGridPosition _destPos;
-                                private _m = format ["Arrived at EPW Processing (%1). Use the Process EPW action to complete RTB (EPW).", _grid];
-                                [_m] remoteExec ["ARC_fnc_intelClientNotify", _x];
-                                ["RTB Arrived: EPW Processing", format ["At %1. Use Process EPW (station or ARC self-interact).", _grid], 8] remoteExec ["ARC_fnc_clientToast", _x];
+                                ["RTB Arrived: EPW Processing", format ["Arrived at %1. Use Process EPW (station or ARC self-interact) to complete RTB (EPW).", _grid], 8] remoteExec ["ARC_fnc_clientToast", _x];
                             };
                         };
                     } forEach units _g;

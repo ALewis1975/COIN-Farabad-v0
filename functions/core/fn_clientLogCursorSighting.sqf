@@ -15,7 +15,7 @@
 if (!hasInterface) exitWith {false};
 
 private _tgt = cursorTarget;
-if (isNull _tgt) exitWith { hint "No target under cursor."; false };
+if (isNull _tgt) exitWith { ["No target under cursor.", "WARN", "TOAST"] call ARC_fnc_clientHint; false };
 
 private _posATL = getPosATL _tgt;
 private _grid = mapGridPosition _posATL;
@@ -40,5 +40,5 @@ private _metaExtra = [
 ];
 
 [player, name player, "SIGHTING", _posATL, _sum, "", _metaExtra] remoteExec ["ARC_fnc_tocRequestLogIntel", 2];
-hint format ["Submitted sighting: %1", _label];
+[format ["Submitted sighting: %1", _label], "INFO", "TOAST"] call ARC_fnc_clientHint;
 true

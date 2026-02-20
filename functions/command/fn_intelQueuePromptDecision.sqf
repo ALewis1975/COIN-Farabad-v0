@@ -27,11 +27,11 @@ if (!_ok) exitWith {false};
 private _qid = trim _sum;
 if (_qid isEqualTo "") exitWith
 {
-    hint "No Queue ID provided.";
+    ["No queue ID provided.", "WARN", "TOAST"] call ARC_fnc_clientHint;
     false
 };
 
 [player, _qid, _approve, _det] remoteExec ["ARC_fnc_intelQueueDecide", 2];
 
-hint format ["Queue decision sent: %1 %2", if (_approve) then {"APPROVE"} else {"REJECT"}, _qid];
+[format ["Queue decision sent: %1 %2", if (_approve) then {"APPROVE"} else {"REJECT"}, _qid], "INFO", "TOAST"] call ARC_fnc_clientHint;
 true

@@ -115,7 +115,7 @@ if (_reopenConsole) then
     };
 };
 
-hint "Map click to place the LEAD REQUEST (Esc to cancel).";
+["Map click to place the LEAD REQUEST (Esc to cancel).", "ACTION_REQUIRED", "HINT"] call ARC_fnc_clientHint;
 
 private _ctx = createHashMapFromArray [
     ["type", "LEAD_REQ"],
