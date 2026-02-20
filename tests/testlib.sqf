@@ -61,3 +61,39 @@ ARC_TEST_fnc_summary = {
   params [["_label", "RUN"]];
   ["INFO", _label, format ["Summary pass=%1 fail=%2", ARC_TEST_pass, ARC_TEST_fail], []] call ARC_TEST_fnc_log;
 };
+
+ARC_TEST_fnc_diag = {
+  params [
+    "_id",
+    "_msg",
+    ["_meta", []]
+  ];
+
+  ["INFO", _id, _msg, _meta] call ARC_TEST_fnc_log;
+};
+
+ARC_TEST_fnc_measure = {
+  params [
+    "_id",
+    "_msg",
+    "_fn"
+  ];
+
+  private _t0 = diag_tickTime;
+  private _result = call _fn;
+  private _dtMs = (diag_tickTime - _t0) * 1000;
+  ["INFO", _id, _msg, ["durationMs", _dtMs]] call ARC_TEST_fnc_log;
+  _result
+};
+
+ARC_TEST_fnc_assertType = {
+  params [
+    "_value",
+    "_sample",
+    "_id",
+    "_msg"
+  ];
+
+  private _ok = (_value isEqualType _sample);
+  [_ok, _id, _msg, ["value", _value, "sampleType", typeName _sample]] call ARC_TEST_fnc_assert;
+};
