@@ -329,9 +329,18 @@ if ((count _parts) <= 1) then {
     if ((count _legacyParts) > 0) then {
         private _legacyType = toUpperANSI (_legacyParts param [0, ""]);
         switch (_legacyType) do {
-            case "Q": { _rowType = "FLT"; };
-            case "CLR": { _rowType = "REQ"; };
-            case "LANE": { _rowType = "LANE"; };
+            case "Q": {
+                _rowType = "FLT";
+                _parts = ["FLT", _legacyParts param [1, ""]];
+            };
+            case "CLR": {
+                _rowType = "REQ";
+                _parts = ["REQ", _legacyParts param [1, ""]];
+            };
+            case "LANE": {
+                _rowType = "LANE";
+                _parts = ["LANE", _legacyParts param [1, ""]];
+            };
             default {};
         };
     };

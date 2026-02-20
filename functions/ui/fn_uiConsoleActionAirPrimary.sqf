@@ -20,6 +20,27 @@ private _data = if (_sel >= 0) then { _ctrlList lbData _sel } else { "" };
 if (!(_data isEqualType "")) then { _data = ""; };
 private _parts = _data splitString "|";
 private _rowType = if ((count _parts) > 0) then { _parts select 0 } else { "" };
+if ((count _parts) <= 1) then {
+    private _legacyParts = _data splitString ":";
+    if ((count _legacyParts) > 0) then {
+        private _legacyType = toUpperANSI (_legacyParts param [0, ""]);
+        switch (_legacyType) do {
+            case "Q": {
+                _rowType = "FLT";
+                _parts = ["FLT", _legacyParts param [1, ""]];
+            };
+            case "CLR": {
+                _rowType = "REQ";
+                _parts = ["REQ", _legacyParts param [1, ""]];
+            };
+            case "LANE": {
+                _rowType = "LANE";
+                _parts = ["LANE", _legacyParts param [1, ""]];
+            };
+            default {};
+        };
+    };
+};
 
 private _airMode = ["ARC_console_airMode", "TOWER"] call ARC_fnc_uiNsGetString;
 _airMode = toUpperANSI (trim _airMode);
