@@ -67,6 +67,42 @@ if (isNil "ARC_TEST_fnc_log") then {
     ["INFO", _label, format ["Summary pass=%1 fail=%2", ARC_TEST_pass, ARC_TEST_fail], []] call ARC_TEST_fnc_log;
   };
 
+  ARC_TEST_fnc_diag = {
+    params [
+      "_id",
+      "_msg",
+      ["_meta", []]
+    ];
+
+    ["INFO", _id, _msg, _meta] call ARC_TEST_fnc_log;
+  };
+
+  ARC_TEST_fnc_measure = {
+    params [
+      "_id",
+      "_msg",
+      "_fn"
+    ];
+
+    private _tMeasure = diag_tickTime;
+    private _result = call _fn;
+    private _dtMs = (diag_tickTime - _tMeasure) * 1000;
+    ["INFO", _id, _msg, ["durationMs", _dtMs]] call ARC_TEST_fnc_log;
+    _result
+  };
+
+  ARC_TEST_fnc_assertType = {
+    params [
+      "_value",
+      "_sample",
+      "_id",
+      "_msg"
+    ];
+
+    private _ok = (_value isEqualType _sample);
+    [_ok, _id, _msg, ["value", _value, "sampleType", typeName _sample]] call ARC_TEST_fnc_assert;
+  };
+
   ARC_TEST_fnc_stateSnapshot = {
     params ["_keys"];
     private _saved = [];
@@ -153,6 +189,32 @@ if (isNil "ARC_TEST_fnc_varRestore") then {
   };
 };
 
+if (isNil "ARC_TEST_fnc_diag") then {
+  ARC_TEST_fnc_diag = {
+    params ["_id", "_msg", ["_meta", []]];
+    ["INFO", _id, _msg, _meta] call ARC_TEST_fnc_log;
+  };
+};
+
+if (isNil "ARC_TEST_fnc_measure") then {
+  ARC_TEST_fnc_measure = {
+    params ["_id", "_msg", "_fn"];
+    private _tMeasure = diag_tickTime;
+    private _result = call _fn;
+    private _dtMs = (diag_tickTime - _tMeasure) * 1000;
+    ["INFO", _id, _msg, ["durationMs", _dtMs]] call ARC_TEST_fnc_log;
+    _result
+  };
+};
+
+if (isNil "ARC_TEST_fnc_assertType") then {
+  ARC_TEST_fnc_assertType = {
+    params ["_value", "_sample", "_id", "_msg"];
+    private _ok = (_value isEqualType _sample);
+    [_ok, _id, _msg, ["value", _value, "sampleType", typeName _sample]] call ARC_TEST_fnc_assert;
+  };
+};
+
 // ---- Runner ----
 waitUntil { !isNil "ARC_TEST_fnc_log" };
 
@@ -171,6 +233,21 @@ private _expectedFunctions = [
 // Unit: sanity checks (run everywhere)
 [true, "UT-SANITY-000", "runner executed", []] call ARC_TEST_fnc_assert;
 [true, "UT-SANITY-001", "diag_log command is assumed available in engine", []] call ARC_TEST_fnc_assert;
+["UT-DIAG-000", "runtime context", ["time", time, "diag_tickTime", diag_tickTime, "isMultiplayer", isMultiplayer, "didJIP", didJIP]] call ARC_TEST_fnc_diag;
+
+[missionNamespace getVariable ["ARC_pub_state", createHashMap], createHashMap, "UT-DIAG-001", "ARC_pub_state defaults to HashMap type"] call ARC_TEST_fnc_assertType;
+[missionNamespace getVariable ["ARC_pub_stateUpdatedAt", -1], 0, "UT-DIAG-002", "ARC_pub_stateUpdatedAt defaults to numeric type"] call ARC_TEST_fnc_assertType;
+
+private _diagNoop = [
+  "UT-PERF-000",
+  "noop harness timing",
+  {
+    private _sum = 0;
+    for "_i" from 1 to 500 do { _sum = _sum + _i; };
+    _sum
+  }
+] call ARC_TEST_fnc_measure;
+[(_diagNoop isEqualType 0) && {_diagNoop > 0}, "UT-PERF-001", "measurement wrapper returns callback result", ["result", _diagNoop]] call ARC_TEST_fnc_assert;
 
 {
   [_x, format ["UT-API-%1", _forEachIndex + 1], "expected function exists"] call ARC_TEST_fnc_assertNotNil;
