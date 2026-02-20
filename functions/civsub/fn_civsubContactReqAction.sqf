@@ -72,14 +72,25 @@ switch (_actionId) do {
             };
 
             private _html = "";
+            private _serial = _payload getOrDefault ["passport_serial", ""];
             if (_ok) then {
-                private _serial = _payload getOrDefault ["passport_serial", ""];
+                // Gate VERIFIED on minimum identity payload completeness.
+                // A result is only genuinely VERIFIED when a valid passport serial
+                // is present. Without it the underlying identity record is incomplete
+                // and displaying VERIFIED would be misleading.
+                if (_serial isEqualTo "") then {
+                    _ok = false;
+                    _payload set ["reason", "INCOMPLETE_IDENTITY"];
+                };
+            };
+
+            if (_ok) then {
                 _html = format [
                     "<t size='0.95' color='#CFE8FF'>CHECK ID</t><br/>" +
                     "<t size='0.9'>Result: <t color='#77FF77'>VERIFIED</t></t><br/>" +
                     "<t size='0.85'>Serial: %1</t><br/>" +
                     "<t size='0.85'>Embedded ID card opened.</t>",
-                    if (_serial isEqualTo "") then {"N/A"} else {_serial}
+                    _serial
                 ];
             } else {
                 private _reason = "";
@@ -88,6 +99,7 @@ switch (_actionId) do {
                     case "NO_DISTRICT": {"This civilian has no district ID."};
                     case "DISTRICT_LOOKUP_FAIL": {"District lookup failed."};
                     case "REFUSED": {"Civilian refused to show papers."};
+                    case "INCOMPLETE_IDENTITY": {"Identity record is incomplete. Run a background check first."};
                     default {"Check ID failed."};
                 };
                 _html = format ["<t size='0.95' color='#CFE8FF'>CHECK ID</t><br/><t size='0.9'>%1</t>", _msg];

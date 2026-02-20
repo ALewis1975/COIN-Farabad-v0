@@ -143,7 +143,7 @@ if (!isNull _loc) then {
     if (_t isEqualType "" && {!(_t isEqualTo "")} && {_dist <= 750}) then { _locName = _t; };
 };
 if (_locName isEqualTo "around here" && {!(_did isEqualTo "")}) then {
-    _locName = _did;
+    _locName = "this settlement";
 };
 
 // Tone gates
@@ -204,10 +204,10 @@ switch (_qid) do {
 
     case "Q_OPINION_US": {
         _title = "OPINION OF BLUFOR";
-        if (_outlook < 25) then { _answer = "People are angry and scared. They don't trust you."; } else {
-            if (_outlook < 45) then { _answer = "People are cautious. They watch what you do."; } else {
-                if (_outlook < 65) then { _answer = "Some feel safer. Some are still unsure."; } else {
-                    _answer = "Most people here appreciate security and help.";
+        if (_outlook < 25) then { _answer = "Honestly? I'm angry and I'm scared. I don't trust you."; } else {
+            if (_outlook < 45) then { _answer = "I'm cautious. I watch what you do before I decide anything."; } else {
+                if (_outlook < 65) then { _answer = "I feel a little safer lately, but I'm still not sure about you."; } else {
+                    _answer = "Personally, I appreciate the security. And the help has made a difference.";
                 };
             };
         };

@@ -38,6 +38,9 @@ private _trimText = {
 private _ctrlMain = _display displayCtrl 78010;
 if (isNull _ctrlMain) exitWith {false};
 
+private _ctrlDetailsGrp = _display displayCtrl 78016;
+private _ctrlDetails    = _display displayCtrl 78012;
+
 private _gid = groupId (group player);
 private _tag = [player] call ARC_fnc_rolesGetTag;
 if (_tag isEqualTo "") then { _tag = "RFL"; };
@@ -202,9 +205,9 @@ private _accessLine = format [
 ];
 
 private _hdr = format [
-    "<t size='1.15' font='PuristaMedium'>COP / Dashboard</t><br/>" +
+    "<t size='1.15' font='PuristaMedium' color='#B89B6B'>COP / Dashboard</t><br/>" +
     "<t size='0.9'><t color='#B89B6B'>Role:</t> <t color='#FFFFFF'>%1</t> <t color='#B89B6B'>| Group:</t> <t color='#FFFFFF'>%2</t> <t color='#B89B6B'>| Tag:</t> <t color='#FFFFFF'>%3</t></t><br/>" +
-    "<t size='0.85' color='#AAAAAA'>Your grid: %4 | Station: %5</t><br/><br/>",
+    "<t size='0.85' color='#AAAAAA'>Your grid: %4 | Station: %5</t><br/>",
     _roleCat,
     if (_gid isEqualTo "") then {"(none)"} else {_gid},
     _tag,
@@ -223,10 +226,10 @@ if (_foLeadName isNotEqualTo "") then
 };
 if (_foLine isNotEqualTo "") then { _foLine = _foLine + "<br/>"; };
 
-private _secIncident = "<t size='1.0' font='PuristaMedium'>Current Incident</t><br/><br/>" + _incLine + "<br/>" + _foLine + "<br/><br/>";
-private _secOrders   = "<t size='1.0' font='PuristaMedium'>Orders</t><br/><br/>" + _ordLine + "<br/><br/>";
+private _secIncident = "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Current Incident</t><br/>" + _incLine + "<br/>" + _foLine + "<br/>";
+private _secOrders   = "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Orders</t><br/>" + _ordLine + "<br/><br/>";
 private _secIntel    = format [
-    "<t size='1.0' font='PuristaMedium'>Intel / Leads</t><br/><br/>" +
+    "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Intel / Leads</t><br/>" +
     "<t color='#DDDDDD'>Lead pool:</t> %1<br/>" +
     "<t color='#DDDDDD'>Queue pending:</t> %2<br/>" +
     "<t color='#DDDDDD'>Latest intel:</t> %3<br/><br/>",
@@ -234,7 +237,7 @@ private _secIntel    = format [
     _qPending,
     _lastIntel
 ];
-private _secUnits = "<t size='1.0' font='PuristaMedium'>Unit Availability</t><br/><br/>" + _unitsBlock + "<br/><br/>";
+private _secUnits = "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Unit Availability</t><br/>" + _unitsBlock + "<br/><br/>";
 
 // Next Actions: workflow coaching / blocker visibility
 private _secNext = "";
@@ -255,7 +258,7 @@ private _secNext = "";
 	};
 if (_nextArr isEqualType [] && { (count _nextArr) > 0 }) then
 {
-    _secNext = "<t size='1.0' font='PuristaMedium'>Next Actions</t><br/>" + (_nextArr joinString "<br/>") + "<br/><br/>";
+    _secNext = "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Next Actions</t><br/>" + (_nextArr joinString "<br/>") + "<br/><br/>";
 };
 
 private _sections = [];
@@ -312,4 +315,49 @@ private _p = ctrlPosition _ctrlMain;
 _p set [3, (_p # 3) max _minH];
 _ctrlMain ctrlSetPosition _p;
 _ctrlMain ctrlCommit 0;
+
+// Right panel: quick status summary / actionable context.
+if (!isNull _ctrlDetailsGrp && { !isNull _ctrlDetails }) then
+{
+    _ctrlDetailsGrp ctrlShow true;
+    _ctrlDetails ctrlShow true;
+
+    private _incStatusColor = if (!_hasIncident) then {"#AAAAAA"} else { if (_closeReady) then {"#9FE870"} else {"#FFD166"} };
+    private _incStatusText  = if (!_hasIncident) then {"No active incident"} else { if (_closeReady) then {"CLOSE-READY"} else { if (_acc) then {"In progress"} else {"Pending acceptance"} } };
+
+    private _qColor = if (_qPendingCnt >= 5) then {"#FF7A7A"} else { if (_qPendingCnt >= 3) then {"#FFD166"} else {"#9FE870"} };
+
+    private _rTxt =
+        "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Quick Status</t><br/>" +
+        format ["<t size='0.9' color='#BDBDBD'>Incident:</t> <t size='0.9' color='%1'>%2</t><br/>", _incStatusColor, _incStatusText] +
+        format ["<t size='0.9' color='#BDBDBD'>Queue pending:</t> <t size='0.9' color='%1'>%2</t><br/>", _qColor, _qPendingCnt] +
+        format ["<t size='0.9' color='#BDBDBD'>Unit reports:</t> <t size='0.9'>%1</t><br/>", count _statusRows] +
+        format ["<t size='0.9' color='#BDBDBD'>Intel leads:</t> <t size='0.9'>%1</t><br/>", count _leadPool] +
+        "<br/><t size='1.0' font='PuristaMedium' color='#B89B6B'>Quick Reference</t><br/>" +
+        "<t size='0.85' color='#DDDDDD'>OPS — submit/track field actions</t><br/>" +
+        "<t size='0.85' color='#DDDDDD'>INTEL — leads, briefs, EPW</t><br/>" +
+        "<t size='0.85' color='#DDDDDD'>CMD — incident command cycle</t><br/>" +
+        "<t size='0.85' color='#DDDDDD'>AIR — airbase/tower controls</t><br/>" +
+        "<br/><t size='0.8' color='#808080'>LCTRL+LSHIFT+T to open console.</t>";
+
+    _ctrlDetails ctrlSetStructuredText parseText _rTxt;
+
+    private _dashDefaultPos = uiNamespace getVariable ["ARC_console_dashDetailsDefaultPos", []];
+    if (!(_dashDefaultPos isEqualType []) || { (count _dashDefaultPos) < 4 }) then
+    {
+        _dashDefaultPos = ctrlPosition _ctrlDetails;
+        uiNamespace setVariable ["ARC_console_dashDetailsDefaultPos", +_dashDefaultPos];
+    };
+    [_ctrlDetails] call BIS_fnc_ctrlFitToTextHeight;
+    private _dashGrp = _display displayCtrl 78016;
+    private _dashMinH = if (!isNull _dashGrp) then { (ctrlPosition _dashGrp) # 3 } else { 0.74 };
+    private _dashP = ctrlPosition _ctrlDetails;
+    _dashP set [0, _dashDefaultPos # 0];
+    _dashP set [1, _dashDefaultPos # 1];
+    _dashP set [2, _dashDefaultPos # 2];
+    _dashP set [3, (_dashP # 3) max _dashMinH];
+    _ctrlDetails ctrlSetPosition _dashP;
+    _ctrlDetails ctrlCommit 0;
+};
+
 true

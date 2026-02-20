@@ -674,4 +674,24 @@ private _details = format [
 ];
 
 _ctrlDetails ctrlSetStructuredText parseText _details;
+
+// Auto-fit + clamp to viewport so the right-pane group can scroll when needed.
+// Pin x/y/w to the designed inset so BIS_fnc_ctrlFitToTextHeight does not
+// inherit a stretched width from prior paint passes and cause horizontal overflow.
+private _defaultPosAir = uiNamespace getVariable ["ARC_console_airDetailsDefaultPos", []];
+if (!(_defaultPosAir isEqualType []) || { (count _defaultPosAir) < 4 }) then
+{
+    _defaultPosAir = ctrlPosition _ctrlDetails;
+    uiNamespace setVariable ["ARC_console_airDetailsDefaultPos", +_defaultPosAir];
+};
+[_ctrlDetails] call BIS_fnc_ctrlFitToTextHeight;
+private _airGrp = _display displayCtrl 78016;
+private _airMinH = if (!isNull _airGrp) then { (ctrlPosition _airGrp) # 3 } else { 0.74 };
+private _airP = ctrlPosition _ctrlDetails;
+_airP set [0, _defaultPosAir # 0];
+_airP set [1, _defaultPosAir # 1];
+_airP set [2, _defaultPosAir # 2];
+_airP set [3, (_airP # 3) max _airMinH];
+_ctrlDetails ctrlSetPosition _airP;
+_ctrlDetails ctrlCommit 0;
 true

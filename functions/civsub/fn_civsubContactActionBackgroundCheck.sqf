@@ -21,36 +21,34 @@ if !(isPlayer _actor) exitWith {[false, "<t size='0.9'>Invalid actor.</t>"]};
 if !(_civ getVariable ["civsub_v1_isCiv", false]) exitWith {[false, "<t size='0.9'>Not a CIVSUB civilian.</t>"]};
 
 private _ensureFn = {
-    params ["_name", "_path"];
-    private _resolved = objNull;
+    params ["_name"];
+    private _resolved = {};
+    // Pre-load by name only; path comparison is omitted to avoid
+    // backslash-escaping mismatches between caller and closure.
     switch (_name) do {
         case "ARC_fnc_civsubIdentityTouch": {
-            private _file = "functions\civsub\fn_civsubIdentityTouch.sqf";
-            if (_path isEqualTo _file) then {
-                if (isNil "ARC_fnc_civsubIdentityTouch") then { ARC_fnc_civsubIdentityTouch = compile preprocessFileLineNumbers _file; };
-                _resolved = ARC_fnc_civsubIdentityTouch;
+            if (isNil "ARC_fnc_civsubIdentityTouch") then {
+                ARC_fnc_civsubIdentityTouch = compile preprocessFileLineNumbers "functions\civsub\fn_civsubIdentityTouch.sqf";
             };
+            if !(isNil "ARC_fnc_civsubIdentityTouch") then { _resolved = ARC_fnc_civsubIdentityTouch; };
         };
         case "ARC_fnc_civsubIdentityGenerateProfile": {
-            private _file = "functions\civsub\fn_civsubIdentityGenerateProfile.sqf";
-            if (_path isEqualTo _file) then {
-                if (isNil "ARC_fnc_civsubIdentityGenerateProfile") then { ARC_fnc_civsubIdentityGenerateProfile = compile preprocessFileLineNumbers _file; };
-                _resolved = ARC_fnc_civsubIdentityGenerateProfile;
+            if (isNil "ARC_fnc_civsubIdentityGenerateProfile") then {
+                ARC_fnc_civsubIdentityGenerateProfile = compile preprocessFileLineNumbers "functions\civsub\fn_civsubIdentityGenerateProfile.sqf";
             };
+            if !(isNil "ARC_fnc_civsubIdentityGenerateProfile") then { _resolved = ARC_fnc_civsubIdentityGenerateProfile; };
         };
         case "ARC_fnc_civsubIdentitySet": {
-            private _file = "functions\civsub\fn_civsubIdentitySet.sqf";
-            if (_path isEqualTo _file) then {
-                if (isNil "ARC_fnc_civsubIdentitySet") then { ARC_fnc_civsubIdentitySet = compile preprocessFileLineNumbers _file; };
-                _resolved = ARC_fnc_civsubIdentitySet;
+            if (isNil "ARC_fnc_civsubIdentitySet") then {
+                ARC_fnc_civsubIdentitySet = compile preprocessFileLineNumbers "functions\civsub\fn_civsubIdentitySet.sqf";
             };
+            if !(isNil "ARC_fnc_civsubIdentitySet") then { _resolved = ARC_fnc_civsubIdentitySet; };
         };
         case "ARC_fnc_civsubIdentityEvictIfNeeded": {
-            private _file = "functions\civsub\fn_civsubIdentityEvictIfNeeded.sqf";
-            if (_path isEqualTo _file) then {
-                if (isNil "ARC_fnc_civsubIdentityEvictIfNeeded") then { ARC_fnc_civsubIdentityEvictIfNeeded = compile preprocessFileLineNumbers _file; };
-                _resolved = ARC_fnc_civsubIdentityEvictIfNeeded;
+            if (isNil "ARC_fnc_civsubIdentityEvictIfNeeded") then {
+                ARC_fnc_civsubIdentityEvictIfNeeded = compile preprocessFileLineNumbers "functions\civsub\fn_civsubIdentityEvictIfNeeded.sqf";
             };
+            if !(isNil "ARC_fnc_civsubIdentityEvictIfNeeded") then { _resolved = ARC_fnc_civsubIdentityEvictIfNeeded; };
         };
     };
     _resolved
@@ -146,21 +144,20 @@ if (_civUid isEqualTo "") then {
 private _identityDepsOk = true;
 {
     private _depName = _x select 0;
-    private _depPath = _x select 1;
-    private _fn = objNull;
-    private _nilDep = isNil { _fn = [_depName, _depPath] call _ensureFn; };
+    private _fn = {};
+    private _nilDep = isNil { _fn = [_depName] call _ensureFn; };
     if (_nilDep || {!(_fn isEqualType {})}) then {
         _identityDepsOk = false;
-        diag_log format ["[CIVSUB][BG] Missing dependency for IDENTITY_TOUCH fn=%1", _depName];
+        diag_log format ["[CIVSUB][BG] IDENTITY_TOUCH: could not resolve dependency fn=%1", _depName];
     };
 } forEach [
-    ["ARC_fnc_civsubIdentityTouch", "functions\\civsub\\fn_civsubIdentityTouch.sqf"],
-    ["ARC_fnc_civsubIdentityGenerateProfile", "functions\\civsub\\fn_civsubIdentityGenerateProfile.sqf"],
-    ["ARC_fnc_civsubIdentitySet", "functions\\civsub\\fn_civsubIdentitySet.sqf"],
-    ["ARC_fnc_civsubIdentityEvictIfNeeded", "functions\\civsub\\fn_civsubIdentityEvictIfNeeded.sqf"]
+    ["ARC_fnc_civsubIdentityTouch"],
+    ["ARC_fnc_civsubIdentityGenerateProfile"],
+    ["ARC_fnc_civsubIdentitySet"],
+    ["ARC_fnc_civsubIdentityEvictIfNeeded"]
 ];
 
-if !_identityDepsOk exitWith { ["", "Identity record unavailable."] call _inconclusive };
+if !_identityDepsOk exitWith { ["", "One or more identity functions could not be resolved (IDENTITY_TOUCH)."] call _inconclusive };
 
 private _rec = createHashMap;
 _nil = isNil { _rec = [_did, _actorUid, _civUid, getPosATL _civ] call ARC_fnc_civsubIdentityTouch; };

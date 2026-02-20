@@ -43,6 +43,8 @@ private _trimText = {
 
 private _ctrlMain = _display displayCtrl 78010;
 private _b2 = _display displayCtrl 78022;
+private _ctrlDetailsGrp = _display displayCtrl 78016;
+private _ctrlDetails    = _display displayCtrl 78012;
 
 // OMNI override (playtesting)
 private _omniTokens = missionNamespace getVariable ["ARC_consoleOmniTokens", ["OMNI"]];
@@ -150,13 +152,12 @@ if (!isNull _b2) then
 private _role = if (_isOmni) then {"OMNI"} else { if (_canApprove) then {"TOC APPROVER"} else { if (_isAuth) then {"AUTHORIZED"} else {"LIMITED"} } };
 
 private _lines = [];
-_lines pushBack "<t size='1.2' font='PuristaMedium'>TOC / CMD</t>";
+_lines pushBack "<t size='1.2' font='PuristaMedium' color='#B89B6B'>TOC / CMD</t>";
 _lines pushBack format ["<t size='0.95' color='#BDBDBD'>Access:</t> <t size='0.95'>%1</t>", _role];
 _lines pushBack "<br/>";
-_lines pushBack "<br/>";
 
-_lines pushBack "<t size='1.05' font='PuristaMedium'>Active Incident</t>";
-_lines pushBack "<br/>";
+_lines pushBack "<t size='1.05' font='PuristaMedium' color='#B89B6B'>Active Incident</t>";
+_lines pushBack "";
 if (_taskId isEqualTo "") then
 {
     _lines pushBack "<t color='#BBBBBB' size='0.95'>No active incident.</t>";
@@ -232,9 +233,8 @@ else
 };
 
 _lines pushBack "<br/>";
-_lines pushBack "<br/>";
-_lines pushBack "<t size='1.05' font='PuristaMedium'>Unit Status Board</t>";
-_lines pushBack "<br/>";
+_lines pushBack "<t size='1.05' font='PuristaMedium' color='#B89B6B'>Unit Status Board</t>";
+_lines pushBack "";
 private _statusRows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
 if (!(_statusRows isEqualType [])) then { _statusRows = []; };
 if ((count _statusRows) > _rxMaxItems) then { _statusRows = _statusRows select [0, _rxMaxItems]; };
@@ -269,9 +269,8 @@ else
 };
 
 _lines pushBack "<br/>";
-_lines pushBack "<br/>";
-_lines pushBack "<t size='1.05' font='PuristaMedium'>TOC Queue</t>";
-_lines pushBack "<br/>";
+_lines pushBack "<t size='1.05' font='PuristaMedium' color='#B89B6B'>TOC Queue</t>";
+_lines pushBack "";
 _lines pushBack format ["<t size='0.95'>Pending:</t> <t size='0.95'>%1</t>", count _pending];
 _lines pushBack format ["<t size='0.9' color='#BDBDBD'>Incidents:</t> <t size='0.9'>%1</t>  <t size='0.9' color='#BDBDBD'>Leads:</t> <t size='0.9'>%2</t>  <t size='0.9' color='#BDBDBD'>Other:</t> <t size='0.9'>%3</t>", count _pendingInc, count _pendingLead, _pendingOther max 0];
 
@@ -320,4 +319,59 @@ private _p = ctrlPosition _ctrlMain;
 _p set [3, (_p # 3) max _minH];
 _ctrlMain ctrlSetPosition _p;
 _ctrlMain ctrlCommit 0;
+
+// Right panel: incident command quick-reference / queue summary.
+if (!isNull _ctrlDetailsGrp && { !isNull _ctrlDetails }) then
+{
+    _ctrlDetailsGrp ctrlShow true;
+    _ctrlDetails ctrlShow true;
+
+    private _taskId2 = missionNamespace getVariable ["ARC_activeTaskId", ""];
+    if (!(_taskId2 isEqualType "")) then { _taskId2 = ""; };
+    private _hasInc2 = (_taskId2 isNotEqualTo "");
+    private _acc2 = missionNamespace getVariable ["ARC_activeIncidentAccepted", false];
+    if (!(_acc2 isEqualType true) && !(_acc2 isEqualType false)) then { _acc2 = false; };
+    private _cr2 = missionNamespace getVariable ["ARC_activeIncidentCloseReady", false];
+    if (!(_cr2 isEqualType true) && !(_cr2 isEqualType false)) then { _cr2 = false; };
+    private _sr2 = missionNamespace getVariable ["ARC_activeIncidentSitrepSent", false];
+    if (!(_sr2 isEqualType true) && !(_sr2 isEqualType false)) then { _sr2 = false; };
+
+    private _incSumColor = if (!_hasInc2) then {"#AAAAAA"} else { if (_cr2) then {"#9FE870"} else {"#FFD166"} };
+    private _incSumText  = if (!_hasInc2) then {"No active incident"} else { if (_cr2) then {"CLOSE-READY"} else { if (_acc2) then {"Accepted"} else {"Pending acceptance"} } };
+
+    private _qPendingCnt2 = count _pending;
+    private _qColor2 = if (_qPendingCnt2 >= 5) then {"#FF7A7A"} else { if (_qPendingCnt2 >= 3) then {"#FFD166"} else {"#9FE870"} };
+
+    private _rTxt =
+        "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Incident Status</t><br/>" +
+        format ["<t size='0.9' color='#BDBDBD'>State:</t> <t size='0.9' color='%1'>%2</t><br/>", _incSumColor, _incSumText] +
+        format ["<t size='0.9' color='#BDBDBD'>Accepted:</t> <t size='0.9'>%1</t><br/>", if (_acc2) then {"YES"} else {"NO"}] +
+        format ["<t size='0.9' color='#BDBDBD'>SITREP:</t> <t size='0.9'>%1</t><br/>", if (_sr2) then {"SENT"} else {"NOT SENT"}] +
+        format ["<t size='0.9' color='#BDBDBD'>Close-ready:</t> <t size='0.9'>%1</t><br/>", if (_cr2) then {"YES"} else {"NO"}] +
+        "<br/><t size='1.0' font='PuristaMedium' color='#B89B6B'>Queue</t><br/>" +
+        format ["<t size='0.9' color='#BDBDBD'>Pending items:</t> <t size='0.9' color='%1'>%2</t><br/>", _qColor2, _qPendingCnt2] +
+        format ["<t size='0.9' color='#BDBDBD'>Incidents / Leads:</t> <t size='0.9'>%1 / %2</t><br/>", count _pendingInc, count _pendingLead] +
+        "<br/><t size='0.85' color='#808080'>TOC QUEUE to approve items.</t><br/>" +
+        "<t size='0.85' color='#808080'>CLOSEOUT once incident is close-ready.</t>";
+
+    _ctrlDetails ctrlSetStructuredText parseText _rTxt;
+
+    private _cmdRpDefaultPos = uiNamespace getVariable ["ARC_console_cmdRpDefaultPos", []];
+    if (!(_cmdRpDefaultPos isEqualType []) || { (count _cmdRpDefaultPos) < 4 }) then
+    {
+        _cmdRpDefaultPos = ctrlPosition _ctrlDetails;
+        uiNamespace setVariable ["ARC_console_cmdRpDefaultPos", +_cmdRpDefaultPos];
+    };
+    [_ctrlDetails] call BIS_fnc_ctrlFitToTextHeight;
+    private _cmdGrp = _display displayCtrl 78016;
+    private _cmdMinH = if (!isNull _cmdGrp) then { (ctrlPosition _cmdGrp) # 3 } else { 0.74 };
+    private _cmdP = ctrlPosition _ctrlDetails;
+    _cmdP set [0, _cmdRpDefaultPos # 0];
+    _cmdP set [1, _cmdRpDefaultPos # 1];
+    _cmdP set [2, _cmdRpDefaultPos # 2];
+    _cmdP set [3, (_cmdP # 3) max _cmdMinH];
+    _ctrlDetails ctrlSetPosition _cmdP;
+    _ctrlDetails ctrlCommit 0;
+};
+
 true
