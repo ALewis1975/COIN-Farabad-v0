@@ -1882,12 +1882,15 @@
         1601.7975,
         8.4899998
       ],
-      "text": " EPW_Holding",
+      "text": "EPW Holding",
       "color": "",
       "alpha": 1.0,
       "usageNotes": "Editor marker from mission.sqm.",
       "source": "mission.sqm",
-      "aliases": [],
+      "aliases": [
+        "EPW_Holding",
+        "epw_holding_1"
+      ],
       "consumers": [
         "functions/civsub/fn_civsubInteractHandoffSheriff.sqf",
         "functions/command/fn_intelClientCanProcessEpwHere.sqf",
@@ -2711,8 +2714,5 @@
       "canonical": "ARC_loc_military"
     }
   ],
-  "unresolvedReferences": [
-    "EPW_Holding",
-    "epw_holding_1"
-  ]
+  "unresolvedReferences": []
 }

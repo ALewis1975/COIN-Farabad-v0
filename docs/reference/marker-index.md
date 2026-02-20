@@ -130,7 +130,7 @@
 | `arc_zone_SouthWest` | `` | `RECTANGLE` | `[2688.0, 2880.0, 64.0]` |  | `` | 0.000 | Editor marker from mission.sqm. |
 | `attack4_tow_release` | `Empty` | `` | `[6234.4126, 1686.1123, 8.4899998]` |  | `` | 1.000 | Editor marker from mission.sqm. |
 | `attack5_tow_release` | `Empty` | `` | `[6124.3486, 1691.5256, 8.4899998]` |  | `` | 1.000 | Editor marker from mission.sqm. |
-| `epw_holding` | `Empty` | `` | `[6292.145, 1601.7975, 8.4899998]` |  EPW_Holding | `` | 1.000 | Editor marker from mission.sqm. |
+| `epw_holding` | `Empty` | `` | `[6292.145, 1601.7975, 8.4899998]` | `EPW Holding` | `` | 1.000 | Editor marker from mission.sqm. |
 | `marker_12` | `loc_defend` | `` | `[6737.1758, 3238.6482, 9.7045679]` |  North Gate | `` | 0.500 | Editor marker from mission.sqm. |
 | `marker_13` | `loc_defend` | `` | `[5209.2402, 2679.394, 8.6000004]` |  Main Gate | `` | 0.500 | Editor marker from mission.sqm. |
 | `marker_14` | `Empty` | `` | `[2468.0039, 7012.0952, 27.848]` |  Oil Processing | `` | 1.000 | Editor marker from mission.sqm. |
@@ -192,9 +192,15 @@
 | `marker_1` | `ARC_loc_GreenZone` |
 | `ARC_m_logistics_01` | `ARC_loc_military` |
 
+## Legacy Marker Aliases
+
+Deprecated marker names retained for one release cycle via alias resolution:
+
+- `EPW_Holding` → `epw_holding`
+- `epw_holding_1` → `epw_holding`
+
 ## Unresolved-Reference Section
 
 Markers referenced in code but missing from `mission.sqm` and alias canonical/alias sets:
 
-- `EPW_Holding`
-- `epw_holding_1`
+- *(none)*
