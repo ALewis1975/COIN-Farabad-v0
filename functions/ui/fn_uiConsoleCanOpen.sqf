@@ -68,7 +68,7 @@ if (_nearTerminal) exitWith {[true, ""]};
 private _termClasses = missionNamespace getVariable ["ARC_consoleTerminalClasses", []];
 if (!(_termClasses isEqualType []) || { _termClasses isEqualTo [] }) then
 {
-    _termClasses = ["RuggedTerminal_01_communications_F","Land_Laptop_03_black_F","Land_Laptop_03_olive_F","Land_Laptop_02_unfolded_F","Land_Laptop_01_F","Land_Tablet_02_F"];
+    _termClasses = ["RuggedTerminal_01_communications_F","Land_Laptop_03_black_F","Land_Laptop_03_olive_F","Land_Laptop_02_unfolded_F","Land_Laptop_01_F","Land_Tablet_02_F","Land_FlatTV_01_F"];
 };
 
 private _nearObjTerminal = false;

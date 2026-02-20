@@ -37,13 +37,16 @@ if (isNil { missionNamespace getVariable "ARC_consoleOmniTokens" }) then
 
 // Optional: terminal access for players without a tablet.
 // If the player is near one of these terminals (or the mobile ops vehicle), allow console access.
+// Eden naming convention: keep tower terminals named `tower_screen_01` and `tower_screen_02`
+// so client terminal proximity remains aligned with the active station layout.
 if (isNil { missionNamespace getVariable "ARC_consoleTerminalVarNames" }) then
 {
     missionNamespace setVariable ["ARC_consoleTerminalVarNames", [
         "arc_intel_bebrief",
         "ARC_toc_intel_1", "ARC_toc_intel_2",
         "ARC_toc_ops_1", "ARC_toc_ops_2", "ARC_toc_ops_3", "ARC_toc_ops_4",
-        "ARC_toc_screen_1", "ARC_toc_screen_2", "ARC_toc_screen_3"
+        "ARC_toc_screen_1", "ARC_toc_screen_2", "ARC_toc_screen_3",
+        "tower_screen_01", "tower_screen_02"
     ]];
 };
 
