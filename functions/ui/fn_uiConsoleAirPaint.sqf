@@ -324,6 +324,18 @@ if (!(_selData isEqualType "")) then { _selData = ""; };
 
 private _parts = _selData splitString "|";
 private _rowType = if ((count _parts) > 0) then { _parts select 0 } else { "" };
+if ((count _parts) <= 1) then {
+    private _legacyParts = _selData splitString ":";
+    if ((count _legacyParts) > 0) then {
+        private _legacyType = toUpperANSI (_legacyParts param [0, ""]);
+        switch (_legacyType) do {
+            case "Q": { _rowType = "FLT"; };
+            case "CLR": { _rowType = "REQ"; };
+            case "LANE": { _rowType = "LANE"; };
+            default {};
+        };
+    };
+};
 private _selectedFid = if (_rowType isEqualTo "FLT") then { _parts param [1, ""] } else { "" };
 uiNamespace setVariable ["ARC_console_airSelectedFid", _selectedFid];
 uiNamespace setVariable ["ARC_console_airSelectedRow", _parts];
@@ -360,6 +372,10 @@ private _selectedState = "NONE";
 private _selectedUpdated = -1;
 private _selectedDetail = "Select a row.";
 private _selectedRouteDetail = "-";
+private _selectionHeading = "Selection Detail";
+private _selectionLines = [
+    "Pick a queued flight, clearance, or lane row to inspect contextual metadata."
+];
 
 private _primaryLabel = "HOLD";
 private _secondaryLabel = "RELEASE";
@@ -386,15 +402,50 @@ switch (_rowType) do {
             _selectedUpdated = parseNumber (_parts param [5, "-1"]);
             _nextActionOwner = "TOWER_CONTROLLER";
             _selectedDetail = format ["Request %1 (%2) from %3", _rid, _parts param [2, ""], _parts param [3, ""]];
+            _selectionHeading = format ["Clearance %1", _rid];
+            _selectionLines = [];
             private _reqIdx = _clearancePending findIf { (_x param [0, ""]) isEqualTo _rid };
             if (_reqIdx >= 0) then {
                 private _reqRec = _clearancePending # _reqIdx;
+                private _reqType = toUpperANSI (_reqRec param [1, "UNKNOWN"]);
+                private _reqPilot = _reqRec param [2, "-"];
+                private _reqCreated = _reqRec param [3, -1];
+                private _reqPrio = _reqRec param [4, 0];
+                private _reqStatus = toUpperANSI (_reqRec param [5, "PENDING"]);
+                private _reqOwner = _reqRec param [6, ""];
+                private _reqUpdated = _reqRec param [7, -1];
+                private _reqDecision = _reqRec param [8, []];
                 private _reqMeta = _reqRec param [9, []];
+                if !(_reqMeta isEqualType []) then { _reqMeta = []; };
+                private _pilotCallsign = [_reqMeta, "pilotCallsign", ""] call _metaGet;
+                private _pilotGroup = [_reqMeta, "pilotGroupName", ""] call _metaGet;
                 private _laneDecision = [_reqMeta, "runwayLaneDecision", "-"] call _metaGet;
+                private _laneReason = [_reqMeta, "runwayLaneDecisionReason", "-"] call _metaGet;
                 private _runwayMarker = [_reqMeta, "runwayMarker", "-"] call _metaGet;
                 private _chain = [_reqMeta, "routeMarkerChain", []] call _metaGet;
                 if !(_chain isEqualType []) then { _chain = []; };
                 _selectedRouteDetail = format ["%1 via %2 (%3)", _laneDecision, _runwayMarker, if ((count _chain) > 0) then { _chain joinString " -> " } else { "no-chain" }];
+
+                private _decisionBy = if (_reqDecision isEqualType []) then { _reqDecision param [0, "-"] } else { "-" };
+                private _decisionAction = if (_reqDecision isEqualType []) then { toUpperANSI (_reqDecision param [3, "PENDING"]) } else { "PENDING" };
+                private _pilotLabel = if (_pilotCallsign isEqualTo "") then { _reqPilot } else { _pilotCallsign };
+                if (_pilotGroup isNotEqualTo "") then { _pilotLabel = format ["%1 | %2", _pilotLabel, _pilotGroup]; };
+
+                _selectionLines = [
+                    format ["Request id: <t color='#FFFFFF'>%1</t> | Type: <t color='#FFFFFF'>%2</t>", _rid, _reqType],
+                    format ["Pilot: <t color='#FFFFFF'>%1</t> | Current owner: <t color='#FFFFFF'>%2</t>", _pilotLabel, if (_reqOwner isEqualTo "") then {"UNCLAIMED"} else {_reqOwner}],
+                    format ["Status: <t color='#FFFFFF'>%1</t> | Priority: <t color='#FFFFFF'>%2</t>", _reqStatus, _reqPrio],
+                    format ["Lane decision: <t color='#FFFFFF'>%1</t> | Reason: <t color='#FFFFFF'>%2</t>", _laneDecision, _laneReason],
+                    format ["Created/Updated: <t color='#FFFFFF'>%1 / %2</t>", [_reqCreated] call _fmtTime, [_reqUpdated] call _fmtTime],
+                    format ["Last decision: <t color='#FFFFFF'>%1 by %2</t>", _decisionAction, _decisionBy],
+                    format ["Action hint: <t color='#FFFFFF'>%1</t>", if (_canAirQueueManage) then {"Use APPROVE or DENY; verify lane reason before confirming."} else {"Read-only: coordinate with tower controller for decision."}]
+                ];
+            } else {
+                _selectionLines = [
+                    format ["Request id: <t color='#FFFFFF'>%1</t>", _rid],
+                    "Request metadata unavailable in current snapshot.",
+                    "Action hint: Refresh AIR tab to re-sync pending clearance records."
+                ];
             };
             _primaryLabel = "APPROVE";
             _secondaryLabel = "DENY";
@@ -422,15 +473,38 @@ switch (_rowType) do {
             _selectedUpdated = _stateUpdatedAt;
             _nextActionOwner = "TOWER_CONTROLLER";
             _selectedDetail = format ["Flight %1 [%2] %3", _fid, _parts param [2, ""], _parts param [3, ""]];
+            _selectionHeading = format ["Queued Flight %1", _fid];
+            _selectionLines = [];
             private _fltIdx = _nextItems findIf { (_x param [0, ""]) isEqualTo _fid };
             if (_fltIdx >= 0) then {
+                private _fltRec = _nextItems # _fltIdx;
+                private _flightKind = _fltRec param [1, "-"];
+                private _flightAsset = _fltRec param [2, "-"];
                 private _fltMeta = (_nextItems # _fltIdx) param [3, []];
                 if !(_fltMeta isEqualType []) then { _fltMeta = []; };
                 private _laneDecision = [_fltMeta, "runwayLaneDecision", "-"] call _metaGet;
+                private _laneReason = [_fltMeta, "runwayLaneDecisionReason", "-"] call _metaGet;
                 private _runwayMarker = [_fltMeta, "runwayMarker", "-"] call _metaGet;
                 private _chain = [_fltMeta, "routeMarkerChain", []] call _metaGet;
+                private _sourceRid = [_fltMeta, "sourceRequestId", "-"] call _metaGet;
+                private _queueTs = [_fltMeta, "queuedAt", -1] call _metaGet;
+                private _owner = [_fltMeta, "owner", "AUTO"] call _metaGet;
                 if !(_chain isEqualType []) then { _chain = []; };
                 _selectedRouteDetail = format ["%1 via %2 (%3)", _laneDecision, _runwayMarker, if ((count _chain) > 0) then { _chain joinString " -> " } else { "no-chain" }];
+                _selectionLines = [
+                    format ["Flight id: <t color='#FFFFFF'>%1</t> | Kind: <t color='#FFFFFF'>%2</t>", _fid, _flightKind],
+                    format ["Asset: <t color='#FFFFFF'>%1</t> | Source request: <t color='#FFFFFF'>%2</t>", _flightAsset, _sourceRid],
+                    format ["Queue owner: <t color='#FFFFFF'>%1</t> | Queued at: <t color='#FFFFFF'>%2</t>", _owner, [_queueTs] call _fmtTime],
+                    format ["Lane decision: <t color='#FFFFFF'>%1</t> | Reason: <t color='#FFFFFF'>%2</t>", _laneDecision, _laneReason],
+                    format ["Route chain: <t color='#FFFFFF'>%1</t>", if ((count _chain) > 0) then { _chain joinString " -> " } else { "no-chain" }],
+                    format ["Action hint: <t color='#FFFFFF'>%1</t>", if (_canAirQueueManage) then {"Use EXPEDITE for priority handling, CANCEL if route/intent is invalid."} else {"Read-only: report flight id to queue manager for action."}]
+                ];
+            } else {
+                _selectionLines = [
+                    format ["Flight id: <t color='#FFFFFF'>%1</t>", _fid],
+                    "Queue metadata unavailable in current snapshot.",
+                    "Action hint: Refresh AIR tab to re-sync scheduled flight records."
+                ];
             };
             _primaryLabel = "EXPEDITE";
             _secondaryLabel = "CANCEL";
@@ -445,10 +519,19 @@ switch (_rowType) do {
         private _lane = _parts param [1, "tower"];
         private _status = toUpperANSI (_parts param [2, "AUTO"]);
         private _op = _parts param [3, ""];
+        private _laneUid = _parts param [4, ""];
         _selectedState = format ["LANE_%1_%2", toUpperANSI _lane, _status];
         _selectedUpdated = parseNumber (_parts param [5, "-1"]);
         _nextActionOwner = "TOWER_CONTROLLER";
         _selectedDetail = format ["%1 lane controller: %2", toUpperANSI _lane, if (_op isEqualTo "") then {"AUTO"} else {_op}];
+        _selectionHeading = format ["Lane %1", toUpperANSI _lane];
+        _selectionLines = [
+            format ["Lane: <t color='#FFFFFF'>%1</t> | Status: <t color='#FFFFFF'>%2</t>", toUpperANSI _lane, _status],
+            format ["Current owner: <t color='#FFFFFF'>%1</t>", if (_op isEqualTo "") then {"AUTO"} else {_op}],
+            format ["Owner uid: <t color='#FFFFFF'>%1</t>", if (_laneUid isEqualTo "") then {"-"} else {_laneUid}],
+            format ["Last staffing update: <t color='#FFFFFF'>%1</t>", [_selectedUpdated] call _fmtTime],
+            format ["Action hint: <t color='#FFFFFF'>%1</t>", if (_canAirStaff) then {"CLAIM to take controller ownership, RELEASE to return lane to AUTO."} else {"Read-only: staffing updates require air staffing authorization."}]
+        ];
         _primaryLabel = "CLAIM";
         _secondaryLabel = "RELEASE";
         _primaryEnabled = _canAirStaff;
@@ -530,34 +613,44 @@ if (!isNull _btnSecondary) then {
     _btnSecondary ctrlSetTooltip _secondaryTooltip;
 };
 
+private _selectionDetailHtml = "";
+{
+    _selectionDetailHtml = _selectionDetailHtml + format ["<br/><t color='#CFCFCF'>%1</t>", _x];
+} forEach _selectionLines;
+
 private _details = format [
-    "<t size='1.05' color='#B89B6B'>AIRBASE SNAPSHOT</t>"
-    + "<br/><t color='#CFCFCF'>%1</t>"
+    "<t size='1.05' color='#B89B6B'>SELECTION DETAIL</t>"
+    + "<br/><t color='#FFFFFF'>%1</t>"
+    + "<br/>State: <t color='#FFFFFF'>%2</t> | Updated: <t color='#FFFFFF'>%3</t> | Next owner: <t color='#FFFFFF'>%4</t>"
+    + "<br/><t color='#CFCFCF'>%5</t>"
+    + "%6"
+    + "<br/><br/><t size='1.05' color='#B89B6B'>AIRBASE SNAPSHOT</t>"
+    + "<br/><t color='#CFCFCF'>%7</t>"
     + "<br/><br/><t color='#B89B6B'>Queue Summary</t>"
-    + "<br/>Departures queued (backlog): <t color='#FFFFFF'>%2</t>"
-    + "<br/>Departure executing (runway): <t color='#FFFFFF'>%3</t>"
-    + "<br/>Effective departures (queued + executing): <t color='#FFFFFF'>%4</t>"
-    + "<br/>Arrivals queued (backlog): <t color='#FFFFFF'>%5</t>"
-    + "<br/>Total queued (backlog only): <t color='#FFFFFF'>%6</t>"
+    + "<br/>Departures queued (backlog): <t color='#FFFFFF'>%8</t>"
+    + "<br/>Departure executing (runway): <t color='#FFFFFF'>%9</t>"
+    + "<br/>Effective departures (queued + executing): <t color='#FFFFFF'>%10</t>"
+    + "<br/>Arrivals queued (backlog): <t color='#FFFFFF'>%11</t>"
+    + "<br/>Total queued (backlog only): <t color='#FFFFFF'>%12</t>"
     + "<br/><br/><t color='#B89B6B'>Route Validation</t>"
-    + "<br/>Blocked-route attempts (recent): <t color='#FFFFFF'>%7</t> <t color='#CFCFCF'>(non-queued telemetry)</t>"
-    + "<br/>Latest reason: <t color='#FFFFFF'>%8</t>"
-    + "<br/>Latest source id: <t color='#FFFFFF'>%9</t>"
+    + "<br/>Blocked-route attempts (recent): <t color='#FFFFFF'>%13</t> <t color='#CFCFCF'>(non-queued telemetry)</t>"
+    + "<br/>Latest reason: <t color='#FFFFFF'>%14</t>"
+    + "<br/>Latest source id: <t color='#FFFFFF'>%15</t>"
     + "<br/><t color='#CFCFCF'>Blocked-route events do not enter queue.</t>"
     + "<br/><br/><t color='#B89B6B'>Runway</t>"
-    + "<br/>State: <t color='#FFFFFF'>%10</t> | Owner: <t color='#FFFFFF'>%11</t>"
-    + "<br/>Hold departures: <t color='#FFFFFF'>%12</t>"
-    + "<br/>Tower: <t color='#FFFFFF'>%13</t> | Ground: <t color='#FFFFFF'>%14</t> | Arrival: <t color='#FFFFFF'>%15</t>"
-    + "<br/>Execution: <t color='#FFFFFF'>%16</t>"
-    + "<br/><br/><t color='#B89B6B'>Selection</t>"
-    + "<br/>State: <t color='#FFFFFF'>%17</t>"
-    + "<br/>Last update: <t color='#FFFFFF'>%18</t>"
-    + "<br/>Next action owner: <t color='#FFFFFF'>%19</t>"
-    + "<br/><t color='#CFCFCF'>%20</t>"
-    + "<br/>Route decision: <t color='#FFFFFF'>%21</t>"
+    + "<br/>State: <t color='#FFFFFF'>%16</t> | Owner: <t color='#FFFFFF'>%17</t>"
+    + "<br/>Hold departures: <t color='#FFFFFF'>%18</t>"
+    + "<br/>Tower: <t color='#FFFFFF'>%19</t> | Ground: <t color='#FFFFFF'>%20</t> | Arrival: <t color='#FFFFFF'>%21</t>"
+    + "<br/>Execution: <t color='#FFFFFF'>%22</t>"
     + "<br/><br/><t color='#B89B6B'>Pending/Awaiting</t>"
-    + "<br/>Awaiting tower decision: <t color='#FFFFFF'>%22</t>"
-    + "<br/>Arrival warnings (A/C/U): <t color='#FFFFFF'>%23/%24/%25m</t>",
+    + "<br/>Awaiting tower decision: <t color='#FFFFFF'>%23</t>"
+    + "<br/>Arrival warnings (A/C/U): <t color='#FFFFFF'>%24/%25/%26m</t>",
+    _selectionHeading,
+    _selectedState,
+    [_selectedUpdated] call _fmtTime,
+    _nextActionOwner,
+    _selectedDetail,
+    _selectionDetailHtml,
     _canText,
     _depQueued,
     _depInProgress,
@@ -574,11 +667,6 @@ private _details = format [
     if ((toUpperANSI (_groundLane param [1, "AUTO"])) isEqualTo "MANNED") then { _groundLane param [2, "AUTO"] } else { "AUTO" },
     if ((toUpperANSI (_arrivalLane param [1, "AUTO"])) isEqualTo "MANNED") then { _arrivalLane param [2, "AUTO"] } else { "AUTO" },
     if (_execActive) then { format ["%1", _execFid] } else { "none" },
-    _selectedState,
-    [_selectedUpdated] call _fmtTime,
-    _nextActionOwner,
-    _selectedDetail,
-    _selectedRouteDetail,
     _awaitingCount,
     [_air, "arrivalWarnAdvisoryM", 7000] call _getPub,
     [_air, "arrivalWarnCautionM", 4500] call _getPub,

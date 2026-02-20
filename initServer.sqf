@@ -824,7 +824,7 @@ diag_log format [
 missionNamespace setVariable ["ARC_worldTime_enabled", true, true];
 missionNamespace setVariable ["ARC_worldTime_forceDate", true, true];
 missionNamespace setVariable ["ARC_worldTime_startDate", +date, true];
-missionNamespace setVariable ["ARC_worldTime_forceMultiplier", true, true];
+missionNamespace setVariable ["ARC_worldTime_forceMultiplier", false, true];
 missionNamespace setVariable ["ARC_worldTime_timeMultiplier", 6, true];
 missionNamespace setVariable ["ARC_worldTime_broadcastIntervalSec", 30, true];
 
