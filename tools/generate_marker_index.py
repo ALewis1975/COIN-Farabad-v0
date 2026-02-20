@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 import re
 import subprocess
@@ -47,6 +48,13 @@ def parse_aliases(path: Path) -> dict[str, str]:
     text = path.read_text(encoding="utf-8")
     pairs = re.findall(r'\[\s*"([^\"]+)"\s*,\s*"([^\"]+)"\s*\]', text)
     return {legacy: canonical for legacy, canonical in pairs}
+
+
+def canonicalize_marker_text(value: str, aliases: dict[str, str]) -> str:
+    normalized = value
+    for legacy, canonical in sorted(aliases.items(), key=lambda item: len(item[0]), reverse=True):
+        normalized = re.sub(rf"\b{re.escape(legacy)}\b", canonical, normalized)
+    return normalized
 
 
 def parse_mission_markers(path: Path) -> list[dict[str, Any]]:
@@ -137,8 +145,11 @@ def rg_consumers(symbol: str) -> list[str]:
     return sorted(set(files))
 
 
-def normalize_entry(marker: dict[str, Any], aliases_by_canonical: dict[str, list[str]]) -> dict[str, Any]:
-    name = str(marker.get("name", ""))
+def normalize_entry(
+    marker: dict[str, Any], aliases: dict[str, str], aliases_by_canonical: dict[str, list[str]]
+) -> dict[str, Any]:
+    raw_name = str(marker.get("name", ""))
+    name = aliases.get(raw_name, raw_name)
     pos = marker.get("position", marker.get("pos", []))
     if not isinstance(pos, list):
         pos = []
@@ -157,7 +168,7 @@ def normalize_entry(marker: dict[str, Any], aliases_by_canonical: dict[str, list
         "type": str(marker.get("type", "")),
         "shape": str(raw_shape),
         "pos": pos_norm,
-        "text": str(marker.get("text", "")),
+        "text": canonicalize_marker_text(str(marker.get("text", "")), aliases),
         "color": str(marker.get("colorName", marker.get("color", ""))),
         "alpha": clamp_alpha(marker.get("alpha", marker.get("a", 1))),
         "usageNotes": "",
@@ -205,6 +216,12 @@ def write_markdown(entries: list[dict[str, Any]], path: Path) -> None:
         "Regenerate with: `python3 tools/generate_marker_index.py`.",
         "Published under `docs/reference/`.",
         "",
+        "## Summary",
+        "",
+        f"- Total markers: **{len(entries)}**",
+        "",
+        "## Full Marker Table",
+        "",
         *rows,
         "",
     ])
@@ -212,18 +229,28 @@ def write_markdown(entries: list[dict[str, Any]], path: Path) -> None:
 
 
 def main() -> None:
-    aliases = parse_aliases(ALIASES_PATH)
+    parser = argparse.ArgumentParser(description="Generate marker index artifacts")
+    parser.add_argument("--sqm", type=Path, default=MISSION_PATH)
+    parser.add_argument("--aliases", type=Path, default=ALIASES_PATH)
+    parser.add_argument("--out-json", type=Path, default=JSON_OUT)
+    parser.add_argument("--out-md", type=Path, default=MD_OUT)
+    args = parser.parse_args()
+
+    aliases = parse_aliases(args.aliases)
     aliases_by_canonical: dict[str, list[str]] = {}
     for legacy, canonical in aliases.items():
         aliases_by_canonical.setdefault(canonical, []).append(legacy)
 
-    raw_markers = parse_mission_markers(MISSION_PATH)
-    entries = [normalize_entry(marker, aliases_by_canonical) for marker in raw_markers]
+    raw_markers = parse_mission_markers(args.sqm)
+    entries = [normalize_entry(marker, aliases, aliases_by_canonical) for marker in raw_markers]
     entries.sort(key=lambda item: item["name"])
 
-    json_payload = {"markers": entries}
-    JSON_OUT.write_text(json.dumps(json_payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    write_markdown(entries, MD_OUT)
+    json_payload = {
+        "summary": {"total": len(entries)},
+        "markers": entries,
+    }
+    args.out_json.write_text(json.dumps(json_payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    write_markdown(entries, args.out_md)
 
 
 if __name__ == "__main__":

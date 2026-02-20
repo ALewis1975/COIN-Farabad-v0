@@ -364,6 +364,248 @@
       "usageNotes": ""
     },
     {
+      "aliases": [
+        "marker_3"
+      ],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [
+        "data/farabad_marker_aliases.sqf",
+        "data/incident_markers.sqf",
+        "functions/ops/fn_opsSpawnLocalSupport.sqf"
+      ],
+      "name": "ARC_loc_BelleFoilleHotel",
+      "pos": [
+        5349.7939,
+        179.886,
+        11000.318
+      ],
+      "shape": "RECTANGLE",
+      "source": "mission.sqm:Outer Borders",
+      "status": "unresolved",
+      "text": "",
+      "type": "",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [
+        "marker_22"
+      ],
+      "alpha": 0.5,
+      "color": "",
+      "consumers": [
+        "data/farabad_marker_aliases.sqf",
+        "data/incident_markers.sqf"
+      ],
+      "name": "ARC_loc_FortKelati",
+      "pos": [
+        6292.2148,
+        8.4899998,
+        1605.1696
+      ],
+      "shape": "",
+      "source": "mission.sqm:Map / Mission",
+      "status": "unresolved",
+      "text": " EPW Holding",
+      "type": "loc_mission",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [
+        "marker_15"
+      ],
+      "alpha": 0.5,
+      "color": "",
+      "consumers": [
+        "data/farabad_marker_aliases.sqf",
+        "data/incident_markers.sqf",
+        "functions/ops/fn_opsSpawnLocalSupport.sqf"
+      ],
+      "name": "ARC_loc_JaziraOilField",
+      "pos": [
+        6220.3008,
+        7.2160001,
+        1335.816
+      ],
+      "shape": "",
+      "source": "mission.sqm:Map / Mission",
+      "status": "unresolved",
+      "text": " South Gate",
+      "type": "loc_defend",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [
+        "marker_12"
+      ],
+      "alpha": 0.5,
+      "color": "",
+      "consumers": [
+        "data/farabad_marker_aliases.sqf",
+        "data/incident_markers.sqf",
+        "functions/ops/fn_opsSpawnLocalSupport.sqf"
+      ],
+      "name": "ARC_loc_JaziraOilRefinery",
+      "pos": [
+        6737.1758,
+        9.7045679,
+        3238.6482
+      ],
+      "shape": "",
+      "source": "mission.sqm:Map / Mission",
+      "status": "unresolved",
+      "text": " North Gate",
+      "type": "loc_defend",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [
+        "marker_13"
+      ],
+      "alpha": 0.5,
+      "color": "",
+      "consumers": [
+        "data/farabad_marker_aliases.sqf",
+        "data/incident_markers.sqf"
+      ],
+      "name": "ARC_loc_Junkyard",
+      "pos": [
+        5209.2402,
+        8.6000004,
+        2679.394
+      ],
+      "shape": "",
+      "source": "mission.sqm:Map / Mission",
+      "status": "unresolved",
+      "text": " Main Gate",
+      "type": "loc_defend",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [
+        "marker_6"
+      ],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [
+        "data/farabad_marker_aliases.sqf",
+        "data/incident_markers.sqf",
+        "functions/ops/fn_opsSpawnLocalSupport.sqf"
+      ],
+      "name": "ARC_loc_KarkanakPrison",
+      "pos": [
+        10949.0,
+        98.934288,
+        5500.75
+      ],
+      "shape": "RECTANGLE",
+      "source": "mission.sqm:Outer Borders",
+      "status": "unresolved",
+      "text": "",
+      "type": "",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [
+        "marker_4"
+      ],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [
+        "data/farabad_marker_aliases.sqf",
+        "data/incident_markers.sqf",
+        "functions/ops/fn_opsSpawnLocalSupport.sqf"
+      ],
+      "name": "ARC_loc_hospital",
+      "pos": [
+        5350.0811,
+        0.0,
+        -0.8369751
+      ],
+      "shape": "RECTANGLE",
+      "source": "mission.sqm:Outer Borders",
+      "status": "unresolved",
+      "text": "",
+      "type": "",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [
+        "marker_5"
+      ],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [
+        "data/farabad_marker_aliases.sqf",
+        "data/incident_markers.sqf",
+        "functions/ops/fn_opsSpawnLocalSupport.sqf"
+      ],
+      "name": "ARC_loc_industrial022",
+      "pos": [
+        -249.2251,
+        47.273209,
+        5499.5889
+      ],
+      "shape": "RECTANGLE",
+      "source": "mission.sqm:Outer Borders",
+      "status": "unresolved",
+      "text": "",
+      "type": "",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [
+        "ARC_m_logistics_01",
+        "marker_17"
+      ],
+      "alpha": 0.5,
+      "color": "",
+      "consumers": [
+        "data/farabad_marker_aliases.sqf",
+        "data/incident_markers.sqf",
+        "docs/projectFiles/Farabad_ORBAT.md",
+        "functions/ops/fn_opsSpawnRouteSupport.sqf"
+      ],
+      "name": "ARC_loc_military",
+      "pos": [
+        6236.9531,
+        8.4899998,
+        1589.866
+      ],
+      "shape": "",
+      "source": "mission.sqm:Map / Mission",
+      "status": "unresolved",
+      "text": " TOC",
+      "type": "loc_mission",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [
+        "ARC_m_logistics_01",
+        "marker_17"
+      ],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [
+        "data/farabad_marker_aliases.sqf",
+        "data/incident_markers.sqf",
+        "docs/projectFiles/Farabad_ORBAT.md",
+        "functions/ops/fn_opsSpawnRouteSupport.sqf"
+      ],
+      "name": "ARC_loc_military",
+      "pos": [
+        7703.9258,
+        73.036575,
+        7521.1558
+      ],
+      "shape": "",
+      "source": "mission.sqm:Task Markers (Defunct?)",
+      "status": "unresolved",
+      "text": " Logistics 01",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
       "aliases": [],
       "alpha": 1.0,
       "color": "",
@@ -625,27 +867,6 @@
       "source": "mission.sqm:Task Markers (Defunct?)",
       "status": "unresolved",
       "text": " IED 01",
-      "type": "Empty",
-      "usageNotes": ""
-    },
-    {
-      "aliases": [],
-      "alpha": 1.0,
-      "color": "",
-      "consumers": [
-        "data/farabad_marker_aliases.sqf",
-        "data/incident_markers.sqf"
-      ],
-      "name": "ARC_m_logistics_01",
-      "pos": [
-        7703.9258,
-        73.036575,
-        7521.1558
-      ],
-      "shape": "",
-      "source": "mission.sqm:Task Markers (Defunct?)",
-      "status": "unresolved",
-      "text": " Logistics 01",
       "type": "Empty",
       "usageNotes": ""
     },
@@ -1930,6 +2151,7 @@
         "functions/command/fn_intelClientCanProcessEpwHere.sqf",
         "functions/command/fn_intelOrderCompleteRtbEpw.sqf",
         "functions/command/fn_intelResolveRtbDestination.sqf",
+        "scripts/dev/validate_marker_index.py",
         "tests/TEST-LOG.md"
       ],
       "name": "epw_holding",
@@ -1941,48 +2163,8 @@
       "shape": "",
       "source": "mission.sqm:Empty / System",
       "status": "unresolved",
-      "text": " EPW_Holding",
+      "text": " epw_holding",
       "type": "Empty",
-      "usageNotes": ""
-    },
-    {
-      "aliases": [],
-      "alpha": 0.5,
-      "color": "",
-      "consumers": [
-        "data/farabad_marker_aliases.sqf"
-      ],
-      "name": "marker_12",
-      "pos": [
-        6737.1758,
-        9.7045679,
-        3238.6482
-      ],
-      "shape": "",
-      "source": "mission.sqm:Map / Mission",
-      "status": "unresolved",
-      "text": " North Gate",
-      "type": "loc_defend",
-      "usageNotes": ""
-    },
-    {
-      "aliases": [],
-      "alpha": 0.5,
-      "color": "",
-      "consumers": [
-        "data/farabad_marker_aliases.sqf"
-      ],
-      "name": "marker_13",
-      "pos": [
-        5209.2402,
-        8.6000004,
-        2679.394
-      ],
-      "shape": "",
-      "source": "mission.sqm:Map / Mission",
-      "status": "unresolved",
-      "text": " Main Gate",
-      "type": "loc_defend",
       "usageNotes": ""
     },
     {
@@ -2008,26 +2190,6 @@
     },
     {
       "aliases": [],
-      "alpha": 0.5,
-      "color": "",
-      "consumers": [
-        "data/farabad_marker_aliases.sqf"
-      ],
-      "name": "marker_15",
-      "pos": [
-        6220.3008,
-        7.2160001,
-        1335.816
-      ],
-      "shape": "",
-      "source": "mission.sqm:Map / Mission",
-      "status": "unresolved",
-      "text": " South Gate",
-      "type": "loc_defend",
-      "usageNotes": ""
-    },
-    {
-      "aliases": [],
       "alpha": 1.0,
       "color": "",
       "consumers": [
@@ -2044,26 +2206,6 @@
       "status": "unresolved",
       "text": " Mine",
       "type": "Empty",
-      "usageNotes": ""
-    },
-    {
-      "aliases": [],
-      "alpha": 0.5,
-      "color": "",
-      "consumers": [
-        "data/farabad_marker_aliases.sqf"
-      ],
-      "name": "marker_17",
-      "pos": [
-        6236.9531,
-        8.4899998,
-        1589.866
-      ],
-      "shape": "",
-      "source": "mission.sqm:Map / Mission",
-      "status": "unresolved",
-      "text": " TOC",
-      "type": "loc_mission",
       "usageNotes": ""
     },
     {
@@ -2145,26 +2287,6 @@
       "status": "unresolved",
       "text": " Mine",
       "type": "Empty",
-      "usageNotes": ""
-    },
-    {
-      "aliases": [],
-      "alpha": 0.5,
-      "color": "",
-      "consumers": [
-        "data/farabad_marker_aliases.sqf"
-      ],
-      "name": "marker_22",
-      "pos": [
-        6292.2148,
-        8.4899998,
-        1605.1696
-      ],
-      "shape": "",
-      "source": "mission.sqm:Map / Mission",
-      "status": "unresolved",
-      "text": " EPW Holding",
-      "type": "loc_mission",
       "usageNotes": ""
     },
     {
@@ -2295,26 +2417,6 @@
     },
     {
       "aliases": [],
-      "alpha": 1.0,
-      "color": "",
-      "consumers": [
-        "data/farabad_marker_aliases.sqf"
-      ],
-      "name": "marker_3",
-      "pos": [
-        5349.7939,
-        179.886,
-        11000.318
-      ],
-      "shape": "RECTANGLE",
-      "source": "mission.sqm:Outer Borders",
-      "status": "unresolved",
-      "text": "",
-      "type": "",
-      "usageNotes": ""
-    },
-    {
-      "aliases": [],
       "alpha": 0.5,
       "color": "",
       "consumers": [],
@@ -2383,66 +2485,6 @@
       "status": "unresolved",
       "text": " TNA Checkpoint",
       "type": "loc_Bunker",
-      "usageNotes": ""
-    },
-    {
-      "aliases": [],
-      "alpha": 1.0,
-      "color": "",
-      "consumers": [
-        "data/farabad_marker_aliases.sqf"
-      ],
-      "name": "marker_4",
-      "pos": [
-        5350.0811,
-        0.0,
-        -0.8369751
-      ],
-      "shape": "RECTANGLE",
-      "source": "mission.sqm:Outer Borders",
-      "status": "unresolved",
-      "text": "",
-      "type": "",
-      "usageNotes": ""
-    },
-    {
-      "aliases": [],
-      "alpha": 1.0,
-      "color": "",
-      "consumers": [
-        "data/farabad_marker_aliases.sqf"
-      ],
-      "name": "marker_5",
-      "pos": [
-        -249.2251,
-        47.273209,
-        5499.5889
-      ],
-      "shape": "RECTANGLE",
-      "source": "mission.sqm:Outer Borders",
-      "status": "unresolved",
-      "text": "",
-      "type": "",
-      "usageNotes": ""
-    },
-    {
-      "aliases": [],
-      "alpha": 1.0,
-      "color": "",
-      "consumers": [
-        "data/farabad_marker_aliases.sqf"
-      ],
-      "name": "marker_6",
-      "pos": [
-        10949.0,
-        98.934288,
-        5500.75
-      ],
-      "shape": "RECTANGLE",
-      "source": "mission.sqm:Outer Borders",
-      "status": "unresolved",
-      "text": "",
-      "type": "",
       "usageNotes": ""
     },
     {
@@ -2695,5 +2737,8 @@
       "type": "Empty",
       "usageNotes": ""
     }
-  ]
+  ],
+  "summary": {
+    "total": 137
+  }
 }
