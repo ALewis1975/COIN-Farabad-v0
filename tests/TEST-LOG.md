@@ -16,6 +16,9 @@ Append one dated entry per validation pass using:
 
 ## Entries
 
+- 2026-02-20T05:19Z | commit: <pending> | branch: work | Scenario: marker index static validation gate (generator execution + JSON parse + markdown/JSON marker-count parity) (`python3 scripts/dev/validate_marker_index.py --sqm mission.sqm`) | Result: PASS | Notes: Added deterministic static validation command for marker-index artifacts; runtime-only gameplay checks remain out of scope for this pass under container static-review constraints.
+  - Migration Checks: Required keys N/A; Defaulting N/A; Unknown-field preservation N/A
+  - Runtime-only Validation: N/A (static artifact validation only)
 - 2026-02-20T05:12Z | commit: <pending> | branch: work | Scenario: world-time default multiplier force toggle for normal playtest/debug (`git --no-pager diff --check` and `rg -n "ARC_worldTime_forceMultiplier|ARC_worldTime_timeMultiplier" initServer.sqf scripts/worldtime/worldtime_server.sqf`) | Result: PASS | Notes: Set `ARC_worldTime_forceMultiplier` mission default to `false` while retaining `ARC_worldTime_timeMultiplier` for admin-controlled re-enable; confirmed `scripts/worldtime/worldtime_server.sqf` already gates multiplier application on force flag so no logic changes required.
   - Migration Checks: Required keys N/A; Defaulting N/A; Unknown-field preservation N/A
   - Runtime-only Validation: BLOCKED (container static review only; dedicated/local MP runtime needed for live timeflow verification)

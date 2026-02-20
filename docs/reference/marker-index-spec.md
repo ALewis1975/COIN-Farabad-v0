@@ -7,6 +7,14 @@ This document defines the canonical schema and normalization rules for marker in
 - Human-readable output: `docs/reference/marker-index.md`
 - Machine-readable output: `docs/reference/marker-index.json`
 
+## Static validation command
+
+Run this command to validate generator execution, JSON parseability, and markdown/JSON marker-count parity:
+
+```bash
+python3 scripts/dev/validate_marker_index.py --sqm mission.sqm
+```
+
 ## Canonical schema
 
 ### Required fields
