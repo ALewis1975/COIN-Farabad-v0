@@ -46,7 +46,7 @@ private _posList = [];
 } forEach _holdingCandidates;
 
 if ((count _posList) isEqualTo 0) exitWith {
-    ["CIVSUB: No holding markers found (mkr_SHERIFF_HOLDING / epw_holding).", "CHAT"] remoteExecCall ["ARC_fnc_civsubClientMessage", _actor];
+    ["CIVSUB: No holding marker found (epw_holding).", "CHAT"] remoteExecCall ["ARC_fnc_civsubClientMessage", _actor];
     false
 };
 
@@ -61,7 +61,7 @@ private _dActor = [_actor, _posList] call _minDist;
 private _dCiv   = [_civ, _posList] call _minDist;
 
 if ((_dActor > 25) && { _dCiv > 25 }) exitWith {
-    [format ["CIVSUB: Move within 25m of SHERIFF/EPW holding. Dist(actor)=%.1fm Dist(detainee)=%.1fm", _dActor, _dCiv], "CHAT"] remoteExecCall ["ARC_fnc_civsubClientMessage", _actor];
+    [format ["CIVSUB: Move within 25m of epw_holding. Dist(actor)=%.1fm Dist(detainee)=%.1fm", _dActor, _dCiv], "CHAT"] remoteExecCall ["ARC_fnc_civsubClientMessage", _actor];
     false
 };
 

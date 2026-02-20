@@ -93,7 +93,7 @@ switch (_purpose) do
         //   1) sheriff_handling unit (preferred interaction anchor)
         //   2) processing building object vars: EPW_Porcessing (typo), EPW_Processing (legacy)
         //   3) marker epw_processing
-        // Fallback to holding markers: mkr_SHERIFF_HOLDING, epw_holding
+        // Fallback to holding marker epw_holding (legacy aliases still supported)
 
         private _o = missionNamespace getVariable ["sheriff_handling", objNull];
         if (!isNull _o) then

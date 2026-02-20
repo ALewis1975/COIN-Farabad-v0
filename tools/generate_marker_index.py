@@ -1,240 +1,227 @@
 #!/usr/bin/env python3
-"""Generate marker index markdown/json outputs from mission.sqm."""
+"""Generate marker index artifacts from mission.sqm and alias/reference hints."""
 
 from __future__ import annotations
 
-import argparse
 import json
 import re
+import subprocess
 from pathlib import Path
-from typing import Iterable
+from typing import Any
+
+ROOT = Path(__file__).resolve().parents[1]
+MISSION_PATH = ROOT / "mission.sqm"
+ALIASES_PATH = ROOT / "data" / "farabad_marker_aliases.sqf"
+JSON_OUT = ROOT / "docs" / "reference" / "marker-index.json"
+MD_OUT = ROOT / "docs" / "reference" / "marker-index.md"
+
+TEXT_FIELDS = ("name", "type", "shape", "text", "color", "usageNotes", "source", "status")
 
 
-def _parse_item_blocks(text: str) -> Iterable[str]:
-    pattern = re.compile(r"\bclass\s+Item\d+\b")
-    idx = 0
-    while True:
-        match = pattern.search(text, idx)
-        if not match:
-            break
-        start = match.start()
-        brace_start = text.find("{", match.end())
-        if brace_start == -1:
-            idx = match.end()
-            continue
-        depth = 1
-        pos = brace_start + 1
-        n = len(text)
-        while pos < n and depth:
-            ch = text[pos]
-            if ch == "{":
-                depth += 1
-            elif ch == "}":
-                depth -= 1
-            pos += 1
-        if depth == 0:
-            yield text[start:pos]
-            idx = match.end()
-        else:
-            idx = match.end()
+def parse_scalar(raw: str) -> Any:
+    value = raw.strip()
+    if value.startswith('"') and value.endswith('"'):
+        return value[1:-1]
+    if value.startswith("{") and value.endswith("}"):
+        body = value[1:-1].strip()
+        if not body:
+            return []
+        return [parse_scalar(part) for part in body.split(",")]
+    try:
+        if "." in value or "e" in value.lower():
+            return float(value)
+        return int(value)
+    except ValueError:
+        return value
 
 
-def _read_prop(block: str, key: str) -> str:
-    match = re.search(rf"\b{re.escape(key)}\s*=\s*\"([^\"]*)\";", block)
-    return match.group(1) if match else ""
+def clamp_alpha(value: Any) -> float:
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        return 1.0
+    return min(1.0, max(0.0, numeric))
 
 
-def _read_num(block: str, key: str, default: float) -> float:
-    match = re.search(rf"\b{re.escape(key)}\s*=\s*([-+]?\d+(?:\.\d+)?);", block)
-    return float(match.group(1)) if match else default
+def parse_aliases(path: Path) -> dict[str, str]:
+    text = path.read_text(encoding="utf-8")
+    pairs = re.findall(r'\[\s*"([^\"]+)"\s*,\s*"([^\"]+)"\s*\]', text)
+    return {legacy: canonical for legacy, canonical in pairs}
 
 
-def _read_position(block: str) -> list[float]:
-    # Eden marker position is {x, z, y}; normalize to [x, y, z].
-    match = re.search(r"\bposition\s*\[\]\s*=\s*\{([^}]*)\};", block)
-    if not match:
-        return []
-    raw = [part.strip() for part in match.group(1).split(",") if part.strip()]
-    nums = [float(v) for v in raw]
-    if len(nums) >= 3:
-        return [nums[0], nums[2], nums[1]]
-    return nums[:2]
+def parse_mission_markers(path: Path) -> list[dict[str, Any]]:
+    class_inline_re = re.compile(r"^\s*class\s+(\w+)\s*\{\s*$")
+    class_re = re.compile(r"^\s*class\s+(\w+)\s*$")
+    assign_re = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)(\[\])?\s*=\s*(.+);\s*$")
 
+    lines = path.read_text(encoding="utf-8").splitlines()
+    depth = 0
+    stack: list[dict[str, Any]] = []
+    pending_class: str | None = None
+    markers: list[dict[str, Any]] = []
 
-def _extract_markers(sqm_text: str) -> list[dict]:
-    markers = []
-    for block in _parse_item_blocks(sqm_text):
-        marker_count = block.count('dataType="Marker";')
-        if marker_count != 1:
-            continue
-        shape = _read_prop(block, "markerType")
-        marker = {
-            "name": _read_prop(block, "name"),
-            "type": _read_prop(block, "type"),
-            "shape": shape,
-            "pos": _read_position(block),
-            "text": _read_prop(block, "text"),
-            "color": _read_prop(block, "colorName"),
-            "alpha": max(0.0, min(1.0, _read_num(block, "alpha", 1.0))),
-            "usageNotes": "Editor marker from mission.sqm.",
-            "source": "mission.sqm",
-            "aliases": [],
-            "consumers": [],
-            "status": "active",
-        }
-        if marker["name"]:
+    def close_to_depth(target_depth: int) -> None:
+        nonlocal stack
+        while stack and stack[-1]["depth"] > target_depth:
+            node = stack.pop()
+            if node["properties"].get("dataType") != "Marker":
+                continue
+            marker = node["properties"].copy()
+            layer_name = ""
+            for ancestor in reversed(stack):
+                props = ancestor.get("properties", {})
+                if props.get("dataType") == "Layer":
+                    layer_name = str(props.get("name", ""))
+                    break
+            marker["_layer"] = layer_name
             markers.append(marker)
-    markers.sort(key=lambda item: item["name"])
+
+    for line in lines:
+        stripped = line.strip()
+
+        if pending_class and stripped == "{":
+            depth += 1
+            stack.append({"name": pending_class, "depth": depth, "properties": {}})
+            pending_class = None
+            continue
+
+        if stripped in {"};", "}"}:
+            depth = max(0, depth - 1)
+            close_to_depth(depth)
+            continue
+
+        class_inline_match = class_inline_re.match(line)
+        if class_inline_match:
+            depth += 1
+            stack.append({"name": class_inline_match.group(1), "depth": depth, "properties": {}})
+            continue
+
+        class_match = class_re.match(line)
+        if class_match:
+            pending_class = class_match.group(1)
+            continue
+
+        if stripped == "{":
+            depth += 1
+            continue
+
+        assign_match = assign_re.match(line)
+        if assign_match and stack and depth == stack[-1]["depth"]:
+            key, _, raw = assign_match.groups()
+            stack[-1]["properties"][key] = parse_scalar(raw)
+
+    close_to_depth(-1)
     return markers
 
 
-def _extract_aliases(path: Path) -> list[dict]:
-    if not path.exists():
+def rg_consumers(symbol: str) -> list[str]:
+    if not symbol:
         return []
-    text = path.read_text(encoding="utf-8")
-    pairs = re.findall(r'\[\s*"([^"]+)"\s*,\s*"([^"]+)"\s*\]', text)
-    aliases = [{"alias": alias, "canonical": canonical} for alias, canonical in pairs]
-    aliases.sort(key=lambda item: item["alias"])
-    return aliases
+    cmd = [
+        "rg",
+        "--files-with-matches",
+        "--fixed-strings",
+        "--glob",
+        "!mission.sqm",
+        "--glob",
+        "!docs/reference/marker-index.json",
+        "--glob",
+        "!docs/reference/marker-index.md",
+        symbol,
+        str(ROOT),
+    ]
+    result = subprocess.run(cmd, check=False, capture_output=True, text=True)
+    if result.returncode not in (0, 1):
+        raise RuntimeError(f"ripgrep failed for {symbol}: {result.stderr.strip()}")
+    files = [Path(line).resolve().relative_to(ROOT).as_posix() for line in result.stdout.splitlines() if line.strip()]
+    return sorted(set(files))
 
 
-def _extract_referenced_markers(root: Path) -> set[str]:
-    exts = {".sqf", ".hpp", ".ext"}
-    refs: set[str] = set()
-    string_pattern = re.compile(r'"([A-Za-z][A-Za-z0-9_]*)"')
-    likely_prefixes = (
-        "ARC_",
-        "arc_",
-        "marker_",
-        "mkr_",
-        "AEON_",
-        "respawn_",
-        "epw_",
-        "Main_",
-        "NE_",
-        "NW_",
-        "SE_",
-        "SW_",
-        "North_",
-        "South_",
-        "tug",
-        "plane_",
-    )
-    for path in root.rglob("*"):
-        if path.suffix.lower() not in exts:
-            continue
-        if any(part.startswith(".") for part in path.parts):
-            continue
-        if path.parts and path.parts[0] in {"vendor", "dist", "build", "generated"}:
-            continue
-        try:
-            text = path.read_text(encoding="utf-8", errors="ignore")
-        except OSError:
-            continue
-        for value in string_pattern.findall(text):
-            if value.startswith(likely_prefixes):
-                refs.add(value)
-    return refs
+def normalize_entry(marker: dict[str, Any], aliases_by_canonical: dict[str, list[str]]) -> dict[str, Any]:
+    name = str(marker.get("name", ""))
+    pos = marker.get("position", marker.get("pos", []))
+    if not isinstance(pos, list):
+        pos = []
+    pos_norm = [float(value) for value in pos[:3]]
+    while pos_norm and abs(pos_norm[-1]) < 1e-9:
+        pos_norm.pop()
 
+    consumers = set(rg_consumers(name))
+    for alias in aliases_by_canonical.get(name, []):
+        consumers.update(rg_consumers(alias))
 
-def _prefix(name: str) -> str:
-    return f"{name.split('_', 1)[0]}_" if "_" in name else name
+    raw_shape = marker.get("shape", marker.get("markerShape", marker.get("markerType", "")))
 
-
-def _make_summary(markers: list[dict]) -> dict:
-    by_shape: dict[str, int] = {}
-    by_prefix: dict[str, int] = {}
-    for marker in markers:
-        shape = marker["shape"] or "(empty)"
-        by_shape[shape] = by_shape.get(shape, 0) + 1
-        pref = _prefix(marker["name"])
-        by_prefix[pref] = by_prefix.get(pref, 0) + 1
-    return {
-        "total": len(markers),
-        "byShape": dict(sorted(by_shape.items())),
-        "byPrefix": dict(sorted(by_prefix.items())),
+    entry: dict[str, Any] = {
+        "name": name,
+        "type": str(marker.get("type", "")),
+        "shape": str(raw_shape),
+        "pos": pos_norm,
+        "text": str(marker.get("text", "")),
+        "color": str(marker.get("colorName", marker.get("color", ""))),
+        "alpha": clamp_alpha(marker.get("alpha", marker.get("a", 1))),
+        "usageNotes": "",
+        "source": f"mission.sqm{(':' + marker.get('_layer')) if marker.get('_layer') else ''}",
+        "aliases": sorted(aliases_by_canonical.get(name, [])),
+        "consumers": sorted(consumers),
+        "status": "unresolved",
     }
 
+    for field in TEXT_FIELDS:
+        entry[field] = str(entry.get(field, ""))
+    return entry
 
-def _render_md(summary: dict, markers: list[dict], aliases: list[dict], unresolved: list[str]) -> str:
-    lines = ["# Marker Index", "", "## Summary", "", f"- Total markers: **{summary['total']}**", "- By shape:"]
-    for shape, count in summary["byShape"].items():
-        lines.append(f"  - `{shape}`: {count}")
-    lines.append("- By prefix:")
-    for pref, count in summary["byPrefix"].items():
-        lines.append(f"  - `{pref}`: {count}")
 
-    lines.extend([
-        "",
-        "## Full Marker Table",
-        "",
-        "| Name | Type | Shape | Pos | Text | Color | Alpha | Usage Notes |",
-        "|---|---|---|---|---|---|---:|---|",
-    ])
-    for marker in markers:
-        pos = json.dumps(marker["pos"]) if marker["pos"] else "[]"
-        lines.append(
-            "| `{name}` | `{type}` | `{shape}` | `{pos}` | {text} | `{color}` | {alpha:.3f} | {notes} |".format(
-                name=marker["name"],
-                type=marker["type"],
-                shape=marker["shape"],
-                pos=pos,
-                text=marker["text"],
-                color=marker["color"],
-                alpha=marker["alpha"],
-                notes=marker["usageNotes"],
-            )
-        )
-
-    lines.extend(["", "## Alias Section", "", "| Alias | Canonical |", "|---|---|"])
-    for item in aliases:
-        lines.append(f"| `{item['alias']}` | `{item['canonical']}` |")
-
-    lines.extend(["", "## Unresolved-Reference Section", ""])
-    if unresolved:
-        lines.append("Markers referenced in code but missing from `mission.sqm` and alias canonical/alias sets:")
-        lines.append("")
-        for name in unresolved:
-            lines.append(f"- `{name}`")
+def format_cell(value: Any) -> str:
+    if isinstance(value, list):
+        text = ", ".join(str(item) for item in value)
     else:
-        lines.append("No unresolved marker references detected.")
-    lines.append("")
-    return "\n".join(lines)
+        text = str(value)
+    return text.replace("|", "\\|")
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description="Generate marker index outputs from mission.sqm")
-    parser.add_argument("--sqm", required=True, type=Path)
-    parser.add_argument("--out-md", required=True, type=Path)
-    parser.add_argument("--out-json", required=True, type=Path)
-    parser.add_argument("--aliases", default=Path("data/farabad_marker_aliases.sqf"), type=Path)
-    args = parser.parse_args()
+def write_markdown(entries: list[dict[str, Any]], path: Path) -> None:
+    columns = ["name", "type", "shape", "pos", "text", "color", "alpha", "aliases", "consumers", "status", "usageNotes"]
+    header = "| " + " | ".join(columns) + " |"
+    separator = "|" + "|".join(["---"] * len(columns)) + "|"
+    rows = [header, separator]
 
-    sqm_text = args.sqm.read_text(encoding="utf-8", errors="ignore")
-    markers = _extract_markers(sqm_text)
-    aliases = _extract_aliases(args.aliases)
+    for entry in entries:
+        cells = []
+        for col in columns:
+            value = entry.get(col, "")
+            if col == "pos":
+                value = json.dumps(value, separators=(",", ":"))
+            elif col == "alpha":
+                value = f"{float(value):.3f}".rstrip("0").rstrip(".")
+            cells.append(format_cell(value))
+        rows.append("| " + " | ".join(cells) + " |")
 
-    known = {m["name"] for m in markers}
-    known.update(item["alias"] for item in aliases)
-    known.update(item["canonical"] for item in aliases)
+    content = "\n".join([
+        "# Marker Index",
+        "",
+        "Generated from `mission.sqm`, alias mappings, and static repository search hints.",
+        "",
+        *rows,
+        "",
+    ])
+    path.write_text(content, encoding="utf-8")
 
-    referenced = _extract_referenced_markers(Path("."))
-    unresolved = sorted(name for name in referenced if name not in known)
 
-    summary = _make_summary(markers)
-    payload = {
-        "summary": summary,
-        "markers": markers,
-        "aliases": aliases,
-        "unresolvedReferences": unresolved,
-    }
+def main() -> None:
+    aliases = parse_aliases(ALIASES_PATH)
+    aliases_by_canonical: dict[str, list[str]] = {}
+    for legacy, canonical in aliases.items():
+        aliases_by_canonical.setdefault(canonical, []).append(legacy)
 
-    args.out_json.parent.mkdir(parents=True, exist_ok=True)
-    args.out_md.parent.mkdir(parents=True, exist_ok=True)
-    args.out_json.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-    args.out_md.write_text(_render_md(summary, markers, aliases, unresolved), encoding="utf-8")
-    return 0
+    raw_markers = parse_mission_markers(MISSION_PATH)
+    entries = [normalize_entry(marker, aliases_by_canonical) for marker in raw_markers]
+    entries.sort(key=lambda item: item["name"])
+
+    json_payload = {"markers": entries}
+    JSON_OUT.write_text(json.dumps(json_payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    write_markdown(entries, MD_OUT)
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()

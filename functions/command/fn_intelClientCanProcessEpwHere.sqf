@@ -32,7 +32,7 @@ private _orders = missionNamespace getVariable ["ARC_pub_orders", []];
 if (!(_orders isEqualType [])) then { _orders = []; };
 
 private _getPair = {
-    params ["_pairs", "_k", "_d"]; 
+    params ["_pairs", "_k", "_d"];
     if (!(_pairs isEqualType [])) exitWith { _d };
     {
         if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _x # 1 };
@@ -46,7 +46,7 @@ private _destRad = 30;
 {
     if (!(_x isEqualType [] && { (count _x) >= 7 })) then { continue; };
 
-    _x params ["_orderId", "_issuedAt", "_status", "_orderType", "_targetGroup", "_data", "_meta"]; 
+    _x params ["_orderId", "_issuedAt", "_status", "_orderType", "_targetGroup", "_data", "_meta"];
 
     if ((toUpper _status) isNotEqualTo "ACCEPTED") then { continue; };
     if ((toUpper _orderType) isNotEqualTo "RTB") then { continue; };
@@ -69,7 +69,7 @@ if (!(_destPos isEqualType [] && { (count _destPos) >= 2 })) then
     {
         private _cand = [_x] call ARC_fnc_worldResolveMarker;
         if (!((markerType _cand) isEqualTo "")) exitWith { _m = _cand; };
-    } forEach ["epw_processing", "mkr_SHERIFF_HOLDING", "epw_holding"]; 
+    } forEach ["epw_processing", "epw_holding", "mkr_SHERIFF_HOLDING"];
 
     if (_m isNotEqualTo "") then
     {

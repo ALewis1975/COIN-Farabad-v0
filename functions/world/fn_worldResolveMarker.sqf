@@ -15,7 +15,6 @@
 params ["_markerName"];
 
 if (_markerName isEqualTo "") exitWith {""};
-if (_markerName in allMapMarkers) exitWith {_markerName};
 
 private _aliases = missionNamespace getVariable ["ARC_markerAliases", createHashMap];
 if (_aliases isEqualType createHashMap) then
@@ -23,5 +22,7 @@ if (_aliases isEqualType createHashMap) then
     private _alt = _aliases getOrDefault [_markerName, ""];
 	if ((_alt isNotEqualTo "") && { _alt in allMapMarkers }) exitWith { _alt };
 };
+
+if (_markerName in allMapMarkers) exitWith {_markerName};
 
 _markerName
