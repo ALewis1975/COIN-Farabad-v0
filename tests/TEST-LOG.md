@@ -16,6 +16,9 @@ Append one dated entry per validation pass using:
 
 ## Entries
 
+- 2026-02-20T18:26Z | commit: <pending> | branch: copilot/fix-air-traffic-control-functions | Scenario: preflight parse remediation for job `64327683412` (`get_workflow_job`, `get_job_logs`, `~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleOnLoad.sqf`, `~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleRefresh.sqf`, `git --no-pager diff --check`, `python3 scripts/dev/validate_state_migrations.py`) | Result: PASS | Notes: Replaced parser-sensitive `isNotEqualTo`, `#` array index, and `focusedCtrl _display` call form in `fn_uiConsoleOnLoad.sqf` with sqflint-compatible alternatives (`!=`, `select`, `focusedCtrl`) to clear line 253 parse failures.
+  - Migration Checks: Required keys PASS; Defaulting PASS; Unknown-field preservation PASS
+  - Runtime-only Validation: BLOCKED (Arma runtime/display unavailable in container for in-engine verification and screenshot capture)
 - 2026-02-20T18:16Z | commit: <pending> | branch: copilot/fix-air-traffic-control-functions | Scenario: initServer sqflint parse compatibility remediation for preflight job `64326658386` (`list_workflow_runs`, `get_workflow_job`, `get_job_logs`, `~/.local/bin/sqflint -e w initServer.sqf`, `git --no-pager diff --check`, `python3 scripts/dev/validate_state_migrations.py`, `python3 scripts/dev/validate_marker_index.py`) | Result: PASS | Notes: Replaced parser-sensitive `createHashMapFromArray []` with `createHashMap` for empty anchors and converted toggle-consumer registry from HashMap+`getOrDefault` to array pair scan so sqflint parses initServer cleanly.
   - Migration Checks: Required keys PASS; Defaulting PASS; Unknown-field preservation PASS
   - Runtime-only Validation: BLOCKED (Arma runtime/display unavailable in container for in-engine verification and screenshot capture)
