@@ -200,7 +200,10 @@ def write_markdown(entries: list[dict[str, Any]], path: Path) -> None:
     content = "\n".join([
         "# Marker Index",
         "",
-        "Generated from `mission.sqm`, alias mappings, and static repository search hints.",
+        "Generated deterministically from `mission.sqm`, alias mappings, and static repository search hints.",
+        "No embedded timestamps are included.",
+        "Regenerate with: `python3 tools/generate_marker_index.py`.",
+        "Published under `docs/reference/`.",
         "",
         *rows,
         "",
