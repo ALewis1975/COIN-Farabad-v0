@@ -176,8 +176,6 @@ private _canAirPilot = false;
 {
     if (_x isEqualType "" && { [player, _x] call ARC_fnc_rolesHasGroupIdToken }) exitWith { _canAirPilot = true; };
 } forEach _pilotTokens;
-if (!_canAirPilot && _isBnCmd) then { _canAirPilot = true; };
-
 uiNamespace setVariable ["ARC_console_airCanHold", _canAirHold];
 uiNamespace setVariable ["ARC_console_airCanRelease", _canAirRelease];
 uiNamespace setVariable ["ARC_console_airCanPrioritize", _canAirPrioritize];
@@ -219,7 +217,7 @@ if (_canOps) then
     _ctrlTabs lbAdd "S3 / OPS";
 };
 
-if (_canAirRead) then
+if (_canAirRead || _canAirPilot) then
 {
     _tabIds pushBack "AIR";
     _ctrlTabs lbAdd "AIR / TOWER";
@@ -252,7 +250,7 @@ _forceTab = toUpper _forceTab;
 uiNamespace setVariable ["ARC_console_forceTab", nil];
 
 private _sel = 0;
-if (_forceTab isNotEqualTo "") then
+if (_forceTab != "") then
 {
     private _i = _tabIds find _forceTab;
     if (_i >= 0) then { _sel = _i; };
@@ -260,7 +258,7 @@ if (_forceTab isNotEqualTo "") then
 
 if ((count _tabIds) > 0) then
 {
-    uiNamespace setVariable ["ARC_console_activeTab", _tabIds # _sel];
+    uiNamespace setVariable ["ARC_console_activeTab", _tabIds select _sel];
 }
 else
 {
@@ -303,7 +301,7 @@ uiNamespace setVariable ["ARC_console_dirty", false];
         // Prevent repaint from collapsing open dropdowns and interrupting text input.
         // Skip refresh while the user is focused on an Edit or Combo control.
         private _skip = false;
-        private _fc = focusedCtrl _display;
+        private _fc = focusedCtrl;
         if (!isNull _fc) then
         {
             private _ct = ctrlType _fc;
