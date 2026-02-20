@@ -16,6 +16,14 @@ if (!isServer) exitWith {};
 missionNamespace setVariable ["ARC_buildStamp", "COIN_Farabad_v0.Farabad-20260217-0001", true];
 diag_log format ["[ARC][BUILD] %1", missionNamespace getVariable ["ARC_buildStamp","UNKNOWN"]];
 
+// Profile switch (live-safe defaults; dev profile explicitly opts into debug posture)
+if (isNil { missionNamespace getVariable "ARC_profile_devMode" }) then {
+    missionNamespace setVariable ["ARC_profile_devMode", false, true];
+};
+
+private _arcProfileDevMode = missionNamespace getVariable ["ARC_profile_devMode", false];
+diag_log format ["[ARC][PROFILE] ARC_profile_devMode=%1", _arcProfileDevMode];
+
 // Debug toggles (server authoritative)
 missionNamespace setVariable ["ARC_debugLogEnabled", false, true];
 missionNamespace setVariable ["ARC_debugLogToChat", false, true];
@@ -146,7 +154,7 @@ missionNamespace setVariable ["civsub_v1_civ_classPool", [
 missionNamespace setVariable ["civsub_v1_scheduler_enabled", true, true];
 missionNamespace setVariable ["civsub_v1_scheduler_s", 120, true];        // baseline cadence (set to 30 for rapid testing)
 missionNamespace setVariable ["civsub_v1_rumor_enabled", true, true];     // set false to disable rumors
-missionNamespace setVariable ["civsub_v1_debug", true, true];            // enables scheduler/diag logs (if present)
+missionNamespace setVariable ["civsub_v1_debug", false, true];           // enables scheduler/diag logs (if present)
 
 // AIRBASE tower authorization test posture (BN Command group access enabled for validation drills)
 missionNamespace setVariable ["airbase_v1_tower_allowBnCmd", true, true];
@@ -767,6 +775,22 @@ missionNamespace setVariable ["ARC_routeReconMinLengthM", 700, true];
 missionNamespace setVariable ["ARC_routeReconRoadSnapM", 140, true];
 missionNamespace setVariable ["ARC_routeReconStartRadiusM", 75, true];
 missionNamespace setVariable ["ARC_routeReconEndRadiusM", 75, true];
+
+// ============================================================================
+// PROFILE-DRIVEN DEBUG OVERRIDES (single block)
+// ============================================================================
+
+if (_arcProfileDevMode) then {
+    missionNamespace setVariable ["ARC_debugLogEnabled", true, true];
+    missionNamespace setVariable ["ARC_debugLogToChat", true, true];
+    missionNamespace setVariable ["ARC_devDebugInspectorEnabled", true, true];
+    missionNamespace setVariable ["ARC_debugInspectorEnabled", true, true];
+    missionNamespace setVariable ["civsub_v1_debug", true, true];
+    missionNamespace setVariable ["civsub_v1_traffic_debug", true, true];
+    missionNamespace setVariable ["airbase_v1_tower_authDebug", true, true];
+
+    diag_log "[ARC][PROFILE] Dev profile active: debug overrides enabled.";
+};
 
 
 // ============================================================================
