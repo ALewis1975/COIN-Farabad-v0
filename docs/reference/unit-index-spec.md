@@ -7,6 +7,15 @@ This document defines the canonical schema and normalization rules for unit inde
 - Human-readable output: `docs/reference/unit-index.md`
 - Machine-readable output: `docs/reference/unit-index.json`
 
+## Shared workflow conventions
+
+Both index generators (`tools/generate_marker_index.py` and `tools/generate_unit_index.py`) follow the same contributor workflow conventions:
+
+- Outputs are deterministic across repeated runs on unchanged inputs.
+- Generated artifacts do not embed timestamps.
+- Canonical generated docs are published under `docs/reference/`.
+- Contributors regenerate artifacts with script-local commands in the same style: `python3 tools/<generator>.py`.
+
 ## Canonical schema
 
 ### Required fields

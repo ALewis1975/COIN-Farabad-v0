@@ -189,7 +189,10 @@ def write_markdown(groups: list[dict[str, Any]], path: Path) -> None:
     lines = [
         "# Unit Index",
         "",
-        "Generated from `mission.sqm` grouped by editor group ID.",
+        "Generated deterministically from `mission.sqm` grouped by editor group ID.",
+        "No embedded timestamps are included.",
+        "Regenerate with: `python3 tools/generate_unit_index.py`.",
+        "Published under `docs/reference/`.",
         "",
     ]
 

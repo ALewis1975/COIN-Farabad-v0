@@ -1,6 +1,9 @@
 # Unit Index
 
-Generated from `mission.sqm` grouped by editor group ID.
+Generated deterministically from `mission.sqm` grouped by editor group ID.
+No embedded timestamps are included.
+Regenerate with: `python3 tools/generate_unit_index.py`.
+Published under `docs/reference/`.
 
 ## 1-1-B-2-325 AIR | REDFALCON 2-1-1
 

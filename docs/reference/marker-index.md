@@ -1,6 +1,9 @@
 # Marker Index
 
-Generated from `mission.sqm`, alias mappings, and static repository search hints.
+Generated deterministically from `mission.sqm`, alias mappings, and static repository search hints.
+No embedded timestamps are included.
+Regenerate with: `python3 tools/generate_marker_index.py`.
+Published under `docs/reference/`.
 
 | name | type | shape | pos | text | color | alpha | aliases | consumers | status | usageNotes |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -48,26 +51,26 @@ Generated from `mission.sqm`, alias mappings, and static repository search hints
 | SE_Corner | Empty |  | [7141.8027,5.9805398,1366.0491] |  |  | 1 |  | functions/ambiance/fn_airbaseSecurityInit.sqf | unresolved |  |
 | SW_Corner | Empty |  | [4854.4731,7.5370002,1796.756] |  |  | 1 |  | functions/ambiance/fn_airbaseSecurityInit.sqf | unresolved |  |
 | South_Gate | Empty |  | [6220.125,7.2114286,1335.375] |  |  | 1 |  | data/incident_markers.sqf, functions/ambiance/fn_airbaseSecurityInit.sqf | unresolved |  |
-| arc_bridge_01 |  | RECTANGLE | [2493.8643,-0.006000042,1176.199] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt, functions/logistics/fn_execTickConvoy.sqf | unresolved |  |
-| arc_bridge_02 |  | RECTANGLE | [4082.7329,3.2839999,6196.9434] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt, functions/logistics/fn_execTickConvoy.sqf | unresolved |  |
-| arc_bridge_03 |  | RECTANGLE | [5436.6704,-0.085999966,5664.8892] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt | unresolved |  |
-| arc_bridge_04 |  | RECTANGLE | [7464.2456,-0.43913937,991.36316] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt | unresolved |  |
-| arc_bridge_05 |  | RECTANGLE | [8010.8086,7.457777,1052.0198] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt | unresolved |  |
-| arc_bridge_06 |  | RECTANGLE | [4449.8975,6.7000742,2679.0413] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt | unresolved |  |
-| arc_bridge_07 |  | RECTANGLE | [2235.6318,5.9239998,1172.4194] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt | unresolved |  |
-| arc_bridge_08 |  | RECTANGLE | [5739.5752,7.6423988,4382.7573] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt | unresolved |  |
-| arc_bridge_09 |  | RECTANGLE | [5881.1152,12.851498,4638.021] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt | unresolved |  |
-| arc_bridge_10 |  | RECTANGLE | [5259.1226,-0.049523115,4718.1797] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt | unresolved |  |
-| arc_bridge_11 |  | RECTANGLE | [4955.4595,-0.053917646,4351.1343] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt | unresolved |  |
-| arc_bridge_12 |  | RECTANGLE | [3868.0471,2.6981001,3978.5984] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt | unresolved |  |
-| arc_bridge_13 |  | RECTANGLE | [2844.7629,0.78098464,3001.9246] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt | unresolved |  |
-| arc_bridge_14 |  | RECTANGLE | [2695.1616,1.0030847,2599.4351] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt | unresolved |  |
-| arc_bridge_15 |  | RECTANGLE | [5467.6216,0.0,5232.9473] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt | unresolved |  |
-| arc_bridge_16 |  | RECTANGLE | [4586.9097,13.606083,6047.7954] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt | unresolved |  |
-| arc_bridge_17 |  | RECTANGLE | [8274.3721,4.052309,3074.1841] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt | unresolved |  |
-| arc_bridge_18 |  | RECTANGLE | [7524.9277,63.324509,7586.4092] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt | unresolved |  |
-| arc_bridge_19 |  | RECTANGLE | [9184.04,83.946259,9429.3574] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt | unresolved |  |
-| arc_bridge_20 |  | RECTANGLE | [2186.2583,5.3800001,523.78174] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt | unresolved |  |
+| arc_bridge_01 |  | RECTANGLE | [2493.8643,-0.006000042,1176.199] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt, docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt, functions/logistics/fn_execTickConvoy.sqf | unresolved |  |
+| arc_bridge_02 |  | RECTANGLE | [4082.7329,3.2839999,6196.9434] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt, docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt, functions/logistics/fn_execTickConvoy.sqf | unresolved |  |
+| arc_bridge_03 |  | RECTANGLE | [5436.6704,-0.085999966,5664.8892] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt, docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt | unresolved |  |
+| arc_bridge_04 |  | RECTANGLE | [7464.2456,-0.43913937,991.36316] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt, docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt | unresolved |  |
+| arc_bridge_05 |  | RECTANGLE | [8010.8086,7.457777,1052.0198] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt, docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt | unresolved |  |
+| arc_bridge_06 |  | RECTANGLE | [4449.8975,6.7000742,2679.0413] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt, docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt | unresolved |  |
+| arc_bridge_07 |  | RECTANGLE | [2235.6318,5.9239998,1172.4194] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt, docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt | unresolved |  |
+| arc_bridge_08 |  | RECTANGLE | [5739.5752,7.6423988,4382.7573] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt, docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt | unresolved |  |
+| arc_bridge_09 |  | RECTANGLE | [5881.1152,12.851498,4638.021] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt, docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt | unresolved |  |
+| arc_bridge_10 |  | RECTANGLE | [5259.1226,-0.049523115,4718.1797] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt, docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt | unresolved |  |
+| arc_bridge_11 |  | RECTANGLE | [4955.4595,-0.053917646,4351.1343] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt, docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt | unresolved |  |
+| arc_bridge_12 |  | RECTANGLE | [3868.0471,2.6981001,3978.5984] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt, docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt | unresolved |  |
+| arc_bridge_13 |  | RECTANGLE | [2844.7629,0.78098464,3001.9246] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt, docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt | unresolved |  |
+| arc_bridge_14 |  | RECTANGLE | [2695.1616,1.0030847,2599.4351] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt, docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt | unresolved |  |
+| arc_bridge_15 |  | RECTANGLE | [5467.6216,0.0,5232.9473] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt, docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt | unresolved |  |
+| arc_bridge_16 |  | RECTANGLE | [4586.9097,13.606083,6047.7954] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt, docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt | unresolved |  |
+| arc_bridge_17 |  | RECTANGLE | [8274.3721,4.052309,3074.1841] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt, docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt | unresolved |  |
+| arc_bridge_18 |  | RECTANGLE | [7524.9277,63.324509,7586.4092] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt, docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt | unresolved |  |
+| arc_bridge_19 |  | RECTANGLE | [9184.04,83.946259,9429.3574] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt, docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt | unresolved |  |
+| arc_bridge_20 |  | RECTANGLE | [2186.2583,5.3800001,523.78174] |  |  | 0 |  | docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt, docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt | unresolved |  |
 | arc_hq_1_73_CAV | b_hq |  | [6141.9531,12.877,2310.605] |  HQ [1-73 CAV] |  | 0.5 |  |  | unresolved |  |
 | arc_hq_1_73_CAV_1 | b_hq |  | [6643.9868,14.258,3099.813] |  HQ [407 BSB] |  | 0.5 |  |  | unresolved |  |
 | arc_hq_2_325_AIR | b_hq |  | [6227.1611,12.981655,1561.5669] |  HQ [2-325 AIR] |  | 0.5 |  |  | unresolved |  |
@@ -103,7 +106,7 @@ Generated from `mission.sqm`, alias mappings, and static repository search hints
 | arc_zone_SouthWest |  | RECTANGLE | [2688.0,64.0,2880.0] |  |  | 0 |  | data/farabad_world_zones.sqf | unresolved |  |
 | attack4_tow_release | Empty |  | [6234.4126,8.4899998,1686.1123] |  |  | 1 |  |  | unresolved |  |
 | attack5_tow_release | Empty |  | [6124.3486,8.4899998,1691.5256] |  |  | 1 |  |  | unresolved |  |
-| epw_holding | Empty |  | [6292.145,8.4899998,1601.7975] | epw_holding |  | 1 |  | functions/civsub/fn_civsubInteractHandoffSheriff.sqf, functions/command/fn_intelClientCanProcessEpwHere.sqf, functions/command/fn_intelOrderCompleteRtbEpw.sqf, functions/command/fn_intelResolveRtbDestination.sqf | unresolved |  |
+| epw_holding | Empty |  | [6292.145,8.4899998,1601.7975] |  EPW_Holding |  | 1 | EPW_Holding, epw_holding_1 | data/farabad_marker_aliases.sqf, functions/civsub/fn_civsubInteractHandoffSheriff.sqf, functions/command/fn_intelClientCanProcessEpwHere.sqf, functions/command/fn_intelOrderCompleteRtbEpw.sqf, functions/command/fn_intelResolveRtbDestination.sqf, tests/TEST-LOG.md | unresolved |  |
 | marker_12 | loc_defend |  | [6737.1758,9.7045679,3238.6482] |  North Gate |  | 0.5 |  | data/farabad_marker_aliases.sqf | unresolved |  |
 | marker_13 | loc_defend |  | [5209.2402,8.6000004,2679.394] |  Main Gate |  | 0.5 |  | data/farabad_marker_aliases.sqf | unresolved |  |
 | marker_14 | Empty |  | [2468.0039,27.848,7012.0952] |  Oil Processing |  | 1 |  | data/incident_markers.sqf, functions/ops/fn_opsSpawnLocalSupport.sqf | unresolved |  |
