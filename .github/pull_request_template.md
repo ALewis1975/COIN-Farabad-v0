@@ -7,6 +7,8 @@
 
 ### Mode (select exactly one)
 
+> Quick chooser: use **G** when the PR adds/changes tooling scripts; use **F** when the PR is docs/spec only.
+
 - [ ] A — Bug Fix
 - [ ] B — Feature Delivery
 - [ ] C — Safe Refactor
