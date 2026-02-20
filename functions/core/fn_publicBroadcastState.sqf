@@ -110,6 +110,20 @@ if (!(_execActive isEqualType true) && !(_execActive isEqualType false)) then { 
 private _execFid = missionNamespace getVariable ["airbase_v1_execFid", ""];
 if (!(_execFid isEqualType "")) then { _execFid = ""; };
 
+private _depInProgress = 0;
+if (_execActive && { _execFid isNotEqualTo "" }) then {
+    private _execRecIdx = _airRecs findIf {
+        (_x isEqualType []) &&
+        { (count _x) >= 3 } &&
+        { ((_x param [0, ""]) isEqualTo _execFid) }
+    };
+
+    if (_execRecIdx >= 0) then {
+        private _execKind = (_airRecs # _execRecIdx) param [2, ""];
+        if (_execKind isEqualTo "DEP") then { _depInProgress = 1; };
+    };
+};
+
 private _holdDepartures = ["airbase_v1_holdDepartures", false] call ARC_fnc_stateGet;
 if (!(_holdDepartures isEqualType true) && !(_holdDepartures isEqualType false)) then { _holdDepartures = false; };
 
@@ -329,6 +343,7 @@ if ((count _blockedRouteTailView) > _blockedTailN) then {
 
 private _airbasePub = [
     ["depQueued", _depQueued],
+    ["depInProgress", _depInProgress],
     ["arrQueued", _arrQueued],
     ["totalQueued", count _airQueue],
     ["execActive", _execActive],

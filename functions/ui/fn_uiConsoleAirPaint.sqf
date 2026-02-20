@@ -87,8 +87,14 @@ if (!(_depQueued isEqualType 0)) then { _depQueued = 0; };
 private _arrQueued = [_air, "arrQueued", 0] call _getPub;
 if (!(_arrQueued isEqualType 0)) then { _arrQueued = 0; };
 
-private _totalQueued = [_air, "totalQueued", 0] call _getPub;
-if (!(_totalQueued isEqualType 0)) then { _totalQueued = 0; };
+private _depInProgress = [_air, "depInProgress", 0] call _getPub;
+if (!(_depInProgress isEqualType 0) || { _depInProgress < 0 }) then { _depInProgress = 0; };
+if (_depInProgress > 1) then { _depInProgress = 1; };
+
+private _effectiveDepartures = (0 max _depQueued) + _depInProgress;
+
+private _totalQueued = [_air, "totalQueued", ((0 max _depQueued) + (0 max _arrQueued))] call _getPub;
+if (!(_totalQueued isEqualType 0)) then { _totalQueued = (0 max _depQueued) + (0 max _arrQueued); };
 
 private _blockedRouteAttemptsRecent = [_air, "blockedRouteAttemptsRecent", 0] call _getPub;
 if (!(_blockedRouteAttemptsRecent isEqualType 0) || { _blockedRouteAttemptsRecent < 0 }) then { _blockedRouteAttemptsRecent = 0; };
@@ -528,30 +534,34 @@ private _details = format [
     "<t size='1.05' color='#B89B6B'>AIRBASE SNAPSHOT</t>"
     + "<br/><t color='#CFCFCF'>%1</t>"
     + "<br/><br/><t color='#B89B6B'>Queue Summary</t>"
-    + "<br/>Departures queued: <t color='#FFFFFF'>%2</t>"
-    + "<br/>Arrivals queued: <t color='#FFFFFF'>%3</t>"
-    + "<br/>Total queued: <t color='#FFFFFF'>%4</t>"
+    + "<br/>Departures queued (backlog): <t color='#FFFFFF'>%2</t>"
+    + "<br/>Departure executing (runway): <t color='#FFFFFF'>%3</t>"
+    + "<br/>Effective departures (queued + executing): <t color='#FFFFFF'>%4</t>"
+    + "<br/>Arrivals queued (backlog): <t color='#FFFFFF'>%5</t>"
+    + "<br/>Total queued (backlog only): <t color='#FFFFFF'>%6</t>"
     + "<br/><br/><t color='#B89B6B'>Route Validation</t>"
-    + "<br/>Blocked-route attempts (recent): <t color='#FFFFFF'>%5</t> <t color='#CFCFCF'>(non-queued telemetry)</t>"
-    + "<br/>Latest reason: <t color='#FFFFFF'>%6</t>"
-    + "<br/>Latest source id: <t color='#FFFFFF'>%7</t>"
+    + "<br/>Blocked-route attempts (recent): <t color='#FFFFFF'>%7</t> <t color='#CFCFCF'>(non-queued telemetry)</t>"
+    + "<br/>Latest reason: <t color='#FFFFFF'>%8</t>"
+    + "<br/>Latest source id: <t color='#FFFFFF'>%9</t>"
     + "<br/><t color='#CFCFCF'>Blocked-route events do not enter queue.</t>"
     + "<br/><br/><t color='#B89B6B'>Runway</t>"
-    + "<br/>State: <t color='#FFFFFF'>%8</t> | Owner: <t color='#FFFFFF'>%9</t>"
-    + "<br/>Hold departures: <t color='#FFFFFF'>%10</t>"
-    + "<br/>Tower: <t color='#FFFFFF'>%11</t> | Ground: <t color='#FFFFFF'>%12</t> | Arrival: <t color='#FFFFFF'>%13</t>"
-    + "<br/>Execution: <t color='#FFFFFF'>%14</t>"
+    + "<br/>State: <t color='#FFFFFF'>%10</t> | Owner: <t color='#FFFFFF'>%11</t>"
+    + "<br/>Hold departures: <t color='#FFFFFF'>%12</t>"
+    + "<br/>Tower: <t color='#FFFFFF'>%13</t> | Ground: <t color='#FFFFFF'>%14</t> | Arrival: <t color='#FFFFFF'>%15</t>"
+    + "<br/>Execution: <t color='#FFFFFF'>%16</t>"
     + "<br/><br/><t color='#B89B6B'>Selection</t>"
-    + "<br/>State: <t color='#FFFFFF'>%15</t>"
-    + "<br/>Last update: <t color='#FFFFFF'>%16</t>"
-    + "<br/>Next action owner: <t color='#FFFFFF'>%17</t>"
-    + "<br/><t color='#CFCFCF'>%18</t>"
-    + "<br/>Route decision: <t color='#FFFFFF'>%19</t>"
+    + "<br/>State: <t color='#FFFFFF'>%17</t>"
+    + "<br/>Last update: <t color='#FFFFFF'>%18</t>"
+    + "<br/>Next action owner: <t color='#FFFFFF'>%19</t>"
+    + "<br/><t color='#CFCFCF'>%20</t>"
+    + "<br/>Route decision: <t color='#FFFFFF'>%21</t>"
     + "<br/><br/><t color='#B89B6B'>Pending/Awaiting</t>"
-    + "<br/>Awaiting tower decision: <t color='#FFFFFF'>%20</t>"
-    + "<br/>Arrival warnings (A/C/U): <t color='#FFFFFF'>%21/%22/%23m</t>",
+    + "<br/>Awaiting tower decision: <t color='#FFFFFF'>%22</t>"
+    + "<br/>Arrival warnings (A/C/U): <t color='#FFFFFF'>%23/%24/%25m</t>",
     _canText,
     _depQueued,
+    _depInProgress,
+    _effectiveDepartures,
     _arrQueued,
     _totalQueued,
     _blockedRouteAttemptsRecent,
