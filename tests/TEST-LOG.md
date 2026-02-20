@@ -16,6 +16,9 @@ Append one dated entry per validation pass using:
 
 ## Entries
 
+- 2026-02-20T05:12Z | commit: <pending> | branch: work | Scenario: world-time default multiplier force toggle for normal playtest/debug (`git --no-pager diff --check` and `rg -n "ARC_worldTime_forceMultiplier|ARC_worldTime_timeMultiplier" initServer.sqf scripts/worldtime/worldtime_server.sqf`) | Result: PASS | Notes: Set `ARC_worldTime_forceMultiplier` mission default to `false` while retaining `ARC_worldTime_timeMultiplier` for admin-controlled re-enable; confirmed `scripts/worldtime/worldtime_server.sqf` already gates multiplier application on force flag so no logic changes required.
+  - Migration Checks: Required keys N/A; Defaulting N/A; Unknown-field preservation N/A
+  - Runtime-only Validation: BLOCKED (container static review only; dedicated/local MP runtime needed for live timeflow verification)
 - 2026-02-19T02:25Z | commit: <pending> | branch: copilot/create-readme-file | Scenario: migration-schema static harness + CI wiring (`python3 scripts/dev/validate_state_migrations.py`, `python3 -m py_compile scripts/dev/validate_state_migrations.py`, `git diff --check`) | Result: PASS | Notes: Added migration scenario matrix and static validator for required keys/defaulting/unknown-field preservation; wired check into preflight CI and documented runtime-only blocked validations.
   - Migration Checks: Required keys PASS; Defaulting PASS; Unknown-field preservation PASS
   - Runtime-only Validation: BLOCKED (requires Arma hosted MP/dedicated server for persistence/JIP/reconnect behaviors)
