@@ -106,8 +106,7 @@ for "_i" from 0 to ((count _back) - 1) do
         {
             // Look up live lead rec to verify type/tag for eligibility.
             private _li = -1;
-            { if (_x isEqualType [] && { (count _x) >= 1 } && { (_x select 0) isEqualTo _lid }
-    }] call _findIfFn;
+            { if (_x isEqualType [] && { (count _x) >= 1 } && { (_x select 0) isEqualTo _lid }) exitWith { _li = _forEachIndex; }; } forEach _pool;
             if (_li >= 0) then
             {
                 private _lr = _pool select _li;
