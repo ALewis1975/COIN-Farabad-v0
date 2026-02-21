@@ -455,3 +455,23 @@ git --no-pager diff --check
 - `git --no-pager diff --check` passed with no whitespace/merge marker issues.
 - `~/.local/bin/sqflint` is unavailable in this container (`No such file or directory`), so lint validation is blocked by environment.
 - Runtime/dedicated/JIP validation remains deferred (no Arma runtime in container).
+
+## 2026-02-21 05:18 UTC — sqflint compatibility guide + pre-lint scanner
+
+**Branch/Commit:** copilot/fix-invalid-number-in-expression @ pending
+
+**Scenario:** Added a compatibility mapping guide, introduced a lightweight static scanner for parser-compatibility patterns, and wired CI/docs to run scanner before `sqflint -e w`.
+
+**Commands:**
+```
+python3 scripts/dev/sqflint_compat_scan.py --strict
+python3 -m py_compile scripts/dev/sqflint_compat_scan.py
+git diff --check
+```
+
+**Result:** PASS
+
+**Notes:**
+- Scanner is intentionally pattern-based and checks changed SQF files by default.
+- CI preflight now runs the scanner before linting changed SQF files.
+- Runtime/dedicated/JIP validation: BLOCKED (not applicable for docs/tooling-only update in this container).
