@@ -176,6 +176,12 @@ private _canAirPilot = false;
 {
     if (_x isEqualType "" && { [player, _x] call ARC_fnc_rolesHasGroupIdToken }) exitWith { _canAirPilot = true; };
 } forEach _pilotTokens;
+// Supplement: if the player is currently in an air vehicle (e.g. after FIR pilot replacement),
+// preserve pilot status so AIR/TOWER options remain visible in the console.
+if (!_canAirPilot) then {
+    private _pVeh = vehicle player;
+    if (_pVeh != player && { _pVeh isKindOf "Air" }) then { _canAirPilot = true; };
+};
 uiNamespace setVariable ["ARC_console_airCanHold", _canAirHold];
 uiNamespace setVariable ["ARC_console_airCanRelease", _canAirRelease];
 uiNamespace setVariable ["ARC_console_airCanPrioritize", _canAirPrioritize];
@@ -187,6 +193,9 @@ uiNamespace setVariable ["ARC_console_airCanRead", _canAirRead];
 uiNamespace setVariable ["ARC_console_airCanControl", _canAirControl];
 uiNamespace setVariable ["ARC_console_airCanPilot", _canAirPilot];
 uiNamespace setVariable ["ARC_console_airMode", if (_canAirPilot && !_canAirControl) then {"PILOT"} else {"TOWER"}];
+
+// Farabad Tower staff (canAirControl) and pilots (canAirPilot) also need S3/OPS visibility.
+_canOps = _canOps || _canAirControl || _canAirPilot;
 
 // ---------------------------------------------------------------------------
 // Build tab list (store ids so selection events map to stable strings)
