@@ -36,14 +36,13 @@ private _civReqAction = {
         false
     };
 
-    private _disp = uiNamespace getVariable ["ARC_console_display", displayNull];
-    if (!isNull _disp) then { [_disp, false] call ARC_fnc_uiConsoleIntelPaint; };
-
-    [_civ, player, _actionId, _payload] remoteExecCall ["ARC_fnc_civsubContactReqAction", 2];
-
+    // Show feedback toast BEFORE dispatch so it appears immediately regardless of server RTT
     if !(_label isEqualTo "") then {
         ["CIVSUB", format ["%1 requested...", _label]] call ARC_fnc_clientToast;
     };
+
+    // Fire-and-forget: result returns independently via ARC_fnc_civsubContactClientReceiveResult
+    [_civ, player, _actionId, _payload] remoteExec ["ARC_fnc_civsubContactReqAction", 2];
 
     true
 };

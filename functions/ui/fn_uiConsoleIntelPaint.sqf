@@ -667,6 +667,28 @@ private _data = if (_sel >= 0) then { _list lbData _sel } else { "" };
 if (!(_data isEqualType "")) then { _data = ""; };
 uiNamespace setVariable ["ARC_console_intelSelData", _data];
 
+// Clear stale CIVSUB result type when user selects a different CIVSUB action
+private _lastResultType = uiNamespace getVariable ["ARC_civsubInteract_lastResultType", ""];
+if (!(_lastResultType isEqualType "")) then { _lastResultType = ""; };
+private _selParts = _data splitString "|";
+private _selKind = if ((count _selParts) > 0) then { toUpper (_selParts # 0) } else { "" };
+if (_selKind in ["CIV_CONTACT_CHECK_ID","CIV_CONTACT_BACKGROUND","CIV_CONTACT_GIVE_FOOD","CIV_CONTACT_GIVE_WATER","CIV_CONTACT_DETAIN","CIV_CONTACT_RELEASE","CIV_CONTACT_HANDOFF","CIV_CONTACT_QUESTION"]) then {
+    private _expectedType = switch (_selKind) do {
+        case "CIV_CONTACT_CHECK_ID":   { "CHECK_ID" };
+        case "CIV_CONTACT_BACKGROUND": { "BACKGROUND_CHECK" };
+        case "CIV_CONTACT_GIVE_FOOD":  { "AID_RATIONS" };
+        case "CIV_CONTACT_GIVE_WATER": { "AID_WATER" };
+        case "CIV_CONTACT_DETAIN":     { "DETAIN" };
+        case "CIV_CONTACT_RELEASE":    { "RELEASE" };
+        case "CIV_CONTACT_HANDOFF":    { "HANDOFF_SHERIFF" };
+        case "CIV_CONTACT_QUESTION":   { "QUESTION" };
+        default { "" };
+    };
+    if (!(_lastResultType isEqualTo "") && { !(_lastResultType isEqualTo _expectedType) }) then {
+        uiNamespace setVariable ["ARC_civsubInteract_lastResultType", ""];
+    };
+};
+
 private _txt = "";
 
 private _appendCivsubResult = {
