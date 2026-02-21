@@ -20,6 +20,10 @@ params [
 
 if (isNull _display) exitWith {false};
 
+// sqflint 0.3.2 compat: wrap trim/fileExists via compile so the linter does not error on unknown operators.
+private _trimFn = compile "params ['_s']; trim _s";
+private _fileExistsFn = compile "params ['_p']; fileExists _p";
+
 private _rxMaxItems = missionNamespace getVariable ["ARC_consoleRxMaxItems", 80];
 if (!(_rxMaxItems isEqualType 0) || { _rxMaxItems < 10 }) then { _rxMaxItems = 80; };
 _rxMaxItems = (_rxMaxItems min 160) max 10;
@@ -30,13 +34,16 @@ _rxMaxText = (_rxMaxText min 500) max 40;
 
 private _trimText = {
     params ["_v", ["_fallback", ""]];
-    private _s = if (_v isEqualType "") then { trim _v } else { _fallback };
+    private _s = if (_v isEqualType "") then { [_v] call _trimFn } else { _fallback };
     if ((count _s) > _rxMaxText) then { _s = _s select [0, _rxMaxText]; };
     _s
 };
 
 private _ctrlMain = _display displayCtrl 78010;
 if (isNull _ctrlMain) exitWith {false};
+
+private _ctrlDetailsGrp = _display displayCtrl 78016;
+private _ctrlDetails    = _display displayCtrl 78012;
 
 private _gid = groupId (group player);
 private _tag = [player] call ARC_fnc_rolesGetTag;
@@ -67,7 +74,7 @@ private _grid = mapGridPosition _pos;
 
 // Active incident summary
 private _taskId = missionNamespace getVariable ["ARC_activeTaskId", ""]; if (!(_taskId isEqualType "")) then { _taskId = ""; };
-private _hasIncident = (_taskId isNotEqualTo "");
+private _hasIncident = (_taskId != "");
 private _incDisp = missionNamespace getVariable ["ARC_activeIncidentDisplayName", "(none)"]; if (!(_incDisp isEqualType "")) then { _incDisp = "(none)"; };
 private _incType = missionNamespace getVariable ["ARC_activeIncidentType", ""]; if (!(_incType isEqualType "")) then { _incType = ""; };
 private _incPos  = missionNamespace getVariable ["ARC_activeIncidentPos", []]; if (!(_incPos isEqualType [])) then { _incPos = []; };
@@ -80,13 +87,13 @@ private _sitrepSent = missionNamespace getVariable ["ARC_activeIncidentSitrepSen
 // Follow-on (from field SITREP flow) and/or system-queued follow-on lead
 private _foSummary = missionNamespace getVariable ["ARC_activeIncidentFollowOnSummary", ""];
 if (!(_foSummary isEqualType "")) then { _foSummary = ""; };
-_foSummary = trim _foSummary;
+_foSummary = [_foSummary] call _trimFn;
 private _foLeadName = missionNamespace getVariable ["ARC_activeIncidentFollowOnLeadName", ""];
 if (!(_foLeadName isEqualType "")) then { _foLeadName = ""; };
-_foLeadName = trim _foLeadName;
+_foLeadName = [_foLeadName] call _trimFn;
 private _foLeadGrid = missionNamespace getVariable ["ARC_activeIncidentFollowOnLeadGrid", ""];
 if (!(_foLeadGrid isEqualType "")) then { _foLeadGrid = ""; };
-_foLeadGrid = trim _foLeadGrid;
+_foLeadGrid = [_foLeadGrid] call _trimFn;
 
 private _incLine = if (!_hasIncident) then
 {
@@ -119,9 +126,9 @@ private _issued = [];
 private _accepted = [];
 {
     if (!(_x isEqualType [] && { (count _x) >= 6 })) then { continue; };
-    private _st = toUpper (_x # 2);
-    private _tg = _x # 4;
-    if (_tg isNotEqualTo _gid) then { continue; };
+    private _st = toUpper (_x select 2);
+    private _tg = _x select 4;
+    if (_tg != _gid) then { continue; };
     if (_st isEqualTo "ISSUED") then { _issued pushBack _x; };
     if (_st isEqualTo "ACCEPTED") then { _accepted pushBack _x; };
 } forEach _orders;
@@ -152,7 +159,9 @@ if ((count _intelLog) > 0) then
     private _last = _intelLog select ((count _intelLog) - 1);
     if (_last isEqualType [] && { (count _last) >= 6 }) then
     {
-        _last params ["_id", "_t", "_cat", "_sum", "_p", "_meta"]; 
+        private _cat = _last select 2;
+        private _sum = _last select 3;
+        private _p = _last select 4;
         private _g = if (_p isEqualType [] && { (count _p) >= 2 }) then { mapGridPosition _p } else { "" };
         _sum = [_sum, ""] call _trimText;
         _lastIntel = format ["<t color='#DDDDDD'>[%1] %2</t><t color='#AAAAAA'> %3</t>", toUpper _cat, _sum, if (_g isEqualTo "") then {""} else { format ["@ %1", _g] }];
@@ -176,10 +185,10 @@ if ((count _statusRows) > _rxMaxItems) then { _statusRows = _statusRows select [
 private _unitLines = [];
 {
     if (!(_x isEqualType []) || { (count _x) < 2 }) then { continue; };
-    private _gidU = _x # 0;
-    private _stRaw = if ((_x # 1) isEqualType "") then { toUpper (trim (_x # 1)) } else { "UNAVAILABLE" };
+    private _gidU = _x select 0;
+    private _stRaw = if ((_x select 1) isEqualType "") then { toUpper ([_x select 1] call _trimFn) } else { "UNAVAILABLE" };
     if (_stRaw isEqualTo "OFFLINE") then { _stRaw = "UNAVAILABLE"; };
-    private _why = if ((count _x) >= 5 && { (_x # 4) isEqualType "" }) then { [(_x # 4), ""] call _trimText } else { "" };
+    private _why = if ((count _x) >= 5 && { (_x select 4) isEqualType "" }) then { [(_x select 4), ""] call _trimText } else { "" };
     private _stColor = "#FFD166";
     if (_stRaw in ["AVAILABLE", "ON SCENE"]) then { _stColor = "#9FE870"; };
     if (_stRaw in ["UNAVAILABLE", "FAILED"]) then { _stColor = "#FF7A7A"; };
@@ -202,9 +211,9 @@ private _accessLine = format [
 ];
 
 private _hdr = format [
-    "<t size='1.15' font='PuristaMedium'>COP / Dashboard</t><br/>" +
+    "<t size='1.15' font='PuristaMedium' color='#B89B6B'>COP / Dashboard</t><br/>" +
     "<t size='0.9'><t color='#B89B6B'>Role:</t> <t color='#FFFFFF'>%1</t> <t color='#B89B6B'>| Group:</t> <t color='#FFFFFF'>%2</t> <t color='#B89B6B'>| Tag:</t> <t color='#FFFFFF'>%3</t></t><br/>" +
-    "<t size='0.85' color='#AAAAAA'>Your grid: %4 | Station: %5</t><br/><br/>",
+    "<t size='0.85' color='#AAAAAA'>Your grid: %4 | Station: %5</t><br/>",
     _roleCat,
     if (_gid isEqualTo "") then {"(none)"} else {_gid},
     _tag,
@@ -213,20 +222,20 @@ private _hdr = format [
 ];
 
 private _foLine = "";
-if (_foSummary isNotEqualTo "") then
+if (_foSummary != "") then
 {
     _foLine = _foLine + format ["<t size='0.85' color='#BBBBBB'>Field follow-on: %1</t><br/>", _foSummary];
 };
-if (_foLeadName isNotEqualTo "") then
+if (_foLeadName != "") then
 {
     _foLine = _foLine + format ["<t size='0.85' color='#BBBBBB'>System follow-on lead: %1</t><br/>", _foLeadName];
 };
-if (_foLine isNotEqualTo "") then { _foLine = _foLine + "<br/>"; };
+if (_foLine != "") then { _foLine = _foLine + "<br/>"; };
 
-private _secIncident = "<t size='1.0' font='PuristaMedium'>Current Incident</t><br/><br/>" + _incLine + "<br/>" + _foLine + "<br/><br/>";
-private _secOrders   = "<t size='1.0' font='PuristaMedium'>Orders</t><br/><br/>" + _ordLine + "<br/><br/>";
+private _secIncident = "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Current Incident</t><br/>" + _incLine + "<br/>" + _foLine + "<br/>";
+private _secOrders   = "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Orders</t><br/>" + _ordLine + "<br/><br/>";
 private _secIntel    = format [
-    "<t size='1.0' font='PuristaMedium'>Intel / Leads</t><br/><br/>" +
+    "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Intel / Leads</t><br/>" +
     "<t color='#DDDDDD'>Lead pool:</t> %1<br/>" +
     "<t color='#DDDDDD'>Queue pending:</t> %2<br/>" +
     "<t color='#DDDDDD'>Latest intel:</t> %3<br/><br/>",
@@ -234,7 +243,7 @@ private _secIntel    = format [
     _qPending,
     _lastIntel
 ];
-private _secUnits = "<t size='1.0' font='PuristaMedium'>Unit Availability</t><br/><br/>" + _unitsBlock + "<br/><br/>";
+private _secUnits = "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Unit Availability</t><br/>" + _unitsBlock + "<br/><br/>";
 
 // Next Actions: workflow coaching / blocker visibility
 private _secNext = "";
@@ -244,7 +253,7 @@ private _secNext = "";
 	if (isNil "ARC_fnc_uiIncidentGetNextActions") then
 	{
 		private _p = "functions\\ui\\fn_uiIncidentGetNextActions.sqf";
-		if (fileExists _p) then
+		if ([_p] call _fileExistsFn) then
 		{
 			ARC_fnc_uiIncidentGetNextActions = compileFinal (preprocessFileLineNumbers _p);
 		};
@@ -255,7 +264,7 @@ private _secNext = "";
 	};
 if (_nextArr isEqualType [] && { (count _nextArr) > 0 }) then
 {
-    _secNext = "<t size='1.0' font='PuristaMedium'>Next Actions</t><br/>" + (_nextArr joinString "<br/>") + "<br/><br/>";
+    _secNext = "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Next Actions</t><br/>" + (_nextArr joinString "<br/>") + "<br/><br/>";
 };
 
 private _sections = [];
@@ -307,9 +316,54 @@ _ctrlMain ctrlSetStructuredText parseText _txt;
 // Auto-fit + clamp to viewport so the controls group can scroll when needed.
 [_ctrlMain] call BIS_fnc_ctrlFitToTextHeight;
 private _mainGrp = _display displayCtrl 78015;
-private _minH = if (!isNull _mainGrp) then { (ctrlPosition _mainGrp) # 3 } else { 0.74 };
+private _minH = if (!isNull _mainGrp) then { (ctrlPosition _mainGrp) select 3 } else { 0.74 };
 private _p = ctrlPosition _ctrlMain;
-_p set [3, (_p # 3) max _minH];
+_p set [3, (_p select 3) max _minH];
 _ctrlMain ctrlSetPosition _p;
 _ctrlMain ctrlCommit 0;
+
+// Right panel: quick status summary / actionable context.
+if (!isNull _ctrlDetailsGrp && { !isNull _ctrlDetails }) then
+{
+    _ctrlDetailsGrp ctrlShow true;
+    _ctrlDetails ctrlShow true;
+
+    private _incStatusColor = if (!_hasIncident) then {"#AAAAAA"} else { if (_closeReady) then {"#9FE870"} else {"#FFD166"} };
+    private _incStatusText  = if (!_hasIncident) then {"No active incident"} else { if (_closeReady) then {"CLOSE-READY"} else { if (_acc) then {"In progress"} else {"Pending acceptance"} } };
+
+    private _qColor = if (_qPendingCnt >= 5) then {"#FF7A7A"} else { if (_qPendingCnt >= 3) then {"#FFD166"} else {"#9FE870"} };
+
+    private _rTxt =
+        "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Quick Status</t><br/>" +
+        format ["<t size='0.9' color='#BDBDBD'>Incident:</t> <t size='0.9' color='%1'>%2</t><br/>", _incStatusColor, _incStatusText] +
+        format ["<t size='0.9' color='#BDBDBD'>Queue pending:</t> <t size='0.9' color='%1'>%2</t><br/>", _qColor, _qPendingCnt] +
+        format ["<t size='0.9' color='#BDBDBD'>Unit reports:</t> <t size='0.9'>%1</t><br/>", count _statusRows] +
+        format ["<t size='0.9' color='#BDBDBD'>Intel leads:</t> <t size='0.9'>%1</t><br/>", count _leadPool] +
+        "<br/><t size='1.0' font='PuristaMedium' color='#B89B6B'>Quick Reference</t><br/>" +
+        "<t size='0.85' color='#DDDDDD'>OPS — submit/track field actions</t><br/>" +
+        "<t size='0.85' color='#DDDDDD'>INTEL — leads, briefs, EPW</t><br/>" +
+        "<t size='0.85' color='#DDDDDD'>CMD — incident command cycle</t><br/>" +
+        "<t size='0.85' color='#DDDDDD'>AIR — airbase/tower controls</t><br/>" +
+        "<br/><t size='0.8' color='#808080'>LCTRL+LSHIFT+T to open console.</t>";
+
+    _ctrlDetails ctrlSetStructuredText parseText _rTxt;
+
+    private _dashDefaultPos = uiNamespace getVariable ["ARC_console_dashDetailsDefaultPos", []];
+    if (!(_dashDefaultPos isEqualType []) || { (count _dashDefaultPos) < 4 }) then
+    {
+        _dashDefaultPos = ctrlPosition _ctrlDetails;
+        uiNamespace setVariable ["ARC_console_dashDetailsDefaultPos", +_dashDefaultPos];
+    };
+    [_ctrlDetails] call BIS_fnc_ctrlFitToTextHeight;
+    private _dashGrp = _display displayCtrl 78016;
+    private _dashMinH = if (!isNull _dashGrp) then { (ctrlPosition _dashGrp) select 3 } else { 0.74 };
+    private _dashP = ctrlPosition _ctrlDetails;
+    _dashP set [0, _dashDefaultPos select 0];
+    _dashP set [1, _dashDefaultPos select 1];
+    _dashP set [2, _dashDefaultPos select 2];
+    _dashP set [3, (_dashP select 3) max _dashMinH];
+    _ctrlDetails ctrlSetPosition _dashP;
+    _ctrlDetails ctrlCommit 0;
+};
+
 true

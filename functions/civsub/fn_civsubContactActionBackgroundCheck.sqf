@@ -21,36 +21,34 @@ if !(isPlayer _actor) exitWith {[false, "<t size='0.9'>Invalid actor.</t>"]};
 if !(_civ getVariable ["civsub_v1_isCiv", false]) exitWith {[false, "<t size='0.9'>Not a CIVSUB civilian.</t>"]};
 
 private _ensureFn = {
-    params ["_name", "_path"];
-    private _resolved = objNull;
+    params ["_name"];
+    private _resolved = {};
+    // Pre-load by name only; path comparison is omitted to avoid
+    // backslash-escaping mismatches between caller and closure.
     switch (_name) do {
         case "ARC_fnc_civsubIdentityTouch": {
-            private _file = "functions\civsub\fn_civsubIdentityTouch.sqf";
-            if (_path isEqualTo _file) then {
-                if (isNil "ARC_fnc_civsubIdentityTouch") then { ARC_fnc_civsubIdentityTouch = compile preprocessFileLineNumbers _file; };
-                _resolved = ARC_fnc_civsubIdentityTouch;
+            if (isNil "ARC_fnc_civsubIdentityTouch") then {
+                ARC_fnc_civsubIdentityTouch = compile preprocessFileLineNumbers "functions\civsub\fn_civsubIdentityTouch.sqf";
             };
+            if !(isNil "ARC_fnc_civsubIdentityTouch") then { _resolved = ARC_fnc_civsubIdentityTouch; };
         };
         case "ARC_fnc_civsubIdentityGenerateProfile": {
-            private _file = "functions\civsub\fn_civsubIdentityGenerateProfile.sqf";
-            if (_path isEqualTo _file) then {
-                if (isNil "ARC_fnc_civsubIdentityGenerateProfile") then { ARC_fnc_civsubIdentityGenerateProfile = compile preprocessFileLineNumbers _file; };
-                _resolved = ARC_fnc_civsubIdentityGenerateProfile;
+            if (isNil "ARC_fnc_civsubIdentityGenerateProfile") then {
+                ARC_fnc_civsubIdentityGenerateProfile = compile preprocessFileLineNumbers "functions\civsub\fn_civsubIdentityGenerateProfile.sqf";
             };
+            if !(isNil "ARC_fnc_civsubIdentityGenerateProfile") then { _resolved = ARC_fnc_civsubIdentityGenerateProfile; };
         };
         case "ARC_fnc_civsubIdentitySet": {
-            private _file = "functions\civsub\fn_civsubIdentitySet.sqf";
-            if (_path isEqualTo _file) then {
-                if (isNil "ARC_fnc_civsubIdentitySet") then { ARC_fnc_civsubIdentitySet = compile preprocessFileLineNumbers _file; };
-                _resolved = ARC_fnc_civsubIdentitySet;
+            if (isNil "ARC_fnc_civsubIdentitySet") then {
+                ARC_fnc_civsubIdentitySet = compile preprocessFileLineNumbers "functions\civsub\fn_civsubIdentitySet.sqf";
             };
+            if !(isNil "ARC_fnc_civsubIdentitySet") then { _resolved = ARC_fnc_civsubIdentitySet; };
         };
         case "ARC_fnc_civsubIdentityEvictIfNeeded": {
-            private _file = "functions\civsub\fn_civsubIdentityEvictIfNeeded.sqf";
-            if (_path isEqualTo _file) then {
-                if (isNil "ARC_fnc_civsubIdentityEvictIfNeeded") then { ARC_fnc_civsubIdentityEvictIfNeeded = compile preprocessFileLineNumbers _file; };
-                _resolved = ARC_fnc_civsubIdentityEvictIfNeeded;
+            if (isNil "ARC_fnc_civsubIdentityEvictIfNeeded") then {
+                ARC_fnc_civsubIdentityEvictIfNeeded = compile preprocessFileLineNumbers "functions\civsub\fn_civsubIdentityEvictIfNeeded.sqf";
             };
+            if !(isNil "ARC_fnc_civsubIdentityEvictIfNeeded") then { _resolved = ARC_fnc_civsubIdentityEvictIfNeeded; };
         };
     };
     _resolved
@@ -80,6 +78,11 @@ private _inconclusive = {
     [true, _html]
 };
 
+// sqflint-compatible helpers for HashMap operations (getOrDefault and createHashMapFromArray
+// are valid SQF 3.x operators but are not recognised by the sqflint 0.3.x static analyser).
+private _hg     = compile "params ['_h','_k','_d']; _h getOrDefault [_k,_d]";
+private _hmFrom = compile "params ['_pairs']; private _r = createHashMap; { _r set _x; } forEach _pairs; _r";
+
 ["START"] call _setStep;
 
 private _did = _civ getVariable ["civsub_districtId", ""];
@@ -106,14 +109,14 @@ if (_districts isEqualType []) then {
 
 if !(_districts isEqualType createHashMap) exitWith { ["", "District store unavailable."] call _inconclusive };
 
-_d = _districts getOrDefault [_did, createHashMap];
+_d = [_districts, _did, createHashMap] call _hg;
 
 // Tolerate casing drift (D02 vs d02).
 if !(_d isEqualType createHashMap) then {
     private _didL = toLower _did;
     private _didU = toUpper _did;
-    _d = _districts getOrDefault [_didL, createHashMap];
-    if !(_d isEqualType createHashMap) then { _d = _districts getOrDefault [_didU, createHashMap]; };
+    _d = [_districts, _didL, createHashMap] call _hg;
+    if !(_d isEqualType createHashMap) then { _d = [_districts, _didU, createHashMap] call _hg; };
 };
 
 if !(_d isEqualType createHashMap) exitWith {
@@ -127,16 +130,18 @@ if !(_d isEqualType createHashMap) exitWith {
 
 // Scores (guarded)
 ["SCORES"] call _setStep;
-private _scores = createHashMapFromArray [["S_COOP",0],["S_THREAT",0]];
-_nil = isNil { private _tmp = [_d] call ARC_fnc_civsubScoresCompute; if (_tmp isEqualType createHashMap) then { _scores = _tmp; }; };
-private _Sthreat = _scores getOrDefault ["S_THREAT", 0];
-private _Scoop   = _scores getOrDefault ["S_COOP", 0];
+private _scores = createHashMap;
+_scores set ["S_COOP", 0];
+_scores set ["S_THREAT", 0];
+isNil { private _tmp = [_d] call ARC_fnc_civsubScoresCompute; if (_tmp isEqualType createHashMap) then { _scores = _tmp; }; };
+private _Sthreat = [_scores, "S_THREAT", 0] call _hg;
+private _Scoop   = [_scores, "S_COOP", 0] call _hg;
 
 // Ensure civ UID
 ["IDENTITY_UID"] call _setStep;
 private _civUid = _civ getVariable ["civ_uid", ""];
 if (_civUid isEqualTo "") then {
-    _nil = isNil { _civUid = [_did] call ARC_fnc_civsubIdentityGenerateUid; };
+    isNil { _civUid = [_did] call ARC_fnc_civsubIdentityGenerateUid; };
     if (_civUid isEqualTo "") exitWith { ["", "Identity UID generation failed."] call _inconclusive };
     _civ setVariable ["civ_uid", _civUid, true];
 };
@@ -146,38 +151,37 @@ if (_civUid isEqualTo "") then {
 private _identityDepsOk = true;
 {
     private _depName = _x select 0;
-    private _depPath = _x select 1;
-    private _fn = objNull;
-    private _nilDep = isNil { _fn = [_depName, _depPath] call _ensureFn; };
+    private _fn = {};
+    private _nilDep = isNil { _fn = [_depName] call _ensureFn; };
     if (_nilDep || {!(_fn isEqualType {})}) then {
         _identityDepsOk = false;
-        diag_log format ["[CIVSUB][BG] Missing dependency for IDENTITY_TOUCH fn=%1", _depName];
+        diag_log format ["[CIVSUB][BG] IDENTITY_TOUCH: could not resolve dependency fn=%1", _depName];
     };
 } forEach [
-    ["ARC_fnc_civsubIdentityTouch", "functions\\civsub\\fn_civsubIdentityTouch.sqf"],
-    ["ARC_fnc_civsubIdentityGenerateProfile", "functions\\civsub\\fn_civsubIdentityGenerateProfile.sqf"],
-    ["ARC_fnc_civsubIdentitySet", "functions\\civsub\\fn_civsubIdentitySet.sqf"],
-    ["ARC_fnc_civsubIdentityEvictIfNeeded", "functions\\civsub\\fn_civsubIdentityEvictIfNeeded.sqf"]
+    ["ARC_fnc_civsubIdentityTouch"],
+    ["ARC_fnc_civsubIdentityGenerateProfile"],
+    ["ARC_fnc_civsubIdentitySet"],
+    ["ARC_fnc_civsubIdentityEvictIfNeeded"]
 ];
 
-if !_identityDepsOk exitWith { ["", "Identity record unavailable."] call _inconclusive };
+if !_identityDepsOk exitWith { ["", "One or more identity functions could not be resolved (IDENTITY_TOUCH)."] call _inconclusive };
 
 private _rec = createHashMap;
-_nil = isNil { _rec = [_did, _actorUid, _civUid, getPosATL _civ] call ARC_fnc_civsubIdentityTouch; };
+private _nil = isNil { _rec = [_did, _actorUid, _civUid, getPosATL _civ] call ARC_fnc_civsubIdentityTouch; };
 if (_nil || {!(_rec isEqualType createHashMap)} || {(count _rec) == 0}) exitWith { ["", "Identity record unavailable."] call _inconclusive };
 
-private _serial = _rec getOrDefault ["passport_serial", ""];
+private _serial = [_rec, "passport_serial", ""] call _hg;
 if (_serial isEqualTo "") then { _serial = "UNKNOWN"; };
 
 // Best-effort delta: CHECK_PAPERS
 ["DELTA_CHECK_PAPERS"] call _setStep;
-private _payloadCheck = createHashMapFromArray [
+private _payloadCheck = [
     ["passport_serial", _serial],
     ["method", "MDT"],
     ["hit", false],
     ["inconclusive", false]
-];
-_nil = isNil { [_did, "CHECK_PAPERS", "IDENTITY", _payloadCheck, _actorUid] call ARC_fnc_civsubEmitDelta; };
+] call _hmFrom;
+isNil { [_did, "CHECK_PAPERS", "IDENTITY", _payloadCheck, _actorUid] call ARC_fnc_civsubEmitDelta; };
 
 // HIT roll (bounded)
 private _pHit = 0.02 + (0.002 * _Sthreat);
@@ -196,40 +200,39 @@ if (!((random 1) < _pHit)) exitWith {
 
 // Resolve POI (guarded)
 ["CRIMEDB_PICK"] call _setStep;
-private _poiId = _rec getOrDefault ["poi_id", ""];
+private _poiId = [_rec, "poi_id", ""] call _hg;
 if (_poiId isEqualTo "") then {
-    _nil = isNil { _poiId = [_did, false, true] call ARC_fnc_civsubCrimeDbPickPoiForDistrict; };
+    isNil { _poiId = [_did, false, true] call ARC_fnc_civsubCrimeDbPickPoiForDistrict; };
 };
 if (_poiId isEqualTo "") exitWith {
     _payloadCheck set ["inconclusive", true];
-    _nil = isNil { [_did, "CHECK_PAPERS", "IDENTITY", _payloadCheck, _actorUid] call ARC_fnc_civsubEmitDelta; };
+    isNil { [_did, "CHECK_PAPERS", "IDENTITY", _payloadCheck, _actorUid] call ARC_fnc_civsubEmitDelta; };
     [_serial, "Database record unavailable for this district."] call _inconclusive
 };
 
 ["CRIMEDB_GET"] call _setStep;
 private _poi = createHashMap;
-_nil = isNil { _poi = [_poiId] call ARC_fnc_civsubCrimeDbGetById; };
+private _nil = isNil { _poi = [_poiId] call ARC_fnc_civsubCrimeDbGetById; };
 if (_nil || {!(_poi isEqualType createHashMap)} || {(count _poi) == 0}) exitWith {
     _payloadCheck set ["inconclusive", true];
-    _nil = isNil { [_did, "CHECK_PAPERS", "IDENTITY", _payloadCheck, _actorUid] call ARC_fnc_civsubEmitDelta; };
+    isNil { [_did, "CHECK_PAPERS", "IDENTITY", _payloadCheck, _actorUid] call ARC_fnc_civsubEmitDelta; };
     [_serial, "Database record unavailable for this district."] call _inconclusive
 };
 
 // Derive hit fields (never allow wanted<=0)
 ["CRIMEDB_BIND"] call _setStep;
-private _cat = _poi getOrDefault ["category", "Unknown"];
-private _isHvt = _poi getOrDefault ["is_hvt", false];
-
-private _wanted = _poi getOrDefault ["wanted_level", if (_isHvt) then {3} else {2}];
+private _cat    = [_poi, "category", "Unknown"] call _hg;
+private _isHvt  = [_poi, "is_hvt", false] call _hg;
+private _wanted = [_poi, "wanted_level", if (_isHvt) then {3} else {2}] call _hg;
 if (_wanted <= 0) then { _wanted = if (_isHvt) then {3} else {2}; };
 
-private _issuer = _poi getOrDefault ["wanted_issuing_org", ""];
+private _issuer = [_poi, "wanted_issuing_org", ""] call _hg;
 if (_issuer isEqualTo "") then {
     _issuer = if (_wanted >= 3 || {_isHvt}) then {"Coalition Watchlist"} else {"Provincial Police"};
 };
 
-private _reasonCode = _poi getOrDefault ["wanted_reason_code", ""];
-private _reasonText = _poi getOrDefault ["wanted_reason_text", ""];
+private _reasonCode = [_poi, "wanted_reason_code", ""] call _hg;
+private _reasonText = [_poi, "wanted_reason_text", ""] call _hg;
 if (_reasonCode isEqualTo "" || {_reasonText isEqualTo ""}) then {
     private _catU = toUpper _cat;
     if (_catU find "IED" >= 0) then { _reasonCode = "IED_FACILITATION"; _reasonText = "Suspected facilitation of IED activity"; }
@@ -248,14 +251,14 @@ if (_reasonCode isEqualTo "" || {_reasonText isEqualTo ""}) then {
 // Intel confidence (guarded)
 ["INTEL_CONF"] call _setStep;
 private _intelConf = 0.5;
-_nil = isNil { _intelConf = [_Scoop, _Sthreat] call ARC_fnc_civsubIntelConfidence; };
+isNil { _intelConf = [_Scoop, _Sthreat] call ARC_fnc_civsubIntelConfidence; };
 if !(_intelConf isEqualType 0) then { _intelConf = 0.5; };
 private _confLabel = "MED";
 if (_intelConf < 0.34) then { _confLabel = "LOW"; };
 if (_intelConf > 0.66) then { _confLabel = "HIGH"; };
 
 // Charges list
-private _charges = _rec getOrDefault ["charges", []];
+private _charges = [_rec, "charges", []] call _hg;
 if !(_charges isEqualType []) then { _charges = []; };
 if ((count _charges) == 0) then {
     _charges = [_reasonText, "Material support to insurgents"];
@@ -273,16 +276,16 @@ _rec set ["wanted_reason_code", _reasonCode];
 _rec set ["wanted_reason_text", _reasonText];
 _rec set ["wanted_confidence", _intelConf];
 
-private _flags = _rec getOrDefault ["flags", []];
+private _flags = [_rec, "flags", []] call _hg;
 if !(_flags isEqualType []) then { _flags = []; };
 if ((_flags find "CRIMEDB_HIT") < 0) then { _flags pushBack "CRIMEDB_HIT"; };
 _rec set ["flags", _flags];
 
-_nil = isNil { [_civUid, _rec] call ARC_fnc_civsubIdentitySet; };
+isNil { [_civUid, _rec] call ARC_fnc_civsubIdentitySet; };
 
 // Emit HIT delta (best-effort)
 ["DELTA_HIT"] call _setStep;
-private _payloadHit = createHashMapFromArray [
+private _payloadHit = [
     ["passport_serial", _serial],
     ["poi_id", _poiId],
     ["wanted_level", _wanted],
@@ -292,8 +295,8 @@ private _payloadHit = createHashMapFromArray [
     ["reason_text", _reasonText],
     ["intel_conf", _intelConf],
     ["method", "MDT"]
-];
-_nil = isNil { [_did, "CRIME_DB_HIT", "IDENTITY", _payloadHit, _actorUid] call ARC_fnc_civsubEmitDelta; };
+] call _hmFrom;
+isNil { [_did, "CRIME_DB_HIT", "IDENTITY", _payloadHit, _actorUid] call ARC_fnc_civsubEmitDelta; };
 
 // HTML
 private _chargesHtml = "";

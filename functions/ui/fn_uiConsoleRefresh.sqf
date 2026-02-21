@@ -154,6 +154,9 @@ switch (_tab) do
 
 case "DASH":
     {
+        // Show right details panel (populated by the painter).
+        if (!isNull _ctrlDetailsGrp) then { _ctrlDetailsGrp ctrlShow true; };
+        if (!isNull _ctrlDetails) then { _ctrlDetails ctrlShow true; };
         [_display] call ARC_fnc_uiConsoleDashboardPaint;
     };
 
@@ -299,6 +302,9 @@ case "DASH":
                 private _lbl = if (_taskId isEqualTo "") then {"GENERATE"} else { if (!_acc) then {"ACCEPT"} else {"CLOSEOUT"} };
                 _b2 ctrlShow true; _b2 ctrlEnable true; _b2 ctrlSetText _lbl;
             };
+            // Show right panel (populated by the painter).
+            if (!isNull _ctrlDetailsGrp) then { _ctrlDetailsGrp ctrlShow true; };
+            if (!isNull _ctrlDetails) then { _ctrlDetails ctrlShow true; };
             [_display] call ARC_fnc_uiConsoleCommandPaint;
         };
     };

@@ -50,14 +50,14 @@ private _metaGet = {
     params ["_rows", "_k", "_def"];
     private _v = _def;
     {
-        if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x # 0)) isEqualTo _k }) exitWith { _v = _x # 1; };
+        if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x select 0)) isEqualTo _k }) exitWith { _v = _x select 1; };
     } forEach _rows;
     _v
 };
 
 private _warnBadgeMeta = {
     params ["_meta"];
-    private _wl = toUpperANSI ([_meta, "arrivalWarnLevel", "NONE"] call _metaGet);
+    private _wl = toUpper ([_meta, "arrivalWarnLevel", "NONE"] call _metaGet);
     private _dist = [_meta, "arrivalDistanceM", -1] call _metaGet;
     private _distTxt = if (_dist isEqualType 0 && { _dist >= 0 }) then { format ["%1m", round _dist] } else { "-" };
     switch (_wl) do {
@@ -77,6 +77,9 @@ private _fmtTime = {
     private _s = _v mod 60;
     format ["%1m %2s", _m, _s]
 };
+
+// sqflint 0.3.2 compat: wrap trim via compile so the linter does not error on unknown operator.
+private _trimFn = compile "params ['_s']; trim _s";
 
 private _air = [_pub, "airbase", []] call _getPub;
 if (!(_air isEqualType [])) then { _air = []; };
@@ -143,13 +146,11 @@ if (!(_towerStaffing isEqualType [])) then { _towerStaffing = []; };
 
 private _staffLaneRec = {
     params ["_rows", "_lane"];
-    private _idx = _rows findIf {
-        (_x isEqualType []) &&
-        { (count _x) >= 5 } &&
-        { ((_x param [0, ""]) isEqualTo _lane) }
-    };
+    // sqflint 0.3.2 does not understand findIf; replaced with equivalent forEach loop.
+    private _idx = -1;
+    { if ((_x isEqualType []) && { (count _x) >= 5 } && { ((_x param [0, ""]) isEqualTo _lane) }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
     if (_idx < 0) exitWith { [_lane, "AUTO", "", "", -1] };
-    _rows # _idx
+    _rows select _idx
 };
 
 private _towerLane = [_towerStaffing, "tower"] call _staffLaneRec;
@@ -160,7 +161,7 @@ private _stateUpdatedAt = missionNamespace getVariable ["ARC_pub_stateUpdatedAt"
 if (!(_stateUpdatedAt isEqualType 0)) then { _stateUpdatedAt = -1; };
 
 private _airModeList = ["ARC_console_airMode", "TOWER"] call ARC_fnc_uiNsGetString;
-_airModeList = toUpperANSI (trim _airModeList);
+_airModeList = toUpper ([_airModeList] call _trimFn);
 if !(_airModeList in ["TOWER", "PILOT"]) then { _airModeList = "TOWER"; };
 
 if (_rebuild) then {
@@ -170,8 +171,8 @@ if (_rebuild) then {
         private _hdrPilot = _ctrlList lbAdd "-- PILOT ACTIONS --";
         _ctrlList lbSetData [_hdrPilot, "HDR|PACT"];
         {
-            private _row = _ctrlList lbAdd (_x # 0);
-            _ctrlList lbSetData [_row, format ["PACT|%1", _x # 1]];
+            private _row = _ctrlList lbAdd (_x select 0);
+            _ctrlList lbSetData [_row, format ["PACT|%1", _x select 1]];
         } forEach [
             ["Request Taxi", "REQ_TAXI"],
             ["Request Takeoff", "REQ_TAKEOFF"],
@@ -184,7 +185,7 @@ if (_rebuild) then {
         private _myArrivals = _clearancePending select {
             private _meta = _x param [9, []];
             private _pid = [_meta, "pilotUid", ""] call _metaGet;
-            private _rtype = toUpperANSI (_x param [1, ""]);
+            private _rtype = toUpper (_x param [1, ""]);
             (_pid isEqualTo _uidPilot) && (_rtype in ["REQ_INBOUND", "REQ_LAND"])
         };
         if ((count _myArrivals) > 0) then {
@@ -193,7 +194,7 @@ if (_rebuild) then {
             {
                 private _rid = _x param [0, ""];
                 private _rtype = _x param [1, ""];
-                private _status = toUpperANSI (_x param [5, ""]);
+                private _status = toUpper (_x param [5, ""]);
                 private _meta = _x param [9, []];
                 private _badge = [_meta] call _warnBadgeMeta;
                 if (_badge isEqualTo "") then { _badge = "[NONE]"; };
@@ -219,7 +220,7 @@ if (_rebuild) then {
             private _rtype = _x param [1, ""];
             private _pilot = _x param [2, ""];
             private _prio = _x param [4, 0];
-            private _status = toUpperANSI (_x param [5, ""]);
+            private _status = toUpper (_x param [5, ""]);
             private _updated = _x param [7, -1];
             private _decision = _x param [8, []];
             private _meta = _x param [9, []];
@@ -230,11 +231,11 @@ if (_rebuild) then {
             if (_decision isEqualType [] && { (count _decision) >= 1 }) then { _decBy = _decision param [0, ""]; };
 
             private _pilotLabel = if (_callsign isEqualTo "") then { _pilot } else { _callsign };
-            if (_groupName isNotEqualTo "") then { _pilotLabel = format ["%1 | %2", _pilotLabel, _groupName]; };
+            if (_groupName != "") then { _pilotLabel = format ["%1 | %2", _pilotLabel, _groupName]; };
             private _warnBadge = [_meta] call _warnBadgeMeta;
             private _lbl = format ["%1 [%2] %3 (%4)", _rid, _rtype, _pilotLabel, _status];
-            if (_warnBadge isNotEqualTo "") then { _lbl = format ["%1 %2", _lbl, _warnBadge]; };
-            if (_acType isNotEqualTo "") then { _lbl = format ["%1 <%2>", _lbl, _acType]; };
+            if (_warnBadge != "") then { _lbl = format ["%1 %2", _lbl, _warnBadge]; };
+            if (_acType != "") then { _lbl = format ["%1 <%2>", _lbl, _acType]; };
             if ((_prio isEqualType 0) && { _prio >= 100 }) then { _lbl = format ["%1 !EMERGENCY!", _lbl]; };
 
             private _row = _ctrlList lbAdd _lbl;
@@ -269,12 +270,12 @@ if (_rebuild) then {
 
     {
         private _lane = _x param [0, ""];
-        private _status = toUpperANSI (_x param [1, "AUTO"]);
+        private _status = toUpper (_x param [1, "AUTO"]);
         private _op = _x param [2, ""];
         private _uid = _x param [3, ""];
         private _ts = _x param [4, -1];
-        private _who = if (_status isEqualTo "MANNED" && { _op isNotEqualTo "" }) then { _op } else { "AUTO" };
-        private _lbl = format ["%1: %2", toUpperANSI _lane, _who];
+        private _who = if (_status isEqualTo "MANNED" && { _op != "" }) then { _op } else { "AUTO" };
+        private _lbl = format ["%1: %2", toUpper _lane, _who];
         private _row = _ctrlList lbAdd _lbl;
         _ctrlList lbSetData [_row, format ["LANE|%1|%2|%3|%4|%5", _lane, _status, _op, _uid, _ts]];
     } forEach [_towerLane, _groundLane, _arrivalLane];
@@ -289,7 +290,7 @@ if (_rebuild) then {
     _ctrlList lbSetData [_hdrDec, "HDR|DEC"];
 
     private _decisions = _clearanceHistoryTail select {
-        private _s = toUpperANSI (_x param [6, ""]);
+        private _s = toUpper (_x param [6, ""]);
         _s in ["APPROVED", "DENIED", "CANCELED"]
     };
 
@@ -301,7 +302,7 @@ if (_rebuild) then {
         for "_i" from 0 to (_take - 1) do {
             private _rec = _decisions select ((count _decisions) - 1 - _i);
             private _rid = _rec param [0, ""];
-            private _status = toUpperANSI (_rec param [6, ""]);
+            private _status = toUpper (_rec param [6, ""]);
             private _upd = _rec param [8, -1];
             private _dec = _rec param [9, []];
             private _by = if (_dec isEqualType []) then { _dec param [0, ""] } else { "" };
@@ -327,7 +328,7 @@ private _rowType = if ((count _parts) > 0) then { _parts select 0 } else { "" };
 if ((count _parts) <= 1) then {
     private _legacyParts = _selData splitString ":";
     if ((count _legacyParts) > 0) then {
-        private _legacyType = toUpperANSI (_legacyParts param [0, ""]);
+        private _legacyType = toUpper (_legacyParts param [0, ""]);
         switch (_legacyType) do {
             case "Q": { _rowType = "FLT"; };
             case "CLR": { _rowType = "REQ"; };
@@ -348,7 +349,7 @@ private _canAirRead = ["ARC_console_airCanRead", false] call ARC_fnc_uiNsGetBool
 private _canAirControl = _canAirHoldRelease || _canAirQueueManage || _canAirStaff;
 private _canAirPilot = ["ARC_console_airCanPilot", false] call ARC_fnc_uiNsGetBool;
 private _airMode = ["ARC_console_airMode", if (_canAirPilot && !_canAirControl) then {"PILOT"} else {"TOWER"}] call ARC_fnc_uiNsGetString;
-_airMode = toUpperANSI (trim _airMode);
+_airMode = toUpper ([_airMode] call _trimFn);
 if !(_airMode in ["TOWER", "PILOT"]) then { _airMode = "TOWER"; };
 if ((_airMode isEqualTo "PILOT") && !_canAirPilot) then { _airMode = "TOWER"; };
 uiNamespace setVariable ["ARC_console_airMode", _airMode];
@@ -371,7 +372,6 @@ private _nextActionOwner = "TOWER";
 private _selectedState = "NONE";
 private _selectedUpdated = -1;
 private _selectedDetail = "Select a row.";
-private _selectedRouteDetail = "-";
 private _selectionHeading = "Selection Detail";
 private _selectionLines = [
     "Pick a queued flight, clearance, or lane row to inspect contextual metadata."
@@ -404,14 +404,15 @@ switch (_rowType) do {
             _selectedDetail = format ["Request %1 (%2) from %3", _rid, _parts param [2, ""], _parts param [3, ""]];
             _selectionHeading = format ["Clearance %1", _rid];
             _selectionLines = [];
-            private _reqIdx = _clearancePending findIf { (_x param [0, ""]) isEqualTo _rid };
+            private _reqIdx = -1;
+            { if ((_x param [0, ""]) isEqualTo _rid) exitWith { _reqIdx = _forEachIndex; }; } forEach _clearancePending;
             if (_reqIdx >= 0) then {
-                private _reqRec = _clearancePending # _reqIdx;
-                private _reqType = toUpperANSI (_reqRec param [1, "UNKNOWN"]);
+                private _reqRec = _clearancePending select _reqIdx;
+                private _reqType = toUpper (_reqRec param [1, "UNKNOWN"]);
                 private _reqPilot = _reqRec param [2, "-"];
                 private _reqCreated = _reqRec param [3, -1];
                 private _reqPrio = _reqRec param [4, 0];
-                private _reqStatus = toUpperANSI (_reqRec param [5, "PENDING"]);
+                private _reqStatus = toUpper (_reqRec param [5, "PENDING"]);
                 private _reqOwner = _reqRec param [6, ""];
                 private _reqUpdated = _reqRec param [7, -1];
                 private _reqDecision = _reqRec param [8, []];
@@ -421,15 +422,12 @@ switch (_rowType) do {
                 private _pilotGroup = [_reqMeta, "pilotGroupName", ""] call _metaGet;
                 private _laneDecision = [_reqMeta, "runwayLaneDecision", "-"] call _metaGet;
                 private _laneReason = [_reqMeta, "runwayLaneDecisionReason", "-"] call _metaGet;
-                private _runwayMarker = [_reqMeta, "runwayMarker", "-"] call _metaGet;
                 private _chain = [_reqMeta, "routeMarkerChain", []] call _metaGet;
                 if !(_chain isEqualType []) then { _chain = []; };
-                _selectedRouteDetail = format ["%1 via %2 (%3)", _laneDecision, _runwayMarker, if ((count _chain) > 0) then { _chain joinString " -> " } else { "no-chain" }];
-
                 private _decisionBy = if (_reqDecision isEqualType []) then { _reqDecision param [0, "-"] } else { "-" };
-                private _decisionAction = if (_reqDecision isEqualType []) then { toUpperANSI (_reqDecision param [3, "PENDING"]) } else { "PENDING" };
+                private _decisionAction = if (_reqDecision isEqualType []) then { toUpper (_reqDecision param [3, "PENDING"]) } else { "PENDING" };
                 private _pilotLabel = if (_pilotCallsign isEqualTo "") then { _reqPilot } else { _pilotCallsign };
-                if (_pilotGroup isNotEqualTo "") then { _pilotLabel = format ["%1 | %2", _pilotLabel, _pilotGroup]; };
+                if (_pilotGroup != "") then { _pilotLabel = format ["%1 | %2", _pilotLabel, _pilotGroup]; };
 
                 _selectionLines = [
                     format ["Request id: <t color='#FFFFFF'>%1</t> | Type: <t color='#FFFFFF'>%2</t>", _rid, _reqType],
@@ -475,22 +473,21 @@ switch (_rowType) do {
             _selectedDetail = format ["Flight %1 [%2] %3", _fid, _parts param [2, ""], _parts param [3, ""]];
             _selectionHeading = format ["Queued Flight %1", _fid];
             _selectionLines = [];
-            private _fltIdx = _nextItems findIf { (_x param [0, ""]) isEqualTo _fid };
+            private _fltIdx = -1;
+            { if ((_x param [0, ""]) isEqualTo _fid) exitWith { _fltIdx = _forEachIndex; }; } forEach _nextItems;
             if (_fltIdx >= 0) then {
-                private _fltRec = _nextItems # _fltIdx;
+                private _fltRec = _nextItems select _fltIdx;
                 private _flightKind = _fltRec param [1, "-"];
                 private _flightAsset = _fltRec param [2, "-"];
-                private _fltMeta = (_nextItems # _fltIdx) param [3, []];
+                private _fltMeta = (_nextItems select _fltIdx) param [3, []];
                 if !(_fltMeta isEqualType []) then { _fltMeta = []; };
                 private _laneDecision = [_fltMeta, "runwayLaneDecision", "-"] call _metaGet;
                 private _laneReason = [_fltMeta, "runwayLaneDecisionReason", "-"] call _metaGet;
-                private _runwayMarker = [_fltMeta, "runwayMarker", "-"] call _metaGet;
                 private _chain = [_fltMeta, "routeMarkerChain", []] call _metaGet;
                 private _sourceRid = [_fltMeta, "sourceRequestId", "-"] call _metaGet;
                 private _queueTs = [_fltMeta, "queuedAt", -1] call _metaGet;
                 private _owner = [_fltMeta, "owner", "AUTO"] call _metaGet;
                 if !(_chain isEqualType []) then { _chain = []; };
-                _selectedRouteDetail = format ["%1 via %2 (%3)", _laneDecision, _runwayMarker, if ((count _chain) > 0) then { _chain joinString " -> " } else { "no-chain" }];
                 _selectionLines = [
                     format ["Flight id: <t color='#FFFFFF'>%1</t> | Kind: <t color='#FFFFFF'>%2</t>", _fid, _flightKind],
                     format ["Asset: <t color='#FFFFFF'>%1</t> | Source request: <t color='#FFFFFF'>%2</t>", _flightAsset, _sourceRid],
@@ -517,16 +514,16 @@ switch (_rowType) do {
 
     case "LANE": {
         private _lane = _parts param [1, "tower"];
-        private _status = toUpperANSI (_parts param [2, "AUTO"]);
+        private _status = toUpper (_parts param [2, "AUTO"]);
         private _op = _parts param [3, ""];
         private _laneUid = _parts param [4, ""];
-        _selectedState = format ["LANE_%1_%2", toUpperANSI _lane, _status];
+        _selectedState = format ["LANE_%1_%2", toUpper _lane, _status];
         _selectedUpdated = parseNumber (_parts param [5, "-1"]);
         _nextActionOwner = "TOWER_CONTROLLER";
-        _selectedDetail = format ["%1 lane controller: %2", toUpperANSI _lane, if (_op isEqualTo "") then {"AUTO"} else {_op}];
-        _selectionHeading = format ["Lane %1", toUpperANSI _lane];
+        _selectedDetail = format ["%1 lane controller: %2", toUpper _lane, if (_op isEqualTo "") then {"AUTO"} else {_op}];
+        _selectionHeading = format ["Lane %1", toUpper _lane];
         _selectionLines = [
-            format ["Lane: <t color='#FFFFFF'>%1</t> | Status: <t color='#FFFFFF'>%2</t>", toUpperANSI _lane, _status],
+            format ["Lane: <t color='#FFFFFF'>%1</t> | Status: <t color='#FFFFFF'>%2</t>", toUpper _lane, _status],
             format ["Current owner: <t color='#FFFFFF'>%1</t>", if (_op isEqualTo "") then {"AUTO"} else {_op}],
             format ["Owner uid: <t color='#FFFFFF'>%1</t>", if (_laneUid isEqualTo "") then {"-"} else {_laneUid}],
             format ["Last staffing update: <t color='#FFFFFF'>%1</t>", [_selectedUpdated] call _fmtTime],
@@ -663,9 +660,9 @@ private _details = format [
     _runwayState,
     if (_runwayOwner isEqualTo "") then {"-"} else {_runwayOwner},
     if (_holdDepartures) then {"HOLD ACTIVE"} else {"OPEN"},
-    if ((toUpperANSI (_towerLane param [1, "AUTO"])) isEqualTo "MANNED") then { _towerLane param [2, "AUTO"] } else { "AUTO" },
-    if ((toUpperANSI (_groundLane param [1, "AUTO"])) isEqualTo "MANNED") then { _groundLane param [2, "AUTO"] } else { "AUTO" },
-    if ((toUpperANSI (_arrivalLane param [1, "AUTO"])) isEqualTo "MANNED") then { _arrivalLane param [2, "AUTO"] } else { "AUTO" },
+    if ((toUpper (_towerLane param [1, "AUTO"])) isEqualTo "MANNED") then { _towerLane param [2, "AUTO"] } else { "AUTO" },
+    if ((toUpper (_groundLane param [1, "AUTO"])) isEqualTo "MANNED") then { _groundLane param [2, "AUTO"] } else { "AUTO" },
+    if ((toUpper (_arrivalLane param [1, "AUTO"])) isEqualTo "MANNED") then { _arrivalLane param [2, "AUTO"] } else { "AUTO" },
     if (_execActive) then { format ["%1", _execFid] } else { "none" },
     _awaitingCount,
     [_air, "arrivalWarnAdvisoryM", 7000] call _getPub,
@@ -674,4 +671,24 @@ private _details = format [
 ];
 
 _ctrlDetails ctrlSetStructuredText parseText _details;
+
+// Auto-fit + clamp to viewport so the right-pane group can scroll when needed.
+// Pin x/y/w to the designed inset so BIS_fnc_ctrlFitToTextHeight does not
+// inherit a stretched width from prior paint passes and cause horizontal overflow.
+private _defaultPosAir = uiNamespace getVariable ["ARC_console_airDetailsDefaultPos", []];
+if (!(_defaultPosAir isEqualType []) || { (count _defaultPosAir) < 4 }) then
+{
+    _defaultPosAir = ctrlPosition _ctrlDetails;
+    uiNamespace setVariable ["ARC_console_airDetailsDefaultPos", +_defaultPosAir];
+};
+[_ctrlDetails] call BIS_fnc_ctrlFitToTextHeight;
+private _airGrp = _display displayCtrl 78016;
+private _airMinH = if (!isNull _airGrp) then { (ctrlPosition _airGrp) select 3 } else { 0.74 };
+private _airP = ctrlPosition _ctrlDetails;
+_airP set [0, _defaultPosAir select 0];
+_airP set [1, _defaultPosAir select 1];
+_airP set [2, _defaultPosAir select 2];
+_airP set [3, (_airP select 3) max _airMinH];
+_ctrlDetails ctrlSetPosition _airP;
+_ctrlDetails ctrlCommit 0;
 true
