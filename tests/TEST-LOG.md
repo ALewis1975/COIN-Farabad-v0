@@ -9,6 +9,36 @@ Append one dated entry per validation pass using:
 
 ---
 
+## Static QA Checklist — `fn_uiConsoleOnLoad.sqf` touch-required
+
+Run this checklist after any edit to `functions/ui/fn_uiConsoleOnLoad.sqf`.
+
+- sqflint parse/lint:
+  - `~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleOnLoad.sqf`
+- Runtime validation gate (behavior changes):
+  - `BLOCKED in CI/container` until confirmed in local MP and dedicated-server session before merge.
+
+---
+
+## 2026-02-21 02:35 UTC — ui console focus helper extraction + guards
+
+**Branch/Commit:** copilot/fix-invalid-number-in-expression @ pending
+
+**Scenario:** Extract focused-control skip logic into one helper call site in the refresh loop and add teardown guards for null display, non-Control focus values, and between-read nulling.
+
+**Commands:**
+```
+~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleOnLoad.sqf
+```
+
+**Result:** BLOCKED
+
+**Notes:**
+- Added local helper `_shouldSkipRefreshForFocus` to centralize focus-resolution and type-guard behavior.
+- Helper now explicitly handles display closure/null display, non-Control `focusedCtrl` returns, and control invalidation between retrieval and `ctrlType` usage.
+- Static lint command is recorded for required execution, but this container does not have `sqflint` installed (`command not found`).
+- Runtime validation placeholder remains required: local MP + dedicated confirmation before merge when behavior changes.
+
 ## 2026-02-21 01:50 UTC — marker index generator ripgrep fallback
 
 **Branch/Commit:** copilot/fix-recurring-errors-log @ pending
