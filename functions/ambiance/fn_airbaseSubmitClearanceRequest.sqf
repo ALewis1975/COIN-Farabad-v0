@@ -27,6 +27,11 @@ params [
     ["_priorityClassOverride", "", [""]]
 ];
 
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
+private _hmFrom  = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
+private _mapGet  = compile "params ['_h','_k']; _h get _k";
+
 if (!([_caller, "ARC_fnc_airbaseSubmitClearanceRequest", "Airbase clearance request rejected: sender verification failed.", "AIRBASE_CLEARANCE_SUBMIT_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 private _pilotTokens = missionNamespace getVariable ["airbase_v1_pilotGroupTokens", ["EFS", "HAWG", "VIPER", "PILOT"]];
@@ -85,15 +90,15 @@ if ((_vehOwner > 0) && { _vehOwner != _callerOwner }) exitWith {
 };
 
 if (!(_requestType isEqualType "")) then { _requestType = ""; };
-_requestType = toUpperANSI (trim _requestType);
-private _legacyTypeMap = createHashMapFromArray [
+_requestType = toUpper ([_requestType] call _trimFn);
+private _legacyTypeMap = [
     ["TAKEOFF", "REQ_TAKEOFF"],
     ["LANDING", "REQ_LAND"],
     ["TAXI", "REQ_TAXI"],
     ["RUNWAY_CROSS", "REQ_TAXI"],
     ["PARKING", "REQ_TAXI"]
-];
-private _mappedType = _legacyTypeMap get _requestType;
+] call _hmFrom;
+private _mappedType = [_legacyTypeMap, _requestType] call _mapGet;
 if (!isNil "_mappedType") then { _requestType = _mappedType; };
 
 if !(_requestType in ["REQ_TAXI", "REQ_TAKEOFF", "REQ_INBOUND", "REQ_LAND", "REQ_EMERGENCY"]) exitWith {
@@ -115,7 +120,7 @@ private _metaDistGet = {
     params ["_rows", "_k", "_def"];
     private _v = _def;
     {
-        if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x # 0)) isEqualTo _k }) exitWith { _v = _x # 1; };
+        if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x select 0)) isEqualTo _k }) exitWith { _v = _x select 1; };
     } forEach _rows;
     _v
 };
@@ -129,15 +134,15 @@ if (_requestType isEqualTo "REQ_LAND") then {
     private _hasInbound = false;
     {
         if !(_x isEqualType []) then { continue; };
-        private _rtype = toUpperANSI (_x param [1, ""]);
+        private _rtype = toUpper (_x param [1, ""]);
         if !(_rtype isEqualTo "REQ_INBOUND") then { continue; };
-        private _statusChk = toUpperANSI (_x param [6, ""]);
+        private _statusChk = toUpper (_x param [6, ""]);
         if (_statusChk in ["DENIED", "CANCELED", "COMPLETE"]) then { continue; };
         private _metaChk = _x param [10, []];
         if !(_metaChk isEqualType []) then { _metaChk = []; };
         private _metaPilotUid = [_metaChk, "pilotUid", ""] call _metaDistGet;
         private _metaAircraftNid = [_metaChk, "aircraftNetId", ""] call _metaDistGet;
-        if ((_metaPilotUid isEqualTo _pilotUid) || {(_metaAircraftNid isNotEqualTo "") && {_metaAircraftNid isEqualTo _aircraftNid}}) exitWith { _hasInbound = true; };
+        if ((_metaPilotUid isEqualTo _pilotUid) || {(!(_metaAircraftNid isEqualTo "")) && {_metaAircraftNid isEqualTo _aircraftNid}}) exitWith { _hasInbound = true; };
     } forEach _requestsExisting;
 
     if (!_hasInbound) exitWith {
@@ -158,11 +163,11 @@ if (_priority < 0) then { _priority = 0; };
 if (_priority > 100) then { _priority = 100; };
 
 if (!(_source isEqualType "")) then { _source = "PLAYER"; };
-_source = toUpperANSI (trim _source);
+_source = toUpper ([_source] call _trimFn);
 if !(_source in ["PLAYER", "AMBIENT"]) then { _source = "PLAYER"; };
 
 if (!(_lane isEqualType "")) then { _lane = ""; };
-_lane = toUpperANSI (trim _lane);
+_lane = toUpper ([_lane] call _trimFn);
 if (_lane isEqualTo "") then {
     _lane = switch (_requestType) do {
         case "REQ_TAXI": { "GROUND" };
@@ -173,10 +178,10 @@ if (_lane isEqualTo "") then {
 if !(_lane in ["GROUND", "TOWER", "ARRIVAL"]) then { _lane = "TOWER"; };
 
 if (!(_incidentType isEqualType "")) then { _incidentType = ""; };
-_incidentType = toUpperANSI (trim _incidentType);
+_incidentType = toUpper ([_incidentType] call _trimFn);
 
 if (!(_priorityClassOverride isEqualType "")) then { _priorityClassOverride = ""; };
-_priorityClassOverride = toUpperANSI (trim _priorityClassOverride);
+_priorityClassOverride = toUpper ([_priorityClassOverride] call _trimFn);
 
 private _incidentPriorityMap = missionNamespace getVariable ["airbase_v1_incidentPriorityMap", [
     ["MASSCAS", "PRIORITY"],
@@ -190,11 +195,12 @@ private _autoPriorityClass = "ROUTINE";
 if ((_requestType isEqualTo "REQ_EMERGENCY") || {_priority >= 100}) then {
     _autoPriorityClass = "PRIORITY";
 } else {
-    private _rowIdx = _incidentPriorityMap findIf {
-        (_x isEqualType []) && { (count _x) >= 2 } && { ((_x param [0, ""]) isEqualTo _incidentType) }
-    };
+    private _rowIdx = -1;
+    {
+        if ((_x isEqualType []) && { (count _x) >= 2 } && { ((_x param [0, ""]) isEqualTo _incidentType) }) exitWith { _rowIdx = _forEachIndex; };
+    } forEach _incidentPriorityMap;
     if (_rowIdx >= 0) then {
-        _autoPriorityClass = toUpperANSI str ((_incidentPriorityMap # _rowIdx) param [1, "ROUTINE"]);
+        _autoPriorityClass = toUpper str ((_incidentPriorityMap select _rowIdx) param [1, "ROUTINE"]);
     };
 };
 
@@ -226,7 +232,7 @@ private _callerName = name _caller;
 private _aircraftNetId = netId _aircraft;
 if (!(_aircraftNetId isEqualType "")) then { _aircraftNetId = ""; };
 
-private _laneAuto = toLowerANSI _lane;
+private _laneAuto = toLower _lane;
 if (!(_laneAuto in ["tower", "ground", "arrival"])) then {
     if (_requestType in ["REQ_INBOUND", "REQ_LAND", "REQ_EMERGENCY"]) then { _laneAuto = "arrival"; } else {
         if (_requestType isEqualTo "REQ_TAXI") then { _laneAuto = "ground"; } else { _laneAuto = "tower"; };

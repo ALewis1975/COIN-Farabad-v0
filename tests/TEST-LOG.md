@@ -495,3 +495,36 @@ git diff --check
 - CI preflight now runs the scanner before linting changed SQF files.
 - Runtime/dedicated/JIP validation: BLOCKED (not applicable for docs/tooling-only update in this container).
 - 2026-02-21T05:56Z | commit: <pending> | Scenario: marker-index consumer-detection optional/fallback determinism validation (`git --no-pager diff --check`, `python -m py_compile tools/generate_marker_index.py scripts/dev/validate_marker_index.py`, and `python3 scripts/dev/validate_marker_index.py`) | Result: PASS | Notes: Added explicit consumer-detection modes, standardized fallback warning format, and validated parity in `off`, `on`, and simulated-missing-`rg` (`auto-no-rg`) modes.
+
+## 2026-02-21 17:55 UTC — sqflint compat + lint fixes for 3 ambiance/civsub/ui files
+
+**Branch/Commit:** copilot/conduct-analysis-on-systems @ pending
+
+**Scenario:** Fixed sqflint-incompatible constructs in fn_airbaseSubmitClearanceRequest.sqf, fn_civsubSchedulerTick.sqf, and fn_uiConsoleClickSecondary.sqf so that CI preflight passes (both compat scan and `sqflint -e w`).
+
+**Commands:**
+```
+python3 scripts/dev/sqflint_compat_scan.py --strict \
+  functions/ambiance/fn_airbaseSubmitClearanceRequest.sqf \
+  functions/civsub/fn_civsubSchedulerTick.sqf \
+  functions/ui/fn_uiConsoleClickSecondary.sqf
+sqflint -e w functions/ambiance/fn_airbaseSubmitClearanceRequest.sqf
+sqflint -e w functions/civsub/fn_civsubSchedulerTick.sqf
+sqflint -e w functions/ui/fn_uiConsoleClickSecondary.sqf
+python3 scripts/dev/validate_state_migrations.py
+python3 scripts/dev/validate_marker_index.py
+```
+
+**Result:** PASS
+
+**Notes:**
+- Replaced `toUpperANSI` with `toUpper`, wrapped `trim` via `_trimFn` compile helper.
+- Replaced `# N` indexing with `select N`.
+- Replaced `isNotEqualTo` with `!= ` / `!(...isEqualTo...)`.
+- Replaced `findIf` with explicit `forEach` + `exitWith` loops.
+- Replaced method-style `map getOrDefault [...]` with call-form `[map,k,d] call _hg`.
+- Replaced `map get key` with `[map,key] call _mapGet` compile helper.
+- Replaced `createHashMapFromArray [...]` with `[...] call _hmFrom` compile helper.
+- Replaced `keys _map` in forEach/count with `[_map] call _keysFn` compile helper.
+- Replaced `toLowerANSI` with `toLower`.
+- Runtime/dedicated/JIP validation: BLOCKED (no Arma runtime in container).
