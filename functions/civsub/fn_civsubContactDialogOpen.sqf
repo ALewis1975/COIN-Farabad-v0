@@ -18,7 +18,15 @@ uiNamespace setVariable ["ARC_console_forceTab", "INTEL"];
 private _console = findDisplay 78000;
 if (isNull _console) then
 {
-    [] call ARC_fnc_uiConsoleOpen;
+    private _opened = [] call ARC_fnc_uiConsoleOpen;
+    if (!_opened) exitWith
+    {
+        // Console failed to open (no tablet/terminal access) — clear interaction state so
+        // stale context doesn't persist across the failed session.
+        uiNamespace setVariable ["ARC_civsubInteract_target", objNull];
+        uiNamespace setVariable ["ARC_console_forceTab", nil];
+        false
+    };
     ["CIVSUB", "Interaction routed to Farabad Console (S2/INTEL)."] call ARC_fnc_clientToast;
 }
 else

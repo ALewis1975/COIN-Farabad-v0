@@ -528,3 +528,43 @@ python3 scripts/dev/validate_marker_index.py
 - Replaced `keys _map` in forEach/count with `[_map] call _keysFn` compile helper.
 - Replaced `toLowerANSI` with `toLower`.
 - Runtime/dedicated/JIP validation: BLOCKED (no Arma runtime in container).
+
+---
+
+## 2026-02-21 — CIVSUB Console Right-Pane Connectivity Fix
+
+**Branch:** `copilot/fix-civsub-connectivity-issues`
+**Commit range:** `d78a3fd..HEAD`
+**Mode:** A (Bug Fix)
+
+### Static validation
+
+**Commands:**
+```
+python3 scripts/dev/sqflint_compat_scan.py --strict \
+  functions/civsub/fn_civsubContactActionQuestion.sqf \
+  functions/civsub/fn_civsubContactDialogOpen.sqf \
+  functions/civsub/fn_civsubContactReqAction.sqf
+sqflint -e w functions/civsub/fn_civsubContactActionQuestion.sqf
+sqflint -e w functions/civsub/fn_civsubContactDialogOpen.sqf
+sqflint -e w functions/civsub/fn_civsubContactReqAction.sqf
+```
+
+**Result:** PASS
+
+**Changes:**
+- `fn_civsubContactActionQuestion.sqf`: Fixed `_hg` compile helper — changed `[_h,_k,_d] call getOrDefault` (invalid; `getOrDefault` is a binary operator, not callable code) to `(_h) getOrDefault [_k, _d]`. This was causing all QUESTION actions to fail at runtime and return a silent warning toast rather than a right-pane answer.
+- `fn_civsubContactDialogOpen.sqf`: Fixed console-open failure handling — now checks the return value of `ARC_fnc_uiConsoleOpen`. If the console cannot open (no tablet/terminal access), the CIVSUB interaction target is cleared and no misleading "routed to console" toast is displayed.
+- `fn_civsubContactReqAction.sqf`: Fixed compat-scan `_hg` compile string (`_h getOrDefault` → `(_h) getOrDefault`). Added pre-load guards for `ARC_fnc_civsubIdentityTouch`, `ARC_fnc_civsubIdentityGenerateUid`, `ARC_fnc_civsubIdentityGenerateProfile`, and `ARC_fnc_civsubIdentityEvictIfNeeded`, matching the pattern already used in `fn_civsubContactActionBackgroundCheck.sqf`.
+
+### Runtime validation
+
+**Status:** BLOCKED — no Arma 3 / dedicated server runtime in CI container.
+
+**Waiver reason:** Container environment; no Arma 3 runtime available.
+
+**Follow-up owner:** Mission maintainer (ALewis1975).
+
+**Tracking:** PR #296 — validate in local MP: use addAction "Interact" on a CIVSUB civilian, confirm question/action results appear in the INTEL right pane and toast shows the correct action result (not a warning).
+
+**JIP / late-client:** Not evaluated; deferred to dedicated server session.
