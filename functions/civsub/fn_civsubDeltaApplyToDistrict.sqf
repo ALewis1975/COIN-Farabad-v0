@@ -8,7 +8,7 @@
 */
 
 // sqflint-compat helpers
-private _hg       = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg       = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
 
 

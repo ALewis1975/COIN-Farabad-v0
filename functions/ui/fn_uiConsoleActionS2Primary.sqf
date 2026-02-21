@@ -8,7 +8,7 @@ if (!hasInterface) exitWith {false};
 
 // sqflint-compat helpers
 private _trimFn     = compile "params ['_s']; trim _s";
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
 
 private _display = uiNamespace getVariable ["ARC_console_display", displayNull];
@@ -216,7 +216,7 @@ switch (_kind) do
             };
         };
 
-        private _c = [_d, "centroid", [] call _hg];
+        private _c = [_d, "centroid", []];
         if !(_c isEqualType [] && { (count _c) >= 2 }) exitWith
         {
             if (_hasPub) then

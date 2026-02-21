@@ -18,7 +18,7 @@ if (!isServer) exitWith {[0, 0]};
 if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {[0, 0]};
 
 // sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _keysFn   = compile "params ['_m']; keys _m";
 
 private _entries = missionNamespace getVariable ["civsub_v1_editorTestCivs", []];

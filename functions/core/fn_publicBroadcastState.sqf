@@ -73,8 +73,8 @@ if (!(_towerStaffing isEqualType [])) then { _towerStaffing = []; };
 private _normalizeStaffingLane = {
     params ["_rows", "_laneId"];
 
-    private _idx = [_meta, {
-        (_x isEqualType []) &&
+    private _idx = -1;
+    { if ((_x isEqualType []) &&
         { (count _x) >= 5 } &&
         { ((_x param [0, ""]) isEqualTo _laneId) }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
 
@@ -293,8 +293,7 @@ private _metaValue = {
     { if (_x isEqualType [] &&
         { (count _x) >= 2 } &&
         { ((_x select 0) isEqualType "") } &&
-        { (toUpper (_x select 0)) isEqualTo (toUpper _key) }
-    }] call _findIfFn;
+        { (toUpper (_x select 0)) isEqualTo (toUpper _key) }) exitWith { _idx = _forEachIndex; }; } forEach _meta;
     if (_idx < 0) exitWith { _def };
     (_meta select _idx) select 1
 };

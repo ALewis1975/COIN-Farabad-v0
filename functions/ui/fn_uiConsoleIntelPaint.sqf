@@ -39,7 +39,7 @@ if (isNull _display) exitWith {false};
 
 // sqflint-compat helpers
 private _trimFn     = compile "params ['_s']; trim _s";
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
 
 private _rxMaxItems = missionNamespace getVariable ["ARC_consoleRxMaxItems", 80];
@@ -846,7 +846,7 @@ else
                 ["D20", []]
             ]] call _hmFrom;
 
-            private _sett = [_settByDid, _did, [] call _hg];
+            private _sett = [_settByDid, _did, []];
             private _settLine = if ((count _sett) > 0) then { _sett joinString "; " } else { "None (rural / dispersed)" };
 
 // -------------------------------------------------------------------

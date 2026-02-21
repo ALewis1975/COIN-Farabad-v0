@@ -17,7 +17,7 @@ params [
 ];
 
 // sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _mapGet   = compile "params ['_h','_k']; _h get _k";
 private _keysFn   = compile "params ['_m']; keys _m";
 private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
@@ -41,7 +41,7 @@ private _bestD = 1e12;
         _rec = [_rec] call _hmFrom;
     };
     if (_rec isEqualType createHashMap) then {
-        private _c = [_rec, "centroid", [0,0] call _hg];
+        private _c = [_rec, "centroid", [0,0]];
         private _r = [_rec, "radius_m", 0] call _hg;
         if ((_c isEqualType []) && { _r > 0 }) then {
             private _d = (_pos distance2D _c);

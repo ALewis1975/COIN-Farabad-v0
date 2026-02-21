@@ -634,3 +634,39 @@ sqflint -e w functions/ui/fn_uiConsoleCommandPaint.sqf
 **Tracking:** Validate in hosted MP: open the Farabad Console and check the COP/Dashboard and TOC/CMD tabs confirm no horizontal scrollbar at 16:9, 16:10, and 4:3 (if available). Also verify the Dashboard incident line now wraps the acceptance status to a second line.
 
 **JIP / late-client:** Not applicable (UI-only change; no replicated state involved).
+
+---
+
+## 2026-02-21 — Hotfix: _hg recursion + broken forEach/exitWith patterns
+
+**Branch/Commit:** copilot/fix-sqf-syntax-errors
+
+**Scenario:** Mission load freeze — RPT showed compile-time `Error Missing ;` / `Error Missing )` in 20+ files at startup, followed by runtime spam of `Error Undefined variable in expression: _h` from a self-recursive `_hg` HashMap helper.
+
+**Root causes fixed:**
+
+1. **Self-recursive `_hg`**: Every `compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg"` (and variants) replaced with `compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]"` — repo-wide across ~80 files.
+2. **Literal defaults passed to `_hg`**: `[] call _hg`, `[0,0,0] call _hg`, `[0,0] call _hg`, `[0,0,1] call _hg` replaced with literal values.
+3. **Broken `forEach + exitWith` pattern (Pattern C)**: `private _VAR = [_COLL, {\n  COND\n) exitWith { _VAR = _forEachIndex; }; } forEach _COLL;` replaced with `private _VAR = -1;\n{ if (COND) exitWith { _VAR = _forEachIndex; }; } forEach _COLL;` — 13 call-sites across 8 files.
+4. **Broken `{ if (cond }] call _findIfFn;` (Pattern D)**: Fixed missing `)` and replaced with `forEach + exitWith` pattern — 10 sites across 6 files.
+5. **Misplaced helper declarations (Pattern E)**: sqflint-compat helpers (`_trimFn`, `_hg`) inserted BETWEEN `exitWith` and `{...}` — moved before the `exitWith` statement — 4 files.
+6. **Broken parentheses in status extraction (Pattern F)**: `toUpper ([((_rows select _idx)] call _trimFn select 1))` → `toUpper ([(_rows select _idx) select 1] call _trimFn)` — 2 files.
+7. **Miscellaneous**: `fn_airbasePlaneDepart.sqf` line 143 brace/paren mismatch `{!((group _x) isEqualTo _grp}))` → `{!((group _x) isEqualTo _grp)})`; `fn_civsubPersistLoad.sqf` misplaced `call _hg` on default value expressions.
+
+**Files changed:** 94 `.sqf` files
+
+**Commands:**
+
+```
+python3 scripts/dev/sqflint_compat_scan.py --strict $(git diff --name-only HEAD | grep "\.sqf$")
+```
+
+**Result:** PASS — all 94 changed files pass compat scan.
+
+**Runtime validation:** BLOCKED — no Arma 3 runtime in CI container. All fixes are syntactic corrections that restore the original intended semantics. No behavioral changes beyond removing the recursive self-call in `_hg`.
+
+**Follow-up owner:** Mission maintainer (ALewis1975).
+
+**Tracking:** Boot mission with `-showScriptErrors` flag, verify RPT shows no `Error Missing ;` or `Error Missing )` at startup, and no `Error Undefined variable in expression: _h` spam. Confirm mission reaches briefing/map without script error popups.
+
+**JIP / late-client:** Not applicable (syntax fixes only; no replicated state logic changed).

@@ -284,8 +284,8 @@ if (!(_rolePlan isEqualType [])) then { _rolePlan = []; };
 private _rolePlanGet = {
     params ["_pairs", "_key", "_default"];
     if !(_pairs isEqualType []) exitWith {_default};
-    private _idx = [_bridgeMarkers, {
-        (_x isEqualType []) && { (count _x) >= 2 } && { ((_x select 0) isEqualType "") && { (toLower (_x select 0)) isEqualTo (toLower _key) } }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+    private _idx = -1;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { ((_x select 0) isEqualType "") && { (toLower (_x select 0)) isEqualTo (toLower _key) } }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) exitWith {_default};
     (_pairs select _idx) select 1
 };

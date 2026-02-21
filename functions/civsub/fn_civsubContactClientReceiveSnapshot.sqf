@@ -24,7 +24,7 @@ params [
 ];
 
 // sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 uiNamespace setVariable ["ARC_civsubInteract_snapshot", _snap];
 

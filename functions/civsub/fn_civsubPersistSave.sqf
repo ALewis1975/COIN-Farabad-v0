@@ -19,7 +19,7 @@ if !(missionNamespace getVariable ["civsub_v1_persist", true]) exitWith {true};
 if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {false};
 
 // sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _mapGet   = compile "params ['_h','_k']; _h get _k";
 private _keysFn   = compile "params ['_m']; keys _m";
 
@@ -41,7 +41,7 @@ private _districtArr = [];
     private _d = [_districts, _x] call _mapGet;
     if !(_d isEqualType createHashMap) then { continue; };
 
-    private _centroid = [_d, "centroid", [0,0] call _hg];
+    private _centroid = [_d, "centroid", [0,0]];
     private _row = [
         [_d, "id", _x] call _hg,
         _centroid,
@@ -80,7 +80,7 @@ private _idArr = [];
     private _rec = [_ids, _x] call _mapGet;
     if !(_rec isEqualType createHashMap) then { continue; };
 
-    private _flags = [_rec, "flags", [] call _hg];
+    private _flags = [_rec, "flags", []];
     if !(_flags isEqualType []) then { _flags = []; };
 
     private _seen = [_rec, "seen_by", createHashMap] call _hg;
@@ -102,7 +102,7 @@ private _idArr = [];
         [_rec, "dob_iso", ""] call _hg,
         [_rec, "nationality", ""] call _hg,
         [_rec, "home_district_id", ""] call _hg,
-        [_rec, "home_pos", [0,0,0] call _hg],
+        [_rec, "home_pos", [0,0,0]],
         [_rec, "occupation", ""] call _hg,
         [_rec, "background", ""] call _hg,
         [_rec, "passport_serial", ""] call _hg,
@@ -121,7 +121,7 @@ private _idArr = [];
         [_rec, "status_handedOffTo", ""] call _hg,
         [_rec, "status_releasedAt", 0] call _hg,
         [_rec, "poi_id", ""] call _hg,
-        [_rec, "charges", [] call _hg]
+        [_rec, "charges", []]
     ];
 } forEach ([_ids] call _keysFn);
 
@@ -131,7 +131,7 @@ private _crimeArr = [];
     private _rec = [_db, _x] call _mapGet;
     if !(_rec isEqualType createHashMap) then { continue; };
 
-    private _hist = [_rec, "status_history", [] call _hg];
+    private _hist = [_rec, "status_history", []];
     if !(_hist isEqualType []) then { _hist = []; };
 
     _crimeArr pushBack [

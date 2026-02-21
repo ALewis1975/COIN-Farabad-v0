@@ -30,7 +30,7 @@ if (_districtId isEqualTo "" || { _event isEqualTo "" }) exitWith {createHashMap
 if !([_event, _payload] call ARC_fnc_civsubDeltaValidate) exitWith {createHashMap};
 
 // sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 // Normalize payload into a hashmap.
 private _p = createHashMap;

@@ -18,7 +18,7 @@
 if (!isServer) exitWith {[objNull, objNull]};
 
 // sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 missionNamespace setVariable ["civsub_v1_traffic_lastMovingSpawnFail", "", false];
 
@@ -36,7 +36,7 @@ if !(_d isEqualType createHashMap) exitWith {[objNull, objNull]};
 if !(_pool isEqualType []) exitWith {[objNull, objNull]};
 if ((count _pool) == 0) exitWith {[objNull, objNull]};
 
-private _c = [_d, "centroid", [0,0] call _hg];
+private _c = [_d, "centroid", [0,0]];
 private _r = [_d, "radius_m", 400] call _hg;
 if !(_c isEqualType []) exitWith {[objNull, objNull]};
 if ((count _c) < 2) exitWith {[objNull, objNull]};

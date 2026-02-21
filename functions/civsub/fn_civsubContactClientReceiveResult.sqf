@@ -16,7 +16,7 @@ params [
 
 // sqflint-compat helpers
 private _trimFn     = compile "params ['_s']; trim _s";
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
 
 private _d = uiNamespace getVariable ["ARC_civsubInteract_display", displayNull];
@@ -112,7 +112,7 @@ if (_type isEqualTo "CHECK_ID" && {_ok} && {_payload isEqualType createHashMap})
     private _home = [_payload, "home", ""] call _hg;
     private _grid = [_payload, "home_grid", ""] call _hg;
     private _did = [_payload, "districtId", ""] call _hg;
-    private _flags = [_payload, "flags", [] call _hg];
+    private _flags = [_payload, "flags", []];
 
     private _didS = if (_did isEqualTo "") then { "--" } else { _did };
     private _nameParts = if (_name isEqualType "") then { ([_name] call _trimFn) splitString " \t\r\n" } else { [] };

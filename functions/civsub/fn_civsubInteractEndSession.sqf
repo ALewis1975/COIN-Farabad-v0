@@ -26,7 +26,7 @@ if (isNull _actor) exitWith {false};
 if !(_civ getVariable ["civsub_v1_isCiv", false]) exitWith {false};
 
 // sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 private _actorUid = getPlayerUID _actor;
 if (_actorUid isEqualTo "") exitWith {false};

@@ -14,10 +14,10 @@ if (!hasInterface) exitWith {false};
 
 params ["_pos"];
 
-if (!(_pos isEqualType []) || {count _pos < 2}) exitWith
-
 // sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+
+if (!(_pos isEqualType []) || {count _pos < 2}) exitWith
 {
     uiNamespace setVariable ["ARC_mapClick_lastErr", "invalid_pos"];
     false

@@ -11,7 +11,7 @@ params [["_d", createHashMap, [createHashMap]]];
 if !(_d isEqualType createHashMap) exitWith {false};
 
 // sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 {
     private _v = [_d, _x, 0] call _hg;

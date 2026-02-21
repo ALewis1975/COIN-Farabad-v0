@@ -22,7 +22,7 @@ params [
 ];
 
 // sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
 
 private _districtIdCheck = [_districtId, "NON_EMPTY_STRING", "districtId", [""]] call ARC_fnc_paramAssert;
@@ -43,7 +43,7 @@ if (_poiId != "") then {
 private _seed = createHashMap;
 _seed set ["poi_id", _poiId];
 _seed set ["poi", _poi];
-_seed set ["district_centroid", [_d, "centroid", [0,0] call _hg]];
+_seed set ["district_centroid", [_d, "centroid", [0,0]]];
 _seed set ["district_id", _districtId];
 
 private _leadTypes = ["HUMINT", "TIP", "SUSPICIOUS_ACTIVITY"];
@@ -63,7 +63,7 @@ private _influenceDelta = [[["dW", 0], ["dR", 0], ["dG", 0]]] call _hmFrom;
 
 private _bundle = [
     _districtId,
-    [_d, "centroid", [0,0] call _hg],
+    [_d, "centroid", [0,0]],
     "SCHEDULER",
     "LEAD_AMBIENT",
     createHashMap,

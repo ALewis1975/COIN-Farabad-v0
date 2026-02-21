@@ -23,7 +23,7 @@ if (isNull _actor || {isNull _civ}) exitWith {false};
 if !(isPlayer _actor) exitWith {false};
 
 // sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
 
 // Dedicated MP hardening:
@@ -128,7 +128,7 @@ private _homeGrid = mapGridPosition _homePos;
 private _wanted = [_rec, "wanted_level", 0] call _hg;
 private _detained = [_rec, "status_detained", false] call _hg;
 private _poi = [_rec, "poi_id", ""] call _hg;
-private _charges = [_rec, "charges", [] call _hg];
+private _charges = [_rec, "charges", []];
 private _knownDb = !(_poi isEqualTo "") || {(_charges isEqualType []) && {(count _charges) > 0}};
 
 private _flags = [];

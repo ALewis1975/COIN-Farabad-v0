@@ -28,7 +28,7 @@ if (captive _u) exitWith {true};
 if (_u getVariable ["ace_captives_isHandcuffed", false]) exitWith {true};
 
 // sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 // Identity-based (best-effort). Only exists for touched civs.
 private _civUid = _u getVariable ["civ_uid", ""]; 

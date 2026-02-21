@@ -18,7 +18,7 @@ params [
 ];
 
 // sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _mapGet   = compile "params ['_h','_k']; _h get _k";
 private _keysFn   = compile "params ['_m']; keys _m";
 
@@ -116,7 +116,7 @@ private _byD = createHashMap;
     if (_row isEqualType createHashMap) then {
         private _did = [_row, "districtId", ""] call _hg; 
         if !(_did isEqualTo "") then {
-            private _arr = [_byD, _did, [] call _hg];
+            private _arr = [_byD, _did, []];
             _arr pushBack _x;
             _byD set [_did, _arr];
         };

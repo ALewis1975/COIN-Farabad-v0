@@ -1,7 +1,7 @@
 /*
 
 // sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _mapGet   = compile "params ['_h','_k']; _h get _k";
 private _keysFn   = compile "params ['_m']; keys _m";
 private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
@@ -69,7 +69,7 @@ if (_district isEqualType createHashMap) then {
     };
 };
 
-private _center = [_d, "centroid", [0,0] call _hg];
+private _center = [_d, "centroid", [0,0]];
 private _radius = [_d, "radius_m", 500] call _hg;
 
 if !(_center isEqualType []) exitWith { ["center_not_array","district_data"] call _fail };

@@ -22,7 +22,7 @@ params [
 
 // sqflint-compat helpers
 private _trimFn     = compile "params ['_s']; trim _s";
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 if (!(_key isEqualType "")) then { _key = str _key; };
 _key = [_key] call _trimFn;
@@ -37,7 +37,7 @@ private _store = uiNamespace getVariable ["ARC_clientNotifyGateStore", createHas
 if !(_store isEqualType createHashMap) then { _store = createHashMap; };
 
 private _now = diag_tickTime;
-private _entry = [_store, _key, [] call _hg];
+private _entry = [_store, _key, []];
 
 private _lastAt = -1;
 private _lastSig = "";

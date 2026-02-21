@@ -27,7 +27,7 @@ if !(isPlayer _actor) exitWith {[false, createHashMap]};
 
 // sqflint-compat helpers
 private _trimFn     = compile "params ['_s']; trim _s";
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
 
 private _did = _civ getVariable ["civsub_districtId", ""];
@@ -127,7 +127,7 @@ private _homeGrid = mapGridPosition _homePos;
 private _wanted = [_rec, "wanted_level", 0] call _hg;
 private _detained = [_rec, "status_detained", false] call _hg;
 private _poi = [_rec, "poi_id", ""] call _hg;
-private _charges = [_rec, "charges", [] call _hg];
+private _charges = [_rec, "charges", []];
 private _knownDb = !(_poi isEqualTo "") || {(_charges isEqualType []) && {(count _charges) > 0}};
 
 private _flags = [];

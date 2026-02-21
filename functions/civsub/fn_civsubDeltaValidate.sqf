@@ -16,7 +16,7 @@ params [
 ];
 
 // sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 // Allow payload as HashMap or as array-of-pairs (e.g., [["hit", true]])
 if (_payload isEqualType []) then {

@@ -20,10 +20,10 @@ if (!hasInterface) exitWith {false};
 
 // Allow scripted calls like ["HQ"] call ARC_fnc_uiConsoleSelectTab;
 // This avoids params type errors and simply sets the listbox selection.
-if (_this isEqualType "" || { (_this isEqualType []) && { (count _this) > 0 } && { (_this select 0) isEqualType "" } }) exitWith
-
 // sqflint-compat helpers
 private _trimFn     = compile "params ['_s']; trim _s";
+
+if (_this isEqualType "" || { (_this isEqualType []) && { (count _this) > 0 } && { (_this select 0) isEqualType "" } }) exitWith
 {
     private _tab = if (_this isEqualType "") then { _this } else { _this select 0 };
     _tab = toUpper ([_tab] call _trimFn);
