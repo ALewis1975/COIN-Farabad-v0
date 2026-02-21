@@ -118,6 +118,7 @@ if (_qKind isEqualTo "ARR" && { _qDetail isEqualType "" && { !(_qDetail isEqualT
         };
 
         private _aIdx = [_assets, {
+            params ["_x"];
             private _assetId = "";
             if (_x isEqualType createHashMap) then {
                 _assetId = [_x, "id"] call _mapGet;
