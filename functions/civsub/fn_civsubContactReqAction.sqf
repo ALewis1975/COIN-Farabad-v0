@@ -59,7 +59,7 @@ if ((_actor distance _civ) > 6) exitWith {
 
 // sqflint-compatible helpers for HashMap operations
 private _hg     = compile "params ['_h','_k','_d']; _h getOrDefault [_k,_d]";
-private _hmFrom = compile "params ['_pairs']; private _r = createHashMap; { _r set _x; } forEach _pairs; _r";
+private _hmFrom = compile "params ['_pairs']; private _r = createHashMap; if !(_pairs isEqualType []) exitWith {_r}; { if !(_x isEqualType []) then { diag_log format ['[CIVSUB][WARN] _hmFrom skipped non-array entry type=%1', typeName _x]; } else { if ((count _x) < 2) then { diag_log format ['[CIVSUB][WARN] _hmFrom skipped short entry=%1', _x]; } else { private _k = _x select 0; if !(_k isEqualType '') then { _k = str _k; }; _r set [_k, _x select 1]; }; }; } forEach _pairs; _r";
 
 switch (_actionId) do {
     case "CHECK_ID": {
@@ -71,7 +71,21 @@ switch (_actionId) do {
             if (_res isEqualType [] && {(count _res) >= 2}) then {
                 _ok = _res select 0;
                 _payload = _res select 1;
-                if (_payload isEqualType []) then { _payload = [_payload] call _hmFrom; };
+                if !(_payload isEqualType createHashMap) then {
+                    if (_payload isEqualType []) then {
+                        if ((count _payload) > 0 && {(_payload select 0) isEqualType []}) then {
+                            _payload = _payload call _hmFrom;
+                        } else {
+                            if ((count _payload) >= 2) then {
+                                _payload = [_payload] call _hmFrom;
+                            } else {
+                                _payload = createHashMap;
+                            };
+                        };
+                    } else {
+                        _payload = createHashMap;
+                    };
+                };
                 if !(_payload isEqualType createHashMap) then { _payload = createHashMap; };
             };
 
@@ -275,7 +289,21 @@ switch (_actionId) do {
             _ok = _res select 0;
             _html = _res select 1;
             _pl = _res select 2;
-            if (_pl isEqualType []) then { _pl = [_pl] call _hmFrom; };
+            if !(_pl isEqualType createHashMap) then {
+                if (_pl isEqualType []) then {
+                    if ((count _pl) > 0 && {(_pl select 0) isEqualType []}) then {
+                        _pl = _pl call _hmFrom;
+                    } else {
+                        if ((count _pl) >= 2) then {
+                            _pl = [_pl] call _hmFrom;
+                        } else {
+                            _pl = createHashMap;
+                        };
+                    };
+                } else {
+                    _pl = createHashMap;
+                };
+            };
             if !(_pl isEqualType createHashMap) then { _pl = createHashMap; };
         };
 

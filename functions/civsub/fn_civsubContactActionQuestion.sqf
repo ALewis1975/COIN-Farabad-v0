@@ -29,11 +29,25 @@ if (isNull _actor || {isNull _civ}) exitWith { [false, "", createHashMap] };
 
 // sqflint-compatible helpers for HashMap operations and trim
 private _hg     = compile "params ['_h','_k','_d']; [_h, _k, _d] call getOrDefault";
-private _hmFrom = compile "params ['_pairs']; private _r = createHashMap; { _r set _x; } forEach _pairs; _r";
+private _hmFrom = compile "params ['_pairs']; private _r = createHashMap; if !(_pairs isEqualType []) exitWith {_r}; { if !(_x isEqualType []) then { diag_log format ['[CIVSUB][WARN] _hmFrom skipped non-array entry type=%1', typeName _x]; } else { if ((count _x) < 2) then { diag_log format ['[CIVSUB][WARN] _hmFrom skipped short entry=%1', _x]; } else { private _k = _x select 0; if !(_k isEqualType '') then { _k = str _k; }; _r set [_k, _x select 1]; }; }; } forEach _pairs; _r";
 private _trimFn = compile "params ['_s']; trim _s";
 
 private _pl = _payload;
-if (_pl isEqualType []) then { _pl = [_pl] call _hmFrom; };
+if !(_pl isEqualType createHashMap) then {
+    if (_pl isEqualType []) then {
+        if ((count _pl) > 0 && {(_pl select 0) isEqualType []}) then {
+            _pl = _pl call _hmFrom;
+        } else {
+            if ((count _pl) >= 2) then {
+                _pl = [_pl] call _hmFrom;
+            } else {
+                _pl = createHashMap;
+            };
+        };
+    } else {
+        _pl = createHashMap;
+    };
+};
 if !(_pl isEqualType createHashMap) then { _pl = createHashMap; };
 
 private _qidRaw = [_pl, "qid", ""] call _hg;

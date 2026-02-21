@@ -406,3 +406,22 @@ python3 scripts/dev/validate_marker_index.py                              → PA
 - 2026-02-20T23:57Z | commit: <pending> | branch: copilot/gate-check-id-verified-status | Scenario: sqflint compatibility fix for all 7 changed SQF files (`for f in functions/civsub/fn_civsubContactActionBackgroundCheck.sqf functions/civsub/fn_civsubContactActionQuestion.sqf functions/civsub/fn_civsubContactReqAction.sqf functions/ui/fn_uiConsoleAirPaint.sqf functions/ui/fn_uiConsoleCommandPaint.sqf functions/ui/fn_uiConsoleDashboardPaint.sqf functions/ui/fn_uiConsoleRefresh.sqf; do echo -n "=== $f: " && sqflint -e w "$f" 2>&1 && echo PASS; done`) | Result: PASS | Notes: All 7 changed files now pass `sqflint -e w`. Fixes: (1) CIVSUB files — added `compile "string"` helpers `_hg` and `_hmFrom` to bypass sqflint false positives on `getOrDefault` and `createHashMapFromArray`; replaced all instances; removed bare `_nil =` assignments where result not used. (2) UI files — replaced `_arr # N` with `_arr select N`, `isNotEqualTo` with `!=`, `toUpperANSI` with `toUpper`, added `_trimFn`/`_fileExistsFn` compile helpers for `trim`/`fileExists`, inlined `findIf` as `forEach` loops; removed unused private variables. `fn_uiConsoleRefresh.sqf` already passed.
   - Migration Checks: Required keys N/A; Defaulting N/A; Unknown-field preservation N/A
   - Runtime-only Validation: BLOCKED (container cannot run Arma runtime; all changes are sqflint-only workarounds with semantically identical runtime behavior)
+
+## 2026-02-21 02:11 UTC — civsub payload normalization + hardened _hmFrom
+
+**Branch/Commit:** copilot/fix-recurring-errors-log @ pending
+
+**Scenario:** Harden CIVSUB action payload normalization and HashMap conversion helper contracts in request/question/background-check handlers.
+
+**Commands:**
+```
+git --no-pager diff --check
+~/.local/bin/sqflint -e w functions/civsub/fn_civsubContactReqAction.sqf functions/civsub/fn_civsubContactActionQuestion.sqf functions/civsub/fn_civsubContactActionBackgroundCheck.sqf
+```
+
+**Result:** BLOCKED
+
+**Notes:**
+- `git --no-pager diff --check` passed with no whitespace/merge marker issues.
+- `~/.local/bin/sqflint` is unavailable in this container (`No such file or directory`), so lint validation is blocked by environment.
+- Runtime/dedicated/JIP validation remains deferred (no Arma runtime in container).
