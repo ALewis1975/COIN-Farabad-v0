@@ -296,19 +296,29 @@ uiNamespace setVariable ["ARC_console_dirty", false];
     private _fallbackCadenceSec = 3;
     private _nextFallbackAt = diag_tickTime + _fallbackCadenceSec;
     private _focusedCtrlFromDisplay = compile "params ['_display']; focusedCtrl _display";
+    private _shouldSkipRefreshForFocus = {
+        params ["_display"];
+
+        // Guard: display can close while this spawned loop is still winding down.
+        if (isNull _display) exitWith {false};
+
+        private _focusedCtrl = [_display] call _focusedCtrlFromDisplay;
+
+        // Guard: focusedCtrl can return non-Control values during teardown.
+        if (!(_focusedCtrl isEqualType controlNull)) exitWith {false};
+        if (isNull _focusedCtrl) exitWith {false};
+
+        // Guard: control can become null between retrieval and type usage.
+        if (isNull _focusedCtrl) exitWith {false};
+
+        (ctrlType _focusedCtrl) in [2, 4] // CT_EDIT=2, CT_COMBO=4
+    };
 
     while { !isNull _display && { dialog } && { ["ARC_console_refreshLoop", false] call ARC_fnc_uiNsGetBool } } do
     {
         // Prevent repaint from collapsing open dropdowns and interrupting text input.
         // Skip refresh while the user is focused on an Edit or Combo control.
-        private _skip = false;
-        private _fc = [_display] call _focusedCtrlFromDisplay;
-        if (!(_fc isEqualType controlNull)) then { _fc = controlNull; };
-        if (!isNull _fc) then
-        {
-            private _ct = ctrlType _fc;
-            if (_ct in [2, 4]) then { _skip = true; }; // CT_EDIT=2, CT_COMBO=4
-        };
+        private _skip = [_display] call _shouldSkipRefreshForFocus;
 
         if (!_skip) then
         {
