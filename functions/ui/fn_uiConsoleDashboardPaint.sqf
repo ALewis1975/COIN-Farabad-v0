@@ -107,7 +107,7 @@ else
         _incDisp,
         if (_incType isEqualTo "") then {""} else { format [" <t color='#AAAAAA'>(%1)</t>", toUpper _incType] },
         if (_incGrid isEqualTo "") then {""} else { format [" <t color='#AAAAAA'>@ %1</t>", _incGrid] },
-        format ["<t color='#AAAAAA'>Accepted:</t> <t color='%1'>%2</t> <t color='#AAAAAA'>| Unit: %3 | Close-ready: %4 | SITREP:</t> <t color='%5'>%6</t>",
+        format ["<t color='#AAAAAA'>Accepted:</t> <t color='%1'>%2</t> <t color='#AAAAAA'>| Unit:</t> <t color='#DDDDDD'>%3</t><br/><t color='#AAAAAA'>Close-ready:</t> <t color='#DDDDDD'>%4</t> <t color='#AAAAAA'>| SITREP:</t> <t color='%5'>%6</t>",
             if (_acc) then {"#9FE870"} else {"#FF7A7A"},
             if (_acc) then {"YES"} else {"NO"},
             if (_accBy isEqualTo "") then {"UNASSIGNED"} else {_accBy},
