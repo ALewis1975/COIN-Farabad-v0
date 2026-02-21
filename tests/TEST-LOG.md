@@ -531,21 +531,40 @@ python3 scripts/dev/validate_marker_index.py
 
 ---
 
-## 2026-02-21 — Layout overlap fixes: CMD OVERVIEW + OPS frames
+## 2026-02-21 — CIVSUB Console Right-Pane Connectivity Fix
 
-**Branch/Commit:** copilot/check-layout-overlaps-farabad (double-check of #294)
+**Branch:** `copilot/fix-civsub-connectivity-issues`
+**Commit range:** `d78a3fd..HEAD`
+**Mode:** A (Bug Fix)
 
-**Scenario:** Static analysis and layout-coordinate audit for layout overlaps in the Farabad console (TOC/CMD panel and OPS panel).
+### Static validation
 
 **Commands:**
 ```
-python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleRefresh.sqf
-sqflint -e w functions/ui/fn_uiConsoleRefresh.sqf
+python3 scripts/dev/sqflint_compat_scan.py --strict \
+  functions/civsub/fn_civsubContactActionQuestion.sqf \
+  functions/civsub/fn_civsubContactDialogOpen.sqf \
+  functions/civsub/fn_civsubContactReqAction.sqf
+sqflint -e w functions/civsub/fn_civsubContactActionQuestion.sqf
+sqflint -e w functions/civsub/fn_civsubContactDialogOpen.sqf
+sqflint -e w functions/civsub/fn_civsubContactReqAction.sqf
 ```
 
-**Result:** PASS (static)
+**Result:** PASS
 
-**Notes:**
-- Root cause 1 (CMD OVERVIEW): `MainGroup` (IDC 78015) was rendered at full right-panel width (0.242–0.998) while `MainDetailsGroup` (IDC 78016) rendered on top from 0.516–0.998. The `Main` (IDC 78010) structured-text content — including the "TOC Queue" section label — extended across the full width, causing its text to appear at the visual boundary between the two panels. Fixed by clamping `MainGroup` to the middle-panel width (matching `MainList` IDC 78011: x=0.242, w=0.266) in CMD OVERVIEW mode, with a regression guard that restores the full-width default for all other tabs.
-- Root cause 2 (OPS tab): OPS frame controls (IDC 78030–78038) in `CfgDialogs.hpp` used `x=0.24, w=0.27` (right edge 0.51), extending 0.002 further than `MainList` (right edge 0.508) and leaving only a 0.006 gap to `MainDetailsGroup` (start 0.516). Aligned to `x=0.242, w=0.266` so all middle-panel elements share a consistent 0.008 gap to the right panel, matching the `DOCK_RIGHT` layout mode which already used the correct values.
-- Runtime/dedicated/JIP validation: BLOCKED (no Arma runtime in container). Gameplay-path validation requires a local-MP or hosted-MP session exercising the CMD/TOC tab (OVERVIEW and QUEUE sub-modes) and the OPS tab.
+**Changes:**
+- `fn_civsubContactActionQuestion.sqf`: Fixed `_hg` compile helper — changed `[_h,_k,_d] call getOrDefault` (invalid; `getOrDefault` is a binary operator, not callable code) to `(_h) getOrDefault [_k, _d]`. This was causing all QUESTION actions to fail at runtime and return a silent warning toast rather than a right-pane answer.
+- `fn_civsubContactDialogOpen.sqf`: Fixed console-open failure handling — now checks the return value of `ARC_fnc_uiConsoleOpen`. If the console cannot open (no tablet/terminal access), the CIVSUB interaction target is cleared and no misleading "routed to console" toast is displayed.
+- `fn_civsubContactReqAction.sqf`: Fixed compat-scan `_hg` compile string (`_h getOrDefault` → `(_h) getOrDefault`). Added pre-load guards for `ARC_fnc_civsubIdentityTouch`, `ARC_fnc_civsubIdentityGenerateUid`, `ARC_fnc_civsubIdentityGenerateProfile`, and `ARC_fnc_civsubIdentityEvictIfNeeded`, matching the pattern already used in `fn_civsubContactActionBackgroundCheck.sqf`.
+
+### Runtime validation
+
+**Status:** BLOCKED — no Arma 3 / dedicated server runtime in CI container.
+
+**Waiver reason:** Container environment; no Arma 3 runtime available.
+
+**Follow-up owner:** Mission maintainer (ALewis1975).
+
+**Tracking:** PR #296 — validate in local MP: use addAction "Interact" on a CIVSUB civilian, confirm question/action results appear in the INTEL right pane and toast shows the correct action result (not a warning).
+
+**JIP / late-client:** Not evaluated; deferred to dedicated server session.
