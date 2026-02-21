@@ -71,6 +71,29 @@ python3 scripts/dev/validate_marker_index.py                              → PA
 - Dedicated-server + JIP runtime verification and in-engine UI screenshot capture: BLOCKED (Arma runtime not available in this environment).
 
 
+## 2026-02-21 01:42 UTC — CIVSUB debug-mode error hardening (Check ID / Background Check / Questions)
+
+**Branch/Commit:** copilot/fix-id-error-handling @ pending
+
+**Scenario:** Fix reported debug-mode CIVSUB errors: `Type String, expected Array` during Check ID / Ask Questions, plus Background Check dependency resolution failures.
+
+**Commands:**
+```
+git --no-pager diff --check                                              → PASS
+python3 scripts/dev/validate_state_migrations.py                          → PASS
+~/.local/bin/sqflint -e w functions/civsub/fn_civsubContactActionBackgroundCheck.sqf → PASS
+~/.local/bin/sqflint -e w functions/civsub/fn_civsubContactActionQuestion.sqf         → PASS
+~/.local/bin/sqflint -e w functions/civsub/fn_civsubContactActionCheckId.sqf           → BLOCKED (known sqflint parser false positives on repo-valid syntax)
+```
+
+**Result:** PASS (targeted static checks), BLOCKED (runtime/UI verification)
+
+**Notes:**
+- `fn_civsubContactActionCheckId` now validates named-location row shapes and home-position shape before array indexing, preventing runtime `Type String, expected Array` when malformed location/profile data is present.
+- `fn_civsubContactActionBackgroundCheck` now recompiles identity dependencies when missing **or** non-code typed, preventing false dependency-missing failures in debug sessions.
+- `fn_civsubContactActionQuestion` now accepts string payloads and coerces them into `qid`, preventing payload type crashes on question execution paths.
+- Dedicated-server/JIP/runtime and in-engine screenshot validation: BLOCKED (Arma runtime not available in this container).
+
 ## Entry Template
 
 - `<UTC timestamp>` | commit: `<sha|pending>` | branch: `<branch>` | Scenario: `<what was validated>` | Result: `PASS`/`FAIL`/`BLOCKED` | Notes: `<summary>`

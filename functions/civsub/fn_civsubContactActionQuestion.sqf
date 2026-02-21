@@ -22,7 +22,7 @@ if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith { [fals
 params [
     ["_actor", objNull, [objNull]],
     ["_civ", objNull, [objNull]],
-    ["_payload", createHashMap, [createHashMap, []]]
+    ["_payload", createHashMap, [createHashMap, [], ""]]
 ];
 
 if (isNull _actor || {isNull _civ}) exitWith { [false, "", createHashMap] };
@@ -33,6 +33,7 @@ private _hmFrom = compile "params ['_pairs']; private _r = createHashMap; { _r s
 private _trimFn = compile "params ['_s']; trim _s";
 
 private _pl = _payload;
+if (_pl isEqualType "") then { _pl = [["qid", _pl]] call _hmFrom; };
 if (_pl isEqualType []) then { _pl = [_pl] call _hmFrom; };
 if !(_pl isEqualType createHashMap) then { _pl = createHashMap; };
 

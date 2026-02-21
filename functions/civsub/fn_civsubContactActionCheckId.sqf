@@ -85,6 +85,7 @@ if (_name isEqualTo "") then {
 private _dob = _rec getOrDefault ["dob_iso", ""];
 private _job = _rec getOrDefault ["occupation", ""];
 private _homePos = _rec getOrDefault ["home_pos", getPosATL _civ];
+if !(_homePos isEqualType [] && {(count _homePos) >= 2}) then { _homePos = getPosATL _civ; };
 
 // compute age (approx)
 private _age = -1;
@@ -108,11 +109,15 @@ if (_named isEqualType [] && {(count _named) > 0}) then {
     private _hx = _homePos # 0;
     private _hy = _homePos # 1;
     {
-        _x params ["_id","_dn","_p"];
-        private _dx = (_p # 0) - _hx;
-        private _dy = (_p # 1) - _hy;
-        private _dd = (_dx * _dx) + (_dy * _dy);
-        if (_dd < _bestD) then { _bestD = _dd; _homeName = _dn; };
+        if (_x isEqualType [] && {(count _x) >= 3}) then {
+            _x params ["_id","_dn","_p"];
+            if (_p isEqualType [] && {(count _p) >= 2}) then {
+                private _dx = (_p # 0) - _hx;
+                private _dy = (_p # 1) - _hy;
+                private _dd = (_dx * _dx) + (_dy * _dy);
+                if (_dd < _bestD) then { _bestD = _dd; _homeName = _dn; };
+            };
+        };
     } forEach _named;
 };
 

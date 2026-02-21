@@ -59,6 +59,10 @@ if (isNil "ARC_fnc_civsubIdentityGenerateUid") then { ARC_fnc_civsubIdentityGene
 if (isNil "ARC_fnc_civsubCrimeDbPickPoiForDistrict") then { ARC_fnc_civsubCrimeDbPickPoiForDistrict = compile preprocessFileLineNumbers "functions\civsub\fn_civsubCrimeDbPickPoiForDistrict.sqf"; };
 if (isNil "ARC_fnc_civsubCrimeDbGetById") then { ARC_fnc_civsubCrimeDbGetById = compile preprocessFileLineNumbers "functions\civsub\fn_civsubCrimeDbGetById.sqf"; };
 if (isNil "ARC_fnc_civsubEmitDelta") then { ARC_fnc_civsubEmitDelta = compile preprocessFileLineNumbers "functions\civsub\fn_civsubEmitDelta.sqf"; };
+if (isNil "ARC_fnc_civsubIdentityTouch" || {!(ARC_fnc_civsubIdentityTouch isEqualType {})}) then { ARC_fnc_civsubIdentityTouch = compile preprocessFileLineNumbers "functions\civsub\fn_civsubIdentityTouch.sqf"; };
+if (isNil "ARC_fnc_civsubIdentityGenerateProfile" || {!(ARC_fnc_civsubIdentityGenerateProfile isEqualType {})}) then { ARC_fnc_civsubIdentityGenerateProfile = compile preprocessFileLineNumbers "functions\civsub\fn_civsubIdentityGenerateProfile.sqf"; };
+if (isNil "ARC_fnc_civsubIdentitySet" || {!(ARC_fnc_civsubIdentitySet isEqualType {})}) then { ARC_fnc_civsubIdentitySet = compile preprocessFileLineNumbers "functions\civsub\fn_civsubIdentitySet.sqf"; };
+if (isNil "ARC_fnc_civsubIdentityEvictIfNeeded" || {!(ARC_fnc_civsubIdentityEvictIfNeeded isEqualType {})}) then { ARC_fnc_civsubIdentityEvictIfNeeded = compile preprocessFileLineNumbers "functions\civsub\fn_civsubIdentityEvictIfNeeded.sqf"; };
 
 private _setStep = {
     params ["_step"];
