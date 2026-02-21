@@ -28,7 +28,7 @@ params [
 if (isNull _actor || {isNull _civ}) exitWith { [false, "", createHashMap] };
 
 // sqflint-compatible helpers for HashMap operations and trim
-private _hg     = compile "params ['_h','_k','_d']; [_h, _k, _d] call getOrDefault";
+private _hg     = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _hmFrom = compile "params ['_pairs']; private _r = createHashMap; if !(_pairs isEqualType []) exitWith {_r}; { if !(_x isEqualType []) then { diag_log format ['[CIVSUB][WARN] _hmFrom skipped non-array entry type=%1', typeName _x]; } else { if ((count _x) < 2) then { diag_log format ['[CIVSUB][WARN] _hmFrom skipped short entry=%1', _x]; } else { private _k = _x select 0; if !(_k isEqualType '') then { _k = str _k; }; _r set [_k, _x select 1]; }; }; } forEach _pairs; _r";
 private _trimFn = compile "params ['_s']; trim _s";
 
