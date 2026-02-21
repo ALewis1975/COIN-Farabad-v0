@@ -15,6 +15,10 @@
 */
 if (!hasInterface) exitWith { true };
 
+// sqflint-compat helpers
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
+
 private _d = uiNamespace getVariable ["ARC_civsubInteract_display", displayNull];
 if (isNull _d) exitWith { true };
 
@@ -88,7 +92,7 @@ if (_selQ >= 0 && {_lastPane isEqualTo "Q"} && {(_selA < 0) || {_actionIdSel isE
 
     _resp ctrlSetStructuredText parseText format ["QUESTION: %1\nAsking...", _qlbl];
 
-    private _pl = createHashMapFromArray [["qid", _qid], ["label", _qlbl]];
+    private _pl = [[["qid", _qid], ["label", _qlbl]]] call _hmFrom;
             ["QUESTION"] call _kickWatchdog;
     [_civ, player, "QUESTION", _pl] remoteExecCall ["ARC_fnc_civsubContactReqAction", 2];
 
@@ -129,7 +133,7 @@ if (_selA >= 0) then {
         case "DETAIN": {
             private _snap = uiNamespace getVariable ["ARC_civsubInteract_snapshot", createHashMap];
             private _det = false;
-            if (_snap isEqualType createHashMap) then { _det = _snap getOrDefault ["detained", false]; };
+            if (_snap isEqualType createHashMap) then { _det = [_snap, "detained", false] call _hg; };
             if (_det) exitWith {
                 _resp ctrlSetStructuredText parseText "<t size='0.9'>Civilian is already detained.</t>";
                 uiNamespace setVariable ["ARC_civsubInteract_actionInProgress", false];
@@ -141,7 +145,7 @@ if (_selA >= 0) then {
         case "RELEASE": {
             private _snap = uiNamespace getVariable ["ARC_civsubInteract_snapshot", createHashMap];
             private _det = false;
-            if (_snap isEqualType createHashMap) then { _det = _snap getOrDefault ["detained", false]; };
+            if (_snap isEqualType createHashMap) then { _det = [_snap, "detained", false] call _hg; };
             if (!_det) exitWith {
                 _resp ctrlSetStructuredText parseText "<t size='0.9'>Civilian is not detained.</t>";
                 uiNamespace setVariable ["ARC_civsubInteract_actionInProgress", false];
@@ -183,7 +187,7 @@ if (_selA >= 0) then {
             _qlbl
         ];
 
-        private _pl = createHashMapFromArray [["qid", _qid], ["label", _qlbl]];
+        private _pl = [[["qid", _qid], ["label", _qlbl]]] call _hmFrom;
             ["QUESTION"] call _kickWatchdog;
         [_civ, player, "QUESTION", _pl] remoteExecCall ["ARC_fnc_civsubContactReqAction", 2];
     } else {

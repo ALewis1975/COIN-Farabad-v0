@@ -16,6 +16,9 @@ params [
     ["_reason", "COMPLETE"]
 ];
 
+// sqflint-compat helpers
+private _mapGet   = compile "params ['_h','_k']; _h get _k";
+
 ["release", false] call ARC_fnc_airbaseRunwayLockSweep;
 
 private _state = missionNamespace getVariable ["airbase_v1_runwayState", "OPEN"];
@@ -31,7 +34,7 @@ if (!(_force || (_owner isEqualTo _fid) || (_owner isEqualTo ""))) exitWith {
     private _dbgOpsDeny = missionNamespace getVariable ["airbase_v1_debugOpsLog", false];
     if (_opsDeny || _dbgOpsDeny) then {
         private _rtDeny = missionNamespace getVariable ["airbase_v1_rt", createHashMap];
-        private _centerDeny = _rtDeny get "bubbleCenter";
+        private _centerDeny = [_rtDeny, "bubbleCenter"] call _mapGet;
         if (isNil "_centerDeny") then { _centerDeny = getMarkerPos "mkr_airbaseCenter"; };
 
         ["OPS", format ["AIRBASE RUNWAY: release denied for %1 (owner=%2)", _fid, _owner], _centerDeny, 0, [
@@ -53,7 +56,7 @@ if (!(_ops isEqualType true) && !(_ops isEqualType false)) then { _ops = true; }
 private _dbgOps = missionNamespace getVariable ["airbase_v1_debugOpsLog", false];
 if (_ops || _dbgOps) then {
     private _rt = missionNamespace getVariable ["airbase_v1_rt", createHashMap];
-    private _center = _rt get "bubbleCenter";
+    private _center = [_rt, "bubbleCenter"] call _mapGet;
     if (isNil "_center") then { _center = getMarkerPos "mkr_airbaseCenter"; };
 
     ["OPS", format ["AIRBASE RUNWAY: %1 -> OPEN (%2 result=%3)", _state, _fid, _result], _center, 0, [

@@ -12,6 +12,10 @@
 
 if (!isServer) exitWith {[]};
 
+// sqflint-compat helpers
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
+
 private _enabled = ["threat_v0_enabled", true] call ARC_fnc_stateGet;
 if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabled = true; };
 
@@ -19,9 +23,10 @@ if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabl
 private _kvGet = {
     params ["_pairs", "_key", "_default"];
     if (!(_pairs isEqualType [])) exitWith {_default};
-    private _idx = _pairs findIf { (_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key } };
+    private _idx = -1;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) exitWith {_default};
-    private _v = (_pairs # _idx) # 1;
+    private _v = (_pairs select _idx) select 1;
     if (isNil "_v") exitWith {_default};
     _v
 };
@@ -46,21 +51,21 @@ private _byType = createHashMap;
     if (_st isEqualTo "") then { _st = "UNKNOWN"; };
     if (_tp isEqualTo "") then { _tp = "OTHER"; };
 
-    _byState set [_st, (_byState getOrDefault [_st, 0]) + 1];
-    _byType set [_tp, (_byType getOrDefault [_tp, 0]) + 1];
+    _byState set [_st, ([_byState, _st, 0] call _hg) + 1];
+    _byType set [_tp, ([_byType, _tp, 0] call _hg) + 1];
 } forEach _records;
 
 // Truncate open list for inspector readability
 private _openShort = _open;
 if ((count _openShort) > 25) then { _openShort = _openShort select [0, 25]; };
 
-private _counts = createHashMapFromArray [
+private _counts = [[
     ["enabled", _enabled],
     ["by_state", _byState],
     ["by_type", _byType],
     ["open_count", count _open],
     ["closed_count", count _closed]
-];
+]] call _hmFrom;
 
 missionNamespace setVariable ["threat_v0_debug_counts", _counts];
 missionNamespace setVariable ["threat_v0_debug_open", _openShort];

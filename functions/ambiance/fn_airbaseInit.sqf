@@ -108,7 +108,7 @@ private _taxiConnectors = missionNamespace getVariable ["airbase_v1_taxi_center_
 if !(_taxiConnectors isEqualType []) then { _taxiConnectors = ["mkr_airbaseCenter"]; };
 private _taxiConnectorsNorm = [];
 {
-    if (_x isEqualType "" && { _x isNotEqualTo "" }) then { _taxiConnectorsNorm pushBackUnique _x; };
+    if (_x isEqualType "" && { !(_x isEqualTo "") }) then { _taxiConnectorsNorm pushBackUnique _x; };
 } forEach _taxiConnectors;
 if ((count _taxiConnectorsNorm) == 0) then { _taxiConnectorsNorm = ["mkr_airbaseCenter"]; };
 missionNamespace setVariable ["airbase_v1_taxi_center_connectors", _taxiConnectorsNorm, true];
@@ -133,7 +133,7 @@ private _inboundTaxiMarkers = missionNamespace getVariable ["airbase_v1_inbound_
 if !(_inboundTaxiMarkers isEqualType []) then { _inboundTaxiMarkers = ["L-270 Inbound", "T-L Egress", "T-L Ingress"]; };
 private _inboundTaxiMarkersNorm = [];
 {
-    if (_x isEqualType "" && { _x isNotEqualTo "" }) then { _inboundTaxiMarkersNorm pushBackUnique _x; };
+    if (_x isEqualType "" && { !(_x isEqualTo "") }) then { _inboundTaxiMarkersNorm pushBackUnique _x; };
 } forEach _inboundTaxiMarkers;
 if ((count _inboundTaxiMarkersNorm) == 0) then { _inboundTaxiMarkersNorm = ["L-270 Inbound", "T-L Egress", "T-L Ingress"]; };
 missionNamespace setVariable ["airbase_v1_inbound_taxi_markers", _inboundTaxiMarkersNorm, true];
@@ -148,11 +148,10 @@ if (!(_towerStaffing isEqualType [])) then { _towerStaffing = []; };
 
 private _normalizeLane = {
     params ["_rows", "_lane"];
-    private _idx = _rows findIf {
-        (_x isEqualType []) &&
+    private _idx = -1;
+    { if ((_x isEqualType []) &&
         { (count _x) >= 5 } &&
-        { ((_x param [0, ""]) isEqualTo _lane) }
-    };
+        { ((_x param [0, ""]) isEqualTo _lane) }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
     if (_idx < 0) then {
         _rows pushBack [_lane, "AUTO", "", "", -1];
     };

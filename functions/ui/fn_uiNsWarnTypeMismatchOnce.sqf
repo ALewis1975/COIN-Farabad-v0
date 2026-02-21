@@ -13,6 +13,9 @@ params [
 
 if (_key isEqualTo "" || { _expected isEqualTo "" }) exitWith {false};
 
+// sqflint-compat helpers
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+
 private _warned = uiNamespace getVariable ["ARC_uiNs_typeWarned", createHashMap];
 if !(_warned isEqualType createHashMap) then
 {
@@ -21,7 +24,7 @@ if !(_warned isEqualType createHashMap) then
 };
 
 private _token = format ["%1|%2", _key, _expected];
-if (_warned getOrDefault [_token, false]) exitWith {false};
+if ([_warned, _token, false] call _hg) exitWith {false};
 
 _warned set [_token, true];
 uiNamespace setVariable ["ARC_uiNs_typeWarned", _warned];

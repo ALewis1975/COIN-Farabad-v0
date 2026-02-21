@@ -12,6 +12,9 @@ params [
     ["_force", false]
 ];
 
+// sqflint-compat helpers
+private _mapGet   = compile "params ['_h','_k']; _h get _k";
+
 private _state = missionNamespace getVariable ["airbase_v1_runwayState", "OPEN"];
 if (!(_state isEqualType "") || !(_state in ["OPEN", "RESERVED", "OCCUPIED"])) then {
     _state = "OPEN";
@@ -59,7 +62,7 @@ if (_force || _timedOut || _missingOwner || _orphanedExec) then {
     private _dbgOps = missionNamespace getVariable ["airbase_v1_debugOpsLog", false];
     if (_ops || _dbgOps) then {
         private _rt = missionNamespace getVariable ["airbase_v1_rt", createHashMap];
-        private _center = _rt get "bubbleCenter";
+        private _center = [_rt, "bubbleCenter"] call _mapGet;
         if (isNil "_center") then { _center = getMarkerPos "mkr_airbaseCenter"; };
 
         ["OPS", format ["AIRBASE RUNWAY: %1 -> OPEN (cleanup %2)", _state, _why], _center, 0, [

@@ -25,6 +25,9 @@ params [
 
 if (isNull _display) exitWith {false};
 
+// sqflint-compat helpers
+private _trimFn     = compile "params ['_s']; trim _s";
+
 private _rxMaxItems = missionNamespace getVariable ["ARC_consoleRxMaxItems", 80];
 if (!(_rxMaxItems isEqualType 0) || { _rxMaxItems < 10 }) then { _rxMaxItems = 80; };
 _rxMaxItems = (_rxMaxItems min 160) max 10;
@@ -64,7 +67,7 @@ if (!isNull _ctrlDetails) then { _ctrlDetails ctrlShow true; };
 private _safeStr = {
     params ["_s", ["_fallback", "N/A"]];
     if (!(_s isEqualType "")) exitWith {_fallback};
-    _s = trim _s;
+    _s = [_s] call _trimFn;
     if ((count _s) > _rxMaxText) then { _s = _s select [0, _rxMaxText]; };
     if (_s isEqualTo "") then {_fallback} else {_s};
 };
@@ -72,9 +75,10 @@ private _safeStr = {
 private _pairGet = {
     params ["_pairs", "_key", ["_def", ""]];
     if (!(_pairs isEqualType [])) exitWith {_def};
-    private _idx = _pairs findIf { _x isEqualType [] && { (count _x) >= 2 } && { (_x#0) isEqualTo _key } };
+    private _idx = -1;
+    { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) exitWith {_def};
-    private _v = (_pairs # _idx) # 1;
+    private _v = (_pairs select _idx) select 1;
     if (isNil "_v") exitWith {_def};
     _v
 };
@@ -85,7 +89,7 @@ private _selOrdData = uiNamespace getVariable ["ARC_console_opsSel_ord", ""]; if
 private _selLeadData = uiNamespace getVariable ["ARC_console_opsSel_lead", ""]; if (!(_selLeadData isEqualType "")) then { _selLeadData = ""; };
 
 private _focus = uiNamespace getVariable ["ARC_console_opsFocus", "INCIDENT"]; if (!(_focus isEqualType "")) then { _focus = "INCIDENT"; };
-_focus = toUpper (trim _focus);
+_focus = toUpper ([_focus] call _trimFn);
 
 if (_rebuild) then
 {
@@ -94,7 +98,7 @@ if (_rebuild) then
     // -------------------------------
     lbClear _cInc;
     private _activeId = missionNamespace getVariable ["ARC_activeTaskId", ""]; if (!(_activeId isEqualType "")) then { _activeId = ""; };
-    _activeId = trim _activeId;
+    _activeId = [_activeId] call _trimFn;
     if (_activeId isEqualTo "") then
     {
         private _i = _cInc lbAdd "(No active incident)";
@@ -107,7 +111,7 @@ if (_rebuild) then
         private _accepted = missionNamespace getVariable ["ARC_activeIncidentAccepted", false]; if (!(_accepted isEqualType true) && !(_accepted isEqualType false)) then { _accepted = false; };
         private _tag = if (_accepted) then {"ACTIVE"} else {"PENDING"};
         private _label = format ["[%1] %2", _tag, _dispName];
-        if ((trim _typ) != "") then { _label = _label + format [" (%1)", toUpper (trim _typ)]; };
+        if (([_typ] call _trimFn) != "") then { _label = _label + format [" (%1)", toUpper ([_typ] call _trimFn)]; };
         private _i = _cInc lbAdd _label;
         _cInc lbSetData [_i, format ["INCIDENT|%1", _activeId]];
     };
@@ -134,7 +138,7 @@ if (_rebuild) then
     if ((count _orders) > _rxMaxItems) then { _orders = _orders select [((count _orders) - _rxMaxItems) max 0, _rxMaxItems]; };
     private _gid = groupId group player;
     private _mine = _orders select {
-        _x isEqualType [] && { (count _x) >= 5 } && { (_x # 4) isEqualTo _gid }
+        _x isEqualType [] && { (count _x) >= 5 } && { (_x select 4) isEqualTo _gid }
     };
 
     if ((count _mine) isEqualTo 0) then
@@ -146,13 +150,13 @@ if (_rebuild) then
     {
         {
             private _order = _x;
-            private _id = _order # 0;
-            private _status = toUpper (trim (_order # 2));
-            private _otype = toUpper (trim (_order # 3));
-            private _pairs = _order # 5;
+            private _id = _order select 0;
+            private _status = toUpper ([(_order select 2)] call _trimFn);
+            private _otype = toUpper ([(_order select 3)] call _trimFn);
+            private _pairs = _order select 5;
             private _purpose = [_pairs, "purpose", ""] call _pairGet;
             if (!(_purpose isEqualType "")) then { _purpose = ""; };
-            _purpose = trim _purpose;
+            _purpose = [_purpose] call _trimFn;
 
             private _label = format ["[%1] %2", _status, _otype];
             if (_purpose != "") then { _label = _label + format [" - %1", _purpose]; };
@@ -180,9 +184,9 @@ if (_rebuild) then
         {
             private _lead = _x;
             if (!(_lead isEqualType []) || { (count _lead) < 4 }) then { continue };
-            private _id = _lead # 0;
-            private _typ = toUpper (trim (_lead # 1));
-            private _name = _lead # 2;
+            private _id = _lead select 0;
+            private _typ = toUpper ([(_lead select 1)] call _trimFn);
+            private _name = _lead select 2;
             if (!(_name isEqualType "")) then { _name = "Lead"; };
             private _label = format ["[%1] %2", _typ, _name];
             private _idx = _cLead lbAdd _label;
@@ -235,8 +239,17 @@ private _gidSelf = groupId (group player);
 private _statusRows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
 if (!(_statusRows isEqualType [])) then { _statusRows = []; };
 if ((count _statusRows) > _rxMaxItems) then { _statusRows = _statusRows select [0, _rxMaxItems]; };
-private _statusIdx = _statusRows findIf { _x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _gidSelf } };
-private _unitStatus = if (_statusIdx < 0) then { "OFFLINE" } else { toUpper (trim ((_statusRows # _statusIdx) # 1)) };
+private _statusIdx = -1;
+{ if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _gidSelf }) exitWith { _statusIdx = _forEachIndex; }; } forEach _statusRows;
+private _unitStatus = "OFFLINE";
+if (_statusIdx >= 0) then {
+    private _row = _statusRows select _statusIdx;
+    private _s = "OFFLINE";
+    if (_row isEqualType [] && { (count _row) >= 2 } && { (_row select 1) isEqualType "" }) then {
+        _s = _row select 1;
+    };
+    _unitStatus = toUpper ([_s] call _trimFn);
+};
 
 private _allowDuringRtb = missionNamespace getVariable ["ARC_allowIncidentDuringAcceptedRtb", false];
 private _policyText = if (_allowDuringRtb) then
@@ -255,8 +268,8 @@ if (_deny isEqualType [] && { (count _deny) >= 3 }) then
     _deny params ["_denyStamp", "_denyCode", "_denyDetail"];
     if (_denyStamp isEqualType 0 && { (diag_tickTime - _denyStamp) <= 120 }) then
     {
-        private _code = if (_denyCode isEqualType "") then { toUpper (trim _denyCode) } else { "UNKNOWN" };
-        private _detail = if (_denyDetail isEqualType "") then { trim _denyDetail } else { "" };
+        private _code = if (_denyCode isEqualType "") then { toUpper ([_denyCode] call _trimFn) } else { "UNKNOWN" };
+        private _detail = if (_denyDetail isEqualType "") then { [_denyDetail] call _trimFn } else { "" };
         _denialText = if (_detail isEqualTo "") then
         {
             format ["Latest generation denial: %1", _code]
@@ -282,8 +295,8 @@ if (_focusData isEqualTo "") then
 else
 {
     private _parts = _focusData splitString "|";
-    private _kind = toUpper (trim (_parts # 0));
-    private _id = if ((count _parts) > 1) then { _parts # 1 } else { "" };
+    private _kind = toUpper ([(_parts select 0)] call _trimFn);
+    private _id = if ((count _parts) > 1) then { _parts select 1 } else { "" };
 
     switch (_kind) do
     {
@@ -301,7 +314,7 @@ else
             _sitrepDetails = [_sitrepDetails, ""] call _safeStr;
 
             _details = format ["<t size='1.2' font='PuristaMedium'>%1</t><br/>", _dispName];
-            if ((trim _typ) != "") then { _details = _details + format ["<t color='#A0A0A0'>Type:</t> %1<br/>", toUpper (trim _typ)]; };
+            if (([_typ] call _trimFn) != "") then { _details = _details + format ["<t color='#A0A0A0'>Type:</t> %1<br/>", toUpper ([_typ] call _trimFn)]; };
             _details = _details + format ["<t color='#A0A0A0'>Grid:</t> %1<br/>", _grid];
             _details = _details + format ["<t color='#A0A0A0'>Accepted:</t> %1", if (_accepted) then {"YES"} else {"NO"}];
             if (_acceptedBy != "") then { _details = _details + format [" (by %1)", _acceptedBy]; };
@@ -321,7 +334,7 @@ else
             else
             {
                 // Next actions: keep SITREP as the primary reporting step until sent.
-                private _typU = toUpper (trim _typ);
+                private _typU = toUpper ([_typ] call _trimFn);
                 private _canSit = [player] call ARC_fnc_clientCanSendSitrep;
 
                 if (_sitrepSent) then
@@ -331,7 +344,7 @@ else
                     _primaryEnabled = false;
                     _details = _details + "SITREP already submitted. Await TOC follow-on / closeout guidance.";
 
-                    if (_sitrepDetails isNotEqualTo "") then
+                    if (!(_sitrepDetails isEqualTo "")) then
                     {
                         private _sitHtml = (_sitrepDetails splitString "\n") joinString "<br/>";
                         _details = _details + "<br/><br/><t size='1.0' font='PuristaMedium'>Last SITREP (full)</t><br/>" +
@@ -370,26 +383,27 @@ else
         {
             private _orders = missionNamespace getVariable ["ARC_pub_orders", []]; if (!(_orders isEqualType [])) then { _orders = []; };
             if ((count _orders) > _rxMaxItems) then { _orders = _orders select [((count _orders) - _rxMaxItems) max 0, _rxMaxItems]; };
-            private _o = _orders findIf { _x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _id } };
+            private _o = -1;
+            { if (_x isEqualType [] && { (count _x) >= 1 } && { (_x select 0) isEqualTo _id }) exitWith { _o = _forEachIndex; }; } forEach _orders;
             if (_o < 0) then
             {
                 _details = "<t align='left' size='1.1' font='PuristaMedium'>Order</t><br/><br/>Order not found (stale UI).";
             }
             else
             {
-                private _order = _orders # _o;
-                private _status = toUpper (trim (_order # 2));
-                private _otype = toUpper (trim (_order # 3));
-                private _pairs = _order # 5;
-                private _meta = _order # 6;
+                private _order = _orders select _o;
+                private _status = toUpper ([(_order select 2)] call _trimFn);
+                private _otype = toUpper ([(_order select 3)] call _trimFn);
+                private _pairs = _order select 5;
+                private _meta = _order select 6;
 
                 private _purpose = [_pairs, "purpose", ""] call _pairGet;
                 if (!(_purpose isEqualType "")) then { _purpose = ""; };
-                _purpose = trim _purpose;
+                _purpose = [_purpose] call _trimFn;
 
                 private _note = [_meta, "note", ""] call _pairGet;
                 if (!(_note isEqualType "")) then { _note = ""; };
-                _note = trim _note;
+                _note = [_note] call _trimFn;
 
                 _details = format ["<t size='1.2' font='PuristaMedium'>%1</t><br/>", _otype];
                 _details = _details + format ["<t color='#A0A0A0'>Status:</t> %1<br/>", _status];
@@ -418,21 +432,22 @@ else
         {
             private _leads = missionNamespace getVariable ["ARC_leadPoolPublic", []]; if (!(_leads isEqualType [])) then { _leads = []; };
             if ((count _leads) > _rxMaxItems) then { _leads = _leads select [0, _rxMaxItems]; };
-            private _idx = _leads findIf { _x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _id } };
+            private _idx = -1;
+            { if (_x isEqualType [] && { (count _x) >= 1 } && { (_x select 0) isEqualTo _id }) exitWith { _idx = _forEachIndex; }; } forEach _leads;
             if (_idx < 0) then
             {
                 _details = "<t align='left' size='1.1' font='PuristaMedium'>Lead</t><br/><br/>Lead not found (stale UI).";
             }
             else
             {
-                private _lead = _leads # _idx;
-                private _typ = toUpper (trim (_lead # 1));
-                private _name = _lead # 2; if (!(_name isEqualType "")) then { _name = "Lead"; };
-                private _pos = _lead # 3; if (!(_pos isEqualType []) || { (count _pos) < 2 }) then { _pos = [0,0,0]; };
+                private _lead = _leads select _idx;
+                private _typ = toUpper ([(_lead select 1)] call _trimFn);
+                private _name = _lead select 2; if (!(_name isEqualType "")) then { _name = "Lead"; };
+                private _pos = _lead select 3; if (!(_pos isEqualType []) || { (count _pos) < 2 }) then { _pos = [0,0,0]; };
                 private _grid = mapGridPosition _pos;
-                private _tag = if ((count _lead) > 10) then { _lead # 10 } else { "" };
+                private _tag = if ((count _lead) > 10) then { _lead select 10 } else { "" };
                 if (!(_tag isEqualType "")) then { _tag = ""; };
-                _tag = trim _tag;
+                _tag = [_tag] call _trimFn;
 
                 _details = format ["<t size='1.2' font='PuristaMedium'>%1</t><br/>", _name];
                 _details = _details + format ["<t color='#A0A0A0'>Type:</t> %1<br/>", _typ];
@@ -463,12 +478,12 @@ if (!isNull _ctrlDetails) then
 
     [_ctrlDetails] call BIS_fnc_ctrlFitToTextHeight;
     private _grp = _display displayCtrl 78016;
-    private _minH = if (!isNull _grp) then { (ctrlPosition _grp) # 3 } else { 0.74 };
+    private _minH = if (!isNull _grp) then { (ctrlPosition _grp) select 3 } else { 0.74 };
     private _p = ctrlPosition _ctrlDetails;
-    _p set [0, _defaultPos # 0];
-    _p set [1, _defaultPos # 1];
-    _p set [2, _defaultPos # 2];
-    _p set [3, (_p # 3) max _minH];
+    _p set [0, _defaultPos select 0];
+    _p set [1, _defaultPos select 1];
+    _p set [2, _defaultPos select 2];
+    _p set [3, (_p select 3) max _minH];
     _ctrlDetails ctrlSetPosition _p;
     _ctrlDetails ctrlCommit 0;
 };

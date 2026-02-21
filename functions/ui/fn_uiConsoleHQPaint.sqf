@@ -20,14 +20,17 @@ params [
 ];
 if (isNull _display) exitWith {false};
 
+// sqflint-compat helpers
+private _trimFn     = compile "params ['_s']; trim _s";
+
 private _ctrlList = _display displayCtrl 78011;
 
 // Force rebuild if the main list currently belongs to another tab.
 // This prevents INTEL list items persisting when switching to HQ (and vice versa).
 private _owner = uiNamespace getVariable ["ARC_console_mainListOwner", ""];
 if (!(_owner isEqualType "")) then { _owner = ""; };
-_owner = toUpper (trim _owner);
-private _ownerChanged = (_owner isNotEqualTo "HQ");
+_owner = toUpper ([_owner] call _trimFn);
+private _ownerChanged = (!(_owner isEqualTo "HQ"));
 if (_ownerChanged) then { _rebuild = true; };
 uiNamespace setVariable ["ARC_console_mainListOwner", "HQ"];
 private _ctrlDetails = _display displayCtrl 78012;
@@ -47,7 +50,7 @@ private _ensureHQSubPanels = {
         {
             if !(_x isEqualType [] && { (count _x) == 3 }) exitWith { _ok = false; };
             if (_ok) then {
-                if (isNull (_x # 0) || { isNull (_x # 1) } || { isNull (_x # 2) }) exitWith { _ok = false; };
+                if (isNull (_x select 0) || { isNull (_x select 1) } || { isNull (_x select 2) }) exitWith { _ok = false; };
             };
         } forEach _panels;
     };
@@ -112,10 +115,10 @@ private _layoutHQSubPanels = {
     if (isNull _ctrlList) exitWith {};
 
     private _pL = ctrlPosition _ctrlList;
-    private _xPos = _pL # 0;
-    private _y = _pL # 1;
-    private _w = _pL # 2;
-    private _h = _pL # 3;
+    private _xPos = _pL select 0;
+    private _y = _pL select 1;
+    private _w = _pL select 2;
+    private _h = _pL select 3;
 
     private _gap = 0.004;
     private _hHdr = 0.03;
@@ -145,9 +148,9 @@ private _renderHQSubPanelsFromMaster = {
     if (isNull _master) exitWith {};
 
     _panels params ["_pAdmin", "_pInc", "_pDiag"];
-    private _lbAdmin = _pAdmin # 2;
-    private _lbInc   = _pInc # 2;
-    private _lbDiag  = _pDiag # 2;
+    private _lbAdmin = _pAdmin select 2;
+    private _lbInc   = _pInc select 2;
+    private _lbDiag  = _pDiag select 2;
 
     { lbClear _x; } forEach [_lbAdmin, _lbInc, _lbDiag];
 
@@ -195,9 +198,9 @@ private _renderHQSubPanelsFromMaster = {
 
     uiNamespace setVariable ["ARC_hq_subPanels_suppressSel", true];
     {
-        private _lb = _x # 2;
+        private _lb = _x select 2;
         _lb lbSetCurSel -1;
-        if (_selData isNotEqualTo "") then {
+        if (!(_selData isEqualTo "")) then {
             for "_k" from 0 to ((lbSize _lb) - 1) do {
                 if ((_lb lbData _k) isEqualTo _selData) exitWith { _lb lbSetCurSel _k; };
             };
@@ -209,7 +212,7 @@ private _renderHQSubPanelsFromMaster = {
 // HQ mode: TOOLS (default) or INCIDENTS (incident picker)
 private _mode = uiNamespace getVariable ["ARC_console_hqMode", "TOOLS"];
 if (!(_mode isEqualType "")) then { _mode = "TOOLS"; };
-_mode = toUpper (trim _mode);
+_mode = toUpper ([_mode] call _trimFn);
 if !(_mode in ["TOOLS", "INCIDENTS"]) then { _mode = "TOOLS"; };
 
 // Prevent the 1.2s console refresh loop from clearing/rebuilding the HQ list every tick.
@@ -256,7 +259,7 @@ if (!isNull _ctrlList) then
     }
     else
     {
-        if (_lastMode isNotEqualTo _mode) then
+        if (!(_lastMode isEqualTo _mode)) then
         {
             _needRebuild = true;
         }
@@ -308,9 +311,9 @@ if (!_canHQ) exitWith
         // Auto-fit + clamp to viewport so the controls group can scroll when needed.
         [_ctrlDetails] call BIS_fnc_ctrlFitToTextHeight;
         private _grp = _display displayCtrl 78016;
-        private _minH = if (!isNull _grp) then { (ctrlPosition _grp) # 3 } else { 0.74 };
+        private _minH = if (!isNull _grp) then { (ctrlPosition _grp) select 3 } else { 0.74 };
         private _p = ctrlPosition _ctrlDetails;
-        _p set [3, (_p # 3) max _minH];
+        _p set [3, (_p select 3) max _minH];
         _ctrlDetails ctrlSetPosition _p;
         _ctrlDetails ctrlCommit 0;
     };
@@ -378,7 +381,7 @@ if (_needRebuild && {!isNull _ctrlList}) then
         {
             private _tU = _x;
             private _rows = _catalog select {
-                _x isEqualType [] && { (count _x) >= 3 } && { toUpper (_x # 2) isEqualTo _tU }
+                _x isEqualType [] && { (count _x) >= 3 } && { toUpper (_x select 2) isEqualTo _tU }
             };
 
             if ((count _rows) > 0) then
@@ -448,10 +451,10 @@ if (!isNull _ctrlList) then
         [_display, _ctrlList, _hqPanels] call _renderHQSubPanelsFromMaster;
 
         {
-            (_x # 0) ctrlShow true;
-            (_x # 1) ctrlShow true;
-            (_x # 2) ctrlShow true;
-            (_x # 2) ctrlEnable true;
+            (_x select 0) ctrlShow true;
+            (_x select 1) ctrlShow true;
+            (_x select 2) ctrlShow true;
+            (_x select 2) ctrlEnable true;
         } forEach _hqPanels;
     }
     else
@@ -540,7 +543,7 @@ switch (toUpper _data) do
         _txt = _txt + "Runs a server-side QA audit of Farabad Console integration (functions + state coherence).";
 
         private _rep = uiNamespace getVariable ["ARC_console_lastQAReport", ""];
-        if (_rep isEqualType "" && { _rep isNotEqualTo "" }) then
+        if (_rep isEqualType "" && { !(_rep isEqualTo "") }) then
         {
             _txt = _txt + "<br/><br/><t font='PuristaMedium'>Last report:</t><br/>" + _rep;
         };
@@ -551,7 +554,7 @@ switch (toUpper _data) do
         _txt = _txt + "Attempts to compile all ARC functions listed in CfgFunctions. This surfaces SQF syntax errors early (check server RPT for file/line details).";
 
         private _rep = uiNamespace getVariable ["ARC_console_lastCompileReport", ""];
-        if (_rep isEqualType "" && { _rep isNotEqualTo "" }) then
+        if (_rep isEqualType "" && { !(_rep isEqualTo "") }) then
         {
             _txt = _txt + "<br/><br/><t font='PuristaMedium'>Last report:</t><br/>" + _rep;
         };
@@ -608,9 +611,9 @@ switch (toUpper _data) do
                 }
                 else
                 {
-                    private _mkr = _parts # 0;
-                    private _typ = _parts # 1;
-                    private _disp = _parts # 2;
+                    private _mkr = _parts select 0;
+                    private _typ = _parts select 1;
+                    private _disp = _parts select 2;
 
                     private _m = [_mkr] call ARC_fnc_worldResolveMarker;
                     private _pos = getMarkerPos _m;
@@ -619,7 +622,7 @@ switch (toUpper _data) do
 
                     private _taskId = missionNamespace getVariable ["ARC_activeTaskId", ""]; 
                     if (!(_taskId isEqualType "")) then { _taskId = ""; };
-                    private _blocked = (_taskId isNotEqualTo "");
+                    private _blocked = (!(_taskId isEqualTo ""));
 
                     _txt = _txt + format [
                         "<t font='PuristaMedium'>%1</t><br/>Type: %2<br/>Marker: %3<br/>Grid: %4<br/>Zone: %5",
@@ -658,9 +661,9 @@ if (!isNull _ctrlDetails) then
     // Auto-fit + clamp to viewport so the controls group can scroll when needed.
     [_ctrlDetails] call BIS_fnc_ctrlFitToTextHeight;
     private _grp = _display displayCtrl 78016;
-    private _minH = if (!isNull _grp) then { (ctrlPosition _grp) # 3 } else { 0.74 };
+    private _minH = if (!isNull _grp) then { (ctrlPosition _grp) select 3 } else { 0.74 };
     private _p = ctrlPosition _ctrlDetails;
-    _p set [3, (_p # 3) max _minH];
+    _p set [3, (_p select 3) max _minH];
     _ctrlDetails ctrlSetPosition _p;
     _ctrlDetails ctrlCommit 0;
 };

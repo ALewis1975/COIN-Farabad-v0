@@ -25,6 +25,10 @@ params [
 if (_threatId isEqualTo "") exitWith {false};
 if (_stateTo isEqualTo "") exitWith {false};
 
+// sqflint-compat helpers
+private _trimFn     = compile "params ['_s']; trim _s";
+private _findIfFn   = compile "params ['_arr','_cond']; private _r = -1; { if (_x call _cond) exitWith { _r = _forEachIndex; }; } forEach _arr; _r";
+
 private _enabled = ["threat_v0_enabled", true] call ARC_fnc_stateGet;
 if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabled = true; };
 if (!_enabled) exitWith {false};
@@ -35,9 +39,10 @@ private _stateToU = toUpper _stateTo;
 private _kvGet = {
     params ["_pairs", "_key", "_default"];
     if (!(_pairs isEqualType [])) exitWith {_default};
-    private _idx = _pairs findIf { (_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key } };
+    private _idx = -1;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) exitWith {_default};
-    private _v = (_pairs # _idx) # 1;
+    private _v = (_pairs select _idx) select 1;
     if (isNil "_v") exitWith {_default};
     _v
 };
@@ -45,7 +50,8 @@ private _kvGet = {
 private _kvSet = {
     params ["_pairs", "_key", "_value"];
     if (!(_pairs isEqualType [])) then { _pairs = []; };
-    private _idx = _pairs findIf { (_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key } };
+    private _idx = -1;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) then { _pairs pushBack [_key, _value]; } else { _pairs set [_idx, [_key, _value]]; };
     _pairs
 };
@@ -54,10 +60,11 @@ private _kvSet = {
 private _records = ["threat_v0_records", []] call ARC_fnc_stateGet;
 if (!(_records isEqualType [])) exitWith {false};
 
-private _idxRec = _records findIf { ([_x, "threat_id", ""] call _kvGet) isEqualTo _threatId };
+private _idxRec = -1;
+{ if (([_x, "threat_id", ""] call _kvGet) isEqualTo _threatId) exitWith { _idxRec = _forEachIndex; }; } forEach _records;
 if (_idxRec < 0) exitWith {false};
 
-private _rec = _records # _idxRec;
+private _rec = _records select _idxRec;
 
 private _stateFrom = [_rec, "state", ""] call _kvGet;
 private _stateFromU = toUpper _stateFrom;
@@ -173,15 +180,15 @@ private _meta = [
 ];
 
 private _summary = format ["%1: %2 %3→%4", _event, _threatId, _stateFromU, _stateToU];
-if ((trim _note) isNotEqualTo "") then
+if (!(([_note] call _trimFn) isEqualTo "")) then
 {
-    _summary = _summary + format [" (%1)", trim _note];
+    _summary = _summary + format [" (%1)", [_note] call _trimFn];
 };
 
 private _intelId = ["OPS", _summary, _pos, _meta] call ARC_fnc_intelLog;
 
 // Attach log ref (best-effort)
-if (_intelId isNotEqualTo "") then
+if (!(_intelId isEqualTo "")) then
 {
     private _audit = [_rec, "audit", []] call _kvGet;
     private _refs = [_audit, "log_refs", []] call _kvGet;

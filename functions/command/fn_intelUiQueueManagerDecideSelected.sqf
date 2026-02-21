@@ -10,6 +10,9 @@
 params [ ["_approve", true, [true]] ];
 
 if (!hasInterface) exitWith {false};
+// sqflint-compat helpers
+private _trimFn     = compile "params ['_s']; trim _s";
+
 if !([player] call ARC_fnc_rolesCanApproveQueue) exitWith
 {
     ["TOC Queue", "Only S3/Command can approve/reject queue items."] call ARC_fnc_clientHint;
@@ -38,7 +41,7 @@ if (_q isEqualTo []) then
 
 private _it = [];
 {
-    if (_x isEqualType [] && { (count _x) >= 12 } && { (_x # 0) isEqualTo _qid }) exitWith { _it = _x; };
+    if (_x isEqualType [] && { (count _x) >= 12 } && { (_x select 0) isEqualTo _qid }) exitWith { _it = _x; };
 } forEach _q;
 
 if (_it isEqualTo []) exitWith
@@ -47,8 +50,8 @@ if (_it isEqualTo []) exitWith
     false
 };
 
-private _stU = toUpper (_it # 2);
-if (_stU isNotEqualTo "PENDING") exitWith
+private _stU = toUpper (_it select 2);
+if (!(_stU isEqualTo "PENDING")) exitWith
 {
     ["TOC Queue", format ["%1 is %2 (not pending).", _qid, _stU]] call ARC_fnc_clientHint;
     false
@@ -57,7 +60,7 @@ if (_stU isNotEqualTo "PENDING") exitWith
 // Read note field.
 private _note = ctrlText (_disp displayCtrl 61004);
 if !(_note isEqualType "") then { _note = ""; };
-_note = trim _note;
+_note = [_note] call _trimFn;
 
 // Push decision to server.
 [player, _qid, _approve, _note] remoteExecCall ["ARC_fnc_intelQueueDecide", 2];

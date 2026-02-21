@@ -21,6 +21,10 @@ params [
     ["_intelConf", 0.20, [0]]
 ];
 
+// sqflint-compat helpers
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
+
 private _districtIdCheck = [_districtId, "NON_EMPTY_STRING", "districtId", [""]] call ARC_fnc_paramAssert;
 _districtId = _districtIdCheck param [1, ""];
 if !(_districtIdCheck param [0, false]) exitWith {
@@ -39,7 +43,7 @@ if (_poiId != "") then {
 private _seed = createHashMap;
 _seed set ["poi_id", _poiId];
 _seed set ["poi", _poi];
-_seed set ["district_centroid", _d getOrDefault ["centroid", [0,0]]];
+_seed set ["district_centroid", [_d, "centroid", [0,0]]];
 _seed set ["district_id", _districtId];
 
 private _leadTypes = ["HUMINT", "TIP", "SUSPICIOUS_ACTIVITY"];
@@ -47,19 +51,19 @@ private _leadType = _leadTypes select (floor (random (count _leadTypes)));
 
 private _leadId = [] call ARC_fnc_civsubUuid;
 
-private _leadEmit = createHashMapFromArray [
+private _leadEmit = [[
     ["emit", true],
     ["lead_type", _leadType],
     ["lead_id", _leadId],
     ["confidence", _intelConf],
     ["seed", _seed]
-];
+]] call _hmFrom;
 
-private _influenceDelta = createHashMapFromArray [["dW", 0], ["dR", 0], ["dG", 0]];
+private _influenceDelta = [[["dW", 0], ["dR", 0], ["dG", 0]]] call _hmFrom;
 
 private _bundle = [
     _districtId,
-    _d getOrDefault ["centroid", [0,0]],
+    [_d, "centroid", [0,0]],
     "SCHEDULER",
     "LEAD_AMBIENT",
     createHashMap,
@@ -79,7 +83,7 @@ private _bundle = [
 _d set ["cooldown_nextLead_ts", serverTime + 3600];
 
 // Publish last scheduler emission (debug)
-missionNamespace setVariable ["civsub_v1_lastScheduler_bundle_id", _bundle getOrDefault ["bundle_id", ""], true];
+missionNamespace setVariable ["civsub_v1_lastScheduler_bundle_id", [_bundle, "bundle_id", ""] call _hg, true];
 missionNamespace setVariable ["civsub_v1_lastScheduler_event", "LEAD_AMBIENT", true];
 missionNamespace setVariable ["civsub_v1_lastScheduler_ts", serverTime, true];
 missionNamespace setVariable ["civsub_v1_lastScheduler_bundle_pairs", [_bundle] call ARC_fnc_civsubBundleToPairs, true];

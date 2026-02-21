@@ -316,11 +316,18 @@ _lines pushBack "<t size='0.95' color='#BDBDBD'>Use TOC QUEUE to review/approve 
 
 _ctrlMain ctrlSetStructuredText parseText (_lines joinString "<br/>");
 
-// Auto-fit + clamp to viewport so the controls group can scroll when needed.
-[_ctrlMain] call BIS_fnc_ctrlFitToTextHeight;
+// Auto-fit + clamp to viewport; pin width to parent group before fitting to prevent horizontal overflow.
 private _mainGrp = _display displayCtrl 78015;
-private _minH = if (!isNull _mainGrp) then { (ctrlPosition _mainGrp) select 3 } else { 0.74 };
+private _minH  = if (!isNull _mainGrp) then { (ctrlPosition _mainGrp) select 3 } else { 0.74 };
+private _grpW  = if (!isNull _mainGrp) then { (ctrlPosition _mainGrp) select 2 } else { 1.4 };
+private _safeW = _grpW - 0.025;
+private _pPre  = ctrlPosition _ctrlMain;
+_pPre set [2, _safeW];
+_ctrlMain ctrlSetPosition _pPre;
+_ctrlMain ctrlCommit 0;
+[_ctrlMain] call BIS_fnc_ctrlFitToTextHeight;
 private _p = ctrlPosition _ctrlMain;
+_p set [2, _safeW];
 _p set [3, (_p select 3) max _minH];
 _ctrlMain ctrlSetPosition _p;
 _ctrlMain ctrlCommit 0;
@@ -361,15 +368,21 @@ if (!isNull _ctrlDetailsGrp && { !isNull _ctrlDetails }) then
 
     _ctrlDetails ctrlSetStructuredText parseText _rTxt;
 
+    private _cmdGrp = _display displayCtrl 78016;
+    private _cmdMinH = if (!isNull _cmdGrp) then { (ctrlPosition _cmdGrp) select 3 } else { 0.74 };
+    private _cmdGrpW = if (!isNull _cmdGrp) then { (ctrlPosition _cmdGrp) select 2 } else { 0.47 };
     private _cmdRpDefaultPos = uiNamespace getVariable ["ARC_console_cmdRpDefaultPos", []];
     if (!(_cmdRpDefaultPos isEqualType []) || { (count _cmdRpDefaultPos) < 4 }) then
     {
         _cmdRpDefaultPos = ctrlPosition _ctrlDetails;
+        _cmdRpDefaultPos set [2, _cmdGrpW - 0.01];
         uiNamespace setVariable ["ARC_console_cmdRpDefaultPos", +_cmdRpDefaultPos];
     };
+    private _cmdPPre = ctrlPosition _ctrlDetails;
+    _cmdPPre set [2, _cmdRpDefaultPos select 2];
+    _ctrlDetails ctrlSetPosition _cmdPPre;
+    _ctrlDetails ctrlCommit 0;
     [_ctrlDetails] call BIS_fnc_ctrlFitToTextHeight;
-    private _cmdGrp = _display displayCtrl 78016;
-    private _cmdMinH = if (!isNull _cmdGrp) then { (ctrlPosition _cmdGrp) select 3 } else { 0.74 };
     private _cmdP = ctrlPosition _ctrlDetails;
     _cmdP set [0, _cmdRpDefaultPos select 0];
     _cmdP set [1, _cmdRpDefaultPos select 1];

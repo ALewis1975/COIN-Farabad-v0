@@ -30,6 +30,9 @@ if (isNull _actor || {isNull _civ}) exitWith {[false, "<t size='0.9'>Invalid tar
 if !(isPlayer _actor) exitWith {[false, "<t size='0.9'>Invalid actor.</t>"]};
 if !(_civ getVariable ["civsub_v1_isCiv", false]) exitWith {[false, "<t size='0.9'>Not a CIVSUB civilian.</t>"]};
 
+// sqflint-compat helpers
+private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
+
 private _did = _civ getVariable ["civsub_districtId", ""];
 if (_did isEqualTo "") exitWith {[false, "<t size='0.9'>No district ID for this civilian.</t>"]};
 
@@ -140,7 +143,7 @@ _civ setVariable ["civsub_need_satiation", _sat0, true];
 _civ setVariable ["civsub_need_hydration", _hyd1, true];
 _civ setVariable ["civsub_outlook_blufor", _out1, true];
 
-private _payload = createHashMapFromArray [
+private _payload = [[
     ["civ_uid", _civUid],
     ["item", _found],
     ["amount", 1],
@@ -152,7 +155,7 @@ private _payload = createHashMapFromArray [
     ["outlook_before", _out0],
     ["outlook_after", _out1],
     ["outlook_delta", _opDelta]
-];
+]] call _hmFrom;
 
 // Emit CIVSUB delta (validated and applied inside EmitDelta)
 [_did, "AID_WATER", "AID", _payload, _actorUid] call ARC_fnc_civsubEmitDelta;

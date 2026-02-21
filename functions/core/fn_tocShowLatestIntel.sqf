@@ -31,7 +31,7 @@ if (_intelLog isEqualTo []) exitWith
     false
 };
 
-private _e = _intelLog # ((count _intelLog) - 1);
+private _e = _intelLog select ((count _intelLog) - 1);
 if (!(_e isEqualType [] && { (count _e) >= 6 })) exitWith
 {
     ["Intel", "Latest intel entry malformed."] call ARC_fnc_clientToast;
@@ -50,8 +50,8 @@ if (_meta isEqualType [] && { (count _meta) > 0 }) then
     {
         if (_x isEqualType [] && { (count _x) >= 2 }) then
         {
-            private _k = _x # 0;
-            private _v = _x # 1;
+            private _k = _x select 0;
+            private _v = _x select 1;
             _metaTxt = _metaTxt + format ["<br/><t color='#AAAAAA'>%1:</t> %2", _k, _v];
         };
     } forEach _meta;

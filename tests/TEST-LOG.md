@@ -590,3 +590,83 @@ sqflint -e w functions/civsub/fn_civsubContactReqAction.sqf
 **Tracking:** PR #296 — validate in local MP: use addAction "Interact" on a CIVSUB civilian, confirm question/action results appear in the INTEL right pane and toast shows the correct action result (not a warning).
 
 **JIP / late-client:** Not evaluated; deferred to dedicated server session.
+
+---
+
+## 2026-02-21 — UI text-wrap / horizontal overflow fix (PR: fix-text-wrapping-issues)
+
+**Branch/Commit:** copilot/fix-text-wrapping-issues
+
+**Scenario:** Farabad Console — horizontal scrollbar visible in COP/Dashboard and TOC/CMD panels.
+
+**Root causes identified:**
+
+1. `MainDetails` (idc 78012) had `w = 0.99` in `CfgDialogs.hpp`, but its parent `MainDetailsGroup` (idc 78016) has `w = (0.482 * safeZoneW)`. On 16:9 (`safeZoneW ≈ 1.778`) this produces a control wider than the viewport (~0.99 vs ~0.857), causing permanent horizontal scroll in the details panel.
+
+2. `Main` (idc 78010) had `w = 0.99`; parent group `MainGroup` (idc 78015) has `w = (0.756 * safeZoneW)`. On aspect ratios narrower than ~4:3 (`safeZoneW < 1.31`), the inner control overflowed. Additionally, `BIS_fnc_ctrlFitToTextHeight` was called without first pinning the control width, so a stretched width from a prior paint pass could be inherited.
+
+3. Dashboard `_incLine` put the acceptance / unit / SITREP status all on one line. That single long line can extend past the control boundary, compounding the overflow.
+
+**Changes made:**
+
+| File | Change |
+|---|---|
+| `config/CfgDialogs.hpp` | `Main` (78010): `w = 0.99` → `w = (0.74 * safeZoneW)`; `MainDetails` (78012): `w = 0.99` → `w = (0.47 * safeZoneW)` |
+| `fn_uiConsoleDashboardPaint.sqf` | `_incLine`: added `<br/>` before status section; main-panel: pin width to `_grpW - 0.025` before/after `BIS_fnc_ctrlFitToTextHeight`; details-panel: clamp `_dashDefaultPos[2]` to `_dashGrpW - 0.01` |
+| `fn_uiConsoleCommandPaint.sqf` | main-panel: same width-pinning pattern; details-panel: clamp `_cmdRpDefaultPos[2]` to `_cmdGrpW - 0.01` |
+
+**Commands:**
+
+```
+python3 scripts/dev/sqflint_compat_scan.py --strict \
+  functions/ui/fn_uiConsoleDashboardPaint.sqf \
+  functions/ui/fn_uiConsoleCommandPaint.sqf
+sqflint -e w functions/ui/fn_uiConsoleDashboardPaint.sqf
+sqflint -e w functions/ui/fn_uiConsoleCommandPaint.sqf
+```
+
+**Result:** PASS
+
+**Runtime validation:** BLOCKED — no Arma 3 runtime in CI container. Changes are pure layout/geometry math; no game logic touched.
+
+**Follow-up owner:** Mission maintainer (ALewis1975).
+
+**Tracking:** Validate in hosted MP: open the Farabad Console and check the COP/Dashboard and TOC/CMD tabs confirm no horizontal scrollbar at 16:9, 16:10, and 4:3 (if available). Also verify the Dashboard incident line now wraps the acceptance status to a second line.
+
+**JIP / late-client:** Not applicable (UI-only change; no replicated state involved).
+
+---
+
+## 2026-02-21 — Hotfix: _hg recursion + broken forEach/exitWith patterns
+
+**Branch/Commit:** copilot/fix-sqf-syntax-errors
+
+**Scenario:** Mission load freeze — RPT showed compile-time `Error Missing ;` / `Error Missing )` in 20+ files at startup, followed by runtime spam of `Error Undefined variable in expression: _h` from a self-recursive `_hg` HashMap helper.
+
+**Root causes fixed:**
+
+1. **Self-recursive `_hg`**: Every `compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg"` (and variants) replaced with `compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]"` — repo-wide across ~80 files.
+2. **Literal defaults passed to `_hg`**: `[] call _hg`, `[0,0,0] call _hg`, `[0,0] call _hg`, `[0,0,1] call _hg` replaced with literal values.
+3. **Broken `forEach + exitWith` pattern (Pattern C)**: `private _VAR = [_COLL, {\n  COND\n) exitWith { _VAR = _forEachIndex; }; } forEach _COLL;` replaced with `private _VAR = -1;\n{ if (COND) exitWith { _VAR = _forEachIndex; }; } forEach _COLL;` — 13 call-sites across 8 files.
+4. **Broken `{ if (cond }] call _findIfFn;` (Pattern D)**: Fixed missing `)` and replaced with `forEach + exitWith` pattern — 10 sites across 6 files.
+5. **Misplaced helper declarations (Pattern E)**: sqflint-compat helpers (`_trimFn`, `_hg`) inserted BETWEEN `exitWith` and `{...}` — moved before the `exitWith` statement — 4 files.
+6. **Broken parentheses in status extraction (Pattern F)**: `toUpper ([((_rows select _idx)] call _trimFn select 1))` → `toUpper ([(_rows select _idx) select 1] call _trimFn)` — 2 files.
+7. **Miscellaneous**: `fn_airbasePlaneDepart.sqf` line 143 brace/paren mismatch `{!((group _x) isEqualTo _grp}))` → `{!((group _x) isEqualTo _grp)})`; `fn_civsubPersistLoad.sqf` misplaced `call _hg` on default value expressions.
+
+**Files changed:** 94 `.sqf` files
+
+**Commands:**
+
+```
+python3 scripts/dev/sqflint_compat_scan.py --strict $(git diff --name-only HEAD | grep "\.sqf$")
+```
+
+**Result:** PASS — all 94 changed files pass compat scan.
+
+**Runtime validation:** BLOCKED — no Arma 3 runtime in CI container. All fixes are syntactic corrections that restore the original intended semantics. No behavioral changes beyond removing the recursive self-call in `_hg`.
+
+**Follow-up owner:** Mission maintainer (ALewis1975).
+
+**Tracking:** Boot mission with `-showScriptErrors` flag, verify RPT shows no `Error Missing ;` or `Error Missing )` at startup, and no `Error Undefined variable in expression: _h` spam. Confirm mission reaches briefing/map without script error popups.
+
+**JIP / late-client:** Not applicable (syntax fixes only; no replicated state logic changed).

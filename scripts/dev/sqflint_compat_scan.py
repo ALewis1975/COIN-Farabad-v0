@@ -41,7 +41,7 @@ RULES: list[PatternRule] = [
     PatternRule(
         name="hashmap-getOrDefault-method",
         regex=re.compile(r"\b[_A-Za-z]\w*\s+getOrDefault\s*\["),
-        approved_equivalent="Prefer call form: `[map, key, default] call getOrDefault`.",
+        approved_equivalent="Prefer call form: `[map, key, default] call _hg` where `_hg = compile \"params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]\";`.",
         notes="Method-style HashMap calls can misparse under older sqflint builds.",
     ),
     PatternRule(
@@ -57,10 +57,40 @@ RULES: list[PatternRule] = [
         notes="Known parser-compatibility pain point in older sqflint versions.",
     ),
     PatternRule(
+        name="toLowerANSI",
+        regex=re.compile(r"\btoLowerANSI\b"),
+        approved_equivalent="Use `toLower` for ASCII mission strings.",
+        notes="Known parser-compatibility pain point in older sqflint versions.",
+    ),
+    PatternRule(
         name="hash-index-operator",
         regex=re.compile(r"\s#\s"),
         approved_equivalent="Use `select` with explicit bounds/type guards.",
         notes="`#` indexing may not be parsed by older sqflint releases.",
+    ),
+    PatternRule(
+        name="hashmap-get-operator",
+        regex=re.compile(r"\b[_A-Za-z]\w*\s+get\s+[_A-Za-z\"']"),
+        approved_equivalent="Wrap via `_mapGet = compile \"params ['_h','_k']; _h get _k\";` then `[_map, _key] call _mapGet`.",
+        notes="sqflint 0.3.2 does not recognise HashMap `get` as a binary operator; causes parse errors.",
+    ),
+    PatternRule(
+        name="hashmap-keys-operator",
+        regex=re.compile(r"\bkeys\s+[_A-Za-z]"),
+        approved_equivalent="Wrap via `_keysFn = compile \"params ['_m']; keys _m\";` then `[_map] call _keysFn`.",
+        notes="sqflint 0.3.2 does not recognise `keys` as a HashMap unary operator; causes parse errors.",
+    ),
+    PatternRule(
+        name="array-insert-operator",
+        regex=re.compile(r"\b[_A-Za-z]\w*\s+insert\s*\["),
+        approved_equivalent="Wrap via `_insertFn = compile \"params ['_arr','_pos','_items']; _arr insert [_pos, _items]\";`.",
+        notes="sqflint 0.3.2 does not recognise array `insert` operator; causes parse errors.",
+    ),
+    PatternRule(
+        name="createHashMapFromArray",
+        regex=re.compile(r"\bcreateHashMapFromArray\b"),
+        approved_equivalent="Wrap via `_hmFrom = compile \"params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r\";`.",
+        notes="sqflint 0.3.2 does not recognise `createHashMapFromArray`; causes parse errors.",
     ),
 ]
 
@@ -74,8 +104,11 @@ def _git_changed_sqf_files() -> list[Path]:
 
 
 def _is_compat_wrapper_line(line: str, rule_name: str) -> bool:
-    if rule_name in {"trim-operator", "fileExists-operator"}:
-        return "compile" in line and '"' in line
+    """Return True if this line is a sqflint-compat compile-helper declaration (skip it)."""
+    stripped = line.strip()
+    # Any line that defines a compile helper: private _xxx = compile "...";
+    if re.match(r'private\s+_\w+\s*=\s*compile\s+"', stripped):
+        return True
     return False
 
 
@@ -87,10 +120,24 @@ def scan_file(path: Path) -> list[tuple[int, PatternRule, str]]:
         print(f"[sqflint-compat-scan] WARN: unable to read {path}: {exc}")
         return findings
 
+    in_block_comment = False
     for idx, line in enumerate(lines, start=1):
         stripped = line.strip()
+
+        # Track /* ... */ block comment state
+        if in_block_comment:
+            if "*/" in line:
+                in_block_comment = False
+            continue
+        if stripped.startswith("/*"):
+            if "*/" not in line:
+                in_block_comment = True
+            continue
+
+        # Skip single-line comments
         if stripped.startswith("//"):
             continue
+
         for rule in RULES:
             if _is_compat_wrapper_line(line, rule.name):
                 continue

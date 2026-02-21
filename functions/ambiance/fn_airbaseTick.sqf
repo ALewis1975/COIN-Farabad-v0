@@ -6,6 +6,12 @@
       and queues "return arrivals" for departed aircraft once their turnaround timer expires.
 */
 
+// sqflint-compat helpers
+private _mapGet   = compile "params ['_h','_k']; _h get _k";
+private _insertFn = compile "params ['_arr','_pos','_items']; _arr insert [_pos, _items]";
+private _findIfFn = compile "params ['_arr','_cond']; private _r = -1; { if (_x call _cond) exitWith { _r = _forEachIndex; }; } forEach _arr; _r";
+
+
 if (!isServer) exitWith {};
 
 private _rt = missionNamespace getVariable ["airbase_v1_rt", createHashMap];
@@ -13,7 +19,7 @@ private _rt = missionNamespace getVariable ["airbase_v1_rt", createHashMap];
 private _fnHmGet = {
     params ["_hm", "_key", "_fallback"];
     if (!(_hm isEqualType createHashMap)) exitWith { _fallback };
-    private _value = _hm get _key;
+    private _value = [_hm, _key] call _mapGet;
     if (isNil "_value") exitWith { _fallback };
     _value
 };
@@ -40,7 +46,7 @@ _rt set ["bubbleActive", _bubbleActive];
 missionNamespace setVariable ["airbase_v1_bubble_active", _bubbleActive, true];
 
 // Toggle simulation for parked assets when bubble changes
-if (_bubbleActive isNotEqualTo _wasActive) then {
+if (!(_bubbleActive isEqualTo _wasActive)) then {
     private _assetsT = [_rt, "assets", []] call _fnHmGet;
     {
         private _state = [_x, "state", "PARKED"] call _fnHmGet;
@@ -154,14 +160,15 @@ private _metaGet = {
     params ["_rows", "_k", "_def"];
     private _v = _def;
     {
-        if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x # 0)) isEqualTo _k }) exitWith { _v = _x # 1; };
+        if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x select 0)) isEqualTo _k }) exitWith { _v = _x select 1; };
     } forEach _rows;
     _v
 };
 
 private _metaSet = {
     params ["_rows", "_k", "_v"];
-    private _idx = _rows findIf { _x isEqualType [] && { (count _x) >= 2 } && { ((_x # 0)) isEqualTo _k } };
+    private _idx = -1;
+    { if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x select 0)) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
     if (_idx < 0) then { _rows pushBack [_k, _v]; } else { _rows set [_idx, [_k, _v]]; };
     _rows
 };
@@ -179,7 +186,7 @@ private _fnNotifyMaybe = {
     params ["_owner", "_method", "_title", "_body", "_dedupeKey"];
     if (_owner <= 0) exitWith {};
     if (!(_dedupeKey isEqualType "")) then { _dedupeKey = str _dedupeKey; };
-    private _lastAt = _notifyState get _dedupeKey;
+    private _lastAt = [_notifyState, _dedupeKey] call _mapGet;
     if (isNil "_lastAt") then { _lastAt = -1000; };
     if ((_nowTs - _lastAt) < _notifyThrottleS) exitWith {};
     _notifyState set [_dedupeKey, _nowTs];
@@ -219,25 +226,24 @@ if (!(_towerStaffing isEqualType [])) then { _towerStaffing = []; };
 
 private _staffLaneRec = {
     params ["_rows", "_lane"];
-    private _idx = _rows findIf {
-        (_x isEqualType []) &&
+    private _idx = -1;
+    { if ((_x isEqualType []) &&
         { (count _x) >= 5 } &&
-        { ((_x param [0, ""]) isEqualTo _lane) }
-    };
+        { ((_x param [0, ""]) isEqualTo _lane) }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
     if (_idx < 0) exitWith { [_lane, "AUTO", "", "", -1] };
-    _rows # _idx
+    _rows select _idx
 };
 
 private _laneControllerCount = {
     params ["_lane"];
     private _rec = [_towerStaffing, _lane] call _staffLaneRec;
-    private _status = toUpperANSI (_rec param [1, "AUTO"]);
+    private _status = toUpper (_rec param [1, "AUTO"]);
     if (_status isEqualTo "MANNED") then { 1 } else { 0 }
 };
 
 private _laneForRequest = {
     params ["_reqType"];
-    private _rt = toUpperANSI _reqType;
+    private _rt = toUpper _reqType;
     if (_rt in ["REQ_INBOUND", "REQ_LAND", "REQ_EMERGENCY"]) exitWith { "arrival" };
     if (_rt isEqualTo "REQ_TAXI") exitWith { "ground" };
     "tower"
@@ -245,7 +251,7 @@ private _laneForRequest = {
 
 private _laneTimeoutFor = {
     params ["_lane"];
-    switch (toLowerANSI _lane) do {
+    switch (toLower _lane) do {
         case "arrival": { _controllerTimeoutArrivalS };
         case "ground": { _controllerTimeoutGroundS };
         default { _controllerTimeoutTowerS };
@@ -254,7 +260,7 @@ private _laneTimeoutFor = {
 
 private _laneAutoDelayFor = {
     params ["_lane"];
-    switch (toLowerANSI _lane) do {
+    switch (toLower _lane) do {
         case "arrival": { _autoDelayArrivalS };
         case "ground": { _autoDelayGroundS };
         default { _autoDelayTowerS };
@@ -264,10 +270,10 @@ private _laneAutoDelayFor = {
 private _clearanceStateDirty = false;
 
 for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
-    private _rec = _clearanceRequests # _iClr;
+    private _rec = _clearanceRequests select _iClr;
     if !(_rec isEqualType []) then { continue; };
 
-    private _status = toUpperANSI (_rec param [6, ""]);
+    private _status = toUpper (_rec param [6, ""]);
     if (_status in ["APPROVED", "DENIED", "CANCELED", "COMPLETE"]) then { continue; };
 
     private _createdAt = _rec param [7, _nowTs];
@@ -285,7 +291,7 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
     private _staleEscalateS = missionNamespace getVariable ["airbase_v1_inbound_stale_escalate_s", 45];
 
     private _distM = -1;
-    private _rtypeNow = toUpperANSI (_rec param [1, ""]);
+    private _rtypeNow = toUpper (_rec param [1, ""]);
     if (_rtypeNow in ["REQ_INBOUND", "REQ_LAND"]) then {
         private _airNid = _rec param [4, ""];
         private _veh = objectFromNetId _airNid;
@@ -349,7 +355,7 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
 
     if (_laneControllers > 0) then {
         if (_autoInProgress) then {
-            _meta = [_meta, "automationStatus", format ["AUTO decision in progress (%1 lane). ETA %2s", toUpperANSI _laneId, (_autoDecisionAtExisting - _nowTs) max 0]] call _metaSet;
+            _meta = [_meta, "automationStatus", format ["AUTO decision in progress (%1 lane). ETA %2s", toUpper _laneId, (_autoDecisionAtExisting - _nowTs) max 0]] call _metaSet;
             _meta = [_meta, "automationEtaS", (_autoDecisionAtExisting - _nowTs) max 0] call _metaSet;
             _meta = [_meta, "automationSource", "AUTO_IN_PROGRESS_LOCKED"] call _metaSet;
             _rec set [10, _meta];
@@ -363,7 +369,7 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
             _rec set [9, ["", "", -1, "", "AWAITING_TOWER"]];
             _meta = [_meta, "awaitingTowerDecision", true] call _metaSet;
             _meta = [_meta, "towerControllersPresent", _laneControllers] call _metaSet;
-            _meta = [_meta, "automationStatus", format ["Awaiting %1 controller decision", toUpperANSI _laneId]] call _metaSet;
+            _meta = [_meta, "automationStatus", format ["Awaiting %1 controller decision", toUpper _laneId]] call _metaSet;
             _meta = [_meta, "automationEtaS", -1] call _metaSet;
             _meta = [_meta, "automationDecisionAt", -1] call _metaSet;
             _meta = [_meta, "automationSource", "MANNED_LANE"] call _metaSet;
@@ -378,12 +384,12 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
 
             private _requesterOwnerAwait = -1;
             { if ((getPlayerUID _x) isEqualTo _requesterUidAwait) exitWith { _requesterOwnerAwait = owner _x; }; } forEach allPlayers;
-            [_requesterOwnerAwait, "TOAST", "Airbase Clearance", format ["Request queued: %1 awaiting %2 controller", _ridAwait, toUpperANSI _laneId], format ["AIR_REQ_AWAIT:%1", _ridAwait]] call _fnNotifyMaybe;
+            [_requesterOwnerAwait, "TOAST", "Airbase Clearance", format ["Request queued: %1 awaiting %2 controller", _ridAwait, toUpper _laneId], format ["AIR_REQ_AWAIT:%1", _ridAwait]] call _fnNotifyMaybe;
             {
                 private _towUid = _x param [1, ""];
                 private _towOwner = -1;
                 { if ((getPlayerUID _x) isEqualTo _towUid) exitWith { _towOwner = owner _x; }; } forEach allPlayers;
-                [_towOwner, "TOAST", "Airbase Tower", format ["Decision required (%1): %2", toUpperANSI _laneId, _ridAwait], format ["AIR_CTRL_PENDING:%1:%2", _ridAwait, _towUid]] call _fnNotifyMaybe;
+                [_towOwner, "TOAST", "Airbase Tower", format ["Decision required (%1): %2", toUpper _laneId, _ridAwait], format ["AIR_CTRL_PENDING:%1:%2", _ridAwait, _towUid]] call _fnNotifyMaybe;
             } forEach _towerControllers;
 
             if (_opsLogEnabled || _debugOps) then {
@@ -411,7 +417,7 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
         _meta = [_meta, "automationTimeoutS", _laneTimeoutS] call _metaSet;
         _meta = [_meta, "automationDelayS", _laneAutoDelayS] call _metaSet;
         _meta = [_meta, "automationDecisionAt", _autoDueAt] call _metaSet;
-        _meta = [_meta, "automationStatus", format ["AUTO queue active (%1 lane). ETA %2s", toUpperANSI _laneId, _laneTimeoutS + _laneAutoDelayS]] call _metaSet;
+        _meta = [_meta, "automationStatus", format ["AUTO queue active (%1 lane). ETA %2s", toUpper _laneId, _laneTimeoutS + _laneAutoDelayS]] call _metaSet;
         _meta = [_meta, "automationEtaS", (_autoDueAt - _nowTs) max 0] call _metaSet;
         _meta = [_meta, "automationSource", "UNMANNED_LANE"] call _metaSet;
 
@@ -431,12 +437,12 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
 
         private _requesterOwnerAutoQueue = -1;
         { if ((getPlayerUID _x) isEqualTo _requesterUidAutoQueue) exitWith { _requesterOwnerAutoQueue = owner _x; }; } forEach allPlayers;
-        [_requesterOwnerAutoQueue, "TOAST", "Airbase Clearance", format ["%1 in AUTO queue (%2). ETA %3s", _ridAutoQueue, toUpperANSI _laneId, (_autoDueAt - _nowTs) max 0], format ["AIR_REQ_AUTOQ:%1", _ridAutoQueue]] call _fnNotifyMaybe;
+        [_requesterOwnerAutoQueue, "TOAST", "Airbase Clearance", format ["%1 in AUTO queue (%2). ETA %3s", _ridAutoQueue, toUpper _laneId, (_autoDueAt - _nowTs) max 0], format ["AIR_REQ_AUTOQ:%1", _ridAutoQueue]] call _fnNotifyMaybe;
         continue;
     };
 
     _meta = [_meta, "automationEtaS", (_autoDecisionAt - _nowTs) max 0] call _metaSet;
-    _meta = [_meta, "automationStatus", format ["AUTO decision pending (%1 lane). ETA %2s", toUpperANSI _laneId, (_autoDecisionAt - _nowTs) max 0]] call _metaSet;
+    _meta = [_meta, "automationStatus", format ["AUTO decision pending (%1 lane). ETA %2s", toUpper _laneId, (_autoDecisionAt - _nowTs) max 0]] call _metaSet;
     _rec set [10, _meta];
     _clearanceRequests set [_iClr, _rec];
 
@@ -455,7 +461,7 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
     _meta = [_meta, "autoDecidedLane", _laneId] call _metaSet;
     _meta = [_meta, "autoDecidedAt", _nowTs] call _metaSet;
     _meta = [_meta, "automationEtaS", 0] call _metaSet;
-    _meta = [_meta, "automationStatus", format ["AUTO DECIDED by %1 lane automation", toUpperANSI _laneId]] call _metaSet;
+    _meta = [_meta, "automationStatus", format ["AUTO DECIDED by %1 lane automation", toUpper _laneId]] call _metaSet;
     _rec set [10, _meta];
 
     _clearanceRequests set [_iClr, _rec];
@@ -467,7 +473,7 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
 
     private _requesterOwnerAi = -1;
     { if ((getPlayerUID _x) isEqualTo _requesterUidAi) exitWith { _requesterOwnerAi = owner _x; }; } forEach allPlayers;
-    [_requesterOwnerAi, "TOAST", "Airbase Clearance", format ["AUTO DECIDED: %1 approved by %2 lane automation", _ridAi, toUpperANSI _laneId], format ["AIR_REQ_APPROVE_AI:%1", _ridAi]] call _fnNotifyMaybe;
+    [_requesterOwnerAi, "TOAST", "Airbase Clearance", format ["AUTO DECIDED: %1 approved by %2 lane automation", _ridAi, toUpper _laneId], format ["AIR_REQ_APPROVE_AI:%1", _ridAi]] call _fnNotifyMaybe;
 
     if (_opsLogEnabled || _debugOps) then {
         ["OPS", format ["AIRBASE CLEARANCE: %1 AUTO DECIDED by %2 lane automation", _rec param [0, ""], _laneId], _center, 0, [
@@ -496,7 +502,7 @@ if (_clearanceStateDirty) then {
     {
         if !(_x isEqualType []) then { continue; };
         private _rid = _x param [0, ""];
-        private _hIdx = _historyById get _rid;
+        private _hIdx = [_historyById, _rid] call _mapGet;
         if (isNil "_hIdx") then { _hIdx = -1; };
         if (_hIdx >= 0) then {
             _clearanceHistory set [_hIdx, _x];
@@ -747,7 +753,7 @@ private _qArrNow = 0;
 private _sigParts = [];
 private _nSig = 10 min (count _queue);
 for "_i" from 0 to (_nSig - 1) do {
-    private _it = _queue # _i;
+    private _it = _queue select _i;
     _it params ["_sfid","_sk","_sdet"];
     _sigParts pushBack format ["%1/%2/%3", _sfid, _sk, _sdet];
 };
@@ -755,7 +761,7 @@ for "_i" from 0 to (_nSig - 1) do {
 private _queueSig = format ["%1|%2|%3|%4", (count _queue), _qDepNow, _qArrNow, (_sigParts joinString ";")];
 private _lastSig = [_rt, "queueSig", ""] call _fnHmGet;
 
-if (_queueSig isNotEqualTo _lastSig) then {
+if (!(_queueSig isEqualTo _lastSig)) then {
     _rt set ["queueSig", _queueSig];
     missionNamespace setVariable ["airbase_v1_rt", _rt, true];
 
@@ -767,7 +773,7 @@ if (_queueSig isNotEqualTo _lastSig) then {
     private _previewParts = [];
     private _nPrev = 6 min (count _queue);
     for "_i" from 0 to (_nPrev - 1) do {
-        private _it = _queue # _i;
+        private _it = _queue select _i;
         _it params ["_pfid", "_pk", "_pdet"];
         _previewParts pushBack format ["%1 %2 %3", _pfid, _pk, _pdet];
     };
@@ -776,7 +782,7 @@ if (_queueSig isNotEqualTo _lastSig) then {
 
     // Diary entry text (structured text)
     private _st = systemTime;
-    private _stamp = format ["%1-%2-%3 %4:%5", _st # 0, _st # 1, _st # 2, _st # 3, _st # 4];
+    private _stamp = format ["%1-%2-%3 %4:%5", _st select 0, _st select 1, _st select 2, _st select 3, _st select 4];
 
     private _diaryText = format [
         "<t size='1.05'>Airbase Queue Snapshot</t><br/>Time: %1<br/>Exec: %2%3<br/>Queued: DEP %4 | ARR %5 | TOTAL %6<br/><br/><t size='0.95'>Next:</t><br/>%7",
@@ -857,7 +863,7 @@ if (_snapEnabled && { _nowTs >= _nextSnap }) then {
 
     private _n = 3 min _qLen;
     for "_i" from 0 to (_n - 1) do {
-        private _it = _queue # _i;
+        private _it = _queue select _i;
         _it params ["_qFid","_qKind","_qDet"];
         _meta pushBack [format ["q%1", _i + 1], format ["%1 %2 %3", _qFid, _qKind, _qDet]];
     };
@@ -887,7 +893,7 @@ if (_snapEnabled && { _nowTs >= _nextSnap }) then {
     if (_nP > 0) then {
         private _parts = [];
         for "_i" from 0 to (_nP - 1) do {
-            private _it = _queue # _i;
+            private _it = _queue select _i;
             _it params ["_pfid", "_pk", "_pdet"];
             _parts pushBack format ["%1 %2 %3", _pfid, _pk, _pdet];
         };
@@ -942,7 +948,7 @@ if (!_runwayFree) exitWith {
 };
 
 for "_i" from 0 to ((count _queue) - 1) do {
-    private _qItem = _queue # _i;
+    private _qItem = _queue select _i;
     _qItem params ["_qFid", "_qKind", "_qDetail"];
 
     if (_qKind isEqualTo "ARR") exitWith {
@@ -960,9 +966,10 @@ for "_i" from 0 to ((count _queue) - 1) do {
 
         private _isOverride = false;
         private _isEmergency = false;
-        private _rIdx = _recs findIf { (_x param [0, ""]) isEqualTo _qFid };
+        private _rIdx = -1;
+        { if ((_x param [0, ""]) isEqualTo _qFid) exitWith { _rIdx = _forEachIndex; }; } forEach _recs;
         if (_rIdx >= 0) then {
-            private _rec = _recs # _rIdx;
+            private _rec = _recs select _rIdx;
             private _meta = _rec param [7, []];
             if (!(_meta isEqualType [])) then { _meta = []; };
 
@@ -994,8 +1001,8 @@ for "_i" from 0 to ((count _queue) - 1) do {
     };
 };
 
-if ((_opsLogEnabled || _debugOps) && { _policyReason isNotEqualTo "NO_ELIGIBLE" }) then {
-    private _picked = _queue # _policyIdx;
+if ((_opsLogEnabled || _debugOps) && { !(_policyReason isEqualTo "NO_ELIGIBLE") }) then {
+    private _picked = _queue select _policyIdx;
     _picked params ["_pfid", "_pk", "_pd", ["_prouteMeta", []]];
     if !(_prouteMeta isEqualType []) then { _prouteMeta = []; };
     private _laneDecision = [_prouteMeta, "runwayLaneDecision", "-"] call _metaGet;
@@ -1008,8 +1015,8 @@ if ((_opsLogEnabled || _debugOps) && { _policyReason isNotEqualTo "NO_ELIGIBLE" 
 
 if (_policyIdx < 0) exitWith {
     if (_opsLogEnabled || _debugOps) then {
-        private _headKind = (_queue # 0) param [1, ""];
-        private _headFid = (_queue # 0) param [0, ""];
+        private _headKind = (_queue select 0) param [1, ""];
+        private _headFid = (_queue select 0) param [0, ""];
         ["OPS", format ["AIRBASE POLICY: dequeue blocked (hold=%1, head=%2 %3)", _holdDepartures, _headFid, _headKind], _center, 0, [
             ["holdDepartures", _holdDepartures],
             ["queueLen", count _queue]
@@ -1028,7 +1035,7 @@ if (_reserved) then {
     ["LOCK_ACQUIRE", _fid, "SYSTEM", "", [_kind, _detail, _policyReason]] call _fnEventPush;
 };
 if (!_reserved) exitWith {
-    _queue insert [_policyIdx, [[_fid, _kind, _detail, _routeMeta]]];
+    [_queue, _policyIdx, [[_fid, _kind, _detail, _routeMeta] call _insertFn]];
     ["airbase_v1_queue", _queue] call ARC_fnc_stateSet;
     if (_opsLogEnabled || _debugOps) then {
         ["OPS", format ["AIRBASE POLICY: reserve failed; re-queued %1 (%2 %3)", _fid, _kind, _detail], _center, 0, [
@@ -1038,9 +1045,10 @@ if (!_reserved) exitWith {
     };
 };
 
-private _idxRecActive = _recs findIf { (_x param [0,""]) isEqualTo _fid };
+private _idxRecActive = -1;
+{ if ((_x param [0,""]) isEqualTo _fid) exitWith { _idxRecActive = _forEachIndex; }; } forEach _recs;
 if (_idxRecActive >= 0) then {
-    private _rActive = _recs # _idxRecActive;
+    private _rActive = _recs select _idxRecActive;
     _rActive set [5, "ACTIVE"];
     _rActive set [6, _nowTs];
     _recs set [_idxRecActive, _rActive];
@@ -1056,7 +1064,7 @@ if (_idxRecActive >= 0) then {
     private _fnHmGetLocal = {
         params ["_hm", "_key", "_fallback"];
         if (!(_hm isEqualType createHashMap)) exitWith { _fallback };
-        private _value = _hm get _key;
+        private _value = [_hm, _key] call _mapGet;
         if (isNil "_value") exitWith { _fallback };
         _value
     };
@@ -1076,7 +1084,7 @@ if (_idxRecActive >= 0) then {
         params ["_rows", "_k", "_def"];
         private _v = _def;
         {
-            if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x # 0)) isEqualTo _k }) exitWith { _v = _x # 1; };
+            if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x select 0)) isEqualTo _k }) exitWith { _v = _x select 1; };
         } forEach _rows;
         _v
     };
@@ -1084,9 +1092,10 @@ if (_idxRecActive >= 0) then {
     private _occupied = [_fid, _kind, _detail, _occupyTimeoutS, "EXEC_START"] call ARC_fnc_airbaseRunwayLockOccupy;
     if (!_occupied) exitWith {
         private _recsBlock = ["airbase_v1_records", []] call ARC_fnc_stateGet;
-        private _idxBlock = _recsBlock findIf { (_x param [0,""]) isEqualTo _fid };
+        private _idxBlock = -1;
+        { if ((_x param [0,""]) isEqualTo _fid) exitWith { _idxBlock = _forEachIndex; }; } forEach _recsBlock;
         if (_idxBlock >= 0) then {
-            private _rBlock = _recsBlock # _idxBlock;
+            private _rBlock = _recsBlock select _idxBlock;
             _rBlock set [5, "FAILED"];
             _rBlock set [6, serverTime];
             _recsBlock set [_idxBlock, _rBlock];
@@ -1109,9 +1118,10 @@ if (_idxRecActive >= 0) then {
     private _ok = false;
 
     if (_kind isEqualTo "DEP") then {
-        private _aIdx = _assetsL findIf { ([_x, "id", ""] call _fnHmGetLocal) isEqualTo _detail };
+        private _aIdx = -1;
+        { if (([_x, "id", ""] call _fnHmGetLocal) isEqualTo _detail) exitWith { _aIdx = _forEachIndex; }; } forEach _assetsL;
         if (_aIdx >= 0) then {
-            private _asset = _assetsL # _aIdx;
+            private _asset = _assetsL select _aIdx;
 
             // Skip disabled assets
             if (([_asset, "state", "PARKED"] call _fnHmGetLocal) isEqualTo "DISABLED") exitWith {
@@ -1136,9 +1146,10 @@ if (_idxRecActive >= 0) then {
 
     // Mark record complete/failed
     private _recs2 = ["airbase_v1_records", []] call ARC_fnc_stateGet;
-    private _idx2 = _recs2 findIf { (_x param [0,""]) isEqualTo _fid };
+    private _idx2 = -1;
+    { if ((_x param [0,""]) isEqualTo _fid) exitWith { _idx2 = _forEachIndex; }; } forEach _recs2;
     if (_idx2 >= 0) then {
-        private _r2 = _recs2 # _idx2;
+        private _r2 = _recs2 select _idx2;
         _r2 set [5, if (_ok) then { "COMPLETE" } else { "FAILED" }];
         _r2 set [6, serverTime];
         _recs2 set [_idx2, _r2];

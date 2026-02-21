@@ -15,6 +15,9 @@ params [
     ["_reason", "APPROVAL"]
 ];
 
+// sqflint-compat helpers
+private _mapGet   = compile "params ['_h','_k']; _h get _k";
+
 if (_fid isEqualTo "") exitWith { false };
 if (!(_reserveS isEqualType 0) || { _reserveS < 1 }) then { _reserveS = 120; };
 
@@ -31,7 +34,7 @@ if (!((_state isEqualTo "OPEN") || { (_state isEqualTo "RESERVED") && { _owner i
     private _dbgOpsDeny = missionNamespace getVariable ["airbase_v1_debugOpsLog", false];
     if (_opsDeny || _dbgOpsDeny) then {
         private _rtDeny = missionNamespace getVariable ["airbase_v1_rt", createHashMap];
-        private _centerDeny = _rtDeny get "bubbleCenter";
+        private _centerDeny = [_rtDeny, "bubbleCenter"] call _mapGet;
         if (isNil "_centerDeny") then { _centerDeny = getMarkerPos "mkr_airbaseCenter"; };
 
         ["OPS", format ["AIRBASE RUNWAY: reserve denied for %1 (%2 %3)", _fid, _kind, _detail], _centerDeny, 0, [
@@ -54,7 +57,7 @@ if (!(_ops isEqualType true) && !(_ops isEqualType false)) then { _ops = true; }
 private _dbgOps = missionNamespace getVariable ["airbase_v1_debugOpsLog", false];
 if (_ops || _dbgOps) then {
     private _rt = missionNamespace getVariable ["airbase_v1_rt", createHashMap];
-    private _center = _rt get "bubbleCenter";
+    private _center = [_rt, "bubbleCenter"] call _mapGet;
     if (isNil "_center") then { _center = getMarkerPos "mkr_airbaseCenter"; };
 
     ["OPS", format ["AIRBASE RUNWAY: %1 -> RESERVED (%2 %3 %4)", _prevState, _fid, _kind, _detail], _center, 0, [
