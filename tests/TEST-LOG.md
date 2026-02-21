@@ -33,6 +33,24 @@ sqflint -e w functions/ui/fn_uiConsoleDashboardPaint.sqf → PASS (exit 0)
 - Local MP / dedicated server gameplay validation: BLOCKED (no rig available in this CI environment).
 
 
+## 2026-02-21 01:20 UTC — ui console focusedCtrl guard hardening
+
+**Branch/Commit:** copilot/fix-ui-console-on-load-error-again @ pending
+
+**Scenario:** Prevent `focusedCtrl` from surfacing non-Control values in the refresh loop, which caused `isNull` to emit "Invalid number in expression" during UI teardown.
+
+**Commands:**
+```
+~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleOnLoad.sqf
+```
+
+**Result:** PASS
+
+**Notes:**
+- `_fc` is coerced to `controlNull` when `focusedCtrl` returns any non-Control type before running null/type checks.
+- Runtime/dedicated/JIP validation: BLOCKED (Arma runtime not available in this environment).
+
+
 ## Entry Template
 
 - `<UTC timestamp>` | commit: `<sha|pending>` | branch: `<branch>` | Scenario: `<what was validated>` | Result: `PASS`/`FAIL`/`BLOCKED` | Notes: `<summary>`
