@@ -13,7 +13,6 @@ if (!isServer) exitWith {false};
 if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {false};
 
 // sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _keysFn   = compile "params ['_m']; keys _m";
 
 // Phase 2: shared off-road placement helpers (server-owned).
@@ -66,7 +65,7 @@ if (isNil { missionNamespace getVariable "ARC_civsub_fnc_findPosOffRoad" }) then
         if (!(_seed isEqualType []) || { (count _seed) < 2 }) exitWith { [0,0,0] };
 
         private _p0 = _seed;
-        if ((count _p0) == 2) then { _p0 = [_p0#0,_p0#1,0]; };
+        if ((count _p0) == 2) then { _p0 = [(_p0 select 0),(_p0 select 1),0]; };
 
         _minOff = (_minOff max 0.5) min 6;
         _maxOff = (_maxOff max (_minOff + 0.5)) min 30;
@@ -112,6 +111,14 @@ if (_persist) then {
 
 private _ok = false;
 if (_persist) then { _ok = [] call ARC_fnc_civsubPersistLoad; };
+// Sanity: if persistence loaded zero districts, treat as invalid and rebuild defaults.
+if (_ok) then {
+    private _dCheck = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
+    if ((count ([_dCheck] call _keysFn)) == 0) then {
+        diag_log "[CIVSUB][INIT] Persistence loaded zero districts; rebuilding defaults.";
+        _ok = false;
+    };
+};
 if (!_ok) then
 {
     private _districts = [] call ARC_fnc_civsubDistrictsCreateDefaults;
@@ -170,6 +177,9 @@ if ((missionNamespace getVariable ["civsub_v1_harm_enabled", true]) && { mission
         missionNamespace setVariable ["civsub_v1_wiaThreadRunning", true, true];
         [] spawn
         {
+            // Re-declare helpers; private locals from outer scope are not in spawn context.
+            private _hg     = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+            private _keysFn = compile "params ['_m']; keys _m";
             while { isServer && { missionNamespace getVariable ["civsub_v1_enabled", false] } && { missionNamespace getVariable ["civsub_v1_harm_enabled", true] } && { missionNamespace getVariable ["civsub_v1_wia_enabled", true] } } do
             {
                 uiSleep 2;
