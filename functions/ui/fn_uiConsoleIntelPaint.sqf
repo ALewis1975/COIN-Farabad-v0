@@ -676,7 +676,11 @@ uiNamespace setVariable ["ARC_console_intelSelData", _data];
 private _lastResultType = uiNamespace getVariable ["ARC_civsubInteract_lastResultType", ""];
 if (!(_lastResultType isEqualType "")) then { _lastResultType = ""; };
 private _selParts = _data splitString "|";
-private _selKind = if ((count _selParts) > 0) then { toUpper (_selParts # 0) } else { "" };
+private _selKind = "";
+if (_selParts isEqualType [] && { (count _selParts) > 0 }) then {
+    private _first = _selParts select 0;
+    if (_first isEqualType "") then { _selKind = toUpper _first; };
+};
 if (_selKind in ["CIV_CONTACT_CHECK_ID","CIV_CONTACT_BACKGROUND","CIV_CONTACT_GIVE_FOOD","CIV_CONTACT_GIVE_WATER","CIV_CONTACT_DETAIN","CIV_CONTACT_RELEASE","CIV_CONTACT_HANDOFF","CIV_CONTACT_QUESTION"]) then {
     private _expectedType = switch (_selKind) do {
         case "CIV_CONTACT_CHECK_ID":   { "CHECK_ID" };
