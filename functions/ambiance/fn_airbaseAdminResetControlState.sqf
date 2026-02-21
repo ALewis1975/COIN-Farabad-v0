@@ -17,6 +17,9 @@ params [
     ["_actor", objNull, [objNull]]
 ];
 
+// sqflint-compat helpers
+private _mapGet   = compile "params ['_h','_k']; _h get _k";
+
 if (!(_preserveHistory isEqualType true) && !(_preserveHistory isEqualType false)) then { _preserveHistory = true; };
 
 private _requests = ["airbase_v1_clearanceRequests", []] call ARC_fnc_stateGet;
@@ -63,7 +66,7 @@ private _dbgOps = missionNamespace getVariable ["airbase_v1_debugOpsLog", false]
 
 if (_ops || _dbgOps) then {
     private _rt = missionNamespace getVariable ["airbase_v1_rt", createHashMap];
-    private _center = _rt get "bubbleCenter";
+    private _center = [_rt, "bubbleCenter"] call _mapGet;
     if (isNil "_center") then { _center = getMarkerPos "mkr_airbaseCenter"; };
 
     private _actorName = if (isNull _actor) then { "<server>" } else { name _actor };

@@ -8,6 +8,7 @@ if (!isServer) exitWith {false};
 // sqflint-compat helpers
 private _trimFn     = compile "params ['_s']; trim _s";
 private _findIfFn   = compile "params ['_arr','_cond']; private _r = -1; { if (_x call _cond) exitWith { _r = _forEachIndex; }; } forEach _arr; _r";
+private _mapGet     = compile "params ['_h','_k']; _h get _k";
 
 if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\\core\\fn_rpcValidateSender.sqf"; };
 if (isNil "ARC_fnc_airbaseTowerAuthorize") then { ARC_fnc_airbaseTowerAuthorize = compile preprocessFileLineNumbers "functions\\core\\fn_airbaseTowerAuthorize.sqf"; };
@@ -112,14 +113,14 @@ if (_qKind isEqualTo "ARR" && { _qDetail isEqualType "" && { !(_qDetail isEqualT
         private _rt = missionNamespace getVariable ["airbase_v1_rt", createHashMap];
         private _assets = [];
         if (_rt isEqualType createHashMap) then {
-            _assets = _rt get "assets";
+            _assets = [_rt, "assets"] call _mapGet;
             if (isNil "_assets" || {!(_assets isEqualType [])}) then { _assets = []; };
         };
 
         private _aIdx = [_assets, {
             private _assetId = "";
             if (_x isEqualType createHashMap) then {
-                _assetId = _x get "id";
+                _assetId = [_x, "id"] call _mapGet;
                 if (isNil "_assetId" || {!(_assetId isEqualType "")}) then { _assetId = ""; };
             };
             _assetId isEqualTo _qDetail

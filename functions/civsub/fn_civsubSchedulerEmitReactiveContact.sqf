@@ -29,11 +29,11 @@ if (_districtId isEqualTo "") exitWith {createHashMap};
 private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
 private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
 
-private _payload = createHashMapFromArray [
+private _payload = [[
     ["p_tick_eff", _pTickEff],
     ["active", _active],
     ["district_centroid", [_d, "centroid", [0,0] call _hg]]
-];
+]] call _hmFrom;
 
 private _leadEmit = [[["emit", false], ["lead_type", ""], ["lead_id", ""], ["confidence", 0.0], ["seed", createHashMap]]] call _hmFrom;
 private _influenceDelta = [[["dW", 0], ["dR", 0], ["dG", 0]]] call _hmFrom;
