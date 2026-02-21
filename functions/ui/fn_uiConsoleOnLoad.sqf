@@ -302,7 +302,7 @@ uiNamespace setVariable ["ARC_console_dirty", false];
         // Skip refresh while the user is focused on an Edit or Combo control.
         private _skip = false;
         private _fc = focusedCtrl;
-        if (_fc isEqualType controlNull && { !isNull _fc }) then
+        if ((_fc isEqualType controlNull) && { !isNull _fc }) then
         {
             private _ct = ctrlType _fc;
             if (_ct in [2, 4]) then { _skip = true; }; // CT_EDIT=2, CT_COMBO=4
