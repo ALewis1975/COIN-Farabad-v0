@@ -115,7 +115,7 @@ private _fn_applyRouteWps = {
         private _bestD = 1e12;
         for "_i" from 0 to ((count _routePtsIn) - 1) do
         {
-            private _d = (_routePtsIn # _i) distance2D _lp;
+            private _d = (_routePtsIn select _i) distance2D _lp;
             if (_d < _bestD) then { _bestD = _d; _nearIdx = _i; };
         };
     };
@@ -127,7 +127,7 @@ private _fn_applyRouteWps = {
         private _bestDg = 1e12;
         for "_i" from 0 to ((count _routePtsIn) - 1) do
         {
-            private _d = (_routePtsIn # _i) distance2D _forcedPos;
+            private _d = (_routePtsIn select _i) distance2D _forcedPos;
             if (_d < _bestDg) then { _bestDg = _d; _forceIdx = _i; };
         };
         // If we're already beyond the ingress point, don't force it.
@@ -141,7 +141,7 @@ private _fn_applyRouteWps = {
     {
         for "_j" from (_nearIdx + 1) to ((count _routePtsIn) - 1) do
         {
-            _remLen = _remLen + ((_routePtsIn # (_j - 1)) distance2D (_routePtsIn # _j));
+            _remLen = _remLen + ((_routePtsIn select (_j - 1)) distance2D (_routePtsIn select _j));
         };
     };
 
@@ -169,16 +169,16 @@ private _fn_applyRouteWps = {
     if (_routePtsIn isEqualType [] && { (count _routePtsIn) >= 2 }) then
     {
         private _acc = 0;
-        private _last = _routePtsIn # _nearIdx;
+        private _last = _routePtsIn select _nearIdx;
         for "_i" from (_nearIdx + 1) to ((count _routePtsIn) - 1) do
         {
-            private _p = _routePtsIn # _i;
+            private _p = _routePtsIn select _i;
             _acc = _acc + (_last distance2D _p);
 
             // Force-add ingress point when we reach its index.
             if (!_forcedAdded && { _forceIdx >= 0 } && { _i == _forceIdx }) then
             {
-                if ((count _wps) isEqualTo 0 || { (_p distance2D (_wps # ((count _wps) - 1))) > 40 }) then
+                if ((count _wps) isEqualTo 0 || { (_p distance2D (_wps select ((count _wps) - 1))) > 40 }) then
                 {
                     _wps pushBack _p;
                 };
@@ -188,7 +188,7 @@ private _fn_applyRouteWps = {
 
             if (_acc >= _interval) then
             {
-                if ((count _wps) isEqualTo 0 || { (_p distance2D (_wps # ((count _wps) - 1))) > 40 }) then
+                if ((count _wps) isEqualTo 0 || { (_p distance2D (_wps select ((count _wps) - 1))) > 40 }) then
                 {
                     _wps pushBack _p;
                 };
@@ -200,7 +200,7 @@ private _fn_applyRouteWps = {
     };
 
     // Always add the final waypoint (dedupe if already close).
-    if ((count _wps) isEqualTo 0 || { ((_wps # ((count _wps) - 1)) distance2D _destWp) > 60 }) then
+    if ((count _wps) isEqualTo 0 || { ((_wps select ((count _wps) - 1)) distance2D _destWp) > 60 }) then
     {
         _wps pushBack _destWp;
     };
@@ -244,7 +244,7 @@ private _fn_nearRouteIdx = {
 
     for "_i" from 0 to ((count _pts) - 1) do
     {
-        private _d = (_pts # _i) distance2D _pos;
+        private _d = (_pts select _i) distance2D _pos;
         if (_d < _bestD) then { _bestD = _d; _bestI = _i; };
     };
 
@@ -284,9 +284,10 @@ if (!(_rolePlan isEqualType [])) then { _rolePlan = []; };
 private _rolePlanGet = {
     params ["_pairs", "_key", "_default"];
     if !(_pairs isEqualType []) exitWith {_default};
-    private _idx = _pairs findIf { (_x isEqualType []) && { (count _x) >= 2 } && { ((_x # 0) isEqualType "") && { (toLower (_x # 0)) isEqualTo (toLower _key) } } };
+    private _idx = [_bridgeMarkers, {
+        (_x isEqualType []) && { (count _x) >= 2 } && { ((_x select 0) isEqualType "") && { (toLower (_x select 0)) isEqualTo (toLower _key) } }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) exitWith {_default};
-    (_pairs # _idx) # 1
+    (_pairs select _idx) select 1
 };
 
 private _roleBundleId = [_rolePlan, "bundleId", ""] call _rolePlanGet;
@@ -310,7 +311,7 @@ private _setLinkupTaskState = {
     ["activeConvoyLinkupTaskDone", true] call ARC_fnc_stateSet;
 
 	    // Current task is local per-client; broadcast the switch back to the parent convoy task.
-	    if (_taskId isNotEqualTo "") then
+	    if (!(_taskId isEqualTo "")) then
 	    {
 	        [_taskId] remoteExecCall ["ARC_fnc_clientSetCurrentTask", 0];
 	    };
@@ -333,8 +334,8 @@ if ((count _nids) isEqualTo 0) then
     {
         // Keep lead/tail ordering stable using the stored spawn index.
         private _pairs = _existing apply { [ _x getVariable ["ARC_convoyIndex", 999], _x ] };
-        _pairs = [_pairs, [], { _x # 0 }, "ASCEND"] call BIS_fnc_sortBy;
-        _existing = _pairs apply { _x # 1 };
+        _pairs = [_pairs, [], { _x select 0 }, "ASCEND"] call BIS_fnc_sortBy;
+        _existing = _pairs apply { _x select 1 };
 
         private _ids = _existing apply { netId _x };
         ["activeConvoyNetIds", _ids] call ARC_fnc_stateSet;
@@ -358,9 +359,9 @@ if ((count _nids) isEqualTo 0) then
     private _lockAt = -1;
     if (_lock isEqualType [] && { (count _lock) >= 3 }) then
     {
-        _lockTask = _lock # 0;
-        _lockIdExisting = _lock # 1;
-        _lockAt = _lock # 2;
+        _lockTask = _lock select 0;
+        _lockIdExisting = _lock select 1;
+        _lockAt = _lock select 2;
     };
 
     private _lockStaleSec = missionNamespace getVariable ["ARC_convoySpawnLockStaleSec", 240];
@@ -382,7 +383,7 @@ if ((count _nids) isEqualTo 0) then
     else
     {
         // Clear stale lock if it existed.
-        if (_lockTask isNotEqualTo "" && { (_lockAt isEqualType 0) } && { (_now - _lockAt) >= _lockStaleSec }) then
+        if (!(_lockTask isEqualTo "") && { (_lockAt isEqualType 0) } && { (_now - _lockAt) >= _lockStaleSec }) then
         {
             diag_log format ["[ARC][CONVOY] Clearing stale spawn lock (task=%1, age=%2s).", _lockTask, round (_now - _lockAt)];
             missionNamespace setVariable ["ARC_convoySpawnLock", nil];
@@ -405,7 +406,7 @@ if ((count _nids) isEqualTo 0) then
                 (!isNull _x)
                 && { (_x getVariable ["ARC_isConvoyVeh", false]) }
                 // Treat anything not tagged to the current task as an orphan.
-                && { (_x getVariable ["ARC_convoyTaskId", ""]) isNotEqualTo _taskId }
+                && { !((_x getVariable ["ARC_convoyTaskId", ""]) isEqualTo _taskId) }
             };
 
             if ((count _orphans) > 0) then
@@ -438,7 +439,7 @@ if ((count _nids) isEqualTo 0) then
 
                     // Never delete a convoy vehicle if a player is currently in it.
                     private _crew = crew _v;
-                    if ((_crew findIf { isPlayer _x }) >= 0) then
+                    if (([_crew, { isPlayer _x }] call _findIfFn) >= 0) then
                     {
                         _blocked = true;
                     }
@@ -490,7 +491,7 @@ if ((count _nids) isEqualTo 0) then
                     private _releaseLock = {
                         params ["_taskId", "_lockId"];
                         private _l = missionNamespace getVariable ["ARC_convoySpawnLock", []];
-                        if (_l isEqualType [] && { (count _l) >= 2 } && { (_l # 0) isEqualTo _taskId } && { (_l # 1) isEqualTo _lockId }) then
+                        if (_l isEqualType [] && { (count _l) >= 2 } && { (_l select 0) isEqualTo _taskId } && { (_l select 1) isEqualTo _lockId }) then
                         {
                             missionNamespace setVariable ["ARC_convoySpawnLock", nil];
                         };
@@ -498,7 +499,7 @@ if ((count _nids) isEqualTo 0) then
 
                     // Abort cleanly if the spawn lock was stolen/cleared.
                     private _lNow = missionNamespace getVariable ["ARC_convoySpawnLock", []];
-                    if !(_lNow isEqualType [] && { (count _lNow) >= 2 } && { (_lNow # 0) isEqualTo _taskId } && { (_lNow # 1) isEqualTo _lockId }) exitWith
+                    if !(_lNow isEqualType [] && { (count _lNow) >= 2 } && { (_lNow select 0) isEqualTo _taskId } && { (_lNow select 1) isEqualTo _lockId }) exitWith
                     {
                         diag_log format ["[ARC][CONVOY] Spawn aborted: lock lost before execution (task=%1, lock=%2).", _taskId, _lockId];
                         ["activeConvoySpawning", false] call ARC_fnc_stateSet;
@@ -507,7 +508,7 @@ if ((count _nids) isEqualTo 0) then
                     };
 
                     // If the incident was closed/replaced while we were queued, abort cleanly.
-                    if ((["activeTaskId", ""] call ARC_fnc_stateGet) isNotEqualTo _taskId) exitWith
+                    if (!((["activeTaskId", ""] call ARC_fnc_stateGet) isEqualTo _taskId)) exitWith
                     {
                         ["activeConvoySpawning", false] call ARC_fnc_stateSet;
                         ["activeConvoySpawningSince", -1] call ARC_fnc_stateSet;
@@ -530,7 +531,7 @@ if ((count _nids) isEqualTo 0) then
                         private _existingLinkId = ["activeConvoyLinkupTaskId", ""] call ARC_fnc_stateGet;
 
                         private _useLink = (_linkPos isEqualType [] && { (count _linkPos) >= 2 } && { (_startPos distance2D _linkPos) > 75 });
-                        if (_useLink && { _existingLinkId isEqualTo "" } && { _parentId isNotEqualTo "" }) then
+                        if (_useLink && { _existingLinkId isEqualTo "" } && { !(_parentId isEqualTo "") }) then
                         {
                             private _linkTaskId = format ["%1_linkup", _parentId];
                             private _title = "Convoy Link-up";
@@ -609,7 +610,7 @@ if ((count _vehicles) isEqualTo 0) exitWith
     true
 };
 
-private _lead = _vehicles # 0;
+private _lead = _vehicles select 0;
 private _aliveVeh = _vehicles select { alive _x };
 
 
@@ -661,9 +662,8 @@ private _fn_bridgeMarkerAtPos = {
 
     private _p = +_pos; _p resize 3;
 
-    private _idx = _bridgeMarkers findIf
-    {
-        private _mk = _x;
+    private _idx = -1;
+    { if (private _mk = _x;
 
         // Fast path: no buffer requested, use marker inArea directly.
         if (_bridgeBufM <= 0) exitWith { _p inArea _mk };
@@ -675,8 +675,8 @@ private _fn_bridgeMarkerAtPos = {
         private _sz = markerSize _mk;
         if (!(_sz isEqualType []) || { (count _sz) < 2 }) exitWith { false };
 
-        private _a = (_sz # 0) + _bridgeBufM;
-        private _b = (_sz # 1) + _bridgeBufM;
+        private _a = (_sz select 0) + _bridgeBufM;
+        private _b = (_sz select 1) + _bridgeBufM;
         private _dir = markerDir _mk;
 
         private _shape = markerShape _mk;
@@ -684,10 +684,10 @@ private _fn_bridgeMarkerAtPos = {
         private _isRect = ((toUpper _shape) isEqualTo "RECTANGLE");
 
         _p inArea [_c, _a, _b, _dir, _isRect]
-    };
+    }] call _findIfFn;
 
     if (_idx < 0) exitWith { "" };
-    _bridgeMarkers # _idx
+    _bridgeMarkers select _idx
 };
 
 private _fn_isInBridgeZone = {
@@ -737,9 +737,9 @@ private _fn_bridgeFallbackRoutePoints = {
     private _pts = [];
     for "_i" from (_nearIdx + 1) to _exitIdx step _step do
     {
-        private _p = +(_routePts # _i);
+        private _p = +(_routePts select _i);
         _p resize 3;
-        if ((count _pts) isEqualTo 0 || { (_p distance2D (_pts # ((count _pts) - 1))) > 18 }) then
+        if ((count _pts) isEqualTo 0 || { (_p distance2D (_pts select ((count _pts) - 1))) > 18 }) then
         {
             _pts pushBack _p;
         };
@@ -749,7 +749,7 @@ private _fn_bridgeFallbackRoutePoints = {
     if ((count _pts) isEqualTo 0) then
     {
         private _fIdx = (_nearIdx + 2) min ((count _routePts) - 1);
-        private _pF = +(_routePts # _fIdx);
+        private _pF = +(_routePts select _fIdx);
         _pF resize 3;
         _pts pushBack _pF;
     };
@@ -788,8 +788,8 @@ private _fn_bridgeAssistPoints = {
     private _sz = markerSize _mk;
     if (!(_sz isEqualType []) || { (count _sz) < 2 }) exitWith { [] };
 
-    private _a = (_sz # 0) max 1;
-    private _b = (_sz # 1) max 1;
+    private _a = (_sz select 0) max 1;
+    private _b = (_sz select 1) max 1;
 
     // Determine the bridge axis (long side of the rectangle marker).
     private _axisDir = _dir;
@@ -840,7 +840,7 @@ private _fn_bridgeAssistPoints = {
             private _roads = _p nearRoads _bridgeSnapRoadM;
             if ((count _roads) > 0) then
             {
-                private _r = _roads # 0;
+                private _r = _roads select 0;
                 if (!isNull _r) then
                 {
                     _p = getPosATL _r;
@@ -885,7 +885,7 @@ private _fn_bridgeAssistPoints = {
     private _pts = [];
     {
         _x params ["_t", "_p"];
-        if ((count _pts) isEqualTo 0 || { (_p distance2D (_pts # ((count _pts) - 1))) > 8 }) then
+        if ((count _pts) isEqualTo 0 || { (_p distance2D (_pts select ((count _pts) - 1))) > 8 }) then
         {
             _pts pushBack _p;
         };
@@ -1026,7 +1026,7 @@ if (!_started) exitWith
 
         // Prefer editor-set direction of the preset link-up marker.
         private _mk = ["activeConvoyLinkupMarker", ""] call ARC_fnc_stateGet;
-        if (_mk isEqualType "" && { _mk isNotEqualTo "" } && { _mk in allMapMarkers }) then
+        if (_mk isEqualType "" && { !(_mk isEqualTo "") } && { _mk in allMapMarkers }) then
         {
             _dir = markerDir _mk;
         };
@@ -1066,7 +1066,7 @@ if (!_started) exitWith
 
         for "_i" from 0 to ((count _vehArr) - 1) do
         {
-            private _v = _vehArr # _i;
+            private _v = _vehArr select _i;
             if (isNull _v || { !alive _v }) then { continue; };
 
             if (isNull (driver _v)) then { createVehicleCrew _v; };
@@ -1163,7 +1163,7 @@ if (!_started) exitWith
         _grpL setFormation "COLUMN";
         _grpL setSpeedMode "NORMAL";
         // Never rename a player group; keep TOC/role gating stable even if a player drives convoy assets.
-        if ((units _grpL) findIf { isPlayer _x } == -1) then { [_grpL, "CONVOY"] call ARC_fnc_groupSetDesignation; };
+        if ([(units _grpL), { isPlayer _x }] call _findIfFn == -1) then { [_grpL, "CONVOY"] call ARC_fnc_groupSetDesignation; };
 
         // Drive each vehicle into a unique slot at the link-up point.
         // This avoids group waypoint "wait for formation" behavior, and keeps the column clean.
@@ -1270,10 +1270,8 @@ if (!_started) exitWith
     if (!(_detectR isEqualType 0)) then { _detectR = 260; };
     _detectR = (_detectR max 120) min 800;
 
-    private _near = (_players findIf {
-        (_x distance2D _detectPos) <= _detectR
-        || { (_x distance2D _lead) <= ((_detectR min 250) max 160) }
-    }) >= 0;
+    private _near = ([_players, {(_x distance2D _detectPos) <= _detectR
+        || { (_x distance2D _lead) <= ((_detectR min 250) max 160) }}] call _findIfFn) >= 0;
 
     // Delay between first player detection and actual departure (gives time to stage).
     private _delay = missionNamespace getVariable ["ARC_convoyDepartDelaySec", 60];
@@ -1381,7 +1379,7 @@ if (!_started) exitWith
         _grp setFormation "COLUMN";
         _grp setSpeedMode "LIMITED";
         // Never rename a player group; keep TOC/role gating stable even if a player drives convoy assets.
-        if ((units _grp) findIf { isPlayer _x } == -1) then { [_grp, "CONVOY"] call ARC_fnc_groupSetDesignation; };
+        if ([(units _grp), { isPlayer _x }] call _findIfFn == -1) then { [_grp, "CONVOY"] call ARC_fnc_groupSetDesignation; };
 
         // Keep the convoy on roads.
         if (_forceRoad && { !_bypassActiveP }) then
@@ -1508,12 +1506,12 @@ if (isNull _grpW) then
 _grpW setFormation "COLUMN";
 _grpW setSpeedMode "LIMITED";
 // Never rename a player group; keep TOC/role gating stable even if a player drives convoy assets.
-if ((units _grpW) findIf { isPlayer _x } == -1) then { [_grpW, "CONVOY"] call ARC_fnc_groupSetDesignation; };
+if ([(units _grpW), { isPlayer _x }] call _findIfFn == -1) then { [_grpW, "CONVOY"] call ARC_fnc_groupSetDesignation; };
 
 // Keep the group leader in the lead vehicle when possible (helps formation consistency).
 if ((count _aliveVeh) > 0) then
 {
-    private _drvLead = driver (_aliveVeh # 0);
+    private _drvLead = driver (_aliveVeh select 0);
     if (!isNull _drvLead && { leader _grpW != _drvLead }) then { _grpW selectLeader _drvLead; };
 
     // Safety: clear any residual STOP locks (e.g., from link-up hold) once the convoy is moving.
@@ -1560,7 +1558,7 @@ if (_bridgeMarkersAvailable) then
             private _pV = getPosATL _x;
             _pV resize 3;
             private _mk = [_pV] call _fn_bridgeMarkerAtPos;
-            if (_mk isNotEqualTo "") exitWith
+            if (!(_mk isEqualTo "")) exitWith
             {
                 _bridgeMarkerHere = _mk;
                 _bridgeMode = true;
@@ -1615,11 +1613,11 @@ if (!_startupBreadcrumbsLogged) then
 private _prevBridgeMarker = missionNamespace getVariable ["ARC_convoy_prevBridgeMarker", ""];
 if !(_prevBridgeMarker isEqualType "") then { _prevBridgeMarker = ""; };
 
-if (_bridgeMarkerHere isNotEqualTo _prevBridgeMarker) then
+if (!(_bridgeMarkerHere isEqualTo _prevBridgeMarker)) then
 {
     missionNamespace setVariable ["ARC_convoy_prevBridgeMarker", _bridgeMarkerHere];
 
-    if (_bridgeMarkerHere isNotEqualTo "") then
+    if (!(_bridgeMarkerHere isEqualTo "")) then
     {
         ["OPS", format ["Convoy entering bridge zone %1. Applying bridge driving profile.", _bridgeMarkerHere], getPosATL _lead, [["event", "CONVOY_BRIDGE_ENTER"], ["marker", _bridgeMarkerHere], ["taskId", _taskId]]] call ARC_fnc_intelLog;
     }
@@ -1714,7 +1712,7 @@ private _assistFQ = _assistFollowersEnabled;
     if (!(_radQ isEqualType 0)) then { _radQ = 16; };
     _radQ = (_radQ max 8) min 35;
 
-    private _tgtQ = _pts # _idxQ;
+    private _tgtQ = _pts select _idxQ;
     _tgtQ resize 3;
 
     // Advance when close enough.
@@ -1730,7 +1728,7 @@ private _assistFQ = _assistFollowersEnabled;
             _x setVariable ["ARC_convoyBridgeAssistLastOrderAt", nil];
             continue;
         };
-        _tgtQ = _pts # _idxQ;
+        _tgtQ = _pts select _idxQ;
         _tgtQ resize 3;
     };
 
@@ -1777,7 +1775,7 @@ if (_catchup && { (count _aliveVeh) >= 2 }
     private _maxGap = 0;
     for "_i" from 1 to ((count _aliveVeh) - 1) do
     {
-        _maxGap = _maxGap max ((_aliveVeh # (_i - 1)) distance2D (_aliveVeh # _i));
+        _maxGap = _maxGap max ((_aliveVeh select (_i - 1)) distance2D (_aliveVeh select _i));
     };
 
     private _slowF = missionNamespace getVariable ["ARC_convoyCatchupGapSlowFactor", 2.2];
@@ -1961,8 +1959,8 @@ if (_fRec && { (count _aliveVeh) >= 2 }
 
     for "_i" from 1 to ((count _aliveVeh) - 1) do
     {
-        private _v = _aliveVeh # _i;
-        private _prev = _aliveVeh # (_i - 1);
+        private _v = _aliveVeh select _i;
+        private _prev = _aliveVeh select (_i - 1);
         if (isNull _v || { !alive _v }) then { continue; };
 
         private _gap = _prev distance2D _v;
@@ -2016,14 +2014,14 @@ if (_fRec && { (count _aliveVeh) >= 2 }
 // Bridge zones: prefer a micro-route across the bridge rather than off-road bypass.
 private _didBridgeAssistV = false;
 private _bridgeMkV = [_vPos] call _fn_bridgeMarkerAtPos;
-private _bridgeHereV = (_bridgeMkV isNotEqualTo "");
+private _bridgeHereV = (!(_bridgeMkV isEqualTo ""));
 
 if (_bridgeHereV) then
 {
     private _assistF = missionNamespace getVariable ["ARC_convoyBridgeAssistFollowersEnabled", true];
     if (!(_assistF isEqualType true) && !(_assistF isEqualType false)) then { _assistF = true; };
 
-    if (_assistF && { _bridgeMkV isNotEqualTo "" }) then
+    if (_assistF && { !(_bridgeMkV isEqualTo "") }) then
     {
         private _ptsV = [_bridgeMkV, _destWpPos, _vPos] call _fn_bridgeAssistPoints;
         if ((count _ptsV) > 0) then
@@ -2048,7 +2046,7 @@ if (_bridgeHereV) then
             _v setVariable ["ARC_convoyVehBypassUntil", _now + _bypassSecBV];
             _d forceFollowRoad false;
 
-            _d doMove (_ptsV # 0);
+            _d doMove (_ptsV select 0);
 
             _v setVariable ["ARC_convoyFollowerRejoinTarget", nil];
             _v setVariable ["ARC_convoyFollowerRejoinUntil", nil];
@@ -2092,7 +2090,7 @@ else
                         if (_idxP < _idxV) then
                         {
                             private _fIdx = (_idxV + 3) min ((count _routePts) - 1);
-                            _target = _routePts # _fIdx;
+                            _target = _routePts select _fIdx;
                         };
                     };
 
@@ -2123,7 +2121,7 @@ else
     private _prevFollowerStage = ["activeConvoyFollowerRecoverStage", "off"] call ARC_fnc_stateGet;
     if !(_prevFollowerStage isEqualType "") then { _prevFollowerStage = "off"; };
 
-    if (_followerStage isNotEqualTo _prevFollowerStage) then
+    if (!(_followerStage isEqualTo _prevFollowerStage)) then
     {
         ["activeConvoyFollowerRecoverStage", _followerStage] call ARC_fnc_stateSet;
 
@@ -2143,7 +2141,7 @@ else
 {
     private _prevFollowerStage = ["activeConvoyFollowerRecoverStage", "off"] call ARC_fnc_stateGet;
     if !(_prevFollowerStage isEqualType "") then { _prevFollowerStage = "off"; };
-    if (_prevFollowerStage isNotEqualTo "off") then
+    if (!(_prevFollowerStage isEqualTo "off")) then
     {
         ["activeConvoyFollowerRecoverStage", "off"] call ARC_fnc_stateSet;
         ["OPS", "Follower recovery stage: off.", getPosATL _lead, [["event", "CONVOY_FOLLOWER_RECOVERY_STAGE"], ["stage", "off"], ["taskId", _taskId]]] call ARC_fnc_intelLog;
@@ -2309,7 +2307,7 @@ else
             // before continuing on to ingress/destination.
             private _didBridgeAssist = false;
 
-            if (_bridgeLeadMode && { _bridgeMarkerLead isNotEqualTo "" }) then
+            if (_bridgeLeadMode && { !(_bridgeMarkerLead isEqualTo "") }) then
             {
                 private _assistEn = missionNamespace getVariable ["ARC_convoyBridgeAssistEnabled", true];
                 if (!(_assistEn isEqualType true) && !(_assistEn isEqualType false)) then { _assistEn = true; };
@@ -2447,7 +2445,7 @@ else
             private _roads = _pBy nearRoads _snapM2;
             if ((count _roads) > 0) then
             {
-                _pBy = getPosATL (_roads # 0);
+                _pBy = getPosATL (_roads select 0);
                 _pBy resize 3;
             }
             else
@@ -2500,7 +2498,7 @@ else
         _grpW setCombatMode "YELLOW";
         _grpW setSpeedMode "LIMITED";
 
-        if (_stage isNotEqualTo _prevRecoveryStage) then
+        if (!(_stage isEqualTo _prevRecoveryStage)) then
         {
             ["activeConvoyRecoveryLastStageLogged", _stage] call ARC_fnc_stateSet;
             ["OPS", format ["Convoy recovery executed (stage %1) after %2s stall.", _stage, round _stuckFor], _curPos, [["event", "CONVOY_RECOVER"], ["stage", _stage], ["taskId", _taskId]]] call ARC_fnc_intelLog;
@@ -2515,7 +2513,7 @@ else
             "off"
         };
 
-        if (_bridgeRecoverState isNotEqualTo _prevBridgeRecoverState) then
+        if (!(_bridgeRecoverState isEqualTo _prevBridgeRecoverState)) then
         {
             ["activeConvoyBridgeRecoverLogState", _bridgeRecoverState] call ARC_fnc_stateSet;
             if (_bridgeRecoverState isEqualTo "cooldown") then

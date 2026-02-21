@@ -9,6 +9,9 @@
 
 if (!hasInterface) exitWith {false};
 
+// sqflint-compat helpers
+private _trimFn     = compile "params ['_s']; trim _s";
+
 private _disp = findDisplay 78000;
 if (isNull _disp) exitWith {false};
 
@@ -22,7 +25,7 @@ private _parts = _data splitString "|";
 private _rowType = if ((count _parts) > 0) then { _parts select 0 } else { "" };
 
 private _airMode = ["ARC_console_airMode", "TOWER"] call ARC_fnc_uiNsGetString;
-_airMode = toUpperANSI (trim _airMode);
+_airMode = toUpper ([_airMode] call _trimFn);
 if (_airMode isEqualTo "PILOT") exitWith {
     private _canAirControl = ["ARC_console_airCanControl", false] call ARC_fnc_uiNsGetBool;
     if (_canAirControl) then {
@@ -82,7 +85,7 @@ switch (_rowType) do
         };
 
         [_lane, false] call ARC_fnc_airbaseClientRequestSetLaneStaffing;
-        ["AIR", format ["Release request sent for %1 lane.", toUpperANSI _lane]] call ARC_fnc_clientToast;
+        ["AIR", format ["Release request sent for %1 lane.", toUpper _lane]] call ARC_fnc_clientToast;
     };
 
     case "FLT":

@@ -1,4 +1,8 @@
 /*
+
+// sqflint-compat helpers
+private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
     ARC_fnc_civsubDistrictsCreateDefaults
 
     Creates locked v1 district records (D01..D20) using centroid/radius/pop planning table.
@@ -35,23 +39,23 @@ private _rows = [
 ];
 
 {
-    private _id = _x # 0;
-    private _pop = _x # 1;
-    private _cx = _x # 2;
-    private _cy = _x # 3;
-    private _rad = _x # 4;
+    private _id = _x select 0;
+    private _pop = _x select 1;
+    private _cx = _x select 2;
+    private _cy = _x select 3;
+    private _rad = _x select 4;
 
     private _profile = [_id, _pop, [_cx, _cy], _seed] call ARC_fnc_civsubDistrictSeedProfile;
 
-    private _wBase = _profile getOrDefault ["W_BASE_U", 45];
-    private _rBase = _profile getOrDefault ["R_BASE_U", 55];
-    private _gBase = _profile getOrDefault ["G_BASE_U", 35];
+    private _wBase = [_profile, "W_BASE_U", 45] call _hg;
+    private _rBase = [_profile, "R_BASE_U", 55] call _hg;
+    private _gBase = [_profile, "G_BASE_U", 35] call _hg;
 
-    private _wEff = _profile getOrDefault ["W_EFF_U", _wBase];
-    private _rEff = _profile getOrDefault ["R_EFF_U", _rBase];
-    private _gEff = _profile getOrDefault ["G_EFF_U", _gBase];
+    private _wEff = [_profile, "W_EFF_U", _wBase] call _hg;
+    private _rEff = [_profile, "R_EFF_U", _rBase] call _hg;
+    private _gEff = [_profile, "G_EFF_U", _gBase] call _hg;
 
-    private _d = createHashMapFromArray [
+    private _d = [[
         ["id", _id],
         ["centroid", [_cx, _cy]],
         ["radius_m", _rad],
@@ -83,7 +87,7 @@ private _rows = [
         ["cooldown_nextLead_ts", 0],
         ["cooldown_nextAttack_ts", 0],
         ["last_player_touch_ts", 0]
-    ];
+    ]] call _hmFrom;
 
     _districts set [_id, _d];
 } forEach _rows;

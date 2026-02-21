@@ -69,8 +69,8 @@ switch (_actionId) do {
 
         lbClear _lbQ;
         {
-            private _qid = _x # 0;
-            private _ql  = _x # 1;
+            private _qid = _x select 0;
+            private _ql  = _x select 1;
             private _i = _lbQ lbAdd _ql;
             _lbQ lbSetData [_i, _qid];
         } forEach [

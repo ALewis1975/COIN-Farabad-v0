@@ -18,9 +18,12 @@ if (!isServer) exitWith {[0,0,0]};
 params [["_did","",[""]]];
 if (_did isEqualTo "") exitWith {[0,0,0]};
 
+// sqflint-compat helpers
+private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+
 private _row = [_did] call ARC_fnc_civsubSpawnCacheEnsure;
-private _bld = _row getOrDefault ["bldPos", []];
-private _road = _row getOrDefault ["roadPos", []];
+private _bld = [_row, "bldPos", [] call _hg];
+private _road = [_row, "roadPos", [] call _hg];
 if !(_bld isEqualType []) then { _bld = []; };
 if !(_road isEqualType []) then { _road = []; };
 

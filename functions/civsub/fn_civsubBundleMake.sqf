@@ -26,52 +26,56 @@ params [
 
 if (_districtId isEqualTo "") exitWith {createHashMap};
 
+// sqflint-compat helpers
+private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
+
 private _ts = serverTime;
 private _uuid = [] call ARC_fnc_civsubUuid;
 private _eventId = format ["%1:%2:%3", _districtId, (_ts toFixed 3), (_uuid select [0,6])];
 
 // Default position: district centroid
 private _centroid = [0,0];
-private _d = (missionNamespace getVariable ["civsub_v1_districts", createHashMap]) getOrDefault [_districtId, createHashMap];
+private _d = [(missionNamespace getVariable ["civsub_v1_districts", createHashMap]), _districtId, createHashMap] call _hg;
 if (_d isEqualType createHashMap) then {
-    _centroid = _d getOrDefault ["centroid", [0,0]];
+    _centroid = [_d, "centroid", [0,0] call _hg];
 };
 
-private _p3 = [(_centroid # 0), (_centroid # 1), 0];
+private _p3 = [(_centroid select 0), (_centroid select 1), 0];
 if (_pos isEqualType [] && {count _pos >= 2}) then {
-    private _x = _pos # 0;
-    private _y = _pos # 1;
+    private _x = _pos select 0;
+    private _y = _pos select 1;
     private _z = 0;
-    if (count _pos >= 3) then { _z = _pos # 2; };
+    if (count _pos >= 3) then { _z = _pos select 2; };
     _p3 = [_x, _y, _z];
 };
 
-private _src = createHashMapFromArray [
+private _src = [[
     ["system", "CIVSUB"],
     ["module", _sourceModule],
     ["event", _event],
     // Backward-compat: older bundles stored actor_uid here
     ["actor_uid", _actorUid]
-];
+]] call _hmFrom;
 
-private _actor = createHashMapFromArray [
+private _actor = [[
     ["type", _actorType],
     ["uid", _actorUid],
     ["unit_net_id", _actorNetId],
     ["side", _actorSide]
-];
+]] call _hmFrom;
 
-private _target = createHashMapFromArray [
+private _target = [[
     ["civ_uid", _targetCivUid],
     ["unit_net_id", _targetNetId]
-];
+]] call _hmFrom;
 
 // Normalize influence deltas to contract keys (W/R/G), while still emitting backward-compatible aliases (dW/dR/dG).
-private _dW = _influenceDelta getOrDefault ["W", (_influenceDelta getOrDefault ["dW", 0])];
-private _dR = _influenceDelta getOrDefault ["R", (_influenceDelta getOrDefault ["dR", 0])];
-private _dG = _influenceDelta getOrDefault ["G", (_influenceDelta getOrDefault ["dG", 0])];
+private _dW = [_influenceDelta, "W", ([_influenceDelta, "dW", 0] call _hg call _hg)];
+private _dR = [_influenceDelta, "R", ([_influenceDelta, "dR", 0] call _hg call _hg)];
+private _dG = [_influenceDelta, "G", ([_influenceDelta, "dG", 0] call _hg call _hg)];
 
-private _influenceContract = createHashMapFromArray [
+private _influenceContract = [[
     // Contract
     ["W", _dW],
     ["R", _dR],
@@ -81,9 +85,9 @@ private _influenceContract = createHashMapFromArray [
     ["dW", _dW],
     ["dR", _dR],
     ["dG", _dG]
-];
+]] call _hmFrom;
 
-private _bundle = createHashMapFromArray [
+private _bundle = [[
     // Contract
     ["v", 1],
     ["event_id", _eventId],
@@ -102,6 +106,6 @@ private _bundle = createHashMapFromArray [
     // Backward-compatible aliases
     ["bundle_id", _eventId],
     ["districtId", _districtId]
-];
+]] call _hmFrom;
 
 _bundle

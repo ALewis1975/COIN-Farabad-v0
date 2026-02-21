@@ -37,6 +37,11 @@ params [
 
 if (isNull _display) exitWith {false};
 
+// sqflint-compat helpers
+private _trimFn     = compile "params ['_s']; trim _s";
+private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
+
 private _rxMaxItems = missionNamespace getVariable ["ARC_consoleRxMaxItems", 80];
 if (!(_rxMaxItems isEqualType 0) || { _rxMaxItems < 10 }) then { _rxMaxItems = 80; };
 _rxMaxItems = (_rxMaxItems min 160) max 10;
@@ -47,7 +52,7 @@ _rxMaxText = (_rxMaxText min 500) max 40;
 
 private _trimRxText = {
     params ["_v", ["_fallback", ""]];
-    private _s = if (_v isEqualType "") then { trim _v } else { _fallback };
+    private _s = if (_v isEqualType "") then { [_v] call _trimFn } else { _fallback };
     if ((count _s) > _rxMaxText) then { _s = _s select [0, _rxMaxText]; };
     _s
 };
@@ -55,8 +60,8 @@ private _trimRxText = {
 // Own MainList while INTEL is active so cross-tab rebuild logic can detect transitions.
 private _owner = uiNamespace getVariable ["ARC_console_mainListOwner", ""];
 if (!(_owner isEqualType "")) then { _owner = ""; };
-_owner = toUpper (trim _owner);
-if (_owner isNotEqualTo "INTEL") then { _rebuild = true; };
+_owner = toUpper ([_owner] call _trimFn);
+if (!(_owner isEqualTo "INTEL")) then { _rebuild = true; };
 uiNamespace setVariable ["ARC_console_mainListOwner", "INTEL"];
 
 private _list    = _display displayCtrl 78011;
@@ -96,18 +101,18 @@ private _ensureS2Split = {
     };
 
     private _pG = ctrlPosition _grpDetails;
-    private _xR = _pG # 0;         // left edge of details pane (absolute)
+    private _xR = _pG select 0;         // left edge of details pane (absolute)
     private _pL = _p0;             // start from default each paint
 
-    private _xL = _pL # 0;
-    private _yL = _pL # 1;
-    private _hL = _pL # 3;
+    private _xL = _pL select 0;
+    private _yL = _pL select 1;
+    private _hL = _pL select 3;
 
     private _padOuter = 0.006;
     private _gap = 0.006;
 
     private _midW = (_xR - _padOuter) - _xL;
-    if (_midW < 0.18) exitWith { [(_xL + (_pL # 2) + _gap), 0.10, _xR] };
+    if (_midW < 0.18) exitWith { [(_xL + (_pL select 2) + _gap), 0.10, _xR] };
 
     // Reserve ~32% for the workflow control column.
     private _listW = (_midW * 0.68) max 0.14;
@@ -148,7 +153,7 @@ private _ensureS2CatPanels = {
         {
             if !(_x isEqualType [] && { (count _x) == 3 }) exitWith { _ok = false; };
             if (_ok) then {
-                if (isNull (_x # 0) || { isNull (_x # 1) } || { isNull (_x # 2) }) exitWith { _ok = false; };
+                if (isNull (_x select 0) || { isNull (_x select 1) } || { isNull (_x select 2) }) exitWith { _ok = false; };
             };
         } forEach _panels;
     };
@@ -213,16 +218,16 @@ private _layoutS2CatPanels = {
     params ["_display", "_listMaster", "_panels"];
 
     private _pL = ctrlPosition _listMaster;
-    private _x = _pL # 0;
-    private _y = _pL # 1;
-    private _w = _pL # 2;
-    private _h = _pL # 3;
+    private _x = _pL select 0;
+    private _y = _pL select 1;
+    private _w = _pL select 2;
+    private _h = _pL select 3;
 
     private _hHdr = 0.03 * safeZoneH;
     private _probe = _display displayCtrl 78031;
     if (!isNull _probe) then {
         private _pp = ctrlPosition _probe;
-        if ((_pp # 3) > 0) then { _hHdr = _pp # 3; };
+        if ((_pp select 3) > 0) then { _hHdr = _pp select 3; };
     };
 
     private _gap = 0.006;
@@ -235,10 +240,10 @@ private _layoutS2CatPanels = {
 
     private _yCur = _y;
     for "_pi" from 0 to 3 do {
-        private _p = _panels # _pi;
+        private _p = _panels select _pi;
         _p params ["_bg","_lbl","_lb"];
 
-        private _ph = _avail * (_weights # _pi);
+        private _ph = _avail * (_weights select _pi);
         if (_pi == 3) then { _ph = (_y + _h) - _yCur; };
 
         _bg  ctrlSetPosition [_x, _yCur, _w, _ph];
@@ -256,14 +261,14 @@ private _layoutS2CatPanels = {
 private _renderS2CatPanelsFromMaster = {
     params ["_display", "_listMaster", "_panels"];
 
-    { lbClear (_x # 2); } forEach _panels;
+    { lbClear (_x select 2); } forEach _panels;
 
-    private _map = createHashMapFromArray [
-        ["INTEL / LEADS",      (_panels # 0) # 2],
-        ["CIVSUB / MDT",       (_panels # 1) # 2],
-        ["ADMIN / TOOLS",      (_panels # 2) # 2],
-        ["INTEL FEED",         (_panels # 3) # 2]
-    ];
+    private _map = [[
+        ["INTEL / LEADS",      (_panels select 0) select 2],
+        ["CIVSUB / MDT",       (_panels select 1) select 2],
+        ["ADMIN / TOOLS",      (_panels select 2) select 2],
+        ["INTEL FEED",         (_panels select 3) select 2]
+    ]] call _hmFrom;
 
     private _section = "";
     for "_i" from 0 to ((lbSize _listMaster) - 1) do {
@@ -271,17 +276,17 @@ private _renderS2CatPanelsFromMaster = {
         private _t = _listMaster lbText _i;
 
         if (_d in ["HDR", "SEP"]) then {
-            private _sectionCandidate = toUpper (trim _t);
+            private _sectionCandidate = toUpper ([_t] call _trimFn);
             if (_sectionCandidate in ["INTEL LOGGING", "LEAD REQUESTS (S2)"]) then {
                 _sectionCandidate = "INTEL / LEADS";
             };
 
-            if (!isNull (_map getOrDefault [_sectionCandidate, controlNull])) then {
+            if (!isNull ([_map, _sectionCandidate, controlNull] call _hg)) then {
                 _section = _sectionCandidate;
             };
         } else {
             if (_section isEqualTo "") then { continue; };
-            private _lb = _map getOrDefault [_section, controlNull];
+            private _lb = [_map, _section, controlNull] call _hg;
             if (isNull _lb) then { continue; };
             if (!(_d isEqualType "")) then { continue; };
             if (_d in ["", "HDR", "SEP"]) then { continue; };
@@ -296,7 +301,7 @@ private _renderS2CatPanelsFromMaster = {
 
     uiNamespace setVariable ["ARC_s2_catPanels_suppressSel", true];
     {
-        private _lb = (_x # 2);
+        private _lb = (_x select 2);
         private _found = -1;
         for "_j" from 0 to ((lbSize _lb) - 1) do {
             if ((_lb lbData _j) isEqualTo _sel) exitWith { _found = _j; };
@@ -326,7 +331,7 @@ private _storeComboSel = {
     private _i = lbCurSel _ctrl;
     private _d = if (_i >= 0) then { _ctrl lbData _i } else { "" };
     if (!(_d isEqualType "")) then { _d = ""; };
-    if ((trim _d) isEqualTo "") then { _d = _defData; };
+    if (([_d] call _trimFn) isEqualTo "") then { _d = _defData; };
     uiNamespace setVariable [_key, _d];
 };
 
@@ -335,7 +340,7 @@ private _restoreComboSel = {
     if (isNull _ctrl) exitWith {};
     private _want = uiNamespace getVariable [_key, _defaultData];
     if (!(_want isEqualType "")) then { _want = _defaultData; };
-    _want = trim _want;
+    _want = [_want] call _trimFn;
     if (_want isEqualTo "") then { _want = _defaultData; };
 
     private _n = lbSize _ctrl;
@@ -387,11 +392,11 @@ private _inCivCtx = !(isNull _civCtxTarget);
 // Apply the S2 split layout each paint. This keeps the workflow controls inside the middle pane
 // and prevents them from colliding with the right details pane.
 private _s2Split = [_display, _list] call _ensureS2Split;
-private _xCtlBase = _s2Split # 0;
-private _wCtlBase = _s2Split # 1;
-private _xRBase   = _s2Split # 2;
+private _xCtlBase = _s2Split select 0;
+private _wCtlBase = _s2Split select 1;
+private _xRBase   = _s2Split select 2;
 if (!(_mode isEqualType "")) then { _mode = "TOOLS"; };
-_mode = toUpper (trim _mode);
+_mode = toUpper ([_mode] call _trimFn);
 
 
 // ---------------------------------------------------------------------------
@@ -469,18 +474,18 @@ if (_rebuild) then
 
                     if ((count _pub) > 0) then
                     {
-                        private _ph = createHashMapFromArray _pub;
-                        _W = _ph getOrDefault ["W", _W];
-                        _R = _ph getOrDefault ["R", _R];
-                        _G = _ph getOrDefault ["G", _G];
+                        private _ph = [_pub] call _hmFrom;
+                        _W = [_ph, "W", _W] call _hg;
+                        _R = [_ph, "R", _R] call _hg;
+                        _G = [_ph, "G", _G] call _hg;
 
-                        _kia = _ph getOrDefault ["civ_cas_kia", 0];
-                        _wia = _ph getOrDefault ["civ_cas_wia", 0];
-                        _hits = _ph getOrDefault ["crime_db_hits", 0];
-                        _detI = _ph getOrDefault ["detentions_initiated", 0];
-                        _detH = _ph getOrDefault ["detentions_handed_off", 0];
-                        _aid = _ph getOrDefault ["aid_events", 0];
-                        _ts = _ph getOrDefault ["ts", 0];
+                        _kia = [_ph, "civ_cas_kia", 0] call _hg;
+                        _wia = [_ph, "civ_cas_wia", 0] call _hg;
+                        _hits = [_ph, "crime_db_hits", 0] call _hg;
+                        _detI = [_ph, "detentions_initiated", 0] call _hg;
+                        _detH = [_ph, "detentions_handed_off", 0] call _hg;
+                        _aid = [_ph, "aid_events", 0] call _hg;
+                        _ts = [_ph, "ts", 0] call _hg;
                     };
 
                     // Derived scores (locked v1 math, using W/R/G from pub snapshot)
@@ -547,7 +552,7 @@ if (_rebuild) then
 
             private _detained = false;
             private _snap = uiNamespace getVariable ["ARC_civsubInteract_snapshot", createHashMap];
-            if (_snap isEqualType createHashMap) then { _detained = _snap getOrDefault ["detained", false]; };
+            if (_snap isEqualType createHashMap) then { _detained = [_snap, "detained", false] call _hg; };
 
             if (_detained) then {
                 ["Release", "CIV_CONTACT_RELEASE"] call _addTool;
@@ -594,7 +599,7 @@ if (_rebuild) then
         private _start = ((count _intelLog) - 25) max 0;
         for "_i" from _start to ((count _intelLog) - 1) do
         {
-            private _e = _intelLog # _i;
+            private _e = _intelLog select _i;
             if (!(_e isEqualType [] && { (count _e) >= 6 })) then { continue; };
             _e params ["_id", "_t", "_cat", "_sum", "_p", "_meta"];
             _sum = [_sum, ""] call _trimRxText;
@@ -606,7 +611,7 @@ if (_rebuild) then
     };
 
     // Restore selection (or pick first actionable row by default)
-    if (_selDataPrev isNotEqualTo "") then
+    if (!(_selDataPrev isEqualTo "")) then
     {
         private _found = -1;
         for "_j" from 0 to ((lbSize _list) - 1) do
@@ -675,23 +680,23 @@ private _appendCivsubResult = {
     private _txtOut = _txtIn;
     private _typeExpect = _expectType;
     if !(_typeExpect isEqualType "") then { _typeExpect = ""; };
-    _typeExpect = toUpper (trim _typeExpect);
+    _typeExpect = toUpper ([_typeExpect] call _trimFn);
 
     private _rs = uiNamespace getVariable ["ARC_console_civsubLastResult", createHashMap];
     if !(_rs isEqualType createHashMap) exitWith { _txtOut };
 
-    private _type = _rs getOrDefault ["type", ""];
+    private _type = [_rs, "type", ""] call _hg;
     if !(_type isEqualType "") then { _type = ""; };
-    _type = toUpper (trim _type);
-    if (_type isEqualTo "" || {_typeExpect isEqualTo ""} || {_type isNotEqualTo _typeExpect}) exitWith { _txtOut };
+    _type = toUpper ([_type] call _trimFn);
+    if (_type isEqualTo "" || {_typeExpect isEqualTo ""} || {!(_type isEqualTo _typeExpect)}) exitWith { _txtOut };
 
-    private _html = _rs getOrDefault ["html", ""];
+    private _html = [_rs, "html", ""] call _hg;
     if !(_html isEqualType "") then { _html = ""; };
 
-    private _ok = _rs getOrDefault ["ok", false];
+    private _ok = [_rs, "ok", false] call _hg;
     if !(_ok isEqualType true) then { _ok = false; };
 
-    private _updatedAt = _rs getOrDefault ["updatedAtText", "--:--:--"];
+    private _updatedAt = [_rs, "updatedAtText", "--:--:--"] call _hg;
     if !(_updatedAt isEqualType "") then { _updatedAt = "--:--:--"; };
 
     private _statusLbl = if (_ok) then { "COMPLETE" } else { "WARNING" };
@@ -728,8 +733,8 @@ if (_data in ["HDR", "SEP"]) then
 else
 {
     private _parts = _data splitString "|";
-    private _kind = if ((count _parts) > 0) then { _parts # 0 } else { "" };
-    private _arg  = if ((count _parts) > 1) then { _parts # 1 } else { "" };
+    private _kind = if ((count _parts) > 0) then { _parts select 0 } else { "" };
+    private _arg  = if ((count _parts) > 1) then { _parts select 1 } else { "" };
 
     switch (_kind) do
     {
@@ -741,7 +746,7 @@ else
 
         case "CIV_CENSUS_DID":
         {
-            private _did = trim _arg;
+            private _did = [_arg] call _trimFn;
             if (_did isEqualTo "") exitWith { _txt = "<t color='#FFB0B0'>No district selected.</t>"; };
 
             if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith
@@ -755,19 +760,19 @@ else
 
             private _pub = missionNamespace getVariable [format ["civsub_v1_district_pub_%1", _did], []];
             if (!(_pub isEqualType [])) then { _pub = []; };
-            private _ph = if ((count _pub) > 0) then { createHashMapFromArray _pub } else { createHashMap };
+            private _ph = if ((count _pub) > 0) then { [_pub] call _hmFrom } else { createHashMap };
 
-            private _W = _ph getOrDefault ["W", 45];
-            private _R = _ph getOrDefault ["R", 55];
-            private _G = _ph getOrDefault ["G", 35];
+            private _W = [_ph, "W", 45] call _hg;
+            private _R = [_ph, "R", 55] call _hg;
+            private _G = [_ph, "G", 35] call _hg;
 
-            private _kia = _ph getOrDefault ["civ_cas_kia", 0];
-            private _wia = _ph getOrDefault ["civ_cas_wia", 0];
-            private _hits = _ph getOrDefault ["crime_db_hits", 0];
-            private _detI = _ph getOrDefault ["detentions_initiated", 0];
-            private _detH = _ph getOrDefault ["detentions_handed_off", 0];
-            private _aid  = _ph getOrDefault ["aid_events", 0];
-            private _ts   = _ph getOrDefault ["ts", 0];
+            private _kia = [_ph, "civ_cas_kia", 0] call _hg;
+            private _wia = [_ph, "civ_cas_wia", 0] call _hg;
+            private _hits = [_ph, "crime_db_hits", 0] call _hg;
+            private _detI = [_ph, "detentions_initiated", 0] call _hg;
+            private _detH = [_ph, "detentions_handed_off", 0] call _hg;
+            private _aid  = [_ph, "aid_events", 0] call _hg;
+            private _ts   = [_ph, "ts", 0] call _hg;
 
             private _Scoop = (0.55 * _W) + (0.35 * _G) - (0.70 * _R);
             private _Sthreat = (1.00 * _R) - (0.35 * _W) - (0.25 * _G);
@@ -792,7 +797,7 @@ else
             // -------------------------------------------------------------------
             // Key settlements (player-readable)
             // -------------------------------------------------------------------
-            private _settByDid = createHashMapFromArray [
+            private _settByDid = [[
                 ["D01", ["Farabad"]],
                 ["D02", ["Lashgar Kuh", "Hamza", "Fort Kelati", "Shirazan"]],
                 ["D03", ["Shahruk"]],
@@ -813,9 +818,9 @@ else
                 ["D18", []],
                 ["D19", []],
                 ["D20", []]
-            ];
+            ]] call _hmFrom;
 
-            private _sett = _settByDid getOrDefault [_did, []];
+            private _sett = [_settByDid, _did, [] call _hg];
             private _settLine = if ((count _sett) > 0) then { _sett joinString "; " } else { "None (rural / dispersed)" };
 
 // -------------------------------------------------------------------
@@ -916,8 +921,8 @@ if (_data in ["HDR", "SEP"]) then
 else
 {
     private _parts = _data splitString "|";
-    private _kind = if ((count _parts) > 0) then { _parts # 0 } else { "" };
-    private _arg  = if ((count _parts) > 1) then { _parts # 1 } else { "" };
+    private _kind = if ((count _parts) > 0) then { _parts select 0 } else { "" };
+    private _arg  = if ((count _parts) > 1) then { _parts select 1 } else { "" };
 
     switch (_kind) do
     {
@@ -948,7 +953,7 @@ else
             private _grpDetails = _display displayCtrl 78016; // right-pane details group
             if (!isNull _grpDetails) then {
                 private _pG = ctrlPosition _grpDetails;
-                private _xR = _pG # 0; // left edge of details pane
+                private _xR = _pG select 0; // left edge of details pane
 
                                 // Control column anchor comes from the S2 split layout.
                 private _xL = _xCtlBase;
@@ -957,7 +962,7 @@ else
                 // Fallback if split data is unavailable.
                 if (_wCtl <= 0) then {
                     private _pList = ctrlPosition _list;
-                    private _xL2 = (_pList # 0) + (_pList # 2) + 0.006;
+                    private _xL2 = (_pList select 0) + (_pList select 2) + 0.006;
                     private _padX = 0.004;
                     _wCtl = (_xR - _padX) - _xL2;
                     _xL = _xL2;
@@ -966,10 +971,10 @@ else
 
                 private _pLM = ctrlPosition _lblMethod;
                 private _pCM = ctrlPosition _cmbMethod;
-                private _hLbl = (_pLM # 3) max 0.02;
-                private _hCmb = (_pCM # 3) max 0.03;
+                private _hLbl = (_pLM select 3) max 0.02;
+                private _hCmb = (_pCM select 3) max 0.03;
 
-                private _y0 = _pLM # 1;
+                private _y0 = _pLM select 1;
                 private _gap = 0.002;
                 private _gapBlk = 0.006;
 
@@ -1010,7 +1015,7 @@ else
             private _grpDetails = _display displayCtrl 78016;
             if (!isNull _grpDetails) then {
                 private _pG = ctrlPosition _grpDetails;
-                private _xR = _pG # 0;
+                private _xR = _pG select 0;
 
                                 // Control column anchor comes from the S2 split layout.
                 private _xL = _xCtlBase;
@@ -1019,7 +1024,7 @@ else
                 // Fallback if split data is unavailable.
                 if (_wCtl <= 0) then {
                     private _pList = ctrlPosition _list;
-                    private _xL2 = (_pList # 0) + (_pList # 2) + 0.006;
+                    private _xL2 = (_pList select 0) + (_pList select 2) + 0.006;
                     private _padX = 0.004;
                     _wCtl = (_xR - _padX) - _xL2;
                     _xL = _xL2;
@@ -1028,10 +1033,10 @@ else
 
                 private _pLL = ctrlPosition _lblLead;
                 private _pCL = ctrlPosition _cmbLead;
-                private _hLbl = (_pLL # 3) max 0.02;
-                private _hCmb = (_pCL # 3) max 0.03;
+                private _hLbl = (_pLL select 3) max 0.02;
+                private _hCmb = (_pCL select 3) max 0.03;
 
-                private _y0 = _pLL # 1;
+                private _y0 = _pLL select 1;
                 private _gap = 0.002;
 
                 _lblLead ctrlSetPosition [_xL, _y0, _wCtl, _hLbl];
@@ -1082,7 +1087,7 @@ else
 
             private _match = [];
             {
-                if (_x isEqualType [] && { (count _x) >= 6 } && { (_x # 0) isEqualTo _id }) exitWith { _match = _x; };
+                if (_x isEqualType [] && { (count _x) >= 6 } && { (_x select 0) isEqualTo _id }) exitWith { _match = _x; };
             } forEach _intelLog;
 
             if (_match isEqualTo []) then
@@ -1101,8 +1106,8 @@ else
                     {
                         if (_x isEqualType [] && { (count _x) >= 2 }) then
                         {
-                            private _k = _x # 0;
-                            private _v = _x # 1;
+                            private _k = _x select 0;
+                            private _v = _x select 1;
                             _k = [_k, ""] call _trimRxText;
                             if !(_v isEqualType "") then { _v = str _v; };
                             _v = [_v, ""] call _trimRxText;
@@ -1194,15 +1199,15 @@ else
         case "CIV_CONTACT_QUESTION":
         {
             private _qid = _arg;
-            private _qMap = createHashMapFromArray [
+            private _qMap = [[
                 ["Q_LIVE", "Where do you live?"],
                 ["Q_WORK", "Where do you work?"],
                 ["Q_IEDS", "Have you seen any IEDs?"],
                 ["Q_INS", "Have you seen any insurgent activity?"],
                 ["Q_OP_US", "What is your opinion of us?"],
                 ["Q_OP_AREA", "What is the overall opinion of us in the area?"]
-            ];
-            private _qlbl = _qMap getOrDefault [_qid, _qid];
+            ]] call _hmFrom;
+            private _qlbl = [_qMap, _qid, _qid] call _hg;
 
             _txt = format [
                 "<t size='1.1' font='PuristaMedium'>CIVSUB: Ask Question</t><br/><br/>" +
@@ -1211,7 +1216,7 @@ else
                 _qlbl
             ];
             _txt = [_txt, "QUESTION"] call _appendCivsubResult;
-            if (!isNull _b1) then { _b1 ctrlEnable (_inCivCtx && {_qid isNotEqualTo ""}); _b1 ctrlSetText "ASK"; };
+            if (!isNull _b1) then { _b1 ctrlEnable (_inCivCtx && {!(_qid isEqualTo "")}); _b1 ctrlSetText "ASK"; };
         };
 
         case "CIV_CONTACT_END":
@@ -1249,14 +1254,14 @@ else
             private _mixedCnt = 0;
 
             {
-                private _did = _x getOrDefault ["districtId", ""];
+                private _did = [_x, "districtId", ""] call _hg;
                 if (_did isEqualTo "") then { continue; };
 
-                private _W = _x getOrDefault ["W", 0];
-                private _R = _x getOrDefault ["R", 0];
-                private _G = _x getOrDefault ["G", 0];
-                private _pop = _x getOrDefault ["population", 0];
-                private _alive = _x getOrDefault ["alive", 0];
+                private _W = [_x, "W", 0] call _hg;
+                private _R = [_x, "R", 0] call _hg;
+                private _G = [_x, "G", 0] call _hg;
+                private _pop = [_x, "population", 0] call _hg;
+                private _alive = [_x, "alive", 0] call _hg;
 
                 // Locked v1 math
                 private _Scoop = 0;
@@ -1361,7 +1366,7 @@ if (_useCatPanels) then {
         [_display, _list, _panels] call _layoutS2CatPanels;
         [_display, _list, _panels] call _renderS2CatPanelsFromMaster;
 
-        { (_x # 0) ctrlShow true; (_x # 1) ctrlShow true; (_x # 2) ctrlShow true; } forEach _panels;
+        { (_x select 0) ctrlShow true; (_x select 1) ctrlShow true; (_x select 2) ctrlShow true; } forEach _panels;
     };
 } else {
     private _panels = uiNamespace getVariable ["ARC_s2_catPanels", []];
@@ -1400,9 +1405,9 @@ if (!(_defaultPos isEqualType []) || { (count _defaultPos) < 4 }) then
 private _grp = _display displayCtrl 78016;
 if (!isNull _grp) then {
     private _pg = ctrlPosition _grp;
-    private _xG = _pg # 0;
-    private _yG = _pg # 1;
-    private _hG = _pg # 3;
+    private _xG = _pg select 0;
+    private _yG = _pg select 1;
+    private _hG = _pg select 3;
 
     // Determine the lowest visible workflow control bottom edge that intersects
     // the details group horizontally.
@@ -1412,24 +1417,24 @@ if (!isNull _grp) then {
     {
         if (!isNull _x && {ctrlShown _x}) then {
             private _pC = ctrlPosition _x;
-            private _r = (_pC # 0) + (_pC # 2);
+            private _r = (_pC select 0) + (_pC select 2);
             if (_r > _xG) then {
-                private _b = (_pC # 1) + (_pC # 3);
+                private _b = (_pC select 1) + (_pC select 3);
                 if (_b > _maxBottom) then { _maxBottom = _b; };
             };
         };
     } forEach [_lblMethod,_cmbMethod,_lblCat,_cmbCat,_lblLead,_cmbLead];
 
     // Convert absolute y into group-local y and pin x/w to the designed defaults.
-    private _yLocal = ((_maxBottom + _padY) - _yG) max (_defaultPos # 1);
+    private _yLocal = ((_maxBottom + _padY) - _yG) max (_defaultPos select 1);
     private _availH = (_hG - _yLocal) max 0.02;
 
     private _pD = ctrlPosition _details;
-    private _fitH = _pD # 3;
+    private _fitH = _pD select 3;
 
-    _pD set [0, _defaultPos # 0];
+    _pD set [0, _defaultPos select 0];
     _pD set [1, _yLocal];
-    _pD set [2, _defaultPos # 2];
+    _pD set [2, _defaultPos select 2];
     _pD set [3, _fitH max _availH];
 
     _details ctrlSetPosition _pD;
@@ -1437,9 +1442,9 @@ if (!isNull _grp) then {
 } else {
     // Fallback: keep inset x/y/w stable and apply fitted height.
     private _pD = ctrlPosition _details;
-    _pD set [0, _defaultPos # 0];
-    _pD set [1, _defaultPos # 1];
-    _pD set [2, _defaultPos # 2];
+    _pD set [0, _defaultPos select 0];
+    _pD set [1, _defaultPos select 1];
+    _pD set [2, _defaultPos select 2];
     _details ctrlSetPosition _pD;
     _details ctrlCommit 0;
 };

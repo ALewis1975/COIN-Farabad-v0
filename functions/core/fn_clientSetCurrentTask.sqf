@@ -23,6 +23,9 @@ params [
 if (!(_taskId isEqualType "")) exitWith {false};
 if (_taskId isEqualTo "") exitWith {false};
 
+// sqflint-compat helpers
+private _findIfFn   = compile "params ['_arr','_cond']; private _r = -1; { if (_x call _cond) exitWith { _r = _forEachIndex; }; } forEach _arr; _r";
+
 // Provide a client-local "focus" channel for the Assigned Task Helper (ATH)
 // so it can display non-incident tasks (orders, leads, etc.) when focused.
 missionNamespace setVariable ["ARC_uiFocusTaskId", _taskId];
@@ -33,9 +36,10 @@ if (_meta isEqualType [] && { (count _meta) > 0 }) then
     private _kvGet = {
         params ["_pairs", "_k", "_d"]; 
         if (!(_pairs isEqualType [])) exitWith { _d };
-        private _idx = _pairs findIf { (_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k } };
+        private _idx = -1;
+        { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
         if (_idx < 0) exitWith { _d };
-        (_pairs # _idx) # 1
+        (_pairs select _idx) select 1
     };
 
     private _kind = [_meta, "kind", "TASK"] call _kvGet;
@@ -43,7 +47,7 @@ if (_meta isEqualType [] && { (count _meta) > 0 }) then
     missionNamespace setVariable ["ARC_uiFocusTaskKind", _kind];
 
     private _title = [_meta, "title", ""] call _kvGet;
-    if (_title isEqualType "" && { _title isNotEqualTo "" }) then
+    if (_title isEqualType "" && { !(_title isEqualTo "") }) then
     {
         missionNamespace setVariable ["ARC_uiFocusTaskTitle", _title];
     };

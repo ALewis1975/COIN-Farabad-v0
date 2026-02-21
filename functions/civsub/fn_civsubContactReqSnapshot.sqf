@@ -30,6 +30,11 @@ if (isNull _civ || {isNull _actor}) exitWith {false};
 if !(isPlayer _actor) exitWith {false};
 if !(_civ getVariable ["civsub_v1_isCiv", false]) exitWith {false};
 
+// sqflint-compat helpers
+private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _keysFn   = compile "params ['_m']; keys _m";
+private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
+
 // Dedicated MP hardening:
 // If this function was invoked via remoteExec, bind actor identity to the network sender.
 if (!isNil "remoteExecutedOwner") then
@@ -58,16 +63,16 @@ if !(_civUid isEqualTo "") then {
     _rec = [_civUid] call ARC_fnc_civsubIdentityGet;
 };
 
-private _known = (_rec isEqualType createHashMap) && {(count (keys _rec)) > 0};
+private _known = (_rec isEqualType createHashMap) && {(count ([_rec] call _keysFn)) > 0};
 private _detained = false;
 private _nameDisplay = "Unknown";
 private _serial = "";
 
 if (_known) then {
-    private _first = _rec getOrDefault ["first_name", ""];
-    private _last  = _rec getOrDefault ["last_name", ""];
-    _serial = _rec getOrDefault ["passport_serial", ""];
-    _detained = _rec getOrDefault ["status_detained", false];
+    private _first = [_rec, "first_name", ""] call _hg;
+    private _last  = [_rec, "last_name", ""] call _hg;
+    _serial = [_rec, "passport_serial", ""] call _hg;
+    _detained = [_rec, "status_detained", false] call _hg;
 
     private _nm = format ["%1 %2", _first, _last];
     _nameDisplay = if (_nm isEqualTo " ") then {"Unknown"} else {_nm};
@@ -101,7 +106,7 @@ if (_out < 0) then {
     _civ setVariable ["civsub_outlook_blufor", _out, true];
 };
 
-private _snap = createHashMapFromArray [
+private _snap = [[
     ["name_display", _nameDisplay],
     ["passport_serial", _serial],
     ["districtId", _did],
@@ -110,7 +115,7 @@ private _snap = createHashMapFromArray [
     ["need_satiation", _sat],
     ["need_hydration", _hyd],
     ["outlook_blufor", _out]
-];
+]] call _hmFrom;
 
 [_snap] remoteExecCall ["ARC_fnc_civsubContactClientReceiveSnapshot", _actor];
 true

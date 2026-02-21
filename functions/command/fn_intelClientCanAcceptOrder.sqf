@@ -21,8 +21,8 @@ private _hasIssued = false;
 {
     if (_x isEqualType [] && { (count _x) >= 5 }) then
     {
-        private _st = toUpper (_x # 2);
-        private _tg = _x # 4;
+        private _st = toUpper (_x select 2);
+        private _tg = _x select 4;
         if (_st isEqualTo "ISSUED" && { _tg isEqualTo _gid }) exitWith { _hasIssued = true; };
     };
 } forEach _orders;

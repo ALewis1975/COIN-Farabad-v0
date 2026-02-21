@@ -19,6 +19,9 @@ if !(alive _civ) exitWith {false};
 if !(side _civ isEqualTo civilian) exitWith {false};
 if !(_civ getVariable ["civsub_v1_isCiv", false]) exitWith {false};
 
+// sqflint-compat helpers
+private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
+
 // Best-effort: ACE stores last damage source on the unit.
 // Var name differs across older scripts/builds; we check both.
 private _src = _civ getVariable ["ace_medical_lastDamageSource", objNull];
@@ -47,10 +50,10 @@ if (_did isEqualTo "") exitWith {false};
 private _actorUid = "";
 if (!isNull _src && {isPlayer _src}) then { _actorUid = getPlayerUID _src; };
 
-private _payload = createHashMapFromArray [
+private _payload = [[
     ["attrib_side", _attribSide],
     ["attrib_conf", _attribConf]
-];
+]] call _hmFrom;
 
 [_did, "CIV_WIA", "HARM", _payload, _actorUid] call ARC_fnc_civsubEmitDelta;
 

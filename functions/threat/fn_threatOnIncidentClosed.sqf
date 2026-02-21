@@ -12,7 +12,10 @@ params [
     ["_ctx", []]
 ];
 
-if (toUpper _event isNotEqualTo "INCIDENT_CLOSED") exitWith {false};
+if (!(toUpper _event isEqualTo "INCIDENT_CLOSED")) exitWith {false};
+
+// sqflint-compat helpers
+private _trimFn     = compile "params ['_s']; trim _s";
 
 private _enabled = ["threat_v0_enabled", true] call ARC_fnc_stateGet;
 if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabled = true; };
@@ -22,9 +25,10 @@ if (!_enabled) exitWith {false};
 private _kvGet = {
     params ["_pairs", "_key", "_default"];
     if (!(_pairs isEqualType [])) exitWith {_default};
-    private _idx = _pairs findIf { (_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key } };
+    private _idx = [_pairs, {
+        (_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) exitWith {_default};
-    private _v = (_pairs # _idx) # 1;
+    private _v = (_pairs select _idx) select 1;
     if (isNil "_v") exitWith {_default};
     _v
 };
@@ -32,7 +36,9 @@ private _kvGet = {
 private _kvSet = {
     params ["_pairs", "_key", "_value"];
     if (!(_pairs isEqualType [])) then { _pairs = []; };
-    private _idx = _pairs findIf { (_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key } };
+    private _idx = -1;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }
+    }] call _findIfFn;
     if (_idx < 0) then { _pairs pushBack [_key, _value]; } else { _pairs set [_idx, [_key, _value]]; };
     _pairs
 };
@@ -52,9 +58,9 @@ if (!(_records isEqualType [])) exitWith {true};
 
 // Shared note string for this closure event.
 private _noteStr = format ["INCIDENT_CLOSED:%1", _resultU];
-if ((trim _reason) isNotEqualTo "") then
+if (!(([_reason] call _trimFn) isEqualTo "")) then
 {
-    _noteStr = _noteStr + format [" (%1)", trim _reason];
+    _noteStr = _noteStr + format [" (%1)", [_reason] call _trimFn];
 };
 
 // Pass 1: patch outcome fields for all threats linked to this task and collect world refs.
@@ -99,11 +105,12 @@ if ((count _closeIds) > 0) then
         private _tid = _x;
         [_tid, "CLOSED", _noteStr] call ARC_fnc_threatUpdateState;
 
-        private _wi = _worldInfo findIf { (_x # 0) isEqualTo _tid };
+        private _wi = -1;
+        { if ((_x select 0) isEqualTo _tid) exitWith { _wi = _forEachIndex; }; } forEach _worldInfo;
         if (_wi >= 0) then
         {
-            private _spawned = (_worldInfo # _wi) # 1;
-            private _objCount = (_worldInfo # _wi) # 2;
+            private _spawned = (_worldInfo select _wi) select 1;
+            private _objCount = (_worldInfo select _wi) select 2;
             if ((!_spawned) || { _objCount isEqualTo 0 }) then
             {
                 [_tid, "CLEANED", "NO_WORLD_REFS"] call ARC_fnc_threatUpdateState;

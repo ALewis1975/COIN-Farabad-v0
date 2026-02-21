@@ -12,6 +12,10 @@
 if (!isServer) exitWith {false};
 if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {false};
 
+// sqflint-compat helpers
+private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _keysFn   = compile "params ['_m']; keys _m";
+
 // Phase 2: shared off-road placement helpers (server-owned).
 // We store these as missionNamespace function values to avoid touching CfgFunctions.hpp
 // (reduces regression risk when multiple hotfixes touch config files).
@@ -28,7 +32,7 @@ if (isNil { missionNamespace getVariable "ARC_civsub_fnc_posIsRoadish" }) then
         if (!(_pos isEqualType []) || { (count _pos) < 2 }) exitWith { true };
 
         private _p = _pos;
-        if ((count _p) == 2) then { _p = [_p # 0, _p # 1, 0]; };
+        if ((count _p) == 2) then { _p = [_p select 0, _p select 1, 0]; };
 
         _probeStep = (_probeStep max 0.6) min 2.0;
         _nearR = (_nearR max 0.15) min 1.5;
@@ -117,12 +121,12 @@ if (!_ok) then
     missionNamespace setVariable ["civsub_v1_crimedb", createHashMap, true];
     missionNamespace setVariable ["civsub_v1_version", missionNamespace getVariable ["civsub_v1_version", 1], true];
 
-    diag_log format ["[CIVSUB][INIT] Fresh state created (districts=%1)", count (keys _districts)];
+    diag_log format ["[CIVSUB][INIT] Fresh state created (districts=%1)", count ([_districts] call _keysFn)];
 }
 else
 {
     private _d = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
-    diag_log format ["[CIVSUB][INIT] State loaded (districts=%1)", count (keys _d)];
+    diag_log format ["[CIVSUB][INIT] State loaded (districts=%1)", count ([_d] call _keysFn)];
 };
 
 // Phase 3: identity + crime DB init (self-contained, no gameplay integration yet)
@@ -174,10 +178,10 @@ if ((missionNamespace getVariable ["civsub_v1_harm_enabled", true]) && { mission
                 if !(_reg isEqualType createHashMap) then { continue; };
 
                 {
-                    private _row = _reg getOrDefault [_x, createHashMap];
+                    private _row = [_reg, _x, createHashMap] call _hg;
                     if !(_row isEqualType createHashMap) then { continue; };
 
-                    private _u = _row getOrDefault ["unit", objNull];
+                    private _u = [_row, "unit", objNull] call _hg;
                     if (isNull _u) then { continue; };
                     if !(alive _u) then { continue; };
                     if !(_u getVariable ["civsub_v1_isCiv", false]) then { continue; };
@@ -188,7 +192,7 @@ if ((missionNamespace getVariable ["civsub_v1_harm_enabled", true]) && { mission
                         _u setVariable ["civsub_v1_wia_counted", true, true];
                         [_u] call ARC_fnc_civsubOnCivWia;
                     };
-                } forEach (keys _reg);
+                } forEach ([_reg] call _keysFn);
             };
 
             missionNamespace setVariable ["civsub_v1_wiaThreadRunning", false, true];

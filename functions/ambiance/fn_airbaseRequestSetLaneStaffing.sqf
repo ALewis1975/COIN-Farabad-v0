@@ -5,6 +5,10 @@
 
 if (!isServer) exitWith {false};
 
+// sqflint-compat helpers
+private _trimFn     = compile "params ['_s']; trim _s";
+private _findIfFn   = compile "params ['_arr','_cond']; private _r = -1; { if (_x call _cond) exitWith { _r = _forEachIndex; }; } forEach _arr; _r";
+
 if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\\core\\fn_rpcValidateSender.sqf"; };
 if (isNil "ARC_fnc_airbaseTowerAuthorize") then { ARC_fnc_airbaseTowerAuthorize = compile preprocessFileLineNumbers "functions\\core\\fn_airbaseTowerAuthorize.sqf"; };
 
@@ -35,7 +39,7 @@ if (!_ok) exitWith {
 };
 
 if (!(_laneId isEqualType "")) then { _laneId = ""; };
-_laneId = toLowerANSI (trim _laneId);
+_laneId = toLower ([_laneId] call _trimFn);
 if !(_laneId in ["tower", "ground", "arrival"]) exitWith {
     private _owner = owner _caller;
     if (_owner > 0) then { [format ["Invalid lane '%1'.", _laneId]] remoteExec ["ARC_fnc_clientHint", _owner]; };
@@ -49,11 +53,9 @@ if (!(_staffing isEqualType [])) then { _staffing = []; };
 
 private _findLane = {
     params ["_rows", "_lane"];
-    _rows findIf {
-        (_x isEqualType []) &&
+    [_rows, {(_x isEqualType []) &&
         { (count _x) >= 5 } &&
-        { ((_x param [0, ""]) isEqualTo _lane) }
-    }
+        { ((_x param [0, ""]) isEqualTo _lane) }}] call _findIfFn
 };
 
 private _idx = [_staffing, _laneId] call _findLane;
@@ -64,7 +66,7 @@ if (_idx < 0) then {
 
 if (_idx < 0) exitWith {false};
 
-private _rec = _staffing # _idx;
+private _rec = _staffing select _idx;
 private _now = serverTime;
 private _name = name _caller;
 private _uid = getPlayerUID _caller;
@@ -78,8 +80,8 @@ private _laneReqTypes = switch (_laneId) do {
     default { ["REQ_TAKEOFF"] };
 };
 private _lanePending = count (_queue select {
-    private _rtype = toUpperANSI (_x param [1, ""]);
-    private _st = toUpperANSI (_x param [6, ""]);
+    private _rtype = toUpper (_x param [1, ""]);
+    private _st = toUpper (_x param [6, ""]);
     (_rtype in _laneReqTypes) && { _st in ["QUEUED", "PENDING", "AWAITING_TOWER_DECISION"] }
 });
 
@@ -101,10 +103,10 @@ _staffing set [_idx, _rec];
 
 private _owner = owner _caller;
 if (_owner > 0) then {
-    [format ["%1 lane %2 set to %3 (pending handoff queue: %4).", toUpperANSI _laneId, if (_claim) then {"staffing"} else {"AUTO"}, if (_claim) then {_name} else {"AUTO"}, _lanePending]] remoteExec ["ARC_fnc_clientHint", _owner];
+    [format ["%1 lane %2 set to %3 (pending handoff queue: %4).", toUpper _laneId, if (_claim) then {"staffing"} else {"AUTO"}, if (_claim) then {_name} else {"AUTO"}, _lanePending]] remoteExec ["ARC_fnc_clientHint", _owner];
 };
 
-["OPS", format ["AIRBASE STAFFING: %1 lane %2 by %3", if (_claim) then {"claimed"} else {"released"}, toUpperANSI _laneId, _name], getPosATL _caller, 0, [
+["OPS", format ["AIRBASE STAFFING: %1 lane %2 by %3", if (_claim) then {"claimed"} else {"released"}, toUpper _laneId, _name], getPosATL _caller, 0, [
     ["event", _event],
     ["caller", _name],
     ["uid", _uid],

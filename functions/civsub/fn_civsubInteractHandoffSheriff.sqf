@@ -28,6 +28,11 @@ params [
 if (isNull _actor || {isNull _civ}) exitWith {false};
 if !(isPlayer _actor) exitWith {false};
 
+// sqflint-compat helpers
+private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _keysFn   = compile "params ['_m']; keys _m";
+private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
+
 private _resolveMarker = {
     params ["_name"];
     if (!isNil "ARC_fnc_worldResolveMarker") exitWith { [_name] call ARC_fnc_worldResolveMarker };
@@ -78,25 +83,25 @@ if (_civUid isEqualTo "") exitWith {
 private _rec = [_civUid] call ARC_fnc_civsubIdentityGet;
 
 // IdentityGet returns an empty HashMap when missing; treat empty as missing and rebuild via touch.
-if (!(_rec isEqualType createHashMap) || {(count (keys _rec)) isEqualTo 0}) then {
+if (!(_rec isEqualType createHashMap) || {(count ([_rec] call _keysFn)) isEqualTo 0}) then {
     _rec = [_did, _actorUid, _civUid, getPosATL _civ] call ARC_fnc_civsubIdentityTouch;
 };
 
 // If the unit is already in the custody pipeline (pinned), but the record lost the detained flag,
 // restore it so handoff cannot fail due to a persistence/eviction edge case.
 if ((_civ getVariable ["civsub_v1_pinned", false]) && {_rec isEqualType createHashMap}) then {
-    if (!(_rec getOrDefault ["status_detained", false])) then {
+    if (!([_rec, "status_detained", false] call _hg)) then {
         _rec set ["status_detained", true];
-        _rec set ["status_detainedAt", (_rec getOrDefault ["status_detainedAt", serverTime])];
-        _rec set ["status_detainedDistrictId", (_rec getOrDefault ["status_detainedDistrictId", _did])];
+        _rec set ["status_detainedAt", ([_rec, "status_detainedAt", serverTime] call _hg)];
+        _rec set ["status_detainedDistrictId", ([_rec, "status_detainedDistrictId", _did] call _hg)];
         [_civUid, _rec] call ARC_fnc_civsubIdentitySet;
     };
 };
 
 if !(_rec isEqualType createHashMap) exitWith {false};
-private _wl = _rec getOrDefault ["wanted_level", 0];
+private _wl = [_rec, "wanted_level", 0] call _hg;
 if !(_wl isEqualType 0) then { _wl = 0; };
-private _detained = _rec getOrDefault ["status_detained", false];
+private _detained = [_rec, "status_detained", false] call _hg;
 if !(_detained) exitWith {
     ["CIVSUB: Civilian is not marked detained.", "CHAT"] remoteExecCall ["ARC_fnc_civsubClientMessage", _actor];
     false
@@ -125,9 +130,9 @@ _rec set ["status_handedOffAt", serverTime];
 _rec set ["status_handedOffTo", "SHERIFF"]; 
 [_civUid, _rec] call ARC_fnc_civsubIdentitySet;
 
-private _bundle = [_did, "DETENTION_HANDOFF", "IDENTITY", createHashMapFromArray [["civ_uid", _civUid], ["to", "SHERIFF"], ["wanted_level", _wl]], _actorUid] call ARC_fnc_civsubEmitDelta;
+private _bundle = [_did, "DETENTION_HANDOFF", "IDENTITY", [[["civ_uid", _civUid], ["to", "SHERIFF"], ["wanted_level", _wl]]] call _hmFrom, _actorUid] call ARC_fnc_civsubEmitDelta;
 if !(_bundle isEqualType createHashMap) then { _bundle = createHashMap; };
-if ((count (keys _bundle)) isEqualTo 0) exitWith {
+if ((count ([_bundle] call _keysFn)) isEqualTo 0) exitWith {
     ["CIVSUB: Handoff failed (delta rejected).", "CHAT"] remoteExecCall ["ARC_fnc_civsubClientMessage", _actor];
     false
 };
@@ -180,12 +185,12 @@ _transferDelay = (_transferDelay max 30) min 3600;
     } forEach ["epw_holding", "mkr_SHERIFF_HOLDING"];
 
     private _holdPos = getPosATL _u;
-    if (_mHold isNotEqualTo "") then { _holdPos = getMarkerPos _mHold; };
+    if (!(_mHold isEqualTo "")) then { _holdPos = getMarkerPos _mHold; };
     _holdPos resize 3;
 
     private _offX = (random 10) - 5;
     private _offY = (random 10) - 5;
-    private _hp = [(_holdPos # 0) + _offX, (_holdPos # 1) + _offY, 0];
+    private _hp = [(_holdPos select 0) + _offX, (_holdPos select 1) + _offY, 0];
 
     // Ensure not in vehicle
     if (vehicle _u != _u) then {

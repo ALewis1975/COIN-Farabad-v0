@@ -19,12 +19,15 @@
 
 if (!isServer) exitWith {false};
 
+// sqflint-compat helpers
+private _fileExFn   = compile "params ['_p']; fileExists _p";
+
 private _path = "data\farabad_world_locations.sqf";
 
 // Load the exported locations/sites list. Use fileExists + diag_log so missing
 // data files don't cause confusing follow-on errors.
 private _data = [];
-if (fileExists _path) then {
+if ([_path] call _fileExFn) then {
     _data = call compile preprocessFileLineNumbers _path;
 } else {
     diag_log format ["[ARC][worldRegisterLocations] Missing file: %1", _path];

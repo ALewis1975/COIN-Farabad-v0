@@ -35,6 +35,10 @@ if (!isServer) exitWith {createHashMap};
 params [["_did","",[""]]];
 if (_did isEqualTo "") exitWith {createHashMap};
 
+// sqflint-compat helpers
+private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
+
 private _dbg = missionNamespace getVariable ["civsub_v1_debug", false];
 
 // Phase 2 helpers (defined in civsubInitServer)
@@ -47,11 +51,11 @@ if (!(_zones isEqualType []) || {(count _zones) == 0}) then { _zones = [["mkr_ai
 private _inExclusion = {
     params ["_p"];
     if (!(_p isEqualType []) || {(count _p) < 2}) exitWith {false};
-    private _px = _p # 0;
-    private _py = _p # 1;
+    private _px = _p select 0;
+    private _py = _p select 1;
     {
-        private _mk = _x # 0;
-        private _r  = _x # 1;
+        private _mk = _x select 0;
+        private _r  = _x select 1;
         private _mp = getMarkerPos _mk;
         if (_mp isEqualType [] && {(count _mp) >= 2}) then {
             if (([_px, _py] distance2D _mp) < _r) exitWith {true};
@@ -71,12 +75,12 @@ private _roadsideFromRoad =
     params ["_r"];
     private _p0 = getPosATL _r;
     if (!(_p0 isEqualType []) || {(count _p0) < 2}) exitWith { [0,0,0] };
-    if ((count _p0) == 2) then { _p0 = [_p0 # 0, _p0 # 1, 0]; };
+    if ((count _p0) == 2) then { _p0 = [_p0 select 0, _p0 select 1, 0]; };
 
     private _dir = getDir _r;
     private _con = roadsConnectedTo _r;
     if ((count _con) > 0) then {
-        private _p1 = getPosATL (_con # 0);
+        private _p1 = getPosATL (_con select 0);
         if (_p1 isEqualType [] && {(count _p1) >= 2}) then {
             _dir = [_p0, _p1] call BIS_fnc_dirTo;
         };
@@ -89,8 +93,8 @@ private _roadsideFromRoad =
     while { _tries < 3 } do {
         private _off = _roadOff + (_tries * (_roadOff * 0.75));
         private _sd = _dir + _side;
-        private _x = (_p0 # 0) + (sin _sd) * _off;
-        private _y = (_p0 # 1) + (cos _sd) * _off;
+        private _x = (_p0 select 0) + (sin _sd) * _off;
+        private _y = (_p0 select 1) + (cos _sd) * _off;
         private _zASL = getTerrainHeightASL [_x, _y];
         _p = ASLToATL [_x, _y, _zASL];
 
@@ -106,33 +110,33 @@ private _roadsideFromRoad =
 private _cache = missionNamespace getVariable ["civsub_v1_spawn_cache", createHashMap];
 if !(_cache isEqualType createHashMap) then { _cache = createHashMap; };
 
-private _row = _cache getOrDefault [_did, createHashMap];
+private _row = [_cache, _did, createHashMap] call _hg;
 if !(_row isEqualType createHashMap) then { _row = createHashMap; };
 
 private _ttl = missionNamespace getVariable ["civsub_v1_spawn_cache_ttl_s", 600];
 if !(_ttl isEqualType 0) then { _ttl = 600; };
 
-private _ts = _row getOrDefault ["ts", 0];
+private _ts = [_row, "ts", 0] call _hg;
 private _needTTL = ((serverTime - _ts) > _ttl);
 
-private _bld = _row getOrDefault ["bldPos", []];
-private _road = _row getOrDefault ["roadPos", []];
+private _bld = [_row, "bldPos", [] call _hg];
+private _road = [_row, "roadPos", [] call _hg];
 if !(_bld isEqualType []) then { _bld = []; };
 if !(_road isEqualType []) then { _road = []; };
 
 // District metadata
 private _d = [_did] call ARC_fnc_civsubDistrictsGetById;
 private _dm = createHashMap;
-if (_d isEqualType createHashMap) then { _dm = _d; } else { if (_d isEqualType []) then { _dm = createHashMapFromArray _d; }; };
+if (_d isEqualType createHashMap) then { _dm = _d; } else { if (_d isEqualType []) then { _dm = [_d] call _hmFrom; }; };
 
-private _center = _dm getOrDefault ["centroid", [0,0]];
-private _radius = _dm getOrDefault ["radius_m", 500];
+private _center = [_dm, "centroid", [0,0] call _hg];
+private _radius = [_dm, "radius_m", 500] call _hg;
 if !(_center isEqualType [] && {(count _center) >= 2}) exitWith { _row };
 
 // Player anchors (server-only) for this district
 private _pAnchMap = missionNamespace getVariable ["civsub_v1_spawn_player_anchors", createHashMap];
 if !(_pAnchMap isEqualType createHashMap) then { _pAnchMap = createHashMap; };
-private _pAnch = _pAnchMap getOrDefault [_did, []];
+private _pAnch = [_pAnchMap, _did, [] call _hg];
 if !(_pAnch isEqualType []) then { _pAnch = []; };
 
 private _anchorTypes = ["NameVillage","NameCity","NameCityCapital","NameLocal"];
@@ -150,8 +154,8 @@ if ((count _pAnch) > 0) then {
     private _sy = 0;
     {
         if (_x isEqualType [] && {(count _x) >= 2}) then {
-            _sx = _sx + (_x # 0);
-            _sy = _sy + (_x # 1);
+            _sx = _sx + (_x select 0);
+            _sy = _sy + (_x select 1);
         };
     } forEach _pAnch;
     _playerCent = [_sx / (count _pAnch), _sy / (count _pAnch), 0];
@@ -166,7 +170,7 @@ if ((count _pAnch) > 0) then {
         if (_pos isEqualType [] && {(count _pos) >= 2}) then {
             private _locs = nearestLocations [_pos, _anchorTypes, _locRadius];
             if ((count _locs) > 0) then {
-                private _loc = _locs # 0; // nearestLocations is distance-ordered
+                private _loc = _locs select 0; // nearestLocations is distance-ordered
                 private _lp = locationPosition _loc;
                 if (_lp isEqualType [] && {(count _lp) >= 2}) then {
                     private _d2 = _pos distance2D _lp;
@@ -202,7 +206,7 @@ if ((count _pAnch) > 0) then {
     };
 };
 
-private _oldKey = _row getOrDefault ["anchorKey", ""]; 
+private _oldKey = [_row, "anchorKey", ""] call _hg; 
 if !(_oldKey isEqualType "") then { _oldKey = ""; };
 
 private _hasPos = ((count _bld + count _road) > 0);
@@ -288,13 +292,13 @@ if !(_maxR isEqualType 0) then { _maxR = 250; };
 if ((count _bldPos) > _maxB) then { _bldPos resize _maxB; };
 if ((count _roadPos) > _maxR) then { _roadPos resize _maxR; };
 
-_row = createHashMapFromArray [
+_row = [[
     ["bldPos", _bldPos],
     ["roadPos", _roadPos],
     ["ts", serverTime],
     ["anchorKey", _anchorKey],
     ["anchorPos", _primaryPos]
-];
+]] call _hmFrom;
 
 _cache set [_did, _row];
 missionNamespace setVariable ["civsub_v1_spawn_cache", _cache, true];

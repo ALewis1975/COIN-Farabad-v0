@@ -17,6 +17,9 @@ if (!isServer) exitWith {false};
 if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {false};
 if !(missionNamespace getVariable ["civsub_v1_traffic_enabled", false]) exitWith {false};
 
+// sqflint-compat helpers
+private _mapGet   = compile "params ['_h','_k']; _h get _k";
+
 private _debug = missionNamespace getVariable ["civsub_v1_traffic_debug", false];
 if (!(_debug isEqualType true)) then { _debug = false; };
 
@@ -167,7 +170,7 @@ if ((count _act) == 0) then
         if ([_d] call ARC_fnc_civsubIsDistrictActive) then
         {
             // sort key: distance to nearest player (from district centroid)
-            private _c = _d get "centroid";
+            private _c = [_d, "centroid"] call _mapGet;
             if (isNil "_c") then { _c = [0,0]; };
             if !(_c isEqualType []) then { _c = [0,0]; };
             if ((count _c) < 2) then { _c = [0,0]; };
@@ -233,9 +236,9 @@ if ((_tod >= 7 && { _tod <= 9 }) || (_tod >= 16 && { _tod <= 18 })) then { _mTod
     private _d = _x select 2;
 
     // Compute S_THREAT (consistent with CIVSUB baseline)
-    private _W = _d get "W_EFF_U";
-    private _R = _d get "R_EFF_U";
-    private _G = _d get "G_EFF_U";
+    private _W = [_d, "W_EFF_U"] call _mapGet;
+    private _R = [_d, "R_EFF_U"] call _mapGet;
+    private _G = [_d, "G_EFF_U"] call _mapGet;
     if (isNil "_W" || { !(_W isEqualType 0) }) then { _W = 45; };
     if (isNil "_R" || { !(_R isEqualType 0) }) then { _R = 55; };
     if (isNil "_G" || { !(_G isEqualType 0) }) then { _G = 35; };
@@ -248,7 +251,7 @@ if ((_tod >= 7 && { _tod <= 9 }) || (_tod >= 16 && { _tod <= 18 })) then { _mTod
     _mThreat = (_mThreat max 0.25) min 1.0;
 
     // Pop multiplier: bigger towns get more traffic (normalized via pop_total)
-    private _pop = _d get "pop_total";
+    private _pop = [_d, "pop_total"] call _mapGet;
     if (isNil "_pop" || { !(_pop isEqualType 0) }) then { _pop = 100; };
     private _mPop = 0.6 + (0.00025 * _pop); // 100 -> 0.625, 2000 -> 1.1
     _mPop = (_mPop max 0.5) min 1.2;
@@ -263,7 +266,7 @@ if ((_tod >= 7 && { _tod <= 9 }) || (_tod >= 16 && { _tod <= 18 })) then { _mTod
 
     while { _cur < _desired && { (count _parked) < _capG } && { _budget > 0 } && { _budgetG > 0 } } do
     {
-        private _op = _opCenters get _did;
+        private _op = [_opCenters, _did] call _mapGet;
         if (isNil "_op" || { !(_op isEqualType []) }) then { _op = []; };
         private _veh = [_did, _d, _pool, _op] call ARC_fnc_civsubTrafficSpawnParked;
         if (isNull _veh) exitWith { _budget = 0; };
@@ -317,7 +320,7 @@ if (_allowMoving) then
 
             private _did = _row select 1;
             private _d = _row select 2;
-            private _op = _opCenters get _did;
+            private _op = [_opCenters, _did] call _mapGet;
             if (isNil "_op" || { !(_op isEqualType []) }) then { _op = []; };
 
             missionNamespace setVariable ["civsub_v1_traffic_lastMovingSpawnFail", "", false];

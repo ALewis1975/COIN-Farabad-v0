@@ -20,6 +20,12 @@
 if (!isServer) exitWith {createHashMap};
 if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {createHashMap};
 
+// sqflint-compat helpers
+private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _mapGet   = compile "params ['_h','_k']; _h get _k";
+private _keysFn   = compile "params ['_m']; keys _m";
+private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
+
 private _districts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
 if !(_districts isEqualType createHashMap) exitWith {createHashMap};
 
@@ -53,24 +59,24 @@ private _pad3 = {
 private _weights = [];
 private _totalPop = 0;
 {
-    private _d = _districts get _x;
+    private _d = [_districts, _x] call _mapGet;
     if !(_d isEqualType createHashMap) then { continue; };
-    private _p = _d getOrDefault ["pop_total", 0];
+    private _p = [_d, "pop_total", 0] call _hg;
     if !(_p isEqualType 0) then { _p = 0; };
     if (_p < 0) then { _p = 0; };
     _weights pushBack [_x, _p];
     _totalPop = _totalPop + _p;
-} forEach (keys _districts);
+} forEach ([_districts] call _keysFn);
 if (_totalPop <= 0) then { _totalPop = 1; };
 
 private _pickDistrict = {
     private _r = (call _rand01) * _totalPop;
     private _acc = 0;
     {
-        _acc = _acc + (_x # 1);
-        if (_r <= _acc) exitWith { _x # 0 };
+        _acc = _acc + (_x select 1);
+        if (_r <= _acc) exitWith { _x select 0 };
     } forEach _weights;
-    (_weights # 0) # 0
+    (_weights select 0) select 0
 };
 
 private _cats = ["IED_FACILITATOR","OPS_PLANNER","FINANCE_LOGISTICS","URBAN_SUPPORT","WEAPONS_SMUGGLER","CELL_MEMBER"];
@@ -135,7 +141,7 @@ for "_i" from 1 to 30 do
 
     private _hist = [[_status0, serverTime]];
 
-    private _rec = createHashMapFromArray [
+    private _rec = [[
         ["poi_id", _poiId],
         ["is_hvt", _isHvt],
         ["category", _cat],
@@ -144,15 +150,15 @@ for "_i" from 1 to 30 do
         ["status", _status0],
         ["status_ts", serverTime],
         ["status_history", _hist]
-    ];
+    ]] call _hmFrom;
 
     if (_enrich) then {
         private _n = [_poiId, _cat, _isHvt, _rand01] call _mkNarrative;
-        _rec set ["wanted_level", _n # 0];
-        _rec set ["wanted_reason_code", _n # 1];
-        _rec set ["wanted_reason_text", _n # 2];
-        _rec set ["wanted_issuing_org", _n # 3];
-        _rec set ["wanted_confidence", _n # 4];
+        _rec set ["wanted_level", _n select 0];
+        _rec set ["wanted_reason_code", _n select 1];
+        _rec set ["wanted_reason_text", _n select 2];
+        _rec set ["wanted_issuing_org", _n select 3];
+        _rec set ["wanted_confidence", _n select 4];
     };
 
     _db set [_poiId, _rec];

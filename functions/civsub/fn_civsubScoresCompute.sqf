@@ -1,4 +1,8 @@
 /*
+
+// sqflint-compat helpers
+private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
     ARC_fnc_civsubScoresCompute
 
     Computes derived district scores (locked v1 math).
@@ -21,7 +25,7 @@ if ((count _this) > 0) then { _d = _this select 0; };
 if (_d isEqualType []) then
 {
     // Convert array-of-pairs to HashMap
-    _d = createHashMapFromArray _d;
+    _d = [_d] call _hmFrom;
 };
 
 if !(_d isEqualType createHashMap) exitWith
@@ -32,12 +36,12 @@ if !(_d isEqualType createHashMap) exitWith
         missionNamespace setVariable ["civsub_v1_warn_scoresComputeBadType", true];
         diag_log format ["[CIVSUB][WARN] ScoresCompute expected district HashMap but got %1; returning zeros.", typeName _d];
     };
-    createHashMapFromArray [["S_COOP", 0], ["S_THREAT", 0]]
+    [[["S_COOP", 0], ["S_THREAT", 0]]] call _hmFrom
 };
 
-private _W = _d getOrDefault ["W_EFF_U", 45];
-private _R = _d getOrDefault ["R_EFF_U", 55];
-private _G = _d getOrDefault ["G_EFF_U", 35];
+private _W = [_d, "W_EFF_U", 45] call _hg;
+private _R = [_d, "R_EFF_U", 55] call _hg;
+private _G = [_d, "G_EFF_U", 35] call _hg;
 
 private _Scoop = (0.55 * _W) + (0.35 * _G) - (0.70 * _R);
 private _Sthreat = (1.00 * _R) - (0.35 * _W) - (0.25 * _G);
@@ -48,4 +52,4 @@ if (_Scoop > 100) then { _Scoop = 100; };
 if (_Sthreat < 0) then { _Sthreat = 0; };
 if (_Sthreat > 100) then { _Sthreat = 100; };
 
-createHashMapFromArray [["S_COOP", _Scoop], ["S_THREAT", _Sthreat]]
+[[["S_COOP", _Scoop], ["S_THREAT", _Sthreat]]] call _hmFrom

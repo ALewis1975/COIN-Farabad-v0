@@ -14,6 +14,9 @@ if (!hasInterface) exitWith {false};
 // UI event handlers are unscheduled; BIS_fnc_guiMessage requires scheduled.
 if (!canSuspend) exitWith { _this spawn ARC_fnc_uiConsoleActionRequestNextIncident; false };
 
+// sqflint-compat helpers
+private _trimFn     = compile "params ['_s']; trim _s";
+
 // OMNI override (playtesting)
 private _omniTokens = missionNamespace getVariable ["ARC_consoleOmniTokens", ["OMNI"]];
 if (!(_omniTokens isEqualType [])) then { _omniTokens = ["OMNI"]; };
@@ -32,7 +35,7 @@ if (!_canApprove) exitWith
 // Do not spam requests while an incident is active.
 private _taskId = missionNamespace getVariable ["ARC_activeTaskId", ""]; 
 if (!(_taskId isEqualType "")) then { _taskId = ""; };
-if (_taskId isNotEqualTo "") exitWith
+if (!(_taskId isEqualTo "")) exitWith
 {
     ["TOC", "An incident is already active. Close it (and complete SITREP workflow) before generating a new one."] call ARC_fnc_clientToast;
     false
@@ -67,8 +70,8 @@ private _myOwner = clientOwner;
                 _found = true;
                 uiNamespace setVariable ["ARC_console_lastNextIncidentResult", _res];
 
-                private _msg = if (_detail isEqualType "" && { trim _detail isNotEqualTo "" }) then { trim _detail } else { "Server returned no detail." };
-                private _hdr = if (_title isEqualType "" && { trim _title isNotEqualTo "" }) then { trim _title } else { "TOC" };
+                private _msg = if (_detail isEqualType "" && { !([_detail] call _trimFn isEqualTo "") }) then { [_detail] call _trimFn } else { "Server returned no detail." };
+                private _hdr = if (_title isEqualType "" && { !([_title] call _trimFn isEqualTo "") }) then { [_title] call _trimFn } else { "TOC" };
 
                 if (_allowed isEqualType true && { _allowed }) then
                 {

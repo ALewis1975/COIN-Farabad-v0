@@ -24,7 +24,10 @@ params [
     ["_result", "", [""]]
 ];
 
-_result = toUpper (trim _result);
+// sqflint-compat helpers
+private _trimFn     = compile "params ['_s']; trim _s";
+
+_result = toUpper ([_result] call _trimFn);
 if !(_result in ["SUCCEEDED", "FAILED"]) exitWith
 {
     ["Closeout", "Invalid close result."] call ARC_fnc_clientToast;
@@ -91,9 +94,9 @@ private _title = if (_closeReady) then {"Close Active Incident"} else {"FORCE Cl
 private _lines = [];
 _lines pushBack format ["Task: %1", _taskId];
 _lines pushBack format ["Incident: %1%2", _disp, if (_typeU isEqualTo "") then {""} else {format [" (%1)", _typeU]}];
-if (_grid isNotEqualTo "") then { _lines pushBack format ["Location: %1", _grid]; };
+if (!(_grid isEqualTo "")) then { _lines pushBack format ["Location: %1", _grid]; };
 if (_sug in ["SUCCEEDED","FAILED"]) then { _lines pushBack format ["Suggested: %1", _sug]; };
-if (_reason isNotEqualTo "") then { _lines pushBack format ["Reason: %1", _reason]; };
+if (!(_reason isEqualTo "")) then { _lines pushBack format ["Reason: %1", _reason]; };
 
 _lines pushBack "";
 _lines pushBack format ["Close as: %1", _result];

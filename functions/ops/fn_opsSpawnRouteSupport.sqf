@@ -90,7 +90,7 @@ private _sites = [];
     if (!(_x isEqualType []) || { (count _x) < 2 }) then { continue; };
 
     // Legacy: position array [x,y,z]
-    if ((_x # 0) isEqualType 0) then
+    if ((_x select 0) isEqualType 0) then
     {
         private _p = +_x; _p resize 3;
         _sites pushBack [_p, _now];
@@ -98,10 +98,10 @@ private _sites = [];
     };
 
     // Timestamped: [pos, t]
-    if ((_x # 0) isEqualType []) then
+    if ((_x select 0) isEqualType []) then
     {
-        private _p = +(_x # 0); _p resize 3;
-        private _t = _x # 1;
+        private _p = +(_x select 0); _p resize 3;
+        private _t = _x select 1;
         if (!(_t isEqualType 0)) then { _t = _now; };
 
         if (_ttl <= 0 || { (_now - _t) <= _ttl }) then
@@ -288,7 +288,7 @@ private _routeDist = if (_haveRoutePts) then
     private _sum = 0;
     for "_i" from 1 to ((count _rp) - 1) do
     {
-        _sum = _sum + ((_rp # (_i - 1)) distance2D (_rp # _i));
+        _sum = _sum + ((_rp select (_i - 1)) distance2D (_rp select _i));
     };
     _sum
 }
@@ -310,8 +310,8 @@ if (_haveRoutePts) then
 
     for "_i" from 1 to ((count _rp) - 1) do
     {
-        private _a = _rp # (_i - 1);
-        private _b = _rp # _i;
+        private _a = _rp select (_i - 1);
+        private _b = _rp select _i;
         private _seg = _a distance2D _b;
         if (_seg <= 0.5) then { continue; };
 
@@ -320,9 +320,9 @@ if (_haveRoutePts) then
             private _t = (_nextAt - _acc) / _seg;
             _t = (_t max 0) min 1;
             private _p = [
-                (_a # 0) + ((_b # 0) - (_a # 0)) * _t,
-                (_a # 1) + ((_b # 1) - (_a # 1)) * _t,
-                (_a # 2) + ((_b # 2) - (_a # 2)) * _t
+                (_a select 0) + ((_b select 0) - (_a select 0)) * _t,
+                (_a select 1) + ((_b select 1) - (_a select 1)) * _t,
+                (_a select 2) + ((_b select 2) - (_a select 2)) * _t
             ];
             _candidates pushBack _p;
             _nextAt = _nextAt + _spacingM;
@@ -384,7 +384,7 @@ private _fn_roadDir = {
     private _conn = roadsConnectedTo _road;
     if ((count _conn) > 0) then
     {
-        _dir = _road getDir (_conn # 0);
+        _dir = _road getDir (_conn select 0);
     };
 
     _dir
@@ -782,7 +782,7 @@ private _spawnedSites = 0;
     if (surfaceIsWater _sitePos) then { continue; };
 
     // Avoid stacking (runtime-only)
-    private _dupe = (_sites findIf { (_sitePos distance2D (_x # 0)) < _dedupeR }) >= 0;
+    private _dupe = ([_sites, { (_sitePos distance2D (_x select 0)) < _dedupeR }] call _findIfFn) >= 0;
     if (_dupe) then { continue; };
 
     // Avoid placing inside the airbase unless explicitly allowed.

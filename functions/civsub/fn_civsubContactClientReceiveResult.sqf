@@ -14,6 +14,11 @@ params [
     ["_in", "", ["", createHashMap, []]]
 ];
 
+// sqflint-compat helpers
+private _trimFn     = compile "params ['_s']; trim _s";
+private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
+
 private _d = uiNamespace getVariable ["ARC_civsubInteract_display", displayNull];
 private _resp = controlNull;
 if (!isNull _d) then { _resp = _d displayCtrl 78320; };
@@ -28,17 +33,17 @@ if (_in isEqualType "") then {
     _html = _in;
 } else {
     private _hm = _in;
-    if (_hm isEqualType []) then { _hm = createHashMapFromArray _hm; };
+    if (_hm isEqualType []) then { _hm = [_hm] call _hmFrom; };
     if (_hm isEqualType createHashMap) then {
-        _html = _hm getOrDefault ["html", ""];
-        _type = _hm getOrDefault ["type", ""];
-        _ok = _hm getOrDefault ["ok", false];
-        _payload = _hm getOrDefault ["payload", createHashMap];
-        if (_payload isEqualType []) then { _payload = createHashMapFromArray _payload; };
+        _html = [_hm, "html", ""] call _hg;
+        _type = [_hm, "type", ""] call _hg;
+        _ok = [_hm, "ok", false] call _hg;
+        _payload = [_hm, "payload", createHashMap] call _hg;
+        if (_payload isEqualType []) then { _payload = [_payload] call _hmFrom; };
     };
 };
 
-if (_type isEqualType "") then { _type = toUpper (trim _type); };
+if (_type isEqualType "") then { _type = toUpper ([_type] call _trimFn); };
 
 private _st = systemTime;
 private _pad2 = {
@@ -49,12 +54,12 @@ private _pad2 = {
     str _v
 };
 private _stamp = if (_st isEqualType [] && {(count _st) >= 6}) then {
-    format ["%1:%2:%3", [(_st # 3)] call _pad2, [(_st # 4)] call _pad2, [(_st # 5)] call _pad2]
+    format ["%1:%2:%3", [(_st select 3)] call _pad2, [(_st select 4)] call _pad2, [(_st select 5)] call _pad2]
 } else {
     "--:--:--"
 };
 
-uiNamespace setVariable ["ARC_console_civsubLastResult", createHashMapFromArray [
+uiNamespace setVariable ["ARC_console_civsubLastResult", [[
     ["raw", _raw],
     ["html", _html],
     ["type", _type],
@@ -62,7 +67,7 @@ uiNamespace setVariable ["ARC_console_civsubLastResult", createHashMapFromArray 
     ["payload", _payload],
     ["updatedAtText", _stamp],
     ["updatedAtTick", diag_tickTime]
-]];
+]] call _hmFrom];
 
 if (!isNull _resp && {!(_html isEqualTo "")}) then {
     _resp ctrlSetStructuredText parseText _html;
@@ -80,7 +85,7 @@ if (_payload isEqualType createHashMap) then {
         {
             private _k = _x;
             if (_k in ["need_satiation_after","need_hydration_after","outlook_after"]) then {
-                private _v = _payload getOrDefault [_k, -1];
+                private _v = [_payload, _k, -1] call _hg;
                 if (_v isEqualType 0 && {_v >= 0}) then {
                     if (_k isEqualTo "need_satiation_after") then { _snap set ["need_satiation", _v]; };
                     if (_k isEqualTo "need_hydration_after") then { _snap set ["need_hydration", _v]; };
@@ -100,17 +105,17 @@ if (_payload isEqualType createHashMap) then {
 // CHECK_ID: build an ID card panel string and keep it in the right DETAILS pane.
 // We intentionally do NOT use a full-screen overlay; this avoids z-order/"Back" regressions.
 if (_type isEqualTo "CHECK_ID" && {_ok} && {_payload isEqualType createHashMap}) then {
-    private _name = _payload getOrDefault ["name", ""];
-    private _serial = _payload getOrDefault ["passport_serial", ""];
-    private _age = _payload getOrDefault ["age", -1];
-    private _occ = _payload getOrDefault ["occupation", ""];
-    private _home = _payload getOrDefault ["home", ""];
-    private _grid = _payload getOrDefault ["home_grid", ""];
-    private _did = _payload getOrDefault ["districtId", ""];
-    private _flags = _payload getOrDefault ["flags", []];
+    private _name = [_payload, "name", ""] call _hg;
+    private _serial = [_payload, "passport_serial", ""] call _hg;
+    private _age = [_payload, "age", -1] call _hg;
+    private _occ = [_payload, "occupation", ""] call _hg;
+    private _home = [_payload, "home", ""] call _hg;
+    private _grid = [_payload, "home_grid", ""] call _hg;
+    private _did = [_payload, "districtId", ""] call _hg;
+    private _flags = [_payload, "flags", [] call _hg];
 
     private _didS = if (_did isEqualTo "") then { "--" } else { _did };
-    private _nameParts = if (_name isEqualType "") then { (trim _name) splitString " \t\r\n" } else { [] };
+    private _nameParts = if (_name isEqualType "") then { ([_name] call _trimFn) splitString " \t\r\n" } else { [] };
     private _nameS = if ((count _nameParts) > 0) then { _nameParts joinString " " } else { format ["Unknown (%1)", _didS] };
 
     private _ageS = if (_age isEqualType 0 && {_age >= 0}) then { str _age } else { "N/A" };

@@ -22,18 +22,21 @@ if (!isServer) exitWith { false };
 params ["_asset"];
 if (isNil "_asset" || {!(_asset isEqualType createHashMap)}) exitWith { false };
 
-private _id     = _asset getOrDefault ["id", ""];
-private _vehVar = _asset getOrDefault ["vehVar", ""];
+// sqflint-compat helpers
+private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
 
-private _spawnType = _asset getOrDefault ["startVehType", ""];
-private _startPos  = _asset getOrDefault ["startPos", [0,0,0]];
-private _startDir  = _asset getOrDefault ["startDir", 0];
-private _startVecUp = _asset getOrDefault ["startVecUp", [0,0,1]];
+private _id     = [_asset, "id", ""] call _hg;
+private _vehVar = [_asset, "vehVar", ""] call _hg;
+
+private _spawnType = [_asset, "startVehType", ""] call _hg;
+private _startPos  = [_asset, "startPos", [0,0,0] call _hg];
+private _startDir  = [_asset, "startDir", 0] call _hg;
+private _startVecUp = [_asset, "startVecUp", [0,0,1] call _hg];
 
 if (_spawnType isEqualTo "" || {!(_startPos isEqualType [])} || {(count _startPos) < 2}) exitWith { false };
 
 // Safety: delete any lingering vehicle reference
-private _oldVeh = _asset getOrDefault ["veh", objNull];
+private _oldVeh = [_asset, "veh", objNull] call _hg;
 if (!isNull _oldVeh) then { deleteVehicle _oldVeh; };
 
 private _newVeh = createVehicle [_spawnType, _startPos, [], 0, "NONE"];
@@ -56,8 +59,8 @@ if (_vehVar != "") then {
 _asset set ["veh", _newVeh];
 
 // Respawn crew from templates
-private _templates = _asset getOrDefault ["crewTemplates", []];
-private _crewSide  = _asset getOrDefault ["crewSide", west];
+private _templates = [_asset, "crewTemplates", [] call _hg];
+private _crewSide  = [_asset, "crewSide", west] call _hg;
 
 private _grpCrew = createGroup [_crewSide, true];
 

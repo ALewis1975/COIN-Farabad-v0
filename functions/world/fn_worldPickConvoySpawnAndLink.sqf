@@ -55,9 +55,9 @@ private _getRoadWidth = {
     params ["_road"];
     private _w = 0;
     private _ri = getRoadInfo _road;
-    if (_ri isEqualType [] && { (count _ri) > 1 } && { (_ri # 1) isEqualType 0 }) then
+    if (_ri isEqualType [] && { (count _ri) > 1 } && { (_ri select 1) isEqualType 0 }) then
     {
-        _w = _ri # 1;
+        _w = _ri select 1;
     };
     _w
 };

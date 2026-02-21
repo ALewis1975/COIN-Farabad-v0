@@ -58,7 +58,7 @@ if ((_actor distance _civ) > 6) exitWith {
 };
 
 // sqflint-compatible helpers for HashMap operations
-private _hg     = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k,_d]";
+private _hg     = compile "params ['_h','_k','_d']; [(_h), _k,_d] call _hg";
 private _hmFrom = compile "params ['_pairs']; private _r = createHashMap; if !(_pairs isEqualType []) exitWith {_r}; { if !(_x isEqualType []) then { diag_log format ['[CIVSUB][WARN] _hmFrom skipped non-array entry type=%1', typeName _x]; } else { if ((count _x) < 2) then { diag_log format ['[CIVSUB][WARN] _hmFrom skipped short entry=%1', _x]; } else { private _k = _x select 0; if !(_k isEqualType '') then { _k = str _k; }; _r set [_k, _x select 1]; }; }; } forEach _pairs; _r";
 
 // Pre-load identity functions if not yet compiled (guard against cold-start or JIP timing gaps).

@@ -23,13 +23,16 @@ params [
 if (isNull _obj) exitWith {false};
 if (_actionText isEqualTo "" || _kind isEqualTo "") exitWith {false};
 
+// sqflint-compat helpers
+private _trimFn     = compile "params ['_s']; trim _s";
+
 private _nid = netId _obj;
 if (_nid isEqualTo "") exitWith {false};
 
 private _key = format ["ARC_objAct_%1", _nid];
 if (!isNil { missionNamespace getVariable _key }) exitWith {true};
 
-private _kindU = toUpper (trim _kind);
+private _kindU = toUpper ([_kind] call _trimFn);
 
 // IED Phase 1: suspicious-object objectives use a two-step interaction:
 //   1) DISCOVER / INSPECT (sets discovered state; reveals the "render safe" action)

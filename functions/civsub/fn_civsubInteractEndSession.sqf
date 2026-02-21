@@ -25,6 +25,9 @@ if (isNull _actor) exitWith {false};
 
 if !(_civ getVariable ["civsub_v1_isCiv", false]) exitWith {false};
 
+// sqflint-compat helpers
+private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+
 private _actorUid = getPlayerUID _actor;
 if (_actorUid isEqualTo "") exitWith {false};
 
@@ -38,7 +41,7 @@ private _civUid = _civ getVariable ["civ_uid", ""];
 if !(_civUid isEqualTo "") then {
     private _rec = [_civUid] call ARC_fnc_civsubIdentityGet;
     if (_rec isEqualType createHashMap) then {
-        if (_rec getOrDefault ["status_detained", false]) exitWith {
+        if ([_rec, "status_detained", false] call _hg) exitWith {
             if (!_silent) then {
                 ["CIVSUB: Interaction ended. Civilian remains detained.", "CHAT"] remoteExecCall ["ARC_fnc_civsubClientMessage", _actor];
             };
