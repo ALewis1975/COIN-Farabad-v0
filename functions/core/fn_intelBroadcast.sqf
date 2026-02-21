@@ -31,7 +31,7 @@ _metaValueMaxLen = (_metaValueMaxLen min 240) max 20;
 private _log = ["intelLog", []] call ARC_fnc_stateGet;
 if (!(_log isEqualType [])) then { _log = []; };
 
-private _intel = _log select { _x isEqualType [] && { (count _x) >= 3 } && { toUpper !((_x select 2) isEqualTo "OPS") } };
+private _intel = _log select { _x isEqualType [] && { (count _x) >= 3 } && { !(toUpper (_x select 2) isEqualTo "OPS") } };
 private _ops   = _log select { _x isEqualType [] && { (count _x) >= 3 } && { toUpper (_x select 2) isEqualTo "OPS" } };
 
 private _sanitizeMeta = {
@@ -91,7 +91,7 @@ private _sanitizeEntry = {
     if ((count _pos) > 3) then { _pos resize 3; _truncated = true; };
 
     private _metaSafe = [_meta] call _sanitizeMeta;
-    if (([_metaSafe, {_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo "truncated" }}] call _findIfFn) >= 0) then { _truncated = true; };
+    { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo "truncated" }) exitWith { _truncated = true; }; } forEach _metaSafe;
     if (_truncated) then { _metaSafe pushBack ["entryTruncated", true]; };
     [_id, _ts, toUpper _cat, _sum, _pos, _metaSafe]
 };

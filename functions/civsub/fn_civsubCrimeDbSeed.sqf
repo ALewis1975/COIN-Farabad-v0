@@ -69,6 +69,11 @@ private _totalPop = 0;
 } forEach ([_districts] call _keysFn);
 if (_totalPop <= 0) then { _totalPop = 1; };
 
+if ((count _weights) == 0) exitWith {
+    diag_log "[CIVSUB][CRIMEDB] No districts available; crime DB seed skipped.";
+    createHashMap
+};
+
 private _pickDistrict = {
     private _r = (call _rand01) * _totalPop;
     private _acc = 0;
@@ -87,7 +92,7 @@ private _status0 = "AT_LARGE";
 
 private _mkNarrative = {
     // Returns: [wantedLvl, reasonCode, reasonText, issuerOrg, conf]
-    params ["_poiId","_cat","_isHvt","_randFn"];
+    params ["_cat","_isHvt","_randFn"];
 
     private _wl = if (_isHvt) then { 4 + floor ((call _randFn) * 2) } else { 2 + floor ((call _randFn) * 2) };
     if (_wl < 1) then { _wl = 1; };
@@ -153,7 +158,7 @@ for "_i" from 1 to 30 do
     ]] call _hmFrom;
 
     if (_enrich) then {
-        private _n = [_poiId, _cat, _isHvt, _rand01] call _mkNarrative;
+        private _n = [_cat, _isHvt, _rand01] call _mkNarrative;
         _rec set ["wanted_level", _n select 0];
         _rec set ["wanted_reason_code", _n select 1];
         _rec set ["wanted_reason_text", _n select 2];
