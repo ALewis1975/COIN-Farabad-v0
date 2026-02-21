@@ -9,6 +9,25 @@ Append one dated entry per validation pass using:
 
 ---
 
+## Runtime Validation Entry Convention (behavior-changing commit groups)
+
+For every behavior-changing SQF commit group (Mode A/B/D/I/J with runtime impact), add at least one **unique runtime validation entry** in this file.
+
+- Static-only entries (lint/grep/diff/check scripts) do **not** satisfy this requirement.
+- A runtime entry must include:
+  - Commit group identifier (branch + commit SHA or explicit commit range).
+  - Runtime scenario type: `Local MP`, `Hosted MP`, or `Dedicated server`.
+  - Steps performed and observed result (`PASS`, `FAIL`, or `BLOCKED`).
+  - JIP / late-client status for the scenario, or a pointer to the PR checklist.
+- If runtime validation is `BLOCKED`, the same entry must record:
+  - Explicit waiver reason (what prevented execution).
+  - Named owner for follow-up validation.
+  - Tracking reference (issue/task/PR comment) to close the waiver.
+
+This convention ensures deferred runtime checks are visible, uniquely traceable per behavior-changing commit group, and not repeatedly postponed behind static validation-only logs.
+
+---
+
 ## Static QA Checklist — `fn_uiConsoleOnLoad.sqf` touch-required
 
 Run this checklist after any edit to `functions/ui/fn_uiConsoleOnLoad.sqf`.
