@@ -180,6 +180,26 @@ missionNamespace setVariable ["airbase_v1_tower_allowBnCmd", true, true];
 missionNamespace setVariable ["airbase_v1_tower_bnCommandTokens", ["BNCMD", "BN COMMAND", "BNHQ", "BN HQ", "BN CO", "BNCO", "BN CDR", "BNCDR", "BN CMDR", "BATTALION CO", "BATTALION CDR", "REDFALCON 6", "REDFALCON6", "RED FALCON 6", "RED-FALCON-6", "FALCON 6", "FALCON6", "FALCON-6"], true];
 missionNamespace setVariable ["airbase_v1_tower_authDebug", false, true];
 missionNamespace setVariable ["airbase_v1_pilotGroupTokens", ["EFS", "HAWG", "VIPER", "PILOT"], true];
+// CCIC tokens: match "Watch Supervisor / Controller-in-Charge (WS/WIC) @332 EOSS | FARABAD TOWER"
+// Normalized hay for WS/CIC: "332 EOSS | FARABAD TOWER WATCH SUPERVISOR CONTROLLER IN CHARGE (WS WIC) @332 EOSS | FARABAD TOWER"
+missionNamespace setVariable ["airbase_v1_tower_ccicTokens", [
+    "FARABAD TOWER WSCIC",
+    "FARABAD TOWER WS CCIC",
+    "FARABAD TOWER WS-CIC",
+    "FARABAD TOWER W/S CCIC",
+    "FARABAD-TOWER-WS-CCIC",
+    "FARABAD TOWER WS.CCIC",
+    "FARABAD TOWER WATCH SUPERVISOR"
+], true];
+// LC tokens: match "Lead Controller (LC)" with group "332 EOSS | FARABAD TOWER"
+// Normalized hay for LC: "332 EOSS | FARABAD TOWER LEAD CONTROLLER (LC)"
+missionNamespace setVariable ["airbase_v1_tower_lcTokens", [
+    "FARABAD TOWER LC",
+    "FARABAD TOWER WS LC",
+    "FARABAD-TOWER-LC",
+    "FARABAD TOWER W/S LC",
+    "FARABAD TOWER LEAD CONTROLLER"
+], true];
 
 
 // ============================================================================

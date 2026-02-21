@@ -531,6 +531,28 @@ python3 scripts/dev/validate_marker_index.py
 
 ---
 
+## 2026-02-21 — AIR/TOWER access fixes for Farabad Tower roles and pilots
+
+**Branch/Commit:** copilot/update-air-tower-access
+
+**Scenario:** Farabad Tower (WS/CIC and LC) player roles could not see the AIR/TOWER tab; pilots lost AIR/TOWER options on entering the aircraft; tower/pilot roles lacked S3/OPS tab access.
+
+**Commands:**
+```
+python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleOnLoad.sqf
+sqflint -e w functions/ui/fn_uiConsoleOnLoad.sqf
+```
+
+**Result:** PASS (static)
+
+**Notes:**
+- Root cause 1 (token mismatch): Default `airbase_v1_tower_ccicTokens` / `airbase_v1_tower_lcTokens` in `fn_airbaseTowerAuthorize.sqf` did not match the actual roleDescription strings in the mission. Added `airbase_v1_tower_ccicTokens` (adds "FARABAD TOWER WATCH SUPERVISOR") and `airbase_v1_tower_lcTokens` (adds "FARABAD TOWER LEAD CONTROLLER") to `initServer.sqf` so WS/CIC and LC roles receive proper tower authorization.
+- Root cause 2 (S3/OPS access): `_canOps` was gated on TOC staff and authorized leaders only. Extended to include `|| _canAirControl || _canAirPilot` (evaluated after air flags) in `fn_uiConsoleOnLoad.sqf` so Farabad Tower staff and pilots also see the S3/OPS tab.
+- Root cause 3 (pilot options disappear in aircraft): After FIR aircraft system replaces the player unit in the cockpit, the unit's group/roleDescription may no longer contain pilot tokens. Added vehicle-type fallback: if `vehicle player isKindOf "Air"`, treat the player as a pilot regardless of token matching.
+- Runtime/dedicated/JIP validation: BLOCKED (no Arma runtime in container). Requires local-MP session as WS/CIC or LC role, and as F-16/A-10 pilot.
+
+---
+
 ## 2026-02-21 — Layout overlap fixes: CMD OVERVIEW + OPS frames
 
 **Branch/Commit:** copilot/check-layout-overlaps-farabad (double-check of #294)
