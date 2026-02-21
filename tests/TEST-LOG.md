@@ -9,6 +9,24 @@ Append one dated entry per validation pass using:
 
 ---
 
+## 2026-02-21 01:50 UTC — marker index generator ripgrep fallback
+
+**Branch/Commit:** copilot/fix-recurring-errors-log @ pending
+
+**Scenario:** Allow marker index generator to run without ripgrep by skipping consumer detection when `rg` is unavailable, then re-run validation.
+
+**Commands:**
+```
+python3 scripts/dev/validate_marker_index.py
+```
+
+**Result:** PASS
+
+**Notes:**
+- Generator no longer exits when `rg` is missing; it emits a warning and leaves consumer lists empty in that environment.
+- Behavior is unchanged when ripgrep is installed (consumer detection still runs).
+- Dedicated/server runtime validation: N/A (tooling-only change).
+
 ## 2026-02-21 00:23 UTC — sqflint compatibility fixes
 
 **Branch/Commit:** copilot/gate-check-id-verified-status @ 088bf46

@@ -18,8 +18,9 @@ ALIASES_PATH = ROOT / "data" / "farabad_marker_aliases.sqf"
 JSON_OUT = ROOT / "docs" / "reference" / "marker-index.json"
 MD_OUT = ROOT / "docs" / "reference" / "marker-index.md"
 
-if shutil.which("rg") is None:
-    raise SystemExit("Missing dependency: ripgrep (rg). Install ripgrep to run marker index generation.")
+RG_AVAILABLE = shutil.which("rg") is not None
+if not RG_AVAILABLE:
+    print("Warning: ripgrep (rg) not found; consumer detection will be skipped.", file=sys.stderr)
 
 TEXT_FIELDS = ("name", "type", "shape", "text", "color", "usageNotes", "source", "status")
 
@@ -129,6 +130,8 @@ def parse_mission_markers(path: Path) -> list[dict[str, Any]]:
 
 def rg_consumers(symbol: str) -> list[str]:
     if not symbol:
+        return []
+    if not RG_AVAILABLE:
         return []
     cmd = [
         "rg",
