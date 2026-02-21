@@ -241,7 +241,15 @@ if (!(_statusRows isEqualType [])) then { _statusRows = []; };
 if ((count _statusRows) > _rxMaxItems) then { _statusRows = _statusRows select [0, _rxMaxItems]; };
 private _statusIdx = -1;
 { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _gidSelf }) exitWith { _statusIdx = _forEachIndex; }; } forEach _statusRows;
-private _unitStatus = if (_statusIdx < 0) then { "OFFLINE" } else { toUpper ([((_statusRows select _statusIdx)] call _trimFn select 1)) };
+private _unitStatus = "OFFLINE";
+if (_statusIdx >= 0) then {
+    private _row = _statusRows select _statusIdx;
+    private _s = "OFFLINE";
+    if (_row isEqualType [] && { (count _row) >= 2 } && { (_row select 1) isEqualType "" }) then {
+        _s = _row select 1;
+    };
+    _unitStatus = toUpper ([_s] call _trimFn);
+};
 
 private _allowDuringRtb = missionNamespace getVariable ["ARC_allowIncidentDuringAcceptedRtb", false];
 private _policyText = if (_allowDuringRtb) then

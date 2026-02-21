@@ -49,6 +49,7 @@ private _log = {
     if (!isNil "ARC_fnc_log") then { ["CONVOY", _msg, _args, _lvl] call ARC_fnc_log; }
     else { diag_log (if ((count _args) > 0) then { format ([_msg] + _args) } else { _msg }); };
 };
+private _findIfFn = compile "params ['_arr','_cond']; private _r = -1; { if (_x call _cond) exitWith { _r = _forEachIndex; }; } forEach _arr; _r";
 
 // Spawn vehicles with a conservative cadence so each one has time to clear the spawn marker.
 // Large convoys at tight spawn pads (ex: Airbase perimeter road) need this to avoid pileups.
@@ -312,8 +313,7 @@ private _getRoleKeyList = {
     params ["_roleName"];
     private _r = toLower _roleName;
     private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { ((_x select 0) isEqualType "") && { (toLower (_x select 0)) isEqualTo _r } }
-    }] call _findIfFn;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { ((_x select 0) isEqualType "") && { (toLower (_x select 0)) isEqualTo _r } }) exitWith { _idx = _forEachIndex; }; } forEach _roleMatrix;
     if (_idx < 0) exitWith {[]};
     private _keys = (_roleMatrix select _idx) select 1;
     if !(_keys isEqualType []) exitWith {[]};

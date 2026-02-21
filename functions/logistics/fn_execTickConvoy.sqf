@@ -41,6 +41,8 @@ params [
     ["_dt", 0]
 ];
 
+private _findIfFn = compile "params ['_arr','_cond']; private _r = -1; { if (_x call _cond) exitWith { _r = _forEachIndex; }; } forEach _arr; _r";
+
 private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
 if (_taskId isEqualTo "") exitWith {false};
 
@@ -663,28 +665,30 @@ private _fn_bridgeMarkerAtPos = {
     private _p = +_pos; _p resize 3;
 
     private _idx = -1;
-    { if (private _mk = _x;
+    {
+        private _mk = _x;
+        private _matched = false;
 
-        // Fast path: no buffer requested, use marker inArea directly.
-        if (_bridgeBufM <= 0) exitWith { _p inArea _mk };
+        if (_bridgeBufM <= 0) then {
+            _matched = _p inArea _mk;
+        } else {
+            if (_mk in allMapMarkers) then {
+                private _c = getMarkerPos _mk;
+                private _sz = markerSize _mk;
+                if (_sz isEqualType [] && { (count _sz) >= 2 }) then {
+                    private _a = (_sz select 0) + _bridgeBufM;
+                    private _b = (_sz select 1) + _bridgeBufM;
+                    private _dir = markerDir _mk;
+                    private _shape = markerShape _mk;
+                    if (!(_shape isEqualType "")) then { _shape = "RECTANGLE"; };
+                    private _isRect = ((toUpper _shape) isEqualTo "RECTANGLE");
+                    _matched = _p inArea [_c, _a, _b, _dir, _isRect];
+                };
+            };
+        };
 
-        // Buffered check: re-express marker as an area array and expand its radii.
-        if !(_mk in allMapMarkers) exitWith { false };
-
-        private _c = getMarkerPos _mk;
-        private _sz = markerSize _mk;
-        if (!(_sz isEqualType []) || { (count _sz) < 2 }) exitWith { false };
-
-        private _a = (_sz select 0) + _bridgeBufM;
-        private _b = (_sz select 1) + _bridgeBufM;
-        private _dir = markerDir _mk;
-
-        private _shape = markerShape _mk;
-        if (!(_shape isEqualType "")) then { _shape = "RECTANGLE"; };
-        private _isRect = ((toUpper _shape) isEqualTo "RECTANGLE");
-
-        _p inArea [_c, _a, _b, _dir, _isRect]
-    }] call _findIfFn;
+        if (_matched) exitWith { _idx = _forEachIndex; };
+    } forEach _bridgeMarkers;
 
     if (_idx < 0) exitWith { "" };
     _bridgeMarkers select _idx
