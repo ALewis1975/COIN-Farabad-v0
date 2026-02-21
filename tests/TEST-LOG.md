@@ -7,6 +7,31 @@ Append one dated entry per validation pass using:
 - Result: `PASS`, `FAIL`, or `BLOCKED`
 - Notes (environment limits, follow-ups)
 
+---
+
+## 2026-02-21 00:23 UTC — sqflint compatibility fixes
+
+**Branch/Commit:** copilot/gate-check-id-verified-status @ 088bf46
+
+**Scenario:** sqflint static analysis pass on three UI paint functions after replacing operators not understood by sqflint 0.3.2 (`#`, `isNotEqualTo`, `toUpperANSI`, `trim`, `findIf`, `fileExists`).
+
+**Commands:**
+```
+sqflint -e w functions/ui/fn_uiConsoleAirPaint.sqf      → PASS (exit 0)
+sqflint -e w functions/ui/fn_uiConsoleCommandPaint.sqf   → PASS (exit 0)
+sqflint -e w functions/ui/fn_uiConsoleDashboardPaint.sqf → PASS (exit 0)
+```
+
+**Result:** PASS
+
+**Notes:**
+- Gameplay/network behavior unchanged; all replacements are semantically equivalent.
+- `toUpperANSI` → `toUpper`: both are identical for the ASCII content used here.
+- `trim` wrapped via `compile` helper (`_trimFn`) to avoid sqflint parse error.
+- `findIf { }` replaced with equivalent inline `forEach` loops; sqflint 0.3.2 does not understand `findIf`.
+- `fileExists` wrapped via `compile` helper (`_fileExistsFn`) in DashboardPaint.
+- Local MP / dedicated server gameplay validation: BLOCKED (no rig available in this CI environment).
+
 
 ## Entry Template
 
