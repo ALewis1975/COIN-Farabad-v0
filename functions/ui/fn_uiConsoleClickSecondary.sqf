@@ -9,6 +9,9 @@
 
 if (!hasInterface) exitWith {false};
 
+// sqflint-compatible helpers
+private _trimFn = compile "params ['_s']; trim _s";
+
 private _lockKey = format ["ARC_console_secondaryClickLockUntil_%1", getPlayerUID player];
 private _now = diag_tickTime;
 private _lockedUntil = uiNamespace getVariable [_lockKey, -1];
@@ -52,6 +55,7 @@ switch (_tab) do
         {
             [] spawn
             {
+                private _trimFn = compile "params ['_s']; trim _s";
                 private _omniTokens = missionNamespace getVariable ["ARC_consoleOmniTokens", ["OMNI"]];
                 if (!(_omniTokens isEqualType [])) then { _omniTokens = ["OMNI"]; };
                 private _isOmni = false;
@@ -68,8 +72,11 @@ switch (_tab) do
                 if (_gid isEqualTo "") exitWith { ["Status", "Your group has no callsign; cannot update status."] call ARC_fnc_clientToast; };
                 private _rows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
                 if (!(_rows isEqualType [])) then { _rows = []; };
-                private _idx = _rows findIf { _x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _gid } };
-                private _cur = if (_idx < 0) then { "OFFLINE" } else { toUpper (trim ((_rows # _idx) # 1)) };
+                private _idx = -1;
+                {
+                    if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _gid }) exitWith { _idx = _forEachIndex; };
+                } forEach _rows;
+                private _cur = if (_idx < 0) then { "OFFLINE" } else { toUpper ([(_rows select _idx) select 1] call _trimFn) };
                 private _next = if (_cur isEqualTo "AVAILABLE") then { "OFFLINE" } else { "AVAILABLE" };
 
                 [player, _next] remoteExec ["ARC_fnc_tocRequestAcceptIncident", 2];
@@ -80,7 +87,7 @@ switch (_tab) do
         {
             private _typ = missionNamespace getVariable ["ARC_activeIncidentType", ""]; if (!(_typ isEqualType "")) then { _typ = ""; };
             private _sit = missionNamespace getVariable ["ARC_activeIncidentSitrepSent", false]; if (!(_sit isEqualType true) && !(_sit isEqualType false)) then { _sit = false; };
-            if ((toUpper (trim _typ)) isEqualTo "IED" && { !_sit }) then
+            if ((toUpper ([_typ] call _trimFn)) isEqualTo "IED" && { !_sit }) then
             {
                 [] spawn ARC_fnc_uiConsoleActionRequestEodDispo;
             }

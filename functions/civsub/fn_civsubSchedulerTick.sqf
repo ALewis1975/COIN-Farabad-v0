@@ -50,6 +50,13 @@ if ((count _missingFns) > 0 || {!_hasDistrictsState} || {!_hasSchedulerState}) e
     false
 };
 
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _mapGet  = compile "params ['_h','_k']; _h get _k";
+private _hmFrom  = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
+private _keysFn  = compile "params ['_h']; keys _h";
+
 // Test/diagnostics (server only)
 // - civsub_v1_scheduler_force_emit: "" | "LEAD" | "ATTACK" | "BOTH"
 // - civsub_v1_scheduler_force_district: "" (all) or "Dxx"
@@ -59,7 +66,7 @@ private _forceMode = missionNamespace getVariable ["civsub_v1_scheduler_force_em
 private _forceDidRaw = missionNamespace getVariable ["civsub_v1_scheduler_force_district", ""]; // "" (all) or "Dxx"
 private _forceDid = _forceDidRaw;
 if (_forceDid isEqualType "") then {
-    _forceDid = toUpperANSI (trim _forceDid);
+    _forceDid = toUpper ([_forceDid] call _trimFn);
 } else {
     _forceDid = "";
 };
@@ -82,7 +89,7 @@ missionNamespace setVariable ["civsub_v1_scheduler_lastTick_ts", serverTime, tru
 // Scheduler over all districts (stable ids D01..D20)
 {
     private _did = _x;
-    private _d = _districts get _did;
+    private _d = [_districts, _did] call _mapGet;
     if !(_d isEqualType createHashMap) then { continue; };
 
     // Activity
@@ -91,8 +98,8 @@ missionNamespace setVariable ["civsub_v1_scheduler_lastTick_ts", serverTime, tru
 
     // Scores
     private _scores = [_d] call ARC_fnc_civsubScoresCompute;
-    private _Scoop = _scores getOrDefault ["S_COOP", 0];
-    private _Sthreat = _scores getOrDefault ["S_THREAT", 0];
+    private _Scoop = [_scores, "S_COOP", 0] call _hg;
+    private _Sthreat = [_scores, "S_THREAT", 0] call _hg;
 
     // Hourly probabilities
     private _pLeadHour = [_Scoop] call ARC_fnc_civsubProbLeadHour;
@@ -111,12 +118,12 @@ missionNamespace setVariable ["civsub_v1_scheduler_lastTick_ts", serverTime, tru
     private _intelConf = [_Scoop, _Sthreat] call ARC_fnc_civsubIntelConfidence;
 
     // Cooldowns
-    private _nextLead = _d getOrDefault ["cooldown_nextLead_ts", 0];
-    private _nextAttack = _d getOrDefault ["cooldown_nextAttack_ts", 0];
+    private _nextLead = [_d, "cooldown_nextLead_ts", 0] call _hg;
+    private _nextAttack = [_d, "cooldown_nextAttack_ts", 0] call _hg;
 
     // Diagnostics snapshot (per district)
     if (_diagEnabled) then {
-        private _row = createHashMapFromArray [
+        private _row = [
             ["ts", serverTime],
             ["active", _active],
             ["S_COOP", _Scoop],
@@ -129,7 +136,7 @@ missionNamespace setVariable ["civsub_v1_scheduler_lastTick_ts", serverTime, tru
             ["intel_conf", _intelConf],
             ["nextLead_ts", _nextLead],
             ["nextAttack_ts", _nextAttack]
-        ];
+        ] call _hmFrom;
         _diagMap set [_did, _row];
     };
 
@@ -146,7 +153,7 @@ missionNamespace setVariable ["civsub_v1_scheduler_lastTick_ts", serverTime, tru
             if (!isNil "ARC_fnc_civsubLeadEmitBridge") then
             {
                 private _bridgedLeadId = [_b] call ARC_fnc_civsubLeadEmitBridge;
-                if (_bridgedLeadId isEqualType "" && { _bridgedLeadId isNotEqualTo "" }) then
+                if (_bridgedLeadId isEqualType "" && { !(_bridgedLeadId isEqualTo "") }) then
                 {
                     missionNamespace setVariable ["civsub_v1_lastScheduler_leadId", _bridgedLeadId, true];
                 };
@@ -161,9 +168,9 @@ missionNamespace setVariable ["civsub_v1_scheduler_lastTick_ts", serverTime, tru
             _lb set [_did, _b];
             missionNamespace setVariable ["civsub_v1_lastBundleByDistrict", _lb, true];
             if (_diagEnabled) then {
-                private _row2 = _diagMap get _did;
+                private _row2 = [_diagMap, _did] call _mapGet;
                 if (_row2 isEqualType createHashMap) then {
-                    _row2 set ["nextLead_ts", _d getOrDefault ["cooldown_nextLead_ts", _nextLead]];
+                    _row2 set ["nextLead_ts", [_d, "cooldown_nextLead_ts", _nextLead] call _hg];
                 };
             };
         };
@@ -182,15 +189,15 @@ missionNamespace setVariable ["civsub_v1_scheduler_lastTick_ts", serverTime, tru
             _lb2 set [_did, _b2];
             missionNamespace setVariable ["civsub_v1_lastBundleByDistrict", _lb2, true];
             if (_diagEnabled) then {
-                private _row3 = _diagMap get _did;
+                private _row3 = [_diagMap, _did] call _mapGet;
                 if (_row3 isEqualType createHashMap) then {
-                    _row3 set ["nextAttack_ts", _d getOrDefault ["cooldown_nextAttack_ts", _nextAttack]];
+                    _row3 set ["nextAttack_ts", [_d, "cooldown_nextAttack_ts", _nextAttack] call _hg];
                 };
             };
         };
     };
 
-} forEach (keys _districts);
+} forEach ([_districts] call _keysFn);
 
 // Publish diagnostics map (bounded by 20 districts)
 if (_diagEnabled) then {
@@ -204,7 +211,7 @@ if !(_forceMode isEqualTo "") then {
 };
 
 if (missionNamespace getVariable ["civsub_v1_debug", false]) then {
-    diag_log format ["[CIVSUB][SCHED] tick=%1 districts=%2", serverTime, count (keys _districts)];
+    diag_log format ["[CIVSUB][SCHED] tick=%1 districts=%2", serverTime, count ([_districts] call _keysFn)];
 };
 
 true
