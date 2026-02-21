@@ -85,7 +85,7 @@ if (_name isEqualTo "") then {
 private _dob = _rec getOrDefault ["dob_iso", ""];
 private _job = _rec getOrDefault ["occupation", ""];
 private _homePos = _rec getOrDefault ["home_pos", getPosATL _civ];
-if !(_homePos isEqualType [] && {(count _homePos) >= 2}) then { _homePos = getPosATL _civ; };
+if (!(_homePos isEqualType [] && {(count _homePos) >= 2})) then { _homePos = getPosATL _civ; };
 
 // compute age (approx)
 private _age = -1;

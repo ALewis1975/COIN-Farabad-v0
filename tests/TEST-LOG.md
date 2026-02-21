@@ -92,6 +92,7 @@ python3 scripts/dev/validate_state_migrations.py                          → PA
 - `fn_civsubContactActionCheckId` now validates named-location row shapes and home-position shape before array indexing, preventing runtime `Type String, expected Array` when malformed location/profile data is present.
 - `fn_civsubContactActionBackgroundCheck` now recompiles identity dependencies when missing **or** non-code typed, preventing false dependency-missing failures in debug sessions.
 - `fn_civsubContactActionQuestion` now accepts string payloads and coerces them into `qid`, preventing payload type crashes on question execution paths.
+- Post-review pass: `git diff --check` and sqflint checks on changed Background/Question files completed cleanly.
 - Dedicated-server/JIP/runtime and in-engine screenshot validation: BLOCKED (Arma runtime not available in this container).
 
 ## Entry Template
