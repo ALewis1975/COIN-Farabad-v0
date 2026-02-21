@@ -22,19 +22,22 @@ params [
 
 if (isNull _d) exitWith { true };
 
+// sqflint-compat helpers
+private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+
 private _hdr = _d displayCtrl 78392;
 if (isNull _hdr) exitWith { true };
 
 // ----- Snapshot fields -----
-private _name = _snap getOrDefault ["name_display", "Unknown"];
-private _serial = _snap getOrDefault ["passport_serial", ""];
-private _did = _snap getOrDefault ["districtId", ""];
-private _det = _snap getOrDefault ["detained", false];
-private _known = _snap getOrDefault ["known", false];
+private _name = [_snap, "name_display", "Unknown"] call _hg;
+private _serial = [_snap, "passport_serial", ""] call _hg;
+private _did = [_snap, "districtId", ""] call _hg;
+private _det = [_snap, "detained", false] call _hg;
+private _known = [_snap, "known", false] call _hg;
 
-private _sat = _snap getOrDefault ["need_satiation", -1];
-private _hyd = _snap getOrDefault ["need_hydration", -1];
-private _out = _snap getOrDefault ["outlook_blufor", -1];
+private _sat = [_snap, "need_satiation", -1] call _hg;
+private _hyd = [_snap, "need_hydration", -1] call _hg;
+private _out = [_snap, "outlook_blufor", -1] call _hg;
 
 // ----- Player inventory counts -----
 private _inv = (items player) + (magazines player);

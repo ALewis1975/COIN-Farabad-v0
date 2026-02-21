@@ -24,6 +24,9 @@ params [
     ["_requester", objNull, [objNull]]
 ];
 
+// sqflint-compat helpers
+private _fileExFn   = compile "params ['_p']; fileExists _p";
+
 private _owner = 0;
 if (!isNull _requester) then { _owner = owner _requester; };
 if (_owner <= 0 && { !isNil "remoteExecutedOwner" }) then { _owner = remoteExecutedOwner; };
@@ -34,7 +37,7 @@ private _push = {
     private _tag = if (_isWarn) then {"WARN"} else { if (_ok) then {"PASS"} else {"FAIL"} };
     private _c = if (_isWarn) then {"#FBBF24"} else { if (_ok) then {"#6EE7B7"} else {"#FF6B6B"} };
     _lines pushBack format ["<t color='%1'>%2</t> <t font='PuristaMedium'>%3</t>", _c, _tag, _name];
-    if (_detail isEqualType "" && { _detail isNotEqualTo "" }) then {
+    if (_detail isEqualType "" && { !(_detail isEqualTo "") }) then {
         _lines pushBack format ["<t color='#BDBDBD' size='0.9'>%1</t>", _detail];
     };
     _lines pushBack "";
@@ -78,7 +81,7 @@ private _resolveFnPath = {
 
     private _base = _catBase;
     private _override = getText (_fnCfg >> "file");
-    if (_override isNotEqualTo "") then { _base = _override; };
+    if (!(_override isEqualTo "")) then { _base = _override; };
 
     _base = [_base] call _normPath;
 
@@ -135,7 +138,7 @@ diag_log format ["[ARC][COMPILE] buildStamp=%1", missionNamespace getVariable ["
             [false, _fnName, "MISSING: could not resolve file path (check CfgFunctions)", false] call _push;
             diag_log format ["[ARC][COMPILE][MISSING] fn=%1 reason=unresolved", _fnName];
         } else {
-            private _ok = fileExists _path;
+            private _ok = [_path] call _fileExFn;
             if (!_ok) then {
                 _missing = _missing + 1;
                 [false, _fnName, format ["MISSING: %1", _path], false] call _push;

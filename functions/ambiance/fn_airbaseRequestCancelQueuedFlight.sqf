@@ -5,6 +5,11 @@
 
 if (!isServer) exitWith {false};
 
+// sqflint-compat helpers
+private _trimFn     = compile "params ['_s']; trim _s";
+private _findIfFn   = compile "params ['_arr','_cond']; private _r = -1; { if (_x call _cond) exitWith { _r = _forEachIndex; }; } forEach _arr; _r";
+private _mapGet     = compile "params ['_h','_k']; _h get _k";
+
 if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\\core\\fn_rpcValidateSender.sqf"; };
 if (isNil "ARC_fnc_airbaseTowerAuthorize") then { ARC_fnc_airbaseTowerAuthorize = compile preprocessFileLineNumbers "functions\\core\\fn_airbaseTowerAuthorize.sqf"; };
 if (isNil "ARC_fnc_airbaseRestoreParkedAsset") then { ARC_fnc_airbaseRestoreParkedAsset = compile preprocessFileLineNumbers "functions\\ambiance\\fn_airbaseRestoreParkedAsset.sqf"; };
@@ -34,13 +39,14 @@ if (!_ok) exitWith {
 };
 
 if (!(_flightId isEqualType "")) then { _flightId = ""; };
-_flightId = trim _flightId;
+_flightId = [_flightId] call _trimFn;
 if (_flightId isEqualTo "") exitWith {false};
 
 private _queue = ["airbase_v1_queue", []] call ARC_fnc_stateGet;
 if (!(_queue isEqualType [])) then { _queue = []; };
 
-private _idx = _queue findIf { ((_x param [0, ""]) isEqualTo _flightId) };
+private _idx = -1;
+{ if (((_x param [0, ""]) isEqualTo _flightId)) exitWith { _idx = _forEachIndex; }; } forEach _queue;
 if (_idx < 0) exitWith {
     private _owner = owner _caller;
     if (_owner > 0) then { [format ["Flight %1 is not currently queued.", _flightId]] remoteExec ["ARC_fnc_clientHint", _owner]; };
@@ -49,7 +55,8 @@ if (_idx < 0) exitWith {
 
 private _recs = ["airbase_v1_records", []] call ARC_fnc_stateGet;
 if (!(_recs isEqualType [])) then { _recs = []; };
-private _rIdx = _recs findIf { ((_x param [0, ""]) isEqualTo _flightId) };
+private _rIdx = -1;
+{ if (((_x param [0, ""]) isEqualTo _flightId)) exitWith { _rIdx = _forEachIndex; }; } forEach _recs;
 
 // Prevent cancellation of currently executing flights.
 private _execFid = missionNamespace getVariable ["airbase_v1_execFid", ""];
@@ -68,7 +75,7 @@ if (_execFid isEqualTo _flightId) exitWith {
 };
 
 if (_rIdx >= 0) then {
-    private _status = (_recs # _rIdx) param [5, ""];
+    private _status = (_recs select _rIdx) param [5, ""];
     if (_status isEqualTo "ACTIVE") exitWith {
         private _owner = owner _caller;
         if (_owner > 0) then { [format ["Flight %1 is currently executing and cannot be canceled.", _flightId]] remoteExec ["ARC_fnc_clientHint", _owner]; };
@@ -84,7 +91,7 @@ if (_rIdx >= 0) then {
     };
 };
 
-private _qItem = _queue # _idx;
+private _qItem = _queue select _idx;
 private _qKind = _qItem param [1, ""];
 private _qDetail = _qItem param [2, ""];
 
@@ -93,10 +100,11 @@ if (_qKind isEqualTo "ARR" && { _qDetail isEqualType "" && { !(_qDetail isEqualT
     private _isReturn = false;
 
     if (_rIdx >= 0) then {
-        private _rec = _recs # _rIdx;
+        private _rec = _recs select _rIdx;
         private _meta = _rec param [7, []];
         if (_meta isEqualType []) then {
-            private _modeIdx = _meta findIf { (_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo "mode" } && { (_x # 1) isEqualTo "RETURN" } };
+            private _modeIdx = -1;
+            { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo "mode" } && { (_x select 1) isEqualTo "RETURN" }) exitWith { _modeIdx = _forEachIndex; }; } forEach _meta;
             _isReturn = (_modeIdx >= 0);
         };
     };
@@ -105,18 +113,19 @@ if (_qKind isEqualTo "ARR" && { _qDetail isEqualType "" && { !(_qDetail isEqualT
         private _rt = missionNamespace getVariable ["airbase_v1_rt", createHashMap];
         private _assets = [];
         if (_rt isEqualType createHashMap) then {
-            _assets = _rt get "assets";
+            _assets = [_rt, "assets"] call _mapGet;
             if (isNil "_assets" || {!(_assets isEqualType [])}) then { _assets = []; };
         };
 
-        private _aIdx = _assets findIf {
+        private _aIdx = [_assets, {
+            params ["_x"];
             private _assetId = "";
             if (_x isEqualType createHashMap) then {
-                _assetId = _x get "id";
+                _assetId = [_x, "id"] call _mapGet;
                 if (isNil "_assetId" || {!(_assetId isEqualType "")}) then { _assetId = ""; };
             };
             _assetId isEqualTo _qDetail
-        };
+        }] call _findIfFn;
 
         if (_aIdx < 0) exitWith {
             private _owner = owner _caller;
@@ -133,7 +142,7 @@ if (_qKind isEqualTo "ARR" && { _qDetail isEqualType "" && { !(_qDetail isEqualT
             false
         };
 
-        private _asset = _assets # _aIdx;
+        private _asset = _assets select _aIdx;
         private _okRestore = [_asset] call ARC_fnc_airbaseRestoreParkedAsset;
         if (!_okRestore) exitWith {
             private _owner = owner _caller;
@@ -155,7 +164,7 @@ if (_qKind isEqualTo "ARR" && { _qDetail isEqualType "" && { !(_qDetail isEqualT
 _queue deleteAt _idx;
 ["airbase_v1_queue", _queue] call ARC_fnc_stateSet;
 if (_rIdx >= 0) then {
-    private _r = _recs # _rIdx;
+    private _r = _recs select _rIdx;
     _r set [5, "CANCELLED"];
     _r set [6, serverTime];
     private _meta = _r param [7, []];

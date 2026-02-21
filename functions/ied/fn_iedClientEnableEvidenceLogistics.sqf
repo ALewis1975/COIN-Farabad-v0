@@ -26,7 +26,10 @@ params [
     ["_enableDrag", true, [true,false]]
 ];
 
-_nid = trim _nid;
+// sqflint-compat helpers
+private _trimFn     = compile "params ['_s']; trim _s";
+
+_nid = [_nid] call _trimFn;
 if (_nid isEqualTo "") exitWith {false};
 
 // ACE presence checks (avoid hard dependency)

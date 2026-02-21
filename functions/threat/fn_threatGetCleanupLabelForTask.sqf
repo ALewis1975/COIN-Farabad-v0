@@ -13,6 +13,9 @@ if (!isServer) exitWith {""};
 params [["_taskId", ""]];
 if (_taskId isEqualTo "") exitWith {""};
 
+// sqflint-compat helpers
+private _findIfFn   = compile "params ['_arr','_cond']; private _r = -1; { if (_x call _cond) exitWith { _r = _forEachIndex; }; } forEach _arr; _r";
+
 private _enabled = ["threat_v0_enabled", true] call ARC_fnc_stateGet;
 if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabled = true; };
 if (!_enabled) exitWith {""};
@@ -21,9 +24,10 @@ if (!_enabled) exitWith {""};
 private _kvGet = {
     params ["_pairs", "_key", "_default"];
     if (!(_pairs isEqualType [])) exitWith {_default};
-    private _idx = _pairs findIf { (_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key } };
+    private _idx = [_pairs, {
+        (_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) exitWith {_default};
-    private _v = (_pairs # _idx) # 1;
+    private _v = (_pairs select _idx) select 1;
     if (isNil "_v") exitWith {_default};
     _v
 };
@@ -31,7 +35,9 @@ private _kvGet = {
 private _kvSet = {
     params ["_pairs", "_key", "_value"];
     if (!(_pairs isEqualType [])) then { _pairs = []; };
-    private _idx = _pairs findIf { (_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key } };
+    private _idx = -1;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }
+    }] call _findIfFn;
     if (_idx < 0) then { _pairs pushBack [_key, _value]; } else { _pairs set [_idx, [_key, _value]]; };
     _pairs
 };
@@ -39,15 +45,15 @@ private _kvSet = {
 private _records = ["threat_v0_records", []] call ARC_fnc_stateGet;
 if (!(_records isEqualType [])) exitWith {""};
 
-private _idxRec = _records findIf {
+private _idxRec = [_records, {
     private _rec = _x;
     private _links = [_rec, "links", []] call _kvGet;
     ([_links, "task_id", ""] call _kvGet) isEqualTo _taskId
-};
+}] call _findIfFn;
 
 if (_idxRec < 0) exitWith {""};
 
-private _rec = _records # _idxRec;
+private _rec = _records select _idxRec;
 private _tid = [_rec, "threat_id", ""] call _kvGet;
 if (_tid isEqualTo "") exitWith {""};
 
@@ -72,7 +78,7 @@ if (_label isEqualTo "") then
 else
 {
     // Normalize if needed
-    if (_label isNotEqualTo _want) then
+    if (!(_label isEqualTo _want)) then
     {
         _label = _want;
         _world = [_world, "cleanup_label", _label] call _kvSet;

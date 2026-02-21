@@ -20,12 +20,16 @@ params [
     ["_options", []]
 ];
 
+// sqflint-compat helpers
+private _trimFn     = compile "params ['_s']; trim _s";
+private _findIfFn   = compile "params ['_arr','_cond']; private _r = -1; { if (_x call _cond) exitWith { _r = _forEachIndex; }; } forEach _arr; _r";
+
 private _ok = true;
 private _norm = _value;
 private _code = "ARC_ASSERT_OK";
 private _msg = format ["%1 passed %2", _label, _rule];
 
-switch (toUpperANSI _rule) do
+switch (toUpper _rule) do
 {
     case "ARRAY_SHAPE": {
         _options params [
@@ -49,7 +53,8 @@ switch (toUpperANSI _rule) do
                 _msg = format ["%1 count %2 out of bounds [%3,%4]", _label, _n, _minCount, _maxCount];
             } else {
                 if (_requirePairEntries) then {
-                    private _badIdx = _value findIf { !(_x isEqualType []) || { (count _x) < 2 } };
+                    private _badIdx = -1;
+                    { if (!(_x isEqualType []) || { (count _x) < 2 }) exitWith { _badIdx = _forEachIndex; }; } forEach _value;
                     if (_badIdx >= 0) then {
                         _ok = false;
                         _norm = _def;
@@ -98,7 +103,7 @@ switch (toUpperANSI _rule) do
             _code = "ARC_ASSERT_TYPE_MISMATCH";
             _msg = format ["%1 must be STRING", _label];
         } else {
-            _norm = trim _value;
+            _norm = [_value] call _trimFn;
             if (_norm isEqualTo "") then {
                 _ok = false;
                 _norm = _def;

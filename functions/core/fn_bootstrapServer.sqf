@@ -870,10 +870,10 @@ if (isServer) then
                 private _d = date;
                 private _dt = daytime;
 
-                private _tNightEnd = _thr # 0;
-                private _tMorningEnd = _thr # 1;
-                private _tWorkEnd = _thr # 2;
-                private _tEveningEnd = _thr # 3;
+                private _tNightEnd = _thr select 0;
+                private _tMorningEnd = _thr select 1;
+                private _tWorkEnd = _thr select 2;
+                private _tEveningEnd = _thr select 3;
 
                 private _phase = "NIGHT";
                 if (_dt < _tNightEnd) then { _phase = "NIGHT"; }
@@ -910,10 +910,10 @@ if (isServer) then
                     private _d = date;
                     private _dt = daytime;
 
-                    private _tNightEnd = _thr # 0;
-                    private _tMorningEnd = _thr # 1;
-                    private _tWorkEnd = _thr # 2;
-                    private _tEveningEnd = _thr # 3;
+                    private _tNightEnd = _thr select 0;
+                    private _tMorningEnd = _thr select 1;
+                    private _tWorkEnd = _thr select 2;
+                    private _tEveningEnd = _thr select 3;
 
                     private _phase = "NIGHT";
                     if (_dt < _tNightEnd) then { _phase = "NIGHT"; }

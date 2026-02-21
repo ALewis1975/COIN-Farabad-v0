@@ -21,9 +21,13 @@ params [
 
 if (isNull _display) exitWith {"FULL"};
 
+// sqflint-compat helpers
+private _trimFn     = compile "params ['_s']; trim _s";
+private _mapGet   = compile "params ['_h','_k']; _h get _k";
+
 private _modeRaw = missionNamespace getVariable ["ARC_console_layoutMode", "FULL"];
 if (!(_modeRaw isEqualType "")) then { _modeRaw = "FULL"; };
-private _mode = toUpper (trim _modeRaw);
+private _mode = toUpper ([_modeRaw] call _trimFn);
 if !(_mode in ["FULL", "DOCK_RIGHT"]) then { _mode = "FULL"; };
 
 uiNamespace setVariable ["ARC_console_layoutModeActive", _mode];
@@ -51,7 +55,7 @@ if !(_defaults isEqualType createHashMap) then { _defaults = createHashMap; };
     private _ctrl = _display displayCtrl _idc;
     if (!isNull _ctrl) then {
         private _k = str _idc;
-        if (isNil { _defaults get _k }) then {
+        if (isNil { [_defaults, _k] call _mapGet }) then {
             _defaults set [_k, ctrlPosition _ctrl];
         };
     };

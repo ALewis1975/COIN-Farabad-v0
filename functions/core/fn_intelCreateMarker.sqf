@@ -30,7 +30,7 @@ private _catU = toUpper _category;
 if (_catU in ["OPS", "DEBRIEF"]) exitWith {""};
 
 // Ignore "zero" placeholder positions
-if ((_posATL # 0) isEqualTo 0 && { (_posATL # 1) isEqualTo 0 }) exitWith {""};
+if ((_posATL select 0) isEqualTo 0 && { (_posATL select 1) isEqualTo 0 }) exitWith {""};
 
 private _mName = format ["ARC_intel_%1", _intelId];
 private _pos2 = +_posATL; _pos2 resize 2;

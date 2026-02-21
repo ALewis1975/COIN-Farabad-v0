@@ -24,7 +24,7 @@ private _PARA = "<br/><br/>";
 private _m = "";
 private _pos = [];
 
-if (_markerName isNotEqualTo "") then
+if (!(_markerName isEqualTo "")) then
 {
     _m = [_markerName] call ARC_fnc_worldResolveMarker;
     if (_m in allMapMarkers) then
@@ -161,7 +161,7 @@ if (_isActive && { _typeU in ["LOGISTICS","ESCORT"] }) then
     private _nids = ["activeConvoyNetIds", []] call ARC_fnc_stateGet;
     if (_nids isEqualType [] && { (count _nids) > 0 }) then
     {
-        private _leadVeh = objectFromNetId (_nids # 0);
+        private _leadVeh = objectFromNetId (_nids select 0);
         if (!isNull _leadVeh) then
         {
             private _drv = driver _leadVeh;
@@ -170,7 +170,7 @@ if (_isActive && { _typeU in ["LOGISTICS","ESCORT"] }) then
             if (!isNull _drv) then
             {
                 private _gid = groupId (group _drv);
-                if (_gid isEqualType "" && { _gid isNotEqualTo "" }) then
+                if (_gid isEqualType "" && { !(_gid isEqualTo "") }) then
                 {
                     _linkupWith = _gid;
                     _got = true;
@@ -182,7 +182,7 @@ if (_isActive && { _typeU in ["LOGISTICS","ESCORT"] }) then
     // Fallbacks when the convoy has not spawned yet (or netIds not propagated).
     if (!_got) then
     {
-        if (_typeU isEqualTo "ESCORT" && { _taskingFrom isNotEqualTo "" }) then
+        if (_typeU isEqualTo "ESCORT" && { !(_taskingFrom isEqualTo "") }) then
         {
             _linkupWith = _taskingFrom;
             _got = true;
@@ -393,7 +393,7 @@ switch (_typeU) do
     default             { _endState = "Success: Resolve the situation and report. Failure: task expires."; };
 };
 
-if (_timingLine isNotEqualTo "") then
+if (!(_timingLine isEqualTo "")) then
 {
     _endState = format ["%1%2%2%3", _endState, _BR, _timingLine];
 };
@@ -462,7 +462,7 @@ if (_hasExec) then
 };
 
 private _workflowBlock = _workflowText;
-if (_phaseText isNotEqualTo "") then
+if (!(_phaseText isEqualTo "")) then
 {
     _workflowBlock = format ["%1%2%3", _workflowText, _BR, _phaseText];
 };

@@ -6,6 +6,11 @@
 
 if (!hasInterface) exitWith {false};
 
+// sqflint-compat helpers
+private _trimFn     = compile "params ['_s']; trim _s";
+private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
+
 private _display = uiNamespace getVariable ["ARC_console_display", displayNull];
 if (isNull _display) exitWith {false};
 
@@ -22,10 +27,10 @@ private _data = if (_sel >= 0) then { _ctrlList lbData _sel } else { "" };
 if (!(_data isEqualType "")) then { _data = ""; };
 
 private _parts = _data splitString "|";
-private _kind = if ((count _parts) > 0) then { toUpper (_parts # 0) } else { "NONE" };
-private _arg  = if ((count _parts) > 1) then { _parts # 1 } else { "" };
+private _kind = if ((count _parts) > 0) then { toUpper (_parts select 0) } else { "NONE" };
+private _arg  = if ((count _parts) > 1) then { _parts select 1 } else { "" };
 if (!(_arg isEqualType "")) then { _arg = ""; };
-_arg = trim _arg;
+_arg = [_arg] call _trimFn;
 
 private _civReqAction = {
     params ["_actionId", ["_payload", createHashMap, [createHashMap, []]], ["_label", "", [""]]];
@@ -71,21 +76,21 @@ switch (_kind) do
 		{
 			private _i = lbCurSel _cmbMethod;
 			private _d = if (_i >= 0) then { _cmbMethod lbData _i } else { "" };
-			if (_d isEqualType "" && { (trim _d) isNotEqualTo "" }) then { _method = toUpper _d; };
+			if (_d isEqualType "" && { !(([_d] call _trimFn) isEqualTo "") }) then { _method = toUpper _d; };
 		};
 
 		if (!isNull _cmbCat && { (lbSize _cmbCat) > 0 }) then
 		{
 			private _i = lbCurSel _cmbCat;
 			private _d = if (_i >= 0) then { _cmbCat lbData _i } else { "" };
-			if (_d isEqualType "" && { (trim _d) isNotEqualTo "" }) then { _cat = toUpper _d; };
+			if (_d isEqualType "" && { !(([_d] call _trimFn) isEqualTo "") }) then { _cat = toUpper _d; };
 		};
 
 		switch (_method) do
 		{
 			case "CURSOR":
 			{
-				if (_cat isNotEqualTo "SIGHTING") exitWith
+				if (!(_cat isEqualTo "SIGHTING")) exitWith
 				{
 					["S2 Ops", "Cursor logging only supports Sighting. Use Map Click for other categories."] call ARC_fnc_clientToast;
 				};
@@ -140,17 +145,17 @@ switch (_kind) do
     {
         if (_arg isEqualTo "") exitWith { ["CIVSUB", "No question selected."] call ARC_fnc_clientToast; };
 
-        private _qMap = createHashMapFromArray [
+        private _qMap = [[
             ["Q_LIVE", "Where do you live?"],
             ["Q_WORK", "Where do you work?"],
             ["Q_IEDS", "Have you seen any IEDs?"],
             ["Q_INS", "Have you seen any insurgent activity?"],
             ["Q_OP_US", "What is your opinion of us?"],
             ["Q_OP_AREA", "What is the overall opinion of us in the area?"]
-        ];
+        ]] call _hmFrom;
 
-        private _qlbl = _qMap getOrDefault [_arg, _arg];
-        private _payload = createHashMapFromArray [["qid", _arg], ["label", _qlbl]];
+        private _qlbl = [_qMap, _arg, _arg] call _hg;
+        private _payload = [[["qid", _arg], ["label", _qlbl]]] call _hmFrom;
         ["QUESTION", _payload, "Question"] call _civReqAction;
     };
 
@@ -185,7 +190,7 @@ switch (_kind) do
 
     case "CIV_CENSUS_DID":
     {
-        private _did = trim _arg;
+        private _did = [_arg] call _trimFn;
         if (_did isEqualTo "") exitWith { ["Census", "No district selected."] call ARC_fnc_clientToast; };
 
         private _pub = missionNamespace getVariable [format ["civsub_v1_district_pub_%1", _did], []];
@@ -194,11 +199,11 @@ switch (_kind) do
 
 
         private _districts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
-        if (_districts isEqualType []) then { _districts = createHashMapFromArray _districts; };
+        if (_districts isEqualType []) then { _districts = [_districts] call _hmFrom; };
         if !(_districts isEqualType createHashMap) then { _districts = createHashMap; };
 
-        private _d = _districts getOrDefault [_did, createHashMap];
-        if (_d isEqualType []) then { _d = createHashMapFromArray _d; };
+        private _d = [_districts, _did, createHashMap] call _hg;
+        if (_d isEqualType []) then { _d = [_d] call _hmFrom; };
         if !(_d isEqualType createHashMap) exitWith
         {
             if (_hasPub) then
@@ -211,7 +216,7 @@ switch (_kind) do
             };
         };
 
-        private _c = _d getOrDefault ["centroid", []];
+        private _c = [_d, "centroid", [] call _hg];
         if !(_c isEqualType [] && { (count _c) >= 2 }) exitWith
         {
             if (_hasPub) then
@@ -237,7 +242,7 @@ switch (_kind) do
 		{
 			private _i = lbCurSel _cmbLead;
 			private _d = if (_i >= 0) then { _cmbLead lbData _i } else { "" };
-			if (_d isEqualType "" && { (trim _d) isNotEqualTo "" }) then { _type = toUpper _d; };
+			if (_d isEqualType "" && { !(([_d] call _trimFn) isEqualTo "") }) then { _type = toUpper _d; };
 		};
 		[_type] call ARC_fnc_intelClientBeginLeadRequestMapClick;
 		["S2 Ops", format ["Lead request started (%1).", _type]] call ARC_fnc_clientToast;
@@ -289,7 +294,7 @@ switch (_kind) do
 
         private _pos = [];
         {
-            if (_x isEqualType [] && { (count _x) >= 5 } && { (_x # 0) isEqualTo _arg }) exitWith { _pos = _x # 4; };
+            if (_x isEqualType [] && { (count _x) >= 5 } && { (_x select 0) isEqualTo _arg }) exitWith { _pos = _x select 4; };
         } forEach _intelLog;
 
         if (_pos isEqualType [] && { (count _pos) >= 2 }) then

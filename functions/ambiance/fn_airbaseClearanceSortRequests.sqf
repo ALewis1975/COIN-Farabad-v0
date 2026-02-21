@@ -13,15 +13,15 @@ private _openStates = ["SUBMIT", "QUEUED", "PENDING", "AWAITING_TOWER_DECISION",
 
 private _rankFor = {
     params ["_rec"];
-    private _type = toUpperANSI (_rec param [1, ""]);
-    private _status = toUpperANSI (_rec param [6, ""]);
+    private _type = toUpper (_rec param [1, ""]);
+    private _status = toUpper (_rec param [6, ""]);
     private _meta = _rec param [10, []];
     if (!(_meta isEqualType [])) then { _meta = []; };
 
     private _priorityClass = "ROUTINE";
     {
         if ((_x param [0, ""]) isEqualTo "priorityClass") exitWith {
-            _priorityClass = toUpperANSI str (_x param [1, "ROUTINE"]);
+            _priorityClass = toUpper str (_x param [1, "ROUTINE"]);
         };
     } forEach _meta;
 

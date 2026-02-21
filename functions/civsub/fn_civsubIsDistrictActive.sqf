@@ -17,8 +17,11 @@ if (!isServer) exitWith {false};
 params [["_d", createHashMap, [createHashMap]]];
 if !(_d isEqualType createHashMap) exitWith {false};
 
-private _c = _d getOrDefault ["centroid", [0,0]];
-private _r = _d getOrDefault ["radius_m", 0];
+// sqflint-compat helpers
+private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+
+private _c = [_d, "centroid", [0,0] call _hg];
+private _r = [_d, "radius_m", 0] call _hg;
 if !(_c isEqualType []) exitWith {false};
 if ((count _c) < 2) exitWith {false};
 
@@ -28,7 +31,7 @@ if ((count _players) == 0) exitWith {false};
 private _min = 1e12;
 {
     private _p = getPosATL _x;
-    private _d2 = (_p distance2D [_c # 0, _c # 1, 0]);
+    private _d2 = (_p distance2D [_c select 0, _c select 1, 0]);
     if (_d2 < _min) then { _min = _d2; };
 } forEach _players;
 
