@@ -50,6 +50,26 @@ sqflint -e w functions/ui/fn_uiConsoleDashboardPaint.sqf → PASS (exit 0)
 - `_fc` is coerced to `controlNull` when `focusedCtrl` returns any non-Control type before running null/type checks.
 - Runtime/dedicated/JIP validation: BLOCKED (Arma runtime not available in this environment).
 
+## 2026-02-21 01:28 UTC — ui console focusedCtrl parse/runtime compatibility
+
+**Branch/Commit:** copilot/fix-invalid-number-in-expression @ pending
+
+**Scenario:** Resolve `fn_uiConsoleOnLoad.sqf` refresh-loop parse failure (`Invalid number in expression`) by avoiding direct `focusedCtrl;` usage while retaining control type-guard behavior.
+
+**Commands:**
+```
+python3 scripts/dev/validate_state_migrations.py                         → PASS
+python3 scripts/dev/validate_marker_index.py                              → PASS
+~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleOnLoad.sqf            → PASS
+```
+
+**Result:** PASS
+
+**Notes:**
+- Refresh loop now resolves focus control through a compiled helper using display-argument syntax (`focusedCtrl _display`) and then applies the existing non-Control coercion guard.
+- This keeps sqflint parse-clean while addressing the reported runtime expression error path.
+- Dedicated-server + JIP runtime verification and in-engine UI screenshot capture: BLOCKED (Arma runtime not available in this environment).
+
 
 ## Entry Template
 
