@@ -30,7 +30,7 @@ if !(isPlayer _actor) exitWith {false};
 
 // sqflint-compat helpers
 private _trimFn     = compile "params ['_s']; trim _s";
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
 
 // Dedicated MP hardening:
@@ -136,7 +136,7 @@ if (_hit) then
             _rec set ["poi_id", _poiId];
             _rec set ["charges", _charges];
 
-            private _flags = [_rec, "flags", [] call _hg];
+            private _flags = [_rec, "flags", []];
             if !(_flags isEqualType []) then { _flags = []; };
             if ((_flags find "CRIMEDB_HIT") < 0) then { _flags pushBack "CRIMEDB_HIT"; };
             _rec set ["flags", _flags];

@@ -15,7 +15,7 @@ if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {false}
 if !(missionNamespace getVariable ["civsub_v1_civs_enabled", false]) exitWith {false};
 
 // sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _mapGet   = compile "params ['_h','_k']; _h get _k";
 private _keysFn   = compile "params ['_m']; keys _m";
 
@@ -34,7 +34,7 @@ private _pAnch = createHashMap;
         private _pos = getPosATL _x;
         private _did = [_pos] call ARC_fnc_civsubDistrictsFindByPos;
         if !(_did isEqualTo "") then {
-            private _arr = [_pAnch, _did, [] call _hg];
+            private _arr = [_pAnch, _did, []];
             if !(_arr isEqualType []) then { _arr = []; };
             _arr pushBack _pos;
             _pAnch set [_did, _arr];

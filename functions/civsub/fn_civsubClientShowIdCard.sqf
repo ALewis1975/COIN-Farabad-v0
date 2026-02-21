@@ -13,7 +13,7 @@ params [
 ];
 
 // sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
 
 if (_payload isEqualType []) then { _payload = [_payload] call _hmFrom; };
@@ -36,7 +36,7 @@ private _occ = [_payload, "occupation", ""] call _hg;
 private _home = [_payload, "home", ""] call _hg;
 private _grid = [_payload, "home_grid", ""] call _hg;
 private _did = [_payload, "districtId", ""] call _hg;
-private _flags = [_payload, "flags", [] call _hg];
+private _flags = [_payload, "flags", []];
 
 private _ageS = if (_age isEqualType 0 && {_age >= 0}) then { str _age } else { "N/A" };
 private _occS = if (_occ isEqualType "" && {!(_occ isEqualTo "")}) then { _occ } else { "N/A" };

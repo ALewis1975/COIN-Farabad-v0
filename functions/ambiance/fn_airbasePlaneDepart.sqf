@@ -24,7 +24,7 @@ if (isNil "_asset") exitWith { false };
 if (!(_asset isEqualType createHashMap)) exitWith { false };
 
 // sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 private _debug    = missionNamespace getVariable ["airbase_v1_debug", false];
 private _debugOps = missionNamespace getVariable ["airbase_v1_debugOpsLog", false];
@@ -119,7 +119,7 @@ private _fnAbortToIdle = {
 };
 
 // --- resolve crew ---
-private _crew = [_asset, "crew", [] call _hg];
+private _crew = [_asset, "crew", []];
 if (!(_crew isEqualType [])) then { _crew = []; };
 private _crewLive = _crew select { !isNull _x && alive _x };
 
@@ -140,7 +140,7 @@ if (isNull _pilot) exitWith {
 // Ensure all crew are in the pilot's group so doMove/waypoints apply to the vehicle.
 private _grp = group _pilot;
 {
-    if (!isNull _x && {alive _x} && {!((group _x) isEqualTo _grp})) then {
+    if (!isNull _x && {alive _x} && {!((group _x) isEqualTo _grp)}) then {
         [_x] joinSilent _grp;
     };
 } forEach _crewLive;
@@ -570,7 +570,7 @@ if (!isNull _veh) then { deleteVehicle _veh; };
 private _vehVar = [_asset, "vehVar", ""] call _hg; 
 if (_vehVar != "") then { missionNamespace setVariable [_vehVar, objNull, true]; };
 
-private _crewVars = [_asset, "crewVars", [] call _hg];
+private _crewVars = [_asset, "crewVars", []];
 {
     if (_x isEqualType "") then { missionNamespace setVariable [_x, objNull, true]; };
 } forEach _crewVars;

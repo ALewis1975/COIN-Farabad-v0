@@ -10,7 +10,7 @@
 if (!isServer) exitWith {createHashMap};
 
 // sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 private _out = createHashMap;
 

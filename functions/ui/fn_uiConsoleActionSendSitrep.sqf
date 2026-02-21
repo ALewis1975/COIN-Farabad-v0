@@ -14,10 +14,10 @@
 if (!hasInterface) exitWith {false};
 
 // Fast UX gate: show a clear message before we open the text prompt.
-if !([player] call ARC_fnc_clientCanSendSitrep) exitWith
-
 // sqflint-compat helpers
 private _trimFn     = compile "params ['_s']; trim _s";
+
+if !([player] call ARC_fnc_clientCanSendSitrep) exitWith
 {
     ["SITREP", "SITREP is not available yet. Ensure the incident is accepted, close-ready, and you are within range of the objective/lead/convoy."] call ARC_fnc_clientToast;
     false

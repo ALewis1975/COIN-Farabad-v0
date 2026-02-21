@@ -12,7 +12,7 @@ if (!isServer) exitWith {false};
 if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {false};
 
 // sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _keysFn   = compile "params ['_m']; keys _m";
 
 private _threads = ["threads", []] call ARC_fnc_stateGet;

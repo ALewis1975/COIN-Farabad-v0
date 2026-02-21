@@ -57,7 +57,7 @@ private _rows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
 if (!(_rows isEqualType [])) then { _rows = []; };
 private _idx = -1;
 { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _gid }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
-private _status = if (_idx < 0) then { "OFFLINE" } else { toUpper ([((_rows select _idx)] call _trimFn select 1)) };
+private _status = if (_idx < 0) then { "OFFLINE" } else { toUpper ([(_rows select _idx) select 1] call _trimFn) };
 if (!(_status isEqualTo "AVAILABLE")) exitWith
 {
     ["Incident", format ["Set group status to AVAILABLE before accepting incidents. Current: %1", _status]] call ARC_fnc_clientToast;

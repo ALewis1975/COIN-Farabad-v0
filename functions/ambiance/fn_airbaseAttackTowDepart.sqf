@@ -25,7 +25,7 @@ params ["_fid", "_asset"];
 if (isNil "_asset" || {!(_asset isEqualType createHashMap)}) exitWith { false };
 
 // sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 private _debug    = missionNamespace getVariable ["airbase_v1_debug", false];
 private _debugOps = missionNamespace getVariable ["airbase_v1_debugOpsLog", false];

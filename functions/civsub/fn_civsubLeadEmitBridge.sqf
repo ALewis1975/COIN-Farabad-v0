@@ -18,7 +18,7 @@ if !(_bundle isEqualType createHashMap) exitWith {""};
 
 // sqflint-compat helpers
 private _trimFn     = compile "params ['_s']; trim _s";
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
 
 private _lead = [_bundle, "lead_emit", createHashMap] call _hg;
@@ -101,7 +101,7 @@ private _coreType = switch (_civsubType) do
 };
 
 private _pos = [];
-private _seedPos = [_seed, "home_pos", [] call _hg];
+private _seedPos = [_seed, "home_pos", []];
 if (_seedPos isEqualType [] && { (count _seedPos) >= 2 }) then
 {
     _pos = +_seedPos;
@@ -110,8 +110,8 @@ if (_seedPos isEqualType [] && { (count _seedPos) >= 2 }) then
 
 if (_pos isEqualTo []) then
 {
-    private _cent = [_bundle, "district_centroid", [] call _hg];
-    if !(_cent isEqualType []) then { _cent = [_bundle, "centroid", [] call _hg]; };
+    private _cent = [_bundle, "district_centroid", []];
+    if !(_cent isEqualType []) then { _cent = [_bundle, "centroid", []]; };
     if (_cent isEqualType [] && { (count _cent) >= 2 }) then
     {
         _pos = +_cent;

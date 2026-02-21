@@ -37,8 +37,8 @@ if (!(_gid isEqualType "") || { _gid isEqualTo "" }) exitWith {false};
 private _getPair = {
     params ["_pairs", "_k", "_d"];
     if (!(_pairs isEqualType [])) exitWith { _d };
-    private _idx = [_pairs, {
-        (_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+    private _idx = -1;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) exitWith { _d };
     (_pairs select _idx) select 1
 };
@@ -47,8 +47,7 @@ private _setPair = {
     params ["_pairs", "_k", "_v"];
     if (!(_pairs isEqualType [])) then { _pairs = []; };
     private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }
-    }] call _findIfFn;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) then {
         _pairs pushBack [_k, _v];
     } else {

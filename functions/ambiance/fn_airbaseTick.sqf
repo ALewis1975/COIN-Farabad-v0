@@ -167,8 +167,8 @@ private _metaGet = {
 
 private _metaSet = {
     params ["_rows", "_k", "_v"];
-    private _idx = [_rows, {
-        _x isEqualType [] && { (count _x) >= 2 } && { ((_x select 0)) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
+    private _idx = -1;
+    { if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x select 0)) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
     if (_idx < 0) then { _rows pushBack [_k, _v]; } else { _rows set [_idx, [_k, _v]]; };
     _rows
 };
@@ -229,8 +229,7 @@ private _staffLaneRec = {
     private _idx = -1;
     { if ((_x isEqualType []) &&
         { (count _x) >= 5 } &&
-        { ((_x param [0, ""]) isEqualTo _lane) }
-    }] call _findIfFn;
+        { ((_x param [0, ""]) isEqualTo _lane) }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
     if (_idx < 0) exitWith { [_lane, "AUTO", "", "", -1] };
     _rows select _idx
 };

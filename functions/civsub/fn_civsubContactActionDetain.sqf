@@ -30,7 +30,7 @@ if !(isPlayer _actor) exitWith { [false, "<t size='0.9'>Detain failed (invalid a
 if !(_civ getVariable ["civsub_v1_isCiv", false]) exitWith { [false, "<t size='0.9'>Detain failed (not a CIVSUB civilian).</t>"] };
 
 // sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 private _did = _civ getVariable ["civsub_districtId", ""];
 private _actorUid = getPlayerUID _actor;

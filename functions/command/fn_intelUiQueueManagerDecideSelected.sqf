@@ -10,10 +10,10 @@
 params [ ["_approve", true, [true]] ];
 
 if (!hasInterface) exitWith {false};
-if !([player] call ARC_fnc_rolesCanApproveQueue) exitWith
-
 // sqflint-compat helpers
 private _trimFn     = compile "params ['_s']; trim _s";
+
+if !([player] call ARC_fnc_rolesCanApproveQueue) exitWith
 {
     ["TOC Queue", "Only S3/Command can approve/reject queue items."] call ARC_fnc_clientHint;
     false

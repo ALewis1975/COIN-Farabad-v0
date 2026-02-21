@@ -14,7 +14,7 @@ params [
 if (!(_districts isEqualType createHashMap)) exitWith {false};
 
 // sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _mapGet   = compile "params ['_h','_k']; _h get _k";
 private _keysFn   = compile "params ['_m']; keys _m";
 

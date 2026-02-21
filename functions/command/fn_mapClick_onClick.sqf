@@ -9,7 +9,7 @@
 if (!hasInterface) exitWith {false};
 
 // sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 private _state = uiNamespace getVariable ["ARC_mapClick_state", "IDLE"];
 private _cleanupDone = uiNamespace getVariable ["ARC_mapClick_cleanupDone", false];

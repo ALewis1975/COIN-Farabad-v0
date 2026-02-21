@@ -23,7 +23,7 @@ params [
 ];
 
 // sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
 
 private _effects = [];
@@ -112,7 +112,7 @@ private _dR = 0;
 private _dG = 0;
 
 {
-    private _row = [_effectTable, _x, [0,0,0] call _hg];
+    private _row = [_effectTable, _x, [0,0,0]];
     _dW = _dW + (_row select 0);
     _dR = _dR + (_row select 1);
     _dG = _dG + (_row select 2);
@@ -137,7 +137,7 @@ if !(_actorUid isEqualTo "") then { _actorType = "PLAYER"; };
 
 private _centroid = [0,0];
 private _d = [(missionNamespace getVariable ["civsub_v1_districts", createHashMap]), _districtId, createHashMap] call _hg;
-if (_d isEqualType createHashMap) then { _centroid = [_d, "centroid", [0,0] call _hg]; };
+if (_d isEqualType createHashMap) then { _centroid = [_d, "centroid", [0,0]]; };
 
 private _bundle = [
     _districtId,

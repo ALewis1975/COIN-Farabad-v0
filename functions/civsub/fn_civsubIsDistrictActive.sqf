@@ -18,9 +18,9 @@ params [["_d", createHashMap, [createHashMap]]];
 if !(_d isEqualType createHashMap) exitWith {false};
 
 // sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
-private _c = [_d, "centroid", [0,0] call _hg];
+private _c = [_d, "centroid", [0,0]];
 private _r = [_d, "radius_m", 0] call _hg;
 if !(_c isEqualType []) exitWith {false};
 if ((count _c) < 2) exitWith {false};

@@ -17,7 +17,7 @@ if (!isServer) exitWith {false};
 
 // sqflint-compat helpers
 private _trimFn     = compile "params ['_s']; trim _s";
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
 if (_taskId isEqualTo "") exitWith {false};

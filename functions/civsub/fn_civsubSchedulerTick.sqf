@@ -52,7 +52,7 @@ if ((count _missingFns) > 0 || {!_hasDistrictsState} || {!_hasSchedulerState}) e
 
 // sqflint-compatible helpers
 private _trimFn  = compile "params ['_s']; trim _s";
-private _hg      = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _mapGet  = compile "params ['_h','_k']; _h get _k";
 private _hmFrom  = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
 private _keysFn  = compile "params ['_h']; keys _h";

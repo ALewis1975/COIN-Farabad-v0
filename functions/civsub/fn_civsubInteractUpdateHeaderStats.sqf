@@ -23,7 +23,7 @@ params [
 if (isNull _d) exitWith { true };
 
 // sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 private _hdr = _d displayCtrl 78392;
 if (isNull _hdr) exitWith { true };

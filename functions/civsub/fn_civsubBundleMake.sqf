@@ -27,7 +27,7 @@ params [
 if (_districtId isEqualTo "") exitWith {createHashMap};
 
 // sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
 
 private _ts = serverTime;
@@ -38,7 +38,7 @@ private _eventId = format ["%1:%2:%3", _districtId, (_ts toFixed 3), (_uuid sele
 private _centroid = [0,0];
 private _d = [(missionNamespace getVariable ["civsub_v1_districts", createHashMap]), _districtId, createHashMap] call _hg;
 if (_d isEqualType createHashMap) then {
-    _centroid = [_d, "centroid", [0,0] call _hg];
+    _centroid = [_d, "centroid", [0,0]];
 };
 
 private _p3 = [(_centroid select 0), (_centroid select 1), 0];

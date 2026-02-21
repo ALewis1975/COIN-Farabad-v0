@@ -70,8 +70,8 @@ if (!(_pub isEqualType [])) then { _pub = []; };
 
 private _get = {
     params ["_k", "_def"];
-    private _idx = [_meta, {
-        (_x select 0) isEqualTo _k) exitWith { _idx = _forEachIndex; }; } forEach _pub;
+    private _idx = -1;
+    { if ((_x select 0) isEqualTo _k) exitWith { _idx = _forEachIndex; }; } forEach _pub;
     if (_idx < 0) exitWith {_def};
     (_pub select _idx) select 1
 };
@@ -456,8 +456,7 @@ else
         params ["_meta", "_k", "_def"];
         if (!(_meta isEqualType [])) exitWith {_def};
         private _idx = -1;
-        { if ((_x select 0) isEqualTo _k
-    }] call _findIfFn;
+        { if ((_x select 0) isEqualTo _k) exitWith { _idx = _forEachIndex; }; } forEach _meta;
         if (_idx < 0) exitWith {_def};
         (_meta select _idx) select 1
     };
@@ -531,8 +530,8 @@ else
     private _pairGet = {
         params ["_pairs", "_k", "_def"];
         if (!(_pairs isEqualType [])) exitWith { _def };
-        private _idx = [_meta, {
-            (_x select 0) isEqualTo _k) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+        private _idx = -1;
+        { if ((_x select 0) isEqualTo _k) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
         if (_idx < 0) exitWith { _def };
         (_pairs select _idx) select 1
     };
@@ -681,8 +680,7 @@ else
         params ["_meta", "_k", "_def"];
         if (!(_meta isEqualType [])) exitWith {_def};
         private _idx = -1;
-        { if ((_x select 0) isEqualTo _k
-        }] call _findIfFn;
+        { if ((_x select 0) isEqualTo _k) exitWith { _idx = _forEachIndex; }; } forEach _meta;
         if (_idx < 0) exitWith {_def};
         (_meta select _idx) select 1
     };

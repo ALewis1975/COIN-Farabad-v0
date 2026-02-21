@@ -17,7 +17,7 @@ if (!canSuspend) exitWith { _this spawn ARC_fnc_mapClick_arm; true };
 params [["_ctx", createHashMap]];
 
 // sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 if !(_ctx isEqualType createHashMap) then { _ctx = createHashMap; };
 
 private _state = uiNamespace getVariable ["ARC_mapClick_state", "IDLE"];

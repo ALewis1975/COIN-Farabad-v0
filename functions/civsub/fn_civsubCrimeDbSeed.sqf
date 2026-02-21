@@ -21,7 +21,7 @@ if (!isServer) exitWith {createHashMap};
 if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {createHashMap};
 
 // sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; [(_h), _k, _d] call _hg";
+private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _mapGet   = compile "params ['_h','_k']; _h get _k";
 private _keysFn   = compile "params ['_m']; keys _m";
 private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
