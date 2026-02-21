@@ -70,6 +70,25 @@ python3 scripts/dev/validate_marker_index.py                              → PA
 - This keeps sqflint parse-clean while addressing the reported runtime expression error path.
 - Dedicated-server + JIP runtime verification and in-engine UI screenshot capture: BLOCKED (Arma runtime not available in this environment).
 
+## 2026-02-21 01:40 UTC — AIR/TOWER FLT-002 route marker detail visibility
+
+**Branch/Commit:** copilot/fix-missing-route-markers @ pending
+
+**Scenario:** Surface request route-chain and missing-route-marker detail in AIR/TOWER selection pane for FLT-002 triage.
+
+**Commands:**
+```
+sqflint -e w functions/ui/fn_uiConsoleAirPaint.sqf            → PASS
+python3 scripts/dev/validate_state_migrations.py              → PASS
+python3 scripts/dev/validate_marker_index.py                  → PASS
+```
+
+**Result:** PASS
+
+**Notes:**
+- Request detail rows in `fn_uiConsoleAirPaint.sqf` now render both route chain and missing marker names from request metadata.
+- Dedicated-server/JIP runtime verification and in-engine AIR/TOWER screenshot capture: BLOCKED (Arma runtime/display unavailable in this environment).
+
 
 ## Entry Template
 

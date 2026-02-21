@@ -423,7 +423,9 @@ switch (_rowType) do {
                 private _laneDecision = [_reqMeta, "runwayLaneDecision", "-"] call _metaGet;
                 private _laneReason = [_reqMeta, "runwayLaneDecisionReason", "-"] call _metaGet;
                 private _chain = [_reqMeta, "routeMarkerChain", []] call _metaGet;
+                private _missingMarkers = [_reqMeta, "routeMissingMarkers", []] call _metaGet;
                 if !(_chain isEqualType []) then { _chain = []; };
+                if !(_missingMarkers isEqualType []) then { _missingMarkers = []; };
                 private _decisionBy = if (_reqDecision isEqualType []) then { _reqDecision param [0, "-"] } else { "-" };
                 private _decisionAction = if (_reqDecision isEqualType []) then { toUpper (_reqDecision param [3, "PENDING"]) } else { "PENDING" };
                 private _pilotLabel = if (_pilotCallsign isEqualTo "") then { _reqPilot } else { _pilotCallsign };
@@ -434,6 +436,7 @@ switch (_rowType) do {
                     format ["Pilot: <t color='#FFFFFF'>%1</t> | Current owner: <t color='#FFFFFF'>%2</t>", _pilotLabel, if (_reqOwner isEqualTo "") then {"UNCLAIMED"} else {_reqOwner}],
                     format ["Status: <t color='#FFFFFF'>%1</t> | Priority: <t color='#FFFFFF'>%2</t>", _reqStatus, _reqPrio],
                     format ["Lane decision: <t color='#FFFFFF'>%1</t> | Reason: <t color='#FFFFFF'>%2</t>", _laneDecision, _laneReason],
+                    format ["Route chain: <t color='#FFFFFF'>%1</t> | Missing markers: <t color='#FFFFFF'>%2</t>", if ((count _chain) > 0) then { _chain joinString " -> " } else { "no-chain" }, if ((count _missingMarkers) > 0) then { _missingMarkers joinString ", " } else { "none" }],
                     format ["Created/Updated: <t color='#FFFFFF'>%1 / %2</t>", [_reqCreated] call _fmtTime, [_reqUpdated] call _fmtTime],
                     format ["Last decision: <t color='#FFFFFF'>%1 by %2</t>", _decisionAction, _decisionBy],
                     format ["Action hint: <t color='#FFFFFF'>%1</t>", if (_canAirQueueManage) then {"Use APPROVE or DENY; verify lane reason before confirming."} else {"Read-only: coordinate with tower controller for decision."}]
