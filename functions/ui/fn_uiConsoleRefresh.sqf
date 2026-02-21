@@ -140,6 +140,23 @@ private _timeText = daytime call BIS_fnc_timeToString;
 if (!isNull _statusRight) then { _statusRight ctrlSetText format ["TIME: %1", _timeText]; };
 if (!isNull _statusCtrl) then { _statusCtrl ctrlEnable false; };
 
+// Regression guard: restore MainGroup (78015) to its full-width default whenever we are NOT
+// in CMD OVERVIEW mode.  CMD OVERVIEW narrows the group to the middle-panel width so that its
+// structured-text content (which includes the "TOC Queue" section) does not visually overlap
+// with MainDetailsGroup (78016) at the panel boundary.
+if (!isNull _ctrlMainGrp) then {
+    private _kMainGrp = "ARC_ui_mainGrpPosDefault";
+    private _p0Grp = [_kMainGrp, []] call ARC_fnc_uiNsGetArray;
+    if (_p0Grp isEqualTo []) then {
+        uiNamespace setVariable [_kMainGrp, ctrlPosition _ctrlMainGrp];
+        _p0Grp = uiNamespace getVariable [_kMainGrp, ctrlPosition _ctrlMainGrp];
+    };
+    if (!(_tab isEqualTo "CMD" && { _cmdMode isEqualTo "OVERVIEW" })) then {
+        _ctrlMainGrp ctrlSetPosition _p0Grp;
+        _ctrlMainGrp ctrlCommit 0;
+    };
+};
+
 switch (_tab) do
 {
     case "BOARDS":
@@ -305,6 +322,19 @@ case "DASH":
             // Show right panel (populated by the painter).
             if (!isNull _ctrlDetailsGrp) then { _ctrlDetailsGrp ctrlShow true; };
             if (!isNull _ctrlDetails) then { _ctrlDetails ctrlShow true; };
+
+            // Clamp MainGroup (78015) to the middle-panel width so its content (including
+            // the TOC Queue section) does not extend into the right-panel area occupied by
+            // MainDetailsGroup (78016).  Use MainList (78011) as the middle-panel reference.
+            if (!isNull _ctrlMainGrp && { !isNull _ctrlList }) then {
+                private _lp = ctrlPosition _ctrlList;
+                private _gp = ctrlPosition _ctrlMainGrp;
+                if ((count _lp) == 4 && { (count _gp) == 4 }) then {
+                    _ctrlMainGrp ctrlSetPosition [_lp select 0, _gp select 1, _lp select 2, _gp select 3];
+                    _ctrlMainGrp ctrlCommit 0;
+                };
+            };
+
             [_display] call ARC_fnc_uiConsoleCommandPaint;
         };
     };

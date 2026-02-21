@@ -886,9 +886,9 @@ text = "FARABAD CONSOLE";
         class OpsFrameInc_BG: RscText
         {
             idc = 78030;
-            x = safeZoneX + (0.24 * safeZoneW);
+            x = safeZoneX + (0.242 * safeZoneW);
             y = safeZoneY + (0.08 * safeZoneH);
-            w = (0.27 * safeZoneW);
+            w = (0.266 * safeZoneW);
             h = (0.20 * safeZoneH);
             colorBackground[] = {0.05,0.05,0.05,0.65};
         };
@@ -896,18 +896,18 @@ text = "FARABAD CONSOLE";
         {
             idc = 78031;
             text = "INCIDENTS / TASKS";
-            x = safeZoneX + (0.24 * safeZoneW);
+            x = safeZoneX + (0.242 * safeZoneW);
             y = safeZoneY + (0.08 * safeZoneH);
-            w = (0.27 * safeZoneW);
+            w = (0.266 * safeZoneW);
             h = (0.03 * safeZoneH);
             colorBackground[] = {0.05,0.05,0.05,0.92};
         };
         class OpsListIncidents: RscListbox
         {
             idc = 78032;
-            x = safeZoneX + (0.24 * safeZoneW);
+            x = safeZoneX + (0.242 * safeZoneW);
             y = safeZoneY + (0.11 * safeZoneH);
-            w = (0.27 * safeZoneW);
+            w = (0.266 * safeZoneW);
             h = (0.17 * safeZoneH);
             colorBackground[] = {0.05,0.05,0.05,0.65};
             tooltip = "Incidents (current + recent).";
@@ -917,9 +917,9 @@ text = "FARABAD CONSOLE";
         class OpsFrameOrd_BG: RscText
         {
             idc = 78033;
-            x = safeZoneX + (0.24 * safeZoneW);
+            x = safeZoneX + (0.242 * safeZoneW);
             y = safeZoneY + (0.305 * safeZoneH);
-            w = (0.27 * safeZoneW);
+            w = (0.266 * safeZoneW);
             h = (0.20 * safeZoneH);
             colorBackground[] = {0.05,0.05,0.05,0.65};
         };
@@ -927,18 +927,18 @@ text = "FARABAD CONSOLE";
         {
             idc = 78034;
             text = "ORDERS / FRAGOS";
-            x = safeZoneX + (0.24 * safeZoneW);
+            x = safeZoneX + (0.242 * safeZoneW);
             y = safeZoneY + (0.305 * safeZoneH);
-            w = (0.27 * safeZoneW);
+            w = (0.266 * safeZoneW);
             h = (0.03 * safeZoneH);
             colorBackground[] = {0.05,0.05,0.05,0.92};
         };
         class OpsListOrders: RscListbox
         {
             idc = 78035;
-            x = safeZoneX + (0.24 * safeZoneW);
+            x = safeZoneX + (0.242 * safeZoneW);
             y = safeZoneY + (0.335 * safeZoneH);
-            w = (0.27 * safeZoneW);
+            w = (0.266 * safeZoneW);
             h = (0.17 * safeZoneH);
             colorBackground[] = {0.05,0.05,0.05,0.65};
             tooltip = "TOC-issued orders for units.";
@@ -948,9 +948,9 @@ text = "FARABAD CONSOLE";
         class OpsFrameLead_BG: RscText
         {
             idc = 78036;
-            x = safeZoneX + (0.24 * safeZoneW);
+            x = safeZoneX + (0.242 * safeZoneW);
             y = safeZoneY + (0.525 * safeZoneH);
-            w = (0.27 * safeZoneW);
+            w = (0.266 * safeZoneW);
             h = (0.385 * safeZoneH);
             colorBackground[] = {0.05,0.05,0.05,0.65};
         };
@@ -958,18 +958,18 @@ text = "FARABAD CONSOLE";
         {
             idc = 78037;
             text = "LEADS / TIPS";
-            x = safeZoneX + (0.24 * safeZoneW);
+            x = safeZoneX + (0.242 * safeZoneW);
             y = safeZoneY + (0.525 * safeZoneH);
-            w = (0.27 * safeZoneW);
+            w = (0.266 * safeZoneW);
             h = (0.03 * safeZoneH);
             colorBackground[] = {0.05,0.05,0.05,0.92};
         };
         class OpsListLeads: RscListbox
         {
             idc = 78038;
-            x = safeZoneX + (0.24 * safeZoneW);
+            x = safeZoneX + (0.242 * safeZoneW);
             y = safeZoneY + (0.555 * safeZoneH);
-            w = (0.27 * safeZoneW);
+            w = (0.266 * safeZoneW);
             h = (0.355 * safeZoneH);
             colorBackground[] = {0.05,0.05,0.05,0.65};
             tooltip = "S2/S3 leads and follow-on targets.";
