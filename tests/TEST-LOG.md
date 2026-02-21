@@ -528,3 +528,24 @@ python3 scripts/dev/validate_marker_index.py
 - Replaced `keys _map` in forEach/count with `[_map] call _keysFn` compile helper.
 - Replaced `toLowerANSI` with `toLower`.
 - Runtime/dedicated/JIP validation: BLOCKED (no Arma runtime in container).
+
+---
+
+## 2026-02-21 — Layout overlap fixes: CMD OVERVIEW + OPS frames
+
+**Branch/Commit:** copilot/check-layout-overlaps-farabad (double-check of #294)
+
+**Scenario:** Static analysis and layout-coordinate audit for layout overlaps in the Farabad console (TOC/CMD panel and OPS panel).
+
+**Commands:**
+```
+python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleRefresh.sqf
+sqflint -e w functions/ui/fn_uiConsoleRefresh.sqf
+```
+
+**Result:** PASS (static)
+
+**Notes:**
+- Root cause 1 (CMD OVERVIEW): `MainGroup` (IDC 78015) was rendered at full right-panel width (0.242–0.998) while `MainDetailsGroup` (IDC 78016) rendered on top from 0.516–0.998. The `Main` (IDC 78010) structured-text content — including the "TOC Queue" section label — extended across the full width, causing its text to appear at the visual boundary between the two panels. Fixed by clamping `MainGroup` to the middle-panel width (matching `MainList` IDC 78011: x=0.242, w=0.266) in CMD OVERVIEW mode, with a regression guard that restores the full-width default for all other tabs.
+- Root cause 2 (OPS tab): OPS frame controls (IDC 78030–78038) in `CfgDialogs.hpp` used `x=0.24, w=0.27` (right edge 0.51), extending 0.002 further than `MainList` (right edge 0.508) and leaving only a 0.006 gap to `MainDetailsGroup` (start 0.516). Aligned to `x=0.242, w=0.266` so all middle-panel elements share a consistent 0.008 gap to the right panel, matching the `DOCK_RIGHT` layout mode which already used the correct values.
+- Runtime/dedicated/JIP validation: BLOCKED (no Arma runtime in container). Gameplay-path validation requires a local-MP or hosted-MP session exercising the CMD/TOC tab (OVERVIEW and QUEUE sub-modes) and the OPS tab.
