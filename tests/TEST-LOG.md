@@ -590,3 +590,47 @@ sqflint -e w functions/civsub/fn_civsubContactReqAction.sqf
 **Tracking:** PR #296 — validate in local MP: use addAction "Interact" on a CIVSUB civilian, confirm question/action results appear in the INTEL right pane and toast shows the correct action result (not a warning).
 
 **JIP / late-client:** Not evaluated; deferred to dedicated server session.
+
+---
+
+## 2026-02-21 — UI text-wrap / horizontal overflow fix (PR: fix-text-wrapping-issues)
+
+**Branch/Commit:** copilot/fix-text-wrapping-issues
+
+**Scenario:** Farabad Console — horizontal scrollbar visible in COP/Dashboard and TOC/CMD panels.
+
+**Root causes identified:**
+
+1. `MainDetails` (idc 78012) had `w = 0.99` in `CfgDialogs.hpp`, but its parent `MainDetailsGroup` (idc 78016) has `w = (0.482 * safeZoneW)`. On 16:9 (`safeZoneW ≈ 1.778`) this produces a control wider than the viewport (~0.99 vs ~0.857), causing permanent horizontal scroll in the details panel.
+
+2. `Main` (idc 78010) had `w = 0.99`; parent group `MainGroup` (idc 78015) has `w = (0.756 * safeZoneW)`. On aspect ratios narrower than ~4:3 (`safeZoneW < 1.31`), the inner control overflowed. Additionally, `BIS_fnc_ctrlFitToTextHeight` was called without first pinning the control width, so a stretched width from a prior paint pass could be inherited.
+
+3. Dashboard `_incLine` put the acceptance / unit / SITREP status all on one line. That single long line can extend past the control boundary, compounding the overflow.
+
+**Changes made:**
+
+| File | Change |
+|---|---|
+| `config/CfgDialogs.hpp` | `Main` (78010): `w = 0.99` → `w = (0.74 * safeZoneW)`; `MainDetails` (78012): `w = 0.99` → `w = (0.47 * safeZoneW)` |
+| `fn_uiConsoleDashboardPaint.sqf` | `_incLine`: added `<br/>` before status section; main-panel: pin width to `_grpW - 0.025` before/after `BIS_fnc_ctrlFitToTextHeight`; details-panel: clamp `_dashDefaultPos[2]` to `_dashGrpW - 0.01` |
+| `fn_uiConsoleCommandPaint.sqf` | main-panel: same width-pinning pattern; details-panel: clamp `_cmdRpDefaultPos[2]` to `_cmdGrpW - 0.01` |
+
+**Commands:**
+
+```
+python3 scripts/dev/sqflint_compat_scan.py --strict \
+  functions/ui/fn_uiConsoleDashboardPaint.sqf \
+  functions/ui/fn_uiConsoleCommandPaint.sqf
+sqflint -e w functions/ui/fn_uiConsoleDashboardPaint.sqf
+sqflint -e w functions/ui/fn_uiConsoleCommandPaint.sqf
+```
+
+**Result:** PASS
+
+**Runtime validation:** BLOCKED — no Arma 3 runtime in CI container. Changes are pure layout/geometry math; no game logic touched.
+
+**Follow-up owner:** Mission maintainer (ALewis1975).
+
+**Tracking:** Validate in hosted MP: open the Farabad Console and check the COP/Dashboard and TOC/CMD tabs confirm no horizontal scrollbar at 16:9, 16:10, and 4:3 (if available). Also verify the Dashboard incident line now wraps the acceptance status to a second line.
+
+**JIP / late-client:** Not applicable (UI-only change; no replicated state involved).

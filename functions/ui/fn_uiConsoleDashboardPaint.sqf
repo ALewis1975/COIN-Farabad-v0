@@ -102,12 +102,12 @@ private _incLine = if (!_hasIncident) then
 else
 {
     format [
-        "<t color='%1'>%2</t>%3%4 %5",
+        "<t color='%1'>%2</t>%3%4<br/>%5",
         if (_closeReady && !_sitrepSent) then {"#FFFFA0"} else {"#DDDDDD"},
         _incDisp,
         if (_incType isEqualTo "") then {""} else { format [" <t color='#AAAAAA'>(%1)</t>", toUpper _incType] },
         if (_incGrid isEqualTo "") then {""} else { format [" <t color='#AAAAAA'>@ %1</t>", _incGrid] },
-        format ["<t color='#AAAAAA'>| Accepted:</t> <t color='%1'>%2</t> <t color='#AAAAAA'>| Unit: %3 | Close-ready: %4 | SITREP:</t> <t color='%5'>%6</t>",
+        format ["<t color='#AAAAAA'>Accepted:</t> <t color='%1'>%2</t> <t color='#AAAAAA'>| Unit:</t> <t color='#DDDDDD'>%3</t><br/><t color='#AAAAAA'>Close-ready:</t> <t color='#DDDDDD'>%4</t> <t color='#AAAAAA'>| SITREP:</t> <t color='%5'>%6</t>",
             if (_acc) then {"#9FE870"} else {"#FF7A7A"},
             if (_acc) then {"YES"} else {"NO"},
             if (_accBy isEqualTo "") then {"UNASSIGNED"} else {_accBy},
@@ -313,11 +313,18 @@ private _txt =
 
 _ctrlMain ctrlSetStructuredText parseText _txt;
 
-// Auto-fit + clamp to viewport so the controls group can scroll when needed.
-[_ctrlMain] call BIS_fnc_ctrlFitToTextHeight;
+// Auto-fit + clamp to viewport; pin width to parent group before fitting to prevent horizontal overflow.
 private _mainGrp = _display displayCtrl 78015;
-private _minH = if (!isNull _mainGrp) then { (ctrlPosition _mainGrp) select 3 } else { 0.74 };
+private _minH  = if (!isNull _mainGrp) then { (ctrlPosition _mainGrp) select 3 } else { 0.74 };
+private _grpW  = if (!isNull _mainGrp) then { (ctrlPosition _mainGrp) select 2 } else { 1.4 };
+private _safeW = _grpW - 0.025;
+private _pPre  = ctrlPosition _ctrlMain;
+_pPre set [2, _safeW];
+_ctrlMain ctrlSetPosition _pPre;
+_ctrlMain ctrlCommit 0;
+[_ctrlMain] call BIS_fnc_ctrlFitToTextHeight;
 private _p = ctrlPosition _ctrlMain;
+_p set [2, _safeW];
 _p set [3, (_p select 3) max _minH];
 _ctrlMain ctrlSetPosition _p;
 _ctrlMain ctrlCommit 0;
@@ -348,15 +355,21 @@ if (!isNull _ctrlDetailsGrp && { !isNull _ctrlDetails }) then
 
     _ctrlDetails ctrlSetStructuredText parseText _rTxt;
 
+    private _dashGrp = _display displayCtrl 78016;
+    private _dashMinH = if (!isNull _dashGrp) then { (ctrlPosition _dashGrp) select 3 } else { 0.74 };
+    private _dashGrpW = if (!isNull _dashGrp) then { (ctrlPosition _dashGrp) select 2 } else { 0.47 };
     private _dashDefaultPos = uiNamespace getVariable ["ARC_console_dashDetailsDefaultPos", []];
     if (!(_dashDefaultPos isEqualType []) || { (count _dashDefaultPos) < 4 }) then
     {
         _dashDefaultPos = ctrlPosition _ctrlDetails;
+        _dashDefaultPos set [2, _dashGrpW - 0.01];
         uiNamespace setVariable ["ARC_console_dashDetailsDefaultPos", +_dashDefaultPos];
     };
+    private _dashPPre = ctrlPosition _ctrlDetails;
+    _dashPPre set [2, _dashDefaultPos select 2];
+    _ctrlDetails ctrlSetPosition _dashPPre;
+    _ctrlDetails ctrlCommit 0;
     [_ctrlDetails] call BIS_fnc_ctrlFitToTextHeight;
-    private _dashGrp = _display displayCtrl 78016;
-    private _dashMinH = if (!isNull _dashGrp) then { (ctrlPosition _dashGrp) select 3 } else { 0.74 };
     private _dashP = ctrlPosition _ctrlDetails;
     _dashP set [0, _dashDefaultPos select 0];
     _dashP set [1, _dashDefaultPos select 1];
