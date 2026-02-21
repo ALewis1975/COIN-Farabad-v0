@@ -27,20 +27,25 @@ params [
 
 if (isNull _actor || {isNull _civ}) exitWith { [false, "", createHashMap] };
 
+// sqflint-compatible helpers for HashMap operations and trim
+private _hg     = compile "params ['_h','_k','_d']; _h getOrDefault [_k,_d]";
+private _hmFrom = compile "params ['_pairs']; private _r = createHashMap; { _r set _x; } forEach _pairs; _r";
+private _trimFn = compile "params ['_s']; trim _s";
+
 private _pl = _payload;
-if (_pl isEqualType []) then { _pl = createHashMapFromArray _pl; };
+if (_pl isEqualType []) then { _pl = [_pl] call _hmFrom; };
 if !(_pl isEqualType createHashMap) then { _pl = createHashMap; };
 
-private _qidRaw = _pl getOrDefault ["qid", ""]; 
+private _qidRaw = [_pl, "qid", ""] call _hg;
 private _qid = _qidRaw;
 if !(_qid isEqualType "") then { _qid = str _qid; };
-_qid = trim _qid;
+_qid = [_qid] call _trimFn;
 
 // Optional label (UI text) for tolerant routing
-private _lblRaw = _pl getOrDefault ["label", ""];
+private _lblRaw = [_pl, "label", ""] call _hg;
 private _qlabel = _lblRaw;
 if !(_qlabel isEqualType "") then { _qlabel = str _qlabel; };
-_qlabel = trim _qlabel;
+_qlabel = [_qlabel] call _trimFn;
 
 if (_qid isEqualTo "") exitWith { [false, "<t size='0.9'>No question selected.</t>", createHashMap] };
 
@@ -94,7 +99,7 @@ switch (_qidNorm) do {
 if (_canon isEqualTo "") exitWith {
     [true,
         "<t size='0.95' color='#CFE8FF'>QUESTION</t><br/><t size='0.9'>I don't understand the question.</t>",
-        createHashMapFromArray [["qid_raw", _qid]]
+        [["qid_raw", _qid]] call _hmFrom
     ]
 };
 
@@ -110,22 +115,24 @@ if (_civUid isEqualType "" && {!(_civUid isEqualTo "")}) then {
 
 // District state + scores
 private _did = _civ getVariable ["civsub_districtId", ""]; 
-if (_did isEqualTo "") then { _did = _rec getOrDefault ["home_district_id", ""]; };
+if (_did isEqualTo "") then { _did = [_rec, "home_district_id", ""] call _hg; };
 
 private _districts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
 if !(_districts isEqualType createHashMap) then { _districts = createHashMap; };
 
-private _d = _districts getOrDefault [_did, createHashMap];
+private _d = [_districts, _did, createHashMap] call _hg;
 if !(_d isEqualType createHashMap) then { _d = createHashMap; };
 
 private _scores = [_d] call ARC_fnc_civsubScoresCompute;
-if !(_scores isEqualType createHashMap) then { _scores = createHashMapFromArray [["S_COOP", 0], ["S_THREAT", 0]]; };
-private _Scoop = _scores getOrDefault ["S_COOP", 0];
-private _Sthreat = _scores getOrDefault ["S_THREAT", 0];
+if !(_scores isEqualType createHashMap) then {
+    _scores = createHashMap;
+    _scores set ["S_COOP", 0];
+    _scores set ["S_THREAT", 0];
+};
+private _Scoop   = [_scores, "S_COOP", 0] call _hg;
+private _Sthreat = [_scores, "S_THREAT", 0] call _hg;
 
-private _fear = _d getOrDefault ["fear_idx", 50];
-private _foodIdx = _d getOrDefault ["food_idx", 50];
-private _waterIdx = _d getOrDefault ["water_idx", 50];
+private _fear = [_d, "fear_idx", 50] call _hg;
 
 // Civ needs/outlook (tracked by aid actions)
 private _sat = _civ getVariable ["civsub_need_satiation", 50];
@@ -159,7 +166,7 @@ switch (_qid) do {
         if (_guarded) then {
             _answer = "I live nearby. I don't want trouble.";
         } else {
-            private _homeDid = _rec getOrDefault ["home_district_id", _did];
+            private _homeDid = [_rec, "home_district_id", _did] call _hg;
             if (_homeDid isEqualTo "") then { _homeDid = "this district"; };
             _answer = format ["I live in %1, near %2.", _homeDid, _locName];
         };
@@ -167,7 +174,7 @@ switch (_qid) do {
 
     case "Q_WORK": {
         _title = "WHERE DO YOU WORK";
-        private _job = _rec getOrDefault ["occupation", ""]; 
+        private _job = [_rec, "occupation", ""] call _hg;
         if (_job isEqualTo "") then { _job = "odd jobs"; };
         if (_guarded) then {
             _answer = "I work where I can. It's hard here.";
@@ -252,7 +259,7 @@ private _html = format [
     _Sthreat toFixed 0
 ];
 
-private _outPayload = createHashMapFromArray [
+private _outPayload = [
     ["qid", _qid],
     ["qid_raw", _qidRaw],
     ["districtId", _did],
@@ -261,6 +268,6 @@ private _outPayload = createHashMapFromArray [
     ["need_satiation", _sat],
     ["need_hydration", _hyd],
     ["outlook_blufor", _outlook]
-];
+] call _hmFrom;
 
 [true, _html, _outPayload]

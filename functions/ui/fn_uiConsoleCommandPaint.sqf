@@ -26,6 +26,7 @@ params [
 
 if (isNull _display) exitWith {false};
 
+// sqflint 0.3.2 compat: wrap trim via compile so the linter does not error on unknown operator.
 private _trimFn = compile "params ['_s']; trim _s";
 
 private _rxMaxItems = missionNamespace getVariable ["ARC_consoleRxMaxItems", 80];

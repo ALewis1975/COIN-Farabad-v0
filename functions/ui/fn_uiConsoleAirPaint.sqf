@@ -78,6 +78,7 @@ private _fmtTime = {
     format ["%1m %2s", _m, _s]
 };
 
+// sqflint 0.3.2 compat: wrap trim via compile so the linter does not error on unknown operator.
 private _trimFn = compile "params ['_s']; trim _s";
 
 private _air = [_pub, "airbase", []] call _getPub;
@@ -145,6 +146,7 @@ if (!(_towerStaffing isEqualType [])) then { _towerStaffing = []; };
 
 private _staffLaneRec = {
     params ["_rows", "_lane"];
+    // sqflint 0.3.2 does not understand findIf; replaced with equivalent forEach loop.
     private _idx = -1;
     { if ((_x isEqualType []) && { (count _x) >= 5 } && { ((_x param [0, ""]) isEqualTo _lane) }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
     if (_idx < 0) exitWith { [_lane, "AUTO", "", "", -1] };

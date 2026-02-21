@@ -57,6 +57,10 @@ if ((_actor distance _civ) > 6) exitWith {
     false
 };
 
+// sqflint-compatible helpers for HashMap operations
+private _hg     = compile "params ['_h','_k','_d']; _h getOrDefault [_k,_d]";
+private _hmFrom = compile "params ['_pairs']; private _r = createHashMap; { _r set _x; } forEach _pairs; _r";
+
 switch (_actionId) do {
     case "CHECK_ID": {
             // Dialog-native Check ID: no chat output; returns payload for embedded overlay.
@@ -67,12 +71,12 @@ switch (_actionId) do {
             if (_res isEqualType [] && {(count _res) >= 2}) then {
                 _ok = _res select 0;
                 _payload = _res select 1;
-                if (_payload isEqualType []) then { _payload = createHashMapFromArray _payload; };
+                if (_payload isEqualType []) then { _payload = [_payload] call _hmFrom; };
                 if !(_payload isEqualType createHashMap) then { _payload = createHashMap; };
             };
 
             private _html = "";
-            private _serial = _payload getOrDefault ["passport_serial", ""];
+            private _serial = [_payload, "passport_serial", ""] call _hg;
             if (_ok) then {
                 // Gate VERIFIED on minimum identity payload completeness.
                 // A result is only genuinely VERIFIED when a valid passport serial
@@ -94,7 +98,7 @@ switch (_actionId) do {
                 ];
             } else {
                 private _reason = "";
-                if (_payload isEqualType createHashMap) then { _reason = _payload getOrDefault ["reason", ""]; };
+                if (_payload isEqualType createHashMap) then { _reason = [_payload, "reason", ""] call _hg; };
                 private _msg = switch (_reason) do {
                     case "NO_DISTRICT": {"This civilian has no district ID."};
                     case "DISTRICT_LOOKUP_FAIL": {"District lookup failed."};
@@ -105,12 +109,7 @@ switch (_actionId) do {
                 _html = format ["<t size='0.95' color='#CFE8FF'>CHECK ID</t><br/><t size='0.9'>%1</t>", _msg];
             };
 
-            private _out = createHashMapFromArray [
-                ["ok", _ok],
-                ["type", "CHECK_ID"],
-                ["html", _html],
-                ["payload", _payload]
-            ];
+            private _out = [["ok", _ok], ["type", "CHECK_ID"], ["html", _html], ["payload", _payload]] call _hmFrom;
 
             [_out] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
 
@@ -172,12 +171,7 @@ switch (_actionId) do {
             _html = format ["<t size='0.9'>Background Check failed (server error at %1). Try again.</t>", _step];
         };
 
-        private _out = createHashMapFromArray [
-            ["ok", _ok],
-            ["type", "BACKGROUND_CHECK"],
-            ["html", _html],
-            ["payload", createHashMap]
-        ];
+        private _out = [["ok", _ok], ["type", "BACKGROUND_CHECK"], ["html", _html], ["payload", createHashMap]] call _hmFrom;
         [_out] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
 
         if (_ok) then {
@@ -197,12 +191,7 @@ switch (_actionId) do {
             _html = _res select 1;
         };
 
-        private _out = createHashMapFromArray [
-            ["ok", _ok],
-            ["type", "DETAIN"],
-            ["html", _html],
-            ["payload", createHashMap]
-        ];
+        private _out = [["ok", _ok], ["type", "DETAIN"], ["html", _html], ["payload", createHashMap]] call _hmFrom;
         [_out] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
 
         // refresh header snapshot
@@ -218,12 +207,7 @@ switch (_actionId) do {
             "<t size='0.95' color='#CFE8FF'>HANDOFF</t><br/><t size='0.9'>Sheriff handoff failed. Check distance/custody/cuffs requirements.</t>"
         };
 
-        private _out = createHashMapFromArray [
-            ["ok", _ok],
-            ["type", "HANDOFF_SHERIFF"],
-            ["html", _html],
-            ["payload", createHashMap]
-        ];
+        private _out = [["ok", _ok], ["type", "HANDOFF_SHERIFF"], ["html", _html], ["payload", createHashMap]] call _hmFrom;
         [_out] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
 
         if (_ok) then { [_civ, _actor] call ARC_fnc_civsubContactReqSnapshot; };
@@ -239,12 +223,7 @@ switch (_actionId) do {
             _html = _res select 1;
         };
 
-        private _out = createHashMapFromArray [
-            ["ok", _ok],
-            ["type", "RELEASE"],
-            ["html", _html],
-            ["payload", createHashMap]
-        ];
+        private _out = [["ok", _ok], ["type", "RELEASE"], ["html", _html], ["payload", createHashMap]] call _hmFrom;
         [_out] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
 
         // refresh header snapshot
@@ -261,12 +240,7 @@ switch (_actionId) do {
             _html = _res select 1;
         };
 
-        private _out = createHashMapFromArray [
-            ["ok", _ok],
-            ["type", "AID_RATIONS"],
-            ["html", _html],
-            ["payload", createHashMap]
-        ];
+        private _out = [["ok", _ok], ["type", "AID_RATIONS"], ["html", _html], ["payload", createHashMap]] call _hmFrom;
         [_out] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
 
         if (_ok) then { [_civ, _actor] call ARC_fnc_civsubContactReqSnapshot; };
@@ -282,12 +256,7 @@ switch (_actionId) do {
             _html = _res select 1;
         };
 
-        private _out = createHashMapFromArray [
-            ["ok", _ok],
-            ["type", "AID_WATER"],
-            ["html", _html],
-            ["payload", createHashMap]
-        ];
+        private _out = [["ok", _ok], ["type", "AID_WATER"], ["html", _html], ["payload", createHashMap]] call _hmFrom;
         [_out] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
 
         if (_ok) then { [_civ, _actor] call ARC_fnc_civsubContactReqSnapshot; };
@@ -306,16 +275,11 @@ switch (_actionId) do {
             _ok = _res select 0;
             _html = _res select 1;
             _pl = _res select 2;
-            if (_pl isEqualType []) then { _pl = createHashMapFromArray _pl; };
+            if (_pl isEqualType []) then { _pl = [_pl] call _hmFrom; };
             if !(_pl isEqualType createHashMap) then { _pl = createHashMap; };
         };
 
-        private _out = createHashMapFromArray [
-            ["ok", _ok],
-            ["type", "QUESTION"],
-            ["html", _html],
-            ["payload", _pl]
-        ];
+        private _out = [["ok", _ok], ["type", "QUESTION"], ["html", _html], ["payload", _pl]] call _hmFrom;
         [_out] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
         true
     };

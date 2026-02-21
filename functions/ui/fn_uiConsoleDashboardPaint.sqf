@@ -20,6 +20,7 @@ params [
 
 if (isNull _display) exitWith {false};
 
+// sqflint 0.3.2 compat: wrap trim/fileExists via compile so the linter does not error on unknown operators.
 private _trimFn = compile "params ['_s']; trim _s";
 private _fileExistsFn = compile "params ['_p']; fileExists _p";
 
