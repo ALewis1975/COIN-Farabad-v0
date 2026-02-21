@@ -28,7 +28,7 @@ params [
 if (isNull _actor || {isNull _civ}) exitWith { [false, "", createHashMap] };
 
 // sqflint-compatible helpers for HashMap operations and trim
-private _hg     = compile "params ['_h','_k','_d']; _h getOrDefault [_k,_d]";
+private _hg     = compile "params ['_h','_k','_d']; [_h, _k, _d] call getOrDefault";
 private _hmFrom = compile "params ['_pairs']; private _r = createHashMap; { _r set _x; } forEach _pairs; _r";
 private _trimFn = compile "params ['_s']; trim _s";
 
