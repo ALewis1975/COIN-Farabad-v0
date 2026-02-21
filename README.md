@@ -163,16 +163,19 @@ Every PR must declare:
 ### Local Validation (Required Before Merge)
 
 ```bash
-# 1. Syntax check (SQF linting)
+# 1. SQF parser-compat preflight (run before lint)
+python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf functions/path/to/changed_file.sqf
+
+# 2. Syntax check (SQF linting)
 python -m pip install --upgrade pip
 pip install sqflint
 sqflint -e w initServer.sqf
 sqflint -e w functions/path/to/changed_file.sqf
 
-# 2. Config validation
+# 3. Config validation
 # CI workflow includes automated delimiter balance checks
 
-# 3. Local MP Testing
+# 4. Local MP Testing
 # - Host local multiplayer session
 # - Test with at least one client
 # - Verify state replication
@@ -454,6 +457,7 @@ git checkout -b work/your-feature-name
 # 2. Make minimal changes
 
 # 3. Validate locally
+python3 scripts/dev/sqflint_compat_scan.py --strict functions/path/to/your_file.sqf
 pip install sqflint
 sqflint -e w functions/path/to/your_file.sqf
 git diff --check

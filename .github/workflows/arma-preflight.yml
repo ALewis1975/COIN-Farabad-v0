@@ -89,6 +89,9 @@ jobs:
             exit 0
           fi
 
+          echo "Running sqflint compatibility scan before lint..."
+          python3 scripts/dev/sqflint_compat_scan.py --strict $sqf_files
+
           while IFS= read -r file; do
             [ -z "$file" ] && continue
             sqflint -e w "$file"
