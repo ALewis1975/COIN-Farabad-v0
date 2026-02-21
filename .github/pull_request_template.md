@@ -35,6 +35,33 @@
 - `<command>` — `<result>`
 - OR: `Not run` — `<reason>`
 
+### Runtime Validation Evidence (required for behavior-changing SQF PRs)
+
+- [ ] **Local MP smoke evidence** attached (steps + result, or log/screenshot link).
+- [ ] **Dedicated-server smoke evidence** attached (steps + result, or log link).
+  - If dedicated-server smoke is not available in this PR environment, document the deferral in **Runtime Validation Waiver** below.
+- [ ] **JIP / late-client checklist status** provided.
+  - JIP snapshot correctness:
+    - [ ] PASS
+    - [ ] FAIL
+    - [ ] BLOCKED (waiver required)
+  - Late-client recovery for in-flight events:
+    - [ ] PASS
+    - [ ] FAIL
+    - [ ] BLOCKED (waiver required)
+  - Reconnect / respawn ownership edge cases:
+    - [ ] PASS
+    - [ ] FAIL
+    - [ ] BLOCKED (waiver required)
+
+### Runtime Validation Waiver (required when any runtime check is deferred)
+
+- Waived runtime check(s):
+- Reason deferred (explicit environment/runtime constraint):
+- Owner responsible for follow-up validation:
+- Target date / milestone for closure:
+- Tracking issue / task link:
+
 ### Risk Notes
 
 - 
