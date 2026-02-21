@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import os
 import shutil
 import subprocess
 import sys
@@ -18,9 +19,7 @@ ALIASES_PATH = ROOT / "data" / "farabad_marker_aliases.sqf"
 JSON_OUT = ROOT / "docs" / "reference" / "marker-index.json"
 MD_OUT = ROOT / "docs" / "reference" / "marker-index.md"
 
-RG_AVAILABLE = shutil.which("rg") is not None
-if not RG_AVAILABLE:
-    print("Warning: ripgrep (rg) not found; consumer detection will be skipped.", file=sys.stderr)
+WARNING_PREFIX = "[marker-index] WARNING:"
 
 TEXT_FIELDS = ("name", "type", "shape", "text", "color", "usageNotes", "source", "status")
 
@@ -128,10 +127,23 @@ def parse_mission_markers(path: Path) -> list[dict[str, Any]]:
     return markers
 
 
-def rg_consumers(symbol: str) -> list[str]:
+def resolve_consumer_detection_mode(policy: str) -> tuple[bool, str | None]:
+    rg_path = shutil.which("rg")
+    if policy == "off":
+        return False, None
+    if rg_path:
+        return True, None
+    warning = (
+        f"{WARNING_PREFIX} optional dependency 'rg' unavailable; "
+        "consumer detection disabled; consumers=[] fallback enabled."
+    )
+    return False, warning
+
+
+def rg_consumers(symbol: str, *, consumer_detection_enabled: bool) -> list[str]:
     if not symbol:
         return []
-    if not RG_AVAILABLE:
+    if not consumer_detection_enabled:
         return []
     cmd = [
         "rg",
@@ -154,7 +166,11 @@ def rg_consumers(symbol: str) -> list[str]:
 
 
 def normalize_entry(
-    marker: dict[str, Any], aliases: dict[str, str], aliases_by_canonical: dict[str, list[str]]
+    marker: dict[str, Any],
+    aliases: dict[str, str],
+    aliases_by_canonical: dict[str, list[str]],
+    *,
+    consumer_detection_enabled: bool,
 ) -> dict[str, Any]:
     raw_name = str(marker.get("name", ""))
     name = aliases.get(raw_name, raw_name)
@@ -165,9 +181,9 @@ def normalize_entry(
     while pos_norm and abs(pos_norm[-1]) < 1e-9:
         pos_norm.pop()
 
-    consumers = set(rg_consumers(name))
+    consumers = set(rg_consumers(name, consumer_detection_enabled=consumer_detection_enabled))
     for alias in aliases_by_canonical.get(name, []):
-        consumers.update(rg_consumers(alias))
+        consumers.update(rg_consumers(alias, consumer_detection_enabled=consumer_detection_enabled))
 
     raw_shape = marker.get("shape", marker.get("markerShape", marker.get("markerType", "")))
 
@@ -242,7 +258,17 @@ def main() -> None:
     parser.add_argument("--aliases", type=Path, default=ALIASES_PATH)
     parser.add_argument("--out-json", type=Path, default=JSON_OUT)
     parser.add_argument("--out-md", type=Path, default=MD_OUT)
+    parser.add_argument(
+        "--consumer-detection",
+        choices=("auto", "on", "off"),
+        default=os.environ.get("MARKER_INDEX_CONSUMER_DETECTION", "auto"),
+        help="Control consumer lookup via ripgrep: auto (default), on, or off.",
+    )
     args = parser.parse_args()
+
+    consumer_detection_enabled, warning = resolve_consumer_detection_mode(args.consumer_detection)
+    if warning:
+        print(warning, file=sys.stderr)
 
     aliases = parse_aliases(args.aliases)
     aliases_by_canonical: dict[str, list[str]] = {}
@@ -250,7 +276,15 @@ def main() -> None:
         aliases_by_canonical.setdefault(canonical, []).append(legacy)
 
     raw_markers = parse_mission_markers(args.sqm)
-    entries = [normalize_entry(marker, aliases, aliases_by_canonical) for marker in raw_markers]
+    entries = [
+        normalize_entry(
+            marker,
+            aliases,
+            aliases_by_canonical,
+            consumer_detection_enabled=consumer_detection_enabled,
+        )
+        for marker in raw_markers
+    ]
     entries.sort(key=lambda item: item["name"])
 
     json_payload = {

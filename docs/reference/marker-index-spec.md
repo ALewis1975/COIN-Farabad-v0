@@ -15,6 +15,27 @@ Run this command to validate generator execution, JSON parseability, and markdow
 python3 scripts/dev/validate_marker_index.py --sqm mission.sqm
 ```
 
+## Dependency policy
+
+Marker index tooling has one dependency policy shared by generator and validator:
+
+- **Required dependencies:** Python 3.11+ and repository inputs (`mission.sqm`, alias mapping).
+- **Optional enhancement:** `ripgrep` (`rg`) for static consumer detection.
+- **Behavior when optional tool is absent:** generation still succeeds deterministically, and each marker entry emits `"consumers": []`.
+- **Warning format (stderr):**
+
+```text
+[marker-index] WARNING: optional dependency 'rg' unavailable; consumer detection disabled; consumers=[] fallback enabled.
+```
+
+### Consumer detection modes
+
+`tools/generate_marker_index.py` supports `--consumer-detection {auto,on,off}` (or `MARKER_INDEX_CONSUMER_DETECTION`):
+
+- `auto` (default): use `rg` when present; otherwise emit the standard warning and degrade to `consumers=[]`.
+- `on`: prefer `rg`; if unavailable, follow the same warning + fallback behavior as `auto`.
+- `off`: skip consumer detection explicitly with no warning.
+
 ## Shared workflow conventions
 
 Both index generators (`tools/generate_marker_index.py` and `tools/generate_unit_index.py`) follow the same contributor workflow conventions:

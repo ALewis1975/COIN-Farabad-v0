@@ -475,3 +475,4 @@ git diff --check
 - Scanner is intentionally pattern-based and checks changed SQF files by default.
 - CI preflight now runs the scanner before linting changed SQF files.
 - Runtime/dedicated/JIP validation: BLOCKED (not applicable for docs/tooling-only update in this container).
+- 2026-02-21T05:56Z | commit: <pending> | Scenario: marker-index consumer-detection optional/fallback determinism validation (`git --no-pager diff --check`, `python -m py_compile tools/generate_marker_index.py scripts/dev/validate_marker_index.py`, and `python3 scripts/dev/validate_marker_index.py`) | Result: PASS | Notes: Added explicit consumer-detection modes, standardized fallback warning format, and validated parity in `off`, `on`, and simulated-missing-`rg` (`auto-no-rg`) modes.
