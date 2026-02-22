@@ -30,6 +30,12 @@ if !(_did isEqualType "") then
 {
     _did = "";
 };
+_did = toUpper (trim _did);
+if !([_did] call ARC_fnc_worldIsValidDistrictId) then
+{
+    _did = [(_out # 3)] call ARC_fnc_threadResolveDistrictId;
+    if !([_did] call ARC_fnc_worldIsValidDistrictId) then { _did = ""; };
+};
 _out set [14, _did];
 
 _out

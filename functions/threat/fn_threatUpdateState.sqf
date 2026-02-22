@@ -208,6 +208,8 @@ missionNamespace setVariable [
         ["ts", _now],
         ["event", _event],
         ["threat_id", _threatId],
+        ["district_id_source", [_links, "district_id_source", ""] call _kvGet],
+        ["district_id", [_links, "district_id", ""] call _kvGet],
         ["state_from", _stateFromU],
         ["state_to", _stateToU],
         ["note", _note]

@@ -837,3 +837,24 @@ git show 2064e9d:functions/core/fn_intelBroadcast.sqf | nl -ba | sed -n '1,90p'
 - Container can statically confirm repo version at commit `2064e9d` defines `_v` before line 57 and now logs a one-line runtime build stamp.
 - Runtime acceptance (RPT zero `_v` errors after sync + mission relaunch) is BLOCKED in this environment because Arma cannot be launched here.
 - Added sync script + runbook for Windows profile mission path to eliminate stale mission-folder copies before runtime verification.
+
+## 2026-02-22 00:00 UTC — district id normalization + threat sentinel hardening
+
+**Branch/Commit:** work @ pending
+
+**Scenario:** Static validation for district-id normalization changes across threat/thread/civsub persistence paths and documentation updates.
+
+**Commands:**
+```
+git diff --check
+rg -n "worldIsValidDistrictId|district_id_source|D00" functions/core functions/threat functions/civsub docs/qa config/CfgFunctions.hpp
+```
+
+**Result:** PASS
+
+**Notes:**
+- Added canonical district validator helper and wired it into threat/thread/civsub persistence-oriented paths.
+- Threat create/update debug payload now includes both `district_id_source` and normalized `district_id` for auditability.
+- Runtime validation: BLOCKED (Arma local MP/dedicated runtime unavailable in this container).
+- Follow-up owner: mission gameplay QA (TOC/dev host) to verify dedicated-server/JIP behavior for unresolved district sentinel rendering.
+- Tracking reference: this PR.

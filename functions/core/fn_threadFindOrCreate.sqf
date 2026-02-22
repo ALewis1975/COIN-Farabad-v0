@@ -83,9 +83,14 @@ if (_bestIdx >= 0) exitWith
             0
         ];
         _thr set [3, _newBase];
-        if ((_thr # 14) isEqualTo "") then
+        private _did = _thr # 14;
+        if !(_did isEqualType "") then { _did = ""; };
+        _did = toUpper (trim _did);
+        if !([_did] call ARC_fnc_worldIsValidDistrictId) then
         {
-            _thr set [14, ([_newBase] call ARC_fnc_threadResolveDistrictId)];
+            _did = [_newBase] call ARC_fnc_threadResolveDistrictId;
+            if !([_did] call ARC_fnc_worldIsValidDistrictId) then { _did = ""; };
+            _thr set [14, _did];
         };
         _threads set [_bestIdx, _thr];
         ["threads", _threads] call ARC_fnc_stateSet;
@@ -112,6 +117,7 @@ _counter = _counter + 1;
 private _id = format ["ARC_thr_%1", _counter];
 private _parentTaskId = [_id, _threadType, _zoneBias, _center] call ARC_fnc_taskEnsureThreadParent;
 private _districtId = [_center] call ARC_fnc_threadResolveDistrictId;
+if !([_districtId] call ARC_fnc_worldIsValidDistrictId) then { _districtId = ""; };
 
 private _now = serverTime;
 

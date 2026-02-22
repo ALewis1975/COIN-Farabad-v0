@@ -189,8 +189,9 @@ Helpers are reusable, context-sensitive UI components. They do not create new wo
 ## 8. Identifier and Naming Conventions
 
 ### IDs
-- **District ID:** D01–D20
-- **Threat ID:** THR:Dxx:000123
+- **District ID (canonical):** `D01`–`D20`
+- **District ID (threat unresolved sentinel):** `D00` (allowed only when district resolution fails; UI should render as unresolved)
+- **Threat ID:** `THR:<district_id>:000123` where `<district_id>` is canonical `D01..D20` or sentinel `D00`
 - **CASREQ ID:** CAS:Dxx:000001
 
 ### missionNamespace Keys
