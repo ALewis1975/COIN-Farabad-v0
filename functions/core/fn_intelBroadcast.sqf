@@ -8,6 +8,7 @@
 */
 
 if (!isServer) exitWith {false};
+diag_log format ["[ARC][intelBroadcast] build=%1 commit=2064e9d", missionNamespace getVariable ["ARC_buildStamp", "unknown"]];
 
 private _maxEntries = missionNamespace getVariable ["ARC_pubIntelMaxEntries", 40];
 if (!(_maxEntries isEqualType 0) || { _maxEntries < 5 }) then { _maxEntries = 40; };
