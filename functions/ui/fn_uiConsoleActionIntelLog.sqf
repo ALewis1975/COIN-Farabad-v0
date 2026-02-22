@@ -16,9 +16,6 @@ if (!hasInterface) exitWith {false};
 // UI event handlers are unscheduled; dialogs require scheduled context.
 if (!canSuspend) exitWith { _this spawn ARC_fnc_uiConsoleActionIntelLog; false };
 
-// sqflint-compat helpers
-private _trimFn     = compile "params ['_s']; trim _s";
-
 // OMNI override (playtesting)
 private _omniTokens = missionNamespace getVariable ["ARC_consoleOmniTokens", ["OMNI"]];
 if (!(_omniTokens isEqualType [])) then { _omniTokens = ["OMNI"]; };
@@ -41,7 +38,7 @@ if (!_canLog) exitWith
 
 private _cat = missionNamespace getVariable ["ARC_consoleIntelDefaultCategory", "HUMINT"];
 if (!(_cat isEqualType "")) then { _cat = "HUMINT"; };
-_cat = toUpper ([_cat] call _trimFn);
+_cat = toUpper (trim _cat);
 if (_cat isEqualTo "") then { _cat = "HUMINT"; };
 
 private _reporter = [player] call ARC_fnc_rolesFormatUnit;
@@ -78,8 +75,8 @@ if (!_ok) exitWith
     false
 };
 
-_summary = [_summary] call _trimFn;
-_details = [_details] call _trimFn;
+_summary = trim _summary;
+_details = trim _details;
 
 if (_summary isEqualTo "") exitWith
 {

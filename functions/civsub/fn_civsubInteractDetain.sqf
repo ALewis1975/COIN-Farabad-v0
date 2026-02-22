@@ -23,10 +23,6 @@ params [
 if (isNull _actor || {isNull _civ}) exitWith {false};
 if !(isPlayer _actor) exitWith {false};
 
-// sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
-private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
-
 // Dedicated MP hardening:
 // If invoked via remoteExec, bind actor identity to network sender.
 if (!isNil "remoteExecutedOwner") then
@@ -61,6 +57,9 @@ if (_civUid isEqualTo "") then {
     _civ setVariable ["civ_uid", _civUid, true];
 };
 
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
 private _rec = [_did, _actorUid, _civUid, getPosATL _civ] call ARC_fnc_civsubIdentityTouch;
 if !(_rec isEqualType createHashMap) exitWith {false};
 
@@ -85,7 +84,7 @@ _civ switchMove "AmovPercMstpSsurWnonDnon";
 
 [_civUid, _rec] call ARC_fnc_civsubIdentitySet;
 
-[_did, "DETENTION_INIT", "IDENTITY", [[["civ_uid", _civUid], ["wanted_level", _wl]]] call _hmFrom, _actorUid] call ARC_fnc_civsubEmitDelta;
+[_did, "DETENTION_INIT", "IDENTITY", [[["civ_uid", _civUid], ["wanted_level", _wl]]] call _hmCreate, _actorUid] call ARC_fnc_civsubEmitDelta;
 
 if (!_silent) then {
     ["CIVSUB: Civilian marked detained.", "CHAT"] remoteExecCall ["ARC_fnc_civsubClientMessage", _actor];

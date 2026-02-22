@@ -38,15 +38,15 @@ private _changed = false;
     private _thr = [_x] call ARC_fnc_threadNormalizeRecord;
     if (_thr isEqualTo []) then { continue; };
 
-    private _id     = _thr select 0;
-    private _type   = _thr select 1;
-    private _zone   = _thr select 2;
-    private _base   = _thr select 3;
-    private _conf   = (_thr select 4) max 0 min 1;
-    private _heat   = (_thr select 5) max 0 min 1;
-    private _state  = _thr select 6;
-    private _evi    = _thr select 7;
-    private _touch  = _thr select 10;
+    private _id     = _thr # 0;
+    private _type   = _thr # 1;
+    private _zone   = _thr # 2;
+    private _base   = _thr # 3;
+    private _conf   = (_thr # 4) max 0 min 1;
+    private _heat   = (_thr # 5) max 0 min 1;
+    private _state  = _thr # 6;
+    private _evi    = _thr # 7;
+    private _touch  = _thr # 10;
 
     if (!(_evi isEqualType [])) then { _evi = []; };
 
@@ -60,7 +60,7 @@ private _changed = false;
     private _newEvi = [];
     {
         if (!(_x isEqualType []) || { (count _x) < 5 }) then { continue; };
-        private _t = _x select 0;
+        private _t = _x # 0;
         if (!(_t isEqualType 0)) then { continue; };
         if ((_now - _t) <= _eviTTL) then
         {

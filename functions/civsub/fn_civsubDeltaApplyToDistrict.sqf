@@ -7,18 +7,13 @@
       0: bundle hashmap
 */
 
-// sqflint-compat helpers
-private _hg       = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
-private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
-
-
 params [["_bundle", createHashMap, [createHashMap]]];
 if !(_bundle isEqualType createHashMap) exitWith {false};
 
 private _districtId = [_bundle, "districtId", ([_bundle, "district_id", ""] call _hg)];
 if (_districtId isEqualTo "") exitWith {false};
 
-private _delta = [_bundle, "influence_delta", createHashMap] call _hg;
+private _delta = _bundle getOrDefault ["influence_delta", createHashMap];
 if !(_delta isEqualType createHashMap) exitWith {false};
 
 // Support both legacy keys (dW/dR/dG) and contract keys (W/R/G)
@@ -29,30 +24,30 @@ private _dG = [_delta, "G", ([_delta, "dG", 0] call _hg)];
 private _d = [_districtId] call ARC_fnc_civsubDistrictsGetById;
 if !(_d isEqualType createHashMap) exitWith {false};
 
-_d set ["W_EFF_U", ([_d, "W_EFF_U", 0] call _hg) + _dW];
-_d set ["R_EFF_U", ([_d, "R_EFF_U", 0] call _hg) + _dR];
-_d set ["G_EFF_U", ([_d, "G_EFF_U", 0] call _hg) + _dG];
+_d set ["W_EFF_U", (_d getOrDefault ["W_EFF_U", 0]) + _dW];
+_d set ["R_EFF_U", (_d getOrDefault ["R_EFF_U", 0]) + _dR];
+_d set ["G_EFF_U", (_d getOrDefault ["G_EFF_U", 0]) + _dG];
 
 [_d] call ARC_fnc_civsubDistrictsClamp;
 
 // Phase 6 counters (best-effort). These are cumulative district totals.
-private _src = [_bundle, "source", createHashMap] call _hg;
-if (_src isEqualType []) then { _src = [_src] call _hmFrom; };
+private _src = _bundle getOrDefault ["source", createHashMap];
+if (_src isEqualType []) then { _src = createHashMapFromArray _src; };
 private _ev = "";
-if (_src isEqualType createHashMap) then { _ev = toUpper ([_src, "event", ""] call _hg); };
+if (_src isEqualType createHashMap) then { _ev = toUpper (_src getOrDefault ["event", ""]); };
 
-if (!(_ev isEqualTo "")) then
+if (_ev isNotEqualTo "") then
 {
     switch (_ev) do
     {
-        case "CRIME_DB_HIT": { _d set ["crime_db_hits", ([_d, "crime_db_hits", 0] call _hg) + 1]; };
-        case "DETENTION_INIT": { _d set ["detentions_initiated", ([_d, "detentions_initiated", 0] call _hg) + 1]; };
-        case "DETENTION_HANDOFF": { _d set ["detentions_handed_off", ([_d, "detentions_handed_off", 0] call _hg) + 1]; };
+        case "CRIME_DB_HIT": { _d set ["crime_db_hits", (_d getOrDefault ["crime_db_hits", 0]) + 1]; };
+        case "DETENTION_INIT": { _d set ["detentions_initiated", (_d getOrDefault ["detentions_initiated", 0]) + 1]; };
+        case "DETENTION_HANDOFF": { _d set ["detentions_handed_off", (_d getOrDefault ["detentions_handed_off", 0]) + 1]; };
         case "AID_WATER";
         case "AID_RATIONS";
-        case "MED_AID_CIV": { _d set ["aid_events", ([_d, "aid_events", 0] call _hg) + 1]; };
-        case "CIV_KILLED": { _d set ["civ_cas_kia", ([_d, "civ_cas_kia", 0] call _hg) + 1]; };
-        case "CIV_WIA": { _d set ["civ_cas_wia", ([_d, "civ_cas_wia", 0] call _hg) + 1]; };
+        case "MED_AID_CIV": { _d set ["aid_events", (_d getOrDefault ["aid_events", 0]) + 1]; };
+        case "CIV_KILLED": { _d set ["civ_cas_kia", (_d getOrDefault ["civ_cas_kia", 0]) + 1]; };
+        case "CIV_WIA": { _d set ["civ_cas_wia", (_d getOrDefault ["civ_cas_wia", 0]) + 1]; };
         default {};
     };
 };
@@ -61,17 +56,17 @@ if (!(_ev isEqualTo "")) then
 // Reason: broadcasting a HashMap once does not replicate in-place mutations to nested HashMaps.
 // We keep a simple array-of-pairs per district that clients can read reliably.
 private _pub = [
-    ["G", [_d, "G_EFF_U", 35] call _hg],
-    ["crime_db_hits", [_d, "crime_db_hits", 0] call _hg],
-    ["detentions_initiated", [_d, "detentions_initiated", 0] call _hg],
-    ["civ_cas_kia", [_d, "civ_cas_kia", 0] call _hg],
+    ["G", _d getOrDefault ["G_EFF_U", 35]],
+    ["crime_db_hits", _d getOrDefault ["crime_db_hits", 0]],
+    ["detentions_initiated", _d getOrDefault ["detentions_initiated", 0]],
+    ["civ_cas_kia", _d getOrDefault ["civ_cas_kia", 0]],
     ["districtId", _districtId],
-    ["detentions_handed_off", [_d, "detentions_handed_off", 0] call _hg],
-    ["R", [_d, "R_EFF_U", 55] call _hg],
-    ["civ_cas_wia", [_d, "civ_cas_wia", 0] call _hg],
+    ["detentions_handed_off", _d getOrDefault ["detentions_handed_off", 0]],
+    ["R", _d getOrDefault ["R_EFF_U", 55]],
+    ["civ_cas_wia", _d getOrDefault ["civ_cas_wia", 0]],
     ["ts", serverTime],
-    ["aid_events", [_d, "aid_events", 0] call _hg],
-    ["W", [_d, "W_EFF_U", 45] call _hg]
+    ["aid_events", _d getOrDefault ["aid_events", 0]],
+    ["W", _d getOrDefault ["W_EFF_U", 45]]
 ];
 missionNamespace setVariable [format ["civsub_v1_district_pub_%1", _districtId], _pub, true];
 
@@ -81,15 +76,15 @@ if (_ev in ["CRIME_DB_HIT","DETENTION_INIT","DETENTION_HANDOFF","CIV_KILLED","CI
     diag_log format ["[CIVSUB][DELTA][%1] did=%2 W=%3 R=%4 G=%5 kia=%6 wia=%7 hits=%8 detI=%9 detH=%10 aid=%11",
         _ev,
         _districtId,
-        [_d, "W_EFF_U", -1] call _hg,
-        [_d, "R_EFF_U", -1] call _hg,
-        [_d, "G_EFF_U", -1] call _hg,
-        [_d, "civ_cas_kia", -1] call _hg,
-        [_d, "civ_cas_wia", -1] call _hg,
-        [_d, "crime_db_hits", -1] call _hg,
-        [_d, "detentions_initiated", -1] call _hg,
-        [_d, "detentions_handed_off", -1] call _hg,
-        [_d, "aid_events", -1] call _hg
+        _d getOrDefault ["W_EFF_U", -1],
+        _d getOrDefault ["R_EFF_U", -1],
+        _d getOrDefault ["G_EFF_U", -1],
+        _d getOrDefault ["civ_cas_kia", -1],
+        _d getOrDefault ["civ_cas_wia", -1],
+        _d getOrDefault ["crime_db_hits", -1],
+        _d getOrDefault ["detentions_initiated", -1],
+        _d getOrDefault ["detentions_handed_off", -1],
+        _d getOrDefault ["aid_events", -1]
     ];
 };
 

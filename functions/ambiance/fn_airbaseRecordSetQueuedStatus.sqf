@@ -16,25 +16,19 @@ if (!(_flightId isEqualType "")) then { _flightId = ""; };
 if (!(_status isEqualType "")) then { _status = ""; };
 if (!(_metaAppend isEqualType [])) then { _metaAppend = []; };
 
-// sqflint-compat helpers
-private _trimFn = compile "params ['_s']; trim _s";
-
-_flightId = [_flightId] call _trimFn;
-_status = toUpper ([_status] call _trimFn);
+_flightId = trim _flightId;
+_status = toUpperANSI (trim _status);
 
 if (_flightId isEqualTo "") exitWith { [_records, false] };
 if !(_status in ["CANCELED", "PRIORITIZED", "ACTIVE", "COMPLETE", "FAILED"]) exitWith { [_records, false] };
 
-private _idx = -1;
-{
-    if ((_x param [0, ""]) isEqualTo _flightId) exitWith { _idx = _forEachIndex; };
-} forEach _records;
+private _idx = _records findIf { ((_x param [0, ""]) isEqualTo _flightId) };
 if (_idx < 0) exitWith { [_records, false] };
 
-private _rec = _records select _idx;
+private _rec = _records # _idx;
 private _curr = _rec param [5, ""];
 
-if ((_curr != "QUEUED") && { !(_status in ["ACTIVE", "COMPLETE", "FAILED"]) }) exitWith { [_records, false] };
+if ((_curr isNotEqualTo "QUEUED") && { !(_status in ["ACTIVE", "COMPLETE", "FAILED"]) }) exitWith { [_records, false] };
 
 _rec set [5, _status];
 _rec set [6, serverTime];

@@ -33,9 +33,6 @@ params [
 if (isNull _caller) exitWith {false};
 if (!isPlayer _caller) exitWith {false};
 
-// sqflint-compat helpers
-private _trimFn     = compile "params ['_s']; trim _s";
-
 // RemoteExec anti-spoof (best effort)
 if (!isNil "remoteExecutedOwner") then
 {
@@ -60,7 +57,7 @@ private _getPair = {
     params ["_pairs", "_k", "_d"];
     if (!(_pairs isEqualType [])) exitWith { _d };
     {
-        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _x select 1 };
+        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _x # 1 };
     } forEach _pairs;
     _d
 };
@@ -71,8 +68,8 @@ private _setPair = {
     private _found = false;
     for "_i" from 0 to ((count _pairs) - 1) do
     {
-        private _p = _pairs select _i;
-        if (_p isEqualType [] && { (count _p) >= 2 } && { (_p select 0) isEqualTo _k }) exitWith
+        private _p = _pairs # _i;
+        if (_p isEqualType [] && { (count _p) >= 2 } && { (_p # 0) isEqualTo _k }) exitWith
         {
             _pairs set [_i, [_k, _v]];
             _found = true;
@@ -83,7 +80,7 @@ private _setPair = {
 };
 
 private _orderIdO = "";
-if (_orderIdOverride isEqualType "") then { _orderIdO = [_orderIdOverride] call _trimFn; };
+if (_orderIdOverride isEqualType "") then { _orderIdO = trim _orderIdOverride; };
 
 // Find the ACCEPTED RTB(EPW) order.
 // - Default: group-scoped (targetGroup == caller groupId)
@@ -94,35 +91,34 @@ if (!(_orders isEqualType [])) then { _orders = []; };
 private _idx = -1;
 private _ord = [];
 
-if (!(_orderIdO isEqualTo "")) then
+if (_orderIdO isNotEqualTo "") then
 {
     if (!_canForce) exitWith {false};
 
-    _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 7 } && { (_x select 0) isEqualTo _orderIdO }) exitWith { _idx = _forEachIndex; }; } forEach _orders;
-    if (_idx >= 0) then { _ord = _orders select _idx; };
+    _idx = _orders findIf { (_x isEqualType []) && { (count _x) >= 7 } && { (_x # 0) isEqualTo _orderIdO } };
+    if (_idx >= 0) then { _ord = _orders # _idx; };
     if (_idx < 0 || {_ord isEqualTo []}) exitWith {false};
 
     _ord params ["_orderId", "_issuedAt", "_status", "_orderType", "_targetGroup", "_data", "_meta"];
 
-    if (!((toUpper _status) isEqualTo "ACCEPTED")) exitWith {false};
-    if (!((toUpper _orderType) isEqualTo "RTB")) exitWith {false};
+    if ((toUpper _status) isNotEqualTo "ACCEPTED") exitWith {false};
+    if ((toUpper _orderType) isNotEqualTo "RTB") exitWith {false};
 
     private _purposeO = toUpper ([_data, "purpose", "REFIT"] call _getPair);
-    if (!(_purposeO isEqualTo "EPW")) exitWith {false};
+    if (_purposeO isNotEqualTo "EPW") exitWith {false};
 }
 else
 {
     for "_i" from 0 to ((count _orders) - 1) do
     {
-        private _o = _orders select _i;
+        private _o = _orders # _i;
         if (!(_o isEqualType [] && { (count _o) >= 7 })) then { continue; };
 
         _o params ["_orderId", "_issuedAt", "_status", "_orderType", "_targetGroup", "_data", "_meta"]; 
 
-        if (!((toUpper _status) isEqualTo "ACCEPTED")) then { continue; };
-        if (!((toUpper _orderType) isEqualTo "RTB")) then { continue; };
-        if (!(_targetGroup isEqualTo _gidCaller)) then { continue; };
+        if ((toUpper _status) isNotEqualTo "ACCEPTED") then { continue; };
+        if ((toUpper _orderType) isNotEqualTo "RTB") then { continue; };
+        if (_targetGroup isNotEqualTo _gidCaller) then { continue; };
 
         private _purpose = toUpper ([_data, "purpose", "REFIT"] call _getPair);
         if (_purpose isEqualTo "EPW") exitWith
@@ -175,7 +171,7 @@ private _resolveHolding = {
         if (!((markerType _cand) isEqualTo "")) exitWith { _mHold = _cand; };
     } forEach ["epw_holding", "mkr_SHERIFF_HOLDING"];
 
-    if (!(_mHold isEqualTo "")) exitWith
+    if (_mHold isNotEqualTo "") exitWith
     {
         private _hp = getMarkerPos _mHold; _hp resize 3;
         private _hl = markerText _mHold;
@@ -246,7 +242,7 @@ private _moved = 0;
     // Small scatter around holding marker
     private _offX = (random 10) - 5;
     private _offY = (random 10) - 5;
-    private _hp = [(_holdPos select 0) + _offX, (_holdPos select 1) + _offY, 0];
+    private _hp = [(_holdPos # 0) + _offX, (_holdPos # 1) + _offY, 0];
 
     // Move out of vehicle if needed, then place
     [_u, _hp] spawn {
@@ -305,7 +301,7 @@ _orders set [_idx, [_orderId, _issuedAt, _status, _orderType, _targetGroup, _dat
 ["tocOrders", _orders] call ARC_fnc_stateSet;
 
 // Complete the RTB task if present
-if (!(_taskId isEqualTo "")) then
+if (_taskId isNotEqualTo "") then
 {
     if ([_taskId] call BIS_fnc_taskExists) then
     {
@@ -322,8 +318,8 @@ _tot = _tot + _moved;
 private _pos = if (_destPos isEqualType [] && { (count _destPos) >= 2 }) then { +_destPos } else { getPosATL _caller };
 _pos resize 3;
 
-private _sum = [_summary] call _trimFn;
-private _det = [_details] call _trimFn;
+private _sum = trim _summary;
+private _det = trim _details;
 if (_sum isEqualTo "") then
 {
     _sum = format ["EPW processed: %1 transferred to holding (%2).", _moved, _holdLabel];
@@ -338,7 +334,7 @@ private _iMeta = [
     ["moved", _moved],
     ["holding", _holdLabel]
 ];
-if (!(_det isEqualTo "")) then { _iMeta pushBack ["details", _det]; };
+if (_det isNotEqualTo "") then { _iMeta pushBack ["details", _det]; };
 
 ["EPW", _sum, _pos, _iMeta] call ARC_fnc_intelLog;
 

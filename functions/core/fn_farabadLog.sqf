@@ -28,31 +28,28 @@ params [
 private _enabled = missionNamespace getVariable ["FARABAD_log_enabled", true];
 if !(_enabled) exitWith { false };
 
-// sqflint-compat helpers
-private _hmFrom = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
-private _mapGet = compile "params ['_h','_k']; _h get _k";
+private _levelOrder = createHashMapFromArray [
+    ["DEBUG", 10],
+    ["INFO", 20],
+    ["WARN", 30],
+    ["ERROR", 40]
+];
 
-private _levelOrder = [
-    [["DEBUG", 10], ["INFO", 20], ["WARN", 30], ["ERROR", 40]]
-] call _hmFrom;
-
-private _normalizedLevel = toUpper _level;
+private _normalizedLevel = toUpperANSI _level;
 if !(_normalizedLevel in _levelOrder) then {
     _normalizedLevel = "INFO";
 };
 
-private _minLevelCfg = toUpper (missionNamespace getVariable ["FARABAD_log_minLevel", "INFO"]);
+private _minLevelCfg = toUpperANSI (missionNamespace getVariable ["FARABAD_log_minLevel", "INFO"]);
 if !(_minLevelCfg in _levelOrder) then {
     _minLevelCfg = "INFO";
 };
 
-private _currentPriority = [_levelOrder, _normalizedLevel] call _mapGet;
-private _minimumPriority = [_levelOrder, _minLevelCfg] call _mapGet;
-if (!(_currentPriority isEqualType 0)) then { _currentPriority = 20; };
-if (!(_minimumPriority isEqualType 0)) then { _minimumPriority = 20; };
+private _currentPriority = _levelOrder get _normalizedLevel;
+private _minimumPriority = _levelOrder get _minLevelCfg;
 if (_currentPriority < _minimumPriority) exitWith { false };
 
-private _channelNorm = toUpper _channel;
+private _channelNorm = toUpperANSI _channel;
 private _text = if (_message isEqualType "") then { _message } else { str _message };
 private _includeMeta = missionNamespace getVariable ["FARABAD_log_includeMeta", true];
 private _metaText = if (_includeMeta) then { str _meta } else { "<omitted>" };
@@ -78,8 +75,9 @@ if (missionNamespace getVariable ["FARABAD_log_toExtension", false]) then {
 
         // callExtension may fail depending on extension availability/load state.
         // Keep gameplay flow safe by swallowing failures and warning once.
+        private _extensionResult = nil;
         _extensionFailed = isNil {
-            _extensionName callExtension _line;
+            _extensionResult = _extensionName callExtension _line;
             false
         };
 

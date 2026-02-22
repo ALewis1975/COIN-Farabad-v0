@@ -23,9 +23,6 @@ params [
     ["_snap", createHashMap, [createHashMap]]
 ];
 
-// sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
-
 uiNamespace setVariable ["ARC_civsubInteract_snapshot", _snap];
 
 private _d = uiNamespace getVariable ["ARC_civsubInteract_display", displayNull];
@@ -36,11 +33,11 @@ if (!isNull _d) then {
     _lbA = _d displayCtrl 78310;
 };
 
-private _name = [_snap, "name_display", "Unknown"] call _hg; 
-private _serial = [_snap, "passport_serial", ""] call _hg; 
-private _did = [_snap, "districtId", ""] call _hg; 
-private _det = [_snap, "detained", false] call _hg;
-private _known = [_snap, "known", false] call _hg;
+private _name = _snap getOrDefault ["name_display", "Unknown"]; 
+private _serial = _snap getOrDefault ["passport_serial", ""]; 
+private _did = _snap getOrDefault ["districtId", ""]; 
+private _det = _snap getOrDefault ["detained", false];
+private _known = _snap getOrDefault ["known", false];
 
 private _serialLine = if (_serial isEqualTo "") then {"Serial: N/A"} else {format ["Serial: %1", _serial]};
 private _knownLine = if (_known) then {"Status: VERIFIED"} else {"Status: UNVERIFIED"};

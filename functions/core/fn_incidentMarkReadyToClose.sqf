@@ -24,9 +24,6 @@ params [
     ["_posATL", []]
 ];
 
-// sqflint-compat helpers
-private _findIfFn   = compile "params ['_arr','_cond']; private _r = -1; { if (_x call _cond) exitWith { _r = _forEachIndex; }; } forEach _arr; _r";
-
 private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
 if (_taskId isEqualTo "") exitWith {false};
 
@@ -52,12 +49,11 @@ missionNamespace setVariable ["ARC_activeIncidentCloseReason", _reason, true];
 missionNamespace setVariable ["ARC_activeIncidentCloseMarkedAt", serverTime, true];
 
 private _gid = ["activeIncidentAcceptedByGroup", ""] call ARC_fnc_stateGet;
-if (_gid isEqualType "" && { !(_gid isEqualTo "") }) then
+if (_gid isEqualType "" && { _gid isNotEqualTo "" }) then
 {
     private _rows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
     if (!(_rows isEqualType [])) then { _rows = []; };
-    private _idx = -1;
-    { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _gid }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
+    private _idx = _rows findIf { _x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _gid } };
     private _row = [_gid, "ON SCENE", serverTime, "SYSTEM"];
     if (_idx < 0) then { _rows pushBack _row; } else { _rows set [_idx, _row]; };
     missionNamespace setVariable ["ARC_pub_unitStatuses", _rows, true];

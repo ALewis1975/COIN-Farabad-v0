@@ -15,9 +15,6 @@
 
 if (!isServer) exitWith {[]};
 
-// sqflint-compat helpers
-private _trimFn     = compile "params ['_s']; trim _s";
-
 // Prune expired leads first.
 [] call ARC_fnc_leadPrune;
 
@@ -33,11 +30,11 @@ private _cmdBest = -1;
 {
     if !(_x isEqualType []) then { continue; };
     if ((count _x) < 2) then { continue; };
-    private _tU = toUpper (_x select 1);
+    private _tU = toUpper (_x # 1);
     if (_tU find "CMDNODE" != 0) then { continue; };
 
     private _s = 1;
-    if ((count _x) > 4) then { _s = _x select 4; };
+    if ((count _x) > 4) then { _s = _x # 4; };
     if (_s > _cmdBest) then
     {
         _cmdBest = _s;
@@ -54,10 +51,10 @@ private _priBestCreated = 1e12;
     if !(_x isEqualType []) then { continue; };
     if ((count _x) < 11) then { continue; };
 
-    private _tag = _x select 10;
+    private _tag = _x # 10;
     if (!(_tag isEqualType "")) then { continue; };
 
-    private _tU = toUpper ([_tag] call _trimFn);
+    private _tU = toUpper (trim _tag);
     if (_tU isEqualTo "") then { continue; };
 
     private _isPri = false;
@@ -68,7 +65,7 @@ private _priBestCreated = 1e12;
 
     if (!_isPri) then { continue; };
 
-    private _c = _x select 5; // createdAt
+    private _c = _x # 5; // createdAt
     if (!(_c isEqualType 0)) then { _c = serverTime; };
 
     // FIFO-ish: older TOC requests should be consumed first.
@@ -111,7 +108,7 @@ else
             private _acc = 0;
 
             {
-                _acc = _acc + (_weights select _forEachIndex);
+                _acc = _acc + (_weights # _forEachIndex);
                 if (_r <= _acc) exitWith { _pickIdx = _forEachIndex; };
             } forEach _leads;
         }
@@ -129,7 +126,7 @@ private _lead = _leads deleteAt _pickIdx;
 // If this lead had an approximate circle marker, remove it once consumed into a task.
 if (_lead isEqualType [] && { (count _lead) >= 1 }) then
 {
-    private _lid = _lead select 0;
+    private _lid = _lead # 0;
     private _mk = format ["ARC_leadCircle_%1", _lid];
     if (_mk in allMapMarkers) then { deleteMarker _mk; };
     missionNamespace setVariable [format ["ARC_leadCircleExpiresAt_%1", _lid], nil];
@@ -190,7 +187,7 @@ if (_lead isEqualType [] && { (count _lead) >= 4 }) then
 // Track lead end-state (consumed into an actionable task)
 if (_lead isEqualType [] && { (count _lead) >= 1 }) then
 {
-    private _lid = _lead select 0;
+    private _lid = _lead # 0;
     private _lh = ["leadHistory", []] call ARC_fnc_stateGet;
     if (!(_lh isEqualType [])) then { _lh = []; };
     _lh pushBack [_lid, "CONSUMED", serverTime];

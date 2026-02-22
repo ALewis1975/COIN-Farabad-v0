@@ -28,11 +28,6 @@ params [
 if (isNull _actor || {isNull _civ}) exitWith {false};
 if !(isPlayer _actor) exitWith {false};
 
-// sqflint-compat helpers
-private _trimFn     = compile "params ['_s']; trim _s";
-private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
-private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
-
 // Dedicated MP hardening:
 // If invoked via remoteExec, bind actor identity to network sender.
 if (!isNil "remoteExecutedOwner") then
@@ -52,6 +47,10 @@ if (!isNil "remoteExecutedOwner") then
         };
     };
 };
+
+private _hg     = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+private _trimFn = compile "params ['_s']; trim _s";
 
 private _methodUp = toUpper ([_method] call _trimFn);
 if (_methodUp isEqualTo "") then { _methodUp = "SEARCH"; };
@@ -75,7 +74,7 @@ if (_requireCompliance && { !_isCompliant }) exitWith {
 
 
 private _d = [_did] call ARC_fnc_civsubDistrictsGetById;
-if (_d isEqualType []) then { _d = [_d] call _hmFrom; };
+if (_d isEqualType []) then { _d = [_d] call _hmCreate; };
 if !(_d isEqualType createHashMap) exitWith {false};
 
 private _scores = [_d] call ARC_fnc_civsubScoresCompute;
@@ -136,7 +135,7 @@ if (_hit) then
             _rec set ["poi_id", _poiId];
             _rec set ["charges", _charges];
 
-            private _flags = [_rec, "flags", []];
+            private _flags = [_rec, "flags", []] call _hg;
             if !(_flags isEqualType []) then { _flags = []; };
             if ((_flags find "CRIMEDB_HIT") < 0) then { _flags pushBack "CRIMEDB_HIT"; };
             _rec set ["flags", _flags];
@@ -152,7 +151,7 @@ private _payloadCheck = [[
     ["method", _methodUp],
     ["passport_serial", _serial],
     ["hit", _hit]
-]] call _hmFrom;
+]] call _hmCreate;
 [_did, "CHECK_PAPERS", "IDENTITY", _payloadCheck, _actorUid] call ARC_fnc_civsubEmitDelta;
 
 if !(_hit) exitWith {
@@ -166,7 +165,7 @@ private _payloadHit = [[
     ["hit", true],
     ["wanted_level", _wanted],
     ["charges", _charges]
-]] call _hmFrom;
+]] call _hmCreate;
 
 if !(["CRIME_DB_HIT", _payloadHit] call ARC_fnc_civsubDeltaValidate) exitWith {false};
 
@@ -178,7 +177,7 @@ private _seed = [[
     ["subject_civ_uid", _civUid],
     ["home_pos", [_rec, "home_pos", getPosATL _civ] call _hg],
     ["linked_network", "RED"]
-]] call _hmFrom;
+]] call _hmCreate;
 
 _bundle set ["lead_emit", [[
     ["emit", true],
@@ -186,7 +185,7 @@ _bundle set ["lead_emit", [[
     ["lead_id", ""],
     ["confidence", _intelConf],
     ["seed", _seed]
-]] call _hmFrom];
+]] call _hmCreate];
 
 // Apply to district + update lastDelta probes (mirrors ARC_fnc_civsubEmitDelta).
 [_bundle] call ARC_fnc_civsubDeltaApplyToDistrict;

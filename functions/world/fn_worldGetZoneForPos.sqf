@@ -20,17 +20,17 @@ _p2 resize 2;
 private _zones = missionNamespace getVariable ["ARC_worldZones", []];
 if !(_zones isEqualType []) exitWith {""};
 
-private _px = _p2 select 0;
-private _py = _p2 select 1;
+private _px = _p2 # 0;
+private _py = _p2 # 1;
 
 private _zone = "";
 {
     _x params ["_id", "_displayName", "_center", "_halfExtents", "_dir"];
 
-    private _cx = _center select 0;
-    private _cy = _center select 1;
-    private _hw = _halfExtents select 0;
-    private _hh = _halfExtents select 1;
+    private _cx = _center # 0;
+    private _cy = _center # 1;
+    private _hw = _halfExtents # 0;
+    private _hh = _halfExtents # 1;
 
     // Rotate point into zone-local space (rectangle containment check)
     private _dx = _px - _cx;

@@ -24,25 +24,24 @@ if (_threadId isEqualTo "") exitWith {false};
 private _threads = ["threads", []] call ARC_fnc_stateGet;
 if (!(_threads isEqualType [])) then { _threads = []; };
 
-private _idx = -1;
-{ if (!(([_x] call ARC_fnc_threadNormalizeRecord) isEqualTo []) && { ((_x select 0) isEqualTo _threadId) }) exitWith { _idx = _forEachIndex; }; } forEach _threads;
+private _idx = _threads findIf { ([_x] call ARC_fnc_threadNormalizeRecord) isNotEqualTo [] && { ((_x # 0) isEqualTo _threadId) } };
 if (_idx < 0) exitWith {false};
 
-private _thr = [(_threads select _idx)] call ARC_fnc_threadNormalizeRecord;
+private _thr = [(_threads # _idx)] call ARC_fnc_threadNormalizeRecord;
 
 private _now = serverTime;
 
-private _threadType = toUpper (_thr select 1);
-private _zoneBias = _thr select 2;
-private _basePos = _thr select 3;
-private _conf = (_thr select 4) max 0 min 1;
-private _heat = (_thr select 5) max 0 min 1;
-private _state = toUpper (_thr select 6);
-private _evi = _thr select 7;
-private _fuSuccess = _thr select 8;
-private _lastTouched = _thr select 10;
-private _cooldownUntil = _thr select 11;
-private _lastCmd = _thr select 12;
+private _threadType = toUpper (_thr # 1);
+private _zoneBias = _thr # 2;
+private _basePos = _thr # 3;
+private _conf = (_thr # 4) max 0 min 1;
+private _heat = (_thr # 5) max 0 min 1;
+private _state = toUpper (_thr # 6);
+private _evi = _thr # 7;
+private _fuSuccess = _thr # 8;
+private _lastTouched = _thr # 10;
+private _cooldownUntil = _thr # 11;
+private _lastCmd = _thr # 12;
 
 if (!(_evi isEqualType [])) then { _evi = []; };
 
@@ -62,7 +61,7 @@ private _kinds = [];
 {
     if (_x isEqualType [] && { (count _x) >= 4 }) then
     {
-        _kinds pushBackUnique (_x select 3);
+        _kinds pushBackUnique (_x # 3);
     };
 } forEach _evi;
 
@@ -94,8 +93,9 @@ if ((random 1) > _chance) exitWith {false};
 // Do not create a second command node lead if one already exists for this thread.
 private _leadPool = ["leadPool", []] call ARC_fnc_stateGet;
 if (!(_leadPool isEqualType [])) then { _leadPool = []; };
-private _hasCmd = -1;
-{ if (_x isEqualType [] && { (count _x) >= 10 } && { (_x select 9) isEqualTo _threadId } && { toUpper (_x select 1) find "CMDNODE" == 0 }) exitWith { _hasCmd = _forEachIndex; }; } forEach _leadPool;
+private _hasCmd = _leadPool findIf {
+    _x isEqualType [] && { (count _x) >= 10 } && { (_x # 9) isEqualTo _threadId } && { toUpper (_x # 1) find "CMDNODE" == 0 }
+};
 if (_hasCmd >= 0) exitWith {false};
 
 // Variant: heat + commander state determine whether this is a raid, meet, or intercept.

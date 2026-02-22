@@ -22,10 +22,6 @@ params [
 if (isNull _actor || {isNull _civ}) exitWith {false};
 if !(isPlayer _actor) exitWith {false};
 
-// sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
-private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
-
 // Dedicated MP hardening:
 // If invoked via remoteExec, bind actor identity to network sender.
 if (!isNil "remoteExecutedOwner") then
@@ -46,6 +42,9 @@ if (!isNil "remoteExecutedOwner") then
     };
 };
 
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
 private _did = _civ getVariable ["civsub_districtId", ""];
 if (_did isEqualTo "") exitWith {
     ["CIVSUB: This civilian has no district id.", "CHAT"] remoteExecCall ["ARC_fnc_civsubClientMessage", _actor];
@@ -53,7 +52,7 @@ if (_did isEqualTo "") exitWith {
 };
 
 private _d = [_did] call ARC_fnc_civsubDistrictsGetById;
-if (_d isEqualType []) then { _d = [_d] call _hmFrom; };
+if (_d isEqualType []) then { _d = [_d] call _hmCreate; };
 if !(_d isEqualType createHashMap) exitWith {false};
 
 private _scores = [_d] call ARC_fnc_civsubScoresCompute;
@@ -128,7 +127,7 @@ private _homeGrid = mapGridPosition _homePos;
 private _wanted = [_rec, "wanted_level", 0] call _hg;
 private _detained = [_rec, "status_detained", false] call _hg;
 private _poi = [_rec, "poi_id", ""] call _hg;
-private _charges = [_rec, "charges", []];
+private _charges = [_rec, "charges", []] call _hg;
 private _knownDb = !(_poi isEqualTo "") || {(_charges isEqualType []) && {(count _charges) > 0}};
 
 private _flags = [];
@@ -148,7 +147,7 @@ private _payload = [[
     ["home_grid", _homeGrid],
     ["districtId", _did],
     ["flags", _flags]
-]] call _hmFrom;
+]] call _hmCreate;
 
 [_did, "SHOW_PAPERS", "IDENTITY", _payload, _actorUid] call ARC_fnc_civsubEmitDelta;
 

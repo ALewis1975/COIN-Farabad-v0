@@ -13,11 +13,6 @@ params [
     ["_active", [], [[]]]
 ];
 
-// sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
-private _keysFn   = compile "params ['_m']; keys _m";
-private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
-
 private _capG = missionNamespace getVariable ["civsub_v1_civ_cap_global", 24];
 private _capD = missionNamespace getVariable ["civsub_v1_civ_cap_perDistrict", 8];
 
@@ -71,13 +66,13 @@ if !(_districtsAll isEqualType createHashMap) then { _districtsAll = createHashM
 if (_popRef <= 0) then {
     private _mx = 1;
     {
-        private _d0 = [_districtsAll, _x, createHashMap] call _hg;
-        if (_d0 isEqualType []) then { _d0 = [_d0] call _hmFrom; };
+        private _d0 = _districtsAll getOrDefault [_x, createHashMap];
+        if (_d0 isEqualType []) then { _d0 = createHashMapFromArray _d0; };
         if (_d0 isEqualType createHashMap) then {
-            private _p0 = [_d0, "pop_total", 0] call _hg;
+            private _p0 = _d0 getOrDefault ["pop_total", 0];
             if (_p0 isEqualType 0) then { _mx = _mx max _p0; };
         };
-    } forEach ([_districtsAll] call _keysFn);
+    } forEach (keys _districtsAll);
     _popRef = _mx max 1;
     // Keep local (no need to spam PV); this is just a scaling reference.
     missionNamespace setVariable ["civsub_v1_civ_cap_popRef", _popRef, false];
@@ -90,15 +85,15 @@ private _sumCaps = 0;
     private _capThis = _capD;
 
     if (_useDynamic) then {
-        private _ds = [_districtsAll, _did, createHashMap] call _hg;
-        if (_ds isEqualType []) then { _ds = [_ds] call _hmFrom; };
+        private _ds = _districtsAll getOrDefault [_did, createHashMap];
+        if (_ds isEqualType []) then { _ds = createHashMapFromArray _ds; };
 
         if (_ds isEqualType createHashMap) then {
-            private _pop = [_ds, "pop_total", 0] call _hg;
+            private _pop = _ds getOrDefault ["pop_total", 0];
             if !(_pop isEqualType 0) then { _pop = 0; };
             if (_pop < 0) then { _pop = 0; };
 
-            private _kia = [_ds, "civ_cas_kia", 0] call _hg;
+            private _kia = _ds getOrDefault ["civ_cas_kia", 0];
             if !(_kia isEqualType 0) then { _kia = 0; };
             if (_kia < 0) then { _kia = 0; };
 
@@ -124,7 +119,7 @@ private _sumCaps = 0;
     };
 
     // Explicit overrides always win.
-    private _ovCap = [_ovMap, _did, -1] call _hg;
+    private _ovCap = _ovMap getOrDefault [_did, -1];
     if (_ovCap isEqualType 0 && { _ovCap >= 0 }) then { _capThis = _ovCap; };
 
     if (_capThis < 0) then { _capThis = 0; };

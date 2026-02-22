@@ -28,11 +28,6 @@ params [
 if (isNull _actor || {isNull _civ}) exitWith {false};
 if !(isPlayer _actor) exitWith {false};
 
-// sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
-private _keysFn   = compile "params ['_m']; keys _m";
-private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
-
 private _resolveMarker = {
     params ["_name"];
     if (!isNil "ARC_fnc_worldResolveMarker") exitWith { [_name] call ARC_fnc_worldResolveMarker };
@@ -69,6 +64,10 @@ if ((_dActor > 25) && { _dCiv > 25 }) exitWith {
     [format ["CIVSUB: Move within 25m of epw_holding. Dist(actor)=%.1fm Dist(detainee)=%.1fm", _dActor, _dCiv], "CHAT"] remoteExecCall ["ARC_fnc_civsubClientMessage", _actor];
     false
 };
+
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+private _keysFn = compile "params ['_m']; keys _m";
 
 private _did = _civ getVariable ["civsub_districtId", ""];
 if (_did isEqualTo "") exitWith {false};
@@ -130,7 +129,7 @@ _rec set ["status_handedOffAt", serverTime];
 _rec set ["status_handedOffTo", "SHERIFF"]; 
 [_civUid, _rec] call ARC_fnc_civsubIdentitySet;
 
-private _bundle = [_did, "DETENTION_HANDOFF", "IDENTITY", [[["civ_uid", _civUid], ["to", "SHERIFF"], ["wanted_level", _wl]]] call _hmFrom, _actorUid] call ARC_fnc_civsubEmitDelta;
+private _bundle = [_did, "DETENTION_HANDOFF", "IDENTITY", [[["civ_uid", _civUid], ["to", "SHERIFF"], ["wanted_level", _wl]]] call _hmCreate, _actorUid] call ARC_fnc_civsubEmitDelta;
 if !(_bundle isEqualType createHashMap) then { _bundle = createHashMap; };
 if ((count ([_bundle] call _keysFn)) isEqualTo 0) exitWith {
     ["CIVSUB: Handoff failed (delta rejected).", "CHAT"] remoteExecCall ["ARC_fnc_civsubClientMessage", _actor];

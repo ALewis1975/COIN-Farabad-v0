@@ -15,11 +15,6 @@
 
 if (!isServer) exitWith {false};
 
-// sqflint-compat helpers
-private _trimFn     = compile "params ['_s']; trim _s";
-private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
-private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
-
 if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\\core\\fn_rpcValidateSender.sqf"; };
 
 // Fail-safe: ensure role helper functions exist even if CfgFunctions.hpp was not updated.
@@ -46,7 +41,7 @@ if (!isNull _caller && { !([_caller] call ARC_fnc_rolesIsAuthorized) }) exitWith
 };
 
 if (!(_statusRequest isEqualType "")) then { _statusRequest = ""; };
-_statusRequest = toUpper ([_statusRequest] call _trimFn);
+_statusRequest = toUpper (trim _statusRequest);
 private _statusCatalog = ["OFFLINE", "AVAILABLE", "IN TRANSIT", "ON SCENE"];
 private _setGroupStatus = {
     params ["_gid", "_status", ["_who", ""]];
@@ -56,8 +51,7 @@ private _setGroupStatus = {
     private _rows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
     if (!(_rows isEqualType [])) then { _rows = []; };
 
-    private _idx = -1;
-    { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _gid }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
+    private _idx = _rows findIf { _x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _gid } };
     private _row = [_gid, _status, serverTime, _who];
     if (_idx < 0) then { _rows pushBack _row; } else { _rows set [_idx, _row]; };
     missionNamespace setVariable ["ARC_pub_unitStatuses", _rows, true];
@@ -96,10 +90,9 @@ private _callerGroup = if (isNull _caller) then {""} else { groupId (group _call
 if (_callerGroup isEqualTo "") exitWith {false};
 private _unitStatuses = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
 if (!(_unitStatuses isEqualType [])) then { _unitStatuses = []; };
-private _statusIdx = -1;
-{ if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _callerGroup }) exitWith { _statusIdx = _forEachIndex; }; } forEach _unitStatuses;
-private _statusNow = if (_statusIdx < 0) then { "OFFLINE" } else { toUpper ([(_unitStatuses select _statusIdx) select 1] call _trimFn) };
-if (!(_statusNow isEqualTo "AVAILABLE")) exitWith
+private _statusIdx = _unitStatuses findIf { _x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _callerGroup } };
+private _statusNow = if (_statusIdx < 0) then { "OFFLINE" } else { toUpper (trim ((_unitStatuses # _statusIdx) # 1)) };
+if (_statusNow isNotEqualTo "AVAILABLE") exitWith
 {
     ["Incident acceptance denied: your group must set status to AVAILABLE first."] remoteExec ["ARC_fnc_clientHint", owner _caller];
     ["INCIDENT_ACCEPT", "REJECTED", "Set group status to AVAILABLE, then retry."] remoteExec ["ARC_fnc_uiConsoleOpsActionStatus", owner _caller];
@@ -122,31 +115,31 @@ if (missionNamespace getVariable ["civsub_v1_enabled", false]) then
     if (_did isEqualTo "" && { _ipos isEqualType [] && { count _ipos >= 2 } }) then
     {
         _did = [_ipos] call ARC_fnc_civsubDistrictsFindByPos;
-        if (_did isEqualType "" && { !(_did isEqualTo "") }) then
+        if (_did isEqualType "" && { _did isNotEqualTo "" }) then
         {
             ["activeIncidentCivsubDistrictId", _did] call ARC_fnc_stateSet;
             missionNamespace setVariable ["ARC_activeIncidentCivsubDistrictId", _did, true];
         };
     };
 
-    if (_did isEqualType "" && { !(_did isEqualTo "") }) then
+    if (_did isEqualType "" && { _did isNotEqualTo "" }) then
     {
         private _d = [_did] call ARC_fnc_civsubDistrictsGetById;
         if (_d isEqualType createHashMap) then
         {
-            private _snap = [[
+            private _snap = createHashMapFromArray [
                 ["districtId", _did],
                 ["ts", serverTime],
-                ["W", [_d, "W_EFF_U", 0] call _hg],
-                ["R", [_d, "R_EFF_U", 0] call _hg],
-                ["G", [_d, "G_EFF_U", 0] call _hg],
-                ["civ_cas_kia", [_d, "civ_cas_kia", 0] call _hg],
-                ["civ_cas_wia", [_d, "civ_cas_wia", 0] call _hg],
-                ["crime_db_hits", [_d, "crime_db_hits", 0] call _hg],
-                ["detentions_initiated", [_d, "detentions_initiated", 0] call _hg],
-                ["detentions_handed_off", [_d, "detentions_handed_off", 0] call _hg],
-                ["aid_events", [_d, "aid_events", 0] call _hg]
-            ]] call _hmFrom;
+                ["W", _d getOrDefault ["W_EFF_U", 0]],
+                ["R", _d getOrDefault ["R_EFF_U", 0]],
+                ["G", _d getOrDefault ["G_EFF_U", 0]],
+                ["civ_cas_kia", _d getOrDefault ["civ_cas_kia", 0]],
+                ["civ_cas_wia", _d getOrDefault ["civ_cas_wia", 0]],
+                ["crime_db_hits", _d getOrDefault ["crime_db_hits", 0]],
+                ["detentions_initiated", _d getOrDefault ["detentions_initiated", 0]],
+                ["detentions_handed_off", _d getOrDefault ["detentions_handed_off", 0]],
+                ["aid_events", _d getOrDefault ["aid_events", 0]]
+            ];
 
             ["activeIncidentCivsubStart", _snap] call ARC_fnc_stateSet;
             missionNamespace setVariable ["ARC_activeIncidentCivsubStart", _snap, true];
@@ -164,7 +157,7 @@ private _acceptedBy = if (isNull _caller) then {"TOC"} else { [_caller] call ARC
 
 // Remember last tasked group (used for follow-on orders when no incident is active).
 private _lastG = if (isNull _caller) then {""} else { groupId (group _caller) };
-if (!(_lastG isEqualTo "")) then
+if (_lastG isNotEqualTo "") then
 {
     [_lastG, "IN TRANSIT", _acceptedBy] call _setGroupStatus;
     ["lastTaskingGroup", _lastG] call ARC_fnc_stateSet;
@@ -174,7 +167,7 @@ if (!(_lastG isEqualTo "")) then
 // If a "Hold: Main Position" (or any HOLD) order is currently ACCEPTED for this group,
 // auto-complete it now. HOLD is intended to be an "until new tasking" order; without an
 // auto-complete hook it becomes a dead task and can confuse follow-on logic.
-if (!(_lastG isEqualTo "")) then
+if (_lastG isNotEqualTo "") then
 {
     private _ords = ["tocOrders", []] call ARC_fnc_stateGet;
     if (!(_ords isEqualType [])) then { _ords = []; };
@@ -185,13 +178,13 @@ if (!(_lastG isEqualTo "")) then
         _x params ["_orderId", "_issuedAt", "_status", "_orderType", "_tgtGroup", "_data", "_meta"];
 
         if (!(_tgtGroup isEqualType "") || { _tgtGroup isEqualTo "" }) then { continue; };
-        if (!(_tgtGroup isEqualTo _lastG)) then { continue; };
-        if (!(toUpper _orderType isEqualTo "HOLD")) then { continue; };
-        if (!(toUpper _status isEqualTo "ACCEPTED")) then { continue; };
+        if (_tgtGroup isNotEqualTo _lastG) then { continue; };
+        if (toUpper _orderType isNotEqualTo "HOLD") then { continue; };
+        if (toUpper _status isNotEqualTo "ACCEPTED") then { continue; };
 
         // Mark the associated task as succeeded (orderId is the taskId used in fn_intelOrderAccept).
         private _tid = _orderId;
-        if (_tid isEqualType "" && { !(_tid isEqualTo "") }) then
+        if (_tid isEqualType "" && { _tid isNotEqualTo "" }) then
         {
             [_tid, "SUCCEEDED", true] call BIS_fnc_taskSetState;
         };
@@ -279,7 +272,7 @@ private _medNew  = (_med  - _cMed) max 0;
 
 	// Current task is local per-client. Broadcast the parent incident task as current,
 	// except for exec types that immediately create their own actionable child tasks (e.g., ROUTE_RECON).
-	if (!(_taskId isEqualTo "") && { !(_execKind isEqualTo "ROUTE_RECON") }) then
+	if (_taskId isNotEqualTo "" && { _execKind isNotEqualTo "ROUTE_RECON" }) then
 	{
 	    private _re = [_taskId] remoteExecCall ["ARC_fnc_clientSetCurrentTask", 0];
     if (isNil { _re }) then

@@ -19,7 +19,7 @@ private _cls = toLower (typeOf _unit);
 private _tag = "";
 
 // Keep tags RHSUSAF-scoped to avoid false positives from other mods.
-if (!((_cls find "rhsusf_") isEqualTo 0)) exitWith {""};
+if ((_cls find "rhsusf_") isNotEqualTo 0) exitWith {""};
 
 private _len = count _cls;
 private _sufOfficer = "_officer";

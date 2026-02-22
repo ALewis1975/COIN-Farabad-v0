@@ -59,8 +59,8 @@ else
 
         private _ttl = if (_mins < 0) then {"?"} else { str _mins };
 
-        private _thrTxt = if (_threadId isEqualType "" && { !(_threadId isEqualTo "") }) then { format [" %1", _threadId] } else {""};
-        private _tagTxt = if (_tag isEqualType "" && { !(_tag isEqualTo "") }) then { format [" [%1]", toUpper _tag] } else {""};
+        private _thrTxt = if (_threadId isEqualType "" && { _threadId isNotEqualTo "" }) then { format [" %1", _threadId] } else {""};
+        private _tagTxt = if (_tag isEqualType "" && { _tag isNotEqualTo "" }) then { format [" [%1]", toUpper _tag] } else {""};
         _txt = _txt + format ["- %1%2 | %3%4 | %5 | STR %6 | %7m | %8\n", _id, _thrTxt, toUpper _type, _tagTxt, _grid, (round (_strength * 100)), _ttl, _disp];
     } forEach _leads;
 };
