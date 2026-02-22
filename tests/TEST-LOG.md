@@ -984,3 +984,23 @@ git --no-pager diff --check
 - JIP / late-client status: Not validated in this pass; follow-up required on dedicated server.
 - Waiver owner: mission maintainers on current feature branch.
 - Tracking reference: this PR validation section + this `tests/TEST-LOG.md` entry.
+
+## 2026-02-22 18:45 UTC — snapshot refresh PV handler shared-namespace callback fix
+
+**Branch/Commit:** current branch @ pending
+
+**Scenario:** Fixed PV event handlers to call the snapshot refresh callback from shared mission namespace so event-scope refreshes do not fail due to local closure scope.
+
+**Commands:**
+```
+git --no-pager diff --check
+rg -n "ARC_fnc_refreshClientSnapshotView|_callRefreshClientSnapshotView|addPublicVariableEventHandler" initPlayerLocal.sqf
+```
+
+**Result:** PASS
+
+**Notes:**
+- Refresh closure is now persisted as `missionNamespace` variable `ARC_fnc_refreshClientSnapshotView`.
+- PV handlers for state/S1/company now resolve and call the shared callback directly in handler scope.
+- Polling/JIP call sites use local `_callRefreshClientSnapshotView` helper to invoke the same shared callback contract.
+- Dedicated server/JIP runtime verification remains deferred per project environment constraints.
