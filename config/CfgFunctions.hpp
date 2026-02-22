@@ -117,6 +117,7 @@ class CfgFunctions
             class companyCommandInit {};
             class companyCommandTick {};
             class companyCommandIssueTask {};
+            class companyCommandVirtualOpsTick {};
 
             // Briefing / UI helpers
             class briefingInitClient {};

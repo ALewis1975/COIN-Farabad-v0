@@ -443,6 +443,7 @@ private _pub = [
     ["metricsSnapshotsTail", _sTail],
     ["companyCommandNodes", ["companyCommandNodes", []] call ARC_fnc_stateGet],
     ["companyCommandTasking", ["companyCommandTasking", []] call ARC_fnc_stateGet],
+    ["companyVirtualOps", ["companyVirtualOps", []] call ARC_fnc_stateGet],
     ["airbase", _airbasePub]
 ];
 
