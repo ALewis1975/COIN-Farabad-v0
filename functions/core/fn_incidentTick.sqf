@@ -43,6 +43,7 @@ else
 [] call ARC_fnc_threadTickAll;
 [] call ARC_fnc_leadPrune;
 [] call ARC_fnc_companyCommandTick;
+[] call ARC_fnc_companyCommandVirtualOpsTick;
 
 
 // Sustainment drain

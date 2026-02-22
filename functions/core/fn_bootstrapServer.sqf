@@ -288,6 +288,10 @@ if (isNil { missionNamespace getVariable "ARC_convoyArrivalMinVehicles" }) then 
 if (isNil { missionNamespace getVariable "ARC_convoyRouteMarkersEnabled" }) then { missionNamespace setVariable ["ARC_convoyRouteMarkersEnabled", true]; };
 if (isNil { missionNamespace getVariable "ARC_convoyRouteMarkerCount" }) then { missionNamespace setVariable ["ARC_convoyRouteMarkerCount", 10]; };
 if (isNil { missionNamespace getVariable "ARC_convoyRouteMarkerAlpha" }) then { missionNamespace setVariable ["ARC_convoyRouteMarkerAlpha", 0.35]; };
+
+// Company virtual operations scheduler defaults (Alpha/Bravo + attached enablers).
+if (isNil { missionNamespace getVariable "ARC_companyVirtualOpsTickIntervalSec" }) then { missionNamespace setVariable ["ARC_companyVirtualOpsTickIntervalSec", 150]; };
+if (isNil { missionNamespace getVariable "ARC_companyVirtualOpsCap" }) then { missionNamespace setVariable ["ARC_companyVirtualOpsCap", 30]; };
 if (isNil { missionNamespace getVariable "ARC_convoyWaypointMin" }) then { missionNamespace setVariable ["ARC_convoyWaypointMin", 8]; };
 if (isNil { missionNamespace getVariable "ARC_convoyWaypointMax" }) then { missionNamespace setVariable ["ARC_convoyWaypointMax", 12]; };
 if (isNil { missionNamespace getVariable "ARC_convoyWaypointIntervalM" }) then { missionNamespace setVariable ["ARC_convoyWaypointIntervalM", 450]; };

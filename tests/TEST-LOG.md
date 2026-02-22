@@ -733,3 +733,24 @@ git diff --check
 - Static validation confirmed function registration and integration points (bootstrap + tick + state schema + public snapshot exposure).
 - Patch is whitespace-clean.
 - Runtime validation (Local MP/Hosted MP/Dedicated, including JIP behavior) is BLOCKED in this container because Arma runtime is unavailable; follow-up owner: mission gameplay maintainer before merge.
+
+## 2026-02-22 00:00 UTC — company virtual ops scheduler + replication
+
+**Branch/Commit:** copilot/<pending> @ pending
+
+**Scenario:** Added server-side virtual ops scheduler loop for Alpha/Bravo, operation type weighting, player-task deconfliction, and public-state replication/log lifecycle.
+
+**Commands:**
+```
+git diff --check
+rg -n "companyVirtualOps|companyCommandVirtualOpsTick|ARC_companyVirtualOps" functions/core config/CfgFunctions.hpp
+```
+
+**Result:** BLOCKED
+
+**Notes:**
+- Static patch checks passed and symbol wiring verified.
+- Runtime validation (`Local MP` / `Hosted MP` / `Dedicated server`) is BLOCKED because Arma runtime is unavailable in this container.
+- JIP/late-client status: BLOCKED pending dedicated server validation of replicated `ARC_pub_state.companyVirtualOps` updates.
+- Waiver owner: Mission Systems (S3 Integration).
+- Tracking reference: PR for this commit (`company virtual ops scheduler`) — complete runtime closeout before merge.

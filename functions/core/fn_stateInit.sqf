@@ -6,7 +6,7 @@
 */
 
 [
-    ["version", 6],
+    ["version", 7],
 
     // System control
     ["systemPauseUntil", -1],
@@ -302,6 +302,10 @@
     ["companyCommandTasking", []],
     ["companyCommandCounter", 0],
     ["companyCommandLastTickAt", -1],
+    ["companyVirtualOps", []],
+    ["companyVirtualOpsCounter", 0],
+    ["companyVirtualOpsLastTickAt", -1],
+    ["companyVirtualOpsLastRollupAt", -1],
 
     // Airbase clearance request workflow (server authoritative queue + audit trail)
     ["airbase_v1_clearanceRequests", []],
