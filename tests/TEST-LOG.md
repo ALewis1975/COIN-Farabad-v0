@@ -818,3 +818,22 @@ rg -n "ARC_pub_state|ARC_pub_stateUpdatedAt|ARC_pub_companyCommandUpdatedAt|addP
 - Dedicated server execution remains unavailable in this container, so persistence/JIP/reconnect authority checks are deferred.
 - Waiver owner: Mission systems maintainer (next dedicated-server validation pass).
 - Tracking reference: this test-log entry + companion plan `docs/qa/Company_Command_Dedicated_Server_Static_QA_Plan.md`.
+
+## 2026-02-22 07:05 UTC — intelBroadcast mismatch static sync instrumentation
+
+**Branch/Commit:** copilot/<pending> @ pending
+
+**Scenario:** Static verification/update for `fn_intelBroadcast.sqf` build stamp plus repo->Arma profile sync procedure to prevent stale mission-folder runtime.
+
+**Commands:**
+```bash
+nl -ba functions/core/fn_intelBroadcast.sqf | sed -n '1,90p'
+git show 2064e9d:functions/core/fn_intelBroadcast.sqf | nl -ba | sed -n '1,90p'
+```
+
+**Result:** BLOCKED
+
+**Notes:**
+- Container can statically confirm repo version at commit `2064e9d` defines `_v` before line 57 and now logs a one-line runtime build stamp.
+- Runtime acceptance (RPT zero `_v` errors after sync + mission relaunch) is BLOCKED in this environment because Arma cannot be launched here.
+- Added sync script + runbook for Windows profile mission path to eliminate stale mission-folder copies before runtime verification.
