@@ -858,3 +858,26 @@ rg -n "worldIsValidDistrictId|district_id_source|D00" functions/core functions/t
 - Runtime validation: BLOCKED (Arma local MP/dedicated runtime unavailable in this container).
 - Follow-up owner: mission gameplay QA (TOC/dev host) to verify dedicated-server/JIP behavior for unresolved district sentinel rendering.
 - Tracking reference: this PR.
+
+## 2026-02-22 17:23 UTC — CASREQ snapshot contract wiring (AIR + public bundle)
+
+**Branch/Commit:** copilot/fix-recurring-errors-log @ pending
+
+**Scenario:** Added CASREQ server-owned store/module, public bundle + snapshot contract broadcast, AIR tab snapshot-only consumption path, and static assertions for outgoing bundle keys.
+
+**Commands:**
+```
+git --no-pager diff --check
+tests/static/casreq_snapshot_contract_checks.sh
+rg -n "casreq_snapshot|ARC_console_casreqSnapshot|casreq_v1" functions/casreq functions/core/fn_publicBroadcastState.sqf functions/ui/fn_uiConsoleAirPaint.sqf functions/ui/fn_uiConsoleActionAirPrimary.sqf functions/ui/fn_uiConsoleActionAirSecondary.sqf config/CfgFunctions.hpp functions/core/fn_stateInit.sqf functions/core/fn_bootstrapServer.sqf
+```
+
+**Result:** BLOCKED
+
+**Notes:**
+- Static contract checks pass and confirm required keys (`casreq_snapshot`, `rev`, `updatedAt`, `actor`) in CASREQ outgoing bundles.
+- Runtime scenario type: Dedicated server validation required for replication/JIP behavior.
+- JIP/late-client status: BLOCKED pending dedicated environment.
+- Waiver reason: container has no Arma runtime/dedicated server process.
+- Follow-up owner: AIR/CASREQ subsystem maintainer.
+- Tracking reference: PR notes rollback + dedicated validation checklist for this commit group.

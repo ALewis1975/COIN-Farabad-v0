@@ -764,6 +764,12 @@ if (missionNamespace getVariable ["civsub_v1_enabled", false]) then
     [] call ARC_fnc_civsubInitServer;
 };
 
+// CASREQ v1 (server-owned store + snapshot contract)
+if (missionNamespace getVariable ["casreq_v1_enabled", true]) then
+{
+    [] call ARC_fnc_casreqInitServer;
+};
+
 // Mirror persisted SITREP gating state into missionNamespace for clients
 missionNamespace setVariable ["ARC_activeIncidentSitrepSent", ["activeIncidentSitrepSent", false] call ARC_fnc_stateGet, true];
 missionNamespace setVariable ["ARC_activeIncidentSitrepFrom", ["activeIncidentSitrepFrom", ""] call ARC_fnc_stateGet, true];

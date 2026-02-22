@@ -386,6 +386,40 @@ if ((count _blockedRouteTailView) > _blockedTailN) then {
     _blockedRouteTailView = _blockedRouteTailView select [(count _blockedRouteTailView) - _blockedTailN, _blockedTailN];
 };
 
+private _casreqBundle = missionNamespace getVariable ["ARC_pub_casreqBundle", []];
+if !(_casreqBundle isEqualType []) then { _casreqBundle = []; };
+
+private _casreqMeta = [];
+private _casreqPayload = [];
+{
+    if (_x isEqualType [] && { (count _x) >= 2 }) then {
+        if ((_x select 0) isEqualTo "meta") then { _casreqMeta = _x select 1; };
+        if ((_x select 0) isEqualTo "payload") then { _casreqPayload = _x select 1; };
+    };
+} forEach _casreqBundle;
+if !(_casreqMeta isEqualType []) then { _casreqMeta = []; };
+if !(_casreqPayload isEqualType []) then { _casreqPayload = []; };
+
+private _casreqId = "";
+private _casreqSnapshot = [];
+{
+    if (_x isEqualType [] && { (count _x) >= 2 }) then {
+        if ((_x select 0) isEqualTo "casreq_id") then { _casreqId = _x select 1; };
+        if ((_x select 0) isEqualTo "casreq_snapshot") then { _casreqSnapshot = _x select 1; };
+    };
+} forEach _casreqPayload;
+if !(_casreqSnapshot isEqualType []) then { _casreqSnapshot = []; };
+
+private _casreqPub = [
+    ["schemaVersion", missionNamespace getVariable ["casreq_v1_schemaVersion", 1]],
+    ["rev", missionNamespace getVariable ["ARC_casreq_rev", 0]],
+    ["updatedAt", serverTime],
+    ["actor", "PUBLIC_BROADCAST"],
+    ["casreq_id", _casreqId],
+    ["casreq_snapshot", _casreqSnapshot],
+    ["bundleMeta", _casreqMeta]
+];
+
 private _airbasePub = [
     ["depQueued", _depQueued],
     ["depInProgress", _depInProgress],
@@ -444,6 +478,7 @@ private _pub = [
     ["companyCommandNodes", ["companyCommandNodes", []] call ARC_fnc_stateGet],
     ["companyCommandTasking", ["companyCommandTasking", []] call ARC_fnc_stateGet],
     ["companyVirtualOps", ["companyVirtualOps", []] call ARC_fnc_stateGet],
+    ["casreq", _casreqPub],
     ["airbase", _airbasePub]
 ];
 
