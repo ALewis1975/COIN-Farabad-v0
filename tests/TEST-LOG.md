@@ -881,3 +881,28 @@ rg -n "casreq_snapshot|ARC_console_casreqSnapshot|casreq_v1" functions/casreq fu
 - Waiver reason: container has no Arma runtime/dedicated server process.
 - Follow-up owner: AIR/CASREQ subsystem maintainer.
 - Tracking reference: PR notes rollback + dedicated validation checklist for this commit group.
+
+## 2026-02-22 17:32 UTC — CASREQ snapshot id backfill fix
+
+**Branch/Commit:** <current branch> @ pending
+
+**Scenario:** Fix `ARC_fnc_casreqSnapshotGet` so backfilled `casreq_id` defaults to the requested `_casreqId` instead of an empty string, preserving snapshot correlation for snapshot-only consumers.
+
+**Commands:**
+```
+git --no-pager diff --check
+
+tests/static/casreq_snapshot_contract_checks.sh
+```
+
+**Result:** BLOCKED
+
+**Notes:**
+- Static checks passed:
+  - `git --no-pager diff --check` → PASS
+  - `tests/static/casreq_snapshot_contract_checks.sh` → PASS
+- Runtime scenario (`Dedicated server`) remains BLOCKED because this container cannot run Arma dedicated sessions.
+- JIP / late-client status: BLOCKED pending dedicated-server validation.
+- Waiver reason: no Arma runtime in container.
+- Follow-up owner: PR #333 assignee/maintainer.
+- Tracking reference: https://github.com/ALewis1975/COIN-Farabad-v0/pull/333
