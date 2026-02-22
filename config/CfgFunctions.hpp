@@ -113,6 +113,11 @@ class CfgFunctions
             class threadBroadcast {};
             class threadRehydrateParents {};
 
+            // Company command model (Alpha/Bravo HQ intent + posture)
+            class companyCommandInit {};
+            class companyCommandTick {};
+            class companyCommandIssueTask {};
+
             // Briefing / UI helpers
             class briefingInitClient {};
             class briefingUpdateClient {};

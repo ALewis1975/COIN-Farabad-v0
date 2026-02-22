@@ -714,3 +714,22 @@ rg -n "s1RegistryInit|s1RegistryUpsertUnit|s1RegistrySnapshot|ARC_pub_s1_registr
 - Waiver reason: no Arma runtime/dedicated host available in CI container for mission execution.
 - Follow-up owner: Mission systems maintainer (S1/state authority).
 - Tracking reference: PR validation checklist item “S1 registry dedicated-server + JIP snapshot verification”.
+
+## 2026-02-22 04:46 UTC — company command model (Alpha/Bravo HQ nodes)
+
+**Branch/Commit:** <current branch> @ pending
+
+**Scenario:** Added server-authoritative company command model for REDFALCON 2/3 with HQ anchoring, intent/posture tracking, shared tasking writes, and role-gated behavior.
+
+**Commands:**
+```
+rg -n "companyCommand" config/CfgFunctions.hpp functions/core/fn_bootstrapServer.sqf functions/core/fn_incidentTick.sqf functions/core/fn_stateInit.sqf functions/core/fn_publicBroadcastState.sqf
+git diff --check
+```
+
+**Result:** PASS
+
+**Notes:**
+- Static validation confirmed function registration and integration points (bootstrap + tick + state schema + public snapshot exposure).
+- Patch is whitespace-clean.
+- Runtime validation (Local MP/Hosted MP/Dedicated, including JIP behavior) is BLOCKED in this container because Arma runtime is unavailable; follow-up owner: mission gameplay maintainer before merge.

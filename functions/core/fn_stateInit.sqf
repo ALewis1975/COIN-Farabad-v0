@@ -297,6 +297,12 @@
     ["tocBacklog", []],
     ["tocLeadApprovals", []],
 
+    // Company command model (server authoritative; inspectable by TOC/S1)
+    ["companyCommandNodes", []],
+    ["companyCommandTasking", []],
+    ["companyCommandCounter", 0],
+    ["companyCommandLastTickAt", -1],
+
     // Airbase clearance request workflow (server authoritative queue + audit trail)
     ["airbase_v1_clearanceRequests", []],
     ["airbase_v1_clearanceSeq", 0],

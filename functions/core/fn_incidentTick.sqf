@@ -42,6 +42,7 @@ else
 // Maintain threads (confidence/heat decay) and prune expired leads.
 [] call ARC_fnc_threadTickAll;
 [] call ARC_fnc_leadPrune;
+[] call ARC_fnc_companyCommandTick;
 
 
 // Sustainment drain

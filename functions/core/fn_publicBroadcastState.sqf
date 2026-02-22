@@ -441,6 +441,8 @@ private _pub = [
     ["incidentCount", _hCount],
     ["incidentHistoryTail", _hTail],
     ["metricsSnapshotsTail", _sTail],
+    ["companyCommandNodes", ["companyCommandNodes", []] call ARC_fnc_stateGet],
+    ["companyCommandTasking", ["companyCommandTasking", []] call ARC_fnc_stateGet],
     ["airbase", _airbasePub]
 ];
 
