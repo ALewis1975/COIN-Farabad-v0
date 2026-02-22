@@ -233,6 +233,17 @@ class CfgFunctions
             class intelMetricsTick {};
         };
 
+
+        class CASREQ
+        {
+            file = "functions\casreq";
+
+            class casreqInitServer {};
+            class casreqBuildId {};
+            class casreqSnapshotGet {};
+            class casreqBroadcastDelta {};
+        };
+
         class CIVSUB
         {
             file = "functions\civsub";

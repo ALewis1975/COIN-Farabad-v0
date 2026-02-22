@@ -84,6 +84,27 @@ private _trimFn = compile "params ['_s']; trim _s";
 private _air = [_pub, "airbase", []] call _getPub;
 if (!(_air isEqualType [])) then { _air = []; };
 
+private _casreqPub = [_pub, "casreq", []] call _getPub;
+if (!(_casreqPub isEqualType [])) then { _casreqPub = []; };
+
+private _casreqId = [_casreqPub, "casreq_id", ""] call _getPub;
+if (!(_casreqId isEqualType "")) then { _casreqId = ""; };
+
+private _casreqSnapshot = [_casreqPub, "casreq_snapshot", []] call _getPub;
+if (!(_casreqSnapshot isEqualType [])) then { _casreqSnapshot = []; };
+
+private _casreqState = [_casreqSnapshot, "state", "-"] call _getPub;
+if (!(_casreqState isEqualType "")) then { _casreqState = "-"; };
+
+private _casreqDistrict = [_casreqSnapshot, "district_id", "-"] call _getPub;
+if (!(_casreqDistrict isEqualType "")) then { _casreqDistrict = "-"; };
+
+private _casreqRev = [_casreqPub, "rev", 0] call _getPub;
+if (!(_casreqRev isEqualType 0)) then { _casreqRev = 0; };
+
+uiNamespace setVariable ["ARC_console_casreqSnapshot", _casreqSnapshot];
+uiNamespace setVariable ["ARC_console_casreqId", _casreqId];
+
 private _depQueued = [_air, "depQueued", 0] call _getPub;
 if (!(_depQueued isEqualType 0)) then { _depQueued = 0; };
 
@@ -641,7 +662,11 @@ private _details = format [
     + "<br/>Execution: <t color='#FFFFFF'>%22</t>"
     + "<br/><br/><t color='#B89B6B'>Pending/Awaiting</t>"
     + "<br/>Awaiting tower decision: <t color='#FFFFFF'>%23</t>"
-    + "<br/>Arrival warnings (A/C/U): <t color='#FFFFFF'>%24/%25/%26m</t>",
+    + "<br/>Arrival warnings (A/C/U): <t color='#FFFFFF'>%24/%25/%26m</t>"
+    + "<br/><br/><t color='#B89B6B'>CASREQ Snapshot Contract</t>"
+    + "<br/>CASREQ id: <t color='#FFFFFF'>%27</t> | Rev: <t color='#FFFFFF'>%28</t>"
+    + "<br/>District: <t color='#FFFFFF'>%29</t> | State: <t color='#FFFFFF'>%30</t>"
+    + "<br/><t color='#CFCFCF'>AIR UI reads only ARC_pub_state.casreq.casreq_snapshot (no local history inference).</t>",
     _selectionHeading,
     _selectedState,
     [_selectedUpdated] call _fmtTime,
@@ -667,7 +692,11 @@ private _details = format [
     _awaitingCount,
     [_air, "arrivalWarnAdvisoryM", 7000] call _getPub,
     [_air, "arrivalWarnCautionM", 4500] call _getPub,
-    [_air, "arrivalWarnUrgentM", 2600] call _getPub
+    [_air, "arrivalWarnUrgentM", 2600] call _getPub,
+    if (_casreqId isEqualTo "") then {"-"} else {_casreqId},
+    _casreqRev,
+    _casreqDistrict,
+    _casreqState
 ];
 
 _ctrlDetails ctrlSetStructuredText parseText _details;

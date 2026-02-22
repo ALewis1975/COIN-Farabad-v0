@@ -21,6 +21,12 @@ if (!(_data isEqualType "")) then { _data = ""; };
 private _parts = _data splitString "|";
 private _rowType = if ((count _parts) > 0) then { _parts select 0 } else { "" };
 
+private _casreqSnapshot = uiNamespace getVariable ["ARC_console_casreqSnapshot", []];
+if !(_casreqSnapshot isEqualType []) then { _casreqSnapshot = []; };
+private _casreqId = uiNamespace getVariable ["ARC_console_casreqId", ""];
+if !(_casreqId isEqualType "") then { _casreqId = ""; };
+// AIR actions consume only server-published CASREQ snapshot contract.
+
 private _airMode = ["ARC_console_airMode", "TOWER"] call ARC_fnc_uiNsGetString;
 _airMode = toUpper _airMode;
 _airMode = (_airMode splitString " ") joinString "";
@@ -162,7 +168,7 @@ switch (_rowType) do
         };
 
         [] call ARC_fnc_airbaseClientRequestHoldDepartures;
-        ["AIR", "Hold request sent to tower control."] call ARC_fnc_clientToast;
+        ["AIR", format ["Hold request sent to tower control. CASREQ=%1", if (_casreqId isEqualTo "") then {"-"} else {_casreqId}]] call ARC_fnc_clientToast;
     };
 };
 

@@ -317,6 +317,12 @@
     ["airbase_v1_clearanceHistory", []],
 
     // Airbase compact event stream (bounded, UI-facing tail in ARC_pub_state.airbase)
-    ["airbase_v1_events", []]
+    ["airbase_v1_events", []],
+
+    // CASREQ v1 (server-owned request store)
+    ["casreq_v1_records", createHashMap],
+    ["casreq_v1_open_index", []],
+    ["casreq_v1_closed_index", []],
+    ["casreq_v1_seq", 0]
 
 ]
