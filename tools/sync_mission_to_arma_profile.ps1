@@ -12,7 +12,7 @@ if (!(Test-Path -Path $RepoMissionPath)) {
 
 New-Item -ItemType Directory -Force -Path $ArmaMissionPath | Out-Null
 
-robocopy $RepoMissionPath $ArmaMissionPath /MIR /R:2 /W:1 /NFL /NDL /NP /XD .git .github docs data tests .vscode
+robocopy $RepoMissionPath $ArmaMissionPath /MIR /R:2 /W:1 /NFL /NDL /NP /XD .git .github docs tests .vscode
 if ($LASTEXITCODE -gt 7) {
     throw "robocopy failed with exit code $LASTEXITCODE"
 }
