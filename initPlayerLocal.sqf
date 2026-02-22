@@ -118,8 +118,8 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
         {
             missionNamespace setVariable ["ARC_clientSnapshotPvEhId", "ARC_pub_stateUpdatedAt" addPublicVariableEventHandler {
                 private _refreshEnabled = missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false];
-                private _hasPubState = !isNil { missionNamespace getVariable "ARC_pub_state" };
-                if (_refreshEnabled || _hasPubState) then { [] call ARC_fnc_briefingUpdateClient; if (!isNil "ARC_fnc_tocRefreshClient") then { [] call ARC_fnc_tocRefreshClient; }; uiNamespace setVariable ["ARC_console_dirty", true]; };
+                // Race-avoidance contract: PV event handlers must only run refresh after client readiness gate is lifted.
+                if (_refreshEnabled) then { [] call ARC_fnc_briefingUpdateClient; if (!isNil "ARC_fnc_tocRefreshClient") then { [] call ARC_fnc_tocRefreshClient; }; uiNamespace setVariable ["ARC_console_dirty", true]; };
             }];
         };
 
@@ -145,6 +145,13 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
         while {true} do
         {
             uiSleep 2;
+
+            // Snapshot fallback belongs in polling (not PV EH gating): recover if state arrives before/update token propagation.
+            if ((missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false]) && { !isNil { missionNamespace getVariable "ARC_pub_state" } } && { _lastState < 0 }) then
+            {
+                _lastState = missionNamespace getVariable ["ARC_pub_stateUpdatedAt", _lastState];
+                call _refresh;
+            };
 
             private _nowState = missionNamespace getVariable ["ARC_pub_stateUpdatedAt", _lastState];
             private _nowS1 = missionNamespace getVariable ["ARC_pub_s1_registryUpdatedAt", _lastS1];

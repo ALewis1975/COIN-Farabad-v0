@@ -920,3 +920,22 @@ git diff --check
 - Removed early runtime-gate exit from `fn_airbaseAdminResetControlState.sqf`; reset path now remains available while planning mode is enabled.
 - Added `runtimeEnabled` flag into the ops log payload for audit context when resets occur while runtime gate is disabled.
 - Runtime/dedicated validation remains BLOCKED in this container; static checks confirm gate contract still enforced for registered entry files.
+
+## 2026-02-22 18:01 UTC — client snapshot PV readiness gating alignment
+
+**Branch/Commit:** current branch @ pending
+
+**Scenario:** Tightened `ARC_pub_stateUpdatedAt` PV event readiness gating to match other snapshot handlers and moved snapshot-fallback recovery to polling path.
+
+**Commands:**
+```
+git --no-pager diff -- initPlayerLocal.sqf
+rg -n "_refreshEnabled \|\| _hasPubState|Race-avoidance contract|Snapshot fallback belongs in polling" initPlayerLocal.sqf
+```
+
+**Result:** PASS
+
+**Notes:**
+- `ARC_pub_stateUpdatedAt` PV EH now refreshes only when `ARC_clientStateRefreshEnabled` is true, matching S1/company handler contract.
+- Fallback for pre-token snapshot visibility is explicit in polling loop (`_lastState < 0` path) to preserve recovery without relaxing event-path gate.
+- Dedicated server/JIP runtime verification remains deferred per project environment constraints.
