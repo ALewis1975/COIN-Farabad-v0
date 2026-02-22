@@ -111,6 +111,7 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
         private _lastState = missionNamespace getVariable ["ARC_pub_stateUpdatedAt", -1];
         private _lastS1 = missionNamespace getVariable ["ARC_pub_s1_registryUpdatedAt", -1];
         private _lastCompany = missionNamespace getVariable ["ARC_pub_companyCommandUpdatedAt", -1];
+        private _stateFallbackRefreshed = false;
 
         // Preferred path: react immediately to server snapshot publish events.
         private _existingStateEhId = missionNamespace getVariable ["ARC_clientSnapshotPvEhId", -1];
@@ -147,9 +148,10 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
             uiSleep 2;
 
             // Snapshot fallback belongs in polling (not PV EH gating): recover if state arrives before/update token propagation.
-            if ((missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false]) && { !isNil { missionNamespace getVariable "ARC_pub_state" } } && { _lastState < 0 }) then
+            if ((missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false]) && { !isNil { missionNamespace getVariable "ARC_pub_state" } } && { _lastState < 0 } && { !_stateFallbackRefreshed }) then
             {
                 _lastState = missionNamespace getVariable ["ARC_pub_stateUpdatedAt", _lastState];
+                _stateFallbackRefreshed = true;
                 call _refresh;
             };
 

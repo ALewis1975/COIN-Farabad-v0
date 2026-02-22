@@ -9,6 +9,29 @@ Append one dated entry per validation pass using:
 
 ---
 
+
+## 2026-02-22 18:18 UTC — snapshot fallback one-shot latch
+
+**Branch/Commit:** current branch @ pending
+
+**Scenario:** Prevent repeated client-side polling fallback refresh churn when `ARC_pub_stateUpdatedAt` is absent by adding a one-shot latch around the fallback refresh path.
+
+**Commands:**
+```
+git --no-pager diff --check
+~/.local/bin/sqflint -e w initPlayerLocal.sqf
+```
+
+**Result:** BLOCKED
+
+**Notes:**
+- `git --no-pager diff --check`: PASS (no whitespace or patch-format issues).
+- `sqflint` check is BLOCKED in this container because `~/.local/bin/sqflint` is not installed (`No such file or directory`).
+- Runtime scenario type: Dedicated server validation BLOCKED (container static review only).
+- JIP / late-client status: Not validated in this pass; follow-up required on dedicated server.
+- Waiver owner: mission maintainers on current feature branch.
+- Tracking reference: this PR's validation section + `tests/TEST-LOG.md` entry.
+
 ## 2026-02-22 00:00 UTC — AIRBASE planning-mode master runtime gate + static contract
 
 **Branch/Commit:** current branch @ pending
