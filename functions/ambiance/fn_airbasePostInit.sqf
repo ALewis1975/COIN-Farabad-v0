@@ -11,6 +11,8 @@
 
 if (!isServer) exitWith {false};
 
+if (!(["airbasePostInit"] call ARC_fnc_airbaseRuntimeEnabled)) exitWith {false};
+
 // Prevent duplicate init if postInit runs more than once (rare, but safe)
 if (missionNamespace getVariable ["airbase_v1_postInit_ran", false]) exitWith {true};
 missionNamespace setVariable ["airbase_v1_postInit_ran", true];

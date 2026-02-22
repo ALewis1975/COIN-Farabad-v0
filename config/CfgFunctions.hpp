@@ -599,6 +599,7 @@ class Ops
             class airbasePostInit { postInit = 1; };
             class airbaseInit {};
             class airbaseTick {};
+            class airbaseRuntimeEnabled {};
 
             // Fixed-wing departures / towing
             class airbasePlaneDepart {};

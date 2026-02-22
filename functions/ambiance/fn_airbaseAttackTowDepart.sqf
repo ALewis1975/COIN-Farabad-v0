@@ -20,6 +20,7 @@
 */
 
 if (!isServer) exitWith { false };
+if !(["airbaseAttackTowDepart"] call ARC_fnc_airbaseRuntimeEnabled) exitWith {false};
 
 params ["_fid", "_asset"];
 if (isNil "_asset" || {!(_asset isEqualType createHashMap)}) exitWith { false };

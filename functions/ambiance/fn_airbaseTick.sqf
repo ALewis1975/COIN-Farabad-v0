@@ -8,6 +8,8 @@
 
 if (!isServer) exitWith {};
 
+if (!(["airbaseTick"] call ARC_fnc_airbaseRuntimeEnabled)) exitWith {false};
+
 private _rt = missionNamespace getVariable ["airbase_v1_rt", createHashMap];
 
 private _fnHmGet = {

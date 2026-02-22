@@ -11,6 +11,7 @@
 */
 
 if (!isServer) exitWith {false};
+if !(["airbaseAdminResetControlState"] call ARC_fnc_airbaseRuntimeEnabled) exitWith {false};
 
 params [
     ["_preserveHistory", true, [true]],

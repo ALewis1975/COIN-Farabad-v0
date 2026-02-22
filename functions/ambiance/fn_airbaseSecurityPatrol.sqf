@@ -13,6 +13,7 @@
 */
 
 if (!isServer) exitWith {false};
+if !(["airbaseSecurityPatrol"] call ARC_fnc_airbaseRuntimeEnabled) exitWith {false};
 
 params [
     ["_vehicle", objNull, [objNull]],

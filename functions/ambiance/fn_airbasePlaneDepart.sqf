@@ -18,6 +18,7 @@
 */
 
 if (!isServer) exitWith { false };
+if !(["airbasePlaneDepart"] call ARC_fnc_airbaseRuntimeEnabled) exitWith {false};
 
 params ["_fid", "_asset"];
 if (isNil "_asset") exitWith { false };

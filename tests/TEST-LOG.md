@@ -9,6 +9,26 @@ Append one dated entry per validation pass using:
 
 ---
 
+## 2026-02-22 00:00 UTC — AIRBASE planning-mode master runtime gate + static contract
+
+**Branch/Commit:** current branch @ pending
+
+**Scenario:** Added server-authoritative AIRBASE runtime gate defaulting to planning-only, wired runtime entrypoint early exits, documented activation scope, and added static guardrail script/workflow step.
+
+**Commands:**
+```
+bash tests/static/airbase_planning_mode_checks.sh
+python3 scripts/dev/validate_marker_index.py
+python3 scripts/dev/validate_state_migrations.py
+```
+
+**Result:** PASS
+
+**Notes:**
+- Runtime behavior remains intentionally dormant unless `airbase_v1_runtime_enabled` is explicitly enabled.
+- Dedicated-server/JIP runtime validation remains deferred per project constraints; this pass is static-contract focused.
+
+
 ## Runtime Validation Entry Convention (behavior-changing commit groups)
 
 For every behavior-changing SQF commit group (Mode A/B/D/I/J with runtime impact), add at least one **unique runtime validation entry** in this file.
