@@ -20,9 +20,6 @@
 
 if (!hasInterface) exitWith {false};
 
-// sqflint-compat helpers
-private _trimFn     = compile "params ['_s']; trim _s";
-
 private _disp = findDisplay 77301;
 if (isNull _disp) exitWith {false};
 
@@ -33,12 +30,12 @@ private _getText = {
     ctrlText _c
 };
 
-private _summary  = [([77310] call _getText)] call _trimFn;
-private _enemy    = [([77311] call _getText)] call _trimFn;
-private _friendly = [([77312] call _getText)] call _trimFn;
-private _task     = [([77313] call _getText)] call _trimFn;
-private _req      = [([77314] call _getText)] call _trimFn;
-private _notes    = [([77315] call _getText)] call _trimFn;
+private _summary  = trim ([77310] call _getText);
+private _enemy    = trim ([77311] call _getText);
+private _friendly = trim ([77312] call _getText);
+private _task     = trim ([77313] call _getText);
+private _req      = trim ([77314] call _getText);
+private _notes    = trim ([77315] call _getText);
 
 private _cA = _disp displayCtrl 77321;
 private _cC = _disp displayCtrl 77322;
@@ -48,9 +45,9 @@ private _aceAmmo = if (isNull _cA) then {"GREEN"} else { _cA lbText (lbCurSel _c
 private _aceCas  = if (isNull _cC) then {"GREEN"} else { _cC lbText (lbCurSel _cC) };
 private _aceEq   = if (isNull _cE) then {"GREEN"} else { _cE lbText (lbCurSel _cE) };
 
-_aceAmmo = toUpper ([_aceAmmo] call _trimFn);
-_aceCas  = toUpper ([_aceCas] call _trimFn);
-_aceEq   = toUpper ([_aceEq] call _trimFn);
+_aceAmmo = toUpper (trim _aceAmmo);
+_aceCas  = toUpper (trim _aceCas);
+_aceEq   = toUpper (trim _aceEq);
 
 uiNamespace setVariable [
     "ARC_sitrepDialog_result",

@@ -17,11 +17,8 @@
 */
 
 params [["_purpose", "REFIT"]];
-
-// sqflint-compat helpers
-private _trimFn     = compile "params ['_s']; trim _s";
 if (!(_purpose isEqualType "")) then { _purpose = "REFIT"; };
-_purpose = toUpper ([_purpose] call _trimFn);
+_purpose = toUpper (trim _purpose);
 
 private _pos = [0,0,0];
 private _label = "Base";
@@ -138,7 +135,7 @@ switch (_purpose) do
                         if (!((markerType _cand) isEqualTo "")) exitWith { _mHold = _cand; };
                     } forEach ["epw_holding", "mkr_SHERIFF_HOLDING"];
 
-                    if (!(_mHold isEqualTo "")) then
+                    if (_mHold isNotEqualTo "") then
                     {
                         _pos = getMarkerPos _mHold;
                         _label = markerText _mHold;

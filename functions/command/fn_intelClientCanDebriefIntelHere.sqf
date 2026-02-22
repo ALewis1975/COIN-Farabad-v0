@@ -35,7 +35,7 @@ private _getPair = {
     params ["_pairs", "_k", "_d"]; 
     if (!(_pairs isEqualType [])) exitWith { _d };
     {
-        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _x select 1 };
+        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _x # 1 };
     } forEach _pairs;
     _d
 };
@@ -48,12 +48,12 @@ private _destRad = 20;
 
     _x params ["_orderId", "_issuedAt", "_status", "_orderType", "_targetGroup", "_data", "_meta"]; 
 
-    if (!((toUpper _status) isEqualTo "ACCEPTED")) then { continue; };
-    if (!((toUpper _orderType) isEqualTo "RTB")) then { continue; };
-    if (!(_targetGroup isEqualTo _gid)) then { continue; };
+    if ((toUpper _status) isNotEqualTo "ACCEPTED") then { continue; };
+    if ((toUpper _orderType) isNotEqualTo "RTB") then { continue; };
+    if (_targetGroup isNotEqualTo _gid) then { continue; };
 
     private _purpose = toUpper ([_data, "purpose", "REFIT"] call _getPair);
-    if (!(_purpose isEqualTo "INTEL")) then { continue; };
+    if (_purpose isNotEqualTo "INTEL") then { continue; };
 
     _destPos = [_data, "destPos", []] call _getPair;
     _destRad = [_data, "destRadius", 20] call _getPair;
@@ -68,8 +68,8 @@ if (!(_destPos isEqualType [] && { (count _destPos) >= 2 })) then
     private _r = ["INTEL"] call ARC_fnc_intelResolveRtbDestination;
     if (_r isEqualType [] && { (count _r) >= 3 }) then
     {
-        _destPos = _r select 0;
-        _destRad = _r select 2;
+        _destPos = _r # 0;
+        _destRad = _r # 2;
     }
     else
     {

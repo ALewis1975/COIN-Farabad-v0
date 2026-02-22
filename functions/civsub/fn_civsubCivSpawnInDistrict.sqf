@@ -1,10 +1,4 @@
 /*
-
-// sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
-private _mapGet   = compile "params ['_h','_k']; _h get _k";
-private _keysFn   = compile "params ['_m']; keys _m";
-private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
     ARC_fnc_civsubCivSpawnInDistrict
 
     Spawns one civilian in the specified district, assigns an identity, and registers.
@@ -63,14 +57,14 @@ if (_district isEqualType createHashMap) then {
 } else {
     if (_district isEqualType []) then {
         if ((count _district) == 0) exitWith { ["district_empty","district_lookup"] call _fail };
-        _d = [_district] call _hmFrom;
+        _d = createHashMapFromArray _district;
     } else {
         if (true) exitWith { [format ["district_bad_type_%1", typeName _district],"district_lookup"] call _fail };
     };
 };
 
-private _center = [_d, "centroid", [0,0]];
-private _radius = [_d, "radius_m", 500] call _hg;
+private _center = _d getOrDefault ["centroid", [0,0]];
+private _radius = _d getOrDefault ["radius_m", 500];
 
 if !(_center isEqualType []) exitWith { ["center_not_array","district_data"] call _fail };
 if ((count _center) < 2) exitWith { ["center_bad","district_data"] call _fail };
@@ -99,21 +93,21 @@ if ([_pos] call _posIsRoadish) then
 private _minSep = missionNamespace getVariable ["civsub_v1_civ_minSeparation_m", 20];
 if (_minSep isEqualType 0 && {_minSep > 0}) then {
     private _reg = missionNamespace getVariable ["civsub_v1_civ_registry", createHashMap];
-    if (_reg isEqualType createHashMap && {(count ([_reg] call _keysFn)) > 0}) then {
+    if (_reg isEqualType createHashMap && {(count (keys _reg)) > 0}) then {
         private _tries = 0;
         private _ok = false;
         while {!_ok && {_tries < 10}} do {
             _tries = _tries + 1;
             _ok = true;
             {
-                private _row = [_reg, _x] call _mapGet;
+                private _row = _reg get _x;
                 if (_row isEqualType createHashMap) then {
-                    private _u2 = [_row, "unit", objNull] call _hg;
+                    private _u2 = _row getOrDefault ["unit", objNull];
                     if (!isNull _u2 && {(_pos distance2D (getPosATL _u2)) < _minSep}) exitWith {
                         _ok = false;
                     };
                 };
-            } forEach ([_reg] call _keysFn);
+            } forEach (keys _reg);
             if (!_ok) then {
                 private _p2 = [_districtId] call ARC_fnc_civsubCivPickSpawnPos;
                 if !(_p2 isEqualType [] && {(count _p2) >= 2} && {!(_p2 isEqualTo [0,0,0])}) then {

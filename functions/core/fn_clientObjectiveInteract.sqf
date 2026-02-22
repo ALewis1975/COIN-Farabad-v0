@@ -30,10 +30,7 @@ if (isNull _target) exitWith {false};
 if (isNull _caller) exitWith {false};
 if (_kind isEqualTo "") exitWith {false};
 
-// sqflint-compat helpers
-private _trimFn     = compile "params ['_s']; trim _s";
-
-private _stageU = toUpper ([_stage] call _trimFn);
+private _stageU = toUpper (trim _stage);
 
 // Helper: remove any stored objective actions for this target (supports int or array)
 private _removeObjectiveActions = {

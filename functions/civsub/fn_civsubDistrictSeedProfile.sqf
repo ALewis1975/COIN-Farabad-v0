@@ -19,11 +19,7 @@ params [
     ["_campaignSeed", 1337, [0]]
 ];
 
-// sqflint-compat helpers
-private _trimFn     = compile "params ['_s']; trim _s";
-private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
-
-private _idNorm = toUpper ([_districtId] call _trimFn);
+private _idNorm = toUpper (trim _districtId);
 if (_idNorm isEqualTo "") then { _idNorm = "D00"; };
 
 private _pop = _popTotal;
@@ -36,8 +32,8 @@ if !(_seed isEqualType 0) then { _seed = 1337; };
 private _cx = 0;
 private _cy = 0;
 if (_centroid isEqualType [] && { (count _centroid) >= 2 }) then {
-    _cx = _centroid select 0;
-    _cy = _centroid select 1;
+    _cx = _centroid # 0;
+    _cy = _centroid # 1;
 };
 if !(_cx isEqualType 0) then { _cx = 0; };
 if !(_cy isEqualType 0) then { _cy = 0; };
@@ -59,14 +55,14 @@ private _wBase = 45 + ((_idMix + _seedMix + _xyMix) mod 23) - 11;
 private _rBase = 55 + (((_idMix * 2) + _popShift + _seedMix) mod 27) - 13;
 private _gBase = 35 + (((_xyMix * 2) + _popShift + (_seed mod 53)) mod 25) - 12;
 
-private _profile = [[
+private _profile = createHashMapFromArray [
     ["W_BASE_U", _wBase],
     ["R_BASE_U", _rBase],
     ["G_BASE_U", _gBase],
     ["W_EFF_U", _wBase],
     ["R_EFF_U", _rBase],
     ["G_EFF_U", _gBase]
-]] call _hmFrom;
+];
 
 [_profile] call ARC_fnc_civsubDistrictsClamp;
 _profile

@@ -21,9 +21,6 @@
 
 private _t = createHashMap;
 
-// sqflint-compat helpers
-private _mapGet   = compile "params ['_h','_k']; _h get _k";
-
 // Canonical key set
 _t set ["bezelOuter",  [0.169,0.184,0.200,1]];  // gunmetal outer
 _t set ["bezelGreen",  [0.184,0.243,0.184,1]];  // OD green ring
@@ -36,12 +33,12 @@ _t set ["statusAmber", [0.851,0.643,0.255,1]];
 _t set ["statusRed",   [0.784,0.298,0.298,1]];
 
 // Legacy aliases kept for migration compatibility.
-private _bezelOuter = [_t, "bezelOuter"] call _mapGet;
-private _bezelGreen = [_t, "bezelGreen"] call _mapGet;
-private _bezelInner = [_t, "bezelInner"] call _mapGet;
-private _screen = [_t, "screen"] call _mapGet;
-private _text = [_t, "text"] call _mapGet;
-private _border = [_t, "border"] call _mapGet;
+private _bezelOuter = _t get "bezelOuter";
+private _bezelGreen = _t get "bezelGreen";
+private _bezelInner = _t get "bezelInner";
+private _screen = _t get "screen";
+private _text = _t get "text";
+private _border = _t get "border";
 
 _t set ["gunmetalOuter", _bezelOuter];
 _t set ["greenRing",     _bezelGreen];

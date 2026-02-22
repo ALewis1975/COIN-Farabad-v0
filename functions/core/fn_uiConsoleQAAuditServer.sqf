@@ -14,9 +14,6 @@ params [
     ["_requester", objNull, [objNull]]
 ];
 
-// sqflint-compat helpers
-private _trimFn     = compile "params ['_s']; trim _s";
-
 private _owner = 0;
 if (!isNull _requester) then { _owner = owner _requester; };
 if (_owner <= 0 && { !isNil "remoteExecutedOwner" }) then { _owner = remoteExecutedOwner; };
@@ -28,7 +25,7 @@ private _pushCheck = {
     params ["_ok", "_name", ["_detail", ""]];
     private _c = if (_ok) then { "#6EE7B7" } else { "#FF6B6B" };
     _lines pushBack format ["<t color='%1'>%2</t> <t font='PuristaMedium'>%3</t>", _c, if (_ok) then {"PASS"} else {"FAIL"}, _name];
-    if (_detail isEqualType "" && { !(_detail isEqualTo "") }) then
+    if (_detail isEqualType "" && { _detail isNotEqualTo "" }) then
     {
         _lines pushBack format ["<t color='#BDBDBD' size='0.9'>%1</t>", _detail];
     };
@@ -79,19 +76,19 @@ if (!(_acceptedBy isEqualType "")) then { _acceptedBy = ""; };
 if (!(_foQid isEqualType "")) then { _foQid = ""; };
 if (!(_foReq isEqualType [])) then { _foReq = []; };
 
-_incId = [_incId] call _trimFn;
-_taskId = [_taskId] call _trimFn;
-_acceptedBy = [_acceptedBy] call _trimFn;
-_foQid = [_foQid] call _trimFn;
+_incId = trim _incId;
+_taskId = trim _taskId;
+_acceptedBy = trim _acceptedBy;
+_foQid = trim _foQid;
 
-[(_incId isEqualTo "") || { !(_taskId isEqualTo "") }, "Active incident has taskId", format ["activeIncidentId=%1 / activeTaskId=%2", _incId, _taskId]] call _pushCheck;
-[(!_accepted) || { !(_acceptedBy isEqualTo "") }, "Accepted incident has acceptedBy group", format ["accepted=%1 / acceptedBy=%2", _accepted, _acceptedBy]] call _pushCheck;
+[(_incId isEqualTo "") || { _taskId isNotEqualTo "" }, "Active incident has taskId", format ["activeIncidentId=%1 / activeTaskId=%2", _incId, _taskId]] call _pushCheck;
+[(!_accepted) || { _acceptedBy isNotEqualTo "" }, "Accepted incident has acceptedBy group", format ["accepted=%1 / acceptedBy=%2", _accepted, _acceptedBy]] call _pushCheck;
 
 private _foOk = true;
 private _foDetail = "";
 if (_sitrepSent && { _foReq isEqualType [] } && { (count _foReq) > 0 }) then
 {
-    _foOk = !(_foQid isEqualTo "");
+    _foOk = _foQid isNotEqualTo "";
     _foDetail = format ["followOnReqPairs=%1 / queueId=%2", count _foReq, _foQid];
 };
 [_foOk, "Follow-on request queued when submitted", _foDetail] call _pushCheck;

@@ -29,9 +29,6 @@ if (isNull _actor || {isNull _civ}) exitWith { [false, "<t size='0.9'>Detain fai
 if !(isPlayer _actor) exitWith { [false, "<t size='0.9'>Detain failed (invalid actor).</t>"] };
 if !(_civ getVariable ["civsub_v1_isCiv", false]) exitWith { [false, "<t size='0.9'>Detain failed (not a CIVSUB civilian).</t>"] };
 
-// sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
-
 private _did = _civ getVariable ["civsub_districtId", ""];
 private _actorUid = getPlayerUID _actor;
 
@@ -39,7 +36,7 @@ private _civUid = _civ getVariable ["civ_uid", ""];
 if (!(_civUid isEqualTo "")) then {
     private _rec = [_civUid] call ARC_fnc_civsubIdentityGet;
     if (_rec isEqualType createHashMap) then {
-        if ([_rec, "status_detained", false] call _hg) exitWith {
+        if (_rec getOrDefault ["status_detained", false]) exitWith {
             [false, "<t size='0.95' color='#CFE8FF'>DETAIN</t><br/><t size='0.9'>Civilian is already detained.</t>"]
         };
     };

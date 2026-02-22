@@ -13,9 +13,6 @@
 
 if (!isServer) exitWith {false};
 
-// sqflint-compat helpers
-private _keysFn   = compile "params ['_m']; keys _m";
-
 private _enabled = missionNamespace getVariable ["civsub_v1_enabled", false];
 if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabled = false; };
 
@@ -48,6 +45,6 @@ missionNamespace setVariable ["civsub_v1_identity_seq", 0, true];
 // Save immediately so reset survives a restart
 [] call ARC_fnc_civsubPersistSave;
 
-diag_log format ["[CIVSUB][PERSIST] Reset complete. campaign_id=%1 districts=%2", _cid, count ([_districts] call _keysFn)];
+diag_log format ["[CIVSUB][PERSIST] Reset complete. campaign_id=%1 districts=%2", _cid, count (keys _districts)];
 
 true

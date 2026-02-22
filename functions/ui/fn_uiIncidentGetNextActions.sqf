@@ -17,16 +17,13 @@ params [
     ['_roleCat','FIELD',['']]
 ];
 
-// sqflint-compat helpers
-private _trimFn     = compile "params ['_s']; trim _s";
-
 private _lines = [];
 
 private _taskId = missionNamespace getVariable ['ARC_activeTaskId',''];
 if (!(_taskId isEqualType '')) then { _taskId = ''; };
-_taskId = [_taskId] call _trimFn;
+_taskId = trim _taskId;
 
-private _hasIncident = (!(_taskId isEqualTo ''));
+private _hasIncident = (_taskId isNotEqualTo '');
 private _accepted = missionNamespace getVariable ['ARC_activeIncidentAccepted', false];
 if (!(_accepted isEqualType true) && !(_accepted isEqualType false)) then { _accepted = false; };
 
@@ -43,9 +40,9 @@ if (!(_orders isEqualType [])) then { _orders = []; };
 private _issuedCount = 0;
 {
     if (!(_x isEqualType [] && { (count _x) >= 6 })) then { continue; };
-    private _st = toUpper (_x select 2);
-    private _tg = _x select 4;
-    if (!(_tg isEqualTo _gid)) then { continue; };
+    private _st = toUpper (_x # 2);
+    private _tg = _x # 4;
+    if (_tg isNotEqualTo _gid) then { continue; };
     if (_st isEqualTo 'ISSUED') then { _issuedCount = _issuedCount + 1; };
 } forEach _orders;
 
@@ -61,9 +58,9 @@ private _hasRtbEvidenceApproval = false;
 private _hasTowVbiedApproval = false;
 {
     if (!(_x isEqualType [] && { (count _x) >= 6 })) then { continue; };
-    if (!((_x select 0) isEqualTo _taskId)) then { continue; };
-    if (!((_x select 1) isEqualTo _accG)) then { continue; };
-    private _rt = toUpper ([(_x select 2)] call _trimFn);
+    if ((_x # 0) isNotEqualTo _taskId) then { continue; };
+    if ((_x # 1) isNotEqualTo _accG) then { continue; };
+    private _rt = toUpper (trim (_x # 2));
     if (_rt isEqualTo 'RTB_IED') then { _hasRtbEvidenceApproval = true; };
     if (_rt isEqualTo 'TOW_VBIED') then { _hasTowVbiedApproval = true; };
 } forEach _appr;
@@ -82,7 +79,7 @@ private _vbDisposed = missionNamespace getVariable ['ARC_activeVbiedDisposed', f
 if (!(_vbDisposed isEqualType true) && !(_vbDisposed isEqualType false)) then { _vbDisposed = false; };
 private _vbCause = missionNamespace getVariable ['ARC_activeVbiedDestroyedCause', ''];
 if (!(_vbCause isEqualType '')) then { _vbCause = ''; };
-_vbCause = [_vbCause] call _trimFn;
+_vbCause = trim _vbCause;
 
 // Priority 1: active incident acceptance + SITREP gate
 if (_hasIncident) then
@@ -129,7 +126,7 @@ if (_hasIncident && {_accepted}) then
         };
     };
 
-    if (!(_vbCause isEqualTo '')) then
+    if (_vbCause isNotEqualTo '') then
     {
         _lines pushBack "<t color='#FF8080'>Warning:</t> VBIED destroyed without valid disposal. <t color='#DDDDDD'>Next:</t> OPS SITREP; TOC review.";
     };

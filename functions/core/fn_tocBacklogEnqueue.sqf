@@ -29,12 +29,8 @@ params [
     ["_note", "", [""]]
 ];
 
-// sqflint-compat helpers
-private _trimFn     = compile "params ['_s']; trim _s";
-private _findIfFn   = compile "params ['_arr','_cond']; private _r = -1; { if (_x call _cond) exitWith { _r = _forEachIndex; }; } forEach _arr; _r";
-
 if (!(_leadId isEqualType "")) then { _leadId = ""; };
-_leadId = [_leadId] call _trimFn;
+_leadId = trim _leadId;
 if (_leadId isEqualTo "") exitWith {false};
 
 if (!(_priority isEqualType 0)) then { _priority = 3; };
@@ -42,33 +38,32 @@ _priority = round _priority;
 _priority = (_priority max 1) min 5;
 
 if (!(_sourceQid isEqualType "")) then { _sourceQid = ""; };
-_sourceQid = [_sourceQid] call _trimFn;
+_sourceQid = trim _sourceQid;
 
 if (!(_by isEqualType "")) then { _by = "SYSTEM"; };
-_by = [_by] call _trimFn;
+_by = trim _by;
 
 if (!(_note isEqualType "")) then { _note = ""; };
-_note = [_note] call _trimFn;
+_note = trim _note;
 
 // Must exist in leadPool, otherwise backlog entry is meaningless.
 private _pool = ["leadPool", []] call ARC_fnc_stateGet;
 if (!(_pool isEqualType [])) then { _pool = []; };
 
-private _li = -1;
-{ if (_x isEqualType [] && { (count _x) >= 1 } && { (_x select 0) isEqualTo _leadId }) exitWith { _li = _forEachIndex; }; } forEach _pool;
+private _li = _pool findIf { _x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _leadId } };
 if (_li < 0) exitWith {false};
 
-private _lead = _pool select _li;
+private _lead = _pool # _li;
 
 private _leadType = "";
 private _leadName = "";
 private _leadPos = [];
 private _tag = "";
 
-if ((count _lead) >= 2 && { (_lead select 1) isEqualType "" }) then { _leadType = _lead select 1; };
-if ((count _lead) >= 3 && { (_lead select 2) isEqualType "" }) then { _leadName = _lead select 2; };
-if ((count _lead) >= 4 && { (_lead select 3) isEqualType [] }) then { _leadPos = _lead select 3; };
-if ((count _lead) >= 11 && { (_lead select 10) isEqualType "" }) then { _tag = _lead select 10; };
+if ((count _lead) >= 2 && { (_lead # 1) isEqualType "" }) then { _leadType = _lead # 1; };
+if ((count _lead) >= 3 && { (_lead # 2) isEqualType "" }) then { _leadName = _lead # 2; };
+if ((count _lead) >= 4 && { (_lead # 3) isEqualType [] }) then { _leadPos = _lead # 3; };
+if ((count _lead) >= 11 && { (_lead # 10) isEqualType "" }) then { _tag = _lead # 10; };
 
 private _zone = "";
 if (_leadPos isEqualType [] && { (count _leadPos) >= 2 }) then
@@ -80,8 +75,7 @@ private _back = ["tocBacklog", []] call ARC_fnc_stateGet;
 if (!(_back isEqualType [])) then { _back = []; };
 
 // Avoid duplicates by leadId.
-private _exists = -1;
-{ if (_x isEqualType [] && { (count _x) >= 1 } && { (_x select 0) isEqualTo _leadId }) exitWith { _exists = _forEachIndex; }; } forEach _back;
+private _exists = _back findIf { _x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _leadId } };
 if (_exists >= 0) exitWith {true};
 
 // Record shape:

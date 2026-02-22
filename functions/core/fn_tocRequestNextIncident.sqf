@@ -11,9 +11,6 @@
 
 if (!isServer) exitWith {false};
 
-// sqflint-compat helpers
-private _trimFn     = compile "params ['_s']; trim _s";
-
 if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\core\fn_rpcValidateSender.sqf"; };
 
 params [ ["_caller", objNull, [objNull]] ];
@@ -33,7 +30,7 @@ private _publishResult = {
     private _stamp = diag_tickTime;
     missionNamespace setVariable [
         "ARC_pub_nextIncidentResult",
-        [_stamp, _ownerId, toUpper ([_resultCode] call _trimFn), _title, _detail, _allowed],
+        [_stamp, _ownerId, toUpper (trim _resultCode), _title, _detail, _allowed],
         true
     ];
 
@@ -41,7 +38,7 @@ private _publishResult = {
     {
         missionNamespace setVariable [
             "ARC_pub_nextIncidentLastDenied",
-            [_stamp, toUpper ([_resultCode] call _trimFn), _detail],
+            [_stamp, toUpper (trim _resultCode), _detail],
             true
         ];
     };
@@ -88,9 +85,9 @@ if (_taskId isEqualTo "") then
             {
                 if (_x isEqualType [] && { (count _x) >= 5 }) then
                 {
-                    private _st = toUpper (_x select 2);
-                    private _typ = toUpper (_x select 3);
-                    private _tg = _x select 4;
+                    private _st = toUpper (_x # 2);
+                    private _typ = toUpper (_x # 3);
+                    private _tg = _x # 4;
 
                     // Any ISSUED order for the last tasked group should block new incident creation.
                     // This enforces the command cycle: TOC issues -> unit accepts -> execute.

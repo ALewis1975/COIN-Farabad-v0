@@ -20,11 +20,7 @@ if (!hasInterface) exitWith {false};
 if (!canSuspend) exitWith { _this spawn ARC_fnc_intelClientBeginLeadRequestMapClick; true };
 
 params [["_leadType", "RECON"]];
-
-// sqflint-compat helpers
-private _trimFn     = compile "params ['_s']; trim _s";
-private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
-_leadType = toUpper ([_leadType] call _trimFn);
+_leadType = toUpper (trim _leadType);
 if (_leadType isEqualTo "") then { _leadType = "RECON"; };
 
 private _defSum = format ["Lead: %1 (S2 Request)", _leadType];
@@ -34,7 +30,7 @@ private _res = ["S2 LEAD REQUEST", _defSum, _defDet] call ARC_fnc_clientIntelPro
 _res params ["_ok", "_sum", "_det"];
 if (!_ok) exitWith {false};
 
-_sum = [_sum] call _trimFn;
+_sum = trim _sum;
 if (_sum isEqualTo "") then { _sum = _defSum; };
 if ((toUpper _sum) find "LEAD:" < 0) then { _sum = format ["Lead: %1", _sum]; };
 
@@ -121,7 +117,7 @@ if (_reopenConsole) then
 
 ["Map click to place the LEAD REQUEST (Esc to cancel).", "ACTION_REQUIRED", "HINT"] call ARC_fnc_clientHint;
 
-private _ctx = [[
+private _ctx = createHashMapFromArray [
     ["type", "LEAD_REQ"],
     ["leadType", missionNamespace getVariable ["ARC_lastLeadReqType", "RECON"]],
     ["summary", missionNamespace getVariable ["ARC_lastLeadReqSummary", "Lead: Unknown"]],
@@ -129,7 +125,7 @@ private _ctx = [[
     ["confidence", missionNamespace getVariable ["ARC_lastLeadReqConfidence", "MED"]],
     ["strength", missionNamespace getVariable ["ARC_lastLeadReqStrength", 0.55]],
     ["ttl", missionNamespace getVariable ["ARC_lastLeadReqTTL", 3600]]
-]] call _hmFrom;
+];
 
 [_ctx] call ARC_fnc_mapClick_arm;
 

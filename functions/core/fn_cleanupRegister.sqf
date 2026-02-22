@@ -86,7 +86,7 @@ private _count = 0;
         if (_persist isEqualType true && { _persist }) then { continue; };
     };
     // Avoid duplicates
-    if (([_queue, { (_x select 0) isEqualTo _nid }] call _findIfFn) >= 0) then { continue; };
+    if ((_queue findIf { (_x # 0) isEqualTo _nid }) >= 0) then { continue; };
 
     private _a = _anchor;
     if (!(_a isEqualType []) || { (count _a) < 2 }) then

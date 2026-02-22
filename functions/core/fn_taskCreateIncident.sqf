@@ -25,7 +25,7 @@ params [
 private _pos = [];
 private _m = "";
 
-if (!(_markerName isEqualTo "")) then
+if (_markerName isNotEqualTo "") then
 {
     _m = [_markerName] call ARC_fnc_worldResolveMarker;
     if (_m in allMapMarkers) then
@@ -47,11 +47,11 @@ private _desc = [_taskId, _m, _displayName, _incidentType, _pos] call ARC_fnc_ta
 
 // Case/task nesting for intel threads
 private _taskIdParam = _taskId;
-if (!(_threadId isEqualTo "")) then
+if (_threadId isNotEqualTo "") then
 {
     private _zoneBias = [_pos] call ARC_fnc_worldGetZoneForPos;
     private _parent = [_threadId, "GENERIC", _zoneBias, _pos] call ARC_fnc_taskEnsureThreadParent;
-    if (!(_parent isEqualTo "")) then
+    if (_parent isNotEqualTo "") then
     {
         _taskIdParam = [_taskId, _parent];
     };

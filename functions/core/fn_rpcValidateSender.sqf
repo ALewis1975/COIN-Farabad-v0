@@ -53,7 +53,7 @@ if (isNull _caller) exitWith
         ]
     ] call ARC_fnc_intelLog;
 
-    if (_notify isEqualType "" && { !(_notify isEqualTo "") } && { _actualOwner > 0 }) then
+    if (_notify isEqualType "" && { _notify isNotEqualTo "" } && { _actualOwner > 0 }) then
     {
         [_notify] remoteExec ["ARC_fnc_clientHint", _actualOwner];
     };
@@ -76,7 +76,7 @@ if (_expectedOwner != _actualOwner) exitWith
             ]
         ] call ARC_fnc_intelLog;
 
-        if (_notify isEqualType "" && { !(_notify isEqualTo "") } && { _actualOwner > 0 }) then
+        if (_notify isEqualType "" && { _notify isNotEqualTo "" } && { _actualOwner > 0 }) then
         {
             [_notify] remoteExec ["ARC_fnc_clientHint", _actualOwner];
         };

@@ -27,10 +27,6 @@ params [
 
 if (_civUid isEqualTo "" || { _districtId isEqualTo "" }) exitWith {createHashMap};
 
-// sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
-private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
-
 private _seed = missionNamespace getVariable ["civsub_v1_seed", 1337];
 if !(_seed isEqualType 0) then { _seed = 1337; };
 private _seq = missionNamespace getVariable ["civsub_v1_identity_seq", 1];
@@ -51,14 +47,14 @@ private _pad2 = {
 private _pickWeighted = {
     params ["_arr", "_rollFn"]; // _arr: [[val,weight],...]
     private _tw = 0;
-    { _tw = _tw + (_x select 1); } forEach _arr;
-    if (_tw <= 0) exitWith { (_arr select 0) select 0 };
+    { _tw = _tw + (_x # 1); } forEach _arr;
+    if (_tw <= 0) exitWith { (_arr # 0) # 0 };
     private _r = [_tw] call _rollFn;
     private _acc = 0;
-    private _out = (_arr select 0) select 0;
+    private _out = (_arr # 0) # 0;
     {
-        _acc = _acc + (_x select 1);
-        if (_r < _acc) exitWith { _out = _x select 0; };
+        _acc = _acc + (_x # 1);
+        if (_r < _acc) exitWith { _out = _x # 0; };
     } forEach _arr;
     _out
 };
@@ -81,16 +77,16 @@ private _pop = -1;
 if (_enrich) then {
     // Tolerant inline lookup (avoid external getter to prevent hard-fail chains)
     private _districts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
-    if (_districts isEqualType []) then { _districts = [_districts] call _hmFrom; };
+    if (_districts isEqualType []) then { _districts = createHashMapFromArray _districts; };
 
     if (_districts isEqualType createHashMap) then {
-        private _d = [_districts, _districtId, createHashMap] call _hg;
-        if (!(_d isEqualType createHashMap) || {(count _d) == 0}) then { _d = [_districts, toLower _districtId, createHashMap] call _hg; };
-        if (!(_d isEqualType createHashMap) || {(count _d) == 0}) then { _d = [_districts, toUpper _districtId, createHashMap] call _hg; };
+        private _d = _districts getOrDefault [_districtId, createHashMap];
+        if (!(_d isEqualType createHashMap) || {(count _d) == 0}) then { _d = _districts getOrDefault [toLower _districtId, createHashMap]; };
+        if (!(_d isEqualType createHashMap) || {(count _d) == 0}) then { _d = _districts getOrDefault [toUpper _districtId, createHashMap]; };
 
-        if (_d isEqualType []) then { _d = [_d] call _hmFrom; };
+        if (_d isEqualType []) then { _d = createHashMapFromArray _d; };
         if (_d isEqualType createHashMap) then {
-            _pop = [_d, "pop_total", -1] call _hg;
+            _pop = _d getOrDefault ["pop_total", -1];
             if !(_pop isEqualType 0) then { _pop = -1; };
         };
     };
@@ -192,7 +188,7 @@ private _expires = format ["%1-%2-%3", _expYear, ([_expMonth] call _pad2), ([_ex
 private _nat = "Takistan";
 private _isPassport = true;
 
-[[
+createHashMapFromArray [
     ["civ_uid", _civUid],
     ["first_name", _first],
     ["last_name", _last],
@@ -237,4 +233,4 @@ private _isPassport = true;
 
     ["seen_by", createHashMap],
     ["last_interaction_ts", serverTime]
-]] call _hmFrom
+]
