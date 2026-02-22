@@ -41,24 +41,33 @@ private _sanitizeMeta = {
     };
     private _out = [];
     {
-        if !(_x isEqualType [] && { (count _x) >= 2 }) then { _truncated = true; continue; };
-        private _k = _x # 0;
-        private _v = _x # 1;
-        if !(_k isEqualType "") then { _truncated = true; continue; };
-        _k = trim _k;
-        if (_k isEqualTo "") then { _truncated = true; continue; };
-
-        if (_v isEqualType "") then {
-            _v = trim _v;
-            if ((count _v) > _metaValueMaxLen) then { _v = _v select [0, _metaValueMaxLen]; _truncated = true; };
+        if !(_x isEqualType [] && { (count _x) >= 2 }) then {
+            _truncated = true;
         } else {
-            if (!(_v isEqualType 0) && !(_v isEqualType true) && !(_v isEqualType false)) then {
-                _v = str _v;
-                if ((count _v) > _metaValueMaxLen) then { _v = _v select [0, _metaValueMaxLen]; };
+            private _k = _x # 0;
+            if !(_k isEqualType "") then {
                 _truncated = true;
+            } else {
+                _k = trim _k;
+                if (_k isEqualTo "") then {
+                    _truncated = true;
+                } else {
+                    private _v = _x # 1;
+
+                    if (_v isEqualType "") then {
+                        _v = trim _v;
+                        if ((count _v) > _metaValueMaxLen) then { _v = _v select [0, _metaValueMaxLen]; _truncated = true; };
+                    } else {
+                        if (!(_v isEqualType 0) && !(_v isEqualType true) && !(_v isEqualType false)) then {
+                            _v = str _v;
+                            if ((count _v) > _metaValueMaxLen) then { _v = _v select [0, _metaValueMaxLen]; };
+                            _truncated = true;
+                        };
+                    };
+                    _out pushBack [_k, _v];
+                };
             };
         };
-        _out pushBack [_k, _v];
     } forEach _meta;
 
     if (_truncated) then { _out pushBack ["truncated", true]; };
