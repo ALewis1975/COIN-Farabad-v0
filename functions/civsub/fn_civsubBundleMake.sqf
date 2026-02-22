@@ -67,9 +67,9 @@ private _target = createHashMapFromArray [
 ];
 
 // Normalize influence deltas to contract keys (W/R/G), while still emitting backward-compatible aliases (dW/dR/dG).
-private _dW = _influenceDelta getOrDefault ["W", (_influenceDelta getOrDefault ["dW", 0])];
-private _dR = _influenceDelta getOrDefault ["R", (_influenceDelta getOrDefault ["dR", 0])];
-private _dG = _influenceDelta getOrDefault ["G", (_influenceDelta getOrDefault ["dG", 0])];
+private _dW = [_influenceDelta, "W", ([_influenceDelta, "dW", 0] call _hg)];
+private _dR = [_influenceDelta, "R", ([_influenceDelta, "dR", 0] call _hg)];
+private _dG = [_influenceDelta, "G", ([_influenceDelta, "dG", 0] call _hg)];
 
 private _influenceContract = createHashMapFromArray [
     // Contract

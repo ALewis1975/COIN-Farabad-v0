@@ -25,10 +25,13 @@ if (isNil "_asset" || {!(_asset isEqualType createHashMap)}) exitWith { false };
 private _id     = _asset getOrDefault ["id", ""];
 private _vehVar = _asset getOrDefault ["vehVar", ""];
 
-private _spawnType = _asset getOrDefault ["startVehType", ""];
-private _startPos  = _asset getOrDefault ["startPos", [0,0,0]];
-private _startDir  = _asset getOrDefault ["startDir", 0];
-private _startVecUp = _asset getOrDefault ["startVecUp", [0,0,1]];
+private _id     = [_asset, "id", ""] call _hg;
+private _vehVar = [_asset, "vehVar", ""] call _hg;
+
+private _spawnType = [_asset, "startVehType", ""] call _hg;
+private _startPos  = [_asset, "startPos", [0,0,0]] call _hg;
+private _startDir  = [_asset, "startDir", 0] call _hg;
+private _startVecUp = [_asset, "startVecUp", [0,0,1]] call _hg;
 
 if (_spawnType isEqualTo "" || {!(_startPos isEqualType [])} || {(count _startPos) < 2}) exitWith { false };
 
@@ -56,8 +59,8 @@ if (_vehVar != "") then {
 _asset set ["veh", _newVeh];
 
 // Respawn crew from templates
-private _templates = _asset getOrDefault ["crewTemplates", []];
-private _crewSide  = _asset getOrDefault ["crewSide", west];
+private _templates = [_asset, "crewTemplates", []] call _hg;
+private _crewSide  = [_asset, "crewSide", west] call _hg;
 
 private _grpCrew = createGroup [_crewSide, true];
 
