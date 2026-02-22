@@ -795,3 +795,21 @@ git diff --check
 - `git diff --check` passed (no whitespace/patch-format issues).
 - `sqflint` path is unavailable in this container (`/root/.local/bin/sqflint: No such file or directory`).
 - Runtime validation remains BLOCKED in container (no Arma local MP/dedicated server runtime); follow-up owner: mission systems maintainer on dedicated-server validation pass.
+
+## 2026-02-22 06:10 UTC — S-1 virtual-row dedupe fix for empty groups
+
+**Branch/Commit:** copilot/<pending> @ pending
+
+**Scenario:** Prevented restart-time duplication of S-1 virtual unit rows for empty groups by assigning deterministic virtual `unitId` derived from stable `groupId` during bootstrap upsert.
+
+**Commands:**
+```
+git diff --check
+rg -n "stableVirtualUnitId|virtual:%1" functions/core/fn_s1RegistryInit.sqf functions/core/fn_s1RegistryUpsertUnit.sqf
+```
+
+**Result:** PASS
+
+**Notes:**
+- Static check passed and confirms deterministic virtual-ID path is present in init while legacy fallback remains in upsert for non-group virtual writes.
+- Runtime validation remains BLOCKED in this environment (Arma local MP/dedicated server unavailable); dedicated-server restart/rehydration validation required before merge.
