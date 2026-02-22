@@ -962,3 +962,25 @@ rg -n "_refreshEnabled \|\| _hasPubState|Race-avoidance contract|Snapshot fallba
 - `ARC_pub_stateUpdatedAt` PV EH now refreshes only when `ARC_clientStateRefreshEnabled` is true, matching S1/company handler contract.
 - Fallback for pre-token snapshot visibility is explicit in polling loop (`_lastState < 0` path) to preserve recovery without relaxing event-path gate.
 - Dedicated server/JIP runtime verification remains deferred per project environment constraints.
+
+## 2026-02-22 18:25 UTC — snapshot refresh contract closure extraction
+
+**Branch/Commit:** current branch @ pending
+
+**Scenario:** Extracted repeated snapshot refresh body in `initPlayerLocal.sqf` into one local closure and rewired JIP, PV EH, and polling-change call sites to use the single refresh contract.
+
+**Commands:**
+```
+git --no-pager diff --check
+~/.local/bin/sqflint -e w initPlayerLocal.sqf
+```
+
+**Result:** BLOCKED
+
+**Notes:**
+- `git --no-pager diff --check`: PASS (no whitespace/patch formatting issues).
+- `~/.local/bin/sqflint -e w initPlayerLocal.sqf`: BLOCKED in this container because sqflint is not installed (`No such file or directory`).
+- Runtime scenario type: Dedicated server validation BLOCKED (container static review only).
+- JIP / late-client status: Not validated in this pass; follow-up required on dedicated server.
+- Waiver owner: mission maintainers on current feature branch.
+- Tracking reference: this PR validation section + this `tests/TEST-LOG.md` entry.
