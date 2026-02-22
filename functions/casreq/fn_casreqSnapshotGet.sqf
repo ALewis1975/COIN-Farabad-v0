@@ -32,6 +32,7 @@ private _requiredKeys = [
     private _idx = _snapshot findIf { _x isEqualType [] && { (count _x) >= 2 } && { ((_x select 0) isEqualTo _k) } };
     if (_idx < 0) then {
         private _def = switch (_k) do {
+            case "casreq_id": { _casreqId };
             case "messages": { [] };
             case "area": { [["target_pos", [0,0,0]], ["target_marker", ""]] };
             case "created_at": { serverTime };
