@@ -138,7 +138,7 @@ private _changed = false;
 
     private _threadPressure = 0;
     private _threads = ["threads", []] call ARC_fnc_stateGet;
-    if (_threads isEqualType []) then
+    if (_threads isEqualType [] && { _nodeDistrictId isNotEqualTo "" }) then
     {
         {
             private _thr = [_x] call ARC_fnc_threadNormalizeRecord;
