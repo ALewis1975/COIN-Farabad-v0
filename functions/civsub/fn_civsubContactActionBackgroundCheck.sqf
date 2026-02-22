@@ -25,31 +25,44 @@ private _ensureFn = {
     private _resolved = {};
     // Pre-load by name only; path comparison is omitted to avoid
     // backslash-escaping mismatches between caller and closure.
+    private _path = "";
+    private _exists = false;
     switch (_name) do {
         case "ARC_fnc_civsubIdentityTouch": {
-            if (isNil "ARC_fnc_civsubIdentityTouch") then {
-                ARC_fnc_civsubIdentityTouch = compile preprocessFileLineNumbers "functions\civsub\fn_civsubIdentityTouch.sqf";
+            _path = "functions\\civsub\\fn_civsubIdentityTouch.sqf";
+            _exists = fileExists _path;
+            if (isNil "ARC_fnc_civsubIdentityTouch" && {_exists}) then {
+                ARC_fnc_civsubIdentityTouch = compile preprocessFileLineNumbers _path;
             };
             if !(isNil "ARC_fnc_civsubIdentityTouch") then { _resolved = ARC_fnc_civsubIdentityTouch; };
         };
         case "ARC_fnc_civsubIdentityGenerateProfile": {
-            if (isNil "ARC_fnc_civsubIdentityGenerateProfile") then {
-                ARC_fnc_civsubIdentityGenerateProfile = compile preprocessFileLineNumbers "functions\civsub\fn_civsubIdentityGenerateProfile.sqf";
+            _path = "functions\\civsub\\fn_civsubIdentityGenerateProfile.sqf";
+            _exists = fileExists _path;
+            if (isNil "ARC_fnc_civsubIdentityGenerateProfile" && {_exists}) then {
+                ARC_fnc_civsubIdentityGenerateProfile = compile preprocessFileLineNumbers _path;
             };
             if !(isNil "ARC_fnc_civsubIdentityGenerateProfile") then { _resolved = ARC_fnc_civsubIdentityGenerateProfile; };
         };
         case "ARC_fnc_civsubIdentitySet": {
-            if (isNil "ARC_fnc_civsubIdentitySet") then {
-                ARC_fnc_civsubIdentitySet = compile preprocessFileLineNumbers "functions\civsub\fn_civsubIdentitySet.sqf";
+            _path = "functions\\civsub\\fn_civsubIdentitySet.sqf";
+            _exists = fileExists _path;
+            if (isNil "ARC_fnc_civsubIdentitySet" && {_exists}) then {
+                ARC_fnc_civsubIdentitySet = compile preprocessFileLineNumbers _path;
             };
             if !(isNil "ARC_fnc_civsubIdentitySet") then { _resolved = ARC_fnc_civsubIdentitySet; };
         };
         case "ARC_fnc_civsubIdentityEvictIfNeeded": {
-            if (isNil "ARC_fnc_civsubIdentityEvictIfNeeded") then {
-                ARC_fnc_civsubIdentityEvictIfNeeded = compile preprocessFileLineNumbers "functions\civsub\fn_civsubIdentityEvictIfNeeded.sqf";
+            _path = "functions\\civsub\\fn_civsubIdentityEvictIfNeeded.sqf";
+            _exists = fileExists _path;
+            if (isNil "ARC_fnc_civsubIdentityEvictIfNeeded" && {_exists}) then {
+                ARC_fnc_civsubIdentityEvictIfNeeded = compile preprocessFileLineNumbers _path;
             };
             if !(isNil "ARC_fnc_civsubIdentityEvictIfNeeded") then { _resolved = ARC_fnc_civsubIdentityEvictIfNeeded; };
         };
+    };
+    if (!(_resolved isEqualType {})) then {
+        diag_log format ["[CIVSUB][BG] ensureFn unresolved fn=%1 path=%2 fileExists=%3", _name, _path, _exists];
     };
     _resolved
 };
@@ -152,10 +165,12 @@ private _identityDepsOk = true;
 {
     private _depName = _x select 0;
     private _fn = {};
+    private _depPath = format ["functions\\civsub\\fn_%1.sqf", _depName select [8]];
+    private _depExists = fileExists _depPath;
     private _nilDep = isNil { _fn = [_depName] call _ensureFn; };
     if (_nilDep || {!(_fn isEqualType {})}) then {
         _identityDepsOk = false;
-        diag_log format ["[CIVSUB][BG] IDENTITY_TOUCH: could not resolve dependency fn=%1", _depName];
+        diag_log format ["[CIVSUB][BG] IDENTITY_TOUCH: could not resolve dependency fn=%1 path=%2 fileExists=%3", _depName, _depPath, _depExists];
     };
 } forEach [
     ["ARC_fnc_civsubIdentityTouch"],

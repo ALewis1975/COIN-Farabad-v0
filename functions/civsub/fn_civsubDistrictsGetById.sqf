@@ -12,7 +12,14 @@
       districtState HashMap (or createHashMap if missing)
 */
 
-params [["_districtId", "", [""]]];
+params [["_districtId", "", ["", []]]];
+if (_districtId isEqualType [] && {(count _districtId) == 1} && {(_districtId # 0) isEqualType ""}) then {
+    _districtId = _districtId # 0;
+};
+if !(_districtId isEqualType "") exitWith {
+    diag_log format ["[CIVSUB][WARN] DistrictsGetById invalid districtId type=%1 value=%2", typeName _districtId, _districtId];
+    createHashMap
+};
 if (_districtId isEqualTo "") exitWith {createHashMap};
 
 private _districts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];

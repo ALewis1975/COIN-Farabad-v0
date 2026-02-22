@@ -10,16 +10,35 @@
 params [["_bundle", createHashMap, [createHashMap]]];
 if !(_bundle isEqualType createHashMap) exitWith {false};
 
-private _districtId = [_bundle, "districtId", ([_bundle, "district_id", ""] call _hg)];
+private _districtId = [_bundle, "districtId", ([_bundle, "district_id", ""] call _hg)] call _hg;
+if !(_districtId isEqualType "") exitWith {
+    diag_log format ["[CIVSUB][WARN] DeltaApply invalid districtId type=%1 value=%2", typeName _districtId, _districtId];
+    false
+};
 if (_districtId isEqualTo "") exitWith {false};
+
+private _deltaCoerceWarned = false;
+private _coerceDelta = {
+    params ["_name", "_value"];
+    if (_value isEqualType 0) exitWith {_value};
+    if !(_deltaCoerceWarned) then {
+        _deltaCoerceWarned = true;
+        diag_log format ["[CIVSUB][WARN] DeltaApply non-scalar delta coerced to 0 districtId=%1 type=%2 value=%3", _districtId, typeName _value, _value];
+    };
+    0
+};
 
 private _delta = _bundle getOrDefault ["influence_delta", createHashMap];
 if !(_delta isEqualType createHashMap) exitWith {false};
 
 // Support both legacy keys (dW/dR/dG) and contract keys (W/R/G)
-private _dW = [_delta, "W", ([_delta, "dW", 0] call _hg)];
-private _dR = [_delta, "R", ([_delta, "dR", 0] call _hg)];
-private _dG = [_delta, "G", ([_delta, "dG", 0] call _hg)];
+private _dW = [_delta, "W", ([_delta, "dW", 0] call _hg)] call _hg;
+private _dR = [_delta, "R", ([_delta, "dR", 0] call _hg)] call _hg;
+private _dG = [_delta, "G", ([_delta, "dG", 0] call _hg)] call _hg;
+
+_dW = ["W", _dW] call _coerceDelta;
+_dR = ["R", _dR] call _coerceDelta;
+_dG = ["G", _dG] call _coerceDelta;
 
 private _d = [_districtId] call ARC_fnc_civsubDistrictsGetById;
 if !(_d isEqualType createHashMap) exitWith {false};
