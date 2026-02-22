@@ -772,3 +772,21 @@ rg -n "_nodeDistrictId|civsubDistrictsFindByPos|civsubDistrictsGetById|_did isNo
 **Notes:**
 - Static checks confirm district-risk lookup now keys by district ID (`Dxx`) and thread pressure comparison uses normalized thread district ID slot.
 - Runtime validation (`Local MP` / `Hosted MP` / `Dedicated server`) remains BLOCKED in this container because Arma runtime is unavailable.
+
+## 2026-02-22 05:09 UTC — virtual ops thread-pressure empty district guard
+
+**Branch/Commit:** <current branch> @ pending
+
+**Scenario:** Added guard to skip thread-pressure accumulation when node district ID is unresolved (`""`) so unresolved threads do not bias unrelated nodes.
+
+**Commands:**
+```
+git --no-pager diff --check
+rg -n "_threads isEqualType \[\] && \{ _nodeDistrictId isNotEqualTo \"\" \}" functions/core/fn_companyCommandVirtualOpsTick.sqf
+```
+
+**Result:** PASS (static), BLOCKED (runtime)
+
+**Notes:**
+- Static checks confirm thread-pressure loop executes only for resolved district IDs.
+- Runtime validation (`Local MP` / `Hosted MP` / `Dedicated server`) remains BLOCKED in this container because Arma runtime is unavailable.
