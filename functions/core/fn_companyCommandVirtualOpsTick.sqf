@@ -116,10 +116,17 @@ private _changed = false;
     if (!(_nodeZone isEqualType "")) then { _nodeZone = ""; };
     if (_nodeZone isEqualTo "") then { _nodeZone = [_nodePos] call ARC_fnc_worldGetZoneForPos; };
 
-    private _districtRisk = 0.35;
-    if (missionNamespace getVariable ["civsub_v1_enabled", false] && { _nodeZone isNotEqualTo "" }) then
+    private _nodeDistrictId = "";
+    if (missionNamespace getVariable ["civsub_v1_enabled", false]) then
     {
-        private _d = [_nodeZone] call ARC_fnc_civsubDistrictsGetById;
+        _nodeDistrictId = [_nodePos] call ARC_fnc_civsubDistrictsFindByPos;
+        if (!(_nodeDistrictId isEqualType "")) then { _nodeDistrictId = ""; };
+    };
+
+    private _districtRisk = 0.35;
+    if (missionNamespace getVariable ["civsub_v1_enabled", false] && { _nodeDistrictId isNotEqualTo "" }) then
+    {
+        private _d = [_nodeDistrictId] call ARC_fnc_civsubDistrictsGetById;
         if (_d isEqualType createHashMap && { (count _d) > 0 }) then
         {
             private _fear = _d getOrDefault ["fear_idx", 50];
@@ -137,7 +144,7 @@ private _changed = false;
             private _thr = [_x] call ARC_fnc_threadNormalizeRecord;
             if (_thr isEqualTo []) then { continue; };
             private _did = _thr # 14;
-            if (_did isNotEqualTo _nodeZone) then { continue; };
+            if (_did isNotEqualTo _nodeDistrictId) then { continue; };
             private _state = toUpper (_thr # 6);
             if (_state isEqualTo "DORMANT") then { continue; };
             _threadPressure = _threadPressure + (((_thr # 4) max 0 min 1) * 0.5 + ((_thr # 5) max 0 min 1) * 0.5);
