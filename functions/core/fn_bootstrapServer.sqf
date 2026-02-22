@@ -741,6 +741,9 @@ if (_safeModeEnabled) then
 // Load persistent COIN state
 [] call ARC_fnc_stateLoad;
 
+// Server-owned S1 registry: canonical personnel/unit index + public snapshot mirror
+[] call ARC_fnc_s1RegistryInit;
+
 // Threat v0 + IED P1 (server-only)
 if (_safeModeEnabled) then
 {
