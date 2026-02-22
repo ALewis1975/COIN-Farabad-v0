@@ -89,16 +89,30 @@ else
     private _need = (6 - (count _s)) max 0;
     private _seq6 = (_zeros select [0, _need]) + _s;
 
-    private _districtId = [_ctx, "district_id", "D00"] call _kvGet;
-    if (!(_districtId isEqualType "")) then { _districtId = "D00"; };
-    if (_districtId isEqualTo "") then { _districtId = "D00"; };
-
-    private _threatId = format ["THR:%1:%2", _districtId, _seq6];
-
     // Context -> area/links
     private _pos = [_ctx, "pos", [0,0,0]] call _kvGet;
     if (!(_pos isEqualType []) || { (count _pos) < 2 }) then { _pos = [0,0,0]; };
     _pos = +_pos; _pos resize 3;
+
+    private _districtIdSource = [_ctx, "district_id", ""] call _kvGet;
+    if !(_districtIdSource isEqualType "") then { _districtIdSource = ""; };
+    _districtIdSource = toUpper (trim _districtIdSource);
+
+    private _districtId = _districtIdSource;
+    if !([_districtId] call ARC_fnc_worldIsValidDistrictId) then
+    {
+        private _resolvedDistrictId = [_pos] call ARC_fnc_threadResolveDistrictId;
+        if ([_resolvedDistrictId] call ARC_fnc_worldIsValidDistrictId) then
+        {
+            _districtId = _resolvedDistrictId;
+        }
+        else
+        {
+            _districtId = "D00";
+        };
+    };
+
+    private _threatId = format ["THR:%1:%2", _districtId, _seq6];
 
     private _radiusM = [_ctx, "radius_m", 0] call _kvGet;
     if (!(_radiusM isEqualType 0) || { _radiusM <= 0 }) then { _radiusM = 0; };
@@ -129,6 +143,7 @@ else
 
     private _links = [
         ["ao_id", _aoId],
+        ["district_id_source", _districtIdSource],
         ["district_id", _districtId],
         ["task_id", _taskId],
         ["lead_id", _leadId],
@@ -203,6 +218,7 @@ else
         ["state_from", ""],
         ["state_to", "CREATED"],
         ["ao_id", _aoId],
+        ["district_id_source", _districtIdSource],
         ["district_id", _districtId],
         ["task_id", _taskId],
         ["lead_id", _leadId],
@@ -214,6 +230,17 @@ else
     ];
 
     private _intelId = ["OPS", format ["THREAT_CREATED: %1 (%2/%3)", _threatId, _typeU, _subtypeU], _pos, _meta] call ARC_fnc_intelLog;
+
+    missionNamespace setVariable [
+        "threat_v0_debug_last_event",
+        [
+            ["ts", _now],
+            ["event", "THREAT_CREATED"],
+            ["threat_id", _threatId],
+            ["district_id_source", _districtIdSource],
+            ["district_id", _districtId]
+        ]
+    ];
 
     // Attach log ref (best-effort)
     if (_intelId isNotEqualTo "") then

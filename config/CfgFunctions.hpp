@@ -105,6 +105,7 @@ class CfgFunctions
             class taskEnsureThreadParent {};
             class threadFindOrCreate {};
             class threadResolveDistrictId {};
+            class worldIsValidDistrictId {};
             class threadNormalizeRecord {};
             class threadOnIncidentClosed {};
             class threadTickAll {};

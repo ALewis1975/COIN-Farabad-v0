@@ -30,6 +30,9 @@ private _districts = createHashMap;
     if ((count _x) < 16) then { continue; };
 
     private _id = _x # 0;
+    if !(_id isEqualType "") then { _id = ""; };
+    _id = toUpper (trim _id);
+    if !([_id] call ARC_fnc_worldIsValidDistrictId) then { continue; };
     private _centroid = _x # 1;
     private _radius = _x # 2;
     private _pop = _x # 3;
@@ -108,6 +111,9 @@ if (_idRows isEqualType []) then {
         private _dob = _x # 4;
         private _nat = _x # 5;
         private _homeDid = _x # 6;
+        if !(_homeDid isEqualType "") then { _homeDid = ""; };
+        _homeDid = toUpper (trim _homeDid);
+        if !([_homeDid] call ARC_fnc_worldIsValidDistrictId) then { _homeDid = ""; };
         private _homePos = _x # 7;
         private _occ = _x # 8;
         private _bg = _x # 9;
@@ -123,6 +129,9 @@ if (_idRows isEqualType []) then {
         private _detained = if ((count _x) > 17) then { _x # 17 } else { false };
         private _detainedAt = if ((count _x) > 18) then { _x # 18 } else { 0 };
         private _detainedDid = if ((count _x) > 19) then { _x # 19 } else { "" };
+        if !(_detainedDid isEqualType "") then { _detainedDid = ""; };
+        _detainedDid = toUpper (trim _detainedDid);
+        if !([_detainedDid] call ARC_fnc_worldIsValidDistrictId) then { _detainedDid = ""; };
         private _handedOff = if ((count _x) > 20) then { _x # 20 } else { false };
         private _handedOffAt = if ((count _x) > 21) then { _x # 21 } else { 0 };
         private _handedOffTo = if ((count _x) > 22) then { _x # 22 } else { "" };
@@ -183,6 +192,9 @@ if (_crimeRows isEqualType []) then {
         private _poiId = _x # 0;
         private _cat = _x # 1;
         private _did = _x # 2;
+        if !(_did isEqualType "") then { _did = ""; };
+        _did = toUpper (trim _did);
+        if !([_did] call ARC_fnc_worldIsValidDistrictId) then { _did = ""; };
         private _ps = _x # 3;
         private _isHvt = _x # 4;
         private _st = _x # 5;

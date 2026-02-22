@@ -66,9 +66,13 @@ missionNamespace setVariable ["threat_v0_debug_counts", _counts];
 missionNamespace setVariable ["threat_v0_debug_open", _openShort];
 
 private _last = missionNamespace getVariable ["threat_v0_debug_last_event", []];
+private _lastDistrictSource = [_last, "district_id_source", ""] call _kvGet;
+private _lastDistrictNorm = [_last, "district_id", ""] call _kvGet;
 
 [
     ["counts", _counts],
     ["last", _last],
+    ["last_district_id_source", _lastDistrictSource],
+    ["last_district_id", _lastDistrictNorm],
     ["open", _openShort]
 ]
