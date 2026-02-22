@@ -59,7 +59,7 @@ if ((_actor distance _civ) > 6) exitWith {
 
 // sqflint-compatible helpers for HashMap operations
 private _hg     = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k,_d]";
-private _hmFrom = compile "params ['_pairs']; private _r = createHashMap; if !(_pairs isEqualType []) exitWith {_r}; { if !(_x isEqualType []) then { diag_log format ['[CIVSUB][WARN] _hmFrom skipped non-array entry type=%1', typeName _x]; } else { if ((count _x) < 2) then { diag_log format ['[CIVSUB][WARN] _hmFrom skipped short entry=%1', _x]; } else { private _k = _x select 0; if !(_k isEqualType '') then { _k = str _k; }; _r set [_k, _x select 1]; }; }; } forEach _pairs; _r";
+private _hmFrom = compile "params ['_pairs']; private _r = createHashMap; if !(_pairs isEqualType []) exitWith {_r}; { if !(_x isEqualType []) then { diag_log format ['[CIVSUB][WARN][fn_civsubContactReqAction] _hmFrom skipped non-array entry type=%1', typeName _x]; } else { if ((count _x) < 2) then { diag_log format ['[CIVSUB][WARN][fn_civsubContactReqAction] _hmFrom skipped short entry=%1', _x]; } else { private _k = _x select 0; if !(_k isEqualType '') then { _k = str _k; }; _r set [_k, _x select 1]; }; }; } forEach _pairs; _r";
 
 // Pre-load identity functions if not yet compiled (guard against cold-start or JIP timing gaps).
 if (isNil "ARC_fnc_civsubIdentityTouch") then { ARC_fnc_civsubIdentityTouch = compile preprocessFileLineNumbers "functions\civsub\fn_civsubIdentityTouch.sqf"; };
@@ -80,10 +80,11 @@ switch (_actionId) do {
                 if !(_payload isEqualType createHashMap) then {
                     if (_payload isEqualType []) then {
                         if ((count _payload) > 0 && {(_payload select 0) isEqualType []}) then {
-                            _payload = _payload call _hmFrom;
+                            private _pairs = _payload select { _x isEqualType [] && {(count _x) >= 2} };
+                            _payload = _pairs call _hmFrom;
                         } else {
                             if ((count _payload) >= 2) then {
-                                _payload = [_payload] call _hmFrom;
+                                _payload = [[_payload select 0, _payload select 1]] call _hmFrom;
                             } else {
                                 _payload = createHashMap;
                             };
@@ -298,10 +299,11 @@ switch (_actionId) do {
             if !(_pl isEqualType createHashMap) then {
                 if (_pl isEqualType []) then {
                     if ((count _pl) > 0 && {(_pl select 0) isEqualType []}) then {
-                        _pl = _pl call _hmFrom;
+                        private _pairs = _pl select { _x isEqualType [] && {(count _x) >= 2} };
+                        _pl = _pairs call _hmFrom;
                     } else {
                         if ((count _pl) >= 2) then {
-                            _pl = [_pl] call _hmFrom;
+                            _pl = [[_pl select 0, _pl select 1]] call _hmFrom;
                         } else {
                             _pl = createHashMap;
                         };

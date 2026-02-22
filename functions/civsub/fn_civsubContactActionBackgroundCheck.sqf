@@ -22,47 +22,11 @@ if !(_civ getVariable ["civsub_v1_isCiv", false]) exitWith {[false, "<t size='0.
 
 private _ensureFn = {
     params ["_name"];
-    private _resolved = {};
-    // Pre-load by name only; path comparison is omitted to avoid
-    // backslash-escaping mismatches between caller and closure.
-    private _path = "";
-    private _exists = false;
-    switch (_name) do {
-        case "ARC_fnc_civsubIdentityTouch": {
-            _path = "functions\\civsub\\fn_civsubIdentityTouch.sqf";
-            _exists = fileExists _path;
-            if (isNil "ARC_fnc_civsubIdentityTouch" && {_exists}) then {
-                ARC_fnc_civsubIdentityTouch = compile preprocessFileLineNumbers _path;
-            };
-            if !(isNil "ARC_fnc_civsubIdentityTouch") then { _resolved = ARC_fnc_civsubIdentityTouch; };
-        };
-        case "ARC_fnc_civsubIdentityGenerateProfile": {
-            _path = "functions\\civsub\\fn_civsubIdentityGenerateProfile.sqf";
-            _exists = fileExists _path;
-            if (isNil "ARC_fnc_civsubIdentityGenerateProfile" && {_exists}) then {
-                ARC_fnc_civsubIdentityGenerateProfile = compile preprocessFileLineNumbers _path;
-            };
-            if !(isNil "ARC_fnc_civsubIdentityGenerateProfile") then { _resolved = ARC_fnc_civsubIdentityGenerateProfile; };
-        };
-        case "ARC_fnc_civsubIdentitySet": {
-            _path = "functions\\civsub\\fn_civsubIdentitySet.sqf";
-            _exists = fileExists _path;
-            if (isNil "ARC_fnc_civsubIdentitySet" && {_exists}) then {
-                ARC_fnc_civsubIdentitySet = compile preprocessFileLineNumbers _path;
-            };
-            if !(isNil "ARC_fnc_civsubIdentitySet") then { _resolved = ARC_fnc_civsubIdentitySet; };
-        };
-        case "ARC_fnc_civsubIdentityEvictIfNeeded": {
-            _path = "functions\\civsub\\fn_civsubIdentityEvictIfNeeded.sqf";
-            _exists = fileExists _path;
-            if (isNil "ARC_fnc_civsubIdentityEvictIfNeeded" && {_exists}) then {
-                ARC_fnc_civsubIdentityEvictIfNeeded = compile preprocessFileLineNumbers _path;
-            };
-            if !(isNil "ARC_fnc_civsubIdentityEvictIfNeeded") then { _resolved = ARC_fnc_civsubIdentityEvictIfNeeded; };
-        };
-    };
-    if (!(_resolved isEqualType {})) then {
-        diag_log format ["[CIVSUB][BG] ensureFn unresolved fn=%1 path=%2 fileExists=%3", _name, _path, _exists];
+    private _resolved = missionNamespace getVariable [_name, objNull];
+    private _resolvedType = typeName _resolved;
+    if !(_resolved isEqualType {}) then {
+        diag_log format ["[CIVSUB][BG] ensureFn unresolved fn=%1 resolvedType=%2", _name, _resolvedType];
+        _resolved = {};
     };
     _resolved
 };
@@ -94,7 +58,7 @@ private _inconclusive = {
 // sqflint-compatible helpers for HashMap operations (getOrDefault and createHashMapFromArray
 // are valid SQF 3.x operators but are not recognised by the sqflint 0.3.x static analyser).
 private _hg     = compile "params ['_h','_k','_d']; _h getOrDefault [_k,_d]";
-private _hmFrom = compile "params ['_pairs']; private _r = createHashMap; if !(_pairs isEqualType []) exitWith {_r}; { if !(_x isEqualType []) then { diag_log format ['[CIVSUB][WARN] _hmFrom skipped non-array entry type=%1', typeName _x]; } else { if ((count _x) < 2) then { diag_log format ['[CIVSUB][WARN] _hmFrom skipped short entry=%1', _x]; } else { private _k = _x select 0; if !(_k isEqualType '') then { _k = str _k; }; _r set [_k, _x select 1]; }; }; } forEach _pairs; _r";
+private _hmFrom = compile "params ['_pairs']; private _r = createHashMap; if !(_pairs isEqualType []) exitWith {_r}; { if !(_x isEqualType []) then { diag_log format ['[CIVSUB][WARN][fn_civsubContactActionBackgroundCheck] _hmFrom skipped non-array entry type=%1', typeName _x]; } else { if ((count _x) < 2) then { diag_log format ['[CIVSUB][WARN][fn_civsubContactActionBackgroundCheck] _hmFrom skipped short entry=%1', _x]; } else { private _k = _x select 0; if !(_k isEqualType '') then { _k = str _k; }; _r set [_k, _x select 1]; }; }; } forEach _pairs; _r";
 
 ["START"] call _setStep;
 
@@ -165,12 +129,11 @@ private _identityDepsOk = true;
 {
     private _depName = _x select 0;
     private _fn = {};
-    private _depPath = format ["functions\\civsub\\fn_%1.sqf", _depName select [8]];
-    private _depExists = fileExists _depPath;
     private _nilDep = isNil { _fn = [_depName] call _ensureFn; };
     if (_nilDep || {!(_fn isEqualType {})}) then {
         _identityDepsOk = false;
-        diag_log format ["[CIVSUB][BG] IDENTITY_TOUCH: could not resolve dependency fn=%1 path=%2 fileExists=%3", _depName, _depPath, _depExists];
+        private _resolved = missionNamespace getVariable [_depName, objNull];
+        diag_log format ["[CIVSUB][BG] IDENTITY_TOUCH dependency unresolved fn=%1 resolvedType=%2", _depName, typeName _resolved];
     };
 } forEach [
     ["ARC_fnc_civsubIdentityTouch"],
