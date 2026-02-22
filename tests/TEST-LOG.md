@@ -754,3 +754,25 @@ rg -n "companyVirtualOps|companyCommandVirtualOpsTick|ARC_companyVirtualOps" fun
 - JIP/late-client status: BLOCKED pending dedicated server validation of replicated `ARC_pub_state.companyVirtualOps` updates.
 - Waiver owner: Mission Systems (S3 Integration).
 - Tracking reference: PR for this commit (`company virtual ops scheduler`) — complete runtime closeout before merge.
+
+## 2026-02-22 00:00 UTC — S-1 panel integration (console + diary)
+
+**Branch/Commit:** work @ pending
+
+**Scenario:** Added S-1 tab/access gating, read-only registry rendering, station entry points, and diary snapshot mirroring.
+
+**Commands:**
+```
+git diff --check
+~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleRefresh.sqf functions/ui/fn_uiConsoleOnLoad.sqf functions/ui/fn_uiConsoleS1Paint.sqf functions/core/fn_tocInitPlayer.sqf functions/core/fn_briefingUpdateClient.sqf functions/core/fn_briefingInitClient.sqf functions/ui/fn_uiConsoleClickPrimary.sqf functions/ui/fn_uiConsoleClickSecondary.sqf functions/ui/fn_uiConsoleMainListSelChanged.sqf functions/ui/fn_uiConsoleSelectTab.sqf functions/core/fn_uiOpenS1Screen.sqf config/CfgFunctions.hpp
+rg -n "uiOpenS1Screen|uiConsoleS1Paint|ARC_S1|S1 / PERSONNEL|Open S-1 Screen" functions config
+```
+
+**Result:** BLOCKED
+
+**Notes:**
+- `git diff --check` passed and symbol scan confirmed all new S-1 wiring points.
+- `sqflint` is unavailable in this container (`/root/.local/bin/sqflint: No such file or directory`), so static lint was blocked.
+- Runtime validation remains BLOCKED in this environment (no Arma local MP/dedicated runtime for snapshot/JIP behavior).
+- Follow-up owner: mission maintainers during next local MP + dedicated validation pass.
+- Tracking ref: this PR.

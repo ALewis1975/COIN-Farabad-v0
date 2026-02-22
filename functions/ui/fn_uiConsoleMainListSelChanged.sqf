@@ -36,6 +36,7 @@ switch (_tab) do
     case "INTEL": { [_display, false] call ARC_fnc_uiConsoleIntelPaint; };
     case "HQ":    { [_display, false] call ARC_fnc_uiConsoleHQPaint; };
     case "AIR":   { [_display, false] call ARC_fnc_uiConsoleAirPaint; };
+    case "S1":    { [_display] call ARC_fnc_uiConsoleS1Paint; };
     case "CMD":
     {
         private _cmdMode = ["ARC_console_cmdMode", "OVERVIEW"] call ARC_fnc_uiNsGetString;

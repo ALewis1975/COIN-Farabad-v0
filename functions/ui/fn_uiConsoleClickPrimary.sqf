@@ -71,6 +71,13 @@ switch (_tab) do
 
     case "HQ":      { [] spawn ARC_fnc_uiConsoleActionHQPrimary; };
 
+    case "S1":
+    {
+        private _disp = findDisplay 78000;
+        if (!isNull _disp) then { [_disp] call ARC_fnc_uiConsoleRefresh; };
+        ["S-1", "Roster snapshot refreshed."] call ARC_fnc_clientToast;
+    };
+
     case "DASH":
     {
         // Dashboard is passive. Users can switch tabs for actions.

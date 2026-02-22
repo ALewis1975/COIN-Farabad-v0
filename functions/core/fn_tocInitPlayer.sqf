@@ -658,6 +658,7 @@ _obj addAction ["[MOBILE OPS] Open Ops Screen", { [] call ARC_fnc_uiOpenOpsScree
         case "arc_toc_intel_1":
         {
             _obj addAction ["[TOC INTEL] Open Intel Screen", { [] call ARC_fnc_uiOpenIntelScreen; }];
+            _obj addAction ["[TOC INTEL] Open S-1 Screen", { [] call ARC_fnc_uiOpenS1Screen; }, [], 0.94, true, true, "", "([player] call ARC_fnc_rolesIsTocCommand) || ([player] call ARC_fnc_rolesCanApproveQueue)"];
 
             _obj addAction ["[TOC INTEL] Show Lead Pool (Hint)", {
                 [] call ARC_fnc_tocShowLeadPoolLocal;
@@ -765,6 +766,7 @@ _obj addAction ["[MOBILE OPS] Open Ops Screen", { [] call ARC_fnc_uiOpenOpsScree
             _obj addAction ["SITREP: Open SITREP Screen", { [] call ARC_fnc_uiOpenSitrepScreen; }];
             _obj addAction ["SITREP: Open Intel Screen", { [] call ARC_fnc_uiOpenIntelScreen; }];
             _obj addAction ["SITREP: Open Ops Screen", { [] call ARC_fnc_uiOpenOpsScreen; }];
+            _obj addAction ["SITREP: Open S-1 Screen", { [] call ARC_fnc_uiOpenS1Screen; }, [], 0.92, true, true, "", "([player] call ARC_fnc_rolesIsTocCommand) || ([player] call ARC_fnc_rolesCanApproveQueue)"];
         };
 
         case "arc_toc_air_1":

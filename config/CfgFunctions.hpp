@@ -125,6 +125,7 @@ class CfgFunctions
             class briefingHardResetClient {};
             class uiOpenOpsScreen {};
             class uiOpenIntelScreen {};
+            class uiOpenS1Screen {};
             class uiOpenSitrepScreen {};
             class uiTaskTimersInitClient {};
             class clientBeginIntelMapClick {};
@@ -473,6 +474,7 @@ class CfgFunctions
             class uiConsoleCommandPaint {};
             class uiConsoleTocQueuePaint {};
             class uiConsoleHQPaint {};
+            class uiConsoleS1Paint {};
             class uiConsoleAirPaint {};
             class uiConsoleOpsSelChanged {};
 

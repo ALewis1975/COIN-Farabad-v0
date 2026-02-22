@@ -25,6 +25,7 @@ private _ensureSubject = {
 ["ARC_OPS", "OPS", "ARC_diary_rec_ops"] call _ensureSubject;
 ["ARC_INTEL", "INTEL", "ARC_diary_rec_intel"] call _ensureSubject;
 ["ARC_SITREP", "SITREP", "ARC_diary_rec_sitrep"] call _ensureSubject;
+["ARC_S1", "S-1", "ARC_diary_rec_s1"] call _ensureSubject;
 
 // Debug inspector is controlled by a server-published flag.
 private _dbgEnabled = missionNamespace getVariable ["ARC_debugInspectorEnabled", false];
@@ -50,6 +51,7 @@ private _ensureRecord = {
 private _recOps = ['ARC_diary_rec_ops', 'ARC_OPS', 'OPS Dashboard'] call _ensureRecord;
 private _recIntel = ['ARC_diary_rec_intel', 'ARC_INTEL', 'Intel Feed'] call _ensureRecord;
 private _recSitrep = ['ARC_diary_rec_sitrep', 'ARC_SITREP', 'SITREP'] call _ensureRecord;
+private _recS1 = ['ARC_diary_rec_s1', 'ARC_S1', 'Personnel Snapshot'] call _ensureRecord;
 
 private _recDebug = diaryRecordNull;
 if (_dbgEnabled) then
@@ -996,6 +998,43 @@ if (_dbgEnabled) then
     };
 };
 
+
+private _s1Registry = missionNamespace getVariable ["ARC_pub_s1_registry", []];
+if (!(_s1Registry isEqualType [])) then { _s1Registry = []; };
+private _s1UpdatedAt = missionNamespace getVariable ["ARC_pub_s1_registryUpdatedAt", -1];
+if (!(_s1UpdatedAt isEqualType 0)) then { _s1UpdatedAt = -1; };
+private _s1Get = {
+    params ["_pairs", "_key", "_default"];
+    if (!(_pairs isEqualType [])) exitWith { _default };
+    private _idx = _pairs findIf { (_x isEqualType []) && { (count _x) >= 2 } && { ((_x # 0) isEqualTo _key) } };
+    if (_idx < 0) exitWith { _default };
+    (_pairs # _idx) # 1
+};
+private _s1Groups = [_s1Registry, "groups", []] call _s1Get;
+private _s1Units = [_s1Registry, "units", []] call _s1Get;
+if (!(_s1Groups isEqualType [])) then { _s1Groups = []; };
+if (!(_s1Units isEqualType [])) then { _s1Units = []; };
+private _s1Text = "<font size='16' color='#B89B6B'>S-1 Personnel Snapshot</font><br/><br/>";
+if (_s1UpdatedAt < 0 || { (count _s1Groups) isEqualTo 0 }) then
+{
+    _s1Text = _s1Text + "Snapshot unavailable (cold join / JIP sync pending).\n";
+    _s1Text = _s1Text + "Wait for server publication.\n";
+}
+else
+{
+    _s1Text = _s1Text + format ["Updated at: T+%1s\nGroups: %2\nUnits: %3\n\n", round _s1UpdatedAt, count _s1Groups, count _s1Units];
+    {
+        if (!(_x isEqualType [])) then { continue; };
+        private _gid = [_x, "groupId", ""] call _s1Get;
+        if (!(_gid isEqualType "")) then { _gid = ""; };
+        private _co = [_x, "company", "UNK"] call _s1Get;
+        if (!(_co isEqualType "")) then { _co = "UNK"; };
+        private _call = [_x, "callsign", ""] call _s1Get;
+        if (!(_call isEqualType "")) then { _call = ""; };
+        _s1Text = _s1Text + format ["[%1] %2 (%3)\n", _co, _gid, if (_call isEqualTo "") then {"No callsign"} else {_call}];
+    } forEach (_s1Groups select [0, ((count _s1Groups) min 8)]);
+};
+
 // Apply updates (setDiaryRecordText)
 if (_recOps isNotEqualTo diaryRecordNull) then
 {
@@ -1010,6 +1049,11 @@ if (_recIntel isNotEqualTo diaryRecordNull) then
 if (_recSitrep isNotEqualTo diaryRecordNull) then
 {
     player setDiaryRecordText [["ARC_SITREP", _recSitrep], ["SITREP", _sitrepText, ""]];
+};
+
+if (_recS1 isNotEqualTo diaryRecordNull) then
+{
+    player setDiaryRecordText [["ARC_S1", _recS1], ["Personnel Snapshot", _s1Text, ""]];
 };
 
 if (_recDebug isNotEqualTo diaryRecordNull) then
