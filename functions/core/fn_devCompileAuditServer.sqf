@@ -142,7 +142,9 @@ diag_log format ["[ARC][COMPILE] buildStamp=%1", missionNamespace getVariable ["
                 diag_log format ["[ARC][COMPILE][MISSING] %1", _path];
             } else {
                 // Attempt compile. Any syntax errors will show in RPT with line numbers.
-                call compile preprocessFileLineNumbers _path;
+                // Pass empty array as _this so params blocks use defaults
+                // without "Type Object, expected String" errors.
+                [] call compile preprocessFileLineNumbers _path;
                 _compiled = _compiled + 1;
 
                 // WARN tag: compiled attempt made; check RPT for syntax errors.
