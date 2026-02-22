@@ -297,6 +297,10 @@
     ["tocBacklog", []],
     ["tocLeadApprovals", []],
 
+    // Server-owned S1 registry persistence mirror
+    ["s1Registry", []],
+    ["s1RegistryUpdatedAt", -1],
+
     // Company command model (server authoritative; inspectable by TOC/S1)
     ["companyCommandNodes", []],
     ["companyCommandTasking", []],

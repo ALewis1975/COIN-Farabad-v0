@@ -5,6 +5,14 @@
 
 if (!isServer) exitWith {false};
 
+// Ensure server-owned mirrors are serialized in the same persistence write.
+private _s1Registry = missionNamespace getVariable ["ARC_s1_registry", []];
+if (_s1Registry isEqualType []) then
+{
+    ["s1Registry", _s1Registry] call ARC_fnc_stateSet;
+    ["s1RegistryUpdatedAt", serverTime] call ARC_fnc_stateSet;
+};
+
 private _state = missionNamespace getVariable ["ARC_state", []];
 private _stateCheck = [_state, "ARRAY_SHAPE", "ARC_state", [[], 0, -1, true]] call ARC_fnc_paramAssert;
 private _stateOk = _stateCheck param [0, false];

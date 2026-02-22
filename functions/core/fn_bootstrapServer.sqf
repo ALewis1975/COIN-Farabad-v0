@@ -806,6 +806,7 @@ missionNamespace setVariable ["ARC_activeConvoyNetIds", ["activeConvoyNetIds", [
 // Company command model (server-owned Alpha/Bravo leadership nodes)
 [] call ARC_fnc_companyCommandInit;
 [] call ARC_fnc_companyCommandTick;
+[] call ARC_fnc_companyCommandVirtualOpsTick;
 
 // Publish initial snapshots for clients (JIP-safe)
 [] call ARC_fnc_publicBroadcastState;

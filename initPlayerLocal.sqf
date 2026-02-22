@@ -102,27 +102,42 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
         private _refresh = {
             [] call ARC_fnc_briefingUpdateClient;
             if (!isNil "ARC_fnc_tocRefreshClient") then { [] call ARC_fnc_tocRefreshClient; };
+            uiNamespace setVariable ["ARC_console_dirty", true];
         };
 
         // Initial refresh for JIP
         call _refresh;
 
-        private _last = missionNamespace getVariable ["ARC_pub_stateUpdatedAt", -1];
+        private _lastState = missionNamespace getVariable ["ARC_pub_stateUpdatedAt", -1];
+        private _lastS1 = missionNamespace getVariable ["ARC_pub_s1_registryUpdatedAt", -1];
+        private _lastCompany = missionNamespace getVariable ["ARC_pub_companyCommandUpdatedAt", -1];
 
         // Preferred path: react immediately to server snapshot publish events.
-        private _existingPvEhId = missionNamespace getVariable ["ARC_clientSnapshotPvEhId", -1];
-        if (_existingPvEhId < 0) then
+        private _existingStateEhId = missionNamespace getVariable ["ARC_clientSnapshotPvEhId", -1];
+        if (_existingStateEhId < 0) then
         {
             missionNamespace setVariable ["ARC_clientSnapshotPvEhId", "ARC_pub_stateUpdatedAt" addPublicVariableEventHandler {
-                uiNamespace setVariable ["ARC_console_dirty", true];
-
                 private _refreshEnabled = missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false];
                 private _hasPubState = !isNil { missionNamespace getVariable "ARC_pub_state" };
-                if (_refreshEnabled || _hasPubState) then
-                {
-                    [] call ARC_fnc_briefingUpdateClient;
-                    if (!isNil "ARC_fnc_tocRefreshClient") then { [] call ARC_fnc_tocRefreshClient; };
-                };
+                if (_refreshEnabled || _hasPubState) then { [] call ARC_fnc_briefingUpdateClient; if (!isNil "ARC_fnc_tocRefreshClient") then { [] call ARC_fnc_tocRefreshClient; }; uiNamespace setVariable ["ARC_console_dirty", true]; };
+            }];
+        };
+
+        private _existingS1EhId = missionNamespace getVariable ["ARC_clientS1SnapshotPvEhId", -1];
+        if (_existingS1EhId < 0) then
+        {
+            missionNamespace setVariable ["ARC_clientS1SnapshotPvEhId", "ARC_pub_s1_registryUpdatedAt" addPublicVariableEventHandler {
+                private _refreshEnabled = missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false];
+                if (_refreshEnabled) then { [] call ARC_fnc_briefingUpdateClient; if (!isNil "ARC_fnc_tocRefreshClient") then { [] call ARC_fnc_tocRefreshClient; }; uiNamespace setVariable ["ARC_console_dirty", true]; };
+            }];
+        };
+
+        private _existingCompanyEhId = missionNamespace getVariable ["ARC_clientCompanySnapshotPvEhId", -1];
+        if (_existingCompanyEhId < 0) then
+        {
+            missionNamespace setVariable ["ARC_clientCompanySnapshotPvEhId", "ARC_pub_companyCommandUpdatedAt" addPublicVariableEventHandler {
+                private _refreshEnabled = missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false];
+                if (_refreshEnabled) then { [] call ARC_fnc_briefingUpdateClient; if (!isNil "ARC_fnc_tocRefreshClient") then { [] call ARC_fnc_tocRefreshClient; }; uiNamespace setVariable ["ARC_console_dirty", true]; };
             }];
         };
 
@@ -130,12 +145,17 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
         while {true} do
         {
             uiSleep 2;
-            private _now = missionNamespace getVariable ["ARC_pub_stateUpdatedAt", _last];
-            if (_now isEqualType 0 && { _now != _last }) then
-            {
-                _last = _now;
-                call _refresh;
-            };
+
+            private _nowState = missionNamespace getVariable ["ARC_pub_stateUpdatedAt", _lastState];
+            private _nowS1 = missionNamespace getVariable ["ARC_pub_s1_registryUpdatedAt", _lastS1];
+            private _nowCompany = missionNamespace getVariable ["ARC_pub_companyCommandUpdatedAt", _lastCompany];
+
+            private _changed = false;
+            if (_nowState isEqualType 0 && { _nowState != _lastState }) then { _lastState = _nowState; _changed = true; };
+            if (_nowS1 isEqualType 0 && { _nowS1 != _lastS1 }) then { _lastS1 = _nowS1; _changed = true; };
+            if (_nowCompany isEqualType 0 && { _nowCompany != _lastCompany }) then { _lastCompany = _nowCompany; _changed = true; };
+
+            if (_changed) then { call _refresh; };
         };
     };
 };

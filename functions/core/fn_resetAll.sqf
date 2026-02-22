@@ -324,6 +324,23 @@ missionNamespace setVariable ["ARC_pub_intelUpdatedAt", serverTime, true];
 ["orderCounter", 0] call ARC_fnc_stateSet;
 ["tocOrders", []] call ARC_fnc_stateSet;
 
+// Company command + virtual ops lifecycle
+["companyCommandNodes", []] call ARC_fnc_stateSet;
+["companyCommandTasking", []] call ARC_fnc_stateSet;
+["companyCommandCounter", 0] call ARC_fnc_stateSet;
+["companyCommandLastTickAt", -1] call ARC_fnc_stateSet;
+["companyVirtualOps", []] call ARC_fnc_stateSet;
+["companyVirtualOpsCounter", 0] call ARC_fnc_stateSet;
+["companyVirtualOpsLastTickAt", -1] call ARC_fnc_stateSet;
+["companyVirtualOpsLastRollupAt", -1] call ARC_fnc_stateSet;
+
+// S1 registry persistence + public mirrors
+["s1Registry", []] call ARC_fnc_stateSet;
+["s1RegistryUpdatedAt", -1] call ARC_fnc_stateSet;
+missionNamespace setVariable ["ARC_s1_registry", [["version", 1], ["updatedAt", serverTime], ["groups", []], ["units", []]]];
+missionNamespace setVariable ["ARC_pub_s1_registry", [], true];
+missionNamespace setVariable ["ARC_pub_s1_registryUpdatedAt", serverTime, true];
+
 // Threat v0 + IED P1: reset threat store (persistence-safe)
 ["threat_v0_campaign_id", ""] call ARC_fnc_stateSet;
 ["threat_v0_seq", 0] call ARC_fnc_stateSet;
@@ -380,6 +397,10 @@ missionNamespace setVariable ["ARC_activeThreadId", "", true];
 
 // Convoy public anchors (used for client-side SITREP proximity checks)
 missionNamespace setVariable ["ARC_activeConvoyNetIds", [], true];
+
+// Reseed server-owned command/S1 models after reset so clients see deterministic defaults.
+[] call ARC_fnc_companyCommandInit;
+[] call ARC_fnc_s1RegistryInit;
 
 // Persist + broadcast snapshots
 [] call ARC_fnc_stateSave;
