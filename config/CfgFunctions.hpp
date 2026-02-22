@@ -25,6 +25,11 @@ class CfgFunctions
             class stateSet {};
             class stateSetGet {};  // legacy compatibility wrapper
 
+            // S1 registry (server-owned personnel/unit registry)
+            class s1RegistryInit {};
+            class s1RegistryUpsertUnit {};
+            class s1RegistrySnapshot {};
+
             class incidentLoop {};
             class incidentTick {};
             class incidentCreate {};

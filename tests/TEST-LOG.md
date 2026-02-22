@@ -693,3 +693,24 @@ git --no-pager diff --check
 - Follow-up owner: mission maintainers.
 - Tracking reference: this PR (runtime validation to be completed before merge).
 - Expected runtime validation matrix: Local MP respawn/death cycle + Dedicated server join/JIP verification.
+
+## 2026-02-22 00:00 UTC — S1 server-owned registry bootstrap + public mirror
+
+**Branch/Commit:** current branch @ pending
+
+**Scenario:** Introduced S1 registry module (`s1RegistryInit`, `s1RegistryUpsertUnit`, `s1RegistrySnapshot`) with server single-writer guardrails, canonical/public missionNamespace keys, and bootstrap-time publication.
+
+**Commands:**
+```
+git diff --check
+rg -n "s1RegistryInit|s1RegistryUpsertUnit|s1RegistrySnapshot|ARC_pub_s1_registry|ARC_s1_registry|ARC_STATE" config/CfgFunctions.hpp functions/core/fn_bootstrapServer.sqf functions/core/fn_s1RegistryInit.sqf functions/core/fn_s1RegistryUpsertUnit.sqf functions/core/fn_s1RegistrySnapshot.sqf
+```
+
+**Result:** BLOCKED
+
+**Notes:**
+- Static checks passed (whitespace/scope wiring/key presence).
+- Runtime validation type: Dedicated server (required for authoritative/JIP semantics) is BLOCKED in this container.
+- Waiver reason: no Arma runtime/dedicated host available in CI container for mission execution.
+- Follow-up owner: Mission systems maintainer (S1/state authority).
+- Tracking reference: PR validation checklist item “S1 registry dedicated-server + JIP snapshot verification”.
