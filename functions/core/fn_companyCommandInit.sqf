@@ -102,25 +102,100 @@ private _bravoNode = [
     ""
 ];
 
-["companyCommandNodes", [_alphaNode, _bravoNode]] call ARC_fnc_stateSet;
+private _existingNodes = ["companyCommandNodes", []] call ARC_fnc_stateGet;
+if (!(_existingNodes isEqualType [])) then { _existingNodes = []; };
 
-if !(["companyCommandTasking", []] call ARC_fnc_stateGet isEqualType []) then
+private _seedNode = {
+    params ["_nodeId", "_fallback"];
+
+    private _base = +_fallback;
+    private _existing = _existingNodes select {
+        (_x isEqualType []) &&
+        { (count _x) >= 12 } &&
+        { (_x # 0) isEqualTo _nodeId }
+    };
+
+    if ((count _existing) == 0) exitWith { _base };
+
+    private _cur = +(_existing # 0);
+    _base set [6, _cur # 6];
+    _base set [7, _cur # 7];
+    _base set [8, _cur # 8];
+    _base set [9, _cur # 9];
+    _base set [10, _cur # 10];
+    _base set [11, _cur # 11];
+
+    _base
+};
+
+private _seededNodes = [
+    ["COMPANY_ALPHA", _alphaNode] call _seedNode,
+    ["COMPANY_BRAVO", _bravoNode] call _seedNode
+];
+
+["companyCommandNodes", _seededNodes] call ARC_fnc_stateSet;
+
+if !( ["companyCommandTasking", []] call ARC_fnc_stateGet isEqualType [] ) then
 {
     ["companyCommandTasking", []] call ARC_fnc_stateSet;
 };
 
-if !(["companyCommandCounter", 0] call ARC_fnc_stateGet isEqualType 0) then
+if !( ["companyCommandCounter", 0] call ARC_fnc_stateGet isEqualType 0 ) then
 {
     ["companyCommandCounter", 0] call ARC_fnc_stateSet;
 };
 
-if !(["companyCommandLastTickAt", -1] call ARC_fnc_stateGet isEqualType 0) then
+if !( ["companyCommandLastTickAt", -1] call ARC_fnc_stateGet isEqualType 0 ) then
 {
     ["companyCommandLastTickAt", -1] call ARC_fnc_stateSet;
 };
 
+private _ops = ["companyVirtualOps", []] call ARC_fnc_stateGet;
+if (!(_ops isEqualType [])) then { _ops = []; };
+
+private _opsByNode = createHashMap;
+private _dedupedOps = [];
+
+{
+    if (!(_x isEqualType []) || { (count _x) < 14 }) then { continue; };
+
+    private _row = +_x;
+    private _status = toUpper (_row # 3);
+    private _nodeId = _row # 4;
+
+    if (!(_nodeId isEqualType "") || { !(_nodeId in ["COMPANY_ALPHA", "COMPANY_BRAVO"]) }) then { continue; };
+
+    if (_status in ["PLANNED", "ACTIVE"]) then
+    {
+        private _existingIdx = _opsByNode getOrDefault [_nodeId, -1];
+        if (_existingIdx < 0) then
+        {
+            _opsByNode set [_nodeId, count _dedupedOps];
+            _dedupedOps pushBack _row;
+        }
+        else
+        {
+            private _cur = _dedupedOps # _existingIdx;
+            private _curTs = _cur # 2;
+            if (!(_curTs isEqualType 0)) then { _curTs = -1; };
+            private _newTs = _row # 2;
+            if (!(_newTs isEqualType 0)) then { _newTs = -1; };
+            if (_newTs >= _curTs) then { _dedupedOps set [_existingIdx, _row]; };
+        };
+    }
+    else
+    {
+        _dedupedOps pushBack _row;
+    };
+} forEach _ops;
+
+if !(_dedupedOps isEqualTo _ops) then
+{
+    ["companyVirtualOps", _dedupedOps] call ARC_fnc_stateSet;
+};
+
 ["OPS", format ["Company command nodes initialized: ALPHA=%1 BRAVO=%2", _alphaAnchor # 0, _bravoAnchor # 0], [0,0,0],
-    [["event", "COMPANY_COMMAND_INIT"], ["alphaZone", _alphaAnchor # 2], ["bravoZone", _bravoAnchor # 2]]
+    [["event", "COMPANY_COMMAND_INIT"], ["alphaZone", _alphaAnchor # 2], ["bravoZone", _bravoAnchor # 2], ["virtualOps", count _dedupedOps]]
 ] call ARC_fnc_intelLog;
 
 true

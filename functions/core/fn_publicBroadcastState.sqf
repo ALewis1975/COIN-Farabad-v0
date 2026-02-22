@@ -449,6 +449,15 @@ private _pub = [
 
 private _didPublish = [_pub, "publicBroadcastState", false, 0.25] call ARC_fnc_statePublishPublic;
 if (!_didPublish) exitWith { false };
+
+private _companySnapshot = [
+    ["companyCommandNodes", ["companyCommandNodes", []] call ARC_fnc_stateGet],
+    ["companyCommandTasking", ["companyCommandTasking", []] call ARC_fnc_stateGet],
+    ["companyVirtualOps", ["companyVirtualOps", []] call ARC_fnc_stateGet]
+];
+missionNamespace setVariable ["ARC_pub_companyCommand", _companySnapshot, true];
+missionNamespace setVariable ["ARC_pub_companyCommandUpdatedAt", serverTime, true];
+
 // Optional debug snapshot for the in-game inspector diary.
 private _dbgEnabled = missionNamespace getVariable ["ARC_debugInspectorEnabled", false];
 if (!(_dbgEnabled isEqualType true)) then { _dbgEnabled = false; };

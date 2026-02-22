@@ -170,6 +170,8 @@ private _newRegistry = [
 ];
 
 missionNamespace setVariable ["ARC_s1_registry", _newRegistry];
+["s1Registry", _newRegistry] call ARC_fnc_stateSet;
+["s1RegistryUpdatedAt", _updatedAt] call ARC_fnc_stateSet;
 if (_publish) then { [] call ARC_fnc_s1RegistrySnapshot; };
 
 _unitRecord

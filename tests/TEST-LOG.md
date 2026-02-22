@@ -776,3 +776,22 @@ rg -n "uiOpenS1Screen|uiConsoleS1Paint|ARC_S1|S1 / PERSONNEL|Open S-1 Screen" fu
 - Runtime validation remains BLOCKED in this environment (no Arma local MP/dedicated runtime for snapshot/JIP behavior).
 - Follow-up owner: mission maintainers during next local MP + dedicated validation pass.
 - Tracking ref: this PR.
+
+## 2026-02-22 05:37 UTC — persistence rehydration + command/S1 snapshot guards
+
+**Branch/Commit:** copilot/<pending> @ pending
+
+**Scenario:** Extended server persistence/rehydration path for S-1 registry, company command state, and virtual-op lifecycle with reset/idempotency guards; validated patch hygiene in-container.
+
+**Commands:**
+```
+git diff --check
+~/.local/bin/sqflint -e w functions/core/fn_companyCommandInit.sqf functions/core/fn_s1RegistryInit.sqf initPlayerLocal.sqf
+```
+
+**Result:** BLOCKED
+
+**Notes:**
+- `git diff --check` passed (no whitespace/patch-format issues).
+- `sqflint` path is unavailable in this container (`/root/.local/bin/sqflint: No such file or directory`).
+- Runtime validation remains BLOCKED in container (no Arma local MP/dedicated server runtime); follow-up owner: mission systems maintainer on dedicated-server validation pass.
