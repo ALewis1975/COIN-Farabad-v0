@@ -26,7 +26,10 @@ if (_unit != player) exitWith {};
     if (!alive _respawnedUnit) exitWith {};
 
     if (!isNil "ARC_fnc_intelInit") then { [] call ARC_fnc_intelInit; };
-    if (!isNil "ARC_fnc_briefingInitClient") then { [] call ARC_fnc_briefingInitClient; };
+    // Do not re-run briefing init on every respawn; it stores its update-loop guard
+    // on the player unit object and would spawn duplicate loops for each new unit.
+    // Keep only a single immediate refresh for the new unit's diary records.
+    if (!isNil "ARC_fnc_briefingUpdateClient") then { [] call ARC_fnc_briefingUpdateClient; };
     if (!isNil "ARC_fnc_tocInitPlayer") then { [] call ARC_fnc_tocInitPlayer; };
     if (!isNil "ARC_fnc_uiConsoleInitClient") then { [] call ARC_fnc_uiConsoleInitClient; };
 

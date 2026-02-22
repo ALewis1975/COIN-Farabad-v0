@@ -9,6 +9,16 @@ Append one dated entry per validation pass using:
 
 ---
 
+## 2026-02-22 04:24 UTC — respawn briefing loop regression fix (PR #316 follow-up)
+
+**Branch/Commit:** <pending>
+
+- 2026-02-22T04:24Z | commit: <pending> | Scenario: patch sanity (`git diff --check`) | Result: PASS | Notes: `onPlayerRespawn.sqf` change is whitespace-clean.
+- 2026-02-22T04:24Z | commit: <pending> | Scenario: targeted static review of respawn/briefing interaction (`onPlayerRespawn.sqf` + `functions/core/fn_briefingInitClient.sqf`) | Result: PASS | Notes: Respawn hook no longer calls `ARC_fnc_briefingInitClient`; it now performs a one-shot `ARC_fnc_briefingUpdateClient` refresh to avoid per-respawn loop duplication.
+- 2026-02-22T04:24Z | commit: <pending> | Scenario: runtime validation (Local MP / Dedicated server) for repeated death-respawn cycle | Result: BLOCKED | Notes: Arma runtime unavailable in container; Owner: @ALewis1975; Tracking: PR #316 review thread requesting this fix.
+
+---
+
 ## Runtime Validation Entry Convention (behavior-changing commit groups)
 
 For every behavior-changing SQF commit group (Mode A/B/D/I/J with runtime impact), add at least one **unique runtime validation entry** in this file.
