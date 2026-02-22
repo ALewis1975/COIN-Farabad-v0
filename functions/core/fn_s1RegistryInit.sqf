@@ -54,19 +54,18 @@ if (isNil { missionNamespace getVariable "ARC_pub_s1_registryUpdatedAt" }) then 
     private _grp = _x;
     private _members = units _grp;
     if ((count _members) == 0) then {
-        private _stableVirtualUnitId = "";
+        private _virtualPatch = [
+            ["virtualStatus", "VIRTUAL"]
+        ];
         private _stableGroupId = groupId _grp;
         if !(_stableGroupId isEqualTo "") then {
-            _stableVirtualUnitId = format ["virtual:%1", _stableGroupId];
+            _virtualPatch pushBack ["unitId", format ["virtual:%1", _stableGroupId]];
         };
 
         [
             objNull,
             _grp,
-            [
-                ["virtualStatus", "VIRTUAL"],
-                ["unitId", _stableVirtualUnitId]
-            ],
+            _virtualPatch,
             false
         ] call ARC_fnc_s1RegistryUpsertUnit;
     } else {
