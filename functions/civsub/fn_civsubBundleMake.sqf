@@ -71,9 +71,9 @@ private _target = [[
 ]] call _hmFrom;
 
 // Normalize influence deltas to contract keys (W/R/G), while still emitting backward-compatible aliases (dW/dR/dG).
-private _dW = [_influenceDelta, "W", ([_influenceDelta, "dW", 0] call _hg call _hg)];
-private _dR = [_influenceDelta, "R", ([_influenceDelta, "dR", 0] call _hg call _hg)];
-private _dG = [_influenceDelta, "G", ([_influenceDelta, "dG", 0] call _hg call _hg)];
+private _dW = [_influenceDelta, "W", ([_influenceDelta, "dW", 0] call _hg)];
+private _dR = [_influenceDelta, "R", ([_influenceDelta, "dR", 0] call _hg)];
+private _dG = [_influenceDelta, "G", ([_influenceDelta, "dG", 0] call _hg)];
 
 private _influenceContract = [[
     // Contract

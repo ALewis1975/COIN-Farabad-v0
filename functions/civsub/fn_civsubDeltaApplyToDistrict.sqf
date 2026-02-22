@@ -15,16 +15,16 @@ private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r
 params [["_bundle", createHashMap, [createHashMap]]];
 if !(_bundle isEqualType createHashMap) exitWith {false};
 
-private _districtId = [_bundle, "districtId", ([_bundle, "district_id", ""] call _hg call _hg)];
+private _districtId = [_bundle, "districtId", ([_bundle, "district_id", ""] call _hg)];
 if (_districtId isEqualTo "") exitWith {false};
 
 private _delta = [_bundle, "influence_delta", createHashMap] call _hg;
 if !(_delta isEqualType createHashMap) exitWith {false};
 
 // Support both legacy keys (dW/dR/dG) and contract keys (W/R/G)
-private _dW = [_delta, "W", ([_delta, "dW", 0] call _hg call _hg)];
-private _dR = [_delta, "R", ([_delta, "dR", 0] call _hg call _hg)];
-private _dG = [_delta, "G", ([_delta, "dG", 0] call _hg call _hg)];
+private _dW = [_delta, "W", ([_delta, "dW", 0] call _hg)];
+private _dR = [_delta, "R", ([_delta, "dR", 0] call _hg)];
+private _dG = [_delta, "G", ([_delta, "dG", 0] call _hg)];
 
 private _d = [_districtId] call ARC_fnc_civsubDistrictsGetById;
 if !(_d isEqualType createHashMap) exitWith {false};
