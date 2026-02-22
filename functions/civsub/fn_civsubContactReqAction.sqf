@@ -60,6 +60,7 @@ if ((_actor distance _civ) > 6) exitWith {
 // sqflint-compatible helpers for HashMap operations
 private _hg     = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k,_d]";
 private _hmFrom = compile "params ['_pairs']; private _r = createHashMap; if !(_pairs isEqualType []) exitWith {_r}; { if !(_x isEqualType []) then { diag_log format ['[CIVSUB][WARN][fn_civsubContactReqAction] _hmFrom skipped non-array entry type=%1', typeName _x]; } else { if ((count _x) < 2) then { diag_log format ['[CIVSUB][WARN][fn_civsubContactReqAction] _hmFrom skipped short entry=%1', _x]; } else { private _k = _x select 0; if !(_k isEqualType '') then { _k = str _k; }; _r set [_k, _x select 1]; }; }; } forEach _pairs; _r";
+private _hmToPairs = compile "params ['_h']; if !(_h isEqualType createHashMap) exitWith {[]}; private _out = []; { _out pushBack [_x, _h get _x]; } forEach keys _h; _out";
 
 // Pre-load identity functions if not yet compiled (guard against cold-start or JIP timing gaps).
 if (isNil "ARC_fnc_civsubIdentityTouch") then { ARC_fnc_civsubIdentityTouch = compile preprocessFileLineNumbers "functions\civsub\fn_civsubIdentityTouch.sqf"; };
@@ -132,7 +133,7 @@ switch (_actionId) do {
 
             private _out = [["ok", _ok], ["type", "CHECK_ID"], ["html", _html], ["payload", _payload]] call _hmFrom;
 
-            [_out] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
+            [(_out call _hmToPairs)] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
 
             if (_ok) then {
                 // Refresh snapshot so the dialog header updates.
@@ -193,7 +194,7 @@ switch (_actionId) do {
         };
 
         private _out = [["ok", _ok], ["type", "BACKGROUND_CHECK"], ["html", _html], ["payload", createHashMap]] call _hmFrom;
-        [_out] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
+        [(_out call _hmToPairs)] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
 
         if (_ok) then {
             // refresh header snapshot (identity likely touched)
@@ -213,7 +214,7 @@ switch (_actionId) do {
         };
 
         private _out = [["ok", _ok], ["type", "DETAIN"], ["html", _html], ["payload", createHashMap]] call _hmFrom;
-        [_out] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
+        [(_out call _hmToPairs)] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
 
         // refresh header snapshot
         [_civ, _actor] call ARC_fnc_civsubContactReqSnapshot;
@@ -229,7 +230,7 @@ switch (_actionId) do {
         };
 
         private _out = [["ok", _ok], ["type", "HANDOFF_SHERIFF"], ["html", _html], ["payload", createHashMap]] call _hmFrom;
-        [_out] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
+        [(_out call _hmToPairs)] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
 
         if (_ok) then { [_civ, _actor] call ARC_fnc_civsubContactReqSnapshot; };
         true
@@ -245,7 +246,7 @@ switch (_actionId) do {
         };
 
         private _out = [["ok", _ok], ["type", "RELEASE"], ["html", _html], ["payload", createHashMap]] call _hmFrom;
-        [_out] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
+        [(_out call _hmToPairs)] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
 
         // refresh header snapshot
         [_civ, _actor] call ARC_fnc_civsubContactReqSnapshot;
@@ -262,7 +263,7 @@ switch (_actionId) do {
         };
 
         private _out = [["ok", _ok], ["type", "AID_RATIONS"], ["html", _html], ["payload", createHashMap]] call _hmFrom;
-        [_out] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
+        [(_out call _hmToPairs)] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
 
         if (_ok) then { [_civ, _actor] call ARC_fnc_civsubContactReqSnapshot; };
         true
@@ -278,7 +279,7 @@ switch (_actionId) do {
         };
 
         private _out = [["ok", _ok], ["type", "AID_WATER"], ["html", _html], ["payload", createHashMap]] call _hmFrom;
-        [_out] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
+        [(_out call _hmToPairs)] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
 
         if (_ok) then { [_civ, _actor] call ARC_fnc_civsubContactReqSnapshot; };
         true
@@ -316,7 +317,7 @@ switch (_actionId) do {
         };
 
         private _out = [["ok", _ok], ["type", "QUESTION"], ["html", _html], ["payload", _pl]] call _hmFrom;
-        [_out] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
+        [(_out call _hmToPairs)] remoteExecCall ["ARC_fnc_civsubContactClientReceiveResult", _actor];
         true
     };
 
