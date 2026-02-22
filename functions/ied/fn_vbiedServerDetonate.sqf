@@ -19,10 +19,7 @@ params [
     ["_deviceId", "", [""]]
 ];
 
-// sqflint-compat helpers
-private _trimFn     = compile "params ['_s']; trim _s";
-
-_deviceId = [_deviceId] call _trimFn;
+_deviceId = trim _deviceId;
 if (_deviceId isEqualTo "") exitWith {false};
 
 private _done = ["activeVbiedDetonated", false] call ARC_fnc_stateGet;
@@ -40,15 +37,15 @@ private _pos = ["activeObjectivePos", []] call ARC_fnc_stateGet;
 if (!(_pos isEqualType []) || { (count _pos) < 2 }) then
 {
     private _rec = ["activeVbiedDeviceRecord", []] call ARC_fnc_stateGet;
-    if (_rec isEqualType [] && { (count _rec) >= 5 }) then { _pos = _rec select 4; };
+    if (_rec isEqualType [] && { (count _rec) >= 5 }) then { _pos = _rec # 4; };
 };
 if (!(_pos isEqualType []) || { (count _pos) < 2 }) then { _pos = [0,0,0]; };
 _pos = +_pos; _pos resize 3;
-if (!((_pos select 2) isEqualType 0)) then { _pos set [2, 0]; };
+if (!((_pos # 2) isEqualType 0)) then { _pos set [2, 0]; };
 
 // Remove trigger
 private _trgNid = ["activeVbiedTriggerNetId", ""] call ARC_fnc_stateGet;
-if (_trgNid isEqualType "" && { !(_trgNid isEqualTo "") }) then
+if (_trgNid isEqualType "" && { _trgNid isNotEqualTo "" }) then
 {
     private _trg = objectFromNetId _trgNid;
     if (!isNull _trg) then { deleteVehicle _trg; };
@@ -67,7 +64,7 @@ private _boom = createVehicle [_cls, _pos, [], 0, "NONE"];
 _boom setPosATL _pos;
 
 // Delegate to existing detonation pipeline
-private _c = ["activeVbiedDetCause", "PROX_TRIGGER"] call ARC_fnc_stateGet; if (!(_c isEqualType "")) then { _c = "PROX_TRIGGER"; }; _c = toUpper ([_c] call _trimFn); if (_c isEqualTo "") then { _c = "PROX_TRIGGER"; };
+private _c = ["activeVbiedDetCause", "PROX_TRIGGER"] call ARC_fnc_stateGet; if (!(_c isEqualType "")) then { _c = "PROX_TRIGGER"; }; _c = toUpper (trim _c); if (_c isEqualTo "") then { _c = "PROX_TRIGGER"; };
 [_pos, "VBIED_VEHICLE", format ["VBIED_%1", _c]] call ARC_fnc_iedHandleDetonation;
 
 true

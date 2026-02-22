@@ -13,22 +13,17 @@ params [
 
 if (!(_districts isEqualType createHashMap)) exitWith {false};
 
-// sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
-private _mapGet   = compile "params ['_h','_k']; _h get _k";
-private _keysFn   = compile "params ['_m']; keys _m";
-
 {
-    private _d = [_districts, _x] call _mapGet;
+    private _d = _districts get _x;
     if !(_d isEqualType createHashMap) then { continue; };
 
-    private _w = [_d, "W_EFF_U", 0] call _hg;
-    private _r = [_d, "R_EFF_U", 0] call _hg;
-    private _g = [_d, "G_EFF_U", 0] call _hg;
+    private _w = _d getOrDefault ["W_EFF_U", 0];
+    private _r = _d getOrDefault ["R_EFF_U", 0];
+    private _g = _d getOrDefault ["G_EFF_U", 0];
 
-    private _wb = [_d, "W_BASE_U", 45] call _hg;
-    private _rb = [_d, "R_BASE_U", 55] call _hg;
-    private _gb = [_d, "G_BASE_U", 35] call _hg;
+    private _wb = _d getOrDefault ["W_BASE_U", 45];
+    private _rb = _d getOrDefault ["R_BASE_U", 55];
+    private _gb = _d getOrDefault ["G_BASE_U", 35];
 
     // Locked constants (v1)
     _w = _w + (_wb - _w) * 0.0020;
@@ -38,6 +33,6 @@ private _keysFn   = compile "params ['_m']; keys _m";
     _d set ["W_EFF_U", (0 max (_w min 100))];
     _d set ["R_EFF_U", (0 max (_r min 100))];
     _d set ["G_EFF_U", (0 max (_g min 100))];
-} forEach ([_districts] call _keysFn);
+} forEach (keys _districts);
 
 true

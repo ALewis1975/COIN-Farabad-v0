@@ -4,9 +4,6 @@
 */
 if (!isServer) exitWith {false};
 
-// sqflint-compat helpers
-private _trimFn     = compile "params ['_s']; trim _s";
-
 if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\\core\\fn_rpcValidateSender.sqf"; };
 if (isNil "ARC_fnc_airbaseTowerAuthorize") then { ARC_fnc_airbaseTowerAuthorize = compile preprocessFileLineNumbers "functions\\core\\fn_airbaseTowerAuthorize.sqf"; };
 
@@ -35,7 +32,7 @@ if !(_requestIdCheck param [0, false]) exitWith {
 
 if (!(_approve isEqualType true) && !(_approve isEqualType false)) then { _approve = false; };
 if (!(_reason isEqualType "")) then { _reason = ""; };
-_reason = [_reason] call _trimFn;
+_reason = trim _reason;
 if (_reason isEqualTo "") then { _reason = if (_approve) then {"TOWER_APPROVE"} else {"TOWER_DENY"}; };
 
 private _actionToken = if (_approve) then {"APPROVE"} else {"DENY"};
@@ -74,19 +71,18 @@ if !(_eventsCheck param [0, false]) then {
 private _eventsMax = missionNamespace getVariable ["airbase_v1_eventsMax", 60];
 if (!(_eventsMax isEqualType 0) || { _eventsMax < 10 }) then { _eventsMax = 60; };
 
-private _idx = -1;
-{ if (((_x param [0, ""]) isEqualTo _requestId)) exitWith { _idx = _forEachIndex; }; } forEach _requests;
+private _idx = _requests findIf { ((_x param [0, ""]) isEqualTo _requestId) };
 if (_idx < 0) exitWith {false};
 
-private _rec = _requests select _idx;
+private _rec = _requests # _idx;
 private _requesterUid = _rec param [2, ""];
 private _requesterOwner = -1;
-if (!(_requesterUid isEqualTo "")) then {
+if (_requesterUid isNotEqualTo "") then {
     {
         if ((getPlayerUID _x) isEqualTo _requesterUid) exitWith { _requesterOwner = owner _x; };
     } forEach allPlayers;
 };
-private _status = toUpper (_rec param [6, ""]);
+private _status = toUpperANSI (_rec param [6, ""]);
 if !(_status in ["QUEUED", "PENDING", "AWAITING_TOWER_DECISION"]) exitWith {
     private _owner = owner _caller;
     if (_owner > 0) then { ["Clearance request is no longer pending decision."] remoteExec ["ARC_fnc_clientHint", _owner]; };
@@ -119,7 +115,7 @@ if (_approve) then {
 _rec set [10, _meta];
 
 if (_approve) then {
-    private _flowKind = if ((toUpper (_rec param [1, ""])) in ["REQ_INBOUND", "REQ_LAND"]) then { "ARR" } else { "DEP" };
+    private _flowKind = if ((toUpperANSI (_rec param [1, ""])) in ["REQ_INBOUND", "REQ_LAND"]) then { "ARR" } else { "DEP" };
     private _decisionRoute = [_flowKind, "PLAYER", _requestId] call ARC_fnc_airbaseBuildRouteDecision;
     private _routeOk = _decisionRoute param [0, false];
     private _routeMeta = _decisionRoute param [1, []];
@@ -135,7 +131,7 @@ if (_approve) then {
     if (!(_runwayState isEqualType "")) then { _runwayState = "OPEN"; };
     private _runwayOwner = missionNamespace getVariable ["airbase_v1_runwayOwner", ""];
     if (!(_runwayOwner isEqualType "")) then { _runwayOwner = ""; };
-    if (_runwayState in ["RESERVED", "OCCUPIED"] && { !(_runwayOwner isEqualTo "") }) exitWith {
+    if (_runwayState in ["RESERVED", "OCCUPIED"] && { _runwayOwner isNotEqualTo "" }) exitWith {
         private _owner = owner _caller;
         if (_owner > 0) then { [format ["Decision rejected: runway locked (%1 by %2).", _runwayState, _runwayOwner]] remoteExec ["ARC_fnc_clientHint", _owner]; };
         false
@@ -148,8 +144,7 @@ if (_approve) then {
 
 _requests set [_idx, _rec];
 
-private _hIdx = -1;
-{ if (((_x param [0, ""]) isEqualTo _requestId)) exitWith { _hIdx = _forEachIndex; }; } forEach _history;
+private _hIdx = _history findIf { ((_x param [0, ""]) isEqualTo _requestId) };
 if (_hIdx >= 0) then { _history set [_hIdx, _rec]; } else { _history pushBack _rec; };
 
 

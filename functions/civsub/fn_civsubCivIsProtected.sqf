@@ -27,16 +27,13 @@ if (captive _u) exitWith {true};
 // ACE captives (best-effort, do not hard-require ACE)
 if (_u getVariable ["ace_captives_isHandcuffed", false]) exitWith {true};
 
-// sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
-
 // Identity-based (best-effort). Only exists for touched civs.
 private _civUid = _u getVariable ["civ_uid", ""]; 
 if !(_civUid isEqualTo "") then {
     private _rec = [_civUid] call ARC_fnc_civsubIdentityGet;
     if (_rec isEqualType createHashMap) then {
-        if ([_rec, "status_detained", false] call _hg) exitWith {true};
-        if ([_rec, "status_handedOff", false] call _hg) exitWith {true};
+        if (_rec getOrDefault ["status_detained", false]) exitWith {true};
+        if (_rec getOrDefault ["status_handedOff", false]) exitWith {true};
     };
 };
 

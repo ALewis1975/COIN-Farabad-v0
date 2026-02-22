@@ -27,15 +27,12 @@ params [
 
 if (isNull _unit) exitWith {false};
 
-// sqflint-compat helpers
-private _trimFn     = compile "params ['_s']; trim _s";
-
 private _hay = "";
 private _grp = group _unit;
 if (!isNull _grp) then { _hay = groupId _grp; };
 
 if (!(_hay isEqualType "")) then { _hay = ""; };
-_hay = [_hay] call _trimFn;
+_hay = trim _hay;
 
 // Fallback: lobby/editor description can include the callsign string.
 // Append roleDescription even when groupId is non-empty.
@@ -44,9 +41,9 @@ if (_fallbackRoleDesc) then
 {
     private _rd = roleDescription _unit;
     if (!(_rd isEqualType "")) then { _rd = ""; };
-    _rd = [_rd] call _trimFn;
+    _rd = trim _rd;
 
-    if (!(_rd isEqualTo "")) then
+    if (_rd isNotEqualTo "") then
     {
         if (_hay isEqualTo "") then { _hay = _rd; } else { _hay = _hay + " " + _rd; };
     };
@@ -59,16 +56,16 @@ private _hayU = toUpper _hay;
 private _tokList = [];
 if (_tokens isEqualType "") then
 {
-    private _t = [_tokens] call _trimFn;
-    if (!(_t isEqualTo "")) then { _tokList = [_t]; };
+    private _t = trim _tokens;
+    if (_t isNotEqualTo "") then { _tokList = [_t]; };
 }
 else
 {
     {
         if (_x isEqualType "") then
         {
-            private _t = [_x] call _trimFn;
-            if (!(_t isEqualTo "")) then { _tokList pushBack _t; };
+            private _t = trim _x;
+            if (_t isNotEqualTo "") then { _tokList pushBack _t; };
         };
     } forEach _tokens;
 };

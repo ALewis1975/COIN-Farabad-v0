@@ -20,9 +20,6 @@
 
 if (!hasInterface) exitWith {false};
 
-// sqflint-compat helpers
-private _trimFn     = compile "params ['_s']; trim _s";
-
 private _disp = findDisplay 78100;
 if (isNull _disp) exitWith {false};
 
@@ -41,7 +38,7 @@ private _request = "RTB";
 if (!isNull _cReq) then
 {
     private _t = _cReq lbText (lbCurSel _cReq);
-    if (_t isEqualType "") then { _request = toUpper ([_t] call _trimFn); };
+    if (_t isEqualType "") then { _request = toUpper (trim _t); };
 };
 if !(_request in ["RTB","HOLD","PROCEED"]) then { _request = "RTB"; };
 
@@ -51,7 +48,7 @@ if (_request isEqualTo "RTB") then
     if (!isNull _cPurpose) then
     {
         private _t = _cPurpose lbText (lbCurSel _cPurpose);
-        if (_t isEqualType "") then { _purpose = toUpper ([_t] call _trimFn); };
+        if (_t isEqualType "") then { _purpose = toUpper (trim _t); };
     };
     if !(_purpose in ["REFIT","INTEL","EPW"]) then { _purpose = "REFIT"; };
 };
@@ -63,7 +60,7 @@ if (_request isEqualTo "HOLD") then
     if (!isNull _cHoldIntent) then
     {
         private _t = _cHoldIntent lbText (lbCurSel _cHoldIntent);
-        if (_t isEqualType "") then { _holdIntent = toUpper ([_t] call _trimFn); };
+        if (_t isEqualType "") then { _holdIntent = toUpper (trim _t); };
     };
 
     if (!isNull _eHoldMin) then
@@ -84,14 +81,14 @@ if (_request isEqualTo "PROCEED") then
     if (!isNull _cProceed) then
     {
         private _t = _cProceed lbText (lbCurSel _cProceed);
-        if (_t isEqualType "") then { _proceedIntent = toUpper ([_t] call _trimFn); };
+        if (_t isEqualType "") then { _proceedIntent = toUpper (trim _t); };
     };
 };
 
-private _rationale = if (isNull _eRat) then {""} else { [(ctrlText _eRat)] call _trimFn };
-private _constraints = if (isNull _eCon) then {""} else { [(ctrlText _eCon)] call _trimFn };
-private _support = if (isNull _eSup) then {""} else { [(ctrlText _eSup)] call _trimFn };
-private _notes = if (isNull _eNote) then {""} else { [(ctrlText _eNote)] call _trimFn };
+private _rationale = if (isNull _eRat) then {""} else { trim (ctrlText _eRat) };
+private _constraints = if (isNull _eCon) then {""} else { trim (ctrlText _eCon) };
+private _support = if (isNull _eSup) then {""} else { trim (ctrlText _eSup) };
+private _notes = if (isNull _eNote) then {""} else { trim (ctrlText _eNote) };
 
 uiNamespace setVariable [
     "ARC_followOn_result",

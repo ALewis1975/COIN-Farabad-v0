@@ -28,7 +28,7 @@ private _deny = {
         [["event", "TOC_AIRBASE_RESET_SECURITY_DENIED"], ["rpc", _rpc], ["reason", _reason], ["remoteOwner", _owner], ["callerName", _who], ["callerUID", _uid]] + _details
     ] call ARC_fnc_intelLog;
 
-    if (!(_notify isEqualTo "") && { !isNull _requestor }) then {
+    if (_notify isNotEqualTo "" && { !isNull _requestor }) then {
         private _requestOwner = owner _requestor;
         if (_requestOwner > 0) then { [_notify] remoteExec ["ARC_fnc_clientHint", _requestOwner]; };
     };

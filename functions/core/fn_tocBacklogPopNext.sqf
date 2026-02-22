@@ -25,10 +25,6 @@
 if (!isServer) exitWith {[]};
 
 params [ ["_forceLogistics", false, [true]] ];
-
-// sqflint-compat helpers
-private _trimFn     = compile "params ['_s']; trim _s";
-private _findIfFn   = compile "params ['_arr','_cond']; private _r = -1; { if (_x call _cond) exitWith { _r = _forEachIndex; }; } forEach _arr; _r";
 if (!(_forceLogistics isEqualType true)) then { _forceLogistics = false; };
 
 private _back = ["tocBacklog", []] call ARC_fnc_stateGet;
@@ -43,7 +39,7 @@ private _changed = false;
 // First pass: drop invalid entries (bad shape or missing lead).
 for "_i" from ((count _back) - 1) to 0 step -1 do
 {
-    private _e = _back select _i;
+    private _e = _back # _i;
     if !(_e isEqualType [] && { (count _e) >= 3 }) then
     {
         _back deleteAt _i;
@@ -51,16 +47,15 @@ for "_i" from ((count _back) - 1) to 0 step -1 do
         continue;
     };
 
-    private _lid = _e select 0;
-    if !(_lid isEqualType "" && { ([_lid] call _trimFn) != "" }) then
+    private _lid = _e # 0;
+    if !(_lid isEqualType "" && { (trim _lid) != "" }) then
     {
         _back deleteAt _i;
         _changed = true;
         continue;
     };
 
-    private _li = -1;
-    { if (_x isEqualType [] && { (count _x) >= 1 } && { (_x select 0) isEqualTo _lid }) exitWith { _li = _forEachIndex; }; } forEach _pool;
+    private _li = _pool findIf { _x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _lid } };
     if (_li < 0) then
     {
         // Lead expired/consumed; drop backlog entry.
@@ -84,12 +79,12 @@ private _bestAt = 1e12;
 
 for "_i" from 0 to ((count _back) - 1) do
 {
-    private _e = _back select _i;
+    private _e = _back # _i;
     if !(_e isEqualType [] && { (count _e) >= 3 }) then { continue; };
 
-    private _lid = _e select 0;
-    private _pri = _e select 1;
-    private _at  = _e select 2;
+    private _lid = _e # 0;
+    private _pri = _e # 1;
+    private _at  = _e # 2;
 
     if (!(_pri isEqualType 0)) then { _pri = 3; };
     _pri = round _pri;
@@ -105,17 +100,16 @@ for "_i" from 0 to ((count _back) - 1) do
         if (!_urgent) then
         {
             // Look up live lead rec to verify type/tag for eligibility.
-            private _li = -1;
-            { if (_x isEqualType [] && { (count _x) >= 1 } && { (_x select 0) isEqualTo _lid }) exitWith { _li = _forEachIndex; }; } forEach _pool;
+            private _li = _pool findIf { _x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _lid } };
             if (_li >= 0) then
             {
-                private _lr = _pool select _li;
+                private _lr = _pool # _li;
 
                 private _lt = "";
                 private _tag = "";
 
-                if ((count _lr) >= 2 && { (_lr select 1) isEqualType "" }) then { _lt = toUpper ([(_lr select 1)] call _trimFn); };
-                if ((count _lr) >= 11 && { (_lr select 10) isEqualType "" }) then { _tag = toUpper ([(_lr select 10)] call _trimFn); };
+                if ((count _lr) >= 2 && { (_lr # 1) isEqualType "" }) then { _lt = toUpper (trim (_lr # 1)); };
+                if ((count _lr) >= 11 && { (_lr # 10) isEqualType "" }) then { _tag = toUpper (trim (_lr # 10)); };
 
                 private _ok = (_lt in ["LOGISTICS","ESCORT"]) || { (_tag find "TOC_" == 0) } || { (_tag find "URGENT_" == 0) };
                 if (!_ok) then { continue; };

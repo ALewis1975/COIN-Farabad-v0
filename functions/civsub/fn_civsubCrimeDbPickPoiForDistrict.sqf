@@ -22,22 +22,17 @@ params [
 
 if (_districtId isEqualTo "") exitWith {""};
 
-// sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
-private _mapGet   = compile "params ['_h','_k']; _h get _k";
-private _keysFn   = compile "params ['_m']; keys _m";
-
 private _db = missionNamespace getVariable ["civsub_v1_crimedb", createHashMap];
 if !(_db isEqualType createHashMap) exitWith {""};
 
-private _keys = [_db] call _keysFn;
+private _keys = keys _db;
 if ((count _keys) == 0) exitWith {""};
 
 private _candidates = _keys select {
-    private _r = [_db, _x] call _mapGet;
+    private _r = _db get _x;
     (_r isEqualType createHashMap)
-    && { ([_r, "homeDistrictId", ""] call _hg) isEqualTo _districtId }
-    && { (!_wantHvt) || { [_r, "is_hvt", false] call _hg } }
+    && { (_r getOrDefault ["homeDistrictId", ""]) isEqualTo _districtId }
+    && { (!_wantHvt) || { _r getOrDefault ["is_hvt", false] } }
 };
 
 if ((count _candidates) == 0) then {

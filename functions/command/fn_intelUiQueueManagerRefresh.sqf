@@ -43,19 +43,19 @@ private _pending = _items select {
 };
 private _decided = _items select {
     private _st = _x param [2, "", [""]];
-    !((toUpper _st) isEqualTo "PENDING")
+    (toUpper _st) isNotEqualTo "PENDING"
 };
 
 // Sort pending oldest-first.
 if ((count _pending) > 1) then
 {
-    _pending = [_pending, [], { _x select 1 }, "ASCEND"] call BIS_fnc_sortBy;
+    _pending = [_pending, [], { _x # 1 }, "ASCEND"] call BIS_fnc_sortBy;
 };
 
 // Sort decided newest-first (for quick review).
 if ((count _decided) > 1) then
 {
-    _decided = [_decided, [], { _x select 1 }, "DESCEND"] call BIS_fnc_sortBy;
+    _decided = [_decided, [], { _x # 1 }, "DESCEND"] call BIS_fnc_sortBy;
 };
 
 _items = _pending + _decided;
@@ -68,10 +68,11 @@ private _getMeta = {
     if (!(_pairs isEqualType [])) exitWith { _default };
     if (_key isEqualTo "") exitWith { _default };
 
-    private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+    private _idx = _pairs findIf {
+        (_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key }
+    };
     if (_idx < 0) exitWith { _default };
-    (_pairs select _idx) select 1
+    (_pairs # _idx) # 1
 };
 
 private _statusColor = {
@@ -110,7 +111,7 @@ private _statusColor = {
 
     if (_grid isEqualTo "") then
     {
-        if (_posATL isEqualType [] && { (count _posATL) >= 2 } && { (_posATL select 0) isEqualType 0 } && { (_posATL select 1) isEqualType 0 }) then
+        if (_posATL isEqualType [] && { (count _posATL) >= 2 } && { (_posATL # 0) isEqualType 0 } && { (_posATL # 1) isEqualType 0 }) then
         {
             _grid = mapGridPosition _posATL;
         }
@@ -152,7 +153,7 @@ else
 {
     // Restore selection.
     private _sel = 0;
-    if (!(_prevId isEqualTo "")) then
+    if (_prevId isNotEqualTo "") then
     {
         for "_i" from 0 to ((lbSize _lb) - 1) do
         {

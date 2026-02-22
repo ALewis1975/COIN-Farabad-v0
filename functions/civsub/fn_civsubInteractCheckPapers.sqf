@@ -28,11 +28,6 @@ params [
 if (isNull _actor || {isNull _civ}) exitWith {false};
 if !(isPlayer _actor) exitWith {false};
 
-// sqflint-compat helpers
-private _trimFn     = compile "params ['_s']; trim _s";
-private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
-private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
-
 // Dedicated MP hardening:
 // If invoked via remoteExec, bind actor identity to network sender.
 if (!isNil "remoteExecutedOwner") then
@@ -53,7 +48,7 @@ if (!isNil "remoteExecutedOwner") then
     };
 };
 
-private _methodUp = toUpper ([_method] call _trimFn);
+private _methodUp = toUpper (trim _method);
 if (_methodUp isEqualTo "") then { _methodUp = "SEARCH"; };
 private _coop = (_methodUp isEqualTo "MDT");
 
@@ -75,12 +70,12 @@ if (_requireCompliance && { !_isCompliant }) exitWith {
 
 
 private _d = [_did] call ARC_fnc_civsubDistrictsGetById;
-if (_d isEqualType []) then { _d = [_d] call _hmFrom; };
+if (_d isEqualType []) then { _d = createHashMapFromArray _d; };
 if !(_d isEqualType createHashMap) exitWith {false};
 
 private _scores = [_d] call ARC_fnc_civsubScoresCompute;
-private _Scoop = [_scores, "S_COOP", 0] call _hg;
-private _Sthreat = [_scores, "S_THREAT", 0] call _hg;
+private _Scoop = _scores getOrDefault ["S_COOP", 0];
+private _Sthreat = _scores getOrDefault ["S_THREAT", 0];
 
 private _actorUid = getPlayerUID _actor;
 private _civUid = _civ getVariable ["civ_uid", ""];
@@ -93,7 +88,7 @@ if (_civUid isEqualTo "") then {
 private _rec = [_did, _actorUid, _civUid, getPosATL _civ] call ARC_fnc_civsubIdentityTouch;
 if !(_rec isEqualType createHashMap) exitWith {false};
 
-private _serial = [_rec, "passport_serial", ""] call _hg;
+private _serial = _rec getOrDefault ["passport_serial", ""];
 
 // Hit probability is not locked; we tie it to S_THREAT conservatively.
 private _pHit = 0.02 + (0.002 * _Sthreat);
@@ -115,10 +110,10 @@ if (_hit) then
         private _poi = [_poiId] call ARC_fnc_civsubCrimeDbGetById;
         if !(_poi isEqualType createHashMap) then { _hit = false; } else {
             // Ensure serial aligns to a DB record
-            _serial = [_poi, "passport_serial", _serial] call _hg;
+            _serial = _poi getOrDefault ["passport_serial", _serial];
 
-            private _cat = [_poi, "category", ""] call _hg; 
-            private _isHvt = [_poi, "is_hvt", false] call _hg;
+            private _cat = _poi getOrDefault ["category", ""]; 
+            private _isHvt = _poi getOrDefault ["is_hvt", false];
 
             _wanted = if (_isHvt) then { 3 } else {
                 if (_cat in ["IED_FACILITATOR","OPS_PLANNER"]) then { 2 } else { 1 };
@@ -136,7 +131,7 @@ if (_hit) then
             _rec set ["poi_id", _poiId];
             _rec set ["charges", _charges];
 
-            private _flags = [_rec, "flags", []];
+            private _flags = _rec getOrDefault ["flags", []];
             if !(_flags isEqualType []) then { _flags = []; };
             if ((_flags find "CRIMEDB_HIT") < 0) then { _flags pushBack "CRIMEDB_HIT"; };
             _rec set ["flags", _flags];
@@ -147,12 +142,12 @@ if (_hit) then
 };
 
 // Always emit CHECK_PAPERS (hit flag controls effect mapping).
-private _payloadCheck = [[
+private _payloadCheck = createHashMapFromArray [
     ["cooperative", _coop],
     ["method", _methodUp],
     ["passport_serial", _serial],
     ["hit", _hit]
-]] call _hmFrom;
+];
 [_did, "CHECK_PAPERS", "IDENTITY", _payloadCheck, _actorUid] call ARC_fnc_civsubEmitDelta;
 
 if !(_hit) exitWith {
@@ -161,12 +156,12 @@ if !(_hit) exitWith {
 };
 
 // Emit separate CRIME_DB_HIT bundle with lead_emit contract fields.
-private _payloadHit = [[
+private _payloadHit = createHashMapFromArray [
     ["passport_serial", _serial],
     ["hit", true],
     ["wanted_level", _wanted],
     ["charges", _charges]
-]] call _hmFrom;
+];
 
 if !(["CRIME_DB_HIT", _payloadHit] call ARC_fnc_civsubDeltaValidate) exitWith {false};
 
@@ -174,19 +169,19 @@ private _bundle = [_did, "CRIME_DB_HIT", "IDENTITY", _payloadHit, _actorUid] cal
 if !(_bundle isEqualType createHashMap) exitWith {false};
 
 private _intelConf = [_Scoop, _Sthreat] call ARC_fnc_civsubIntelConfidence;
-private _seed = [[
+private _seed = createHashMapFromArray [
     ["subject_civ_uid", _civUid],
-    ["home_pos", [_rec, "home_pos", getPosATL _civ] call _hg],
+    ["home_pos", _rec getOrDefault ["home_pos", getPosATL _civ]],
     ["linked_network", "RED"]
-]] call _hmFrom;
+];
 
-_bundle set ["lead_emit", [[
+_bundle set ["lead_emit", createHashMapFromArray [
     ["emit", true],
     ["lead_type", "LEAD_DETAIN_SUSPECT"],
     ["lead_id", ""],
     ["confidence", _intelConf],
     ["seed", _seed]
-]] call _hmFrom];
+]];
 
 // Apply to district + update lastDelta probes (mirrors ARC_fnc_civsubEmitDelta).
 [_bundle] call ARC_fnc_civsubDeltaApplyToDistrict;
@@ -195,13 +190,13 @@ _bundle set ["lead_emit", [[
 if (!isNil "ARC_fnc_civsubLeadEmitBridge") then
 {
     private _bridgedLeadId = [_bundle] call ARC_fnc_civsubLeadEmitBridge;
-    if (_bridgedLeadId isEqualType "" && { !(_bridgedLeadId isEqualTo "") }) then
+    if (_bridgedLeadId isEqualType "" && { _bridgedLeadId isNotEqualTo "" }) then
     {
         missionNamespace setVariable ["civsub_v1_lastDelta_leadId", _bridgedLeadId, true];
     };
 };
 
-missionNamespace setVariable ["civsub_v1_lastDelta_id", [_bundle, "bundle_id", ""] call _hg, true];
+missionNamespace setVariable ["civsub_v1_lastDelta_id", _bundle getOrDefault ["bundle_id", ""], true];
 missionNamespace setVariable ["civsub_v1_lastDelta_ts", serverTime, true];
 
 [format ["CIVSUB: %1 HIT (%2). Wanted level %3.", _methodUp, _serial, _wanted], "CHAT"] remoteExecCall ["ARC_fnc_civsubClientMessage", _actor];

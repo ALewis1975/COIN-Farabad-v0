@@ -12,9 +12,6 @@ if (!hasInterface) exitWith {false};
 
 // Only start once per client.
 if (missionNamespace getVariable ["ARC_uiTaskTimers_running", false]) exitWith {true};
-
-// sqflint-compat helpers
-private _trimFn     = compile "params ['_s']; trim _s";
 missionNamespace setVariable ["ARC_uiTaskTimers_running", true];
 
 // Only show by default for authorized roles (SL / Officers).
@@ -57,14 +54,14 @@ uiNamespace setVariable ["ARC_TaskTimerHUD_layer", _layer];
 
         private _taskId = missionNamespace getVariable ["ARC_activeTaskId", ""];
         private _accepted = missionNamespace getVariable ["ARC_activeIncidentAccepted", false];
-        private _useIncident = (!(_taskId isEqualTo "")) && { _accepted };
+        private _useIncident = (_taskId isNotEqualTo "") && { _accepted };
 
         // Non-incident tasks: show the ATH for any focused task set via ARC_fnc_clientSetCurrentTask.
         if (!_useIncident) then
         {
             private _focusId = missionNamespace getVariable ["ARC_uiFocusTaskId", ""];
             if (!(_focusId isEqualType "")) then { _focusId = ""; };
-            _focusId = [_focusId] call _trimFn;
+            _focusId = trim _focusId;
             if (_focusId isEqualTo "") then
             {
                 _ctrl ctrlShow false;
@@ -87,14 +84,14 @@ uiNamespace setVariable ["ARC_TaskTimerHUD_layer", _layer];
 
             private _txt = format ["<t size='%1' font='PuristaMedium' color='#FFD700'>ASSIGNED TASK</t>", _sHeader];
 
-            if (!(_fTitle isEqualTo "")) then
+            if (_fTitle isNotEqualTo "") then
             {
                 _txt = _txt + "<br/>" + format ["<t size='%1' font='PuristaMedium'>%2</t>", _uiScale, _fTitle];
             };
 
             _txt = _txt + "<br/>" + format ["<t size='%1' font='PuristaLight'>%2</t>", _uiScale, _fKind];
 
-            if (!(_grid isEqualTo "")) then
+            if (_grid isNotEqualTo "") then
             {
                 private _line = if (_dist >= 0) then { format ["GRID %1 | %2m", _grid, _dist] } else { format ["GRID %1", _grid] };
                 _txt = _txt + "<br/>" + format ["<t size='%1' font='PuristaLight'>%2</t>", _sGrid, _line];

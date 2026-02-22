@@ -14,11 +14,7 @@ params [
     ["_ctx", []]
 ];
 
-if (!(toUpper _event isEqualTo "AO_ACTIVATED")) exitWith {false};
-
-// sqflint-compat helpers
-private _trimFn     = compile "params ['_s']; trim _s";
-private _findIfFn   = compile "params ['_arr','_cond']; private _r = -1; { if (_x call _cond) exitWith { _r = _forEachIndex; }; } forEach _arr; _r";
+if (toUpper _event isNotEqualTo "AO_ACTIVATED") exitWith {false};
 
 private _enabled = ["threat_v0_enabled", true] call ARC_fnc_stateGet;
 if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabled = true; };
@@ -28,10 +24,9 @@ if (!_enabled) exitWith {false};
 private _kvGet = {
     params ["_pairs", "_key", "_default"];
     if (!(_pairs isEqualType [])) exitWith {_default};
-    private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+    private _idx = _pairs findIf { (_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key } };
     if (_idx < 0) exitWith {_default};
-    private _v = (_pairs select _idx) select 1;
+    private _v = (_pairs # _idx) # 1;
     if (isNil "_v") exitWith {_default};
     _v
 };
@@ -40,14 +35,14 @@ private _taskId = [_ctx, "task_id", ""] call _kvGet;
 if (_taskId isEqualTo "") then
 {
     private _tasks = [_ctx, "task_ids_activated", []] call _kvGet;
-    if (_tasks isEqualType [] && { (count _tasks) > 0 }) then { _taskId = _tasks select 0; };
+    if (_tasks isEqualType [] && { (count _tasks) > 0 }) then { _taskId = _tasks # 0; };
 };
 if (_taskId isEqualTo "") exitWith {false};
 
 private _incType = toUpper ([_ctx, "incident_type", ""] call _kvGet);
 
 // v0 scope: create threats only for IED incidents (Phase 1 package)
-if (!(_incType isEqualTo "IED")) exitWith {true};
+if (_incType isNotEqualTo "IED") exitWith {true};
 
 // Ensure minimal area context exists
 private _pos = [_ctx, "pos", [0,0,0]] call _kvGet;
@@ -67,7 +62,7 @@ private _objKind = ["activeObjectiveKind", ""] call ARC_fnc_stateGet;
 private _objNid = ["activeObjectiveNetId", ""] call ARC_fnc_stateGet;
 
 if (
-    (!(_objNid isEqualTo ""))
+    (_objNid isNotEqualTo "")
     && { (toUpper _objKind) in ["IED_DEVICE", "VBIED_VEHICLE"] }
 ) then
 {
@@ -75,12 +70,10 @@ if (
     private _records = ["threat_v0_records", []] call ARC_fnc_stateGet;
     if (_records isEqualType []) then
     {
-        private _idxRec = [_records, {
-            private _r = _x; private _id = [_r, "threat_id", ""] call _kvGet; _id isEqualTo _tid
-        }] call _findIfFn;
+        private _idxRec = _records findIf { private _r = _x; private _id = [_r, "threat_id", ""] call _kvGet; _id isEqualTo _tid };
         if (_idxRec >= 0) then
         {
-            private _rec = _records select _idxRec;
+            private _rec = _records # _idxRec;
 
             private _world = [_rec, "world", []] call _kvGet;
 
@@ -95,8 +88,7 @@ if (
             private _kvSet = {
                 params ["_pairs", "_key", "_value"];
                 if (!(_pairs isEqualType [])) then { _pairs = []; };
-                private _i = -1;
-                { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _i = _forEachIndex; }; } forEach _pairs;
+                private _i = _pairs findIf { (_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key } };
                 if (_i < 0) then { _pairs pushBack [_key, _value]; } else { _pairs set [_i, [_key, _value]]; };
                 _pairs
             };
@@ -130,17 +122,15 @@ private _cur = "CREATED";
 private _recs2 = ["threat_v0_records", []] call ARC_fnc_stateGet;
 if (_recs2 isEqualType []) then
 {
-    private _i2 = [_recs2, {
-        private _r = _x; private _id = [_r, "threat_id", ""] call _kvGet; _id isEqualTo _tid
-    }] call _findIfFn;
+    private _i2 = _recs2 findIf { private _r = _x; private _id = [_r, "threat_id", ""] call _kvGet; _id isEqualTo _tid };
     if (_i2 >= 0) then
     {
-        _cur = [_recs2 select _i2, "state", ""] call _kvGet;
+        _cur = [_recs2 # _i2, "state", ""] call _kvGet;
     };
 };
 
 if (!(_cur isEqualType "")) then { _cur = ""; };
-_cur = toUpper ([_cur] call _trimFn);
+_cur = toUpper (trim _cur);
 
 if (_cur in ["", "CREATED"]) then
 {

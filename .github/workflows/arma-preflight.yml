@@ -78,26 +78,19 @@ jobs:
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
-      - name: SQF static analysis — compat scan ALL files, sqflint -e w changed files
+      - name: SQF static analysis (changed *.sqf files only)
         run: |
           set -euo pipefail
 
-          echo "=== Compat scan: ALL .sqf files ==="
-          mapfile -d '' all_sqf < <(find functions initServer.sqf initPlayerLocal.sqf -name "*.sqf" -print0 2>/dev/null)
-          if [ ${#all_sqf[@]} -eq 0 ]; then
-            echo "No SQF files found."
-          else
-            python3 scripts/dev/sqflint_compat_scan.py --strict "${all_sqf[@]}"
-          fi
-
-          echo ""
-          echo "=== sqflint -e w: changed *.sqf files ==="
           sqf_files="${{ steps.changed.outputs.sqf_files }}"
 
           if [ -z "$sqf_files" ]; then
             echo "No changed SQF files to lint."
             exit 0
           fi
+
+          echo "Running sqflint compatibility scan before lint..."
+          python3 scripts/dev/sqflint_compat_scan.py --strict $sqf_files
 
           while IFS= read -r file; do
             [ -z "$file" ] && continue

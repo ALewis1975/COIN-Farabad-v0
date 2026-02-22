@@ -26,9 +26,6 @@ if !(_d isEqualType createHashMap) exitWith {objNull};
 if !(_pool isEqualType []) exitWith {objNull};
 if ((count _pool) == 0) exitWith {objNull};
 
-// sqflint-compat helpers
-private _mapGet   = compile "params ['_h','_k']; _h get _k";
-
 private _dbg = missionNamespace getVariable ["civsub_v1_traffic_debug", false];
 if (!(_dbg isEqualType true)) then { _dbg = false; };
 
@@ -48,7 +45,7 @@ if (!(_poolFallback isEqualType [])) then { _poolFallback = []; };
 
 private _fnHmGet = {
     params ["_hm", "_key", "_fallback"];
-    private _v = [_hm, _key] call _mapGet;
+    private _v = _hm get _key;
     if (isNil "_v") exitWith { _fallback };
     _v
 };

@@ -27,9 +27,6 @@ params [
 
 if (isNull _display) exitWith {false};
 
-// sqflint-compat helpers
-private _trimFn     = compile "params ['_s']; trim _s";
-
 private _ctrlMain    = _display displayCtrl 78010;
 private _ctrlMainGrp = _display displayCtrl 78015;
 private _ctrlList    = _display displayCtrl 78011;
@@ -82,7 +79,7 @@ if (_rebuild) then
 
     // Restore selection
     private _set = -1;
-    if (!(_prevData isEqualTo "")) then
+    if (_prevData isNotEqualTo "") then
     {
         for "_n" from 0 to ((lbSize _ctrlList) - 1) do
         {
@@ -103,8 +100,8 @@ private _data = if (_sel >= 0) then { _ctrlList lbData _sel } else { "" };
 if (!(_data isEqualType "")) then { _data = ""; };
 
 private _parts = _data splitString "|";
-private _kind = if ((count _parts) > 0) then { toUpper (_parts select 0) } else { "NONE" };
-private _arg  = if ((count _parts) > 1) then { toUpper (_parts select 1) } else { "" };
+private _kind = if ((count _parts) > 0) then { toUpper (_parts # 0) } else { "NONE" };
+private _arg  = if ((count _parts) > 1) then { toUpper (_parts # 1) } else { "" };
 
 private _civsubEnabled = missionNamespace getVariable ["civsub_v1_enabled", false];
 if (!(_civsubEnabled isEqualType true) && !(_civsubEnabled isEqualType false)) then { _civsubEnabled = false; };
@@ -113,8 +110,8 @@ if (!(_intelLog isEqualType [])) then { _intelLog = []; };
 private _threatHits = 0;
 {
     if (!(_x isEqualType []) || { (count _x) < 4 }) then { continue; };
-    private _cat = toUpper ([(_x select 2)] call _trimFn);
-    private _sum = toUpper ([(_x select 3)] call _trimFn);
+    private _cat = toUpper (trim (_x # 2));
+    private _sum = toUpper (trim (_x # 3));
     if (_cat in ["THREAT", "OPS"] && { (_sum find "THREAT") >= 0 || { (_sum find "IED") >= 0 } }) then
     {
         _threatHits = _threatHits + 1;
@@ -173,9 +170,9 @@ _ctrlDetails ctrlSetStructuredText parseText _txt;
 // Auto-fit + clamp to viewport so the controls group can scroll when needed.
 [_ctrlDetails] call BIS_fnc_ctrlFitToTextHeight;
 private _grp = _display displayCtrl 78016;
-private _minH = if (!isNull _grp) then { (ctrlPosition _grp) select 3 } else { 0.74 };
+private _minH = if (!isNull _grp) then { (ctrlPosition _grp) # 3 } else { 0.74 };
 private _p = ctrlPosition _ctrlDetails;
-_p set [3, (_p select 3) max _minH];
+_p set [3, (_p # 3) max _minH];
 _ctrlDetails ctrlSetPosition _p;
 _ctrlDetails ctrlCommit 0;
 

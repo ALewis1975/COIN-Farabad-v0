@@ -20,9 +20,6 @@ params [
 
 if (isNull _civ) exitWith {false};
 
-// sqflint-compat helpers
-private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
-
 private _src = if (!isNull _instigator) then { _instigator } else { _killer };
 
 private _attribSide = "UNKNOWN";
@@ -51,10 +48,10 @@ if (_did isEqualTo "") exitWith {false};
 private _actorUid = "";
 if (!isNull _src && {isPlayer _src}) then { _actorUid = getPlayerUID _src; };
 
-private _payload = [[
+private _payload = createHashMapFromArray [
     ["attrib_side", _attribSide],
     ["attrib_conf", _attribConf]
-]] call _hmFrom;
+];
 
 [_did, "CIV_KILLED", "HARM", _payload, _actorUid] call ARC_fnc_civsubEmitDelta;
 

@@ -22,9 +22,6 @@
 
 if (!isServer) exitWith {false};
 
-// sqflint-compat helpers
-private _trimFn     = compile "params ['_s']; trim _s";
-
 if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\\core\\fn_rpcValidateSender.sqf"; };
 
 // Fail-safe: ensure role helper functions exist even if CfgFunctions.hpp was not updated.
@@ -85,8 +82,8 @@ if (!isNull _unit && { !([_unit] call ARC_fnc_rolesIsAuthorized) }) exitWith
 private _closeReady = ["activeIncidentCloseReady", false] call ARC_fnc_stateGet;
 if (!(_closeReady isEqualType true)) then { _closeReady = false; };
 
-private _tU = toUpper ([(["activeIncidentType", ""] call ARC_fnc_stateGet)] call _trimFn);
-if (!_updateOnly && { !_closeReady } && { !(_tU isEqualTo "IED") }) exitWith
+private _tU = toUpper (trim (["activeIncidentType", ""] call ARC_fnc_stateGet));
+if (!_updateOnly && { !_closeReady } && { _tU isNotEqualTo "IED" }) exitWith
 {
     private _msg = "SITREP rejected: incident still in progress. Complete the objective or wait for the incident timer to expire.";
     if (!isNull _unit) then { [_msg] remoteExec ["ARC_fnc_clientHint", owner _unit]; };
@@ -134,8 +131,8 @@ if (_recommend isEqualType "") then
 
 if (!(_summary isEqualType "")) then { _summary = ""; };
 if (!(_details isEqualType "")) then { _details = ""; };
-_summary = [_summary] call _trimFn;
-_details = [_details] call _trimFn;
+_summary = trim _summary;
+_details = trim _details;
 
 // Position resolution: prefer actual sender position (prevents spoofed client coords).
 private _pos = if (!isNull _unit) then { getPosATL _unit } else { _posATL };
@@ -216,7 +213,7 @@ if (!_nearOk) exitWith
 };
 
 private _grid = "";
-if !((_pos select 0) isEqualTo 0 && {(_pos select 1) isEqualTo 0}) then
+if !((_pos # 0) isEqualTo 0 && {(_pos # 1) isEqualTo 0}) then
 {
     _grid = mapGridPosition _pos;
 };
@@ -239,20 +236,20 @@ if (missionNamespace getVariable ["civsub_v1_enabled", false]) then
     //  3) explicit UNKNOWN-district fallback annex (never empty)
     private _didC = [_pos] call ARC_fnc_civsubDistrictsFindByPos;
     if (!(_didC isEqualType "")) then { _didC = ""; };
-    _didC = toUpper ([_didC] call _trimFn);
+    _didC = toUpper (trim _didC);
 
     if (_didC isEqualTo "") then
     {
         _didC = ["activeIncidentCivsubDistrictId", ""] call ARC_fnc_stateGet;
         if (!(_didC isEqualType "")) then { _didC = ""; };
-        _didC = toUpper ([_didC] call _trimFn);
+        _didC = toUpper (trim _didC);
     };
 
-    if (!(_didC isEqualTo "")) then
+    if (_didC isNotEqualTo "") then
     {
         _civAnnex = [_didC, _pos] call ARC_fnc_civsubSitrepAnnexBuild;
         if (!(_civAnnex isEqualType "")) then { _civAnnex = ""; };
-        _civAnnex = [_civAnnex] call _trimFn;
+        _civAnnex = trim _civAnnex;
     };
 
     // Contract-safe fallback when district cannot be resolved or builder returns blank.
@@ -304,11 +301,11 @@ missionNamespace setVariable ["ARC_activeIncidentSitrepDetails", _details, true]
 private _foReqU = "";
 if (_foRequest isEqualType "") then
 {
-    _foReqU = toUpper ([_foRequest] call _trimFn);
+    _foReqU = toUpper (trim _foRequest);
     if !(_foReqU in ["RTB", "HOLD", "PROCEED"]) then { _foReqU = ""; };
 };
 
-if (!_updateOnly && { !(_foReqU isEqualTo "") }) then
+if (!_updateOnly && { _foReqU isNotEqualTo "" }) then
 {
     // Use the SITREP reporting group string as the follow-on "from group" identifier.
     private _groupId = _grpId;
@@ -318,8 +315,7 @@ if (!_updateOnly && { !(_foReqU isEqualTo "") }) then
     private _fo = [];
     private _setPair = {
         params ["_arr", "_k", "_v"];
-        private _i = -1;
-        { if (_x isEqualType [] && { (count _x) == 2 } && { (_x select 0) isEqualTo _k }) exitWith { _i = _forEachIndex; }; } forEach _arr;
+        private _i = _arr findIf { _x isEqualType [] && { (count _x) == 2 } && { (_x # 0) isEqualTo _k } };
         if (_i >= 0) then { _arr set [_i, [_k, _v]]; } else { _arr pushBack [_k, _v]; };
         _arr
     };
@@ -330,21 +326,21 @@ if (!_updateOnly && { !(_foReqU isEqualTo "") }) then
     private _pU = "";
     if (_foPurpose isEqualType "") then
     {
-        _pU = toUpper ([_foPurpose] call _trimFn);
+        _pU = toUpper (trim _foPurpose);
         if !(_pU in ["REFIT", "INTEL", "EPW"]) then { _pU = ""; };
     };
-    if (!(_pU isEqualTo "")) then { _fo = [_fo, "purpose", _pU] call _setPair; };
+    if (_pU isNotEqualTo "") then { _fo = [_fo, "purpose", _pU] call _setPair; };
 
     // Optional narrative fields
-    if (_foRationale isEqualType "" && { !(([_foRationale] call _trimFn) isEqualTo "") }) then { _fo = [_fo, "rationale", [_foRationale] call _trimFn] call _setPair; };
-    if (_foConstraints isEqualType "" && { !(([_foConstraints] call _trimFn) isEqualTo "") }) then { _fo = [_fo, "constraints", [_foConstraints] call _trimFn] call _setPair; };
-    if (_foSupport isEqualType "" && { !(([_foSupport] call _trimFn) isEqualTo "") }) then { _fo = [_fo, "support", [_foSupport] call _trimFn] call _setPair; };
-    if (_foNotes isEqualType "" && { !(([_foNotes] call _trimFn) isEqualTo "") }) then { _fo = [_fo, "notes", [_foNotes] call _trimFn] call _setPair; };
+    if (_foRationale isEqualType "" && { (trim _foRationale) isNotEqualTo "" }) then { _fo = [_fo, "rationale", trim _foRationale] call _setPair; };
+    if (_foConstraints isEqualType "" && { (trim _foConstraints) isNotEqualTo "" }) then { _fo = [_fo, "constraints", trim _foConstraints] call _setPair; };
+    if (_foSupport isEqualType "" && { (trim _foSupport) isNotEqualTo "" }) then { _fo = [_fo, "support", trim _foSupport] call _setPair; };
+    if (_foNotes isEqualType "" && { (trim _foNotes) isNotEqualTo "" }) then { _fo = [_fo, "notes", trim _foNotes] call _setPair; };
 
     // HOLD/PROCEED specifics
-    if (_foHoldIntent isEqualType "" && { !(([_foHoldIntent] call _trimFn) isEqualTo "") }) then { _fo = [_fo, "holdIntent", [_foHoldIntent] call _trimFn] call _setPair; };
+    if (_foHoldIntent isEqualType "" && { (trim _foHoldIntent) isNotEqualTo "" }) then { _fo = [_fo, "holdIntent", trim _foHoldIntent] call _setPair; };
     if (_foHoldMinutes isEqualType 0 && { _foHoldMinutes > 0 }) then { _fo = [_fo, "holdMinutes", _foHoldMinutes] call _setPair; };
-    if (_foProceedIntent isEqualType "" && { !(([_foProceedIntent] call _trimFn) isEqualTo "") }) then { _fo = [_fo, "proceedIntent", [_foProceedIntent] call _trimFn] call _setPair; };
+    if (_foProceedIntent isEqualType "" && { (trim _foProceedIntent) isNotEqualTo "" }) then { _fo = [_fo, "proceedIntent", trim _foProceedIntent] call _setPair; };
 
     // Keep a server-side copy for TOC closeout logic + UI display.
     ["activeIncidentFollowOnRequest", _fo] call ARC_fnc_stateSet;
@@ -354,7 +350,7 @@ if (!_updateOnly && { !(_foReqU isEqualTo "") }) then
         "FOLLOW-ON REQUEST (%1): %2%3",
         _groupId,
         _foReqU,
-        if (_foReqU isEqualTo "RTB" && { !(_pU isEqualTo "") }) then { format [" (%1)", _pU] } else { "" }
+        if (_foReqU isEqualTo "RTB" && { _pU isNotEqualTo "" }) then { format [" (%1)", _pU] } else { "" }
     ];
 
     // Compose details from the structured fields.
@@ -362,11 +358,11 @@ if (!_updateOnly && { !(_foReqU isEqualTo "") }) then
     {
         if (_x isEqualType [] && { (count _x) == 2 }) then
         {
-            private _k = _x select 0;
-            private _v = _x select 1;
-            if (_v isEqualType "" && { !(([_v] call _trimFn) isEqualTo "") }) then
+            private _k = _x # 0;
+            private _v = _x # 1;
+            if (_v isEqualType "" && { (trim _v) isNotEqualTo "" }) then
             {
-                _foDet = _foDet + format ["%1: %2\n", toUpper _k, [_v] call _trimFn];
+                _foDet = _foDet + format ["%1: %2\n", toUpper _k, trim _v];
             }
             else
             {
@@ -377,7 +373,7 @@ if (!_updateOnly && { !(_foReqU isEqualTo "") }) then
             };
         };
     } forEach _fo;
-    _foDet = [_foDet] call _trimFn;
+    _foDet = trim _foDet;
 
     // Informational only: store with the incident so TOC can review during closeout.
     // Do NOT create a TOC approval queue item.
@@ -420,8 +416,8 @@ private _meta = [
     ["fromSide", _sideTxt]
 ];
 
-if (!(_recU isEqualTo "")) then { _meta pushBack ["recommend", _recU]; };
-if (!(_details isEqualTo "")) then { _meta pushBack ["details", _details]; };
+if (_recU isNotEqualTo "") then { _meta pushBack ["recommend", _recU]; };
+if (_details isNotEqualTo "") then { _meta pushBack ["details", _details]; };
 
 // Log to OPS (OPS entries have no marker clutter; now displayed in ARC_OPS dashboard)
 ["OPS", _line, _pos, _meta] call ARC_fnc_intelLog;

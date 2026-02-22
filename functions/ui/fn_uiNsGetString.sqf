@@ -10,9 +10,6 @@ params [
     ["_normalize", true, [true]]
 ];
 
-// sqflint-compat helpers
-private _trimFn     = compile "params ['_s']; trim _s";
-
 private _value = uiNamespace getVariable [_key, _default];
 
 if !(_value isEqualType "") then
@@ -24,7 +21,7 @@ if !(_value isEqualType "") then
 
 if (_normalize) then
 {
-    _value = [_value] call _trimFn;
+    _value = trim _value;
 };
 
 _value

@@ -5,10 +5,6 @@
 
 if (!isServer) exitWith {false};
 
-// sqflint-compat helpers
-private _trimFn     = compile "params ['_s']; trim _s";
-private _findIfFn   = compile "params ['_arr','_cond']; private _r = -1; { if (_x call _cond) exitWith { _r = _forEachIndex; }; } forEach _arr; _r";
-
 if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\\core\\fn_rpcValidateSender.sqf"; };
 if (isNil "ARC_fnc_airbaseTowerAuthorize") then { ARC_fnc_airbaseTowerAuthorize = compile preprocessFileLineNumbers "functions\\core\\fn_airbaseTowerAuthorize.sqf"; };
 
@@ -37,14 +33,13 @@ if (!_ok) exitWith {
 };
 
 if (!(_flightId isEqualType "")) then { _flightId = ""; };
-_flightId = [_flightId] call _trimFn;
+_flightId = trim _flightId;
 if (_flightId isEqualTo "") exitWith {false};
 
 private _queue = ["airbase_v1_queue", []] call ARC_fnc_stateGet;
 if (!(_queue isEqualType [])) then { _queue = []; };
 
-private _idx = -1;
-{ if (((_x param [0, ""]) isEqualTo _flightId)) exitWith { _idx = _forEachIndex; }; } forEach _queue;
+private _idx = _queue findIf { ((_x param [0, ""]) isEqualTo _flightId) };
 if (_idx < 0) exitWith {
     private _owner = owner _caller;
     if (_owner > 0) then { [format ["Flight %1 is not currently queued.", _flightId]] remoteExec ["ARC_fnc_clientHint", _owner]; };
@@ -64,7 +59,7 @@ _recs = _updated param [0, []];
 
 private _manualPriority = ["airbase_v1_manualPriority", []] call ARC_fnc_stateGet;
 if (!(_manualPriority isEqualType [])) then { _manualPriority = []; };
-_manualPriority = _manualPriority select { _x isEqualType "" && { !(_x isEqualTo _flightId) } };
+_manualPriority = _manualPriority select { _x isEqualType "" && { _x isNotEqualTo _flightId } };
 _manualPriority pushBack _flightId;
 ["airbase_v1_manualPriority", _manualPriority] call ARC_fnc_stateSet;
 

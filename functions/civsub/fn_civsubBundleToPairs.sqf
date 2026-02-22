@@ -1,8 +1,4 @@
 /*
-
-// sqflint-compat helpers
-private _mapGet   = compile "params ['_h','_k']; _h get _k";
-private _keysFn   = compile "params ['_m']; keys _m";
     ARC_fnc_civsubBundleToPairs
 
     Phase 5.5 helper: convert a HashMap (and nested HashMaps) into a
@@ -20,9 +16,9 @@ private _v = _this param [0, nil];
 if (_v isEqualType createHashMap) exitWith {
     private _out = [];
     {
-        private _val = [_v, _x] call _mapGet;
+        private _val = _v get _x;
         _out pushBack [_x, [_val] call ARC_fnc_civsubBundleToPairs];
-    } forEach ([_v] call _keysFn);
+    } forEach (keys _v);
     _out
 };
 

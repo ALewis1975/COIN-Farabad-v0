@@ -15,25 +15,22 @@ if (!isServer) exitWith {""};
 
 params ["_category", "_summary", ["_posATL", [0,0,0]], ["_meta", []]];
 
-// sqflint-compat helpers
-private _findIfFn   = compile "params ['_arr','_cond']; private _r = -1; { if (_x call _cond) exitWith { _r = _forEachIndex; }; } forEach _arr; _r";
-
 if (_category isEqualTo "") then { _category = "GEN"; };
 if (_summary isEqualTo "") then { _summary = "No details provided."; };
 if (!(_posATL isEqualType [])) then { _posATL = [0,0,0]; };
 if (!(_meta isEqualType [])) then { _meta = []; };
 
 // Enrich meta with grid/zone when possible (helps UI formatting)
-if !((_posATL select 0) isEqualTo 0 && {(_posATL select 1) isEqualTo 0}) then
+if !((_posATL # 0) isEqualTo 0 && {(_posATL # 1) isEqualTo 0}) then
 {
     private _grid = mapGridPosition _posATL;
     private _zone = [_posATL] call ARC_fnc_worldGetZoneForPos;
 
-    if (([_meta, { (_x select 0) isEqualTo "grid" }] call _findIfFn) < 0) then
+    if ((_meta findIf { (_x # 0) isEqualTo "grid" }) < 0) then
     {
         _meta pushBack ["grid", _grid];
     };
-    if (([_meta, { (_x select 0) isEqualTo "zone" }] call _findIfFn) < 0) then
+    if ((_meta findIf { (_x # 0) isEqualTo "zone" }) < 0) then
     {
         _meta pushBack ["zone", _zone];
     };
@@ -70,7 +67,7 @@ if (_rptOps && { _catU isEqualTo "OPS" }) then
 {
     private _grid = "";
     private _zone = "";
-    if !((_posATL select 0) isEqualTo 0 && {(_posATL select 1) isEqualTo 0}) then
+    if !((_posATL # 0) isEqualTo 0 && {(_posATL # 1) isEqualTo 0}) then
     {
         _grid = mapGridPosition _posATL;
         _zone = [_posATL] call ARC_fnc_worldGetZoneForPos;
@@ -82,7 +79,7 @@ if (_rptOps && { _catU isEqualTo "OPS" }) then
 
 // Create/update a map marker so players can navigate to intel items while testing.
 // Do NOT create markers for OPS entries (tasks already have map context; OPS markers create clutter).
-if (!(_catU isEqualTo "OPS")) then
+if (_catU isNotEqualTo "OPS") then
 {
     [_id, _catU, _posATL] call ARC_fnc_intelCreateMarker;
 };

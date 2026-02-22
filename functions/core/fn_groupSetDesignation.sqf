@@ -50,9 +50,9 @@ if (_profile isEqualType [] && { (count _profile) >= 3 }) then
         ["_pMaxSq", -1]
     ];
 
-    if (_pBnReg isEqualType "" && { !(_pBnReg isEqualTo "") }) then { _bnReg = _pBnReg; };
-    if (_pType isEqualType "" && { !(_pType isEqualTo "") }) then { _uType = _pType; };
-    if (_pCall isEqualType "" && { !(_pCall isEqualTo "") }) then { _callsign = _pCall; };
+    if (_pBnReg isEqualType "" && { _pBnReg isNotEqualTo "" }) then { _bnReg = _pBnReg; };
+    if (_pType isEqualType "" && { _pType isNotEqualTo "" }) then { _uType = _pType; };
+    if (_pCall isEqualType "" && { _pCall isNotEqualTo "" }) then { _callsign = _pCall; };
     if (_pCompanies isEqualType [] && { (count _pCompanies) > 0 }) then { _letters = _pCompanies; };
     if (_pMaxPlt isEqualType 0 && { _pMaxPlt > 0 }) then { _maxPlt = _pMaxPlt; };
     if (_pMaxSq isEqualType 0 && { _pMaxSq > 0 }) then { _maxSq = _pMaxSq; };
@@ -80,7 +80,7 @@ _plt  = (_plt max 1) min _maxPlt;
 _sq   = (_sq max 1) min _maxSq;
 
 private _cSlot = _cIdx % (count _letters);
-private _companyLetter = _letters select _cSlot;
+private _companyLetter = _letters # _cSlot;
 private _companyNum = _cSlot + 1;
 
 // Build group name

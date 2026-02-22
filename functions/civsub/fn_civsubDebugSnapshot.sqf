@@ -6,12 +6,9 @@
 
 if (!isServer) exitWith {[]};
 
-// sqflint-compat helpers
-private _keysFn   = compile "params ['_m']; keys _m";
-
 private _districts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
 private _dc = 0;
-if (_districts isEqualType createHashMap) then { _dc = count ([_districts] call _keysFn); };
+if (_districts isEqualType createHashMap) then { _dc = count (keys _districts); };
 
 [
     ["civsubEnabled", missionNamespace getVariable ["civsub_v1_enabled", false]],

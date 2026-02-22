@@ -30,11 +30,8 @@ params [
 
 if (isNull _issuer) exitWith {false};
 
-// sqflint-compat helpers
-private _trimFn     = compile "params ['_s']; trim _s";
-
-_order = toUpper ([_order] call _trimFn);
-_purpose = toUpper ([_purpose] call _trimFn);
+_order = toUpper (trim _order);
+_purpose = toUpper (trim _purpose);
 
 private _targetGroup = ["activeIncidentAcceptedByGroup", ""] call ARC_fnc_stateGet;
 if (!(_targetGroup isEqualType "") || { _targetGroup isEqualTo "" }) then

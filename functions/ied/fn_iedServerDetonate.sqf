@@ -17,10 +17,7 @@ params [
     ["_deviceId", "", [""]]
 ];
 
-// sqflint-compat helpers
-private _trimFn     = compile "params ['_s']; trim _s";
-
-_deviceId = [_deviceId] call _trimFn;
+_deviceId = trim _deviceId;
 if (_deviceId isEqualTo "") exitWith {false};
 
 // Guard: only detonate once per incident.
@@ -31,7 +28,7 @@ private _nid = ["activeObjectiveNetId", ""] call ARC_fnc_stateGet;
 if (!(_nid isEqualType "")) then { _nid = ""; };
 
 private _obj = objNull;
-if (!(_nid isEqualTo "")) then { _obj = objectFromNetId _nid; };
+if (_nid isNotEqualTo "") then { _obj = objectFromNetId _nid; };
 
 private _pos = if (!isNull _obj) then { getPosATL _obj } else { ["activeObjectivePos", []] call ARC_fnc_stateGet };
 if (!(_pos isEqualType []) || { (count _pos) < 2 }) then { _pos = ["activeExecPos", []] call ARC_fnc_stateGet; };

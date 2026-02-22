@@ -17,10 +17,6 @@
 if (!isServer) exitWith {[0, 0]};
 if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {[0, 0]};
 
-// sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
-private _keysFn   = compile "params ['_m']; keys _m";
-
 private _entries = missionNamespace getVariable ["civsub_v1_editorTestCivs", []];
 if !(_entries isEqualType []) exitWith {
     diag_log "[CIVSUB][EDITOR] civsub_v1_editorTestCivs is not an array; skipping editor registration";
@@ -105,9 +101,9 @@ private _skipped = 0;
 
     private _already = false;
     if !(_key isEqualTo "") then {
-        private _row = [_reg, _key, createHashMap] call _hg;
+        private _row = _reg getOrDefault [_key, createHashMap];
         if (_row isEqualType createHashMap) then {
-            private _existing = [_row, "unit", objNull] call _hg;
+            private _existing = _row getOrDefault ["unit", objNull];
             _already = (!isNull _existing) && { _existing isEqualTo _unit };
         };
     };
@@ -148,7 +144,7 @@ diag_log format ["[CIVSUB][EDITOR] Registration pass complete (registered=%1 ski
 private _finalRegistry = missionNamespace getVariable ["civsub_v1_civ_registry", createHashMap];
 private _finalKeys = [];
 if (_finalRegistry isEqualType createHashMap) then {
-    _finalKeys = [_finalRegistry] call _keysFn;
+    _finalKeys = keys _finalRegistry;
 };
 diag_log format ["[CIVSUB][EDITOR] Final registered unit keys: %1", _finalKeys];
 

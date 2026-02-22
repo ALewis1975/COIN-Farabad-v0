@@ -24,14 +24,9 @@ params [
 
 if (_districtId isEqualTo "") exitWith {createHashMap};
 
-// sqflint-compat helpers
-private _hg         = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
-private _keysFn   = compile "params ['_m']; keys _m";
-private _hmFrom   = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
-
 private _ids = missionNamespace getVariable ["civsub_v1_identities", createHashMap];
 // tolerate legacy array-of-pairs store
-if (_ids isEqualType []) then { _ids = [_ids] call _hmFrom; };
+if (_ids isEqualType []) then { _ids = createHashMapFromArray _ids; };
 if !(_ids isEqualType createHashMap) then { _ids = createHashMap; };
 
 if (_civUid isEqualTo "") then {
@@ -41,10 +36,10 @@ if (_civUid isEqualTo "") then {
     _civUid = _tmpUid;
 };
 
-private _rec = [_ids, _civUid, createHashMap] call _hg;
+private _rec = _ids getOrDefault [_civUid, createHashMap];
 if !(_rec isEqualType createHashMap) then { _rec = createHashMap; };
 
-if ((count ([_rec] call _keysFn)) == 0) then {
+if ((count (keys _rec)) == 0) then {
     private _tmpRec = createHashMap;
     private _nilRec = isNil { _tmpRec = [_civUid, _districtId, _homePos] call ARC_fnc_civsubIdentityGenerateProfile; };
     if (_nilRec || {!(_tmpRec isEqualType createHashMap)} || {(count _tmpRec) == 0}) exitWith { createHashMap };
@@ -53,14 +48,14 @@ if ((count ([_rec] call _keysFn)) == 0) then {
 
 // Update seen_by ledger
 if !(_actorUid isEqualTo "") then {
-    private _seen = [_rec, "seen_by", createHashMap] call _hg;
+    private _seen = _rec getOrDefault ["seen_by", createHashMap];
     if !(_seen isEqualType createHashMap) then { _seen = createHashMap; };
 
-    private _row = [_seen, _actorUid, [serverTime, serverTime, 0] call _hg]; // [first, last, count]
+    private _row = _seen getOrDefault [_actorUid, [serverTime, serverTime, 0]]; // [first, last, count]
     if !(_row isEqualType []) then { _row = [serverTime, serverTime, 0]; };
 
     _row set [1, serverTime];
-    _row set [2, (_row select 2) + 1];
+    _row set [2, (_row # 2) + 1];
     _seen set [_actorUid, _row];
     _rec set ["seen_by", _seen];
 };

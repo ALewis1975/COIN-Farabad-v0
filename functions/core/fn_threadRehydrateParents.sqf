@@ -22,11 +22,11 @@ private _changed = false;
     private _thr = [_x] call ARC_fnc_threadNormalizeRecord;
     if (_thr isEqualTo []) then { continue; };
 
-    private _id = _thr select 0;
-    private _type = _thr select 1;
-    private _zone = _thr select 2;
-    private _base = _thr select 3;
-    private _districtId = _thr select 14;
+    private _id = _thr # 0;
+    private _type = _thr # 1;
+    private _zone = _thr # 2;
+    private _base = _thr # 3;
+    private _districtId = _thr # 14;
     if (_districtId isEqualTo "") then
     {
         _districtId = [_base] call ARC_fnc_threadResolveDistrictId;
@@ -36,7 +36,7 @@ private _changed = false;
     };
 
     private _parent = [_id, _type, _zone, _base] call ARC_fnc_taskEnsureThreadParent;
-    if (!(_parent isEqualTo "") && { !((_thr select 13) isEqualTo _parent) }) then
+    if (_parent isNotEqualTo "" && { (_thr # 13) isNotEqualTo _parent }) then
     {
         _thr set [13, _parent];
         _threads set [_forEachIndex, _thr];

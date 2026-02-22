@@ -17,9 +17,6 @@ if (!hasInterface) exitWith {false};
 
 if (!canSuspend) exitWith { _this spawn ARC_fnc_clientSendSitrep; false };
 
-// sqflint-compat helpers
-private _trimFn     = compile "params ['_s']; trim _s";
-
 // Fail-safe: ensure role helper functions exist even if CfgFunctions.hpp was not updated.
 if (isNil "ARC_fnc_rolesIsAuthorized") then { ARC_fnc_rolesIsAuthorized = compile preprocessFileLineNumbers "functions\\core\\fn_rolesIsAuthorized.sqf"; };
 
@@ -54,7 +51,7 @@ if (missionNamespace getVariable ["ARC_activeIncidentSitrepSent", false]) exitWi
 // NOTE: IED incidents are allowed to submit earlier because TOC disposition/approval may be required
 // before the incident reaches close-ready state. This mirrors server-side validation in
 // ARC_fnc_tocReceiveSitrep and keeps client/server gating consistent.
-private _iTypU = missionNamespace getVariable ["ARC_activeIncidentType", ""]; if (!(_iTypU isEqualType "")) then { _iTypU = ""; }; _iTypU = toUpper ([_iTypU] call _trimFn);
+private _iTypU = missionNamespace getVariable ["ARC_activeIncidentType", ""]; if (!(_iTypU isEqualType "")) then { _iTypU = ""; }; _iTypU = toUpper (trim _iTypU);
 private _closeReady = missionNamespace getVariable ["ARC_activeIncidentCloseReady", false];
 if (!(_closeReady isEqualType true) && !(_closeReady isEqualType false)) then { _closeReady = false; };
 
@@ -73,7 +70,7 @@ private _recordClientGate = {
     };
 };
 
-if (!_updateOnly && { !_closeReady } && { !(_iTypU isEqualTo "IED") }) exitWith
+if (!_updateOnly && { !_closeReady } && { _iTypU isNotEqualTo "IED" }) exitWith
 {
     ["NOT_CLOSE_READY", _iTypU, _closeReady, _updateOnly] call _recordClientGate;
     ["SITREP unavailable: incident still in progress. Complete the objective or wait for the incident timer to expire.", "WARN", "TOAST"] call ARC_fnc_clientHint;
@@ -135,7 +132,7 @@ if (!(_res isEqualType []) || { (count _res) < 10 }) exitWith {false};
 _res params ["_ok", "_sum", "_enemy", "_friendly", "_task", "_aceAmmo", "_aceCas", "_aceEq", "_req", "_notes"];
 if (!_ok) exitWith {false};
 
-_sum = [_sum] call _trimFn;
+_sum = trim _sum;
 if (_sum isEqualTo "") then { _sum = _defaultSummary; };
 
 private _gid = groupId group player;
@@ -145,13 +142,13 @@ private _from = if (_gid isEqualTo "") then { name player } else { format ["%1 (
 private _detLines = [];
 _detLines pushBack format ["FROM: %1", _from];
 _detLines pushBack format ["LOCATION: %1", _grid];
-if (!(_recU isEqualTo "")) then { _detLines pushBack format ["RECOMMEND: %1", _recU]; };
+if (_recU isNotEqualTo "") then { _detLines pushBack format ["RECOMMEND: %1", _recU]; };
 
-_detLines pushBack format ["ENEMY: %1", if ([_enemy] call _trimFn isEqualTo "") then {"N/A"} else {[_enemy] call _trimFn}];
-_detLines pushBack format ["FRIENDLY: %1", if ([_friendly] call _trimFn isEqualTo "") then {"N/A"} else {[_friendly] call _trimFn}];
+_detLines pushBack format ["ENEMY: %1", if (trim _enemy isEqualTo "") then {"N/A"} else {trim _enemy}];
+_detLines pushBack format ["FRIENDLY: %1", if (trim _friendly isEqualTo "") then {"N/A"} else {trim _friendly}];
 
 	// IED/EOD integration: include basic disposition status in SITREP details (informational only).
-	private _typeU2 = toUpper ([_type] call _trimFn);
+	private _typeU2 = toUpper (trim _type);
 	if (_typeU2 isEqualTo "IED") then
 	{
 		private _eod = "PENDING";
@@ -165,10 +162,10 @@ _detLines pushBack format ["FRIENDLY: %1", if ([_friendly] call _trimFn isEqualT
 
 		_detLines pushBack format ["EOD: %1", _eod];
 	};
-_detLines pushBack format ["TASK: %1", if ([_task] call _trimFn isEqualTo "") then {"N/A"} else {[_task] call _trimFn}];
+_detLines pushBack format ["TASK: %1", if (trim _task isEqualTo "") then {"N/A"} else {trim _task}];
 _detLines pushBack format ["ACE: AMMO=%1 | CAS=%2 | EQUIP=%3", _aceAmmo, _aceCas, _aceEq];
-_detLines pushBack format ["REQUESTS: %1", if ([_req] call _trimFn isEqualTo "") then {"N/A"} else {[_req] call _trimFn}];
-if (!([_notes] call _trimFn isEqualTo "")) then { _detLines pushBack format ["NOTES: %1", [_notes] call _trimFn]; };
+_detLines pushBack format ["REQUESTS: %1", if (trim _req isEqualTo "") then {"N/A"} else {trim _req}];
+if (trim _notes isNotEqualTo "") then { _detLines pushBack format ["NOTES: %1", trim _notes]; };
 
 private _det = _detLines joinString "\n";
 
@@ -227,15 +224,15 @@ if (!_updateOnly) then
         };
         if (_okFo) then
         {
-            if (_r isEqualType "") then { _foReq = toUpper ([_r] call _trimFn); };
-            if (_p isEqualType "") then { _foPurpose = toUpper ([_p] call _trimFn); };
-            if (_rat isEqualType "") then { _foRationale = [_rat] call _trimFn; };
-            if (_con isEqualType "") then { _foConstraints = [_con] call _trimFn; };
-            if (_sup isEqualType "") then { _foSupport = [_sup] call _trimFn; };
-            if (_n isEqualType "") then { _foNotes = [_n] call _trimFn; };
-            if (_hIntent isEqualType "") then { _foHoldIntent = [_hIntent] call _trimFn; };
+            if (_r isEqualType "") then { _foReq = toUpper (trim _r); };
+            if (_p isEqualType "") then { _foPurpose = toUpper (trim _p); };
+            if (_rat isEqualType "") then { _foRationale = trim _rat; };
+            if (_con isEqualType "") then { _foConstraints = trim _con; };
+            if (_sup isEqualType "") then { _foSupport = trim _sup; };
+            if (_n isEqualType "") then { _foNotes = trim _n; };
+            if (_hIntent isEqualType "") then { _foHoldIntent = trim _hIntent; };
             if (_hMin isEqualType 0) then { _foHoldMinutes = _hMin; };
-            if (_pIntent isEqualType "") then { _foProceedIntent = [_pIntent] call _trimFn; };
+            if (_pIntent isEqualType "") then { _foProceedIntent = trim _pIntent; };
         };
     };
 };
