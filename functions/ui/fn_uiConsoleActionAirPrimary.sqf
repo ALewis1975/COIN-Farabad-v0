@@ -22,7 +22,8 @@ private _parts = _data splitString "|";
 private _rowType = if ((count _parts) > 0) then { _parts select 0 } else { "" };
 
 private _airMode = ["ARC_console_airMode", "TOWER"] call ARC_fnc_uiNsGetString;
-_airMode = toUpperANSI (trim _airMode);
+_airMode = toUpper _airMode;
+_airMode = (_airMode splitString " ") joinString "";
 
 if (_airMode isEqualTo "PILOT") exitWith {
     private _canAirPilot = ["ARC_console_airCanPilot", false] call ARC_fnc_uiNsGetBool;
@@ -118,7 +119,7 @@ switch (_rowType) do
         };
 
         [_lane, true] call ARC_fnc_airbaseClientRequestSetLaneStaffing;
-        ["AIR", format ["Claim request sent for %1 lane.", toUpperANSI _lane]] call ARC_fnc_clientToast;
+        ["AIR", format ["Claim request sent for %1 lane.", toUpper _lane]] call ARC_fnc_clientToast;
     };
 
     case "FLT":
