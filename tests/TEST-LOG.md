@@ -795,3 +795,26 @@ git diff --check
 - `git diff --check` passed (no whitespace/patch-format issues).
 - `sqflint` path is unavailable in this container (`/root/.local/bin/sqflint: No such file or directory`).
 - Runtime validation remains BLOCKED in container (no Arma local MP/dedicated server runtime); follow-up owner: mission systems maintainer on dedicated-server validation pass.
+
+## 2026-02-22 06:18 UTC — company-command static QA planning + dedicated-server deferral
+
+**Branch/Commit:** copilot/<pending> @ pending
+
+**Scenario:** Documentation/static-review pass for company-command acceptance criteria and verification plan, with dedicated-server-only checks explicitly deferred.
+
+**Commands:**
+```bash
+rg -n "ARC_fnc_stateLoad|ARC_fnc_companyCommandInit|ARC_fnc_companyCommandTick|ARC_fnc_companyCommandVirtualOpsTick|ARC_fnc_publicBroadcastState|ARC_fnc_incidentLoop" functions/core/fn_bootstrapServer.sqf
+rg -n "if \(!isServer\) exitWith|ARC_pub_state|ARC_pub_stateUpdatedAt|ARC_pub_companyCommand|ARC_pub_companyCommandUpdatedAt" functions/core/fn_statePublishPublic.sqf functions/core/fn_publicBroadcastState.sqf
+rg -n "COMPANY_ALPHA|COMPANY_BRAVO|REDFALCON 2|REDFALCON 3|Alpha Commander|Bravo Commander" functions/core/fn_companyCommandInit.sqf
+rg -n "PLAYER_SUPPORT|INDEPENDENT_SHAPING|QRF_STANDBY|deconflict|playerTaskActive|districtRisk|threadPressure" functions/core/fn_companyCommandVirtualOpsTick.sqf
+rg -n "ARC_pub_state|ARC_pub_stateUpdatedAt|ARC_pub_companyCommandUpdatedAt|addPublicVariableEventHandler|JIP" initPlayerLocal.sqf
+```
+
+**Result:** BLOCKED
+
+**Notes:**
+- Static verification confirms required symbols/paths exist for single-writer state flow, Alpha/Bravo command model, balancing logic, and JIP snapshot watchers.
+- Dedicated server execution remains unavailable in this container, so persistence/JIP/reconnect authority checks are deferred.
+- Waiver owner: Mission systems maintainer (next dedicated-server validation pass).
+- Tracking reference: this test-log entry + companion plan `docs/qa/Company_Command_Dedicated_Server_Static_QA_Plan.md`.
