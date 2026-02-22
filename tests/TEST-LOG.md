@@ -813,3 +813,22 @@ rg -n "stableVirtualUnitId|virtual:%1" functions/core/fn_s1RegistryInit.sqf func
 **Notes:**
 - Static check passed and confirms deterministic virtual-ID path is present in init while legacy fallback remains in upsert for non-group virtual writes.
 - Runtime validation remains BLOCKED in this environment (Arma local MP/dedicated server unavailable); dedicated-server restart/rehydration validation required before merge.
+
+## 2026-02-22 00:00 UTC — S-1 virtual unitId patch guard for empty groupId
+
+**Branch/Commit:** current branch @ pending
+
+**Scenario:** Prevent empty `groupId` bootstrap from replaying an empty `unitId` patch during S-1 registry initialization; keep fallback ID generation authoritative in upsert path.
+
+**Commands:**
+```
+git diff --check
+rg -n "_virtualPatch|stableGroupId|virtual:%1" functions/core/fn_s1RegistryInit.sqf
+```
+
+**Result:** PASS
+
+**Notes:**
+- `fn_s1RegistryInit.sqf` now only sends `unitId` in the patch when a stable `groupId` exists; empty `groupId` cases send `virtualStatus` only, avoiding overwrite of fallback-generated IDs.
+- Runtime validation (`Local MP`/`Dedicated server`) remains BLOCKED in this container due to missing Arma runtime; follow-up owner: PR #326 assignee/reviewer on in-engine environment.
+- JIP/late-client status: deferred to dedicated-server validation checklist for PR #326.
