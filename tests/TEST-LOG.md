@@ -754,3 +754,21 @@ rg -n "companyVirtualOps|companyCommandVirtualOpsTick|ARC_companyVirtualOps" fun
 - JIP/late-client status: BLOCKED pending dedicated server validation of replicated `ARC_pub_state.companyVirtualOps` updates.
 - Waiver owner: Mission Systems (S3 Integration).
 - Tracking reference: PR for this commit (`company virtual ops scheduler`) — complete runtime closeout before merge.
+
+## 2026-02-22 05:05 UTC — virtual ops district-risk ID source correction
+
+**Branch/Commit:** <current branch> @ pending
+
+**Scenario:** Corrected virtual-op district risk/thread pressure matching to use CIVSUB district IDs resolved from node position instead of world-zone IDs.
+
+**Commands:**
+```
+git --no-pager diff --check
+rg -n "_nodeDistrictId|civsubDistrictsFindByPos|civsubDistrictsGetById|_did isNotEqualTo _nodeDistrictId" functions/core/fn_companyCommandVirtualOpsTick.sqf
+```
+
+**Result:** PASS (static), BLOCKED (runtime)
+
+**Notes:**
+- Static checks confirm district-risk lookup now keys by district ID (`Dxx`) and thread pressure comparison uses normalized thread district ID slot.
+- Runtime validation (`Local MP` / `Hosted MP` / `Dedicated server`) remains BLOCKED in this container because Arma runtime is unavailable.
