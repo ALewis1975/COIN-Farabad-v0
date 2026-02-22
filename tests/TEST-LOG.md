@@ -1006,3 +1006,23 @@ git --no-pager diff --check
 - Added startup INFO log confirming reset state for this run.
 - Summary function remains unchanged and now reports current-run totals because counters are reset before assertions execute.
 - Runtime/dedicated validation remains BLOCKED in container-only static environment.
+
+## 2026-02-22 20:24 UTC — test-log placeholder guard dependency fail-fast
+
+**Branch/Commit:** current branch @ a3c8291
+
+**Scenario:** Verified `scripts/dev/check_test_log_commits.sh` fails fast when ripgrep is unavailable, preventing false PASS outcomes from conditional command-not-found behavior.
+
+**Commands:**
+```bash
+bash scripts/dev/check_test_log_commits.sh
+git --no-pager diff --check
+PATH=/nonexistent /usr/bin/bash scripts/dev/check_test_log_commits.sh
+```
+
+**Result:** PASS
+
+**Notes:**
+- Baseline run passes with no pending placeholders detected in `tests/TEST-LOG.md`.
+- `PATH=/nonexistent` simulation returns explicit dependency error and exit code 2 (`ripgrep (rg) is required...`), confirming fail-closed behavior.
+- Dedicated server/runtime gameplay validation remains BLOCKED in this container; this pass is static/tooling-only.
