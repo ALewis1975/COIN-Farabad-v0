@@ -93,20 +93,21 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
     missionNamespace setVariable ["ARC_clientSnapshotWatcherRunning", true];
 
     [] spawn {
+        // Single refresh contract: keep TOC + briefing parity when any client snapshot signal changes.
+        private _refreshClientSnapshotView = {
+            [] call ARC_fnc_briefingUpdateClient;
+            if (!isNil "ARC_fnc_tocRefreshClient") then { [] call ARC_fnc_tocRefreshClient; };
+            uiNamespace setVariable ["ARC_console_dirty", true];
+        };
+
         // Wait for server readiness gate + first snapshot
         waitUntil {
             (missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false]) &&
             { !isNil { missionNamespace getVariable "ARC_pub_state" } }
         };
 
-        private _refresh = {
-            [] call ARC_fnc_briefingUpdateClient;
-            if (!isNil "ARC_fnc_tocRefreshClient") then { [] call ARC_fnc_tocRefreshClient; };
-            uiNamespace setVariable ["ARC_console_dirty", true];
-        };
-
         // Initial refresh for JIP
-        call _refresh;
+        call _refreshClientSnapshotView;
 
         private _lastState = missionNamespace getVariable ["ARC_pub_stateUpdatedAt", -1];
         private _lastS1 = missionNamespace getVariable ["ARC_pub_s1_registryUpdatedAt", -1];
@@ -120,7 +121,7 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
             missionNamespace setVariable ["ARC_clientSnapshotPvEhId", "ARC_pub_stateUpdatedAt" addPublicVariableEventHandler {
                 private _refreshEnabled = missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false];
                 // Race-avoidance contract: PV event handlers must only run refresh after client readiness gate is lifted.
-                if (_refreshEnabled) then { [] call ARC_fnc_briefingUpdateClient; if (!isNil "ARC_fnc_tocRefreshClient") then { [] call ARC_fnc_tocRefreshClient; }; uiNamespace setVariable ["ARC_console_dirty", true]; };
+                if (_refreshEnabled) then { call _refreshClientSnapshotView; };
             }];
         };
 
@@ -129,7 +130,7 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
         {
             missionNamespace setVariable ["ARC_clientS1SnapshotPvEhId", "ARC_pub_s1_registryUpdatedAt" addPublicVariableEventHandler {
                 private _refreshEnabled = missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false];
-                if (_refreshEnabled) then { [] call ARC_fnc_briefingUpdateClient; if (!isNil "ARC_fnc_tocRefreshClient") then { [] call ARC_fnc_tocRefreshClient; }; uiNamespace setVariable ["ARC_console_dirty", true]; };
+                if (_refreshEnabled) then { call _refreshClientSnapshotView; };
             }];
         };
 
@@ -138,7 +139,7 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
         {
             missionNamespace setVariable ["ARC_clientCompanySnapshotPvEhId", "ARC_pub_companyCommandUpdatedAt" addPublicVariableEventHandler {
                 private _refreshEnabled = missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false];
-                if (_refreshEnabled) then { [] call ARC_fnc_briefingUpdateClient; if (!isNil "ARC_fnc_tocRefreshClient") then { [] call ARC_fnc_tocRefreshClient; }; uiNamespace setVariable ["ARC_console_dirty", true]; };
+                if (_refreshEnabled) then { call _refreshClientSnapshotView; };
             }];
         };
 
@@ -152,7 +153,7 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
             {
                 _lastState = missionNamespace getVariable ["ARC_pub_stateUpdatedAt", _lastState];
                 _stateFallbackRefreshed = true;
-                call _refresh;
+                call _refreshClientSnapshotView;
             };
 
             private _nowState = missionNamespace getVariable ["ARC_pub_stateUpdatedAt", _lastState];
@@ -164,7 +165,7 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
             if (_nowS1 isEqualType 0 && { _nowS1 != _lastS1 }) then { _lastS1 = _nowS1; _changed = true; };
             if (_nowCompany isEqualType 0 && { _nowCompany != _lastCompany }) then { _lastCompany = _nowCompany; _changed = true; };
 
-            if (_changed) then { call _refresh; };
+            if (_changed) then { call _refreshClientSnapshotView; };
         };
     };
 };
