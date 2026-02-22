@@ -984,3 +984,23 @@ git --no-pager diff --check
 - JIP / late-client status: Not validated in this pass; follow-up required on dedicated server.
 - Waiver owner: mission maintainers on current feature branch.
 - Tracking reference: this PR validation section + this `tests/TEST-LOG.md` entry.
+
+## 2026-02-22 19:37 UTC — deterministic test counter reset in run_all
+
+**Branch/Commit:** current branch @ pending
+
+**Scenario:** Updated `tests/run_all.sqf` bootstrap so `ARC_TEST_pass`/`ARC_TEST_fail` reset on every invocation while preserving helper-function memoization behind existing `isNil` guards.
+
+**Commands:**
+```bash
+git --no-pager diff -- tests/run_all.sqf
+git --no-pager diff --check
+```
+
+**Result:** PASS
+
+**Notes:**
+- Counter reset is now unconditional at startup (`ARC_TEST_pass = 0; ARC_TEST_fail = 0;`) to avoid cross-run accumulation.
+- Added startup INFO log confirming reset state for this run.
+- Summary function remains unchanged and now reports current-run totals because counters are reset before assertions execute.
+- Runtime/dedicated validation remains BLOCKED in container-only static environment.

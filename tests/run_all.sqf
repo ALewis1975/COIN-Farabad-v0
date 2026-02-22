@@ -13,8 +13,8 @@
 */
 
 // ---- Minimal testlib (inlined) ----
-if (isNil "ARC_TEST_pass") then { ARC_TEST_pass = 0; };
-if (isNil "ARC_TEST_fail") then { ARC_TEST_fail = 0; };
+ARC_TEST_pass = 0;
+ARC_TEST_fail = 0;
 
 if (isNil "ARC_TEST_fnc_log") then {
   ARC_TEST_fnc_log = {
@@ -219,6 +219,7 @@ if (isNil "ARC_TEST_fnc_assertType") then {
 waitUntil { !isNil "ARC_TEST_fnc_log" };
 
 private _t0 = diag_tickTime;
+["INFO", "RUN", "Reset test counters for deterministic run", ["pass", ARC_TEST_pass, "fail", ARC_TEST_fail]] call ARC_TEST_fnc_log;
 ["INFO", "RUN", "Starting ARC test runner", ["isServer", isServer, "isDedicated", isDedicated, "clientOwner", clientOwner]] call ARC_TEST_fnc_log;
 
 /*
