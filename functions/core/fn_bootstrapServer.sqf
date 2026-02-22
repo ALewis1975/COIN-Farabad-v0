@@ -799,6 +799,10 @@ missionNamespace setVariable ["ARC_activeConvoyNetIds", ["activeConvoyNetIds", [
 // Intel layer init (TOC queue, orders, metrics sampling)
 [] call ARC_fnc_intelInit;
 
+// Company command model (server-owned Alpha/Bravo leadership nodes)
+[] call ARC_fnc_companyCommandInit;
+[] call ARC_fnc_companyCommandTick;
+
 // Publish initial snapshots for clients (JIP-safe)
 [] call ARC_fnc_publicBroadcastState;
 [] call ARC_fnc_intelBroadcast;
