@@ -672,3 +672,24 @@ python3 scripts/dev/sqflint_compat_scan.py --strict $(git diff --name-only HEAD 
 **JIP / late-client:** Not applicable (syntax fixes only; no replicated state logic changed).
 - 2026-02-22T02:05Z | commit: <pending> | branch: work | Scenario: PR #306 follow-up bugfixes for CIVSUB delta fallback and airbase parked asset start position restoration | Result: PASS | Notes: Fixed three P1 regressions by removing accidental nested `call _hg` in `fn_civsubDeltaApplyToDistrict.sqf` and `fn_civsubBundleMake.sqf`, and restoring helper lookups for `startPos`/`startVecUp`/`crewTemplates` in `fn_airbaseRestoreParkedAsset.sqf`. Validation: `git diff --check` PASS; `python3 scripts/dev/validate_state_migrations.py` PASS (`State migration validation passed (3 scenarios).`); `scripts/dev/check_console_conflicts.sh` and `scripts/dev/check_remoteexec_contract.sh` BLOCKED (scripts not present in current repo snapshot).
 - 2026-02-22T02:32Z | commit: <pending> | branch: work | Scenario: CIVSUB console result delivery hardening for S2 Check ID/Background actions (`git --no-pager diff --check` and `rg -n "_hmToPairs|remoteExecCall \[\"ARC_fnc_civsubContactClientReceiveResult\"" functions/civsub/fn_civsubContactReqAction.sqf`) | Result: PASS | Notes: Converted CIVSUB action result envelopes to array-pairs before `remoteExecCall` so client-side `ARC_fnc_civsubContactClientReceiveResult` can reliably deserialize results on dedicated/MP, preventing stale "requested..." state when HashMap transport is not preserved.
+
+## 2026-02-22 UTC — mission-root lifecycle starter hooks (join/respawn/killed)
+
+**Branch/Commit:** <pending> @ <pending>
+
+**Scenario:** Added minimal mission-root lifecycle hooks (`initPlayerServer.sqf`, `onPlayerRespawn.sqf`, `onPlayerKilled.sqf`) with no-op-safe guards and ARC logging-only behavior.
+
+**Commands:**
+```
+git --no-pager diff --check
+```
+
+**Result:** BLOCKED
+
+**Notes:**
+- Static check passed (`git diff --check` clean).
+- Runtime scenario required for behavior-changing lifecycle hooks is currently unavailable in container.
+- Waiver reason: no Arma local MP/dedicated environment in this CI/container.
+- Follow-up owner: mission maintainers.
+- Tracking reference: this PR (runtime validation to be completed before merge).
+- Expected runtime validation matrix: Local MP respawn/death cycle + Dedicated server join/JIP verification.
