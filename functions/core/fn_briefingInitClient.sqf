@@ -32,6 +32,7 @@ private _ensureSubject = {
 ["ARC_OPS", "OPS"] call _ensureSubject;
 ["ARC_INTEL", "INTEL"] call _ensureSubject;
 ["ARC_SITREP", "SITREP"] call _ensureSubject;
+["ARC_S1", "S-1"] call _ensureSubject;
 
 // Ensure records exist (store handles so update can set text).
 private _ensureRecord = {
@@ -50,6 +51,7 @@ private _ensureRecord = {
 ["ARC_diary_rec_ops", "ARC_OPS", "OPS Dashboard", "Initializing..."] call _ensureRecord;
 ["ARC_diary_rec_intel", "ARC_INTEL", "Intel Feed", "Initializing..."] call _ensureRecord;
 ["ARC_diary_rec_sitrep", "ARC_SITREP", "SITREP", "Initializing..."] call _ensureRecord;
+["ARC_diary_rec_s1", "ARC_S1", "Personnel Snapshot", "Initializing..."] call _ensureRecord;
 ["ARC_diary_rec_opord", "Diary", "OPORD", "Initializing..."] call _ensureRecord;
 ["ARC_diary_rec_orbat", "Diary", "ORBAT", "Initializing..."] call _ensureRecord;
 // SOI (Signal Operating Instructions) integrated into the same Diary schema as OPORD/ORBAT.

@@ -139,6 +139,15 @@ private _isBnCmd = false;
 
 private _canHQ = _isOmni || _isCmd || _isTocS3 || _isBnCmd;
 
+// S-1 (personnel) access mirrors HQ-style token/command controls.
+private _s1Tokens = missionNamespace getVariable ["ARC_consoleS1Tokens", _hqTokens];
+if (!(_s1Tokens isEqualType [])) then { _s1Tokens = _hqTokens; };
+private _isS1Token = false;
+{
+    if (_x isEqualType "" && { [player, _x] call ARC_fnc_rolesHasGroupIdToken }) exitWith { _isS1Token = true; };
+} forEach _s1Tokens;
+private _canS1 = _isOmni || _isCmd || _isTocS3 || _isS1Token;
+
 // Operations tab access: field leadership + TOC staff
 private _canOps = _isOmni || _isCmd || _isTocS3 || _isAuth;
 
@@ -245,6 +254,12 @@ if (_canHQ) then
 {
     _tabIds pushBack "HQ";
     _ctrlTabs lbAdd "HQ / ADMIN";
+};
+
+if (_canS1) then
+{
+    _tabIds pushBack "S1";
+    _ctrlTabs lbAdd "S1 / PERSONNEL";
 };
 
 uiNamespace setVariable ["ARC_console_tabIds", _tabIds];

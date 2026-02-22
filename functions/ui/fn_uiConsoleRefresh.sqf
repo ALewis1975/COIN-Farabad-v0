@@ -11,6 +11,7 @@
       HANDOFF   - Handoff (Intel/EPW)
       CMD       - Command (TOC)
       HQ        - Headquarters (Admin)
+      S1        - Personnel registry (S-1)
 
     Params:
       0: DISPLAY (optional; falls back to uiNamespace stored display)
@@ -337,6 +338,22 @@ case "DASH":
 
             [_display] call ARC_fnc_uiConsoleCommandPaint;
         };
+    };
+
+
+    case "S1":
+    {
+        // Read-only list/details layout
+        if (!isNull _ctrlMainGrp) then { _ctrlMainGrp ctrlShow false; };
+        if (!isNull _ctrlMain) then { _ctrlMain ctrlShow true; };
+        if (!isNull _ctrlList) then { _ctrlList ctrlShow true; };
+        if (!isNull _ctrlDetailsGrp) then { _ctrlDetailsGrp ctrlShow true; };
+        if (!isNull _ctrlDetails) then { _ctrlDetails ctrlShow true; };
+
+        if (!isNull _b1) then { _b1 ctrlShow true; _b1 ctrlEnable true; _b1 ctrlSetText "REFRESH"; };
+        if (!isNull _b2) then { _b2 ctrlShow true; _b2 ctrlEnable false; _b2 ctrlSetText "READ-ONLY"; };
+
+        [_display] call ARC_fnc_uiConsoleS1Paint;
     };
 
     case "HQ":
