@@ -223,3 +223,7 @@ jobs:
       - name: Marker index generator static validation (rg-on + fallback modes)
         run: |
           python3 scripts/dev/validate_marker_index.py
+
+      - name: AIRBASE planning-mode static validation
+        run: |
+          tests/static/airbase_planning_mode_checks.sh

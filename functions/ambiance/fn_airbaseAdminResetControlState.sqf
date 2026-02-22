@@ -11,6 +11,7 @@
 */
 
 if (!isServer) exitWith {false};
+private _runtimeEnabled = ["airbaseAdminResetControlState"] call ARC_fnc_airbaseRuntimeEnabled;
 
 params [
     ["_preserveHistory", true, [true]],
@@ -73,6 +74,7 @@ if (_ops || _dbgOps) then {
         ["event", "AIRBASE_CONTROL_RESET"],
         ["actor", _actorName],
         ["actorUid", _actorUid],
+        ["runtimeEnabled", _runtimeEnabled],
         ["preserveHistory", _preserveHistory],
         ["pendingRequestsCleared", _pendingBefore],
         ["queueCleared", _queueBefore],

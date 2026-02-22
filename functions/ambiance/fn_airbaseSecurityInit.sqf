@@ -9,6 +9,7 @@
 */
 
 if (!isServer) exitWith {false};
+if !(["airbaseSecurityInit"] call ARC_fnc_airbaseRuntimeEnabled) exitWith {false};
 
 if (missionNamespace getVariable ["airbase_v1_security_inited", false]) exitWith {true};
 missionNamespace setVariable ["airbase_v1_security_inited", true];

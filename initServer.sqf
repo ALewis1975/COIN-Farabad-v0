@@ -340,6 +340,7 @@ missionNamespace setVariable ["ARC_vbiedTelegraphIntelLog", true, true];
 // VBIED scaffolding (object-first)
 missionNamespace setVariable ["ARC_vbiedScaffoldEnabled", true, true];
 missionNamespace setVariable ["airbase_v1_ambiance_enabled", true, true];
+missionNamespace setVariable ["airbase_v1_runtime_enabled", false, true];
 
 if (_arcSafeModeEnabled) then {
     missionNamespace setVariable ["civsub_v1_traffic_enabled", false, true];
@@ -347,6 +348,7 @@ if (_arcSafeModeEnabled) then {
     missionNamespace setVariable ["ARC_vbiedPhase3_enabled", false, true];
     missionNamespace setVariable ["ARC_vbiedScaffoldEnabled", false, true];
     missionNamespace setVariable ["airbase_v1_ambiance_enabled", false, true];
+    missionNamespace setVariable ["airbase_v1_runtime_enabled", false, true];
 };
 
 // VBIED defuse window (Phase 3.1)
@@ -909,14 +911,16 @@ missionNamespace setVariable ["ARC_operatorToggleAuditCatalog", [
     ["Airbase", [
         ["airbase_v1_tower_allowBnCmd", "bool"],
         ["airbase_v1_tower_authDebug", "bool"],
-        ["airbase_v1_ambiance_enabled", "bool"]
+        ["airbase_v1_ambiance_enabled", "bool"],
+        ["airbase_v1_runtime_enabled", "bool"]
     ]],
     ["SafeMode", [
         ["ARC_safeModeEnabled", "bool"],
         ["civsub_v1_traffic_enabled", "bool"],
         ["ARC_iedPhase1_siteSelectionEnabled", "bool"],
         ["ARC_vbiedPhase3_enabled", "bool"],
-        ["airbase_v1_ambiance_enabled", "bool"]
+        ["airbase_v1_ambiance_enabled", "bool"],
+        ["airbase_v1_runtime_enabled", "bool"]
     ]],
     ["WorldTime", [
         ["ARC_worldTime_enabled", "bool"],
@@ -950,7 +954,8 @@ private _arcDeclaredServerToggles = [
     "ARC_worldTime_startDate",
     "ARC_worldTime_forceMultiplier",
     "ARC_worldTime_timeMultiplier",
-    "ARC_worldTime_broadcastIntervalSec"
+    "ARC_worldTime_broadcastIntervalSec",
+    "airbase_v1_runtime_enabled"
 ];
 
 private _arcKnownToggleConsumers = [
@@ -970,7 +975,8 @@ private _arcKnownToggleConsumers = [
     ["ARC_worldTime_startDate", "scripts/worldtime/worldtime_server.sqf"],
     ["ARC_worldTime_forceMultiplier", "scripts/worldtime/worldtime_server.sqf"],
     ["ARC_worldTime_timeMultiplier", "scripts/worldtime/worldtime_server.sqf"],
-    ["ARC_worldTime_broadcastIntervalSec", "scripts/worldtime/worldtime_server.sqf"]
+    ["ARC_worldTime_broadcastIntervalSec", "scripts/worldtime/worldtime_server.sqf"],
+    ["airbase_v1_runtime_enabled", "functions/ambiance/fn_airbaseRuntimeEnabled.sqf"]
 ];
 
 {

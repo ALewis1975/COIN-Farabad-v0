@@ -9,6 +9,26 @@ Append one dated entry per validation pass using:
 
 ---
 
+## 2026-02-22 00:00 UTC — AIRBASE planning-mode master runtime gate + static contract
+
+**Branch/Commit:** current branch @ pending
+
+**Scenario:** Added server-authoritative AIRBASE runtime gate defaulting to planning-only, wired runtime entrypoint early exits, documented activation scope, and added static guardrail script/workflow step.
+
+**Commands:**
+```
+bash tests/static/airbase_planning_mode_checks.sh
+python3 scripts/dev/validate_marker_index.py
+python3 scripts/dev/validate_state_migrations.py
+```
+
+**Result:** PASS
+
+**Notes:**
+- Runtime behavior remains intentionally dormant unless `airbase_v1_runtime_enabled` is explicitly enabled.
+- Dedicated-server/JIP runtime validation remains deferred per project constraints; this pass is static-contract focused.
+
+
 ## Runtime Validation Entry Convention (behavior-changing commit groups)
 
 For every behavior-changing SQF commit group (Mode A/B/D/I/J with runtime impact), add at least one **unique runtime validation entry** in this file.
@@ -881,3 +901,22 @@ rg -n "casreq_snapshot|ARC_console_casreqSnapshot|casreq_v1" functions/casreq fu
 - Waiver reason: container has no Arma runtime/dedicated server process.
 - Follow-up owner: AIR/CASREQ subsystem maintainer.
 - Tracking reference: PR notes rollback + dedicated validation checklist for this commit group.
+
+## 2026-02-22 17:40 UTC — AIRBASE control reset planning-mode recovery guard fix
+
+**Branch/Commit:** work @ pending
+
+**Scenario:** Ensure `ARC_fnc_airbaseAdminResetControlState` still performs control reset in planning-only mode (`airbase_v1_runtime_enabled=false`) so TOC/admin rollback remains available.
+
+**Commands:**
+```bash
+bash tests/static/airbase_planning_mode_checks.sh
+git diff --check
+```
+
+**Result:** PASS
+
+**Notes:**
+- Removed early runtime-gate exit from `fn_airbaseAdminResetControlState.sqf`; reset path now remains available while planning mode is enabled.
+- Added `runtimeEnabled` flag into the ops log payload for audit context when resets occur while runtime gate is disabled.
+- Runtime/dedicated validation remains BLOCKED in this container; static checks confirm gate contract still enforced for registered entry files.

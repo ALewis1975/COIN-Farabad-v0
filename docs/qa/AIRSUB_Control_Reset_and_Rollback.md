@@ -3,6 +3,12 @@
 ## Purpose
 Operational runbook for resetting AIRSUB control state and rolling back safely if needed.
 
+## Runtime Mode + Scope Declaration
+- **Default mode:** Planning-only (`airbase_v1_runtime_enabled=false`).
+- **Operational mode (explicit opt-in):** Set `airbase_v1_runtime_enabled=true` to allow AIRBASE scheduler/runtime entrypoints.
+- **Authoritative entrypoint scope:** `airbasePostInit`, `airbaseInit`, `airbaseTick`, and server RPC/runtime handlers in `functions/ambiance/fn_airbase*.sqf` that mutate or execute AIRBASE state.
+- **Static enforcement:** `tests/static/airbase_planning_mode_checks.sh` fails when planning-only defaults are broken or entrypoint gate checks are missing.
+
 ## Server Admin Reset Handler
 - RPC entrypoint: `ARC_fnc_tocRequestAirbaseResetControlState`
 - Server reset function: `ARC_fnc_airbaseAdminResetControlState`

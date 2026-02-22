@@ -7,6 +7,8 @@
 
 if (!isServer) exitWith {};
 
+if (!(["airbaseInit"] call ARC_fnc_airbaseRuntimeEnabled)) exitWith {false};
+
 private _debug = missionNamespace getVariable ["airbase_v1_debug", false];
 if (!(_debug isEqualType true) && !(_debug isEqualType false)) then { _debug = false; };
 missionNamespace setVariable ["airbase_v1_debug", _debug];

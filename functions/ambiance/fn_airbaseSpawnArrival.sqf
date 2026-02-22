@@ -7,6 +7,7 @@
 */
 
 if (!isServer) exitWith { false };
+if !(["airbaseSpawnArrival"] call ARC_fnc_airbaseRuntimeEnabled) exitWith {false};
 
 params ["_fid"];
 
