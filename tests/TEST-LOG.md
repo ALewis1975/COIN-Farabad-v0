@@ -776,3 +776,23 @@ rg -n "uiOpenS1Screen|uiConsoleS1Paint|ARC_S1|S1 / PERSONNEL|Open S-1 Screen" fu
 - Runtime validation remains BLOCKED in this environment (no Arma local MP/dedicated runtime for snapshot/JIP behavior).
 - Follow-up owner: mission maintainers during next local MP + dedicated validation pass.
 - Tracking ref: this PR.
+
+## 2026-02-22 00:00 UTC — S-1 repaint selection-loop fix
+
+**Branch/Commit:** work @ pending
+
+**Scenario:** Fixed S-1 roster repaint so list selection persists by groupId and suppresses self-triggered `onLBSelChanged` recursion when `lbSetCurSel` is applied during repaint.
+
+**Commands:**
+```
+git diff --check
+rg -n "ARC_console_s1SelectedGid|ARC_console_s1SuppressSelChanged" functions/ui/fn_uiConsoleS1Paint.sqf functions/ui/fn_uiConsoleMainListSelChanged.sqf
+```
+
+**Result:** PASS
+
+**Notes:**
+- Patch is whitespace-clean.
+- Static scan confirms selection persistence + repaint suppression guards are present in S-1 painter and list-selection handler.
+- Runtime validation remains BLOCKED in this container (no Arma local MP/dedicated runtime for UI event-loop behavior); follow-up owner: mission maintainers during local MP test pass.
+- Tracking ref: PR #323 follow-up (Codex review P1).

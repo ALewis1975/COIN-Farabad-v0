@@ -60,6 +60,19 @@ private _statusByGroup = createHashMap;
     };
 } forEach _statusRows;
 
+private _prevSelGid = "";
+private _prevSelIdx = lbCurSel _ctrlList;
+if (_prevSelIdx >= 0) then
+{
+    _prevSelGid = _ctrlList lbData _prevSelIdx;
+};
+if (!(_prevSelGid isEqualType "")) then { _prevSelGid = ""; };
+if (_prevSelGid isEqualTo "") then
+{
+    _prevSelGid = uiNamespace getVariable ["ARC_console_s1SelectedGid", ""];
+    if (!(_prevSelGid isEqualType "")) then { _prevSelGid = ""; };
+};
+
 lbClear _ctrlList;
 private _listRows = [];
 
@@ -97,15 +110,17 @@ if ((count _listRows) isEqualTo 0) then
 }
 else
 {
-    private _sel = lbCurSel _ctrlList;
+    private _sel = _listRows findIf { (_x # 0) isEqualTo _prevSelGid };
     if (_sel < 0) then { _sel = 0; };
-    if (_sel >= (count _listRows)) then { _sel = 0; };
+
+    uiNamespace setVariable ["ARC_console_s1SuppressSelChanged", true];
     _ctrlList lbSetCurSel _sel;
 };
 
 private _selIdx = lbCurSel _ctrlList;
 if (_selIdx < 0) then { _selIdx = 0; };
 private _selGid = _ctrlList lbData _selIdx;
+uiNamespace setVariable ["ARC_console_s1SelectedGid", _selGid];
 
 private _main = "<t size='1.15' color='#B89B6B' font='PuristaMedium'>S-1 / Personnel Registry</t><br/>";
 if (_updatedAt < 0 || { (count _groups) isEqualTo 0 }) then
