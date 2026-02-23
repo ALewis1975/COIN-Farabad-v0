@@ -26,7 +26,6 @@ params [
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k,_d]";
 
 if (_districtId isEqualTo "") exitWith {createHashMap};
-if (_civUid isEqualTo "") exitWith {createHashMap};
 
 private _ids = missionNamespace getVariable ["civsub_v1_identities", createHashMap];
 // tolerate legacy array-of-pairs store
