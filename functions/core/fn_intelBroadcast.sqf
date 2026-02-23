@@ -42,10 +42,12 @@ private _sanitizeMeta = {
     };
     private _out = [];
     {
+        private _k = "";
+        private _v;
         if !(_x isEqualType [] && { (count _x) >= 2 }) then {
             _truncated = true;
         } else {
-            private _k = _x # 0;
+            _k = _x # 0;
             if !(_k isEqualType "") then {
                 _truncated = true;
             } else {
@@ -53,7 +55,7 @@ private _sanitizeMeta = {
                 if (_k isEqualTo "") then {
                     _truncated = true;
                 } else {
-                    private _v = _x # 1;
+                    _v = _x # 1;
 
                     if (_v isEqualType "") then {
                         _v = trim _v;

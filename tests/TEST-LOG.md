@@ -12,6 +12,27 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 ---
 
 
+## 2026-02-23 03:09 UTC — intel meta sanitizer `_v` declaration hardening
+
+**Branch/Commit:** current branch @ 6ffd9fd0
+
+**Scenario:** Reworked `_sanitizeMeta` pair processing in `fn_intelBroadcast.sqf` so `_v` is explicitly declared in loop scope before type checks, removing the startup error signature `Undefined variable ... _v` (`fn_intelBroadcast.sqf` line 58).
+
+**Commands:**
+```
+git --no-pager diff --check
+~/.local/bin/sqflint -e w functions/core/fn_intelBroadcast.sqf
+```
+
+**Result:** BLOCKED
+
+**Notes:**
+- `git --no-pager diff --check`: PASS (no whitespace or patch-format issues).
+- `sqflint` command is BLOCKED in this container because `~/.local/bin/sqflint` is not installed (`No such file or directory`).
+- Static review confirms no accepted `_sanitizeMeta` path reaches `_out pushBack [_k, _v];` before `_v` assignment; no uninitialized `_v` path remains.
+- Dedicated server runtime verification remains deferred per repository constraints.
+
+
 ## 2026-02-22 18:18 UTC — snapshot fallback one-shot latch
 
 **Branch/Commit:** current branch @ 47e45b63
