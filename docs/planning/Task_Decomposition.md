@@ -16,7 +16,9 @@ Each task below is a **single PR-sized work package**. Tasks are grouped into ph
 
 ## Phase 1: Stabilize — Fix P0 Bugs + CI Blockers
 
-### Task 1.1 — Fix `isNil` Assignment Bug in `fn_civsubIdentityTouch.sqf`
+> **Status: ✅ COMPLETE** — All Phase 1 tasks delivered in PR branch `copilot/audit-sqf-mission-project`.
+
+### Task 1.1 — Fix `isNil` Assignment Bug in `fn_civsubIdentityTouch.sqf` ✅ DONE
 
 | Field | Value |
 |-------|-------|
@@ -39,13 +41,13 @@ private _nilRec = isNil { _tmpRec = [_civUid, _districtId, _homePos] call ARC_fn
 **Also in scope:** Line 33 has bare `createHashMapFromArray _ids` — wrap in compile helper for sqflint compat (or use `_hmCreate` pattern from other CIVSUB files).
 
 **Acceptance:**
-- [ ] CIVSUB identity records are created for new civilians (isNil returns false when function returns valid data)
-- [ ] `sqflint -e w` passes on the file
-- [ ] `sqflint_compat_scan.py --strict` passes on the file
+- [x] CIVSUB identity records are created for new civilians (isNil returns false when function returns valid data)
+- [x] `sqflint -e w` passes on the file
+- [x] `sqflint_compat_scan.py --strict` passes on the file
 
 ---
 
-### Task 1.2 — Replace `toUpperANSI` / `toLowerANSI` Across Codebase
+### Task 1.2 — Replace `toUpperANSI` / `toLowerANSI` Across Codebase ✅ DONE
 
 | Field | Value |
 |-------|-------|
@@ -80,19 +82,19 @@ private _nilRec = isNil { _tmpRec = [_civUid, _districtId, _homePos] call ARC_fn
 - `toLowerANSI` → `toLower`
 
 **Acceptance:**
-- [ ] Zero `toUpperANSI`/`toLowerANSI` occurrences remain in `functions/`
-- [ ] `sqflint -e w` passes on all 14 files
-- [ ] `sqflint_compat_scan.py --strict` passes on all 14 files
+- [x] Zero `toUpperANSI`/`toLowerANSI` occurrences remain in `functions/`
+- [x] `sqflint -e w` passes on all 14 files
+- [x] `sqflint_compat_scan.py --strict` passes on all 14 files
 
 ---
 
-### Task 1.3 — Replace `findIf` with `forEach` + `exitWith` Pattern
+### Task 1.3 — Replace `findIf` with `forEach` + `exitWith` Pattern ✅ DONE
 
 | Field | Value |
 |-------|-------|
 | **PR Mode** | C — Safe Refactor (no behavior change) |
 | **Severity** | P1 — Latent CI blocker |
-| **Files** | 55 files, ~110 occurrences |
+| **Files** | 59 files, 131 occurrences (verified count) |
 | **Est. Lines** | ~300+ changed (each `findIf` expands to ~3-5 lines) |
 
 **Problem:** `findIf` is not recognized by sqflint. Semantically equivalent to a `forEach` + `exitWith` loop returning `_forEachIndex`.
@@ -119,20 +121,20 @@ private _idx = -1;
 ```
 
 **Acceptance per sub-PR:**
-- [ ] Zero `findIf` occurrences in changed files
-- [ ] `sqflint -e w` passes on all changed files
-- [ ] `sqflint_compat_scan.py --strict` passes on all changed files
-- [ ] Behavioral parity: returned index matches `findIf` semantics (-1 when not found)
+- [x] Zero `findIf` occurrences in changed files (1 comment reference remains)
+- [x] `sqflint -e w` passes on all changed files (no new errors)
+- [x] `sqflint_compat_scan.py --strict` passes on all changed files
+- [x] Behavioral parity: returned index matches `findIf` semantics (-1 when not found)
 
 ---
 
-### Task 1.4 — Wrap Bare `createHashMapFromArray` Calls
+### Task 1.4 — Wrap Bare `createHashMapFromArray` Calls ✅ DONE
 
 | Field | Value |
 |-------|-------|
 | **PR Mode** | C — Safe Refactor (no behavior change) |
 | **Severity** | P1 — Latent CI blocker |
-| **Files** | 41 files with bare `createHashMapFromArray` |
+| **Files** | 39 files with bare `createHashMapFromArray`, 74 occurrences (verified count) |
 | **Est. Lines** | ~80+ (add helper declaration + update call sites) |
 
 **Problem:** sqflint does not parse `createHashMapFromArray` as a valid operator. Must be wrapped in a compile helper.
@@ -152,8 +154,9 @@ private _map = [[...]] call _hmCreate;
 **Recommendation:** Split by subsystem like Task 1.3.
 
 **Acceptance:**
-- [ ] Zero bare `createHashMapFromArray` in changed files
-- [ ] `sqflint -e w` passes on all changed files
+- [x] Zero bare `createHashMapFromArray` in changed files
+- [x] `sqflint -e w` passes on all changed files
+- [x] `bare-createHashMapFromArray` rule added to `sqflint_compat_scan.py`
 
 ---
 
