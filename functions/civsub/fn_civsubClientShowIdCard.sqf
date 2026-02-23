@@ -12,7 +12,9 @@ params [
     ["_payload", createHashMap, [createHashMap, []]]
 ];
 
-if (_payload isEqualType []) then { _payload = createHashMapFromArray _payload; };
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
+if (_payload isEqualType []) then { _payload = [_payload] call _hmCreate; };
 if !(_payload isEqualType createHashMap) exitWith {false};
 
 uiNamespace setVariable ["ARC_civsub_lastIdCardPayload", _payload];

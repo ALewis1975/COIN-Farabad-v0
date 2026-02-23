@@ -86,7 +86,9 @@ private _count = 0;
         if (_persist isEqualType true && { _persist }) then { continue; };
     };
     // Avoid duplicates
-    if ((_queue findIf { (_x # 0) isEqualTo _nid }) >= 0) then { continue; };
+    private _foundInQueue = false;
+    { if ((_x # 0) isEqualTo _nid) exitWith { _foundInQueue = true; }; } forEach _queue;
+    if (_foundInQueue) then { continue; };
 
     private _a = _anchor;
     if (!(_a isEqualType []) || { (count _a) < 2 }) then

@@ -30,6 +30,21 @@ params [
 
 if (isNull _issuer) exitWith {false};
 
+// Dedicated MP hardening: validate sender identity.
+if (!isNil "remoteExecutedOwner") then
+{
+    private _reo = remoteExecutedOwner;
+    if (_reo > 0) then
+    {
+        if ((owner _issuer) != _reo) exitWith
+        {
+            diag_log format ["[ARC][SEC] %1 denied: sender-owner mismatch reo=%2 issuerOwner=%3 issuer=%4",
+                "ARC_fnc_intelTocIssueOrder", _reo, owner _issuer, name _issuer];
+            false
+        };
+    };
+};
+
 _order = toUpper (trim _order);
 _purpose = toUpper (trim _purpose);
 

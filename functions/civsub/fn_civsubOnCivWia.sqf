@@ -21,6 +21,9 @@ if !(_civ getVariable ["civsub_v1_isCiv", false]) exitWith {false};
 
 // Best-effort: ACE stores last damage source on the unit.
 // Var name differs across older scripts/builds; we check both.
+
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
 private _src = _civ getVariable ["ace_medical_lastDamageSource", objNull];
 if (isNull _src) then { _src = _civ getVariable ["ACE_medical_lastDamageSource", objNull]; };
 
@@ -47,10 +50,10 @@ if (_did isEqualTo "") exitWith {false};
 private _actorUid = "";
 if (!isNull _src && {isPlayer _src}) then { _actorUid = getPlayerUID _src; };
 
-private _payload = createHashMapFromArray [
+private _payload = [[
     ["attrib_side", _attribSide],
     ["attrib_conf", _attribConf]
-];
+]] call _hmCreate;
 
 [_did, "CIV_WIA", "HARM", _payload, _actorUid] call ARC_fnc_civsubEmitDelta;
 

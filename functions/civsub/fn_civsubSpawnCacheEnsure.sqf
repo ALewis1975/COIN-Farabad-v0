@@ -35,6 +35,8 @@ if (!isServer) exitWith {createHashMap};
 params [["_did","",[""]]];
 if (_did isEqualTo "") exitWith {createHashMap};
 
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
 private _dbg = missionNamespace getVariable ["civsub_v1_debug", false];
 
 // Phase 2 helpers (defined in civsubInitServer)
@@ -123,7 +125,7 @@ if !(_road isEqualType []) then { _road = []; };
 // District metadata
 private _d = [_did] call ARC_fnc_civsubDistrictsGetById;
 private _dm = createHashMap;
-if (_d isEqualType createHashMap) then { _dm = _d; } else { if (_d isEqualType []) then { _dm = createHashMapFromArray _d; }; };
+if (_d isEqualType createHashMap) then { _dm = _d; } else { if (_d isEqualType []) then { _dm = [_d] call _hmCreate; }; };
 
 private _center = _dm getOrDefault ["centroid", [0,0]];
 private _radius = _dm getOrDefault ["radius_m", 500];
@@ -288,13 +290,13 @@ if !(_maxR isEqualType 0) then { _maxR = 250; };
 if ((count _bldPos) > _maxB) then { _bldPos resize _maxB; };
 if ((count _roadPos) > _maxR) then { _roadPos resize _maxR; };
 
-_row = createHashMapFromArray [
+_row = [[
     ["bldPos", _bldPos],
     ["roadPos", _roadPos],
     ["ts", serverTime],
     ["anchorKey", _anchorKey],
     ["anchorPos", _primaryPos]
-];
+]] call _hmCreate;
 
 _cache set [_did, _row];
 missionNamespace setVariable ["civsub_v1_spawn_cache", _cache, true];

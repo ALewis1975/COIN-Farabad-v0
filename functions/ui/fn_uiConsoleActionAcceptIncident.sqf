@@ -52,7 +52,8 @@ if (_accepted) exitWith
 private _gid = groupId group player;
 private _rows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
 if (!(_rows isEqualType [])) then { _rows = []; };
-private _idx = _rows findIf { _x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _gid } };
+private _idx = -1;
+{ if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _gid }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
 private _status = if (_idx < 0) then { "OFFLINE" } else { toUpper (trim ((_rows # _idx) # 1)) };
 if (_status isNotEqualTo "AVAILABLE") exitWith
 {

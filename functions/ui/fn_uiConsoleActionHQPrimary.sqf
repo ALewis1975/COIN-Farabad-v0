@@ -203,6 +203,18 @@ switch (_data) do
         [] call ARC_fnc_tocShowLatestIntel;
     };
 
+    case "ADMIN_DIAG_STATUS":
+    {
+        [player] remoteExec ["ARC_fnc_devDiagnosticsSnapshot", 2];
+        ["HQ", "Diagnostics snapshot requested (server)."] call ARC_fnc_clientToast;
+    };
+
+    case "ADMIN_DIAG_TOGGLE_DEBUG":
+    {
+        [player] remoteExec ["ARC_fnc_devToggleDebugMode", 2];
+        ["HQ", "Debug mode toggle requested (server)."] call ARC_fnc_clientToast;
+    };
+
     default
     {
         ["HQ", "No admin action selected."] call ARC_fnc_clientToast;

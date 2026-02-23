@@ -6,6 +6,8 @@
 
 if (!hasInterface) exitWith {false};
 
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
 private _display = uiNamespace getVariable ["ARC_console_display", displayNull];
 if (isNull _display) exitWith {false};
 
@@ -141,17 +143,17 @@ switch (_kind) do
     {
         if (_arg isEqualTo "") exitWith { ["CIVSUB", "No question selected."] call ARC_fnc_clientToast; };
 
-        private _qMap = createHashMapFromArray [
+        private _qMap = [[
             ["Q_LIVE", "Where do you live?"],
             ["Q_WORK", "Where do you work?"],
             ["Q_IEDS", "Have you seen any IEDs?"],
             ["Q_INS", "Have you seen any insurgent activity?"],
             ["Q_OP_US", "What is your opinion of us?"],
             ["Q_OP_AREA", "What is the overall opinion of us in the area?"]
-        ];
+        ]] call _hmCreate;
 
         private _qlbl = _qMap getOrDefault [_arg, _arg];
-        private _payload = createHashMapFromArray [["qid", _arg], ["label", _qlbl]];
+        private _payload = [[["qid", _arg], ["label", _qlbl]]] call _hmCreate;
         ["QUESTION", _payload, "Question"] call _civReqAction;
     };
 
@@ -195,11 +197,11 @@ switch (_kind) do
 
 
         private _districts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
-        if (_districts isEqualType []) then { _districts = createHashMapFromArray _districts; };
+        if (_districts isEqualType []) then { _districts = [_districts] call _hmCreate; };
         if !(_districts isEqualType createHashMap) then { _districts = createHashMap; };
 
         private _d = _districts getOrDefault [_did, createHashMap];
-        if (_d isEqualType []) then { _d = createHashMapFromArray _d; };
+        if (_d isEqualType []) then { _d = [_d] call _hmCreate; };
         if !(_d isEqualType createHashMap) exitWith
         {
             if (_hasPub) then

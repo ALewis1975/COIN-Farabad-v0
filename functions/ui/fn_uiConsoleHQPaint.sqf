@@ -161,7 +161,7 @@ private _renderHQSubPanelsFromMaster = {
         "ADMIN_FORCE_CLOSE_SUCC", "ADMIN_FORCE_CLOSE_FAIL", "ADMIN_REBUILD_ACTIVE", "ADMIN_BROADCAST"
     ];
     private _incRows = ["ADMIN_INCIDENTS"];
-    private _diagRows = ["ADMIN_COVERAGE", "ADMIN_QA", "ADMIN_COMPILE", "ADMIN_DUMP_LEADS", "ADMIN_DUMP_INTEL"];
+    private _diagRows = ["ADMIN_COVERAGE", "ADMIN_QA", "ADMIN_COMPILE", "ADMIN_DUMP_LEADS", "ADMIN_DUMP_INTEL", "ADMIN_DIAG_STATUS", "ADMIN_DIAG_TOGGLE_DEBUG"];
 
     for "_i" from 0 to ((lbSize _master) - 1) do {
         private _d = _master lbData _i;
@@ -244,7 +244,7 @@ if (!isNull _ctrlList) then
         }
         else
         {
-            if (_d in ["ADMIN_SAVE","ADMIN_CIVSUB_SAVE","ADMIN_RESET","ADMIN_AIRBASE_RESET_CTRL","ADMIN_CIVSUB_RESET","ADMIN_FORCE_CLOSE_SUCC","ADMIN_FORCE_CLOSE_FAIL","ADMIN_REBUILD_ACTIVE","ADMIN_BROADCAST","ADMIN_INCIDENTS","ADMIN_COVERAGE","ADMIN_QA","ADMIN_COMPILE","ADMIN_DUMP_LEADS","ADMIN_DUMP_INTEL"]) exitWith { _hasHqRow = true; };
+            if (_d in ["ADMIN_SAVE","ADMIN_CIVSUB_SAVE","ADMIN_RESET","ADMIN_AIRBASE_RESET_CTRL","ADMIN_CIVSUB_RESET","ADMIN_FORCE_CLOSE_SUCC","ADMIN_FORCE_CLOSE_FAIL","ADMIN_REBUILD_ACTIVE","ADMIN_BROADCAST","ADMIN_INCIDENTS","ADMIN_COVERAGE","ADMIN_QA","ADMIN_COMPILE","ADMIN_DUMP_LEADS","ADMIN_DUMP_INTEL","ADMIN_DIAG_STATUS","ADMIN_DIAG_TOGGLE_DEBUG"]) exitWith { _hasHqRow = true; };
         };
     };
 
@@ -423,6 +423,8 @@ if (_needRebuild && {!isNull _ctrlList}) then
         ["Run Compile Audit (Server)", "ADMIN_COMPILE"] call _addRow;
         ["Dump Lead Pool (Local)", "ADMIN_DUMP_LEADS"] call _addRow;
         ["Dump Intel Log (Local)", "ADMIN_DUMP_INTEL"] call _addRow;
+        ["Diagnostics Snapshot (Server)", "ADMIN_DIAG_STATUS"] call _addRow;
+        ["Toggle Debug Mode (Server)", "ADMIN_DIAG_TOGGLE_DEBUG"] call _addRow;
     };
 
     // Restore selection
@@ -563,6 +565,26 @@ switch (toUpper _data) do
     case "ADMIN_DUMP_INTEL":
     {
         _txt = _txt + "Print the latest intel log entries to your client log / hint (local-only).";
+    };
+    case "ADMIN_DIAG_STATUS":
+    {
+        _txt = _txt + "Request a diagnostics snapshot from the server. Shows all debug toggle states, subsystem health, logger config, and key metrics." +
+               "<br/><br/><t size='0.9' color='#AAAAAA'>Results appear in this detail pane after the server responds.</t>";
+
+        private _rep = uiNamespace getVariable ["ARC_console_lastDiagReport", ""];
+        if (_rep isEqualType "" && { _rep isNotEqualTo "" }) then
+        {
+            _txt = _txt + "<br/><br/><t font='PuristaMedium'>Last report:</t><br/>" + _rep;
+        };
+    };
+    case "ADMIN_DIAG_TOGGLE_DEBUG":
+    {
+        private _debugOn = missionNamespace getVariable ["ARC_debugLogEnabled", false];
+        private _stateLabel = if (_debugOn) then { "<t color='#6EE7B7'>ON</t>" } else { "<t color='#BDBDBD'>OFF</t>" };
+        _txt = _txt + "Toggle all debug flags on/off as a group (server-authoritative).<br/><br/>" +
+               "Current debug state: " + _stateLabel + "<br/><br/>" +
+               "Toggles: ARC_debugLogEnabled, ARC_debugLogToChat, ARC_debugInspectorEnabled, civsub_v1_debug, civsub_v1_traffic_debug, airbase_v1_tower_authDebug, FARABAD_log_minLevel" +
+               "<br/><br/><t size='0.9' color='#AAAAAA'>This mirrors the ARC_profile_devMode override block in initServer.sqf.</t>";
     };
     case "HDR":
     {

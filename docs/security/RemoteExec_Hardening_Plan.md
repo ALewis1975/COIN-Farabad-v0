@@ -24,6 +24,8 @@ These are the highest-risk endpoints because any connected client can attempt to
 | `ARC_fnc_civsubInteractShowPapers` | ACE interaction | Identity presentation request. |
 | `ARC_fnc_civsubRunMdtByNetId` | TOC UI action | Lookup workflow by target netId. |
 | `ARC_fnc_devCompileAuditServer` | HQ UI dev tool | Dev/admin server audit execution. |
+| `ARC_fnc_devDiagnosticsSnapshot` | HQ UI dev tool | Server-side diagnostics snapshot. |
+| `ARC_fnc_devToggleDebugMode` | HQ UI dev tool | Server-side debug mode toggle. |
 | `ARC_fnc_execObjectiveComplete` | Objective/IED interactions | Completes objective stages on server. |
 | `ARC_fnc_iedCollectEvidence` | Evidence action | Collect evidence item by netId. |
 | `ARC_fnc_iedServerDetonate` | IED disposition action | Server detonation of IED. |
@@ -74,6 +76,7 @@ These are the highest-risk endpoints because any connected client can attempt to
 | `ARC_fnc_tocInitPlayer` | Broadcast from bootstrap | Non-JIP (player init should use join hook). |
 | `ARC_fnc_uiConsoleCompileAuditClientReceive` | Targeted | Non-JIP request/response. |
 | `ARC_fnc_uiConsoleQAAuditClientReceive` | Targeted | Non-JIP request/response. |
+| `ARC_fnc_devDiagnosticsClientReceive` | Targeted | Non-JIP request/response. |
 
 ### 1.3 Non-ARC / engine command remoteExec targets in repository
 

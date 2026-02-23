@@ -338,6 +338,77 @@ private _convoyCatchupCap = {
   "non-bridge large tail gap triggers hold-speed catch-up"
 ] call ARC_TEST_fnc_assert;
 
+// ---------- Phase 1 regression: API existence for new/changed functions ----------
+
+private _phase1ApiFns = [
+  "ARC_fnc_devDiagnosticsSnapshot",
+  "ARC_fnc_devToggleDebugMode",
+  "ARC_fnc_devDiagnosticsClientReceive",
+  "ARC_fnc_paramAssert",
+  "ARC_fnc_stateGet",
+  "ARC_fnc_stateSet",
+  "ARC_fnc_devCompileAuditServer",
+  "ARC_fnc_civsubIdentityTouch"
+];
+{
+  [_x, format ["UT-PH1-API-%1", _forEachIndex + 1], format ["Phase 1 function '%1' exists", _x]] call ARC_TEST_fnc_assertNotNil;
+} forEach _phase1ApiFns;
+
+
+// ---------- Phase 1 regression: paramAssert contract tests ----------
+
+if (!(isNil "ARC_fnc_paramAssert")) then {
+
+  // ARRAY_SHAPE — valid array
+  private _paArrOk = [[1, 2, 3], "ARRAY_SHAPE", "testArr", [[], 1, 5, false]] call ARC_fnc_paramAssert;
+  [(_paArrOk select 0), "UT-PASSERT-001", "ARRAY_SHAPE accepts valid array within bounds"] call ARC_TEST_fnc_assert;
+
+  // ARRAY_SHAPE — too short
+  private _paArrShort = [[], "ARRAY_SHAPE", "testArr", [[], 2, 5, false]] call ARC_fnc_paramAssert;
+  [!(_paArrShort select 0), "UT-PASSERT-002", "ARRAY_SHAPE rejects array below minCount"] call ARC_TEST_fnc_assert;
+  [(_paArrShort select 2) isEqualTo "ARC_ASSERT_ARRAY_SHAPE", "UT-PASSERT-003", "ARRAY_SHAPE below-min returns correct code"] call ARC_TEST_fnc_assert;
+
+  // ARRAY_SHAPE — non-array input
+  private _paArrType = ["not_array", "ARRAY_SHAPE", "testArr", [[], 0, 5, false]] call ARC_fnc_paramAssert;
+  [!(_paArrType select 0), "UT-PASSERT-004", "ARRAY_SHAPE rejects non-array input"] call ARC_TEST_fnc_assert;
+  [(_paArrType select 2) isEqualTo "ARC_ASSERT_TYPE_MISMATCH", "UT-PASSERT-005", "ARRAY_SHAPE type-mismatch returns correct code"] call ARC_TEST_fnc_assert;
+
+  // SCALAR_BOUNDS — in range
+  private _paScOk = [50, "SCALAR_BOUNDS", "testNum", [0, 0, 100]] call ARC_fnc_paramAssert;
+  [(_paScOk select 0), "UT-PASSERT-006", "SCALAR_BOUNDS accepts value in range"] call ARC_TEST_fnc_assert;
+
+  // SCALAR_BOUNDS — below min
+  private _paScLow = [-5, "SCALAR_BOUNDS", "testNum", [0, 0, 100]] call ARC_fnc_paramAssert;
+  [!(_paScLow select 0), "UT-PASSERT-007", "SCALAR_BOUNDS rejects value below minimum"] call ARC_TEST_fnc_assert;
+  [(_paScLow select 2) isEqualTo "ARC_ASSERT_SCALAR_BOUNDS", "UT-PASSERT-008", "SCALAR_BOUNDS below-min returns correct code"] call ARC_TEST_fnc_assert;
+
+  // SCALAR_BOUNDS — above max
+  private _paScHigh = [200, "SCALAR_BOUNDS", "testNum", [0, 0, 100]] call ARC_fnc_paramAssert;
+  [!(_paScHigh select 0), "UT-PASSERT-009", "SCALAR_BOUNDS rejects value above maximum"] call ARC_TEST_fnc_assert;
+
+  // SCALAR_BOUNDS — type mismatch
+  private _paScType = ["string_val", "SCALAR_BOUNDS", "testNum", [0, 0, 100]] call ARC_fnc_paramAssert;
+  [!(_paScType select 0), "UT-PASSERT-010", "SCALAR_BOUNDS rejects non-numeric input"] call ARC_TEST_fnc_assert;
+
+  // NON_EMPTY_STRING — valid
+  private _paStrOk = ["hello", "NON_EMPTY_STRING", "testStr", [""]] call ARC_fnc_paramAssert;
+  [(_paStrOk select 0), "UT-PASSERT-011", "NON_EMPTY_STRING accepts valid string"] call ARC_TEST_fnc_assert;
+
+  // NON_EMPTY_STRING — empty (uses toUpper-compatible trim from Phase 1)
+  private _paStrEmpty = ["", "NON_EMPTY_STRING", "testStr", ["fallback"]] call ARC_fnc_paramAssert;
+  [!(_paStrEmpty select 0), "UT-PASSERT-012", "NON_EMPTY_STRING rejects empty string"] call ARC_TEST_fnc_assert;
+  [(_paStrEmpty select 2) isEqualTo "ARC_ASSERT_EMPTY_STRING", "UT-PASSERT-013", "NON_EMPTY_STRING empty returns correct code"] call ARC_TEST_fnc_assert;
+
+  // Unknown rule
+  private _paUnknown = ["x", "BOGUS_RULE", "test", []] call ARC_fnc_paramAssert;
+  [!(_paUnknown select 0), "UT-PASSERT-014", "unknown rule rejects input"] call ARC_TEST_fnc_assert;
+  [(_paUnknown select 2) isEqualTo "ARC_ASSERT_RULE_UNKNOWN", "UT-PASSERT-015", "unknown rule returns correct code"] call ARC_TEST_fnc_assert;
+
+} else {
+  ["INFO", "UT-PASSERT-SKIP", "paramAssert tests skipped; function missing", []] call ARC_TEST_fnc_log;
+};
+
+
 // Authoritative-only checks (server)
 if (isServer) then {
   ["INFO", "UT-SERVER-000", "Running server-only tests", []] call ARC_TEST_fnc_log;
@@ -537,6 +608,93 @@ if (isServer) then {
     } forEach _wdCfgSaved;
   } else {
     ["INFO", "UT-WD-SKIP", "watchdog regression prerequisites missing", []] call ARC_TEST_fnc_log;
+  };
+
+
+  // ---------- Phase 1 regression: stateGet / stateSet roundtrip ----------
+
+  if (!(isNil "ARC_fnc_stateSet") && !(isNil "ARC_fnc_stateGet")) then {
+    private _stateTestKeys = ["_ut_state_test_str", "_ut_state_test_num", "_ut_state_test_arr"];
+    private _stSaved = [_stateTestKeys] call ARC_TEST_fnc_stateSnapshot;
+
+    // Set + Get string
+    ["_ut_state_test_str", "hello_phase1"] call ARC_fnc_stateSet;
+    private _stStr = ["_ut_state_test_str", ""] call ARC_fnc_stateGet;
+    [_stStr isEqualTo "hello_phase1", "UT-STATE-001", "stateSet/stateGet roundtrip for STRING", ["got", _stStr]] call ARC_TEST_fnc_assert;
+
+    // Set + Get number
+    ["_ut_state_test_num", 42] call ARC_fnc_stateSet;
+    private _stNum = ["_ut_state_test_num", -1] call ARC_fnc_stateGet;
+    [_stNum isEqualTo 42, "UT-STATE-002", "stateSet/stateGet roundtrip for SCALAR", ["got", _stNum]] call ARC_TEST_fnc_assert;
+
+    // Set + Get array
+    ["_ut_state_test_arr", [1, "two", 3]] call ARC_fnc_stateSet;
+    private _stArr = ["_ut_state_test_arr", []] call ARC_fnc_stateGet;
+    [_stArr isEqualTo [1, "two", 3], "UT-STATE-003", "stateSet/stateGet roundtrip for ARRAY", ["got", _stArr]] call ARC_TEST_fnc_assert;
+
+    // Overwrite existing key
+    ["_ut_state_test_str", "updated"] call ARC_fnc_stateSet;
+    private _stUpd = ["_ut_state_test_str", ""] call ARC_fnc_stateGet;
+    [_stUpd isEqualTo "updated", "UT-STATE-004", "stateSet overwrites existing key", ["got", _stUpd]] call ARC_TEST_fnc_assert;
+
+    // Get with default for missing key
+    private _stMiss = ["_ut_state_nonexistent_key", "DEFAULT"] call ARC_fnc_stateGet;
+    [_stMiss isEqualTo "DEFAULT", "UT-STATE-005", "stateGet returns default for missing key", ["got", _stMiss]] call ARC_TEST_fnc_assert;
+
+    // String-form call
+    private _stStrForm = "_ut_state_test_num" call ARC_fnc_stateGet;
+    [(_stStrForm isEqualType 0), "UT-STATE-006", "stateGet accepts string-form call (returns SCALAR)", ["got", _stStrForm]] call ARC_TEST_fnc_assert;
+    [_stStrForm isEqualTo 42, "UT-STATE-006b", "stateGet string-form returns correct value", ["expected", 42, "got", _stStrForm]] call ARC_TEST_fnc_assert;
+
+    // Malformed input returns false
+    private _stBad = "justAString" call ARC_fnc_stateSet;
+    [!_stBad, "UT-STATE-007", "stateSet rejects string input (expects array)", ["got", _stBad]] call ARC_TEST_fnc_assert;
+
+    // Empty-key returns false
+    private _stEmpty = ["", "value"] call ARC_fnc_stateSet;
+    [!_stEmpty, "UT-STATE-008", "stateSet rejects empty key", ["got", _stEmpty]] call ARC_TEST_fnc_assert;
+
+    [_stSaved] call ARC_TEST_fnc_stateRestore;
+  } else {
+    ["INFO", "UT-STATE-SKIP", "stateGet/stateSet tests skipped; functions missing", []] call ARC_TEST_fnc_log;
+  };
+
+
+  // ---------- Phase 1 regression: compile audit debounce ----------
+
+  if (!(isNil "ARC_fnc_devCompileAuditServer")) then {
+    private _auditVars = ["ARC_compileAudit_lastStartTime"];
+    private _auditSaved = [_auditVars] call ARC_TEST_fnc_varSnapshot;
+
+    // Simulate recent audit (within 15s)
+    missionNamespace setVariable ["ARC_compileAudit_lastStartTime", serverTime, false];
+    private _debounced = [objNull] call ARC_fnc_devCompileAuditServer;
+    [!_debounced, "UT-CAUDIT-001", "compile audit rejects re-invocation within 15s debounce", ["result", _debounced]] call ARC_TEST_fnc_assert;
+
+    // Simulate expired debounce (>15s ago) — should accept invocation
+    missionNamespace setVariable ["ARC_compileAudit_lastStartTime", serverTime - 20, false];
+    // The function will proceed past the debounce guard and attempt CfgFunctions iteration.
+    // Even if it returns false (due to missing config data), the debounce timestamp should
+    // be updated to prove it accepted the invocation.
+    [objNull] call ARC_fnc_devCompileAuditServer;
+    private _updatedTs = missionNamespace getVariable ["ARC_compileAudit_lastStartTime", -999];
+    [(_updatedTs > (serverTime - 5)), "UT-CAUDIT-002", "compile audit accepts invocation after debounce expires (timestamp updated)", ["ts", _updatedTs, "serverTime", serverTime]] call ARC_TEST_fnc_assert;
+
+    [_auditSaved] call ARC_TEST_fnc_varRestore;
+  } else {
+    ["INFO", "UT-CAUDIT-SKIP", "compile audit tests skipped; function missing", []] call ARC_TEST_fnc_log;
+  };
+
+
+  // ---------- Phase 1 regression: diagnostics functions ----------
+
+  if (!(isNil "ARC_fnc_devDiagnosticsSnapshot")) then {
+    // Function exists and is callable (server-side)
+    [!(isNil "ARC_fnc_devDiagnosticsSnapshot"), "UT-DIAG-SNAP-001", "devDiagnosticsSnapshot function exists"] call ARC_TEST_fnc_assert;
+    [!(isNil "ARC_fnc_devToggleDebugMode"), "UT-DIAG-SNAP-002", "devToggleDebugMode function exists"] call ARC_TEST_fnc_assert;
+    [!(isNil "ARC_fnc_devDiagnosticsClientReceive"), "UT-DIAG-SNAP-003", "devDiagnosticsClientReceive function exists"] call ARC_TEST_fnc_assert;
+  } else {
+    ["INFO", "UT-DIAG-SNAP-SKIP", "diagnostics snapshot tests skipped; function missing", []] call ARC_TEST_fnc_log;
   };
 
 } else {

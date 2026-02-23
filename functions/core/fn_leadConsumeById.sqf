@@ -27,9 +27,8 @@ if (!(_leads isEqualType [])) then { _leads = []; };
 
 if (_leads isEqualTo []) exitWith {[]};
 
-private _idx = _leads findIf {
-    _x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _leadId }
-};
+private _idx = -1;
+{ if (_x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _leadId }) exitWith { _idx = _forEachIndex; }; } forEach _leads;
 
 if (_idx < 0) exitWith {[]};
 

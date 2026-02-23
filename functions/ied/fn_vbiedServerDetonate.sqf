@@ -22,6 +22,16 @@ params [
 _deviceId = trim _deviceId;
 if (_deviceId isEqualTo "") exitWith {false};
 
+// Dedicated MP hardening: log remote invocation source.
+if (!isNil "remoteExecutedOwner") then
+{
+    private _reo = remoteExecutedOwner;
+    if (_reo > 0) then
+    {
+        diag_log format ["[ARC][SEC] ARC_fnc_vbiedServerDetonate: invoked via remoteExec from owner=%1 deviceId=%2", _reo, _deviceId];
+    };
+};
+
 private _done = ["activeVbiedDetonated", false] call ARC_fnc_stateGet;
 if (!(_done isEqualType true) && !(_done isEqualType false)) then { _done = false; };
 if (_done) exitWith {true};

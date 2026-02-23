@@ -24,6 +24,8 @@
 
 if (!isServer) exitWith {false};
 
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
 private _nodes = ["companyCommandNodes", []] call ARC_fnc_stateGet;
 if (!(_nodes isEqualType []) || { _nodes isEqualTo [] }) exitWith {false};
 
@@ -65,13 +67,13 @@ if (_activeZone isEqualTo "") then
 };
 if (_activeZone isEqualTo "") then { _activeZone = [_activePos] call ARC_fnc_worldGetZoneForPos; };
 
-private _baseWeights = createHashMapFromArray [
+private _baseWeights = [[
     ["PRESENCE_PATROL", 0.90],
     ["MSR_SECURITY", 0.75],
     ["QRF_STANDBY", 0.70],
     ["PLAYER_SUPPORT", 0.65],
     ["INDEPENDENT_SHAPING", 0.60]
-];
+]] call _hmCreate;
 
 private _pickWeightedType = {
     params ["_weights"]; 
@@ -191,12 +193,8 @@ private _changed = false;
 
     private _priority = ((_weights getOrDefault [_opType, 0.5]) + (_districtRisk * 0.45) + (_threadPressure * 0.35)) min 3;
 
-    private _existingIdx = _updatedOps findIf {
-        (_x isEqualType []) &&
-        { (count _x) >= 14 } &&
-        { ((_x # 4) isEqualTo _nodeId) } &&
-        { toUpper (_x # 3) in ["PLANNED", "ACTIVE"] }
-    };
+    private _existingIdx = -1;
+    { if ((_x isEqualType []) && { (count _x) >= 14 } && { ((_x # 4) isEqualTo _nodeId) } && { toUpper (_x # 3) in ["PLANNED", "ACTIVE"] }) exitWith { _existingIdx = _forEachIndex; }; } forEach _updatedOps;
 
     private _meta = [
         ["districtRisk", _districtRisk],

@@ -386,7 +386,8 @@ if (_prevAcceptedGroup isEqualType "" && { _prevAcceptedGroup isNotEqualTo "" })
 {
     private _rows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
     if (!(_rows isEqualType [])) then { _rows = []; };
-    private _idx = _rows findIf { _x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _prevAcceptedGroup } };
+    private _idx = -1;
+    { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _prevAcceptedGroup }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
     private _row = [_prevAcceptedGroup, "AVAILABLE", serverTime, "SYSTEM"];
     if (_idx < 0) then { _rows pushBack _row; } else { _rows set [_idx, _row]; };
     missionNamespace setVariable ["ARC_pub_unitStatuses", _rows, true];

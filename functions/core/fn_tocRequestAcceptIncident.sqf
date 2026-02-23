@@ -15,6 +15,8 @@
 
 if (!isServer) exitWith {false};
 
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
 if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\\core\\fn_rpcValidateSender.sqf"; };
 
 // Fail-safe: ensure role helper functions exist even if CfgFunctions.hpp was not updated.
@@ -51,7 +53,8 @@ private _setGroupStatus = {
     private _rows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
     if (!(_rows isEqualType [])) then { _rows = []; };
 
-    private _idx = _rows findIf { _x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _gid } };
+    private _idx = -1;
+    { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _gid }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
     private _row = [_gid, _status, serverTime, _who];
     if (_idx < 0) then { _rows pushBack _row; } else { _rows set [_idx, _row]; };
     missionNamespace setVariable ["ARC_pub_unitStatuses", _rows, true];
@@ -90,7 +93,8 @@ private _callerGroup = if (isNull _caller) then {""} else { groupId (group _call
 if (_callerGroup isEqualTo "") exitWith {false};
 private _unitStatuses = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
 if (!(_unitStatuses isEqualType [])) then { _unitStatuses = []; };
-private _statusIdx = _unitStatuses findIf { _x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _callerGroup } };
+private _statusIdx = -1;
+{ if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _callerGroup }) exitWith { _statusIdx = _forEachIndex; }; } forEach _unitStatuses;
 private _statusNow = if (_statusIdx < 0) then { "OFFLINE" } else { toUpper (trim ((_unitStatuses # _statusIdx) # 1)) };
 if (_statusNow isNotEqualTo "AVAILABLE") exitWith
 {
@@ -127,7 +131,7 @@ if (missionNamespace getVariable ["civsub_v1_enabled", false]) then
         private _d = [_did] call ARC_fnc_civsubDistrictsGetById;
         if (_d isEqualType createHashMap) then
         {
-            private _snap = createHashMapFromArray [
+            private _snap = [[
                 ["districtId", _did],
                 ["ts", serverTime],
                 ["W", _d getOrDefault ["W_EFF_U", 0]],
@@ -139,7 +143,7 @@ if (missionNamespace getVariable ["civsub_v1_enabled", false]) then
                 ["detentions_initiated", _d getOrDefault ["detentions_initiated", 0]],
                 ["detentions_handed_off", _d getOrDefault ["detentions_handed_off", 0]],
                 ["aid_events", _d getOrDefault ["aid_events", 0]]
-            ];
+            ]] call _hmCreate;
 
             ["activeIncidentCivsubStart", _snap] call ARC_fnc_stateSet;
             missionNamespace setVariable ["ARC_activeIncidentCivsubStart", _snap, true];

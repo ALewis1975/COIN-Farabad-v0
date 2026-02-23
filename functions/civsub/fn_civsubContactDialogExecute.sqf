@@ -15,6 +15,8 @@
 */
 if (!hasInterface) exitWith { true };
 
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
 private _d = uiNamespace getVariable ["ARC_civsubInteract_display", displayNull];
 if (isNull _d) exitWith { true };
 
@@ -88,7 +90,7 @@ if (_selQ >= 0 && {_lastPane isEqualTo "Q"} && {(_selA < 0) || {_actionIdSel isE
 
     _resp ctrlSetStructuredText parseText format ["QUESTION: %1\nAsking...", _qlbl];
 
-    private _pl = createHashMapFromArray [["qid", _qid], ["label", _qlbl]];
+    private _pl = [[["qid", _qid], ["label", _qlbl]]] call _hmCreate;
             ["QUESTION"] call _kickWatchdog;
     [_civ, player, "QUESTION", _pl] remoteExecCall ["ARC_fnc_civsubContactReqAction", 2];
 
@@ -183,7 +185,7 @@ if (_selA >= 0) then {
             _qlbl
         ];
 
-        private _pl = createHashMapFromArray [["qid", _qid], ["label", _qlbl]];
+        private _pl = [[["qid", _qid], ["label", _qlbl]]] call _hmCreate;
             ["QUESTION"] call _kickWatchdog;
         [_civ, player, "QUESTION", _pl] remoteExecCall ["ARC_fnc_civsubContactReqAction", 2];
     } else {

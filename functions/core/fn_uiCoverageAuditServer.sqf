@@ -24,6 +24,16 @@
 
 if (!isServer) exitWith {false};
 
+// Dedicated MP hardening: log remote invocation source.
+if (!isNil "remoteExecutedOwner") then
+{
+    private _reo = remoteExecutedOwner;
+    if (_reo > 0) then
+    {
+        diag_log format ["[ARC][SEC] ARC_fnc_uiCoverageAuditServer: invoked via remoteExec from owner=%1", _reo];
+    };
+};
+
 private _now = diag_tickTime;
 
 private _entries =

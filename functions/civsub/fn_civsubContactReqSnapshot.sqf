@@ -32,6 +32,9 @@ if !(_civ getVariable ["civsub_v1_isCiv", false]) exitWith {false};
 
 // Dedicated MP hardening:
 // If this function was invoked via remoteExec, bind actor identity to the network sender.
+
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
 if (!isNil "remoteExecutedOwner") then
 {
     private _reo = remoteExecutedOwner;
@@ -101,7 +104,7 @@ if (_out < 0) then {
     _civ setVariable ["civsub_outlook_blufor", _out, true];
 };
 
-private _snap = createHashMapFromArray [
+private _snap = [[
     ["name_display", _nameDisplay],
     ["passport_serial", _serial],
     ["districtId", _did],
@@ -110,7 +113,7 @@ private _snap = createHashMapFromArray [
     ["need_satiation", _sat],
     ["need_hydration", _hyd],
     ["outlook_blufor", _out]
-];
+]] call _hmCreate;
 
 [_snap] remoteExecCall ["ARC_fnc_civsubContactClientReceiveSnapshot", _actor];
 true

@@ -35,6 +35,21 @@ if (isNull _target) exitWith {false};
 if (isNull _caller) exitWith {false};
 if (!isPlayer _caller) exitWith {false};
 
+// Dedicated MP hardening: validate sender identity.
+if (!isNil "remoteExecutedOwner") then
+{
+    private _reo = remoteExecutedOwner;
+    if (_reo > 0) then
+    {
+        if ((owner _caller) != _reo) exitWith
+        {
+            diag_log format ["[ARC][SEC] %1 denied: sender-owner mismatch reo=%2 callerOwner=%3 caller=%4",
+                "ARC_fnc_execObjectiveComplete", _reo, owner _caller, name _caller];
+            false
+        };
+    };
+};
+
 private _stageU = toUpper (trim _stage);
 // IED/VBIED suspicious-object objectives support a "scan" discovery stage.
 if !(_stageU in ["DISCOVER", "DISCOVER_SCAN", "COMPLETE"]) then { _stageU = "COMPLETE"; };
@@ -67,9 +82,8 @@ private _getThreatState = {
     private _records = ["threat_v0_records", []] call ARC_fnc_stateGet;
     if (!(_records isEqualType [])) then { _records = []; };
 
-    private _idx = _records findIf {
-        _x isEqualType [] && { ([_x, "threat_id", ""] call _kvGet) isEqualTo _tid }
-    };
+    private _idx = -1;
+    { if (_x isEqualType [] && { ([_x, "threat_id", ""] call _kvGet) isEqualTo _tid }) exitWith { _idx = _forEachIndex; }; } forEach _records;
     if (_idx < 0) exitWith {""};
 
     private _st = [_records # _idx, "state", ""] call _kvGet;

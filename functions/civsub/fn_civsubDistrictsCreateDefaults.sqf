@@ -5,6 +5,8 @@
     Returns: hashmap districtId -> districtState(hashmap)
 */
 
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
 private _districts = createHashMap;
 
 private _seed = missionNamespace getVariable ["civsub_v1_seed", 1337];
@@ -51,7 +53,7 @@ private _rows = [
     private _rEff = _profile getOrDefault ["R_EFF_U", _rBase];
     private _gEff = _profile getOrDefault ["G_EFF_U", _gBase];
 
-    private _d = createHashMapFromArray [
+    private _d = [[
         ["id", _id],
         ["centroid", [_cx, _cy]],
         ["radius_m", _rad],
@@ -83,7 +85,7 @@ private _rows = [
         ["cooldown_nextLead_ts", 0],
         ["cooldown_nextAttack_ts", 0],
         ["last_player_touch_ts", 0]
-    ];
+    ]] call _hmCreate;
 
     _districts set [_id, _d];
 } forEach _rows;

@@ -121,9 +121,8 @@ private _setPair = {
     if (!(_pairs isEqualType [])) then { _pairs = []; };
     if (!(_k isEqualType "")) then { _k = str _k; };
 
-    private _idx = _pairs findIf {
-        (_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }
-    };
+    private _idx = -1;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
 
     if (_idx < 0) then
     {

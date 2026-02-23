@@ -37,7 +37,8 @@ private _subtypeU = toUpper _subtype;
 private _kvGet = {
     params ["_pairs", "_key", "_default"];
     if (!(_pairs isEqualType [])) exitWith {_default};
-    private _idx = _pairs findIf { (_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key } };
+    private _idx = -1;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) exitWith {_default};
     private _v = (_pairs # _idx) # 1;
     if (isNil "_v") exitWith {_default};
@@ -47,7 +48,8 @@ private _kvGet = {
 private _kvSet = {
     params ["_pairs", "_key", "_value"];
     if (!(_pairs isEqualType [])) then { _pairs = []; };
-    private _idx = _pairs findIf { (_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key } };
+    private _idx = -1;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) then { _pairs pushBack [_key, _value]; } else { _pairs set [_idx, [_key, _value]]; };
     _pairs
 };
@@ -57,11 +59,12 @@ private _records = ["threat_v0_records", []] call ARC_fnc_stateGet;
 if (!(_records isEqualType [])) then { _records = []; };
 
 // Idempotent: return existing record for this task_id
-private _existingIdx = _records findIf {
+private _existingIdx = -1;
+{
     private _rec = _x;
     private _links = [_rec, "links", []] call _kvGet;
-    ([_links, "task_id", ""] call _kvGet) isEqualTo _taskId
-};
+    if (([_links, "task_id", ""] call _kvGet) isEqualTo _taskId) exitWith { _existingIdx = _forEachIndex; };
+} forEach _records;
 
 if (_existingIdx >= 0) then
 {

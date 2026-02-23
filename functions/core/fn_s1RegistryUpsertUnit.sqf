@@ -48,14 +48,16 @@ if (isNull _resolvedGroup && {!isNull _safeUnit}) then { _resolvedGroup = group 
 private _groupId = "";
 if (!isNull _resolvedGroup) then { _groupId = groupId _resolvedGroup; };
 if (_groupId isEqualTo "") then {
-    private _idxGroupId = _patch findIf { (_x isEqualType []) && {count _x >= 2} && {(_x # 0) isEqualTo "groupId"} };
+    private _idxGroupId = -1;
+    { if ((_x isEqualType []) && {count _x >= 2} && {(_x # 0) isEqualTo "groupId"}) exitWith { _idxGroupId = _forEachIndex; }; } forEach _patch;
     if (_idxGroupId >= 0) then { _groupId = ((_patch # _idxGroupId) param [1, ""]); };
 };
 
 private _unitId = "";
 if (!isNull _safeUnit) then { _unitId = netId _safeUnit; };
 if (_unitId isEqualTo "") then {
-    private _idxUnitId = _patch findIf { (_x isEqualType []) && {count _x >= 2} && {(_x # 0) isEqualTo "unitId"} };
+    private _idxUnitId = -1;
+    { if ((_x isEqualType []) && {count _x >= 2} && {(_x # 0) isEqualTo "unitId"}) exitWith { _idxUnitId = _forEachIndex; }; } forEach _patch;
     if (_idxUnitId >= 0) then { _unitId = ((_patch # _idxUnitId) param [1, ""]); };
 };
 if (_unitId isEqualTo "") then { _unitId = format ["virtual:%1", diag_tickTime]; };
@@ -83,8 +85,8 @@ if (_parentEchelon isEqualTo "") then { _parentEchelon = _groupId; };
 private _role = "RIFLEMAN";
 if (!isNull _safeUnit) then
 {
-    _role = toUpperANSI (typeOf _safeUnit);
-    if ((toUpperANSI _role) find "LEADER" >= 0) then { _role = "LEADER"; };
+    _role = toUpper (typeOf _safeUnit);
+    if ((toUpper _role) find "LEADER" >= 0) then { _role = "LEADER"; };
 };
 
 private _locationAnchor = [];
@@ -141,24 +143,32 @@ private _unitRecord = [
     private _v = _x param [1, nil];
     if (_k isNotEqualTo "") then
     {
-        private _gIdx = _groupRecord findIf { (_x param [0, ""]) isEqualTo _k };
+        private _gIdx = -1;
+        { if ((_x param [0, ""]) isEqualTo _k) exitWith { _gIdx = _forEachIndex; }; } forEach _groupRecord;
         if (_gIdx >= 0) then { (_groupRecord # _gIdx) set [1, _v]; } else { _groupRecord pushBack [_k, _v]; };
 
-        private _uIdx = _unitRecord findIf { (_x param [0, ""]) isEqualTo _k };
+        private _uIdx = -1;
+        { if ((_x param [0, ""]) isEqualTo _k) exitWith { _uIdx = _forEachIndex; }; } forEach _unitRecord;
         if (_uIdx >= 0) then { (_unitRecord # _uIdx) set [1, _v]; } else { _unitRecord pushBack [_k, _v]; };
     };
 } forEach _patch;
 
-private _groupIdx = _groups findIf {
-    private _gidIdx = _x findIf { (_x param [0, ""]) isEqualTo "groupId" };
-    (_gidIdx >= 0) && { ((_x # _gidIdx) param [1, ""]) isEqualTo _groupId }
-};
+private _groupIdx = -1;
+{
+    private _grpRec = _x;
+    private _gidIdx = -1;
+    { if ((_x param [0, ""]) isEqualTo "groupId") exitWith { _gidIdx = _forEachIndex; }; } forEach _grpRec;
+    if ((_gidIdx >= 0) && { ((_grpRec # _gidIdx) param [1, ""]) isEqualTo _groupId }) exitWith { _groupIdx = _forEachIndex; };
+} forEach _groups;
 if (_groupIdx >= 0) then { _groups set [_groupIdx, _groupRecord]; } else { _groups pushBack _groupRecord; };
 
-private _unitIdx = _units findIf {
-    private _uidIdx = _x findIf { (_x param [0, ""]) isEqualTo "unitId" };
-    (_uidIdx >= 0) && { ((_x # _uidIdx) param [1, ""]) isEqualTo _unitId }
-};
+private _unitIdx = -1;
+{
+    private _unitRec = _x;
+    private _uidIdx = -1;
+    { if ((_x param [0, ""]) isEqualTo "unitId") exitWith { _uidIdx = _forEachIndex; }; } forEach _unitRec;
+    if ((_uidIdx >= 0) && { ((_unitRec # _uidIdx) param [1, ""]) isEqualTo _unitId }) exitWith { _unitIdx = _forEachIndex; };
+} forEach _units;
 if (_unitIdx >= 0) then { _units set [_unitIdx, _unitRecord]; } else { _units pushBack _unitRecord; };
 
 private _updatedAt = serverTime;

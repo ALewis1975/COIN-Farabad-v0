@@ -35,7 +35,8 @@ if (_threadId isEqualTo "" || { _result isEqualTo "" }) exitWith {false};
 private _threads = ["threads", []] call ARC_fnc_stateGet;
 if (!(_threads isEqualType [])) then { _threads = []; };
 
-private _idx = _threads findIf { ([_x] call ARC_fnc_threadNormalizeRecord) isNotEqualTo [] && { ((_x # 0) isEqualTo _threadId) } };
+private _idx = -1;
+{ if (([_x] call ARC_fnc_threadNormalizeRecord) isNotEqualTo [] && { ((_x # 0) isEqualTo _threadId) }) exitWith { _idx = _forEachIndex; }; } forEach _threads;
 if (_idx < 0) exitWith {false};
 
 private _thr = [(_threads # _idx)] call ARC_fnc_threadNormalizeRecord;

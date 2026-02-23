@@ -22,6 +22,8 @@ params [
     ["_actorUid", "", [""]]
 ];
 
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
 private _effects = [];
 
 switch (_event) do
@@ -86,7 +88,7 @@ switch (_event) do
 };
 
 // Effect table (locked v1)
-private _effectTable = createHashMapFromArray [
+private _effectTable = [[
     ["WHITE_TRUST_MICRO_GAIN", [0.25, -0.05, 0.10]],
     ["WHITE_TRUST_SMALL_GAIN", [1.00, -0.25, 0.25]],
     ["WHITE_TRUST_MED_GAIN", [2.00, -0.50, 0.50]],
@@ -101,7 +103,7 @@ private _effectTable = createHashMapFromArray [
     ["RED_DISRUPTION_SMALL", [0.10, -1.00, 0.25]],
     ["RED_DISRUPTION_MED", [0.25, -2.50, 0.75]],
     ["FEAR_SPIKE", [-0.50, 0.50, -0.25]]
-];
+]] call _hmCreate;
 
 private _dW = 0;
 private _dR = 0;
@@ -114,19 +116,19 @@ private _dG = 0;
     _dG = _dG + (_row # 2);
 } forEach _effects;
 
-private _influenceDelta = createHashMapFromArray [
+private _influenceDelta = [[
     ["dW", _dW],
     ["dR", _dR],
     ["dG", _dG]
-];
+]] call _hmCreate;
 
-private _leadEmit = createHashMapFromArray [
+private _leadEmit = [[
     ["emit", false],
     ["lead_type", ""],
     ["lead_id", ""],
     ["confidence", 0.0],
     ["seed", createHashMap]
-];
+]] call _hmCreate;
 
 private _actorType = "AI";
 if !(_actorUid isEqualTo "") then { _actorType = "PLAYER"; };

@@ -25,11 +25,12 @@ if (!(_requests isEqualType [])) then { _requests = []; };
 private _history = ["airbase_v1_clearanceHistory", []] call ARC_fnc_stateGet;
 if (!(_history isEqualType [])) then { _history = []; };
 
-private _idx = _requests findIf { ((_x param [0, ""]) isEqualTo _requestId) };
+private _idx = -1;
+{ if ((_x param [0, ""]) isEqualTo _requestId) exitWith { _idx = _forEachIndex; }; } forEach _requests;
 if (_idx < 0) exitWith {false};
 
 private _rec = _requests # _idx;
-private _status = toUpperANSI (_rec param [6, ""]);
+private _status = toUpper (_rec param [6, ""]);
 private _uid = _rec param [2, ""];
 private _callerUid = getPlayerUID _caller;
 
@@ -63,7 +64,8 @@ _rec set [10, _meta];
 
 _requests set [_idx, _rec];
 
-private _hIdx = _history findIf { ((_x param [0, ""]) isEqualTo _requestId) };
+private _hIdx = -1;
+{ if ((_x param [0, ""]) isEqualTo _requestId) exitWith { _hIdx = _forEachIndex; }; } forEach _history;
 if (_hIdx >= 0) then { _history set [_hIdx, _rec]; } else { _history pushBack _rec; };
 
 _requests = [_requests] call ARC_fnc_airbaseClearanceSortRequests;

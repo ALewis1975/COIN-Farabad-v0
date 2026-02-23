@@ -55,7 +55,8 @@ for "_i" from ((count _back) - 1) to 0 step -1 do
         continue;
     };
 
-    private _li = _pool findIf { _x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _lid } };
+    private _li = -1;
+    { if (_x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _lid }) exitWith { _li = _forEachIndex; }; } forEach _pool;
     if (_li < 0) then
     {
         // Lead expired/consumed; drop backlog entry.
@@ -100,7 +101,8 @@ for "_i" from 0 to ((count _back) - 1) do
         if (!_urgent) then
         {
             // Look up live lead rec to verify type/tag for eligibility.
-            private _li = _pool findIf { _x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _lid } };
+            private _li = -1;
+            { if (_x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _lid }) exitWith { _li = _forEachIndex; }; } forEach _pool;
             if (_li >= 0) then
             {
                 private _lr = _pool # _li;

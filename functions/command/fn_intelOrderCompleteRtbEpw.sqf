@@ -95,7 +95,8 @@ if (_orderIdO isNotEqualTo "") then
 {
     if (!_canForce) exitWith {false};
 
-    _idx = _orders findIf { (_x isEqualType []) && { (count _x) >= 7 } && { (_x # 0) isEqualTo _orderIdO } };
+    _idx = -1;
+    { if ((_x isEqualType []) && { (count _x) >= 7 } && { (_x # 0) isEqualTo _orderIdO }) exitWith { _idx = _forEachIndex; }; } forEach _orders;
     if (_idx >= 0) then { _ord = _orders # _idx; };
     if (_idx < 0 || {_ord isEqualTo []}) exitWith {false};
 

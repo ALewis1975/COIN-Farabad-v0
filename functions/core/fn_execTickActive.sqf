@@ -240,7 +240,8 @@ if (_cpEnabled && { _incTypeU isEqualTo "CHECKPOINT" } && { (toUpper _objKind) i
     if (!(_sites isEqualType [])) then { _sites = []; };
 
     // Don't stack multiple checkpoints at the same location.
-    private _exists = (_sites findIf { (_pos distance2D _x) < 80 }) >= 0;
+    private _exists = false;
+    { if ((_pos distance2D _x) < 80) exitWith { _exists = true; }; } forEach _sites;
 
     if (!_exists) then
     {
@@ -342,10 +343,13 @@ if (_incTypeU isEqualTo "IED") then
     };
 };
 
-private _onSite = (_players findIf {
+private _onSite = false;
+{
     private _p = _x;
-    (_anchorPosList findIf { (_p distance2D _x) <= _radius }) >= 0
-}) >= 0;
+    private _nearAnchor = false;
+    { if ((_p distance2D _x) <= _radius) exitWith { _nearAnchor = true; }; } forEach _anchorPosList;
+    if (_nearAnchor) exitWith { _onSite = true; };
+} forEach _players;
 
 // Route recon uses a start point for AO activation (not the incident center).
 if (_execKind isEqualTo "ROUTE_RECON") then
@@ -357,7 +361,8 @@ if (_execKind isEqualTo "ROUTE_RECON") then
 
     if (_sPos isEqualType [] && { (count _sPos) >= 2 }) then
     {
-        _onSite = (_players findIf { (_x distance2D _sPos) <= _sRad }) >= 0;
+        _onSite = false;
+        { if ((_x distance2D _sPos) <= _sRad) exitWith { _onSite = true; }; } forEach _players;
     };
 };
 
@@ -608,7 +613,8 @@ if (_execKind isEqualTo "ROUTE_RECON") exitWith
     // 1) Start gate
     if (!_startReached && { _sPos isEqualType [] && { (count _sPos) >= 2 } }) then
     {
-        private _atStart = (_players findIf { (_x distance2D _sPos) <= _sRad }) >= 0;
+        private _atStart = false;
+        { if ((_x distance2D _sPos) <= _sRad) exitWith { _atStart = true; }; } forEach _players;
         if (_atStart) then
         {
             _startReached = true;
@@ -631,7 +637,8 @@ if (_execKind isEqualTo "ROUTE_RECON") exitWith
     // 2) End gate
     if (_startReached && { !_endReached } && { _ePos isEqualType [] && { (count _ePos) >= 2 } }) then
     {
-        private _atEnd = (_players findIf { (_x distance2D _ePos) <= _eRad }) >= 0;
+        private _atEnd = false;
+        { if ((_x distance2D _ePos) <= _eRad) exitWith { _atEnd = true; }; } forEach _players;
         if (_atEnd) then
         {
             _endReached = true;

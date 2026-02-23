@@ -17,8 +17,10 @@ params [
 
 if (_districtId isEqualTo "") exitWith {createHashMap};
 
-private _leadEmit = createHashMapFromArray [["emit", false], ["lead_type", ""], ["lead_id", ""], ["confidence", 0.0], ["seed", createHashMap]];
-private _influenceDelta = createHashMapFromArray [["dW", 0], ["dR", 0], ["dG", 0]];
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
+private _leadEmit = [[["emit", false], ["lead_type", ""], ["lead_id", ""], ["confidence", 0.0], ["seed", createHashMap]]] call _hmCreate;
+private _influenceDelta = [[["dW", 0], ["dR", 0], ["dG", 0]]] call _hmCreate;
 
 private _bundle = [
     _districtId,

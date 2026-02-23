@@ -146,6 +146,9 @@ class CfgFunctions
 
             // Dev: compile audit (server) to surface SQF syntax errors early
             class devCompileAuditServer {};
+            class devDiagnosticsSnapshot {};
+            class devDiagnosticsClientReceive {};
+            class devToggleDebugMode {};
 
             // Field SITREPs (player -> TOC)
             class clientCanSendSitrep {};

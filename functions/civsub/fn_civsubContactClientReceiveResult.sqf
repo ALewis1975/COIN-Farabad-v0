@@ -14,6 +14,8 @@ params [
     ["_in", "", ["", createHashMap, []]]
 ];
 
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
 private _d = uiNamespace getVariable ["ARC_civsubInteract_display", displayNull];
 private _resp = controlNull;
 if (!isNull _d) then { _resp = _d displayCtrl 78320; };
@@ -28,13 +30,13 @@ if (_in isEqualType "") then {
     _html = _in;
 } else {
     private _hm = _in;
-    if (_hm isEqualType []) then { _hm = createHashMapFromArray _hm; };
+    if (_hm isEqualType []) then { _hm = [_hm] call _hmCreate; };
     if (_hm isEqualType createHashMap) then {
         _html = _hm getOrDefault ["html", ""];
         _type = _hm getOrDefault ["type", ""];
         _ok = _hm getOrDefault ["ok", false];
         _payload = _hm getOrDefault ["payload", createHashMap];
-        if (_payload isEqualType []) then { _payload = createHashMapFromArray _payload; };
+        if (_payload isEqualType []) then { _payload = [_payload] call _hmCreate; };
     };
 };
 
@@ -54,7 +56,7 @@ private _stamp = if (_st isEqualType [] && {(count _st) >= 6}) then {
     "--:--:--"
 };
 
-uiNamespace setVariable ["ARC_console_civsubLastResult", createHashMapFromArray [
+uiNamespace setVariable ["ARC_console_civsubLastResult", [[
     ["raw", _raw],
     ["html", _html],
     ["type", _type],
@@ -62,7 +64,7 @@ uiNamespace setVariable ["ARC_console_civsubLastResult", createHashMapFromArray 
     ["payload", _payload],
     ["updatedAtText", _stamp],
     ["updatedAtTick", diag_tickTime]
-]];
+]] call _hmCreate];
 
 if (!isNull _resp && {!(_html isEqualTo "")}) then {
     _resp ctrlSetStructuredText parseText _html;

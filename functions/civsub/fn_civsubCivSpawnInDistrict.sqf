@@ -14,6 +14,8 @@
       - Publishes lastSpawnStage for fast probing without relying on RPT
 */
 
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
 private _dbg = missionNamespace getVariable ["civsub_v1_debug", false];
 
 // Phase 2 helpers (defined in civsubInitServer)
@@ -57,7 +59,7 @@ if (_district isEqualType createHashMap) then {
 } else {
     if (_district isEqualType []) then {
         if ((count _district) == 0) exitWith { ["district_empty","district_lookup"] call _fail };
-        _d = createHashMapFromArray _district;
+        _d = [_district] call _hmCreate;
     } else {
         if (true) exitWith { [format ["district_bad_type_%1", typeName _district],"district_lookup"] call _fail };
     };

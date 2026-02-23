@@ -68,9 +68,8 @@ private _getMeta = {
     if (!(_pairs isEqualType [])) exitWith { _default };
     if (_key isEqualTo "") exitWith { _default };
 
-    private _idx = _pairs findIf {
-        (_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key }
-    };
+    private _idx = -1;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) exitWith { _default };
     (_pairs # _idx) # 1
 };

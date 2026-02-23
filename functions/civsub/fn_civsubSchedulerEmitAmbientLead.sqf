@@ -21,6 +21,8 @@ params [
     ["_intelConf", 0.20, [0]]
 ];
 
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
 private _districtIdCheck = [_districtId, "NON_EMPTY_STRING", "districtId", [""]] call ARC_fnc_paramAssert;
 _districtId = _districtIdCheck param [1, ""];
 if !(_districtIdCheck param [0, false]) exitWith {
@@ -47,15 +49,15 @@ private _leadType = _leadTypes select (floor (random (count _leadTypes)));
 
 private _leadId = [] call ARC_fnc_civsubUuid;
 
-private _leadEmit = createHashMapFromArray [
+private _leadEmit = [[
     ["emit", true],
     ["lead_type", _leadType],
     ["lead_id", _leadId],
     ["confidence", _intelConf],
     ["seed", _seed]
-];
+]] call _hmCreate;
 
-private _influenceDelta = createHashMapFromArray [["dW", 0], ["dR", 0], ["dG", 0]];
+private _influenceDelta = [[["dW", 0], ["dR", 0], ["dG", 0]]] call _hmCreate;
 
 private _bundle = [
     _districtId,

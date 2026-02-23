@@ -24,7 +24,8 @@ if (_threadId isEqualTo "") exitWith {false};
 private _threads = ["threads", []] call ARC_fnc_stateGet;
 if (!(_threads isEqualType [])) then { _threads = []; };
 
-private _idx = _threads findIf { ([_x] call ARC_fnc_threadNormalizeRecord) isNotEqualTo [] && { ((_x # 0) isEqualTo _threadId) } };
+private _idx = -1;
+{ if (([_x] call ARC_fnc_threadNormalizeRecord) isNotEqualTo [] && { ((_x # 0) isEqualTo _threadId) }) exitWith { _idx = _forEachIndex; }; } forEach _threads;
 if (_idx < 0) exitWith {false};
 
 private _thr = [(_threads # _idx)] call ARC_fnc_threadNormalizeRecord;
@@ -93,9 +94,8 @@ if ((random 1) > _chance) exitWith {false};
 // Do not create a second command node lead if one already exists for this thread.
 private _leadPool = ["leadPool", []] call ARC_fnc_stateGet;
 if (!(_leadPool isEqualType [])) then { _leadPool = []; };
-private _hasCmd = _leadPool findIf {
-    _x isEqualType [] && { (count _x) >= 10 } && { (_x # 9) isEqualTo _threadId } && { toUpper (_x # 1) find "CMDNODE" == 0 }
-};
+private _hasCmd = -1;
+{ if (_x isEqualType [] && { (count _x) >= 10 } && { (_x # 9) isEqualTo _threadId } && { toUpper (_x # 1) find "CMDNODE" == 0 }) exitWith { _hasCmd = _forEachIndex; }; } forEach _leadPool;
 if (_hasCmd >= 0) exitWith {false};
 
 // Variant: heat + commander state determine whether this is a raid, meet, or intercept.

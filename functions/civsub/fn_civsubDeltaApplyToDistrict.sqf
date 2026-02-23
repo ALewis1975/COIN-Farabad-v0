@@ -10,6 +10,8 @@
 params [["_bundle", createHashMap, [createHashMap]]];
 if !(_bundle isEqualType createHashMap) exitWith {false};
 
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
 private _districtId = [_bundle, "districtId", ([_bundle, "district_id", ""] call _hg)] call _hg;
 if !(_districtId isEqualType "") exitWith {
     diag_log format ["[CIVSUB][WARN] DeltaApply invalid districtId type=%1 value=%2", typeName _districtId, _districtId];
@@ -51,7 +53,7 @@ _d set ["G_EFF_U", (_d getOrDefault ["G_EFF_U", 0]) + _dG];
 
 // Phase 6 counters (best-effort). These are cumulative district totals.
 private _src = _bundle getOrDefault ["source", createHashMap];
-if (_src isEqualType []) then { _src = createHashMapFromArray _src; };
+if (_src isEqualType []) then { _src = [_src] call _hmCreate; };
 private _ev = "";
 if (_src isEqualType createHashMap) then { _ev = toUpper (_src getOrDefault ["event", ""]); };
 

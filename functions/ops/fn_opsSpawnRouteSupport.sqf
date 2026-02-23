@@ -782,7 +782,8 @@ private _spawnedSites = 0;
     if (surfaceIsWater _sitePos) then { continue; };
 
     // Avoid stacking (runtime-only)
-    private _dupe = (_sites findIf { (_sitePos distance2D (_x # 0)) < _dedupeR }) >= 0;
+    private _dupe = false;
+    { if ((_sitePos distance2D (_x # 0)) < _dedupeR) exitWith { _dupe = true; }; } forEach _sites;
     if (_dupe) then { continue; };
 
     // Avoid placing inside the airbase unless explicitly allowed.

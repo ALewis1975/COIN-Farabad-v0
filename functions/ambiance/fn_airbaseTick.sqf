@@ -163,7 +163,8 @@ private _metaGet = {
 
 private _metaSet = {
     params ["_rows", "_k", "_v"];
-    private _idx = _rows findIf { _x isEqualType [] && { (count _x) >= 2 } && { ((_x # 0)) isEqualTo _k } };
+    private _idx = -1;
+    { if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x # 0)) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
     if (_idx < 0) then { _rows pushBack [_k, _v]; } else { _rows set [_idx, [_k, _v]]; };
     _rows
 };
@@ -194,6 +195,13 @@ private _fnNotifyMaybe = {
     };
 };
 
+// UID → owner cache: built once per tick, replaces 4 inline allPlayers scans
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+private _uidOwnerPairs = [];
+{ _uidOwnerPairs pushBack [getPlayerUID _x, owner _x]; } forEach allPlayers;
+private _uidOwnerCache = [_uidOwnerPairs] call _hmCreate;
+private _hgOwner = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+
 private _towerControllers = [];
 if (!_forceAiOnly) then {
     {
@@ -221,11 +229,8 @@ if (!(_towerStaffing isEqualType [])) then { _towerStaffing = []; };
 
 private _staffLaneRec = {
     params ["_rows", "_lane"];
-    private _idx = _rows findIf {
-        (_x isEqualType []) &&
-        { (count _x) >= 5 } &&
-        { ((_x param [0, ""]) isEqualTo _lane) }
-    };
+    private _idx = -1;
+    { if ((_x isEqualType []) && { (count _x) >= 5 } && { ((_x param [0, ""]) isEqualTo _lane) }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
     if (_idx < 0) exitWith { [_lane, "AUTO", "", "", -1] };
     _rows # _idx
 };
@@ -233,13 +238,13 @@ private _staffLaneRec = {
 private _laneControllerCount = {
     params ["_lane"];
     private _rec = [_towerStaffing, _lane] call _staffLaneRec;
-    private _status = toUpperANSI (_rec param [1, "AUTO"]);
+    private _status = toUpper (_rec param [1, "AUTO"]);
     if (_status isEqualTo "MANNED") then { 1 } else { 0 }
 };
 
 private _laneForRequest = {
     params ["_reqType"];
-    private _rt = toUpperANSI _reqType;
+    private _rt = toUpper _reqType;
     if (_rt in ["REQ_INBOUND", "REQ_LAND", "REQ_EMERGENCY"]) exitWith { "arrival" };
     if (_rt isEqualTo "REQ_TAXI") exitWith { "ground" };
     "tower"
@@ -247,7 +252,7 @@ private _laneForRequest = {
 
 private _laneTimeoutFor = {
     params ["_lane"];
-    switch (toLowerANSI _lane) do {
+    switch (toLower _lane) do {
         case "arrival": { _controllerTimeoutArrivalS };
         case "ground": { _controllerTimeoutGroundS };
         default { _controllerTimeoutTowerS };
@@ -256,7 +261,7 @@ private _laneTimeoutFor = {
 
 private _laneAutoDelayFor = {
     params ["_lane"];
-    switch (toLowerANSI _lane) do {
+    switch (toLower _lane) do {
         case "arrival": { _autoDelayArrivalS };
         case "ground": { _autoDelayGroundS };
         default { _autoDelayTowerS };
@@ -269,7 +274,7 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
     private _rec = _clearanceRequests # _iClr;
     if !(_rec isEqualType []) then { continue; };
 
-    private _status = toUpperANSI (_rec param [6, ""]);
+    private _status = toUpper (_rec param [6, ""]);
     if (_status in ["APPROVED", "DENIED", "CANCELED", "COMPLETE"]) then { continue; };
 
     private _createdAt = _rec param [7, _nowTs];
@@ -287,7 +292,7 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
     private _staleEscalateS = missionNamespace getVariable ["airbase_v1_inbound_stale_escalate_s", 45];
 
     private _distM = -1;
-    private _rtypeNow = toUpperANSI (_rec param [1, ""]);
+    private _rtypeNow = toUpper (_rec param [1, ""]);
     if (_rtypeNow in ["REQ_INBOUND", "REQ_LAND"]) then {
         private _airNid = _rec param [4, ""];
         private _veh = objectFromNetId _airNid;
@@ -351,7 +356,7 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
 
     if (_laneControllers > 0) then {
         if (_autoInProgress) then {
-            _meta = [_meta, "automationStatus", format ["AUTO decision in progress (%1 lane). ETA %2s", toUpperANSI _laneId, (_autoDecisionAtExisting - _nowTs) max 0]] call _metaSet;
+            _meta = [_meta, "automationStatus", format ["AUTO decision in progress (%1 lane). ETA %2s", toUpper _laneId, (_autoDecisionAtExisting - _nowTs) max 0]] call _metaSet;
             _meta = [_meta, "automationEtaS", (_autoDecisionAtExisting - _nowTs) max 0] call _metaSet;
             _meta = [_meta, "automationSource", "AUTO_IN_PROGRESS_LOCKED"] call _metaSet;
             _rec set [10, _meta];
@@ -365,7 +370,7 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
             _rec set [9, ["", "", -1, "", "AWAITING_TOWER"]];
             _meta = [_meta, "awaitingTowerDecision", true] call _metaSet;
             _meta = [_meta, "towerControllersPresent", _laneControllers] call _metaSet;
-            _meta = [_meta, "automationStatus", format ["Awaiting %1 controller decision", toUpperANSI _laneId]] call _metaSet;
+            _meta = [_meta, "automationStatus", format ["Awaiting %1 controller decision", toUpper _laneId]] call _metaSet;
             _meta = [_meta, "automationEtaS", -1] call _metaSet;
             _meta = [_meta, "automationDecisionAt", -1] call _metaSet;
             _meta = [_meta, "automationSource", "MANNED_LANE"] call _metaSet;
@@ -378,14 +383,12 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
             private _requesterUidAwait = _rec param [2, ""];
             ["LOCK_ACQUIRE", _ridAwait, "SYSTEM", _requesterUidAwait, [_laneId, _laneControllers]] call _fnEventPush;
 
-            private _requesterOwnerAwait = -1;
-            { if ((getPlayerUID _x) isEqualTo _requesterUidAwait) exitWith { _requesterOwnerAwait = owner _x; }; } forEach allPlayers;
-            [_requesterOwnerAwait, "TOAST", "Airbase Clearance", format ["Request queued: %1 awaiting %2 controller", _ridAwait, toUpperANSI _laneId], format ["AIR_REQ_AWAIT:%1", _ridAwait]] call _fnNotifyMaybe;
+            private _requesterOwnerAwait = [_uidOwnerCache, _requesterUidAwait, -1] call _hgOwner;
+            [_requesterOwnerAwait, "TOAST", "Airbase Clearance", format ["Request queued: %1 awaiting %2 controller", _ridAwait, toUpper _laneId], format ["AIR_REQ_AWAIT:%1", _ridAwait]] call _fnNotifyMaybe;
             {
                 private _towUid = _x param [1, ""];
-                private _towOwner = -1;
-                { if ((getPlayerUID _x) isEqualTo _towUid) exitWith { _towOwner = owner _x; }; } forEach allPlayers;
-                [_towOwner, "TOAST", "Airbase Tower", format ["Decision required (%1): %2", toUpperANSI _laneId, _ridAwait], format ["AIR_CTRL_PENDING:%1:%2", _ridAwait, _towUid]] call _fnNotifyMaybe;
+                private _towOwner = [_uidOwnerCache, _towUid, -1] call _hgOwner;
+                [_towOwner, "TOAST", "Airbase Tower", format ["Decision required (%1): %2", toUpper _laneId, _ridAwait], format ["AIR_CTRL_PENDING:%1:%2", _ridAwait, _towUid]] call _fnNotifyMaybe;
             } forEach _towerControllers;
 
             if (_opsLogEnabled || _debugOps) then {
@@ -413,7 +416,7 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
         _meta = [_meta, "automationTimeoutS", _laneTimeoutS] call _metaSet;
         _meta = [_meta, "automationDelayS", _laneAutoDelayS] call _metaSet;
         _meta = [_meta, "automationDecisionAt", _autoDueAt] call _metaSet;
-        _meta = [_meta, "automationStatus", format ["AUTO queue active (%1 lane). ETA %2s", toUpperANSI _laneId, _laneTimeoutS + _laneAutoDelayS]] call _metaSet;
+        _meta = [_meta, "automationStatus", format ["AUTO queue active (%1 lane). ETA %2s", toUpper _laneId, _laneTimeoutS + _laneAutoDelayS]] call _metaSet;
         _meta = [_meta, "automationEtaS", (_autoDueAt - _nowTs) max 0] call _metaSet;
         _meta = [_meta, "automationSource", "UNMANNED_LANE"] call _metaSet;
 
@@ -431,14 +434,13 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
         private _requesterUidAutoQueue = _rec param [2, ""];
         ["AUTO_QUEUE", _ridAutoQueue, "SYSTEM", _requesterUidAutoQueue, [_laneId, _autoDueAt]] call _fnEventPush;
 
-        private _requesterOwnerAutoQueue = -1;
-        { if ((getPlayerUID _x) isEqualTo _requesterUidAutoQueue) exitWith { _requesterOwnerAutoQueue = owner _x; }; } forEach allPlayers;
-        [_requesterOwnerAutoQueue, "TOAST", "Airbase Clearance", format ["%1 in AUTO queue (%2). ETA %3s", _ridAutoQueue, toUpperANSI _laneId, (_autoDueAt - _nowTs) max 0], format ["AIR_REQ_AUTOQ:%1", _ridAutoQueue]] call _fnNotifyMaybe;
+        private _requesterOwnerAutoQueue = [_uidOwnerCache, _requesterUidAutoQueue, -1] call _hgOwner;
+        [_requesterOwnerAutoQueue, "TOAST", "Airbase Clearance", format ["%1 in AUTO queue (%2). ETA %3s", _ridAutoQueue, toUpper _laneId, (_autoDueAt - _nowTs) max 0], format ["AIR_REQ_AUTOQ:%1", _ridAutoQueue]] call _fnNotifyMaybe;
         continue;
     };
 
     _meta = [_meta, "automationEtaS", (_autoDecisionAt - _nowTs) max 0] call _metaSet;
-    _meta = [_meta, "automationStatus", format ["AUTO decision pending (%1 lane). ETA %2s", toUpperANSI _laneId, (_autoDecisionAt - _nowTs) max 0]] call _metaSet;
+    _meta = [_meta, "automationStatus", format ["AUTO decision pending (%1 lane). ETA %2s", toUpper _laneId, (_autoDecisionAt - _nowTs) max 0]] call _metaSet;
     _rec set [10, _meta];
     _clearanceRequests set [_iClr, _rec];
 
@@ -457,7 +459,7 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
     _meta = [_meta, "autoDecidedLane", _laneId] call _metaSet;
     _meta = [_meta, "autoDecidedAt", _nowTs] call _metaSet;
     _meta = [_meta, "automationEtaS", 0] call _metaSet;
-    _meta = [_meta, "automationStatus", format ["AUTO DECIDED by %1 lane automation", toUpperANSI _laneId]] call _metaSet;
+    _meta = [_meta, "automationStatus", format ["AUTO DECIDED by %1 lane automation", toUpper _laneId]] call _metaSet;
     _rec set [10, _meta];
 
     _clearanceRequests set [_iClr, _rec];
@@ -467,9 +469,8 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
     private _requesterUidAi = _rec param [2, ""];
     ["APPROVE", _ridAi, "AI", _requesterUidAi, ["AUTO_DECIDED", _laneId]] call _fnEventPush;
 
-    private _requesterOwnerAi = -1;
-    { if ((getPlayerUID _x) isEqualTo _requesterUidAi) exitWith { _requesterOwnerAi = owner _x; }; } forEach allPlayers;
-    [_requesterOwnerAi, "TOAST", "Airbase Clearance", format ["AUTO DECIDED: %1 approved by %2 lane automation", _ridAi, toUpperANSI _laneId], format ["AIR_REQ_APPROVE_AI:%1", _ridAi]] call _fnNotifyMaybe;
+    private _requesterOwnerAi = [_uidOwnerCache, _requesterUidAi, -1] call _hgOwner;
+    [_requesterOwnerAi, "TOAST", "Airbase Clearance", format ["AUTO DECIDED: %1 approved by %2 lane automation", _ridAi, toUpper _laneId], format ["AIR_REQ_APPROVE_AI:%1", _ridAi]] call _fnNotifyMaybe;
 
     if (_opsLogEnabled || _debugOps) then {
         ["OPS", format ["AIRBASE CLEARANCE: %1 AUTO DECIDED by %2 lane automation", _rec param [0, ""], _laneId], _center, 0, [
@@ -962,7 +963,8 @@ for "_i" from 0 to ((count _queue) - 1) do {
 
         private _isOverride = false;
         private _isEmergency = false;
-        private _rIdx = _recs findIf { (_x param [0, ""]) isEqualTo _qFid };
+        private _rIdx = -1;
+        { if ((_x param [0, ""]) isEqualTo _qFid) exitWith { _rIdx = _forEachIndex; }; } forEach _recs;
         if (_rIdx >= 0) then {
             private _rec = _recs # _rIdx;
             private _meta = _rec param [7, []];
@@ -1040,7 +1042,8 @@ if (!_reserved) exitWith {
     };
 };
 
-private _idxRecActive = _recs findIf { (_x param [0,""]) isEqualTo _fid };
+private _idxRecActive = -1;
+{ if ((_x param [0,""]) isEqualTo _fid) exitWith { _idxRecActive = _forEachIndex; }; } forEach _recs;
 if (_idxRecActive >= 0) then {
     private _rActive = _recs # _idxRecActive;
     _rActive set [5, "ACTIVE"];
@@ -1086,7 +1089,8 @@ if (_idxRecActive >= 0) then {
     private _occupied = [_fid, _kind, _detail, _occupyTimeoutS, "EXEC_START"] call ARC_fnc_airbaseRunwayLockOccupy;
     if (!_occupied) exitWith {
         private _recsBlock = ["airbase_v1_records", []] call ARC_fnc_stateGet;
-        private _idxBlock = _recsBlock findIf { (_x param [0,""]) isEqualTo _fid };
+        private _idxBlock = -1;
+        { if ((_x param [0,""]) isEqualTo _fid) exitWith { _idxBlock = _forEachIndex; }; } forEach _recsBlock;
         if (_idxBlock >= 0) then {
             private _rBlock = _recsBlock # _idxBlock;
             _rBlock set [5, "FAILED"];
@@ -1111,7 +1115,8 @@ if (_idxRecActive >= 0) then {
     private _ok = false;
 
     if (_kind isEqualTo "DEP") then {
-        private _aIdx = _assetsL findIf { ([_x, "id", ""] call _fnHmGetLocal) isEqualTo _detail };
+        private _aIdx = -1;
+        { if (([_x, "id", ""] call _fnHmGetLocal) isEqualTo _detail) exitWith { _aIdx = _forEachIndex; }; } forEach _assetsL;
         if (_aIdx >= 0) then {
             private _asset = _assetsL # _aIdx;
 
@@ -1138,7 +1143,8 @@ if (_idxRecActive >= 0) then {
 
     // Mark record complete/failed
     private _recs2 = ["airbase_v1_records", []] call ARC_fnc_stateGet;
-    private _idx2 = _recs2 findIf { (_x param [0,""]) isEqualTo _fid };
+    private _idx2 = -1;
+    { if ((_x param [0,""]) isEqualTo _fid) exitWith { _idx2 = _forEachIndex; }; } forEach _recs2;
     if (_idx2 >= 0) then {
         private _r2 = _recs2 # _idx2;
         _r2 set [5, if (_ok) then { "COMPLETE" } else { "FAILED" }];

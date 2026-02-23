@@ -26,11 +26,15 @@ if !((_posATL # 0) isEqualTo 0 && {(_posATL # 1) isEqualTo 0}) then
     private _grid = mapGridPosition _posATL;
     private _zone = [_posATL] call ARC_fnc_worldGetZoneForPos;
 
-    if ((_meta findIf { (_x # 0) isEqualTo "grid" }) < 0) then
+    private _foundGrid = false;
+    { if ((_x # 0) isEqualTo "grid") exitWith { _foundGrid = true; }; } forEach _meta;
+    if (!_foundGrid) then
     {
         _meta pushBack ["grid", _grid];
     };
-    if ((_meta findIf { (_x # 0) isEqualTo "zone" }) < 0) then
+    private _foundZone = false;
+    { if ((_x # 0) isEqualTo "zone") exitWith { _foundZone = true; }; } forEach _meta;
+    if (!_foundZone) then
     {
         _meta pushBack ["zone", _zone];
     };

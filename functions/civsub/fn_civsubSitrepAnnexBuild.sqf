@@ -26,6 +26,8 @@ params [
     ["_pos", [0,0,0], [[]]]
 ];
 
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
 _districtId = toUpper (trim _districtId);
 if (_districtId isEqualTo "") exitWith {""};
 
@@ -33,7 +35,7 @@ private _districts = missionNamespace getVariable ["civsub_v1_districts", create
 if !(_districts isEqualType createHashMap) exitWith {""};
 
 private _d = _districts getOrDefault [_districtId, createHashMap];
-if (_d isEqualType []) then { _d = createHashMapFromArray _d; };
+if (_d isEqualType []) then { _d = [_d] call _hmCreate; };
 if !(_d isEqualType createHashMap) exitWith {""};
 
 private _active = [_d] call ARC_fnc_civsubIsDistrictActive;
@@ -79,7 +81,7 @@ if (_start isEqualType createHashMap) then { _startHm = _start; };
 if (_start isEqualType []) then
 {
     // array-of-pairs -> hashmap
-    _startHm = createHashMapFromArray _start;
+    _startHm = [_start] call _hmCreate;
 };
 
 private _hasWindow = (_incDid isEqualTo _districtId) && { _startHm isEqualType createHashMap } && { (count (keys _startHm)) > 0 };
@@ -121,7 +123,7 @@ private _daid = _aid - _aidS;
 
 // Pull latest district event bundle if available (Phase 5.5 contract).
 private _last = missionNamespace getVariable ["civsub_v1_lastScheduler_bundle", createHashMap];
-if (_last isEqualType []) then { _last = createHashMapFromArray _last; };
+if (_last isEqualType []) then { _last = [_last] call _hmCreate; };
 private _lastEvent = "";
 if (_last isEqualType createHashMap) then
 {
@@ -130,14 +132,14 @@ if (_last isEqualType createHashMap) then
     if ((toUpper _did) isEqualTo _districtId) then
     {
         private _src = _last getOrDefault ["source", createHashMap];
-        if (_src isEqualType []) then { _src = createHashMapFromArray _src; };
+        if (_src isEqualType []) then { _src = [_src] call _hmCreate; };
         private _ev = "";
         if (_src isEqualType createHashMap) then { _ev = _src getOrDefault ["event", ""]; };
         if (_ev isEqualTo "") then { _ev = "CIVSUB_EVENT"; };
 
         private _ts = _last getOrDefault ["ts", -1];
         private _lead = _last getOrDefault ["lead_emit", createHashMap];
-        if (_lead isEqualType []) then { _lead = createHashMapFromArray _lead; };
+        if (_lead isEqualType []) then { _lead = [_lead] call _hmCreate; };
         private _lt = "";
         private _conf = -1;
         if (_lead isEqualType createHashMap) then

@@ -50,7 +50,8 @@ _note = trim _note;
 private _pool = ["leadPool", []] call ARC_fnc_stateGet;
 if (!(_pool isEqualType [])) then { _pool = []; };
 
-private _li = _pool findIf { _x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _leadId } };
+private _li = -1;
+{ if (_x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _leadId }) exitWith { _li = _forEachIndex; }; } forEach _pool;
 if (_li < 0) exitWith {false};
 
 private _lead = _pool # _li;
@@ -75,7 +76,8 @@ private _back = ["tocBacklog", []] call ARC_fnc_stateGet;
 if (!(_back isEqualType [])) then { _back = []; };
 
 // Avoid duplicates by leadId.
-private _exists = _back findIf { _x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _leadId } };
+private _exists = -1;
+{ if (_x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _leadId }) exitWith { _exists = _forEachIndex; }; } forEach _back;
 if (_exists >= 0) exitWith {true};
 
 // Record shape:
