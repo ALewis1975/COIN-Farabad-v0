@@ -33,6 +33,7 @@ class CfgFunctions
             class incidentLoop {};
             class incidentTick {};
             class incidentCreate {};
+            class incidentSeedQueue {};
             class incidentClose {};
             class incidentMarkReadyToClose {};
 

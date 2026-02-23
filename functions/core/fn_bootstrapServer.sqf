@@ -44,7 +44,7 @@ enableDynamicSimulationSystem true;
         _mob setVariable ["ARC_mobileOps_ehInstalled", true, true];
 
         _mob addEventHandler ["Local", {
-            params ["_entity", "_isLocal"];
+            params ["_entity", ""];
             missionNamespace setVariable ["ARC_mobileOpsVehicleNetId", netId _entity, true];
             [] remoteExecCall ["ARC_fnc_tocInitPlayer", 0];
         }];
@@ -809,6 +809,9 @@ missionNamespace setVariable ["ARC_activeConvoyNetIds", ["activeConvoyNetIds", [
 // Intel layer init (TOC queue, orders, metrics sampling)
 [] call ARC_fnc_intelInit;
 
+// Seed initial TOC queue from METT-TC starting conditions
+[] call ARC_fnc_incidentSeedQueue;
+
 // Company command model (server-owned Alpha/Bravo leadership nodes)
 [] call ARC_fnc_companyCommandInit;
 [] call ARC_fnc_companyCommandTick;
@@ -888,10 +891,10 @@ if (isServer) then
                 private _d = date;
                 private _dt = daytime;
 
-                private _tNightEnd = _thr # 0;
-                private _tMorningEnd = _thr # 1;
-                private _tWorkEnd = _thr # 2;
-                private _tEveningEnd = _thr # 3;
+                private _tNightEnd = _thr select 0;
+                private _tMorningEnd = _thr select 1;
+                private _tWorkEnd = _thr select 2;
+                private _tEveningEnd = _thr select 3;
 
                 private _phase = "NIGHT";
                 if (_dt < _tNightEnd) then { _phase = "NIGHT"; }
@@ -928,10 +931,10 @@ if (isServer) then
                     private _d = date;
                     private _dt = daytime;
 
-                    private _tNightEnd = _thr # 0;
-                    private _tMorningEnd = _thr # 1;
-                    private _tWorkEnd = _thr # 2;
-                    private _tEveningEnd = _thr # 3;
+                    private _tNightEnd = _thr select 0;
+                    private _tMorningEnd = _thr select 1;
+                    private _tWorkEnd = _thr select 2;
+                    private _tEveningEnd = _thr select 3;
 
                     private _phase = "NIGHT";
                     if (_dt < _tNightEnd) then { _phase = "NIGHT"; }
