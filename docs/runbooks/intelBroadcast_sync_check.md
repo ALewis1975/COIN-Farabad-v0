@@ -27,6 +27,6 @@ This line comes from `functions/core/fn_intelBroadcast.sqf` and confirms the run
 Search RPT for:
 
 - `Undefined variable in expression: _v`
-- `fn_intelBroadcast.sqf line 57`
+- `fn_intelBroadcast.sqf`
 
-Expected result after sync and run: **zero occurrences** tied to `fn_intelBroadcast.sqf line 57`.
+Expected result after sync and run: **zero occurrences** of `Undefined variable in expression: _v` tied to `fn_intelBroadcast.sqf`.
