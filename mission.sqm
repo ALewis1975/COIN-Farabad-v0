@@ -20,7 +20,7 @@ class EditorData
 	};
 	class LayerIndexProvider
 	{
-		nextID=100072;
+		nextID=100844;
 	};
 	class Camera
 	{
@@ -26883,7 +26883,7 @@ class Mission
 														angles[]={0,4.7120719,0};
 													};
 													side="West";
-													flags=1;
+													flags=5;
 													class Attributes
 													{
 														skill=0.2;
@@ -26990,7 +26990,6 @@ class Mission
 													};
 													id=119;
 													type="rhsusf_airforce_security_force_rifleman";
-													atlOffset=0.38735962;
 													class CustomAttributes
 													{
 														class Attribute0
@@ -27189,7 +27188,6 @@ class Mission
 													};
 													id=120;
 													type="rhsusf_airforce_security_force_rifleman";
-													atlOffset=-1.6212463e-05;
 													class CustomAttributes
 													{
 														class Attribute0
@@ -27282,7 +27280,7 @@ class Mission
 														angles[]={0,4.7120719,0};
 													};
 													side="West";
-													flags=1;
+													flags=5;
 													class Attributes
 													{
 														skill=0.2;
@@ -27388,7 +27386,6 @@ class Mission
 													};
 													id=121;
 													type="rhsusf_airforce_security_force_rifleman";
-													atlOffset=0.38735962;
 													class CustomAttributes
 													{
 														class Attribute0
@@ -27572,7 +27569,7 @@ class Mission
 													};
 													id=122;
 													type="rhsusf_airforce_security_force_rifleman";
-													atlOffset=0.11466312;
+													atlOffset=8.9645386e-05;
 													class CustomAttributes
 													{
 														class Attribute0
@@ -27974,6 +27971,7 @@ class Mission
 													};
 													id=124;
 													type="rhsusf_airforce_security_force_rifleman";
+													atlOffset=-1.6212463e-05;
 													class CustomAttributes
 													{
 														class Attribute0
@@ -28066,7 +28064,7 @@ class Mission
 														angles[]={0,4.7120719,0};
 													};
 													side="West";
-													flags=1;
+													flags=5;
 													class Attributes
 													{
 														skill=0.2;
@@ -28173,7 +28171,7 @@ class Mission
 													};
 													id=125;
 													type="rhsusf_airforce_security_force_rifleman";
-													atlOffset=0.38979912;
+													atlOffset=-1.6212463e-05;
 													class CustomAttributes
 													{
 														class Attribute0
@@ -28266,7 +28264,7 @@ class Mission
 														angles[]={0,4.7120719,0};
 													};
 													side="West";
-													flags=1;
+													flags=5;
 													class Attributes
 													{
 														skill=0.2;
@@ -28372,7 +28370,7 @@ class Mission
 													};
 													id=126;
 													type="rhsusf_airforce_security_force_rifleman";
-													atlOffset=0.38979912;
+													atlOffset=-1.6212463e-05;
 													class CustomAttributes
 													{
 														class Attribute0
@@ -28963,7 +28961,7 @@ class Mission
 														angles[]={6.2527204,4.7120719,0.0076193968};
 													};
 													side="West";
-													flags=1;
+													flags=5;
 													class Attributes
 													{
 														skill=0.2;
@@ -29070,7 +29068,7 @@ class Mission
 													};
 													id=241;
 													type="rhsusf_airforce_security_force_rifleman";
-													atlOffset=0.30136251;
+													atlOffset=-0.0016794205;
 													class CustomAttributes
 													{
 														class Attribute0
@@ -29269,7 +29267,7 @@ class Mission
 													};
 													id=242;
 													type="rhsusf_airforce_security_force_rifleman";
-													atlOffset=-0.082568169;
+													atlOffset=-0.0016794205;
 													class CustomAttributes
 													{
 														class Attribute0
@@ -29362,7 +29360,7 @@ class Mission
 														angles[]={6.2527204,4.7120719,0.0076193968};
 													};
 													side="West";
-													flags=1;
+													flags=5;
 													class Attributes
 													{
 														skill=0.2;
@@ -29468,7 +29466,7 @@ class Mission
 													};
 													id=243;
 													type="rhsusf_airforce_security_force_rifleman";
-													atlOffset=0.30136251;
+													atlOffset=-0.0016794205;
 													class CustomAttributes
 													{
 														class Attribute0
@@ -30428,7 +30426,7 @@ class Mission
 														angles[]={0,5.7603893,0};
 													};
 													side="West";
-													flags=1;
+													flags=5;
 													class Attributes
 													{
 														skill=0.2;
@@ -30535,7 +30533,7 @@ class Mission
 													};
 													id=253;
 													type="rhsusf_airforce_security_force_rifleman";
-													atlOffset=0.30724669;
+													atlOffset=-0.010922432;
 													class CustomAttributes
 													{
 														class Attribute0
@@ -30628,7 +30626,7 @@ class Mission
 														angles[]={0,5.7603893,0};
 													};
 													side="West";
-													flags=1;
+													flags=5;
 													class Attributes
 													{
 														skill=0.2;
@@ -30734,7 +30732,7 @@ class Mission
 													};
 													id=254;
 													type="rhsusf_airforce_security_force_rifleman";
-													atlOffset=0.30724669;
+													atlOffset=-0.010922432;
 													class CustomAttributes
 													{
 														class Attribute0
@@ -37091,7 +37089,7 @@ class Mission
 													};
 													id=2044;
 													type="rhsusf_army_ocp_engineer";
-													atlOffset=0.008433342;
+													atlOffset=-0.0090475082;
 													class CustomAttributes
 													{
 														class Attribute0
@@ -37252,7 +37250,7 @@ class Mission
 													};
 													id=2043;
 													type="rhsusf_army_ocp_medic";
-													atlOffset=0.0033655167;
+													atlOffset=-0.0068035126;
 													class CustomAttributes
 													{
 														class Attribute0
@@ -37413,7 +37411,7 @@ class Mission
 													};
 													id=1544;
 													type="rhsusf_army_ocp_driver_armored";
-													atlOffset=-4.7683716e-07;
+													atlOffset=-0.0093860626;
 												};
 												class Item1
 												{
@@ -37505,7 +37503,7 @@ class Mission
 													};
 													id=1560;
 													type="rhsusf_army_ocp_driver_armored";
-													atlOffset=0.0032453537;
+													atlOffset=-0.015376091;
 												};
 												class Item1
 												{
@@ -108974,7 +108972,6 @@ class Mission
 											};
 											id=4546;
 											type="UK3CB_MEC_C_DOC";
-											atlOffset=4.7683716e-07;
 										};
 										class Item1
 										{
@@ -108991,7 +108988,6 @@ class Mission
 											};
 											id=4547;
 											type="UK3CB_MEC_C_DOC";
-											atlOffset=4.7683716e-07;
 										};
 										class Item2
 										{
@@ -109071,7 +109067,6 @@ class Mission
 											};
 											id=4553;
 											type="UK3CB_MEC_C_DOC";
-											atlOffset=0.010010242;
 										};
 										class Item1
 										{
@@ -109088,7 +109083,6 @@ class Mission
 											};
 											id=4554;
 											type="UK3CB_MEC_C_DOC";
-											atlOffset=0.010010242;
 										};
 										class Item2
 										{
@@ -109168,7 +109162,6 @@ class Mission
 											};
 											id=4557;
 											type="UK3CB_MEC_C_DOC";
-											atlOffset=0.040009975;
 										};
 										class Item1
 										{
@@ -110383,6 +110376,7 @@ class Mission
 					};
 					id=4433;
 					type="B_Deck_Crew_F";
+					atlOffset=0.00049972534;
 					class CustomAttributes
 					{
 						class Attribute0
