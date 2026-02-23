@@ -29,6 +29,7 @@ class CfgFunctions
             class s1RegistryInit {};
             class s1RegistryUpsertUnit {};
             class s1RegistrySnapshot {};
+            class s1EchelonClassify {};
 
             class incidentLoop {};
             class incidentTick {};
