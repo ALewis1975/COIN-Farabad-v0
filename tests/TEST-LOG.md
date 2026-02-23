@@ -12,6 +12,32 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 ---
 
 
+## 2026-02-23 06:33 UTC — RPT evaluation fixes (compile audit, CIVSUB isNil, lightbar)
+
+**Branch/Commit:** copilot/audit-sqf-mission-project @ e0e07f2
+
+**Scenario:** Address P0/P1 findings from RPT evaluation (Arma3_x64_2026-02-22_23-17-05.rpt).
+
+**Changes:**
+1. `fn_devCompileAuditServer.sqf`: Replace `[] call compile` with `compile` (compile-only, no execution). Add 15s debounce.
+2. `fn_civsubContactActionBackgroundCheck.sqf`: Fix `isNil` patterns on lines 152 and 201 — add trailing variable so `isNil` checks the assigned value instead of the assignment expression (which always returns Nothing).
+3. `ARC_lightbarStartupServer.sqf`: Read vehicle targets from `ARC_lightbarTargets` missionNamespace variable with fallback to hardcoded default.
+
+**Commands:**
+```
+python3 scripts/dev/sqflint_compat_scan.py --strict <changed files>
+git --no-pager diff --check
+```
+
+**Result:** BLOCKED
+
+**Notes:**
+- `sqflint_compat_scan.py`: 3 pre-existing warnings in fn_devCompileAuditServer.sqf (isNotEqualTo ×2, fileExists ×1) — none introduced by this change.
+- `git diff --check`: PASS (no whitespace issues).
+- sqflint binary not available in CI container; runtime validation requires dedicated server.
+- Dedicated server runtime verification remains deferred per repository constraints.
+
+
 ## 2026-02-23 03:09 UTC — intel meta sanitizer `_v` declaration hardening
 
 **Branch/Commit:** current branch @ 6ffd9fd0
