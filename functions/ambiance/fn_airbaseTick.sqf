@@ -163,7 +163,8 @@ private _metaGet = {
 
 private _metaSet = {
     params ["_rows", "_k", "_v"];
-    private _idx = _rows findIf { _x isEqualType [] && { (count _x) >= 2 } && { ((_x # 0)) isEqualTo _k } };
+    private _idx = -1;
+    { if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x # 0)) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
     if (_idx < 0) then { _rows pushBack [_k, _v]; } else { _rows set [_idx, [_k, _v]]; };
     _rows
 };
@@ -221,11 +222,8 @@ if (!(_towerStaffing isEqualType [])) then { _towerStaffing = []; };
 
 private _staffLaneRec = {
     params ["_rows", "_lane"];
-    private _idx = _rows findIf {
-        (_x isEqualType []) &&
-        { (count _x) >= 5 } &&
-        { ((_x param [0, ""]) isEqualTo _lane) }
-    };
+    private _idx = -1;
+    { if ((_x isEqualType []) && { (count _x) >= 5 } && { ((_x param [0, ""]) isEqualTo _lane) }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
     if (_idx < 0) exitWith { [_lane, "AUTO", "", "", -1] };
     _rows # _idx
 };
@@ -962,7 +960,8 @@ for "_i" from 0 to ((count _queue) - 1) do {
 
         private _isOverride = false;
         private _isEmergency = false;
-        private _rIdx = _recs findIf { (_x param [0, ""]) isEqualTo _qFid };
+        private _rIdx = -1;
+        { if ((_x param [0, ""]) isEqualTo _qFid) exitWith { _rIdx = _forEachIndex; }; } forEach _recs;
         if (_rIdx >= 0) then {
             private _rec = _recs # _rIdx;
             private _meta = _rec param [7, []];
@@ -1040,7 +1039,8 @@ if (!_reserved) exitWith {
     };
 };
 
-private _idxRecActive = _recs findIf { (_x param [0,""]) isEqualTo _fid };
+private _idxRecActive = -1;
+{ if ((_x param [0,""]) isEqualTo _fid) exitWith { _idxRecActive = _forEachIndex; }; } forEach _recs;
 if (_idxRecActive >= 0) then {
     private _rActive = _recs # _idxRecActive;
     _rActive set [5, "ACTIVE"];
@@ -1086,7 +1086,8 @@ if (_idxRecActive >= 0) then {
     private _occupied = [_fid, _kind, _detail, _occupyTimeoutS, "EXEC_START"] call ARC_fnc_airbaseRunwayLockOccupy;
     if (!_occupied) exitWith {
         private _recsBlock = ["airbase_v1_records", []] call ARC_fnc_stateGet;
-        private _idxBlock = _recsBlock findIf { (_x param [0,""]) isEqualTo _fid };
+        private _idxBlock = -1;
+        { if ((_x param [0,""]) isEqualTo _fid) exitWith { _idxBlock = _forEachIndex; }; } forEach _recsBlock;
         if (_idxBlock >= 0) then {
             private _rBlock = _recsBlock # _idxBlock;
             _rBlock set [5, "FAILED"];
@@ -1111,7 +1112,8 @@ if (_idxRecActive >= 0) then {
     private _ok = false;
 
     if (_kind isEqualTo "DEP") then {
-        private _aIdx = _assetsL findIf { ([_x, "id", ""] call _fnHmGetLocal) isEqualTo _detail };
+        private _aIdx = -1;
+        { if (([_x, "id", ""] call _fnHmGetLocal) isEqualTo _detail) exitWith { _aIdx = _forEachIndex; }; } forEach _assetsL;
         if (_aIdx >= 0) then {
             private _asset = _assetsL # _aIdx;
 
@@ -1138,7 +1140,8 @@ if (_idxRecActive >= 0) then {
 
     // Mark record complete/failed
     private _recs2 = ["airbase_v1_records", []] call ARC_fnc_stateGet;
-    private _idx2 = _recs2 findIf { (_x param [0,""]) isEqualTo _fid };
+    private _idx2 = -1;
+    { if ((_x param [0,""]) isEqualTo _fid) exitWith { _idx2 = _forEachIndex; }; } forEach _recs2;
     if (_idx2 >= 0) then {
         private _r2 = _recs2 # _idx2;
         _r2 set [5, if (_ok) then { "COMPLETE" } else { "FAILED" }];

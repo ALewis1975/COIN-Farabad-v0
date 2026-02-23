@@ -40,7 +40,8 @@ if (_flightId isEqualTo "") exitWith {false};
 private _queue = ["airbase_v1_queue", []] call ARC_fnc_stateGet;
 if (!(_queue isEqualType [])) then { _queue = []; };
 
-private _idx = _queue findIf { ((_x param [0, ""]) isEqualTo _flightId) };
+private _idx = -1;
+{ if ((_x param [0, ""]) isEqualTo _flightId) exitWith { _idx = _forEachIndex; }; } forEach _queue;
 if (_idx < 0) exitWith {
     private _owner = owner _caller;
     if (_owner > 0) then { [format ["Flight %1 is not currently queued.", _flightId]] remoteExec ["ARC_fnc_clientHint", _owner]; };

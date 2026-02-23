@@ -15,7 +15,8 @@ _flightId = trim _flightId;
 
 if (_flightId isEqualTo "") exitWith { [_queue, false, []] };
 
-private _idx = _queue findIf { ((_x param [0, ""]) isEqualTo _flightId) };
+private _idx = -1;
+{ if ((_x param [0, ""]) isEqualTo _flightId) exitWith { _idx = _forEachIndex; }; } forEach _queue;
 if (_idx < 0) exitWith { [_queue, false, []] };
 
 private _item = _queue deleteAt _idx;

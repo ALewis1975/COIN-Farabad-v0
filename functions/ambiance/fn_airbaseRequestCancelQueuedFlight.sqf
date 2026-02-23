@@ -41,7 +41,8 @@ if (_flightId isEqualTo "") exitWith {false};
 private _queue = ["airbase_v1_queue", []] call ARC_fnc_stateGet;
 if (!(_queue isEqualType [])) then { _queue = []; };
 
-private _idx = _queue findIf { ((_x param [0, ""]) isEqualTo _flightId) };
+private _idx = -1;
+{ if ((_x param [0, ""]) isEqualTo _flightId) exitWith { _idx = _forEachIndex; }; } forEach _queue;
 if (_idx < 0) exitWith {
     private _owner = owner _caller;
     if (_owner > 0) then { [format ["Flight %1 is not currently queued.", _flightId]] remoteExec ["ARC_fnc_clientHint", _owner]; };
@@ -50,7 +51,8 @@ if (_idx < 0) exitWith {
 
 private _recs = ["airbase_v1_records", []] call ARC_fnc_stateGet;
 if (!(_recs isEqualType [])) then { _recs = []; };
-private _rIdx = _recs findIf { ((_x param [0, ""]) isEqualTo _flightId) };
+private _rIdx = -1;
+{ if ((_x param [0, ""]) isEqualTo _flightId) exitWith { _rIdx = _forEachIndex; }; } forEach _recs;
 
 // Prevent cancellation of currently executing flights.
 private _execFid = missionNamespace getVariable ["airbase_v1_execFid", ""];
@@ -97,7 +99,8 @@ if (_qKind isEqualTo "ARR" && { _qDetail isEqualType "" && { !(_qDetail isEqualT
         private _rec = _recs # _rIdx;
         private _meta = _rec param [7, []];
         if (_meta isEqualType []) then {
-            private _modeIdx = _meta findIf { (_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo "mode" } && { (_x # 1) isEqualTo "RETURN" } };
+            private _modeIdx = -1;
+            { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo "mode" } && { (_x # 1) isEqualTo "RETURN" }) exitWith { _modeIdx = _forEachIndex; }; } forEach _meta;
             _isReturn = (_modeIdx >= 0);
         };
     };
@@ -110,14 +113,8 @@ if (_qKind isEqualTo "ARR" && { _qDetail isEqualType "" && { !(_qDetail isEqualT
             if (isNil "_assets" || {!(_assets isEqualType [])}) then { _assets = []; };
         };
 
-        private _aIdx = _assets findIf {
-            private _assetId = "";
-            if (_x isEqualType createHashMap) then {
-                _assetId = _x get "id";
-                if (isNil "_assetId" || {!(_assetId isEqualType "")}) then { _assetId = ""; };
-            };
-            _assetId isEqualTo _qDetail
-        };
+        private _aIdx = -1;
+        { private _assetId = ""; if (_x isEqualType createHashMap) then { _assetId = _x get "id"; if (isNil "_assetId" || {!(_assetId isEqualType "")}) then { _assetId = ""; }; }; if (_assetId isEqualTo _qDetail) exitWith { _aIdx = _forEachIndex; }; } forEach _assets;
 
         if (_aIdx < 0) exitWith {
             private _owner = owner _caller;

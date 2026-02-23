@@ -50,11 +50,9 @@ if (!(_staffing isEqualType [])) then { _staffing = []; };
 
 private _findLane = {
     params ["_rows", "_lane"];
-    _rows findIf {
-        (_x isEqualType []) &&
-        { (count _x) >= 5 } &&
-        { ((_x param [0, ""]) isEqualTo _lane) }
-    }
+    private _idx = -1;
+    { if ((_x isEqualType []) && { (count _x) >= 5 } && { ((_x param [0, ""]) isEqualTo _lane) }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
+    _idx
 };
 
 private _idx = [_staffing, _laneId] call _findLane;

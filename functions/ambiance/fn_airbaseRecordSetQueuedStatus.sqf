@@ -22,7 +22,8 @@ _status = toUpper (trim _status);
 if (_flightId isEqualTo "") exitWith { [_records, false] };
 if !(_status in ["CANCELED", "PRIORITIZED", "ACTIVE", "COMPLETE", "FAILED"]) exitWith { [_records, false] };
 
-private _idx = _records findIf { ((_x param [0, ""]) isEqualTo _flightId) };
+private _idx = -1;
+{ if ((_x param [0, ""]) isEqualTo _flightId) exitWith { _idx = _forEachIndex; }; } forEach _records;
 if (_idx < 0) exitWith { [_records, false] };
 
 private _rec = _records # _idx;

@@ -16,7 +16,8 @@ private _debugOps = missionNamespace getVariable ["airbase_v1_debugOpsLog", fals
 
 // Pull record
 private _recs = ["airbase_v1_records", []] call ARC_fnc_stateGet;
-private _idx = _recs findIf { (_x param [0,""]) isEqualTo _fid };
+private _idx = -1;
+{ if ((_x param [0,""]) isEqualTo _fid) exitWith { _idx = _forEachIndex; }; } forEach _recs;
 private _rec = if (_idx >= 0) then { _recs # _idx } else { [] };
 
 private _category = _rec param [3, "FW"];
@@ -31,7 +32,8 @@ private _isReturn = false;
 private _vehType = "";
 
 if (_detail isNotEqualTo "INBOUND") then {
-    private _aIdx = _assets findIf { (_x getOrDefault ["id",""]) isEqualTo _detail };
+    private _aIdx = -1;
+    { if ((_x getOrDefault ["id",""]) isEqualTo _detail) exitWith { _aIdx = _forEachIndex; }; } forEach _assets;
     if (_aIdx >= 0) then {
         _asset = _assets # _aIdx;
         _isReturn = true;
