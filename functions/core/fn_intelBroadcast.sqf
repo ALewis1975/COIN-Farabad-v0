@@ -26,11 +26,13 @@ private _metaValueMaxLen = missionNamespace getVariable ["ARC_pubIntelMetaValueM
 if (!(_metaValueMaxLen isEqualType 0) || { _metaValueMaxLen < 20 }) then { _metaValueMaxLen = 140; };
 _metaValueMaxLen = (_metaValueMaxLen min 240) max 20;
 
+private _trimFn = compile "params ['_s']; trim _s";
+
 private _log = ["intelLog", []] call ARC_fnc_stateGet;
 if (!(_log isEqualType [])) then { _log = []; };
 
-private _intel = _log select { _x isEqualType [] && { (count _x) >= 3 } && { toUpper (_x # 2) isNotEqualTo "OPS" } };
-private _ops   = _log select { _x isEqualType [] && { (count _x) >= 3 } && { toUpper (_x # 2) isEqualTo "OPS" } };
+private _intel = _log select { _x isEqualType [] && { (count _x) >= 3 } && { !(toUpper (_x select 2) isEqualTo "OPS") } };
+private _ops   = _log select { _x isEqualType [] && { (count _x) >= 3 } && { toUpper (_x select 2) isEqualTo "OPS" } };
 
 private _sanitizeMeta = {
     params ["_metaIn"];
@@ -48,17 +50,17 @@ private _sanitizeMeta = {
             _truncated = true;
             // Do NOT pushBack an invalid entry!
         } else {
-            _k = _x # 0;
+            _k = _x select 0;
             if !(_k isEqualType "") then {
                 _truncated = true;
             } else {
-                _k = trim _k;
+                _k = [_k] call _trimFn;
                 if (_k isEqualTo "") then {
                     _truncated = true;
                 } else {
-                    _v = _x # 1;
+                    _v = _x select 1;
                     if (_v isEqualType "") then {
-                        _v = trim _v;
+                        _v = [_v] call _trimFn;
                         if ((count _v) > _metaValueMaxLen) then { _v = _v select [0, _metaValueMaxLen]; _truncated = true; };
                     } else {
                         if (!(_v isEqualType 0) && !(_v isEqualType true) && !(_v isEqualType false)) then {
@@ -81,26 +83,30 @@ private _sanitizeEntry = {
     params ["_row"];
     if !(_row isEqualType [] && { (count _row) >= 6 }) exitWith { [] };
 
-    private _id = _row # 0;
-    private _ts = _row # 1;
-    private _cat = _row # 2;
-    private _sum = _row # 3;
-    private _pos = _row # 4;
-    private _meta = _row # 5;
+    private _id = _row select 0;
+    private _ts = _row select 1;
+    private _cat = _row select 2;
+    private _sum = _row select 3;
+    private _pos = _row select 4;
+    private _meta = _row select 5;
     private _truncated = false;
 
     if !(_id isEqualType "") then { _id = ""; _truncated = true; };
     if !(_ts isEqualType 0) then { _ts = 0; _truncated = true; };
     if !(_cat isEqualType "") then { _cat = "GEN"; _truncated = true; };
     if !(_sum isEqualType "") then { _sum = str _sum; _truncated = true; };
-    _sum = trim _sum;
+    _sum = [_sum] call _trimFn;
     if ((count _sum) > _maxSummaryLen) then { _sum = _sum select [0, _maxSummaryLen]; _truncated = true; };
 
     if !(_pos isEqualType [] && { (count _pos) >= 2 }) then { _pos = [0,0,0]; _truncated = true; };
     if ((count _pos) > 3) then { _pos resize 3; _truncated = true; };
 
     private _metaSafe = [_meta] call _sanitizeMeta;
-    if ((_metaSafe findIf { _x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo "truncated" } }) >= 0) then { _truncated = true; };
+    private _foundTruncated = false;
+    {
+        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo "truncated" }) exitWith { _foundTruncated = true; };
+    } forEach _metaSafe;
+    if (_foundTruncated) then { _truncated = true; };
     if (_truncated) then { _metaSafe pushBack ["entryTruncated", true]; };
     [_id, _ts, toUpper _cat, _sum, _pos, _metaSafe]
 };

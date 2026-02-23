@@ -30,7 +30,7 @@ params [
 
 // sqflint-compatible helpers
 private _trimFn  = compile "params ['_s']; trim _s";
-private _hmFrom  = compile "params ['_pairs']; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
+private _hmFrom  = compile "private _pairs = _this; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
 private _mapGet  = compile "params ['_h','_k']; _h get _k";
 
 if (!([_caller, "ARC_fnc_airbaseSubmitClearanceRequest", "Airbase clearance request rejected: sender verification failed.", "AIRBASE_CLEARANCE_SUBMIT_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
