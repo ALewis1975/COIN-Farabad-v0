@@ -20,6 +20,8 @@
 
 if (!isServer) exitWith { false };
 
+if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\core\fn_rpcValidateSender.sqf"; };
+
 // Debounce: reject re-invocations within 15 seconds of the last audit start.
 private _lastAudit = missionNamespace getVariable ["ARC_compileAudit_lastStartTime", -999];
 if (serverTime - _lastAudit < 15) exitWith {
@@ -35,6 +37,23 @@ params [
 private _owner = 0;
 if (!isNull _requester) then { _owner = owner _requester; };
 if (_owner <= 0 && { !isNil "remoteExecutedOwner" }) then { _owner = remoteExecutedOwner; };
+
+// S1 + S3: sender validation and HQ role gate (audit tools are approver-only).
+if (!isNil "remoteExecutedOwner" && { _owner > 0 }) then
+{
+    private _requestor = _requester;
+    if (isNull _requestor) then
+    {
+        { if (owner _x == _owner) exitWith { _requestor = _x; }; } forEach allPlayers;
+    };
+    if (!([_requestor, "ARC_fnc_devCompileAuditServer", "Compile audit denied: sender verification failed.", "COMPILE_AUDIT_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
+    private _isOmni = [_requestor, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
+    private _can = _isOmni || { [_requestor] call ARC_fnc_rolesCanApproveQueue };
+    if (!_can) exitWith {
+        diag_log format ["[ARC][SEC] ARC_fnc_devCompileAuditServer: unauthorized caller owner=%1", _owner];
+        false
+    };
+};
 
 private _lines = [];
 private _push = {
