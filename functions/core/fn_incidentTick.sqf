@@ -20,6 +20,7 @@ private _activeTaskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
 if (_activeTaskId isEqualTo "") then
 {
     // No active incident. TOC will generate the next when ready.
+    diag_log format ["[ARC][INC][TICK] No active incident at t=%1. Waiting for TOC generate request.", serverTime];
 }
 else
 {

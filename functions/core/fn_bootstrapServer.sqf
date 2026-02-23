@@ -845,9 +845,13 @@ if (isNil { missionNamespace getVariable 'ARC_missionEndSaveEH' }) then
 };
 
 // Start the incident loop
+// Clear stale loop guard before starting — prevents #restart double-block.
+missionNamespace setVariable ["ARC_incidentLoopRunning", nil];
 [] call ARC_fnc_incidentLoop;
 
 // Start the execution loop (checks end states / objective completion)
+// Clear stale loop guard before starting — prevents #restart double-block.
+missionNamespace setVariable ["ARC_execLoopRunning", nil];
 [] call ARC_fnc_execLoop;
 
 // Start incident watchdog (stall detector / close-ready suggestions)
