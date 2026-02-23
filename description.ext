@@ -20,6 +20,10 @@ missionGroup = "ARC_FARABAD_COIN";
 
 #include "config\CfgFunctions.hpp"
 
+// RemoteExec whitelist (mode=1: deny by default).
+// See docs/security/RemoteExec_Hardening_Plan.md for policy.
+#include "config\CfgRemoteExec.hpp"
+
 // Minimal dialogs (used for free-text intel reporting)
 #include "config\CfgDialogs.hpp"
 

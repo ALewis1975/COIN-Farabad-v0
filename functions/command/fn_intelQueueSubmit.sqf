@@ -49,6 +49,21 @@ if (!(_kind isEqualType "")) then { _kind = ""; };
 _kind = toUpper (trim _kind);
 if (_kind isEqualTo "") exitWith {""};
 
+// Dedicated MP hardening: validate sender when requestor is provided.
+if (!isNil "remoteExecutedOwner" && { !isNull _requestor }) then
+{
+    private _reo = remoteExecutedOwner;
+    if (_reo > 0) then
+    {
+        if ((owner _requestor) != _reo) exitWith
+        {
+            diag_log format ["[ARC][SEC] %1 denied: sender-owner mismatch reo=%2 requestorOwner=%3 requestor=%4",
+                "ARC_fnc_intelQueueSubmit", _reo, owner _requestor, name _requestor];
+            ""
+        };
+    };
+};
+
 if (!(_payload isEqualType [])) then { _payload = []; };
 if (!(_summary isEqualType "")) then { _summary = ""; };
 if (!(_details isEqualType "")) then { _details = ""; };

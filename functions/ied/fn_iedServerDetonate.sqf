@@ -20,6 +20,16 @@ params [
 _deviceId = trim _deviceId;
 if (_deviceId isEqualTo "") exitWith {false};
 
+// Dedicated MP hardening: log remote invocation source.
+if (!isNil "remoteExecutedOwner") then
+{
+    private _reo = remoteExecutedOwner;
+    if (_reo > 0) then
+    {
+        diag_log format ["[ARC][SEC] ARC_fnc_iedServerDetonate: invoked via remoteExec from owner=%1 deviceId=%2", _reo, _deviceId];
+    };
+};
+
 // Guard: only detonate once per incident.
 private _handled = ["activeIedDetonationHandled", false] call ARC_fnc_stateGet;
 if (_handled isEqualType true && { _handled }) exitWith {false};

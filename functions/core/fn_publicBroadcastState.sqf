@@ -7,6 +7,16 @@
 
 if (!isServer) exitWith {false};
 
+// Dedicated MP hardening: require valid remoteExec context when invoked remotely.
+if (!isNil "remoteExecutedOwner") then
+{
+    private _reo = remoteExecutedOwner;
+    if (_reo > 0) then
+    {
+        diag_log format ["[ARC][SEC] ARC_fnc_publicBroadcastState: invoked via remoteExec from owner=%1", _reo];
+    };
+};
+
 private _p = ["insurgentPressure", 0.35] call ARC_fnc_stateGet;
 private _c = ["corruption", 0.55] call ARC_fnc_stateGet;
 private _i = ["infiltration", 0.35] call ARC_fnc_stateGet;

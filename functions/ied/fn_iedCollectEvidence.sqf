@@ -19,6 +19,21 @@ params [
 
 if (_evidenceNid isEqualTo "") exitWith {false};
 
+// Dedicated MP hardening: validate sender when collector is provided.
+if (!isNil "remoteExecutedOwner" && { !isNull _collector }) then
+{
+    private _reo = remoteExecutedOwner;
+    if (_reo > 0) then
+    {
+        if ((owner _collector) != _reo) exitWith
+        {
+            diag_log format ["[ARC][SEC] %1 denied: sender-owner mismatch reo=%2 collectorOwner=%3 collector=%4",
+                "ARC_fnc_iedCollectEvidence", _reo, owner _collector, name _collector];
+            false
+        };
+    };
+};
+
 private _obj = objectFromNetId _evidenceNid;
 if (isNull _obj) exitWith {false};
 
