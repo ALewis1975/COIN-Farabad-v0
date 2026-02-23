@@ -1095,3 +1095,24 @@ git --no-pager diff --check
 - JIP / late-client status: BLOCKED pending dedicated-server validation per project constraints.
 - Waiver owner: mission maintainers on current branch.
 - Tracking reference: current PR validation section + this TEST-LOG entry.
+
+## 2026-02-23 06:11 UTC — queue approval INCIDENT handler activation path
+
+**Branch/Commit:** current branch @ commit: unrecoverable (pre-commit log entry; exact SHA recorded in git history for this change)
+
+**Scenario:** Added `INCIDENT` approval handling in `fn_intelQueueDecide.sqf` so approving METT-TC seeded queue entries now creates/activates an incident task instead of falling through the "No handler" branch.
+
+**Commands:**
+```
+git --no-pager diff --check
+python3 scripts/dev/validate_state_migrations.py
+~/.local/bin/sqflint -e w functions/command/fn_intelQueueDecide.sqf
+```
+
+**Result:** BLOCKED
+
+**Notes:**
+- `git --no-pager diff --check`: PASS (no whitespace/patch-format issues).
+- `python3 scripts/dev/validate_state_migrations.py`: PASS (`State migration validation passed (3 scenarios).`).
+- `~/.local/bin/sqflint -e w functions/command/fn_intelQueueDecide.sqf`: BLOCKED (`No such file or directory` for sqflint binary in this container).
+- Runtime validation remains BLOCKED (no Arma runtime in container); dedicated/JIP verification still required by maintainers.
