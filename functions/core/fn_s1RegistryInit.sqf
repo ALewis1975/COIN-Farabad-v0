@@ -52,6 +52,7 @@ if (isNil { missionNamespace getVariable "ARC_pub_s1_registryUpdatedAt" }) then 
 
 {
     private _grp = _x;
+    if (side _grp != west) then { continue; };
     private _members = units _grp;
     if ((count _members) == 0) then {
         [objNull, _grp, [["virtualStatus", "VIRTUAL"]], false] call ARC_fnc_s1RegistryUpsertUnit;

@@ -1095,3 +1095,35 @@ git --no-pager diff --check
 - JIP / late-client status: BLOCKED pending dedicated-server validation per project constraints.
 - Waiver owner: mission maintainers on current branch.
 - Tracking reference: current PR validation section + this TEST-LOG entry.
+
+## 2026-02-23 05:51 UTC — S1 Personnel Screen performance overhaul + BLUFOR filter
+
+**Branch/Commit:** copilot/optimize-personnel-screen-performance @ (current)
+
+**Scenario:** Implemented echelon tree with server-side pre-aggregation to eliminate O(G×U×K) paint loop. Added BLUFOR-only filter to registry init. New `fn_s1EchelonClassify.sqf` classifies groups into 7 top categories.
+
+**Commands:**
+```
+python3 scripts/dev/sqflint_compat_scan.py --strict \
+  functions/core/fn_s1EchelonClassify.sqf \
+  functions/core/fn_s1RegistryInit.sqf \
+  functions/core/fn_s1RegistrySnapshot.sqf \
+  functions/ui/fn_uiConsoleS1Paint.sqf
+sqflint -e w functions/core/fn_s1EchelonClassify.sqf
+sqflint -e w functions/core/fn_s1RegistryInit.sqf
+sqflint -e w functions/core/fn_s1RegistrySnapshot.sqf
+sqflint -e w functions/ui/fn_uiConsoleS1Paint.sqf
+```
+
+**Result:** PASS
+
+**Notes:**
+- All 4 changed .sqf files pass `sqflint_compat_scan.py --strict` (no findIf, #, trim, getOrDefault-method, isNotEqualTo, toUpperANSI patterns).
+- All 4 files pass `sqflint -e w` with exit 0 (no warnings or errors).
+- `fn_s1RegistryInit.sqf`: added `if (side _grp != west) then { continue; };` to exclude OPFOR/CIV/ambient groups from the registry.
+- `fn_s1EchelonClassify.sqf`: new pure function classifying parentEchelon into [topCategory, subCategory, echelonDepth, companyLetter, parentEchelonStr] for 8 top categories (JTF FARABAD, TF REDFALCON, USAF / AIRBASE, SUPPORT / BSB, BSTB, AVIATION, HOST NATION, OTHER).
+- `fn_s1RegistrySnapshot.sqf`: v2 schema published — augments each group record with pre-computed paxCount/activePax/kiaPax/avgReadiness and classification fields; publishes category aggregate stats (catStats) so client paint requires no unit-level iteration for counting.
+- `fn_uiConsoleS1Paint.sqf`: echelon tree render (7 top categories, expandable company/platoon/squad for REDFALCON); rev-check skips repaint when updatedAt, expand state, and selection all unchanged; expand/collapse via LBSelChanged EH added once per display; roster unit iteration limited to selected leaf group only.
+- `config/CfgFunctions.hpp`: registered `s1EchelonClassify` under Core class.
+- Gameplay/network validation: BLOCKED pending Arma 3 dedicated server environment.
+- JIP / late-client snapshot: BLOCKED pending dedicated-server validation.
