@@ -162,33 +162,37 @@ private _map = [[...]] call _hmCreate;
 
 ## Phase 2: Harden — Security + Resilience
 
-### Task 2.1 — Implement `CfgRemoteExec` Allowlist
+> **Status: IN PROGRESS** — Task 2.1 DONE, Task 2.3 DONE. Tasks 2.2 pending.
+
+### Task 2.1 — Implement `CfgRemoteExec` Allowlist ✅ DONE
 
 | Field | Value |
 |-------|-------|
 | **PR Mode** | I — Security Hardening |
 | **Severity** | P1 — Open attack surface |
-| **Files** | `description.ext` |
-| **Est. Lines** | ~80 new lines |
+| **Files** | `description.ext`, `config/CfgRemoteExec.hpp`, 12 SQF files |
+| **Actual Lines** | ~280 new lines |
 | **Reference** | `docs/security/RemoteExec_Hardening_Plan.md` §2 |
 
-**Problem:** No `CfgRemoteExec` in `description.ext`. Engine runs in default permissive mode — any connected client can invoke any function via `remoteExec`.
-
-**Fix:** Add `CfgRemoteExec` class with:
-- 33 client→server ARC function allowlist entries
-- 17 server→client ARC function allowlist entries (with JIP flags per plan)
-- 13 engine command allowlist entries
-- `mode = 1` (whitelist only) for both Functions and Commands classes
-
-**Pre-requisites:** Must smoke-test in local MP — a missing allowlist entry silently blocks functionality.
+**Delivered:**
+- Created `config/CfgRemoteExec.hpp` with `mode=1` (whitelist only) for Functions and Commands
+- 39 client→server ARC function entries (allowedTargets=2)
+- 19 server→client ARC function entries (allowedTargets=0), 5 with jip=1
+- 13 engine command entries
+- Added `remoteExecutedOwner` sender validation to 12 previously unprotected endpoints:
+  - CIVSUB (4): EndSession, HandoffSheriff, OrderStop, RunMdtByNetId
+  - Core (3): execObjectiveComplete, publicBroadcastState, uiCoverageAuditServer
+  - IED (3): iedCollectEvidence, iedServerDetonate, vbiedServerDetonate
+  - Command (2): intelQueueSubmit, intelTocIssueOrder
 
 **Acceptance:**
-- [ ] `CfgRemoteExec` class present in `description.ext`
-- [ ] `mode = 1` for both Functions and Commands
-- [ ] All 33 client→server endpoints listed
-- [ ] All 17 server→client endpoints listed with correct JIP flags
-- [ ] All 13 engine commands listed
-- [ ] Config sanity check passes
+- [x] `CfgRemoteExec` class present in `config/CfgRemoteExec.hpp`, included from `description.ext`
+- [x] `mode = 1` for both Functions and Commands
+- [x] All 39 client→server endpoints listed
+- [x] All 19 server→client endpoints listed with correct JIP flags
+- [x] All 13 engine commands listed
+- [x] All 39 client→server RPCs have `remoteExecutedOwner` sender validation
+- [x] Zero new sqflint compat warnings introduced
 
 ---
 

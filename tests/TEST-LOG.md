@@ -1164,3 +1164,28 @@ git --no-pager diff --check
 - JIP / late-client status: BLOCKED pending dedicated-server validation per project constraints.
 - Waiver owner: mission maintainers on current branch.
 - Tracking reference: current PR validation section + this TEST-LOG entry.
+
+---
+
+## 2026-02-23 — Security Hardening: CfgRemoteExec Allowlist + Sender Validation (Task 2.1)
+
+- **Branch:** copilot/audit-sqf-mission-project
+- **Commit:** a22e666 (security: CfgRemoteExec allowlist + sender validation for 12 RPCs)
+- **Scenario:** Static analysis of CfgRemoteExec.hpp config + sender validation code additions
+
+### Checks
+
+| # | Check | Result | Notes |
+|---|-------|--------|-------|
+| 1 | CfgRemoteExec.hpp syntax (class structure, semicolons) | PASS | 39+19+13 entries, mode=1 for both blocks |
+| 2 | description.ext includes CfgRemoteExec.hpp | PASS | Line 25 |
+| 3 | All 39 client→server RPCs have remoteExecutedOwner | PASS | grep -c confirmed 2/file for all 39 |
+| 4 | sqflint_compat_scan.py --strict on 12 changed SQF files | PASS | 57 pre-existing warnings only |
+| 5 | No new sqflint compat violations introduced | PASS | All warnings are Phase 2+ (#, trim, isNotEqualTo) |
+| 6 | Code review | PASS | Clean — no comments |
+| 7 | Local MP smoke test (CfgRemoteExec blocks no functionality) | BLOCKED | Container environment; requires Arma 3 dedicated server |
+| 8 | JIP replay with jip=1 entries (objective/evidence actions) | BLOCKED | Requires dedicated server + JIP client |
+
+### Status
+- Static validation: **PASS**
+- Runtime validation: **BLOCKED** (requires dedicated server)
