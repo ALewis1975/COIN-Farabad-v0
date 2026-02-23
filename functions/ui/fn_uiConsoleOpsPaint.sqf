@@ -72,7 +72,8 @@ private _safeStr = {
 private _pairGet = {
     params ["_pairs", "_key", ["_def", ""]];
     if (!(_pairs isEqualType [])) exitWith {_def};
-    private _idx = _pairs findIf { _x isEqualType [] && { (count _x) >= 2 } && { (_x#0) isEqualTo _key } };
+    private _idx = -1;
+    { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x#0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) exitWith {_def};
     private _v = (_pairs # _idx) # 1;
     if (isNil "_v") exitWith {_def};
@@ -235,7 +236,8 @@ private _gidSelf = groupId (group player);
 private _statusRows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
 if (!(_statusRows isEqualType [])) then { _statusRows = []; };
 if ((count _statusRows) > _rxMaxItems) then { _statusRows = _statusRows select [0, _rxMaxItems]; };
-private _statusIdx = _statusRows findIf { _x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _gidSelf } };
+private _statusIdx = -1;
+{ if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _gidSelf }) exitWith { _statusIdx = _forEachIndex; }; } forEach _statusRows;
 private _unitStatus = if (_statusIdx < 0) then { "OFFLINE" } else { toUpper (trim ((_statusRows # _statusIdx) # 1)) };
 
 private _allowDuringRtb = missionNamespace getVariable ["ARC_allowIncidentDuringAcceptedRtb", false];
@@ -370,7 +372,8 @@ else
         {
             private _orders = missionNamespace getVariable ["ARC_pub_orders", []]; if (!(_orders isEqualType [])) then { _orders = []; };
             if ((count _orders) > _rxMaxItems) then { _orders = _orders select [((count _orders) - _rxMaxItems) max 0, _rxMaxItems]; };
-            private _o = _orders findIf { _x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _id } };
+            private _o = -1;
+            { if (_x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _id }) exitWith { _o = _forEachIndex; }; } forEach _orders;
             if (_o < 0) then
             {
                 _details = "<t align='left' size='1.1' font='PuristaMedium'>Order</t><br/><br/>Order not found (stale UI).";
@@ -418,7 +421,8 @@ else
         {
             private _leads = missionNamespace getVariable ["ARC_leadPoolPublic", []]; if (!(_leads isEqualType [])) then { _leads = []; };
             if ((count _leads) > _rxMaxItems) then { _leads = _leads select [0, _rxMaxItems]; };
-            private _idx = _leads findIf { _x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _id } };
+            private _idx = -1;
+            { if (_x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _id }) exitWith { _idx = _forEachIndex; }; } forEach _leads;
             if (_idx < 0) then
             {
                 _details = "<t align='left' size='1.1' font='PuristaMedium'>Lead</t><br/><br/>Lead not found (stale UI).";

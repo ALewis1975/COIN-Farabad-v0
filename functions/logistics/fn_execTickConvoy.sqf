@@ -284,7 +284,8 @@ if (!(_rolePlan isEqualType [])) then { _rolePlan = []; };
 private _rolePlanGet = {
     params ["_pairs", "_key", "_default"];
     if !(_pairs isEqualType []) exitWith {_default};
-    private _idx = _pairs findIf { (_x isEqualType []) && { (count _x) >= 2 } && { ((_x # 0) isEqualType "") && { (toLower (_x # 0)) isEqualTo (toLower _key) } } };
+    private _idx = -1;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { ((_x # 0) isEqualType "") && { (toLower (_x # 0)) isEqualTo (toLower _key) } }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) exitWith {_default};
     (_pairs # _idx) # 1
 };
@@ -438,7 +439,9 @@ if ((count _nids) isEqualTo 0) then
 
                     // Never delete a convoy vehicle if a player is currently in it.
                     private _crew = crew _v;
-                    if ((_crew findIf { isPlayer _x }) >= 0) then
+                    private _crewHasPlayer = false;
+                    { if (isPlayer _x) exitWith { _crewHasPlayer = true; }; } forEach _crew;
+                    if (_crewHasPlayer) then
                     {
                         _blocked = true;
                     }
@@ -661,30 +664,31 @@ private _fn_bridgeMarkerAtPos = {
 
     private _p = +_pos; _p resize 3;
 
-    private _idx = _bridgeMarkers findIf
+    private _idx = -1;
     {
         private _mk = _x;
+        private _matched = false;
 
-        // Fast path: no buffer requested, use marker inArea directly.
-        if (_bridgeBufM <= 0) exitWith { _p inArea _mk };
+        if (_bridgeBufM <= 0) then {
+            _matched = _p inArea _mk;
+        } else {
+            if (_mk in allMapMarkers) then {
+                private _c = getMarkerPos _mk;
+                private _sz = markerSize _mk;
+                if ((_sz isEqualType []) && { (count _sz) >= 2 }) then {
+                    private _a = (_sz # 0) + _bridgeBufM;
+                    private _b = (_sz # 1) + _bridgeBufM;
+                    private _dir = markerDir _mk;
+                    private _shape = markerShape _mk;
+                    if (!(_shape isEqualType "")) then { _shape = "RECTANGLE"; };
+                    private _isRect = ((toUpper _shape) isEqualTo "RECTANGLE");
+                    _matched = _p inArea [_c, _a, _b, _dir, _isRect];
+                };
+            };
+        };
 
-        // Buffered check: re-express marker as an area array and expand its radii.
-        if !(_mk in allMapMarkers) exitWith { false };
-
-        private _c = getMarkerPos _mk;
-        private _sz = markerSize _mk;
-        if (!(_sz isEqualType []) || { (count _sz) < 2 }) exitWith { false };
-
-        private _a = (_sz # 0) + _bridgeBufM;
-        private _b = (_sz # 1) + _bridgeBufM;
-        private _dir = markerDir _mk;
-
-        private _shape = markerShape _mk;
-        if (!(_shape isEqualType "")) then { _shape = "RECTANGLE"; };
-        private _isRect = ((toUpper _shape) isEqualTo "RECTANGLE");
-
-        _p inArea [_c, _a, _b, _dir, _isRect]
-    };
+        if (_matched) exitWith { _idx = _forEachIndex; };
+    } forEach _bridgeMarkers;
 
     if (_idx < 0) exitWith { "" };
     _bridgeMarkers # _idx
@@ -1163,7 +1167,9 @@ if (!_started) exitWith
         _grpL setFormation "COLUMN";
         _grpL setSpeedMode "NORMAL";
         // Never rename a player group; keep TOC/role gating stable even if a player drives convoy assets.
-        if ((units _grpL) findIf { isPlayer _x } == -1) then { [_grpL, "CONVOY"] call ARC_fnc_groupSetDesignation; };
+        private _hasPlayerL = false;
+        { if (isPlayer _x) exitWith { _hasPlayerL = true; }; } forEach (units _grpL);
+        if (!_hasPlayerL) then { [_grpL, "CONVOY"] call ARC_fnc_groupSetDesignation; };
 
         // Drive each vehicle into a unique slot at the link-up point.
         // This avoids group waypoint "wait for formation" behavior, and keeps the column clean.
@@ -1270,10 +1276,8 @@ if (!_started) exitWith
     if (!(_detectR isEqualType 0)) then { _detectR = 260; };
     _detectR = (_detectR max 120) min 800;
 
-    private _near = (_players findIf {
-        (_x distance2D _detectPos) <= _detectR
-        || { (_x distance2D _lead) <= ((_detectR min 250) max 160) }
-    }) >= 0;
+    private _near = false;
+    { if ((_x distance2D _detectPos) <= _detectR || { (_x distance2D _lead) <= ((_detectR min 250) max 160) }) exitWith { _near = true; }; } forEach _players;
 
     // Delay between first player detection and actual departure (gives time to stage).
     private _delay = missionNamespace getVariable ["ARC_convoyDepartDelaySec", 60];
@@ -1381,7 +1385,9 @@ if (!_started) exitWith
         _grp setFormation "COLUMN";
         _grp setSpeedMode "LIMITED";
         // Never rename a player group; keep TOC/role gating stable even if a player drives convoy assets.
-        if ((units _grp) findIf { isPlayer _x } == -1) then { [_grp, "CONVOY"] call ARC_fnc_groupSetDesignation; };
+        private _hasPlayerD = false;
+        { if (isPlayer _x) exitWith { _hasPlayerD = true; }; } forEach (units _grp);
+        if (!_hasPlayerD) then { [_grp, "CONVOY"] call ARC_fnc_groupSetDesignation; };
 
         // Keep the convoy on roads.
         if (_forceRoad && { !_bypassActiveP }) then
@@ -1508,7 +1514,9 @@ if (isNull _grpW) then
 _grpW setFormation "COLUMN";
 _grpW setSpeedMode "LIMITED";
 // Never rename a player group; keep TOC/role gating stable even if a player drives convoy assets.
-if ((units _grpW) findIf { isPlayer _x } == -1) then { [_grpW, "CONVOY"] call ARC_fnc_groupSetDesignation; };
+private _hasPlayerW = false;
+{ if (isPlayer _x) exitWith { _hasPlayerW = true; }; } forEach (units _grpW);
+if (!_hasPlayerW) then { [_grpW, "CONVOY"] call ARC_fnc_groupSetDesignation; };
 
 // Keep the group leader in the lead vehicle when possible (helps formation consistency).
 if ((count _aliveVeh) > 0) then

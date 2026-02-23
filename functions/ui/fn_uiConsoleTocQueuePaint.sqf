@@ -32,9 +32,8 @@ private _getPair = {
     if (!(_pairs isEqualType [])) exitWith { _d };
     if (_k isEqualTo "") exitWith { _d };
 
-    private _j = _pairs findIf {
-        (_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }
-    };
+    private _j = -1;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _j = _forEachIndex; }; } forEach _pairs;
     if (_j < 0) exitWith { _d };
     (_pairs # _j) # 1
 };

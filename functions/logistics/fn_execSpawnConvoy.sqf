@@ -122,7 +122,8 @@ if (!(_rolePlan isEqualType [])) then { _rolePlan = []; };
 private _rolePlanGet = {
     params ["_pairs", "_key", "_default"];
     if !(_pairs isEqualType []) exitWith {_default};
-    private _idx = _pairs findIf { (_x isEqualType []) && { (count _x) >= 2 } && { ((_x # 0) isEqualType "") && { (toLower (_x # 0)) isEqualTo (toLower _key) } } };
+    private _idx = -1;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { ((_x # 0) isEqualType "") && { (toLower (_x # 0)) isEqualTo (toLower _key) } }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) exitWith {_default};
     (_pairs # _idx) # 1
 };
@@ -138,13 +139,8 @@ if (!(_bundleMatrix isEqualType [])) then { _bundleMatrix = []; };
 private _bundleClassPool = [];
 if (_roleBundleId isNotEqualTo "") then
 {
-    private _idxBundle = _bundleMatrix findIf
-    {
-        (_x isEqualType [])
-        && { (count _x) >= 2 }
-        && { ((_x # 0) isEqualType "") }
-        && { (toUpper (_x # 0)) isEqualTo _roleBundleId }
-    };
+    private _idxBundle = -1;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { ((_x # 0) isEqualType "") } && { (toUpper (_x # 0)) isEqualTo _roleBundleId }) exitWith { _idxBundle = _forEachIndex; }; } forEach _bundleMatrix;
 
     if (_idxBundle >= 0) then
     {
@@ -312,7 +308,8 @@ private _pickFrom = {
 private _getRoleKeyList = {
     params ["_roleName"];
     private _r = toLower _roleName;
-    private _idx = _roleMatrix findIf { (_x isEqualType []) && { (count _x) >= 2 } && { ((_x # 0) isEqualType "") && { (toLower (_x # 0)) isEqualTo _r } } };
+    private _idx = -1;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { ((_x # 0) isEqualType "") && { (toLower (_x # 0)) isEqualTo _r } }) exitWith { _idx = _forEachIndex; }; } forEach _roleMatrix;
     if (_idx < 0) exitWith {[]};
     private _keys = (_roleMatrix # _idx) # 1;
     if !(_keys isEqualType []) exitWith {[]};
@@ -557,7 +554,8 @@ private _pickProfileByCallsign = {
     if (!(_callsign isEqualType "")) exitWith {[]};
     private _cU = toUpper _callsign;
 
-    private _idx = _ps findIf { (_x isEqualType []) && { (count _x) >= 3 } && { (toUpper (_x # 2)) isEqualTo _cU } };
+    private _idx = -1;
+    { if ((_x isEqualType []) && { (count _x) >= 3 } && { (toUpper (_x # 2)) isEqualTo _cU }) exitWith { _idx = _forEachIndex; }; } forEach _ps;
     if (_idx < 0) exitWith {[]};
     _ps # _idx
 };
@@ -614,7 +612,9 @@ private _prevPos = _spawnPos;
 private _isPadOccupied = {
     params ["_pos", "_r"];
     private _near = nearestObjects [_pos, ["LandVehicle"], _r];
-    (_near findIf { alive _x }) >= 0
+    private _foundAlive = false;
+    { if (alive _x) exitWith { _foundAlive = true; }; } forEach _near;
+    _foundAlive
 };
 
 

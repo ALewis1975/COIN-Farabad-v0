@@ -29,7 +29,8 @@ private _requiredKeys = [
 
 {
     private _k = _x;
-    private _idx = _snapshot findIf { _x isEqualType [] && { (count _x) >= 2 } && { ((_x select 0) isEqualTo _k) } };
+    private _idx = -1;
+    { if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x select 0) isEqualTo _k) }) exitWith { _idx = _forEachIndex; }; } forEach _snapshot;
     if (_idx < 0) then {
         private _def = switch (_k) do {
             case "messages": { [] };

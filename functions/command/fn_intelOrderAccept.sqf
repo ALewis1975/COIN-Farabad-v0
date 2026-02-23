@@ -34,7 +34,8 @@ if (!(_gid isEqualType "") || { _gid isEqualTo "" }) exitWith {false};
 private _getPair = {
     params ["_pairs", "_k", "_d"];
     if (!(_pairs isEqualType [])) exitWith { _d };
-    private _idx = _pairs findIf { (_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k } };
+    private _idx = -1;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) exitWith { _d };
     (_pairs # _idx) # 1
 };
@@ -42,7 +43,8 @@ private _getPair = {
 private _setPair = {
     params ["_pairs", "_k", "_v"];
     if (!(_pairs isEqualType [])) then { _pairs = []; };
-    private _idx = _pairs findIf { (_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k } };
+    private _idx = -1;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) then {
         _pairs pushBack [_k, _v];
     } else {
@@ -54,7 +56,8 @@ private _setPair = {
 private _orders = ["tocOrders", []] call ARC_fnc_stateGet;
 if (!(_orders isEqualType [])) then { _orders = []; };
 
-private _idx = _orders findIf { (_x isEqualType []) && { (count _x) >= 7 } && { (_x # 0) isEqualTo _orderId } };
+private _idx = -1;
+{ if ((_x isEqualType []) && { (count _x) >= 7 } && { (_x # 0) isEqualTo _orderId }) exitWith { _idx = _forEachIndex; }; } forEach _orders;
 if (_idx < 0) exitWith
 {
     ["ORDER_ACCEPT", "REJECTED", "Order is no longer available."] remoteExec ["ARC_fnc_uiConsoleOpsActionStatus", owner _acceptor];
@@ -170,7 +173,8 @@ switch (_type) do
                     // Return the lead to the pool
                     if ((_leadRec isEqualType []) && { (count _leadRec) > 0 }) then
                     {
-                        private _existing = _leadPool findIf { (_x isEqualType []) && { (count _x) > 0 } && { (_x # 0) isEqualTo (_leadRec # 0) } };
+                        private _existing = -1;
+                        { if ((_x isEqualType []) && { (count _x) > 0 } && { (_x # 0) isEqualTo (_leadRec # 0) }) exitWith { _existing = _forEachIndex; }; } forEach _leadPool;
                         if (_existing < 0) then { _leadPool pushBack _leadRec; };
                     };
 

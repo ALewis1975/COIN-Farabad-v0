@@ -164,7 +164,9 @@ switch (_kind) do
             if (!_accepted) then
             {
                 _b1 ctrlSetText "ACCEPT INCIDENT";
-                _b1 ctrlEnable (([player] call ARC_fnc_rolesIsAuthorized) || { (missionNamespace getVariable ["ARC_consoleOmniTokens", ["OMNI"]]) findIf { [player, _x] call ARC_fnc_rolesHasGroupIdToken } >= 0 });
+                private _hasOmniToken = false;
+                { if ([player, _x] call ARC_fnc_rolesHasGroupIdToken) exitWith { _hasOmniToken = true; }; } forEach (missionNamespace getVariable ["ARC_consoleOmniTokens", ["OMNI"]]);
+                _b1 ctrlEnable (([player] call ARC_fnc_rolesIsAuthorized) || { _hasOmniToken });
             }
             else
             {
