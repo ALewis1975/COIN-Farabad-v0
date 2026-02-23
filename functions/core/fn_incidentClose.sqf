@@ -116,6 +116,11 @@ if (_re isEqualType "" && { _re isNotEqualTo "" }) then { _childIds pushBackUniq
 private _hist = ["incidentHistory", []] call ARC_fnc_stateGet;
 if (!(_hist isEqualType [])) then { _hist = []; };
 _hist pushBack [_taskId, _marker, _type, _display, _result, _created, serverTime, _pos, _zone, _threadId];
+// Trim oldest entries (configurable cap; preserves most-recent tail)
+private _histMax = missionNamespace getVariable ["ARC_incidentHistoryMaxEntries", 200];
+if (!(_histMax isEqualType 0)) then { _histMax = 200; };
+_histMax = (_histMax max 10) min 1000;
+if ((count _hist) > _histMax) then { _hist = _hist select [((count _hist) - _histMax), _histMax]; };
 ["incidentHistory", _hist] call ARC_fnc_stateSet;
 
 // Basic COIN pressure hooks (light-touch, can be tuned later)

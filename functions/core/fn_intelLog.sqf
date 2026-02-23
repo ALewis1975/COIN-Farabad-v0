@@ -56,8 +56,11 @@ if (!(_log isEqualType [])) then { _log = []; };
 private _catU = toUpper _category;
 _log pushBack [_id, serverTime, _catU, _summary, _posATL, _meta];
 
-// Trim oldest entries
-while {count _log > 200} do { _log deleteAt 0; };
+// Trim oldest entries (configurable cap; preserves most-recent tail)
+private _intelMax = missionNamespace getVariable ["ARC_intelLogMaxEntries", 500];
+if (!(_intelMax isEqualType 0)) then { _intelMax = 500; };
+_intelMax = (_intelMax max 10) min 2000;
+if ((count _log) > _intelMax) then { _log = _log select [((count _log) - _intelMax), _intelMax]; };
 
 ["intelLog", _log] call ARC_fnc_stateSet;
 

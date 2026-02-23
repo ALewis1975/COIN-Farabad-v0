@@ -338,6 +338,51 @@ private _convoyCatchupCap = {
   "non-bridge large tail gap triggers hold-speed catch-up"
 ] call ARC_TEST_fnc_assert;
 
+// ---------- Task 2.2 regression: intelLog array cap algorithm ----------
+
+// Trims to configured max
+private _capLog = [];
+for "_i" from 1 to 15 do { _capLog pushBack _i; };
+private _capMax = 10;
+if ((count _capLog) > _capMax) then { _capLog = _capLog select [((count _capLog) - _capMax), _capMax]; };
+[(count _capLog) isEqualTo 10, "UT-ILCAP-001", "intelLog cap trims array to configured max", ["count", count _capLog]] call ARC_TEST_fnc_assert;
+// Preserves most-recent tail (not head): first retained entry = 15-10+1 = 6
+[(_capLog select 0) isEqualTo 6, "UT-ILCAP-002", "intelLog cap preserves most-recent tail (not head)", ["first", _capLog select 0]] call ARC_TEST_fnc_assert;
+
+// Cap not applied when under limit
+private _capLogSmall = [];
+for "_i" from 1 to 5 do { _capLogSmall pushBack _i; };
+if ((count _capLogSmall) > _capMax) then { _capLogSmall = _capLogSmall select [((count _capLogSmall) - _capMax), _capMax]; };
+[(count _capLogSmall) isEqualTo 5, "UT-ILCAP-003", "intelLog cap not applied when under limit", ["count", count _capLogSmall]] call ARC_TEST_fnc_assert;
+
+// Configurable max: below-10 input clamps to 10
+private _capRawLow = 5;
+private _capClampedLow = (_capRawLow max 10) min 2000;
+[_capClampedLow isEqualTo 10, "UT-ILCAP-004", "intelLog ARC_intelLogMaxEntries below 10 clamps to 10", ["clamped", _capClampedLow]] call ARC_TEST_fnc_assert;
+
+// Type guard: non-numeric falls back to default 500
+private _capBadType = "not_a_number";
+if (!(_capBadType isEqualType 0)) then { _capBadType = 500; };
+[_capBadType isEqualTo 500, "UT-ILCAP-005", "intelLog non-numeric ARC_intelLogMaxEntries falls back to 500", ["fallback", _capBadType]] call ARC_TEST_fnc_assert;
+
+
+// ---------- Task 2.2 regression: incidentHistory array cap algorithm ----------
+
+// Trims to configured max, preserves tail
+private _capHist = [];
+for "_i" from 1 to 15 do { _capHist pushBack _i; };
+private _capHistMax = 10;
+if ((count _capHist) > _capHistMax) then { _capHist = _capHist select [((count _capHist) - _capHistMax), _capHistMax]; };
+[(count _capHist) isEqualTo 10, "UT-IHCAP-001", "incidentHistory cap trims array to configured max", ["count", count _capHist]] call ARC_TEST_fnc_assert;
+[(_capHist select 0) isEqualTo 6, "UT-IHCAP-002", "incidentHistory cap preserves most-recent tail", ["first", _capHist select 0]] call ARC_TEST_fnc_assert;
+
+// Cap not applied when under limit
+private _capHistSmall = [];
+for "_i" from 1 to 5 do { _capHistSmall pushBack _i; };
+if ((count _capHistSmall) > _capHistMax) then { _capHistSmall = _capHistSmall select [((count _capHistSmall) - _capHistMax), _capHistMax]; };
+[(count _capHistSmall) isEqualTo 5, "UT-IHCAP-003", "incidentHistory cap not applied when under limit", ["count", count _capHistSmall]] call ARC_TEST_fnc_assert;
+
+
 // ---------- Phase 1 regression: API existence for new/changed functions ----------
 
 private _phase1ApiFns = [
@@ -348,7 +393,8 @@ private _phase1ApiFns = [
   "ARC_fnc_stateGet",
   "ARC_fnc_stateSet",
   "ARC_fnc_devCompileAuditServer",
-  "ARC_fnc_civsubIdentityTouch"
+  "ARC_fnc_civsubIdentityTouch",
+  "ARC_fnc_uiConsoleQAAuditServer"
 ];
 {
   [_x, format ["UT-PH1-API-%1", _forEachIndex + 1], format ["Phase 1 function '%1' exists", _x]] call ARC_TEST_fnc_assertNotNil;
@@ -658,6 +704,25 @@ if (isServer) then {
   } else {
     ["INFO", "UT-STATE-SKIP", "stateGet/stateSet tests skipped; functions missing", []] call ARC_TEST_fnc_log;
   };
+
+
+  // ---------- Bug 2 regression: loop guard nil-clear pattern ----------
+
+  private _lgVars = ["ARC_incidentLoopRunning", "ARC_execLoopRunning"];
+  private _lgSaved = [_lgVars] call ARC_TEST_fnc_varSnapshot;
+
+  // Simulate stale guard (as if a previous session set both without clearing)
+  missionNamespace setVariable ["ARC_incidentLoopRunning", true];
+  missionNamespace setVariable ["ARC_execLoopRunning", true];
+
+  // Apply the bootstrap nil-clear (mirrors fn_bootstrapServer.sqf fix)
+  missionNamespace setVariable ["ARC_incidentLoopRunning", nil];
+  missionNamespace setVariable ["ARC_execLoopRunning", nil];
+
+  [isNil "ARC_incidentLoopRunning", "UT-LOOPGUARD-001", "nil-clear removes stale ARC_incidentLoopRunning guard", []] call ARC_TEST_fnc_assert;
+  [isNil "ARC_execLoopRunning", "UT-LOOPGUARD-002", "nil-clear removes stale ARC_execLoopRunning guard", []] call ARC_TEST_fnc_assert;
+
+  [_lgSaved] call ARC_TEST_fnc_varRestore;
 
 
   // ---------- Phase 1 regression: compile audit debounce ----------

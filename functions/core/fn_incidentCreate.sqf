@@ -10,7 +10,14 @@ private _activeTaskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
 if (_activeTaskId isNotEqualTo "") exitWith {false};
 
 private _catalog = call compile preprocessFileLineNumbers "data\incident_markers.sqf";
-if (!(_catalog isEqualType [])) exitWith {false};
+if (!(_catalog isEqualType [])) exitWith {
+    diag_log format ["[ARC][INC][ERR] incidentCreate: catalog load failed. type=%1", typeName _catalog];
+    false
+};
+if ((count _catalog) == 0) exitWith {
+    diag_log "[ARC][INC][ERR] incidentCreate: catalog loaded but is empty (0 entries).";
+    false
+};
 
 // World-state levers (0..1)
 // Defaults align with ARC_fnc_stateInit starting values.
@@ -321,7 +328,11 @@ if (_forceLogistics && { !_useLead } && { !(_typeU in ["LOGISTICS","ESCORT"]) })
 } forEach _catalog;
 
 // If we aren't tasking a lead, we need at least one catalog choice.
-if (!_useLead && { _choices isEqualTo [] }) exitWith {false};
+if (!_useLead && { _choices isEqualTo [] }) exitWith {
+    diag_log format ["[ARC][INC][WARN] incidentCreate: catalog has %1 entries but all filtered out. forceLogistics=%2 safeModeEnabled=%3 catalogType=%4",
+        count _catalog, _forceLogistics, _safeModeEnabled, typeName _catalog];
+    false
+};
 
 // Weighted random pick (catalog only)
 private _idx = 0;

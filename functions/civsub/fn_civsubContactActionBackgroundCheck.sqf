@@ -39,6 +39,8 @@ if (isNil "ARC_fnc_civsubIdentityEvictIfNeeded") then { ARC_fnc_civsubIdentityEv
 if (isNil "ARC_fnc_civsubCrimeDbPickPoiForDistrict") then { ARC_fnc_civsubCrimeDbPickPoiForDistrict = compile preprocessFileLineNumbers "functions\civsub\fn_civsubCrimeDbPickPoiForDistrict.sqf"; };
 if (isNil "ARC_fnc_civsubCrimeDbGetById") then { ARC_fnc_civsubCrimeDbGetById = compile preprocessFileLineNumbers "functions\civsub\fn_civsubCrimeDbGetById.sqf"; };
 if (isNil "ARC_fnc_civsubEmitDelta") then { ARC_fnc_civsubEmitDelta = compile preprocessFileLineNumbers "functions\civsub\fn_civsubEmitDelta.sqf"; };
+if (isNil "ARC_fnc_civsubScoresCompute") then { ARC_fnc_civsubScoresCompute = compile preprocessFileLineNumbers "functions\civsub\fn_civsubScoresCompute.sqf"; };
+if (isNil "ARC_fnc_civsubIntelConfidence") then { ARC_fnc_civsubIntelConfidence = compile preprocessFileLineNumbers "functions\civsub\fn_civsubIntelConfidence.sqf"; };
 
 private _setStep = {
     params ["_step"];
@@ -113,9 +115,15 @@ if !(_d isEqualType createHashMap) exitWith {
 private _scores = createHashMap;
 _scores set ["S_COOP", 0];
 _scores set ["S_THREAT", 0];
-isNil { private _tmp = [_d] call ARC_fnc_civsubScoresCompute; if (_tmp isEqualType createHashMap) then { _scores = _tmp; }; };
+if (isNil "ARC_fnc_civsubScoresCompute") then {
+    diag_log format ["[CIVSUB][ERR] BACKGROUND_CHECK: ARC_fnc_civsubScoresCompute still nil after guard. did=%1", _did];
+} else {
+    isNil { private _tmp = [_d] call ARC_fnc_civsubScoresCompute; if (_tmp isEqualType createHashMap) then { _scores = _tmp; }; };
+};
 private _Sthreat = [_scores, "S_THREAT", 0] call _hg;
+if !(_Sthreat isEqualType 0) then { _Sthreat = 0; };
 private _Scoop   = [_scores, "S_COOP", 0] call _hg;
+if !(_Scoop isEqualType 0) then { _Scoop = 0; };
 
 // Ensure civ UID
 ["IDENTITY_UID"] call _setStep;
@@ -237,7 +245,9 @@ if (_reasonCode isEqualTo "" || {_reasonText isEqualTo ""}) then {
 // Intel confidence (guarded)
 ["INTEL_CONF"] call _setStep;
 private _intelConf = 0.5;
-isNil { _intelConf = [_Scoop, _Sthreat] call ARC_fnc_civsubIntelConfidence; };
+if (!isNil "ARC_fnc_civsubIntelConfidence") then {
+    isNil { _intelConf = [_Scoop, _Sthreat] call ARC_fnc_civsubIntelConfidence; };
+};
 if !(_intelConf isEqualType 0) then { _intelConf = 0.5; };
 private _confLabel = "MED";
 if (_intelConf < 0.34) then { _confLabel = "LOW"; };

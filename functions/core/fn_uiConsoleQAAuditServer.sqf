@@ -10,6 +10,8 @@
 
 if (!isServer) exitWith { false };
 
+if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\core\fn_rpcValidateSender.sqf"; };
+
 params [
     ["_requester", objNull, [objNull]]
 ];
@@ -18,14 +20,33 @@ private _owner = 0;
 if (!isNull _requester) then { _owner = owner _requester; };
 if (_owner <= 0 && { !isNil "remoteExecutedOwner" }) then { _owner = remoteExecutedOwner; };
 
+// S1 + S3: sender validation and HQ role gate (audit tools are approver-only).
+if (!isNil "remoteExecutedOwner" && { _owner > 0 }) then
+{
+    private _requestor = _requester;
+    if (isNull _requestor) then
+    {
+        { if (owner _x == _owner) exitWith { _requestor = _x; }; } forEach allPlayers;
+    };
+    if (!([_requestor, "ARC_fnc_uiConsoleQAAuditServer", "QA audit denied: sender verification failed.", "QA_AUDIT_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
+    private _isOmni = [_requestor, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
+    private _can = _isOmni || { [_requestor] call ARC_fnc_rolesCanApproveQueue };
+    if (!_can) exitWith {
+        diag_log format ["[ARC][SEC] ARC_fnc_uiConsoleQAAuditServer: unauthorized caller owner=%1", _owner];
+        false
+    };
+};
+
 private _lines = [];
 private _nl = "<br/>";
+
+private _trimFn = compile "params ['_s']; trim _s";
 
 private _pushCheck = {
     params ["_ok", "_name", ["_detail", ""]];
     private _c = if (_ok) then { "#6EE7B7" } else { "#FF6B6B" };
     _lines pushBack format ["<t color='%1'>%2</t> <t font='PuristaMedium'>%3</t>", _c, if (_ok) then {"PASS"} else {"FAIL"}, _name];
-    if (_detail isEqualType "" && { _detail isNotEqualTo "" }) then
+    if (_detail isEqualType "" && { !(_detail isEqualTo "") }) then
     {
         _lines pushBack format ["<t color='#BDBDBD' size='0.9'>%1</t>", _detail];
     };
@@ -76,19 +97,19 @@ if (!(_acceptedBy isEqualType "")) then { _acceptedBy = ""; };
 if (!(_foQid isEqualType "")) then { _foQid = ""; };
 if (!(_foReq isEqualType [])) then { _foReq = []; };
 
-_incId = trim _incId;
-_taskId = trim _taskId;
-_acceptedBy = trim _acceptedBy;
-_foQid = trim _foQid;
+_incId = [_incId] call _trimFn;
+_taskId = [_taskId] call _trimFn;
+_acceptedBy = [_acceptedBy] call _trimFn;
+_foQid = [_foQid] call _trimFn;
 
-[(_incId isEqualTo "") || { _taskId isNotEqualTo "" }, "Active incident has taskId", format ["activeIncidentId=%1 / activeTaskId=%2", _incId, _taskId]] call _pushCheck;
-[(!_accepted) || { _acceptedBy isNotEqualTo "" }, "Accepted incident has acceptedBy group", format ["accepted=%1 / acceptedBy=%2", _accepted, _acceptedBy]] call _pushCheck;
+[(_incId isEqualTo "") || { !(_taskId isEqualTo "") }, "Active incident has taskId", format ["activeIncidentId=%1 / activeTaskId=%2", _incId, _taskId]] call _pushCheck;
+[(!_accepted) || { !(_acceptedBy isEqualTo "") }, "Accepted incident has acceptedBy group", format ["accepted=%1 / acceptedBy=%2", _accepted, _acceptedBy]] call _pushCheck;
 
 private _foOk = true;
 private _foDetail = "";
 if (_sitrepSent && { _foReq isEqualType [] } && { (count _foReq) > 0 }) then
 {
-    _foOk = _foQid isNotEqualTo "";
+    _foOk = !(_foQid isEqualTo "");
     _foDetail = format ["followOnReqPairs=%1 / queueId=%2", count _foReq, _foQid];
 };
 [_foOk, "Follow-on request queued when submitted", _foDetail] call _pushCheck;

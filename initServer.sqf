@@ -864,7 +864,7 @@ private _unitsNeedingGuardPost = allUnits select { (faction _x) in _targetFactio
 [] execVM "scripts\ARC_lightbarStartupServer.sqf";
 
 diag_log format [
-    "[ARC][DEBUG] Effective toggles | ARC_debugLogEnabled=%1 | ARC_debugLogToChat=%2 | ARC_debugInspectorEnabled=%3",
+    "[ARC][CONFIG] Effective toggles | ARC_debugLogEnabled=%1 | ARC_debugLogToChat=%2 | ARC_debugInspectorEnabled=%3",
     missionNamespace getVariable ["ARC_debugLogEnabled", false],
     missionNamespace getVariable ["ARC_debugLogToChat", false],
     missionNamespace getVariable ["ARC_debugInspectorEnabled", false]
