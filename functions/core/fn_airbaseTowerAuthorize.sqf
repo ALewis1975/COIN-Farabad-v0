@@ -25,7 +25,7 @@ private _normalizeAuthText = {
 
     if (!(_text isEqualType "")) then { _text = ""; };
 
-    private _parts = ((toUpperANSI (trim _text)) splitString (" .:-_/" + toString [9,10,13])) select {
+    private _parts = ((toUpper (trim _text)) splitString (" .:-_/" + toString [9,10,13])) select {
         _x isNotEqualTo ""
     };
     _parts joinString " "

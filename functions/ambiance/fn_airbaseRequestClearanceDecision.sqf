@@ -83,7 +83,7 @@ if (_requesterUid isNotEqualTo "") then {
         if ((getPlayerUID _x) isEqualTo _requesterUid) exitWith { _requesterOwner = owner _x; };
     } forEach allPlayers;
 };
-private _status = toUpperANSI (_rec param [6, ""]);
+private _status = toUpper (_rec param [6, ""]);
 if !(_status in ["QUEUED", "PENDING", "AWAITING_TOWER_DECISION"]) exitWith {
     private _owner = owner _caller;
     if (_owner > 0) then { ["Clearance request is no longer pending decision."] remoteExec ["ARC_fnc_clientHint", _owner]; };
@@ -116,7 +116,7 @@ if (_approve) then {
 _rec set [10, _meta];
 
 if (_approve) then {
-    private _flowKind = if ((toUpperANSI (_rec param [1, ""])) in ["REQ_INBOUND", "REQ_LAND"]) then { "ARR" } else { "DEP" };
+    private _flowKind = if ((toUpper (_rec param [1, ""])) in ["REQ_INBOUND", "REQ_LAND"]) then { "ARR" } else { "DEP" };
     private _decisionRoute = [_flowKind, "PLAYER", _requestId] call ARC_fnc_airbaseBuildRouteDecision;
     private _routeOk = _decisionRoute param [0, false];
     private _routeMeta = _decisionRoute param [1, []];

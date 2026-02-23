@@ -36,7 +36,7 @@ if (!_ok) exitWith {
 };
 
 if (!(_laneId isEqualType "")) then { _laneId = ""; };
-_laneId = toLowerANSI (trim _laneId);
+_laneId = toLower (trim _laneId);
 if !(_laneId in ["tower", "ground", "arrival"]) exitWith {
     private _owner = owner _caller;
     if (_owner > 0) then { [format ["Invalid lane '%1'.", _laneId]] remoteExec ["ARC_fnc_clientHint", _owner]; };
@@ -79,8 +79,8 @@ private _laneReqTypes = switch (_laneId) do {
     default { ["REQ_TAKEOFF"] };
 };
 private _lanePending = count (_queue select {
-    private _rtype = toUpperANSI (_x param [1, ""]);
-    private _st = toUpperANSI (_x param [6, ""]);
+    private _rtype = toUpper (_x param [1, ""]);
+    private _st = toUpper (_x param [6, ""]);
     (_rtype in _laneReqTypes) && { _st in ["QUEUED", "PENDING", "AWAITING_TOWER_DECISION"] }
 });
 
@@ -102,10 +102,10 @@ _staffing set [_idx, _rec];
 
 private _owner = owner _caller;
 if (_owner > 0) then {
-    [format ["%1 lane %2 set to %3 (pending handoff queue: %4).", toUpperANSI _laneId, if (_claim) then {"staffing"} else {"AUTO"}, if (_claim) then {_name} else {"AUTO"}, _lanePending]] remoteExec ["ARC_fnc_clientHint", _owner];
+    [format ["%1 lane %2 set to %3 (pending handoff queue: %4).", toUpper _laneId, if (_claim) then {"staffing"} else {"AUTO"}, if (_claim) then {_name} else {"AUTO"}, _lanePending]] remoteExec ["ARC_fnc_clientHint", _owner];
 };
 
-["OPS", format ["AIRBASE STAFFING: %1 lane %2 by %3", if (_claim) then {"claimed"} else {"released"}, toUpperANSI _laneId, _name], getPosATL _caller, 0, [
+["OPS", format ["AIRBASE STAFFING: %1 lane %2 by %3", if (_claim) then {"claimed"} else {"released"}, toUpper _laneId, _name], getPosATL _caller, 0, [
     ["event", _event],
     ["caller", _name],
     ["uid", _uid],

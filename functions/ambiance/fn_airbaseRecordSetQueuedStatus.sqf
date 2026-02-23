@@ -17,7 +17,7 @@ if (!(_status isEqualType "")) then { _status = ""; };
 if (!(_metaAppend isEqualType [])) then { _metaAppend = []; };
 
 _flightId = trim _flightId;
-_status = toUpperANSI (trim _status);
+_status = toUpper (trim _status);
 
 if (_flightId isEqualTo "") exitWith { [_records, false] };
 if !(_status in ["CANCELED", "PRIORITIZED", "ACTIVE", "COMPLETE", "FAILED"]) exitWith { [_records, false] };

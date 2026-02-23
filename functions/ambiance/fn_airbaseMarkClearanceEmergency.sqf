@@ -29,7 +29,7 @@ private _idx = _requests findIf { ((_x param [0, ""]) isEqualTo _requestId) };
 if (_idx < 0) exitWith {false};
 
 private _rec = _requests # _idx;
-private _status = toUpperANSI (_rec param [6, ""]);
+private _status = toUpper (_rec param [6, ""]);
 private _uid = _rec param [2, ""];
 private _callerUid = getPlayerUID _caller;
 

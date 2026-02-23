@@ -16,7 +16,7 @@ params [
     ["_districtId", "D00", [""]]
 ];
 
-private _district = toUpperANSI (trim _districtId);
+private _district = toUpper (trim _districtId);
 if (_district isEqualTo "") then { _district = "D00"; };
 if ((count _district) < 3) then { _district = "D00"; };
 _district = format ["D%1", (_district select [1, 2])];

@@ -35,12 +35,12 @@ private _levelOrder = createHashMapFromArray [
     ["ERROR", 40]
 ];
 
-private _normalizedLevel = toUpperANSI _level;
+private _normalizedLevel = toUpper _level;
 if !(_normalizedLevel in _levelOrder) then {
     _normalizedLevel = "INFO";
 };
 
-private _minLevelCfg = toUpperANSI (missionNamespace getVariable ["FARABAD_log_minLevel", "INFO"]);
+private _minLevelCfg = toUpper (missionNamespace getVariable ["FARABAD_log_minLevel", "INFO"]);
 if !(_minLevelCfg in _levelOrder) then {
     _minLevelCfg = "INFO";
 };
@@ -49,7 +49,7 @@ private _currentPriority = _levelOrder get _normalizedLevel;
 private _minimumPriority = _levelOrder get _minLevelCfg;
 if (_currentPriority < _minimumPriority) exitWith { false };
 
-private _channelNorm = toUpperANSI _channel;
+private _channelNorm = toUpper _channel;
 private _text = if (_message isEqualType "") then { _message } else { str _message };
 private _includeMeta = missionNamespace getVariable ["FARABAD_log_includeMeta", true];
 private _metaText = if (_includeMeta) then { str _meta } else { "<omitted>" };

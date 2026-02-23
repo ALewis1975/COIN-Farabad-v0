@@ -79,7 +79,7 @@ private _normalizeStaffingLane = {
     private _base = if (_idx >= 0) then { _rows # _idx } else { [_laneId, "AUTO", "", "", -1] };
     [
         _laneId,
-        toUpperANSI (_base param [1, "AUTO"]),
+        toUpper (_base param [1, "AUTO"]),
         _base param [2, ""],
         _base param [3, ""],
         _base param [4, -1]
@@ -182,10 +182,10 @@ for "_i" from 0 to (_nextN - 1) do
 };
 
 private _clearancePending = _clrReqs select {
-    private _st = toUpperANSI (_x param [6, ""]);
+    private _st = toUpper (_x param [6, ""]);
     (_st in ["QUEUED", "PENDING", "AWAITING_TOWER_DECISION"])
 };
-private _clearanceAwaitingTower = _clearancePending select { (toUpperANSI (_x param [6, ""])) isEqualTo "AWAITING_TOWER_DECISION" };
+private _clearanceAwaitingTower = _clearancePending select { (toUpper (_x param [6, ""])) isEqualTo "AWAITING_TOWER_DECISION" };
 private _clearanceEmergency = _clearancePending select { ((_x param [5, 0]) >= 100) };
 
 private _clearancePendingView = _clearancePending apply {
@@ -249,12 +249,12 @@ private _readReasonFromMeta = {
     };
 
     if (_reason isEqualTo "") then {
-        private _idxReason = _meta findIf { _x isEqualType [] && { (count _x) >= 2 } && { toUpperANSI (_x # 0) in ["REASON", "ROUTEVALIDATIONREASON"] } };
+        private _idxReason = _meta findIf { _x isEqualType [] && { (count _x) >= 2 } && { toUpper (_x # 0) in ["REASON", "ROUTEVALIDATIONREASON"] } };
         if (_idxReason >= 0) then { _reason = (_meta # _idxReason) # 1; };
     };
 
     if !(_reason isEqualType "") then { _reason = str _reason; };
-    toUpperANSI (trim _reason)
+    toUpper (trim _reason)
 };
 
 private _extractBlockedReason = {
@@ -266,7 +266,7 @@ private _extractBlockedReason = {
     private _out = "";
     private _close = _t find ")";
     if (_close > _open) then { _out = _t select [_open + 1, _close - _open - 1]; };
-    toUpperANSI (trim _out)
+    toUpper (trim _out)
 };
 
 private _extractBlockedSourceId = {
@@ -275,7 +275,7 @@ private _extractBlockedSourceId = {
     private _tokens = _txt splitString " :()[]|,.;\t\n\r";
     private _found = "";
     {
-        private _t = toUpperANSI (trim _x);
+        private _t = toUpper (trim _x);
         if (_t isEqualTo "") then { continue; };
         if ((_t find "FLT-") == 0 || { (_t find "CLR-") == 0 } || { (_t find "REQ-") == 0 }) exitWith {
             _found = _t;
@@ -291,7 +291,7 @@ private _metaValue = {
         _x isEqualType [] &&
         { (count _x) >= 2 } &&
         { ((_x # 0) isEqualType "") } &&
-        { (toUpperANSI (_x # 0)) isEqualTo (toUpperANSI _key) }
+        { (toUpper (_x # 0)) isEqualTo (toUpper _key) }
     };
     if (_idx < 0) exitWith { _def };
     (_meta # _idx) # 1
@@ -301,7 +301,7 @@ private _blockedRouteTail = [];
 
 {
     if !(_x isEqualType []) then { continue; };
-    private _kind = toUpperANSI (_x param [1, ""]);
+    private _kind = toUpper (_x param [1, ""]);
     private _reason = [(_x param [5, []])] call _readReasonFromMeta;
     if ((_kind in ["DENY", "REJECT", "ROUTE_BLOCK"]) && { (_reason find "ROUTE") >= 0 || { (_reason find "MARKER") >= 0 } }) then {
         _blockedRouteTail pushBack [
@@ -315,17 +315,17 @@ private _blockedRouteTail = [];
 {
     if !(_x isEqualType []) then { continue; };
     if ((count _x) < 4) then { continue; };
-    private _cat = toUpperANSI (_x param [2, ""]);
+    private _cat = toUpper (_x param [2, ""]);
     if (_cat isNotEqualTo "OPS") then { continue; };
 
     private _summary = _x param [3, ""];
     if !(_summary isEqualType "") then { _summary = str _summary; };
-    private _summaryU = toUpperANSI _summary;
+    private _summaryU = toUpper _summary;
 
     private _meta = _x param [5, []];
     if !(_meta isEqualType []) then { _meta = []; };
-    private _eventCode = toUpperANSI ([_meta, "event", ""] call _metaValue);
-    private _metaReason = toUpperANSI ([_meta, "reason", ""] call _metaValue);
+    private _eventCode = toUpper ([_meta, "event", ""] call _metaValue);
+    private _metaReason = toUpper ([_meta, "reason", ""] call _metaValue);
 
     private _isRouteBlockedSummary = (_summaryU find "AIRBASE ROUTE: BLOCKED") >= 0;
     private _isRouteInvalidClearance =
@@ -341,8 +341,8 @@ private _blockedRouteTail = [];
 
     private _reason = if (_metaReason isEqualTo "") then { [_summaryU] call _extractBlockedReason } else { _metaReason };
     if (_reason isEqualTo "") then { _reason = "ROUTE_DENIED"; };
-    private _sourceId = toUpperANSI ([_meta, "flightId", ""] call _metaValue);
-    if (_sourceId isEqualTo "") then { _sourceId = toUpperANSI ([_meta, "requestId", ""] call _metaValue); };
+    private _sourceId = toUpper ([_meta, "flightId", ""] call _metaValue);
+    if (_sourceId isEqualTo "") then { _sourceId = toUpper ([_meta, "requestId", ""] call _metaValue); };
     if (_sourceId isEqualTo "") then { _sourceId = [_summaryU] call _extractBlockedSourceId; };
 
     _blockedRouteTail pushBack [

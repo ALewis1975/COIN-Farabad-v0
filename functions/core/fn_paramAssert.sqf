@@ -25,7 +25,7 @@ private _norm = _value;
 private _code = "ARC_ASSERT_OK";
 private _msg = format ["%1 passed %2", _label, _rule];
 
-switch (toUpperANSI _rule) do
+switch (toUpper _rule) do
 {
     case "ARRAY_SHAPE": {
         _options params [

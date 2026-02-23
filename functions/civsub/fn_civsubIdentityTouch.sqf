@@ -22,20 +22,22 @@ params [
     ["_homePos", [0,0,0], [[]]]
 ];
 
-// sqflint-compatible helper: getOrDefault is not recognised by sqflint 0.3.x static analyser.
+// sqflint-compatible helpers: operators not recognised by sqflint 0.3.x static analyser.
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k,_d]";
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+private _keysFn = compile "params ['_m']; keys _m";
 
 if (_districtId isEqualTo "") exitWith {createHashMap};
 if (_civUid isEqualTo "") exitWith {createHashMap};
 
 private _ids = missionNamespace getVariable ["civsub_v1_identities", createHashMap];
 // tolerate legacy array-of-pairs store
-if (_ids isEqualType []) then { _ids = createHashMapFromArray _ids; };
+if (_ids isEqualType []) then { _ids = [_ids] call _hmCreate; };
 if !(_ids isEqualType createHashMap) then { _ids = createHashMap; };
 
 if (_civUid isEqualTo "") then {
     private _tmpUid = "";
-    private _nilUid = isNil { _tmpUid = [_districtId] call ARC_fnc_civsubIdentityGenerateUid; };
+    private _nilUid = isNil { _tmpUid = [_districtId] call ARC_fnc_civsubIdentityGenerateUid; _tmpUid };
     if (_nilUid || {_tmpUid isEqualTo ""}) exitWith { createHashMap };
     _civUid = _tmpUid;
 };
@@ -43,9 +45,9 @@ if (_civUid isEqualTo "") then {
 private _rec = [_ids, _civUid, createHashMap] call _hg;
 if !(_rec isEqualType createHashMap) then { _rec = createHashMap; };
 
-if ((count (keys _rec)) == 0) then {
+if ((count ([_rec] call _keysFn)) == 0) then {
     private _tmpRec = createHashMap;
-    private _nilRec = isNil { _tmpRec = [_civUid, _districtId, _homePos] call ARC_fnc_civsubIdentityGenerateProfile; };
+    private _nilRec = isNil { _tmpRec = [_civUid, _districtId, _homePos] call ARC_fnc_civsubIdentityGenerateProfile; _tmpRec };
     if (_nilRec || {!(_tmpRec isEqualType createHashMap)} || {(count _tmpRec) == 0}) exitWith { createHashMap };
     _rec = _tmpRec;
 };

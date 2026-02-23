@@ -83,8 +83,8 @@ if (_parentEchelon isEqualTo "") then { _parentEchelon = _groupId; };
 private _role = "RIFLEMAN";
 if (!isNull _safeUnit) then
 {
-    _role = toUpperANSI (typeOf _safeUnit);
-    if ((toUpperANSI _role) find "LEADER" >= 0) then { _role = "LEADER"; };
+    _role = toUpper (typeOf _safeUnit);
+    if ((toUpper _role) find "LEADER" >= 0) then { _role = "LEADER"; };
 };
 
 private _locationAnchor = [];

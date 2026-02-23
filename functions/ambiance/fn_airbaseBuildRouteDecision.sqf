@@ -21,8 +21,8 @@ params [
     ["_sourceId", "", [""]]
 ];
 
-_opKind = toUpperANSI (trim _opKind);
-_context = toUpperANSI (trim _context);
+_opKind = toUpper (trim _opKind);
+_context = toUpper (trim _context);
 if !(_opKind in ["DEP", "ARR"]) exitWith {[false, [], "UNSUPPORTED_OP_KIND"]};
 if (_context isEqualTo "") then { _context = "AMBIENT"; };
 
