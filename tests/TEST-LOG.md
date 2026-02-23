@@ -1095,3 +1095,22 @@ git --no-pager diff --check
 - JIP / late-client status: BLOCKED pending dedicated-server validation per project constraints.
 - Waiver owner: mission maintainers on current branch.
 - Tracking reference: current PR validation section + this TEST-LOG entry.
+
+## 2026-02-23 05:55 UTC — restore empty civ_uid generation path in identity touch
+
+**Branch/Commit:** current branch @ 6594fcd
+
+**Scenario:** Removed the premature empty-`_civUid` guard in `fn_civsubIdentityTouch.sqf` so documented optional-empty UID input continues to flow into the existing UID generation branch.
+
+**Commands:**
+```
+python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubIdentityTouch.sqf
+git --no-pager diff --check
+```
+
+**Result:** PASS
+
+**Notes:**
+- Compat scan PASS after restoring generation-path reachability.
+- Patch-format/whitespace check PASS.
+- Dedicated server runtime validation remains BLOCKED in this container environment.
