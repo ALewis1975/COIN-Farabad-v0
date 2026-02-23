@@ -92,7 +92,9 @@ private _subsystems = [
     ["ARC_iedPhase1_siteSelectionEnabled", "IED Phase1 Enabled"],
     ["ARC_vbiedPhase3_enabled", "VBIED Phase3 Enabled"],
     ["ARC_patrolSpawnContactsEnabled", "Patrol Contacts Enabled"],
-    ["ARC_worldTime_enabled", "World Time Enabled"]
+    ["ARC_worldTime_enabled", "World Time Enabled"],
+    ["ARC_incidentLoopRunning", "Incident Loop Running"],
+    ["ARC_execLoopRunning", "Exec Loop Running"]
 ];
 
 {
