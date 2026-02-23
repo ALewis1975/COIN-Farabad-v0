@@ -149,8 +149,12 @@ private _identityDepsOk = true;
 if (!_identityDepsOk) exitWith { ["", "One or more identity functions could not be resolved (IDENTITY_TOUCH)."] call _inconclusive };
 
 private _rec = createHashMap;
-private _nil = isNil { _rec = [_did, _actorUid, _civUid, getPosATL _civ] call ARC_fnc_civsubIdentityTouch; };
-if (_nil || {!(_rec isEqualType createHashMap)} || {(count _rec) == 0}) exitWith { ["", "Identity record unavailable."] call _inconclusive };
+private _nil = isNil { _rec = [_did, _actorUid, _civUid, getPosATL _civ] call ARC_fnc_civsubIdentityTouch; _rec };
+if (_nil || {!(_rec isEqualType createHashMap)} || {(count _rec) == 0}) exitWith {
+    diag_log format ["[CIVSUB][ERR] BACKGROUND_CHECK step=IDENTITY_TOUCH failed did=%1 civUid=%2 actorUid=%3 nilResult=%4 recType=%5 recCount=%6",
+        _did, _civUid, _actorUid, _nil, typeName _rec, count _rec];
+    ["", "Identity record unavailable."] call _inconclusive
+};
 
 private _serial = [_rec, "passport_serial", ""] call _hg;
 if (_serial isEqualTo "") then { _serial = "UNKNOWN"; };
@@ -194,7 +198,7 @@ if (_poiId isEqualTo "") exitWith {
 
 ["CRIMEDB_GET"] call _setStep;
 private _poi = createHashMap;
-private _nil = isNil { _poi = [_poiId] call ARC_fnc_civsubCrimeDbGetById; };
+private _nil = isNil { _poi = [_poiId] call ARC_fnc_civsubCrimeDbGetById; _poi };
 if (_nil || {!(_poi isEqualType createHashMap)} || {(count _poi) == 0}) exitWith {
     _payloadCheck set ["inconclusive", true];
     isNil { [_did, "CHECK_PAPERS", "IDENTITY", _payloadCheck, _actorUid] call ARC_fnc_civsubEmitDelta; };

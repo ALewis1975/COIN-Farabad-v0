@@ -20,6 +20,14 @@
 
 if (!isServer) exitWith { false };
 
+// Debounce: reject re-invocations within 15 seconds of the last audit start.
+private _lastAudit = missionNamespace getVariable ["ARC_compileAudit_lastStartTime", -999];
+if (serverTime - _lastAudit < 15) exitWith {
+    diag_log format ["[ARC][COMPILE] Audit rejected (debounce). lastStart=%1 now=%2", _lastAudit, serverTime];
+    false
+};
+missionNamespace setVariable ["ARC_compileAudit_lastStartTime", serverTime, false];
+
 params [
     ["_requester", objNull, [objNull]]
 ];
@@ -141,10 +149,11 @@ diag_log format ["[ARC][COMPILE] buildStamp=%1", missionNamespace getVariable ["
                 [false, _fnName, format ["MISSING: %1", _path], false] call _push;
                 diag_log format ["[ARC][COMPILE][MISSING] %1", _path];
             } else {
-                // Attempt compile. Any syntax errors will show in RPT with line numbers.
-                // Pass empty array as _this so params blocks use defaults
-                // without "Type Object, expected String" errors.
-                [] call compile preprocessFileLineNumbers _path;
+                // Compile only — do NOT execute. Syntax errors will be logged to RPT
+                // by the engine during compilation.  Previous versions used
+                // '[] call compile …' which executed every function body,
+                // causing undefined-variable errors and mission-state side effects.
+                compile preprocessFileLineNumbers _path;
                 _compiled = _compiled + 1;
 
                 // WARN tag: compiled attempt made; check RPT for syntax errors.
