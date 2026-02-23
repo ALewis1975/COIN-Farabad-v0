@@ -1075,3 +1075,23 @@ git --no-pager diff --check
 - Static parity harness covered required valid (`D01`, `D09`, `D10`, `D20`) and invalid (`D1`, `D21`, `DX1`) cases and normalization paths for lowercase/whitespace inputs after trim+toupper.
 - Expected runtime symptom removed: no dependency on `BIS_fnc_padNumber`, so environments missing `bis_fnc_padnumber` should no longer emit undefined-function errors for this validator path.
 - Runtime-only gameplay/network validation remains BLOCKED in this container (no Arma runtime).
+
+## 2026-02-23 03:32 UTC — intelBroadcast `_v` declaration + runbook line-number hardening
+
+**Branch/Commit:** current branch @ f45348a
+
+**Scenario:** Fixed `_sanitizeMeta` local declaration in `fn_intelBroadcast.sqf` (`private _v = nil;`) to prevent undefined-variable runtime spam, and updated the intelBroadcast sync runbook to validate by error string rather than a stale line number.
+
+**Commands:**
+```
+git --no-pager diff --check
+```
+
+**Result:** PASS
+
+**Notes:**
+- `git --no-pager diff --check`: PASS (no whitespace or patch-format issues).
+- Runtime scenario type: Local MP/Hosted MP/Dedicated server validation BLOCKED in this container (static-only environment).
+- JIP / late-client status: BLOCKED pending dedicated-server validation per project constraints.
+- Waiver owner: mission maintainers on current branch.
+- Tracking reference: current PR validation section + this TEST-LOG entry.

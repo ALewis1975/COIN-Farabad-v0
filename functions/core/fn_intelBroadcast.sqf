@@ -43,7 +43,7 @@ private _sanitizeMeta = {
     private _out = [];
     {
         private _k = "";
-        private _v;
+        private _v = nil;
         if !(_x isEqualType [] && { (count _x) >= 2 }) then {
             _truncated = true;
         } else {
