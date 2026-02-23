@@ -31,4 +31,10 @@ private _numStr = _id select [1, 2];
 private _num = parseNumber _numStr;
 if (_num <= 0 || { _num > 20 }) exitWith {false};
 
-(_numStr isEqualTo ([_num, 2] call BIS_fnc_padNumber))
+private _expectedNumStr = if (_num < 10) then {
+    "0" + (str _num)
+} else {
+    str _num
+};
+
+(_numStr isEqualTo _expectedNumStr)

@@ -1006,3 +1006,51 @@ git --no-pager diff --check
 - Added startup INFO log confirming reset state for this run.
 - Summary function remains unchanged and now reports current-run totals because counters are reset before assertions execute.
 - Runtime/dedicated validation remains BLOCKED in container-only static environment.
+
+## 2026-02-23 03:04 UTC — district ID canonicalization local padding
+
+**Branch/Commit:** current branch @ f32acfe
+
+**Scenario:** Replaced `BIS_fnc_padNumber` dependency in `fn_worldIsValidDistrictId.sqf` with local two-digit canonicalization and statically validated parity cases.
+
+**Commands:**
+```
+python3 - <<'PY'
+def check(v, allow_sentinel=False):
+    if not isinstance(v, str):
+        return False
+    _id = v.strip().upper()
+    if _id == "":
+        return False
+    if allow_sentinel and _id == "D00":
+        return True
+    if len(_id) != 3 or _id[0] != "D":
+        return False
+    _num_str = _id[1:3]
+    try:
+        _num = float(_num_str)
+    except ValueError:
+        _num = 0
+    if _num <= 0 or _num > 20:
+        return False
+    _expected = ("0" + str(int(_num))) if _num < 10 else str(int(_num))
+    return _num_str == _expected
+
+for v in ["D01", "D09", "D10", "D20"]:
+    assert check(v), v
+for v in ["D1", "D21", "DX1"]:
+    assert not check(v), v
+for v in [" d01 ", "d09", "\tD10\n"]:
+    assert check(v), v
+print("district-id parity assertions: PASS")
+PY
+
+git --no-pager diff --check
+```
+
+**Result:** PASS
+
+**Notes:**
+- Static parity harness covered required valid (`D01`, `D09`, `D10`, `D20`) and invalid (`D1`, `D21`, `DX1`) cases and normalization paths for lowercase/whitespace inputs after trim+toupper.
+- Expected runtime symptom removed: no dependency on `BIS_fnc_padNumber`, so environments missing `bis_fnc_padnumber` should no longer emit undefined-function errors for this validator path.
+- Runtime-only gameplay/network validation remains BLOCKED in this container (no Arma runtime).
