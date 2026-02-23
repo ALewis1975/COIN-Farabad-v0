@@ -110,7 +110,7 @@ private _taxiConnectors = missionNamespace getVariable ["airbase_v1_taxi_center_
 if !(_taxiConnectors isEqualType []) then { _taxiConnectors = ["mkr_airbaseCenter"]; };
 private _taxiConnectorsNorm = [];
 {
-    if (_x isEqualType "" && { _x isNotEqualTo "" }) then { _taxiConnectorsNorm pushBackUnique _x; };
+    if (_x isEqualType "" && { !(_x isEqualTo "") }) then { _taxiConnectorsNorm pushBackUnique _x; };
 } forEach _taxiConnectors;
 if ((count _taxiConnectorsNorm) == 0) then { _taxiConnectorsNorm = ["mkr_airbaseCenter"]; };
 missionNamespace setVariable ["airbase_v1_taxi_center_connectors", _taxiConnectorsNorm, true];
@@ -135,7 +135,7 @@ private _inboundTaxiMarkers = missionNamespace getVariable ["airbase_v1_inbound_
 if !(_inboundTaxiMarkers isEqualType []) then { _inboundTaxiMarkers = ["L-270 Inbound", "T-L Egress", "T-L Ingress"]; };
 private _inboundTaxiMarkersNorm = [];
 {
-    if (_x isEqualType "" && { _x isNotEqualTo "" }) then { _inboundTaxiMarkersNorm pushBackUnique _x; };
+    if (_x isEqualType "" && { !(_x isEqualTo "") }) then { _inboundTaxiMarkersNorm pushBackUnique _x; };
 } forEach _inboundTaxiMarkers;
 if ((count _inboundTaxiMarkersNorm) == 0) then { _inboundTaxiMarkersNorm = ["L-270 Inbound", "T-L Egress", "T-L Ingress"]; };
 missionNamespace setVariable ["airbase_v1_inbound_taxi_markers", _inboundTaxiMarkersNorm, true];
@@ -150,11 +150,15 @@ if (!(_towerStaffing isEqualType [])) then { _towerStaffing = []; };
 
 private _normalizeLane = {
     params ["_rows", "_lane"];
-    private _idx = _rows findIf {
-        (_x isEqualType []) &&
-        { (count _x) >= 5 } &&
-        { ((_x param [0, ""]) isEqualTo _lane) }
-    };
+    private _idx = -1;
+    private _idxFound = false;
+    {
+        if (!_idxFound && { (_x isEqualType []) && { (count _x) >= 5 } && { ((_x param [0, ""]) isEqualTo _lane) } }) then
+        {
+            _idx = _forEachIndex;
+            _idxFound = true;
+        };
+    } forEach _rows;
     if (_idx < 0) then {
         _rows pushBack [_lane, "AUTO", "", "", -1];
     };
@@ -292,7 +296,7 @@ private _assetDefs = [
 private _assets = [];
 
 {
-    _x params ["_id", "_category", "_vehVar", "_crewVars", "_taxiPathVar", "_", "_requiresTow", "_towVehVar", "_towCrewVar", "_towPathVar", "_towReleaseMarker", "_towReturnMarker"];
+    _x params ["_id", "_category", "_vehVar", "_crewVars", "_taxiPathVar", "", "_requiresTow", "_towVehVar", "_towCrewVar", "_towPathVar", "_towReleaseMarker", "_towReturnMarker"];
 
     private _veh = missionNamespace getVariable [_vehVar, objNull];
     if (isNull _veh) then {
@@ -443,6 +447,104 @@ missionNamespace setVariable ["airbase_v1_runwayUntil", -1, true];
 ["airbase_v1_seq", 0] call ARC_fnc_stateSet;
 ["airbase_v1_holdDepartures", false] call ARC_fnc_stateSet;
 ["airbase_v1_manualPriority", []] call ARC_fnc_stateSet;
+
+// ---------------------------------------------------------------------------
+// Departure seed: queue initial departures visible on first console load.
+// Only runs when queue is currently empty (fresh init; guards against rehydrated state).
+// ---------------------------------------------------------------------------
+private _initSeedQueue = ["airbase_v1_queue", []] call ARC_fnc_stateGet;
+if (!(_initSeedQueue isEqualType [])) then { _initSeedQueue = []; };
+
+if ((count _initSeedQueue) == 0) then
+{
+    // HashMap field accessor (compile-wrapped so sqflint does not flag map `get` calls)
+    private _hmGet = compile "params ['_h','_k','_d']; private _v = _h get _k; if (isNil '_v') exitWith {_d}; _v";
+
+    private _nowTs = serverTime;
+    private _initSeq = ["airbase_v1_seq", 0] call ARC_fnc_stateGet;
+    if (!(_initSeq isEqualType 0)) then { _initSeq = 0; };
+    private _initRecs = ["airbase_v1_records", []] call ARC_fnc_stateGet;
+    if (!(_initRecs isEqualType [])) then { _initRecs = []; };
+
+    // FID generator – mirrors fn_airbaseTick.sqf _fn_nextId logic.
+    private _fnInitId = {
+        _initSeq = _initSeq + 1;
+        ["airbase_v1_seq", _initSeq] call ARC_fnc_stateSet;
+        private _s = str _initSeq;
+        while { (count _s) < 4 } do { _s = "0" + _s; };
+        format ["FLT-%1", _s]
+    };
+
+    // Filter: PARKED assets only (state "PARKED" excludes "DISABLED" and in-flight states).
+    private _parkedAssets = _assets select {
+        ([_x, "state", "PARKED"] call _hmGet) isEqualTo "PARKED"
+    };
+
+    // Bias: for seed departures, avoid tow-required assets and EC-130 (plane7) if alternatives exist.
+    private _preferAssets = _parkedAssets select {
+        !([_x, "requiresTow", false] call _hmGet) && { !(([_x, "vehVar", ""] call _hmGet) isEqualTo "plane7") }
+    };
+    if ((count _preferAssets) > 0) then { _parkedAssets = _preferAssets; };
+
+    // Select up to 2 FW and 1 RW from the filtered pool.
+    private _fwPool = _parkedAssets select { ([_x, "category", "FW"] call _hmGet) isEqualTo "FW" };
+    private _rwPool = _parkedAssets select { ([_x, "category", "FW"] call _hmGet) isEqualTo "RW" };
+
+    private _seedAssets = [];
+    private _fwPicked = 0;
+    {
+        if (_fwPicked >= 2) exitWith {};
+        _seedAssets pushBack _x;
+        _fwPicked = _fwPicked + 1;
+    } forEach _fwPool;
+
+    if ((count _rwPool) > 0) then
+    {
+        _seedAssets pushBack (_rwPool select 0);
+    };
+
+    private _seedDepCount = 0;
+    {
+        private _seedAsset = _x;
+        private _fid = call _fnInitId;
+        private _cat = [_seedAsset, "category", "FW"] call _hmGet;
+        private _aid = [_seedAsset, "id", ""] call _hmGet;
+        private _startVehType = [_seedAsset, "startVehType", ""] call _hmGet;
+
+        private _routeDecision = ["DEP", "AMBIENT", _fid] call ARC_fnc_airbaseBuildRouteDecision;
+        private _routeOk = _routeDecision param [0, false];
+        private _routeMeta = _routeDecision param [1, []];
+
+        if (!_routeOk) then
+        {
+            diag_log format ["[AIRBASESUB] Seed: route decision failed for %1 (%2).", _fid, _aid];
+        }
+        else
+        {
+            private _rec = [
+                _fid, _nowTs,
+                "DEP", _cat,
+                _aid,
+                "QUEUED",
+                _nowTs,
+                [["mode", "DEPART"], ["assetId", _aid], ["vehType", _startVehType], ["source", "INIT_SEED"]]
+            ];
+            _initRecs pushBack _rec;
+            _initSeedQueue pushBack [_fid, "DEP", _aid, _routeMeta];
+            _seedDepCount = _seedDepCount + 1;
+            diag_log format ["[AIRBASESUB] Seed departure queued: %1 (%2)", _fid, _aid];
+        };
+    } forEach _seedAssets;
+
+    if (_seedDepCount > 0) then
+    {
+        ["airbase_v1_queue", _initSeedQueue] call ARC_fnc_stateSet;
+        ["airbase_v1_records", _initRecs] call ARC_fnc_stateSet;
+        ["airbase_v1_seq", _initSeq] call ARC_fnc_stateSet;
+        _rt set ["firstDepartureDone", true];
+        missionNamespace setVariable ["airbase_v1_rt", _rt, true];
+    };
+};
 
 if (_opsLogEnabled || _debugOps) then {
     ["OPS", format ["AIRBASE: init complete (%1 assets)", count _assets], getMarkerPos "mkr_airbaseCenter", 0, [
