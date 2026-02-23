@@ -408,6 +408,191 @@ if (_approve) then
             ] call ARC_fnc_intelLog;
         };
 
+        case "INCIDENT":
+        {
+            // Seeded/system incident queue item: activate the specific incident payload.
+            private _markerRaw = [_payload, "marker", ""] call _getP;
+            private _incidentType = [_payload, "incidentType", ""] call _getP;
+            private _displayName = [_payload, "displayName", _summary] call _getP;
+            private _payloadPosATL = [_payload, "pos", _posATL] call _getP;
+
+            if (!(_markerRaw isEqualType "")) then { _markerRaw = ""; };
+            if (!(_incidentType isEqualType "")) then { _incidentType = ""; };
+            if (!(_displayName isEqualType "")) then { _displayName = _summary; };
+            if (!(_payloadPosATL isEqualType [])) then { _payloadPosATL = _posATL; };
+
+            _markerRaw = trim _markerRaw;
+            _incidentType = toUpper (trim _incidentType);
+            _displayName = trim _displayName;
+            if (_displayName isEqualTo "") then { _displayName = "Seeded Incident"; };
+
+            private _spawned = false;
+            private _spawnReason = "";
+            private _taskId = "";
+
+            private _activeTaskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
+            if (!(_activeTaskId isEqualType "")) then { _activeTaskId = ""; };
+
+            if (_activeTaskId isNotEqualTo "") then
+            {
+                _spawnReason = format ["active incident already set (%1)", _activeTaskId];
+            }
+            else
+            {
+                if (_markerRaw isEqualTo "") then
+                {
+                    _spawnReason = "missing marker in payload";
+                }
+                else
+                {
+                    private _markerResolved = [_markerRaw] call ARC_fnc_worldResolveMarker;
+                    if !(_markerResolved in allMapMarkers) then
+                    {
+                        _spawnReason = format ["marker not found (%1)", _markerRaw];
+                    }
+                    else
+                    {
+                        if (_incidentType isEqualTo "") then { _incidentType = "LOGISTICS"; };
+
+                        private _pos = + (getMarkerPos _markerResolved);
+                        if (_payloadPosATL isEqualType [] && { (count _payloadPosATL) >= 2 }) then
+                        {
+                            _pos = +_payloadPosATL;
+                        };
+                        _pos resize 3;
+
+                        private _zone = [_markerRaw] call ARC_fnc_worldGetZoneForMarker;
+                        private _counter = ["taskCounter", 0] call ARC_fnc_stateGet;
+                        if (!(_counter isEqualType 0)) then { _counter = 0; };
+                        _counter = _counter + 1;
+                        ["taskCounter", _counter] call ARC_fnc_stateSet;
+                        _taskId = format ["ARC_inc_%1", _counter];
+
+                        ["activeTaskId", _taskId] call ARC_fnc_stateSet;
+                        ["activeIncidentType", _incidentType] call ARC_fnc_stateSet;
+                        ["activeIncidentMarker", _markerRaw] call ARC_fnc_stateSet;
+                        ["activeIncidentDisplayName", _displayName] call ARC_fnc_stateSet;
+                        ["activeIncidentCreatedAt", serverTime] call ARC_fnc_stateSet;
+                        ["activeIncidentZone", _zone] call ARC_fnc_stateSet;
+                        ["activeIncidentPos", _pos] call ARC_fnc_stateSet;
+
+                        ["activeIncidentAccepted", false] call ARC_fnc_stateSet;
+                        ["activeIncidentAcceptedAt", -1] call ARC_fnc_stateSet;
+                        ["activeIncidentAcceptedBy", ""] call ARC_fnc_stateSet;
+                        ["activeIncidentAcceptedByName", ""] call ARC_fnc_stateSet;
+                        ["activeIncidentAcceptedByUID", ""] call ARC_fnc_stateSet;
+                        ["activeIncidentAcceptedByRoleTag", ""] call ARC_fnc_stateSet;
+                        ["activeIncidentAcceptedByGroup", ""] call ARC_fnc_stateSet;
+
+                        ["activeIncidentSitrepSent", false] call ARC_fnc_stateSet;
+                        ["activeIncidentSitrepSentAt", -1] call ARC_fnc_stateSet;
+                        ["activeIncidentSitrepFrom", ""] call ARC_fnc_stateSet;
+                        ["activeIncidentSitrepFromUID", ""] call ARC_fnc_stateSet;
+                        ["activeIncidentSitrepFromGroup", ""] call ARC_fnc_stateSet;
+                        ["activeIncidentSitrepFromRoleTag", ""] call ARC_fnc_stateSet;
+                        ["activeIncidentSitrepSummary", ""] call ARC_fnc_stateSet;
+                        ["activeIncidentSitrepDetails", ""] call ARC_fnc_stateSet;
+
+                        ["activeIncidentCloseReady", false] call ARC_fnc_stateSet;
+                        ["activeIncidentSuggestedResult", ""] call ARC_fnc_stateSet;
+                        ["activeIncidentCloseReason", ""] call ARC_fnc_stateSet;
+                        ["activeIncidentCloseMarkedAt", -1] call ARC_fnc_stateSet;
+
+                        ["activeLeadId", ""] call ARC_fnc_stateSet;
+                        ["activeThreadId", ""] call ARC_fnc_stateSet;
+                        ["activeLeadTag", ""] call ARC_fnc_stateSet;
+
+                        ["activeExecTaskId", ""] call ARC_fnc_stateSet;
+                        ["activeExecKind", ""] call ARC_fnc_stateSet;
+                        ["activeExecPos", []] call ARC_fnc_stateSet;
+                        ["activeExecRadius", 0] call ARC_fnc_stateSet;
+                        ["activeExecStartedAt", -1] call ARC_fnc_stateSet;
+                        ["activeExecDeadlineAt", -1] call ARC_fnc_stateSet;
+                        ["activeExecArrivalReq", 0] call ARC_fnc_stateSet;
+                        ["activeExecArrived", false] call ARC_fnc_stateSet;
+                        ["activeExecHoldReq", 0] call ARC_fnc_stateSet;
+                        ["activeExecHoldAccum", 0] call ARC_fnc_stateSet;
+                        ["activeExecLastProg", -1] call ARC_fnc_stateSet;
+                        ["activeExecLastProgressAt", -1] call ARC_fnc_stateSet;
+                        ["activeObjectiveKind", ""] call ARC_fnc_stateSet;
+                        ["activeObjectiveClass", ""] call ARC_fnc_stateSet;
+                        ["activeObjectivePos", []] call ARC_fnc_stateSet;
+                        ["activeObjectiveNetId", ""] call ARC_fnc_stateSet;
+
+                        [_taskId, _markerRaw, _displayName, _incidentType, _pos, ""] call ARC_fnc_taskCreateIncident;
+
+                        missionNamespace setVariable ["ARC_activeTaskId", _taskId, true];
+                        missionNamespace setVariable ["ARC_activeIncidentMarker", _markerRaw, true];
+                        missionNamespace setVariable ["ARC_activeIncidentType", _incidentType, true];
+                        missionNamespace setVariable ["ARC_activeIncidentDisplayName", _displayName, true];
+                        missionNamespace setVariable ["ARC_activeIncidentPos", _pos, true];
+                        missionNamespace setVariable ["ARC_activeIncidentAccepted", false, true];
+                        missionNamespace setVariable ["ARC_activeIncidentAcceptedAt", -1, true];
+                        missionNamespace setVariable ["ARC_activeIncidentAcceptedByGroup", "", true];
+
+                        missionNamespace setVariable ["ARC_activeIncidentSitrepSent", false, true];
+                        missionNamespace setVariable ["ARC_activeIncidentSitrepSentAt", -1, true];
+                        missionNamespace setVariable ["ARC_activeIncidentSitrepFrom", "", true];
+                        missionNamespace setVariable ["ARC_activeIncidentSitrepFromGroup", "", true];
+                        missionNamespace setVariable ["ARC_activeIncidentSitrepSummary", "", true];
+                        missionNamespace setVariable ["ARC_activeIncidentSitrepDetails", "", true];
+                        missionNamespace setVariable ["ARC_activeIncidentCloseReady", false, true];
+                        missionNamespace setVariable ["ARC_activeIncidentSuggestedResult", "", true];
+                        missionNamespace setVariable ["ARC_activeIncidentCloseReason", "", true];
+                        missionNamespace setVariable ["ARC_activeIncidentCloseMarkedAt", -1, true];
+                        missionNamespace setVariable ["ARC_activeLeadId", "", true];
+                        missionNamespace setVariable ["ARC_activeThreadId", "", true];
+
+                        [] call ARC_fnc_publicBroadcastState;
+
+                        private _grid = mapGridPosition _pos;
+                        [
+                            "New Incident Pending Acceptance",
+                            format ["%1 (%2) at %3. Accept the incident to start execution.", _displayName, _incidentType, _grid],
+                            8
+                        ] remoteExec ["ARC_fnc_clientToast", 0];
+
+                        _spawned = true;
+                    };
+                };
+            };
+
+            _meta = [_meta, "incidentActivated", _spawned] call _setPair;
+            if (_taskId isNotEqualTo "") then { _meta = [_meta, "taskId", _taskId] call _setPair; };
+            if (_spawnReason isNotEqualTo "") then { _meta = [_meta, "activationError", _spawnReason] call _setPair; };
+            _item set [11, _meta];
+            _q set [_idx, _item];
+            ["tocQueue", _q] call ARC_fnc_stateSet;
+            [] call ARC_fnc_intelQueueBroadcast;
+
+            if (_spawned) then
+            {
+                ["OPS", format ["QUEUE: %1 approved %2 (%3). Activated task %4 at %5.", _by, _id, _kindU, _taskId, _markerRaw], _posATL,
+                    [
+                        ["event", "TOC_QUEUE_APPROVED"],
+                        ["queueId", _id],
+                        ["kind", _kindU],
+                        ["taskId", _taskId],
+                        ["marker", _markerRaw],
+                        ["incidentType", _incidentType]
+                    ]
+                ] call ARC_fnc_intelLog;
+            }
+            else
+            {
+                ["OPS", format ["QUEUE: %1 approved %2 (%3) but activation skipped: %4.", _by, _id, _kindU, _spawnReason], _posATL,
+                    [
+                        ["event", "TOC_QUEUE_APPROVED"],
+                        ["queueId", _id],
+                        ["kind", _kindU],
+                        ["activationError", _spawnReason],
+                        ["marker", _markerRaw],
+                        ["incidentType", _incidentType]
+                    ]
+                ] call ARC_fnc_intelLog;
+            };
+        };
+
         default
         {
             ["OPS", format ["QUEUE: %1 approved %2 (%3). No handler.", _by, _id, _kindU], _posATL,
