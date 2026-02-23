@@ -49,7 +49,8 @@ switch (toUpper _rule) do
                 _msg = format ["%1 count %2 out of bounds [%3,%4]", _label, _n, _minCount, _maxCount];
             } else {
                 if (_requirePairEntries) then {
-                    private _badIdx = _value findIf { !(_x isEqualType []) || { (count _x) < 2 } };
+                    private _badIdx = -1;
+                    { if (!(_x isEqualType []) || { (count _x) < 2 }) exitWith { _badIdx = _forEachIndex; }; } forEach _value;
                     if (_badIdx >= 0) then {
                         _ok = false;
                         _norm = _def;

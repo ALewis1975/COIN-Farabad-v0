@@ -172,7 +172,9 @@ if (_taskId isNotEqualTo "" && {_marker isNotEqualTo ""}) then
     };
 };
 
-if ((_meta findIf { (_x # 0) isEqualTo "confidence" }) < 0) then
+private _foundConfidence = false;
+{ if ((_x # 0) isEqualTo "confidence") exitWith { _foundConfidence = true; }; } forEach _meta;
+if (!_foundConfidence) then
 {
     _meta pushBack ["confidence", "UNVERIFIED"]; // TOC reports outside the active incident area
 };

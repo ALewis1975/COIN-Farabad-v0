@@ -74,9 +74,8 @@ if (_orders isEqualType [] && { (count _orders) > 0 }) then
         private _acceptedAt = _issuedAt;
         if (_meta isEqualType []) then
         {
-            private _idxA = _meta findIf {
-                _x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo "acceptedAt" }
-            };
+            private _idxA = -1;
+            { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo "acceptedAt" }) exitWith { _idxA = _forEachIndex; }; } forEach _meta;
             if (_idxA >= 0) then
             {
                 private _v = (_meta # _idxA) # 1;
@@ -101,9 +100,8 @@ if (_leadOrderIdx >= 0) then
     private _leadRec = [];
     if (_leadOrderData isEqualType []) then
     {
-        private _idxL = _leadOrderData findIf {
-            _x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo "lead" }
-        };
+        private _idxL = -1;
+        { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo "lead" }) exitWith { _idxL = _forEachIndex; }; } forEach _leadOrderData;
         if (_idxL >= 0) then { _leadRec = (_leadOrderData # _idxL) # 1; };
     };
 
@@ -156,19 +154,22 @@ if (_leadPool isEqualType [] && { (count _leadPool) > 0 }) then
     {
         // If an urgent/TOC lead exists (ex: detonation follow-on), do NOT let the
         // sustainment override suppress it. Consume the next lead normally.
-        private _hasUrgent = (_leadPool findIf {
-            if !(_x isEqualType []) exitWith {false};
-            if ((count _x) < 2) exitWith {false};
-            private _t = _x # 1; if !(_t isEqualType "") then { _t = ""; };
-            private _tag = "";
-            if ((count _x) >= 11) then { _tag = _x # 10; };
-            if !(_tag isEqualType "") then { _tag = ""; };
+        private _hasUrgent = false;
+        {
+            private _match = false;
+            if (_x isEqualType [] && { (count _x) >= 2 }) then {
+                private _t = _x # 1; if !(_t isEqualType "") then { _t = ""; };
+                private _tag = "";
+                if ((count _x) >= 11) then { _tag = _x # 10; };
+                if !(_tag isEqualType "") then { _tag = ""; };
 
-            private _tU = toUpper (trim _t);
-            private _tagU = toUpper (trim _tag);
+                private _tU = toUpper (trim _t);
+                private _tagU = toUpper (trim _tag);
 
-            (_tU find "CMDNODE" isEqualTo 0) || (_tagU find "TOC_" isEqualTo 0) || (_tagU find "URGENT_" isEqualTo 0)
-        }) >= 0;
+                if ((_tU find "CMDNODE" isEqualTo 0) || (_tagU find "TOC_" isEqualTo 0) || (_tagU find "URGENT_" isEqualTo 0)) then { _match = true; };
+            };
+            if (_match) exitWith { _hasUrgent = true; };
+        } forEach _leadPool;
 
         if (_hasUrgent) then
         {
@@ -178,9 +179,8 @@ if (_leadPool isEqualType [] && { (count _leadPool) > 0 }) then
 
         if (_useLead) exitWith {};
 
-        private _idxLead = _leadPool findIf {
-            _x isEqualType [] && { (count _x) >= 2 } && { toUpper (_x # 1) in ["LOGISTICS","ESCORT"] }
-        };
+        private _idxLead = -1;
+        { if (_x isEqualType [] && { (count _x) >= 2 } && { toUpper (_x # 1) in ["LOGISTICS","ESCORT"] }) exitWith { _idxLead = _forEachIndex; }; } forEach _leadPool;
 
         if (_idxLead >= 0) then
         {
@@ -494,7 +494,8 @@ if (_leadOrderIdx >= 0 && { _leadOrderIdx < (count _orders) }) then
         private _setPair = {
             params ["_pairs", "_k", "_v"];
             if !(_pairs isEqualType []) then { _pairs = []; };
-            private _j = _pairs findIf { (_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k } };
+            private _j = -1;
+            { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _j = _forEachIndex; }; } forEach _pairs;
             if (_j < 0) then { _pairs pushBack [_k, _v]; } else { _pairs set [_j, [_k, _v]]; };
             _pairs
         };

@@ -51,7 +51,8 @@ private _setGroupStatus = {
     private _rows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
     if (!(_rows isEqualType [])) then { _rows = []; };
 
-    private _idx = _rows findIf { _x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _gid } };
+    private _idx = -1;
+    { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _gid }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
     private _row = [_gid, _status, serverTime, _who];
     if (_idx < 0) then { _rows pushBack _row; } else { _rows set [_idx, _row]; };
     missionNamespace setVariable ["ARC_pub_unitStatuses", _rows, true];
@@ -90,7 +91,8 @@ private _callerGroup = if (isNull _caller) then {""} else { groupId (group _call
 if (_callerGroup isEqualTo "") exitWith {false};
 private _unitStatuses = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
 if (!(_unitStatuses isEqualType [])) then { _unitStatuses = []; };
-private _statusIdx = _unitStatuses findIf { _x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _callerGroup } };
+private _statusIdx = -1;
+{ if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _callerGroup }) exitWith { _statusIdx = _forEachIndex; }; } forEach _unitStatuses;
 private _statusNow = if (_statusIdx < 0) then { "OFFLINE" } else { toUpper (trim ((_unitStatuses # _statusIdx) # 1)) };
 if (_statusNow isNotEqualTo "AVAILABLE") exitWith
 {

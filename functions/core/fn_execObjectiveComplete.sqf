@@ -67,9 +67,8 @@ private _getThreatState = {
     private _records = ["threat_v0_records", []] call ARC_fnc_stateGet;
     if (!(_records isEqualType [])) then { _records = []; };
 
-    private _idx = _records findIf {
-        _x isEqualType [] && { ([_x, "threat_id", ""] call _kvGet) isEqualTo _tid }
-    };
+    private _idx = -1;
+    { if (_x isEqualType [] && { ([_x, "threat_id", ""] call _kvGet) isEqualTo _tid }) exitWith { _idx = _forEachIndex; }; } forEach _records;
     if (_idx < 0) exitWith {""};
 
     private _st = [_records # _idx, "state", ""] call _kvGet;

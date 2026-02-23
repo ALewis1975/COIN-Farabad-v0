@@ -191,12 +191,8 @@ private _changed = false;
 
     private _priority = ((_weights getOrDefault [_opType, 0.5]) + (_districtRisk * 0.45) + (_threadPressure * 0.35)) min 3;
 
-    private _existingIdx = _updatedOps findIf {
-        (_x isEqualType []) &&
-        { (count _x) >= 14 } &&
-        { ((_x # 4) isEqualTo _nodeId) } &&
-        { toUpper (_x # 3) in ["PLANNED", "ACTIVE"] }
-    };
+    private _existingIdx = -1;
+    { if ((_x isEqualType []) && { (count _x) >= 14 } && { ((_x # 4) isEqualTo _nodeId) } && { toUpper (_x # 3) in ["PLANNED", "ACTIVE"] }) exitWith { _existingIdx = _forEachIndex; }; } forEach _updatedOps;
 
     private _meta = [
         ["districtRisk", _districtRisk],

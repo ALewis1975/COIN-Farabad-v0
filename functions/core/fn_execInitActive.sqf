@@ -98,7 +98,7 @@ if (_typeU isEqualTo "RAID") then
         "explosives"
     ];
 
-    _isCacheRaid = (_cacheKeys findIf { (_d3 find _x) >= 0 }) >= 0;
+    { if ((_d3 find _x) >= 0) exitWith { _isCacheRaid = true; }; } forEach _cacheKeys;
 };
 
 // Feature toggles (initServer overrides)

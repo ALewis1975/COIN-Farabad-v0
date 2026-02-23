@@ -315,7 +315,8 @@ if (!_updateOnly && { _foReqU isNotEqualTo "" }) then
     private _fo = [];
     private _setPair = {
         params ["_arr", "_k", "_v"];
-        private _i = _arr findIf { _x isEqualType [] && { (count _x) == 2 } && { (_x # 0) isEqualTo _k } };
+        private _i = -1;
+        { if (_x isEqualType [] && { (count _x) == 2 } && { (_x # 0) isEqualTo _k }) exitWith { _i = _forEachIndex; }; } forEach _arr;
         if (_i >= 0) then { _arr set [_i, [_k, _v]]; } else { _arr pushBack [_k, _v]; };
         _arr
     };

@@ -70,11 +70,8 @@ if (!(_towerStaffing isEqualType [])) then { _towerStaffing = []; };
 private _normalizeStaffingLane = {
     params ["_rows", "_laneId"];
 
-    private _idx = _rows findIf {
-        (_x isEqualType []) &&
-        { (count _x) >= 5 } &&
-        { ((_x param [0, ""]) isEqualTo _laneId) }
-    };
+    private _idx = -1;
+    { if ((_x isEqualType []) && { (count _x) >= 5 } && { ((_x param [0, ""]) isEqualTo _laneId) }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
 
     private _base = if (_idx >= 0) then { _rows # _idx } else { [_laneId, "AUTO", "", "", -1] };
     [
@@ -112,11 +109,8 @@ if (!(_execFid isEqualType "")) then { _execFid = ""; };
 
 private _depInProgress = 0;
 if (_execActive && { _execFid isNotEqualTo "" }) then {
-    private _execRecIdx = _airRecs findIf {
-        (_x isEqualType []) &&
-        { (count _x) >= 3 } &&
-        { ((_x param [0, ""]) isEqualTo _execFid) }
-    };
+    private _execRecIdx = -1;
+    { if ((_x isEqualType []) && { (count _x) >= 3 } && { ((_x param [0, ""]) isEqualTo _execFid) }) exitWith { _execRecIdx = _forEachIndex; }; } forEach _airRecs;
 
     if (_execRecIdx >= 0) then {
         private _execKind = (_airRecs # _execRecIdx) param [2, ""];
@@ -249,7 +243,8 @@ private _readReasonFromMeta = {
     };
 
     if (_reason isEqualTo "") then {
-        private _idxReason = _meta findIf { _x isEqualType [] && { (count _x) >= 2 } && { toUpper (_x # 0) in ["REASON", "ROUTEVALIDATIONREASON"] } };
+        private _idxReason = -1;
+        { if (_x isEqualType [] && { (count _x) >= 2 } && { toUpper (_x # 0) in ["REASON", "ROUTEVALIDATIONREASON"] }) exitWith { _idxReason = _forEachIndex; }; } forEach _meta;
         if (_idxReason >= 0) then { _reason = (_meta # _idxReason) # 1; };
     };
 
@@ -287,12 +282,8 @@ private _extractBlockedSourceId = {
 private _metaValue = {
     params ["_meta", "_key", ["_def", ""]];
     if !(_meta isEqualType []) exitWith { _def };
-    private _idx = _meta findIf {
-        _x isEqualType [] &&
-        { (count _x) >= 2 } &&
-        { ((_x # 0) isEqualType "") } &&
-        { (toUpper (_x # 0)) isEqualTo (toUpper _key) }
-    };
+    private _idx = -1;
+    { if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x # 0) isEqualType "") } && { (toUpper (_x # 0)) isEqualTo (toUpper _key) }) exitWith { _idx = _forEachIndex; }; } forEach _meta;
     if (_idx < 0) exitWith { _def };
     (_meta # _idx) # 1
 };
@@ -520,11 +511,8 @@ if (_dbgEnabled) then
             if (_p > 0) then { _key = _label select [0, _p]; };
             if (_key isEqualTo "") then { _key = "(none)"; };
 
-            private _idx = _labelCounts findIf {
-                (_x isEqualType []) &&
-                { (count _x) >= 2 } &&
-                { ((_x select 0)) isEqualTo _key }
-            };
+            private _idx = -1;
+            { if ((_x isEqualType []) && { (count _x) >= 2 } && { ((_x select 0)) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _labelCounts;
 
             if (_idx < 0) then {
                 _labelCounts pushBack [_key, 1];

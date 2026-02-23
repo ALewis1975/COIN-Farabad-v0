@@ -69,7 +69,8 @@ if (!(_pub isEqualType [])) then { _pub = []; };
 
 private _get = {
     params ["_k", "_def"];
-    private _idx = _pub findIf { (_x # 0) isEqualTo _k };
+    private _idx = -1;
+    { if ((_x # 0) isEqualTo _k) exitWith { _idx = _forEachIndex; }; } forEach _pub;
     if (_idx < 0) exitWith {_def};
     (_pub # _idx) # 1
 };
@@ -453,7 +454,8 @@ else
     private _metaGetOps = {
         params ["_meta", "_k", "_def"];
         if (!(_meta isEqualType [])) exitWith {_def};
-        private _idx = _meta findIf { (_x # 0) isEqualTo _k };
+        private _idx = -1;
+        { if ((_x # 0) isEqualTo _k) exitWith { _idx = _forEachIndex; }; } forEach _meta;
         if (_idx < 0) exitWith {_def};
         (_meta # _idx) # 1
     };
@@ -527,7 +529,8 @@ else
     private _pairGet = {
         params ["_pairs", "_k", "_def"];
         if (!(_pairs isEqualType [])) exitWith { _def };
-        private _idx = _pairs findIf { (_x # 0) isEqualTo _k };
+        private _idx = -1;
+        { if ((_x # 0) isEqualTo _k) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
         if (_idx < 0) exitWith { _def };
         (_pairs # _idx) # 1
     };
@@ -675,7 +678,8 @@ else
     private _metaGet = {
         params ["_meta", "_k", "_def"];
         if (!(_meta isEqualType [])) exitWith {_def};
-        private _idx = _meta findIf { (_x # 0) isEqualTo _k };
+        private _idx = -1;
+        { if ((_x # 0) isEqualTo _k) exitWith { _idx = _forEachIndex; }; } forEach _meta;
         if (_idx < 0) exitWith {_def};
         (_meta # _idx) # 1
     };
@@ -880,7 +884,8 @@ if (_dbgEnabled) then
 
     private _getDbg = {
         params ["_k", "_def"];
-        private _idx = _dbgPub findIf { (_x # 0) isEqualTo _k };
+        private _idx = -1;
+        { if ((_x # 0) isEqualTo _k) exitWith { _idx = _forEachIndex; }; } forEach _dbgPub;
         if (_idx < 0) exitWith { _def };
         (_dbgPub # _idx) # 1
     };
@@ -1006,7 +1011,8 @@ if (!(_s1UpdatedAt isEqualType 0)) then { _s1UpdatedAt = -1; };
 private _s1Get = {
     params ["_pairs", "_key", "_default"];
     if (!(_pairs isEqualType [])) exitWith { _default };
-    private _idx = _pairs findIf { (_x isEqualType []) && { (count _x) >= 2 } && { ((_x # 0) isEqualTo _key) } };
+    private _idx = -1;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { ((_x # 0) isEqualTo _key) }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) exitWith { _default };
     (_pairs # _idx) # 1
 };

@@ -90,7 +90,7 @@ if (!_force) then
 {
     // Key rule: keep the entity if any alive player is near the entity itself.
     // This prevents "early despawn" when an anchor is far from the convoy/prop.
-    _nearPlayers = (_players findIf { (_x distance2D _objPos) <= _radius }) >= 0;
+    { if ((_x distance2D _objPos) <= _radius) exitWith { _nearPlayers = true; }; } forEach _players;
 };
 
 if (_nearPlayers) then
@@ -114,7 +114,9 @@ if (_nearPlayers) then
         private _groups = [];
 
         // If any player is somehow in the vehicle, keep it.
-        if ((_crew findIf { isPlayer _x }) >= 0) then
+        private _hasPlayerCrew = false;
+        { if (isPlayer _x) exitWith { _hasPlayerCrew = true; }; } forEach _crew;
+        if (_hasPlayerCrew) then
         {
             _new pushBack [_nid, _objPos, _radius, _earliest, _label];
             continue;
