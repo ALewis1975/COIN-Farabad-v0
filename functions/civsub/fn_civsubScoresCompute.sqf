@@ -15,13 +15,15 @@
       HashMap: {"S_COOP":n,"S_THREAT":n}
 */
 
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
 private _d = objNull;
 if ((count _this) > 0) then { _d = _this select 0; };
 
 if (_d isEqualType []) then
 {
     // Convert array-of-pairs to HashMap
-    _d = createHashMapFromArray _d;
+    _d = [_d] call _hmCreate;
 };
 
 if !(_d isEqualType createHashMap) exitWith
@@ -32,7 +34,7 @@ if !(_d isEqualType createHashMap) exitWith
         missionNamespace setVariable ["civsub_v1_warn_scoresComputeBadType", true];
         diag_log format ["[CIVSUB][WARN] ScoresCompute expected district HashMap but got %1; returning zeros.", typeName _d];
     };
-    createHashMapFromArray [["S_COOP", 0], ["S_THREAT", 0]]
+    [[["S_COOP", 0], ["S_THREAT", 0]]] call _hmCreate
 };
 
 private _W = _d getOrDefault ["W_EFF_U", 45];
@@ -48,4 +50,4 @@ if (_Scoop > 100) then { _Scoop = 100; };
 if (_Sthreat < 0) then { _Sthreat = 0; };
 if (_Sthreat > 100) then { _Sthreat = 100; };
 
-createHashMapFromArray [["S_COOP", _Scoop], ["S_THREAT", _Sthreat]]
+[[["S_COOP", _Scoop], ["S_THREAT", _Sthreat]]] call _hmCreate

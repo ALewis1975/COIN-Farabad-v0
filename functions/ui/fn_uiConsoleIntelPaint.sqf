@@ -37,6 +37,8 @@ params [
 
 if (isNull _display) exitWith {false};
 
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
 private _rxMaxItems = missionNamespace getVariable ["ARC_consoleRxMaxItems", 80];
 if (!(_rxMaxItems isEqualType 0) || { _rxMaxItems < 10 }) then { _rxMaxItems = 80; };
 _rxMaxItems = (_rxMaxItems min 160) max 10;
@@ -258,12 +260,12 @@ private _renderS2CatPanelsFromMaster = {
 
     { lbClear (_x # 2); } forEach _panels;
 
-    private _map = createHashMapFromArray [
+    private _map = [[
         ["INTEL / LEADS",      (_panels # 0) # 2],
         ["CIVSUB / MDT",       (_panels # 1) # 2],
         ["ADMIN / TOOLS",      (_panels # 2) # 2],
         ["INTEL FEED",         (_panels # 3) # 2]
-    ];
+    ]] call _hmCreate;
 
     private _section = "";
     for "_i" from 0 to ((lbSize _listMaster) - 1) do {
@@ -469,7 +471,7 @@ if (_rebuild) then
 
                     if ((count _pub) > 0) then
                     {
-                        private _ph = createHashMapFromArray _pub;
+                        private _ph = [_pub] call _hmCreate;
                         _W = _ph getOrDefault ["W", _W];
                         _R = _ph getOrDefault ["R", _R];
                         _G = _ph getOrDefault ["G", _G];
@@ -755,7 +757,7 @@ else
 
             private _pub = missionNamespace getVariable [format ["civsub_v1_district_pub_%1", _did], []];
             if (!(_pub isEqualType [])) then { _pub = []; };
-            private _ph = if ((count _pub) > 0) then { createHashMapFromArray _pub } else { createHashMap };
+            private _ph = if ((count _pub) > 0) then { [_pub] call _hmCreate } else { createHashMap };
 
             private _W = _ph getOrDefault ["W", 45];
             private _R = _ph getOrDefault ["R", 55];
@@ -792,7 +794,7 @@ else
             // -------------------------------------------------------------------
             // Key settlements (player-readable)
             // -------------------------------------------------------------------
-            private _settByDid = createHashMapFromArray [
+            private _settByDid = [[
                 ["D01", ["Farabad"]],
                 ["D02", ["Lashgar Kuh", "Hamza", "Fort Kelati", "Shirazan"]],
                 ["D03", ["Shahruk"]],
@@ -813,7 +815,7 @@ else
                 ["D18", []],
                 ["D19", []],
                 ["D20", []]
-            ];
+            ]] call _hmCreate;
 
             private _sett = _settByDid getOrDefault [_did, []];
             private _settLine = if ((count _sett) > 0) then { _sett joinString "; " } else { "None (rural / dispersed)" };
@@ -1194,14 +1196,14 @@ else
         case "CIV_CONTACT_QUESTION":
         {
             private _qid = _arg;
-            private _qMap = createHashMapFromArray [
+            private _qMap = [[
                 ["Q_LIVE", "Where do you live?"],
                 ["Q_WORK", "Where do you work?"],
                 ["Q_IEDS", "Have you seen any IEDs?"],
                 ["Q_INS", "Have you seen any insurgent activity?"],
                 ["Q_OP_US", "What is your opinion of us?"],
                 ["Q_OP_AREA", "What is the overall opinion of us in the area?"]
-            ];
+            ]] call _hmCreate;
             private _qlbl = _qMap getOrDefault [_qid, _qid];
 
             _txt = format [

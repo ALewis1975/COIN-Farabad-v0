@@ -25,15 +25,17 @@ params [
     ["_meta", []]
 ];
 
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
 private _enabled = missionNamespace getVariable ["FARABAD_log_enabled", true];
 if !(_enabled) exitWith { false };
 
-private _levelOrder = createHashMapFromArray [
+private _levelOrder = [[
     ["DEBUG", 10],
     ["INFO", 20],
     ["WARN", 30],
     ["ERROR", 40]
-];
+]] call _hmCreate;
 
 private _normalizedLevel = toUpper _level;
 if !(_normalizedLevel in _levelOrder) then {

@@ -9,8 +9,10 @@
 */
 if (!hasInterface) exitWith {false};
 
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
 private _payload = uiNamespace getVariable ["ARC_civsub_lastIdCardPayload", createHashMap];
-if (_payload isEqualType []) then { _payload = createHashMapFromArray _payload; };
+if (_payload isEqualType []) then { _payload = [_payload] call _hmCreate; };
 if !(_payload isEqualType createHashMap) exitWith {false};
 
 private _netId = _payload getOrDefault ["civ_netId", ""];

@@ -20,6 +20,8 @@
 if (!isServer) exitWith {createHashMap};
 if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {createHashMap};
 
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
 private _districts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
 if !(_districts isEqualType createHashMap) exitWith {createHashMap};
 
@@ -135,7 +137,7 @@ for "_i" from 1 to 30 do
 
     private _hist = [[_status0, serverTime]];
 
-    private _rec = createHashMapFromArray [
+    private _rec = [[
         ["poi_id", _poiId],
         ["is_hvt", _isHvt],
         ["category", _cat],
@@ -144,7 +146,7 @@ for "_i" from 1 to 30 do
         ["status", _status0],
         ["status_ts", serverTime],
         ["status_history", _hist]
-    ];
+    ]] call _hmCreate;
 
     if (_enrich) then {
         private _n = [_poiId, _cat, _isHvt, _rand01] call _mkNarrative;

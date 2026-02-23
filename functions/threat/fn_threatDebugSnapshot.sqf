@@ -12,6 +12,8 @@
 
 if (!isServer) exitWith {[]};
 
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
 private _enabled = ["threat_v0_enabled", true] call ARC_fnc_stateGet;
 if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabled = true; };
 
@@ -55,13 +57,13 @@ private _byType = createHashMap;
 private _openShort = _open;
 if ((count _openShort) > 25) then { _openShort = _openShort select [0, 25]; };
 
-private _counts = createHashMapFromArray [
+private _counts = [[
     ["enabled", _enabled],
     ["by_state", _byState],
     ["by_type", _byType],
     ["open_count", count _open],
     ["closed_count", count _closed]
-];
+]] call _hmCreate;
 
 missionNamespace setVariable ["threat_v0_debug_counts", _counts];
 missionNamespace setVariable ["threat_v0_debug_open", _openShort];

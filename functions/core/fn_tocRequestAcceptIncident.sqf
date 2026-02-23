@@ -15,6 +15,8 @@
 
 if (!isServer) exitWith {false};
 
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
 if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\\core\\fn_rpcValidateSender.sqf"; };
 
 // Fail-safe: ensure role helper functions exist even if CfgFunctions.hpp was not updated.
@@ -129,7 +131,7 @@ if (missionNamespace getVariable ["civsub_v1_enabled", false]) then
         private _d = [_did] call ARC_fnc_civsubDistrictsGetById;
         if (_d isEqualType createHashMap) then
         {
-            private _snap = createHashMapFromArray [
+            private _snap = [[
                 ["districtId", _did],
                 ["ts", serverTime],
                 ["W", _d getOrDefault ["W_EFF_U", 0]],
@@ -141,7 +143,7 @@ if (missionNamespace getVariable ["civsub_v1_enabled", false]) then
                 ["detentions_initiated", _d getOrDefault ["detentions_initiated", 0]],
                 ["detentions_handed_off", _d getOrDefault ["detentions_handed_off", 0]],
                 ["aid_events", _d getOrDefault ["aid_events", 0]]
-            ];
+            ]] call _hmCreate;
 
             ["activeIncidentCivsubStart", _snap] call ARC_fnc_stateSet;
             missionNamespace setVariable ["ARC_activeIncidentCivsubStart", _snap, true];

@@ -13,6 +13,8 @@ params [
     ["_active", [], [[]]]
 ];
 
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
 private _capG = missionNamespace getVariable ["civsub_v1_civ_cap_global", 24];
 private _capD = missionNamespace getVariable ["civsub_v1_civ_cap_perDistrict", 8];
 
@@ -67,7 +69,7 @@ if (_popRef <= 0) then {
     private _mx = 1;
     {
         private _d0 = _districtsAll getOrDefault [_x, createHashMap];
-        if (_d0 isEqualType []) then { _d0 = createHashMapFromArray _d0; };
+        if (_d0 isEqualType []) then { _d0 = [_d0] call _hmCreate; };
         if (_d0 isEqualType createHashMap) then {
             private _p0 = _d0 getOrDefault ["pop_total", 0];
             if (_p0 isEqualType 0) then { _mx = _mx max _p0; };
@@ -86,7 +88,7 @@ private _sumCaps = 0;
 
     if (_useDynamic) then {
         private _ds = _districtsAll getOrDefault [_did, createHashMap];
-        if (_ds isEqualType []) then { _ds = createHashMapFromArray _ds; };
+        if (_ds isEqualType []) then { _ds = [_ds] call _hmCreate; };
 
         if (_ds isEqualType createHashMap) then {
             private _pop = _ds getOrDefault ["pop_total", 0];

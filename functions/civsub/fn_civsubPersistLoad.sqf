@@ -11,6 +11,8 @@ if !(missionNamespace getVariable ["civsub_v1_persist", true]) exitWith {false};
 
 if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {false};
 
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
 private _blob = profileNamespace getVariable ["FARABAD_CIVSUB_V1_STATE", ""];
 if (_blob isEqualTo "") exitWith {false};
 
@@ -18,7 +20,7 @@ private _parsed = parseSimpleArray _blob;
 if !(_parsed isEqualType []) exitWith {false};
 
 // _parsed is an array of [key,value] pairs
-private _hm = createHashMapFromArray _parsed;
+private _hm = [_parsed] call _hmCreate;
 
 // --- Districts ---
 private _districtRows = _hm getOrDefault ["districts", []];
@@ -61,7 +63,7 @@ private _districts = createHashMap;
     private _detHand = if ((count _x) > 20) then { _x # 20 } else { 0 };
     private _aid = if ((count _x) > 21) then { _x # 21 } else { 0 };
 
-    private _d = createHashMapFromArray [
+    private _d = [[
         ["id", _id],
         ["centroid", _centroid],
         ["radius_m", _radius],
@@ -90,7 +92,7 @@ private _districts = createHashMap;
         ["detentions_initiated", _detInit],
         ["detentions_handed_off", _detHand],
         ["aid_events", _aid]
-    ];
+    ]] call _hmCreate;
 
     [_d] call ARC_fnc_civsubDistrictsClamp;
     _districts set [_id, _d];
@@ -148,7 +150,7 @@ if (_idRows isEqualType []) then {
             } forEach _seenRows;
         };
 
-        private _rec = createHashMapFromArray [
+        private _rec = [[
             ["civ_uid", _civUid],
             ["first_name", _first],
             ["last_name", _last],
@@ -175,7 +177,7 @@ if (_idRows isEqualType []) then {
             ["charges", _charges],
             ["seen_by", _seen],
             ["last_interaction_ts", _lastTs]
-        ];
+        ]] call _hmCreate;
 
         _ids set [_civUid, _rec];
     } forEach _idRows;
@@ -201,7 +203,7 @@ if (_crimeRows isEqualType []) then {
         private _ts = _x # 6;
         private _hist = _x # 7;
 
-        private _rec = createHashMapFromArray [
+        private _rec = [[
             ["poi_id", _poiId],
             ["category", _cat],
             ["homeDistrictId", _did],
@@ -210,7 +212,7 @@ if (_crimeRows isEqualType []) then {
             ["status", _st],
             ["status_ts", _ts],
             ["status_history", _hist]
-        ];
+        ]] call _hmCreate;
 
         _db set [_poiId, _rec];
     } forEach _crimeRows;

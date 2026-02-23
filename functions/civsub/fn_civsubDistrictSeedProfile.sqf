@@ -19,6 +19,8 @@ params [
     ["_campaignSeed", 1337, [0]]
 ];
 
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
 private _idNorm = toUpper (trim _districtId);
 if (_idNorm isEqualTo "") then { _idNorm = "D00"; };
 
@@ -55,14 +57,14 @@ private _wBase = 45 + ((_idMix + _seedMix + _xyMix) mod 23) - 11;
 private _rBase = 55 + (((_idMix * 2) + _popShift + _seedMix) mod 27) - 13;
 private _gBase = 35 + (((_xyMix * 2) + _popShift + (_seed mod 53)) mod 25) - 12;
 
-private _profile = createHashMapFromArray [
+private _profile = [[
     ["W_BASE_U", _wBase],
     ["R_BASE_U", _rBase],
     ["G_BASE_U", _gBase],
     ["W_EFF_U", _wBase],
     ["R_EFF_U", _rBase],
     ["G_EFF_U", _gBase]
-];
+]] call _hmCreate;
 
 [_profile] call ARC_fnc_civsubDistrictsClamp;
 _profile

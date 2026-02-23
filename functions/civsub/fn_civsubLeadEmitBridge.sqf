@@ -16,8 +16,10 @@ if (!isServer) exitWith {""};
 params [["_bundle", createHashMap, [createHashMap]]];
 if !(_bundle isEqualType createHashMap) exitWith {""};
 
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
 private _lead = _bundle getOrDefault ["lead_emit", createHashMap];
-if (_lead isEqualType []) then { _lead = createHashMapFromArray _lead; };
+if (_lead isEqualType []) then { _lead = [_lead] call _hmCreate; };
 if !(_lead isEqualType createHashMap) exitWith {""};
 
 if !(_lead getOrDefault ["emit", false]) exitWith {""};
@@ -28,11 +30,11 @@ _civsubType = toUpper (trim _civsubType);
 if (_civsubType isEqualTo "") exitWith {""};
 
 private _seed = _lead getOrDefault ["seed", createHashMap];
-if (_seed isEqualType []) then { _seed = createHashMapFromArray _seed; };
+if (_seed isEqualType []) then { _seed = [_seed] call _hmCreate; };
 if !(_seed isEqualType createHashMap) then { _seed = createHashMap; };
 
 private _source = _bundle getOrDefault ["source", createHashMap];
-if (_source isEqualType []) then { _source = createHashMapFromArray _source; };
+if (_source isEqualType []) then { _source = [_source] call _hmCreate; };
 if !(_source isEqualType createHashMap) then { _source = createHashMap; };
 
 private _districtId = _bundle getOrDefault ["districtId", (_bundle getOrDefault ["district_id", ""])];

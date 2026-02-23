@@ -12,6 +12,9 @@ if (!hasInterface) exitWith {false};
 if (!canSuspend) exitWith { _this spawn ARC_fnc_clientBeginIntelMapClick; true };
 
 params ["_category"];
+
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
 if (_category isEqualTo "") then { _category = "SIGHTING"; };
 
 // Prompt for human-readable text first (prevents generic "reported HUMINT" entries)
@@ -66,12 +69,12 @@ openMap true;
 waitUntil { uiSleep 0.05; visibleMap };
 [format ["Intel Logging: %1\nClick a position on the map to submit.", toUpper _category], "ACTION_REQUIRED", "HINT"] call ARC_fnc_clientHint;
 
-private _ctx = createHashMapFromArray [
+private _ctx = [[
     ["type", "INTEL_LOG"],
     ["category", missionNamespace getVariable ["ARC_pendingIntelCategory", "SIGHTING"]],
     ["summary", missionNamespace getVariable ["ARC_pendingIntelSummary", "No details provided."]],
     ["details", missionNamespace getVariable ["ARC_pendingIntelDetails", ""]]
-];
+]] call _hmCreate;
 
 [_ctx] call ARC_fnc_mapClick_arm;
 

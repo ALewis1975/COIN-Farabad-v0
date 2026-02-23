@@ -17,6 +17,8 @@ params [
 ];
 
 
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
 private _zone = "";
 if (!isNil "ARC_fnc_worldGetZoneForPos") then {
     _zone = toUpper ([_pos] call ARC_fnc_worldGetZoneForPos);
@@ -32,7 +34,7 @@ private _bestD = 1e12;
     private _rec = _districts get _x;
     if (_rec isEqualType []) then {
         // stored as array-of-pairs; normalize to HashMap on the fly
-        _rec = createHashMapFromArray _rec;
+        _rec = [_rec] call _hmCreate;
     };
     if (_rec isEqualType createHashMap) then {
         private _c = _rec getOrDefault ["centroid", [0,0]];

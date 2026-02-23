@@ -20,6 +20,9 @@ if (!hasInterface) exitWith {false};
 if (!canSuspend) exitWith { _this spawn ARC_fnc_intelClientBeginLeadRequestMapClick; true };
 
 params [["_leadType", "RECON"]];
+
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
 _leadType = toUpper (trim _leadType);
 if (_leadType isEqualTo "") then { _leadType = "RECON"; };
 
@@ -117,7 +120,7 @@ if (_reopenConsole) then
 
 ["Map click to place the LEAD REQUEST (Esc to cancel).", "ACTION_REQUIRED", "HINT"] call ARC_fnc_clientHint;
 
-private _ctx = createHashMapFromArray [
+private _ctx = [[
     ["type", "LEAD_REQ"],
     ["leadType", missionNamespace getVariable ["ARC_lastLeadReqType", "RECON"]],
     ["summary", missionNamespace getVariable ["ARC_lastLeadReqSummary", "Lead: Unknown"]],
@@ -125,7 +128,7 @@ private _ctx = createHashMapFromArray [
     ["confidence", missionNamespace getVariable ["ARC_lastLeadReqConfidence", "MED"]],
     ["strength", missionNamespace getVariable ["ARC_lastLeadReqStrength", 0.55]],
     ["ttl", missionNamespace getVariable ["ARC_lastLeadReqTTL", 3600]]
-];
+]] call _hmCreate;
 
 [_ctx] call ARC_fnc_mapClick_arm;
 

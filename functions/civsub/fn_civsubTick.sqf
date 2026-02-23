@@ -9,6 +9,8 @@
 if (!isServer) exitWith {false};
 if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {false};
 
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+
 private _districts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
 if (!(_districts isEqualType createHashMap)) exitWith {false};
 
@@ -20,7 +22,7 @@ missionNamespace setVariable ["civsub_v1_lastTick_ts", serverTime, true];
 {
     private _did = _x;
     private _d = _districts getOrDefault [_did, createHashMap];
-    if (_d isEqualType []) then { _d = createHashMapFromArray _d; };
+    if (_d isEqualType []) then { _d = [_d] call _hmCreate; };
     if !(_d isEqualType createHashMap) then { continue; };
 
     private _pub = [
