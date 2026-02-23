@@ -68,6 +68,12 @@ RULES: list[PatternRule] = [
         approved_equivalent="Use `select` with explicit bounds/type guards.",
         notes="`#` indexing may not be parsed by older sqflint releases.",
     ),
+    PatternRule(
+        name="bare-createHashMapFromArray",
+        regex=re.compile(r"(?<!\")createHashMapFromArray\b"),
+        approved_equivalent="Wrap via compiled helper: `_hmCreate = compile \"params ['_a']; createHashMapFromArray _a\";` then `[args] call _hmCreate`.",
+        notes="sqflint 0.3.2 cannot parse bare `createHashMapFromArray`; use compile-string wrapper.",
+    ),
 ]
 
 
@@ -80,7 +86,7 @@ def _git_changed_sqf_files() -> list[Path]:
 
 
 def _is_compat_wrapper_line(line: str, rule_name: str) -> bool:
-    if rule_name in {"trim-operator", "fileExists-operator"}:
+    if rule_name in {"trim-operator", "fileExists-operator", "bare-createHashMapFromArray"}:
         return "compile" in line and '"' in line
     return False
 
