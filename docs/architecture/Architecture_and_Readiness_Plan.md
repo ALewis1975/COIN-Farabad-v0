@@ -10,9 +10,9 @@
 
 COIN Farabad v0 is a 79-slot dedicated-server Arma 3 COIN sandbox comprising **426 SQF functions** across **12 subsystems**. The architecture follows a **server-authoritative single-writer** model where clients consume read-only snapshots.
 
-**Current status:** Structurally sound. The authority model, replication strategy, and RPC validation patterns are consistently applied. Three P0 fixes were applied in this thread (compile audit execution, CIVSUB isNil, lightbar). One remaining P0 bug blocks CIVSUB identity generation. CI compatibility gaps exist in airbase and threat subsystems.
+**Current status:** Structurally sound. The authority model, replication strategy, and RPC validation patterns are consistently applied. Phase 0 fixes were applied (compile audit execution, CIVSUB isNil in background check, lightbar). Phase 1 is **COMPLETE**: all sqflint CI blockers resolved (131 findIf, 74 createHashMapFromArray, 53 toUpperANSI/toLowerANSI → 0). CIVSUB identity `isNil` bug fixed. Diagnostics tools added.
 
-**Readiness assessment:** CONDITIONAL GO for continued development. GO for multiplayer testing of non-CIVSUB workflows. The minimum fix set (§8) must land before CIVSUB interaction is viable.
+**Readiness assessment:** CONDITIONAL GO for continued development. Phase 2 (CfgRemoteExec allowlist, array caps, guard post optimization) is the next priority. Dedicated server QA remains BLOCKED pending runtime environment.
 
 ---
 
@@ -158,16 +158,16 @@ Clients receive state via:
 
 ### 5.2 Outstanding
 
-| ID | Sev | Finding | File(s) | Fix Description |
-|----|-----|---------|---------|-----------------|
-| **F1** | **P0** | `isNil` bug in `fn_civsubIdentityTouch.sqf:38,48` — same root cause as P0-2. New civilians never get identity records. | `fn_civsubIdentityTouch.sqf` | Add trailing var: `isNil { _tmpUid = ...; _tmpUid }` and `isNil { _tmpRec = ...; _tmpRec }` |
-| **F2** | P1 | `toUpperANSI`/`toLowerANSI` in **14 files** (53 occurrences) — CI sqflint rejects. Heaviest: `fn_airbaseTick.sqf` (15), `fn_publicBroadcastState.sqf` (15) | 14 files across ambiance/, core/, casreq/ | Replace with `toUpper`/`toLower` |
-| **F3** | P1 | `findIf` in **55 files** (~110 occurrences) — CI sqflint rejects. Spans all subsystems. | 55 files across all subsystem dirs | Replace with `forEach` + `exitWith` |
-| **F4** | P1 | Bare `createHashMapFromArray` in **41 files** — sqflint rejects | 41 files across civsub/, core/, ui/, command/ | Wrap in `_hmCreate` compile helper |
-| **F5** | P1 | No `CfgRemoteExec` allowlist in `description.ext` | `description.ext` | Implement allowlist per `RemoteExec_Hardening_Plan.md` |
-| **F6** | P2 | Unbounded `intelLog`, `incidentHistory`, `metricsSnapshots` arrays | `fn_stateInit.sqf`, `fn_publicBroadcastState.sqf` | Add max-size caps with prune-on-write |
-| **F7** | P2 | Guard post `AllUnits` iteration — O(N×M) per guard unit per cycle | `fn_guardPost.sqf` | Add distance/side pre-filter |
-| **F8** | P2 | State write race — `fn_stateSet` does unsynchronized read-modify-write | `fn_stateSet.sqf` | Queue-and-flush or atomic upsert pattern |
+| ID | Sev | Finding | File(s) | Status |
+|----|-----|---------|---------|--------|
+| **F1** | ~~P0~~ | ~~`isNil` bug in `fn_civsubIdentityTouch.sqf`~~ | `fn_civsubIdentityTouch.sqf` | ✅ **RESOLVED** — Task 1.1 |
+| **F2** | ~~P1~~ | ~~`toUpperANSI`/`toLowerANSI` in 14 files~~ | 14 files | ✅ **RESOLVED** — Task 1.2 (53→0 occurrences) |
+| **F3** | ~~P1~~ | ~~`findIf` in 55 files~~ | 59 files | ✅ **RESOLVED** — Task 1.3 (131→0 occurrences) |
+| **F4** | ~~P1~~ | ~~Bare `createHashMapFromArray` in 41 files~~ | 39 files | ✅ **RESOLVED** — Task 1.4 (74→0 occurrences) |
+| **F5** | P1 | No `CfgRemoteExec` allowlist in `description.ext` | `description.ext` | OPEN — Task 2.1 |
+| **F6** | P2 | Unbounded `intelLog`, `incidentHistory`, `metricsSnapshots` arrays | `fn_stateInit.sqf`, `fn_publicBroadcastState.sqf` | OPEN — Task 2.2 |
+| **F7** | P2 | Guard post `AllUnits` iteration — O(N×M) per guard unit per cycle | `fn_guardPost.sqf` | OPEN — Task 2.3 |
+| **F8** | P2 | State write race — `fn_stateSet` does unsynchronized read-modify-write | `fn_stateSet.sqf` | OPEN — Phase 4 |
 
 ---
 
@@ -192,16 +192,19 @@ No per-frame handlers (`onEachFrame`, `CBA_fnc_addPerFrameHandler`) detected. �
 
 ## 7. Architectural Vision — Forward Plan
 
-### Phase 1: Stabilize (Next PR)
+### Phase 1: Stabilize ✅ COMPLETE
 
 **Goal:** Fix all P0/P1 bugs so CIVSUB interactions work and CI passes clean.
 
-| Item | Effort | Files |
-|------|--------|-------|
-| Fix `isNil` in `fn_civsubIdentityTouch.sqf:38,48` | 2 lines | 1 file |
-| Replace `toUpperANSI`/`toLowerANSI` across codebase | 53 replacements | 14 files |
-| Replace `findIf` across codebase | ~110 occurrences (~300 LOC) | 55 files (split by subsystem) |
-| Wrap bare `createHashMapFromArray` across codebase | ~80 call sites | 41 files (split by subsystem) |
+| Item | Effort | Files | Status |
+|------|--------|-------|--------|
+| Fix `isNil` in `fn_civsubIdentityTouch.sqf:38,48` | 2 lines | 1 file | ✅ DONE |
+| Replace `toUpperANSI`/`toLowerANSI` across codebase | 53 replacements | 14 files | ✅ DONE |
+| Replace `findIf` across codebase | 131 occurrences | 59 files | ✅ DONE |
+| Wrap bare `createHashMapFromArray` across codebase | 74 call sites | 39 files | ✅ DONE |
+| Add `toLowerANSI` + `bare-createHashMapFromArray` rules to compat scanner | 2 rules | 1 file | ✅ DONE |
+| Add diagnostics tools (Snapshot + Toggle Debug) | 3 new functions | 6 files | ✅ DONE |
+| Add Phase 1 regression tests | 41 assertions | 1 file | ✅ DONE |
 
 ### Phase 2: Harden (Security + Resilience)
 
@@ -242,14 +245,14 @@ No per-frame handlers (`onEachFrame`, `CBA_fnc_addPerFrameHandler`) detected. �
 
 Ordered by severity and dependency:
 
-| # | Priority | Finding | Fix | Est. Lines |
-|---|----------|---------|-----|------------|
-| 1 | **P0** | `fn_civsubIdentityTouch.sqf:38,48` isNil bug | Add trailing var in isNil blocks | 2 |
-| 2 | **P1** | `toUpperANSI`/`toLowerANSI` → CI failure | Replace with `toUpper`/`toLower` | 53 (14 files) |
-| 3 | **P1** | `findIf` → CI failure | Replace with `forEach` + `exitWith` | ~300 (55 files) |
-| 4 | **P1** | Bare `createHashMapFromArray` → CI failure | Wrap in compile helper | ~80 (41 files) |
-| 5 | **P1** | `CfgRemoteExec` allowlist missing | Implement per hardening plan | 50 |
-| 6 | **P2** | Unbounded state arrays | Add max-size caps | 15 |
+| # | Priority | Finding | Fix | Status |
+|---|----------|---------|-----|--------|
+| 1 | ~~P0~~ | `fn_civsubIdentityTouch.sqf:38,48` isNil bug | Add trailing var in isNil blocks | ✅ DONE (Task 1.1) |
+| 2 | ~~P1~~ | `toUpperANSI`/`toLowerANSI` → CI failure | Replace with `toUpper`/`toLower` | ✅ DONE (Task 1.2) |
+| 3 | ~~P1~~ | `findIf` → CI failure | Replace with `forEach` + `exitWith` | ✅ DONE (Task 1.3) |
+| 4 | ~~P1~~ | Bare `createHashMapFromArray` → CI failure | Wrap in compile helper | ✅ DONE (Task 1.4) |
+| 5 | **P1** | `CfgRemoteExec` allowlist missing | Implement per hardening plan | OPEN (Task 2.1) |
+| 6 | **P2** | Unbounded state arrays | Add max-size caps | OPEN (Task 2.2) |
 
 ---
 

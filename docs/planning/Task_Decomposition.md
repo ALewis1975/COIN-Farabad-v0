@@ -390,9 +390,9 @@ The CI compat scanner (`scripts/dev/sqflint_compat_scan.py`) checks for:
 | `_map getOrDefault [...]` | `hashmap-getOrDefault-method` | ✅ |
 | `isNotEqualTo` | `isNotEqualTo` | ✅ |
 | `toUpperANSI` | `toUpperANSI` | ✅ |
+| `toLowerANSI` | `toLowerANSI` | ✅ (added in Phase 1) |
 | `#` indexing | `hash-index-operator` | ✅ |
-| `toLowerANSI` | — | ❌ **Not covered** (add rule) |
-| `createHashMapFromArray` | — | ❌ **Not covered** (sqflint catches it) |
+| `createHashMapFromArray` | `bare-createHashMapFromArray` | ✅ (added in Phase 1) |
 | `keys _map` | — | ❌ **Not covered** (sqflint catches it) |
 
-**Note:** Consider adding `toLowerANSI` and optionally `createHashMapFromArray` / `keys` rules to the compat scanner for earlier detection.
+See `docs/qa/SQFLINT_COMPAT_GUIDE.md` for the full compile-helper reference.

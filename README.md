@@ -321,7 +321,13 @@ COIN-Farabad-v0/
 **Quality Assurance:**
 - `docs/qa/QA_Audit_Executive_Summary.md` — Latest QA status (Score: 7.6/10, Production Ready)
 - `docs/qa/Comprehensive_QA_Audit_2026-02-18.md` — Full audit report (425 files, ~57k LOC)
+- `docs/qa/SQFLINT_COMPAT_GUIDE.md` — Compile helper reference and banned pattern mapping
 - `tests/TEST-LOG.md` — Canonical validation log
+
+**Architecture & Planning:**
+- `docs/architecture/Architecture_and_Readiness_Plan.md` — System map, authority model, findings, and 4-phase forward plan
+- `docs/planning/Task_Decomposition.md` — PR-sized work packages with dependency graph and acceptance criteria
+- `docs/security/RemoteExec_Hardening_Plan.md` — RPC endpoint inventory and allowlist policy
 
 ### Marker Index
 
@@ -424,6 +430,7 @@ The Farabad Console provides unified access to all command functions:
 5. **HANDOFF:** Return-to-base debrief and enemy prisoner of war processing
 6. **CMD:** Incident workflow management, queue statistics, TOC actions
 7. **BOARDS:** Read-only operational snapshot for situational awareness
+8. **HQ / ADMIN:** Headquarters admin tools, diagnostics (compile audit, QA audit, debug toggle, coverage map, diagnostics snapshot)
 
 ---
 
@@ -492,8 +499,8 @@ Use `.github/pull_request_template.md` which requires:
 ## Known Limitations
 
 ### Static Analysis
-- `sqflint` produces false positives on valid modern SQF constructs (createHashMapFromArray, #, findIf, isNotEqualTo, etc.)
-- Parser limitations do not reflect actual runtime correctness
+- `sqflint` produces false positives on valid modern SQF constructs; see `docs/qa/SQFLINT_COMPAT_GUIDE.md` for full pattern mapping
+- All known CI-blocking patterns (`findIf`, `createHashMapFromArray`, `toUpperANSI`/`toLowerANSI`) have been resolved via compile helpers
 
 ### Container Environment
 - CI pipeline limited to static checks only
@@ -519,13 +526,14 @@ Until dedicated server environment is available:
 - ✅ Strong state isolation (pub vs. private variables)
 - ✅ Robust defensive programming (type checks, nil guards)
 - ✅ Well-structured UI integration
-- ✅ Clear module boundaries across 8 subsystems
+- ✅ Clear module boundaries across 12 subsystems
+- ✅ All sqflint CI-blocking patterns resolved (Phase 1 complete)
+- ✅ 62 automated unit test assertions in test harness
 
-**Priority Fixes Needed:**
-1. Tower role validation (P0) — 5 lines
-2. State save error logging (P0) — 10 lines
-3. CIVSUB init race guard (P1) — 3 lines
-4. CMD tab debounce (HIGH) — 5 lines
+**Remaining Priority Fixes:**
+1. CfgRemoteExec allowlist (P1) — ~80 lines in `description.ext`
+2. Unbounded state array caps (P2) — ~15 lines
+3. Guard post AllUnits optimization (P2) — ~10 lines
 
 See `docs/qa/QA_Audit_Executive_Summary.md` for details.
 
@@ -585,14 +593,15 @@ See `docs/projectFiles/US_Army_Doctrine_References.md` for complete citations.
 - CIVSUBv1 baseline complete
 - CASREQ v1 baseline complete
 - Threat v0 + IED Phase 1 baseline complete
-- Farabad Console with 7 tabs operational
-- Production-ready with priority fixes pending
+- Farabad Console with 8 tabs operational
+- Phase 1 stabilization complete: all sqflint CI blockers resolved, CIVSUB isNil bugs fixed, diagnostics tools added
+- Production-ready with Phase 2 hardening pending (CfgRemoteExec, array caps)
 
 See `tests/TEST-LOG.md` for detailed validation history.
 
 ---
 
-**Last Updated:** 2026-02-19
+**Last Updated:** 2026-02-23
 **Mission Type:** Persistent Multiplayer COIN Sandbox
 **Max Players:** 79
 **Map:** Takistan (CUP Terrains)
