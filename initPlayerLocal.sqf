@@ -95,6 +95,13 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
     [] spawn {
         // Single refresh contract: keep TOC + briefing parity when any client snapshot signal changes.
         private _refreshClientSnapshotView = {
+            // Debounce: skip if a refresh already ran within the last second
+            private _pendingAt = uiNamespace getVariable ["ARC_clientSnapshotRefreshPendingAt", -1];
+            if (!(_pendingAt isEqualType 0)) then { _pendingAt = -1; };
+            private _now = diag_tickTime;
+            if ((_now - _pendingAt) < 1) exitWith {};
+            uiNamespace setVariable ["ARC_clientSnapshotRefreshPendingAt", _now];
+
             [] call ARC_fnc_briefingUpdateClient;
             if (!isNil "ARC_fnc_tocRefreshClient") then { [] call ARC_fnc_tocRefreshClient; };
             uiNamespace setVariable ["ARC_console_dirty", true];
@@ -121,7 +128,7 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
             missionNamespace setVariable ["ARC_clientSnapshotPvEhId", "ARC_pub_stateUpdatedAt" addPublicVariableEventHandler {
                 private _refreshEnabled = missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false];
                 // Race-avoidance contract: PV event handlers must only run refresh after client readiness gate is lifted.
-                if (_refreshEnabled) then { call _refreshClientSnapshotView; };
+                if (_refreshEnabled) then { [] spawn _refreshClientSnapshotView; };
             }];
         };
 
@@ -130,7 +137,7 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
         {
             missionNamespace setVariable ["ARC_clientS1SnapshotPvEhId", "ARC_pub_s1_registryUpdatedAt" addPublicVariableEventHandler {
                 private _refreshEnabled = missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false];
-                if (_refreshEnabled) then { call _refreshClientSnapshotView; };
+                if (_refreshEnabled) then { [] spawn _refreshClientSnapshotView; };
             }];
         };
 
@@ -139,7 +146,7 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
         {
             missionNamespace setVariable ["ARC_clientCompanySnapshotPvEhId", "ARC_pub_companyCommandUpdatedAt" addPublicVariableEventHandler {
                 private _refreshEnabled = missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false];
-                if (_refreshEnabled) then { call _refreshClientSnapshotView; };
+                if (_refreshEnabled) then { [] spawn _refreshClientSnapshotView; };
             }];
         };
 
