@@ -7,7 +7,7 @@
       - ARC_pub_intelUpdatedAt (Number: serverTime)
 */
 
-if (!isServer) exitWith {false};
+if (!isServer) exitWith { false };
 diag_log format ["[ARC][intelBroadcast] build=%1 commit=2064e9d", missionNamespace getVariable ["ARC_buildStamp", "unknown"]];
 
 private _maxEntries = missionNamespace getVariable ["ARC_pubIntelMaxEntries", 40];
@@ -46,6 +46,7 @@ private _sanitizeMeta = {
         private _v = nil;
         if !(_x isEqualType [] && { (count _x) >= 2 }) then {
             _truncated = true;
+            // Do NOT pushBack an invalid entry!
         } else {
             _k = _x # 0;
             if !(_k isEqualType "") then {
@@ -56,7 +57,6 @@ private _sanitizeMeta = {
                     _truncated = true;
                 } else {
                     _v = _x # 1;
-
                     if (_v isEqualType "") then {
                         _v = trim _v;
                         if ((count _v) > _metaValueMaxLen) then { _v = _v select [0, _metaValueMaxLen]; _truncated = true; };
