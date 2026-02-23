@@ -1189,3 +1189,61 @@ git --no-pager diff --check
 ### Status
 - Static validation: **PASS**
 - Runtime validation: **BLOCKED** (requires dedicated server)
+
+---
+
+## 2026-02-23 22:00–23:10 UTC — Bug Fixes, Task 2.2 Array Caps, QA/Audit Compat, Tests, Docs
+
+**Branch:** copilot/fix-background-check-error  
+**Commits:** 36e403b → 144f992 (grafted; 4 working commits on top of security hardening base)
+
+**Scenario:** Full static PR validation pass covering two confirmed P0/P1 live bugs from `serverRPT/Arma3_x64_2026-02-23_16-14-05.rpt`, Task 2.2 (array caps), QA/Audit sqflint compat cleanup, debug/diagnostic improvements, and 11 new regression tests.
+
+### Changes validated
+
+| File | Change type | Result |
+|------|-------------|--------|
+| `functions/civsub/fn_civsubContactActionBackgroundCheck.sqf` | Bug 1: lazy-compile nil-guards for `ARC_fnc_civsubScoresCompute` + `ARC_fnc_civsubIntelConfidence`; type guards on `_Sthreat`/`_Scoop`; `[CIVSUB][ERR]` log on guard fire; `!isNil` wrapper on IntelConfidence call | PASS (static) |
+| `functions/core/fn_bootstrapServer.sqf` | Bug 2: `setVariable ["ARC_incidentLoopRunning", nil]` + `setVariable ["ARC_execLoopRunning", nil]` immediately before each loop call | PASS (static) |
+| `functions/core/fn_incidentCreate.sqf` | Diagnostics: `[ARC][INC][ERR]` on catalog load failure; `[ARC][INC][ERR]` on empty catalog; `[ARC][INC][WARN]` on empty `_choices` after filter | PASS (static) |
+| `functions/core/fn_incidentTick.sqf` | Debug gate: idle TICK `diag_log` → `ARC_fnc_log` at DEBUG level (gated by `ARC_debugLogEnabled`) | PASS (static) |
+| `functions/core/fn_devDiagnosticsSnapshot.sqf` | Added `ARC_incidentLoopRunning` + `ARC_execLoopRunning` to subsystem status panel | PASS (static) |
+| `initServer.sqf` | Startup toggle-audit label `[ARC][DEBUG]` → `[ARC][CONFIG]` | PASS (static) |
+| `functions/core/fn_intelLog.sqf` | Task 2.2: replace hardcoded `while deleteAt 200` with configurable `select`-slice cap (`ARC_intelLogMaxEntries`, default 500, clamped 10–2000) | PASS (static) |
+| `functions/core/fn_incidentClose.sqf` | Task 2.2: add configurable `select`-slice cap on `incidentHistory` (`ARC_incidentHistoryMaxEntries`, default 200, clamped 10–1000) | PASS (static) |
+| `functions/core/fn_uiConsoleQAAuditServer.sqf` | QA/Audit: 4× bare `trim` → `_trimFn` helper; 4× `isNotEqualTo` → `!(_ isEqualTo _)` | PASS (static) |
+| `functions/core/fn_devCompileAuditServer.sqf` | QA/Audit: 1× bare `fileExists` → `_fileExistsFn` helper; 2× `isNotEqualTo` → `!(_ isEqualTo _)` | PASS (static) |
+| `tests/run_all.sqf` | +11 assertions: UT-ILCAP-001..005, UT-IHCAP-001..003, UT-LOOPGUARD-001..002, UT-PH1-API-9 (62→73 total) | PASS (static) |
+
+### Checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | sqflint compat scan — civsub/backgroundCheck | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubContactActionBackgroundCheck.sqf` | PASS | 0 new violations (7 pre-existing unchanged lines) |
+| 2 | sqflint compat scan — bootstrapServer | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_bootstrapServer.sqf` | PASS | 0 new violations |
+| 3 | sqflint compat scan — incidentCreate + incidentTick | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_incidentCreate.sqf functions/core/fn_incidentTick.sqf` | PASS | 0 new violations |
+| 4 | sqflint compat scan — Task 2.2 files | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_intelLog.sqf functions/core/fn_incidentClose.sqf` | PASS | 0 new violations (15 pre-existing in unchanged lines) |
+| 5 | sqflint compat scan — QA/Audit files (was 11 violations) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_uiConsoleQAAuditServer.sqf functions/core/fn_devCompileAuditServer.sqf functions/ui/fn_uiConsoleQAAuditClientReceive.sqf functions/ui/fn_uiConsoleCompileAuditClientReceive.sqf` | PASS | 11 violations → 0 |
+| 6 | sqflint compat scan — tests/run_all.sqf | `python3 scripts/dev/sqflint_compat_scan.py --strict tests/run_all.sqf` | PASS | 0 violations |
+| 7 | git diff --check | `git --no-pager diff --check` | PASS | No whitespace issues |
+| 8 | Code review (automated) | `code_review` tool | PASS | No comments on any changed file |
+| 9 | CodeQL security scan | `codeql_checker` tool | N/A | SQF not analyzed by CodeQL |
+| 10 | Local MP smoke test | — | BLOCKED | No Arma 3 runtime in container |
+| 11 | Dedicated server `#restart` loop guard | — | BLOCKED | Requires dedicated server |
+| 12 | CIVSUB background check (DELTA_CHECK_PAPERS) gameplay | — | BLOCKED | Requires Arma 3 runtime |
+| 13 | JIP / late-client / reconnect | — | BLOCKED | Requires dedicated server + JIP client |
+
+### Status
+
+- Static validation: **PASS**
+- Runtime validation: **BLOCKED** (requires Arma 3 dedicated server)
+
+### Follow-up actions (on next dedicated-server session)
+
+1. Verify `DELTA_CHECK_PAPERS` no longer emits "server error" for contacts with known identities
+2. Confirm `#restart` → re-bootstrap correctly starts the incident loop (no stale guard block)
+3. Confirm `ARC_incidentLoopRunning` shows `true` in Diagnostics Snapshot after bootstrap
+4. Confirm TICK log is suppressed in RPT when debug mode is off; enable debug and verify it fires
+5. Validate `intelLog` and `incidentHistory` do not grow beyond configured caps during a 2-hour session
+6. Run QA Audit from HQ tab and confirm new `_trimFn`/`_fileExistsFn` helpers produce identical report format
+7. Run `[] execVM "tests/run_all.sqf";` from Debug Console; confirm 73 assertions all PASS
