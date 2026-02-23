@@ -57,6 +57,12 @@ RULES: list[PatternRule] = [
         notes="Known parser-compatibility pain point in older sqflint versions.",
     ),
     PatternRule(
+        name="toLowerANSI",
+        regex=re.compile(r"\btoLowerANSI\b"),
+        approved_equivalent="Use `toLower` for ASCII mission strings.",
+        notes="Known parser-compatibility pain point in older sqflint versions.",
+    ),
+    PatternRule(
         name="hash-index-operator",
         regex=re.compile(r"\s#\s"),
         approved_equivalent="Use `select` with explicit bounds/type guards.",
