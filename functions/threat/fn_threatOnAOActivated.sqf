@@ -24,7 +24,8 @@ if (!_enabled) exitWith {false};
 private _kvGet = {
     params ["_pairs", "_key", "_default"];
     if (!(_pairs isEqualType [])) exitWith {_default};
-    private _idx = _pairs findIf { (_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key } };
+    private _idx = -1;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) exitWith {_default};
     private _v = (_pairs # _idx) # 1;
     if (isNil "_v") exitWith {_default};
@@ -70,7 +71,8 @@ if (
     private _records = ["threat_v0_records", []] call ARC_fnc_stateGet;
     if (_records isEqualType []) then
     {
-        private _idxRec = _records findIf { private _r = _x; private _id = [_r, "threat_id", ""] call _kvGet; _id isEqualTo _tid };
+        private _idxRec = -1;
+        { if (([_x, "threat_id", ""] call _kvGet) isEqualTo _tid) exitWith { _idxRec = _forEachIndex; }; } forEach _records;
         if (_idxRec >= 0) then
         {
             private _rec = _records # _idxRec;
@@ -88,7 +90,8 @@ if (
             private _kvSet = {
                 params ["_pairs", "_key", "_value"];
                 if (!(_pairs isEqualType [])) then { _pairs = []; };
-                private _i = _pairs findIf { (_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key } };
+                private _i = -1;
+                { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key }) exitWith { _i = _forEachIndex; }; } forEach _pairs;
                 if (_i < 0) then { _pairs pushBack [_key, _value]; } else { _pairs set [_i, [_key, _value]]; };
                 _pairs
             };
@@ -122,7 +125,8 @@ private _cur = "CREATED";
 private _recs2 = ["threat_v0_records", []] call ARC_fnc_stateGet;
 if (_recs2 isEqualType []) then
 {
-    private _i2 = _recs2 findIf { private _r = _x; private _id = [_r, "threat_id", ""] call _kvGet; _id isEqualTo _tid };
+    private _i2 = -1;
+    { if (([_x, "threat_id", ""] call _kvGet) isEqualTo _tid) exitWith { _i2 = _forEachIndex; }; } forEach _recs2;
     if (_i2 >= 0) then
     {
         _cur = [_recs2 # _i2, "state", ""] call _kvGet;
