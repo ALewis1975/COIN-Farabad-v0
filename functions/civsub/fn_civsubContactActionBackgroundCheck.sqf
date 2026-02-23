@@ -120,11 +120,12 @@ private _Scoop   = [_scores, "S_COOP", 0] call _hg;
 // Ensure civ UID
 ["IDENTITY_UID"] call _setStep;
 private _civUid = _civ getVariable ["civ_uid", ""];
-if (_civUid isEqualTo "") then {
+private _civUidGenerated = (_civUid isEqualTo "");
+if (_civUidGenerated) then {
     isNil { _civUid = [_did] call ARC_fnc_civsubIdentityGenerateUid; };
-    if (_civUid isEqualTo "") exitWith { ["", "Identity UID generation failed."] call _inconclusive };
-    _civ setVariable ["civ_uid", _civUid, true];
 };
+if (_civUid isEqualTo "") exitWith { ["", "Identity UID generation failed."] call _inconclusive };
+if (_civUidGenerated) then { _civ setVariable ["civ_uid", _civUid, true]; };
 
 // Touch identity (guarded)
 ["IDENTITY_TOUCH"] call _setStep;
@@ -145,7 +146,7 @@ private _identityDepsOk = true;
     ["ARC_fnc_civsubIdentityEvictIfNeeded"]
 ];
 
-if !_identityDepsOk exitWith { ["", "One or more identity functions could not be resolved (IDENTITY_TOUCH)."] call _inconclusive };
+if (!_identityDepsOk) exitWith { ["", "One or more identity functions could not be resolved (IDENTITY_TOUCH)."] call _inconclusive };
 
 private _rec = createHashMap;
 private _nil = isNil { _rec = [_did, _actorUid, _civUid, getPosATL _civ] call ARC_fnc_civsubIdentityTouch; };
