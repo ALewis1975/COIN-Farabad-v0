@@ -195,6 +195,13 @@ private _fnNotifyMaybe = {
     };
 };
 
+// UID → owner cache: built once per tick, replaces 4 inline allPlayers scans
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+private _uidOwnerPairs = [];
+{ _uidOwnerPairs pushBack [getPlayerUID _x, owner _x]; } forEach allPlayers;
+private _uidOwnerCache = [_uidOwnerPairs] call _hmCreate;
+private _hgOwner = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+
 private _towerControllers = [];
 if (!_forceAiOnly) then {
     {
@@ -376,13 +383,11 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
             private _requesterUidAwait = _rec param [2, ""];
             ["LOCK_ACQUIRE", _ridAwait, "SYSTEM", _requesterUidAwait, [_laneId, _laneControllers]] call _fnEventPush;
 
-            private _requesterOwnerAwait = -1;
-            { if ((getPlayerUID _x) isEqualTo _requesterUidAwait) exitWith { _requesterOwnerAwait = owner _x; }; } forEach allPlayers;
+            private _requesterOwnerAwait = [_uidOwnerCache, _requesterUidAwait, -1] call _hgOwner;
             [_requesterOwnerAwait, "TOAST", "Airbase Clearance", format ["Request queued: %1 awaiting %2 controller", _ridAwait, toUpper _laneId], format ["AIR_REQ_AWAIT:%1", _ridAwait]] call _fnNotifyMaybe;
             {
                 private _towUid = _x param [1, ""];
-                private _towOwner = -1;
-                { if ((getPlayerUID _x) isEqualTo _towUid) exitWith { _towOwner = owner _x; }; } forEach allPlayers;
+                private _towOwner = [_uidOwnerCache, _towUid, -1] call _hgOwner;
                 [_towOwner, "TOAST", "Airbase Tower", format ["Decision required (%1): %2", toUpper _laneId, _ridAwait], format ["AIR_CTRL_PENDING:%1:%2", _ridAwait, _towUid]] call _fnNotifyMaybe;
             } forEach _towerControllers;
 
@@ -429,8 +434,7 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
         private _requesterUidAutoQueue = _rec param [2, ""];
         ["AUTO_QUEUE", _ridAutoQueue, "SYSTEM", _requesterUidAutoQueue, [_laneId, _autoDueAt]] call _fnEventPush;
 
-        private _requesterOwnerAutoQueue = -1;
-        { if ((getPlayerUID _x) isEqualTo _requesterUidAutoQueue) exitWith { _requesterOwnerAutoQueue = owner _x; }; } forEach allPlayers;
+        private _requesterOwnerAutoQueue = [_uidOwnerCache, _requesterUidAutoQueue, -1] call _hgOwner;
         [_requesterOwnerAutoQueue, "TOAST", "Airbase Clearance", format ["%1 in AUTO queue (%2). ETA %3s", _ridAutoQueue, toUpper _laneId, (_autoDueAt - _nowTs) max 0], format ["AIR_REQ_AUTOQ:%1", _ridAutoQueue]] call _fnNotifyMaybe;
         continue;
     };
@@ -465,8 +469,7 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
     private _requesterUidAi = _rec param [2, ""];
     ["APPROVE", _ridAi, "AI", _requesterUidAi, ["AUTO_DECIDED", _laneId]] call _fnEventPush;
 
-    private _requesterOwnerAi = -1;
-    { if ((getPlayerUID _x) isEqualTo _requesterUidAi) exitWith { _requesterOwnerAi = owner _x; }; } forEach allPlayers;
+    private _requesterOwnerAi = [_uidOwnerCache, _requesterUidAi, -1] call _hgOwner;
     [_requesterOwnerAi, "TOAST", "Airbase Clearance", format ["AUTO DECIDED: %1 approved by %2 lane automation", _ridAi, toUpper _laneId], format ["AIR_REQ_APPROVE_AI:%1", _ridAi]] call _fnNotifyMaybe;
 
     if (_opsLogEnabled || _debugOps) then {
