@@ -1127,3 +1127,24 @@ sqflint -e w functions/ui/fn_uiConsoleS1Paint.sqf
 - `config/CfgFunctions.hpp`: registered `s1EchelonClassify` under Core class.
 - Gameplay/network validation: BLOCKED pending Arma 3 dedicated server environment.
 - JIP / late-client snapshot: BLOCKED pending dedicated-server validation.
+
+## 2026-02-23 06:20 UTC — S1 branch toggle suppression during programmatic selection restore
+
+**Branch/Commit:** copilot/optimize-personnel-screen-performance @ (current)
+
+**Scenario:** Fixed `fn_uiConsoleS1Paint.sqf` so listbox `LBSelChanged` branch expand/collapse logic is ignored while paint restores selection via `lbSetCurSel`, preventing branch-node oscillation and repeated `ARC_console_s1ExpandToggled` churn.
+
+**Commands:**
+```
+python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleS1Paint.sqf
+sqflint -e w functions/ui/fn_uiConsoleS1Paint.sqf
+git --no-pager diff --check
+```
+
+**Result:** PASS with BLOCKED component
+
+**Notes:**
+- `sqflint_compat_scan.py --strict`: PASS.
+- `sqflint -e w`: BLOCKED in container (`sqflint: command not found`).
+- `git --no-pager diff --check`: PASS.
+- Runtime gameplay/network validation remains BLOCKED (no Arma runtime in container).

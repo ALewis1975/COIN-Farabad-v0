@@ -96,6 +96,7 @@ if (isNil { _ctrlList getVariable "ARC_s1EhAdded" }) then {
     _ctrlList setVariable ["ARC_s1EhAdded", true];
     _ctrlList ctrlAddEventHandler ["LBSelChanged", {
         params ["_ctrl", "_selIdx"];
+        if (_ctrl getVariable ["ARC_s1SuppressSelChanged", false]) exitWith {};
         if (_selIdx < 0) exitWith {};
         private _nodeData = _ctrl lbData _selIdx;
         // Only branch nodes (prefixed "cat:") toggle expand/collapse
@@ -127,7 +128,9 @@ private _paintedSelData = "";
 if (!_isV2 || { (count _catOrder) isEqualTo 0 }) then {
     _ctrlList lbAdd "No S-1 registry snapshot yet.";
     _ctrlList lbSetData [0, "__EMPTY__"];
+    _ctrlList setVariable ["ARC_s1SuppressSelChanged", true];
     _ctrlList lbSetCurSel 0;
+    _ctrlList setVariable ["ARC_s1SuppressSelChanged", false];
 } else {
     {
         private _cat      = _x;
@@ -291,7 +294,9 @@ if (!_isV2 || { (count _catOrder) isEqualTo 0 }) then {
             _si = _si + 1;
         };
     };
+    _ctrlList setVariable ["ARC_s1SuppressSelChanged", true];
     _ctrlList lbSetCurSel _newSel;
+    _ctrlList setVariable ["ARC_s1SuppressSelChanged", false];
 };
 
 // --- Paint header (main text area) ---
