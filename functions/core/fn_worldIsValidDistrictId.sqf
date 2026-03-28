@@ -20,12 +20,14 @@ params [
 
 if !(_districtId isEqualType "") exitWith {false};
 
-private _id = toUpper (trim _districtId);
+private _trimFn = compile "params ['_s']; trim _s";
+
+private _id = toUpper ([_districtId] call _trimFn);
 if (_id isEqualTo "") exitWith {false};
 if (_allowSentinel && { _id isEqualTo "D00" }) exitWith {true};
 
-if ((count _id) isNotEqualTo 3) exitWith {false};
-if ((_id select [0, 1]) isNotEqualTo "D") exitWith {false};
+if (!((count _id) isEqualTo 3)) exitWith {false};
+if (!((_id select [0, 1]) isEqualTo "D")) exitWith {false};
 
 private _numStr = _id select [1, 2];
 private _num = parseNumber _numStr;

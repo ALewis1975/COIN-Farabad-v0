@@ -20,6 +20,8 @@ params [
     ["_options", []]
 ];
 
+private _trimFn = compile "params ['_s']; trim _s";
+
 private _ok = true;
 private _norm = _value;
 private _code = "ARC_ASSERT_OK";
@@ -99,7 +101,7 @@ switch (toUpper _rule) do
             _code = "ARC_ASSERT_TYPE_MISMATCH";
             _msg = format ["%1 must be STRING", _label];
         } else {
-            _norm = trim _value;
+            _norm = [_value] call _trimFn;
             if (_norm isEqualTo "") then {
                 _ok = false;
                 _norm = _def;

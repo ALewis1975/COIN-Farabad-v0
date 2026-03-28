@@ -15,6 +15,8 @@ if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {false}
 // Phase 2: shared off-road placement helpers (server-owned).
 // We store these as missionNamespace function values to avoid touching CfgFunctions.hpp
 // (reduces regression risk when multiple hotfixes touch config files).
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+
 if (isNil { missionNamespace getVariable "ARC_civsub_fnc_posIsRoadish" }) then
 {
     missionNamespace setVariable ["ARC_civsub_fnc_posIsRoadish",
@@ -28,7 +30,7 @@ if (isNil { missionNamespace getVariable "ARC_civsub_fnc_posIsRoadish" }) then
         if (!(_pos isEqualType []) || { (count _pos) < 2 }) exitWith { true };
 
         private _p = _pos;
-        if ((count _p) == 2) then { _p = [_p # 0, _p # 1, 0]; };
+        if ((count _p) == 2) then { _p = [_p select 0, _p select 1, 0]; };
 
         _probeStep = (_probeStep max 0.6) min 2.0;
         _nearR = (_nearR max 0.15) min 1.5;
@@ -174,10 +176,10 @@ if ((missionNamespace getVariable ["civsub_v1_harm_enabled", true]) && { mission
                 if !(_reg isEqualType createHashMap) then { continue; };
 
                 {
-                    private _row = _reg getOrDefault [_x, createHashMap];
+                    private _row = [_reg, _x, createHashMap] call _hg;
                     if !(_row isEqualType createHashMap) then { continue; };
 
-                    private _u = _row getOrDefault ["unit", objNull];
+                    private _u = [_row, "unit", objNull] call _hg;
                     if (isNull _u) then { continue; };
                     if !(alive _u) then { continue; };
                     if !(_u getVariable ["civsub_v1_isCiv", false]) then { continue; };

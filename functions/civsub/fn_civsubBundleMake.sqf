@@ -28,6 +28,8 @@ if (_districtId isEqualTo "") exitWith {createHashMap};
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
 
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+
 private _ts = serverTime;
 private _uuid = [] call ARC_fnc_civsubUuid;
 private _eventId = format ["%1:%2:%3", _districtId, (_ts toFixed 3), (_uuid select [0,6])];
@@ -36,15 +38,15 @@ private _eventId = format ["%1:%2:%3", _districtId, (_ts toFixed 3), (_uuid sele
 private _centroid = [0,0];
 private _d = (missionNamespace getVariable ["civsub_v1_districts", createHashMap]) getOrDefault [_districtId, createHashMap];
 if (_d isEqualType createHashMap) then {
-    _centroid = _d getOrDefault ["centroid", [0,0]];
+    _centroid = [_d, "centroid", [0,0] call _hg];
 };
 
-private _p3 = [(_centroid # 0), (_centroid # 1), 0];
+private _p3 = [(_centroid select 0), (_centroid select 1), 0];
 if (_pos isEqualType [] && {count _pos >= 2}) then {
-    private _x = _pos # 0;
-    private _y = _pos # 1;
+    private _x = _pos select 0;
+    private _y = _pos select 1;
     private _z = 0;
-    if (count _pos >= 3) then { _z = _pos # 2; };
+    if (count _pos >= 3) then { _z = _pos select 2; };
     _p3 = [_x, _y, _z];
 };
 

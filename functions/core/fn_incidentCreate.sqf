@@ -6,8 +6,10 @@
 if (!isServer) exitWith {false};
 
 // Prevent overlapping incidents
+private _trimFn = compile "params ['_s']; trim _s";
+
 private _activeTaskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
-if (_activeTaskId isNotEqualTo "") exitWith {false};
+if (!(_activeTaskId isEqualTo "")) exitWith {false};
 
 private _catalog = call compile preprocessFileLineNumbers "data\incident_markers.sqf";
 if (!(_catalog isEqualType [])) exitWith {
@@ -69,7 +71,7 @@ if (_orders isEqualType [] && { (count _orders) > 0 }) then
 
     for "_i" from 0 to ((count _orders) - 1) do
     {
-        private _o = _orders # _i;
+        private _o = _orders select _i;
         if !(_o isEqualType [] && { (count _o) >= 7 }) then { continue; };
         _o params ["_oid", "_issuedAt", "_status", "_orderType", "_targetGroup", "_data", "_meta"];
         if !(_orderType isEqualType "") then { continue; };
@@ -82,10 +84,10 @@ if (_orders isEqualType [] && { (count _orders) > 0 }) then
         if (_meta isEqualType []) then
         {
             private _idxA = -1;
-            { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo "acceptedAt" }) exitWith { _idxA = _forEachIndex; }; } forEach _meta;
+            { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo "acceptedAt" }) exitWith { _idxA = _forEachIndex; }; } forEach _meta;
             if (_idxA >= 0) then
             {
-                private _v = (_meta # _idxA) # 1;
+                private _v = (_meta select _idxA) select 1;
                 if (_v isEqualType 0) then { _acceptedAt = _v; };
             };
         };
@@ -108,8 +110,8 @@ if (_leadOrderIdx >= 0) then
     if (_leadOrderData isEqualType []) then
     {
         private _idxL = -1;
-        { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo "lead" }) exitWith { _idxL = _forEachIndex; }; } forEach _leadOrderData;
-        if (_idxL >= 0) then { _leadRec = (_leadOrderData # _idxL) # 1; };
+        { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo "lead" }) exitWith { _idxL = _forEachIndex; }; } forEach _leadOrderData;
+        if (_idxL >= 0) then { _leadRec = (_leadOrderData select _idxL) select 1; };
     };
 
     if (_leadRec isEqualType [] && { (count _leadRec) > 0 }) then
@@ -140,9 +142,9 @@ if (!_useLead && { !isNil "ARC_fnc_tocBacklogPopNext" }) then
         private _bk = [_forceLogistics] call ARC_fnc_tocBacklogPopNext;
         if !(_bk isEqualType [] && { (count _bk) >= 1 }) exitWith {};
 
-        private _bkLeadId = _bk # 0;
+        private _bkLeadId = _bk select 0;
         if (!(_bkLeadId isEqualType "")) then { _bkLeadId = ""; };
-        _bkLeadId = trim _bkLeadId;
+        _bkLeadId = [_bkLeadId] call _trimFn;
         if (_bkLeadId isEqualTo "") then { continue; };
 
         private _tmp = [_bkLeadId] call ARC_fnc_leadConsumeById;
@@ -165,13 +167,13 @@ if (_leadPool isEqualType [] && { (count _leadPool) > 0 }) then
         {
             private _match = false;
             if (_x isEqualType [] && { (count _x) >= 2 }) then {
-                private _t = _x # 1; if !(_t isEqualType "") then { _t = ""; };
+                private _t = _x select 1; if !(_t isEqualType "") then { _t = ""; };
                 private _tag = "";
-                if ((count _x) >= 11) then { _tag = _x # 10; };
+                if ((count _x) >= 11) then { _tag = _x select 10; };
                 if !(_tag isEqualType "") then { _tag = ""; };
 
-                private _tU = toUpper (trim _t);
-                private _tagU = toUpper (trim _tag);
+                private _tU = toUpper ([_t] call _trimFn);
+                private _tagU = toUpper ([_tag] call _trimFn);
 
                 if ((_tU find "CMDNODE" isEqualTo 0) || (_tagU find "TOC_" isEqualTo 0) || (_tagU find "URGENT_" isEqualTo 0)) then { _match = true; };
             };
@@ -187,7 +189,7 @@ if (_leadPool isEqualType [] && { (count _leadPool) > 0 }) then
         if (_useLead) exitWith {};
 
         private _idxLead = -1;
-        { if (_x isEqualType [] && { (count _x) >= 2 } && { toUpper (_x # 1) in ["LOGISTICS","ESCORT"] }) exitWith { _idxLead = _forEachIndex; }; } forEach _leadPool;
+        { if (_x isEqualType [] && { (count _x) >= 2 } && { toUpper (_x select 1) in ["LOGISTICS","ESCORT"] }) exitWith { _idxLead = _forEachIndex; }; } forEach _leadPool;
 
         if (_idxLead >= 0) then
         {
@@ -232,8 +234,8 @@ if (_hist isEqualType [] && { (count _hist) > 0 }) then
     private _last = _hist select ((count _hist) - 1);
     if (_last isEqualType [] && { (count _last) >= 3 }) then
     {
-        _lastMarker = _last # 1;
-        _lastTypeU = toUpper (_last # 2);
+        _lastMarker = _last select 1;
+        _lastTypeU = toUpper (_last select 2);
     };
 };
 
@@ -350,7 +352,7 @@ if (!_useLead) then
         private _acc = 0;
 
         {
-            _acc = _acc + (_weights # _forEachIndex);
+            _acc = _acc + (_weights select _forEachIndex);
             if (_r <= _acc) exitWith { _idx = _forEachIndex; };
         } forEach _choices;
     };
@@ -395,7 +397,7 @@ if (_useLead) then
 }
 else
 {
-    private _pick = _choices # _idx;
+    private _pick = _choices select _idx;
     _pick params ["_mkr", "_disp", "_t"]; 
 
     _markerName = _mkr;
@@ -497,7 +499,7 @@ missionNamespace setVariable ["ARC_activeIncidentSitrepDetails", "", true];
 // If this incident was generated from an accepted LEAD order, mark that order as completed (consumed into this task).
 if (_leadOrderIdx >= 0 && { _leadOrderIdx < (count _orders) }) then
 {
-    private _ord = _orders # _leadOrderIdx;
+    private _ord = _orders select _leadOrderIdx;
     if (_ord isEqualType [] && { (count _ord) >= 7 }) then
     {
         _ord params ["_oid", "_issuedAt", "_status", "_orderType", "_targetGroup", "_data", "_meta"];
@@ -506,7 +508,7 @@ if (_leadOrderIdx >= 0 && { _leadOrderIdx < (count _orders) }) then
             params ["_pairs", "_k", "_v"];
             if !(_pairs isEqualType []) then { _pairs = []; };
             private _j = -1;
-            { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _j = _forEachIndex; }; } forEach _pairs;
+            { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _j = _forEachIndex; }; } forEach _pairs;
             if (_j < 0) then { _pairs pushBack [_k, _v]; } else { _pairs set [_j, [_k, _v]]; };
             _pairs
         };

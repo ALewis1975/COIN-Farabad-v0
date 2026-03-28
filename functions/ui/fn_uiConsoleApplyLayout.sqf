@@ -21,9 +21,11 @@ params [
 
 if (isNull _display) exitWith {"FULL"};
 
+private _trimFn = compile "params ['_s']; trim _s";
+
 private _modeRaw = missionNamespace getVariable ["ARC_console_layoutMode", "FULL"];
 if (!(_modeRaw isEqualType "")) then { _modeRaw = "FULL"; };
-private _mode = toUpper (trim _modeRaw);
+private _mode = toUpper ([_modeRaw] call _trimFn);
 if !(_mode in ["FULL", "DOCK_RIGHT"]) then { _mode = "FULL"; };
 
 uiNamespace setVariable ["ARC_console_layoutModeActive", _mode];

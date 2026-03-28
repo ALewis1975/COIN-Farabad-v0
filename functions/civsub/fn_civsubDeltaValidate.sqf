@@ -16,6 +16,8 @@ params [
 ];
 
 // Allow payload as HashMap or as array-of-pairs (e.g., [["hit", true]])
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+
 if (_payload isEqualType []) then {
     private _hm = createHashMap;
     {
@@ -45,7 +47,7 @@ if !(_event in _allow) exitWith {false};
 // CHECK_PAPERS can optionally include hit (bool)
 if (_event isEqualTo "CHECK_PAPERS") then
 {
-    private _hit = _payload getOrDefault ["hit", false];
+    private _hit = [_payload, "hit", false] call _hg;
     if !(_hit isEqualType true) then { _payload set ["hit", false]; };
 };
 

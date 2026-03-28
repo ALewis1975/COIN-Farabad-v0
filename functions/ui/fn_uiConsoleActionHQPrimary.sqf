@@ -39,14 +39,14 @@ if (_hqMode isEqualTo "INCIDENTS") exitWith
         false
     };
 
-    private _mkr = _parts # 0;
-    private _typ = _parts # 1;
-    private _disp = _parts # 2;
+    private _mkr = _parts select 0;
+    private _typ = _parts select 1;
+    private _disp = _parts select 2;
 
     // Do not spam while an incident is active.
     private _taskId = missionNamespace getVariable ["ARC_activeTaskId", ""]; 
     if (!(_taskId isEqualType "")) then { _taskId = ""; };
-    if (_taskId isNotEqualTo "") exitWith
+    if (!(_taskId isEqualTo "")) exitWith
     {
         ["HQ", "An incident is already active. Close it (and complete SITREP) before spawning a new one."] call ARC_fnc_clientToast;
         false

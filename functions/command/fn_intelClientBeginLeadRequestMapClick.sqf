@@ -23,7 +23,9 @@ params [["_leadType", "RECON"]];
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
 
-_leadType = toUpper (trim _leadType);
+private _trimFn = compile "params ['_s']; trim _s";
+
+_leadType = toUpper ([_leadType] call _trimFn);
 if (_leadType isEqualTo "") then { _leadType = "RECON"; };
 
 private _defSum = format ["Lead: %1 (S2 Request)", _leadType];
@@ -33,7 +35,7 @@ private _res = ["S2 LEAD REQUEST", _defSum, _defDet] call ARC_fnc_clientIntelPro
 _res params ["_ok", "_sum", "_det"];
 if (!_ok) exitWith {false};
 
-_sum = trim _sum;
+_sum = [_sum] call _trimFn;
 if (_sum isEqualTo "") then { _sum = _defSum; };
 if ((toUpper _sum) find "LEAD:" < 0) then { _sum = format ["Lead: %1", _sum]; };
 

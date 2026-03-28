@@ -24,6 +24,8 @@ if (isNull _civ) exitWith {false};
 if (isNull _actor) exitWith {false};
 
 // Dedicated MP hardening: bind actor identity to network sender.
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+
 if (!isNil "remoteExecutedOwner") then
 {
     private _reo = remoteExecutedOwner;
@@ -53,7 +55,7 @@ private _civUid = _civ getVariable ["civ_uid", ""];
 if !(_civUid isEqualTo "") then {
     private _rec = [_civUid] call ARC_fnc_civsubIdentityGet;
     if (_rec isEqualType createHashMap) then {
-        if (_rec getOrDefault ["status_detained", false]) exitWith {
+        if ([_rec, "status_detained", false] call _hg) exitWith {
             if (!_silent) then {
                 ["CIVSUB: Interaction ended. Civilian remains detained.", "CHAT"] remoteExecCall ["ARC_fnc_civsubClientMessage", _actor];
             };

@@ -18,9 +18,11 @@
 
 params [["_purpose", "REFIT"]];
 if (!(_purpose isEqualType "")) then { _purpose = "REFIT"; };
-_purpose = toUpper (trim _purpose);
+_purpose = toUpper ([_purpose] call _trimFn);
 
 private _pos = [0,0,0];
+private _trimFn = compile "params ['_s']; trim _s";
+
 private _label = "Base";
 private _radius = 40;
 
@@ -135,7 +137,7 @@ switch (_purpose) do
                         if (!((markerType _cand) isEqualTo "")) exitWith { _mHold = _cand; };
                     } forEach ["epw_holding", "mkr_SHERIFF_HOLDING"];
 
-                    if (_mHold isNotEqualTo "") then
+                    if (!(_mHold isEqualTo "")) then
                     {
                         _pos = getMarkerPos _mHold;
                         _label = markerText _mHold;

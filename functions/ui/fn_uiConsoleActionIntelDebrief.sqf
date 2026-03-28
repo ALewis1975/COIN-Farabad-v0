@@ -10,6 +10,8 @@
 
 if (!hasInterface) exitWith {false};
 
+private _trimFn = compile "params ['_s']; trim _s";
+
 private _gidSelf = groupId (group player);
 if (_gidSelf isEqualTo "") exitWith {false};
 
@@ -25,8 +27,8 @@ if (_isToc) then {
     _orderTg = ["ARC_console_handoff_intelTargetGroup", ""] call ARC_fnc_uiNsGetString;
     if (!(_orderId isEqualType "")) then { _orderId = ""; };
     if (!(_orderTg isEqualType "")) then { _orderTg = ""; };
-    _orderId = trim _orderId;
-    _orderTg = trim _orderTg;
+    _orderId = [_orderId] call _trimFn;
+    _orderTg = [_orderTg] call _trimFn;
 };
 
 // Fallback: find accepted RTB(INTEL) for your own group
@@ -37,7 +39,7 @@ private _getPair = {
     params ["_pairs", "_k", "_d"];
     if (!(_pairs isEqualType [])) exitWith { _d };
     {
-        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _x # 1 };
+        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _x select 1 };
     } forEach _pairs;
     _d
 };
@@ -79,10 +81,10 @@ else
             _x params ["_oid", "_iat", "_st", "_ot", "_tg", "_data", "_meta"];
             if (_oid isEqualTo _orderId) exitWith
             {
-                if ((toUpper _st) isNotEqualTo "ACCEPTED") exitWith {};
-                if ((toUpper _ot) isNotEqualTo "RTB") exitWith {};
+                if (!((toUpper _st) isEqualTo "ACCEPTED")) exitWith {};
+                if (!((toUpper _ot) isEqualTo "RTB")) exitWith {};
                 private _purpose = toUpper ([_data, "purpose", "REFIT"] call _getPair);
-                if (_purpose isNotEqualTo "INTEL") exitWith {};
+                if (!(_purpose isEqualTo "INTEL")) exitWith {};
                 _hasAccepted = true;
                 _orderTg = _tg;
                 _destPos = [_data, "destPos", []] call _getPair;
@@ -108,7 +110,7 @@ if (_destPos isEqualType [] && { (count _destPos) >= 2 }) then {
 
 // If the order belongs to another group, console override must be true
 private _force = !_near;
-if (_isToc && { _orderTg isNotEqualTo "" } && { _orderTg isNotEqualTo _gidSelf }) then {
+if (_isToc && { !(_orderTg isEqualTo "") } && { !(_orderTg isEqualTo _gidSelf) }) then {
     _force = true;
 };
 

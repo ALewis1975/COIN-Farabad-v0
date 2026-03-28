@@ -5,6 +5,8 @@
 if (!isServer) exitWith {false};
 if !(["airbaseRequestClearanceDecision"] call ARC_fnc_airbaseRuntimeEnabled) exitWith {false};
 
+private _trimFn = compile "params ['_s']; trim _s";
+
 if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\\core\\fn_rpcValidateSender.sqf"; };
 if (isNil "ARC_fnc_airbaseTowerAuthorize") then { ARC_fnc_airbaseTowerAuthorize = compile preprocessFileLineNumbers "functions\\core\\fn_airbaseTowerAuthorize.sqf"; };
 
@@ -33,7 +35,7 @@ if !(_requestIdCheck param [0, false]) exitWith {
 
 if (!(_approve isEqualType true) && !(_approve isEqualType false)) then { _approve = false; };
 if (!(_reason isEqualType "")) then { _reason = ""; };
-_reason = trim _reason;
+_reason = [_reason] call _trimFn;
 if (_reason isEqualTo "") then { _reason = if (_approve) then {"TOWER_APPROVE"} else {"TOWER_DENY"}; };
 
 private _actionToken = if (_approve) then {"APPROVE"} else {"DENY"};
@@ -76,10 +78,10 @@ private _idx = -1;
 { if ((_x param [0, ""]) isEqualTo _requestId) exitWith { _idx = _forEachIndex; }; } forEach _requests;
 if (_idx < 0) exitWith {false};
 
-private _rec = _requests # _idx;
+private _rec = _requests select _idx;
 private _requesterUid = _rec param [2, ""];
 private _requesterOwner = -1;
-if (_requesterUid isNotEqualTo "") then {
+if (!(_requesterUid isEqualTo "")) then {
     {
         if ((getPlayerUID _x) isEqualTo _requesterUid) exitWith { _requesterOwner = owner _x; };
     } forEach allPlayers;
@@ -133,7 +135,7 @@ if (_approve) then {
     if (!(_runwayState isEqualType "")) then { _runwayState = "OPEN"; };
     private _runwayOwner = missionNamespace getVariable ["airbase_v1_runwayOwner", ""];
     if (!(_runwayOwner isEqualType "")) then { _runwayOwner = ""; };
-    if (_runwayState in ["RESERVED", "OCCUPIED"] && { _runwayOwner isNotEqualTo "" }) exitWith {
+    if (_runwayState in ["RESERVED", "OCCUPIED"] && { !(_runwayOwner isEqualTo "") }) exitWith {
         private _owner = owner _caller;
         if (_owner > 0) then { [format ["Decision rejected: runway locked (%1 by %2).", _runwayState, _runwayOwner]] remoteExec ["ARC_fnc_clientHint", _owner]; };
         false

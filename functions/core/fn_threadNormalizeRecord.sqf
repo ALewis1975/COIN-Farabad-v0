@@ -17,23 +17,25 @@ params [
 if !(_thread isEqualType []) exitWith {[]};
 if ((count _thread) < 14) exitWith {[]};
 
+private _trimFn = compile "params ['_s']; trim _s";
+
 private _out = +_thread;
 
 if ((count _out) < 15) then
 {
-    private _districtId = [(_out # 3)] call ARC_fnc_threadResolveDistrictId;
+    private _districtId = [(_out select 3)] call ARC_fnc_threadResolveDistrictId;
     _out pushBack _districtId;
 };
 
-private _did = _out # 14;
+private _did = _out select 14;
 if !(_did isEqualType "") then
 {
     _did = "";
 };
-_did = toUpper (trim _did);
+_did = toUpper ([_did] call _trimFn);
 if !([_did] call ARC_fnc_worldIsValidDistrictId) then
 {
-    _did = [(_out # 3)] call ARC_fnc_threadResolveDistrictId;
+    _did = [(_out select 3)] call ARC_fnc_threadResolveDistrictId;
     if !([_did] call ARC_fnc_worldIsValidDistrictId) then { _did = ""; };
 };
 _out set [14, _did];

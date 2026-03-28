@@ -26,6 +26,8 @@ params [
 
 if (!(_pos isEqualType []) || { (count _pos) < 2 }) exitWith {""};
 
+private _trimFn = compile "params ['_s']; trim _s";
+
 private _threads = ["threads", []] call ARC_fnc_stateGet;
 if (!(_threads isEqualType [])) then { _threads = []; };
 
@@ -42,14 +44,14 @@ private _radius = 2500;
     private _thrN = [_x] call ARC_fnc_threadNormalizeRecord;
     if (_thrN isEqualTo []) then { continue; };
 
-    private _id   = _thrN # 0;
-    private _t    = toUpper (_thrN # 1);
-    private _base = _thrN # 3;
-    private _conf = _thrN # 4;
-    private _heat = _thrN # 5;
-    private _st   = toUpper (_thrN # 6);
+    private _id   = _thrN select 0;
+    private _t    = toUpper (_thrN select 1);
+    private _base = _thrN select 3;
+    private _conf = _thrN select 4;
+    private _heat = _thrN select 5;
+    private _st   = toUpper (_thrN select 6);
 
-    if (_t isNotEqualTo _typeU) then { continue; };
+    if (!(_t isEqualTo _typeU)) then { continue; };
     if (_st isEqualTo "DORMANT") then { continue; };
 
     if (!(_base isEqualType []) || { (count _base) < 2 }) then { continue; };
@@ -70,22 +72,22 @@ private _radius = 2500;
 
 if (_bestIdx >= 0) exitWith
 {
-    private _thr = [(_threads # _bestIdx)] call ARC_fnc_threadNormalizeRecord;
-    private _id = _thr # 0;
+    private _thr = [(_threads select _bestIdx)] call ARC_fnc_threadNormalizeRecord;
+    private _id = _thr select 0;
 
     // Lightly pull the thread base toward the new activity.
-    private _base = _thr # 3;
+    private _base = _thr select 3;
     if (_base isEqualType [] && { (count _base) >= 2 }) then
     {
         private _newBase = [
-            ((_base # 0) * 0.75) + ((_center # 0) * 0.25),
-            ((_base # 1) * 0.75) + ((_center # 1) * 0.25),
+            ((_base select 0) * 0.75) + ((_center select 0) * 0.25),
+            ((_base select 1) * 0.75) + ((_center select 1) * 0.25),
             0
         ];
         _thr set [3, _newBase];
-        private _did = _thr # 14;
+        private _did = _thr select 14;
         if !(_did isEqualType "") then { _did = ""; };
-        _did = toUpper (trim _did);
+        _did = toUpper ([_did] call _trimFn);
         if !([_did] call ARC_fnc_worldIsValidDistrictId) then
         {
             _did = [_newBase] call ARC_fnc_threadResolveDistrictId;
@@ -97,8 +99,8 @@ if (_bestIdx >= 0) exitWith
     };
 
     // Ensure parent task exists (safe on repeat)
-    private _parentTaskId = [_id, _threadType, _zoneBias, (_thr # 3)] call ARC_fnc_taskEnsureThreadParent;
-    if (_parentTaskId isNotEqualTo "") then
+    private _parentTaskId = [_id, _threadType, _zoneBias, (_thr select 3)] call ARC_fnc_taskEnsureThreadParent;
+    if (!(_parentTaskId isEqualTo "")) then
     {
         _thr set [13, _parentTaskId];
         _threads set [_bestIdx, _thr];

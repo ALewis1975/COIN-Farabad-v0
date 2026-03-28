@@ -31,6 +31,8 @@ params [
 if (isNull _issuer) exitWith {false};
 
 // Dedicated MP hardening: validate sender identity.
+private _trimFn = compile "params ['_s']; trim _s";
+
 if (!isNil "remoteExecutedOwner") then
 {
     private _reo = remoteExecutedOwner;
@@ -45,8 +47,8 @@ if (!isNil "remoteExecutedOwner") then
     };
 };
 
-_order = toUpper (trim _order);
-_purpose = toUpper (trim _purpose);
+_order = toUpper ([_order] call _trimFn);
+_purpose = toUpper ([_purpose] call _trimFn);
 
 private _targetGroup = ["activeIncidentAcceptedByGroup", ""] call ARC_fnc_stateGet;
 if (!(_targetGroup isEqualType "") || { _targetGroup isEqualTo "" }) then

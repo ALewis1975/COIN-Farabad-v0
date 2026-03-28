@@ -21,7 +21,9 @@ params [
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
 
-private _idNorm = toUpper (trim _districtId);
+private _trimFn = compile "params ['_s']; trim _s";
+
+private _idNorm = toUpper ([_districtId] call _trimFn);
 if (_idNorm isEqualTo "") then { _idNorm = "D00"; };
 
 private _pop = _popTotal;
@@ -34,8 +36,8 @@ if !(_seed isEqualType 0) then { _seed = 1337; };
 private _cx = 0;
 private _cy = 0;
 if (_centroid isEqualType [] && { (count _centroid) >= 2 }) then {
-    _cx = _centroid # 0;
-    _cy = _centroid # 1;
+    _cx = _centroid select 0;
+    _cy = _centroid select 1;
 };
 if !(_cx isEqualType 0) then { _cx = 0; };
 if !(_cy isEqualType 0) then { _cy = 0; };

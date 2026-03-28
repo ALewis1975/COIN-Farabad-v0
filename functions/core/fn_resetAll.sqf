@@ -26,7 +26,7 @@ private _ids = [];
 
 private _pushId = {
     params ["_id"]; 
-    if (_id isEqualType "" && {_id isNotEqualTo ""}) then { _ids pushBackUnique _id; };
+    if (_id isEqualType "" && {!(_id isEqualTo ""})) then { _ids pushBackUnique _id; };
 };
 
 private _active = ["activeTaskId", ""] call ARC_fnc_stateGet;
@@ -63,7 +63,7 @@ if (_threads isEqualType []) then
     {
         private _thr = [_x] call ARC_fnc_threadNormalizeRecord;
         if (_thr isEqualTo []) then { continue; };
-        private _parent = _thr # 13;
+        private _parent = _thr select 13;
         [_parent] call _pushId;
     } forEach _threads;
 };

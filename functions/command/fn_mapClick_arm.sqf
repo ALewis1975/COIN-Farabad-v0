@@ -18,6 +18,8 @@ params [["_ctx", createHashMap]];
 if !(_ctx isEqualType createHashMap) then { _ctx = createHashMap; };
 
 private _state = uiNamespace getVariable ["ARC_mapClick_state", "IDLE"];
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+
 if (_state in ["ARMED", "CAPTURED"]) then
 {
     ["REARM"] call ARC_fnc_mapClick_disarm;
@@ -25,10 +27,10 @@ if (_state in ["ARMED", "CAPTURED"]) then
 
 private _debug = uiNamespace getVariable ["ARC_mapClick_debug", false];
 private _armedAt = diag_tickTime;
-private _timeout = _ctx getOrDefault ["timeoutSec", 45];
+private _timeout = [_ctx, "timeoutSec", 45] call _hg;
 _timeout = (_timeout max 30) min 60;
 private _deadline = _armedAt + _timeout;
-private _type = toUpper (_ctx getOrDefault ["type", ""]);
+private _type = toUpper ([_ctx, "type", ""] call _hg);
 
 diag_log format ["[FARABAD][MAPCLICK][ARM] type=%1 timeoutSec=%2", _type, _timeout];
 

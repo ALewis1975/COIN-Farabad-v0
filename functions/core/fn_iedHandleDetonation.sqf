@@ -34,7 +34,7 @@ private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
 if (_taskId isEqualTo "") exitWith {false};
 
 private _typeU = toUpper (["activeIncidentType", ""] call ARC_fnc_stateGet);
-if (_typeU isNotEqualTo "IED") exitWith {false};
+if (!(_typeU isEqualTo "IED")) exitWith {false};
 
 // Only handle once per incident.
 private _already = ["activeIedDetonationHandled", false] call ARC_fnc_stateGet;
@@ -42,7 +42,7 @@ if (_already isEqualType true && { _already }) exitWith {false};
 
 // Objective kind (state is authoritative, but allow override if provided)
 private _objKind = ["activeObjectiveKind", ""] call ARC_fnc_stateGet;
-if (_objKindOverride isNotEqualTo "") then { _objKind = _objKindOverride; };
+if (!(_objKindOverride isEqualTo "")) then { _objKind = _objKindOverride; };
 _objKind = toUpper _objKind;
 
 if !(_objKind in ["IED_DEVICE", "VBIED_VEHICLE", "SUICIDE_VEST"]) exitWith {false};
@@ -172,7 +172,7 @@ private _leadId = [_p, _objKind, _causeU, _snapPairs] call ARC_fnc_iedQueueDeton
 
 private _detail = "";
 private _leadNote = "";
-if (_leadId isEqualType "" && { _leadId isNotEqualTo "" }) then
+if (_leadId isEqualType "" && { !(_leadId isEqualTo "") }) then
 {
     _leadNote = format [" Follow-on queued: %1.", _leadId];
 };
@@ -222,7 +222,7 @@ else
 
 // Player feedback: toast the tasking group so detonation recognition is obvious.
 private _gId = ["lastTaskingGroup", ""] call ARC_fnc_stateGet;
-if (_gId isEqualType "" && { _gId isNotEqualTo "" }) then
+if (_gId isEqualType "" && { !(_gId isEqualTo "") }) then
 {
     private _grp = grpNull;
     {

@@ -101,7 +101,7 @@ if (_fullCycle) then
     else
     {
         private _active = ["activeTaskId",""] call ARC_fnc_stateGet;
-        if (_active isNotEqualTo "") then
+        if (!(_active isEqualTo "")) then
         {
             ["INC","SKIP: active incident exists (%1). Not clobbering.",[_active],"WARN"] call _log;
         }
@@ -128,7 +128,7 @@ if (_fullCycle) then
                 {
                     sleep 0.5;
                     private _after = ["activeTaskId",""] call ARC_fnc_stateGet;
-                    if (_after isNotEqualTo "") then
+                    if (!(_after isEqualTo "")) then
                     {
                         ["INC","FAIL: activeTaskId still set after close (%1)",[_after],"ERROR"] call _log;
                     }

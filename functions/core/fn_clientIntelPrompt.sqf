@@ -21,6 +21,8 @@ if (!canSuspend) exitWith {
     diag_log "[FARABAD][PROMPT][WARN] ARC_fnc_clientIntelPrompt requires scheduled execution (canSuspend == true).";
     [false, "", ""]
 };
+private _trimFn = compile "params ['_s']; trim _s";
+
 
 params [
     ["_category", "INTEL"],
@@ -51,8 +53,8 @@ if (!(_ok isEqualType true)) then { _ok = false; };
 if (!(_sum isEqualType "")) then { _sum = ""; };
 if (!(_det isEqualType "")) then { _det = ""; };
 
-_sum = trim _sum;
-_det = trim _det;
+_sum = [_sum] call _trimFn;
+_det = [_det] call _trimFn;
 
 diag_log format ["[FARABAD][PROMPT][DONE] ok=%1", _ok];
 

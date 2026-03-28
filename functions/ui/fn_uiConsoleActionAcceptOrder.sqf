@@ -21,6 +21,8 @@ if (!hasInterface) exitWith {false};
 // which internally suspends (waitUntil), so force scheduled execution.
 if (!canSuspend) exitWith { _this spawn ARC_fnc_uiConsoleActionAcceptOrder; false };
 
+private _trimFn = compile "params ['_s']; trim _s";
+
 private _g = group player;
 if (isNull _g) exitWith {false};
 private _gid = groupId _g;
@@ -51,8 +53,8 @@ if (!(_orders isEqualType [])) then { _orders = []; };
 private _ord = [];
 {
     if (!(_x isEqualType [] && { (count _x) >= 7 })) then { continue; };
-    private _st = toUpper (_x # 2);
-    private _tg = _x # 4;
+    private _st = toUpper (_x select 2);
+    private _tg = _x select 4;
     if (_st isEqualTo "ISSUED" && { _tg isEqualTo _gid }) exitWith { _ord = _x; };
 } forEach _orders;
 
@@ -63,13 +65,13 @@ if (_ord isEqualTo []) exitWith
 };
 
 _ord params ["_orderId", "_issuedAt", "_status", "_orderType", "_targetGroup", "_data", "_meta"];
-_orderType = toUpper (trim _orderType);
+_orderType = toUpper ([_orderType] call _trimFn);
 
 private _getPair = {
     params ["_pairs", "_k", "_d"];
     if (!(_pairs isEqualType [])) exitWith { _d };
     {
-        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _x # 1 };
+        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _x select 1 };
     } forEach _pairs;
     _d
 };
@@ -102,13 +104,13 @@ switch (_orderType) do
         private _grid = if (_leadPos isEqualType [] && { (count _leadPos) >= 2 }) then { mapGridPosition _leadPos } else { "" };
 
         _lines pushBack format ["Lead: %1", _leadName];
-        if (_grid isNotEqualTo "") then { _lines pushBack format ["Lead Location: %1", _grid]; };
+        if (!(_grid isEqualTo "")) then { _lines pushBack format ["Lead Location: %1", _grid]; };
     };
 
     default { };
 };
 
-if (_note isNotEqualTo "") then
+if (!(_note isEqualTo "")) then
 {
     _lines pushBack "";
     _lines pushBack "TOC Note:";

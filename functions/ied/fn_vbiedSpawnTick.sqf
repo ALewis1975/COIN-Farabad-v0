@@ -19,11 +19,11 @@ if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabl
 if (!_enabled) exitWith {false};
 
 private _incTypeU = toUpper (["activeIncidentType", ""] call ARC_fnc_stateGet);
-if (_incTypeU isNotEqualTo "IED") exitWith {false};
+if (!(_incTypeU isEqualTo "IED")) exitWith {false};
 
 private _objKind = ["activeObjectiveKind", ""] call ARC_fnc_stateGet;
 if (!(_objKind isEqualType "")) then { _objKind = ""; };
-if ((toUpper _objKind) isNotEqualTo "VBIED_VEHICLE") exitWith {false};
+if (!((toUpper _objKind) isEqualTo "VBIED_VEHICLE")) exitWith {false};
 
 private _vehNid = ["activeObjectiveNetId", ""] call ARC_fnc_stateGet;
 if (!(_vehNid isEqualType "")) then { _vehNid = ""; };

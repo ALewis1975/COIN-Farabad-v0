@@ -16,6 +16,8 @@
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
 
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+
 private _dbg = missionNamespace getVariable ["civsub_v1_debug", false];
 
 // Phase 2 helpers (defined in civsubInitServer)
@@ -65,8 +67,8 @@ if (_district isEqualType createHashMap) then {
     };
 };
 
-private _center = _d getOrDefault ["centroid", [0,0]];
-private _radius = _d getOrDefault ["radius_m", 500];
+private _center = [_d, "centroid", [0,0] call _hg];
+private _radius = [_d, "radius_m", 500] call _hg;
 
 if !(_center isEqualType []) exitWith { ["center_not_array","district_data"] call _fail };
 if ((count _center) < 2) exitWith { ["center_bad","district_data"] call _fail };
@@ -104,7 +106,7 @@ if (_minSep isEqualType 0 && {_minSep > 0}) then {
             {
                 private _row = _reg get _x;
                 if (_row isEqualType createHashMap) then {
-                    private _u2 = _row getOrDefault ["unit", objNull];
+                    private _u2 = [_row, "unit", objNull] call _hg;
                     if (!isNull _u2 && {(_pos distance2D (getPosATL _u2)) < _minSep}) exitWith {
                         _ok = false;
                     };

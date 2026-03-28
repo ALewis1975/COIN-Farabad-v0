@@ -20,13 +20,15 @@ if (isNil "ARC_fnc_rolesIsAuthorized") then { ARC_fnc_rolesIsAuthorized = compil
 private _now = diag_tickTime;
 private _next = _unit getVariable ["ARC_sitrep_canSendNext", 0];
 if (_now < _next) exitWith { _unit getVariable ["ARC_sitrep_canSendCached", false] };
+private _trimFn = compile "params ['_s']; trim _s";
+
 _unit setVariable ["ARC_sitrep_canSendNext", _now + 0.5];
 
 private _ok = true;
 
 if ((missionNamespace getVariable ["ARC_activeTaskId", ""]) isEqualTo "") then { _ok = false; };
 if !(missionNamespace getVariable ["ARC_activeIncidentAccepted", false]) then { _ok = false; };
-private _typU = missionNamespace getVariable ["ARC_activeIncidentType", ""]; if (!(_typU isEqualType "")) then { _typU = ""; }; _typU = toUpper (trim _typU);
+private _typU = missionNamespace getVariable ["ARC_activeIncidentType", ""]; if (!(_typU isEqualType "")) then { _typU = ""; }; _typU = toUpper ([_typU] call _trimFn);
 if !(_typU in ["IED"]) then {
     if !(missionNamespace getVariable ["ARC_activeIncidentCloseReady", false]) then { _ok = false; };
 };

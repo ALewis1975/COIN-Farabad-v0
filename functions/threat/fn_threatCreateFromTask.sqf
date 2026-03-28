@@ -26,6 +26,8 @@ params [
 
 if (_taskId isEqualTo "") exitWith {""};
 
+private _trimFn = compile "params ['_s']; trim _s";
+
 private _enabled = ["threat_v0_enabled", true] call ARC_fnc_stateGet;
 if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabled = true; };
 if (!_enabled) exitWith {""};
@@ -38,9 +40,9 @@ private _kvGet = {
     params ["_pairs", "_key", "_default"];
     if (!(_pairs isEqualType [])) exitWith {_default};
     private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) exitWith {_default};
-    private _v = (_pairs # _idx) # 1;
+    private _v = (_pairs select _idx) select 1;
     if (isNil "_v") exitWith {_default};
     _v
 };
@@ -49,7 +51,7 @@ private _kvSet = {
     params ["_pairs", "_key", "_value"];
     if (!(_pairs isEqualType [])) then { _pairs = []; };
     private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) then { _pairs pushBack [_key, _value]; } else { _pairs set [_idx, [_key, _value]]; };
     _pairs
 };
@@ -68,7 +70,7 @@ private _existingIdx = -1;
 
 if (_existingIdx >= 0) then
 {
-    private _rec = _records # _existingIdx;
+    private _rec = _records select _existingIdx;
     private _tid = [_rec, "threat_id", ""] call _kvGet;
     _tid
 }
@@ -99,7 +101,7 @@ else
 
     private _districtIdSource = [_ctx, "district_id", ""] call _kvGet;
     if !(_districtIdSource isEqualType "") then { _districtIdSource = ""; };
-    _districtIdSource = toUpper (trim _districtIdSource);
+    _districtIdSource = toUpper ([_districtIdSource] call _trimFn);
 
     private _districtId = _districtIdSource;
     if !([_districtId] call ARC_fnc_worldIsValidDistrictId) then
@@ -246,7 +248,7 @@ else
     ];
 
     // Attach log ref (best-effort)
-    if (_intelId isNotEqualTo "") then
+    if (!(_intelId isEqualTo "")) then
     {
         private _a = [_rec, "audit", []] call _kvGet;
         private _refs = [_a, "log_refs", []] call _kvGet;

@@ -7,6 +7,8 @@
 
 if (!isServer) exitWith {0};
 
+private _trimFn = compile "params ['_s']; trim _s";
+
 private _leads = ["leadPool", []] call ARC_fnc_stateGet;
 if (!(_leads isEqualType [])) then { _leads = []; };
 
@@ -18,10 +20,10 @@ private _expiredIds = [];
 {
     if (_x isEqualType [] && { (count _x) >= 7 }) then
     {
-        private _expiresAt = _x # 6;
+        private _expiresAt = _x select 6;
         if (_expiresAt isEqualType 0 && { _expiresAt > 0 } && { _expiresAt <= _now }) then
         {
-            _expiredIds pushBack (_x # 0);
+            _expiredIds pushBack (_x select 0);
         };
     };
 } forEach _leads;
@@ -38,11 +40,11 @@ _leads = _leads select
 // Safety net: if a suspicious lead circle has a TTL, remove its marker even if the lead itself does not expire.
 {
     if (!(_x isEqualType []) || { (count _x) < 11 }) then { continue; };
-    private _id = _x # 0;
-    private _tag = _x # 10;
+    private _id = _x select 0;
+    private _tag = _x select 10;
     if (!(_tag isEqualType "")) then { continue; };
 
-    private _tU = toUpper (trim _tag);
+    private _tU = toUpper ([_tag] call _trimFn);
     if (_tU find "SUS_" != 0) then { continue; };
 
     private _exp = missionNamespace getVariable [format ["ARC_leadCircleExpiresAt_%1", _id], -1];
@@ -72,7 +74,7 @@ if (_removed > 0) then
 } forEach _expiredIds;
 
     // Lead end-state: expired (never actioned)
-    if (_expiredIds isNotEqualTo []) then
+    if (!(_expiredIds isEqualTo [])) then
     {
         private _lh = ["leadHistory", []] call ARC_fnc_stateGet;
         if (!(_lh isEqualType [])) then { _lh = []; };

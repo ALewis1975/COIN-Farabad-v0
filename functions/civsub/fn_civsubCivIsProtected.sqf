@@ -29,11 +29,13 @@ if (_u getVariable ["ace_captives_isHandcuffed", false]) exitWith {true};
 
 // Identity-based (best-effort). Only exists for touched civs.
 private _civUid = _u getVariable ["civ_uid", ""]; 
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+
 if !(_civUid isEqualTo "") then {
     private _rec = [_civUid] call ARC_fnc_civsubIdentityGet;
     if (_rec isEqualType createHashMap) then {
-        if (_rec getOrDefault ["status_detained", false]) exitWith {true};
-        if (_rec getOrDefault ["status_handedOff", false]) exitWith {true};
+        if ([_rec, "status_detained", false] call _hg) exitWith {true};
+        if ([_rec, "status_handedOff", false] call _hg) exitWith {true};
     };
 };
 

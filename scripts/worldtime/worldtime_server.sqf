@@ -79,10 +79,10 @@ if (isNil { missionNamespace getVariable "ARC_fnc_worldTimePhaseFromDaytime" }) 
         private _thr = missionNamespace getVariable ["ARC_worldTime_phaseThresholds", [5.5, 9.0, 17.0, 20.5]];
         if (!(_thr isEqualType []) || { (count _thr) < 4 }) then { _thr = [5.5, 9.0, 17.0, 20.5]; };
 
-        private _nightEnd   = _thr # 0;
-        private _morningEnd = _thr # 1;
-        private _workEnd    = _thr # 2;
-        private _eveningEnd = _thr # 3;
+        private _nightEnd   = _thr select 0;
+        private _morningEnd = _thr select 1;
+        private _workEnd    = _thr select 2;
+        private _eveningEnd = _thr select 3;
 
         if (_t < _nightEnd || { _t >= _eveningEnd }) exitWith { "NIGHT" };
         if (_t < _morningEnd) exitWith { "MORNING" };

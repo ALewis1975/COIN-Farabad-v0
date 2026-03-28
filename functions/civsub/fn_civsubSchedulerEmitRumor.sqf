@@ -19,12 +19,14 @@ if (_districtId isEqualTo "") exitWith {createHashMap};
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
 
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+
 private _leadEmit = [[["emit", false], ["lead_type", ""], ["lead_id", ""], ["confidence", 0.0], ["seed", createHashMap]]] call _hmCreate;
 private _influenceDelta = [[["dW", 0], ["dR", 0], ["dG", 0]]] call _hmCreate;
 
 private _bundle = [
     _districtId,
-    _d getOrDefault ["centroid", [0,0]],
+    [_d, "centroid", [0,0] call _hg],
     "SCHEDULER",
     "RUMOR_AMBIENT",
     createHashMap,

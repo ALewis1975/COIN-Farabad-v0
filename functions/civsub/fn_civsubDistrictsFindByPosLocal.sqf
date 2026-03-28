@@ -18,6 +18,8 @@ params [
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
 
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+
 private _zone = "";
 if (!isNil "ARC_fnc_worldGetZoneForPos") then {
     _zone = toUpper ([_pos] call ARC_fnc_worldGetZoneForPos);
@@ -39,8 +41,8 @@ private _bestD = 1e12;
 
     if (_rec isEqualType createHashMap) then
     {
-        private _c = _rec getOrDefault ["centroid", [0,0]];
-        private _r = _rec getOrDefault ["radius_m", 0];
+        private _c = [_rec, "centroid", [0,0] call _hg];
+        private _r = [_rec, "radius_m", 0] call _hg;
         if ((_c isEqualType []) && { _r > 0 }) then
         {
             private _d = (_pos distance2D _c);

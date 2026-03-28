@@ -28,7 +28,7 @@ private _now = serverTime;
 private _out = [];
 {
     if (!(_x isEqualType []) || { (count _x) < 6 }) then { continue; };
-    private _exp = _x # 5;
+    private _exp = _x select 5;
     if (!(_exp isEqualType 0)) then { _exp = -1; };
     if (_exp >= 0 && { _now > _exp }) then { continue; };
     _out pushBack _x;

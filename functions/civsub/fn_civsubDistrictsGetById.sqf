@@ -16,8 +16,10 @@ params [["_districtId", "", ["", []]]];
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
 
-if (_districtId isEqualType [] && {(count _districtId) == 1} && {(_districtId # 0) isEqualType ""}) then {
-    _districtId = _districtId # 0;
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+
+if (_districtId isEqualType [] && {(count _districtId) == 1} && {(_districtId select 0) isEqualType ""}) then {
+    _districtId = _districtId select 0;
 };
 if !(_districtId isEqualType "") exitWith {
     diag_log format ["[CIVSUB][WARN] DistrictsGetById invalid districtId type=%1 value=%2", typeName _districtId, _districtId];
@@ -33,9 +35,9 @@ private _k1 = _districtId;
 private _k2 = toLower _districtId;
 private _k3 = toUpper _districtId;
 
-private _d = _districts getOrDefault [_k1, createHashMap];
-if (!(_d isEqualType createHashMap) || {(count _d) == 0}) then { _d = _districts getOrDefault [_k2, createHashMap]; };
-if (!(_d isEqualType createHashMap) || {(count _d) == 0}) then { _d = _districts getOrDefault [_k3, createHashMap]; };
+private _d = [_districts, _k1, createHashMap] call _hg;
+if (!(_d isEqualType createHashMap) || {(count _d) == 0}) then { _d = [_districts, _k2, createHashMap] call _hg; };
+if (!(_d isEqualType createHashMap) || {(count _d) == 0}) then { _d = [_districts, _k3, createHashMap] call _hg; };
 
 if !(_d isEqualType createHashMap) then { createHashMap } else { _d };
 

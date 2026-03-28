@@ -19,6 +19,8 @@ if (_qid isEqualTo "") exitWith {false};
 
 private _getPair = {
     private _pairs = _this param [0, [], [[]]];
+private _trimFn = compile "params ['_s']; trim _s";
+
     private _k = _this param [1, "", [""]];
     private _d = _this param [2, nil];
 
@@ -26,9 +28,9 @@ private _getPair = {
     if (_k isEqualTo "") exitWith { _d };
 
     private _j = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _j = _forEachIndex; }; } forEach _pairs;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _j = _forEachIndex; }; } forEach _pairs;
     if (_j < 0) exitWith { _d };
-    (_pairs # _j) # 1
+    (_pairs select _j) select 1
 };
 
 // Prefer queue tail so decided items can still be viewed.
@@ -74,7 +76,7 @@ private _grid = [_meta, "grid", ""] call _getPair;
 if (!(_grid isEqualType "")) then { _grid = ""; };
 if (_grid isEqualTo "") then
 {
-    if (_posATL isEqualType [] && { (count _posATL) >= 2 } && { (_posATL # 0) isEqualType 0 } && { (_posATL # 1) isEqualType 0 }) then
+    if (_posATL isEqualType [] && { (count _posATL) >= 2 } && { (_posATL select 0) isEqualType 0 } && { (_posATL select 1) isEqualType 0 }) then
     {
         _grid = mapGridPosition _posATL;
     }
@@ -113,13 +115,13 @@ switch (_kindU) do
         private _tag      = [_payload, "tag", "S2_REQUEST"] call _getPair;
 
         if (!(_leadType isEqualType "")) then { _leadType = "RECON"; };
-        _leadType = toUpper (trim _leadType);
+        _leadType = toUpper ([_leadType] call _trimFn);
 
         if (!(_dispName isEqualType "")) then { _dispName = _sum; };
-        _dispName = trim _dispName;
+        _dispName = [_dispName] call _trimFn;
 
         private _pGrid = _grid;
-        if (_lp isEqualType [] && { (count _lp) >= 2 } && { (_lp # 0) isEqualType 0 } && { (_lp # 1) isEqualType 0 }) then
+        if (_lp isEqualType [] && { (count _lp) >= 2 } && { (_lp select 0) isEqualType 0 } && { (_lp select 1) isEqualType 0 }) then
         {
             _pGrid = mapGridPosition _lp;
         };
@@ -128,7 +130,7 @@ switch (_kindU) do
         _pri = (_pri max 1) min 5;
 
         if (!(_tag isEqualType "")) then { _tag = "S2_REQUEST"; };
-        _tag = trim _tag;
+        _tag = [_tag] call _trimFn;
 
         _payloadTxt = format ["Lead Request: <t color='#FFD700'>%1</t> (P%2)<br/>Grid: %3 | Zone: %4<br/>Tag: %5<br/>Title: %6", _leadType, _pri, _pGrid, _zone, _tag, _dispName];
 
@@ -145,9 +147,9 @@ switch (_kindU) do
             {
                 if (_x isEqualType [] && { (count _x) >= 10 }) then
                 {
-                    private _lid = _x # 0;
-                    private _srcTask = _x # 7;
-                    private _srcInc  = _x # 8;
+                    private _lid = _x select 0;
+                    private _srcTask = _x select 7;
+                    private _srcInc  = _x select 8;
 
                     if (_leadId != "" && { _lid isEqualTo _leadId }) exitWith { _lead = _x; };
                     if (_leadId isEqualTo "" && { _srcTask isEqualTo _qid } && { toUpper _srcInc isEqualTo "QUEUE" }) exitWith { _lead = _x; };
@@ -189,7 +191,7 @@ switch (_kindU) do
             } forEach _orders;
 
             // Status priority: AVAILABLE -> ORDER ISSUED/ACCEPTED -> ACTIVE -> CONSUMED -> UNKNOWN
-            if (_lead isNotEqualTo []) then
+            if (!(_lead isEqualTo [])) then
             {
                 private _expiresAt = _lead param [6, -1, [0]];
                 private _minsLeft = 0;
@@ -206,7 +208,7 @@ switch (_kindU) do
             }
             else
             {
-                if (_leadOrder isNotEqualTo []) then
+                if (!(_leadOrder isEqualTo [])) then
                 {
                     private _oid = _leadOrder param [0, "", [""]];
                     private _ost = toUpper (_leadOrder param [2, "", [""]]);
@@ -229,12 +231,12 @@ switch (_kindU) do
                     {
                         // If we don't have leadId, try to match last-consumed by sourceTaskId.
                         private _lcMatch = false;
-                        if (_leadId != "" && { _lastConsumed isEqualType [] } && { (count _lastConsumed) >= 10 } && { (_lastConsumed # 0) isEqualTo _leadId }) then { _lcMatch = true; };
-                        if (_leadId isEqualTo "" && { _lastConsumed isEqualType [] } && { (count _lastConsumed) >= 10 } && { (_lastConsumed # 7) isEqualTo _qid } && { toUpper (_lastConsumed # 8) isEqualTo "QUEUE" }) then { _lcMatch = true; };
+                        if (_leadId != "" && { _lastConsumed isEqualType [] } && { (count _lastConsumed) >= 10 } && { (_lastConsumed select 0) isEqualTo _leadId }) then { _lcMatch = true; };
+                        if (_leadId isEqualTo "" && { _lastConsumed isEqualType [] } && { (count _lastConsumed) >= 10 } && { (_lastConsumed select 7) isEqualTo _qid } && { toUpper (_lastConsumed select 8) isEqualTo "QUEUE" }) then { _lcMatch = true; };
 
                         if (_lcMatch) then
                         {
-                            private _lcId = _lastConsumed # 0;
+                            private _lcId = _lastConsumed select 0;
                             _statusTxt = format ["Lead Status: <t color='#FFD700'>CONSUMED</t><br/>LeadId: %1", _lcId];
                         }
                         else
@@ -266,10 +268,10 @@ case "FOLLOWON_PACKAGE":
     if (!(_sitSum isEqualType "")) then { _sitSum = ""; };
     if (!(_leadIds isEqualType [])) then { _leadIds = []; };
 
-    _incType = toUpper (trim _incType);
-    _res = toUpper (trim _res);
-    _rec = toUpper (trim _rec);
-    _purpose = toUpper (trim _purpose);
+    _incType = toUpper ([_incType] call _trimFn);
+    _res = toUpper ([_res] call _trimFn);
+    _rec = toUpper ([_rec] call _trimFn);
+    _purpose = toUpper ([_purpose] call _trimFn);
 
     private _n = count _leadIds;
     private _leadTxt = if (_n > 0) then { _leadIds joinString ", " } else { "None" };
@@ -307,10 +309,10 @@ case "FOLLOWON_REQUEST":
         private _reqRole  = [_payload, "requestorRole", ""] call _getPair;
 
         if (!(_req isEqualType "")) then { _req = "RTB"; };
-        _req = toUpper (trim _req);
+        _req = toUpper ([_req] call _trimFn);
 
         if (!(_purpose isEqualType "")) then { _purpose = "REFIT"; };
-        _purpose = toUpper (trim _purpose);
+        _purpose = toUpper ([_purpose] call _trimFn);
 
         if (!(_reqGroup isEqualType "")) then { _reqGroup = _fromGroup; };
 
@@ -334,18 +336,18 @@ case "FOLLOWON_REQUEST":
 
         if (_req isEqualTo "HOLD") then
         {
-            if (trim _holdIntent isNotEqualTo "") then { _extra pushBack format ["Hold intent: %1", trim _holdIntent]; };
+            if (trim !(_holdIntent isEqualTo "")) then { _extra pushBack format ["Hold intent: %1", [_holdIntent] call _trimFn]; };
             if (_holdMin > 0) then { _extra pushBack format ["Hold duration: %1 min", _holdMin]; };
         };
 
         if (_req isEqualTo "PROCEED") then
         {
-            if (trim _proceedIntent isNotEqualTo "") then { _extra pushBack format ["Proceed intent: %1", trim _proceedIntent]; };
+            if (trim !(_proceedIntent isEqualTo "")) then { _extra pushBack format ["Proceed intent: %1", [_proceedIntent] call _trimFn]; };
         };
 
-        if (trim _rat isNotEqualTo "") then { _extra pushBack format ["Rationale: %1", trim _rat]; };
-        if (trim _con isNotEqualTo "") then { _extra pushBack format ["Constraints: %1", trim _con]; };
-        if (trim _sup isNotEqualTo "") then { _extra pushBack format ["Support: %1", trim _sup]; };
+        if (trim !(_rat isEqualTo "")) then { _extra pushBack format ["Rationale: %1", [_rat] call _trimFn]; };
+        if (trim !(_con isEqualTo "")) then { _extra pushBack format ["Constraints: %1", [_con] call _trimFn]; };
+        if (trim !(_sup isEqualTo "")) then { _extra pushBack format ["Support: %1", [_sup] call _trimFn]; };
 
         if ((count _extra) > 0) then
         {
@@ -361,11 +363,11 @@ case "FOLLOWON_REQUEST":
             {
                 if (_x isEqualType [] && { (count _x) >= 7 }) then
                 {
-                    private _oid = _x # 0;
-                    private _ost = _x # 2;
-                    private _otype = _x # 3;
-                    private _tgt = _x # 4;
-                    private _meta2 = _x # 6;
+                    private _oid = _x select 0;
+                    private _ost = _x select 2;
+                    private _otype = _x select 3;
+                    private _tgt = _x select 4;
+                    private _meta2 = _x select 6;
 
                     private _src = [_meta2, "sourceQid", ""] call _getPair;
                     if (_src isEqualType "" && { _src isEqualTo _qid }) exitWith
@@ -400,7 +402,7 @@ if (_dec isEqualType [] && { (count _dec) >= 4 }) then
     };
 
     if (!(_decNote isEqualType "")) then { _decNote = ""; };
-    _decNote = trim _decNote;
+    _decNote = [_decNote] call _trimFn;
     if (_decNote isEqualTo "") then { _decNote = "(no note)"; };
 
     _decTxt = format ["Decision: <t color='#FFD700'>%1</t> by %2 (%3m ago)<br/>Note: %4", _d, _decBy, _decAge, _decNote];

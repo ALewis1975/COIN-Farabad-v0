@@ -14,6 +14,8 @@ params [
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
 
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+
 if (_payload isEqualType []) then { _payload = [_payload] call _hmCreate; };
 if !(_payload isEqualType createHashMap) exitWith {false};
 
@@ -27,14 +29,14 @@ if (isNull _disp) exitWith {false};
 private _ctrl = _disp displayCtrl 86101;
 if (isNull _ctrl) exitWith {false};
 
-private _name = _payload getOrDefault ["name", "Unknown"];
-private _serial = _payload getOrDefault ["passport_serial", ""];
-private _age = _payload getOrDefault ["age", -1];
-private _occ = _payload getOrDefault ["occupation", ""];
-private _home = _payload getOrDefault ["home", ""];
-private _grid = _payload getOrDefault ["home_grid", ""];
-private _did = _payload getOrDefault ["districtId", ""];
-private _flags = _payload getOrDefault ["flags", []];
+private _name = [_payload, "name", "Unknown"] call _hg;
+private _serial = [_payload, "passport_serial", ""] call _hg;
+private _age = [_payload, "age", -1] call _hg;
+private _occ = [_payload, "occupation", ""] call _hg;
+private _home = [_payload, "home", ""] call _hg;
+private _grid = [_payload, "home_grid", ""] call _hg;
+private _did = [_payload, "districtId", ""] call _hg;
+private _flags = [_payload, "flags", [] call _hg];
 
 private _ageS = if (_age isEqualType 0 && {_age >= 0}) then { str _age } else { "N/A" };
 private _occS = if (_occ isEqualType "" && {!(_occ isEqualTo "")}) then { _occ } else { "N/A" };

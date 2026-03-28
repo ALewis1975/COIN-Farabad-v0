@@ -72,7 +72,7 @@ while {alive _vehicle} do
     private _choices = _markers;
     if !(_lastMarker isEqualTo "") then
     {
-        _choices = _markers select { _x isNotEqualTo _lastMarker };
+        _choices = _markers select { !(_x isEqualTo _lastMarker) };
         if (_choices isEqualTo []) then { _choices = _markers; };
     };
 

@@ -27,8 +27,8 @@ private _avoidZonesU = _avoidZones apply { toUpper _x };
 private _c = +_center;
 _c resize 2;
 
-private _cx = _c # 0;
-private _cy = _c # 1;
+private _cx = _c select 0;
+private _cy = _c select 1;
 
 private _r2 = _radius * _radius;
 
@@ -51,8 +51,8 @@ private _candidates = [];
 {
     _x params ["_cls", "_pos", "_dir"];
 
-    private _dx = (_pos # 0) - _cx;
-    private _dy = (_pos # 1) - _cy;
+    private _dx = (_pos select 0) - _cx;
+    private _dy = (_pos select 1) - _cy;
 
 	// Skip positions inside heavily damaged buildings (e.g., after an IED burn-down)
 	private _okBuilding = true;
@@ -123,8 +123,8 @@ else
         private _best = [];
         private _bestD2 = 1e18;
         {
-            private _dx = (_x # 0) - _cx;
-            private _dy = (_x # 1) - _cy;
+            private _dx = (_x select 0) - _cx;
+            private _dy = (_x select 1) - _cy;
             private _d2 = (_dx * _dx + _dy * _dy);
             if (_d2 < _bestD2) then
             {
@@ -172,10 +172,10 @@ else
             // Fallback: pick the lowest building position (often ground floor)
             if ((count _bps) > 0) then
             {
-                private _best = _bps # 0;
-                private _bestZ = (_best # 2);
+                private _best = _bps select 0;
+                private _bestZ = (_best select 2);
                 {
-                    private _z = _x # 2;
+                    private _z = _x select 2;
                     if (_z < _bestZ) then { _best = _x; _bestZ = _z; };
                 } forEach _bps;
                 _p = +_best;

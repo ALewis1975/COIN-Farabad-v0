@@ -13,6 +13,8 @@
 
 if (!isServer) exitWith {false};
 
+private _trimFn = compile "params ['_s']; trim _s";
+
 if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\\core\\fn_rpcValidateSender.sqf"; };
 
 params [
@@ -24,7 +26,7 @@ params [
 if (!([_acceptor, "ARC_fnc_intelOrderAccept", "Order acceptance rejected: sender verification failed.", "TOC_ORDER_ACCEPT_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 if (isNull _acceptor) exitWith {false};
-_orderId = trim _orderId;
+_orderId = [_orderId] call _trimFn;
 if (_orderId isEqualTo "") exitWith {false};
 
 private _gid = groupId (group _acceptor);
@@ -35,16 +37,16 @@ private _getPair = {
     params ["_pairs", "_k", "_d"];
     if (!(_pairs isEqualType [])) exitWith { _d };
     private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) exitWith { _d };
-    (_pairs # _idx) # 1
+    (_pairs select _idx) select 1
 };
 
 private _setPair = {
     params ["_pairs", "_k", "_v"];
     if (!(_pairs isEqualType [])) then { _pairs = []; };
     private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) then {
         _pairs pushBack [_k, _v];
     } else {
@@ -57,19 +59,19 @@ private _orders = ["tocOrders", []] call ARC_fnc_stateGet;
 if (!(_orders isEqualType [])) then { _orders = []; };
 
 private _idx = -1;
-{ if ((_x isEqualType []) && { (count _x) >= 7 } && { (_x # 0) isEqualTo _orderId }) exitWith { _idx = _forEachIndex; }; } forEach _orders;
+{ if ((_x isEqualType []) && { (count _x) >= 7 } && { (_x select 0) isEqualTo _orderId }) exitWith { _idx = _forEachIndex; }; } forEach _orders;
 if (_idx < 0) exitWith
 {
     ["ORDER_ACCEPT", "REJECTED", "Order is no longer available."] remoteExec ["ARC_fnc_uiConsoleOpsActionStatus", owner _acceptor];
     false
 };
 
-private _ord = _orders # _idx;
-private _status = toUpper (_ord # 2);
-private _type   = toUpper (_ord # 3);
-private _target = _ord # 4;
-private _data   = _ord # 5;
-private _meta   = _ord # 6;
+private _ord = _orders select _idx;
+private _status = toUpper (_ord select 2);
+private _type   = toUpper (_ord select 3);
+private _target = _ord select 4;
+private _data   = _ord select 5;
+private _meta   = _ord select 6;
 
 if (!(_target isEqualTo _gid)) exitWith
 {
@@ -112,12 +114,12 @@ switch (_type) do
         {
             if (!(_x isEqualType []) || { (count _x) < 7 }) then { continue; };
 
-            private _oId = _x # 0;
-            private _oSt = toUpper (_x # 2);
-            private _oTy = toUpper (_x # 3);
-            private _oTg = _x # 4;
-            private _oDa = _x # 5;
-            private _oMe = _x # 6;
+            private _oId = _x select 0;
+            private _oSt = toUpper (_x select 2);
+            private _oTy = toUpper (_x select 3);
+            private _oTg = _x select 4;
+            private _oDa = _x select 5;
+            private _oMe = _x select 6;
 
             if (!(_oTy isEqualTo "LEAD") || { !(_oTg isEqualTo _gid) }) then { continue; };
 
@@ -127,8 +129,8 @@ switch (_type) do
             private _leadId = "";
             if (_leadRec isEqualType [] && { (count _leadRec) > 0 }) then
             {
-                private _tmp = _leadRec # 0;
-                if (_tmp isEqualType "" && { _tmp isNotEqualTo "" }) then { _leadId = _tmp; };
+                private _tmp = _leadRec select 0;
+                if (_tmp isEqualType "" && { !(_tmp isEqualTo "") }) then { _leadId = _tmp; };
             };
 
             if (_oSt isEqualTo "ACCEPTED") then
@@ -137,14 +139,14 @@ switch (_type) do
                 if (_leadId isEqualType "" && { _leadId != "" }) then
                 {
                     private _lz = "";
-                    private _pos = _leadRec # 3;
+                    private _pos = _leadRec select 3;
                     if (_pos isEqualType [] && { (count _pos) >= 2 }) then
                     {
                         _lz = [_pos] call ARC_fnc_worldGetZoneForPos;
                     };
 
-                    private _lt = _leadRec # 1;
-                    private _th = _leadRec # 9;
+                    private _lt = _leadRec select 1;
+                    private _th = _leadRec select 9;
 
                     private _leadHist = ["leadHistory", []] call ARC_fnc_stateGet;
                     if (!(_leadHist isEqualType [])) then { _leadHist = []; };
@@ -174,7 +176,7 @@ switch (_type) do
                     if ((_leadRec isEqualType []) && { (count _leadRec) > 0 }) then
                     {
                         private _existing = -1;
-                        { if ((_x isEqualType []) && { (count _x) > 0 } && { (_x # 0) isEqualTo (_leadRec # 0) }) exitWith { _existing = _forEachIndex; }; } forEach _leadPool;
+                        { if ((_x isEqualType []) && { (count _x) > 0 } && { (_x select 0) isEqualTo (_leadRec select 0) }) exitWith { _existing = _forEachIndex; }; } forEach _leadPool;
                         if (_existing < 0) then { _leadPool pushBack _leadRec; };
                     };
 
@@ -199,9 +201,9 @@ switch (_type) do
         if (!(_destPos isEqualType []) || { (count _destPos) < 2 }) then
         {
             private _res = [_purpose] call ARC_fnc_intelResolveRtbDestination;
-            _destPos = _res # 0;
-            _destLbl = _res # 1;
-            _destRad = _res # 2;
+            _destPos = _res select 0;
+            _destLbl = _res select 1;
+            _destRad = _res select 2;
         };
 
         _destPos resize 3;
@@ -310,10 +312,10 @@ switch (_type) do
         private _leadName = "Investigate Lead";
         if (_leadRec isEqualType [] && { (count _leadRec) >= 4 }) then
         {
-            private _dn = _leadRec # 2;
-            if (_dn isEqualType "" && { _dn isNotEqualTo "" }) then { _leadName = _dn; };
+            private _dn = _leadRec select 2;
+            if (_dn isEqualType "" && { !(_dn isEqualTo "") }) then { _leadName = _dn; };
 
-            private _p = _leadRec # 3;
+            private _p = _leadRec select 3;
             if (_p isEqualType [] && { (count _p) >= 2 }) then { _leadPos = _p; };
         };
 
@@ -389,11 +391,11 @@ if (_pend) then
 {
     private _pendOrderId = ["activeIncidentClosePendingOrderId", ""] call ARC_fnc_stateGet;
     if (!(_pendOrderId isEqualType "")) then { _pendOrderId = ""; };
-    _pendOrderId = trim _pendOrderId;
+    _pendOrderId = [_pendOrderId] call _trimFn;
 
     private _pendGroup = ["activeIncidentClosePendingGroup", ""] call ARC_fnc_stateGet;
     if (!(_pendGroup isEqualType "")) then { _pendGroup = ""; };
-    _pendGroup = trim _pendGroup;
+    _pendGroup = [_pendGroup] call _trimFn;
 
     private _matchGroup = (_pendGroup isEqualTo "") || { _pendGroup isEqualTo _gid };
     private _matchOrder = (_pendOrderId isEqualTo "") || { _pendOrderId isEqualTo _orderId };
@@ -402,13 +404,13 @@ if (_pend) then
     {
         private _res = ["activeIncidentClosePendingResult", "SUCCEEDED"] call ARC_fnc_stateGet;
         if (!(_res isEqualType "")) then { _res = "SUCCEEDED"; };
-        _res = toUpper (trim _res);
+        _res = toUpper ([_res] call _trimFn);
         if !(_res in ["SUCCEEDED", "FAILED", "CANCELED"]) then { _res = "SUCCEEDED"; };
 
         // Defensive: enforce forced-fail for IED CIV KIA at close time.
         private _itype = ["activeIncidentType", ""] call ARC_fnc_stateGet;
         if (!(_itype isEqualType "")) then { _itype = ""; };
-        _itype = toUpper (trim _itype);
+        _itype = toUpper ([_itype] call _trimFn);
 
         if (_res isEqualTo "SUCCEEDED" && { _itype isEqualTo "IED" }) then
         {

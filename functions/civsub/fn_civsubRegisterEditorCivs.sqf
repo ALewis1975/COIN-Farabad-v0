@@ -17,6 +17,8 @@
 if (!isServer) exitWith {[0, 0]};
 if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {[0, 0]};
 
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+
 private _entries = missionNamespace getVariable ["civsub_v1_editorTestCivs", []];
 if !(_entries isEqualType []) exitWith {
     diag_log "[CIVSUB][EDITOR] civsub_v1_editorTestCivs is not an array; skipping editor registration";
@@ -101,9 +103,9 @@ private _skipped = 0;
 
     private _already = false;
     if !(_key isEqualTo "") then {
-        private _row = _reg getOrDefault [_key, createHashMap];
+        private _row = [_reg, _key, createHashMap] call _hg;
         if (_row isEqualType createHashMap) then {
-            private _existing = _row getOrDefault ["unit", objNull];
+            private _existing = [_row, "unit", objNull] call _hg;
             _already = (!isNull _existing) && { _existing isEqualTo _unit };
         };
     };

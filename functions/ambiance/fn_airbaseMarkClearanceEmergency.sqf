@@ -5,6 +5,8 @@
 if (!isServer) exitWith {false};
 if !(["airbaseMarkClearanceEmergency"] call ARC_fnc_airbaseRuntimeEnabled) exitWith {false};
 
+private _trimFn = compile "params ['_s']; trim _s";
+
 if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\\core\\fn_rpcValidateSender.sqf"; };
 if (isNil "ARC_fnc_airbaseTowerAuthorize") then { ARC_fnc_airbaseTowerAuthorize = compile preprocessFileLineNumbers "functions\\core\\fn_airbaseTowerAuthorize.sqf"; };
 
@@ -16,7 +18,7 @@ params [
 if (!([_caller, "ARC_fnc_airbaseMarkClearanceEmergency", "Airbase emergency escalation rejected: sender verification failed.", "AIRBASE_CLEARANCE_EMERGENCY_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 if (!(_requestId isEqualType "")) then { _requestId = ""; };
-_requestId = trim _requestId;
+_requestId = [_requestId] call _trimFn;
 if (_requestId isEqualTo "") exitWith {false};
 
 private _requests = ["airbase_v1_clearanceRequests", []] call ARC_fnc_stateGet;
@@ -29,7 +31,7 @@ private _idx = -1;
 { if ((_x param [0, ""]) isEqualTo _requestId) exitWith { _idx = _forEachIndex; }; } forEach _requests;
 if (_idx < 0) exitWith {false};
 
-private _rec = _requests # _idx;
+private _rec = _requests select _idx;
 private _status = toUpper (_rec param [6, ""]);
 private _uid = _rec param [2, ""];
 private _callerUid = getPlayerUID _caller;
@@ -43,7 +45,7 @@ if !(_status in ["QUEUED", "PENDING", "AWAITING_TOWER_DECISION"]) exitWith {
 private _overrideAuth = [_caller, "OVERRIDE"] call ARC_fnc_airbaseTowerAuthorize;
 private _hasOverride = _overrideAuth param [0, false];
 
-if ((_uid isNotEqualTo _callerUid) && {!_hasOverride}) exitWith {
+if ((!(_uid isEqualTo _callerUid)) && {!_hasOverride}) exitWith {
     private _owner = owner _caller;
     if (_owner > 0) then { ["Only the requesting pilot or tower override can mark emergency."] remoteExec ["ARC_fnc_clientHint", _owner]; };
     false

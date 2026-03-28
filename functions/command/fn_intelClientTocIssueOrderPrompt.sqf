@@ -23,8 +23,10 @@ params [
 
 if (!([player] call ARC_fnc_rolesIsAuthorized)) exitWith {false};
 
-_order = toUpper (trim _order);
-_purpose = toUpper (trim _purpose);
+private _trimFn = compile "params ['_s']; trim _s";
+
+_order = toUpper ([_order] call _trimFn);
+_purpose = toUpper ([_purpose] call _trimFn);
 
 private _sum = format ["Issue TOC Order: %1%2", _order, if (_order isEqualTo "RTB") then { format [" (%1)", _purpose] } else { "" }];
 private _def = "Optional note to the unit.";

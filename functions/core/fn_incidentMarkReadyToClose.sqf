@@ -49,12 +49,12 @@ missionNamespace setVariable ["ARC_activeIncidentCloseReason", _reason, true];
 missionNamespace setVariable ["ARC_activeIncidentCloseMarkedAt", serverTime, true];
 
 private _gid = ["activeIncidentAcceptedByGroup", ""] call ARC_fnc_stateGet;
-if (_gid isEqualType "" && { _gid isNotEqualTo "" }) then
+if (_gid isEqualType "" && { !(_gid isEqualTo "") }) then
 {
     private _rows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
     if (!(_rows isEqualType [])) then { _rows = []; };
     private _idx = -1;
-    { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _gid }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
+    { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _gid }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
     private _row = [_gid, "ON SCENE", serverTime, "SYSTEM"];
     if (_idx < 0) then { _rows pushBack _row; } else { _rows set [_idx, _row]; };
     missionNamespace setVariable ["ARC_pub_unitStatuses", _rows, true];

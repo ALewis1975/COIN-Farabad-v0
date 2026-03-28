@@ -26,8 +26,10 @@ params [
     ["_timeoutS", 8]
 ];
 
-_action = toUpper (trim _action);
-_stage = toUpper (trim _stage);
+private _trimFn = compile "params ['_s']; trim _s";
+
+_action = toUpper ([_action] call _trimFn);
+_stage = toUpper ([_stage] call _trimFn);
 if (!(_detail isEqualType "")) then { _detail = str _detail; };
 if (!(_timeoutS isEqualType 0)) then { _timeoutS = 8; };
 _timeoutS = (_timeoutS max 3) min 20;

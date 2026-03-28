@@ -10,11 +10,20 @@ require_pattern() {
   local pattern="$1"
   local file="$2"
   local label="$3"
-  if rg -n "$pattern" "$file" >/dev/null; then
-    echo "[PASS] $label"
+  if command -v rg >/dev/null 2>&1; then
+    if rg -n "$pattern" "$file" >/dev/null 2>&1; then
+      echo "[PASS] $label"
+    else
+      echo "[FAIL] $label"
+      pass=false
+    fi
   else
-    echo "[FAIL] $label"
-    pass=false
+    if grep -Pn "$pattern" "$file" >/dev/null 2>&1; then
+      echo "[PASS] $label"
+    else
+      echo "[FAIL] $label"
+      pass=false
+    fi
   fi
 }
 

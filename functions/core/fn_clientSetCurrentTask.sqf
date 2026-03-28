@@ -34,9 +34,9 @@ if (_meta isEqualType [] && { (count _meta) > 0 }) then
         params ["_pairs", "_k", "_d"]; 
         if (!(_pairs isEqualType [])) exitWith { _d };
         private _idx = -1;
-        { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+        { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
         if (_idx < 0) exitWith { _d };
-        (_pairs # _idx) # 1
+        (_pairs select _idx) select 1
     };
 
     private _kind = [_meta, "kind", "TASK"] call _kvGet;
@@ -44,7 +44,7 @@ if (_meta isEqualType [] && { (count _meta) > 0 }) then
     missionNamespace setVariable ["ARC_uiFocusTaskKind", _kind];
 
     private _title = [_meta, "title", ""] call _kvGet;
-    if (_title isEqualType "" && { _title isNotEqualTo "" }) then
+    if (_title isEqualType "" && { !(_title isEqualTo "") }) then
     {
         missionNamespace setVariable ["ARC_uiFocusTaskTitle", _title];
     };

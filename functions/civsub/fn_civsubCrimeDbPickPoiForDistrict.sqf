@@ -22,6 +22,8 @@ params [
 
 if (_districtId isEqualTo "") exitWith {""};
 
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+
 private _db = missionNamespace getVariable ["civsub_v1_crimedb", createHashMap];
 if !(_db isEqualType createHashMap) exitWith {""};
 
@@ -31,8 +33,8 @@ if ((count _keys) == 0) exitWith {""};
 private _candidates = _keys select {
     private _r = _db get _x;
     (_r isEqualType createHashMap)
-    && { (_r getOrDefault ["homeDistrictId", ""]) isEqualTo _districtId }
-    && { (!_wantHvt) || { _r getOrDefault ["is_hvt", false] } }
+    && { ([_r, "homeDistrictId", ""] call _hg) isEqualTo _districtId }
+    && { (!_wantHvt) || { [_r, "is_hvt", false] call _hg } }
 };
 
 if ((count _candidates) == 0) then {
