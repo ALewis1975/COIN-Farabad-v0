@@ -231,7 +231,6 @@ private _cat = switch (_kindU) do
     default { "INTEL" };
 };
 
-private _meta = [
     ["event", "OBJECTIVE_COMPLETE"],
     ["stage", "COMPLETE"],
     ["objectiveKind", _kindU],
@@ -259,7 +258,6 @@ if (_kindU in ["IED_DEVICE", "VBIED_VEHICLE"]) then
         _target setVariable ["ARC_objectiveDiscoveredAt", serverTime, true];
     };
 
-    private _tCtx = [
         ["task_id", _taskId],
         ["objective_kind", _kindU],
         ["pos", _pos],
@@ -267,10 +265,8 @@ if (_kindU in ["IED_DEVICE", "VBIED_VEHICLE"]) then
     ];
 
     // Ensure a threat record exists (idempotent) and update states without downgrades.
-    private _tid = [_taskId, "IED", "IED_SUSPICIOUS_OBJECT", _tCtx] call ARC_fnc_threatCreateFromTask;
     if (!(_tid isEqualTo "")) then
     {
-        private _cur = [_tid] call _getThreatState;
 
         if (_cur in ["", "CREATED", "ACTIVE"]) then
         {

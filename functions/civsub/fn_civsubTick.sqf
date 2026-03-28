@@ -28,17 +28,17 @@ missionNamespace setVariable ["civsub_v1_lastTick_ts", serverTime, true];
     if !(_d isEqualType createHashMap) then { continue; };
 
     private _pub = [
-        ["G", [_d, "G_EFF_U", 35] call _hg],
-        ["crime_db_hits", [_d, "crime_db_hits", 0] call _hg],
-        ["detentions_initiated", [_d, "detentions_initiated", 0] call _hg],
-        ["civ_cas_kia", [_d, "civ_cas_kia", 0] call _hg],
+        ["G", [_d, "G_EFF_U", 35]] call _hg,
+        ["crime_db_hits", [_d, "crime_db_hits", 0]] call _hg,
+        ["detentions_initiated", [_d, "detentions_initiated", 0]] call _hg,
+        ["civ_cas_kia", [_d, "civ_cas_kia", 0]] call _hg,
         ["districtId", _did],
-        ["detentions_handed_off", [_d, "detentions_handed_off", 0] call _hg],
-        ["R", [_d, "R_EFF_U", 55] call _hg],
-        ["civ_cas_wia", [_d, "civ_cas_wia", 0] call _hg],
+        ["detentions_handed_off", [_d, "detentions_handed_off", 0]] call _hg,
+        ["R", [_d, "R_EFF_U", 55]] call _hg,
+        ["civ_cas_wia", [_d, "civ_cas_wia", 0]] call _hg,
         ["ts", serverTime],
-        ["aid_events", [_d, "aid_events", 0] call _hg],
-        ["W", [_d, "W_EFF_U", 45] call _hg]
+        ["aid_events", [_d, "aid_events", 0]] call _hg,
+        ["W", [_d, "W_EFF_U", 45]] call _hg
     ];
 
     missionNamespace setVariable [format ["civsub_v1_district_pub_%1", _did], _pub, true];

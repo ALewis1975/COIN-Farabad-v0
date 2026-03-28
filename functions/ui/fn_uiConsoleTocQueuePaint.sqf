@@ -171,10 +171,8 @@ private _dec = _it param [12, [], [[]]];
 private _stU = toUpper _status;
 private _isPending = _stU isEqualTo "PENDING";
 
-private _zone = [_meta, "zone", "Unzoned"] call _getPair;
 if (!(_zone isEqualType "")) then { _zone = "Unzoned"; };
 
-private _grid = [_meta, "grid", ""] call _getPair;
 if (!(_grid isEqualType "")) then { _grid = ""; };
 if (_grid isEqualTo "") then
 {

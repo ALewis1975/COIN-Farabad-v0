@@ -170,7 +170,7 @@ missionNamespace setVariable ["civsub_v1_scheduler_lastTick_ts", serverTime, tru
             if (_diagEnabled) then {
                 private _row2 = [_diagMap, _did] call _mapGet;
                 if (_row2 isEqualType createHashMap) then {
-                    _row2 set ["nextLead_ts", [_d, "cooldown_nextLead_ts", _nextLead] call _hg];
+                    _row2 set ["nextLead_ts", [_d, "cooldown_nextLead_ts", _nextLead]] call _hg;
                 };
             };
         };
@@ -191,7 +191,7 @@ missionNamespace setVariable ["civsub_v1_scheduler_lastTick_ts", serverTime, tru
             if (_diagEnabled) then {
                 private _row3 = [_diagMap, _did] call _mapGet;
                 if (_row3 isEqualType createHashMap) then {
-                    _row3 set ["nextAttack_ts", [_d, "cooldown_nextAttack_ts", _nextAttack] call _hg];
+                    _row3 set ["nextAttack_ts", [_d, "cooldown_nextAttack_ts", _nextAttack]] call _hg;
                 };
             };
         };

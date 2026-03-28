@@ -179,7 +179,6 @@ if (_kind isEqualTo "FOLLOWON_REQUEST") then
 if (_kind isEqualTo "EOD_DISPO_REQUEST") then
 {
     // Require an active IED incident matching the request payload.
-    private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
     if (!(_taskId isEqualType "")) then { _taskId = ""; };
     _taskId = [_taskId] call _trimFn;
 

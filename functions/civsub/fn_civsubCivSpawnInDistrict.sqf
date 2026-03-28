@@ -67,7 +67,7 @@ if (_district isEqualType createHashMap) then {
     };
 };
 
-private _center = [_d, "centroid", [0,0] call _hg];
+private _center = [_d, "centroid", [0,0]] call _hg;
 private _radius = [_d, "radius_m", 500] call _hg;
 
 if !(_center isEqualType []) exitWith { ["center_not_array","district_data"] call _fail };
@@ -128,7 +128,6 @@ if (_minSep isEqualType 0 && {_minSep > 0}) then {
 // Phase 2 final guard (post de-cluster)
 if ([_pos] call _posIsRoadish) then
 {
-    private _fixed = [_pos, 2, 22, 14] call _findOffRoad;
     if !(_fixed isEqualTo [0,0,0]) then { _pos = _fixed; } else { ["pos_roadish","post_declust"] call _fail };
 };
 

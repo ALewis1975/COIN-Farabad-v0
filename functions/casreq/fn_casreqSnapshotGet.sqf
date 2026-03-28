@@ -15,7 +15,7 @@ private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _records = ["casreq_v1_records", createHashMap] call ARC_fnc_stateGet;
 if !(_records isEqualType createHashMap) exitWith { [] };
 
-private _snapshot = [_records, _casreqId, [] call _hg];
+private _snapshot = [_records, _casreqId, []] call _hg;
 if !(_snapshot isEqualType []) then { _snapshot = []; };
 
 private _requiredKeys = [

@@ -119,7 +119,7 @@ private _fnAbortToIdle = {
 };
 
 // --- resolve crew ---
-private _crew = [_asset, "crew", [] call _hg];
+private _crew = [_asset, "crew", []] call _hg;
 if (!(_crew isEqualType [])) then { _crew = []; };
 private _crewLive = _crew select { !isNull _x && alive _x };
 
@@ -570,7 +570,7 @@ if (!isNull _veh) then { deleteVehicle _veh; };
 private _vehVar = [_asset, "vehVar", ""] call _hg; 
 if (_vehVar != "") then { missionNamespace setVariable [_vehVar, objNull, true]; };
 
-private _crewVars = [_asset, "crewVars", [] call _hg];
+private _crewVars = [_asset, "crewVars", []] call _hg;
 {
     if (_x isEqualType "") then { missionNamespace setVariable [_x, objNull, true]; };
 } forEach _crewVars;

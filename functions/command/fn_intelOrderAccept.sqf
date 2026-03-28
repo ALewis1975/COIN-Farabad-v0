@@ -264,8 +264,6 @@ switch (_type) do
 
     case "HOLD":
     {
-        private _issuer = [_meta, "issuedBy", "TOC"] call _getPair;
-        private _note   = [_meta, "note", ""] call _getPair;
 
         private _holdPos = getPosATL _acceptor;
         private _holdRad = 40;

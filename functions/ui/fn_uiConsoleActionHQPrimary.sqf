@@ -106,7 +106,6 @@ switch (_data) do
         [] spawn {
             // Use the standard (bool) guiMessage signature; button labels are not critical here.
             // Prevents silent failures from unexpected parameter shapes.
-            private _ok = [
                 "Reset all persistent state and clear active tasks?\n\nThis is destructive and intended for testing.",
                 "Confirm Reset",
                 true,
@@ -126,7 +125,6 @@ switch (_data) do
     case "ADMIN_AIRBASE_RESET_CTRL":
     {
         [] spawn {
-            private _ok = [
                 "Reset AIRBASE control state?\n\nThis clears runway lock state, queue, pending clearance requests, and hold/manual-priority controls while preserving history/events by default.",
                 "Confirm AIRBASE Control Reset",
                 true,
@@ -146,7 +144,6 @@ switch (_data) do
     case "ADMIN_CIVSUB_RESET":
     {
         [] spawn {
-            private _ok = [
                 "Reset CIVSUB campaign persistence?\n\nThis will clear CIVSUB saved state and start a new CIVSUB campaign_id.",
                 "Confirm CIVSUB Reset",
                 true,

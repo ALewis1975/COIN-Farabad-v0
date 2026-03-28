@@ -113,7 +113,7 @@ if (_type isEqualTo "CHECK_ID" && {_ok} && {_payload isEqualType createHashMap})
     private _home = [_payload, "home", ""] call _hg;
     private _grid = [_payload, "home_grid", ""] call _hg;
     private _did = [_payload, "districtId", ""] call _hg;
-    private _flags = [_payload, "flags", [] call _hg];
+    private _flags = [_payload, "flags", []] call _hg;
 
     private _didS = if (_did isEqualTo "") then { "--" } else { _did };
     private _nameParts = if (_name isEqualType "") then { ([_name] call _trimFn) splitString " \t\r\n" } else { [] };

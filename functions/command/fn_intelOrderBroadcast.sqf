@@ -74,7 +74,6 @@ private _sanitizeOrder = {
 private _o = ["tocOrders", []] call ARC_fnc_stateGet;
 if (!(_o isEqualType [])) then { _o = []; };
 
-private _out = [];
 {
     if (_x isEqualType [] && { (count _x) >= 7 }) then
     {

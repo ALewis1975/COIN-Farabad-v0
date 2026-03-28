@@ -100,7 +100,6 @@ switch (_rowType) do
             false
         };
 
-        private _canAirQueueManage = ["ARC_console_airCanQueueManage", false] call ARC_fnc_uiNsGetBool;
         private _canCancel = ["ARC_console_airCanCancel", false] call ARC_fnc_uiNsGetBool;
         if (!_canAirQueueManage || !_canCancel) exitWith
         {

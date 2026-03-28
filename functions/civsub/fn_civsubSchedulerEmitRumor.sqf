@@ -26,7 +26,7 @@ private _influenceDelta = [[["dW", 0], ["dR", 0], ["dG", 0]]] call _hmCreate;
 
 private _bundle = [
     _districtId,
-    [_d, "centroid", [0,0] call _hg],
+    [_d, "centroid", [0,0]] call _hg,
     "SCHEDULER",
     "RUMOR_AMBIENT",
     createHashMap,

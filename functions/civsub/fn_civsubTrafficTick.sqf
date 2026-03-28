@@ -161,7 +161,6 @@ if ((count _act) == 0) then
 
     {
         private _did = _x;
-        private _d = [_did] call ARC_fnc_civsubDistrictsGetById;
         if !(_d isEqualType createHashMap) then { continue; };
 
         if ([_d] call ARC_fnc_civsubIsDistrictActive) then

@@ -17,8 +17,8 @@ if (!isServer) exitWith {false};
 params [["_d", createHashMap, [createHashMap]]];
 if !(_d isEqualType createHashMap) exitWith {false};
 
-private _c = [_d, "centroid", [0,0] call _hg];
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _c = [_d, "centroid", [0,0]] call _hg;
 
 private _r = [_d, "radius_m", 0] call _hg;
 if !(_c isEqualType []) exitWith {false};

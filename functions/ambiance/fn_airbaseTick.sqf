@@ -74,9 +74,7 @@ if (!(_bubbleActive isEqualTo _wasActive)) then {
 if (!_bubbleActive) then {
     private _assetsF = [_rt, "assets", []] call _fnHmGet;
     {
-        private _state = [_x, "state", "PARKED"] call _fnHmGet;
         if (_state == "PARKED") then {
-            private _veh = [_x, "veh", objNull] call _fnHmGet;
             if (!isNull _veh) then { _veh enableSimulationGlobal false; };
         };
     } forEach _assetsF;
@@ -825,7 +823,6 @@ if (_snapEnabled && { _nowTs >= _nextSnap }) then {
     private _soonestReturnAt = 1e9;
 
     {
-        private _st = [_x, "state", "PARKED"] call _fnHmGet;
         switch (_st) do {
             case "PARKED": { _parked = _parked + 1; };
             case "ACTIVE": { _active = _active + 1; };

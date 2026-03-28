@@ -227,8 +227,6 @@ private _epwDest = "";
 if (_epwAccepted) then
 {
     _epwOrd params ["_oid", "_iat", "_st", "_ot", "_tg", "_data", "_meta"]; 
-    private _lbl = [_data, "destLabel", "Destination"] call _getPair;
-    private _pos = [_data, "destPos", []] call _getPair;
     private _grid = if (_pos isEqualType [] && { (count _pos) >= 2 }) then { mapGridPosition _pos } else { "" };
     _epwDest = format ["<t size='0.9' color='#CCCCCC'>%1 %2</t>", _lbl, if (_grid isEqualTo "") then {""} else {format ["(@ %1)", _grid]}];
 };

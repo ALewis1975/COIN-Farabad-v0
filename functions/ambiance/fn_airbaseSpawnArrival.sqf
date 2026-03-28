@@ -27,7 +27,7 @@ private _detail   = _rec param [4, "INBOUND"]; // assetId for return, or "INBOUN
 private _meta     = _rec param [7, []];
 
 private _rt = missionNamespace getVariable ["airbase_v1_rt", createHashMap];
-private _assets = [_rt, "assets", [] call _hg];
+private _assets = [_rt, "assets", []] call _hg;
 
 private _asset = createHashMap;
 private _isReturn = false;

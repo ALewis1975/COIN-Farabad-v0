@@ -145,7 +145,6 @@ else
     private _b = nearestBuilding _p;
     if (!isNull _b) then
     {
-        private _bps = [_b] call BIS_fnc_buildingPositions;
         if (!(_bps isEqualType [])) then { _bps = []; };
 
         // Filter out roof/outdoor positions by checking for nearby overhead geometry.

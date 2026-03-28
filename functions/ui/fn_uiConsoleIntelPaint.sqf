@@ -821,7 +821,7 @@ else
                 ["D20", []]
             ]] call _hmCreate;
 
-            private _sett = [_settByDid, _did, [] call _hg];
+            private _sett = [_settByDid, _did, []] call _hg;
             private _settLine = if ((count _sett) > 0) then { _sett joinString "; " } else { "None (rural / dispersed)" };
 
 // -------------------------------------------------------------------

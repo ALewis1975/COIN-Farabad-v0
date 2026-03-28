@@ -57,7 +57,6 @@ if (_recycleDist > 0 && { count _keysEvictable > 0 }) then
             private _k = _x;
             private _row = _reg get _k;
             if !(_row isEqualType createHashMap) then { continue; };
-            private _u = [_row, "unit", objNull] call _hg;
             if (isNull _u || { !alive _u }) then { continue; };
 
             private _uPos = getPosATL _u;

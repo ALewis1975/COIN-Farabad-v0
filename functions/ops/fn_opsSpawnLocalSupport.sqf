@@ -214,7 +214,6 @@ if ((count _classes) isEqualTo 0) then
     {
         private _found = [];
         private _cfg = configFile >> "CfgVehicles";
-        private _sideNum = [_side] call _fn_sideNum;
         {
             if (getNumber (_x >> "scope") != 2) then { continue; };
             if ((getText (_x >> "faction")) != _factionId) then { continue; };
@@ -449,7 +448,6 @@ if (_patrolN > 0) then
     {
         private _spawnP = _pos getPos [10 + random 35, random 360];
         _spawnP resize 3;
-        private _cls = [_classes] call _fn_pickClass;
 
         private _u = _grpP createUnit [_cls, _spawnP, [], 0, "NONE"];
         _u setPosATL _spawnP;

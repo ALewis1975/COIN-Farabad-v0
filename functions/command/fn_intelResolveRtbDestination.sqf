@@ -18,10 +18,10 @@
 
 params [["_purpose", "REFIT"]];
 if (!(_purpose isEqualType "")) then { _purpose = "REFIT"; };
+private _trimFn = compile "params ['_s']; trim _s";
 _purpose = toUpper ([_purpose] call _trimFn);
 
 private _pos = [0,0,0];
-private _trimFn = compile "params ['_s']; trim _s";
 
 private _label = "Base";
 private _radius = 40;

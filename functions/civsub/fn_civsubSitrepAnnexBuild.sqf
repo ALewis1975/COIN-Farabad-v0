@@ -67,7 +67,7 @@ private _detInit = [_d, "detentions_initiated", 0] call _hg;
 private _detHand = [_d, "detentions_handed_off", 0] call _hg;
 private _aid = [_d, "aid_events", 0] call _hg;
 
-private _cent = [_d, "centroid", [0,0] call _hg];
+private _cent = [_d, "centroid", [0,0]] call _hg;
 private _grid = "";
 if (_cent isEqualType [] && { (count _cent) >= 2 }) then
 {

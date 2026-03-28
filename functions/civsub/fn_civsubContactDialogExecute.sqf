@@ -187,7 +187,6 @@ if (_selA >= 0) then {
             _qlbl
         ];
 
-        private _pl = [[["qid", _qid], ["label", _qlbl]]] call _hmCreate;
             ["QUESTION"] call _kickWatchdog;
         [_civ, player, "QUESTION", _pl] remoteExecCall ["ARC_fnc_civsubContactReqAction", 2];
     } else {

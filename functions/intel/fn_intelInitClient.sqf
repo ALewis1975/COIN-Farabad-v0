@@ -148,7 +148,6 @@ player setVariable ["ARC_intelInitClient_done", true];
     uiSleep 1;
 
     private _names = ["sheriff_handling", "EPW_Porcessing", "EPW_Processing", "EPW_Processing_Building"];
-    private _stations = [];
 
     // Stations can be missing on JIP for a moment. Retry briefly.
     for "_i" from 1 to 20 do

@@ -79,17 +79,17 @@ if (!(_ev isEqualTo "")) then
 // Reason: broadcasting a HashMap once does not replicate in-place mutations to nested HashMaps.
 // We keep a simple array-of-pairs per district that clients can read reliably.
 private _pub = [
-    ["G", [_d, "G_EFF_U", 35] call _hg],
-    ["crime_db_hits", [_d, "crime_db_hits", 0] call _hg],
-    ["detentions_initiated", [_d, "detentions_initiated", 0] call _hg],
-    ["civ_cas_kia", [_d, "civ_cas_kia", 0] call _hg],
+    ["G", [_d, "G_EFF_U", 35]] call _hg,
+    ["crime_db_hits", [_d, "crime_db_hits", 0]] call _hg,
+    ["detentions_initiated", [_d, "detentions_initiated", 0]] call _hg,
+    ["civ_cas_kia", [_d, "civ_cas_kia", 0]] call _hg,
     ["districtId", _districtId],
-    ["detentions_handed_off", [_d, "detentions_handed_off", 0] call _hg],
-    ["R", [_d, "R_EFF_U", 55] call _hg],
-    ["civ_cas_wia", [_d, "civ_cas_wia", 0] call _hg],
+    ["detentions_handed_off", [_d, "detentions_handed_off", 0]] call _hg,
+    ["R", [_d, "R_EFF_U", 55]] call _hg,
+    ["civ_cas_wia", [_d, "civ_cas_wia", 0]] call _hg,
     ["ts", serverTime],
-    ["aid_events", [_d, "aid_events", 0] call _hg],
-    ["W", [_d, "W_EFF_U", 45] call _hg]
+    ["aid_events", [_d, "aid_events", 0]] call _hg,
+    ["W", [_d, "W_EFF_U", 45]] call _hg
 ];
 missionNamespace setVariable [format ["civsub_v1_district_pub_%1", _districtId], _pub, true];
 

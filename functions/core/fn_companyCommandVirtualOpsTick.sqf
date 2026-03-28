@@ -224,7 +224,7 @@ private _changed = false;
         _cur set [13, _meta];
         _updatedOps set [_existingIdx, _cur];
 
-        if (toUpper !(_oldType isEqualTo _opType)) then
+        if (!((toUpper _oldType) isEqualTo _opType)) then
         {
             _changed = true;
             ["OPS", format ["VOP UPDATE: %1 shifted to %2 (%3).", _callsign, _opType, _deconflict], _nodePos,

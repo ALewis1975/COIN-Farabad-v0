@@ -35,7 +35,7 @@ if !(_d isEqualType createHashMap) exitWith {[objNull, objNull]};
 if !(_pool isEqualType []) exitWith {[objNull, objNull]};
 if ((count _pool) == 0) exitWith {[objNull, objNull]};
 
-private _c = [_d, "centroid", [0,0] call _hg];
+private _c = [_d, "centroid", [0,0]] call _hg;
 private _r = [_d, "radius_m", 400] call _hg;
 if !(_c isEqualType []) exitWith {[objNull, objNull]};
 if ((count _c) < 2) exitWith {[objNull, objNull]};

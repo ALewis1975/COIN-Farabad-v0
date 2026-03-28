@@ -138,15 +138,15 @@ if (missionNamespace getVariable ["civsub_v1_enabled", false]) then
             private _snap = [[
                 ["districtId", _did],
                 ["ts", serverTime],
-                ["W", [_d, "W_EFF_U", 0] call _hg],
-                ["R", [_d, "R_EFF_U", 0] call _hg],
-                ["G", [_d, "G_EFF_U", 0] call _hg],
-                ["civ_cas_kia", [_d, "civ_cas_kia", 0] call _hg],
-                ["civ_cas_wia", [_d, "civ_cas_wia", 0] call _hg],
-                ["crime_db_hits", [_d, "crime_db_hits", 0] call _hg],
-                ["detentions_initiated", [_d, "detentions_initiated", 0] call _hg],
-                ["detentions_handed_off", [_d, "detentions_handed_off", 0] call _hg],
-                ["aid_events", [_d, "aid_events", 0] call _hg]
+                ["W", [_d, "W_EFF_U", 0]] call _hg,
+                ["R", [_d, "R_EFF_U", 0]] call _hg,
+                ["G", [_d, "G_EFF_U", 0]] call _hg,
+                ["civ_cas_kia", [_d, "civ_cas_kia", 0]] call _hg,
+                ["civ_cas_wia", [_d, "civ_cas_wia", 0]] call _hg,
+                ["crime_db_hits", [_d, "crime_db_hits", 0]] call _hg,
+                ["detentions_initiated", [_d, "detentions_initiated", 0]] call _hg,
+                ["detentions_handed_off", [_d, "detentions_handed_off", 0]] call _hg,
+                ["aid_events", [_d, "aid_events", 0]] call _hg
             ]] call _hmCreate;
 
             ["activeIncidentCivsubStart", _snap] call ARC_fnc_stateSet;
@@ -187,8 +187,8 @@ if (!(_lastG isEqualTo "")) then
 
         if (!(_tgtGroup isEqualType "") || { _tgtGroup isEqualTo "" }) then { continue; };
         if (!(_tgtGroup isEqualTo _lastG)) then { continue; };
-        if (toUpper !(_orderType isEqualTo "HOLD")) then { continue; };
-        if (toUpper !(_status isEqualTo "ACCEPTED")) then { continue; };
+        if (!((toUpper _orderType) isEqualTo "HOLD")) then { continue; };
+        if (!((toUpper _status) isEqualTo "ACCEPTED")) then { continue; };
 
         // Mark the associated task as succeeded (orderId is the taskId used in fn_intelOrderAccept).
         private _tid = _orderId;

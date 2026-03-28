@@ -12,7 +12,7 @@ params [
     ["_ctx", []]
 ];
 
-if (toUpper !(_event isEqualTo "INCIDENT_CLOSED")) exitWith {false};
+if (!((toUpper _event) isEqualTo "INCIDENT_CLOSED")) exitWith {false};
 
 private _trimFn = compile "params ['_s']; trim _s";
 

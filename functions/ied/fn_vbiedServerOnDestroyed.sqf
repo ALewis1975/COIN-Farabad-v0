@@ -160,7 +160,6 @@ else
         ]
     ] call ARC_fnc_intelLog;
 
-    private _thr = [_taskId, 'IED', 'VBIED', [['pos', _pos]]] call ARC_fnc_threatCreateFromTask;
     if (!(_thr isEqualTo '')) then { [_thr, 'CLOSED', _cause] call ARC_fnc_threatUpdateState; };
 
     [] call ARC_fnc_threatDebugSnapshot;

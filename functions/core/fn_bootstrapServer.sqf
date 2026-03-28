@@ -192,7 +192,6 @@ if (isNil { missionNamespace getVariable "ARC_reconObservationRadiusM" }) then {
 // Intel prop pool for raids/safehouses. Keeps objectives from feeling like "all briefcases".
 if (isNil { missionNamespace getVariable "ARC_intelPropClassPool" }) then
 {
-    private _pool = [];
     {
         if (isClass (configFile >> "CfgVehicles" >> _x)) then { _pool pushBackUnique _x; };
     } forEach [
@@ -956,7 +955,6 @@ if (isServer) then
                         };
                     };
 
-                    private _snap = [_d, _dt, _phase, timeMultiplier, serverTime];
                     missionNamespace setVariable ["ARC_worldTimeSnap", _snap, true];
                     missionNamespace setVariable ["ARC_worldTime_dayPhase", _phase, true];
 

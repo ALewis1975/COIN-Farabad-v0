@@ -119,8 +119,8 @@ if !(_ttl isEqualType 0) then { _ttl = 600; };
 private _ts = [_row, "ts", 0] call _hg;
 private _needTTL = ((serverTime - _ts) > _ttl);
 
-private _bld = [_row, "bldPos", [] call _hg];
-private _road = [_row, "roadPos", [] call _hg];
+private _bld = [_row, "bldPos", []] call _hg;
+private _road = [_row, "roadPos", []] call _hg;
 if !(_bld isEqualType []) then { _bld = []; };
 if !(_road isEqualType []) then { _road = []; };
 
@@ -129,14 +129,14 @@ private _d = [_did] call ARC_fnc_civsubDistrictsGetById;
 private _dm = createHashMap;
 if (_d isEqualType createHashMap) then { _dm = _d; } else { if (_d isEqualType []) then { _dm = [_d] call _hmCreate; }; };
 
-private _center = [_dm, "centroid", [0,0] call _hg];
+private _center = [_dm, "centroid", [0,0]] call _hg;
 private _radius = [_dm, "radius_m", 500] call _hg;
 if !(_center isEqualType [] && {(count _center) >= 2}) exitWith { _row };
 
 // Player anchors (server-only) for this district
 private _pAnchMap = missionNamespace getVariable ["civsub_v1_spawn_player_anchors", createHashMap];
 if !(_pAnchMap isEqualType createHashMap) then { _pAnchMap = createHashMap; };
-private _pAnch = [_pAnchMap, _did, [] call _hg];
+private _pAnch = [_pAnchMap, _did, []] call _hg;
 if !(_pAnch isEqualType []) then { _pAnch = []; };
 
 private _anchorTypes = ["NameVillage","NameCity","NameCityCapital","NameLocal"];

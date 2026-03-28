@@ -336,18 +336,18 @@ case "FOLLOWON_REQUEST":
 
         if (_req isEqualTo "HOLD") then
         {
-            if (trim !(_holdIntent isEqualTo "")) then { _extra pushBack format ["Hold intent: %1", [_holdIntent] call _trimFn]; };
+            if (!(([_holdIntent] call _trimFn) isEqualTo "")) then { _extra pushBack format ["Hold intent: %1", [_holdIntent] call _trimFn]; };
             if (_holdMin > 0) then { _extra pushBack format ["Hold duration: %1 min", _holdMin]; };
         };
 
         if (_req isEqualTo "PROCEED") then
         {
-            if (trim !(_proceedIntent isEqualTo "")) then { _extra pushBack format ["Proceed intent: %1", [_proceedIntent] call _trimFn]; };
+            if (!(([_proceedIntent] call _trimFn) isEqualTo "")) then { _extra pushBack format ["Proceed intent: %1", [_proceedIntent] call _trimFn]; };
         };
 
-        if (trim !(_rat isEqualTo "")) then { _extra pushBack format ["Rationale: %1", [_rat] call _trimFn]; };
-        if (trim !(_con isEqualTo "")) then { _extra pushBack format ["Constraints: %1", [_con] call _trimFn]; };
-        if (trim !(_sup isEqualTo "")) then { _extra pushBack format ["Support: %1", [_sup] call _trimFn]; };
+        if (!(([_rat] call _trimFn) isEqualTo "")) then { _extra pushBack format ["Rationale: %1", [_rat] call _trimFn]; };
+        if (!(([_con] call _trimFn) isEqualTo "")) then { _extra pushBack format ["Constraints: %1", [_con] call _trimFn]; };
+        if (!(([_sup] call _trimFn) isEqualTo "")) then { _extra pushBack format ["Support: %1", [_sup] call _trimFn]; };
 
         if ((count _extra) > 0) then
         {
@@ -369,7 +369,6 @@ case "FOLLOWON_REQUEST":
                     private _tgt = _x select 4;
                     private _meta2 = _x select 6;
 
-                    private _src = [_meta2, "sourceQid", ""] call _getPair;
                     if (_src isEqualType "" && { _src isEqualTo _qid }) exitWith
                     {
                         _ordTxt = format ["Order: %1 (%2) Type: %3 Target: %4", _oid, toUpper _ost, toUpper _otype, _tgt];

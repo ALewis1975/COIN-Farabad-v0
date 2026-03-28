@@ -388,7 +388,6 @@ else
                 private _pairs = _order select 5;
                 private _meta = _order select 6;
 
-                private _purpose = [_pairs, "purpose", ""] call _pairGet;
                 if (!(_purpose isEqualType "")) then { _purpose = ""; };
                 _purpose = [_purpose] call _trimFn;
 

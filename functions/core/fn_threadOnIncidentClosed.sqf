@@ -200,7 +200,6 @@ if (_typeU find "CMDNODE" == 0 || { _tagU isEqualTo "CMDNODE" }) then
         _thr set [11, _now + (2 * 60 * 60)];
 
         // Immediate follow-up lead: track fleeing commander
-        private _avoid = ["Airbase", "GreenZone"];
         private _pPos = _pos;
         if (!(_pPos isEqualType []) || { (count _pPos) < 2 }) then
         {

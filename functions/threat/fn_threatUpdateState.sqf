@@ -144,7 +144,6 @@ private _subtype = [_rec, "subtype", ""] call _kvGet;
 
 private _links = [_rec, "links", []] call _kvGet;
 private _area = [_rec, "area", []] call _kvGet;
-private _world = [_rec, "world", []] call _kvGet;
 
 private _pos = [_area, "pos", [0,0,0]] call _kvGet;
 if (!(_pos isEqualType []) || { (count _pos) < 2 }) then { _pos = [0,0,0]; };

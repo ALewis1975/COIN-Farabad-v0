@@ -136,7 +136,6 @@ switch (_actionId) do {
 
             case "DETAIN": {
                 private _det = if (!isNull _civ) then { _civ getVariable ["civsub_status_detained", false] } else { false };
-                private _html = [[
                     "<t size='1.0' color='#CFE8FF'>Instructions</t>",
                     "Execute to detain the civilian.",
                     "The civilian stays pinned after closing the dialog.",
@@ -147,7 +146,6 @@ switch (_actionId) do {
 
             case "RELEASE": {
                 private _det = if (!isNull _civ) then { _civ getVariable ["civsub_status_detained", false] } else { false };
-                private _html = [[
                     "<t size='1.0' color='#CFE8FF'>Instructions</t>",
                     "Execute to release the civilian.",
                     "Movement resumes after session end.",
@@ -157,7 +155,6 @@ switch (_actionId) do {
             };
 
             case "AID_RATIONS": {
-                private _html = [[
                     "<t size='1.0' color='#CFE8FF'>Supplies</t>",
                     format ["Food on-hand: %1", _foodCnt],
                     "",
@@ -172,7 +169,6 @@ switch (_actionId) do {
             };
 
             case "AID_WATER": {
-                private _html = [[
                     "<t size='1.0' color='#CFE8FF'>Supplies</t>",
                     format ["Water on-hand: %1", _waterCnt],
                     "",
@@ -187,7 +183,6 @@ switch (_actionId) do {
             };
 
             default {
-                private _html = [[
                     "Select an action on the left.",
                     "Or select Ask Questions to view questions."
                 ]] call _detailsBlock;

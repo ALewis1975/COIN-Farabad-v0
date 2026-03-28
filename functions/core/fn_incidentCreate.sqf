@@ -175,7 +175,7 @@ if (_leadPool isEqualType [] && { (count _leadPool) > 0 }) then
                 private _tU = toUpper ([_t] call _trimFn);
                 private _tagU = toUpper ([_tag] call _trimFn);
 
-                if ((_tU find "CMDNODE" isEqualTo 0) || (_tagU find "TOC_" isEqualTo 0) || (_tagU find "URGENT_" isEqualTo 0)) then { _match = true; };
+                if (((_tU find "CMDNODE") isEqualTo 0) || ((_tagU find "TOC_") isEqualTo 0) || ((_tagU find "URGENT_") isEqualTo 0)) then { _match = true; };
             };
             if (_match) exitWith { _hasUrgent = true; };
         } forEach _leadPool;

@@ -2030,7 +2030,6 @@ if (_showSpawnMarker) then
             if (!_found) exitWith
             {
                 _diagFallbackUsed = true;
-                private _fb = [_pStart, _pEnd, _snap, _avoidZone, _avoidNear, _avoidNearR] call _fn_fallbackRoute;
                 [false, _diagFallbackUsed, _fb, "astar_no_path"] call _fn_logRouteResult;
                 _fb
             };
@@ -2053,7 +2052,6 @@ if (_showSpawnMarker) then
             if ((count _keys) == 0) exitWith
             {
                 _diagFallbackUsed = true;
-                private _fb = [_pStart, _pEnd, _snap, _avoidZone, _avoidNear, _avoidNearR] call _fn_fallbackRoute;
                 [false, _diagFallbackUsed, _fb, "astar_reconstruct_failed"] call _fn_logRouteResult;
                 _fb
             };

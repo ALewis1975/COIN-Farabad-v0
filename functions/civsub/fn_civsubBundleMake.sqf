@@ -38,7 +38,7 @@ private _eventId = format ["%1:%2:%3", _districtId, (_ts toFixed 3), (_uuid sele
 private _centroid = [0,0];
 private _d = (missionNamespace getVariable ["civsub_v1_districts", createHashMap]) getOrDefault [_districtId, createHashMap];
 if (_d isEqualType createHashMap) then {
-    _centroid = [_d, "centroid", [0,0] call _hg];
+    _centroid = [_d, "centroid", [0,0]] call _hg;
 };
 
 private _p3 = [(_centroid select 0), (_centroid select 1), 0];

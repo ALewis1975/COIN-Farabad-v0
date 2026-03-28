@@ -359,7 +359,6 @@ private _bundleOrLegacy = {
     params ["_legacyPool"];
     if ((count _bundleClassPool) > 0) exitWith { +_bundleClassPool };
 
-    private _out = [];
     if (_legacyPool isEqualType []) then
     {
         {
@@ -462,7 +461,6 @@ switch (_incidentTypeU) do
     case "ESCORT":
     {
         // Lead + 2-4 escort vehicles (VIP variants bias toward SUVs/PMCs)
-        private _lead = [_poolLeadSelect] call _pickFrom;
         if (!(_lead isEqualTo "")) then { _classes pushBack _lead; };
 
         private _count = if (_isVIP) then { 3 + floor (random 3) } else { 2 + floor (random 3) }; // VIP 3..5, normal 2..4
@@ -497,7 +495,6 @@ switch (_incidentTypeU) do
     default
     {
         // Safe fallback: escort style
-        private _lead = [_poolLeadSelect] call _pickFrom;
         if (!(_lead isEqualTo "")) then { _classes pushBack _lead; };
         private _c = [_poolEscSelect] call _pickFrom;
         if (!(_c isEqualTo "")) then { _classes pushBack _c; };

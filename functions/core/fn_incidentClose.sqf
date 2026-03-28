@@ -258,7 +258,6 @@ switch (toUpper _result) do
         {
             private _isAirbase = (toUpper _zone) isEqualTo "AIRBASE";
 
-            private _supply = ["activeConvoySupplyKind", ""] call ARC_fnc_stateGet;
             if (!(_supply isEqualType "")) then { _supply = ""; };
             _supply = toUpper _supply;
 

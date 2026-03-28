@@ -175,7 +175,7 @@ if !(_bundle isEqualType createHashMap) exitWith {false};
 private _intelConf = [_Scoop, _Sthreat] call ARC_fnc_civsubIntelConfidence;
 private _seed = [[
     ["subject_civ_uid", _civUid],
-    ["home_pos", [_rec, "home_pos", getPosATL _civ] call _hg],
+    ["home_pos", [_rec, "home_pos", getPosATL _civ]] call _hg,
     ["linked_network", "RED"]
 ]] call _hmCreate;
 

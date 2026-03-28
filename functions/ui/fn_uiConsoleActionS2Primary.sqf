@@ -218,7 +218,7 @@ switch (_kind) do
             };
         };
 
-        private _c = [_d, "centroid", [] call _hg];
+        private _c = [_d, "centroid", []] call _hg;
         if !(_c isEqualType [] && { (count _c) >= 2 }) exitWith
         {
             if (_hasPub) then

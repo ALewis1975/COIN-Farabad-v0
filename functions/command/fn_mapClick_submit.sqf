@@ -45,7 +45,6 @@ switch (_type) do
     {
         private _leadType = [_ctx, "leadType", "RECON"] call _hg;
         private _sum = [_ctx, "summary", "Lead: Unknown"] call _hg;
-        private _det = [_ctx, "details", ""] call _hg;
         private _conf = [_ctx, "confidence", "MED"] call _hg;
         private _strength = [_ctx, "strength", 0.55] call _hg;
         private _ttl = [_ctx, "ttl", 3600] call _hg;

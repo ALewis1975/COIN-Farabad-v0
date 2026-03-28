@@ -886,7 +886,6 @@ private _fn_bridgeAssistPoints = {
 
     _pairs sort true;
 
-    private _pts = [];
     {
         _x params ["_t", "_p"];
         if ((count _pts) isEqualTo 0 || { (_p distance2D (_pts select ((count _pts) - 1))) > 8 }) then
@@ -1214,7 +1213,6 @@ if (!_started) exitWith
 
                 while { (count waypoints _grpL) > 0 } do { deleteWaypoint ((waypoints _grpL) select 0); };
 
-                private _holdDir = [_startDir] call _fn_getLinkupHoldDir;
                 [_vehicles, _linkupPos, _spacing, _holdDir, _speedKph, _forceRoad, _bypassActiveP] call _fn_enforceLinkupSlots;
 
 
@@ -1244,7 +1242,6 @@ if (!_started) exitWith
             while { (count waypoints _grpL) > 0 } do { deleteWaypoint ((waypoints _grpL) select 0); };
 
             // Slot vehicles and lock those that have arrived.
-            private _holdDir = [_startDir] call _fn_getLinkupHoldDir;
             [_vehicles, _linkupPos, _spacing, _holdDir, _speedKph, _forceRoad, _bypassActiveP] call _fn_enforceLinkupSlots;
 
             ["OPS", "Convoy reached link-up point and is holding for escort.", _linkupPos, [["event", "CONVOY_LINKUP_HOLD"], ["taskId", _taskId]]] call ARC_fnc_intelLog;
@@ -1263,7 +1260,6 @@ if (!_started) exitWith
     // If we are holding at the link-up, keep the column slotted while waiting for players.
     if (_hasLinkup && { _linkupReached }) then
     {
-        private _holdDir = [_startDir] call _fn_getLinkupHoldDir;
         [_vehicles, _linkupPos, _spacing, _holdDir, _speedKph, _forceRoad, _bypassActiveP] call _fn_enforceLinkupSlots;
     };
 
@@ -2149,7 +2145,6 @@ else
 }
 else
 {
-    private _prevFollowerStage = ["activeConvoyFollowerRecoverStage", "off"] call ARC_fnc_stateGet;
     if !(_prevFollowerStage isEqualType "") then { _prevFollowerStage = "off"; };
     if (!(_prevFollowerStage isEqualTo "off")) then
     {
@@ -2254,7 +2249,6 @@ else
         ["activeConvoyLastRecoveryAt", _now] call ARC_fnc_stateSet;
 
         // Ensure vehicles are not accidentally refrozen.
-        private _spacing = ["activeConvoySpacingM", missionNamespace getVariable ["ARC_convoySpacingM", 59]] call ARC_fnc_stateGet;
         if (!(_spacing isEqualType 0)) then { _spacing = missionNamespace getVariable ["ARC_convoySpacingM", 59]; };
         _spacing = (_spacing max 20) min 150;
 

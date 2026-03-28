@@ -132,7 +132,6 @@ if (_allowBnCmd) then {
 
     private _isBnCmd = false;
     {
-        private _tok = [_x] call _normalizeAuthText;
         if (_tok isEqualTo "") then { continue; };
         if ((_hayNorm find _tok) >= 0) exitWith { _isBnCmd = true; };
     } forEach _bnTokens;
@@ -153,7 +152,6 @@ if (!(_lcTokens isEqualType [])) then { _lcTokens = ["FARABAD TOWER LC", "FARABA
 
 private _hasLcToken = false;
 {
-    private _tok = [_x] call _normalizeAuthText;
     if (_tok isEqualTo "") then { continue; };
     if ((_hayNorm find _tok) >= 0) exitWith { _hasLcToken = true; };
 } forEach _lcTokens;

@@ -435,7 +435,6 @@ if (_onSite && { !_activated }) then
     if (_typeU isEqualTo "PATROL") then
     {
         // Zone context is used to clamp patrol route radius in sensitive areas.
-        private _zone = ["activeIncidentZone", ""] call ARC_fnc_stateGet;
         if (!(_zone isEqualType "")) then { _zone = ""; };
         if (_zone isEqualTo "") then
         {
@@ -516,7 +515,6 @@ private _broadcast = {
     missionNamespace setVariable ["ARC_sitrepProximityM", _sitrepProx, true];
 
     private _anchors = [];
-    private _oPos = ["activeObjectivePos", []] call ARC_fnc_stateGet;
     if (_oPos isEqualType [] && { (count _oPos) >= 2 }) then
     {
         _oPos = +_oPos; _oPos resize 3;
@@ -560,7 +558,6 @@ private _broadcast = {
 // INTERACT tasks: objective existence + kill-fail enforcement
 if (_execKind isEqualTo "INTERACT") then
 {
-    private _objKind = ["activeObjectiveKind", ""] call ARC_fnc_stateGet;
     private _nid     = ["activeObjectiveNetId", ""] call ARC_fnc_stateGet;
 
     if (!(_objKind isEqualTo "") && { !(_nid isEqualTo "") }) then
@@ -587,10 +584,8 @@ if (_execKind isEqualTo "INTERACT") then
 // ROUTE_RECON logic: sequential start -> end progression.
 if (_execKind isEqualTo "ROUTE_RECON") exitWith
 {
-    private _sPos = ["activeReconRouteStartPos", []] call ARC_fnc_stateGet;
     private _ePos = ["activeReconRouteEndPos", []] call ARC_fnc_stateGet;
 
-    private _sRad = ["activeReconRouteStartRadius", 60] call ARC_fnc_stateGet;
     if (!(_sRad isEqualType 0) || { _sRad <= 0 }) then { _sRad = 60; };
     _sRad = (_sRad max 25) min 250;
 

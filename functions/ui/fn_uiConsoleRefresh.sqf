@@ -270,7 +270,6 @@ case "DASH":
 
     case "CMD":
     {
-        private _cmdMode = ["ARC_console_cmdMode", "OVERVIEW"] call ARC_fnc_uiNsGetString;
         _cmdMode = toUpper _cmdMode;
 
         if (_cmdMode isEqualTo "QUEUE") then

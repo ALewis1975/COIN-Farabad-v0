@@ -136,7 +136,6 @@ switch (_rowType) do
             false
         };
 
-        private _canAirQueueManage = ["ARC_console_airCanQueueManage", false] call ARC_fnc_uiNsGetBool;
         private _canPrioritize = ["ARC_console_airCanPrioritize", false] call ARC_fnc_uiNsGetBool;
         if (!_canAirQueueManage || !_canPrioritize) exitWith
         {

@@ -194,7 +194,6 @@ _transferDelay = (_transferDelay max 30) min 3600;
     // Prefer EPW holding, fallback to sheriff holding
     private _mHold = "";
     {
-        private _m = [_x] call _resolveMarker;
         if !((markerType _m) isEqualTo "") exitWith { _mHold = _m; };
     } forEach ["epw_holding", "mkr_SHERIFF_HOLDING"];
 

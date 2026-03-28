@@ -27,7 +27,7 @@ if !(_parsed isEqualType []) exitWith {false};
 private _hm = [_parsed] call _hmCreate;
 
 // --- Districts ---
-private _districtRows = [_hm, "districts", [] call _hg];
+private _districtRows = [_hm, "districts", []] call _hg;
 if !(_districtRows isEqualType []) exitWith {false};
 
 private _districts = createHashMap;
@@ -104,7 +104,7 @@ private _districts = createHashMap;
 
 // --- Identities ---
 private _ids = createHashMap;
-private _idRows = [_hm, "identities", [] call _hg];
+private _idRows = [_hm, "identities", []] call _hg;
 if (_idRows isEqualType []) then {
     {
         if !(_x isEqualType []) then { continue; };
@@ -189,7 +189,7 @@ if (_idRows isEqualType []) then {
 
 // --- Crime DB ---
 private _db = createHashMap;
-private _crimeRows = [_hm, "crimedb", [] call _hg];
+private _crimeRows = [_hm, "crimedb", []] call _hg;
 if (_crimeRows isEqualType []) then {
     {
         if !(_x isEqualType []) then { continue; };
@@ -207,7 +207,6 @@ if (_crimeRows isEqualType []) then {
         private _ts = _x select 6;
         private _hist = _x select 7;
 
-        private _rec = [[
             ["poi_id", _poiId],
             ["category", _cat],
             ["homeDistrictId", _did],
@@ -226,11 +225,11 @@ missionNamespace setVariable ["civsub_v1_districts", _districts, true];
 missionNamespace setVariable ["civsub_v1_identities", _ids, true];
 missionNamespace setVariable ["civsub_v1_crimedb", _db, true];
 
-private _ver = [_hm, "version", missionNamespace getVariable ["civsub_v1_version", 1] call _hg];
+private _ver = [_hm, "version", missionNamespace getVariable ["civsub_v1_version", 1]] call _hg;
 missionNamespace setVariable ["civsub_v1_version", _ver, true];
 
-missionNamespace setVariable ["civsub_v1_seed", [_hm, "seed", missionNamespace getVariable ["civsub_v1_seed", 1337] call _hg], true];
-missionNamespace setVariable ["civsub_v1_identity_seq", [_hm, "identity_seq", missionNamespace getVariable ["civsub_v1_identity_seq", 0] call _hg], true];
+missionNamespace setVariable ["civsub_v1_seed", [_hm, "seed", missionNamespace getVariable ["civsub_v1_seed", 1337]] call _hg, true];
+missionNamespace setVariable ["civsub_v1_identity_seq", [_hm, "identity_seq", missionNamespace getVariable ["civsub_v1_identity_seq", 0]] call _hg, true];
 
 // Enforce identity cap after load
 [500] call ARC_fnc_civsubIdentityEvictIfNeeded;

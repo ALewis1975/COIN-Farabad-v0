@@ -64,7 +64,6 @@ if (_n > 0) then
         private _k = _q deleteAt 0;
         private _row = [_reg, _k, createHashMap] call _hg;
         if (_row isEqualType createHashMap) then {
-            private _u = [_row, "unit", objNull] call _hg;
             if (!isNull _u) then {
                 [_u] call ARC_fnc_civsubCivDespawnUnit;
             };

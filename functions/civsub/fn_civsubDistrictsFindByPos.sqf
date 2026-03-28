@@ -39,7 +39,7 @@ private _bestD = 1e12;
         _rec = [_rec] call _hmCreate;
     };
     if (_rec isEqualType createHashMap) then {
-        private _c = [_rec, "centroid", [0,0] call _hg];
+        private _c = [_rec, "centroid", [0,0]] call _hg;
         private _r = [_rec, "radius_m", 0] call _hg;
         if ((_c isEqualType []) && { _r > 0 }) then {
             private _d = (_pos distance2D _c);

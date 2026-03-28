@@ -88,7 +88,7 @@ if (!isNull _approver) then
     };
 };
 
-if (!(_status isEqualType "") || { toUpper !(_status isEqualTo "PENDING") }) exitWith {false};
+if (!(_status isEqualType "") || { !((toUpper _status) isEqualTo "PENDING") }) exitWith {false};
 
 private _newStatus = if (_approve) then {"APPROVED"} else {"REJECTED"};
 private _dec = [serverTime, _by, _approve, [_note] call _trimFn];
@@ -161,7 +161,7 @@ if (_approve) then
             if (!(_disp isEqualType "")) then { _disp = _summary; };
             _disp = [_disp] call _trimFn;
             if (_disp isEqualTo "") then { _disp = "Lead: S2 Requested Collection"; };
-!(            if ((toLower _disp) find "lead:" isEqualTo 0)) then { _disp = format ["Lead: %1", _disp]; };
+            if (!(((toLower _disp) find "lead:") isEqualTo 0)) then { _disp = format ["Lead: %1", _disp]; };
 
             if (!(_strength isEqualType 0)) then { _strength = 0.55; };
             _strength = (_strength max 0.05) min 0.95;
@@ -308,9 +308,9 @@ if (_approve) then
             _holdMinutes = (_holdMinutes max 0) min 240;
 
             private _seed = [];
-            if (trim !(_rationale isEqualTo "")) then { _seed pushBack ["rationale", [_rationale] call _trimFn]; };
-            if (trim !(_constraints isEqualTo "")) then { _seed pushBack ["constraints", [_constraints] call _trimFn]; };
-            if (trim !(_support isEqualTo "")) then { _seed pushBack ["support", [_support] call _trimFn]; };
+            if (!(([_rationale] call _trimFn) isEqualTo "")) then { _seed pushBack ["rationale", [_rationale] call _trimFn]; };
+            if (!(([_constraints] call _trimFn) isEqualTo "")) then { _seed pushBack ["constraints", [_constraints] call _trimFn]; };
+            if (!(([_support] call _trimFn) isEqualTo "")) then { _seed pushBack ["support", [_support] call _trimFn]; };
 
             private _issueOk = false;
 
@@ -325,7 +325,7 @@ if (_approve) then
                 case "HOLD":
                 {
                     _seed pushBack ["purpose", "HOLD"];
-                    if (trim !(_holdIntent isEqualTo "")) then { _seed pushBack ["holdIntent", [_holdIntent] call _trimFn]; };
+                    if (!(([_holdIntent] call _trimFn) isEqualTo "")) then { _seed pushBack ["holdIntent", [_holdIntent] call _trimFn]; };
                     if (_holdMinutes > 0) then { _seed pushBack ["holdMinutes", _holdMinutes]; };
                     _issueOk = ["HOLD", _fromGroup, _seed, _approver, _note2, _id] call ARC_fnc_intelOrderIssue;
                 };
@@ -333,7 +333,7 @@ if (_approve) then
                 case "PROCEED":
                 {
                     // PROCEED becomes a LEAD assignment when possible; otherwise STANDBY.
-                    if (trim !(_proceedIntent isEqualTo "")) then { _seed pushBack ["proceedIntent", [_proceedIntent] call _trimFn]; };
+                    if (!(([_proceedIntent] call _trimFn) isEqualTo "")) then { _seed pushBack ["proceedIntent", [_proceedIntent] call _trimFn]; };
                     _issueOk = ["LEAD", _fromGroup, _seed, _approver, _note2, _id] call ARC_fnc_intelOrderIssue;
                 };
 

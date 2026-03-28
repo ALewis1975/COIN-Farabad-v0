@@ -31,7 +31,7 @@ private _pAnch = createHashMap;
         private _pos = getPosATL _x;
         private _did = [_pos] call ARC_fnc_civsubDistrictsFindByPos;
         if !(_did isEqualTo "") then {
-            private _arr = [_pAnch, _did, [] call _hg];
+            private _arr = [_pAnch, _did, []] call _hg;
             if !(_arr isEqualType []) then { _arr = []; };
             _arr pushBack _pos;
             _pAnch set [_did, _arr];

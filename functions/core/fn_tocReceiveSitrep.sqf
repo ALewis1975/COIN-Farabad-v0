@@ -172,7 +172,6 @@ private _k = ["activeExecKind", ""] call ARC_fnc_stateGet;
 if (_k isEqualType "" && { (toUpper _k) isEqualTo "ROUTE_RECON" }) then
 {
     {
-        private _p = [_x, []] call ARC_fnc_stateGet;
         if (_p isEqualType [] && { (count _p) >= 2 }) then
         {
             private _pp = +_p;

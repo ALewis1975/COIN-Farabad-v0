@@ -16,6 +16,7 @@
 if (!isServer) exitWith {[]};
 
 params [ ["_leadId", "", [""]] ];
+private _trimFn = compile "params ['_s']; trim _s";
 _leadId = [_leadId] call _trimFn;
 if (_leadId isEqualTo "") exitWith {[]};
 
@@ -27,7 +28,6 @@ if (!(_leads isEqualType [])) then { _leads = []; };
 
 if (_leads isEqualTo []) exitWith {[]};
 
-private _trimFn = compile "params ['_s']; trim _s";
 
 private _idx = -1;
 { if (_x isEqualType [] && { (count _x) >= 1 } && { (_x select 0) isEqualTo _leadId }) exitWith { _idx = _forEachIndex; }; } forEach _leads;

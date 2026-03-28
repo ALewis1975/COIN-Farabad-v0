@@ -66,7 +66,6 @@ switch (_event) do
     case "DETENTION_HANDOFF":
     {
         // Handoff reinforces legitimacy when the detainee was actually wanted.
-        private _wl = [_payload, "wanted_level", 0] call _hg;
         if !(_wl isEqualType 0) then { _wl = 0; };
         if (_wl > 0) then { _effects = ["WHITE_TRUST_SMALL_GAIN"]; } else { _effects = []; };
     };
@@ -112,7 +111,7 @@ private _dR = 0;
 private _dG = 0;
 
 {
-    private _row = [_effectTable, _x, [0,0,0] call _hg];
+    private _row = [_effectTable, _x, [0,0,0]] call _hg;
     _dW = _dW + (_row select 0);
     _dR = _dR + (_row select 1);
     _dG = _dG + (_row select 2);
@@ -137,7 +136,7 @@ if !(_actorUid isEqualTo "") then { _actorType = "PLAYER"; };
 
 private _centroid = [0,0];
 private _d = (missionNamespace getVariable ["civsub_v1_districts", createHashMap]) getOrDefault [_districtId, createHashMap];
-if (_d isEqualType createHashMap) then { _centroid = [_d, "centroid", [0,0] call _hg]; };
+if (_d isEqualType createHashMap) then { _centroid = [_d, "centroid", [0,0]] call _hg; };
 
 private _bundle = [
     _districtId,

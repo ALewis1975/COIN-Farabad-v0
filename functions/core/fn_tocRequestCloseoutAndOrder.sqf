@@ -423,7 +423,6 @@ private _zone = if (_marker isEqualTo "") then { [_pos] call ARC_fnc_worldGetZon
 // Enforce IED detonation rule: any CIV KIA forces FAIL.
 if (_closeResult isEqualTo "SUCCEEDED" && { toUpper _type isEqualTo "IED" }) then
 {
-    private _civKia = ["activeIedCivKia", 0] call ARC_fnc_stateGet;
     if (!(_civKia isEqualType 0)) then { _civKia = 0; };
     if (_civKia > 0) then
     {
@@ -511,7 +510,6 @@ if (_incTypeU isEqualTo "IED") then
         if (!(_ttl isEqualType 0)) then { _ttl = 900; };
         _ttl = (_ttl max 60) min (60*60);
 
-        private _appr = ["eodDispoApprovals", []] call ARC_fnc_stateGet;
         if (!(_appr isEqualType [])) then { _appr = []; };
 
         private _exp = serverTime + _ttl;
@@ -538,21 +536,21 @@ if (_incTypeU isEqualTo "IED") then
 };
 
 private _seed = [];
-if (trim !(_rationale isEqualTo "")) then { _seed pushBack ["rationale", [_rationale] call _trimFn]; };
-if (trim !(_constraints isEqualTo "")) then { _seed pushBack ["constraints", [_constraints] call _trimFn]; };
-if (trim !(_support isEqualTo "")) then { _seed pushBack ["support", [_support] call _trimFn]; };
+if (!(([_rationale] call _trimFn) isEqualTo "")) then { _seed pushBack ["rationale", [_rationale] call _trimFn]; };
+if (!(([_constraints] call _trimFn) isEqualTo "")) then { _seed pushBack ["constraints", [_constraints] call _trimFn]; };
+if (!(([_support] call _trimFn) isEqualTo "")) then { _seed pushBack ["support", [_support] call _trimFn]; };
 
 if (_orderType isEqualTo "RTB") then { _seed pushBack ["purpose", _purpose]; };
 
 if (_orderType isEqualTo "HOLD") then
 {
-    if (trim !(_holdIntent isEqualTo "")) then { _seed pushBack ["holdIntent", [_holdIntent] call _trimFn]; };
+    if (!(([_holdIntent] call _trimFn) isEqualTo "")) then { _seed pushBack ["holdIntent", [_holdIntent] call _trimFn]; };
     if (_holdMinutes isEqualType 0 && { _holdMinutes > 0 }) then { _seed pushBack ["holdMinutes", _holdMinutes]; };
 };
 
 if (_orderType isEqualTo "LEAD") then
 {
-    if (trim !(_proceedIntent isEqualTo "")) then { _seed pushBack ["proceedIntent", [_proceedIntent] call _trimFn]; };
+    if (!(([_proceedIntent] call _trimFn) isEqualTo "")) then { _seed pushBack ["proceedIntent", [_proceedIntent] call _trimFn]; };
 
     // Prefer system-suggested follow-on lead, otherwise the closeout-generated lead.
     if (!(_foLeadIdCaptured isEqualTo "")) then

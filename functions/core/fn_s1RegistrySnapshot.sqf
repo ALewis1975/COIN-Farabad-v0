@@ -87,7 +87,6 @@ private _groupStats = [];
 private _augmentedGroups = [];
 {
     if (!(_x isEqualType [])) then { continue; };
-    private _gid = [_x, "groupId", ""] call _getPair;
     if (!(_gid isEqualType "") || { _gid isEqualTo "" }) then { continue; };
 
     private _pe       = [_x, "parentEchelon", ""] call _getPair;
