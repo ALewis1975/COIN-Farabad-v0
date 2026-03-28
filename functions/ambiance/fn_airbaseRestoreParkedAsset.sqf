@@ -24,9 +24,7 @@ if (isNil "_asset" || {!(_asset isEqualType createHashMap)}) exitWith { false };
 
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _id     = [_asset, "id", ""] call _hg;
-
 private _vehVar = [_asset, "vehVar", ""] call _hg;
-
 
 private _spawnType = [_asset, "startVehType", ""] call _hg;
 private _startPos  = [_asset, "startPos", [0,0,0]] call _hg;
