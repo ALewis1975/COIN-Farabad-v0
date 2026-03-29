@@ -9,6 +9,8 @@
 
 if (!isServer) exitWith {createHashMap};
 
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+
 private _out = createHashMap;
 
 _out set ["enabled", missionNamespace getVariable ["civsub_v1_traffic_enabled", false]];
@@ -42,13 +44,13 @@ private _per = createHashMap;
 {
     if (isNull _x) then { continue; };
     private _d = _x getVariable ["ARC_civtraf_districtId", "D00"];
-    _per set [_d, 1 + ([_per, _d, 0] call getOrDefault)];
+    _per set [_d, 1 + ([_per, _d, 0] call _hg)];
 } forEach _parked;
 
 {
     if (isNull _x) then { continue; };
     private _d = _x getVariable ["ARC_civtraf_districtId", "D00"];
-    _per set [_d, 1 + ([_per, _d, 0] call getOrDefault)];
+    _per set [_d, 1 + ([_per, _d, 0] call _hg)];
 } forEach _moving;
 
 _out set ["perDistrict", _per];
