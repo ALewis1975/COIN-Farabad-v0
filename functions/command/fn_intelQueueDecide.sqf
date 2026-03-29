@@ -407,6 +407,70 @@ if (_approve) then
             ] call ARC_fnc_intelLog;
         };
 
+        case "INCIDENT":
+        {
+            // Seeded or submitted INCIDENT items: create a lead from the payload,
+            // enqueue it to the TOC backlog, and auto-trigger incident creation
+            // so the approved incident appears on the Ops screen for acceptance.
+            private _incType    = [_payload, "incidentType", "PATROL"] call _getP;
+            private _disp       = [_payload, "displayName", _summary] call _getP;
+            private _marker     = [_payload, "marker", ""] call _getP;
+            private _incPos     = [_payload, "pos", _posATL] call _getP;
+
+            if (!(_incType isEqualType "")) then { _incType = "PATROL"; };
+            _incType = toUpper (trim _incType);
+            if (_incType isEqualTo "") then { _incType = "PATROL"; };
+
+            if (!(_disp isEqualType "")) then { _disp = _summary; };
+            _disp = trim _disp;
+            if (_disp isEqualTo "") then { _disp = format ["Incident: %1", _incType]; };
+
+            if (!(_marker isEqualType "")) then { _marker = ""; };
+            if (!(_incPos isEqualType [])) then { _incPos = _posATL; };
+            if ((count _incPos) < 2) then { _incPos = _posATL; };
+
+            // Create a high-priority lead so the incident generator will consume it.
+            private _lid = [_incType, _disp, _incPos, 0.80, 3600, _id, "", "", "TOC_INCIDENT"] call ARC_fnc_leadCreate;
+            if (!(_lid isEqualType "")) then { _lid = ""; };
+
+            // Attach the leadId to the queue item meta for UI traceability.
+            if (_lid isNotEqualTo "") then
+            {
+                _meta = [_meta, "leadId", _lid] call _setPair;
+                _meta = [_meta, "marker", _marker] call _setPair;
+                _item set [11, _meta];
+                _q set [_idx, _item];
+                ["tocQueue", _q] call ARC_fnc_stateSet;
+                [] call ARC_fnc_intelQueueBroadcast;
+            };
+
+            // Enqueue the lead into the TOC backlog (priority 1 = highest).
+            if (!isNil "ARC_fnc_tocBacklogEnqueue" && { _lid isEqualType "" } && { _lid isNotEqualTo "" }) then
+            {
+                [_lid, 1, _id, _by, _summary] call ARC_fnc_tocBacklogEnqueue;
+            };
+
+            // Auto-trigger incident creation if no active incident exists.
+            // This ensures the approved incident immediately appears on the Ops screen.
+            private _activeTaskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
+            if (!(_activeTaskId isEqualType "")) then { _activeTaskId = ""; };
+            if (_activeTaskId isEqualTo "" && { _lid isNotEqualTo "" }) then
+            {
+                [] call ARC_fnc_incidentCreate;
+            };
+
+            ["OPS", format ["QUEUE: %1 approved %2 (%3). Lead %4 created. Incident generation triggered.", _by, _id, _kindU, _lid], _posATL,
+                [
+                    ["event", "TOC_QUEUE_APPROVED"],
+                    ["queueId", _id],
+                    ["kind", _kindU],
+                    ["leadId", _lid],
+                    ["incidentType", _incType],
+                    ["marker", _marker]
+                ]
+            ] call ARC_fnc_intelLog;
+        };
+
         default
         {
             ["OPS", format ["QUEUE: %1 approved %2 (%3). No handler.", _by, _id, _kindU], _posATL,
