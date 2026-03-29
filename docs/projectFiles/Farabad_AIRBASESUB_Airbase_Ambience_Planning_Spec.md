@@ -9,12 +9,12 @@
 
 ## Runtime Authorization (Current Mission Contract)
 
-- **Authorized mode:** Planning-only by default. `airbase_v1_runtime_enabled=false` means AIRBASE runtime execution is intentionally blocked server-side.
-- **How to activate intentionally:** Set `airbase_v1_runtime_enabled=true` on the server and keep `airbase_v1_ambiance_enabled=true`.
+- **Authorized mode:** Runtime-enabled by default. `airbase_v1_runtime_enabled=true` allows AIRBASE runtime execution server-side.
+- **How to deactivate intentionally:** Set `airbase_v1_runtime_enabled=false` on the server (or use safe mode) to block AIRBASE runtime entrypoints.
 - **Scope of active runtime when enabled:**
   - Scheduler/init: `ARC_fnc_airbasePostInit` -> `ARC_fnc_airbaseInit` -> `ARC_fnc_airbaseTick`
   - Runtime execution: spawn/departure/security loops and server authority RPC handlers in `functions/ambiance/fn_airbase*.sqf`
-- **Reviewer signal:** if AIRBASE runtime is expected to stay dormant, PRs must preserve planning-only default and pass `tests/static/airbase_planning_mode_checks.sh`.
+- **Reviewer signal:** if AIRBASE runtime is expected to stay active, PRs must preserve runtime-enabled default and pass `tests/static/airbase_planning_mode_checks.sh`.
 
 ## 0) v1 locks from the development thread (non-negotiable)
 

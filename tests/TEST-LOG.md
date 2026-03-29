@@ -12,6 +12,27 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 ---
 
 
+## 2026-03-29 16:18 UTC — AIRBASE ambiance startup default runtime enable
+
+**Branch/Commit:** copilot/fix-airbase-ambiance-initialization @ 8359bb3
+
+**Scenario:** Restore AIRBASE ambiance initialization by enabling runtime gate default and align static check/docs with runtime-enabled default.
+
+**Commands:**
+```bash
+bash tests/static/airbase_planning_mode_checks.sh
+git --no-pager diff --check
+python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf tests/static/airbase_planning_mode_checks.sh
+```
+
+**Result:** PASS
+
+**Notes:**
+- AIRBASE gate static script now asserts `airbase_v1_runtime_enabled=true` default.
+- Safe mode override remains authoritative and still forces `airbase_v1_runtime_enabled=false`.
+- Dedicated server + JIP runtime verification remains BLOCKED in this container environment.
+
+
 ## 2026-02-23 17:11 UTC — QA / Audit Mode: Comprehensive Branch Validation
 
 **Branch/Commit:** copilot/audit-sqf-mission-project @ ba062a9

@@ -340,7 +340,7 @@ missionNamespace setVariable ["ARC_vbiedTelegraphIntelLog", true, true];
 // VBIED scaffolding (object-first)
 missionNamespace setVariable ["ARC_vbiedScaffoldEnabled", true, true];
 missionNamespace setVariable ["airbase_v1_ambiance_enabled", true, true];
-missionNamespace setVariable ["airbase_v1_runtime_enabled", false, true];
+missionNamespace setVariable ["airbase_v1_runtime_enabled", true, true];
 
 if (_arcSafeModeEnabled) then {
     missionNamespace setVariable ["civsub_v1_traffic_enabled", false, true];
