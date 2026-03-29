@@ -140,7 +140,7 @@ def scan_file(path: Path) -> list[tuple[int, PatternRule, str]]:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Scan SQF files for known sqflint parser-compatibility patterns.")
     parser.add_argument("files", nargs="*", help="SQF files to scan. If omitted, scans changed *.sqf files vs HEAD.")
-    parser.add_argument("--strict", action="store_true", help="Exit non-zero when *error*-severity findings are present.")
+    parser.add_argument("--strict", action="store_true", help="Exit non-zero when error-severity findings are present.")
     args = parser.parse_args()
 
     files = [Path(f) for f in args.files if f.endswith(".sqf")]

@@ -102,8 +102,6 @@ jobs:
             # Run sqflint capturing output; filter known parser limitation noise
             lint_out=$(timeout 10 sqflint -e w "$file" 2>&1 || true)
             filtered=$(echo "$lint_out" | grep -v \
-              -e 'isNotEqualTo' \
-              -e 'getOrDefault' \
               -e '<Variable(#)>' \
               -e '<Variable(isNotEqualTo)>' \
               -e '<Variable(getOrDefault)>' \
