@@ -12,6 +12,33 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 ---
 
 
+## 2026-03-29 16:59 UTC — WCIC AIR/TOWER initial empty pane + schedule/execution sync fix
+
+**Branch/Commit:** copilot/fix-scheduled-flights-information @ 5a7553f
+
+**Scenario:** Fix AIR/TOWER center-pane initialization and ensure scheduled flight list tracks latest published snapshot while preserving row context.
+
+**Commands:**
+```bash
+python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleAirPaint.sqf
+sqflint -e w functions/ui/fn_uiConsoleAirPaint.sqf
+bash tests/static/airbase_planning_mode_checks.sh
+bash tests/static/casreq_snapshot_contract_checks.sh
+python3 scripts/dev/validate_state_migrations.py
+python3 scripts/dev/validate_marker_index.py
+```
+
+**Result:** BLOCKED
+
+**Notes:**
+- PASS: `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleAirPaint.sqf`
+- BLOCKED: `sqflint` binary is not installed in this environment (`sqflint: command not found`).
+- BLOCKED: static shell checks rely on `rg`/ripgrep in this environment (`rg: command not found`).
+- PASS: `python3 scripts/dev/validate_state_migrations.py`
+- PASS: `python3 scripts/dev/validate_marker_index.py`
+- Dedicated server + JIP behavior remains deferred outside this container.
+
+
 ## 2026-03-29 16:44 UTC — Farabad Console AIR/TOWER contextual action usability fix
 
 **Branch/Commit:** copilot/qa-check-air-tower-menu @ commit: unrecoverable

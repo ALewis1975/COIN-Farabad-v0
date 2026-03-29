@@ -26,10 +26,26 @@ private _owner = uiNamespace getVariable ["ARC_console_mainListOwner", ""];
 if (!(_owner isEqualType "")) then { _owner = ""; };
 _owner = toUpper _owner;
 if (!(_owner isEqualTo "AIR")) then { _rebuild = true; };
+if ((lbSize _ctrlList) <= 0) then { _rebuild = true; };
 uiNamespace setVariable ["ARC_console_mainListOwner", "AIR"];
 
 private _pub = missionNamespace getVariable ["ARC_pub_state", []];
 if (!(_pub isEqualType [])) then { _pub = []; };
+
+private _stateUpdatedAt = missionNamespace getVariable ["ARC_pub_stateUpdatedAt", -1];
+if (!(_stateUpdatedAt isEqualType 0)) then { _stateUpdatedAt = -1; };
+private _lastStateUpdatedAt = uiNamespace getVariable ["ARC_console_airLastStateUpdatedAt", -2];
+if (!(_lastStateUpdatedAt isEqualType 0)) then { _lastStateUpdatedAt = -2; };
+if (_stateUpdatedAt != _lastStateUpdatedAt) then { _rebuild = true; };
+
+private _prevSelData = "";
+if (_rebuild) then {
+    private _prevSel = lbCurSel _ctrlList;
+    if (_prevSel >= 0) then {
+        _prevSelData = _ctrlList lbData _prevSel;
+        if (!(_prevSelData isEqualType "")) then { _prevSelData = ""; };
+    };
+};
 
 private _getPub = {
     params ["_pairs", "_k", "_def"];
@@ -178,9 +194,6 @@ private _towerLane = [_towerStaffing, "tower"] call _staffLaneRec;
 private _groundLane = [_towerStaffing, "ground"] call _staffLaneRec;
 private _arrivalLane = [_towerStaffing, "arrival"] call _staffLaneRec;
 
-private _stateUpdatedAt = missionNamespace getVariable ["ARC_pub_stateUpdatedAt", -1];
-if (!(_stateUpdatedAt isEqualType 0)) then { _stateUpdatedAt = -1; };
-
 private _airModeList = ["ARC_console_airMode", "TOWER"] call ARC_fnc_uiNsGetString;
 _airModeList = toUpper ([_airModeList] call _trimFn);
 if !(_airModeList in ["TOWER", "PILOT"]) then { _airModeList = "TOWER"; };
@@ -224,7 +237,6 @@ if (_rebuild) then {
             } forEach _myArrivals;
         };
 
-        if ((lbSize _ctrlList) > 1) then { _ctrlList lbSetCurSel 1; };
     } else {
 
     private _hdrReq = _ctrlList lbAdd "-- PENDING CLEARANCES --";
@@ -334,7 +346,26 @@ if (_rebuild) then {
         };
     };
 
-    if ((lbSize _ctrlList) > 0) then { _ctrlList lbSetCurSel 0; };
+    if ((lbSize _ctrlList) > 0) then {
+        private _restoreSel = -1;
+        if (_prevSelData != "") then {
+            for "_iSel" from 0 to ((lbSize _ctrlList) - 1) do {
+                private _d = _ctrlList lbData _iSel;
+                if (_d isEqualTo _prevSelData) exitWith { _restoreSel = _iSel; };
+            };
+        };
+
+        if (_restoreSel < 0) then {
+            for "_iFirst" from 0 to ((lbSize _ctrlList) - 1) do {
+                private _d2 = _ctrlList lbData _iFirst;
+                private _pfx = if ((_d2 isEqualType "") && { (count _d2) >= 3 }) then { toUpper (_d2 select [0, 3]) } else { "" };
+                if (_pfx != "HDR") exitWith { _restoreSel = _iFirst; };
+            };
+        };
+
+        if (_restoreSel < 0) then { _restoreSel = 0; };
+        _ctrlList lbSetCurSel _restoreSel;
+    };
     };
 };
 
@@ -720,4 +751,6 @@ _airP set [2, _defaultPosAir select 2];
 _airP set [3, (_airP select 3) max _airMinH];
 _ctrlDetails ctrlSetPosition _airP;
 _ctrlDetails ctrlCommit 0;
+
+uiNamespace setVariable ["ARC_console_airLastStateUpdatedAt", _stateUpdatedAt];
 true
