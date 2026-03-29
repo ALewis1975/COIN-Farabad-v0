@@ -36,6 +36,7 @@ params [["_did","",[""]]];
 if (_did isEqualTo "") exitWith {createHashMap};
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 private _dbg = missionNamespace getVariable ["civsub_v1_debug", false];
 
@@ -108,17 +109,17 @@ private _roadsideFromRoad =
 private _cache = missionNamespace getVariable ["civsub_v1_spawn_cache", createHashMap];
 if !(_cache isEqualType createHashMap) then { _cache = createHashMap; };
 
-private _row = _cache getOrDefault [_did, createHashMap];
+private _row = [_cache, _did, createHashMap] call _hg;
 if !(_row isEqualType createHashMap) then { _row = createHashMap; };
 
 private _ttl = missionNamespace getVariable ["civsub_v1_spawn_cache_ttl_s", 600];
 if !(_ttl isEqualType 0) then { _ttl = 600; };
 
-private _ts = _row getOrDefault ["ts", 0];
+private _ts = [_row, "ts", 0] call _hg;
 private _needTTL = ((serverTime - _ts) > _ttl);
 
-private _bld = _row getOrDefault ["bldPos", []];
-private _road = _row getOrDefault ["roadPos", []];
+private _bld = [_row, "bldPos", []] call _hg;
+private _road = [_row, "roadPos", []] call _hg;
 if !(_bld isEqualType []) then { _bld = []; };
 if !(_road isEqualType []) then { _road = []; };
 
@@ -127,14 +128,14 @@ private _d = [_did] call ARC_fnc_civsubDistrictsGetById;
 private _dm = createHashMap;
 if (_d isEqualType createHashMap) then { _dm = _d; } else { if (_d isEqualType []) then { _dm = [_d] call _hmCreate; }; };
 
-private _center = _dm getOrDefault ["centroid", [0,0]];
-private _radius = _dm getOrDefault ["radius_m", 500];
+private _center = [_dm, "centroid", [0,0]] call _hg;
+private _radius = [_dm, "radius_m", 500] call _hg;
 if !(_center isEqualType [] && {(count _center) >= 2}) exitWith { _row };
 
 // Player anchors (server-only) for this district
 private _pAnchMap = missionNamespace getVariable ["civsub_v1_spawn_player_anchors", createHashMap];
 if !(_pAnchMap isEqualType createHashMap) then { _pAnchMap = createHashMap; };
-private _pAnch = _pAnchMap getOrDefault [_did, []];
+private _pAnch = [_pAnchMap, _did, []] call _hg;
 if !(_pAnch isEqualType []) then { _pAnch = []; };
 
 private _anchorTypes = ["NameVillage","NameCity","NameCityCapital","NameLocal"];
@@ -204,7 +205,7 @@ if ((count _pAnch) > 0) then {
     };
 };
 
-private _oldKey = _row getOrDefault ["anchorKey", ""]; 
+private _oldKey = [_row, "anchorKey", ""] call _hg; 
 if !(_oldKey isEqualType "") then { _oldKey = ""; };
 
 private _hasPos = ((count _bld + count _road) > 0);

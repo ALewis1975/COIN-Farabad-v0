@@ -46,6 +46,9 @@ if (_actorUid isEqualTo "") exitWith {false};
 private _ownerUid = _civ getVariable ["civsub_v1_stopOwnerUid", ""];
 if !(_ownerUid isEqualTo "" || {_ownerUid isEqualTo _actorUid}) exitWith {false};
 
+
+// sqflint-compatible helpers
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _releasePending = _civ getVariable ["ARC_civsub_releasePending", false];
 
 // If the civilian is detained, keep them pinned in place.
@@ -53,7 +56,7 @@ private _civUid = _civ getVariable ["civ_uid", ""];
 if !(_civUid isEqualTo "") then {
     private _rec = [_civUid] call ARC_fnc_civsubIdentityGet;
     if (_rec isEqualType createHashMap) then {
-        if (_rec getOrDefault ["status_detained", false]) exitWith {
+        if ([_rec, "status_detained", false] call _hg) exitWith {
             if (!_silent) then {
                 ["CIVSUB: Interaction ended. Civilian remains detained.", "CHAT"] remoteExecCall ["ARC_fnc_civsubClientMessage", _actor];
             };

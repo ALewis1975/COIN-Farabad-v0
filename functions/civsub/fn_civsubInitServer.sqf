@@ -144,6 +144,9 @@ if (missionNamespace getVariable ["civsub_v1_harm_enabled", true]) then
     {
         private _ehId = addMissionEventHandler ["EntityKilled", {
             params ["_killed", "_killer", "_instigator"];
+
+// sqflint-compatible helpers
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
             if (!isServer) exitWith {};
             if (isNull _killed) exitWith {};
             if !(side _killed isEqualTo civilian) exitWith {};
@@ -174,10 +177,10 @@ if ((missionNamespace getVariable ["civsub_v1_harm_enabled", true]) && { mission
                 if !(_reg isEqualType createHashMap) then { continue; };
 
                 {
-                    private _row = _reg getOrDefault [_x, createHashMap];
+                    private _row = [_reg, _x, createHashMap] call _hg;
                     if !(_row isEqualType createHashMap) then { continue; };
 
-                    private _u = _row getOrDefault ["unit", objNull];
+                    private _u = [_row, "unit", objNull] call _hg;
                     if (isNull _u) then { continue; };
                     if !(alive _u) then { continue; };
                     if !(_u getVariable ["civsub_v1_isCiv", false]) then { continue; };

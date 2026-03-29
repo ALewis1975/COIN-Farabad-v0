@@ -28,6 +28,7 @@ params [
 if (_civUid isEqualTo "" || { _districtId isEqualTo "" }) exitWith {createHashMap};
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 private _seed = missionNamespace getVariable ["civsub_v1_seed", 1337];
 if !(_seed isEqualType 0) then { _seed = 1337; };
@@ -82,13 +83,13 @@ if (_enrich) then {
     if (_districts isEqualType []) then { _districts = [_districts] call _hmCreate; };
 
     if (_districts isEqualType createHashMap) then {
-        private _d = _districts getOrDefault [_districtId, createHashMap];
-        if (!(_d isEqualType createHashMap) || {(count _d) == 0}) then { _d = _districts getOrDefault [toLower _districtId, createHashMap]; };
-        if (!(_d isEqualType createHashMap) || {(count _d) == 0}) then { _d = _districts getOrDefault [toUpper _districtId, createHashMap]; };
+        private _d = [_districts, _districtId, createHashMap] call _hg;
+        if (!(_d isEqualType createHashMap) || {(count _d) == 0}) then { _d = [_districts, toLower _districtId, createHashMap] call _hg; };
+        if (!(_d isEqualType createHashMap) || {(count _d) == 0}) then { _d = [_districts, toUpper _districtId, createHashMap] call _hg; };
 
         if (_d isEqualType []) then { _d = [_d] call _hmCreate; };
         if (_d isEqualType createHashMap) then {
-            _pop = _d getOrDefault ["pop_total", -1];
+            _pop = [_d, "pop_total", -1] call _hg;
             if !(_pop isEqualType 0) then { _pop = -1; };
         };
     };

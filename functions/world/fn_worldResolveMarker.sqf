@@ -14,12 +14,15 @@
 
 params ["_markerName"];
 
+
+// sqflint-compatible helpers
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 if (_markerName isEqualTo "") exitWith {""};
 
 private _aliases = missionNamespace getVariable ["ARC_markerAliases", createHashMap];
 if (_aliases isEqualType createHashMap) then
 {
-    private _alt = _aliases getOrDefault [_markerName, ""];
+    private _alt = [_aliases, _markerName, ""] call _hg;
 	if ((!(_alt isEqualTo "")) && { _alt in allMapMarkers }) exitWith { _alt };
 };
 

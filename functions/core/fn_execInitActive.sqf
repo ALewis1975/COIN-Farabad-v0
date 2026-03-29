@@ -1812,6 +1812,9 @@ if (_showSpawnMarker) then
             private _fn_fallbackRoute = {
                 params ["_s", "_e", "_snapLocal", "_avoidZoneLocal", "_avoidNearLocal", "_avoidNearRLocal"];
 
+
+// sqflint-compatible helpers
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
                 private _hardSnap = missionNamespace getVariable ["ARC_convoyRoadSnapHardM", (_snapLocal * 4)];
                 if (!(_hardSnap isEqualType 0)) then { _hardSnap = (_snapLocal * 4); };
                 _hardSnap = (_hardSnap max (_snapLocal + 80)) min 1400;
@@ -1962,13 +1965,13 @@ if (_showSpawnMarker) then
                 private _bestIdx = 0;
                 private _best    = _open select 0;
                 private _bestKey = str _best;
-                private _bestF   = _f getOrDefault [_bestKey, 1e12];
+                private _bestF   = [_f, _bestKey, 1e12] call _hg;
 
                 for "_i" from 1 to ((count _open) - 1) do
                 {
                     private _r  = _open select _i;
                     private _rk = str _r;
-                    private _fv = _f getOrDefault [_rk, 1e12];
+                    private _fv = [_f, _rk, 1e12] call _hg;
                     if (_fv < _bestF) then { _bestF = _fv; _bestIdx = _i; _best = _r; _bestKey = _rk; };
                 };
 
@@ -1979,13 +1982,13 @@ if (_showSpawnMarker) then
                 _closed set [_bestKey, true];
 
                 private _curPos = getPosATL _best; _curPos resize 3;
-                private _gCur   = _g getOrDefault [_bestKey, 1e12];
+                private _gCur   = [_g, _bestKey, 1e12] call _hg;
 
                 {
                     private _nbr = _x;
                     private _nk  = str _nbr;
 
-                    if !(_closed getOrDefault [_nk, false]) then
+                    if !([_closed, _nk, false] call _hg) then
                     {
                         _node set [_nk, _nbr];
 
@@ -2005,7 +2008,7 @@ if (_showSpawnMarker) then
                         };
 
                         private _tent = _gCur + (_curPos distance2D _nbrPos) + _zPen;
-                        private _gOld = _g getOrDefault [_nk, 1e12];
+                        private _gOld = [_g, _nk, 1e12] call _hg;
 
                         if (_tent < _gOld) then
                         {
@@ -2013,7 +2016,7 @@ if (_showSpawnMarker) then
                             _g set [_nk, _tent];
                             _f set [_nk, _tent + (_nbrPos distance2D _pGoal)];
 
-                            if !(_openKey getOrDefault [_nk, false]) then
+                            if !([_openKey, _nk, false] call _hg) then
                             {
                                 _open pushBack _nbr;
                                 _openKey set [_nk, true];
@@ -2040,7 +2043,7 @@ if (_showSpawnMarker) then
                 _keys pushBack _ck;
                 if (_ck isEqualTo _k0) exitWith {};
 
-                private _prev = _came getOrDefault [_ck, ""];
+                private _prev = [_came, _ck, ""] call _hg;
                 if (_prev isEqualTo "") exitWith { _keys = []; };
 
                 _ck = _prev;
@@ -2060,7 +2063,7 @@ if (_showSpawnMarker) then
             private _pts = [];
 
             {
-                private _r = _node getOrDefault [_x, objNull];
+                private _r = [_node, _x, objNull] call _hg;
                 if (!isNull _r) then
                 {
                     private _p = getPosATL _r; _p resize 3;

@@ -21,6 +21,7 @@ if (!isServer) exitWith {createHashMap};
 if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {createHashMap};
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 private _districts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
 if !(_districts isEqualType createHashMap) exitWith {createHashMap};
@@ -57,7 +58,7 @@ private _totalPop = 0;
 {
     private _d = _districts get _x;
     if !(_d isEqualType createHashMap) then { continue; };
-    private _p = _d getOrDefault ["pop_total", 0];
+    private _p = [_d, "pop_total", 0] call _hg;
     if !(_p isEqualType 0) then { _p = 0; };
     if (_p < 0) then { _p = 0; };
     _weights pushBack [_x, _p];

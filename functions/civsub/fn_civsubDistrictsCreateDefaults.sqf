@@ -6,6 +6,7 @@
 */
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 private _districts = createHashMap;
 
@@ -45,13 +46,13 @@ private _rows = [
 
     private _profile = [_id, _pop, [_cx, _cy], _seed] call ARC_fnc_civsubDistrictSeedProfile;
 
-    private _wBase = _profile getOrDefault ["W_BASE_U", 45];
-    private _rBase = _profile getOrDefault ["R_BASE_U", 55];
-    private _gBase = _profile getOrDefault ["G_BASE_U", 35];
+    private _wBase = [_profile, "W_BASE_U", 45] call _hg;
+    private _rBase = [_profile, "R_BASE_U", 55] call _hg;
+    private _gBase = [_profile, "G_BASE_U", 35] call _hg;
 
-    private _wEff = _profile getOrDefault ["W_EFF_U", _wBase];
-    private _rEff = _profile getOrDefault ["R_EFF_U", _rBase];
-    private _gEff = _profile getOrDefault ["G_EFF_U", _gBase];
+    private _wEff = [_profile, "W_EFF_U", _wBase] call _hg;
+    private _rEff = [_profile, "R_EFF_U", _rBase] call _hg;
+    private _gEff = [_profile, "G_EFF_U", _gBase] call _hg;
 
     private _d = [[
         ["id", _id],

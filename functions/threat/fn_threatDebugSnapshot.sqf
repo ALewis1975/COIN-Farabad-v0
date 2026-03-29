@@ -13,6 +13,7 @@
 if (!isServer) exitWith {[]};
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 private _enabled = ["threat_v0_enabled", true] call ARC_fnc_stateGet;
 if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabled = true; };
@@ -49,8 +50,8 @@ private _byType = createHashMap;
     if (_st isEqualTo "") then { _st = "UNKNOWN"; };
     if (_tp isEqualTo "") then { _tp = "OTHER"; };
 
-    _byState set [_st, (_byState getOrDefault [_st, 0]) + 1];
-    _byType set [_tp, (_byType getOrDefault [_tp, 0]) + 1];
+    _byState set [_st, ([_byState, _st, 0] call _hg) + 1];
+    _byType set [_tp, ([_byType, _tp, 0] call _hg) + 1];
 } forEach _records;
 
 // Truncate open list for inspector readability

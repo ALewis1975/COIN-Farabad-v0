@@ -16,6 +16,9 @@ if (!isServer) exitWith {0};
 if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {0};
 
 params [["_cap", 500, [0]]];
+
+// sqflint-compatible helpers
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 if (_cap < 1) exitWith {0};
 
 private _ids = missionNamespace getVariable ["civsub_v1_identities", createHashMap];
@@ -29,7 +32,7 @@ private _rows = [];
 {
     private _rec = _ids get _x;
     if !(_rec isEqualType createHashMap) then { continue; };
-    private _ts = _rec getOrDefault ["last_interaction_ts", 0];
+    private _ts = [_rec, "last_interaction_ts", 0] call _hg;
     _rows pushBack [_x, _ts];
 } forEach _keys;
 

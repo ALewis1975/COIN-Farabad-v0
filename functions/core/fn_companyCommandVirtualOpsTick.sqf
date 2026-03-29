@@ -25,6 +25,7 @@
 if (!isServer) exitWith {false};
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 private _nodes = ["companyCommandNodes", []] call ARC_fnc_stateGet;
 if (!(_nodes isEqualType []) || { _nodes isEqualTo [] }) exitWith {false};
@@ -82,7 +83,7 @@ private _pickWeightedType = {
     private _sum = 0;
     {
         private _k = _x;
-        private _w = _weights getOrDefault [_k, 0];
+        private _w = [_weights, _k, 0] call _hg;
         if (_w > 0) then
         {
             _sum = _sum + _w;
@@ -124,9 +125,9 @@ private _changed = false;
         private _d = [_nodeZone] call ARC_fnc_civsubDistrictsGetById;
         if (_d isEqualType createHashMap && { (count _d) > 0 }) then
         {
-            private _fear = _d getOrDefault ["fear_idx", 50];
-            private _rEff = _d getOrDefault ["R_EFF_U", 50];
-            private _gEff = _d getOrDefault ["G_EFF_U", 50];
+            private _fear = [_d, "fear_idx", 50] call _hg;
+            private _rEff = [_d, "R_EFF_U", 50] call _hg;
+            private _gEff = [_d, "G_EFF_U", 50] call _hg;
             _districtRisk = (((_fear / 100) * 0.55) + ((_rEff / 100) * 0.45) - ((_gEff / 100) * 0.25)) max 0 min 1;
         };
     };
@@ -191,7 +192,7 @@ private _changed = false;
         default { format ["%1 running presence patrols in %2.", _callsign, _nodeZone] };
     };
 
-    private _priority = ((_weights getOrDefault [_opType, 0.5]) + (_districtRisk * 0.45) + (_threadPressure * 0.35)) min 3;
+    private _priority = (([_weights, _opType, 0.5] call _hg) + (_districtRisk * 0.45) + (_threadPressure * 0.35)) min 3;
 
     private _existingIdx = -1;
     { if ((_x isEqualType []) && { (count _x) >= 14 } && { ((_x select 4) isEqualTo _nodeId) } && { toUpper (_x select 3) in ["PLANNED", "ACTIVE"] }) exitWith { _existingIdx = _forEachIndex; }; } forEach _updatedOps;

@@ -7,6 +7,7 @@
 if (!hasInterface) exitWith {false};
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 private _display = uiNamespace getVariable ["ARC_console_display", displayNull];
 if (isNull _display) exitWith {false};
@@ -152,7 +153,7 @@ switch (_kind) do
             ["Q_OP_AREA", "What is the overall opinion of us in the area?"]
         ]] call _hmCreate;
 
-        private _qlbl = _qMap getOrDefault [_arg, _arg];
+        private _qlbl = [_qMap, _arg, _arg] call _hg;
         private _payload = [[["qid", _arg], ["label", _qlbl]]] call _hmCreate;
         ["QUESTION", _payload, "Question"] call _civReqAction;
     };
@@ -200,7 +201,7 @@ switch (_kind) do
         if (_districts isEqualType []) then { _districts = [_districts] call _hmCreate; };
         if !(_districts isEqualType createHashMap) then { _districts = createHashMap; };
 
-        private _d = _districts getOrDefault [_did, createHashMap];
+        private _d = [_districts, _did, createHashMap] call _hg;
         if (_d isEqualType []) then { _d = [_d] call _hmCreate; };
         if !(_d isEqualType createHashMap) exitWith
         {
@@ -214,7 +215,7 @@ switch (_kind) do
             };
         };
 
-        private _c = _d getOrDefault ["centroid", []];
+        private _c = [_d, "centroid", []] call _hg;
         if !(_c isEqualType [] && { (count _c) >= 2 }) exitWith
         {
             if (_hasPub) then

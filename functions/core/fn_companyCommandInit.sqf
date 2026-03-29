@@ -108,6 +108,9 @@ if (!(_existingNodes isEqualType [])) then { _existingNodes = []; };
 private _seedNode = {
     params ["_nodeId", "_fallback"];
 
+
+// sqflint-compatible helpers
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
     private _base = +_fallback;
     private _existing = _existingNodes select {
         (_x isEqualType []) &&
@@ -167,7 +170,7 @@ private _dedupedOps = [];
 
     if (_status in ["PLANNED", "ACTIVE"]) then
     {
-        private _existingIdx = _opsByNode getOrDefault [_nodeId, -1];
+        private _existingIdx = [_opsByNode, _nodeId, -1] call _hg;
         if (_existingIdx < 0) then
         {
             _opsByNode set [_nodeId, count _dedupedOps];

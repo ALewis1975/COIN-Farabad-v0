@@ -28,7 +28,7 @@ if (isNil "_asset" || {!(_asset isEqualType createHashMap)}) exitWith { false };
 private _debug    = missionNamespace getVariable ["airbase_v1_debug", false];
 private _debugOps = missionNamespace getVariable ["airbase_v1_debugOpsLog", false];
 
-private _veh = _asset getOrDefault ["veh", objNull];
+private _veh = [_asset, "veh", objNull] call _hg;
 if (isNull _veh) exitWith {
     _asset set ["state", "PARKED"]; 
     _asset set ["activeFlight", ""]; 
@@ -36,9 +36,9 @@ if (isNull _veh) exitWith {
 };
 
 private _vehType = typeOf _veh;
-private _towVehVar  = _asset getOrDefault ["towVehVar", ""]; 
-private _towCrewVar = _asset getOrDefault ["towCrewVar", ""]; 
-private _towPathVar = _asset getOrDefault ["towPathVar", ""]; 
+private _towVehVar  = [_asset, "towVehVar", ""] call _hg; 
+private _towCrewVar = [_asset, "towCrewVar", ""] call _hg; 
+private _towPathVar = [_asset, "towPathVar", ""] call _hg; 
 
 private _towVeh = if (_towVehVar != "") then { missionNamespace getVariable [_towVehVar, objNull] } else { objNull };
 private _towCrew = if (_towCrewVar != "") then { missionNamespace getVariable [_towCrewVar, objNull] } else { objNull };
@@ -64,6 +64,9 @@ private _fnUnitPlayBlocking = {
     if (isNull _vehL) exitWith { false };
     if ((count _framesL) == 0) exitWith { false };
 
+
+// sqflint-compatible helpers
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
     _vehL enableSimulationGlobal true;
     _vehL allowDamage false;
     _vehL engineOn true;

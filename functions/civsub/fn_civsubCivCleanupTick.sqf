@@ -9,6 +9,9 @@
 if (!isServer) exitWith {false};
 if !(missionNamespace getVariable ["civsub_v1_civs_enabled", false]) exitWith {false};
 
+
+// sqflint-compatible helpers
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _reg = missionNamespace getVariable ["civsub_v1_civ_registry", createHashMap];
 if !(_reg isEqualType createHashMap) then { _reg = createHashMap; };
 
@@ -25,8 +28,8 @@ if !(_q isEqualType []) then { _q = []; };
     if !(_row isEqualType createHashMap) then {
         _reg deleteAt _k;
     } else {
-        private _u = _row getOrDefault ["unit", objNull];
-        private _did = _row getOrDefault ["districtId", ""]; 
+        private _u = [_row, "unit", objNull] call _hg;
+        private _did = [_row, "districtId", ""] call _hg; 
 
         if (isNull _u) then {
             _reg deleteAt _k;
@@ -60,9 +63,9 @@ if (_n > 0) then
     for "_i" from 0 to (_take - 1) do
     {
         private _k = _q deleteAt 0;
-        private _row = _reg getOrDefault [_k, createHashMap];
+        private _row = [_reg, _k, createHashMap] call _hg;
         if (_row isEqualType createHashMap) then {
-            private _u = _row getOrDefault ["unit", objNull];
+            private _u = [_row, "unit", objNull] call _hg;
             if (!isNull _u) then {
                 [_u] call ARC_fnc_civsubCivDespawnUnit;
             };

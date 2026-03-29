@@ -1,6 +1,9 @@
 /*
     ARC_fnc_civsubTrafficDebugSnapshot
 
+// sqflint-compatible helpers
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+
     Server-only snapshot of CIVTRAF state for debugging/UI integration later.
 
     Returns HashMap with:
@@ -34,13 +37,13 @@ private _per = createHashMap;
 {
     if (isNull _x) then { continue; };
     private _d = _x getVariable ["ARC_civtraf_districtId", "D00"];
-    _per set [_d, 1 + (_per getOrDefault [_d, 0])];
+    _per set [_d, 1 + ([_per, _d, 0] call _hg)];
 } forEach _parked;
 
 {
     if (isNull _x) then { continue; };
     private _d = _x getVariable ["ARC_civtraf_districtId", "D00"];
-    _per set [_d, 1 + (_per getOrDefault [_d, 0])];
+    _per set [_d, 1 + ([_per, _d, 0] call _hg)];
 } forEach _moving;
 
 _out set ["perDistrict", _per];

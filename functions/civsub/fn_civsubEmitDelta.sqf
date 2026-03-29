@@ -25,6 +25,9 @@ params [
     ["_actorUid", "", [""]]
 ];
 
+
+// sqflint-compatible helpers
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 if (_districtId isEqualTo "" || { _event isEqualTo "" }) exitWith {createHashMap};
 
 if !([_event, _payload] call ARC_fnc_civsubDeltaValidate) exitWith {createHashMap};
@@ -60,7 +63,7 @@ if (!isNil "ARC_fnc_civsubLeadEmitBridge") then
 };
 
 // Track last emission for debug inspector
-missionNamespace setVariable ["civsub_v1_lastDelta_id", _bundle getOrDefault ["bundle_id", ""], true];
+missionNamespace setVariable ["civsub_v1_lastDelta_id", [_bundle, "bundle_id", ""] call _hg, true];
 missionNamespace setVariable ["civsub_v1_lastDelta_ts", serverTime, true];
 
 _bundle

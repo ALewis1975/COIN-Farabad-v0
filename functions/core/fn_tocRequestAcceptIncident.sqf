@@ -16,6 +16,7 @@
 if (!isServer) exitWith {false};
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\\core\\fn_rpcValidateSender.sqf"; };
 
@@ -134,15 +135,15 @@ if (missionNamespace getVariable ["civsub_v1_enabled", false]) then
             private _snap = [[
                 ["districtId", _did],
                 ["ts", serverTime],
-                ["W", _d getOrDefault ["W_EFF_U", 0]],
-                ["R", _d getOrDefault ["R_EFF_U", 0]],
-                ["G", _d getOrDefault ["G_EFF_U", 0]],
-                ["civ_cas_kia", _d getOrDefault ["civ_cas_kia", 0]],
-                ["civ_cas_wia", _d getOrDefault ["civ_cas_wia", 0]],
-                ["crime_db_hits", _d getOrDefault ["crime_db_hits", 0]],
-                ["detentions_initiated", _d getOrDefault ["detentions_initiated", 0]],
-                ["detentions_handed_off", _d getOrDefault ["detentions_handed_off", 0]],
-                ["aid_events", _d getOrDefault ["aid_events", 0]]
+                ["W", [_d, "W_EFF_U", 0] call _hg],
+                ["R", [_d, "R_EFF_U", 0] call _hg],
+                ["G", [_d, "G_EFF_U", 0] call _hg],
+                ["civ_cas_kia", [_d, "civ_cas_kia", 0] call _hg],
+                ["civ_cas_wia", [_d, "civ_cas_wia", 0] call _hg],
+                ["crime_db_hits", [_d, "crime_db_hits", 0] call _hg],
+                ["detentions_initiated", [_d, "detentions_initiated", 0] call _hg],
+                ["detentions_handed_off", [_d, "detentions_handed_off", 0] call _hg],
+                ["aid_events", [_d, "aid_events", 0] call _hg]
             ]] call _hmCreate;
 
             ["activeIncidentCivsubStart", _snap] call ARC_fnc_stateSet;

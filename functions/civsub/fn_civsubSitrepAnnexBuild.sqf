@@ -27,6 +27,7 @@ params [
 ];
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 _districtId = toUpper (trim _districtId);
 if (_districtId isEqualTo "") exitWith {""};
@@ -34,7 +35,7 @@ if (_districtId isEqualTo "") exitWith {""};
 private _districts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
 if !(_districts isEqualType createHashMap) exitWith {""};
 
-private _d = _districts getOrDefault [_districtId, createHashMap];
+private _d = [_districts, _districtId, createHashMap] call _hg;
 if (_d isEqualType []) then { _d = [_d] call _hmCreate; };
 if !(_d isEqualType createHashMap) exitWith {""};
 
@@ -45,25 +46,25 @@ private _Scoop = 0;
 private _Sthreat = 0;
 if (_scores isEqualType createHashMap) then
 {
-    _Scoop = _scores getOrDefault ["S_COOP", 0];
-    _Sthreat = _scores getOrDefault ["S_THREAT", 0];
+    _Scoop = [_scores, "S_COOP", 0] call _hg;
+    _Sthreat = [_scores, "S_THREAT", 0] call _hg;
 };
 
 private _intelConf = [_Scoop, _Sthreat] call ARC_fnc_civsubIntelConfidence;
 
-private _W = _d getOrDefault ["W_EFF_U", 0];
-private _R = _d getOrDefault ["R_EFF_U", 0];
-private _G = _d getOrDefault ["G_EFF_U", 0];
+private _W = [_d, "W_EFF_U", 0] call _hg;
+private _R = [_d, "R_EFF_U", 0] call _hg;
+private _G = [_d, "G_EFF_U", 0] call _hg;
 
 // Baseline A.6 counters (persisted per district)
-private _kia = _d getOrDefault ["civ_cas_kia", 0];
-private _wia = _d getOrDefault ["civ_cas_wia", 0];
-private _crimeHits = _d getOrDefault ["crime_db_hits", 0];
-private _detInit = _d getOrDefault ["detentions_initiated", 0];
-private _detHand = _d getOrDefault ["detentions_handed_off", 0];
-private _aid = _d getOrDefault ["aid_events", 0];
+private _kia = [_d, "civ_cas_kia", 0] call _hg;
+private _wia = [_d, "civ_cas_wia", 0] call _hg;
+private _crimeHits = [_d, "crime_db_hits", 0] call _hg;
+private _detInit = [_d, "detentions_initiated", 0] call _hg;
+private _detHand = [_d, "detentions_handed_off", 0] call _hg;
+private _aid = [_d, "aid_events", 0] call _hg;
 
-private _cent = _d getOrDefault ["centroid", [0,0]];
+private _cent = [_d, "centroid", [0,0]] call _hg;
 private _grid = "";
 if (_cent isEqualType [] && { (count _cent) >= 2 }) then
 {
@@ -98,16 +99,16 @@ private _aidS = _aid;
 
 if (_hasWindow) then
 {
-    _Ws = _startHm getOrDefault ["W", _W];
-    _Rs = _startHm getOrDefault ["R", _R];
-    _Gs = _startHm getOrDefault ["G", _G];
+    _Ws = [_startHm, "W", _W] call _hg;
+    _Rs = [_startHm, "R", _R] call _hg;
+    _Gs = [_startHm, "G", _G] call _hg;
 
-    _kiaS = _startHm getOrDefault ["civ_cas_kia", _kia];
-    _wiaS = _startHm getOrDefault ["civ_cas_wia", _wia];
-    _crimeS = _startHm getOrDefault ["crime_db_hits", _crimeHits];
-    _detInitS = _startHm getOrDefault ["detentions_initiated", _detInit];
-    _detHandS = _startHm getOrDefault ["detentions_handed_off", _detHand];
-    _aidS = _startHm getOrDefault ["aid_events", _aid];
+    _kiaS = [_startHm, "civ_cas_kia", _kia] call _hg;
+    _wiaS = [_startHm, "civ_cas_wia", _wia] call _hg;
+    _crimeS = [_startHm, "crime_db_hits", _crimeHits] call _hg;
+    _detInitS = [_startHm, "detentions_initiated", _detInit] call _hg;
+    _detHandS = [_startHm, "detentions_handed_off", _detHand] call _hg;
+    _aidS = [_startHm, "aid_events", _aid] call _hg;
 };
 
 private _dW = _W - _Ws;
@@ -127,25 +128,25 @@ if (_last isEqualType []) then { _last = [_last] call _hmCreate; };
 private _lastEvent = "";
 if (_last isEqualType createHashMap) then
 {
-    private _did = _last getOrDefault ["district_id", ""]; // contract
-    if (_did isEqualTo "") then { _did = _last getOrDefault ["districtId", ""]; }; // legacy
+    private _did = [_last, "district_id", ""] call _hg; // contract
+    if (_did isEqualTo "") then { _did = [_last, "districtId", ""] call _hg; }; // legacy
     if ((toUpper _did) isEqualTo _districtId) then
     {
-        private _src = _last getOrDefault ["source", createHashMap];
+        private _src = [_last, "source", createHashMap] call _hg;
         if (_src isEqualType []) then { _src = [_src] call _hmCreate; };
         private _ev = "";
-        if (_src isEqualType createHashMap) then { _ev = _src getOrDefault ["event", ""]; };
+        if (_src isEqualType createHashMap) then { _ev = [_src, "event", ""] call _hg; };
         if (_ev isEqualTo "") then { _ev = "CIVSUB_EVENT"; };
 
-        private _ts = _last getOrDefault ["ts", -1];
-        private _lead = _last getOrDefault ["lead_emit", createHashMap];
+        private _ts = [_last, "ts", -1] call _hg;
+        private _lead = [_last, "lead_emit", createHashMap] call _hg;
         if (_lead isEqualType []) then { _lead = [_lead] call _hmCreate; };
         private _lt = "";
         private _conf = -1;
         if (_lead isEqualType createHashMap) then
         {
-            _lt = _lead getOrDefault ["lead_type", ""]; 
-            _conf = _lead getOrDefault ["confidence", -1];
+            _lt = [_lead, "lead_type", ""] call _hg; 
+            _conf = [_lead, "confidence", -1] call _hg;
         };
 
         private _tsTxt = if (_ts < 0) then {""} else { str (round _ts) };

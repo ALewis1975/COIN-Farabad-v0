@@ -38,6 +38,7 @@ params [
 if (isNull _display) exitWith {false};
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 private _rxMaxItems = missionNamespace getVariable ["ARC_consoleRxMaxItems", 80];
 if (!(_rxMaxItems isEqualType 0) || { _rxMaxItems < 10 }) then { _rxMaxItems = 80; };
@@ -278,12 +279,12 @@ private _renderS2CatPanelsFromMaster = {
                 _sectionCandidate = "INTEL / LEADS";
             };
 
-            if (!isNull (_map getOrDefault [_sectionCandidate, controlNull])) then {
+            if (!isNull ([_map, _sectionCandidate, controlNull] call _hg)) then {
                 _section = _sectionCandidate;
             };
         } else {
             if (_section isEqualTo "") then { continue; };
-            private _lb = _map getOrDefault [_section, controlNull];
+            private _lb = [_map, _section, controlNull] call _hg;
             if (isNull _lb) then { continue; };
             if (!(_d isEqualType "")) then { continue; };
             if (_d in ["", "HDR", "SEP"]) then { continue; };
@@ -472,17 +473,17 @@ if (_rebuild) then
                     if ((count _pub) > 0) then
                     {
                         private _ph = [_pub] call _hmCreate;
-                        _W = _ph getOrDefault ["W", _W];
-                        _R = _ph getOrDefault ["R", _R];
-                        _G = _ph getOrDefault ["G", _G];
+                        _W = [_ph, "W", _W] call _hg;
+                        _R = [_ph, "R", _R] call _hg;
+                        _G = [_ph, "G", _G] call _hg;
 
-                        _kia = _ph getOrDefault ["civ_cas_kia", 0];
-                        _wia = _ph getOrDefault ["civ_cas_wia", 0];
-                        _hits = _ph getOrDefault ["crime_db_hits", 0];
-                        _detI = _ph getOrDefault ["detentions_initiated", 0];
-                        _detH = _ph getOrDefault ["detentions_handed_off", 0];
-                        _aid = _ph getOrDefault ["aid_events", 0];
-                        _ts = _ph getOrDefault ["ts", 0];
+                        _kia = [_ph, "civ_cas_kia", 0] call _hg;
+                        _wia = [_ph, "civ_cas_wia", 0] call _hg;
+                        _hits = [_ph, "crime_db_hits", 0] call _hg;
+                        _detI = [_ph, "detentions_initiated", 0] call _hg;
+                        _detH = [_ph, "detentions_handed_off", 0] call _hg;
+                        _aid = [_ph, "aid_events", 0] call _hg;
+                        _ts = [_ph, "ts", 0] call _hg;
                     };
 
                     // Derived scores (locked v1 math, using W/R/G from pub snapshot)
@@ -549,7 +550,7 @@ if (_rebuild) then
 
             private _detained = false;
             private _snap = uiNamespace getVariable ["ARC_civsubInteract_snapshot", createHashMap];
-            if (_snap isEqualType createHashMap) then { _detained = _snap getOrDefault ["detained", false]; };
+            if (_snap isEqualType createHashMap) then { _detained = [_snap, "detained", false] call _hg; };
 
             if (_detained) then {
                 ["Release", "CIV_CONTACT_RELEASE"] call _addTool;
@@ -682,18 +683,18 @@ private _appendCivsubResult = {
     private _rs = uiNamespace getVariable ["ARC_console_civsubLastResult", createHashMap];
     if !(_rs isEqualType createHashMap) exitWith { _txtOut };
 
-    private _type = _rs getOrDefault ["type", ""];
+    private _type = [_rs, "type", ""] call _hg;
     if !(_type isEqualType "") then { _type = ""; };
     _type = toUpper (trim _type);
     if (_type isEqualTo "" || {_typeExpect isEqualTo ""} || {!(_type isEqualTo _typeExpect)}) exitWith { _txtOut };
 
-    private _html = _rs getOrDefault ["html", ""];
+    private _html = [_rs, "html", ""] call _hg;
     if !(_html isEqualType "") then { _html = ""; };
 
-    private _ok = _rs getOrDefault ["ok", false];
+    private _ok = [_rs, "ok", false] call _hg;
     if !(_ok isEqualType true) then { _ok = false; };
 
-    private _updatedAt = _rs getOrDefault ["updatedAtText", "--:--:--"];
+    private _updatedAt = [_rs, "updatedAtText", "--:--:--"] call _hg;
     if !(_updatedAt isEqualType "") then { _updatedAt = "--:--:--"; };
 
     private _statusLbl = if (_ok) then { "COMPLETE" } else { "WARNING" };
@@ -759,17 +760,17 @@ else
             if (!(_pub isEqualType [])) then { _pub = []; };
             private _ph = if ((count _pub) > 0) then { [_pub] call _hmCreate } else { createHashMap };
 
-            private _W = _ph getOrDefault ["W", 45];
-            private _R = _ph getOrDefault ["R", 55];
-            private _G = _ph getOrDefault ["G", 35];
+            private _W = [_ph, "W", 45] call _hg;
+            private _R = [_ph, "R", 55] call _hg;
+            private _G = [_ph, "G", 35] call _hg;
 
-            private _kia = _ph getOrDefault ["civ_cas_kia", 0];
-            private _wia = _ph getOrDefault ["civ_cas_wia", 0];
-            private _hits = _ph getOrDefault ["crime_db_hits", 0];
-            private _detI = _ph getOrDefault ["detentions_initiated", 0];
-            private _detH = _ph getOrDefault ["detentions_handed_off", 0];
-            private _aid  = _ph getOrDefault ["aid_events", 0];
-            private _ts   = _ph getOrDefault ["ts", 0];
+            private _kia = [_ph, "civ_cas_kia", 0] call _hg;
+            private _wia = [_ph, "civ_cas_wia", 0] call _hg;
+            private _hits = [_ph, "crime_db_hits", 0] call _hg;
+            private _detI = [_ph, "detentions_initiated", 0] call _hg;
+            private _detH = [_ph, "detentions_handed_off", 0] call _hg;
+            private _aid  = [_ph, "aid_events", 0] call _hg;
+            private _ts   = [_ph, "ts", 0] call _hg;
 
             private _Scoop = (0.55 * _W) + (0.35 * _G) - (0.70 * _R);
             private _Sthreat = (1.00 * _R) - (0.35 * _W) - (0.25 * _G);
@@ -817,7 +818,7 @@ else
                 ["D20", []]
             ]] call _hmCreate;
 
-            private _sett = _settByDid getOrDefault [_did, []];
+            private _sett = [_settByDid, _did, []] call _hg;
             private _settLine = if ((count _sett) > 0) then { _sett joinString "; " } else { "None (rural / dispersed)" };
 
 // -------------------------------------------------------------------
@@ -1204,7 +1205,7 @@ else
                 ["Q_OP_US", "What is your opinion of us?"],
                 ["Q_OP_AREA", "What is the overall opinion of us in the area?"]
             ]] call _hmCreate;
-            private _qlbl = _qMap getOrDefault [_qid, _qid];
+            private _qlbl = [_qMap, _qid, _qid] call _hg;
 
             _txt = format [
                 "<t size='1.1' font='PuristaMedium'>CIVSUB: Ask Question</t><br/><br/>" +
@@ -1251,14 +1252,14 @@ else
             private _mixedCnt = 0;
 
             {
-                private _did = _x getOrDefault ["districtId", ""];
+                private _did = [_x, "districtId", ""] call _hg;
                 if (_did isEqualTo "") then { continue; };
 
-                private _W = _x getOrDefault ["W", 0];
-                private _R = _x getOrDefault ["R", 0];
-                private _G = _x getOrDefault ["G", 0];
-                private _pop = _x getOrDefault ["population", 0];
-                private _alive = _x getOrDefault ["alive", 0];
+                private _W = [_x, "W", 0] call _hg;
+                private _R = [_x, "R", 0] call _hg;
+                private _G = [_x, "G", 0] call _hg;
+                private _pop = [_x, "population", 0] call _hg;
+                private _alive = [_x, "alive", 0] call _hg;
 
                 // Locked v1 math
                 private _Scoop = 0;

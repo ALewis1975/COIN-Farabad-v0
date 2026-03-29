@@ -42,6 +42,9 @@ private _isNumericPos =
     private _n = count _cand;
     if !(_n in [2, 3]) exitWith {false};
 
+
+// sqflint-compatible helpers
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
     private _nums = true;
     {
         if !(_x isEqualType 0) exitWith { _nums = false; };
@@ -98,7 +101,7 @@ diag_log format ["[FARABAD][MAPCLICK][CLICK] pos=%1 source=%2 payloadType=%3 pay
 
 private _ok = [_pos] call ARC_fnc_mapClick_submit;
 private _ctx = uiNamespace getVariable ["ARC_mapClick_ctx", createHashMap];
-private _type = toUpper (_ctx getOrDefault ["type", ""]);
+private _type = toUpper ([_ctx, "type", ""] call _hg);
 
 if (_ok) then
 {
@@ -106,7 +109,7 @@ if (_ok) then
     {
         case "INTEL_LOG":
         {
-            private _cat = _ctx getOrDefault ["category", "SIGHTING"];
+            private _cat = [_ctx, "category", "SIGHTING"] call _hg;
             private _safeGridPos = [];
             if (_pos isEqualType []) then
             {

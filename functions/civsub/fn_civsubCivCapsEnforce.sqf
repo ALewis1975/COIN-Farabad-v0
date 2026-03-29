@@ -35,8 +35,11 @@ private _keys = keys _reg;
 private _keysEvictable = _keys select {
     private _row = _reg get _x;
     if !(_row isEqualType createHashMap) exitWith {false};
-    private _u = _row getOrDefault ["unit", objNull];
+    private _u = [_row, "unit", objNull] call _hg;
     if (isNull _u) exitWith {false};
+
+// sqflint-compatible helpers
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
     !([_u] call ARC_fnc_civsubCivIsProtected)
 };
 
@@ -55,7 +58,7 @@ if (_recycleDist > 0 && { count _keysEvictable > 0 }) then
             private _k = _x;
             private _row = _reg get _k;
             if !(_row isEqualType createHashMap) then { continue; };
-            private _u = _row getOrDefault ["unit", objNull];
+            private _u = [_row, "unit", objNull] call _hg;
             if (isNull _u || { !alive _u }) then { continue; };
 
             private _uPos = getPosATL _u;
@@ -91,7 +94,7 @@ if ((count _keys) > _capGE && {count _keysEvictable > 0}) then
     private _sorted = _keysEvictable apply {
         private _row = _reg get _x;
         private _ts = 0;
-        if (_row isEqualType createHashMap) then { _ts = _row getOrDefault ["spawnTs", 0]; };
+        if (_row isEqualType createHashMap) then { _ts = [_row, "spawnTs", 0] call _hg; };
         [_ts, _x]
     };
     _sorted sort true;
@@ -109,9 +112,9 @@ private _byD = createHashMap;
 {
     private _row = _reg get _x;
     if (_row isEqualType createHashMap) then {
-        private _did = _row getOrDefault ["districtId", ""]; 
+        private _did = [_row, "districtId", ""] call _hg; 
         if !(_did isEqualTo "") then {
-            private _arr = _byD getOrDefault [_did, []];
+            private _arr = [_byD, _did, []] call _hg;
             _arr pushBack _x;
             _byD set [_did, _arr];
         };
@@ -121,7 +124,7 @@ private _byD = createHashMap;
 {
     private _did = _x;
     private _arr = _byD get _did;
-    private _capDThis = _ovMap getOrDefault [_did, (_capByD getOrDefault [_did, _capDE])];
+    private _capDThis = [_ovMap, _did, ([_capByD, _did, _capDE] call _hg)] call _hg;
     if !(_capDThis isEqualType 0) then { _capDThis = _capDE; };
     if (_capDThis < 0) then { _capDThis = 0; };
 
@@ -130,7 +133,7 @@ private _byD = createHashMap;
         private _sorted = _arr apply {
             private _row = _reg get _x;
             private _ts = 0;
-            if (_row isEqualType createHashMap) then { _ts = _row getOrDefault ["spawnTs", 0]; };
+            if (_row isEqualType createHashMap) then { _ts = [_row, "spawnTs", 0] call _hg; };
             [_ts, _x]
         };
         _sorted sort true;
