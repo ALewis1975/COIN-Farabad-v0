@@ -1399,3 +1399,29 @@ git --no-pager diff --check
 | Code review feedback pass | PASS | Switched high-frequency activity telemetry writes to server-local (`public=false`) to avoid unnecessary replication churn |
 | Re-run compat scan (3 touched files) | PASS | No known parser-compat patterns found |
 | Re-run sqflint (3 touched files) | FAIL | Same legacy parser errors in unchanged map/keys constructs; no new parser-compat regressions |
+
+## 2026-03-29 21:24–21:35 UTC — RPT Bug Fix: `call getOrDefault` runtime crash
+
+- **Branch:** copilot/fix-undefined-variable-error-again
+- **Commit:** unrecoverable (rationale: fix applied in current working tree; no prior SHA)
+- **Scenario:** RPT `Arma3_x64_2026-03-29_10-57-25.rpt` — "Undefined variable in expression: getordefault" looping in CIVSUB sampler and init threads
+
+### Root Cause
+
+Three files used `[map, key, default] call getOrDefault` — but `getOrDefault` is a SQF binary operator, not a callable function. At runtime Arma 3 reports `Undefined variable in expression: getordefault`. The correct pattern per the compat guide is `[map, key, default] call _hg` where `_hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]"`.
+
+The RPT also showed a cascade error `_cur` undefined in `fn_civsubCivSamplerTick.sqf` line 140 — this was a direct consequence of the failed `call getOrDefault` line earlier in the same block; resolved by the same fix.
+
+### Files Changed
+
+- `functions/civsub/fn_civsubCivSamplerTick.sqf` — 6 call sites fixed; `_hg` helper added after exitWith guards
+- `functions/civsub/fn_civsubInitServer.sqf` — 2 call sites fixed inside `[] spawn` block; `_hg` added as first line of spawn body
+- `functions/civsub/fn_civsubTrafficDebugSnapshot.sqf` — 2 call sites fixed; `_hg` helper added after exitWith guard
+
+### Checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | SQFLINT compat scan (3 changed files) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubCivSamplerTick.sqf functions/civsub/fn_civsubInitServer.sqf functions/civsub/fn_civsubTrafficDebugSnapshot.sqf` | PASS | No known parser-compat patterns found |
+| 2 | Confirm no remaining `call getOrDefault` in functions/ | `grep -rn "call getOrDefault" functions/` | PASS | 0 matches |
+| 3 | Dedicated-server runtime validation | N/A | BLOCKED | No Arma dedicated server/JIP runtime available in this container |

@@ -14,6 +14,8 @@ if (!isServer) exitWith {false};
 if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {false};
 if !(missionNamespace getVariable ["civsub_v1_civs_enabled", false]) exitWith {false};
 
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+
 private _dbg = missionNamespace getVariable ["civsub_v1_debug", false];
 
 private _players = [] call ARC_fnc_civsubBubbleGetPlayers;
@@ -29,7 +31,7 @@ private _pAnch = createHashMap;
         private _pos = getPosATL _x;
         private _did = [_pos] call ARC_fnc_civsubDistrictsFindByPos;
         if !(_did isEqualTo "") then {
-            private _arr = [_pAnch, _did, []] call getOrDefault;
+            private _arr = [_pAnch, _did, []] call _hg;
             if !(_arr isEqualType []) then { _arr = []; };
             _arr pushBack _pos;
             _pAnch set [_did, _arr];
@@ -79,7 +81,7 @@ if (_capGE < 0) then { _capGE = 0; };
 
 {
     private _did0 = _x;
-    private _cap0 = [_capByD, _did0, _capDE] call getOrDefault;
+    private _cap0 = [_capByD, _did0, _capDE] call _hg;
     if !(_cap0 isEqualType 0) then { _cap0 = _capDE; };
     _cap0 = floor (_cap0 * _mCiv);
     if (_cap0 < 0) then { _cap0 = 0; };
@@ -106,9 +108,9 @@ private _counts = createHashMap;
 {
     private _row = _reg get _x;
     if (_row isEqualType createHashMap) then {
-        private _did = [_row, "districtId", ""] call getOrDefault;
+        private _did = [_row, "districtId", ""] call _hg;
         if !(_did isEqualTo "") then {
-            _counts set [_did, ([_counts, _did, 0] call getOrDefault) + 1];
+            _counts set [_did, ([_counts, _did, 0] call _hg) + 1];
         };
     };
 } forEach (keys _reg);
@@ -125,7 +127,7 @@ if (_dbg) then {
     if (_total >= _capGE) exitWith {};
 
     private _did = _x;
-    private _cur = [_counts, _did, 0] call getOrDefault;
+    private _cur = [_counts, _did, 0] call _hg;
 
     private _budget = missionNamespace getVariable ["civsub_v1_civ_spawn_perDistrictPerTick", 1];
     if !(_budget isEqualType 0) then { _budget = 1; };
@@ -133,7 +135,7 @@ if (_dbg) then {
 
     private _spawned = 0;
 
-    private _capThis = [_capByD, _did, _capDE] call getOrDefault;
+    private _capThis = [_capByD, _did, _capDE] call _hg;
     if !(_capThis isEqualType 0) then { _capThis = _capDE; };
     if (_capThis < 0) then { _capThis = 0; };
 

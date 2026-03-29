@@ -166,6 +166,7 @@ if ((missionNamespace getVariable ["civsub_v1_harm_enabled", true]) && { mission
         missionNamespace setVariable ["civsub_v1_wiaThreadRunning", true, true];
         [] spawn
         {
+            private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
             while { isServer && { missionNamespace getVariable ["civsub_v1_enabled", false] } && { missionNamespace getVariable ["civsub_v1_harm_enabled", true] } && { missionNamespace getVariable ["civsub_v1_wia_enabled", true] } } do
             {
                 uiSleep 2;
@@ -174,10 +175,10 @@ if ((missionNamespace getVariable ["civsub_v1_harm_enabled", true]) && { mission
                 if !(_reg isEqualType createHashMap) then { continue; };
 
                 {
-                    private _row = [_reg, _x, createHashMap] call getOrDefault;
+                    private _row = [_reg, _x, createHashMap] call _hg;
                     if !(_row isEqualType createHashMap) then { continue; };
 
-                    private _u = [_row, "unit", objNull] call getOrDefault;
+                    private _u = [_row, "unit", objNull] call _hg;
                     if (isNull _u) then { continue; };
                     if !(alive _u) then { continue; };
                     if !(_u getVariable ["civsub_v1_isCiv", false]) then { continue; };
