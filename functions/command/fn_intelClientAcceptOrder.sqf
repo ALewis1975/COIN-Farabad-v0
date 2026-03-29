@@ -26,8 +26,8 @@ private _o = [];
 {
     if (_x isEqualType [] && { (count _x) >= 7 }) then
     {
-        private _st = toUpper (_x select 2);
-        private _tg = _x select 4;
+        private _st = toUpper (_x # 2);
+        private _tg = _x # 4;
         if (_st isEqualTo "ISSUED" && { _tg isEqualTo _gid }) exitWith { _o = _x; };
     };
 } forEach _orders;
@@ -41,7 +41,7 @@ private _getPair = {
     params ["_pairs", "_k", "_d"];
     if (!(_pairs isEqualType [])) exitWith { _d };
     {
-        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _x select 1 };
+        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _x # 1 };
     } forEach _pairs;
     _d
 };
@@ -74,13 +74,13 @@ switch (_orderType) do
         private _leadPos = [_data, "leadPos", []] call _getPair;
         private _grid = if (_leadPos isEqualType [] && { (count _leadPos) >= 2 }) then { mapGridPosition _leadPos } else { "" };
         _lines pushBack format ["Lead: %1", _leadName];
-        if (!(_grid isEqualTo "")) then { _lines pushBack format ["Lead Location: %1", _grid]; };
+        if (_grid isNotEqualTo "") then { _lines pushBack format ["Lead Location: %1", _grid]; };
     };
 
     default { };
 };
 
-if (!(_note isEqualTo "")) then
+if (_note isNotEqualTo "") then
 {
     _lines pushBack "";
     _lines pushBack "TOC Note:";

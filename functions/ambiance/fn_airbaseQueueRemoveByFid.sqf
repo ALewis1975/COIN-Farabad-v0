@@ -9,12 +9,9 @@ params [
     ["_flightId", "", [""]]
 ];
 
-
-// sqflint-compatible helpers
-private _trimFn  = compile "params ['_s']; trim _s";
 if (!(_queue isEqualType [])) then { _queue = []; };
 if (!(_flightId isEqualType "")) then { _flightId = ""; };
-_flightId = [_flightId] call _trimFn;
+_flightId = trim _flightId;
 
 if (_flightId isEqualTo "") exitWith { [_queue, false, []] };
 

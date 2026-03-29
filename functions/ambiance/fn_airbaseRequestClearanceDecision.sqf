@@ -33,7 +33,7 @@ if !(_requestIdCheck param [0, false]) exitWith {
 
 if (!(_approve isEqualType true) && !(_approve isEqualType false)) then { _approve = false; };
 if (!(_reason isEqualType "")) then { _reason = ""; };
-_reason = [_reason] call _trimFn;
+_reason = trim _reason;
 if (_reason isEqualTo "") then { _reason = if (_approve) then {"TOWER_APPROVE"} else {"TOWER_DENY"}; };
 
 private _actionToken = if (_approve) then {"APPROVE"} else {"DENY"};
@@ -76,13 +76,10 @@ private _idx = -1;
 { if ((_x param [0, ""]) isEqualTo _requestId) exitWith { _idx = _forEachIndex; }; } forEach _requests;
 if (_idx < 0) exitWith {false};
 
-
-// sqflint-compatible helpers
-private _trimFn  = compile "params ['_s']; trim _s";
-private _rec = _requests select _idx;
+private _rec = _requests # _idx;
 private _requesterUid = _rec param [2, ""];
 private _requesterOwner = -1;
-if (!(_requesterUid isEqualTo "")) then {
+if (_requesterUid isNotEqualTo "") then {
     {
         if ((getPlayerUID _x) isEqualTo _requesterUid) exitWith { _requesterOwner = owner _x; };
     } forEach allPlayers;
@@ -136,7 +133,7 @@ if (_approve) then {
     if (!(_runwayState isEqualType "")) then { _runwayState = "OPEN"; };
     private _runwayOwner = missionNamespace getVariable ["airbase_v1_runwayOwner", ""];
     if (!(_runwayOwner isEqualType "")) then { _runwayOwner = ""; };
-    if (_runwayState in ["RESERVED", "OCCUPIED"] && { !(_runwayOwner isEqualTo "") }) exitWith {
+    if (_runwayState in ["RESERVED", "OCCUPIED"] && { _runwayOwner isNotEqualTo "" }) exitWith {
         private _owner = owner _caller;
         if (_owner > 0) then { [format ["Decision rejected: runway locked (%1 by %2).", _runwayState, _runwayOwner]] remoteExec ["ARC_fnc_clientHint", _owner]; };
         false

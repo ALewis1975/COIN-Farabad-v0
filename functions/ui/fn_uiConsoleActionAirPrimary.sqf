@@ -49,10 +49,10 @@ if (_airMode isEqualTo "PILOT") exitWith {
             if (_requestType isEqualTo "CANCEL") then {
                 private _pub = missionNamespace getVariable ["ARC_pub_state", []];
                 private _air = [_pub, "airbase", []] call {
-                    params ["_pairs", "_k", "_def"]; private _v=_def; { if (_x isEqualType [] && {(count _x)>=2} && {(_x select 0) isEqualTo _k}) exitWith {_v=_x select 1}; } forEach _pairs; _v
+                    params ["_pairs", "_k", "_def"]; private _v=_def; { if (_x isEqualType [] && {(count _x)>=2} && {(_x#0) isEqualTo _k}) exitWith {_v=_x#1}; } forEach _pairs; _v
                 };
                 private _pending = [_air, "clearancePending", []] call {
-                    params ["_pairs", "_k", "_def"]; private _v=_def; { if (_x isEqualType [] && {(count _x)>=2} && {(_x select 0) isEqualTo _k}) exitWith {_v=_x select 1}; } forEach _pairs; _v
+                    params ["_pairs", "_k", "_def"]; private _v=_def; { if (_x isEqualType [] && {(count _x)>=2} && {(_x#0) isEqualTo _k}) exitWith {_v=_x#1}; } forEach _pairs; _v
                 };
                 private _uid = getPlayerUID player;
                 private _rid = "";
@@ -60,7 +60,7 @@ if (_airMode isEqualTo "PILOT") exitWith {
                     if (!(_x isEqualType [])) then { continue; };
                     private _meta = _x param [9, []];
                     private _pilotUid = "";
-                    { if (_x isEqualType [] && {(count _x)>=2} && {(_x select 0) isEqualTo "pilotUid"}) exitWith { _pilotUid = _x select 1; }; } forEach _meta;
+                    { if (_x isEqualType [] && {(count _x)>=2} && {(_x#0) isEqualTo "pilotUid"}) exitWith { _pilotUid = _x#1; }; } forEach _meta;
                     if (_pilotUid isEqualTo _uid) exitWith { _rid = _x param [0, ""]; };
                 } forEach _pending;
 

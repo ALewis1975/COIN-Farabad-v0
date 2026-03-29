@@ -16,7 +16,6 @@
 if (!hasInterface) exitWith { true };
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
-private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 private _d = uiNamespace getVariable ["ARC_civsubInteract_display", displayNull];
 if (isNull _d) exitWith { true };
@@ -132,7 +131,7 @@ if (_selA >= 0) then {
         case "DETAIN": {
             private _snap = uiNamespace getVariable ["ARC_civsubInteract_snapshot", createHashMap];
             private _det = false;
-            if (_snap isEqualType createHashMap) then { _det = [_snap, "detained", false] call _hg; };
+            if (_snap isEqualType createHashMap) then { _det = _snap getOrDefault ["detained", false]; };
             if (_det) exitWith {
                 _resp ctrlSetStructuredText parseText "<t size='0.9'>Civilian is already detained.</t>";
                 uiNamespace setVariable ["ARC_civsubInteract_actionInProgress", false];
@@ -144,7 +143,7 @@ if (_selA >= 0) then {
         case "RELEASE": {
             private _snap = uiNamespace getVariable ["ARC_civsubInteract_snapshot", createHashMap];
             private _det = false;
-            if (_snap isEqualType createHashMap) then { _det = [_snap, "detained", false] call _hg; };
+            if (_snap isEqualType createHashMap) then { _det = _snap getOrDefault ["detained", false]; };
             if (!_det) exitWith {
                 _resp ctrlSetStructuredText parseText "<t size='0.9'>Civilian is not detained.</t>";
                 uiNamespace setVariable ["ARC_civsubInteract_actionInProgress", false];

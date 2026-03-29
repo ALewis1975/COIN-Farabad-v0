@@ -28,7 +28,7 @@ params [
 if (!([_approver, "ARC_fnc_intelQueueDecide", "Queue decision rejected: sender verification failed.", "TOC_QUEUE_DECIDE_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 if (!(_qid isEqualType "")) then { _qid = ""; };
-_qid = [_qid] call _trimFn;
+_qid = trim _qid;
 if (_qid isEqualTo "") exitWith {false};
 
 if (!(_approve isEqualType true)) then { _approve = false; };
@@ -43,8 +43,8 @@ if (!(_q isEqualType [])) exitWith {false};
 private _idx = -1;
 for "_i" from 0 to ((count _q) - 1) do
 {
-    private _it = _q select _i;
-    if (_it isEqualType [] && { (count _it) >= 12 } && { (_it select 0) isEqualTo _qid }) exitWith
+    private _it = _q # _i;
+    if (_it isEqualType [] && { (count _it) >= 12 } && { (_it # 0) isEqualTo _qid }) exitWith
     {
         _idx = _i;
     };
@@ -52,7 +52,7 @@ for "_i" from 0 to ((count _q) - 1) do
 
 if (_idx < 0) exitWith {false};
 
-private _item = _q select _idx;
+private _item = _q # _idx;
 _item params [
     "_id",
     "_createdAt",
@@ -86,10 +86,10 @@ if (!isNull _approver) then
     };
 };
 
-if (!(_status isEqualType "") || { !((toUpper _status) isEqualTo "PENDING") }) exitWith {false};
+if (!(_status isEqualType "") || { toUpper _status isNotEqualTo "PENDING" }) exitWith {false};
 
 private _newStatus = if (_approve) then {"APPROVED"} else {"REJECTED"};
-private _dec = [serverTime, _by, _approve, [_note] call _trimFn];
+private _dec = [serverTime, _by, _approve, trim _note];
 
 // Update the queue item
 _item set [2, _newStatus];
@@ -106,9 +106,9 @@ private _getP = {
     if (!(_pairs isEqualType [])) exitWith { _d };
     private _out = _d;
     {
-        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith
+        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith
         {
-            _out = _x select 1;
+            _out = _x # 1;
         };
     } forEach _pairs;
     _out
@@ -118,14 +118,11 @@ private _getP = {
 private _setPair = {
     params ["_pairs", "_k", "_v"];
 
-
-// sqflint-compatible helpers
-private _trimFn  = compile "params ['_s']; trim _s";
     if (!(_pairs isEqualType [])) then { _pairs = []; };
     if (!(_k isEqualType "")) then { _k = str _k; };
 
     private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
 
     if (_idx < 0) then
     {
@@ -157,12 +154,12 @@ if (_approve) then
             private _pri      = [_payload, "priority", 3] call _getP;
 
             if (!(_leadType isEqualType "")) then { _leadType = "RECON"; };
-            _leadType = toUpper ([_leadType] call _trimFn);
+            _leadType = toUpper (trim _leadType);
 
             if (!(_disp isEqualType "")) then { _disp = _summary; };
-            _disp = [_disp] call _trimFn;
+            _disp = trim _disp;
             if (_disp isEqualTo "") then { _disp = "Lead: S2 Requested Collection"; };
-            if (!(((toLower _disp) find "lead:") isEqualTo 0)) then { _disp = format ["Lead: %1", _disp]; };
+            if ((toLower _disp) find "lead:" isNotEqualTo 0) then { _disp = format ["Lead: %1", _disp]; };
 
             if (!(_strength isEqualType 0)) then { _strength = 0.55; };
             _strength = (_strength max 0.05) min 0.95;
@@ -171,7 +168,7 @@ if (_approve) then
             _ttl = (_ttl max (10*60)) min (6*60*60);
 
             if (!(_tag isEqualType "")) then { _tag = "S2_REQUEST"; };
-            _tag = [_tag] call _trimFn;
+            _tag = trim _tag;
             if (_tag isEqualTo "") then { _tag = "S2_REQUEST"; };
 
             if (!(_pri isEqualType 0)) then { _pri = 3; };
@@ -200,7 +197,7 @@ if (_approve) then
 
 
             // Enqueue into TOC backlog so the next incident generator can prefer this approved lead.
-            if (!isNil "ARC_fnc_tocBacklogEnqueue" && { _lid isEqualType "" } && { !(_lid isEqualTo "") }) then
+            if (!isNil "ARC_fnc_tocBacklogEnqueue" && { _lid isEqualType "" } && { _lid isNotEqualTo "" }) then
             {
                 [_lid, _pri, _id, _by, _summary] call ARC_fnc_tocBacklogEnqueue;
             };
@@ -228,8 +225,8 @@ if (_approve) then
             {
                 if (_x isEqualType "") then
                 {
-                    private _lid = [_x] call _trimFn;
-                    if (!(_lid isEqualTo "")) then { _approved pushBackUnique _lid; };
+                    private _lid = trim _x;
+                    if (_lid isNotEqualTo "") then { _approved pushBackUnique _lid; };
                 };
             } forEach _leadIds;
 
@@ -258,7 +255,7 @@ if (_approve) then
             if (!isNil "ARC_fnc_tocBacklogEnqueue") then
             {
                 {
-                    if (_x isEqualType "" && { !(_x isEqualTo "") }) then
+                    if (_x isEqualType "" && { _x isNotEqualTo "" }) then
                     {
                         [_x, 3, _id, _by, _summary] call ARC_fnc_tocBacklogEnqueue;
                     };
@@ -292,11 +289,11 @@ if (_approve) then
             private _proceedIntent = [_payload, "proceedIntent", ""] call _getP;
 
             if (!(_req isEqualType "")) then { _req = "RTB"; };
-            _req = toUpper ([_req] call _trimFn);
+            _req = toUpper (trim _req);
             if !(_req in ["RTB","HOLD","PROCEED"]) then { _req = "RTB"; };
 
             if (!(_purpose isEqualType "")) then { _purpose = "REFIT"; };
-            _purpose = toUpper ([_purpose] call _trimFn);
+            _purpose = toUpper (trim _purpose);
             if !(_purpose in ["REFIT","INTEL","EPW"]) then { _purpose = "REFIT"; };
 
             if (!(_note2 isEqualType "")) then { _note2 = ""; };
@@ -309,9 +306,9 @@ if (_approve) then
             _holdMinutes = (_holdMinutes max 0) min 240;
 
             private _seed = [];
-            if (!(([_rationale] call _trimFn) isEqualTo "")) then { _seed pushBack ["rationale", [_rationale] call _trimFn]; };
-            if (!(([_constraints] call _trimFn) isEqualTo "")) then { _seed pushBack ["constraints", [_constraints] call _trimFn]; };
-            if (!(([_support] call _trimFn) isEqualTo "")) then { _seed pushBack ["support", [_support] call _trimFn]; };
+            if (trim _rationale isNotEqualTo "") then { _seed pushBack ["rationale", trim _rationale]; };
+            if (trim _constraints isNotEqualTo "") then { _seed pushBack ["constraints", trim _constraints]; };
+            if (trim _support isNotEqualTo "") then { _seed pushBack ["support", trim _support]; };
 
             private _issueOk = false;
 
@@ -326,7 +323,7 @@ if (_approve) then
                 case "HOLD":
                 {
                     _seed pushBack ["purpose", "HOLD"];
-                    if (!(([_holdIntent] call _trimFn) isEqualTo "")) then { _seed pushBack ["holdIntent", [_holdIntent] call _trimFn]; };
+                    if (trim _holdIntent isNotEqualTo "") then { _seed pushBack ["holdIntent", trim _holdIntent]; };
                     if (_holdMinutes > 0) then { _seed pushBack ["holdMinutes", _holdMinutes]; };
                     _issueOk = ["HOLD", _fromGroup, _seed, _approver, _note2, _id] call ARC_fnc_intelOrderIssue;
                 };
@@ -334,7 +331,7 @@ if (_approve) then
                 case "PROCEED":
                 {
                     // PROCEED becomes a LEAD assignment when possible; otherwise STANDBY.
-                    if (!(([_proceedIntent] call _trimFn) isEqualTo "")) then { _seed pushBack ["proceedIntent", [_proceedIntent] call _trimFn]; };
+                    if (trim _proceedIntent isNotEqualTo "") then { _seed pushBack ["proceedIntent", trim _proceedIntent]; };
                     _issueOk = ["LEAD", _fromGroup, _seed, _approver, _note2, _id] call ARC_fnc_intelOrderIssue;
                 };
 
@@ -362,16 +359,16 @@ if (_approve) then
         {
             private _taskId = [_payload, "taskId", ""] call _getP;
             if (!(_taskId isEqualType "")) then { _taskId = ""; };
-            _taskId = [_taskId] call _trimFn;
+            _taskId = trim _taskId;
 
             private _reqType = [_payload, "requestType", "DET_IN_PLACE"] call _getP;
             if (!(_reqType isEqualType "")) then { _reqType = "DET_IN_PLACE"; };
-            _reqType = toUpper ([_reqType] call _trimFn);
+            _reqType = toUpper (trim _reqType);
             if !(_reqType in ["DET_IN_PLACE","RTB_IED","TOW_VBIED"]) then { _reqType = "DET_IN_PLACE"; };
 
             private _notes = [_payload, "notes", ""] call _getP;
             if (!(_notes isEqualType "")) then { _notes = ""; };
-            _notes = [_notes] call _trimFn;
+            _notes = trim _notes;
 
             private _ttl = missionNamespace getVariable ["ARC_eodDispoApprovalTTLsec", 900];
             if (!(_ttl isEqualType 0)) then { _ttl = 900; };
@@ -421,11 +418,11 @@ if (_approve) then
             private _incPos     = [_payload, "pos", _posATL] call _getP;
 
             if (!(_incType isEqualType "")) then { _incType = "PATROL"; };
-            _incType = toUpper ([_incType] call _trimFn);
+            _incType = toUpper (trim _incType);
             if (_incType isEqualTo "") then { _incType = "PATROL"; };
 
             if (!(_disp isEqualType "")) then { _disp = _summary; };
-            _disp = [_disp] call _trimFn;
+            _disp = trim _disp;
             if (_disp isEqualTo "") then { _disp = format ["Incident: %1", _incType]; };
 
             if (!(_marker isEqualType "")) then { _marker = ""; };
@@ -437,7 +434,7 @@ if (_approve) then
             if (!(_lid isEqualType "")) then { _lid = ""; };
 
             // Attach the leadId to the queue item meta for UI traceability.
-            if (!(_lid isEqualTo "")) then
+            if (_lid isNotEqualTo "") then
             {
                 _meta = [_meta, "leadId", _lid] call _setPair;
                 _meta = [_meta, "marker", _marker] call _setPair;
@@ -448,7 +445,7 @@ if (_approve) then
             };
 
             // Enqueue the lead into the TOC backlog (priority 1 = highest).
-            if (!isNil "ARC_fnc_tocBacklogEnqueue" && { _lid isEqualType "" } && { !(_lid isEqualTo "") }) then
+            if (!isNil "ARC_fnc_tocBacklogEnqueue" && { _lid isEqualType "" } && { _lid isNotEqualTo "" }) then
             {
                 [_lid, 1, _id, _by, _summary] call ARC_fnc_tocBacklogEnqueue;
             };
@@ -457,7 +454,7 @@ if (_approve) then
             // This ensures the approved incident immediately appears on the Ops screen.
             private _activeTaskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
             if (!(_activeTaskId isEqualType "")) then { _activeTaskId = ""; };
-            if (_activeTaskId isEqualTo "" && { !(_lid isEqualTo "") }) then
+            if (_activeTaskId isEqualTo "" && { _lid isNotEqualTo "" }) then
             {
                 [] call ARC_fnc_incidentCreate;
             };

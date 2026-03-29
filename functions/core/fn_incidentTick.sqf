@@ -83,7 +83,7 @@ else
         _scale = (_scale max 1) min 3;
 
         // Active incident multiplier (operations consume more while a mission is in-flight).
-        private _hasActive = !((["activeTaskId", ""] call ARC_fnc_stateGet) isEqualTo "");
+        private _hasActive = (["activeTaskId", ""] call ARC_fnc_stateGet) isNotEqualTo "";
         private _accepted = ["activeIncidentAccepted", false] call ARC_fnc_stateGet;
         if (_hasActive && { _accepted isEqualType true && { _accepted } }) then
         {

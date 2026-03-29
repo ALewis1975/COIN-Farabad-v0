@@ -26,7 +26,7 @@ params [
     ["_enableDrag", true, [true,false]]
 ];
 
-_nid = [_nid] call _trimFn;
+_nid = trim _nid;
 if (_nid isEqualTo "") exitWith {false};
 
 // ACE presence checks (avoid hard dependency)
@@ -38,9 +38,6 @@ if (isNil "ace_dragging_fnc_setDraggable") exitWith {false};
 private _obj = objectFromNetId _nid;
 if (isNull _obj) exitWith {false};
 
-
-// sqflint-compatible helpers
-private _trimFn  = compile "params ['_s']; trim _s";
 if (_obj getVariable ["ARC_eodEvidenceAceEnabled", false]) exitWith {true};
 
 // Cargo sizing (ACE cargo)

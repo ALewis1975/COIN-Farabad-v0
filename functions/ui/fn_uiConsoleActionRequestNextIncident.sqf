@@ -32,7 +32,7 @@ if (!_canApprove) exitWith
 // Do not spam requests while an incident is active.
 private _taskId = missionNamespace getVariable ["ARC_activeTaskId", ""]; 
 if (!(_taskId isEqualType "")) then { _taskId = ""; };
-if (!(_taskId isEqualTo "")) exitWith
+if (_taskId isNotEqualTo "") exitWith
 {
     ["TOC", "An incident is already active. Close it (and complete SITREP workflow) before generating a new one."] call ARC_fnc_clientToast;
     false
@@ -51,9 +51,6 @@ private _myOwner = clientOwner;
 {
     params ["_stamp", "_ownerId"];
 
-
-// sqflint-compatible helpers
-private _trimFn  = compile "params ['_s']; trim _s";
     private _timeoutAt = time + 8;
     private _found = false;
 
@@ -70,8 +67,8 @@ private _trimFn  = compile "params ['_s']; trim _s";
                 _found = true;
                 uiNamespace setVariable ["ARC_console_lastNextIncidentResult", _res];
 
-                private _msg = if (_detail isEqualType "" && { !(([_detail] call _trimFn) isEqualTo "") }) then { [_detail] call _trimFn } else { "Server returned no detail." };
-                private _hdr = if (_title isEqualType "" && { !(([_title] call _trimFn) isEqualTo "") }) then { [_title] call _trimFn } else { "TOC" };
+                private _msg = if (_detail isEqualType "" && { trim _detail isNotEqualTo "" }) then { trim _detail } else { "Server returned no detail." };
+                private _hdr = if (_title isEqualType "" && { trim _title isNotEqualTo "" }) then { trim _title } else { "TOC" };
 
                 if (_allowed isEqualType true && { _allowed }) then
                 {

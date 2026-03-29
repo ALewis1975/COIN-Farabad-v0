@@ -24,9 +24,6 @@ params [
     ["_zoneBias", ""]
 ];
 
-
-// sqflint-compatible helpers
-private _trimFn  = compile "params ['_s']; trim _s";
 if (!(_pos isEqualType []) || { (count _pos) < 2 }) exitWith {""};
 
 private _threads = ["threads", []] call ARC_fnc_stateGet;
@@ -45,14 +42,14 @@ private _radius = 2500;
     private _thrN = [_x] call ARC_fnc_threadNormalizeRecord;
     if (_thrN isEqualTo []) then { continue; };
 
-    private _id   = _thrN select 0;
-    private _t    = toUpper (_thrN select 1);
-    private _base = _thrN select 3;
-    private _conf = _thrN select 4;
-    private _heat = _thrN select 5;
-    private _st   = toUpper (_thrN select 6);
+    private _id   = _thrN # 0;
+    private _t    = toUpper (_thrN # 1);
+    private _base = _thrN # 3;
+    private _conf = _thrN # 4;
+    private _heat = _thrN # 5;
+    private _st   = toUpper (_thrN # 6);
 
-    if (!(_t isEqualTo _typeU)) then { continue; };
+    if (_t isNotEqualTo _typeU) then { continue; };
     if (_st isEqualTo "DORMANT") then { continue; };
 
     if (!(_base isEqualType []) || { (count _base) < 2 }) then { continue; };
@@ -73,22 +70,22 @@ private _radius = 2500;
 
 if (_bestIdx >= 0) exitWith
 {
-    private _thr = [(_threads select _bestIdx)] call ARC_fnc_threadNormalizeRecord;
-    private _id = _thr select 0;
+    private _thr = [(_threads # _bestIdx)] call ARC_fnc_threadNormalizeRecord;
+    private _id = _thr # 0;
 
     // Lightly pull the thread base toward the new activity.
-    private _base = _thr select 3;
+    private _base = _thr # 3;
     if (_base isEqualType [] && { (count _base) >= 2 }) then
     {
         private _newBase = [
-            ((_base select 0) * 0.75) + ((_center select 0) * 0.25),
-            ((_base select 1) * 0.75) + ((_center select 1) * 0.25),
+            ((_base # 0) * 0.75) + ((_center # 0) * 0.25),
+            ((_base # 1) * 0.75) + ((_center # 1) * 0.25),
             0
         ];
         _thr set [3, _newBase];
-        private _did = _thr select 14;
+        private _did = _thr # 14;
         if !(_did isEqualType "") then { _did = ""; };
-        _did = toUpper ([_did] call _trimFn);
+        _did = toUpper (trim _did);
         if !([_did] call ARC_fnc_worldIsValidDistrictId) then
         {
             _did = [_newBase] call ARC_fnc_threadResolveDistrictId;
@@ -100,25 +97,13 @@ if (_bestIdx >= 0) exitWith
     };
 
     // Ensure parent task exists (safe on repeat)
-    private _parentTaskId = [_id, _threadType, _zoneBias, (_thr select 3)] call ARC_fnc_taskEnsureThreadParent;
-    if (!(_parentTaskId isEqualTo "")) then
+    private _parentTaskId = [_id, _threadType, _zoneBias, (_thr # 3)] call ARC_fnc_taskEnsureThreadParent;
+    if (_parentTaskId isNotEqualTo "") then
     {
         _thr set [13, _parentTaskId];
         _threads set [_bestIdx, _thr];
         ["threads", _threads] call ARC_fnc_stateSet;
     };
-
-    // Sync thread_store (TASKENG v0 schema rev 4)
-    private _store = ["taskeng_v0_thread_store", createHashMap] call ARC_fnc_stateGet;
-    if (!(_store isEqualType createHashMap)) then { _store = createHashMap; };
-    private _rec = createHashMap;
-    _rec set ["thread_id", _id];
-    _rec set ["type", toUpper (_thr select 1)];
-    _rec set ["confidence", _thr select 4];
-    _rec set ["heat", _thr select 5];
-    _rec set ["parent_task_id", _thr select 13];
-    _store set [_id, _rec];
-    ["taskeng_v0_thread_store", _store] call ARC_fnc_stateSet;
 
     [] call ARC_fnc_threadBroadcast;
     _id
@@ -156,18 +141,6 @@ private _thread = [
 
 _threads pushBack _thread;
 ["threads", _threads] call ARC_fnc_stateSet;
-
-// Sync thread_store (TASKENG v0 schema rev 4)
-private _store = ["taskeng_v0_thread_store", createHashMap] call ARC_fnc_stateGet;
-if (!(_store isEqualType createHashMap)) then { _store = createHashMap; };
-private _rec = createHashMap;
-_rec set ["thread_id", _id];
-_rec set ["type", _threadType];
-_rec set ["confidence", 0.12];
-_rec set ["heat", 0.08];
-_rec set ["parent_task_id", _parentTaskId];
-_store set [_id, _rec];
-["taskeng_v0_thread_store", _store] call ARC_fnc_stateSet;
 
 [] call ARC_fnc_threadBroadcast;
 

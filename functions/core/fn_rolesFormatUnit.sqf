@@ -19,8 +19,8 @@ private _tag = [_unit] call ARC_fnc_rolesGetTag;
 
 private _out = "";
 
-if (!(_gid isEqualTo "")) then { _out = _gid; } else { _out = "UNASSIGNED"; };
-if (!(_tag isEqualTo "")) then { _out = format ["%1 [%2]", _out, _tag]; };
-if (!(_name isEqualTo "")) then { _out = format ["%1 (%2)", _out, _name]; };
+if (_gid isNotEqualTo "") then { _out = _gid; } else { _out = "UNASSIGNED"; };
+if (_tag isNotEqualTo "") then { _out = format ["%1 [%2]", _out, _tag]; };
+if (_name isNotEqualTo "") then { _out = format ["%1 (%2)", _out, _name]; };
 
 _out

@@ -40,36 +40,33 @@ if (!(_posATL isEqualType []) || { (count _posATL) < 2 }) exitWith {""};
 _posATL = +_posATL;
 _posATL resize 3;
 
-if (!((_posATL select 0) isEqualType 0) || { !((_posATL select 1) isEqualType 0) }) exitWith {""};
-if (!((_posATL select 2) isEqualType 0)) then { _posATL set [2, 0]; };
+if (!((_posATL # 0) isEqualType 0) || { !((_posATL # 1) isEqualType 0) }) exitWith {""};
+if (!((_posATL # 2) isEqualType 0)) then { _posATL set [2, 0]; };
 
 private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
 if (_taskId isEqualTo "") exitWith {""};
 
 private _incType = ["activeIncidentType", ""] call ARC_fnc_stateGet;
 if (!(_incType isEqualType "")) then { _incType = ""; };
-if (!((toUpper _incType) isEqualTo "IED")) exitWith {""};
+if ((toUpper _incType) isNotEqualTo "IED") exitWith {""};
 
-private _objKindU = toUpper ([_objKind] call _trimFn);
+private _objKindU = toUpper (trim _objKind);
 if (!(_objKindU in ["IED_DEVICE", "VBIED_VEHICLE", "SUICIDE_VEST", "UNKNOWN"])) then { _objKindU = "UNKNOWN"; };
 
 // Idempotence: only queue one follow-on lead per active incident.
 private _existingLeadId = ["activeIedDetonationResponseLeadId", ""] call ARC_fnc_stateGet;
 if (!(_existingLeadId isEqualType "")) then { _existingLeadId = ""; };
-if (!(_existingLeadId isEqualTo "")) exitWith {_existingLeadId};
+if (_existingLeadId isNotEqualTo "") exitWith {_existingLeadId};
 
 // Helper: pull values from an array of [k,v] pairs.
 private _getP = {
     params ["_pairs", "_k", "_d"];
-
-// sqflint-compatible helpers
-private _trimFn  = compile "params ['_s']; trim _s";
     if (!(_pairs isEqualType [])) exitWith { _d };
     private _out = _d;
     {
-        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith
+        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith
         {
-            _out = _x select 1;
+            _out = _x # 1;
         };
     } forEach _pairs;
     _out

@@ -15,7 +15,6 @@
 */
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
-private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 private _dbg = missionNamespace getVariable ["civsub_v1_debug", false];
 
@@ -66,8 +65,8 @@ if (_district isEqualType createHashMap) then {
     };
 };
 
-private _center = [_d, "centroid", [0,0]] call _hg;
-private _radius = [_d, "radius_m", 500] call _hg;
+private _center = _d getOrDefault ["centroid", [0,0]];
+private _radius = _d getOrDefault ["radius_m", 500];
 
 if !(_center isEqualType []) exitWith { ["center_not_array","district_data"] call _fail };
 if ((count _center) < 2) exitWith { ["center_bad","district_data"] call _fail };
@@ -83,7 +82,7 @@ if !(_pos isEqualType [] && {(count _pos) >= 2} && {!(_pos isEqualTo [0,0,0])}) 
     _pos = [_center, _spawnR, _districtId] call ARC_fnc_civsubCivFindSpawnPos;
 };
 if !(_pos isEqualType [] && {(count _pos) >= 2}) then { _pos = _center; };
-if ((count _pos) == 2) then { _pos = [_pos select 0, _pos select 1, 0]; };
+if ((count _pos) == 2) then { _pos = [_pos#0, _pos#1, 0]; };
 
 // Phase 2: never spawn a civilian in the road.
 if ([_pos] call _posIsRoadish) then
@@ -105,7 +104,7 @@ if (_minSep isEqualType 0 && {_minSep > 0}) then {
             {
                 private _row = _reg get _x;
                 if (_row isEqualType createHashMap) then {
-                    private _u2 = [_row, "unit", objNull] call _hg;
+                    private _u2 = _row getOrDefault ["unit", objNull];
                     if (!isNull _u2 && {(_pos distance2D (getPosATL _u2)) < _minSep}) exitWith {
                         _ok = false;
                     };
@@ -117,7 +116,7 @@ if (_minSep isEqualType 0 && {_minSep > 0}) then {
                     _p2 = [_center, _spawnR, _districtId] call ARC_fnc_civsubCivFindSpawnPos;
                 };
                 if (_p2 isEqualType [] && {(count _p2) >= 2}) then {
-                    _pos = if ((count _p2) == 2) then { [_p2 select 0,_p2 select 1,0] } else { _p2 };
+                    _pos = if ((count _p2) == 2) then { [_p2#0,_p2#1,0] } else { _p2 };
                 };
             };
         };
@@ -180,7 +179,7 @@ _u disableAI "SUPPRESSION";
 
 // Give them a small wander loop (only if we have a valid group)
 if !(isNull _grp) then {
-    private _wp = _grp addWaypoint [[(_pos select 0)+random 60 - 30, (_pos select 1)+random 60 - 30, 0], 0];
+    private _wp = _grp addWaypoint [[(_pos#0)+random 60 - 30, (_pos#1)+random 60 - 30, 0], 0];
     _wp setWaypointType "MOVE";
     _wp setWaypointSpeed "LIMITED";
     _wp setWaypointBehaviour "SAFE";

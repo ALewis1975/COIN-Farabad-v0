@@ -11,14 +11,11 @@ if (!isServer) exitWith {createHashMap};
 if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {createHashMap};
 
 params [["_civUid", "", [""]]];
-
-// sqflint-compatible helpers
-private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 if (_civUid isEqualTo "") exitWith {createHashMap};
 
 private _ids = missionNamespace getVariable ["civsub_v1_identities", createHashMap];
 if !(_ids isEqualType createHashMap) exitWith {createHashMap};
 
-private _rec = [_ids, _civUid, createHashMap] call _hg;
+private _rec = _ids getOrDefault [_civUid, createHashMap];
 if !(_rec isEqualType createHashMap) exitWith {createHashMap};
 _rec

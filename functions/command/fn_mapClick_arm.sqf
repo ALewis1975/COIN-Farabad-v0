@@ -25,10 +25,10 @@ if (_state in ["ARMED", "CAPTURED"]) then
 
 private _debug = uiNamespace getVariable ["ARC_mapClick_debug", false];
 private _armedAt = diag_tickTime;
-private _timeout = [_ctx, "timeoutSec", 45] call _hg;
+private _timeout = _ctx getOrDefault ["timeoutSec", 45];
 _timeout = (_timeout max 30) min 60;
 private _deadline = _armedAt + _timeout;
-private _type = toUpper ([_ctx, "type", ""] call _hg);
+private _type = toUpper (_ctx getOrDefault ["type", ""]);
 
 diag_log format ["[FARABAD][MAPCLICK][ARM] type=%1 timeoutSec=%2", _type, _timeout];
 
@@ -54,9 +54,6 @@ waitUntil { uiSleep 0.05; visibleMap };
 {
     params ["_token", "_expireAt"];
 
-
-// sqflint-compatible helpers
-private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
     waitUntil
     {
         uiSleep 0.05;

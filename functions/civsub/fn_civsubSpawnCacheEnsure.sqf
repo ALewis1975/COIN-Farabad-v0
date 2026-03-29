@@ -36,7 +36,6 @@ params [["_did","",[""]]];
 if (_did isEqualTo "") exitWith {createHashMap};
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
-private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 private _dbg = missionNamespace getVariable ["civsub_v1_debug", false];
 
@@ -50,11 +49,11 @@ if (!(_zones isEqualType []) || {(count _zones) == 0}) then { _zones = [["mkr_ai
 private _inExclusion = {
     params ["_p"];
     if (!(_p isEqualType []) || {(count _p) < 2}) exitWith {false};
-    private _px = _p select 0;
-    private _py = _p select 1;
+    private _px = _p # 0;
+    private _py = _p # 1;
     {
-        private _mk = _x select 0;
-        private _r  = _x select 1;
+        private _mk = _x # 0;
+        private _r  = _x # 1;
         private _mp = getMarkerPos _mk;
         if (_mp isEqualType [] && {(count _mp) >= 2}) then {
             if (([_px, _py] distance2D _mp) < _r) exitWith {true};
@@ -74,12 +73,12 @@ private _roadsideFromRoad =
     params ["_r"];
     private _p0 = getPosATL _r;
     if (!(_p0 isEqualType []) || {(count _p0) < 2}) exitWith { [0,0,0] };
-    if ((count _p0) == 2) then { _p0 = [_p0 select 0, _p0 select 1, 0]; };
+    if ((count _p0) == 2) then { _p0 = [_p0 # 0, _p0 # 1, 0]; };
 
     private _dir = getDir _r;
     private _con = roadsConnectedTo _r;
     if ((count _con) > 0) then {
-        private _p1 = getPosATL (_con select 0);
+        private _p1 = getPosATL (_con # 0);
         if (_p1 isEqualType [] && {(count _p1) >= 2}) then {
             _dir = [_p0, _p1] call BIS_fnc_dirTo;
         };
@@ -92,8 +91,8 @@ private _roadsideFromRoad =
     while { _tries < 3 } do {
         private _off = _roadOff + (_tries * (_roadOff * 0.75));
         private _sd = _dir + _side;
-        private _x = (_p0 select 0) + (sin _sd) * _off;
-        private _y = (_p0 select 1) + (cos _sd) * _off;
+        private _x = (_p0 # 0) + (sin _sd) * _off;
+        private _y = (_p0 # 1) + (cos _sd) * _off;
         private _zASL = getTerrainHeightASL [_x, _y];
         _p = ASLToATL [_x, _y, _zASL];
 
@@ -109,17 +108,17 @@ private _roadsideFromRoad =
 private _cache = missionNamespace getVariable ["civsub_v1_spawn_cache", createHashMap];
 if !(_cache isEqualType createHashMap) then { _cache = createHashMap; };
 
-private _row = [_cache, _did, createHashMap] call _hg;
+private _row = _cache getOrDefault [_did, createHashMap];
 if !(_row isEqualType createHashMap) then { _row = createHashMap; };
 
 private _ttl = missionNamespace getVariable ["civsub_v1_spawn_cache_ttl_s", 600];
 if !(_ttl isEqualType 0) then { _ttl = 600; };
 
-private _ts = [_row, "ts", 0] call _hg;
+private _ts = _row getOrDefault ["ts", 0];
 private _needTTL = ((serverTime - _ts) > _ttl);
 
-private _bld = [_row, "bldPos", []] call _hg;
-private _road = [_row, "roadPos", []] call _hg;
+private _bld = _row getOrDefault ["bldPos", []];
+private _road = _row getOrDefault ["roadPos", []];
 if !(_bld isEqualType []) then { _bld = []; };
 if !(_road isEqualType []) then { _road = []; };
 
@@ -128,14 +127,14 @@ private _d = [_did] call ARC_fnc_civsubDistrictsGetById;
 private _dm = createHashMap;
 if (_d isEqualType createHashMap) then { _dm = _d; } else { if (_d isEqualType []) then { _dm = [_d] call _hmCreate; }; };
 
-private _center = [_dm, "centroid", [0,0]] call _hg;
-private _radius = [_dm, "radius_m", 500] call _hg;
+private _center = _dm getOrDefault ["centroid", [0,0]];
+private _radius = _dm getOrDefault ["radius_m", 500];
 if !(_center isEqualType [] && {(count _center) >= 2}) exitWith { _row };
 
 // Player anchors (server-only) for this district
 private _pAnchMap = missionNamespace getVariable ["civsub_v1_spawn_player_anchors", createHashMap];
 if !(_pAnchMap isEqualType createHashMap) then { _pAnchMap = createHashMap; };
-private _pAnch = [_pAnchMap, _did, []] call _hg;
+private _pAnch = _pAnchMap getOrDefault [_did, []];
 if !(_pAnch isEqualType []) then { _pAnch = []; };
 
 private _anchorTypes = ["NameVillage","NameCity","NameCityCapital","NameLocal"];
@@ -153,8 +152,8 @@ if ((count _pAnch) > 0) then {
     private _sy = 0;
     {
         if (_x isEqualType [] && {(count _x) >= 2}) then {
-            _sx = _sx + (_x select 0);
-            _sy = _sy + (_x select 1);
+            _sx = _sx + (_x # 0);
+            _sy = _sy + (_x # 1);
         };
     } forEach _pAnch;
     _playerCent = [_sx / (count _pAnch), _sy / (count _pAnch), 0];
@@ -169,7 +168,7 @@ if ((count _pAnch) > 0) then {
         if (_pos isEqualType [] && {(count _pos) >= 2}) then {
             private _locs = nearestLocations [_pos, _anchorTypes, _locRadius];
             if ((count _locs) > 0) then {
-                private _loc = _locs select 0; // nearestLocations is distance-ordered
+                private _loc = _locs # 0; // nearestLocations is distance-ordered
                 private _lp = locationPosition _loc;
                 if (_lp isEqualType [] && {(count _lp) >= 2}) then {
                     private _d2 = _pos distance2D _lp;
@@ -184,13 +183,13 @@ if ((count _pAnch) > 0) then {
     } forEach _pAnch;
 
     if (!(isNull _bestLoc) && {_bestD <= _locRadius} && {_bestPos isEqualType [] && {(count _bestPos) >= 2}}) then {
-        _primaryPos = if ((count _bestPos) == 2) then { [_bestPos select 0,_bestPos select 1,0] } else { _bestPos };
+        _primaryPos = if ((count _bestPos) == 2) then { [_bestPos#0,_bestPos#1,0] } else { _bestPos };
 
         private _n = text _bestLoc;
         if (_n isEqualType "") then {
             // text may be empty for some NameLocal entries; fall back to position key
             if (_n isEqualTo "") then {
-                _anchorKey = format ["LOC:%1:%2", round (_primaryPos select 0), round (_primaryPos select 1)];
+                _anchorKey = format ["LOC:%1:%2", round (_primaryPos#0), round (_primaryPos#1)];
             } else {
                 _anchorKey = format ["LOC:%1", _n];
             };
@@ -201,11 +200,11 @@ if ((count _pAnch) > 0) then {
         private _g = missionNamespace getVariable ["civsub_v1_spawn_cache_playerGrid_m", 250];
         if !(_g isEqualType 0) then { _g = 250; };
         if (_g < 50) then { _g = 50; };
-        _anchorKey = format ["P:%1:%2:%3", _did, floor ((_primaryPos select 0) / _g), floor ((_primaryPos select 1) / _g)];
+        _anchorKey = format ["P:%1:%2:%3", _did, floor ((_primaryPos#0) / _g), floor ((_primaryPos#1) / _g)];
     };
 };
 
-private _oldKey = [_row, "anchorKey", ""] call _hg; 
+private _oldKey = _row getOrDefault ["anchorKey", ""]; 
 if !(_oldKey isEqualType "") then { _oldKey = ""; };
 
 private _hasPos = ((count _bld + count _road) > 0);
@@ -225,7 +224,7 @@ private _anchors = [];
 if ((count _pAnch) > 0) then {
     _anchors pushBackUnique _primaryPos;
     if (_playerCent isEqualType [] && {(count _playerCent) >= 2}) then {
-        private _pc = if ((count _playerCent) == 2) then { [_playerCent select 0,_playerCent select 1,0] } else { _playerCent };
+        private _pc = if ((count _playerCent) == 2) then { [_playerCent#0,_playerCent#1,0] } else { _playerCent };
         if ((_pc distance2D _primaryPos) > 100) then {
             _anchors pushBackUnique _pc;
         };
@@ -234,13 +233,13 @@ if ((count _pAnch) > 0) then {
     private _locs = nearestLocations [_center, _anchorTypes, _radius];
     {
         private _p = locationPosition _x;
-        if (_p isEqualType [] && {(count _p) >= 2}) then { _anchors pushBackUnique (if ((count _p) == 2) then {[_p select 0,_p select 1,0]} else {_p}); };
+        if (_p isEqualType [] && {(count _p) >= 2}) then { _anchors pushBackUnique (if ((count _p) == 2) then {[_p#0,_p#1,0]} else {_p}); };
     } forEach _locs;
-    _anchors pushBackUnique (if ((count _center) == 2) then {[_center select 0,_center select 1,0]} else {_center});
+    _anchors pushBackUnique (if ((count _center) == 2) then {[_center#0,_center#1,0]} else {_center});
 };
 
 // Always have at least one anchor
-if ((count _anchors) == 0) then { _anchors pushBackUnique (if ((count _center) == 2) then {[_center select 0,_center select 1,0]} else {_center}); };
+if ((count _anchors) == 0) then { _anchors pushBackUnique (if ((count _center) == 2) then {[_center#0,_center#1,0]} else {_center}); };
 
 // Limit anchors to avoid heavy scans
 private _maxAnchors = missionNamespace getVariable ["civsub_v1_spawn_cache_maxAnchors", 6];

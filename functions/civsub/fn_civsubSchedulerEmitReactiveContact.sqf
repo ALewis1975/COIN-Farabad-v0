@@ -26,12 +26,11 @@ params [
 if (_districtId isEqualTo "") exitWith {createHashMap};
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
-private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 private _payload = [[
     ["p_tick_eff", _pTickEff],
     ["active", _active],
-    ["district_centroid", [_d, "centroid", [0,0]] call _hg]
+    ["district_centroid", _d getOrDefault ["centroid", [0,0]]]
 ]] call _hmCreate;
 
 private _leadEmit = [[["emit", false], ["lead_type", ""], ["lead_id", ""], ["confidence", 0.0], ["seed", createHashMap]]] call _hmCreate;
@@ -39,7 +38,7 @@ private _influenceDelta = [[["dW", 0], ["dR", 0], ["dG", 0]]] call _hmCreate;
 
 private _bundle = [
     _districtId,
-    [_d, "centroid", [0,0]] call _hg,
+    _d getOrDefault ["centroid", [0,0]],
     "SCHEDULER",
     "ATTACK_REACTIVE",
     _payload,
@@ -57,7 +56,7 @@ private _bundle = [
 
 _d set ["cooldown_nextAttack_ts", serverTime + 1800];
 
-missionNamespace setVariable ["civsub_v1_lastScheduler_bundle_id", [_bundle, "bundle_id", ""] call _hg, true];
+missionNamespace setVariable ["civsub_v1_lastScheduler_bundle_id", _bundle getOrDefault ["bundle_id", ""], true];
 missionNamespace setVariable ["civsub_v1_lastScheduler_event", "ATTACK_REACTIVE", true];
 missionNamespace setVariable ["civsub_v1_lastScheduler_ts", serverTime, true];
 missionNamespace setVariable ["civsub_v1_lastScheduler_bundle_pairs", [_bundle] call ARC_fnc_civsubBundleToPairs, true];

@@ -34,7 +34,6 @@ if !(_civ getVariable ["civsub_v1_isCiv", false]) exitWith {false};
 // If this function was invoked via remoteExec, bind actor identity to the network sender.
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
-private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 if (!isNil "remoteExecutedOwner") then
 {
@@ -68,10 +67,10 @@ private _nameDisplay = "Unknown";
 private _serial = "";
 
 if (_known) then {
-    private _first = [_rec, "first_name", ""] call _hg;
-    private _last  = [_rec, "last_name", ""] call _hg;
-    _serial = [_rec, "passport_serial", ""] call _hg;
-    _detained = [_rec, "status_detained", false] call _hg;
+    private _first = _rec getOrDefault ["first_name", ""];
+    private _last  = _rec getOrDefault ["last_name", ""];
+    _serial = _rec getOrDefault ["passport_serial", ""];
+    _detained = _rec getOrDefault ["status_detained", false];
 
     private _nm = format ["%1 %2", _first, _last];
     _nameDisplay = if (_nm isEqualTo " ") then {"Unknown"} else {_nm};

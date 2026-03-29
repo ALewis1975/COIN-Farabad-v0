@@ -29,7 +29,7 @@ if (_nid isEqualTo "") exitWith {false};
 private _key = format ["ARC_objAct_%1", _nid];
 if (!isNil { missionNamespace getVariable _key }) exitWith {true};
 
-private _kindU = toUpper ([_kind] call _trimFn);
+private _kindU = toUpper (trim _kind);
 
 // IED Phase 1: suspicious-object objectives use a two-step interaction:
 //   1) DISCOVER / INSPECT (sets discovered state; reveals the "render safe" action)
@@ -126,9 +126,6 @@ else
         _actionText,
         {
             params ["_target", "_caller", "_actionId", "_args"];
-
-// sqflint-compatible helpers
-private _trimFn  = compile "params ['_s']; trim _s";
             _args params ["_kind"]; // objectiveKind
 
             [_target, _caller, _kind, "COMPLETE"] call ARC_fnc_clientObjectiveInteract;

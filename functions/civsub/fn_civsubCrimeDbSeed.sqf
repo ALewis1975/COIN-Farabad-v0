@@ -21,7 +21,6 @@ if (!isServer) exitWith {createHashMap};
 if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {createHashMap};
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
-private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 private _districts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
 if !(_districts isEqualType createHashMap) exitWith {createHashMap};
@@ -58,7 +57,7 @@ private _totalPop = 0;
 {
     private _d = _districts get _x;
     if !(_d isEqualType createHashMap) then { continue; };
-    private _p = [_d, "pop_total", 0] call _hg;
+    private _p = _d getOrDefault ["pop_total", 0];
     if !(_p isEqualType 0) then { _p = 0; };
     if (_p < 0) then { _p = 0; };
     _weights pushBack [_x, _p];
@@ -70,10 +69,10 @@ private _pickDistrict = {
     private _r = (call _rand01) * _totalPop;
     private _acc = 0;
     {
-        _acc = _acc + (_x select 1);
-        if (_r <= _acc) exitWith { _x select 0 };
+        _acc = _acc + (_x # 1);
+        if (_r <= _acc) exitWith { _x # 0 };
     } forEach _weights;
-    (_weights select 0) select 0
+    (_weights # 0) # 0
 };
 
 private _cats = ["IED_FACILITATOR","OPS_PLANNER","FINANCE_LOGISTICS","URBAN_SUPPORT","WEAPONS_SMUGGLER","CELL_MEMBER"];
@@ -151,11 +150,11 @@ for "_i" from 1 to 30 do
 
     if (_enrich) then {
         private _n = [_poiId, _cat, _isHvt, _rand01] call _mkNarrative;
-        _rec set ["wanted_level", _n select 0];
-        _rec set ["wanted_reason_code", _n select 1];
-        _rec set ["wanted_reason_text", _n select 2];
-        _rec set ["wanted_issuing_org", _n select 3];
-        _rec set ["wanted_confidence", _n select 4];
+        _rec set ["wanted_level", _n # 0];
+        _rec set ["wanted_reason_code", _n # 1];
+        _rec set ["wanted_reason_text", _n # 2];
+        _rec set ["wanted_issuing_org", _n # 3];
+        _rec set ["wanted_confidence", _n # 4];
     };
 
     _db set [_poiId, _rec];

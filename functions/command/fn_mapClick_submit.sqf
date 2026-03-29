@@ -14,9 +14,6 @@ if (!hasInterface) exitWith {false};
 
 params ["_pos"];
 
-
-// sqflint-compatible helpers
-private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 if (!(_pos isEqualType []) || {count _pos < 2}) exitWith
 {
     uiNamespace setVariable ["ARC_mapClick_lastErr", "invalid_pos"];
@@ -26,16 +23,16 @@ if (!(_pos isEqualType []) || {count _pos < 2}) exitWith
 private _ctx = uiNamespace getVariable ["ARC_mapClick_ctx", createHashMap];
 if !(_ctx isEqualType createHashMap) then { _ctx = createHashMap; };
 
-private _type = toUpper ([_ctx, "type", ""] call _hg);
+private _type = toUpper (_ctx getOrDefault ["type", ""]);
 diag_log format ["[FARABAD][MAPCLICK][SUBMIT] type=%1", _type];
 
 switch (_type) do
 {
     case "INTEL_LOG":
     {
-        private _cat = [_ctx, "category", "SIGHTING"] call _hg;
-        private _sum = [_ctx, "summary", "No details provided."] call _hg;
-        private _det = [_ctx, "details", ""] call _hg;
+        private _cat = _ctx getOrDefault ["category", "SIGHTING"];
+        private _sum = _ctx getOrDefault ["summary", "No details provided."];
+        private _det = _ctx getOrDefault ["details", ""];
 
         [player, name player, _cat, _pos, _sum, _det] remoteExec ["ARC_fnc_tocRequestLogIntel", 2];
         uiNamespace setVariable ["ARC_mapClick_lastErr", ""];
@@ -44,12 +41,12 @@ switch (_type) do
 
     case "LEAD_REQ":
     {
-        private _leadType = [_ctx, "leadType", "RECON"] call _hg;
-        private _sum = [_ctx, "summary", "Lead: Unknown"] call _hg;
-        private _det = [_ctx, "details", ""] call _hg;
-        private _conf = [_ctx, "confidence", "MED"] call _hg;
-        private _strength = [_ctx, "strength", 0.55] call _hg;
-        private _ttl = [_ctx, "ttl", 3600] call _hg;
+        private _leadType = _ctx getOrDefault ["leadType", "RECON"];
+        private _sum = _ctx getOrDefault ["summary", "Lead: Unknown"];
+        private _det = _ctx getOrDefault ["details", ""];
+        private _conf = _ctx getOrDefault ["confidence", "MED"];
+        private _strength = _ctx getOrDefault ["strength", 0.55];
+        private _ttl = _ctx getOrDefault ["ttl", 3600];
 
         private _payload = [
             ["leadType", _leadType],

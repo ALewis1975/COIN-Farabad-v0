@@ -20,17 +20,14 @@ params [
     ["_d", createHashMap, [createHashMap]]
 ];
 
-
-// sqflint-compatible helpers
-private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _center = [0,0,0];
 
 if (_d isEqualType createHashMap) then
 {
-    private _c = [_d, "centroid", [0,0]] call _hg;
+    private _c = _d getOrDefault ["centroid", [0,0]];
     if (_c isEqualType [] && { (count _c) >= 2 }) then
     {
-        _center = [_c select 0, _c select 1, 0];
+        _center = [_c # 0, _c # 1, 0];
     };
 };
 
@@ -39,9 +36,9 @@ if (_districtId isEqualTo "") exitWith {_center};
 private _anchors = missionNamespace getVariable ["civsub_v1_traffic_spawnAnchors", createHashMap];
 if !(_anchors isEqualType createHashMap) exitWith {_center};
 
-private _anchor = [_anchors, _districtId, []] call _hg;
+private _anchor = _anchors getOrDefault [_districtId, []];
 if !(_anchor isEqualType []) exitWith {_center};
 if ((count _anchor) < 2) exitWith {_center};
 
-[_anchor select 0, _anchor select 1, if ((count _anchor) >= 3) then { _anchor select 2 } else { 0 }]
+[_anchor # 0, _anchor # 1, if ((count _anchor) >= 3) then { _anchor # 2 } else { 0 }]
 

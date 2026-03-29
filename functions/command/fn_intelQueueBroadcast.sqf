@@ -42,7 +42,7 @@ _maxNestedDepth = (_maxNestedDepth min 4) max 0;
 private _sanitizeValue = {
     params ["_v", ["_depth", 0]];
     if (_v isEqualType "") exitWith {
-        private _s = [_v] call _trimFn;
+        private _s = trim _v;
         if ((count _s) > _maxTextLen) then { _s = _s select [0, _maxTextLen]; };
         _s
     };
@@ -67,10 +67,10 @@ private _sanitizePairs = {
     private _out = [];
     {
         if !(_x isEqualType [] && { (count _x) >= 2 }) then { _truncated = true; continue; };
-        private _k = _x select 0;
+        private _k = _x # 0;
         if !(_k isEqualType "") then { _truncated = true; continue; };
-        private _v = [(_x select 1), 0] call _sanitizeValue;
-        _out pushBack [[_k] call _trimFn, _v];
+        private _v = [(_x # 1), 0] call _sanitizeValue;
+        _out pushBack [trim _k, _v];
     } forEach _in;
     if (_truncated) then { _out pushBack ["truncated", true]; };
     _out
@@ -78,23 +78,20 @@ private _sanitizePairs = {
 
 private _sanitizeItem = {
     params ["_it"];
-
-// sqflint-compatible helpers
-private _trimFn  = compile "params ['_s']; trim _s";
     if !(_it isEqualType [] && { (count _it) >= 12 }) exitWith { [] };
-    private _id = _it select 0;
-    private _createdAt = _it select 1;
-    private _status = _it select 2;
-    private _kind = _it select 3;
-    private _from = _it select 4;
-    private _fromGroup = _it select 5;
-    private _fromUid = _it select 6;
-    private _pos = _it select 7;
-    private _summary = _it select 8;
-    private _details = _it select 9;
-    private _payload = _it select 10;
-    private _meta = _it select 11;
-    private _decision = if ((count _it) > 12) then { _it select 12 } else { [] };
+    private _id = _it # 0;
+    private _createdAt = _it # 1;
+    private _status = _it # 2;
+    private _kind = _it # 3;
+    private _from = _it # 4;
+    private _fromGroup = _it # 5;
+    private _fromUid = _it # 6;
+    private _pos = _it # 7;
+    private _summary = _it # 8;
+    private _details = _it # 9;
+    private _payload = _it # 10;
+    private _meta = _it # 11;
+    private _decision = if ((count _it) > 12) then { _it # 12 } else { [] };
     private _tr = false;
 
     if !(_id isEqualType "") then { _id = ""; _tr = true; };
@@ -106,8 +103,8 @@ private _trimFn  = compile "params ['_s']; trim _s";
     if !(_fromUid isEqualType "") then { _fromUid = ""; _tr = true; };
     if !(_summary isEqualType "") then { _summary = str _summary; _tr = true; };
     if !(_details isEqualType "") then { _details = str _details; _tr = true; };
-    _summary = [_summary] call _trimFn;
-    _details = [_details] call _trimFn;
+    _summary = trim _summary;
+    _details = trim _details;
     if ((count _summary) > _maxTextLen) then { _summary = _summary select [0, _maxTextLen]; _tr = true; };
     if ((count _details) > _maxTextLen) then { _details = _details select [0, _maxTextLen]; _tr = true; };
     if !(_pos isEqualType [] && { (count _pos) >= 2 }) then { _pos = [0,0,0]; _tr = true; };
@@ -128,7 +125,7 @@ private _pendingRaw = [];
     if (_x isEqualType [] && { (count _x) >= 12 }) then
     {
         // [id, createdAt, status, kind, from, fromGroup, fromUID, pos, summary, details, payload, meta, decision]
-        private _st = _x select 2;
+        private _st = _x # 2;
         if (_st isEqualType "" && { toUpper _st isEqualTo "PENDING" }) then
         {
             _pendingRaw pushBack _x;

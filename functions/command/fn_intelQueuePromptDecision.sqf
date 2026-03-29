@@ -24,10 +24,7 @@ private _res = [_cat, "", _help] call ARC_fnc_clientIntelPrompt;
 _res params ["_ok", "_sum", "_det"];
 if (!_ok) exitWith {false};
 
-
-// sqflint-compatible helpers
-private _trimFn  = compile "params ['_s']; trim _s";
-private _qid = [_sum] call _trimFn;
+private _qid = trim _sum;
 if (_qid isEqualTo "") exitWith
 {
     ["No queue ID provided.", "WARN", "TOAST"] call ARC_fnc_clientHint;

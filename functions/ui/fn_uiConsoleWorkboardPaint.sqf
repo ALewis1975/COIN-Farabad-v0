@@ -50,7 +50,7 @@ if (_rebuild) then
 
     // 1) Active incident (if any)
     private _taskId = missionNamespace getVariable ["ARC_activeTaskId", ""];
-    if ((_taskId isEqualType "") && { !(_taskId isEqualTo "") }) then
+    if ((_taskId isEqualType "") && { _taskId isNotEqualTo "" }) then
     {
         private _disp = missionNamespace getVariable ["ARC_activeIncidentDisplayName", "Active Incident"];
         if (!(_disp isEqualType "")) then { _disp = "Active Incident"; };
@@ -87,7 +87,7 @@ if (_rebuild) then
 
     // Restore selection if possible
     private _set = -1;
-    if (!(_prevData isEqualTo "")) then
+    if (_prevData isNotEqualTo "") then
     {
         for "_n" from 0 to ((lbSize _ctrlList) - 1) do
         {
@@ -107,8 +107,8 @@ private _data = if (_sel >= 0) then { _ctrlList lbData _sel } else { "NONE|" };
 
 if (!(_data isEqualType "")) then { _data = "NONE|"; };
 private _parts = _data splitString "|";
-private _kind = if ((count _parts) > 0) then { toUpper (_parts select 0) } else { "NONE" };
-private _id   = if ((count _parts) > 1) then { _parts select 1 } else { "" };
+private _kind = if ((count _parts) > 0) then { toUpper (_parts # 0) } else { "NONE" };
+private _id   = if ((count _parts) > 1) then { _parts # 1 } else { "" };
 
 // Default buttons
 { if (!isNull _x) then { _x ctrlShow true; _x ctrlEnable false; }; } forEach [_b1, _b2];
@@ -192,7 +192,7 @@ switch (_kind) do
 
         private _lead = [];
         {
-            if (_x isEqualType [] && { (count _x) >= 4 } && { (_x select 0) isEqualTo _id }) exitWith { _lead = _x; };
+            if (_x isEqualType [] && { (count _x) >= 4 } && { (_x # 0) isEqualTo _id }) exitWith { _lead = _x; };
         } forEach _pool;
 
         if (_lead isEqualTo []) then
@@ -215,8 +215,8 @@ switch (_kind) do
             _txt = _txt + format [
                 "<t size='0.95'>Details</t><br/>- Strength: %1<br/>- Age: %2<br/>- Tag: %3<br/>- Thread: %4<br/><br/>",
                 _strength, _ageTxt,
-                if (_tag isEqualType "" && { !(_tag isEqualTo "") }) then {_tag} else {"(none)"},
-                if (_threadId isEqualType "" && { !(_threadId isEqualTo "") }) then {_threadId} else {"(none)"}
+                if (_tag isEqualType "" && { _tag isNotEqualTo "" }) then {_tag} else {"(none)"},
+                if (_threadId isEqualType "" && { _threadId isNotEqualTo "" }) then {_threadId} else {"(none)"}
             ];
 
             _txt = _txt + "<t size='0.9' color='#DDDDDD'>Leads feed TOC tasking. S2 creates leads; TOC converts them into orders/incidents.</t>";
@@ -238,9 +238,9 @@ _ctrlDetails ctrlSetStructuredText parseText _txt;
 // Auto-fit + clamp to viewport so the controls group can scroll when needed.
 [_ctrlDetails] call BIS_fnc_ctrlFitToTextHeight;
 private _grp = _display displayCtrl 78016;
-private _minH = if (!isNull _grp) then { (ctrlPosition _grp) select 3 } else { 0.74 };
+private _minH = if (!isNull _grp) then { (ctrlPosition _grp) # 3 } else { 0.74 };
 private _p = ctrlPosition _ctrlDetails;
-_p set [3, (_p select 3) max _minH];
+_p set [3, (_p # 3) max _minH];
 _ctrlDetails ctrlSetPosition _p;
 _ctrlDetails ctrlCommit 0;
 

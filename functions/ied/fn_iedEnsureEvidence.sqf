@@ -21,7 +21,7 @@ params [
 ];
 
 private _incType = toUpper (["activeIncidentType", ""] call ARC_fnc_stateGet);
-if (!(_incType isEqualTo "IED")) exitWith {false};
+if (_incType isNotEqualTo "IED") exitWith {false};
 
 private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
 if (!(_taskId isEqualType "") || { _taskId isEqualTo "" }) exitWith {false};
@@ -29,7 +29,7 @@ if (!(_taskId isEqualType "") || { _taskId isEqualTo "" }) exitWith {false};
 private _existingNid = ["activeIedEvidenceNetId", ""] call ARC_fnc_stateGet;
 if (!(_existingNid isEqualType "")) then { _existingNid = ""; };
 
-if (!(_existingNid isEqualTo "")) then
+if (_existingNid isNotEqualTo "") then
 {
     private _ex = objectFromNetId _existingNid;
     if (!isNull _ex) exitWith {true};
@@ -99,9 +99,9 @@ if (!_placed) then
     for "_i" from 0 to 15 do
     {
         private _cand = [
-            (_p select 0) + (random (_radius * 2) - _radius),
-            (_p select 1) + (random (_radius * 2) - _radius),
-            (_p select 2)
+            (_p # 0) + (random (_radius * 2) - _radius),
+            (_p # 1) + (random (_radius * 2) - _radius),
+            (_p # 2)
         ];
         if (surfaceIsWater _cand) then { continue; };
         private _b = nearestBuilding _cand;
@@ -116,12 +116,9 @@ if (!(_cls isEqualType "")) then { _cls = "Land_File1_F"; };
 
 private _obj = createVehicle [_cls, _posE, [], 0, "CAN_COLLIDE"];
 if (isNull _obj) exitWith {false};
-
-// sqflint-compatible helpers
-private _trimFn  = compile "params ['_s']; trim _s";
 // Keep evidence on the selected ATL surface near the device; do NOT snap upward (prevents rooftop spawns).
-private _pz = _posE select 2; if (!(_pz isEqualType 0)) then { _pz = 0; };
-_obj setPosATL [_posE select 0, _posE select 1, _pz + 0.05];
+private _pz = _posE # 2; if (!(_pz isEqualType 0)) then { _pz = 0; };
+_obj setPosATL [_posE # 0, _posE # 1, _pz + 0.05];
 _obj setVectorUp [0,0,1];
 _obj allowDamage false;
 
@@ -151,7 +148,7 @@ if (!(_transportEnabled isEqualType true) && !(_transportEnabled isEqualType fal
 
 private _mode = missionNamespace getVariable ["ARC_eodRtbEvidenceMode", "ACE_CARGO"]; 
 if (!(_mode isEqualType "")) then { _mode = "ACE_CARGO"; };
-_mode = toUpper ([_mode] call _trimFn);
+_mode = toUpper (trim _mode);
 
 if (_transportEnabled && { _mode isEqualTo "ACE_CARGO" }) then
 {

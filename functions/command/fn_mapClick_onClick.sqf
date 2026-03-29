@@ -42,9 +42,6 @@ private _isNumericPos =
     private _n = count _cand;
     if !(_n in [2, 3]) exitWith {false};
 
-
-// sqflint-compatible helpers
-private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
     private _nums = true;
     {
         if !(_x isEqualType 0) exitWith { _nums = false; };
@@ -101,7 +98,7 @@ diag_log format ["[FARABAD][MAPCLICK][CLICK] pos=%1 source=%2 payloadType=%3 pay
 
 private _ok = [_pos] call ARC_fnc_mapClick_submit;
 private _ctx = uiNamespace getVariable ["ARC_mapClick_ctx", createHashMap];
-private _type = toUpper ([_ctx, "type", ""] call _hg);
+private _type = toUpper (_ctx getOrDefault ["type", ""]);
 
 if (_ok) then
 {
@@ -109,15 +106,15 @@ if (_ok) then
     {
         case "INTEL_LOG":
         {
-            private _cat = [_ctx, "category", "SIGHTING"] call _hg;
+            private _cat = _ctx getOrDefault ["category", "SIGHTING"];
             private _safeGridPos = [];
             if (_pos isEqualType []) then
             {
                 private _n = count _pos;
                 if (_n >= 2) then
                 {
-                    private _x = _pos select 0;
-                    private _y = _pos select 1;
+                    private _x = _pos # 0;
+                    private _y = _pos # 1;
                     private _validX = (_x isEqualType 0) && {finite _x} && {_x isEqualTo _x};
                     private _validY = (_y isEqualType 0) && {finite _y} && {_y isEqualTo _y};
 
@@ -127,7 +124,7 @@ if (_ok) then
 
                         if (_n >= 3) then
                         {
-                            private _z = _pos select 2;
+                            private _z = _pos # 2;
                             private _validZ = (_z isEqualType 0) && {finite _z} && {_z isEqualTo _z};
                             if (_validZ) then
                             {

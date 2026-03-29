@@ -22,8 +22,8 @@ if (!isServer) exitWith { false };
 params ["_asset"];
 if (isNil "_asset" || {!(_asset isEqualType createHashMap)}) exitWith { false };
 
-// sqflint-compatible helpers
-private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _id     = _asset getOrDefault ["id", ""];
+private _vehVar = _asset getOrDefault ["vehVar", ""];
 
 private _id     = [_asset, "id", ""] call _hg;
 private _vehVar = [_asset, "vehVar", ""] call _hg;
@@ -35,9 +35,8 @@ private _startVecUp = [_asset, "startVecUp", [0,0,1]] call _hg;
 
 if (_spawnType isEqualTo "" || {!(_startPos isEqualType [])} || {(count _startPos) < 2}) exitWith { false };
 
-
 // Safety: delete any lingering vehicle reference
-private _oldVeh = [_asset, "veh", objNull] call _hg;
+private _oldVeh = _asset getOrDefault ["veh", objNull];
 if (!isNull _oldVeh) then { deleteVehicle _oldVeh; };
 
 private _newVeh = createVehicle [_spawnType, _startPos, [], 0, "NONE"];

@@ -37,11 +37,11 @@ params [
 
 // Normalize
 if (!(_request isEqualType "")) then { _request = "RTB"; };
-_request = toUpper ([_request] call _trimFn);
+_request = toUpper (trim _request);
 if !(_request in ["RTB","HOLD","PROCEED"]) then { _request = "RTB"; };
 
 if (!(_purpose isEqualType "")) then { _purpose = "REFIT"; };
-_purpose = toUpper ([_purpose] call _trimFn);
+_purpose = toUpper (trim _purpose);
 if !(_purpose in ["REFIT","INTEL","EPW"]) then { _purpose = "REFIT"; };
 
 if (!(_rationale isEqualType "")) then { _rationale = ""; };
@@ -77,7 +77,7 @@ private _leadSummary = "";
     {
         {
             // NOTE: order payload uses key "leadName" (not "leadDisplayName")
-            if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo "leadName" }) exitWith { _leadDisp = _x select 1; };
+            if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo "leadName" }) exitWith { _leadDisp = _x # 1; };
         } forEach _data;
     };
 
@@ -94,9 +94,6 @@ if (_request isEqualTo "RTB" && { _hasAcceptedLead }) then
 
     private _ok = [_txt, "RTB Warning", true, true] call BIS_fnc_guiMessage;
     if (!_ok) exitWith {false};
-
-// sqflint-compatible helpers
-private _trimFn  = compile "params ['_s']; trim _s";
 };
 
 // Ensure purpose is meaningful for non-RTB for display
@@ -124,28 +121,28 @@ _lines pushBack format ["REQUEST: %1 (%2)", _request, _purposeDisp];
 
 if (_request isEqualTo "HOLD") then
 {
-    if (!(([_holdIntent] call _trimFn) isEqualTo "")) then { _lines pushBack format ["HOLD INTENT: %1", [_holdIntent] call _trimFn]; };
+    if (trim _holdIntent isNotEqualTo "") then { _lines pushBack format ["HOLD INTENT: %1", trim _holdIntent]; };
     if (_holdMinutes > 0) then { _lines pushBack format ["HOLD DURATION: %1 min", _holdMinutes]; };
 };
 
 if (_request isEqualTo "PROCEED") then
 {
-    if (!(([_proceedIntent] call _trimFn) isEqualTo "")) then { _lines pushBack format ["PROCEED INTENT: %1", [_proceedIntent] call _trimFn]; };
+    if (trim _proceedIntent isNotEqualTo "") then { _lines pushBack format ["PROCEED INTENT: %1", trim _proceedIntent]; };
 };
 
-if (!(([_rationale] call _trimFn) isEqualTo "")) then { _lines pushBack format ["RATIONALE: %1", [_rationale] call _trimFn]; };
-if (!(([_constraints] call _trimFn) isEqualTo "")) then { _lines pushBack format ["CONSTRAINTS: %1", [_constraints] call _trimFn]; };
-if (!(([_support] call _trimFn) isEqualTo "")) then { _lines pushBack format ["SUPPORT: %1", [_support] call _trimFn]; };
-if (!(([_notes] call _trimFn) isEqualTo "")) then { _lines pushBack format ["NOTES: %1", [_notes] call _trimFn]; };
+if (trim _rationale isNotEqualTo "") then { _lines pushBack format ["RATIONALE: %1", trim _rationale]; };
+if (trim _constraints isNotEqualTo "") then { _lines pushBack format ["CONSTRAINTS: %1", trim _constraints]; };
+if (trim _support isNotEqualTo "") then { _lines pushBack format ["SUPPORT: %1", trim _support]; };
+if (trim _notes isNotEqualTo "") then { _lines pushBack format ["NOTES: %1", trim _notes]; };
 
 private _details = _lines joinString "\n";
 
 // Short note to carry into issued order meta
 private _noteLines = [];
-if (!(([_rationale] call _trimFn) isEqualTo "")) then { _noteLines pushBack format ["Rationale: %1", [_rationale] call _trimFn]; };
-if (!(([_constraints] call _trimFn) isEqualTo "")) then { _noteLines pushBack format ["Constraints: %1", [_constraints] call _trimFn]; };
-if (!(([_support] call _trimFn) isEqualTo "")) then { _noteLines pushBack format ["Support: %1", [_support] call _trimFn]; };
-if (!(([_notes] call _trimFn) isEqualTo "")) then { _noteLines pushBack format ["Notes: %1", [_notes] call _trimFn]; };
+if (trim _rationale isNotEqualTo "") then { _noteLines pushBack format ["Rationale: %1", trim _rationale]; };
+if (trim _constraints isNotEqualTo "") then { _noteLines pushBack format ["Constraints: %1", trim _constraints]; };
+if (trim _support isNotEqualTo "") then { _noteLines pushBack format ["Support: %1", trim _support]; };
+if (trim _notes isNotEqualTo "") then { _noteLines pushBack format ["Notes: %1", trim _notes]; };
 private _noteForOrder = _noteLines joinString " | ";
 
 private _payload =
@@ -155,12 +152,12 @@ private _payload =
     ["purposeDisp", _purposeDisp],
     ["requestorGroup", _gid],
     ["requestorRole", ([player] call ARC_fnc_rolesGetTag)],
-    ["rationale", [_rationale] call _trimFn],
-    ["constraints", [_constraints] call _trimFn],
-    ["support", [_support] call _trimFn],
-    ["holdIntent", [_holdIntent] call _trimFn],
+    ["rationale", trim _rationale],
+    ["constraints", trim _constraints],
+    ["support", trim _support],
+    ["holdIntent", trim _holdIntent],
     ["holdMinutes", _holdMinutes],
-    ["proceedIntent", [_proceedIntent] call _trimFn],
+    ["proceedIntent", trim _proceedIntent],
     ["note", _noteForOrder]
 ];
 

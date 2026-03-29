@@ -21,9 +21,6 @@ if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {false}
 private _districts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
 if !(_districts isEqualType createHashMap) exitWith {false};
 
-
-// sqflint-compatible helpers
-private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 // Enforce identity cap before save
 [500] call ARC_fnc_civsubIdentityEvictIfNeeded;
 
@@ -39,34 +36,34 @@ private _districtArr = [];
     private _d = _districts get _x;
     if !(_d isEqualType createHashMap) then { continue; };
 
-    private _centroid = [_d, "centroid", [0,0]] call _hg;
+    private _centroid = _d getOrDefault ["centroid", [0,0]];
     private _row = [
-        [_d, "id", _x] call _hg,
+        _d getOrDefault ["id", _x],
         _centroid,
-        [_d, "radius_m", 0] call _hg,
-        [_d, "pop_total", 0] call _hg,
+        _d getOrDefault ["radius_m", 0],
+        _d getOrDefault ["pop_total", 0],
 
-        [_d, "W_EFF_U", 0] call _hg,
-        [_d, "R_EFF_U", 0] call _hg,
-        [_d, "G_EFF_U", 0] call _hg,
+        _d getOrDefault ["W_EFF_U", 0],
+        _d getOrDefault ["R_EFF_U", 0],
+        _d getOrDefault ["G_EFF_U", 0],
 
-        [_d, "W_BASE_U", 45] call _hg,
-        [_d, "R_BASE_U", 55] call _hg,
-        [_d, "G_BASE_U", 35] call _hg,
+        _d getOrDefault ["W_BASE_U", 45],
+        _d getOrDefault ["R_BASE_U", 55],
+        _d getOrDefault ["G_BASE_U", 35],
 
-        [_d, "food_idx", 50] call _hg,
-        [_d, "water_idx", 50] call _hg,
-        [_d, "fear_idx", 50] call _hg,
+        _d getOrDefault ["food_idx", 50],
+        _d getOrDefault ["water_idx", 50],
+        _d getOrDefault ["fear_idx", 50],
 
-        [_d, "cooldown_nextLead_ts", 0] call _hg,
-        [_d, "cooldown_nextAttack_ts", 0] call _hg,
-        [_d, "last_player_touch_ts", 0] call _hg
-        ,[_d, "civ_cas_kia", 0] call _hg
-        ,[_d, "civ_cas_wia", 0] call _hg
-        ,[_d, "crime_db_hits", 0] call _hg
-        ,[_d, "detentions_initiated", 0] call _hg
-        ,[_d, "detentions_handed_off", 0] call _hg
-        ,[_d, "aid_events", 0] call _hg
+        _d getOrDefault ["cooldown_nextLead_ts", 0],
+        _d getOrDefault ["cooldown_nextAttack_ts", 0],
+        _d getOrDefault ["last_player_touch_ts", 0]
+        ,_d getOrDefault ["civ_cas_kia", 0]
+        ,_d getOrDefault ["civ_cas_wia", 0]
+        ,_d getOrDefault ["crime_db_hits", 0]
+        ,_d getOrDefault ["detentions_initiated", 0]
+        ,_d getOrDefault ["detentions_handed_off", 0]
+        ,_d getOrDefault ["aid_events", 0]
     ];
 
     _districtArr pushBack _row;
@@ -78,48 +75,48 @@ private _idArr = [];
     private _rec = _ids get _x;
     if !(_rec isEqualType createHashMap) then { continue; };
 
-    private _flags = [_rec, "flags", []] call _hg;
+    private _flags = _rec getOrDefault ["flags", []];
     if !(_flags isEqualType []) then { _flags = []; };
 
-    private _seen = [_rec, "seen_by", createHashMap] call _hg;
+    private _seen = _rec getOrDefault ["seen_by", createHashMap];
     private _seenRows = [];
     if (_seen isEqualType createHashMap) then {
         {
             private _row = _seen get _x;
             if (_row isEqualType [] && {count _row >= 3}) then {
-                _seenRows pushBack [_x, _row select 0, _row select 1, _row select 2];
+                _seenRows pushBack [_x, _row # 0, _row # 1, _row # 2];
             };
         } forEach (keys _seen);
     };
 
     _idArr pushBack [
-        [_rec, "civ_uid", _x] call _hg,
-        [_rec, "first_name", ""] call _hg,
-        [_rec, "last_name", ""] call _hg,
-        [_rec, "sex", ""] call _hg,
-        [_rec, "dob_iso", ""] call _hg,
-        [_rec, "nationality", ""] call _hg,
-        [_rec, "home_district_id", ""] call _hg,
-        [_rec, "home_pos", [0,0,0]] call _hg,
-        [_rec, "occupation", ""] call _hg,
-        [_rec, "background", ""] call _hg,
-        [_rec, "passport_serial", ""] call _hg,
-        [_rec, "passport_expires_iso", ""] call _hg,
-        [_rec, "passport_isPassport", true] call _hg,
+        _rec getOrDefault ["civ_uid", _x],
+        _rec getOrDefault ["first_name", ""],
+        _rec getOrDefault ["last_name", ""],
+        _rec getOrDefault ["sex", ""],
+        _rec getOrDefault ["dob_iso", ""],
+        _rec getOrDefault ["nationality", ""],
+        _rec getOrDefault ["home_district_id", ""],
+        _rec getOrDefault ["home_pos", [0,0,0]],
+        _rec getOrDefault ["occupation", ""],
+        _rec getOrDefault ["background", ""],
+        _rec getOrDefault ["passport_serial", ""],
+        _rec getOrDefault ["passport_expires_iso", ""],
+        _rec getOrDefault ["passport_isPassport", true],
         _flags,
-        [_rec, "wanted_level", 0] call _hg,
+        _rec getOrDefault ["wanted_level", 0],
         _seenRows,
-        [_rec, "last_interaction_ts", 0] call _hg,
+        _rec getOrDefault ["last_interaction_ts", 0],
         // Phase 7: detention status (optional; backward compatible)
-        [_rec, "status_detained", false] call _hg,
-        [_rec, "status_detainedAt", 0] call _hg,
-        [_rec, "status_detainedDistrictId", ""] call _hg,
-        [_rec, "status_handedOff", false] call _hg,
-        [_rec, "status_handedOffAt", 0] call _hg,
-        [_rec, "status_handedOffTo", ""] call _hg,
-        [_rec, "status_releasedAt", 0] call _hg,
-        [_rec, "poi_id", ""] call _hg,
-        [_rec, "charges", []] call _hg
+        _rec getOrDefault ["status_detained", false],
+        _rec getOrDefault ["status_detainedAt", 0],
+        _rec getOrDefault ["status_detainedDistrictId", ""],
+        _rec getOrDefault ["status_handedOff", false],
+        _rec getOrDefault ["status_handedOffAt", 0],
+        _rec getOrDefault ["status_handedOffTo", ""],
+        _rec getOrDefault ["status_releasedAt", 0],
+        _rec getOrDefault ["poi_id", ""],
+        _rec getOrDefault ["charges", []]
     ];
 } forEach (keys _ids);
 
@@ -129,17 +126,17 @@ private _crimeArr = [];
     private _rec = _db get _x;
     if !(_rec isEqualType createHashMap) then { continue; };
 
-    private _hist = [_rec, "status_history", []] call _hg;
+    private _hist = _rec getOrDefault ["status_history", []];
     if !(_hist isEqualType []) then { _hist = []; };
 
     _crimeArr pushBack [
-        [_rec, "poi_id", _x] call _hg,
-        [_rec, "category", ""] call _hg,
-        [_rec, "homeDistrictId", ""] call _hg,
-        [_rec, "passport_serial", ""] call _hg,
-        [_rec, "is_hvt", false] call _hg,
-        [_rec, "status", ""] call _hg,
-        [_rec, "status_ts", 0] call _hg,
+        _rec getOrDefault ["poi_id", _x],
+        _rec getOrDefault ["category", ""],
+        _rec getOrDefault ["homeDistrictId", ""],
+        _rec getOrDefault ["passport_serial", ""],
+        _rec getOrDefault ["is_hvt", false],
+        _rec getOrDefault ["status", ""],
+        _rec getOrDefault ["status_ts", 0],
         _hist
     ];
 } forEach (keys _db);

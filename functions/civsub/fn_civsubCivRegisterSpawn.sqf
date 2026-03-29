@@ -16,12 +16,9 @@ params [
     ["_unit", objNull, [objNull]],
     ["_districtId", "", [""]]
 ];
-
-// sqflint-compatible helpers
-private _trimFn  = compile "params ['_s']; trim _s";
 if (isNull _unit) exitWith {""};
 
-private _districtIdNorm = toUpper ([_districtId] call _trimFn);
+private _districtIdNorm = toUpper (trim _districtId);
 if !([_districtIdNorm] call ARC_fnc_worldIsValidDistrictId) then
 {
     _districtIdNorm = [getPosATL _unit] call ARC_fnc_threadResolveDistrictId;

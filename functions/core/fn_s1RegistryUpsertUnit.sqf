@@ -18,9 +18,6 @@ params [
     ["_publish", true, [true]]
 ];
 
-
-// sqflint-compatible helpers
-private _trimFn  = compile "params ['_s']; trim _s";
 if (!isServer) exitWith { [] };
 
 private _registry = missionNamespace getVariable ["ARC_s1_registry", []];
@@ -42,7 +39,7 @@ private _safeUnit = _unit;
 if (isNull _safeUnit && {!isNull _group}) then
 {
     private _members = units _group;
-    if ((count _members) > 0) then { _safeUnit = _members select 0; };
+    if ((count _members) > 0) then { _safeUnit = _members # 0; };
 };
 
 private _resolvedGroup = _group;
@@ -52,24 +49,24 @@ private _groupId = "";
 if (!isNull _resolvedGroup) then { _groupId = groupId _resolvedGroup; };
 if (_groupId isEqualTo "") then {
     private _idxGroupId = -1;
-    { if ((_x isEqualType []) && {count _x >= 2} && {(_x select 0) isEqualTo "groupId"}) exitWith { _idxGroupId = _forEachIndex; }; } forEach _patch;
-    if (_idxGroupId >= 0) then { _groupId = ((_patch select _idxGroupId) param [1, ""]); };
+    { if ((_x isEqualType []) && {count _x >= 2} && {(_x # 0) isEqualTo "groupId"}) exitWith { _idxGroupId = _forEachIndex; }; } forEach _patch;
+    if (_idxGroupId >= 0) then { _groupId = ((_patch # _idxGroupId) param [1, ""]); };
 };
 
 private _unitId = "";
 if (!isNull _safeUnit) then { _unitId = netId _safeUnit; };
 if (_unitId isEqualTo "") then {
     private _idxUnitId = -1;
-    { if ((_x isEqualType []) && {count _x >= 2} && {(_x select 0) isEqualTo "unitId"}) exitWith { _idxUnitId = _forEachIndex; }; } forEach _patch;
-    if (_idxUnitId >= 0) then { _unitId = ((_patch select _idxUnitId) param [1, ""]); };
+    { if ((_x isEqualType []) && {count _x >= 2} && {(_x # 0) isEqualTo "unitId"}) exitWith { _idxUnitId = _forEachIndex; }; } forEach _patch;
+    if (_idxUnitId >= 0) then { _unitId = ((_patch # _idxUnitId) param [1, ""]); };
 };
 if (_unitId isEqualTo "") then { _unitId = format ["virtual:%1", diag_tickTime]; };
 
 private _groupTokens = _groupId splitString "|";
 private _orbatLeft = "";
 private _callsign = "";
-if ((count _groupTokens) > 0) then { _orbatLeft = [(_groupTokens select 0)] call _trimFn; };
-if ((count _groupTokens) > 1) then { _callsign = [(_groupTokens select 1)] call _trimFn; };
+if ((count _groupTokens) > 0) then { _orbatLeft = trim (_groupTokens # 0); };
+if ((count _groupTokens) > 1) then { _callsign = trim (_groupTokens # 1); };
 if (_callsign isEqualTo "") then
 {
     if (!isNull _resolvedGroup) then { _callsign = _resolvedGroup getVariable ["ARC_groupCallsign", ""]; };
@@ -78,7 +75,7 @@ if (_callsign isEqualTo "") then
 private _leftTokens = _orbatLeft splitString "- ";
 private _company = "";
 if ((count _leftTokens) >= 3) then {
-    private _candidate = _leftTokens select 2;
+    private _candidate = _leftTokens # 2;
     if ((count _candidate) <= 2) then { _company = toUpper _candidate; };
 };
 
@@ -144,15 +141,15 @@ private _unitRecord = [
 {
     private _k = _x param [0, ""];
     private _v = _x param [1, nil];
-    if (!(_k isEqualTo "")) then
+    if (_k isNotEqualTo "") then
     {
         private _gIdx = -1;
         { if ((_x param [0, ""]) isEqualTo _k) exitWith { _gIdx = _forEachIndex; }; } forEach _groupRecord;
-        if (_gIdx >= 0) then { (_groupRecord select _gIdx) set [1, _v]; } else { _groupRecord pushBack [_k, _v]; };
+        if (_gIdx >= 0) then { (_groupRecord # _gIdx) set [1, _v]; } else { _groupRecord pushBack [_k, _v]; };
 
         private _uIdx = -1;
         { if ((_x param [0, ""]) isEqualTo _k) exitWith { _uIdx = _forEachIndex; }; } forEach _unitRecord;
-        if (_uIdx >= 0) then { (_unitRecord select _uIdx) set [1, _v]; } else { _unitRecord pushBack [_k, _v]; };
+        if (_uIdx >= 0) then { (_unitRecord # _uIdx) set [1, _v]; } else { _unitRecord pushBack [_k, _v]; };
     };
 } forEach _patch;
 
@@ -161,7 +158,7 @@ private _groupIdx = -1;
     private _grpRec = _x;
     private _gidIdx = -1;
     { if ((_x param [0, ""]) isEqualTo "groupId") exitWith { _gidIdx = _forEachIndex; }; } forEach _grpRec;
-    if ((_gidIdx >= 0) && { ((_grpRec select _gidIdx) param [1, ""]) isEqualTo _groupId }) exitWith { _groupIdx = _forEachIndex; };
+    if ((_gidIdx >= 0) && { ((_grpRec # _gidIdx) param [1, ""]) isEqualTo _groupId }) exitWith { _groupIdx = _forEachIndex; };
 } forEach _groups;
 if (_groupIdx >= 0) then { _groups set [_groupIdx, _groupRecord]; } else { _groups pushBack _groupRecord; };
 
@@ -170,7 +167,7 @@ private _unitIdx = -1;
     private _unitRec = _x;
     private _uidIdx = -1;
     { if ((_x param [0, ""]) isEqualTo "unitId") exitWith { _uidIdx = _forEachIndex; }; } forEach _unitRec;
-    if ((_uidIdx >= 0) && { ((_unitRec select _uidIdx) param [1, ""]) isEqualTo _unitId }) exitWith { _unitIdx = _forEachIndex; };
+    if ((_uidIdx >= 0) && { ((_unitRec # _uidIdx) param [1, ""]) isEqualTo _unitId }) exitWith { _unitIdx = _forEachIndex; };
 } forEach _units;
 if (_unitIdx >= 0) then { _units set [_unitIdx, _unitRecord]; } else { _units pushBack _unitRecord; };
 

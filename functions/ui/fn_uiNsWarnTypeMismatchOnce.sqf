@@ -21,11 +21,8 @@ if !(_warned isEqualType createHashMap) then
 };
 
 private _token = format ["%1|%2", _key, _expected];
-if ([_warned, _token, false] call _hg) exitWith {false};
+if (_warned getOrDefault [_token, false]) exitWith {false};
 
-
-// sqflint-compatible helpers
-private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 _warned set [_token, true];
 uiNamespace setVariable ["ARC_uiNs_typeWarned", _warned];
 

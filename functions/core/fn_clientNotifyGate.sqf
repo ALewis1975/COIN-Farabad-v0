@@ -20,12 +20,8 @@ params [
     ["_msg", ""]
 ];
 
-
-// sqflint-compatible helpers
-private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
-private _trimFn  = compile "params ['_s']; trim _s";
 if (!(_key isEqualType "")) then { _key = str _key; };
-_key = [_key] call _trimFn;
+_key = trim _key;
 if (_key isEqualTo "") exitWith {true};
 
 if (!(_cooldownS isEqualType 0)) then { _cooldownS = 0; };
@@ -37,14 +33,14 @@ private _store = uiNamespace getVariable ["ARC_clientNotifyGateStore", createHas
 if !(_store isEqualType createHashMap) then { _store = createHashMap; };
 
 private _now = diag_tickTime;
-private _entry = [_store, _key, []] call _hg;
+private _entry = _store getOrDefault [_key, []];
 
 private _lastAt = -1;
 private _lastSig = "";
 if (_entry isEqualType [] && { (count _entry) >= 2 }) then
 {
-    _lastAt = _entry select 0;
-    _lastSig = _entry select 1;
+    _lastAt = _entry # 0;
+    _lastSig = _entry # 1;
 };
 
 private _allow = true;

@@ -13,9 +13,6 @@
 
 if (!hasInterface) exitWith {false};
 
-
-// sqflint-compatible helpers
-private _trimFn  = compile "params ['_s']; trim _s";
 // Fast UX gate: show a clear message before we open the text prompt.
 if !([player] call ARC_fnc_clientCanSendSitrep) exitWith
 {
@@ -25,7 +22,7 @@ if !([player] call ARC_fnc_clientCanSendSitrep) exitWith
 
 private _rec = missionNamespace getVariable ["ARC_activeIncidentSuggestedResult", ""]; 
 if (!(_rec isEqualType "")) then { _rec = ""; };
-_rec = toUpper ([_rec] call _trimFn);
+_rec = toUpper (trim _rec);
 
 // clientSendSitrep validates the recommendation itself.
 [_rec, false] spawn ARC_fnc_clientSendSitrep;

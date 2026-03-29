@@ -68,7 +68,7 @@ for "_i" from 0 to (_tries - 1) do
 
         private _n = surfaceNormal _cand;
         if (!(_n isEqualType []) || { (count _n) < 3 }) then { continue; };
-        if (abs (_n select 2) < (1 - _slopeMax)) then { continue; };
+        if (abs (_n # 2) < (1 - _slopeMax)) then { continue; };
 
         if (_avoidAirbase) then
         {
@@ -93,7 +93,7 @@ for "_i" from 0 to (_tries - 1) do
         break;
     } forEach _candList;
 
-    if (!(_best isEqualTo [])) exitWith {};
+    if (_best isNotEqualTo []) exitWith {};
 };
 
 _best

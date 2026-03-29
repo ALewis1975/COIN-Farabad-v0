@@ -16,10 +16,7 @@
 if (!isServer) exitWith {[]};
 
 params [ ["_leadId", "", [""]] ];
-
-// sqflint-compatible helpers
-private _trimFn  = compile "params ['_s']; trim _s";
-_leadId = [_leadId] call _trimFn;
+_leadId = trim _leadId;
 if (_leadId isEqualTo "") exitWith {[]};
 
 // Prune expired leads first.
@@ -31,7 +28,7 @@ if (!(_leads isEqualType [])) then { _leads = []; };
 if (_leads isEqualTo []) exitWith {[]};
 
 private _idx = -1;
-{ if (_x isEqualType [] && { (count _x) >= 1 } && { (_x select 0) isEqualTo _leadId }) exitWith { _idx = _forEachIndex; }; } forEach _leads;
+{ if (_x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _leadId }) exitWith { _idx = _forEachIndex; }; } forEach _leads;
 
 if (_idx < 0) exitWith {[]};
 
@@ -41,7 +38,7 @@ private _lead = _leads deleteAt _idx;
 // If this lead had an approximate circle marker, remove it once consumed into a task.
 if (_lead isEqualType [] && { (count _lead) >= 1 }) then
 {
-    private _lid = _lead select 0;
+    private _lid = _lead # 0;
     private _mk = format ["ARC_leadCircle_%1", _lid];
     if (_mk in allMapMarkers) then { deleteMarker _mk; };
     missionNamespace setVariable [format ["ARC_leadCircleExpiresAt_%1", _lid], nil];
@@ -102,7 +99,7 @@ if (_lead isEqualType [] && { (count _lead) >= 4 }) then
 // Track lead end-state (consumed into an actionable task)
 if (_lead isEqualType [] && { (count _lead) >= 1 }) then
 {
-    private _lid = _lead select 0;
+    private _lid = _lead # 0;
     private _lh = ["leadHistory", []] call ARC_fnc_stateGet;
     if (!(_lh isEqualType [])) then { _lh = []; };
     _lh pushBack [_lid, "CONSUMED", serverTime];

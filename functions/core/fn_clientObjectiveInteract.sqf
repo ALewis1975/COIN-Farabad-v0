@@ -30,7 +30,7 @@ if (isNull _target) exitWith {false};
 if (isNull _caller) exitWith {false};
 if (_kind isEqualTo "") exitWith {false};
 
-private _stageU = toUpper ([_stage] call _trimFn);
+private _stageU = toUpper (trim _stage);
 
 // Helper: remove any stored objective actions for this target (supports int or array)
 private _removeObjectiveActions = {
@@ -106,9 +106,6 @@ private _resp = [_cat, _defaultSummary, _defaultDetails] call ARC_fnc_clientInte
 _resp params ["_ok", "_sum", "_det"];
 if (!_ok) exitWith {false};
 
-
-// sqflint-compatible helpers
-private _trimFn  = compile "params ['_s']; trim _s";
 // Prevent spam double-clicks on this client.
 [_target] call _removeObjectiveActions;
 

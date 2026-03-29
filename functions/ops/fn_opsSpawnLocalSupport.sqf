@@ -151,7 +151,7 @@ if (_reuseExisting) then
         private _q = ["cleanupQueue", []] call ARC_fnc_stateGet;
         if (_q isEqualType []) then
         {
-            _q = _q select { !((_x isEqualType []) && { (count _x) >= 1 } && { (_x select 0) in _nids }) };
+            _q = _q select { !((_x isEqualType []) && { (count _x) >= 1 } && { (_x # 0) in _nids }) };
             ["cleanupQueue", _q] call ARC_fnc_stateSet;
         };
 
@@ -312,7 +312,7 @@ private _fn_buildingPositions = {
         {
             private _p = _b buildingPos _i;
             if (!(_p isEqualType []) || { (count _p) < 2 }) exitWith {};
-            if ((_p select 0) == 0 && { (_p select 1) == 0 }) exitWith {};
+            if ((_p # 0) == 0 && { (_p # 1) == 0 }) exitWith {};
             _arr pushBack _p;
         };
     };
@@ -408,7 +408,7 @@ if (_garrisonN > 0) then
     {
         _bPos = _bPos apply { [random 1, _x] };
         _bPos sort true;
-        _bPos = _bPos apply { _x select 1 };
+        _bPos = _bPos apply { _x # 1 };
     };
 
     for "_i" from 1 to _garrisonN do

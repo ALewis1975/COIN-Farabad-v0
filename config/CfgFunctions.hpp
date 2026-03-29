@@ -65,7 +65,6 @@ class CfgFunctions
             class rolesIsTocS3 {};
             class rolesIsTocCommand {};
             class rolesCanApproveQueue {};
-            class rolesCanUseMobileOps {};
             class rpcValidateSender {};
             class airbaseTowerAuthorize {};
 
@@ -82,8 +81,6 @@ class CfgFunctions
 
             // User-friendly tasks + intel feed
             class publicBroadcastState {};
-            class consoleVmBuild {};
-            class consoleVmAdapterV1 {};
             class statePublishPublic {};
             class intelLog {};
             class intelCreateMarker {};
@@ -108,7 +105,6 @@ class CfgFunctions
 
             // Threads / cases
             class taskEnsureThreadParent {};
-            class taskengMigrateSchema {};
             class threadFindOrCreate {};
             class threadResolveDistrictId {};
             class worldIsValidDistrictId {};
@@ -157,7 +153,6 @@ class CfgFunctions
             // Field SITREPs (player -> TOC)
             class clientCanSendSitrep {};
             class clientSendSitrep {};
-            class sitrepGateEval {};
             class tocReceiveSitrep {};
 
             // TOC actions
@@ -532,7 +527,6 @@ class CfgFunctions
             class uiConsoleActionTocSecondary {};
 
             class uiConsoleActionOpenCloseout {};
-            class uiConsoleActionCloseIncident {};
 
             class uiConsoleActionAcceptIncident {};
             class uiConsoleActionAcceptOrder {};

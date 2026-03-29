@@ -17,33 +17,31 @@ params [["_bundle", createHashMap, [createHashMap]]];
 if !(_bundle isEqualType createHashMap) exitWith {""};
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
-private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
-private _trimFn  = compile "params ['_s']; trim _s";
 
-private _lead = [_bundle, "lead_emit", createHashMap] call _hg;
+private _lead = _bundle getOrDefault ["lead_emit", createHashMap];
 if (_lead isEqualType []) then { _lead = [_lead] call _hmCreate; };
 if !(_lead isEqualType createHashMap) exitWith {""};
 
-if !([_lead, "emit", false] call _hg) exitWith {""};
+if !(_lead getOrDefault ["emit", false]) exitWith {""};
 
-private _civsubType = [_lead, "lead_type", ""] call _hg;
+private _civsubType = _lead getOrDefault ["lead_type", ""];
 if !(_civsubType isEqualType "") then { _civsubType = ""; };
-_civsubType = toUpper ([_civsubType] call _trimFn);
+_civsubType = toUpper (trim _civsubType);
 if (_civsubType isEqualTo "") exitWith {""};
 
-private _seed = [_lead, "seed", createHashMap] call _hg;
+private _seed = _lead getOrDefault ["seed", createHashMap];
 if (_seed isEqualType []) then { _seed = [_seed] call _hmCreate; };
 if !(_seed isEqualType createHashMap) then { _seed = createHashMap; };
 
-private _source = [_bundle, "source", createHashMap] call _hg;
+private _source = _bundle getOrDefault ["source", createHashMap];
 if (_source isEqualType []) then { _source = [_source] call _hmCreate; };
 if !(_source isEqualType createHashMap) then { _source = createHashMap; };
 
-private _districtId = [_bundle, "districtId", ([_bundle, "district_id", ""] call _hg)] call _hg;
+private _districtId = _bundle getOrDefault ["districtId", (_bundle getOrDefault ["district_id", ""])];
 if !(_districtId isEqualType "") then { _districtId = ""; };
-_districtId = toUpper ([_districtId] call _trimFn);
+_districtId = toUpper (trim _districtId);
 
-private _confidence = [_lead, "confidence", 0.35] call _hg;
+private _confidence = _lead getOrDefault ["confidence", 0.35];
 if !(_confidence isEqualType 0) then { _confidence = 0.35; };
 _confidence = (_confidence max 0.10) min 0.90;
 
@@ -65,8 +63,8 @@ if !(_hist isEqualType []) then { _hist = []; };
 _hist = _hist select {
     _x isEqualType []
     && { (count _x) >= 5 }
-    && { (_x select 0) isEqualType 0 }
-    && { (_x select 0) >= _windowStart }
+    && { (_x # 0) isEqualType 0 }
+    && { (_x # 0) >= _windowStart }
 };
 
 private _globalCount = count _hist;
@@ -79,11 +77,11 @@ if (_globalCount >= _capGlobal) exitWith {
 private _districtCount = count (_hist select {
     _x isEqualType []
     && { (count _x) >= 2 }
-    && { (_x select 1) isEqualType "" }
-    && { (toUpper (_x select 1)) isEqualTo _districtId }
+    && { (_x # 1) isEqualType "" }
+    && { (toUpper (_x # 1)) isEqualTo _districtId }
 });
 
-if (!(_districtId isEqualTo "") && { _districtCount >= _capDistrict }) exitWith {
+if (_districtId isNotEqualTo "" && { _districtCount >= _capDistrict }) exitWith {
     missionNamespace setVariable ["civsub_v1_leadBridge_history", _hist, true];
     missionNamespace setVariable ["civsub_v1_lastLeadBridgeReject", [serverTime, "CAP_DISTRICT", _districtId, _districtCount, _capDistrict], true];
     ""
@@ -100,7 +98,7 @@ private _coreType = switch (_civsubType) do
 };
 
 private _pos = [];
-private _seedPos = [_seed, "home_pos", []] call _hg;
+private _seedPos = _seed getOrDefault ["home_pos", []];
 if (_seedPos isEqualType [] && { (count _seedPos) >= 2 }) then
 {
     _pos = +_seedPos;
@@ -109,8 +107,8 @@ if (_seedPos isEqualType [] && { (count _seedPos) >= 2 }) then
 
 if (_pos isEqualTo []) then
 {
-    private _cent = [_bundle, "district_centroid", []] call _hg;
-    if !(_cent isEqualType []) then { _cent = [_bundle, "centroid", []] call _hg; };
+    private _cent = _bundle getOrDefault ["district_centroid", []];
+    if !(_cent isEqualType []) then { _cent = _bundle getOrDefault ["centroid", []]; };
     if (_cent isEqualType [] && { (count _cent) >= 2 }) then
     {
         _pos = +_cent;
@@ -137,9 +135,9 @@ private _ttl = missionNamespace getVariable ["civsub_v1_leadBridge_ttlSec", 60 *
 if !(_ttl isEqualType 0) then { _ttl = 60 * 60; };
 _ttl = (_ttl max (10 * 60)) min (6 * 60 * 60);
 
-private _srcEvent = [_source, "event", ""] call _hg;
+private _srcEvent = _source getOrDefault ["event", ""];
 if !(_srcEvent isEqualType "") then { _srcEvent = ""; };
-_srcEvent = toUpper ([_srcEvent] call _trimFn);
+_srcEvent = toUpper (trim _srcEvent);
 
 private _tag = if (_srcEvent isEqualTo "") then { "CIVSUB" } else { format ["CIVSUB_%1", _srcEvent] };
 
