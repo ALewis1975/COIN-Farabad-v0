@@ -155,6 +155,7 @@ class CfgFunctions
             // Field SITREPs (player -> TOC)
             class clientCanSendSitrep {};
             class clientSendSitrep {};
+            class sitrepGateEval {};
             class tocReceiveSitrep {};
 
             // TOC actions
