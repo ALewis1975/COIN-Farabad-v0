@@ -42,13 +42,13 @@ private _per = createHashMap;
 {
     if (isNull _x) then { continue; };
     private _d = _x getVariable ["ARC_civtraf_districtId", "D00"];
-    _per set [_d, 1 + (_per getOrDefault [_d, 0])];
+    _per set [_d, 1 + ([_per, _d, 0] call getOrDefault)];
 } forEach _parked;
 
 {
     if (isNull _x) then { continue; };
     private _d = _x getVariable ["ARC_civtraf_districtId", "D00"];
-    _per set [_d, 1 + (_per getOrDefault [_d, 0])];
+    _per set [_d, 1 + ([_per, _d, 0] call getOrDefault)];
 } forEach _moving;
 
 _out set ["perDistrict", _per];

@@ -1319,3 +1319,28 @@ git --no-pager diff --check
 5. Validate `intelLog` and `incidentHistory` do not grow beyond configured caps during a 2-hour session
 6. Run QA Audit from HQ tab and confirm new `_trimFn`/`_fileExistsFn` helpers produce identical report format
 7. Run `[] execVM "tests/run_all.sqf";` from Debug Console; confirm 73 assertions all PASS
+
+---
+
+## 2026-03-29 17:45–17:50 UTC — CIVSUB Ambient Activity Profiles (Traffic/Civs/Scheduler)
+
+- **Branch:** copilot/progress-civilian-ambient-systems
+- **Commit:** cdfaf6d (plus uncommitted compat-only follow-up in three CIVSUB files)
+- **Scenario:** Static validation pass for CIVSUB time-of-day activity profile wiring
+
+### Checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | SQFLINT compat scan (changed CIVSUB files) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubInitServer.sqf functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubCivSamplerTick.sqf functions/civsub/fn_civsubSchedulerTick.sqf functions/civsub/fn_civsubTrafficDebugSnapshot.sqf` | PASS | No known parser-compat patterns found |
+| 2 | sqflint static lint (changed CIVSUB files) | `sqflint -e w <each changed file>` | FAIL | Parser errors in pre-existing legacy constructs (`keys`, map `get`) in unchanged sections of existing files; no new compat-scan violations introduced |
+| 3 | State migration validator | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios passed |
+| 4 | Marker index validator | `python3 scripts/dev/validate_marker_index.py` | PASS | Passed all modes |
+| 5 | AIRBASE planning static checks | `bash tests/static/airbase_planning_mode_checks.sh` | PASS | Passed after installing `ripgrep` |
+| 6 | CASREQ snapshot contract checks | `bash tests/static/casreq_snapshot_contract_checks.sh` | PASS | All contract checks passed |
+| 7 | Dedicated-server runtime validation | N/A | BLOCKED | No Arma dedicated server/JIP runtime available in this container |
+
+### Status
+
+- Static validation: **PASS with one known sqflint legacy-parser FAIL** (documented above)
+- Runtime validation: **BLOCKED** (dedicated/JIP environment unavailable)
