@@ -106,6 +106,7 @@ class CfgFunctions
 
             // Threads / cases
             class taskEnsureThreadParent {};
+            class taskengMigrateSchema {};
             class threadFindOrCreate {};
             class threadResolveDistrictId {};
             class worldIsValidDistrictId {};

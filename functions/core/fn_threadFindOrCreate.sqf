@@ -108,6 +108,18 @@ if (_bestIdx >= 0) exitWith
         ["threads", _threads] call ARC_fnc_stateSet;
     };
 
+    // Sync thread_store (TASKENG v0 schema rev 4)
+    private _store = ["taskeng_v0_thread_store", createHashMap] call ARC_fnc_stateGet;
+    if (!(_store isEqualType createHashMap)) then { _store = createHashMap; };
+    private _rec = createHashMap;
+    _rec set ["thread_id", _id];
+    _rec set ["type", toUpper (_thr select 1)];
+    _rec set ["confidence", _thr select 4];
+    _rec set ["heat", _thr select 5];
+    _rec set ["parent_task_id", _thr select 13];
+    _store set [_id, _rec];
+    ["taskeng_v0_thread_store", _store] call ARC_fnc_stateSet;
+
     [] call ARC_fnc_threadBroadcast;
     _id
 };
@@ -144,6 +156,18 @@ private _thread = [
 
 _threads pushBack _thread;
 ["threads", _threads] call ARC_fnc_stateSet;
+
+// Sync thread_store (TASKENG v0 schema rev 4)
+private _store = ["taskeng_v0_thread_store", createHashMap] call ARC_fnc_stateGet;
+if (!(_store isEqualType createHashMap)) then { _store = createHashMap; };
+private _rec = createHashMap;
+_rec set ["thread_id", _id];
+_rec set ["type", _threadType];
+_rec set ["confidence", 0.12];
+_rec set ["heat", 0.08];
+_rec set ["parent_task_id", _parentTaskId];
+_store set [_id, _rec];
+["taskeng_v0_thread_store", _store] call ARC_fnc_stateSet;
 
 [] call ARC_fnc_threadBroadcast;
 

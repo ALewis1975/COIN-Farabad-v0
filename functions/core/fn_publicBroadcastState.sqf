@@ -461,8 +461,36 @@ private _airbasePub = [
     ["automationDelayArrivalS", _autoDelayArrivalS]
 ];
 
+];
+
+// --- TASKENG v0 snapshot (thread/task hierarchy) ----------------------------
+private _taskengStore = ["taskeng_v0_thread_store", createHashMap] call ARC_fnc_stateGet;
+if (!(_taskengStore isEqualType createHashMap)) then { _taskengStore = createHashMap; };
+private _taskengRev = ["taskeng_v0_schema_rev", 0] call ARC_fnc_stateGet;
+if (!(_taskengRev isEqualType 0)) then { _taskengRev = 0; };
+
+private _taskengRows = [];
+private _hgTaskeng = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+{
+    private _thrRec = _y;
+    if (_thrRec isEqualType createHashMap) then {
+        private _thrId = [_thrRec, "thread_id", ""] call _hgTaskeng;
+        private _thrType = [_thrRec, "type", ""] call _hgTaskeng;
+        private _thrConf = [_thrRec, "confidence", 0] call _hgTaskeng;
+        private _thrHeat = [_thrRec, "heat", 0] call _hgTaskeng;
+        private _thrParent = [_thrRec, "parent_task_id", ""] call _hgTaskeng;
+        _taskengRows pushBack [_thrId, _thrType, _thrConf, _thrHeat, _thrParent];
+    };
+} forEach _taskengStore;
+
+private _taskengPub = [
+    ["schema", "taskeng_v0"],
+    ["schema_rev", _taskengRev],
+    ["thread_count", count _taskengRows],
+    ["rows", _taskengRows]
+];
+
 private _pub = [
-    ["insurgentPressure", _p],
     ["corruption", _c],
     ["infiltration", _i],
     ["civSentiment", _sent],
@@ -480,7 +508,8 @@ private _pub = [
     ["companyCommandTasking", ["companyCommandTasking", []] call ARC_fnc_stateGet],
     ["companyVirtualOps", ["companyVirtualOps", []] call ARC_fnc_stateGet],
     ["casreq", _casreqPub],
-    ["airbase", _airbasePub]
+    ["airbase", _airbasePub],
+    ["taskeng", _taskengPub]
 ];
 
 private _didPublish = [_pub, "publicBroadcastState", false, 0.25] call ARC_fnc_statePublishPublic;

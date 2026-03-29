@@ -745,6 +745,9 @@ if (_safeModeEnabled) then
 // Load persistent COIN state
 [] call ARC_fnc_stateLoad;
 
+// TASKENG v0 schema migration (idempotent; must run after stateLoad, before thread ops)
+[] call ARC_fnc_taskengMigrateSchema;
+
 // Server-owned S1 registry: canonical personnel/unit index + public snapshot mirror
 [] call ARC_fnc_s1RegistryInit;
 

@@ -216,6 +216,18 @@ if (_typeU find "CMDNODE" == 0 || { _tagU isEqualTo "CMDNODE" }) then
 _threads set [_idx, _thr];
 ["threads", _threads] call ARC_fnc_stateSet;
 
+// Sync thread_store (TASKENG v0 schema rev 4)
+private _store = ["taskeng_v0_thread_store", createHashMap] call ARC_fnc_stateGet;
+if (!(_store isEqualType createHashMap)) then { _store = createHashMap; };
+private _storeRec = createHashMap;
+_storeRec set ["thread_id", _threadId];
+_storeRec set ["type", toUpper (_thr select 1)];
+_storeRec set ["confidence", _thr select 4];
+_storeRec set ["heat", _thr select 5];
+_storeRec set ["parent_task_id", _thr select 13];
+_store set [_threadId, _storeRec];
+["taskeng_v0_thread_store", _store] call ARC_fnc_stateSet;
+
 // Opportunity: maybe create a command node lead (only after normal follow-ups)
 if (_resU isEqualTo "SUCCEEDED" && { !(_typeU find "CMDNODE" == 0) }) then
 {

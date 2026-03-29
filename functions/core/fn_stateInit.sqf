@@ -323,6 +323,12 @@
     ["casreq_v1_records", createHashMap],
     ["casreq_v1_open_index", []],
     ["casreq_v1_closed_index", []],
-    ["casreq_v1_seq", 0]
+    ["casreq_v1_seq", 0],
+
+    // TASKENG v0 (thread-to-task hierarchy, schema-versioned persistence)
+    ["taskeng_v0_schema_rev", 0],
+    ["taskeng_v0_thread_store", createHashMap],
+    ["taskeng_v0_lead_linkage", createHashMap],
+    ["taskeng_v0_generation_buffers", createHashMap]
 
 ]
