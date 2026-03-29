@@ -12,6 +12,30 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 ---
 
 
+## 2026-03-29 20:33 UTC — Runtime fix for TOC lead-pool local hint undefined variable errors
+
+**Branch/Commit:** copilot/update-ied-object-pool @ bbf67b9
+
+**Scenario:** Fix client runtime errors in `ARC_fnc_tocShowLeadPoolLocal` where lead entry locals (`_pos`, then `_txt`) became undefined during lead-pool hint rendering.
+
+**Commands:**
+```bash
+python3 scripts/dev/sqflint_compat_scan.py --strict $(find functions/ -name "*.sqf")
+python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_tocShowLeadPoolLocal.sqf
+sqflint -e w functions/core/fn_tocShowLeadPoolLocal.sqf
+```
+
+**Result:** BLOCKED
+
+**Notes:**
+- FAIL (pre-existing baseline): full-repo compat scan reports existing violations outside this fix scope.
+- PASS: targeted compat scan on `functions/core/fn_tocShowLeadPoolLocal.sqf`.
+- PASS: targeted compat scan re-run after code-review follow-up adjustment (`>=` bounds checks).
+- BLOCKED: `sqflint` is unavailable in this container (`sqflint: command not found`).
+- Fix applied by replacing fragile tuple-style `params` destructuring in local formatter with explicit guarded `select` assignments for `_id`, `_type`, `_disp`, `_pos`, `_strength`, `_expiresAt`.
+- Dedicated server + JIP validation remains deferred in this environment.
+
+
 ## 2026-03-29 17:23 UTC — AIR/TOWER buttons stuck on APPROVE/DENY (N/A) after queue changes
 
 **Branch/Commit:** copilot/fix-tower-controls-issue @ commit: unrecoverable
