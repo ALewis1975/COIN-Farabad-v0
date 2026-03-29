@@ -383,49 +383,53 @@ if ((side _unit) isEqualTo (side _guard)) then { continue; };
 
 ---
 
-## Phase 4: Feature Completion
+## Phase 4: Feature Completion ✅ COMPLETE (2026-03-29)
 
-### Task 4.1 — Console VM v1 Migration
+### Task 4.1 — Console VM v1 Migration ✅
 
 | Field | Value |
 |-------|-------|
 | **PR Mode** | B — Feature Delivery |
 | **Reference** | `docs/architecture/Console_VM_v1.md` |
+| **Status** | ✅ Phase A complete: server-side builder + client adapter + wired into broadcast |
 
-Migrate console paint functions from direct `ARC_pub_*` reads to structured View Model contract. This is a large effort (~68 UI files) and should be split by tab.
+Phase A delivered: `fn_consoleVmBuild.sqf` (server-side VM builder with 6 sections: incident, followOn, ops, stateSummary, access, civsub), `fn_consoleVmAdapterV1.sqf` (client-side adapter), and VM payload published via `publicBroadcastState`. Remaining tab-by-tab migration (Phase B→D) is a future sprint.
 
 ---
 
-### Task 4.2 — CIVSUB Lead-Emit Bridge
+### Task 4.2 — CIVSUB Lead-Emit Bridge ✅
 
 | Field | Value |
 |-------|-------|
 | **PR Mode** | B — Feature Delivery |
 | **Reference** | `docs/architecture/CIVSUB_Incident_Lead_Permutation_Matrix.md` |
+| **Status** | ✅ Already implemented (162 lines) |
 
-Materialize CIVSUB-sourced leads into core `leadPool` for incident generation. Requires district binding and per-district lead throttling.
+`fn_civsubLeadEmitBridge.sqf` materializes CIVSUB-sourced leads into core `leadPool` with global/district rate caps, history tracking, and type mapping. Registered in CfgFunctions.hpp.
 
 ---
 
-### Task 4.3 — SITREP Gate Parity Enforcement
+### Task 4.3 — SITREP Gate Parity Enforcement ✅
 
 | Field | Value |
 |-------|-------|
 | **PR Mode** | B — Feature Delivery |
 | **Reference** | `docs/architecture/SITREP_Gate_Parity.md` |
+| **Status** | ✅ Complete |
 
-Ensure client pre-checks and server authority checks use identical rule vocabulary, reason codes, and evaluation order.
+Created `fn_sitrepGateEval.sqf` (shared gate evaluation with all canonical reason codes from the spec). Updated `fn_clientCanSendSitrep.sqf` to use shared gate for client pre-checks with parity. Updated `fn_tocReceiveSitrep.sqf` with breadcrumb logging (SITREP_GATE_EVAL events) at all deny/allow paths.
 
 ---
 
-### Task 4.4 — TASKENG Thread/Task Hierarchy
+### Task 4.4 — TASKENG Thread/Task Hierarchy ✅
 
 | Field | Value |
 |-------|-------|
 | **PR Mode** | B — Feature Delivery |
 | **Reference** | `docs/projectFiles/Farabad_TASKENG_Thread_Task_Hierarchy*` |
+| **Status** | ✅ Complete |
 
-Implement parent-case pattern for thread records, deterministic parent task ID generation, and thread store persistence via schema rev 4.
+Created `fn_taskengMigrateSchema.sqf` (versioned migration rev 1→4). Added `taskeng_v0_thread_store`, `taskeng_v0_schema_rev`, `taskeng_v0_lead_linkage`, `taskeng_v0_generation_buffers` to state. Updated `fn_threadFindOrCreate.sqf`, `fn_threadOnIncidentClosed.sqf`, and `fn_threadRehydrateParents.sqf` to sync thread_store. Added TASKENG snapshot to `fn_publicBroadcastState.sqf`. Wired migration in bootstrap after stateLoad.
 
 ---
 

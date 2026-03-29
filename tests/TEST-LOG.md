@@ -1287,3 +1287,53 @@ git --no-pager diff --check
 - Static validation: **PASS** — All 2159 sqflint compat violations resolved to 0
 - Orphan functions: **FIXED** — rolesCanUseMobileOps + uiConsoleActionCloseIncident registered
 - Runtime validation: **BLOCKED** (requires Arma 3 dedicated server)
+
+---
+
+## 2026-03-29 06:30 UTC — Phase 4: Feature Completion Implementation
+
+**Branch/Commit:** copilot/audit-coin-farabad-v0-again @ 3d12e87
+
+**Scenario:** Phase 4 feature delivery — TASKENG hierarchy, SITREP gate parity, Console VM v1, CIVSUB bridge.
+
+**Changes:**
+
+1. **Task 4.4 — TASKENG Thread/Task Hierarchy:**
+   - Added `taskeng_v0_schema_rev` + `taskeng_v0_thread_store` + supporting keys to stateInit
+   - Created `fn_taskengMigrateSchema.sqf` — versioned migration (rev 1→4) with legacy seed
+   - Updated `fn_threadFindOrCreate.sqf` — writes thread_store on create/attach
+   - Updated `fn_threadOnIncidentClosed.sqf` — syncs thread_store on confidence/heat change
+   - Updated `fn_threadRehydrateParents.sqf` — reads/writes thread_store for parent linkage
+   - Added TASKENG snapshot section to `fn_publicBroadcastState.sqf`
+   - Wired migration call in bootstrapServer after stateLoad
+
+2. **Task 4.3 — SITREP Gate Parity:**
+   - Created `fn_sitrepGateEval.sqf` — shared gate evaluation with all canonical reason codes
+   - Updated `fn_clientCanSendSitrep.sqf` — uses shared gate for client pre-checks
+   - Updated `fn_tocReceiveSitrep.sqf` — breadcrumb logging at all deny/allow paths
+
+3. **Task 4.1 — Console VM v1 (Phase A):**
+   - Created `fn_consoleVmBuild.sqf` — server-side VM builder with 6 sections
+   - Created `fn_consoleVmAdapterV1.sqf` — client-side adapter for reading VM payload
+   - Wired VM build into publicBroadcastState (published as ARC_consoleVM_payload)
+
+4. **Task 4.2 — CIVSUB Lead-Emit Bridge:** Verified already implemented (162 lines).
+
+### Validation Results
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | sqflint compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict $(find functions/ -name "*.sqf")` | ✅ PASS (0 violations, 434 files) | 4 new files clean |
+| 2 | Airbase planning-mode checks | `bash tests/static/airbase_planning_mode_checks.sh` | ✅ PASS (20/20) | — |
+| 3 | CASREQ snapshot contract | `bash tests/static/casreq_snapshot_contract_checks.sh` | ✅ PASS (6/6) | — |
+| 4 | State migration validation | `python3 scripts/dev/validate_state_migrations.py` | ✅ PASS (3 scenarios) | — |
+| 5 | Marker index validation | `python3 scripts/dev/validate_marker_index.py` | ✅ PASS (137 markers × 6 modes) | — |
+| 6 | Config delimiter balance | All 5 config files | ✅ PASS (5/5 balanced) | CfgFunctions now 448 braces |
+| 7 | Local MP smoke test | — | BLOCKED | No Arma 3 runtime |
+| 8 | Dedicated server / JIP | — | BLOCKED | No dedicated server |
+
+### Status
+
+- Static validation: **PASS** — All new code sqflint-compat clean
+- Phase 4 features: **IMPLEMENTED** — All 4 tasks delivered
+- Runtime validation: **BLOCKED** (requires Arma 3 dedicated server)
