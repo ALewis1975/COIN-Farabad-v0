@@ -39,12 +39,12 @@ switch (_tab) do
     case "S1":    { [_display] call ARC_fnc_uiConsoleS1Paint; };
     case "CMD":
     {
+        if (uiNamespace getVariable ["ARC_console_cmdQueuePainting", false]) exitWith {};
         private _cmdMode = ["ARC_console_cmdMode", "OVERVIEW"] call ARC_fnc_uiNsGetString;
         if ((_cmdMode isEqualType "") && { (toUpper (trim _cmdMode)) isEqualTo "QUEUE" }) then
         {
             uiNamespace setVariable ["ARC_console_cmdQueueForceRebuild", false];
             [_display, false] call ARC_fnc_uiConsoleTocQueuePaint;
-            [_display] call ARC_fnc_uiConsoleRefresh;
         };
     };
     default

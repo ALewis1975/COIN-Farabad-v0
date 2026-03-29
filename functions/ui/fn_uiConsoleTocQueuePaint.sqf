@@ -138,7 +138,9 @@ if (_selectedId isNotEqualTo "") then
         if ((_lb lbData _i) isEqualTo _selectedId) exitWith { _sel = _i; };
     };
 };
+uiNamespace setVariable ["ARC_console_cmdQueuePainting", true];
 _lb lbSetCurSel _sel;
+uiNamespace setVariable ["ARC_console_cmdQueuePainting", false];
 
 private _qid = _lb lbData _sel;
 if (_qid isEqualTo "") exitWith {["", false]};
