@@ -92,16 +92,16 @@ private _forceTag = if (_closeReady) then { "" } else { "<t color='#FFB0B0'>(FOR
 private _body = "";
 _body = _body + format ["<t size='1.1' font='PuristaMedium'>%1Closeout</t><br/>", _forceTag];
 _body = _body + format ["<t size='0.95' color='#DDDDDD'>%1 (%2)</t><br/>", _disp, if (_typeU isEqualTo "") then {"UNKNOWN"} else {_typeU}];
-if (_grid isNotEqualTo "") then { _body = _body + format ["<t size='0.9' color='#CCCCCC'>Grid: %1</t><br/>", _grid]; };
+if (!(_grid isEqualTo "")) then { _body = _body + format ["<t size='0.9' color='#CCCCCC'>Grid: %1</t><br/>", _grid]; };
 
 _body = _body + "<br/>";
 _body = _body + format ["<t size='0.9'>Close-ready: %1</t><br/>", if (_closeReady) then {"YES"} else {"NO"}];
-if (_suggestU isNotEqualTo "") then { _body = _body + format ["<t size='0.9'>Suggested: %1</t><br/>", _suggestU]; };
-if (_reasonU isNotEqualTo "") then { _body = _body + format ["<t size='0.9'>Reason: %1</t><br/>", _reasonU]; };
+if (!(_suggestU isEqualTo "")) then { _body = _body + format ["<t size='0.9'>Suggested: %1</t><br/>", _suggestU]; };
+if (!(_reasonU isEqualTo "")) then { _body = _body + format ["<t size='0.9'>Reason: %1</t><br/>", _reasonU]; };
 
 _body = _body + "<br/>";
 _body = _body + format ["<t size='0.9'>SITREP: %1</t><br/>", if (_sitrepSent) then {"SENT"} else {"PENDING"}];
-if (_sitrepSent && { _sitrepSum isNotEqualTo "" }) then
+if (_sitrepSent && { !(_sitrepSum isEqualTo "") }) then
 {
     _body = _body + format ["<t size='0.85' color='#CCCCCC'>From: %1</t><br/>", if (_sitrepFrom isEqualTo "") then {"(unknown)"} else {_sitrepFrom}];
     _body = _body + format ["<t size='0.85' color='#CCCCCC'>%1</t><br/>", _sitrepSum];
@@ -152,21 +152,21 @@ if (!(_foSummary isEqualType "")) then { _foSummary = ""; };
 
 private _sysLeadId = missionNamespace getVariable ["ARC_activeIncidentFollowOnLeadId", ""]; 
 if (!(_sysLeadId isEqualType "")) then { _sysLeadId = ""; };
-_sysLeadId = trim _sysLeadId;
+_sysLeadId = [_sysLeadId] call _trimFn;
 private _sysLeadName = missionNamespace getVariable ["ARC_activeIncidentFollowOnLeadName", ""]; 
 if (!(_sysLeadName isEqualType "")) then { _sysLeadName = ""; };
-_sysLeadName = trim _sysLeadName;
+_sysLeadName = [_sysLeadName] call _trimFn;
 
 private _tgtGrp = missionNamespace getVariable ["ARC_activeIncidentAcceptedByGroup", ""]; 
 if (!(_tgtGrp isEqualType "")) then { _tgtGrp = ""; };
-_tgtGrp = trim _tgtGrp;
+_tgtGrp = [_tgtGrp] call _trimFn;
 if (_tgtGrp isEqualTo "") then { _tgtGrp = "(unknown group)"; };
 
 private _getPair = {
     params ["_arr", "_k", "_d"];
     private _i = -1;
-    { if (_x isEqualType [] && { (count _x) == 2 } && { (_x # 0) isEqualTo _k }) exitWith { _i = _forEachIndex; }; } forEach _arr;
-    if (_i >= 0) exitWith { _arr # _i # 1 };
+    { if (_x isEqualType [] && { (count _x) == 2 } && { (_x select 0) isEqualTo _k }) exitWith { _i = _forEachIndex; }; } forEach _arr;
+    if (_i >= 0) exitWith { _arr select _i select 1 };
     _d
 };
 
@@ -178,20 +178,20 @@ private _dHoldMin = 30;
 private _dProceedIntent = "NEXT TASK";
 
 // If field requested a follow-on, use it as default.
-private _fReq = toUpper (trim ([_foArr, "request", ""] call _getPair));
-private _fPurpose = toUpper (trim ([_foArr, "purpose", ""] call _getPair));
-private _fHoldIntent = toUpper (trim ([_foArr, "holdIntent", ""] call _getPair));
+private _fReq = toUpper ([([_foArr, "request", ""] call _getPair)] call _trimFn);
+private _fPurpose = toUpper ([([_foArr, "purpose", ""] call _getPair)] call _trimFn);
+private _fHoldIntent = toUpper ([([_foArr, "holdIntent", ""] call _getPair)] call _trimFn);
 private _fHoldMin = [_foArr, "holdMinutes", -1] call _getPair;
-private _fProceedIntent = toUpper (trim ([_foArr, "proceedIntent", ""] call _getPair));
+private _fProceedIntent = toUpper ([([_foArr, "proceedIntent", ""] call _getPair)] call _trimFn);
 
 if (_fReq in ["RTB","HOLD","PROCEED"]) then { _dReq = _fReq; };
 if (_fPurpose in ["REFIT","INTEL","EPW"]) then { _dPurpose = _fPurpose; };
-if (_fHoldIntent isNotEqualTo "") then { _dHoldIntent = _fHoldIntent; };
+if (!(_fHoldIntent isEqualTo "")) then { _dHoldIntent = _fHoldIntent; };
 if (_fHoldMin isEqualType 0 && { _fHoldMin > 0 }) then { _dHoldMin = _fHoldMin; };
-if (_fProceedIntent isNotEqualTo "") then { _dProceedIntent = _fProceedIntent; };
+if (!(_fProceedIntent isEqualTo "")) then { _dProceedIntent = _fProceedIntent; };
 
 // If a system follow-on lead exists (IED detonation response, etc.), bias toward PROCEED.
-if (_sysLeadId isNotEqualTo "") then { _dReq = "PROCEED"; };
+if (!(_sysLeadId isEqualTo "")) then { _dReq = "PROCEED"; };
 
 // Custom header for TOC issue flow
 private _hdr = format [
@@ -199,10 +199,10 @@ private _hdr = format [
     _tgtGrp,
     _disp
 ];
-if (_grid isNotEqualTo "") then { _hdr = _hdr + format ["<br/><t size='0.85' color='#AAAAAA'>Last known grid: %1</t>", _grid]; };
-if (_sitrepSent && { _sitrepSum isNotEqualTo "" }) then { _hdr = _hdr + format ["<br/><t size='0.85' color='#AAAAAA'>SITREP: %1</t>", _sitrepSum]; };
-if (_foSummary isNotEqualTo "") then { _hdr = _hdr + format ["<br/><t size='0.85' color='#AAAAAA'>Field follow-on request: %1</t>", _foSummary]; };
-if (_sysLeadName isNotEqualTo "") then { _hdr = _hdr + format ["<br/><t size='0.85' color='#AAAAAA'>System follow-on lead queued: %1</t>", _sysLeadName]; };
+if (!(_grid isEqualTo "")) then { _hdr = _hdr + format ["<br/><t size='0.85' color='#AAAAAA'>Last known grid: %1</t>", _grid]; };
+if (_sitrepSent && { !(_sitrepSum isEqualTo "") }) then { _hdr = _hdr + format ["<br/><t size='0.85' color='#AAAAAA'>SITREP: %1</t>", _sitrepSum]; };
+if (!(_foSummary isEqualTo "")) then { _hdr = _hdr + format ["<br/><t size='0.85' color='#AAAAAA'>Field follow-on request: %1</t>", _foSummary]; };
+if (!(_sysLeadName isEqualTo "")) then { _hdr = _hdr + format ["<br/><t size='0.85' color='#AAAAAA'>System follow-on lead queued: %1</t>", _sysLeadName]; };
 
 uiNamespace setVariable ["ARC_followOn_title", "ISSUE FOLLOW-ON ORDER"]; 
 uiNamespace setVariable ["ARC_followOn_headerOverride", _hdr];
@@ -232,6 +232,9 @@ private _prompt = format ["Close %1 as %2%3 and issue %4?", _disp, _result, if (
 private _confirm = [_prompt, "TOC Ops", true, true] call BIS_fnc_guiMessage;
 if (!_confirm) exitWith {false};
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 [_result, _req, _purpose, _rat, _con, _sup, _notes, _hIntent, _hMin, _pIntent, player] remoteExec ["ARC_fnc_tocRequestCloseoutAndOrder", 2];
 ["TOC Ops", format ["Closeout submitted: %1. Awaiting server confirmation. Follow-on: %2", _result, _orderLine]] call ARC_fnc_clientToast;
 

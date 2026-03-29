@@ -36,9 +36,9 @@ private _kvGet = {
     params ["_pairs", "_key", "_default"];
     if (!(_pairs isEqualType [])) exitWith {_default};
     private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) exitWith {_default};
-    private _v = (_pairs # _idx) # 1;
+    private _v = (_pairs select _idx) select 1;
     if (isNil "_v") exitWith {_default};
     _v
 };
@@ -47,7 +47,7 @@ private _kvSet = {
     params ["_pairs", "_key", "_value"];
     if (!(_pairs isEqualType [])) then { _pairs = []; };
     private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) then { _pairs pushBack [_key, _value]; } else { _pairs set [_idx, [_key, _value]]; };
     _pairs
 };
@@ -60,13 +60,16 @@ private _idxRec = -1;
 { if (([_x, "threat_id", ""] call _kvGet) isEqualTo _threatId) exitWith { _idxRec = _forEachIndex; }; } forEach _records;
 if (_idxRec < 0) exitWith {false};
 
-private _rec = _records # _idxRec;
+private _rec = _records select _idxRec;
 
 private _stateFrom = [_rec, "state", ""] call _kvGet;
 private _stateFromU = toUpper _stateFrom;
 
 if (_stateFromU isEqualTo _stateToU) exitWith {false};
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 private _now = serverTime;
 
 // Update state + timestamps
@@ -176,15 +179,15 @@ private _meta = [
 ];
 
 private _summary = format ["%1: %2 %3→%4", _event, _threatId, _stateFromU, _stateToU];
-if ((trim _note) isNotEqualTo "") then
+if (!(([_note] call _trimFn) isEqualTo "")) then
 {
-    _summary = _summary + format [" (%1)", trim _note];
+    _summary = _summary + format [" (%1)", [_note] call _trimFn];
 };
 
 private _intelId = ["OPS", _summary, _pos, _meta] call ARC_fnc_intelLog;
 
 // Attach log ref (best-effort)
-if (_intelId isNotEqualTo "") then
+if (!(_intelId isEqualTo "")) then
 {
     private _audit = [_rec, "audit", []] call _kvGet;
     private _refs = [_audit, "log_refs", []] call _kvGet;

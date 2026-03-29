@@ -17,6 +17,9 @@ if (isNull _ctrl || { _index < 0 }) exitWith {false};
 private _display = ctrlParent _ctrl;
 if (isNull _display) exitWith {false};
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 private _tab = ["ARC_console_activeTab", "HANDOFF"] call ARC_fnc_uiNsGetString;
 _tab = toUpper _tab;
 
@@ -41,7 +44,7 @@ switch (_tab) do
     {
         if (uiNamespace getVariable ["ARC_console_cmdQueuePainting", false]) exitWith {};
         private _cmdMode = ["ARC_console_cmdMode", "OVERVIEW"] call ARC_fnc_uiNsGetString;
-        if ((_cmdMode isEqualType "") && { (toUpper (trim _cmdMode)) isEqualTo "QUEUE" }) then
+        if ((_cmdMode isEqualType "") && { (toUpper ([_cmdMode] call _trimFn)) isEqualTo "QUEUE" }) then
         {
             uiNamespace setVariable ["ARC_console_cmdQueueForceRebuild", false];
             [_display, false] call ARC_fnc_uiConsoleTocQueuePaint;

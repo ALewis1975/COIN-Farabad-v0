@@ -30,13 +30,13 @@ private _resolveAnchor = {
     {
         if !(_x isEqualType "") then { continue; };
         private _m = [_x] call ARC_fnc_worldResolveMarker;
-        if (_m isEqualType "" && { _m isNotEqualTo "" } && { _m in allMapMarkers }) exitWith { _resolved = _m; };
+        if (_m isEqualType "" && { !(_m isEqualTo "") } && { _m in allMapMarkers }) exitWith { _resolved = _m; };
     } forEach _markerCandidates;
 
     if (_resolved isEqualTo "") then
     {
         private _fb = [_fallbackMarker] call ARC_fnc_worldResolveMarker;
-        if (_fb isEqualType "" && { _fb isNotEqualTo "" } && { _fb in allMapMarkers }) then
+        if (_fb isEqualType "" && { !(_fb isEqualTo "") } && { _fb in allMapMarkers }) then
         {
             _resolved = _fb;
         };
@@ -46,7 +46,7 @@ private _resolveAnchor = {
     if (!(_pos isEqualType [])) then { _pos = [0,0,0]; };
     if ((count _pos) < 3) then { _pos resize 3; };
 
-    if (_resolved isNotEqualTo "") then
+    if (!(_resolved isEqualTo "")) then
     {
         _pos = markerPos _resolved;
         if ((count _pos) < 3) then { _pos resize 3; };
@@ -57,7 +57,7 @@ private _resolveAnchor = {
 };
 
 private _airbaseMarker = ["mkr_airbaseCenter"] call ARC_fnc_worldResolveMarker;
-private _airbasePos = if (_airbaseMarker isNotEqualTo "" && { _airbaseMarker in allMapMarkers }) then { markerPos _airbaseMarker } else { [0,0,0] };
+private _airbasePos = if (!(_airbaseMarker isEqualTo "") && { _airbaseMarker in allMapMarkers }) then { markerPos _airbaseMarker } else { [0,0,0] };
 if ((count _airbasePos) < 3) then { _airbasePos resize 3; };
 
 private _alphaCandidates = missionNamespace getVariable [
@@ -76,9 +76,9 @@ private _alphaNode = [
     "COMPANY_ALPHA",
     "REDFALCON 2",
     "Alpha Commander",
-    _alphaAnchor # 0,
-    _alphaAnchor # 1,
-    _alphaAnchor # 2,
+    _alphaAnchor select 0,
+    _alphaAnchor select 1,
+    _alphaAnchor select 2,
     "SUPPORT_PLAYERS",
     "RESERVE_REACTION",
     "",
@@ -91,9 +91,9 @@ private _bravoNode = [
     "COMPANY_BRAVO",
     "REDFALCON 3",
     "Bravo Commander",
-    _bravoAnchor # 0,
-    _bravoAnchor # 1,
-    _bravoAnchor # 2,
+    _bravoAnchor select 0,
+    _bravoAnchor select 1,
+    _bravoAnchor select 2,
     "AREA_SECURITY",
     "INDEPENDENT_SECURITY",
     "",
@@ -108,22 +108,25 @@ if (!(_existingNodes isEqualType [])) then { _existingNodes = []; };
 private _seedNode = {
     params ["_nodeId", "_fallback"];
 
+
+// sqflint-compatible helpers
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
     private _base = +_fallback;
     private _existing = _existingNodes select {
         (_x isEqualType []) &&
         { (count _x) >= 12 } &&
-        { (_x # 0) isEqualTo _nodeId }
+        { (_x select 0) isEqualTo _nodeId }
     };
 
     if ((count _existing) == 0) exitWith { _base };
 
-    private _cur = +(_existing # 0);
-    _base set [6, _cur # 6];
-    _base set [7, _cur # 7];
-    _base set [8, _cur # 8];
-    _base set [9, _cur # 9];
-    _base set [10, _cur # 10];
-    _base set [11, _cur # 11];
+    private _cur = +(_existing select 0);
+    _base set [6, _cur select 6];
+    _base set [7, _cur select 7];
+    _base set [8, _cur select 8];
+    _base set [9, _cur select 9];
+    _base set [10, _cur select 10];
+    _base set [11, _cur select 11];
 
     _base
 };
@@ -160,14 +163,14 @@ private _dedupedOps = [];
     if (!(_x isEqualType []) || { (count _x) < 14 }) then { continue; };
 
     private _row = +_x;
-    private _status = toUpper (_row # 3);
-    private _nodeId = _row # 4;
+    private _status = toUpper (_row select 3);
+    private _nodeId = _row select 4;
 
     if (!(_nodeId isEqualType "") || { !(_nodeId in ["COMPANY_ALPHA", "COMPANY_BRAVO"]) }) then { continue; };
 
     if (_status in ["PLANNED", "ACTIVE"]) then
     {
-        private _existingIdx = _opsByNode getOrDefault [_nodeId, -1];
+        private _existingIdx = [_opsByNode, _nodeId, -1] call _hg;
         if (_existingIdx < 0) then
         {
             _opsByNode set [_nodeId, count _dedupedOps];
@@ -175,10 +178,10 @@ private _dedupedOps = [];
         }
         else
         {
-            private _cur = _dedupedOps # _existingIdx;
-            private _curTs = _cur # 2;
+            private _cur = _dedupedOps select _existingIdx;
+            private _curTs = _cur select 2;
             if (!(_curTs isEqualType 0)) then { _curTs = -1; };
-            private _newTs = _row # 2;
+            private _newTs = _row select 2;
             if (!(_newTs isEqualType 0)) then { _newTs = -1; };
             if (_newTs >= _curTs) then { _dedupedOps set [_existingIdx, _row]; };
         };
@@ -194,8 +197,8 @@ if !(_dedupedOps isEqualTo _ops) then
     ["companyVirtualOps", _dedupedOps] call ARC_fnc_stateSet;
 };
 
-["OPS", format ["Company command nodes initialized: ALPHA=%1 BRAVO=%2", _alphaAnchor # 0, _bravoAnchor # 0], [0,0,0],
-    [["event", "COMPANY_COMMAND_INIT"], ["alphaZone", _alphaAnchor # 2], ["bravoZone", _bravoAnchor # 2], ["virtualOps", count _dedupedOps]]
+["OPS", format ["Company command nodes initialized: ALPHA=%1 BRAVO=%2", _alphaAnchor select 0, _bravoAnchor select 0], [0,0,0],
+    [["event", "COMPANY_COMMAND_INIT"], ["alphaZone", _alphaAnchor select 2], ["bravoZone", _bravoAnchor select 2], ["virtualOps", count _dedupedOps]]
 ] call ARC_fnc_intelLog;
 
 true

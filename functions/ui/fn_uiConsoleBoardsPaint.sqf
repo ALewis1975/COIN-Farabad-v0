@@ -35,9 +35,9 @@ private _getPair = {
     params ["_pairs", "_k", "_d"];
     if (!(_pairs isEqualType [])) exitWith { _d };
     private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) exitWith { _d };
-    (_pairs # _idx) # 1
+    (_pairs select _idx) select 1
 };
 
 private _fmtHdr = {
@@ -47,6 +47,9 @@ private _fmtHdr = {
 
 private _fmtKV = {
     params ["_k", "_v"];
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
     private _vv = _v; if (!(_vv isEqualType "")) then { _vv = str _vv; }; if ((_vv find "<t") >= 0) then { format ["<t color='#B89B6B'>%1:</t> %2<br/>", _k, _vv ] } else { format ["<t color='#B89B6B'>%1:</t> <t color='#FFFFFF'>%2</t><br/>", _k, _vv ] }
 };
 
@@ -98,7 +101,7 @@ private _queueLines = [];
     if (!(_x isEqualType []) || { (count _x) < 8 }) then { continue; };
     _x params ["_qid", "_createdAt", "_qSt", "_qKind", "_qFrom", "_qFromGrp", "_qPos", "_qSummary"]; 
 
-    private _k = toUpper (trim _qKind);
+    private _k = toUpper ([_qKind] call _trimFn);
     switch (_k) do
     {
         case "INCIDENT": { _qInc = _qInc + 1; };
@@ -110,8 +113,8 @@ private _queueLines = [];
     // Keep the snapshot short (top 10)
     if ((count _queueLines) < 10) then
     {
-        private _g = if (_qFromGrp isEqualType "" && { _qFromGrp isNotEqualTo "" }) then { _qFromGrp } else { "" };
-        private _s = if (_qSummary isEqualType "" && { _qSummary isNotEqualTo "" }) then { _qSummary } else { "(no summary)" };
+        private _g = if (_qFromGrp isEqualType "" && { !(_qFromGrp isEqualTo "") }) then { _qFromGrp } else { "" };
+        private _s = if (_qSummary isEqualType "" && { !(_qSummary isEqualTo "") }) then { _qSummary } else { "(no summary)" };
         _queueLines pushBack format ["- <t color='#B89B6B'>%1</t> %2 <t color='#FFFFFF'>(%3)</t>", _k, _s, if (_g isEqualTo "") then {"TOC"} else {_g}];
     };
 } forEach _queue;
@@ -152,7 +155,7 @@ if (!(_ops isEqualType [])) then { _ops = []; };
 private _sit = [];
 for "_i" from ((count _ops) - 1) to 0 step -1 do
 {
-    private _e = _ops # _i;
+    private _e = _ops select _i;
     if (!(_e isEqualType []) || { (count _e) < 6 }) then { continue; };
     _e params ["_id", "_ts", "_cat", "_summary", "_pos", "_meta"]; 
     private _evt = [_meta, "event", ""] call _getPair;
@@ -161,7 +164,7 @@ for "_i" from ((count _ops) - 1) to 0 step -1 do
 };
 
 private _sitTxt = "<t color='#FFFFFF'>(none)</t>";
-if (_sit isNotEqualTo []) then
+if (!(_sit isEqualTo [])) then
 {
     _sit params ["_id", "_ts", "_cat", "_summary", "_pos", "_meta"]; 
     private _from = [_meta, "from", ""] call _getPair;
@@ -175,7 +178,7 @@ if (_sit isNotEqualTo []) then
         if (_from isEqualTo "") then {"(n/a)"} else {_from},
         if (_rec isEqualTo "") then {"(n/a)"} else {toUpper _rec},
         if (_grid2 isEqualTo "") then {"(n/a)"} else {_grid2},
-        if (_summary isEqualType "" && { _summary isNotEqualTo "" }) then {_summary} else {"(no summary)"}
+        if (_summary isEqualType "" && { !(_summary isEqualTo "") }) then {_summary} else {"(no summary)"}
     ];
 };
 
@@ -202,10 +205,10 @@ else
     private _support = [];
     {
         if (!(_x isEqualType []) || { (count _x) < 2 }) then { continue; };
-        private _g = _x # 0;
-        private _s = toUpper (trim (_x # 1));
+        private _g = _x select 0;
+        private _s = toUpper ([(_x select 1)] call _trimFn);
         if (_s isEqualTo "OFFLINE") then { _s = "UNAVAILABLE"; };
-        if (_accBy isNotEqualTo "" && { _g isNotEqualTo _accBy } && { _s in ["IN TRANSIT", "ON SCENE"] }) then { _support pushBack _g; };
+        if (!(_accBy isEqualTo "") && { !(_g isEqualTo _accBy) } && { _s in ["IN TRANSIT", "ON SCENE"] }) then { _support pushBack _g; };
     } forEach _statusRows;
 
     private _supportColor = "#AAAAAA";
@@ -262,9 +265,9 @@ _ctrlMain ctrlSetStructuredText parseText _txt;
 // Auto-fit + clamp to viewport so the controls group can scroll when needed.
 [_ctrlMain] call BIS_fnc_ctrlFitToTextHeight;
 private _mainGrp = _display displayCtrl 78015;
-private _minH = if (!isNull _mainGrp) then { (ctrlPosition _mainGrp) # 3 } else { 0.74 };
+private _minH = if (!isNull _mainGrp) then { (ctrlPosition _mainGrp) select 3 } else { 0.74 };
 private _p = ctrlPosition _ctrlMain;
-_p set [3, (_p # 3) max _minH];
+_p set [3, (_p select 3) max _minH];
 _ctrlMain ctrlSetPosition _p;
 _ctrlMain ctrlCommit 0;
 

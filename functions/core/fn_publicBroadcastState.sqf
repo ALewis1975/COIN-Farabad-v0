@@ -83,7 +83,7 @@ private _normalizeStaffingLane = {
     private _idx = -1;
     { if ((_x isEqualType []) && { (count _x) >= 5 } && { ((_x param [0, ""]) isEqualTo _laneId) }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
 
-    private _base = if (_idx >= 0) then { _rows # _idx } else { [_laneId, "AUTO", "", "", -1] };
+    private _base = if (_idx >= 0) then { _rows select _idx } else { [_laneId, "AUTO", "", "", -1] };
     [
         _laneId,
         toUpper (_base param [1, "AUTO"]),
@@ -118,12 +118,12 @@ private _execFid = missionNamespace getVariable ["airbase_v1_execFid", ""];
 if (!(_execFid isEqualType "")) then { _execFid = ""; };
 
 private _depInProgress = 0;
-if (_execActive && { _execFid isNotEqualTo "" }) then {
+if (_execActive && { !(_execFid isEqualTo "") }) then {
     private _execRecIdx = -1;
     { if ((_x isEqualType []) && { (count _x) >= 3 } && { ((_x param [0, ""]) isEqualTo _execFid) }) exitWith { _execRecIdx = _forEachIndex; }; } forEach _airRecs;
 
     if (_execRecIdx >= 0) then {
-        private _execKind = (_airRecs # _execRecIdx) param [2, ""];
+        private _execKind = (_airRecs select _execRecIdx) param [2, ""];
         if (_execKind isEqualTo "DEP") then { _depInProgress = 1; };
     };
 };
@@ -174,7 +174,7 @@ private _nextN = _nextCap min (count _airQueue);
 private _nextItems = [];
 for "_i" from 0 to (_nextN - 1) do
 {
-    private _it = _airQueue # _i;
+    private _it = _airQueue select _i;
     private _routeMeta = _it param [3, []];
     if !(_routeMeta isEqualType []) then { _routeMeta = []; };
     _nextItems pushBack [
@@ -242,36 +242,36 @@ private _readReasonFromMeta = {
     if !(_meta isEqualType []) exitWith { _reason };
 
     if ((count _meta) > 0) then {
-        private _first = _meta # 0;
+        private _first = _meta select 0;
         if (_first isEqualType "") then {
             _reason = _first;
         } else {
-            if (_first isEqualType [] && { (count _first) >= 2 } && { ((_first # 0) isEqualType "") }) then {
-                _reason = _first # 1;
+            if (_first isEqualType [] && { (count _first) >= 2 } && { ((_first select 0) isEqualType "") }) then {
+                _reason = _first select 1;
             };
         };
     };
 
     if (_reason isEqualTo "") then {
         private _idxReason = -1;
-        { if (_x isEqualType [] && { (count _x) >= 2 } && { toUpper (_x # 0) in ["REASON", "ROUTEVALIDATIONREASON"] }) exitWith { _idxReason = _forEachIndex; }; } forEach _meta;
-        if (_idxReason >= 0) then { _reason = (_meta # _idxReason) # 1; };
+        { if (_x isEqualType [] && { (count _x) >= 2 } && { toUpper (_x select 0) in ["REASON", "ROUTEVALIDATIONREASON"] }) exitWith { _idxReason = _forEachIndex; }; } forEach _meta;
+        if (_idxReason >= 0) then { _reason = (_meta select _idxReason) select 1; };
     };
 
     if !(_reason isEqualType "") then { _reason = str _reason; };
-    toUpper (trim _reason)
+    toUpper ([_reason] call _trimFn)
 };
 
 private _extractBlockedReason = {
     params ["_txt"];
     if !(_txt isEqualType "") exitWith { "" };
-    private _t = trim _txt;
+    private _t = [_txt] call _trimFn;
     private _open = _t find "(";
     if (_open < 0) exitWith { "" };
     private _out = "";
     private _close = _t find ")";
     if (_close > _open) then { _out = _t select [_open + 1, _close - _open - 1]; };
-    toUpper (trim _out)
+    toUpper ([_out] call _trimFn)
 };
 
 private _extractBlockedSourceId = {
@@ -280,7 +280,7 @@ private _extractBlockedSourceId = {
     private _tokens = _txt splitString " :()[]|,.;\t\n\r";
     private _found = "";
     {
-        private _t = toUpper (trim _x);
+        private _t = toUpper ([_x] call _trimFn);
         if (_t isEqualTo "") then { continue; };
         if ((_t find "FLT-") == 0 || { (_t find "CLR-") == 0 } || { (_t find "REQ-") == 0 }) exitWith {
             _found = _t;
@@ -293,9 +293,9 @@ private _metaValue = {
     params ["_meta", "_key", ["_def", ""]];
     if !(_meta isEqualType []) exitWith { _def };
     private _idx = -1;
-    { if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x # 0) isEqualType "") } && { (toUpper (_x # 0)) isEqualTo (toUpper _key) }) exitWith { _idx = _forEachIndex; }; } forEach _meta;
+    { if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x select 0) isEqualType "") } && { (toUpper (_x select 0)) isEqualTo (toUpper _key) }) exitWith { _idx = _forEachIndex; }; } forEach _meta;
     if (_idx < 0) exitWith { _def };
-    (_meta # _idx) # 1
+    (_meta select _idx) select 1
 };
 
 private _blockedRouteTail = [];
@@ -317,7 +317,7 @@ private _blockedRouteTail = [];
     if !(_x isEqualType []) then { continue; };
     if ((count _x) < 4) then { continue; };
     private _cat = toUpper (_x param [2, ""]);
-    if (_cat isNotEqualTo "OPS") then { continue; };
+    if (!(_cat isEqualTo "OPS")) then { continue; };
 
     private _summary = _x param [3, ""];
     if !(_summary isEqualType "") then { _summary = str _summary; };
@@ -373,7 +373,7 @@ if ((count _blockedRouteTail) > _blockedRouteWindow) then {
 private _blockedRouteLatestReason = "-";
 private _blockedRouteLatestSourceId = "-";
 if ((count _blockedRouteTail) > 0) then {
-    private _lastBlocked = _blockedRouteTail # ((count _blockedRouteTail) - 1);
+    private _lastBlocked = _blockedRouteTail select ((count _blockedRouteTail) - 1);
     _blockedRouteLatestReason = _lastBlocked param [1, "-"];
     _blockedRouteLatestSourceId = _lastBlocked param [2, "-"];
     if (_blockedRouteLatestReason isEqualTo "") then { _blockedRouteLatestReason = "-"; };
@@ -461,8 +461,36 @@ private _airbasePub = [
     ["automationDelayArrivalS", _autoDelayArrivalS]
 ];
 
+];
+
+// --- TASKENG v0 snapshot (thread/task hierarchy) ----------------------------
+private _taskengStore = ["taskeng_v0_thread_store", createHashMap] call ARC_fnc_stateGet;
+if (!(_taskengStore isEqualType createHashMap)) then { _taskengStore = createHashMap; };
+private _taskengRev = ["taskeng_v0_schema_rev", 0] call ARC_fnc_stateGet;
+if (!(_taskengRev isEqualType 0)) then { _taskengRev = 0; };
+
+private _taskengRows = [];
+private _hgTaskeng = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+{
+    private _thrRec = _y;
+    if (_thrRec isEqualType createHashMap) then {
+        private _thrId = [_thrRec, "thread_id", ""] call _hgTaskeng;
+        private _thrType = [_thrRec, "type", ""] call _hgTaskeng;
+        private _thrConf = [_thrRec, "confidence", 0] call _hgTaskeng;
+        private _thrHeat = [_thrRec, "heat", 0] call _hgTaskeng;
+        private _thrParent = [_thrRec, "parent_task_id", ""] call _hgTaskeng;
+        _taskengRows pushBack [_thrId, _thrType, _thrConf, _thrHeat, _thrParent];
+    };
+} forEach _taskengStore;
+
+private _taskengPub = [
+    ["schema", "taskeng_v0"],
+    ["schema_rev", _taskengRev],
+    ["thread_count", count _taskengRows],
+    ["rows", _taskengRows]
+];
+
 private _pub = [
-    ["insurgentPressure", _p],
     ["corruption", _c],
     ["infiltration", _i],
     ["civSentiment", _sent],
@@ -480,12 +508,16 @@ private _pub = [
     ["companyCommandTasking", ["companyCommandTasking", []] call ARC_fnc_stateGet],
     ["companyVirtualOps", ["companyVirtualOps", []] call ARC_fnc_stateGet],
     ["casreq", _casreqPub],
-    ["airbase", _airbasePub]
+    ["airbase", _airbasePub],
+    ["taskeng", _taskengPub]
 ];
 
 private _didPublish = [_pub, "publicBroadcastState", false, 0.25] call ARC_fnc_statePublishPublic;
 if (!_didPublish) exitWith { false };
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 private _companySnapshot = [
     ["companyCommandNodes", ["companyCommandNodes", []] call ARC_fnc_stateGet],
     ["companyCommandTasking", ["companyCommandTasking", []] call ARC_fnc_stateGet],
@@ -658,5 +690,9 @@ missionNamespace setVariable ["ARC_consoleVM_meta", [
     ["publishedAt", serverTime],
     ["source", "publicBroadcastState"]
 ], true];
+
+// Build and publish Console VM v1 envelope (Phase A: observe)
+private _vmPayload = [] call ARC_fnc_consoleVmBuild;
+missionNamespace setVariable ["ARC_consoleVM_payload", _vmPayload, true];
 
 true

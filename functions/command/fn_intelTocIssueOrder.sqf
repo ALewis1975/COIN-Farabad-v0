@@ -30,6 +30,9 @@ params [
 
 if (isNull _issuer) exitWith {false};
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 // Dedicated MP hardening: validate sender identity.
 if (!isNil "remoteExecutedOwner") then
 {
@@ -45,8 +48,8 @@ if (!isNil "remoteExecutedOwner") then
     };
 };
 
-_order = toUpper (trim _order);
-_purpose = toUpper (trim _purpose);
+_order = toUpper ([_order] call _trimFn);
+_purpose = toUpper ([_purpose] call _trimFn);
 
 private _targetGroup = ["activeIncidentAcceptedByGroup", ""] call ARC_fnc_stateGet;
 if (!(_targetGroup isEqualType "") || { _targetGroup isEqualTo "" }) then

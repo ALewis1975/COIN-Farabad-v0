@@ -87,7 +87,7 @@ private _count = 0;
     };
     // Avoid duplicates
     private _foundInQueue = false;
-    { if ((_x # 0) isEqualTo _nid) exitWith { _foundInQueue = true; }; } forEach _queue;
+    { if ((_x select 0) isEqualTo _nid) exitWith { _foundInQueue = true; }; } forEach _queue;
     if (_foundInQueue) then { continue; };
 
     private _a = _anchor;

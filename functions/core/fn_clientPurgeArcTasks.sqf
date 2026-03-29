@@ -10,7 +10,7 @@ params [["_taskIds", []]];
 if (!(_taskIds isEqualType [])) then { _taskIds = []; };
 
 {
-    if (_x isEqualType "" && {_x isNotEqualTo ""}) then
+    if (_x isEqualType "" && {!(_x isEqualTo "")}) then
     {
         // Best-effort local cleanup; server should already delete globally.
         [_x, true, true] call BIS_fnc_deleteTask;

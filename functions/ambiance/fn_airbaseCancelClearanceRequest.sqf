@@ -16,7 +16,7 @@ params [
 if (!([_caller, "ARC_fnc_airbaseCancelClearanceRequest", "Airbase clearance cancel rejected: sender verification failed.", "AIRBASE_CLEARANCE_CANCEL_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 if (!(_requestId isEqualType "")) then { _requestId = ""; };
-_requestId = trim _requestId;
+_requestId = [_requestId] call _trimFn;
 if (_requestId isEqualTo "") exitWith {false};
 
 private _requests = ["airbase_v1_clearanceRequests", []] call ARC_fnc_stateGet;
@@ -35,11 +35,14 @@ private _idx = -1;
 { if ((_x param [0, ""]) isEqualTo _requestId) exitWith { _idx = _forEachIndex; }; } forEach _requests;
 if (_idx < 0) exitWith {false};
 
-private _rec = _requests # _idx;
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
+private _rec = _requests select _idx;
 private _status = toUpper (_rec param [6, ""]);
 private _uid = _rec param [2, ""];
 private _requesterOwner = -1;
-if (_uid isNotEqualTo "") then {
+if (!(_uid isEqualTo "")) then {
     {
         if ((getPlayerUID _x) isEqualTo _uid) exitWith { _requesterOwner = owner _x; };
     } forEach allPlayers;
@@ -55,7 +58,7 @@ if !(_status in ["QUEUED", "PENDING", "AWAITING_TOWER_DECISION"]) exitWith {
 private _overrideAuth = [_caller, "OVERRIDE"] call ARC_fnc_airbaseTowerAuthorize;
 private _hasOverride = _overrideAuth param [0, false];
 
-if ((_uid isNotEqualTo _callerUid) && {!_hasOverride}) exitWith {
+if ((!(_uid isEqualTo _callerUid)) && {!_hasOverride}) exitWith {
     private _owner = owner _caller;
     if (_owner > 0) then { ["Only the requesting pilot or tower override can cancel this request."] remoteExec ["ARC_fnc_clientHint", _owner]; };
     false

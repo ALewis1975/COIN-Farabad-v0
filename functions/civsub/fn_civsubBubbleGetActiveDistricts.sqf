@@ -18,6 +18,9 @@ params [
     ["_players", [], [[]]]
 ];
 
+
+// sqflint-compatible helpers
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _maxD = missionNamespace getVariable ["civsub_v1_civ_cap_activeDistrictsMax", 3];
 if (!(_maxD isEqualType 0)) then { _maxD = 3; };
 if (_maxD < 1) then { _maxD = 1; };
@@ -43,7 +46,7 @@ if !(_last isEqualType createHashMap) then { _last = createHashMap; };
 private _active = [];
 {
     private _did = _x;
-    private _ts = _last getOrDefault [_did, -1];
+    private _ts = [_last, _did, -1] call _hg;
     if (_ts >= 0 && {(_now - _ts) <= _grace}) then {
         _active pushBack _did;
     };

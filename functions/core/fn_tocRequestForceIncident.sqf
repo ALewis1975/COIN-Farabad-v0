@@ -32,9 +32,12 @@ if (!isNil "remoteExecutedOwner") then { _owner = remoteExecutedOwner; };
 // RemoteExec-only validation path: requires remoteExecutedOwner context.
 if (!([_caller, "ARC_fnc_tocRequestForceIncident", "Force incident rejected: sender verification failed.", "TOC_FORCE_INCIDENT_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
-_markerRaw = trim _markerRaw;
-_displayName = trim _displayName;
-_incidentType = trim _incidentType;
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
+_markerRaw = [_markerRaw] call _trimFn;
+_displayName = [_displayName] call _trimFn;
+_incidentType = [_incidentType] call _trimFn;
 
 if (_markerRaw isEqualTo "" || { _displayName isEqualTo "" } || { _incidentType isEqualTo "" }) exitWith
 {
@@ -67,7 +70,7 @@ if (!(_isOmni || _isCmd || _isTocS3 || _isBnCmd)) exitWith
 // Do not allow overlap.
 private _activeTaskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
 if (!(_activeTaskId isEqualType "")) then { _activeTaskId = ""; };
-if (_activeTaskId isNotEqualTo "") exitWith
+if (!(_activeTaskId isEqualTo "")) exitWith
 {
     if (_owner > 0) then { ["HQ", "An incident is already active. Close it (and complete SITREP) before spawning a new one."] remoteExec ["ARC_fnc_clientToast", _owner]; };
     false

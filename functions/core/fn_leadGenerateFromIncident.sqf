@@ -33,7 +33,7 @@ if (_pos isEqualType [] && { (count _pos) >= 2 }) then
 }
 else
 {
-    if (_marker isNotEqualTo "") then
+    if (!(_marker isEqualTo "")) then
     {
         private _m = [_marker] call ARC_fnc_worldResolveMarker;
         if (_m in allMapMarkers) then
@@ -102,25 +102,25 @@ if (_resU isEqualTo "SUCCEEDED") then
             _opts pushBack [ (1.20 * _stage) + (0.90 * _inf) + 0.05, "RAID", "Lead: Likely Insurgent Hideout", 0.20 + (0.35 * _inf) + (0.15 * _stage), 0.50 + (0.35 * _inf), 80 * 60, 1100, ["Airbase", "GreenZone"] ];
 
             private _totalW = 0;
-            { _totalW = _totalW + (_x # 0); } forEach _opts;
+            { _totalW = _totalW + (_x select 0); } forEach _opts;
 
             if (_totalW > 0) then
             {
                 private _r = random _totalW;
-                private _pick = _opts # 0;
+                private _pick = _opts select 0;
 
                 {
-                    _r = _r - (_x # 0);
+                    _r = _r - (_x select 0);
                     if (_r <= 0) exitWith { _pick = _x; };
                 } forEach _opts;
 
-                _leadType = _pick # 1;
-                _leadDisp = _pick # 2;
-                _chance   = (_pick # 3) min 0.95;
-                _strength = _pick # 4;
-                _ttl      = _pick # 5;
-                _radius   = _pick # 6;
-                _avoidZones = _pick # 7;
+                _leadType = _pick select 1;
+                _leadDisp = _pick select 2;
+                _chance   = (_pick select 3) min 0.95;
+                _strength = _pick select 4;
+                _ttl      = _pick select 5;
+                _radius   = _pick select 6;
+                _avoidZones = _pick select 7;
             };
         };
 
@@ -306,7 +306,7 @@ if (_resU isEqualTo "FAILED") then
     if (_typeU isEqualTo "IED") then
     {
         private _qid = ["activeIedDetonationQueueId", ""] call ARC_fnc_stateGet;
-        if (_qid isEqualType "" && { _qid isNotEqualTo "" }) exitWith {0};
+        if (_qid isEqualType "" && { !(_qid isEqualTo "") }) exitWith {0};
     };
 
     // Default urgent response

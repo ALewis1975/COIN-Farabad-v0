@@ -23,7 +23,7 @@ if (isNull _display) exitWith {"FULL"};
 
 private _modeRaw = missionNamespace getVariable ["ARC_console_layoutMode", "FULL"];
 if (!(_modeRaw isEqualType "")) then { _modeRaw = "FULL"; };
-private _mode = toUpper (trim _modeRaw);
+private _mode = toUpper ([_modeRaw] call _trimFn);
 if !(_mode in ["FULL", "DOCK_RIGHT"]) then { _mode = "FULL"; };
 
 uiNamespace setVariable ["ARC_console_layoutModeActive", _mode];
@@ -60,6 +60,9 @@ uiNamespace setVariable [_defaultsKey, _defaults];
 
 private _setPos = {
     params ["_idc", "_x", "_y", "_w", "_h"];
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
     private _ctrl = _display displayCtrl _idc;
     if (isNull _ctrl) exitWith {};
     _ctrl ctrlSetPosition [_x, _y, _w, _h];

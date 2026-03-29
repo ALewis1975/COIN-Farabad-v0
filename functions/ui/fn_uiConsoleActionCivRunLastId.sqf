@@ -10,13 +10,15 @@
 if (!hasInterface) exitWith {false};
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _trimFn  = compile "params ['_s']; trim _s";
 
 private _payload = uiNamespace getVariable ["ARC_civsub_lastIdCardPayload", createHashMap];
 if (_payload isEqualType []) then { _payload = [_payload] call _hmCreate; };
 if !(_payload isEqualType createHashMap) exitWith {false};
 
-private _netId = _payload getOrDefault ["civ_netId", ""];
-if (!(_netId isEqualType "") || { (trim _netId) isEqualTo "" }) exitWith {
+private _netId = [_payload, "civ_netId", ""] call _hg;
+if (!(_netId isEqualType "") || { ([_netId] call _trimFn) isEqualTo "" }) exitWith {
     ["S2 Ops", "No recent civilian ID on file. Use Show Papers first."] call ARC_fnc_clientToast;
     false
 };

@@ -23,6 +23,7 @@ params [
 ];
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 private _effects = [];
 
@@ -31,9 +32,9 @@ switch (_event) do
     case "SHOW_PAPERS": { _effects = ["WHITE_TRUST_MICRO_GAIN"]; };
     case "CHECK_PAPERS":
     {
-        private _hit = _payload getOrDefault ["hit", false];
-        private _method = toUpper (_payload getOrDefault ["method", "SEARCH"]);
-        private _coop = _payload getOrDefault ["cooperative", false];
+        private _hit = [_payload, "hit", false] call _hg;
+        private _method = toUpper ([_payload, "method", "SEARCH"] call _hg);
+        private _coop = [_payload, "cooperative", false] call _hg;
 
         if (_hit) then
         {
@@ -57,14 +58,14 @@ switch (_event) do
     case "DETENTION_INIT":
     {
         // Detaining wanted suspects improves trust; detaining innocents reduces trust.
-        private _wl = _payload getOrDefault ["wanted_level", 0];
+        private _wl = [_payload, "wanted_level", 0] call _hg;
         if !(_wl isEqualType 0) then { _wl = 0; };
         if (_wl > 0) then { _effects = ["WHITE_TRUST_MICRO_GAIN"]; } else { _effects = ["WHITE_TRUST_HARD_LOSS"]; };
     };
     case "DETENTION_HANDOFF":
     {
         // Handoff reinforces legitimacy when the detainee was actually wanted.
-        private _wl = _payload getOrDefault ["wanted_level", 0];
+        private _wl = [_payload, "wanted_level", 0] call _hg;
         if !(_wl isEqualType 0) then { _wl = 0; };
         if (_wl > 0) then { _effects = ["WHITE_TRUST_SMALL_GAIN"]; } else { _effects = []; };
     };
@@ -75,7 +76,7 @@ switch (_event) do
     case "CIV_KILLED":
     {
         // Baseline distinguishes blame attribution. Payload may include attrib_side.
-        private _as = toUpper (_payload getOrDefault ["attrib_side", "UNKNOWN"]);
+        private _as = toUpper ([_payload, "attrib_side", "UNKNOWN"] call _hg);
         switch (_as) do
         {
             case "BLUFOR": { _effects = ["CIV_CASUALTY_BLAME_BLUFOR"]; };
@@ -110,10 +111,10 @@ private _dR = 0;
 private _dG = 0;
 
 {
-    private _row = _effectTable getOrDefault [_x, [0,0,0]];
-    _dW = _dW + (_row # 0);
-    _dR = _dR + (_row # 1);
-    _dG = _dG + (_row # 2);
+    private _row = [_effectTable, _x, [0,0,0]] call _hg;
+    _dW = _dW + (_row select 0);
+    _dR = _dR + (_row select 1);
+    _dG = _dG + (_row select 2);
 } forEach _effects;
 
 private _influenceDelta = [[
@@ -135,7 +136,7 @@ if !(_actorUid isEqualTo "") then { _actorType = "PLAYER"; };
 
 private _centroid = [0,0];
 private _d = (missionNamespace getVariable ["civsub_v1_districts", createHashMap]) getOrDefault [_districtId, createHashMap];
-if (_d isEqualType createHashMap) then { _centroid = _d getOrDefault ["centroid", [0,0]]; };
+if (_d isEqualType createHashMap) then { _centroid = [_d, "centroid", [0,0]] call _hg; };
 
 private _bundle = [
     _districtId,

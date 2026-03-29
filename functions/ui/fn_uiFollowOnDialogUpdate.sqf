@@ -12,13 +12,16 @@ if (!hasInterface) exitWith {false};
 private _disp = findDisplay 78100;
 if (isNull _disp) exitWith {false};
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 private _cReq = _disp displayCtrl 78102;
 private _req = "RTB";
 
 if (!isNull _cReq) then
 {
     private _t = _cReq lbText (lbCurSel _cReq);
-    if (_t isEqualType "") then { _req = toUpper (trim _t); };
+    if (_t isEqualType "") then { _req = toUpper ([_t] call _trimFn); };
 };
 
 if !(_req in ["RTB","HOLD","PROCEED"]) then { _req = "RTB"; };

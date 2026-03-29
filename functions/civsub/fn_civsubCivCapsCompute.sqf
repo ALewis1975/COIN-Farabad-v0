@@ -14,6 +14,7 @@ params [
 ];
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 private _capG = missionNamespace getVariable ["civsub_v1_civ_cap_global", 24];
 private _capD = missionNamespace getVariable ["civsub_v1_civ_cap_perDistrict", 8];
@@ -68,10 +69,10 @@ if !(_districtsAll isEqualType createHashMap) then { _districtsAll = createHashM
 if (_popRef <= 0) then {
     private _mx = 1;
     {
-        private _d0 = _districtsAll getOrDefault [_x, createHashMap];
+        private _d0 = [_districtsAll, _x, createHashMap] call _hg;
         if (_d0 isEqualType []) then { _d0 = [_d0] call _hmCreate; };
         if (_d0 isEqualType createHashMap) then {
-            private _p0 = _d0 getOrDefault ["pop_total", 0];
+            private _p0 = [_d0, "pop_total", 0] call _hg;
             if (_p0 isEqualType 0) then { _mx = _mx max _p0; };
         };
     } forEach (keys _districtsAll);
@@ -87,15 +88,15 @@ private _sumCaps = 0;
     private _capThis = _capD;
 
     if (_useDynamic) then {
-        private _ds = _districtsAll getOrDefault [_did, createHashMap];
+        private _ds = [_districtsAll, _did, createHashMap] call _hg;
         if (_ds isEqualType []) then { _ds = [_ds] call _hmCreate; };
 
         if (_ds isEqualType createHashMap) then {
-            private _pop = _ds getOrDefault ["pop_total", 0];
+            private _pop = [_ds, "pop_total", 0] call _hg;
             if !(_pop isEqualType 0) then { _pop = 0; };
             if (_pop < 0) then { _pop = 0; };
 
-            private _kia = _ds getOrDefault ["civ_cas_kia", 0];
+            private _kia = [_ds, "civ_cas_kia", 0] call _hg;
             if !(_kia isEqualType 0) then { _kia = 0; };
             if (_kia < 0) then { _kia = 0; };
 
@@ -121,7 +122,7 @@ private _sumCaps = 0;
     };
 
     // Explicit overrides always win.
-    private _ovCap = _ovMap getOrDefault [_did, -1];
+    private _ovCap = [_ovMap, _did, -1] call _hg;
     if (_ovCap isEqualType 0 && { _ovCap >= 0 }) then { _capThis = _ovCap; };
 
     if (_capThis < 0) then { _capThis = 0; };

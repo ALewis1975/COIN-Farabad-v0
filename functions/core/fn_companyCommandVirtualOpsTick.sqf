@@ -25,6 +25,7 @@
 if (!isServer) exitWith {false};
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 private _nodes = ["companyCommandNodes", []] call ARC_fnc_stateGet;
 if (!(_nodes isEqualType []) || { _nodes isEqualTo [] }) exitWith {false};
@@ -46,7 +47,7 @@ if (!(_ops isEqualType [])) then { _ops = []; };
 private _activeTaskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
 private _activeAccepted = ["activeIncidentAccepted", false] call ARC_fnc_stateGet;
 if (!(_activeAccepted isEqualType true) && !(_activeAccepted isEqualType false)) then { _activeAccepted = false; };
-private _playerTaskActive = (_activeTaskId isNotEqualTo "") && { _activeAccepted };
+private _playerTaskActive = (!(_activeTaskId isEqualTo "")) && { _activeAccepted };
 
 private _activePos = ["activeExecPos", []] call ARC_fnc_stateGet;
 if (!(_activePos isEqualType [])) then { _activePos = []; };
@@ -82,7 +83,7 @@ private _pickWeightedType = {
     private _sum = 0;
     {
         private _k = _x;
-        private _w = _weights getOrDefault [_k, 0];
+        private _w = [_weights, _k, 0] call _hg;
         if (_w > 0) then
         {
             _sum = _sum + _w;
@@ -95,7 +96,7 @@ private _pickWeightedType = {
     private _roll = random _sum;
     private _pick = "PRESENCE_PATROL";
     {
-        if (_roll <= (_x # 1)) exitWith { _pick = _x # 0; };
+        if (_roll <= (_x select 1)) exitWith { _pick = _x select 0; };
     } forEach _pairs;
 
     _pick
@@ -108,25 +109,25 @@ private _changed = false;
     private _n = +_x;
     if (!(_n isEqualType []) || { (count _n) < 8 }) then { continue; };
 
-    private _nodeId = _n # 0;
-    private _callsign = _n # 1;
-    private _nodePos = _n # 4;
+    private _nodeId = _n select 0;
+    private _callsign = _n select 1;
+    private _nodePos = _n select 4;
     if (!(_nodePos isEqualType [])) then { _nodePos = [0,0,0]; };
     if ((count _nodePos) < 3) then { _nodePos resize 3; };
 
-    private _nodeZone = _n # 5;
+    private _nodeZone = _n select 5;
     if (!(_nodeZone isEqualType "")) then { _nodeZone = ""; };
     if (_nodeZone isEqualTo "") then { _nodeZone = [_nodePos] call ARC_fnc_worldGetZoneForPos; };
 
     private _districtRisk = 0.35;
-    if (missionNamespace getVariable ["civsub_v1_enabled", false] && { _nodeZone isNotEqualTo "" }) then
+    if (missionNamespace getVariable ["civsub_v1_enabled", false] && { !(_nodeZone isEqualTo "") }) then
     {
         private _d = [_nodeZone] call ARC_fnc_civsubDistrictsGetById;
         if (_d isEqualType createHashMap && { (count _d) > 0 }) then
         {
-            private _fear = _d getOrDefault ["fear_idx", 50];
-            private _rEff = _d getOrDefault ["R_EFF_U", 50];
-            private _gEff = _d getOrDefault ["G_EFF_U", 50];
+            private _fear = [_d, "fear_idx", 50] call _hg;
+            private _rEff = [_d, "R_EFF_U", 50] call _hg;
+            private _gEff = [_d, "G_EFF_U", 50] call _hg;
             _districtRisk = (((_fear / 100) * 0.55) + ((_rEff / 100) * 0.45) - ((_gEff / 100) * 0.25)) max 0 min 1;
         };
     };
@@ -138,11 +139,11 @@ private _changed = false;
         {
             private _thr = [_x] call ARC_fnc_threadNormalizeRecord;
             if (_thr isEqualTo []) then { continue; };
-            private _did = _thr # 14;
-            if (_did isNotEqualTo _nodeZone) then { continue; };
-            private _state = toUpper (_thr # 6);
+            private _did = _thr select 14;
+            if (!(_did isEqualTo _nodeZone)) then { continue; };
+            private _state = toUpper (_thr select 6);
             if (_state isEqualTo "DORMANT") then { continue; };
-            _threadPressure = _threadPressure + (((_thr # 4) max 0 min 1) * 0.5 + ((_thr # 5) max 0 min 1) * 0.5);
+            _threadPressure = _threadPressure + (((_thr select 4) max 0 min 1) * 0.5 + ((_thr select 5) max 0 min 1) * 0.5);
         } forEach _threads;
     };
     _threadPressure = (_threadPressure min 1);
@@ -170,7 +171,7 @@ private _changed = false;
 
     private _opType = [_weights] call _pickWeightedType;
 
-    if (_deconflict isNotEqualTo "NONE") then
+    if (!(_deconflict isEqualTo "NONE")) then
     {
         if (_opType in ["PLAYER_SUPPORT", "MSR_SECURITY"] && { _playerTaskActive }) then
         {
@@ -191,10 +192,10 @@ private _changed = false;
         default { format ["%1 running presence patrols in %2.", _callsign, _nodeZone] };
     };
 
-    private _priority = ((_weights getOrDefault [_opType, 0.5]) + (_districtRisk * 0.45) + (_threadPressure * 0.35)) min 3;
+    private _priority = (([_weights, _opType, 0.5] call _hg) + (_districtRisk * 0.45) + (_threadPressure * 0.35)) min 3;
 
     private _existingIdx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 14 } && { ((_x # 4) isEqualTo _nodeId) } && { toUpper (_x # 3) in ["PLANNED", "ACTIVE"] }) exitWith { _existingIdx = _forEachIndex; }; } forEach _updatedOps;
+    { if ((_x isEqualType []) && { (count _x) >= 14 } && { ((_x select 4) isEqualTo _nodeId) } && { toUpper (_x select 3) in ["PLANNED", "ACTIVE"] }) exitWith { _existingIdx = _forEachIndex; }; } forEach _updatedOps;
 
     private _meta = [
         ["districtRisk", _districtRisk],
@@ -208,8 +209,8 @@ private _changed = false;
 
     if (_existingIdx >= 0) then
     {
-        private _cur = +(_updatedOps # _existingIdx);
-        private _oldType = _cur # 6;
+        private _cur = +(_updatedOps select _existingIdx);
+        private _oldType = _cur select 6;
         _cur set [2, _now];
         _cur set [3, "ACTIVE"];
         _cur set [6, _opType];
@@ -222,7 +223,7 @@ private _changed = false;
         _cur set [13, _meta];
         _updatedOps set [_existingIdx, _cur];
 
-        if (toUpper _oldType isNotEqualTo _opType) then
+        if (!((toUpper _oldType) isEqualTo _opType)) then
         {
             _changed = true;
             ["OPS", format ["VOP UPDATE: %1 shifted to %2 (%3).", _callsign, _opType, _deconflict], _nodePos,

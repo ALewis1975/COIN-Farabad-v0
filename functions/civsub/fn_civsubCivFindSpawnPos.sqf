@@ -23,7 +23,7 @@ private _posIsRoadish = missionNamespace getVariable ["ARC_civsub_fnc_posIsRoadi
 private _findOffRoad = missionNamespace getVariable ["ARC_civsub_fnc_findPosOffRoad", { params ["_p"]; _p }];
 
 private _c = _center;
-if ((count _c) == 2) then { _c = [_c#0, _c#1, 0]; };
+if ((count _c) == 2) then { _c = [_c select 0, _c select 1, 0]; };
 
 private _zones = missionNamespace getVariable ["civsub_v1_civ_exclusion_zones", []];
 if !(_zones isEqualType []) then { _zones = []; };
@@ -43,8 +43,8 @@ private _inExclusion = {
         if !(_z isEqualType []) then { continue };
         if ((count _z) < 2) then { continue };
 
-        private _zc = _z#0;
-        private _zr = _z#1;
+        private _zc = _z select 0;
+        private _zr = _z select 1;
         if !(_zr isEqualType 0) then { continue };
 
         private _zp = [0,0,0];
@@ -85,7 +85,7 @@ private _pickFromBuilding = {
 for "_k" from 1 to 25 do {
     private _angle = random 360;
     private _dist = random _r;
-    private _origin = [_c#0 + (sin _angle) * _dist, _c#1 + (cos _angle) * _dist, 0];
+    private _origin = [_c select 0 + (sin _angle) * _dist, _c select 1 + (cos _angle) * _dist, 0];
 
     if ([_origin] call _inExclusion) then { continue };
 
@@ -96,7 +96,7 @@ for "_k" from 1 to 25 do {
 // Fallback to safe pos (still enforce exclusions)
 for "_k" from 1 to 10 do {
     private _pos = [_c, 0, _r, 3, 0, 0.3, 0] call BIS_fnc_findSafePos;
-    if ((_pos#0) == 0 && {(_pos#1) == 0}) then { continue };
+    if ((_pos select 0) == 0 && {(_pos select 1) == 0}) then { continue };
     if (surfaceIsWater _pos) then { continue };
     if ([_pos] call _posIsRoadish) then
     {
@@ -116,8 +116,8 @@ private _bestDist = 1e12;
 {
     private _z = _x;
     if !(_z isEqualType [] && {(count _z) >= 2}) then { continue };
-    private _zc = _z#0;
-    private _zr = _z#1;
+    private _zc = _z select 0;
+    private _zr = _z select 1;
     private _zp = if (_zc isEqualType "") then { markerPos _zc } else { _zc };
     private _d = _c distance2D _zp;
     if (_d < _bestDist) then {
@@ -125,7 +125,7 @@ private _bestDist = 1e12;
         // Randomize the escape direction so multiple spawns don't stack on a single point.
         private _dir = random 360;
         private _pad = 50 + random 250;
-        _best = [_zp#0 + (sin _dir) * (_zr + _pad), _zp#1 + (cos _dir) * (_zr + _pad), 0];
+        _best = [_zp select 0 + (sin _dir) * (_zr + _pad), _zp select 1 + (cos _dir) * (_zr + _pad), 0];
     };
 } forEach _zones;
 

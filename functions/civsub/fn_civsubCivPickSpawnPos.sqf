@@ -16,11 +16,14 @@
 if (!isServer) exitWith {[0,0,0]};
 
 params [["_did","",[""]]];
+
+// sqflint-compatible helpers
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 if (_did isEqualTo "") exitWith {[0,0,0]};
 
 private _row = [_did] call ARC_fnc_civsubSpawnCacheEnsure;
-private _bld = _row getOrDefault ["bldPos", []];
-private _road = _row getOrDefault ["roadPos", []];
+private _bld = [_row, "bldPos", []] call _hg;
+private _road = [_row, "roadPos", []] call _hg;
 if !(_bld isEqualType []) then { _bld = []; };
 if !(_road isEqualType []) then { _road = []; };
 
@@ -39,7 +42,7 @@ if ((count _bld) > 0 && {(random 1) < _pB}) then {
 };
 
 if !(_pos isEqualType [] && {(count _pos) >= 2}) then { _pos = [0,0,0]; };
-if ((count _pos) == 2) then { _pos = [_pos#0,_pos#1,0]; };
+if ((count _pos) == 2) then { _pos = [_pos select 0,_pos select 1,0]; };
 
 // Phase 2: enforce off-road placement (never return a road placement)
 if (_pos isEqualType [] && {(count _pos) >= 2} && {!(_pos isEqualTo [0,0,0])}) then

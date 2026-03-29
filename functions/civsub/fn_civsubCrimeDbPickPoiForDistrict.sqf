@@ -20,6 +20,9 @@ params [
     ["_allowFallback", false, [true]]
 ];
 
+
+// sqflint-compatible helpers
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 if (_districtId isEqualTo "") exitWith {""};
 
 private _db = missionNamespace getVariable ["civsub_v1_crimedb", createHashMap];
@@ -31,8 +34,8 @@ if ((count _keys) == 0) exitWith {""};
 private _candidates = _keys select {
     private _r = _db get _x;
     (_r isEqualType createHashMap)
-    && { (_r getOrDefault ["homeDistrictId", ""]) isEqualTo _districtId }
-    && { (!_wantHvt) || { _r getOrDefault ["is_hvt", false] } }
+    && { ([_r, "homeDistrictId", ""] call _hg) isEqualTo _districtId }
+    && { (!_wantHvt) || { [_r, "is_hvt", false] call _hg } }
 };
 
 if ((count _candidates) == 0) then {

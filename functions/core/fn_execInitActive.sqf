@@ -36,7 +36,7 @@ private _leadTagU = toUpper _leadTag;
 private _pos = [];
 private _m = "";
 
-if (_marker isNotEqualTo "") then
+if (!(_marker isEqualTo "")) then
 {
     _m = [_marker] call ARC_fnc_worldResolveMarker;
     if (_m in allMapMarkers) then
@@ -120,7 +120,7 @@ if (!(_startedAt isEqualType 0)) then { _startedAt = -1; };
 private _zone = [_pos] call ARC_fnc_worldGetZoneForPos;
 
 // If we already have a package for this task, only ensure objective objects exist.
-private _needsBuild = !(_execTaskId isEqualTo _taskId && { _execKind isNotEqualTo "" });
+private _needsBuild = !(_execTaskId isEqualTo _taskId && { !(_execKind isEqualTo "") });
 
 // If TOC just accepted the incident, force a rebuild so we can start timers and spawn assets.
 if (_accepted && { _startedAt < 0 }) then
@@ -146,7 +146,7 @@ private _spawnObjective = {
 // We enforce that here by using the dedicated site pickers.
 // Other objective kinds may spawn indoors when appropriate.
 private _p = [];
-private _kindU = toUpper (trim _kind);
+private _kindU = toUpper ([_kind] call _trimFn);
 
 switch (_kindU) do
 {
@@ -210,9 +210,9 @@ if (_p isEqualTo []) then { _p = +_center; _p resize 3; };
             _obj = createVehicle [_class, _p, [], 0, "CAN_COLLIDE"];
             // Place at the chosen ATL position; do NOT snap upward (avoids rooftop placement).
             private _pFix = +_p; _pFix resize 3;
-            private _pz = _pFix # 2; if (!(_pz isEqualType 0)) then { _pz = 0; };
+            private _pz = _pFix select 2; if (!(_pz isEqualType 0)) then { _pz = 0; };
             if (_pz < -2) then { _pz = 0; };
-            _obj setPosATL [_pFix # 0, _pFix # 1, _pz + 0.05];
+            _obj setPosATL [_pFix select 0, _pFix select 1, _pz + 0.05];
             _obj setVectorUp [0,0,1];            _obj setVariable ["ARC_objectiveKind", _kind, true];
             // If this objective failing on death, keep it safe until players are on-site.
             _obj allowDamage (!_failOnKilled);
@@ -263,7 +263,7 @@ if (_kind isEqualTo "VBIED_VEHICLE") then
             };
             _pos = +_pos;
             _pos resize 3;
-            if (!((_pos # 2) isEqualType 0)) then { _pos set [2, 0]; };
+            if (!((_pos select 2) isEqualType 0)) then { _pos set [2, 0]; };
 
             private _kind = _killed getVariable ["ARC_objectiveKind", ""];
             if (!(_kind isEqualType "")) then { _kind = ""; };
@@ -352,8 +352,8 @@ private _spawnCacheObjective = {
         private _cls = selectRandom _valid;
         private _o = createVehicle [_cls, _p, [], 0, "CAN_COLLIDE"];
         // Place at the chosen interior ATL position (already filtered to avoid rooftops).
-        private _pz = _p # 2; if (!(_pz isEqualType 0)) then { _pz = 0; };
-        _o setPosATL [_p # 0, _p # 1, _pz + 0.05];
+        private _pz = _p select 2; if (!(_pz isEqualType 0)) then { _pz = 0; };
+        _o setPosATL [_p select 0, _p select 1, _pz + 0.05];
         _o setVectorUp [0,0,1];
         _o setVariable ["ARC_objectiveKind", "CACHE_SEARCH", true];
         _o setVariable ["ARC_cacheIsTrue", (_i isEqualTo _trueIdx), true];
@@ -362,7 +362,7 @@ private _spawnCacheObjective = {
         [_o, _actionText, "CACHE_SEARCH"] remoteExec ["ARC_fnc_clientAddObjectiveAction", 0, true];
 
         private _nid = netId _o;
-        if (_nid isNotEqualTo "") then
+        if (!(_nid isEqualTo "")) then
         {
             _nids pushBack _nid;
             if (_i isEqualTo _trueIdx) then { _trueNid = _nid; };
@@ -789,7 +789,7 @@ case "IED":
     private _stagingLabel = "JBF";
 
     private _leadId = ["activeLeadId", ""] call ARC_fnc_stateGet;
-    if (_leadId isNotEqualTo "") then
+    if (!(_leadId isEqualTo "")) then
     {
         private _hist = ["incidentHistory", []] call ARC_fnc_stateGet;
         if (_hist isEqualType [] && { (count _hist) > 0 }) then
@@ -798,7 +798,7 @@ case "IED":
             // Expected format includes position at index 7.
             if (_last isEqualType [] && { (count _last) >= 8 }) then
             {
-                private _lastPos = _last # 7;
+                private _lastPos = _last select 7;
                 if (_lastPos isEqualType [] && { (count _lastPos) >= 2 }) then
                 {
                     _stagingPos = +_lastPos;
@@ -1120,8 +1120,8 @@ case "IED":
             private _out = +_p; _out resize 3;
             if (!(_ws isEqualType 0) || { _ws <= 0 }) exitWith { _out };
 
-            private _x = (_out # 0);
-            private _y = (_out # 1);
+            private _x = (_out select 0);
+            private _y = (_out select 1);
             _x = (_x max _m) min (_ws - _m);
             _y = (_y max _m) min (_ws - _m);
 
@@ -1246,13 +1246,13 @@ case "IED":
         // Keep the actionable child task "current" so the parent incident task does not override it.
         // (Route recon is sequential start -> end, so at init we force the start child to current.)
 	        // Task "current" is local to each client; broadcast so players don't see the parent task override the child.
-	        if (_startTaskId isNotEqualTo "") then
+	        if (!(_startTaskId isEqualTo "")) then
 	        {
 	            [_startTaskId] remoteExecCall ["ARC_fnc_clientSetCurrentTask", 0];
 	        };
     };
 // Spawn an objective if this incident uses one
-if (_objKind isNotEqualTo "") then
+if (!(_objKind isEqualTo "")) then
 {
     private _spawned = [];
 
@@ -1263,9 +1263,9 @@ if (_objKind isNotEqualTo "") then
 
         if (_spawned isEqualType [] && { (count _spawned) >= 3 }) then
         {
-            private _basePos = _spawned # 0;
-            private _nids = _spawned # 1;
-            private _trueNid = _spawned # 2;
+            private _basePos = _spawned select 0;
+            private _nids = _spawned select 1;
+            private _trueNid = _spawned select 2;
 
             ["activeObjectiveKind", _objKind] call ARC_fnc_stateSet;
             ["activeObjectiveClass", "CACHE"] call ARC_fnc_stateSet;
@@ -1284,8 +1284,8 @@ if (_objKind isNotEqualTo "") then
         _spawned = [_objKind, _objClass, _pos, _objRadius, _objAction, _failOnKilled] call _spawnObjective;
         if (_spawned isEqualType [] && { (count _spawned) >= 2 }) then
         {
-            private _obj = _spawned # 0;
-            private _oPos = _spawned # 1;
+            private _obj = _spawned select 0;
+            private _oPos = _spawned select 1;
 
             ["activeObjectiveKind", _objKind] call ARC_fnc_stateSet;
             ["activeObjectiveClass", _objClass] call ARC_fnc_stateSet;
@@ -1417,7 +1417,7 @@ if (_objKind isNotEqualTo "") then
                 private _rp = getPosATL _x;
                 private _ok = true;
 
-                if (_avoidZone isNotEqualTo "") then
+                if (!(_avoidZone isEqualTo "")) then
                 {
                     private _z = [_rp] call ARC_fnc_worldGetZoneForPos;
                     if ((toUpper _z) isEqualTo (toUpper _avoidZone)) then
@@ -1466,7 +1466,7 @@ if (_objKind isNotEqualTo "") then
         private _spawnPos = +_cMarkerPos;
         _spawnPos resize 3;
 
-        private _isEdgeStart = (_cStartMarker isNotEqualTo "" && { _cStartMarker isNotEqualTo "ARC_convoy_start" } && { _cStartMarker isNotEqualTo "(override)" });
+        private _isEdgeStart = (!(_cStartMarker isEqualTo "") && { !(_cStartMarker isEqualTo "ARC_convoy_start") } && { !(_cStartMarker isEqualTo "(override)") });
         if (_isEdgeStart && { _edgeInset > 0 }) then
         {
             // Inset inward (toward Airbase/JBF), not along markerDir (markers may be imperfect).
@@ -1576,7 +1576,7 @@ if (_objKind isNotEqualTo "") then
         private _havePresetLink = false;
         private _presetLinkPos = [];
 
-        if (_presetLinkMk isNotEqualTo "" && { _presetLinkMk in allMapMarkers }) then
+        if (!(_presetLinkMk isEqualTo "") && { _presetLinkMk in allMapMarkers }) then
         {
             _presetLinkPos = getMarkerPos _presetLinkMk;
             if (_presetLinkPos isEqualType [] && { (count _presetLinkPos) >= 2 }) then
@@ -1623,8 +1623,8 @@ if (_objKind isNotEqualTo "") then
 
         if (_picked isEqualType [] && { (count _picked) >= 3 }) then
         {
-            _spawnPos = +(_picked # 0); _spawnPos resize 3;
-            _linkupPos = +(_picked # 2); _linkupPos resize 3;
+            _spawnPos = +(_picked select 0); _spawnPos resize 3;
+            _linkupPos = +(_picked select 2); _linkupPos resize 3;
         }
         else
         {
@@ -1636,8 +1636,8 @@ if (_objKind isNotEqualTo "") then
             // Keep link-up reasonably inside the map.
             private _ws = worldSize;
             private _margin = 150;
-            _p set [0, ((_p # 0) max _margin) min (_ws - _margin)];
-            _p set [1, ((_p # 1) max _margin) min (_ws - _margin)];
+            _p set [0, ((_p select 0) max _margin) min (_ws - _margin)];
+            _p set [1, ((_p select 1) max _margin) min (_ws - _margin)];
 
             private _snapR2 = (_roadSnap max 100) min 500;
             private _rL = if (_isBaseStart2) then { [_p, _snapR2, "Airbase"] call _fn_nearestRoad } else { [_p, _snapR2] call _fn_nearestRoad };
@@ -1660,7 +1660,7 @@ if (_objKind isNotEqualTo "") then
                     private _r2 = [_p2, (_roadSnap max 150) min 600, "Airbase"] call _fn_nearestRoad;
                     if (!isNull _r2) then { _linkupPos = getPosATL _r2; _linkupPos resize 3; };
                     private _z2 = [_linkupPos] call ARC_fnc_worldGetZoneForPos;
-                    if ((toUpper _z2) isNotEqualTo "AIRBASE") exitWith {};
+                    if (!((toUpper _z2) isEqualTo "AIRBASE")) exitWith {};
                     _step = _step + 200;
                 };
             };
@@ -1732,7 +1732,7 @@ if (_showSpawnMarker) then
         private _zEnd = [_routeEnd] call ARC_fnc_worldGetZoneForPos;
         private _zStart = [_routeStart] call ARC_fnc_worldGetZoneForPos;
 
-        if ((toUpper _zEnd) isEqualTo "AIRBASE" && { (toUpper _zStart) isNotEqualTo "AIRBASE" } && { "North_Gate" in allMapMarkers }) then
+        if ((toUpper _zEnd) isEqualTo "AIRBASE" && { !((toUpper _zStart) isEqualTo "AIRBASE") } && { "North_Gate" in allMapMarkers }) then
         {
             _ingressPos = getMarkerPos "North_Gate";
             _ingressPos resize 3;
@@ -1802,7 +1802,7 @@ if (_showSpawnMarker) then
                 {
                     for "_li" from 1 to ((count _pts) - 1) do
                     {
-                        _len = _len + ((_pts # (_li - 1)) distance2D (_pts # _li));
+                        _len = _len + ((_pts select (_li - 1)) distance2D (_pts select _li));
                     };
                 };
 
@@ -1812,6 +1812,10 @@ if (_showSpawnMarker) then
             private _fn_fallbackRoute = {
                 params ["_s", "_e", "_snapLocal", "_avoidZoneLocal", "_avoidNearLocal", "_avoidNearRLocal"];
 
+
+// sqflint-compatible helpers
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _trimFn  = compile "params ['_s']; trim _s";
                 private _hardSnap = missionNamespace getVariable ["ARC_convoyRoadSnapHardM", (_snapLocal * 4)];
                 if (!(_hardSnap isEqualType 0)) then { _hardSnap = (_snapLocal * 4); };
                 _hardSnap = (_hardSnap max (_snapLocal + 80)) min 1400;
@@ -1829,12 +1833,12 @@ if (_showSpawnMarker) then
                 {
                     private _t = _si / _sampleCount;
                     private _probe = [
-                        (_s # 0) + ((_e # 0) - (_s # 0)) * _t,
-                        (_s # 1) + ((_e # 1) - (_s # 1)) * _t,
+                        (_s select 0) + ((_e select 0) - (_s select 0)) * _t,
+                        (_s select 1) + ((_e select 1) - (_s select 1)) * _t,
                         0
                     ];
 
-                    private _r = if (_avoidZoneLocal isNotEqualTo "") then
+                    private _r = if (!(_avoidZoneLocal isEqualTo "")) then
                     {
                         [_probe, _hardSnap, _avoidZoneLocal, _avoidNearLocal, _avoidNearRLocal] call _fn_nearestRoad
                     }
@@ -1850,7 +1854,7 @@ if (_showSpawnMarker) then
                         _pt resize 3;
                     };
 
-                    if ((count _fallback) isEqualTo 0 || { _pt distance2D (_fallback # ((count _fallback) - 1)) > 20 }) then
+                    if ((count _fallback) isEqualTo 0 || { _pt distance2D (_fallback select ((count _fallback) - 1)) > 20 }) then
                     {
                         _fallback pushBack _pt;
                     };
@@ -1858,12 +1862,12 @@ if (_showSpawnMarker) then
 
                 if ((count _fallback) < 3) then
                 {
-                    private _mid = [(_s # 0) + ((_e # 0) - (_s # 0)) * 0.50, (_s # 1) + ((_e # 1) - (_s # 1)) * 0.50, 0];
+                    private _mid = [(_s select 0) + ((_e select 0) - (_s select 0)) * 0.50, (_s select 1) + ((_e select 1) - (_s select 1)) * 0.50, 0];
                     _fallback = [+_s, _mid, +_e];
                 };
 
                 // Snap endpoints to nearby roads (if available) so fallback remains road-biased.
-                private _rStart = if (_avoidZoneLocal isNotEqualTo "") then
+                private _rStart = if (!(_avoidZoneLocal isEqualTo "")) then
                 {
                     [_s, _hardSnap, _avoidZoneLocal, _avoidNearLocal, _avoidNearRLocal] call _fn_nearestRoad
                 }
@@ -1872,7 +1876,7 @@ if (_showSpawnMarker) then
                     [_s, _hardSnap] call _fn_nearestRoad
                 };
 
-                private _rEnd = if (_avoidZoneLocal isNotEqualTo "") then
+                private _rEnd = if (!(_avoidZoneLocal isEqualTo "")) then
                 {
                     [_e, _hardSnap, _avoidZoneLocal, _avoidNearLocal, _avoidNearRLocal] call _fn_nearestRoad
                 }
@@ -1900,7 +1904,7 @@ if (_showSpawnMarker) then
             };
 
             // When we're avoiding a zone (ex: Airbase), also avoid snapping the start/end to a road inside that zone.
-            private _r0 = if (_avoidZone isNotEqualTo "") then
+            private _r0 = if (!(_avoidZone isEqualTo "")) then
             {
                 [_pStart, _snap, _avoidZone, _avoidNear, _avoidNearR] call _fn_nearestRoad
             }
@@ -1909,7 +1913,7 @@ if (_showSpawnMarker) then
                 [_pStart, _snap] call _fn_nearestRoad
             };
 
-            private _r1 = if (_avoidZone isNotEqualTo "") then
+            private _r1 = if (!(_avoidZone isEqualTo "")) then
             {
                 [_pEnd, _snap, _avoidZone, _avoidNear, _avoidNearR] call _fn_nearestRoad
             }
@@ -1960,15 +1964,15 @@ if (_showSpawnMarker) then
 
                 // Pick open node with lowest f-score.
                 private _bestIdx = 0;
-                private _best    = _open # 0;
+                private _best    = _open select 0;
                 private _bestKey = str _best;
-                private _bestF   = _f getOrDefault [_bestKey, 1e12];
+                private _bestF   = [_f, _bestKey, 1e12] call _hg;
 
                 for "_i" from 1 to ((count _open) - 1) do
                 {
-                    private _r  = _open # _i;
+                    private _r  = _open select _i;
                     private _rk = str _r;
-                    private _fv = _f getOrDefault [_rk, 1e12];
+                    private _fv = [_f, _rk, 1e12] call _hg;
                     if (_fv < _bestF) then { _bestF = _fv; _bestIdx = _i; _best = _r; _bestKey = _rk; };
                 };
 
@@ -1979,13 +1983,13 @@ if (_showSpawnMarker) then
                 _closed set [_bestKey, true];
 
                 private _curPos = getPosATL _best; _curPos resize 3;
-                private _gCur   = _g getOrDefault [_bestKey, 1e12];
+                private _gCur   = [_g, _bestKey, 1e12] call _hg;
 
                 {
                     private _nbr = _x;
                     private _nk  = str _nbr;
 
-                    if !(_closed getOrDefault [_nk, false]) then
+                    if !([_closed, _nk, false] call _hg) then
                     {
                         _node set [_nk, _nbr];
 
@@ -1994,7 +1998,7 @@ if (_showSpawnMarker) then
                         // Optional zone avoidance: penalize candidates inside the avoid zone, except close to the
                         // allowed "near" point (used so inbound convoys do not cut across the airfield).
                         private _zPen = 0;
-                        if (_avoidZone isNotEqualTo "") then
+                        if (!(_avoidZone isEqualTo "")) then
                         {
                             private _z = [_nbrPos] call ARC_fnc_worldGetZoneForPos;
                             if ((toUpper _z) isEqualTo (toUpper _avoidZone)) then
@@ -2005,7 +2009,7 @@ if (_showSpawnMarker) then
                         };
 
                         private _tent = _gCur + (_curPos distance2D _nbrPos) + _zPen;
-                        private _gOld = _g getOrDefault [_nk, 1e12];
+                        private _gOld = [_g, _nk, 1e12] call _hg;
 
                         if (_tent < _gOld) then
                         {
@@ -2013,7 +2017,7 @@ if (_showSpawnMarker) then
                             _g set [_nk, _tent];
                             _f set [_nk, _tent + (_nbrPos distance2D _pGoal)];
 
-                            if !(_openKey getOrDefault [_nk, false]) then
+                            if !([_openKey, _nk, false] call _hg) then
                             {
                                 _open pushBack _nbr;
                                 _openKey set [_nk, true];
@@ -2040,7 +2044,7 @@ if (_showSpawnMarker) then
                 _keys pushBack _ck;
                 if (_ck isEqualTo _k0) exitWith {};
 
-                private _prev = _came getOrDefault [_ck, ""];
+                private _prev = [_came, _ck, ""] call _hg;
                 if (_prev isEqualTo "") exitWith { _keys = []; };
 
                 _ck = _prev;
@@ -2060,11 +2064,11 @@ if (_showSpawnMarker) then
             private _pts = [];
 
             {
-                private _r = _node getOrDefault [_x, objNull];
+                private _r = [_node, _x, objNull] call _hg;
                 if (!isNull _r) then
                 {
                     private _p = getPosATL _r; _p resize 3;
-                    if ((count _pts) isEqualTo 0 || { (_p distance2D (_pts # ((count _pts) - 1))) > 25 }) then
+                    if ((count _pts) isEqualTo 0 || { (_p distance2D (_pts select ((count _pts) - 1))) > 25 }) then
                     {
                         _pts pushBack _p;
                     };
@@ -2073,7 +2077,7 @@ if (_showSpawnMarker) then
 
             // Ensure end point is present.
             private _pEndRoad = getPosATL _r1; _pEndRoad resize 3;
-            if ((count _pts) isEqualTo 0 || { (_pEndRoad distance2D (_pts # ((count _pts) - 1))) > 10 }) then
+            if ((count _pts) isEqualTo 0 || { (_pEndRoad distance2D (_pts select ((count _pts) - 1))) > 10 }) then
             {
                 _pts pushBack _pEndRoad;
             };
@@ -2097,8 +2101,8 @@ if (_showSpawnMarker) then
             _routePts = +_legA;
             if ((count _routePts) > 0 && { (count _legB) > 0 }) then
             {
-                private _pJoin = _legB # 0;
-                if (((_routePts # ((count _routePts) - 1)) distance2D _pJoin) < 10) then
+                private _pJoin = _legB select 0;
+                if (((_routePts select ((count _routePts) - 1)) distance2D _pJoin) < 10) then
                 {
                     _legB deleteAt 0;
                 };
@@ -2113,7 +2117,7 @@ if (_showSpawnMarker) then
             private _avoidNear = [];
             private _avoidNearR = 220;
 
-            if ((toUpper _zStart) isNotEqualTo "AIRBASE" && { (toUpper _zEnd) isNotEqualTo "AIRBASE" }) then
+            if (!((toUpper _zStart) isEqualTo "AIRBASE") && { !((toUpper _zEnd) isEqualTo "AIRBASE") }) then
             {
                 _avoidZone = "Airbase";
                 if ("North_Gate" in allMapMarkers) then
@@ -2133,7 +2137,7 @@ if (_showSpawnMarker) then
 
         if (_routeUsedFallbackAny && { (count _routePts) < 3 } && { (count _routePts) >= 2 }) then
         {
-            _routePts = [_routePts # 0, _routePts # 1, _snapM, "", [], 0] call _fn_buildRoadRoute;
+            _routePts = [_routePts select 0, _routePts select 1, _snapM, "", [], 0] call _fn_buildRoadRoute;
         };
 
         // Store route points for the convoy tick (waypoint build) and compute an approximate road-distance.
@@ -2142,7 +2146,7 @@ if (_showSpawnMarker) then
         {
             for "_i" from 1 to ((count _routePts) - 1) do
             {
-                _routeLen = _routeLen + ((_routePts # (_i - 1)) distance2D (_routePts # _i));
+                _routeLen = _routeLen + ((_routePts select (_i - 1)) distance2D (_routePts select _i));
             };
         };
 
@@ -2179,7 +2183,7 @@ if (!(_total isEqualType 0) || { _total <= 0 }) then
     _total = 0;
     for "_k" from 1 to ((count _routePts) - 1) do
     {
-        _total = _total + ((_routePts # (_k - 1)) distance2D (_routePts # _k));
+        _total = _total + ((_routePts select (_k - 1)) distance2D (_routePts select _k));
     };
 };
 
@@ -2187,7 +2191,7 @@ private _cum = [0];
 private _acc = 0;
 for "_k" from 1 to ((count _routePts) - 1) do
 {
-    _acc = _acc + ((_routePts # (_k - 1)) distance2D (_routePts # _k));
+    _acc = _acc + ((_routePts select (_k - 1)) distance2D (_routePts select _k));
     _cum pushBack _acc;
 };
 
@@ -2196,33 +2200,33 @@ for "_i" from 0 to (_rmCount - 1) do
     private _t = if ((_rmCount - 1) > 0) then { _i / (_rmCount - 1) } else { 0 };
     private _dReq = _total * _t;
 
-    private _p = +(_routePts # 0);
+    private _p = +(_routePts select 0);
     _p resize 3;
 
     // Find segment containing _dReq.
     private _seg = 0;
     for "_s" from 1 to ((count _cum) - 1) do
     {
-        if ((_cum # _s) >= _dReq) exitWith { _seg = _s; };
+        if ((_cum select _s) >= _dReq) exitWith { _seg = _s; };
         _seg = _s;
     };
 
     if (_seg > 0) then
     {
-        private _a = _cum # (_seg - 1);
-        private _b = _cum # _seg;
+        private _a = _cum select (_seg - 1);
+        private _b = _cum select _seg;
 
-        private _pA = +(_routePts # (_seg - 1));
-        private _pB = +(_routePts # _seg);
+        private _pA = +(_routePts select (_seg - 1));
+        private _pB = +(_routePts select _seg);
         _pA resize 3; _pB resize 3;
 
         private _den = ((_b - _a) max 0.001);
         private _u = ((_dReq - _a) / _den);
         _u = (_u max 0) min 1;
 
-        private _dx = (_pB # 0) - (_pA # 0);
-        private _dy = (_pB # 1) - (_pA # 1);
-        _p = [(_pA # 0) + (_dx * _u), (_pA # 1) + (_dy * _u), _pA # 2];
+        private _dx = (_pB select 0) - (_pA select 0);
+        private _dy = (_pB select 1) - (_pA select 1);
+        _p = [(_pA select 0) + (_dx * _u), (_pA select 1) + (_dy * _u), _pA select 2];
         _p resize 3;
     };
 
@@ -2403,7 +2407,7 @@ for "_i" from 0 to (_rmCount - 1) do
         if (!(_rsTaskId isEqualType "")) then { _rsTaskId = ""; };
 
         // Re-spawn only when this is a new task package (or state was wiped).
-        if (!_rsSpawned || { _rsTaskId isNotEqualTo _taskId }) then
+        if (!_rsSpawned || { !(_rsTaskId isEqualTo _taskId) }) then
         {
             private _kNow = ["activeExecKind", ""] call ARC_fnc_stateGet;
             if (!(_kNow isEqualType "")) then { _kNow = ""; };
@@ -2429,7 +2433,7 @@ for "_i" from 0 to (_rmCount - 1) do
             if (_skipNearM > 0) then
             {
                 private _accGid = ["activeIncidentAcceptedByGroup", ""] call ARC_fnc_stateGet;
-                if (_accGid isEqualType "" && { _accGid isNotEqualTo "" }) then
+                if (_accGid isEqualType "" && { !(_accGid isEqualTo "") }) then
                 {
                     {
                         if (!isNull _x && { (groupId (group _x)) isEqualTo _accGid } && { (_x distance2D _pos) <= _skipNearM }) exitWith
@@ -2486,10 +2490,10 @@ for "_i" from 0 to (_rmCount - 1) do
 private _ok = true;
 private _kindNow = ["activeExecKind", ""] call ARC_fnc_stateGet;
 private _objKindNow = ["activeObjectiveKind", ""] call ARC_fnc_stateGet;
-if (_kindNow isEqualTo "INTERACT" && { _objKindNow isNotEqualTo "" }) then
+if (_kindNow isEqualTo "INTERACT" && { !(_objKindNow isEqualTo "") }) then
 {
     private _nid = ["activeObjectiveNetId", ""] call ARC_fnc_stateGet;
-    if (_nid isNotEqualTo "") then
+    if (!(_nid isEqualTo "")) then
     {
         private _obj = objectFromNetId _nid;
         if (isNull _obj) then
@@ -2521,14 +2525,14 @@ if (_kindNow isEqualTo "ROUTE_RECON") then
         private _endReached = ["activeReconRouteEndReached", false] call ARC_fnc_stateGet;
         if (!(_endReached isEqualType true)) then { _endReached = false; };
 
-        if (_startTaskId isNotEqualTo "" && { !([_startTaskId] call BIS_fnc_taskExists) } && { _startPos isEqualType [] && { (count _startPos) >= 2 } }) then
+        if (!(_startTaskId isEqualTo "") && { !([_startTaskId] call BIS_fnc_taskExists) } && { _startPos isEqualType [] && { (count _startPos) >= 2 } }) then
         {
             private _tS = "Route Recon Start";
             private _dS = "Proceed to the route start point. Once on-site, begin route reconnaissance toward the end point.";
             [true, [_startTaskId, _taskId], [_dS, _tS, ""], _startPos, "ASSIGNED", 1, true, "MOVE", false] call BIS_fnc_taskCreate;
         };
 
-        if (_endTaskId isNotEqualTo "" && { !([_endTaskId] call BIS_fnc_taskExists) } && { _endPos isEqualType [] && { (count _endPos) >= 2 } }) then
+        if (!(_endTaskId isEqualTo "") && { !([_endTaskId] call BIS_fnc_taskExists) } && { _endPos isEqualType [] && { (count _endPos) >= 2 } }) then
         {
             private _tE = "Route Recon End";
             private _dE = "Move along the route to the end point while observing and reporting. Avoid decisive engagement when possible.";
@@ -2536,13 +2540,13 @@ if (_kindNow isEqualTo "ROUTE_RECON") then
         };
 
         // Restore child task states (start always assigned until reached; end stays created until start reached).
-        if (_startTaskId isNotEqualTo "") then
+        if (!(_startTaskId isEqualTo "")) then
         {
             private _stS = if (_startReached) then { "SUCCEEDED" } else { "ASSIGNED" };
             [_startTaskId, _stS, true] call BIS_fnc_taskSetState;
         };
 
-        if (_endTaskId isNotEqualTo "") then
+        if (!(_endTaskId isEqualTo "")) then
         {
             private _stE = "CREATED";
             if (_endReached) then
@@ -2568,7 +2572,7 @@ if (_kindNow isEqualTo "ROUTE_RECON") then
 	            if (!_endReached) then { _cur = _endTaskId; };
 	        };
 
-	        if (_cur isNotEqualTo "") then
+	        if (!(_cur isEqualTo "")) then
 	        {
 	            [_cur] remoteExecCall ["ARC_fnc_clientSetCurrentTask", 0];
 	        };

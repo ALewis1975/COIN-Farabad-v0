@@ -26,7 +26,7 @@ params [
 
 if (!(_basePos isEqualType []) || { (count _basePos) < 2 }) exitWith {[]};
 _basePos = +_basePos; _basePos resize 3;
-if (!((_basePos # 0) isEqualType 0) || { !((_basePos # 1) isEqualType 0) }) exitWith {[]};
+if (!((_basePos select 0) isEqualType 0) || { !((_basePos select 1) isEqualType 0) }) exitWith {[]};
 _basePos set [2, 0];
 
 if (!(_searchRad isEqualType 0) || { _searchRad <= 0 }) then
@@ -118,7 +118,7 @@ for "_i" from 1 to _tries do
     // Reject steep slopes.
     private _n = surfaceNormal _cand;
     if (!(_n isEqualType []) || { (count _n) < 3 }) then { continue; };
-    if ((_n # 2) < _maxSlopeN) then { continue; };
+    if ((_n select 2) < _maxSlopeN) then { continue; };
 
     // Reject Airbase zone unless allowed.
     if (_avoidAirbase) then
@@ -147,7 +147,7 @@ for "_i" from 1 to _tries do
         {
             if (_x isEqualType [] && { (count _x) >= 6 }) then
             {
-                private _p = _x # 4;
+                private _p = _x select 4;
                 if (_p isEqualType [] && { (count _p) >= 2 } && { (_cand distance2D _p) < _minSep }) exitWith { _tooClose = true; };
             };
         } forEach _active;

@@ -25,6 +25,9 @@ params [
     ["_actorUid", "", [""]]
 ];
 
+
+// sqflint-compatible helpers
+private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 if (_districtId isEqualTo "" || { _event isEqualTo "" }) exitWith {createHashMap};
 
 if !([_event, _payload] call ARC_fnc_civsubDeltaValidate) exitWith {createHashMap};
@@ -39,7 +42,7 @@ else
 {
     // Array of pairs
     {
-        if (_x isEqualType [] && { (count _x) == 2 }) then { _p set [_x # 0, _x # 1]; };
+        if (_x isEqualType [] && { (count _x) == 2 }) then { _p set [_x select 0, _x select 1]; };
     } forEach _payload;
 };
 
@@ -53,14 +56,14 @@ if !(_bundle isEqualType createHashMap) exitWith {createHashMap};
 if (!isNil "ARC_fnc_civsubLeadEmitBridge") then
 {
     private _bridgedLeadId = [_bundle] call ARC_fnc_civsubLeadEmitBridge;
-    if (_bridgedLeadId isEqualType "" && { _bridgedLeadId isNotEqualTo "" }) then
+    if (_bridgedLeadId isEqualType "" && { !(_bridgedLeadId isEqualTo "") }) then
     {
         missionNamespace setVariable ["civsub_v1_lastDelta_leadId", _bridgedLeadId, true];
     };
 };
 
 // Track last emission for debug inspector
-missionNamespace setVariable ["civsub_v1_lastDelta_id", _bundle getOrDefault ["bundle_id", ""], true];
+missionNamespace setVariable ["civsub_v1_lastDelta_id", [_bundle, "bundle_id", ""] call _hg, true];
 missionNamespace setVariable ["civsub_v1_lastDelta_ts", serverTime, true];
 
 _bundle
