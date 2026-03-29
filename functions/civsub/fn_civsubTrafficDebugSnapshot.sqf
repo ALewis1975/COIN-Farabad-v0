@@ -19,6 +19,14 @@ _out set ["cap_moving_global", missionNamespace getVariable ["civsub_v1_traffic_
 _out set ["prob_moving", missionNamespace getVariable ["civsub_v1_traffic_prob_moving", -1]];
 _out set ["tick_i", missionNamespace getVariable ["civsub_v1_traffic_tick_i", -1]];
 _out set ["spawn_radius_m", missionNamespace getVariable ["civsub_v1_traffic_spawnRadius_m", -1]];
+_out set ["activity_phase", missionNamespace getVariable ["civsub_v1_activity_phase", "DAY"]];
+_out set ["activity_tod", missionNamespace getVariable ["civsub_v1_activity_tod", -1]];
+_out set ["activity_mul_traffic", missionNamespace getVariable ["civsub_v1_activity_mul_traffic_active", 1]];
+_out set ["activity_mul_moving", missionNamespace getVariable ["civsub_v1_activity_mul_moving_active", 1]];
+_out set ["activity_prob_moving_effective", missionNamespace getVariable ["civsub_v1_activity_prob_moving_effective", -1]];
+_out set ["activity_mul_civ", missionNamespace getVariable ["civsub_v1_activity_mul_civ_active", 1]];
+_out set ["activity_mul_sched_lead", missionNamespace getVariable ["civsub_v1_activity_mul_sched_lead_active", 1]];
+_out set ["activity_mul_sched_attack", missionNamespace getVariable ["civsub_v1_activity_mul_sched_attack_active", 1]];
 
 private _parked = missionNamespace getVariable ["civsub_v1_traffic_list_parked", []];
 private _moving = missionNamespace getVariable ["civsub_v1_traffic_list_moving", []];
@@ -34,13 +42,13 @@ private _per = createHashMap;
 {
     if (isNull _x) then { continue; };
     private _d = _x getVariable ["ARC_civtraf_districtId", "D00"];
-    _per set [_d, 1 + (_per getOrDefault [_d, 0])];
+    _per set [_d, 1 + ([_per, _d, 0] call getOrDefault)];
 } forEach _parked;
 
 {
     if (isNull _x) then { continue; };
     private _d = _x getVariable ["ARC_civtraf_districtId", "D00"];
-    _per set [_d, 1 + (_per getOrDefault [_d, 0])];
+    _per set [_d, 1 + ([_per, _d, 0] call getOrDefault)];
 } forEach _moving;
 
 _out set ["perDistrict", _per];

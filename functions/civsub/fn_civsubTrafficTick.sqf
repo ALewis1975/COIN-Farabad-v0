@@ -220,11 +220,46 @@ private _budgetG = missionNamespace getVariable ["civsub_v1_traffic_spawn_budget
 if (!(_budgetG isEqualType 0)) then { _budgetG = 1; };
 if (_budgetG < 0) then { _budgetG = 0; };
 
-// Time-of-day multiplier (lightweight heuristic until TOD system exists)
+// Time-of-day activity profile (shared multipliers configured in initServer)
 private _tod = dayTime; // 0..24
-private _mTod = 1.0;
-if (_tod < 5 || { _tod > 21 }) then { _mTod = 0.35; };
-if ((_tod >= 7 && { _tod <= 9 }) || (_tod >= 16 && { _tod <= 18 })) then { _mTod = 1.15; };
+private _nightStart = missionNamespace getVariable ["civsub_v1_activity_night_start_h", 21];
+private _nightEnd = missionNamespace getVariable ["civsub_v1_activity_night_end_h", 5];
+private _peakAM0 = missionNamespace getVariable ["civsub_v1_activity_morning_peak_start_h", 7];
+private _peakAM1 = missionNamespace getVariable ["civsub_v1_activity_morning_peak_end_h", 9];
+private _peakPM0 = missionNamespace getVariable ["civsub_v1_activity_evening_peak_start_h", 16];
+private _peakPM1 = missionNamespace getVariable ["civsub_v1_activity_evening_peak_end_h", 18];
+if !(_nightStart isEqualType 0) then { _nightStart = 21; };
+if !(_nightEnd isEqualType 0) then { _nightEnd = 5; };
+if !(_peakAM0 isEqualType 0) then { _peakAM0 = 7; };
+if !(_peakAM1 isEqualType 0) then { _peakAM1 = 9; };
+if !(_peakPM0 isEqualType 0) then { _peakPM0 = 16; };
+if !(_peakPM1 isEqualType 0) then { _peakPM1 = 18; };
+
+private _isNight = (_tod >= _nightStart) || { _tod < _nightEnd };
+private _isPeak = ((_tod >= _peakAM0) && { _tod <= _peakAM1 }) || { ((_tod >= _peakPM0) && { _tod <= _peakPM1 }) };
+private _phase = "DAY";
+if (_isNight) then { _phase = "NIGHT"; };
+if (_isPeak) then { _phase = "PEAK"; };
+
+private _mTraffic = missionNamespace getVariable ["civsub_v1_activity_mul_traffic_day", 1.0];
+private _mMoving = missionNamespace getVariable ["civsub_v1_activity_mul_moving_day", 1.0];
+if (_phase isEqualTo "NIGHT") then {
+    _mTraffic = missionNamespace getVariable ["civsub_v1_activity_mul_traffic_night", 0.35];
+    _mMoving = missionNamespace getVariable ["civsub_v1_activity_mul_moving_night", 0.60];
+};
+if (_phase isEqualTo "PEAK") then {
+    _mTraffic = missionNamespace getVariable ["civsub_v1_activity_mul_traffic_peak", 1.15];
+    _mMoving = missionNamespace getVariable ["civsub_v1_activity_mul_moving_peak", 1.20];
+};
+if !(_mTraffic isEqualType 0) then { _mTraffic = 1.0; };
+if !(_mMoving isEqualType 0) then { _mMoving = 1.0; };
+_mTraffic = (_mTraffic max 0.1) min 2.0;
+_mMoving = (_mMoving max 0.1) min 2.0;
+
+missionNamespace setVariable ["civsub_v1_activity_phase", _phase, false];
+missionNamespace setVariable ["civsub_v1_activity_tod", _tod, false];
+missionNamespace setVariable ["civsub_v1_activity_mul_traffic_active", _mTraffic, false];
+missionNamespace setVariable ["civsub_v1_activity_mul_moving_active", _mMoving, false];
 
 // Spawn parked vehicles per active district (mostly parked)
 {
@@ -253,7 +288,7 @@ if ((_tod >= 7 && { _tod <= 9 }) || (_tod >= 16 && { _tod <= 18 })) then { _mTod
     private _mPop = 0.6 + (0.00025 * _pop); // 100 -> 0.625, 2000 -> 1.1
     _mPop = (_mPop max 0.5) min 1.2;
 
-    private _desired = floor ((_capD * _mPop * _mThreat * _mTod) max 0);
+    private _desired = floor ((_capD * _mPop * _mThreat * _mTraffic) max 0);
     _desired = _desired min _capD;
 
     // Current parked count for this district
@@ -299,9 +334,13 @@ if (_allowMoving) then
     private _spawnCreateFail = missionNamespace getVariable ["civsub_v1_traffic_dbg_moving_spawnFail_createFail", 0];
     if (!(_spawnCreateFail isEqualType 0)) then { _spawnCreateFail = 0; };
 
+    private _probMEff = _probM * _mMoving;
+    _probMEff = (_probMEff max 0) min 1;
+    missionNamespace setVariable ["civsub_v1_activity_prob_moving_effective", _probMEff, false];
+
     // spawn one moving vehicle at most per tick, with probability
     // try each selected active district (bounded) until one succeeds
-    if ((count _moving) < _capMG && { (count _act) > 0 } && { (random 1) < _probM }) then
+    if ((count _moving) < _capMG && { (count _act) > 0 } && { (random 1) < _probMEff }) then
     {
         private _drvCls = missionNamespace getVariable ["civsub_v1_traffic_driverClass", "C_man_1"];
         if (!(_drvCls isEqualType "")) then { _drvCls = "C_man_1"; };

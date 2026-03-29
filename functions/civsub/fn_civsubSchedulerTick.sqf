@@ -74,6 +74,43 @@ private _diagEnabled = missionNamespace getVariable ["civsub_v1_scheduler_diag_e
 private _diagMap = missionNamespace getVariable ["civsub_v1_scheduler_diag", createHashMap];
 if !(_diagMap isEqualType createHashMap) then { _diagMap = createHashMap; };
 
+private _tod = dayTime;
+private _nightStart = missionNamespace getVariable ["civsub_v1_activity_night_start_h", 21];
+private _nightEnd = missionNamespace getVariable ["civsub_v1_activity_night_end_h", 5];
+private _peakAM0 = missionNamespace getVariable ["civsub_v1_activity_morning_peak_start_h", 7];
+private _peakAM1 = missionNamespace getVariable ["civsub_v1_activity_morning_peak_end_h", 9];
+private _peakPM0 = missionNamespace getVariable ["civsub_v1_activity_evening_peak_start_h", 16];
+private _peakPM1 = missionNamespace getVariable ["civsub_v1_activity_evening_peak_end_h", 18];
+if !(_nightStart isEqualType 0) then { _nightStart = 21; };
+if !(_nightEnd isEqualType 0) then { _nightEnd = 5; };
+if !(_peakAM0 isEqualType 0) then { _peakAM0 = 7; };
+if !(_peakAM1 isEqualType 0) then { _peakAM1 = 9; };
+if !(_peakPM0 isEqualType 0) then { _peakPM0 = 16; };
+if !(_peakPM1 isEqualType 0) then { _peakPM1 = 18; };
+
+private _isNight = (_tod >= _nightStart) || { _tod < _nightEnd };
+private _isPeak = ((_tod >= _peakAM0) && { _tod <= _peakAM1 }) || { ((_tod >= _peakPM0) && { _tod <= _peakPM1 }) };
+private _phase = "DAY";
+if (_isNight) then { _phase = "NIGHT"; };
+if (_isPeak) then { _phase = "PEAK"; };
+
+private _mLead = missionNamespace getVariable ["civsub_v1_activity_mul_sched_lead_day", 1.0];
+private _mAttack = missionNamespace getVariable ["civsub_v1_activity_mul_sched_attack_day", 1.0];
+if (_phase isEqualTo "NIGHT") then {
+    _mLead = missionNamespace getVariable ["civsub_v1_activity_mul_sched_lead_night", 0.85];
+    _mAttack = missionNamespace getVariable ["civsub_v1_activity_mul_sched_attack_night", 1.10];
+};
+if (_phase isEqualTo "PEAK") then {
+    _mLead = missionNamespace getVariable ["civsub_v1_activity_mul_sched_lead_peak", 1.10];
+    _mAttack = missionNamespace getVariable ["civsub_v1_activity_mul_sched_attack_peak", 0.95];
+};
+if !(_mLead isEqualType 0) then { _mLead = 1.0; };
+if !(_mAttack isEqualType 0) then { _mAttack = 1.0; };
+_mLead = (_mLead max 0.1) min 2.0;
+_mAttack = (_mAttack max 0.1) min 2.0;
+missionNamespace setVariable ["civsub_v1_activity_mul_sched_lead_active", _mLead, false];
+missionNamespace setVariable ["civsub_v1_activity_mul_sched_attack_active", _mAttack, false];
+
 private _districts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
 if !(_districts isEqualType createHashMap) exitWith {false};
 
@@ -108,6 +145,8 @@ missionNamespace setVariable ["civsub_v1_scheduler_lastTick_ts", serverTime, tru
     // Tick probabilities
     private _pLeadTick = [_pLeadHour, _schedS] call ARC_fnc_civsubProbHourToTick;
     private _pAttackTick = [_pAttackHour, _schedS] call ARC_fnc_civsubProbHourToTick;
+    _pLeadTick = (_pLeadTick * _mLead) min 1;
+    _pAttackTick = (_pAttackTick * _mAttack) min 1;
 
     // Active multiplier applies only to reactive contact probability
     private _pAttackTickEff = _pAttackTick;

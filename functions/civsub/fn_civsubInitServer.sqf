@@ -28,7 +28,7 @@ if (isNil { missionNamespace getVariable "ARC_civsub_fnc_posIsRoadish" }) then
         if (!(_pos isEqualType []) || { (count _pos) < 2 }) exitWith { true };
 
         private _p = _pos;
-        if ((count _p) == 2) then { _p = [_p # 0, _p # 1, 0]; };
+        if ((count _p) == 2) then { _p = [_p select 0, _p select 1, 0]; };
 
         _probeStep = (_probeStep max 0.6) min 2.0;
         _nearR = (_nearR max 0.15) min 1.5;
@@ -174,10 +174,10 @@ if ((missionNamespace getVariable ["civsub_v1_harm_enabled", true]) && { mission
                 if !(_reg isEqualType createHashMap) then { continue; };
 
                 {
-                    private _row = _reg getOrDefault [_x, createHashMap];
+                    private _row = [_reg, _x, createHashMap] call getOrDefault;
                     if !(_row isEqualType createHashMap) then { continue; };
 
-                    private _u = _row getOrDefault ["unit", objNull];
+                    private _u = [_row, "unit", objNull] call getOrDefault;
                     if (isNull _u) then { continue; };
                     if !(alive _u) then { continue; };
                     if !(_u getVariable ["civsub_v1_isCiv", false]) then { continue; };
@@ -205,6 +205,34 @@ if (isNil { missionNamespace getVariable "civsub_v1_civ_tick_s" }) then { missio
 if (isNil { missionNamespace getVariable "civsub_v1_civ_cap_global" }) then { missionNamespace setVariable ["civsub_v1_civ_cap_global", 24, true]; };
 if (isNil { missionNamespace getVariable "civsub_v1_civ_cap_perDistrict" }) then { missionNamespace setVariable ["civsub_v1_civ_cap_perDistrict", 8, true]; };
 if (isNil { missionNamespace getVariable "civsub_v1_civ_cap_activeDistrictsMax" }) then { missionNamespace setVariable ["civsub_v1_civ_cap_activeDistrictsMax", 3, true]; };
+
+// Ambient activity profile defaults (time-of-day shaping for traffic/civs/scheduler)
+if (isNil { missionNamespace getVariable "civsub_v1_activity_night_start_h" }) then { missionNamespace setVariable ["civsub_v1_activity_night_start_h", 21, true]; };
+if (isNil { missionNamespace getVariable "civsub_v1_activity_night_end_h" }) then { missionNamespace setVariable ["civsub_v1_activity_night_end_h", 5, true]; };
+if (isNil { missionNamespace getVariable "civsub_v1_activity_morning_peak_start_h" }) then { missionNamespace setVariable ["civsub_v1_activity_morning_peak_start_h", 7, true]; };
+if (isNil { missionNamespace getVariable "civsub_v1_activity_morning_peak_end_h" }) then { missionNamespace setVariable ["civsub_v1_activity_morning_peak_end_h", 9, true]; };
+if (isNil { missionNamespace getVariable "civsub_v1_activity_evening_peak_start_h" }) then { missionNamespace setVariable ["civsub_v1_activity_evening_peak_start_h", 16, true]; };
+if (isNil { missionNamespace getVariable "civsub_v1_activity_evening_peak_end_h" }) then { missionNamespace setVariable ["civsub_v1_activity_evening_peak_end_h", 18, true]; };
+
+if (isNil { missionNamespace getVariable "civsub_v1_activity_mul_traffic_night" }) then { missionNamespace setVariable ["civsub_v1_activity_mul_traffic_night", 0.35, true]; };
+if (isNil { missionNamespace getVariable "civsub_v1_activity_mul_traffic_peak" }) then { missionNamespace setVariable ["civsub_v1_activity_mul_traffic_peak", 1.15, true]; };
+if (isNil { missionNamespace getVariable "civsub_v1_activity_mul_traffic_day" }) then { missionNamespace setVariable ["civsub_v1_activity_mul_traffic_day", 1.00, true]; };
+
+if (isNil { missionNamespace getVariable "civsub_v1_activity_mul_civ_night" }) then { missionNamespace setVariable ["civsub_v1_activity_mul_civ_night", 0.55, true]; };
+if (isNil { missionNamespace getVariable "civsub_v1_activity_mul_civ_peak" }) then { missionNamespace setVariable ["civsub_v1_activity_mul_civ_peak", 1.10, true]; };
+if (isNil { missionNamespace getVariable "civsub_v1_activity_mul_civ_day" }) then { missionNamespace setVariable ["civsub_v1_activity_mul_civ_day", 1.00, true]; };
+
+if (isNil { missionNamespace getVariable "civsub_v1_activity_mul_moving_night" }) then { missionNamespace setVariable ["civsub_v1_activity_mul_moving_night", 0.60, true]; };
+if (isNil { missionNamespace getVariable "civsub_v1_activity_mul_moving_peak" }) then { missionNamespace setVariable ["civsub_v1_activity_mul_moving_peak", 1.20, true]; };
+if (isNil { missionNamespace getVariable "civsub_v1_activity_mul_moving_day" }) then { missionNamespace setVariable ["civsub_v1_activity_mul_moving_day", 1.00, true]; };
+
+if (isNil { missionNamespace getVariable "civsub_v1_activity_mul_sched_lead_night" }) then { missionNamespace setVariable ["civsub_v1_activity_mul_sched_lead_night", 0.85, true]; };
+if (isNil { missionNamespace getVariable "civsub_v1_activity_mul_sched_lead_peak" }) then { missionNamespace setVariable ["civsub_v1_activity_mul_sched_lead_peak", 1.10, true]; };
+if (isNil { missionNamespace getVariable "civsub_v1_activity_mul_sched_lead_day" }) then { missionNamespace setVariable ["civsub_v1_activity_mul_sched_lead_day", 1.00, true]; };
+
+if (isNil { missionNamespace getVariable "civsub_v1_activity_mul_sched_attack_night" }) then { missionNamespace setVariable ["civsub_v1_activity_mul_sched_attack_night", 1.10, true]; };
+if (isNil { missionNamespace getVariable "civsub_v1_activity_mul_sched_attack_peak" }) then { missionNamespace setVariable ["civsub_v1_activity_mul_sched_attack_peak", 0.95, true]; };
+if (isNil { missionNamespace getVariable "civsub_v1_activity_mul_sched_attack_day" }) then { missionNamespace setVariable ["civsub_v1_activity_mul_sched_attack_day", 1.00, true]; };
 
 // Register optional editor-placed CIVSUB test civilians (after identity init and before runtime ticks rely on registry).
 [] call ARC_fnc_civsubRegisterEditorCivs;
