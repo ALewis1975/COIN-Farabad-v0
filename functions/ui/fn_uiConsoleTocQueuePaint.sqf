@@ -138,6 +138,7 @@ if (_selectedId isNotEqualTo "") then
         if ((_lb lbData _i) isEqualTo _selectedId) exitWith { _sel = _i; };
     };
 };
+// Guard: lbSetCurSel fires onSelChanged synchronously; flag prevents re-entrant paint cycle.
 uiNamespace setVariable ["ARC_console_cmdQueuePainting", true];
 _lb lbSetCurSel _sel;
 uiNamespace setVariable ["ARC_console_cmdQueuePainting", false];
