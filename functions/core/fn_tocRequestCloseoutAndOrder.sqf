@@ -539,21 +539,21 @@ if (_incTypeU isEqualTo "IED") then
 };
 
 private _seed = [];
-if (trim !(_rationale isEqualTo "")) then { _seed pushBack ["rationale", [_rationale] call _trimFn]; };
-if (trim !(_constraints isEqualTo "")) then { _seed pushBack ["constraints", [_constraints] call _trimFn]; };
-if (trim !(_support isEqualTo "")) then { _seed pushBack ["support", [_support] call _trimFn]; };
+if (!(([_rationale] call _trimFn) isEqualTo "")) then { _seed pushBack ["rationale", [_rationale] call _trimFn]; };
+if (!(([_constraints] call _trimFn) isEqualTo "")) then { _seed pushBack ["constraints", [_constraints] call _trimFn]; };
+if (!(([_support] call _trimFn) isEqualTo "")) then { _seed pushBack ["support", [_support] call _trimFn]; };
 
 if (_orderType isEqualTo "RTB") then { _seed pushBack ["purpose", _purpose]; };
 
 if (_orderType isEqualTo "HOLD") then
 {
-    if (trim !(_holdIntent isEqualTo "")) then { _seed pushBack ["holdIntent", [_holdIntent] call _trimFn]; };
+    if (!(([_holdIntent] call _trimFn) isEqualTo "")) then { _seed pushBack ["holdIntent", [_holdIntent] call _trimFn]; };
     if (_holdMinutes isEqualType 0 && { _holdMinutes > 0 }) then { _seed pushBack ["holdMinutes", _holdMinutes]; };
 };
 
 if (_orderType isEqualTo "LEAD") then
 {
-    if (trim !(_proceedIntent isEqualTo "")) then { _seed pushBack ["proceedIntent", [_proceedIntent] call _trimFn]; };
+    if (!(([_proceedIntent] call _trimFn) isEqualTo "")) then { _seed pushBack ["proceedIntent", [_proceedIntent] call _trimFn]; };
 
     // Prefer system-suggested follow-on lead, otherwise the closeout-generated lead.
     if (!(_foLeadIdCaptured isEqualTo "")) then

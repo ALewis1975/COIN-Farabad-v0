@@ -185,8 +185,8 @@ if (!(_lastG isEqualTo "")) then
 
         if (!(_tgtGroup isEqualType "") || { _tgtGroup isEqualTo "" }) then { continue; };
         if (!(_tgtGroup isEqualTo _lastG)) then { continue; };
-        if (toUpper !(_orderType isEqualTo "HOLD")) then { continue; };
-        if (toUpper !(_status isEqualTo "ACCEPTED")) then { continue; };
+        if (!((toUpper _orderType) isEqualTo "HOLD")) then { continue; };
+        if (!((toUpper _status) isEqualTo "ACCEPTED")) then { continue; };
 
         // Mark the associated task as succeeded (orderId is the taskId used in fn_intelOrderAccept).
         private _tid = _orderId;

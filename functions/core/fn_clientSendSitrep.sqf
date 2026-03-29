@@ -168,7 +168,7 @@ _detLines pushBack format ["FRIENDLY: %1", if ([_friendly] call _trimFn isEqualT
 _detLines pushBack format ["TASK: %1", if ([_task] call _trimFn isEqualTo "") then {"N/A"} else {[_task] call _trimFn}];
 _detLines pushBack format ["ACE: AMMO=%1 | CAS=%2 | EQUIP=%3", _aceAmmo, _aceCas, _aceEq];
 _detLines pushBack format ["REQUESTS: %1", if ([_req] call _trimFn isEqualTo "") then {"N/A"} else {[_req] call _trimFn}];
-if (trim !(_notes isEqualTo "")) then { _detLines pushBack format ["NOTES: %1", [_notes] call _trimFn]; };
+if (!(([_notes] call _trimFn) isEqualTo "")) then { _detLines pushBack format ["NOTES: %1", [_notes] call _trimFn]; };
 
 private _det = _detLines joinString "\n";
 

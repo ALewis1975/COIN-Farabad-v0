@@ -12,7 +12,7 @@ if (!isServer) exitWith {false};
 private _log = ["intelLog", []] call ARC_fnc_stateGet;
 if (!(_log isEqualType [])) then { _log = []; };
 
-private _intel = _log select { _x isEqualType [] && { (count _x) >= 3 } && { toUpper !((_x select 2) isEqualTo "OPS") } };
+private _intel = _log select { _x isEqualType [] && { (count _x) >= 3 } && { !((toUpper (_x select 2)) isEqualTo "OPS") } };
 private _ops   = _log select { _x isEqualType [] && { (count _x) >= 3 } && { toUpper (_x select 2) isEqualTo "OPS" } };
 
 private _iCount = count _intel;

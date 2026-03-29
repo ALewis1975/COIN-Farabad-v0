@@ -124,28 +124,28 @@ _lines pushBack format ["REQUEST: %1 (%2)", _request, _purposeDisp];
 
 if (_request isEqualTo "HOLD") then
 {
-    if (trim !(_holdIntent isEqualTo "")) then { _lines pushBack format ["HOLD INTENT: %1", [_holdIntent] call _trimFn]; };
+    if (!(([_holdIntent] call _trimFn) isEqualTo "")) then { _lines pushBack format ["HOLD INTENT: %1", [_holdIntent] call _trimFn]; };
     if (_holdMinutes > 0) then { _lines pushBack format ["HOLD DURATION: %1 min", _holdMinutes]; };
 };
 
 if (_request isEqualTo "PROCEED") then
 {
-    if (trim !(_proceedIntent isEqualTo "")) then { _lines pushBack format ["PROCEED INTENT: %1", [_proceedIntent] call _trimFn]; };
+    if (!(([_proceedIntent] call _trimFn) isEqualTo "")) then { _lines pushBack format ["PROCEED INTENT: %1", [_proceedIntent] call _trimFn]; };
 };
 
-if (trim !(_rationale isEqualTo "")) then { _lines pushBack format ["RATIONALE: %1", [_rationale] call _trimFn]; };
-if (trim !(_constraints isEqualTo "")) then { _lines pushBack format ["CONSTRAINTS: %1", [_constraints] call _trimFn]; };
-if (trim !(_support isEqualTo "")) then { _lines pushBack format ["SUPPORT: %1", [_support] call _trimFn]; };
-if (trim !(_notes isEqualTo "")) then { _lines pushBack format ["NOTES: %1", [_notes] call _trimFn]; };
+if (!(([_rationale] call _trimFn) isEqualTo "")) then { _lines pushBack format ["RATIONALE: %1", [_rationale] call _trimFn]; };
+if (!(([_constraints] call _trimFn) isEqualTo "")) then { _lines pushBack format ["CONSTRAINTS: %1", [_constraints] call _trimFn]; };
+if (!(([_support] call _trimFn) isEqualTo "")) then { _lines pushBack format ["SUPPORT: %1", [_support] call _trimFn]; };
+if (!(([_notes] call _trimFn) isEqualTo "")) then { _lines pushBack format ["NOTES: %1", [_notes] call _trimFn]; };
 
 private _details = _lines joinString "\n";
 
 // Short note to carry into issued order meta
 private _noteLines = [];
-if (trim !(_rationale isEqualTo "")) then { _noteLines pushBack format ["Rationale: %1", [_rationale] call _trimFn]; };
-if (trim !(_constraints isEqualTo "")) then { _noteLines pushBack format ["Constraints: %1", [_constraints] call _trimFn]; };
-if (trim !(_support isEqualTo "")) then { _noteLines pushBack format ["Support: %1", [_support] call _trimFn]; };
-if (trim !(_notes isEqualTo "")) then { _noteLines pushBack format ["Notes: %1", [_notes] call _trimFn]; };
+if (!(([_rationale] call _trimFn) isEqualTo "")) then { _noteLines pushBack format ["Rationale: %1", [_rationale] call _trimFn]; };
+if (!(([_constraints] call _trimFn) isEqualTo "")) then { _noteLines pushBack format ["Constraints: %1", [_constraints] call _trimFn]; };
+if (!(([_support] call _trimFn) isEqualTo "")) then { _noteLines pushBack format ["Support: %1", [_support] call _trimFn]; };
+if (!(([_notes] call _trimFn) isEqualTo "")) then { _noteLines pushBack format ["Notes: %1", [_notes] call _trimFn]; };
 private _noteForOrder = _noteLines joinString " | ";
 
 private _payload =

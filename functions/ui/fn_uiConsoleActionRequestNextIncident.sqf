@@ -70,8 +70,8 @@ private _trimFn  = compile "params ['_s']; trim _s";
                 _found = true;
                 uiNamespace setVariable ["ARC_console_lastNextIncidentResult", _res];
 
-                private _msg = if (_detail isEqualType "" && { trim !(_detail isEqualTo "") }) then { [_detail] call _trimFn } else { "Server returned no detail." };
-                private _hdr = if (_title isEqualType "" && { trim !(_title isEqualTo "") }) then { [_title] call _trimFn } else { "TOC" };
+                private _msg = if (_detail isEqualType "" && { !(([_detail] call _trimFn) isEqualTo "") }) then { [_detail] call _trimFn } else { "Server returned no detail." };
+                private _hdr = if (_title isEqualType "" && { !(([_title] call _trimFn) isEqualTo "") }) then { [_title] call _trimFn } else { "TOC" };
 
                 if (_allowed isEqualType true && { _allowed }) then
                 {

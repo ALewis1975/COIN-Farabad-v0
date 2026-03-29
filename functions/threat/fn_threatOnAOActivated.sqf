@@ -14,7 +14,7 @@ params [
     ["_ctx", []]
 ];
 
-if (toUpper !(_event isEqualTo "AO_ACTIVATED")) exitWith {false};
+if (!((toUpper _event) isEqualTo "AO_ACTIVATED")) exitWith {false};
 
 private _enabled = ["threat_v0_enabled", true] call ARC_fnc_stateGet;
 if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabled = true; };

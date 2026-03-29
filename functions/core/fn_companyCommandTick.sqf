@@ -89,7 +89,7 @@ private _updated = [];
         _posture = "INDEPENDENT_SECURITY";
     };
 
-    private _changed = (toUpper !((_n select 6) isEqualTo _intent)) || { toUpper !((_n select 7) isEqualTo _posture) };
+    private _changed = !((toUpper (_n select 6)) isEqualTo _intent) || { !((toUpper (_n select 7)) isEqualTo _posture) };
 
     _n set [6, _intent];
     _n set [7, _posture];
