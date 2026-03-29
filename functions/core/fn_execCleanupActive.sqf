@@ -61,7 +61,7 @@ private _deleteVehicleWithCrew = {
 
 // --- Objective object/NPC -----------------------------------------------------
 private _nid = ["activeObjectiveNetId", ""] call ARC_fnc_stateGet;
-if (_nid isNotEqualTo "") then
+if (!(_nid isEqualTo "")) then
 {
     private _obj = objectFromNetId _nid;
     if (!isNull _obj) then
@@ -76,13 +76,13 @@ if (_nid isNotEqualTo "") then
         private _kind = ["activeObjectiveKind", ""] call ARC_fnc_stateGet;
 
         if (
-            (_taskId isNotEqualTo "")
+            (!(_taskId isEqualTo ""))
             && { (_kind isEqualTo "IED_DEVICE") || { _kind isEqualTo "VBIED_VEHICLE" } }
             && { !isNil "ARC_fnc_threatGetCleanupLabelForTask" }
         ) then
         {
             private _tl = [_taskId] call ARC_fnc_threatGetCleanupLabelForTask;
-            if (_tl isNotEqualTo "") then { _label = _tl; };
+            if (!(_tl isEqualTo "")) then { _label = _tl; };
         };
 
         [_obj, _anchor, _radius, _minDelay, _label] call ARC_fnc_cleanupRegister;
@@ -111,7 +111,7 @@ missionNamespace setVariable ["ARC_activeIedTriggerDeviceId", ""];
 
 // --- IED Phase 2 evidence cleanup -------------------------------------------
 private _evNid = ["activeIedEvidenceNetId", ""] call ARC_fnc_stateGet;
-if (_evNid isEqualType "" && { _evNid isNotEqualTo "" }) then
+if (_evNid isEqualType "" && { !(_evNid isEqualTo "") }) then
 {
     private _ev = objectFromNetId _evNid;
     if (!isNull _ev) then { deleteVehicle _ev; };
@@ -127,7 +127,7 @@ if (_evNid isEqualType "" && { _evNid isNotEqualTo "" }) then
 
 // --- IED Phase 3 (VBIED v1) cleanup ----------------------------------------
 private _vTrgNid = ["activeVbiedTriggerNetId", ""] call ARC_fnc_stateGet;
-if (_vTrgNid isEqualType "" && { _vTrgNid isNotEqualTo "" }) then
+if (_vTrgNid isEqualType "" && { !(_vTrgNid isEqualTo "") }) then
 {
     private _vt = objectFromNetId _vTrgNid;
     if (!isNull _vt) then { deleteVehicle _vt; };

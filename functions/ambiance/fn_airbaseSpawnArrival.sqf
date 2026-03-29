@@ -31,7 +31,7 @@ private _asset = createHashMap;
 private _isReturn = false;
 private _vehType = "";
 
-if (_detail isNotEqualTo "INBOUND") then {
+if (!(_detail isEqualTo "INBOUND")) then {
     private _aIdx = -1;
     { if ((_x getOrDefault ["id",""]) isEqualTo _detail) exitWith { _aIdx = _forEachIndex; }; } forEach _assets;
     if (_aIdx >= 0) then {

@@ -44,7 +44,7 @@ if (_meta isEqualType [] && { (count _meta) > 0 }) then
     missionNamespace setVariable ["ARC_uiFocusTaskKind", _kind];
 
     private _title = [_meta, "title", ""] call _kvGet;
-    if (_title isEqualType "" && { _title isNotEqualTo "" }) then
+    if (_title isEqualType "" && { !(_title isEqualTo "") }) then
     {
         missionNamespace setVariable ["ARC_uiFocusTaskTitle", _title];
     };

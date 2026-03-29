@@ -80,9 +80,9 @@ private _findAcceptedRtb = {
     {
         if (!(_x isEqualType [] && { (count _x) >= 7 })) then { continue; };
         _x params ["_orderId", "_issuedAt", "_status", "_orderType", "_targetGroup", "_data", "_meta"]; 
-        if ((toUpper _status) isNotEqualTo "ACCEPTED") then { continue; };
-        if ((toUpper _orderType) isNotEqualTo "RTB") then { continue; };
-        if (_targetGroup isNotEqualTo _focusGid) then { continue; };
+        if (!((toUpper _status) isEqualTo "ACCEPTED")) then { continue; };
+        if (!((toUpper _orderType) isEqualTo "RTB")) then { continue; };
+        if (!(_targetGroup isEqualTo _focusGid)) then { continue; };
         private _p = toUpper ([_data, "purpose", "REFIT"] call _getPair);
         if (_p isEqualTo _purposeU) exitWith { _out = _x; };
     } forEach _orders;
@@ -172,7 +172,7 @@ private _hdr = format [
     _roleTag
 ];
 
-if (_isToc && { _focusGid isNotEqualTo _gidSelf }) then
+if (_isToc && { !(_focusGid isEqualTo _gidSelf) }) then
 {
     private _selfLbl = if (_gidSelf isEqualTo "") then {"(no callsign)"} else {_gidSelf};
     _hdr = _hdr + format ["<br/><t size='0.85' color='#CCCCCC'>Focus: Active incident group (you are %1)</t>", _selfLbl];
@@ -185,14 +185,14 @@ private _epwOrd   = ["EPW"] call _findAcceptedRtb;
 // Cache selected orders for the ACTION / ALT handlers (deterministic console buttons)
 private _intelId = "";
 private _intelTg = "";
-if (_intelOrd isNotEqualTo []) then {
+if (!(_intelOrd isEqualTo [])) then {
     _intelId = _intelOrd # 0;
     _intelTg = _intelOrd # 4;
 };
 
 private _epwId = "";
 private _epwTg = "";
-if (_epwOrd isNotEqualTo []) then {
+if (!(_epwOrd isEqualTo [])) then {
     _epwId = _epwOrd # 0;
     _epwTg = _epwOrd # 4;
 };
@@ -202,8 +202,8 @@ uiNamespace setVariable ["ARC_console_handoff_intelTargetGroup", _intelTg];
 uiNamespace setVariable ["ARC_console_handoff_epwOrderId", _epwId];
 uiNamespace setVariable ["ARC_console_handoff_epwTargetGroup", _epwTg];
 
-private _intelAccepted = (_intelOrd isNotEqualTo []);
-private _epwAccepted = (_epwOrd isNotEqualTo []);
+private _intelAccepted = (!(_intelOrd isEqualTo []));
+private _epwAccepted = (!(_epwOrd isEqualTo []));
 
 private _intelArr = [_intelOrd, "INTEL"] call _isArrived;
 private _epwArr   = [_epwOrd, "EPW"] call _isArrived;

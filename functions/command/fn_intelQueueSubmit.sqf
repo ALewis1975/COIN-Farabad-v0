@@ -194,7 +194,7 @@ if (_kind isEqualTo "EOD_DISPO_REQUEST") then
     _reqType = toUpper (trim _reqType);
     if !(_reqType in ["DET_IN_PLACE","RTB_IED","TOW_VBIED"]) then { _reqType = "DET_IN_PLACE"; };
 
-    if (_taskId isEqualTo "" || { _reqTask isEqualTo "" } || { _reqTask isNotEqualTo _taskId } || { _typ isNotEqualTo "IED" }) exitWith
+    if (_taskId isEqualTo "" || { _reqTask isEqualTo "" } || { !(_reqTask isEqualTo _taskId) } || { !(_typ isEqualTo "IED") }) exitWith
     {
         if (!isNull _requestor) then
         {

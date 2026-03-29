@@ -92,16 +92,16 @@ private _forceTag = if (_closeReady) then { "" } else { "<t color='#FFB0B0'>(FOR
 private _body = "";
 _body = _body + format ["<t size='1.1' font='PuristaMedium'>%1Closeout</t><br/>", _forceTag];
 _body = _body + format ["<t size='0.95' color='#DDDDDD'>%1 (%2)</t><br/>", _disp, if (_typeU isEqualTo "") then {"UNKNOWN"} else {_typeU}];
-if (_grid isNotEqualTo "") then { _body = _body + format ["<t size='0.9' color='#CCCCCC'>Grid: %1</t><br/>", _grid]; };
+if (!(_grid isEqualTo "")) then { _body = _body + format ["<t size='0.9' color='#CCCCCC'>Grid: %1</t><br/>", _grid]; };
 
 _body = _body + "<br/>";
 _body = _body + format ["<t size='0.9'>Close-ready: %1</t><br/>", if (_closeReady) then {"YES"} else {"NO"}];
-if (_suggestU isNotEqualTo "") then { _body = _body + format ["<t size='0.9'>Suggested: %1</t><br/>", _suggestU]; };
-if (_reasonU isNotEqualTo "") then { _body = _body + format ["<t size='0.9'>Reason: %1</t><br/>", _reasonU]; };
+if (!(_suggestU isEqualTo "")) then { _body = _body + format ["<t size='0.9'>Suggested: %1</t><br/>", _suggestU]; };
+if (!(_reasonU isEqualTo "")) then { _body = _body + format ["<t size='0.9'>Reason: %1</t><br/>", _reasonU]; };
 
 _body = _body + "<br/>";
 _body = _body + format ["<t size='0.9'>SITREP: %1</t><br/>", if (_sitrepSent) then {"SENT"} else {"PENDING"}];
-if (_sitrepSent && { _sitrepSum isNotEqualTo "" }) then
+if (_sitrepSent && { !(_sitrepSum isEqualTo "") }) then
 {
     _body = _body + format ["<t size='0.85' color='#CCCCCC'>From: %1</t><br/>", if (_sitrepFrom isEqualTo "") then {"(unknown)"} else {_sitrepFrom}];
     _body = _body + format ["<t size='0.85' color='#CCCCCC'>%1</t><br/>", _sitrepSum];
@@ -186,12 +186,12 @@ private _fProceedIntent = toUpper (trim ([_foArr, "proceedIntent", ""] call _get
 
 if (_fReq in ["RTB","HOLD","PROCEED"]) then { _dReq = _fReq; };
 if (_fPurpose in ["REFIT","INTEL","EPW"]) then { _dPurpose = _fPurpose; };
-if (_fHoldIntent isNotEqualTo "") then { _dHoldIntent = _fHoldIntent; };
+if (!(_fHoldIntent isEqualTo "")) then { _dHoldIntent = _fHoldIntent; };
 if (_fHoldMin isEqualType 0 && { _fHoldMin > 0 }) then { _dHoldMin = _fHoldMin; };
-if (_fProceedIntent isNotEqualTo "") then { _dProceedIntent = _fProceedIntent; };
+if (!(_fProceedIntent isEqualTo "")) then { _dProceedIntent = _fProceedIntent; };
 
 // If a system follow-on lead exists (IED detonation response, etc.), bias toward PROCEED.
-if (_sysLeadId isNotEqualTo "") then { _dReq = "PROCEED"; };
+if (!(_sysLeadId isEqualTo "")) then { _dReq = "PROCEED"; };
 
 // Custom header for TOC issue flow
 private _hdr = format [
@@ -199,10 +199,10 @@ private _hdr = format [
     _tgtGrp,
     _disp
 ];
-if (_grid isNotEqualTo "") then { _hdr = _hdr + format ["<br/><t size='0.85' color='#AAAAAA'>Last known grid: %1</t>", _grid]; };
-if (_sitrepSent && { _sitrepSum isNotEqualTo "" }) then { _hdr = _hdr + format ["<br/><t size='0.85' color='#AAAAAA'>SITREP: %1</t>", _sitrepSum]; };
-if (_foSummary isNotEqualTo "") then { _hdr = _hdr + format ["<br/><t size='0.85' color='#AAAAAA'>Field follow-on request: %1</t>", _foSummary]; };
-if (_sysLeadName isNotEqualTo "") then { _hdr = _hdr + format ["<br/><t size='0.85' color='#AAAAAA'>System follow-on lead queued: %1</t>", _sysLeadName]; };
+if (!(_grid isEqualTo "")) then { _hdr = _hdr + format ["<br/><t size='0.85' color='#AAAAAA'>Last known grid: %1</t>", _grid]; };
+if (_sitrepSent && { !(_sitrepSum isEqualTo "") }) then { _hdr = _hdr + format ["<br/><t size='0.85' color='#AAAAAA'>SITREP: %1</t>", _sitrepSum]; };
+if (!(_foSummary isEqualTo "")) then { _hdr = _hdr + format ["<br/><t size='0.85' color='#AAAAAA'>Field follow-on request: %1</t>", _foSummary]; };
+if (!(_sysLeadName isEqualTo "")) then { _hdr = _hdr + format ["<br/><t size='0.85' color='#AAAAAA'>System follow-on lead queued: %1</t>", _sysLeadName]; };
 
 uiNamespace setVariable ["ARC_followOn_title", "ISSUE FOLLOW-ON ORDER"]; 
 uiNamespace setVariable ["ARC_followOn_headerOverride", _hdr];

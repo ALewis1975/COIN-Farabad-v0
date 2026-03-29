@@ -176,7 +176,7 @@ private _meta = [
 ];
 
 private _summary = format ["%1: %2 %3→%4", _event, _threatId, _stateFromU, _stateToU];
-if ((trim _note) isNotEqualTo "") then
+if (!((trim _note) isEqualTo "")) then
 {
     _summary = _summary + format [" (%1)", trim _note];
 };
@@ -184,7 +184,7 @@ if ((trim _note) isNotEqualTo "") then
 private _intelId = ["OPS", _summary, _pos, _meta] call ARC_fnc_intelLog;
 
 // Attach log ref (best-effort)
-if (_intelId isNotEqualTo "") then
+if (!(_intelId isEqualTo "")) then
 {
     private _audit = [_rec, "audit", []] call _kvGet;
     private _refs = [_audit, "log_refs", []] call _kvGet;

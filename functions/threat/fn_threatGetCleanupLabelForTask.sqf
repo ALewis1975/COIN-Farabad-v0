@@ -75,7 +75,7 @@ if (_label isEqualTo "") then
 else
 {
     // Normalize if needed
-    if (_label isNotEqualTo _want) then
+    if (!(_label isEqualTo _want)) then
     {
         _label = _want;
         _world = [_world, "cleanup_label", _label] call _kvSet;

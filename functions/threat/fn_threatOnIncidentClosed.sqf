@@ -12,7 +12,7 @@ params [
     ["_ctx", []]
 ];
 
-if (toUpper _event isNotEqualTo "INCIDENT_CLOSED") exitWith {false};
+if (toUpper !(_event isEqualTo "INCIDENT_CLOSED")) exitWith {false};
 
 private _enabled = ["threat_v0_enabled", true] call ARC_fnc_stateGet;
 if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabled = true; };
@@ -54,7 +54,7 @@ if (!(_records isEqualType [])) exitWith {true};
 
 // Shared note string for this closure event.
 private _noteStr = format ["INCIDENT_CLOSED:%1", _resultU];
-if ((trim _reason) isNotEqualTo "") then
+if (!((trim _reason) isEqualTo "")) then
 {
     _noteStr = _noteStr + format [" (%1)", trim _reason];
 };

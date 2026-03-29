@@ -48,7 +48,7 @@ if (_taskId isEqualTo "") exitWith {""};
 
 private _incType = ["activeIncidentType", ""] call ARC_fnc_stateGet;
 if (!(_incType isEqualType "")) then { _incType = ""; };
-if ((toUpper _incType) isNotEqualTo "IED") exitWith {""};
+if (!((toUpper _incType) isEqualTo "IED")) exitWith {""};
 
 private _objKindU = toUpper (trim _objKind);
 if (!(_objKindU in ["IED_DEVICE", "VBIED_VEHICLE", "SUICIDE_VEST", "UNKNOWN"])) then { _objKindU = "UNKNOWN"; };
@@ -56,7 +56,7 @@ if (!(_objKindU in ["IED_DEVICE", "VBIED_VEHICLE", "SUICIDE_VEST", "UNKNOWN"])) 
 // Idempotence: only queue one follow-on lead per active incident.
 private _existingLeadId = ["activeIedDetonationResponseLeadId", ""] call ARC_fnc_stateGet;
 if (!(_existingLeadId isEqualType "")) then { _existingLeadId = ""; };
-if (_existingLeadId isNotEqualTo "") exitWith {_existingLeadId};
+if (!(_existingLeadId isEqualTo "")) exitWith {_existingLeadId};
 
 // Helper: pull values from an array of [k,v] pairs.
 private _getP = {

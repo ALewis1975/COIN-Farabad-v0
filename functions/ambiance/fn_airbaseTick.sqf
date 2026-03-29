@@ -42,7 +42,7 @@ _rt set ["bubbleActive", _bubbleActive];
 missionNamespace setVariable ["airbase_v1_bubble_active", _bubbleActive, true];
 
 // Toggle simulation for parked assets when bubble changes
-if (_bubbleActive isNotEqualTo _wasActive) then {
+if (!(_bubbleActive isEqualTo _wasActive)) then {
     private _assetsT = [_rt, "assets", []] call _fnHmGet;
     {
         private _state = [_x, "state", "PARKED"] call _fnHmGet;
@@ -758,7 +758,7 @@ for "_i" from 0 to (_nSig - 1) do {
 private _queueSig = format ["%1|%2|%3|%4", (count _queue), _qDepNow, _qArrNow, (_sigParts joinString ";")];
 private _lastSig = [_rt, "queueSig", ""] call _fnHmGet;
 
-if (_queueSig isNotEqualTo _lastSig) then {
+if (!(_queueSig isEqualTo _lastSig)) then {
     _rt set ["queueSig", _queueSig];
     missionNamespace setVariable ["airbase_v1_rt", _rt, true];
 
@@ -998,7 +998,7 @@ for "_i" from 0 to ((count _queue) - 1) do {
     };
 };
 
-if ((_opsLogEnabled || _debugOps) && { _policyReason isNotEqualTo "NO_ELIGIBLE" }) then {
+if ((_opsLogEnabled || _debugOps) && { !(_policyReason isEqualTo "NO_ELIGIBLE") }) then {
     private _picked = _queue # _policyIdx;
     _picked params ["_pfid", "_pk", "_pd", ["_prouteMeta", []]];
     if !(_prouteMeta isEqualType []) then { _prouteMeta = []; };

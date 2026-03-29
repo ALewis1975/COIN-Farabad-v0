@@ -79,7 +79,7 @@ if (_idx < 0) exitWith {false};
 private _rec = _requests # _idx;
 private _requesterUid = _rec param [2, ""];
 private _requesterOwner = -1;
-if (_requesterUid isNotEqualTo "") then {
+if (!(_requesterUid isEqualTo "")) then {
     {
         if ((getPlayerUID _x) isEqualTo _requesterUid) exitWith { _requesterOwner = owner _x; };
     } forEach allPlayers;
@@ -133,7 +133,7 @@ if (_approve) then {
     if (!(_runwayState isEqualType "")) then { _runwayState = "OPEN"; };
     private _runwayOwner = missionNamespace getVariable ["airbase_v1_runwayOwner", ""];
     if (!(_runwayOwner isEqualType "")) then { _runwayOwner = ""; };
-    if (_runwayState in ["RESERVED", "OCCUPIED"] && { _runwayOwner isNotEqualTo "" }) exitWith {
+    if (_runwayState in ["RESERVED", "OCCUPIED"] && { !(_runwayOwner isEqualTo "") }) exitWith {
         private _owner = owner _caller;
         if (_owner > 0) then { [format ["Decision rejected: runway locked (%1 by %2).", _runwayState, _runwayOwner]] remoteExec ["ARC_fnc_clientHint", _owner]; };
         false

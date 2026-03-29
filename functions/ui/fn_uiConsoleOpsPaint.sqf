@@ -333,7 +333,7 @@ else
                     _primaryEnabled = false;
                     _details = _details + "SITREP already submitted. Await TOC follow-on / closeout guidance.";
 
-                    if (_sitrepDetails isNotEqualTo "") then
+                    if (!(_sitrepDetails isEqualTo "")) then
                     {
                         private _sitHtml = (_sitrepDetails splitString "\n") joinString "<br/>";
                         _details = _details + "<br/><br/><t size='1.0' font='PuristaMedium'>Last SITREP (full)</t><br/>" +

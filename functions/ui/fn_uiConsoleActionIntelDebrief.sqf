@@ -79,10 +79,10 @@ else
             _x params ["_oid", "_iat", "_st", "_ot", "_tg", "_data", "_meta"];
             if (_oid isEqualTo _orderId) exitWith
             {
-                if ((toUpper _st) isNotEqualTo "ACCEPTED") exitWith {};
-                if ((toUpper _ot) isNotEqualTo "RTB") exitWith {};
+                if (!((toUpper _st) isEqualTo "ACCEPTED")) exitWith {};
+                if (!((toUpper _ot) isEqualTo "RTB")) exitWith {};
                 private _purpose = toUpper ([_data, "purpose", "REFIT"] call _getPair);
-                if (_purpose isNotEqualTo "INTEL") exitWith {};
+                if (!(_purpose isEqualTo "INTEL")) exitWith {};
                 _hasAccepted = true;
                 _orderTg = _tg;
                 _destPos = [_data, "destPos", []] call _getPair;
@@ -108,7 +108,7 @@ if (_destPos isEqualType [] && { (count _destPos) >= 2 }) then {
 
 // If the order belongs to another group, console override must be true
 private _force = !_near;
-if (_isToc && { _orderTg isNotEqualTo "" } && { _orderTg isNotEqualTo _gidSelf }) then {
+if (_isToc && { !(_orderTg isEqualTo "") } && { !(_orderTg isEqualTo _gidSelf) }) then {
     _force = true;
 };
 

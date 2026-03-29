@@ -34,7 +34,7 @@ private _resolveMarker = {
 
     if ((markerShape _chosen) isEqualTo "") then {
         {
-            if (_x isEqualType "" && { _x isNotEqualTo "" } && { (markerShape _x) isNotEqualTo "" }) exitWith {
+            if (_x isEqualType "" && { !(_x isEqualTo "") } && { !((markerShape _x) isEqualTo "") }) exitWith {
                 _chosen = _x;
             };
         } forEach _fallbacks;
@@ -73,7 +73,7 @@ if (_opKind isEqualTo "DEP") then {
 
 private _connectors = missionNamespace getVariable ["airbase_v1_taxi_center_connectors", ["mkr_airbaseCenter"]];
 if !(_connectors isEqualType []) then { _connectors = ["mkr_airbaseCenter"]; };
-private _connectorValid = _connectors select { (_x isEqualType "") && { _x isNotEqualTo "" } && { (markerShape _x) isNotEqualTo "" } };
+private _connectorValid = _connectors select { (_x isEqualType "") && { !(_x isEqualTo "") } && { !((markerShape _x) isEqualTo "") } };
 if ((count _connectorValid) == 0) then {
     private _fallbackCenter = ["mkr_airbaseCenter", ["mkr_airbaseCenter"], "mkr_airbaseCenter"] call _resolveMarker;
     _connectorValid = [_fallbackCenter];
@@ -85,7 +85,7 @@ private _pathMarkers = if (_opKind isEqualTo "DEP") then {
     [_runwayMarker, _egressMarker, _connectorValid # 0, _ingressMarker]
 };
 
-private _missing = _pathMarkers select { (_x isEqualType "") && { _x isNotEqualTo "" } && { (markerShape _x) isEqualTo "" } };
+private _missing = _pathMarkers select { (_x isEqualType "") && { !(_x isEqualTo "") } && { (markerShape _x) isEqualTo "" } };
 if ((count _missing) > 0) exitWith {
     [false, [["routeMissingMarkers", _missing]], "MISSING_ROUTE_MARKERS"]
 };

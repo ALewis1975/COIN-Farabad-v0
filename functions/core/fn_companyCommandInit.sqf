@@ -30,13 +30,13 @@ private _resolveAnchor = {
     {
         if !(_x isEqualType "") then { continue; };
         private _m = [_x] call ARC_fnc_worldResolveMarker;
-        if (_m isEqualType "" && { _m isNotEqualTo "" } && { _m in allMapMarkers }) exitWith { _resolved = _m; };
+        if (_m isEqualType "" && { !(_m isEqualTo "") } && { _m in allMapMarkers }) exitWith { _resolved = _m; };
     } forEach _markerCandidates;
 
     if (_resolved isEqualTo "") then
     {
         private _fb = [_fallbackMarker] call ARC_fnc_worldResolveMarker;
-        if (_fb isEqualType "" && { _fb isNotEqualTo "" } && { _fb in allMapMarkers }) then
+        if (_fb isEqualType "" && { !(_fb isEqualTo "") } && { _fb in allMapMarkers }) then
         {
             _resolved = _fb;
         };
@@ -46,7 +46,7 @@ private _resolveAnchor = {
     if (!(_pos isEqualType [])) then { _pos = [0,0,0]; };
     if ((count _pos) < 3) then { _pos resize 3; };
 
-    if (_resolved isNotEqualTo "") then
+    if (!(_resolved isEqualTo "")) then
     {
         _pos = markerPos _resolved;
         if ((count _pos) < 3) then { _pos resize 3; };
@@ -57,7 +57,7 @@ private _resolveAnchor = {
 };
 
 private _airbaseMarker = ["mkr_airbaseCenter"] call ARC_fnc_worldResolveMarker;
-private _airbasePos = if (_airbaseMarker isNotEqualTo "" && { _airbaseMarker in allMapMarkers }) then { markerPos _airbaseMarker } else { [0,0,0] };
+private _airbasePos = if (!(_airbaseMarker isEqualTo "") && { _airbaseMarker in allMapMarkers }) then { markerPos _airbaseMarker } else { [0,0,0] };
 if ((count _airbasePos) < 3) then { _airbasePos resize 3; };
 
 private _alphaCandidates = missionNamespace getVariable [

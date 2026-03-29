@@ -60,7 +60,7 @@ if (_q isEqualTo []) then
 
 private _items = _q select { (_x isEqualType []) && { (count _x) >= 12 } };
 private _pending = _items select { (toUpper (_x param [2, "", [""]])) isEqualTo "PENDING" };
-private _decided = _items select { (toUpper (_x param [2, "", [""]])) isNotEqualTo "PENDING" };
+private _decided = _items select { !((toUpper (_x param [2, "", [""]])) isEqualTo "PENDING") };
 
 if ((count _pending) > 1) then
 {
@@ -131,7 +131,7 @@ if ((count _items) isEqualTo 0) exitWith
 };
 
 private _sel = 0;
-if (_selectedId isNotEqualTo "") then
+if (!(_selectedId isEqualTo "")) then
 {
     for "_i" from 0 to ((lbSize _lb) - 1) do
     {

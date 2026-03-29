@@ -26,7 +26,7 @@ private _ids = [];
 
 private _pushId = {
     params ["_id"]; 
-    if (_id isEqualType "" && {_id isNotEqualTo ""}) then { _ids pushBackUnique _id; };
+    if (_id isEqualType "" && {!(_id isEqualTo "")}) then { _ids pushBackUnique _id; };
 };
 
 private _active = ["activeTaskId", ""] call ARC_fnc_stateGet;

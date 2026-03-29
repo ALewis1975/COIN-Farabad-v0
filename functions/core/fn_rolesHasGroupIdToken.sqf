@@ -43,7 +43,7 @@ if (_fallbackRoleDesc) then
     if (!(_rd isEqualType "")) then { _rd = ""; };
     _rd = trim _rd;
 
-    if (_rd isNotEqualTo "") then
+    if (!(_rd isEqualTo "")) then
     {
         if (_hay isEqualTo "") then { _hay = _rd; } else { _hay = _hay + " " + _rd; };
     };
@@ -57,7 +57,7 @@ private _tokList = [];
 if (_tokens isEqualType "") then
 {
     private _t = trim _tokens;
-    if (_t isNotEqualTo "") then { _tokList = [_t]; };
+    if (!(_t isEqualTo "")) then { _tokList = [_t]; };
 }
 else
 {
@@ -65,7 +65,7 @@ else
         if (_x isEqualType "") then
         {
             private _t = trim _x;
-            if (_t isNotEqualTo "") then { _tokList pushBack _t; };
+            if (!(_t isEqualTo "")) then { _tokList pushBack _t; };
         };
     } forEach _tokens;
 };

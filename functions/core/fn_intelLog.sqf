@@ -86,7 +86,7 @@ if (_rptOps && { _catU isEqualTo "OPS" }) then
 
 // Create/update a map marker so players can navigate to intel items while testing.
 // Do NOT create markers for OPS entries (tasks already have map context; OPS markers create clutter).
-if (_catU isNotEqualTo "OPS") then
+if (!(_catU isEqualTo "OPS")) then
 {
     [_id, _catU, _posATL] call ARC_fnc_intelCreateMarker;
 };

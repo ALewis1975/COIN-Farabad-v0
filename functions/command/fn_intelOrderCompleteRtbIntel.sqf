@@ -82,7 +82,7 @@ if (!(_orders isEqualType [])) then { _orders = []; };
 private _idx = -1;
 private _ord = [];
 
-if (_orderIdO isNotEqualTo "") then
+if (!(_orderIdO isEqualTo "")) then
 {
     if (!_canForce) exitWith {false};
 
@@ -93,11 +93,11 @@ if (_orderIdO isNotEqualTo "") then
 
     _ord params ["_orderId", "_issuedAt", "_status", "_orderType", "_targetGroup", "_data", "_meta"]; 
 
-    if ((toUpper _status) isNotEqualTo "ACCEPTED") exitWith {false};
-    if ((toUpper _orderType) isNotEqualTo "RTB") exitWith {false};
+    if (!((toUpper _status) isEqualTo "ACCEPTED")) exitWith {false};
+    if (!((toUpper _orderType) isEqualTo "RTB")) exitWith {false};
 
     private _purposeO = toUpper ([_data, "purpose", "REFIT"] call _getPair);
-    if (_purposeO isNotEqualTo "INTEL") exitWith {false};
+    if (!(_purposeO isEqualTo "INTEL")) exitWith {false};
 }
 else
 {
@@ -108,9 +108,9 @@ else
 
         _o params ["_orderId", "_issuedAt", "_status", "_orderType", "_targetGroup", "_data", "_meta"];
 
-        if ((toUpper _status) isNotEqualTo "ACCEPTED") then { continue; };
-        if ((toUpper _orderType) isNotEqualTo "RTB") then { continue; };
-        if (_targetGroup isNotEqualTo _gidCaller) then { continue; };
+        if (!((toUpper _status) isEqualTo "ACCEPTED")) then { continue; };
+        if (!((toUpper _orderType) isEqualTo "RTB")) then { continue; };
+        if (!(_targetGroup isEqualTo _gidCaller)) then { continue; };
 
         private _purpose = toUpper ([_data, "purpose", "REFIT"] call _getPair);
         if (_purpose isEqualTo "INTEL") exitWith
@@ -158,7 +158,7 @@ _orders set [_idx, [_orderId, _issuedAt, _status, _orderType, _targetGroup, _dat
 ["tocOrders", _orders] call ARC_fnc_stateSet;
 
 // Complete the RTB task if present
-if (_taskId isNotEqualTo "") then
+if (!(_taskId isEqualTo "")) then
 {
     if ([_taskId] call BIS_fnc_taskExists) then
     {
@@ -181,7 +181,7 @@ private _iMeta = [
     ["targetGroup", _gidTarget],
     ["caller", name _caller]
 ];
-if (_det isNotEqualTo "") then { _iMeta pushBack ["details", _det]; };
+if (!(_det isEqualTo "")) then { _iMeta pushBack ["details", _det]; };
 
 ["DEBRIEF", _sum, _pos, _iMeta] call ARC_fnc_intelLog;
 

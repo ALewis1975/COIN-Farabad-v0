@@ -81,7 +81,7 @@ private _districtCount = count (_hist select {
     && { (toUpper (_x # 1)) isEqualTo _districtId }
 });
 
-if (_districtId isNotEqualTo "" && { _districtCount >= _capDistrict }) exitWith {
+if (!(_districtId isEqualTo "") && { _districtCount >= _capDistrict }) exitWith {
     missionNamespace setVariable ["civsub_v1_leadBridge_history", _hist, true];
     missionNamespace setVariable ["civsub_v1_lastLeadBridgeReject", [serverTime, "CAP_DISTRICT", _districtId, _districtCount, _capDistrict], true];
     ""

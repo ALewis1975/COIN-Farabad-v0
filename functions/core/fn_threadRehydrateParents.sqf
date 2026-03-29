@@ -36,7 +36,7 @@ private _changed = false;
     };
 
     private _parent = [_id, _type, _zone, _base] call ARC_fnc_taskEnsureThreadParent;
-    if (_parent isNotEqualTo "" && { (_thr # 13) isNotEqualTo _parent }) then
+    if (!(_parent isEqualTo "") && { !((_thr # 13) isEqualTo _parent) }) then
     {
         _thr set [13, _parent];
         _threads set [_forEachIndex, _thr];

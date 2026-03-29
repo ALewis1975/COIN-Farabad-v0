@@ -102,13 +102,13 @@ switch (_orderType) do
         private _grid = if (_leadPos isEqualType [] && { (count _leadPos) >= 2 }) then { mapGridPosition _leadPos } else { "" };
 
         _lines pushBack format ["Lead: %1", _leadName];
-        if (_grid isNotEqualTo "") then { _lines pushBack format ["Lead Location: %1", _grid]; };
+        if (!(_grid isEqualTo "")) then { _lines pushBack format ["Lead Location: %1", _grid]; };
     };
 
     default { };
 };
 
-if (_note isNotEqualTo "") then
+if (!(_note isEqualTo "")) then
 {
     _lines pushBack "";
     _lines pushBack "TOC Note:";

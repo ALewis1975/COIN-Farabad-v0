@@ -21,7 +21,7 @@ params [
 ];
 
 private _incType = toUpper (["activeIncidentType", ""] call ARC_fnc_stateGet);
-if (_incType isNotEqualTo "IED") exitWith {false};
+if (!(_incType isEqualTo "IED")) exitWith {false};
 
 private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
 if (!(_taskId isEqualType "") || { _taskId isEqualTo "" }) exitWith {false};
@@ -29,7 +29,7 @@ if (!(_taskId isEqualType "") || { _taskId isEqualTo "" }) exitWith {false};
 private _existingNid = ["activeIedEvidenceNetId", ""] call ARC_fnc_stateGet;
 if (!(_existingNid isEqualType "")) then { _existingNid = ""; };
 
-if (_existingNid isNotEqualTo "") then
+if (!(_existingNid isEqualTo "")) then
 {
     private _ex = objectFromNetId _existingNid;
     if (!isNull _ex) exitWith {true};

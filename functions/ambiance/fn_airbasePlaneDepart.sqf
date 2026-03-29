@@ -138,11 +138,11 @@ if (isNull _pilot) exitWith {
 // Ensure all crew are in the pilot's group so doMove/waypoints apply to the vehicle.
 private _grp = group _pilot;
 {
-    if (!isNull _x && {alive _x} && {(group _x) isNotEqualTo _grp}) then {
+    if (!isNull _x && {alive _x} && {!((group _x) isEqualTo _grp)}) then {
         [_x] joinSilent _grp;
     };
 } forEach _crewLive;
-if ((leader _grp) isNotEqualTo _pilot) then { _grp selectLeader _pilot; };
+if (!((leader _grp) isEqualTo _pilot)) then { _grp selectLeader _pilot; };
 
 // Stop idle animations and order a real walk-up boarding (NO moveIn)
 _veh lock false;

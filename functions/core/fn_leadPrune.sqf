@@ -72,7 +72,7 @@ if (_removed > 0) then
 } forEach _expiredIds;
 
     // Lead end-state: expired (never actioned)
-    if (_expiredIds isNotEqualTo []) then
+    if (!(_expiredIds isEqualTo [])) then
     {
         private _lh = ["leadHistory", []] call ARC_fnc_stateGet;
         if (!(_lh isEqualType [])) then { _lh = []; };

@@ -33,7 +33,7 @@ if (_pos isEqualType [] && { (count _pos) >= 2 }) then
 }
 else
 {
-    if (_marker isNotEqualTo "") then
+    if (!(_marker isEqualTo "")) then
     {
         private _m = [_marker] call ARC_fnc_worldResolveMarker;
         if (_m in allMapMarkers) then
@@ -306,7 +306,7 @@ if (_resU isEqualTo "FAILED") then
     if (_typeU isEqualTo "IED") then
     {
         private _qid = ["activeIedDetonationQueueId", ""] call ARC_fnc_stateGet;
-        if (_qid isEqualType "" && { _qid isNotEqualTo "" }) exitWith {0};
+        if (_qid isEqualType "" && { !(_qid isEqualTo "") }) exitWith {0};
     };
 
     // Default urgent response

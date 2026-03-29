@@ -26,7 +26,7 @@ private _normalizeAuthText = {
     if (!(_text isEqualType "")) then { _text = ""; };
 
     private _parts = ((toUpper (trim _text)) splitString (" .:-_/" + toString [9,10,13])) select {
-        _x isNotEqualTo ""
+        !(_x isEqualTo "")
     };
     _parts joinString " "
 };
@@ -68,7 +68,7 @@ _hay = trim _hay;
 private _role = roleDescription _unit;
 if (!(_role isEqualType "")) then { _role = ""; };
 _role = trim _role;
-if (_role isNotEqualTo "") then {
+if (!(_role isEqualTo "")) then {
     if (_hay isEqualTo "") then { _hay = _role; } else { _hay = _hay + " " + _role; };
 };
 

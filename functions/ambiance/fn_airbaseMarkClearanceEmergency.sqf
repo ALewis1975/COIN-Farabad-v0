@@ -43,7 +43,7 @@ if !(_status in ["QUEUED", "PENDING", "AWAITING_TOWER_DECISION"]) exitWith {
 private _overrideAuth = [_caller, "OVERRIDE"] call ARC_fnc_airbaseTowerAuthorize;
 private _hasOverride = _overrideAuth param [0, false];
 
-if ((_uid isNotEqualTo _callerUid) && {!_hasOverride}) exitWith {
+if ((!(_uid isEqualTo _callerUid)) && {!_hasOverride}) exitWith {
     private _owner = owner _caller;
     if (_owner > 0) then { ["Only the requesting pilot or tower override can mark emergency."] remoteExec ["ARC_fnc_clientHint", _owner]; };
     false

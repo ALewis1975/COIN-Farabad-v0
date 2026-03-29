@@ -113,7 +113,7 @@ private _catU = toUpper _category;
 private _summary = "";
 
 // If a note was provided, use it as the human-readable core of the entry.
-if ((trim _noteSummary) isNotEqualTo "") then
+if (!((trim _noteSummary) isEqualTo "")) then
 {
     private _prefix = switch (_catU) do
     {
@@ -140,7 +140,7 @@ private _meta = [
     ["callerUID", _callerUID]
 ];
 
-if ((trim _noteDetails) isNotEqualTo "") then
+if (!((trim _noteDetails) isEqualTo "")) then
 {
     _meta pushBack ["details", trim _noteDetails];
 };
@@ -157,7 +157,7 @@ if ((trim _noteDetails) isNotEqualTo "") then
 private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
 private _marker = ["activeIncidentMarker", ""] call ARC_fnc_stateGet;
 
-if (_taskId isNotEqualTo "" && {_marker isNotEqualTo ""}) then
+if (!(_taskId isEqualTo "") && {!(_marker isEqualTo "")}) then
 {
     private _m = [_marker] call ARC_fnc_worldResolveMarker;
     if (_m in allMapMarkers) then

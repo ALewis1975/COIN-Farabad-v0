@@ -73,7 +73,7 @@ private _fmtType = {
         ["_districtId", ""]
     ];
 
-    private _star = if (_active isEqualType "" && { _active isNotEqualTo "" } && { _id isEqualTo _active }) then {"> "} else {"- "};
+    private _star = if (_active isEqualType "" && { !(_active isEqualTo "") } && { _id isEqualTo _active }) then {"> "} else {"- "};
 
     private _minsSince = if (_touch > 0) then { floor ((_touch - serverTime) / 60) } else { -1 };
     private _sinceTxt = if (_touch > 0) then { format ["touched %1m ago", floor ((serverTime - _touch) / 60)] } else { "touched ?" };

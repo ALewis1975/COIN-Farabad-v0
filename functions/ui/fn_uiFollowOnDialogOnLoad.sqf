@@ -26,7 +26,7 @@ private _ctrlTitle = _display displayCtrl 78191;
 private _titleOverride = uiNamespace getVariable ["ARC_followOn_title", ""];
 if (!(_titleOverride isEqualType "")) then { _titleOverride = ""; };
 _titleOverride = trim _titleOverride;
-if (!isNull _ctrlTitle && { _titleOverride isNotEqualTo "" }) then { _ctrlTitle ctrlSetText _titleOverride; };
+if (!isNull _ctrlTitle && { !(_titleOverride isEqualTo "") }) then { _ctrlTitle ctrlSetText _titleOverride; };
 private _cReq = _display displayCtrl 78102;
 private _cPurpose = _display displayCtrl 78104;
 private _cHoldIntent = _display displayCtrl 78106;
@@ -64,7 +64,7 @@ _hdrOverride = trim _hdrOverride;
 
 if (!isNull _ctrlHeader) then
 {
-    if (_hdrOverride isNotEqualTo "") then
+    if (!(_hdrOverride isEqualTo "")) then
     {
         _ctrlHeader ctrlSetStructuredText parseText _hdrOverride;
     }

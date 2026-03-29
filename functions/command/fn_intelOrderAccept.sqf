@@ -128,7 +128,7 @@ switch (_type) do
             if (_leadRec isEqualType [] && { (count _leadRec) > 0 }) then
             {
                 private _tmp = _leadRec # 0;
-                if (_tmp isEqualType "" && { _tmp isNotEqualTo "" }) then { _leadId = _tmp; };
+                if (_tmp isEqualType "" && { !(_tmp isEqualTo "") }) then { _leadId = _tmp; };
             };
 
             if (_oSt isEqualTo "ACCEPTED") then
@@ -311,7 +311,7 @@ switch (_type) do
         if (_leadRec isEqualType [] && { (count _leadRec) >= 4 }) then
         {
             private _dn = _leadRec # 2;
-            if (_dn isEqualType "" && { _dn isNotEqualTo "" }) then { _leadName = _dn; };
+            if (_dn isEqualType "" && { !(_dn isEqualTo "") }) then { _leadName = _dn; };
 
             private _p = _leadRec # 3;
             if (_p isEqualType [] && { (count _p) >= 2 }) then { _leadPos = _p; };

@@ -48,7 +48,7 @@ if (_it isEqualTo []) exitWith
 };
 
 private _stU = toUpper (_it # 2);
-if (_stU isNotEqualTo "PENDING") exitWith
+if (!(_stU isEqualTo "PENDING")) exitWith
 {
     ["TOC Queue", format ["%1 is %2 (not pending).", _qid, _stU]] call ARC_fnc_clientHint;
     false

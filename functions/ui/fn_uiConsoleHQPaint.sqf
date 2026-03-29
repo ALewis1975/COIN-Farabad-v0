@@ -27,7 +27,7 @@ private _ctrlList = _display displayCtrl 78011;
 private _owner = uiNamespace getVariable ["ARC_console_mainListOwner", ""];
 if (!(_owner isEqualType "")) then { _owner = ""; };
 _owner = toUpper (trim _owner);
-private _ownerChanged = (_owner isNotEqualTo "HQ");
+private _ownerChanged = (!(_owner isEqualTo "HQ"));
 if (_ownerChanged) then { _rebuild = true; };
 uiNamespace setVariable ["ARC_console_mainListOwner", "HQ"];
 private _ctrlDetails = _display displayCtrl 78012;
@@ -197,7 +197,7 @@ private _renderHQSubPanelsFromMaster = {
     {
         private _lb = _x # 2;
         _lb lbSetCurSel -1;
-        if (_selData isNotEqualTo "") then {
+        if (!(_selData isEqualTo "")) then {
             for "_k" from 0 to ((lbSize _lb) - 1) do {
                 if ((_lb lbData _k) isEqualTo _selData) exitWith { _lb lbSetCurSel _k; };
             };
@@ -256,7 +256,7 @@ if (!isNull _ctrlList) then
     }
     else
     {
-        if (_lastMode isNotEqualTo _mode) then
+        if (!(_lastMode isEqualTo _mode)) then
         {
             _needRebuild = true;
         }
@@ -542,7 +542,7 @@ switch (toUpper _data) do
         _txt = _txt + "Runs a server-side QA audit of Farabad Console integration (functions + state coherence).";
 
         private _rep = uiNamespace getVariable ["ARC_console_lastQAReport", ""];
-        if (_rep isEqualType "" && { _rep isNotEqualTo "" }) then
+        if (_rep isEqualType "" && { !(_rep isEqualTo "") }) then
         {
             _txt = _txt + "<br/><br/><t font='PuristaMedium'>Last report:</t><br/>" + _rep;
         };
@@ -553,7 +553,7 @@ switch (toUpper _data) do
         _txt = _txt + "Attempts to compile all ARC functions listed in CfgFunctions. This surfaces SQF syntax errors early (check server RPT for file/line details).";
 
         private _rep = uiNamespace getVariable ["ARC_console_lastCompileReport", ""];
-        if (_rep isEqualType "" && { _rep isNotEqualTo "" }) then
+        if (_rep isEqualType "" && { !(_rep isEqualTo "") }) then
         {
             _txt = _txt + "<br/><br/><t font='PuristaMedium'>Last report:</t><br/>" + _rep;
         };
@@ -572,7 +572,7 @@ switch (toUpper _data) do
                "<br/><br/><t size='0.9' color='#AAAAAA'>Results appear in this detail pane after the server responds.</t>";
 
         private _rep = uiNamespace getVariable ["ARC_console_lastDiagReport", ""];
-        if (_rep isEqualType "" && { _rep isNotEqualTo "" }) then
+        if (_rep isEqualType "" && { !(_rep isEqualTo "") }) then
         {
             _txt = _txt + "<br/><br/><t font='PuristaMedium'>Last report:</t><br/>" + _rep;
         };
@@ -641,7 +641,7 @@ switch (toUpper _data) do
 
                     private _taskId = missionNamespace getVariable ["ARC_activeTaskId", ""]; 
                     if (!(_taskId isEqualType "")) then { _taskId = ""; };
-                    private _blocked = (_taskId isNotEqualTo "");
+                    private _blocked = (!(_taskId isEqualTo ""));
 
                     _txt = _txt + format [
                         "<t font='PuristaMedium'>%1</t><br/>Type: %2<br/>Marker: %3<br/>Grid: %4<br/>Zone: %5",

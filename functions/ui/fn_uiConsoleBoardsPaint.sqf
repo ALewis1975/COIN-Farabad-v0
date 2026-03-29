@@ -110,8 +110,8 @@ private _queueLines = [];
     // Keep the snapshot short (top 10)
     if ((count _queueLines) < 10) then
     {
-        private _g = if (_qFromGrp isEqualType "" && { _qFromGrp isNotEqualTo "" }) then { _qFromGrp } else { "" };
-        private _s = if (_qSummary isEqualType "" && { _qSummary isNotEqualTo "" }) then { _qSummary } else { "(no summary)" };
+        private _g = if (_qFromGrp isEqualType "" && { !(_qFromGrp isEqualTo "") }) then { _qFromGrp } else { "" };
+        private _s = if (_qSummary isEqualType "" && { !(_qSummary isEqualTo "") }) then { _qSummary } else { "(no summary)" };
         _queueLines pushBack format ["- <t color='#B89B6B'>%1</t> %2 <t color='#FFFFFF'>(%3)</t>", _k, _s, if (_g isEqualTo "") then {"TOC"} else {_g}];
     };
 } forEach _queue;
@@ -161,7 +161,7 @@ for "_i" from ((count _ops) - 1) to 0 step -1 do
 };
 
 private _sitTxt = "<t color='#FFFFFF'>(none)</t>";
-if (_sit isNotEqualTo []) then
+if (!(_sit isEqualTo [])) then
 {
     _sit params ["_id", "_ts", "_cat", "_summary", "_pos", "_meta"]; 
     private _from = [_meta, "from", ""] call _getPair;
@@ -175,7 +175,7 @@ if (_sit isNotEqualTo []) then
         if (_from isEqualTo "") then {"(n/a)"} else {_from},
         if (_rec isEqualTo "") then {"(n/a)"} else {toUpper _rec},
         if (_grid2 isEqualTo "") then {"(n/a)"} else {_grid2},
-        if (_summary isEqualType "" && { _summary isNotEqualTo "" }) then {_summary} else {"(no summary)"}
+        if (_summary isEqualType "" && { !(_summary isEqualTo "") }) then {_summary} else {"(no summary)"}
     ];
 };
 
@@ -205,7 +205,7 @@ else
         private _g = _x # 0;
         private _s = toUpper (trim (_x # 1));
         if (_s isEqualTo "OFFLINE") then { _s = "UNAVAILABLE"; };
-        if (_accBy isNotEqualTo "" && { _g isNotEqualTo _accBy } && { _s in ["IN TRANSIT", "ON SCENE"] }) then { _support pushBack _g; };
+        if (!(_accBy isEqualTo "") && { !(_g isEqualTo _accBy) } && { _s in ["IN TRANSIT", "ON SCENE"] }) then { _support pushBack _g; };
     } forEach _statusRows;
 
     private _supportColor = "#AAAAAA";

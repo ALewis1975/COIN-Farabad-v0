@@ -33,9 +33,9 @@ if (!(_appr isEqualType [])) then { _appr = []; };
 private _ok = false;
 {
     if (!(_x isEqualType []) || { (count _x) < 3 }) then { continue; };
-    if ((_x # 0) isNotEqualTo _taskId) then { continue; };
-    if ((_x # 1) isNotEqualTo _gid) then { continue; };
-    if ((toUpper (trim (_x # 2))) isNotEqualTo _req) then { continue; };
+    if (!((_x # 0) isEqualTo _taskId)) then { continue; };
+    if (!((_x # 1) isEqualTo _gid)) then { continue; };
+    if (!((toUpper (trim (_x # 2))) isEqualTo _req)) then { continue; };
     _ok = true;
     break;
 } forEach _appr;

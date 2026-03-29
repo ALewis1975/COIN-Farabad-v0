@@ -36,7 +36,7 @@ private _leadTagU = toUpper _leadTag;
 private _pos = [];
 private _m = "";
 
-if (_marker isNotEqualTo "") then
+if (!(_marker isEqualTo "")) then
 {
     _m = [_marker] call ARC_fnc_worldResolveMarker;
     if (_m in allMapMarkers) then
@@ -120,7 +120,7 @@ if (!(_startedAt isEqualType 0)) then { _startedAt = -1; };
 private _zone = [_pos] call ARC_fnc_worldGetZoneForPos;
 
 // If we already have a package for this task, only ensure objective objects exist.
-private _needsBuild = !(_execTaskId isEqualTo _taskId && { _execKind isNotEqualTo "" });
+private _needsBuild = !(_execTaskId isEqualTo _taskId && { !(_execKind isEqualTo "") });
 
 // If TOC just accepted the incident, force a rebuild so we can start timers and spawn assets.
 if (_accepted && { _startedAt < 0 }) then
@@ -362,7 +362,7 @@ private _spawnCacheObjective = {
         [_o, _actionText, "CACHE_SEARCH"] remoteExec ["ARC_fnc_clientAddObjectiveAction", 0, true];
 
         private _nid = netId _o;
-        if (_nid isNotEqualTo "") then
+        if (!(_nid isEqualTo "")) then
         {
             _nids pushBack _nid;
             if (_i isEqualTo _trueIdx) then { _trueNid = _nid; };
@@ -789,7 +789,7 @@ case "IED":
     private _stagingLabel = "JBF";
 
     private _leadId = ["activeLeadId", ""] call ARC_fnc_stateGet;
-    if (_leadId isNotEqualTo "") then
+    if (!(_leadId isEqualTo "")) then
     {
         private _hist = ["incidentHistory", []] call ARC_fnc_stateGet;
         if (_hist isEqualType [] && { (count _hist) > 0 }) then
@@ -1246,13 +1246,13 @@ case "IED":
         // Keep the actionable child task "current" so the parent incident task does not override it.
         // (Route recon is sequential start -> end, so at init we force the start child to current.)
 	        // Task "current" is local to each client; broadcast so players don't see the parent task override the child.
-	        if (_startTaskId isNotEqualTo "") then
+	        if (!(_startTaskId isEqualTo "")) then
 	        {
 	            [_startTaskId] remoteExecCall ["ARC_fnc_clientSetCurrentTask", 0];
 	        };
     };
 // Spawn an objective if this incident uses one
-if (_objKind isNotEqualTo "") then
+if (!(_objKind isEqualTo "")) then
 {
     private _spawned = [];
 
@@ -1417,7 +1417,7 @@ if (_objKind isNotEqualTo "") then
                 private _rp = getPosATL _x;
                 private _ok = true;
 
-                if (_avoidZone isNotEqualTo "") then
+                if (!(_avoidZone isEqualTo "")) then
                 {
                     private _z = [_rp] call ARC_fnc_worldGetZoneForPos;
                     if ((toUpper _z) isEqualTo (toUpper _avoidZone)) then
@@ -1466,7 +1466,7 @@ if (_objKind isNotEqualTo "") then
         private _spawnPos = +_cMarkerPos;
         _spawnPos resize 3;
 
-        private _isEdgeStart = (_cStartMarker isNotEqualTo "" && { _cStartMarker isNotEqualTo "ARC_convoy_start" } && { _cStartMarker isNotEqualTo "(override)" });
+        private _isEdgeStart = (!(_cStartMarker isEqualTo "") && { !(_cStartMarker isEqualTo "ARC_convoy_start") } && { !(_cStartMarker isEqualTo "(override)") });
         if (_isEdgeStart && { _edgeInset > 0 }) then
         {
             // Inset inward (toward Airbase/JBF), not along markerDir (markers may be imperfect).
@@ -1576,7 +1576,7 @@ if (_objKind isNotEqualTo "") then
         private _havePresetLink = false;
         private _presetLinkPos = [];
 
-        if (_presetLinkMk isNotEqualTo "" && { _presetLinkMk in allMapMarkers }) then
+        if (!(_presetLinkMk isEqualTo "") && { _presetLinkMk in allMapMarkers }) then
         {
             _presetLinkPos = getMarkerPos _presetLinkMk;
             if (_presetLinkPos isEqualType [] && { (count _presetLinkPos) >= 2 }) then
@@ -1660,7 +1660,7 @@ if (_objKind isNotEqualTo "") then
                     private _r2 = [_p2, (_roadSnap max 150) min 600, "Airbase"] call _fn_nearestRoad;
                     if (!isNull _r2) then { _linkupPos = getPosATL _r2; _linkupPos resize 3; };
                     private _z2 = [_linkupPos] call ARC_fnc_worldGetZoneForPos;
-                    if ((toUpper _z2) isNotEqualTo "AIRBASE") exitWith {};
+                    if (!((toUpper _z2) isEqualTo "AIRBASE")) exitWith {};
                     _step = _step + 200;
                 };
             };
@@ -1732,7 +1732,7 @@ if (_showSpawnMarker) then
         private _zEnd = [_routeEnd] call ARC_fnc_worldGetZoneForPos;
         private _zStart = [_routeStart] call ARC_fnc_worldGetZoneForPos;
 
-        if ((toUpper _zEnd) isEqualTo "AIRBASE" && { (toUpper _zStart) isNotEqualTo "AIRBASE" } && { "North_Gate" in allMapMarkers }) then
+        if ((toUpper _zEnd) isEqualTo "AIRBASE" && { !((toUpper _zStart) isEqualTo "AIRBASE") } && { "North_Gate" in allMapMarkers }) then
         {
             _ingressPos = getMarkerPos "North_Gate";
             _ingressPos resize 3;
@@ -1834,7 +1834,7 @@ if (_showSpawnMarker) then
                         0
                     ];
 
-                    private _r = if (_avoidZoneLocal isNotEqualTo "") then
+                    private _r = if (!(_avoidZoneLocal isEqualTo "")) then
                     {
                         [_probe, _hardSnap, _avoidZoneLocal, _avoidNearLocal, _avoidNearRLocal] call _fn_nearestRoad
                     }
@@ -1863,7 +1863,7 @@ if (_showSpawnMarker) then
                 };
 
                 // Snap endpoints to nearby roads (if available) so fallback remains road-biased.
-                private _rStart = if (_avoidZoneLocal isNotEqualTo "") then
+                private _rStart = if (!(_avoidZoneLocal isEqualTo "")) then
                 {
                     [_s, _hardSnap, _avoidZoneLocal, _avoidNearLocal, _avoidNearRLocal] call _fn_nearestRoad
                 }
@@ -1872,7 +1872,7 @@ if (_showSpawnMarker) then
                     [_s, _hardSnap] call _fn_nearestRoad
                 };
 
-                private _rEnd = if (_avoidZoneLocal isNotEqualTo "") then
+                private _rEnd = if (!(_avoidZoneLocal isEqualTo "")) then
                 {
                     [_e, _hardSnap, _avoidZoneLocal, _avoidNearLocal, _avoidNearRLocal] call _fn_nearestRoad
                 }
@@ -1900,7 +1900,7 @@ if (_showSpawnMarker) then
             };
 
             // When we're avoiding a zone (ex: Airbase), also avoid snapping the start/end to a road inside that zone.
-            private _r0 = if (_avoidZone isNotEqualTo "") then
+            private _r0 = if (!(_avoidZone isEqualTo "")) then
             {
                 [_pStart, _snap, _avoidZone, _avoidNear, _avoidNearR] call _fn_nearestRoad
             }
@@ -1909,7 +1909,7 @@ if (_showSpawnMarker) then
                 [_pStart, _snap] call _fn_nearestRoad
             };
 
-            private _r1 = if (_avoidZone isNotEqualTo "") then
+            private _r1 = if (!(_avoidZone isEqualTo "")) then
             {
                 [_pEnd, _snap, _avoidZone, _avoidNear, _avoidNearR] call _fn_nearestRoad
             }
@@ -1994,7 +1994,7 @@ if (_showSpawnMarker) then
                         // Optional zone avoidance: penalize candidates inside the avoid zone, except close to the
                         // allowed "near" point (used so inbound convoys do not cut across the airfield).
                         private _zPen = 0;
-                        if (_avoidZone isNotEqualTo "") then
+                        if (!(_avoidZone isEqualTo "")) then
                         {
                             private _z = [_nbrPos] call ARC_fnc_worldGetZoneForPos;
                             if ((toUpper _z) isEqualTo (toUpper _avoidZone)) then
@@ -2113,7 +2113,7 @@ if (_showSpawnMarker) then
             private _avoidNear = [];
             private _avoidNearR = 220;
 
-            if ((toUpper _zStart) isNotEqualTo "AIRBASE" && { (toUpper _zEnd) isNotEqualTo "AIRBASE" }) then
+            if (!((toUpper _zStart) isEqualTo "AIRBASE") && { !((toUpper _zEnd) isEqualTo "AIRBASE") }) then
             {
                 _avoidZone = "Airbase";
                 if ("North_Gate" in allMapMarkers) then
@@ -2403,7 +2403,7 @@ for "_i" from 0 to (_rmCount - 1) do
         if (!(_rsTaskId isEqualType "")) then { _rsTaskId = ""; };
 
         // Re-spawn only when this is a new task package (or state was wiped).
-        if (!_rsSpawned || { _rsTaskId isNotEqualTo _taskId }) then
+        if (!_rsSpawned || { !(_rsTaskId isEqualTo _taskId) }) then
         {
             private _kNow = ["activeExecKind", ""] call ARC_fnc_stateGet;
             if (!(_kNow isEqualType "")) then { _kNow = ""; };
@@ -2429,7 +2429,7 @@ for "_i" from 0 to (_rmCount - 1) do
             if (_skipNearM > 0) then
             {
                 private _accGid = ["activeIncidentAcceptedByGroup", ""] call ARC_fnc_stateGet;
-                if (_accGid isEqualType "" && { _accGid isNotEqualTo "" }) then
+                if (_accGid isEqualType "" && { !(_accGid isEqualTo "") }) then
                 {
                     {
                         if (!isNull _x && { (groupId (group _x)) isEqualTo _accGid } && { (_x distance2D _pos) <= _skipNearM }) exitWith
@@ -2486,10 +2486,10 @@ for "_i" from 0 to (_rmCount - 1) do
 private _ok = true;
 private _kindNow = ["activeExecKind", ""] call ARC_fnc_stateGet;
 private _objKindNow = ["activeObjectiveKind", ""] call ARC_fnc_stateGet;
-if (_kindNow isEqualTo "INTERACT" && { _objKindNow isNotEqualTo "" }) then
+if (_kindNow isEqualTo "INTERACT" && { !(_objKindNow isEqualTo "") }) then
 {
     private _nid = ["activeObjectiveNetId", ""] call ARC_fnc_stateGet;
-    if (_nid isNotEqualTo "") then
+    if (!(_nid isEqualTo "")) then
     {
         private _obj = objectFromNetId _nid;
         if (isNull _obj) then
@@ -2521,14 +2521,14 @@ if (_kindNow isEqualTo "ROUTE_RECON") then
         private _endReached = ["activeReconRouteEndReached", false] call ARC_fnc_stateGet;
         if (!(_endReached isEqualType true)) then { _endReached = false; };
 
-        if (_startTaskId isNotEqualTo "" && { !([_startTaskId] call BIS_fnc_taskExists) } && { _startPos isEqualType [] && { (count _startPos) >= 2 } }) then
+        if (!(_startTaskId isEqualTo "") && { !([_startTaskId] call BIS_fnc_taskExists) } && { _startPos isEqualType [] && { (count _startPos) >= 2 } }) then
         {
             private _tS = "Route Recon Start";
             private _dS = "Proceed to the route start point. Once on-site, begin route reconnaissance toward the end point.";
             [true, [_startTaskId, _taskId], [_dS, _tS, ""], _startPos, "ASSIGNED", 1, true, "MOVE", false] call BIS_fnc_taskCreate;
         };
 
-        if (_endTaskId isNotEqualTo "" && { !([_endTaskId] call BIS_fnc_taskExists) } && { _endPos isEqualType [] && { (count _endPos) >= 2 } }) then
+        if (!(_endTaskId isEqualTo "") && { !([_endTaskId] call BIS_fnc_taskExists) } && { _endPos isEqualType [] && { (count _endPos) >= 2 } }) then
         {
             private _tE = "Route Recon End";
             private _dE = "Move along the route to the end point while observing and reporting. Avoid decisive engagement when possible.";
@@ -2536,13 +2536,13 @@ if (_kindNow isEqualTo "ROUTE_RECON") then
         };
 
         // Restore child task states (start always assigned until reached; end stays created until start reached).
-        if (_startTaskId isNotEqualTo "") then
+        if (!(_startTaskId isEqualTo "")) then
         {
             private _stS = if (_startReached) then { "SUCCEEDED" } else { "ASSIGNED" };
             [_startTaskId, _stS, true] call BIS_fnc_taskSetState;
         };
 
-        if (_endTaskId isNotEqualTo "") then
+        if (!(_endTaskId isEqualTo "")) then
         {
             private _stE = "CREATED";
             if (_endReached) then
@@ -2568,7 +2568,7 @@ if (_kindNow isEqualTo "ROUTE_RECON") then
 	            if (!_endReached) then { _cur = _endTaskId; };
 	        };
 
-	        if (_cur isNotEqualTo "") then
+	        if (!(_cur isEqualTo "")) then
 	        {
 	            [_cur] remoteExecCall ["ARC_fnc_clientSetCurrentTask", 0];
 	        };

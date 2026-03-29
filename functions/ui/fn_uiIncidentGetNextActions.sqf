@@ -23,7 +23,7 @@ private _taskId = missionNamespace getVariable ['ARC_activeTaskId',''];
 if (!(_taskId isEqualType '')) then { _taskId = ''; };
 _taskId = trim _taskId;
 
-private _hasIncident = (_taskId isNotEqualTo '');
+private _hasIncident = (!(_taskId isEqualTo )'');
 private _accepted = missionNamespace getVariable ['ARC_activeIncidentAccepted', false];
 if (!(_accepted isEqualType true) && !(_accepted isEqualType false)) then { _accepted = false; };
 
@@ -42,7 +42,7 @@ private _issuedCount = 0;
     if (!(_x isEqualType [] && { (count _x) >= 6 })) then { continue; };
     private _st = toUpper (_x # 2);
     private _tg = _x # 4;
-    if (_tg isNotEqualTo _gid) then { continue; };
+    if (!(_tg isEqualTo _gid)) then { continue; };
     if (_st isEqualTo 'ISSUED') then { _issuedCount = _issuedCount + 1; };
 } forEach _orders;
 
@@ -58,8 +58,8 @@ private _hasRtbEvidenceApproval = false;
 private _hasTowVbiedApproval = false;
 {
     if (!(_x isEqualType [] && { (count _x) >= 6 })) then { continue; };
-    if ((_x # 0) isNotEqualTo _taskId) then { continue; };
-    if ((_x # 1) isNotEqualTo _accG) then { continue; };
+    if (!((_x # 0) isEqualTo _taskId)) then { continue; };
+    if (!((_x # 1) isEqualTo _accG)) then { continue; };
     private _rt = toUpper (trim (_x # 2));
     if (_rt isEqualTo 'RTB_IED') then { _hasRtbEvidenceApproval = true; };
     if (_rt isEqualTo 'TOW_VBIED') then { _hasTowVbiedApproval = true; };
@@ -126,7 +126,7 @@ if (_hasIncident && {_accepted}) then
         };
     };
 
-    if (_vbCause isNotEqualTo '') then
+    if (!(_vbCause isEqualTo )'') then
     {
         _lines pushBack "<t color='#FF8080'>Warning:</t> VBIED destroyed without valid disposal. <t color='#DDDDDD'>Next:</t> OPS SITREP; TOC review.";
     };

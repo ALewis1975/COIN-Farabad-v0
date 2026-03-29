@@ -58,7 +58,7 @@ private _trimRxText = {
 private _owner = uiNamespace getVariable ["ARC_console_mainListOwner", ""];
 if (!(_owner isEqualType "")) then { _owner = ""; };
 _owner = toUpper (trim _owner);
-if (_owner isNotEqualTo "INTEL") then { _rebuild = true; };
+if (!(_owner isEqualTo "INTEL")) then { _rebuild = true; };
 uiNamespace setVariable ["ARC_console_mainListOwner", "INTEL"];
 
 private _list    = _display displayCtrl 78011;
@@ -608,7 +608,7 @@ if (_rebuild) then
     };
 
     // Restore selection (or pick first actionable row by default)
-    if (_selDataPrev isNotEqualTo "") then
+    if (!(_selDataPrev isEqualTo "")) then
     {
         private _found = -1;
         for "_j" from 0 to ((lbSize _list) - 1) do
@@ -685,7 +685,7 @@ private _appendCivsubResult = {
     private _type = _rs getOrDefault ["type", ""];
     if !(_type isEqualType "") then { _type = ""; };
     _type = toUpper (trim _type);
-    if (_type isEqualTo "" || {_typeExpect isEqualTo ""} || {_type isNotEqualTo _typeExpect}) exitWith { _txtOut };
+    if (_type isEqualTo "" || {_typeExpect isEqualTo ""} || {!(_type isEqualTo _typeExpect)}) exitWith { _txtOut };
 
     private _html = _rs getOrDefault ["html", ""];
     if !(_html isEqualType "") then { _html = ""; };
@@ -1213,7 +1213,7 @@ else
                 _qlbl
             ];
             _txt = [_txt, "QUESTION"] call _appendCivsubResult;
-            if (!isNull _b1) then { _b1 ctrlEnable (_inCivCtx && {_qid isNotEqualTo ""}); _b1 ctrlSetText "ASK"; };
+            if (!isNull _b1) then { _b1 ctrlEnable (_inCivCtx && {!(_qid isEqualTo "")}); _b1 ctrlSetText "ASK"; };
         };
 
         case "CIV_CONTACT_END":

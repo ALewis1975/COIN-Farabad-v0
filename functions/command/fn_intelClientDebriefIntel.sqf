@@ -37,7 +37,7 @@ if (_orderIdOverride isEqualType "") then { _orderIdO = trim _orderIdOverride; }
 
 private _useOverride = false;
 
-if (_orderIdO isNotEqualTo "") then
+if (!(_orderIdO isEqualTo "")) then
 {
     // Override requires TOC authority and forceConsole mode (used by the Farabad Console).
     if (!_forceConsole) exitWith

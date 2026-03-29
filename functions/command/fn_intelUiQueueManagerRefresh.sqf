@@ -43,7 +43,7 @@ private _pending = _items select {
 };
 private _decided = _items select {
     private _st = _x param [2, "", [""]];
-    (toUpper _st) isNotEqualTo "PENDING"
+    !((toUpper _st) isEqualTo "PENDING")
 };
 
 // Sort pending oldest-first.
@@ -152,7 +152,7 @@ else
 {
     // Restore selection.
     private _sel = 0;
-    if (_prevId isNotEqualTo "") then
+    if (!(_prevId isEqualTo "")) then
     {
         for "_i" from 0 to ((lbSize _lb) - 1) do
         {

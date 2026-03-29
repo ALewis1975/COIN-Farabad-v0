@@ -50,7 +50,7 @@ if (_rebuild) then
 
     // 1) Active incident (if any)
     private _taskId = missionNamespace getVariable ["ARC_activeTaskId", ""];
-    if ((_taskId isEqualType "") && { _taskId isNotEqualTo "" }) then
+    if ((_taskId isEqualType "") && { !(_taskId isEqualTo "") }) then
     {
         private _disp = missionNamespace getVariable ["ARC_activeIncidentDisplayName", "Active Incident"];
         if (!(_disp isEqualType "")) then { _disp = "Active Incident"; };
@@ -87,7 +87,7 @@ if (_rebuild) then
 
     // Restore selection if possible
     private _set = -1;
-    if (_prevData isNotEqualTo "") then
+    if (!(_prevData isEqualTo "")) then
     {
         for "_n" from 0 to ((lbSize _ctrlList) - 1) do
         {
@@ -215,8 +215,8 @@ switch (_kind) do
             _txt = _txt + format [
                 "<t size='0.95'>Details</t><br/>- Strength: %1<br/>- Age: %2<br/>- Tag: %3<br/>- Thread: %4<br/><br/>",
                 _strength, _ageTxt,
-                if (_tag isEqualType "" && { _tag isNotEqualTo "" }) then {_tag} else {"(none)"},
-                if (_threadId isEqualType "" && { _threadId isNotEqualTo "" }) then {_threadId} else {"(none)"}
+                if (_tag isEqualType "" && { !(_tag isEqualTo "") }) then {_tag} else {"(none)"},
+                if (_threadId isEqualType "" && { !(_threadId isEqualTo "") }) then {_threadId} else {"(none)"}
             ];
 
             _txt = _txt + "<t size='0.9' color='#DDDDDD'>Leads feed TOC tasking. S2 creates leads; TOC converts them into orders/incidents.</t>";

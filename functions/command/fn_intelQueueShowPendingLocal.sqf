@@ -78,7 +78,7 @@ if (_updatedAt isEqualType 0 && { _updatedAt > 0 }) then
     if ((count _s) > 72) then { _s = (_s select [0, 72]) + "..."; };
 
     _lines pushBack (format ["%1 | %2 | %3m | %4 | %5 | %6", _qid, _kind, _ageMin, _shortFrom, _zone, _grid]);
-    if (_s isNotEqualTo "") then { _lines pushBack (format ["  %1", _s]); };
+    if (!(_s isEqualTo "")) then { _lines pushBack (format ["  %1", _s]); };
 } forEach _q;
 
 [(_lines joinString "\n"), "INFO", "HINT"] call ARC_fnc_clientHint;

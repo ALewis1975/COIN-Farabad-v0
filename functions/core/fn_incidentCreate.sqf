@@ -7,7 +7,7 @@ if (!isServer) exitWith {false};
 
 // Prevent overlapping incidents
 private _activeTaskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
-if (_activeTaskId isNotEqualTo "") exitWith {false};
+if (!(_activeTaskId isEqualTo "")) exitWith {false};
 
 private _catalog = call compile preprocessFileLineNumbers "data\incident_markers.sqf";
 if (!(_catalog isEqualType [])) exitWith {

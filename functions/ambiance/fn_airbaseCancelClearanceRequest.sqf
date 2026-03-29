@@ -39,7 +39,7 @@ private _rec = _requests # _idx;
 private _status = toUpper (_rec param [6, ""]);
 private _uid = _rec param [2, ""];
 private _requesterOwner = -1;
-if (_uid isNotEqualTo "") then {
+if (!(_uid isEqualTo "")) then {
     {
         if ((getPlayerUID _x) isEqualTo _uid) exitWith { _requesterOwner = owner _x; };
     } forEach allPlayers;
@@ -55,7 +55,7 @@ if !(_status in ["QUEUED", "PENDING", "AWAITING_TOWER_DECISION"]) exitWith {
 private _overrideAuth = [_caller, "OVERRIDE"] call ARC_fnc_airbaseTowerAuthorize;
 private _hasOverride = _overrideAuth param [0, false];
 
-if ((_uid isNotEqualTo _callerUid) && {!_hasOverride}) exitWith {
+if ((!(_uid isEqualTo _callerUid)) && {!_hasOverride}) exitWith {
     private _owner = owner _caller;
     if (_owner > 0) then { ["Only the requesting pilot or tower override can cancel this request."] remoteExec ["ARC_fnc_clientHint", _owner]; };
     false

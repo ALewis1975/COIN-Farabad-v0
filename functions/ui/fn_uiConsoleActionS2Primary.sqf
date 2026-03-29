@@ -74,21 +74,21 @@ switch (_kind) do
 		{
 			private _i = lbCurSel _cmbMethod;
 			private _d = if (_i >= 0) then { _cmbMethod lbData _i } else { "" };
-			if (_d isEqualType "" && { (trim _d) isNotEqualTo "" }) then { _method = toUpper _d; };
+			if (_d isEqualType "" && { !((trim _d) isEqualTo "") }) then { _method = toUpper _d; };
 		};
 
 		if (!isNull _cmbCat && { (lbSize _cmbCat) > 0 }) then
 		{
 			private _i = lbCurSel _cmbCat;
 			private _d = if (_i >= 0) then { _cmbCat lbData _i } else { "" };
-			if (_d isEqualType "" && { (trim _d) isNotEqualTo "" }) then { _cat = toUpper _d; };
+			if (_d isEqualType "" && { !((trim _d) isEqualTo "") }) then { _cat = toUpper _d; };
 		};
 
 		switch (_method) do
 		{
 			case "CURSOR":
 			{
-				if (_cat isNotEqualTo "SIGHTING") exitWith
+				if (!(_cat isEqualTo "SIGHTING")) exitWith
 				{
 					["S2 Ops", "Cursor logging only supports Sighting. Use Map Click for other categories."] call ARC_fnc_clientToast;
 				};
@@ -240,7 +240,7 @@ switch (_kind) do
 		{
 			private _i = lbCurSel _cmbLead;
 			private _d = if (_i >= 0) then { _cmbLead lbData _i } else { "" };
-			if (_d isEqualType "" && { (trim _d) isNotEqualTo "" }) then { _type = toUpper _d; };
+			if (_d isEqualType "" && { !((trim _d) isEqualTo "") }) then { _type = toUpper _d; };
 		};
 		[_type] call ARC_fnc_intelClientBeginLeadRequestMapClick;
 		["S2 Ops", format ["Lead request started (%1).", _type]] call ARC_fnc_clientToast;

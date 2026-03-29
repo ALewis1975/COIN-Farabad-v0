@@ -46,7 +46,7 @@ if (!(_ops isEqualType [])) then { _ops = []; };
 private _activeTaskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
 private _activeAccepted = ["activeIncidentAccepted", false] call ARC_fnc_stateGet;
 if (!(_activeAccepted isEqualType true) && !(_activeAccepted isEqualType false)) then { _activeAccepted = false; };
-private _playerTaskActive = (_activeTaskId isNotEqualTo "") && { _activeAccepted };
+private _playerTaskActive = (!(_activeTaskId isEqualTo "")) && { _activeAccepted };
 
 private _activePos = ["activeExecPos", []] call ARC_fnc_stateGet;
 if (!(_activePos isEqualType [])) then { _activePos = []; };
@@ -119,7 +119,7 @@ private _changed = false;
     if (_nodeZone isEqualTo "") then { _nodeZone = [_nodePos] call ARC_fnc_worldGetZoneForPos; };
 
     private _districtRisk = 0.35;
-    if (missionNamespace getVariable ["civsub_v1_enabled", false] && { _nodeZone isNotEqualTo "" }) then
+    if (missionNamespace getVariable ["civsub_v1_enabled", false] && { !(_nodeZone isEqualTo "") }) then
     {
         private _d = [_nodeZone] call ARC_fnc_civsubDistrictsGetById;
         if (_d isEqualType createHashMap && { (count _d) > 0 }) then
@@ -139,7 +139,7 @@ private _changed = false;
             private _thr = [_x] call ARC_fnc_threadNormalizeRecord;
             if (_thr isEqualTo []) then { continue; };
             private _did = _thr # 14;
-            if (_did isNotEqualTo _nodeZone) then { continue; };
+            if (!(_did isEqualTo _nodeZone)) then { continue; };
             private _state = toUpper (_thr # 6);
             if (_state isEqualTo "DORMANT") then { continue; };
             _threadPressure = _threadPressure + (((_thr # 4) max 0 min 1) * 0.5 + ((_thr # 5) max 0 min 1) * 0.5);
@@ -170,7 +170,7 @@ private _changed = false;
 
     private _opType = [_weights] call _pickWeightedType;
 
-    if (_deconflict isNotEqualTo "NONE") then
+    if (!(_deconflict isEqualTo "NONE")) then
     {
         if (_opType in ["PLAYER_SUPPORT", "MSR_SECURITY"] && { _playerTaskActive }) then
         {
@@ -222,7 +222,7 @@ private _changed = false;
         _cur set [13, _meta];
         _updatedOps set [_existingIdx, _cur];
 
-        if (toUpper _oldType isNotEqualTo _opType) then
+        if (toUpper !(_oldType isEqualTo _opType)) then
         {
             _changed = true;
             ["OPS", format ["VOP UPDATE: %1 shifted to %2 (%3).", _callsign, _opType, _deconflict], _nodePos,

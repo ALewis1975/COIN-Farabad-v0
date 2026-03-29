@@ -191,6 +191,6 @@ else
 };
 
 _lines pushBack ("S_COOP: " + (_Scoop toFixed 1) + "  S_THREAT: " + (_Sthreat toFixed 1) + "  IntelConf: " + (_intelConf toFixed 2));
-if (_lastEvent isNotEqualTo "") then { _lines pushBack _lastEvent; };
+if (!(_lastEvent isEqualTo "")) then { _lines pushBack _lastEvent; };
 
 _lines joinString "\n"

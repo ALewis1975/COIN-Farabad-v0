@@ -22,7 +22,7 @@ if (!(_data isEqualType "")) then { _data = ""; };
 private _parts = _data splitString "|";
 private _kind = if ((count _parts) > 0) then { toUpper (_parts # 0) } else { "" };
 
-if (_kind isNotEqualTo "INCIDENT") exitWith
+if (!(_kind isEqualTo "INCIDENT")) exitWith
 {
     ["Workboard", "No primary action is available for this item."] call ARC_fnc_clientToast;
     false

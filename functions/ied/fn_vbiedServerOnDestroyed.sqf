@@ -29,7 +29,7 @@ if (_vehNid isEqualTo '') exitWith {false};
 
 private _curVehNid = ['activeVbiedVehicleNetId',''] call ARC_fnc_stateGet;
 if (!(_curVehNid isEqualType '' )) then { _curVehNid = ''; };
-if (_curVehNid isEqualTo '' || { _curVehNid isNotEqualTo _vehNid }) exitWith {false};
+if (_curVehNid isEqualTo '' || { !(_curVehNid isEqualTo _vehNid) }) exitWith {false};
 
 // If the VBIED detonated via the detonation pipeline, do not double-handle.
 private _det = ['activeVbiedDetonated', false] call ARC_fnc_stateGet;
@@ -46,10 +46,10 @@ if (!(_destroyed isEqualType true) && !(_destroyed isEqualType false)) then { _d
 if (_destroyed) exitWith {true};
 
 private _taskId = ['activeTaskId',''] call ARC_fnc_stateGet;
-if !(_taskId isEqualType '' && { _taskId isNotEqualTo '' }) exitWith {false};
+if !(_taskId isEqualType '' && { !(_taskId isEqualTo )'' }) exitWith {false};
 
 private _gid = ['activeIncidentAcceptedByGroup',''] call ARC_fnc_stateGet;
-if !(_gid isEqualType '' && { _gid isNotEqualTo '' }) then { _gid = ''; };
+if !(_gid isEqualType '' && { !(_gid isEqualTo )'' }) then { _gid = ''; };
 
 private _mkr = missionNamespace getVariable ['ARC_eodDisposalMarkerName','mkr_eod_disposal'];
 if !(_mkr isEqualType '') then { _mkr = 'mkr_eod_disposal'; };
@@ -68,13 +68,13 @@ if (!(_safe isEqualType true) && !(_safe isEqualType false)) then { _safe = fals
 // Approval check (published approvals should already be filtered for expiry)
 private _hasApproval = false;
 private _appr = missionNamespace getVariable ['ARC_pub_eodDispoApprovals', []];
-if (_appr isEqualType [] && { _gid isNotEqualTo '' }) then
+if (_appr isEqualType [] && { !(_gid isEqualTo )'' }) then
 {
     {
         if !(_x isEqualType [] && { (count _x) >= 6 }) then { continue; };
-        if ((_x # 0) isNotEqualTo _taskId) then { continue; };
-        if ((_x # 1) isNotEqualTo _gid) then { continue; };
-        if ((toUpper (trim (_x # 2))) isNotEqualTo 'TOW_VBIED') then { continue; };
+        if (!((_x # 0) isEqualTo _taskId)) then { continue; };
+        if (!((_x # 1) isEqualTo _gid)) then { continue; };
+        if (!((toUpper (trim (_x # 2))) isEqualTo )'TOW_VBIED') then { continue; };
         private _exp = _x # 5;
         if (!(_exp isEqualType 0)) then { _exp = -1; };
         if (_exp >= 0 && { serverTime > _exp }) then { continue; };
@@ -128,7 +128,7 @@ if (_hasApproval && _safe && _atSite) then
     ] call ARC_fnc_intelLog;
 
     private _thr = [_taskId, 'IED', 'VBIED', [['pos', _pos]]] call ARC_fnc_threatCreateFromTask;
-    if (_thr isNotEqualTo '') then { [_thr, 'NEUTRALIZED', _cause] call ARC_fnc_threatUpdateState; };
+    if (!(_thr isEqualTo )'') then { [_thr, 'NEUTRALIZED', _cause] call ARC_fnc_threatUpdateState; };
 
     [] call ARC_fnc_threatDebugSnapshot;
 
@@ -159,7 +159,7 @@ else
     ] call ARC_fnc_intelLog;
 
     private _thr = [_taskId, 'IED', 'VBIED', [['pos', _pos]]] call ARC_fnc_threatCreateFromTask;
-    if (_thr isNotEqualTo '') then { [_thr, 'CLOSED', _cause] call ARC_fnc_threatUpdateState; };
+    if (!(_thr isEqualTo )'') then { [_thr, 'CLOSED', _cause] call ARC_fnc_threatUpdateState; };
 
     [] call ARC_fnc_threatDebugSnapshot;
 

@@ -101,7 +101,7 @@ waitUntil {
 };
 _towCrew forceWalk false;
 
-if ((driver _towVeh) isNotEqualTo _towCrew) then {
+if (!((driver _towVeh) isEqualTo _towCrew)) then {
     if (_debug) then { diag_log format ["[AIRBASESUB] %1 tow driver failed to board tug", _fid]; };
     // Continue anyway (tow will likely fail, but avoid hard deadlock)
 };

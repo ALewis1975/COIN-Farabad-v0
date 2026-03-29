@@ -70,7 +70,7 @@ private _recordClientGate = {
     };
 };
 
-if (!_updateOnly && { !_closeReady } && { _iTypU isNotEqualTo "IED" }) exitWith
+if (!_updateOnly && { !_closeReady } && { !(_iTypU isEqualTo "IED") }) exitWith
 {
     ["NOT_CLOSE_READY", _iTypU, _closeReady, _updateOnly] call _recordClientGate;
     ["SITREP unavailable: incident still in progress. Complete the objective or wait for the incident timer to expire.", "WARN", "TOAST"] call ARC_fnc_clientHint;
@@ -142,7 +142,7 @@ private _from = if (_gid isEqualTo "") then { name player } else { format ["%1 (
 private _detLines = [];
 _detLines pushBack format ["FROM: %1", _from];
 _detLines pushBack format ["LOCATION: %1", _grid];
-if (_recU isNotEqualTo "") then { _detLines pushBack format ["RECOMMEND: %1", _recU]; };
+if (!(_recU isEqualTo "")) then { _detLines pushBack format ["RECOMMEND: %1", _recU]; };
 
 _detLines pushBack format ["ENEMY: %1", if (trim _enemy isEqualTo "") then {"N/A"} else {trim _enemy}];
 _detLines pushBack format ["FRIENDLY: %1", if (trim _friendly isEqualTo "") then {"N/A"} else {trim _friendly}];
@@ -165,7 +165,7 @@ _detLines pushBack format ["FRIENDLY: %1", if (trim _friendly isEqualTo "") then
 _detLines pushBack format ["TASK: %1", if (trim _task isEqualTo "") then {"N/A"} else {trim _task}];
 _detLines pushBack format ["ACE: AMMO=%1 | CAS=%2 | EQUIP=%3", _aceAmmo, _aceCas, _aceEq];
 _detLines pushBack format ["REQUESTS: %1", if (trim _req isEqualTo "") then {"N/A"} else {trim _req}];
-if (trim _notes isNotEqualTo "") then { _detLines pushBack format ["NOTES: %1", trim _notes]; };
+if (trim !(_notes isEqualTo "")) then { _detLines pushBack format ["NOTES: %1", trim _notes]; };
 
 private _det = _detLines joinString "\n";
 

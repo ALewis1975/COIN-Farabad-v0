@@ -141,7 +141,7 @@ private _unitRecord = [
 {
     private _k = _x param [0, ""];
     private _v = _x param [1, nil];
-    if (_k isNotEqualTo "") then
+    if (!(_k isEqualTo "")) then
     {
         private _gIdx = -1;
         { if ((_x param [0, ""]) isEqualTo _k) exitWith { _gIdx = _forEachIndex; }; } forEach _groupRecord;

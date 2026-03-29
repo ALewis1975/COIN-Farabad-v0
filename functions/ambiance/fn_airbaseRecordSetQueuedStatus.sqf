@@ -29,7 +29,7 @@ if (_idx < 0) exitWith { [_records, false] };
 private _rec = _records # _idx;
 private _curr = _rec param [5, ""];
 
-if ((_curr isNotEqualTo "QUEUED") && { !(_status in ["ACTIVE", "COMPLETE", "FAILED"]) }) exitWith { [_records, false] };
+if ((!(_curr isEqualTo "QUEUED")) && { !(_status in ["ACTIVE", "COMPLETE", "FAILED"]) }) exitWith { [_records, false] };
 
 _rec set [5, _status];
 _rec set [6, serverTime];

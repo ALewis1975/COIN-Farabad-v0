@@ -246,7 +246,7 @@ else
     ];
 
     // Attach log ref (best-effort)
-    if (_intelId isNotEqualTo "") then
+    if (!(_intelId isEqualTo "")) then
     {
         private _a = [_rec, "audit", []] call _kvGet;
         private _refs = [_a, "log_refs", []] call _kvGet;

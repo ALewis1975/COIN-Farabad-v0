@@ -48,12 +48,12 @@ private _destRad = 30;
 
     _x params ["_orderId", "_issuedAt", "_status", "_orderType", "_targetGroup", "_data", "_meta"];
 
-    if ((toUpper _status) isNotEqualTo "ACCEPTED") then { continue; };
-    if ((toUpper _orderType) isNotEqualTo "RTB") then { continue; };
-    if (_targetGroup isNotEqualTo _gid) then { continue; };
+    if (!((toUpper _status) isEqualTo "ACCEPTED")) then { continue; };
+    if (!((toUpper _orderType) isEqualTo "RTB")) then { continue; };
+    if (!(_targetGroup isEqualTo _gid)) then { continue; };
 
     private _purpose = toUpper ([_data, "purpose", "REFIT"] call _getPair);
-    if (_purpose isNotEqualTo "EPW") then { continue; };
+    if (!(_purpose isEqualTo "EPW")) then { continue; };
 
     _destPos = [_data, "destPos", []] call _getPair;
     _destRad = [_data, "destRadius", 30] call _getPair;
@@ -71,7 +71,7 @@ if (!(_destPos isEqualType [] && { (count _destPos) >= 2 })) then
         if (!((markerType _cand) isEqualTo "")) exitWith { _m = _cand; };
     } forEach ["epw_processing", "epw_holding", "mkr_SHERIFF_HOLDING"];
 
-    if (_m isNotEqualTo "") then
+    if (!(_m isEqualTo "")) then
     {
         _destPos = getMarkerPos _m;
         _destRad = 30;

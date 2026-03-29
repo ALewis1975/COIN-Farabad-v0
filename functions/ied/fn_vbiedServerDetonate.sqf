@@ -55,7 +55,7 @@ if (!((_pos # 2) isEqualType 0)) then { _pos set [2, 0]; };
 
 // Remove trigger
 private _trgNid = ["activeVbiedTriggerNetId", ""] call ARC_fnc_stateGet;
-if (_trgNid isEqualType "" && { _trgNid isNotEqualTo "" }) then
+if (_trgNid isEqualType "" && { !(_trgNid isEqualTo "") }) then
 {
     private _trg = objectFromNetId _trgNid;
     if (!isNull _trg) then { deleteVehicle _trg; };

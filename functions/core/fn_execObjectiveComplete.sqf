@@ -61,8 +61,8 @@ if (_taskId isEqualTo "") exitWith {false};
 private _activeKind = ["activeObjectiveKind", ""] call ARC_fnc_stateGet;
 private _activeNet = ["activeObjectiveNetId", ""] call ARC_fnc_stateGet;
 
-if (_activeKind isNotEqualTo _kind) exitWith {false};
-if (_activeNet isNotEqualTo "" && { (netId _target) isNotEqualTo _activeNet }) exitWith {false};
+if (!(_activeKind isEqualTo _kind)) exitWith {false};
+if (!(_activeNet isEqualTo "") && { !((netId _target) isEqualTo _activeNet) }) exitWith {false};
 
 private _kindU = toUpper (trim _kind);
 
@@ -149,7 +149,7 @@ if (_stageU in ["DISCOVER","DISCOVER_SCAN"]) exitWith
         ["caller", name _caller]
     ];
 
-    if ((trim _details) isNotEqualTo "") then { _meta pushBack ["details", trim _details]; };
+    if (!((trim _details) isEqualTo "")) then { _meta pushBack ["details", trim _details]; };
 
     ["TECHINT", _summary, _pos, _meta] call ARC_fnc_intelLog;
 
@@ -175,7 +175,7 @@ if (_kindU in ["IED_DEVICE", "VBIED_VEHICLE"]) then
     ];
 
     private _tid = [_taskId, "IED", "IED_SUSPICIOUS_OBJECT", _tCtx] call ARC_fnc_threatCreateFromTask;
-    if (_tid isNotEqualTo "") then
+    if (!(_tid isEqualTo "")) then
     {
         private _cur = [_tid] call _getThreatState;
         if (_cur in ["", "CREATED", "ACTIVE"]) then
@@ -193,7 +193,7 @@ if (_kindU in ["IED_DEVICE", "VBIED_VEHICLE"]) then
 
 // Basic idempotence for single-object objectives (prevents double-click / two-player spam).
 // CACHE_SEARCH is special and must not be blocked here.
-if (_kindU isNotEqualTo "CACHE_SEARCH") then
+if (!(_kindU isEqualTo "CACHE_SEARCH")) then
 {
     private _done = _target getVariable ["ARC_objectiveCompleted", false];
     if (!(_done isEqualType true) && !(_done isEqualType false)) then { _done = false; };
@@ -238,7 +238,7 @@ private _meta = [
     ["caller", name _caller]
 ];
 
-if ((trim _details) isNotEqualTo "") then
+if (!((trim _details) isEqualTo "")) then
 {
     _meta pushBack ["details", trim _details];
 };
@@ -266,7 +266,7 @@ if (_kindU in ["IED_DEVICE", "VBIED_VEHICLE"]) then
 
     // Ensure a threat record exists (idempotent) and update states without downgrades.
     private _tid = [_taskId, "IED", "IED_SUSPICIOUS_OBJECT", _tCtx] call ARC_fnc_threatCreateFromTask;
-    if (_tid isNotEqualTo "") then
+    if (!(_tid isEqualTo "")) then
     {
         private _cur = [_tid] call _getThreatState;
 
@@ -338,7 +338,7 @@ if (_leadOut) then
         if (_existing isEqualTo "") then
         {
             private _lid = ["RECON", "Lead: HUMINT follow-up", _pos, 0.45, 55*60, _taskId, _incType, "", "SUS_ACTIVITY"] call ARC_fnc_leadCreate;
-            if (_lid isNotEqualTo "") then
+            if (!(_lid isEqualTo "")) then
             {
                 _target setVariable ["ARC_objectiveLeadId", _lid, true];
             };
@@ -354,7 +354,7 @@ if (_leadOut) then
         if (_existing isEqualTo "") then
         {
             private _lid = ["RECON", "Lead: Vehicle of interest follow-up", _pos, 0.45, 50*60, _taskId, _incType, "", "SUS_VEHICLE"] call ARC_fnc_leadCreate;
-            if (_lid isNotEqualTo "") then
+            if (!(_lid isEqualTo "")) then
             {
                 _target setVariable ["ARC_objectiveLeadId", _lid, true];
             };

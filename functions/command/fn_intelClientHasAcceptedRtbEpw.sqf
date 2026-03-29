@@ -40,9 +40,9 @@ private _has = false;
 
     _x params ["_orderId", "_issuedAt", "_status", "_orderType", "_targetGroup", "_data", "_meta"];
 
-    if ((toUpper _status) isNotEqualTo "ACCEPTED") then { continue; };
-    if ((toUpper _orderType) isNotEqualTo "RTB") then { continue; };
-    if (_targetGroup isNotEqualTo _gid) then { continue; };
+    if (!((toUpper _status) isEqualTo "ACCEPTED")) then { continue; };
+    if (!((toUpper _orderType) isEqualTo "RTB")) then { continue; };
+    if (!(_targetGroup isEqualTo _gid)) then { continue; };
 
     private _purpose = toUpper ([_data, "purpose", "REFIT"] call _getPair);
     if (_purpose isEqualTo "EPW") exitWith { _has = true; };

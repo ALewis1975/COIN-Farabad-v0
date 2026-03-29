@@ -18,10 +18,10 @@
 if (!isServer) exitWith {false};
 
 private _typeU = toUpper (["activeIncidentType", ""] call ARC_fnc_stateGet);
-if (_typeU isNotEqualTo "IED") exitWith {false};
+if (!(_typeU isEqualTo "IED")) exitWith {false};
 
 private _objKind = toUpper (["activeObjectiveKind", ""] call ARC_fnc_stateGet);
-if (_objKind isNotEqualTo "IED_DEVICE") exitWith {false};
+if (!(_objKind isEqualTo "IED_DEVICE")) exitWith {false};
 
 private _activated = ["activeExecActivated", false] call ARC_fnc_stateGet;
 if (!(_activated isEqualType true) && !(_activated isEqualType false)) then { _activated = false; };
@@ -71,7 +71,7 @@ if (_passive) then
             private _caller = _near # 0;
             private _kindRaw = ["activeObjectiveKind", ""] call ARC_fnc_stateGet;
             if (!(_kindRaw isEqualType "")) then { _kindRaw = ""; };
-            if (_kindRaw isNotEqualTo "") then
+            if (!(_kindRaw isEqualTo "")) then
             {
                 [_kindRaw, _obj, _caller, "", "", "DISCOVER_SCAN"] call ARC_fnc_execObjectiveComplete;
             };
@@ -86,7 +86,7 @@ if (!(_deviceId isEqualType "")) then { _deviceId = ""; };
 private _objDevId = _obj getVariable ["ARC_ied_deviceId", ""];
 if (!(_objDevId isEqualType "")) then { _objDevId = ""; };
 
-private _needsNew = (_deviceId isEqualTo "") || { _objDevId isEqualTo "" } || { _objDevId isNotEqualTo _deviceId };
+private _needsNew = (_deviceId isEqualTo "") || { _objDevId isEqualTo "" } || { !(_objDevId isEqualTo _deviceId) };
 
 if (_needsNew) then
 {
@@ -155,7 +155,7 @@ private _proxRad2 = missionNamespace getVariable ["ARC_iedProxRadiusM", 7];
 if (!(_proxRad2 isEqualType 0) || { _proxRad2 <= 0 }) then { _proxRad2 = 7; };
 _proxRad2 = (_proxRad2 max 3) min 25;
 
-private _needTrg = isNull _trg || { _trgDev isEqualTo "" } || { _trgDev isNotEqualTo _deviceId };
+private _needTrg = isNull _trg || { _trgDev isEqualTo "" } || { !(_trgDev isEqualTo _deviceId) };
 
 if (_needTrg) then
 {

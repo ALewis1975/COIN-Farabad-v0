@@ -20,7 +20,7 @@ private _aliases = missionNamespace getVariable ["ARC_markerAliases", createHash
 if (_aliases isEqualType createHashMap) then
 {
     private _alt = _aliases getOrDefault [_markerName, ""];
-	if ((_alt isNotEqualTo "") && { _alt in allMapMarkers }) exitWith { _alt };
+	if ((!(_alt isEqualTo "")) && { _alt in allMapMarkers }) exitWith { _alt };
 };
 
 if (_markerName in allMapMarkers) exitWith {_markerName};

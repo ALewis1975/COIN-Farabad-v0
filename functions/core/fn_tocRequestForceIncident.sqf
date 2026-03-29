@@ -67,7 +67,7 @@ if (!(_isOmni || _isCmd || _isTocS3 || _isBnCmd)) exitWith
 // Do not allow overlap.
 private _activeTaskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
 if (!(_activeTaskId isEqualType "")) then { _activeTaskId = ""; };
-if (_activeTaskId isNotEqualTo "") exitWith
+if (!(_activeTaskId isEqualTo "")) exitWith
 {
     if (_owner > 0) then { ["HQ", "An incident is already active. Close it (and complete SITREP) before spawning a new one."] remoteExec ["ARC_fnc_clientToast", _owner]; };
     false

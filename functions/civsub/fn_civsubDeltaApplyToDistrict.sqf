@@ -57,7 +57,7 @@ if (_src isEqualType []) then { _src = [_src] call _hmCreate; };
 private _ev = "";
 if (_src isEqualType createHashMap) then { _ev = toUpper (_src getOrDefault ["event", ""]); };
 
-if (_ev isNotEqualTo "") then
+if (!(_ev isEqualTo "")) then
 {
     switch (_ev) do
     {

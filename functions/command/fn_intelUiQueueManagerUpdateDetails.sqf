@@ -189,7 +189,7 @@ switch (_kindU) do
             } forEach _orders;
 
             // Status priority: AVAILABLE -> ORDER ISSUED/ACCEPTED -> ACTIVE -> CONSUMED -> UNKNOWN
-            if (_lead isNotEqualTo []) then
+            if (!(_lead isEqualTo [])) then
             {
                 private _expiresAt = _lead param [6, -1, [0]];
                 private _minsLeft = 0;
@@ -206,7 +206,7 @@ switch (_kindU) do
             }
             else
             {
-                if (_leadOrder isNotEqualTo []) then
+                if (!(_leadOrder isEqualTo [])) then
                 {
                     private _oid = _leadOrder param [0, "", [""]];
                     private _ost = toUpper (_leadOrder param [2, "", [""]]);
@@ -334,18 +334,18 @@ case "FOLLOWON_REQUEST":
 
         if (_req isEqualTo "HOLD") then
         {
-            if (trim _holdIntent isNotEqualTo "") then { _extra pushBack format ["Hold intent: %1", trim _holdIntent]; };
+            if (trim !(_holdIntent isEqualTo "")) then { _extra pushBack format ["Hold intent: %1", trim _holdIntent]; };
             if (_holdMin > 0) then { _extra pushBack format ["Hold duration: %1 min", _holdMin]; };
         };
 
         if (_req isEqualTo "PROCEED") then
         {
-            if (trim _proceedIntent isNotEqualTo "") then { _extra pushBack format ["Proceed intent: %1", trim _proceedIntent]; };
+            if (trim !(_proceedIntent isEqualTo "")) then { _extra pushBack format ["Proceed intent: %1", trim _proceedIntent]; };
         };
 
-        if (trim _rat isNotEqualTo "") then { _extra pushBack format ["Rationale: %1", trim _rat]; };
-        if (trim _con isNotEqualTo "") then { _extra pushBack format ["Constraints: %1", trim _con]; };
-        if (trim _sup isNotEqualTo "") then { _extra pushBack format ["Support: %1", trim _sup]; };
+        if (trim !(_rat isEqualTo "")) then { _extra pushBack format ["Rationale: %1", trim _rat]; };
+        if (trim !(_con isEqualTo "")) then { _extra pushBack format ["Constraints: %1", trim _con]; };
+        if (trim !(_sup isEqualTo "")) then { _extra pushBack format ["Support: %1", trim _sup]; };
 
         if ((count _extra) > 0) then
         {

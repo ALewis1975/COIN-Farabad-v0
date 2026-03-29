@@ -311,7 +311,7 @@ private _setLinkupTaskState = {
     ["activeConvoyLinkupTaskDone", true] call ARC_fnc_stateSet;
 
 	    // Current task is local per-client; broadcast the switch back to the parent convoy task.
-	    if (_taskId isNotEqualTo "") then
+	    if (!(_taskId isEqualTo "")) then
 	    {
 	        [_taskId] remoteExecCall ["ARC_fnc_clientSetCurrentTask", 0];
 	    };
@@ -383,7 +383,7 @@ if ((count _nids) isEqualTo 0) then
     else
     {
         // Clear stale lock if it existed.
-        if (_lockTask isNotEqualTo "" && { (_lockAt isEqualType 0) } && { (_now - _lockAt) >= _lockStaleSec }) then
+        if (!(_lockTask isEqualTo "") && { (_lockAt isEqualType 0) } && { (_now - _lockAt) >= _lockStaleSec }) then
         {
             diag_log format ["[ARC][CONVOY] Clearing stale spawn lock (task=%1, age=%2s).", _lockTask, round (_now - _lockAt)];
             missionNamespace setVariable ["ARC_convoySpawnLock", nil];
@@ -406,7 +406,7 @@ if ((count _nids) isEqualTo 0) then
                 (!isNull _x)
                 && { (_x getVariable ["ARC_isConvoyVeh", false]) }
                 // Treat anything not tagged to the current task as an orphan.
-                && { (_x getVariable ["ARC_convoyTaskId", ""]) isNotEqualTo _taskId }
+                && { !((_x getVariable ["ARC_convoyTaskId", ""]) isEqualTo _taskId) }
             };
 
             if ((count _orphans) > 0) then
@@ -510,7 +510,7 @@ if ((count _nids) isEqualTo 0) then
                     };
 
                     // If the incident was closed/replaced while we were queued, abort cleanly.
-                    if ((["activeTaskId", ""] call ARC_fnc_stateGet) isNotEqualTo _taskId) exitWith
+                    if (!((["activeTaskId", ""] call ARC_fnc_stateGet) isEqualTo _taskId)) exitWith
                     {
                         ["activeConvoySpawning", false] call ARC_fnc_stateSet;
                         ["activeConvoySpawningSince", -1] call ARC_fnc_stateSet;
@@ -533,7 +533,7 @@ if ((count _nids) isEqualTo 0) then
                         private _existingLinkId = ["activeConvoyLinkupTaskId", ""] call ARC_fnc_stateGet;
 
                         private _useLink = (_linkPos isEqualType [] && { (count _linkPos) >= 2 } && { (_startPos distance2D _linkPos) > 75 });
-                        if (_useLink && { _existingLinkId isEqualTo "" } && { _parentId isNotEqualTo "" }) then
+                        if (_useLink && { _existingLinkId isEqualTo "" } && { !(_parentId isEqualTo "") }) then
                         {
                             private _linkTaskId = format ["%1_linkup", _parentId];
                             private _title = "Convoy Link-up";
@@ -1030,7 +1030,7 @@ if (!_started) exitWith
 
         // Prefer editor-set direction of the preset link-up marker.
         private _mk = ["activeConvoyLinkupMarker", ""] call ARC_fnc_stateGet;
-        if (_mk isEqualType "" && { _mk isNotEqualTo "" } && { _mk in allMapMarkers }) then
+        if (_mk isEqualType "" && { !(_mk isEqualTo "") } && { _mk in allMapMarkers }) then
         {
             _dir = markerDir _mk;
         };
@@ -1568,7 +1568,7 @@ if (_bridgeMarkersAvailable) then
             private _pV = getPosATL _x;
             _pV resize 3;
             private _mk = [_pV] call _fn_bridgeMarkerAtPos;
-            if (_mk isNotEqualTo "") exitWith
+            if (!(_mk isEqualTo "")) exitWith
             {
                 _bridgeMarkerHere = _mk;
                 _bridgeMode = true;
@@ -1623,11 +1623,11 @@ if (!_startupBreadcrumbsLogged) then
 private _prevBridgeMarker = missionNamespace getVariable ["ARC_convoy_prevBridgeMarker", ""];
 if !(_prevBridgeMarker isEqualType "") then { _prevBridgeMarker = ""; };
 
-if (_bridgeMarkerHere isNotEqualTo _prevBridgeMarker) then
+if (!(_bridgeMarkerHere isEqualTo _prevBridgeMarker)) then
 {
     missionNamespace setVariable ["ARC_convoy_prevBridgeMarker", _bridgeMarkerHere];
 
-    if (_bridgeMarkerHere isNotEqualTo "") then
+    if (!(_bridgeMarkerHere isEqualTo "")) then
     {
         ["OPS", format ["Convoy entering bridge zone %1. Applying bridge driving profile.", _bridgeMarkerHere], getPosATL _lead, [["event", "CONVOY_BRIDGE_ENTER"], ["marker", _bridgeMarkerHere], ["taskId", _taskId]]] call ARC_fnc_intelLog;
     }
@@ -2024,14 +2024,14 @@ if (_fRec && { (count _aliveVeh) >= 2 }
 // Bridge zones: prefer a micro-route across the bridge rather than off-road bypass.
 private _didBridgeAssistV = false;
 private _bridgeMkV = [_vPos] call _fn_bridgeMarkerAtPos;
-private _bridgeHereV = (_bridgeMkV isNotEqualTo "");
+private _bridgeHereV = (!(_bridgeMkV isEqualTo ""));
 
 if (_bridgeHereV) then
 {
     private _assistF = missionNamespace getVariable ["ARC_convoyBridgeAssistFollowersEnabled", true];
     if (!(_assistF isEqualType true) && !(_assistF isEqualType false)) then { _assistF = true; };
 
-    if (_assistF && { _bridgeMkV isNotEqualTo "" }) then
+    if (_assistF && { !(_bridgeMkV isEqualTo "") }) then
     {
         private _ptsV = [_bridgeMkV, _destWpPos, _vPos] call _fn_bridgeAssistPoints;
         if ((count _ptsV) > 0) then
@@ -2131,7 +2131,7 @@ else
     private _prevFollowerStage = ["activeConvoyFollowerRecoverStage", "off"] call ARC_fnc_stateGet;
     if !(_prevFollowerStage isEqualType "") then { _prevFollowerStage = "off"; };
 
-    if (_followerStage isNotEqualTo _prevFollowerStage) then
+    if (!(_followerStage isEqualTo _prevFollowerStage)) then
     {
         ["activeConvoyFollowerRecoverStage", _followerStage] call ARC_fnc_stateSet;
 
@@ -2151,7 +2151,7 @@ else
 {
     private _prevFollowerStage = ["activeConvoyFollowerRecoverStage", "off"] call ARC_fnc_stateGet;
     if !(_prevFollowerStage isEqualType "") then { _prevFollowerStage = "off"; };
-    if (_prevFollowerStage isNotEqualTo "off") then
+    if (!(_prevFollowerStage isEqualTo "off")) then
     {
         ["activeConvoyFollowerRecoverStage", "off"] call ARC_fnc_stateSet;
         ["OPS", "Follower recovery stage: off.", getPosATL _lead, [["event", "CONVOY_FOLLOWER_RECOVERY_STAGE"], ["stage", "off"], ["taskId", _taskId]]] call ARC_fnc_intelLog;
@@ -2317,7 +2317,7 @@ else
             // before continuing on to ingress/destination.
             private _didBridgeAssist = false;
 
-            if (_bridgeLeadMode && { _bridgeMarkerLead isNotEqualTo "" }) then
+            if (_bridgeLeadMode && { !(_bridgeMarkerLead isEqualTo "") }) then
             {
                 private _assistEn = missionNamespace getVariable ["ARC_convoyBridgeAssistEnabled", true];
                 if (!(_assistEn isEqualType true) && !(_assistEn isEqualType false)) then { _assistEn = true; };
@@ -2508,7 +2508,7 @@ else
         _grpW setCombatMode "YELLOW";
         _grpW setSpeedMode "LIMITED";
 
-        if (_stage isNotEqualTo _prevRecoveryStage) then
+        if (!(_stage isEqualTo _prevRecoveryStage)) then
         {
             ["activeConvoyRecoveryLastStageLogged", _stage] call ARC_fnc_stateSet;
             ["OPS", format ["Convoy recovery executed (stage %1) after %2s stall.", _stage, round _stuckFor], _curPos, [["event", "CONVOY_RECOVER"], ["stage", _stage], ["taskId", _taskId]]] call ARC_fnc_intelLog;
@@ -2523,7 +2523,7 @@ else
             "off"
         };
 
-        if (_bridgeRecoverState isNotEqualTo _prevBridgeRecoverState) then
+        if (!(_bridgeRecoverState isEqualTo _prevBridgeRecoverState)) then
         {
             ["activeConvoyBridgeRecoverLogState", _bridgeRecoverState] call ARC_fnc_stateSet;
             if (_bridgeRecoverState isEqualTo "cooldown") then

@@ -96,7 +96,7 @@ if (!(_unitStatuses isEqualType [])) then { _unitStatuses = []; };
 private _statusIdx = -1;
 { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _callerGroup }) exitWith { _statusIdx = _forEachIndex; }; } forEach _unitStatuses;
 private _statusNow = if (_statusIdx < 0) then { "OFFLINE" } else { toUpper (trim ((_unitStatuses # _statusIdx) # 1)) };
-if (_statusNow isNotEqualTo "AVAILABLE") exitWith
+if (!(_statusNow isEqualTo "AVAILABLE")) exitWith
 {
     ["Incident acceptance denied: your group must set status to AVAILABLE first."] remoteExec ["ARC_fnc_clientHint", owner _caller];
     ["INCIDENT_ACCEPT", "REJECTED", "Set group status to AVAILABLE, then retry."] remoteExec ["ARC_fnc_uiConsoleOpsActionStatus", owner _caller];
@@ -119,14 +119,14 @@ if (missionNamespace getVariable ["civsub_v1_enabled", false]) then
     if (_did isEqualTo "" && { _ipos isEqualType [] && { count _ipos >= 2 } }) then
     {
         _did = [_ipos] call ARC_fnc_civsubDistrictsFindByPos;
-        if (_did isEqualType "" && { _did isNotEqualTo "" }) then
+        if (_did isEqualType "" && { !(_did isEqualTo "") }) then
         {
             ["activeIncidentCivsubDistrictId", _did] call ARC_fnc_stateSet;
             missionNamespace setVariable ["ARC_activeIncidentCivsubDistrictId", _did, true];
         };
     };
 
-    if (_did isEqualType "" && { _did isNotEqualTo "" }) then
+    if (_did isEqualType "" && { !(_did isEqualTo "") }) then
     {
         private _d = [_did] call ARC_fnc_civsubDistrictsGetById;
         if (_d isEqualType createHashMap) then
@@ -161,7 +161,7 @@ private _acceptedBy = if (isNull _caller) then {"TOC"} else { [_caller] call ARC
 
 // Remember last tasked group (used for follow-on orders when no incident is active).
 private _lastG = if (isNull _caller) then {""} else { groupId (group _caller) };
-if (_lastG isNotEqualTo "") then
+if (!(_lastG isEqualTo "")) then
 {
     [_lastG, "IN TRANSIT", _acceptedBy] call _setGroupStatus;
     ["lastTaskingGroup", _lastG] call ARC_fnc_stateSet;
@@ -171,7 +171,7 @@ if (_lastG isNotEqualTo "") then
 // If a "Hold: Main Position" (or any HOLD) order is currently ACCEPTED for this group,
 // auto-complete it now. HOLD is intended to be an "until new tasking" order; without an
 // auto-complete hook it becomes a dead task and can confuse follow-on logic.
-if (_lastG isNotEqualTo "") then
+if (!(_lastG isEqualTo "")) then
 {
     private _ords = ["tocOrders", []] call ARC_fnc_stateGet;
     if (!(_ords isEqualType [])) then { _ords = []; };
@@ -182,13 +182,13 @@ if (_lastG isNotEqualTo "") then
         _x params ["_orderId", "_issuedAt", "_status", "_orderType", "_tgtGroup", "_data", "_meta"];
 
         if (!(_tgtGroup isEqualType "") || { _tgtGroup isEqualTo "" }) then { continue; };
-        if (_tgtGroup isNotEqualTo _lastG) then { continue; };
-        if (toUpper _orderType isNotEqualTo "HOLD") then { continue; };
-        if (toUpper _status isNotEqualTo "ACCEPTED") then { continue; };
+        if (!(_tgtGroup isEqualTo _lastG)) then { continue; };
+        if (toUpper !(_orderType isEqualTo "HOLD")) then { continue; };
+        if (toUpper !(_status isEqualTo "ACCEPTED")) then { continue; };
 
         // Mark the associated task as succeeded (orderId is the taskId used in fn_intelOrderAccept).
         private _tid = _orderId;
-        if (_tid isEqualType "" && { _tid isNotEqualTo "" }) then
+        if (_tid isEqualType "" && { !(_tid isEqualTo "") }) then
         {
             [_tid, "SUCCEEDED", true] call BIS_fnc_taskSetState;
         };
@@ -276,7 +276,7 @@ private _medNew  = (_med  - _cMed) max 0;
 
 	// Current task is local per-client. Broadcast the parent incident task as current,
 	// except for exec types that immediately create their own actionable child tasks (e.g., ROUTE_RECON).
-	if (_taskId isNotEqualTo "" && { _execKind isNotEqualTo "ROUTE_RECON" }) then
+	if (!(_taskId isEqualTo "") && { !(_execKind isEqualTo "ROUTE_RECON") }) then
 	{
 	    private _re = [_taskId] remoteExecCall ["ARC_fnc_clientSetCurrentTask", 0];
     if (isNil { _re }) then

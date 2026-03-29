@@ -106,7 +106,7 @@ if (_posATL isEqualType [] && { (count _posATL) >= 2 }) then
 };
 
 private _locLine = "";
-if (_taskId isNotEqualTo "") then
+if (!(_taskId isEqualTo "")) then
 {
     if (_mkr isEqualTo "") then
     {
@@ -128,7 +128,7 @@ if (_taskId isEqualTo "") then
 }
 else
 {
-    if (_mkr isNotEqualTo "") then
+    if (!(_mkr isEqualTo "")) then
     {
         _zoneA = [_mkr] call ARC_fnc_worldGetZoneForMarker;
     }
@@ -146,7 +146,7 @@ if (_zoneA isEqualTo "") then { _zoneA = "Unzoned"; };
 private _taskingFrom = "";
 private _supporting = "";
 private _constraints = "";
-if (_taskId isNotEqualTo "" && { _type isNotEqualTo "" }) then
+if (!(_taskId isEqualTo "") && { !(_type isEqualTo "") }) then
 {
     private _t = [_type, _zoneA] call ARC_fnc_orbatPickTasking;
     if (_t isEqualType [] && { (count _t) >= 3 }) then
@@ -166,7 +166,7 @@ if (_acceptedByGrp isEqualTo "") then { _acceptedByGrp = "UNASSIGNED"; };
 private _statusA = "";
 private _linkupWith = "None";
 
-if (_taskId isNotEqualTo "") then
+if (!(_taskId isEqualTo "")) then
 {
     private _accepted = missionNamespace getVariable ["ARC_activeIncidentAccepted", false];
     if (!(_accepted isEqualType true) && !(_accepted isEqualType false)) then { _accepted = false; };
@@ -241,7 +241,7 @@ if (_taskId isNotEqualTo "") then
                 if (!isNull _drv) then
                 {
                     private _gid = groupId (group _drv);
-                    if (_gid isEqualType "" && { _gid isNotEqualTo "" }) then
+                    if (_gid isEqualType "" && { !(_gid isEqualTo "") }) then
                     {
                         _linkupWith = _gid;
                         _got = true;
@@ -252,7 +252,7 @@ if (_taskId isNotEqualTo "") then
 
         if (!_got) then
         {
-            _linkupWith = if ((toUpper _type) isEqualTo "ESCORT" && { _taskingFrom isNotEqualTo "" }) then { _taskingFrom } else { "Friendly convoy element" };
+            _linkupWith = if ((toUpper _type) isEqualTo "ESCORT" && { !(_taskingFrom isEqualTo "") }) then { _taskingFrom } else { "Friendly convoy element" };
         };
     };
 };
@@ -269,7 +269,7 @@ else
         "<t size='1.05'>%1</t><br/>Type: %2<br/>Status: %3<br/>%4<br/>Zone: %5<br/>Task ID: %6<br/>Tasking From: %7<br/>Linking up with: %8<br/>Supported by: %9<br/>Assigned Unit: %10<br/><br/>",
         _disp, _type, _statusA, _locLine, _zoneA, _taskId, _taskingFrom, _linkupWith, _supporting, _acceptedByGrp
     ];
-    if (_constraints isNotEqualTo "") then
+    if (!(_constraints isEqualTo "")) then
     {
         _opsText = _opsText + format ["<t size='0.9' color='#C0C0C0'>Constraints: %1</t><br/><br/>", _constraints];
     };
@@ -376,7 +376,7 @@ else
         if ((count _sumQ) > 64) then { _sumQ = (_sumQ select [0, 64]) + "..."; };
 
         _opsText = _opsText + format ["<t color='#FFD700'>%1</t> | %2 | %3m | %4 | %5 | %6<br/>", _qid, _qkind, _age, _whoQ, _zoneQ, _gridQ];
-        if (_sumQ isNotEqualTo "") then { _opsText = _opsText + format ["<t color='#A0A0A0'>%1</t><br/>", _sumQ]; };
+        if (!(_sumQ isEqualTo "")) then { _opsText = _opsText + format ["<t color='#A0A0A0'>%1</t><br/>", _sumQ]; };
 
         _shown = _shown + 1;
         if (_shown >= _showN) exitWith {};
@@ -476,7 +476,7 @@ else
         private _details = [_meta, "details", ""] call _metaGetOps;
         if (!(_details isEqualType "")) then { _details = ""; };
         _details = trim _details;
-        if (_details isNotEqualTo "") then
+        if (!(_details isEqualTo "")) then
         {
             _details = (_details splitString (toString [10])) joinString "<br/>";
             _details = format ["<br/><t color='#A0A0A0'>%1</t>", _details];
@@ -642,7 +642,7 @@ else
         };
 
         private _tagTxt = "";
-        if (_lTag isEqualType "" && { _lTag isNotEqualTo "" }) then
+        if (_lTag isEqualType "" && { !(_lTag isEqualTo "") }) then
         {
             _tagTxt = format [" <t color='#A0A0A0'>[%1]</t>", _lTag];
         };
@@ -700,7 +700,7 @@ else
         private _details = [_meta, "details", ""] call _metaGet;
         if (!(_details isEqualType "")) then { _details = ""; };
         _details = trim _details;
-        if (_details isNotEqualTo "") then
+        if (!(_details isEqualTo "")) then
         {
             // Convert any newline characters to <br/> for structured text output
             _details = (_details splitString (toString [10])) joinString "<br/>";
@@ -1042,48 +1042,48 @@ else
 };
 
 // Apply updates (setDiaryRecordText)
-if (_recOps isNotEqualTo diaryRecordNull) then
+if (!(_recOps isEqualTo diaryRecordNull)) then
 {
     player setDiaryRecordText [["ARC_OPS", _recOps], ["OPS Dashboard", _opsText, ""]];
 };
 
-if (_recIntel isNotEqualTo diaryRecordNull) then
+if (!(_recIntel isEqualTo diaryRecordNull)) then
 {
     player setDiaryRecordText [["ARC_INTEL", _recIntel], ["Intel Feed", _intelText, ""]];
 };
 
-if (_recSitrep isNotEqualTo diaryRecordNull) then
+if (!(_recSitrep isEqualTo diaryRecordNull)) then
 {
     player setDiaryRecordText [["ARC_SITREP", _recSitrep], ["SITREP", _sitrepText, ""]];
 };
 
-if (_recS1 isNotEqualTo diaryRecordNull) then
+if (!(_recS1 isEqualTo diaryRecordNull)) then
 {
     player setDiaryRecordText [["ARC_S1", _recS1], ["Personnel Snapshot", _s1Text, ""]];
 };
 
-if (_recDebug isNotEqualTo diaryRecordNull) then
+if (!(_recDebug isEqualTo diaryRecordNull)) then
 {
     player setDiaryRecordText [["ARC_DEBUG", _recDebug], ["Debug Inspector", _dbgText, ""]];
 };
 
-if (_recOpord isNotEqualTo diaryRecordNull) then
+if (!(_recOpord isEqualTo diaryRecordNull)) then
 {
     player setDiaryRecordText [["Diary", _recOpord], ["OPORD", _opordText, ""]];
 };
 
 
-if (_recRoles isNotEqualTo diaryRecordNull) then
+if (!(_recRoles isEqualTo diaryRecordNull)) then
 {
     player setDiaryRecordText [["Diary", _recRoles], ["ROLES & CAPABILITIES", _rolesText, ""]];
 };
 
-if (_recOrbat isNotEqualTo diaryRecordNull) then
+if (!(_recOrbat isEqualTo diaryRecordNull)) then
 {
     player setDiaryRecordText [["Diary", _recOrbat], ["ORBAT", _orbatText, ""]];
 };
 
-if (_recSoI isNotEqualTo diaryRecordNull) then
+if (!(_recSoI isEqualTo diaryRecordNull)) then
 {
     player setDiaryRecordText [["Diary", _recSoI], ["SOI", _soiText, ""]];
 };

@@ -49,7 +49,7 @@ private _radius = 2500;
     private _heat = _thrN # 5;
     private _st   = toUpper (_thrN # 6);
 
-    if (_t isNotEqualTo _typeU) then { continue; };
+    if (!(_t isEqualTo _typeU)) then { continue; };
     if (_st isEqualTo "DORMANT") then { continue; };
 
     if (!(_base isEqualType []) || { (count _base) < 2 }) then { continue; };
@@ -98,7 +98,7 @@ if (_bestIdx >= 0) exitWith
 
     // Ensure parent task exists (safe on repeat)
     private _parentTaskId = [_id, _threadType, _zoneBias, (_thr # 3)] call ARC_fnc_taskEnsureThreadParent;
-    if (_parentTaskId isNotEqualTo "") then
+    if (!(_parentTaskId isEqualTo "")) then
     {
         _thr set [13, _parentTaskId];
         _threads set [_bestIdx, _thr];

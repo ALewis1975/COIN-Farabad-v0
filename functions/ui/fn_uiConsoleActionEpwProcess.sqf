@@ -93,10 +93,10 @@ else
             _x params ["_oid", "_iat", "_st", "_ot", "_tg", "_data", "_meta"];
             if (_oid isEqualTo _orderId) exitWith
             {
-                if ((toUpper _st) isNotEqualTo "ACCEPTED") exitWith {};
-                if ((toUpper _ot) isNotEqualTo "RTB") exitWith {};
+                if (!((toUpper _st) isEqualTo "ACCEPTED")) exitWith {};
+                if (!((toUpper _ot) isEqualTo "RTB")) exitWith {};
                 private _purpose = toUpper ([_data, "purpose", "REFIT"] call _getPair);
-                if (_purpose isNotEqualTo "EPW") exitWith {};
+                if (!(_purpose isEqualTo "EPW")) exitWith {};
                 [_oid, _tg, _data, _meta] call _consumeOrder;
             };
         };
@@ -150,7 +150,7 @@ if (!_arrived && {!_near}) exitWith {
 
 // Force only when not physically at the point, or when TOC is processing another unit
 private _force = (!_near);
-if (_isToc && { _orderTg isNotEqualTo "" } && { _orderTg isNotEqualTo _gidSelf }) then {
+if (_isToc && { !(_orderTg isEqualTo "") } && { !(_orderTg isEqualTo _gidSelf) }) then {
     _force = true;
 };
 

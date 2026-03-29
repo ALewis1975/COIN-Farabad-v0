@@ -93,7 +93,7 @@ for "_i" from 0 to (_tries - 1) do
         break;
     } forEach _candList;
 
-    if (_best isNotEqualTo []) exitWith {};
+    if (!(_best isEqualTo [])) exitWith {};
 };
 
 _best

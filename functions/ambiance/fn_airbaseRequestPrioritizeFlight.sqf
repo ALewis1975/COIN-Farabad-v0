@@ -61,7 +61,7 @@ _recs = _updated param [0, []];
 
 private _manualPriority = ["airbase_v1_manualPriority", []] call ARC_fnc_stateGet;
 if (!(_manualPriority isEqualType [])) then { _manualPriority = []; };
-_manualPriority = _manualPriority select { _x isEqualType "" && { _x isNotEqualTo _flightId } };
+_manualPriority = _manualPriority select { _x isEqualType "" && { !(_x isEqualTo _flightId) } };
 _manualPriority pushBack _flightId;
 ["airbase_v1_manualPriority", _manualPriority] call ARC_fnc_stateSet;
 

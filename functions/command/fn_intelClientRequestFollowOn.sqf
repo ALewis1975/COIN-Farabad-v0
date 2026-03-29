@@ -121,28 +121,28 @@ _lines pushBack format ["REQUEST: %1 (%2)", _request, _purposeDisp];
 
 if (_request isEqualTo "HOLD") then
 {
-    if (trim _holdIntent isNotEqualTo "") then { _lines pushBack format ["HOLD INTENT: %1", trim _holdIntent]; };
+    if (trim !(_holdIntent isEqualTo "")) then { _lines pushBack format ["HOLD INTENT: %1", trim _holdIntent]; };
     if (_holdMinutes > 0) then { _lines pushBack format ["HOLD DURATION: %1 min", _holdMinutes]; };
 };
 
 if (_request isEqualTo "PROCEED") then
 {
-    if (trim _proceedIntent isNotEqualTo "") then { _lines pushBack format ["PROCEED INTENT: %1", trim _proceedIntent]; };
+    if (trim !(_proceedIntent isEqualTo "")) then { _lines pushBack format ["PROCEED INTENT: %1", trim _proceedIntent]; };
 };
 
-if (trim _rationale isNotEqualTo "") then { _lines pushBack format ["RATIONALE: %1", trim _rationale]; };
-if (trim _constraints isNotEqualTo "") then { _lines pushBack format ["CONSTRAINTS: %1", trim _constraints]; };
-if (trim _support isNotEqualTo "") then { _lines pushBack format ["SUPPORT: %1", trim _support]; };
-if (trim _notes isNotEqualTo "") then { _lines pushBack format ["NOTES: %1", trim _notes]; };
+if (trim !(_rationale isEqualTo "")) then { _lines pushBack format ["RATIONALE: %1", trim _rationale]; };
+if (trim !(_constraints isEqualTo "")) then { _lines pushBack format ["CONSTRAINTS: %1", trim _constraints]; };
+if (trim !(_support isEqualTo "")) then { _lines pushBack format ["SUPPORT: %1", trim _support]; };
+if (trim !(_notes isEqualTo "")) then { _lines pushBack format ["NOTES: %1", trim _notes]; };
 
 private _details = _lines joinString "\n";
 
 // Short note to carry into issued order meta
 private _noteLines = [];
-if (trim _rationale isNotEqualTo "") then { _noteLines pushBack format ["Rationale: %1", trim _rationale]; };
-if (trim _constraints isNotEqualTo "") then { _noteLines pushBack format ["Constraints: %1", trim _constraints]; };
-if (trim _support isNotEqualTo "") then { _noteLines pushBack format ["Support: %1", trim _support]; };
-if (trim _notes isNotEqualTo "") then { _noteLines pushBack format ["Notes: %1", trim _notes]; };
+if (trim !(_rationale isEqualTo "")) then { _noteLines pushBack format ["Rationale: %1", trim _rationale]; };
+if (trim !(_constraints isEqualTo "")) then { _noteLines pushBack format ["Constraints: %1", trim _constraints]; };
+if (trim !(_support isEqualTo "")) then { _noteLines pushBack format ["Support: %1", trim _support]; };
+if (trim !(_notes isEqualTo "")) then { _noteLines pushBack format ["Notes: %1", trim _notes]; };
 private _noteForOrder = _noteLines joinString " | ";
 
 private _payload =

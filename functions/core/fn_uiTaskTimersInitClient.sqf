@@ -54,7 +54,7 @@ uiNamespace setVariable ["ARC_TaskTimerHUD_layer", _layer];
 
         private _taskId = missionNamespace getVariable ["ARC_activeTaskId", ""];
         private _accepted = missionNamespace getVariable ["ARC_activeIncidentAccepted", false];
-        private _useIncident = (_taskId isNotEqualTo "") && { _accepted };
+        private _useIncident = (!(_taskId isEqualTo "")) && { _accepted };
 
         // Non-incident tasks: show the ATH for any focused task set via ARC_fnc_clientSetCurrentTask.
         if (!_useIncident) then
@@ -84,14 +84,14 @@ uiNamespace setVariable ["ARC_TaskTimerHUD_layer", _layer];
 
             private _txt = format ["<t size='%1' font='PuristaMedium' color='#FFD700'>ASSIGNED TASK</t>", _sHeader];
 
-            if (_fTitle isNotEqualTo "") then
+            if (!(_fTitle isEqualTo "")) then
             {
                 _txt = _txt + "<br/>" + format ["<t size='%1' font='PuristaMedium'>%2</t>", _uiScale, _fTitle];
             };
 
             _txt = _txt + "<br/>" + format ["<t size='%1' font='PuristaLight'>%2</t>", _uiScale, _fKind];
 
-            if (_grid isNotEqualTo "") then
+            if (!(_grid isEqualTo "")) then
             {
                 private _line = if (_dist >= 0) then { format ["GRID %1 | %2m", _grid, _dist] } else { format ["GRID %1", _grid] };
                 _txt = _txt + "<br/>" + format ["<t size='%1' font='PuristaLight'>%2</t>", _sGrid, _line];

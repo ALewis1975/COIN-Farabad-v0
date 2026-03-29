@@ -79,7 +79,7 @@ if (_rebuild) then
 
     // Restore selection
     private _set = -1;
-    if (_prevData isNotEqualTo "") then
+    if (!(_prevData isEqualTo "")) then
     {
         for "_n" from 0 to ((lbSize _ctrlList) - 1) do
         {

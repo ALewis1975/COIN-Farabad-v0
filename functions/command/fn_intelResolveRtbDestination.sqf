@@ -135,7 +135,7 @@ switch (_purpose) do
                         if (!((markerType _cand) isEqualTo "")) exitWith { _mHold = _cand; };
                     } forEach ["epw_holding", "mkr_SHERIFF_HOLDING"];
 
-                    if (_mHold isNotEqualTo "") then
+                    if (!(_mHold isEqualTo "")) then
                     {
                         _pos = getMarkerPos _mHold;
                         _label = markerText _mHold;

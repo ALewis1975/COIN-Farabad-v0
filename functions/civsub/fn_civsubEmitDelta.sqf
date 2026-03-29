@@ -53,7 +53,7 @@ if !(_bundle isEqualType createHashMap) exitWith {createHashMap};
 if (!isNil "ARC_fnc_civsubLeadEmitBridge") then
 {
     private _bridgedLeadId = [_bundle] call ARC_fnc_civsubLeadEmitBridge;
-    if (_bridgedLeadId isEqualType "" && { _bridgedLeadId isNotEqualTo "" }) then
+    if (_bridgedLeadId isEqualType "" && { !(_bridgedLeadId isEqualTo "") }) then
     {
         missionNamespace setVariable ["civsub_v1_lastDelta_leadId", _bridgedLeadId, true];
     };

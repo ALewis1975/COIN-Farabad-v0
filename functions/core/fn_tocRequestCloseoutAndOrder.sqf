@@ -85,7 +85,7 @@ private _deny = {
         [["event", "TOC_CLOSEOUT_SECURITY_DENIED"], ["rpc", _rpc], ["reason", _reason], ["remoteOwner", _owner], ["callerName", _who], ["callerUID", _uid]] + _details
     ] call ARC_fnc_intelLog;
 
-    if (_toastMsg isNotEqualTo "") then {
+    if (!(_toastMsg isEqualTo "")) then {
         ["TOC Ops", _toastMsg] call _toast;
     };
 };
@@ -413,7 +413,7 @@ private _display = ["activeIncidentDisplayName", "Incident"] call ARC_fnc_stateG
 if (!(_display isEqualType "")) then { _display = "Incident"; };
 
 private _pos = [];
-if (_posATL isNotEqualTo []) then { _pos = +_posATL; _pos resize 3; };
+if (!(_posATL isEqualTo [])) then { _pos = +_posATL; _pos resize 3; };
 if (_pos isEqualTo []) then { _pos = [0,0,0]; };
 
 private _zone = if (_marker isEqualTo "") then { [_pos] call ARC_fnc_worldGetZoneForPos } else { [_marker] call ARC_fnc_worldGetZoneForMarker };
@@ -448,7 +448,7 @@ if (!(_leadsBefore isEqualType [])) then { _leadsBefore = []; };
     if (_x isEqualType [] && { (count _x) >= 1 }) then
     {
         private _lid = _x # 0;
-        if (_lid isEqualType "" && { _lid isNotEqualTo "" }) then { _leadIdsBefore pushBackUnique _lid; };
+        if (_lid isEqualType "" && { !(_lid isEqualTo "") }) then { _leadIdsBefore pushBackUnique _lid; };
     };
 } forEach _leadsBefore;
 
@@ -481,7 +481,7 @@ if (!(_leadsAfter isEqualType [])) then { _leadsAfter = []; };
     };
 } forEach _leadsAfter;
 
-if (_genLeadId isNotEqualTo "") then
+if (!(_genLeadId isEqualTo "")) then
 {
     ["lastCloseoutGeneratedLeadId", _genLeadId] call ARC_fnc_stateSet;
     ["lastCloseoutGeneratedLeadName", _genLeadName] call ARC_fnc_stateSet;
@@ -536,30 +536,30 @@ if (_incTypeU isEqualTo "IED") then
 };
 
 private _seed = [];
-if (trim _rationale isNotEqualTo "") then { _seed pushBack ["rationale", trim _rationale]; };
-if (trim _constraints isNotEqualTo "") then { _seed pushBack ["constraints", trim _constraints]; };
-if (trim _support isNotEqualTo "") then { _seed pushBack ["support", trim _support]; };
+if (trim !(_rationale isEqualTo "")) then { _seed pushBack ["rationale", trim _rationale]; };
+if (trim !(_constraints isEqualTo "")) then { _seed pushBack ["constraints", trim _constraints]; };
+if (trim !(_support isEqualTo "")) then { _seed pushBack ["support", trim _support]; };
 
 if (_orderType isEqualTo "RTB") then { _seed pushBack ["purpose", _purpose]; };
 
 if (_orderType isEqualTo "HOLD") then
 {
-    if (trim _holdIntent isNotEqualTo "") then { _seed pushBack ["holdIntent", trim _holdIntent]; };
+    if (trim !(_holdIntent isEqualTo "")) then { _seed pushBack ["holdIntent", trim _holdIntent]; };
     if (_holdMinutes isEqualType 0 && { _holdMinutes > 0 }) then { _seed pushBack ["holdMinutes", _holdMinutes]; };
 };
 
 if (_orderType isEqualTo "LEAD") then
 {
-    if (trim _proceedIntent isNotEqualTo "") then { _seed pushBack ["proceedIntent", trim _proceedIntent]; };
+    if (trim !(_proceedIntent isEqualTo "")) then { _seed pushBack ["proceedIntent", trim _proceedIntent]; };
 
     // Prefer system-suggested follow-on lead, otherwise the closeout-generated lead.
-    if (_foLeadIdCaptured isNotEqualTo "") then
+    if (!(_foLeadIdCaptured isEqualTo "")) then
     {
         _seed pushBack ["leadId", _foLeadIdCaptured];
     }
     else
     {
-        if (_genLeadId isNotEqualTo "") then { _seed pushBack ["leadId", _genLeadId]; };
+        if (!(_genLeadId isEqualTo "")) then { _seed pushBack ["leadId", _genLeadId]; };
     };
 };
 

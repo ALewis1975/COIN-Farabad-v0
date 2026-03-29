@@ -14,7 +14,7 @@ params [
     ["_ctx", []]
 ];
 
-if (toUpper _event isNotEqualTo "AO_ACTIVATED") exitWith {false};
+if (toUpper !(_event isEqualTo "AO_ACTIVATED")) exitWith {false};
 
 private _enabled = ["threat_v0_enabled", true] call ARC_fnc_stateGet;
 if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabled = true; };
@@ -43,7 +43,7 @@ if (_taskId isEqualTo "") exitWith {false};
 private _incType = toUpper ([_ctx, "incident_type", ""] call _kvGet);
 
 // v0 scope: create threats only for IED incidents (Phase 1 package)
-if (_incType isNotEqualTo "IED") exitWith {true};
+if (!(_incType isEqualTo "IED")) exitWith {true};
 
 // Ensure minimal area context exists
 private _pos = [_ctx, "pos", [0,0,0]] call _kvGet;
@@ -63,7 +63,7 @@ private _objKind = ["activeObjectiveKind", ""] call ARC_fnc_stateGet;
 private _objNid = ["activeObjectiveNetId", ""] call ARC_fnc_stateGet;
 
 if (
-    (_objNid isNotEqualTo "")
+    (!(_objNid isEqualTo ""))
     && { (toUpper _objKind) in ["IED_DEVICE", "VBIED_VEHICLE"] }
 ) then
 {

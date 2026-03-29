@@ -118,7 +118,7 @@ private _execFid = missionNamespace getVariable ["airbase_v1_execFid", ""];
 if (!(_execFid isEqualType "")) then { _execFid = ""; };
 
 private _depInProgress = 0;
-if (_execActive && { _execFid isNotEqualTo "" }) then {
+if (_execActive && { !(_execFid isEqualTo "") }) then {
     private _execRecIdx = -1;
     { if ((_x isEqualType []) && { (count _x) >= 3 } && { ((_x param [0, ""]) isEqualTo _execFid) }) exitWith { _execRecIdx = _forEachIndex; }; } forEach _airRecs;
 
@@ -317,7 +317,7 @@ private _blockedRouteTail = [];
     if !(_x isEqualType []) then { continue; };
     if ((count _x) < 4) then { continue; };
     private _cat = toUpper (_x param [2, ""]);
-    if (_cat isNotEqualTo "OPS") then { continue; };
+    if (!(_cat isEqualTo "OPS")) then { continue; };
 
     private _summary = _x param [3, ""];
     if !(_summary isEqualType "") then { _summary = str _summary; };

@@ -86,7 +86,7 @@ if (!isNull _approver) then
     };
 };
 
-if (!(_status isEqualType "") || { toUpper _status isNotEqualTo "PENDING" }) exitWith {false};
+if (!(_status isEqualType "") || { toUpper !(_status isEqualTo "PENDING") }) exitWith {false};
 
 private _newStatus = if (_approve) then {"APPROVED"} else {"REJECTED"};
 private _dec = [serverTime, _by, _approve, trim _note];
@@ -159,7 +159,7 @@ if (_approve) then
             if (!(_disp isEqualType "")) then { _disp = _summary; };
             _disp = trim _disp;
             if (_disp isEqualTo "") then { _disp = "Lead: S2 Requested Collection"; };
-            if ((toLower _disp) find "lead:" isNotEqualTo 0) then { _disp = format ["Lead: %1", _disp]; };
+            if ((toLower _disp) find !("lead:" isEqualTo 0)) then { _disp = format ["Lead: %1", _disp]; };
 
             if (!(_strength isEqualType 0)) then { _strength = 0.55; };
             _strength = (_strength max 0.05) min 0.95;
@@ -197,7 +197,7 @@ if (_approve) then
 
 
             // Enqueue into TOC backlog so the next incident generator can prefer this approved lead.
-            if (!isNil "ARC_fnc_tocBacklogEnqueue" && { _lid isEqualType "" } && { _lid isNotEqualTo "" }) then
+            if (!isNil "ARC_fnc_tocBacklogEnqueue" && { _lid isEqualType "" } && { !(_lid isEqualTo "") }) then
             {
                 [_lid, _pri, _id, _by, _summary] call ARC_fnc_tocBacklogEnqueue;
             };
@@ -226,7 +226,7 @@ if (_approve) then
                 if (_x isEqualType "") then
                 {
                     private _lid = trim _x;
-                    if (_lid isNotEqualTo "") then { _approved pushBackUnique _lid; };
+                    if (!(_lid isEqualTo "")) then { _approved pushBackUnique _lid; };
                 };
             } forEach _leadIds;
 
@@ -255,7 +255,7 @@ if (_approve) then
             if (!isNil "ARC_fnc_tocBacklogEnqueue") then
             {
                 {
-                    if (_x isEqualType "" && { _x isNotEqualTo "" }) then
+                    if (_x isEqualType "" && { !(_x isEqualTo "") }) then
                     {
                         [_x, 3, _id, _by, _summary] call ARC_fnc_tocBacklogEnqueue;
                     };
@@ -306,9 +306,9 @@ if (_approve) then
             _holdMinutes = (_holdMinutes max 0) min 240;
 
             private _seed = [];
-            if (trim _rationale isNotEqualTo "") then { _seed pushBack ["rationale", trim _rationale]; };
-            if (trim _constraints isNotEqualTo "") then { _seed pushBack ["constraints", trim _constraints]; };
-            if (trim _support isNotEqualTo "") then { _seed pushBack ["support", trim _support]; };
+            if (trim !(_rationale isEqualTo "")) then { _seed pushBack ["rationale", trim _rationale]; };
+            if (trim !(_constraints isEqualTo "")) then { _seed pushBack ["constraints", trim _constraints]; };
+            if (trim !(_support isEqualTo "")) then { _seed pushBack ["support", trim _support]; };
 
             private _issueOk = false;
 
@@ -323,7 +323,7 @@ if (_approve) then
                 case "HOLD":
                 {
                     _seed pushBack ["purpose", "HOLD"];
-                    if (trim _holdIntent isNotEqualTo "") then { _seed pushBack ["holdIntent", trim _holdIntent]; };
+                    if (trim !(_holdIntent isEqualTo "")) then { _seed pushBack ["holdIntent", trim _holdIntent]; };
                     if (_holdMinutes > 0) then { _seed pushBack ["holdMinutes", _holdMinutes]; };
                     _issueOk = ["HOLD", _fromGroup, _seed, _approver, _note2, _id] call ARC_fnc_intelOrderIssue;
                 };
@@ -331,7 +331,7 @@ if (_approve) then
                 case "PROCEED":
                 {
                     // PROCEED becomes a LEAD assignment when possible; otherwise STANDBY.
-                    if (trim _proceedIntent isNotEqualTo "") then { _seed pushBack ["proceedIntent", trim _proceedIntent]; };
+                    if (trim !(_proceedIntent isEqualTo "")) then { _seed pushBack ["proceedIntent", trim _proceedIntent]; };
                     _issueOk = ["LEAD", _fromGroup, _seed, _approver, _note2, _id] call ARC_fnc_intelOrderIssue;
                 };
 
@@ -434,7 +434,7 @@ if (_approve) then
             if (!(_lid isEqualType "")) then { _lid = ""; };
 
             // Attach the leadId to the queue item meta for UI traceability.
-            if (_lid isNotEqualTo "") then
+            if (!(_lid isEqualTo "")) then
             {
                 _meta = [_meta, "leadId", _lid] call _setPair;
                 _meta = [_meta, "marker", _marker] call _setPair;
@@ -445,7 +445,7 @@ if (_approve) then
             };
 
             // Enqueue the lead into the TOC backlog (priority 1 = highest).
-            if (!isNil "ARC_fnc_tocBacklogEnqueue" && { _lid isEqualType "" } && { _lid isNotEqualTo "" }) then
+            if (!isNil "ARC_fnc_tocBacklogEnqueue" && { _lid isEqualType "" } && { !(_lid isEqualTo "") }) then
             {
                 [_lid, 1, _id, _by, _summary] call ARC_fnc_tocBacklogEnqueue;
             };
@@ -454,7 +454,7 @@ if (_approve) then
             // This ensures the approved incident immediately appears on the Ops screen.
             private _activeTaskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
             if (!(_activeTaskId isEqualType "")) then { _activeTaskId = ""; };
-            if (_activeTaskId isEqualTo "" && { _lid isNotEqualTo "" }) then
+            if (_activeTaskId isEqualTo "" && { !(_lid isEqualTo "") }) then
             {
                 [] call ARC_fnc_incidentCreate;
             };
