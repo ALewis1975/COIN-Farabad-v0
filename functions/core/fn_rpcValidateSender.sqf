@@ -27,6 +27,16 @@ params [
 private _isRemoteRpc = !isNil "remoteExecutedOwner";
 if (!_isRemoteRpc) exitWith
 {
+    // Hosted-server self-call detection:
+    // When the host player calls remoteExec ["fnc", 2] on a non-dedicated server,
+    // the engine optimizes this to a local call without setting remoteExecutedOwner.
+    // Validate that the caller object is local and non-null — this is a legitimate path.
+    if (!isDedicated && {!isNull _caller} && {local _caller}) exitWith
+    {
+        diag_log format ["[ARC][INFO] %1: hosted-server self-call detected for %2 — allowing.", _rpc, name _caller];
+        true
+    };
+
     ["OPS", format ["SECURITY: %1 invoked without RemoteExec context (remoteExecutedOwner missing).", _rpc], [0,0,0],
         [
             ["event", _event],
