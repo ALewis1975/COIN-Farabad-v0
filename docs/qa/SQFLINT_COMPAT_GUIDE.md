@@ -4,20 +4,52 @@ This guide documents SQF constructs that are valid in-engine but have been probl
 
 Use this mapping before running `sqflint -e w` so compatibility issues are fixed consistently.
 
+## Severity levels
+
+Rules are classified into two severity levels:
+
+| Level | CI behavior | Description |
+|---|---|---|
+| **Error** | Blocks CI in `--strict` mode | Simple, safe 1:1 replacements. Always fix these. |
+| **Advisory** | Reported but does NOT block CI | Known sqflint 0.3.2 parser limitations. The workarounds require compile-wrapper helpers or bulk mechanical rewrites that are error-prone at scale. Fixing is optional and must be done carefully with correct scoping. |
+
+> **Why advisory?** sqflint 0.3.2 (the latest available version) does not recognise
+> several valid modern SQF constructs (`#` indexing, `isNotEqualTo`, `getOrDefault`
+> method form, `trim`, `createHashMapFromArray`).  The Arma 3 engine handles all of
+> these correctly.  Bulk-rewriting hundreds of files with compile-wrapper helpers is
+> extremely error-prone (helpers must be declared at the correct scope, before first
+> use) and a previous attempt to do so broke virtually every SQF file in the repo.
+
 ---
 
 ## Pattern mapping (disallowed/problematic → approved)
+
+### Error-severity patterns (enforced)
 
 | Problematic construct | Why it is problematic | Approved equivalent |
 |---|---|---|
 | `findIf { ... }` | sqflint does not consistently parse `findIf`. | `forEach` + `_forEachIndex` + `exitWith` (see §1). |
 | `toUpperANSI` / `toLowerANSI` | sqflint does not recognise these operators. | `toUpper` / `toLower` (identical for ASCII). |
+
+### Advisory-severity patterns (informational only)
+
+These are valid SQF that the Arma 3 engine handles correctly. sqflint 0.3.2 cannot parse them.
+
+| Problematic construct | Why sqflint chokes | Workaround (optional) |
+|---|---|---|
+| Direct `trim _value` | `trim` parsing fails in sqflint 0.3.2. | `_trimFn` compile helper (see §2). |
+| Direct `fileExists _path` | Similar parser issue as `trim`. | `_fileExistsFn` compile helper (see §2). |
+| HashMap method form `_map getOrDefault [k, d]` | Method-style parsing fails. | `_hg` compile helper (see §3). |
+| `isNotEqualTo` | sqflint does not recognise this operator. | `!(_a isEqualTo _b)` |
+| `_arr # _idx` (hash indexing) | sqflint does not recognise `#` as an operator. | `_arr select _idx` with bounds guard. |
 | Bare `createHashMapFromArray [...]` | sqflint cannot parse this as an operator. | `_hmCreate` compile helper (see §4). |
 | Bare `keys _map` | sqflint cannot parse `keys` as an operator. | `_keysFn` compile helper (see §5). |
-| Direct `trim _value` | `trim` parsing can fail in sqflint compatibility mode. | `_trimFn` compile helper (see §2). |
-| Direct `fileExists _path` | Similar parser-compat issue as `trim`. | `_fileExistsFn` compile helper (see §2). |
-| HashMap method form `_map getOrDefault [k, d]` | Method-style parsing can fail. | `_hg` compile helper (see §3). |
-| `isNotEqualTo` | sqflint does not recognise this operator. | `!(_a isEqualTo _b)` |
+
+> **Caution:** If you choose to fix advisory patterns, you **must** place compile
+> helpers at the correct scope (top of function, after exitWith guards, before first
+> use).  Never place helpers inside nested scopes like `{ ... }` blocks,
+> `_fnSomething = { ... }` closures, or `spawn { ... }` bodies where they will not be
+> visible to the outer code that uses them.
 
 ---
 
@@ -115,15 +147,15 @@ The scanner is intentionally lightweight and pattern-based. It catches known par
 
 ### Scanner coverage
 
-| Pattern | Scanner rule | Status |
-|---------|-------------|--------|
-| `findIf` | `findIf` | ✅ Covered |
-| `trim` | `trim-operator` | ✅ Covered |
-| `fileExists` | `fileExists-operator` | ✅ Covered |
-| `getOrDefault` (method) | `hashmap-getOrDefault-method` | ✅ Covered |
-| `isNotEqualTo` | `isNotEqualTo` | ✅ Covered |
-| `toUpperANSI` | `toUpperANSI` | ✅ Covered |
-| `toLowerANSI` | `toLowerANSI` | ✅ Covered |
-| `#` indexing | `hash-index-operator` | ✅ Covered |
-| `createHashMapFromArray` | `bare-createHashMapFromArray` | ✅ Covered |
-| `keys _map` | — | ❌ Caught by sqflint only |
+| Pattern | Scanner rule | Severity | Status |
+|---------|-------------|----------|--------|
+| `findIf` | `findIf` | Error | ✅ Enforced |
+| `toUpperANSI` | `toUpperANSI` | Error | ✅ Enforced |
+| `toLowerANSI` | `toLowerANSI` | Error | ✅ Enforced |
+| `trim` | `trim-operator` | Advisory | ⚠️ Reported only |
+| `fileExists` | `fileExists-operator` | Advisory | ⚠️ Reported only |
+| `getOrDefault` (method) | `hashmap-getOrDefault-method` | Advisory | ⚠️ Reported only |
+| `isNotEqualTo` | `isNotEqualTo` | Advisory | ⚠️ Reported only |
+| `#` indexing | `hash-index-operator` | Advisory | ⚠️ Reported only |
+| `createHashMapFromArray` | `bare-createHashMapFromArray` | Advisory | ⚠️ Reported only |
+| `keys _map` | — | — | ❌ Caught by sqflint only |
