@@ -83,6 +83,7 @@ class CfgRemoteExec
         class ARC_fnc_intelClientNotify                    { allowedTargets = 0; };
         class ARC_fnc_tocInitPlayer                        { allowedTargets = 0; };
         class ARC_fnc_uiConsoleCompileAuditClientReceive   { allowedTargets = 0; };
+        class ARC_fnc_uiConsoleOpsActionStatus             { allowedTargets = 0; };
         class ARC_fnc_uiConsoleQAAuditClientReceive        { allowedTargets = 0; };
 
         // Persistent / JIP-critical (late joiners need these actions)
