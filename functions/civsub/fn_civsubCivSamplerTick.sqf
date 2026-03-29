@@ -47,6 +47,47 @@ private _capDE = _caps # 1;
 private _capByD = missionNamespace getVariable ["civsub_v1_civ_cap_effectiveByDistrict", createHashMap];
 if !(_capByD isEqualType createHashMap) then { _capByD = createHashMap; };
 
+// Time-of-day activity profile multiplier for civilian foot traffic.
+private _tod = dayTime;
+private _nightStart = missionNamespace getVariable ["civsub_v1_activity_night_start_h", 21];
+private _nightEnd = missionNamespace getVariable ["civsub_v1_activity_night_end_h", 5];
+private _peakAM0 = missionNamespace getVariable ["civsub_v1_activity_morning_peak_start_h", 7];
+private _peakAM1 = missionNamespace getVariable ["civsub_v1_activity_morning_peak_end_h", 9];
+private _peakPM0 = missionNamespace getVariable ["civsub_v1_activity_evening_peak_start_h", 16];
+private _peakPM1 = missionNamespace getVariable ["civsub_v1_activity_evening_peak_end_h", 18];
+if !(_nightStart isEqualType 0) then { _nightStart = 21; };
+if !(_nightEnd isEqualType 0) then { _nightEnd = 5; };
+if !(_peakAM0 isEqualType 0) then { _peakAM0 = 7; };
+if !(_peakAM1 isEqualType 0) then { _peakAM1 = 9; };
+if !(_peakPM0 isEqualType 0) then { _peakPM0 = 16; };
+if !(_peakPM1 isEqualType 0) then { _peakPM1 = 18; };
+
+private _isNight = (_tod >= _nightStart) || { _tod < _nightEnd };
+private _isPeak = ((_tod >= _peakAM0) && { _tod <= _peakAM1 }) || { ((_tod >= _peakPM0) && { _tod <= _peakPM1 }) };
+private _phase = "DAY";
+if (_isNight) then { _phase = "NIGHT"; };
+if (_isPeak) then { _phase = "PEAK"; };
+
+private _mCiv = missionNamespace getVariable ["civsub_v1_activity_mul_civ_day", 1.0];
+if (_phase isEqualTo "NIGHT") then { _mCiv = missionNamespace getVariable ["civsub_v1_activity_mul_civ_night", 0.55]; };
+if (_phase isEqualTo "PEAK") then { _mCiv = missionNamespace getVariable ["civsub_v1_activity_mul_civ_peak", 1.10]; };
+if !(_mCiv isEqualType 0) then { _mCiv = 1.0; };
+_mCiv = (_mCiv max 0.1) min 2.0;
+
+_capGE = floor (_capGE * _mCiv);
+if (_capGE < 0) then { _capGE = 0; };
+
+{
+    private _did0 = _x;
+    private _cap0 = _capByD getOrDefault [_did0, _capDE];
+    if !(_cap0 isEqualType 0) then { _cap0 = _capDE; };
+    _cap0 = floor (_cap0 * _mCiv);
+    if (_cap0 < 0) then { _cap0 = 0; };
+    _capByD set [_did0, _cap0];
+} forEach (keys _capByD);
+
+missionNamespace setVariable ["civsub_v1_activity_mul_civ_active", _mCiv, true];
+
 // Publish sampler decision state for probes
 missionNamespace setVariable ["civsub_v1_civ_sampler_last_active", _active, true];
 missionNamespace setVariable ["civsub_v1_civ_sampler_last_capGE", _capGE, true];
