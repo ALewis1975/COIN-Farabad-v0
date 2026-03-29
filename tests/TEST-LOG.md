@@ -1247,3 +1247,43 @@ git --no-pager diff --check
 5. Validate `intelLog` and `incidentHistory` do not grow beyond configured caps during a 2-hour session
 6. Run QA Audit from HQ tab and confirm new `_trimFn`/`_fileExistsFn` helpers produce identical report format
 7. Run `[] execVM "tests/run_all.sqf";` from Debug Console; confirm 73 assertions all PASS
+
+---
+
+## 2026-03-29 05:50 UTC — Full sqflint Compat Resolution + Orphan Function Registration
+
+**Branch:** `copilot/audit-coin-farabad-v0-again`  
+**Commit range:** `ae11e70..HEAD`  
+**Scenario:** Complete sqflint compat resolution across all 430 SQF files + orphan function registration.
+
+### Changes Applied
+
+| Phase | Pattern | Count | Files | Status |
+|-------|---------|-------|-------|--------|
+| C | Register orphan functions | 2 | CfgFunctions.hpp, fn_uiConsoleActionCloseIncident.sqf | ✅ PASS |
+| D | isNotEqualTo → !isEqualTo | 439 | 118 files | ✅ PASS |
+| E | # indexing → select | 939 | 148 files | ✅ PASS |
+| F | getOrDefault method → _hg helper | 395 | 69 files | ✅ PASS |
+| G | direct trim → _trimFn helper | 384 | 109 files | ✅ PASS |
+| H | fileExists → _fileExistsFn helper | 1 | 1 file | ✅ PASS |
+
+**Total:** 2158 sqflint compat violations resolved across ~250 unique files.
+
+### Validation Results
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | sqflint compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict $(find functions/ -name "*.sqf")` | ✅ PASS (0 violations, 430 files) | Was 2159 violations |
+| 2 | Airbase planning-mode checks | `bash tests/static/airbase_planning_mode_checks.sh` | ✅ PASS (20/20) | All runtime gates verified |
+| 3 | CASREQ snapshot contract | `bash tests/static/casreq_snapshot_contract_checks.sh` | ✅ PASS (6/6) | All contract fields present |
+| 4 | State migration validation | `python3 scripts/dev/validate_state_migrations.py` | ✅ PASS (3 scenarios) | — |
+| 5 | Marker index validation | `python3 scripts/dev/validate_marker_index.py` | ✅ PASS (137 markers × 3 modes × 2 states) | — |
+| 6 | Config delimiter balance | CfgDialogs.hpp, CfgFunctions.hpp, CfgRemoteExec.hpp, RscTitles.hpp, description.ext | ✅ PASS (5/5 balanced) | — |
+| 7 | Local MP smoke test | — | BLOCKED | No Arma 3 runtime |
+| 8 | Dedicated server / JIP | — | BLOCKED | No dedicated server |
+
+### Status
+
+- Static validation: **PASS** — All 2159 sqflint compat violations resolved to 0
+- Orphan functions: **FIXED** — rolesCanUseMobileOps + uiConsoleActionCloseIncident registered
+- Runtime validation: **BLOCKED** (requires Arma 3 dedicated server)
