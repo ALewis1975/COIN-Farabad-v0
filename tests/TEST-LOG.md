@@ -12,6 +12,30 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 ---
 
 
+## 2026-03-29 16:44 UTC — Farabad Console AIR/TOWER contextual action usability fix
+
+**Branch/Commit:** copilot/qa-check-air-tower-menu @ commit: unrecoverable
+
+**Scenario:** QA follow-up for reported console usability issue where selecting AIR / TOWER rows did not surface contextual menu/action options.
+
+**Commands:**
+```bash
+python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleAirPaint.sqf
+python3 scripts/dev/validate_state_migrations.py
+python3 scripts/dev/validate_marker_index.py
+bash tests/static/airbase_planning_mode_checks.sh
+bash tests/static/casreq_snapshot_contract_checks.sh
+```
+
+**Result:** PASS
+
+**Notes:**
+- Root cause identified and fixed in `functions/ui/fn_uiConsoleAirPaint.sqf`: AIR painter referenced non-existent button IDCs `78002/78003`; updated to actual console action button IDCs `78021/78022`.
+- Pre-fix baseline run initially showed `BLOCKED` static scripts due to missing `rg`; environment dependency resolved by installing ripgrep, then both scripts passed.
+- Container environment only supports static validation; dedicated server + JIP interaction validation remains deferred.
+- Rationale for unrecoverable commit marker: this entry is created prior to commit generation in this session; exact SHA is recorded in the progress commit message history.
+
+
 ## 2026-03-29 16:18 UTC — AIRBASE ambiance startup default runtime enable
 
 **Branch/Commit:** copilot/fix-airbase-ambiance-initialization @ 8359bb3
