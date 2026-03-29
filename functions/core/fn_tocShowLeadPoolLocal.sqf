@@ -30,7 +30,12 @@ private _fmtLead = {
     params ["_entry", ["_prefix", ""]];
     if (!(_entry isEqualType []) || { (count _entry) < 4 }) exitWith {""};
 
-    _entry params ["_id", "_type", "_disp", "_pos", ["_strength", 0.5], ["_createdAt", -1], ["_expiresAt", -1]];
+    private _id = _entry select 0;
+    private _type = _entry select 1;
+    private _disp = _entry select 2;
+    private _pos = _entry select 3;
+    private _strength = if ((count _entry) > 4) then { _entry select 4 } else { 0.5 };
+    private _expiresAt = if ((count _entry) > 6) then { _entry select 6 } else { -1 };
 
     private _grid = if (_pos isEqualType [] && { (count _pos) >= 2 }) then { mapGridPosition _pos } else { "????" };
 
