@@ -82,6 +82,8 @@ class CfgFunctions
 
             // User-friendly tasks + intel feed
             class publicBroadcastState {};
+            class consoleVmBuild {};
+            class consoleVmAdapterV1 {};
             class statePublishPublic {};
             class intelLog {};
             class intelCreateMarker {};

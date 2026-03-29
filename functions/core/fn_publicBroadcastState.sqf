@@ -691,4 +691,8 @@ missionNamespace setVariable ["ARC_consoleVM_meta", [
     ["source", "publicBroadcastState"]
 ], true];
 
+// Build and publish Console VM v1 envelope (Phase A: observe)
+private _vmPayload = [] call ARC_fnc_consoleVmBuild;
+missionNamespace setVariable ["ARC_consoleVM_payload", _vmPayload, true];
+
 true
