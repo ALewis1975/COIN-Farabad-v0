@@ -100,7 +100,7 @@ private _meta = [
 {
     if (_x isEqualType [] && { (count _x) >= 2 }) then
     {
-        _meta pushBack [_x # 0, _x # 1];
+        _meta pushBack [_x select 0, _x select 1];
     };
 } forEach _metaExtra;
 
@@ -110,7 +110,7 @@ private _getP =
     params ["_pairs", "_k", "_d"];
     private _v = _d;
     {
-        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _v = _x # 1; };
+        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _v = _x select 1; };
     } forEach _pairs;
     _v
 };
@@ -148,8 +148,8 @@ if (_kind isEqualTo "FOLLOWON_REQUEST") then
     {
         if (_x isEqualType [] && { (count _x) >= 7 }) then
         {
-            private _st = toUpper (_x # 2);
-            private _tgt = _x # 4;
+            private _st = toUpper (_x select 2);
+            private _tgt = _x select 4;
             if (_st isEqualTo "ISSUED" && { _tgt isEqualTo _fromGroup }) exitWith { _pending = true; };
         };
     } forEach _orders;

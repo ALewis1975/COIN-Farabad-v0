@@ -35,9 +35,9 @@ private _getPair = {
     params ["_pairs", "_k", "_d"];
     if (!(_pairs isEqualType [])) exitWith { _d };
     private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) exitWith { _d };
-    (_pairs # _idx) # 1
+    (_pairs select _idx) select 1
 };
 
 private _fmtHdr = {
@@ -152,7 +152,7 @@ if (!(_ops isEqualType [])) then { _ops = []; };
 private _sit = [];
 for "_i" from ((count _ops) - 1) to 0 step -1 do
 {
-    private _e = _ops # _i;
+    private _e = _ops select _i;
     if (!(_e isEqualType []) || { (count _e) < 6 }) then { continue; };
     _e params ["_id", "_ts", "_cat", "_summary", "_pos", "_meta"]; 
     private _evt = [_meta, "event", ""] call _getPair;
@@ -202,8 +202,8 @@ else
     private _support = [];
     {
         if (!(_x isEqualType []) || { (count _x) < 2 }) then { continue; };
-        private _g = _x # 0;
-        private _s = toUpper (trim (_x # 1));
+        private _g = _x select 0;
+        private _s = toUpper (trim (_x select 1));
         if (_s isEqualTo "OFFLINE") then { _s = "UNAVAILABLE"; };
         if (!(_accBy isEqualTo "") && { !(_g isEqualTo _accBy) } && { _s in ["IN TRANSIT", "ON SCENE"] }) then { _support pushBack _g; };
     } forEach _statusRows;
@@ -262,9 +262,9 @@ _ctrlMain ctrlSetStructuredText parseText _txt;
 // Auto-fit + clamp to viewport so the controls group can scroll when needed.
 [_ctrlMain] call BIS_fnc_ctrlFitToTextHeight;
 private _mainGrp = _display displayCtrl 78015;
-private _minH = if (!isNull _mainGrp) then { (ctrlPosition _mainGrp) # 3 } else { 0.74 };
+private _minH = if (!isNull _mainGrp) then { (ctrlPosition _mainGrp) select 3 } else { 0.74 };
 private _p = ctrlPosition _ctrlMain;
-_p set [3, (_p # 3) max _minH];
+_p set [3, (_p select 3) max _minH];
 _ctrlMain ctrlSetPosition _p;
 _ctrlMain ctrlCommit 0;
 

@@ -26,7 +26,7 @@ private _idx = -1;
 { if ((_x param [0, ""]) isEqualTo _flightId) exitWith { _idx = _forEachIndex; }; } forEach _records;
 if (_idx < 0) exitWith { [_records, false] };
 
-private _rec = _records # _idx;
+private _rec = _records select _idx;
 private _curr = _rec param [5, ""];
 
 if ((!(_curr isEqualTo "QUEUED")) && { !(_status in ["ACTIVE", "COMPLETE", "FAILED"]) }) exitWith { [_records, false] };

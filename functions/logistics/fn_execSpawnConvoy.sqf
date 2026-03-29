@@ -123,9 +123,9 @@ private _rolePlanGet = {
     params ["_pairs", "_key", "_default"];
     if !(_pairs isEqualType []) exitWith {_default};
     private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { ((_x # 0) isEqualType "") && { (toLower (_x # 0)) isEqualTo (toLower _key) } }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { ((_x select 0) isEqualType "") && { (toLower (_x select 0)) isEqualTo (toLower _key) } }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) exitWith {_default};
-    (_pairs # _idx) # 1
+    (_pairs select _idx) select 1
 };
 
 private _roleBundleId = [_rolePlan, "bundleId", ""] call _rolePlanGet;
@@ -140,11 +140,11 @@ private _bundleClassPool = [];
 if (!(_roleBundleId isEqualTo "")) then
 {
     private _idxBundle = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { ((_x # 0) isEqualType "") } && { (toUpper (_x # 0)) isEqualTo _roleBundleId }) exitWith { _idxBundle = _forEachIndex; }; } forEach _bundleMatrix;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { ((_x select 0) isEqualType "") } && { (toUpper (_x select 0)) isEqualTo _roleBundleId }) exitWith { _idxBundle = _forEachIndex; }; } forEach _bundleMatrix;
 
     if (_idxBundle >= 0) then
     {
-        private _rawPool = (_bundleMatrix # _idxBundle) # 1;
+        private _rawPool = (_bundleMatrix select _idxBundle) select 1;
         if (_rawPool isEqualType []) then
         {
             {
@@ -309,9 +309,9 @@ private _getRoleKeyList = {
     params ["_roleName"];
     private _r = toLower _roleName;
     private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { ((_x # 0) isEqualType "") && { (toLower (_x # 0)) isEqualTo _r } }) exitWith { _idx = _forEachIndex; }; } forEach _roleMatrix;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { ((_x select 0) isEqualType "") && { (toLower (_x select 0)) isEqualTo _r } }) exitWith { _idx = _forEachIndex; }; } forEach _roleMatrix;
     if (_idx < 0) exitWith {[]};
-    private _keys = (_roleMatrix # _idx) # 1;
+    private _keys = (_roleMatrix select _idx) select 1;
     if !(_keys isEqualType []) exitWith {[]};
     _keys select { _x isEqualType "" }
 };
@@ -555,9 +555,9 @@ private _pickProfileByCallsign = {
     private _cU = toUpper _callsign;
 
     private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 3 } && { (toUpper (_x # 2)) isEqualTo _cU }) exitWith { _idx = _forEachIndex; }; } forEach _ps;
+    { if ((_x isEqualType []) && { (count _x) >= 3 } && { (toUpper (_x select 2)) isEqualTo _cU }) exitWith { _idx = _forEachIndex; }; } forEach _ps;
     if (_idx < 0) exitWith {[]};
-    _ps # _idx
+    _ps select _idx
 };
 
 private _profile = [];
@@ -668,7 +668,7 @@ if (_stageEnabled) then
         params ["_p", "_r"];
         private _near = _p nearRoads _r;
         if ((count _near) == 0) exitWith { _p };
-        private _best = _near # 0;
+        private _best = _near select 0;
         private _bestD = (getPosATL _best) distance2D _p;
         {
             private _d = (getPosATL _x) distance2D _p;
@@ -823,7 +823,7 @@ if (_stageEnabled) then
                         if (!isNull _prevDrv && { _drv != _prevDrv }) then { _drv doFollow _prevDrv; };
 
                         private _tgt = _legPos;
-                        if (_stageEnabled && { (count _stagePos) > _forEachIndex }) then { _tgt = _stagePos # _forEachIndex; };
+                        if (_stageEnabled && { (count _stagePos) > _forEachIndex }) then { _tgt = _stagePos select _forEachIndex; };
 
                         // Per-vehicle caps are more reliable during doMove than group speedMode alone.
                         _veh limitSpeed _spawnKph;
@@ -938,8 +938,8 @@ if (_incidentTypeU isEqualTo "ESCORT" && { _isVIP } && { !isNull _grp } && { (co
         if (!(_guardCount isEqualType 0)) then { _guardCount = 4; };
         _guardCount = (_guardCount max 0) min 20;
 
-        private _leadVeh = _vehicles # 0;
-        private _tailVeh = _vehicles # ((count _vehicles) - 1);
+        private _leadVeh = _vehicles select 0;
+        private _tailVeh = _vehicles select ((count _vehicles) - 1);
 
         // Choose a VIP vehicle: prefer a middle vehicle with cargo seats (keeps lead/tail as security cars).
         private _vipVeh = objNull;
@@ -947,7 +947,7 @@ if (_incidentTypeU isEqualTo "ESCORT" && { _isVIP } && { !isNull _grp } && { (co
         {
             for "_i" from 1 to ((count _vehicles) - 2) do
             {
-                private _v = _vehicles # _i;
+                private _v = _vehicles select _i;
                 if (!isNull _v && { (_v emptyPositions "cargo") > 0 }) exitWith { _vipVeh = _v; };
             };
         };

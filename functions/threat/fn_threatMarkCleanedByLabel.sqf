@@ -28,10 +28,10 @@ if (!_enabled) exitWith {false};
 private _parts = _label splitString ":";
 
 if ((count _parts) < 3) exitWith {false};
-if (!((_parts # 0) isEqualTo "THREAT")) exitWith {false};
+if (!((_parts select 0) isEqualTo "THREAT")) exitWith {false};
 
 // _parts: ["THREAT", "<type>", "THR", "<district>", "<seq6>"]
-private _type = _parts # 1;
+private _type = _parts select 1;
 private _rest = _parts select [2, (count _parts) - 2];
 private _threatId = _rest joinString ":";
 

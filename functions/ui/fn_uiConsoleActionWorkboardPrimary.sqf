@@ -20,7 +20,7 @@ private _data = if (_sel >= 0) then { _ctrlList lbData _sel } else { "" };
 if (!(_data isEqualType "")) then { _data = ""; };
 
 private _parts = _data splitString "|";
-private _kind = if ((count _parts) > 0) then { toUpper (_parts # 0) } else { "" };
+private _kind = if ((count _parts) > 0) then { toUpper (_parts select 0) } else { "" };
 
 if (!(_kind isEqualTo "INCIDENT")) exitWith
 {

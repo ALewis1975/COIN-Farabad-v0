@@ -80,7 +80,7 @@ _plt  = (_plt max 1) min _maxPlt;
 _sq   = (_sq max 1) min _maxSq;
 
 private _cSlot = _cIdx % (count _letters);
-private _companyLetter = _letters # _cSlot;
+private _companyLetter = _letters select _cSlot;
 private _companyNum = _cSlot + 1;
 
 // Build group name

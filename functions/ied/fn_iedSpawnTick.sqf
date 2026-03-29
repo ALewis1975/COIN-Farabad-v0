@@ -68,7 +68,7 @@ if (_passive) then
         private _near = allPlayers select { alive _x && { (_x distance2D _pos) <= _rad } && { [_x] call _detectorFn } };
         if ((count _near) > 0) then
         {
-            private _caller = _near # 0;
+            private _caller = _near select 0;
             private _kindRaw = ["activeObjectiveKind", ""] call ARC_fnc_stateGet;
             if (!(_kindRaw isEqualType "")) then { _kindRaw = ""; };
             if (!(_kindRaw isEqualTo "")) then

@@ -213,7 +213,7 @@ if (!_nearOk) exitWith
 };
 
 private _grid = "";
-if !((_pos # 0) isEqualTo 0 && {(_pos # 1) isEqualTo 0}) then
+if !((_pos select 0) isEqualTo 0 && {(_pos select 1) isEqualTo 0}) then
 {
     _grid = mapGridPosition _pos;
 };
@@ -316,7 +316,7 @@ if (!_updateOnly && { !(_foReqU isEqualTo "") }) then
     private _setPair = {
         params ["_arr", "_k", "_v"];
         private _i = -1;
-        { if (_x isEqualType [] && { (count _x) == 2 } && { (_x # 0) isEqualTo _k }) exitWith { _i = _forEachIndex; }; } forEach _arr;
+        { if (_x isEqualType [] && { (count _x) == 2 } && { (_x select 0) isEqualTo _k }) exitWith { _i = _forEachIndex; }; } forEach _arr;
         if (_i >= 0) then { _arr set [_i, [_k, _v]]; } else { _arr pushBack [_k, _v]; };
         _arr
     };
@@ -359,8 +359,8 @@ if (!_updateOnly && { !(_foReqU isEqualTo "") }) then
     {
         if (_x isEqualType [] && { (count _x) == 2 }) then
         {
-            private _k = _x # 0;
-            private _v = _x # 1;
+            private _k = _x select 0;
+            private _v = _x select 1;
             if (_v isEqualType "" && { !((trim _v) isEqualTo "") }) then
             {
                 _foDet = _foDet + format ["%1: %2\n", toUpper _k, trim _v];

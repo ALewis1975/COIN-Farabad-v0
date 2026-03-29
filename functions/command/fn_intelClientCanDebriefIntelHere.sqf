@@ -35,7 +35,7 @@ private _getPair = {
     params ["_pairs", "_k", "_d"]; 
     if (!(_pairs isEqualType [])) exitWith { _d };
     {
-        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _x # 1 };
+        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _x select 1 };
     } forEach _pairs;
     _d
 };
@@ -68,8 +68,8 @@ if (!(_destPos isEqualType [] && { (count _destPos) >= 2 })) then
     private _r = ["INTEL"] call ARC_fnc_intelResolveRtbDestination;
     if (_r isEqualType [] && { (count _r) >= 3 }) then
     {
-        _destPos = _r # 0;
-        _destRad = _r # 2;
+        _destPos = _r select 0;
+        _destRad = _r select 2;
     }
     else
     {

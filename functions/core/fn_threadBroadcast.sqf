@@ -25,20 +25,20 @@ private _pub = [];
     private _thr = [_x] call ARC_fnc_threadNormalizeRecord;
     if (_thr isEqualTo []) then { continue; };
 
-    private _id   = _thr # 0;
-    private _type = _thr # 1;
-    private _zone = _thr # 2;
-    private _base = _thr # 3;
-    private _conf = _thr # 4;
-    private _heat = _thr # 5;
-    private _st   = _thr # 6;
-    private _suc  = _thr # 8;
-    private _fail = _thr # 9;
-    private _touch= _thr # 10;
-    private _cd   = _thr # 11;
-    private _last = _thr # 12;
-    private _parent = _thr # 13;
-    private _districtId = _thr # 14;
+    private _id   = _thr select 0;
+    private _type = _thr select 1;
+    private _zone = _thr select 2;
+    private _base = _thr select 3;
+    private _conf = _thr select 4;
+    private _heat = _thr select 5;
+    private _st   = _thr select 6;
+    private _suc  = _thr select 8;
+    private _fail = _thr select 9;
+    private _touch= _thr select 10;
+    private _cd   = _thr select 11;
+    private _last = _thr select 12;
+    private _parent = _thr select 13;
+    private _districtId = _thr select 14;
 
     private _grid = if (_base isEqualType [] && { (count _base) >= 2 }) then { mapGridPosition _base } else { "????" };
 

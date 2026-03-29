@@ -26,9 +26,9 @@ private _getPair = {
     if (_k isEqualTo "") exitWith { _d };
 
     private _j = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _j = _forEachIndex; }; } forEach _pairs;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _j = _forEachIndex; }; } forEach _pairs;
     if (_j < 0) exitWith { _d };
-    (_pairs # _j) # 1
+    (_pairs select _j) select 1
 };
 
 // Prefer queue tail so decided items can still be viewed.
@@ -74,7 +74,7 @@ private _grid = [_meta, "grid", ""] call _getPair;
 if (!(_grid isEqualType "")) then { _grid = ""; };
 if (_grid isEqualTo "") then
 {
-    if (_posATL isEqualType [] && { (count _posATL) >= 2 } && { (_posATL # 0) isEqualType 0 } && { (_posATL # 1) isEqualType 0 }) then
+    if (_posATL isEqualType [] && { (count _posATL) >= 2 } && { (_posATL select 0) isEqualType 0 } && { (_posATL select 1) isEqualType 0 }) then
     {
         _grid = mapGridPosition _posATL;
     }
@@ -119,7 +119,7 @@ switch (_kindU) do
         _dispName = trim _dispName;
 
         private _pGrid = _grid;
-        if (_lp isEqualType [] && { (count _lp) >= 2 } && { (_lp # 0) isEqualType 0 } && { (_lp # 1) isEqualType 0 }) then
+        if (_lp isEqualType [] && { (count _lp) >= 2 } && { (_lp select 0) isEqualType 0 } && { (_lp select 1) isEqualType 0 }) then
         {
             _pGrid = mapGridPosition _lp;
         };
@@ -145,9 +145,9 @@ switch (_kindU) do
             {
                 if (_x isEqualType [] && { (count _x) >= 10 }) then
                 {
-                    private _lid = _x # 0;
-                    private _srcTask = _x # 7;
-                    private _srcInc  = _x # 8;
+                    private _lid = _x select 0;
+                    private _srcTask = _x select 7;
+                    private _srcInc  = _x select 8;
 
                     if (_leadId != "" && { _lid isEqualTo _leadId }) exitWith { _lead = _x; };
                     if (_leadId isEqualTo "" && { _srcTask isEqualTo _qid } && { toUpper _srcInc isEqualTo "QUEUE" }) exitWith { _lead = _x; };
@@ -229,12 +229,12 @@ switch (_kindU) do
                     {
                         // If we don't have leadId, try to match last-consumed by sourceTaskId.
                         private _lcMatch = false;
-                        if (_leadId != "" && { _lastConsumed isEqualType [] } && { (count _lastConsumed) >= 10 } && { (_lastConsumed # 0) isEqualTo _leadId }) then { _lcMatch = true; };
-                        if (_leadId isEqualTo "" && { _lastConsumed isEqualType [] } && { (count _lastConsumed) >= 10 } && { (_lastConsumed # 7) isEqualTo _qid } && { toUpper (_lastConsumed # 8) isEqualTo "QUEUE" }) then { _lcMatch = true; };
+                        if (_leadId != "" && { _lastConsumed isEqualType [] } && { (count _lastConsumed) >= 10 } && { (_lastConsumed select 0) isEqualTo _leadId }) then { _lcMatch = true; };
+                        if (_leadId isEqualTo "" && { _lastConsumed isEqualType [] } && { (count _lastConsumed) >= 10 } && { (_lastConsumed select 7) isEqualTo _qid } && { toUpper (_lastConsumed select 8) isEqualTo "QUEUE" }) then { _lcMatch = true; };
 
                         if (_lcMatch) then
                         {
-                            private _lcId = _lastConsumed # 0;
+                            private _lcId = _lastConsumed select 0;
                             _statusTxt = format ["Lead Status: <t color='#FFD700'>CONSUMED</t><br/>LeadId: %1", _lcId];
                         }
                         else
@@ -361,11 +361,11 @@ case "FOLLOWON_REQUEST":
             {
                 if (_x isEqualType [] && { (count _x) >= 7 }) then
                 {
-                    private _oid = _x # 0;
-                    private _ost = _x # 2;
-                    private _otype = _x # 3;
-                    private _tgt = _x # 4;
-                    private _meta2 = _x # 6;
+                    private _oid = _x select 0;
+                    private _ost = _x select 2;
+                    private _otype = _x select 3;
+                    private _tgt = _x select 4;
+                    private _meta2 = _x select 6;
 
                     private _src = [_meta2, "sourceQid", ""] call _getPair;
                     if (_src isEqualType "" && { _src isEqualTo _qid }) exitWith

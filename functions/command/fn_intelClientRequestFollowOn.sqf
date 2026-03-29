@@ -77,7 +77,7 @@ private _leadSummary = "";
     {
         {
             // NOTE: order payload uses key "leadName" (not "leadDisplayName")
-            if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo "leadName" }) exitWith { _leadDisp = _x # 1; };
+            if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo "leadName" }) exitWith { _leadDisp = _x select 1; };
         } forEach _data;
     };
 

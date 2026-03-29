@@ -49,14 +49,14 @@ private _pad2 = {
 private _pickWeighted = {
     params ["_arr", "_rollFn"]; // _arr: [[val,weight],...]
     private _tw = 0;
-    { _tw = _tw + (_x # 1); } forEach _arr;
-    if (_tw <= 0) exitWith { (_arr # 0) # 0 };
+    { _tw = _tw + (_x select 1); } forEach _arr;
+    if (_tw <= 0) exitWith { (_arr select 0) select 0 };
     private _r = [_tw] call _rollFn;
     private _acc = 0;
-    private _out = (_arr # 0) # 0;
+    private _out = (_arr select 0) select 0;
     {
-        _acc = _acc + (_x # 1);
-        if (_r < _acc) exitWith { _out = _x # 0; };
+        _acc = _acc + (_x select 1);
+        if (_r < _acc) exitWith { _out = _x select 0; };
     } forEach _arr;
     _out
 };

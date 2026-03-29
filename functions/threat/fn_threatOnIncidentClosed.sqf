@@ -23,9 +23,9 @@ private _kvGet = {
     params ["_pairs", "_key", "_default"];
     if (!(_pairs isEqualType [])) exitWith {_default};
     private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) exitWith {_default};
-    private _v = (_pairs # _idx) # 1;
+    private _v = (_pairs select _idx) select 1;
     if (isNil "_v") exitWith {_default};
     _v
 };
@@ -34,7 +34,7 @@ private _kvSet = {
     params ["_pairs", "_key", "_value"];
     if (!(_pairs isEqualType [])) then { _pairs = []; };
     private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) then { _pairs pushBack [_key, _value]; } else { _pairs set [_idx, [_key, _value]]; };
     _pairs
 };
@@ -102,11 +102,11 @@ if ((count _closeIds) > 0) then
         [_tid, "CLOSED", _noteStr] call ARC_fnc_threatUpdateState;
 
         private _wi = -1;
-        { if ((_x # 0) isEqualTo _tid) exitWith { _wi = _forEachIndex; }; } forEach _worldInfo;
+        { if ((_x select 0) isEqualTo _tid) exitWith { _wi = _forEachIndex; }; } forEach _worldInfo;
         if (_wi >= 0) then
         {
-            private _spawned = (_worldInfo # _wi) # 1;
-            private _objCount = (_worldInfo # _wi) # 2;
+            private _spawned = (_worldInfo select _wi) select 1;
+            private _objCount = (_worldInfo select _wi) select 2;
             if ((!_spawned) || { _objCount isEqualTo 0 }) then
             {
                 [_tid, "CLEANED", "NO_WORLD_REFS"] call ARC_fnc_threatUpdateState;

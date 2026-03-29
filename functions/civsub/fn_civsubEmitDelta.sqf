@@ -39,7 +39,7 @@ else
 {
     // Array of pairs
     {
-        if (_x isEqualType [] && { (count _x) == 2 }) then { _p set [_x # 0, _x # 1]; };
+        if (_x isEqualType [] && { (count _x) == 2 }) then { _p set [_x select 0, _x select 1]; };
     } forEach _payload;
 };
 

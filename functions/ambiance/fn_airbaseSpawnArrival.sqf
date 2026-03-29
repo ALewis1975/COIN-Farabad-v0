@@ -18,7 +18,7 @@ private _debugOps = missionNamespace getVariable ["airbase_v1_debugOpsLog", fals
 private _recs = ["airbase_v1_records", []] call ARC_fnc_stateGet;
 private _idx = -1;
 { if ((_x param [0,""]) isEqualTo _fid) exitWith { _idx = _forEachIndex; }; } forEach _recs;
-private _rec = if (_idx >= 0) then { _recs # _idx } else { [] };
+private _rec = if (_idx >= 0) then { _recs select _idx } else { [] };
 
 private _category = _rec param [3, "FW"];
 private _detail   = _rec param [4, "INBOUND"]; // assetId for return, or "INBOUND"
@@ -35,7 +35,7 @@ if (!(_detail isEqualTo "INBOUND")) then {
     private _aIdx = -1;
     { if ((_x getOrDefault ["id",""]) isEqualTo _detail) exitWith { _aIdx = _forEachIndex; }; } forEach _assets;
     if (_aIdx >= 0) then {
-        _asset = _assets # _aIdx;
+        _asset = _assets select _aIdx;
         _isReturn = true;
         _vehType = _asset getOrDefault ["startVehType", ""];
         _category = _asset getOrDefault ["category", _category];
@@ -80,7 +80,7 @@ private _veh = createVehicle [_vehType, _spawnPos, [], 0, "FLY"];
 if (isNull _veh) exitWith { false };
 
 _veh setDir _runwayDir;
-_veh setPosASL [_spawnPos # 0, _spawnPos # 1, _altSpawn];
+_veh setPosASL [_spawnPos select 0, _spawnPos select 1, _altSpawn];
 _veh allowDamage false;
 _veh engineOn true;
 if (_veh isKindOf "Air") then { _veh setCollisionLight true; _veh setPilotLight true; };

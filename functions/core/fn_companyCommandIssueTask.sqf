@@ -24,11 +24,11 @@ params [
 
 if (!(_node isEqualType []) || { (count _node) < 6 }) exitWith {false};
 
-private _nodeId = _node # 0;
-private _cmdToken = _node # 1;
-private _hqMarker = _node # 3;
-private _hqPos = _node # 4;
-private _hqZone = _node # 5;
+private _nodeId = _node select 0;
+private _cmdToken = _node select 1;
+private _hqMarker = _node select 3;
+private _hqPos = _node select 4;
+private _hqZone = _node select 5;
 
 if (!(_meta isEqualType [])) then { _meta = []; };
 
@@ -60,10 +60,10 @@ if (!(_tasking isEqualType [])) then { _tasking = []; };
 // One open task per node; close old one before appending a fresh record.
 for "_i" from 0 to ((count _tasking) - 1) do
 {
-    private _r = _tasking # _i;
+    private _r = _tasking select _i;
     if (_r isEqualType [] && { (count _r) >= 4 }) then
     {
-        if ((_r # 3) isEqualTo _nodeId && { toUpper (_r # 2) isEqualTo "ISSUED" }) then
+        if ((_r select 3) isEqualTo _nodeId && { toUpper (_r select 2) isEqualTo "ISSUED" }) then
         {
             _r set [2, "SUPERSEDED"];
             _tasking set [_i, _r];

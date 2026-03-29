@@ -40,8 +40,8 @@ if (!(_posATL isEqualType []) || { (count _posATL) < 2 }) exitWith {""};
 _posATL = +_posATL;
 _posATL resize 3;
 
-if (!((_posATL # 0) isEqualType 0) || { !((_posATL # 1) isEqualType 0) }) exitWith {""};
-if (!((_posATL # 2) isEqualType 0)) then { _posATL set [2, 0]; };
+if (!((_posATL select 0) isEqualType 0) || { !((_posATL select 1) isEqualType 0) }) exitWith {""};
+if (!((_posATL select 2) isEqualType 0)) then { _posATL set [2, 0]; };
 
 private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
 if (_taskId isEqualTo "") exitWith {""};
@@ -64,9 +64,9 @@ private _getP = {
     if (!(_pairs isEqualType [])) exitWith { _d };
     private _out = _d;
     {
-        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith
+        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith
         {
-            _out = _x # 1;
+            _out = _x select 1;
         };
     } forEach _pairs;
     _out

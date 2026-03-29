@@ -161,7 +161,7 @@ if (_isActive && { _typeU in ["LOGISTICS","ESCORT"] }) then
     private _nids = ["activeConvoyNetIds", []] call ARC_fnc_stateGet;
     if (_nids isEqualType [] && { (count _nids) > 0 }) then
     {
-        private _leadVeh = objectFromNetId (_nids # 0);
+        private _leadVeh = objectFromNetId (_nids select 0);
         if (!isNull _leadVeh) then
         {
             private _drv = driver _leadVeh;

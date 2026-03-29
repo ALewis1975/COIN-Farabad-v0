@@ -25,9 +25,9 @@ private _kvGet = {
     params ["_pairs", "_key", "_default"];
     if (!(_pairs isEqualType [])) exitWith {_default};
     private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) exitWith {_default};
-    private _v = (_pairs # _idx) # 1;
+    private _v = (_pairs select _idx) select 1;
     if (isNil "_v") exitWith {_default};
     _v
 };
@@ -36,7 +36,7 @@ private _taskId = [_ctx, "task_id", ""] call _kvGet;
 if (_taskId isEqualTo "") then
 {
     private _tasks = [_ctx, "task_ids_activated", []] call _kvGet;
-    if (_tasks isEqualType [] && { (count _tasks) > 0 }) then { _taskId = _tasks # 0; };
+    if (_tasks isEqualType [] && { (count _tasks) > 0 }) then { _taskId = _tasks select 0; };
 };
 if (_taskId isEqualTo "") exitWith {false};
 
@@ -75,7 +75,7 @@ if (
         { if (([_x, "threat_id", ""] call _kvGet) isEqualTo _tid) exitWith { _idxRec = _forEachIndex; }; } forEach _records;
         if (_idxRec >= 0) then
         {
-            private _rec = _records # _idxRec;
+            private _rec = _records select _idxRec;
 
             private _world = [_rec, "world", []] call _kvGet;
 
@@ -91,7 +91,7 @@ if (
                 params ["_pairs", "_key", "_value"];
                 if (!(_pairs isEqualType [])) then { _pairs = []; };
                 private _i = -1;
-                { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key }) exitWith { _i = _forEachIndex; }; } forEach _pairs;
+                { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _i = _forEachIndex; }; } forEach _pairs;
                 if (_i < 0) then { _pairs pushBack [_key, _value]; } else { _pairs set [_i, [_key, _value]]; };
                 _pairs
             };
@@ -129,7 +129,7 @@ if (_recs2 isEqualType []) then
     { if (([_x, "threat_id", ""] call _kvGet) isEqualTo _tid) exitWith { _i2 = _forEachIndex; }; } forEach _recs2;
     if (_i2 >= 0) then
     {
-        _cur = [_recs2 # _i2, "state", ""] call _kvGet;
+        _cur = [_recs2 select _i2, "state", ""] call _kvGet;
     };
 };
 

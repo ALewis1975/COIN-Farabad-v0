@@ -33,9 +33,9 @@ private _getPair = {
     if (_k isEqualTo "") exitWith { _d };
 
     private _j = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _j = _forEachIndex; }; } forEach _pairs;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _j = _forEachIndex; }; } forEach _pairs;
     if (_j < 0) exitWith { _d };
-    (_pairs # _j) # 1
+    (_pairs select _j) select 1
 };
 
 private _statusColor = {
@@ -64,11 +64,11 @@ private _decided = _items select { !((toUpper (_x param [2, "", [""]])) isEqualT
 
 if ((count _pending) > 1) then
 {
-    _pending = [_pending, [], { _x # 1 }, "ASCEND"] call BIS_fnc_sortBy;
+    _pending = [_pending, [], { _x select 1 }, "ASCEND"] call BIS_fnc_sortBy;
 };
 if ((count _decided) > 1) then
 {
-    _decided = [_decided, [], { _x # 1 }, "DESCEND"] call BIS_fnc_sortBy;
+    _decided = [_decided, [], { _x select 1 }, "DESCEND"] call BIS_fnc_sortBy;
 };
 _items = _pending + _decided;
 
@@ -99,7 +99,7 @@ if (_forceRebuild) then
         if (!(_grid isEqualType "")) then { _grid = ""; };
         if (_grid isEqualTo "") then
         {
-            if (_posATL isEqualType [] && { (count _posATL) >= 2 } && { (_posATL # 0) isEqualType 0 } && { (_posATL # 1) isEqualType 0 }) then
+            if (_posATL isEqualType [] && { (count _posATL) >= 2 } && { (_posATL select 0) isEqualType 0 } && { (_posATL select 1) isEqualType 0 }) then
             {
                 _grid = mapGridPosition _posATL;
             }
@@ -179,7 +179,7 @@ private _grid = [_meta, "grid", ""] call _getPair;
 if (!(_grid isEqualType "")) then { _grid = ""; };
 if (_grid isEqualTo "") then
 {
-    if (_posATL isEqualType [] && { (count _posATL) >= 2 } && { (_posATL # 0) isEqualType 0 } && { (_posATL # 1) isEqualType 0 }) then
+    if (_posATL isEqualType [] && { (count _posATL) >= 2 } && { (_posATL select 0) isEqualType 0 } && { (_posATL select 1) isEqualType 0 }) then
     {
         _grid = mapGridPosition _posATL;
     }

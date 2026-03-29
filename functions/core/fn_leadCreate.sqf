@@ -58,7 +58,7 @@ if ((count _leads) > _cap) then
     private _dropped = _leads deleteAt 0;
     if (_dropped isEqualType [] && { (count _dropped) >= 1 }) then
     {
-        private _did = _dropped # 0;
+        private _did = _dropped select 0;
         private _mk = format ["ARC_leadCircle_%1", _did];
         if (_mk in allMapMarkers) then { deleteMarker _mk; };
         missionNamespace setVariable [format ["ARC_leadCircleExpiresAt_%1", _did], nil];

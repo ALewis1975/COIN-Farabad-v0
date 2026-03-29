@@ -63,8 +63,8 @@ if !(_hist isEqualType []) then { _hist = []; };
 _hist = _hist select {
     _x isEqualType []
     && { (count _x) >= 5 }
-    && { (_x # 0) isEqualType 0 }
-    && { (_x # 0) >= _windowStart }
+    && { (_x select 0) isEqualType 0 }
+    && { (_x select 0) >= _windowStart }
 };
 
 private _globalCount = count _hist;
@@ -77,8 +77,8 @@ if (_globalCount >= _capGlobal) exitWith {
 private _districtCount = count (_hist select {
     _x isEqualType []
     && { (count _x) >= 2 }
-    && { (_x # 1) isEqualType "" }
-    && { (toUpper (_x # 1)) isEqualTo _districtId }
+    && { (_x select 1) isEqualType "" }
+    && { (toUpper (_x select 1)) isEqualTo _districtId }
 });
 
 if (!(_districtId isEqualTo "") && { _districtCount >= _capDistrict }) exitWith {

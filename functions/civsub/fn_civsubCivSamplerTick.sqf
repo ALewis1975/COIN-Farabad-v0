@@ -41,8 +41,8 @@ missionNamespace setVariable ["civsub_v1_spawn_player_anchors", _pAnch, false];
 
 // Compute effective caps for this tick
 private _caps = [_active] call ARC_fnc_civsubCivCapsCompute; // [capGlobalEff, capPerDistEff]
-private _capGE = _caps # 0;
-private _capDE = _caps # 1;
+private _capGE = _caps select 0;
+private _capDE = _caps select 1;
 
 private _capByD = missionNamespace getVariable ["civsub_v1_civ_cap_effectiveByDistrict", createHashMap];
 if !(_capByD isEqualType createHashMap) then { _capByD = createHashMap; };

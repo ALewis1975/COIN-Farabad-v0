@@ -47,11 +47,11 @@ private _pos = ["activeObjectivePos", []] call ARC_fnc_stateGet;
 if (!(_pos isEqualType []) || { (count _pos) < 2 }) then
 {
     private _rec = ["activeVbiedDeviceRecord", []] call ARC_fnc_stateGet;
-    if (_rec isEqualType [] && { (count _rec) >= 5 }) then { _pos = _rec # 4; };
+    if (_rec isEqualType [] && { (count _rec) >= 5 }) then { _pos = _rec select 4; };
 };
 if (!(_pos isEqualType []) || { (count _pos) < 2 }) then { _pos = [0,0,0]; };
 _pos = +_pos; _pos resize 3;
-if (!((_pos # 2) isEqualType 0)) then { _pos set [2, 0]; };
+if (!((_pos select 2) isEqualType 0)) then { _pos set [2, 0]; };
 
 // Remove trigger
 private _trgNid = ["activeVbiedTriggerNetId", ""] call ARC_fnc_stateGet;

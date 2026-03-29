@@ -66,8 +66,8 @@ private _setPair = {
     private _found = false;
     for "_i" from 0 to ((count _pairs) - 1) do
     {
-        private _p = _pairs # _i;
-        if (_p isEqualType [] && { (count _p) >= 2 } && { (_p # 0) isEqualTo _k }) exitWith
+        private _p = _pairs select _i;
+        if (_p isEqualType [] && { (count _p) >= 2 } && { (_p select 0) isEqualTo _k }) exitWith
         {
             _pairs set [_i, [_k, _v]];
             _found = true;
@@ -83,9 +83,9 @@ private _getPair = {
     if (!(_pairs isEqualType [])) exitWith { _d };
     private _out = _d;
     {
-        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith
+        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith
         {
-            _out = _x # 1;
+            _out = _x select 1;
         };
     } forEach _pairs;
     _out
@@ -99,8 +99,8 @@ private _hasIssued = false;
 {
     if (_x isEqualType [] && { (count _x) >= 7 }) then
     {
-        private _st = toUpper (_x # 2);
-        private _tg = _x # 4;
+        private _st = toUpper (_x select 2);
+        private _tg = _x select 4;
         if (_st isEqualTo "ISSUED" && { _tg isEqualTo _targetGroupId }) exitWith { _hasIssued = true; };
     };
 } forEach _orders;
@@ -162,10 +162,10 @@ switch (_orderType) do
         }
         else
         {
-            private _leadId = _lead # 0;
-            private _leadType = _lead # 1;
-            private _leadName = _lead # 2;
-            private _leadPos  = _lead # 3;
+            private _leadId = _lead select 0;
+            private _leadType = _lead select 1;
+            private _leadName = _lead select 2;
+            private _leadPos  = _lead select 3;
 
             private _zone = [_leadPos] call ARC_fnc_worldGetZoneForPos;
 

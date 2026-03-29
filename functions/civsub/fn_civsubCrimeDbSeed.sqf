@@ -69,10 +69,10 @@ private _pickDistrict = {
     private _r = (call _rand01) * _totalPop;
     private _acc = 0;
     {
-        _acc = _acc + (_x # 1);
-        if (_r <= _acc) exitWith { _x # 0 };
+        _acc = _acc + (_x select 1);
+        if (_r <= _acc) exitWith { _x select 0 };
     } forEach _weights;
-    (_weights # 0) # 0
+    (_weights select 0) select 0
 };
 
 private _cats = ["IED_FACILITATOR","OPS_PLANNER","FINANCE_LOGISTICS","URBAN_SUPPORT","WEAPONS_SMUGGLER","CELL_MEMBER"];
@@ -150,11 +150,11 @@ for "_i" from 1 to 30 do
 
     if (_enrich) then {
         private _n = [_poiId, _cat, _isHvt, _rand01] call _mkNarrative;
-        _rec set ["wanted_level", _n # 0];
-        _rec set ["wanted_reason_code", _n # 1];
-        _rec set ["wanted_reason_text", _n # 2];
-        _rec set ["wanted_issuing_org", _n # 3];
-        _rec set ["wanted_confidence", _n # 4];
+        _rec set ["wanted_level", _n select 0];
+        _rec set ["wanted_reason_code", _n select 1];
+        _rec set ["wanted_reason_text", _n select 2];
+        _rec set ["wanted_issuing_org", _n select 3];
+        _rec set ["wanted_confidence", _n select 4];
     };
 
     _db set [_poiId, _rec];

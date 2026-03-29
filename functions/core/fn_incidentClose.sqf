@@ -18,7 +18,7 @@ private _log = {
 };
 
 
-private _rawResult = if (_this isEqualType [] && { (count _this) > 0 }) then { _this # 0 } else { nil };
+private _rawResult = if (_this isEqualType [] && { (count _this) > 0 }) then { _this select 0 } else { nil };
 params [["_result", "", [""]]];
 _result = toUpper (trim _result);
 
@@ -392,7 +392,7 @@ if (_prevAcceptedGroup isEqualType "" && { !(_prevAcceptedGroup isEqualTo "") })
     private _rows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
     if (!(_rows isEqualType [])) then { _rows = []; };
     private _idx = -1;
-    { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _prevAcceptedGroup }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
+    { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _prevAcceptedGroup }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
     private _row = [_prevAcceptedGroup, "AVAILABLE", serverTime, "SYSTEM"];
     if (_idx < 0) then { _rows pushBack _row; } else { _rows set [_idx, _row]; };
     missionNamespace setVariable ["ARC_pub_unitStatuses", _rows, true];

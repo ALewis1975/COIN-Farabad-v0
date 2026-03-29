@@ -69,9 +69,9 @@ private _fillCombo = {
     _ctrl lbSetCurSel _i;
 };
 
-[_display displayCtrl 77321, _aceDef # 0] call _fillCombo;
-[_display displayCtrl 77322, _aceDef # 1] call _fillCombo;
-[_display displayCtrl 77323, _aceDef # 2] call _fillCombo;
+[_display displayCtrl 77321, _aceDef select 0] call _fillCombo;
+[_display displayCtrl 77322, _aceDef select 1] call _fillCombo;
+[_display displayCtrl 77323, _aceDef select 2] call _fillCombo;
 
 // Clear previous result
 uiNamespace setVariable ["ARC_sitrepDialog_result", nil];

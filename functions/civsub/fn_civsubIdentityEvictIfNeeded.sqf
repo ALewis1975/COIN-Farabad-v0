@@ -38,7 +38,7 @@ _rows sort true; // ascending by timestamp
 private _need = (count _rows) - _cap;
 private _evicted = 0;
 for "_i" from 0 to (_need - 1) do {
-    private _id = (_rows # _i) # 0;
+    private _id = (_rows select _i) select 0;
     _ids deleteAt _id;
     _evicted = _evicted + 1;
 };

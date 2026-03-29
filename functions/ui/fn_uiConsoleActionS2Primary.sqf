@@ -24,8 +24,8 @@ private _data = if (_sel >= 0) then { _ctrlList lbData _sel } else { "" };
 if (!(_data isEqualType "")) then { _data = ""; };
 
 private _parts = _data splitString "|";
-private _kind = if ((count _parts) > 0) then { toUpper (_parts # 0) } else { "NONE" };
-private _arg  = if ((count _parts) > 1) then { _parts # 1 } else { "" };
+private _kind = if ((count _parts) > 0) then { toUpper (_parts select 0) } else { "NONE" };
+private _arg  = if ((count _parts) > 1) then { _parts select 1 } else { "" };
 if (!(_arg isEqualType "")) then { _arg = ""; };
 _arg = trim _arg;
 
@@ -292,7 +292,7 @@ switch (_kind) do
 
         private _pos = [];
         {
-            if (_x isEqualType [] && { (count _x) >= 5 } && { (_x # 0) isEqualTo _arg }) exitWith { _pos = _x # 4; };
+            if (_x isEqualType [] && { (count _x) >= 5 } && { (_x select 0) isEqualTo _arg }) exitWith { _pos = _x select 4; };
         } forEach _intelLog;
 
         if (_pos isEqualType [] && { (count _pos) >= 2 }) then

@@ -28,9 +28,9 @@ private _getMeta = {
     if (!(_meta isEqualType [])) exitWith { _d };
     private _out = _d;
     {
-        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith
+        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith
         {
-            _out = _x # 1;
+            _out = _x select 1;
         };
     } forEach _meta;
     _out

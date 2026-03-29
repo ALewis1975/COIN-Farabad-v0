@@ -38,7 +38,7 @@ private _fmtType = {
     private _t = _this;
     if (_t isEqualType []) then
     {
-        _t = if ((count _t) > 0) then { _t # 0 } else { "" };
+        _t = if ((count _t) > 0) then { _t select 0 } else { "" };
     };
     if !(_t isEqualType "") exitWith { str _t };
 

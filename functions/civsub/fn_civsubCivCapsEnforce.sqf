@@ -77,7 +77,7 @@ if (_recycleDist > 0 && { count _keysEvictable > 0 }) then
             private _max = (count _cands) min 12;
             for "_i" from 0 to (_max - 1) do
             {
-                private _k = (_cands # _i) # 1;
+                private _k = (_cands select _i) select 1;
                 _q pushBackUnique _k;
             };
         };
@@ -99,7 +99,7 @@ if ((count _keys) > _capGE && {count _keysEvictable > 0}) then
     private _over = (count _keys) - _capGE;
     if (_over > (count _sorted)) then { _over = count _sorted; };
     for "_i" from 0 to (_over - 1) do {
-        private _k = (_sorted # _i) # 1;
+        private _k = (_sorted select _i) select 1;
         _q pushBackUnique _k;
     };
 };
@@ -137,7 +137,7 @@ private _byD = createHashMap;
         private _over = (count _arr) - _capDThis;
         if (_over > (count _sorted)) then { _over = count _sorted; };
         for "_i" from 0 to (_over - 1) do {
-            private _k = (_sorted # _i) # 1;
+            private _k = (_sorted select _i) select 1;
             _q pushBackUnique _k;
         };
     };

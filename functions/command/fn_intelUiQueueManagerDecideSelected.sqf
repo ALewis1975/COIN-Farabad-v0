@@ -38,7 +38,7 @@ if (_q isEqualTo []) then
 
 private _it = [];
 {
-    if (_x isEqualType [] && { (count _x) >= 12 } && { (_x # 0) isEqualTo _qid }) exitWith { _it = _x; };
+    if (_x isEqualType [] && { (count _x) >= 12 } && { (_x select 0) isEqualTo _qid }) exitWith { _it = _x; };
 } forEach _q;
 
 if (_it isEqualTo []) exitWith
@@ -47,7 +47,7 @@ if (_it isEqualTo []) exitWith
     false
 };
 
-private _stU = toUpper (_it # 2);
+private _stU = toUpper (_it select 2);
 if (!(_stU isEqualTo "PENDING")) exitWith
 {
     ["TOC Queue", format ["%1 is %2 (not pending).", _qid, _stU]] call ARC_fnc_clientHint;

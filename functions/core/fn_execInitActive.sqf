@@ -210,9 +210,9 @@ if (_p isEqualTo []) then { _p = +_center; _p resize 3; };
             _obj = createVehicle [_class, _p, [], 0, "CAN_COLLIDE"];
             // Place at the chosen ATL position; do NOT snap upward (avoids rooftop placement).
             private _pFix = +_p; _pFix resize 3;
-            private _pz = _pFix # 2; if (!(_pz isEqualType 0)) then { _pz = 0; };
+            private _pz = _pFix select 2; if (!(_pz isEqualType 0)) then { _pz = 0; };
             if (_pz < -2) then { _pz = 0; };
-            _obj setPosATL [_pFix # 0, _pFix # 1, _pz + 0.05];
+            _obj setPosATL [_pFix select 0, _pFix select 1, _pz + 0.05];
             _obj setVectorUp [0,0,1];            _obj setVariable ["ARC_objectiveKind", _kind, true];
             // If this objective failing on death, keep it safe until players are on-site.
             _obj allowDamage (!_failOnKilled);
@@ -263,7 +263,7 @@ if (_kind isEqualTo "VBIED_VEHICLE") then
             };
             _pos = +_pos;
             _pos resize 3;
-            if (!((_pos # 2) isEqualType 0)) then { _pos set [2, 0]; };
+            if (!((_pos select 2) isEqualType 0)) then { _pos set [2, 0]; };
 
             private _kind = _killed getVariable ["ARC_objectiveKind", ""];
             if (!(_kind isEqualType "")) then { _kind = ""; };
@@ -352,8 +352,8 @@ private _spawnCacheObjective = {
         private _cls = selectRandom _valid;
         private _o = createVehicle [_cls, _p, [], 0, "CAN_COLLIDE"];
         // Place at the chosen interior ATL position (already filtered to avoid rooftops).
-        private _pz = _p # 2; if (!(_pz isEqualType 0)) then { _pz = 0; };
-        _o setPosATL [_p # 0, _p # 1, _pz + 0.05];
+        private _pz = _p select 2; if (!(_pz isEqualType 0)) then { _pz = 0; };
+        _o setPosATL [_p select 0, _p select 1, _pz + 0.05];
         _o setVectorUp [0,0,1];
         _o setVariable ["ARC_objectiveKind", "CACHE_SEARCH", true];
         _o setVariable ["ARC_cacheIsTrue", (_i isEqualTo _trueIdx), true];
@@ -798,7 +798,7 @@ case "IED":
             // Expected format includes position at index 7.
             if (_last isEqualType [] && { (count _last) >= 8 }) then
             {
-                private _lastPos = _last # 7;
+                private _lastPos = _last select 7;
                 if (_lastPos isEqualType [] && { (count _lastPos) >= 2 }) then
                 {
                     _stagingPos = +_lastPos;
@@ -1120,8 +1120,8 @@ case "IED":
             private _out = +_p; _out resize 3;
             if (!(_ws isEqualType 0) || { _ws <= 0 }) exitWith { _out };
 
-            private _x = (_out # 0);
-            private _y = (_out # 1);
+            private _x = (_out select 0);
+            private _y = (_out select 1);
             _x = (_x max _m) min (_ws - _m);
             _y = (_y max _m) min (_ws - _m);
 
@@ -1263,9 +1263,9 @@ if (!(_objKind isEqualTo "")) then
 
         if (_spawned isEqualType [] && { (count _spawned) >= 3 }) then
         {
-            private _basePos = _spawned # 0;
-            private _nids = _spawned # 1;
-            private _trueNid = _spawned # 2;
+            private _basePos = _spawned select 0;
+            private _nids = _spawned select 1;
+            private _trueNid = _spawned select 2;
 
             ["activeObjectiveKind", _objKind] call ARC_fnc_stateSet;
             ["activeObjectiveClass", "CACHE"] call ARC_fnc_stateSet;
@@ -1284,8 +1284,8 @@ if (!(_objKind isEqualTo "")) then
         _spawned = [_objKind, _objClass, _pos, _objRadius, _objAction, _failOnKilled] call _spawnObjective;
         if (_spawned isEqualType [] && { (count _spawned) >= 2 }) then
         {
-            private _obj = _spawned # 0;
-            private _oPos = _spawned # 1;
+            private _obj = _spawned select 0;
+            private _oPos = _spawned select 1;
 
             ["activeObjectiveKind", _objKind] call ARC_fnc_stateSet;
             ["activeObjectiveClass", _objClass] call ARC_fnc_stateSet;
@@ -1623,8 +1623,8 @@ if (!(_objKind isEqualTo "")) then
 
         if (_picked isEqualType [] && { (count _picked) >= 3 }) then
         {
-            _spawnPos = +(_picked # 0); _spawnPos resize 3;
-            _linkupPos = +(_picked # 2); _linkupPos resize 3;
+            _spawnPos = +(_picked select 0); _spawnPos resize 3;
+            _linkupPos = +(_picked select 2); _linkupPos resize 3;
         }
         else
         {
@@ -1636,8 +1636,8 @@ if (!(_objKind isEqualTo "")) then
             // Keep link-up reasonably inside the map.
             private _ws = worldSize;
             private _margin = 150;
-            _p set [0, ((_p # 0) max _margin) min (_ws - _margin)];
-            _p set [1, ((_p # 1) max _margin) min (_ws - _margin)];
+            _p set [0, ((_p select 0) max _margin) min (_ws - _margin)];
+            _p set [1, ((_p select 1) max _margin) min (_ws - _margin)];
 
             private _snapR2 = (_roadSnap max 100) min 500;
             private _rL = if (_isBaseStart2) then { [_p, _snapR2, "Airbase"] call _fn_nearestRoad } else { [_p, _snapR2] call _fn_nearestRoad };
@@ -1802,7 +1802,7 @@ if (_showSpawnMarker) then
                 {
                     for "_li" from 1 to ((count _pts) - 1) do
                     {
-                        _len = _len + ((_pts # (_li - 1)) distance2D (_pts # _li));
+                        _len = _len + ((_pts select (_li - 1)) distance2D (_pts select _li));
                     };
                 };
 
@@ -1829,8 +1829,8 @@ if (_showSpawnMarker) then
                 {
                     private _t = _si / _sampleCount;
                     private _probe = [
-                        (_s # 0) + ((_e # 0) - (_s # 0)) * _t,
-                        (_s # 1) + ((_e # 1) - (_s # 1)) * _t,
+                        (_s select 0) + ((_e select 0) - (_s select 0)) * _t,
+                        (_s select 1) + ((_e select 1) - (_s select 1)) * _t,
                         0
                     ];
 
@@ -1850,7 +1850,7 @@ if (_showSpawnMarker) then
                         _pt resize 3;
                     };
 
-                    if ((count _fallback) isEqualTo 0 || { _pt distance2D (_fallback # ((count _fallback) - 1)) > 20 }) then
+                    if ((count _fallback) isEqualTo 0 || { _pt distance2D (_fallback select ((count _fallback) - 1)) > 20 }) then
                     {
                         _fallback pushBack _pt;
                     };
@@ -1858,7 +1858,7 @@ if (_showSpawnMarker) then
 
                 if ((count _fallback) < 3) then
                 {
-                    private _mid = [(_s # 0) + ((_e # 0) - (_s # 0)) * 0.50, (_s # 1) + ((_e # 1) - (_s # 1)) * 0.50, 0];
+                    private _mid = [(_s select 0) + ((_e select 0) - (_s select 0)) * 0.50, (_s select 1) + ((_e select 1) - (_s select 1)) * 0.50, 0];
                     _fallback = [+_s, _mid, +_e];
                 };
 
@@ -1960,13 +1960,13 @@ if (_showSpawnMarker) then
 
                 // Pick open node with lowest f-score.
                 private _bestIdx = 0;
-                private _best    = _open # 0;
+                private _best    = _open select 0;
                 private _bestKey = str _best;
                 private _bestF   = _f getOrDefault [_bestKey, 1e12];
 
                 for "_i" from 1 to ((count _open) - 1) do
                 {
-                    private _r  = _open # _i;
+                    private _r  = _open select _i;
                     private _rk = str _r;
                     private _fv = _f getOrDefault [_rk, 1e12];
                     if (_fv < _bestF) then { _bestF = _fv; _bestIdx = _i; _best = _r; _bestKey = _rk; };
@@ -2064,7 +2064,7 @@ if (_showSpawnMarker) then
                 if (!isNull _r) then
                 {
                     private _p = getPosATL _r; _p resize 3;
-                    if ((count _pts) isEqualTo 0 || { (_p distance2D (_pts # ((count _pts) - 1))) > 25 }) then
+                    if ((count _pts) isEqualTo 0 || { (_p distance2D (_pts select ((count _pts) - 1))) > 25 }) then
                     {
                         _pts pushBack _p;
                     };
@@ -2073,7 +2073,7 @@ if (_showSpawnMarker) then
 
             // Ensure end point is present.
             private _pEndRoad = getPosATL _r1; _pEndRoad resize 3;
-            if ((count _pts) isEqualTo 0 || { (_pEndRoad distance2D (_pts # ((count _pts) - 1))) > 10 }) then
+            if ((count _pts) isEqualTo 0 || { (_pEndRoad distance2D (_pts select ((count _pts) - 1))) > 10 }) then
             {
                 _pts pushBack _pEndRoad;
             };
@@ -2097,8 +2097,8 @@ if (_showSpawnMarker) then
             _routePts = +_legA;
             if ((count _routePts) > 0 && { (count _legB) > 0 }) then
             {
-                private _pJoin = _legB # 0;
-                if (((_routePts # ((count _routePts) - 1)) distance2D _pJoin) < 10) then
+                private _pJoin = _legB select 0;
+                if (((_routePts select ((count _routePts) - 1)) distance2D _pJoin) < 10) then
                 {
                     _legB deleteAt 0;
                 };
@@ -2133,7 +2133,7 @@ if (_showSpawnMarker) then
 
         if (_routeUsedFallbackAny && { (count _routePts) < 3 } && { (count _routePts) >= 2 }) then
         {
-            _routePts = [_routePts # 0, _routePts # 1, _snapM, "", [], 0] call _fn_buildRoadRoute;
+            _routePts = [_routePts select 0, _routePts select 1, _snapM, "", [], 0] call _fn_buildRoadRoute;
         };
 
         // Store route points for the convoy tick (waypoint build) and compute an approximate road-distance.
@@ -2142,7 +2142,7 @@ if (_showSpawnMarker) then
         {
             for "_i" from 1 to ((count _routePts) - 1) do
             {
-                _routeLen = _routeLen + ((_routePts # (_i - 1)) distance2D (_routePts # _i));
+                _routeLen = _routeLen + ((_routePts select (_i - 1)) distance2D (_routePts select _i));
             };
         };
 
@@ -2179,7 +2179,7 @@ if (!(_total isEqualType 0) || { _total <= 0 }) then
     _total = 0;
     for "_k" from 1 to ((count _routePts) - 1) do
     {
-        _total = _total + ((_routePts # (_k - 1)) distance2D (_routePts # _k));
+        _total = _total + ((_routePts select (_k - 1)) distance2D (_routePts select _k));
     };
 };
 
@@ -2187,7 +2187,7 @@ private _cum = [0];
 private _acc = 0;
 for "_k" from 1 to ((count _routePts) - 1) do
 {
-    _acc = _acc + ((_routePts # (_k - 1)) distance2D (_routePts # _k));
+    _acc = _acc + ((_routePts select (_k - 1)) distance2D (_routePts select _k));
     _cum pushBack _acc;
 };
 
@@ -2196,33 +2196,33 @@ for "_i" from 0 to (_rmCount - 1) do
     private _t = if ((_rmCount - 1) > 0) then { _i / (_rmCount - 1) } else { 0 };
     private _dReq = _total * _t;
 
-    private _p = +(_routePts # 0);
+    private _p = +(_routePts select 0);
     _p resize 3;
 
     // Find segment containing _dReq.
     private _seg = 0;
     for "_s" from 1 to ((count _cum) - 1) do
     {
-        if ((_cum # _s) >= _dReq) exitWith { _seg = _s; };
+        if ((_cum select _s) >= _dReq) exitWith { _seg = _s; };
         _seg = _s;
     };
 
     if (_seg > 0) then
     {
-        private _a = _cum # (_seg - 1);
-        private _b = _cum # _seg;
+        private _a = _cum select (_seg - 1);
+        private _b = _cum select _seg;
 
-        private _pA = +(_routePts # (_seg - 1));
-        private _pB = +(_routePts # _seg);
+        private _pA = +(_routePts select (_seg - 1));
+        private _pB = +(_routePts select _seg);
         _pA resize 3; _pB resize 3;
 
         private _den = ((_b - _a) max 0.001);
         private _u = ((_dReq - _a) / _den);
         _u = (_u max 0) min 1;
 
-        private _dx = (_pB # 0) - (_pA # 0);
-        private _dy = (_pB # 1) - (_pA # 1);
-        _p = [(_pA # 0) + (_dx * _u), (_pA # 1) + (_dy * _u), _pA # 2];
+        private _dx = (_pB select 0) - (_pA select 0);
+        private _dy = (_pB select 1) - (_pA select 1);
+        _p = [(_pA select 0) + (_dx * _u), (_pA select 1) + (_dy * _u), _pA select 2];
         _p resize 3;
     };
 

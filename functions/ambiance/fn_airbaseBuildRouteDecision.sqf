@@ -80,9 +80,9 @@ if ((count _connectorValid) == 0) then {
 };
 
 private _pathMarkers = if (_opKind isEqualTo "DEP") then {
-    [_connectorValid # 0, _ingressMarker, _runwayMarker, _egressMarker]
+    [_connectorValid select 0, _ingressMarker, _runwayMarker, _egressMarker]
 } else {
-    [_runwayMarker, _egressMarker, _connectorValid # 0, _ingressMarker]
+    [_runwayMarker, _egressMarker, _connectorValid select 0, _ingressMarker]
 };
 
 private _missing = _pathMarkers select { (_x isEqualType "") && { !(_x isEqualTo "") } && { (markerShape _x) isEqualTo "" } };

@@ -54,7 +54,7 @@ private _setGroupStatus = {
     if (!(_rows isEqualType [])) then { _rows = []; };
 
     private _idx = -1;
-    { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _gid }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
+    { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _gid }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
     private _row = [_gid, _status, serverTime, _who];
     if (_idx < 0) then { _rows pushBack _row; } else { _rows set [_idx, _row]; };
     missionNamespace setVariable ["ARC_pub_unitStatuses", _rows, true];
@@ -94,8 +94,8 @@ if (_callerGroup isEqualTo "") exitWith {false};
 private _unitStatuses = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
 if (!(_unitStatuses isEqualType [])) then { _unitStatuses = []; };
 private _statusIdx = -1;
-{ if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _callerGroup }) exitWith { _statusIdx = _forEachIndex; }; } forEach _unitStatuses;
-private _statusNow = if (_statusIdx < 0) then { "OFFLINE" } else { toUpper (trim ((_unitStatuses # _statusIdx) # 1)) };
+{ if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _callerGroup }) exitWith { _statusIdx = _forEachIndex; }; } forEach _unitStatuses;
+private _statusNow = if (_statusIdx < 0) then { "OFFLINE" } else { toUpper (trim ((_unitStatuses select _statusIdx) select 1)) };
 if (!(_statusNow isEqualTo "AVAILABLE")) exitWith
 {
     ["Incident acceptance denied: your group must set status to AVAILABLE first."] remoteExec ["ARC_fnc_clientHint", owner _caller];

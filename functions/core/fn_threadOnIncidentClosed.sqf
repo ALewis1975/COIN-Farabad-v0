@@ -36,10 +36,10 @@ private _threads = ["threads", []] call ARC_fnc_stateGet;
 if (!(_threads isEqualType [])) then { _threads = []; };
 
 private _idx = -1;
-{ if (!(([_x] call ARC_fnc_threadNormalizeRecord) isEqualTo []) && { ((_x # 0) isEqualTo _threadId) }) exitWith { _idx = _forEachIndex; }; } forEach _threads;
+{ if (!(([_x] call ARC_fnc_threadNormalizeRecord) isEqualTo []) && { ((_x select 0) isEqualTo _threadId) }) exitWith { _idx = _forEachIndex; }; } forEach _threads;
 if (_idx < 0) exitWith {false};
 
-private _thr = [(_threads # _idx)] call ARC_fnc_threadNormalizeRecord;
+private _thr = [(_threads select _idx)] call ARC_fnc_threadNormalizeRecord;
 
 private _now = serverTime;
 
@@ -50,10 +50,10 @@ private _tagU  = toUpper _incidentTag;
 private _inf = ["infiltration", 0.35] call ARC_fnc_stateGet;
 _inf = (_inf max 0) min 1;
 
-private _conf = (_thr # 4) max 0 min 1;
-private _heat = (_thr # 5) max 0 min 1;
-private _state = _thr # 6;
-private _evi = _thr # 7;
+private _conf = (_thr select 4) max 0 min 1;
+private _heat = (_thr select 5) max 0 min 1;
+private _state = _thr select 6;
+private _evi = _thr select 7;
 if (!(_evi isEqualType [])) then { _evi = []; };
 
 // Mark touched
@@ -122,8 +122,8 @@ if (_resU isEqualTo "SUCCEEDED") then
 };
 
 // Follow-up counts
-private _suc = _thr # 8;
-private _fail = _thr # 9;
+private _suc = _thr select 8;
+private _fail = _thr select 9;
 if (_resU isEqualTo "SUCCEEDED") then { _suc = _suc + 1; };
 if (_resU isEqualTo "FAILED") then { _fail = _fail + 1; };
 _thr set [8, _suc];
@@ -204,7 +204,7 @@ if (_typeU find "CMDNODE" == 0 || { _tagU isEqualTo "CMDNODE" }) then
         private _pPos = _pos;
         if (!(_pPos isEqualType []) || { (count _pPos) < 2 }) then
         {
-            _pPos = _thr # 3;
+            _pPos = _thr select 3;
         };
 
         private _trackPos = [_pPos, 2200, _avoid] call ARC_fnc_worldPickEnterablePosNear;

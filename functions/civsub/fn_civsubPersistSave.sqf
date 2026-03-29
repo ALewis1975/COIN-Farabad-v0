@@ -84,7 +84,7 @@ private _idArr = [];
         {
             private _row = _seen get _x;
             if (_row isEqualType [] && {count _row >= 3}) then {
-                _seenRows pushBack [_x, _row # 0, _row # 1, _row # 2];
+                _seenRows pushBack [_x, _row select 0, _row select 1, _row select 2];
             };
         } forEach (keys _seen);
     };

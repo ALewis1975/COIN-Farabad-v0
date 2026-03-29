@@ -37,7 +37,7 @@ private _getPair = {
     params ["_pairs", "_k", "_d"];
     if (!(_pairs isEqualType [])) exitWith { _d };
     {
-        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _x # 1 };
+        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _x select 1 };
     } forEach _pairs;
     _d
 };

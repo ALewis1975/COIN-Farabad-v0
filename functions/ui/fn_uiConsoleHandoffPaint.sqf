@@ -69,7 +69,7 @@ private _getPair = {
     params ["_pairs", "_k", "_d"];
     if (!(_pairs isEqualType [])) exitWith { _d };
     {
-        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _x # 1 };
+        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _x select 1 };
     } forEach _pairs;
     _d
 };
@@ -94,8 +94,8 @@ private _findIssuedAny = {
     {
         if (_x isEqualType [] && { (count _x) >= 5 }) then
         {
-            private _st = toUpper (_x # 2);
-            private _tg = _x # 4;
+            private _st = toUpper (_x select 2);
+            private _tg = _x select 4;
             if (_st isEqualTo "ISSUED" && { _tg isEqualTo _focusGid }) exitWith { _has = true; };
         };
     } forEach _orders;
@@ -186,15 +186,15 @@ private _epwOrd   = ["EPW"] call _findAcceptedRtb;
 private _intelId = "";
 private _intelTg = "";
 if (!(_intelOrd isEqualTo [])) then {
-    _intelId = _intelOrd # 0;
-    _intelTg = _intelOrd # 4;
+    _intelId = _intelOrd select 0;
+    _intelTg = _intelOrd select 4;
 };
 
 private _epwId = "";
 private _epwTg = "";
 if (!(_epwOrd isEqualTo [])) then {
-    _epwId = _epwOrd # 0;
-    _epwTg = _epwOrd # 4;
+    _epwId = _epwOrd select 0;
+    _epwTg = _epwOrd select 4;
 };
 
 uiNamespace setVariable ["ARC_console_handoff_intelOrderId", _intelId];
@@ -249,9 +249,9 @@ _ctrlMain ctrlSetStructuredText parseText _txt;
 // Auto-fit + clamp to viewport so the controls group can scroll when needed.
 [_ctrlMain] call BIS_fnc_ctrlFitToTextHeight;
 private _mainGrp = _display displayCtrl 78015;
-private _minH = if (!isNull _mainGrp) then { (ctrlPosition _mainGrp) # 3 } else { 0.74 };
+private _minH = if (!isNull _mainGrp) then { (ctrlPosition _mainGrp) select 3 } else { 0.74 };
 private _p = ctrlPosition _ctrlMain;
-_p set [3, (_p # 3) max _minH];
+_p set [3, (_p select 3) max _minH];
 _ctrlMain ctrlSetPosition _p;
 _ctrlMain ctrlCommit 0;
 

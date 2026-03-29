@@ -40,8 +40,8 @@ if (!(_orders isEqualType [])) then { _orders = []; };
 private _issuedCount = 0;
 {
     if (!(_x isEqualType [] && { (count _x) >= 6 })) then { continue; };
-    private _st = toUpper (_x # 2);
-    private _tg = _x # 4;
+    private _st = toUpper (_x select 2);
+    private _tg = _x select 4;
     if (!(_tg isEqualTo _gid)) then { continue; };
     if (_st isEqualTo 'ISSUED') then { _issuedCount = _issuedCount + 1; };
 } forEach _orders;
@@ -58,9 +58,9 @@ private _hasRtbEvidenceApproval = false;
 private _hasTowVbiedApproval = false;
 {
     if (!(_x isEqualType [] && { (count _x) >= 6 })) then { continue; };
-    if (!((_x # 0) isEqualTo _taskId)) then { continue; };
-    if (!((_x # 1) isEqualTo _accG)) then { continue; };
-    private _rt = toUpper (trim (_x # 2));
+    if (!((_x select 0) isEqualTo _taskId)) then { continue; };
+    if (!((_x select 1) isEqualTo _accG)) then { continue; };
+    private _rt = toUpper (trim (_x select 2));
     if (_rt isEqualTo 'RTB_IED') then { _hasRtbEvidenceApproval = true; };
     if (_rt isEqualTo 'TOW_VBIED') then { _hasTowVbiedApproval = true; };
 } forEach _appr;

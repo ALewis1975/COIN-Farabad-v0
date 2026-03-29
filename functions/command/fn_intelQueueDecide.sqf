@@ -43,8 +43,8 @@ if (!(_q isEqualType [])) exitWith {false};
 private _idx = -1;
 for "_i" from 0 to ((count _q) - 1) do
 {
-    private _it = _q # _i;
-    if (_it isEqualType [] && { (count _it) >= 12 } && { (_it # 0) isEqualTo _qid }) exitWith
+    private _it = _q select _i;
+    if (_it isEqualType [] && { (count _it) >= 12 } && { (_it select 0) isEqualTo _qid }) exitWith
     {
         _idx = _i;
     };
@@ -52,7 +52,7 @@ for "_i" from 0 to ((count _q) - 1) do
 
 if (_idx < 0) exitWith {false};
 
-private _item = _q # _idx;
+private _item = _q select _idx;
 _item params [
     "_id",
     "_createdAt",
@@ -106,9 +106,9 @@ private _getP = {
     if (!(_pairs isEqualType [])) exitWith { _d };
     private _out = _d;
     {
-        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith
+        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith
         {
-            _out = _x # 1;
+            _out = _x select 1;
         };
     } forEach _pairs;
     _out
@@ -122,7 +122,7 @@ private _setPair = {
     if (!(_k isEqualType "")) then { _k = str _k; };
 
     private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
 
     if (_idx < 0) then
     {

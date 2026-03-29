@@ -53,8 +53,8 @@ if (isNull _towVeh || {isNull _towCrew}) exitWith {
 private _fnNormalize = {
     params ["_data"]; 
     if (!(_data isEqualType [])) exitWith { [] };
-    if ((count _data) == 1 && { (_data # 0) isEqualType [] } && { (count (_data # 0)) > 0 } && { ((_data # 0) # 0) isEqualType [] }) exitWith {
-        _data # 0
+    if ((count _data) == 1 && { (_data select 0) isEqualType [] } && { (count (_data select 0)) > 0 } && { ((_data select 0) select 0) isEqualType [] }) exitWith {
+        _data select 0
     };
     _data
 };
@@ -72,7 +72,7 @@ private _fnUnitPlayBlocking = {
 
     private _duration = 0;
     private _last = _framesL select ((count _framesL) - 1);
-    if (_last isEqualType [] && { (count _last) > 0 } && { (_last # 0) isEqualType 0 }) then { _duration = (_last # 0); };
+    if (_last isEqualType [] && { (count _last) > 0 } && { (_last select 0) isEqualType 0 }) then { _duration = (_last select 0); };
     private _tEnd = time + (_duration + 10);
 
     private _h = [_vehL, _framesL] spawn BIS_fnc_unitPlay;

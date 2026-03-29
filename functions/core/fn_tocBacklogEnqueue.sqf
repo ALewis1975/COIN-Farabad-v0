@@ -51,20 +51,20 @@ private _pool = ["leadPool", []] call ARC_fnc_stateGet;
 if (!(_pool isEqualType [])) then { _pool = []; };
 
 private _li = -1;
-{ if (_x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _leadId }) exitWith { _li = _forEachIndex; }; } forEach _pool;
+{ if (_x isEqualType [] && { (count _x) >= 1 } && { (_x select 0) isEqualTo _leadId }) exitWith { _li = _forEachIndex; }; } forEach _pool;
 if (_li < 0) exitWith {false};
 
-private _lead = _pool # _li;
+private _lead = _pool select _li;
 
 private _leadType = "";
 private _leadName = "";
 private _leadPos = [];
 private _tag = "";
 
-if ((count _lead) >= 2 && { (_lead # 1) isEqualType "" }) then { _leadType = _lead # 1; };
-if ((count _lead) >= 3 && { (_lead # 2) isEqualType "" }) then { _leadName = _lead # 2; };
-if ((count _lead) >= 4 && { (_lead # 3) isEqualType [] }) then { _leadPos = _lead # 3; };
-if ((count _lead) >= 11 && { (_lead # 10) isEqualType "" }) then { _tag = _lead # 10; };
+if ((count _lead) >= 2 && { (_lead select 1) isEqualType "" }) then { _leadType = _lead select 1; };
+if ((count _lead) >= 3 && { (_lead select 2) isEqualType "" }) then { _leadName = _lead select 2; };
+if ((count _lead) >= 4 && { (_lead select 3) isEqualType [] }) then { _leadPos = _lead select 3; };
+if ((count _lead) >= 11 && { (_lead select 10) isEqualType "" }) then { _tag = _lead select 10; };
 
 private _zone = "";
 if (_leadPos isEqualType [] && { (count _leadPos) >= 2 }) then
@@ -77,7 +77,7 @@ if (!(_back isEqualType [])) then { _back = []; };
 
 // Avoid duplicates by leadId.
 private _exists = -1;
-{ if (_x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _leadId }) exitWith { _exists = _forEachIndex; }; } forEach _back;
+{ if (_x isEqualType [] && { (count _x) >= 1 } && { (_x select 0) isEqualTo _leadId }) exitWith { _exists = _forEachIndex; }; } forEach _back;
 if (_exists >= 0) exitWith {true};
 
 // Record shape:

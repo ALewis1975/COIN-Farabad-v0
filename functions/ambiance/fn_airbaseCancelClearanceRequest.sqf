@@ -35,7 +35,7 @@ private _idx = -1;
 { if ((_x param [0, ""]) isEqualTo _requestId) exitWith { _idx = _forEachIndex; }; } forEach _requests;
 if (_idx < 0) exitWith {false};
 
-private _rec = _requests # _idx;
+private _rec = _requests select _idx;
 private _status = toUpper (_rec param [6, ""]);
 private _uid = _rec param [2, ""];
 private _requesterOwner = -1;

@@ -67,7 +67,7 @@ private _cent = _d getOrDefault ["centroid", [0,0]];
 private _grid = "";
 if (_cent isEqualType [] && { (count _cent) >= 2 }) then
 {
-    _grid = mapGridPosition [_cent # 0, _cent # 1, 0];
+    _grid = mapGridPosition [_cent select 0, _cent select 1, 0];
 };
 
 // Incident window snapshot (captured at acceptance)

@@ -28,7 +28,7 @@ if (isNil { missionNamespace getVariable "ARC_civsub_fnc_posIsRoadish" }) then
         if (!(_pos isEqualType []) || { (count _pos) < 2 }) exitWith { true };
 
         private _p = _pos;
-        if ((count _p) == 2) then { _p = [_p # 0, _p # 1, 0]; };
+        if ((count _p) == 2) then { _p = [_p select 0, _p select 1, 0]; };
 
         _probeStep = (_probeStep max 0.6) min 2.0;
         _nearR = (_nearR max 0.15) min 1.5;
@@ -62,7 +62,7 @@ if (isNil { missionNamespace getVariable "ARC_civsub_fnc_findPosOffRoad" }) then
         if (!(_seed isEqualType []) || { (count _seed) < 2 }) exitWith { [0,0,0] };
 
         private _p0 = _seed;
-        if ((count _p0) == 2) then { _p0 = [_p0#0,_p0#1,0]; };
+        if ((count _p0) == 2) then { _p0 = [_p0 select 0,_p0 select 1,0]; };
 
         _minOff = (_minOff max 0.5) min 6;
         _maxOff = (_maxOff max (_minOff + 0.5)) min 30;

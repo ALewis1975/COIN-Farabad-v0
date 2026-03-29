@@ -70,9 +70,9 @@ if (!(_pub isEqualType [])) then { _pub = []; };
 private _get = {
     params ["_k", "_def"];
     private _idx = -1;
-    { if ((_x # 0) isEqualTo _k) exitWith { _idx = _forEachIndex; }; } forEach _pub;
+    { if ((_x select 0) isEqualTo _k) exitWith { _idx = _forEachIndex; }; } forEach _pub;
     if (_idx < 0) exitWith {_def};
-    (_pub # _idx) # 1
+    (_pub select _idx) select 1
 };
 
 private _p = ["insurgentPressure", 0.60] call _get;
@@ -232,7 +232,7 @@ if (!(_taskId isEqualTo "")) then
         private _nids = missionNamespace getVariable ["ARC_activeConvoyNetIds", []];
         if (_nids isEqualType [] && { (count _nids) > 0 }) then
         {
-            private _leadVeh = objectFromNetId (_nids # 0);
+            private _leadVeh = objectFromNetId (_nids select 0);
             if (!isNull _leadVeh) then
             {
                 private _drv = driver _leadVeh;
@@ -314,9 +314,9 @@ private _qMetaGet = {
     if (!(_meta isEqualType [])) exitWith { _d };
     private _out = _d;
     {
-        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith
+        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith
         {
-            _out = _x # 1;
+            _out = _x select 1;
         };
     } forEach _meta;
     _out
@@ -392,7 +392,7 @@ else
 private _decisions = [];
 {
     if !(_x isEqualType [] && { (count _x) >= 13 }) then { continue; };
-    private _st = _x # 2;
+    private _st = _x select 2;
     if (_st isEqualType "") then
     {
         private _u = toUpper _st;
@@ -407,7 +407,7 @@ if ((count _decisions) > 0) then
     private _start = ((count _decisions) - _n) max 0;
     for "_i" from _start to ((count _decisions) - 1) do
     {
-        private _it = _decisions # _i;
+        private _it = _decisions select _i;
         _it params [
             "_qid",
             "_qt",
@@ -455,9 +455,9 @@ else
         params ["_meta", "_k", "_def"];
         if (!(_meta isEqualType [])) exitWith {_def};
         private _idx = -1;
-        { if ((_x # 0) isEqualTo _k) exitWith { _idx = _forEachIndex; }; } forEach _meta;
+        { if ((_x select 0) isEqualTo _k) exitWith { _idx = _forEachIndex; }; } forEach _meta;
         if (_idx < 0) exitWith {_def};
-        (_meta # _idx) # 1
+        (_meta select _idx) select 1
     };
 
     {
@@ -530,9 +530,9 @@ else
         params ["_pairs", "_k", "_def"];
         if (!(_pairs isEqualType [])) exitWith { _def };
         private _idx = -1;
-        { if ((_x # 0) isEqualTo _k) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+        { if ((_x select 0) isEqualTo _k) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
         if (_idx < 0) exitWith { _def };
-        (_pairs # _idx) # 1
+        (_pairs select _idx) select 1
     };
 
     private _fmtPctDelta = {
@@ -556,13 +556,13 @@ else
     private _startIdx = ((_n - _maxLines) max 1);
     for "_i" from _startIdx to (_n - 1) do
     {
-        private _a = _snapTail # (_i - 1);
-        private _b = _snapTail # _i;
+        private _a = _snapTail select (_i - 1);
+        private _b = _snapTail select _i;
         if (!(_a isEqualType []) || { !(_b isEqualType []) } || { (count _a) < 2 } || { (count _b) < 2 }) then { continue; };
-        private _tB = _b # 0;
+        private _tB = _b select 0;
         private _minsB = round (_tB / 60);
-        private _pA = _a # 1;
-        private _pB = _b # 1;
+        private _pA = _a select 1;
+        private _pB = _b select 1;
 
         private _dPress = ([_pB, "insurgentPressure", 0] call _pairGet) - ([_pA, "insurgentPressure", 0] call _pairGet);
         private _dSent  = ([_pB, "civSentiment", 0] call _pairGet) - ([_pA, "civSentiment", 0] call _pairGet);
@@ -679,9 +679,9 @@ else
         params ["_meta", "_k", "_def"];
         if (!(_meta isEqualType [])) exitWith {_def};
         private _idx = -1;
-        { if ((_x # 0) isEqualTo _k) exitWith { _idx = _forEachIndex; }; } forEach _meta;
+        { if ((_x select 0) isEqualTo _k) exitWith { _idx = _forEachIndex; }; } forEach _meta;
         if (_idx < 0) exitWith {_def};
-        (_meta # _idx) # 1
+        (_meta select _idx) select 1
     };
 
     {
@@ -885,9 +885,9 @@ if (_dbgEnabled) then
     private _getDbg = {
         params ["_k", "_def"];
         private _idx = -1;
-        { if ((_x # 0) isEqualTo _k) exitWith { _idx = _forEachIndex; }; } forEach _dbgPub;
+        { if ((_x select 0) isEqualTo _k) exitWith { _idx = _forEachIndex; }; } forEach _dbgPub;
         if (_idx < 0) exitWith { _def };
-        (_dbgPub # _idx) # 1
+        (_dbgPub select _idx) select 1
     };
 
     // Server publishes this using serverTime; treat as display/change token, not wall-clock age.
@@ -1012,9 +1012,9 @@ private _s1Get = {
     params ["_pairs", "_key", "_default"];
     if (!(_pairs isEqualType [])) exitWith { _default };
     private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { ((_x # 0) isEqualTo _key) }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { ((_x select 0) isEqualTo _key) }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) exitWith { _default };
-    (_pairs # _idx) # 1
+    (_pairs select _idx) select 1
 };
 private _s1Groups = [_s1Registry, "groups", []] call _s1Get;
 private _s1Units = [_s1Registry, "units", []] call _s1Get;

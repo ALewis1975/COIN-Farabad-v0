@@ -71,7 +71,7 @@ private _kvGet = {
     params ["_pairs", "_key", ["_default",""]];
     private _out = _default;
     {
-        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key }) exitWith { _out = _x # 1; };
+        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _out = _x select 1; };
     } forEach _pairs;
     _out
 };
@@ -86,7 +86,7 @@ private _getThreatState = {
     { if (_x isEqualType [] && { ([_x, "threat_id", ""] call _kvGet) isEqualTo _tid }) exitWith { _idx = _forEachIndex; }; } forEach _records;
     if (_idx < 0) exitWith {""};
 
-    private _st = [_records # _idx, "state", ""] call _kvGet;
+    private _st = [_records select _idx, "state", ""] call _kvGet;
     if (!(_st isEqualType "")) then { _st = ""; };
     toUpper (trim _st)
 };

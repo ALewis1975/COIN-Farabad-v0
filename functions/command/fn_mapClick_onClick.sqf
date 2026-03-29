@@ -113,8 +113,8 @@ if (_ok) then
                 private _n = count _pos;
                 if (_n >= 2) then
                 {
-                    private _x = _pos # 0;
-                    private _y = _pos # 1;
+                    private _x = _pos select 0;
+                    private _y = _pos select 1;
                     private _validX = (_x isEqualType 0) && {finite _x} && {_x isEqualTo _x};
                     private _validY = (_y isEqualType 0) && {finite _y} && {_y isEqualTo _y};
 
@@ -124,7 +124,7 @@ if (_ok) then
 
                         if (_n >= 3) then
                         {
-                            private _z = _pos # 2;
+                            private _z = _pos select 2;
                             private _validZ = (_z isEqualType 0) && {finite _z} && {_z isEqualTo _z};
                             if (_validZ) then
                             {

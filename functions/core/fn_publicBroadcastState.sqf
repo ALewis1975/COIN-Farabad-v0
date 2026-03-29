@@ -83,7 +83,7 @@ private _normalizeStaffingLane = {
     private _idx = -1;
     { if ((_x isEqualType []) && { (count _x) >= 5 } && { ((_x param [0, ""]) isEqualTo _laneId) }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
 
-    private _base = if (_idx >= 0) then { _rows # _idx } else { [_laneId, "AUTO", "", "", -1] };
+    private _base = if (_idx >= 0) then { _rows select _idx } else { [_laneId, "AUTO", "", "", -1] };
     [
         _laneId,
         toUpper (_base param [1, "AUTO"]),
@@ -123,7 +123,7 @@ if (_execActive && { !(_execFid isEqualTo "") }) then {
     { if ((_x isEqualType []) && { (count _x) >= 3 } && { ((_x param [0, ""]) isEqualTo _execFid) }) exitWith { _execRecIdx = _forEachIndex; }; } forEach _airRecs;
 
     if (_execRecIdx >= 0) then {
-        private _execKind = (_airRecs # _execRecIdx) param [2, ""];
+        private _execKind = (_airRecs select _execRecIdx) param [2, ""];
         if (_execKind isEqualTo "DEP") then { _depInProgress = 1; };
     };
 };
@@ -174,7 +174,7 @@ private _nextN = _nextCap min (count _airQueue);
 private _nextItems = [];
 for "_i" from 0 to (_nextN - 1) do
 {
-    private _it = _airQueue # _i;
+    private _it = _airQueue select _i;
     private _routeMeta = _it param [3, []];
     if !(_routeMeta isEqualType []) then { _routeMeta = []; };
     _nextItems pushBack [
@@ -242,20 +242,20 @@ private _readReasonFromMeta = {
     if !(_meta isEqualType []) exitWith { _reason };
 
     if ((count _meta) > 0) then {
-        private _first = _meta # 0;
+        private _first = _meta select 0;
         if (_first isEqualType "") then {
             _reason = _first;
         } else {
-            if (_first isEqualType [] && { (count _first) >= 2 } && { ((_first # 0) isEqualType "") }) then {
-                _reason = _first # 1;
+            if (_first isEqualType [] && { (count _first) >= 2 } && { ((_first select 0) isEqualType "") }) then {
+                _reason = _first select 1;
             };
         };
     };
 
     if (_reason isEqualTo "") then {
         private _idxReason = -1;
-        { if (_x isEqualType [] && { (count _x) >= 2 } && { toUpper (_x # 0) in ["REASON", "ROUTEVALIDATIONREASON"] }) exitWith { _idxReason = _forEachIndex; }; } forEach _meta;
-        if (_idxReason >= 0) then { _reason = (_meta # _idxReason) # 1; };
+        { if (_x isEqualType [] && { (count _x) >= 2 } && { toUpper (_x select 0) in ["REASON", "ROUTEVALIDATIONREASON"] }) exitWith { _idxReason = _forEachIndex; }; } forEach _meta;
+        if (_idxReason >= 0) then { _reason = (_meta select _idxReason) select 1; };
     };
 
     if !(_reason isEqualType "") then { _reason = str _reason; };
@@ -293,9 +293,9 @@ private _metaValue = {
     params ["_meta", "_key", ["_def", ""]];
     if !(_meta isEqualType []) exitWith { _def };
     private _idx = -1;
-    { if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x # 0) isEqualType "") } && { (toUpper (_x # 0)) isEqualTo (toUpper _key) }) exitWith { _idx = _forEachIndex; }; } forEach _meta;
+    { if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x select 0) isEqualType "") } && { (toUpper (_x select 0)) isEqualTo (toUpper _key) }) exitWith { _idx = _forEachIndex; }; } forEach _meta;
     if (_idx < 0) exitWith { _def };
-    (_meta # _idx) # 1
+    (_meta select _idx) select 1
 };
 
 private _blockedRouteTail = [];
@@ -373,7 +373,7 @@ if ((count _blockedRouteTail) > _blockedRouteWindow) then {
 private _blockedRouteLatestReason = "-";
 private _blockedRouteLatestSourceId = "-";
 if ((count _blockedRouteTail) > 0) then {
-    private _lastBlocked = _blockedRouteTail # ((count _blockedRouteTail) - 1);
+    private _lastBlocked = _blockedRouteTail select ((count _blockedRouteTail) - 1);
     _blockedRouteLatestReason = _lastBlocked param [1, "-"];
     _blockedRouteLatestSourceId = _lastBlocked param [2, "-"];
     if (_blockedRouteLatestReason isEqualTo "") then { _blockedRouteLatestReason = "-"; };

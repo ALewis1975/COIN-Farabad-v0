@@ -49,8 +49,8 @@ private _updated = [];
     private _n = +_x;
     if (!(_n isEqualType []) || { (count _n) < 12 }) then { continue; };
 
-    private _nodeId = _n # 0;
-    private _cmdToken = _n # 1;
+    private _nodeId = _n select 0;
+    private _cmdToken = _n select 1;
 
     private _commander = objNull;
     {
@@ -89,7 +89,7 @@ private _updated = [];
         _posture = "INDEPENDENT_SECURITY";
     };
 
-    private _changed = (toUpper !((_n # 6) isEqualTo _intent)) || { toUpper !((_n # 7) isEqualTo _posture) };
+    private _changed = (toUpper !((_n select 6) isEqualTo _intent)) || { toUpper !((_n select 7) isEqualTo _posture) };
 
     _n set [6, _intent];
     _n set [7, _posture];

@@ -16,8 +16,8 @@ params [["_districtId", "", ["", []]]];
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
 
-if (_districtId isEqualType [] && {(count _districtId) == 1} && {(_districtId # 0) isEqualType ""}) then {
-    _districtId = _districtId # 0;
+if (_districtId isEqualType [] && {(count _districtId) == 1} && {(_districtId select 0) isEqualType ""}) then {
+    _districtId = _districtId select 0;
 };
 if !(_districtId isEqualType "") exitWith {
     diag_log format ["[CIVSUB][WARN] DistrictsGetById invalid districtId type=%1 value=%2", typeName _districtId, _districtId];

@@ -47,7 +47,7 @@ private _ensureHQSubPanels = {
         {
             if !(_x isEqualType [] && { (count _x) == 3 }) exitWith { _ok = false; };
             if (_ok) then {
-                if (isNull (_x # 0) || { isNull (_x # 1) } || { isNull (_x # 2) }) exitWith { _ok = false; };
+                if (isNull (_x select 0) || { isNull (_x select 1) } || { isNull (_x select 2) }) exitWith { _ok = false; };
             };
         } forEach _panels;
     };
@@ -112,10 +112,10 @@ private _layoutHQSubPanels = {
     if (isNull _ctrlList) exitWith {};
 
     private _pL = ctrlPosition _ctrlList;
-    private _xPos = _pL # 0;
-    private _y = _pL # 1;
-    private _w = _pL # 2;
-    private _h = _pL # 3;
+    private _xPos = _pL select 0;
+    private _y = _pL select 1;
+    private _w = _pL select 2;
+    private _h = _pL select 3;
 
     private _gap = 0.004;
     private _hHdr = 0.03;
@@ -145,9 +145,9 @@ private _renderHQSubPanelsFromMaster = {
     if (isNull _master) exitWith {};
 
     _panels params ["_pAdmin", "_pInc", "_pDiag"];
-    private _lbAdmin = _pAdmin # 2;
-    private _lbInc   = _pInc # 2;
-    private _lbDiag  = _pDiag # 2;
+    private _lbAdmin = _pAdmin select 2;
+    private _lbInc   = _pInc select 2;
+    private _lbDiag  = _pDiag select 2;
 
     { lbClear _x; } forEach [_lbAdmin, _lbInc, _lbDiag];
 
@@ -195,7 +195,7 @@ private _renderHQSubPanelsFromMaster = {
 
     uiNamespace setVariable ["ARC_hq_subPanels_suppressSel", true];
     {
-        private _lb = _x # 2;
+        private _lb = _x select 2;
         _lb lbSetCurSel -1;
         if (!(_selData isEqualTo "")) then {
             for "_k" from 0 to ((lbSize _lb) - 1) do {
@@ -308,9 +308,9 @@ if (!_canHQ) exitWith
         // Auto-fit + clamp to viewport so the controls group can scroll when needed.
         [_ctrlDetails] call BIS_fnc_ctrlFitToTextHeight;
         private _grp = _display displayCtrl 78016;
-        private _minH = if (!isNull _grp) then { (ctrlPosition _grp) # 3 } else { 0.74 };
+        private _minH = if (!isNull _grp) then { (ctrlPosition _grp) select 3 } else { 0.74 };
         private _p = ctrlPosition _ctrlDetails;
-        _p set [3, (_p # 3) max _minH];
+        _p set [3, (_p select 3) max _minH];
         _ctrlDetails ctrlSetPosition _p;
         _ctrlDetails ctrlCommit 0;
     };
@@ -378,7 +378,7 @@ if (_needRebuild && {!isNull _ctrlList}) then
         {
             private _tU = _x;
             private _rows = _catalog select {
-                _x isEqualType [] && { (count _x) >= 3 } && { toUpper (_x # 2) isEqualTo _tU }
+                _x isEqualType [] && { (count _x) >= 3 } && { toUpper (_x select 2) isEqualTo _tU }
             };
 
             if ((count _rows) > 0) then
@@ -450,10 +450,10 @@ if (!isNull _ctrlList) then
         [_display, _ctrlList, _hqPanels] call _renderHQSubPanelsFromMaster;
 
         {
-            (_x # 0) ctrlShow true;
-            (_x # 1) ctrlShow true;
-            (_x # 2) ctrlShow true;
-            (_x # 2) ctrlEnable true;
+            (_x select 0) ctrlShow true;
+            (_x select 1) ctrlShow true;
+            (_x select 2) ctrlShow true;
+            (_x select 2) ctrlEnable true;
         } forEach _hqPanels;
     }
     else
@@ -630,9 +630,9 @@ switch (toUpper _data) do
                 }
                 else
                 {
-                    private _mkr = _parts # 0;
-                    private _typ = _parts # 1;
-                    private _disp = _parts # 2;
+                    private _mkr = _parts select 0;
+                    private _typ = _parts select 1;
+                    private _disp = _parts select 2;
 
                     private _m = [_mkr] call ARC_fnc_worldResolveMarker;
                     private _pos = getMarkerPos _m;
@@ -680,9 +680,9 @@ if (!isNull _ctrlDetails) then
     // Auto-fit + clamp to viewport so the controls group can scroll when needed.
     [_ctrlDetails] call BIS_fnc_ctrlFitToTextHeight;
     private _grp = _display displayCtrl 78016;
-    private _minH = if (!isNull _grp) then { (ctrlPosition _grp) # 3 } else { 0.74 };
+    private _minH = if (!isNull _grp) then { (ctrlPosition _grp) select 3 } else { 0.74 };
     private _p = ctrlPosition _ctrlDetails;
-    _p set [3, (_p # 3) max _minH];
+    _p set [3, (_p select 3) max _minH];
     _ctrlDetails ctrlSetPosition _p;
     _ctrlDetails ctrlCommit 0;
 };

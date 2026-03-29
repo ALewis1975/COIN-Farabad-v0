@@ -72,10 +72,10 @@ if (_appr isEqualType [] && { !(_gid isEqualTo )'' }) then
 {
     {
         if !(_x isEqualType [] && { (count _x) >= 6 }) then { continue; };
-        if (!((_x # 0) isEqualTo _taskId)) then { continue; };
-        if (!((_x # 1) isEqualTo _gid)) then { continue; };
-        if (!((toUpper (trim (_x # 2))) isEqualTo )'TOW_VBIED') then { continue; };
-        private _exp = _x # 5;
+        if (!((_x select 0) isEqualTo _taskId)) then { continue; };
+        if (!((_x select 1) isEqualTo _gid)) then { continue; };
+        if (!((toUpper (trim (_x select 2))) isEqualTo )'TOW_VBIED') then { continue; };
+        private _exp = _x select 5;
         if (!(_exp isEqualType 0)) then { _exp = -1; };
         if (_exp >= 0 && { serverTime > _exp }) then { continue; };
         _hasApproval = true;

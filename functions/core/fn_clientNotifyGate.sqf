@@ -39,8 +39,8 @@ private _lastAt = -1;
 private _lastSig = "";
 if (_entry isEqualType [] && { (count _entry) >= 2 }) then
 {
-    _lastAt = _entry # 0;
-    _lastSig = _entry # 1;
+    _lastAt = _entry select 0;
+    _lastSig = _entry select 1;
 };
 
 private _allow = true;

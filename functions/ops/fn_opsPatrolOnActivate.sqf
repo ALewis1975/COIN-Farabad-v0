@@ -70,8 +70,8 @@ for "_i" from 0 to (_routePtsN - 1) do
     private _ang = _baseAng + (_i * _step) + (random 30 - 15);
     private _dist = _routeRadius * (0.65 + random 0.35);
 
-    private _px = (_posATL # 0) + (sin _ang) * _dist;
-    private _py = (_posATL # 1) + (cos _ang) * _dist;
+    private _px = (_posATL select 0) + (sin _ang) * _dist;
+    private _py = (_posATL select 1) + (cos _ang) * _dist;
 
     private _p = [_px, _py, 0];
     _pts pushBack _p;
@@ -141,8 +141,8 @@ if (_spawnContacts && {!(_zone in ["Airbase", "GreenZone"])}) then
             private _ang = random 360;
             private _dist = _routeRadius * (0.6 + random 0.35);
             _spawnPos = [
-                (_posATL # 0) + (sin _ang) * _dist,
-                (_posATL # 1) + (cos _ang) * _dist,
+                (_posATL select 0) + (sin _ang) * _dist,
+                (_posATL select 1) + (cos _ang) * _dist,
                 0
             ];
 
@@ -181,8 +181,8 @@ if (_spawnContacts && {!(_zone in ["Airbase", "GreenZone"])}) then
                 private _ang = random 360;
                 private _dist = _routeRadius * random 1;
                 private _wpPos = [
-                    (_posATL # 0) + (sin _ang) * _dist,
-                    (_posATL # 1) + (cos _ang) * _dist,
+                    (_posATL select 0) + (sin _ang) * _dist,
+                    (_posATL select 1) + (cos _ang) * _dist,
                     0
                 ];
                 private _wp = _grp addWaypoint [_wpPos, 0];

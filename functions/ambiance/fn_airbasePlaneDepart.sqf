@@ -43,8 +43,8 @@ private _fnNormalize = {
     if (!(_data isEqualType [])) exitWith { [] };
 
     // Some recorder exports wrap frames as [frames]
-    if ((count _data) == 1 && { (_data # 0) isEqualType [] } && { (count (_data # 0)) > 0 } && { ((_data # 0) # 0) isEqualType [] }) exitWith {
-        _data # 0
+    if ((count _data) == 1 && { (_data select 0) isEqualType [] } && { (count (_data select 0)) > 0 } && { ((_data select 0) select 0) isEqualType [] }) exitWith {
+        _data select 0
     };
 
     _data
@@ -64,8 +64,8 @@ private _fnUnitPlayBlocking = {
 
     private _duration = 0;
     private _last = _framesL select ((count _framesL) - 1);
-    if (_last isEqualType [] && { (count _last) > 0 } && { (_last # 0) isEqualType 0 }) then {
-        _duration = (_last # 0);
+    if (_last isEqualType [] && { (count _last) > 0 } && { (_last select 0) isEqualType 0 }) then {
+        _duration = (_last select 0);
     };
     private _tEnd = time + (_duration + 10);
 
@@ -128,7 +128,7 @@ if ((count _crewLive) == 0) exitWith {
     false
 };
 
-private _pilot = _crewLive # 0;
+private _pilot = _crewLive select 0;
 if (isNull _pilot) exitWith {
     _asset set ["state", "PARKED"];
     _asset set ["activeFlight", ""];
@@ -164,7 +164,7 @@ _pilot assignAsDriver _veh;
 [_pilot] orderGetIn true;
 
 if ((count _crewLive) > 1) then {
-    private _u2 = _crewLive # 1;
+    private _u2 = _crewLive select 1;
     if (_isHeli && {_hasCommander}) then {
         _u2 assignAsCommander _veh;
     } else {
@@ -174,7 +174,7 @@ if ((count _crewLive) > 1) then {
 };
 
 for "_i" from 2 to ((count _crewLive) - 1) do {
-    private _ux = _crewLive # _i;
+    private _ux = _crewLive select _i;
     _ux assignAsCargo _veh;
     [_ux] orderGetIn true;
 };
@@ -223,9 +223,9 @@ if (_isHeli) then {
         private _adj = [];
         {
             private _f = _x;
-            if (_f isEqualType [] && { (count _f) >= 2 } && { (_f # 1) isEqualType [] } && { (count (_f # 1)) >= 3 }) then {
-                private _pos = +(_f # 1);
-                _pos set [2, (_pos # 2) + _hoverM];
+            if (_f isEqualType [] && { (count _f) >= 2 } && { (_f select 1) isEqualType [] } && { (count (_f select 1)) >= 3 }) then {
+                private _pos = +(_f select 1);
+                _pos set [2, (_pos select 2) + _hoverM];
                 private _nf = +_f;
                 _nf set [1, _pos];
                 _adj pushBack _nf;
@@ -270,7 +270,7 @@ if (_veh isKindOf "Air") then { _veh setCollisionLight true; _veh setPilotLight 
 // If a rotary-wing asset is still skimming the ground at taxi end, nudge it into a hover before outbound waypoints.
 if (_isHeli) then
 {
-    private _a0 = (getPosATL _veh) # 2;
+    private _a0 = (getPosATL _veh) select 2;
     if (_a0 < 1.5) then
     {
         _veh land "NONE";
@@ -302,7 +302,7 @@ if (_isEC130) exitWith {
     private _center = [worldSize / 2, worldSize / 2, 0];
     _veh flyInHeight 1829; // 6000 ft
 
-    while { (count (waypoints _grp)) > 0 } do { deleteWaypoint ((waypoints _grp) # 0); };
+    while { (count (waypoints _grp)) > 0 } do { deleteWaypoint ((waypoints _grp) select 0); };
     private _wp = _grp addWaypoint [_center, 0];
     _wp setWaypointType "LOITER";
     _wp setWaypointLoiterType "CIRCLE_L";
@@ -325,7 +325,7 @@ if (_isEC130) exitWith {
 private _despawnMkr = missionNamespace getVariable ["airbase_v1_plane_despawn_marker", "plane_despawn"]; 
 private _despawnPos = getMarkerPos _despawnMkr;
 
-while { (count (waypoints _grp)) > 0 } do { deleteWaypoint ((waypoints _grp) # 0); };
+while { (count (waypoints _grp)) > 0 } do { deleteWaypoint ((waypoints _grp) select 0); };
 _grp setSpeedMode "FULL";
 _grp setBehaviour "CARELESS";
 _grp setCombatMode "BLUE";
@@ -395,7 +395,7 @@ if (_isHeli) then {
             // If it's still low after a few seconds, nudge again.
             sleep 5;
             if (!isNull _vehL && {alive _vehL}) then {
-                private _altNow = (getPosATL _vehL) # 2;
+                private _altNow = (getPosATL _vehL) select 2;
                 if (_altNow < (10 max (_altTargetL * 0.25))) then {
                     _vehL land "NONE";
                     _vehL flyInHeight _altTargetL;
@@ -451,8 +451,8 @@ if (_isHeli) then {
         // Compute a runway-end point forward of outbound marker if clear marker is missing.
         private _dir = markerDir _mkrOut;
         _clearPos = [
-            (_outPos # 0) + (sin _dir) * _fallbackM,
-            (_outPos # 1) + (cos _dir) * _fallbackM,
+            (_outPos select 0) + (sin _dir) * _fallbackM,
+            (_outPos select 1) + (cos _dir) * _fallbackM,
             0
         ];
         _hasClear = true;

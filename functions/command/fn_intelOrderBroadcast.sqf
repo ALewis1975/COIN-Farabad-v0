@@ -32,10 +32,10 @@ private _sanitizePairs = {
     if ((count _in) > _maxPairs) then { _in = _in select [0, _maxPairs]; _truncated = true; };
     private _out = [];
     {
-        if !(_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualType "" }) then { _truncated = true; continue; };
-        private _k = trim (_x # 0);
+        if !(_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualType "" }) then { _truncated = true; continue; };
+        private _k = trim (_x select 0);
         if (_k isEqualTo "") then { _truncated = true; continue; };
-        private _v = _x # 1;
+        private _v = _x select 1;
         if (_v isEqualType "") then {
             _v = trim _v;
             if ((count _v) > _maxTextLen) then { _v = _v select [0, _maxTextLen]; _truncated = true; };
@@ -49,13 +49,13 @@ private _sanitizePairs = {
 private _sanitizeOrder = {
     params ["_order"];
     if !(_order isEqualType [] && { (count _order) >= 7 }) exitWith { [] };
-    private _id = _order # 0;
-    private _createdAt = _order # 1;
-    private _status = _order # 2;
-    private _kind = _order # 3;
-    private _targetGroup = _order # 4;
-    private _data = _order # 5;
-    private _meta = _order # 6;
+    private _id = _order select 0;
+    private _createdAt = _order select 1;
+    private _status = _order select 2;
+    private _kind = _order select 3;
+    private _targetGroup = _order select 4;
+    private _data = _order select 5;
+    private _meta = _order select 6;
     private _tr = false;
 
     if !(_id isEqualType "") then { _id = ""; _tr = true; };
@@ -76,7 +76,7 @@ private _out = [];
 {
     if (_x isEqualType [] && { (count _x) >= 7 }) then
     {
-        private _st = _x # 2;
+        private _st = _x select 2;
         if (_st isEqualType "") then
         {
             private _su = toUpper _st;

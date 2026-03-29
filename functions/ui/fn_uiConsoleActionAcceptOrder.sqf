@@ -51,8 +51,8 @@ if (!(_orders isEqualType [])) then { _orders = []; };
 private _ord = [];
 {
     if (!(_x isEqualType [] && { (count _x) >= 7 })) then { continue; };
-    private _st = toUpper (_x # 2);
-    private _tg = _x # 4;
+    private _st = toUpper (_x select 2);
+    private _tg = _x select 4;
     if (_st isEqualTo "ISSUED" && { _tg isEqualTo _gid }) exitWith { _ord = _x; };
 } forEach _orders;
 
@@ -69,7 +69,7 @@ private _getPair = {
     params ["_pairs", "_k", "_d"];
     if (!(_pairs isEqualType [])) exitWith { _d };
     {
-        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _x # 1 };
+        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _x select 1 };
     } forEach _pairs;
     _d
 };

@@ -107,8 +107,8 @@ private _data = if (_sel >= 0) then { _ctrlList lbData _sel } else { "NONE|" };
 
 if (!(_data isEqualType "")) then { _data = "NONE|"; };
 private _parts = _data splitString "|";
-private _kind = if ((count _parts) > 0) then { toUpper (_parts # 0) } else { "NONE" };
-private _id   = if ((count _parts) > 1) then { _parts # 1 } else { "" };
+private _kind = if ((count _parts) > 0) then { toUpper (_parts select 0) } else { "NONE" };
+private _id   = if ((count _parts) > 1) then { _parts select 1 } else { "" };
 
 // Default buttons
 { if (!isNull _x) then { _x ctrlShow true; _x ctrlEnable false; }; } forEach [_b1, _b2];
@@ -192,7 +192,7 @@ switch (_kind) do
 
         private _lead = [];
         {
-            if (_x isEqualType [] && { (count _x) >= 4 } && { (_x # 0) isEqualTo _id }) exitWith { _lead = _x; };
+            if (_x isEqualType [] && { (count _x) >= 4 } && { (_x select 0) isEqualTo _id }) exitWith { _lead = _x; };
         } forEach _pool;
 
         if (_lead isEqualTo []) then
@@ -238,9 +238,9 @@ _ctrlDetails ctrlSetStructuredText parseText _txt;
 // Auto-fit + clamp to viewport so the controls group can scroll when needed.
 [_ctrlDetails] call BIS_fnc_ctrlFitToTextHeight;
 private _grp = _display displayCtrl 78016;
-private _minH = if (!isNull _grp) then { (ctrlPosition _grp) # 3 } else { 0.74 };
+private _minH = if (!isNull _grp) then { (ctrlPosition _grp) select 3 } else { 0.74 };
 private _p = ctrlPosition _ctrlDetails;
-_p set [3, (_p # 3) max _minH];
+_p set [3, (_p select 3) max _minH];
 _ctrlDetails ctrlSetPosition _p;
 _ctrlDetails ctrlCommit 0;
 

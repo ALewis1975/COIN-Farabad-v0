@@ -49,7 +49,7 @@ if (!(_pos isEqualType []) || { (count _pos) < 2 }) then { _pos = [0,0,0]; };
 _pos = +_pos; _pos resize 3;
 
 private _grid = "";
-if !((_pos # 0) isEqualTo 0 && {(_pos # 1) isEqualTo 0}) then { _grid = mapGridPosition _pos; };
+if !((_pos select 0) isEqualTo 0 && {(_pos select 1) isEqualTo 0}) then { _grid = mapGridPosition _pos; };
 
 private _grp = groupId (group player);
 private _hdrTxt = format [

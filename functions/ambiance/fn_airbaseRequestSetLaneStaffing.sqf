@@ -63,7 +63,7 @@ if (_idx < 0) then {
 
 if (_idx < 0) exitWith {false};
 
-private _rec = _staffing # _idx;
+private _rec = _staffing select _idx;
 private _now = serverTime;
 private _name = name _caller;
 private _uid = getPlayerUID _caller;

@@ -111,9 +111,9 @@ private _dG = 0;
 
 {
     private _row = _effectTable getOrDefault [_x, [0,0,0]];
-    _dW = _dW + (_row # 0);
-    _dR = _dR + (_row # 1);
-    _dG = _dG + (_row # 2);
+    _dW = _dW + (_row select 0);
+    _dR = _dR + (_row select 1);
+    _dG = _dG + (_row select 2);
 } forEach _effects;
 
 private _influenceDelta = [[

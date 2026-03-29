@@ -39,9 +39,9 @@ if (_hqMode isEqualTo "INCIDENTS") exitWith
         false
     };
 
-    private _mkr = _parts # 0;
-    private _typ = _parts # 1;
-    private _disp = _parts # 2;
+    private _mkr = _parts select 0;
+    private _typ = _parts select 1;
+    private _disp = _parts select 2;
 
     // Do not spam while an incident is active.
     private _taskId = missionNamespace getVariable ["ARC_activeTaskId", ""]; 

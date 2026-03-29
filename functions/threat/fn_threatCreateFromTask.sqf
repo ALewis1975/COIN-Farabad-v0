@@ -38,9 +38,9 @@ private _kvGet = {
     params ["_pairs", "_key", "_default"];
     if (!(_pairs isEqualType [])) exitWith {_default};
     private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) exitWith {_default};
-    private _v = (_pairs # _idx) # 1;
+    private _v = (_pairs select _idx) select 1;
     if (isNil "_v") exitWith {_default};
     _v
 };
@@ -49,7 +49,7 @@ private _kvSet = {
     params ["_pairs", "_key", "_value"];
     if (!(_pairs isEqualType [])) then { _pairs = []; };
     private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) then { _pairs pushBack [_key, _value]; } else { _pairs set [_idx, [_key, _value]]; };
     _pairs
 };
@@ -68,7 +68,7 @@ private _existingIdx = -1;
 
 if (_existingIdx >= 0) then
 {
-    private _rec = _records # _existingIdx;
+    private _rec = _records select _existingIdx;
     private _tid = [_rec, "threat_id", ""] call _kvGet;
     _tid
 }

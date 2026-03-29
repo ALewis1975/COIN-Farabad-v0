@@ -51,7 +51,7 @@ private _getPair = {
     params ["_pairs", "_k", "_d"];
     if (!(_pairs isEqualType [])) exitWith { _d };
     {
-        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _x # 1 };
+        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _x select 1 };
     } forEach _pairs;
     _d
 };
@@ -62,8 +62,8 @@ private _setPair = {
     private _found = false;
     for "_i" from 0 to ((count _pairs) - 1) do
     {
-        private _p = _pairs # _i;
-        if (_p isEqualType [] && { (count _p) >= 2 } && { (_p # 0) isEqualTo _k }) exitWith
+        private _p = _pairs select _i;
+        if (_p isEqualType [] && { (count _p) >= 2 } && { (_p select 0) isEqualTo _k }) exitWith
         {
             _pairs set [_i, [_k, _v]];
             _found = true;
@@ -87,8 +87,8 @@ if (!(_orderIdO isEqualTo "")) then
     if (!_canForce) exitWith {false};
 
     _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 7 } && { (_x # 0) isEqualTo _orderIdO }) exitWith { _idx = _forEachIndex; }; } forEach _orders;
-    if (_idx >= 0) then { _ord = _orders # _idx; };
+    { if ((_x isEqualType []) && { (count _x) >= 7 } && { (_x select 0) isEqualTo _orderIdO }) exitWith { _idx = _forEachIndex; }; } forEach _orders;
+    if (_idx >= 0) then { _ord = _orders select _idx; };
     if (_idx < 0 || {_ord isEqualTo []}) exitWith {false};
 
     _ord params ["_orderId", "_issuedAt", "_status", "_orderType", "_targetGroup", "_data", "_meta"]; 
@@ -103,7 +103,7 @@ else
 {
     for "_i" from 0 to ((count _orders) - 1) do
     {
-        private _o = _orders # _i;
+        private _o = _orders select _i;
         if (!(_o isEqualType [] && { (count _o) >= 7 })) then { continue; };
 
         _o params ["_orderId", "_issuedAt", "_status", "_orderType", "_targetGroup", "_data", "_meta"];

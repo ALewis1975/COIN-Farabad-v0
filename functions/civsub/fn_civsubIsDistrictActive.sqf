@@ -28,7 +28,7 @@ if ((count _players) == 0) exitWith {false};
 private _min = 1e12;
 {
     private _p = getPosATL _x;
-    private _d2 = (_p distance2D [_c # 0, _c # 1, 0]);
+    private _d2 = (_p distance2D [_c select 0, _c select 1, 0]);
     if (_d2 < _min) then { _min = _d2; };
 } forEach _players;
 

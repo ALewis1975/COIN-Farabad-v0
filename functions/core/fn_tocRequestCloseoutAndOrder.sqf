@@ -252,7 +252,7 @@ if (_noAutoOrders) exitWith
 
             // Remove any existing approval for this task+group+type before adding a new one (prevents duplicates)
             _appr = _appr select {
-                !(_x isEqualType [] && { (count _x) >= 6 } && { (_x # 0) isEqualTo _taskId } && { (_x # 1) isEqualTo _gid } && { (toUpper (trim (_x # 2))) isEqualTo _eodReqU })
+                !(_x isEqualType [] && { (count _x) >= 6 } && { (_x select 0) isEqualTo _taskId } && { (_x select 1) isEqualTo _gid } && { (toUpper (trim (_x select 2))) isEqualTo _eodReqU })
             };
             _appr pushBack [_taskId, _gid, _eodReqU, serverTime, if (isNull _caller) then {"TOC"} else { name _caller }, _exp, _notesE];
 
@@ -283,8 +283,8 @@ if (_noAutoOrders) exitWith
     {
         if (_x isEqualType [] && { (count _x) >= 8 }) then
         {
-            private _lid = _x # 0;
-            private _srcTask = _x # 7;
+            private _lid = _x select 0;
+            private _srcTask = _x select 7;
             if (_lid isEqualType "" && { _srcTask isEqualType "" } && { _srcTask isEqualTo _taskId }) then
             {
                 _leadIds pushBackUnique _lid;
@@ -447,7 +447,7 @@ if (!(_leadsBefore isEqualType [])) then { _leadsBefore = []; };
 {
     if (_x isEqualType [] && { (count _x) >= 1 }) then
     {
-        private _lid = _x # 0;
+        private _lid = _x select 0;
         if (_lid isEqualType "" && { !(_lid isEqualTo "") }) then { _leadIdsBefore pushBackUnique _lid; };
     };
 } forEach _leadsBefore;
@@ -468,16 +468,16 @@ if (!(_leadsAfter isEqualType [])) then { _leadsAfter = []; };
 
 {
     if (!(_x isEqualType []) || { (count _x) < 7 }) then { continue; };
-    private _lid = _x # 0;
-    private _srcTask = _x # 6;
+    private _lid = _x select 0;
+    private _srcTask = _x select 6;
     if (!(_lid isEqualType "")) then { continue; };
     if (!(_srcTask isEqualType "")) then { continue; };
 
     if (!(_lid in _leadIdsBefore) && { _srcTask isEqualTo _taskId }) then
     {
         _genLeadId = _lid;
-        _genLeadType = _x # 1;
-        _genLeadName = _x # 2;
+        _genLeadType = _x select 1;
+        _genLeadName = _x select 2;
     };
 } forEach _leadsAfter;
 
@@ -517,7 +517,7 @@ if (_incTypeU isEqualTo "IED") then
 
         // Remove any existing approval for this task+group+type before adding a new one (prevents duplicates)
         _appr = _appr select {
-            !(_x isEqualType [] && { (count _x) >= 6 } && { (_x # 0) isEqualTo _taskId } && { (_x # 1) isEqualTo _gid } && { (toUpper (trim (_x # 2))) isEqualTo _eodReqU })
+            !(_x isEqualType [] && { (count _x) >= 6 } && { (_x select 0) isEqualTo _taskId } && { (_x select 1) isEqualTo _gid } && { (toUpper (trim (_x select 2))) isEqualTo _eodReqU })
         };
         _appr pushBack [_taskId, _gid, _eodReqU, serverTime, if (isNull _caller) then {"TOC"} else { name _caller }, _exp, _notesE];
 

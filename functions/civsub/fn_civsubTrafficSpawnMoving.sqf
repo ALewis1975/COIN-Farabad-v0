@@ -38,10 +38,10 @@ private _r = _d getOrDefault ["radius_m", 400];
 if !(_c isEqualType []) exitWith {[objNull, objNull]};
 if ((count _c) < 2) exitWith {[objNull, objNull]};
 
-private _center = [_c # 0, _c # 1, 0];
+private _center = [_c select 0, _c select 1, 0];
 if (_opCenter isEqualType [] && { (count _opCenter) >= 2 }) then
 {
-    _center = [_opCenter # 0, _opCenter # 1, 0];
+    _center = [_opCenter select 0, _opCenter select 1, 0];
 };
 
 private _spawnR = missionNamespace getVariable ["civsub_v1_traffic_spawnRadius_m", 600];
@@ -57,8 +57,8 @@ if ((count _pick) < 2) exitWith
     [objNull, objNull]
 };
 
-private _pos = _pick # 0;
-private _dir = _pick # 1;
+private _pos = _pick select 0;
+private _dir = _pick select 1;
 
 private _pMin = missionNamespace getVariable ["civsub_v1_traffic_playerMinDistance_m", 60];
 if (!(_pMin isEqualType 0)) then { _pMin = 60; };

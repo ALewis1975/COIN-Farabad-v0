@@ -73,9 +73,9 @@ private _pairGet = {
     params ["_pairs", "_key", ["_def", ""]];
     if (!(_pairs isEqualType [])) exitWith {_def};
     private _idx = -1;
-    { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x#0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+    { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) exitWith {_def};
-    private _v = (_pairs # _idx) # 1;
+    private _v = (_pairs select _idx) select 1;
     if (isNil "_v") exitWith {_def};
     _v
 };
@@ -135,7 +135,7 @@ if (_rebuild) then
     if ((count _orders) > _rxMaxItems) then { _orders = _orders select [((count _orders) - _rxMaxItems) max 0, _rxMaxItems]; };
     private _gid = groupId group player;
     private _mine = _orders select {
-        _x isEqualType [] && { (count _x) >= 5 } && { (_x # 4) isEqualTo _gid }
+        _x isEqualType [] && { (count _x) >= 5 } && { (_x select 4) isEqualTo _gid }
     };
 
     if ((count _mine) isEqualTo 0) then
@@ -147,10 +147,10 @@ if (_rebuild) then
     {
         {
             private _order = _x;
-            private _id = _order # 0;
-            private _status = toUpper (trim (_order # 2));
-            private _otype = toUpper (trim (_order # 3));
-            private _pairs = _order # 5;
+            private _id = _order select 0;
+            private _status = toUpper (trim (_order select 2));
+            private _otype = toUpper (trim (_order select 3));
+            private _pairs = _order select 5;
             private _purpose = [_pairs, "purpose", ""] call _pairGet;
             if (!(_purpose isEqualType "")) then { _purpose = ""; };
             _purpose = trim _purpose;
@@ -181,9 +181,9 @@ if (_rebuild) then
         {
             private _lead = _x;
             if (!(_lead isEqualType []) || { (count _lead) < 4 }) then { continue };
-            private _id = _lead # 0;
-            private _typ = toUpper (trim (_lead # 1));
-            private _name = _lead # 2;
+            private _id = _lead select 0;
+            private _typ = toUpper (trim (_lead select 1));
+            private _name = _lead select 2;
             if (!(_name isEqualType "")) then { _name = "Lead"; };
             private _label = format ["[%1] %2", _typ, _name];
             private _idx = _cLead lbAdd _label;
@@ -237,8 +237,8 @@ private _statusRows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
 if (!(_statusRows isEqualType [])) then { _statusRows = []; };
 if ((count _statusRows) > _rxMaxItems) then { _statusRows = _statusRows select [0, _rxMaxItems]; };
 private _statusIdx = -1;
-{ if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _gidSelf }) exitWith { _statusIdx = _forEachIndex; }; } forEach _statusRows;
-private _unitStatus = if (_statusIdx < 0) then { "OFFLINE" } else { toUpper (trim ((_statusRows # _statusIdx) # 1)) };
+{ if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _gidSelf }) exitWith { _statusIdx = _forEachIndex; }; } forEach _statusRows;
+private _unitStatus = if (_statusIdx < 0) then { "OFFLINE" } else { toUpper (trim ((_statusRows select _statusIdx) select 1)) };
 
 private _allowDuringRtb = missionNamespace getVariable ["ARC_allowIncidentDuringAcceptedRtb", false];
 private _policyText = if (_allowDuringRtb) then
@@ -284,8 +284,8 @@ if (_focusData isEqualTo "") then
 else
 {
     private _parts = _focusData splitString "|";
-    private _kind = toUpper (trim (_parts # 0));
-    private _id = if ((count _parts) > 1) then { _parts # 1 } else { "" };
+    private _kind = toUpper (trim (_parts select 0));
+    private _id = if ((count _parts) > 1) then { _parts select 1 } else { "" };
 
     switch (_kind) do
     {
@@ -373,18 +373,18 @@ else
             private _orders = missionNamespace getVariable ["ARC_pub_orders", []]; if (!(_orders isEqualType [])) then { _orders = []; };
             if ((count _orders) > _rxMaxItems) then { _orders = _orders select [((count _orders) - _rxMaxItems) max 0, _rxMaxItems]; };
             private _o = -1;
-            { if (_x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _id }) exitWith { _o = _forEachIndex; }; } forEach _orders;
+            { if (_x isEqualType [] && { (count _x) >= 1 } && { (_x select 0) isEqualTo _id }) exitWith { _o = _forEachIndex; }; } forEach _orders;
             if (_o < 0) then
             {
                 _details = "<t align='left' size='1.1' font='PuristaMedium'>Order</t><br/><br/>Order not found (stale UI).";
             }
             else
             {
-                private _order = _orders # _o;
-                private _status = toUpper (trim (_order # 2));
-                private _otype = toUpper (trim (_order # 3));
-                private _pairs = _order # 5;
-                private _meta = _order # 6;
+                private _order = _orders select _o;
+                private _status = toUpper (trim (_order select 2));
+                private _otype = toUpper (trim (_order select 3));
+                private _pairs = _order select 5;
+                private _meta = _order select 6;
 
                 private _purpose = [_pairs, "purpose", ""] call _pairGet;
                 if (!(_purpose isEqualType "")) then { _purpose = ""; };
@@ -422,19 +422,19 @@ else
             private _leads = missionNamespace getVariable ["ARC_leadPoolPublic", []]; if (!(_leads isEqualType [])) then { _leads = []; };
             if ((count _leads) > _rxMaxItems) then { _leads = _leads select [0, _rxMaxItems]; };
             private _idx = -1;
-            { if (_x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _id }) exitWith { _idx = _forEachIndex; }; } forEach _leads;
+            { if (_x isEqualType [] && { (count _x) >= 1 } && { (_x select 0) isEqualTo _id }) exitWith { _idx = _forEachIndex; }; } forEach _leads;
             if (_idx < 0) then
             {
                 _details = "<t align='left' size='1.1' font='PuristaMedium'>Lead</t><br/><br/>Lead not found (stale UI).";
             }
             else
             {
-                private _lead = _leads # _idx;
-                private _typ = toUpper (trim (_lead # 1));
-                private _name = _lead # 2; if (!(_name isEqualType "")) then { _name = "Lead"; };
-                private _pos = _lead # 3; if (!(_pos isEqualType []) || { (count _pos) < 2 }) then { _pos = [0,0,0]; };
+                private _lead = _leads select _idx;
+                private _typ = toUpper (trim (_lead select 1));
+                private _name = _lead select 2; if (!(_name isEqualType "")) then { _name = "Lead"; };
+                private _pos = _lead select 3; if (!(_pos isEqualType []) || { (count _pos) < 2 }) then { _pos = [0,0,0]; };
                 private _grid = mapGridPosition _pos;
-                private _tag = if ((count _lead) > 10) then { _lead # 10 } else { "" };
+                private _tag = if ((count _lead) > 10) then { _lead select 10 } else { "" };
                 if (!(_tag isEqualType "")) then { _tag = ""; };
                 _tag = trim _tag;
 
@@ -467,12 +467,12 @@ if (!isNull _ctrlDetails) then
 
     [_ctrlDetails] call BIS_fnc_ctrlFitToTextHeight;
     private _grp = _display displayCtrl 78016;
-    private _minH = if (!isNull _grp) then { (ctrlPosition _grp) # 3 } else { 0.74 };
+    private _minH = if (!isNull _grp) then { (ctrlPosition _grp) select 3 } else { 0.74 };
     private _p = ctrlPosition _ctrlDetails;
-    _p set [0, _defaultPos # 0];
-    _p set [1, _defaultPos # 1];
-    _p set [2, _defaultPos # 2];
-    _p set [3, (_p # 3) max _minH];
+    _p set [0, _defaultPos select 0];
+    _p set [1, _defaultPos select 1];
+    _p set [2, _defaultPos select 2];
+    _p set [3, (_p select 3) max _minH];
     _ctrlDetails ctrlSetPosition _p;
     _ctrlDetails ctrlCommit 0;
 };

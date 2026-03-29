@@ -51,7 +51,7 @@ private _pad2 = {
     str _v
 };
 private _stamp = if (_st isEqualType [] && {(count _st) >= 6}) then {
-    format ["%1:%2:%3", [(_st # 3)] call _pad2, [(_st # 4)] call _pad2, [(_st # 5)] call _pad2]
+    format ["%1:%2:%3", [(_st select 3)] call _pad2, [(_st select 4)] call _pad2, [(_st select 5)] call _pad2]
 } else {
     "--:--:--"
 };

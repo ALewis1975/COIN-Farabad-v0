@@ -39,7 +39,7 @@ if ((count _bld) > 0 && {(random 1) < _pB}) then {
 };
 
 if !(_pos isEqualType [] && {(count _pos) >= 2}) then { _pos = [0,0,0]; };
-if ((count _pos) == 2) then { _pos = [_pos#0,_pos#1,0]; };
+if ((count _pos) == 2) then { _pos = [_pos select 0,_pos select 1,0]; };
 
 // Phase 2: enforce off-road placement (never return a road placement)
 if (_pos isEqualType [] && {(count _pos) >= 2} && {!(_pos isEqualTo [0,0,0])}) then

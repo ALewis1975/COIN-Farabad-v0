@@ -99,9 +99,9 @@ if (!_placed) then
     for "_i" from 0 to 15 do
     {
         private _cand = [
-            (_p # 0) + (random (_radius * 2) - _radius),
-            (_p # 1) + (random (_radius * 2) - _radius),
-            (_p # 2)
+            (_p select 0) + (random (_radius * 2) - _radius),
+            (_p select 1) + (random (_radius * 2) - _radius),
+            (_p select 2)
         ];
         if (surfaceIsWater _cand) then { continue; };
         private _b = nearestBuilding _cand;
@@ -117,8 +117,8 @@ if (!(_cls isEqualType "")) then { _cls = "Land_File1_F"; };
 private _obj = createVehicle [_cls, _posE, [], 0, "CAN_COLLIDE"];
 if (isNull _obj) exitWith {false};
 // Keep evidence on the selected ATL surface near the device; do NOT snap upward (prevents rooftop spawns).
-private _pz = _posE # 2; if (!(_pz isEqualType 0)) then { _pz = 0; };
-_obj setPosATL [_posE # 0, _posE # 1, _pz + 0.05];
+private _pz = _posE select 2; if (!(_pz isEqualType 0)) then { _pz = 0; };
+_obj setPosATL [_posE select 0, _posE select 1, _pz + 0.05];
 _obj setVectorUp [0,0,1];
 _obj allowDamage false;
 

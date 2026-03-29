@@ -327,7 +327,7 @@ if (_cNids isEqualType [] && { (count _cNids) > 0 }) then
             private _convoyAnchor = _anchor;
             if ((count _veh) > 0) then
             {
-                private _leadV = _veh # 0;
+                private _leadV = _veh select 0;
                 if (!isNull _leadV) then { _convoyAnchor = getPosATL _leadV; };
             };
 

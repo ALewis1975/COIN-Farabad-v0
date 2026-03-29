@@ -98,18 +98,18 @@ private _ensureS2Split = {
     };
 
     private _pG = ctrlPosition _grpDetails;
-    private _xR = _pG # 0;         // left edge of details pane (absolute)
+    private _xR = _pG select 0;         // left edge of details pane (absolute)
     private _pL = _p0;             // start from default each paint
 
-    private _xL = _pL # 0;
-    private _yL = _pL # 1;
-    private _hL = _pL # 3;
+    private _xL = _pL select 0;
+    private _yL = _pL select 1;
+    private _hL = _pL select 3;
 
     private _padOuter = 0.006;
     private _gap = 0.006;
 
     private _midW = (_xR - _padOuter) - _xL;
-    if (_midW < 0.18) exitWith { [(_xL + (_pL # 2) + _gap), 0.10, _xR] };
+    if (_midW < 0.18) exitWith { [(_xL + (_pL select 2) + _gap), 0.10, _xR] };
 
     // Reserve ~32% for the workflow control column.
     private _listW = (_midW * 0.68) max 0.14;
@@ -150,7 +150,7 @@ private _ensureS2CatPanels = {
         {
             if !(_x isEqualType [] && { (count _x) == 3 }) exitWith { _ok = false; };
             if (_ok) then {
-                if (isNull (_x # 0) || { isNull (_x # 1) } || { isNull (_x # 2) }) exitWith { _ok = false; };
+                if (isNull (_x select 0) || { isNull (_x select 1) } || { isNull (_x select 2) }) exitWith { _ok = false; };
             };
         } forEach _panels;
     };
@@ -215,16 +215,16 @@ private _layoutS2CatPanels = {
     params ["_display", "_listMaster", "_panels"];
 
     private _pL = ctrlPosition _listMaster;
-    private _x = _pL # 0;
-    private _y = _pL # 1;
-    private _w = _pL # 2;
-    private _h = _pL # 3;
+    private _x = _pL select 0;
+    private _y = _pL select 1;
+    private _w = _pL select 2;
+    private _h = _pL select 3;
 
     private _hHdr = 0.03 * safeZoneH;
     private _probe = _display displayCtrl 78031;
     if (!isNull _probe) then {
         private _pp = ctrlPosition _probe;
-        if ((_pp # 3) > 0) then { _hHdr = _pp # 3; };
+        if ((_pp select 3) > 0) then { _hHdr = _pp select 3; };
     };
 
     private _gap = 0.006;
@@ -237,10 +237,10 @@ private _layoutS2CatPanels = {
 
     private _yCur = _y;
     for "_pi" from 0 to 3 do {
-        private _p = _panels # _pi;
+        private _p = _panels select _pi;
         _p params ["_bg","_lbl","_lb"];
 
-        private _ph = _avail * (_weights # _pi);
+        private _ph = _avail * (_weights select _pi);
         if (_pi == 3) then { _ph = (_y + _h) - _yCur; };
 
         _bg  ctrlSetPosition [_x, _yCur, _w, _ph];
@@ -258,13 +258,13 @@ private _layoutS2CatPanels = {
 private _renderS2CatPanelsFromMaster = {
     params ["_display", "_listMaster", "_panels"];
 
-    { lbClear (_x # 2); } forEach _panels;
+    { lbClear (_x select 2); } forEach _panels;
 
     private _map = [[
-        ["INTEL / LEADS",      (_panels # 0) # 2],
-        ["CIVSUB / MDT",       (_panels # 1) # 2],
-        ["ADMIN / TOOLS",      (_panels # 2) # 2],
-        ["INTEL FEED",         (_panels # 3) # 2]
+        ["INTEL / LEADS",      (_panels select 0) select 2],
+        ["CIVSUB / MDT",       (_panels select 1) select 2],
+        ["ADMIN / TOOLS",      (_panels select 2) select 2],
+        ["INTEL FEED",         (_panels select 3) select 2]
     ]] call _hmCreate;
 
     private _section = "";
@@ -298,7 +298,7 @@ private _renderS2CatPanelsFromMaster = {
 
     uiNamespace setVariable ["ARC_s2_catPanels_suppressSel", true];
     {
-        private _lb = (_x # 2);
+        private _lb = (_x select 2);
         private _found = -1;
         for "_j" from 0 to ((lbSize _lb) - 1) do {
             if ((_lb lbData _j) isEqualTo _sel) exitWith { _found = _j; };
@@ -389,9 +389,9 @@ private _inCivCtx = !(isNull _civCtxTarget);
 // Apply the S2 split layout each paint. This keeps the workflow controls inside the middle pane
 // and prevents them from colliding with the right details pane.
 private _s2Split = [_display, _list] call _ensureS2Split;
-private _xCtlBase = _s2Split # 0;
-private _wCtlBase = _s2Split # 1;
-private _xRBase   = _s2Split # 2;
+private _xCtlBase = _s2Split select 0;
+private _wCtlBase = _s2Split select 1;
+private _xRBase   = _s2Split select 2;
 if (!(_mode isEqualType "")) then { _mode = "TOOLS"; };
 _mode = toUpper (trim _mode);
 
@@ -596,7 +596,7 @@ if (_rebuild) then
         private _start = ((count _intelLog) - 25) max 0;
         for "_i" from _start to ((count _intelLog) - 1) do
         {
-            private _e = _intelLog # _i;
+            private _e = _intelLog select _i;
             if (!(_e isEqualType [] && { (count _e) >= 6 })) then { continue; };
             _e params ["_id", "_t", "_cat", "_sum", "_p", "_meta"];
             _sum = [_sum, ""] call _trimRxText;
@@ -730,8 +730,8 @@ if (_data in ["HDR", "SEP"]) then
 else
 {
     private _parts = _data splitString "|";
-    private _kind = if ((count _parts) > 0) then { _parts # 0 } else { "" };
-    private _arg  = if ((count _parts) > 1) then { _parts # 1 } else { "" };
+    private _kind = if ((count _parts) > 0) then { _parts select 0 } else { "" };
+    private _arg  = if ((count _parts) > 1) then { _parts select 1 } else { "" };
 
     switch (_kind) do
     {
@@ -876,7 +876,7 @@ else
                 "<t color='#AAAAAA'>What this means</t><br/>" + _what +
                 "<br/><br/><t size='1.05' font='PuristaMedium'>Raw Metrics</t><br/><br/>" +
                 format ["<t color='#AAAAAA'>Centroid:</t> %1  <t color='#AAAAAA'>Grid:</t> %2  <t color='#AAAAAA'>Radius:</t> %3m<br/>",
-                        if (_centroid isEqualType [] && { (count _centroid) >= 2 }) then { format ['[%1,%2]', (_centroid#0) toFixed 0, (_centroid#1) toFixed 0] } else { "(n/a)" },
+                        if (_centroid isEqualType [] && { (count _centroid) >= 2 }) then { format ['[%1,%2]', (_centroid select 0) toFixed 0, (_centroid select 1) toFixed 0] } else { "(n/a)" },
                         if (_grid isEqualTo "") then {"(n/a)"} else {_grid},
                         _rad
                 ] +
@@ -918,8 +918,8 @@ if (_data in ["HDR", "SEP"]) then
 else
 {
     private _parts = _data splitString "|";
-    private _kind = if ((count _parts) > 0) then { _parts # 0 } else { "" };
-    private _arg  = if ((count _parts) > 1) then { _parts # 1 } else { "" };
+    private _kind = if ((count _parts) > 0) then { _parts select 0 } else { "" };
+    private _arg  = if ((count _parts) > 1) then { _parts select 1 } else { "" };
 
     switch (_kind) do
     {
@@ -950,7 +950,7 @@ else
             private _grpDetails = _display displayCtrl 78016; // right-pane details group
             if (!isNull _grpDetails) then {
                 private _pG = ctrlPosition _grpDetails;
-                private _xR = _pG # 0; // left edge of details pane
+                private _xR = _pG select 0; // left edge of details pane
 
                                 // Control column anchor comes from the S2 split layout.
                 private _xL = _xCtlBase;
@@ -959,7 +959,7 @@ else
                 // Fallback if split data is unavailable.
                 if (_wCtl <= 0) then {
                     private _pList = ctrlPosition _list;
-                    private _xL2 = (_pList # 0) + (_pList # 2) + 0.006;
+                    private _xL2 = (_pList select 0) + (_pList select 2) + 0.006;
                     private _padX = 0.004;
                     _wCtl = (_xR - _padX) - _xL2;
                     _xL = _xL2;
@@ -968,10 +968,10 @@ else
 
                 private _pLM = ctrlPosition _lblMethod;
                 private _pCM = ctrlPosition _cmbMethod;
-                private _hLbl = (_pLM # 3) max 0.02;
-                private _hCmb = (_pCM # 3) max 0.03;
+                private _hLbl = (_pLM select 3) max 0.02;
+                private _hCmb = (_pCM select 3) max 0.03;
 
-                private _y0 = _pLM # 1;
+                private _y0 = _pLM select 1;
                 private _gap = 0.002;
                 private _gapBlk = 0.006;
 
@@ -1012,7 +1012,7 @@ else
             private _grpDetails = _display displayCtrl 78016;
             if (!isNull _grpDetails) then {
                 private _pG = ctrlPosition _grpDetails;
-                private _xR = _pG # 0;
+                private _xR = _pG select 0;
 
                                 // Control column anchor comes from the S2 split layout.
                 private _xL = _xCtlBase;
@@ -1021,7 +1021,7 @@ else
                 // Fallback if split data is unavailable.
                 if (_wCtl <= 0) then {
                     private _pList = ctrlPosition _list;
-                    private _xL2 = (_pList # 0) + (_pList # 2) + 0.006;
+                    private _xL2 = (_pList select 0) + (_pList select 2) + 0.006;
                     private _padX = 0.004;
                     _wCtl = (_xR - _padX) - _xL2;
                     _xL = _xL2;
@@ -1030,10 +1030,10 @@ else
 
                 private _pLL = ctrlPosition _lblLead;
                 private _pCL = ctrlPosition _cmbLead;
-                private _hLbl = (_pLL # 3) max 0.02;
-                private _hCmb = (_pCL # 3) max 0.03;
+                private _hLbl = (_pLL select 3) max 0.02;
+                private _hCmb = (_pCL select 3) max 0.03;
 
-                private _y0 = _pLL # 1;
+                private _y0 = _pLL select 1;
                 private _gap = 0.002;
 
                 _lblLead ctrlSetPosition [_xL, _y0, _wCtl, _hLbl];
@@ -1084,7 +1084,7 @@ else
 
             private _match = [];
             {
-                if (_x isEqualType [] && { (count _x) >= 6 } && { (_x # 0) isEqualTo _id }) exitWith { _match = _x; };
+                if (_x isEqualType [] && { (count _x) >= 6 } && { (_x select 0) isEqualTo _id }) exitWith { _match = _x; };
             } forEach _intelLog;
 
             if (_match isEqualTo []) then
@@ -1103,8 +1103,8 @@ else
                     {
                         if (_x isEqualType [] && { (count _x) >= 2 }) then
                         {
-                            private _k = _x # 0;
-                            private _v = _x # 1;
+                            private _k = _x select 0;
+                            private _v = _x select 1;
                             _k = [_k, ""] call _trimRxText;
                             if !(_v isEqualType "") then { _v = str _v; };
                             _v = [_v, ""] call _trimRxText;
@@ -1363,7 +1363,7 @@ if (_useCatPanels) then {
         [_display, _list, _panels] call _layoutS2CatPanels;
         [_display, _list, _panels] call _renderS2CatPanelsFromMaster;
 
-        { (_x # 0) ctrlShow true; (_x # 1) ctrlShow true; (_x # 2) ctrlShow true; } forEach _panels;
+        { (_x select 0) ctrlShow true; (_x select 1) ctrlShow true; (_x select 2) ctrlShow true; } forEach _panels;
     };
 } else {
     private _panels = uiNamespace getVariable ["ARC_s2_catPanels", []];
@@ -1402,9 +1402,9 @@ if (!(_defaultPos isEqualType []) || { (count _defaultPos) < 4 }) then
 private _grp = _display displayCtrl 78016;
 if (!isNull _grp) then {
     private _pg = ctrlPosition _grp;
-    private _xG = _pg # 0;
-    private _yG = _pg # 1;
-    private _hG = _pg # 3;
+    private _xG = _pg select 0;
+    private _yG = _pg select 1;
+    private _hG = _pg select 3;
 
     // Determine the lowest visible workflow control bottom edge that intersects
     // the details group horizontally.
@@ -1414,24 +1414,24 @@ if (!isNull _grp) then {
     {
         if (!isNull _x && {ctrlShown _x}) then {
             private _pC = ctrlPosition _x;
-            private _r = (_pC # 0) + (_pC # 2);
+            private _r = (_pC select 0) + (_pC select 2);
             if (_r > _xG) then {
-                private _b = (_pC # 1) + (_pC # 3);
+                private _b = (_pC select 1) + (_pC select 3);
                 if (_b > _maxBottom) then { _maxBottom = _b; };
             };
         };
     } forEach [_lblMethod,_cmbMethod,_lblCat,_cmbCat,_lblLead,_cmbLead];
 
     // Convert absolute y into group-local y and pin x/w to the designed defaults.
-    private _yLocal = ((_maxBottom + _padY) - _yG) max (_defaultPos # 1);
+    private _yLocal = ((_maxBottom + _padY) - _yG) max (_defaultPos select 1);
     private _availH = (_hG - _yLocal) max 0.02;
 
     private _pD = ctrlPosition _details;
-    private _fitH = _pD # 3;
+    private _fitH = _pD select 3;
 
-    _pD set [0, _defaultPos # 0];
+    _pD set [0, _defaultPos select 0];
     _pD set [1, _yLocal];
-    _pD set [2, _defaultPos # 2];
+    _pD set [2, _defaultPos select 2];
     _pD set [3, _fitH max _availH];
 
     _details ctrlSetPosition _pD;
@@ -1439,9 +1439,9 @@ if (!isNull _grp) then {
 } else {
     // Fallback: keep inset x/y/w stable and apply fitted height.
     private _pD = ctrlPosition _details;
-    _pD set [0, _defaultPos # 0];
-    _pD set [1, _defaultPos # 1];
-    _pD set [2, _defaultPos # 2];
+    _pD set [0, _defaultPos select 0];
+    _pD set [1, _defaultPos select 1];
+    _pD set [2, _defaultPos select 2];
     _details ctrlSetPosition _pD;
     _details ctrlCommit 0;
 };

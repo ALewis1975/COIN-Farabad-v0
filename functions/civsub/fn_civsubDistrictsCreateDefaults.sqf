@@ -37,11 +37,11 @@ private _rows = [
 ];
 
 {
-    private _id = _x # 0;
-    private _pop = _x # 1;
-    private _cx = _x # 2;
-    private _cy = _x # 3;
-    private _rad = _x # 4;
+    private _id = _x select 0;
+    private _pop = _x select 1;
+    private _cx = _x select 2;
+    private _cy = _x select 3;
+    private _rad = _x select 4;
 
     private _profile = [_id, _pop, [_cx, _cy], _seed] call ARC_fnc_civsubDistrictSeedProfile;
 

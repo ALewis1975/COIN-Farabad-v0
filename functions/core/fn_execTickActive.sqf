@@ -272,7 +272,7 @@ if (_cpEnabled && { _incTypeU isEqualTo "CHECKPOINT" } && { !((toUpper _objKind)
             private _conn = roadsConnectedTo _road;
             if ((count _conn) > 0) then
             {
-                _dir = _road getDir (_conn # 0);
+                _dir = _road getDir (_conn select 0);
             };
         };
 
