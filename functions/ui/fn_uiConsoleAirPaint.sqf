@@ -18,8 +18,8 @@ if (isNull _display) exitWith {false};
 
 private _ctrlList = _display displayCtrl 78011;
 private _ctrlDetails = _display displayCtrl 78012;
-private _btnPrimary = _display displayCtrl 78002;
-private _btnSecondary = _display displayCtrl 78003;
+private _btnPrimary = _display displayCtrl 78021;
+private _btnSecondary = _display displayCtrl 78022;
 if (isNull _ctrlList || { isNull _ctrlDetails }) exitWith {false};
 
 private _owner = uiNamespace getVariable ["ARC_console_mainListOwner", ""];
