@@ -34,8 +34,9 @@ private _fmtLead = {
     private _type = _entry select 1;
     private _disp = _entry select 2;
     private _pos = _entry select 3;
-    private _strength = if ((count _entry) > 4) then { _entry select 4 } else { 0.5 };
-    private _expiresAt = if ((count _entry) > 6) then { _entry select 6 } else { -1 };
+    private _strength = if ((count _entry) >= 5) then { _entry select 4 } else { 0.5 };
+    private _createdAt = if ((count _entry) >= 6) then { _entry select 5 } else { -1 };
+    private _expiresAt = if ((count _entry) >= 7) then { _entry select 6 } else { -1 };
 
     private _grid = if (_pos isEqualType [] && { (count _pos) >= 2 }) then { mapGridPosition _pos } else { "????" };
 

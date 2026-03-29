@@ -30,6 +30,7 @@ sqflint -e w functions/core/fn_tocShowLeadPoolLocal.sqf
 **Notes:**
 - FAIL (pre-existing baseline): full-repo compat scan reports existing violations outside this fix scope.
 - PASS: targeted compat scan on `functions/core/fn_tocShowLeadPoolLocal.sqf`.
+- PASS: targeted compat scan re-run after code-review follow-up adjustment (`>=` bounds checks).
 - BLOCKED: `sqflint` is unavailable in this container (`sqflint: command not found`).
 - Fix applied by replacing fragile tuple-style `params` destructuring in local formatter with explicit guarded `select` assignments for `_id`, `_type`, `_disp`, `_pos`, `_strength`, `_expiresAt`.
 - Dedicated server + JIP validation remains deferred in this environment.
