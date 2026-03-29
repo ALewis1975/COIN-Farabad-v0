@@ -1,8 +1,8 @@
 # Farabad COIN v0 — Task Decomposition
 
-**Version:** 1.0  
-**Date:** 2026-02-23  
-**Source:** Architecture & Readiness Plan §5–§8, verified scope counts.
+**Version:** 2.0  
+**Date:** 2026-03-29  
+**Source:** Architecture & Readiness Plan §5–§8, verified scope counts, 2026-03-29 audit.
 
 ---
 
@@ -243,6 +243,108 @@ if ((side _unit) isEqualTo (side _guard)) then { continue; };
 
 ---
 
+## Phase 2.5: Resolve All Remaining sqflint Compat Violations
+
+> **Status: ✅ COMPLETE** — All 2159 violations resolved to 0 in branch `copilot/audit-coin-farabad-v0-again`.
+
+### Task 2.5a — Register Orphan Functions ✅ DONE
+
+| Field | Value |
+|-------|-------|
+| **PR Mode** | C — Safe Refactor |
+| **Severity** | P2 — Dead code crash risk |
+| **Files** | `config/CfgFunctions.hpp`, `functions/ui/fn_uiConsoleActionCloseIncident.sqf` |
+| **Actual Lines** | ~8 changed |
+
+**Delivered:**
+- Registered `fn_rolesCanUseMobileOps` in Core class of CfgFunctions.hpp
+- Registered `fn_uiConsoleActionCloseIncident` in UI class of CfgFunctions.hpp
+- Fixed sqflint compat in `fn_uiConsoleActionCloseIncident.sqf` (direct `trim` → `_trimFn`, `isNotEqualTo` → `!isEqualTo`)
+
+**Acceptance:**
+- [x] Both functions registered in CfgFunctions.hpp
+- [x] `sqflint_compat_scan.py --strict` passes on changed files
+
+---
+
+### Task 2.5b — Replace `isNotEqualTo` with `!isEqualTo` ✅ DONE
+
+| Field | Value |
+|-------|-------|
+| **PR Mode** | C — Safe Refactor |
+| **Files** | 118 files, 439 occurrences |
+| **Actual Lines** | 437 replacements (mechanical) |
+
+**Pattern:** `_x isNotEqualTo _y` → `!(_x isEqualTo _y)`
+
+**Acceptance:**
+- [x] Zero `isNotEqualTo` occurrences remain in `functions/`
+- [x] `sqflint_compat_scan.py --strict` passes on all files
+
+---
+
+### Task 2.5c — Replace `#` Hash Indexing with `select` ✅ DONE
+
+| Field | Value |
+|-------|-------|
+| **PR Mode** | C — Safe Refactor |
+| **Files** | 148 files, 939 occurrences |
+| **Actual Lines** | 964 replacements |
+
+**Pattern:** `_arr # _idx` → `_arr select _idx`
+
+**Acceptance:**
+- [x] Zero hash-index-operator violations remain
+- [x] `sqflint_compat_scan.py --strict` passes on all files
+
+---
+
+### Task 2.5d — Replace `getOrDefault` Method with `_hg` Helper ✅ DONE
+
+| Field | Value |
+|-------|-------|
+| **PR Mode** | C — Safe Refactor |
+| **Files** | 69 files, 395 occurrences |
+| **Actual Lines** | 547 changed (replacements + helper declarations) |
+
+**Pattern:** `_map getOrDefault [key, default]` → `[_map, key, default] call _hg`
+
+**Acceptance:**
+- [x] Zero method-style `getOrDefault` violations remain
+- [x] `_hg` helper declared in each file that needs it
+- [x] `sqflint_compat_scan.py --strict` passes on all files
+
+---
+
+### Task 2.5e — Replace Direct `trim` with `_trimFn` Helper ✅ DONE
+
+| Field | Value |
+|-------|-------|
+| **PR Mode** | C — Safe Refactor |
+| **Files** | 109 files, 384 occurrences |
+| **Actual Lines** | 687 changed (replacements + helper declarations) |
+
+**Pattern:** `trim _var` → `[_var] call _trimFn`
+
+**Acceptance:**
+- [x] Zero direct `trim` violations remain
+- [x] `_trimFn` helper declared in each file that needs it
+- [x] `sqflint_compat_scan.py --strict` passes on all files
+
+---
+
+### Task 2.5f — Replace Direct `fileExists` with Helper ✅ DONE
+
+| Field | Value |
+|-------|-------|
+| **PR Mode** | C — Safe Refactor |
+| **Files** | 1 file, 1 occurrence |
+
+**Acceptance:**
+- [x] Zero `fileExists-operator` violations remain
+
+---
+
 ## Phase 3: Validate — Dedicated Server QA
 
 ### Task 3.1 — Local MP Smoke Test Protocol
@@ -341,6 +443,9 @@ Task 1.4 (createHashMap) ──┤               │
                     Task 2.1 (CfgRemoteExec)
                     Task 2.2 (Array caps)
                     Task 2.3 (Guard post)
+                           │
+                           ▼
+                    Task 2.5a-f (sqflint compat: 2159 → 0)
                            │
                            ▼
                     Task 3.1 (Local MP test) ← BLOCKED
