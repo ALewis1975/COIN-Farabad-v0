@@ -65,6 +65,7 @@ class CfgFunctions
             class rolesIsTocS3 {};
             class rolesIsTocCommand {};
             class rolesCanApproveQueue {};
+            class rolesCanUseMobileOps {};
             class rpcValidateSender {};
             class airbaseTowerAuthorize {};
 
@@ -527,6 +528,7 @@ class CfgFunctions
             class uiConsoleActionTocSecondary {};
 
             class uiConsoleActionOpenCloseout {};
+            class uiConsoleActionCloseIncident {};
 
             class uiConsoleActionAcceptIncident {};
             class uiConsoleActionAcceptOrder {};
