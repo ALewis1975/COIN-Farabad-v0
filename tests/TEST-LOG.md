@@ -12,6 +12,29 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 ---
 
 
+## 2026-03-29 17:23 UTC — AIR/TOWER buttons stuck on APPROVE/DENY (N/A) after queue changes
+
+**Branch/Commit:** copilot/fix-tower-controls-issue @ commit: unrecoverable
+
+**Scenario:** Fix AIR/TOWER list selection restore behavior so refresh does not auto-select placeholder `(none)` rows (`REQ|NONE`/`FLT|NONE`/`DEC|NONE`) and gray out actionable controls while real actionable rows exist.
+
+**Commands:**
+```bash
+python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleAirPaint.sqf
+bash tests/static/airbase_planning_mode_checks.sh
+bash tests/static/casreq_snapshot_contract_checks.sh
+```
+
+**Result:** BLOCKED
+
+**Notes:**
+- PASS: `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleAirPaint.sqf`
+- BLOCKED: static scripts require `rg`/ripgrep in this environment (`rg: command not found`), producing false FAIL output unrelated to this patch.
+- Root cause was deterministic fallback selection in `fn_uiConsoleAirPaint.sqf` choosing the first non-header row, which can be `REQ|NONE`; patch now prefers actionable rows first and only falls back to placeholders if no actionable rows exist.
+- Dedicated server + JIP verification remains deferred in this container.
+- Rationale for `commit: unrecoverable`: this test-log entry is recorded before the next progress commit SHA is generated.
+
+
 ## 2026-03-29 16:59 UTC — WCIC AIR/TOWER initial empty pane + schedule/execution sync fix
 
 **Branch/Commit:** copilot/fix-scheduled-flights-information @ 5a7553f
