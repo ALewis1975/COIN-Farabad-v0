@@ -359,7 +359,21 @@ if (_rebuild) then {
             for "_iFirst" from 0 to ((lbSize _ctrlList) - 1) do {
                 private _d2 = _ctrlList lbData _iFirst;
                 private _pfx = if ((_d2 isEqualType "") && { (count _d2) >= 3 }) then { toUpper (_d2 select [0, 3]) } else { "" };
-                if (_pfx != "HDR") exitWith { _restoreSel = _iFirst; };
+                if (_pfx != "HDR") then {
+                    private _parts2 = _d2 splitString "|";
+                    private _rowType2 = if ((count _parts2) > 0) then { _parts2 select 0 } else { "" };
+                    private _rowId2 = toUpper (_parts2 param [1, ""]);
+                    private _isPlaceholderNone = (_rowType2 in ["REQ", "FLT", "DEC"]) && { _rowId2 isEqualTo "NONE" };
+                    if (!_isPlaceholderNone) exitWith { _restoreSel = _iFirst; };
+                };
+            };
+        };
+
+        if (_restoreSel < 0) then {
+            for "_iFirstFallback" from 0 to ((lbSize _ctrlList) - 1) do {
+                private _d3 = _ctrlList lbData _iFirstFallback;
+                private _pfxFallback = if ((_d3 isEqualType "") && { (count _d3) >= 3 }) then { toUpper (_d3 select [0, 3]) } else { "" };
+                if (_pfxFallback != "HDR") exitWith { _restoreSel = _iFirstFallback; };
             };
         };
 
