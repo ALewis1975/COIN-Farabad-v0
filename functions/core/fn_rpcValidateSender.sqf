@@ -29,7 +29,7 @@ if (!_isRemoteRpc) exitWith
 {
     // Hosted-server self-call detection:
     // When the host player calls remoteExec ["fnc", 2] on a non-dedicated server,
-    // the engine optimises this to a local call without setting remoteExecutedOwner.
+    // the engine optimizes this to a local call without setting remoteExecutedOwner.
     // Validate that the caller object is local and non-null — this is a legitimate path.
     if (!isDedicated && {!isNull _caller} && {local _caller}) exitWith
     {
