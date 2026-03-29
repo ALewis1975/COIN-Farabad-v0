@@ -108,8 +108,8 @@ if !(_mLead isEqualType 0) then { _mLead = 1.0; };
 if !(_mAttack isEqualType 0) then { _mAttack = 1.0; };
 _mLead = (_mLead max 0.1) min 2.0;
 _mAttack = (_mAttack max 0.1) min 2.0;
-missionNamespace setVariable ["civsub_v1_activity_mul_sched_lead_active", _mLead, true];
-missionNamespace setVariable ["civsub_v1_activity_mul_sched_attack_active", _mAttack, true];
+missionNamespace setVariable ["civsub_v1_activity_mul_sched_lead_active", _mLead, false];
+missionNamespace setVariable ["civsub_v1_activity_mul_sched_attack_active", _mAttack, false];
 
 private _districts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
 if !(_districts isEqualType createHashMap) exitWith {false};

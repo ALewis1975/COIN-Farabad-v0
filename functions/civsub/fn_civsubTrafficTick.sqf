@@ -256,10 +256,10 @@ if !(_mMoving isEqualType 0) then { _mMoving = 1.0; };
 _mTraffic = (_mTraffic max 0.1) min 2.0;
 _mMoving = (_mMoving max 0.1) min 2.0;
 
-missionNamespace setVariable ["civsub_v1_activity_phase", _phase, true];
-missionNamespace setVariable ["civsub_v1_activity_tod", _tod, true];
-missionNamespace setVariable ["civsub_v1_activity_mul_traffic_active", _mTraffic, true];
-missionNamespace setVariable ["civsub_v1_activity_mul_moving_active", _mMoving, true];
+missionNamespace setVariable ["civsub_v1_activity_phase", _phase, false];
+missionNamespace setVariable ["civsub_v1_activity_tod", _tod, false];
+missionNamespace setVariable ["civsub_v1_activity_mul_traffic_active", _mTraffic, false];
+missionNamespace setVariable ["civsub_v1_activity_mul_moving_active", _mMoving, false];
 
 // Spawn parked vehicles per active district (mostly parked)
 {

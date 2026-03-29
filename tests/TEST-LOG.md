@@ -1344,3 +1344,11 @@ git --no-pager diff --check
 
 - Static validation: **PASS with one known sqflint legacy-parser FAIL** (documented above)
 - Runtime validation: **BLOCKED** (dedicated/JIP environment unavailable)
+
+### Follow-up delta (same session)
+
+| Check | Result | Notes |
+|---|---|---|
+| Code review feedback pass | PASS | Switched high-frequency activity telemetry writes to server-local (`public=false`) to avoid unnecessary replication churn |
+| Re-run compat scan (3 touched files) | PASS | No known parser-compat patterns found |
+| Re-run sqflint (3 touched files) | FAIL | Same legacy parser errors in unchanged map/keys constructs; no new parser-compat regressions |

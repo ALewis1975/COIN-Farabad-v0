@@ -86,7 +86,7 @@ if (_capGE < 0) then { _capGE = 0; };
     _capByD set [_did0, _cap0];
 } forEach (keys _capByD);
 
-missionNamespace setVariable ["civsub_v1_activity_mul_civ_active", _mCiv, true];
+missionNamespace setVariable ["civsub_v1_activity_mul_civ_active", _mCiv, false];
 
 // Publish sampler decision state for probes
 missionNamespace setVariable ["civsub_v1_civ_sampler_last_active", _active, true];
