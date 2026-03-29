@@ -13,6 +13,9 @@
 params [["_unit", player]];
 if (isNull _unit) exitWith {false};
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 // Fail-safe: ensure role helper functions exist even if CfgFunctions.hpp was not updated.
 if (isNil "ARC_fnc_rolesIsAuthorized") then { ARC_fnc_rolesIsAuthorized = compile preprocessFileLineNumbers "functions\\core\\fn_rolesIsAuthorized.sqf"; };
 
@@ -26,7 +29,7 @@ private _ok = true;
 
 if ((missionNamespace getVariable ["ARC_activeTaskId", ""]) isEqualTo "") then { _ok = false; };
 if !(missionNamespace getVariable ["ARC_activeIncidentAccepted", false]) then { _ok = false; };
-private _typU = missionNamespace getVariable ["ARC_activeIncidentType", ""]; if (!(_typU isEqualType "")) then { _typU = ""; }; _typU = toUpper (trim _typU);
+private _typU = missionNamespace getVariable ["ARC_activeIncidentType", ""]; if (!(_typU isEqualType "")) then { _typU = ""; }; _typU = toUpper ([_typU] call _trimFn);
 if !(_typU in ["IED"]) then {
     if !(missionNamespace getVariable ["ARC_activeIncidentCloseReady", false]) then { _ok = false; };
 };

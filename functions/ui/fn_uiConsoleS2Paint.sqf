@@ -56,6 +56,9 @@ if (_rebuild) then
 
     private _add = {
         params ["_label", "_data"];
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
         private _i = _ctrlList lbAdd _label;
         _ctrlList lbSetData [_i, _data];
     };
@@ -110,8 +113,8 @@ if (!(_intelLog isEqualType [])) then { _intelLog = []; };
 private _threatHits = 0;
 {
     if (!(_x isEqualType []) || { (count _x) < 4 }) then { continue; };
-    private _cat = toUpper (trim (_x select 2));
-    private _sum = toUpper (trim (_x select 3));
+    private _cat = toUpper ([(_x select 2)] call _trimFn);
+    private _sum = toUpper ([(_x select 3)] call _trimFn);
     if (_cat in ["THREAT", "OPS"] && { (_sum find "THREAT") >= 0 || { (_sum find "IED") >= 0 } }) then
     {
         _threatHits = _threatHits + 1;

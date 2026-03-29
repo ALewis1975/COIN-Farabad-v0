@@ -47,6 +47,9 @@ private _fmtHdr = {
 
 private _fmtKV = {
     params ["_k", "_v"];
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
     private _vv = _v; if (!(_vv isEqualType "")) then { _vv = str _vv; }; if ((_vv find "<t") >= 0) then { format ["<t color='#B89B6B'>%1:</t> %2<br/>", _k, _vv ] } else { format ["<t color='#B89B6B'>%1:</t> <t color='#FFFFFF'>%2</t><br/>", _k, _vv ] }
 };
 
@@ -98,7 +101,7 @@ private _queueLines = [];
     if (!(_x isEqualType []) || { (count _x) < 8 }) then { continue; };
     _x params ["_qid", "_createdAt", "_qSt", "_qKind", "_qFrom", "_qFromGrp", "_qPos", "_qSummary"]; 
 
-    private _k = toUpper (trim _qKind);
+    private _k = toUpper ([_qKind] call _trimFn);
     switch (_k) do
     {
         case "INCIDENT": { _qInc = _qInc + 1; };
@@ -203,7 +206,7 @@ else
     {
         if (!(_x isEqualType []) || { (count _x) < 2 }) then { continue; };
         private _g = _x select 0;
-        private _s = toUpper (trim (_x select 1));
+        private _s = toUpper ([(_x select 1)] call _trimFn);
         if (_s isEqualTo "OFFLINE") then { _s = "UNAVAILABLE"; };
         if (!(_accBy isEqualTo "") && { !(_g isEqualTo _accBy) } && { _s in ["IN TRANSIT", "ON SCENE"] }) then { _support pushBack _g; };
     } forEach _statusRows;

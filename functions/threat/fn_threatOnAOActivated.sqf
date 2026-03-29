@@ -89,6 +89,9 @@ if (
             // Write back world
             private _kvSet = {
                 params ["_pairs", "_key", "_value"];
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
                 if (!(_pairs isEqualType [])) then { _pairs = []; };
                 private _i = -1;
                 { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _i = _forEachIndex; }; } forEach _pairs;
@@ -134,7 +137,7 @@ if (_recs2 isEqualType []) then
 };
 
 if (!(_cur isEqualType "")) then { _cur = ""; };
-_cur = toUpper (trim _cur);
+_cur = toUpper ([_cur] call _trimFn);
 
 if (_cur in ["", "CREATED"]) then
 {

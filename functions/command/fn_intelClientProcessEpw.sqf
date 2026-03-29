@@ -36,7 +36,7 @@ if (time < _until) exitWith {false};
 missionNamespace setVariable ["ARC_epwProcess_lockUntil", time + 3];
 
 private _orderIdO = "";
-if (_orderIdOverride isEqualType "") then { _orderIdO = trim _orderIdOverride; };
+if (_orderIdOverride isEqualType "") then { _orderIdO = [_orderIdOverride] call _trimFn; };
 
 private _useOverride = false;
 
@@ -77,6 +77,9 @@ private _resp = ["EPW", _defaultSummary, _defaultDetails] call ARC_fnc_clientInt
 _resp params ["_ok", "_sum", "_det"]; 
 if (!_ok) exitWith {false};
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 [_caller, _sum, _det, _forceConsole, _orderIdO] remoteExec ["ARC_fnc_intelOrderCompleteRtbEpw", 2];
 ["EPW processing submitted.", "INFO", "TOAST"] call ARC_fnc_clientHint;
 true

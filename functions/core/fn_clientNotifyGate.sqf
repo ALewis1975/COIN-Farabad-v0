@@ -23,8 +23,9 @@ params [
 
 // sqflint-compatible helpers
 private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _trimFn  = compile "params ['_s']; trim _s";
 if (!(_key isEqualType "")) then { _key = str _key; };
-_key = trim _key;
+_key = [_key] call _trimFn;
 if (_key isEqualTo "") exitWith {true};
 
 if (!(_cooldownS isEqualType 0)) then { _cooldownS = 0; };

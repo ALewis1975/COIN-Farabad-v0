@@ -25,8 +25,8 @@ if (_isToc) then {
     _orderTg = ["ARC_console_handoff_epwTargetGroup", ""] call ARC_fnc_uiNsGetString;
     if (!(_orderId isEqualType "")) then { _orderId = ""; };
     if (!(_orderTg isEqualType "")) then { _orderTg = ""; };
-    _orderId = trim _orderId;
-    _orderTg = trim _orderTg;
+    _orderId = [_orderId] call _trimFn;
+    _orderTg = [_orderTg] call _trimFn;
 };
 
 private _orders = missionNamespace getVariable ["ARC_pub_orders", []];
@@ -49,6 +49,9 @@ private _destRad = 30;
 private _consumeOrder = {
     params ["_oid", "_tg", "_data", "_meta"];
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
     _hasAccepted = true;
     _orderId = _oid;
     _orderTg = _tg;

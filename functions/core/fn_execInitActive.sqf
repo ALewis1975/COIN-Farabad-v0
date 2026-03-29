@@ -146,7 +146,7 @@ private _spawnObjective = {
 // We enforce that here by using the dedicated site pickers.
 // Other objective kinds may spawn indoors when appropriate.
 private _p = [];
-private _kindU = toUpper (trim _kind);
+private _kindU = toUpper ([_kind] call _trimFn);
 
 switch (_kindU) do
 {
@@ -1815,6 +1815,7 @@ if (_showSpawnMarker) then
 
 // sqflint-compatible helpers
 private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _trimFn  = compile "params ['_s']; trim _s";
                 private _hardSnap = missionNamespace getVariable ["ARC_convoyRoadSnapHardM", (_snapLocal * 4)];
                 if (!(_hardSnap isEqualType 0)) then { _hardSnap = (_snapLocal * 4); };
                 _hardSnap = (_hardSnap max (_snapLocal + 80)) min 1400;

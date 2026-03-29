@@ -50,7 +50,7 @@ private _incType = ["activeIncidentType", ""] call ARC_fnc_stateGet;
 if (!(_incType isEqualType "")) then { _incType = ""; };
 if (!((toUpper _incType) isEqualTo "IED")) exitWith {""};
 
-private _objKindU = toUpper (trim _objKind);
+private _objKindU = toUpper ([_objKind] call _trimFn);
 if (!(_objKindU in ["IED_DEVICE", "VBIED_VEHICLE", "SUICIDE_VEST", "UNKNOWN"])) then { _objKindU = "UNKNOWN"; };
 
 // Idempotence: only queue one follow-on lead per active incident.
@@ -61,6 +61,9 @@ if (!(_existingLeadId isEqualTo "")) exitWith {_existingLeadId};
 // Helper: pull values from an array of [k,v] pairs.
 private _getP = {
     params ["_pairs", "_k", "_d"];
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
     if (!(_pairs isEqualType [])) exitWith { _d };
     private _out = _d;
     {

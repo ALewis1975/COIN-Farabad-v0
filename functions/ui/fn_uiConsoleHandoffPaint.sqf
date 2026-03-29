@@ -50,13 +50,13 @@ if (_isToc) then
 {
     _focusGid = missionNamespace getVariable ["ARC_activeIncidentSitrepFromGroup", ""];
     if (!(_focusGid isEqualType "")) then { _focusGid = ""; };
-    _focusGid = trim _focusGid;
+    _focusGid = [_focusGid] call _trimFn;
 
     if (_focusGid isEqualTo "") then
     {
         _focusGid = missionNamespace getVariable ["ARC_activeIncidentAcceptedByGroup", ""];
         if (!(_focusGid isEqualType "")) then { _focusGid = ""; };
-        _focusGid = trim _focusGid;
+        _focusGid = [_focusGid] call _trimFn;
     };
 
     if (_focusGid isEqualTo "") then { _focusGid = _gidSelf; };
@@ -106,6 +106,9 @@ private _isArrived = {
     params ["_ord", "_purposeU"];
     if (_ord isEqualTo []) exitWith {false};
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
     _ord params ["_oid", "_iat", "_st", "_ot", "_tg", "_data", "_meta"]; 
 
     // Primary: server arrival state

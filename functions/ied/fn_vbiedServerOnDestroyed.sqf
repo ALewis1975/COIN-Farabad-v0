@@ -24,7 +24,7 @@ params [
     ['_instigator',objNull,[objNull]]
 ];
 
-_vehNid = trim _vehNid;
+_vehNid = [_vehNid] call _trimFn;
 if (_vehNid isEqualTo '') exitWith {false};
 
 private _curVehNid = ['activeVbiedVehicleNetId',''] call ARC_fnc_stateGet;
@@ -48,6 +48,9 @@ if (_destroyed) exitWith {true};
 private _taskId = ['activeTaskId',''] call ARC_fnc_stateGet;
 if !(_taskId isEqualType '' && { !(_taskId isEqualTo )'' }) exitWith {false};
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 private _gid = ['activeIncidentAcceptedByGroup',''] call ARC_fnc_stateGet;
 if !(_gid isEqualType '' && { !(_gid isEqualTo )'' }) then { _gid = ''; };
 
@@ -74,7 +77,7 @@ if (_appr isEqualType [] && { !(_gid isEqualTo )'' }) then
         if !(_x isEqualType [] && { (count _x) >= 6 }) then { continue; };
         if (!((_x select 0) isEqualTo _taskId)) then { continue; };
         if (!((_x select 1) isEqualTo _gid)) then { continue; };
-        if (!((toUpper (trim (_x select 2))) isEqualTo )'TOW_VBIED') then { continue; };
+        if (!((toUpper ([(_x select 2)] call _trimFn)) isEqualTo )'TOW_VBIED') then { continue; };
         private _exp = _x select 5;
         if (!(_exp isEqualType 0)) then { _exp = -1; };
         if (_exp >= 0 && { serverTime > _exp }) then { continue; };

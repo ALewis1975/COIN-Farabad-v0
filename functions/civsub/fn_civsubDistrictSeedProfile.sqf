@@ -20,8 +20,9 @@ params [
 ];
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+private _trimFn  = compile "params ['_s']; trim _s";
 
-private _idNorm = toUpper (trim _districtId);
+private _idNorm = toUpper ([_districtId] call _trimFn);
 if (_idNorm isEqualTo "") then { _idNorm = "D00"; };
 
 private _pop = _popTotal;

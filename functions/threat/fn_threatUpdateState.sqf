@@ -67,6 +67,9 @@ private _stateFromU = toUpper _stateFrom;
 
 if (_stateFromU isEqualTo _stateToU) exitWith {false};
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 private _now = serverTime;
 
 // Update state + timestamps
@@ -176,9 +179,9 @@ private _meta = [
 ];
 
 private _summary = format ["%1: %2 %3→%4", _event, _threatId, _stateFromU, _stateToU];
-if (!((trim _note) isEqualTo "")) then
+if (!(([_note] call _trimFn) isEqualTo "")) then
 {
-    _summary = _summary + format [" (%1)", trim _note];
+    _summary = _summary + format [" (%1)", [_note] call _trimFn];
 };
 
 private _intelId = ["OPS", _summary, _pos, _meta] call ARC_fnc_intelLog;

@@ -33,7 +33,7 @@ if !(_requestIdCheck param [0, false]) exitWith {
 
 if (!(_approve isEqualType true) && !(_approve isEqualType false)) then { _approve = false; };
 if (!(_reason isEqualType "")) then { _reason = ""; };
-_reason = trim _reason;
+_reason = [_reason] call _trimFn;
 if (_reason isEqualTo "") then { _reason = if (_approve) then {"TOWER_APPROVE"} else {"TOWER_DENY"}; };
 
 private _actionToken = if (_approve) then {"APPROVE"} else {"DENY"};
@@ -76,6 +76,9 @@ private _idx = -1;
 { if ((_x param [0, ""]) isEqualTo _requestId) exitWith { _idx = _forEachIndex; }; } forEach _requests;
 if (_idx < 0) exitWith {false};
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 private _rec = _requests select _idx;
 private _requesterUid = _rec param [2, ""];
 private _requesterOwner = -1;

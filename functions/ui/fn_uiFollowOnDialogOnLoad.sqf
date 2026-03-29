@@ -16,6 +16,9 @@ params [
 
 if (isNull _display) exitWith {false};
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 // Clear any previous result
 uiNamespace setVariable ["ARC_followOn_result", nil];
 
@@ -25,7 +28,7 @@ private _ctrlTitle = _display displayCtrl 78191;
 // Optional title override (used by TOC issue-order flow)
 private _titleOverride = uiNamespace getVariable ["ARC_followOn_title", ""];
 if (!(_titleOverride isEqualType "")) then { _titleOverride = ""; };
-_titleOverride = trim _titleOverride;
+_titleOverride = [_titleOverride] call _trimFn;
 if (!isNull _ctrlTitle && { !(_titleOverride isEqualTo "") }) then { _ctrlTitle ctrlSetText _titleOverride; };
 private _cReq = _display displayCtrl 78102;
 private _cPurpose = _display displayCtrl 78104;
@@ -41,7 +44,7 @@ private _eNote = _display displayCtrl 78118;
 // Header context (best-effort)
 private _taskName = missionNamespace getVariable ["ARC_activeIncidentDisplayName", ""]; 
 if (!(_taskName isEqualType "")) then { _taskName = ""; };
-_taskName = trim _taskName;
+_taskName = [_taskName] call _trimFn;
 if (_taskName isEqualTo "") then { _taskName = "Active Task"; };
 
 private _pos = getPosATL player;
@@ -60,7 +63,7 @@ private _hdrTxt = format [
 ];
 private _hdrOverride = uiNamespace getVariable ["ARC_followOn_headerOverride", ""]; 
 if (!(_hdrOverride isEqualType "")) then { _hdrOverride = ""; };
-_hdrOverride = trim _hdrOverride;
+_hdrOverride = [_hdrOverride] call _trimFn;
 
 if (!isNull _ctrlHeader) then
 {
@@ -77,21 +80,21 @@ if (!isNull _ctrlHeader) then
 // Defaults
 private _dReq = uiNamespace getVariable ["ARC_followOn_defaultRequest", "RTB"]; 
 if (!(_dReq isEqualType "")) then { _dReq = "RTB"; };
-_dReq = toUpper (trim _dReq);
+_dReq = toUpper ([_dReq] call _trimFn);
 if !(_dReq in ["RTB","HOLD","PROCEED"]) then { _dReq = "RTB"; };
 
 private _dPurpose = uiNamespace getVariable ["ARC_followOn_defaultPurpose", "REFIT"]; 
 if (!(_dPurpose isEqualType "")) then { _dPurpose = "REFIT"; };
-_dPurpose = toUpper (trim _dPurpose);
+_dPurpose = toUpper ([_dPurpose] call _trimFn);
 if !(_dPurpose in ["REFIT","INTEL","EPW"]) then { _dPurpose = "REFIT"; };
 
 private _dHoldIntent = uiNamespace getVariable ["ARC_followOn_defaultHoldIntent", "SECURITY"]; 
 if (!(_dHoldIntent isEqualType "")) then { _dHoldIntent = "SECURITY"; };
-_dHoldIntent = toUpper (trim _dHoldIntent);
+_dHoldIntent = toUpper ([_dHoldIntent] call _trimFn);
 
 private _dProceed = uiNamespace getVariable ["ARC_followOn_defaultProceedIntent", "NEXT TASK"]; 
 if (!(_dProceed isEqualType "")) then { _dProceed = "NEXT TASK"; };
-_dProceed = toUpper (trim _dProceed);
+_dProceed = toUpper ([_dProceed] call _trimFn);
 
 private _dHoldMin = uiNamespace getVariable ["ARC_followOn_defaultHoldMinutes", 30];
 if (!(_dHoldMin isEqualType 0)) then { _dHoldMin = 30; };

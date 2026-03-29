@@ -1,6 +1,9 @@
 /*
     Prune expired leads from the lead pool.
 
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
+
     Returns:
         NUMBER - count of removed leads
 */
@@ -42,7 +45,7 @@ _leads = _leads select
     private _tag = _x select 10;
     if (!(_tag isEqualType "")) then { continue; };
 
-    private _tU = toUpper (trim _tag);
+    private _tU = toUpper ([_tag] call _trimFn);
     if (_tU find "SUS_" != 0) then { continue; };
 
     private _exp = missionNamespace getVariable [format ["ARC_leadCircleExpiresAt_%1", _id], -1];

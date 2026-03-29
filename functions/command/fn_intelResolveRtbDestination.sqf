@@ -17,8 +17,11 @@
 */
 
 params [["_purpose", "REFIT"]];
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 if (!(_purpose isEqualType "")) then { _purpose = "REFIT"; };
-_purpose = toUpper (trim _purpose);
+_purpose = toUpper ([_purpose] call _trimFn);
 
 private _pos = [0,0,0];
 private _label = "Base";

@@ -32,6 +32,9 @@ private _kvGet = {
 
 private _kvSet = {
     params ["_pairs", "_key", "_value"];
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
     if (!(_pairs isEqualType [])) then { _pairs = []; };
     private _idx = -1;
     { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
@@ -54,9 +57,9 @@ if (!(_records isEqualType [])) exitWith {true};
 
 // Shared note string for this closure event.
 private _noteStr = format ["INCIDENT_CLOSED:%1", _resultU];
-if (!((trim _reason) isEqualTo "")) then
+if (!(([_reason] call _trimFn) isEqualTo "")) then
 {
-    _noteStr = _noteStr + format [" (%1)", trim _reason];
+    _noteStr = _noteStr + format [" (%1)", [_reason] call _trimFn];
 };
 
 // Pass 1: patch outcome fields for all threats linked to this task and collect world refs.

@@ -24,6 +24,9 @@ params [
     ["_zoneBias", ""]
 ];
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 if (!(_pos isEqualType []) || { (count _pos) < 2 }) exitWith {""};
 
 private _threads = ["threads", []] call ARC_fnc_stateGet;
@@ -85,7 +88,7 @@ if (_bestIdx >= 0) exitWith
         _thr set [3, _newBase];
         private _did = _thr select 14;
         if !(_did isEqualType "") then { _did = ""; };
-        _did = toUpper (trim _did);
+        _did = toUpper ([_did] call _trimFn);
         if !([_did] call ARC_fnc_worldIsValidDistrictId) then
         {
             _did = [_newBase] call ARC_fnc_threadResolveDistrictId;

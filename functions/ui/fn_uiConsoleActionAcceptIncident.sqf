@@ -18,6 +18,9 @@
 
 if (!hasInterface) exitWith {false};
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 // OMNI override (playtesting)
 private _omniTokens = missionNamespace getVariable ["ARC_consoleOmniTokens", ["OMNI"]];
 if (!(_omniTokens isEqualType [])) then { _omniTokens = ["OMNI"]; };
@@ -54,7 +57,7 @@ private _rows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
 if (!(_rows isEqualType [])) then { _rows = []; };
 private _idx = -1;
 { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _gid }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
-private _status = if (_idx < 0) then { "OFFLINE" } else { toUpper (trim ((_rows select _idx) select 1)) };
+private _status = if (_idx < 0) then { "OFFLINE" } else { toUpper ([((_rows select _idx) select 1)] call _trimFn) };
 if (!(_status isEqualTo "AVAILABLE")) exitWith
 {
     ["Incident", format ["Set group status to AVAILABLE before accepting incidents. Current: %1", _status]] call ARC_fnc_clientToast;

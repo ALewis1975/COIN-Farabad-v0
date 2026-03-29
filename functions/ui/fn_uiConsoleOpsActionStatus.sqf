@@ -26,8 +26,8 @@ params [
     ["_timeoutS", 8]
 ];
 
-_action = toUpper (trim _action);
-_stage = toUpper (trim _stage);
+_action = toUpper ([_action] call _trimFn);
+_stage = toUpper ([_stage] call _trimFn);
 if (!(_detail isEqualType "")) then { _detail = str _detail; };
 if (!(_timeoutS isEqualType 0)) then { _timeoutS = 8; };
 _timeoutS = (_timeoutS max 3) min 20;
@@ -58,6 +58,9 @@ switch (_stage) do
         [_action, _pendingKey, _token, _timeoutS] spawn
         {
             params ["_action2", "_pendingKey2", "_token2", "_timeoutS2"];
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
             uiSleep _timeoutS2;
 
             private _activeToken = uiNamespace getVariable [_pendingKey2, -1];

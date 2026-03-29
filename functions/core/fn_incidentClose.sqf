@@ -20,7 +20,7 @@ private _log = {
 
 private _rawResult = if (_this isEqualType [] && { (count _this) > 0 }) then { _this select 0 } else { nil };
 params [["_result", "", [""]]];
-_result = toUpper (trim _result);
+_result = toUpper ([_result] call _trimFn);
 
 private _validResults = ["SUCCEEDED", "FAILED", "CANCELED"];
 if !(_result in _validResults) exitWith
@@ -32,6 +32,9 @@ if !(_result in _validResults) exitWith
 private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
 if (_taskId isEqualTo "") exitWith {false};
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 private _marker = ["activeIncidentMarker", ""] call ARC_fnc_stateGet;
 private _type = ["activeIncidentType", ""] call ARC_fnc_stateGet;
 private _display = ["activeIncidentDisplayName", ""] call ARC_fnc_stateGet;

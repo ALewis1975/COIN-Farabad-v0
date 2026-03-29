@@ -17,6 +17,7 @@ if (!isServer) exitWith {false};
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
 private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _trimFn  = compile "params ['_s']; trim _s";
 
 if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\\core\\fn_rpcValidateSender.sqf"; };
 
@@ -44,7 +45,7 @@ if (!isNull _caller && { !([_caller] call ARC_fnc_rolesIsAuthorized) }) exitWith
 };
 
 if (!(_statusRequest isEqualType "")) then { _statusRequest = ""; };
-_statusRequest = toUpper (trim _statusRequest);
+_statusRequest = toUpper ([_statusRequest] call _trimFn);
 private _statusCatalog = ["OFFLINE", "AVAILABLE", "IN TRANSIT", "ON SCENE"];
 private _setGroupStatus = {
     params ["_gid", "_status", ["_who", ""]];
@@ -96,7 +97,7 @@ private _unitStatuses = missionNamespace getVariable ["ARC_pub_unitStatuses", []
 if (!(_unitStatuses isEqualType [])) then { _unitStatuses = []; };
 private _statusIdx = -1;
 { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _callerGroup }) exitWith { _statusIdx = _forEachIndex; }; } forEach _unitStatuses;
-private _statusNow = if (_statusIdx < 0) then { "OFFLINE" } else { toUpper (trim ((_unitStatuses select _statusIdx) select 1)) };
+private _statusNow = if (_statusIdx < 0) then { "OFFLINE" } else { toUpper ([((_unitStatuses select _statusIdx) select 1)] call _trimFn) };
 if (!(_statusNow isEqualTo "AVAILABLE")) exitWith
 {
     ["Incident acceptance denied: your group must set status to AVAILABLE first."] remoteExec ["ARC_fnc_clientHint", owner _caller];

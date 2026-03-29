@@ -23,8 +23,8 @@ params [
 
 if (!([player] call ARC_fnc_rolesIsAuthorized)) exitWith {false};
 
-_order = toUpper (trim _order);
-_purpose = toUpper (trim _purpose);
+_order = toUpper ([_order] call _trimFn);
+_purpose = toUpper ([_purpose] call _trimFn);
 
 private _sum = format ["Issue TOC Order: %1%2", _order, if (_order isEqualTo "RTB") then { format [" (%1)", _purpose] } else { "" }];
 private _def = "Optional note to the unit.";
@@ -33,6 +33,9 @@ private _res = ["ISSUE TOC ORDER", _sum, _def] call ARC_fnc_clientIntelPrompt;
 _res params ["_ok", "_s", "_d"];
 if (!_ok) exitWith {false};
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 [player, _order, _purpose, _d] remoteExec ["ARC_fnc_intelTocIssueOrder", 2];
 
 ["Order sent to server.", "INFO", "TOAST"] call ARC_fnc_clientHint;

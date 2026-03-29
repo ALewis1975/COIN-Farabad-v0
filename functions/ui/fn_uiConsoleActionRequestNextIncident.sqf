@@ -51,6 +51,9 @@ private _myOwner = clientOwner;
 {
     params ["_stamp", "_ownerId"];
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
     private _timeoutAt = time + 8;
     private _found = false;
 
@@ -67,8 +70,8 @@ private _myOwner = clientOwner;
                 _found = true;
                 uiNamespace setVariable ["ARC_console_lastNextIncidentResult", _res];
 
-                private _msg = if (_detail isEqualType "" && { trim !(_detail isEqualTo "") }) then { trim _detail } else { "Server returned no detail." };
-                private _hdr = if (_title isEqualType "" && { trim !(_title isEqualTo "") }) then { trim _title } else { "TOC" };
+                private _msg = if (_detail isEqualType "" && { trim !(_detail isEqualTo "") }) then { [_detail] call _trimFn } else { "Server returned no detail." };
+                private _hdr = if (_title isEqualType "" && { trim !(_title isEqualTo "") }) then { [_title] call _trimFn } else { "TOC" };
 
                 if (_allowed isEqualType true && { _allowed }) then
                 {

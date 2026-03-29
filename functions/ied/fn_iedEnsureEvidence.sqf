@@ -116,6 +116,9 @@ if (!(_cls isEqualType "")) then { _cls = "Land_File1_F"; };
 
 private _obj = createVehicle [_cls, _posE, [], 0, "CAN_COLLIDE"];
 if (isNull _obj) exitWith {false};
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 // Keep evidence on the selected ATL surface near the device; do NOT snap upward (prevents rooftop spawns).
 private _pz = _posE select 2; if (!(_pz isEqualType 0)) then { _pz = 0; };
 _obj setPosATL [_posE select 0, _posE select 1, _pz + 0.05];
@@ -148,7 +151,7 @@ if (!(_transportEnabled isEqualType true) && !(_transportEnabled isEqualType fal
 
 private _mode = missionNamespace getVariable ["ARC_eodRtbEvidenceMode", "ACE_CARGO"]; 
 if (!(_mode isEqualType "")) then { _mode = "ACE_CARGO"; };
-_mode = toUpper (trim _mode);
+_mode = toUpper ([_mode] call _trimFn);
 
 if (_transportEnabled && { _mode isEqualTo "ACE_CARGO" }) then
 {

@@ -17,6 +17,9 @@ private _btnReject  = _disp displayCtrl 61012;
 private _qid = _lb lbData _idx;
 if (_qid isEqualTo "") exitWith {false};
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 private _getPair = {
     private _pairs = _this param [0, [], [[]]];
     private _k = _this param [1, "", [""]];
@@ -113,10 +116,10 @@ switch (_kindU) do
         private _tag      = [_payload, "tag", "S2_REQUEST"] call _getPair;
 
         if (!(_leadType isEqualType "")) then { _leadType = "RECON"; };
-        _leadType = toUpper (trim _leadType);
+        _leadType = toUpper ([_leadType] call _trimFn);
 
         if (!(_dispName isEqualType "")) then { _dispName = _sum; };
-        _dispName = trim _dispName;
+        _dispName = [_dispName] call _trimFn;
 
         private _pGrid = _grid;
         if (_lp isEqualType [] && { (count _lp) >= 2 } && { (_lp select 0) isEqualType 0 } && { (_lp select 1) isEqualType 0 }) then
@@ -128,7 +131,7 @@ switch (_kindU) do
         _pri = (_pri max 1) min 5;
 
         if (!(_tag isEqualType "")) then { _tag = "S2_REQUEST"; };
-        _tag = trim _tag;
+        _tag = [_tag] call _trimFn;
 
         _payloadTxt = format ["Lead Request: <t color='#FFD700'>%1</t> (P%2)<br/>Grid: %3 | Zone: %4<br/>Tag: %5<br/>Title: %6", _leadType, _pri, _pGrid, _zone, _tag, _dispName];
 
@@ -266,10 +269,10 @@ case "FOLLOWON_PACKAGE":
     if (!(_sitSum isEqualType "")) then { _sitSum = ""; };
     if (!(_leadIds isEqualType [])) then { _leadIds = []; };
 
-    _incType = toUpper (trim _incType);
-    _res = toUpper (trim _res);
-    _rec = toUpper (trim _rec);
-    _purpose = toUpper (trim _purpose);
+    _incType = toUpper ([_incType] call _trimFn);
+    _res = toUpper ([_res] call _trimFn);
+    _rec = toUpper ([_rec] call _trimFn);
+    _purpose = toUpper ([_purpose] call _trimFn);
 
     private _n = count _leadIds;
     private _leadTxt = if (_n > 0) then { _leadIds joinString ", " } else { "None" };
@@ -307,10 +310,10 @@ case "FOLLOWON_REQUEST":
         private _reqRole  = [_payload, "requestorRole", ""] call _getPair;
 
         if (!(_req isEqualType "")) then { _req = "RTB"; };
-        _req = toUpper (trim _req);
+        _req = toUpper ([_req] call _trimFn);
 
         if (!(_purpose isEqualType "")) then { _purpose = "REFIT"; };
-        _purpose = toUpper (trim _purpose);
+        _purpose = toUpper ([_purpose] call _trimFn);
 
         if (!(_reqGroup isEqualType "")) then { _reqGroup = _fromGroup; };
 
@@ -334,18 +337,18 @@ case "FOLLOWON_REQUEST":
 
         if (_req isEqualTo "HOLD") then
         {
-            if (trim !(_holdIntent isEqualTo "")) then { _extra pushBack format ["Hold intent: %1", trim _holdIntent]; };
+            if (trim !(_holdIntent isEqualTo "")) then { _extra pushBack format ["Hold intent: %1", [_holdIntent] call _trimFn]; };
             if (_holdMin > 0) then { _extra pushBack format ["Hold duration: %1 min", _holdMin]; };
         };
 
         if (_req isEqualTo "PROCEED") then
         {
-            if (trim !(_proceedIntent isEqualTo "")) then { _extra pushBack format ["Proceed intent: %1", trim _proceedIntent]; };
+            if (trim !(_proceedIntent isEqualTo "")) then { _extra pushBack format ["Proceed intent: %1", [_proceedIntent] call _trimFn]; };
         };
 
-        if (trim !(_rat isEqualTo "")) then { _extra pushBack format ["Rationale: %1", trim _rat]; };
-        if (trim !(_con isEqualTo "")) then { _extra pushBack format ["Constraints: %1", trim _con]; };
-        if (trim !(_sup isEqualTo "")) then { _extra pushBack format ["Support: %1", trim _sup]; };
+        if (trim !(_rat isEqualTo "")) then { _extra pushBack format ["Rationale: %1", [_rat] call _trimFn]; };
+        if (trim !(_con isEqualTo "")) then { _extra pushBack format ["Constraints: %1", [_con] call _trimFn]; };
+        if (trim !(_sup isEqualTo "")) then { _extra pushBack format ["Support: %1", [_sup] call _trimFn]; };
 
         if ((count _extra) > 0) then
         {
@@ -400,7 +403,7 @@ if (_dec isEqualType [] && { (count _dec) >= 4 }) then
     };
 
     if (!(_decNote isEqualType "")) then { _decNote = ""; };
-    _decNote = trim _decNote;
+    _decNote = [_decNote] call _trimFn;
     if (_decNote isEqualTo "") then { _decNote = "(no note)"; };
 
     _decTxt = format ["Decision: <t color='#FFD700'>%1</t> by %2 (%3m ago)<br/>Note: %4", _d, _decBy, _decAge, _decNote];

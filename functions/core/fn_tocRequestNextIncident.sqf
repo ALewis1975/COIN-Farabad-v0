@@ -27,10 +27,13 @@ private _publishResult = {
         ["_allowed", false, [true]]
     ];
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
     private _stamp = diag_tickTime;
     missionNamespace setVariable [
         "ARC_pub_nextIncidentResult",
-        [_stamp, _ownerId, toUpper (trim _resultCode), _title, _detail, _allowed],
+        [_stamp, _ownerId, toUpper ([_resultCode] call _trimFn), _title, _detail, _allowed],
         true
     ];
 
@@ -38,7 +41,7 @@ private _publishResult = {
     {
         missionNamespace setVariable [
             "ARC_pub_nextIncidentLastDenied",
-            [_stamp, toUpper (trim _resultCode), _detail],
+            [_stamp, toUpper ([_resultCode] call _trimFn), _detail],
             true
         ];
     };

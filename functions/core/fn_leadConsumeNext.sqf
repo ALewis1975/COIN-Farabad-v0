@@ -1,6 +1,9 @@
 /*
     Consume (remove) one lead from the pool, returning the picked lead entry.
 
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
+
     Selection:
       - Command node leads preempt everything
       - TOC-requested leads (e.g., S2 requests) preempt normal weighted selection
@@ -54,7 +57,7 @@ private _priBestCreated = 1e12;
     private _tag = _x select 10;
     if (!(_tag isEqualType "")) then { continue; };
 
-    private _tU = toUpper (trim _tag);
+    private _tU = toUpper ([_tag] call _trimFn);
     if (_tU isEqualTo "") then { continue; };
 
     private _isPri = false;

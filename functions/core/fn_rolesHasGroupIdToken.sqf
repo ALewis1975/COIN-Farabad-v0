@@ -32,7 +32,7 @@ private _grp = group _unit;
 if (!isNull _grp) then { _hay = groupId _grp; };
 
 if (!(_hay isEqualType "")) then { _hay = ""; };
-_hay = trim _hay;
+_hay = [_hay] call _trimFn;
 
 // Fallback: lobby/editor description can include the callsign string.
 // Append roleDescription even when groupId is non-empty.
@@ -41,7 +41,7 @@ if (_fallbackRoleDesc) then
 {
     private _rd = roleDescription _unit;
     if (!(_rd isEqualType "")) then { _rd = ""; };
-    _rd = trim _rd;
+    _rd = [_rd] call _trimFn;
 
     if (!(_rd isEqualTo "")) then
     {
@@ -56,7 +56,7 @@ private _hayU = toUpper _hay;
 private _tokList = [];
 if (_tokens isEqualType "") then
 {
-    private _t = trim _tokens;
+    private _t = [_tokens] call _trimFn;
     if (!(_t isEqualTo "")) then { _tokList = [_t]; };
 }
 else
@@ -64,7 +64,7 @@ else
     {
         if (_x isEqualType "") then
         {
-            private _t = trim _x;
+            private _t = [_x] call _trimFn;
             if (!(_t isEqualTo "")) then { _tokList pushBack _t; };
         };
     } forEach _tokens;
@@ -72,6 +72,9 @@ else
 
 if (_tokList isEqualTo []) exitWith {false};
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 private _hits = 0;
 {
     private _tU = toUpper _x;

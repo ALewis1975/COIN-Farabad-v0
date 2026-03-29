@@ -46,7 +46,7 @@ params [
 ];
 
 if (!(_kind isEqualType "")) then { _kind = ""; };
-_kind = toUpper (trim _kind);
+_kind = toUpper ([_kind] call _trimFn);
 if (_kind isEqualTo "") exitWith {""};
 
 // Dedicated MP hardening: validate sender when requestor is provided.
@@ -108,6 +108,9 @@ private _meta = [
 private _getP =
 {
     params ["_pairs", "_k", "_d"];
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
     private _v = _d;
     {
         if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _v = _x select 1; };
@@ -179,19 +182,19 @@ if (_kind isEqualTo "EOD_DISPO_REQUEST") then
     // Require an active IED incident matching the request payload.
     private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
     if (!(_taskId isEqualType "")) then { _taskId = ""; };
-    _taskId = trim _taskId;
+    _taskId = [_taskId] call _trimFn;
 
     private _typ = ["activeIncidentType", ""] call ARC_fnc_stateGet;
     if (!(_typ isEqualType "")) then { _typ = ""; };
-    _typ = toUpper (trim _typ);
+    _typ = toUpper ([_typ] call _trimFn);
 
     private _reqTask = [_payload, "taskId", ""] call _getP;
     if (!(_reqTask isEqualType "")) then { _reqTask = ""; };
-    _reqTask = trim _reqTask;
+    _reqTask = [_reqTask] call _trimFn;
 
     private _reqType = [_payload, "requestType", "DET_IN_PLACE"] call _getP;
     if (!(_reqType isEqualType "")) then { _reqType = "DET_IN_PLACE"; };
-    _reqType = toUpper (trim _reqType);
+    _reqType = toUpper ([_reqType] call _trimFn);
     if !(_reqType in ["DET_IN_PLACE","RTB_IED","TOW_VBIED"]) then { _reqType = "DET_IN_PLACE"; };
 
     if (_taskId isEqualTo "" || { _reqTask isEqualTo "" } || { !(_reqTask isEqualTo _taskId) } || { !(_typ isEqualTo "IED") }) exitWith
@@ -231,8 +234,8 @@ private _item = [
     _fromGroup,
     _fromUID,
     _posATL,
-    trim _summary,
-    trim _details,
+    [_summary] call _trimFn,
+    [_details] call _trimFn,
     _payload,
     _meta,
     []

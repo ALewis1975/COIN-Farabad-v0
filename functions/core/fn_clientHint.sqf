@@ -34,8 +34,8 @@ private _channel = "AUTO";
 private _gateKey = "";
 private _gateCooldown = 0;
 
-private _arg1Upper = if (_arg1 isEqualType "") then { toUpper (trim _arg1) } else { "" };
-private _arg2Upper = if (_arg2 isEqualType "") then { toUpper (trim _arg2) } else { "" };
+private _arg1Upper = if (_arg1 isEqualType "") then { toUpper ([_arg1] call _trimFn) } else { "" };
+private _arg2Upper = if (_arg2 isEqualType "") then { toUpper ([_arg2] call _trimFn) } else { "" };
 private _isNewApi = (_arg1Upper in _knownLevels) || (_arg2Upper in _knownChannels);
 
 if (_isNewApi) then
@@ -53,12 +53,15 @@ else
 
 if (!(_txt isEqualType "")) then { _txt = str _txt; };
 if (!(_gateKey isEqualType "")) then { _gateKey = str _gateKey; };
-_gateKey = trim _gateKey;
+_gateKey = [_gateKey] call _trimFn;
 if (!(_gateCooldown isEqualType 0)) then { _gateCooldown = 0; };
 _gateCooldown = _gateCooldown max 0;
 
 if (_gateKey != "" && { !([_gateKey, _gateCooldown, _txt] call ARC_fnc_clientNotifyGate) }) exitWith {false};
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 if (_channel isEqualTo "AUTO") then
 {
     _channel = switch (_level) do

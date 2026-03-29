@@ -93,6 +93,9 @@ private _deny = {
 // Helper: send a toast back to the originating client (best-effort)
 private _toast = {
     params ["_title", "_msg"];
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
     if (_owner > 0) then { [_title, _msg] remoteExec ["ARC_fnc_clientToast", _owner]; };
 };
 
@@ -103,16 +106,16 @@ if (!([_caller] call ARC_fnc_rolesCanApproveQueue)) exitWith
     false
 };
 
-_closeResult = toUpper (trim _closeResult);
+_closeResult = toUpper ([_closeResult] call _trimFn);
 if !(_closeResult in ["SUCCEEDED", "FAILED"]) exitWith {
     ["INVALID_PARAM_VALUE", [["param", "_closeResult"], ["received", _closeResult]], ""] call _deny;
     false
 };
 
-_req = toUpper (trim _req);
+_req = toUpper ([_req] call _trimFn);
 if !(_req in ["RTB","HOLD","PROCEED"]) then { _req = "HOLD"; };
 
-_purpose = toUpper (trim _purpose);
+_purpose = toUpper ([_purpose] call _trimFn);
 if !(_purpose in ["REFIT","INTEL","EPW",""]) then { _purpose = "REFIT"; };
 
 // Defensive reset: clear stale staged-close flags left over from a previous flow
@@ -148,29 +151,29 @@ if (!_sitrepSent) exitWith
 // Active context (rehydrate if needed)
 private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
 if (!(_taskId isEqualType "")) then { _taskId = ""; };
-_taskId = trim _taskId;
+_taskId = [_taskId] call _trimFn;
 
 if (_taskId isEqualTo "") then
 {
     [] call ARC_fnc_taskRehydrateActive;
     _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
     if (!(_taskId isEqualType "")) then { _taskId = ""; };
-    _taskId = trim _taskId;
+    _taskId = [_taskId] call _trimFn;
 };
 
 // Group context (Farabad rule): follow-on orders go to the unit that SENT the SITREP.
 // Fallbacks exist for edge cases where SITREP data is missing.
 private _gidSitrep = ["activeIncidentSitrepFromGroup", ""] call ARC_fnc_stateGet;
 if (!(_gidSitrep isEqualType "")) then { _gidSitrep = ""; };
-_gidSitrep = trim _gidSitrep;
+_gidSitrep = [_gidSitrep] call _trimFn;
 
 private _gidAccepted = ["activeIncidentAcceptedByGroup", ""] call ARC_fnc_stateGet;
 if (!(_gidAccepted isEqualType "")) then { _gidAccepted = ""; };
-_gidAccepted = trim _gidAccepted;
+_gidAccepted = [_gidAccepted] call _trimFn;
 
 private _gidLast = ["lastSitrepFromGroup", ""] call ARC_fnc_stateGet;
 if (!(_gidLast isEqualType "")) then { _gidLast = ""; };
-_gidLast = trim _gidLast;
+_gidLast = [_gidLast] call _trimFn;
 
 private _gid = _gidSitrep;
 if (_gid isEqualTo "") then { _gid = _gidAccepted; };
@@ -199,19 +202,19 @@ if (_noAutoOrders) exitWith
     // Capture incident context BEFORE closing (incidentClose clears many keys)
     private _itype = ["activeIncidentType", ""] call ARC_fnc_stateGet;
     if (!(_itype isEqualType "")) then { _itype = ""; };
-    _itype = trim _itype;
+    _itype = [_itype] call _trimFn;
 
     private _imarker = ["activeIncidentMarker", ""] call ARC_fnc_stateGet;
     if (!(_imarker isEqualType "")) then { _imarker = ""; };
-    _imarker = trim _imarker;
+    _imarker = [_imarker] call _trimFn;
 
     private _izone = ["activeIncidentZone", ""] call ARC_fnc_stateGet;
     if (!(_izone isEqualType "")) then { _izone = ""; };
-    _izone = trim _izone;
+    _izone = [_izone] call _trimFn;
 
     private _idisplay = ["activeIncidentDisplayName", "Incident"] call ARC_fnc_stateGet;
     if (!(_idisplay isEqualType "")) then { _idisplay = "Incident"; };
-    _idisplay = trim _idisplay;
+    _idisplay = [_idisplay] call _trimFn;
     if (_idisplay isEqualTo "") then { _idisplay = "Incident"; };
 
     private _iposATL = ["activeIncidentPos", []] call ARC_fnc_stateGet;
@@ -233,10 +236,10 @@ if (_noAutoOrders) exitWith
     };
 
     // Preserve the convenience behavior: IED/VBIED closeout can approve EOD disposition.
-    if (toUpper (trim _itype) isEqualTo "IED") then
+    if (toUpper ([_itype] call _trimFn) isEqualTo "IED") then
     {
-        private _eodReqU = toUpper (trim (["activeIncidentEodDispoRequestedType", ""] call ARC_fnc_stateGet));
-        private _objKindU = toUpper (trim (["activeIncidentEodDispoObjectiveKind", ""] call ARC_fnc_stateGet));
+        private _eodReqU = toUpper ([(["activeIncidentEodDispoRequestedType", ""] call ARC_fnc_stateGet)] call _trimFn);
+        private _objKindU = toUpper ([(["activeIncidentEodDispoObjectiveKind", ""] call ARC_fnc_stateGet)] call _trimFn);
 
         if (_eodReqU in ["DET_IN_PLACE","RTB_IED","TOW_VBIED"] && { _objKindU in ["IED_DEVICE","VBIED_VEHICLE"] }) then
         {
@@ -248,11 +251,11 @@ if (_noAutoOrders) exitWith
             if (!(_appr isEqualType [])) then { _appr = []; };
 
             private _exp = serverTime + _ttl;
-            private _notesE = trim (["activeIncidentEodDispoNotes", ""] call ARC_fnc_stateGet);
+            private _notesE = [(["activeIncidentEodDispoNotes", ""] call ARC_fnc_stateGet)] call _trimFn;
 
             // Remove any existing approval for this task+group+type before adding a new one (prevents duplicates)
             _appr = _appr select {
-                !(_x isEqualType [] && { (count _x) >= 6 } && { (_x select 0) isEqualTo _taskId } && { (_x select 1) isEqualTo _gid } && { (toUpper (trim (_x select 2))) isEqualTo _eodReqU })
+                !(_x isEqualType [] && { (count _x) >= 6 } && { (_x select 0) isEqualTo _taskId } && { (_x select 1) isEqualTo _gid } && { (toUpper ([(_x select 2)] call _trimFn)) isEqualTo _eodReqU })
             };
             _appr pushBack [_taskId, _gid, _eodReqU, serverTime, if (isNull _caller) then {"TOC"} else { name _caller }, _exp, _notesE];
 
@@ -355,7 +358,7 @@ if (_hasIssued) exitWith
     } forEach _ordersExisting;
 
     if (!(_reuseId isEqualType "")) then { _reuseId = ""; };
-    _reuseId = trim _reuseId;
+    _reuseId = [_reuseId] call _trimFn;
 
     if (_reuseId isEqualTo "") exitWith
     {
@@ -400,11 +403,11 @@ if (_hasIssued) exitWith
 // Incident context for lead generation / logging
 private _type = ["activeIncidentType", ""] call ARC_fnc_stateGet;
 if (!(_type isEqualType "")) then { _type = ""; };
-_type = trim _type;
+_type = [_type] call _trimFn;
 
 private _marker = ["activeIncidentMarker", ""] call ARC_fnc_stateGet;
 if (!(_marker isEqualType "")) then { _marker = ""; };
-_marker = trim _marker;
+_marker = [_marker] call _trimFn;
 
 private _posATL = ["activeIncidentPos", []] call ARC_fnc_stateGet;
 if (!(_posATL isEqualType []) || { (count _posATL) < 2 }) then { _posATL = []; };
@@ -438,7 +441,7 @@ if (_closeResult isEqualTo "SUCCEEDED" && { toUpper _type isEqualTo "IED" }) the
 // Capture system-suggested follow-on lead (if any)
 private _foLeadIdCaptured = ["activeIncidentFollowOnLeadId", ""] call ARC_fnc_stateGet;
 if (!(_foLeadIdCaptured isEqualType "")) then { _foLeadIdCaptured = ""; };
-_foLeadIdCaptured = trim _foLeadIdCaptured;
+_foLeadIdCaptured = [_foLeadIdCaptured] call _trimFn;
 
 // Snapshot lead pool before generating
 private _leadIdsBefore = [];
@@ -498,11 +501,11 @@ if (_req isEqualTo "PROCEED") then { _orderType = "LEAD"; };
 
 // IED/VBIED closeout: if the SITREP included an EOD disposition request, treat this closeout
 // action as TOC approval and broadcast it immediately (no separate UI hunt).
-private _incTypeU = toUpper (trim (['activeIncidentType',''] call ARC_fnc_stateGet));
+private _incTypeU = toUpper ([(['activeIncidentType',''] call ARC_fnc_stateGet)] call _trimFn);
 if (_incTypeU isEqualTo "IED") then
 {
-    private _eodReqU = toUpper (trim (['activeIncidentEodDispoRequestedType',''] call ARC_fnc_stateGet));
-    private _objKindU = toUpper (trim (['activeIncidentEodDispoObjectiveKind',''] call ARC_fnc_stateGet));
+    private _eodReqU = toUpper ([(['activeIncidentEodDispoRequestedType',''] call ARC_fnc_stateGet)] call _trimFn);
+    private _objKindU = toUpper ([(['activeIncidentEodDispoObjectiveKind',''] call ARC_fnc_stateGet)] call _trimFn);
     if (_eodReqU in ["DET_IN_PLACE","RTB_IED","TOW_VBIED"] && { _objKindU in ["IED_DEVICE","VBIED_VEHICLE"] }) then
     {
         private _ttl = missionNamespace getVariable ["ARC_eodDispoApprovalTTLsec", 900];
@@ -513,11 +516,11 @@ if (_incTypeU isEqualTo "IED") then
         if (!(_appr isEqualType [])) then { _appr = []; };
 
         private _exp = serverTime + _ttl;
-        private _notesE = trim (['activeIncidentEodDispoNotes',''] call ARC_fnc_stateGet);
+        private _notesE = [(['activeIncidentEodDispoNotes',''] call ARC_fnc_stateGet)] call _trimFn;
 
         // Remove any existing approval for this task+group+type before adding a new one (prevents duplicates)
         _appr = _appr select {
-            !(_x isEqualType [] && { (count _x) >= 6 } && { (_x select 0) isEqualTo _taskId } && { (_x select 1) isEqualTo _gid } && { (toUpper (trim (_x select 2))) isEqualTo _eodReqU })
+            !(_x isEqualType [] && { (count _x) >= 6 } && { (_x select 0) isEqualTo _taskId } && { (_x select 1) isEqualTo _gid } && { (toUpper ([(_x select 2)] call _trimFn)) isEqualTo _eodReqU })
         };
         _appr pushBack [_taskId, _gid, _eodReqU, serverTime, if (isNull _caller) then {"TOC"} else { name _caller }, _exp, _notesE];
 
@@ -536,21 +539,21 @@ if (_incTypeU isEqualTo "IED") then
 };
 
 private _seed = [];
-if (trim !(_rationale isEqualTo "")) then { _seed pushBack ["rationale", trim _rationale]; };
-if (trim !(_constraints isEqualTo "")) then { _seed pushBack ["constraints", trim _constraints]; };
-if (trim !(_support isEqualTo "")) then { _seed pushBack ["support", trim _support]; };
+if (trim !(_rationale isEqualTo "")) then { _seed pushBack ["rationale", [_rationale] call _trimFn]; };
+if (trim !(_constraints isEqualTo "")) then { _seed pushBack ["constraints", [_constraints] call _trimFn]; };
+if (trim !(_support isEqualTo "")) then { _seed pushBack ["support", [_support] call _trimFn]; };
 
 if (_orderType isEqualTo "RTB") then { _seed pushBack ["purpose", _purpose]; };
 
 if (_orderType isEqualTo "HOLD") then
 {
-    if (trim !(_holdIntent isEqualTo "")) then { _seed pushBack ["holdIntent", trim _holdIntent]; };
+    if (trim !(_holdIntent isEqualTo "")) then { _seed pushBack ["holdIntent", [_holdIntent] call _trimFn]; };
     if (_holdMinutes isEqualType 0 && { _holdMinutes > 0 }) then { _seed pushBack ["holdMinutes", _holdMinutes]; };
 };
 
 if (_orderType isEqualTo "LEAD") then
 {
-    if (trim !(_proceedIntent isEqualTo "")) then { _seed pushBack ["proceedIntent", trim _proceedIntent]; };
+    if (trim !(_proceedIntent isEqualTo "")) then { _seed pushBack ["proceedIntent", [_proceedIntent] call _trimFn]; };
 
     // Prefer system-suggested follow-on lead, otherwise the closeout-generated lead.
     if (!(_foLeadIdCaptured isEqualTo "")) then
@@ -563,7 +566,7 @@ if (_orderType isEqualTo "LEAD") then
     };
 };
 
-private _orderNote = trim _notes;
+private _orderNote = [_notes] call _trimFn;
 
 private _issueOk = [_orderType, _gid, _seed, _caller, _orderNote, ""] call ARC_fnc_intelOrderIssue;
 if (!(_issueOk isEqualType true)) then { _issueOk = false; };
@@ -591,7 +594,7 @@ private _bestAt = -1;
 } forEach _orders;
 
 if (!(_orderId isEqualType "")) then { _orderId = ""; };
-_orderId = trim _orderId;
+_orderId = [_orderId] call _trimFn;
 
 // STAGED branch (new order): order issued now, incident closes later via acceptance trigger in fn_intelOrderAccept.
 ["activeIncidentClosePending", true] call ARC_fnc_stateSet;

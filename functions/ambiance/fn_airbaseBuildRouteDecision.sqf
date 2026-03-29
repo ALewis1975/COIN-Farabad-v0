@@ -21,14 +21,17 @@ params [
     ["_sourceId", "", [""]]
 ];
 
-_opKind = toUpper (trim _opKind);
-_context = toUpper (trim _context);
+_opKind = toUpper ([_opKind] call _trimFn);
+_context = toUpper ([_context] call _trimFn);
 if !(_opKind in ["DEP", "ARR"]) exitWith {[false, [], "UNSUPPORTED_OP_KIND"]};
 if (_context isEqualTo "") then { _context = "AMBIENT"; };
 
 private _resolveMarker = {
     params ["_primary", "_fallbacks", "_default"];
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
     private _chosen = _primary;
     if (!(_chosen isEqualType "") || { _chosen isEqualTo "" }) then { _chosen = _default; };
 

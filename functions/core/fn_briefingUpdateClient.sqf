@@ -475,7 +475,7 @@ else
 
         private _details = [_meta, "details", ""] call _metaGetOps;
         if (!(_details isEqualType "")) then { _details = ""; };
-        _details = trim _details;
+        _details = [_details] call _trimFn;
         if (!(_details isEqualTo "")) then
         {
             _details = (_details splitString (toString [10])) joinString "<br/>";
@@ -699,7 +699,7 @@ else
 
         private _details = [_meta, "details", ""] call _metaGet;
         if (!(_details isEqualType "")) then { _details = ""; };
-        _details = trim _details;
+        _details = [_details] call _trimFn;
         if (!(_details isEqualTo "")) then
         {
             // Convert any newline characters to <br/> for structured text output
@@ -1010,6 +1010,9 @@ private _s1UpdatedAt = missionNamespace getVariable ["ARC_pub_s1_registryUpdated
 if (!(_s1UpdatedAt isEqualType 0)) then { _s1UpdatedAt = -1; };
 private _s1Get = {
     params ["_pairs", "_key", "_default"];
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
     if (!(_pairs isEqualType [])) exitWith { _default };
     private _idx = -1;
     { if ((_x isEqualType []) && { (count _x) >= 2 } && { ((_x select 0) isEqualTo _key) }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;

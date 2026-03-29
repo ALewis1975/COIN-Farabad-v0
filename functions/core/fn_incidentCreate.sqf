@@ -142,7 +142,7 @@ if (!_useLead && { !isNil "ARC_fnc_tocBacklogPopNext" }) then
 
         private _bkLeadId = _bk select 0;
         if (!(_bkLeadId isEqualType "")) then { _bkLeadId = ""; };
-        _bkLeadId = trim _bkLeadId;
+        _bkLeadId = [_bkLeadId] call _trimFn;
         if (_bkLeadId isEqualTo "") then { continue; };
 
         private _tmp = [_bkLeadId] call ARC_fnc_leadConsumeById;
@@ -170,8 +170,8 @@ if (_leadPool isEqualType [] && { (count _leadPool) > 0 }) then
                 if ((count _x) >= 11) then { _tag = _x select 10; };
                 if !(_tag isEqualType "") then { _tag = ""; };
 
-                private _tU = toUpper (trim _t);
-                private _tagU = toUpper (trim _tag);
+                private _tU = toUpper ([_t] call _trimFn);
+                private _tagU = toUpper ([_tag] call _trimFn);
 
                 if ((_tU find "CMDNODE" isEqualTo 0) || (_tagU find "TOC_" isEqualTo 0) || (_tagU find "URGENT_" isEqualTo 0)) then { _match = true; };
             };
@@ -504,6 +504,9 @@ if (_leadOrderIdx >= 0 && { _leadOrderIdx < (count _orders) }) then
 
         private _setPair = {
             params ["_pairs", "_k", "_v"];
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
             if !(_pairs isEqualType []) then { _pairs = []; };
             private _j = -1;
             { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _j = _forEachIndex; }; } forEach _pairs;

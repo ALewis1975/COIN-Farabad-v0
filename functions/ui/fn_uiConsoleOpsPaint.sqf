@@ -64,7 +64,7 @@ if (!isNull _ctrlDetails) then { _ctrlDetails ctrlShow true; };
 private _safeStr = {
     params ["_s", ["_fallback", "N/A"]];
     if (!(_s isEqualType "")) exitWith {_fallback};
-    _s = trim _s;
+    _s = [_s] call _trimFn;
     if ((count _s) > _rxMaxText) then { _s = _s select [0, _rxMaxText]; };
     if (_s isEqualTo "") then {_fallback} else {_s};
 };
@@ -86,7 +86,7 @@ private _selOrdData = uiNamespace getVariable ["ARC_console_opsSel_ord", ""]; if
 private _selLeadData = uiNamespace getVariable ["ARC_console_opsSel_lead", ""]; if (!(_selLeadData isEqualType "")) then { _selLeadData = ""; };
 
 private _focus = uiNamespace getVariable ["ARC_console_opsFocus", "INCIDENT"]; if (!(_focus isEqualType "")) then { _focus = "INCIDENT"; };
-_focus = toUpper (trim _focus);
+_focus = toUpper ([_focus] call _trimFn);
 
 if (_rebuild) then
 {
@@ -95,7 +95,7 @@ if (_rebuild) then
     // -------------------------------
     lbClear _cInc;
     private _activeId = missionNamespace getVariable ["ARC_activeTaskId", ""]; if (!(_activeId isEqualType "")) then { _activeId = ""; };
-    _activeId = trim _activeId;
+    _activeId = [_activeId] call _trimFn;
     if (_activeId isEqualTo "") then
     {
         private _i = _cInc lbAdd "(No active incident)";
@@ -108,7 +108,7 @@ if (_rebuild) then
         private _accepted = missionNamespace getVariable ["ARC_activeIncidentAccepted", false]; if (!(_accepted isEqualType true) && !(_accepted isEqualType false)) then { _accepted = false; };
         private _tag = if (_accepted) then {"ACTIVE"} else {"PENDING"};
         private _label = format ["[%1] %2", _tag, _dispName];
-        if ((trim _typ) != "") then { _label = _label + format [" (%1)", toUpper (trim _typ)]; };
+        if (([_typ] call _trimFn) != "") then { _label = _label + format [" (%1)", toUpper ([_typ] call _trimFn)]; };
         private _i = _cInc lbAdd _label;
         _cInc lbSetData [_i, format ["INCIDENT|%1", _activeId]];
     };
@@ -116,6 +116,9 @@ if (_rebuild) then
     // Restore selection (incident)
     private _restoreSel = {
         params ["_ctrl", "_wantedData"];
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
         if (isNull _ctrl) exitWith {};
         if (_wantedData isEqualTo "") exitWith {};
         private _n = lbSize _ctrl;
@@ -148,12 +151,12 @@ if (_rebuild) then
         {
             private _order = _x;
             private _id = _order select 0;
-            private _status = toUpper (trim (_order select 2));
-            private _otype = toUpper (trim (_order select 3));
+            private _status = toUpper ([(_order select 2)] call _trimFn);
+            private _otype = toUpper ([(_order select 3)] call _trimFn);
             private _pairs = _order select 5;
             private _purpose = [_pairs, "purpose", ""] call _pairGet;
             if (!(_purpose isEqualType "")) then { _purpose = ""; };
-            _purpose = trim _purpose;
+            _purpose = [_purpose] call _trimFn;
 
             private _label = format ["[%1] %2", _status, _otype];
             if (_purpose != "") then { _label = _label + format [" - %1", _purpose]; };
@@ -182,7 +185,7 @@ if (_rebuild) then
             private _lead = _x;
             if (!(_lead isEqualType []) || { (count _lead) < 4 }) then { continue };
             private _id = _lead select 0;
-            private _typ = toUpper (trim (_lead select 1));
+            private _typ = toUpper ([(_lead select 1)] call _trimFn);
             private _name = _lead select 2;
             if (!(_name isEqualType "")) then { _name = "Lead"; };
             private _label = format ["[%1] %2", _typ, _name];
@@ -238,7 +241,7 @@ if (!(_statusRows isEqualType [])) then { _statusRows = []; };
 if ((count _statusRows) > _rxMaxItems) then { _statusRows = _statusRows select [0, _rxMaxItems]; };
 private _statusIdx = -1;
 { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _gidSelf }) exitWith { _statusIdx = _forEachIndex; }; } forEach _statusRows;
-private _unitStatus = if (_statusIdx < 0) then { "OFFLINE" } else { toUpper (trim ((_statusRows select _statusIdx) select 1)) };
+private _unitStatus = if (_statusIdx < 0) then { "OFFLINE" } else { toUpper ([((_statusRows select _statusIdx) select 1)] call _trimFn) };
 
 private _allowDuringRtb = missionNamespace getVariable ["ARC_allowIncidentDuringAcceptedRtb", false];
 private _policyText = if (_allowDuringRtb) then
@@ -257,8 +260,8 @@ if (_deny isEqualType [] && { (count _deny) >= 3 }) then
     _deny params ["_denyStamp", "_denyCode", "_denyDetail"];
     if (_denyStamp isEqualType 0 && { (diag_tickTime - _denyStamp) <= 120 }) then
     {
-        private _code = if (_denyCode isEqualType "") then { toUpper (trim _denyCode) } else { "UNKNOWN" };
-        private _detail = if (_denyDetail isEqualType "") then { trim _denyDetail } else { "" };
+        private _code = if (_denyCode isEqualType "") then { toUpper ([_denyCode] call _trimFn) } else { "UNKNOWN" };
+        private _detail = if (_denyDetail isEqualType "") then { [_denyDetail] call _trimFn } else { "" };
         _denialText = if (_detail isEqualTo "") then
         {
             format ["Latest generation denial: %1", _code]
@@ -284,7 +287,7 @@ if (_focusData isEqualTo "") then
 else
 {
     private _parts = _focusData splitString "|";
-    private _kind = toUpper (trim (_parts select 0));
+    private _kind = toUpper ([(_parts select 0)] call _trimFn);
     private _id = if ((count _parts) > 1) then { _parts select 1 } else { "" };
 
     switch (_kind) do
@@ -303,7 +306,7 @@ else
             _sitrepDetails = [_sitrepDetails, ""] call _safeStr;
 
             _details = format ["<t size='1.2' font='PuristaMedium'>%1</t><br/>", _dispName];
-            if ((trim _typ) != "") then { _details = _details + format ["<t color='#A0A0A0'>Type:</t> %1<br/>", toUpper (trim _typ)]; };
+            if (([_typ] call _trimFn) != "") then { _details = _details + format ["<t color='#A0A0A0'>Type:</t> %1<br/>", toUpper ([_typ] call _trimFn)]; };
             _details = _details + format ["<t color='#A0A0A0'>Grid:</t> %1<br/>", _grid];
             _details = _details + format ["<t color='#A0A0A0'>Accepted:</t> %1", if (_accepted) then {"YES"} else {"NO"}];
             if (_acceptedBy != "") then { _details = _details + format [" (by %1)", _acceptedBy]; };
@@ -323,7 +326,7 @@ else
             else
             {
                 // Next actions: keep SITREP as the primary reporting step until sent.
-                private _typU = toUpper (trim _typ);
+                private _typU = toUpper ([_typ] call _trimFn);
                 private _canSit = [player] call ARC_fnc_clientCanSendSitrep;
 
                 if (_sitrepSent) then
@@ -381,18 +384,18 @@ else
             else
             {
                 private _order = _orders select _o;
-                private _status = toUpper (trim (_order select 2));
-                private _otype = toUpper (trim (_order select 3));
+                private _status = toUpper ([(_order select 2)] call _trimFn);
+                private _otype = toUpper ([(_order select 3)] call _trimFn);
                 private _pairs = _order select 5;
                 private _meta = _order select 6;
 
                 private _purpose = [_pairs, "purpose", ""] call _pairGet;
                 if (!(_purpose isEqualType "")) then { _purpose = ""; };
-                _purpose = trim _purpose;
+                _purpose = [_purpose] call _trimFn;
 
                 private _note = [_meta, "note", ""] call _pairGet;
                 if (!(_note isEqualType "")) then { _note = ""; };
-                _note = trim _note;
+                _note = [_note] call _trimFn;
 
                 _details = format ["<t size='1.2' font='PuristaMedium'>%1</t><br/>", _otype];
                 _details = _details + format ["<t color='#A0A0A0'>Status:</t> %1<br/>", _status];
@@ -430,13 +433,13 @@ else
             else
             {
                 private _lead = _leads select _idx;
-                private _typ = toUpper (trim (_lead select 1));
+                private _typ = toUpper ([(_lead select 1)] call _trimFn);
                 private _name = _lead select 2; if (!(_name isEqualType "")) then { _name = "Lead"; };
                 private _pos = _lead select 3; if (!(_pos isEqualType []) || { (count _pos) < 2 }) then { _pos = [0,0,0]; };
                 private _grid = mapGridPosition _pos;
                 private _tag = if ((count _lead) > 10) then { _lead select 10 } else { "" };
                 if (!(_tag isEqualType "")) then { _tag = ""; };
-                _tag = trim _tag;
+                _tag = [_tag] call _trimFn;
 
                 _details = format ["<t size='1.2' font='PuristaMedium'>%1</t><br/>", _name];
                 _details = _details + format ["<t color='#A0A0A0'>Type:</t> %1<br/>", _typ];

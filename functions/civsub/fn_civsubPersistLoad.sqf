@@ -13,6 +13,7 @@ if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {false}
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
 private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _trimFn  = compile "params ['_s']; trim _s";
 
 private _blob = profileNamespace getVariable ["FARABAD_CIVSUB_V1_STATE", ""];
 if (_blob isEqualTo "") exitWith {false};
@@ -34,7 +35,7 @@ private _districts = createHashMap;
 
     private _id = _x select 0;
     if !(_id isEqualType "") then { _id = ""; };
-    _id = toUpper (trim _id);
+    _id = toUpper ([_id] call _trimFn);
     if !([_id] call ARC_fnc_worldIsValidDistrictId) then { continue; };
     private _centroid = _x select 1;
     private _radius = _x select 2;
@@ -115,7 +116,7 @@ if (_idRows isEqualType []) then {
         private _nat = _x select 5;
         private _homeDid = _x select 6;
         if !(_homeDid isEqualType "") then { _homeDid = ""; };
-        _homeDid = toUpper (trim _homeDid);
+        _homeDid = toUpper ([_homeDid] call _trimFn);
         if !([_homeDid] call ARC_fnc_worldIsValidDistrictId) then { _homeDid = ""; };
         private _homePos = _x select 7;
         private _occ = _x select 8;
@@ -133,7 +134,7 @@ if (_idRows isEqualType []) then {
         private _detainedAt = if ((count _x) > 18) then { _x select 18 } else { 0 };
         private _detainedDid = if ((count _x) > 19) then { _x select 19 } else { "" };
         if !(_detainedDid isEqualType "") then { _detainedDid = ""; };
-        _detainedDid = toUpper (trim _detainedDid);
+        _detainedDid = toUpper ([_detainedDid] call _trimFn);
         if !([_detainedDid] call ARC_fnc_worldIsValidDistrictId) then { _detainedDid = ""; };
         private _handedOff = if ((count _x) > 20) then { _x select 20 } else { false };
         private _handedOffAt = if ((count _x) > 21) then { _x select 21 } else { 0 };
@@ -196,7 +197,7 @@ if (_crimeRows isEqualType []) then {
         private _cat = _x select 1;
         private _did = _x select 2;
         if !(_did isEqualType "") then { _did = ""; };
-        _did = toUpper (trim _did);
+        _did = toUpper ([_did] call _trimFn);
         if !([_did] call ARC_fnc_worldIsValidDistrictId) then { _did = ""; };
         private _ps = _x select 3;
         private _isHvt = _x select 4;

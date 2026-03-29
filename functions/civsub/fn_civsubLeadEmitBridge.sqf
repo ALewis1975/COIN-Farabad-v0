@@ -18,6 +18,7 @@ if !(_bundle isEqualType createHashMap) exitWith {""};
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
 private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _trimFn  = compile "params ['_s']; trim _s";
 
 private _lead = [_bundle, "lead_emit", createHashMap] call _hg;
 if (_lead isEqualType []) then { _lead = [_lead] call _hmCreate; };
@@ -27,7 +28,7 @@ if !([_lead, "emit", false] call _hg) exitWith {""};
 
 private _civsubType = [_lead, "lead_type", ""] call _hg;
 if !(_civsubType isEqualType "") then { _civsubType = ""; };
-_civsubType = toUpper (trim _civsubType);
+_civsubType = toUpper ([_civsubType] call _trimFn);
 if (_civsubType isEqualTo "") exitWith {""};
 
 private _seed = [_lead, "seed", createHashMap] call _hg;
@@ -40,7 +41,7 @@ if !(_source isEqualType createHashMap) then { _source = createHashMap; };
 
 private _districtId = [_bundle, "districtId", ([_bundle, "district_id", ""] call _hg)] call _hg;
 if !(_districtId isEqualType "") then { _districtId = ""; };
-_districtId = toUpper (trim _districtId);
+_districtId = toUpper ([_districtId] call _trimFn);
 
 private _confidence = [_lead, "confidence", 0.35] call _hg;
 if !(_confidence isEqualType 0) then { _confidence = 0.35; };
@@ -138,7 +139,7 @@ _ttl = (_ttl max (10 * 60)) min (6 * 60 * 60);
 
 private _srcEvent = [_source, "event", ""] call _hg;
 if !(_srcEvent isEqualType "") then { _srcEvent = ""; };
-_srcEvent = toUpper (trim _srcEvent);
+_srcEvent = toUpper ([_srcEvent] call _trimFn);
 
 private _tag = if (_srcEvent isEqualTo "") then { "CIVSUB" } else { format ["CIVSUB_%1", _srcEvent] };
 

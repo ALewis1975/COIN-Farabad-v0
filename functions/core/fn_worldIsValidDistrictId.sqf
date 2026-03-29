@@ -20,7 +20,7 @@ params [
 
 if !(_districtId isEqualType "") exitWith {false};
 
-private _id = toUpper (trim _districtId);
+private _id = toUpper ([_districtId] call _trimFn);
 if (_id isEqualTo "") exitWith {false};
 if (_allowSentinel && { _id isEqualTo "D00" }) exitWith {true};
 
@@ -31,6 +31,9 @@ private _numStr = _id select [1, 2];
 private _num = parseNumber _numStr;
 if (_num <= 0 || { _num > 20 }) exitWith {false};
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 private _expectedNumStr = if (_num < 10) then {
     "0" + (str _num)
 } else {

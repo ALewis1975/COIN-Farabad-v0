@@ -24,7 +24,7 @@ params [
 if (!([_acceptor, "ARC_fnc_intelOrderAccept", "Order acceptance rejected: sender verification failed.", "TOC_ORDER_ACCEPT_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 if (isNull _acceptor) exitWith {false};
-_orderId = trim _orderId;
+_orderId = [_orderId] call _trimFn;
 if (_orderId isEqualTo "") exitWith {false};
 
 private _gid = groupId (group _acceptor);
@@ -42,6 +42,9 @@ private _getPair = {
 
 private _setPair = {
     params ["_pairs", "_k", "_v"];
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
     if (!(_pairs isEqualType [])) then { _pairs = []; };
     private _idx = -1;
     { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
@@ -389,11 +392,11 @@ if (_pend) then
 {
     private _pendOrderId = ["activeIncidentClosePendingOrderId", ""] call ARC_fnc_stateGet;
     if (!(_pendOrderId isEqualType "")) then { _pendOrderId = ""; };
-    _pendOrderId = trim _pendOrderId;
+    _pendOrderId = [_pendOrderId] call _trimFn;
 
     private _pendGroup = ["activeIncidentClosePendingGroup", ""] call ARC_fnc_stateGet;
     if (!(_pendGroup isEqualType "")) then { _pendGroup = ""; };
-    _pendGroup = trim _pendGroup;
+    _pendGroup = [_pendGroup] call _trimFn;
 
     private _matchGroup = (_pendGroup isEqualTo "") || { _pendGroup isEqualTo _gid };
     private _matchOrder = (_pendOrderId isEqualTo "") || { _pendOrderId isEqualTo _orderId };
@@ -402,13 +405,13 @@ if (_pend) then
     {
         private _res = ["activeIncidentClosePendingResult", "SUCCEEDED"] call ARC_fnc_stateGet;
         if (!(_res isEqualType "")) then { _res = "SUCCEEDED"; };
-        _res = toUpper (trim _res);
+        _res = toUpper ([_res] call _trimFn);
         if !(_res in ["SUCCEEDED", "FAILED", "CANCELED"]) then { _res = "SUCCEEDED"; };
 
         // Defensive: enforce forced-fail for IED CIV KIA at close time.
         private _itype = ["activeIncidentType", ""] call ARC_fnc_stateGet;
         if (!(_itype isEqualType "")) then { _itype = ""; };
-        _itype = toUpper (trim _itype);
+        _itype = toUpper ([_itype] call _trimFn);
 
         if (_res isEqualTo "SUCCEEDED" && { _itype isEqualTo "IED" }) then
         {

@@ -27,6 +27,9 @@ uiNamespace setVariable ["ARC_TaskTimerHUD_layer", _layer];
     // Small helper to format seconds as MM:SS
     private _fmt = {
         params [ ["_sec", 0, [0]] ];
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
         _sec = _sec max 0;
         private _m = floor (_sec / 60);
         private _s = floor (_sec mod 60);
@@ -61,7 +64,7 @@ uiNamespace setVariable ["ARC_TaskTimerHUD_layer", _layer];
         {
             private _focusId = missionNamespace getVariable ["ARC_uiFocusTaskId", ""];
             if (!(_focusId isEqualType "")) then { _focusId = ""; };
-            _focusId = trim _focusId;
+            _focusId = [_focusId] call _trimFn;
             if (_focusId isEqualTo "") then
             {
                 _ctrl ctrlShow false;

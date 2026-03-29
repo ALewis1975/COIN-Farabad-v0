@@ -28,7 +28,7 @@ params [
 if (!([_approver, "ARC_fnc_intelQueueDecide", "Queue decision rejected: sender verification failed.", "TOC_QUEUE_DECIDE_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 if (!(_qid isEqualType "")) then { _qid = ""; };
-_qid = trim _qid;
+_qid = [_qid] call _trimFn;
 if (_qid isEqualTo "") exitWith {false};
 
 if (!(_approve isEqualType true)) then { _approve = false; };
@@ -89,7 +89,7 @@ if (!isNull _approver) then
 if (!(_status isEqualType "") || { toUpper !(_status isEqualTo "PENDING") }) exitWith {false};
 
 private _newStatus = if (_approve) then {"APPROVED"} else {"REJECTED"};
-private _dec = [serverTime, _by, _approve, trim _note];
+private _dec = [serverTime, _by, _approve, [_note] call _trimFn];
 
 // Update the queue item
 _item set [2, _newStatus];
@@ -118,6 +118,9 @@ private _getP = {
 private _setPair = {
     params ["_pairs", "_k", "_v"];
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
     if (!(_pairs isEqualType [])) then { _pairs = []; };
     if (!(_k isEqualType "")) then { _k = str _k; };
 
@@ -154,10 +157,10 @@ if (_approve) then
             private _pri      = [_payload, "priority", 3] call _getP;
 
             if (!(_leadType isEqualType "")) then { _leadType = "RECON"; };
-            _leadType = toUpper (trim _leadType);
+            _leadType = toUpper ([_leadType] call _trimFn);
 
             if (!(_disp isEqualType "")) then { _disp = _summary; };
-            _disp = trim _disp;
+            _disp = [_disp] call _trimFn;
             if (_disp isEqualTo "") then { _disp = "Lead: S2 Requested Collection"; };
             if ((toLower _disp) find !("lead:" isEqualTo 0)) then { _disp = format ["Lead: %1", _disp]; };
 
@@ -168,7 +171,7 @@ if (_approve) then
             _ttl = (_ttl max (10*60)) min (6*60*60);
 
             if (!(_tag isEqualType "")) then { _tag = "S2_REQUEST"; };
-            _tag = trim _tag;
+            _tag = [_tag] call _trimFn;
             if (_tag isEqualTo "") then { _tag = "S2_REQUEST"; };
 
             if (!(_pri isEqualType 0)) then { _pri = 3; };
@@ -225,7 +228,7 @@ if (_approve) then
             {
                 if (_x isEqualType "") then
                 {
-                    private _lid = trim _x;
+                    private _lid = [_x] call _trimFn;
                     if (!(_lid isEqualTo "")) then { _approved pushBackUnique _lid; };
                 };
             } forEach _leadIds;
@@ -289,11 +292,11 @@ if (_approve) then
             private _proceedIntent = [_payload, "proceedIntent", ""] call _getP;
 
             if (!(_req isEqualType "")) then { _req = "RTB"; };
-            _req = toUpper (trim _req);
+            _req = toUpper ([_req] call _trimFn);
             if !(_req in ["RTB","HOLD","PROCEED"]) then { _req = "RTB"; };
 
             if (!(_purpose isEqualType "")) then { _purpose = "REFIT"; };
-            _purpose = toUpper (trim _purpose);
+            _purpose = toUpper ([_purpose] call _trimFn);
             if !(_purpose in ["REFIT","INTEL","EPW"]) then { _purpose = "REFIT"; };
 
             if (!(_note2 isEqualType "")) then { _note2 = ""; };
@@ -306,9 +309,9 @@ if (_approve) then
             _holdMinutes = (_holdMinutes max 0) min 240;
 
             private _seed = [];
-            if (trim !(_rationale isEqualTo "")) then { _seed pushBack ["rationale", trim _rationale]; };
-            if (trim !(_constraints isEqualTo "")) then { _seed pushBack ["constraints", trim _constraints]; };
-            if (trim !(_support isEqualTo "")) then { _seed pushBack ["support", trim _support]; };
+            if (trim !(_rationale isEqualTo "")) then { _seed pushBack ["rationale", [_rationale] call _trimFn]; };
+            if (trim !(_constraints isEqualTo "")) then { _seed pushBack ["constraints", [_constraints] call _trimFn]; };
+            if (trim !(_support isEqualTo "")) then { _seed pushBack ["support", [_support] call _trimFn]; };
 
             private _issueOk = false;
 
@@ -323,7 +326,7 @@ if (_approve) then
                 case "HOLD":
                 {
                     _seed pushBack ["purpose", "HOLD"];
-                    if (trim !(_holdIntent isEqualTo "")) then { _seed pushBack ["holdIntent", trim _holdIntent]; };
+                    if (trim !(_holdIntent isEqualTo "")) then { _seed pushBack ["holdIntent", [_holdIntent] call _trimFn]; };
                     if (_holdMinutes > 0) then { _seed pushBack ["holdMinutes", _holdMinutes]; };
                     _issueOk = ["HOLD", _fromGroup, _seed, _approver, _note2, _id] call ARC_fnc_intelOrderIssue;
                 };
@@ -331,7 +334,7 @@ if (_approve) then
                 case "PROCEED":
                 {
                     // PROCEED becomes a LEAD assignment when possible; otherwise STANDBY.
-                    if (trim !(_proceedIntent isEqualTo "")) then { _seed pushBack ["proceedIntent", trim _proceedIntent]; };
+                    if (trim !(_proceedIntent isEqualTo "")) then { _seed pushBack ["proceedIntent", [_proceedIntent] call _trimFn]; };
                     _issueOk = ["LEAD", _fromGroup, _seed, _approver, _note2, _id] call ARC_fnc_intelOrderIssue;
                 };
 
@@ -359,16 +362,16 @@ if (_approve) then
         {
             private _taskId = [_payload, "taskId", ""] call _getP;
             if (!(_taskId isEqualType "")) then { _taskId = ""; };
-            _taskId = trim _taskId;
+            _taskId = [_taskId] call _trimFn;
 
             private _reqType = [_payload, "requestType", "DET_IN_PLACE"] call _getP;
             if (!(_reqType isEqualType "")) then { _reqType = "DET_IN_PLACE"; };
-            _reqType = toUpper (trim _reqType);
+            _reqType = toUpper ([_reqType] call _trimFn);
             if !(_reqType in ["DET_IN_PLACE","RTB_IED","TOW_VBIED"]) then { _reqType = "DET_IN_PLACE"; };
 
             private _notes = [_payload, "notes", ""] call _getP;
             if (!(_notes isEqualType "")) then { _notes = ""; };
-            _notes = trim _notes;
+            _notes = [_notes] call _trimFn;
 
             private _ttl = missionNamespace getVariable ["ARC_eodDispoApprovalTTLsec", 900];
             if (!(_ttl isEqualType 0)) then { _ttl = 900; };
@@ -418,11 +421,11 @@ if (_approve) then
             private _incPos     = [_payload, "pos", _posATL] call _getP;
 
             if (!(_incType isEqualType "")) then { _incType = "PATROL"; };
-            _incType = toUpper (trim _incType);
+            _incType = toUpper ([_incType] call _trimFn);
             if (_incType isEqualTo "") then { _incType = "PATROL"; };
 
             if (!(_disp isEqualType "")) then { _disp = _summary; };
-            _disp = trim _disp;
+            _disp = [_disp] call _trimFn;
             if (_disp isEqualTo "") then { _disp = format ["Incident: %1", _incType]; };
 
             if (!(_marker isEqualType "")) then { _marker = ""; };

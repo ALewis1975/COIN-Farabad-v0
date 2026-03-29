@@ -39,6 +39,7 @@ if (isNull _display) exitWith {false};
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
 private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _trimFn  = compile "params ['_s']; trim _s";
 
 private _rxMaxItems = missionNamespace getVariable ["ARC_consoleRxMaxItems", 80];
 if (!(_rxMaxItems isEqualType 0) || { _rxMaxItems < 10 }) then { _rxMaxItems = 80; };
@@ -50,7 +51,7 @@ _rxMaxText = (_rxMaxText min 500) max 40;
 
 private _trimRxText = {
     params ["_v", ["_fallback", ""]];
-    private _s = if (_v isEqualType "") then { trim _v } else { _fallback };
+    private _s = if (_v isEqualType "") then { [_v] call _trimFn } else { _fallback };
     if ((count _s) > _rxMaxText) then { _s = _s select [0, _rxMaxText]; };
     _s
 };
@@ -58,7 +59,7 @@ private _trimRxText = {
 // Own MainList while INTEL is active so cross-tab rebuild logic can detect transitions.
 private _owner = uiNamespace getVariable ["ARC_console_mainListOwner", ""];
 if (!(_owner isEqualType "")) then { _owner = ""; };
-_owner = toUpper (trim _owner);
+_owner = toUpper ([_owner] call _trimFn);
 if (!(_owner isEqualTo "INTEL")) then { _rebuild = true; };
 uiNamespace setVariable ["ARC_console_mainListOwner", "INTEL"];
 
@@ -274,7 +275,7 @@ private _renderS2CatPanelsFromMaster = {
         private _t = _listMaster lbText _i;
 
         if (_d in ["HDR", "SEP"]) then {
-            private _sectionCandidate = toUpper (trim _t);
+            private _sectionCandidate = toUpper ([_t] call _trimFn);
             if (_sectionCandidate in ["INTEL LOGGING", "LEAD REQUESTS (S2)"]) then {
                 _sectionCandidate = "INTEL / LEADS";
             };
@@ -329,7 +330,7 @@ private _storeComboSel = {
     private _i = lbCurSel _ctrl;
     private _d = if (_i >= 0) then { _ctrl lbData _i } else { "" };
     if (!(_d isEqualType "")) then { _d = ""; };
-    if ((trim _d) isEqualTo "") then { _d = _defData; };
+    if (([_d] call _trimFn) isEqualTo "") then { _d = _defData; };
     uiNamespace setVariable [_key, _d];
 };
 
@@ -338,7 +339,7 @@ private _restoreComboSel = {
     if (isNull _ctrl) exitWith {};
     private _want = uiNamespace getVariable [_key, _defaultData];
     if (!(_want isEqualType "")) then { _want = _defaultData; };
-    _want = trim _want;
+    _want = [_want] call _trimFn;
     if (_want isEqualTo "") then { _want = _defaultData; };
 
     private _n = lbSize _ctrl;
@@ -394,7 +395,7 @@ private _xCtlBase = _s2Split select 0;
 private _wCtlBase = _s2Split select 1;
 private _xRBase   = _s2Split select 2;
 if (!(_mode isEqualType "")) then { _mode = "TOOLS"; };
-_mode = toUpper (trim _mode);
+_mode = toUpper ([_mode] call _trimFn);
 
 
 // ---------------------------------------------------------------------------
@@ -678,14 +679,14 @@ private _appendCivsubResult = {
     private _txtOut = _txtIn;
     private _typeExpect = _expectType;
     if !(_typeExpect isEqualType "") then { _typeExpect = ""; };
-    _typeExpect = toUpper (trim _typeExpect);
+    _typeExpect = toUpper ([_typeExpect] call _trimFn);
 
     private _rs = uiNamespace getVariable ["ARC_console_civsubLastResult", createHashMap];
     if !(_rs isEqualType createHashMap) exitWith { _txtOut };
 
     private _type = [_rs, "type", ""] call _hg;
     if !(_type isEqualType "") then { _type = ""; };
-    _type = toUpper (trim _type);
+    _type = toUpper ([_type] call _trimFn);
     if (_type isEqualTo "" || {_typeExpect isEqualTo ""} || {!(_type isEqualTo _typeExpect)}) exitWith { _txtOut };
 
     private _html = [_rs, "html", ""] call _hg;
@@ -744,7 +745,7 @@ else
 
         case "CIV_CENSUS_DID":
         {
-            private _did = trim _arg;
+            private _did = [_arg] call _trimFn;
             if (_did isEqualTo "") exitWith { _txt = "<t color='#FFB0B0'>No district selected.</t>"; };
 
             if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith

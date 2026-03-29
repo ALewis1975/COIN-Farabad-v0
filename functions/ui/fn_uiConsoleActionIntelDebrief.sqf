@@ -25,8 +25,8 @@ if (_isToc) then {
     _orderTg = ["ARC_console_handoff_intelTargetGroup", ""] call ARC_fnc_uiNsGetString;
     if (!(_orderId isEqualType "")) then { _orderId = ""; };
     if (!(_orderTg isEqualType "")) then { _orderTg = ""; };
-    _orderId = trim _orderId;
-    _orderTg = trim _orderTg;
+    _orderId = [_orderId] call _trimFn;
+    _orderTg = [_orderTg] call _trimFn;
 };
 
 // Fallback: find accepted RTB(INTEL) for your own group
@@ -35,6 +35,9 @@ if (!(_orders isEqualType [])) then { _orders = []; };
 
 private _getPair = {
     params ["_pairs", "_k", "_d"];
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
     if (!(_pairs isEqualType [])) exitWith { _d };
     {
         if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _x select 1 };

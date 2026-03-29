@@ -8,6 +8,7 @@ if (!hasInterface) exitWith {false};
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
 private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _trimFn  = compile "params ['_s']; trim _s";
 
 private _display = uiNamespace getVariable ["ARC_console_display", displayNull];
 if (isNull _display) exitWith {false};
@@ -28,7 +29,7 @@ private _parts = _data splitString "|";
 private _kind = if ((count _parts) > 0) then { toUpper (_parts select 0) } else { "NONE" };
 private _arg  = if ((count _parts) > 1) then { _parts select 1 } else { "" };
 if (!(_arg isEqualType "")) then { _arg = ""; };
-_arg = trim _arg;
+_arg = [_arg] call _trimFn;
 
 private _civReqAction = {
     params ["_actionId", ["_payload", createHashMap, [createHashMap, []]], ["_label", "", [""]]];
@@ -75,14 +76,14 @@ switch (_kind) do
 		{
 			private _i = lbCurSel _cmbMethod;
 			private _d = if (_i >= 0) then { _cmbMethod lbData _i } else { "" };
-			if (_d isEqualType "" && { !((trim _d) isEqualTo "") }) then { _method = toUpper _d; };
+			if (_d isEqualType "" && { !(([_d] call _trimFn) isEqualTo "") }) then { _method = toUpper _d; };
 		};
 
 		if (!isNull _cmbCat && { (lbSize _cmbCat) > 0 }) then
 		{
 			private _i = lbCurSel _cmbCat;
 			private _d = if (_i >= 0) then { _cmbCat lbData _i } else { "" };
-			if (_d isEqualType "" && { !((trim _d) isEqualTo "") }) then { _cat = toUpper _d; };
+			if (_d isEqualType "" && { !(([_d] call _trimFn) isEqualTo "") }) then { _cat = toUpper _d; };
 		};
 
 		switch (_method) do
@@ -189,7 +190,7 @@ switch (_kind) do
 
     case "CIV_CENSUS_DID":
     {
-        private _did = trim _arg;
+        private _did = [_arg] call _trimFn;
         if (_did isEqualTo "") exitWith { ["Census", "No district selected."] call ARC_fnc_clientToast; };
 
         private _pub = missionNamespace getVariable [format ["civsub_v1_district_pub_%1", _did], []];
@@ -241,7 +242,7 @@ switch (_kind) do
 		{
 			private _i = lbCurSel _cmbLead;
 			private _d = if (_i >= 0) then { _cmbLead lbData _i } else { "" };
-			if (_d isEqualType "" && { !((trim _d) isEqualTo "") }) then { _type = toUpper _d; };
+			if (_d isEqualType "" && { !(([_d] call _trimFn) isEqualTo "") }) then { _type = toUpper _d; };
 		};
 		[_type] call ARC_fnc_intelClientBeginLeadRequestMapClick;
 		["S2 Ops", format ["Lead request started (%1).", _type]] call ARC_fnc_clientToast;

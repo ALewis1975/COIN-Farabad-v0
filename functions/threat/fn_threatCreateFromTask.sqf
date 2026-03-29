@@ -47,6 +47,9 @@ private _kvGet = {
 
 private _kvSet = {
     params ["_pairs", "_key", "_value"];
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
     if (!(_pairs isEqualType [])) then { _pairs = []; };
     private _idx = -1;
     { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
@@ -99,7 +102,7 @@ else
 
     private _districtIdSource = [_ctx, "district_id", ""] call _kvGet;
     if !(_districtIdSource isEqualType "") then { _districtIdSource = ""; };
-    _districtIdSource = toUpper (trim _districtIdSource);
+    _districtIdSource = toUpper ([_districtIdSource] call _trimFn);
 
     private _districtId = _districtIdSource;
     if !([_districtId] call ARC_fnc_worldIsValidDistrictId) then

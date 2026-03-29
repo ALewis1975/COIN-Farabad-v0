@@ -27,6 +27,9 @@ if (_sel < 0) exitWith {false};
 private _qid = _lb lbData _sel;
 if (_qid isEqualTo "") exitWith {false};
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 // Validate status client-side so we don't spam the server with invalid decisions.
 private _q = missionNamespace getVariable ["ARC_pub_queueTail", []];
 if (!(_q isEqualType [])) then { _q = []; };
@@ -57,7 +60,7 @@ if (!(_stU isEqualTo "PENDING")) exitWith
 // Read note field.
 private _note = ctrlText (_disp displayCtrl 61004);
 if !(_note isEqualType "") then { _note = ""; };
-_note = trim _note;
+_note = [_note] call _trimFn;
 
 // Push decision to server.
 [player, _qid, _approve, _note] remoteExecCall ["ARC_fnc_intelQueueDecide", 2];

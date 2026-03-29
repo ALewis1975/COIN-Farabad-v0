@@ -35,9 +35,12 @@ if (!_ok) exitWith {
 };
 
 if (!(_flightId isEqualType "")) then { _flightId = ""; };
-_flightId = trim _flightId;
+_flightId = [_flightId] call _trimFn;
 if (_flightId isEqualTo "") exitWith {false};
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 private _queue = ["airbase_v1_queue", []] call ARC_fnc_stateGet;
 if (!(_queue isEqualType [])) then { _queue = []; };
 

@@ -30,7 +30,7 @@ params [
 ];
 
 if (!(_leadId isEqualType "")) then { _leadId = ""; };
-_leadId = trim _leadId;
+_leadId = [_leadId] call _trimFn;
 if (_leadId isEqualTo "") exitWith {false};
 
 if (!(_priority isEqualType 0)) then { _priority = 3; };
@@ -38,13 +38,13 @@ _priority = round _priority;
 _priority = (_priority max 1) min 5;
 
 if (!(_sourceQid isEqualType "")) then { _sourceQid = ""; };
-_sourceQid = trim _sourceQid;
+_sourceQid = [_sourceQid] call _trimFn;
 
 if (!(_by isEqualType "")) then { _by = "SYSTEM"; };
-_by = trim _by;
+_by = [_by] call _trimFn;
 
 if (!(_note isEqualType "")) then { _note = ""; };
-_note = trim _note;
+_note = [_note] call _trimFn;
 
 // Must exist in leadPool, otherwise backlog entry is meaningless.
 private _pool = ["leadPool", []] call ARC_fnc_stateGet;
@@ -54,6 +54,9 @@ private _li = -1;
 { if (_x isEqualType [] && { (count _x) >= 1 } && { (_x select 0) isEqualTo _leadId }) exitWith { _li = _forEachIndex; }; } forEach _pool;
 if (_li < 0) exitWith {false};
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 private _lead = _pool select _li;
 
 private _leadType = "";

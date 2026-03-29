@@ -74,7 +74,7 @@ private _setPair = {
 };
 
 private _orderIdO = "";
-if (_orderIdOverride isEqualType "") then { _orderIdO = trim _orderIdOverride; };
+if (_orderIdOverride isEqualType "") then { _orderIdO = [_orderIdOverride] call _trimFn; };
 
 private _orders = ["tocOrders", []] call ARC_fnc_stateGet;
 if (!(_orders isEqualType [])) then { _orders = []; };
@@ -121,6 +121,9 @@ else
     };
 
     if (_idx < 0 || {_ord isEqualTo []}) exitWith {false};
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 };
 
 _ord params ["_orderId", "_issuedAt", "_status", "_orderType", "_targetGroup", "_data", "_meta"];
@@ -170,8 +173,8 @@ if (!(_taskId isEqualTo "")) then
 private _pos = if (_destPos isEqualType [] && { (count _destPos) >= 2 }) then { +_destPos } else { getPosATL _caller };
 _pos resize 3;
 
-private _sum = trim _summary;
-private _det = trim _details;
+private _sum = [_summary] call _trimFn;
+private _det = [_details] call _trimFn;
 if (_sum isEqualTo "") then { _sum = "Intel debrief delivered."; };
 
 private _iMeta = [

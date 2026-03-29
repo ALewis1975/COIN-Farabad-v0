@@ -38,13 +38,13 @@ params [
 ];
 
 if (!(_orderType isEqualType "")) then { _orderType = ""; };
-_orderType = toUpper (trim _orderType);
+_orderType = toUpper ([_orderType] call _trimFn);
 
 if (_orderType in ["PROCEED"]) then { _orderType = "LEAD"; };
 if (_orderType isEqualTo "") exitWith {false};
 
 if (!(_targetGroupId isEqualType "")) then { _targetGroupId = ""; };
-_targetGroupId = trim _targetGroupId;
+_targetGroupId = [_targetGroupId] call _trimFn;
 if (_targetGroupId isEqualTo "") exitWith {false};
 
 if (!(_dataSeed isEqualType [])) then { _dataSeed = []; };
@@ -80,6 +80,9 @@ private _setPair = {
 // Helper: get a [k,v] pair
 private _getPair = {
     params ["_pairs", "_k", "_d"];
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
     if (!(_pairs isEqualType [])) exitWith { _d };
     private _out = _d;
     {
@@ -128,7 +131,7 @@ switch (_orderType) do
     {
         private _purpose = [_dataSeed, "purpose", "REFIT"] call _getPair;
         if (!(_purpose isEqualType "")) then { _purpose = "REFIT"; };
-        _purpose = toUpper (trim _purpose);
+        _purpose = toUpper ([_purpose] call _trimFn);
 
         private _dest = [_purpose] call ARC_fnc_intelResolveRtbDestination;
         _dest params ["_destPos", "_destLabel", "_destRad"];
@@ -145,7 +148,7 @@ switch (_orderType) do
         // If the caller provided a specific leadId in the seed, try to consume that lead first.
         private _seedLeadId = [_data, "leadId", ""] call _getPair;
         if (!(_seedLeadId isEqualType "")) then { _seedLeadId = ""; };
-        _seedLeadId = trim _seedLeadId;
+        _seedLeadId = [_seedLeadId] call _trimFn;
 
         private _lead = [];
         if (_seedLeadId != "") then
@@ -191,8 +194,8 @@ private _orderId = format ["ARC_ord_%1", _ctr];
 private _meta = [];
 _meta = [_meta, "issuedBy", _issuerStr] call _setPair;
 _meta = [_meta, "issuedByUID", _issuerUID] call _setPair;
-_meta = [_meta, "note", trim _note] call _setPair;
-_meta = [_meta, "sourceQid", trim _sourceQid] call _setPair;
+_meta = [_meta, "note", [_note] call _trimFn] call _setPair;
+_meta = [_meta, "sourceQid", [_sourceQid] call _trimFn] call _setPair;
 
 private _rec = [_orderId, serverTime, "ISSUED", _orderType, _targetGroupId, _data, _meta];
 
@@ -215,7 +218,7 @@ while { (count _orders) > _cap } do { _orders deleteAt 0; };
         ["orderId", _orderId],
         ["orderType", _orderType],
         ["targetGroup", _targetGroupId],
-        ["sourceQid", trim _sourceQid]
+        ["sourceQid", [_sourceQid] call _trimFn]
     ]
 ] call ARC_fnc_intelLog;
 

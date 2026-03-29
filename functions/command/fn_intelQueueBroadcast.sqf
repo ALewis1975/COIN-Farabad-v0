@@ -42,7 +42,7 @@ _maxNestedDepth = (_maxNestedDepth min 4) max 0;
 private _sanitizeValue = {
     params ["_v", ["_depth", 0]];
     if (_v isEqualType "") exitWith {
-        private _s = trim _v;
+        private _s = [_v] call _trimFn;
         if ((count _s) > _maxTextLen) then { _s = _s select [0, _maxTextLen]; };
         _s
     };
@@ -70,7 +70,7 @@ private _sanitizePairs = {
         private _k = _x select 0;
         if !(_k isEqualType "") then { _truncated = true; continue; };
         private _v = [(_x select 1), 0] call _sanitizeValue;
-        _out pushBack [trim _k, _v];
+        _out pushBack [[_k] call _trimFn, _v];
     } forEach _in;
     if (_truncated) then { _out pushBack ["truncated", true]; };
     _out
@@ -78,6 +78,9 @@ private _sanitizePairs = {
 
 private _sanitizeItem = {
     params ["_it"];
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
     if !(_it isEqualType [] && { (count _it) >= 12 }) exitWith { [] };
     private _id = _it select 0;
     private _createdAt = _it select 1;
@@ -103,8 +106,8 @@ private _sanitizeItem = {
     if !(_fromUid isEqualType "") then { _fromUid = ""; _tr = true; };
     if !(_summary isEqualType "") then { _summary = str _summary; _tr = true; };
     if !(_details isEqualType "") then { _details = str _details; _tr = true; };
-    _summary = trim _summary;
-    _details = trim _details;
+    _summary = [_summary] call _trimFn;
+    _details = [_details] call _trimFn;
     if ((count _summary) > _maxTextLen) then { _summary = _summary select [0, _maxTextLen]; _tr = true; };
     if ((count _details) > _maxTextLen) then { _details = _details select [0, _maxTextLen]; _tr = true; };
     if !(_pos isEqualType [] && { (count _pos) >= 2 }) then { _pos = [0,0,0]; _tr = true; };

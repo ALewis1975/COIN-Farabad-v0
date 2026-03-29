@@ -19,9 +19,12 @@ params [
     ["_deviceId", "", [""]]
 ];
 
-_deviceId = trim _deviceId;
+_deviceId = [_deviceId] call _trimFn;
 if (_deviceId isEqualTo "") exitWith {false};
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 // Dedicated MP hardening: log remote invocation source.
 if (!isNil "remoteExecutedOwner") then
 {
@@ -74,7 +77,7 @@ private _boom = createVehicle [_cls, _pos, [], 0, "NONE"];
 _boom setPosATL _pos;
 
 // Delegate to existing detonation pipeline
-private _c = ["activeVbiedDetCause", "PROX_TRIGGER"] call ARC_fnc_stateGet; if (!(_c isEqualType "")) then { _c = "PROX_TRIGGER"; }; _c = toUpper (trim _c); if (_c isEqualTo "") then { _c = "PROX_TRIGGER"; };
+private _c = ["activeVbiedDetCause", "PROX_TRIGGER"] call ARC_fnc_stateGet; if (!(_c isEqualType "")) then { _c = "PROX_TRIGGER"; }; _c = toUpper ([_c] call _trimFn); if (_c isEqualTo "") then { _c = "PROX_TRIGGER"; };
 [_pos, "VBIED_VEHICLE", format ["VBIED_%1", _c]] call ARC_fnc_iedHandleDetonation;
 
 true

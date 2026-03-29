@@ -11,13 +11,16 @@ params [
     ["_metaAppend", [], [[]]]
 ];
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 if (!(_records isEqualType [])) then { _records = []; };
 if (!(_flightId isEqualType "")) then { _flightId = ""; };
 if (!(_status isEqualType "")) then { _status = ""; };
 if (!(_metaAppend isEqualType [])) then { _metaAppend = []; };
 
-_flightId = trim _flightId;
-_status = toUpper (trim _status);
+_flightId = [_flightId] call _trimFn;
+_status = toUpper ([_status] call _trimFn);
 
 if (_flightId isEqualTo "") exitWith { [_records, false] };
 if !(_status in ["CANCELED", "PRIORITIZED", "ACTIVE", "COMPLETE", "FAILED"]) exitWith { [_records, false] };

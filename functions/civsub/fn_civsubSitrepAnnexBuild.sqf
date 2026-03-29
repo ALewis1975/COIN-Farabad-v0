@@ -28,8 +28,9 @@ params [
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
 private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _trimFn  = compile "params ['_s']; trim _s";
 
-_districtId = toUpper (trim _districtId);
+_districtId = toUpper ([_districtId] call _trimFn);
 if (_districtId isEqualTo "") exitWith {""};
 
 private _districts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];

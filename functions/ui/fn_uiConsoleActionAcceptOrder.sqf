@@ -63,7 +63,7 @@ if (_ord isEqualTo []) exitWith
 };
 
 _ord params ["_orderId", "_issuedAt", "_status", "_orderType", "_targetGroup", "_data", "_meta"];
-_orderType = toUpper (trim _orderType);
+_orderType = toUpper ([_orderType] call _trimFn);
 
 private _getPair = {
     params ["_pairs", "_k", "_d"];
@@ -119,6 +119,9 @@ private _msg = _lines joinString "\n";
 private _ok = [_msg, "Accept TOC Order", true, true] call BIS_fnc_guiMessage;
 if (!_ok) exitWith { false };
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 ["ORDER_ACCEPT", "SUBMITTING", format ["Order %1", _orderId], 8] call ARC_fnc_uiConsoleOpsActionStatus;
 [player, _orderId] remoteExec ["ARC_fnc_intelOrderAccept", 2];
 true

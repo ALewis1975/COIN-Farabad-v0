@@ -38,12 +38,15 @@ private _hasApproval = {
     params ['_reqType'];
     private _appr = missionNamespace getVariable ['ARC_pub_eodDispoApprovals', []];
     if !(_appr isEqualType []) exitWith {false};
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
     private _ok = false;
     {
         if !(_x isEqualType [] && { (count _x) >= 6 }) then { continue; };
         if (!((_x select 0) isEqualTo _taskId)) then { continue; };
         if (!((_x select 1) isEqualTo _gid)) then { continue; };
-        if (!((toUpper (trim (_x select 2))) isEqualTo _reqType)) then { continue; };
+        if (!((toUpper ([(_x select 2)] call _trimFn)) isEqualTo _reqType)) then { continue; };
         private _exp = _x select 5;
         if (!(_exp isEqualType 0)) then { _exp = -1; };
         if (_exp >= 0 && { serverTime > _exp }) then { continue; };
@@ -65,7 +68,7 @@ if (!(_delivered isEqualType true) && !(_delivered isEqualType false)) then { _d
 
 private _mode = missionNamespace getVariable ['ARC_eodRtbEvidenceMode','ACE_CARGO'];
 if !(_mode isEqualType '') then { _mode = 'ACE_CARGO'; };
-_mode = toUpper (trim _mode);
+_mode = toUpper ([_mode] call _trimFn);
 if !(_mode in ['ACE_CARGO','VIRTUAL_ITEM']) then { _mode = 'ACE_CARGO'; };
 
 private _rtbApproved = ['RTB_IED'] call _hasApproval;

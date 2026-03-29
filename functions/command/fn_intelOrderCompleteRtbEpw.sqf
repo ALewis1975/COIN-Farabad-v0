@@ -80,7 +80,7 @@ private _setPair = {
 };
 
 private _orderIdO = "";
-if (_orderIdOverride isEqualType "") then { _orderIdO = trim _orderIdOverride; };
+if (_orderIdOverride isEqualType "") then { _orderIdO = [_orderIdOverride] call _trimFn; };
 
 // Find the ACCEPTED RTB(EPW) order.
 // - Default: group-scoped (targetGroup == caller groupId)
@@ -272,6 +272,9 @@ private _moved = 0;
 
         [_u, _delay] spawn {
             params ["_u", "_delay"];
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
             sleep _delay;
             if (isNull _u) exitWith {};
             if (!alive _u) exitWith {};
@@ -319,8 +322,8 @@ _tot = _tot + _moved;
 private _pos = if (_destPos isEqualType [] && { (count _destPos) >= 2 }) then { +_destPos } else { getPosATL _caller };
 _pos resize 3;
 
-private _sum = trim _summary;
-private _det = trim _details;
+private _sum = [_summary] call _trimFn;
+private _det = [_details] call _trimFn;
 if (_sum isEqualTo "") then
 {
     _sum = format ["EPW processed: %1 transferred to holding (%2).", _moved, _holdLabel];

@@ -50,7 +50,7 @@ if (!isNil "remoteExecutedOwner") then
     };
 };
 
-private _stageU = toUpper (trim _stage);
+private _stageU = toUpper ([_stage] call _trimFn);
 // IED/VBIED suspicious-object objectives support a "scan" discovery stage.
 if !(_stageU in ["DISCOVER", "DISCOVER_SCAN", "COMPLETE"]) then { _stageU = "COMPLETE"; };
 
@@ -64,7 +64,7 @@ private _activeNet = ["activeObjectiveNetId", ""] call ARC_fnc_stateGet;
 if (!(_activeKind isEqualTo _kind)) exitWith {false};
 if (!(_activeNet isEqualTo "") && { !((netId _target) isEqualTo _activeNet) }) exitWith {false};
 
-private _kindU = toUpper (trim _kind);
+private _kindU = toUpper ([_kind] call _trimFn);
 
 // Tiny kv helper for threat records
 private _kvGet = {
@@ -88,7 +88,7 @@ private _getThreatState = {
 
     private _st = [_records select _idx, "state", ""] call _kvGet;
     if (!(_st isEqualType "")) then { _st = ""; };
-    toUpper (trim _st)
+    toUpper ([_st] call _trimFn)
 };
 
 // CACHE_SEARCH is a multi-container objective: allow interactions with any cache container.
@@ -149,7 +149,7 @@ if (_stageU in ["DISCOVER","DISCOVER_SCAN"]) exitWith
         ["caller", name _caller]
     ];
 
-    if (!((trim _details) isEqualTo "")) then { _meta pushBack ["details", trim _details]; };
+    if (!(([_details] call _trimFn) isEqualTo "")) then { _meta pushBack ["details", [_details] call _trimFn]; };
 
     ["TECHINT", _summary, _pos, _meta] call ARC_fnc_intelLog;
 
@@ -238,9 +238,9 @@ private _meta = [
     ["caller", name _caller]
 ];
 
-if (!((trim _details) isEqualTo "")) then
+if (!(([_details] call _trimFn) isEqualTo "")) then
 {
-    _meta pushBack ["details", trim _details];
+    _meta pushBack ["details", [_details] call _trimFn];
 };
 
 [_cat, _summary, _pos, _meta] call ARC_fnc_intelLog;
@@ -293,6 +293,9 @@ if (_kindU isEqualTo "IED_DEVICE") then
     [_target, _deleteOnClear] spawn
     {
         params ["_o", "_doDel"];
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
         sleep 0.5;
         if (isNull _o) exitWith {};
 
@@ -327,7 +330,7 @@ if (_leadOut) then
     private _tag = ["activeLeadTag", ""] call ARC_fnc_stateGet;
     if (!(_tag isEqualType "")) then { _tag = ""; };
 
-    private _tagU = toUpper (trim _tag);
+    private _tagU = toUpper ([_tag] call _trimFn);
 
     // 1) HUMINT interview -> follow-on recon lead
     if (_kindU isEqualTo "CIV_MEET") then

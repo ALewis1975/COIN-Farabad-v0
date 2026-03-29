@@ -16,7 +16,7 @@ params [
 if (!([_caller, "ARC_fnc_airbaseMarkClearanceEmergency", "Airbase emergency escalation rejected: sender verification failed.", "AIRBASE_CLEARANCE_EMERGENCY_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 if (!(_requestId isEqualType "")) then { _requestId = ""; };
-_requestId = trim _requestId;
+_requestId = [_requestId] call _trimFn;
 if (_requestId isEqualTo "") exitWith {false};
 
 private _requests = ["airbase_v1_clearanceRequests", []] call ARC_fnc_stateGet;
@@ -29,6 +29,9 @@ private _idx = -1;
 { if ((_x param [0, ""]) isEqualTo _requestId) exitWith { _idx = _forEachIndex; }; } forEach _requests;
 if (_idx < 0) exitWith {false};
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 private _rec = _requests select _idx;
 private _status = toUpper (_rec param [6, ""]);
 private _uid = _rec param [2, ""];

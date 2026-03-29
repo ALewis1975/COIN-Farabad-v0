@@ -25,6 +25,9 @@
 if (!isServer) exitWith {[]};
 
 params [ ["_forceLogistics", false, [true]] ];
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 if (!(_forceLogistics isEqualType true)) then { _forceLogistics = false; };
 
 private _back = ["tocBacklog", []] call ARC_fnc_stateGet;
@@ -48,7 +51,7 @@ for "_i" from ((count _back) - 1) to 0 step -1 do
     };
 
     private _lid = _e select 0;
-    if !(_lid isEqualType "" && { (trim _lid) != "" }) then
+    if !(_lid isEqualType "" && { ([_lid] call _trimFn) != "" }) then
     {
         _back deleteAt _i;
         _changed = true;
@@ -110,8 +113,8 @@ for "_i" from 0 to ((count _back) - 1) do
                 private _lt = "";
                 private _tag = "";
 
-                if ((count _lr) >= 2 && { (_lr select 1) isEqualType "" }) then { _lt = toUpper (trim (_lr select 1)); };
-                if ((count _lr) >= 11 && { (_lr select 10) isEqualType "" }) then { _tag = toUpper (trim (_lr select 10)); };
+                if ((count _lr) >= 2 && { (_lr select 1) isEqualType "" }) then { _lt = toUpper ([(_lr select 1)] call _trimFn); };
+                if ((count _lr) >= 11 && { (_lr select 10) isEqualType "" }) then { _tag = toUpper ([(_lr select 10)] call _trimFn); };
 
                 private _ok = (_lt in ["LOGISTICS","ESCORT"]) || { (_tag find "TOC_" == 0) } || { (_tag find "URGENT_" == 0) };
                 if (!_ok) then { continue; };

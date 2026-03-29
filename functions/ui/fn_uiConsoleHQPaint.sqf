@@ -26,7 +26,7 @@ private _ctrlList = _display displayCtrl 78011;
 // This prevents INTEL list items persisting when switching to HQ (and vice versa).
 private _owner = uiNamespace getVariable ["ARC_console_mainListOwner", ""];
 if (!(_owner isEqualType "")) then { _owner = ""; };
-_owner = toUpper (trim _owner);
+_owner = toUpper ([_owner] call _trimFn);
 private _ownerChanged = (!(_owner isEqualTo "HQ"));
 if (_ownerChanged) then { _rebuild = true; };
 uiNamespace setVariable ["ARC_console_mainListOwner", "HQ"];
@@ -209,7 +209,7 @@ private _renderHQSubPanelsFromMaster = {
 // HQ mode: TOOLS (default) or INCIDENTS (incident picker)
 private _mode = uiNamespace getVariable ["ARC_console_hqMode", "TOOLS"];
 if (!(_mode isEqualType "")) then { _mode = "TOOLS"; };
-_mode = toUpper (trim _mode);
+_mode = toUpper ([_mode] call _trimFn);
 if !(_mode in ["TOOLS", "INCIDENTS"]) then { _mode = "TOOLS"; };
 
 // Prevent the 1.2s console refresh loop from clearing/rebuilding the HQ list every tick.
@@ -337,6 +337,9 @@ if (_needRebuild && {!isNull _ctrlList}) then
 
     private _addRow = {
         params ["_label", "_data"];
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
         private _i = _ctrlList lbAdd _label;
         _ctrlList lbSetData [_i, _data];
         _i

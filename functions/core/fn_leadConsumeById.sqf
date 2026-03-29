@@ -16,7 +16,10 @@
 if (!isServer) exitWith {[]};
 
 params [ ["_leadId", "", [""]] ];
-_leadId = trim _leadId;
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
+_leadId = [_leadId] call _trimFn;
 if (_leadId isEqualTo "") exitWith {[]};
 
 // Prune expired leads first.

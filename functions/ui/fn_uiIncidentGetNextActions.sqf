@@ -17,11 +17,14 @@ params [
     ['_roleCat','FIELD',['']]
 ];
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 private _lines = [];
 
 private _taskId = missionNamespace getVariable ['ARC_activeTaskId',''];
 if (!(_taskId isEqualType '')) then { _taskId = ''; };
-_taskId = trim _taskId;
+_taskId = [_taskId] call _trimFn;
 
 private _hasIncident = (!(_taskId isEqualTo )'');
 private _accepted = missionNamespace getVariable ['ARC_activeIncidentAccepted', false];
@@ -60,7 +63,7 @@ private _hasTowVbiedApproval = false;
     if (!(_x isEqualType [] && { (count _x) >= 6 })) then { continue; };
     if (!((_x select 0) isEqualTo _taskId)) then { continue; };
     if (!((_x select 1) isEqualTo _accG)) then { continue; };
-    private _rt = toUpper (trim (_x select 2));
+    private _rt = toUpper ([(_x select 2)] call _trimFn);
     if (_rt isEqualTo 'RTB_IED') then { _hasRtbEvidenceApproval = true; };
     if (_rt isEqualTo 'TOW_VBIED') then { _hasTowVbiedApproval = true; };
 } forEach _appr;
@@ -79,7 +82,7 @@ private _vbDisposed = missionNamespace getVariable ['ARC_activeVbiedDisposed', f
 if (!(_vbDisposed isEqualType true) && !(_vbDisposed isEqualType false)) then { _vbDisposed = false; };
 private _vbCause = missionNamespace getVariable ['ARC_activeVbiedDestroyedCause', ''];
 if (!(_vbCause isEqualType '')) then { _vbCause = ''; };
-_vbCause = trim _vbCause;
+_vbCause = [_vbCause] call _trimFn;
 
 // Priority 1: active incident acceptance + SITREP gate
 if (_hasIncident) then

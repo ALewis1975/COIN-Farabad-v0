@@ -14,6 +14,9 @@ params [
     ["_thread", [], [[]]]
 ];
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 if !(_thread isEqualType []) exitWith {[]};
 if ((count _thread) < 14) exitWith {[]};
 
@@ -30,7 +33,7 @@ if !(_did isEqualType "") then
 {
     _did = "";
 };
-_did = toUpper (trim _did);
+_did = toUpper ([_did] call _trimFn);
 if !([_did] call ARC_fnc_worldIsValidDistrictId) then
 {
     _did = [(_out select 3)] call ARC_fnc_threadResolveDistrictId;

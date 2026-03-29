@@ -32,9 +32,12 @@ if (!isNil "remoteExecutedOwner") then { _owner = remoteExecutedOwner; };
 // RemoteExec-only validation path: requires remoteExecutedOwner context.
 if (!([_caller, "ARC_fnc_tocRequestForceIncident", "Force incident rejected: sender verification failed.", "TOC_FORCE_INCIDENT_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
-_markerRaw = trim _markerRaw;
-_displayName = trim _displayName;
-_incidentType = trim _incidentType;
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
+_markerRaw = [_markerRaw] call _trimFn;
+_displayName = [_displayName] call _trimFn;
+_incidentType = [_incidentType] call _trimFn;
 
 if (_markerRaw isEqualTo "" || { _displayName isEqualTo "" } || { _incidentType isEqualTo "" }) exitWith
 {

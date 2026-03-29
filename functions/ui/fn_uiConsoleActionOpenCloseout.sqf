@@ -152,14 +152,14 @@ if (!(_foSummary isEqualType "")) then { _foSummary = ""; };
 
 private _sysLeadId = missionNamespace getVariable ["ARC_activeIncidentFollowOnLeadId", ""]; 
 if (!(_sysLeadId isEqualType "")) then { _sysLeadId = ""; };
-_sysLeadId = trim _sysLeadId;
+_sysLeadId = [_sysLeadId] call _trimFn;
 private _sysLeadName = missionNamespace getVariable ["ARC_activeIncidentFollowOnLeadName", ""]; 
 if (!(_sysLeadName isEqualType "")) then { _sysLeadName = ""; };
-_sysLeadName = trim _sysLeadName;
+_sysLeadName = [_sysLeadName] call _trimFn;
 
 private _tgtGrp = missionNamespace getVariable ["ARC_activeIncidentAcceptedByGroup", ""]; 
 if (!(_tgtGrp isEqualType "")) then { _tgtGrp = ""; };
-_tgtGrp = trim _tgtGrp;
+_tgtGrp = [_tgtGrp] call _trimFn;
 if (_tgtGrp isEqualTo "") then { _tgtGrp = "(unknown group)"; };
 
 private _getPair = {
@@ -178,11 +178,11 @@ private _dHoldMin = 30;
 private _dProceedIntent = "NEXT TASK";
 
 // If field requested a follow-on, use it as default.
-private _fReq = toUpper (trim ([_foArr, "request", ""] call _getPair));
-private _fPurpose = toUpper (trim ([_foArr, "purpose", ""] call _getPair));
-private _fHoldIntent = toUpper (trim ([_foArr, "holdIntent", ""] call _getPair));
+private _fReq = toUpper ([([_foArr, "request", ""] call _getPair)] call _trimFn);
+private _fPurpose = toUpper ([([_foArr, "purpose", ""] call _getPair)] call _trimFn);
+private _fHoldIntent = toUpper ([([_foArr, "holdIntent", ""] call _getPair)] call _trimFn);
 private _fHoldMin = [_foArr, "holdMinutes", -1] call _getPair;
-private _fProceedIntent = toUpper (trim ([_foArr, "proceedIntent", ""] call _getPair));
+private _fProceedIntent = toUpper ([([_foArr, "proceedIntent", ""] call _getPair)] call _trimFn);
 
 if (_fReq in ["RTB","HOLD","PROCEED"]) then { _dReq = _fReq; };
 if (_fPurpose in ["REFIT","INTEL","EPW"]) then { _dPurpose = _fPurpose; };
@@ -232,6 +232,9 @@ private _prompt = format ["Close %1 as %2%3 and issue %4?", _disp, _result, if (
 private _confirm = [_prompt, "TOC Ops", true, true] call BIS_fnc_guiMessage;
 if (!_confirm) exitWith {false};
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 [_result, _req, _purpose, _rat, _con, _sup, _notes, _hIntent, _hMin, _pIntent, player] remoteExec ["ARC_fnc_tocRequestCloseoutAndOrder", 2];
 ["TOC Ops", format ["Closeout submitted: %1. Awaiting server confirmation. Follow-on: %2", _result, _orderLine]] call ARC_fnc_clientToast;
 

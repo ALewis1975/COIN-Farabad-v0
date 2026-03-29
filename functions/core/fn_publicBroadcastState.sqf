@@ -259,19 +259,19 @@ private _readReasonFromMeta = {
     };
 
     if !(_reason isEqualType "") then { _reason = str _reason; };
-    toUpper (trim _reason)
+    toUpper ([_reason] call _trimFn)
 };
 
 private _extractBlockedReason = {
     params ["_txt"];
     if !(_txt isEqualType "") exitWith { "" };
-    private _t = trim _txt;
+    private _t = [_txt] call _trimFn;
     private _open = _t find "(";
     if (_open < 0) exitWith { "" };
     private _out = "";
     private _close = _t find ")";
     if (_close > _open) then { _out = _t select [_open + 1, _close - _open - 1]; };
-    toUpper (trim _out)
+    toUpper ([_out] call _trimFn)
 };
 
 private _extractBlockedSourceId = {
@@ -280,7 +280,7 @@ private _extractBlockedSourceId = {
     private _tokens = _txt splitString " :()[]|,.;\t\n\r";
     private _found = "";
     {
-        private _t = toUpper (trim _x);
+        private _t = toUpper ([_x] call _trimFn);
         if (_t isEqualTo "") then { continue; };
         if ((_t find "FLT-") == 0 || { (_t find "CLR-") == 0 } || { (_t find "REQ-") == 0 }) exitWith {
             _found = _t;
@@ -486,6 +486,9 @@ private _pub = [
 private _didPublish = [_pub, "publicBroadcastState", false, 0.25] call ARC_fnc_statePublishPublic;
 if (!_didPublish) exitWith { false };
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 private _companySnapshot = [
     ["companyCommandNodes", ["companyCommandNodes", []] call ARC_fnc_stateGet],
     ["companyCommandTasking", ["companyCommandTasking", []] call ARC_fnc_stateGet],

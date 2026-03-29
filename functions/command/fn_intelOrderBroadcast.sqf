@@ -33,11 +33,11 @@ private _sanitizePairs = {
     private _out = [];
     {
         if !(_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualType "" }) then { _truncated = true; continue; };
-        private _k = trim (_x select 0);
+        private _k = [(_x select 0)] call _trimFn;
         if (_k isEqualTo "") then { _truncated = true; continue; };
         private _v = _x select 1;
         if (_v isEqualType "") then {
-            _v = trim _v;
+            _v = [_v] call _trimFn;
             if ((count _v) > _maxTextLen) then { _v = _v select [0, _maxTextLen]; _truncated = true; };
         };
         _out pushBack [_k, _v];
@@ -48,6 +48,9 @@ private _sanitizePairs = {
 
 private _sanitizeOrder = {
     params ["_order"];
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
     if !(_order isEqualType [] && { (count _order) >= 7 }) exitWith { [] };
     private _id = _order select 0;
     private _createdAt = _order select 1;

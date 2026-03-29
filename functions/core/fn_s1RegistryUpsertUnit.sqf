@@ -18,6 +18,9 @@ params [
     ["_publish", true, [true]]
 ];
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 if (!isServer) exitWith { [] };
 
 private _registry = missionNamespace getVariable ["ARC_s1_registry", []];
@@ -65,8 +68,8 @@ if (_unitId isEqualTo "") then { _unitId = format ["virtual:%1", diag_tickTime];
 private _groupTokens = _groupId splitString "|";
 private _orbatLeft = "";
 private _callsign = "";
-if ((count _groupTokens) > 0) then { _orbatLeft = trim (_groupTokens select 0); };
-if ((count _groupTokens) > 1) then { _callsign = trim (_groupTokens select 1); };
+if ((count _groupTokens) > 0) then { _orbatLeft = [(_groupTokens select 0)] call _trimFn; };
+if ((count _groupTokens) > 1) then { _callsign = [(_groupTokens select 1)] call _trimFn; };
 if (_callsign isEqualTo "") then
 {
     if (!isNull _resolvedGroup) then { _callsign = _resolvedGroup getVariable ["ARC_groupCallsign", ""]; };

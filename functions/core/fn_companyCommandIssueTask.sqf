@@ -24,6 +24,9 @@ params [
 
 if (!(_node isEqualType []) || { (count _node) < 6 }) exitWith {false};
 
+
+// sqflint-compatible helpers
+private _trimFn  = compile "params ['_s']; trim _s";
 private _nodeId = _node select 0;
 private _cmdToken = _node select 1;
 private _hqMarker = _node select 3;
@@ -46,8 +49,8 @@ private _rec = [
     "ISSUED",
     _nodeId,
     _cmdToken,
-    toUpper (trim _intent),
-    toUpper (trim _posture),
+    toUpper ([_intent] call _trimFn),
+    toUpper ([_posture] call _trimFn),
     _hqMarker,
     _hqPos,
     _hqZone,
@@ -80,7 +83,7 @@ while { (count _tasking) > _cap } do { _tasking deleteAt 0; };
 
 ["companyCommandTasking", _tasking] call ARC_fnc_stateSet;
 
-["OPS", format ["COMPANY CMD: %1 issued %2/%3 (%4).", _cmdToken, toUpper (trim _intent), toUpper (trim _posture), _taskId], _hqPos,
+["OPS", format ["COMPANY CMD: %1 issued %2/%3 (%4).", _cmdToken, toUpper ([_intent] call _trimFn), toUpper ([_posture] call _trimFn), _taskId], _hqPos,
     [["event", "COMPANY_COMMAND_TASK_ISSUED"], ["taskId", _taskId], ["nodeId", _nodeId], ["zone", _hqZone]]
 ] call ARC_fnc_intelLog;
 

@@ -16,6 +16,7 @@ params [
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
 private _hg      = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _trimFn  = compile "params ['_s']; trim _s";
 
 private _d = uiNamespace getVariable ["ARC_civsubInteract_display", displayNull];
 private _resp = controlNull;
@@ -41,7 +42,7 @@ if (_in isEqualType "") then {
     };
 };
 
-if (_type isEqualType "") then { _type = toUpper (trim _type); };
+if (_type isEqualType "") then { _type = toUpper ([_type] call _trimFn); };
 
 private _st = systemTime;
 private _pad2 = {
@@ -113,7 +114,7 @@ if (_type isEqualTo "CHECK_ID" && {_ok} && {_payload isEqualType createHashMap})
     private _flags = [_payload, "flags", []] call _hg;
 
     private _didS = if (_did isEqualTo "") then { "--" } else { _did };
-    private _nameParts = if (_name isEqualType "") then { (trim _name) splitString " \t\r\n" } else { [] };
+    private _nameParts = if (_name isEqualType "") then { ([_name] call _trimFn) splitString " \t\r\n" } else { [] };
     private _nameS = if ((count _nameParts) > 0) then { _nameParts joinString " " } else { format ["Unknown (%1)", _didS] };
 
     private _ageS = if (_age isEqualType 0 && {_age >= 0}) then { str _age } else { "N/A" };
