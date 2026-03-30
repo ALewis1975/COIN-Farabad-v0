@@ -107,7 +107,7 @@ missionNamespace setVariable ["ARC_patrolSpawnContactsEnabled", true, true];
 missionNamespace setVariable ["ARC_rtbInWorldActionsEnabled", true, true];
 
 // SITREP in-world action (dismounted): enable addAction
-missionNamespace setVariable ["ARC_sitrepInWorldActionsEnabled", true, true];
+missionNamespace setVariable ["ARC_sitrepInWorldActionsEnabled", true, false];
 
 // Intel props spawn radius (meters)
 missionNamespace setVariable ["ARC_intelPropSpawnRadiusM", 10, true];

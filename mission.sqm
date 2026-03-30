@@ -20,7 +20,7 @@ class EditorData
 	};
 	class LayerIndexProvider
 	{
-		nextID=100844;
+		nextID=105476;
 	};
 	class Camera
 	{
@@ -78876,7 +78876,6 @@ class Mission
 															};
 															id=3348;
 															type="rhsusf_army_ocp_fso";
-															atlOffset=0.07522583;
 															class CustomAttributes
 															{
 																class Attribute0
@@ -82173,7 +82172,7 @@ class Mission
 																		angles[]={0,3.0292881,0};
 																	};
 																	side="West";
-																	flags=1;
+																	flags=5;
 																	class Attributes
 																	{
 																		skill=0.2;
@@ -82183,7 +82182,6 @@ class Mission
 																	};
 																	id=3401;
 																	type="rhsusf_army_ocp_machinegunner";
-																	atlOffset=2.2802048;
 																	class CustomAttributes
 																	{
 																		class Attribute0
