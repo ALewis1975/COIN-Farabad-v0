@@ -191,7 +191,7 @@ if (_gid isEqualTo "" || { _taskId isEqualTo "" }) exitWith
 //   ARC_policy_noAutoOrdersOnCloseout = true  -> IMMEDIATE close + TOC follow-on package.
 //   ARC_policy_noAutoOrdersOnCloseout = false -> STAGED close (order acceptance trigger).
 // -------------------------------------------------------------------------
-private _noAutoOrders = missionNamespace getVariable ["ARC_policy_noAutoOrdersOnCloseout", true];
+private _noAutoOrders = missionNamespace getVariable ["ARC_policy_noAutoOrdersOnCloseout", false];
 if (!(_noAutoOrders isEqualType true)) then { _noAutoOrders = true; };
 
 if (_noAutoOrders) exitWith
