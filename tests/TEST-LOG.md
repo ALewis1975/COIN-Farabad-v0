@@ -12,6 +12,31 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 ---
 
 
+## 2026-03-30 17:19 UTC — Fix `fn_tocReceiveSitrep.sqf` switch/case parse error (Missing ;)
+
+**Branch/Commit:** copilot/fix-sitrep-error-in-function @ commit: unrecoverable
+
+**Scenario:** Runtime parser failure in `functions/core/fn_tocReceiveSitrep.sqf` at line 122 when handling gate rejection code `E_STATE_NOT_READY_FOR_SITREP`. Root cause was malformed `switch` syntax (`case "..." { ... };`) missing the required colon before the case block.
+
+**Fix:** Changed the case arm to valid SQF syntax:
+- from `case "E_STATE_NOT_READY_FOR_SITREP" { ... };`
+- to `case "E_STATE_NOT_READY_FOR_SITREP": { ... };`
+
+**Commands:**
+```bash
+python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_tocReceiveSitrep.sqf
+sqflint -e w functions/core/fn_tocReceiveSitrep.sqf
+```
+
+**Result:** BLOCKED
+
+**Notes:**
+- BLOCKED: `sqflint` binary is unavailable in this container (`sqflint: command not found`).
+- FAIL (pre-existing baseline, out of scope): compat scan reports existing legacy parser-compat warnings in this file not introduced by this one-line syntax correction.
+- Dedicated server + JIP runtime verification remains deferred in this environment.
+- Rationale for `commit: unrecoverable`: test-log entry is recorded before progress commit SHA is generated.
+
+
 ## 2026-03-30 16:20 UTC — Fix "Background check failed (server error at DELTA_HIT)"
 
 **Branch/Commit:** copilot/fix-background-check-server-error @ commit: unrecoverable
