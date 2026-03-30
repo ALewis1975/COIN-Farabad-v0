@@ -47,6 +47,7 @@ private _pos = +_incPos; _pos resize 3;
 
 // Derive district from active incident civsub district id (or blank for D00)
 private _districtId = missionNamespace getVariable ["ARC_activeIncidentCivsubDistrictId", "D00"];
+// OR: first guard resets if type mismatch (non-string); second resets if empty string. Both → D00.
 if (!(_districtId isEqualType "") || { _districtId isEqualTo "" }) then { _districtId = "D00"; };
 
 // Build minimal 9-line from available state
