@@ -119,7 +119,7 @@ if (!_gateAllowed) exitWith
     {
         case "E_NO_ACTIVE_INCIDENT":        { "No active incident is available for SITREP." };
         case "E_INCIDENT_NOT_ACCEPTED":     { "Incident has not been accepted yet." };
-        case "E_STATE_NOT_READY_FOR_SITREP" { "SITREP rejected: incident still in progress. Complete the objective or wait for the incident timer to expire." };
+        case "E_STATE_NOT_READY_FOR_SITREP": { "SITREP rejected: incident still in progress. Complete the objective or wait for the incident timer to expire." };
         case "E_ROLE_NOT_AUTHORIZED":
         {
             if (!isNull _unit) then {
