@@ -1425,3 +1425,26 @@ The RPT also showed a cascade error `_cur` undefined in `fn_civsubCivSamplerTick
 | 1 | SQFLINT compat scan (3 changed files) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubCivSamplerTick.sqf functions/civsub/fn_civsubInitServer.sqf functions/civsub/fn_civsubTrafficDebugSnapshot.sqf` | PASS | No known parser-compat patterns found |
 | 2 | Confirm no remaining `call getOrDefault` in functions/ | `grep -rn "call getOrDefault" functions/` | PASS | 0 matches |
 | 3 | Dedicated-server runtime validation | N/A | BLOCKED | No Arma dedicated server/JIP runtime available in this container |
+
+---
+
+## Test Run — 2026-03-30
+
+**Branch/commit:** copilot/check-systems-status (commit: pending)
+**Scenario:** Enable three high-confidence gameplay flags in initServer.sqf
+
+### Change Summary
+
+Three flags deferred for stabilization are now enabled:
+- `ARC_patrolSpawnContactsEnabled` `false` → `true` (patrol AI contact spawn)
+- `ARC_rtbInWorldActionsEnabled` `false` → `true` (Intel/EPW ACE in-world RTB actions)
+- `ARC_sitrepInWorldActionsEnabled` `false` → `true` (dismounted SITREP addAction)
+
+### Checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | sqflint compat scan (initServer.sqf) | `python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf` | PASS | No compat patterns found |
+| 2 | State migration validation | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios |
+| 3 | Marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | 137 markers across all modes |
+| 4 | Dedicated-server runtime validation | N/A | BLOCKED | No Arma dedicated server/JIP runtime available in this container |

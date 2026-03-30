@@ -95,19 +95,19 @@ missionNamespace setVariable ["ARC_objectiveScaffoldEnabled", true, true];
 // declared for future feature; currently not consumed
 missionNamespace setVariable ["ARC_objectiveMeetUseAI", true, true];
 
-// Hold off on hostile contact AI while object systems and markers stabilize
-missionNamespace setVariable ["ARC_patrolSpawnContactsEnabled", false, true];
+// Hostile contact AI enabled; object systems and markers are stable
+missionNamespace setVariable ["ARC_patrolSpawnContactsEnabled", true, true];
 
 
 // ============================================================================
 // UI / IN-WORLD ACTIONS
 // ============================================================================
 
-// RTB in-world actions (Intel/EPW): disable addActions + ACE interact
-missionNamespace setVariable ["ARC_rtbInWorldActionsEnabled", false, true];
+// RTB in-world actions (Intel/EPW): enable addActions + ACE interact
+missionNamespace setVariable ["ARC_rtbInWorldActionsEnabled", true, true];
 
-// SITREP in-world action (dismounted): disable addAction
-missionNamespace setVariable ["ARC_sitrepInWorldActionsEnabled", false, true];
+// SITREP in-world action (dismounted): enable addAction
+missionNamespace setVariable ["ARC_sitrepInWorldActionsEnabled", true, true];
 
 // Intel props spawn radius (meters)
 missionNamespace setVariable ["ARC_intelPropSpawnRadiusM", 10, true];
