@@ -2477,6 +2477,7 @@ for "_i" from 0 to (_rmCount - 1) do
     missionNamespace setVariable ["ARC_activeExecHoldReq", ["activeExecHoldReq", 0] call ARC_fnc_stateGet, true];
     missionNamespace setVariable ["ARC_activeExecHoldAccum", ["activeExecHoldAccum", 0] call ARC_fnc_stateGet, true];
     missionNamespace setVariable ["ARC_activeExecActivated", ["activeExecActivated", false] call ARC_fnc_stateGet, true];
+    missionNamespace setVariable ["ARC_activeObjectivePos", ["activeObjectivePos", []] call ARC_fnc_stateGet, true];
 
     // Refresh task description so players see the end-state criteria
     [] call ARC_fnc_taskUpdateActiveDescription;

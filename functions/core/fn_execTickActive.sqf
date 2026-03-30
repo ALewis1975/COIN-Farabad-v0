@@ -329,12 +329,15 @@ _sites pushBack _basePos;
 // Friendly presence check (west + independent)
 private _players = allPlayers select { alive _x && { side group _x in [west, independent] } };
 
-// IED-specific anchor fix:
-// The suspicious device can spawn outside the incident center radius (intentional search space), which used to prevent AO
-// activation/timers from ever starting if players went straight to the device. Treat the device position as a valid on-scene
-// anchor for presence checks.
+// Anchor list for on-site detection.
+// INTERACT tasks may spawn their objective outside the incident center radius. For example,
+// a CIV_MEET liaison NPC spawns in the nearest enterable building within up to 350m of the
+// incident center, and cache containers can be placed up to 380m away. Without the objective
+// position as an additional anchor, players who go straight to the objective (guided by the
+// objective map marker) would never trigger AO activation even while standing on it. The
+// SITREP anchor list already includes the objective position; this aligns the on-site check.
 private _anchorPosList = [_pos];
-if (_incTypeU isEqualTo "IED") then
+if (_execKind isEqualTo "INTERACT") then
 {
     private _oPos = ["activeObjectivePos", []] call ARC_fnc_stateGet;
     if (_oPos isEqualType [] && { (count _oPos) >= 2 }) then
@@ -522,6 +525,9 @@ private _broadcast = {
         _oPos = +_oPos; _oPos resize 3;
         _anchors pushBack _oPos;
     };
+    // Broadcast objective position so ATH clients can compute distance to objective,
+    // not just distance to the incident center.
+    missionNamespace setVariable ["ARC_activeObjectivePos", _oPos, true];
 
     // If patrol routes are used, include route points as additional anchors.
     private _pPts = ["activePatrolRoutePosList", []] call ARC_fnc_stateGet;

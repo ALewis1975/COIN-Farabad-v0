@@ -95,6 +95,7 @@ if (_nid isNotEqualTo "") then
 };
 
 missionNamespace setVariable ["ARC_activeObjective", objNull, true];
+missionNamespace setVariable ["ARC_activeObjectivePos", [], true];
 
 // --- IED Phase 1 trigger cleanup (server only) ------------------------------
 private _trg = missionNamespace getVariable ["ARC_activeIedTrigger", objNull];

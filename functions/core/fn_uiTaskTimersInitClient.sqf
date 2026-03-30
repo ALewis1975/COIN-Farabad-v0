@@ -116,6 +116,7 @@ uiNamespace setVariable ["ARC_TaskTimerHUD_layer", _layer];
         private _holdAccum = missionNamespace getVariable ["ARC_activeExecHoldAccum", 0];
         private _arrived = missionNamespace getVariable ["ARC_activeExecArrived", false];
         private _activated = missionNamespace getVariable ["ARC_activeExecActivated", false];
+        private _objPos = missionNamespace getVariable ["ARC_activeObjectivePos", []];
 
         private _now = serverTime;
 
@@ -165,7 +166,10 @@ uiNamespace setVariable ["ARC_TaskTimerHUD_layer", _layer];
         if (_showTimer && { !(_tLeft isEqualType 0) }) then { _ctrl ctrlShow false; continue; };
 
         private _grid = if (_pos isEqualType [] && { (count _pos) >= 2 }) then { mapGridPosition _pos } else { "" };
-        private _dist = if (_pos isEqualType [] && { (count _pos) >= 2 }) then { round (player distance2D _pos) } else { -1 };
+        // For INTERACT tasks the objective may be in a different building/location than the incident
+        // center marker.  Show the player their distance to the objective, not to the incident center.
+        private _distPos = if (_kind isEqualTo "INTERACT" && { _objPos isEqualType [] && { (count _objPos) >= 2 } }) then { _objPos } else { _pos };
+        private _dist = if (_distPos isEqualType [] && { (count _distPos) >= 2 }) then { round (player distance2D _distPos) } else { -1 };
 
         private _line2 = if (_showTimer) then { format ["%1 | %2", _phase, ([_tLeft] call _fmt)] } else { _phase };
         private _line3 = "";
