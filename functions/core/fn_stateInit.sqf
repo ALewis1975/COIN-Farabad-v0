@@ -86,6 +86,14 @@
     ["leadHistory", []],
     ["threads", []],
 
+    // TASKENG v0 persistence (schema-versioned thread store)
+    // Migration from threads array to HASHMAP runs at bootstrap via ARC_fnc_taskengMigrateSchema.
+    // taskeng_v0_thread_store is the canonical authoritative store once schema rev >= 4.
+    ["taskeng_v0_schema_rev",         0],
+    ["taskeng_v0_thread_store",       createHashMap],
+    ["taskeng_v0_lead_linkage",       createHashMap],
+    ["taskeng_v0_generation_buffers", createHashMap],
+
     // Deferred cleanup queue (despawn spawned entities after players move on)
     ["cleanupQueue", []],
 
