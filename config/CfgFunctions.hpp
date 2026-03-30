@@ -65,6 +65,7 @@ class CfgFunctions
             class rolesIsTocS3 {};
             class rolesIsTocCommand {};
             class rolesCanApproveQueue {};
+            class rolesCanUseMobileOps {};
             class rpcValidateSender {};
             class airbaseTowerAuthorize {};
 
@@ -81,6 +82,8 @@ class CfgFunctions
 
             // User-friendly tasks + intel feed
             class publicBroadcastState {};
+            class consoleVmBuild {};
+            class consoleVmAdapterV1 {};
             class statePublishPublic {};
             class intelLog {};
             class intelCreateMarker {};
@@ -104,6 +107,7 @@ class CfgFunctions
 
 
             // Threads / cases
+            class taskengMigrateSchema {};
             class taskEnsureThreadParent {};
             class threadFindOrCreate {};
             class threadResolveDistrictId {};
@@ -152,6 +156,7 @@ class CfgFunctions
 
             // Field SITREPs (player -> TOC)
             class clientCanSendSitrep {};
+            class sitrepGateEval {};
             class clientSendSitrep {};
             class tocReceiveSitrep {};
 
@@ -247,6 +252,11 @@ class CfgFunctions
             class casreqBuildId {};
             class casreqSnapshotGet {};
             class casreqBroadcastDelta {};
+            class casreqOpen {};
+            class casreqDecide {};
+            class casreqExecute {};
+            class casreqClose {};
+            class casreqClientSubmit {};
         };
 
         class CIVSUB
@@ -527,6 +537,7 @@ class CfgFunctions
             class uiConsoleActionTocSecondary {};
 
             class uiConsoleActionOpenCloseout {};
+            class uiConsoleActionCloseIncident {};
 
             class uiConsoleActionAcceptIncident {};
             class uiConsoleActionAcceptOrder {};
@@ -593,6 +604,11 @@ class Ops
         class Medical
         {
             file = "functions\medical";
+
+            class medicalInit {};
+            class medicalOnCasualty {};
+            class medicalTick {};
+            class medicalSnapshot {};
         };
 
         class Ambiance

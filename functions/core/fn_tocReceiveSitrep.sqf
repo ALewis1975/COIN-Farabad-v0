@@ -52,56 +52,100 @@ params [
 // RemoteExec-only validation path: requires remoteExecutedOwner context.
 if (!([_unit, "ARC_fnc_tocReceiveSitrep", "SITREP rejected: sender verification failed.", "TOC_SITREP_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
-private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
-if (_taskId isEqualTo "") exitWith
-{
-    if (!isNull _unit) then { ["SITREP", "REJECTED", "No active incident is available for SITREP."] remoteExec ["ARC_fnc_uiConsoleOpsActionStatus", owner _unit]; };
-    false
+// Fail-safe: ensure evaluator exists even if CfgFunctions.hpp was not yet updated.
+if (isNil "ARC_fnc_sitrepGateEval") then {
+    ARC_fnc_sitrepGateEval = compile preprocessFileLineNumbers "functions\\core\\fn_sitrepGateEval.sqf";
 };
 
-private _accepted = ["activeIncidentAccepted", false] call ARC_fnc_stateGet;
-if (!(_accepted isEqualType true)) then { _accepted = false; };
-if (!_accepted) exitWith
+// Build anchor list from authoritative state (server-side, used for proximity gate)
+private _prox = missionNamespace getVariable ["ARC_sitrepProximityM", 350];
+if (!(_prox isEqualType 0)) then { _prox = 350; };
+_prox = (_prox max 100) min 2000;
+
+private _execRad = ["activeExecRadius", 0] call ARC_fnc_stateGet;
+if (_execRad isEqualType 0 && { _execRad > 0 }) then
 {
-    if (!isNull _unit) then { ["SITREP", "REJECTED", "Incident has not been accepted yet."] remoteExec ["ARC_fnc_uiConsoleOpsActionStatus", owner _unit]; };
-    false
+    _prox = (_prox max (_execRad + 100));
 };
 
-// Role-gated SITREPs (RHSUSAF Officer / Squad Leader classnames).
-if (!isNull _unit && { !([_unit] call ARC_fnc_rolesIsAuthorized) }) exitWith
+private _anchors = [];
 {
-    private _whoBad = [_unit] call ARC_fnc_rolesFormatUnit;
-    diag_log format ["[ARC][SITREP] Rejecting SITREP from unauthorized role: %1", _whoBad];
-    ["You are not authorized to send ARC SITREPs. Authorized: RHSUSAF Officer / Squad Leader classnames."] remoteExec ["ARC_fnc_clientHint", owner _unit];
-    ["SITREP", "REJECTED", "You are not authorized to submit SITREPs."] remoteExec ["ARC_fnc_uiConsoleOpsActionStatus", owner _unit];
-    false
+    private _p = [_x, []] call ARC_fnc_stateGet;
+    if (_p isEqualType [] && { (count _p) >= 2 }) then
+    {
+        private _pp = +_p;
+        _pp resize 3;
+        _anchors pushBack _pp;
+    };
+} forEach ["activeIncidentPos", "activeExecPos", "activeObjectivePos", "activeConvoyLinkupPos", "activeConvoyIngressPos"];
+
+// Route recon: allow SITREP from route start/end anchors as well.
+private _k = ["activeExecKind", ""] call ARC_fnc_stateGet;
+if (_k isEqualType "" && { (toUpper _k) isEqualTo "ROUTE_RECON" }) then
+{
+    {
+        private _p = [_x, []] call ARC_fnc_stateGet;
+        if (_p isEqualType [] && { (count _p) >= 2 }) then
+        {
+            private _pp = +_p;
+            _pp resize 3;
+            _anchors pushBack _pp;
+        };
+    } forEach ["activeReconRouteStartPos", "activeReconRouteEndPos"];
 };
 
-// Closure SITREPs are only accepted once the incident is ready to close (end-state reached).
-// Exception: IED/VBIED incidents may submit SITREP earlier to request TOC permission/disposition.
-private _closeReady = ["activeIncidentCloseReady", false] call ARC_fnc_stateGet;
-if (!(_closeReady isEqualType true)) then { _closeReady = false; };
-
-private _tU = toUpper (trim (["activeIncidentType", ""] call ARC_fnc_stateGet));
-if (!_updateOnly && { !_closeReady } && { _tU isNotEqualTo "IED" }) exitWith
+private _nids = ["activeConvoyNetIds", []] call ARC_fnc_stateGet;
+if (_nids isEqualType []) then
 {
-    private _msg = "SITREP rejected: incident still in progress. Complete the objective or wait for the incident timer to expire.";
+    {
+        private _o = objectFromNetId _x;
+        if (!isNull _o) then
+        {
+            private _p = getPosATL _o;
+            _p = +_p; _p resize 3;
+            _anchors pushBack _p;
+        };
+    } forEach _nids;
+};
+
+// Delegate all gate logic to the shared evaluator (server context: reads authoritative state)
+private _gateResult = [_unit, _anchors, _prox, _updateOnly] call ARC_fnc_sitrepGateEval;
+private _gateAllowed  = _gateResult select 0;
+private _gateCode     = _gateResult select 1;
+
+if (!_gateAllowed) exitWith
+{
+    private _msg = switch (_gateCode) do
+    {
+        case "E_NO_ACTIVE_INCIDENT":        { "No active incident is available for SITREP." };
+        case "E_INCIDENT_NOT_ACCEPTED":     { "Incident has not been accepted yet." };
+        case "E_STATE_NOT_READY_FOR_SITREP" { "SITREP rejected: incident still in progress. Complete the objective or wait for the incident timer to expire." };
+        case "E_ROLE_NOT_AUTHORIZED":
+        {
+            if (!isNull _unit) then {
+                private _whoBad = [_unit] call ARC_fnc_rolesFormatUnit;
+                diag_log format ["[ARC][SITREP] Rejecting SITREP from unauthorized role: %1", _whoBad];
+                ["You are not authorized to send ARC SITREPs. Authorized: RHSUSAF Officer / Squad Leader classnames."] remoteExec ["ARC_fnc_clientHint", owner _unit];
+            };
+            "You are not authorized to submit SITREPs."
+        };
+        case "E_AUTH_SCOPE_DENIED":         { format ["SITREP rejected: you must be within %1m of the active task / objective / convoy to send a SITREP.", round _prox] };
+        default { format ["SITREP rejected: gate check failed (%1).", _gateCode] };
+    };
     if (!isNull _unit) then { [_msg] remoteExec ["ARC_fnc_clientHint", owner _unit]; };
-    if (!isNull _unit) then { ["SITREP", "REJECTED", "Incident still in progress; wait for close-ready."] remoteExec ["ARC_fnc_uiConsoleOpsActionStatus", owner _unit]; };
+    if (!isNull _unit) then { ["SITREP", "REJECTED", _msg] remoteExec ["ARC_fnc_uiConsoleOpsActionStatus", owner _unit]; };
     false
 };
 
-
-// One SITREP per incident
-private _alreadySent = ["activeIncidentSitrepSent", false] call ARC_fnc_stateGet;
-if (!(_alreadySent isEqualType true)) then { _alreadySent = false; };
-if (_alreadySent) exitWith
+// Idempotent: already-sent SITREP is surfaced as OK_IDEMPOTENT (gateAllowed=true), but we still reject.
+if (_gateCode isEqualTo "OK_IDEMPOTENT") exitWith
 {
     if (!isNull _unit) then { ["SITREP", "REJECTED", "SITREP already submitted for this incident."] remoteExec ["ARC_fnc_uiConsoleOpsActionStatus", owner _unit]; };
     false
 };
 
-// Identify sender (prefer group ID + player name)
+// --- Sender identity + position resolution (all gates passed) ---------------
+
 private _pName = "UNKNOWN";
 private _grpId = "";
 private _uid = "";
@@ -131,8 +175,9 @@ if (_recommend isEqualType "") then
 
 if (!(_summary isEqualType "")) then { _summary = ""; };
 if (!(_details isEqualType "")) then { _details = ""; };
-_summary = trim _summary;
-_details = trim _details;
+private _trimFn = compile "params ['_s']; trim _s";
+_summary = [_summary] call _trimFn;
+_details = [_details] call _trimFn;
 
 // Position resolution: prefer actual sender position (prevents spoofed client coords).
 private _pos = if (!isNull _unit) then { getPosATL _unit } else { _posATL };
@@ -143,77 +188,10 @@ if (!(_pos isEqualType []) || { (count _pos) < 2 }) then
 if (!(_pos isEqualType []) || { (count _pos) < 2 }) then { _pos = [0,0,0]; };
 _pos = +_pos; _pos resize 3;
 
-// Proximity enforcement: SITREPs only from near the task / lead / convoy.
-private _prox = missionNamespace getVariable ["ARC_sitrepProximityM", 350];
-if (!(_prox isEqualType 0)) then { _prox = 350; };
-_prox = (_prox max 100) min 2000;
-
-private _execRad = ["activeExecRadius", 0] call ARC_fnc_stateGet;
-if (_execRad isEqualType 0 && { _execRad > 0 }) then
-{
-    _prox = (_prox max (_execRad + 100));
-};
-
-private _anchors = [];
-{
-    private _p = [_x, []] call ARC_fnc_stateGet;
-    if (_p isEqualType [] && { (count _p) >= 2 }) then
-    {
-        private _pp = +_p;
-        _pp resize 3;
-        _anchors pushBack _pp;
-    };
-} forEach ["activeIncidentPos", "activeExecPos", "activeObjectivePos", "activeConvoyLinkupPos", "activeConvoyIngressPos"];
-
-// Route recon: allow SITREP from the route start/end anchors (not just the incident center).
-private _k = ["activeExecKind", ""] call ARC_fnc_stateGet;
-if (_k isEqualType "" && { (toUpper _k) isEqualTo "ROUTE_RECON" }) then
-{
-    {
-        private _p = [_x, []] call ARC_fnc_stateGet;
-        if (_p isEqualType [] && { (count _p) >= 2 }) then
-        {
-            private _pp = +_p;
-            _pp resize 3;
-            _anchors pushBack _pp;
-        };
-    } forEach ["activeReconRouteStartPos", "activeReconRouteEndPos"];
-};
-
-
-private _nids = ["activeConvoyNetIds", []] call ARC_fnc_stateGet;
-if (_nids isEqualType []) then
-{
-    {
-        private _o = objectFromNetId _x;
-        if (!isNull _o) then
-        {
-            private _p = getPosATL _o;
-            _p = +_p; _p resize 3;
-            _anchors pushBack _p;
-        };
-    } forEach _nids;
-};
-
-private _nearOk = true;
-if ((count _anchors) > 0) then
-{
-    _nearOk = false;
-    {
-        if ((_pos distance2D _x) <= _prox) exitWith { _nearOk = true; };
-    } forEach _anchors;
-};
-
-if (!_nearOk) exitWith
-{
-    private _msg = format ["SITREP rejected: you must be within %1m of the active task / objective / convoy to send a SITREP.", round _prox];
-    if (!isNull _unit) then { [_msg] remoteExec ["ARC_fnc_clientHint", owner _unit]; };
-    if (!isNull _unit) then { ["SITREP", "REJECTED", format ["Move within %1m and retry.", round _prox]] remoteExec ["ARC_fnc_uiConsoleOpsActionStatus", owner _unit]; };
-    false
-};
+// ---------------------------------------------------------------------------
 
 private _grid = "";
-if !((_pos # 0) isEqualTo 0 && {(_pos # 1) isEqualTo 0}) then
+if !((_pos select 0) isEqualTo 0 && { (_pos select 1) isEqualTo 0 }) then
 {
     _grid = mapGridPosition _pos;
 };

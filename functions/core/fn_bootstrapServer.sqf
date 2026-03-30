@@ -745,6 +745,9 @@ if (_safeModeEnabled) then
 // Load persistent COIN state
 [] call ARC_fnc_stateLoad;
 
+// TASKENG schema migration (runs once after stateLoad, before any thread writes)
+[] call ARC_fnc_taskengMigrateSchema;
+
 // Server-owned S1 registry: canonical personnel/unit index + public snapshot mirror
 [] call ARC_fnc_s1RegistryInit;
 
@@ -816,6 +819,9 @@ missionNamespace setVariable ["ARC_activeConvoyNetIds", ["activeConvoyNetIds", [
 [] call ARC_fnc_companyCommandInit;
 [] call ARC_fnc_companyCommandTick;
 [] call ARC_fnc_companyCommandVirtualOpsTick;
+
+// Medical subsystem (casualty tracking, baseMed events)
+[] call ARC_fnc_medicalInit;
 
 // Publish initial snapshots for clients (JIP-safe)
 [] call ARC_fnc_publicBroadcastState;

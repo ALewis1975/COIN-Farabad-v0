@@ -123,6 +123,11 @@ else
 [] call ARC_fnc_intelMetricsTick;
 [] call ARC_fnc_intelOrderTick;
 
+// Medical subsystem recovery tick
+if (missionNamespace getVariable ["ARC_medical_initialized", false]) then {
+    [] call ARC_fnc_medicalTick;
+};
+
 // Publish a public snapshot for client briefing / SITREP
 [] call ARC_fnc_publicBroadcastState;
 // Persist on every tick (safe and simple). If this becomes chatty, we can throttle.

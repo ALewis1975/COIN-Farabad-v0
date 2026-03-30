@@ -1448,3 +1448,31 @@ Three flags deferred for stabilization are now enabled:
 | 2 | State migration validation | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios |
 | 3 | Marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | 137 markers across all modes |
 | 4 | Dedicated-server runtime validation | N/A | BLOCKED | No Arma dedicated server/JIP runtime available in this container |
+
+---
+
+## Test Run — 2026-03-30
+
+**Branch/commit:** copilot/audit-project-status (commit: unrecoverable — in-progress PR)
+**Scenario:** Implementation of P2-A, P2-B, P4-A, P3-A, P3-B, P3-C, P3-E, P3-D decomposition tasks
+
+### Change Summary
+
+- P2-A: Registered `fn_rolesCanUseMobileOps` and `fn_uiConsoleActionCloseIncident` in CfgFunctions.hpp
+- P2-B: Replaced `rg` with `grep -En` in both static CI scripts; verified all checks pass
+- P4-A: Deleted `functions/ui/theme/fn_consoleThemeGet.sqf` orphan (no callers)
+- P3-A: Created `fn_sitrepGateEval.sqf`; refactored `fn_clientCanSendSitrep` and `fn_tocReceiveSitrep` gate sections to use shared evaluator
+- P3-B: Created `fn_consoleVmBuild.sqf` and `fn_consoleVmAdapterV1.sqf`; wired into `fn_publicBroadcastState`
+- P3-C: Added TASKENG v0 state keys to `fn_stateInit.sqf`; created `fn_taskengMigrateSchema.sqf`; wired into bootstrap after stateLoad
+- P3-E: Created medical minimum functions (init/onCasualty/tick/snapshot); wired medicalInit into bootstrap and medicalTick into incidentTick
+- P3-D: Created CASREQ lifecycle functions (open/decide/execute/close/clientSubmit); updated CfgFunctions.hpp and CfgRemoteExec.hpp
+
+### Checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan — all new files | `python3 scripts/dev/sqflint_compat_scan.py --strict <16 new files>` | PASS | No violations in any new file |
+| 2 | Compat scan — modified files | `python3 scripts/dev/sqflint_compat_scan.py --strict fn_tocReceiveSitrep.sqf fn_incidentTick.sqf` | WARN (pre-existing) | 31 violations — all pre-existing in untouched follow-on/sustain sections (lines 217+/86) |
+| 3 | AIRBASE planning-mode checks | `bash tests/static/airbase_planning_mode_checks.sh` | PASS | All 20 checks pass with grep -En |
+| 4 | CASREQ snapshot contract checks | `bash tests/static/casreq_snapshot_contract_checks.sh` | PASS | All 6 checks pass |
+| 5 | Dedicated-server runtime validation | N/A | BLOCKED | No Arma dedicated server/JIP runtime available in this container |

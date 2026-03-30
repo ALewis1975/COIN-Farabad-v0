@@ -59,6 +59,12 @@ class CfgRemoteExec
         class ARC_fnc_iedServerDetonate             { allowedTargets = 2; };
         class ARC_fnc_vbiedServerDetonate           { allowedTargets = 2; };
 
+        // CASREQ RPCs
+        class ARC_fnc_casreqOpen                    { allowedTargets = 2; };
+        class ARC_fnc_casreqDecide                  { allowedTargets = 2; };
+        class ARC_fnc_casreqExecute                 { allowedTargets = 2; };
+        class ARC_fnc_casreqClose                   { allowedTargets = 2; };
+
         // Dev / admin RPCs
         class ARC_fnc_devCompileAuditServer         { allowedTargets = 2; };
         class ARC_fnc_devDiagnosticsSnapshot        { allowedTargets = 2; };

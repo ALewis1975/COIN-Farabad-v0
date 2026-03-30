@@ -659,4 +659,12 @@ missionNamespace setVariable ["ARC_consoleVM_meta", [
     ["source", "publicBroadcastState"]
 ], true];
 
+// ---------------------------------------------------------------------------
+// Console VM v1 full payload — build and publish (used by future tab migrations)
+// ---------------------------------------------------------------------------
+private _vmPayload = [] call ARC_fnc_consoleVmBuild;
+if (_vmPayload isEqualType [] && { !(_vmPayload isEqualTo []) }) then {
+    missionNamespace setVariable ["ARC_consoleVM_payload", _vmPayload, true];
+};
+
 true
