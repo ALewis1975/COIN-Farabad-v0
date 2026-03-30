@@ -27,6 +27,7 @@ params [
 if (_districtId isEqualTo "") exitWith {createHashMap};
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k,_d]";
 
 private _ts = serverTime;
 private _uuid = [] call ARC_fnc_civsubUuid;

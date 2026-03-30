@@ -11,6 +11,7 @@ params [["_bundle", createHashMap, [createHashMap]]];
 if !(_bundle isEqualType createHashMap) exitWith {false};
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k,_d]";
 
 private _districtId = [_bundle, "districtId", ([_bundle, "district_id", ""] call _hg)] call _hg;
 if !(_districtId isEqualType "") exitWith {

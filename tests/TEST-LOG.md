@@ -12,6 +12,27 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 ---
 
 
+## 2026-03-30 16:20 UTC — Fix "Background check failed (server error at DELTA_HIT)"
+
+**Branch/Commit:** copilot/fix-background-check-server-error @ commit: unrecoverable
+
+**Scenario:** `fn_civsubContactActionBackgroundCheck` always reported "server error at DELTA_HIT" on any run that reached the HIT branch. Root cause: `fn_civsubBundleMake.sqf` and `fn_civsubDeltaApplyToDistrict.sqf` both used the sqflint-compat `_hg` helper (HashMap getOrDefault wrapper) without defining it, causing a runtime nil-call exception. The exception propagated from `civsubBundleMake` → `civsubDeltaBuildEnvelope` → `civsubEmitDelta` and was caught by the outer `isNil {}` dispatcher wrapper with `civsub_bg_lastStep` already set to `DELTA_HIT`.
+
+**Fix:** Added `private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k,_d]";` to both affected files immediately after the `_hmCreate` definition.
+
+**Commands:**
+```bash
+python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubBundleMake.sqf functions/civsub/fn_civsubDeltaApplyToDistrict.sqf
+```
+
+**Result:** BLOCKED
+
+**Notes:**
+- PASS: targeted compat scan on both changed files (36 pre-existing `hashmap-getOrDefault-method` warnings in unchanged code; no new violations introduced).
+- Rationale for `commit: unrecoverable`: log entry recorded before push SHA is available.
+- Gameplay validation (HIT branch exercise, RPT check, district influence update) requires dedicated server; deferred.
+
+
 ## 2026-03-29 20:33 UTC — Runtime fix for TOC lead-pool local hint undefined variable errors
 
 **Branch/Commit:** copilot/update-ied-object-pool @ bbf67b9
