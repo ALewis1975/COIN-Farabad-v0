@@ -372,6 +372,10 @@ if (!_updateOnly && { _foReqU isNotEqualTo "" }) then
     missionNamespace setVariable ["ARC_activeIncidentFollowOnAt", serverTime, true];
 };
 
+// Read task ID from authoritative state (gate already confirmed it exists).
+private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
+if (!(_taskId isEqualType "")) then { _taskId = ""; };
+
 // Compose log line
 private _head = if (_recU isEqualTo "") then { "SITREP" } else { format ["SITREP (%1)", _recU] };
 private _where = if (_grid isEqualTo "") then { "" } else { format [" (%1)", _grid] };
