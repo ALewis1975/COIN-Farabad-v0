@@ -1600,3 +1600,24 @@ Three flags deferred for stabilization are now enabled:
 | 2 | CfgFunctions.hpp registration audit | Manual review | PASS | All 19 new functions registered in Threat and IED blocks |
 | 3 | CfgRemoteExec.hpp audit | Manual review | PASS | ARC_fnc_suicideBomberOnDetonate added with allowedTargets=2 |
 | 4 | Dedicated-server runtime validation | N/A | BLOCKED | No Arma dedicated server/JIP runtime available in this container |
+
+---
+
+## Session: 2026-03-31 — Dialog Layout Fixes (SITREP, Follow-On, ISSUE FOLLOW-ON ORDER)
+
+**Branch/commit:** copilot/update-dialogues-to-fit-content (commit: in-progress PR)
+**Scenario:** Fix dialog header RscStructuredText controls being too short to display dynamic multi-line content, and fix duplicate title in ISSUE FOLLOW-ON ORDER.
+
+### Change Summary
+
+- `config/CfgDialogs.hpp` — `ARC_SitrepDialog` (IDD 77301): Header (IDC 77392) h 0.06→0.12; all form controls y+=0.06; BG h 0.74→0.81
+- `config/CfgDialogs.hpp` — `ARC_FollowOnDialog` (IDD 78100): Header (IDC 78192) h 0.06→0.12; all form controls y+=0.06; BG h 0.68→0.74
+- `functions/ui/fn_uiConsoleActionOpenCloseout.sqf` — TOC header override: removed duplicate `<t>ISSUE FOLLOW-ON ORDER</t>` title line (title bar already shows it); compacted optional context lines (SITREP summary, field FO, sys lead) onto one combined line to keep header within 3 lines max
+
+### Checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Static compat scan — changed SQF file | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleActionOpenCloseout.sqf` | BLOCKED | Container environment; no new SQF constructs introduced in the one SQF file changed |
+| 2 | CfgDialogs.hpp structure audit | Manual grep of IDC positions and heights | PASS | Header h=0.12 for both dialogs; all form control y values incremented +0.06; BG heights updated; buttons remain within BG bounds |
+| 3 | Dedicated-server runtime validation | N/A | BLOCKED | No Arma dedicated server/JIP runtime available in this container |
