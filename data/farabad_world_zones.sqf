@@ -9,7 +9,7 @@ private _zones = [
     ["Airbase", "Farabad Airbase", [6117.955, 2280.710], [650, 525], 89.864],
     ["GreenZone", "Green Zone", [5104.140, 4948.940], [287.5, 150], 113],
     // Broad city footprint (used in addition to quadrant zones). Adjust size/dir as the mission evolves.
-    ["FarabadCity", "Farabad City", [16681.9, 14391.5], [1200, 900], 0]
+    ["FarabadCity", "Farabad City", [4507.911, 5144.383], [1200, 900], 0]
 ];
 
 // Additional quadrant zone markers (added in-editor):
