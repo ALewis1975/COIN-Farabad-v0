@@ -218,12 +218,12 @@ missionNamespace setVariable ["civsub_v1_traffic_spawn_budget_perDistrictPerTick
 missionNamespace setVariable ["civsub_v1_traffic_activeDistrictsMax", 3, true];
 
 // Caps
-missionNamespace setVariable ["civsub_v1_traffic_cap_global", 18, true];
+missionNamespace setVariable ["civsub_v1_traffic_cap_global", 28, true];
 missionNamespace setVariable ["civsub_v1_traffic_cap_perDistrict", 10, true];
 
 // Placement / separation
 missionNamespace setVariable ["civsub_v1_traffic_minSeparation_m", 35, true];
-missionNamespace setVariable ["civsub_v1_traffic_spawnRadius_m", 250, true];
+missionNamespace setVariable ["civsub_v1_traffic_spawnRadius_m", 350, true];
 missionNamespace setVariable ["civsub_v1_traffic_playerMinDistance_m", 90, true];
 missionNamespace setVariable ["civsub_v1_traffic_roadside_offset_m", 4, true];            // shoulder offset baseline
 missionNamespace setVariable ["civsub_v1_traffic_fallback_roadsideMin_m", 8, true];      // fallback: nearest-road shoulder band min
@@ -274,10 +274,10 @@ missionNamespace setVariable ["civsub_v1_traffic_vehiclePool_fallback", [
     "C_Hatchback_01_F"
 ], true];
 
-// Minimal moving (enabled with conservative cap/probability)
+// Moving traffic (visible ambient flow)
 missionNamespace setVariable ["civsub_v1_traffic_allow_moving", true, true];
-missionNamespace setVariable ["civsub_v1_traffic_cap_moving_global", 2, true];
-missionNamespace setVariable ["civsub_v1_traffic_prob_moving", 0.10, true];
+missionNamespace setVariable ["civsub_v1_traffic_cap_moving_global", 6, true];
+missionNamespace setVariable ["civsub_v1_traffic_prob_moving", 0.40, true];
 missionNamespace setVariable ["civsub_v1_traffic_moving_spawnMaxDistrictAttempts", 3, true];
 missionNamespace setVariable ["civsub_v1_traffic_moving_maxSpeed", 35, true];
 missionNamespace setVariable ["civsub_v1_traffic_driverClass", "C_man_1", true];
@@ -288,6 +288,39 @@ missionNamespace setVariable ["civsub_v1_traffic_dbg_moving_spawnFail_noRoadside
 missionNamespace setVariable ["civsub_v1_traffic_dbg_moving_spawnFail_playerTooNear", 0, true];
 missionNamespace setVariable ["civsub_v1_traffic_dbg_moving_spawnFail_createFail", 0, true];
 missionNamespace setVariable ["civsub_v1_traffic_lastMovingSpawnFail", "", true];
+
+
+// ============================================================================
+// CIVLOC — location-appropriate ambient NPCs (workers, patients, etc.)
+// ============================================================================
+
+missionNamespace setVariable ["civsub_v1_locnpc_enabled", true, true];
+missionNamespace setVariable ["civsub_v1_locnpc_tick_s",   10, true];           // tick cadence (s); 10 recommended
+
+// Bubble: spawn NPCs at sites within this distance of any player
+missionNamespace setVariable ["civsub_v1_locnpc_bubbleRadius_m", 500, true];
+
+// Global NPC cap across all sites
+missionNamespace setVariable ["civsub_v1_locnpc_cap_global",      32, true];
+
+// Site-position clustering radius (m) — positions closer than this become one site
+missionNamespace setVariable ["civsub_v1_locnpc_cluster_m",       80, true];
+
+// Cleanup: despawn NPCs when players have been further than this for cleanupMinDelay_s
+missionNamespace setVariable ["civsub_v1_locnpc_cleanupRadius_m",    600, true];
+missionNamespace setVariable ["civsub_v1_locnpc_cleanupMinDelay_s",  120, true];
+
+// NPC class pools (prefer 3CB Takistan; fallback to vanilla if mods absent)
+missionNamespace setVariable ["civsub_v1_locnpc_classPool_worker", [
+    "UK3CB_TKC_C_WORKER",
+    "C_man_1"
+], true];
+missionNamespace setVariable ["civsub_v1_locnpc_classPool_civ", [
+    "UK3CB_TKC_C_CIV",
+    "C_man_polo_1_F"
+], true];
+
+missionNamespace setVariable ["civsub_v1_locnpc_debug", false, true];
 
 
 // ============================================================================

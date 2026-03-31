@@ -11,6 +11,46 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-03-31 23:03 UTC — Ambient traffic enhancement + CIVLOC location NPC system
+
+**Branch/Commit:** copilot/add-ambient-traffic-and-npcs @ commit: unrecoverable (pre-push)
+
+**Scenario:** Player feedback: moving traffic not visible; no NPCs at terrain sites (fuel stations, hospital, etc.).
+
+**Changes validated:**
+
+1. `initServer.sqf` — Traffic tuning:
+   - `civsub_v1_traffic_cap_moving_global`: 2 → 6
+   - `civsub_v1_traffic_prob_moving`: 0.10 → 0.40
+   - `civsub_v1_traffic_cap_global`: 18 → 28
+   - `civsub_v1_traffic_spawnRadius_m`: 250 → 350
+
+2. New CIVLOC subsystem:
+   - `fn_civsubLocNpcInit.sqf` — clusters terrain sites, assigns NPC profiles, starts tick thread
+   - `fn_civsubLocNpcTick.sqf` — per-tick spawn/cull per site/phase
+   - `fn_civsubLocNpcSpawn.sqf` — spawns one NPC with idle wander + cleanup registration
+   - `config/CfgFunctions.hpp` — 3 new registrations
+   - `fn_civsubInitServer.sqf` — wired init call
+   - `initServer.sqf` — `civsub_v1_locnpc_*` config block added
+
+**Commands run:**
+```
+python3 scripts/dev/sqflint_compat_scan.py fn_civsubLocNpcInit.sqf fn_civsubLocNpcTick.sqf fn_civsubLocNpcSpawn.sqf
+→ PASS: scanned 3 file(s); no known parser-compat patterns found.
+```
+
+sqflint binary: not installed in sandbox.
+
+**Results:**
+- Static analysis: PASS (compat scan clean)
+- Gameplay smoke test: BLOCKED — requires local MP or dedicated server
+
+**Deferred:**
+- Dedicated server: persistence/JIP behaviour of CIVLOC registry
+- Confirm 3CB class names (`UK3CB_TKC_C_WORKER`, `UK3CB_TKC_C_CIV`) resolve; fallback `C_man_1`/`C_man_polo_1_F` included
+
+---
+
 ## 2026-03-31 14:45 UTC — Fix undefined `_taskId` in fn_tocReceiveSitrep causing "Error in expression"
 
 **Branch/Commit:** copilot/fix-undefined-variable-error-another-one @ 99adc4d

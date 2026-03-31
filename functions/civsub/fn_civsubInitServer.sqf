@@ -247,6 +247,11 @@ if (missionNamespace getVariable ["civsub_v1_traffic_enabled", false]) then {
     [] call ARC_fnc_civsubTrafficInit;
 };
 
+// CIVLOC: location-appropriate ambient NPCs (workers, patients, etc.)
+if (missionNamespace getVariable ["civsub_v1_locnpc_enabled", false]) then {
+    [] call ARC_fnc_civsubLocNpcInit;
+};
+
 // Phase 5 defaults + scheduler init (enabled by default for Phase 5 testing)
 if (isNil { missionNamespace getVariable "civsub_v1_scheduler_enabled" }) then {
     missionNamespace setVariable ["civsub_v1_scheduler_enabled", true, true];
