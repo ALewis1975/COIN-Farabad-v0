@@ -11,6 +11,27 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-03-31 14:45 UTC — Fix undefined `_taskId` in fn_tocReceiveSitrep causing "Error in expression"
+
+**Branch/Commit:** copilot/fix-undefined-variable-error-another-one @ 99adc4d
+
+**Scenario:** RPT showed `Error in expression` immediately after `[ARC][INFO] ARC_fnc_tocReceiveSitrep: hosted-server self-call detected … — allowing.` Root cause: `_taskId` used in `_meta` array (line 390) but never declared in `fn_tocReceiveSitrep.sqf`. The variable exists only inside `ARC_fnc_sitrepGateEval` as a local; the outer function never read it from state.
+
+**Fix:**
+- Added `private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;` with a type-guard before the `_meta` construction in `fn_tocReceiveSitrep.sqf`. Gate already confirmed taskId is non-empty at this point.
+
+**Commands:**
+```bash
+python3 scripts/dev/sqflint_compat_scan.py functions/core/fn_tocReceiveSitrep.sqf
+```
+
+**Result:** PASS
+
+**Notes:**
+- PASS: compat scan — 0 new violations from the 3 added lines (30 pre-existing violations in file, all pre-dated).
+- BLOCKED: `sqflint` binary unavailable in container; dedicated-server gameplay validation deferred.
+
+---
 
 ## 2026-03-31 14:27 UTC — Fix dead environment at Presidential Palace during PoL follow-up
 
