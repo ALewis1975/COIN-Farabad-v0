@@ -281,12 +281,12 @@ if (_pendingCnt > 0) then
     private _shownItems = 0;
     {
         if (_shownItems >= 5) exitWith {};
-        if (!(_x isEqualType []) || { (count _x) < 8 }) then { continue; };
+        if (!(_x isEqualType []) || { (count _x) < 8 }) then { continue; }; // Needs fields: [id, createdAt, status, kind, from, fromGrp, pos, summary]
         private _qKindItem = toUpper (_x param [3, "?", [""]]);
         private _qCreated  = _x param [1, -1, [0]];
         private _qFromGrpItem = _x param [5, "", [""]];
-        private _qSumItem  = _x param [7, "", [""]];
-        private _ageS = if (_qCreated > 0) then { round (serverTime - _qCreated) } else { -1 };
+        private _qSumItem  = _x param [7, "", [""]]; // Queue item fields: [id(0), createdAt(1), status(2), kind(3), from(4), fromGrp(5), pos(6), summary(7)]
+        if (!(_qSumItem isEqualType "")) then { _qSumItem = ""; };        private _ageS = if (_qCreated > 0) then { round (serverTime - _qCreated) } else { -1 };
         private _ageFmt = if (_ageS < 0) then { "" } else { if (_ageS < 60) then { format [" %1s ago", _ageS] } else { format [" %1m ago", floor (_ageS / 60)] } };
         private _fromFmt = if (_qFromGrpItem isEqualTo "") then { "" } else { format [" <t color='#AAAAAA'>(%1)</t>", _qFromGrpItem] };
         private _sumFmt = if (_qSumItem isEqualTo "") then { "" } else { format [" — %1", _qSumItem select [0, (30 min (count _qSumItem))]] };

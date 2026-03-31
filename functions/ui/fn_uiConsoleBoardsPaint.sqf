@@ -286,7 +286,7 @@ if (!isNull _ctrlDetailsGrp && { !isNull _ctrlDetails }) then
     private _cntOnScene = 0;
     private _cntOther = 0;
     {
-        if (!(_x isEqualType []) || { (count _x) < 2 }) then { continue; };
+        if (!(_x isEqualType []) || { (count _x) < 2 }) then { continue; }; // Status row fields: [groupId(0), status(1)]
         private _sRaw = if ((_x select 1) isEqualType "") then { _x select 1 } else { "UNAVAILABLE" };
         private _s = toUpper _sRaw;
         if (_s isEqualTo "OFFLINE") then { _s = "UNAVAILABLE"; };
