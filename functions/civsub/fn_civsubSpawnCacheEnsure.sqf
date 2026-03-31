@@ -270,6 +270,37 @@ private _roadPos = [];
         };
     } forEach _objs;
 
+    // Supplement: indexed building catalog covers non-House/Building typed structures
+    // (e.g. Land_GuardBox, Land_GuardHouse, Land_Hospital at the Presidential Palace).
+    // Reuses the ARC_enterableBuildings cache loaded by fn_worldPickEnterablePosNear.
+    private _catalog = missionNamespace getVariable ["ARC_enterableBuildings", []];
+    if (!(_catalog isEqualType []) || { _catalog isEqualTo [] }) then
+    {
+        _catalog = call compile preprocessFileLineNumbers "data\farabad_enterable_buildings_unique.sqf";
+        if (!(_catalog isEqualType [])) then { _catalog = []; };
+        missionNamespace setVariable ["ARC_enterableBuildings", _catalog];
+    };
+
+    private _ax = _a # 0;
+    private _ay = _a # 1;
+    private _scanR2 = _scanR * _scanR;
+    {
+        if (!(_x isEqualType []) || { (count _x) < 2 }) then { continue; };
+        private _pos = _x select 1;
+        if (!(_pos isEqualType []) || { (count _pos) < 2 }) then { continue; };
+        private _dx = (_pos # 0) - _ax;
+        private _dy = (_pos # 1) - _ay;
+        if ((_dx * _dx + _dy * _dy) > _scanR2) then { continue; };
+        if ([_pos] call _inExclusion) then { continue; };
+        private _b = nearestBuilding _pos;
+        if (isNull _b) then { continue; };
+        private _bp = [_b] call BIS_fnc_buildingPositions;
+        if (!(_bp isEqualType []) || { count _bp == 0 }) then { continue; };
+        {
+            if (_x isEqualType [] && {(count _x) >= 2}) then { _bldPos pushBackUnique _x; };
+        } forEach _bp;
+    } forEach _catalog;
+
     // Roads
     private _roads = _a nearRoads _scanR;
     {
