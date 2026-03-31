@@ -59,13 +59,13 @@ private _nearPlayers = allPlayers select { alive _x && { (_x distance2D _midPos)
 if ((count _nearPlayers) == 0) then
 {
     diag_log "[ARC][INFO] ARC_fnc_suicideBomberSpawnTick: no players near approach path — aborting, EXPIRED";
-    private _threatId = ["activeIedThreatId", ""] call ARC_fnc_stateGet;
-    if (!(_threatId isEqualTo "")) then
+    private _abortThreatId = ["activeIedThreatId", ""] call ARC_fnc_stateGet;
+    if (!(_abortThreatId isEqualTo "")) then
     {
-        [_threatId, "EXPIRED", "sb_no_players_near_approach"] call ARC_fnc_threatUpdateState;
+        [_abortThreatId, "EXPIRED", "sb_no_players_near_approach"] call ARC_fnc_threatUpdateState;
     };
-    exitWith {false};
 };
+if ((count _nearPlayers) == 0) exitWith {false};
 
 // Mark spawned and emit STAGED lead
 missionNamespace setVariable ["ARC_suicideBomberSpawned", true];
