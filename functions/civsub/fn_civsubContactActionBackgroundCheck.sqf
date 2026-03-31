@@ -175,6 +175,9 @@ private _payloadCheck = [
     ["hit", false],
     ["inconclusive", false]
 ] call _hmFrom;
+// Guard: _hmFrom may return nil if the compiled helper is broken; ensure _payloadCheck
+// is always a valid HashMap so downstream set-calls don't throw.
+if (!(_payloadCheck isEqualType createHashMap)) then { _payloadCheck = createHashMap; };
 isNil { [_did, "CHECK_PAPERS", "IDENTITY", _payloadCheck, _actorUid] call ARC_fnc_civsubEmitDelta; };
 
 // HIT roll (bounded)
