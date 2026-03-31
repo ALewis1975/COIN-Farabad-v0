@@ -446,6 +446,7 @@ class CfgFunctions
             class intelOrderBroadcast {};
             class intelOrderTick {};
             class intelTocIssueOrder {};
+            class intelTocIssueLead {};
 
             // Client helpers
             class intelClientNotify {};

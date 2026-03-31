@@ -36,6 +36,7 @@ class CfgRemoteExec
         class ARC_fnc_intelQueueDecide              { allowedTargets = 2; };
         class ARC_fnc_intelQueueSubmit              { allowedTargets = 2; };
         class ARC_fnc_intelTocIssueOrder            { allowedTargets = 2; };
+        class ARC_fnc_intelTocIssueLead             { allowedTargets = 2; };
 
         // Core / TOC RPCs
         class ARC_fnc_execObjectiveComplete         { allowedTargets = 2; };

@@ -1732,6 +1732,32 @@ python3 scripts/dev/sqflint_compat_scan.py \
 | 2 | CfgDialogs.hpp structure audit | Manual grep of IDC positions and heights | PASS | Header h=0.12 for both dialogs; all form control y values incremented +0.06; BG heights updated; buttons remain within BG bounds |
 | 3 | Dedicated-server runtime validation | N/A | BLOCKED | No Arma dedicated server/JIP runtime available in this container |
 
+---
+
+## Session: 2026-03-31 — HUMINT/CIVSUB Lead Integration Fixes
+
+**Branch/commit:** copilot/improve-humint-interface (commit: unrecoverable — appended before push)
+
+**Scenario:** Fix multiple interconnected issues: standalone CIVSUB dialogue never opened (dialog bypassed in favour of console INTEL tab), addAction proximity too tight (3 m vs dialog auto-close at 5 m), questions produced no actionable intel, leads could not be issued from the Farabad Console OPS tab.
+
+### Change Summary
+
+- `fn_civsubContactDialogOpen.sqf` — Use `createDialog "ARC_CivsubInteractDialog"` (IDD 78300) directly; console INTEL tab retained as fallback only if dialog creation fails. Dialog `onLoad` populates actions list, questions list, and requests the server snapshot.
+- `fn_civsubCivAddContactActions.sqf` — Proximity condition 3 m → 5 m, matching the dialog's built-in distance auto-close watcher.
+- `fn_civsubContactActionQuestion.sqf` — Cooperative Q_SEEN_IED / Q_SEEN_INS answers (threat ≥ 35) now call `ARC_fnc_intelLog` and `ARC_fnc_leadCreate` (offset RECON/IED lead 150–350 m from civ). HTML response includes lead ID confirmation.
+- `fn_uiConsoleOpsPaint.sqf` — OPS LEAD focus: authorized users see primary button enabled as "ISSUE LEAD ORDER"; others see explanatory disabled label.
+- `fn_uiConsoleActionOpsPrimary.sqf` — LEAD focus: reads selected lead ID from IDC 78038, dispatches `ARC_fnc_intelTocIssueLead` to server.
+- New `functions/command/fn_intelTocIssueLead.sqf` — Server RPC; resolves active field group (activeIncidentAcceptedByGroup → lastTaskingGroup → issuer's group); calls `ARC_fnc_intelOrderIssue` with type LEAD and specific leadId seed. Includes sender-owner security validation.
+- `config/CfgFunctions.hpp` + `config/CfgRemoteExec.hpp` — Register `ARC_fnc_intelTocIssueLead` (command subsystem, allowedTargets=2).
+
+### Checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan — all authored/modified SQF | `python3 scripts/dev/sqflint_compat_scan.py --strict <5 files>` | PASS | 0 violations in authored files |
+| 2 | Code review (automated) | Copilot code_review tool | PASS | 4 comments; semicolon added, magic number comment added; redundant type checks left as-is (matches existing `fn_intelTocIssueOrder` pattern) |
+| 3 | CodeQL security scan | codeql_checker | PASS | 0 alerts (SQF project; database created but no applicable rules fired) |
+| 4 | Gameplay / dedicated-server runtime | N/A | BLOCKED | No Arma dedicated server available in container |
 
 ---
 

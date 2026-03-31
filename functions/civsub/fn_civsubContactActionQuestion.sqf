@@ -262,15 +262,68 @@ if (_hyd < 35) then { _needsTail = _needsTail + " We also need clean water."; };
 private _condTail = "";
 if (_Sthreat >= 70) then { _condTail = " It's dangerous right now."; };
 
+// Intel generation: log an intel entry and optionally create a lead when the civ gives
+// a cooperative, informative answer about IEDs or insurgent activity.
+private _intelHtml = "";
+if (_cooperative && { _Sthreat >= 35 } && { _canon in ["Q_SEEN_IED", "Q_SEEN_INS"] }) then
+{
+    private _civPos = getPosATL _civ;
+    // Offset the lead position from the civ by 150-350 m (enough for a squad-size search area
+    // without pointing exactly at the civ, which would compromise the source).
+    private _jitter = 150 + floor (random 200);
+    private _leadPos = _civPos getPos [_jitter, random 360];
+    _leadPos resize 3;
+
+    private _cat = if (_canon isEqualTo "Q_SEEN_IED") then { "IED" } else { "HUMINT" };
+    private _leadType = if (_canon isEqualTo "Q_SEEN_IED") then { "IED" } else { "RECON" };
+    private _intelSummary = format [
+        "HUMINT (civilian tip): %1 in %2 (%3)",
+        if (_canon isEqualTo "Q_SEEN_IED") then { "possible IED activity" } else { "armed elements sighted" },
+        if (_did isEqualTo "") then { "unknown district" } else { _did },
+        _locName
+    ];
+
+    [_cat, _intelSummary, _civPos,
+        [
+            ["qid", _canon],
+            ["districtId", _did],
+            ["S_COOP", _Scoop toFixed 1],
+            ["S_THREAT", _Sthreat toFixed 1],
+            ["source", "HUMINT_QUESTION"]
+        ]
+    ] call ARC_fnc_intelLog;
+
+    // Create an actionable lead offset from the civ so field units have a grid to investigate.
+    private _leadId = [
+        _leadType,
+        format ["HUMINT: %1 near %2", if (_canon isEqualTo "Q_SEEN_IED") then {"IED activity"} else {"insurgents"}, _locName],
+        _leadPos,
+        (_Sthreat / 100) min 0.85,
+        1800,
+        "",
+        "CIVSUB",
+        "",
+        "CIVSUB_HUMINT"
+    ] call ARC_fnc_leadCreate;
+
+    if (_leadId isEqualType "" && { !(_leadId isEqualTo "") }) then
+    {
+        _intelHtml = format ["<br/><t size='0.78' color='#FFD080'>Intel logged. Lead created: %1</t>", _leadId];
+    } else {
+        _intelHtml = "<br/><t size='0.78' color='#FFD080'>Intel logged.</t>";
+    };
+};
+
 private _html = format [
-    "<t size='0.95' color='#CFE8FF'>%1</t><br/><t size='0.9'>%2%3%4</t><br/><t size='0.78' color='#A0A0A0'>D:%5  Coop:%6  Threat:%7</t>",
+    "<t size='0.95' color='#CFE8FF'>%1</t><br/><t size='0.9'>%2%3%4</t><br/><t size='0.78' color='#A0A0A0'>D:%5  Coop:%6  Threat:%7</t>%8",
     _title,
     _answer,
     _needsTail,
     _condTail,
     if (_did isEqualTo "") then {"N/A"} else {_did},
     _Scoop toFixed 0,
-    _Sthreat toFixed 0
+    _Sthreat toFixed 0,
+    _intelHtml
 ];
 
 private _outPayload = [
