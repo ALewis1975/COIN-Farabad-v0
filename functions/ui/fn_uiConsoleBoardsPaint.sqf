@@ -111,7 +111,12 @@ private _queueLines = [];
     if ((count _queueLines) < 10) then
     {
         private _g = if (_qFromGrp isEqualType "" && { _qFromGrp isNotEqualTo "" }) then { _qFromGrp } else { "" };
-        private _s = if (_qSummary isEqualType "" && { _qSummary isNotEqualTo "" }) then { _qSummary } else { "(no summary)" };
+        private _s = if (_qSummary isEqualType "" && { _qSummary isNotEqualTo "" }) then { _qSummary } else {
+            // No summary — fall back to kind + age + submitter for differentiation
+            private _ageS = if (_createdAt isEqualType 0 && { _createdAt > 0 }) then { round (serverTime - _createdAt) } else { -1 };
+            private _ageFmt = if (_ageS < 0) then { "" } else { if (_ageS < 60) then { format [" (%1s ago)", _ageS] } else { format [" (%1m ago)", floor (_ageS / 60)] } };
+            if (_g isEqualTo "") then { format ["%1%2", _k, _ageFmt] } else { format ["%1%2 from %3", _k, _ageFmt, _g] }
+        };
         _queueLines pushBack format ["- <t color='#B89B6B'>%1</t> %2 <t color='#FFFFFF'>(%3)</t>", _k, _s, if (_g isEqualTo "") then {"TOC"} else {_g}];
     };
 } forEach _queue;
@@ -220,7 +225,7 @@ else
         (["Grid", if (_grid isEqualTo "") then {"(n/a)"} else {_grid}] call _fmtKV) +
         (["AO", if (_zone isEqualTo "") then {"(n/a)"} else {_zone}] call _fmtKV) +
         (["Closeout Ready", format ["<t color='%1'>%2</t>", _crColor, _cr]] call _fmtKV) +
-        (["SITREP", _sr] call _fmtKV) +
+        (["SITREP", format ["<t color='%1'>%2</t>", if (_sitrepSent) then {"#9FE870"} else {"#FFD166"}, _sr]] call _fmtKV) +
         (["NEXT STEP", format ["<t color='%1'>%2</t>", _nextColor, _nextStep]] call _fmtKV)
     );
 };
@@ -267,5 +272,68 @@ private _p = ctrlPosition _ctrlMain;
 _p set [3, (_p # 3) max _minH];
 _ctrlMain ctrlSetPosition _p;
 _ctrlMain ctrlCommit 0;
+
+// Right panel: unit status summary + intel pool snapshot.
+private _ctrlDetailsGrp = _display displayCtrl 78016;
+private _ctrlDetails    = _display displayCtrl 78012;
+if (!isNull _ctrlDetailsGrp && { !isNull _ctrlDetails }) then
+{
+    _ctrlDetailsGrp ctrlShow true;
+    _ctrlDetails ctrlShow true;
+
+    // Unit status counts by state
+    private _cntAvail = 0;
+    private _cntOnScene = 0;
+    private _cntOther = 0;
+    {
+        if (!(_x isEqualType []) || { (count _x) < 2 }) then { continue; }; // Status row fields: [groupId(0), status(1)]
+        private _sRaw = if ((_x select 1) isEqualType "") then { _x select 1 } else { "UNAVAILABLE" };
+        private _s = toUpper _sRaw;
+        if (_s isEqualTo "OFFLINE") then { _s = "UNAVAILABLE"; };
+        if (_s in ["AVAILABLE"]) then { _cntAvail = _cntAvail + 1; } else {
+            if (_s in ["ON SCENE", "IN TRANSIT"]) then { _cntOnScene = _cntOnScene + 1; } else { _cntOther = _cntOther + 1; };
+        };
+    } forEach _statusRows;
+    private _unitSummary =
+        format ["<t color='#9FE870'>Available: %1</t>  <t color='#FFD166'>On task: %2</t>  <t color='#AAAAAA'>Other: %3</t>", _cntAvail, _cntOnScene, _cntOther];
+
+    // Lead pool snapshot
+    private _leadPoolR = missionNamespace getVariable ["ARC_leadPoolPublic", []];
+    if (!(_leadPoolR isEqualType [])) then { _leadPoolR = []; };
+    private _leadCnt = count _leadPoolR;
+    private _leadColor = if (_leadCnt >= 5) then {"#9FE870"} else { if (_leadCnt >= 1) then {"#FFD166"} else {"#AAAAAA"} };
+
+    // Queue counts
+    private _qCntR = count _queue;
+    private _qColor2 = if (_qCntR >= 5) then {"#FF7A7A"} else { if (_qCntR >= 3) then {"#FFD166"} else {"#9FE870"} };
+
+    private _rTxt =
+        "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Unit Status</t><br/>" +
+        _unitSummary + "<br/><br/>" +
+        "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Intel Pool</t><br/>" +
+        format ["<t size='0.9' color='#BDBDBD'>Active leads:</t> <t size='0.9' color='%1'>%2</t><br/>", _leadColor, _leadCnt] +
+        format ["<t size='0.9' color='#BDBDBD'>Queue pending:</t> <t size='0.9' color='%1'>%2</t><br/>", _qColor2, _qCntR] +
+        format ["<t size='0.9' color='#BDBDBD'>  INC %1 | FOL %2 | LEAD %3 | OTHER %4</t><br/>", _qInc, _qFollow, _qLead, _qOther] +
+        "<br/><t size='0.85' color='#808080'>BOARDS is read-only. Use TOC/CMD for actions.</t>";
+
+    _ctrlDetails ctrlSetStructuredText parseText _rTxt;
+
+    private _boardsRpDefaultPos = uiNamespace getVariable ["ARC_console_boardsRpDefaultPos", []];
+    if (!(_boardsRpDefaultPos isEqualType []) || { (count _boardsRpDefaultPos) < 4 }) then
+    {
+        _boardsRpDefaultPos = ctrlPosition _ctrlDetails;
+        uiNamespace setVariable ["ARC_console_boardsRpDefaultPos", +_boardsRpDefaultPos];
+    };
+    [_ctrlDetails] call BIS_fnc_ctrlFitToTextHeight;
+    private _boardsGrp = _display displayCtrl 78016;
+    private _boardsMinH = if (!isNull _boardsGrp) then { (ctrlPosition _boardsGrp) select 3 } else { 0.74 };
+    private _boardsP = ctrlPosition _ctrlDetails;
+    _boardsP set [0, _boardsRpDefaultPos select 0];
+    _boardsP set [1, _boardsRpDefaultPos select 1];
+    _boardsP set [2, _boardsRpDefaultPos select 2];
+    _boardsP set [3, (_boardsP select 3) max _boardsMinH];
+    _ctrlDetails ctrlSetPosition _boardsP;
+    _ctrlDetails ctrlCommit 0;
+};
 
 true
