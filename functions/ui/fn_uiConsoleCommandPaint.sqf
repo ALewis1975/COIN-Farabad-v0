@@ -128,7 +128,7 @@ if (!(_taskId isEqualTo "")) then
     }
     else
     {
-        _secText = "ACTION";
+        _secText = "CLOSEOUT / FOLLOW-ON";
         _secEnable = false;
     };
 }
@@ -271,8 +271,33 @@ else
 _lines pushBack "<br/>";
 _lines pushBack "<t size='1.05' font='PuristaMedium' color='#B89B6B'>TOC Queue</t>";
 _lines pushBack "";
-_lines pushBack format ["<t size='0.95'>Pending:</t> <t size='0.95'>%1</t>", count _pending];
-_lines pushBack format ["<t size='0.9' color='#BDBDBD'>Incidents:</t> <t size='0.9'>%1</t>  <t size='0.9' color='#BDBDBD'>Leads:</t> <t size='0.9'>%2</t>  <t size='0.9' color='#BDBDBD'>Other:</t> <t size='0.9'>%3</t>", count _pendingInc, count _pendingLead, _pendingOther max 0];
+private _pendingCnt = count _pending;
+_lines pushBack format ["<t size='0.95'>Pending:</t> <t size='0.95'>%1</t>  <t size='0.9' color='#BDBDBD'>(INC %2 | LEAD %3 | OTHER %4)</t>", _pendingCnt, count _pendingInc, count _pendingLead, _pendingOther max 0];
+
+// Per-item list: show up to 5 oldest pending items with type + age
+if (_pendingCnt > 0) then
+{
+    _lines pushBack "";
+    private _shownItems = 0;
+    {
+        if (_shownItems >= 5) exitWith {};
+        if (!(_x isEqualType []) || { (count _x) < 8 }) then { continue; };
+        private _qKindItem = toUpper (_x param [3, "?", [""]]);
+        private _qCreated  = _x param [1, -1, [0]];
+        private _qFromGrpItem = _x param [5, "", [""]];
+        private _qSumItem  = _x param [7, "", [""]];
+        private _ageS = if (_qCreated > 0) then { round (serverTime - _qCreated) } else { -1 };
+        private _ageFmt = if (_ageS < 0) then { "" } else { if (_ageS < 60) then { format [" %1s ago", _ageS] } else { format [" %1m ago", floor (_ageS / 60)] } };
+        private _fromFmt = if (_qFromGrpItem isEqualTo "") then { "" } else { format [" <t color='#AAAAAA'>(%1)</t>", _qFromGrpItem] };
+        private _sumFmt = if (_qSumItem isEqualTo "") then { "" } else { format [" — %1", _qSumItem select [0, (30 min (count _qSumItem))]] };
+        _lines pushBack format ["<t size='0.85'><t color='#B89B6B'>%1</t><t color='#AAAAAA'>%2%3</t>%4</t>", _qKindItem, _ageFmt, _fromFmt, _sumFmt];
+        _shownItems = _shownItems + 1;
+    } forEach _pending;
+    if (_pendingCnt > 5) then
+    {
+        _lines pushBack format ["<t size='0.85' color='#AAAAAA'>… and %1 more. Open TOC QUEUE to review all.</t>", _pendingCnt - 5];
+    };
+};
 
 private _allowDuringRtb = missionNamespace getVariable ["ARC_allowIncidentDuringAcceptedRtb", false];
 private _policyText = if (_allowDuringRtb) then
@@ -320,39 +345,75 @@ _p set [3, (_p select 3) max _minH];
 _ctrlMain ctrlSetPosition _p;
 _ctrlMain ctrlCommit 0;
 
-// Right panel: incident command quick-reference / queue summary.
+// Right panel: time-on-incident, per-group order state, next unlock condition.
 if (!isNull _ctrlDetailsGrp && { !isNull _ctrlDetails }) then
 {
     _ctrlDetailsGrp ctrlShow true;
     _ctrlDetails ctrlShow true;
 
-    private _taskId2 = missionNamespace getVariable ["ARC_activeTaskId", ""];
-    if (!(_taskId2 isEqualType "")) then { _taskId2 = ""; };
-    private _hasInc2 = (_taskId2 != "");
-    private _acc2 = missionNamespace getVariable ["ARC_activeIncidentAccepted", false];
-    if (!(_acc2 isEqualType true) && !(_acc2 isEqualType false)) then { _acc2 = false; };
-    private _cr2 = missionNamespace getVariable ["ARC_activeIncidentCloseReady", false];
-    if (!(_cr2 isEqualType true) && !(_cr2 isEqualType false)) then { _cr2 = false; };
-    private _sr2 = missionNamespace getVariable ["ARC_activeIncidentSitrepSent", false];
-    if (!(_sr2 isEqualType true) && !(_sr2 isEqualType false)) then { _sr2 = false; };
+    // Time-on-incident (from acceptance timestamp)
+    private _accAtRaw = missionNamespace getVariable ["ARC_activeIncidentAcceptedAt", -1];
+    if (!(_accAtRaw isEqualType 0)) then { _accAtRaw = -1; };
+    private _timeOnLine = if (!(_taskId isEqualTo "") && { _accepted } && { _accAtRaw > 0 }) then
+    {
+        private _elapsedS = round (serverTime - _accAtRaw);
+        private _elapsedFmt = if (_elapsedS < 60) then { format ["%1s", _elapsedS] } else { format ["%1m %2s", floor (_elapsedS / 60), _elapsedS mod 60] };
+        format ["<t size='0.9' color='#BDBDBD'>Time on incident:</t> <t size='0.9' color='#FFD166'>%1</t>", _elapsedFmt]
+    } else {
+        "<t size='0.9' color='#AAAAAA'>Time on incident: — </t>"
+    };
 
-    private _incSumColor = if (!_hasInc2) then {"#AAAAAA"} else { if (_cr2) then {"#9FE870"} else {"#FFD166"} };
-    private _incSumText  = if (!_hasInc2) then {"No active incident"} else { if (_cr2) then {"CLOSE-READY"} else { if (_acc2) then {"Accepted"} else {"Pending acceptance"} } };
+    // Per-group order state breakdown (all groups)
+    private _ordersR = missionNamespace getVariable ["ARC_pub_orders", []];
+    if (!(_ordersR isEqualType [])) then { _ordersR = []; };
+    private _grpOrderLines = [];
+    {
+        if (!(_x isEqualType []) || { (count _x) < 7 }) then { continue; };
+        private _stO = toUpper (_x select 2);
+        if (!(_stO in ["ISSUED","ACCEPTED","COMPLETED","FAILED"])) then { continue; };
+        private _tgO = _x select 4;
+        private _tyO = _x select 3;
+        private _stColor = "#FFFFFF";
+        if (_stO isEqualTo "ISSUED")    then { _stColor = "#FFD166"; };
+        if (_stO isEqualTo "ACCEPTED")  then { _stColor = "#9FE870"; };
+        if (_stO isEqualTo "COMPLETED") then { _stColor = "#AAAAAA"; };
+        if (_stO isEqualTo "FAILED")    then { _stColor = "#FF7A7A"; };
+        _grpOrderLines pushBack format ["<t size='0.85' color='#BDBDBD'>%1:</t> <t size='0.85'>%2</t> <t size='0.85' color='%3'>(%4)</t>", _tgO, _tyO, _stColor, _stO];
+        if ((count _grpOrderLines) >= 8) exitWith {};
+    } forEach _ordersR;
+    private _ordersSection = if ((count _grpOrderLines) > 0) then
+    {
+        "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Unit Orders</t><br/>" + (_grpOrderLines joinString "<br/>") + "<br/>"
+    } else {
+        "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Unit Orders</t><br/><t size='0.9' color='#AAAAAA'>No active orders.</t><br/>"
+    };
 
-    private _qPendingCnt2 = count _pending;
-    private _qColor2 = if (_qPendingCnt2 >= 5) then {"#FF7A7A"} else { if (_qPendingCnt2 >= 3) then {"#FFD166"} else {"#9FE870"} };
+    // Next workflow unlock condition
+    private _nextUnlock = if (_taskId isEqualTo "") then
+    {
+        "<t size='0.9' color='#AAAAAA'>Waiting for next incident.</t>"
+    } else {
+        if (!_accepted) then {
+            "<t size='0.9' color='#FFD166'>Unlock: Unit must ACCEPT ORDER (OPS tab).</t>"
+        } else {
+            if (!_sitrepSent) then {
+                "<t size='0.9' color='#FFD166'>Unlock: Field unit must submit SITREP (close-ready required).</t>"
+            } else {
+                if (!_closeReady) then {
+                    "<t size='0.9' color='#FF7A7A'>Unlock: Closeout conditions not yet met.</t>"
+                } else {
+                    "<t size='0.9' color='#9FE870'>Ready: Issue CLOSEOUT + FOLLOW-ON order now.</t>"
+                };
+            };
+        };
+    };
 
     private _rTxt =
-        "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Incident Status</t><br/>" +
-        format ["<t size='0.9' color='#BDBDBD'>State:</t> <t size='0.9' color='%1'>%2</t><br/>", _incSumColor, _incSumText] +
-        format ["<t size='0.9' color='#BDBDBD'>Accepted:</t> <t size='0.9'>%1</t><br/>", if (_acc2) then {"YES"} else {"NO"}] +
-        format ["<t size='0.9' color='#BDBDBD'>SITREP:</t> <t size='0.9'>%1</t><br/>", if (_sr2) then {"SENT"} else {"NOT SENT"}] +
-        format ["<t size='0.9' color='#BDBDBD'>Close-ready:</t> <t size='0.9'>%1</t><br/>", if (_cr2) then {"YES"} else {"NO"}] +
-        "<br/><t size='1.0' font='PuristaMedium' color='#B89B6B'>Queue</t><br/>" +
-        format ["<t size='0.9' color='#BDBDBD'>Pending items:</t> <t size='0.9' color='%1'>%2</t><br/>", _qColor2, _qPendingCnt2] +
-        format ["<t size='0.9' color='#BDBDBD'>Incidents / Leads:</t> <t size='0.9'>%1 / %2</t><br/>", count _pendingInc, count _pendingLead] +
-        "<br/><t size='0.85' color='#808080'>TOC QUEUE to approve items.</t><br/>" +
-        "<t size='0.85' color='#808080'>CLOSEOUT once incident is close-ready.</t>";
+        "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Incident Timeline</t><br/>" +
+        _timeOnLine + "<br/><br/>" +
+        _ordersSection + "<br/>" +
+        "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Next Unlock</t><br/>" +
+        _nextUnlock;
 
     _ctrlDetails ctrlSetStructuredText parseText _rTxt;
 

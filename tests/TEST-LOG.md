@@ -1600,3 +1600,42 @@ Three flags deferred for stabilization are now enabled:
 | 2 | CfgFunctions.hpp registration audit | Manual review | PASS | All 19 new functions registered in Threat and IED blocks |
 | 3 | CfgRemoteExec.hpp audit | Manual review | PASS | ARC_fnc_suicideBomberOnDetonate added with allowedTargets=2 |
 | 4 | Dedicated-server runtime validation | N/A | BLOCKED | No Arma dedicated server/JIP runtime available in this container |
+
+---
+
+## 2026-03-31 14:38 UTC — Console UI improvements: T-1 through T-14
+
+**Branch/Commit:** copilot/fix-cx-ui-issues @ commit: unrecoverable (pre-push, base 99adc4d)
+
+**Scenario:** 14 console UI tasks implemented across DASH, BOARDS, CMD, and shared infrastructure:
+- T-1: Clear spurious tooltip on IDC 78012 (CfgDialogs.hpp)
+- T-2: Convert OPS status-toggle toast to clientHint with 3s dedupe key
+- T-3+T-4: DASH incident block rewritten as multi-row structured text; SITREP NOT SENT colour-coded amber
+- T-5: DASH right-panel Quick Reference expanded from 4 to 8 tabs
+- T-6: DASH Intel/Leads "Queue pending" count replaced with oldest-queue-item descriptor (kind + age)
+- T-7: Next Actions coaching hint updated to reference "S3 / OPS tab → ACCEPT ORDER"
+- T-8: BOARDS queue rows show kind + age fallback when summary is empty
+- T-9: BOARDS SITREP field colour-coded (green=SENT, amber=NOT SENT)
+- T-10: BOARDS right panel added (unit status counts, lead pool, queue breakdown)
+- T-11: SKIPPED — group ID "2 325 AIR" dash issue is a mission.sqm callsign config, not code
+- T-12: CMD secondary button shows "CLOSEOUT / FOLLOW-ON" label even when disabled
+- T-13: CMD right panel replaced with time-on-incident, per-group order breakdown, next-unlock condition
+- T-14: CMD left panel TOC Queue section shows per-item list (max 5 items with type + age)
+
+**Commands:**
+```bash
+python3 scripts/dev/sqflint_compat_scan.py \
+  functions/ui/fn_uiConsoleCommandPaint.sqf \
+  functions/ui/fn_uiConsoleDashboardPaint.sqf \
+  functions/ui/fn_uiConsoleBoardsPaint.sqf \
+  functions/ui/fn_uiConsoleClickSecondary.sqf \
+  functions/ui/fn_uiIncidentGetNextActions.sqf
+```
+
+**Result:** PASS (compat scan)
+
+**Notes:**
+- PASS: compat scan — 27 total matches across 5 files, all pre-existing (reduced from 29 by fixing 2 new violations introduced in initial BOARDS right-panel draft).
+- No new sqflint violations introduced in any of the changed files.
+- BLOCKED: `sqflint` binary unavailable in container; dedicated-server gameplay validation deferred.
+- BLOCKED: JIP / late-client recovery for new right-panel data deferred to dedicated server test.

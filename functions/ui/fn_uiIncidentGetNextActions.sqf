@@ -86,7 +86,7 @@ if (_hasIncident) then
 {
     if (!_accepted) then
     {
-        _lines pushBack "<t color='#FFFFA0'>Blocked:</t> Incident not accepted. <t color='#DDDDDD'>Next:</t> OPS accept incident (OPS tab).";
+        _lines pushBack "<t color='#FFFFA0'>Blocked:</t> Incident not accepted. <t color='#DDDDDD'>Next:</t> S3 / OPS tab <t color='#B89B6B'>→ ACCEPT ORDER</t>";
     }
     else
     {

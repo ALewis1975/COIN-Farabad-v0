@@ -101,20 +101,24 @@ private _incLine = if (!_hasIncident) then
 }
 else
 {
+    private _titleColor = if (_closeReady && !_sitrepSent) then {"#FFFFA0"} else {"#DDDDDD"};
+    private _typeSuffix = if (_incType isEqualTo "") then {""} else { format [" <t color='#AAAAAA'>(%1)</t>", toUpper _incType] };
+    private _gridSuffix = if (_incGrid isEqualTo "") then {""} else { format [" <t color='#AAAAAA'>@ %1</t>", _incGrid] };
+    private _accColor = if (_acc) then {"#9FE870"} else {"#FF7A7A"};
+    private _srColor = if (_sitrepSent) then {"#9FE870"} else {"#FFD166"};
+    private _srText  = if (_sitrepSent) then {"SENT"} else {"NOT SENT"};
     format [
-        "<t color='%1'>%2</t>%3%4 %5",
-        if (_closeReady && !_sitrepSent) then {"#FFFFA0"} else {"#DDDDDD"},
+        "<t color='%1'>%2</t>%3%4<br/><t color='#AAAAAA'>Accepted:</t> <t color='%5'>%6</t>  <t color='#AAAAAA'>Unit:</t> <t>%7</t><br/><t color='#AAAAAA'>Close-ready:</t> <t>%8</t>  <t color='#AAAAAA'>SITREP:</t> <t color='%9'>%10</t>",
+        _titleColor,
         _incDisp,
-        if (_incType isEqualTo "") then {""} else { format [" <t color='#AAAAAA'>(%1)</t>", toUpper _incType] },
-        if (_incGrid isEqualTo "") then {""} else { format [" <t color='#AAAAAA'>@ %1</t>", _incGrid] },
-        format ["<t color='#AAAAAA'>| Accepted:</t> <t color='%1'>%2</t> <t color='#AAAAAA'>| Unit: %3 | Close-ready: %4 | SITREP:</t> <t color='%5'>%6</t>",
-            if (_acc) then {"#9FE870"} else {"#FF7A7A"},
-            if (_acc) then {"YES"} else {"NO"},
-            if (_accBy isEqualTo "") then {"UNASSIGNED"} else {_accBy},
-            if (_closeReady) then {"YES"} else {"NO"},
-            if (_sitrepSent) then {"#9FE870"} else {"#FFD166"},
-            if (_sitrepSent) then {"SENT"} else {"NOT SENT"}
-        ]
+        _typeSuffix,
+        _gridSuffix,
+        _accColor,
+        if (_acc) then {"YES"} else {"NO"},
+        if (_accBy isEqualTo "") then {"UNASSIGNED"} else {_accBy},
+        if (_closeReady) then {"YES"} else {"NO"},
+        _srColor,
+        _srText
     ]
 };
 
@@ -234,13 +238,29 @@ if (_foLine != "") then { _foLine = _foLine + "<br/>"; };
 
 private _secIncident = "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Current Incident</t><br/>" + _incLine + "<br/>" + _foLine + "<br/>";
 private _secOrders   = "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Orders</t><br/>" + _ordLine + "<br/><br/>";
+
+// Build oldest-queue-item descriptor (replaces duplicate pending count from right panel)
+private _qOldestDesc = "(none)";
+if (_qPendingCnt > 0) then
+{
+    private _q0 = _qPendingArr select 0;
+    if (_q0 isEqualType [] && { (count _q0) >= 4 }) then
+    {
+        private _q0Kind = toUpper ([_q0 select 3, "?"] call _trimText);
+        private _q0Created = _q0 select 1;
+        private _q0AgeS = if (_q0Created isEqualType 0 && { _q0Created > 0 }) then { round (serverTime - _q0Created) } else { -1 };
+        private _q0AgeFmt = if (_q0AgeS < 0) then { "" } else { if (_q0AgeS < 60) then { format [" (%1s ago)", _q0AgeS] } else { format [" (%1m ago)", floor (_q0AgeS / 60)] } };
+        _qOldestDesc = format ["<t color='#FFD166'>%1</t>%2", _q0Kind, _q0AgeFmt];
+    };
+};
+
 private _secIntel    = format [
     "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Intel / Leads</t><br/>" +
     "<t color='#DDDDDD'>Lead pool:</t> %1<br/>" +
-    "<t color='#DDDDDD'>Queue pending:</t> %2<br/>" +
+    "<t color='#DDDDDD'>Queue oldest:</t> %2<br/>" +
     "<t color='#DDDDDD'>Latest intel:</t> %3<br/><br/>",
     count _leadPool,
-    _qPending,
+    _qOldestDesc,
     _lastIntel
 ];
 private _secUnits = "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Unit Availability</t><br/>" + _unitsBlock + "<br/><br/>";
@@ -340,10 +360,14 @@ if (!isNull _ctrlDetailsGrp && { !isNull _ctrlDetails }) then
         format ["<t size='0.9' color='#BDBDBD'>Unit reports:</t> <t size='0.9'>%1</t><br/>", count _statusRows] +
         format ["<t size='0.9' color='#BDBDBD'>Intel leads:</t> <t size='0.9'>%1</t><br/>", count _leadPool] +
         "<br/><t size='1.0' font='PuristaMedium' color='#B89B6B'>Quick Reference</t><br/>" +
-        "<t size='0.85' color='#DDDDDD'>OPS — submit/track field actions</t><br/>" +
+        "<t size='0.85' color='#DDDDDD'>DASH  — at-a-glance COP / status</t><br/>" +
+        "<t size='0.85' color='#DDDDDD'>OPS   — submit/track field actions</t><br/>" +
         "<t size='0.85' color='#DDDDDD'>INTEL — leads, briefs, EPW</t><br/>" +
-        "<t size='0.85' color='#DDDDDD'>CMD — incident command cycle</t><br/>" +
-        "<t size='0.85' color='#DDDDDD'>AIR — airbase/tower controls</t><br/>" +
+        "<t size='0.85' color='#DDDDDD'>BOARDS — TOC queue / orders / SITREP</t><br/>" +
+        "<t size='0.85' color='#DDDDDD'>HANDOFF — EPW / evidence process</t><br/>" +
+        "<t size='0.85' color='#DDDDDD'>CMD   — incident command cycle</t><br/>" +
+        "<t size='0.85' color='#DDDDDD'>AIR   — airbase / tower controls</t><br/>" +
+        "<t size='0.85' color='#DDDDDD'>HQ    — admin / S1 personnel</t><br/>" +
         "<br/><t size='0.8' color='#808080'>LCTRL+LSHIFT+T to open console.</t>";
 
     _ctrlDetails ctrlSetStructuredText parseText _rTxt;

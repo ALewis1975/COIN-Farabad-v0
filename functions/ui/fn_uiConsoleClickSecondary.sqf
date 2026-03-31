@@ -80,7 +80,7 @@ switch (_tab) do
                 private _next = if (_cur isEqualTo "AVAILABLE") then { "OFFLINE" } else { "AVAILABLE" };
 
                 [player, _next] remoteExec ["ARC_fnc_tocRequestAcceptIncident", 2];
-                ["Status", format ["Status request sent: %1", _next]] call ARC_fnc_clientToast;
+                [format ["Status request sent: %1", _next], "INFO", "TOAST", "arc_ops_status_req", 3] call ARC_fnc_clientHint;
             };
         }
         else

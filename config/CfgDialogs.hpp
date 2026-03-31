@@ -812,7 +812,7 @@ text = "FARABAD CONSOLE";
                     h = 0.99;
                     colorBackground[] = {0.05,0.05,0.05,0.65};
                     colorText[] = {0.722,0.608,0.420,1};
-                    tooltip = "Details panel (scroll).";
+                    tooltip = "";
                 };
             };
         };
