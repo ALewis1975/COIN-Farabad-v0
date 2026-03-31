@@ -1758,3 +1758,31 @@ python3 scripts/dev/sqflint_compat_scan.py \
 | 2 | Code review (automated) | Copilot code_review tool | PASS | 4 comments; semicolon added, magic number comment added; redundant type checks left as-is (matches existing `fn_intelTocIssueOrder` pattern) |
 | 3 | CodeQL security scan | codeql_checker | PASS | 0 alerts (SQF project; database created but no applicable rules fired) |
 | 4 | Gameplay / dedicated-server runtime | N/A | BLOCKED | No Arma dedicated server available in container |
+
+---
+
+## 2026-03-31 16:17 UTC — Fix CIVSUB Background Check "server error at DELTA_CHECK_PAPERS"
+
+**Branch/Commit:** copilot/fix-background-check-error-again @ (this PR)
+
+**Scenario:** Player runs Background Check on a civilian and consistently receives "Background Check failed (server error at DELTA_CHECK_PAPERS). Try again." in the S2 console Latest Result panel. The step marker `civsub_bg_lastStep` is stuck at `DELTA_CHECK_PAPERS`.
+
+**Root cause (static analysis):**
+`fn_civsubIdentityTouch.sqf` contains two `exitWith { createHashMap }` statements placed inside `then {}` blocks:
+- Line 41 (uid generation guard): exits only the `then {}` block, not the function — `_civUid` remains `""` and execution continues
+- Line 51 (profile generation guard): exits only the `then {}` block, not the function — `_rec` is never assigned the generated profile
+
+When profile generation fails, the function returns a partially-populated `_rec` containing only `seen_by` and `last_interaction_ts` keys (no `passport_serial`). The background check guard at line 161 (`count _rec == 0`) passes because `count _rec == 2`. Execution reaches DELTA_CHECK_PAPERS with an incomplete identity record. Depending on runtime conditions, a crash between that step and CRIMEDB_PICK leaves `civsub_bg_lastStep = "DELTA_CHECK_PAPERS"` and the dispatcher shows the observed error.
+
+Secondary issue: `_payloadCheck` (built via inline `_hmFrom` compile block) could theoretically be nil if the helper compiled to an empty block, leaving `_payloadCheck set [...]` at lines 202/211 able to throw.
+
+**Fix:**
+- `fn_civsubIdentityTouch.sqf`: replaced both `exitWith` statements inside `then {}` with a flag-pattern (`_civUidOk`, `_profOk`) that places the `exitWith` at function scope after the block, with diagnostic log on failure.
+- `fn_civsubContactActionBackgroundCheck.sqf`: added `if (!(_payloadCheck isEqualType createHashMap)) then { _payloadCheck = createHashMap; }` immediately after the `_hmFrom` call, ensuring subsequent `set` operations never operate on nil.
+
+**Commands run:**
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan — changed SQF files | `python3 scripts/dev/sqflint_compat_scan.py functions/civsub/fn_civsubIdentityTouch.sqf functions/civsub/fn_civsubContactActionBackgroundCheck.sqf` | PASS | 0 violations |
+| 2 | Dedicated-server runtime validation | N/A | BLOCKED | No Arma dedicated server available in container |
