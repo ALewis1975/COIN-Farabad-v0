@@ -1550,3 +1550,27 @@ Three flags deferred for stabilization are now enabled:
 | 3 | AIRBASE planning-mode checks | `bash tests/static/airbase_planning_mode_checks.sh` | PASS | All 20 checks pass with grep -En |
 | 4 | CASREQ snapshot contract checks | `bash tests/static/casreq_snapshot_contract_checks.sh` | PASS | All 6 checks pass |
 | 5 | Dedicated-server runtime validation | N/A | BLOCKED | No Arma dedicated server/JIP runtime available in this container |
+
+---
+
+## 2026-03-31 03:30 UTC — S1-S5 Threat Economy / IED Lead Emission / VBIED Driven / Suicide Bomber
+
+**Branch/commit:** copilot/add-npcs-objects-and-enemies (commit: unrecoverable — in-progress PR)
+**Scenario:** Implementation of all 20 tasks from the IED/VBIED/Suicide decomposition plan
+
+### Change Summary
+
+- S1 (Tasks 001-005): Threat Economy Foundation — fn_threatEconomyInit, fn_threatGovernorCheck, fn_threatSchedulerTick, fn_threatScheduleEvent stub, fn_threatDistrictRiskDecay; wired into fn_threatInit, fn_stateInit, fn_bootstrapServer
+- S2 (Tasks 006-010): IED/VBIED lead emission — fn_iedEmitLeads, fn_vbiedEmitLeads, fn_iedComplexAttackStage, fn_iedBuildCaseFile; extended fn_iedCollectEvidence; CIVSUB coupling added to governor + decay
+- S3 (Tasks 011-014): Attribution + chain — fn_threatAttributionUpdate, fn_threatFollowOnTaskGate, fn_iedChainEmplace, fn_threatLeadEmitFromOutcome; extended fn_threatUpdateState with lead router + COIN influence hooks
+- S4 (Tasks 015-017): VBIED Driven + Facilitator Node — fn_vbiedDrivenSpawnTick (with telegraphing), fn_threatFacilitatorNode
+- S5 (Tasks 018-020): Feedback loop + Suicide Bomber — fn_threatApplyCoinInfluence, fn_threatAoPostureUpdate, fn_suicideBomberSpawnTick, fn_suicideBomberOnDetonate; extended civsub delta validate/envelope with IED events; added CfgRemoteExec entry for suicideBomberOnDetonate
+
+### Checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Static compat scan — all 19 new SQF files | `python3 scripts/dev/sqflint_compat_scan.py --strict <19 new files>` | PASS | Zero new violations in all 19 new files |
+| 2 | CfgFunctions.hpp registration audit | Manual review | PASS | All 19 new functions registered in Threat and IED blocks |
+| 3 | CfgRemoteExec.hpp audit | Manual review | PASS | ARC_fnc_suicideBomberOnDetonate added with allowedTargets=2 |
+| 4 | Dedicated-server runtime validation | N/A | BLOCKED | No Arma dedicated server/JIP runtime available in this container |

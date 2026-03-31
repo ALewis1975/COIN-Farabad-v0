@@ -94,6 +94,16 @@
     ["taskeng_v0_lead_linkage",       createHashMap],
     ["taskeng_v0_generation_buffers", createHashMap],
 
+    // Threat Economy v0 persistence
+    ["threat_v0_district_risk",           createHashMap],
+    ["threat_v0_attack_budget",           createHashMap],
+    ["threat_v0_global_cooldown_until",   -1],
+    ["threat_v0_scheduler_last_ts",       -1],
+    ["threat_v0_node_store",              createHashMap],
+
+    // IED v0 case files
+    ["ied_v0_case_files",                 createHashMap],
+
     // Deferred cleanup queue (despawn spawned entities after players move on)
     ["cleanupQueue", []],
 

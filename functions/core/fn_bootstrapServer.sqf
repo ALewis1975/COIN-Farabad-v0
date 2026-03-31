@@ -820,6 +820,11 @@ missionNamespace setVariable ["ARC_activeConvoyNetIds", ["activeConvoyNetIds", [
 [] call ARC_fnc_companyCommandTick;
 [] call ARC_fnc_companyCommandVirtualOpsTick;
 
+// Threat Economy v0: scheduler + risk decay ticks
+[] call ARC_fnc_threatSchedulerTick;
+[] call ARC_fnc_threatDistrictRiskDecay;
+[] call ARC_fnc_threatAoPostureUpdate;
+
 // Medical subsystem (casualty tracking, baseMed events)
 [] call ARC_fnc_medicalInit;
 

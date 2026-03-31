@@ -229,6 +229,16 @@ class CfgFunctions
             class iedClientEnableEvidenceLogistics {};
             class iedServerCheckDisposal {};
             class vbiedServerOnDestroyed {};
+
+            // S2-S5: Lead emission, complex attack, chain, VBIED driven, suicide bomber
+            class iedEmitLeads {};
+            class iedComplexAttackStage {};
+            class iedBuildCaseFile {};
+            class vbiedEmitLeads {};
+            class iedChainEmplace {};
+            class vbiedDrivenSpawnTick {};
+            class suicideBomberSpawnTick {};
+            class suicideBomberOnDetonate {};
         };
 
         // New: Intel layer functions live here (separate from Core/World)
@@ -588,6 +598,19 @@ class CfgFunctions
             class threatDebugSnapshot {};
             class threatGetCleanupLabelForTask {};
             class threatMarkCleanedByLabel {};
+
+            // Threat Economy v0 (S1-S5)
+            class threatEconomyInit {};
+            class threatGovernorCheck {};
+            class threatSchedulerTick {};
+            class threatScheduleEvent {};
+            class threatDistrictRiskDecay {};
+            class threatAttributionUpdate {};
+            class threatFollowOnTaskGate {};
+            class threatLeadEmitFromOutcome {};
+            class threatFacilitatorNode {};
+            class threatApplyCoinInfluence {};
+            class threatAoPostureUpdate {};
         };
 
 class Ops

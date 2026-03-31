@@ -84,6 +84,10 @@ switch (_event) do
         };
     };
     case "INTIMIDATION_EVENT": { _effects = ["FEAR_SPIKE"]; };
+    case "IED_DEFUSED":        { _effects = ["WHITE_TRUST_SMALL_GAIN", "RED_DISRUPTION_SMALL"]; };
+    case "IED_DETONATED":      { _effects = ["WHITE_TRUST_HARD_LOSS", "FEAR_SPIKE"]; };
+    case "IED_DRIVER_DETAINED":{ _effects = ["GOV_LEGIT_SMALL_GAIN", "RED_DISRUPTION_MED"]; };
+    case "VBIED_DETONATED":    { _effects = ["WHITE_TRUST_HARD_LOSS", "FEAR_SPIKE", "CIV_CASUALTY_LOSS"]; };
     default { _effects = []; };
 };
 

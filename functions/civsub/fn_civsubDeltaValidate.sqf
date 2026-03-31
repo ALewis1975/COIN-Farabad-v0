@@ -37,7 +37,11 @@ private _allow = [
     "MED_AID_CIV",
     "CIV_KILLED",
     "CIV_WIA",
-    "INTIMIDATION_EVENT"
+    "INTIMIDATION_EVENT",
+    "IED_DEFUSED",
+    "IED_DETONATED",
+    "IED_DRIVER_DETAINED",
+    "VBIED_DETONATED"
 ];
 
 if !(_event in _allow) exitWith {false};
