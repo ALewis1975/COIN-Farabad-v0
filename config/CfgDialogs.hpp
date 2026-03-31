@@ -137,7 +137,7 @@ class ARC_SitrepDialog
             x = 0.18;
             y = 0.12;
             w = 0.64;
-            h = 0.74;
+            h = 0.81;
             colorBackground[] = {0,0,0,0.80};
         };
 
@@ -161,7 +161,7 @@ class ARC_SitrepDialog
             x = 0.19;
             y = 0.165;
             w = 0.62;
-            h = 0.06;
+            h = 0.12;
         };
 
         class LabelSummary: RscText
@@ -169,7 +169,7 @@ class ARC_SitrepDialog
             idc = 77301;
             text = "Summary (one line):";
             x = 0.19;
-            y = 0.235;
+            y = 0.295;
             w = 0.25;
             h = 0.03;
         };
@@ -177,7 +177,7 @@ class ARC_SitrepDialog
         {
             idc = 77310;
             x = 0.19;
-            y = 0.265;
+            y = 0.325;
             w = 0.62;
             h = 0.04;
         };
@@ -187,7 +187,7 @@ class ARC_SitrepDialog
             idc = 77302;
             text = "Enemy / Situation:";
             x = 0.19;
-            y = 0.315;
+            y = 0.375;
             w = 0.25;
             h = 0.03;
         };
@@ -195,7 +195,7 @@ class ARC_SitrepDialog
         {
             idc = 77311;
             x = 0.19;
-            y = 0.345;
+            y = 0.405;
             w = 0.62;
             h = 0.04;
         };
@@ -205,7 +205,7 @@ class ARC_SitrepDialog
             idc = 77303;
             text = "Friendly Actions:";
             x = 0.19;
-            y = 0.395;
+            y = 0.455;
             w = 0.25;
             h = 0.03;
         };
@@ -213,7 +213,7 @@ class ARC_SitrepDialog
         {
             idc = 77312;
             x = 0.19;
-            y = 0.425;
+            y = 0.485;
             w = 0.62;
             h = 0.04;
         };
@@ -223,7 +223,7 @@ class ARC_SitrepDialog
             idc = 77304;
             text = "Task Status:";
             x = 0.19;
-            y = 0.475;
+            y = 0.535;
             w = 0.25;
             h = 0.03;
         };
@@ -231,7 +231,7 @@ class ARC_SitrepDialog
         {
             idc = 77313;
             x = 0.19;
-            y = 0.505;
+            y = 0.565;
             w = 0.62;
             h = 0.04;
         };
@@ -241,7 +241,7 @@ class ARC_SitrepDialog
             idc = 77305;
             text = "ACE Status (Ammo / Casualties / Equipment):";
             x = 0.19;
-            y = 0.555;
+            y = 0.615;
             w = 0.45;
             h = 0.03;
         };
@@ -249,7 +249,7 @@ class ARC_SitrepDialog
         {
             idc = 77321;
             x = 0.19;
-            y = 0.585;
+            y = 0.645;
             w = 0.20;
             h = 0.04;
         };
@@ -257,7 +257,7 @@ class ARC_SitrepDialog
         {
             idc = 77322;
             x = 0.40;
-            y = 0.585;
+            y = 0.645;
             w = 0.20;
             h = 0.04;
         };
@@ -265,7 +265,7 @@ class ARC_SitrepDialog
         {
             idc = 77323;
             x = 0.61;
-            y = 0.585;
+            y = 0.645;
             w = 0.20;
             h = 0.04;
         };
@@ -275,7 +275,7 @@ class ARC_SitrepDialog
             idc = 77306;
             text = "Requests:";
             x = 0.19;
-            y = 0.635;
+            y = 0.695;
             w = 0.25;
             h = 0.03;
         };
@@ -283,7 +283,7 @@ class ARC_SitrepDialog
         {
             idc = 77314;
             x = 0.19;
-            y = 0.665;
+            y = 0.725;
             w = 0.62;
             h = 0.04;
         };
@@ -293,7 +293,7 @@ class ARC_SitrepDialog
             idc = 77307;
             text = "Notes (optional):";
             x = 0.19;
-            y = 0.715;
+            y = 0.775;
             w = 0.25;
             h = 0.03;
         };
@@ -302,7 +302,7 @@ class ARC_SitrepDialog
             idc = 77315;
             style = 16; // ST_MULTI
             x = 0.19;
-            y = 0.745;
+            y = 0.805;
             w = 0.62;
             h = 0.07;
         };
@@ -312,7 +312,7 @@ class ARC_SitrepDialog
             idc = 77360;
             text = "Submit";
             x = 0.19;
-            y = 0.825;
+            y = 0.885;
             w = 0.30;
             h = 0.04;
             action = "[] call ARC_fnc_uiSitrepDialogSubmit;";
@@ -323,7 +323,7 @@ class ARC_SitrepDialog
             idc = 77361;
             text = "Cancel";
             x = 0.51;
-            y = 0.825;
+            y = 0.885;
             w = 0.30;
             h = 0.04;
             action = "[] call ARC_fnc_uiSitrepDialogCancel;";
@@ -1056,7 +1056,7 @@ class ARC_FollowOnDialog
             x = 0.20;
             y = 0.16;
             w = 0.60;
-            h = 0.68;
+            h = 0.74;
             colorBackground[] = {0,0,0,0.80};
         };
 
@@ -1080,7 +1080,7 @@ class ARC_FollowOnDialog
             x = 0.21;
             y = 0.205;
             w = 0.58;
-            h = 0.06;
+            h = 0.12;
         };
 
         class LabelRequest: RscText
@@ -1088,7 +1088,7 @@ class ARC_FollowOnDialog
             idc = 78101;
             text = "Requested follow-on:";
             x = 0.21;
-            y = 0.275;
+            y = 0.335;
             w = 0.25;
             h = 0.03;
         };
@@ -1096,7 +1096,7 @@ class ARC_FollowOnDialog
         {
             idc = 78102;
             x = 0.46;
-            y = 0.272;
+            y = 0.332;
             w = 0.33;
             h = 0.04;
             onLBSelChanged = "[] call ARC_fnc_uiFollowOnDialogUpdate;";
@@ -1107,7 +1107,7 @@ class ARC_FollowOnDialog
             idc = 78103;
             text = "RTB purpose:";
             x = 0.21;
-            y = 0.322;
+            y = 0.382;
             w = 0.25;
             h = 0.03;
         };
@@ -1115,7 +1115,7 @@ class ARC_FollowOnDialog
         {
             idc = 78104;
             x = 0.46;
-            y = 0.319;
+            y = 0.379;
             w = 0.33;
             h = 0.04;
         };
@@ -1125,7 +1125,7 @@ class ARC_FollowOnDialog
             idc = 78105;
             text = "HOLD intent:";
             x = 0.21;
-            y = 0.322;
+            y = 0.382;
             w = 0.25;
             h = 0.03;
         };
@@ -1133,7 +1133,7 @@ class ARC_FollowOnDialog
         {
             idc = 78106;
             x = 0.46;
-            y = 0.319;
+            y = 0.379;
             w = 0.20;
             h = 0.04;
         };
@@ -1142,7 +1142,7 @@ class ARC_FollowOnDialog
             idc = 78107;
             text = "Min:";
             x = 0.67;
-            y = 0.322;
+            y = 0.382;
             w = 0.05;
             h = 0.03;
         };
@@ -1150,7 +1150,7 @@ class ARC_FollowOnDialog
         {
             idc = 78108;
             x = 0.72;
-            y = 0.319;
+            y = 0.379;
             w = 0.07;
             h = 0.04;
         };
@@ -1160,7 +1160,7 @@ class ARC_FollowOnDialog
             idc = 78109;
             text = "PROCEED intent:";
             x = 0.21;
-            y = 0.322;
+            y = 0.382;
             w = 0.25;
             h = 0.03;
         };
@@ -1168,7 +1168,7 @@ class ARC_FollowOnDialog
         {
             idc = 78110;
             x = 0.46;
-            y = 0.319;
+            y = 0.379;
             w = 0.33;
             h = 0.04;
         };
@@ -1178,7 +1178,7 @@ class ARC_FollowOnDialog
             idc = 78111;
             text = "Rationale:";
             x = 0.21;
-            y = 0.372;
+            y = 0.432;
             w = 0.25;
             h = 0.03;
         };
@@ -1186,7 +1186,7 @@ class ARC_FollowOnDialog
         {
             idc = 78112;
             x = 0.21;
-            y = 0.402;
+            y = 0.462;
             w = 0.58;
             h = 0.04;
         };
@@ -1196,7 +1196,7 @@ class ARC_FollowOnDialog
             idc = 78113;
             text = "Constraints:";
             x = 0.21;
-            y = 0.452;
+            y = 0.512;
             w = 0.25;
             h = 0.03;
         };
@@ -1204,7 +1204,7 @@ class ARC_FollowOnDialog
         {
             idc = 78114;
             x = 0.21;
-            y = 0.482;
+            y = 0.542;
             w = 0.58;
             h = 0.04;
         };
@@ -1214,7 +1214,7 @@ class ARC_FollowOnDialog
             idc = 78115;
             text = "Support request:";
             x = 0.21;
-            y = 0.532;
+            y = 0.592;
             w = 0.25;
             h = 0.03;
         };
@@ -1222,7 +1222,7 @@ class ARC_FollowOnDialog
         {
             idc = 78116;
             x = 0.21;
-            y = 0.562;
+            y = 0.622;
             w = 0.58;
             h = 0.04;
         };
@@ -1232,7 +1232,7 @@ class ARC_FollowOnDialog
             idc = 78117;
             text = "Notes (optional):";
             x = 0.21;
-            y = 0.612;
+            y = 0.672;
             w = 0.25;
             h = 0.03;
         };
@@ -1241,7 +1241,7 @@ class ARC_FollowOnDialog
             idc = 78118;
             style = 16; // ST_MULTI
             x = 0.21;
-            y = 0.642;
+            y = 0.702;
             w = 0.58;
             h = 0.12;
         };
@@ -1251,7 +1251,7 @@ class ARC_FollowOnDialog
             idc = 78120;
             text = "Submit";
             x = 0.21;
-            y = 0.77;
+            y = 0.83;
             w = 0.28;
             h = 0.05;
             action = "[] call ARC_fnc_uiFollowOnDialogSubmit;";
@@ -1262,7 +1262,7 @@ class ARC_FollowOnDialog
             idc = 78121;
             text = "Cancel";
             x = 0.51;
-            y = 0.77;
+            y = 0.83;
             w = 0.28;
             h = 0.05;
             action = "[] call ARC_fnc_uiFollowOnDialogCancel;";

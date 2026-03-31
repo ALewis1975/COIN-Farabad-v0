@@ -145,8 +145,8 @@ missionNamespace setVariable ["civsub_v1_civ_tick_s", 20, true];
 missionNamespace setVariable ["civsub_v1_editorTestCivs", ["civsub_test_01"], true];
 missionNamespace setVariable ["civsub_v1_editorTestCivs_pin", true, true];
 
-missionNamespace setVariable ["civsub_v1_civ_cap_activeDistrictsMax", 1, true];
-missionNamespace setVariable ["civsub_v1_civ_cap_global", 24, true];
+missionNamespace setVariable ["civsub_v1_civ_cap_activeDistrictsMax", 3, true];
+missionNamespace setVariable ["civsub_v1_civ_cap_global", 36, true];
 missionNamespace setVariable ["civsub_v1_civ_cap_perDistrict", 16, true];
 missionNamespace setVariable ["civsub_v1_civ_cap_overrides", [["D14",2]], true]; // e.g., keep specific districts low
 missionNamespace setVariable ["civsub_v1_civ_minSeparation_m", 25, true];

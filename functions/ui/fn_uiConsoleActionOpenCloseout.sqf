@@ -193,16 +193,29 @@ if (_fProceedIntent isNotEqualTo "") then { _dProceedIntent = _fProceedIntent; }
 // If a system follow-on lead exists (IED detonation response, etc.), bias toward PROCEED.
 if (_sysLeadId isNotEqualTo "") then { _dReq = "PROCEED"; };
 
-// Custom header for TOC issue flow
+// Custom header for TOC issue flow (title bar already shows "ISSUE FOLLOW-ON ORDER")
 private _hdr = format [
-    "<t size='1.05' font='PuristaMedium'>ISSUE FOLLOW-ON ORDER</t><br/><t size='0.9' color='#CCCCCC'>To: %1 | After: %2</t>",
+    "<t size='0.9' color='#CCCCCC'>To: %1 | After: %2</t>",
     _tgtGrp,
     _disp
 ];
-if (_grid isNotEqualTo "") then { _hdr = _hdr + format ["<br/><t size='0.85' color='#AAAAAA'>Last known grid: %1</t>", _grid]; };
-if (_sitrepSent && { _sitrepSum isNotEqualTo "" }) then { _hdr = _hdr + format ["<br/><t size='0.85' color='#AAAAAA'>SITREP: %1</t>", _sitrepSum]; };
-if (_foSummary isNotEqualTo "") then { _hdr = _hdr + format ["<br/><t size='0.85' color='#AAAAAA'>Field follow-on request: %1</t>", _foSummary]; };
-if (_sysLeadName isNotEqualTo "") then { _hdr = _hdr + format ["<br/><t size='0.85' color='#AAAAAA'>System follow-on lead queued: %1</t>", _sysLeadName]; };
+if (_grid isNotEqualTo "") then { _hdr = _hdr + format ["<br/><t size='0.85' color='#AAAAAA'>Grid: %1</t>", _grid]; };
+// Combine context (SITREP summary and/or field follow-on) onto one line to keep header compact
+private _ctxLine = "";
+if (_sitrepSent && { _sitrepSum isNotEqualTo "" }) then { _ctxLine = format ["SITREP: %1", _sitrepSum]; };
+if (_foSummary isNotEqualTo "") then {
+    if (_ctxLine isNotEqualTo "") then
+        { _ctxLine = _ctxLine + format [" | Req: %1", _foSummary]; }
+    else
+        { _ctxLine = format ["Field req: %1", _foSummary]; };
+};
+if (_sysLeadName isNotEqualTo "") then {
+    if (_ctxLine isNotEqualTo "") then
+        { _ctxLine = _ctxLine + format [" | Lead: %1", _sysLeadName]; }
+    else
+        { _ctxLine = format ["Sys lead: %1", _sysLeadName]; };
+};
+if (_ctxLine isNotEqualTo "") then { _hdr = _hdr + format ["<br/><t size='0.85' color='#AAAAAA'>%1</t>", _ctxLine]; };
 
 uiNamespace setVariable ["ARC_followOn_title", "ISSUE FOLLOW-ON ORDER"]; 
 uiNamespace setVariable ["ARC_followOn_headerOverride", _hdr];
