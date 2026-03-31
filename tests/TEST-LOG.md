@@ -12,6 +12,32 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 ---
 
 
+## 2026-03-31 14:15 UTC — Fix SQF "Missing ;" syntax error in vbied/suicideBomber spawn ticks
+
+**Branch/Commit:** copilot/fix-missing-semicolon-error @ commit: unrecoverable (pre-push)
+
+**Scenario:** RPT showed "Error Missing ;" at line 64 of `fn_vbiedDrivenSpawnTick.sqf` and line 67 of `fn_suicideBomberSpawnTick.sqf`. Root cause: bare `exitWith {false}` used as the final statement inside an `if () then {}` body — invalid SQF syntax. Secondary issue: `private _threatId` declared inside the `then {}` block (which shares scope with the caller) and again at script level a few lines later — same-scope redeclaration.
+
+**Fix:**
+- Both files: moved the side-effect block into `if (cond) then { ... }` without `exitWith`, then placed `if (cond) exitWith {false}` at script scope immediately after.
+- Renamed inner `_threatId` to `_abortThreatId` to eliminate the same-scope double-declaration.
+
+**Commands:**
+```bash
+python3 scripts/dev/sqflint_compat_scan.py \
+  functions/ied/fn_vbiedDrivenSpawnTick.sqf \
+  functions/ied/fn_suicideBomberSpawnTick.sqf
+```
+
+**Result:** PASS
+
+**Notes:**
+- PASS: compat scan — 0 violations on both changed files.
+- BLOCKED: `sqflint` binary unavailable in container; dedicated-server gameplay validation deferred.
+- Rationale for `commit: unrecoverable`: entry recorded before push SHA is available.
+
+---
+
 ## 2026-03-31 00:27 UTC — Fix TOC Queue decision display, S3 OPS order visibility, and task-cycle guidance
 
 **Branch/Commit:** copilot/check-farabad-console-functionality @ commit: unrecoverable (pre-push; see HEAD 9d50839b)

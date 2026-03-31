@@ -56,13 +56,13 @@ private _nearPlayers = allPlayers select { alive _x && { (_x distance2D _spawnPo
 if ((count _nearPlayers) == 0) then
 {
     diag_log format ["[ARC][INFO] ARC_fnc_vbiedDrivenSpawnTick: no players near spawn — aborting, setting EXPIRED"];
-    private _threatId = ["activeIedThreatId", ""] call ARC_fnc_stateGet;
-    if (!(_threatId isEqualTo "")) then
+    private _abortThreatId = ["activeIedThreatId", ""] call ARC_fnc_stateGet;
+    if (!(_abortThreatId isEqualTo "")) then
     {
-        [_threatId, "EXPIRED", "driven_vbied_no_players_at_spawn"] call ARC_fnc_threatUpdateState;
+        [_abortThreatId, "EXPIRED", "driven_vbied_no_players_at_spawn"] call ARC_fnc_threatUpdateState;
     };
-    exitWith {false};
 };
+if ((count _nearPlayers) == 0) exitWith {false};
 
 // Telegraphing: emit STAGED lead before spawning (via lead router)
 private _threatId = ["activeIedThreatId", ""] call ARC_fnc_stateGet;
