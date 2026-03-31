@@ -81,6 +81,14 @@ private _spawnDelay = 60 + (floor (random 60));
     params ["_sp", "_tp", "_tid", "_delay"];
     sleep _delay;
 
+    // Validity gate: abort if threat was canceled or objective changed during delay
+    private _activeTaskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
+    private _activeObjKind = toUpper (["activeObjectiveKind", ""] call ARC_fnc_stateGet);
+    if (!(_activeObjKind isEqualTo "VBIED_DRIVEN_CHECKPOINT") && !(_activeObjKind isEqualTo "VBIED_DRIVEN_GATE")) exitWith
+    {
+        diag_log format ["[ARC][INFO] ARC_fnc_vbiedDrivenSpawnTick: objective changed during delay, aborting spawn tid=%1", _tid];
+    };
+
     // Fairness check: intel level gate
     private _intelLevel = missionNamespace getVariable ["ARC_vbiedDrivenIntelLevel", 0];
     if (!(_intelLevel isEqualType 0)) then { _intelLevel = 0; };

@@ -89,14 +89,21 @@ if ((count _chainNetIds) > 0) then
                 params ["_chainNid", "_delayS"];
                 sleep _delayS;
                 private _chainObj = objectFromNetId _chainNid;
-                if (!isNull _chainObj) then
+                if (isNull _chainObj) then
                 {
-                    private _p = getPosATL _chainObj;
-                    _p resize 3; _p set [2, 0];
-                    private _boomClass = "Bo_Mk82";
-                    createVehicle [_boomClass, _p, [], 0, "CAN_COLLIDE"];
-                    deleteVehicle _chainObj;
-                    diag_log format ["[ARC][INFO] Chain device detonated netId=%1", _chainNid];
+                    diag_log format ["[ARC][WARN] ARC_fnc_iedChainEmplace: chain device not found at detonation netId=%1", _chainNid];
+                }
+                else
+                {
+                    if (alive _chainObj) then
+                    {
+                        private _p = getPosATL _chainObj;
+                        _p resize 3; _p set [2, 0];
+                        private _boomClass = "Bo_Mk82";
+                        createVehicle [_boomClass, _p, [], 0, "CAN_COLLIDE"];
+                        deleteVehicle _chainObj;
+                        diag_log format ["[ARC][INFO] Chain device detonated netId=%1", _chainNid];
+                    };
                 };
             };
             _delay = _delay + 2 + (floor (random 4));

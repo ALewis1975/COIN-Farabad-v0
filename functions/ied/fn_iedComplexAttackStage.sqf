@@ -82,8 +82,9 @@ private _unitClasses = [
     "O_Soldier_GL_F"
 ];
 
+for "_unitIdx" from 0 to (_unitCount - 1) do
 {
-    private _uClass = _unitClasses select (_forEachIndex mod (count _unitClasses));
+    private _uClass = _unitClasses select (_unitIdx mod (count _unitClasses));
     private _u = _grp createUnit [_uClass, _stagePos, [], 5, "NONE"];
     if (alive _u) then
     {
@@ -91,7 +92,7 @@ private _unitClasses = [
         _u setBehaviour "CARELESS";
         _u setCombatMode "BLUE";
     };
-} forEach ([] call { private _r=[]; for "_i" from 1 to _unitCount do {_r pushBack _i}; _r });
+};
 
 // Hold waypoint at staging pos
 private _wp = _grp addWaypoint [_stagePos, 0];

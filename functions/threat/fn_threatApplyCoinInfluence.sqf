@@ -66,7 +66,8 @@ private _rec = _records select _idxRec;
 private _influence = [_rec, "influence", []] call _kvGet;
 if (!(_influence isEqualType [])) then { _influence = []; };
 private _applied = [_influence, "applied", false] call _kvGet;
-if (_applied isEqualType true && { _applied }) exitWith
+// Guard: only skip when explicitly true (not missing or wrong type)
+if (_applied isEqualType true && { _applied isEqualTo true }) exitWith
 {
     diag_log format ["[ARC][INFO] ARC_fnc_threatApplyCoinInfluence: already applied, skipping threat=%1", _threatId];
     false

@@ -41,8 +41,7 @@ if (!(_records isEqualType [])) then { _records = []; };
 private _openDistricts = [];
 {
     private _rec = _x;
-    private _stateU = toUpper ((_rec select {(_x isEqualType []) && {(count _x) >= 2} && {(_x select 0) isEqualTo "state"}} select [0,1]) apply {_x select 1} select [0,""] select 0);
-    // Simplified: look for state not in terminal set
+    // Extract state value from pairs array
     private _stateVal = "";
     {
         if ((_x isEqualType []) && { (count _x) >= 2 } && { ((_x select 0) isEqualTo "state") }) exitWith { _stateVal = _x select 1; };

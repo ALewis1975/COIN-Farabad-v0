@@ -88,14 +88,9 @@ switch (_transU) do
             diag_log format ["[ARC][INFO] ARC_fnc_vbiedEmitLeads: STAGED → checkpoint_advisory lead=%1 threat=%2", _cpId, _threatId];
         };
 
-        // Set checkpoint standby flag for district (auto-cleared after 5 min)
-        missionNamespace setVariable [format ["ARC_checkpointStandby_%1", _districtId], true, true];
-        private _flagVar = format ["ARC_checkpointStandby_%1", _districtId];
-        [_flagVar] spawn {
-            params ["_v"];
-            sleep 300;
-            missionNamespace setVariable [_v, false, true];
-        };
+        // Set checkpoint standby flag (timestamp-based; cleared when ts has expired)
+        private _standbyExpiry = serverTime + 300;
+        missionNamespace setVariable [format ["ARC_checkpointStandby_%1", _districtId], _standbyExpiry, true];
     };
 
     case "DISCOVERED":

@@ -75,12 +75,12 @@ if (_confidence >= 0.5 && { _prevConfidence < 0.5 }) then
 {
     _actorType = "TIM_CELL";
 
-    // Deterministic callsign from district + threat sequence
+    // Deterministic callsign from district character codes
     private _links = [_rec, "links", []] call _kvGet;
     private _districtId = [_links, "district_id", "D00"] call _kvGet;
     private _seed = 0;
-    private _cs = count _districtId;
-    for "_i" from 0 to (_cs - 1) do { _seed = _seed + (toArray (_districtId select [_i,1]) select 0); };
+    private _districtChars = toArray _districtId;
+    { _seed = _seed + _x; } forEach _districtChars;
     private _csIdx = _seed mod 3; // COBRA/VIPER/ALPHA
     private _callsign = _callsigns select _csIdx;
 

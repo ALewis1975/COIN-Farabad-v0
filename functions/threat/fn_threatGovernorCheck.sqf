@@ -83,7 +83,7 @@ if (missionNamespace getVariable ["civsub_v1_enabled", false]) then
     if (_civDistricts isEqualType createHashMap) then
     {
         private _d = [_civDistricts, _districtId, createHashMap] call _hg;
-        private _greenScore = [_d, "G", 35] call _hg;
+        private _greenScore = [_d, "G", 35] call _hg; // 35 = neutral GREEN baseline (matches ARC_fnc_civsubDistrictSeedProfile G_BASE_U default)
         if (!(_greenScore isEqualType 0)) then { _greenScore = 35; };
 
         if (_greenScore >= 80 && { _tier < 2 }) then

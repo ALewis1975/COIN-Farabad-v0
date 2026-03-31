@@ -105,6 +105,26 @@ diag_log format ["[ARC][INFO] ARC_fnc_suicideBomberSpawnTick: bomber=%1 target=%
     while { alive _unit } do
     {
         sleep 2;
+
+        // Exit if threat is no longer active (EXPIRED, CLOSED, CLEANED)
+        if (!(_tid isEqualTo "")) then
+        {
+            private _records = ["threat_v0_records", []] call ARC_fnc_stateGet;
+            private _recState = "";
+            if (_records isEqualType []) then
+            {
+                {
+                    private _tid2 = "";
+                    { if ((_x isEqualType []) && {(count _x) >= 2} && {(_x select 0) isEqualTo "threat_id"}) exitWith { _tid2 = _x select 1; }; } forEach _x;
+                    if (_tid2 isEqualTo _tid) exitWith
+                    {
+                        { if ((_x isEqualType []) && {(count _x) >= 2} && {(_x select 0) isEqualTo "state"}) exitWith { _recState = _x select 1; }; } forEach _x;
+                    };
+                } forEach _records;
+            };
+            if (_recState isEqualType "" && { toUpper _recState in ["EXPIRED","CLOSED","CLEANED"] }) then { break; };
+        };
+
         if ((_unit distance2D _tp) <= 8) then
         {
             // Trigger detonation via server RPC

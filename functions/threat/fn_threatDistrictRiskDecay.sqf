@@ -69,7 +69,7 @@ private _districtIds = [
     if (_civEnabled) then
     {
         private _d = [_civDistricts, _id, createHashMap] call _hg;
-        _whiteScore = [_d, "W", 50] call _hg;
+        _whiteScore = [_d, "W", 50] call _hg; // 50 = neutral WHITE baseline (mid-point of 0..100 W scale)
         if (!(_whiteScore isEqualType 0)) then { _whiteScore = 50; };
     };
 
