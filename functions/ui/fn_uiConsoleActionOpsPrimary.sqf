@@ -29,7 +29,30 @@ switch (_focus) do
 
     case "LEAD":
     {
-        ["Operations", "Leads are actionable via follow-on requests or TOC tasking."] call ARC_fnc_clientToast;
+        // Issue the selected lead to the active field group as a PROCEED/LEAD order.
+        private _disp = findDisplay 78000;
+        private _cLead = if (!isNull _disp) then { _disp displayCtrl 78038 } else { controlNull };
+        private _sel = if (!isNull _cLead) then { lbCurSel _cLead } else { -1 };
+        private _lbData = if (_sel >= 0) then { _cLead lbData _sel } else { "NONE" };
+        private _parts = _lbData splitString "|";
+        private _leadId = if ((count _parts) > 1) then { _parts select 1 } else { "" };
+        private _ok = (!isNull _disp) && { !isNull _cLead } && { _sel >= 0 } && { !(_lbData isEqualTo "") } && { !(_lbData isEqualTo "NONE") } && { !(_leadId isEqualTo "") };
+
+        if (_ok) then
+        {
+            [player, _leadId, ""] remoteExecCall ["ARC_fnc_intelTocIssueLead", 2];
+            ["Operations", format ["LEAD ORDER issued: %1", _leadId]] call ARC_fnc_clientToast;
+        }
+        else
+        {
+            private _msg = "Could not issue lead.";
+            if (isNull _disp)    then { _msg = "Console not found."; } else {
+            if (isNull _cLead)   then { _msg = "Lead list not found."; } else {
+            if (_sel < 0)        then { _msg = "Select a lead from the list first."; } else {
+            if (_lbData isEqualTo "NONE") then { _msg = "No leads available."; };
+            };};};
+            ["Operations", _msg] call ARC_fnc_clientToast;
+        };
     };
 
     default

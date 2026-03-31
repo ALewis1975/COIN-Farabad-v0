@@ -464,9 +464,19 @@ else
                 _details = _details + format ["<t color='#A0A0A0'>Type:</t> %1<br/>", _typ];
                 _details = _details + format ["<t color='#A0A0A0'>Grid:</t> %1<br/>", _grid];
                 if (_tag != "") then { _details = _details + format ["<t color='#A0A0A0'>Tag:</t> %1<br/>", _tag]; };
-                _details = _details + "<br/>Leads are intelligence-derived opportunities. TOC/S2 can convert them into tasks/orders.";
-                _primaryLabel = "ACTION";
-                _primaryEnabled = false;
+                _details = _details + "<br/>Leads are intelligence-derived opportunities.<br/>";
+                if (_isAuth) then
+                {
+                    _primaryLabel = "ISSUE LEAD ORDER";
+                    _primaryEnabled = true;
+                    _details = _details + "ISSUE LEAD ORDER: assign this lead to the active field group as a PROCEED order.";
+                }
+                else
+                {
+                    _primaryLabel = "ACTION";
+                    _primaryEnabled = false;
+                    _details = _details + "TOC/S2 can issue this as a PROCEED order to a field group.";
+                };
             };
         };
     };

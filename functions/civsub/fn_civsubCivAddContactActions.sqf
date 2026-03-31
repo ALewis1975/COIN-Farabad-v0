@@ -30,7 +30,7 @@ if !(_civ getVariable ["civsub_v1_isCiv", false]) exitWith {
 if (_civ getVariable ["civsub_v1_contact_actions_added", false]) exitWith {true};
 _civ setVariable ["civsub_v1_contact_actions_added", true];
 
-private _cond = "alive _target && {player distance _target < 3} && {_target getVariable ['civsub_v1_isCiv',false]}";
+private _cond = "alive _target && {player distance _target < 5} && {_target getVariable ['civsub_v1_isCiv',false]}";
 
 _civ addAction [
     "Order to Stop",
