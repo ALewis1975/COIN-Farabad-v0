@@ -11,6 +11,43 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-03-31 23:05 UTC — Fix task system: leads bypassing TOC queue, auto-converting to incidents, and Proceed Order flow
+
+**Branch/Commit:** copilot/fix-leads-actionable-on-s3-screen @ commit: unrecoverable (static review pass; SHA not yet available at time of log entry)
+
+**Scenario:** Task system had four related bugs:
+1. S3 could directly issue LEAD orders from the OPS screen without TOC review.
+2. Leads automatically converted into incidents via TOC backlog and lead pool consumption in `fn_incidentCreate`.
+3. Leads had no REJECTED end-state in `leadHistory`.
+4. Accepting a Proceed Order would trigger a new lead-pool-based incident rather than using the order's embedded data.
+
+**Files changed:**
+- `functions/ui/fn_uiConsoleOpsPaint.sqf` — S3 LEAD action button now reads "SUBMIT TO TOC QUEUE"
+- `functions/ui/fn_uiConsoleActionOpsPrimary.sqf` — LEAD case now submits `LEAD_ISSUE_REQUEST` to TOC queue via `ARC_fnc_intelQueueSubmit` instead of directly calling `ARC_fnc_intelTocIssueLead`
+- `functions/command/fn_intelQueueSubmit.sqf` — Server-side validation for `LEAD_ISSUE_REQUEST`: rejects if leadId missing or lead not in pool
+- `functions/command/fn_intelQueueDecide.sqf` — Added `LEAD_ISSUE_REQUEST` approval case (calls `fn_intelTocIssueLead`); added `REJECTED` leadHistory entry for rejected `LEAD_ISSUE_REQUEST`; removed backlog enqueue from `LEAD_REQUEST` case; `INCIDENT` case now passes `_lid` directly to `fn_incidentCreate` (no backlog intermediary)
+- `functions/core/fn_incidentCreate.sqf` — Added `_seedLeadId` param; removed TOC backlog auto-consumption and lead pool auto-consumption; only accepted LEAD orders or `_seedLeadId` can introduce leads into incidents
+- `functions/ui/fn_uiConsoleTocQueuePaint.sqf` — Added `LEAD_ISSUE_REQUEST` display case in queue detail panel
+
+**Commands:**
+```bash
+python3 scripts/dev/sqflint_compat_scan.py \
+  functions/ui/fn_uiConsoleOpsPaint.sqf \
+  functions/ui/fn_uiConsoleActionOpsPrimary.sqf \
+  functions/command/fn_intelQueueSubmit.sqf \
+  functions/command/fn_intelQueueDecide.sqf \
+  functions/core/fn_incidentCreate.sqf \
+  functions/ui/fn_uiConsoleTocQueuePaint.sqf
+```
+
+**Result:** PASS (compat scan) / BLOCKED (gameplay)
+
+**Notes:**
+- PASS: compat scan — no new violations in changed files; 142 pre-existing violations across the 6 files, all pre-dated.
+- BLOCKED: `sqflint` binary unavailable in container; dedicated-server gameplay validation (TOC queue approval cycle, Proceed Order acceptance, incident generation) deferred.
+
+---
+
 ## 2026-03-31 14:45 UTC — Fix undefined `_taskId` in fn_tocReceiveSitrep causing "Error in expression"
 
 **Branch/Commit:** copilot/fix-undefined-variable-error-another-one @ 99adc4d

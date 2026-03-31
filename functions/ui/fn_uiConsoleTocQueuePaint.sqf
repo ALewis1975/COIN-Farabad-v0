@@ -201,6 +201,29 @@ private _statusTxt = "";
 private _kindU = toUpper _kind;
 switch (_kindU) do
 {
+    case "LEAD_ISSUE_REQUEST":
+    {
+        private _leadId2  = [_payload, "leadId",      ""] call _getPair;
+        private _leadType = [_payload, "leadType",    "LEAD"] call _getPair;
+        private _dispName = [_payload, "displayName", _sum] call _getPair;
+
+        if (!(_leadId2  isEqualType "")) then { _leadId2  = ""; };
+        if (!(_leadType isEqualType "")) then { _leadType = "LEAD"; };
+        if (!(_dispName isEqualType "")) then { _dispName = _sum; };
+
+        _payloadTxt = format ["Lead Issue Request: <t color='#FFD700'>%1</t><br/>Lead: %2<br/>Grid: %3 | Zone: %4<br/>Lead ID: %5",
+            toUpper (trim _leadType), trim _dispName, _grid, _zone, trim _leadId2];
+
+        if (_stU isEqualTo "APPROVED") then
+        {
+            _statusTxt = "Lead Status: APPROVED — PROCEED order issued to field group.";
+        };
+        if (_stU isEqualTo "REJECTED") then
+        {
+            _statusTxt = "Lead Status: REJECTED — lead remains in pool.";
+        };
+    };
+
     case "LEAD_REQUEST":
     {
         private _leadType = [_payload, "leadType", "RECON"] call _getPair;

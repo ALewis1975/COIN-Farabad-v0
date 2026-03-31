@@ -195,12 +195,9 @@ if (_approve) then
                 [] call ARC_fnc_intelQueueBroadcast;
             };
 
-
-            // Enqueue into TOC backlog so the next incident generator can prefer this approved lead.
-            if (!isNil "ARC_fnc_tocBacklogEnqueue" && { _lid isEqualType "" } && { _lid isNotEqualTo "" }) then
-            {
-                [_lid, _pri, _id, _by, _summary] call ARC_fnc_tocBacklogEnqueue;
-            };
+            // NOTE: Do NOT enqueue to TOC backlog here. The lead now sits in the pool.
+            // S3 staff must submit a LEAD_ISSUE_REQUEST queue item to have it issued as a
+            // PROCEED order. This enforces the full command review cycle.
 
             ["OPS", format ["QUEUE: %1 approved %2 (%3). Lead %4 created.", _by, _id, _kindU, _lid], _posATL,
                 [
@@ -213,6 +210,50 @@ if (_approve) then
                     ["fromGroup", _fromGroup]
                 ]
             ] call ARC_fnc_intelLog;
+        };
+
+        case "LEAD_ISSUE_REQUEST":
+        {
+            // S3 has requested TOC approval to issue a specific lead as a PROCEED order.
+            private _leadId2 = [_payload, "leadId", ""] call _getP;
+            if (!(_leadId2 isEqualType "")) then { _leadId2 = ""; };
+            _leadId2 = trim _leadId2;
+
+            if (_leadId2 isEqualTo "") then
+            {
+                ["OPS", format ["QUEUE: %1 approved %2 (%3) but no leadId in payload — skipped.", _by, _id, _kindU], _posATL,
+                    [
+                        ["event", "TOC_QUEUE_APPROVED"],
+                        ["queueId", _id],
+                        ["kind", _kindU],
+                        ["error", "NO_LEAD_ID"]
+                    ]
+                ] call ARC_fnc_intelLog;
+            }
+            else
+            {
+                // Issue the LEAD order for this specific lead.
+                // fn_intelTocIssueLead consumes the lead from the pool and creates the PROCEED order.
+                private _issueNote = trim _note;
+                [_approver, _leadId2, _issueNote] call ARC_fnc_intelTocIssueLead;
+
+                _meta = [_meta, "leadId", _leadId2] call _setPair;
+                _item set [11, _meta];
+                _q set [_idx, _item];
+                ["tocQueue", _q] call ARC_fnc_stateSet;
+                [] call ARC_fnc_intelQueueBroadcast;
+
+                ["OPS", format ["QUEUE: %1 approved %2 (%3). PROCEED order issued for lead %4.", _by, _id, _kindU, _leadId2], _posATL,
+                    [
+                        ["event", "TOC_QUEUE_APPROVED"],
+                        ["queueId", _id],
+                        ["kind", _kindU],
+                        ["leadId", _leadId2],
+                        ["from", _from],
+                        ["fromGroup", _fromGroup]
+                    ]
+                ] call ARC_fnc_intelLog;
+            };
         };
 
         case "FOLLOWON_PACKAGE":
@@ -409,9 +450,8 @@ if (_approve) then
 
         case "INCIDENT":
         {
-            // Seeded or submitted INCIDENT items: create a lead from the payload,
-            // enqueue it to the TOC backlog, and auto-trigger incident creation
-            // so the approved incident appears on the Ops screen for acceptance.
+            // Seeded or submitted INCIDENT items: create a lead from the payload and
+            // pass it directly to fn_incidentCreate to avoid using the TOC backlog.
             private _incType    = [_payload, "incidentType", "PATROL"] call _getP;
             private _disp       = [_payload, "displayName", _summary] call _getP;
             private _marker     = [_payload, "marker", ""] call _getP;
@@ -429,7 +469,7 @@ if (_approve) then
             if (!(_incPos isEqualType [])) then { _incPos = _posATL; };
             if ((count _incPos) < 2) then { _incPos = _posATL; };
 
-            // Create a high-priority lead so the incident generator will consume it.
+            // Create a high-priority seed lead for the incident generator.
             private _lid = [_incType, _disp, _incPos, 0.80, 3600, _id, "", "", "TOC_INCIDENT"] call ARC_fnc_leadCreate;
             if (!(_lid isEqualType "")) then { _lid = ""; };
 
@@ -444,19 +484,13 @@ if (_approve) then
                 [] call ARC_fnc_intelQueueBroadcast;
             };
 
-            // Enqueue the lead into the TOC backlog (priority 1 = highest).
-            if (!isNil "ARC_fnc_tocBacklogEnqueue" && { _lid isEqualType "" } && { _lid isNotEqualTo "" }) then
-            {
-                [_lid, 1, _id, _by, _summary] call ARC_fnc_tocBacklogEnqueue;
-            };
-
-            // Auto-trigger incident creation if no active incident exists.
-            // This ensures the approved incident immediately appears on the Ops screen.
+            // Auto-trigger incident creation, passing the leadId directly so
+            // fn_incidentCreate does not need to consult the backlog or pool.
             private _activeTaskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
             if (!(_activeTaskId isEqualType "")) then { _activeTaskId = ""; };
             if (_activeTaskId isEqualTo "" && { _lid isNotEqualTo "" }) then
             {
-                [] call ARC_fnc_incidentCreate;
+                [_lid] call ARC_fnc_incidentCreate;
             };
 
             ["OPS", format ["QUEUE: %1 approved %2 (%3). Lead %4 created. Incident generation triggered.", _by, _id, _kindU, _lid], _posATL,
@@ -485,6 +519,22 @@ if (_approve) then
 }
 else
 {
+    // Record REJECTED end-state for LEAD_ISSUE_REQUEST so the lead pool knows it was reviewed.
+    if (_kindU isEqualTo "LEAD_ISSUE_REQUEST") then
+    {
+        private _rejLeadId = [_payload, "leadId", ""] call _getP;
+        if (!(_rejLeadId isEqualType "")) then { _rejLeadId = ""; };
+        _rejLeadId = trim _rejLeadId;
+
+        if (_rejLeadId isNotEqualTo "") then
+        {
+            private _lh = ["leadHistory", []] call ARC_fnc_stateGet;
+            if (!(_lh isEqualType [])) then { _lh = []; };
+            _lh pushBack [_rejLeadId, "REJECTED", serverTime, _by, _id];
+            ["leadHistory", _lh] call ARC_fnc_stateSet;
+        };
+    };
+
     ["OPS", format ["QUEUE: %1 rejected %2 (%3).", _by, _id, _kindU], _posATL,
         [
             ["event", "TOC_QUEUE_REJECTED"],

@@ -29,7 +29,8 @@ switch (_focus) do
 
     case "LEAD":
     {
-        // Issue the selected lead to the active field group as a PROCEED/LEAD order.
+        // Submit the selected lead to the TOC queue as a LEAD_ISSUE_REQUEST.
+        // TOC must approve before a PROCEED order is issued to the field group.
         private _disp = findDisplay 78000;
         private _cLead = if (!isNull _disp) then { _disp displayCtrl 78038 } else { controlNull };
         private _sel = if (!isNull _cLead) then { lbCurSel _cLead } else { -1 };
@@ -40,15 +41,37 @@ switch (_focus) do
 
         if (_ok) then
         {
-            [player, _leadId, ""] remoteExecCall ["ARC_fnc_intelTocIssueLead", 2];
-            ["Operations", format ["LEAD ORDER issued: %1", _leadId]] call ARC_fnc_clientToast;
+            // Resolve lead record from the public pool so we can build a rich queue payload.
+            private _leads = missionNamespace getVariable ["ARC_leadPoolPublic", []];
+            if (!(_leads isEqualType [])) then { _leads = []; };
+
+            private _leadRec = [];
+            { if (_x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _leadId }) exitWith { _leadRec = _x; }; } forEach _leads;
+
+            private _leadType = if ((count _leadRec) >= 2) then { toUpper (trim (_leadRec # 1)) } else { "LEAD" };
+            private _leadName = if ((count _leadRec) >= 3) then { _leadRec # 2 } else { "Lead" };
+            if (!(_leadName isEqualType "")) then { _leadName = "Lead"; };
+            private _leadPos  = if ((count _leadRec) >= 4) then { _leadRec # 3 } else { [] };
+            if (!(_leadPos isEqualType []) || { (count _leadPos) < 2 }) then { _leadPos = getPosATL player; };
+
+            private _summary = format ["LEAD ISSUE: %1 - %2", _leadType, _leadName];
+            private _details = format ["S3 requests TOC approval to issue a PROCEED order for lead %1 (%2) at grid %3.", _leadId, _leadType, mapGridPosition _leadPos];
+
+            private _payload = [
+                ["leadId",      _leadId],
+                ["leadType",    _leadType],
+                ["displayName", _leadName]
+            ];
+
+            [player, "LEAD_ISSUE_REQUEST", _payload, _summary, _details, _leadPos] remoteExec ["ARC_fnc_intelQueueSubmit", 2];
+            ["Operations", format ["Lead %1 submitted to TOC queue for approval.", _leadId]] call ARC_fnc_clientToast;
         }
         else
         {
-            private _msg = "Could not issue lead.";
-            if (isNull _disp)    then { _msg = "Console not found."; } else {
-            if (isNull _cLead)   then { _msg = "Lead list not found."; } else {
-            if (_sel < 0)        then { _msg = "Select a lead from the list first."; } else {
+            private _msg = "Could not submit lead.";
+            if (isNull _disp) then { _msg = "Console not found."; } else {
+            if (isNull _cLead) then { _msg = "Lead list not found."; } else {
+            if (_sel < 0) then { _msg = "Select a lead from the list first."; } else {
             if (_lbData isEqualTo "NONE") then { _msg = "No leads available."; };
             };};};
             ["Operations", _msg] call ARC_fnc_clientToast;

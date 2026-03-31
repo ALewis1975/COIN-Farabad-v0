@@ -1,9 +1,17 @@
 /*
     Creates a new incident task (if none is active).
     Pulls from data\incident_markers.sqf.
+
+    Params:
+      0: STRING seedLeadId (optional) - if provided, consume this specific lead rather than
+         relying on an accepted LEAD order or the catalog. Used by the INCIDENT queue handler.
 */
 
 if (!isServer) exitWith {false};
+
+params [ ["_seedLeadId", "", [""]] ];
+if (!(_seedLeadId isEqualType "")) then { _seedLeadId = ""; };
+_seedLeadId = trim _seedLeadId;
 
 // Prevent overlapping incidents
 private _activeTaskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
@@ -119,7 +127,7 @@ if (_leadOrderIdx >= 0) then
     }
     else
     {
-        // Invalid payload; ignore and fall back to the standard lead pool.
+        // Invalid payload; clear order reference so catalog selection runs below.
         _leadOrderIdx = -1;
         _leadOrderId = "";
         _leadOrderTarget = "";
@@ -128,82 +136,25 @@ if (_leadOrderIdx >= 0) then
     };
 };
 
-
-// TOC backlog: if TOC approved leads for triage, prefer them when generating the next incident.
-// This does NOT auto-activate anything; it only affects selection when an incident is created.
-if (!_useLead && { !isNil "ARC_fnc_tocBacklogPopNext" }) then
+// Seed lead from INCIDENT queue handler (TOC approved a specific incident directly).
+// This is the only remaining path that consumes a lead without a prior accepted LEAD order.
+if (!_useLead && { _seedLeadId isNotEqualTo "" }) then
 {
-    // Respect sustainment override: when supplies are critical, only burn backlog items that are urgent
-    // or explicitly LOGISTICS/ESCORT (enforced by tocBacklogPopNext).
-    for "_k" from 0 to 4 do
+    private _tmp = [_seedLeadId] call ARC_fnc_leadConsumeById;
+    if (_tmp isEqualType [] && { (count _tmp) > 0 }) then
     {
-        private _bk = [_forceLogistics] call ARC_fnc_tocBacklogPopNext;
-        if !(_bk isEqualType [] && { (count _bk) >= 1 }) exitWith {};
-
-        private _bkLeadId = _bk # 0;
-        if (!(_bkLeadId isEqualType "")) then { _bkLeadId = ""; };
-        _bkLeadId = trim _bkLeadId;
-        if (_bkLeadId isEqualTo "") then { continue; };
-
-        private _tmp = [_bkLeadId] call ARC_fnc_leadConsumeById;
-        if (_tmp isEqualType [] && { (count _tmp) > 0 }) exitWith
-        {
-            _lead = _tmp;
-            _useLead = true;
-        };
+        _lead = _tmp;
+        _useLead = true;
     };
 };
 
-private _leadPool = ["leadPool", []] call ARC_fnc_stateGet;
-if (_leadPool isEqualType [] && { (count _leadPool) > 0 }) then
-{
-    if (!_useLead && { _forceLogistics }) then
-    {
-        // If an urgent/TOC lead exists (ex: detonation follow-on), do NOT let the
-        // sustainment override suppress it. Consume the next lead normally.
-        private _hasUrgent = false;
-        {
-            private _match = false;
-            if (_x isEqualType [] && { (count _x) >= 2 }) then {
-                private _t = _x # 1; if !(_t isEqualType "") then { _t = ""; };
-                private _tag = "";
-                if ((count _x) >= 11) then { _tag = _x # 10; };
-                if !(_tag isEqualType "") then { _tag = ""; };
-
-                private _tU = toUpper (trim _t);
-                private _tagU = toUpper (trim _tag);
-
-                if ((_tU find "CMDNODE" isEqualTo 0) || (_tagU find "TOC_" isEqualTo 0) || (_tagU find "URGENT_" isEqualTo 0)) then { _match = true; };
-            };
-            if (_match) exitWith { _hasUrgent = true; };
-        } forEach _leadPool;
-
-        if (_hasUrgent) then
-        {
-            _lead = [] call ARC_fnc_leadConsumeNext;
-            _useLead = !(_lead isEqualTo []);
-        };
-
-        if (_useLead) exitWith {};
-
-        private _idxLead = -1;
-        { if (_x isEqualType [] && { (count _x) >= 2 } && { toUpper (_x # 1) in ["LOGISTICS","ESCORT"] }) exitWith { _idxLead = _forEachIndex; }; } forEach _leadPool;
-
-        if (_idxLead >= 0) then
-        {
-            _lead = _leadPool deleteAt _idxLead;
-            ["leadPool", _leadPool] call ARC_fnc_stateSet;
-            [] call ARC_fnc_leadBroadcast;
-            _useLead = true;
-        };
-    };
-
-    if (!_useLead && { !_forceLogistics }) then
-    {
-        _lead = [] call ARC_fnc_leadConsumeNext;
-        _useLead = !(_lead isEqualTo []);
-    };
-};
+// NOTE: The TOC backlog and lead pool auto-consumption paths have been intentionally removed.
+// Leads must now reach incidents only via one of the two explicit paths above:
+//   1. A LEAD order was issued via the TOC queue (LEAD_ISSUE_REQUEST approved), accepted by
+//      a field unit, and the lead record is embedded in the ACCEPTED order.
+//   2. TOC approved an INCIDENT queue item, which passes _seedLeadId directly here.
+// This enforces the command review cycle and prevents leads from silently converting to
+// incidents without TOC oversight.
 
 // Campaign stage (0..1) based on how many incidents have been closed.
 // This lets the catalog task generator skew mundane early, more kinetic later.

@@ -115,6 +115,57 @@ private _getP =
     _v
 };
 
+if (_kind isEqualTo "LEAD_ISSUE_REQUEST") then
+{
+    // Validate that the referenced lead exists in the pool.
+    private _leadId = [_payload, "leadId", ""] call _getP;
+    if (!(_leadId isEqualType "")) then { _leadId = ""; };
+    _leadId = trim _leadId;
+
+    if (_leadId isEqualTo "") exitWith
+    {
+        if (!isNull _requestor) then
+        {
+            ["TOC QUEUE", "Lead Issue Request requires a valid lead ID."] remoteExec ["ARC_fnc_clientToast", owner _requestor];
+        };
+        ["OPS", format ["QUEUE: rejected LEAD_ISSUE_REQUEST from %1 (no leadId in payload).", _from], _posATL,
+            [
+                ["event", "TOC_QUEUE_REJECT"],
+                ["kind", _kind],
+                ["from", _from],
+                ["fromGroup", _fromGroup],
+                ["reason", "NO_LEAD_ID"]
+            ]
+        ] call ARC_fnc_intelLog;
+        ""
+    };
+
+    private _pool = ["leadPool", []] call ARC_fnc_stateGet;
+    if (!(_pool isEqualType [])) then { _pool = []; };
+
+    private _found = false;
+    { if (_x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _leadId }) exitWith { _found = true; }; } forEach _pool;
+
+    if (!_found) exitWith
+    {
+        if (!isNull _requestor) then
+        {
+            ["TOC QUEUE", format ["Lead %1 is no longer in the pool (expired or already consumed).", _leadId]] remoteExec ["ARC_fnc_clientToast", owner _requestor];
+        };
+        ["OPS", format ["QUEUE: rejected LEAD_ISSUE_REQUEST from %1 (lead %2 not in pool).", _from, _leadId], _posATL,
+            [
+                ["event", "TOC_QUEUE_REJECT"],
+                ["kind", _kind],
+                ["from", _from],
+                ["fromGroup", _fromGroup],
+                ["reason", "LEAD_NOT_IN_POOL"],
+                ["leadId", _leadId]
+            ]
+        ] call ARC_fnc_intelLog;
+        ""
+    };
+};
+
 if (_kind isEqualTo "FOLLOWON_REQUEST") then
 {
     private _sitrepSent = ["activeIncidentSitrepSent", false] call ARC_fnc_stateGet;
