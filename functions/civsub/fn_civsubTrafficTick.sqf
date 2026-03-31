@@ -98,10 +98,12 @@ private _trafficDistrictSource = "PLAYER_BUBBLE";
 
 // Primary source: districts derived directly from player positions.
 private _playerDistrictCounts = []; // [[districtId, count], ...]
+private _playerDistrictPositions = createHashMap; // districtId -> [playerPositions]
 {
     if (isNull _x) then { continue; };
 
-    private _did = [getPosATL _x] call ARC_fnc_civsubDistrictsFindByPos;
+    private _ppos = getPosATL _x;
+    private _did = [_ppos] call ARC_fnc_civsubDistrictsFindByPos;
     if (_did isEqualTo "") then { continue; };
 
     private _idx = -1;
@@ -123,6 +125,10 @@ private _playerDistrictCounts = []; // [[districtId, count], ...]
         _row set [1, _cnt + 1];
         _playerDistrictCounts set [_idx, _row];
     };
+
+    private _existingPositions = _playerDistrictPositions getOrDefault [_did, []];
+    _existingPositions pushBack _ppos;
+    _playerDistrictPositions set [_did, _existingPositions];
 } forEach _players;
 
 private _playerDistrictKeys = _playerDistrictCounts apply { _x select 0 };
@@ -196,7 +202,8 @@ private _opCenters = createHashMap;
 {
     private _did = _x select 1;
     private _d = _x select 2;
-    private _op = [_did, _d] call ARC_fnc_civsubTrafficResolveSpawnCenter;
+    private _playerPosForDid = _playerDistrictPositions getOrDefault [_did, []];
+    private _op = [_did, _d, _playerPosForDid] call ARC_fnc_civsubTrafficResolveSpawnCenter;
     _opCenters set [_did, _op];
 } forEach _act;
 missionNamespace setVariable ["civsub_v1_traffic_opCenters", _opCenters, true];
