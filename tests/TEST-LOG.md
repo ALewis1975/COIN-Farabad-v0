@@ -1786,3 +1786,30 @@ Secondary issue: `_payloadCheck` (built via inline `_hmFrom` compile block) coul
 |---|-------|---------|--------|-------|
 | 1 | Compat scan — changed SQF files | `python3 scripts/dev/sqflint_compat_scan.py functions/civsub/fn_civsubIdentityTouch.sqf functions/civsub/fn_civsubContactActionBackgroundCheck.sqf` | PASS | 0 violations |
 | 2 | Dedicated-server runtime validation | N/A | BLOCKED | No Arma dedicated server available in container |
+
+---
+
+## 2026-03-31 22:50 UTC — Fix CIVSUB Background Check "server error at DELTA_CHECK_PAPERS" (second pass)
+
+**Branch/Commit:** copilot/fix-background-check-error-another-one @ commit: unrecoverable (grafted shallow clone)
+
+**Scenario:** Player consistently receives "Background Check failed (server error at DELTA_CHECK_PAPERS). Try again." after the previous fix (PR #386) was merged. Check ID works correctly on the same civilian.
+
+**Root cause (static analysis):**
+`fn_civsubContactReqAction.sqf` BACKGROUND_CHECK case (line 153–155): the `isNil {}` block's last evaluated expression is the assignment statement `_res = [...] call ARC_fnc_civsubContactActionBackgroundCheck`. In SQF, assignment statements return `Nothing` (nil), not the assigned value. Therefore `isNil` always sees a nil result and returns `true`, regardless of whether the background check function succeeded.
+
+Consequence: `_nil = true` on every call → the error branch fires every time → `civsub_bg_lastStep` is re-read (= `"DELTA_CHECK_PAPERS"` left by the previous no-hit exit) → user sees "server error at DELTA_CHECK_PAPERS" consistently.
+
+Contrast with the correct pattern used in the background check handler itself:
+- Line 160: `isNil { _rec = [...] call ...; _rec }` — `_rec` is the final expression, so `isNil` checks the value, not the assignment.
+- Line 212: `isNil { _poi = [...] call ...; _poi }` — same correct pattern.
+
+**Fix:**
+`fn_civsubContactReqAction.sqf` line 153–156: added `_res` as the final expression inside the `isNil {}` block, so `isNil` checks the return value of the background check function rather than the assignment statement.
+
+**Commands run:**
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan — changed file | `python3 scripts/dev/sqflint_compat_scan.py functions/civsub/fn_civsubContactReqAction.sqf` | PASS | 0 violations |
+| 2 | Dedicated-server runtime validation | N/A | BLOCKED | No Arma dedicated server available in container |
