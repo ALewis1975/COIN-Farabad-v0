@@ -6,7 +6,7 @@
     Behavior:
       - Presents a minimal dialog to choose SUCCEEDED or FAILED.
       - Confirms the choice.
-      - RemoteExecs the decision to the server (ARC_fnc_tocRequestCloseIncident).
+      - RemoteExecs the decision to the server (ARC_fnc_tocRequestCloseoutAndOrder).
 
     Design rules:
       - Server remains authoritative (will enforce any forced-fail rules).

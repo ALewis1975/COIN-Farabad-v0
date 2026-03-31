@@ -134,16 +134,11 @@ if (!(_taskId isEqualTo "")) then
 }
 else
 {
-    if ((count _pendingInc) > 0 && (_canApprove || _isOmni)) then
-    {
-		_secText = "APPROVE NEXT (QUEUE)";
-        _secEnable = true;
-    }
-    else
-    {
-		_secText = "GENERATE INCIDENT";
-        _secEnable = true;
-    };
+    // Pending INCIDENT queue items require explicit approval via TOC QUEUE mode.
+    // The secondary button always generates the next incident from the pool/backlog;
+    // use the primary "TOC QUEUE" button to approve specific queue items.
+    _secText = "GENERATE INCIDENT";
+    _secEnable = true;
 };
 
 if (!isNull _b2) then

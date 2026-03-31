@@ -12,6 +12,34 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 ---
 
 
+## 2026-03-31 00:27 UTC — Fix TOC Queue decision display, S3 OPS order visibility, and task-cycle guidance
+
+**Branch/Commit:** copilot/check-farabad-console-functionality @ commit: unrecoverable (pre-push; see HEAD 9d50839b)
+
+**Scenario:** Four bugs found and fixed relating to "closed out incidents showing as Approved in TOC Queue" and "follow-on orders not sent to S3 Ops screen":
+1. `fn_intelQueueBroadcast.sqf`: Decision field (flat array `[timestamp, by, bool, note]`) was passed through `_sanitizePairs` which expects pairs arrays — all decision data was silently discarded, so decided queue items showed no approver/timestamp in the TOC Queue detail panel.
+2. `fn_uiConsoleOpsPaint.sqf`: Orders panel filtered to `groupId group player` only. S3/TOC players in a different group than the field unit could not see follow-on orders issued to that unit. Changed to show all outstanding orders with target-group label; ACCEPT ORDER gated on own-group check.
+3. `fn_intelOrderIssue.sqf`: All order toast notifications said "Use [Player] Actions to accept" (stale guidance); HOLD case also lacked a distinct `_toastBody`. Updated to "Accept on the OPS tab."
+4. `fn_uiConsoleCommandPaint.sqf`: Secondary button in CMD OVERVIEW showed "APPROVE NEXT (QUEUE)" when pending INCIDENT queue items existed, but the action always called `fn_uiConsoleActionRequestNextIncident` (generate from backlog) — misleading TOC into thinking they were approving queue items. Simplified to always show "GENERATE INCIDENT".
+
+**Commands:**
+```bash
+python3 scripts/dev/sqflint_compat_scan.py --strict \
+  functions/command/fn_intelQueueBroadcast.sqf \
+  functions/ui/fn_uiConsoleOpsPaint.sqf \
+  functions/command/fn_intelOrderIssue.sqf \
+  functions/ui/fn_uiConsoleCommandPaint.sqf \
+  functions/ui/fn_uiConsoleActionOpenCloseout.sqf
+```
+
+**Result:** BLOCKED
+
+**Notes:**
+- PASS: compat scan on changed files — 113 warnings, all pre-existing (none introduced by this change; 4 fewer than before due to `select` instead of `#` in new broadcast code).
+- BLOCKED: `sqflint` binary unavailable in this container. Dedicated-server / JIP gameplay validation (order flow, queue display after decide, unit accept + incident close) deferred.
+- Rationale for `commit: unrecoverable`: test-log entry recorded before push SHA is available.
+
+
 ## 2026-03-30 17:19 UTC — Fix `fn_tocReceiveSitrep.sqf` switch/case parse error (Missing ;)
 
 **Branch/Commit:** copilot/fix-sitrep-error-in-function @ commit: unrecoverable
