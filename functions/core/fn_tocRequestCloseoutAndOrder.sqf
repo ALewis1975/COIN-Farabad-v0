@@ -460,16 +460,18 @@ if (!(_createdLeads isEqualType 0)) then { _createdLeads = 0; };
 ["activeIncidentClosePendingLeadsCreated", _createdLeads] call ARC_fnc_stateSet;
 
 // Detect newly created leads linked to this closeout (sourceTaskId == _taskId)
+// Lead array: [id(0), leadType(1), displayName(2), pos(3), strength(4), createdAt(5), expiresAt(6), sourceTaskId(7), ...]
 private _genLeadId = "";
 private _genLeadName = "";
 private _genLeadType = "";
+private _genLeadPos = [];
 private _leadsAfter = ["leadPool", []] call ARC_fnc_stateGet;
 if (!(_leadsAfter isEqualType [])) then { _leadsAfter = []; };
 
 {
-    if (!(_x isEqualType []) || { (count _x) < 7 }) then { continue; };
+    if (!(_x isEqualType []) || { (count _x) < 8 }) then { continue; };
     private _lid = _x # 0;
-    private _srcTask = _x # 6;
+    private _srcTask = _x # 7;
     if (!(_lid isEqualType "")) then { continue; };
     if (!(_srcTask isEqualType "")) then { continue; };
 
@@ -478,6 +480,7 @@ if (!(_leadsAfter isEqualType [])) then { _leadsAfter = []; };
         _genLeadId = _lid;
         _genLeadType = _x # 1;
         _genLeadName = _x # 2;
+        _genLeadPos = if ((count _x) >= 4 && { (_x # 3) isEqualType [] }) then { _x # 3 } else { [] };
     };
 } forEach _leadsAfter;
 
@@ -490,6 +493,12 @@ if (_genLeadId isNotEqualTo "") then
     missionNamespace setVariable ["ARC_lastCloseoutGeneratedLeadId", _genLeadId, true];
     missionNamespace setVariable ["ARC_lastCloseoutGeneratedLeadName", _genLeadName, true];
     missionNamespace setVariable ["ARC_lastCloseoutGeneratedLeadType", _genLeadType, true];
+
+    // Populate the standard follow-on lead display variables so the CMD tab
+    // "System follow-on lead" section reflects this staged-closeout lead.
+    missionNamespace setVariable ["ARC_activeIncidentFollowOnLeadId", _genLeadId, true];
+    missionNamespace setVariable ["ARC_activeIncidentFollowOnLeadName", _genLeadName, true];
+    missionNamespace setVariable ["ARC_activeIncidentFollowOnLeadPos", _genLeadPos, true];
 };
 
 // Build follow-on order

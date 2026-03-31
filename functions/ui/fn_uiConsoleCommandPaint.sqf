@@ -112,7 +112,7 @@ private _items = _qTail select { (_x isEqualType []) && { (count _x) >= 12 } };
 private _pending = _items select { (toUpper (_x param [2, "", [""]])) isEqualTo "PENDING" };
 
 private _pendingInc = _pending select { (toUpper (_x param [3, "", [""]])) isEqualTo "INCIDENT" };
-private _pendingLead = _pending select { (toUpper (_x param [3, "", [""]])) isEqualTo "LEAD" };
+private _pendingLead = _pending select { (toUpper (_x param [3, "", [""]])) isEqualTo "LEAD_REQUEST" };
 private _pendingOther = (count _pending) - (count _pendingInc) - (count _pendingLead);
 
 // Decide what the secondary button SHOULD say / whether it should be enabled.
