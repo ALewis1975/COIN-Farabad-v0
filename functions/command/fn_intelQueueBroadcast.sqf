@@ -112,7 +112,27 @@ private _sanitizeItem = {
 
     private _payloadSafe = [_payload] call _sanitizePairs;
     private _metaSafe = [_meta] call _sanitizePairs;
-    private _decisionSafe = [_decision] call _sanitizePairs;
+    // Decision is a flat array [decidedAt(NUMBER), decidedBy(STRING), approved(BOOL), note(STRING)].
+    // Do NOT pass through _sanitizePairs (which expects pairs arrays) — that would mangle the data.
+    // Validate and truncate each scalar field individually.
+    // Safety: the (count _decision) >= 4 guard above ensures indices 0-3 are valid.
+    private _decisionSafe = [];
+    if (_decision isEqualType [] && { (count _decision) >= 4 }) then
+    {
+        private _dAt   = _decision select 0;
+        private _dBy   = _decision select 1;
+        private _dOk   = _decision select 2;
+        private _dNote = _decision select 3;
+        if (!(_dAt   isEqualType 0))    then { _dAt   = 0; };
+        if (!(_dBy   isEqualType ""))   then { _dBy   = ""; };
+        if (!(_dOk   isEqualType true) && !(_dOk isEqualType false)) then { _dOk = false; };
+        if (!(_dNote isEqualType ""))   then { _dNote = ""; };
+        _dBy   = trim _dBy;
+        _dNote = trim _dNote;
+        if ((count _dBy)   > _maxTextLen) then { _dBy   = _dBy   select [0, _maxTextLen]; };
+        if ((count _dNote) > _maxTextLen) then { _dNote = _dNote select [0, _maxTextLen]; };
+        _decisionSafe = [_dAt, _dBy, _dOk, _dNote];
+    };
     if (_tr) then { _metaSafe pushBack ["entryTruncated", true]; };
     [_id, _createdAt, toUpper _status, toUpper _kind, _from, _fromGroup, _fromUid, _pos, _summary, _details, _payloadSafe, _metaSafe, _decisionSafe]
 };

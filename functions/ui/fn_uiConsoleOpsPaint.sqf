@@ -134,13 +134,14 @@ if (_rebuild) then
     if (!(_orders isEqualType [])) then { _orders = []; };
     if ((count _orders) > _rxMaxItems) then { _orders = _orders select [((count _orders) - _rxMaxItems) max 0, _rxMaxItems]; };
     private _gid = groupId group player;
-    private _mine = _orders select {
-        _x isEqualType [] && { (count _x) >= 5 } && { (_x # 4) isEqualTo _gid }
-    };
+    // Show ALL outstanding orders (ISSUED/ACCEPTED) so TOC/S3 staff can track follow-ons
+    // issued to any field unit, not just their own group.  The ACCEPT action is gated
+    // separately in the details panel to only allow own-group acceptance.
+    private _allOrders = _orders select { _x isEqualType [] && { (count _x) >= 5 } };
 
-    if ((count _mine) isEqualTo 0) then
+    if ((count _allOrders) isEqualTo 0) then
     {
-        private _o = _cOrd lbAdd "(No orders for your group)";
+        private _o = _cOrd lbAdd "(No outstanding orders)";
         _cOrd lbSetData [_o, "NONE"];
     }
     else
@@ -150,16 +151,22 @@ if (_rebuild) then
             private _id = _order # 0;
             private _status = toUpper (trim (_order # 2));
             private _otype = toUpper (trim (_order # 3));
-            private _pairs = _order # 5;
+            private _tgtGrp = if ((count _order) >= 5) then { _order # 4 } else { "" };
+            if (!(_tgtGrp isEqualType "")) then { _tgtGrp = ""; };
+            _tgtGrp = trim _tgtGrp;
+            private _pairs = if ((count _order) >= 6) then { _order # 5 } else { [] };
             private _purpose = [_pairs, "purpose", ""] call _pairGet;
             if (!(_purpose isEqualType "")) then { _purpose = ""; };
             _purpose = trim _purpose;
 
             private _label = format ["[%1] %2", _status, _otype];
             if (_purpose != "") then { _label = _label + format [" - %1", _purpose]; };
+            // Append the target group name when it differs from the viewing player's group
+            // so S3/TOC staff can see which unit the order is for.
+            if (_tgtGrp != "" && { _tgtGrp != _gid }) then { _label = _label + format [" → %1", _tgtGrp]; };
             private _idx = _cOrd lbAdd _label;
             _cOrd lbSetData [_idx, format ["ORDER|%1", _id]];
-        } forEach _mine;
+        } forEach _allOrders;
     };
     [_cOrd, _selOrdData] call _restoreSel;
 
@@ -383,8 +390,12 @@ else
                 private _order = _orders # _o;
                 private _status = toUpper (trim (_order # 2));
                 private _otype = toUpper (trim (_order # 3));
-                private _pairs = _order # 5;
-                private _meta = _order # 6;
+                private _orderTgtGrp = if ((count _order) >= 5) then { _order # 4 } else { "" };
+                if (!(_orderTgtGrp isEqualType "")) then { _orderTgtGrp = ""; };
+                _orderTgtGrp = trim _orderTgtGrp;
+                private _isOwnOrder = (_orderTgtGrp isEqualTo "") || { _orderTgtGrp isEqualTo _gidSelf };
+                private _pairs = if ((count _order) >= 6) then { _order # 5 } else { [] };
+                private _meta  = if ((count _order) >= 7) then { _order # 6 } else { [] };
 
                 private _purpose = [_pairs, "purpose", ""] call _pairGet;
                 if (!(_purpose isEqualType "")) then { _purpose = ""; };
@@ -396,21 +407,32 @@ else
 
                 _details = format ["<t size='1.2' font='PuristaMedium'>%1</t><br/>", _otype];
                 _details = _details + format ["<t color='#A0A0A0'>Status:</t> %1<br/>", _status];
+                if (_orderTgtGrp != "") then { _details = _details + format ["<t color='#A0A0A0'>Tasked unit:</t> %1<br/>", _orderTgtGrp]; };
                 if (_purpose != "") then { _details = _details + format ["<t color='#A0A0A0'>Purpose:</t> %1<br/>", _purpose]; };
                 if (_note != "") then { _details = _details + format ["<t color='#A0A0A0'>Note:</t> %1<br/>", _note]; };
                 _details = _details + "<br/>";
 
                 if (_status isEqualTo "ISSUED") then
                 {
-                    _primaryLabel = "ACCEPT ORDER";
-                    _primaryEnabled = _isAuth;
-                    _details = _details + "Next: accept the order to proceed.";
+                    if (_isOwnOrder) then
+                    {
+                        _primaryLabel = "ACCEPT ORDER";
+                        _primaryEnabled = _isAuth;
+                        _details = _details + "Next: accept the order to proceed.";
+                    }
+                    else
+                    {
+                        _primaryLabel = "ACTION";
+                        _primaryEnabled = false;
+                        private _orderTgtLabel = if (_orderTgtGrp isEqualTo "") then {"(unknown group)"} else {_orderTgtGrp};
+                        _details = _details + format ["Order issued to %1. They must accept it from their console.", _orderTgtLabel];
+                    };
                 }
                 else
                 {
                     _primaryLabel = "ACTION";
                     _primaryEnabled = false;
-                    _details = _details + "No action available for this order in UI09 (view only).";
+                    _details = _details + "No action available for this order (view only).";
                 };
             };
 

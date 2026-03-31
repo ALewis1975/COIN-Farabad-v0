@@ -236,17 +236,21 @@ if (!isNull _targetGroup) then
         {
             private _purpose = [_data, "purpose", "REFIT"] call _getPair;
             private _destLabel = [_data, "destLabel", "Base"] call _getPair;
-            _msg = format ["TOC ORDER: RTB (%1) to %2. Use [Player] Actions to accept.", _purpose, _destLabel];
-            _toastBody = format ["RTB (%1) to %2. Accept the order.", _purpose, _destLabel];
+            _msg = format ["TOC ORDER: RTB (%1) to %2. Accept on the OPS tab.", _purpose, _destLabel];
+            _toastBody = format ["RTB (%1) to %2. Accept the order on the OPS tab.", _purpose, _destLabel];
         };
-        case "HOLD": { _msg = "TOC ORDER: HOLD. Use [Player] Actions to accept."; };
+        case "HOLD":
+        {
+            _msg = "TOC ORDER: HOLD in place. Accept on the OPS tab.";
+            _toastBody = "HOLD in place. Accept the order on the OPS tab.";
+        };
         case "LEAD":
         {
             private _leadName = [_data, "leadName", "Lead"] call _getPair;
-            _msg = format ["TOC ORDER: PROCEED on %1. Use [Player] Actions to accept.", _leadName];
-            _toastBody = format ["PROCEED on %1. Accept the order.", _leadName];
+            _msg = format ["TOC ORDER: PROCEED on %1. Accept on the OPS tab.", _leadName];
+            _toastBody = format ["PROCEED on %1. Accept the order on the OPS tab.", _leadName];
         };
-        default { _msg = format ["TOC ORDER: %1. Use [Player] Actions to accept.", _orderType]; };
+        default { _msg = format ["TOC ORDER: %1. Accept on the OPS tab.", _orderType]; };
     };
 
     if (_toastBody isEqualTo "") then
