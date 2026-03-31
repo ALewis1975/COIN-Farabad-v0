@@ -1697,6 +1697,22 @@ python3 scripts/dev/sqflint_compat_scan.py \
 - No new sqflint violations introduced in any of the changed files.
 - BLOCKED: `sqflint` binary unavailable in container; dedicated-server gameplay validation deferred.
 - BLOCKED: JIP / late-client recovery for new right-panel data deferred to dedicated server test.
+## Session: 2026-03-31 — ARC_FollowOnDialog further height increase (ISSUE FOLLOW-ON ORDER)
+
+**Branch/commit:** copilot/update-follow-on-order-dialogue-height (commit: 3d56ec4 + pending)
+**Scenario:** ISSUE FOLLOW-ON ORDER dialog header clipping long SITREP context line; dialog needs additional height.
+
+### Change Summary
+
+- `config/CfgDialogs.hpp` — `ARC_FollowOnDialog` (IDD 78100): Header (IDC 78192) h 0.12→0.17 (+0.05); all form controls y+=0.05; BG h 0.74→0.79
+
+### Checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | CfgDialogs.hpp structure audit | Manual inspection of IDC positions | PASS | Header h=0.17; all form controls incremented +0.05; BtnSubmit/Cancel at y=0.88; BG ends at 0.95 (within safe area) |
+| 2 | Dedicated-server runtime validation | N/A | BLOCKED | No Arma dedicated server available in this container |
+
 ## Session: 2026-03-31 — Dialog Layout Fixes (SITREP, Follow-On, ISSUE FOLLOW-ON ORDER)
 
 **Branch/commit:** copilot/update-dialogues-to-fit-content (commit: in-progress PR)
