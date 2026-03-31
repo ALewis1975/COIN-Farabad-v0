@@ -27,8 +27,8 @@ missionNamespace setVariable ["civsub_v1_locnpc_threadRunning", true, true];
 // ── NPC class pools ──────────────────────────────────────────────────────────
 private _clsWorker = missionNamespace getVariable ["civsub_v1_locnpc_classPool_worker", ["UK3CB_TKC_C_WORKER", "C_man_1"]];
 private _clsCiv    = missionNamespace getVariable ["civsub_v1_locnpc_classPool_civ",    ["UK3CB_TKC_C_CIV",    "C_man_polo_1_F"]];
-if !(_clsWorker isEqualType []) then { _clsWorker = ["UK3CB_TKC_C_WORKER", "C_man_1"]; };
-if !(_clsCiv    isEqualType []) then { _clsCiv    = ["UK3CB_TKC_C_CIV",    "C_man_polo_1_F"]; };
+if (!(_clsWorker isEqualType [])) then { _clsWorker = ["UK3CB_TKC_C_WORKER", "C_man_1"]; };
+if (!(_clsCiv    isEqualType [])) then { _clsCiv    = ["UK3CB_TKC_C_CIV",    "C_man_polo_1_F"]; };
 
 private _clsMixed = _clsWorker + _clsCiv;
 
@@ -62,7 +62,7 @@ private _profTransmitter = [
 
 // ── Cluster helper (greedy; groups positions within _clusterR of first unassigned) ───
 private _clusterR = missionNamespace getVariable ["civsub_v1_locnpc_cluster_m", 80];
-if !(_clusterR isEqualType 0) then { _clusterR = 80; };
+if (!(_clusterR isEqualType 0)) then { _clusterR = 80; };
 
 // Returns array of centroids given flat position list
 private _fnCluster = {
@@ -103,7 +103,7 @@ private _sites = [];
 
 // Terrain sites
 private _terrainSites = missionNamespace getVariable ["ARC_worldTerrainSites", []];
-if !(_terrainSites isEqualType []) then { _terrainSites = []; };
+if (!(_terrainSites isEqualType [])) then { _terrainSites = []; };
 
 {
     _x params [["_type", "", [""]], ["_positions", [], [[]]]];
@@ -129,7 +129,7 @@ if !(_terrainSites isEqualType []) then { _terrainSites = []; };
 
 // Named locations with explicit worksite/hospital profiles
 private _namedLocations = missionNamespace getVariable ["ARC_worldNamedLocations", []];
-if !(_namedLocations isEqualType []) then { _namedLocations = []; };
+if (!(_namedLocations isEqualType [])) then { _namedLocations = []; };
 
 {
     _x params [["_id", "", [""]], ["_displayName", "", [""]], ["_pos", [0,0,0], [[]]]];
@@ -163,7 +163,7 @@ missionNamespace setVariable ["civsub_v1_locnpc_sites", _sites, false];
 missionNamespace setVariable ["civsub_v1_locnpc_registry", createHashMap, true];
 
 private _tickS = missionNamespace getVariable ["civsub_v1_locnpc_tick_s", 10];
-if !(_tickS isEqualType 0) then { _tickS = 10; };
+if (!(_tickS isEqualType 0)) then { _tickS = 10; };
 if (_tickS < 5) then { _tickS = 5; };
 missionNamespace setVariable ["civsub_v1_locnpc_tick_s", _tickS, true];
 

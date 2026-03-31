@@ -96,9 +96,9 @@ _unit setVariable ["civsub_v1_isCiv",    true,       true];
 
 // Cleanup: remove when players stay away for cleanupMinDelay
 private _cleanR = missionNamespace getVariable ["civsub_v1_locnpc_cleanupRadius_m", 600];
-if !(_cleanR isEqualType 0) then { _cleanR = 600; };
+if (!(_cleanR isEqualType 0)) then { _cleanR = 600; };
 private _delay = missionNamespace getVariable ["civsub_v1_locnpc_cleanupMinDelay_s", 120];
-if !(_delay isEqualType 0) then { _delay = 120; };
+if (!(_delay isEqualType 0)) then { _delay = 120; };
 
 [[_unit], _spawnPos, _cleanR, _delay, format ["CIVLOC:%1", _siteKey]] call ARC_fnc_cleanupRegister;
 
