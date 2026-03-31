@@ -35,21 +35,42 @@ private _ids = missionNamespace getVariable ["civsub_v1_identities", createHashM
 if (_ids isEqualType []) then { _ids = [_ids] call _hmCreate; };
 if !(_ids isEqualType createHashMap) then { _ids = createHashMap; };
 
+// Guard: generate UID if not supplied. Use a flag so the early-exit fires at
+// function scope, not only inside the then-block (exitWith exits its enclosing
+// block, which would be the then-clause, not this function).
+private _civUidOk = true;
 if (_civUid isEqualTo "") then {
     private _tmpUid = "";
     private _nilUid = isNil { _tmpUid = [_districtId] call ARC_fnc_civsubIdentityGenerateUid; _tmpUid };
-    if (_nilUid || {_tmpUid isEqualTo ""}) exitWith { createHashMap };
-    _civUid = _tmpUid;
+    if (_nilUid || {_tmpUid isEqualTo ""}) then {
+        _civUidOk = false;
+    } else {
+        _civUid = _tmpUid;
+    };
+};
+if (!_civUidOk) exitWith {
+    diag_log format ["[CIVSUB][WARN] fn_civsubIdentityTouch: UID generation failed did=%1", _districtId];
+    createHashMap
 };
 
 private _rec = [_ids, _civUid, createHashMap] call _hg;
 if !(_rec isEqualType createHashMap) then { _rec = createHashMap; };
 
+// Guard: generate profile for new civilian. Same flag pattern — exitWith inside
+// then-block would only exit that block, not the function.
+private _profOk = true;
 if ((count ([_rec] call _keysFn)) == 0) then {
     private _tmpRec = createHashMap;
     private _nilRec = isNil { _tmpRec = [_civUid, _districtId, _homePos] call ARC_fnc_civsubIdentityGenerateProfile; _tmpRec };
-    if (_nilRec || {!(_tmpRec isEqualType createHashMap)} || {(count _tmpRec) == 0}) exitWith { createHashMap };
-    _rec = _tmpRec;
+    if (_nilRec || {!(_tmpRec isEqualType createHashMap)} || {(count _tmpRec) == 0}) then {
+        _profOk = false;
+    } else {
+        _rec = _tmpRec;
+    };
+};
+if (!_profOk) exitWith {
+    diag_log format ["[CIVSUB][WARN] fn_civsubIdentityTouch: profile generation failed civUid=%1 did=%2", _civUid, _districtId];
+    createHashMap
 };
 
 // Update seen_by ledger

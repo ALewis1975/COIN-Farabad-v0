@@ -1731,3 +1731,32 @@ python3 scripts/dev/sqflint_compat_scan.py \
 | 1 | Static compat scan — changed SQF file | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleActionOpenCloseout.sqf` | BLOCKED | Container environment; no new SQF constructs introduced in the one SQF file changed |
 | 2 | CfgDialogs.hpp structure audit | Manual grep of IDC positions and heights | PASS | Header h=0.12 for both dialogs; all form control y values incremented +0.06; BG heights updated; buttons remain within BG bounds |
 | 3 | Dedicated-server runtime validation | N/A | BLOCKED | No Arma dedicated server/JIP runtime available in this container |
+
+
+---
+
+## 2026-03-31 16:17 UTC — Fix CIVSUB Background Check "server error at DELTA_CHECK_PAPERS"
+
+**Branch/Commit:** copilot/fix-background-check-error-again @ (this PR)
+
+**Scenario:** Player runs Background Check on a civilian and consistently receives "Background Check failed (server error at DELTA_CHECK_PAPERS). Try again." in the S2 console Latest Result panel. The step marker `civsub_bg_lastStep` is stuck at `DELTA_CHECK_PAPERS`.
+
+**Root cause (static analysis):**
+`fn_civsubIdentityTouch.sqf` contains two `exitWith { createHashMap }` statements placed inside `then {}` blocks:
+- Line 41 (uid generation guard): exits only the `then {}` block, not the function — `_civUid` remains `""` and execution continues
+- Line 51 (profile generation guard): exits only the `then {}` block, not the function — `_rec` is never assigned the generated profile
+
+When profile generation fails, the function returns a partially-populated `_rec` containing only `seen_by` and `last_interaction_ts` keys (no `passport_serial`). The background check guard at line 161 (`count _rec == 0`) passes because `count _rec == 2`. Execution reaches DELTA_CHECK_PAPERS with an incomplete identity record. Depending on runtime conditions, a crash between that step and CRIMEDB_PICK leaves `civsub_bg_lastStep = "DELTA_CHECK_PAPERS"` and the dispatcher shows the observed error.
+
+Secondary issue: `_payloadCheck` (built via inline `_hmFrom` compile block) could theoretically be nil if the helper compiled to an empty block, leaving `_payloadCheck set [...]` at lines 202/211 able to throw.
+
+**Fix:**
+- `fn_civsubIdentityTouch.sqf`: replaced both `exitWith` statements inside `then {}` with a flag-pattern (`_civUidOk`, `_profOk`) that places the `exitWith` at function scope after the block, with diagnostic log on failure.
+- `fn_civsubContactActionBackgroundCheck.sqf`: added `if (!(_payloadCheck isEqualType createHashMap)) then { _payloadCheck = createHashMap; }` immediately after the `_hmFrom` call, ensuring subsequent `set` operations never operate on nil.
+
+**Commands run:**
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan — changed SQF files | `python3 scripts/dev/sqflint_compat_scan.py functions/civsub/fn_civsubIdentityTouch.sqf functions/civsub/fn_civsubContactActionBackgroundCheck.sqf` | PASS | 0 violations |
+| 2 | Dedicated-server runtime validation | N/A | BLOCKED | No Arma dedicated server available in container |
