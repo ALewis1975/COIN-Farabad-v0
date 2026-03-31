@@ -92,4 +92,11 @@ if (_leadId isEqualTo "" && { (random 1) < _chance }) then
     ["activeIedEvidenceLeadPendingPos", _pos] call ARC_fnc_stateSet;
 };
 
+// Build case file from collected evidence (emits facilitator lead when confidence >= 0.4)
+if (!isNil "ARC_fnc_iedBuildCaseFile") then
+{
+    private _collectorUid = if (!isNull _collector) then { getPlayerUID _collector } else { "UNKNOWN" };
+    [_evidenceNid, _collectorUid] call ARC_fnc_iedBuildCaseFile;
+};
+
 true

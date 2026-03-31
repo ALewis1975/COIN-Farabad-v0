@@ -54,4 +54,7 @@ if (isNil { missionNamespace getVariable "threat_v0_debug_last_event" }) then
 
 [] call ARC_fnc_threatDebugSnapshot;
 
+// Threat Economy v0: seed economy keys (idempotent)
+[] call ARC_fnc_threatEconomyInit;
+
 true

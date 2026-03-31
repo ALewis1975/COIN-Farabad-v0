@@ -221,4 +221,22 @@ missionNamespace setVariable [
 
 [] call ARC_fnc_threatDebugSnapshot;
 
+// Lead emission router: fire on key tactical transitions
+if (_stateToU in ["DISCOVERED", "STAGED", "DETONATED", "NEUTRALIZED", "INTERDICTED"]) then
+{
+    if (!isNil "ARC_fnc_threatLeadEmitFromOutcome") then
+    {
+        [_rec, _stateToU] call ARC_fnc_threatLeadEmitFromOutcome;
+    };
+};
+
+// COIN influence application on terminal outcome transitions
+if (_stateToU in ["DETONATED", "NEUTRALIZED"]) then
+{
+    if (!isNil "ARC_fnc_threatApplyCoinInfluence") then
+    {
+        [_threatId] call ARC_fnc_threatApplyCoinInfluence;
+    };
+};
+
 true
