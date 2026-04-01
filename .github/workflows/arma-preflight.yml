@@ -19,10 +19,10 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install SQF linter (sqflint)
+      - name: Install SQF linter (sqflint) and ripgrep
         run: |
           python -m pip install --upgrade pip
-          pip install sqflint
+          pip install sqflint ripgrep
 
       - name: Detect changed SQF/config files
         id: changed
@@ -221,8 +221,7 @@ jobs:
 
       - name: Install ripgrep (required for marker-index full-mode coverage)
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y ripgrep
+          pip install ripgrep
 
       - name: Marker index generator static validation (rg-on + fallback modes)
         run: |
@@ -231,3 +230,7 @@ jobs:
       - name: AIRBASE planning-mode static validation
         run: |
           tests/static/airbase_planning_mode_checks.sh
+
+      - name: CASREQ snapshot contract static validation
+        run: |
+          tests/static/casreq_snapshot_contract_checks.sh
