@@ -20,7 +20,7 @@
 
 if (!isServer) exitWith {0};
 
-if (!missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {0};
+if (!(missionNamespace getVariable ["civsub_v1_enabled", false])) exitWith {0};
 
 private _districts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
 if (!(_districts isEqualType createHashMap)) exitWith {0};

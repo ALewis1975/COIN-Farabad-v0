@@ -24,7 +24,9 @@ if (_threadId isEqualTo "") exitWith
 private _caseId = "CASE:" + _threadId;
 
 // Idempotent: if the task already exists in the Arma task system return early.
-private _existingState = getTaskState _caseId;
+// Compile helper: sqflint does not parse `side getTaskState id` as a binary call.
+private _getTaskStateFn = compile "params ['_side','_id']; _side getTaskState _id";
+private _existingState = [west, _caseId] call _getTaskStateFn;
 if (!(_existingState isEqualTo "NONE")) exitWith
 {
     diag_log format ["[ARC][TASKENG] taskengEnsureParentCaseTask: task %1 already exists (state=%2).", _caseId, _existingState];

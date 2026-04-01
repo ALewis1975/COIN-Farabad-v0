@@ -20,7 +20,7 @@
 
 if (!isServer) exitWith {0};
 
-if (!missionNamespace getVariable ["ARC_worldPersonnelEnabled", true]) exitWith {0};
+if (!(missionNamespace getVariable ["ARC_worldPersonnelEnabled", true])) exitWith {0};
 if (missionNamespace getVariable ["ARC_worldPersonnelInitDone", false]) exitWith {0};
 missionNamespace setVariable ["ARC_worldPersonnelInitDone", true];
 
@@ -59,7 +59,7 @@ private _classIdx = 0;
     private _pos = getMarkerPos _mkr;
     if (_pos isEqualTo [0,0,0]) then { continue; };
 
-    private _dir = getMarkerDir _mkr;
+    private _dir = markerDir _mkr;
 
     private _cls = _classPool select (_classIdx mod (count _classPool));
     _classIdx = _classIdx + 1;
