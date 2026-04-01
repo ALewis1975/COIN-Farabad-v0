@@ -352,8 +352,15 @@ else
                     // Primary: SITREP (enabled if allowed)
                     _primaryLabel = "SEND SITREP";
                     _primaryEnabled = _canSit;
-                    _secondaryLabel = "FOLLOW-ON REQUEST";
-                    _secondaryEnabled = _isAuth;
+
+                    // Secondary: REQUEST CAS for all accepted incidents except IED
+                    // (IED overrides to EOD DISPOSITION below). CAS request requires JTAC
+                    // authorization or queue-approver role and CASREQ subsystem enabled.
+                    private _casreqSysEnabled = missionNamespace getVariable ["casreq_v1_enabled", true];
+                    if (!(_casreqSysEnabled isEqualType true) && !(_casreqSysEnabled isEqualType false)) then { _casreqSysEnabled = true; };
+                    private _canCasreq = _casreqSysEnabled && { _isAuth || { [player] call ARC_fnc_rolesCanApproveQueue } };
+                    _secondaryLabel = "REQUEST CAS";
+                    _secondaryEnabled = _canCasreq;
 
                     if (_canSit) then
                     {
@@ -364,7 +371,7 @@ else
                         _details = _details + "Next: send SITREP (not available yet). Ensure you are within range and the incident is accepted.";
                     };
 
-                    // Secondary: EOD disposition request (IED incidents only, pre-closeout)
+                    // Override secondary for IED incidents: EOD disposition takes priority.
                     if (_typU isEqualTo "IED") then
                     {
                         _secondaryLabel = "EOD DISPOSITION";
