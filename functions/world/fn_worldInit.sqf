@@ -85,4 +85,15 @@ if (_zones isEqualType []) then
 [] call ARC_fnc_worldScanPatrolWaypoints;
 [] call ARC_fnc_worldIndexObjectives;
 
+// Living base: ambient personnel + gate barrier logic
+if (!isNil "ARC_fnc_worldAmbientPersonnelInit") then
+{
+    [] call ARC_fnc_worldAmbientPersonnelInit;
+};
+
+if (!isNil "ARC_fnc_worldGateBarrierInit") then
+{
+    [] call ARC_fnc_worldGateBarrierInit;
+};
+
 true

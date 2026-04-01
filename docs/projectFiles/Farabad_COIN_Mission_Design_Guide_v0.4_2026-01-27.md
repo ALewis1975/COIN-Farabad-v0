@@ -440,14 +440,34 @@ Planning specs:
 
 ---
 
-## 16. Open decisions to lock down next
+## 16. Open decisions — status as of roadmap implementation (2026-04)
 
-1. SITREP radius: one global value or per-task radius?
-2. Task/SITREP role detection method for leadership roles (station roles are already moving toward explicit identifiers).
-3. TOC control model: player-only, rules-only, or hybrid?
-4. LACE detail level: colored status vs numeric counts?
-5. When Threat begins consuming CIVSUB scores (post-v0 + P1), define minimal coupling rules and thresholds.
-6. Mod stack governance: how/when to update the launcher preset file and how to keep dated versions for traceability.
+The following decisions were open in v0.4. Status reflects locks applied
+during the 22-item roadmap implementation pass.
+
+| # | Decision | Status | Locked value |
+|---|---|---|---|
+| 1 | SITREP radius: global vs per-task | **LOCKED** | Single global value `ARC_sitrepProximityM` (default 350 m). Per-task override is deferred post-v1. |
+| 2 | Task/SITREP role detection method | **LOCKED** | Explicit station-role identifiers via `ARC_fnc_rolesIsAuthorized`; no ambiguous group-role inference. |
+| 3 | TOC control model | **LOCKED** | Hybrid: TOC roles (HQ tokens) for approval actions; field players for SITREP/follow-on requests. |
+| 4 | LACE detail level | **DEFERRED** | Numeric counts are default; colored-status UI is a future UX polish task. |
+| 5 | Threat/CIVSUB coupling rules | **LOCKED** | `ARC_fnc_threatGovernorCheck` step 6 gates IED budget on district GREEN score (≥ 80 → budget bonus; < 20 → budget penalty). Threshold defaults: 20/80 (configurable). |
+| 6 | Mod stack governance | **DEFERRED** | Launcher preset updates remain manual with dated filename convention. Automated governance tracking is a future DevOps task. |
+
+### New decisions locked by roadmap
+
+| Decision | Locked value |
+|---|---|
+| Adaptive incident loop cadence | Heat-based: 25–90 s range; `ARC_incidentLoopSleepMin` / `ARC_incidentLoopSleepMax` tuneable. |
+| Intel lead decay | Linear strength decay toward floor over TTL; `ARC_leadDecayEnabled`, `ARC_leadDecayRate` (0.6), `ARC_leadDecayFloor` (0.05). Expired leads emit "window missed" to intel log. |
+| CASEVAC TOC integration | BLUFOR incap → `ARC_fnc_medicalCasevacRequest` → QRF lead in lead pool. Cooldown: 180 s. ACE unconscious EH bridges via CBA. |
+| CIV density modulation | RED ≥ `civsub_v1_densityModRedThreshold` (65) → probabilistic spawn suppression (min 10 % floor). `civsub_v1_densityModEnabled` flag. |
+| District influence map markers | Per-district ellipse markers updated each broadcast cycle when CIVSUB enabled. Dominant axis drives color. |
+| Gate barrier logic | BLUFOR vehicle proximity (default 18 m) auto-opens named Eden barrier objects. Auto-closes after `ARC_worldGateAutoLowerDelayS` (10 s) with no BLUFOR present. |
+| KLE task type | 5-min dwell threshold triggers WHITE/GREEN delta + HUMINT lead. `ARC_kleEngageDurationS` tuneable. |
+| Route clearance task type | EOD dwell → segment IED suppression for 2 h (`ARC_routeClearSuppressionS`). Evidence → component trace lead. |
+| Console VM tab migration path | VM payload (`ARC_consoleVM_payload`) is built every broadcast cycle. Feature flags `ARC_console_dashboard_v2` and `ARC_console_ops_v2` (both default false) enable VM-sourced reads per tab. |
+| Mission scoring schema | `ARC_missionScore_v1` composite (0–100) published as `ARC_pub_missionScore`. Rating: UNSAT/MARGINAL/SATISFACTORY/OUTSTANDING. |
 
 ---
 

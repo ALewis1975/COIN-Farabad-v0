@@ -489,6 +489,25 @@ if (!isNil "ARC_fnc_incidentPreCache") then
     [_posATL, _incidentType] call ARC_fnc_incidentPreCache;
 };
 
+// Dispatch task-type-specific init hooks for new gameplay types
+switch (toUpper _incidentType) do
+{
+    case "KLE":
+    {
+        if (!isNil "ARC_fnc_kleInit") then
+        {
+            [_taskId, _posATL, _displayName] call ARC_fnc_kleInit;
+        };
+    };
+    case "ROUTE_CLEARANCE":
+    {
+        if (!isNil "ARC_fnc_routeClearanceInit") then
+        {
+            [_taskId, _posATL, _displayName] call ARC_fnc_routeClearanceInit;
+        };
+    };
+};
+
 // Log initial tasking note into OPS feed (this also refreshes active task text)
 private _grid = mapGridPosition _posATL;
 private _leadTxt = if (_leadId isEqualTo "") then {""} else {format [" Lead: %1.", _leadId]};

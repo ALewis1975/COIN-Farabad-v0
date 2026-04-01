@@ -49,6 +49,48 @@ params [
 ];
 if (_districtId isEqualTo "") exitWith { ["districtId_empty","params"] call _fail };
 
+// ── Ambient density modulation (Item 17): RED-heavy districts suppress civilian presence ──
+// In high-RED districts the population avoids the streets (threat-driven modulation).
+// Probability gate: HIGH_RED → 30 % spawn chance; NORMAL → 100 %.
+// Configurable: civsub_v1_densityModEnabled (bool), civsub_v1_densityModRedThreshold (number, default 65).
+private _densityModEnabled = missionNamespace getVariable ["civsub_v1_densityModEnabled", true];
+if (!(_densityModEnabled isEqualType true) && !(_densityModEnabled isEqualType false)) then { _densityModEnabled = true; };
+
+if (_densityModEnabled) then
+{
+    private _districts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
+    if (_districts isEqualType createHashMap) then
+    {
+        private _dMap = _districts getOrDefault [_districtId, createHashMap];
+        if (_dMap isEqualType createHashMap) then
+        {
+            private _scoreR = _dMap getOrDefault ["R", 35];
+            if (!(_scoreR isEqualType 0)) then { _scoreR = 35; };
+            _scoreR = (_scoreR max 0) min 100;
+
+            private _redThreshold = missionNamespace getVariable ["civsub_v1_densityModRedThreshold", 65];
+            if (!(_redThreshold isEqualType 0)) then { _redThreshold = 65; };
+            _redThreshold = (_redThreshold max 20) min 90;
+
+            if (_scoreR >= _redThreshold) then
+            {
+                // High-RED: suppress spawns probabilistically
+                private _spawnChance = 1 - ((_scoreR - _redThreshold) / (100 - _redThreshold)) * 0.70;
+                _spawnChance = (_spawnChance max 0.10) min 1;
+
+                if ((random 1) > _spawnChance) exitWith
+                {
+                    if (_dbg) then
+                    {
+                        diag_log format ["[CIVSUB][CIVS][DENSITY] district=%1 RED=%2 chance=%3 — spawn suppressed.", _districtId, _scoreR, round (_spawnChance * 100)];
+                    };
+                    ["density_suppressed_red", "density_mod"] call _fail
+                };
+            };
+        };
+    };
+};
+
 missionNamespace setVariable ["civsub_v1_civ_lastSpawnStage", "district_lookup", true];
 
 private _district = [_districtId] call ARC_fnc_civsubDistrictsGetById;

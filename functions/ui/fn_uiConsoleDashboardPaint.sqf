@@ -72,6 +72,14 @@ if (_isCmd) then { _roleCat = "TOC-CMD"; } else {
 private _pos = getPosATL player;
 private _grid = mapGridPosition _pos;
 
+// ── Console VM v1 shadow-mode (Item 8: Dashboard tab migration) ─────────────
+// When ARC_console_dashboard_v2 is true, state vars below are sourced from the
+// VM payload via ARC_fnc_consoleVmAdapterV1 instead of direct missionNamespace
+// reads. Default: false (legacy path). Set true after parity testing on a
+// dedicated server with live traffic.
+private _useVm = missionNamespace getVariable ["ARC_console_dashboard_v2", false];
+if (!(_useVm isEqualType true) && !(_useVm isEqualType false)) then { _useVm = false; };
+
 // Active incident summary
 private _taskId = missionNamespace getVariable ["ARC_activeTaskId", ""]; if (!(_taskId isEqualType "")) then { _taskId = ""; };
 private _hasIncident = (_taskId != "");
@@ -185,6 +193,56 @@ private _qPending = format ["<t color='%1'>%2</t>", _qPendingColor, _qPendingCnt
 private _statusRows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
 if (!(_statusRows isEqualType [])) then { _statusRows = []; };
 if ((count _statusRows) > _rxMaxItems) then { _statusRows = _statusRows select [0, _rxMaxItems]; };
+
+// ── VM v2 path override (shadow-mode) ──────────────────────────────────────
+// When ARC_console_dashboard_v2 is true: re-read incident, follow-on, ops, and
+// queue fields from the VM payload (ARC_fnc_consoleVmAdapterV1) rather than
+// from raw missionNamespace vars. ARC_pub_unitStatuses has no VM equivalent
+// yet and remains on the legacy path regardless of flag.
+if (_useVm && { !isNil "ARC_fnc_consoleVmAdapterV1" }) then
+{
+    _taskId      = ["incident",  "task_id",           ""]      call ARC_fnc_consoleVmAdapterV1;
+    _hasIncident = (_taskId != "");
+    _incDisp     = ["incident",  "display_name",       "(none)"] call ARC_fnc_consoleVmAdapterV1;
+    _incType     = ["incident",  "incident_type",       ""]      call ARC_fnc_consoleVmAdapterV1;
+    _incPos      = ["incident",  "position",            []]      call ARC_fnc_consoleVmAdapterV1;
+    _acc         = ["incident",  "accepted",            false]   call ARC_fnc_consoleVmAdapterV1;
+    _accBy       = ["incident",  "accepted_by_group",   ""]      call ARC_fnc_consoleVmAdapterV1;
+    _closeReady  = ["incident",  "close_ready",         false]   call ARC_fnc_consoleVmAdapterV1;
+    _sitrepSent  = ["incident",  "sitrep_sent",         false]   call ARC_fnc_consoleVmAdapterV1;
+    _foSummary   = ["followOn",  "summary",             ""]      call ARC_fnc_consoleVmAdapterV1;
+    _foLeadName  = ["followOn",  "lead_name",           ""]      call ARC_fnc_consoleVmAdapterV1;
+    _foLeadGrid  = ["followOn",  "lead_grid",           ""]      call ARC_fnc_consoleVmAdapterV1;
+    _orders      = ["ops",       "orders",              []]      call ARC_fnc_consoleVmAdapterV1;
+    _leadPool    = ["ops",       "lead_pool",           []]      call ARC_fnc_consoleVmAdapterV1;
+    _intelLog    = ["ops",       "intel_log",           []]      call ARC_fnc_consoleVmAdapterV1;
+    _qPendingArr = ["ops",       "queue_pending",       []]      call ARC_fnc_consoleVmAdapterV1;
+
+    if (!(_taskId     isEqualType ""))                                          then { _taskId     = ""; };
+    if (!(_incDisp    isEqualType ""))                                          then { _incDisp    = "(none)"; };
+    if (!(_incType    isEqualType ""))                                          then { _incType    = ""; };
+    if (!(_incPos     isEqualType []))                                          then { _incPos     = []; };
+    if (!(_acc        isEqualType true) && { !(_acc     isEqualType false) })   then { _acc        = false; };
+    if (!(_accBy      isEqualType ""))                                          then { _accBy      = ""; };
+    if (!(_closeReady isEqualType true) && { !(_closeReady isEqualType false) }) then { _closeReady = false; };
+    if (!(_sitrepSent isEqualType true) && { !(_sitrepSent isEqualType false) }) then { _sitrepSent = false; };
+    if (!(_foSummary  isEqualType ""))                                          then { _foSummary  = ""; };
+    if (!(_foLeadName isEqualType ""))                                          then { _foLeadName = ""; };
+    if (!(_foLeadGrid isEqualType ""))                                          then { _foLeadGrid = ""; };
+    if (!(_orders     isEqualType []))                                          then { _orders     = []; };
+    if (!(_leadPool   isEqualType []))                                          then { _leadPool   = []; };
+    if (!(_intelLog   isEqualType []))                                          then { _intelLog   = []; };
+    if (!(_qPendingArr isEqualType []))                                         then { _qPendingArr = []; };
+
+    // Recompute derived values from VM data
+    _incGrid     = if (_incPos isEqualType [] && { (count _incPos) >= 2 }) then { mapGridPosition _incPos } else { "" };
+    _qPendingCnt = count _qPendingArr;
+    _qPendingColor = "#FFFFFF";
+    if (_qPendingCnt >= 5) then { _qPendingColor = "#FF7A7A"; } else {
+        if (_qPendingCnt >= 3) then { _qPendingColor = "#FFD166"; };
+    };
+    _qPending = format ["<t color='%1'>%2</t>", _qPendingColor, _qPendingCnt];
+};
 
 private _unitLines = [];
 {

@@ -67,6 +67,12 @@ class CfgRemoteExec
         class ARC_fnc_casreqExecute                 { allowedTargets = 2; };
         class ARC_fnc_casreqClose                   { allowedTargets = 2; };
 
+        // CASEVAC RPC (Item 5 — client → server request)
+        class ARC_fnc_medicalCasevacRequest         { allowedTargets = 2; };
+
+        // Mission scoring (Item 22 — TOC operator trigger)
+        class ARC_fnc_missionScoreGenerate          { allowedTargets = 2; };
+
         // Dev / admin RPCs
         class ARC_fnc_devCompileAuditServer         { allowedTargets = 2; };
         class ARC_fnc_devDiagnosticsSnapshot        { allowedTargets = 2; };

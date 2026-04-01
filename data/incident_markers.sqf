@@ -153,5 +153,24 @@
     ["ARC_m_civil_01", "Civil: Crowd Control / Mediation", "CIVIL"],
 
     ["ARC_m_logistics_01", "Logistics: Convoy Escort", "LOGISTICS"],
-    ["ARC_m_logistics_01", "Escort: Convoy Protection", "ESCORT"]
+    ["ARC_m_logistics_01", "Escort: Convoy Protection", "ESCORT"],
+
+    // ── Key Leader Engagement (KLE) task type ─────────────────────────────
+    // KLE tasks are non-kinetic: a player element conducts a structured
+    // meeting with a district elder to build legitimacy and gather HUMINT.
+    // Outcome drives WHITE/GREEN influence delta and may emit a HUMINT lead.
+    ["ARC_loc_GrandMosque",   "KLE: Elder Engagement — Grand Mosque District",    "KLE"],
+    ["ARC_loc_GreenZone",     "KLE: Elder Engagement — Green Zone Council",       "KLE"],
+    ["ARC_loc_MarketDistrict","KLE: Elder Engagement — Market District Shura",    "KLE"],
+    ["ARC_loc_ResidentialNorth","KLE: Elder Engagement — North Residential Leaders","KLE"],
+    ["ARC_loc_FarmlandEast",  "KLE: Elder Engagement — Farmland Cooperative",     "KLE"],
+
+    // ── Route Clearance task type ─────────────────────────────────────────
+    // Route clearance tasks reduce IED placement probability on the cleared
+    // MSR segment for a configurable number of hours. EOD-led, results in
+    // an intel lead if evidence is found.
+    ["ARC_m_patrol_01", "Route Clearance: MSR Hamza Sweep",          "ROUTE_CLEARANCE"],
+    ["ARC_m_patrol_02", "Route Clearance: Farabad District Arterial", "ROUTE_CLEARANCE"],
+    ["ARC_m_patrol_03", "Route Clearance: South Route Sweep",         "ROUTE_CLEARANCE"],
+    ["ARC_m_ied_01",    "Route Clearance: EOD Clearance — MSR IED",   "ROUTE_CLEARANCE"]
 ]

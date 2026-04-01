@@ -72,6 +72,13 @@ else
 // CIVSUB contact (ALiVE-style) - client init
 [] call ARC_fnc_civsubContactInitClient;
 
+// ACE Medical → TOC CASEVAC integration (Item 21)
+// Registers the ace_unconscious CBA event handler on this client.
+if (!isNil "ARC_fnc_medicalAceIncapHandler") then
+{
+    [] call ARC_fnc_medicalAceIncapHandler;
+};
+
 // ---------------------------------------------------------------------------
 // Console resilience: rebind/reinit a few times in case actions/keybinds get cleared
 // by locality swaps, mods, or UI rebuilds.

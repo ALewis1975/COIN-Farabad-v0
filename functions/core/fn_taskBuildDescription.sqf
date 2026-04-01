@@ -390,6 +390,8 @@ switch (_typeU) do
     case "IED":        { _endState = "Success: Locate and clear the device (on-site action). Failure: device detonates/destroyed or task expires."; };
     case "CIVIL":      { _endState = "Success: Conduct the engagement (on-site action). Failure: liaison killed or task expires."; };
     case "CMDNODE_MEET": { _endState = "Success: Conduct the engagement (on-site action). Failure: liaison killed or task expires."; };
+    case "KLE":        { _endState = format ["Success: Conduct a structured elder engagement — remain within 75 m for %1 minutes. HUMINT lead generated on success. Failure: element withdraws or task expires.", (_holdMin max 5)]; };
+    case "ROUTE_CLEARANCE": { _endState = "Success: EOD team sweeps the route — remain within the sweep area for the required dwell time. IED suppression applied on success. Failure: task expires."; };
     default             { _endState = "Success: Resolve the situation and report. Failure: task expires."; };
 };
 
