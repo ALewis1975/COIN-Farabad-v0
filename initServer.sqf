@@ -100,6 +100,16 @@ missionNamespace setVariable ["ARC_patrolSpawnContactsEnabled", true, true];
 
 
 // ============================================================================
+// CONSOLE VM — feature flags (Phase 4.1 migration)
+// ============================================================================
+// When true, the tab reads from ARC_consoleVM_payload via
+// ARC_fnc_consoleVmAdapterV1 instead of direct missionNamespace reads.
+// Both flags default to false in the paint functions; set true once VM
+// publishing is confirmed stable on this server.
+missionNamespace setVariable ["ARC_console_ops_v2",       true, true];
+missionNamespace setVariable ["ARC_console_dashboard_v2", true, true];
+
+// ============================================================================
 // UI / IN-WORLD ACTIONS
 // ============================================================================
 

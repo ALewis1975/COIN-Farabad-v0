@@ -81,10 +81,95 @@ private _classIdx = 0;
     // BIS ambient animation
     [_unit] spawn BIS_fnc_ambientAnimCombat;
 
+    // Behavioural depth (Roadmap #13) ─────────────────────────────────────────
+    // Guard posts: simple two-point patrol (10-15 m radius) that loops forever.
+    if (_role isEqualTo "Guard") then
+    {
+        private _guardUnit = _unit;
+        private _originPos = _pos;
+        [_guardUnit, _originPos] spawn
+        {
+            params ["_u", "_origin"];
+            while { alive _u } do
+            {
+                // Pick a secondary position 10-15 m away in a random direction
+                private _angle = random 360;
+                private _dist  = 10 + (random 5);  // 10-15 m
+                private _secondary = [_origin # 0 + (_dist * sin _angle),
+                                      _origin # 1 + (_dist * cos _angle),
+                                      _origin # 2];
+                _u enableAI "MOVE";
+                _u doMove _secondary;
+                waitUntil { sleep 2; !alive _u || { (_u distance _secondary) < 2 } };
+                _u disableAI "MOVE";
+                sleep (15 + (random 10));  // pause 15-25 s at secondary
+
+                if (!alive _u) exitWith {};
+
+                _u enableAI "MOVE";
+                _u doMove _origin;
+                waitUntil { sleep 2; !alive _u || { (_u distance _origin) < 2 } };
+                _u disableAI "MOVE";
+                sleep (15 + (random 10));
+            };
+        };
+    };
+
+    // Medical bay: periodically re-trigger ambient animation to vary the idle pose.
+    if (_role isEqualTo "Medic") then
+    {
+        private _medicUnit = _unit;
+        [_medicUnit] spawn
+        {
+            params ["_u"];
+            while { alive _u } do
+            {
+                sleep (60 + (random 60));  // 60-120 s interval
+                if (alive _u) then { [_u] spawn BIS_fnc_ambientAnimCombat; };
+            };
+        };
+    };
+
     _spawned = _spawned + 1;
 
     diag_log format ["[ARC][WORLD] worldAmbientPersonnelInit: spawned '%1' at %2 (marker=%3)", _role, mapGridPosition _pos, _mkr];
 } forEach _slots;
+
+// Threat-pressure watcher — polls insurgentPressure every 30 s and calls
+// ARC_fnc_worldThreatStateReact when the base posture needs to change.
+// Hysteresis band: elevate to HIGH above 0.60, return to NORMAL below 0.40.
+[] spawn
+{
+    while { true } do
+    {
+        sleep 30;
+        private _pressure = ["insurgentPressure", 0.35] call ARC_fnc_stateGet;
+        if (!(_pressure isEqualType 0)) then { _pressure = 0.35; };
+
+        private _curPosture = missionNamespace getVariable ["ARC_worldBasePosture", "NORMAL"];
+        if (!(_curPosture isEqualType "")) then { _curPosture = "NORMAL"; };
+
+        if (_pressure > 0.60) then
+        {
+            if (!(_curPosture isEqualTo "HIGH") && { !(_curPosture isEqualTo "CRITICAL") }) then
+            {
+                diag_log "[ARC][WORLD] worldAmbientPersonnelInit: HIGH THREAT — calling worldThreatStateReact.";
+                ["HIGH"] call ARC_fnc_worldThreatStateReact;
+            };
+        }
+        else
+        {
+            if (_pressure < 0.40) then
+            {
+                if (!(_curPosture isEqualTo "NORMAL")) then
+                {
+                    diag_log "[ARC][WORLD] worldAmbientPersonnelInit: pressure normalised — calling worldThreatStateReact.";
+                    ["NORMAL"] call ARC_fnc_worldThreatStateReact;
+                };
+            };
+        };
+    };
+};
 
 diag_log format ["[ARC][WORLD] worldAmbientPersonnelInit: %1 ambient base personnel spawned.", _spawned];
 

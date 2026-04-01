@@ -167,6 +167,79 @@ switch (_incidentType) do
         };
     };
 
+    // ── Named CIVIL scenario types — differentiated deltas (Roadmap #10) ────────
+    // CIVIL_LIAISON: direct village/district outreach; moderate trust + legitimacy.
+    case "CIVIL_LIAISON":
+    {
+        switch (_result) do
+        {
+            case "SUCCEEDED": { _dW = 1.5; _dR = -0.5; _dG = 1.0; };
+            case "FAILED":    { _dW = -1.5; _dG = -1.0; _dR = 0.5; };
+        };
+    };
+
+    // CIVIL_COMMUNITY_ENGAGEMENT: broader outreach event; higher upside/downside.
+    case "CIVIL_COMMUNITY_ENGAGEMENT":
+    {
+        switch (_result) do
+        {
+            case "SUCCEEDED": { _dW = 2.5; _dR = -1.0; _dG = 1.5; };
+            case "FAILED":    { _dW = -3.0; _dG = -2.0; _dR = 1.5; };
+        };
+    };
+
+    // CIVIL_VIP_SECURITY: protecting a key leader; success builds legitimacy;
+    // failure is catastrophic for G and fuels insurgent morale.
+    case "CIVIL_VIP_SECURITY":
+    {
+        switch (_result) do
+        {
+            case "SUCCEEDED": { _dW = 1.0; _dG = 2.5; _dR = -1.0; };
+            case "FAILED":    { _dW = -2.0; _dG = -4.0; _dR = 3.0; };
+        };
+    };
+
+    // CIVIL_MEDICAL_OUTREACH: humanitarian lens; pure W/G on success.
+    case "CIVIL_MEDICAL_OUTREACH":
+    {
+        switch (_result) do
+        {
+            case "SUCCEEDED": { _dW = 3.0; _dG = 1.5; _dR = -0.5; };
+            case "FAILED":    { _dW = -4.0; _dG = -1.0; _dR = 1.0; };
+        };
+    };
+
+    // CIVIL_GOVERNMENT_LIAISON: building government capacity; strong G focus.
+    case "CIVIL_GOVERNMENT_LIAISON":
+    {
+        switch (_result) do
+        {
+            case "SUCCEEDED": { _dW = 1.0; _dR = -1.5; _dG = 3.0; };
+            case "FAILED":    { _dW = -1.5; _dG = -3.0; _dR = 2.0; };
+        };
+    };
+
+    // CIVIL_EMBASSY: formal diplomatic engagement; balanced W and G gains.
+    case "CIVIL_EMBASSY":
+    {
+        switch (_result) do
+        {
+            case "SUCCEEDED": { _dW = 1.5; _dR = -1.0; _dG = 2.0; };
+            case "FAILED":    { _dW = -2.5; _dG = -2.5; _dR = 1.5; };
+        };
+    };
+
+    // CIVIL_CROWD_CONTROL: high-risk; disciplined handling grows W;
+    // excessive force collapses W and spikes R.
+    case "CIVIL_CROWD_CONTROL":
+    {
+        switch (_result) do
+        {
+            case "SUCCEEDED": { _dW = 1.0; _dG = 1.0; _dR = -0.5; };
+            case "FAILED":    { _dW = -5.0; _dG = -2.0; _dR = 3.5; };
+        };
+    };
+
     case "CHECKPOINT":
     {
         switch (_result) do

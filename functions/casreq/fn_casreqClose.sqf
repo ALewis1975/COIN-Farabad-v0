@@ -21,6 +21,8 @@ params [
     ["_notes",  "",      [""]]
 ];
 
+if (!([_unit, "ARC_fnc_casreqClose", "CASREQ close rejected: sender mismatch.", "CASREQ_CLOSE_SEC_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
+
 if (_id isEqualTo "") exitWith {false};
 
 private _trimFn = compile "params ['_s']; trim _s";

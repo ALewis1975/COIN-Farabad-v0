@@ -2204,3 +2204,54 @@ Contrast with the correct pattern used in the background check handler itself:
 - CIV density modulation is probabilistic; a `civsub_v1_densityModEnabled = false` flag disables it entirely.
 - Gate barrier logic requires Eden-placed barrier objects; missing objects log and continue (no crash).
 - KLE/Route Clearance init functions are no-ops when task type is not matched (no side effects on existing tasks).
+
+---
+
+## 2026-04-01 — Roadmap Items #1-#15 Implementation Pass (copilot/assess-project-roadmap)
+
+**Branch:** copilot/assess-project-roadmap
+**Scenario:** Implement all 15 prioritized roadmap items — static review pass
+
+### Items implemented in this pass:
+
+| # | Item | Files Changed | Status |
+|---|------|--------------|--------|
+| 1  | Security: rpcValidateSender in casreqExecute/Close/missionScoreGenerate | fn_casreqExecute.sqf, fn_casreqClose.sqf, fn_missionScoreGenerate.sqf | PASS (static) |
+| 2  | TASKENG: fn_taskengEnsureParentCaseTask.sqf + CfgFunctions | fn_taskengEnsureParentCaseTask.sqf (new), CfgFunctions.hpp | PASS (static) |
+| 3  | SITREP: Fix banned direct trim in uiConsoleActionSendSitrep | fn_uiConsoleActionSendSitrep.sqf | PASS (static) |
+| 4  | Docs: ModStackGovernance.md | docs/operations/ModStackGovernance.md (new) | PASS (docs) |
+| 5  | S2 Heat-Map: worldDistrictMarkersUpdate + S2 toggle + handler | fn_worldDistrictMarkersUpdate.sqf (new), fn_uiConsoleS2Paint.sqf, fn_uiConsoleActionS2Primary.sqf, CfgFunctions.hpp | PASS (static) |
+| 6  | TASKENG wiring: fn_incidentCreate → taskengEnsureParentCaseTask | fn_incidentCreate.sqf | PASS (static) |
+| 7  | Console VM Ops: ARC_console_ops_v2=true in initServer | initServer.sqf | PASS (static) |
+| 8  | Convoy logging: CONVOY_DESPAWN diag_log | fn_execCleanupActive.sqf | PASS (static) |
+| 9  | CIV density: RED-score (R_EFF_U > 40) modulation in civCapsCompute | fn_civsubCivCapsCompute.sqf | PASS (static) |
+| 10 | CIVIL scenarios: 7 named CIVIL_* types in ApplyIncidentOutcomeDelta | fn_civsubApplyIncidentOutcomeDelta.sqf | PASS (static) |
+| 11 | TEST-LOG: Phase 3 BLOCKED entries (this entry) | tests/TEST-LOG.md | PASS (docs) |
+| 12 | Dashboard VM: ARC_console_dashboard_v2=true in initServer | initServer.sqf | PASS (static) |
+| 13 | Base ambiance: guard patrols, medic anim refresh, threat watcher | fn_worldAmbientPersonnelInit.sqf | PASS (static) |
+| 14 | Threat reaction: fn_worldThreatStateReact.sqf + CfgFunctions | fn_worldThreatStateReact.sqf (new), CfgFunctions.hpp | PASS (static) |
+| 15 | Facilitator disruption: 30-min budget penalty | fn_threatFacilitatorNode.sqf, fn_threatGovernorCheck.sqf | PASS (static) |
+
+### Phase 3 Runtime Validation (deferred — BLOCKED)
+
+| # | Check | Result | Notes |
+|---|-------|--------|-------|
+| 1 | Local MP smoke test — all 15 items | BLOCKED | No Arma 3 runtime in container |
+| 2 | Dedicated server — gate barrier animation on HIGH/CRITICAL | BLOCKED | No dedicated server available |
+| 3 | JIP snapshot: ARC_worldBasePosture + ARC_worldThreatAlert replicated correctly | BLOCKED | No dedicated/JIP environment |
+| 4 | Console VM flag activation (ops_v2 + dashboard_v2) — live tab parity | BLOCKED | No Arma 3 runtime in container |
+| 5 | CIVSUB CIVIL_* outcome deltas — verify correct W/R/G application | BLOCKED | No Arma 3 runtime in container |
+| 6 | Facilitator disruption penalty — verify budget reduction timing | BLOCKED | No Arma 3 runtime in container |
+| 7 | S2 heat-map markers — verify correct district centroid placement | BLOCKED | No Arma 3 runtime in container |
+| 8 | Guard patrol routes — verify unit movement between posts | BLOCKED | No Arma 3 runtime in container |
+
+**All BLOCKED items require a dedicated server or hosted MP session to validate.**
+**Owner:** Mission Commander / server operator.
+
+**Commands run:**
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan — new files | manual review against SQFLINT_COMPAT_GUIDE.md | PASS | No # indexing, findIf, isNotEqualTo, bare trim, anonymous remoteExec in new code |
+| 2 | CfgFunctions audit | grep worldDistrictMarkersUpdate/worldThreatStateReact/taskengEnsureParentCaseTask config/CfgFunctions.hpp | PASS | All 3 new functions registered |
+| 3 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 dedicated server available in container |

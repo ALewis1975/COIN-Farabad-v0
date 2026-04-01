@@ -115,6 +115,20 @@ private _sumCaps = 0;
                     private _ratio = _alive / _pop;
                     _capThis = round (_base * _ratio);
                     if (_capThis < _minD) then { _capThis = _minD; };
+
+                    // COIN feedback (#9): high insurgent influence (R) thins visible
+                    // civilian presence — dangerous districts feel emptier.
+                    // R >= 65 → up to 35% cap reduction; R < 40 → no effect.
+                    private _rScore = _ds getOrDefault ["R_EFF_U", 50];
+                    if (!(_rScore isEqualType 0)) then { _rScore = 50; };
+                    _rScore = (_rScore max 0) min 100;
+                    if (_rScore > 40) then
+                    {
+                        private _rMod = 1.0 - ((_rScore - 40) * 0.014);
+                        if (_rMod < 0.65) then { _rMod = 0.65; };
+                        _capThis = round (_capThis * _rMod);
+                        if (_capThis < _minD) then { _capThis = _minD; };
+                    };
                 };
             };
         };

@@ -424,6 +424,13 @@ missionNamespace setVariable ["ARC_activeIncidentSitrepDetails", "", true];
 ["activeThreadId", _threadId] call ARC_fnc_stateSet;
 ["activeLeadTag", _leadTag] call ARC_fnc_stateSet;
 
+// TASKENG (#6): ensure a CASE parent task exists for thread-driven incidents
+// so related child tasks are grouped under CASE:<threadId> in the task system.
+if (!(_threadId isEqualTo "")) then
+{
+    [_threadId] call ARC_fnc_taskengEnsureParentCaseTask;
+};
+
 // Reset execution bookkeeping for the new incident
 ["activeExecTaskId", ""] call ARC_fnc_stateSet;
 ["activeExecKind", ""] call ARC_fnc_stateSet;

@@ -117,6 +117,7 @@ class CfgFunctions
             // Threads / cases
             class taskengMigrateSchema {};
             class taskEnsureThreadParent {};
+            class taskengEnsureParentCaseTask {};
             class threadFindOrCreate {};
             class threadResolveDistrictId {};
             class worldIsValidDistrictId {};
@@ -218,6 +219,12 @@ class CfgFunctions
             // Living base — ambient personnel + gate barriers (Items 15-16)
             class worldAmbientPersonnelInit {};
             class worldGateBarrierInit {};
+
+            // S2 district influence heat-map (Roadmap #5)
+            class worldDistrictMarkersUpdate {};
+
+            // Threat-state base reaction — barriers + posture broadcast (Roadmap #14)
+            class worldThreatStateReact {};
         };
 
 
