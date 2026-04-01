@@ -36,7 +36,10 @@ missionNamespace setVariable ["civsub_v1_lastTick_ts", serverTime, true];
         ["civ_cas_wia", _d getOrDefault ["civ_cas_wia", 0]],
         ["ts", serverTime],
         ["aid_events", _d getOrDefault ["aid_events", 0]],
-        ["W", _d getOrDefault ["W_EFF_U", 45]]
+        ["W", _d getOrDefault ["W_EFF_U", 45]],
+        ["centroid", _d getOrDefault ["centroid", []]],
+        ["radius", _d getOrDefault ["radius", 0]],
+        ["population", _d getOrDefault ["population", 0]]
     ];
 
     missionNamespace setVariable [format ["civsub_v1_district_pub_%1", _did], _pub, true];

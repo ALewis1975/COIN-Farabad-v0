@@ -514,6 +514,7 @@ if (_rebuild) then
                     private _detH = 0;
                     private _aid = 0;
                     private _ts = 0;
+                    private _popVal = -1;
 
                     if ((count _pub) > 0) then
                     {
@@ -529,6 +530,7 @@ if (_rebuild) then
                         _detH = _ph getOrDefault ["detentions_handed_off", 0];
                         _aid = _ph getOrDefault ["aid_events", 0];
                         _ts = _ph getOrDefault ["ts", 0];
+                        _popVal = _ph getOrDefault ["population", -1];
                     };
 
                     // Derived scores (locked v1 math, using W/R/G from pub snapshot)
@@ -540,9 +542,12 @@ if (_rebuild) then
                     if (_Sthreat < 0) then { _Sthreat = 0; };
                     if (_Sthreat > 100) then { _Sthreat = 100; };
 
+                    private _popLabel = if (_popVal >= 0) then { str _popVal } else { "n/a" };
+                    private _aliveLabel = if (_popVal >= 0) then { str ((_popVal - _kia) max 0) } else { "n/a" };
+
                     private _label = format [
                         "%1  Pop:%2  Alive:%3  W/R/G:%4/%5/%6  K/W:%7/%8  Coop:%9  Threat:%10",
-                        _did, "n/a", "n/a",
+                        _did, _popLabel, _aliveLabel,
                         round _W, round _R, round _G,
                         _kia, _wia,
                         round _Scoop, round _Sthreat
@@ -833,6 +838,9 @@ else
             private _detH = _ph getOrDefault ["detentions_handed_off", 0];
             private _aid  = _ph getOrDefault ["aid_events", 0];
             private _ts   = _ph getOrDefault ["ts", 0];
+            _centroid = _ph getOrDefault ["centroid", []];
+            _rad      = _ph getOrDefault ["radius", 0];
+            _pop      = _ph getOrDefault ["population", -1];
 
             private _Scoop = (0.55 * _W) + (0.35 * _G) - (0.70 * _R);
             private _Sthreat = (1.00 * _R) - (0.35 * _W) - (0.25 * _G);
