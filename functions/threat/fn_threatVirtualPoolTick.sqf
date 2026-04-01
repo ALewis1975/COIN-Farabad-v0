@@ -149,7 +149,7 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
             private _ri  = _forEachIndex;
 
             // Only process VIRTUAL_OPFOR records
-            if (!([_rec, "type", ""] call _kvGet) isEqualTo "VIRTUAL_OPFOR") then { continue; };
+            if (!(([_rec, "type", ""] call _kvGet) isEqualTo "VIRTUAL_OPFOR")) then { continue; };
 
             private _state     = [_rec, "state",   "VIRTUAL_DORMANT"] call _kvGet;
             private _vgId      = [_rec, "vgroup_id", ""]              call _kvGet;
