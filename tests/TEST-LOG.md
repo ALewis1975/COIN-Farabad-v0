@@ -1929,3 +1929,26 @@ Contrast with the correct pattern used in the background check handler itself:
 |---|-------|---------|--------|-------|
 | 1 | Compat scan — changed file | `python3 scripts/dev/sqflint_compat_scan.py functions/civsub/fn_civsubContactReqAction.sqf` | PASS | 0 violations |
 | 2 | Dedicated-server runtime validation | N/A | BLOCKED | No Arma dedicated server available in container |
+
+---
+
+## 2026-04-01 01:22 UTC — Playtest feedback: spawn distances, layout, incident OPORD
+
+**Branch/Commit:** copilot/update-civsub-dashboard-features @ commit: unrecoverable (pre-push)
+
+**Scenario:** Implement spawn distance air/ground differentiation (2,000 m ground / 5,000 m air), per-tab console center/right pane equal-width layout, and incident OPORD in S3/OPS right pane.
+
+**Changes validated (static review; no dedicated server available):**
+- `initServer.sqf`: replaced single virtual-pool radii with `_ground`/`_air` split variants; updated civilian NPC bubble and cleanup radii.
+- `fn_threatVirtualPoolTick.sqf`: per-group nearest-player vehicle type check; selects air or ground activation/spawn/despawn radii; raised hard caps to 10,000 m (activation/despawn) and 8,000 m (spawn).
+- `fn_civsubLocNpcTick.sqf`: per-player air-aware bubble radius check.
+- `fn_uiConsoleApplyLayout.sqf`: added `_activeTab` param; 50/50 center/right split for DASH/BOARDS/OPS/CMD/HQ; 47/53 for all others.
+- `fn_uiConsoleRefresh.sqf`: calls `applyLayout` with active tab after regression guards so each screen gets correct ratio.
+- `fn_uiConsoleOpsPaint.sqf`: appended abbreviated 5-paragraph OPORD block to the `INCIDENT` case right-pane details.
+
+**Commands run:**
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan — 5 changed files | `python3 scripts/dev/sqflint_compat_scan.py fn_threatVirtualPoolTick.sqf fn_civsubLocNpcTick.sqf fn_uiConsoleApplyLayout.sqf fn_uiConsoleRefresh.sqf fn_uiConsoleOpsPaint.sqf` | PASS | 56 pre-existing violations; 0 new violations introduced |
+| 2 | Dedicated-server runtime validation | N/A | BLOCKED | No Arma dedicated server available in container |

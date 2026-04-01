@@ -37,9 +37,13 @@ if (!(_registry isEqualType createHashMap)) then { _registry = createHashMap; };
 private _players  = [] call ARC_fnc_civsubBubbleGetPlayers;
 if ((count _players) == 0) exitWith { false };
 
-private _bubbleR = missionNamespace getVariable ["civsub_v1_locnpc_bubbleRadius_m", 500];
-if (!(_bubbleR isEqualType 0)) then { _bubbleR = 500; };
-_bubbleR = (_bubbleR max 200) min 1000;
+private _bubbleR_ground = missionNamespace getVariable ["civsub_v1_locnpc_bubbleRadius_m_ground", 2000];
+if (!(_bubbleR_ground isEqualType 0)) then { _bubbleR_ground = 2000; };
+_bubbleR_ground = (_bubbleR_ground max 200) min 8000;
+
+private _bubbleR_air = missionNamespace getVariable ["civsub_v1_locnpc_bubbleRadius_m_air", 5000];
+if (!(_bubbleR_air isEqualType 0)) then { _bubbleR_air = 5000; };
+_bubbleR_air = (_bubbleR_air max 200) min 8000;
 
 // ── 3. Time-of-day phase (reuse civsub_v1_activity_phase set by TrafficTick) ─
 private _phase = missionNamespace getVariable ["civsub_v1_activity_phase", "DAY"];
@@ -71,10 +75,13 @@ private _totalLive = 0;
     if ((count _sitePos) < 2)      then { continue; };
     if ((count _profile) == 0)     then { continue; };
 
-    // Inside any player bubble?
+    // Inside any player bubble? Each player's effective bubble radius depends on whether
+    // they are airborne (larger radius) or on the ground.
     private _inBubble = false;
     {
-        if (!isNull _x && { (getPosATL _x) distance2D [_sitePos select 0, _sitePos select 1, 0] <= _bubbleR }) exitWith { _inBubble = true; };
+        private _p = _x;
+        private _pr = if ((vehicle _p) isKindOf "Air") then { _bubbleR_air } else { _bubbleR_ground };
+        if (!isNull _p && { (getPosATL _p) distance2D [_sitePos select 0, _sitePos select 1, 0] <= _pr }) exitWith { _inBubble = true; };
     } forEach _players;
     if (!_inBubble) then { continue; };
 

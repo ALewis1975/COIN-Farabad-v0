@@ -129,10 +129,20 @@ missionNamespace setVariable ["ARC_worldIndex_weights", [0.25, 0.25, 0.30, 0.20]
 // Incident seeding multipliers: HIGH x1.4, MED x1.1, LOW x0.8.
 missionNamespace setVariable ["ARC_worldIndex_tierThresholds", [0.65, 0.35], true];
 
-// Virtual OpFor pool: activation/spawn/despawn radii (metres) and timing (seconds).
-missionNamespace setVariable ["ARC_threatVirtualActivationRadiusM", 600,  true]; // DORMANT -> ACTIVE when player within this radius
-missionNamespace setVariable ["ARC_threatVirtualSpawnRadiusM",      400,  true]; // ACTIVE  -> PHYSICAL when player within this radius
-missionNamespace setVariable ["ARC_threatVirtualDespawnRadiusM",    700,  true]; // PHYSICAL -> start despawn countdown when all players beyond this
+// Virtual OpFor pool: activation/spawn/despawn radii (metres) split by player platform type.
+// Ground players (infantry, ground vehicles): use the _ground values.
+// Air players (helicopters, fixed-wing): use the _air values — greater range improves
+// aerial ambiance and ensures pilots see world activity at realistic distances.
+missionNamespace setVariable ["ARC_threatVirtualActivationRadiusM_ground", 2200, true]; // DORMANT -> ACTIVE (ground player nearby)
+missionNamespace setVariable ["ARC_threatVirtualActivationRadiusM_air",    5500, true]; // DORMANT -> ACTIVE (air player nearby)
+missionNamespace setVariable ["ARC_threatVirtualSpawnRadiusM_ground",      2000, true]; // ACTIVE  -> PHYSICAL (ground player within this radius)
+missionNamespace setVariable ["ARC_threatVirtualSpawnRadiusM_air",         5000, true]; // ACTIVE  -> PHYSICAL (air player within this radius)
+missionNamespace setVariable ["ARC_threatVirtualDespawnRadiusM_ground",    2400, true]; // PHYSICAL -> start despawn countdown (ground)
+missionNamespace setVariable ["ARC_threatVirtualDespawnRadiusM_air",       6000, true]; // PHYSICAL -> start despawn countdown (air)
+// Legacy single-value fallbacks (= ground defaults; kept for compatibility with external callers).
+missionNamespace setVariable ["ARC_threatVirtualActivationRadiusM", 2200, true];
+missionNamespace setVariable ["ARC_threatVirtualSpawnRadiusM",      2000, true];
+missionNamespace setVariable ["ARC_threatVirtualDespawnRadiusM",    2400, true];
 missionNamespace setVariable ["ARC_threatVirtualDespawnDelayS",     90,   true]; // seconds beyond despawn radius before group is deleted
 missionNamespace setVariable ["ARC_threatVirtualRepositionS",       600,  true]; // drift interval for DORMANT groups (seconds)
 missionNamespace setVariable ["ARC_threatVirtualPoolTickS",         60,   true]; // pool tick cadence (seconds)
@@ -320,8 +330,12 @@ missionNamespace setVariable ["civsub_v1_traffic_lastMovingSpawnFail", "", true]
 missionNamespace setVariable ["civsub_v1_locnpc_enabled", true, true];
 missionNamespace setVariable ["civsub_v1_locnpc_tick_s",   10, true];           // tick cadence (s); 10 recommended
 
-// Bubble: spawn NPCs at sites within this distance of any player
-missionNamespace setVariable ["civsub_v1_locnpc_bubbleRadius_m", 500, true];
+// Bubble: spawn NPCs at sites within this distance of any player.
+// Air players (helicopter/fixed-wing) use the larger radius so pilots see world activity.
+missionNamespace setVariable ["civsub_v1_locnpc_bubbleRadius_m_ground", 2000, true];
+missionNamespace setVariable ["civsub_v1_locnpc_bubbleRadius_m_air",    5000, true];
+// Legacy single-value fallback (= ground default).
+missionNamespace setVariable ["civsub_v1_locnpc_bubbleRadius_m", 2000, true];
 
 // Global NPC cap across all sites
 missionNamespace setVariable ["civsub_v1_locnpc_cap_global",      32, true];
@@ -330,7 +344,7 @@ missionNamespace setVariable ["civsub_v1_locnpc_cap_global",      32, true];
 missionNamespace setVariable ["civsub_v1_locnpc_cluster_m",       80, true];
 
 // Cleanup: despawn NPCs when players have been further than this for cleanupMinDelay_s
-missionNamespace setVariable ["civsub_v1_locnpc_cleanupRadius_m",    600, true];
+missionNamespace setVariable ["civsub_v1_locnpc_cleanupRadius_m",    2400, true];
 missionNamespace setVariable ["civsub_v1_locnpc_cleanupMinDelay_s",  120, true];
 
 // NPC class pools (prefer 3CB Takistan; fallback to vanilla if mods absent)

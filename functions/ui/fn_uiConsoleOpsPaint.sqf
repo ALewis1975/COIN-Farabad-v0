@@ -373,6 +373,34 @@ else
                 };
 
             };
+
+            // ── Incident OPORD ─────────────────────────────────────────────
+            // Abbreviated five-paragraph OPORD for quick leader reference.
+            private _typU_ord = toUpper (trim _typ);
+            private _missionStmt = switch (_typU_ord) do {
+                case "IED":     { "Investigate and clear reported IED threat. EOD disposition required before close." };
+                case "VBIED":   { "Intercept and neutralize reported VBIED before it reaches its target." };
+                case "CONTACT": { "Respond to reported enemy contact. Neutralize threat. Report KIA/WIA and equipment." };
+                case "PATROL":  { "Conduct patrol to designated grid. Report all significant activities." };
+                case "HUMINT":  { "Conduct HUMINT collection at designated location. Report all findings via SITREP." };
+                case "CIVIL":   { "Respond to civil situation. Assess, stabilize, and report IAW COIN TTPs." };
+                case "CASEVAC": { "Respond to CASEVAC request. Extract and treat all casualties. Report status to TOC." };
+                default         { format ["Execute %1 mission at designated grid. Report all significant activities.", if (_typU_ord isEqualTo "") then {"ASSIGNED"} else {_typU_ord}] };
+            };
+            _details = _details
+                + "<br/><t size='1.0' font='PuristaMedium'>INCIDENT OPORD</t><br/>"
+                + "<t color='#A0A0A0'>1. SITUATION</t><br/>"
+                + format ["   Type: %1 | Grid: %2<br/>", if (_typU_ord isEqualTo "") then {"UNSPECIFIED"} else {_typU_ord}, _grid]
+                + "<t color='#A0A0A0'>2. MISSION</t><br/>"
+                + format ["   %1<br/>", _missionStmt]
+                + "<t color='#A0A0A0'>3. EXECUTION</t><br/>"
+                + "   Accept incident, execute assigned task, submit SITREP to TOC upon completion.<br/>"
+                + "   ROE: Card Alpha applies. Report all civilian casualties to TOC immediately.<br/>"
+                + "<t color='#A0A0A0'>4. SUSTAINMENT</t><br/>"
+                + "   Request CASEVAC and resupply via TOC queue as required.<br/>"
+                + "<t color='#A0A0A0'>5. COMMAND AND SIGNAL</t><br/>"
+                + "   Report: TOC via SITREP on task completion.";
+            // ── end OPORD ───────────────────────────────────────────────────
         };
 
         case "ORDER":

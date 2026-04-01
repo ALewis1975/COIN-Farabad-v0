@@ -8,6 +8,10 @@
 
     Params:
       0: DISPLAY
+      1: STRING (optional) — active tab key.  When the tab is one of
+         DASH | BOARDS | OPS | CMD | HQ the center and right panes are
+         given equal width (50 / 50 split).  All other tabs use the
+         default 47 / 53 split.
 
     Returns:
       STRING selected mode
@@ -16,7 +20,8 @@
 if (!hasInterface) exitWith {"FULL"};
 
 params [
-    ["_display", displayNull, [displayNull]]
+    ["_display", displayNull, [displayNull]],
+    ["_activeTab", "", [""]]
 ];
 
 if (isNull _display) exitWith {"FULL"};
@@ -98,7 +103,10 @@ private _tabsW = _fw * 0.27;
 private _gap = _fw * 0.012;
 private _mainX = _tabsX + _tabsW + _gap;
 private _mainW = (_fx + _fw - _mainX - (_fw * 0.012)) max (_fw * 0.24);
-private _mainSplitW = _mainW * 0.47;
+// Equal-width (50/50) split for ops-facing screens; 47/53 for all others.
+private _equalSplitTabs = ["DASH", "BOARDS", "OPS", "CMD", "HQ"];
+private _splitRatio = if (_activeTab in _equalSplitTabs) then { 0.50 } else { 0.47 };
+private _mainSplitW = _mainW * _splitRatio;
 private _detailsX = _mainX + _mainSplitW + _gap;
 private _detailsW = (_fx + _fw - _detailsX - (_fw * 0.012)) max (_fw * 0.18);
 

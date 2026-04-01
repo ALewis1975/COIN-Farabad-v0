@@ -158,6 +158,11 @@ if (!isNull _ctrlMainGrp) then {
     };
 };
 
+// Re-apply layout with the current tab so the correct center/right split ratio
+// is used (equal-width for DASH/BOARDS/OPS/CMD/HQ; default 47/53 for others).
+// This runs after the regression guards so it wins over any stale restored positions.
+[_display, _tab] call ARC_fnc_uiConsoleApplyLayout;
+
 switch (_tab) do
 {
     case "BOARDS":
