@@ -417,6 +417,11 @@ class CfgFunctions
             class civsubTrafficSpawnMoving {};
             class civsubTrafficDebugSnapshot {};
 
+            // CIVLOC: location-specific ambient NPCs (site workers / patients / etc.)
+            class civsubLocNpcInit {};
+            class civsubLocNpcTick {};
+            class civsubLocNpcSpawn {};
+
             // Phase 7.2: WIA handling (server)
             class civsubOnCivWia {};
 
