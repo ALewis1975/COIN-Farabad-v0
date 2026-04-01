@@ -267,6 +267,20 @@ switch (_kind) do
         ["S2 Ops", "Intel refresh requested."] call ARC_fnc_clientToast;
     };
 
+    // S2 district influence heat-map toggle (Roadmap #5)
+    case "DISTRICT_HEAT_MAP":
+    {
+        private _heatMapOn = uiNamespace getVariable ["ARC_s2_districtHeatMap", false];
+        if (!(_heatMapOn isEqualType true) && !(_heatMapOn isEqualType false)) then { _heatMapOn = false; };
+        _heatMapOn = !_heatMapOn;
+        uiNamespace setVariable ["ARC_s2_districtHeatMap", _heatMapOn];
+        [_heatMapOn] call ARC_fnc_worldDistrictMarkersUpdate;
+        private _msg = if (_heatMapOn) then {"District heat-map ON — markers show dominant influence axis."} else {"District heat-map OFF."};
+        ["S2 Ops", _msg] call ARC_fnc_clientToast;
+        // Refresh tab so the [ON]/[OFF] label updates.
+        [_display, true] call ARC_fnc_uiConsoleS2Paint;
+    };
+
     case "S2_SHOW_LEADS":
     {
         [] call ARC_fnc_tocShowLeadPoolLocal;

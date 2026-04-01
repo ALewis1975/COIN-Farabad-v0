@@ -59,6 +59,23 @@ if (!(_budgetMap isEqualType createHashMap)) then { _budgetMap = createHashMap; 
 private _bEntry = [_budgetMap, _districtId, createHashMap] call _hg;
 private _bPoints = [_bEntry, "budget_points", 3] call _hg;
 private _spent   = [_bEntry, "spent_today", 0] call _hg;
+
+// Roadmap #15 — Apply facilitator disruption penalty when active.
+private _penaltyUntil = [_bEntry, "disruption_penalty_until", -1] call _hg;
+if (!(_penaltyUntil isEqualType 0)) then { _penaltyUntil = -1; };
+if (_penaltyUntil > 0 && { _now < _penaltyUntil }) then
+{
+    private _penaltyPts = [_bEntry, "disruption_penalty_pts", 0] call _hg;
+    if (!(_penaltyPts isEqualType 0)) then { _penaltyPts = 0; };
+    if (_penaltyPts > 0) then
+    {
+        _bPoints = (_bPoints - _penaltyPts) max 0;
+        diag_log format ["[ARC][THREAT] threatGovernorCheck: disruption penalty active distId=%1 reducedBy=%2 effectiveBudget=%3",
+            _districtId, _penaltyPts, _bPoints
+        ];
+    };
+};
+
 if (_spent >= _bPoints) exitWith
 {
     diag_log format ["[ARC][WARN] ARC_fnc_threatGovernorCheck: BUDGET_EXHAUSTED district=%1 type=%2 spent=%3 budget=%4", _districtId, _threatType, _spent, _bPoints];

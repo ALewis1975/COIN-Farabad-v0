@@ -22,7 +22,8 @@ if !([player] call ARC_fnc_clientCanSendSitrep) exitWith
 
 private _rec = missionNamespace getVariable ["ARC_activeIncidentSuggestedResult", ""]; 
 if (!(_rec isEqualType "")) then { _rec = ""; };
-_rec = toUpper (trim _rec);
+private _trimFn = compile "params ['_s']; trim _s";
+_rec = toUpper ([_rec] call _trimFn);
 
 // clientSendSitrep validates the recommendation itself.
 [_rec, false] spawn ARC_fnc_clientSendSitrep;

@@ -25,6 +25,15 @@
 
 if (!isServer) exitWith {[]};
 
+// Optional caller unit (provided when invoked via remoteExec from a TOC operator).
+params [["_unit", objNull, [objNull]]];
+
+// Validate sender when invoked via RPC.
+if (!isNull _unit) then
+{
+    if (!([_unit, "ARC_fnc_missionScoreGenerate", "Score generate rejected: sender mismatch.", "SCORE_GEN_SEC_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith { [] };
+};
+
 private _now = serverTime;
 
 // ── Tasks ──────────────────────────────────────────────────────────────────

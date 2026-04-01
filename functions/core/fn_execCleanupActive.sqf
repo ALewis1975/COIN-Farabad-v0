@@ -314,6 +314,16 @@ if (_cNids isEqualType [] && { (count _cNids) > 0 }) then
 
     if ((count _veh) > 0) then
     {
+        // Structured despawn log for post-session AAR and convoy timing analysis.
+        private _convoyTaskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
+        if (!(_convoyTaskId isEqualType "")) then { _convoyTaskId = ""; };
+        private _convoyStartedAt = ["activeConvoyStartedAt", -1] call ARC_fnc_stateGet;
+        if (!(_convoyStartedAt isEqualType 0)) then { _convoyStartedAt = -1; };
+        private _convoyDurationS = if (_convoyStartedAt > 0) then { (serverTime - _convoyStartedAt) max 0 } else { -1 };
+        diag_log format ["[ARC][CONVOY] CONVOY_DESPAWN taskId=%1 vehicleCount=%2 mode=%3 durationS=%4",
+            _convoyTaskId, count _veh, _m, _convoyDurationS
+        ];
+
         if (_defer) then
         {
             // Freeze them so they don't keep roaming after handoff.

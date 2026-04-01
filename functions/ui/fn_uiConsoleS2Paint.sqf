@@ -77,6 +77,12 @@ if (_rebuild) then
     // Refresh
     ["Request Intel Refresh (TOC)", "REFRESH_INTEL|"] call _add;
 
+    // S2 district influence heat-map toggle (Roadmap #5)
+    private _heatMapOn = uiNamespace getVariable ["ARC_s2_districtHeatMap", false];
+    if (!(_heatMapOn isEqualType true) && !(_heatMapOn isEqualType false)) then { _heatMapOn = false; };
+    private _heatLabel = if (_heatMapOn) then {"[ON]  District Heat-Map"} else {"[OFF] District Heat-Map"};
+    [_heatLabel, "DISTRICT_HEAT_MAP|"] call _add;
+
     // Restore selection
     private _set = -1;
     if (_prevData isNotEqualTo "") then
@@ -157,6 +163,22 @@ switch (_kind) do
     {
         _txt = _txt + "<t size='1.0' font='PuristaMedium'>Request Intel Refresh</t><br/><br/>";
         _txt = _txt + "<t size='0.95'>What happens</t><br/>- Server broadcasts the latest lead pool + intel objects snapshot<br/><br/>";
+    };
+
+    case "DISTRICT_HEAT_MAP":
+    {
+        private _heatNow = uiNamespace getVariable ["ARC_s2_districtHeatMap", false];
+        if (!(_heatNow isEqualType true) && !(_heatNow isEqualType false)) then { _heatNow = false; };
+        private _heatState = if (_heatNow) then {"ENABLED"} else {"DISABLED"};
+        private _heatColor = if (_heatNow) then {"#9FE870"} else {"#DDDDDD"};
+        _txt = _txt + "<t size='1.0' font='PuristaMedium'>District Influence Heat-Map</t><br/><br/>";
+        _txt = _txt + format ["<t size='0.95' color='%1'>Currently: %2</t><br/><br/>", _heatColor, _heatState];
+        _txt = _txt + "<t size='0.9'>Marker colours:</t><br/>";
+        _txt = _txt + "<t size='0.9' color='#FF7A7A'>RED</t>   = Insurgent influence (R) dominant<br/>";
+        _txt = _txt + "<t size='0.9' color='#9FE870'>GREEN</t> = Civilian trust (W) dominant<br/>";
+        _txt = _txt + "<t size='0.9' color='#7AB4FF'>BLUE</t>  = Governance (G) dominant<br/>";
+        _txt = _txt + "<t size='0.9' color='#FFD166'>YELLOW</t>= Balanced / contested<br/><br/>";
+        _txt = _txt + "<t size='0.9' color='#AAAAAA'>Markers are local only (not visible to other players).</t>";
     };
 
     default

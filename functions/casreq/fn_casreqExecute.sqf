@@ -19,6 +19,8 @@ params [
     ["_ttt",    -1,      [0]]
 ];
 
+if (!([_unit, "ARC_fnc_casreqExecute", "CASREQ execute rejected: sender mismatch.", "CASREQ_EXECUTE_SEC_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
+
 if (_id isEqualTo "") exitWith {false};
 
 private _records = ["casreq_v1_records", createHashMap] call ARC_fnc_stateGet;

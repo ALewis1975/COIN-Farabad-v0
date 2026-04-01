@@ -171,4 +171,26 @@ if ((count _existingTaskIds) < _maxFollowOn) then
 
 diag_log format ["[ARC][INFO] ARC_fnc_threatFacilitatorNode: node=%1 lead=%2 taskCreated=%3 threat=%4", _nodeKey, _nodeLeadId, _taskCreated, _threatId];
 
+// Roadmap #15 — Facilitator Disruption Budget Penalty ─────────────────────────
+// When a RAID_SAFEHOUSE task is created, apply a 30-minute disruption penalty
+// to the district's attack budget so follow-on attacks are throttled.
+if (_taskCreated && { !(_districtId isEqualTo "") }) then
+{
+    private _budgetMap = ["threat_v0_attack_budget", createHashMap] call ARC_fnc_stateGet;
+    if (!(_budgetMap isEqualType createHashMap)) then { _budgetMap = createHashMap; };
+
+    private _bEntry = [_budgetMap, _districtId, createHashMap] call _hg;
+    if (!(_bEntry isEqualType createHashMap)) then { _bEntry = createHashMap; };
+
+    // 30-minute disruption window; 1 budget-point penalty reduces effective budget.
+    _bEntry set ["disruption_penalty_until", serverTime + 1800];
+    _bEntry set ["disruption_penalty_pts",   1];
+    _budgetMap set [_districtId, _bEntry];
+    ["threat_v0_attack_budget", _budgetMap] call ARC_fnc_stateSet;
+
+    diag_log format ["[ARC][THREAT] threatFacilitatorNode: disruption penalty applied districtId=%1 until=%2",
+        _districtId, (serverTime + 1800)
+    ];
+};
+
 true
