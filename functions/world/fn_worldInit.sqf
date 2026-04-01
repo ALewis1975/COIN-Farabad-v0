@@ -96,4 +96,11 @@ if (!isNil "ARC_fnc_worldGateBarrierInit") then
     [] call ARC_fnc_worldGateBarrierInit;
 };
 
+// Site population subsystem — dynamic NPC presence at major sites.
+// Must run after worldScanBuildingSlots and worldScanPatrolWaypoints (both above).
+if (!isNil "ARC_fnc_sitePopInit") then
+{
+    [] call ARC_fnc_sitePopInit;
+};
+
 true

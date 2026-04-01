@@ -11,6 +11,65 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-01 20:30 UTC — SitePop subsystem: compat scan + sqflint + CI static checks
+
+**Branch/Commit:** copilot/create-dynamic-spawn-template @ commit: unrecoverable
+(SHA unavailable prior to report_progress commit; no local git commit exists yet for this entry.)
+
+**Scenario:** New `sitepop` subsystem introduced (8 new SQF files, 1 new data file, 2 modified
+files). Full static validation pass against the new files and existing CI checks.
+
+**New files:**
+- `data/farabad_site_templates.sqf`
+- `functions/sitepop/fn_sitePopInit.sqf`
+- `functions/sitepop/fn_sitePopTick.sqf`
+- `functions/sitepop/fn_sitePopSpawnSite.sqf`
+- `functions/sitepop/fn_sitePopBuildGroup.sqf`
+- `functions/sitepop/fn_sitePopApplyAmbiance.sqf`
+- `functions/sitepop/fn_sitePopDespawnSite.sqf`
+- `functions/sitepop/fn_sitePopActivateSite.sqf`
+
+**Modified files:**
+- `config/CfgFunctions.hpp` — added `class SitePop` block
+- `functions/world/fn_worldInit.sqf` — added `ARC_fnc_sitePopInit` hook after world scans
+
+**Commands run:**
+```bash
+pip install sqflint ripgrep
+python3 scripts/dev/sqflint_compat_scan.py --strict <all 8 new sqf files>
+sqflint -e w <each new sqf file>
+bash tests/static/airbase_planning_mode_checks.sh
+bash tests/static/casreq_snapshot_contract_checks.sh
+python3 scripts/dev/validate_state_migrations.py
+python3 scripts/dev/validate_marker_index.py
+```
+
+**Result:** PASS (static)
+
+**Notes:**
+- `sqflint_compat_scan.py --strict`: PASS — 0 banned patterns across 8 files.
+- `sqflint -e w` per file: exit 0 (clean) for all 8 new files.
+  - Fixes applied during this pass: removed unused `params` destructuring in tick/spawn
+    functions (replaced with indexed `select`), fixed `default:` → `default` in switch/do,
+    replaced bare `HashMap get` with `_hg` compile helper, pre-computed complex `if`
+    condition to eliminate sqflint type-inference false positive on `removeAllWeapons`.
+- `airbase_planning_mode_checks.sh`: PASS — 21/21 checks.
+- `casreq_snapshot_contract_checks.sh`: PASS — 6/6 checks.
+- `validate_state_migrations.py`: PASS — 3 migration scenarios.
+- `validate_marker_index.py`: PASS — 137 markers across all modes.
+- **Runtime-blocked checks** (require Arma 3 dedicated server or local MP):
+  - Proximity trigger: player within 600 m activates KarkanakPrison NPC population.
+  - Task-triggered activation: `ARC_fnc_sitePopActivateSite` populates site immediately on
+    task assignment even before player proximity.
+  - LAMBS behavior: `lambs_danger_fnc_garrison` applied to guard groups; fallback behavior
+    verified via code path (isNil guard present).
+  - Despawn grace period: site depopulates after 120 s with no player within 900 m; lockout
+    prevents immediate re-spawn.
+  - Dynamic simulation cost: `enableDynamicSimulation true` on spawned units.
+  - JIP: SitePop state is server-local only; no JIP surface needed (no replicated events).
+
+---
+
 ## 2026-04-01 18:11 UTC — Retroactive static validation pass (sqflint + ripgrep now available)
 
 **Branch/Commit:** copilot/health-assessment-and-development-plan @ b08c075
