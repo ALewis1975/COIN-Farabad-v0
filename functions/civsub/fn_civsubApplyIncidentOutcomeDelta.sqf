@@ -194,8 +194,9 @@ private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
 private _influenceDelta = [[["W", _dW], ["R", _dR], ["G", _dG]]] call _hmCreate;
 
 // Build the full delta bundle via civsubBundleMake for contract compliance
+private _emptyPayload = createHashMap;
 private _bundle = [_districtId, [], "INCIDENT", format ["INCIDENT_%1_%2", _incidentType, _result],
-    createHashMap, [], _influenceDelta] call ARC_fnc_civsubBundleMake;
+    _emptyPayload, [], _influenceDelta] call ARC_fnc_civsubBundleMake;
 
 if (!(_bundle isEqualType createHashMap) || { count _bundle == 0 }) exitWith
 {
