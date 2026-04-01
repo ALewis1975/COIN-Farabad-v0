@@ -2107,3 +2107,46 @@ Contrast with the correct pattern used in the background check handler itself:
 |---|-------|---------|--------|-------|
 | 1 | Compat scan — 3 changed files | `python3 scripts/dev/sqflint_compat_scan.py fn_uiConsoleOpsPaint.sqf fn_uiConsoleClickSecondary.sqf fn_uiConsoleIntelPaint.sqf` | PASS | 167 pre-existing violations; 0 new violations in new code |
 | 2 | Dedicated-server runtime validation | N/A | BLOCKED | No Arma dedicated server available in container |
+
+---
+
+## 2026-04-01 14:xx UTC — CIVSUB: Implement 20-row incident outcome influence delta (all permutation matrix items)
+
+**Branch/Commit:** copilot/assessment-and-roadmap (this PR)
+
+**Scenario:** Implement all 20 rows of the CIVSUB_Incident_Lead_Permutation_Matrix.md — one influence delta per incident type × outcome combination — wired into fn_tocReceiveSitrep.sqf at SITREP submission time.
+
+**Changes:**
+- `functions/civsub/fn_civsubApplyIncidentOutcomeDelta.sqf` (new): implements all 20 matrix rows via switch on incidentType × result; rows 9 (DEFEND/SUCCEEDED) and 11 (QRF/SUCCEEDED) are LATER no-ops; all others apply W/R/G deltas via `ARC_fnc_civsubBundleMake` + `ARC_fnc_civsubDeltaApplyToDistrict`.
+- `config/CfgFunctions.hpp`: registered `civsubApplyIncidentOutcomeDelta` in CIVSUB block.
+- `functions/core/fn_tocReceiveSitrep.sqf`: Phase 6 extension — after annex build, calls the new function when `_didC` is resolved and `_recU in ["SUCCEEDED","FAILED"]`.
+
+**Matrix rows covered:**
+- Row  1: LOGISTICS/SUCCEEDED — dW=+1.5 dG=+1.0
+- Row  2: LOGISTICS/FAILED   — dW=-2.0 dR=+2.0
+- Row  3: ESCORT/SUCCEEDED   — dW=+1.0
+- Row  4: ESCORT/FAILED      — dR=+2.0 dW=-1.0
+- Row  5: IED/SUCCEEDED      — dW=+2.0 dR=-2.0 dG=+1.5
+- Row  6: IED/FAILED         — dW=-3.0 dR=+3.0 dG=-1.5
+- Row  7: RAID/SUCCEEDED     — dW=+2.0 dR=-1.5 dG=+1.5
+- Row  8: RAID/FAILED        — dW=-3.0 dR=+2.5
+- Row  9: DEFEND/SUCCEEDED   — no-op (LATER)
+- Row 10: DEFEND/FAILED      — dW=-2.5 dR=+3.0 dG=-1.0
+- Row 11: QRF/SUCCEEDED      — no-op (LATER)
+- Row 12: QRF/FAILED         — dW=-2.5 dG=-1.5 dR=+2.5
+- Row 13: PATROL/SUCCEEDED   — dW=+1.5 dG=+1.0
+- Row 14: PATROL/FAILED      — dW=-1.0 dG=-0.5
+- Row 15: RECON/SUCCEEDED    — dW=+1.0 dG=+0.5
+- Row 16: RECON/FAILED       — dW=-2.0 dR=+1.5
+- Row 17: CIVIL/SUCCEEDED    — dW=+2.0 dR=-1.0 dG=+1.5
+- Row 18: CIVIL/FAILED       — dW=-4.0 dG=-2.5 dR=+2.0
+- Row 19: CHECKPOINT/SUCCEEDED — dW=+1.5 dG=+1.0
+- Row 20: CHECKPOINT/FAILED  — dW=-2.0 dR=+2.5
+
+**Commands run:**
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan — new function | `python3 scripts/dev/sqflint_compat_scan.py functions/civsub/fn_civsubApplyIncidentOutcomeDelta.sqf` | PASS | 0 violations |
+| 2 | Compat scan — modified function | `python3 scripts/dev/sqflint_compat_scan.py functions/core/fn_tocReceiveSitrep.sqf` | WARN (pre-existing) | 30 matches, all pre-existing; 0 new violations introduced |
+| 3 | Dedicated-server runtime validation | N/A | BLOCKED | No Arma dedicated server/JIP runtime available in container |

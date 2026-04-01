@@ -249,6 +249,26 @@ if (missionNamespace getVariable ["civsub_v1_enabled", false]) then
 
     // Also append to details for archival
     if (_details isEqualTo "") then { _details = _civAnnex; } else { _details = _details + "\n\n" + _civAnnex; };
+
+    // Phase 6 extension: apply per-incident-type CIVSUB influence deltas on outcome.
+    // Implements the 20-row permutation matrix (CIVSUB_Incident_Lead_Permutation_Matrix.md).
+    if (!(_didC isEqualTo "") && { _recU in ["SUCCEEDED", "FAILED"] }) then
+    {
+        private _iType = ["activeIncidentType", ""] call ARC_fnc_stateGet;
+        if (!(_iType isEqualType "")) then { _iType = ""; };
+        private _iZone = ["activeIncidentZone", ""] call ARC_fnc_stateGet;
+        if (!(_iZone isEqualType "")) then { _iZone = ""; };
+
+        if (!(_iType isEqualTo "")) then
+        {
+            if (isNil "ARC_fnc_civsubApplyIncidentOutcomeDelta") then
+            {
+                ARC_fnc_civsubApplyIncidentOutcomeDelta = compile preprocessFileLineNumbers
+                    "functions\civsub\fn_civsubApplyIncidentOutcomeDelta.sqf";
+            };
+            [_didC, _iType, _recU, _iZone] call ARC_fnc_civsubApplyIncidentOutcomeDelta;
+        };
+    };
 };
 
 // Persist SITREP gating and capture sender + payload (useful for debugging / after restart)
