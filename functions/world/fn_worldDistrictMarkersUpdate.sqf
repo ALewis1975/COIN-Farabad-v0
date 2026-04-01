@@ -32,12 +32,12 @@ private _ownedMarkers = uiNamespace getVariable ["ARC_s2_districtMarkerNames", [
 if (!(_ownedMarkers isEqualType [])) then { _ownedMarkers = []; };
 
 // ── Hide / delete path ────────────────────────────────────────────────────────
-if (!_show) then
+if (!_show) exitWith
 {
     { deleteMarkerLocal _x; } forEach _ownedMarkers;
     uiNamespace setVariable ["ARC_s2_districtMarkerNames", []];
     diag_log format ["[ARC][WORLD] worldDistrictMarkersUpdate: removed %1 heat-map marker(s).", count _ownedMarkers];
-    exitWith { 0 };
+    0
 };
 
 // ── Show / update path ────────────────────────────────────────────────────────
