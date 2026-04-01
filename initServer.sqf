@@ -133,10 +133,19 @@ missionNamespace setVariable ["ARC_worldIndex_tierThresholds", [0.65, 0.35], tru
 // Ground players (infantry, ground vehicles): use the _ground values.
 // Air players (helicopters, fixed-wing): use the _air values — greater range improves
 // aerial ambiance and ensures pilots see world activity at realistic distances.
+//
+// Radius relationships (intentional):
+//   Activation > Spawn > Despawn margin:
+//   Activation radius is ~10 % larger than spawn radius so groups enter ACTIVE
+//   (alert) state slightly before they physically spawn, preventing pop-in at
+//   the boundary.  Despawn radius is slightly larger than spawn radius so groups
+//   do not immediately despawn when a player backs off the spawn edge.
+//   The spawn radii (2,000 m ground / 5,000 m air) are the "spawn distances"
+//   referenced in playtest notes — activation/despawn are derived buffers.
 missionNamespace setVariable ["ARC_threatVirtualActivationRadiusM_ground", 2200, true]; // DORMANT -> ACTIVE (ground player nearby)
 missionNamespace setVariable ["ARC_threatVirtualActivationRadiusM_air",    5500, true]; // DORMANT -> ACTIVE (air player nearby)
-missionNamespace setVariable ["ARC_threatVirtualSpawnRadiusM_ground",      2000, true]; // ACTIVE  -> PHYSICAL (ground player within this radius)
-missionNamespace setVariable ["ARC_threatVirtualSpawnRadiusM_air",         5000, true]; // ACTIVE  -> PHYSICAL (air player within this radius)
+missionNamespace setVariable ["ARC_threatVirtualSpawnRadiusM_ground",      2000, true]; // ACTIVE  -> PHYSICAL — ground player spawn distance
+missionNamespace setVariable ["ARC_threatVirtualSpawnRadiusM_air",         5000, true]; // ACTIVE  -> PHYSICAL — air player spawn distance
 missionNamespace setVariable ["ARC_threatVirtualDespawnRadiusM_ground",    2400, true]; // PHYSICAL -> start despawn countdown (ground)
 missionNamespace setVariable ["ARC_threatVirtualDespawnRadiusM_air",       6000, true]; // PHYSICAL -> start despawn countdown (air)
 // Legacy single-value fallbacks (= ground defaults; kept for compatibility with external callers).
