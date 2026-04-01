@@ -76,13 +76,10 @@ private _gatesInit = 0;
             // Detect nearest BLUFOR vehicle within trigger radius
             private _nearVehicles = _gatePos nearEntities [["Car", "Truck", "Tank", "Motorcycle"], _triggerRadius];
             private _hasBlufor = false;
-            private _hasOther  = false;
 
             {
-                if (side (group _x) isEqualTo west) then
-                {
-                    if (_x != (vehicle _x) || { (vehicle _x) != _x }) then { _hasBlufor = true; };
-                };
+                // nearEntities returns the vehicle objects; check if any are owned by BLUFOR
+                if (side (group _x) isEqualTo west) then { _hasBlufor = true; };
             } forEach _nearVehicles;
 
             // Open gate for BLUFOR approach

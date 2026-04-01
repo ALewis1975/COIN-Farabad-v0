@@ -25,6 +25,7 @@ private _segmentRadius = missionNamespace getVariable ["ARC_routeClearSegmentMat
 if (!(_segmentRadius isEqualType 0)) then { _segmentRadius = 500; };
 _segmentRadius = (_segmentRadius max 100) min 2000;
 
+private _foundSeg = false;
 {
     private _segId      = _x;
     private _clearUntil = _y;
@@ -35,9 +36,7 @@ _segmentRadius = (_segmentRadius max 100) min 2000;
     if ((count _parts) < 3) then { continue; };
     private _sx = parseNumber (_parts # 1);
     private _sy = parseNumber (_parts # 2);
-    if ((_pos distance2D [_sx, _sy]) < _segmentRadius) exitWith { true };
-
-    false
+    if ((_pos distance2D [_sx, _sy]) < _segmentRadius) then { _foundSeg = true; };
 } forEach _suppressed;
 
-false
+_foundSeg

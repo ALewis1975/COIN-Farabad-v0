@@ -88,7 +88,6 @@ private _elderName  = _elderNames select (floor (random (count _elderNames)));
 _elder setName _elderName;
 
 private _elderNid = netId _elder;
-missionNamespace setVariable ["kle_v0_elderNetId", _elderNid];
 missionNamespace setVariable ["kle_v0_elderNetId", _elderNid, true];
 
 diag_log format ["[ARC][KLE] kleInit: elder '%1' spawned at %2 (taskId=%3).", _elderName, mapGridPosition _pos, _taskId];
