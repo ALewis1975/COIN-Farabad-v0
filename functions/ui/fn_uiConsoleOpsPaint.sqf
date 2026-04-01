@@ -467,15 +467,15 @@ else
                 _details = _details + "<br/>Leads are intelligence-derived opportunities.<br/>";
                 if (_isAuth) then
                 {
-                    _primaryLabel = "ISSUE LEAD ORDER";
+                    _primaryLabel = "SUBMIT TO TOC QUEUE";
                     _primaryEnabled = true;
-                    _details = _details + "ISSUE LEAD ORDER: assign this lead to the active field group as a PROCEED order.";
+                    _details = _details + "SUBMIT TO TOC QUEUE: send this lead to the TOC for review and approval before a PROCEED order is issued.";
                 }
                 else
                 {
                     _primaryLabel = "ACTION";
                     _primaryEnabled = false;
-                    _details = _details + "TOC/S2 can issue this as a PROCEED order to a field group.";
+                    _details = _details + "Authorized S3/TOC staff can submit this lead to the TOC queue for review.";
                 };
             };
         };
