@@ -65,10 +65,21 @@ private _count = 0;
 
     // Dominant axis → marker colour
     private _color = "ColorYellow";
-    if (_rEff > _wEff && { _rEff > _gEff }) then { _color = "ColorRed";  } else {
-    if (_gEff > _rEff && { _gEff >= _wEff }) then { _color = "ColorBlue"; } else {
-    if (_wEff >= _rEff && { _wEff > _gEff }) then { _color = "ColorGreen"; };
-    };};
+    if (_rEff > _wEff && { _rEff > _gEff }) then
+    {
+        _color = "ColorRed";
+    }
+    else
+    {
+        if (_gEff > _rEff && { _gEff >= _wEff }) then
+        {
+            _color = "ColorBlue";
+        }
+        else
+        {
+            if (_wEff >= _rEff && { _wEff > _gEff }) then { _color = "ColorGreen"; };
+        };
+    };
 
     private _mName = "ARC_s2_dist_" + _did;
     deleteMarkerLocal _mName;

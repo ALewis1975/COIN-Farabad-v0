@@ -95,9 +95,9 @@ private _classIdx = 0;
                 // Pick a secondary position 10-15 m away in a random direction
                 private _angle = random 360;
                 private _dist  = 10 + (random 5);  // 10-15 m
-                private _secondary = [_origin # 0 + (_dist * sin _angle),
-                                      _origin # 1 + (_dist * cos _angle),
-                                      _origin # 2];
+                private _secondary = [(_origin select 0) + (_dist * sin _angle),
+                                      (_origin select 1) + (_dist * cos _angle),
+                                      (_origin select 2)];
                 _u enableAI "MOVE";
                 _u doMove _secondary;
                 waitUntil { sleep 2; !alive _u || { (_u distance _secondary) < 2 } };

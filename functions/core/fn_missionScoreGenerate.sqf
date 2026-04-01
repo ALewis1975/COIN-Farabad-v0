@@ -31,7 +31,7 @@ params [["_unit", objNull, [objNull]]];
 // Validate sender when invoked via RPC.
 if (!isNull _unit) then
 {
-    if (!([_unit, "ARC_fnc_missionScoreGenerate", "Score generate rejected: sender mismatch.", "SCORE_GEN_SEC_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {};
+    if (!([_unit, "ARC_fnc_missionScoreGenerate", "Score generate rejected: sender mismatch.", "SCORE_GEN_SEC_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith { [] };
 };
 
 private _now = serverTime;
