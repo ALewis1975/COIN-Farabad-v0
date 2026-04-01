@@ -48,6 +48,40 @@ sqflint binary: not installed in sandbox.
 **Deferred:**
 - Dedicated server: persistence/JIP behaviour of CIVLOC registry
 - Confirm 3CB class names (`UK3CB_TKC_C_WORKER`, `UK3CB_TKC_C_CIV`) resolve; fallback `C_man_1`/`C_man_polo_1_F` included
+## 2026-03-31 23:05 UTC — Fix task system: leads bypassing TOC queue, auto-converting to incidents, and Proceed Order flow
+
+**Branch/Commit:** copilot/fix-leads-actionable-on-s3-screen @ commit: unrecoverable (static review pass; SHA not yet available at time of log entry)
+
+**Scenario:** Task system had four related bugs:
+1. S3 could directly issue LEAD orders from the OPS screen without TOC review.
+2. Leads automatically converted into incidents via TOC backlog and lead pool consumption in `fn_incidentCreate`.
+3. Leads had no REJECTED end-state in `leadHistory`.
+4. Accepting a Proceed Order would trigger a new lead-pool-based incident rather than using the order's embedded data.
+
+**Files changed:**
+- `functions/ui/fn_uiConsoleOpsPaint.sqf` — S3 LEAD action button now reads "SUBMIT TO TOC QUEUE"
+- `functions/ui/fn_uiConsoleActionOpsPrimary.sqf` — LEAD case now submits `LEAD_ISSUE_REQUEST` to TOC queue via `ARC_fnc_intelQueueSubmit` instead of directly calling `ARC_fnc_intelTocIssueLead`
+- `functions/command/fn_intelQueueSubmit.sqf` — Server-side validation for `LEAD_ISSUE_REQUEST`: rejects if leadId missing or lead not in pool
+- `functions/command/fn_intelQueueDecide.sqf` — Added `LEAD_ISSUE_REQUEST` approval case (calls `fn_intelTocIssueLead`); added `REJECTED` leadHistory entry for rejected `LEAD_ISSUE_REQUEST`; removed backlog enqueue from `LEAD_REQUEST` case; `INCIDENT` case now passes `_lid` directly to `fn_incidentCreate` (no backlog intermediary)
+- `functions/core/fn_incidentCreate.sqf` — Added `_seedLeadId` param; removed TOC backlog auto-consumption and lead pool auto-consumption; only accepted LEAD orders or `_seedLeadId` can introduce leads into incidents
+- `functions/ui/fn_uiConsoleTocQueuePaint.sqf` — Added `LEAD_ISSUE_REQUEST` display case in queue detail panel
+
+**Commands:**
+```bash
+python3 scripts/dev/sqflint_compat_scan.py \
+  functions/ui/fn_uiConsoleOpsPaint.sqf \
+  functions/ui/fn_uiConsoleActionOpsPrimary.sqf \
+  functions/command/fn_intelQueueSubmit.sqf \
+  functions/command/fn_intelQueueDecide.sqf \
+  functions/core/fn_incidentCreate.sqf \
+  functions/ui/fn_uiConsoleTocQueuePaint.sqf
+```
+
+**Result:** PASS (compat scan) / BLOCKED (gameplay)
+
+**Notes:**
+- PASS: compat scan — no new violations in changed files; 142 pre-existing violations across the 6 files, all pre-dated.
+- BLOCKED: `sqflint` binary unavailable in container; dedicated-server gameplay validation (TOC queue approval cycle, Proceed Order acceptance, incident generation) deferred.
 
 ---
 
@@ -1825,4 +1859,31 @@ Secondary issue: `_payloadCheck` (built via inline `_hmFrom` compile block) coul
 | # | Check | Command | Result | Notes |
 |---|-------|---------|--------|-------|
 | 1 | Compat scan — changed SQF files | `python3 scripts/dev/sqflint_compat_scan.py functions/civsub/fn_civsubIdentityTouch.sqf functions/civsub/fn_civsubContactActionBackgroundCheck.sqf` | PASS | 0 violations |
+| 2 | Dedicated-server runtime validation | N/A | BLOCKED | No Arma dedicated server available in container |
+
+---
+
+## 2026-03-31 22:50 UTC — Fix CIVSUB Background Check "server error at DELTA_CHECK_PAPERS" (second pass)
+
+**Branch/Commit:** copilot/fix-background-check-error-another-one @ commit: unrecoverable (grafted shallow clone)
+
+**Scenario:** Player consistently receives "Background Check failed (server error at DELTA_CHECK_PAPERS). Try again." after the previous fix (PR #386) was merged. Check ID works correctly on the same civilian.
+
+**Root cause (static analysis):**
+`fn_civsubContactReqAction.sqf` BACKGROUND_CHECK case (line 153–155): the `isNil {}` block's last evaluated expression is the assignment statement `_res = [...] call ARC_fnc_civsubContactActionBackgroundCheck`. In SQF, assignment statements return `Nothing` (nil), not the assigned value. Therefore `isNil` always sees a nil result and returns `true`, regardless of whether the background check function succeeded.
+
+Consequence: `_nil = true` on every call → the error branch fires every time → `civsub_bg_lastStep` is re-read (= `"DELTA_CHECK_PAPERS"` left by the previous no-hit exit) → user sees "server error at DELTA_CHECK_PAPERS" consistently.
+
+Contrast with the correct pattern used in the background check handler itself:
+- Line 160: `isNil { _rec = [...] call ...; _rec }` — `_rec` is the final expression, so `isNil` checks the value, not the assignment.
+- Line 212: `isNil { _poi = [...] call ...; _poi }` — same correct pattern.
+
+**Fix:**
+`fn_civsubContactReqAction.sqf` line 153–156: added `_res` as the final expression inside the `isNil {}` block, so `isNil` checks the return value of the background check function rather than the assignment statement.
+
+**Commands run:**
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan — changed file | `python3 scripts/dev/sqflint_compat_scan.py functions/civsub/fn_civsubContactReqAction.sqf` | PASS | 0 violations |
 | 2 | Dedicated-server runtime validation | N/A | BLOCKED | No Arma dedicated server available in container |

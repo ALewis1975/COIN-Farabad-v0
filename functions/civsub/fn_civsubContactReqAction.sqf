@@ -152,6 +152,7 @@ switch (_actionId) do {
 
         private _nil = isNil {
             _res = [_actor, _civ] call ARC_fnc_civsubContactActionBackgroundCheck;
+            _res
         };
 
         if (!_nil && {_res isEqualType [] && {(count _res) >= 2}}) then {
