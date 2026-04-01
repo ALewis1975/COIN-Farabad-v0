@@ -1929,3 +1929,50 @@ Contrast with the correct pattern used in the background check handler itself:
 |---|-------|---------|--------|-------|
 | 1 | Compat scan — changed file | `python3 scripts/dev/sqflint_compat_scan.py functions/civsub/fn_civsubContactReqAction.sqf` | PASS | 0 violations |
 | 2 | Dedicated-server runtime validation | N/A | BLOCKED | No Arma dedicated server available in container |
+
+---
+
+## 2026-04-01 01:22 UTC — Playtest feedback: spawn distances, layout, incident OPORD
+
+**Branch/Commit:** copilot/update-civsub-dashboard-features @ commit: unrecoverable (pre-push)
+
+**Scenario:** Implement spawn distance air/ground differentiation (2,000 m ground / 5,000 m air), per-tab console center/right pane equal-width layout, and incident OPORD in S3/OPS right pane.
+
+**Changes validated (static review; no dedicated server available):**
+- `initServer.sqf`: replaced single virtual-pool radii with `_ground`/`_air` split variants; updated civilian NPC bubble and cleanup radii.
+- `fn_threatVirtualPoolTick.sqf`: per-group nearest-player vehicle type check; selects air or ground activation/spawn/despawn radii; raised hard caps to 10,000 m (activation/despawn) and 8,000 m (spawn).
+- `fn_civsubLocNpcTick.sqf`: per-player air-aware bubble radius check.
+- `fn_uiConsoleApplyLayout.sqf`: added `_activeTab` param; 50/50 center/right split for DASH/BOARDS/OPS/CMD/HQ; 47/53 for all others.
+- `fn_uiConsoleRefresh.sqf`: calls `applyLayout` with active tab after regression guards so each screen gets correct ratio.
+- `fn_uiConsoleOpsPaint.sqf`: appended abbreviated 5-paragraph OPORD block to the `INCIDENT` case right-pane details.
+
+**Commands run:**
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan — 5 changed files | `python3 scripts/dev/sqflint_compat_scan.py fn_threatVirtualPoolTick.sqf fn_civsubLocNpcTick.sqf fn_uiConsoleApplyLayout.sqf fn_uiConsoleRefresh.sqf fn_uiConsoleOpsPaint.sqf` | PASS | 56 pre-existing violations; 0 new violations introduced |
+| 2 | Dedicated-server runtime validation | N/A | BLOCKED | No Arma dedicated server available in container |
+
+---
+
+## 2026-04-01 01:46 UTC — CASREQ button, CIVSUB R/A/G, Gov/OPFOR screens
+
+**Branch/Commit:** copilot/update-civsub-dashboard-features @ commit: unrecoverable (pre-push)
+
+**Scenario:** Wire REQUEST CAS button in S3/OPS; add R/A/G district badges + world-time header to CIVSUB Census; add Government Status and OPFOR Situation detail screens under S2/INTEL.
+
+**Changes validated (static review; no dedicated server available):**
+- `fn_uiConsoleOpsPaint.sqf`: secondary button for accepted non-IED incidents changed to "REQUEST CAS"; CASREQ auth gate added; IED still overrides to "EOD DISPOSITION".
+- `fn_uiConsoleClickSecondary.sqf`: OPS secondary dispatch now routes accepted non-IED pre-SITREP to `fn_casreqClientSubmit`; SITREP-sent case shows hint.
+- `fn_uiConsoleIntelPaint.sqf`:
+  - CENSUS mode: world-time header (date, time, phase, cultural activity note) prepended before district list.
+  - CENSUS mode: each district row prefixed with `[G]`/`[A]`/`[R]` badge (Green: Coop≥55 & Threat≤35; Red: Threat≥65 or Coop≤30; Amber: all else); row color now uses unified RAG palette.
+  - TOOLS mode: "Government Status" (`GOV_STATUS`) and "OPFOR Situation" (`OPFOR_STATUS`) tools added under new "S2 / GOVERNMENT SITUATION" panel header.
+  - Detail switch: `GOV_STATUS` case renders aggregate G-index, per-district governance rating (A–F), and improvement guidance; `OPFOR_STATUS` case renders AO threat level, active incident, last 10 SIGHTING/THREAT/ISR intel entries.
+
+**Commands run:**
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan — 3 changed files | `python3 scripts/dev/sqflint_compat_scan.py fn_uiConsoleOpsPaint.sqf fn_uiConsoleClickSecondary.sqf fn_uiConsoleIntelPaint.sqf` | PASS | 167 pre-existing violations; 0 new violations in new code |
+| 2 | Dedicated-server runtime validation | N/A | BLOCKED | No Arma dedicated server available in container |

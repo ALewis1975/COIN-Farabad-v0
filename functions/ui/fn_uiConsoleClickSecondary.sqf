@@ -91,9 +91,16 @@ switch (_tab) do
             {
                 [] spawn ARC_fnc_uiConsoleActionRequestEodDispo;
             }
+            else if (!_sit) then
+            {
+                // Non-IED accepted incident, SITREP not yet sent → CAS request.
+                // fn_casreqClientSubmit handles its own authorization gate and dialogs.
+                [] spawn ARC_fnc_casreqClientSubmit;
+            }
             else
             {
-                [] spawn ARC_fnc_uiConsoleActionRequestFollowOn;
+                // SITREP already sent — nothing to do via secondary.
+                ["Operations", "SITREP already submitted. Await TOC follow-on."] call ARC_fnc_clientHint;
             };
         };
     };

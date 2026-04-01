@@ -60,18 +60,30 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
         if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabled = true; };
         if (!_enabled) then { continue; };
 
-        // Configuration
-        private _activationR = missionNamespace getVariable ["ARC_threatVirtualActivationRadiusM", 600];
-        if (!(_activationR isEqualType 0)) then { _activationR = 600; };
-        _activationR = (_activationR max 100) min 2000;
+        // Configuration — ground vs. air radii loaded once per tick; per-group selection below.
+        private _activationR_ground = missionNamespace getVariable ["ARC_threatVirtualActivationRadiusM_ground", 2200];
+        if (!(_activationR_ground isEqualType 0)) then { _activationR_ground = 2200; };
+        _activationR_ground = (_activationR_ground max 100) min 10000;
 
-        private _spawnR = missionNamespace getVariable ["ARC_threatVirtualSpawnRadiusM", 400];
-        if (!(_spawnR isEqualType 0)) then { _spawnR = 400; };
-        _spawnR = (_spawnR max 50) min 1000;
+        private _activationR_air = missionNamespace getVariable ["ARC_threatVirtualActivationRadiusM_air", 5500];
+        if (!(_activationR_air isEqualType 0)) then { _activationR_air = 5500; };
+        _activationR_air = (_activationR_air max 100) min 10000;
 
-        private _despawnR = missionNamespace getVariable ["ARC_threatVirtualDespawnRadiusM", 700];
-        if (!(_despawnR isEqualType 0)) then { _despawnR = 700; };
-        _despawnR = (_despawnR max 100) min 3000;
+        private _spawnR_ground = missionNamespace getVariable ["ARC_threatVirtualSpawnRadiusM_ground", 2000];
+        if (!(_spawnR_ground isEqualType 0)) then { _spawnR_ground = 2000; };
+        _spawnR_ground = (_spawnR_ground max 50) min 8000;
+
+        private _spawnR_air = missionNamespace getVariable ["ARC_threatVirtualSpawnRadiusM_air", 5000];
+        if (!(_spawnR_air isEqualType 0)) then { _spawnR_air = 5000; };
+        _spawnR_air = (_spawnR_air max 50) min 8000;
+
+        private _despawnR_ground = missionNamespace getVariable ["ARC_threatVirtualDespawnRadiusM_ground", 2400];
+        if (!(_despawnR_ground isEqualType 0)) then { _despawnR_ground = 2400; };
+        _despawnR_ground = (_despawnR_ground max 100) min 10000;
+
+        private _despawnR_air = missionNamespace getVariable ["ARC_threatVirtualDespawnRadiusM_air", 6000];
+        if (!(_despawnR_air isEqualType 0)) then { _despawnR_air = 6000; };
+        _despawnR_air = (_despawnR_air max 100) min 10000;
 
         private _despawnDelayS = missionNamespace getVariable ["ARC_threatVirtualDespawnDelayS", 90];
         if (!(_despawnDelayS isEqualType 0)) then { _despawnDelayS = 90; };
@@ -149,13 +161,22 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
 
             if (!(_vgPos isEqualType []) || {(count _vgPos) < 2}) then { continue; };
 
-            // Nearest player distance
+            // Nearest player distance + platform type (air vs ground)
             private _nearestPlayerD = 1e12;
+            private _nearestPlayer = objNull;
             {
-                if (_x distance2D _vgPos < _nearestPlayerD) then {
-                    _nearestPlayerD = _x distance2D _vgPos;
+                private _d = _x distance2D _vgPos;
+                if (_d < _nearestPlayerD) then {
+                    _nearestPlayerD = _d;
+                    _nearestPlayer  = _x;
                 };
             } forEach _alivePlayers;
+
+            // Select radii based on whether the nearest player is airborne.
+            private _playerIsAir = !isNull _nearestPlayer && { (vehicle _nearestPlayer) isKindOf "Air" };
+            private _activationR  = if (_playerIsAir) then { _activationR_air  } else { _activationR_ground  };
+            private _spawnR       = if (_playerIsAir) then { _spawnR_air       } else { _spawnR_ground       };
+            private _despawnR     = if (_playerIsAir) then { _despawnR_air     } else { _despawnR_ground     };
 
             private _playerNearby      = (_nearestPlayerD <= _activationR);
             private _playerVeryNearby  = (_nearestPlayerD <= _spawnR);

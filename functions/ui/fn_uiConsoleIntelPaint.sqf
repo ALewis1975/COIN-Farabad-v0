@@ -424,6 +424,45 @@ if (_rebuild) then
         ["CIVSUB CENSUS"] call _addHdr;
         ["< BACK (S2 Tools)", "CIV_CENSUS_BACK"] call _addTool;
 
+        // ── World-time header ─────────────────────────────────────────────
+        // Show current mission date, local time, and day-phase cultural note.
+        private _wtSnap = missionNamespace getVariable ["ARC_worldTimeSnap", []];
+        if (_wtSnap isEqualType [] && { (count _wtSnap) >= 3 }) then
+        {
+            private _dateArr  = _wtSnap select 0;
+            private _daytime  = _wtSnap select 1;
+            private _phase    = _wtSnap select 2;
+            if (!(_phase isEqualType "")) then { _phase = "UNKNOWN"; };
+            _phase = toUpper _phase;
+
+            private _dateStr = "---";
+            if (_dateArr isEqualType [] && { (count _dateArr) >= 3 }) then
+            {
+                _dateStr = format ["%1-%2-%3", _dateArr select 0, _dateArr select 1, _dateArr select 2];
+            };
+            private _timeHH = floor _daytime;
+            private _timeMM = round ((_daytime - _timeHH) * 60);
+            private _timeStr = format ["%1%2:%3%4L",
+                if (_timeHH < 10) then {"0"} else {""},
+                _timeHH,
+                if (_timeMM < 10) then {"0"} else {""},
+                _timeMM
+            ];
+
+            // Central Asian cultural activity note by phase
+            private _phaseNote = switch (_phase) do {
+                case "NIGHT":   { "Night watch. Markets closed. Reduced movement." };
+                case "MORNING": { "Fajr (morning prayer). Bazaar opening. Activity increasing." };
+                case "WORK":    { "Market hours. Normal civilian movement. Midday prayer (Dhuhr)." };
+                case "EVENING": { "Asr (afternoon prayer). Bazaar closing. Maghrib at sundown." };
+                default         { "Phase unknown. Observe local pattern of life." };
+            };
+
+            [format ["TIME: %1  DATE: %2  PHASE: %3", _timeStr, _dateStr, _phase], "HDR"] call _addTool;
+            [format ["  %1", _phaseNote], "HDR"] call _addTool;
+        };
+        // ── end world-time header ─────────────────────────────────────────
+
         ["DISTRICTS"] call _addHdr;
 
         if !(missionNamespace getVariable ["civsub_v1_enabled", false]) then
@@ -502,12 +541,23 @@ if (_rebuild) then
                         round _Scoop, round _Sthreat
                     ];
 
+                    // R/A/G status badge (prepended to label)
+                    private _ragBadge = "A";   // Amber default
+                    private _ragColor = [1.0, 0.87, 0.50, 1]; // Amber
+                    if (_Scoop >= 55 && { _Sthreat <= 35 }) then {
+                        _ragBadge = "G"; _ragColor = [0.65, 0.90, 0.65, 1]; // Green
+                    } else {
+                        if (_Sthreat >= 65 || { _Scoop <= 30 }) then {
+                            _ragBadge = "R"; _ragColor = [1.0, 0.52, 0.40, 1]; // Red
+                        };
+                    };
+                    _label = format ["[%1] %2", _ragBadge, _label];
+
                     private _i = _list lbAdd _label;
                     _list lbSetData [_i, format ["CIV_CENSUS_DID|%1", _did]];
 
-                    // Subtle coloring when district is "hot" (threat high)
-                    if (_Sthreat >= 70) then { _list lbSetColor [_i, [1.0, 0.72, 0.55, 1]]; };
-                    if (_Scoop >= 75 && { _Sthreat <= 35 }) then { _list lbSetColor [_i, [0.70, 0.95, 0.70, 1]]; };
+                    // Apply R/A/G color to the row
+                    _list lbSetColor [_i, _ragColor];
                 } forEach _ids;
             };
         };
@@ -538,6 +588,11 @@ if (_rebuild) then
         ["CIVSUB / MDT"] call _addHdr;
         ["CIVSUB Census (District Stats)", "CIV_CENSUS_OPEN"] call _addTool;
         ["AO Threat Summary", "CIV_THREAT_SUMMARY"] call _addTool;
+
+        // S2 analytical screens (Government + OPFOR)
+        ["S2 / GOVERNMENT SITUATION"] call _addHdr;
+        ["Government Status", "GOV_STATUS"] call _addTool;
+        ["OPFOR Situation (Known Intel)", "OPFOR_STATUS"] call _addTool;
 
         if (_inCivCtx) then
         {
@@ -1333,7 +1388,155 @@ else
             if (!isNull _b1) then { _b1 ctrlEnable false; };
         };
 
+        // ── GOVERNMENT STATUS ────────────────────────────────────────────────
+        case "GOV_STATUS":
+        {
+            // Aggregate governance picture across all districts using G_EFF_U from
+            // published district snapshots.
+            private _prefix2 = "civsub_v1_district_pub_";
+            private _govIds = [];
+            {
+                private _n = _x;
+                if ((_n find _prefix2) == 0) then { _govIds pushBack (_n select [count _prefix2]); };
+            } forEach (allVariables missionNamespace);
+            _govIds sort true;
 
+            private _govTotal = 0;
+            private _govCnt   = 0;
+            private _govRows  = [];
+            private _govStable = 0; private _govFrag = 0; private _govFail = 0;
+
+            {
+                private _did2 = _x;
+                private _pub2 = missionNamespace getVariable [format ["%1%2", _prefix2, _did2], []];
+                if (!(_pub2 isEqualType [])) then { continue; };
+                if ((count _pub2) == 0) then { continue; };
+                private _ph2 = [_pub2] call _hmCreate;
+                private _G2  = _ph2 getOrDefault ["G", 35];
+                if (!(_G2 isEqualType 0)) then { _G2 = 35; };
+                _govTotal = _govTotal + _G2;
+                _govCnt   = _govCnt + 1;
+
+                private _gLbl = "Developing";
+                private _gCol = "#FFD166";
+                if (_G2 >= 55) then { _gLbl = "Stable";  _gCol = "#9FE870"; _govStable = _govStable + 1; } else {
+                    if (_G2 <= 30) then { _gLbl = "Failing"; _gCol = "#FF7A7A"; _govFail = _govFail + 1; } else {
+                        _govFrag = _govFrag + 1;
+                    };
+                };
+                _govRows pushBack format ["<t color='#BDBDBD'>%1:</t> Gov <t color='%2'>%3</t> (%4)", _did2, _gCol, round _G2, _gLbl];
+            } forEach _govIds;
+
+            private _avgG = if (_govCnt > 0) then { _govTotal / _govCnt } else { 0 };
+            private _govRating = "C — Developing";
+            private _govRatingColor = "#FFD166";
+            if (_avgG >= 65) then { _govRating = "A — Strong";    _govRatingColor = "#9FE870"; } else {
+            if (_avgG >= 50) then { _govRating = "B — Functional"; _govRatingColor = "#C8E87A"; } else {
+            if (_avgG <= 25) then { _govRating = "F — Failed";    _govRatingColor = "#FF7A7A"; } else {
+            if (_avgG <= 35) then { _govRating = "D — Fragile";   _govRatingColor = "#FF9966"; };
+            };};};
+
+            _txt = "<t size='1.25' font='PuristaMedium'>Government Status</t><br/>" +
+                   "<t size='0.9' color='#AAAAAA'>S2 Assessment — Government/Host-Nation Situation</t><br/><br/>" +
+                   format ["<t color='#AAAAAA'>Overall Rating:</t> <t color='%1'>%2</t>  (avg G-index: %3)<br/>", _govRatingColor, _govRating, round _avgG] +
+                   format ["<t color='#9FE870'>Stable:</t> %1   <t color='#FFD166'>Fragile:</t> %2   <t color='#FF7A7A'>Failing:</t> %3<br/><br/>", _govStable, _govFrag, _govFail];
+
+            if ((count _govRows) > 0) then {
+                _txt = _txt + "<t size='1.0' font='PuristaMedium' color='#B89B6B'>District Breakdown</t><br/><br/>" +
+                       (_govRows joinString "<br/>") + "<br/><br/>";
+            } else {
+                _txt = _txt + "<t color='#BBBBBB'>No district data published yet.</t><br/><br/>";
+            };
+
+            _txt = _txt + "<t size='0.9' color='#AAAAAA'>G-index: Host-Nation government legitimacy/effectiveness (0–100). " +
+                          "Increase via aid events, successful detentions (handoff), and low civilian casualties. " +
+                          "Decreases with civilian harm and unchallenged insurgent activity.</t>";
+
+            if (!isNull _b1) then { _b1 ctrlEnable false; };
+        };
+
+        // ── OPFOR STATUS ─────────────────────────────────────────────────────
+        case "OPFOR_STATUS":
+        {
+            // Known enemy situation from S2 perspective:
+            // - Overall threat level (aggregate S_THREAT from districts)
+            // - Active incident (if any)
+            // - Last 10 threat/sighting intel log entries
+            private _prefix3 = "civsub_v1_district_pub_";
+            private _opforIds = [];
+            {
+                private _n = _x;
+                if ((_n find _prefix3) == 0) then { _opforIds pushBack (_n select [count _prefix3]); };
+            } forEach (allVariables missionNamespace);
+
+            private _threatSum = 0; private _threatCnt = 0;
+            {
+                private _did3 = _x;
+                private _pub3 = missionNamespace getVariable [format ["%1%2", _prefix3, _did3], []];
+                if (!(_pub3 isEqualType []) || { (count _pub3) == 0 }) then { continue; };
+                private _ph3 = [_pub3] call _hmCreate;
+                private _W3  = _ph3 getOrDefault ["W", 45]; if (!(_W3  isEqualType 0)) then { _W3  = 45; };
+                private _R3  = _ph3 getOrDefault ["R", 55]; if (!(_R3  isEqualType 0)) then { _R3  = 55; };
+                private _G3  = _ph3 getOrDefault ["G", 35]; if (!(_G3  isEqualType 0)) then { _G3  = 35; };
+                private _St3 = ((1.00 * _R3) - (0.35 * _W3) - (0.25 * _G3)) max 0 min 100;
+                _threatSum = _threatSum + _St3;
+                _threatCnt = _threatCnt + 1;
+            } forEach _opforIds;
+
+            private _avgThreat = if (_threatCnt > 0) then { _threatSum / _threatCnt } else { 0 };
+            private _threatLevel = "MODERATE";
+            private _threatColor = "#FFD166";
+            if (_avgThreat >= 65) then { _threatLevel = "HIGH";    _threatColor = "#FF7A7A"; } else {
+                if (_avgThreat <= 30) then { _threatLevel = "LOW"; _threatColor = "#9FE870"; };
+            };
+
+            // Active incident
+            private _activeTaskId = missionNamespace getVariable ["ARC_activeTaskId", ""];
+            if (!(_activeTaskId isEqualType "")) then { _activeTaskId = ""; };
+            private _activeIncDisp = missionNamespace getVariable ["ARC_activeIncidentDisplayName", ""];
+            if (!(_activeIncDisp isEqualType "")) then { _activeIncDisp = ""; };
+
+            _txt = "<t size='1.25' font='PuristaMedium'>Enemy Situation</t><br/>" +
+                   "<t size='0.9' color='#AAAAAA'>S2 Estimate — Based on collected HUMINT/SIGINT</t><br/><br/>" +
+                   format ["<t color='#AAAAAA'>AO Threat Level:</t> <t color='%1'>%2</t>  (avg S-Threat: %3)<br/>", _threatColor, _threatLevel, round _avgThreat] +
+                   format ["<t color='#AAAAAA'>Active Incident:</t> %1<br/><br/>",
+                       if (_activeTaskId isEqualTo "") then {"None"} else { format ["%1 (ID: %2)", _activeIncDisp, _activeTaskId] }];
+
+            // Last 10 SIGHTING/THREAT intel log entries
+            private _iLog = missionNamespace getVariable ["ARC_pub_intelLog", []];
+            if (!(_iLog isEqualType [])) then { _iLog = []; };
+            private _opforEntries = [];
+            {
+                if (!(_x isEqualType []) || { (count _x) < 6 }) then { continue; };
+                private _cat = if ((count _x) > 2) then { toUpper (trim (_x # 2)) } else { "" };
+                if (_cat in ["SIGHTING", "THREAT", "ISR"]) then { _opforEntries pushBack _x; };
+            } forEach _iLog;
+
+            // Take last 10
+            if ((count _opforEntries) > 10) then { _opforEntries = _opforEntries select [((count _opforEntries) - 10), 10]; };
+
+            if ((count _opforEntries) > 0) then {
+                _txt = _txt + "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Recent Intel (SIGHTING/THREAT/ISR)</t><br/><br/>";
+                {
+                    if ((count _x) < 6) then { continue; };
+                    private _cat2  = toUpper (trim (_x # 2));
+                    private _summ  = trim (_x # 3);
+                    if ((count _summ) > 80) then { _summ = (_summ select [0, 80]) + "..."; };
+                    private _grid2 = if ((count _x) > 4) then {
+                        private _iPos = _x # 4;
+                        if (_iPos isEqualType [] && { (count _iPos) >= 2 }) then { mapGridPosition _iPos } else { "---" }
+                    } else { "---" };
+                    _txt = _txt + format ["<t color='#AAAAAA'>%1</t>  Grid:<t color='#DDDDDD'>%2</t>  %3<br/>", _cat2, _grid2, _summ];
+                } forEach _opforEntries;
+            } else {
+                _txt = _txt + "<t color='#BBBBBB'>No SIGHTING/THREAT/ISR intel logged yet. Log sightings via S2 tools.</t><br/>";
+            };
+
+            _txt = _txt + "<br/><t size='0.9' color='#AAAAAA'>This is an S2 estimate based on collected field intelligence. " +
+                          "Threat level is derived from district W/R/G influence indices.</t>";
+
+            if (!isNull _b1) then { _b1 ctrlEnable false; };
+        };
 
         default
         {
