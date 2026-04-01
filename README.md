@@ -112,7 +112,7 @@ functions/
 - RHS USAF (U.S. Army and USAF assets)
 - CUP Terrains Core (Takistan map)
 
-See `docs/projectFiles/Ambient_Dev_Mods_2026-01-22.html` for the complete mod preset.
+See `docs/projectFiles/Ambient_Dev_Mods_2026-04-01.html` for the complete mod preset.
 
 **Development Tools:**
 - Arma 3 Tools (for mission editing)
