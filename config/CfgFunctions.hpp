@@ -296,6 +296,7 @@ class CfgFunctions
             class civsubDeltaApplyToDistrict {};
             class civsubDeltaValidate {};
             class civsubLeadEmitBridge {};
+            class civsubApplyIncidentOutcomeDelta {};
 
             // Phase 5.5: bundle normalization helpers
             class civsubBundleMake {};
