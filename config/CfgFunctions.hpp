@@ -37,6 +37,7 @@ class CfgFunctions
             class incidentSeedQueue {};
             class incidentClose {};
             class incidentMarkReadyToClose {};
+            class incidentPreCache {};
 
             // Incident watchdog (stall detection / close-ready suggestions)
             class incidentWatchdog {};
@@ -82,6 +83,7 @@ class CfgFunctions
 
             // User-friendly tasks + intel feed
             class publicBroadcastState {};
+            class govStatsCompute {};
             class consoleVmBuild {};
             class consoleVmAdapterV1 {};
             class statePublishPublic {};

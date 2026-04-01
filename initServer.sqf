@@ -957,6 +957,10 @@ missionNamespace setVariable ["ARC_worldTime_forceMultiplier", false, true];
 missionNamespace setVariable ["ARC_worldTime_timeMultiplier", 6, true];
 missionNamespace setVariable ["ARC_worldTime_broadcastIntervalSec", 30, true];
 
+// World time events (Central Asian prayer/market/cultural schedule)
+missionNamespace setVariable ["ARC_worldTimeEvents_enabled", true, true];
+missionNamespace setVariable ["ARC_worldTimeEvents_broadcastIntervalSec", 30, true];
+
 // Operator startup audit catalog (curated, operator-facing controls only)
 missionNamespace setVariable ["ARC_operatorToggleAuditCatalog", [
     ["MIG", [
@@ -1034,6 +1038,8 @@ private _arcDeclaredServerToggles = [
     "ARC_worldTime_forceMultiplier",
     "ARC_worldTime_timeMultiplier",
     "ARC_worldTime_broadcastIntervalSec",
+    "ARC_worldTimeEvents_enabled",
+    "ARC_worldTimeEvents_broadcastIntervalSec",
     "airbase_v1_runtime_enabled"
 ];
 
@@ -1055,6 +1061,8 @@ private _arcKnownToggleConsumers = [
     ["ARC_worldTime_forceMultiplier", "scripts/worldtime/worldtime_server.sqf"],
     ["ARC_worldTime_timeMultiplier", "scripts/worldtime/worldtime_server.sqf"],
     ["ARC_worldTime_broadcastIntervalSec", "scripts/worldtime/worldtime_server.sqf"],
+    ["ARC_worldTimeEvents_enabled", "scripts/worldtime/worldtime_events_server.sqf"],
+    ["ARC_worldTimeEvents_broadcastIntervalSec", "scripts/worldtime/worldtime_events_server.sqf"],
     ["airbase_v1_runtime_enabled", "functions/ambiance/fn_airbaseRuntimeEnabled.sqf"]
 ];
 
@@ -1075,3 +1083,29 @@ private _arcKnownToggleConsumers = [
 } forEach _arcDeclaredServerToggles;
 
 [] call ARC_fnc_bootstrapServer;
+
+// ---------------------------------------------------------------------------
+// World time events (Central Asian prayer/market schedule).
+// Starts AFTER bootstrapServer because it waits for ARC_serverReady internally.
+// ---------------------------------------------------------------------------
+[] execVM "scripts\worldtime\worldtime_events_server.sqf";
+
+// ---------------------------------------------------------------------------
+// Government stats aggregate loop (low-frequency, same cadence as worldtime).
+// Publishes ARC_govStats for client UI (Government Status / S2 sub-panels).
+// ---------------------------------------------------------------------------
+if (isServer) then
+{
+    [] spawn
+    {
+        waitUntil { missionNamespace getVariable ["ARC_serverReady", false] };
+        private _interval = missionNamespace getVariable ["ARC_worldTime_broadcastIntervalSec", 30];
+        if (!(_interval isEqualType 0) || { _interval < 10 }) then { _interval = 30; };
+        diag_log format ["[ARC][GOVSTATS] aggregate loop start (interval=%1s)", _interval];
+        while { true } do
+        {
+            [] call ARC_fnc_govStatsCompute;
+            sleep _interval;
+        };
+    };
+};

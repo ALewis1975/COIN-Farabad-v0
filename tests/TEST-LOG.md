@@ -11,6 +11,73 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-01 02:05 UTC — World time events, govStats, incidentPreCache, AO Thread UI
+
+**Branch/Commit:** copilot/add-civsub-dashboard-indicators @ commit: 551e157d80ad77bb67d85849f40e14079e53abdd (pre-push)
+
+**Scenario:** Continue CIVSUB dashboard implementation — world time cultural events subsystem, government stats aggregate, incident pre-cache/seed system, and AO Thread UI.
+
+**Changes validated (static review; no dedicated server available):**
+
+1. `scripts/worldtime/worldtime_events_server.sqf` (new)
+   - Central Asian prayer/market/cultural event schedule (Fajr, Dhuhr, Asr, Maghrib, Isha, Jumu'ah, Morning/Evening Bazaar)
+   - Day-of-week computed via Tomohiko Sakamoto's algorithm; Jumu'ah on Fridays suppresses Dhuhr
+   - Publishes `ARC_worldTimeEvents` (active event array) and `ARC_worldTimeNextEvent` (upcoming event)
+   - Waits for `ARC_serverReady`; idempotent (double-start guard)
+   - `sqflint_compat_scan.py --strict`: **PASS**
+
+2. `functions/core/fn_govStatsCompute.sqf` (new)
+   - Aggregates G_EFF_U, security force effectiveness (incident close rate), and aid events across all published district snapshots
+   - Publishes `ARC_govStats` (array-of-pairs) JIP-safe to all clients
+   - `sqflint_compat_scan.py --strict`: **PASS**
+
+3. `functions/core/fn_incidentPreCache.sqf` (new)
+   - Scans straight-line corridor from player centroid to incident position (default 250 m radius)
+   - Transitions DORMANT virtual OpFor groups along corridor to VIRTUAL_ACTIVE (priority sort: nearest first)
+   - Limits activation to `maxAssets` (default 6) to avoid over-spawning
+   - `sqflint_compat_scan.py --strict`: **PASS**
+
+4. `config/CfgFunctions.hpp` (modified)
+   - Registered `incidentPreCache` and `govStatsCompute` under Core
+
+5. `functions/core/fn_incidentCreate.sqf` (modified)
+   - Hooks `ARC_fnc_incidentPreCache` call after incident position is resolved, before intel log
+
+6. `initServer.sqf` (modified)
+   - Added `ARC_worldTimeEvents_enabled` and `ARC_worldTimeEvents_broadcastIntervalSec` tunables
+   - Starts `worldtime_events_server.sqf` via `execVM` after `bootstrapServer`
+   - Spawns `govStatsCompute` on same cadence as world time broadcast
+   - Registered new toggles in `_arcDeclaredServerToggles` and `_arcKnownToggleConsumers`
+
+7. `functions/ui/fn_uiConsoleIntelPaint.sqf` (modified)
+   - CENSUS mode world-time header: displays `ARC_worldTimeEvents` active events inline
+   - TOOLS mode: added "AO Thread (Events + Activity)" tool
+   - New `case "AO_THREAD"`: shows active cultural events, next upcoming event, and chronological intel feed (newest first, last 15 entries, colour-coded by category)
+   - GOV_STATUS case: augmented with `ARC_govStats` security force effectiveness, incident close rate, and cumulative aid events when data available
+
+**Commands run:**
+```
+python3 scripts/dev/sqflint_compat_scan.py --strict scripts/worldtime/worldtime_events_server.sqf functions/core/fn_govStatsCompute.sqf functions/core/fn_incidentPreCache.sqf
+→ PASS (no compat patterns found)
+
+python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleIntelPaint.sqf functions/core/fn_incidentCreate.sqf
+→ All new additions: PASS (pre-existing issues in unchanged lines not attributable to this change)
+```
+
+**Results:**
+- Static review: `PASS`
+- Gameplay / dedicated server validation: `BLOCKED` (no dedicated server available)
+
+**Risk notes:**
+- `incidentPreCache` force-activates DORMANT virtual groups — if the virtual pool is empty or no players are online, it no-ops safely
+- `govStatsCompute` reads `incidentClosedCount` state key — if this key is not set, defaults to 0 (graceful)
+- `worldtime_events_server.sqf` is a new `execVM` started after `bootstrapServer`; uses `waitUntil {ARC_serverReady}` to avoid race
+- AO Thread UI is read-only (no side effects); reversal path = remove tool entry from list
+
+**Rollback:** Revert `initServer.sqf` (remove execVM + govStats spawn), revert `fn_incidentCreate.sqf` (remove pre-cache hook), revert `fn_uiConsoleIntelPaint.sqf` (remove AO_THREAD case + event header additions), revert `CfgFunctions.hpp` (remove two class entries), delete three new files.
+
+---
+
 ## 2026-04-01 00:00 UTC — World scan + virtual OpFor pool (Task 1–4)
 
 **Branch/Commit:** copilot/setup-npc-vehicle-scanning @ commit: unrecoverable (pre-push)
