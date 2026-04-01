@@ -759,6 +759,9 @@ if (_safeModeEnabled) then
 else
 {
     [] call ARC_fnc_threatInit;
+
+    // Virtual OpFor group pool (provides persistent enemy presence between incidents)
+    [] call ARC_fnc_threatVirtualPoolInit;
 };
 
 // CIVSUB v1 (district influence + identity plumbing)

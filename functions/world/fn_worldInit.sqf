@@ -80,4 +80,9 @@ if (_zones isEqualType []) then
     } forEach _zones;
 };
 
+// Startup world scans (populate server-local caches used by CIVSUB, OPS patrol, and incident seeding)
+[] call ARC_fnc_worldScanBuildingSlots;
+[] call ARC_fnc_worldScanPatrolWaypoints;
+[] call ARC_fnc_worldIndexObjectives;
+
 true

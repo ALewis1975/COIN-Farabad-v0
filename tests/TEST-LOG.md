@@ -11,6 +11,48 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-01 00:00 UTC — World scan + virtual OpFor pool (Task 1–4)
+
+**Branch/Commit:** copilot/setup-npc-vehicle-scanning @ commit: unrecoverable (pre-push)
+
+**Scenario:** Implement world startup scans and virtual OpFor pool per task decomposition plan.
+
+**Changes validated (static review; no dedicated server available):**
+
+**Task 1 — worldRoadsideOffsets + worldScanBuildingSlots**
+- `fn_worldRoadsideOffsets.sqf`: new file; loops road objects, computes perpendicular offset positions; uses `select` (no `#`); rejects water/road surfaces.
+- `fn_worldScanBuildingSlots.sqf`: new file; scans 42 named locations with `nearestObjects` + `BIS_fnc_buildingPositions` + `nearRoads`; stores `ARC_worldBuildingSlots` HashMap.
+- `fn_civsubSpawnCacheEnsure.sqf`: cache-aware inner loop; looks up `ARC_worldBuildingSlots` for anchors within 500 m of a named location; falls back to original geometry scan; replaced `# 0`/`# 1` with `select 0`/`select 1` in fallback catalog scan.
+- **Static:** `PASS` — logic correct; fallback preserved; compat violations not added.
+- **Runtime (build slots at startup):** `BLOCKED` — dedicated server required to measure `nearestObjects` load.
+
+**Task 2 — worldScanPatrolWaypoints + fn_opsPatrolOnActivate**
+- `fn_worldScanPatrolWaypoints.sqf`: new file; generates tight/medium/wide rings (5 pts each) for all 42 locations; stores `ARC_worldPatrolRings` HashMap.
+- `fn_opsPatrolOnActivate.sqf`: uses nearest pre-scanned ring when within 600 m; re-centres ring on task pos + ±20 m jitter; falls back to geometric generation when far from locations. Replaced `_posATL # 0` / `# 1` with `select 0` / `select 1`.
+- **Static:** `PASS` — fallback untouched; OPFOR contact spawn block unchanged.
+- **Runtime (patrol ring usage):** `BLOCKED` — requires local MP with PATROL task active.
+
+**Task 4 — worldIndexObjectives + fn_incidentSeedQueue**
+- `fn_worldIndexObjectives.sqf`: new file; scores 42 locations on density/junction/site/proximity; stores `ARC_worldObjectiveIndex` HashMap and `ARC_worldObjectiveRanked` sorted array.
+- `fn_incidentSeedQueue.sqf`: looks up nearest indexed location (≤800 m) for each catalog marker; applies tier multiplier (HIGH ×1.4, MED ×1.1, LOW ×0.8) after stage skew.
+- `initServer.sqf`: added WORLD SIMULATION config block with weight/tier/virtual-pool tuning vars.
+- **Static:** `PASS` — no existing weight/zone logic modified; new multiplier is additive.
+- **Runtime (incident distribution):** `BLOCKED` — requires multiple seeded runs to observe statistical skew.
+
+**Task 3 — threatVirtualPoolInit + threatVirtualPoolTick**
+- `fn_threatVirtualPoolInit.sqf`: new file; seeds virtual group records into `threat_v0_records` (prefixed `vg_`); uses VIRTUAL_OPFOR type with VIRTUAL_DORMANT/VIRTUAL_ACTIVE/PHYSICAL states; idempotent; calls tick loop at end.
+- `fn_threatVirtualPoolTick.sqf`: new file; single-run guard + `spawn` loop; 60 s cadence; processes state transitions (DORMANT→ACTIVE→PHYSICAL→DORMANT); despawn on player departure; drift repositioning.
+- `fn_threatInit.sqf`: added `threat_v0_vgroup_active_index` init.
+- `fn_bootstrapServer.sqf`: calls `ARC_fnc_threatVirtualPoolInit` after `ARC_fnc_threatInit` (inside !safeModeEnabled block).
+- **Static:** `PASS` — vgroup states ("VIRTUAL_*") are distinct from existing IED states; existing forEach/index logic unaffected.
+- **Runtime (spawn/despawn cycle):** `BLOCKED` — requires local MP with player proximity testing.
+- **JIP/persistence (vgroup records survive restart):** `BLOCKED` — requires dedicated server + state save/load cycle.
+
+**CfgFunctions.hpp:** 6 new class entries added (4 World, 2 Threat). `PASS`.
+
+---
+
+
 ## 2026-03-31 23:03 UTC — Ambient traffic enhancement + CIVLOC location NPC system
 
 **Branch/Commit:** copilot/add-ambient-traffic-and-npcs @ commit: unrecoverable (pre-push)
