@@ -483,6 +483,12 @@ if (_leadOrderIdx >= 0 && { _leadOrderIdx < (count _orders) }) then
     };
 };
 
+// Pre-cache virtual OpFor assets along the player-to-objective corridor.
+if (!isNil "ARC_fnc_incidentPreCache") then
+{
+    [_posATL, _incidentType] call ARC_fnc_incidentPreCache;
+};
+
 // Log initial tasking note into OPS feed (this also refreshes active task text)
 private _grid = mapGridPosition _posATL;
 private _leadTxt = if (_leadId isEqualTo "") then {""} else {format [" Lead: %1.", _leadId]};

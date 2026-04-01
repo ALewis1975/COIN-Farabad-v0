@@ -460,6 +460,13 @@ if (_rebuild) then
 
             [format ["TIME: %1  DATE: %2  PHASE: %3", _timeStr, _dateStr, _phase], "HDR"] call _addTool;
             [format ["  %1", _phaseNote], "HDR"] call _addTool;
+
+            // Active cultural events from worldtime events subsystem
+            private _wtEvents = missionNamespace getVariable ["ARC_worldTimeEvents", []];
+            if (_wtEvents isEqualType [] && { (count _wtEvents) > 0 }) then
+            {
+                [format ["  Active: %1", _wtEvents joinString " | "], "HDR"] call _addTool;
+            };
         };
         // ── end world-time header ─────────────────────────────────────────
 
@@ -593,6 +600,7 @@ if (_rebuild) then
         ["S2 / GOVERNMENT SITUATION"] call _addHdr;
         ["Government Status", "GOV_STATUS"] call _addTool;
         ["OPFOR Situation (Known Intel)", "OPFOR_STATUS"] call _addTool;
+        ["AO Thread (Events + Activity)", "AO_THREAD"] call _addTool;
 
         if (_inCivCtx) then
         {
@@ -1452,6 +1460,42 @@ else
                           "Increase via aid events, successful detentions (handoff), and low civilian casualties. " +
                           "Decreases with civilian harm and unchallenged insurgent activity.</t>";
 
+            // Security force effectiveness + aid from ARC_govStats aggregate (if available)
+            private _gs = missionNamespace getVariable ["ARC_govStats", []];
+            if (_gs isEqualType [] && { (count _gs) > 0 }) then
+            {
+                private _hmGs = compile "params ['_a']; createHashMapFromArray _a";
+                private _gsMap = [_gs] call _hmGs;
+                private _secEff    = _gsMap getOrDefault ["security_effectiveness", -1];
+                private _secRating = _gsMap getOrDefault ["security_rating", ""];
+                private _aidTotal  = _gsMap getOrDefault ["aid_events_total", -1];
+                private _closed    = _gsMap getOrDefault ["incidents_closed", -1];
+                private _total     = _gsMap getOrDefault ["incidents_total",  -1];
+                if (_secEff isEqualType 0 && { _secEff >= 0 }) then
+                {
+                    private _secCol = "#FFD166";
+                    if (_secRating isEqualTo "HIGH") then { _secCol = "#9FE870"; } else {
+                        if (_secRating isEqualTo "LOW") then { _secCol = "#FF7A7A"; };
+                    };
+                    _txt = _txt + "<br/><br/><t size='1.0' font='PuristaMedium' color='#B89B6B'>S2 Force Metrics</t><br/><br/>";
+                    _txt = _txt + format [
+                        "<t color='#AAAAAA'>Security Force Effectiveness:</t> <t color='%1'>%2</t> (%3%%)<br/>",
+                        _secCol, _secRating, round _secEff
+                    ];
+                    if (_total isEqualType 0 && { _total > 0 }) then
+                    {
+                        _txt = _txt + format [
+                            "<t color='#AAAAAA'>Incident Close Rate:</t> %1 / %2 (%3%%)<br/>",
+                            _closed, _total, round ((_closed / _total) * 100)
+                        ];
+                    };
+                    if (_aidTotal isEqualType 0 && { _aidTotal >= 0 }) then
+                    {
+                        _txt = _txt + format ["<t color='#AAAAAA'>Cumulative Aid Events:</t> %1<br/>", _aidTotal];
+                    };
+                };
+            };
+
             if (!isNull _b1) then { _b1 ctrlEnable false; };
         };
 
@@ -1541,6 +1585,116 @@ else
         default
         {
             _txt = "<t color='#BBBBBB'>Select a tool or an intel log entry.</t>";
+        };
+
+        // ── AO THREAD ─────────────────────────────────────────────────────
+        case "AO_THREAD":
+        {
+            // Combined activity feed: active world-time cultural events
+            // + most recent intel log entries across all categories.
+
+            // World-time events
+            private _wtSnap2 = missionNamespace getVariable ["ARC_worldTimeSnap", []];
+            private _activeEvents = missionNamespace getVariable ["ARC_worldTimeEvents", []];
+            if (!(_activeEvents isEqualType [])) then { _activeEvents = []; };
+            private _nextEvt = missionNamespace getVariable ["ARC_worldTimeNextEvent", ["", 25.0]];
+            if (!(_nextEvt isEqualType []) || { (count _nextEvt) < 2 }) then { _nextEvt = ["", 25.0]; };
+
+            private _evtHeader = "";
+            if (_wtSnap2 isEqualType [] && { (count _wtSnap2) >= 3 }) then
+            {
+                private _dt2    = _wtSnap2 select 1;
+                private _phase2 = _wtSnap2 select 2;
+                if (!(_phase2 isEqualType "")) then { _phase2 = "UNKNOWN"; };
+                private _hh2 = floor _dt2;
+                private _mm2 = round ((_dt2 - _hh2) * 60);
+                _evtHeader = format [
+                    "<t color='#AAAAAA'>Local time:</t> %1%2:%3%4  <t color='#AAAAAA'>Phase:</t> %5<br/>",
+                    if (_hh2 < 10) then {"0"} else {""},
+                    _hh2,
+                    if (_mm2 < 10) then {"0"} else {""},
+                    _mm2,
+                    _phase2
+                ];
+            };
+
+            private _evtBody = "";
+            if ((count _activeEvents) > 0) then
+            {
+                _evtBody = format [
+                    "<t color='#9FE870'>Now:</t> %1<br/>",
+                    _activeEvents joinString "  |  "
+                ];
+            } else {
+                _evtBody = "<t color='#888888'>No active cultural events for current time.</t><br/>";
+            };
+
+            private _nextEvtName  = _nextEvt select 0;
+            private _nextEvtStart = _nextEvt select 1;
+            private _nextStr = "";
+            if (!(_nextEvtName isEqualTo "") && { _nextEvtStart < 25 }) then
+            {
+                private _nHH = floor _nextEvtStart;
+                private _nMM = round ((_nextEvtStart - _nHH) * 60);
+                _nextStr = format [
+                    "<t color='#FFD166'>Next:</t> %1 (~%2%3:%4%5L)<br/><br/>",
+                    _nextEvtName,
+                    if (_nHH < 10) then {"0"} else {""},
+                    _nHH,
+                    if (_nMM < 10) then {"0"} else {""},
+                    _nMM
+                ];
+            };
+
+            // Intel feed: last 15 entries (all categories)
+            private _iLog2 = missionNamespace getVariable ["ARC_pub_intelLog", []];
+            if (!(_iLog2 isEqualType [])) then { _iLog2 = []; };
+            private _feedEntries = [];
+            {
+                if (!(_x isEqualType []) || { (count _x) < 4 }) then { continue; };
+                _feedEntries pushBack _x;
+            } forEach _iLog2;
+
+            // Take last 15
+            if ((count _feedEntries) > 15) then
+            {
+                _feedEntries = _feedEntries select [((count _feedEntries) - 15), 15];
+            };
+            // Reverse (newest first) using index walk
+            private _feedRevArr = [];
+            private _fi = (count _feedEntries) - 1;
+            while { _fi >= 0 } do { _feedRevArr pushBack (_feedEntries select _fi); _fi = _fi - 1; };
+
+            private _feedLines = "";
+            if ((count _feedRevArr) > 0) then
+            {
+                {
+                    if ((count _x) < 4) then { continue; };
+                    private _cat3  = toUpper (_x select 2);
+                    private _summ3 = _x select 3;
+                    if (!(_summ3 isEqualType "")) then { _summ3 = ""; };
+                    if ((count _summ3) > 90) then { _summ3 = (_summ3 select [0, 90]) + "..."; };
+                    private _catCol = "#AAAAAA";
+                    if (_cat3 isEqualTo "OPS")     then { _catCol = "#6EB8E0"; };
+                    if (_cat3 isEqualTo "HUMINT")  then { _catCol = "#FFD166"; };
+                    if (_cat3 isEqualTo "ISR")     then { _catCol = "#C8E87A"; };
+                    if (_cat3 isEqualTo "SIGHTING" || { _cat3 isEqualTo "THREAT" }) then { _catCol = "#FF9966"; };
+                    _feedLines = _feedLines + format [
+                        "<t color='%1'>[%2]</t> %3<br/>",
+                        _catCol, _cat3, _summ3
+                    ];
+                } forEach _feedRevArr;
+            } else {
+                _feedLines = "<t color='#888888'>No intel log entries yet.</t><br/>";
+            };
+
+            _txt = "<t size='1.25' font='PuristaMedium'>AO Thread</t><br/>" +
+                   "<t size='0.9' color='#AAAAAA'>Pattern-of-Life + Activity Feed</t><br/><br/>" +
+                   _evtHeader + _evtBody + _nextStr +
+                   "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Intel Activity (newest first)</t><br/><br/>" +
+                   _feedLines;
+
+            if (!isNull _b1) then { _b1 ctrlEnable false; };
         };
     };
 };

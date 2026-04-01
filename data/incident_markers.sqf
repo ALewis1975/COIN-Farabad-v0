@@ -138,21 +138,20 @@
     ["ARC_m_base_toc", "Defend: TOC / Base Alarm", "DEFEND"],
     ["ARC_m_base_toc", "Logistics: TOC Inventory Check", "LOGISTICS"],
 
-    ["ARC_m_patrol_01", "Hamza Patrol", "PATROL"],
+    ["ARC_m_patrol_01", "Patrol: Hamza Route", "PATROL"],
     ["ARC_m_patrol_01", "Checkpoint: Hamza Route Control", "CHECKPOINT"],
 
-    ["ARC_m_patrol_02", "Farabad District Patrol", "PATROL"],
+    ["ARC_m_patrol_02", "Patrol: Farabad District", "PATROL"],
     ["ARC_m_patrol_02", "Recon: Farabad District Route Recon", "RECON"],
 
-    ["ARC_m_patrol_03", "Farabad District Patrol 3", "PATROL"],
+    ["ARC_m_patrol_03", "Patrol: Farabad District South", "PATROL"],
     ["ARC_m_patrol_03", "Checkpoint: District Interdiction Point", "CHECKPOINT"],
 
-    ["ARC_m_ied_01", "MSR IED Report", "IED"],
-    ["ARC_m_ied_01", "EOD: Clear IED and Reopen Route", "IED"],
+    ["ARC_m_ied_01", "IED: MSR IED Report", "IED"],
+    ["ARC_m_ied_01", "IED: EOD — Clear and Reopen Route", "IED"],
 
-    ["ARC_m_civil_01", "Crowd Control", "CIVIL"],
     ["ARC_m_civil_01", "Civil: Crowd Control / Mediation", "CIVIL"],
 
-    ["ARC_m_logistics_01", "Convoy Escort", "LOGISTICS"],
-    ["ARC_m_logistics_01", "Logistics: Convoy Escort", "ESCORT"]
+    ["ARC_m_logistics_01", "Logistics: Convoy Escort", "LOGISTICS"],
+    ["ARC_m_logistics_01", "Escort: Convoy Protection", "ESCORT"]
 ]
