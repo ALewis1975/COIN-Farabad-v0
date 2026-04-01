@@ -185,7 +185,7 @@ class ARC_SitrepDialog
         class LabelEnemy: RscText
         {
             idc = 77302;
-            text = "Enemy / Situation:";
+            text = "Enemy Situation:";
             x = 0.19;
             y = 0.375;
             w = 0.25;
@@ -203,7 +203,7 @@ class ARC_SitrepDialog
         class LabelFriendly: RscText
         {
             idc = 77303;
-            text = "Friendly Actions:";
+            text = "Friendly Forces / Actions:";
             x = 0.19;
             y = 0.455;
             w = 0.25;

@@ -61,7 +61,7 @@ private _fillCombo = {
     if (isNull _ctrl) exitWith {};
     lbClear _ctrl;
     _ctrl lbAdd "GREEN";
-    _ctrl lbAdd "YELLOW";
+    _ctrl lbAdd "AMBER";
     _ctrl lbAdd "RED";
     private _i = _idx;
     if !(_i isEqualType 0) then { _i = 0; };

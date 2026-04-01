@@ -119,7 +119,7 @@ else
 private _hdr = format [
     "<t size='1.15' color='#FFFFFF'>%1</t><br/>" +
     "<t size='0.95' color='#DDDDDD'>%2</t><br/>" +
-    "<t size='0.85' color='#AAAAAA'>Grid %3 | Use plain English + doctrinal acronyms. ACE uses GREEN / YELLOW / RED.</t>",
+    "<t size='0.85' color='#AAAAAA'>Grid %3 | Use plain English + doctrinal acronyms. ACE uses GREEN / AMBER / RED.</t>",
     _prefix,
     _disp,
     _grid

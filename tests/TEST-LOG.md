@@ -11,6 +11,70 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-01 02:27 UTC — Dialogue / Vocabulary Scan
+
+**Branch/Commit:** copilot/add-civsub-dashboard-indicators @ commit: ba4d83e4d4efbc9b6cad6f686ded3b04d5ce39be (pre-push)
+
+**Scenario:** Systematic player-facing vocabulary scan against U.S. Army terminology (FM 6-0, ADP 5-0, FM 3-24 COIN). Covered: SITREP dialog, follow-on dialog, TOC queue labels, incident catalog, incident OPORD text, button labels, S2 intel combo labels.
+
+**Reference standards consulted:**
+- FM 6-0 (Commander and Staff Organization and Operations) — SITREP field labels, ACE reporting colors, OPORD paragraph headings
+- ADP 5-0 (The Operations Process) — mission/task language
+- FM 3-24 (COIN) — civilian engagement terminology
+- ADP 4-0 (Sustainment) — GREEN/AMBER/RED readiness color coding
+
+**Changes made:**
+
+1. `functions/ui/fn_uiSitrepDialogOnLoad.sqf`
+   - ACE status combo: "YELLOW" → "AMBER" (FM 6-0 / ADP 4-0 standard is GREEN/AMBER/RED for readiness reporting)
+
+2. `functions/core/fn_clientSendSitrep.sqf`
+   - SITREP dialog hint text: "ACE uses GREEN / YELLOW / RED" → "ACE uses GREEN / AMBER / RED"
+
+3. `data/incident_markers.sqf`
+   - "Hamza Patrol" → "Patrol: Hamza Route" (type-prefix consistency)
+   - "Farabad District Patrol" → "Patrol: Farabad District" (type-prefix consistency)
+   - "Farabad District Patrol 3" → "Patrol: Farabad District South" (type-prefix consistency)
+   - "MSR IED Report" → "IED: MSR IED Report" (type-prefix consistency)
+   - "EOD: Clear IED and Reopen Route" (IED type) → "IED: EOD — Clear and Reopen Route" (prefix matches type)
+   - Removed duplicate "Crowd Control" CIVIL entry (kept "Civil: Crowd Control / Mediation")
+   - "Convoy Escort" (LOGISTICS type) → "Logistics: Convoy Escort" (type-prefix consistency)
+
+4. `functions/ui/fn_uiConsoleOpsPaint.sqf`
+   - "Next: send SITREP to trigger TOC follow-on." → "Next: submit SITREP to TOC for follow-on." ("trigger" is informal; "submit" is doctrinal)
+   - "Await TOC follow-on / closeout guidance." → "Await TOC follow-on order and closeout instructions." (FM 6-0 language)
+   - "Next: send SITREP (not available yet)." → "Next: submit SITREP (not yet available)." (consistency)
+   - Incident OPORD mission statements: replaced dead "HUMINT" case with all active incident types (DEFEND, RAID, RECON, QRF, CHECKPOINT, ESCORT, LOGISTICS); default changed "mission" to "task" (Army uses "task" in tactical context)
+
+5. `config/CfgDialogs.hpp`
+   - SITREP dialog: "Enemy / Situation:" → "Enemy Situation:" (cleaner Army usage; "Situation" is redundant with the slash)
+   - SITREP dialog: "Friendly Actions:" → "Friendly Forces / Actions:" (FM 6-0 SITREP format reports friendly forces status, not just actions)
+
+**Items NOT changed (and rationale):**
+- RTB purpose "INTEL" → kept as-is. "INTEL" is deeply embedded as a data key across 10+ processing files (`fn_intelClientCanDebriefIntelHere`, `fn_intelQueueDecide`, `fn_intelResolveRtbDestination`, `fn_intelOrderTick`, `fn_intelOrderCompleteRtbIntel`, etc.). Changing the display label to "DEBRIEF" without changing all downstream comparisons would break RTB INTEL orders. "INTEL" as an abbreviated purpose for RTB is acceptable Army shorthand.
+- Intel combo display labels ("Sighting", "Map Click", "Cursor Target") → kept. Mixed-case is correct UX for dropdown menus; abbreviations (HUMINT/ISR/SIGINT) remain uppercase per Army convention.
+- ACE default index `[0,0,0]` → unchanged (index 0 = GREEN; no semantic change needed).
+
+**Commands run:**
+```
+python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiSitrepDialogOnLoad.sqf functions/core/fn_clientSendSitrep.sqf functions/ui/fn_uiConsoleOpsPaint.sqf
+→ 0 new pattern matches in changed lines (pre-existing issues in unchanged code only)
+```
+
+**Results:**
+- Static review: `PASS`
+- Gameplay validation: `BLOCKED` (no dedicated server available)
+
+**Risk notes:**
+- ACE color change is display-only; no logic compares `_aceAmmo isEqualTo "YELLOW"`. Safe.
+- Incident catalog display names are display-only; task IDs use marker name + type, not display name. Safe.
+- OPORD text is purely informational (details pane only). Safe.
+- CfgDialogs.hpp field labels are static text; no SQF reads them by content. Safe.
+
+**Rollback:** Revert the 5 changed files.
+
+---
+
 ## 2026-04-01 02:05 UTC — World time events, govStats, incidentPreCache, AO Thread UI
 
 **Branch/Commit:** copilot/add-civsub-dashboard-indicators @ commit: 551e157d80ad77bb67d85849f40e14079e53abdd (pre-push)

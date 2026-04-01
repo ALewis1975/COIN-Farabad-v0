@@ -338,7 +338,7 @@ else
                     // Prevent duplicate SITREPs; display the submitted report inline for transparency.
                     _primaryLabel = "SITREP SENT";
                     _primaryEnabled = false;
-                    _details = _details + "SITREP already submitted. Await TOC follow-on / closeout guidance.";
+                    _details = _details + "SITREP already submitted. Await TOC follow-on order and closeout instructions.";
 
                     if (_sitrepDetails isNotEqualTo "") then
                     {
@@ -364,11 +364,11 @@ else
 
                     if (_canSit) then
                     {
-                        _details = _details + "Next: send SITREP to trigger TOC follow-on.";
+                        _details = _details + "Next: submit SITREP to TOC for follow-on.";
                     }
                     else
                     {
-                        _details = _details + "Next: send SITREP (not available yet). Ensure you are within range and the incident is accepted.";
+                        _details = _details + "Next: submit SITREP (not yet available). Ensure you are within range and the incident is accepted.";
                     };
 
                     // Override secondary for IED incidents: EOD disposition takes priority.
@@ -385,14 +385,20 @@ else
             // Abbreviated five-paragraph OPORD for quick leader reference.
             private _typU_ord = toUpper (trim _typ);
             private _missionStmt = switch (_typU_ord) do {
-                case "IED":     { "Investigate and clear reported IED threat. EOD disposition required before close." };
-                case "VBIED":   { "Intercept and neutralize reported VBIED before it reaches its target." };
-                case "CONTACT": { "Respond to reported enemy contact. Neutralize threat. Report KIA/WIA and equipment." };
-                case "PATROL":  { "Conduct patrol to designated grid. Report all significant activities." };
-                case "HUMINT":  { "Conduct HUMINT collection at designated location. Report all findings via SITREP." };
-                case "CIVIL":   { "Respond to civil situation. Assess, stabilize, and report IAW COIN TTPs." };
-                case "CASEVAC": { "Respond to CASEVAC request. Extract and treat all casualties. Report status to TOC." };
-                default         { format ["Execute %1 mission at designated grid. Report all significant activities.", if (_typU_ord isEqualTo "") then {"ASSIGNED"} else {_typU_ord}] };
+                case "IED":        { "Investigate and clear reported IED threat. EOD disposition required before close." };
+                case "VBIED":      { "Intercept and neutralize reported VBIED before it reaches its target." };
+                case "CONTACT":    { "Respond to reported enemy contact. Neutralize threat. Report KIA/WIA and equipment." };
+                case "PATROL":     { "Conduct area patrol to designated grid. Report all significant activities (SALUTE format)." };
+                case "DEFEND":     { "Occupy and defend designated position. Maintain security until relieved or task closed." };
+                case "RAID":       { "Conduct deliberate raid on designated objective. Detain HVTs, collect evidence, and clear site." };
+                case "RECON":      { "Conduct route/area reconnaissance to designated grid. Report findings via SITREP." };
+                case "QRF":        { "Respond immediately to designated grid. Assess situation, support in-contact elements, and report." };
+                case "CHECKPOINT": { "Establish and man vehicle checkpoint at designated position. Search personnel and vehicles IAW ROE." };
+                case "ESCORT":     { "Escort designated convoy/VIP along planned route. Maintain security throughout movement." };
+                case "LOGISTICS":  { "Conduct logistics task at designated grid. Coordinate resupply/delivery and report status to TOC." };
+                case "CIVIL":      { "Respond to civil situation. Assess, stabilize, and report IAW COIN TTPs." };
+                case "CASEVAC":    { "Respond to CASEVAC request. Extract and treat all casualties. Report status to TOC." };
+                default            { format ["Execute %1 task at designated grid. Report all significant activities.", if (_typU_ord isEqualTo "") then {"ASSIGNED"} else {_typU_ord}] };
             };
             _details = _details
                 + "<br/><t size='1.0' font='PuristaMedium'>INCIDENT OPORD</t><br/>"
