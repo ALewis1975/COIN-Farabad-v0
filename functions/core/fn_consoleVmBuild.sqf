@@ -41,23 +41,26 @@ if (!(_rev isEqualType 0)) then { _rev = 0; };
 // ---------------------------------------------------------------------------
 private _taskId    = ["activeTaskId",             ""]    call ARC_fnc_stateGet;
 private _accepted  = ["activeIncidentAccepted",   false] call ARC_fnc_stateGet;
+private _acceptedBy = ["activeIncidentAcceptedByGroup", ""] call ARC_fnc_stateGet;
 private _closeReady = ["activeIncidentCloseReady", false] call ARC_fnc_stateGet;
 private _incType   = ["activeIncidentType",       ""]    call ARC_fnc_stateGet;
 private _incDisp   = ["activeIncidentDisplayName",""]    call ARC_fnc_stateGet;
 private _incPos    = ["activeIncidentPos",         []]   call ARC_fnc_stateGet;
 private _sitSent   = ["activeIncidentSitrepSent",  false] call ARC_fnc_stateGet;
 
-if (!(_taskId    isEqualType ""))                                         then { _taskId    = ""; };
-if (!(_accepted  isEqualType true) && { !(_accepted  isEqualType false) }) then { _accepted  = false; };
+if (!(_taskId     isEqualType ""))                                          then { _taskId     = ""; };
+if (!(_accepted   isEqualType true) && { !(_accepted  isEqualType false) }) then { _accepted   = false; };
+if (!(_acceptedBy isEqualType ""))                                          then { _acceptedBy = ""; };
 if (!(_closeReady isEqualType true) && { !(_closeReady isEqualType false) }) then { _closeReady = false; };
-if (!(_incType   isEqualType ""))                                         then { _incType   = ""; };
-if (!(_incDisp   isEqualType ""))                                         then { _incDisp   = ""; };
-if (!(_incPos    isEqualType []))                                         then { _incPos    = []; };
-if (!(_sitSent   isEqualType true) && { !(_sitSent   isEqualType false) }) then { _sitSent   = false; };
+if (!(_incType    isEqualType ""))                                          then { _incType    = ""; };
+if (!(_incDisp    isEqualType ""))                                          then { _incDisp    = ""; };
+if (!(_incPos     isEqualType []))                                          then { _incPos     = []; };
+if (!(_sitSent    isEqualType true) && { !(_sitSent   isEqualType false) }) then { _sitSent    = false; };
 
 private _incidentData = [
     ["task_id",           _taskId],
     ["accepted",          _accepted],
+    ["accepted_by_group", _acceptedBy],
     ["close_ready",       _closeReady],
     ["incident_type",     _incType],
     ["display_name",      _incDisp],
@@ -74,20 +77,29 @@ private _incidentSection = [
 ];
 
 // ---------------------------------------------------------------------------
-// Section: followOn — active follow-on request
+// Section: followOn — active follow-on request + lead fields
 // ---------------------------------------------------------------------------
-private _foReq    = ["activeIncidentFollowOnRequest",   []] call ARC_fnc_stateGet;
-private _foSumm   = ["activeIncidentFollowOnSummary",   ""] call ARC_fnc_stateGet;
-private _foAt     = ["activeIncidentFollowOnAt",        -1] call ARC_fnc_stateGet;
+private _foReq      = ["activeIncidentFollowOnRequest",   []] call ARC_fnc_stateGet;
+private _foSumm     = ["activeIncidentFollowOnSummary",   ""] call ARC_fnc_stateGet;
+private _foAt       = ["activeIncidentFollowOnAt",        -1] call ARC_fnc_stateGet;
+private _foLeadName = ["activeIncidentFollowOnLeadName",  ""] call ARC_fnc_stateGet;
+private _foLeadGrid = ["activeIncidentFollowOnLeadGrid",  ""] call ARC_fnc_stateGet;
+private _foLeadPos  = ["activeIncidentFollowOnLeadPos",   []] call ARC_fnc_stateGet;
 
-if (!(_foReq  isEqualType [])) then { _foReq  = []; };
-if (!(_foSumm isEqualType "")) then { _foSumm = ""; };
-if (!(_foAt   isEqualType 0))  then { _foAt   = -1; };
+if (!(_foReq      isEqualType [])) then { _foReq      = []; };
+if (!(_foSumm     isEqualType "")) then { _foSumm     = ""; };
+if (!(_foAt       isEqualType 0))  then { _foAt       = -1; };
+if (!(_foLeadName isEqualType "")) then { _foLeadName = ""; };
+if (!(_foLeadGrid isEqualType "")) then { _foLeadGrid = ""; };
+if (!(_foLeadPos  isEqualType [])) then { _foLeadPos  = []; };
 
 private _followOnData = [
-    ["request",    _foReq],
-    ["summary",    _foSumm],
-    ["updated_at", _foAt]
+    ["request",   _foReq],
+    ["summary",   _foSumm],
+    ["updated_at",_foAt],
+    ["lead_name", _foLeadName],
+    ["lead_grid", _foLeadGrid],
+    ["lead_pos",  _foLeadPos]
 ];
 
 private _followOnSection = [
@@ -96,7 +108,8 @@ private _followOnSection = [
 ];
 
 // ---------------------------------------------------------------------------
-// Section: ops — recent OPS log tail (last 3 entries from public state)
+// Section: ops — OPS log tail, orders, queue, intel log, and lead pool
+// (expanded to cover the full set of fields consumed by migrated tab paints)
 // ---------------------------------------------------------------------------
 private _pubState = missionNamespace getVariable ["ARC_pub_state", []];
 private _opsLog = [];
@@ -108,13 +121,32 @@ if (_pubState isEqualType []) then
     if (!(_opsLog isEqualType [])) then { _opsLog = []; };
 };
 
+private _queuePending = missionNamespace getVariable ["ARC_pub_queuePending", []];
+if (!(_queuePending isEqualType [])) then { _queuePending = []; };
+
+private _orders = missionNamespace getVariable ["ARC_pub_orders", []];
+if (!(_orders isEqualType [])) then { _orders = []; };
+
+private _intelLog = missionNamespace getVariable ["ARC_pub_intelLog", []];
+if (!(_intelLog isEqualType [])) then { _intelLog = []; };
+
+private _leadPool = missionNamespace getVariable ["ARC_leadPoolPublic", []];
+if (!(_leadPool isEqualType [])) then { _leadPool = []; };
+
+private _opsUpdatedAt = missionNamespace getVariable ["ARC_pub_ordersUpdatedAt", _now];
+if (!(_opsUpdatedAt isEqualType 0)) then { _opsUpdatedAt = _now; };
+
 private _opsData = [
-    ["log_tail", if ((count _opsLog) > 5) then { _opsLog select [(count _opsLog) - 5, 5] } else { _opsLog }]
+    ["log_tail",     if ((count _opsLog) > 5) then { _opsLog select [(count _opsLog) - 5, 5] } else { _opsLog }],
+    ["queue_pending", _queuePending],
+    ["orders",       _orders],
+    ["intel_log",    _intelLog],
+    ["lead_pool",    _leadPool]
 ];
 
 private _opsSection = [
     ["data",      _opsData],
-    ["freshness", [["updatedAt", _now], ["staleAfterS", 180]]]
+    ["freshness", [["updatedAt", _opsUpdatedAt], ["staleAfterS", 60]]]
 ];
 
 // ---------------------------------------------------------------------------

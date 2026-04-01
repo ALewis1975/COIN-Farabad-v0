@@ -65,4 +65,10 @@ if (_med < _critical) then
     diag_log format ["[ARC][WARN] medicalOnCasualty: baseMed=%1 below critical threshold %2 — LOGI_MEDICAL incident may be generated.", _med, _critical];
 };
 
+// CASEVAC lead: generate a TOC-visible CASEVAC request for BLUFOR casualties.
+if (_side isEqualTo west && { !isNil "ARC_fnc_medicalCasevacRequest" }) then
+{
+    [_entity, _side] call ARC_fnc_medicalCasevacRequest;
+};
+
 true

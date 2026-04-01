@@ -91,6 +91,12 @@ class CfgFunctions
             class intelCreateMarker {};
             class intelBroadcast {};
 
+            // District influence map markers (Item 13)
+            class districtMarkersUpdate {};
+
+            // Mission scoring (Item 22)
+            class missionScoreGenerate {};
+
             class orbatPickTasking {};
             class taskBuildDescription {};
             class taskUpdateActiveDescription {};
@@ -208,6 +214,10 @@ class CfgFunctions
             class worldScanBuildingSlots {};
             class worldScanPatrolWaypoints {};
             class worldIndexObjectives {};
+
+            // Living base — ambient personnel + gate barriers (Items 15-16)
+            class worldAmbientPersonnelInit {};
+            class worldGateBarrierInit {};
         };
 
 
@@ -495,6 +505,13 @@ class CfgFunctions
             class intelUiQueueManagerRefresh {};
             class intelUiQueueManagerUpdateDetails {};
             class intelUiQueueManagerDecideSelected {};
+
+            // Key Leader Engagement (KLE) — Item 19
+            class kleInit {};
+
+            // Route Clearance — Item 20
+            class routeClearanceInit {};
+            class routeClearanceIsSegmentSuppressed {};
         };
 
         // Farabad Console (tablet UI)
@@ -651,6 +668,10 @@ class Ops
             class medicalOnCasualty {};
             class medicalTick {};
             class medicalSnapshot {};
+
+            // CASEVAC loop hook + ACE medical integration (Items 5, 21)
+            class medicalCasevacRequest {};
+            class medicalAceIncapHandler {};
         };
 
         class Ambiance

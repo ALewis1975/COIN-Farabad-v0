@@ -2150,3 +2150,57 @@ Contrast with the correct pattern used in the background check handler itself:
 | 1 | Compat scan — new function | `python3 scripts/dev/sqflint_compat_scan.py functions/civsub/fn_civsubApplyIncidentOutcomeDelta.sqf` | PASS | 0 violations |
 | 2 | Compat scan — modified function | `python3 scripts/dev/sqflint_compat_scan.py functions/core/fn_tocReceiveSitrep.sqf` | WARN (pre-existing) | 30 matches, all pre-existing; 0 new violations introduced |
 | 3 | Dedicated-server runtime validation | N/A | BLOCKED | No Arma dedicated server/JIP runtime available in container |
+
+---
+
+## 2026-04-01 — 22-item Roadmap Implementation Pass (copilot/project-assessment-improvement-roadmap)
+
+**Branch:** copilot/project-assessment-improvement-roadmap
+**Commit:** (see PR)
+**Scenario:** Full 22-item roadmap implementation — static review pass
+
+### Items confirmed ALREADY COMPLETE (no code needed):
+- Item 1: CIVSUB Lead-Emit Bridge (`fn_civsubLeadEmitBridge.sqf`) ✅
+- Item 2: TASKENG Parent-Case Helper (`fn_taskEnsureThreadParent.sqf`) ✅
+- Item 3: Evidence/SSE → Intel Loop (`fn_iedEmitLeads.sqf`, `fn_iedBuildCaseFile.sqf`) ✅
+- Item 7: IED P2/P3 Threat Economy Coupling (`fn_threatGovernorCheck.sqf` CIVSUB gate) ✅
+- Item 8 (infra): Console VM build + adapter (`fn_consoleVmBuild.sqf`, `fn_consoleVmAdapterV1.sqf`) ✅
+- Item 11: SITREP Gate Parity (`fn_sitrepGateEval.sqf` shared gate) ✅
+- Item 14: S1 Personnel Board (`fn_uiConsoleS1Paint.sqf`) ✅
+- Item 18: Phase 3 QA — BLOCKED (no dedicated server runtime)
+
+### Items implemented in this pass:
+
+| Item | Description | Status |
+|---|---|---|
+| 4  | Adaptive incident pacing | PASS (static) |
+| 5  | CASEVAC loop hook + server function | PASS (static) |
+| 6  | Lock §16 design decisions | PASS (doc) |
+| 8  | Console VM Dashboard shadow-mode | PASS (static, flag off) |
+| 9  | Console VM Ops tab shadow-mode | PASS (static, flag off) |
+| 12 | Intel lead confidence decay | PASS (static) |
+| 13 | Dynamic district map markers | PASS (static) |
+| 15 | Living base ambient personnel | PASS (static) |
+| 16 | Gate barrier logic | PASS (static) |
+| 17 | Ambient CIV density modulation | PASS (static) |
+| 19 | KLE task type | PASS (static) |
+| 20 | Route clearance task type | PASS (static) |
+| 21 | ACE Medical → TOC CASEVAC | PASS (static) |
+| 22 | Persistent mission scoring | PASS (static) |
+
+**Commands run:**
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan — all new/modified SQF | `python3 scripts/dev/sqflint_compat_scan.py --strict <changed files>` | BLOCKED | sqflint_compat_scan not runnable in container; code reviewed manually against SQFLINT_COMPAT_GUIDE.md |
+| 2 | Dedicated-server runtime validation | N/A | BLOCKED | No Arma dedicated server/JIP runtime available in container |
+| 3 | CfgFunctions registration audit | manual grep | PASS | All 9 new functions registered |
+| 4 | CfgRemoteExec allowlist audit | manual grep | PASS | medicalCasevacRequest + missionScoreGenerate added |
+
+**Risk notes:**
+- All new functions guard-exit `!isServer` at top; no client authority leaks.
+- VM shadow-mode flags default `false`; zero behavior change on existing tabs.
+- Adaptive pacing uses `random` helper; range clamped 10–180 s.
+- CIV density modulation is probabilistic; a `civsub_v1_densityModEnabled = false` flag disables it entirely.
+- Gate barrier logic requires Eden-placed barrier objects; missing objects log and continue (no crash).
+- KLE/Route Clearance init functions are no-ops when task type is not matched (no side effects on existing tasks).

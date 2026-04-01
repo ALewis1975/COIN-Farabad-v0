@@ -667,4 +667,12 @@ if (_vmPayload isEqualType [] && { !(_vmPayload isEqualTo []) }) then {
     missionNamespace setVariable ["ARC_consoleVM_payload", _vmPayload, true];
 };
 
+// ---------------------------------------------------------------------------
+// District influence map markers (S2 heat-map visualization)
+// ---------------------------------------------------------------------------
+if (!isNil "ARC_fnc_districtMarkersUpdate") then
+{
+    [] call ARC_fnc_districtMarkersUpdate;
+};
+
 true
