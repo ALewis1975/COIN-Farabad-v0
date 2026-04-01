@@ -751,5 +751,19 @@ class Ops
             class airbaseClientRequestClearanceDecision {};
 
         };
+
+        // Dynamic site population (proximity + task-triggered NPC presence)
+        class SitePop
+        {
+            file = "functions\sitepop";
+
+            class sitePopInit {};
+            class sitePopTick {};
+            class sitePopSpawnSite {};
+            class sitePopBuildGroup {};
+            class sitePopApplyAmbiance {};
+            class sitePopDespawnSite {};
+            class sitePopActivateSite {};
+        };
     };
 };
