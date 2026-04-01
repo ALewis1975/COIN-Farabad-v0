@@ -118,6 +118,29 @@ missionNamespace setVariable ["ARC_allowIncidentDuringAcceptedRtb", false, true]
 
 
 // ============================================================================
+// WORLD SIMULATION — objective index + virtual pool tuning
+// ============================================================================
+
+// Strategic objective index scoring weights (density, junction, site, proximity).
+// All four weights should sum to 1.0 for a balanced score; adjust to shift emphasis.
+missionNamespace setVariable ["ARC_worldIndex_weights", [0.25, 0.25, 0.30, 0.20], true];
+
+// Tier thresholds: locations with score >= HIGH threshold are "HIGH"; >= MED = "MED"; else "LOW".
+// Incident seeding multipliers: HIGH x1.4, MED x1.1, LOW x0.8.
+missionNamespace setVariable ["ARC_worldIndex_tierThresholds", [0.65, 0.35], true];
+
+// Virtual OpFor pool: activation/spawn/despawn radii (metres) and timing (seconds).
+missionNamespace setVariable ["ARC_threatVirtualActivationRadiusM", 600,  true]; // DORMANT -> ACTIVE when player within this radius
+missionNamespace setVariable ["ARC_threatVirtualSpawnRadiusM",      400,  true]; // ACTIVE  -> PHYSICAL when player within this radius
+missionNamespace setVariable ["ARC_threatVirtualDespawnRadiusM",    700,  true]; // PHYSICAL -> start despawn countdown when all players beyond this
+missionNamespace setVariable ["ARC_threatVirtualDespawnDelayS",     90,   true]; // seconds beyond despawn radius before group is deleted
+missionNamespace setVariable ["ARC_threatVirtualRepositionS",       600,  true]; // drift interval for DORMANT groups (seconds)
+missionNamespace setVariable ["ARC_threatVirtualPoolTickS",         60,   true]; // pool tick cadence (seconds)
+missionNamespace setVariable ["ARC_threatVirtualPatrolRadiusM",    200,  true]; // physical group patrol radius when spawned (metres)
+missionNamespace setVariable ["ARC_threatVirtualPatrolWaypointN",  5,    true]; // waypoint count for physical group patrol task
+
+
+// ============================================================================
 // CIVSUB v1 (district influence + identity + physical civ sampling)
 // ============================================================================
 

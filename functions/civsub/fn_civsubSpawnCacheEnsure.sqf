@@ -254,61 +254,113 @@ if (_scanR < 150) then { _scanR = 150; };
 private _bldPos = [];
 private _roadPos = [];
 
+// World building slots cache (populated at startup by ARC_fnc_worldScanBuildingSlots).
+// When the primary anchor is near a named location we avoid the expensive
+// nearestObjects / BIS_fnc_buildingPositions / nearRoads calls.
+private _worldSlots = missionNamespace getVariable ["ARC_worldBuildingSlots", createHashMap];
+if (!(_worldSlots isEqualType createHashMap)) then { _worldSlots = createHashMap; };
+
+private _worldLocations = missionNamespace getVariable ["ARC_worldNamedLocations", []];
+if (!(_worldLocations isEqualType [])) then { _worldLocations = []; };
+
+private _hgSlot = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+
 {
-    private _a = _x;
+    private _a        = _x;
+    private _cacheHit = false;
 
-    // Buildings (prefer enterable buildings with interior positions)
-    private _objs = nearestObjects [_a, ["House","House_F","Building","Building_F"], _scanR];
-    {
-        private _bp = [_x] call BIS_fnc_buildingPositions;
-        if (_bp isEqualType [] && {count _bp > 0}) then {
-            {
-                if (_x isEqualType [] && {(count _x) >= 2}) then {
-                    if (!([_x] call _inExclusion)) then { _bldPos pushBackUnique _x; };
+    // Use pre-scanned world building/roadside cache when the anchor is close to a named location.
+    if (!(_worldSlots isEqualTo createHashMap) && {(count _worldLocations) > 0}) then {
+        private _bestId = "";
+        private _bestD  = 1e12;
+        {
+            _x params [["_lid", "", [""]], ["_ldisplay", "", [""]], ["_lpos", [], [[]]]];
+            if ((count _lpos) >= 2) then {
+                private _dist = _a distance2D _lpos;
+                if (_dist < _bestD && {_dist < 500}) then {
+                    _bestD  = _dist;
+                    _bestId = _lid;
                 };
-            } forEach _bp;
-        };
-    } forEach _objs;
+            };
+        } forEach _worldLocations;
 
-    // Supplement: indexed building catalog covers non-House/Building typed structures
-    // (e.g. Land_GuardBox, Land_GuardHouse, Land_Hospital at the Presidential Palace).
-    // Reuses the ARC_enterableBuildings cache loaded by fn_worldPickEnterablePosNear.
-    private _catalog = missionNamespace getVariable ["ARC_enterableBuildings", []];
-    if (!(_catalog isEqualType []) || { _catalog isEqualTo [] }) then
-    {
-        _catalog = call compile preprocessFileLineNumbers "data\farabad_enterable_buildings_unique.sqf";
-        if (!(_catalog isEqualType [])) then { _catalog = []; };
-        missionNamespace setVariable ["ARC_enterableBuildings", _catalog];
+        if (!(_bestId isEqualTo "")) then {
+            private _slotEntry = [_worldSlots, _bestId, []] call _hgSlot;
+            if (_slotEntry isEqualType [] && {(count _slotEntry) >= 2}) then {
+                {
+                    if (_x isEqualType [] && {(count _x) >= 2} && {!([_x] call _inExclusion)}) then {
+                        _bldPos pushBackUnique _x;
+                    };
+                } forEach (_slotEntry select 0);
+                {
+                    if (_x isEqualType [] && {(count _x) >= 2} && {!([_x] call _inExclusion)} && {!([_x] call _posIsRoadish)}) then {
+                        _roadPos pushBackUnique _x;
+                    };
+                } forEach (_slotEntry select 1);
+                _cacheHit = true;
+                if (_dbg) then {
+                    diag_log format ["[CIVSUB][SPAWNCACHE] cache hit did=%1 loc=%2 bld=%3 road=%4", _did, _bestId, count (_slotEntry select 0), count (_slotEntry select 1)];
+                };
+            };
+        };
     };
 
-    private _ax = _a # 0;
-    private _ay = _a # 1;
-    private _scanR2 = _scanR * _scanR;
-    {
-        if (!(_x isEqualType []) || { (count _x) < 2 }) then { continue; };
-        private _pos = _x select 1;
-        if (!(_pos isEqualType []) || { (count _pos) < 2 }) then { continue; };
-        private _dx = (_pos # 0) - _ax;
-        private _dy = (_pos # 1) - _ay;
-        if ((_dx * _dx + _dy * _dy) > _scanR2) then { continue; };
-        if ([_pos] call _inExclusion) then { continue; };
-        private _b = nearestBuilding _pos;
-        if (isNull _b) then { continue; };
-        private _bp = [_b] call BIS_fnc_buildingPositions;
-        if (!(_bp isEqualType []) || { count _bp == 0 }) then { continue; };
-        {
-            if (_x isEqualType [] && {(count _x) >= 2}) then { _bldPos pushBackUnique _x; };
-        } forEach _bp;
-    } forEach _catalog;
+    if (!_cacheHit) then {
+        // Fallback: full geometry scan for this anchor (no pre-scanned slot within 500 m).
 
-    // Roads
-    private _roads = _a nearRoads _scanR;
-    {
-        private _rp = [_x] call _roadsideFromRoad;
-        if (_rp isEqualType [] && {(count _rp) >= 2} && {!(_rp isEqualTo [0,0,0])}) then {
-            _roadPos pushBackUnique _rp;
+        // Buildings (prefer enterable buildings with interior positions)
+        private _objs = nearestObjects [_a, ["House","House_F","Building","Building_F"], _scanR];
+        {
+            private _bp = [_x] call BIS_fnc_buildingPositions;
+            if (_bp isEqualType [] && {count _bp > 0}) then {
+                {
+                    if (_x isEqualType [] && {(count _x) >= 2}) then {
+                        if (!([_x] call _inExclusion)) then { _bldPos pushBackUnique _x; };
+                    };
+                } forEach _bp;
+            };
+        } forEach _objs;
+
+        // Supplement: indexed building catalog covers non-House/Building typed structures
+        // (e.g. Land_GuardBox, Land_GuardHouse, Land_Hospital at the Presidential Palace).
+        // Reuses the ARC_enterableBuildings cache loaded by fn_worldPickEnterablePosNear.
+        private _catalog = missionNamespace getVariable ["ARC_enterableBuildings", []];
+        if (!(_catalog isEqualType []) || { _catalog isEqualTo [] }) then
+        {
+            _catalog = call compile preprocessFileLineNumbers "data\farabad_enterable_buildings_unique.sqf";
+            if (!(_catalog isEqualType [])) then { _catalog = []; };
+            missionNamespace setVariable ["ARC_enterableBuildings", _catalog];
         };
-    } forEach _roads;
+
+        private _ax     = _a select 0;
+        private _ay     = _a select 1;
+        private _scanR2 = _scanR * _scanR;
+        {
+            if (!(_x isEqualType []) || { (count _x) < 2 }) then { continue; };
+            private _pos = _x select 1;
+            if (!(_pos isEqualType []) || { (count _pos) < 2 }) then { continue; };
+            private _dx = (_pos select 0) - _ax;
+            private _dy = (_pos select 1) - _ay;
+            if ((_dx * _dx + _dy * _dy) > _scanR2) then { continue; };
+            if ([_pos] call _inExclusion) then { continue; };
+            private _b = nearestBuilding _pos;
+            if (isNull _b) then { continue; };
+            private _bp = [_b] call BIS_fnc_buildingPositions;
+            if (!(_bp isEqualType []) || { count _bp == 0 }) then { continue; };
+            {
+                if (_x isEqualType [] && {(count _x) >= 2}) then { _bldPos pushBackUnique _x; };
+            } forEach _bp;
+        } forEach _catalog;
+
+        // Roads
+        private _roads = _a nearRoads _scanR;
+        {
+            private _rp = [_x] call _roadsideFromRoad;
+            if (_rp isEqualType [] && {(count _rp) >= 2} && {!(_rp isEqualTo [0,0,0])}) then {
+                _roadPos pushBackUnique _rp;
+            };
+        } forEach _roads;
+    };
 
 } forEach _anchors;
 

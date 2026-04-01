@@ -46,6 +46,10 @@ private _closedMax = ["threat_v0_closed_max", 200] call ARC_fnc_stateGet;
 if (!(_closedMax isEqualType 0) || { _closedMax < 50 }) then { _closedMax = 200; };
 ["threat_v0_closed_max", _closedMax] call ARC_fnc_stateSet;
 
+// Virtual group pool active index (IDs of vgroups currently PHYSICAL)
+private _vgActive = ["threat_v0_vgroup_active_index", []] call ARC_fnc_stateGet;
+if (!(_vgActive isEqualType [])) then { _vgActive = []; ["threat_v0_vgroup_active_index", _vgActive] call ARC_fnc_stateSet; };
+
 // Seed debug vars (not persisted)
 if (isNil { missionNamespace getVariable "threat_v0_debug_last_event" }) then
 {

@@ -200,6 +200,12 @@ class CfgFunctions
             class worldPickEnterablePosNear {};
             class worldPickConvoySpawnAndLink {};
             class worldRegisterLocations {};
+
+            // Startup world scans (building slots, patrol rings, objective index)
+            class worldRoadsideOffsets {};
+            class worldScanBuildingSlots {};
+            class worldScanPatrolWaypoints {};
+            class worldIndexObjectives {};
         };
 
 
@@ -617,6 +623,10 @@ class CfgFunctions
             class threatFacilitatorNode {};
             class threatApplyCoinInfluence {};
             class threatAoPostureUpdate {};
+
+            // Virtual OpFor group pool (persistent enemy presence between incidents)
+            class threatVirtualPoolInit {};
+            class threatVirtualPoolTick {};
         };
 
 class Ops

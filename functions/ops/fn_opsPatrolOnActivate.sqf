@@ -63,18 +63,83 @@ _routeRadius = (_routeRadius max 60) min 900;
 _routeRadius = (_routeRadius min _routeCap);
 
 private _pts = [];
-private _baseAng = random 360;
-private _step = 360 / _routePtsN;
-for "_i" from 0 to (_routePtsN - 1) do
-{
-    private _ang = _baseAng + (_i * _step) + (random 30 - 15);
-    private _dist = _routeRadius * (0.65 + random 0.35);
+private _usedPreScanned = false;
 
-    private _px = (_posATL # 0) + (sin _ang) * _dist;
-    private _py = (_posATL # 1) + (cos _ang) * _dist;
+// Try pre-scanned patrol rings first (populated at startup by ARC_fnc_worldScanPatrolWaypoints).
+private _patrolRings = missionNamespace getVariable ["ARC_worldPatrolRings", createHashMap];
+if (!(_patrolRings isEqualType createHashMap)) then { _patrolRings = createHashMap; };
 
-    private _p = [_px, _py, 0];
-    _pts pushBack _p;
+if (!(_patrolRings isEqualTo createHashMap)) then {
+    private _locations = missionNamespace getVariable ["ARC_worldNamedLocations", []];
+    if (!(_locations isEqualType [])) then { _locations = []; };
+
+    private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+
+    // Find nearest named location within 600 m of the task centre
+    private _nearId  = "";
+    private _nearPos = [];
+    private _nearD   = 1e12;
+    {
+        _x params [["_lid", "", [""]], ["_ldisplay", "", [""]], ["_lpos", [], [[]]]];
+        if ((count _lpos) >= 2) then {
+            private _d = _posATL distance2D _lpos;
+            if (_d < _nearD && {_d < 600}) then {
+                _nearD   = _d;
+                _nearId  = _lid;
+                _nearPos = _lpos;
+            };
+        };
+    } forEach _locations;
+
+    if (!(_nearId isEqualTo "")) then {
+        private _locationRings = [_patrolRings, _nearId, []] call _hg;
+        if (_locationRings isEqualType [] && {(count _locationRings) >= 3}) then {
+            // Ring radii mirror ARC_fnc_worldScanPatrolWaypoints: 0=tight(80m), 1=medium(180m), 2=wide(350m)
+            private _ringRadii = [80, 180, 350];
+            private _bestIdx   = 0;
+            private _bestDiff  = abs (_routeRadius - (_ringRadii select 0));
+            for "_ri" from 1 to ((count _ringRadii) - 1) do {
+                private _diff = abs (_routeRadius - (_ringRadii select _ri));
+                if (_diff < _bestDiff) then { _bestDiff = _diff; _bestIdx = _ri; };
+            };
+
+            private _ring = _locationRings select _bestIdx;
+            if (_ring isEqualType [] && {(count _ring) > 0}) then {
+                // Re-centre ring on task position: shift each waypoint by the
+                // offset from the named location to the task centre, then add jitter.
+                private _lp3 = +_nearPos;
+                if ((count _lp3) < 3) then { _lp3 pushBack 0; };
+
+                private _offX = (_posATL select 0) - (_lp3 select 0);
+                private _offY = (_posATL select 1) - (_lp3 select 1);
+
+                {
+                    if (!(_x isEqualType []) || {(count _x) < 2}) then { continue; };
+                    private _nx = (_x select 0) + _offX + (random 40 - 20);
+                    private _ny = (_x select 1) + _offY + (random 40 - 20);
+                    _pts pushBack [_nx, _ny, 0];
+                } forEach _ring;
+
+                _usedPreScanned = true;
+            };
+        };
+    };
+};
+
+// Geometric fallback: generate waypoints from scratch when no pre-scanned ring is nearby.
+if (!_usedPreScanned) then {
+    private _baseAng = random 360;
+    private _step    = 360 / _routePtsN;
+    for "_i" from 0 to (_routePtsN - 1) do
+    {
+        private _ang  = _baseAng + (_i * _step) + (random 30 - 15);
+        private _dist = _routeRadius * (0.65 + random 0.35);
+
+        private _px = (_posATL select 0) + (sin _ang) * _dist;
+        private _py = (_posATL select 1) + (cos _ang) * _dist;
+
+        _pts pushBack [_px, _py, 0];
+    };
 };
 
 ["activePatrolRoutePosList", _pts] call ARC_fnc_stateSet;

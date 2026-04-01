@@ -57,6 +57,13 @@ private _early = 1;
 private _choices = [];
 private _weights = [];
 
+// Strategic objective tier index (populated by ARC_fnc_worldIndexObjectives at startup)
+private _objIndex    = missionNamespace getVariable ["ARC_worldObjectiveIndex", createHashMap];
+if (!(_objIndex isEqualType createHashMap)) then { _objIndex = createHashMap; };
+private _worldLocs   = missionNamespace getVariable ["ARC_worldNamedLocations", []];
+if (!(_worldLocs isEqualType [])) then { _worldLocs = []; };
+private _hgObj       = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+
 {
     if !(_x isEqualType []) then { continue; };
     _x params ["_rawMarker", "_displayName", "_incidentType"];
@@ -120,6 +127,35 @@ private _weights = [];
         _stageMul = 0.35 + (0.65 * _stage); // stage=0 => 0.35
     };
     _w = _w * _stageMul;
+
+    // Strategic objective tier weighting: skews incidents toward tactically significant locations.
+    if (!(_objIndex isEqualTo createHashMap) && {(count _worldLocs) > 0}) then {
+        private _mPos  = markerPos _m;
+        private _nearObjId = "";
+        private _nearObjD  = 1e12;
+        {
+            _x params [["_lid", "", [""]], ["_ldisplay", "", [""]], ["_lpos", [], [[]]]];
+            if ((count _lpos) >= 2) then {
+                private _d = _mPos distance2D _lpos;
+                if (_d < _nearObjD && {_d < 800}) then {
+                    _nearObjD  = _d;
+                    _nearObjId = _lid;
+                };
+            };
+        } forEach _worldLocs;
+
+        if (!(_nearObjId isEqualTo "")) then {
+            private _objEntry = [_objIndex, _nearObjId, []] call _hgObj;
+            if (_objEntry isEqualType [] && {(count _objEntry) >= 2}) then {
+                private _tier = _objEntry select 1;
+                private _tierMul = 1.0;
+                if (_tier isEqualTo "HIGH") then { _tierMul = 1.4; };
+                if (_tier isEqualTo "MED")  then { _tierMul = 1.1; };
+                if (_tier isEqualTo "LOW")  then { _tierMul = 0.8; };
+                _w = _w * _tierMul;
+            };
+        };
+    };
 
     if (_w <= 0) then { continue; };
 
