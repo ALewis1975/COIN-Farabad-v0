@@ -43,6 +43,21 @@ else
         {
             [] call ARC_fnc_incidentTick;
 
+            // Auto-generate COIN score report every 30 minutes (configurable).
+            // Publishes ARC_pub_missionScore so the HQ tab always has a recent score.
+            private _scoreIntervalS = missionNamespace getVariable ["ARC_missionScoreAutoIntervalS", 1800];
+            if (!(_scoreIntervalS isEqualType 0)) then { _scoreIntervalS = 1800; };
+            _scoreIntervalS = (_scoreIntervalS max 300) min 7200;
+            private _lastScoreAt = missionNamespace getVariable ["ARC_pub_missionScoreAt", -1];
+            if (!(_lastScoreAt isEqualType 0)) then { _lastScoreAt = -1; };
+            if (_lastScoreAt < 0 || { (serverTime - _lastScoreAt) >= _scoreIntervalS }) then
+            {
+                if (!isNil "ARC_fnc_missionScoreGenerate") then
+                {
+                    [] call ARC_fnc_missionScoreGenerate;
+                };
+            };
+
             // Adaptive sleep: modulate tick frequency from insurgentPressure and threat
             // district heat so the AO "breathes" — calm districts slow the loop,
             // hot districts accelerate it.

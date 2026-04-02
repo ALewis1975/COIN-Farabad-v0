@@ -157,7 +157,7 @@ private _renderHQSubPanelsFromMaster = {
     };
 
     private _adminRows = [
-        "ADMIN_SAVE", "ADMIN_CIVSUB_SAVE", "ADMIN_RESET", "ADMIN_CIVSUB_RESET",
+        "ADMIN_SAVE", "ADMIN_CIVSUB_SAVE", "ADMIN_SCORE", "ADMIN_RESET", "ADMIN_CIVSUB_RESET",
         "ADMIN_FORCE_CLOSE_SUCC", "ADMIN_FORCE_CLOSE_FAIL", "ADMIN_REBUILD_ACTIVE", "ADMIN_BROADCAST"
     ];
     private _incRows = ["ADMIN_INCIDENTS"];
@@ -244,7 +244,7 @@ if (!isNull _ctrlList) then
         }
         else
         {
-            if (_d in ["ADMIN_SAVE","ADMIN_CIVSUB_SAVE","ADMIN_RESET","ADMIN_AIRBASE_RESET_CTRL","ADMIN_CIVSUB_RESET","ADMIN_FORCE_CLOSE_SUCC","ADMIN_FORCE_CLOSE_FAIL","ADMIN_REBUILD_ACTIVE","ADMIN_BROADCAST","ADMIN_INCIDENTS","ADMIN_COVERAGE","ADMIN_QA","ADMIN_COMPILE","ADMIN_DUMP_LEADS","ADMIN_DUMP_INTEL","ADMIN_DIAG_STATUS","ADMIN_DIAG_TOGGLE_DEBUG"]) exitWith { _hasHqRow = true; };
+            if (_d in ["ADMIN_SAVE","ADMIN_CIVSUB_SAVE","ADMIN_SCORE","ADMIN_RESET","ADMIN_AIRBASE_RESET_CTRL","ADMIN_CIVSUB_RESET","ADMIN_FORCE_CLOSE_SUCC","ADMIN_FORCE_CLOSE_FAIL","ADMIN_REBUILD_ACTIVE","ADMIN_BROADCAST","ADMIN_INCIDENTS","ADMIN_COVERAGE","ADMIN_QA","ADMIN_COMPILE","ADMIN_DUMP_LEADS","ADMIN_DUMP_INTEL","ADMIN_DIAG_STATUS","ADMIN_DIAG_TOGGLE_DEBUG"]) exitWith { _hasHqRow = true; };
         };
     };
 
@@ -406,6 +406,7 @@ if (_needRebuild && {!isNull _ctrlList}) then
         ["ADMIN TOOLS"] call _addHdr;
         ["Save World State (Persistence)", "ADMIN_SAVE"] call _addRow;
         ["Save CIVSUB (Campaign)", "ADMIN_CIVSUB_SAVE"] call _addRow;
+        ["Generate COIN Score Report", "ADMIN_SCORE"] call _addRow;
         ["Reset All (CAUTION)", "ADMIN_RESET"] call _addRow;
         ["Reset AIRBASE Control State", "ADMIN_AIRBASE_RESET_CTRL"] call _addRow;
         ["Reset CIVSUB Campaign (CAUTION)", "ADMIN_CIVSUB_RESET"] call _addRow;
@@ -500,6 +501,40 @@ switch (toUpper _data) do
     case "ADMIN_SAVE":
     {
         _txt = _txt + "Save current mission state to persistence (server-side).";
+    };
+
+    case "ADMIN_SCORE":
+    {
+        _txt = _txt + "<t size='1.0' font='PuristaMedium'>COIN Score Report</t><br/><br/>" +
+               "Generate a composite COIN assessment report (0–100). Covers task success rate, civilian protection, lead actioned rate, sustainment health, and SITREP discipline.<br/><br/>";
+
+        // Show the latest score if available.
+        private _score = missionNamespace getVariable ["ARC_pub_missionScore", []];
+        private _scoreAt = missionNamespace getVariable ["ARC_pub_missionScoreAt", -1];
+        if (_score isEqualType [] && { (count _score) > 0 } && { _scoreAt isEqualType 0 } && { _scoreAt > 0 }) then
+        {
+            private _composite = -1;
+            private _rating    = "";
+            {
+                if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo "compositeScore" }) exitWith { _composite = _x select 1; };
+            } forEach _score;
+            {
+                if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo "rating" }) exitWith { _rating = _x select 1; };
+            } forEach _score;
+
+            private _ageS = round (serverTime - _scoreAt);
+            private _ratingColor = "#AAAAAA";
+            if (_rating isEqualTo "OUTSTANDING")   then { _ratingColor = "#6EE7B7"; };
+            if (_rating isEqualTo "SATISFACTORY")  then { _ratingColor = "#86EFAC"; };
+            if (_rating isEqualTo "MARGINAL")       then { _ratingColor = "#FCD34D"; };
+            if (_rating isEqualTo "UNSAT")          then { _ratingColor = "#F87171"; };
+
+            _txt = _txt + format ["Score: <t font='PuristaMedium'>%1 / 100</t>  Rating: <t color='%2'>%3</t><br/>",
+                _composite, _ratingColor, _rating];
+            _txt = _txt + format ["<t size='0.85' color='#AAAAAA'>Generated %1s ago.</t>", _ageS];
+        } else {
+            _txt = _txt + "<t color='#AAAAAA'>No report yet. Press EXECUTE to generate.</t>";
+        };
     };
 
     case "ADMIN_CIVSUB_SAVE":

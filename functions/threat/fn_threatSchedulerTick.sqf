@@ -18,6 +18,36 @@ if (!(_intervalS isEqualType 0) || { _intervalS < 30 }) then { _intervalS = 120;
 private _lastTs = ["threat_v0_scheduler_last_ts", -1] call ARC_fnc_stateGet;
 if (!(_lastTs isEqualType 0)) then { _lastTs = -1; };
 
+// ── Daily budget reset (TEA-F5 fix) ────────────────────────────────────────
+// A "day" is measured as a floor(serverTime / 86400) epoch. On rollover the
+// per-district spent_today counters are reset to 0 so each day gets a fresh budget.
+private _lastResetDay = ["threat_v0_budget_last_reset_day", -1] call ARC_fnc_stateGet;
+if (!(_lastResetDay isEqualType 0)) then { _lastResetDay = -1; };
+private _todayDay = floor (serverTime / 86400);
+if (_todayDay != _lastResetDay) then
+{
+    private _budgetMap = ["threat_v0_attack_budget", createHashMap] call ARC_fnc_stateGet;
+    if (!(_budgetMap isEqualType createHashMap)) then { _budgetMap = createHashMap; };
+    private _hgReset = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+    // Iterate over the canonical 20-district list; avoids sqflint `keys` parser issue.
+    private _distReset = [
+        "D01","D02","D03","D04","D05","D06","D07","D08","D09","D10",
+        "D11","D12","D13","D14","D15","D16","D17","D18","D19","D20"
+    ];
+    {
+        private _bId  = _x;
+        private _bEntry = [_budgetMap, _bId, createHashMap] call _hgReset;
+        if (_bEntry isEqualType createHashMap) then
+        {
+            _bEntry set ["spent_today", 0];
+            _budgetMap set [_bId, _bEntry];
+        };
+    } forEach _distReset;
+    ["threat_v0_attack_budget", _budgetMap] call ARC_fnc_stateSet;
+    ["threat_v0_budget_last_reset_day", _todayDay] call ARC_fnc_stateSet;
+    diag_log format ["[ARC][THREAT] ARC_fnc_threatSchedulerTick: daily budget reset day=%1", _todayDay];
+};
+
 private _now = serverTime;
 if (_lastTs > 0 && { (_now - _lastTs) < _intervalS }) exitWith {false};
 
@@ -79,6 +109,22 @@ private _scheduledAny = false;
     if (_allowed) then
     {
         [_districtId, _tier] call ARC_fnc_threatScheduleEvent;
+
+        // Increment per-district attack budget spend_today counter (TEA-F5 fix).
+        // IED=1pt, VBIED would be 2pt, SUICIDE would be 3pt; scheduler always passes
+        // "IED" as the type here; subtypes are resolved at execution layer.
+        private _spendCost = 1;
+        private _budgetMap2 = ["threat_v0_attack_budget", createHashMap] call ARC_fnc_stateGet;
+        if (!(_budgetMap2 isEqualType createHashMap)) then { _budgetMap2 = createHashMap; };
+        private _bEntry2 = [_budgetMap2, _districtId, createHashMap] call _hg;
+        if (!(_bEntry2 isEqualType createHashMap)) then { _bEntry2 = createHashMap; };
+        private _spentNow = [_bEntry2, "spent_today", 0] call _hg;
+        if (!(_spentNow isEqualType 0)) then { _spentNow = 0; };
+        _bEntry2 set ["spent_today", _spentNow + _spendCost];
+        _budgetMap2 set [_districtId, _bEntry2];
+        ["threat_v0_attack_budget", _budgetMap2] call ARC_fnc_stateSet;
+        diag_log format ["[ARC][THREAT] ARC_fnc_threatSchedulerTick: budget spend did=%1 tier=%2 spent=%3 cost=%4", _districtId, _tier, _spentNow + _spendCost, _spendCost];
+
         _scheduledAny = true;
     };
 } forEach _districtIds;

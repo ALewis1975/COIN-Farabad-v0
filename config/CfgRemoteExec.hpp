@@ -55,6 +55,23 @@ class CfgRemoteExec
         class ARC_fnc_tocRequestResetAll            { allowedTargets = 2; };
         class ARC_fnc_tocRequestSave                { allowedTargets = 2; };
 
+        // AIRBASE client → server RPCs (ATC interactions)
+        // All 9 server-side handlers have isServer guard + ARC_fnc_rpcValidateSender;
+        // these entries are additive — mode=1 blocked all of them without them.
+        class ARC_fnc_airbaseSubmitClearanceRequest     { allowedTargets = 2; };
+        class ARC_fnc_airbaseRequestClearanceDecision   { allowedTargets = 2; };
+        class ARC_fnc_airbaseRequestPrioritizeFlight    { allowedTargets = 2; };
+        class ARC_fnc_airbaseCancelClearanceRequest     { allowedTargets = 2; };
+        class ARC_fnc_airbaseRequestCancelQueuedFlight  { allowedTargets = 2; };
+        class ARC_fnc_airbaseMarkClearanceEmergency     { allowedTargets = 2; };
+        class ARC_fnc_airbaseRequestSetLaneStaffing     { allowedTargets = 2; };
+        class ARC_fnc_airbaseRequestHoldDepartures      { allowedTargets = 2; };
+        class ARC_fnc_airbaseRequestReleaseDepartures   { allowedTargets = 2; };
+
+        // Logistics relay + AIRBASE admin RPCs
+        class ARC_fnc_execSpawnConvoy                   { allowedTargets = 2; };
+        class ARC_fnc_tocRequestAirbaseResetControlState{ allowedTargets = 2; };
+
         // IED / VBIED RPCs
         class ARC_fnc_iedCollectEvidence            { allowedTargets = 2; };
         class ARC_fnc_iedServerDetonate             { allowedTargets = 2; };

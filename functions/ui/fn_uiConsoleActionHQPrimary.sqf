@@ -82,6 +82,12 @@ switch (_data) do
         ["HQ", "Save requested (server persistence)."] call ARC_fnc_clientToast;
     };
 
+    case "ADMIN_SCORE":
+    {
+        [player] remoteExec ["ARC_fnc_missionScoreGenerate", 2];
+        ["HQ", "COIN score report requested (server). Report will appear in this pane."] call ARC_fnc_clientToast;
+    };
+
     case "ADMIN_CIVSUB_SAVE":
     {
         [player] remoteExec ["ARC_fnc_tocRequestCivsubSave", 2];
