@@ -11,6 +11,24 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-02 20:41 UTC — Bug fix: AO Threat Summary shows "No district data published yet" on mission start
+
+**Branch/Commit:** copilot/no-district-data-published @ `a69753c7c589d5289def09fc88612b1c1d6c2d3a`
+
+**Scenario:** AO Threat Summary UI panel shows "Districts: 0 total" and "No district data published yet." immediately after mission start. Root cause: `fn_civsubInitServer.sqf` creates district objects in `civsub_v1_districts` HashMap but does not publish `civsub_v1_district_pub_*` client-readable snapshots at init time. First publish is delayed by `civsub_v1_tick_s` (60 s default) via the background tick spawn loop.
+
+**Fix:** Added `[] call ARC_fnc_civsubTick;` immediately before the spawn loop in `fn_civsubInitServer.sqf` (line 290) to publish initial snapshots at mission start.
+
+**Commands:**
+1. `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubInitServer.sqf` → PASS (no compat violations)
+2. `sqflint -e w functions/civsub/fn_civsubInitServer.sqf` → pre-existing errors only (lines 65, 120, 125, 192); no new errors from this change
+
+**Result:** `PASS` (static analysis); `BLOCKED` (dedicated server / JIP runtime — no rig available)
+
+**Notes:** Gameplay verification requires hosted/dedicated MP session. Open AO Threat Summary immediately on mission start; expect district rows to appear (not "No district data published yet."). Decay applied at t=0 is safe — values start at baseline so delta is negligible.
+
+---
+
 ## 2026-04-02 18:21 UTC — Bug verification: worldGateBarrierInit line-28 !-namespace fix
 
 **Branch/Commit:** copilot/fix-world-gate-barrier-init-error-again @ `0ece4c7970009d21c4e2ae1854cef44b0a9b5b37`
