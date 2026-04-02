@@ -465,7 +465,7 @@ else
         private _mins = round (_t / 60);
 
         private _grid = [_meta, "grid", ""] call _metaGetOps;
-        if (_grid isEqualTo "" && {_posATL isEqualType []}) then { _grid = mapGridPosition _posATL; };
+        if (_grid isEqualTo "" && {_posATL isEqualType [] && { (count _posATL) >= 2 }}) then { _grid = mapGridPosition _posATL; };
 
         private _event = [_meta, "event", ""] call _metaGetOps;
         if (!(_event isEqualType "")) then { _event = ""; };
@@ -689,7 +689,7 @@ else
         private _mins = round (_t / 60);
 
         private _grid = [_meta, "grid", ""] call _metaGet;
-        if (_grid isEqualTo "" && {_posATL isEqualType []}) then { _grid = mapGridPosition _posATL; };
+        if (_grid isEqualTo "" && {_posATL isEqualType [] && { (count _posATL) >= 2 }}) then { _grid = mapGridPosition _posATL; };
 
         private _zone = [_meta, "zone", ""] call _metaGet;
         if (_zone isEqualTo "") then { _zone = "Unzoned"; };

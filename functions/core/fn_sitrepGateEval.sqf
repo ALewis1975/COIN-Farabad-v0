@@ -15,6 +15,9 @@
       4: STRING  - requestId (optional; auto-generated when "" or omitted). Used to
                    correlate client-side and server-side breadcrumbs for the same user
                    action. Pass the same value to the server remoteExec to link traces.
+      5: BOOL    - silent: when true, suppresses all diag_log breadcrumb output (default false).
+                   Pass true from addAction condition polling paths to prevent log storms in
+                   hosted MP sessions where isServer is true on the player's machine.
 
     Returns:
       ARRAY — [allowed (BOOL), reasonCode (STRING), stage (STRING)]
@@ -46,7 +49,8 @@ params [
     ["_anchors",    [],      [[]]],
     ["_prox",       350,     [0]],
     ["_updateOnly", false,   [false]],
-    ["_requestId",  "",      [""]]
+    ["_requestId",  "",      [""]],
+    ["_silent",     false,   [false]]
 ];
 
 private _trimFn = compile "params ['_s']; trim _s";
@@ -114,8 +118,10 @@ private _taskStateBefore =
 // Emits a structured SITREP_GATE_EVAL event per SITREP_Gate_Parity.md §4.
 // Mandatory fields: stage, outcome, reasonCode, gateStage, taskId, taskStateBefore, requestId.
 // Emitted via diag_log for immediate audit; future work can route to a telemetry bus.
+// Suppressed when _silent=true (e.g. addAction condition polling) to prevent log storms.
 private _emitBreadcrumb = {
     params ["_outcome", "_reasonCode", "_gateStage", "_taskStateAfter"];
+    if (_silent) exitWith {};
     private _stage = if (isServer) then {"server_authority"} else {"client_precheck"};
     private _crumb = [
         ["event",          "SITREP_GATE_EVAL"],

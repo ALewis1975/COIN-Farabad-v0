@@ -2553,6 +2553,48 @@ Contrast with the correct pattern used in the background check handler itself:
 
 ---
 
+## 2026-04-02 19:30 UTC — RPT review fixes: briefingUpdateClient crash + SITREP gate log storm
+
+**Branch/Commit:** copilot/review-arma3-rpt-file-again @ `f3d6f90` (pre-commit base; changes committed after)
+
+**Scenario:** Implement P1/P2 fixes from RPT review of `Arma3_x64_2026-04-02_13-55-51.rpt`.
+
+**Issues addressed:**
+
+1. **P1 — `fn_briefingUpdateClient.sqf` (lines 468 + 692):** `mapGridPosition` called with empty
+   `[]` array (53 repeated `Error 0 elements provided, 3 expected` per session). Root cause: guard
+   `_posATL isEqualType []` only confirmed type, not count. Fixed to
+   `_posATL isEqualType [] && { (count _posATL) >= 2 }`.
+
+2. **P1 — SITREP_GATE breadcrumb storm:** In hosted MP sessions `isServer` is true on the player's
+   machine, causing `fn_clientCanSendSitrep` addAction condition polls (~2/sec) to emit
+   `[ARC][SITREP_GATE]` diag_log breadcrumbs labelled `server_authority`. 39 identical denials in
+   90s were observed. Fixed by: (a) adding `_silent` (BOOL, param 5, default false) to
+   `fn_sitrepGateEval` that skips diag_log when true; (b) passing `_silent=true` from
+   `fn_clientCanSendSitrep`. Server-authoritative `fn_tocReceiveSitrep` path unchanged — full
+   logging preserved.
+
+3. **P1 — `data/paths/taxiPath_UH_60M_01.sqf`:** File exists with an empty array; airbase init
+   correctly detects this and disables RW-UH60M-01. Added comment documenting that the taxi path
+   must be recorded in-game with `BIS_fnc_unitCapture`. No code change possible without Arma 3
+   runtime. **BLOCKED for runtime validation.**
+
+4. **P2 — Patrol_07/08/09 LIGHTBAR:** Editor-placed vehicles are missing; already handled
+   gracefully by `[FARABAD][POLICE][WARN]` log. No code fix possible without editor access.
+   **BLOCKED.**
+
+**Commands run:**
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan — fn_sitrepGateEval, fn_clientCanSendSitrep | `python3 scripts/dev/sqflint_compat_scan.py --strict <files>` | PASS | No new compat violations in changed files |
+| 2 | Compat scan — fn_briefingUpdateClient | `python3 scripts/dev/sqflint_compat_scan.py --strict <file>` | PASS (pre-existing violations only) | 44 pre-existing violations unchanged; no new violations from this change |
+| 3 | sqflint — fn_sitrepGateEval | `sqflint -e w fn_sitrepGateEval.sqf` | PASS (clean) | No errors |
+| 4 | sqflint — fn_clientCanSendSitrep | `sqflint -e w fn_clientCanSendSitrep.sqf` | PASS (clean) | No errors |
+| 5 | sqflint — fn_briefingUpdateClient | `sqflint -e w fn_briefingUpdateClient.sqf` | Pre-existing errors only | 44 pre-existing isNotEqualTo / # / trim violations; no new errors from this change |
+| 6 | Runtime: mapGridPosition guard | N/A | BLOCKED | Requires Arma 3 session with ops log entries lacking a position |
+| 7 | Runtime: SITREP silent flag | N/A | BLOCKED | Requires hosted MP session to verify no log storm |
+| 8 | Runtime: UH-60M taxi path | N/A | BLOCKED | Requires in-game BIS_fnc_unitCapture recording |
 ## 2026-04-02 — Switch OPFOR/Civilian unit classes to 3CB MEI/MEE/TKC/MEC (copilot/update-opfor-unit-assets)
 
 **Branch:** copilot/update-opfor-unit-assets

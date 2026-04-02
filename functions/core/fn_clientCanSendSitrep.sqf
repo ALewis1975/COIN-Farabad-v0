@@ -69,8 +69,14 @@ if (_nids isEqualType []) then
     } forEach _nids;
 };
 
-// Delegate all gate logic to the shared evaluator
-private _result = [_unit, _anchors, _prox] call ARC_fnc_sitrepGateEval;
+// Delegate all gate logic to the shared evaluator.
+// Pass _silent=true (param 5) to suppress diag_log breadcrumbs: this function is
+// called from addAction condition evaluation (~2/sec) and in hosted MP sessions
+// isServer is true on the player machine, producing log storms when the deny
+// reason is unchanged. The server-authoritative path (fn_tocReceiveSitrep) always
+// logs normally since it does not pass _silent.
+// Params: [unit, anchors, prox, updateOnly=false, requestId="", silent=true]
+private _result = [_unit, _anchors, _prox, false, "", true] call ARC_fnc_sitrepGateEval;
 private _ok = (_result select 0);
 
 // Cache the reason code alongside the bool so the UI can display a specific hint.
