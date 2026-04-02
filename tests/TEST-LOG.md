@@ -11,6 +11,31 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-02 18:23 UTC — sqflint_compat_scan accuracy audit and gap fixes
+
+**Branch/Commit:** copilot/check-sqf-lint-accuracy @ `0ece4c7` (pre-push)
+
+**Scenario:** Full audit of all CI static-check mechanisms for accuracy (no false positives) and coverage completeness.
+
+**Commands/Steps:**
+1. Ran compat scan on all 526 SQF files — confirmed no false positives in existing rules.
+2. Manually verified every banned pattern against sqflint 0.3.2 — all rules match real parse failures.
+3. Discovered four coverage gaps: `hash-index-operator` regex missed no-space/expression variants; `bare-keys`, `hashmap-get-bare`, and `array-insert-method` had no scanner rules.
+4. Updated `scripts/dev/sqflint_compat_scan.py` with fixed regex and three new rules.
+5. Updated `docs/qa/SQFLINT_COMPAT_GUIDE.md` — added constructs, helpers, and coverage table entries.
+6. Re-ran all static checks: validate_state_migrations, validate_marker_index, check_test_log_commits, airbase_planning_mode_checks, casreq_snapshot_contract_checks — all PASS.
+7. Re-ran compat scan on eight clean reference files — all PASS (no new false positives).
+
+**Result:**
+- Static checks (non-sqflint): PASS
+- Compat scan on clean files: PASS
+- sqflint on changed Python/doc files: N/A (Python only; CodeQL clean)
+- Gameplay/network: BLOCKED — no dedicated server available
+
+**Notes:** The four new compat-scan rules now pre-warn on 25 previously uncaught no-space `#` usages, 40 `keys _map` usages, 36 bare `_map get _key` usages, and 2 `_arr insert [...]` usages — all of which would silently fail sqflint without a helpful message. The underlying violations in existing files remain to be fixed separately.
+
+---
+
 ## 2026-04-02 16:56 UTC — Health plan implementation batch 2: TC-P1A/TC-P1B/TC-P2B/TC-P2C
 
 **Branch/Commit:** copilot/full-health-assessment @ `1c0ecc718dc488e23b82d6c0f9a153ed735625fb` (pre-push; SHA updated post-commit)

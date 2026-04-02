@@ -64,15 +64,33 @@ RULES: list[PatternRule] = [
     ),
     PatternRule(
         name="hash-index-operator",
-        regex=re.compile(r"\s#\s"),
+        regex=re.compile(r"(?:[A-Za-z_][A-Za-z0-9_]*|\))\s*#\s*[0-9A-Za-z_\(]"),
         approved_equivalent="Use `select` with explicit bounds/type guards.",
-        notes="`#` indexing may not be parsed by older sqflint releases.",
+        notes="`#` indexing (with or without surrounding spaces) is not parsed by sqflint 0.3.2.",
     ),
     PatternRule(
         name="bare-createHashMapFromArray",
         regex=re.compile(r"(?<!\")createHashMapFromArray\b"),
         approved_equivalent="Wrap via compiled helper: `_hmCreate = compile \"params ['_a']; createHashMapFromArray _a\";` then `[args] call _hmCreate`.",
         notes="sqflint 0.3.2 cannot parse bare `createHashMapFromArray`; use compile-string wrapper.",
+    ),
+    PatternRule(
+        name="bare-keys",
+        regex=re.compile(r"\bkeys\s+_"),
+        approved_equivalent="Use `_keysFn` compile helper: `private _keysFn = compile \"params ['_m']; keys _m\";` then `[_map] call _keysFn`.",
+        notes="sqflint 0.3.2 does not recognise `keys` as an operator; a compile-string wrapper is required.",
+    ),
+    PatternRule(
+        name="hashmap-get-bare",
+        regex=re.compile(r"\b[_A-Za-z]\w*\s+get\s+[_\"A-Za-z(]"),
+        approved_equivalent="Use `_hmGet` compile helper: `private _hmGet = compile \"params ['_h','_k']; _h get _k\";` then `[_map, _key] call _hmGet`.",
+        notes="Direct HashMap `get` method (without getOrDefault) fails to parse under sqflint 0.3.2.",
+    ),
+    PatternRule(
+        name="array-insert-method",
+        regex=re.compile(r"\b[_A-Za-z]\w*\s+insert\s*\["),
+        approved_equivalent="Use a compile helper: `private _arrInsert = compile \"params ['_a','_i','_v']; _a insert [_i, _v]\";` then `[_arr, _idx, _items] call _arrInsert`.",
+        notes="Array `insert` method fails to parse under sqflint 0.3.2.",
     ),
 ]
 
@@ -86,7 +104,14 @@ def _git_changed_sqf_files() -> list[Path]:
 
 
 def _is_compat_wrapper_line(line: str, rule_name: str) -> bool:
-    if rule_name in {"trim-operator", "fileExists-operator", "bare-createHashMapFromArray"}:
+    if rule_name in {
+        "trim-operator",
+        "fileExists-operator",
+        "bare-createHashMapFromArray",
+        "bare-keys",
+        "hashmap-get-bare",
+        "array-insert-method",
+    }:
         return "compile" in line and '"' in line
     return False
 

@@ -17,6 +17,8 @@ Use this mapping before running `sqflint -e w` so compatibility issues are fixed
 | Direct `trim _value` | `trim` parsing can fail in sqflint compatibility mode. | `_trimFn` compile helper (see §2). |
 | Direct `fileExists _path` | Similar parser-compat issue as `trim`. | `_fileExistsFn` compile helper (see §2). |
 | HashMap method form `_map getOrDefault [k, d]` | Method-style parsing can fail. | `_hg` compile helper (see §3). |
+| Direct `_map get _key` | Direct HashMap `get` (without default) also fails sqflint 0.3.2 method parsing. | `_hmGet` compile helper (see §6). |
+| `_arr insert [idx, items]` | Array `insert` method fails sqflint 0.3.2 parsing. | `_hmInsert` compile helper (see §7). |
 | `isNotEqualTo` | sqflint does not recognise this operator. | `!(_a isEqualTo _b)` |
 
 ---
@@ -33,6 +35,8 @@ Every helper is declared at the top of the file (after `exitWith` guards, before
 | `_hmCreate` | `compile "params ['_a']; createHashMapFromArray _a"` | `[[key1,val1,...]] call _hmCreate` |
 | `_hmFrom` | `compile "private _pairs = _this; createHashMapFromArray _pairs"` | `[[k,v],[k,v]] call _hmFrom` |
 | `_keysFn` | `compile "params ['_m']; keys _m"` | `[_map] call _keysFn` |
+| `_hmGet` | `compile "params ['_h','_k']; _h get _k"` | `[_map, _key] call _hmGet` |
+| `_arrInsert` | `compile "params ['_a','_i','_v']; _a insert [_i, _v]"` | `[_arr, _idx, _items] call _arrInsert` |
 
 **Important notes:**
 - The parentheses around `_h` in `_hg` are **required** for correct parsing: `(_h) getOrDefault [_k, _d]`.
@@ -92,7 +96,25 @@ private _allKeys = [_myMap] call _keysFn;
 
 Source: `fn_civsubInteractHandoffSheriff.sqf`, `fn_civsubIdentityTouch.sqf`.
 
-### 6) `toUpperANSI` / `toLowerANSI` replacement
+### 6) `_map get _key` (bare HashMap get) via `_hmGet`
+
+```sqf
+private _hmGet = compile "params ['_h','_k']; _h get _k";
+private _center = [_rt, "bubbleCenter"] call _hmGet;
+```
+
+Source: `fn_airbaseRunwayLockRelease.sqf`, `fn_airbaseRunwayLockOccupy.sqf`, and many others.
+
+### 7) `_arr insert [idx, items]` via `_hmInsert`
+
+```sqf
+private _arrInsert = compile "params ['_a','_i','_v']; _a insert [_i, _v]";
+[_queue, _policyIdx, [[_fid, _kind, _detail, _routeMeta]]] call _arrInsert;
+```
+
+Source: `fn_airbaseTick.sqf`, `fn_airbaseQueueMoveToFront.sqf`.
+
+### 8) `toUpperANSI` / `toLowerANSI` replacement
 
 ```sqf
 // BEFORE (banned):
@@ -124,6 +146,8 @@ The scanner is intentionally lightweight and pattern-based. It catches known par
 | `isNotEqualTo` | `isNotEqualTo` | ✅ Covered |
 | `toUpperANSI` | `toUpperANSI` | ✅ Covered |
 | `toLowerANSI` | `toLowerANSI` | ✅ Covered |
-| `#` indexing | `hash-index-operator` | ✅ Covered |
+| `#` indexing (spaced: `arr # 0`; no-space: `arr#0`; expression: `(fn arg)#0`) | `hash-index-operator` | ✅ Covered |
 | `createHashMapFromArray` | `bare-createHashMapFromArray` | ✅ Covered |
-| `keys _map` | — | ❌ Caught by sqflint only |
+| `keys _map` | `bare-keys` | ✅ Covered |
+| `_map get _key` | `hashmap-get-bare` | ✅ Covered |
+| `_arr insert [...]` | `array-insert-method` | ✅ Covered |
