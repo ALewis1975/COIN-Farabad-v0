@@ -287,6 +287,10 @@ if (_tickS < 5) then { _tickS = 5; };
 missionNamespace setVariable ["civsub_v1_lastTick_ts", serverTime, true];
 missionNamespace setVariable ["civsub_v1_nextSave_ts", serverTime + 300, true];
 
+// Publish initial district snapshots immediately so UI panels show data on mission start
+// without waiting for the first periodic tick (which is delayed by civsub_v1_tick_s seconds).
+[] call ARC_fnc_civsubTick;
+
 [] spawn
 {
     while { isServer && { missionNamespace getVariable ["civsub_v1_enabled", false] } } do
