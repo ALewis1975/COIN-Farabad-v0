@@ -2550,3 +2550,30 @@ Contrast with the correct pattern used in the background check handler itself:
 | 1 | Compat scan — new files | manual review against SQFLINT_COMPAT_GUIDE.md | PASS | No # indexing, findIf, isNotEqualTo, bare trim, anonymous remoteExec in new code |
 | 2 | CfgFunctions audit | grep worldDistrictMarkersUpdate/worldThreatStateReact/taskengEnsureParentCaseTask config/CfgFunctions.hpp | PASS | All 3 new functions registered |
 | 3 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 dedicated server available in container |
+
+---
+
+## 2026-04-02 — Switch OPFOR/Civilian unit classes to 3CB MEI/MEE/TKC/MEC (copilot/update-opfor-unit-assets)
+
+**Branch:** copilot/update-opfor-unit-assets
+**Commit:** 52af6f6 (pre-change; changes committed after this entry)
+**Scenario:** Replace vanilla OPFOR (`O_G_*`) and vanilla civilian (`C_man_*`) classes with correct 3CB factions.
+
+### Changes made
+
+| File | Change |
+|------|--------|
+| `initServer.sqf` | Added `ARC_opforPatrolUnitClasses` with `UK3CB_MEI_O_*` + `UK3CB_MEE_O_*` OPFOR classes |
+| `initServer.sqf` | Updated `civsub_v1_civ_classPool` to add `UK3CB_MEC_C_*` alongside TKC classes |
+| `data/farabad_site_templates.sqf` | Replaced vanilla `_civPool` with 3CB TKC + MEC civilian classes |
+
+### Static Validation
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf data/farabad_site_templates.sqf` | PASS | No banned patterns found |
+| 2 | sqflint | `sqflint -e w initServer.sqf && sqflint -e w data/farabad_site_templates.sqf` | PASS | No warnings |
+| 3 | MEI_O classnames verified | cross-referenced against community mission source (https://github.com/Diego-Dominguezz/ARMA3EvasionNavegacion/blob/e3249367736ebbaf81094fcf70728331e4f5975c/Funciones/hunterKiller.sqf) | PASS | UK3CB_MEI_O_RIF_2/3/4/7, GL, AR_01, AT, MD confirmed |
+| 4 | MEE_O classnames | follow same naming convention as MEI_O; filtered at runtime if absent | PASS (inferred) | Runtime createUnit null-safety in fn_threatVirtualPoolTick.sqf:234 |
+| 5 | MEC_C classnames | follow UK3CB_TKC_C_ naming convention; filtered via isClass in fn_sitePopBuildGroup.sqf:78 | PASS (inferred) | SitePop system validates all classes against CfgVehicles before spawning |
+| 6 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime available in container |
