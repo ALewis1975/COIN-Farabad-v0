@@ -102,6 +102,51 @@ _sysFoLeadName = [_sysFoLeadName, ""] call _trimText;
 
 private _sysFoLeadPos = missionNamespace getVariable ["ARC_activeIncidentFollowOnLeadPos", []];
 
+// ── Console VM v1 opt-in (Command tab) ──────────────────────────────────────
+// When ARC_console_command_v2 is true, the incident, follow-on, and queue fields
+// above are re-sourced from the VM payload via ARC_fnc_consoleVmAdapterV1 rather
+// than from raw missionNamespace vars. Defaults to false (legacy path).
+// Set true after parity testing on a dedicated server with live traffic.
+private _cmdUseVm = missionNamespace getVariable ["ARC_console_command_v2", false];
+if (!(_cmdUseVm isEqualType true) && { !(_cmdUseVm isEqualType false) }) then { _cmdUseVm = false; };
+
+if (_cmdUseVm && { !isNil "ARC_fnc_consoleVmAdapterV1" }) then
+{
+    _taskId     = ["incident", "task_id",           ""]      call ARC_fnc_consoleVmAdapterV1;
+    _dispName   = ["incident", "display_name",       "(none)"] call ARC_fnc_consoleVmAdapterV1;
+    _typ        = ["incident", "incident_type",      ""]      call ARC_fnc_consoleVmAdapterV1;
+    _pos        = ["incident", "position",           []]      call ARC_fnc_consoleVmAdapterV1;
+    _accepted   = ["incident", "accepted",           false]   call ARC_fnc_consoleVmAdapterV1;
+    _acceptedBy = ["incident", "accepted_by_group",  ""]      call ARC_fnc_consoleVmAdapterV1;
+    _closeReady = ["incident", "close_ready",        false]   call ARC_fnc_consoleVmAdapterV1;
+    _sitrepSent = ["incident", "sitrep_sent",        false]   call ARC_fnc_consoleVmAdapterV1;
+    _holdMain   = ["incident", "hold_main",          false]   call ARC_fnc_consoleVmAdapterV1;
+    _foSummary  = ["followOn", "summary",            ""]      call ARC_fnc_consoleVmAdapterV1;
+    _sysFoLeadName = ["followOn", "lead_name",       ""]      call ARC_fnc_consoleVmAdapterV1;
+    _sysFoLeadPos  = ["followOn", "lead_pos",        []]      call ARC_fnc_consoleVmAdapterV1;
+
+    // Type-guard VM values (adapter returns default on nil/mismatch, but be defensive)
+    if (!(_taskId     isEqualType ""))                                            then { _taskId     = ""; };
+    if (!(_dispName   isEqualType ""))                                            then { _dispName   = "(none)"; };
+    if (!(_typ        isEqualType ""))                                            then { _typ        = ""; };
+    if (!(_pos        isEqualType []))                                            then { _pos        = []; };
+    if (!(_accepted   isEqualType true)  && { !(_accepted   isEqualType false) }) then { _accepted   = false; };
+    if (!(_acceptedBy isEqualType ""))                                            then { _acceptedBy = ""; };
+    if (!(_closeReady isEqualType true)  && { !(_closeReady isEqualType false) }) then { _closeReady = false; };
+    if (!(_sitrepSent isEqualType true)  && { !(_sitrepSent isEqualType false) }) then { _sitrepSent = false; };
+    if (!(_holdMain   isEqualType true)  && { !(_holdMain   isEqualType false) }) then { _holdMain   = false; };
+    if (!(_foSummary  isEqualType ""))                                            then { _foSummary  = ""; };
+    if (!(_sysFoLeadName isEqualType ""))                                         then { _sysFoLeadName = ""; };
+    if (!(_sysFoLeadPos  isEqualType []))                                         then { _sysFoLeadPos  = []; };
+
+    // Re-trim text fields sourced from VM
+    _foSummary    = [_foSummary, ""]    call _trimText;
+    _sysFoLeadName = [_sysFoLeadName, ""] call _trimText;
+
+    // Recompute grid from VM position
+    _grid = if (_pos isEqualType [] && { (count _pos) >= 2 }) then { mapGridPosition _pos } else { "????" };
+};
+
 
 // Queue stats
 private _qTail = missionNamespace getVariable ["ARC_pub_queueTail", []];
@@ -364,8 +409,16 @@ if (!isNull _ctrlDetailsGrp && { !isNull _ctrlDetails }) then
     };
 
     // Per-group order state breakdown (all groups)
-    private _ordersR = missionNamespace getVariable ["ARC_pub_orders", []];
-    if (!(_ordersR isEqualType [])) then { _ordersR = []; };
+    private _ordersR = if (_cmdUseVm && { !isNil "ARC_fnc_consoleVmAdapterV1" }) then
+    {
+        private _vmOrders = ["ops", "orders", []] call ARC_fnc_consoleVmAdapterV1;
+        if (!(_vmOrders isEqualType [])) then { _vmOrders = []; };
+        _vmOrders
+    } else {
+        private _legacyOrders = missionNamespace getVariable ["ARC_pub_orders", []];
+        if (!(_legacyOrders isEqualType [])) then { _legacyOrders = []; };
+        _legacyOrders
+    };
     private _grpOrderLines = [];
     {
         if (!(_x isEqualType []) || { (count _x) < 7 }) then { continue; };

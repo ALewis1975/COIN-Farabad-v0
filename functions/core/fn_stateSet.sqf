@@ -12,8 +12,24 @@
       - `nil` is unsupported as a stored state value. Passing nil clears/removes the key.
       - Use explicit empty substitutes when a key should stay defined (`false`, "", [], 0,
         createHashMap, etc.).
+
+    Authority:
+      - Server-only. Clients must never write shared state directly; request state changes
+        via server-side RPCs instead.
+      - ARC_stateWriteGen (SCALAR) is incremented on every successful write. Callers that
+        perform read-modify-write patterns across a sleep boundary can snapshot this counter
+        before the sleep and compare after to detect whether another writer has intervened.
+        Pattern:
+          private _genBefore = missionNamespace getVariable ["ARC_stateWriteGen", 0];
+          // ... compute new value ...
+          if ((missionNamespace getVariable ["ARC_stateWriteGen", 0]) isEqualTo _genBefore) then {
+              ["key", _newValue] call ARC_fnc_stateSet;
+          } else {
+              diag_log "[ARC][WARN] stale read detected — skipping write";
+          };
 */
 
+if (!isServer) exitWith { false };
 if !(_this isEqualType []) exitWith { false };
 if ((count _this) < 2) exitWith { false };
 
@@ -55,4 +71,11 @@ for "_i" from 0 to ((count _state) - 1) do
 	};
 
 missionNamespace setVariable ["ARC_state", _state];
+
+// Increment the write-generation counter so callers performing read-modify-write
+// patterns across sleep boundaries can detect intervening writes.
+private _gen = missionNamespace getVariable ["ARC_stateWriteGen", 0];
+if (!(_gen isEqualType 0)) then { _gen = 0; };
+missionNamespace setVariable ["ARC_stateWriteGen", (_gen + 1)];
+
 true

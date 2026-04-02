@@ -11,6 +11,76 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-02 14:30 UTC — Health plan implementation: F8/P2/P1/P4 static validation
+
+**Branch/Commit:** copilot/full-project-health-assessment @ commit: unrecoverable
+(SHA unavailable prior to report_progress commit; no local git commit exists yet for this entry.)
+
+**Scenario:** Implementation of the top items from the 2026-04-02 project health plan.
+Three SQF files modified; one new QA document created. Full static validation on all
+changed files.
+
+**Changed files:**
+- `functions/core/fn_stateSet.sqf` — P0/F8: added `isServer` authority guard and
+  `ARC_stateWriteGen` write-generation counter for read-modify-write race detection.
+- `functions/core/fn_sitrepGateEval.sqf` — P2: added structured `SITREP_GATE_EVAL`
+  breadcrumb emission at every gate decision point; added optional 5th param `_requestId`;
+  derived canonical `_taskStateBefore` string from incident flag state.
+- `functions/ui/fn_uiConsoleCommandPaint.sqf` — P1: added `ARC_console_command_v2`
+  VM opt-in flag (default `false`); incident, follow-on, and orders fields re-sourced
+  from `ARC_fnc_consoleVmAdapterV1` when flag is true; full legacy fallback retained.
+- `docs/qa/IED_Threat_Economy_Coupling_Audit.md` — P4: new static coupling audit
+  documenting the scheduling-layer vs. execution-layer architecture for IED/VBIED/Suicide
+  Bomber spawns and enumerating 5 open findings (F1–F5) including critical finding F5:
+  `threat_v0_attack_budget.spent_today` is never incremented in current code.
+
+**Commands run:**
+```bash
+pip install sqflint ripgrep
+python3 scripts/dev/sqflint_compat_scan.py --strict \
+    functions/core/fn_stateSet.sqf \
+    functions/core/fn_sitrepGateEval.sqf \
+    functions/ui/fn_uiConsoleCommandPaint.sqf
+sqflint -e w functions/core/fn_stateSet.sqf
+sqflint -e w functions/core/fn_sitrepGateEval.sqf
+sqflint -e w functions/ui/fn_uiConsoleCommandPaint.sqf
+```
+
+**Result:** PASS (static)
+
+**Notes:**
+- `sqflint_compat_scan.py --strict`: PASS — 0 banned patterns across 3 changed files.
+- `sqflint -e w` per file: exit 0 (clean) for all 3 changed files.
+- `fn_stateSet.sqf` isServer guard: prevents client-side state mutation; write-gen counter
+  is purely additive (SCALAR increment, no logic change to existing callers).
+- `fn_sitrepGateEval.sqf` breadcrumb: additive logging only — no gate logic changed;
+  existing callers (fn_clientCanSendSitrep, fn_tocReceiveSitrep) are fully backward
+  compatible (5th param is optional with "" default). The `_emitBreadcrumb` code block
+  uses variables from the enclosing scope (`_taskId`, `_typeU`, `_taskStateBefore`,
+  `_requestId`) which are defined before the gate checks begin.
+- `fn_uiConsoleCommandPaint.sqf` VM opt-in: flag defaults to `false` — zero behavior
+  change until a server sets `ARC_console_command_v2 = true`. The VM adapter call chain
+  is identical to the Dashboard tab pattern established in the prior session.
+- IED/Threat audit (P4) — key findings:
+  - F5 (P1, OPEN): `spent_today` budget counter is never incremented; the attack budget
+    gate in `fn_threatGovernorCheck` is read-only. Fix: increment in `fn_threatSchedulerTick`
+    after a successful `fn_threatScheduleEvent` call (detailed in audit doc §6).
+  - F1 (P2, OPEN): `fn_threatScheduleEvent` is a logging stub only; spawn ticks are
+    wired separately via `fn_execTickActive`; this is confirmed-by-design but the stub
+    must either be expanded to write a threat record or the design documented formally.
+  - F2, F3 (P2, OPEN): VBIED (tier≥2) and Suicide Bomber (tier≥3) escalation-tier gates
+    exist only in the governor, not in the execution-layer spawn ticks.
+  - F4 (P2, OPEN): `fn_vbiedDrivenSpawnTick` referenced in stub comment but no call
+    found in `fn_execTickActive`.
+- **Runtime-blocked checks** (require Arma 3 dedicated server or local MP):
+  - SITREP breadcrumb: verify client and server emit matching `requestId` for same action.
+  - VM opt-in Command tab: shadow-compare `ARC_console_command_v2=true` vs `false` under
+    live incident traffic. Prerequisites: dedicated server + at least 2 players (TOC + field).
+  - F8 write-gen counter: verify stale-write detection pattern works correctly under
+    concurrent `spawn` blocks with `sleep` interleavings.
+
+---
+
 ## 2026-04-01 20:30 UTC — SitePop subsystem: compat scan + sqflint + CI static checks
 
 **Branch/Commit:** copilot/create-dynamic-spawn-template @ commit: unrecoverable
