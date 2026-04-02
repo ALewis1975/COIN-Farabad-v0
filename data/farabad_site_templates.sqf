@@ -94,9 +94,20 @@ private _staffPool = +_civPool;
 [
     // -------------------------------------------------------------------------
     // KARKANAK PRISON
-    //   Guards (TNP), prisoners (CIV unarmed), vendors (CIV), contractors (CIV)
-    //   LAMBS garrison for guards; wander/camp for civilians.
+    //   BLUFOR (TNP) guard sections: 8 named elements totalling 40 personnel.
+    //   Civilian roles: prisoners (unarmed), vendors, maintenance contractors.
+    //   LAMBS garrison for armed guards; wander/camp for civilians.
     //   Trigger at 600 m; despawn after 120 s with no player within 900 m.
+    //
+    //   BLUFOR composition (doctrinal):
+    //     hq_admin   (4)  Prison HQ / Admin Cell – commander, deputy, radio clerk, records clerk
+    //     gate_guard (8)  Main Gate / Vehicle Search – gate guards, vehicle search, visitor control, outer sally port
+    //     perimeter  (8)  Perimeter / Tower Section – wall posts, roving exterior guard, alarm response
+    //     internal_a (6)  Internal Guard Section A – cellblock security, key control, prisoner movement
+    //     internal_b (6)  Internal Guard Section B – second block / segregation / overflow guard
+    //     intake     (4)  Intake / Processing / Evidence Cell – search, booking, property, paperwork
+    //     escort     (4)  Escort / Transport Section – detainee transfer, courtroom or handoff movement
+    //     reaction   (4)  Prison Reaction / Reserve Section – riot response, breakout response, emergency reserve
     // -------------------------------------------------------------------------
     [
         "KarkanakPrison",
@@ -105,8 +116,22 @@ private _staffPool = +_civPool;
         900,
         120,
         [
-            // Guards occupy buildings and hold position (LAMBS garrison)
-            ["guard",      "west", _tnpPool,    [8,  12], "garrison", 100],
+            // Prison HQ / Admin Cell – commander, deputy, radio clerk, records clerk (4)
+            ["hq_admin",   "west", _tnpPool,    [4,  4], "camp",      40],
+            // Main Gate / Vehicle Search Section – gate guards, search, visitor control, outer sally port (8)
+            ["gate_guard", "west", _tnpPool,    [8,  8], "garrison",  70],
+            // Perimeter / Tower Section – wall posts, roving exterior guard, alarm response (8)
+            ["perimeter",  "west", _tnpPool,    [8,  8], "garrison", 100],
+            // Internal Guard Section A – cellblock security, key control, prisoner movement (6)
+            ["internal_a", "west", _tnpPool,    [6,  6], "garrison",  50],
+            // Internal Guard Section B – second block / segregation / overflow guard (6)
+            ["internal_b", "west", _tnpPool,    [6,  6], "garrison",  50],
+            // Intake / Processing / Evidence Cell – search, booking, property, paperwork (4)
+            ["intake",     "west", _tnpPool,    [4,  4], "camp",      40],
+            // Escort / Transport Section – detainee transfer, courtroom or handoff movement (4)
+            ["escort",     "west", _tnpPool,    [4,  4], "wander",    60],
+            // Prison Reaction / Reserve Section – riot response, breakout response, emergency reserve (4)
+            ["reaction",   "west", _tnpPool,    [4,  4], "camp",      50],
             // Prisoners wander the yard (tight patrol ring, unarmed)
             ["prisoner",   "civ",  _civPool,    [10, 18], "wander",    80],
             // Vendors cluster near the compound gate (LAMBS camp or loiter)
