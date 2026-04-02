@@ -25,7 +25,7 @@
 
 if (!isServer) exitWith {0};
 
-if (!missionNamespace getVariable ["ARC_worldGateEnabled", true]) exitWith {0};
+if (!(missionNamespace getVariable ["ARC_worldGateEnabled", true])) exitWith {0};
 if (missionNamespace getVariable ["ARC_worldGateInitDone", false]) exitWith {0};
 missionNamespace setVariable ["ARC_worldGateInitDone", true];
 

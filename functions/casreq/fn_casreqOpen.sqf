@@ -33,7 +33,7 @@ if (isNull _unit) exitWith
     ""
 };
 
-if (!missionNamespace getVariable ["casreq_v1_enabled", true]) exitWith
+if (!(missionNamespace getVariable ["casreq_v1_enabled", true])) exitWith
 {
     diag_log "[ARC][CASREQ] casreqOpen: subsystem disabled.";
     ""
