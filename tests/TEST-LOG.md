@@ -11,6 +11,45 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-02 18:21 UTC — Bug verification: worldGateBarrierInit line-28 !-namespace fix
+
+**Branch/Commit:** copilot/fix-world-gate-barrier-init-error-again @ `0ece4c7970009d21c4e2ae1854cef44b0a9b5b37`
+
+**Scenario:** Verify fix for RPT runtime error `Error !: Type Namespace, expected Bool` at
+`fn_worldGateBarrierInit.sqf` line 28.
+
+**Root cause:** The original expression `!missionNamespace getVariable ["ARC_worldGateEnabled", true]`
+applied the unary `!` directly to `missionNamespace` (a Namespace type), rather than to the Bool
+result of `getVariable`. SQF evaluated this as `(!missionNamespace) getVariable [...]`, which
+raised `!: Type Namespace, expected Bool`.
+
+**Fix applied (already in codebase):** Line 28 was corrected to wrap the binary call in parentheses:
+`!(missionNamespace getVariable ["ARC_worldGateEnabled", true])` so that `!` is applied to the
+Bool result, not the namespace object.
+
+**Commands run:**
+```bash
+pip install sqflint
+python3 scripts/dev/sqflint_compat_scan.py --strict functions/world/fn_worldGateBarrierInit.sqf
+sqflint -e w functions/world/fn_worldGateBarrierInit.sqf
+```
+
+**Results:**
+
+| # | Check | Files | Result |
+|---|-------|-------|--------|
+| 1 | Compat scan | fn_worldGateBarrierInit.sqf | PASS (static) |
+| 2 | sqflint lint | fn_worldGateBarrierInit.sqf | PASS (static) — one minor unused-var warning in spawn block for `_guardObj`, which is intentional infrastructure reserved for future guard-post animation; no runtime impact |
+| 3 | Line-28 fix confirmed | fn_worldGateBarrierInit.sqf:28 | PASS — `!(missionNamespace getVariable [...])` present with correct inner parens |
+
+### Deferred
+
+| # | Check | Result | Notes |
+|---|-------|--------|-------|
+| 1 | Gate barrier animation in live MP | BLOCKED | No Arma 3 runtime in container |
+
+---
+
 ## 2026-04-02 16:56 UTC — Health plan implementation batch 2: TC-P1A/TC-P1B/TC-P2B/TC-P2C
 
 **Branch/Commit:** copilot/full-health-assessment @ `1c0ecc718dc488e23b82d6c0f9a153ed735625fb` (pre-push; SHA updated post-commit)
