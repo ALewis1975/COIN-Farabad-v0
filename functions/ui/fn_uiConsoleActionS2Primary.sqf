@@ -7,6 +7,7 @@
 if (!hasInterface) exitWith {false};
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k,_d]";
 
 private _display = uiNamespace getVariable ["ARC_console_display", displayNull];
 if (isNull _display) exitWith {false};
@@ -193,38 +194,17 @@ switch (_kind) do
 
         private _pub = missionNamespace getVariable [format ["civsub_v1_district_pub_%1", _did], []];
         if (!(_pub isEqualType [])) then { _pub = []; };
-        private _hasPub = ((count _pub) > 0);
 
-
-        private _districts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
-        if (_districts isEqualType []) then { _districts = [_districts] call _hmCreate; };
-        if !(_districts isEqualType createHashMap) then { _districts = createHashMap; };
-
-        private _d = _districts getOrDefault [_did, createHashMap];
-        if (_d isEqualType []) then { _d = [_d] call _hmCreate; };
-        if !(_d isEqualType createHashMap) exitWith
+        if ((count _pub) == 0) exitWith
         {
-            if (_hasPub) then
-            {
-                ["Census", "District snapshot exists, but full district details are not available on the client yet. Re-open after the next CIVSUB tick."] call ARC_fnc_clientToast;
-            }
-            else
-            {
-                ["Census", "District not found."] call ARC_fnc_clientToast;
-            };
+            ["Census", "District snapshot not yet available. Re-open after the next CIVSUB tick."] call ARC_fnc_clientToast;
         };
 
-        private _c = _d getOrDefault ["centroid", []];
+        private _ph = [_pub] call _hmCreate;
+        private _c = [_ph, "centroid", []] call _hg;
         if !(_c isEqualType [] && { (count _c) >= 2 }) exitWith
         {
-            if (_hasPub) then
-            {
-                ["Census", "Centroid unavailable on client. Re-open after the next CIVSUB tick."] call ARC_fnc_clientToast;
-            }
-            else
-            {
-                ["Census", "No centroid for district."] call ARC_fnc_clientToast;
-            };
+            ["Census", "Centroid unavailable on client. Re-open after the next CIVSUB tick."] call ARC_fnc_clientToast;
         };
 
         openMap [true, false];
