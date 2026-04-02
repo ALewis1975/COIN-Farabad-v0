@@ -168,6 +168,28 @@ missionNamespace setVariable ["ARC_threatVirtualPoolTickS",         60,   true];
 missionNamespace setVariable ["ARC_threatVirtualPatrolRadiusM",    200,  true]; // physical group patrol radius when spawned (metres)
 missionNamespace setVariable ["ARC_threatVirtualPatrolWaypointN",  5,    true]; // waypoint count for physical group patrol task
 
+// OPFOR unit class pool — 3CB Middle Eastern Insurgents (MEI) + Extremists (MEE), OPFOR side.
+// Use _O_ (East/OPFOR) variants so faction side in CfgVehicles matches createGroup east.
+// MEI_O classnames confirmed from community mission sources; MEE_O follows same pattern.
+// Classes absent from CfgVehicles produce null on createUnit and are handled gracefully.
+missionNamespace setVariable ["ARC_opforPatrolUnitClasses", [
+    // 3CB Middle Eastern Insurgents — OPFOR (faction: UK3CB_MEI_O)
+    "UK3CB_MEI_O_RIF_2",       // Rifleman (AK variant 2)
+    "UK3CB_MEI_O_RIF_3",       // Rifleman (AK variant 3)
+    "UK3CB_MEI_O_RIF_4",       // Rifleman (AK variant 4)
+    "UK3CB_MEI_O_RIF_7",       // Rifleman (AK variant 7)
+    "UK3CB_MEI_O_GL",          // Grenadier (AK + underbarrel GL)
+    "UK3CB_MEI_O_AR_01",       // Auto-Rifleman (PKM/RPD)
+    "UK3CB_MEI_O_AT",          // Anti-Tank (RPG-7)
+    "UK3CB_MEI_O_MD",          // Combat Medic
+    // 3CB Middle Eastern Extremists — OPFOR (faction: UK3CB_MEE_O) — hardline cells
+    "UK3CB_MEE_O_RIF_1",       // Rifleman (AK variant 1)
+    "UK3CB_MEE_O_RIF_2",       // Rifleman (AK variant 2)
+    "UK3CB_MEE_O_GL",          // Grenadier
+    "UK3CB_MEE_O_AR_01",       // Auto-Rifleman
+    "UK3CB_MEE_O_MD"           // Medic
+], true];
+
 
 // ============================================================================
 // CIVSUB v1 (district influence + identity + physical civ sampling)
@@ -214,11 +236,18 @@ missionNamespace setVariable ["civsub_v1_civ_classPool_forceRebuild", true, true
 missionNamespace setVariable ["civsub_v1_civ_classPool_cached", [], true];
 missionNamespace setVariable ["civsub_v1_civ_classPool_cached_key", "", true];
 
-// Optional: hard-set deterministic 3CB Takistan Civ class pool
+// Explicit civilian class pool: 3CB Takistan (TKC) + Middle Eastern (MEC) civilians.
+// This overrides the dynamic faction-scan in fn_civsubCivBuildClassPool.
+// MEC classes are silently ignored at createUnit time if not present in the modset.
 missionNamespace setVariable ["civsub_v1_civ_classPool", [
+    // 3CB Takistan Civilians (faction: UK3CB_TKC_C)
     "UK3CB_TKC_C_CIV",
     "UK3CB_TKC_C_SPOT",
-    "UK3CB_TKC_C_WORKER"
+    "UK3CB_TKC_C_WORKER",
+    "UK3CB_TKC_C_DOC",
+    // 3CB Middle Eastern Civilians (faction: UK3CB_MEC_C)
+    "UK3CB_MEC_C_CIV",
+    "UK3CB_MEC_C_WORKER"
 ], true];
 
 // Scheduler (rumors / ambient emissions, etc.)
