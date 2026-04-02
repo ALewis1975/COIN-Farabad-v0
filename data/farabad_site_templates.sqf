@@ -63,22 +63,22 @@ private _tnaPool = [
     "B_Soldier_AR_F"
 ];
 
-// Civilian population: vanilla Arma 3 male civilian classes.
-// Extend here when 3CB Takistan civilian classnames are confirmed for this modset.
+// Civilian population: 3CB Takistan (TKC) and Middle Eastern (MEC) civilians.
+// Invalid classes are silently skipped at spawn time (fn_sitePopBuildGroup validates via CfgVehicles).
+// Vanilla Arma 3 classes are included as a final fallback for no-mod environments.
 private _civPool = [
-    "C_man_polo_1_F",
-    "C_man_polo_2_F",
-    "C_man_polo_4_F",
-    "C_man_polo_5_F",
+    // 3CB Takistan Civilians (faction: UK3CB_TKC_C) — primary Takistan population
+    "UK3CB_TKC_C_CIV",
+    "UK3CB_TKC_C_SPOT",
+    "UK3CB_TKC_C_WORKER",
+    "UK3CB_TKC_C_DOC",
+    // 3CB Middle Eastern Civilians (faction: UK3CB_MEC_C) — broader regional population
+    "UK3CB_MEC_C_CIV",
+    "UK3CB_MEC_C_WORKER",
+    // Vanilla fallback (skipped when 3CB classes are present and valid)
     "C_Man_casual_1_F",
-    "C_Man_casual_2_F",
-    "C_Man_casual_3_F",
-    "C_Man_casual_4_F",
-    "C_Man_casual_5_F",
-    "C_Man_casual_6_F",
-    "C_man_w_worker1_F",
-    "C_man_w_worker2_F",
-    "C_man_w_worker3_F"
+    "C_man_polo_1_F",
+    "C_man_w_worker1_F"
 ];
 
 // Worker / contractor subset — same pool, different behavior applied per group.
