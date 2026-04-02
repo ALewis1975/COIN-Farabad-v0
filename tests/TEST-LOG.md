@@ -2637,3 +2637,37 @@ Contrast with the correct pattern used in the background check handler itself:
 | 4 | MEE_O classnames | follow same naming convention as MEI_O; filtered at runtime if absent | PASS (inferred) | Runtime createUnit null-safety in fn_threatVirtualPoolTick.sqf:234 |
 | 5 | MEC_C classnames | follow UK3CB_TKC_C_ naming convention; filtered via isClass in fn_sitePopBuildGroup.sqf:78 | PASS (inferred) | SitePop system validates all classes against CfgVehicles before spawning |
 | 6 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime available in container |
+
+---
+
+## 2026-04-02 20:40 UTC — Bug fix: CIVSUB census centroid unavailable + population/alive showing 0
+
+**Branch/Commit:** copilot/fix-centroid-unavailability-issue @ commit pending push
+
+**Scenario:** Two reported regressions from in-game screenshot:
+1. "Centroid unavailable on client" error when clicking OPEN MAP in CIVSUB Census dialog.
+2. Population and Alive estimates showing 0 for all districts in the district list and census panel.
+
+### Root causes identified
+
+| # | Bug | Root cause | File(s) |
+|---|-----|-----------|---------|
+| 1 | Centroid unavailable | `CIV_CENSUS_DID` action reads centroid from `civsub_v1_districts` (server-only HashMap, not replicated) instead of the public snapshot `civsub_v1_district_pub_*` (replicated via `setVariable [k,v,true]`) | `fn_uiConsoleActionS2Primary.sqf:199-228` |
+| 2 | Population = 0 | `fn_civsubTick.sqf` and `fn_civsubDeltaApplyToDistrict.sqf` publish `["population", _d getOrDefault ["population", 0]]` but district stores the field as `"pop_total"` — key mismatch always returns 0 | `fn_civsubTick.sqf:42`, `fn_civsubDeltaApplyToDistrict.sqf:94` |
+| 2b | Radius = 0 | Same pattern: published as `"radius"` but stored as `"radius_m"` | `fn_civsubTick.sqf:41`, `fn_civsubDeltaApplyToDistrict.sqf:93` |
+
+### Changes made
+
+| File | Change |
+|------|--------|
+| `fn_uiConsoleActionS2Primary.sqf` | `CIV_CENSUS_DID` case: removed lookup of server-only `civsub_v1_districts`; now builds `_ph` from the replicated `_pub` snapshot and reads centroid from `_ph` |
+| `fn_civsubTick.sqf` | Changed `"radius"` → `"radius_m"` and `"population"` → `"pop_total"` in pub array |
+| `fn_civsubDeltaApplyToDistrict.sqf` | Same key name fixes as tick |
+
+### Static Validation
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict fn_civsubTick.sqf fn_civsubDeltaApplyToDistrict.sqf fn_uiConsoleActionS2Primary.sqf` | WARN (pre-existing) | All 61 warnings are pre-existing `getOrDefault` method-form debt in these files; no new patterns introduced |
+| 2 | sqflint | `sqflint -e w <each file>` | FAIL (pre-existing) | Same pre-existing `getOrDefault`/`#`/`trim`/`isNotEqualTo` errors; none introduced by this change |
+| 3 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime available in container; requires live session to verify district pub replication and pop display |

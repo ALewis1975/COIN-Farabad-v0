@@ -90,8 +90,8 @@ private _pub = [
     ["aid_events", _d getOrDefault ["aid_events", 0]],
     ["W", _d getOrDefault ["W_EFF_U", 45]],
     ["centroid", _d getOrDefault ["centroid", []]],
-    ["radius", _d getOrDefault ["radius", 0]],
-    ["population", _d getOrDefault ["population", 0]]
+    ["radius", _d getOrDefault ["radius_m", 0]],
+    ["population", _d getOrDefault ["pop_total", 0]]
 ];
 missionNamespace setVariable [format ["civsub_v1_district_pub_%1", _districtId], _pub, true];
 
