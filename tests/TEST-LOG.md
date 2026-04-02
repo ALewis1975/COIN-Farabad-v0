@@ -11,6 +11,53 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-02 21:10 UTC — Feature: KarkanakPrison hospital — TKP medics, civilian doctors, parked ambulances
+
+**Branch/Commit:** copilot/add-blufor-prison-spawn-composition @ `5a8bcddbfb21ccbdd4ed8aca91b9822da07731ed`
+
+**Scenario:** Add prison hospital population to KarkanakPrison site template:
+- `prison_medic` (3–4, BLUFOR west, `_tnpMedPool`, camp, 35 m) — TKP armed medical escort/security
+- `prison_civ_doc` (2–3, civ, `_civMedPool`, camp, 35 m) — civilian doctors/nurses (weapons stripped)
+- `prison_ambulance` (1–2, civ, `_ambVehiclePool`, parked, 60 m) — parked ambulance(s)
+
+Vehicle placement uses roadside positions from `ARC_worldBuildingSlots` cache (building index).
+Extended `fn_sitePopBuildGroup.sqf` with a `"parked"` vehicle path (`createVehicle`, roadside slots,
+group variable `ARC_sitePop_vehicles` for despawn tracking).
+Extended `fn_sitePopDespawnSite.sqf` to delete tracked vehicles alongside infantry groups.
+
+**Commands:**
+1. `python3 scripts/dev/sqflint_compat_scan.py --strict data/farabad_site_templates.sqf functions/sitepop/fn_sitePopBuildGroup.sqf functions/sitepop/fn_sitePopDespawnSite.sqf` → PASS
+2. `sqflint -e w <each file individually>` → PASS (exit 0 for all three)
+
+**Result:** `PASS` (static analysis); `BLOCKED` (dedicated server / JIP runtime — no rig available)
+
+**Notes:** Runtime validation requires hosted/dedicated MP session near Karkanak Prison (within 600 m).
+Verify hospital personnel spawn and adopt camp behavior; ambulance(s) spawn parked on roadside slots
+and are deleted cleanly on despawn. No pre-existing sqflint errors introduced.
+
+---
+
+## 2026-04-02 21:03 UTC — Feature: KarkanakPrison BLUFOR composition expanded to 8 doctrinal sections (40 personnel)
+
+**Branch/Commit:** copilot/add-blufor-prison-spawn-composition @ `efe374f8a9e1fc1137bc86024966bf48291563b1`
+
+**Scenario:** Replace single generic `guard` entry in KarkanakPrison site template with 8 distinct
+BLUFOR (TNP) sections matching doctrinal prison staffing: hq_admin(4), gate_guard(8), perimeter(8),
+internal_a(6), internal_b(6), intake(4), escort(4), reaction(4) — 40 total. Civilian roles (prisoner,
+vendor, contractor) unchanged.
+
+**Commands:**
+1. `python3 scripts/dev/sqflint_compat_scan.py --strict data/farabad_site_templates.sqf` → PASS
+2. `sqflint -e w data/farabad_site_templates.sqf` → PASS (no errors)
+
+**Result:** `PASS` (static analysis); `BLOCKED` (dedicated server / JIP runtime — no rig available)
+
+**Notes:** Runtime validation requires hosted/dedicated MP session near Karkanak Prison (within 600 m
+trigger radius). Verify all 8 BLUFOR groups spawn and adopt correct behaviors (garrison/camp/wander).
+Civilian groups should be unaffected. No schema changes — uses existing `fn_sitePopBuildGroup` format.
+
+---
+
 ## 2026-04-02 20:41 UTC — Bug fix: AO Threat Summary shows "No district data published yet" on mission start
 
 **Branch/Commit:** copilot/no-district-data-published @ `a69753c7c589d5289def09fc88612b1c1d6c2d3a`
