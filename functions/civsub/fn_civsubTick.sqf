@@ -10,6 +10,8 @@ if (!isServer) exitWith {false};
 if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {false};
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+private _hg       = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _keysFn   = compile "params ['_m']; keys _m";
 
 private _districts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
 if (!(_districts isEqualType createHashMap)) exitWith {false};
@@ -21,28 +23,28 @@ missionNamespace setVariable ["civsub_v1_lastTick_ts", serverTime, true];
 // This avoids relying on replication of nested HashMap mutations.
 {
     private _did = _x;
-    private _d = _districts getOrDefault [_did, createHashMap];
+    private _d = [_districts, _did, createHashMap] call _hg;
     if (_d isEqualType []) then { _d = [_d] call _hmCreate; };
     if !(_d isEqualType createHashMap) then { continue; };
 
     private _pub = [
-        ["G", _d getOrDefault ["G_EFF_U", 35]],
-        ["crime_db_hits", _d getOrDefault ["crime_db_hits", 0]],
-        ["detentions_initiated", _d getOrDefault ["detentions_initiated", 0]],
-        ["civ_cas_kia", _d getOrDefault ["civ_cas_kia", 0]],
+        ["G", [_d, "G_EFF_U", 35] call _hg],
+        ["crime_db_hits", [_d, "crime_db_hits", 0] call _hg],
+        ["detentions_initiated", [_d, "detentions_initiated", 0] call _hg],
+        ["civ_cas_kia", [_d, "civ_cas_kia", 0] call _hg],
         ["districtId", _did],
-        ["detentions_handed_off", _d getOrDefault ["detentions_handed_off", 0]],
-        ["R", _d getOrDefault ["R_EFF_U", 55]],
-        ["civ_cas_wia", _d getOrDefault ["civ_cas_wia", 0]],
+        ["detentions_handed_off", [_d, "detentions_handed_off", 0] call _hg],
+        ["R", [_d, "R_EFF_U", 55] call _hg],
+        ["civ_cas_wia", [_d, "civ_cas_wia", 0] call _hg],
         ["ts", serverTime],
-        ["aid_events", _d getOrDefault ["aid_events", 0]],
-        ["W", _d getOrDefault ["W_EFF_U", 45]],
-        ["centroid", _d getOrDefault ["centroid", []]],
-        ["radius", _d getOrDefault ["radius", 0]],
-        ["population", _d getOrDefault ["population", 0]]
+        ["aid_events", [_d, "aid_events", 0] call _hg],
+        ["W", [_d, "W_EFF_U", 45] call _hg],
+        ["centroid", [_d, "centroid", []] call _hg],
+        ["radius", [_d, "radius_m", 0] call _hg],
+        ["population", [_d, "pop_total", 0] call _hg]
     ];
 
     missionNamespace setVariable [format ["civsub_v1_district_pub_%1", _did], _pub, true];
-} forEach (keys _districts);
+} forEach ([_districts] call _keysFn);
 
 true

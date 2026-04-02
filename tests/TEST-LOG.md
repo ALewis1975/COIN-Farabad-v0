@@ -2619,3 +2619,31 @@ Contrast with the correct pattern used in the background check handler itself:
 | 4 | MEE_O classnames | follow same naming convention as MEI_O; filtered at runtime if absent | PASS (inferred) | Runtime createUnit null-safety in fn_threatVirtualPoolTick.sqf:234 |
 | 5 | MEC_C classnames | follow UK3CB_TKC_C_ naming convention; filtered via isClass in fn_sitePopBuildGroup.sqf:78 | PASS (inferred) | SitePop system validates all classes against CfgVehicles before spawning |
 | 6 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime available in container |
+
+---
+
+## 2026-04-02 20:46 UTC — Fix syntax errors in UI console + CIVSUB census data key mismatches (copilot/fix-syntax-error-in-ui-console)
+
+**Branch/Commit:** copilot/fix-syntax-error-in-ui-console @ a69753c (pre-change base)
+
+**Scenario:** Fix "16:41:51 Error in expression" traced to sqflint compat violations in `fn_uiConsoleActionS2Primary.sqf` and census pub snapshot key mismatches (`radius`/`population` using wrong district HashMap keys).
+
+**Issues addressed:**
+
+1. **P1 — `fn_uiConsoleActionS2Primary.sqf` sqflint compat violations:** Banned patterns (`#` indexing, direct `trim`, `isNotEqualTo`, method-form `getOrDefault`) present throughout the file. Added `_trimFn` and `_hg` compile helpers; replaced all banned patterns with approved equivalents. File now passes `sqflint -e w` and `sqflint_compat_scan.py --strict` clean.
+
+2. **P1 — `CIV_CENSUS_DID` reads centroid from server-only HashMap:** On clients, `civsub_v1_districts` is never replicated so centroid was always empty, causing "Centroid unavailable" toast. Fixed to read centroid directly from the replicated `civsub_v1_district_pub_<did>` snapshot via `_hmCreate`/`_hg` helpers.
+
+3. **P1 — Pub snapshot radius/population always 0:** `fn_civsubTick.sqf` and `fn_civsubDeltaApplyToDistrict.sqf` looked up `"radius"` and `"population"` in the district HashMap but those keys are stored as `"radius_m"` and `"pop_total"`. Fixed lookups to use the correct storage keys while keeping the published snapshot keys (`"radius"`, `"population"`) unchanged so client UI reads remain compatible.
+
+4. **P2 — Pre-existing compat violations in `fn_civsubTick.sqf` and `fn_civsubDeltaApplyToDistrict.sqf`:** Both files were already exposed to CI scan by the key-fix changes. Converted all method-form `getOrDefault` calls to `_hg` compile-helper call form; replaced `keys _districts` forEach with `_keysFn` helper; replaced `isNotEqualTo` with `!(...isEqualTo...)`.
+
+**Commands run:**
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan — all 3 changed SQF files | `python3 scripts/dev/sqflint_compat_scan.py --strict fn_uiConsoleActionS2Primary.sqf fn_civsubTick.sqf fn_civsubDeltaApplyToDistrict.sqf` | PASS | No banned patterns found |
+| 2 | sqflint — fn_uiConsoleActionS2Primary | `sqflint -e w fn_uiConsoleActionS2Primary.sqf` | PASS | Clean |
+| 3 | sqflint — fn_civsubTick | `sqflint -e w fn_civsubTick.sqf` | PASS | Clean (keys forEach → _keysFn helper) |
+| 4 | sqflint — fn_civsubDeltaApplyToDistrict | `sqflint -e w fn_civsubDeltaApplyToDistrict.sqf` | PASS | Clean |
+| 5 | Runtime: census centroid + radius/population display | N/A | BLOCKED | No Arma 3 runtime available in container |
