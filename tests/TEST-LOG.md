@@ -11,7 +11,82 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
-## 2026-04-02 14:30 UTC — Health plan implementation: F8/P2/P1/P4 static validation
+## 2026-04-02 16:56 UTC — Health plan implementation batch 2: TC-P1A/TC-P1B/TC-P2B/TC-P2C
+
+**Branch/Commit:** copilot/full-health-assessment @ `1c0ecc718dc488e23b82d6c0f9a153ed735625fb` (pre-push; SHA updated post-commit)
+
+**Scenario:** Implement the five top-priority task cards from the 2026-04-02 full project health assessment.
+TC-P2A (CIVSUB lead-emit bridge) was already fully implemented; the other four are addressed here.
+
+**Changed files:**
+- `config/CfgRemoteExec.hpp` — TC-P1A: added 11 missing `allowedTargets=2` entries for AIRBASE
+  client→server RPCs + `ARC_fnc_execSpawnConvoy` + `ARC_fnc_tocRequestAirbaseResetControlState`.
+  All 9 AIRBASE handlers already had `isServer` + `rpcValidateSender` guards; this is additive only.
+- `functions/threat/fn_threatSchedulerTick.sqf` — TC-P1B: added daily `spent_today` budget reset
+  (keyed on `floor(serverTime/86400)` epoch stored in `threat_v0_budget_last_reset_day`); added
+  `spent_today += 1` spend-down after each successful `fn_threatScheduleEvent` call. Fixes TEA-F5.
+- `functions/core/fn_stateInit.sqf` — TC-P1B: added `["threat_v0_budget_last_reset_day", -1]`
+  key so the daily reset survives server restarts correctly.
+- `functions/core/fn_incidentLoop.sqf` — TC-P2B: added auto-generate score every 30 minutes
+  (configurable via `ARC_missionScoreAutoIntervalS`).
+- `functions/ui/fn_uiConsoleHQPaint.sqf` — TC-P2B: added "Generate COIN Score Report" row in
+  ADMIN TOOLS panel; added ADMIN_SCORE details pane showing composite score (0–100), rating,
+  and age-of-last-report from `ARC_pub_missionScore` / `ARC_pub_missionScoreAt`.
+- `functions/ui/fn_uiConsoleActionHQPrimary.sqf` — TC-P2B: added `ADMIN_SCORE` case that calls
+  `[player] remoteExec ["ARC_fnc_missionScoreGenerate", 2]`.
+- `functions/core/fn_clientCanSendSitrep.sqf` — TC-P2C: cache last `reasonCode` from
+  `sitrepGateEval` into `ARC_sitrep_lastDenyReason` unit variable alongside cached bool.
+- `functions/ui/fn_uiConsoleActionSendSitrep.sqf` — TC-P2C: read cached `ARC_sitrep_lastDenyReason`
+  and display a specific human-readable denial message for each canonical reason code.
+
+**Commands run:**
+```bash
+pip install sqflint ripgrep
+python3 scripts/dev/sqflint_compat_scan.py --strict \
+    functions/threat/fn_threatSchedulerTick.sqf \
+    functions/core/fn_stateInit.sqf \
+    functions/core/fn_clientCanSendSitrep.sqf \
+    functions/core/fn_incidentLoop.sqf \
+    functions/ui/fn_uiConsoleActionSendSitrep.sqf
+sqflint -e w functions/threat/fn_threatSchedulerTick.sqf
+sqflint -e w functions/core/fn_stateInit.sqf
+sqflint -e w functions/core/fn_clientCanSendSitrep.sqf
+sqflint -e w functions/core/fn_incidentLoop.sqf
+sqflint -e w functions/ui/fn_uiConsoleActionSendSitrep.sqf
+sqflint -e w functions/ui/fn_uiConsoleActionHQPrimary.sqf
+bash tests/static/airbase_planning_mode_checks.sh
+bash tests/static/casreq_snapshot_contract_checks.sh
+```
+
+**Result:** PASS (static)
+
+**Notes:**
+- `sqflint_compat_scan.py --strict` on all new-change SQF files: PASS — 0 banned patterns introduced.
+  (Pre-existing patterns in `fn_uiConsoleHQPaint.sqf`, `fn_incidentLoop.sqf` are not introduced here.)
+- `sqflint -e w` on `fn_threatSchedulerTick.sqf`: exit 0 (clean).
+- `sqflint -e w` on `fn_clientCanSendSitrep.sqf`, `fn_uiConsoleActionSendSitrep.sqf`: exit 0.
+- `sqflint -e w` on HQ paint + HQ primary: pre-existing `#` / `isNotEqualTo` / `trim` parser
+  issues in those files (not introduced by this change); flagged for a separate Mode C PR.
+- `airbase_planning_mode_checks.sh`: 21/21 PASS (unchanged by CfgRemoteExec addition).
+- `casreq_snapshot_contract_checks.sh`: 6/6 PASS.
+- TC-P1A: CfgRemoteExec is purely additive — no SQF logic changed; mode=1 enforcement
+  now correctly allows all 9 AIRBASE ATC operations + convoy relay + airbase admin reset.
+- TC-P1B: `spent_today` now increments each time `fn_threatScheduleEvent` succeeds;
+  daily reset uses `floor(serverTime/86400)` comparison so it runs exactly once per day;
+  no changes to `fn_threatGovernorCheck` (read path is correct; only write path was missing).
+- TC-P2B: score auto-generation fires every 30 min from `fn_incidentLoop` (no additional
+  loop required — reuses the existing scheduled loop); HQ tab shows score from replicated
+  `ARC_pub_missionScore` (client-side read-only); "Generate" action is role-gated via the
+  existing HQ tab access control.
+- TC-P2C: return type of `fn_clientCanSendSitrep` remains `BOOL` (6 callers, including an
+  addAction condition string, depend on this); reason code is exposed separately via
+  `ARC_sitrep_lastDenyReason` unit variable for UI layers that need it.
+- **Runtime-blocked:** Full gameplay validation (threat budget exhaust, score card render,
+  SITREP denial hint UX) requires Arma 3 dedicated server.
+
+---
+
+
 
 **Branch/Commit:** copilot/full-project-health-assessment @ commit: unrecoverable
 (SHA unavailable prior to report_progress commit; no local git commit exists yet for this entry.)

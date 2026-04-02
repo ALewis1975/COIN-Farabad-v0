@@ -73,6 +73,13 @@ if (_nids isEqualType []) then
 private _result = [_unit, _anchors, _prox] call ARC_fnc_sitrepGateEval;
 private _ok = (_result select 0);
 
+// Cache the reason code alongside the bool so the UI can display a specific hint.
+// Callers that only need a bool continue to work unchanged; the detail is available
+// via ARC_sitrep_lastDenyReason for UI layers that want to show a specific message.
+private _reasonCode = (_result select 1);
+if (!(_reasonCode isEqualType "")) then { _reasonCode = ""; };
+_unit setVariable ["ARC_sitrep_lastDenyReason", _reasonCode];
+
 _unit setVariable ["ARC_sitrep_canSendCached", _ok];
 _ok
 

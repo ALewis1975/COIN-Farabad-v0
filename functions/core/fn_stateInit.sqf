@@ -99,6 +99,7 @@
     ["threat_v0_attack_budget",           createHashMap],
     ["threat_v0_global_cooldown_until",   -1],
     ["threat_v0_scheduler_last_ts",       -1],
+    ["threat_v0_budget_last_reset_day",   -1],
     ["threat_v0_node_store",              createHashMap],
 
     // IED v0 case files
