@@ -513,7 +513,6 @@ switch (toUpper _data) do
         private _scoreAt = missionNamespace getVariable ["ARC_pub_missionScoreAt", -1];
         if (_score isEqualType [] && { (count _score) > 0 } && { _scoreAt isEqualType 0 } && { _scoreAt > 0 }) then
         {
-            private _trimFn = compile "params ['_s']; trim _s";
             private _composite = -1;
             private _rating    = "";
             {
