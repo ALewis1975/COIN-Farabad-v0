@@ -108,6 +108,70 @@ private _p3 = +_sitePos;
 if ((count _p3) < 3) then { _p3 pushBack 0; };
 
 // ---------------------------------------------------------------------------
+// Parked-vehicle path (behavior = "parked")
+// Creates vehicles from roadside positions in the building-index cache; returns
+// a persistent group (auto-delete disabled) that carries an ARC_sitePop_vehicles
+// variable for cleanup by ARC_fnc_sitePopDespawnSite.
+// ---------------------------------------------------------------------------
+if (_behavior isEqualTo "parked") exitWith
+{
+    private _roadsideSlots = [];
+    if (_slotsData isEqualType [] && { (count _slotsData) >= 2 } && { (_slotsData select 1) isEqualType [] }) then
+    {
+        _roadsideSlots = +(_slotsData select 1);
+    };
+    if ((count _roadsideSlots) > 1 && { !isNil "BIS_fnc_arrayShuffle" }) then
+    {
+        _roadsideSlots = _roadsideSlots call BIS_fnc_arrayShuffle;
+    };
+
+    // false = do not auto-delete when empty; vehicles are tracked via variable
+    private _grp = createGroup [_side, false];
+    _grp setVariable ["ARC_sitePop_siteId", _siteId];
+    _grp setVariable ["ARC_sitePop_role",   _roleTag];
+
+    private _vehicles = [];
+    for "_i" from 1 to _count do
+    {
+        private _spawnPos = [];
+        if ((count _roadsideSlots) > 0) then
+        {
+            _spawnPos = _roadsideSlots deleteAt 0;
+        }
+        else
+        {
+            private _ang  = random 360;
+            private _dist = 5 + random _spawnR;
+            _spawnPos = [(_p3 select 0) + (sin _ang) * _dist, (_p3 select 1) + (cos _ang) * _dist, 0];
+        };
+
+        if (!(_spawnPos isEqualType []) || { (count _spawnPos) < 2 }) then
+        {
+            private _ang  = random 360;
+            private _dist = 5 + random _spawnR;
+            _spawnPos = [(_p3 select 0) + (sin _ang) * _dist, (_p3 select 1) + (cos _ang) * _dist, 0];
+        };
+
+        _spawnPos resize 3;
+
+        private _cls = selectRandom _validClasses;
+        private _veh = createVehicle [_cls, _spawnPos, [], 0, "NONE"];
+        _veh setPosATL _spawnPos;
+        _veh lock true;
+        _veh enableDynamicSimulation true;
+        _veh setVariable ["ARC_sitePop_siteId", _siteId];
+        _veh setVariable ["ARC_sitePop_role",   _roleTag];
+        _vehicles pushBack _veh;
+    };
+
+    _grp setVariable ["ARC_sitePop_vehicles", _vehicles];
+
+    diag_log format ["[ARC][SITEPOP][INFO] ARC_fnc_sitePopBuildGroup: site '%1' role '%2' — %3 vehicle(s) spawned (parked).", _siteId, _roleTag, count _vehicles];
+
+    _grp
+};
+
+// ---------------------------------------------------------------------------
 // Create group
 // ---------------------------------------------------------------------------
 private _grp = createGroup [_side, true]; // true = delete group when empty

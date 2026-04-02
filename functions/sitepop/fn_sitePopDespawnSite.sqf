@@ -40,6 +40,10 @@ if (!(_groups isEqualType [])) then { _groups = []; };
     private _g = _x;
     if (!isNull _g) then
     {
+        // Delete any parked vehicles tracked on this group (vehicle-mode groups)
+        private _gVehicles = _g getVariable ["ARC_sitePop_vehicles", []];
+        { if (!isNull _x) then { deleteVehicle _x; }; } forEach _gVehicles;
+
         private _gUnits = units _g;
         _unitCount = _unitCount + (count _gUnits);
         { if (!isNull _x) then { deleteVehicle _x; }; } forEach _gUnits;

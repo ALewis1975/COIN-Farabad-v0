@@ -51,6 +51,35 @@ private _tnpPool = [
     "B_Soldier_AR_F"
 ];
 
+// Takistan National Police — medical/escort role.
+// UK3CB_TKP_B_Medic is included speculatively; the class filter silently drops
+// it when the mod variant is absent. B_medic_F provides a vanilla fallback.
+private _tnpMedPool = [
+    "UK3CB_TKP_B_Medic",
+    "UK3CB_TKP_B_Soldier",
+    "UK3CB_TKP_B_NCO",
+    "B_medic_F",
+    "B_GEN_Soldier_F"
+];
+
+// Civilian medical personnel: doctors, nurses, paramedics.
+// UK3CB_TKC_C_DOC is the primary 3CB Takistan doctor class.
+private _civMedPool = [
+    "UK3CB_TKC_C_DOC",
+    "UK3CB_MEC_C_CIV",
+    "C_man_polo_5_F",
+    "C_Man_casual_1_F"
+];
+
+// Ambulance / medical transport vehicles.
+// UK3CB_TKC_C_S1203_Amb is the primary civilian ambulance class.
+// C_Offroad_01_red_F provides a minimal vanilla fallback.
+private _ambVehiclePool = [
+    "UK3CB_TKC_C_S1203_Amb",
+    "UK3CB_TKC_C_S1203",
+    "C_Offroad_01_red_F"
+];
+
 // Takistan National Army (3CB UK3CB_TKA_B faction, BLUFOR)
 private _tnaPool = [
     "UK3CB_TKA_B_Soldier",
@@ -95,19 +124,25 @@ private _staffPool = +_civPool;
     // -------------------------------------------------------------------------
     // KARKANAK PRISON
     //   BLUFOR (TNP) guard sections: 8 named elements totalling 40 personnel.
+    //   Prison hospital: TKP medical guards, civilian medical staff, parked
+    //   ambulances — placed using building-index (roadside) slots.
     //   Civilian roles: prisoners (unarmed), vendors, maintenance contractors.
     //   LAMBS garrison for armed guards; wander/camp for civilians.
     //   Trigger at 600 m; despawn after 120 s with no player within 900 m.
     //
     //   BLUFOR composition (doctrinal):
-    //     hq_admin   (4)  Prison HQ / Admin Cell – commander, deputy, radio clerk, records clerk
-    //     gate_guard (8)  Main Gate / Vehicle Search – gate guards, vehicle search, visitor control, outer sally port
-    //     perimeter  (8)  Perimeter / Tower Section – wall posts, roving exterior guard, alarm response
-    //     internal_a (6)  Internal Guard Section A – cellblock security, key control, prisoner movement
-    //     internal_b (6)  Internal Guard Section B – second block / segregation / overflow guard
-    //     intake     (4)  Intake / Processing / Evidence Cell – search, booking, property, paperwork
-    //     escort     (4)  Escort / Transport Section – detainee transfer, courtroom or handoff movement
-    //     reaction   (4)  Prison Reaction / Reserve Section – riot response, breakout response, emergency reserve
+    //     hq_admin      (4)  Prison HQ / Admin Cell – commander, deputy, radio clerk, records clerk
+    //     gate_guard    (8)  Main Gate / Vehicle Search – gate guards, vehicle search, visitor control, outer sally port
+    //     perimeter     (8)  Perimeter / Tower Section – wall posts, roving exterior guard, alarm response
+    //     internal_a    (6)  Internal Guard Section A – cellblock security, key control, prisoner movement
+    //     internal_b    (6)  Internal Guard Section B – second block / segregation / overflow guard
+    //     intake        (4)  Intake / Processing / Evidence Cell – search, booking, property, paperwork
+    //     escort        (4)  Escort / Transport Section – detainee transfer, courtroom or handoff movement
+    //     reaction      (4)  Prison Reaction / Reserve Section – riot response, breakout response, emergency reserve
+    //   Prison hospital:
+    //     prison_medic     (3-4)  TKP armed medical escort / security (BLUFOR)
+    //     prison_civ_doc   (2-3)  Civilian doctors / nurses (unarmed)
+    //     prison_ambulance (1-2)  Parked ambulance(s) — placed via roadside building-index slots
     // -------------------------------------------------------------------------
     [
         "KarkanakPrison",
@@ -117,27 +152,33 @@ private _staffPool = +_civPool;
         120,
         [
             // Prison HQ / Admin Cell – commander, deputy, radio clerk, records clerk (4)
-            ["hq_admin",   "west", _tnpPool,    [4,  4], "camp",      40],
+            ["hq_admin",        "west", _tnpPool,        [4,  4], "camp",      40],
             // Main Gate / Vehicle Search Section – gate guards, search, visitor control, outer sally port (8)
-            ["gate_guard", "west", _tnpPool,    [8,  8], "garrison",  70],
+            ["gate_guard",      "west", _tnpPool,        [8,  8], "garrison",  70],
             // Perimeter / Tower Section – wall posts, roving exterior guard, alarm response (8)
-            ["perimeter",  "west", _tnpPool,    [8,  8], "garrison", 100],
+            ["perimeter",       "west", _tnpPool,        [8,  8], "garrison", 100],
             // Internal Guard Section A – cellblock security, key control, prisoner movement (6)
-            ["internal_a", "west", _tnpPool,    [6,  6], "garrison",  50],
+            ["internal_a",      "west", _tnpPool,        [6,  6], "garrison",  50],
             // Internal Guard Section B – second block / segregation / overflow guard (6)
-            ["internal_b", "west", _tnpPool,    [6,  6], "garrison",  50],
+            ["internal_b",      "west", _tnpPool,        [6,  6], "garrison",  50],
             // Intake / Processing / Evidence Cell – search, booking, property, paperwork (4)
-            ["intake",     "west", _tnpPool,    [4,  4], "camp",      40],
+            ["intake",          "west", _tnpPool,        [4,  4], "camp",      40],
             // Escort / Transport Section – detainee transfer, courtroom or handoff movement (4)
-            ["escort",     "west", _tnpPool,    [4,  4], "wander",    60],
+            ["escort",          "west", _tnpPool,        [4,  4], "wander",    60],
             // Prison Reaction / Reserve Section – riot response, breakout response, emergency reserve (4)
-            ["reaction",   "west", _tnpPool,    [4,  4], "camp",      50],
+            ["reaction",        "west", _tnpPool,        [4,  4], "camp",      50],
+            // Prison hospital — TKP armed medical escort / security (3-4, BLUFOR)
+            ["prison_medic",    "west", _tnpMedPool,     [3,  4], "camp",      35],
+            // Prison hospital — civilian doctors and nurses (2-3, unarmed)
+            ["prison_civ_doc",  "civ",  _civMedPool,     [2,  3], "camp",      35],
+            // Prison hospital — parked ambulance(s) near roadside building-index slots (1-2)
+            ["prison_ambulance","civ",  _ambVehiclePool, [1,  2], "parked",    60],
             // Prisoners wander the yard (tight patrol ring, unarmed)
-            ["prisoner",   "civ",  _civPool,    [10, 18], "wander",    80],
+            ["prisoner",        "civ",  _civPool,        [10, 18], "wander",   80],
             // Vendors cluster near the compound gate (LAMBS camp or loiter)
-            ["vendor",     "civ",  _civPool,    [3,   6], "camp",      60],
+            ["vendor",          "civ",  _civPool,        [3,   6], "camp",     60],
             // Maintenance contractors move around the outer area
-            ["contractor", "civ",  _workerPool, [2,   4], "wander",   120]
+            ["contractor",      "civ",  _workerPool,     [2,   4], "wander",  120]
         ]
     ],
 
