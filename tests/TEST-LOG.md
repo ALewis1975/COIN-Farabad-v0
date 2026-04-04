@@ -2947,6 +2947,11 @@ Contrast with the correct pattern used in the background check handler itself:
 | 2 | sqflint | `sqflint -e w data/farabad_site_templates.sqf` | PASS | No warnings |
 | 3 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime in container; requires live session to confirm correct civilians spawn at all three sites |
 
+## 2026-04-04 02:53 UTC — Add plane6 (RQ-4A HORIZON) to airbase queue
+
+**Branch/Commit:** copilot/add-aircraft-to-queue @ 73def553e3f820bf0db524ce275f9ea2e38e63b6
+
+**Scenario:** Ensure all aircraft with path files are included in the Air/Tower Queue. Audit revealed `plane6` (`USAF_RQ4A`, callsign HORIZON per ORBAT) had a populated 1.1 MB path file (`data/paths/taxiPath_plane6.sqf`) but was missing from both the `_pathFiles` load list and `_assetDefs` in `fn_airbaseInit.sqf`. `OH_58D_01` is excluded because no path file exists for it.
 ---
 
 ## [2026-04-04] District display_name – B-mode feature
@@ -2960,6 +2965,7 @@ Contrast with the correct pattern used in the background check handler itself:
 
 | File | Change |
 |------|--------|
+| `fn_airbaseInit.sqf` | Added `taxiPath_plane6.sqf` to `_pathFiles`; added `FW-RQ4A-HORIZON11` entry to `_assetDefs` (crewVars=[] — unmanned) |
 | `functions/civsub/fn_civsubDistrictsCreateDefaults.sqf` | Added `_names` array (20 names); added `_hg` helper; added `["display_name", _displayName]` field to each district hashmap; fixed `_x # N` → `select`; fixed `getOrDefault` method form → `_hg` |
 | `functions/civsub/fn_civsubTick.sqf` | Added `_hg` + `_keysFn` helpers; added `["display_name", ...]` to published snapshot; fixed all `getOrDefault` method-form violations; replaced `keys _districts` with `[_districts] call _keysFn` |
 | `functions/civsub/fn_civsubDeltaApplyToDistrict.sqf` | Added `["display_name", ...]` to published snapshot; fixed `getOrDefault` method-form violations; fixed `isNotEqualTo` violation; fixed unused `_name` param in diag_log; added `_hg2` redeclaration in switch block |
@@ -2969,6 +2975,11 @@ Contrast with the correct pattern used in the background check handler itself:
 
 | # | Check | Command | Result | Notes |
 |---|-------|---------|--------|-------|
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbaseInit.sqf` | PASS | No banned patterns |
+| 2 | sqflint | `sqflint -e w functions/ambiance/fn_airbaseInit.sqf` | PASS | No warnings |
+| 3 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime in container; follow-up: verify OPS log shows `FW-RQ4A-HORIZON11` registered; crewVars=[] is intentional (RQ-4A is unmanned — no crew unit required); fn_airbasePlaneDepart exits gracefully when crewLive==0 (returns false, sets PARKED) until a pilot crew unit is added in Eden if airborne departure is desired |
+
+---
 | 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict <4 files>` | PASS | No compat patterns found |
 | 2 | sqflint | `sqflint -e w <each file>` | PASS | No warnings or errors |
 | 3 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime; requires live session to confirm district names appear on map markers |
