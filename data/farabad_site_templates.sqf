@@ -39,27 +39,23 @@
 // ---------------------------------------------------------------------------
 
 // Takistan National Police (3CB UK3CB_TKP_B faction, BLUFOR)
-// Vanilla BLUFOR classes serve as fallback when 3CB is absent.
+// Requires 3CB Takistan mod. Groups using this pool are skipped entirely
+// when none of these classes are present in CfgVehicles.
 private _tnpPool = [
     "UK3CB_TKP_B_Soldier",
     "UK3CB_TKP_B_Soldier_L",
     "UK3CB_TKP_B_Soldier_AR",
     "UK3CB_TKP_B_Soldier_GL",
-    "UK3CB_TKP_B_NCO",
-    "B_GEN_Soldier_F",
-    "B_Soldier_F",
-    "B_Soldier_AR_F"
+    "UK3CB_TKP_B_NCO"
 ];
 
 // Takistan National Police — medical/escort role.
-// UK3CB_TKP_B_Medic is included speculatively; the class filter silently drops
-// it when the mod variant is absent. B_medic_F provides a vanilla fallback.
+// Requires 3CB Takistan mod. Groups using this pool are skipped entirely
+// when none of these classes are present in CfgVehicles.
 private _tnpMedPool = [
     "UK3CB_TKP_B_Medic",
     "UK3CB_TKP_B_Soldier",
-    "UK3CB_TKP_B_NCO",
-    "B_medic_F",
-    "B_GEN_Soldier_F"
+    "UK3CB_TKP_B_NCO"
 ];
 
 // Civilian medical personnel: doctors, nurses, paramedics.

@@ -2750,3 +2750,32 @@ Contrast with the correct pattern used in the background check handler itself:
 | 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict fn_civsubTick.sqf fn_civsubDeltaApplyToDistrict.sqf fn_uiConsoleActionS2Primary.sqf` | WARN (pre-existing) | All 61 warnings are pre-existing `getOrDefault` method-form debt in these files; no new patterns introduced |
 | 2 | sqflint | `sqflint -e w <each file>` | FAIL (pre-existing) | Same pre-existing `getOrDefault`/`#`/`trim`/`isNotEqualTo` errors; none introduced by this change |
 | 3 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime available in container; requires live session to verify district pub replication and pop display |
+
+---
+
+## 2026-04-04 01:31 UTC — Bug fix: NATO fallback classes removed from Karkanak Prison unit pools
+
+**Branch/Commit:** copilot/karkanak-prison-nato-troops @ 03aea1ea493f09583d55e32236180c1e0d280f24 (pre-change; see commit after push)
+
+**Scenario:** Vanilla NATO troops (`B_Soldier_F`, `B_GEN_Soldier_F`, `B_Soldier_AR_F`, `B_medic_F`) were spawning at Karkanak Prison when the 3CB Takistan mod was absent. The `_tnpPool` and `_tnpMedPool` class arrays in `data/farabad_site_templates.sqf` included these vanilla BLUFOR classes as explicit fallbacks. Per mission design, only Takistan National Police (`UK3CB_TKP_B_*`) should staff the prison; if those classes are unavailable, the affected groups must be skipped (existing behaviour of `fn_sitePopBuildGroup` when `_validClasses` is empty).
+
+### Root cause
+
+| # | Bug | File(s) |
+|---|-----|---------|
+| 1 | `_tnpPool` listed `B_GEN_Soldier_F`, `B_Soldier_F`, `B_Soldier_AR_F` as fallbacks | `data/farabad_site_templates.sqf:49-51` |
+| 2 | `_tnpMedPool` listed `B_medic_F`, `B_GEN_Soldier_F` as fallbacks | `data/farabad_site_templates.sqf:61-62` |
+
+### Changes made
+
+| File | Change |
+|------|--------|
+| `data/farabad_site_templates.sqf` | Removed vanilla NATO fallback classes from `_tnpPool` and `_tnpMedPool`; updated comments to state groups are skipped when 3CB classes are absent |
+
+### Static Validation
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict data/farabad_site_templates.sqf` | PASS | No compat patterns found |
+| 2 | sqflint | `sqflint -e w data/farabad_site_templates.sqf` | PASS | No warnings |
+| 3 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime in container; requires live session to confirm prison groups are skipped gracefully when 3CB absent |
