@@ -90,7 +90,12 @@ if ((count _validInitClasses) < (count _unitClasses)) then {
     diag_log format ["[ARC][VPOOL][WARN] ARC_fnc_threatVirtualPoolInit: %1 class(es) missing from CfgVehicles — filtered. Valid: %2",
         (count _unitClasses) - (count _validInitClasses), _validInitClasses];
 };
-if ((count _validInitClasses) > 0) then { _unitClasses = _validInitClasses; };
+if ((count _validInitClasses) == 0) then {
+    diag_log "[ARC][VPOOL][WARN] ARC_fnc_threatVirtualPoolInit: all unit classes invalid — reverting to vanilla defaults.";
+    _unitClasses = ["O_G_Soldier_F", "O_G_Soldier_GL_F", "O_G_Soldier_AR_F", "O_G_medic_F", "O_G_Soldier_TL_F"];
+} else {
+    _unitClasses = _validInitClasses;
+};
 
 private _records    = ["threat_v0_records", []] call ARC_fnc_stateGet;
 if (!(_records isEqualType [])) then { _records = []; };

@@ -120,7 +120,12 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
             diag_log format ["[ARC][VPOOL][WARN] ARC_fnc_threatVirtualPoolTick: %1 class(es) missing from CfgVehicles — filtered. Valid: %2",
                 (count _unitClasses) - (count _validTickClasses), _validTickClasses];
         };
-        if ((count _validTickClasses) > 0) then { _unitClasses = _validTickClasses; };
+        if ((count _validTickClasses) == 0) then {
+            diag_log "[ARC][VPOOL][WARN] ARC_fnc_threatVirtualPoolTick: all unit classes invalid — reverting to vanilla defaults.";
+            _unitClasses = ["O_G_Soldier_F", "O_G_Soldier_GL_F", "O_G_Soldier_AR_F", "O_G_medic_F", "O_G_Soldier_TL_F"];
+        } else {
+            _unitClasses = _validTickClasses;
+        };
 
         // Get current alive players (server poll)
         private _alivePlayers = allPlayers select { alive _x };

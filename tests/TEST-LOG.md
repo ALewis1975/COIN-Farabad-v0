@@ -13,7 +13,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-04-04 00:42 UTC — Bug fix: ACCESS_VIOLATION crash from invalid classname in virtual pool createUnit
 
-**Branch/Commit:** copilot/fix-access-violation-issue @ 7f35d0d7f4e0b1f5993f5150bdccc7d90fa6f3a6 (pre-change base)
+**Branch/Commit:** copilot/fix-access-violation-issue @ commit pending push (see git log after merge)
 
 **Scenario:** Arma 3 dedicated server crash with `Ref to nonnetwork object ... babe_helper` immediately after `[ARC][VPOOL][INFO] vg_59_66841 spawned PHYSICAL (4 units)`. Root cause: `fn_threatVirtualPoolTick.sqf` called `createUnit` without validating classnames exist in `CfgVehicles`, and without an `isNull` guard on the returned unit object.
 
@@ -29,8 +29,8 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 | File | Change |
 |------|--------|
-| `fn_threatVirtualPoolTick.sqf` | Per-tick `isClass` filter on `_unitClasses` (logs WARN for any rejected); `isNull _u` guard in spawn loop; abort/`deleteGroup` if `count _spawnedNetIds == 0`; log reports actual unit count |
-| `fn_threatVirtualPoolInit.sqf` | Same `isClass` filter on `_unitClasses` at init time so bad classes are caught early |
+| `fn_threatVirtualPoolTick.sqf` | Per-tick `isClass` filter on `_unitClasses` (WARN + vanilla fallback if all invalid); `isNull _u` guard in spawn loop; abort/`deleteGroup` if `count _spawnedNetIds == 0`; log reports actual unit count |
+| `fn_threatVirtualPoolInit.sqf` | Same `isClass` filter at init time so bad classes are caught early; same WARN + vanilla fallback |
 
 ### Static Validation
 
@@ -39,7 +39,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict fn_threatVirtualPoolTick.sqf fn_threatVirtualPoolInit.sqf` | PASS | No banned patterns |
 | 2 | sqflint | `sqflint -e w fn_threatVirtualPoolTick.sqf` | PASS | No warnings |
 | 3 | sqflint | `sqflint -e w fn_threatVirtualPoolInit.sqf` | PASS (pre-existing warn) | `_displayName not used` at params line — pre-existing, not introduced by this change |
-| 4 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime available in container |
+| 4 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime available in container; **follow-up required**: reproduce the crash scenario (invalid mod class in `ARC_opforPatrolUnitClasses`) in a real dedicated session to confirm the WARN fires and no `babe_helper` error appears |
 
 ---
 
