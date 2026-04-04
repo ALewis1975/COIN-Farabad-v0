@@ -491,7 +491,7 @@ if ((count _initSeedQueue) == 0) then
     private _rwPool = _parkedAssets select { ([_x, "category", "FW"] call _hmGet) isEqualTo "RW" };
 
     private _seedAssets = [];
-    private _fwRemaining = + _fwPool;
+    private _fwRemaining = + _fwPool; // shallow copy so we can remove picked entries without modifying the original pool
     private _fwPicked = 0;
     while { _fwPicked < 2 && { (count _fwRemaining) > 0 } } do {
         private _pick = selectRandom _fwRemaining;
