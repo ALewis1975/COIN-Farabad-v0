@@ -46,19 +46,19 @@ private _resolveMarker = {
 private _runwayMarker = if (_opKind isEqualTo "DEP") then {
     missionNamespace getVariable ["airbase_v1_depart_runway_marker", "R-270 Outbound"]
 } else {
-    missionNamespace getVariable ["airbase_v1_arrival_runway_marker", "L-270 Inbound"]
+    missionNamespace getVariable ["airbase_v1_arrival_runway_marker", "AEON_Right_270_Outbound"]
 };
 
 private _ingressMarker = if (_opKind isEqualTo "DEP") then {
     missionNamespace getVariable ["airbase_v1_depart_taxi_ingress_marker", "T-R Ingress"]
 } else {
-    missionNamespace getVariable ["airbase_v1_arrival_taxi_ingress_marker", "T-L Ingress"]
+    missionNamespace getVariable ["airbase_v1_arrival_taxi_ingress_marker", "AEON_Taxi_Right_Ingress"]
 };
 
 private _egressMarker = if (_opKind isEqualTo "DEP") then {
     missionNamespace getVariable ["airbase_v1_depart_taxi_egress_marker", "T-R Egress"]
 } else {
-    missionNamespace getVariable ["airbase_v1_arrival_taxi_egress_marker", "T-L Egress"]
+    missionNamespace getVariable ["airbase_v1_arrival_taxi_egress_marker", "AEON_Taxi_Right_Egress"]
 };
 
 if (_opKind isEqualTo "DEP") then {
@@ -66,9 +66,9 @@ if (_opKind isEqualTo "DEP") then {
     _ingressMarker = [_ingressMarker, ["AEON_Taxi_Right_Ingress", "T-R Ingress"], "T-R Ingress"] call _resolveMarker;
     _egressMarker = [_egressMarker, ["AEON_Taxi_Right_Egress", "T-R Egress"], "T-R Egress"] call _resolveMarker;
 } else {
-    _runwayMarker = [_runwayMarker, ["L-270 Inbound"], "L-270 Inbound"] call _resolveMarker;
-    _ingressMarker = [_ingressMarker, ["T-L Ingress"], "T-L Ingress"] call _resolveMarker;
-    _egressMarker = [_egressMarker, ["T-L Egress"], "T-L Egress"] call _resolveMarker;
+    _runwayMarker = [_runwayMarker, ["AEON_Right_270_Outbound", "R-270 Outbound"], "AEON_Right_270_Outbound"] call _resolveMarker;
+    _ingressMarker = [_ingressMarker, ["AEON_Taxi_Right_Ingress", "T-R Ingress"], "AEON_Taxi_Right_Ingress"] call _resolveMarker;
+    _egressMarker = [_egressMarker, ["AEON_Taxi_Right_Egress", "T-R Egress"], "AEON_Taxi_Right_Egress"] call _resolveMarker;
 };
 
 private _connectors = missionNamespace getVariable ["airbase_v1_taxi_center_connectors", ["mkr_airbaseCenter"]];

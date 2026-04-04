@@ -297,7 +297,7 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
         private _airNid = _rec param [4, ""];
         private _veh = objectFromNetId _airNid;
         if (!isNull _veh) then {
-            private _runwayMarker = missionNamespace getVariable ["airbase_v1_arrival_runway_marker", "L-270 Inbound"];
+            private _runwayMarker = missionNamespace getVariable ["airbase_v1_arrival_runway_marker", "AEON_Right_270_Outbound"];
             private _runwayPos = getMarkerPos _runwayMarker;
             if ((_runwayPos select 0) != 0 || {(_runwayPos select 1) != 0}) then {
                 _distM = _veh distance2D _runwayPos;
