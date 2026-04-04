@@ -3145,6 +3145,82 @@ Contrast with the correct pattern used in the background check handler itself:
 
 ---
 
+## [2026-04-04] RPT Debug Audit — `serverRpts/Arma3_x64_2026-04-04_13-29-59.rpt`
+
+**Branch:** copilot/debug-audit-arma3-log
+**Commit:** 1a100cb
+**Mode:** A (Bug analysis / audit)
+**Session window:** 13:34:35 → 13:55:20 (~20 min)
+**Build:** `COIN_Farabad_v0.Farabad-20260217-0001`
+**Player:** MAJ.Lewis.A (UID: 76561198027320796), no JIP
+**Mods absent this session (confirmed from logs):** 3CB TKP (Takistan Police), LAMBS Danger
+
+---
+
+### Findings Summary
+
+| # | Sev | Subsystem | Finding | Occ | Action |
+|---|-----|-----------|---------|-----|--------|
+| F1 | P1 | SITEPOP / PRISON | `prison_holding_area` marker `type=""` → `getMarkerType` returns `""` → treated as missing; prisoner_holding group spawns at site centre instead of holding yard | 1 | Fix marker type in Eden to `Empty` OR change predicate to `markerExists` in `fn_sitePopBuildGroup.sqf:70` |
+| F2 | P1 | THREAT / VPOOL | `UK3CB_MEE_O_AR_01` absent from CfgVehicles (3CB version mismatch); MEE Auto-Rifleman never spawns; 18 redundant WARN/tick | 18 | Remove from `initServer.sqf:189` or verify 3CB classname |
+| F3 | P1 | SITEPOP / PRISON | All 11 KarkanakPrison armed-guard roles skipped — `_tnpPool` classes (`UK3CB_TKP_B_*`) not in CfgVehicles; 3CB TKP mod not loaded. Prison has zero guards | 11 | Add 3CB TKP mod to server load list OR add fallback pool in `farabad_site_templates.sqf` |
+| F4 | P1 | AIRBASE | `RW-UH60M-01` disabled at init — `taxiPathData_UH_60M_01` variable is empty array (file is a placeholder stub). Asset absent from departure queue all session | 1 | Record UH-60M taxi path in-game with `BIS_fnc_unitCapture` and populate `data/paths/taxiPath_UH_60M_01.sqf` |
+| F5 | P1 | AIRBASE | Ambient inbound FLT-0005 blocked: `MISSING_ROUTE_MARKERS` — ambient inbound route markers not found; ambient arrival traffic generator non-functional | 1 | Define required ambient-inbound route markers in Eden for AIRBASE ambient arrival routes |
+| F6 | P1 | SITEPOP | `lambs_danger_fnc_camp` not found — camp AI groups (prisoner_holding, vendor) use vanilla loiter waypoints instead of LAMBS reactive AI | 2 | Add LAMBS Danger mod, or document as intentional optional dependency |
+| F7 | P1 | SITEPOP / Loadouts | `HELMET_CITIZEN` classname not found — UK3CB civilian units attempt to equip this item; silently dropped. Source: UK3CB mod internal loadout, not mission scripts | 2 | Report to 3CB / verify correct classname in installed 3CB version |
+| F8 | P1 | SITEPOP / Loadouts | `G_Squares` with embedded UTF-8 BOM (`\xEF\xBB\xBF` between `G_S` and `quares`) — permanently invalid classname. Confirmed via hex dump of RPT. Source is a data file saved with BOM encoding | 2 | Identify source file and remove BOM; save as UTF-8 without BOM |
+| F9 | P2 | POLICE / Lightbar | `Patrol_07`, `Patrol_08`, `Patrol_09` resolve to `objNull` — vehicles not in mission.sqm or variable names changed. Only `Patrol_01` resolves | 3 | Place vehicles in Eden with correct variable names OR remove from `ARC_lightbarStartupServer.sqf` |
+| F10 | P2 | Mod / MKY Surroundings | `mky_surr_handle` SCRIPT-type variable triggers slow generic CBA serialization — 324 occurrences. Third-party mod issue | 324 | Report to MKY Surroundings author; consider removing mod if non-essential |
+| F11 | P2 | CBA / ACE compat | `BIS_fnc_holdActionAdd`/`Remove` do not exist at PreInit — ACE3 replaces them; cosmetic noise only | 3 | No action; mod version alignment if persistent |
+| F12 | P2 | Engine / Spawn | `Setting invalid pitch 0.0000` for 4 BLUFOR units (B Delta 3-3:1, B Charlie 1-4:1, B Charlie 1-5:1, B Delta 3-4:1) — cosmetic voice pitch | 4 | Add guard or explicit `setPitch` for affected placed units |
+| F13 | P2 | USAF Mod | `USAF_C130J` turret body/gun not found in model — mod config/model version mismatch; 4 errors at load | 4 | Update USAF Mod |
+| F14 | P2 | FIR AWC Mod | Pylon weapon creation failures for `FIR_F16C_Fueltank_P_1rnd_M`, `FIR_F16C_center_Fueltank_P_1rnd_M`, `FIR_Empty_P_1rnd_M` — FIR AWC config error | 24 | Update FIR AWC mod |
+| F15 | P2 | BABE Mod | `Ref to nonnetwork object babe_helper` — expected BABE AI mod behaviour, not a bug | 468 | No action; known noise |
+| F16 | P2 | Terrain / AI | `No more slot to add connection` at grid 046054 / 051057 — terrain road network too dense at 2 nodes; AI pathfinding degraded there | 2 | Not actionable from mission; report to terrain author |
+
+---
+
+### AIRBASE Session Telemetry
+
+| FLT | Asset | Queued | Departed | Runway OCCUPIED | Completed | Notes |
+|-----|-------|--------|----------|-----------------|-----------|-------|
+| FLT-0004 | RW-AH64D-01 | t=41s | t=42s | t=42→t=897s (855s) | t=897s | Runway held for full 14-min sortie |
+| FLT-0003 | FW-KC135-SHELL101 | t=41s | t=900s | t=900s→ | still active at t=1010s | Selected after AH-64D runway released |
+| FLT-0001 | FW-RQ4A-HORIZON11 | t=41s | **NEVER** | — | — | Runway contention + session end; not a bug |
+| FLT-0002 | FW-EC130-SNITCH11 | t=41s | **NEVER** | — | — | Same; single-runway bottleneck |
+| FLT-0005 | (ambient inbound) | auto | BLOCKED | — | — | MISSING_ROUTE_MARKERS (F5) |
+| RW-UH60M-01 | — | — | — | — | DISABLED | Empty taxi path file (F4) |
+
+**Observation:** 900s departure cooldown + 14-min AH-64D sortie leaves insufficient runway time for all seeded departures in a 20-min session. Not a bug, but a mission design timing constraint.
+
+---
+
+### Security Posture
+
+**PASS** — No `[SEC]` or `[ARC][SEC]` security violation log lines found. No remoteExec sender-owner mismatch, no client-side authoritative state mutation, no authority violations.
+
+---
+
+### Validation Results
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | RPT read + parse | `grep` + `python3` hex analysis | PASS | Full 11,775-line file analyzed |
+| 2 | Source cross-reference | View `fn_sitePopBuildGroup.sqf:70`, `initServer.sqf:189`, `taxiPath_UH_60M_01.sqf`, `fn_airbaseTick.sqf:640-680` | PASS | All findings verified against source |
+| 3 | Security audit | Full `[SEC]` grep | PASS — CLEAN | Zero security violations |
+| 4 | Dedicated-server runtime | N/A | BLOCKED | This IS the dedicated server run; fixes require follow-up session |
+
+---
+
+### Top-Priority Actions Before Next Session
+
+1. **[P1 — Critical]** Add 3CB TKP mod to server OR add classname fallback in `farabad_site_templates.sqf`. KarkanakPrison has zero armed guards.
+2. **[P1 — Data corruption]** Hunt and fix `G_Squares` BOM — check all loadout `.sqf`/`.hpp` files for `\xEF\xBB\xBF` encoding; save as UTF-8 without BOM.
+3. **[P1 — Config]** Record and populate `taxiPath_UH_60M_01` via in-game `BIS_fnc_unitCapture`. File is placeholder stub.
+4. **[P1 — Bug]** Fix `prison_holding_area` marker type in Eden (`""` → `Empty`) **OR** change `fn_sitePopBuildGroup.sqf:70` predicate to `markerExists`.
+5. **[P1 — Config]** Remove `UK3CB_MEE_O_AR_01` from `initServer.sqf:189` or confirm correct 3CB classname to silence 18 VPOOL WARNs/session.
+6. **[P1 — Missing markers]** Define ambient-inbound route markers in Eden for AIRBASE ambient arrival (MISSING_ROUTE_MARKERS for FLT-0005).
+7. **[P2 — Eden]** Place `Patrol_07`, `Patrol_08`, `Patrol_09` in mission or remove from `ARC_lightbarStartupServer.sqf`.
 ## [2026-04-04] Prison / UAV / CivTraffic bug-fix session — Mode A
 
 **Branch:** copilot/test-prisoner-system-performance
