@@ -3267,24 +3267,33 @@ Contrast with the correct pattern used in the background check handler itself:
 - Confirm no civ vehicles spawn inside 250 m of `prison_central_guard_tower` (requires live session)
 
 ---
-## 2026-04-04 — branch: copilot/ensure-collision-avoidance-vehicles
 
-### Scope
-- `functions/civsub/fn_civsubTrafficPickRoadsidePos.sqf`
-- `functions/sitepop/fn_sitePopBuildGroup.sqf`
+## 2026-04-04 19:01 UTC — Fix: remove vanilla BLUFOR fallbacks from TNP/TNA class pools
 
-### Changes
-1. **CIVTRAF roadside picker return bug** — for-loop line 123 evaluated `[_pos, _dir]` as a discarded expression; `[]` at line 126 was always the function return. Now uses `break` + pre-declared `_foundPos`/`_foundDir` result vars, consistent with SpawnParked pattern.
-2. **SitePop vehicle collision check** — added `nearestObjects [_spawnPos, ["LandVehicle"], 6]` guard before `createVehicle`; `continue` skips already-occupied slots.
+**Branch/Commit:** copilot/force-correct-group-spawn @ (see git log)
 
-### Tests Run
-| Check | Command | Result |
-|---|---|---|
-| sqflint compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict <files>` | PASS |
-| sqflint lint | `sqflint -e w <files>` | BLOCKED (sqflint not installed in CI env) |
-| Gameplay / MP | local hosted MP | BLOCKED (requires game runtime) |
-| JIP / dedicated | dedicated server run | BLOCKED (no dedicated rig) |
+**Scenario:** NATO / Gendarmerie units (`B_Soldier_F`, `B_Soldier_AR_F`, `B_GEN_Soldier_F`, `B_Medic_F`)
+were spawning at KarkanakPrison and PresidentialPalace as fallbacks when UK3CB mod classes were
+absent from CfgVehicles. Fix: removed all vanilla BLUFOR fallback entries from `_tnpPool`,
+`_tnpMedPool`, and `_tnaPool` so groups gracefully skip (return grpNull) rather than spawn
+wrong-faction units.
 
-### Risk Notes
-- CIVTRAF picker fix: moving traffic should now spawn (was silently discarding all valid positions). Parked traffic fallback path (`findEmptyPosition`) will now be used less — primary roadside picker succeeds. Net effect: more and better-positioned parked vehicles, moving vehicles now appear.
-- SitePop collision check: vehicle count at a site may be 1–2 fewer if slots overlap pre-existing objects at spawn time. This is safe; the group still forms correctly with fewer vehicles.
+### Files changed
+
+| File | Change |
+|------|--------|
+| `data/farabad_site_templates.sqf` | Removed `B_Soldier_F`, `B_Soldier_AR_F`, `B_GEN_Soldier_F` from `_tnpPool`; removed `B_Medic_F`, `B_Soldier_F` from `_tnpMedPool`; removed `B_GEN_Soldier_F`, `B_Soldier_F`, `B_Soldier_AR_F` from `_tnaPool`. Updated comments to document no-fallback policy. |
+
+### Validation
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Static review | Code inspection | PASS | Vanilla `B_*_F` classes confirmed removed from all three pools; 3CB UK3CB_TKP_B_* / UK3CB_TKA_B_* classes retained |
+| 2 | sqflint / compat scan | N/A | BLOCKED | Not installed in CI container |
+| 3 | Live session | N/A | BLOCKED | No Arma 3 runtime in container |
+
+### Deferred Checks
+
+- Confirm TNP (`UK3CB_TKP_B_*`) guards and no NATO/Gendarmerie units spawn at KarkanakPrison (requires live session with 3CB loaded)
+- Confirm TNA (`UK3CB_TKA_B_*`) guards spawn at PresidentialPalace (requires live session)
+- Confirm prison guard groups silently skip (no spawn, WARN in RPT) when 3CB TKP mod is absent (requires session without 3CB)
