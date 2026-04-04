@@ -11,7 +11,41 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
-## 2026-04-04 00:55 UTC — Bug fix: AIR/TOWER flight loop terminates after 3 flights; seed queue not randomized
+## 2026-04-04 02:16 UTC — Bug fix: AIR/TOWER seed randomization (shuffle) + scheduling throughput + reset re-seed
+
+**Branch/Commit:** copilot/fix-air-tower-system-issues @ commit: unrecoverable (pre-push; see git log after merge)
+
+**Scenario:** Two follow-on AIR/TOWER issues after PR #414: (1) seed queue departure order is still deterministic when pool is small (FW always before RW; with only 1 qualified FW asset, queue never changes), and (2) after the seed flights complete the system runs very few additional flights because default per-hour scheduling rates are too low (~1 departure per 1.8 h) and admin reset (`fn_airbaseAdminResetControlState`) does not re-enable the forced-first-departure path.
+
+### Root causes
+
+| # | Bug | Root cause | File(s) |
+|---|-----|-----------|---------|
+| 1 | Seed departure order deterministic (P1) | `_seedAssets` built as `[FW1, FW2, RW]` with no post-selection shuffle; RW is always last; with 1 qualified FW the queue never changes | `fn_airbaseInit.sqf:493-507` |
+| 2 | Flights stop after seed (P1) | Default per-hour departure rates `_pDepartFW=0.25`, `_pDepartRW=0.30` → combined 0.55/h = ~1 departure per 1.8 h; in a 3-h session at most 1 post-seed departure on average | `fn_airbaseTick.sqf:621-624` |
+| 3 | Admin reset leaves queue empty forever (P1) | `fn_airbaseAdminResetControlState` clears the queue but leaves `_rt.firstDepartureDone=true` and `lastDepartTs=recent`, so neither the forced-first-departure path nor probability rolls produce a timely departure | `fn_airbaseAdminResetControlState.sqf:41-49` |
+
+### Changes made
+
+| File | Change |
+|------|--------|
+| `fn_airbaseInit.sqf` | Raised FW seed cap 2→3; added Fisher-Yates shuffle of `_seedAssets` before queue build so departure order varies each session; updated seed block comment |
+| `fn_airbaseTick.sqf` | Raised default per-hour rates: FW dep 0.25→1.5, RW dep 0.30→1.0, FW arr 0.40→1.5, RW arr 0.45→1.0 (all remain overrideable via missionNamespace); added explanatory comment |
+| `fn_airbaseAdminResetControlState.sqf` | After queue clear, reset `_rt.firstDepartureDone=false`, `lastDepartTs=-1e9`, `lastArriveTs=-1e9` so tick forces a departure on next eligible tick |
+
+### Static Validation
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict fn_airbaseInit.sqf fn_airbaseAdminResetControlState.sqf fn_airbaseTick.sqf` | PASS (new code) | 22 pre-existing warnings in fn_airbaseTick.sqf (#, isNotEqualTo) — not introduced by this change |
+| 2 | sqflint | `sqflint -e w fn_airbaseInit.sqf` | PASS | No new warnings |
+| 3 | sqflint | `sqflint -e w fn_airbaseAdminResetControlState.sqf` | 1 pre-existing error (L80 `_rt get "bubbleCenter"`) | Not introduced by this change |
+| 4 | sqflint | `sqflint -e w fn_airbaseTick.sqf` | Multiple pre-existing errors (`#`, `isNotEqualTo`) | Not introduced by this change |
+| 5 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime in container; follow-up: run mission, confirm OPS log shows varied seed FIDs across restarts and continues scheduling departures/arrivals beyond the 3-seed window; verify admin reset triggers timely first departure |
+
+---
+
+
 
 **Branch/Commit:** copilot/fix-air-tower-flight-queue-issues @ commit: unrecoverable (pre-push; see git log after merge)
 

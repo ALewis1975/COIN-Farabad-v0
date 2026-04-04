@@ -618,10 +618,13 @@ missionNamespace setVariable ["airbase_v1_firstDepartureDelay_s", _firstDelay, t
 private _forceFirstDeparture = (_sinceStart >= _firstDelay) && { !([_rt, "firstDepartureDone", false] call _fnHmGet) };
 
 // Per-tick rolls
-private _pDepartFW = missionNamespace getVariable ["airbase_v1_p_depart_hour_fw", 0.25];
-private _pArriveFW = missionNamespace getVariable ["airbase_v1_p_arrive_hour_fw", 0.40];
-private _pDepartRW = missionNamespace getVariable ["airbase_v1_p_depart_hour_rw", 0.30];
-private _pArriveRW = missionNamespace getVariable ["airbase_v1_p_arrive_hour_rw", 0.45];
+// Defaults raised from 0.25/0.30/0.40/0.45 per-hour to produce roughly 1 departure
+// and 1 arrival per hour so the airbase remains active after the seed flights complete.
+// All four rates are still configurable via missionNamespace variables set before init.
+private _pDepartFW = missionNamespace getVariable ["airbase_v1_p_depart_hour_fw", 1.5];
+private _pArriveFW = missionNamespace getVariable ["airbase_v1_p_arrive_hour_fw", 1.5];
+private _pDepartRW = missionNamespace getVariable ["airbase_v1_p_depart_hour_rw", 1.0];
+private _pArriveRW = missionNamespace getVariable ["airbase_v1_p_arrive_hour_rw", 1.0];
 
 private _pTickDepFW = (_pDepartFW / 3600) * _tickS;
 private _pTickDepRW = (_pDepartRW / 3600) * _tickS;

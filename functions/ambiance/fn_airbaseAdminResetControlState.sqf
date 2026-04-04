@@ -48,6 +48,19 @@ private _historyBefore = count _history;
     ["arrival", "AUTO", "", "", -1]
 ]] call ARC_fnc_stateSet;
 
+// Reset runtime scheduling state so the tick triggers a forced re-seed:
+//   - firstDepartureDone = false: re-enables the forced-first-departure path
+//   - lastDepartTs / lastArriveTs = -1e9: departure and arrival cooldowns are
+//     immediately satisfied, so the next probability roll that succeeds will
+//     schedule a flight without any extra wait.
+private _rtReset = missionNamespace getVariable ["airbase_v1_rt", createHashMap];
+if (_rtReset isEqualType createHashMap) then {
+    _rtReset set ["firstDepartureDone", false];
+    _rtReset set ["lastDepartTs", -1e9];
+    _rtReset set ["lastArriveTs", -1e9];
+    missionNamespace setVariable ["airbase_v1_rt", _rtReset, true];
+};
+
 if (!_preserveHistory) then {
     ["airbase_v1_clearanceHistory", []] call ARC_fnc_stateSet;
     ["airbase_v1_events", []] call ARC_fnc_stateSet;
