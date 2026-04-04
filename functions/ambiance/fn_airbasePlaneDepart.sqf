@@ -82,15 +82,20 @@ private _fnSeatScan = {
     params ["_vehL"];
     private _hasCommander = false;
     private _hasGunner = false;
+    private _gunnerTurretPaths = [];
 
     private _fc = fullCrew [_vehL, "", true];
     {
-        private _role = _x param [1, ""]; // role string
+        private _role = _x param [1, ""];
+        private _tp   = _x param [3, []];
         if (_role isEqualTo "commander") then { _hasCommander = true; };
-        if (_role isEqualTo "gunner") then { _hasGunner = true; };
+        if (_role isEqualTo "gunner") then {
+            _hasGunner = true;
+            _gunnerTurretPaths pushBack _tp;
+        };
     } forEach _fc;
 
-    [_hasCommander, _hasGunner]
+    [_hasCommander, _hasGunner, _gunnerTurretPaths]
 };
 
 private _fnAbortToIdle = {
@@ -157,25 +162,35 @@ _veh lock false;
 } forEach _crewLive;
 
 private _scan = [_veh] call _fnSeatScan;
-_scan params ["_hasCommander", "_hasGunner"]; 
+_scan params ["_hasCommander", "_hasGunner", "_gunnerTurretPaths"];
 
 // Assign seats
 _pilot assignAsDriver _veh;
 [_pilot] orderGetIn true;
 
+// Track whether index-1 consumed the first gunner turret path (so index-2+ offset correctly).
+private _u2UsedGunner = false;
 if ((count _crewLive) > 1) then {
-    private _u2 = _crewLive # 1;
+    private _u2 = _crewLive select 1;
     if (_isHeli && {_hasCommander}) then {
         _u2 assignAsCommander _veh;
     } else {
-        if (_hasGunner) then { _u2 assignAsGunner _veh; } else { _u2 assignAsCargo _veh; };
+        if (_hasGunner) then { _u2 assignAsGunner _veh; _u2UsedGunner = true; } else { _u2 assignAsCargo _veh; };
     };
     [_u2] orderGetIn true;
 };
 
+// Crew beyond index 1 go to door-gun turret seats where available, else cargo.
+// If index 1 already took the first gunner turret path, start from path index 1.
+private _turretStartIdx = if (_u2UsedGunner) then { 1 } else { 0 };
 for "_i" from 2 to ((count _crewLive) - 1) do {
-    private _ux = _crewLive # _i;
-    _ux assignAsCargo _veh;
+    private _ux = _crewLive select _i;
+    private _tpIdx = (_i - 2) + _turretStartIdx;
+    if (_tpIdx < (count _gunnerTurretPaths)) then {
+        _ux assignAsTurret [_veh, _gunnerTurretPaths select _tpIdx];
+    } else {
+        _ux assignAsCargo _veh;
+    };
     [_ux] orderGetIn true;
 };
 

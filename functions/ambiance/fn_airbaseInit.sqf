@@ -289,8 +289,8 @@ private _assetDefs = [
 
     // Rotary-wing (treat the same as fixed-wing for scheduling + return arrivals)
     ["RW-AH64D-01",       "RW", "AH_64D_01", ["AH_64D_01D","AH_64D_01G"], "taxiPathData_AH_64D_01", "data\paths\taxiPath_AH_64D_01.sqf", false, "", "", "", "", ""],
-    ["RW-CH47F-01",       "RW", "CH_47F_01", ["CH_47F_01D","CH_47F_01G"], "taxiPathData_CH_47F_01", "data\paths\taxiPath_CH_47F_01.sqf", false, "", "", "", "", ""],
-    ["RW-UH60M-01",       "RW", "UH_60M_01", ["UH_60M_01D","UH_60M_01G"], "taxiPathData_UH_60M_01", "data\paths\taxiPath_UH_60M_01.sqf", false, "", "", "", "", ""]
+    ["RW-CH47F-01",       "RW", "CH_47F_01", ["CH_47F_01D","CH_47F_01CP","CH_47F_01CC","CH_47F_01DD"], "taxiPathData_CH_47F_01", "data\paths\taxiPath_CH_47F_01.sqf", false, "", "", "", "", ""],
+    ["RW-UH60M-01",       "RW", "UH_60M_01", ["UH_60M_01D","UH_60M_01CP","UH_60M_01CC","UH_60M_01DG"], "taxiPathData_UH_60M_01", "data\paths\taxiPath_UH_60M_01.sqf", false, "", "", "", "", ""]
 ];
 
 private _assets = [];

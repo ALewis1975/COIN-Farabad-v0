@@ -44,6 +44,37 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-04 02:45 UTC — Bug fix: CH-47F and UH-60M crew not boarding (missing Eden variable names) + door-gun seat assignment
+
+**Branch/Commit:** copilot/fix-ch47-takeoff-banking-issue @ 4ed1aa529e499b277634c9698291c7331af2dbb7
+
+**Scenario:** Crew Chief and Door Gunner on CH-47F (and identically structured UH-60M) were not boarding before taxi because their units had no variable names set in the Eden Editor — `crewResolved` pushed `objNull` for them, `_crewLive` filtered them out, and boarding ran with pilot only. User assigned names in Eden. Additionally, even with names, indices 2+ were sent to `assignAsCargo` rather than the correct left/right door-gun turret seats.
+
+### Root causes
+
+| # | Bug | Root cause | File(s) |
+|---|-----|-----------|---------|
+| 1 | Crew Chief + Door Gunner never board (P1) | `fn_airbaseInit.sqf` crewVars for CH-47F listed `["CH_47F_01D","CH_47F_01G"]` and for UH-60M listed `["UH_60M_01D","UH_60M_01G"]` — the Gunner vars (`CH_47F_01G`, `UH_60M_01G`) were not set in Eden, so they resolved to `objNull` and were excluded from `_crewLive` | `fn_airbaseInit.sqf:292-293` |
+| 2 | Door-gun crew assigned to cargo instead of turret seats (P1) | `fn_airbasePlaneDepart.sqf` boarding loop assigned all indices ≥ 2 via `assignAsCargo`. Door gunners must use `assignAsTurret` with the correct turret path | `fn_airbasePlaneDepart.sqf:176-180` |
+
+### Changes made
+
+| File | Change |
+|------|--------|
+| `fn_airbaseInit.sqf` | CH-47F crewVars updated to `["CH_47F_01D","CH_47F_01CP","CH_47F_01CC","CH_47F_01DD"]`; UH-60M crewVars updated to `["UH_60M_01D","UH_60M_01CP","UH_60M_01CC","UH_60M_01DG"]` |
+| `fn_airbasePlaneDepart.sqf` | `_fnSeatScan` extended to collect `_gunnerTurretPaths` (ordered turret paths for all "gunner" role seats via `fullCrew`); index-1 boarding now tracks `_u2UsedGunner`; index 2+ loop uses `assignAsTurret [_veh, _gunnerTurretPaths select _tpIdx]` with cargo fallback; replaced banned `# 1` / `# _i` with `select` in modified blocks |
+
+### Static Validation
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf functions/ambiance/fn_airbaseInit.sqf` | PASS (new code) | 22 pre-existing violations in untouched lines; zero new violations |
+| 2 | sqflint | `sqflint -e w functions/ambiance/fn_airbasePlaneDepart.sqf` | PASS (new code) | All errors pre-existing `#`/`getOrDefault`/`isNotEqualTo` in untouched lines |
+| 3 | sqflint | `sqflint -e w functions/ambiance/fn_airbaseInit.sqf` | PASS | No errors |
+| 4 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime in container; follow-up: confirm all 4 CH-47F crew walk to helo and board (pilot→driver, co-pilot→commander, crew chief→left door gun, door gunner→right door gun); repeat for UH-60M |
+
+---
+
 ## 2026-04-04 02:25 UTC — Bug fix: CH-47 (and other multi-crew RW) banks right on takeoff and does not climb
 
 **Branch/Commit:** copilot/fix-ch47-takeoff-banking-issue @ e5a9756 (pre-change base; patch applied on top)
