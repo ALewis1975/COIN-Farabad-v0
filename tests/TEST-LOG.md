@@ -11,7 +11,55 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
-## 2026-04-04 06:09 UTC — Test coverage: add 37 new unit tests across 5 uncovered subsystems
+## 2026-04-04 15:32 UTC — Karkanak Prison / PSI Architecture (all 5 PR layers)
+
+**Branch/Commit:** copilot/update-prison-spawning-design @ 4301b18 (pre-edit; changes applied on top)
+
+**Scenario:** Full implementation of the five-layer Prison / PSI plan:
+PR1 (spatial correctness), PR2 (prison zone rebuild), PR3 (site persistence),
+PR4 (prison scheduler), PR5 (incident logic) implemented in one pass.
+
+### Files changed
+
+| File | Type | Purpose |
+|------|------|---------|
+| `functions/sitepop/fn_sitePopBuildGroup.sqf` | Modified | 7th group field (spawnAnchor); 4th param (spawnCtx); anchor resolution; anchor-local slot filtering; prisoner tag variables |
+| `functions/sitepop/fn_sitePopApplyAmbiance.sqf` | Modified | 5th param (_anchorName); anchor-local wander bypasses site-wide patrol rings |
+| `data/farabad_site_templates.sqf` | Modified | Header documents 7th group field; KarkanakPrison rebuilt as 20-group zone-aware template |
+| `data/farabad_site_profiles.sqf` | Created | Site metadata (districtId, siteType, adaptationPolicy) for KarkanakPrison / Palace / Embassy |
+| `functions/sitepop/fn_sitePopInit.sqf` | Modified | Loads farabad_site_profiles.sqf → ARC_sitePopSiteProfiles |
+| `functions/core/fn_stateInit.sqf` | Modified | Added `sitepop_v1_site_states` key |
+| `functions/sitepop/fn_sitePopStateInit.sqf` | Created | Post-stateLoad site state hydration into ARC_sitePopSiteStates |
+| `functions/sitepop/fn_sitePopGetSpawnModifiers.sqf` | Created | Policy-gated spawn context (GOV_PRISON never gets OPFOR) |
+| `functions/sitepop/fn_sitePopDespawnSite.sqf` | Modified | Captures guard casualties / role stats before cleanup; persists to ARC_state |
+| `functions/sitepop/fn_sitePopSpawnSite.sqf` | Modified | Retrieves spawnCtx from getSpawnModifiers; records visitCount |
+| `functions/core/fn_bootstrapServer.sqf` | Modified | Wires sitePopStateInit + prisonInit after stateLoad |
+| `functions/prison/fn_prisonInit.sqf` | Created | Prison overlay init; creates ARC_prisonState; spawns tick |
+| `functions/prison/fn_prisonTick.sqf` | Created | 30-second non-blocking overlay: phase + prayer transitions |
+| `functions/prison/fn_prisonEvalIncident.sqf` | Created | Disorder + breakout evaluator with tagged actor handles |
+| `config/CfgFunctions.hpp` | Modified | Registered sitePopStateInit, sitePopGetSpawnModifiers, Prison class |
+
+### Checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict <14 files>` | PASS | No banned patterns |
+| 2 | sqflint | `/home/runner/.local/bin/sqflint -e w <each file>` | PASS | Fixed `"prayer" in _str` (String-in-String) → `(_str find "prayer") >= 0` |
+| 3 | State migration validator | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios |
+| 4 | Marker index validator | `python3 scripts/dev/validate_marker_index.py` | PASS | 156 markers across all modes |
+| 5 | Runtime | N/A | BLOCKED | No Arma 3 runtime in container |
+
+### Deferred (dedicated server + JIP environment)
+
+- Eden markers (`prison_admin_offices`, `prison_entry_office`, `prison_guard_tower_1`, `prison_guard_tower_2`, `prison_central_guard_tower`, `prison_dorm_01`–`_04`, `prison_intake_01`, `prison_hospital`, `prison_holding_area`) must be placed in mission.sqm before anchor-local spawning activates; without them, groups log a WARN and fall back to site centre gracefully.
+- Spatial acceptance test: verify `prison_ambulance` vehicles spawn near hospital marker; prisoner wander stays within dorm radii.
+- Persistence acceptance test: spawn KarkanakPrison, incur casualties, despawn, restart — `guardCasualties` and `visitCount` survive restart; second spawn reflects elevated `adaptationLevel`.
+- Scheduler acceptance test: run 2+ game-hours; verify prayer windows pause wander groups without blocking despawn or respawn.
+- Incident test: set `guardCasualties` ≥ 5 via debug console; verify INCIDENT_LOCKDOWN phase; verify breakout spawns only at adaptationLevel 3; verify suppression tracking clears when all breakout group units are dead.
+
+---
+
+
 
 **Branch/Commit:** copilot/analyze-test-coverage @ cbf2d52 (pre-edit; tests added on top)
 

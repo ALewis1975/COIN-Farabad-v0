@@ -342,6 +342,10 @@
     ["casreq_v1_records", createHashMap],
     ["casreq_v1_open_index", []],
     ["casreq_v1_closed_index", []],
-    ["casreq_v1_seq", 0]
+    ["casreq_v1_seq", 0],
+
+    // SitePop v1 site state persistence (loaded post-stateLoad via ARC_fnc_sitePopStateInit)
+    // Each entry: siteId → site-state HashMap (visitCount, guardCasualties, adaptationLevel, ...)
+    ["sitepop_v1_site_states", createHashMap]
 
 ]

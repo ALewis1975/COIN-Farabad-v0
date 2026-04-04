@@ -120,7 +120,22 @@ missionNamespace setVariable ["ARC_sitePopLockout",  createHashMap];
 missionNamespace setVariable ["ARC_sitePopGroupCounter", 0];
 
 // ---------------------------------------------------------------------------
-// 5. Spawn proximity tick loop
+// 5. Load site profiles (PSI metadata: districtId, siteType, owner, policy)
+// ---------------------------------------------------------------------------
+private _profilesRaw = call compile preprocessFileLineNumbers "data\farabad_site_profiles.sqf";
+if (_profilesRaw isEqualType createHashMap) then
+{
+    missionNamespace setVariable ["ARC_sitePopSiteProfiles", _profilesRaw];
+    diag_log format ["[ARC][SITEPOP][INFO] ARC_fnc_sitePopInit: site profiles loaded (%1 site(s)).", count _profilesRaw];
+}
+else
+{
+    missionNamespace setVariable ["ARC_sitePopSiteProfiles", createHashMap];
+    diag_log "[ARC][SITEPOP][WARN] ARC_fnc_sitePopInit: farabad_site_profiles.sqf did not return a HASHMAP — profiles unavailable.";
+};
+
+// ---------------------------------------------------------------------------
+// 6. Spawn proximity tick loop
 // ---------------------------------------------------------------------------
 [] spawn ARC_fnc_sitePopTick;
 

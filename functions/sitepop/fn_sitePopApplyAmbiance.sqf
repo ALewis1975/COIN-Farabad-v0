@@ -18,8 +18,11 @@
     Params:
         0: GROUP  — the spawned group to configure
         1: STRING — behavior mode: "garrison" | "camp" | "wander"
-        2: ARRAY  — site world position [x, y, z] (ATL anchor)
+        2: ARRAY  — effective world position [x, y, z] (ATL anchor, or site centre if no anchor)
         3: NUMBER — spawn/behavior radius (meters)
+        4: STRING — (optional) spawn anchor marker name ("" = no anchor; triggers site-wide
+                    patrol ring lookup). When non-empty, the wander branch uses anchor-local
+                    random waypoints and bypasses site-wide patrol rings entirely.
 
     Returns: Nothing
 */
@@ -27,10 +30,11 @@
 if (!isServer) exitWith {};
 
 params [
-    ["_grp",      grpNull, [grpNull]],
-    ["_behavior", "wander", [""]],
-    ["_sitePos",  [],       [[]]],
-    ["_radius",   80,       [0]]
+    ["_grp",        grpNull, [grpNull]],
+    ["_behavior",   "wander", [""]],
+    ["_sitePos",    [],       [[]]],
+    ["_radius",     80,       [0]],
+    ["_anchorName", "",       [""]]
 ];
 
 if (isNull _grp) exitWith {};
@@ -100,42 +104,14 @@ switch (_behL) do
         _grp setBehaviour "SAFE";
         _grp setCombatMode "WHITE";
 
-        // Choose patrol ring variant by radius
-        private _ringVariant = 0; // 0=tight(~80 m), 1=medium(~180 m), 2=wide(~350 m)
-        if (_radius >= 150) then { _ringVariant = 1; };
-        if (_radius >= 280) then { _ringVariant = 2; };
-
-        // Look up pre-scanned ring for this site via _hg helper (avoids bare HashMap get)
-        private _siteId  = _grp getVariable ["ARC_sitePop_siteId", ""];
-        private _rings   = missionNamespace getVariable ["ARC_worldPatrolRings", createHashMap];
-        private _ringData = [_rings, _siteId, []] call _hg;
-
-        private _ringWps = [];
-        if (_ringData isEqualType [] && { (count _ringData) > _ringVariant }) then
+        if (!(_anchorName isEqualTo "")) then
         {
-            _ringWps = +(_ringData select _ringVariant);
-        };
-
-        if ((count _ringWps) > 0) then
-        {
-            {
-                private _wp = _grp addWaypoint [_x, 5];
-                _wp setWaypointType "MOVE";
-                _wp setWaypointSpeed "LIMITED";
-                _wp setWaypointBehaviour "SAFE";
-                _wp setWaypointCombatMode "WHITE";
-            } forEach _ringWps;
-
-            private _cycle = _grp addWaypoint [_p3, 5];
-            _cycle setWaypointType "CYCLE";
-        }
-        else
-        {
-            // Fallback: generate random MOVE+CYCLE waypoints
+            // Anchor-local wander: bypass site-wide patrol rings entirely.
+            // Generate random waypoints constrained to the anchor radius (_p3).
             for "_w" from 1 to 4 do
             {
                 private _ang   = random 360;
-                private _dist  = _radius * (0.4 + random 0.5);
+                private _dist  = _radius * (0.3 + random 0.6);
                 private _wpPos = [(_p3 select 0) + (sin _ang) * _dist, (_p3 select 1) + (cos _ang) * _dist, 0];
                 private _wp    = _grp addWaypoint [_wpPos, 5];
                 _wp setWaypointType "MOVE";
@@ -145,6 +121,57 @@ switch (_behL) do
             };
             private _cycle = _grp addWaypoint [_p3, 5];
             _cycle setWaypointType "CYCLE";
+        }
+        else
+        {
+            // Site-wide wander: use pre-scanned ARC_worldPatrolRings keyed by siteId.
+
+            // Choose patrol ring variant by radius
+            private _ringVariant = 0; // 0=tight(~80 m), 1=medium(~180 m), 2=wide(~350 m)
+            if (_radius >= 150) then { _ringVariant = 1; };
+            if (_radius >= 280) then { _ringVariant = 2; };
+
+            // Look up pre-scanned ring for this site via _hg helper (avoids bare HashMap get)
+            private _siteId  = _grp getVariable ["ARC_sitePop_siteId", ""];
+            private _rings   = missionNamespace getVariable ["ARC_worldPatrolRings", createHashMap];
+            private _ringData = [_rings, _siteId, []] call _hg;
+
+            private _ringWps = [];
+            if (_ringData isEqualType [] && { (count _ringData) > _ringVariant }) then
+            {
+                _ringWps = +(_ringData select _ringVariant);
+            };
+
+            if ((count _ringWps) > 0) then
+            {
+                {
+                    private _wp = _grp addWaypoint [_x, 5];
+                    _wp setWaypointType "MOVE";
+                    _wp setWaypointSpeed "LIMITED";
+                    _wp setWaypointBehaviour "SAFE";
+                    _wp setWaypointCombatMode "WHITE";
+                } forEach _ringWps;
+
+                private _cycle = _grp addWaypoint [_p3, 5];
+                _cycle setWaypointType "CYCLE";
+            }
+            else
+            {
+                // Fallback: generate random MOVE+CYCLE waypoints
+                for "_w" from 1 to 4 do
+                {
+                    private _ang   = random 360;
+                    private _dist  = _radius * (0.4 + random 0.5);
+                    private _wpPos = [(_p3 select 0) + (sin _ang) * _dist, (_p3 select 1) + (cos _ang) * _dist, 0];
+                    private _wp    = _grp addWaypoint [_wpPos, 5];
+                    _wp setWaypointType "MOVE";
+                    _wp setWaypointSpeed "LIMITED";
+                    _wp setWaypointBehaviour "SAFE";
+                    _wp setWaypointCombatMode "WHITE";
+                };
+                private _cycle = _grp addWaypoint [_p3, 5];
+                _cycle setWaypointType "CYCLE";
+            };
         };
     };
 };

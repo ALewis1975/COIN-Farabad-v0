@@ -57,10 +57,38 @@ if ((count _groups) isEqualTo 0) exitWith
 
 diag_log format ["[ARC][SITEPOP][INFO] ARC_fnc_sitePopSpawnSite: spawning site '%1' (%2 group definition(s)).", _siteId, count _groups];
 
+// ---------------------------------------------------------------------------
+// Build spawn-context modifiers from site history + profile (PSI v1).
+// Gracefully no-ops if fn_sitePopGetSpawnModifiers or site state is unavailable.
+// ---------------------------------------------------------------------------
+private _spawnCtx = createHashMap;
+if (!isNil "ARC_fnc_sitePopGetSpawnModifiers") then
+{
+    _spawnCtx = [_siteId] call ARC_fnc_sitePopGetSpawnModifiers;
+    if (!(_spawnCtx isEqualType createHashMap)) then { _spawnCtx = createHashMap; };
+};
+
+// Record this spawn in persistent site state (visitCount + lastSpawnAt).
+if (!isNil { missionNamespace getVariable "ARC_sitePopSiteStates" }) then
+{
+    private _siteStates = missionNamespace getVariable ["ARC_sitePopSiteStates", createHashMap];
+    if (_siteStates isEqualType createHashMap) then
+    {
+        private _siteState = [_siteStates, _siteId, createHashMap] call _hg;
+        if (!(_siteState isEqualType createHashMap)) then { _siteState = createHashMap; };
+
+        private _visits = [_siteState, "visitCount", 0] call _hg;
+        if (!(_visits isEqualType 0)) then { _visits = 0; };
+        _siteState set ["visitCount",  _visits + 1];
+        _siteState set ["lastSpawnAt", serverTime];
+        _siteStates set [_siteId, _siteState];
+    };
+};
+
 private _spawnedGroups = [];
 
 {
-    private _grp = [_siteId, _sitePos, _x] call ARC_fnc_sitePopBuildGroup;
+    private _grp = [_siteId, _sitePos, _x, _spawnCtx] call ARC_fnc_sitePopBuildGroup;
     if (!isNull _grp) then
     {
         _spawnedGroups pushBack _grp;
