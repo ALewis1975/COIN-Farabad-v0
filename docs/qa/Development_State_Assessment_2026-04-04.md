@@ -1,7 +1,7 @@
 # Development State Assessment and Task Plan — 2026-04-04
 
-**Repository:** `ALewis1975/COIN-Farabad-v0`  
-**Assessment branch/head used:** `copilot/assess-development-state` @ `5b74c68` (pre-edit baseline)  
+**Repository:** `ALewis1975/COIN-Farabad-v0`
+**Assessment branch/head used:** `copilot/assess-development-state` @ `5b74c68` (pre-edit baseline)
 **Purpose:** Replace guesswork with an evidence-based snapshot of current development state and a non-stale task plan.
 
 ---
