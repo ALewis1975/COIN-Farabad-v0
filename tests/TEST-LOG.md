@@ -2787,6 +2787,18 @@ Contrast with the correct pattern used in the background check handler itself:
 
 ---
 
+## 2026-04-04 02:17 UTC — Bug fix: S-1 Personnel Snapshot diary formatting
+
+**Branch/Commit:** copilot/clean-up-s1-personnel-snapshot @ commit: unrecoverable (pre-push)
+
+**Scenario:** S-1 Personnel Snapshot diary entry displayed literal `\n` characters instead of newlines, and group entries showed redundant `groupId (callsign)` when both values were identical (e.g. "FARABAD 6 (FARABAD 6)").
+
+### Root causes
+
+| # | Finding | Root cause | Location |
+|---|---------|------------|----------|
+| 1 | `\n` shown as literal text | Arma diary uses structured text (HTML subset); `\n` is not a line-break in this context — `<br/>` is required | `fn_briefingUpdateClient.sqf:1026-1031,1040` |
+| 2 | Redundant `groupId (callsign)` | Format string `[%1] %2 (%3)` always appended callsign even when it equalled groupId; no deduplication logic | `fn_briefingUpdateClient.sqf:1040` |
 ## 2026-04-04 01:31 UTC — Bug fix: NATO fallback classes removed from Karkanak Prison unit pools
 
 **Branch/Commit:** copilot/karkanak-prison-nato-troops @ 03aea1ea493f09583d55e32236180c1e0d280f24 (pre-change; see commit after push)
@@ -2804,12 +2816,15 @@ Contrast with the correct pattern used in the background check handler itself:
 
 | File | Change |
 |------|--------|
+| `fn_briefingUpdateClient.sqf` | Replaced all `\n` in S-1 text with `<br/>`; changed header format from `Groups: %2\nUnits: %3\n\n` to `Groups: %2 | Units: %3<br/><br/>`; changed per-group entry from `[company] groupId (callsign)` to `company | label` where `label` is callsign when it differs from groupId, otherwise groupId |
 | `data/farabad_site_templates.sqf` | Removed vanilla NATO fallback classes from `_tnpPool` and `_tnpMedPool`; updated comments to state groups are skipped when 3CB classes are absent |
 
 ### Static Validation
 
 | # | Check | Command | Result | Notes |
 |---|-------|---------|--------|-------|
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict fn_briefingUpdateClient.sqf` | PASS | No new violations introduced |
+| 2 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime available in container; requires live session to verify diary rendering |
 | 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict data/farabad_site_templates.sqf` | PASS | No compat patterns found |
 | 2 | sqflint | `sqflint -e w data/farabad_site_templates.sqf` | PASS | No warnings |
 | 3 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime in container; requires live session to confirm prison groups are skipped gracefully when 3CB absent |
