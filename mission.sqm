@@ -12,7 +12,7 @@ class EditorData
 	};
 	class ItemIDProvider
 	{
-		nextID=4836;
+		nextID=4837;
 	};
 	class MarkerIDProvider
 	{
@@ -24,10 +24,10 @@ class EditorData
 	};
 	class Camera
 	{
-		pos[]={6606.0728,33.489998,1588.3513};
-		dir[]={-0.0046522543,-0.79832435,-0.60220975};
-		up[]={-0.0061671152,0.60222769,-0.79830045};
-		aside[]={-0.99997008,-2.3283064e-10,0.0077250744};
+		pos[]={2216.6758,72.702522,1383.2412};
+		dir[]={0,-0.70710683,0.70710683};
+		up[]={0,0.70710677,0.70710677};
+		aside[]={0.99999994,0,-0};
 	};
 };
 binarizationWanted=0;
@@ -2019,7 +2019,7 @@ class Mission
 	};
 	class Entities
 	{
-		items=16;
+		items=17;
 		class Item0
 		{
 			dataType="Layer";
@@ -113520,6 +113520,22 @@ class Mission
 			};
 			id=4725;
 			atlOffset=0.24534178;
+		};
+		class Item16
+		{
+			dataType="Object";
+			class PositionInfo
+			{
+				position[]={2230.5398,4.1781464,1441.1276};
+				angles[]={6.2717605,4.7687492,6.2717605};
+			};
+			side="Empty";
+			flags=4;
+			class Attributes
+			{
+			};
+			id=4836;
+			type="Land_HelipadSquare_F";
 		};
 	};
 	class Connections
