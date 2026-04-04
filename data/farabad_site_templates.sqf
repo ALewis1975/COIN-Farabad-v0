@@ -50,29 +50,22 @@
 // ---------------------------------------------------------------------------
 
 // Takistan National Police (3CB UK3CB_TKP_B faction, BLUFOR)
-// Preferred: 3CB TKP classes. Vanilla BLUFOR soldiers are fallbacks so
-// prison guards always spawn even when the 3CB TKP sub-mod is absent.
+// No vanilla fallbacks: if 3CB TKP classes are absent from CfgVehicles the
+// group will not spawn rather than substituting wrong-faction units.
 private _tnpPool = [
     "UK3CB_TKP_B_Soldier",
     "UK3CB_TKP_B_Soldier_L",
     "UK3CB_TKP_B_Soldier_AR",
     "UK3CB_TKP_B_Soldier_GL",
-    "UK3CB_TKP_B_NCO",
-    // Vanilla BLUFOR fallbacks (filtered at spawn time; used only if no 3CB class is valid)
-    "B_Soldier_F",
-    "B_Soldier_AR_F",
-    "B_GEN_Soldier_F"
+    "UK3CB_TKP_B_NCO"
 ];
 
 // Takistan National Police — medical/escort role.
-// Preferred: 3CB TKP medic/NCO classes. Vanilla medic fallback provided.
+// No vanilla fallbacks: group skips gracefully if 3CB TKP classes are absent.
 private _tnpMedPool = [
     "UK3CB_TKP_B_Medic",
     "UK3CB_TKP_B_Soldier",
-    "UK3CB_TKP_B_NCO",
-    // Vanilla BLUFOR fallbacks
-    "B_Medic_F",
-    "B_Soldier_F"
+    "UK3CB_TKP_B_NCO"
 ];
 
 // Civilian medical personnel: doctors, nurses, paramedics (3CB + IDAP).
@@ -96,15 +89,13 @@ private _ambVehiclePool = [
 ];
 
 // Takistan National Army (3CB UK3CB_TKA_B faction, BLUFOR)
+// No vanilla fallbacks: group skips gracefully if 3CB TKA classes are absent.
 private _tnaPool = [
     "UK3CB_TKA_B_Soldier",
     "UK3CB_TKA_B_Soldier_L",
     "UK3CB_TKA_B_Soldier_AR",
     "UK3CB_TKA_B_Soldier_LAT",
-    "UK3CB_TKA_B_NCO",
-    "B_GEN_Soldier_F",
-    "B_Soldier_F",
-    "B_Soldier_AR_F"
+    "UK3CB_TKA_B_NCO"
 ];
 
 // Civilian population: common civs from 3CB MEC, TKC, and ADC factions.

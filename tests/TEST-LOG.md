@@ -3265,3 +3265,35 @@ Contrast with the correct pattern used in the background check handler itself:
 - Confirm RQ-4A enters loiter after taxi (requires live session)
 - Confirm `plane_despawn` marker repositioned east of runway for manned aircraft (Eden edit required by operator)
 - Confirm no civ vehicles spawn inside 250 m of `prison_central_guard_tower` (requires live session)
+
+---
+
+## 2026-04-04 19:01 UTC — Fix: remove vanilla BLUFOR fallbacks from TNP/TNA class pools
+
+**Branch/Commit:** copilot/force-correct-group-spawn @ (see git log)
+
+**Scenario:** NATO / Gendarmerie units (`B_Soldier_F`, `B_Soldier_AR_F`, `B_GEN_Soldier_F`, `B_Medic_F`)
+were spawning at KarkanakPrison and PresidentialPalace as fallbacks when UK3CB mod classes were
+absent from CfgVehicles. Fix: removed all vanilla BLUFOR fallback entries from `_tnpPool`,
+`_tnpMedPool`, and `_tnaPool` so groups gracefully skip (return grpNull) rather than spawn
+wrong-faction units.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `data/farabad_site_templates.sqf` | Removed `B_Soldier_F`, `B_Soldier_AR_F`, `B_GEN_Soldier_F` from `_tnpPool`; removed `B_Medic_F`, `B_Soldier_F` from `_tnpMedPool`; removed `B_GEN_Soldier_F`, `B_Soldier_F`, `B_Soldier_AR_F` from `_tnaPool`. Updated comments to document no-fallback policy. |
+
+### Validation
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Static review | Code inspection | PASS | Vanilla `B_*_F` classes confirmed removed from all three pools; 3CB UK3CB_TKP_B_* / UK3CB_TKA_B_* classes retained |
+| 2 | sqflint / compat scan | N/A | BLOCKED | Not installed in CI container |
+| 3 | Live session | N/A | BLOCKED | No Arma 3 runtime in container |
+
+### Deferred Checks
+
+- Confirm TNP (`UK3CB_TKP_B_*`) guards and no NATO/Gendarmerie units spawn at KarkanakPrison (requires live session with 3CB loaded)
+- Confirm TNA (`UK3CB_TKA_B_*`) guards spawn at PresidentialPalace (requires live session)
+- Confirm prison guard groups silently skip (no spawn, WARN in RPT) when 3CB TKP mod is absent (requires session without 3CB)
