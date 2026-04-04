@@ -390,12 +390,12 @@ private _despawnMkr = missionNamespace getVariable ["airbase_v1_plane_despawn_ma
 private _despawnPos = getMarkerPos _despawnMkr;
 
 // Validate despawn marker position. A position at [0,0,0] means the marker is
-// missing; a negative x means it is off the west edge of the map (wrong direction
-// for east-facing runway departures). Both will cause aircraft to fly off-map,
-// hit the boundary, and freeze. Abort to idle so a corrected marker can be placed.
+// missing; a negative x means the marker is off the west edge of the map (x < 0).
+// Either case will cause aircraft to fly off-map, hit the boundary, and freeze.
+// Abort to idle so a corrected marker can be placed.
 private _despawnX = _despawnPos select 0;
 if (_despawnPos isEqualTo [0,0,0] || { _despawnX < 0 }) exitWith {
-    diag_log format ["[AIRBASESUB] %1 ABORT: despawn marker '%2' is missing or off-map (pos=%3). Ensure the marker is placed on-map beyond the runway departure path and restart.", _fid, _despawnMkr, _despawnPos];
+    diag_log format ["[AIRBASESUB] %1 ABORT: despawn marker '%2' is missing or off-map (pos=%3). Place the marker anywhere on-map (x >= 0) along the departure flight path and restart.", _fid, _despawnMkr, _despawnPos];
     [_crewLive, _veh] call _fnAbortToIdle;
     _asset set ["state", "PARKED"];
     _asset set ["activeFlight", ""];

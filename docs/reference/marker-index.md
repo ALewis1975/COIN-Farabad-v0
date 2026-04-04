@@ -165,7 +165,7 @@ Published under `docs/reference/`.
 | palace_parking_lot_02 | Empty |  | [5389.7568,4.1399999,5134.938] |  |  | 1 |  |  | unresolved |  |
 | palace_security_office | Empty |  | [5391.0259,4.2849998,5182.6641] |  |  | 1 |  |  | unresolved |  |
 | palace_security_wing | Empty |  | [5361.6152,4.1399999,5096.0996] |  |  | 1 |  |  | unresolved |  |
-| plane_despawn | Empty |  | [-3252.3577,41.396038,11384.788] |  |  | 1 |  |  | unresolved |  |
+| plane_despawn | Empty |  | NW corner of map (on-map, x≥0) — update coords after Eden save |  |  | 1 |  |  | valid |  |
 | prison_admin_offices | Empty |  | [2085.0149,4.3200002,1473.952] |  |  | 1 |  |  | unresolved |  |
 | prison_central_guard_tower | Empty |  | [2145.729,4.3200002,1596.2939] |  |  | 1 |  |  | unresolved |  |
 | prison_dorm_01 | Empty |  | [2143.2229,4.3200002,1567.094] |  |  | 1 |  |  | unresolved |  |
