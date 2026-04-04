@@ -450,7 +450,8 @@ missionNamespace setVariable ["airbase_v1_runwayUntil", -1, true];
 
 // ---------------------------------------------------------------------------
 // Departure seed: queue initial departures visible on first console load.
-// Only runs when queue is currently empty (fresh init; guards against rehydrated state).
+// Selects up to 3 FW + 1 RW from the filtered parked-asset pool and shuffles
+// them randomly so the departure order varies each session.
 // ---------------------------------------------------------------------------
 private _initSeedQueue = ["airbase_v1_queue", []] call ARC_fnc_stateGet;
 if (!(_initSeedQueue isEqualType [])) then { _initSeedQueue = []; };
@@ -486,14 +487,14 @@ if ((count _initSeedQueue) == 0) then
     };
     if ((count _preferAssets) > 0) then { _parkedAssets = _preferAssets; };
 
-    // Select up to 2 FW and 1 RW from the filtered pool.
+    // Select up to 3 FW and 1 RW from the filtered pool.
     private _fwPool = _parkedAssets select { ([_x, "category", "FW"] call _hmGet) isEqualTo "FW" };
     private _rwPool = _parkedAssets select { ([_x, "category", "FW"] call _hmGet) isEqualTo "RW" };
 
     private _seedAssets = [];
     private _fwRemaining = + _fwPool; // shallow copy so we can remove picked entries without modifying the original pool
     private _fwPicked = 0;
-    while { _fwPicked < 2 && { (count _fwRemaining) > 0 } } do {
+    while { _fwPicked < 3 && { (count _fwRemaining) > 0 } } do {
         private _pick = selectRandom _fwRemaining;
         _seedAssets pushBack _pick;
         _fwPicked = _fwPicked + 1;
@@ -504,6 +505,16 @@ if ((count _initSeedQueue) == 0) then
     if ((count _rwPool) > 0) then
     {
         _seedAssets pushBack (selectRandom _rwPool);
+    };
+
+    // Shuffle seed assets in-place (Knuth/Fisher-Yates) so the departure order
+    // varies each session, regardless of asset pool size.
+    private _nSeed = count _seedAssets;
+    for "_si" from (_nSeed - 1) to 1 step -1 do {
+        private _ri = floor (random (_si + 1));
+        private _tmp = _seedAssets select _si;
+        _seedAssets set [_si, _seedAssets select _ri];
+        _seedAssets set [_ri, _tmp];
     };
 
     private _seedDepCount = 0;
