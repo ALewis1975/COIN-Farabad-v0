@@ -105,6 +105,7 @@ for "_i" from 1 to _tries do
     {
         private _excluded = false;
         {
+            if (_excluded) then { continue; };  // already matched; skip remaining zones
             if (_x isEqualType [] && { (count _x) >= 2 }) then
             {
                 private _zp = _x select 0;

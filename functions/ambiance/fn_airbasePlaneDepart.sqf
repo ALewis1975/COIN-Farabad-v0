@@ -395,14 +395,14 @@ private _despawnPos = getMarkerPos _despawnMkr;
 // hit the boundary, and freeze. Abort to idle so a corrected marker can be placed.
 private _despawnX = _despawnPos select 0;
 if (_despawnPos isEqualTo [0,0,0] || { _despawnX < 0 }) exitWith {
-    diag_log format ["[AIRBASESUB] %1 ABORT: despawn marker '%2' is missing or off-map (pos=%3). Place the marker east of the airbase boundary and restart.", _fid, _despawnMkr, _despawnPos];
+    diag_log format ["[AIRBASESUB] %1 ABORT: despawn marker '%2' is missing or off-map (pos=%3). Ensure the marker is placed on-map beyond the runway departure path and restart.", _fid, _despawnMkr, _despawnPos];
     [_crewLive, _veh] call _fnAbortToIdle;
     _asset set ["state", "PARKED"];
     _asset set ["activeFlight", ""];
     false
 };
 
-while { (count (waypoints _grp)) > 0 } do { deleteWaypoint ((waypoints _grp) # 0); };
+while { (count (waypoints _grp)) > 0 } do { deleteWaypoint ((waypoints _grp) select 0); };
 _grp setSpeedMode "FULL";
 _grp setBehaviour "CARELESS";
 _grp setCombatMode "BLUE";
