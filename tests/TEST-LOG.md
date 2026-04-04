@@ -11,6 +11,39 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-04 21:16 UTC — SitePop anchor resolution fix for rectangle markers
+
+**Branch/Commit:** copilot/assess-development-state-and-plan @ 26b7a2d (pre-edit baseline; changes applied on top)
+
+**Scenario:** Fix `ARC_fnc_sitePopBuildGroup` so `spawnAnchor` checks accept any mission marker name, including rectangle markers like `prison_holding_area`, instead of relying on `getMarkerType`. While touching the file, clear the pre-existing sqflint `_this` warning in the deferred prisoner re-strip block.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `functions/sitepop/fn_sitePopBuildGroup.sqf` | Replaced `getMarkerType` anchor existence check with `allMapMarkers` membership; replaced spawned-block `_this` usage with typed `params` local |
+
+### Checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Baseline state migrations | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios |
+| 2 | Baseline marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | All modes passed |
+| 3 | Test-log commit guard | `bash scripts/dev/check_test_log_commits.sh` | PASS | Passed after adding `~/.local/bin` to `PATH` so `rg` resolves |
+| 4 | Targeted compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/sitepop/fn_sitePopBuildGroup.sqf` | PASS | No banned parser-compat patterns |
+| 5 | Targeted sqflint | `sqflint -e w functions/sitepop/fn_sitePopBuildGroup.sqf` | PASS | Pre-existing `_this` warning removed in touched block |
+| 6 | Repo diff sanity | `git --no-pager diff --check` | PASS | No whitespace/conflict-marker issues |
+| 7 | Local MP runtime | N/A | BLOCKED | No Arma 3 runtime in container |
+| 8 | Dedicated/JIP runtime | N/A | BLOCKED | No dedicated/JIP environment in container |
+
+### Outcome
+
+- Rectangle and shape markers in `mission.sqm` now satisfy SitePop anchor existence checks because the function accepts any marker present in `allMapMarkers`.
+- `prison_holding_area` should no longer fall back as “missing” when spawning anchor-local prisoner groups.
+- Dedicated/local MP runtime validation is still required to confirm anchor-local spawn placement and warning removal in live mission flow.
+
+---
+
 ## 2026-04-04 20:53 UTC — Development-state assessment and task-plan refresh
 
 **Branch/Commit:** copilot/assess-development-state @ 5b74c68 (pre-edit baseline; assessment docs added on top)
