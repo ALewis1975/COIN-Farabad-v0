@@ -1057,7 +1057,7 @@
           "side": "West",
           "source": "mission.sqm",
           "unitType": "rhsusf_army_ocp_helicrew",
-          "varName": ""
+          "varName": "UH_60M_01CC"
         },
         {
           "className": "rhsusf_army_ocp_helipilot",
@@ -1067,7 +1067,7 @@
           "side": "West",
           "source": "mission.sqm",
           "unitType": "rhsusf_army_ocp_helipilot",
-          "varName": ""
+          "varName": "UH_60M_01CP"
         },
         {
           "className": "rhsusf_army_ocp_helipilot",
@@ -1087,7 +1087,7 @@
           "side": "West",
           "source": "mission.sqm",
           "unitType": "rhsusf_army_ocp_helicrew",
-          "varName": "UH_60M_01G"
+          "varName": "UH_60M_01DG"
         }
       ]
     },
@@ -1298,17 +1298,17 @@
           "side": "West",
           "source": "mission.sqm",
           "unitType": "rhsusf_army_ocp_helicrew",
-          "varName": ""
+          "varName": "CH_47F_01CC"
         },
         {
-          "className": "rhsusf_army_ocp_helicrew",
+          "className": "rhsusf_army_ocp_helipilot",
           "groupId": "3-82 GSAB | TALON 71 (CH-47F)",
           "isPlayable": false,
           "isPlayer": false,
           "side": "West",
           "source": "mission.sqm",
-          "unitType": "rhsusf_army_ocp_helicrew",
-          "varName": ""
+          "unitType": "rhsusf_army_ocp_helipilot",
+          "varName": "CH_47F_01CP"
         },
         {
           "className": "rhsusf_army_ocp_helipilot",
@@ -1321,14 +1321,14 @@
           "varName": "CH_47F_01D"
         },
         {
-          "className": "rhsusf_army_ocp_helipilot",
+          "className": "rhsusf_army_ocp_helicrew",
           "groupId": "3-82 GSAB | TALON 71 (CH-47F)",
           "isPlayable": false,
           "isPlayer": false,
           "side": "West",
           "source": "mission.sqm",
-          "unitType": "rhsusf_army_ocp_helipilot",
-          "varName": "CH_47F_01G"
+          "unitType": "rhsusf_army_ocp_helicrew",
+          "varName": "CH_47F_01DD"
         }
       ]
     },
@@ -2698,43 +2698,6 @@
       ]
     },
     {
-      "groupKey": "Civilian:4577",
-      "id": "4577",
-      "side": "Civilian",
-      "units": [
-        {
-          "className": "UK3CB_MEC_C_DOC",
-          "groupId": "Civilian:4577",
-          "isPlayable": false,
-          "isPlayer": false,
-          "side": "Civilian",
-          "source": "mission.sqm",
-          "unitType": "UK3CB_MEC_C_DOC",
-          "varName": ""
-        },
-        {
-          "className": "UK3CB_TKC_C_PILOT",
-          "groupId": "Civilian:4577",
-          "isPlayable": false,
-          "isPlayer": false,
-          "side": "Civilian",
-          "source": "mission.sqm",
-          "unitType": "UK3CB_TKC_C_PILOT",
-          "varName": ""
-        },
-        {
-          "className": "UK3CB_TKC_C_PILOT",
-          "groupId": "Civilian:4577",
-          "isPlayable": false,
-          "isPlayer": false,
-          "side": "Civilian",
-          "source": "mission.sqm",
-          "unitType": "UK3CB_TKC_C_PILOT",
-          "varName": ""
-        }
-      ]
-    },
-    {
       "groupKey": "Civilian:4607",
       "id": "4607",
       "side": "Civilian",
@@ -3002,6 +2965,33 @@
           "source": "mission.sqm",
           "unitType": "B_UAV_AI",
           "varName": ""
+        }
+      ]
+    },
+    {
+      "groupKey": "West:4706",
+      "id": "4706",
+      "side": "West",
+      "units": [
+        {
+          "className": "B_UAV_AI",
+          "groupId": "West:4706",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "B_UAV_AI",
+          "varName": "plane6D"
+        },
+        {
+          "className": "B_UAV_AI",
+          "groupId": "West:4706",
+          "isPlayable": false,
+          "isPlayer": false,
+          "side": "West",
+          "source": "mission.sqm",
+          "unitType": "B_UAV_AI",
+          "varName": "plane6G"
         }
       ]
     }
@@ -3905,7 +3895,7 @@
       "side": "West",
       "source": "mission.sqm",
       "unitType": "rhsusf_army_ocp_helicrew",
-      "varName": ""
+      "varName": "UH_60M_01CC"
     },
     {
       "className": "rhsusf_army_ocp_helipilot",
@@ -3915,7 +3905,7 @@
       "side": "West",
       "source": "mission.sqm",
       "unitType": "rhsusf_army_ocp_helipilot",
-      "varName": ""
+      "varName": "UH_60M_01CP"
     },
     {
       "className": "rhsusf_army_ocp_helipilot",
@@ -3935,7 +3925,7 @@
       "side": "West",
       "source": "mission.sqm",
       "unitType": "rhsusf_army_ocp_helicrew",
-      "varName": "UH_60M_01G"
+      "varName": "UH_60M_01DG"
     },
     {
       "className": "rhsusf_army_ocp_autorifleman",
@@ -4125,17 +4115,17 @@
       "side": "West",
       "source": "mission.sqm",
       "unitType": "rhsusf_army_ocp_helicrew",
-      "varName": ""
+      "varName": "CH_47F_01CC"
     },
     {
-      "className": "rhsusf_army_ocp_helicrew",
+      "className": "rhsusf_army_ocp_helipilot",
       "groupId": "3-82 GSAB | TALON 71 (CH-47F)",
       "isPlayable": false,
       "isPlayer": false,
       "side": "West",
       "source": "mission.sqm",
-      "unitType": "rhsusf_army_ocp_helicrew",
-      "varName": ""
+      "unitType": "rhsusf_army_ocp_helipilot",
+      "varName": "CH_47F_01CP"
     },
     {
       "className": "rhsusf_army_ocp_helipilot",
@@ -4148,14 +4138,14 @@
       "varName": "CH_47F_01D"
     },
     {
-      "className": "rhsusf_army_ocp_helipilot",
+      "className": "rhsusf_army_ocp_helicrew",
       "groupId": "3-82 GSAB | TALON 71 (CH-47F)",
       "isPlayable": false,
       "isPlayer": false,
       "side": "West",
       "source": "mission.sqm",
-      "unitType": "rhsusf_army_ocp_helipilot",
-      "varName": "CH_47F_01G"
+      "unitType": "rhsusf_army_ocp_helicrew",
+      "varName": "CH_47F_01DD"
     },
     {
       "className": "rhsusf_army_ocp_officer",
@@ -5208,36 +5198,6 @@
       "varName": ""
     },
     {
-      "className": "UK3CB_MEC_C_DOC",
-      "groupId": "Civilian:4577",
-      "isPlayable": false,
-      "isPlayer": false,
-      "side": "Civilian",
-      "source": "mission.sqm",
-      "unitType": "UK3CB_MEC_C_DOC",
-      "varName": ""
-    },
-    {
-      "className": "UK3CB_TKC_C_PILOT",
-      "groupId": "Civilian:4577",
-      "isPlayable": false,
-      "isPlayer": false,
-      "side": "Civilian",
-      "source": "mission.sqm",
-      "unitType": "UK3CB_TKC_C_PILOT",
-      "varName": ""
-    },
-    {
-      "className": "UK3CB_TKC_C_PILOT",
-      "groupId": "Civilian:4577",
-      "isPlayable": false,
-      "isPlayer": false,
-      "side": "Civilian",
-      "source": "mission.sqm",
-      "unitType": "UK3CB_TKC_C_PILOT",
-      "varName": ""
-    },
-    {
       "className": "UK3CB_TKC_C_CIV",
       "groupId": "Civilian:4607",
       "isPlayable": false,
@@ -5416,6 +5376,26 @@
       "source": "mission.sqm",
       "unitType": "B_UAV_AI",
       "varName": ""
+    },
+    {
+      "className": "B_UAV_AI",
+      "groupId": "West:4706",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "B_UAV_AI",
+      "varName": "plane6D"
+    },
+    {
+      "className": "B_UAV_AI",
+      "groupId": "West:4706",
+      "isPlayable": false,
+      "isPlayer": false,
+      "side": "West",
+      "source": "mission.sqm",
+      "unitType": "B_UAV_AI",
+      "varName": "plane6G"
     }
   ]
 }

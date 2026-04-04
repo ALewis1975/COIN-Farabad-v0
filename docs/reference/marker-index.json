@@ -22,12 +22,7 @@
       "aliases": [],
       "alpha": 0.5,
       "color": "",
-      "consumers": [
-        "functions/ambiance/fn_airbaseBuildRouteDecision.sqf",
-        "functions/ambiance/fn_airbaseInit.sqf",
-        "functions/ambiance/fn_airbasePlaneDepart.sqf",
-        "tests/TEST-LOG.md"
-      ],
+      "consumers": [],
       "name": "AEON_Right_270_Outbound",
       "pos": [
         5126.4092,
@@ -45,10 +40,7 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "functions/ambiance/fn_airbaseInit.sqf",
-        "functions/ambiance/fn_airbasePlaneDepart.sqf"
-      ],
+      "consumers": [],
       "name": "AEON_Right_270_Outbound_Clear",
       "pos": [
         7272.646,
@@ -138,10 +130,7 @@
       "aliases": [],
       "alpha": 0.5,
       "color": "",
-      "consumers": [
-        "functions/ambiance/fn_airbaseBuildRouteDecision.sqf",
-        "tests/TEST-LOG.md"
-      ],
+      "consumers": [],
       "name": "AEON_Taxi_Right_Egress",
       "pos": [
         5575.0171,
@@ -159,10 +148,7 @@
       "aliases": [],
       "alpha": 0.5,
       "color": "",
-      "consumers": [
-        "functions/ambiance/fn_airbaseBuildRouteDecision.sqf",
-        "tests/TEST-LOG.md"
-      ],
+      "consumers": [],
       "name": "AEON_Taxi_Right_Ingress",
       "pos": [
         7040.6211,
@@ -252,9 +238,7 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "functions/core/fn_execInitActive.sqf"
-      ],
+      "consumers": [],
       "name": "ARC_convoy_linkup_airbase",
       "pos": [
         6736.3511,
@@ -272,12 +256,7 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "functions/core/fn_execCleanupActive.sqf",
-        "functions/core/fn_execInitActive.sqf",
-        "functions/core/fn_resetAll.sqf",
-        "functions/ops/fn_opsSpawnLocalSupport.sqf"
-      ],
+      "consumers": [],
       "name": "ARC_convoy_start",
       "pos": [
         6736.75,
@@ -369,11 +348,7 @@
       ],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "data/farabad_marker_aliases.sqf",
-        "data/incident_markers.sqf",
-        "functions/ops/fn_opsSpawnLocalSupport.sqf"
-      ],
+      "consumers": [],
       "name": "ARC_loc_BelleFoilleHotel",
       "pos": [
         5349.7939,
@@ -393,10 +368,7 @@
       ],
       "alpha": 0.5,
       "color": "",
-      "consumers": [
-        "data/farabad_marker_aliases.sqf",
-        "data/incident_markers.sqf"
-      ],
+      "consumers": [],
       "name": "ARC_loc_FortKelati",
       "pos": [
         6292.2148,
@@ -416,11 +388,7 @@
       ],
       "alpha": 0.5,
       "color": "",
-      "consumers": [
-        "data/farabad_marker_aliases.sqf",
-        "data/incident_markers.sqf",
-        "functions/ops/fn_opsSpawnLocalSupport.sqf"
-      ],
+      "consumers": [],
       "name": "ARC_loc_JaziraOilField",
       "pos": [
         6220.3008,
@@ -440,11 +408,7 @@
       ],
       "alpha": 0.5,
       "color": "",
-      "consumers": [
-        "data/farabad_marker_aliases.sqf",
-        "data/incident_markers.sqf",
-        "functions/ops/fn_opsSpawnLocalSupport.sqf"
-      ],
+      "consumers": [],
       "name": "ARC_loc_JaziraOilRefinery",
       "pos": [
         6737.1758,
@@ -464,10 +428,7 @@
       ],
       "alpha": 0.5,
       "color": "",
-      "consumers": [
-        "data/farabad_marker_aliases.sqf",
-        "data/incident_markers.sqf"
-      ],
+      "consumers": [],
       "name": "ARC_loc_Junkyard",
       "pos": [
         5209.2402,
@@ -487,11 +448,7 @@
       ],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "data/farabad_marker_aliases.sqf",
-        "data/incident_markers.sqf",
-        "functions/ops/fn_opsSpawnLocalSupport.sqf"
-      ],
+      "consumers": [],
       "name": "ARC_loc_KarkanakPrison",
       "pos": [
         10949.0,
@@ -511,11 +468,7 @@
       ],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "data/farabad_marker_aliases.sqf",
-        "data/incident_markers.sqf",
-        "functions/ops/fn_opsSpawnLocalSupport.sqf"
-      ],
+      "consumers": [],
       "name": "ARC_loc_hospital",
       "pos": [
         5350.0811,
@@ -535,11 +488,7 @@
       ],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "data/farabad_marker_aliases.sqf",
-        "data/incident_markers.sqf",
-        "functions/ops/fn_opsSpawnLocalSupport.sqf"
-      ],
+      "consumers": [],
       "name": "ARC_loc_industrial022",
       "pos": [
         -249.2251,
@@ -560,12 +509,7 @@
       ],
       "alpha": 0.5,
       "color": "",
-      "consumers": [
-        "data/farabad_marker_aliases.sqf",
-        "data/incident_markers.sqf",
-        "docs/projectFiles/Farabad_ORBAT.md",
-        "functions/ops/fn_opsSpawnRouteSupport.sqf"
-      ],
+      "consumers": [],
       "name": "ARC_loc_military",
       "pos": [
         6236.9531,
@@ -586,12 +530,7 @@
       ],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "data/farabad_marker_aliases.sqf",
-        "data/incident_markers.sqf",
-        "docs/projectFiles/Farabad_ORBAT.md",
-        "functions/ops/fn_opsSpawnRouteSupport.sqf"
-      ],
+      "consumers": [],
       "name": "ARC_loc_military",
       "pos": [
         7703.9258,
@@ -699,9 +638,7 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "functions/ops/fn_opsSpawnRouteSupport.sqf"
-      ],
+      "consumers": [],
       "name": "ARC_m_base_hq_1",
       "pos": [
         6409.7266,
@@ -755,11 +692,7 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "data/incident_markers.sqf",
-        "functions/ops/fn_opsSpawnLocalSupport.sqf",
-        "functions/ui/fn_uiConsoleInitClient.sqf"
-      ],
+      "consumers": [],
       "name": "ARC_m_base_toc",
       "pos": [
         6237.0,
@@ -813,10 +746,7 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "functions/command/fn_intelResolveRtbDestination.sqf",
-        "functions/ops/fn_opsSpawnRouteSupport.sqf"
-      ],
+      "consumers": [],
       "name": "ARC_m_charlie_2_325AIR",
       "pos": [
         5894.0,
@@ -834,9 +764,7 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "data/incident_markers.sqf"
-      ],
+      "consumers": [],
       "name": "ARC_m_civil_01",
       "pos": [
         8120.0439,
@@ -854,9 +782,7 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "data/incident_markers.sqf"
-      ],
+      "consumers": [],
       "name": "ARC_m_ied_01",
       "pos": [
         5118.0,
@@ -874,9 +800,7 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "data/incident_markers.sqf"
-      ],
+      "consumers": [],
       "name": "ARC_m_patrol_01",
       "pos": [
         8970.6133,
@@ -894,9 +818,7 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "data/incident_markers.sqf"
-      ],
+      "consumers": [],
       "name": "ARC_m_patrol_02",
       "pos": [
         514.91968,
@@ -914,9 +836,7 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "data/incident_markers.sqf"
-      ],
+      "consumers": [],
       "name": "ARC_m_patrol_03",
       "pos": [
         8914.458,
@@ -934,10 +854,7 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "data/incident_markers.sqf",
-        "functions/ambiance/fn_airbaseSecurityInit.sqf"
-      ],
+      "consumers": [],
       "name": "Main_Gate",
       "pos": [
         5244.375,
@@ -955,9 +872,7 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "functions/ambiance/fn_airbaseSecurityInit.sqf"
-      ],
+      "consumers": [],
       "name": "NE_Corner",
       "pos": [
         7362.7529,
@@ -975,9 +890,7 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "functions/ambiance/fn_airbaseSecurityInit.sqf"
-      ],
+      "consumers": [],
       "name": "NW_Corner",
       "pos": [
         4888.5781,
@@ -995,15 +908,7 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "data/incident_markers.sqf",
-        "docs/projectFiles/Farabad_AIRBASESUB_Airbase_Ambience_Planning_Spec.md",
-        "docs/projectFiles/Farabad_CIVSUBv1_Development_Baseline (1).md",
-        "docs/projectFiles/Farabad_COIN_Mission_Design_Guide_v0.4_2026-01-27.md",
-        "docs/projectFiles/farabad_project_dictionary_v_1.1.md",
-        "functions/ambiance/fn_airbaseSecurityInit.sqf",
-        "functions/core/fn_execInitActive.sqf"
-      ],
+      "consumers": [],
       "name": "North_Gate",
       "pos": [
         6737.875,
@@ -1021,9 +926,7 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "functions/ambiance/fn_airbaseSecurityInit.sqf"
-      ],
+      "consumers": [],
       "name": "SE_Corner",
       "pos": [
         7141.8027,
@@ -1041,9 +944,7 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "functions/ambiance/fn_airbaseSecurityInit.sqf"
-      ],
+      "consumers": [],
       "name": "SW_Corner",
       "pos": [
         4854.4731,
@@ -1061,10 +962,7 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "data/incident_markers.sqf",
-        "functions/ambiance/fn_airbaseSecurityInit.sqf"
-      ],
+      "consumers": [],
       "name": "South_Gate",
       "pos": [
         6220.125,
@@ -1082,11 +980,7 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [
-        "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
-        "docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt",
-        "functions/logistics/fn_execTickConvoy.sqf"
-      ],
+      "consumers": [],
       "name": "arc_bridge_01",
       "pos": [
         2493.8643,
@@ -1104,11 +998,7 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [
-        "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
-        "docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt",
-        "functions/logistics/fn_execTickConvoy.sqf"
-      ],
+      "consumers": [],
       "name": "arc_bridge_02",
       "pos": [
         4082.7329,
@@ -1126,10 +1016,7 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [
-        "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
-        "docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt"
-      ],
+      "consumers": [],
       "name": "arc_bridge_03",
       "pos": [
         5436.6704,
@@ -1147,10 +1034,7 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [
-        "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
-        "docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt"
-      ],
+      "consumers": [],
       "name": "arc_bridge_04",
       "pos": [
         7464.2456,
@@ -1168,10 +1052,7 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [
-        "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
-        "docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt"
-      ],
+      "consumers": [],
       "name": "arc_bridge_05",
       "pos": [
         8010.8086,
@@ -1189,10 +1070,7 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [
-        "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
-        "docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt"
-      ],
+      "consumers": [],
       "name": "arc_bridge_06",
       "pos": [
         4449.8975,
@@ -1210,10 +1088,7 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [
-        "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
-        "docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt"
-      ],
+      "consumers": [],
       "name": "arc_bridge_07",
       "pos": [
         2235.6318,
@@ -1231,10 +1106,7 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [
-        "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
-        "docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt"
-      ],
+      "consumers": [],
       "name": "arc_bridge_08",
       "pos": [
         5739.5752,
@@ -1252,10 +1124,7 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [
-        "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
-        "docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt"
-      ],
+      "consumers": [],
       "name": "arc_bridge_09",
       "pos": [
         5881.1152,
@@ -1273,10 +1142,7 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [
-        "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
-        "docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt"
-      ],
+      "consumers": [],
       "name": "arc_bridge_10",
       "pos": [
         5259.1226,
@@ -1294,10 +1160,7 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [
-        "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
-        "docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt"
-      ],
+      "consumers": [],
       "name": "arc_bridge_11",
       "pos": [
         4955.4595,
@@ -1315,10 +1178,7 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [
-        "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
-        "docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt"
-      ],
+      "consumers": [],
       "name": "arc_bridge_12",
       "pos": [
         3868.0471,
@@ -1336,10 +1196,7 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [
-        "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
-        "docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt"
-      ],
+      "consumers": [],
       "name": "arc_bridge_13",
       "pos": [
         2844.7629,
@@ -1357,10 +1214,7 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [
-        "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
-        "docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt"
-      ],
+      "consumers": [],
       "name": "arc_bridge_14",
       "pos": [
         2695.1616,
@@ -1378,10 +1232,7 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [
-        "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
-        "docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt"
-      ],
+      "consumers": [],
       "name": "arc_bridge_15",
       "pos": [
         5467.6216,
@@ -1399,10 +1250,7 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [
-        "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
-        "docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt"
-      ],
+      "consumers": [],
       "name": "arc_bridge_16",
       "pos": [
         4586.9097,
@@ -1420,10 +1268,7 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [
-        "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
-        "docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt"
-      ],
+      "consumers": [],
       "name": "arc_bridge_17",
       "pos": [
         8274.3721,
@@ -1441,10 +1286,7 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [
-        "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
-        "docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt"
-      ],
+      "consumers": [],
       "name": "arc_bridge_18",
       "pos": [
         7524.9277,
@@ -1462,10 +1304,7 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [
-        "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
-        "docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt"
-      ],
+      "consumers": [],
       "name": "arc_bridge_19",
       "pos": [
         9184.04,
@@ -1483,10 +1322,7 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [
-        "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt",
-        "docs/artifacts/Arma3_x64_2026-02-19_20-48-03.rpt"
-      ],
+      "consumers": [],
       "name": "arc_bridge_20",
       "pos": [
         2186.2583,
@@ -2026,9 +1862,7 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [
-        "data/farabad_world_zones.sqf"
-      ],
+      "consumers": [],
       "name": "arc_zone_NorthEast",
       "pos": [
         8079.5059,
@@ -2046,9 +1880,7 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [
-        "data/farabad_world_zones.sqf"
-      ],
+      "consumers": [],
       "name": "arc_zone_NorthWest",
       "pos": [
         2703.28,
@@ -2066,9 +1898,7 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [
-        "data/farabad_world_zones.sqf"
-      ],
+      "consumers": [],
       "name": "arc_zone_SouthEast",
       "pos": [
         8064.0,
@@ -2086,9 +1916,7 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [
-        "data/farabad_world_zones.sqf"
-      ],
+      "consumers": [],
       "name": "arc_zone_SouthWest",
       "pos": [
         2688.0,
@@ -2145,15 +1973,7 @@
       ],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "data/farabad_marker_aliases.sqf",
-        "functions/civsub/fn_civsubInteractHandoffSheriff.sqf",
-        "functions/command/fn_intelClientCanProcessEpwHere.sqf",
-        "functions/command/fn_intelOrderCompleteRtbEpw.sqf",
-        "functions/command/fn_intelResolveRtbDestination.sqf",
-        "scripts/dev/validate_marker_index.py",
-        "tests/TEST-LOG.md"
-      ],
+      "consumers": [],
       "name": "epw_holding",
       "pos": [
         6292.145,
@@ -2171,10 +1991,169 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "data/incident_markers.sqf",
-        "functions/ops/fn_opsSpawnLocalSupport.sqf"
+      "consumers": [],
+      "name": "farabad_hospital_bldg_1",
+      "pos": [
+        4300.9639,
+        4.3429999,
+        5033.3389
       ],
+      "shape": "",
+      "source": "mission.sqm:Farabad Hospital",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "farabad_hospital_bldg_2",
+      "pos": [
+        4361.9673,
+        4.4830117,
+        4998.6816
+      ],
+      "shape": "",
+      "source": "mission.sqm:Farabad Hospital",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "farabad_hospital_hospice_1",
+      "pos": [
+        4422.71,
+        4.1399999,
+        4989.3008
+      ],
+      "shape": "",
+      "source": "mission.sqm:Farabad Hospital",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "farabad_hospital_hospice_2",
+      "pos": [
+        4410.7178,
+        4.1399999,
+        4961.9395
+      ],
+      "shape": "",
+      "source": "mission.sqm:Farabad Hospital",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "hq_a_2_325_barracks_1",
+      "pos": [
+        5086.6792,
+        4.1399999,
+        4782.7788
+      ],
+      "shape": "",
+      "source": "mission.sqm:HQ [A/2-325 AIR]",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "hq_a_2_325_barracks_2",
+      "pos": [
+        5094.1362,
+        5.6399999,
+        4752.7817
+      ],
+      "shape": "",
+      "source": "mission.sqm:HQ [A/2-325 AIR]",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "hq_a_2_325_motor_maintenance",
+      "pos": [
+        5152.498,
+        4.2150979,
+        4745.7041
+      ],
+      "shape": "",
+      "source": "mission.sqm:HQ [A/2-325 AIR]",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "hq_a_2_325_offices",
+      "pos": [
+        5035.9507,
+        5.681015,
+        4734.0571
+      ],
+      "shape": "",
+      "source": "mission.sqm:HQ [A/2-325 AIR]",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "hq_a_2_325_supply",
+      "pos": [
+        5089.7749,
+        5.7470002,
+        4681.6641
+      ],
+      "shape": "",
+      "source": "mission.sqm:HQ [A/2-325 AIR]",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
       "name": "marker_14",
       "pos": [
         2468.0039,
@@ -2192,9 +2171,7 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "data/incident_markers.sqf"
-      ],
+      "consumers": [],
       "name": "marker_16",
       "pos": [
         5974.5332,
@@ -2212,9 +2189,7 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "data/incident_markers.sqf"
-      ],
+      "consumers": [],
       "name": "marker_18",
       "pos": [
         3660.427,
@@ -2232,9 +2207,7 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "data/incident_markers.sqf"
-      ],
+      "consumers": [],
       "name": "marker_19",
       "pos": [
         3021.792,
@@ -2252,9 +2225,7 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "data/incident_markers.sqf"
-      ],
+      "consumers": [],
       "name": "marker_20",
       "pos": [
         5468.5742,
@@ -2272,10 +2243,7 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "data/incident_markers.sqf",
-        "docs/artifacts/Arma3_x64_2026-02-17_11-41-42.rpt"
-      ],
+      "consumers": [],
       "name": "marker_21",
       "pos": [
         3131.905,
@@ -2491,14 +2459,7 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "docs/projectFiles/Farabad_CIVSUBv1_Development_Baseline (1).md",
-        "docs/projectFiles/farabad_project_dictionary_v_1.1.md",
-        "functions/civsub/fn_civsubInteractHandoffSheriff.sqf",
-        "functions/command/fn_intelClientCanProcessEpwHere.sqf",
-        "functions/command/fn_intelOrderCompleteRtbEpw.sqf",
-        "functions/command/fn_intelResolveRtbDestination.sqf"
-      ],
+      "consumers": [],
       "name": "mkr_SHERIFF_HOLDING",
       "pos": [
         6299.4312,
@@ -2518,28 +2479,7 @@
       ],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "data/farabad_marker_aliases.sqf",
-        "data/incident_markers.sqf",
-        "docs/projectFiles/Farabad_AIRBASESUB_Airbase_Ambience_Planning_Spec.md",
-        "docs/projectFiles/Farabad_COIN_Mission_Design_Guide_v0.4_2026-01-27.md",
-        "docs/projectFiles/farabad_project_dictionary_v_1.1.md",
-        "functions/ambiance/fn_airbaseAdminResetControlState.sqf",
-        "functions/ambiance/fn_airbaseBuildRouteDecision.sqf",
-        "functions/ambiance/fn_airbaseInit.sqf",
-        "functions/ambiance/fn_airbaseRunwayLockOccupy.sqf",
-        "functions/ambiance/fn_airbaseRunwayLockRelease.sqf",
-        "functions/ambiance/fn_airbaseRunwayLockReserve.sqf",
-        "functions/ambiance/fn_airbaseRunwayLockSweep.sqf",
-        "functions/ambiance/fn_airbaseTick.sqf",
-        "functions/civsub/fn_civsubCivFindSpawnPos.sqf",
-        "functions/civsub/fn_civsubSpawnCacheEnsure.sqf",
-        "functions/command/fn_intelOrderCompleteRtbEpw.sqf",
-        "functions/command/fn_intelResolveRtbDestination.sqf",
-        "functions/core/fn_execInitActive.sqf",
-        "functions/ops/fn_opsSpawnLocalSupport.sqf",
-        "initServer.sqf"
-      ],
+      "consumers": [],
       "name": "mkr_airbaseCenter",
       "pos": [
         6117.9551,
@@ -2557,10 +2497,7 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "functions/ambiance/fn_airbaseInit.sqf",
-        "functions/ambiance/fn_airbaseSpawnArrival.sqf"
-      ],
+      "consumers": [],
       "name": "mkr_arrivalRunwayStart",
       "pos": [
         5168.8018,
@@ -2578,10 +2515,7 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "functions/ambiance/fn_airbaseInit.sqf",
-        "functions/ambiance/fn_airbaseSpawnArrival.sqf"
-      ],
+      "consumers": [],
       "name": "mkr_arrivalRunwayStop",
       "pos": [
         6129.2188,
@@ -2599,10 +2533,7 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "functions/ambiance/fn_airbaseInit.sqf",
-        "functions/ambiance/fn_airbaseSpawnArrival.sqf"
-      ],
+      "consumers": [],
       "name": "mkr_arrivalRunwayTaxiOut",
       "pos": [
         6302.9102,
@@ -2620,10 +2551,7 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "functions/ambiance/fn_airbaseInit.sqf",
-        "functions/ambiance/fn_airbaseSpawnArrival.sqf"
-      ],
+      "consumers": [],
       "name": "mkr_arrivalSpawn",
       "pos": [
         -3252.3577,
@@ -2641,12 +2569,7 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "functions/ied/fn_iedServerCheckDisposal.sqf",
-        "functions/ied/fn_vbiedServerOnDestroyed.sqf",
-        "functions/ui/fn_uiIncidentGetNextActions.sqf",
-        "initServer.sqf"
-      ],
+      "consumers": [],
       "name": "mkr_eod_disposal",
       "pos": [
         6856.167,
@@ -2664,10 +2587,187 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "functions/ambiance/fn_airbaseInit.sqf",
-        "functions/ambiance/fn_airbasePlaneDepart.sqf"
+      "consumers": [],
+      "name": "palace_central_building",
+      "pos": [
+        5340.4038,
+        4.2456155,
+        4996.3901
       ],
+      "shape": "",
+      "source": "mission.sqm:Presidential Palace",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "palace_guardpost_01",
+      "pos": [
+        5234.9473,
+        4.3279147,
+        4959.9126
+      ],
+      "shape": "",
+      "source": "mission.sqm:Presidential Palace",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "palace_guardpost_02",
+      "pos": [
+        5264.7212,
+        4.3479033,
+        5079.646
+      ],
+      "shape": "",
+      "source": "mission.sqm:Presidential Palace",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "palace_guardpost_03",
+      "pos": [
+        5390.6978,
+        4.205327,
+        5192.5293
+      ],
+      "shape": "",
+      "source": "mission.sqm:Presidential Palace",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "palace_living_quarters",
+      "pos": [
+        5307.9258,
+        4.1399999,
+        4901.3169
+      ],
+      "shape": "",
+      "source": "mission.sqm:Presidential Palace",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "palace_maintenance",
+      "pos": [
+        5275.6021,
+        4.2350001,
+        4830.1782
+      ],
+      "shape": "",
+      "source": "mission.sqm:Presidential Palace",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "palace_parking_lot_01",
+      "pos": [
+        5309.7358,
+        4.1399999,
+        4852.2319
+      ],
+      "shape": "",
+      "source": "mission.sqm:Presidential Palace",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "palace_parking_lot_02",
+      "pos": [
+        5389.7568,
+        4.1399999,
+        5134.938
+      ],
+      "shape": "",
+      "source": "mission.sqm:Presidential Palace",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "palace_security_office",
+      "pos": [
+        5391.0259,
+        4.2849998,
+        5182.6641
+      ],
+      "shape": "",
+      "source": "mission.sqm:Presidential Palace",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "palace_security_wing",
+      "pos": [
+        5361.6152,
+        4.1399999,
+        5096.0996
+      ],
+      "shape": "",
+      "source": "mission.sqm:Presidential Palace",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
       "name": "plane_despawn",
       "pos": [
         -3252.3577,
@@ -2685,9 +2785,259 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [
-        "functions/core/fn_execInitActive.sqf"
+      "consumers": [],
+      "name": "prison_admin_offices",
+      "pos": [
+        2085.0149,
+        4.3200002,
+        1473.952
       ],
+      "shape": "",
+      "source": "mission.sqm:Karkanak Prison",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "prison_central_guard_tower",
+      "pos": [
+        2145.729,
+        4.3200002,
+        1596.2939
+      ],
+      "shape": "",
+      "source": "mission.sqm:Karkanak Prison",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "prison_dorm_01",
+      "pos": [
+        2143.2229,
+        4.3200002,
+        1567.094
+      ],
+      "shape": "",
+      "source": "mission.sqm:Karkanak Prison",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "prison_dorm_02",
+      "pos": [
+        2171.9604,
+        4.4226847,
+        1593.9999
+      ],
+      "shape": "",
+      "source": "mission.sqm:Karkanak Prison",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "prison_dorm_03",
+      "pos": [
+        2147.5881,
+        4.3200002,
+        1628.1787
+      ],
+      "shape": "",
+      "source": "mission.sqm:Karkanak Prison",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "prison_dorm_04",
+      "pos": [
+        2119.5784,
+        4.4222736,
+        1597.6367
+      ],
+      "shape": "",
+      "source": "mission.sqm:Karkanak Prison",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "prison_entry_office",
+      "pos": [
+        2259.7739,
+        4.4070001,
+        1508.532
+      ],
+      "shape": "",
+      "source": "mission.sqm:Karkanak Prison",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "prison_guard_tower_1",
+      "pos": [
+        2083.114,
+        4.3759999,
+        1535.21
+      ],
+      "shape": "",
+      "source": "mission.sqm:Karkanak Prison",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "prison_guard_tower_2",
+      "pos": [
+        2261.3252,
+        4.3200002,
+        1502.7606
+      ],
+      "shape": "",
+      "source": "mission.sqm:Karkanak Prison",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "prison_holding_area",
+      "pos": [
+        2133.3813,
+        4.3200002,
+        1596.4423
+      ],
+      "shape": "RECTANGLE",
+      "source": "mission.sqm:Karkanak Prison",
+      "status": "unresolved",
+      "text": "",
+      "type": "",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "prison_hospital",
+      "pos": [
+        2161.6389,
+        4.52,
+        1470.218
+      ],
+      "shape": "",
+      "source": "mission.sqm:Karkanak Prison",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "prison_intake_01",
+      "pos": [
+        2221.574,
+        4.3200002,
+        1512.783
+      ],
+      "shape": "",
+      "source": "mission.sqm:Karkanak Prison",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "prison_intake_02",
+      "pos": [
+        2223.0796,
+        4.4577188,
+        1525.5261
+      ],
+      "shape": "",
+      "source": "mission.sqm:Karkanak Prison",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "prison_intake_03",
+      "pos": [
+        2209.1799,
+        4.3569999,
+        1544.109
+      ],
+      "shape": "",
+      "source": "mission.sqm:Karkanak Prison",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
       "name": "respawn_west",
       "pos": [
         5725.5,
@@ -2698,6 +3048,132 @@
       "source": "mission.sqm:Empty / System",
       "status": "unresolved",
       "text": " Respawn West",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "tnp_farabad_hq_barracks_1",
+      "pos": [
+        4757.9951,
+        4.1500001,
+        5648.4155
+      ],
+      "shape": "",
+      "source": "mission.sqm:TNP Farabad HQ",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "tnp_farabad_hq_barracks_2",
+      "pos": [
+        4727.2881,
+        4.1500001,
+        5662.9429
+      ],
+      "shape": "",
+      "source": "mission.sqm:TNP Farabad HQ",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "tnp_farabad_hq_garage_1",
+      "pos": [
+        4686.1069,
+        4.2459998,
+        5623.7192
+      ],
+      "shape": "",
+      "source": "mission.sqm:TNP Farabad HQ",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "tnp_farabad_hq_garage_2",
+      "pos": [
+        4698.9609,
+        9.9141912,
+        5631.3535
+      ],
+      "shape": "",
+      "source": "mission.sqm:TNP Farabad HQ",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "tnp_farabad_hq_office_1",
+      "pos": [
+        4722.5352,
+        4.1500001,
+        5594.9063
+      ],
+      "shape": "",
+      "source": "mission.sqm:TNP Farabad HQ",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "tnp_farabad_hq_office_2",
+      "pos": [
+        4729.1025,
+        4.1500001,
+        5612.7451
+      ],
+      "shape": "",
+      "source": "mission.sqm:TNP Farabad HQ",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "tnp_farabad_hq_security_office",
+      "pos": [
+        4751.3374,
+        4.4951596,
+        5628.3696
+      ],
+      "shape": "",
+      "source": "mission.sqm:TNP Farabad HQ",
+      "status": "unresolved",
+      "text": "",
       "type": "Empty",
       "usageNotes": ""
     },
@@ -2739,6 +3215,6 @@
     }
   ],
   "summary": {
-    "total": 137
+    "total": 177
   }
 }
