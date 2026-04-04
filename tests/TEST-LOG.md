@@ -3104,3 +3104,41 @@ Contrast with the correct pattern used in the background check handler itself:
 | 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict <4 files>` | PASS | No compat patterns found |
 | 2 | sqflint | `sqflint -e w <each file>` | PASS | No warnings or errors |
 | 3 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime; requires live session to confirm district names appear on map markers |
+
+---
+
+## [2026-04-04] mission.sqm full scan — markers, units, vehicles — F-mode
+
+**Branch:** copilot/index-mission-sqm-markers-units-vehicles
+**Commit:** e5e6720 (pre-vehicle-index; final commit SHA pending push)
+
+**Scenario:** Full deterministic scan of `mission.sqm` to regenerate all agent-reference indexes: markers, units (grouped), and standalone vehicles/objects.
+
+### Scan results
+
+| Index | Tool | Output files | Count |
+|-------|------|--------------|-------|
+| Markers | `python3 tools/generate_marker_index.py` | `docs/reference/marker-index.md`, `docs/reference/marker-index.json` | **177** (was 137) |
+| Units (grouped) | `python3 tools/generate_unit_index.py` | `docs/reference/unit-index.md`, `docs/reference/unit-index.json` | **85 groups, 240 units** |
+| Vehicles / Objects | `python3 tools/generate_vehicle_index.py` (new) | `docs/reference/vehicle-index.md`, `docs/reference/vehicle-index.json` | **1558 standalone objects** |
+
+### Vehicle index breakdown (new)
+
+| Category | Count |
+|---|---|
+| Fixed-Wing | 12 |
+| Rotary-Wing | 14 |
+| Ground Vehicle | 103 |
+| Infantry (standalone) | 6 |
+| Equipment | 12 |
+| Prop | 1411 |
+| **Total** | **1558** |
+
+### Validation
+
+| # | Check | Command | Result |
+|---|-------|---------|--------|
+| 1 | Marker index parity | `python3 scripts/dev/validate_marker_index.py --sqm mission.sqm` | PASS — json=177/md-summary=177/md-table=177 across all modes |
+| 2 | Vehicle index generator | `python3 tools/generate_vehicle_index.py` | PASS — 0 unclassified objects |
+| 3 | Unit index generator | `python3 tools/generate_unit_index.py` | PASS — 85 groups, 240 units |
+| 4 | Dedicated-server runtime | N/A | BLOCKED — static scan only; no Arma 3 runtime in CI |
