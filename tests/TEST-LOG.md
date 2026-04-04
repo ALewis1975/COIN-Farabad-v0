@@ -2854,3 +2854,29 @@ Contrast with the correct pattern used in the background check handler itself:
 | 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict data/farabad_site_templates.sqf` | PASS | No compat patterns found |
 | 2 | sqflint | `sqflint -e w data/farabad_site_templates.sqf` | PASS | No warnings |
 | 3 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime in container; requires live session to confirm correct civilians spawn at all three sites |
+
+---
+
+## [2026-04-04] District display_name – B-mode feature
+
+**Branch:** copilot/add-district-names
+**Commit:** 9db32115e50ab291b3081fb8c9a9c76fe7de63d1 (pre-change; updated below after push)
+
+**Scenario:** Added human-readable `display_name` field to each district record (D01–D20). Names appear on map markers and are stored in the per-district hashmap and published snapshots. Canonical IDs (D01..D20) unchanged. Also fixed pre-existing sqflint compat violations in all four touched files.
+
+### Changes made
+
+| File | Change |
+|------|--------|
+| `functions/civsub/fn_civsubDistrictsCreateDefaults.sqf` | Added `_names` array (20 names); added `_hg` helper; added `["display_name", _displayName]` field to each district hashmap; fixed `_x # N` → `select`; fixed `getOrDefault` method form → `_hg` |
+| `functions/civsub/fn_civsubTick.sqf` | Added `_hg` + `_keysFn` helpers; added `["display_name", ...]` to published snapshot; fixed all `getOrDefault` method-form violations; replaced `keys _districts` with `[_districts] call _keysFn` |
+| `functions/civsub/fn_civsubDeltaApplyToDistrict.sqf` | Added `["display_name", ...]` to published snapshot; fixed `getOrDefault` method-form violations; fixed `isNotEqualTo` violation; fixed unused `_name` param in diag_log; added `_hg2` redeclaration in switch block |
+| `functions/core/fn_districtMarkersUpdate.sqf` | Added `_hg` helper; removed `_hmCreate` (unused); fixed `_y` implicit var → explicit lookup; fixed `_cent # N` → `select`; fixed `getOrDefault` method form; updated marker text to include `display_name` |
+
+### Static Validation
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict <4 files>` | PASS | No compat patterns found |
+| 2 | sqflint | `sqflint -e w <each file>` | PASS | No warnings or errors |
+| 3 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime; requires live session to confirm district names appear on map markers |
