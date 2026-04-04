@@ -36,6 +36,10 @@ if (isNull _veh) exitWith {
 
 private _vehType = typeOf _veh;
 private _isHeli  = (_veh isKindOf "Helicopter");
+// UAS / RPAS detection: fixed-wing UAVs (e.g. RQ-4A Global Hawk) need ISR loiter
+// treatment rather than a standard fly-to-despawn departure.
+// Detect by type name; covers USAF_RQ4A and any mod variant containing "RQ4".
+private _isUAS   = (!_isHeli) && { (_vehType find "RQ4") >= 0 || { (toLower _vehType) find "uav" >= 0 } };
 
 // --- helpers ---
 private _fnNormalize = {
@@ -338,9 +342,65 @@ if (_isEC130) exitWith {
     true
 };
 
+// --- UAS / RPAS loiter (ISR platforms: RQ-4A etc.) ---
+// UAS assets provide persistent ISR coverage and should not depart.
+// After taxi, they climb to operational altitude and loiter over the AO centre,
+// mirroring the EC-130 treatment. Sensors are activated for realism.
+if (_isUAS) exitWith {
+    _veh setVehicleRadar 1;
+    _veh setVehicleReportRemoteTargets true;
+    _veh setVehicleReceiveRemoteTargets true;
+    _veh setVehicleReportOwnPosition true;
+    { _veh enableVehicleSensor [_x, true]; } forEach (listVehicleSensors _veh);
+
+    private _uasAlt = missionNamespace getVariable ["airbase_v1_uas_loiter_alt_m", 6096]; // 20,000 ft
+    if (!(_uasAlt isEqualType 0) || { _uasAlt < 500 }) then { _uasAlt = 6096; };
+
+    private _uasRadius = missionNamespace getVariable ["airbase_v1_uas_loiter_radius_m", 8000];
+    if (!(_uasRadius isEqualType 0) || { _uasRadius < 1000 }) then { _uasRadius = 8000; };
+
+    private _uasCenter = [worldSize / 2, worldSize / 2, 0];
+
+    _veh engineOn true;
+    _veh land "NONE";
+    _veh flyInHeight _uasAlt;
+
+    while { (count (waypoints _grp)) > 0 } do { deleteWaypoint ((waypoints _grp) select 0); };
+    private _wpU = _grp addWaypoint [_uasCenter, 0];
+    _wpU setWaypointType "LOITER";
+    _wpU setWaypointLoiterType "CIRCLE_L";
+    _wpU setWaypointLoiterRadius _uasRadius;
+    _wpU setWaypointSpeed "NORMAL";
+    _wpU setWaypointBehaviour "SAFE";
+
+    if (_debugOps) then {
+        ["OPS", format ["AIRBASE: %1 UAS on-station loiter (ISR)", _fid], _uasCenter, 0, [
+            ["vehType", _vehType],
+            ["alt_m", _uasAlt],
+            ["radius_m", _uasRadius]
+        ]] call ARC_fnc_intelLog;
+    };
+
+    diag_log format ["[AIRBASESUB] %1 UAS (%2) on-station loiter — alt=%3 m radius=%4 m", _fid, _vehType, _uasAlt, _uasRadius];
+    true
+};
+
 // --- takeoff / fly-out ---
 private _despawnMkr = missionNamespace getVariable ["airbase_v1_plane_despawn_marker", "plane_despawn"]; 
 private _despawnPos = getMarkerPos _despawnMkr;
+
+// Validate despawn marker position. A position at [0,0,0] means the marker is
+// missing; a negative x means it is off the west edge of the map (wrong direction
+// for east-facing runway departures). Both will cause aircraft to fly off-map,
+// hit the boundary, and freeze. Abort to idle so a corrected marker can be placed.
+private _despawnX = _despawnPos select 0;
+if (_despawnPos isEqualTo [0,0,0] || { _despawnX < 0 }) exitWith {
+    diag_log format ["[AIRBASESUB] %1 ABORT: despawn marker '%2' is missing or off-map (pos=%3). Place the marker east of the airbase boundary and restart.", _fid, _despawnMkr, _despawnPos];
+    [_crewLive, _veh] call _fnAbortToIdle;
+    _asset set ["state", "PARKED"];
+    _asset set ["activeFlight", ""];
+    false
+};
 
 while { (count (waypoints _grp)) > 0 } do { deleteWaypoint ((waypoints _grp) # 0); };
 _grp setSpeedMode "FULL";

@@ -97,6 +97,27 @@ for "_i" from 1 to _tries do
     private _near = nearestObjects [_pos, ["LandVehicle"], _minSep];
     if ((count _near) > 0) then { continue; };
 
+    // Exclusion zone check: skip positions inside registered no-traffic areas.
+    // ARC_trafficExclusionZones is set by fn_civsubTrafficInit.
+    // Format: array of [[x,y,z], radiusM] entries.
+    private _exclZones = missionNamespace getVariable ["ARC_trafficExclusionZones", []];
+    if ((_exclZones isEqualType []) && { (count _exclZones) > 0 }) then
+    {
+        private _excluded = false;
+        {
+            if (_x isEqualType [] && { (count _x) >= 2 }) then
+            {
+                private _zp = _x select 0;
+                private _zr = _x select 1;
+                if ((_zp isEqualType []) && { (count _zp) >= 2 } && { (_zr isEqualType 0) }) then
+                {
+                    if ((_pos distance2D _zp) <= _zr) then { _excluded = true; };
+                };
+            };
+        } forEach _exclZones;
+        if (_excluded) then { continue; };
+    };
+
     // Return the base road direction (caller may flip 180 for variety)
     [_pos, _dir]
 };
