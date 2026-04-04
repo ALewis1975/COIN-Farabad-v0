@@ -24,9 +24,9 @@ class EditorData
 	};
 	class Camera
 	{
-		pos[]={-3252.3577,66.396042,11359.788};
-		dir[]={0,-0.70710683,0.70710671};
-		up[]={0,0.70710665,0.70710677};
+		pos[]={1326.5216,92.807877,9059.3418};
+		dir[]={0,-0.70710683,0.70710683};
+		up[]={0,0.70710677,0.70710677};
 		aside[]={0.99999994,0,-0};
 	};
 };
@@ -3980,7 +3980,7 @@ class Mission
 						class Item2
 						{
 							dataType="Marker";
-							position[]={273.50821,112.41631,10013.855};
+							position[]={218.80875,43.882961,8633.2549};
 							name="plane_despawn";
 							type="Empty";
 							id=84;
@@ -4135,7 +4135,7 @@ class Mission
 						};
 					};
 					id=81;
-					atlOffset=12.099469;
+					atlOffset=4.3003836;
 				};
 				class Item1
 				{
@@ -8039,7 +8039,7 @@ class Mission
 						class Item3
 						{
 							dataType="Marker";
-							position[]={259.8327,53.229893,9439.7451};
+							position[]={218.80875,58.870594,9494.4219};
 							name="mkr_arrivalSpawn";
 							type="Empty";
 							id=101;
@@ -8090,7 +8090,7 @@ class Mission
 						};
 					};
 					id=363;
-					atlOffset=13.342312;
+					atlOffset=16.144938;
 				};
 				class Item5
 				{
@@ -11775,7 +11775,7 @@ class Mission
 						class Item2
 						{
 							dataType="Marker";
-							position[]={6882.7173,8.4914999,1532.2246};
+							position[]={-7248,52.9855,12050.586};
 							name="arc_rotary_pad_3";
 							text=" Pad 3 (CH-47 [AI])";
 							type="mil_dot";
@@ -11784,6 +11784,7 @@ class Mission
 							a=0.5;
 							b=0.5;
 							id=3195;
+							atlOffset=12.117588;
 							class CustomAttributes
 							{
 								class Attribute0
@@ -12124,7 +12125,7 @@ class Mission
 						};
 					};
 					id=3205;
-					atlOffset=0.00037479401;
+					atlOffset=1.360014;
 				};
 				class Item12
 				{
@@ -12837,7 +12838,7 @@ class Mission
 				};
 			};
 			id=80;
-			atlOffset=-34.714222;
+			atlOffset=-39.450573;
 		};
 		class Item2
 		{
