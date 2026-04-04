@@ -3265,3 +3265,26 @@ Contrast with the correct pattern used in the background check handler itself:
 - Confirm RQ-4A enters loiter after taxi (requires live session)
 - Confirm `plane_despawn` marker repositioned east of runway for manned aircraft (Eden edit required by operator)
 - Confirm no civ vehicles spawn inside 250 m of `prison_central_guard_tower` (requires live session)
+
+---
+## 2026-04-04 — branch: copilot/ensure-collision-avoidance-vehicles
+
+### Scope
+- `functions/civsub/fn_civsubTrafficPickRoadsidePos.sqf`
+- `functions/sitepop/fn_sitePopBuildGroup.sqf`
+
+### Changes
+1. **CIVTRAF roadside picker return bug** — for-loop line 123 evaluated `[_pos, _dir]` as a discarded expression; `[]` at line 126 was always the function return. Now uses `break` + pre-declared `_foundPos`/`_foundDir` result vars, consistent with SpawnParked pattern.
+2. **SitePop vehicle collision check** — added `nearestObjects [_spawnPos, ["LandVehicle"], 6]` guard before `createVehicle`; `continue` skips already-occupied slots.
+
+### Tests Run
+| Check | Command | Result |
+|---|---|---|
+| sqflint compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict <files>` | PASS |
+| sqflint lint | `sqflint -e w <files>` | BLOCKED (sqflint not installed in CI env) |
+| Gameplay / MP | local hosted MP | BLOCKED (requires game runtime) |
+| JIP / dedicated | dedicated server run | BLOCKED (no dedicated rig) |
+
+### Risk Notes
+- CIVTRAF picker fix: moving traffic should now spawn (was silently discarding all valid positions). Parked traffic fallback path (`findEmptyPosition`) will now be used less — primary roadside picker succeeds. Net effect: more and better-positioned parked vehicles, moving vehicles now appear.
+- SitePop collision check: vehicle count at a site may be 1–2 fewer if slots overlap pre-existing objects at spawn time. This is safe; the group still forms correctly with fewer vehicles.
