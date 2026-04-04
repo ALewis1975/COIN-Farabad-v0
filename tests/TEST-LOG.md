@@ -3221,3 +3221,47 @@ Contrast with the correct pattern used in the background check handler itself:
 5. **[P1 — Config]** Remove `UK3CB_MEE_O_AR_01` from `initServer.sqf:189` or confirm correct 3CB classname to silence 18 VPOOL WARNs/session.
 6. **[P1 — Missing markers]** Define ambient-inbound route markers in Eden for AIRBASE ambient arrival (MISSING_ROUTE_MARKERS for FLT-0005).
 7. **[P2 — Eden]** Place `Patrol_07`, `Patrol_08`, `Patrol_09` in mission or remove from `ARC_lightbarStartupServer.sqf`.
+## [2026-04-04] Prison / UAV / CivTraffic bug-fix session — Mode A
+
+**Branch:** copilot/test-prisoner-system-performance
+**Commit:** pending (pre-push)
+
+**Scenario:** Live playtest at Karkanak Prison revealed five actionable bugs. Root-cause analysis performed via RPT log review and source inspection. Fixes applied in single session.
+
+### Findings
+
+| # | Finding | Severity | Root Cause |
+|---|---------|----------|------------|
+| F1 | Prisoners retain backpacks after spawn | P1 | `uk3cb_factions_common_fnc_unit_loadout` EH re-applies class loadout (incl. backpack) in the frame after `createUnit`, after the immediate `removeBackpack` has already run |
+| F2 | No TNP guards at Karkanak Prison | P1 | `_tnpPool` and `_tnpMedPool` had no vanilla BLUFOR fallbacks; when 3CB TKP sub-mod classes fail `isClass(CfgVehicles)` filter, all 10+ guard groups are silently skipped |
+| F3 | Prisoners have no CIVSUB interaction | P1 | Prisoners spawned via SitePop never pass through `fn_civsubCivAssignIdentity`; `civsub_v1_isCiv` never set; `fn_civsubCivAddContactActions` guard fails |
+| F4 | UAV (plane6 / USAF_RQ4A) flies at low alt to west map edge and freezes | P0 | `plane_despawn` marker placed at x=-3252 (off-map west); aircraft follows waypoints off the west edge and hits map boundary before reaching 300 m despawn trigger; aircraft freezes rather than despawning. RQ-4A is an ISR asset and should loiter, not depart |
+| F5 | Civ vehicles spawn inside prison dormitory compound | P1 | `fn_civsubTrafficPickRoadsidePos` has no exclusion for the prison footprint; roads inside the compound are valid `nearRoads` hits |
+
+### Fixes Applied
+
+| # | File(s) | Fix |
+|---|---------|-----|
+| F1 | `functions/sitepop/fn_sitePopBuildGroup.sqf` | Deferred re-strip: after unit loop, spawns `{ sleep 0.1; removeAllWeapons/Items/Vest/Backpack }` for prisoner units so UK3CB EH runs first |
+| F2 | `data/farabad_site_templates.sqf` | Added vanilla `B_Soldier_F`, `B_Soldier_AR_F`, `B_GEN_Soldier_F` to `_tnpPool`; `B_Medic_F`, `B_Soldier_F` to `_tnpMedPool` as fallbacks |
+| F3 | `functions/sitepop/fn_sitePopBuildGroup.sqf` | After prisoner tags set, calls `ARC_fnc_civsubCivAssignIdentity` with district resolved from `_effectiveSitePos`; guarded by `civsub_v1_enabled` and nil checks |
+| F4 | `functions/ambiance/fn_airbasePlaneDepart.sqf` | (a) Added `_isUAS` detection (`USAF_RQ4A` / type containing "RQ4"/"uav"); (b) UAS exits into ISR loiter at 6096 m altitude, 8000 m orbit radius, sensors enabled — mirroring EC-130 treatment; (c) Added despawn marker validation: if pos is `[0,0,0]` or x<0 (off-map west), aborts to idle with actionable RPT error |
+| F5 | `functions/civsub/fn_civsubTrafficPickRoadsidePos.sqf`, `fn_civsubTrafficInit.sqf` | Traffic init registers `prison_central_guard_tower` + 250 m as `ARC_trafficExclusionZones`; position picker skips any candidate inside a registered zone |
+
+### Static Validation
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan — 4 changed files (excl. pre-existing fn_airbasePlaneDepart violations) | `python3 scripts/dev/sqflint_compat_scan.py --strict <4 files>` | PASS | No new patterns in authored lines |
+| 2 | Compat scan — fn_airbasePlaneDepart.sqf | `python3 scripts/dev/sqflint_compat_scan.py --strict fn_airbasePlaneDepart.sqf` | WARN (pre-existing) | 23 pre-existing violations in helper lambdas and EC-130 block; none in new UAS/despawn code |
+| 3 | sqflint | N/A | BLOCKED | sqflint not installed in CI container |
+| 4 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime in container |
+
+### Deferred Checks
+
+- Confirm TNP vanilla fallback soldiers appear at prison when 3CB TKP classes are absent (requires live session)
+- Confirm prisoner backpacks removed with 0.1 s deferred strip (requires UK3CB loaded session)
+- Confirm CIVSUB contact actions appear on prisoner units (requires live session with ACE)
+- Confirm RQ-4A enters loiter after taxi (requires live session)
+- Confirm `plane_despawn` marker repositioned east of runway for manned aircraft (Eden edit required by operator)
+- Confirm no civ vehicles spawn inside 250 m of `prison_central_guard_tower` (requires live session)
