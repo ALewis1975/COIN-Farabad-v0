@@ -44,6 +44,33 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-04 02:25 UTC — Bug fix: CH-47 (and other multi-crew RW) banks right on takeoff and does not climb
+
+**Branch/Commit:** copilot/fix-ch47-takeoff-banking-issue @ e5a9756 (pre-change base; patch applied on top)
+
+**Scenario:** CH-47F (and potentially other rotary-wing assets with two crew) banks hard right after the taxi playback completes and fails to gain altitude, causing the helicopter to collide with a hangar or building near the runway.
+
+### Root cause
+
+| # | Bug | Root cause | File(s) |
+|---|-----|-----------|---------|
+| 1 | Helicopter banks right and skims ground on takeoff (P1) | `fn_airbasePlaneDepart.sqf` disabled AI (`disableAI "PATH"/"MOVE"/"FSM"`) only for `_pilot` before `BIS_fnc_unitPlay` taxi playback. The second crew member (co-pilot/commander) retained active AI throughout taxi, allowing it to issue competing movement commands. After unitPlay, the co-pilot AI continued to influence heading, causing the right bank and suppressing altitude gain. | `fn_airbasePlaneDepart.sqf:254-264` |
+
+### Changes made
+
+| File | Change |
+|------|--------|
+| `fn_airbasePlaneDepart.sqf` | Extended `disableAI "PATH"/"MOVE"/"FSM"` + `setBehaviour`/`setCombatMode` to ALL `_crewLive` (forEach) before `BIS_fnc_unitPlay`; extended `enableAI` restoration to ALL `_crewLive` after taxi completes |
+
+### Static Validation
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf` | PASS (new code) | 24 pre-existing violations in untouched lines; zero new violations introduced by this change |
+| 2 | sqflint | `sqflint -e w functions/ambiance/fn_airbasePlaneDepart.sqf` | PASS (new code) | All errors are pre-existing `#`/`getOrDefault`/`isNotEqualTo` patterns in untouched lines |
+| 3 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime in container; follow-up required: observe CH-47F departure in hosted/dedicated session; confirm helicopter climbs straight out and does not bank into hangar |
+
+---
 
 ## 2026-04-04 00:42 UTC — Bug fix: ACCESS_VIOLATION crash from invalid classname in virtual pool createUnit
 

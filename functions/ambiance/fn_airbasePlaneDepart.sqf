@@ -251,17 +251,19 @@ if ((count _taxiFrames) == 0) exitWith {
 _veh engineOn true;
 if (_veh isKindOf "Air") then { _veh setCollisionLight true; _veh setPilotLight true; };
 
-_pilot disableAI "PATH";
-_pilot disableAI "MOVE";
-_pilot disableAI "FSM";
-_pilot setBehaviour "CARELESS";
-_pilot setCombatMode "BLUE";
+// Disable AI for ALL crew during unitPlay so no crew member (including co-pilot/commander)
+// can issue competing movement commands and cause the helicopter to bank or deviate.
+{
+    _x disableAI "PATH";
+    _x disableAI "MOVE";
+    _x disableAI "FSM";
+    _x setBehaviour "CARELESS";
+    _x setCombatMode "BLUE";
+} forEach _crewLive;
 
 private _okTaxi = [_veh, _taxiFrames] call _fnUnitPlayBlocking;
 
-_pilot enableAI "PATH";
-_pilot enableAI "MOVE";
-_pilot enableAI "FSM";
+{ _x enableAI "PATH"; _x enableAI "MOVE"; _x enableAI "FSM"; } forEach _crewLive;
 
 _veh enableSimulationGlobal true;
 _veh engineOn true;
