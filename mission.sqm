@@ -20,14 +20,14 @@ class EditorData
 	};
 	class LayerIndexProvider
 	{
-		nextID=111097;
+		nextID=111296;
 	};
 	class Camera
 	{
-		pos[]={6207.6309,32.022575,1303.017};
-		dir[]={0,-0.70710677,0.70710683};
-		up[]={0,0.70710677,0.70710671};
-		aside[]={0.99999994,0,-0};
+		pos[]={6606.0728,33.489998,1588.3513};
+		dir[]={-0.0046522543,-0.79832435,-0.60220975};
+		up[]={-0.0061671152,0.60222769,-0.79830045};
+		aside[]={-0.99997008,-2.3283064e-10,0.0077250744};
 	};
 };
 binarizationWanted=0;
@@ -1280,6 +1280,19 @@ class CustomAttributes
 		name="Multiplayer";
 		class Attribute0
 		{
+			property="ENH_saveLoadout";
+			expression="if (!isMultiplayer || !_value || is3DEN || !hasInterface) exitWith {};        0 spawn        {            waitUntil {sleep 1; !isNull player};            player setVariable ['ENH_savedLoadout', getUnitloadout player];            player addMPEventHandler ['MPRespawn',            {                params ['_unit'];                private _loadout = _unit getVariable ['ENH_savedLoadout', []];                if (_loadout isNotEqualTo []) then {_unit setUnitLoadout _loadout};            }];        };";
+			class Value
+			{
+				class data
+				{
+					singleType="BOOL";
+					value=1;
+				};
+			};
+		};
+		class Attribute1
+		{
 			property="RespawnTemplates";
 			expression="true";
 			class Value
@@ -1299,19 +1312,6 @@ class CustomAttributes
 							};
 						};
 					};
-				};
-			};
-		};
-		class Attribute1
-		{
-			property="ENH_saveLoadout";
-			expression="if (!isMultiplayer || !_value || is3DEN || !hasInterface) exitWith {};        0 spawn        {            waitUntil {sleep 1; !isNull player};            player setVariable ['ENH_savedLoadout', getUnitloadout player];            player addMPEventHandler ['MPRespawn',            {                params ['_unit'];                private _loadout = _unit getVariable ['ENH_savedLoadout', []];                if (_loadout isNotEqualTo []) then {_unit setUnitLoadout _loadout};            }];        };";
-			class Value
-			{
-				class data
-				{
-					singleType="BOOL";
-					value=1;
 				};
 			};
 		};
@@ -12864,8 +12864,8 @@ class Mission
 								class Item0
 								{
 									dataType="Trigger";
-									position[]={6910.4395,8.4899998,1612.5405};
-									angle=3.681819;
+									position[]={6605.8257,8.5659437,1565.0323};
+									angle=4.7180357;
 									class Attributes
 									{
 										onActivation="[m151, 600, 30, false, 0] spawn BIS_fnc_unitCapture;";
@@ -13146,7 +13146,7 @@ class Mission
 						};
 					};
 					id=449;
-					atlOffset=-37.901436;
+					atlOffset=-35.101563;
 				};
 				class Item1
 				{
@@ -31029,8 +31029,8 @@ class Mission
 											{
 												class Attribute0
 												{
-													property="ENH_enableHeadlights";
-													expression="[_this, _value] remoteExec ['setPilotLight', _this]";
+													property="ENH_doStop";
+													expression="if (!is3DEN && _value) then {doStop _this}";
 													class Value
 													{
 														class data
@@ -31081,8 +31081,8 @@ class Mission
 												};
 												class Attribute4
 												{
-													property="ENH_doStop";
-													expression="if (!is3DEN && _value) then {doStop _this}";
+													property="ENH_enableHeadlights";
+													expression="[_this, _value] remoteExec ['setPilotLight', _this]";
 													class Value
 													{
 														class data
@@ -109502,7 +109502,7 @@ class Mission
 				};
 			};
 			id=448;
-			atlOffset=0.67115211;
+			atlOffset=0.67051315;
 		};
 		class Item3
 		{
@@ -110340,8 +110340,8 @@ class Mission
 					dataType="Object";
 					class PositionInfo
 					{
-						position[]={6865.3813,8.4914389,1462.0734};
-						angles[]={0,2.0967338,0};
+						position[]={6819.0737,8.4921885,1623.4229};
+						angles[]={0.0076115699,3.1329513,0};
 					};
 					side="West";
 					flags=6;
@@ -110353,7 +110353,6 @@ class Mission
 					};
 					id=4433;
 					type="B_Deck_Crew_F";
-					atlOffset=0.00049972534;
 					class CustomAttributes
 					{
 						class Attribute0
@@ -110452,7 +110451,6 @@ class Mission
 				};
 			};
 			id=4432;
-			atlOffset=0.00049972534;
 			class CustomAttributes
 			{
 				class Attribute0
@@ -110476,8 +110474,8 @@ class Mission
 			dataType="Object";
 			class PositionInfo
 			{
-				position[]={6913.7349,9.9338989,1608.323};
-				angles[]={0,2.0967338,0};
+				position[]={6603.583,10.010329,1564.7059};
+				angles[]={0.0076115699,3.1329513,0};
 			};
 			side="West";
 			flags=6;
@@ -110487,7 +110485,6 @@ class Mission
 			};
 			id=4434;
 			type="Peral_M151";
-			atlOffset=0.00049972534;
 			class CustomAttributes
 			{
 				class Attribute0
