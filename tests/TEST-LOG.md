@@ -11,6 +11,50 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-04 20:53 UTC — Development-state assessment and task-plan refresh
+
+**Branch/Commit:** copilot/assess-development-state @ 5b74c68 (pre-edit baseline; assessment docs added on top)
+
+**Scenario:** Evidence-focused assessment pass to reconcile current source, mission data, existing test-log history, and last-known runtime evidence before planning follow-up work. Goal: separate confirmed open defects from stale findings and runtime-unverified fixes.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `docs/qa/Development_State_Assessment_2026-04-04.md` | Added current-head assessment, verified issue ledger, and PR-sized task plan grouped by risk/ownership |
+
+### Checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | State migration validation | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios |
+| 2 | Marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | All modes passed |
+| 3 | Test-log commit guard | `bash scripts/dev/check_test_log_commits.sh` | PASS | Passed after adding `~/.local/bin` to `PATH` so `rg` resolves |
+| 4 | AIRBASE planning static checks | `bash tests/static/airbase_planning_mode_checks.sh` | PASS | Runtime gate/planning-mode checks clean |
+| 5 | CASREQ snapshot static checks | `bash tests/static/casreq_snapshot_contract_checks.sh` | PASS | Snapshot contract checks clean |
+| 6 | Repo diff sanity | `git --no-pager diff --check` | PASS | No whitespace/conflict-marker issues |
+| 7 | Targeted compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbaseInit.sqf functions/ambiance/fn_airbaseBuildRouteDecision.sqf functions/ambiance/fn_airbaseTick.sqf functions/sitepop/fn_sitePopBuildGroup.sqf functions/prison/fn_prisonEvalIncident.sqf functions/world/fn_worldGateBarrierInit.sqf data/paths/taxiPath_UH_60M_01.sqf` | FAIL (pre-existing) | Existing `trim` / `isNotEqualTo` / `#` patterns remain in AIRBASE files; assessment recorded, no code change in this pass |
+| 8 | Targeted sqflint | `sqflint -e w functions/ambiance/fn_airbaseInit.sqf functions/sitepop/fn_sitePopBuildGroup.sqf functions/prison/fn_prisonEvalIncident.sqf functions/world/fn_worldGateBarrierInit.sqf` | WARN (pre-existing) | `fn_sitePopBuildGroup.sqf` warns on `_this`; `fn_worldGateBarrierInit.sqf` warns on unused `_guardObj` |
+| 9 | Local MP runtime | N/A | BLOCKED | No Arma 3 runtime in container |
+| 10 | Dedicated/JIP runtime | N/A | BLOCKED | No dedicated/JIP environment in container |
+
+### Key assessment outcomes
+
+- AIRBASE arrival-route defaults are already remapped to existing AEON markers; remaining work is fresh dedicated runtime verification.
+- `data/paths/taxiPath_UH_60M_01.sqf` now contains captured path data, so old “empty taxi path” runtime evidence is likely stale until reproven on current head.
+- `plane_despawn` is now on-map in `mission.sqm`, so the earlier off-map blocker is stale for current source.
+- `fn_prisonEvalIncident.sqf` already handles `prison_holding_area` as a rectangle marker correctly.
+- `fn_sitePopBuildGroup.sqf` still checks anchors via `getMarkerType`, so `prison_holding_area` remains a confirmed current-head bug for SitePop anchor resolution.
+- `mission.sqm` still lacks the named `ARC_barrier_*` / `ARC_guardpost_*` objects required by `fn_worldGateBarrierInit.sqf`; this remains an open Eden/world-data prerequisite gap.
+
+### Deferred follow-up
+
+- Dedicated AIRBASE smoke on current head: confirm no `MISSING_ROUTE_MARKERS`, no UH-60 disable log, and expected FW/UAS behavior.
+- Local MP prison/sitepop smoke: confirm holding-area anchor behavior, CIVSUB interactions, and prison traffic exclusion.
+- Dedicated JIP/reconnect/respawn validation for AIRBASE/public-state ownership and late-client correctness.
+
+---
+
 ## 2026-04-04 15:32 UTC — Karkanak Prison / PSI Architecture (all 5 PR layers)
 
 **Branch/Commit:** copilot/update-prison-spawning-design @ 4301b18 (pre-edit; changes applied on top)
