@@ -78,6 +78,64 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-04 02:45 UTC — Bug fix: CH-47F and UH-60M crew not boarding (missing Eden variable names) + door-gun seat assignment
+
+**Branch/Commit:** copilot/fix-ch47-takeoff-banking-issue @ 4ed1aa529e499b277634c9698291c7331af2dbb7
+
+**Scenario:** Crew Chief and Door Gunner on CH-47F (and identically structured UH-60M) were not boarding before taxi because their units had no variable names set in the Eden Editor — `crewResolved` pushed `objNull` for them, `_crewLive` filtered them out, and boarding ran with pilot only. User assigned names in Eden. Additionally, even with names, indices 2+ were sent to `assignAsCargo` rather than the correct left/right door-gun turret seats.
+
+### Root causes
+
+| # | Bug | Root cause | File(s) |
+|---|-----|-----------|---------|
+| 1 | Crew Chief + Door Gunner never board (P1) | `fn_airbaseInit.sqf` crewVars for CH-47F listed `["CH_47F_01D","CH_47F_01G"]` and for UH-60M listed `["UH_60M_01D","UH_60M_01G"]` — the Gunner vars (`CH_47F_01G`, `UH_60M_01G`) were not set in Eden, so they resolved to `objNull` and were excluded from `_crewLive` | `fn_airbaseInit.sqf:292-293` |
+| 2 | Door-gun crew assigned to cargo instead of turret seats (P1) | `fn_airbasePlaneDepart.sqf` boarding loop assigned all indices ≥ 2 via `assignAsCargo`. Door gunners must use `assignAsTurret` with the correct turret path | `fn_airbasePlaneDepart.sqf:176-180` |
+
+### Changes made
+
+| File | Change |
+|------|--------|
+| `fn_airbaseInit.sqf` | CH-47F crewVars updated to `["CH_47F_01D","CH_47F_01CP","CH_47F_01CC","CH_47F_01DD"]`; UH-60M crewVars updated to `["UH_60M_01D","UH_60M_01CP","UH_60M_01CC","UH_60M_01DG"]` |
+| `fn_airbasePlaneDepart.sqf` | `_fnSeatScan` extended to collect `_gunnerTurretPaths` (ordered turret paths for all "gunner" role seats via `fullCrew`); index-1 boarding now tracks `_u2UsedGunner`; index 2+ loop uses `assignAsTurret [_veh, _gunnerTurretPaths select _tpIdx]` with cargo fallback; replaced banned `# 1` / `# _i` with `select` in modified blocks |
+
+### Static Validation
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf functions/ambiance/fn_airbaseInit.sqf` | PASS (new code) | 22 pre-existing violations in untouched lines; zero new violations |
+| 2 | sqflint | `sqflint -e w functions/ambiance/fn_airbasePlaneDepart.sqf` | PASS (new code) | All errors pre-existing `#`/`getOrDefault`/`isNotEqualTo` in untouched lines |
+| 3 | sqflint | `sqflint -e w functions/ambiance/fn_airbaseInit.sqf` | PASS | No errors |
+| 4 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime in container; follow-up: confirm all 4 CH-47F crew walk to helo and board (pilot→driver, co-pilot→commander, crew chief→left door gun, door gunner→right door gun); repeat for UH-60M |
+
+---
+
+## 2026-04-04 02:25 UTC — Bug fix: CH-47 (and other multi-crew RW) banks right on takeoff and does not climb
+
+**Branch/Commit:** copilot/fix-ch47-takeoff-banking-issue @ e5a9756 (pre-change base; patch applied on top)
+
+**Scenario:** CH-47F (and potentially other rotary-wing assets with two crew) banks hard right after the taxi playback completes and fails to gain altitude, causing the helicopter to collide with a hangar or building near the runway.
+
+### Root cause
+
+| # | Bug | Root cause | File(s) |
+|---|-----|-----------|---------|
+| 1 | Helicopter banks right and skims ground on takeoff (P1) | `fn_airbasePlaneDepart.sqf` disabled AI (`disableAI "PATH"/"MOVE"/"FSM"`) only for `_pilot` before `BIS_fnc_unitPlay` taxi playback. The second crew member (co-pilot/commander) retained active AI throughout taxi, allowing it to issue competing movement commands. After unitPlay, the co-pilot AI continued to influence heading, causing the right bank and suppressing altitude gain. | `fn_airbasePlaneDepart.sqf:254-264` |
+
+### Changes made
+
+| File | Change |
+|------|--------|
+| `fn_airbasePlaneDepart.sqf` | Extended `disableAI "PATH"/"MOVE"/"FSM"` + `setBehaviour`/`setCombatMode` to ALL `_crewLive` (forEach) before `BIS_fnc_unitPlay`; extended `enableAI` restoration to ALL `_crewLive` after taxi completes |
+
+### Static Validation
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf` | PASS (new code) | 24 pre-existing violations in untouched lines; zero new violations introduced by this change |
+| 2 | sqflint | `sqflint -e w functions/ambiance/fn_airbasePlaneDepart.sqf` | PASS (new code) | All errors are pre-existing `#`/`getOrDefault`/`isNotEqualTo` patterns in untouched lines |
+| 3 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime in container; follow-up required: observe CH-47F departure in hosted/dedicated session; confirm helicopter climbs straight out and does not bank into hangar |
+
+---
 
 ## 2026-04-04 00:42 UTC — Bug fix: ACCESS_VIOLATION crash from invalid classname in virtual pool createUnit
 
@@ -2894,12 +2952,24 @@ Contrast with the correct pattern used in the background check handler itself:
 **Branch/Commit:** copilot/add-aircraft-to-queue @ 73def553e3f820bf0db524ce275f9ea2e38e63b6
 
 **Scenario:** Ensure all aircraft with path files are included in the Air/Tower Queue. Audit revealed `plane6` (`USAF_RQ4A`, callsign HORIZON per ORBAT) had a populated 1.1 MB path file (`data/paths/taxiPath_plane6.sqf`) but was missing from both the `_pathFiles` load list and `_assetDefs` in `fn_airbaseInit.sqf`. `OH_58D_01` is excluded because no path file exists for it.
+---
+
+## [2026-04-04] District display_name – B-mode feature
+
+**Branch:** copilot/add-district-names
+**Commit:** 9db32115e50ab291b3081fb8c9a9c76fe7de63d1 (pre-change; updated below after push)
+
+**Scenario:** Added human-readable `display_name` field to each district record (D01–D20). Names appear on map markers and are stored in the per-district hashmap and published snapshots. Canonical IDs (D01..D20) unchanged. Also fixed pre-existing sqflint compat violations in all four touched files.
 
 ### Changes made
 
 | File | Change |
 |------|--------|
 | `fn_airbaseInit.sqf` | Added `taxiPath_plane6.sqf` to `_pathFiles`; added `FW-RQ4A-HORIZON11` entry to `_assetDefs` (crewVars=[] — unmanned) |
+| `functions/civsub/fn_civsubDistrictsCreateDefaults.sqf` | Added `_names` array (20 names); added `_hg` helper; added `["display_name", _displayName]` field to each district hashmap; fixed `_x # N` → `select`; fixed `getOrDefault` method form → `_hg` |
+| `functions/civsub/fn_civsubTick.sqf` | Added `_hg` + `_keysFn` helpers; added `["display_name", ...]` to published snapshot; fixed all `getOrDefault` method-form violations; replaced `keys _districts` with `[_districts] call _keysFn` |
+| `functions/civsub/fn_civsubDeltaApplyToDistrict.sqf` | Added `["display_name", ...]` to published snapshot; fixed `getOrDefault` method-form violations; fixed `isNotEqualTo` violation; fixed unused `_name` param in diag_log; added `_hg2` redeclaration in switch block |
+| `functions/core/fn_districtMarkersUpdate.sqf` | Added `_hg` helper; removed `_hmCreate` (unused); fixed `_y` implicit var → explicit lookup; fixed `_cent # N` → `select`; fixed `getOrDefault` method form; updated marker text to include `display_name` |
 
 ### Static Validation
 
@@ -2910,3 +2980,6 @@ Contrast with the correct pattern used in the background check handler itself:
 | 3 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime in container; follow-up: verify OPS log shows `FW-RQ4A-HORIZON11` registered; crewVars=[] is intentional (RQ-4A is unmanned — no crew unit required); fn_airbasePlaneDepart exits gracefully when crewLive==0 (returns false, sets PARKED) until a pilot crew unit is added in Eden if airborne departure is desired |
 
 ---
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict <4 files>` | PASS | No compat patterns found |
+| 2 | sqflint | `sqflint -e w <each file>` | PASS | No warnings or errors |
+| 3 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime; requires live session to confirm district names appear on map markers |
