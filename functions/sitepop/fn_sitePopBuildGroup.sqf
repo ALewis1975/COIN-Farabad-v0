@@ -67,7 +67,7 @@ private _effectiveSitePos = _sitePos;
 
 if (!(_spawnAnchor isEqualTo "")) then
 {
-    if (!((getMarkerType _spawnAnchor) isEqualTo "")) then
+    if (_spawnAnchor in allMapMarkers) then
     {
         private _anchorPos = getMarkerPos _spawnAnchor;
         private _anchorP3  = +_anchorPos;
@@ -360,13 +360,14 @@ if (_isPrisonerRole) then
     {
         _prisonerUnits spawn
         {
+            params [["_unitList", [], [[]]]];
             sleep 0.1;
             {
                 removeAllWeapons _x;
                 removeAllItems _x;
                 removeVest _x;
                 removeBackpack _x;
-            } forEach _this;
+            } forEach _unitList;
         };
     };
 };
