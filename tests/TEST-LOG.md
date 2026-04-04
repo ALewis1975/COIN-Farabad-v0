@@ -11,6 +11,40 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-04 00:55 UTC — Bug fix: AIR/TOWER flight loop terminates after 3 flights; seed queue not randomized
+
+**Branch/Commit:** copilot/fix-air-tower-flight-queue-issues @ commit: unrecoverable (pre-push; see git log after merge)
+
+**Scenario:** AIR/TOWER subsystem reported two issues: (1) seed departure queue always identical on every mission start/reset, and (2) system executes only the 3 seed departures then stops scheduling any further flights (no departures, no return arrivals).
+
+### Root causes
+
+| # | Bug | Root cause | File(s) |
+|---|-----|-----------|---------|
+| 1 | Seed queue identical every start (P1) | `fn_airbaseInit.sqf` seed selection iterates `_fwPool` in array order (`forEach`), always picking the first 2 FW and first RW assets — no `selectRandom` or shuffle | `fn_airbaseInit.sqf:493-504` |
+| 2 | Loop terminates after 3 flights (P0) | `fn_airbaseRestoreParkedAsset.sqf` references `_hg` (getOrDefault compile helper) on lines 28–34 and 62–63 but never defines it. Calling `nil call nil` throws a runtime error; `_spawnType`/`_startPos` remain nil; the function exits early via the type-guard (`exitWith { false }`). Assets are never restored to PARKED state and remain COOLDOWN forever; no new departure candidates exist | `fn_airbaseRestoreParkedAsset.sqf:28-34,62-63` |
+
+### Changes made
+
+| File | Change |
+|------|--------|
+| `fn_airbaseRestoreParkedAsset.sqf` | Define `_hg` compile helper immediately after `params` block; remove duplicate direct-`getOrDefault` declarations (lines 25-26, now overridden); fix line 39 direct `getOrDefault`; remove unused `_id` variable |
+| `fn_airbaseInit.sqf` | Replace sequential FW seed selection with `selectRandom`+exclusion loop; replace `_rwPool select 0` with `selectRandom _rwPool` |
+| `fn_airbaseSpawnArrival.sqf` | Add `_hg` helper; convert all 10 direct `getOrDefault` method calls to `call _hg` form; replace `isNotEqualTo` with `!(...isEqualTo...)`; replace `#` indexing with `select`; remove unused `_debug` and `_meta` variables |
+
+### Static Validation
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict fn_airbaseRestoreParkedAsset.sqf fn_airbaseSpawnArrival.sqf fn_airbaseInit.sqf` | PASS | No banned patterns |
+| 2 | sqflint | `sqflint -e w fn_airbaseRestoreParkedAsset.sqf` | PASS | No warnings |
+| 3 | sqflint | `sqflint -e w fn_airbaseSpawnArrival.sqf` | PASS | No warnings |
+| 4 | sqflint | `sqflint -e w fn_airbaseInit.sqf` | PASS | No warnings |
+| 5 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime available in container; follow-up required: run mission, observe OPS log for `AIRBASE: restocked` / `AIRBASE: queued RETURN arrival` entries confirming cycle continues beyond the 3 seed flights; verify seed departures vary across restarts |
+
+---
+
+
 ## 2026-04-04 00:42 UTC — Bug fix: ACCESS_VIOLATION crash from invalid classname in virtual pool createUnit
 
 **Branch/Commit:** copilot/fix-access-violation-issue @ commit pending push (see git log after merge)
