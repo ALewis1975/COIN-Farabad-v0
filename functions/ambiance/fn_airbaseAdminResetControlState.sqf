@@ -53,12 +53,12 @@ private _historyBefore = count _history;
 //   - lastDepartTs / lastArriveTs = -1e9: departure and arrival cooldowns are
 //     immediately satisfied, so the next probability roll that succeeds will
 //     schedule a flight without any extra wait.
-private _rtReset = missionNamespace getVariable ["airbase_v1_rt", createHashMap];
-if (_rtReset isEqualType createHashMap) then {
-    _rtReset set ["firstDepartureDone", false];
-    _rtReset set ["lastDepartTs", -1e9];
-    _rtReset set ["lastArriveTs", -1e9];
-    missionNamespace setVariable ["airbase_v1_rt", _rtReset, true];
+private _rt = missionNamespace getVariable ["airbase_v1_rt", createHashMap];
+if (_rt isEqualType createHashMap) then {
+    _rt set ["firstDepartureDone", false];
+    _rt set ["lastDepartTs", -1e9];
+    _rt set ["lastArriveTs", -1e9];
+    missionNamespace setVariable ["airbase_v1_rt", _rt, true];
 };
 
 if (!_preserveHistory) then {

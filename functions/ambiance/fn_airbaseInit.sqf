@@ -507,13 +507,14 @@ if ((count _initSeedQueue) == 0) then
         _seedAssets pushBack (selectRandom _rwPool);
     };
 
-    // Shuffle seed assets so the departure order varies each init (avoids the same
-    // aircraft always going first when the pool is small).
-    private _shuffleRem = + _seedAssets;
-    _seedAssets = [];
-    while { (count _shuffleRem) > 0 } do {
-        private _ri = floor (random (count _shuffleRem));
-        _seedAssets pushBack (_shuffleRem deleteAt _ri);
+    // Shuffle seed assets in-place (Knuth/Fisher-Yates) so the departure order
+    // varies each session, regardless of asset pool size.
+    private _nSeed = count _seedAssets;
+    for "_si" from (_nSeed - 1) to 1 step -1 do {
+        private _ri = floor (random (_si + 1));
+        private _tmp = _seedAssets select _si;
+        _seedAssets set [_si, _seedAssets select _ri];
+        _seedAssets set [_ri, _tmp];
     };
 
     private _seedDepCount = 0;
