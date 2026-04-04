@@ -762,10 +762,269 @@ if (isServer) then {
     ["INFO", "UT-DIAG-SNAP-SKIP", "diagnostics snapshot tests skipped; function missing", []] call ARC_TEST_fnc_log;
   };
 
+
+  // ---------- Threat Governor gate tests ----------
+  // Covers: disabled flag, global cooldown, district cooldown, budget exhausted,
+  //         VBIED/SUICIDE escalation-tier minimums, disruption penalty, allow-through.
+
+  if (!(isNil "ARC_fnc_threatGovernorCheck") && !(isNil "ARC_fnc_stateSet") && !(isNil "ARC_fnc_stateGet")) then {
+    private _govStateKeys = [
+      "threat_v0_enabled",
+      "threat_v0_global_cooldown_until",
+      "threat_v0_district_risk",
+      "threat_v0_attack_budget"
+    ];
+    private _govStateSaved = [_govStateKeys] call ARC_TEST_fnc_stateSnapshot;
+    private _govVarsSaved  = [["civsub_v1_enabled"]] call ARC_TEST_fnc_varSnapshot;
+
+    missionNamespace setVariable ["civsub_v1_enabled", false];
+
+    // UT-GOV-001/002: disabled flag → [false, "THREAT_DISABLED"]
+    ["threat_v0_enabled", false]      call ARC_fnc_stateSet;
+    ["threat_v0_global_cooldown_until", -1] call ARC_fnc_stateSet;
+    ["threat_v0_district_risk",  createHashMap] call ARC_fnc_stateSet;
+    ["threat_v0_attack_budget",  createHashMap] call ARC_fnc_stateSet;
+
+    private _govDis = ["D01", "IED", 0] call ARC_fnc_threatGovernorCheck;
+    [!(_govDis select 0), "UT-GOV-001", "governor rejects when threat_v0_enabled=false"] call ARC_TEST_fnc_assert;
+    [((_govDis select 1) isEqualTo "THREAT_DISABLED"), "UT-GOV-002", "governor returns THREAT_DISABLED deny reason", ["reason", _govDis select 1]] call ARC_TEST_fnc_assert;
+
+    // UT-GOV-003/004: global cooldown active → [false, "GLOBAL_COOLDOWN"]
+    ["threat_v0_enabled", true] call ARC_fnc_stateSet;
+    ["threat_v0_global_cooldown_until", serverTime + 3600] call ARC_fnc_stateSet;
+
+    private _govGc = ["D01", "IED", 0] call ARC_fnc_threatGovernorCheck;
+    [!(_govGc select 0), "UT-GOV-003", "governor rejects on active global cooldown"] call ARC_TEST_fnc_assert;
+    [((_govGc select 1) isEqualTo "GLOBAL_COOLDOWN"), "UT-GOV-004", "governor returns GLOBAL_COOLDOWN deny reason", ["reason", _govGc select 1]] call ARC_TEST_fnc_assert;
+
+    // UT-GOV-005/006: district cooldown active → [false, "DISTRICT_COOLDOWN"]
+    ["threat_v0_global_cooldown_until", -1] call ARC_fnc_stateSet;
+    private _riskMapDc = createHashMap;
+    private _entryDc   = createHashMap;
+    _entryDc set ["cooldown_until", serverTime + 3600];
+    _riskMapDc set ["D01", _entryDc];
+    ["threat_v0_district_risk", _riskMapDc] call ARC_fnc_stateSet;
+
+    private _govDc = ["D01", "IED", 0] call ARC_fnc_threatGovernorCheck;
+    [!(_govDc select 0), "UT-GOV-005", "governor rejects on active district cooldown"] call ARC_TEST_fnc_assert;
+    [((_govDc select 1) isEqualTo "DISTRICT_COOLDOWN"), "UT-GOV-006", "governor returns DISTRICT_COOLDOWN deny reason", ["reason", _govDc select 1]] call ARC_TEST_fnc_assert;
+
+    // UT-GOV-007/008: budget exhausted (spent >= budget_points) → [false, "BUDGET_EXHAUSTED"]
+    ["threat_v0_district_risk", createHashMap] call ARC_fnc_stateSet;
+    private _budgetExh = createHashMap;
+    private _entryExh  = createHashMap;
+    _entryExh set ["budget_points", 3];
+    _entryExh set ["spent_today",   3];
+    _budgetExh set ["D01", _entryExh];
+    ["threat_v0_attack_budget", _budgetExh] call ARC_fnc_stateSet;
+
+    private _govExh = ["D01", "IED", 0] call ARC_fnc_threatGovernorCheck;
+    [!(_govExh select 0), "UT-GOV-007", "governor rejects when spent_today equals budget_points"] call ARC_TEST_fnc_assert;
+    [((_govExh select 1) isEqualTo "BUDGET_EXHAUSTED"), "UT-GOV-008", "governor returns BUDGET_EXHAUSTED deny reason", ["reason", _govExh select 1]] call ARC_TEST_fnc_assert;
+
+    // UT-GOV-009/010: VBIED at tier 1 (needs tier 2) → [false, "ESCALATION_TIER"]
+    ["threat_v0_attack_budget", createHashMap] call ARC_fnc_stateSet;
+    private _govVbiedLow = ["D01", "VBIED", 1] call ARC_fnc_threatGovernorCheck;
+    [!(_govVbiedLow select 0), "UT-GOV-009", "governor rejects VBIED at tier 1 (minimum is tier 2)"] call ARC_TEST_fnc_assert;
+    [((_govVbiedLow select 1) isEqualTo "ESCALATION_TIER"), "UT-GOV-010", "governor returns ESCALATION_TIER for under-tier VBIED", ["reason", _govVbiedLow select 1]] call ARC_TEST_fnc_assert;
+
+    // UT-GOV-011: VBIED at required tier 2, budget clear → [true, ""]
+    private _govVbiedOk = ["D01", "VBIED", 2] call ARC_fnc_threatGovernorCheck;
+    [(_govVbiedOk select 0), "UT-GOV-011", "governor allows VBIED at required tier 2 with budget available"] call ARC_TEST_fnc_assert;
+
+    // UT-GOV-012/013: SUICIDE at tier 2 (needs tier 3) → [false, "ESCALATION_TIER"]
+    private _govSuicide = ["D01", "SUICIDE", 2] call ARC_fnc_threatGovernorCheck;
+    [!(_govSuicide select 0), "UT-GOV-012", "governor rejects SUICIDE at tier 2 (minimum is tier 3)"] call ARC_TEST_fnc_assert;
+    [((_govSuicide select 1) isEqualTo "ESCALATION_TIER"), "UT-GOV-013", "governor returns ESCALATION_TIER for under-tier SUICIDE", ["reason", _govSuicide select 1]] call ARC_TEST_fnc_assert;
+
+    // UT-GOV-014: IED at tier 0, empty budget map → [true, ""] (uses default budget_points=3)
+    private _govIedOk = ["D01", "IED", 0] call ARC_fnc_threatGovernorCheck;
+    [(_govIedOk select 0), "UT-GOV-014", "governor allows IED at tier 0 with fresh budget"] call ARC_TEST_fnc_assert;
+
+    // UT-GOV-015: disruption penalty reduces effective budget to 0 → BUDGET_EXHAUSTED
+    // budget_points=2, penalty_pts=2, effective=0; spent_today=1 → 1 >= 0 → exhausted.
+    private _budgetPen = createHashMap;
+    private _entryPen  = createHashMap;
+    _entryPen set ["budget_points",           2];
+    _entryPen set ["spent_today",             1];
+    _entryPen set ["disruption_penalty_pts",  2];
+    _entryPen set ["disruption_penalty_until", serverTime + 3600];
+    _budgetPen set ["D02", _entryPen];
+    ["threat_v0_attack_budget", _budgetPen] call ARC_fnc_stateSet;
+
+    private _govPen = ["D02", "IED", 0] call ARC_fnc_threatGovernorCheck;
+    [!(_govPen select 0), "UT-GOV-015", "governor rejects when disruption penalty zeroes effective budget", ["result", _govPen select 1]] call ARC_TEST_fnc_assert;
+
+    [_govStateSaved] call ARC_TEST_fnc_stateRestore;
+    [_govVarsSaved]  call ARC_TEST_fnc_varRestore;
+  } else {
+    ["INFO", "UT-GOV-SKIP", "threatGovernorCheck tests skipped; prerequisites missing", []] call ARC_TEST_fnc_log;
+  };
+
+
+  // ---------- ARC_stateWriteGen counter tests ----------
+  // Verifies that every ARC_fnc_stateSet call increments the write-generation counter,
+  // enabling callers to detect intervening writes across sleep boundaries.
+
+  if (!(isNil "ARC_fnc_stateSet")) then {
+    private _wgVarSaved = [["ARC_stateWriteGen"]] call ARC_TEST_fnc_varSnapshot;
+
+    missionNamespace setVariable ["ARC_stateWriteGen", 0];
+    ["_ut_wg_test", "initial_value"] call ARC_fnc_stateSet;
+    private _wgAfter1 = missionNamespace getVariable ["ARC_stateWriteGen", 0];
+    [(_wgAfter1 isEqualTo 1), "UT-WRITEGEN-001", "ARC_stateWriteGen is 1 after first stateSet", ["gen", _wgAfter1]] call ARC_TEST_fnc_assert;
+
+    ["_ut_wg_test", "updated_value"] call ARC_fnc_stateSet;
+    private _wgAfter2 = missionNamespace getVariable ["ARC_stateWriteGen", 0];
+    [(_wgAfter2 isEqualTo 2), "UT-WRITEGEN-002", "ARC_stateWriteGen increments by 1 on each stateSet", ["gen", _wgAfter2]] call ARC_TEST_fnc_assert;
+
+    // Verify staleRead detection: snapshot gen, simulate intervening write, confirm gen changed.
+    private _wgSnap = missionNamespace getVariable ["ARC_stateWriteGen", 0];
+    ["_ut_wg_other", "concurrent"] call ARC_fnc_stateSet;
+    private _wgSnapAfter = missionNamespace getVariable ["ARC_stateWriteGen", 0];
+    [!(_wgSnapAfter isEqualTo _wgSnap), "UT-WRITEGEN-003", "gen snapshot detects intervening write (staleRead detection pattern)", ["snap", _wgSnap, "after", _wgSnapAfter]] call ARC_TEST_fnc_assert;
+
+    // Clean up test keys, then restore original counter.
+    ["_ut_wg_test",  ""] call ARC_fnc_stateSet;
+    ["_ut_wg_other", ""] call ARC_fnc_stateSet;
+    [_wgVarSaved] call ARC_TEST_fnc_varRestore;
+  } else {
+    ["INFO", "UT-WRITEGEN-SKIP", "stateWriteGen tests skipped; ARC_fnc_stateSet missing", []] call ARC_TEST_fnc_log;
+  };
+
+
+  // ---------- CASREQ ID builder tests ----------
+  // Covers: return type, CAS: prefix, district embedding, seq increment, D00 fallback.
+
+  if (!(isNil "ARC_fnc_casreqBuildId") && !(isNil "ARC_fnc_stateSet") && !(isNil "ARC_fnc_stateGet")) then {
+    private _casreqSaved = [["casreq_v1_seq"]] call ARC_TEST_fnc_stateSnapshot;
+    ["casreq_v1_seq", 0] call ARC_fnc_stateSet;
+
+    private _casId1 = ["D01"] call ARC_fnc_casreqBuildId;
+    [(_casId1 isEqualType ""), "UT-CASREQ-001", "casreqBuildId returns a STRING", ["got", _casId1]] call ARC_TEST_fnc_assert;
+    [((_casId1 find "CAS:") isEqualTo 0), "UT-CASREQ-002", "casreqBuildId result begins with CAS: prefix", ["got", _casId1]] call ARC_TEST_fnc_assert;
+    [((_casId1 find "D01") >= 0), "UT-CASREQ-003", "casreqBuildId embeds district D01 in ID", ["got", _casId1]] call ARC_TEST_fnc_assert;
+
+    // UT-CASREQ-004/005: successive calls produce unique IDs and advance seq
+    private _casId2 = ["D01"] call ARC_fnc_casreqBuildId;
+    [!(_casId2 isEqualTo _casId1), "UT-CASREQ-004", "casreqBuildId produces unique IDs on successive calls", ["id1", _casId1, "id2", _casId2]] call ARC_TEST_fnc_assert;
+    private _seqAfter2 = ["casreq_v1_seq", -1] call ARC_fnc_stateGet;
+    [(_seqAfter2 isEqualTo 2), "UT-CASREQ-005", "casreq_v1_seq is 2 after two calls (started at 0)", ["seq", _seqAfter2]] call ARC_TEST_fnc_assert;
+
+    // UT-CASREQ-006: empty district falls back to D00
+    ["casreq_v1_seq", 0] call ARC_fnc_stateSet;
+    private _casIdEmpty = [""] call ARC_fnc_casreqBuildId;
+    [((_casIdEmpty find "D00") >= 0), "UT-CASREQ-006", "casreqBuildId uses D00 fallback for empty district string", ["got", _casIdEmpty]] call ARC_TEST_fnc_assert;
+
+    // UT-CASREQ-007: 2-char district (count < 3) falls back to D00
+    ["casreq_v1_seq", 0] call ARC_fnc_stateSet;
+    private _casIdShort = ["D1"] call ARC_fnc_casreqBuildId;
+    [((_casIdShort find "D00") >= 0), "UT-CASREQ-007", "casreqBuildId uses D00 fallback for 2-char district (count<3)", ["got", _casIdShort]] call ARC_TEST_fnc_assert;
+
+    [_casreqSaved] call ARC_TEST_fnc_stateRestore;
+  } else {
+    ["INFO", "UT-CASREQ-SKIP", "casreqBuildId tests skipped; prerequisites missing", []] call ARC_TEST_fnc_log;
+  };
+
 } else {
   ["INFO", "UT-SERVER-SKIP", "Skipping server-only tests (not running on server)", []] call ARC_TEST_fnc_log;
 };
 
 sleep 0.1;
+
+
+// ---------- CIVSUB district clamp tests ----------
+// Tests ARC_fnc_civsubDistrictsClamp: W/R/G + food/water/fear_idx clamped to 0..100.
+// Runs on any machine (no server/state dependency).
+
+if (!(isNil "ARC_fnc_civsubDistrictsClamp")) then {
+  private _hgCl = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k,_d]";
+
+  // UT-CLAMP-001/002/003: over-range values capped at 100
+  private _clHigh = createHashMap;
+  _clHigh set ["W_EFF_U", 150];
+  _clHigh set ["R_EFF_U", 999];
+  _clHigh set ["G_EFF_U", 100];
+  [_clHigh] call ARC_fnc_civsubDistrictsClamp;
+  [([_clHigh, "W_EFF_U", -1] call _hgCl) isEqualTo 100, "UT-CLAMP-001", "clamp caps W_EFF_U at 100 when over-range",  ["W", [_clHigh, "W_EFF_U", -1] call _hgCl]] call ARC_TEST_fnc_assert;
+  [([_clHigh, "R_EFF_U", -1] call _hgCl) isEqualTo 100, "UT-CLAMP-002", "clamp caps R_EFF_U at 100 when over-range",  ["R", [_clHigh, "R_EFF_U", -1] call _hgCl]] call ARC_TEST_fnc_assert;
+  [([_clHigh, "G_EFF_U", -1] call _hgCl) isEqualTo 100, "UT-CLAMP-003", "clamp preserves G_EFF_U exactly at 100",     ["G", [_clHigh, "G_EFF_U", -1] call _hgCl]] call ARC_TEST_fnc_assert;
+
+  // UT-CLAMP-004/005/006: under-0 values floored to 0
+  private _clLow = createHashMap;
+  _clLow set ["W_EFF_U", -50];
+  _clLow set ["R_EFF_U", -1];
+  _clLow set ["G_EFF_U", 0];
+  [_clLow] call ARC_fnc_civsubDistrictsClamp;
+  [([_clLow, "W_EFF_U", -99] call _hgCl) isEqualTo 0, "UT-CLAMP-004", "clamp floors W_EFF_U to 0 when under-range",   ["W", [_clLow, "W_EFF_U", -99] call _hgCl]] call ARC_TEST_fnc_assert;
+  [([_clLow, "R_EFF_U", -99] call _hgCl) isEqualTo 0, "UT-CLAMP-005", "clamp floors R_EFF_U to 0 when under-range",   ["R", [_clLow, "R_EFF_U", -99] call _hgCl]] call ARC_TEST_fnc_assert;
+  [([_clLow, "G_EFF_U", -99] call _hgCl) isEqualTo 0, "UT-CLAMP-006", "clamp preserves G_EFF_U exactly at 0",         ["G", [_clLow, "G_EFF_U", -99] call _hgCl]] call ARC_TEST_fnc_assert;
+
+  // UT-CLAMP-007/008/009: in-range values unchanged
+  private _clMid = createHashMap;
+  _clMid set ["W_EFF_U", 45];
+  _clMid set ["R_EFF_U", 55];
+  _clMid set ["G_EFF_U", 35];
+  [_clMid] call ARC_fnc_civsubDistrictsClamp;
+  [([_clMid, "W_EFF_U", -1] call _hgCl) isEqualTo 45, "UT-CLAMP-007", "clamp leaves W_EFF_U unchanged when in-range", ["W", [_clMid, "W_EFF_U", -1] call _hgCl]] call ARC_TEST_fnc_assert;
+  [([_clMid, "R_EFF_U", -1] call _hgCl) isEqualTo 55, "UT-CLAMP-008", "clamp leaves R_EFF_U unchanged when in-range", ["R", [_clMid, "R_EFF_U", -1] call _hgCl]] call ARC_TEST_fnc_assert;
+  [([_clMid, "G_EFF_U", -1] call _hgCl) isEqualTo 35, "UT-CLAMP-009", "clamp leaves G_EFF_U unchanged when in-range", ["G", [_clMid, "G_EFF_U", -1] call _hgCl]] call ARC_TEST_fnc_assert;
+
+  // UT-CLAMP-010: non-hashmap input returns false
+  private _clBad = "not_a_hashmap" call ARC_fnc_civsubDistrictsClamp;
+  [!_clBad, "UT-CLAMP-010", "clamp returns false for non-hashmap input"] call ARC_TEST_fnc_assert;
+
+  // UT-CLAMP-011/012/013: secondary index fields (food_idx, water_idx, fear_idx) also clamped
+  private _clIdx = createHashMap;
+  _clIdx set ["food_idx",  120];
+  _clIdx set ["water_idx",  -5];
+  _clIdx set ["fear_idx",   50];
+  [_clIdx] call ARC_fnc_civsubDistrictsClamp;
+  [([_clIdx, "food_idx",  -1] call _hgCl) isEqualTo 100, "UT-CLAMP-011", "clamp caps food_idx at 100",              ["food",  [_clIdx, "food_idx",  -1] call _hgCl]] call ARC_TEST_fnc_assert;
+  [([_clIdx, "water_idx", -99] call _hgCl) isEqualTo 0,  "UT-CLAMP-012", "clamp floors water_idx to 0",             ["water", [_clIdx, "water_idx", -99] call _hgCl]] call ARC_TEST_fnc_assert;
+  [([_clIdx, "fear_idx",  -1] call _hgCl) isEqualTo 50,  "UT-CLAMP-013", "clamp leaves in-range fear_idx unchanged", ["fear",  [_clIdx, "fear_idx",  -1] call _hgCl]] call ARC_TEST_fnc_assert;
+} else {
+  ["INFO", "UT-CLAMP-SKIP", "civsubDistrictsClamp tests skipped; function missing", []] call ARC_TEST_fnc_log;
+};
+
+
+// ---------- Threat district risk-decay rate math tests ----------
+// Validates the WHITE-score modulation formula from fn_threatDistrictRiskDecay.sqf.
+// Tested inline (no tick-function call) so these run on any machine without timing deps.
+//
+// Formula:
+//   effectiveRate = baseRate
+//   if whiteScore >= 70: effectiveRate = baseRate * 2   (high legitimacy → fast decay)
+//   if whiteScore >= 50: riskLevel -= effectiveRate      (clamp 0)
+//   if whiteScore < 30:  riskLevel += effectiveRate      (clamp 100)
+//   else (30–49):        riskLevel -= effectiveRate*0.5  (clamp 0)
+
+{
+  _x params ["_label", "_id", "_baseRate", "_whiteScore", "_initialRisk", "_expectedRisk"];
+  private _effectiveRate = _baseRate;
+  if (_whiteScore >= 70) then { _effectiveRate = _baseRate * 2; };
+  private _resultRisk = _initialRisk;
+  if (_whiteScore >= 50) then {
+    _resultRisk = (_initialRisk - _effectiveRate) max 0;
+  } else {
+    if (_whiteScore < 30) then {
+      _resultRisk = (_initialRisk + _effectiveRate) min 100;
+    } else {
+      _resultRisk = (_initialRisk - (_effectiveRate * 0.5)) max 0;
+    };
+  };
+  [(_resultRisk isEqualTo _expectedRisk), _id, _label, ["got", _resultRisk, "expected", _expectedRisk]] call ARC_TEST_fnc_assert;
+} forEach [
+  // [label, testId, baseRate, whiteScore, initialRisk, expectedRisk]
+  ["WHITE>=70: effectiveRate doubles  (rate=1,w=80,risk=50 → 48)", "UT-DECAY-001", 1, 80, 50, 48],
+  ["WHITE 50-69: normal decay        (rate=1,w=60,risk=50 → 49)", "UT-DECAY-002", 1, 60, 50, 49],
+  ["WHITE<30: passive rise           (rate=1,w=20,risk=50 → 51)", "UT-DECAY-003", 1, 20, 50, 51],
+  ["WHITE 30-49: half-rate decay     (rate=2,w=40,risk=50 → 49)", "UT-DECAY-004", 2, 40, 50, 49],
+  ["risk floor clamp                 (rate=5,w=80,risk=1  →  0)", "UT-DECAY-005", 5, 80,  1,  0],
+  ["risk ceiling clamp               (rate=5,w=10,risk=99 →100)", "UT-DECAY-006", 5, 10, 99, 100]
+];
+
+
+
 ["INFO", "RUN", format ["Completed in %1s", (diag_tickTime - _t0)], []] call ARC_TEST_fnc_log;
 call ARC_TEST_fnc_summary;
