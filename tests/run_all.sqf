@@ -843,18 +843,19 @@ if (isServer) then {
 
     // UT-GOV-015: disruption penalty reduces effective budget to 0 → BUDGET_EXHAUSTED
     // budget_points=2, penalty_pts=2, effective=0; spent_today=1 → 1 >= 0 → exhausted.
-    private _budgetPen = createHashMap;
-    private _entryPen  = createHashMap;
-    _entryPen set ["budget_points",           2];
-    _entryPen set ["spent_today",             1];
-    _entryPen set ["disruption_penalty_pts",  2];
-    _entryPen set ["disruption_penalty_until", serverTime + 3600];
-    _budgetPen set ["D02", _entryPen];
-    ["threat_v0_attack_budget", _budgetPen] call ARC_fnc_stateSet;
+    private _budgetPenalty = createHashMap;
+    private _entryPenalty  = createHashMap;
+    _entryPenalty set ["budget_points",           2];
+    _entryPenalty set ["spent_today",             1];
+    _entryPenalty set ["disruption_penalty_pts",  2];
+    _entryPenalty set ["disruption_penalty_until", serverTime + 3600];
+    _budgetPenalty set ["D02", _entryPenalty];
+    ["threat_v0_attack_budget", _budgetPenalty] call ARC_fnc_stateSet;
 
-    private _govPen = ["D02", "IED", 0] call ARC_fnc_threatGovernorCheck;
-    [!(_govPen select 0), "UT-GOV-015", "governor rejects when disruption penalty zeroes effective budget", ["result", _govPen select 1]] call ARC_TEST_fnc_assert;
+    private _govPenalty = ["D02", "IED", 0] call ARC_fnc_threatGovernorCheck;
+    [!(_govPenalty select 0), "UT-GOV-015", "governor rejects when disruption penalty zeroes effective budget", ["result", _govPenalty select 1]] call ARC_TEST_fnc_assert;
 
+    // NOTE: cleanup is unconditional — ARC_TEST_fnc_assert only logs, never exitWith the caller.
     [_govStateSaved] call ARC_TEST_fnc_stateRestore;
     [_govVarsSaved]  call ARC_TEST_fnc_varRestore;
   } else {
@@ -866,8 +867,10 @@ if (isServer) then {
   // Verifies that every ARC_fnc_stateSet call increments the write-generation counter,
   // enabling callers to detect intervening writes across sleep boundaries.
 
-  if (!(isNil "ARC_fnc_stateSet")) then {
-    private _wgVarSaved = [["ARC_stateWriteGen"]] call ARC_TEST_fnc_varSnapshot;
+  if (!(isNil "ARC_fnc_stateSet") && !(isNil "ARC_fnc_stateGet")) then {
+    // Snapshot both the gen counter and the two test state keys so cleanup is exact.
+    private _wgVarSaved   = [["ARC_stateWriteGen"]] call ARC_TEST_fnc_varSnapshot;
+    private _wgStateSaved = [["_ut_wg_test", "_ut_wg_other"]] call ARC_TEST_fnc_stateSnapshot;
 
     missionNamespace setVariable ["ARC_stateWriteGen", 0];
     ["_ut_wg_test", "initial_value"] call ARC_fnc_stateSet;
@@ -884,12 +887,11 @@ if (isServer) then {
     private _wgSnapAfter = missionNamespace getVariable ["ARC_stateWriteGen", 0];
     [!(_wgSnapAfter isEqualTo _wgSnap), "UT-WRITEGEN-003", "gen snapshot detects intervening write (staleRead detection pattern)", ["snap", _wgSnap, "after", _wgSnapAfter]] call ARC_TEST_fnc_assert;
 
-    // Clean up test keys, then restore original counter.
-    ["_ut_wg_test",  ""] call ARC_fnc_stateSet;
-    ["_ut_wg_other", ""] call ARC_fnc_stateSet;
-    [_wgVarSaved] call ARC_TEST_fnc_varRestore;
+    // Restore state keys and write-gen counter. Cleanup is unconditional.
+    [_wgStateSaved] call ARC_TEST_fnc_stateRestore;
+    [_wgVarSaved]   call ARC_TEST_fnc_varRestore;
   } else {
-    ["INFO", "UT-WRITEGEN-SKIP", "stateWriteGen tests skipped; ARC_fnc_stateSet missing", []] call ARC_TEST_fnc_log;
+    ["INFO", "UT-WRITEGEN-SKIP", "stateWriteGen tests skipped; stateSet/stateGet missing", []] call ARC_TEST_fnc_log;
   };
 
 
@@ -970,9 +972,9 @@ if (!(isNil "ARC_fnc_civsubDistrictsClamp")) then {
   [([_clMid, "R_EFF_U", -1] call _hgCl) isEqualTo 55, "UT-CLAMP-008", "clamp leaves R_EFF_U unchanged when in-range", ["R", [_clMid, "R_EFF_U", -1] call _hgCl]] call ARC_TEST_fnc_assert;
   [([_clMid, "G_EFF_U", -1] call _hgCl) isEqualTo 35, "UT-CLAMP-009", "clamp leaves G_EFF_U unchanged when in-range", ["G", [_clMid, "G_EFF_U", -1] call _hgCl]] call ARC_TEST_fnc_assert;
 
-  // UT-CLAMP-010: non-hashmap input returns false
+  // UT-CLAMP-010: non-hashmap input returns false (boolean false, not nil or other)
   private _clBad = "not_a_hashmap" call ARC_fnc_civsubDistrictsClamp;
-  [!_clBad, "UT-CLAMP-010", "clamp returns false for non-hashmap input"] call ARC_TEST_fnc_assert;
+  [(_clBad isEqualTo false), "UT-CLAMP-010", "clamp returns boolean false for non-hashmap input"] call ARC_TEST_fnc_assert;
 
   // UT-CLAMP-011/012/013: secondary index fields (food_idx, water_idx, fear_idx) also clamped
   private _clIdx = createHashMap;
@@ -991,8 +993,10 @@ if (!(isNil "ARC_fnc_civsubDistrictsClamp")) then {
 // ---------- Threat district risk-decay rate math tests ----------
 // Validates the WHITE-score modulation formula from fn_threatDistrictRiskDecay.sqf.
 // Tested inline (no tick-function call) so these run on any machine without timing deps.
+// IMPORTANT: If the formula in fn_threatDistrictRiskDecay.sqf changes, update these
+//            expected values to match — see functions/threat/fn_threatDistrictRiskDecay.sqf.
 //
-// Formula:
+// Formula (canonical source: fn_threatDistrictRiskDecay.sqf):
 //   effectiveRate = baseRate
 //   if whiteScore >= 70: effectiveRate = baseRate * 2   (high legitimacy → fast decay)
 //   if whiteScore >= 50: riskLevel -= effectiveRate      (clamp 0)
