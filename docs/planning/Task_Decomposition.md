@@ -1,389 +1,181 @@
-# Farabad COIN v0 — Task Decomposition
+# Farabad COIN v0 — Task Decomposition (Revised)
 
-**Version:** 1.0  
-**Date:** 2026-02-23  
-**Source:** Architecture & Readiness Plan §5–§8, verified scope counts.
-
----
-
-## How to Use This Document
-
-Each task below is a **single PR-sized work package**. Tasks are grouped into phases from the Architecture & Readiness Plan and ordered by dependency and severity.
-
-**PR Mode labels** follow AGENTS.md (A=Bug Fix, C=Safe Refactor, I=Security Hardening, etc.).
+**Version:** 2.0  
+**Date:** 2026-04-04  
+**Source:** Revised Architecture Assessment (`docs/architecture/Architecture_and_Readiness_Plan.md`)
 
 ---
 
-## Phase 1: Stabilize — Fix P0 Bugs + CI Blockers
+## 1) Objective
 
-> **Status: ✅ COMPLETE** — All Phase 1 tasks delivered in PR branch `copilot/audit-sqf-mission-project`.
+Execute the revised program of work with stronger governance discipline, explicit security/risk tracks, and clear runtime-validation closure criteria.
 
-### Task 1.1 — Fix `isNil` Assignment Bug in `fn_civsubIdentityTouch.sqf` ✅ DONE
-
-| Field | Value |
-|-------|-------|
-| **PR Mode** | A — Bug Fix |
-| **Severity** | P0 — Blocks all CIVSUB new-civ identity generation |
-| **Files** | `functions/civsub/fn_civsubIdentityTouch.sqf` |
-| **Est. Lines** | ~4 changed |
-
-**Problem:** Lines 38 and 48 use `isNil { _var = someCall; }` which always returns `true` because SQF assignments return Nothing. New civilians never get identity records, breaking the entire CIVSUB interaction chain.
-
-**Fix:**
-```sqf
-// Line 38: add trailing _tmpUid
-private _nilUid = isNil { _tmpUid = [_districtId] call ARC_fnc_civsubIdentityGenerateUid; _tmpUid };
-
-// Line 48: add trailing _tmpRec
-private _nilRec = isNil { _tmpRec = [_civUid, _districtId, _homePos] call ARC_fnc_civsubIdentityGenerateProfile; _tmpRec };
-```
-
-**Also in scope:** Line 33 has bare `createHashMapFromArray _ids` — wrap in compile helper for sqflint compat (or use `_hmCreate` pattern from other CIVSUB files).
-
-**Acceptance:**
-- [x] CIVSUB identity records are created for new civilians (isNil returns false when function returns valid data)
-- [x] `sqflint -e w` passes on the file
-- [x] `sqflint_compat_scan.py --strict` passes on the file
+This decomposition supersedes older phase/task narratives that are now stale relative to current grading and workflow expectations.
 
 ---
 
-### Task 1.2 — Replace `toUpperANSI` / `toLowerANSI` Across Codebase ✅ DONE
+## 2) Workstream decomposition (project-wide)
 
-| Field | Value |
-|-------|-------|
-| **PR Mode** | C — Safe Refactor (no behavior change) |
-| **Severity** | P1 — Latent CI blocker (fires when any file is touched) |
-| **Files** | 14 files, 53 occurrences |
-| **Est. Lines** | ~53 replacements (mechanical) |
+## Track 1 — Governance & Source-of-Truth Enforcement
 
-**Problem:** `toUpperANSI` and `toLowerANSI` are not recognized by sqflint. They function identically to `toUpper`/`toLower` for ASCII mission strings.
+### Scope
+- Enforce `main`-truth checks for all architecture/diagnostic conclusions.
+- Add mandatory branch-drift step in analysis workflow.
+- Enforce response-shape discipline (analysis request → analysis output only).
 
-**Affected files (occurrence count):**
+### Deliverables
+- Standardized truth-check procedure integrated into planning/analysis workflows.
+- Explicit distinction between branch-local finding vs `main`-confirmed finding.
 
-| File | Count |
-|------|-------|
-| `functions/ambiance/fn_airbaseTick.sqf` | 15 |
-| `functions/core/fn_publicBroadcastState.sqf` | 15 |
-| `functions/ambiance/fn_airbaseRequestSetLaneStaffing.sqf` | 5 |
-| `functions/ambiance/fn_airbaseClearanceSortRequests.sqf` | 3 |
-| `functions/core/fn_farabadLog.sqf` | 3 |
-| `functions/ambiance/fn_airbaseBuildRouteDecision.sqf` | 2 |
-| `functions/ambiance/fn_airbaseRequestClearanceDecision.sqf` | 2 |
-| `functions/core/fn_s1RegistryUpsertUnit.sqf` | 2 |
-| `functions/ambiance/fn_airbaseCancelClearanceRequest.sqf` | 1 |
-| `functions/ambiance/fn_airbaseMarkClearanceEmergency.sqf` | 1 |
-| `functions/ambiance/fn_airbaseRecordSetQueuedStatus.sqf` | 1 |
-| `functions/casreq/fn_casreqBuildId.sqf` | 1 |
-| `functions/core/fn_airbaseTowerAuthorize.sqf` | 1 |
-| `functions/core/fn_paramAssert.sqf` | 1 |
-
-**Fix:** Global search-and-replace:
-- `toUpperANSI` → `toUpper`
-- `toLowerANSI` → `toLower`
-
-**Acceptance:**
-- [x] Zero `toUpperANSI`/`toLowerANSI` occurrences remain in `functions/`
-- [x] `sqflint -e w` passes on all 14 files
-- [x] `sqflint_compat_scan.py --strict` passes on all 14 files
+### Acceptance
+- Every diagnostic artifact includes truth-check status.
+- No informational request answered in PR-template format unless requested.
 
 ---
 
-### Task 1.3 — Replace `findIf` with `forEach` + `exitWith` Pattern ✅ DONE
+## Track 2 — Architecture Integrity
 
-| Field | Value |
-|-------|-------|
-| **PR Mode** | C — Safe Refactor (no behavior change) |
-| **Severity** | P1 — Latent CI blocker |
-| **Files** | 59 files, 131 occurrences (verified count) |
-| **Est. Lines** | ~300+ changed (each `findIf` expands to ~3-5 lines) |
+### Scope
+- Re-verify single-writer boundaries for shared `missionNamespace` state.
+- Audit client-only namespace usage (`uiNamespace`) to prevent authority leakage.
+- Confirm subsystem ownership contracts remain aligned with locked baselines.
 
-**Problem:** `findIf` is not recognized by sqflint. Semantically equivalent to a `forEach` + `exitWith` loop returning `_forEachIndex`.
+### Deliverables
+- Updated architecture integrity audit notes with ownership confirmations/exceptions.
 
-**Recommendation:** Due to the scale (~110 occurrences in 55 files), split into sub-PRs by subsystem:
-
-| Sub-task | Files | Count | Priority |
-|----------|-------|-------|----------|
-| **1.3a** Threat subsystem | 6 files | 17 | HIGH (files actively being worked) |
-| **1.3b** Ambiance/Airbase | 11 files | 22 | HIGH |
-| **1.3c** Core | 18 files | 48 | MEDIUM |
-| **1.3d** Command | 6 files | 11 | MEDIUM |
-| **1.3e** Logistics | 2 files | 12 | LOW |
-| **1.3f** UI + Ops + CASREQ | 8 files | ~10 | LOW |
-
-**Pattern to apply:**
-```sqf
-// BEFORE:
-private _idx = _array findIf { condition };
-
-// AFTER:
-private _idx = -1;
-{ if (condition) exitWith { _idx = _forEachIndex; }; } forEach _array;
-```
-
-**Acceptance per sub-PR:**
-- [x] Zero `findIf` occurrences in changed files (1 comment reference remains)
-- [x] `sqflint -e w` passes on all changed files (no new errors)
-- [x] `sqflint_compat_scan.py --strict` passes on all changed files
-- [x] Behavioral parity: returned index matches `findIf` semantics (-1 when not found)
+### Acceptance
+- No unmediated client writes to authoritative shared mission state.
+- Ownership boundaries documented and conflict-free.
 
 ---
 
-### Task 1.4 — Wrap Bare `createHashMapFromArray` Calls ✅ DONE
+## Track 3 — RemoteExec / Security
 
-| Field | Value |
-|-------|-------|
-| **PR Mode** | C — Safe Refactor (no behavior change) |
-| **Severity** | P1 — Latent CI blocker |
-| **Files** | 39 files with bare `createHashMapFromArray`, 74 occurrences (verified count) |
-| **Est. Lines** | ~80+ (add helper declaration + update call sites) |
+### Scope
+- Validate each endpoint against hardening requirements:
+  - sender binding
+  - authorization gate
+  - parameter type/shape validation
+  - world/state invariants
+  - rate-limit/idempotency behavior where needed
+- Minimize risky command allowlist usage where wrappers are feasible.
+- Re-confirm JIP persistence RPC set is narrow and intentional.
 
-**Problem:** sqflint does not parse `createHashMapFromArray` as a valid operator. Must be wrapped in a compile helper.
+### Deliverables
+- Endpoint validation matrix with pass/fail status and remediation list.
 
-**Pattern to apply:**
-```sqf
-// Add at top of file (after exitWith guards, before logic):
-private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
-
-// Replace each bare call:
-// BEFORE:
-private _map = createHashMapFromArray [...];
-// AFTER:
-private _map = [[...]] call _hmCreate;
-```
-
-**Recommendation:** Split by subsystem like Task 1.3.
-
-**Acceptance:**
-- [x] Zero bare `createHashMapFromArray` in changed files
-- [x] `sqflint -e w` passes on all changed files
-- [x] `bare-createHashMapFromArray` rule added to `sqflint_compat_scan.py`
+### Acceptance
+- No unvalidated privileged client→server path remains in active surface.
+- JIP usage restricted to persistent late-join requirements only.
 
 ---
 
-## Phase 2: Harden — Security + Resilience
+## Track 4 — State / Persistence / TASKENG
 
-> **Status: ✅ COMPLETE** — Tasks 2.1, 2.2, and 2.3 all delivered. Task 2.1 in branch `copilot/audit-sqf-mission-project`. Tasks 2.2 and 2.3 in branch `copilot/fix-background-check-error`.
+### Scope
+- Re-validate migration idempotency and backward compatibility.
+- Verify bounded behavior and consistency of thread/task/lead stores across load/save cycles.
+- Confirm reset/rebuild paths do not leave orphaned runtime state.
 
-### Task 2.1 — Implement `CfgRemoteExec` Allowlist ✅ DONE
+### Deliverables
+- Persistence integrity report tied to schema revision rules.
 
-| Field | Value |
-|-------|-------|
-| **PR Mode** | I — Security Hardening |
-| **Severity** | P1 — Open attack surface |
-| **Files** | `description.ext`, `config/CfgRemoteExec.hpp`, 12 SQF files |
-| **Actual Lines** | ~280 new lines |
-| **Reference** | `docs/security/RemoteExec_Hardening_Plan.md` §2 |
-
-**Delivered:**
-- Created `config/CfgRemoteExec.hpp` with `mode=1` (whitelist only) for Functions and Commands
-- 39 client→server ARC function entries (allowedTargets=2)
-- 19 server→client ARC function entries (allowedTargets=0), 5 with jip=1
-- 13 engine command entries
-- Added `remoteExecutedOwner` sender validation to 12 previously unprotected endpoints:
-  - CIVSUB (4): EndSession, HandoffSheriff, OrderStop, RunMdtByNetId
-  - Core (3): execObjectiveComplete, publicBroadcastState, uiCoverageAuditServer
-  - IED (3): iedCollectEvidence, iedServerDetonate, vbiedServerDetonate
-  - Command (2): intelQueueSubmit, intelTocIssueOrder
-
-**Acceptance:**
-- [x] `CfgRemoteExec` class present in `config/CfgRemoteExec.hpp`, included from `description.ext`
-- [x] `mode = 1` for both Functions and Commands
-- [x] All 39 client→server endpoints listed
-- [x] All 19 server→client endpoints listed with correct JIP flags
-- [x] All 13 engine commands listed
-- [x] All 39 client→server RPCs have `remoteExecutedOwner` sender validation
-- [x] Zero new sqflint compat warnings introduced
+### Acceptance
+- Migration re-runs are no-op when appropriate.
+- Reset/rebuild cycles produce consistent clean state.
 
 ---
 
-### Task 2.2 — Cap Unbounded State Arrays ✅ DONE
+## Track 5 — Runtime Subsystem Reliability
 
-| Field | Value |
-|-------|-------|
-| **PR Mode** | D — Performance Optimization |
-| **Severity** | P2 — Long-campaign stability |
-| **Files** | `functions/core/fn_intelLog.sqf`, `functions/core/fn_incidentClose.sqf` |
-| **Actual Lines** | ~10 changed |
+### Scope
+- **Airbase:** queue lifecycle, crew seat assignment pathing, despawn marker logic, parked-restore continuity.
+- **SitePop/Prison:** anchor resolution correctness, fallback log quality, spawn/despawn persistence coupling.
+- **CIVSUB/Threat:** delta-bundle emission correctness and cross-system event hygiene.
 
-**Delivered (branch `copilot/fix-background-check-error`):**
-- `fn_intelLog.sqf`: replaced hardcoded `while deleteAt 200` loop with configurable `select`-slice cap. Default 500, configurable via `ARC_intelLogMaxEntries` (type-guarded, clamped 10–2000). Single-pass O(1) vs repeated deleteAt.
-- `fn_incidentClose.sqf`: added configurable `select`-slice cap on `incidentHistory` (previously uncapped). Default 200, configurable via `ARC_incidentHistoryMaxEntries` (type-guarded, clamped 10–1000).
-- `fn_intelMetricsTick.sqf`: already had a proper configurable cap (`ARC_metricsSnapshotsCap`, default 24) — no change needed.
+### Deliverables
+- Reliability checklists per subsystem with observed behavior and risk notes.
 
-**Acceptance:**
-- [x] Each array has a configurable max cap (via `missionNamespace getVariable`)
-- [x] Prune preserves most-recent entries (tail, not head) via `select [offset, count]`
-- [x] Type guard on cap variable prevents non-numeric crash
-- [x] `sqflint_compat_scan.py --strict` passes on both changed files (0 new violations)
+### Acceptance
+- Critical lifecycle loops complete without stalls across representative scenarios.
+- Fallback paths are explicit and logged.
 
 ---
 
-### Task 2.3 — Optimize Guard Post AllUnits Scan ✅ DONE
+## Track 6 — Validation & Evidence
 
-| Field | Value |
-|-------|-------|
-| **PR Mode** | D — Performance Optimization |
-| **Severity** | P2 — Server FPS under load |
-| **Files** | `functions/core/fn_guardPost.sqf` |
-| **Est. Lines** | ~10 |
+### Scope
+- Keep compat-scan + sqflint mandatory for changed SQF.
+- Require local MP smoke checklist for changed gameplay paths.
+- Treat dedicated/JIP checks as explicit gates with owner/date, not passive backlog.
+- Keep `tests/TEST-LOG.md` current for every validation pass.
 
-**Problem:** Guard post logic iterates `allUnits` O(N×M) per guard unit per cycle. With 79 players + AI, this becomes expensive.
+### Deliverables
+- Validation records (PASS/FAIL/BLOCKED) with command/step evidence and context.
 
-**Fix:** Add distance pre-filter and side check before expensive checks:
-```sqf
-// Early-out: skip if too far
-if ((_unit distance _guardPos) > _triggerRadius * 2) then { continue; };
-// Early-out: skip friendlies
-if ((side _unit) isEqualTo (side _guard)) then { continue; };
-```
-
-**Acceptance:**
-- [x] Guard behavior unchanged for units within trigger radius
-- [x] Measurable reduction in per-tick cost (side pre-filter + 500m distance pre-filter added)
+### Acceptance
+- Every change has corresponding static validation evidence.
+- Deferred runtime checks have explicit closure ownership.
 
 ---
 
-## Phase 3: Validate — Dedicated Server QA
+## Track 7 — Execution Governance
 
-### Task 3.1 — Local MP Smoke Test Protocol
+### Scope
+- Enforce the revised execution order and completion criteria.
+- Prevent scope drift between tracks.
 
-| Field | Value |
-|-------|-------|
-| **PR Mode** | E — Test-Only |
-| **Status** | BLOCKED (requires Arma 3 runtime) |
+### Deliverables
+- Ordered execution board tied to the four phases below.
 
-**Steps when environment available:**
-1. Host local MP (1 server + 1 client)
-2. Complete full command cycle: TOC generates → player accepts → execute → SITREP → close
-3. Verify console tabs update at each phase
-4. Verify CIVSUB contact dialog opens and identity records persist
-5. Verify lightbar starts on configured vehicles
-6. Verify compile audit produces no RPT errors
-7. Record results in `tests/TEST-LOG.md`
+### Acceptance
+- Work proceeds in phase order unless an explicit risk-based exception is approved.
 
 ---
 
-### Task 3.2 — Dedicated Server + JIP Validation
+## 3) Execution order (mandatory)
 
-| Field | Value |
-|-------|-------|
-| **PR Mode** | E — Test-Only |
-| **Status** | BLOCKED (requires dedicated server environment) |
+## Phase 1 — Governance/Security Gates
+- Track 1 (Governance & Source-of-Truth)
+- Track 3 (RemoteExec/Security) initial pass
 
-**Steps when environment available:**
-1. Start dedicated server, join with 2+ clients
-2. Start incident, have one client disconnect and rejoin (JIP)
-3. Verify JIP client receives snapshot within 35s timeout
-4. Verify console shows correct state for JIP client
-5. Verify `ARC_pub_stateUpdatedAt` PV event fires and client catches it
-6. Test respawn/reconnect ownership edge cases
-7. Record results in `tests/TEST-LOG.md`
+## Phase 2 — Persistence/Runtime Integrity Audits
+- Track 2 (Architecture Integrity)
+- Track 4 (State/Persistence/TASKENG)
 
----
+## Phase 3 — Subsystem Regression Reliability Passes
+- Track 5 (Airbase, SitePop/Prison, CIVSUB/Threat)
 
-## Phase 4: Feature Completion
-
-### Task 4.1 — Console VM v1 Migration
-
-| Field | Value |
-|-------|-------|
-| **PR Mode** | B — Feature Delivery |
-| **Reference** | `docs/architecture/Console_VM_v1.md` |
-
-Migrate console paint functions from direct `ARC_pub_*` reads to structured View Model contract. This is a large effort (~68 UI files) and should be split by tab.
+## Phase 4 — Dedicated/JIP Closure + Release Readiness
+- Track 6 (Validation & Evidence) deferred closure
+- Track 7 (Execution Governance) final readiness confirmation
 
 ---
 
-### Task 4.2 — CIVSUB Lead-Emit Bridge
+## 4) Immediate grading-driven corrections (must apply now)
 
-| Field | Value |
-|-------|-------|
-| **PR Mode** | B — Feature Delivery |
-| **Reference** | `docs/architecture/CIVSUB_Incident_Lead_Permutation_Matrix.md` |
-
-Materialize CIVSUB-sourced leads into core `leadPool` for incident generation. Requires district binding and per-district lead throttling.
-
----
-
-### Task 4.3 — SITREP Gate Parity Enforcement
-
-| Field | Value |
-|-------|-------|
-| **PR Mode** | B — Feature Delivery |
-| **Reference** | `docs/architecture/SITREP_Gate_Parity.md` |
-
-Ensure client pre-checks and server authority checks use identical rule vocabulary, reason codes, and evaluation order.
+1. Add hard **truth-before-claim** checks to every diagnostic task.
+2. Keep responses tightly scoped to user request type:
+   - analysis request → analysis
+   - plan request → plan
+   - implementation request → implementation artifacts
 
 ---
 
-### Task 4.4 — TASKENG Thread/Task Hierarchy
+## 5) Operational checklist (quick use)
 
-| Field | Value |
-|-------|-------|
-| **PR Mode** | B — Feature Delivery |
-| **Reference** | `docs/projectFiles/Farabad_TASKENG_Thread_Task_Hierarchy*` |
-
-Implement parent-case pattern for thread records, deterministic parent task ID generation, and thread store persistence via schema rev 4.
-
----
-
-## Dependency Graph
-
-```
-Task 1.1 (P0 isNil) ──────────────────────┐
-Task 1.2 (toUpperANSI) ───┐               │
-Task 1.3 (findIf) ────────┤               │
-Task 1.4 (createHashMap) ──┤               │
-                           ▼               ▼
-                    CI PASSES CLEAN    CIVSUB WORKS
-                           │               │
-                           ▼               ▼
-                    Task 2.1 (CfgRemoteExec)
-                    Task 2.2 (Array caps)
-                    Task 2.3 (Guard post)
-                           │
-                           ▼
-                    Task 3.1 (Local MP test) ← BLOCKED
-                    Task 3.2 (Dedicated QA)  ← BLOCKED
-                           │
-                           ▼
-                    Task 4.1–4.4 (Features)
-```
+- [ ] Verified relevant findings against `origin/main` before asserting.
+- [ ] Marked each conclusion as branch-local or main-confirmed.
+- [ ] Applied authority/ownership checks for affected subsystem.
+- [ ] Applied RemoteExec/security checks for affected RPC surfaces.
+- [ ] Ran required static validations for changed SQF/config.
+- [ ] Logged validation results in `tests/TEST-LOG.md`.
+- [ ] Recorded deferred dedicated/JIP checks with explicit owner/date.
 
 ---
 
-## Suggested PR Ordering
+## 6) Notes on scope control
 
-| Order | Task | Mode | Risk | Effort |
-|-------|------|------|------|--------|
-| 1 | **1.1** — isNil fix + createHashMap in identityTouch | A | P0 fix — immediate value | XS (4 lines) |
-| 2 | **1.2** — toUpperANSI/toLowerANSI replacement | C | Mechanical, low risk | S (53 replacements) |
-| 3 | **1.3a** — findIf in threat (6 files) | C | Contained subsystem | S |
-| 4 | **1.3b** — findIf in ambiance/airbase (11 files) | C | Contained subsystem | M |
-| 5 | **1.3c** — findIf in core (18 files) | C | Hot files — careful review | M-L |
-| 6 | **1.3d-f** — findIf in command/logistics/ui | C | Lower priority files | M |
-| 7 | **1.4** — Remaining createHashMapFromArray wraps | C | Mechanical | M |
-| 8 | **2.1** — CfgRemoteExec allowlist | I | Requires MP smoke test | M |
-| 9 | **2.2** — Array caps | D | Low risk, bounded scope | XS | ✅ DONE |
-| 10 | **2.3** — Guard post optimization | D | Low risk | XS | ✅ DONE |
-
----
-
-## Appendix: Compat Scan Coverage
-
-The CI compat scanner (`scripts/dev/sqflint_compat_scan.py`) checks for:
-
-| Pattern | Rule Name | Covered? |
-|---------|-----------|----------|
-| `findIf` | `findIf` | ✅ |
-| `trim _var` | `trim-operator` | ✅ |
-| `fileExists _var` | `fileExists-operator` | ✅ |
-| `_map getOrDefault [...]` | `hashmap-getOrDefault-method` | ✅ |
-| `isNotEqualTo` | `isNotEqualTo` | ✅ |
-| `toUpperANSI` | `toUpperANSI` | ✅ |
-| `toLowerANSI` | `toLowerANSI` | ✅ (added in Phase 1) |
-| `#` indexing | `hash-index-operator` | ✅ |
-| `createHashMapFromArray` | `bare-createHashMapFromArray` | ✅ (added in Phase 1) |
-| `keys _map` | — | ❌ **Not covered** (sqflint catches it) |
-
-See `docs/qa/SQFLINT_COMPAT_GUIDE.md` for the full compile-helper reference.
+- This document defines **what** to execute, not implementation-level code steps.
+- Use subsystem baselines and security/QA guides as authoritative references during execution.
+- If new requirements materially expand scope, update this decomposition before executing expanded work.
