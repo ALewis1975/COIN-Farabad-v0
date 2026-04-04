@@ -222,7 +222,10 @@ private _staffPool = [
             ["prisoner_holding",    "civ",  _civPool,        [2, 4], "wander",   30, "prison_holding_area"],
             // --- Support (CIV) ---
             ["vendor",              "civ",  _civPool,        [3, 6], "camp",     50, "prison_entry_office"],
-            // Contractor has no anchor — roams the outer perimeter footprint
+            // Contractor has no anchor — roams the outer perimeter footprint.
+            // An empty string "" and omitting the 7th field are functionally identical:
+            // fn_sitePopBuildGroup defaults _spawnAnchor to "" in both cases, resulting
+            // in site-wide slot usage and site-wide patrol-ring wander (same as 6-field legacy).
             ["contractor",          "civ",  _workerPool,     [2, 4], "wander",  100, ""]
         ]
     ],

@@ -82,8 +82,6 @@ if (!(_spawnAnchor isEqualTo "")) then
 };
 
 // ---------------------------------------------------------------------------
-// Apply spawnCtx count delta (before class-pool filter so delta is clamped correctly)
-// ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
 // Resolve side
 // ---------------------------------------------------------------------------
@@ -319,7 +317,7 @@ for "_i" from 1 to _count do
     _u setVariable ["ARC_sitePop_role",   _roleTag];
 
     // Strip weapons: civilians and prisoners are always unarmed
-    private _isPrisoner    = ("prisoner" in _roleTag);
+    private _isPrisoner    = ((_roleTag find "prisoner") >= 0);
     private _stripWeapons  = ((_sideStr isEqualTo "civ") || { _isPrisoner });
     if (_stripWeapons) then
     {
