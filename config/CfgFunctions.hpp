@@ -764,6 +764,17 @@ class Ops
             class sitePopApplyAmbiance {};
             class sitePopDespawnSite {};
             class sitePopActivateSite {};
+            class sitePopStateInit {};
+            class sitePopGetSpawnModifiers {};
+        };
+
+        class Prison
+        {
+            file = "functions\prison";
+
+            class prisonInit {};
+            class prisonTick {};
+            class prisonEvalIncident {};
         };
     };
 };
