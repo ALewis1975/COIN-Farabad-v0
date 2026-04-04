@@ -26,7 +26,7 @@ Players experience a living joint operational environment where their actions ha
 - **Farabad Console:** Unified station-aware UI for all command and control functions
 
 ### 👥 Population & Influence (CIVSUBv1)
-- **District-Based Influence Model:** Three-axis system (RED/WHITE/GREEN) tracking insurgent control, civilian sentiment, and governance legitimacy
+- **District-Based Influence Model:** Three-axis system (RED/WHITE/GREEN) tracking insurgent control, civilian sentiment, and governance legitimacy across 20 named districts (D01 "Farabad" → D20 "Taran Fringes")
 - **Virtual Population:** Statistical modeling of ~5,800 civilians across 20 districts without spawning thousands of AI
 - **Persistent Identity Layer:** Tracks civilians players interact with through interrogations, aid, detentions
 - **Delta Bundle Integration:** Structured events feed the influence model and task generation
@@ -45,6 +45,17 @@ Players experience a living joint operational environment where their actions ha
 - **Convoy System:** Route security missions with proper cleanup and bubble-based despawn
 - **Unit Status Tracking:** Equipment, casualties, ammo, and liquids constrain operational tempo
 - **Resupply Workflow:** Integrated with SITREP system and follow-on decisions
+
+### 🏘️ Site Population (SitePop)
+- **Dynamic NPC Presence:** Proximity-triggered and task-triggered spawn system populating buildings and patrol rings at named sites
+- **Template-Driven:** Site templates in `data/farabad_site_templates.sqf` define group composition per site type (market, checkpoint, camp, etc.)
+- **LAMBS Integration:** Uses LAMBS garrison/camp functions for realistic NPC behavior on activation
+- **Lockout & Grace Periods:** Prevents despawn flicker and repeated spawning during active player contact
+
+### 🏥 Medical Tracking
+- **Casualty Accounting:** Server-side EntityKilled handler tracks BLUFOR and civilian casualties against persistent `baseMed` / `civCasualties` counters
+- **Influence Coupling:** Civilian casualties feed back into the CIVSUBv1 influence model (population sentiment)
+- **CASEVAC Integration:** Medical snapshots available to CASREQ and SITREP workflows
 
 ### 🌍 Living Base Environment
 - **Joint Base Farabad:** Modeled after Joint Base Balad with USAF host installation
@@ -81,7 +92,7 @@ Players experience a living joint operational environment where their actions ha
 ### Entry Points
 - **`initServer.sqf`:** Server bootstrap and configuration overrides
 - **`initPlayerLocal.sqf`:** Client bootstrap with server-ready gate
-- **`config/CfgFunctions.hpp`:** ARC function registry (400+ functions)
+- **`config/CfgFunctions.hpp`:** ARC function registry (494+ functions)
 
 ### Subsystems
 ```
@@ -95,6 +106,8 @@ functions/
 ├── intel/         # Intelligence logging and lead generation
 ├── ops/           # Operational tempo and patrol logic
 ├── logistics/     # Convoy and sustainment systems
+├── medical/       # Casualty tracking and medical influence feedback
+├── sitepop/       # Dynamic site NPC presence (proximity/task-triggered)
 ├── ambiance/      # Airbase operations and world simulation
 └── world/         # Location registry and world utilities
 ```
@@ -235,7 +248,7 @@ This staged return-to-service keeps command/control online while reducing noness
 ```
 COIN-Farabad-v0/
 ├── config/              # CfgFunctions, dialogs, HUD overlays
-├── functions/           # 400+ SQF functions (57k LOC)
+├── functions/           # 494+ SQF functions (73k LOC, 14 subsystems)
 ├── scripts/             # Utility scripts (world time, dev tools)
 ├── data/                # Compositions, paths, documentation
 ├── docs/                # Comprehensive project documentation
@@ -285,8 +298,9 @@ COIN-Farabad-v0/
 **Flying Units:**
 - REACH (C-130/C-17) — Airlift
 - TEXACO (KC-135) — Tanker
-- TIGER (F-16C) — CAS
-- HAWG (A-10C) — CAS
+- TIGER (F-16C Viper, 97 EFS) — CAS
+- HAWG (A-10C Thunderbolt II, 74th FS) — CAS
+- HORIZON (RQ-4A Global Hawk) — Strategic ISR
 
 ### Host Nation
 - **TNP:** Takistan National Police (partnered, variable reliability)
@@ -393,7 +407,7 @@ Excessive force → Grievances → Less cooperation → Worse intel → Broader 
 ### Language & Runtime
 - **Scripting:** SQF (Real Virtuality 4 / Poseidon engine)
 - **Target:** Arma 3 dedicated server multiplayer environment
-- **Codebase:** 432 SQF/HPP files, ~57,000 lines of code
+- **Codebase:** ~530 SQF/HPP files, ~73,000 lines of code (14 subsystems, 494+ registered functions)
 
 ### State Management
 - **Authority:** Dedicated server is single writer for all persistent state
@@ -526,7 +540,7 @@ Until dedicated server environment is available:
 - ✅ Strong state isolation (pub vs. private variables)
 - ✅ Robust defensive programming (type checks, nil guards)
 - ✅ Well-structured UI integration
-- ✅ Clear module boundaries across 12 subsystems
+- ✅ Clear module boundaries across 14 subsystems
 - ✅ All sqflint CI-blocking patterns resolved (Phase 1 complete)
 - ✅ 62 automated unit test assertions in test harness
 
@@ -590,18 +604,21 @@ See `docs/projectFiles/US_Army_Doctrine_References.md` for complete citations.
 
 **Current:** v0 (Development)
 - Initial implementation of core systems
-- CIVSUBv1 baseline complete
+- CIVSUBv1 baseline complete — district influence model with 20 named districts (D01 "Farabad" → D20 "Taran Fringes")
 - CASREQ v1 baseline complete
 - Threat v0 + IED Phase 1 baseline complete
 - Farabad Console with 8 tabs operational
 - Phase 1 stabilization complete: all sqflint CI blockers resolved, CIVSUB isNil bugs fixed, diagnostics tools added
-- Production-ready with Phase 2 hardening pending (CfgRemoteExec, array caps)
+- SitePop subsystem added: proximity/task-triggered NPC presence at named sites (LAMBS garrison/camp integration)
+- Medical subsystem added: server-authoritative casualty tracking with CIVSUBv1 influence feedback
+- Airbase expanded: RQ-4A Global Hawk (HORIZON11) added to asset roster with Eden-assigned crew
+- Production-ready with Phase 2 hardening pending (CfgRemoteExec allowlist completion, array caps)
 
 See `tests/TEST-LOG.md` for detailed validation history.
 
 ---
 
-**Last Updated:** 2026-02-23
+**Last Updated:** 2026-04-04
 **Mission Type:** Persistent Multiplayer COIN Sandbox
 **Max Players:** 79
 **Map:** Takistan (CUP Terrains)
