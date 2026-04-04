@@ -6,6 +6,7 @@
 */
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k,_d]";
 
 private _districts = createHashMap;
 
@@ -36,25 +37,52 @@ private _rows = [
     ["D20", 14, 4251.9, 2959.6, 83]
 ];
 
+// Human-readable display names (UI alias only; never used as persistence keys).
+// Order must match _rows exactly (D01..D20).
+private _names = [
+    "Farabad",            // D01 – city centre
+    "Lashgar Valley",     // D02 – Lashgar Kuh / Hamza corridor
+    "Shahruk",            // D03 – Shahruk settlement
+    "Southern Highlands", // D04 – rural south
+    "Kandah",             // D05 – Kandah township
+    "Pashtat",            // D06 – western Pashtat
+    "Naseri",             // D07 – Naseri quarter
+    "Karkanak",           // D08 – Karkanak / Prison complex
+    "Al-Nazara",          // D09 – Al-Nazara enclave
+    "Ali Kala",           // D10 – Ali Kala outpost zone
+    "Kaftar Kar",         // D11 – northern Kaftar Kar
+    "Taran Ridge",        // D12 – central ridge district
+    "Ghorak Pass",        // D13 – eastern pass settlement
+    "Lashgar Plains",     // D14 – Lashgar lowlands / Port Farabad
+    "Kala Outpost",       // D15 – far eastern outpost
+    "Safar Corner",       // D16 – northeastern fringe
+    "Naseri West",        // D17 – western approaches
+    "Al-Nazara Hills",    // D18 – northwestern high ground
+    "Shahruk Crossing",   // D19 – eastern crossing
+    "Taran Fringes"       // D20 – southern rural fringe
+];
+
 {
-    private _id = _x # 0;
-    private _pop = _x # 1;
-    private _cx = _x # 2;
-    private _cy = _x # 3;
-    private _rad = _x # 4;
+    private _id          = _x select 0;
+    private _pop         = _x select 1;
+    private _cx          = _x select 2;
+    private _cy          = _x select 3;
+    private _rad         = _x select 4;
+    private _displayName = _names select _forEachIndex;
 
     private _profile = [_id, _pop, [_cx, _cy], _seed] call ARC_fnc_civsubDistrictSeedProfile;
 
-    private _wBase = _profile getOrDefault ["W_BASE_U", 45];
-    private _rBase = _profile getOrDefault ["R_BASE_U", 55];
-    private _gBase = _profile getOrDefault ["G_BASE_U", 35];
+    private _wBase = [_profile, "W_BASE_U", 45] call _hg;
+    private _rBase = [_profile, "R_BASE_U", 55] call _hg;
+    private _gBase = [_profile, "G_BASE_U", 35] call _hg;
 
-    private _wEff = _profile getOrDefault ["W_EFF_U", _wBase];
-    private _rEff = _profile getOrDefault ["R_EFF_U", _rBase];
-    private _gEff = _profile getOrDefault ["G_EFF_U", _gBase];
+    private _wEff = [_profile, "W_EFF_U", _wBase] call _hg;
+    private _rEff = [_profile, "R_EFF_U", _rBase] call _hg;
+    private _gEff = [_profile, "G_EFF_U", _gBase] call _hg;
 
     private _d = [[
         ["id", _id],
+        ["display_name", _displayName],
         ["centroid", [_cx, _cy]],
         ["radius_m", _rad],
         ["pop_total", _pop],
@@ -79,7 +107,6 @@ private _rows = [
         ["detentions_initiated", 0],
         ["detentions_handed_off", 0],
         ["aid_events", 0],
-
 
         // Cooldowns and touches
         ["cooldown_nextLead_ts", 0],
