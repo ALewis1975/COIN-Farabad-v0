@@ -62,8 +62,8 @@ if (!(_controllerFallbackEnabled isEqualType true) && !(_controllerFallbackEnabl
 missionNamespace setVariable ["airbase_v1_controller_fallback_enabled", _controllerFallbackEnabled, true];
 
 // Arrival request lifecycle + warning gates (distance to runway marker, meters)
-private _arrivalRunwayMarker = missionNamespace getVariable ["airbase_v1_arrival_runway_marker", "L-270 Inbound"];
-if (!(_arrivalRunwayMarker isEqualType "") || { _arrivalRunwayMarker isEqualTo "" }) then { _arrivalRunwayMarker = "L-270 Inbound"; };
+private _arrivalRunwayMarker = missionNamespace getVariable ["airbase_v1_arrival_runway_marker", "AEON_Right_270_Outbound"];
+if (!(_arrivalRunwayMarker isEqualType "") || { _arrivalRunwayMarker isEqualTo "" }) then { _arrivalRunwayMarker = "AEON_Right_270_Outbound"; };
 missionNamespace setVariable ["airbase_v1_arrival_runway_marker", _arrivalRunwayMarker, true];
 
 private _arrivalLandGateM = missionNamespace getVariable ["airbase_v1_arrival_land_gate_m", 2200];
@@ -98,12 +98,12 @@ private _departTaxiIngress = missionNamespace getVariable ["airbase_v1_depart_ta
 if (!(_departTaxiIngress isEqualType "") || { _departTaxiIngress isEqualTo "" }) then { _departTaxiIngress = "T-R Ingress"; };
 missionNamespace setVariable ["airbase_v1_depart_taxi_ingress_marker", _departTaxiIngress, true];
 
-private _arrivalTaxiEgress = missionNamespace getVariable ["airbase_v1_arrival_taxi_egress_marker", "T-L Egress"];
-if (!(_arrivalTaxiEgress isEqualType "") || { _arrivalTaxiEgress isEqualTo "" }) then { _arrivalTaxiEgress = "T-L Egress"; };
+private _arrivalTaxiEgress = missionNamespace getVariable ["airbase_v1_arrival_taxi_egress_marker", "AEON_Taxi_Right_Egress"];
+if (!(_arrivalTaxiEgress isEqualType "") || { _arrivalTaxiEgress isEqualTo "" }) then { _arrivalTaxiEgress = "AEON_Taxi_Right_Egress"; };
 missionNamespace setVariable ["airbase_v1_arrival_taxi_egress_marker", _arrivalTaxiEgress, true];
 
-private _arrivalTaxiIngress = missionNamespace getVariable ["airbase_v1_arrival_taxi_ingress_marker", "T-L Ingress"];
-if (!(_arrivalTaxiIngress isEqualType "") || { _arrivalTaxiIngress isEqualTo "" }) then { _arrivalTaxiIngress = "T-L Ingress"; };
+private _arrivalTaxiIngress = missionNamespace getVariable ["airbase_v1_arrival_taxi_ingress_marker", "AEON_Taxi_Right_Ingress"];
+if (!(_arrivalTaxiIngress isEqualType "") || { _arrivalTaxiIngress isEqualTo "" }) then { _arrivalTaxiIngress = "AEON_Taxi_Right_Ingress"; };
 missionNamespace setVariable ["airbase_v1_arrival_taxi_ingress_marker", _arrivalTaxiIngress, true];
 
 private _taxiConnectors = missionNamespace getVariable ["airbase_v1_taxi_center_connectors", ["mkr_airbaseCenter"]];
@@ -131,13 +131,13 @@ private _occupyArrS = missionNamespace getVariable ["airbase_v1_runwayOccupyTime
 if (!(_occupyArrS isEqualType 0) || { _occupyArrS < 60 }) then { _occupyArrS = 900; };
 missionNamespace setVariable ["airbase_v1_runwayOccupyTimeout_arr_s", _occupyArrS, true];
 
-private _inboundTaxiMarkers = missionNamespace getVariable ["airbase_v1_inbound_taxi_markers", ["L-270 Inbound", "T-L Egress", "T-L Ingress"]];
-if !(_inboundTaxiMarkers isEqualType []) then { _inboundTaxiMarkers = ["L-270 Inbound", "T-L Egress", "T-L Ingress"]; };
+private _inboundTaxiMarkers = missionNamespace getVariable ["airbase_v1_inbound_taxi_markers", ["AEON_Right_270_Outbound", "AEON_Taxi_Right_Egress", "AEON_Taxi_Right_Ingress"]];
+if !(_inboundTaxiMarkers isEqualType []) then { _inboundTaxiMarkers = ["AEON_Right_270_Outbound", "AEON_Taxi_Right_Egress", "AEON_Taxi_Right_Ingress"]; };
 private _inboundTaxiMarkersNorm = [];
 {
     if (_x isEqualType "" && { !(_x isEqualTo "") }) then { _inboundTaxiMarkersNorm pushBackUnique _x; };
 } forEach _inboundTaxiMarkers;
-if ((count _inboundTaxiMarkersNorm) == 0) then { _inboundTaxiMarkersNorm = ["L-270 Inbound", "T-L Egress", "T-L Ingress"]; };
+if ((count _inboundTaxiMarkersNorm) == 0) then { _inboundTaxiMarkersNorm = ["AEON_Right_270_Outbound", "AEON_Taxi_Right_Egress", "AEON_Taxi_Right_Ingress"]; };
 missionNamespace setVariable ["airbase_v1_inbound_taxi_markers", _inboundTaxiMarkersNorm, true];
 
 // Debug-only test mode: bypass tower-controller detection and force AI arbitration.
@@ -428,8 +428,8 @@ _rt set ["arrivalSpawnMarker", "mkr_arrivalSpawn"];
 _rt set ["arrivalRunwayStartMarker", "mkr_arrivalRunwayStart"];
 _rt set ["arrivalRunwayStopMarker", "mkr_arrivalRunwayStop"];
 _rt set ["arrivalRunwayTaxiOutMarker", "mkr_arrivalRunwayTaxiOut"];
-_rt set ["inboundTaxiMarkers", missionNamespace getVariable ["airbase_v1_inbound_taxi_markers", ["L-270 Inbound", "T-L Egress", "T-L Ingress"]]];
-_rt set ["arrivalRunwayMarker", missionNamespace getVariable ["airbase_v1_arrival_runway_marker", "L-270 Inbound"]];
+_rt set ["inboundTaxiMarkers", missionNamespace getVariable ["airbase_v1_inbound_taxi_markers", ["AEON_Right_270_Outbound", "AEON_Taxi_Right_Egress", "AEON_Taxi_Right_Ingress"]]];
+_rt set ["arrivalRunwayMarker", missionNamespace getVariable ["airbase_v1_arrival_runway_marker", "AEON_Right_270_Outbound"]];
 _rt set ["runwayStateContract", ["OPEN", "RESERVED", "OCCUPIED"]];
 
 _rt set ["assets", _assets];

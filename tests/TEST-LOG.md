@@ -3297,3 +3297,32 @@ wrong-faction units.
 - Confirm TNP (`UK3CB_TKP_B_*`) guards and no NATO/Gendarmerie units spawn at KarkanakPrison (requires live session with 3CB loaded)
 - Confirm TNA (`UK3CB_TKA_B_*`) guards spawn at PresidentialPalace (requires live session)
 - Confirm prison guard groups silently skip (no spawn, WARN in RPT) when 3CB TKP mod is absent (requires session without 3CB)
+
+
+## 2026-04-04 20:00 UTC — AIRBASE inbound route remap to existing marker set
+
+**Branch/Commit:** copilot/assess-current-development-state @ pre-push (working tree)
+
+**Scenario:** Implemented <new_requirement>remap to existing marker set</new_requirement> for AIRBASE inbound route markers so ambient arrivals do not depend on missing `L-270 Inbound` / `T-L Ingress` / `T-L Egress` Eden markers.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `functions/ambiance/fn_airbaseInit.sqf` | Remapped arrival defaults to existing AEON markers (`AEON_Right_270_Outbound`, `AEON_Taxi_Right_Ingress`, `AEON_Taxi_Right_Egress`) including inbound taxi marker list and runtime seed defaults |
+| `functions/ambiance/fn_airbaseBuildRouteDecision.sqf` | Remapped ARR route decision defaults/fallbacks to existing AEON marker set |
+| `functions/ambiance/fn_airbaseTick.sqf` | Remapped arrival runway distance gate default to `AEON_Right_270_Outbound` |
+
+### Checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Static grep verification | `rg -n "airbase_v1_arrival_runway_marker|arrival_taxi|AEON_Taxi_Right|AEON_Right_270_Outbound" functions/ambiance` | PASS | All targeted defaults now map to existing AEON markers |
+| 2 | Compat scan (changed files) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbaseInit.sqf functions/ambiance/fn_airbaseBuildRouteDecision.sqf functions/ambiance/fn_airbaseTick.sqf` | FAIL (pre-existing) | Existing compat warnings in untouched legacy patterns (`trim`, `isNotEqualTo`, `#`) remain; no new warning class introduced by this remap |
+| 3 | sqflint | `sqflint -e w <changed files>` | BLOCKED | `sqflint` binary not available in container (`command not found`) |
+| 4 | Dedicated-server runtime | N/A | BLOCKED | No Arma runtime in container; follow-up required to confirm `MISSING_ROUTE_MARKERS` is cleared for ambient inbound arrivals |
+
+### Deferred
+
+- Dedicated server validation: confirm ambient inbound records no longer block with `MISSING_ROUTE_MARKERS` when using remapped existing AEON markers.
+- UH-60 taxi path (`data/paths/taxiPath_UH_60M_01.sqf`) remains a separate open blocker and was not changed in this patch.
