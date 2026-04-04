@@ -254,10 +254,10 @@ Side: `West` · Group id: `277`
 
 | varName | className | unitType | playable | player |
 |---|---|---|---|---|
-|  | rhsusf_army_ocp_helicrew | rhsusf_army_ocp_helicrew | false | false |
-|  | rhsusf_army_ocp_helipilot | rhsusf_army_ocp_helipilot | false | false |
+| UH_60M_01CC | rhsusf_army_ocp_helicrew | rhsusf_army_ocp_helicrew | false | false |
+| UH_60M_01CP | rhsusf_army_ocp_helipilot | rhsusf_army_ocp_helipilot | false | false |
 | UH_60M_01D | rhsusf_army_ocp_helipilot | rhsusf_army_ocp_helipilot | false | false |
-| UH_60M_01G | rhsusf_army_ocp_helicrew | rhsusf_army_ocp_helicrew | false | false |
+| UH_60M_01DG | rhsusf_army_ocp_helicrew | rhsusf_army_ocp_helicrew | false | false |
 
 ## 3-1-B-2-325 AIR | REDFALCON 2-1-3
 
@@ -297,10 +297,10 @@ Side: `West` · Group id: `269`
 
 | varName | className | unitType | playable | player |
 |---|---|---|---|---|
-|  | rhsusf_army_ocp_helicrew | rhsusf_army_ocp_helicrew | false | false |
-|  | rhsusf_army_ocp_helicrew | rhsusf_army_ocp_helicrew | false | false |
+| CH_47F_01CC | rhsusf_army_ocp_helicrew | rhsusf_army_ocp_helicrew | false | false |
+| CH_47F_01CP | rhsusf_army_ocp_helipilot | rhsusf_army_ocp_helipilot | false | false |
 | CH_47F_01D | rhsusf_army_ocp_helipilot | rhsusf_army_ocp_helipilot | false | false |
-| CH_47F_01G | rhsusf_army_ocp_helipilot | rhsusf_army_ocp_helipilot | false | false |
+| CH_47F_01DD | rhsusf_army_ocp_helicrew | rhsusf_army_ocp_helicrew | false | false |
 
 ## 332 EMSG CIVENG | MAYOR CIVENG
 
@@ -722,16 +722,6 @@ Side: `Civilian` · Group id: `4556`
 |  | UK3CB_MEC_C_DOC | UK3CB_MEC_C_DOC | false | false |
 |  | UK3CB_MEC_C_DOC | UK3CB_MEC_C_DOC | false | false |
 
-## Civilian:4577
-
-Side: `Civilian` · Group id: `4577`
-
-| varName | className | unitType | playable | player |
-|---|---|---|---|---|
-|  | UK3CB_MEC_C_DOC | UK3CB_MEC_C_DOC | false | false |
-|  | UK3CB_TKC_C_PILOT | UK3CB_TKC_C_PILOT | false | false |
-|  | UK3CB_TKC_C_PILOT | UK3CB_TKC_C_PILOT | false | false |
-
 ## Civilian:4607
 
 Side: `Civilian` · Group id: `4607`
@@ -840,3 +830,12 @@ Side: `West` · Group id: `3709`
 | varName | className | unitType | playable | player |
 |---|---|---|---|---|
 |  | B_UAV_AI | B_UAV_AI | false | false |
+
+## West:4706
+
+Side: `West` · Group id: `4706`
+
+| varName | className | unitType | playable | player |
+|---|---|---|---|---|
+| plane6D | B_UAV_AI | B_UAV_AI | false | false |
+| plane6G | B_UAV_AI | B_UAV_AI | false | false |
