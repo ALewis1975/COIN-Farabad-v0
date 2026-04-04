@@ -11,7 +11,39 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
-## 2026-04-04 03:47 UTC — Correction: plane5 asset ID (F-16C TIGER11) and plane6 crewVars update
+## 2026-04-04 06:09 UTC — Test coverage: add 37 new unit tests across 5 uncovered subsystems
+
+**Branch/Commit:** copilot/analyze-test-coverage @ cbf2d52 (pre-edit; tests added on top)
+
+**Scenario:** Static analysis of coverage gaps in `tests/run_all.sqf`. Five subsystems had no contract tests; 37 new tests added in `tests/run_all.sqf`.
+
+### New test suites added
+
+| Suite | IDs | Subsystem | What is covered |
+|-------|-----|-----------|-----------------|
+| Governor gate | UT-GOV-001..015 | `fn_threatGovernorCheck` | All 5 gates: disabled flag, global cooldown, district cooldown, budget exhausted, VBIED/SUICIDE escalation-tier minimums; disruption-penalty budget reduction; allow-through path |
+| Write-gen counter | UT-WRITEGEN-001..003 | `fn_stateSet` / `ARC_stateWriteGen` | Counter increments on every write; staleRead detection pattern verifiable |
+| CASREQ ID builder | UT-CASREQ-001..007 | `fn_casreqBuildId` | Return type STRING, CAS: prefix, district embedding, sequence increment, D00 fallbacks for empty and short district strings |
+| CIVSUB clamp | UT-CLAMP-001..013 | `fn_civsubDistrictsClamp` | W/R/G EFF_U over-100 cap, under-0 floor, in-range preserve; food/water/fear_idx; non-hashmap input → false |
+| Decay rate math | UT-DECAY-001..006 | `fn_threatDistrictRiskDecay` (logic) | WHITE-score modulation formula: doubling at ≥70, normal decay 50–69, passive rise <30, half-rate 30–49; floor/ceiling clamps |
+
+### Checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict tests/run_all.sqf` | PASS | No banned patterns in new code |
+| 2 | sqflint | `sqflint -e w tests/run_all.sqf` | PASS (new code) | Pre-existing error at line 277 (`keys _theme`) unrelated to these changes |
+| 3 | Runtime | N/A | BLOCKED | No Arma 3 runtime in container; all new tests are server-side or pure-math inline |
+
+### Deferred (dedicated server + JIP environment)
+
+- Governor gate tests require live `serverTime` and state persistence
+- CASREQ ID tests require live `BIS_fnc_padNumber` and server authority
+- WRITEGEN counter tests require server authority path in `fn_stateSet`
+
+---
+
+ — Correction: plane5 asset ID (F-16C TIGER11) and plane6 crewVars update
 
 **Branch/Commit:** copilot/plan-aircraft-loitering-strategy @ 04db34e (pre-edit; correction applied on top)
 
