@@ -2799,12 +2799,25 @@ Contrast with the correct pattern used in the background check handler itself:
 |---|---------|------------|----------|
 | 1 | `\n` shown as literal text | Arma diary uses structured text (HTML subset); `\n` is not a line-break in this context — `<br/>` is required | `fn_briefingUpdateClient.sqf:1026-1031,1040` |
 | 2 | Redundant `groupId (callsign)` | Format string `[%1] %2 (%3)` always appended callsign even when it equalled groupId; no deduplication logic | `fn_briefingUpdateClient.sqf:1040` |
+## 2026-04-04 01:31 UTC — Bug fix: NATO fallback classes removed from Karkanak Prison unit pools
+
+**Branch/Commit:** copilot/karkanak-prison-nato-troops @ 03aea1ea493f09583d55e32236180c1e0d280f24 (pre-change; see commit after push)
+
+**Scenario:** Vanilla NATO troops (`B_Soldier_F`, `B_GEN_Soldier_F`, `B_Soldier_AR_F`, `B_medic_F`) were spawning at Karkanak Prison when the 3CB Takistan mod was absent. The `_tnpPool` and `_tnpMedPool` class arrays in `data/farabad_site_templates.sqf` included these vanilla BLUFOR classes as explicit fallbacks. Per mission design, only Takistan National Police (`UK3CB_TKP_B_*`) should staff the prison; if those classes are unavailable, the affected groups must be skipped (existing behaviour of `fn_sitePopBuildGroup` when `_validClasses` is empty).
+
+### Root cause
+
+| # | Bug | File(s) |
+|---|-----|---------|
+| 1 | `_tnpPool` listed `B_GEN_Soldier_F`, `B_Soldier_F`, `B_Soldier_AR_F` as fallbacks | `data/farabad_site_templates.sqf:49-51` |
+| 2 | `_tnpMedPool` listed `B_medic_F`, `B_GEN_Soldier_F` as fallbacks | `data/farabad_site_templates.sqf:61-62` |
 
 ### Changes made
 
 | File | Change |
 |------|--------|
 | `fn_briefingUpdateClient.sqf` | Replaced all `\n` in S-1 text with `<br/>`; changed header format from `Groups: %2\nUnits: %3\n\n` to `Groups: %2 | Units: %3<br/><br/>`; changed per-group entry from `[company] groupId (callsign)` to `company | label` where `label` is callsign when it differs from groupId, otherwise groupId |
+| `data/farabad_site_templates.sqf` | Removed vanilla NATO fallback classes from `_tnpPool` and `_tnpMedPool`; updated comments to state groups are skipped when 3CB classes are absent |
 
 ### Static Validation
 
@@ -2812,3 +2825,32 @@ Contrast with the correct pattern used in the background check handler itself:
 |---|-------|---------|--------|-------|
 | 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict fn_briefingUpdateClient.sqf` | PASS | No new violations introduced |
 | 2 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime available in container; requires live session to verify diary rendering |
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict data/farabad_site_templates.sqf` | PASS | No compat patterns found |
+| 2 | sqflint | `sqflint -e w data/farabad_site_templates.sqf` | PASS | No warnings |
+| 3 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime in container; requires live session to confirm prison groups are skipped gracefully when 3CB absent |
+
+---
+
+## 2026-04-04 02:12 UTC — Update: canonical civilian class pools in site templates
+
+**Branch/Commit:** copilot/karkanak-prison-nato-troops @ 9679dbaf5cbb641c92a0b62c25764af99ade1574 (pre-change; see commit after push)
+
+**Scenario:** Civilian class pools in `data/farabad_site_templates.sqf` used an ad-hoc mix of 3CB classes with vanilla fallbacks. The mission designer provided a canonical per-category class list covering common civs, workers, doctors/paramedics, VIP/government/diplomat, pilots, and priests. All civilian pools are replaced with the authoritative lists; no vanilla fallbacks remain in any civilian pool.
+
+### Changes made
+
+| File | Change |
+|------|--------|
+| `data/farabad_site_templates.sqf` | `_civPool` → 11 canonical COMMON CIVS classes (MEC, TKC, ADC) |
+| `data/farabad_site_templates.sqf` | `_workerPool` → 5 canonical WORKERS classes; no longer a `+_civPool` copy |
+| `data/farabad_site_templates.sqf` | `_civMedPool` → 6 canonical DOCTORS/PARAMEDICS classes incl. `C_IDAP_Man_Paramedic_01_F` |
+| `data/farabad_site_templates.sqf` | `_staffPool` → 8 canonical VIP/GOVERNMENT/DIPLOMAT classes; no longer a `+_civPool` copy |
+| `data/farabad_site_templates.sqf` | Pilot and priest pool classes noted; deferred to new array declarations when corresponding template groups are defined (omitted now to avoid sqflint unused-variable error) |
+
+### Static Validation
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict data/farabad_site_templates.sqf` | PASS | No compat patterns found |
+| 2 | sqflint | `sqflint -e w data/farabad_site_templates.sqf` | PASS | No warnings |
+| 3 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime in container; requires live session to confirm correct civilians spawn at all three sites |
