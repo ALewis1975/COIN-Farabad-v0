@@ -11,6 +11,29 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-04 03:21 UTC — Feature: prioritize initial plane queue by type (UAS > EWS/AWACS > tanker > METT-TC)
+
+**Branch/Commit:** copilot/prioritize-planes-by-type @ commit: unrecoverable (pre-push; see git log after merge)
+
+**Scenario:** Initial departure seed queue in `fn_airbaseInit.sqf` should be ordered by platform type priority: UAS (plane6) first, EWS/AWACS (plane7) second, tanker (plane2) third, then remaining FW shuffled for METT-TC variability, with one RW appended.
+
+### Changes made
+
+| File | Change |
+|------|--------|
+| `functions/ambiance/fn_airbaseInit.sqf` | Replaced random FW selection + full Fisher-Yates shuffle with priority-tiered vehVar picks (plane6→plane7→plane2) followed by shuffled filler for remaining FW slots. Removed old bias that excluded plane7 from seed. |
+
+### Validation
+
+| Step | Command | Result |
+|------|---------|--------|
+| sqflint compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbaseInit.sqf` | PASS |
+| sqflint lint | `sqflint -e w functions/ambiance/fn_airbaseInit.sqf` | PASS |
+| Gameplay (local MP) | BLOCKED — no local Arma 3 environment; seed queue ordering verified by code review |
+| Dedicated/JIP | BLOCKED — no dedicated server rig |
+
+---
+
 ## 2026-04-04 02:16 UTC — Bug fix: AIR/TOWER seed randomization (shuffle) + scheduling throughput + reset re-seed
 
 **Branch/Commit:** copilot/fix-air-tower-system-issues @ commit: unrecoverable (pre-push; see git log after merge)

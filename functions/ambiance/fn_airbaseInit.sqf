@@ -452,8 +452,9 @@ missionNamespace setVariable ["airbase_v1_runwayUntil", -1, true];
 
 // ---------------------------------------------------------------------------
 // Departure seed: queue initial departures visible on first console load.
-// Selects up to 3 FW + 1 RW from the filtered parked-asset pool and shuffles
-// them randomly so the departure order varies each session.
+// Priority order: UAS (plane6) first, then EWS/AWACS (plane7), then tanker
+// (plane2), then remaining FW (non-tow preferred) shuffled for METT-TC
+// variability. One RW appended from the rotary-wing pool.
 // ---------------------------------------------------------------------------
 private _initSeedQueue = ["airbase_v1_queue", []] call ARC_fnc_stateGet;
 if (!(_initSeedQueue isEqualType [])) then { _initSeedQueue = []; };
@@ -483,40 +484,55 @@ if ((count _initSeedQueue) == 0) then
         ([_x, "state", "PARKED"] call _hmGet) isEqualTo "PARKED"
     };
 
-    // Bias: for seed departures, avoid tow-required assets and EC-130 (plane7) if alternatives exist.
-    private _preferAssets = _parkedAssets select {
-        !([_x, "requiresTow", false] call _hmGet) && { !(([_x, "vehVar", ""] call _hmGet) isEqualTo "plane7") }
-    };
-    if ((count _preferAssets) > 0) then { _parkedAssets = _preferAssets; };
+    private _fwParked = _parkedAssets select { ([_x, "category", "FW"] call _hmGet) isEqualTo "FW" };
+    private _rwPool   = _parkedAssets select { ([_x, "category", "FW"] call _hmGet) isEqualTo "RW" };
 
-    // Select up to 3 FW and 1 RW from the filtered pool.
-    private _fwPool = _parkedAssets select { ([_x, "category", "FW"] call _hmGet) isEqualTo "FW" };
-    private _rwPool = _parkedAssets select { ([_x, "category", "FW"] call _hmGet) isEqualTo "RW" };
-
+    // Build priority-ordered FW seed:
+    //   Tier 1: UAS       (plane6 = RQ-4A HORIZON11)   – persistent ISR coverage
+    //   Tier 2: EWS/AWACS (plane7 = EC-130 SNITCH11)   – C2/EW support
+    //   Tier 3: Tanker    (plane2 = KC-135 SHELL101)   – force-multiplier
+    //   Tier 4: Remaining FW (non-tow-required preferred), shuffled for METT-TC variability
     private _seedAssets = [];
-    private _fwRemaining = + _fwPool; // shallow copy so we can remove picked entries without modifying the original pool
-    private _fwPicked = 0;
-    while { _fwPicked < 3 && { (count _fwRemaining) > 0 } } do {
-        private _pick = selectRandom _fwRemaining;
-        _seedAssets pushBack _pick;
-        _fwPicked = _fwPicked + 1;
-        private _pickId = [_pick, "id", ""] call _hmGet;
-        _fwRemaining = _fwRemaining select { !(([_x, "id", ""] call _hmGet) isEqualTo _pickId) };
+    private _fwRemaining = + _fwParked;
+
+    // Pick each priority asset by vehVar; remove it from _fwRemaining so it
+    // is not selected again in the filler pass below.
+    {
+        private _targetVv = _x;
+        private _pickIdx = -1;
+        {
+            if (([_x, "vehVar", ""] call _hmGet) isEqualTo _targetVv) exitWith {
+                _pickIdx = _forEachIndex;
+            };
+        } forEach _fwRemaining;
+        if (_pickIdx >= 0) then {
+            _seedAssets pushBack (_fwRemaining select _pickIdx);
+            _fwRemaining deleteAt _pickIdx;
+        };
+    } forEach ["plane6", "plane7", "plane2"];
+
+    // Fill remaining FW slots (up to 3 total) with non-tow-required assets first,
+    // shuffled for METT-TC variability.
+    private _fwFiller = _fwRemaining select { !([_x, "requiresTow", false] call _hmGet) };
+    if ((count _fwFiller) == 0) then { _fwFiller = + _fwRemaining; };
+    private _nFill = count _fwFiller;
+    for "_si" from (_nFill - 1) to 1 step -1 do {
+        private _ri = floor (random (_si + 1));
+        private _tmp = _fwFiller select _si;
+        _fwFiller set [_si, _fwFiller select _ri];
+        _fwFiller set [_ri, _tmp];
+    };
+    private _fwSlotsLeft = 3 - (count _seedAssets);
+    private _fillIdx = 0;
+    while { _fillIdx < _fwSlotsLeft && { _fillIdx < (count _fwFiller) } } do {
+        _seedAssets pushBack (_fwFiller select _fillIdx);
+        _fillIdx = _fillIdx + 1;
     };
 
+    // Rotary-wing: one random RW appended.
     if ((count _rwPool) > 0) then
     {
         _seedAssets pushBack (selectRandom _rwPool);
-    };
-
-    // Shuffle seed assets in-place (Knuth/Fisher-Yates) so the departure order
-    // varies each session, regardless of asset pool size.
-    private _nSeed = count _seedAssets;
-    for "_si" from (_nSeed - 1) to 1 step -1 do {
-        private _ri = floor (random (_si + 1));
-        private _tmp = _seedAssets select _si;
-        _seedAssets set [_si, _seedAssets select _ri];
-        _seedAssets set [_ri, _tmp];
     };
 
     private _seedDepCount = 0;
