@@ -186,7 +186,7 @@ missionNamespace setVariable ["ARC_opforPatrolUnitClasses", [
     "UK3CB_MEE_O_RIF_1",       // Rifleman (AK variant 1)
     "UK3CB_MEE_O_RIF_2",       // Rifleman (AK variant 2)
     "UK3CB_MEE_O_GL",          // Grenadier
-    "UK3CB_MEE_O_AR_01",       // Auto-Rifleman
+    "UK3CB_MEE_O_AR",          // Auto-Rifleman
     "UK3CB_MEE_O_MD"           // Medic
 ], true];
 

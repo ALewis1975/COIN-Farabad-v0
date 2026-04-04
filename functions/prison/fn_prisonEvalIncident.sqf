@@ -117,14 +117,29 @@ _prisonState set ["activeBreakoutGroups", _liveBreakoutGroups];
 //   - Prison has reached adaptationLevel 3 (severely stressed)
 if ((count _liveBreakoutGroups) isEqualTo 0 && { _adaptLevel >= 3 }) then
 {
-    // Resolve spawn position near the prison holding area (or site centre fallback)
+    // Resolve spawn position within the prison holding area marker (or site centre fallback).
+    // prison_holding_area is a RECTANGLE shape marker; getMarkerType returns "" for shape
+    // markers, so we detect it by checking whether the marker position is non-zero instead.
     private _spawnPos = [];
-    if (!((getMarkerType "prison_holding_area") isEqualTo "")) then
+    private _holdPos = getMarkerPos "prison_holding_area";
+    if (!(_holdPos isEqualTo [0,0,0])) then
     {
-        private _holdPos = getMarkerPos "prison_holding_area";
-        private _ang     = random 360;
-        private _dist    = 20 + random 30;
-        _spawnPos = [(_holdPos select 0) + (sin _ang) * _dist, (_holdPos select 1) + (cos _ang) * _dist, 0];
+        // Pick a random point inside the rectangle bounds using markerSize / markerDir.
+        // markerSize returns [halfA, halfB] — half-extents along and across the marker direction.
+        private _sz  = markerSize "prison_holding_area";
+        private _dir = markerDir  "prison_holding_area";
+        private _ha  = (_sz select 0) max 10; // half-extent along marker direction
+        private _hb  = (_sz select 1) max 10; // half-extent perpendicular
+        // Random offset in marker-local frame, then rotate to world frame.
+        private _lx  = (_ha * 2 * (random 1)) - _ha;
+        private _ly  = (_hb * 2 * (random 1)) - _hb;
+        private _sinD = sin _dir;
+        private _cosD = cos _dir;
+        _spawnPos = [
+            (_holdPos select 0) + (_lx * _cosD) - (_ly * _sinD),
+            (_holdPos select 1) + (_lx * _sinD) + (_ly * _cosD),
+            0
+        ];
     }
     else
     {

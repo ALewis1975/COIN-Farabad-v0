@@ -3265,3 +3265,43 @@ Contrast with the correct pattern used in the background check handler itself:
 - Confirm RQ-4A enters loiter after taxi (requires live session)
 - Confirm `plane_despawn` marker repositioned east of runway for manned aircraft (Eden edit required by operator)
 - Confirm no civ vehicles spawn inside 250 m of `prison_central_guard_tower` (requires live session)
+
+---
+
+## 2026-04-04 19:13 UTC — T0 Prerequisites: Prison rectangle fix, UK3CB classname, lightbar cleanup
+
+**Branch/Commit:** copilot/assess-development-state-gaps (pending push)
+
+**Scenario:** Three code fixes for T0 prerequisite items identified in the development state assessment.
+
+### Changes
+
+| File | Change | T0 Item |
+|------|--------|---------|
+| `functions/prison/fn_prisonEvalIncident.sqf` | Replace `getMarkerType` predicate (returns `""` for rectangle/shape markers) with `getMarkerPos != [0,0,0]` check. Random spawn point now picked within rectangle bounds using `markerSize` + `markerDir` rotation — uses the full rectangle area as the breakout spawn zone. | T0-D |
+| `initServer.sqf` | Corrected `UK3CB_MEE_O_AR_01` → `UK3CB_MEE_O_AR` in `ARC_opforPatrolUnitClasses`. Eliminates 18 WARN-per-session log entries from virtual pool class validation. | T0-F |
+| `scripts/ARC_lightbarStartupServer.sqf` | Removed `Patrol_07`, `Patrol_08`, `Patrol_09` from `_defaultTargets` list. Only `Patrol_01` remains. Eliminates 3 WARN logs per session for missing vehicle variables. | T0-G |
+
+### T0 Items Confirmed No Code Change Needed
+
+| Item | Resolution |
+|------|-----------|
+| T0-A | `plane_despawn` marker repositioned on-map NW by operator (Eden). Guard at `fn_airbasePlaneDepart:397` already requires `x >= 0` — code path is now unblocked. |
+| T0-B | `mkr_arrivalSpawn` confirmed as the correct marker name; already the default in `fn_airbaseSpawnArrival:63`. No code change needed. |
+| T0-C | Deferred by operator decision. |
+| T0-E | `G_Squares` BOM is not present in any mission SQF/data file. Source is UK3CB Factions mod internal loadout assignment. Not fixable from mission scripts — cosmetic equip failure only. |
+| T0-H | `epw_holding` and `mkr_SHERIFF_HOLDING` confirmed present in mission.sqm. No action needed. |
+
+### Checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict <3 files>` | PASS | No banned patterns |
+| 2 | sqflint | N/A | BLOCKED | Not installed in CI container |
+| 3 | Runtime | N/A | BLOCKED | No Arma 3 runtime in container |
+
+### Deferred (dedicated server + live session)
+
+- Confirm breakout spawns land within `prison_holding_area` rectangle bounds (requires prison at adaptationLevel 3)
+- Confirm `UK3CB_MEE_O_AR` resolves to a valid class in the installed UK3CB version (check RPT for class-not-found WARNs)
+- Confirm `plane_despawn` NW placement does not interfere with departure AI routing (T0-A — Eden done)

@@ -35,10 +35,7 @@ private _log = {
 // otherwise fall back to the original hardcoded list.
 // Each entry is [varName, disableAILights].
 private _defaultTargets = [
-  ["Patrol_01", false],
-  ["Patrol_07", false],
-  ["Patrol_08", true],
-  ["Patrol_09", false]
+  ["Patrol_01", false]
 ];
 
 private _targets = missionNamespace getVariable ["ARC_lightbarTargets", _defaultTargets];
