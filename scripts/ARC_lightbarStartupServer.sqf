@@ -12,7 +12,8 @@
 
   Notes:
     - This replicates the prior init call: this execVM "\Expansion_Mod_Police\Vehicles\Scripts\Lightbar\CODE2_On.sqf";
-    - For Patrol_08 we also replicate: this disableAI "LIGHTS";
+    - Vehicles with AI light management issues should set `disableAILights = true` in `ARC_lightbarTargets`.
+    - Patrol_07 through Patrol_09 are not currently placed in mission.sqm; add them here via ARC_lightbarTargets override in initServer.sqf once placed in Eden.
 */
 
 if (!isServer) exitWith {};

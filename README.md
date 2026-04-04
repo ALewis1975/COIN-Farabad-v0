@@ -122,8 +122,17 @@ functions/
 - ACE3 (interaction framework, medical, field rations)
 - CBA_A3 (common scripting framework)
 - 3CB Factions (Takistan civilians, TNP, TNA, insurgents)
+  - **3CB UK Factions – TKP sub-mod is required** for KarkanakPrison armed guard staffing (`UK3CB_TKP_B_*` classes). If absent, prison guard sites will not spawn armed guards correctly.
+  - 3CB UK Factions – TKA sub-mod provides Afghan National Army classes used in allied patrol compositions.
 - RHS USAF (U.S. Army and USAF assets)
 - CUP Terrains Core (Takistan map)
+
+**Optional Mods (degraded behavior if absent):**
+- **LAMBS Danger** — used by SitePop for `lambs_danger_fnc_camp` and `lambs_danger_fnc_garrison` AI behaviors at active sites. If absent, the subsystem falls back to vanilla loiter waypoints. Gameplay still functions but AI site behavior is less realistic.
+- **Police Extended** (`Expansion_Mod_Police`) — required for lightbar activation on police patrol vehicles (`Patrol_01`, etc.). If absent, lightbar scripts log a warning and skip silently; patrol vehicles still spawn.
+
+**Known RPT Noise (not mission code defects):**
+- `UK3CB_MEE_O_AR` / `UK3CB_MEE_O_AR_01` — approximately 18 warnings total per session appear in RPT (one per unit-pool tick attempt for that classname). This is a classname mismatch between the 3CB version in the mod preset and the class registered in `ARC_opforPatrolUnitClasses`. The engine silently skips the missing class; spawns still occur using other classes in the pool. To suppress, either update the class name to match your installed 3CB version or remove `UK3CB_MEE_O_AR_01` from `ARC_opforPatrolUnitClasses` in `initServer.sqf`.
 
 See `docs/projectFiles/Ambient_Dev_Mods_2026-04-01.html` for the complete mod preset.
 

@@ -42,7 +42,7 @@ _rt set ["bubbleActive", _bubbleActive];
 missionNamespace setVariable ["airbase_v1_bubble_active", _bubbleActive, true];
 
 // Toggle simulation for parked assets when bubble changes
-if (_bubbleActive isNotEqualTo _wasActive) then {
+if (!(_bubbleActive isEqualTo _wasActive)) then {
     private _assetsT = [_rt, "assets", []] call _fnHmGet;
     {
         private _state = [_x, "state", "PARKED"] call _fnHmGet;
@@ -156,7 +156,7 @@ private _metaGet = {
     params ["_rows", "_k", "_def"];
     private _v = _def;
     {
-        if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x # 0)) isEqualTo _k }) exitWith { _v = _x # 1; };
+        if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x select 0)) isEqualTo _k }) exitWith { _v = _x select 1; };
     } forEach _rows;
     _v
 };
@@ -164,7 +164,7 @@ private _metaGet = {
 private _metaSet = {
     params ["_rows", "_k", "_v"];
     private _idx = -1;
-    { if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x # 0)) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
+    { if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x select 0)) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
     if (_idx < 0) then { _rows pushBack [_k, _v]; } else { _rows set [_idx, [_k, _v]]; };
     _rows
 };
@@ -232,7 +232,7 @@ private _staffLaneRec = {
     private _idx = -1;
     { if ((_x isEqualType []) && { (count _x) >= 5 } && { ((_x param [0, ""]) isEqualTo _lane) }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
     if (_idx < 0) exitWith { [_lane, "AUTO", "", "", -1] };
-    _rows # _idx
+    _rows select _idx
 };
 
 private _laneControllerCount = {
@@ -271,7 +271,7 @@ private _laneAutoDelayFor = {
 private _clearanceStateDirty = false;
 
 for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
-    private _rec = _clearanceRequests # _iClr;
+    private _rec = _clearanceRequests select _iClr;
     if !(_rec isEqualType []) then { continue; };
 
     private _status = toUpper (_rec param [6, ""]);
@@ -753,7 +753,7 @@ private _qArrNow = 0;
 private _sigParts = [];
 private _nSig = 10 min (count _queue);
 for "_i" from 0 to (_nSig - 1) do {
-    private _it = _queue # _i;
+    private _it = _queue select _i;
     _it params ["_sfid","_sk","_sdet"];
     _sigParts pushBack format ["%1/%2/%3", _sfid, _sk, _sdet];
 };
@@ -761,7 +761,7 @@ for "_i" from 0 to (_nSig - 1) do {
 private _queueSig = format ["%1|%2|%3|%4", (count _queue), _qDepNow, _qArrNow, (_sigParts joinString ";")];
 private _lastSig = [_rt, "queueSig", ""] call _fnHmGet;
 
-if (_queueSig isNotEqualTo _lastSig) then {
+if (!(_queueSig isEqualTo _lastSig)) then {
     _rt set ["queueSig", _queueSig];
     missionNamespace setVariable ["airbase_v1_rt", _rt, true];
 
@@ -773,7 +773,7 @@ if (_queueSig isNotEqualTo _lastSig) then {
     private _previewParts = [];
     private _nPrev = 6 min (count _queue);
     for "_i" from 0 to (_nPrev - 1) do {
-        private _it = _queue # _i;
+        private _it = _queue select _i;
         _it params ["_pfid", "_pk", "_pdet"];
         _previewParts pushBack format ["%1 %2 %3", _pfid, _pk, _pdet];
     };
@@ -782,7 +782,7 @@ if (_queueSig isNotEqualTo _lastSig) then {
 
     // Diary entry text (structured text)
     private _st = systemTime;
-    private _stamp = format ["%1-%2-%3 %4:%5", _st # 0, _st # 1, _st # 2, _st # 3, _st # 4];
+    private _stamp = format ["%1-%2-%3 %4:%5", (_st select 0), (_st select 1), (_st select 2), (_st select 3), (_st select 4)];
 
     private _diaryText = format [
         "<t size='1.05'>Airbase Queue Snapshot</t><br/>Time: %1<br/>Exec: %2%3<br/>Queued: DEP %4 | ARR %5 | TOTAL %6<br/><br/><t size='0.95'>Next:</t><br/>%7",
@@ -863,7 +863,7 @@ if (_snapEnabled && { _nowTs >= _nextSnap }) then {
 
     private _n = 3 min _qLen;
     for "_i" from 0 to (_n - 1) do {
-        private _it = _queue # _i;
+        private _it = _queue select _i;
         _it params ["_qFid","_qKind","_qDet"];
         _meta pushBack [format ["q%1", _i + 1], format ["%1 %2 %3", _qFid, _qKind, _qDet]];
     };
@@ -893,7 +893,7 @@ if (_snapEnabled && { _nowTs >= _nextSnap }) then {
     if (_nP > 0) then {
         private _parts = [];
         for "_i" from 0 to (_nP - 1) do {
-            private _it = _queue # _i;
+            private _it = _queue select _i;
             _it params ["_pfid", "_pk", "_pdet"];
             _parts pushBack format ["%1 %2 %3", _pfid, _pk, _pdet];
         };
@@ -948,7 +948,7 @@ if (!_runwayFree) exitWith {
 };
 
 for "_i" from 0 to ((count _queue) - 1) do {
-    private _qItem = _queue # _i;
+    private _qItem = _queue select _i;
     _qItem params ["_qFid", "_qKind", "_qDetail"];
 
     if (_qKind isEqualTo "ARR") exitWith {
@@ -969,7 +969,7 @@ for "_i" from 0 to ((count _queue) - 1) do {
         private _rIdx = -1;
         { if ((_x param [0, ""]) isEqualTo _qFid) exitWith { _rIdx = _forEachIndex; }; } forEach _recs;
         if (_rIdx >= 0) then {
-            private _rec = _recs # _rIdx;
+            private _rec = _recs select _rIdx;
             private _meta = _rec param [7, []];
             if (!(_meta isEqualType [])) then { _meta = []; };
 
@@ -1001,8 +1001,8 @@ for "_i" from 0 to ((count _queue) - 1) do {
     };
 };
 
-if ((_opsLogEnabled || _debugOps) && { _policyReason isNotEqualTo "NO_ELIGIBLE" }) then {
-    private _picked = _queue # _policyIdx;
+if ((_opsLogEnabled || _debugOps) && { !(_policyReason isEqualTo "NO_ELIGIBLE") }) then {
+    private _picked = _queue select _policyIdx;
     _picked params ["_pfid", "_pk", "_pd", ["_prouteMeta", []]];
     if !(_prouteMeta isEqualType []) then { _prouteMeta = []; };
     private _laneDecision = [_prouteMeta, "runwayLaneDecision", "-"] call _metaGet;
@@ -1015,8 +1015,8 @@ if ((_opsLogEnabled || _debugOps) && { _policyReason isNotEqualTo "NO_ELIGIBLE" 
 
 if (_policyIdx < 0) exitWith {
     if (_opsLogEnabled || _debugOps) then {
-        private _headKind = (_queue # 0) param [1, ""];
-        private _headFid = (_queue # 0) param [0, ""];
+        private _headKind = (_queue select 0) param [1, ""];
+        private _headFid = (_queue select 0) param [0, ""];
         ["OPS", format ["AIRBASE POLICY: dequeue blocked (hold=%1, head=%2 %3)", _holdDepartures, _headFid, _headKind], _center, 0, [
             ["holdDepartures", _holdDepartures],
             ["queueLen", count _queue]
@@ -1048,7 +1048,7 @@ if (!_reserved) exitWith {
 private _idxRecActive = -1;
 { if ((_x param [0,""]) isEqualTo _fid) exitWith { _idxRecActive = _forEachIndex; }; } forEach _recs;
 if (_idxRecActive >= 0) then {
-    private _rActive = _recs # _idxRecActive;
+    private _rActive = _recs select _idxRecActive;
     _rActive set [5, "ACTIVE"];
     _rActive set [6, _nowTs];
     _recs set [_idxRecActive, _rActive];
@@ -1084,7 +1084,7 @@ if (_idxRecActive >= 0) then {
         params ["_rows", "_k", "_def"];
         private _v = _def;
         {
-            if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x # 0)) isEqualTo _k }) exitWith { _v = _x # 1; };
+            if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x select 0)) isEqualTo _k }) exitWith { _v = _x select 1; };
         } forEach _rows;
         _v
     };
@@ -1095,7 +1095,7 @@ if (_idxRecActive >= 0) then {
         private _idxBlock = -1;
         { if ((_x param [0,""]) isEqualTo _fid) exitWith { _idxBlock = _forEachIndex; }; } forEach _recsBlock;
         if (_idxBlock >= 0) then {
-            private _rBlock = _recsBlock # _idxBlock;
+            private _rBlock = _recsBlock select _idxBlock;
             _rBlock set [5, "FAILED"];
             _rBlock set [6, serverTime];
             _recsBlock set [_idxBlock, _rBlock];
@@ -1121,7 +1121,7 @@ if (_idxRecActive >= 0) then {
         private _aIdx = -1;
         { if (([_x, "id", ""] call _fnHmGetLocal) isEqualTo _detail) exitWith { _aIdx = _forEachIndex; }; } forEach _assetsL;
         if (_aIdx >= 0) then {
-            private _asset = _assetsL # _aIdx;
+            private _asset = _assetsL select _aIdx;
 
             // Skip disabled assets
             if (([_asset, "state", "PARKED"] call _fnHmGetLocal) isEqualTo "DISABLED") exitWith {
@@ -1149,7 +1149,7 @@ if (_idxRecActive >= 0) then {
     private _idx2 = -1;
     { if ((_x param [0,""]) isEqualTo _fid) exitWith { _idx2 = _forEachIndex; }; } forEach _recs2;
     if (_idx2 >= 0) then {
-        private _r2 = _recs2 # _idx2;
+        private _r2 = _recs2 select _idx2;
         _r2 set [5, if (_ok) then { "COMPLETE" } else { "FAILED" }];
         _r2 set [6, serverTime];
         _recs2 set [_idx2, _r2];
