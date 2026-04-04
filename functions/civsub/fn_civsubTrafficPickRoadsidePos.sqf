@@ -39,6 +39,10 @@ _maxExtra = (_maxExtra max 6) min 26;
 
 private _tries = 28;
 
+// Pre-declared result vars; populated inside the loop and returned after it.
+private _foundPos = [];
+private _foundDir = 0;
+
 for "_i" from 1 to _tries do
 {
     private _probe = _center getPos [random _searchR, random 360];
@@ -120,7 +124,10 @@ for "_i" from 1 to _tries do
     };
 
     // Return the base road direction (caller may flip 180 for variety)
-    [_pos, _dir]
+    _foundPos = _pos;
+    _foundDir = _dir;
+    break;
 };
 
-[]
+if ((count _foundPos) == 0) exitWith { [] };
+[_foundPos, _foundDir]
