@@ -491,16 +491,19 @@ if ((count _initSeedQueue) == 0) then
     private _rwPool = _parkedAssets select { ([_x, "category", "FW"] call _hmGet) isEqualTo "RW" };
 
     private _seedAssets = [];
+    private _fwRemaining = + _fwPool;
     private _fwPicked = 0;
-    {
-        if (_fwPicked >= 2) exitWith {};
-        _seedAssets pushBack _x;
+    while { _fwPicked < 2 && { (count _fwRemaining) > 0 } } do {
+        private _pick = selectRandom _fwRemaining;
+        _seedAssets pushBack _pick;
         _fwPicked = _fwPicked + 1;
-    } forEach _fwPool;
+        private _pickId = [_pick, "id", ""] call _hmGet;
+        _fwRemaining = _fwRemaining select { !(([_x, "id", ""] call _hmGet) isEqualTo _pickId) };
+    };
 
     if ((count _rwPool) > 0) then
     {
-        _seedAssets pushBack (_rwPool select 0);
+        _seedAssets pushBack (selectRandom _rwPool);
     };
 
     private _seedDepCount = 0;
