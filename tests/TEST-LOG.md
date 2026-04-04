@@ -2888,3 +2888,25 @@ Contrast with the correct pattern used in the background check handler itself:
 | 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict data/farabad_site_templates.sqf` | PASS | No compat patterns found |
 | 2 | sqflint | `sqflint -e w data/farabad_site_templates.sqf` | PASS | No warnings |
 | 3 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime in container; requires live session to confirm correct civilians spawn at all three sites |
+
+## 2026-04-04 02:53 UTC — Add plane6 (RQ-4A HORIZON) to airbase queue
+
+**Branch/Commit:** copilot/add-aircraft-to-queue @ 73def553e3f820bf0db524ce275f9ea2e38e63b6
+
+**Scenario:** Ensure all aircraft with path files are included in the Air/Tower Queue. Audit revealed `plane6` (`USAF_RQ4A`, callsign HORIZON per ORBAT) had a populated 1.1 MB path file (`data/paths/taxiPath_plane6.sqf`) but was missing from both the `_pathFiles` load list and `_assetDefs` in `fn_airbaseInit.sqf`. `OH_58D_01` is excluded because no path file exists for it.
+
+### Changes made
+
+| File | Change |
+|------|--------|
+| `fn_airbaseInit.sqf` | Added `taxiPath_plane6.sqf` to `_pathFiles`; added `FW-RQ4A-HORIZON11` entry to `_assetDefs` (crewVars=[] — unmanned) |
+
+### Static Validation
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbaseInit.sqf` | PASS | No banned patterns |
+| 2 | sqflint | `sqflint -e w functions/ambiance/fn_airbaseInit.sqf` | PASS | No warnings |
+| 3 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime in container; follow-up: verify OPS log shows `FW-RQ4A-HORIZON11` registered; note fn_airbasePlaneDepart exits gracefully when crewLive==0 (returns false, sets PARKED) — mission editor should add plane6D crew unit if airborne departure is required |
+
+---
