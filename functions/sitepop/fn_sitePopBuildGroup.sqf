@@ -4,22 +4,32 @@
     Server: spawn a single population group for a site.
 
     Steps:
-    1. Parse group definition (roleTag, side, class pool, count range, behavior, radius).
-    2. Filter class pool against CfgVehicles (handles absent mods gracefully).
-    3. Draw unit count from [min, max] range.
-    4. Obtain building slots from ARC_worldBuildingSlots cache; shuffle for variety.
-    5. Create group and units; place each unit in a building slot (or random offset
-       if slots exhausted).
-    6. Strip weapons from civilian-side and prisoner units.
-    7. Enable dynamic simulation per unit (cost reduction).
-    8. Tag each unit and the group for cleanup.
-    9. Call ARC_fnc_sitePopApplyAmbiance.
+    1. Parse group definition (roleTag, side, class pool, count range, behavior, radius,
+       optional spawnAnchor marker).
+    2. Resolve effective spawn position: if spawnAnchor is a valid Eden marker, use its
+       world position; otherwise fall back to the site centre.
+    3. Filter class pool against CfgVehicles (handles absent mods gracefully).
+    4. Draw unit count from [min, max] range; apply optional spawnCtx count delta.
+    5. Obtain building slots from ARC_worldBuildingSlots cache; filter to anchor radius
+       when an anchor is active; shuffle for variety.
+    6. Create group and units; place each unit in a filtered slot (or random offset
+       within anchor radius if slots exhausted).
+    7. Strip weapons from civilian-side and prisoner units; strip vest/backpack and
+       apply persistent tags for prisoner roles.
+    8. Enable dynamic simulation per unit (cost reduction).
+    9. Tag each unit and the group for cleanup.
+   10. Call ARC_fnc_sitePopApplyAmbiance with anchor-aware position and marker name.
 
     Params:
         0: STRING — siteId
         1: ARRAY  — site world position [x, y, z] (ATL)
         2: ARRAY  — population group definition
                     [roleTag, sideStr, unitClassPool, countRange, behavior, spawnRadiusM]
+                    Optional 7th element: spawnAnchor (STRING — Eden marker name for
+                    zone-local slot filtering and wander; "" = site-wide, no anchor)
+        3: ANY    — (optional) spawnCtx HashMap from ARC_fnc_sitePopGetSpawnModifiers.
+                    Supported keys:
+                      "roleDelta" → HashMap of roleTag → INTEGER count delta.
 
     Returns: GROUP — the spawned group, or grpNull on failure.
 */
@@ -29,7 +39,8 @@ if (!isServer) exitWith {grpNull};
 params [
     ["_siteId",   "", [""]],
     ["_sitePos",  [], [[]]],
-    ["_groupDef", [], [[]]]
+    ["_groupDef", [], [[]]],
+    ["_spawnCtx", []]
 ];
 
 if (_siteId isEqualTo "") exitWith {grpNull};
@@ -37,16 +48,42 @@ if (!(_sitePos isEqualType []) || { (count _sitePos) < 2 }) exitWith {grpNull};
 if (!(_groupDef isEqualType []) || { (count _groupDef) < 6 }) exitWith {grpNull};
 
 _groupDef params [
-    ["_roleTag",     "unit",   [""]],
-    ["_sideStr",     "west",   [""]],
-    ["_classPool",   [],       [[]]],
-    ["_countRange",  [2, 4],   [[]]],
-    ["_behavior",    "wander", [""]],
-    ["_spawnRadiusM", 80,      [0]]
+    ["_roleTag",      "unit",   [""]],
+    ["_sideStr",      "west",   [""]],
+    ["_classPool",    [],       [[]]],
+    ["_countRange",   [2, 4],   [[]]],
+    ["_behavior",     "wander", [""]],
+    ["_spawnRadiusM", 80,       [0]],
+    ["_spawnAnchor",  "",       [""]]
 ];
 
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
+// ---------------------------------------------------------------------------
+// Resolve effective spawn position from optional anchor marker
+// ---------------------------------------------------------------------------
+private _hasAnchor        = false;
+private _effectiveSitePos = _sitePos;
+
+if (!(_spawnAnchor isEqualTo "")) then
+{
+    if (!((getMarkerType _spawnAnchor) isEqualTo "")) then
+    {
+        private _anchorPos = getMarkerPos _spawnAnchor;
+        private _anchorP3  = +_anchorPos;
+        if ((count _anchorP3) < 3) then { _anchorP3 pushBack 0; };
+        _effectiveSitePos = _anchorP3;
+        _hasAnchor = true;
+    }
+    else
+    {
+        diag_log format ["[ARC][SITEPOP][WARN] ARC_fnc_sitePopBuildGroup: site '%1' role '%2' — anchor marker '%3' not found in mission; using site centre.", _siteId, _roleTag, _spawnAnchor];
+    };
+};
+
+// ---------------------------------------------------------------------------
+// Apply spawnCtx count delta (before class-pool filter so delta is clamped correctly)
+// ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
 // Resolve side
 // ---------------------------------------------------------------------------
@@ -71,6 +108,20 @@ if (_countRange isEqualType [] && { (count _countRange) >= 2 }) then
 };
 private _count = _minCount + floor (random ((_maxCount - _minCount + 1)));
 _count = _count min _maxCount;
+
+// Apply spawnCtx count delta (per-role modifier from fn_sitePopGetSpawnModifiers)
+if (_spawnCtx isEqualType createHashMap) then
+{
+    private _roleDelta = [_spawnCtx, "roleDelta", createHashMap] call _hg;
+    if (_roleDelta isEqualType createHashMap) then
+    {
+        private _delta = [_roleDelta, _roleTag, 0] call _hg;
+        if (_delta isEqualType 0 && { !(_delta isEqualTo 0) }) then
+        {
+            _count = (_count + _delta) max 1;
+        };
+    };
+};
 
 // ---------------------------------------------------------------------------
 // Filter class pool
@@ -99,12 +150,33 @@ if ((count _bldSlots) > 1 && { !isNil "BIS_fnc_arrayShuffle" }) then
     _bldSlots = _bldSlots call BIS_fnc_arrayShuffle;
 };
 
+// Filter building slots to anchor-local radius when an anchor is active.
+// Removes slots outside spawnRadiusM of the anchor marker so units only
+// occupy buildings within their designated subzone.
+if (_hasAnchor) then
+{
+    private _anchorR2 = _spawnRadiusM * _spawnRadiusM;
+    private _anchorX  = _effectiveSitePos select 0;
+    private _anchorY  = _effectiveSitePos select 1;
+    private _filtered = [];
+    {
+        if (!(_x isEqualType []) || { (count _x) < 2 }) then { continue; };
+        private _dx = (_x select 0) - _anchorX;
+        private _dy = (_x select 1) - _anchorY;
+        if ((_dx * _dx + _dy * _dy) <= _anchorR2) then
+        {
+            _filtered pushBack _x;
+        };
+    } forEach _bldSlots;
+    _bldSlots = _filtered;
+};
+
 // ---------------------------------------------------------------------------
 // Effective spawn radius (non-zero guard)
 // ---------------------------------------------------------------------------
 private _spawnR = if (_spawnRadiusM > 0) then { _spawnRadiusM } else { 80 };
 
-private _p3 = +_sitePos;
+private _p3 = +_effectiveSitePos;
 if ((count _p3) < 3) then { _p3 pushBack 0; };
 
 // ---------------------------------------------------------------------------
@@ -123,6 +195,25 @@ if (_behavior isEqualTo "parked") exitWith
     if ((count _roadsideSlots) > 1 && { !isNil "BIS_fnc_arrayShuffle" }) then
     {
         _roadsideSlots = _roadsideSlots call BIS_fnc_arrayShuffle;
+    };
+
+    // Filter roadside slots to anchor-local radius when an anchor is active.
+    if (_hasAnchor) then
+    {
+        private _anchorR2 = _spawnRadiusM * _spawnRadiusM;
+        private _anchorX  = _effectiveSitePos select 0;
+        private _anchorY  = _effectiveSitePos select 1;
+        private _filteredR = [];
+        {
+            if (!(_x isEqualType []) || { (count _x) < 2 }) then { continue; };
+            private _dx = (_x select 0) - _anchorX;
+            private _dy = (_x select 1) - _anchorY;
+            if ((_dx * _dx + _dy * _dy) <= _anchorR2) then
+            {
+                _filteredR pushBack _x;
+            };
+        } forEach _roadsideSlots;
+        _roadsideSlots = _filteredR;
     };
 
     // false = do not auto-delete when empty; vehicles are tracked via variable
@@ -228,11 +319,22 @@ for "_i" from 1 to _count do
     _u setVariable ["ARC_sitePop_role",   _roleTag];
 
     // Strip weapons: civilians and prisoners are always unarmed
-    private _stripWeapons = ((_sideStr isEqualTo "civ") || { _roleTag isEqualTo "prisoner" });
+    private _isPrisoner    = ("prisoner" in _roleTag);
+    private _stripWeapons  = ((_sideStr isEqualTo "civ") || { _isPrisoner });
     if (_stripWeapons) then
     {
         removeAllWeapons _u;
         removeAllItems _u;
+    };
+
+    // Prisoner-specific: strip vest/backpack and apply persistent identity tags.
+    if (_isPrisoner) then
+    {
+        removeVest _u;
+        removeBackpack _u;
+        _u setVariable ["ARC_prisoner",      true,         false];
+        _u setVariable ["ARC_prisonHomeZone", _spawnAnchor, false];
+        _u setVariable ["ARC_prisonRiskTier", "low",        false];
     };
 
     // Reduce simulation cost when players are absent
@@ -242,7 +344,7 @@ for "_i" from 1 to _count do
 // ---------------------------------------------------------------------------
 // Apply LAMBS or vanilla ambiance behavior
 // ---------------------------------------------------------------------------
-[_grp, _behavior, _p3, _spawnR] call ARC_fnc_sitePopApplyAmbiance;
+[_grp, _behavior, _p3, _spawnR, _spawnAnchor] call ARC_fnc_sitePopApplyAmbiance;
 
 diag_log format ["[ARC][SITEPOP][INFO] ARC_fnc_sitePopBuildGroup: site '%1' role '%2' — %3 unit(s) spawned.", _siteId, _roleTag, count (units _grp)];
 

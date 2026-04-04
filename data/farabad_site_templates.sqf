@@ -22,16 +22,27 @@
             sideStr         STRING  - "west" | "east" | "indep" | "civ"
             unitClassPool   ARRAY   - candidate CfgVehicles classnames; invalid classes filtered at spawn time
             countRange      ARRAY   - [minCount, maxCount]
-            behavior        STRING  - "garrison" | "camp" | "wander"
-            spawnRadiusM    NUMBER  - spawn units within this radius of site center
+            behavior        STRING  - "garrison" | "camp" | "wander" | "parked"
+            spawnRadiusM    NUMBER  - spawn units within this radius of the anchor (or site centre if no anchor)
+            spawnAnchor     STRING  - (optional) Eden marker name for zone-local spawning and wander.
+                                      When non-empty, ARC_worldBuildingSlots entries and wander waypoints
+                                      are filtered to within spawnRadiusM of this marker.
+                                      Falls back to site centre if the marker does not exist in the mission.
+                                      Omit or leave "" to use site-wide (legacy 6-field) behaviour.
         ]
 
     Side notes:
     - "garrison": LAMBS lambs_danger_fnc_garrison if available; falls back to SAFE/WHITE hold in buildings.
     - "camp":     LAMBS lambs_danger_fnc_camp if available; falls back to loiter waypoints.
-    - "wander":   Uses pre-scanned ARC_worldPatrolRings (tight/medium ring); falls back to random loiter waypoints.
-    - Civilian ("civ") and "prisoner" roles always have weapons stripped after spawn.
+    - "wander":   When spawnAnchor is set, generates anchor-local waypoints (bypasses ARC_worldPatrolRings).
+                  When no anchor, uses pre-scanned ARC_worldPatrolRings (tight/medium ring); falls back to random loiter.
+    - Civilian ("civ") and prisoner roles (roleTag containing "prisoner") always have weapons stripped.
+    - Prisoner roles additionally have vest and backpack removed and receive ARC_prisoner / ARC_prisonHomeZone /
+      ARC_prisonRiskTier variable tags.
     - Class pool entries that are not present in CfgVehicles are silently skipped.
+
+    NOTE: The optional 7th field (spawnAnchor) is backward-compatible. All existing 6-field group
+    definitions continue to work unchanged; the anchor defaults to "" (site-wide behaviour).
 */
 
 // ---------------------------------------------------------------------------
@@ -133,27 +144,48 @@ private _staffPool = [
 
 [
     // -------------------------------------------------------------------------
-    // KARKANAK PRISON
-    //   BLUFOR (TNP) guard sections: 8 named elements totalling 40 personnel.
-    //   Prison hospital: TKP medical guards, civilian medical staff, parked
-    //   ambulances — placed using building-index (roadside) slots.
-    //   Civilian roles: prisoners (unarmed), vendors, maintenance contractors.
-    //   LAMBS garrison for armed guards; wander/camp for civilians.
-    //   Trigger at 600 m; despawn after 120 s with no player within 900 m.
+    // KARKANAK PRISON  (zone-aware, anchor-local spawning)
+    //   All guard roles use TNP (BLUFOR). Civilian roles: medical staff, vendors,
+    //   contractors, prisoners. TNA is NOT a baseline role — use as conditional
+    //   QRF overlay only.
     //
-    //   BLUFOR composition (doctrinal):
-    //     hq_admin      (4)  Prison HQ / Admin Cell – commander, deputy, radio clerk, records clerk
-    //     gate_guard    (8)  Main Gate / Vehicle Search – gate guards, vehicle search, visitor control, outer sally port
-    //     perimeter     (8)  Perimeter / Tower Section – wall posts, roving exterior guard, alarm response
-    //     internal_a    (6)  Internal Guard Section A – cellblock security, key control, prisoner movement
-    //     internal_b    (6)  Internal Guard Section B – second block / segregation / overflow guard
-    //     intake        (4)  Intake / Processing / Evidence Cell – search, booking, property, paperwork
-    //     escort        (4)  Escort / Transport Section – detainee transfer, courtroom or handoff movement
-    //     reaction      (4)  Prison Reaction / Reserve Section – riot response, breakout response, emergency reserve
-    //   Prison hospital:
-    //     prison_medic     (3-4)  TKP armed medical escort / security (BLUFOR)
+    //   Spawn anchors reference Eden markers placed inside the prison footprint.
+    //   Each anchor gates building-slot filtering and wander waypoints to its own
+    //   radius, so no group bleeds across subzone boundaries.
+    //
+    //   Anchor markers required in mission.sqm (place once in Eden):
+    //     prison_admin_offices        — command/admin block
+    //     prison_entry_office         — main gate / entry processing
+    //     prison_guard_tower_1        — north perimeter tower
+    //     prison_guard_tower_2        — south perimeter tower
+    //     prison_central_guard_tower  — central internal tower
+    //     prison_dorm_01 .. _04       — individual dormitory blocks
+    //     prison_intake_01            — intake/processing cluster
+    //     prison_hospital             — medical wing
+    //     prison_holding_area         — holding yard / high-risk block
+    //   When a marker is absent, the group falls back to site-centre with a WARN log.
+    //
+    //   Guard composition (BLUFOR, doctrinal):
+    //     hq_admin       (4)   Prison HQ / Admin Cell
+    //     gate_guard     (8)   Main Gate / Vehicle Search
+    //     tower_north    (2-3) North perimeter tower
+    //     tower_south    (2-3) South perimeter tower
+    //     tower_central  (2-3) Central internal guard tower
+    //     internal_a     (6)   Internal Guard Section A — dorm 01/02 block
+    //     internal_b     (6)   Internal Guard Section B — dorm 03/04 block
+    //     intake         (4)   Intake / Processing / Evidence Cell
+    //     escort         (4)   Escort / Transport Section
+    //     reaction       (4)   Prison Reaction / Reserve Section
+    //   Prison hospital (BLUFOR + CIV):
+    //     prison_medic     (3-4)  TKP armed medical escort / security
     //     prison_civ_doc   (2-3)  Civilian doctors / nurses (unarmed)
-    //     prison_ambulance (1-2)  Parked ambulance(s) — placed via roadside building-index slots
+    //     prison_ambulance (1-2)  Parked ambulance(s) — roadside slots near hospital
+    //   Prisoners (CIV, stripped, tagged):
+    //     prisoner_dorm_01 .. _04  (3-5 each)  Dorm-bound wander populations
+    //     prisoner_holding         (2-4)        Holding-yard wander population
+    //   Support (CIV):
+    //     vendor      (3-6)   Gate compound clusters
+    //     contractor  (2-4)   Outer maintenance / perimeter support (no anchor)
     // -------------------------------------------------------------------------
     [
         "KarkanakPrison",
@@ -162,34 +194,36 @@ private _staffPool = [
         900,
         120,
         [
-            // Prison HQ / Admin Cell – commander, deputy, radio clerk, records clerk (4)
-            ["hq_admin",        "west", _tnpPool,        [4,  4], "camp",      40],
-            // Main Gate / Vehicle Search Section – gate guards, search, visitor control, outer sally port (8)
-            ["gate_guard",      "west", _tnpPool,        [8,  8], "garrison",  70],
-            // Perimeter / Tower Section – wall posts, roving exterior guard, alarm response (8)
-            ["perimeter",       "west", _tnpPool,        [8,  8], "garrison", 100],
-            // Internal Guard Section A – cellblock security, key control, prisoner movement (6)
-            ["internal_a",      "west", _tnpPool,        [6,  6], "garrison",  50],
-            // Internal Guard Section B – second block / segregation / overflow guard (6)
-            ["internal_b",      "west", _tnpPool,        [6,  6], "garrison",  50],
-            // Intake / Processing / Evidence Cell – search, booking, property, paperwork (4)
-            ["intake",          "west", _tnpPool,        [4,  4], "camp",      40],
-            // Escort / Transport Section – detainee transfer, courtroom or handoff movement (4)
-            ["escort",          "west", _tnpPool,        [4,  4], "wander",    60],
-            // Prison Reaction / Reserve Section – riot response, breakout response, emergency reserve (4)
-            ["reaction",        "west", _tnpPool,        [4,  4], "camp",      50],
-            // Prison hospital — TKP armed medical escort / security (3-4, BLUFOR)
-            ["prison_medic",    "west", _tnpMedPool,     [3,  4], "camp",      35],
-            // Prison hospital — civilian doctors and nurses (2-3, unarmed)
-            ["prison_civ_doc",  "civ",  _civMedPool,     [2,  3], "camp",      35],
-            // Prison hospital — parked ambulance(s) near roadside building-index slots (1-2)
-            ["prison_ambulance","civ",  _ambVehiclePool, [1,  2], "parked",    60],
-            // Prisoners wander the yard (tight patrol ring, unarmed)
-            ["prisoner",        "civ",  _civPool,        [10, 18], "wander",   80],
-            // Vendors cluster near the compound gate (LAMBS camp or loiter)
-            ["vendor",          "civ",  _civPool,        [3,   6], "camp",     60],
-            // Maintenance contractors move around the outer area
-            ["contractor",      "civ",  _workerPool,     [2,   4], "wander",  120]
+            // --- Admin & Command ---
+            ["hq_admin",            "west", _tnpPool,        [4, 4], "camp",     35, "prison_admin_offices"],
+            // --- Entry ---
+            ["gate_guard",          "west", _tnpPool,        [8, 8], "garrison", 50, "prison_entry_office"],
+            // --- Perimeter / Towers (split from monolithic "perimeter") ---
+            ["tower_north",         "west", _tnpPool,        [2, 3], "garrison", 25, "prison_guard_tower_1"],
+            ["tower_south",         "west", _tnpPool,        [2, 3], "garrison", 25, "prison_guard_tower_2"],
+            ["tower_central",       "west", _tnpPool,        [2, 3], "garrison", 25, "prison_central_guard_tower"],
+            // --- Internal Guard Sections ---
+            ["internal_a",          "west", _tnpPool,        [6, 6], "garrison", 45, "prison_dorm_01"],
+            ["internal_b",          "west", _tnpPool,        [6, 6], "garrison", 45, "prison_dorm_03"],
+            // --- Intake ---
+            ["intake",              "west", _tnpPool,        [4, 4], "camp",     35, "prison_intake_01"],
+            // --- Escort / Reaction (both anchor to admin area) ---
+            ["escort",              "west", _tnpPool,        [4, 4], "wander",   50, "prison_admin_offices"],
+            ["reaction",            "west", _tnpPool,        [4, 4], "camp",     40, "prison_admin_offices"],
+            // --- Hospital (all three groups anchored to hospital marker) ---
+            ["prison_medic",        "west", _tnpMedPool,     [3, 4], "camp",     30, "prison_hospital"],
+            ["prison_civ_doc",      "civ",  _civMedPool,     [2, 3], "camp",     30, "prison_hospital"],
+            ["prison_ambulance",    "civ",  _ambVehiclePool, [1, 2], "parked",   40, "prison_hospital"],
+            // --- Prisoner populations (one per dormitory block + holding yard) ---
+            ["prisoner_dorm_01",    "civ",  _civPool,        [3, 5], "wander",   25, "prison_dorm_01"],
+            ["prisoner_dorm_02",    "civ",  _civPool,        [3, 5], "wander",   25, "prison_dorm_02"],
+            ["prisoner_dorm_03",    "civ",  _civPool,        [3, 5], "wander",   25, "prison_dorm_03"],
+            ["prisoner_dorm_04",    "civ",  _civPool,        [3, 5], "wander",   25, "prison_dorm_04"],
+            ["prisoner_holding",    "civ",  _civPool,        [2, 4], "wander",   30, "prison_holding_area"],
+            // --- Support (CIV) ---
+            ["vendor",              "civ",  _civPool,        [3, 6], "camp",     50, "prison_entry_office"],
+            // Contractor has no anchor — roams the outer perimeter footprint
+            ["contractor",          "civ",  _workerPool,     [2, 4], "wander",  100, ""]
         ]
     ],
 

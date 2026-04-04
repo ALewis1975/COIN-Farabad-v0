@@ -748,6 +748,14 @@ if (_safeModeEnabled) then
 // TASKENG schema migration (runs once after stateLoad, before any thread writes)
 [] call ARC_fnc_taskengMigrateSchema;
 
+// SitePop site state init: loads sitepop_v1_site_states from persisted ARC_state into
+// ARC_sitePopSiteStates. MUST run after stateLoad so persistent history is available.
+[] call ARC_fnc_sitePopStateInit;
+
+// Prison overlay subsystem: initialises ARC_prisonState and spawns the non-blocking
+// prison tick loop. MUST run after sitePopStateInit.
+[] call ARC_fnc_prisonInit;
+
 // Server-owned S1 registry: canonical personnel/unit index + public snapshot mirror
 [] call ARC_fnc_s1RegistryInit;
 
