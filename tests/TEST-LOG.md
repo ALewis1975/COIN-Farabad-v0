@@ -2907,6 +2907,6 @@ Contrast with the correct pattern used in the background check handler itself:
 |---|-------|---------|--------|-------|
 | 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbaseInit.sqf` | PASS | No banned patterns |
 | 2 | sqflint | `sqflint -e w functions/ambiance/fn_airbaseInit.sqf` | PASS | No warnings |
-| 3 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime in container; follow-up: verify OPS log shows `FW-RQ4A-HORIZON11` registered; note fn_airbasePlaneDepart exits gracefully when crewLive==0 (returns false, sets PARKED) — mission editor should add plane6D crew unit if airborne departure is required |
+| 3 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime in container; follow-up: verify OPS log shows `FW-RQ4A-HORIZON11` registered; crewVars=[] is intentional (RQ-4A is unmanned — no crew unit required); fn_airbasePlaneDepart exits gracefully when crewLive==0 (returns false, sets PARKED) until a pilot crew unit is added in Eden if airborne departure is desired |
 
 ---

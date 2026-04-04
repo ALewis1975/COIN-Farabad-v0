@@ -287,7 +287,7 @@ private _assetDefs = [
     ["FW-A10-WARTHOG11",  "FW", "plane4", ["plane4D"], "taxiPathData_plane4", "data\paths\attackTaxiPath_plane4.sqf", true,  "tug4", "tug4D", "towPathData_plane4", "", ""],
     ["FW-A10-WARTHOG12",  "FW", "plane5", ["plane5D"], "taxiPathData_plane5", "data\paths\attackTaxiPath_plane5.sqf", true,  "tug5", "tug5D", "towPathData_plane5","", ""],
     ["FW-EC130-SNITCH11", "FW", "plane7", ["plane7D","plane7G"], "taxiPathData_plane7", "data\paths\taxiPath_plane7.sqf", false, "",     "",     "",                   "",              ""],
-    ["FW-RQ4A-HORIZON11", "FW", "plane6", [], "taxiPathData_plane6", "data\paths\taxiPath_plane6.sqf", false, "", "", "", "", ""],
+    ["FW-RQ4A-HORIZON11", "FW", "plane6", [], "taxiPathData_plane6", "data\paths\taxiPath_plane6.sqf", false, "", "", "", "", ""], // RQ-4A is unmanned; crewVars=[] — fn_airbasePlaneDepart exits gracefully (returns false/PARKED) until a pilot crew unit is added in Eden
 
     // Rotary-wing (treat the same as fixed-wing for scheduling + return arrivals)
     ["RW-AH64D-01",       "RW", "AH_64D_01", ["AH_64D_01D","AH_64D_01G"], "taxiPathData_AH_64D_01", "data\paths\taxiPath_AH_64D_01.sqf", false, "", "", "", "", ""],
