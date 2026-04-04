@@ -2779,3 +2779,29 @@ Contrast with the correct pattern used in the background check handler itself:
 | 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict data/farabad_site_templates.sqf` | PASS | No compat patterns found |
 | 2 | sqflint | `sqflint -e w data/farabad_site_templates.sqf` | PASS | No warnings |
 | 3 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime in container; requires live session to confirm prison groups are skipped gracefully when 3CB absent |
+
+---
+
+## 2026-04-04 02:12 UTC — Update: canonical civilian class pools in site templates
+
+**Branch/Commit:** copilot/karkanak-prison-nato-troops @ 9679dbaf5cbb641c92a0b62c25764af99ade1574 (pre-change; see commit after push)
+
+**Scenario:** Civilian class pools in `data/farabad_site_templates.sqf` used an ad-hoc mix of 3CB classes with vanilla fallbacks. The mission designer provided a canonical per-category class list covering common civs, workers, doctors/paramedics, VIP/government/diplomat, pilots, and priests. All civilian pools are replaced with the authoritative lists; no vanilla fallbacks remain in any civilian pool.
+
+### Changes made
+
+| File | Change |
+|------|--------|
+| `data/farabad_site_templates.sqf` | `_civPool` → 11 canonical COMMON CIVS classes (MEC, TKC, ADC) |
+| `data/farabad_site_templates.sqf` | `_workerPool` → 5 canonical WORKERS classes; no longer a `+_civPool` copy |
+| `data/farabad_site_templates.sqf` | `_civMedPool` → 6 canonical DOCTORS/PARAMEDICS classes incl. `C_IDAP_Man_Paramedic_01_F` |
+| `data/farabad_site_templates.sqf` | `_staffPool` → 8 canonical VIP/GOVERNMENT/DIPLOMAT classes; no longer a `+_civPool` copy |
+| `data/farabad_site_templates.sqf` | Pilot and priest pool classes noted; deferred to new array declarations when corresponding template groups are defined (omitted now to avoid sqflint unused-variable error) |
+
+### Static Validation
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict data/farabad_site_templates.sqf` | PASS | No compat patterns found |
+| 2 | sqflint | `sqflint -e w data/farabad_site_templates.sqf` | PASS | No warnings |
+| 3 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime in container; requires live session to confirm correct civilians spawn at all three sites |

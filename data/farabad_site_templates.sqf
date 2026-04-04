@@ -58,13 +58,15 @@ private _tnpMedPool = [
     "UK3CB_TKP_B_NCO"
 ];
 
-// Civilian medical personnel: doctors, nurses, paramedics.
-// UK3CB_TKC_C_DOC is the primary 3CB Takistan doctor class.
+// Civilian medical personnel: doctors, nurses, paramedics (3CB + IDAP).
+// Invalid classes are silently skipped at spawn time.
 private _civMedPool = [
+    "UK3CB_MEC_C_DOC",
     "UK3CB_TKC_C_DOC",
-    "UK3CB_MEC_C_CIV",
-    "C_man_polo_5_F",
-    "C_Man_casual_1_F"
+    "UK3CB_CHC_C_DOC",
+    "UK3CB_ADC_C_DOC_CHR",
+    "UK3CB_ADC_C_DOC_ISL",
+    "C_IDAP_Man_Paramedic_01_F"
 ];
 
 // Ambulance / medical transport vehicles.
@@ -88,29 +90,42 @@ private _tnaPool = [
     "B_Soldier_AR_F"
 ];
 
-// Civilian population: 3CB Takistan (TKC) and Middle Eastern (MEC) civilians.
-// Invalid classes are silently skipped at spawn time (fn_sitePopBuildGroup validates via CfgVehicles).
-// Vanilla Arma 3 classes are included as a final fallback for no-mod environments.
+// Civilian population: common civs from 3CB MEC, TKC, and ADC factions.
+// Invalid classes are silently skipped at spawn time.
 private _civPool = [
-    // 3CB Takistan Civilians (faction: UK3CB_TKC_C) — primary Takistan population
+    "UK3CB_MEC_C_CIV_01",
+    "UK3CB_MEC_C_CIV_02",
+    "UK3CB_MEC_C_HUNTER",
+    "UK3CB_MEC_C_CIT",
+    "UK3CB_MEC_C_COACH",
+    "UK3CB_MEC_C_PROF",
+    "UK3CB_MEC_C_CIV",
+    "UK3CB_MEC_C_SPOT",
     "UK3CB_TKC_C_CIV",
     "UK3CB_TKC_C_SPOT",
-    "UK3CB_TKC_C_WORKER",
-    "UK3CB_TKC_C_DOC",
-    // 3CB Middle Eastern Civilians (faction: UK3CB_MEC_C) — broader regional population
-    "UK3CB_MEC_C_CIV",
-    "UK3CB_MEC_C_WORKER",
-    // Vanilla fallback (skipped when 3CB classes are present and valid)
-    "C_Man_casual_1_F",
-    "C_man_polo_1_F",
-    "C_man_w_worker1_F"
+    "UK3CB_ADC_C_SPOT_ISL"
 ];
 
-// Worker / contractor subset — same pool, different behavior applied per group.
-private _workerPool = +_civPool;
+// Workers and contractors (labourers, manual trades).
+private _workerPool = [
+    "UK3CB_MEC_C_LABOURER",
+    "UK3CB_MEC_C_WORKER",
+    "UK3CB_TKC_C_WORKER",
+    "UK3CB_ADC_C_LABOURER_CHR",
+    "UK3CB_ADC_C_LABOURER_ISL"
+];
 
-// Palace / embassy staff (civilian appearance).
-private _staffPool = +_civPool;
+// Palace / embassy staff: government officials, diplomats, VIPs.
+private _staffPool = [
+    "UK3CB_MEC_C_FUNC",
+    "UK3CB_CHC_C_BODYG",
+    "UK3CB_CHC_C_FUNC",
+    "UK3CB_CHC_C_POLITIC",
+    "UK3CB_CHC_C_CAN",
+    "UK3CB_ADC_C_FUNC",
+    "C_Story_Scientist_01_F",
+    "C_Nikos_aged"
+];
 
 // ---------------------------------------------------------------------------
 // Templates
