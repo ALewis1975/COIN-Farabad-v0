@@ -143,7 +143,11 @@ if ((count _liveBreakoutGroups) isEqualTo 0 && { _adaptLevel >= 3 }) then
     {
         _spawnPos resize 3;
 
-        // Use a basic OPFOR infantry class; filtered against CfgVehicles at spawn
+        // OPFOR class pool for breakout actors. Classes are filtered against CfgVehicles
+        // at spawn time so absent mod classes are silently skipped.
+        // If the mission's OPFOR faction changes (e.g., switching from UK3CB_TKA_O to a
+        // different faction), update UK3CB_TKA_O_* entries here and in the relevant
+        // farabad_site_templates.sqf pools to keep factions consistent.
         private _opforClasses = [
             "UK3CB_TKA_O_Soldier",
             "UK3CB_TKA_O_Soldier_L",

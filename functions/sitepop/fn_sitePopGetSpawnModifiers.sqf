@@ -80,6 +80,8 @@ switch (_policy) do
 
         if (_towerDelta > 0 || { _reactionDelta > 0 }) then
         {
+            // COUPLING: role tag strings must match the KarkanakPrison template in
+            // data/farabad_site_templates.sqf. Rename here if template roles change.
             private _roleDelta = createHashMap;
             if (_towerDelta > 0) then
             {

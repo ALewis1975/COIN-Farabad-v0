@@ -316,7 +316,11 @@ for "_i" from 1 to _count do
     _u setVariable ["ARC_sitePop_siteId", _siteId];
     _u setVariable ["ARC_sitePop_role",   _roleTag];
 
-    // Strip weapons: civilians and prisoners are always unarmed
+    // Strip weapons: civilians and prisoners are always unarmed.
+    // Prisoner detection: any roleTag containing the substring "prisoner" qualifies
+    // (covers prisoner_dorm_01..04, prisoner_holding, prisoner).
+    // NOTE: no other role in farabad_site_templates.sqf contains this substring;
+    // verify before adding roles with "prisoner" in the name for non-prisoner purposes.
     private _isPrisoner    = ((_roleTag find "prisoner") >= 0);
     private _stripWeapons  = ((_sideStr isEqualTo "civ") || { _isPrisoner });
     if (_stripWeapons) then

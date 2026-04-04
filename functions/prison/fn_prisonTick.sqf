@@ -25,6 +25,8 @@ private _tickS  = 30;
 private _siteId = "KarkanakPrison";
 
 // Role tags whose wander AI is paused during prayer windows.
+// COUPLING: these must match the exact roleTag values in data/farabad_site_templates.sqf
+// (KarkanakPrison block). Update here if template role names change.
 private _wanderRoles = [
     "prisoner_dorm_01", "prisoner_dorm_02", "prisoner_dorm_03", "prisoner_dorm_04",
     "prisoner_holding", "prisoner", "escort"

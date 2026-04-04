@@ -81,7 +81,10 @@ if (!isNil { missionNamespace getVariable "ARC_sitePopSiteStates" }) then
         _siteState set ["guardCasualties", _guardCas];
         _siteState set ["lastDespawnAt",   serverTime];
 
-        // Update adaptation level from cumulative guard casualties (never downgrade)
+        // Update adaptation level from cumulative guard casualties (never downgrade).
+        // Thresholds:  >2 → level 1 (minor hardening)
+        //              >5 → level 2 (elevated; also aligns with _disorderThreshold in fn_prisonEvalIncident)
+        //             >10 → level 3 (maximum; triggers breakout-eligible state in fn_prisonEvalIncident)
         private _newAdapt = 0;
         if (_guardCas >  2) then { _newAdapt = 1; };
         if (_guardCas >  5) then { _newAdapt = 2; };

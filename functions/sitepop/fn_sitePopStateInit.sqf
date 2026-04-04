@@ -56,8 +56,9 @@ if (!(_siteIds isEqualType [])) then { _siteIds = []; };
     if (!(_sid isEqualTo "")) then
     {
         private _existing = [_persisted, _sid, createHashMap] call _hg;
-        // A real stored record always has "visitCount" (≥ 0).
-        // A fresh-default empty HashMap returns the sentinel -999, indicating no record.
+        // Use -999 as a sentinel that can never be a real visitCount (always >= 0).
+        // If the stored HashMap is empty (fresh default from getOrDefault), its own
+        // "visitCount" lookup will also return -999, indicating no prior record exists.
         private _visits = [_existing, "visitCount", -999] call _hg;
         if (!(_visits isEqualType 0) || { _visits isEqualTo -999 }) then
         {
