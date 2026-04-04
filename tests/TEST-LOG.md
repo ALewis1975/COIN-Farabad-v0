@@ -2784,3 +2784,31 @@ Contrast with the correct pattern used in the background check handler itself:
 | 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict fn_civsubTick.sqf fn_civsubDeltaApplyToDistrict.sqf fn_uiConsoleActionS2Primary.sqf` | WARN (pre-existing) | All 61 warnings are pre-existing `getOrDefault` method-form debt in these files; no new patterns introduced |
 | 2 | sqflint | `sqflint -e w <each file>` | FAIL (pre-existing) | Same pre-existing `getOrDefault`/`#`/`trim`/`isNotEqualTo` errors; none introduced by this change |
 | 3 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime available in container; requires live session to verify district pub replication and pop display |
+
+---
+
+## 2026-04-04 02:17 UTC — Bug fix: S-1 Personnel Snapshot diary formatting
+
+**Branch/Commit:** copilot/clean-up-s1-personnel-snapshot @ commit: unrecoverable (pre-push)
+
+**Scenario:** S-1 Personnel Snapshot diary entry displayed literal `\n` characters instead of newlines, and group entries showed redundant `groupId (callsign)` when both values were identical (e.g. "FARABAD 6 (FARABAD 6)").
+
+### Root causes
+
+| # | Finding | Root cause | Location |
+|---|---------|------------|----------|
+| 1 | `\n` shown as literal text | Arma diary uses structured text (HTML subset); `\n` is not a line-break in this context — `<br/>` is required | `fn_briefingUpdateClient.sqf:1026-1031,1040` |
+| 2 | Redundant `groupId (callsign)` | Format string `[%1] %2 (%3)` always appended callsign even when it equalled groupId; no deduplication logic | `fn_briefingUpdateClient.sqf:1040` |
+
+### Changes made
+
+| File | Change |
+|------|--------|
+| `fn_briefingUpdateClient.sqf` | Replaced all `\n` in S-1 text with `<br/>`; changed header format from `Groups: %2\nUnits: %3\n\n` to `Groups: %2 | Units: %3<br/><br/>`; changed per-group entry from `[company] groupId (callsign)` to `company | label` where `label` is callsign when it differs from groupId, otherwise groupId |
+
+### Static Validation
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict fn_briefingUpdateClient.sqf` | PASS | No new violations introduced |
+| 2 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime available in container; requires live session to verify diary rendering |

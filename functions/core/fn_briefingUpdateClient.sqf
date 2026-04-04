@@ -1023,12 +1023,12 @@ if (!(_s1Units isEqualType [])) then { _s1Units = []; };
 private _s1Text = "<font size='16' color='#B89B6B'>S-1 Personnel Snapshot</font><br/><br/>";
 if (_s1UpdatedAt < 0 || { (count _s1Groups) isEqualTo 0 }) then
 {
-    _s1Text = _s1Text + "Snapshot unavailable (cold join / JIP sync pending).\n";
-    _s1Text = _s1Text + "Wait for server publication.\n";
+    _s1Text = _s1Text + "Snapshot unavailable (cold join / JIP sync pending).<br/>";
+    _s1Text = _s1Text + "Wait for server publication.<br/>";
 }
 else
 {
-    _s1Text = _s1Text + format ["Updated at: T+%1s\nGroups: %2\nUnits: %3\n\n", round _s1UpdatedAt, count _s1Groups, count _s1Units];
+    _s1Text = _s1Text + format ["Updated at: T+%1s<br/>Groups: %2 | Units: %3<br/><br/>", round _s1UpdatedAt, count _s1Groups, count _s1Units];
     {
         if (!(_x isEqualType [])) then { continue; };
         private _gid = [_x, "groupId", ""] call _s1Get;
@@ -1037,7 +1037,8 @@ else
         if (!(_co isEqualType "")) then { _co = "UNK"; };
         private _call = [_x, "callsign", ""] call _s1Get;
         if (!(_call isEqualType "")) then { _call = ""; };
-        _s1Text = _s1Text + format ["[%1] %2 (%3)\n", _co, _gid, if (_call isEqualTo "") then {"No callsign"} else {_call}];
+        private _label = if (_call isEqualTo "" || { _call isEqualTo _gid }) then { _gid } else { _call };
+        _s1Text = _s1Text + format ["%1 | %2<br/>", _co, _label];
     } forEach (_s1Groups select [0, ((count _s1Groups) min 8)]);
 };
 
