@@ -3268,40 +3268,32 @@ Contrast with the correct pattern used in the background check handler itself:
 
 ---
 
-## 2026-04-04 19:13 UTC — T0 Prerequisites: Prison rectangle fix, UK3CB classname, lightbar cleanup
+## 2026-04-04 19:01 UTC — Fix: remove vanilla BLUFOR fallbacks from TNP/TNA class pools
 
-**Branch/Commit:** copilot/assess-development-state-gaps (pending push)
+**Branch/Commit:** copilot/force-correct-group-spawn @ (see git log)
 
-**Scenario:** Three code fixes for T0 prerequisite items identified in the development state assessment.
+**Scenario:** NATO / Gendarmerie units (`B_Soldier_F`, `B_Soldier_AR_F`, `B_GEN_Soldier_F`, `B_Medic_F`)
+were spawning at KarkanakPrison and PresidentialPalace as fallbacks when UK3CB mod classes were
+absent from CfgVehicles. Fix: removed all vanilla BLUFOR fallback entries from `_tnpPool`,
+`_tnpMedPool`, and `_tnaPool` so groups gracefully skip (return grpNull) rather than spawn
+wrong-faction units.
 
-### Changes
+### Files changed
 
-| File | Change | T0 Item |
-|------|--------|---------|
-| `functions/prison/fn_prisonEvalIncident.sqf` | Replace `getMarkerType` predicate (returns `""` for rectangle/shape markers) with `getMarkerPos != [0,0,0]` check. Random spawn point now picked within rectangle bounds using `markerSize` + `markerDir` rotation — uses the full rectangle area as the breakout spawn zone. | T0-D |
-| `initServer.sqf` | Corrected `UK3CB_MEE_O_AR_01` → `UK3CB_MEE_O_AR` in `ARC_opforPatrolUnitClasses`. Eliminates 18 WARN-per-session log entries from virtual pool class validation. | T0-F |
-| `scripts/ARC_lightbarStartupServer.sqf` | Removed `Patrol_07`, `Patrol_08`, `Patrol_09` from `_defaultTargets` list. Only `Patrol_01` remains. Eliminates 3 WARN logs per session for missing vehicle variables. | T0-G |
+| File | Change |
+|------|--------|
+| `data/farabad_site_templates.sqf` | Removed `B_Soldier_F`, `B_Soldier_AR_F`, `B_GEN_Soldier_F` from `_tnpPool`; removed `B_Medic_F`, `B_Soldier_F` from `_tnpMedPool`; removed `B_GEN_Soldier_F`, `B_Soldier_F`, `B_Soldier_AR_F` from `_tnaPool`. Updated comments to document no-fallback policy. |
 
-### T0 Items Confirmed No Code Change Needed
-
-| Item | Resolution |
-|------|-----------|
-| T0-A | `plane_despawn` marker repositioned on-map NW by operator (Eden). Guard at `fn_airbasePlaneDepart:397` already requires `x >= 0` — code path is now unblocked. |
-| T0-B | `mkr_arrivalSpawn` confirmed as the correct marker name; already the default in `fn_airbaseSpawnArrival:63`. No code change needed. |
-| T0-C | Deferred by operator decision. |
-| T0-E | `G_Squares` BOM is not present in any mission SQF/data file. Source is UK3CB Factions mod internal loadout assignment. Not fixable from mission scripts — cosmetic equip failure only. |
-| T0-H | `epw_holding` and `mkr_SHERIFF_HOLDING` confirmed present in mission.sqm. No action needed. |
-
-### Checks
+### Validation
 
 | # | Check | Command | Result | Notes |
 |---|-------|---------|--------|-------|
-| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict <3 files>` | PASS | No banned patterns |
-| 2 | sqflint | N/A | BLOCKED | Not installed in CI container |
-| 3 | Runtime | N/A | BLOCKED | No Arma 3 runtime in container |
+| 1 | Static review | Code inspection | PASS | Vanilla `B_*_F` classes confirmed removed from all three pools; 3CB UK3CB_TKP_B_* / UK3CB_TKA_B_* classes retained |
+| 2 | sqflint / compat scan | N/A | BLOCKED | Not installed in CI container |
+| 3 | Live session | N/A | BLOCKED | No Arma 3 runtime in container |
 
-### Deferred (dedicated server + live session)
+### Deferred Checks
 
-- Confirm breakout spawns land within `prison_holding_area` rectangle bounds (requires prison at adaptationLevel 3)
-- Confirm `UK3CB_MEE_O_AR` resolves to a valid class in the installed UK3CB version (check RPT for class-not-found WARNs)
-- Confirm `plane_despawn` NW placement does not interfere with departure AI routing (T0-A — Eden done)
+- Confirm TNP (`UK3CB_TKP_B_*`) guards and no NATO/Gendarmerie units spawn at KarkanakPrison (requires live session with 3CB loaded)
+- Confirm TNA (`UK3CB_TKA_B_*`) guards spawn at PresidentialPalace (requires live session)
+- Confirm prison guard groups silently skip (no spawn, WARN in RPT) when 3CB TKP mod is absent (requires session without 3CB)

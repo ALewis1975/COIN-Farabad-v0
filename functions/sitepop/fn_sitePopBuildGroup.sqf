@@ -243,6 +243,9 @@ if (_behavior isEqualTo "parked") exitWith
 
         _spawnPos resize 3;
 
+        // Collision avoidance: skip positions already occupied by another vehicle.
+        if ((count (nearestObjects [_spawnPos, ["LandVehicle"], 6])) > 0) then { continue; };
+
         private _cls = selectRandom _validClasses;
         private _veh = createVehicle [_cls, _spawnPos, [], 0, "NONE"];
         _veh setPosATL _spawnPos;
@@ -355,7 +358,7 @@ if (_isPrisonerRole) then
     private _prisonerUnits = units _grp select { _x getVariable ["ARC_prisoner", false] };
     if ((count _prisonerUnits) > 0) then
     {
-        [_prisonerUnits] spawn
+        _prisonerUnits spawn
         {
             sleep 0.1;
             {
