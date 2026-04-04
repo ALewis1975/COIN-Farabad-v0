@@ -11,6 +11,38 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-04 00:42 UTC — Bug fix: ACCESS_VIOLATION crash from invalid classname in virtual pool createUnit
+
+**Branch/Commit:** copilot/fix-access-violation-issue @ commit pending push (see git log after merge)
+
+**Scenario:** Arma 3 dedicated server crash with `Ref to nonnetwork object ... babe_helper` immediately after `[ARC][VPOOL][INFO] vg_59_66841 spawned PHYSICAL (4 units)`. Root cause: `fn_threatVirtualPoolTick.sqf` called `createUnit` without validating classnames exist in `CfgVehicles`, and without an `isNull` guard on the returned unit object.
+
+### Root causes
+
+| # | Bug | Root cause | File(s) |
+|---|-----|-----------|---------|
+| 1 | ENGINE CRASH | `createUnit` called with classname absent from `CfgVehicles`; engine produces partially-initialized unit causing `ACCESS_VIOLATION` in native animation code | `fn_threatVirtualPoolTick.sqf:232-237` |
+| 2 | No null guard | `setSkill` and `netId` called on potentially null unit without `isNull` check | `fn_threatVirtualPoolTick.sqf:235-236` |
+| 3 | No abort on total failure | If all `createUnit` calls return null, an empty group is left and state is incorrectly set to PHYSICAL | `fn_threatVirtualPoolTick.sqf:257-264` |
+
+### Changes made
+
+| File | Change |
+|------|--------|
+| `fn_threatVirtualPoolTick.sqf` | Per-tick `isClass` filter on `_unitClasses` (WARN + vanilla fallback if all invalid); `isNull _u` guard in spawn loop; abort/`deleteGroup` if `count _spawnedNetIds == 0`; log reports actual unit count |
+| `fn_threatVirtualPoolInit.sqf` | Same `isClass` filter at init time so bad classes are caught early; same WARN + vanilla fallback |
+
+### Static Validation
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict fn_threatVirtualPoolTick.sqf fn_threatVirtualPoolInit.sqf` | PASS | No banned patterns |
+| 2 | sqflint | `sqflint -e w fn_threatVirtualPoolTick.sqf` | PASS | No warnings |
+| 3 | sqflint | `sqflint -e w fn_threatVirtualPoolInit.sqf` | PASS (pre-existing warn) | `_displayName not used` at params line — pre-existing, not introduced by this change |
+| 4 | Dedicated-server runtime | N/A | BLOCKED | No Arma 3 runtime available in container; **follow-up required**: reproduce the crash scenario (invalid mod class in `ARC_opforPatrolUnitClasses`) in a real dedicated session to confirm the WARN fires and no `babe_helper` error appears |
+
+---
+
 ## 2026-04-02 21:10 UTC — Feature: KarkanakPrison hospital — TKP medics, civilian doctors, parked ambulances
 
 **Branch/Commit:** copilot/add-blufor-prison-spawn-composition @ `5a8bcddbfb21ccbdd4ed8aca91b9822da07731ed`

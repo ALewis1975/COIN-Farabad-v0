@@ -113,6 +113,20 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
             _unitClasses = ["O_G_Soldier_F", "O_G_Soldier_GL_F", "O_G_Soldier_AR_F", "O_G_medic_F", "O_G_Soldier_TL_F"];
         };
 
+        // Filter out classnames absent from CfgVehicles to prevent null-object crashes on createUnit
+        private _validTickClasses = [];
+        { if (isClass (configFile >> "CfgVehicles" >> _x)) then { _validTickClasses pushBack _x; }; } forEach _unitClasses;
+        if ((count _validTickClasses) < (count _unitClasses)) then {
+            diag_log format ["[ARC][VPOOL][WARN] ARC_fnc_threatVirtualPoolTick: %1 class(es) missing from CfgVehicles — filtered. Valid: %2",
+                (count _unitClasses) - (count _validTickClasses), _validTickClasses];
+        };
+        if ((count _validTickClasses) == 0) then {
+            diag_log "[ARC][VPOOL][WARN] ARC_fnc_threatVirtualPoolTick: all unit classes invalid — reverting to vanilla defaults.";
+            _unitClasses = ["O_G_Soldier_F", "O_G_Soldier_GL_F", "O_G_Soldier_AR_F", "O_G_medic_F", "O_G_Soldier_TL_F"];
+        } else {
+            _unitClasses = _validTickClasses;
+        };
+
         // Get current alive players (server poll)
         private _alivePlayers = allPlayers select { alive _x };
 
@@ -232,9 +246,19 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
                             for "_i" from 1 to _strength do {
                                 private _cls = selectRandom _unitClasses;
                                 private _u   = _grp createUnit [_cls, _spawnPos, [], 10, "NONE"];
-                                _u setSkill (0.35 + random 0.25);
-                                _spawnedNetIds pushBack (netId _u);
+                                if (isNull _u) then {
+                                    diag_log format ["[ARC][VPOOL][WARN] %1 createUnit returned null for class %2 — skipping unit", _vgId, _cls];
+                                } else {
+                                    _u setSkill (0.35 + random 0.25);
+                                    _spawnedNetIds pushBack (netId _u);
+                                };
                             };
+
+                            // Abort if no units were successfully created — leave group clean and stay VIRTUAL_ACTIVE
+                            if ((count _spawnedNetIds) == 0) then {
+                                deleteGroup _grp;
+                                diag_log format ["[ARC][VPOOL][WARN] %1 spawn aborted — all createUnit calls returned null; remaining VIRTUAL_ACTIVE", _vgId];
+                            } else {
 
                             // Simple patrol task
                             if (!isNil "CBA_fnc_taskPatrol") then {
@@ -261,7 +285,9 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
 
                             _activeVgIndex pushBackUnique _vgId;
 
-                            diag_log format ["[ARC][VPOOL][INFO] %1 spawned PHYSICAL (%2 units) at %3", _vgId, _strength, _spawnPos];
+                            diag_log format ["[ARC][VPOOL][INFO] %1 spawned PHYSICAL (%2 units) at %3", _vgId, count _spawnedNetIds, _spawnPos];
+
+                            }; // end spawn-success block
                         };
                     };
                 };
