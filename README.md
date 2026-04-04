@@ -132,7 +132,7 @@ functions/
 - **Police Extended** (`Expansion_Mod_Police`) — required for lightbar activation on police patrol vehicles (`Patrol_01`, etc.). If absent, lightbar scripts log a warning and skip silently; patrol vehicles still spawn.
 
 **Known RPT Noise (not mission code defects):**
-- `UK3CB_MEE_O_AR` / `UK3CB_MEE_O_AR_01` — approximately 18 `WARN/tick` entries per session may appear in RPT. This is a classname mismatch between the 3CB version in the mod preset and the class registered in `ARC_opforPatrolUnitClasses`. The engine silently skips the missing class; spawns still occur using other classes in the pool. To suppress, either update the class name to match your installed 3CB version or remove `UK3CB_MEE_O_AR_01` from `ARC_opforPatrolUnitClasses` in `initServer.sqf`.
+- `UK3CB_MEE_O_AR` / `UK3CB_MEE_O_AR_01` — approximately 18 warnings total per session appear in RPT (one per unit-pool tick attempt for that classname). This is a classname mismatch between the 3CB version in the mod preset and the class registered in `ARC_opforPatrolUnitClasses`. The engine silently skips the missing class; spawns still occur using other classes in the pool. To suppress, either update the class name to match your installed 3CB version or remove `UK3CB_MEE_O_AR_01` from `ARC_opforPatrolUnitClasses` in `initServer.sqf`.
 
 See `docs/projectFiles/Ambient_Dev_Mods_2026-04-01.html` for the complete mod preset.
 

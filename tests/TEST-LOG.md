@@ -3430,7 +3430,7 @@ wrong-faction units.
 
 | # | Check | Command | Result | Notes |
 |---|-------|---------|--------|-------|
-| 1 | Compat scan (both files) | python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbaseBuildRouteDecision.sqf functions/ambiance/fn_airbaseTick.sqf | PASS | Exit 0; 0 findings across 29 previously-failing patterns |
+| 1 | Compat scan (both files) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbaseBuildRouteDecision.sqf functions/ambiance/fn_airbaseTick.sqf` (or `functions/ambiance/fn_airbase*.sqf` to catch any renames) | PASS | Exit 0; 0 findings across 29 previously-failing patterns |
 | 2 | No logic change (trim helper) | Code review of fn_airbaseBuildRouteDecision.sqf | PASS | `_trimFn = compile "params ['_s']; trim _s"` helper added; `trim` replaced with `[_x] call _trimFn`; identical semantics |
 | 3 | No logic change (isNotEqualTo) | Code review of fn_airbaseTick.sqf | PASS | All `isNotEqualTo` replaced with `!(...isEqualTo...)` equivalents; 3 occurrences |
 | 4 | No logic change (# indexing) | Code review of fn_airbaseTick.sqf | PASS | All `_arr # _idx` replaced with `_arr select _idx`; 21 occurrences; semantics identical |
