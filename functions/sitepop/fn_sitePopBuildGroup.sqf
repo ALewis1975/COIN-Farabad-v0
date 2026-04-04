@@ -344,6 +344,54 @@ for "_i" from 1 to _count do
 };
 
 // ---------------------------------------------------------------------------
+// Deferred re-strip for prisoner units.
+// The UK3CB Factions mod registers a unit_loadout event handler that re-applies
+// the class loadout (including backpack) in the simulation frame after createUnit.
+// Scheduling a second strip after one frame ensures UK3CB's EH runs first.
+// ---------------------------------------------------------------------------
+private _isPrisonerRole = ((_roleTag find "prisoner") >= 0);
+if (_isPrisonerRole) then
+{
+    private _prisonerUnits = units _grp select { _x getVariable ["ARC_prisoner", false] };
+    if ((count _prisonerUnits) > 0) then
+    {
+        [_prisonerUnits] spawn
+        {
+            sleep 0.1;
+            {
+                removeAllWeapons _x;
+                removeAllItems _x;
+                removeVest _x;
+                removeBackpack _x;
+            } forEach _this;
+        };
+    };
+};
+
+// ---------------------------------------------------------------------------
+// CIVSUB identity and interaction registration for prisoner units.
+// Assigns a CIVSUB uid and queues ACE/addAction interactions on clients so
+// players can question and interact with prisoners via the contact dialog.
+// Guarded: only runs when CIVSUB is enabled and functions are compiled.
+// ---------------------------------------------------------------------------
+if (_isPrisonerRole && { missionNamespace getVariable ["civsub_v1_enabled", false] } && { !isNil "ARC_fnc_civsubCivAssignIdentity" } && { !isNil "ARC_fnc_civsubDistrictsFindByPos" }) then
+{
+    private _prisonDistrictId = [_effectiveSitePos] call ARC_fnc_civsubDistrictsFindByPos;
+    if (!(_prisonDistrictId isEqualTo "")) then
+    {
+        {
+            if (!isNull _x && { _x getVariable ["ARC_prisoner", false] }) then
+            {
+                [_x, _prisonDistrictId] call ARC_fnc_civsubCivAssignIdentity;
+            };
+        } forEach (units _grp);
+        diag_log format ["[ARC][SITEPOP][INFO] ARC_fnc_sitePopBuildGroup: site '%1' role '%2' — CIVSUB identities assigned (district=%3).", _siteId, _roleTag, _prisonDistrictId];
+    } else {
+        diag_log format ["[ARC][SITEPOP][WARN] ARC_fnc_sitePopBuildGroup: site '%1' role '%2' — prisoner CIVSUB skipped (no district resolved for pos %3).", _siteId, _roleTag, _effectiveSitePos];
+    };
+};
+
+// ---------------------------------------------------------------------------
 // Apply LAMBS or vanilla ambiance behavior
 // ---------------------------------------------------------------------------
 [_grp, _behavior, _p3, _spawnR, _spawnAnchor] call ARC_fnc_sitePopApplyAmbiance;

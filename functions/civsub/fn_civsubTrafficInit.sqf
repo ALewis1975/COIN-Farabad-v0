@@ -38,6 +38,26 @@ if (isNil { missionNamespace getVariable "civsub_v1_traffic_list_moving" }) then
 private _pool = [] call ARC_fnc_civsubTrafficBuildVehiclePool;
 missionNamespace setVariable ["civsub_v1_traffic_vehiclePool_valid", _pool, true];
 
+// ---------------------------------------------------------------------------
+// Register static traffic exclusion zones (areas where civ vehicles must not spawn).
+// Format: [[x,y,z], radiusM]   — position from getMarkerPos, radius in metres.
+// Karkanak Prison: vehicles spawning inside the prison compound break immersion.
+// Use the central guard tower marker as the compound centroid (250 m covers the
+// full footprint including the dorms, hospital, and entry office).
+// ---------------------------------------------------------------------------
+private _trafficExclZones = [];
+private _prisonAnchorMkr = "prison_central_guard_tower";
+if (!((getMarkerType _prisonAnchorMkr) isEqualTo "")) then
+{
+    _trafficExclZones pushBack [getMarkerPos _prisonAnchorMkr, 250];
+    diag_log format ["[CIVTRAF][INIT] exclusion zone registered: marker=%1 radius=250 m", _prisonAnchorMkr];
+}
+else
+{
+    diag_log "[CIVTRAF][INIT] WARN: prison_central_guard_tower not found — prison compound not excluded from civ traffic.";
+};
+missionNamespace setVariable ["ARC_trafficExclusionZones", _trafficExclZones];
+
 private _tickS = missionNamespace getVariable ["civsub_v1_traffic_tick_s", 30];
 if (!(_tickS isEqualType 0)) then { _tickS = 30; };
 // Enforce 1s minimum cadence to align with initServer guidance (1-2s recommended).
