@@ -335,7 +335,7 @@ missionNamespace setVariable ["civsub_v1_traffic_exclusions", [["mkr_airbaseCent
 // Diagnostics (temporary)
 missionNamespace setVariable ["civsub_v1_traffic_debug", false, true];
 
-// Vehicle pool (prefer spawnable 3CB Takistan civ vehicles; fallback to vanilla)
+// Vehicle pool (prefer spawnable 3CB Takistan civ vehicles and D3S civilian pack; fallback to vanilla)
 missionNamespace setVariable ["civsub_v1_traffic_vehiclePool_prefer", [
     "UK3CB_TKC_C_Datsun_Civ_Closed",
     "UK3CB_TKC_C_Datsun_Civ_Open",
@@ -352,7 +352,30 @@ missionNamespace setVariable ["civsub_v1_traffic_vehiclePool_prefer", [
     "UK3CB_TKC_C_Golf",
     "UK3CB_TKC_C_Pickup",
     "UK3CB_TKC_C_UAZ_Closed",
-    "UK3CB_TKC_C_UAZ_Open"
+    "UK3CB_TKC_C_UAZ_Open",
+    "d3s_scania_16_30reef",
+    "d3s_scania_16_30",
+    "d3s_scania_16_t75",
+    "d3s_scania_16_t50",
+    "d3s_scania_16_t14",
+    "d3s_scania_16_t22",
+    "d3s_peterbilt_579_tank",
+    "d3s_peterbilt_579_dump",
+    "d3s_peterbilt_579_dryvan",
+    "d3s_peterbilt_579",
+    "d3s_SRmh_9500",
+    "d3s_SRmh_9500_fuel",
+    "d3s_SRmh_9500_cov",
+    "d3s_SRlonghorn_4520",
+    "d3s_SRlonghorn_4520_fuel",
+    "d3s_SRlonghorn_4520_cov",
+    "d3s_scania_16",
+    "d3s_escalade_16",
+    "d3s_raptor_17_3_BIG",
+    "d3s_h1_06_A",
+    "d3s_h1_06",
+    "d3s_h2_02",
+    "d3s_h2_02_Black"
 ], true];
 
 missionNamespace setVariable ["civsub_v1_traffic_vehiclePool_fallback", [
