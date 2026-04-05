@@ -11,6 +11,37 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-05 23:39 UTC — AIR Route Validation blocked-route telemetry recency window
+
+**Branch/Commit:** copilot/still-not-fixed-issue @ commit: unrecoverable (pre-push; change applied on top)
+
+**Scenario:** AIR console Route Validation showed stale blocked-route data (`MISSING_ROUTE_MARKERS`, `FLT 0005`) long after marker remap fixes. Scope limited to public snapshot telemetry recency semantics so stale historical route-block events no longer persist indefinitely in “recent” UI fields.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `functions/core/fn_publicBroadcastState.sqf` | Added server-time bounded filter for blocked-route telemetry (`airbase_v1_publicBlockedRouteRecentWindow_s`, default 1800s) before window/tail aggregation |
+
+### Checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Baseline working tree | `git --no-pager status --short` | PASS | Clean before edit |
+| 2 | Baseline compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_publicBroadcastState.sqf` | FAIL (pre-existing) | Existing repo-wide sqflint-compat findings in this file (`#`, `isNotEqualTo`, direct `trim`) unchanged by this patch |
+| 3 | Baseline sqflint | `sqflint -e w functions/core/fn_publicBroadcastState.sqf` | BLOCKED | `sqflint` binary not available in container (`command not found`) |
+| 4 | Post-change compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_publicBroadcastState.sqf` | FAIL (pre-existing) | Same pre-existing findings; no new pattern introduced by recency-window lines |
+| 5 | Repo diff sanity | `git --no-pager diff --check` | PASS | No whitespace/conflict marker issues |
+| 6 | Runtime validation (local MP / dedicated / JIP) | N/A | BLOCKED | No Arma runtime in container; requires dedicated session to confirm stale FLT-0005 no longer appears after recency window expires |
+
+### Outcome
+
+- Blocked-route telemetry used by AIR Route Validation now excludes events older than a configurable recent window before computing count/latest fields.
+- Default window is 30 minutes (`airbase_v1_publicBlockedRouteRecentWindow_s = 1800`), preserving near-term diagnostics while preventing old failures from appearing as current.
+- Dedicated follow-up still required to confirm expected in-mission behavior and tune window length if needed.
+
+---
+
 ## 2026-04-04 21:16 UTC — SitePop anchor resolution fix for rectangle markers
 
 **Branch/Commit:** copilot/assess-development-state-and-plan @ 26b7a2d (pre-edit baseline; changes applied on top)
@@ -3716,4 +3747,3 @@ Branch: `copilot/align-vehicles-with-orbat`
 #### Deferred
 - Runtime smoke: **BLOCKED** (requires Arma 3 session)
 - JIP/late-client: **BLOCKED**
-
