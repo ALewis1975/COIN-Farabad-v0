@@ -97,6 +97,49 @@ private _fmtTime = {
 // sqflint 0.3.2 compat: wrap trim via compile so the linter does not error on unknown operator.
 private _trimFn = compile "params ['_s']; trim _s";
 
+// Human-readable relative time ("just now", "30s ago", "2m 15s ago").
+// Uses serverTime so timestamps from airbase events are comparable on clients.
+private _fmtAgo = {
+    params ["_t"];
+    if (!(_t isEqualType 0) || { _t < 0 }) exitWith { "-" };
+    private _age = (serverTime - _t) max 0;
+    if (_age < 5)  exitWith { "just now" };
+    if (_age < 60) exitWith { format ["%1s ago", round _age] };
+    format ["%1m %2s ago", floor (_age / 60), (round _age) mod 60]
+};
+
+// Human-readable label for a single event record from recentEvents.
+// Event structure (after eventsView normalization): [ts, kind, rid, actorUid, targetUid, meta]
+private _fmtEventRow = {
+    params ["_ev"];
+    private _ts   = _ev param [0, -1];
+    private _kind = toUpper (_ev param [1, ""]);
+    private _rid  = _ev param [2, ""];
+    private _meta = _ev param [5, []];
+    if !(_meta isEqualType []) then { _meta = []; };
+    private _ago  = [_ts] call _fmtAgo;
+
+    private _lbl = format ["%1 %2 (%3)", _kind, _rid, _ago];
+    if (_kind isEqualTo "EXEC_START") then {
+        private _acKind = toUpper (_meta param [0, ""]);
+        private _dir = if (_acKind isEqualTo "ARR") then { "ARRIVING" } else { "DEPARTING" };
+        _lbl = format [">>> %1 %2 (%3)", _rid, _dir, _ago];
+    };
+    if (_kind isEqualTo "EXEC_END") then {
+        private _outcome = toUpper (_meta param [0, "FAILED"]);
+        if (_outcome isEqualTo "COMPLETE") then {
+            _lbl = format ["<<< %1 COMPLETE (%2)", _rid, _ago];
+        } else {
+            _lbl = format ["!!! %1 ABORTED (%2)", _rid, _ago];
+        };
+    };
+    if (_kind isEqualTo "APPROVE")              then { _lbl = format ["CLR: %1 APPROVED (%2)",   _rid, _ago]; };
+    if (_kind isEqualTo "AUTO_QUEUE")           then { _lbl = format ["AUTO: %1 QUEUED (%2)",    _rid, _ago]; };
+    if (_kind isEqualTo "LIFECYCLE_LAND_GATE")  then { _lbl = format ["LAND GATE: %1 (%2)",      _rid, _ago]; };
+    if (_kind isEqualTo "ESCALATE")             then { _lbl = format ["ALERT: %1 ESCALATED (%2)", _rid, _ago]; };
+    _lbl
+};
+
 private _air = [_pub, "airbase", []] call _getPub;
 if (!(_air isEqualType [])) then { _air = []; };
 
@@ -175,6 +218,9 @@ if (!(_clearancePending isEqualType [])) then { _clearancePending = []; };
 private _clearanceHistoryTail = [_air, "clearanceHistoryTail", []] call _getPub;
 if (!(_clearanceHistoryTail isEqualType [])) then { _clearanceHistoryTail = []; };
 
+private _recentEvents = [_air, "recentEvents", []] call _getPub;
+if (!(_recentEvents isEqualType [])) then { _recentEvents = []; };
+
 private _awaitingCount = [_air, "clearanceAwaitingTowerCount", 0] call _getPub;
 if (!(_awaitingCount isEqualType 0)) then { _awaitingCount = 0; };
 
@@ -239,6 +285,44 @@ if (_rebuild) then {
 
     } else {
 
+    // -----------------------------------------------------------------------
+    // AIRSPACE STATUS — always-visible top row giving a quick situation summary.
+    // -----------------------------------------------------------------------
+    private _hdrStatus = _ctrlList lbAdd "-- AIRSPACE STATUS --";
+    _ctrlList lbSetData [_hdrStatus, "HDR|STATUS"];
+
+    private _rwyLabel = "RUNWAY: OPEN";
+    if ((toUpper _runwayState) isEqualTo "OCCUPIED") then { _rwyLabel = "RUNWAY: OCCUPIED"; };
+    if ((toUpper _runwayState) isEqualTo "RESERVED") then { _rwyLabel = "RUNWAY: RESERVED"; };
+    private _holdLabel  = if (_holdDepartures) then { "HOLD ACTIVE" } else { "DEP OPEN" };
+    private _execLabel  = if (_execActive && { !(_execFid isEqualTo "") }) then { format ["EXEC: %1", _execFid] } else { "STANDBY" };
+    private _statusLbl  = format ["%1  |  %2  |  %3", _rwyLabel, _holdLabel, _execLabel];
+    private _statusRow  = _ctrlList lbAdd _statusLbl;
+    _ctrlList lbSetData [_statusRow, format ["STATUS|%1|%2|%3|%4", _runwayState, _holdDepartures, _execActive, _execFid]];
+
+    // -----------------------------------------------------------------------
+    // ACTIVE DEPARTURE — visible only while a flight is executing on the runway.
+    // -----------------------------------------------------------------------
+    if (_execActive && { !(_execFid isEqualTo "") }) then {
+        private _hdrExec = _ctrlList lbAdd "-- ACTIVE DEPARTURE --";
+        _ctrlList lbSetData [_hdrExec, "HDR|EXEC"];
+
+        private _execAsset = "";
+        {
+            if ((_x isEqualType []) && { (_x param [0, ""]) isEqualTo _execFid }) exitWith {
+                _execAsset = _x param [2, ""];
+            };
+        } forEach _nextItems;
+
+        private _execLbl = if (_execAsset isEqualTo "") then {
+            format [">>> %1  |  DEPARTING NOW", _execFid]
+        } else {
+            format [">>> %1  |  %2  |  DEPARTING NOW", _execFid, _execAsset]
+        };
+        private _execRow = _ctrlList lbAdd _execLbl;
+        _ctrlList lbSetData [_execRow, format ["EXEC|%1|%2", _execFid, _execAsset]];
+    };
+
     private _hdrReq = _ctrlList lbAdd "-- PENDING CLEARANCES --";
     _ctrlList lbSetData [_hdrReq, "HDR|REQ"];
 
@@ -292,10 +376,40 @@ if (_rebuild) then {
             if !(_routeMeta isEqualType []) then { _routeMeta = []; };
             private _laneDecision = [_routeMeta, "runwayLaneDecision", "-"] call _metaGet;
 
-            private _lbl = format ["%1  [%2] %3 lane=%4", _fid, _kind, _asset, _laneDecision];
+            private _dirIcon  = if (_kind isEqualTo "DEP") then { "^" } else { if (_kind isEqualTo "ARR") then { "v" } else { "?" } };
+            private _kindName = if (_kind isEqualTo "DEP") then { "DEPARTURE" } else { if (_kind isEqualTo "ARR") then { "ARRIVAL" } else { toUpper _kind } };
+            private _lbl = format ["%1 #%2 %3  |  %4  |  lane: %5", _dirIcon, _forEachIndex + 1, _kindName, _asset, _laneDecision];
             private _row = _ctrlList lbAdd _lbl;
             _ctrlList lbSetData [_row, format ["FLT|%1|%2|%3", _fid, _kind, _asset]];
         } forEach _nextItems;
+    };
+
+    // -----------------------------------------------------------------------
+    // RECENT EVENTS — last 5 airbase events, newest first. Provides dynamic
+    // feedback as aircraft depart, arrive, and clearances are decided.
+    // (Filters LOCK_ACQUIRE/LOCK_RELEASE which are too granular for the BC view.)
+    // -----------------------------------------------------------------------
+    private _hdrEvt = _ctrlList lbAdd "-- RECENT EVENTS --";
+    _ctrlList lbSetData [_hdrEvt, "HDR|EVT"];
+
+    private _evtFiltered = _recentEvents select {
+        private _evKind = toUpper (_x param [1, ""]);
+        !(_evKind in ["LOCK_ACQUIRE", "LOCK_RELEASE"])
+    };
+    private _evtCount = count _evtFiltered;
+    if (_evtCount == 0) then {
+        private _noneEvt = _ctrlList lbAdd "(no events yet)";
+        _ctrlList lbSetData [_noneEvt, "EVT|NONE"];
+    } else {
+        private _evtShow = 5 min _evtCount;
+        private _evtStart = _evtCount - _evtShow;
+        for "_ei" from (_evtCount - 1) to _evtStart step -1 do {
+            private _ev = _evtFiltered select _ei;
+            if !(_ev isEqualType []) then { continue; };
+            private _evLbl = [_ev] call _fmtEventRow;
+            private _evRow = _ctrlList lbAdd _evLbl;
+            _ctrlList lbSetData [_evRow, format ["EVT|%1|%2", _ev param [1, ""], _ev param [2, ""]]];
+        };
     };
 
     private _hdrLane = _ctrlList lbAdd "-- ATC STAFFING --";
@@ -313,9 +427,9 @@ if (_rebuild) then {
         _ctrlList lbSetData [_row, format ["LANE|%1|%2|%3|%4|%5", _lane, _status, _op, _uid, _ts]];
     } forEach [_towerLane, _groundLane, _arrivalLane];
 
-    private _hdrRwy = _ctrlList lbAdd "-- RUNWAY LOCK STATUS --";
+    private _hdrRwy = _ctrlList lbAdd "-- RUNWAY & HOLD --";
     _ctrlList lbSetData [_hdrRwy, "HDR|RWY"];
-    private _runwayLbl = format ["State %1 | Owner %2", _runwayState, if (_runwayOwner isEqualTo "") then {"-"} else {_runwayOwner}];
+    private _runwayLbl = format ["State: %1  |  Owner: %2  |  Hold: %3", _runwayState, if (_runwayOwner isEqualTo "") then {"-"} else {_runwayOwner}, if (_holdDepartures) then {"HOLD ACTIVE"} else {"OPEN"}];
     private _runwayRow = _ctrlList lbAdd _runwayLbl;
     _ctrlList lbSetData [_runwayRow, format ["RWY|%1|%2|%3", _runwayState, _runwayOwner, _runwayUntil]];
 
@@ -341,7 +455,8 @@ if (_rebuild) then {
             private _by = if (_dec isEqualType []) then { _dec param [0, ""] } else { "" };
             private _action = if (_dec isEqualType []) then { _dec param [3, ""] } else { "" };
 
-            private _row = _ctrlList lbAdd format ["%1 %2 by %3", _rid, _status, if (_by isEqualTo "") then {"UNKNOWN"} else {_by}];
+            private _agoStr = [_upd] call _fmtAgo;
+            private _row = _ctrlList lbAdd format ["%1 %2 by %3 (%4)", _rid, _status, if (_by isEqualTo "") then {"SYSTEM"} else {_by}, _agoStr];
             _ctrlList lbSetData [_row, format ["DEC|%1|%2|%3|%4", _rid, _status, _upd, _action]];
         };
     };
@@ -363,7 +478,7 @@ if (_rebuild) then {
                     private _parts2 = _d2 splitString "|";
                     private _rowType2 = if ((count _parts2) > 0) then { _parts2 select 0 } else { "" };
                     private _rowId2 = toUpper (_parts2 param [1, ""]);
-                    private _isPlaceholderNone = (_rowType2 in ["REQ", "FLT", "DEC"]) && { _rowId2 isEqualTo "NONE" };
+                    private _isPlaceholderNone = (_rowType2 in ["REQ", "FLT", "DEC", "EVT"]) && { _rowId2 isEqualTo "NONE" };
                     if (!_isPlaceholderNone) exitWith { _restoreSel = _iFirst; };
                 };
             };
@@ -627,6 +742,71 @@ switch (_rowType) do {
         _secondaryEnabled = _canAirPilot || _canAirControl;
         _primaryTooltip = "Submit selected pilot request to tower queue.";
         _secondaryTooltip = if (_canAirControl) then {"Switch to tower control submode."} else {"Refresh pilot queue snapshot."};
+    };
+
+    case "STATUS": {
+        _selectedState = format ["RWY_%1", toUpper _runwayState];
+        _selectedUpdated = _stateUpdatedAt;
+        _nextActionOwner = "SYSTEM";
+        _selectedDetail = format ["Airspace status: runway %1, hold %2, exec %3", _runwayState, if (_holdDepartures) then {"HOLD ACTIVE"} else {"OPEN"}, if (_execActive) then {_execFid} else {"none"}];
+        _selectionHeading = "Airspace Status";
+        _selectionLines = [
+            format ["Runway state: <t color='#FFFFFF'>%1</t>  |  Owner: <t color='#FFFFFF'>%2</t>", _runwayState, if (_runwayOwner isEqualTo "") then {"-"} else {_runwayOwner}],
+            format ["Hold departures: <t color='#FFFFFF'>%1</t>", if (_holdDepartures) then {"HOLD ACTIVE"} else {"OPEN"}],
+            format ["Active execution: <t color='#FFFFFF'>%1</t>", if (_execActive) then {_execFid} else {"none"}],
+            format ["Departures queued: <t color='#FFFFFF'>%1</t>  |  In-progress: <t color='#FFFFFF'>%2</t>", _depQueued, _depInProgress],
+            format ["Arrivals queued: <t color='#FFFFFF'>%1</t>  |  Awaiting tower: <t color='#FFFFFF'>%2</t>", _arrQueued, _awaitingCount]
+        ];
+        _primaryLabel = "HOLD";
+        _secondaryLabel = "RELEASE";
+        _primaryEnabled = _canAirHoldRelease;
+        _secondaryEnabled = _canAirHoldRelease;
+        _primaryTooltip = if (_canAirHoldRelease) then { "Global hold on departures." } else { "Disabled: no hold/release authorization." };
+        _secondaryTooltip = if (_canAirHoldRelease) then { "Global release departures." } else { "Disabled: no hold/release authorization." };
+    };
+
+    case "EXEC": {
+        private _eFid   = _parts param [1, ""];
+        private _eAsset = _parts param [2, ""];
+        _selectedState = "EXECUTING";
+        _selectedUpdated = _stateUpdatedAt;
+        _nextActionOwner = "SYSTEM";
+        _selectedDetail = format ["Active departure: %1 (%2)", _eFid, if (_eAsset isEqualTo "") then {"-"} else {_eAsset}];
+        _selectionHeading = format ["Active Departure: %1", _eFid];
+        _selectionLines = [
+            format ["Flight id: <t color='#FFFFFF'>%1</t>", _eFid],
+            format ["Aircraft: <t color='#FFFFFF'>%1</t>", if (_eAsset isEqualTo "") then {"-"} else {_eAsset}],
+            format ["Runway state: <t color='#FFFFFF'>%1</t>", _runwayState],
+            "Status: <t color='#FFFFFF'>DEPARTING NOW — runway occupied</t>",
+            "<t color='#CFCFCF'>Next departure will queue once runway clears.</t>"
+        ];
+        _primaryLabel = "HOLD";
+        _secondaryLabel = "RELEASE";
+        _primaryEnabled = _canAirHoldRelease;
+        _secondaryEnabled = _canAirHoldRelease;
+        _primaryTooltip = if (_canAirHoldRelease) then { "Global hold on departures." } else { "Disabled: no hold/release authorization." };
+        _secondaryTooltip = if (_canAirHoldRelease) then { "Global release departures." } else { "Disabled: no hold/release authorization." };
+    };
+
+    case "EVT": {
+        private _evKind = _parts param [1, ""];
+        private _evRid  = _parts param [2, ""];
+        _selectedState = format ["EVENT_%1", toUpper _evKind];
+        _selectedUpdated = _stateUpdatedAt;
+        _nextActionOwner = "AUDIT";
+        _selectedDetail = format ["Airbase event: %1 — %2", _evKind, if (_evRid isEqualTo "") then {"-"} else {_evRid}];
+        _selectionHeading = format ["Event: %1", _evKind];
+        _selectionLines = [
+            format ["Event type: <t color='#FFFFFF'>%1</t>", _evKind],
+            format ["Subject: <t color='#FFFFFF'>%1</t>", if (_evRid isEqualTo "") then {"-"} else {_evRid}],
+            "<t color='#CFCFCF'>Event log entry — for situational awareness only.</t>"
+        ];
+        _primaryLabel = "HOLD";
+        _secondaryLabel = "RELEASE";
+        _primaryEnabled = _canAirHoldRelease;
+        _secondaryEnabled = _canAirHoldRelease;
+        _primaryTooltip = if (_canAirHoldRelease) then { "Global hold on departures." } else { "Disabled: no hold/release authorization." };
+        _secondaryTooltip = if (_canAirHoldRelease) then { "Global release departures." } else { "Disabled: no hold/release authorization." };
     };
 
     case "DEC": {
