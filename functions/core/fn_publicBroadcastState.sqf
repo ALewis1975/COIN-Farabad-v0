@@ -237,12 +237,14 @@ private _blockedRouteWindow = missionNamespace getVariable ["airbase_v1_publicBl
 if (!(_blockedRouteWindow isEqualType 0) || { _blockedRouteWindow < 1 }) then { _blockedRouteWindow = 25; };
 private _blockedRouteRecentWindowMin_s = 60;
 private _blockedRouteRecentWindow_s = missionNamespace getVariable ["airbase_v1_publicBlockedRouteRecentWindow_s", 1800];
-if (!(_blockedRouteRecentWindow_s isEqualType 0) || { _blockedRouteRecentWindow_s < _blockedRouteRecentWindowMin_s }) then { _blockedRouteRecentWindow_s = 1800; };
+if (!(_blockedRouteRecentWindow_s isEqualType 0)) then { _blockedRouteRecentWindow_s = 1800; };
+_blockedRouteRecentWindow_s = _blockedRouteRecentWindow_s max _blockedRouteRecentWindowMin_s;
 private _blockedRouteCutoffTs = serverTime - _blockedRouteRecentWindow_s;
+private _blockedRouteInvalidTs = -1;
 // Returns true when a blocked-route row [timestamp, reason, sourceId] falls within the configured recent window.
 private _isBlockedRouteRecent = {
     params [["_row", [], [[]]]];
-    private _ts = _row param [0, -1];
+    private _ts = _row param [0, _blockedRouteInvalidTs];
     (_ts isEqualType 0) && { _ts >= _blockedRouteCutoffTs }
 };
 
