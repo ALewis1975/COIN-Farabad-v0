@@ -11,6 +11,38 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-05 23:18 UTC — AH-64 rotary-wing takeoff/arrival smoothing (airbase ambient)
+
+**Branch/Commit:** copilot/fix-ah-64-takeoff-behavior @ 7277e75 (pre-edit baseline; changes applied on top)
+
+**Scenario:** Address reported AH-64 behavior where departure liftoff climbed too vertically and arrival runway landing looked abrupt. Added helicopter-only climb-profile smoothing for departures and staged approach profile for arrivals.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `functions/ambiance/fn_airbasePlaneDepart.sqf` | Replaced one-shot RW climb command with stepped climb profile (bounded altitude increments + interval + forward velocity kick), including marker-missing fallback profile |
+| `functions/ambiance/fn_airbaseSpawnArrival.sqf` | Added RW staged arrival profile (final approach + flare heights by distance), delayed `land "LAND"` to runway-stop waypoint, tightened RW runway-stop completion radius |
+| `functions/ambiance/fn_airbaseInit.sqf` | Added/validated missionNamespace tunables for RW climb profile and RW arrival profile |
+
+### Checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Targeted compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf functions/ambiance/fn_airbaseSpawnArrival.sqf functions/ambiance/fn_airbaseInit.sqf` | FAIL (pre-existing in touched file) | Existing `fn_airbasePlaneDepart.sqf` compat patterns (`#`, `getOrDefault`, `isNotEqualTo`) still present; this pass did not introduce new patterns outside that file’s existing baseline style |
+| 2 | Targeted sqflint | `sqflint -e w functions/ambiance/fn_airbasePlaneDepart.sqf && sqflint -e w functions/ambiance/fn_airbaseSpawnArrival.sqf && sqflint -e w functions/ambiance/fn_airbaseInit.sqf` | BLOCKED | `sqflint: command not found` in container environment |
+| 3 | Repo diff sanity | `git --no-pager diff --check` | PASS | No whitespace/conflict-marker issues |
+| 4 | Local MP runtime | N/A | BLOCKED | No Arma 3 runtime in container |
+| 5 | Dedicated/JIP runtime | N/A | BLOCKED | No dedicated/JIP environment in container |
+
+### Outcome
+
+- Rotary-wing departure now uses progressive altitude commands instead of an immediate jump to cruise, reducing near-vertical AH-64 climb behavior after taxi.
+- Rotary-wing arrival now keeps approach in `land "NONE"` with staged altitude control before issuing `land "LAND"` closer to runway-stop, improving touchdown behavior.
+- Dedicated/local MP validation is still required to tune final values (`airbase_v1_rw_climb_*`, `airbase_v1_rw_arrival_*`) against live AI flight behavior.
+
+---
+
 ## 2026-04-04 21:16 UTC — SitePop anchor resolution fix for rectangle markers
 
 **Branch/Commit:** copilot/assess-development-state-and-plan @ 26b7a2d (pre-edit baseline; changes applied on top)
@@ -3716,4 +3748,3 @@ Branch: `copilot/align-vehicles-with-orbat`
 #### Deferred
 - Runtime smoke: **BLOCKED** (requires Arma 3 session)
 - JIP/late-client: **BLOCKED**
-

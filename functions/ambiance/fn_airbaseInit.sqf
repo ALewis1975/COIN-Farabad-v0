@@ -194,6 +194,18 @@ private _rwAltLow = missionNamespace getVariable ["airbase_v1_rw_takeoff_alt_low
 if (!(_rwAltLow isEqualType 0) || { _rwAltLow < 0 }) then { _rwAltLow = 3; };
 missionNamespace setVariable ["airbase_v1_rw_takeoff_alt_low_m", _rwAltLow];
 
+private _rwClimbStepAlt = missionNamespace getVariable ["airbase_v1_rw_climb_step_alt_m", 30];
+if (!(_rwClimbStepAlt isEqualType 0) || { _rwClimbStepAlt < 10 }) then { _rwClimbStepAlt = 30; };
+missionNamespace setVariable ["airbase_v1_rw_climb_step_alt_m", _rwClimbStepAlt];
+
+private _rwClimbStepIntervalS = missionNamespace getVariable ["airbase_v1_rw_climb_step_interval_s", 4];
+if (!(_rwClimbStepIntervalS isEqualType 0) || { _rwClimbStepIntervalS < 1 }) then { _rwClimbStepIntervalS = 4; };
+missionNamespace setVariable ["airbase_v1_rw_climb_step_interval_s", _rwClimbStepIntervalS];
+
+private _rwClimbKickFwd = missionNamespace getVariable ["airbase_v1_rw_climb_kick_forward_mps", 18];
+if (!(_rwClimbKickFwd isEqualType 0) || { _rwClimbKickFwd < 6 }) then { _rwClimbKickFwd = 18; };
+missionNamespace setVariable ["airbase_v1_rw_climb_kick_forward_mps", _rwClimbKickFwd];
+
 private _rwAltCruise = missionNamespace getVariable ["airbase_v1_rw_depart_alt_m", 152];
 if (!(_rwAltCruise isEqualType 0) || { _rwAltCruise < 20 }) then { _rwAltCruise = 152; };
 missionNamespace setVariable ["airbase_v1_rw_depart_alt_m", _rwAltCruise];
@@ -210,6 +222,26 @@ missionNamespace setVariable ["airbase_v1_rw_outbound_marker", _rwMkrOut];
 private _rwMkrClear = missionNamespace getVariable ["airbase_v1_rw_outbound_clear_marker", "AEON_Right_270_Outbound_Clear"]; 
 if (!(_rwMkrClear isEqualType "")) then { _rwMkrClear = "AEON_Right_270_Outbound_Clear"; };
 missionNamespace setVariable ["airbase_v1_rw_outbound_clear_marker", _rwMkrClear];
+
+private _rwArrivalFinalApproachAlt = missionNamespace getVariable ["airbase_v1_rw_arrival_final_approach_alt_m", 35];
+if (!(_rwArrivalFinalApproachAlt isEqualType 0) || { _rwArrivalFinalApproachAlt < 10 }) then { _rwArrivalFinalApproachAlt = 35; };
+missionNamespace setVariable ["airbase_v1_rw_arrival_final_approach_alt_m", _rwArrivalFinalApproachAlt, true];
+
+private _rwArrivalFinalApproachDist = missionNamespace getVariable ["airbase_v1_rw_arrival_final_approach_dist_m", 600];
+if (!(_rwArrivalFinalApproachDist isEqualType 0) || { _rwArrivalFinalApproachDist < 150 }) then { _rwArrivalFinalApproachDist = 600; };
+missionNamespace setVariable ["airbase_v1_rw_arrival_final_approach_dist_m", _rwArrivalFinalApproachDist, true];
+
+private _rwArrivalFlareAlt = missionNamespace getVariable ["airbase_v1_rw_arrival_flare_alt_m", 8];
+if (!(_rwArrivalFlareAlt isEqualType 0) || { _rwArrivalFlareAlt < 3 }) then { _rwArrivalFlareAlt = 8; };
+missionNamespace setVariable ["airbase_v1_rw_arrival_flare_alt_m", _rwArrivalFlareAlt, true];
+
+private _rwArrivalFlareDist = missionNamespace getVariable ["airbase_v1_rw_arrival_flare_dist_m", 180];
+if (!(_rwArrivalFlareDist isEqualType 0) || { _rwArrivalFlareDist < 50 }) then { _rwArrivalFlareDist = 180; };
+missionNamespace setVariable ["airbase_v1_rw_arrival_flare_dist_m", _rwArrivalFlareDist, true];
+
+private _rwArrivalApproachTickS = missionNamespace getVariable ["airbase_v1_rw_arrival_approach_tick_s", 2];
+if (!(_rwArrivalApproachTickS isEqualType 0) || { _rwArrivalApproachTickS < 1 }) then { _rwArrivalApproachTickS = 2; };
+missionNamespace setVariable ["airbase_v1_rw_arrival_approach_tick_s", _rwArrivalApproachTickS, true];
 
 private _turnMin = missionNamespace getVariable ["airbase_v1_turnaroundMin_s", 1200];
 if (!(_turnMin isEqualType 0) || { _turnMin < 0 }) then { _turnMin = 1200; };
