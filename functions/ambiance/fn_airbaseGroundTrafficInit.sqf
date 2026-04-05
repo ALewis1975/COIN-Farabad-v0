@@ -1,7 +1,7 @@
 /*
     ARC_fnc_airbaseGroundTrafficInit
 
-    Initialises the airbase ground vehicle traffic system (server-only).
+    Initializes the airbase ground vehicle traffic system (server-only).
 
     Sets up:
       - Vehicle whitelist pools by ORBAT category (stored in mission namespace).
