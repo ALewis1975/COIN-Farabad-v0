@@ -37,4 +37,4 @@ _out set ["canSpawnCivil", _canSpawnCivil];
 _out set ["canSpawnAirbase", _canSpawnAirbase];
 _out set ["canSpawnThreat", _canSpawnThreat];
 _out set ["canSpawnOps", _canSpawnOps];
-_out
+_out;

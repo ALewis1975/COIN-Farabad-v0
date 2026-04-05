@@ -81,7 +81,7 @@ if (!_canSpawnCivil) exitWith
     false
 };
 
-if ((_pool isEqualTo []) || { !(_keyCached isEqualTo _key) }) then
+if (_pool isEqualTo [] || { !(_keyCached isEqualTo _key) }) then
 {
     _pool = [] call ARC_fnc_civsubTrafficBuildVehiclePool;
 };

@@ -85,4 +85,4 @@ _policy set ["canSpawnCivil", _canSpawnCivil];
 _policy set ["canSpawnAirbase", _canSpawnAirbase];
 _policy set ["canSpawnThreat", _canSpawnThreat];
 _policy set ["canSpawnOps", _canSpawnOps];
-_policy
+_policy;
