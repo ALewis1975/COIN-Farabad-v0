@@ -40,6 +40,7 @@ private _isHeli  = (_veh isKindOf "Helicopter");
 // treatment rather than a standard fly-to-despawn departure.
 // Detect by type name; covers USAF_RQ4A and any mod variant containing "RQ4".
 private _isUAS   = (!_isHeli) && { (_vehType find "RQ4") >= 0 || { (toLower _vehType) find "uav" >= 0 } };
+private _isEC130 = (_vehType find "aws_C130_AEW") >= 0;
 
 // --- helpers ---
 private _fnNormalize = {
@@ -267,6 +268,7 @@ if ((count _taxiFrames) == 0) exitWith {
     false
 };
 
+if (_isEC130) then { _veh setFuel 1; };
 _veh engineOn true;
 if (_veh isKindOf "Air") then { _veh setCollisionLight true; _veh setPilotLight true; };
 
@@ -312,7 +314,6 @@ if (!_okTaxi) exitWith {
 };
 
 // --- special case: EC-130 loiter (do not despawn) ---
-private _isEC130 = (_vehType find "aws_C130_AEW") >= 0;
 if (_isEC130) exitWith {
     _veh setVehicleRadar 1;
     _veh setVehicleReportRemoteTargets true;
