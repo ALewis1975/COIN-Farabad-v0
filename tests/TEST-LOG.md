@@ -41,6 +41,11 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 - Rotary-wing arrival now keeps approach in `land "NONE"` with staged altitude control before issuing `land "LAND"` closer to runway-stop, improving touchdown behavior.
 - Dedicated/local MP validation is still required to tune final values (`airbase_v1_rw_climb_*`, `airbase_v1_rw_arrival_*`) against live AI flight behavior.
 
+### Follow-up adjustments (post-review)
+
+- Removed unnecessary global replication (`public=true`) from the new RW arrival tuning missionNamespace writes so these server-owned tuning values remain server-local by default.
+- Added a timeout guard to the RW arrival approach control loop (`900s`) to prevent runaway helper loops if AI never reaches the flare threshold.
+
 ---
 
 ## 2026-04-04 21:16 UTC — SitePop anchor resolution fix for rectangle markers

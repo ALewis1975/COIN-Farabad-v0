@@ -119,6 +119,7 @@ if (_veh isKindOf "Helicopter") then {
 
     [_veh, _rwyStart, _rwFinalApproachDist, _rwFinalApproachAlt, _rwFlareApproachDist, _rwFlareApproachAlt, _rwApproachTickS] spawn {
         params ["_v", "_rwy", "_finalD", "_finalAlt", "_flareD", "_flareAlt", "_tickS"];
+        private _t0 = time;
         while { !isNull _v && { alive _v } } do
         {
             private _d = _v distance2D _rwy;
@@ -131,6 +132,7 @@ if (_veh isKindOf "Helicopter") then {
             };
 
             if (_d < (_flareD * 0.5)) exitWith {};
+            if ((time - _t0) > 900) exitWith {};
             sleep _tickS;
         };
     };
