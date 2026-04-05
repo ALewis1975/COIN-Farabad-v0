@@ -46,9 +46,11 @@ if (_opCenter isEqualType [] && { (count _opCenter) >= 2 }) then
 
 private _spawnR = missionNamespace getVariable ["civsub_v1_traffic_spawnRadius_m", 600];
 if (!(_spawnR isEqualType 0)) then { _spawnR = 600; };
-_spawnR = (_spawnR max 250) min 1100;
-
-private _searchR = (_spawnR min ((_r + 200) max 450)) min 1100;
+// Upper bound raised to 1500 to support out-of-view-distance spawning (1 km+).
+_spawnR = (_spawnR max 250) min 1500;
+// Use _spawnR directly; the former district-radius cap would prevent spawning
+// beyond the district edge even when spawnRadius_m is configured at 1400 m.
+private _searchR = _spawnR;
 
 private _pick = [_center, _searchR, (missionNamespace getVariable ["civsub_v1_traffic_minSeparation_m", 35])] call ARC_fnc_civsubTrafficPickRoadsidePos;
 if ((count _pick) < 2) exitWith
@@ -62,7 +64,8 @@ private _dir = _pick # 1;
 
 private _pMin = missionNamespace getVariable ["civsub_v1_traffic_playerMinDistance_m", 60];
 if (!(_pMin isEqualType 0)) then { _pMin = 60; };
-_pMin = (_pMin max 50) min 300;
+// Upper bound raised to 1200 to allow out-of-view-distance enforcement (1 km view).
+_pMin = (_pMin max 50) min 1200;
 if (_pMin > 0) then
 {
     private _nearP = false;

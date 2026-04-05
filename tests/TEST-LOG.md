@@ -3531,29 +3531,22 @@ wrong-faction units.
 
 ---
 
-## Session 2026-04-05 — UH-60M Takeoff Fix
+### T11 — CIVTRAF Out-of-View-Distance Spawn (2026-04-05)
 
-**Branch:** copilot/fix-uh-60m-takeoff-issue
-**Commit:** (see PR)
+Branch: `copilot/improve-vehicle-spawn-distance`
 
-### Change
-
-`fn_airbasePlaneDepart.sqf`: zeroed Z component in all helicopter `setVelocityModelSpace` calls (lines 299, 470, 479, 598) so that `flyInHeight` controls the vertical climb rather than an instant upward velocity impulse.
-
-| Line | Before | After | Purpose |
-|------|--------|-------|---------|
-| 299 | `[0, 6, 9]` | `[0, 6, 0]` | Post-taxi ground nudge |
-| 470 | `[0, 25, 10]` | `[0, 25, 0]` | Climb-trigger forward nudge |
-| 479 | `[0, 25, 12]` | `[0, 25, 0]` | Secondary climb nudge |
-| 598 | `[0, 10, 10]` | `[0, 10, 0]` | Takeoff kick (stalled heli) |
-
-### Tests
-
-| ID | Description | Result |
-|----|-------------|--------|
-| T-RW-01 | Static review — no sqflint compat violations introduced | PASS |
-| T-RW-02 | UH-60M takeoff visual (gains altitude over runway rather than going straight up) | BLOCKED — requires local MP session |
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | `spawnRadius_m` raised to 1400 in initServer | `grep "civsub_v1_traffic_spawnRadius_m" initServer.sqf` | PASS | Value now 1400 |
+| 2 | `playerMinDistance_m` raised to 1050 in initServer | `grep "civsub_v1_traffic_playerMinDistance_m" initServer.sqf` | PASS | Value now 1050 |
+| 3 | `cleanupRadius_m` raised to 1500 in initServer | `grep "civsub_v1_traffic_cleanupRadius_m" initServer.sqf` | PASS | Value now 1500 |
+| 4 | SpawnParked `_spawnR` max clamp raised 900→1500 | `grep "min 1500" functions/civsub/fn_civsubTrafficSpawnParked.sqf` | PASS | Clamp updated |
+| 5 | SpawnParked `_pMin` max clamp raised 300→1200 | `grep "min 1200" functions/civsub/fn_civsubTrafficSpawnParked.sqf` | PASS | Clamp updated |
+| 6 | SpawnParked `_searchR` no longer capped by district radius | `grep "_searchR = _spawnR" functions/civsub/fn_civsubTrafficSpawnParked.sqf` | PASS | Direct assignment |
+| 7 | SpawnMoving same clamp raises applied | `grep "min 1500\|min 1200" functions/civsub/fn_civsubTrafficSpawnMoving.sqf` | PASS | Both clamps updated |
+| 8 | Compat scan: no new violations in changed lines | `python3 scripts/dev/sqflint_compat_scan.py --strict <changed files>` | PASS | 6 pre-existing warnings in unmodified code; 0 new |
+| 9 | Gameplay smoke (vehicles spawn >1 km from player) | Local/dedicated MP session | BLOCKED | Requires Arma 3 runtime |
 
 ### Deferred
 
-- T-RW-02: operator must verify in local MP that the UH-60M now climbs progressively as it traverses the departure path instead of shooting vertically.
+- T11/9: runtime gameplay verification that vehicles appear only beyond 1 km from all players — requires hosted or dedicated Arma 3 session.
