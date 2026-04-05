@@ -621,6 +621,7 @@ class CfgFunctions
             file = "functions\logistics";
             class execSpawnConvoy {};
             class execTickConvoy {};
+            class execMsrThreatCheck {};  // T10: MSR/convoy threat awareness
         };
 
         // Reserved layers (future expansion)

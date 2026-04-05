@@ -24,6 +24,15 @@ if (isNull _display) exitWith {false};
 private _trimFn = compile "params ['_s']; trim _s";
 private _fileExistsFn = compile "params ['_p']; fileExists _p";
 
+// TSH-INC1: Standardized typography and contrast tokens for shell-level text surfaces.
+// These tokens are used by shell elements (title, strip labels, main panel contrast pairings).
+// Existing structured-text markup that already encodes its own colors continues to work as-is.
+private _tshCoyote = "#B89B6B";   // Coyote sand — labels, headers, status text
+private _tshGreen  = "#4CAF50";   // Ready / linked state
+private _tshAmber  = "#F5A623";   // Caution / incomplete state
+private _tshRed    = "#E74C3C";   // Critical alerts only
+private _tshBody   = "#C8C8C8";   // Body / value text
+
 private _rxMaxItems = missionNamespace getVariable ["ARC_consoleRxMaxItems", 80];
 if (!(_rxMaxItems isEqualType 0) || { _rxMaxItems < 10 }) then { _rxMaxItems = 80; };
 _rxMaxItems = (_rxMaxItems min 160) max 10;

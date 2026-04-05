@@ -685,54 +685,56 @@ text = "FARABAD CONSOLE";
 
     class controls
     {
-        class StatusLeft: RscText
+        // TSH-INC1: Top status strip — four labeled indicators (NET / GPS / BATT / SYNC).
+        // Each indicator is display-only in this increment (readout text and color only).
+        // IDCs preserved: 78060=NET, 78061=GPS, 78062=BATT, 78063=SYNC (was RscButton, now RscText).
+        class StatusNet: RscText
         {
             idc = 78060;
-            text = "NET: LINKED";
-            x = safeZoneX + (0.01 * safeZoneW);
+            text = "NET: --";
+            x = safeZoneX + (0.010 * safeZoneW);
             y = safeZoneY + (0.049 * safeZoneH);
-            w = (0.16 * safeZoneW);
+            w = (0.220 * safeZoneW);
             h = (0.022 * safeZoneH);
             colorBackground[] = {0,0,0,0};
-                    colorText[] = {0.722,0.608,0.420,1};
-};
+            colorText[] = {0.722,0.608,0.420,1};
+        };
 
-        class StatusCenter: RscText
+        class StatusGps: RscText
         {
             idc = 78061;
-            text = "MODE: FIELD-HARDENED";
-            x = safeZoneX + (0.39 * safeZoneW);
+            text = "GPS: --";
+            x = safeZoneX + (0.255 * safeZoneW);
             y = safeZoneY + (0.049 * safeZoneH);
-            w = (0.24 * safeZoneW);
+            w = (0.220 * safeZoneW);
             h = (0.022 * safeZoneH);
             colorBackground[] = {0,0,0,0};
-                    colorText[] = {0.722,0.608,0.420,1};
-};
+            colorText[] = {0.722,0.608,0.420,1};
+        };
 
-        class StatusRight: RscText
+        class StatusBatt: RscText
         {
             idc = 78062;
-            text = "PWR: 96%";
-            x = safeZoneX + (0.82 * safeZoneW);
+            text = "BATT: --";
+            x = safeZoneX + (0.500 * safeZoneW);
             y = safeZoneY + (0.049 * safeZoneH);
-            w = (0.09 * safeZoneW);
+            w = (0.220 * safeZoneW);
             h = (0.022 * safeZoneH);
             colorBackground[] = {0,0,0,0};
-                    colorText[] = {0.722,0.608,0.420,1};
-};
+            colorText[] = {0.722,0.608,0.420,1};
+        };
 
-        class StatusCtrlLink: RscButton
+        class StatusSync: RscText
         {
             idc = 78063;
-            text = "LINK";
-            x = safeZoneX + (0.93 * safeZoneW);
-            y = safeZoneY + (0.048 * safeZoneH);
-            w = (0.05 * safeZoneW);
-            h = (0.024 * safeZoneH);
-            tooltip = "Status strip control placeholder (first pass shell).";
-            action = "true";
-                    colorText[] = {0.722,0.608,0.420,1};
-};
+            text = "SYNC: --";
+            x = safeZoneX + (0.745 * safeZoneW);
+            y = safeZoneY + (0.049 * safeZoneH);
+            w = (0.220 * safeZoneW);
+            h = (0.022 * safeZoneH);
+            colorBackground[] = {0,0,0,0};
+            colorText[] = {0.722,0.608,0.420,1};
+        };
 
         class Tabs: RscListbox
         {

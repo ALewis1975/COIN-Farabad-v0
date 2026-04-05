@@ -615,6 +615,12 @@ if ((count _vehicles) isEqualTo 0) exitWith
 private _lead = _vehicles # 0;
 private _aliveVeh = _vehicles select { alive _x };
 
+// T10: MSR threat awareness — check for CONVOY-targeted threat records near the route.
+// Rate-limited internally; read-only (no convoy state mutation).
+if ((count _routePts) > 0) then
+{
+    [_lead, _routePts] call ARC_fnc_execMsrThreatCheck;
+};
 
 /*
     Bridge zone handling (mission-maker authored):

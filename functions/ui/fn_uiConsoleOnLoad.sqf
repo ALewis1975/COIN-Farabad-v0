@@ -42,11 +42,12 @@ if (!isNull _ctrlTitle) then {
     _ctrlTitle ctrlSetFontHeight ((safeZoneH / 25) * 1.75);
 };
 
-// Status strip + nav + buttons: coyote
+// TSH-INC1: Status strip indicators (NET/GPS/BATT/SYNC) + nav + buttons: coyote
 { if (!isNull _x) then { _x ctrlSetTextColor _coyote; }; } forEach [
-    _display displayCtrl 78060,   // StatusLeft
-    _display displayCtrl 78061,   // StatusCenter
-    _display displayCtrl 78062,   // StatusRight
+    _display displayCtrl 78060,   // StatusNet
+    _display displayCtrl 78061,   // StatusGps
+    _display displayCtrl 78062,   // StatusBatt
+    _display displayCtrl 78063,   // StatusSync
     _display displayCtrl 78001,   // Tabs list
     _display displayCtrl 78021,   // Primary
     _display displayCtrl 78022,   // Secondary

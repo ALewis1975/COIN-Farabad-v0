@@ -3488,3 +3488,43 @@ wrong-faction units.
 - **T9 (Tablet Shell)** — Deferred. Implementation blocked on T6–T8 runtime gates closing at PASS per plan §8.
 - **T10 (Convoy/MSR threat integration)** — Deferred. Implementation blocked on T6–T8 runtime gates closing at PASS per plan §8.
 - All T6–T8 items remain BLOCKED; operator must run dedicated-server sessions to close them.
+
+---
+
+## Session: 2026-04-04 — T9/T10 Forward Feature Unblock
+
+**Branch:** `copilot/t9-t10-forward-features`
+**Tasks covered:** T9 (Tablet Shell TSH-INC1), T10 (MSR/Convoy Threat Integration Phase 0-1)
+**Note:** T6–T8 MP/Dedicated Server/JIP tests remain BLOCKED pending operator server session; T9/T10 development proceeds independently per operator instruction.
+
+### T9 — Tablet Shell (TSH-INC1)
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Status strip 4-indicator layout in dialog config | `grep -c "StatusNet\|StatusGps\|StatusBatt\|StatusSync" config/CfgDialogs.hpp` | PASS | 4 named RscText controls (78060–78063) evenly spaced across strip |
+| 2 | 78063 changed from RscButton to RscText | `grep -A2 "idc = 78063" config/CfgDialogs.hpp` | PASS | StatusSync class is RscText; no action/tooltip properties |
+| 3 | fn_uiConsoleOnLoad applies coyote to 78063 | `grep "78063" functions/ui/fn_uiConsoleOnLoad.sqf` | PASS | 78063 now in the coyote color forEach loop |
+| 4 | fn_uiConsoleRefresh: 4-indicator update logic | `grep -c "statusNet\|statusGps\|statusBatt\|statusSync" functions/ui/fn_uiConsoleRefresh.sqf` | PASS | All four indicator variables referenced; NET/GPS/BATT/SYNC set correctly |
+| 5 | Parity: no action-route changes | Code review of changed files | PASS | No primary/secondary action handlers modified; tab routing unchanged |
+| 6 | TSH-INC1 typography token block in DashboardPaint | `grep -c "_tshCoyote\|_tshGreen\|_tshAmber\|_tshRed\|_tshBody" functions/ui/fn_uiConsoleDashboardPaint.sqf` | PASS | 5 tokens defined at function top |
+| 7 | Compat scan (changed UI files) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleOnLoad.sqf functions/ui/fn_uiConsoleRefresh.sqf functions/ui/fn_uiConsoleDashboardPaint.sqf` | BLOCKED | sqflint compat scanner not available in container |
+| 8 | Visual smoke (console open/tab switch) | Local MP session | BLOCKED | Requires Arma 3 client |
+
+### T10 — MSR/Convoy Threat Integration (Phase 0-1)
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | fn_threatScheduleEvent: stub replaced with implementation | `wc -l functions/threat/fn_threatScheduleEvent.sqf` | PASS | ~200-line implementation replaces 30-line stub |
+| 2 | Convoy-aware target selection | `grep -c "CONVOY\|_targetProfile\|ARC_activeConvoyNetIds" functions/threat/fn_threatScheduleEvent.sqf` | PASS | Convoy check present; CONVOY target profile emitted when convoy active |
+| 3 | ThreatRecord creation and persistence | `grep -c "threat_v0_records\|threat_v0_open_index" functions/threat/fn_threatScheduleEvent.sqf` | PASS | Record appended to threat_v0_records; ID added to open_index |
+| 4 | IED Warning Lead emitted after scheduling | `grep "iedEmitLeads" functions/threat/fn_threatScheduleEvent.sqf` | PASS | `[_rec, "DISCOVERED"] call ARC_fnc_iedEmitLeads` at end |
+| 5 | fn_execMsrThreatCheck created | `wc -l functions/logistics/fn_execMsrThreatCheck.sqf` | PASS | New function; server-only, read-only, rate-limited at 90 s |
+| 6 | fn_execMsrThreatCheck registered in CfgFunctions | `grep "execMsrThreatCheck" config/CfgFunctions.hpp` | PASS | Registered under Logistics class |
+| 7 | MSR threat check called from convoy tick | `grep "execMsrThreatCheck" functions/logistics/fn_execTickConvoy.sqf` | PASS | Called after lead vehicle confirmed; gated on `count _routePts > 0` |
+| 8 | Runtime smoke (threat scheduler → convoy → warning) | Dedicated server session | BLOCKED | Requires Arma 3 dedicated server |
+
+### Deferred
+
+- All T6–T8 items remain BLOCKED; operator must run dedicated-server sessions to close them.
+- T9 visual smoke (console open, tab switch, status strip legibility) deferred to first local MP preview session.
+- T10 runtime smoke (threat scheduler triggers → CONVOY record created → MSR_THREAT_DETECTED log entry) deferred to dedicated server session.

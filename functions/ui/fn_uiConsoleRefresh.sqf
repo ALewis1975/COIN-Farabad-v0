@@ -41,10 +41,10 @@ private _b1 = _display displayCtrl 78021;
 private _b2 = _display displayCtrl 78022;
 
 
-private _statusLeft = _display displayCtrl 78060;
-private _statusCenter = _display displayCtrl 78061;
-private _statusRight = _display displayCtrl 78062;
-private _statusCtrl = _display displayCtrl 78063;
+private _statusNet  = _display displayCtrl 78060;
+private _statusGps  = _display displayCtrl 78061;
+private _statusBatt = _display displayCtrl 78062;
+private _statusSync = _display displayCtrl 78063;
 
 // Ops frame controls
 private _opsCtrls = [
@@ -130,16 +130,25 @@ if (!isNull _ctrlList) then {
 private _opsSecondaryLabel = "FOLLOW-ON (SITREP)";
 
 
+// TSH-INC1: Top status strip — four indicators (NET / GPS / BATT / SYNC).
+// NET: network link type (TOC terminal or field).
 private _atStation = [player] call ARC_fnc_uiConsoleIsAtStation;
 private _netText = if (_atStation) then {"NET: TOC-LINK"} else {"NET: FIELD"};
-if (!isNull _statusLeft) then { _statusLeft ctrlSetText _netText; };
+if (!isNull _statusNet) then { _statusNet ctrlSetText _netText; };
+
+// GPS: display-only, always active in this increment.
+if (!isNull _statusGps) then { _statusGps ctrlSetText "GPS: ACTIVE"; };
+
+// BATT: display-only, shows OK in this increment.
+if (!isNull _statusBatt) then { _statusBatt ctrlSetText "BATT: OK"; };
+
+// SYNC: live if mission pub-state is available; otherwise indicates no sync.
+private _hasPubState = !isNil { missionNamespace getVariable "ARC_pub_state" };
+private _syncText = if (_hasPubState) then {"SYNC: LIVE"} else {"SYNC: --"};
+if (!isNull _statusSync) then { _statusSync ctrlSetText _syncText; };
+
 private _cmdMode = ["ARC_console_cmdMode", "OVERVIEW"] call ARC_fnc_uiNsGetString;
 _cmdMode = toUpper _cmdMode;
-private _modeText = if (_tab isEqualTo "CMD" && { _cmdMode isEqualTo "QUEUE" }) then { "MODE: CMD / QUEUE" } else { format ["MODE: %1", _tab] };
-if (!isNull _statusCenter) then { _statusCenter ctrlSetText _modeText; };
-private _timeText = daytime call BIS_fnc_timeToString;
-if (!isNull _statusRight) then { _statusRight ctrlSetText format ["TIME: %1", _timeText]; };
-if (!isNull _statusCtrl) then { _statusCtrl ctrlEnable false; };
 
 // Regression guard: restore MainGroup (78015) to its full-width default whenever we are NOT
 // in CMD OVERVIEW mode.  CMD OVERVIEW narrows the group to the middle-panel width so that its
