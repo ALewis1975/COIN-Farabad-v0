@@ -132,10 +132,10 @@ if (_basePos isEqualTo [] || { (count _basePos) < 2 }) then
     if (_mk in allMapMarkers) then { _basePos = getMarkerPos _mk; };
 };
 
-if (_basePos isEqualTo [] || { (count _basePos) < 2 }) then
+if (_basePos isEqualTo [] || { (count _basePos) < 2 }) exitWith
 {
     diag_log format ["[ARC][WARN] ARC_fnc_threatScheduleEvent: no base position for district=%1 - skipping", _districtId];
-    exitWith {false};
+    false
 };
 
 _basePos = +_basePos; _basePos resize 3; _basePos set [2, 0];
