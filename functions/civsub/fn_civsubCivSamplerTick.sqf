@@ -79,6 +79,18 @@ missionNamespace setVariable ["civsub_v1_activity_mul_civ_active", _mCiv, false]
 missionNamespace setVariable ["civsub_v1_activity_phase", _phase, false];
 missionNamespace setVariable ["civsub_v1_activity_tod", _tod, false];
 
+if (!_canSpawnCivil) exitWith
+{
+    // Enforce non-spawn window while still publishing activity/cap state for diagnostics.
+    missionNamespace setVariable ["civsub_v1_civ_sampler_last_active", _active, true];
+    missionNamespace setVariable ["civsub_v1_civ_sampler_last_capGE", _capGE, true];
+    missionNamespace setVariable ["civsub_v1_civ_sampler_last_capDE", _capDE, true];
+    missionNamespace setVariable ["civsub_v1_civ_sampler_last_capByDistrict", _capByD, true];
+    missionNamespace setVariable ["civsub_v1_civ_lastSampler_ts", serverTime, true];
+    if (_dbg) then { diag_log format ["[CIVSUB][CIVS][TOD] spawn gate closed phase=%1", _phase]; };
+    false
+};
+
 // Publish sampler decision state for probes
 missionNamespace setVariable ["civsub_v1_civ_sampler_last_active", _active, true];
 missionNamespace setVariable ["civsub_v1_civ_sampler_last_capGE", _capGE, true];
@@ -129,7 +141,6 @@ if (_dbg) then {
     if (_capThis < 0) then { _capThis = 0; };
 
     while { _total < _capGE && { _cur < _capThis } && { _spawned < _budget } } do {
-        if (!_canSpawnCivil) exitWith {};
         // Count attempt (even if spawn returns objNull)
         missionNamespace setVariable ["civsub_v1_civ_spawn_attempt_count", (missionNamespace getVariable ["civsub_v1_civ_spawn_attempt_count", 0]) + 1, true];
         missionNamespace setVariable ["civsub_v1_civ_sampler_last_attempt_did", _did, true];

@@ -304,7 +304,6 @@ missionNamespace setVariable ["civsub_v1_traffic_cap_perDistrict", 10, true];
 
 // Shared airbase dynamic boundary radius (single source of truth for airbase cleanup + civ exclusion)
 missionNamespace setVariable ["ARC_airbase_dynamic_radius_m", 1600, true];
-private _airbaseDynRadius = missionNamespace getVariable ["ARC_airbase_dynamic_radius_m", 1600];
 
 // Placement / separation
 // spawnRadius_m: search radius around the player-centroid spawn center.
@@ -334,7 +333,7 @@ missionNamespace setVariable ["civsub_v1_traffic_cleanupMinDelay_s", 60, true];
 missionNamespace setVariable ["civsub_v1_traffic_deleteWrecks", true, true];
 
 // Exclusions: keep traffic out of the airbase bubble
-missionNamespace setVariable ["civsub_v1_traffic_exclusions", [["mkr_airbaseCenter", _airbaseDynRadius]], true];
+missionNamespace setVariable ["civsub_v1_traffic_exclusions", [["mkr_airbaseCenter", missionNamespace getVariable ["ARC_airbase_dynamic_radius_m", 1600]]], true];
 
 // Diagnostics (temporary)
 missionNamespace setVariable ["civsub_v1_traffic_debug", false, true];
@@ -521,7 +520,7 @@ missionNamespace setVariable ["airbase_v1_ambiance_enabled", true, true];
 missionNamespace setVariable ["airbase_v1_runtime_enabled", true, true];
 // Ambient ground vehicle traffic (ORBAT-aligned whitelist; see fn_airbaseGroundTrafficInit)
 missionNamespace setVariable ["airbase_v1_gnd_traffic_enabled", true, true];
-missionNamespace setVariable ["airbase_v1_gnd_cleanupRadius_m", _airbaseDynRadius, true];
+missionNamespace setVariable ["airbase_v1_gnd_cleanupRadius_m", missionNamespace getVariable ["ARC_airbase_dynamic_radius_m", 1600], true];
 missionNamespace setVariable ["ARC_dynamic_tod_allowCivilNight", true, true];
 missionNamespace setVariable ["ARC_dynamic_tod_allowAirbaseNight", false, true];
 missionNamespace setVariable ["ARC_dynamic_tod_allowThreatNight", true, true];
