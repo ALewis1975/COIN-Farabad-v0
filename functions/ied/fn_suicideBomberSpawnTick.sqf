@@ -13,6 +13,14 @@
 
 if (!isServer) exitWith {false};
 
+private _todPolicy = [] call ARC_fnc_dynamicTodGetPolicy;
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _canSpawnThreat = [_todPolicy, "canSpawnThreat", true] call _hg;
+if (!(_canSpawnThreat isEqualType true) && !(_canSpawnThreat isEqualType false)) then { _canSpawnThreat = true; };
+if (!_canSpawnThreat) exitWith {false};
+private _todPhase = [_todPolicy, "phase", "DAY"] call _hg;
+if (!(_todPhase isEqualType "")) then { _todPhase = "DAY"; };
+
 private _objKind = toUpper (["activeObjectiveKind", ""] call ARC_fnc_stateGet);
 private _validKinds = ["SB_MARKET_APPROACH","SB_CHECKPOINT_APPROACH","SB_SHURA_APPROACH"];
 if (!(_objKind in _validKinds)) exitWith {false};
@@ -84,6 +92,8 @@ private _bomber = _grp createUnit ["O_Soldier_F", _spawnPos, [], 0, "NONE"];
 _bomber setPos _spawnPos;
 _bomber setVariable ["ARC_isSuicideBomber", true, true];
 _bomber setVariable ["ARC_cleanupLabel", format ["SB:%1", _threatId], true];
+_bomber setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];
+_bomber setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hg, true];
 
 // Civ appearance (unit stays east faction but low-profile)
 _bomber setObjectTextureGlobal [0, "#(argb,8,8,3)color(0.35,0.25,0.15,1)"];

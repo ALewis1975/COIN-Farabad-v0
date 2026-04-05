@@ -9,6 +9,14 @@
 if (!isServer) exitWith { false };
 if !(["airbaseSpawnArrival"] call ARC_fnc_airbaseRuntimeEnabled) exitWith {false};
 
+private _todPolicy = [] call ARC_fnc_dynamicTodGetPolicy;
+private _hgTod = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _canSpawnAirbase = [_todPolicy, "canSpawnAirbase", true] call _hgTod;
+if (!(_canSpawnAirbase isEqualType true) && !(_canSpawnAirbase isEqualType false)) then { _canSpawnAirbase = true; };
+if (!_canSpawnAirbase) exitWith { false };
+private _todPhase = [_todPolicy, "phase", "DAY"] call _hgTod;
+if (!(_todPhase isEqualType "")) then { _todPhase = "DAY"; };
+
 params ["_fid"];
 
 private _debugOps = missionNamespace getVariable ["airbase_v1_debugOpsLog", false];
@@ -84,6 +92,8 @@ _veh setPosASL [(_spawnPos select 0), (_spawnPos select 1), _altSpawn];
 _veh allowDamage false;
 _veh engineOn true;
 if (_veh isKindOf "Air") then { _veh setCollisionLight true; _veh setPilotLight true; };
+_veh setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, false];
+_veh setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hgTod, false];
 
 // Crew (no moveIn*; spawn crew already inside the aircraft)
 createVehicleCrew _veh;

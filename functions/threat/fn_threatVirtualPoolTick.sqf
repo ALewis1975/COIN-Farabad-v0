@@ -60,6 +60,12 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
         if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabled = true; };
         if (!_enabled) then { continue; };
 
+        [] call ARC_fnc_dynamicTodGetPolicy;
+        private _canSpawnThreat = missionNamespace getVariable ["ARC_dynamic_tod_canSpawnThreat", true];
+        if (!(_canSpawnThreat isEqualType true) && !(_canSpawnThreat isEqualType false)) then { _canSpawnThreat = true; };
+        private _todPhase = missionNamespace getVariable ["ARC_dynamic_tod_phase", "DAY"];
+        if (!(_todPhase isEqualType "")) then { _todPhase = "DAY"; };
+
         // Configuration — ground vs. air radii loaded once per tick; per-group selection below.
         private _activationR_ground = missionNamespace getVariable ["ARC_threatVirtualActivationRadiusM_ground", 2200];
         if (!(_activationR_ground isEqualType 0)) then { _activationR_ground = 2200; };
@@ -229,7 +235,7 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
                     } else {
                         // Spawn gate: player very nearby AND there is an active combat incident
                         private _combatIncidentActive = !((_activeTaskId isEqualTo "") || {_activeIncidentZone in ["Airbase", "GreenZone", ""]});
-                        if (_playerVeryNearby && { _combatIncidentActive }) then {
+                        if (_playerVeryNearby && { _combatIncidentActive } && { _canSpawnThreat }) then {
                             // Physically spawn group
                             private _spawnPos          = _vgPos;
                             private _vgPatrolRadiusM   = missionNamespace getVariable ["ARC_threatVirtualPatrolRadiusM", 200];
@@ -250,6 +256,8 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
                                     diag_log format ["[ARC][VPOOL][WARN] %1 createUnit returned null for class %2 — skipping unit", _vgId, _cls];
                                 } else {
                                     _u setSkill (0.35 + random 0.25);
+                                    _u setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, false];
+                                    _u setVariable ["ARC_dynamic_tod_profile_spawn", missionNamespace getVariable ["ARC_dynamic_tod_profile", "STANDARD"], false];
                                     _spawnedNetIds pushBack (netId _u);
                                 };
                             };
@@ -288,6 +296,10 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
                             diag_log format ["[ARC][VPOOL][INFO] %1 spawned PHYSICAL (%2 units) at %3", _vgId, count _spawnedNetIds, _spawnPos];
 
                             }; // end spawn-success block
+                        } else {
+                            if (_playerVeryNearby && { _combatIncidentActive } && { !_canSpawnThreat }) then {
+                                diag_log format ["[ARC][VPOOL][TOD] %1 spawn suppressed phase=%2", _vgId, _todPhase];
+                            };
                         };
                     };
                 };

@@ -18,8 +18,9 @@
 if (!isServer) exitWith {[objNull, objNull]};
 
 missionNamespace setVariable ["civsub_v1_traffic_lastMovingSpawnFail", "", false];
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _todPolicy = [] call ARC_fnc_dynamicTodGetPolicy;
-private _todPhase = _todPolicy getOrDefault ["phase", "DAY"];
+private _todPhase = [_todPolicy, "phase", "DAY"] call _hg;
 if (!(_todPhase isEqualType "")) then { _todPhase = "DAY"; };
 
 params [
@@ -123,7 +124,7 @@ _veh setVariable ["ARC_civtraf_spawnTs", serverTime, true];
 _veh setVariable ["ARC_civtraf_nextMoveTs", serverTime, true];
 _veh setVariable ["ARC_civtraf_moveTarget", _pos, true];
 _veh setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];
-_veh setVariable ["ARC_dynamic_tod_profile_spawn", _todPolicy getOrDefault ["profile", "STANDARD"], true];
+_veh setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hg, true];
 
 _drv setVariable ["ARC_civtraf_role", "MOVING_DRIVER", true];
 

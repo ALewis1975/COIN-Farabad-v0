@@ -22,11 +22,11 @@ private _players = [] call ARC_fnc_civsubBubbleGetPlayers;
 private _active = [_players] call ARC_fnc_civsubBubbleGetActiveDistricts;
 
 private _todPolicy = [] call ARC_fnc_dynamicTodRefresh;
-private _canSpawnCivil = _todPolicy getOrDefault ["canSpawnCivil", true];
+private _canSpawnCivil = [_todPolicy, "canSpawnCivil", true] call _hg;
 if (!(_canSpawnCivil isEqualType true) && !(_canSpawnCivil isEqualType false)) then { _canSpawnCivil = true; };
-private _phase = _todPolicy getOrDefault ["phase", "DAY"];
+private _phase = [_todPolicy, "phase", "DAY"] call _hg;
 if (!(_phase isEqualType "")) then { _phase = "DAY"; };
-private _tod = _todPolicy getOrDefault ["tod", dayTime];
+private _tod = [_todPolicy, "tod", dayTime] call _hg;
 if (!(_tod isEqualType 0)) then { _tod = dayTime; };
 
 missionNamespace setVariable ["civsub_v1_activeDistrictIds", _active, true];

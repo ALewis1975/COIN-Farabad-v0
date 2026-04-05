@@ -58,6 +58,11 @@ _groupDef params [
 ];
 
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _todPolicy = [] call ARC_fnc_dynamicTodGetPolicy;
+private _todPhase = [_todPolicy, "phase", "DAY"] call _hg;
+if (!(_todPhase isEqualType "")) then { _todPhase = "DAY"; };
+private _todProfile = [_todPolicy, "profile", "STANDARD"] call _hg;
+if (!(_todProfile isEqualType "")) then { _todProfile = "STANDARD"; };
 
 // ---------------------------------------------------------------------------
 // Resolve effective spawn position from optional anchor marker
@@ -218,6 +223,8 @@ if (_behavior isEqualTo "parked") exitWith
     private _grp = createGroup [_side, false];
     _grp setVariable ["ARC_sitePop_siteId", _siteId];
     _grp setVariable ["ARC_sitePop_role",   _roleTag];
+    _grp setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase];
+    _grp setVariable ["ARC_dynamic_tod_profile_spawn", _todProfile];
 
     private _vehicles = [];
     for "_i" from 1 to _count do
@@ -253,6 +260,8 @@ if (_behavior isEqualTo "parked") exitWith
         _veh enableDynamicSimulation true;
         _veh setVariable ["ARC_sitePop_siteId", _siteId];
         _veh setVariable ["ARC_sitePop_role",   _roleTag];
+        _veh setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, false];
+        _veh setVariable ["ARC_dynamic_tod_profile_spawn", _todProfile, false];
         _vehicles pushBack _veh;
     };
 
@@ -270,6 +279,8 @@ private _grp = createGroup [_side, true]; // true = delete group when empty
 
 _grp setVariable ["ARC_sitePop_siteId", _siteId];
 _grp setVariable ["ARC_sitePop_role",   _roleTag];
+_grp setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase];
+_grp setVariable ["ARC_dynamic_tod_profile_spawn", _todProfile];
 
 if (!(_side isEqualTo civilian)) then
 {
@@ -318,6 +329,8 @@ for "_i" from 1 to _count do
     // Tag unit for cleanup
     _u setVariable ["ARC_sitePop_siteId", _siteId];
     _u setVariable ["ARC_sitePop_role",   _roleTag];
+    _u setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, false];
+    _u setVariable ["ARC_dynamic_tod_profile_spawn", _todProfile, false];
 
     // Strip weapons: civilians and prisoners are always unarmed.
     // Prisoner detection: any roleTag containing the substring "prisoner" qualifies

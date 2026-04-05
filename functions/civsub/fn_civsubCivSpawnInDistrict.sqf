@@ -15,10 +15,11 @@
 */
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 private _dbg = missionNamespace getVariable ["civsub_v1_debug", false];
 private _todPolicy = [] call ARC_fnc_dynamicTodGetPolicy;
-private _todPhase = _todPolicy getOrDefault ["phase", "DAY"];
+private _todPhase = [_todPolicy, "phase", "DAY"] call _hg;
 if (!(_todPhase isEqualType "")) then { _todPhase = "DAY"; };
 
 // Phase 2 helpers (defined in civsubInitServer)
@@ -235,7 +236,7 @@ missionNamespace setVariable ["civsub_v1_civ_lastSpawnStage", "identity", true];
 
 [_u, _districtId] call ARC_fnc_civsubCivAssignIdentity;
 _u setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];
-_u setVariable ["ARC_dynamic_tod_profile_spawn", _todPolicy getOrDefault ["profile", "STANDARD"], true];
+_u setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hg, true];
 [_u, _districtId] call ARC_fnc_civsubCivRegisterSpawn;
 
 missionNamespace setVariable ["civsub_v1_civ_lastSpawnFail", "", true];

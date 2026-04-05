@@ -21,10 +21,11 @@ if !(["airbaseGroundTrafficTick"] call ARC_fnc_airbaseRuntimeEnabled) exitWith {
 private _dbg = missionNamespace getVariable ["airbase_v1_gnd_debug", false];
 if (!(_dbg isEqualType true)) then { _dbg = false; };
 
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _todPolicy = [] call ARC_fnc_dynamicTodRefresh;
-private _canSpawnAirbase = _todPolicy getOrDefault ["canSpawnAirbase", true];
+private _canSpawnAirbase = [_todPolicy, "canSpawnAirbase", true] call _hg;
 if (!(_canSpawnAirbase isEqualType true) && !(_canSpawnAirbase isEqualType false)) then { _canSpawnAirbase = true; };
-private _todPhase = _todPolicy getOrDefault ["phase", "DAY"];
+private _todPhase = [_todPolicy, "phase", "DAY"] call _hg;
 if (!(_todPhase isEqualType "")) then { _todPhase = "DAY"; };
 
 // -------------------------------------------------------------------------
@@ -203,7 +204,7 @@ if (!(_playerPresenceRadius isEqualType 0)) then { _playerPresenceRadius = 1800;
     _veh setVariable ["ARC_abtraf_cls",      _cls,    false];
     _veh setVariable ["ARC_abtraf_spawnTs",  serverTime, false];
     _veh setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, false];
-    _veh setVariable ["ARC_dynamic_tod_profile_spawn", _todPolicy getOrDefault ["profile", "STANDARD"], false];
+    _veh setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hg, false];
 
     _list pushBack _veh;
 

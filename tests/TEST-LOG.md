@@ -11,6 +11,65 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-05 23:52 UTC — Dynamic TOD policy sync + shared airbase boundary constant
+
+**Branch/Commit:** copilot/fix-vehicle-spawn-in-buildings @ 6cf053f (pre-edit baseline; changes applied on top)
+
+**Scenario:** Implement shared server-authoritative dynamic TOD policy/state, wire major dynamic spawn/despawn paths to consume it, standardize TOD spawn metadata tags, and lock airbase/civ exclusion radius to a single mission-level constant.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `initServer.sqf` | Added `ARC_airbase_dynamic_radius_m`; wired civ traffic airbase exclusion + airbase ground cleanup radius to shared constant; added TOD gating defaults |
+| `config/CfgFunctions.hpp` | Registered `dynamicTodRefresh` and `dynamicTodGetPolicy` |
+| `functions/core/fn_dynamicTodRefresh.sqf` | Added canonical server-side TOD phase/profile policy writer and replicated policy state |
+| `functions/core/fn_dynamicTodGetPolicy.sqf` | Added shared TOD policy reader |
+| `functions/ambiance/fn_airbaseGroundTrafficInit.sqf` | Default cleanup radius now sources shared airbase boundary constant |
+| `functions/ambiance/fn_airbaseGroundTrafficTick.sqf` | Uses TOD policy spawn gate; adds TOD metadata tags on spawned vehicles |
+| `functions/ambiance/fn_airbaseSpawnArrival.sqf` | Uses TOD policy spawn gate; tags spawned arrival aircraft with TOD metadata |
+| `functions/civsub/fn_civsubTrafficTick.sqf` | Replaced local TOD derivation with shared TOD refresh; enforces civil spawn gate |
+| `functions/civsub/fn_civsubSchedulerTick.sqf` | Uses shared TOD phase/tod state |
+| `functions/civsub/fn_civsubCivSamplerTick.sqf` | Uses shared TOD phase/tod state; enforces civil spawn gate |
+| `functions/civsub/fn_civsubLocNpcTick.sqf` | Uses shared TOD phase; enforces civil spawn gate for loc-NPC spawning |
+| `functions/civsub/fn_civsubTrafficSpawnParked.sqf` | Adds TOD metadata tags on parked vehicle spawns |
+| `functions/civsub/fn_civsubTrafficSpawnMoving.sqf` | Adds TOD metadata tags on moving vehicle spawns |
+| `functions/civsub/fn_civsubLocNpcSpawn.sqf` | Adds TOD metadata tags on loc-NPC spawns |
+| `functions/civsub/fn_civsubCivSpawnInDistrict.sqf` | Adds TOD metadata tags on civ spawns |
+| `functions/sitepop/fn_sitePopSpawnSite.sqf` | Uses TOD civil spawn gate |
+| `functions/sitepop/fn_sitePopBuildGroup.sqf` | Adds TOD metadata tags on sitepop groups/units/vehicles |
+| `functions/ied/fn_suicideBomberSpawnTick.sqf` | Uses TOD threat spawn gate; adds TOD metadata tags |
+| `functions/ied/fn_vbiedDrivenSpawnTick.sqf` | Uses TOD threat spawn gate; adds TOD metadata tags |
+| `functions/prison/fn_prisonEvalIncident.sqf` | Uses TOD threat spawn gate for breakout spawn; adds TOD metadata tags |
+| `functions/ops/fn_opsSpawnLocalSupport.sqf` | Uses TOD ops spawn gate; adds TOD metadata tags on support groups/units |
+| `functions/ops/fn_opsSpawnRouteSupport.sqf` | Uses TOD ops spawn gate; adds TOD metadata tags on support objects/groups |
+| `functions/logistics/fn_execSpawnConvoy.sqf` | Uses TOD ops spawn gate; adds TOD metadata tags on convoy assets |
+| `functions/threat/fn_threatVirtualPoolTick.sqf` | Uses TOD threat spawn gate for VIRTUAL_ACTIVE→PHYSICAL spawn path; tags spawned units |
+
+### Checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Baseline state migration validation | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios |
+| 2 | Baseline marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | All modes passed |
+| 3 | Baseline static AIRBASE + CASREQ checks | `bash tests/static/airbase_planning_mode_checks.sh && bash tests/static/casreq_snapshot_contract_checks.sh` | PASS | Runtime-gate and CASREQ snapshot checks clean |
+| 4 | Targeted compat scan (changed files) | `python3 scripts/dev/sqflint_compat_scan.py --strict <changed files>` | FAIL (pre-existing) | Existing repo-wide compat hotspots remain in touched files (`#`, `isNotEqualTo`, direct hashmap method form) |
+| 5 | sqflint installation | `python3 -m pip install --user sqflint` | PASS | Installed v0.3.2 under `/home/runner/.local/bin` |
+| 6 | Targeted sqflint (changed SQF files) | `/home/runner/.local/bin/sqflint -e w <each changed .sqf file>` | FAIL (pre-existing/tool limits) | Current sqflint parser reports existing legacy syntax patterns in multiple touched files; not introduced by this pass |
+| 7 | Post-change static validation | `python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && bash tests/static/airbase_planning_mode_checks.sh && bash tests/static/casreq_snapshot_contract_checks.sh` | PASS | Static regression checks passed after edits |
+| 8 | Repo diff sanity | `git --no-pager diff --check` | PASS | No whitespace/conflict-marker issues |
+| 9 | Local MP runtime smoke | N/A | BLOCKED | No Arma 3 runtime in container |
+| 10 | Dedicated/JIP runtime smoke | N/A | BLOCKED | No dedicated/JIP environment in container |
+
+### Outcome
+
+- Airbase dynamic boundary now has a single mission-level constant used by both airbase cleanup and civ exclusion radius logic.
+- Dynamic TOD policy is server-authoritative and shared via replicated missionNamespace keys; CIVSUB phase windows are the canonical source.
+- Major dynamic spawn systems now consume shared TOD policy and tag spawned entities/groups with TOD phase/profile metadata for observability.
+- Dedicated/JIP runtime verification remains required for persistence, synchronization, and reconnect/respawn edge-case confirmation.
+
+---
+
 ## 2026-04-04 21:16 UTC — SitePop anchor resolution fix for rectangle markers
 
 **Branch/Commit:** copilot/assess-development-state-and-plan @ 26b7a2d (pre-edit baseline; changes applied on top)
@@ -3716,4 +3775,3 @@ Branch: `copilot/align-vehicles-with-orbat`
 #### Deferred
 - Runtime smoke: **BLOCKED** (requires Arma 3 session)
 - JIP/late-client: **BLOCKED**
-

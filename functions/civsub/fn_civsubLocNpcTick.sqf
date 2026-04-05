@@ -15,6 +15,7 @@ if !(missionNamespace getVariable ["civsub_v1_locnpc_enabled", false]) exitWith 
 
 private _debug = missionNamespace getVariable ["civsub_v1_locnpc_debug", false];
 if (!(_debug isEqualType true)) then { _debug = false; };
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 private _sites    = missionNamespace getVariable ["civsub_v1_locnpc_sites",    []];
 private _registry = missionNamespace getVariable ["civsub_v1_locnpc_registry", createHashMap];
@@ -47,9 +48,9 @@ _bubbleR_air = (_bubbleR_air max 200) min 8000;
 
 // ── 3. Time-of-day phase (reuse civsub_v1_activity_phase set by TrafficTick) ─
 private _todPolicy = [] call ARC_fnc_dynamicTodGetPolicy;
-private _phase = _todPolicy getOrDefault ["phase", missionNamespace getVariable ["civsub_v1_activity_phase", "DAY"]];
+private _phase = [_todPolicy, "phase", missionNamespace getVariable ["civsub_v1_activity_phase", "DAY"]] call _hg;
 if (!(_phase isEqualType "")) then { _phase = "DAY"; };
-private _canSpawnCivil = _todPolicy getOrDefault ["canSpawnCivil", true];
+private _canSpawnCivil = [_todPolicy, "canSpawnCivil", true] call _hg;
 if (!(_canSpawnCivil isEqualType true) && !(_canSpawnCivil isEqualType false)) then { _canSpawnCivil = true; };
 
 // ── 4. Global cap ────────────────────────────────────────────────────────────

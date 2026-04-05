@@ -21,6 +21,16 @@ params [["_siteId", "", [""]]];
 if (_siteId isEqualTo "") exitWith {false};
 
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _todPolicy = [] call ARC_fnc_dynamicTodGetPolicy;
+private _canSpawnCivil = [_todPolicy, "canSpawnCivil", true] call _hg;
+if (!(_canSpawnCivil isEqualType true) && !(_canSpawnCivil isEqualType false)) then { _canSpawnCivil = true; };
+private _todPhase = [_todPolicy, "phase", "DAY"] call _hg;
+if (!(_todPhase isEqualType "")) then { _todPhase = "DAY"; };
+if (!_canSpawnCivil) exitWith
+{
+    diag_log format ["[ARC][SITEPOP][TOD] ARC_fnc_sitePopSpawnSite: spawn suppressed site='%1' phase=%2", _siteId, _todPhase];
+    false
+};
 
 private _registry = missionNamespace getVariable ["ARC_sitePopRegistry", createHashMap];
 private _active   = missionNamespace getVariable ["ARC_sitePopActive",   createHashMap];

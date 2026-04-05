@@ -19,6 +19,7 @@ if !(missionNamespace getVariable ["civsub_v1_traffic_enabled", false]) exitWith
 
 private _debug = missionNamespace getVariable ["civsub_v1_traffic_debug", false];
 if (!(_debug isEqualType true)) then { _debug = false; };
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 private _parked = missionNamespace getVariable ["civsub_v1_traffic_list_parked", []];
 private _moving = missionNamespace getVariable ["civsub_v1_traffic_list_moving", []];
@@ -63,11 +64,11 @@ private _pool = missionNamespace getVariable ["civsub_v1_traffic_vehiclePool_val
 if !(_pool isEqualType []) then { _pool = []; };
 
 private _todPolicy = [] call ARC_fnc_dynamicTodRefresh;
-private _canSpawnCivil = _todPolicy getOrDefault ["canSpawnCivil", true];
+private _canSpawnCivil = [_todPolicy, "canSpawnCivil", true] call _hg;
 if (!(_canSpawnCivil isEqualType true) && !(_canSpawnCivil isEqualType false)) then { _canSpawnCivil = true; };
-private _phasePolicy = _todPolicy getOrDefault ["phase", "DAY"];
+private _phasePolicy = [_todPolicy, "phase", "DAY"] call _hg;
 if (!(_phasePolicy isEqualType "")) then { _phasePolicy = "DAY"; };
-private _todPolicyVal = _todPolicy getOrDefault ["tod", dayTime];
+private _todPolicyVal = [_todPolicy, "tod", dayTime] call _hg;
 if (!(_todPolicyVal isEqualType 0)) then { _todPolicyVal = dayTime; };
 
 if (!_canSpawnCivil) exitWith

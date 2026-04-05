@@ -43,6 +43,13 @@ if (!(_callerOwner isEqualType 0)) then { _callerOwner = -1; };
 
 private _incidentTypeU = toUpper _incidentType;
 private _debug = missionNamespace getVariable ["ARC_convoyDebug", false];
+private _todPolicy = [] call ARC_fnc_dynamicTodGetPolicy;
+private _hgTod = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _canSpawnOps = [_todPolicy, "canSpawnOps", true] call _hgTod;
+if (!(_canSpawnOps isEqualType true) && !(_canSpawnOps isEqualType false)) then { _canSpawnOps = true; };
+if (!_canSpawnOps) exitWith {[]};
+private _todPhase = [_todPolicy, "phase", "DAY"] call _hgTod;
+if (!(_todPhase isEqualType "")) then { _todPhase = "DAY"; };
 
 private _log = {
     params [["_msg", "", [""]], ["_args", [], [[]]], ["_lvl", "WARN", [""]]];
@@ -536,6 +543,8 @@ _grp setSpeedMode "LIMITED";
 // Tag the group so watchdog/rehydration can recognize the current convoy.
 if (_taskId isNotEqualTo "") then { _grp setVariable ["ARC_convoyTaskId", _taskId, true]; };
 _grp setVariable ["ARC_convoyIncidentType", _incidentTypeU, true];
+_grp setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];
+_grp setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hgTod, true];
 
 // Convoy ORBAT designation profile (drives groupId/callsigns via ARC_fnc_groupSetDesignation).
 // Profiles are defined in bootstrapServer: LONGHAUL/PROVIDER/LIFELINE... (LOGISTICS) and LAWDAWG/SAPPER... (ESCORT).
@@ -725,6 +734,8 @@ if (_stageEnabled) then
             _veh setPosATL (_spawnPos vectorAdd [0,0,0.25]); // slight Z lift to reduce ground clipping
             _veh allowDamage false;
             _veh setVariable ["ARC_isConvoyVeh", true, true];
+            _veh setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];
+            _veh setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hgTod, true];
 
             // Tag this vehicle so we can rehydrate and enforce one-convoy-at-a-time.
             if (_taskId isNotEqualTo "") then { _veh setVariable ["ARC_convoyTaskId", _taskId, true]; };
@@ -968,6 +979,8 @@ if (_incidentTypeU isEqualTo "ESCORT" && { _isVIP } && { !isNull _grp } && { (co
             {
                 _vip setRank "PRIVATE"; // reduce chance of taking group lead if drivers die
                 _vip setVariable ["ARC_isConvoyVIP", true, true];
+                _vip setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];
+                _vip setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hgTod, true];
                 _vip assignAsCargo _vipVeh;
                 _vip moveInCargo _vipVeh;
             };
@@ -991,6 +1004,8 @@ if (_incidentTypeU isEqualTo "ESCORT" && { _isVIP } && { !isNull _grp } && { (co
 
                 _u setRank "PRIVATE";
                 _u setVariable ["ARC_isConvoyVIPGuard", true, true];
+                _u setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];
+                _u setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hgTod, true];
 
                 private _seated = false;
                 {

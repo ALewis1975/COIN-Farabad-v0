@@ -40,6 +40,14 @@ params [
 if (_taskId isEqualTo "") exitWith {[]};
 if (!(_endPosATL isEqualType []) || { (count _endPosATL) < 2 }) exitWith {[]};
 
+private _todPolicy = [] call ARC_fnc_dynamicTodGetPolicy;
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _canSpawnOps = [_todPolicy, "canSpawnOps", true] call _hg;
+if (!(_canSpawnOps isEqualType true) && !(_canSpawnOps isEqualType false)) then { _canSpawnOps = true; };
+if (!_canSpawnOps) exitWith {[]};
+private _todPhase = [_todPolicy, "phase", "DAY"] call _hg;
+if (!(_todPhase isEqualType "")) then { _todPhase = "DAY"; };
+
 private _enabled = missionNamespace getVariable ["ARC_routeSupportEnabled", true];
 if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabled = true; };
 if (!_enabled) exitWith {[]};
@@ -399,6 +407,8 @@ private _fn_tag = {
     _o setVariable ["ARC_routeSupportTaskId", _taskId, true];
     _o setVariable ["ARC_routeSupportIncidentType", _type, true];
     _o setVariable ["ARC_routeSupportPackage", _pkg, true];
+    _o setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];
+    _o setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hg, true];
 
     if (_persistInAO) then
     {
@@ -568,6 +578,8 @@ private _fn_spawnVehElement = {
     _grpCrew setVariable ["ARC_routeSupportTaskId", _taskId, true];
     _grpCrew setVariable ["ARC_routeSupportPackage", _pkg, true];
     _grpCrew setVariable ["ARC_routeSupportRole", "CREW", true];
+    _grpCrew setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];
+    _grpCrew setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hg, true];
     _grpCrew allowFleeing 0;
 
     // Start friendly elements calm unless threatened.
@@ -630,6 +642,8 @@ private _fn_spawnVehElement = {
         _grpSec setVariable ["ARC_routeSupportTaskId", _taskId, true];
         _grpSec setVariable ["ARC_routeSupportPackage", _pkg, true];
         _grpSec setVariable ["ARC_routeSupportRole", "SECURITY", true];
+        _grpSec setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];
+        _grpSec setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hg, true];
         _grpSec allowFleeing 0;
 
         _grpSec setBehaviour "SAFE";
@@ -692,6 +706,8 @@ private _fn_spawnFootElement = {
     _grp setVariable ["ARC_routeSupportTaskId", _taskId, true];
     _grp setVariable ["ARC_routeSupportPackage", _pkg, true];
     _grp setVariable ["ARC_routeSupportRole", "FOOT", true];
+    _grp setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];
+    _grp setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hg, true];
     _grp allowFleeing 0;
 
     // Start friendly locals calm unless threatened.

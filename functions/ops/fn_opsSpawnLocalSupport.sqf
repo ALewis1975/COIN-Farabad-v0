@@ -32,6 +32,14 @@ params [
 if (_taskId isEqualTo "") exitWith {[]};
 if (!(_posATL isEqualType []) || { (count _posATL) < 2 }) exitWith {[]};
 
+private _todPolicy = [] call ARC_fnc_dynamicTodGetPolicy;
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _canSpawnOps = [_todPolicy, "canSpawnOps", true] call _hg;
+if (!(_canSpawnOps isEqualType true) && !(_canSpawnOps isEqualType false)) then { _canSpawnOps = true; };
+if (!_canSpawnOps) exitWith {[]};
+private _todPhase = [_todPolicy, "phase", "DAY"] call _hg;
+if (!(_todPhase isEqualType "")) then { _todPhase = "DAY"; };
+
 private _enabled = missionNamespace getVariable ["ARC_localSupportEnabled", true];
 if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabled = true; };
 if (!_enabled) exitWith {[]};
@@ -336,6 +344,8 @@ private _fn_tagUnit = {
     _u setVariable ["ARC_localSupportTaskId", _taskId, true];
     _u setVariable ["ARC_localSupportMarker", _marker, true];
     _u setVariable ["ARC_localSupportType", _type, true];
+    _u setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];
+    _u setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hg, true];
 
     // Persist in AO like static checkpoint compositions (optional).
     if (_persistInAO) then
@@ -371,6 +381,8 @@ private _fn_initGroup = {
     _g setVariable ["ARC_localSupportMarker", _marker, true];
     _g setVariable ["ARC_localSupportType", _type, true];
     _g setVariable ["ARC_localSupportRole", _role, true];
+    _g setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];
+    _g setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hg, true];
     _g allowFleeing 0;
 
     // Start friendly locals calm unless threatened.

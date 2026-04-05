@@ -75,9 +75,9 @@ private _diagMap = missionNamespace getVariable ["civsub_v1_scheduler_diag", cre
 if !(_diagMap isEqualType createHashMap) then { _diagMap = createHashMap; };
 
 private _todPolicy = [] call ARC_fnc_dynamicTodRefresh;
-private _phase = _todPolicy getOrDefault ["phase", "DAY"];
+private _phase = [_todPolicy, "phase", "DAY"] call _hg;
 if (!(_phase isEqualType "")) then { _phase = "DAY"; };
-private _tod = _todPolicy getOrDefault ["tod", dayTime];
+private _tod = [_todPolicy, "tod", dayTime] call _hg;
 if (!(_tod isEqualType 0)) then { _tod = dayTime; };
 
 private _mLead = missionNamespace getVariable ["civsub_v1_activity_mul_sched_lead_day", 1.0];
