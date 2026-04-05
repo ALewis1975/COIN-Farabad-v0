@@ -235,9 +235,11 @@ private _eventsView = _eventsTail apply {
 
 private _blockedRouteWindow = missionNamespace getVariable ["airbase_v1_publicBlockedRouteWindow", 25];
 if (!(_blockedRouteWindow isEqualType 0) || { _blockedRouteWindow < 1 }) then { _blockedRouteWindow = 25; };
+private _blockedRouteRecentWindowMin_s = 60;
 private _blockedRouteRecentWindow_s = missionNamespace getVariable ["airbase_v1_publicBlockedRouteRecentWindow_s", 1800];
-if (!(_blockedRouteRecentWindow_s isEqualType 0) || { _blockedRouteRecentWindow_s < 60 }) then { _blockedRouteRecentWindow_s = 1800; };
+if (!(_blockedRouteRecentWindow_s isEqualType 0) || { _blockedRouteRecentWindow_s < _blockedRouteRecentWindowMin_s }) then { _blockedRouteRecentWindow_s = 1800; };
 private _blockedRouteCutoffTs = serverTime - _blockedRouteRecentWindow_s;
+// Returns true when a blocked-route row [timestamp, reason, sourceId] falls within the configured recent window.
 private _isBlockedRouteRecent = {
     params [["_row", [], [[]]]];
     private _ts = _row param [0, -1];
@@ -370,8 +372,8 @@ if ((count _blockedRouteTail) > 1) then {
             _x
         ]
     };
-    _blockedSort sort true;
     _blockedSort = _blockedSort select { [_x] call _isBlockedRouteRecent };
+    _blockedSort sort true;
     _blockedRouteTail = _blockedSort apply { _x param [1, []] };
 } else {
     _blockedRouteTail = _blockedRouteTail select { [_x] call _isBlockedRouteRecent };
