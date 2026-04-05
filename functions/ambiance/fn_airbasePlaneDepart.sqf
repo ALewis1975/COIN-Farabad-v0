@@ -26,8 +26,6 @@ if (!(_asset isEqualType createHashMap)) exitWith { false };
 
 private _debug    = missionNamespace getVariable ["airbase_v1_debug", false];
 private _debugOps = missionNamespace getVariable ["airbase_v1_debugOpsLog", false];
-private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
-
 private _veh = [_asset, "veh", objNull] call getOrDefault;
 if (isNull _veh) exitWith {
     _asset set ["state", "PARKED"];

@@ -11,6 +11,35 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-05 23:51 UTC — AIRBASE sqflint warning fix (unused `_hg`)
+
+**Branch/Commit:** copilot/taxi-with-engines-on @ 0e2caef (pre-edit baseline; unused-variable fix applied on top)
+
+**Scenario:** Resolve CI `sqflint -e w` failure in `functions/ambiance/fn_airbasePlaneDepart.sqf` caused by warning `[29,8]: Variable "_hg" not used` by removing the unused local helper declaration.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `functions/ambiance/fn_airbasePlaneDepart.sqf` | Removed unused local variable `_hg` compile helper |
+
+### Checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Targeted strict compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf` | PASS | File remains strict-compat clean |
+| 2 | Targeted sqflint warnings-as-errors | `sqflint -e w functions/ambiance/fn_airbasePlaneDepart.sqf` | BLOCKED | `sqflint` binary not available in container |
+| 3 | Repo diff sanity | `git --no-pager diff --check` | PASS | No whitespace/conflict-marker issues |
+| 4 | Local MP runtime | N/A | BLOCKED | No Arma 3 runtime in container |
+| 5 | Dedicated/JIP runtime | N/A | BLOCKED | No dedicated/JIP environment in container |
+
+### Outcome
+
+- Removed the single unused `_hg` declaration that triggered warnings-as-errors failure in CI.
+- `fn_airbasePlaneDepart.sqf` remains compatible with strict compat scan after the change.
+
+---
+
 ## 2026-04-05 23:37 UTC — AIRBASE sqflint compat remediation for fn_airbasePlaneDepart
 
 **Branch/Commit:** copilot/taxi-with-engines-on @ 5576210 (pre-edit baseline; compat remediation applied on top)
