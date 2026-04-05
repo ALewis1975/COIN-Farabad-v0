@@ -111,7 +111,7 @@ if (_convoyActive) then
 
     if (_basePos isEqualTo [] || { (count _basePos) < 2 }) then
     {
-        // Route not available — use lead vehicle position.
+        // Route not available - use lead vehicle position.
         private _leadNid = _convoyNetIds select 0;
         private _leadVeh = objectFromNetId _leadNid;
         if (!isNull _leadVeh) then { _basePos = getPosATL _leadVeh; };
@@ -134,7 +134,7 @@ if (_basePos isEqualTo [] || { (count _basePos) < 2 }) then
 
 if (_basePos isEqualTo [] || { (count _basePos) < 2 }) then
 {
-    diag_log format ["[ARC][WARN] ARC_fnc_threatScheduleEvent: no base position for district=%1 — skipping", _districtId];
+    diag_log format ["[ARC][WARN] ARC_fnc_threatScheduleEvent: no base position for district=%1 - skipping", _districtId];
     exitWith {false};
 };
 
