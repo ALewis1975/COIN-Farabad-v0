@@ -26,6 +26,7 @@ if (!(_asset isEqualType createHashMap)) exitWith { false };
 
 private _debug    = missionNamespace getVariable ["airbase_v1_debug", false];
 private _debugOps = missionNamespace getVariable ["airbase_v1_debugOpsLog", false];
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 private _veh = [_asset, "veh", objNull] call getOrDefault;
 if (isNull _veh) exitWith {
@@ -421,6 +422,14 @@ private _kickPos = _despawnPos;
 if (_isHeli) then {
     private _altLow = missionNamespace getVariable ["airbase_v1_rw_takeoff_alt_low_m", 3];
     if (!(_altLow isEqualType 0) || { _altLow < 0 }) then { _altLow = 3; };
+    private _rwClimbStepAlt = missionNamespace getVariable ["airbase_v1_rw_climb_step_alt_m", 30];
+    if (!(_rwClimbStepAlt isEqualType 0) || { _rwClimbStepAlt < 10 }) then { _rwClimbStepAlt = 30; };
+    private _rwClimbStepIntervalS = missionNamespace getVariable ["airbase_v1_rw_climb_step_interval_s", 4];
+    if (!(_rwClimbStepIntervalS isEqualType 0) || { _rwClimbStepIntervalS < 1 }) then { _rwClimbStepIntervalS = 4; };
+    private _rwClimbKickFwd = missionNamespace getVariable ["airbase_v1_rw_climb_kick_forward_mps", 18];
+    if (!(_rwClimbKickFwd isEqualType 0) || { _rwClimbKickFwd < 6 }) then { _rwClimbKickFwd = 18; };
+    private _rwClimbProfileTimeoutS = missionNamespace getVariable ["airbase_v1_rw_climb_profile_timeout_s", 240];
+    if (!(_rwClimbProfileTimeoutS isEqualType 0) || { _rwClimbProfileTimeoutS < 30 }) then { _rwClimbProfileTimeoutS = 240; };
 
     private _mkrOut = missionNamespace getVariable ["airbase_v1_rw_outbound_marker", "AEON_Right_270_Outbound"]; 
     if (!(_mkrOut isEqualType "") || { _mkrOut isEqualTo "" }) then { _mkrOut = "AEON_Right_270_Outbound"; };
@@ -455,8 +464,8 @@ if (_isHeli) then {
         if (!(_climbTrig isEqualType 0) || { _climbTrig < 3 }) then { _climbTrig = 15; };
 
         // Near runway start marker: begin climb to departure altitude (default ~500ft).
-        [_fid, _veh, _outPos, _cruiseAlt, _climbTrig, _debugOps] spawn {
-            params ["_fidL", "_vehL", "_outPosL", "_altTargetL", "_trigL", "_dbgOpsL"];
+        [_fid, _veh, _outPos, _cruiseAlt, _climbTrig, _rwClimbStepAlt, _rwClimbStepIntervalS, _rwClimbKickFwd, _rwClimbProfileTimeoutS, _debugOps] spawn {
+            params ["_fidL", "_vehL", "_outPosL", "_altTargetL", "_trigL", "_stepAltL", "_stepIntervalSL", "_kickForwardL", "_profileTimeoutSL", "_dbgOpsL"];
             private _t0 = time;
             waitUntil {
                 sleep 1;
@@ -488,8 +497,31 @@ if (_isHeli) then {
             };
         };
     } else {
-        // Missing outbound marker: start climbing immediately.
-        _veh flyInHeight _cruiseAlt;
+        // Missing outbound marker: start a progressive climb immediately.
+        [_fid, _veh, _cruiseAlt, _rwClimbStepAlt, _rwClimbStepIntervalS, _rwClimbKickFwd, _rwClimbProfileTimeoutS, _debugOps] spawn {
+            params ["_fidL", "_vehL", "_altTargetL", "_stepAltL", "_stepIntervalSL", "_kickForwardL", "_profileTimeoutSL", "_dbgOpsL"];
+            if (isNull _vehL || {!alive _vehL}) exitWith {};
+
+            _vehL land "NONE";
+            private _cmdAlt = (_stepAltL min _altTargetL) max 5;
+            _vehL flyInHeight _cmdAlt;
+            _vehL setVelocityModelSpace [0, _kickForwardL, 0];
+
+            private _tRamp0 = time;
+            // Timeout keeps the helper from running forever; when reached, AI continues on existing waypoints at last commanded altitude.
+            while { !isNull _vehL && {alive _vehL} && {_cmdAlt < _altTargetL} && {(time - _tRamp0) < _profileTimeoutSL} } do {
+                sleep _stepIntervalSL;
+                _cmdAlt = (_cmdAlt + _stepAltL) min _altTargetL;
+                _vehL land "NONE";
+                _vehL flyInHeight _cmdAlt;
+                _vehL setVelocityModelSpace [0, _kickForwardL, 0];
+            };
+
+            if (_dbgOpsL) then {
+                private _altNow = (getPosATL _vehL) select 2;
+                ["OPS", format ["AIRBASE: %1 helo climb profile complete (alt=%2m target=%3m)", _fidL, round _altNow, _altTargetL], getPosATL _vehL, 0, []] call ARC_fnc_intelLog;
+            };
+        };
     };
 
     if (_hasClear) then {
