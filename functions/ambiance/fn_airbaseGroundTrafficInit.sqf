@@ -159,7 +159,7 @@ missionNamespace setVariable ["airbase_v1_gnd_pool_tka",
 private _zones = [
     // Flightline / hangar area: USAF GSE (Peral equipment)
     // Anchor: C-17 parking ramp (central hardstand reference)
-    ["FLIGHTLINE",   "arc_m_base_c17_parking",        350, ["airfield_logistics"],          4],
+    ["FLIGHTLINE",   "ARC_m_base_c17_parking",        350, ["airfield_logistics"],          4],
 
     // Convoy staging yard / MCP: 407 BSB logistics trucks and support vehicles
     // Anchor: convoy staging / MCP marker
@@ -171,11 +171,11 @@ private _zones = [
 
     // Joint Base HQ and admin: light transport (HMMWVs, quadbikes) for staff
     // Anchor: Joint Base HQ
-    ["HQ_ADMIN",     "arc_m_base_hq_1",               120, ["admin"],                       3],
+    ["HQ_ADMIN",     "ARC_m_base_hq_1",               120, ["admin"],                       3],
 
     // Base Mayor / 332 EMSG admin area: light transport
     // Anchor: 332 EMSG (Base Mayor) marker
-    ["MAYOR",        "arc_m_base_mayor_1",             100, ["admin"],                       2],
+    ["MAYOR",        "ARC_m_base_mayor_1",             100, ["admin"],                       2],
 
     // Theater hospital: medical vehicles
     // Anchor: theater hospital marker
@@ -195,7 +195,7 @@ private _zones = [
 
     // TOC area: command HMMWVs and SICPS
     // Anchor: TOC marker
-    ["TOC",          "arc_m_base_toc",                   80, ["admin"],                      2]
+    ["TOC",          "ARC_m_base_toc",                   80, ["admin"],                      2]
 ];
 
 missionNamespace setVariable ["airbase_v1_gnd_zones", _zones, false];

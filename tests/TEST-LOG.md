@@ -3575,3 +3575,106 @@ Branch: `copilot/align-vehicles-with-orbat`
 - T12/10: runtime gameplay verification — requires hosted or dedicated Arma 3 session.
 - Dedicated-server verification that pool validation correctly identifies valid classnames for all modded vehicle packs (RHS, UK3CB, Peral, d3s).
 - Editor note: Patrol_01 / Patrol_02 Eden-placed vehicle classnames may still need updating in mission.sqm to a USAF-aligned model (e.g., rhsusf_m1151_usarmy_d) in a future Eden session.
+
+---
+
+### T13 — Airbase Marker / Resident Unit Audit (2026-04-05)
+
+Branch: `copilot/align-vehicles-with-orbat`
+
+**Audit method:** Python parsing of mission.sqm (nested 3den format), cross-referenced against initServer.sqf, fn_airbaseInit.sqf, fn_airbaseSecurityInit.sqf, fn_airbaseGroundTrafficInit.sqf, ORBAT layer tree.
+
+#### PASS — All critical runtime markers present
+
+| Marker | Purpose | In SQM? |
+|--------|---------|---------|
+| `mkr_airbaseCenter` | Airbase bubble center | ✅ [6118,2281] |
+| `Main_Gate` | Security patrol waypoint + gate | ✅ [5244,2680] |
+| `North_Gate` | Security patrol waypoint | ✅ [6738,3231] |
+| `South_Gate` | Security patrol waypoint | ✅ [6220,1335] |
+| `NE_Corner` | Security patrol waypoint | ✅ [7363,2835] |
+| `NW_Corner` | Security patrol waypoint | ✅ [4889,2993] |
+| `SE_Corner` | Security patrol waypoint | ✅ [7142,1366] |
+| `SW_Corner` | Security patrol waypoint | ✅ [4854,1797] |
+| `AEON_*` (all 8) | Flight route markers | ✅ all present |
+| `arc_rotary_pad_1–7` | Rotary pad anchors | ✅ all 7 present |
+| `plane_despawn` | Fixed-wing despawn | ✅ present |
+| `mkr_arrivalRunwayStart/Stop/TaxiOut` | FW arrivals | ✅ all present |
+| `ARC_m_base_c17_parking` | Ground traffic FLIGHTLINE zone | ✅ [6368,1637] |
+| `arc_m_base_convoy_staging` | Ground traffic STAGING zone | ✅ [6631,3167] |
+| `arc_m_base_supply_depot` | Ground traffic SUPPLY zone | ✅ [5336,2617] |
+| `ARC_m_base_hq_1` | Ground traffic HQ_ADMIN zone | ✅ [6410,1585] |
+| `ARC_m_base_mayor_1` | Ground traffic MAYOR zone | ✅ [6293,1559] |
+| `arc_m_base_theater_hospital` | Ground traffic MEDICAL zone | ✅ [5714,2344] |
+| `arc_m_base_maintenance` | Ground traffic MAINT zone | ✅ [5626,2367] |
+| `arc_m_base_fuel_depot` | Ground traffic FUEL_DEPOT zone | ✅ [7157,1477] |
+| `ARC_m_base_toc` | Ground traffic TOC zone | ✅ [6237,1590] |
+
+**Marker case fix applied:** `fn_airbaseGroundTrafficInit.sqf` was using lowercase `arc_m_base_c17_parking`, `arc_m_base_hq_1`, `arc_m_base_mayor_1`, `arc_m_base_toc`. Corrected to match mission.sqm uppercase `ARC_m_base_*` names.
+
+#### PASS — Key Eden-placed asset variables present
+
+| Variable | Type | Status |
+|----------|------|--------|
+| `plane1` | USAF_C17 (C-17) | ✅ |
+| `plane2` | usaf_kc135 (KC-135) | ✅ |
+| `plane3` | USAF_C130J (C-130J) | ✅ |
+| `plane4` | FIR_A10C_FT (A-10C) | ✅ |
+| `plane5` | FIR_F16C_910379_sqd (F-16C) | ✅ |
+| `plane6` | USAF_RQ4A (RQ-4A) | ✅ |
+| `plane7` | aws_C130_AEW (EC-130H COMPASS) | ✅ |
+| `AH_64D_01` | RHS_AH64D | ✅ |
+| `CH_47F_01` | RHS_CH_47F_10 | ✅ |
+| `UH_60M_01` | RHS_UH60M_d | ✅ |
+| `OH_58D_01` | ad_oh58d | ✅ |
+| `tug4` | Peral_B600 | ✅ |
+| `tug5` | Peral_B600 | ✅ |
+| `m151` | Peral_M151 | ✅ |
+| `Patrol_01` | d3s_tundra_19_COP | ⚠️ See note |
+| `Patrol_02` | rhsusf_m1043_d | ✅ |
+| `FarabadTower_LA` | USAF tower unit | ✅ |
+| `farabad_tower_ws_ccic` | WS/CCIC | ✅ |
+| `farabad_tower_lc` | Local Controller | ✅ |
+| `farabad_6` | JTF Commander | ✅ |
+| `farabad_5` | Deputy JTF Cdr/CoS | ✅ |
+| `tf_co` | TF CO (REDFALCON 6) | ✅ |
+
+**Note — Patrol_01 vehicle:** `d3s_tundra_19_COP` is a civilian-style police car. For ORBAT alignment with USAF Security Forces (SENTRY), this should be changed in Eden to an ORBAT-appropriate type (e.g. `rhsusf_m1151_usarmy_d`). This is an Eden editor task.
+
+**Note — tug6D/7D/8D:** These are `FIR_USAF_GroundCrew_1` ambient walking figures (not vehicles), so the absence of a `tug6`/`tug7`/`tug8` vehicle variable is intentional.
+
+#### ⚠️ GAPS REQUIRING EDEN EDITOR SESSIONS
+
+The following ORBAT layers are structurally present but contain **no Eden-placed units**. These are not runtime errors (the system handles empty layers gracefully), but they represent missing ambient detail that should be added in a future Eden session:
+
+| Layer | Role | Gap |
+|-------|------|-----|
+| `01.2) 332 AEW HQ [REDTAIL]` → `REDTAIL 6 / Staff` | Wing Commander and staff | **0 units placed** |
+| `02.3) Aerial Port (cargo/pax handling)` | APOD cargo handlers | **0 units placed** |
+| `03.1) 332 EMDG / Theater Hospital [LIFELINE]` → `LIFELINE ER/SURG/WARD` | Medical personnel | **0 units placed** |
+| `03.2) Ambulances / CCPs (on-base)` | Medical vehicles | **0 units placed** |
+| `04.1.2) Flightline Security` | SENTRY flightline guards | **0 units placed** |
+| `04.1.3) QRF (on-base)` | SENTRY QRF | **0 units placed** |
+| `04.3.1) 1-73 CAV` → Troop A / Troop B | THUNDER cavalry troops | **0 units placed** (Troop C: 2 groups) |
+| `09.2.6) MEDEVAC Flight [DUSTOFF]` | DUSTOFF crew/aircraft | **0 units placed** |
+
+#### ✅ POPULATED — Key ORBAT layers confirmed present
+
+- `09.1.1) TF HQ / TOC (REDFALCON 6/5/TOC)`: 9 groups, 681 objects ✅
+- `09.1.2) A Co (REDFALCON 1)`: 6 groups ✅
+- `09.1.3) B Co (REDFALCON 2)`: 6 groups ✅
+- `09.1.4) C Co (REDFALCON 3) [player co]`: 6 groups, 259 objects ✅
+- `09.2.1–2.5) TF PEGASUS aviation`: all populated ✅
+- `09.2.7) ATLAS (aviation support)`: 6 groups ✅
+- `10.2.2) MPs [SHERIFF]`: 3 groups ✅
+- `10.2.3.1) EOD / 10.2.3.2) Route Clearance`: populated ✅
+- `04.1.1) ECPs / Gates`: 3 groups ✅
+- `04.2) USAF SF Outside Patrol [SENTRY PATROL]`: 2 groups ✅
+- `06.2.1) 407 BSB`: 4 groups ✅
+- `06.2.2) Convoy Staging Yard / MCP`: 116+ objects ✅
+- `08.1–08.4, 08.6) Flying tenants (C-17, C-130, KC-135, F-16, A-10)`: all populated ✅
+
+### Deferred
+
+- All gap closures require Eden editor sessions (unit placement in empty layers).
+- `Patrol_01` vehicle classname change to ORBAT-correct type requires Eden editor session.
