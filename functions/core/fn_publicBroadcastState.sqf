@@ -235,9 +235,9 @@ private _eventsView = _eventsTail apply {
 
 private _blockedRouteWindow = missionNamespace getVariable ["airbase_v1_publicBlockedRouteWindow", 25];
 if (!(_blockedRouteWindow isEqualType 0) || { _blockedRouteWindow < 1 }) then { _blockedRouteWindow = 25; };
-private _blockedRouteRecentWindowS = missionNamespace getVariable ["airbase_v1_publicBlockedRouteRecentWindow_s", 1800];
-if (!(_blockedRouteRecentWindowS isEqualType 0) || { _blockedRouteRecentWindowS < 60 }) then { _blockedRouteRecentWindowS = 1800; };
-private _blockedRouteCutoffTs = serverTime - _blockedRouteRecentWindowS;
+private _blockedRouteRecentWindow_s = missionNamespace getVariable ["airbase_v1_publicBlockedRouteRecentWindow_s", 1800];
+if (!(_blockedRouteRecentWindow_s isEqualType 0) || { _blockedRouteRecentWindow_s < 60 }) then { _blockedRouteRecentWindow_s = 1800; };
+private _blockedRouteCutoffTs = serverTime - _blockedRouteRecentWindow_s;
 
 private _readReasonFromMeta = {
     params ["_meta"];
@@ -366,12 +366,16 @@ if ((count _blockedRouteTail) > 1) then {
         ]
     };
     _blockedSort sort true;
+    _blockedSort = _blockedSort select {
+        private _ts = _x param [0, -1];
+        (_ts isEqualType 0) && { _ts >= _blockedRouteCutoffTs }
+    };
     _blockedRouteTail = _blockedSort apply { _x param [1, []] };
-};
-
-_blockedRouteTail = _blockedRouteTail select {
-    private _ts = _x param [0, -1];
-    (_ts isEqualType 0) && { _ts >= _blockedRouteCutoffTs }
+} else {
+    _blockedRouteTail = _blockedRouteTail select {
+        private _ts = _x param [0, -1];
+        (_ts isEqualType 0) && { _ts >= _blockedRouteCutoffTs }
+    };
 };
 
 if ((count _blockedRouteTail) > _blockedRouteWindow) then {

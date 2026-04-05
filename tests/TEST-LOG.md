@@ -11,6 +11,33 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-05 23:45 UTC — AIR blocked-route recency filter review follow-up
+
+**Branch/Commit:** copilot/still-not-fixed-issue @ commit: unrecoverable (pre-push; review-fix applied on top)
+
+**Scenario:** Address code-review feedback on blocked-route recency filtering path in `fn_publicBroadcastState` and keep naming consistent with mission variable style.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `functions/core/fn_publicBroadcastState.sqf` | Applied timestamp cutoff on timestamp-preserving sorted rows before array projection; renamed local `_blockedRouteRecentWindowS` to `_blockedRouteRecentWindow_s` |
+
+### Checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Post-fix compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_publicBroadcastState.sqf` | FAIL (pre-existing) | Same existing file-level compat findings (`#`, `isNotEqualTo`, direct `trim`) remain unchanged |
+| 2 | Repo diff sanity | `git --no-pager diff --check` | PASS | No whitespace/conflict marker issues |
+| 3 | Runtime validation (local MP / dedicated / JIP) | N/A | BLOCKED | No Arma runtime in container |
+
+### Outcome
+
+- Recency cutoff now executes on rows that explicitly carry timestamp + payload before projection to telemetry payload rows.
+- Resulting `blockedRouteAttemptsRecent`, latest reason, and latest source id are based on genuinely recent blocked-route events.
+
+---
+
 ## 2026-04-05 23:39 UTC — AIR Route Validation blocked-route telemetry recency window
 
 **Branch/Commit:** copilot/still-not-fixed-issue @ commit: unrecoverable (pre-push; change applied on top)
