@@ -3550,3 +3550,28 @@ Branch: `copilot/improve-vehicle-spawn-distance`
 ### Deferred
 
 - T11/9: runtime gameplay verification that vehicles appear only beyond 1 km from all players — requires hosted or dedicated Arma 3 session.
+
+---
+
+### T12 — Airbase Ground Traffic + ORBAT Alignment (2026-04-05)
+
+Branch: `copilot/align-vehicles-with-orbat`
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Security patrol driver changed from B_Soldier_F to rhsusf_airforce_m | `grep "rhsusf_airforce_m" functions/ambiance/fn_airbaseSecurityPatrol.sqf` | PASS | ORBAT-aligned to USAF Security Forces (SENTRY) |
+| 2 | isNotEqualTo replaced with !(...isEqualTo...) in SecurityPatrol | `grep "isNotEqualTo" functions/ambiance/fn_airbaseSecurityPatrol.sqf` | PASS | Zero matches |
+| 3 | Three new ground traffic functions created | `ls functions/ambiance/fn_airbaseGroundTraffic*.sqf` | PASS | Init, BuildPool, Tick |
+| 4 | New functions registered in CfgFunctions.hpp | `grep "airbaseGroundTraffic" config/CfgFunctions.hpp` | PASS | Three entries added |
+| 5 | airbase_v1_gnd_traffic_enabled set in initServer | `grep "airbase_v1_gnd_traffic_enabled" initServer.sqf` | PASS | Enabled by default, disabled in safe mode |
+| 6 | Ground traffic init called from fn_airbasePostInit | `grep "airbaseGroundTrafficInit" functions/ambiance/fn_airbasePostInit.sqf` | PASS | Called after security init |
+| 7 | All six pool categories defined with canonical whitelist | `grep "airbase_v1_gnd_pool_" functions/ambiance/fn_airbaseGroundTrafficInit.sqf` | PASS | airfield_logistics, admin, medical, transport, support, tka |
+| 8 | Ten spawn zones defined keyed to existing airbase markers | `grep "FLIGHTLINE\|STAGING\|SUPPLY\|HQ_ADMIN\|MAYOR\|MEDICAL\|MAINT\|FUEL_DEPOT\|MAIN_GATE\|TOC" functions/ambiance/fn_airbaseGroundTrafficInit.sqf` | PASS | All markers verified in marker-index.md |
+| 9 | Compat scan clean on all changed/new files | `python3 scripts/dev/sqflint_compat_scan.py --strict <changed files>` | PASS | 0 warnings |
+| 10 | Runtime smoke (ground vehicles spawn at airbase zones) | Local/dedicated MP session | BLOCKED | Requires Arma 3 runtime |
+
+### Deferred
+
+- T12/10: runtime gameplay verification — requires hosted or dedicated Arma 3 session.
+- Dedicated-server verification that pool validation correctly identifies valid classnames for all modded vehicle packs (RHS, UK3CB, Peral, d3s).
+- Editor note: Patrol_01 / Patrol_02 Eden-placed vehicle classnames may still need updating in mission.sqm to a USAF-aligned model (e.g., rhsusf_m1151_usarmy_d) in a future Eden session.

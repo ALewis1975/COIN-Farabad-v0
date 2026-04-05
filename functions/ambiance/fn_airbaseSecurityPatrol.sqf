@@ -26,10 +26,12 @@ if (!alive _vehicle) exitWith {false};
 if (_markers isEqualTo []) exitWith {false};
 
 // Ensure the vehicle has a driver (NO moveIn*)
+// ORBAT: USAF Security Forces (332 ESFG / SENTRY) patrol the installation.
+// rhsusf_airforce_m is the USAF enlisted male — correct for SENTRY patrols.
 if (isNull (driver _vehicle)) then
 {
     private _g = createGroup west;
-    private _d = _g createUnit ["B_Soldier_F", getPosATL _vehicle, [], 0, "NONE"];
+    private _d = _g createUnit ["rhsusf_airforce_m", getPosATL _vehicle, [], 0, "NONE"];
     _vehicle lock false;
     unassignVehicle _d;
     _d assignAsDriver _vehicle;
@@ -72,7 +74,7 @@ while {alive _vehicle} do
     private _choices = _markers;
     if !(_lastMarker isEqualTo "") then
     {
-        _choices = _markers select { _x isNotEqualTo _lastMarker };
+        _choices = _markers select { !(_x isEqualTo _lastMarker) };
         if (_choices isEqualTo []) then { _choices = _markers; };
     };
 

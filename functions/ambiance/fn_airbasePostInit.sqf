@@ -40,6 +40,9 @@ if (!_ambianceEnabled) exitWith
 
     // Start perimeter patrol ambience (editor-placed vehicles)
     [] call ARC_fnc_airbaseSecurityInit;
+
+    // Start ambient ground vehicle traffic (ORBAT-aligned vehicle pool)
+    [] call ARC_fnc_airbaseGroundTrafficInit;
 };
 
 true
