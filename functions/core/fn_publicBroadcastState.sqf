@@ -85,7 +85,7 @@ private _normalizeStaffingLane = {
     { if ((_x isEqualType []) && { (count _x) >= 5 } && { ((_x param [0, ""]) isEqualTo _laneId) }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
 
     private _base = [_laneId, "AUTO", "", "", -1];
-    if (_idx >= 0 && { _idx < (count _rows) }) then { _base = _rows select _idx; };
+    if (_idx >= 0) then { _base = _rows select _idx; };
     [
         _laneId,
         toUpper (_base param [1, "AUTO"]),
