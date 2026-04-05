@@ -65,16 +65,19 @@ private _players = allPlayers;
 
 private _spawnR = missionNamespace getVariable ["civsub_v1_traffic_spawnRadius_m", 600];
 if (!(_spawnR isEqualType 0)) then { _spawnR = 600; };
-_spawnR = (_spawnR max 180) min 900;
-// Keep within district, but ensure at least a reasonable local radius.
-private _searchR = (_spawnR min ((_r max 250) min 950));
+// Upper bound raised to 1500 to support out-of-view-distance spawning (1 km+).
+_spawnR = (_spawnR max 180) min 1500;
+// Use _spawnR directly; the former district-radius cap (min 950) would prevent
+// spawning beyond ~400 m even when spawnRadius_m is configured at 1400 m.
+private _searchR = _spawnR;
 
 private _minSep = missionNamespace getVariable ["civsub_v1_traffic_minSeparation_m", 35];
 if (!(_minSep isEqualType 0)) then { _minSep = 35; };
 
 private _pMin = missionNamespace getVariable ["civsub_v1_traffic_playerMinDistance_m", 60];
 if (!(_pMin isEqualType 0)) then { _pMin = 60; };
-_pMin = (_pMin max 50) min 300;
+// Upper bound raised to 1200 to allow out-of-view-distance enforcement (1 km view).
+_pMin = (_pMin max 50) min 1200;
 
 private _fallbackRoadMin = missionNamespace getVariable ["civsub_v1_traffic_fallback_roadsideMin_m", 8];
 if (!(_fallbackRoadMin isEqualType 0)) then { _fallbackRoadMin = 8; };

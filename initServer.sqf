@@ -303,9 +303,13 @@ missionNamespace setVariable ["civsub_v1_traffic_cap_global", 28, true];
 missionNamespace setVariable ["civsub_v1_traffic_cap_perDistrict", 10, true];
 
 // Placement / separation
+// spawnRadius_m: search radius around the player-centroid spawn center.
+// playerMinDistance_m: hard minimum distance from any player — set to just beyond
+//   the 1 km view distance so vehicles never pop into existence within player sight.
+// Both values must be consistent: spawnRadius_m > playerMinDistance_m.
 missionNamespace setVariable ["civsub_v1_traffic_minSeparation_m", 35, true];
-missionNamespace setVariable ["civsub_v1_traffic_spawnRadius_m", 350, true];
-missionNamespace setVariable ["civsub_v1_traffic_playerMinDistance_m", 90, true];
+missionNamespace setVariable ["civsub_v1_traffic_spawnRadius_m", 1400, true];
+missionNamespace setVariable ["civsub_v1_traffic_playerMinDistance_m", 1050, true];
 missionNamespace setVariable ["civsub_v1_traffic_roadside_offset_m", 4, true];            // shoulder offset baseline
 missionNamespace setVariable ["civsub_v1_traffic_fallback_roadsideMin_m", 8, true];      // fallback: nearest-road shoulder band min
 missionNamespace setVariable ["civsub_v1_traffic_fallback_roadsideMax_m", 20, true];     // fallback: nearest-road shoulder band max
@@ -318,7 +322,9 @@ missionNamespace setVariable ["civsub_v1_traffic_spawnAnchors", createHashMap, t
 missionNamespace setVariable ["civsub_v1_traffic_preferWeight", 0.90, true];              // bias toward 3CB
 
 // Cleanup posture
-missionNamespace setVariable ["civsub_v1_traffic_cleanupRadius_m", 500, true];
+// cleanupRadius_m must exceed spawnRadius_m so vehicles at the far edge of the
+// spawn ring are not immediately considered out-of-bubble and cleaned up.
+missionNamespace setVariable ["civsub_v1_traffic_cleanupRadius_m", 1500, true];
 missionNamespace setVariable ["civsub_v1_traffic_cleanupMinDelay_s", 60, true];
 missionNamespace setVariable ["civsub_v1_traffic_deleteWrecks", true, true];
 

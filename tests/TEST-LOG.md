@@ -3528,3 +3528,25 @@ wrong-faction units.
 - All T6–T8 items remain BLOCKED; operator must run dedicated-server sessions to close them.
 - T9 visual smoke (console open, tab switch, status strip legibility) deferred to first local MP preview session.
 - T10 runtime smoke (threat scheduler triggers → CONVOY record created → MSR_THREAT_DETECTED log entry) deferred to dedicated server session.
+
+---
+
+### T11 — CIVTRAF Out-of-View-Distance Spawn (2026-04-05)
+
+Branch: `copilot/improve-vehicle-spawn-distance`
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | `spawnRadius_m` raised to 1400 in initServer | `grep "civsub_v1_traffic_spawnRadius_m" initServer.sqf` | PASS | Value now 1400 |
+| 2 | `playerMinDistance_m` raised to 1050 in initServer | `grep "civsub_v1_traffic_playerMinDistance_m" initServer.sqf` | PASS | Value now 1050 |
+| 3 | `cleanupRadius_m` raised to 1500 in initServer | `grep "civsub_v1_traffic_cleanupRadius_m" initServer.sqf` | PASS | Value now 1500 |
+| 4 | SpawnParked `_spawnR` max clamp raised 900→1500 | `grep "min 1500" functions/civsub/fn_civsubTrafficSpawnParked.sqf` | PASS | Clamp updated |
+| 5 | SpawnParked `_pMin` max clamp raised 300→1200 | `grep "min 1200" functions/civsub/fn_civsubTrafficSpawnParked.sqf` | PASS | Clamp updated |
+| 6 | SpawnParked `_searchR` no longer capped by district radius | `grep "_searchR = _spawnR" functions/civsub/fn_civsubTrafficSpawnParked.sqf` | PASS | Direct assignment |
+| 7 | SpawnMoving same clamp raises applied | `grep "min 1500\|min 1200" functions/civsub/fn_civsubTrafficSpawnMoving.sqf` | PASS | Both clamps updated |
+| 8 | Compat scan: no new violations in changed lines | `python3 scripts/dev/sqflint_compat_scan.py --strict <changed files>` | PASS | 6 pre-existing warnings in unmodified code; 0 new |
+| 9 | Gameplay smoke (vehicles spawn >1 km from player) | Local/dedicated MP session | BLOCKED | Requires Arma 3 runtime |
+
+### Deferred
+
+- T11/9: runtime gameplay verification that vehicles appear only beyond 1 km from all players — requires hosted or dedicated Arma 3 session.
