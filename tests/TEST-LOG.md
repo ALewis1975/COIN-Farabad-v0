@@ -11,6 +11,34 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-05 23:37 UTC — AIRBASE sqflint compat remediation for fn_airbasePlaneDepart
+
+**Branch/Commit:** copilot/taxi-with-engines-on @ 0ea9674 (pre-edit baseline; compat remediation applied on top)
+
+**Scenario:** Resolve CI sqflint compatibility scan failure on `functions/ambiance/fn_airbasePlaneDepart.sqf` by converting method-form `getOrDefault` to call-form and clearing remaining strict-compat findings in the same changed file.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `functions/ambiance/fn_airbasePlaneDepart.sqf` | Replaced method-form `getOrDefault` with call-form `[_map, key, default] call getOrDefault`; replaced `#` indexing with `select`; replaced `isNotEqualTo` with `!isEqualTo` equivalents |
+
+### Checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Targeted strict compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf` | PASS | No known parser-compat patterns remain in file |
+| 2 | Repo diff sanity | `git --no-pager diff --check` | PASS | No whitespace/conflict-marker issues |
+| 3 | Local MP runtime | N/A | BLOCKED | No Arma 3 runtime in container |
+| 4 | Dedicated/JIP runtime | N/A | BLOCKED | No dedicated/JIP environment in container |
+
+### Outcome
+
+- Compatibility failure mode reported by CI for method-form `getOrDefault` is resolved in `fn_airbasePlaneDepart.sqf`.
+- Additional strict-compat patterns in that file were remediated to avoid repeat CI failure on the same job step.
+
+---
+
 ## 2026-04-05 23:23 UTC — AIRBASE AWACS taxi engines-on hardening
 
 **Branch/Commit:** copilot/taxi-with-engines-on @ cef2a99
