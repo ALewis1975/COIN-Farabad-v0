@@ -40,6 +40,7 @@ private _isHeli  = (_veh isKindOf "Helicopter");
 // treatment rather than a standard fly-to-despawn departure.
 // Detect by type name; covers USAF_RQ4A and any mod variant containing "RQ4".
 private _isUAS   = (!_isHeli) && { (_vehType find "RQ4") >= 0 || { (toLower _vehType) find "uav" >= 0 } };
+// Keep EC-130 detection here because taxi prep needs it for pre-taxi fuel restore.
 private _isEC130 = (_vehType find "aws_C130_AEW") >= 0;
 
 // --- helpers ---
