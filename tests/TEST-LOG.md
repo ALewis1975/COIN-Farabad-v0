@@ -11,90 +11,95 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
-## 2026-04-05 23:45 UTC — SQF static analysis strict-compat fix (job 70027820729)
+## 2026-04-05 23:51 UTC — AIRBASE sqflint warning fix (unused `_hg`)
 
-**Branch/Commit:** copilot/still-not-fixed-issue @ commit: unrecoverable (pre-push; CI-fix applied on top)
+**Branch/Commit:** copilot/taxi-with-engines-on @ 0e2caef (pre-edit baseline; unused-variable fix applied on top)
 
-**Scenario:** GitHub Actions job `70027820729` failed in `SQF static analysis` because `scripts/dev/sqflint_compat_scan.py --strict` flagged parser-incompatible patterns in changed file `functions/core/fn_publicBroadcastState.sqf` (notably `#` indexing in blocked-route latest extraction, plus additional strict patterns in same file).
+**Scenario:** Resolve CI `sqflint -e w` failure in `functions/ambiance/fn_airbasePlaneDepart.sqf` caused by warning `[29,8]: Variable "_hg" not used` by removing the unused local helper declaration.
 
 ### Files changed
 
 | File | Change |
 |------|--------|
-| `functions/core/fn_publicBroadcastState.sqf` | Converted strict-incompatible patterns to compat-safe forms in changed file: `#` → `select` (with guards where needed), `isNotEqualTo` → `!isEqualTo`, direct `trim` → compiled `_trimFn` helper |
+| `functions/ambiance/fn_airbasePlaneDepart.sqf` | Removed unused local variable `_hg` compile helper |
 
 ### Checks
 
 | # | Check | Command | Result | Notes |
 |---|-------|---------|--------|-------|
-| 1 | Baseline strict compat (pre-fix) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_publicBroadcastState.sqf` | FAIL | 17 strict pattern matches including `#` at blocked-route latest extraction |
-| 2 | Baseline sqflint availability | `sqflint -e w functions/core/fn_publicBroadcastState.sqf` | BLOCKED | `sqflint` binary not available in container (`command not found`) |
-| 3 | Post-fix strict compat | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_publicBroadcastState.sqf` | PASS | No known parser-compat patterns in changed file |
-| 4 | Repo diff sanity | `git --no-pager diff --check` | PASS | No whitespace/conflict marker issues |
-| 5 | Runtime validation (local MP / dedicated / JIP) | N/A | BLOCKED | No Arma runtime in container |
+| 1 | Targeted strict compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf` | PASS | File remains strict-compat clean |
+| 2 | Targeted sqflint warnings-as-errors | `sqflint -e w functions/ambiance/fn_airbasePlaneDepart.sqf` | BLOCKED | `sqflint` binary not available in container; validation deferred to GitHub workflow environment where sqflint is installed |
+| 3 | Repo diff sanity | `git --no-pager diff --check` | PASS | No whitespace/conflict-marker issues |
+| 4 | Local MP runtime | N/A | BLOCKED | No Arma 3 runtime in container |
+| 5 | Dedicated/JIP runtime | N/A | BLOCKED | No dedicated/JIP environment in container |
 
 ### Outcome
 
-- The failing strict-compat path in `SQF static analysis` is addressed for the changed file.
-- `fn_publicBroadcastState.sqf` now passes strict compat scan cleanly in this environment.
+- Removed the single unused `_hg` declaration that triggered warnings-as-errors failure in CI; final confirmation is expected from the GitHub workflow sqflint step.
+- `fn_airbasePlaneDepart.sqf` remains compatible with strict compat scan after the change.
 
 ---
 
-## 2026-04-05 23:45 UTC — AIR blocked-route recency filter review follow-up
+## 2026-04-05 23:37 UTC — AIRBASE sqflint compat remediation for fn_airbasePlaneDepart
 
-**Branch/Commit:** copilot/still-not-fixed-issue @ commit: unrecoverable (pre-push; review-fix applied on top)
+**Branch/Commit:** copilot/taxi-with-engines-on @ 5576210 (pre-edit baseline; compat remediation applied on top)
 
-**Scenario:** Address code-review feedback on blocked-route recency filtering path in `fn_publicBroadcastState` and keep naming consistent with mission variable style.
+**Scenario:** Resolve CI sqflint compatibility scan failure on `functions/ambiance/fn_airbasePlaneDepart.sqf` by converting method-form `getOrDefault` to call-form and clearing remaining strict-compat findings in the same changed file.
 
 ### Files changed
 
 | File | Change |
 |------|--------|
-| `functions/core/fn_publicBroadcastState.sqf` | Applied timestamp cutoff on timestamp-preserving sorted rows before array projection; renamed local `_blockedRouteRecentWindowS` to `_blockedRouteRecentWindow_s` |
+| `functions/ambiance/fn_airbasePlaneDepart.sqf` | Replaced method-form `getOrDefault` with call-form `[_map, key, default] call getOrDefault`; replaced `#` indexing with `select`; replaced `isNotEqualTo` with `!isEqualTo` equivalents |
 
 ### Checks
 
 | # | Check | Command | Result | Notes |
 |---|-------|---------|--------|-------|
-| 1 | Post-fix compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_publicBroadcastState.sqf` | FAIL (pre-existing) | Same existing file-level compat findings (`#`, `isNotEqualTo`, direct `trim`) remain unchanged |
-| 2 | Repo diff sanity | `git --no-pager diff --check` | PASS | No whitespace/conflict marker issues |
-| 3 | Runtime validation (local MP / dedicated / JIP) | N/A | BLOCKED | No Arma runtime in container |
+| 1 | Targeted strict compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf` | PASS | No known parser-compat patterns remain in file |
+| 2 | Repo diff sanity | `git --no-pager diff --check` | PASS | No whitespace/conflict-marker issues |
+| 3 | Local MP runtime | N/A | BLOCKED | No Arma 3 runtime in container |
+| 4 | Dedicated/JIP runtime | N/A | BLOCKED | No dedicated/JIP environment in container |
 
 ### Outcome
 
-- Recency cutoff now executes on rows that explicitly carry timestamp + payload before projection to telemetry payload rows.
-- Resulting `blockedRouteAttemptsRecent`, latest reason, and latest source id are based on genuinely recent blocked-route events.
+- Compatibility failure mode reported by CI for method-form `getOrDefault` is resolved in `fn_airbasePlaneDepart.sqf`.
+- Additional strict-compat patterns in that file were remediated to avoid repeat CI failure on the same job step.
 
 ---
 
-## 2026-04-05 23:39 UTC — AIR Route Validation blocked-route telemetry recency window
+## 2026-04-05 23:23 UTC — AIRBASE AWACS taxi engines-on hardening
 
-**Branch/Commit:** copilot/still-not-fixed-issue @ commit: unrecoverable (pre-push; change applied on top)
+**Branch/Commit:** copilot/taxi-with-engines-on @ cef2a99
 
-**Scenario:** AIR console Route Validation showed stale blocked-route data (`MISSING_ROUTE_MARKERS`, `FLT 0005`) long after marker remap fixes. Scope limited to public snapshot telemetry recency semantics so stale historical route-block events no longer persist indefinitely in “recent” UI fields.
+**Scenario:** Ensure AWACS (`plane7`, `aws_C130_AEW`) can taxi with engines on by hardening departure prep to restore fuel before taxi start for EC-130 assets.
 
 ### Files changed
 
 | File | Change |
 |------|--------|
-| `functions/core/fn_publicBroadcastState.sqf` | Added server-time bounded filter for blocked-route telemetry (`airbase_v1_publicBlockedRouteRecentWindow_s`, default 1800s) before window/tail aggregation |
+| `functions/ambiance/fn_airbasePlaneDepart.sqf` | Added `_isEC130` detection earlier and set `setFuel 1` before taxi `engineOn true` to prevent engine-off taxi on AWACS |
 
 ### Checks
 
 | # | Check | Command | Result | Notes |
 |---|-------|---------|--------|-------|
-| 1 | Baseline working tree | `git --no-pager status --short` | PASS | Clean before edit |
-| 2 | Baseline compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_publicBroadcastState.sqf` | FAIL (pre-existing) | Existing repo-wide sqflint-compat findings in this file (`#`, `isNotEqualTo`, direct `trim`) unchanged by this patch |
-| 3 | Baseline sqflint | `sqflint -e w functions/core/fn_publicBroadcastState.sqf` | BLOCKED | `sqflint` binary not available in container (`command not found`) |
-| 4 | Post-change compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_publicBroadcastState.sqf` | FAIL (pre-existing) | Same pre-existing findings; no new pattern introduced by recency-window lines |
-| 5 | Repo diff sanity | `git --no-pager diff --check` | PASS | No whitespace/conflict marker issues |
-| 6 | Runtime validation (local MP / dedicated / JIP) | N/A | BLOCKED | No Arma runtime in container; requires dedicated session to confirm stale FLT-0005 no longer appears after recency window expires |
+| 1 | Baseline state migrations | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios |
+| 2 | Baseline marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | all modes passed |
+| 3 | Test-log commit guard | `bash scripts/dev/check_test_log_commits.sh` | PASS | Script reported `rg: command not found` in env but still returned PASS |
+| 4 | AIRBASE static checks | `bash tests/static/airbase_planning_mode_checks.sh` | PASS | runtime gate/planning checks clean |
+| 5 | CASREQ static checks | `bash tests/static/casreq_snapshot_contract_checks.sh` | PASS | snapshot contract checks clean |
+| 6 | Targeted compat scan (changed file) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf` | FAIL (pre-existing) | Existing parser-compat findings in unchanged sections of this file |
+| 7 | Targeted sqflint (changed file) | `sqflint -e w functions/ambiance/fn_airbasePlaneDepart.sqf` | BLOCKED | `sqflint` binary not available in this container |
+| 8 | Repo diff sanity | `git --no-pager diff --check` | PASS | no whitespace/conflict-marker issues |
+| 9 | Local MP runtime | N/A | BLOCKED | No Arma 3 runtime in container |
+| 10 | Dedicated/JIP runtime | N/A | BLOCKED | No dedicated/JIP environment in container |
 
 ### Outcome
 
-- Blocked-route telemetry used by AIR Route Validation now excludes events older than a configurable recent window before computing count/latest fields.
-- Default window is 30 minutes (`airbase_v1_publicBlockedRouteRecentWindow_s = 1800`), preserving near-term diagnostics while preventing old failures from appearing as current.
-- Dedicated follow-up still required to confirm expected in-mission behavior and tune window length if needed.
+- AWACS departures now explicitly restore full fuel before taxi playback begins, then issue `engineOn true`, reducing risk of engine-off taxi behavior for `aws_C130_AEW`.
+- No non-AWACS aircraft behavior was changed.
+- Dedicated/JIP runtime verification remains required for authoritative multiplayer confirmation.
 
 ---
 

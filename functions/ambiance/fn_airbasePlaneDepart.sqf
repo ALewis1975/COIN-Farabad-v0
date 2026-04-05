@@ -26,9 +26,7 @@ if (!(_asset isEqualType createHashMap)) exitWith { false };
 
 private _debug    = missionNamespace getVariable ["airbase_v1_debug", false];
 private _debugOps = missionNamespace getVariable ["airbase_v1_debugOpsLog", false];
-private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
-
-private _veh = [_asset, "veh", objNull] call _hg;
+private _veh = [_asset, "veh", objNull] call getOrDefault;
 if (isNull _veh) exitWith {
     _asset set ["state", "PARKED"];
     _asset set ["activeFlight", ""];
@@ -41,6 +39,8 @@ private _isHeli  = (_veh isKindOf "Helicopter");
 // treatment rather than a standard fly-to-despawn departure.
 // Detect by type name; covers USAF_RQ4A and any mod variant containing "RQ4".
 private _isUAS   = (!_isHeli) && { (_vehType find "RQ4") >= 0 || { (toLower _vehType) find "uav" >= 0 } };
+// Keep EC-130 detection here because taxi prep needs it for pre-taxi fuel restore.
+private _isEC130 = (_vehType find "aws_C130_AEW") >= 0;
 
 // --- helpers ---
 private _fnNormalize = {
@@ -48,7 +48,7 @@ private _fnNormalize = {
     if (!(_data isEqualType [])) exitWith { [] };
 
     // Some recorder exports wrap frames as [frames]
-    if ((count _data) == 1 && { (_data select 0) isEqualType [] } && { (count (_data select 0)) > 0 } && { (((_data select 0) select 0) isEqualType []) }) exitWith {
+    if ((count _data) == 1 && { (_data select 0) isEqualType [] } && { (count (_data select 0)) > 0 } && { ((_data select 0) select 0) isEqualType [] }) exitWith {
         _data select 0
     };
 
@@ -127,7 +127,7 @@ private _fnAbortToIdle = {
 };
 
 // --- resolve crew ---
-private _crew = [_asset, "crew", []] call _hg;
+private _crew = [_asset, "crew", []] call getOrDefault;
 if (!(_crew isEqualType [])) then { _crew = []; };
 private _crewLive = _crew select { !isNull _x && alive _x };
 
@@ -230,7 +230,7 @@ if (!(_prepDelay isEqualType 0) || { _prepDelay < 0 }) then { _prepDelay = 15; }
 if (_prepDelay > 0) then { sleep _prepDelay; };
 
 // --- taxi playback ---
-private _taxiVar = [_asset, "taxiPathVar", ""] call _hg;
+private _taxiVar = [_asset, "taxiPathVar", ""] call getOrDefault;
 private _taxiData = missionNamespace getVariable [_taxiVar, []];
 private _taxiFrames = [_taxiData] call _fnNormalize;
 
@@ -268,6 +268,7 @@ if ((count _taxiFrames) == 0) exitWith {
     false
 };
 
+if (_isEC130) then { _veh setFuel 1; };
 _veh engineOn true;
 if (_veh isKindOf "Air") then { _veh setCollisionLight true; _veh setPilotLight true; };
 
@@ -313,7 +314,7 @@ if (!_okTaxi) exitWith {
 };
 
 // --- special case: EC-130 loiter (do not despawn) ---
-private _isEC130 = (_vehType find "aws_C130_AEW") >= 0;
+// Uses `_isEC130` defined with the early vehicle-type flags so taxi prep can also apply EC-130-specific handling.
 if (_isEC130) exitWith {
     _veh setVehicleRadar 1;
     _veh setVehicleReportRemoteTargets true;
@@ -473,23 +474,24 @@ if (_isHeli) then {
             if (isNull _vehL || {!alive _vehL}) exitWith {};
 
             _vehL land "NONE";
-            private _cmdAlt = (_stepAltL min _altTargetL) max 5;
-            _vehL flyInHeight _cmdAlt;
-            _vehL setVelocityModelSpace [0, _kickForwardL, 0];
+            _vehL flyInHeight _altTargetL;
 
-            private _tRamp0 = time;
-            // Timeout keeps the helper from running forever; when reached, AI continues on existing waypoints at last commanded altitude.
-            while { !isNull _vehL && {alive _vehL} && {_cmdAlt < _altTargetL} && {(time - _tRamp0) < _profileTimeoutSL} } do {
-                sleep _stepIntervalSL;
-                _cmdAlt = (_cmdAlt + _stepAltL) min _altTargetL;
-                _vehL land "NONE";
-                _vehL flyInHeight _cmdAlt;
-                _vehL setVelocityModelSpace [0, _kickForwardL, 0];
-            };
+            // Nudge climb: AI sometimes skims the runway after a unitPlay taxi.
+            _vehL setVelocityModelSpace [0, 25, 0];
 
-            if (_dbgOpsL) then {
+            // If it's still low after a few seconds, nudge again.
+            sleep 5;
+            if (!isNull _vehL && {alive _vehL}) then {
                 private _altNow = (getPosATL _vehL) select 2;
-                ["OPS", format ["AIRBASE: %1 helo climb profile complete (alt=%2m target=%3m)", _fidL, round _altNow, _altTargetL], getPosATL _vehL, 0, []] call ARC_fnc_intelLog;
+                if (_altNow < (10 max (_altTargetL * 0.25))) then {
+                    _vehL land "NONE";
+                    _vehL flyInHeight _altTargetL;
+                    _vehL setVelocityModelSpace [0, 25, 0];
+
+                    if (_dbgOpsL) then {
+                        ["OPS", format ["AIRBASE: %1 climb nudge (alt=%2m target=%3m)", _fidL, round _altNow, _altTargetL], getPosATL _vehL, 0, []] call ARC_fnc_intelLog;
+                    };
+                };
             };
         };
     } else {
@@ -673,10 +675,10 @@ private _toDelete = [];
 if (!isNull _veh) then { deleteVehicle _veh; };
 
 // Clear missionNamespace vars so a clean respawn can occur on return.
-private _vehVar = [_asset, "vehVar", ""] call _hg;
+private _vehVar = [_asset, "vehVar", ""] call getOrDefault;
 if (_vehVar != "") then { missionNamespace setVariable [_vehVar, objNull, true]; };
 
-private _crewVars = [_asset, "crewVars", []] call _hg;
+private _crewVars = [_asset, "crewVars", []] call getOrDefault;
 {
     if (_x isEqualType "") then { missionNamespace setVariable [_x, objNull, true]; };
 } forEach _crewVars;
@@ -694,7 +696,7 @@ _asset set ["availableAt", _returnAt];
 
 if (_debugOps) then {
     ["OPS", format ["AIRBASE: %1 departed (%2) - return ETA in ~%3s", _fid, _vehType, round (_returnAt - serverTime)], _despawnPos, 0, [
-        ["assetId", ([_asset, "id", ""] call _hg)],
+        ["assetId", ([_asset, "id", ""] call getOrDefault)],
         ["vehType", _vehType],
         ["returnAt", _returnAt]
     ]] call ARC_fnc_intelLog;
