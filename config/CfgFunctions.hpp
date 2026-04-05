@@ -718,6 +718,7 @@ class Ops
             class airbaseGroundTrafficInit {};
             class airbaseGroundTrafficBuildPool {};
             class airbaseGroundTrafficTick {};
+            class airbaseOrbatPopulate {};
 
             // Airbase tower control RPCs (server authority + client wrappers)
             class airbaseRequestHoldDepartures {};

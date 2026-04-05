@@ -43,6 +43,9 @@ if (!_ambianceEnabled) exitWith
 
     // Start ambient ground vehicle traffic (ORBAT-aligned vehicle pool)
     [] call ARC_fnc_airbaseGroundTrafficInit;
+
+    // Dynamically populate the 8 ORBAT layers that have no Eden-placed units
+    [] call ARC_fnc_airbaseOrbatPopulate;
 };
 
 true

@@ -468,6 +468,8 @@ missionNamespace setVariable ["airbase_v1_ambiance_enabled", true, true];
 missionNamespace setVariable ["airbase_v1_runtime_enabled", true, true];
 // Ambient ground vehicle traffic (ORBAT-aligned whitelist; see fn_airbaseGroundTrafficInit)
 missionNamespace setVariable ["airbase_v1_gnd_traffic_enabled", true, true];
+// Dynamic ORBAT population for the 8 empty Eden layers (see fn_airbaseOrbatPopulate)
+missionNamespace setVariable ["airbase_v1_orbat_populate_enabled", true, true];
 
 if (_arcSafeModeEnabled) then {
     missionNamespace setVariable ["civsub_v1_traffic_enabled", false, true];
@@ -477,6 +479,7 @@ if (_arcSafeModeEnabled) then {
     missionNamespace setVariable ["airbase_v1_ambiance_enabled", false, true];
     missionNamespace setVariable ["airbase_v1_runtime_enabled", false, true];
     missionNamespace setVariable ["airbase_v1_gnd_traffic_enabled", false, true];
+    missionNamespace setVariable ["airbase_v1_orbat_populate_enabled", false, true];
 };
 
 // VBIED defuse window (Phase 3.1)

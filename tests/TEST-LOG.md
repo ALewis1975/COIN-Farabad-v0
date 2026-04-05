@@ -3678,3 +3678,42 @@ The following ORBAT layers are structurally present but contain **no Eden-placed
 
 - All gap closures require Eden editor sessions (unit placement in empty layers).
 - `Patrol_01` vehicle classname change to ORBAT-correct type requires Eden editor session.
+
+---
+
+### T14 — Dynamic ORBAT Population for 8 Empty Eden Layers (2026-04-05)
+
+Branch: `copilot/align-vehicles-with-orbat`
+
+**Scope:** `fn_airbaseOrbatPopulate.sqf` (new), `fn_airbasePostInit.sqf`, `CfgFunctions.hpp`, `initServer.sqf`
+
+**Problem:** T13 audit identified 8 ORBAT layers with zero Eden-placed units. Operator-requested that these be populated dynamically at mission start instead of requiring Eden editor sessions.
+
+**Solution:** `ARC_fnc_airbaseOrbatPopulate` — server-only, feature-gated, single-pass function that spawns ambient personnel and vehicles for all 8 empty layers, anchored to existing mission.sqm markers.
+
+#### Slots implemented
+
+| # | ORBAT Layer | Anchor Marker | Units | Veh |
+|---|------------|--------------|-------|-----|
+| 1 | `01.2) 332 AEW HQ [REDTAIL]` → REDTAIL 6/Staff | `ARC_m_base_avn_hq` | 4× `rhsusf_airforce_m` (Wing Cdr + staff) | — |
+| 2 | `02.3) Aerial Port` | `arc_m_base_civilian_terminal_01` | 4× `FIR_USAF_GroundCrew_*` | — |
+| 3 | `03.1) LIFELINE ER/SURG/WARD` | `arc_m_base_theater_hospital` | 6× `rhsusf_airforce_m` | — |
+| 4 | `03.2) Ambulances / CCPs` | `arc_m_base_theater_hospital` | 2× crew | 2× `UK3CB_C_Hilux_Ambulance` |
+| 5 | `04.1.2) Flightline Security` | `ARC_m_base_usaf_pilot_hangar` | 4× `rhsusf_airforce_security_force_rifleman` | — |
+| 6 | `04.1.3) SENTRY QRF` | `arc_m_base_police_hq` | 5× `rhsusf_airforce_security_force_rifleman` | 1× `rhsusf_m1043_d` |
+| 7a | `04.3.1) 1-73 CAV Troop A` | `arc_m_base_1_73_CAV_hq` (−20m NW) | 5× `rhsusf_army_ocp_*` | — |
+| 7b | `04.3.1) 1-73 CAV Troop B` | `arc_m_base_1_73_CAV_hq` (+20m SE) | 5× `rhsusf_army_ocp_*` | — |
+| 8 | `09.2.6) DUSTOFF` | `arc_rotary_pad_6` | 4× heli pilots/crew | — |
+| **Total** | | | **39 units** | **3 vehicles** |
+
+#### Feature flag
+`airbase_v1_orbat_populate_enabled = true` in initServer.sqf (disabled in safe mode)
+
+#### Static checks
+- `python3 scripts/dev/sqflint_compat_scan.py --strict` — **PASS** across all changed files
+- No temp markers (temp-marker approach for CAV troops refactored to direct-pos helper)
+
+#### Deferred
+- Runtime smoke: **BLOCKED** (requires Arma 3 session)
+- JIP/late-client: **BLOCKED**
+
