@@ -3550,3 +3550,33 @@ Branch: `copilot/improve-vehicle-spawn-distance`
 ### Deferred
 
 - T11/9: runtime gameplay verification that vehicles appear only beyond 1 km from all players — requires hosted or dedicated Arma 3 session.
+
+---
+
+## 2026-04-05 — AIRBASE DEP Route Marker defaults fixed (MISSING_ROUTE_MARKERS)
+
+**Branch/Commit:** copilot/fix-continuing-issue @ 4c56c4e (pre-edit baseline; changes applied on top)
+
+**Scenario:** `Route Validation` dashboard showed `MISSING_ROUTE_MARKERS` for `FLT-0005`. Root cause: DEP marker defaults in `fn_airbaseInit.sqf` and `fn_airbaseBuildRouteDecision.sqf` still referenced `"R-270 Outbound"`, `"T-R Ingress"`, `"T-R Egress"` — markers absent from `mission.sqm`. The previous fix (PR #440 / session 2026-04-04) corrected ARR defaults to AEON markers but left DEP defaults unchanged.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `functions/ambiance/fn_airbaseInit.sqf` | DEP runway/egress/ingress defaults changed from `"R-270 Outbound"` / `"T-R Egress"` / `"T-R Ingress"` → `"AEON_Right_270_Outbound"` / `"AEON_Taxi_Right_Egress"` / `"AEON_Taxi_Right_Ingress"` |
+| `functions/ambiance/fn_airbaseBuildRouteDecision.sqf` | DEP `missionNamespace getVariable` inline fallbacks + `_resolveMarker` default params updated to AEON markers; DEP and ARR branches are now symmetric |
+
+### Checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan on changed files | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbaseInit.sqf functions/ambiance/fn_airbaseBuildRouteDecision.sqf` | PASS | 0 violations |
+| 2 | sqflint | `sqflint -e w <changed files>` | BLOCKED | sqflint not installed in CI environment |
+| 3 | DEP marker defaults in init | `grep "AEON_Right_270_Outbound\|AEON_Taxi_Right" functions/ambiance/fn_airbaseInit.sqf` | PASS | All six DEP+ARR marker vars now reference AEON markers |
+| 4 | Route decision code symmetry | Visual diff of DEP/ARR branches in fn_airbaseBuildRouteDecision.sqf | PASS | DEP and ARR now identical in structure; both fallback-default to AEON markers |
+| 5 | Gameplay smoke (no MISSING_ROUTE_MARKERS in Route Validation panel) | Dedicated server session | BLOCKED | Requires Arma 3 runtime |
+
+### Deferred
+
+- T12/2: sqflint full lint pass — requires sqflint binary in environment.
+- T12/5: runtime verification that `blockedRouteAttemptsRecent` stays at 0 for DEP flights — requires dedicated server session.

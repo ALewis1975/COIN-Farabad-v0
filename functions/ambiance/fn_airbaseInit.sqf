@@ -86,16 +86,16 @@ missionNamespace setVariable ["airbase_v1_arrival_warn_advisory_m", _warnAdvisor
 missionNamespace setVariable ["airbase_v1_arrival_warn_caution_m", _warnCautionM, true];
 missionNamespace setVariable ["airbase_v1_arrival_warn_urgent_m", _warnUrgentM, true];
 
-private _departRunwayMarker = missionNamespace getVariable ["airbase_v1_depart_runway_marker", "R-270 Outbound"];
-if (!(_departRunwayMarker isEqualType "") || { _departRunwayMarker isEqualTo "" }) then { _departRunwayMarker = "R-270 Outbound"; };
+private _departRunwayMarker = missionNamespace getVariable ["airbase_v1_depart_runway_marker", "AEON_Right_270_Outbound"];
+if (!(_departRunwayMarker isEqualType "") || { _departRunwayMarker isEqualTo "" }) then { _departRunwayMarker = "AEON_Right_270_Outbound"; };
 missionNamespace setVariable ["airbase_v1_depart_runway_marker", _departRunwayMarker, true];
 
-private _departTaxiEgress = missionNamespace getVariable ["airbase_v1_depart_taxi_egress_marker", "T-R Egress"];
-if (!(_departTaxiEgress isEqualType "") || { _departTaxiEgress isEqualTo "" }) then { _departTaxiEgress = "T-R Egress"; };
+private _departTaxiEgress = missionNamespace getVariable ["airbase_v1_depart_taxi_egress_marker", "AEON_Taxi_Right_Egress"];
+if (!(_departTaxiEgress isEqualType "") || { _departTaxiEgress isEqualTo "" }) then { _departTaxiEgress = "AEON_Taxi_Right_Egress"; };
 missionNamespace setVariable ["airbase_v1_depart_taxi_egress_marker", _departTaxiEgress, true];
 
-private _departTaxiIngress = missionNamespace getVariable ["airbase_v1_depart_taxi_ingress_marker", "T-R Ingress"];
-if (!(_departTaxiIngress isEqualType "") || { _departTaxiIngress isEqualTo "" }) then { _departTaxiIngress = "T-R Ingress"; };
+private _departTaxiIngress = missionNamespace getVariable ["airbase_v1_depart_taxi_ingress_marker", "AEON_Taxi_Right_Ingress"];
+if (!(_departTaxiIngress isEqualType "") || { _departTaxiIngress isEqualTo "" }) then { _departTaxiIngress = "AEON_Taxi_Right_Ingress"; };
 missionNamespace setVariable ["airbase_v1_depart_taxi_ingress_marker", _departTaxiIngress, true];
 
 private _arrivalTaxiEgress = missionNamespace getVariable ["airbase_v1_arrival_taxi_egress_marker", "AEON_Taxi_Right_Egress"];
