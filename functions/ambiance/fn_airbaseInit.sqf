@@ -243,6 +243,14 @@ private _rwArrivalApproachTickS = missionNamespace getVariable ["airbase_v1_rw_a
 if (!(_rwArrivalApproachTickS isEqualType 0) || { _rwArrivalApproachTickS < 1 }) then { _rwArrivalApproachTickS = 2; };
 missionNamespace setVariable ["airbase_v1_rw_arrival_approach_tick_s", _rwArrivalApproachTickS];
 
+private _rwArrivalApproachTimeoutS = missionNamespace getVariable ["airbase_v1_rw_arrival_approach_timeout_s", 900];
+if (!(_rwArrivalApproachTimeoutS isEqualType 0) || { _rwArrivalApproachTimeoutS < 60 }) then { _rwArrivalApproachTimeoutS = 900; };
+missionNamespace setVariable ["airbase_v1_rw_arrival_approach_timeout_s", _rwArrivalApproachTimeoutS];
+
+private _rwClimbProfileTimeoutS = missionNamespace getVariable ["airbase_v1_rw_climb_profile_timeout_s", 240];
+if (!(_rwClimbProfileTimeoutS isEqualType 0) || { _rwClimbProfileTimeoutS < 30 }) then { _rwClimbProfileTimeoutS = 240; };
+missionNamespace setVariable ["airbase_v1_rw_climb_profile_timeout_s", _rwClimbProfileTimeoutS];
+
 private _turnMin = missionNamespace getVariable ["airbase_v1_turnaroundMin_s", 1200];
 if (!(_turnMin isEqualType 0) || { _turnMin < 0 }) then { _turnMin = 1200; };
 missionNamespace setVariable ["airbase_v1_turnaroundMin_s", _turnMin];

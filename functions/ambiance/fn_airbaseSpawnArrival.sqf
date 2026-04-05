@@ -84,6 +84,8 @@ private _rwFlareApproachDist = missionNamespace getVariable ["airbase_v1_rw_arri
 if (!(_rwFlareApproachDist isEqualType 0) || { _rwFlareApproachDist < 50 }) then { _rwFlareApproachDist = 180; };
 private _rwApproachTickS = missionNamespace getVariable ["airbase_v1_rw_arrival_approach_tick_s", 2];
 if (!(_rwApproachTickS isEqualType 0) || { _rwApproachTickS < 1 }) then { _rwApproachTickS = 2; };
+private _rwApproachTimeoutS = missionNamespace getVariable ["airbase_v1_rw_arrival_approach_timeout_s", 900];
+if (!(_rwApproachTimeoutS isEqualType 0) || { _rwApproachTimeoutS < 60 }) then { _rwApproachTimeoutS = 900; };
 
 // Spawn inbound vehicle
 private _veh = createVehicle [_vehType, _spawnPos, [], 0, "FLY"];
@@ -117,8 +119,8 @@ _wp0 setWaypointCompletionRadius 80;
 if (_veh isKindOf "Helicopter") then {
     _wp0 setWaypointStatements ["true", "vehicle this land 'NONE';"];
 
-    [_veh, _rwyStart, _rwFinalApproachDist, _rwFinalApproachAlt, _rwFlareApproachDist, _rwFlareApproachAlt, _rwApproachTickS] spawn {
-        params ["_v", "_rwy", "_finalD", "_finalAlt", "_flareD", "_flareAlt", "_tickS"];
+    [_veh, _rwyStart, _rwFinalApproachDist, _rwFinalApproachAlt, _rwFlareApproachDist, _rwFlareApproachAlt, _rwApproachTickS, _rwApproachTimeoutS] spawn {
+        params ["_v", "_rwy", "_finalD", "_finalAlt", "_flareD", "_flareAlt", "_tickS", "_timeoutS"];
         private _t0 = time;
         while { !isNull _v && { alive _v } } do
         {
@@ -132,7 +134,8 @@ if (_veh isKindOf "Helicopter") then {
             };
 
             if (_d < (_flareD * 0.5)) exitWith {};
-            if ((time - _t0) > 900) exitWith {};
+            // Timeout keeps helper bounded; if hit, helo continues on existing waypoints with last commanded approach altitude.
+            if ((time - _t0) > _timeoutS) exitWith {};
             sleep _tickS;
         };
     };

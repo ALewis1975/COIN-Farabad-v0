@@ -45,6 +45,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 - Removed unnecessary global replication (`public=true`) from the new RW arrival tuning missionNamespace writes so these server-owned tuning values remain server-local by default.
 - Added a timeout guard to the RW arrival approach control loop (`900s`) to prevent runaway helper loops if AI never reaches the flare threshold.
+- Replaced hardcoded RW helper timeout values with named tunables (`airbase_v1_rw_arrival_approach_timeout_s`, `airbase_v1_rw_climb_profile_timeout_s`) and reused the climb timeout in both departure climb paths.
 
 ---
 
