@@ -238,6 +238,11 @@ if (!(_blockedRouteWindow isEqualType 0) || { _blockedRouteWindow < 1 }) then { 
 private _blockedRouteRecentWindow_s = missionNamespace getVariable ["airbase_v1_publicBlockedRouteRecentWindow_s", 1800];
 if (!(_blockedRouteRecentWindow_s isEqualType 0) || { _blockedRouteRecentWindow_s < 60 }) then { _blockedRouteRecentWindow_s = 1800; };
 private _blockedRouteCutoffTs = serverTime - _blockedRouteRecentWindow_s;
+private _isBlockedRouteRecent = {
+    params [["_row", [], [[]]]];
+    private _ts = _row param [0, -1];
+    (_ts isEqualType 0) && { _ts >= _blockedRouteCutoffTs }
+};
 
 private _readReasonFromMeta = {
     params ["_meta"];
@@ -366,16 +371,10 @@ if ((count _blockedRouteTail) > 1) then {
         ]
     };
     _blockedSort sort true;
-    _blockedSort = _blockedSort select {
-        private _ts = _x param [0, -1];
-        (_ts isEqualType 0) && { _ts >= _blockedRouteCutoffTs }
-    };
+    _blockedSort = _blockedSort select { [_x] call _isBlockedRouteRecent };
     _blockedRouteTail = _blockedSort apply { _x param [1, []] };
 } else {
-    _blockedRouteTail = _blockedRouteTail select {
-        private _ts = _x param [0, -1];
-        (_ts isEqualType 0) && { _ts >= _blockedRouteCutoffTs }
-    };
+    _blockedRouteTail = _blockedRouteTail select { [_x] call _isBlockedRouteRecent };
 };
 
 if ((count _blockedRouteTail) > _blockedRouteWindow) then {
