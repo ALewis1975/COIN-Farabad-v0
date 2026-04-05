@@ -3528,3 +3528,32 @@ wrong-faction units.
 - All T6–T8 items remain BLOCKED; operator must run dedicated-server sessions to close them.
 - T9 visual smoke (console open, tab switch, status strip legibility) deferred to first local MP preview session.
 - T10 runtime smoke (threat scheduler triggers → CONVOY record created → MSR_THREAT_DETECTED log entry) deferred to dedicated server session.
+
+---
+
+## Session 2026-04-05 — UH-60M Takeoff Fix
+
+**Branch:** copilot/fix-uh-60m-takeoff-issue
+**Commit:** (see PR)
+
+### Change
+
+`fn_airbasePlaneDepart.sqf`: zeroed Z component in all helicopter `setVelocityModelSpace` calls (lines 299, 470, 479, 598) so that `flyInHeight` controls the vertical climb rather than an instant upward velocity impulse.
+
+| Line | Before | After | Purpose |
+|------|--------|-------|---------|
+| 299 | `[0, 6, 9]` | `[0, 6, 0]` | Post-taxi ground nudge |
+| 470 | `[0, 25, 10]` | `[0, 25, 0]` | Climb-trigger forward nudge |
+| 479 | `[0, 25, 12]` | `[0, 25, 0]` | Secondary climb nudge |
+| 598 | `[0, 10, 10]` | `[0, 10, 0]` | Takeoff kick (stalled heli) |
+
+### Tests
+
+| ID | Description | Result |
+|----|-------------|--------|
+| T-RW-01 | Static review — no sqflint compat violations introduced | PASS |
+| T-RW-02 | UH-60M takeoff visual (gains altitude over runway rather than going straight up) | BLOCKED — requires local MP session |
+
+### Deferred
+
+- T-RW-02: operator must verify in local MP that the UH-60M now climbs progressively as it traverses the departure path instead of shooting vertically.
