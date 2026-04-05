@@ -11,6 +11,34 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-05 23:35 UTC — CI strict compat fix for Job 70027406617 (airbase files)
+
+**Branch/Commit:** copilot/fix-ah-64-takeoff-behavior @ dd995d8 (pre-edit baseline; strict-compat fix applied on top)
+
+**Scenario:** GitHub Actions job `70027406617` failed in strict mode (`python3 scripts/dev/sqflint_compat_scan.py --strict ...`) due to parser-compat pattern matches in the airbase changed set, primarily method-style `getOrDefault`, `#` indexing, and `isNotEqualTo` in `fn_airbasePlaneDepart.sqf`.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `functions/ambiance/fn_airbasePlaneDepart.sqf` | Replaced strict-flagged method-style HashMap access with `_hg` call-form, replaced strict-flagged `#` usages with `select`, replaced strict-flagged `isNotEqualTo` with `!(... isEqualTo ...)` |
+
+### Checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Strict compat scan (airbase set) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbaseInit.sqf functions/ambiance/fn_airbasePlaneDepart.sqf functions/ambiance/fn_airbaseSpawnArrival.sqf` | PASS | No known parser-compat patterns found |
+| 2 | Repo diff sanity | `git --no-pager diff --check` | PASS | No whitespace/conflict-marker issues |
+| 3 | Local MP runtime | N/A | BLOCKED | No Arma 3 runtime in container |
+| 4 | Dedicated/JIP runtime | N/A | BLOCKED | No dedicated/JIP environment in container |
+
+### Outcome
+
+- The strict compat scan now passes for the same three-file set used by the failing workflow step.
+- This addresses the immediate CI blocker for strict-mode compatibility scanning on this PR path.
+
+---
+
 ## 2026-04-05 23:18 UTC — AH-64 rotary-wing takeoff/arrival smoothing (airbase ambient)
 
 **Branch/Commit:** copilot/fix-ah-64-takeoff-behavior @ 7277e75 (pre-edit baseline; changes applied on top)

@@ -26,8 +26,9 @@ if (!(_asset isEqualType createHashMap)) exitWith { false };
 
 private _debug    = missionNamespace getVariable ["airbase_v1_debug", false];
 private _debugOps = missionNamespace getVariable ["airbase_v1_debugOpsLog", false];
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
-private _veh = _asset getOrDefault ["veh", objNull];
+private _veh = [_asset, "veh", objNull] call _hg;
 if (isNull _veh) exitWith {
     _asset set ["state", "PARKED"];
     _asset set ["activeFlight", ""];
@@ -47,8 +48,8 @@ private _fnNormalize = {
     if (!(_data isEqualType [])) exitWith { [] };
 
     // Some recorder exports wrap frames as [frames]
-    if ((count _data) == 1 && { (_data # 0) isEqualType [] } && { (count (_data # 0)) > 0 } && { ((_data # 0) # 0) isEqualType [] }) exitWith {
-        _data # 0
+    if ((count _data) == 1 && { (_data select 0) isEqualType [] } && { (count (_data select 0)) > 0 } && { (((_data select 0) select 0) isEqualType []) }) exitWith {
+        _data select 0
     };
 
     _data
@@ -68,8 +69,8 @@ private _fnUnitPlayBlocking = {
 
     private _duration = 0;
     private _last = _framesL select ((count _framesL) - 1);
-    if (_last isEqualType [] && { (count _last) > 0 } && { (_last # 0) isEqualType 0 }) then {
-        _duration = (_last # 0);
+    if (_last isEqualType [] && { (count _last) > 0 } && { (_last select 0) isEqualType 0 }) then {
+        _duration = (_last select 0);
     };
     private _tEnd = time + (_duration + 10);
 
@@ -126,7 +127,7 @@ private _fnAbortToIdle = {
 };
 
 // --- resolve crew ---
-private _crew = _asset getOrDefault ["crew", []];
+private _crew = [_asset, "crew", []] call _hg;
 if (!(_crew isEqualType [])) then { _crew = []; };
 private _crewLive = _crew select { !isNull _x && alive _x };
 
@@ -137,7 +138,7 @@ if ((count _crewLive) == 0) exitWith {
     false
 };
 
-private _pilot = _crewLive # 0;
+private _pilot = _crewLive select 0;
 if (isNull _pilot) exitWith {
     _asset set ["state", "PARKED"];
     _asset set ["activeFlight", ""];
@@ -147,11 +148,11 @@ if (isNull _pilot) exitWith {
 // Ensure all crew are in the pilot's group so doMove/waypoints apply to the vehicle.
 private _grp = group _pilot;
 {
-    if (!isNull _x && {alive _x} && {(group _x) isNotEqualTo _grp}) then {
+    if (!isNull _x && {alive _x} && {!((group _x) isEqualTo _grp)}) then {
         [_x] joinSilent _grp;
     };
 } forEach _crewLive;
-if ((leader _grp) isNotEqualTo _pilot) then { _grp selectLeader _pilot; };
+if (!((leader _grp) isEqualTo _pilot)) then { _grp selectLeader _pilot; };
 
 // Stop idle animations and order a real walk-up boarding (NO moveIn)
 _veh lock false;
@@ -229,7 +230,7 @@ if (!(_prepDelay isEqualType 0) || { _prepDelay < 0 }) then { _prepDelay = 15; }
 if (_prepDelay > 0) then { sleep _prepDelay; };
 
 // --- taxi playback ---
-private _taxiVar = _asset getOrDefault ["taxiPathVar", ""]; 
+private _taxiVar = [_asset, "taxiPathVar", ""] call _hg;
 private _taxiData = missionNamespace getVariable [_taxiVar, []];
 private _taxiFrames = [_taxiData] call _fnNormalize;
 
@@ -242,9 +243,9 @@ if (_isHeli) then {
         private _adj = [];
         {
             private _f = _x;
-            if (_f isEqualType [] && { (count _f) >= 2 } && { (_f # 1) isEqualType [] } && { (count (_f # 1)) >= 3 }) then {
-                private _pos = +(_f # 1);
-                _pos set [2, (_pos # 2) + _hoverM];
+            if (_f isEqualType [] && { (count _f) >= 2 } && { (_f select 1) isEqualType [] } && { (count (_f select 1)) >= 3 }) then {
+                private _pos = +(_f select 1);
+                _pos set [2, (_pos select 2) + _hoverM];
                 private _nf = +_f;
                 _nf set [1, _pos];
                 _adj pushBack _nf;
@@ -291,7 +292,7 @@ if (_veh isKindOf "Air") then { _veh setCollisionLight true; _veh setPilotLight 
 // If a rotary-wing asset is still skimming the ground at taxi end, nudge it into a hover before outbound waypoints.
 if (_isHeli) then
 {
-    private _a0 = (getPosATL _veh) # 2;
+    private _a0 = (getPosATL _veh) select 2;
     if (_a0 < 1.5) then
     {
         _veh land "NONE";
@@ -323,7 +324,7 @@ if (_isEC130) exitWith {
     private _center = [worldSize / 2, worldSize / 2, 0];
     _veh flyInHeight 1829; // 6000 ft
 
-    while { (count (waypoints _grp)) > 0 } do { deleteWaypoint ((waypoints _grp) # 0); };
+    while { (count (waypoints _grp)) > 0 } do { deleteWaypoint ((waypoints _grp) select 0); };
     private _wp = _grp addWaypoint [_center, 0];
     _wp setWaypointType "LOITER";
     _wp setWaypointLoiterType "CIRCLE_L";
@@ -558,8 +559,8 @@ if (_isHeli) then {
         // Compute a runway-end point forward of outbound marker if clear marker is missing.
         private _dir = markerDir _mkrOut;
         _clearPos = [
-            (_outPos # 0) + (sin _dir) * _fallbackM,
-            (_outPos # 1) + (cos _dir) * _fallbackM,
+            (_outPos select 0) + (sin _dir) * _fallbackM,
+            (_outPos select 1) + (cos _dir) * _fallbackM,
             0
         ];
         _hasClear = true;
@@ -672,10 +673,10 @@ private _toDelete = [];
 if (!isNull _veh) then { deleteVehicle _veh; };
 
 // Clear missionNamespace vars so a clean respawn can occur on return.
-private _vehVar = _asset getOrDefault ["vehVar", ""]; 
+private _vehVar = [_asset, "vehVar", ""] call _hg;
 if (_vehVar != "") then { missionNamespace setVariable [_vehVar, objNull, true]; };
 
-private _crewVars = _asset getOrDefault ["crewVars", []];
+private _crewVars = [_asset, "crewVars", []] call _hg;
 {
     if (_x isEqualType "") then { missionNamespace setVariable [_x, objNull, true]; };
 } forEach _crewVars;
@@ -693,7 +694,7 @@ _asset set ["availableAt", _returnAt];
 
 if (_debugOps) then {
     ["OPS", format ["AIRBASE: %1 departed (%2) - return ETA in ~%3s", _fid, _vehType, round (_returnAt - serverTime)], _despawnPos, 0, [
-        ["assetId", (_asset getOrDefault ["id", ""])],
+        ["assetId", ([_asset, "id", ""] call _hg)],
         ["vehType", _vehType],
         ["returnAt", _returnAt]
     ]] call ARC_fnc_intelLog;
