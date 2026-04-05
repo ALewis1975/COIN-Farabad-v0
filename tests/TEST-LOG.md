@@ -13,7 +13,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-04-05 23:37 UTC — AIRBASE sqflint compat remediation for fn_airbasePlaneDepart
 
-**Branch/Commit:** copilot/taxi-with-engines-on @ 0ea9674 (pre-edit baseline; compat remediation applied on top)
+**Branch/Commit:** copilot/taxi-with-engines-on @ 5576210 (pre-edit baseline; compat remediation applied on top)
 
 **Scenario:** Resolve CI sqflint compatibility scan failure on `functions/ambiance/fn_airbasePlaneDepart.sqf` by converting method-form `getOrDefault` to call-form and clearing remaining strict-compat findings in the same changed file.
 
