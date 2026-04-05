@@ -67,8 +67,10 @@ private _spawnR = missionNamespace getVariable ["civsub_v1_traffic_spawnRadius_m
 if (!(_spawnR isEqualType 0)) then { _spawnR = 600; };
 // Upper bound raised to 1500 to support out-of-view-distance spawning (1 km+).
 _spawnR = (_spawnR max 180) min 1500;
-// Use _spawnR directly; the former district-radius cap (min 950) would prevent
-// spawning beyond ~400 m even when spawnRadius_m is configured at 1400 m.
+// Use _spawnR directly. The former formula `(_spawnR min ((_r max 250) min 950))`
+// capped _searchR at the district radius (_r, typically ~400 m), meaning even with
+// spawnRadius_m = 1400 the effective search area was only ~400 m — never reaching
+// the out-of-view threshold. The outer 950 bound was never the binding constraint.
 private _searchR = _spawnR;
 
 private _minSep = missionNamespace getVariable ["civsub_v1_traffic_minSeparation_m", 35];

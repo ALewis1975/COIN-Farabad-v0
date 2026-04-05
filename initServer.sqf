@@ -306,7 +306,8 @@ missionNamespace setVariable ["civsub_v1_traffic_cap_perDistrict", 10, true];
 // spawnRadius_m: search radius around the player-centroid spawn center.
 // playerMinDistance_m: hard minimum distance from any player — set to just beyond
 //   the 1 km view distance so vehicles never pop into existence within player sight.
-// Both values must be consistent: spawnRadius_m > playerMinDistance_m.
+// spawnRadius_m must significantly exceed playerMinDistance_m to leave a viable
+// spawn ring (e.g. 1400 m radius with 1050 m exclusion → ~350 m wide ring beyond view).
 missionNamespace setVariable ["civsub_v1_traffic_minSeparation_m", 35, true];
 missionNamespace setVariable ["civsub_v1_traffic_spawnRadius_m", 1400, true];
 missionNamespace setVariable ["civsub_v1_traffic_playerMinDistance_m", 1050, true];
