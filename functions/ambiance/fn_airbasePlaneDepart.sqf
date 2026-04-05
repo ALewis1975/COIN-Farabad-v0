@@ -296,7 +296,7 @@ if (_isHeli) then
     {
         _veh land "NONE";
         _veh flyInHeight 5;
-        _veh setVelocityModelSpace [0, 6, 9];
+        _veh setVelocityModelSpace [0, 6, 0];
     };
 };
 
@@ -467,7 +467,7 @@ if (_isHeli) then {
             _vehL flyInHeight _altTargetL;
 
             // Nudge climb: AI sometimes skims the runway after a unitPlay taxi.
-            _vehL setVelocityModelSpace [0, 25, 10];
+            _vehL setVelocityModelSpace [0, 25, 0];
 
             // If it's still low after a few seconds, nudge again.
             sleep 5;
@@ -476,7 +476,7 @@ if (_isHeli) then {
                 if (_altNow < (10 max (_altTargetL * 0.25))) then {
                     _vehL land "NONE";
                     _vehL flyInHeight _altTargetL;
-                    _vehL setVelocityModelSpace [0, 25, 12];
+                    _vehL setVelocityModelSpace [0, 25, 0];
 
                     if (_dbgOpsL) then {
                         ["OPS", format ["AIRBASE: %1 climb nudge (alt=%2m target=%3m)", _fidL, round _altNow, _altTargetL], getPosATL _vehL, 0, []] call ARC_fnc_intelLog;
@@ -595,7 +595,7 @@ if (_kickEnabled) then {
             if (_isHeliL) then {
                 _vehL land "NONE";
                 _vehL flyInHeight 5;
-                _vehL setVelocityModelSpace [0, 10, 10];
+                _vehL setVelocityModelSpace [0, 10, 0];
                 _pilotL doMove _kickPosL;
             } else {
                 _vehL land "NONE";
