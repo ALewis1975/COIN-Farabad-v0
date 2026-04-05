@@ -46,27 +46,27 @@ private _resolveMarker = {
 };
 
 private _runwayMarker = if (_opKind isEqualTo "DEP") then {
-    missionNamespace getVariable ["airbase_v1_depart_runway_marker", "R-270 Outbound"]
+    missionNamespace getVariable ["airbase_v1_depart_runway_marker", "AEON_Right_270_Outbound"]
 } else {
     missionNamespace getVariable ["airbase_v1_arrival_runway_marker", "AEON_Right_270_Outbound"]
 };
 
 private _ingressMarker = if (_opKind isEqualTo "DEP") then {
-    missionNamespace getVariable ["airbase_v1_depart_taxi_ingress_marker", "T-R Ingress"]
+    missionNamespace getVariable ["airbase_v1_depart_taxi_ingress_marker", "AEON_Taxi_Right_Ingress"]
 } else {
     missionNamespace getVariable ["airbase_v1_arrival_taxi_ingress_marker", "AEON_Taxi_Right_Ingress"]
 };
 
 private _egressMarker = if (_opKind isEqualTo "DEP") then {
-    missionNamespace getVariable ["airbase_v1_depart_taxi_egress_marker", "T-R Egress"]
+    missionNamespace getVariable ["airbase_v1_depart_taxi_egress_marker", "AEON_Taxi_Right_Egress"]
 } else {
     missionNamespace getVariable ["airbase_v1_arrival_taxi_egress_marker", "AEON_Taxi_Right_Egress"]
 };
 
 if (_opKind isEqualTo "DEP") then {
-    _runwayMarker = [_runwayMarker, ["AEON_Right_270_Outbound", "R-270 Outbound"], "R-270 Outbound"] call _resolveMarker;
-    _ingressMarker = [_ingressMarker, ["AEON_Taxi_Right_Ingress", "T-R Ingress"], "T-R Ingress"] call _resolveMarker;
-    _egressMarker = [_egressMarker, ["AEON_Taxi_Right_Egress", "T-R Egress"], "T-R Egress"] call _resolveMarker;
+    _runwayMarker = [_runwayMarker, ["AEON_Right_270_Outbound", "R-270 Outbound"], "AEON_Right_270_Outbound"] call _resolveMarker;
+    _ingressMarker = [_ingressMarker, ["AEON_Taxi_Right_Ingress", "T-R Ingress"], "AEON_Taxi_Right_Ingress"] call _resolveMarker;
+    _egressMarker = [_egressMarker, ["AEON_Taxi_Right_Egress", "T-R Egress"], "AEON_Taxi_Right_Egress"] call _resolveMarker;
 } else {
     _runwayMarker = [_runwayMarker, ["AEON_Right_270_Outbound", "R-270 Outbound"], "AEON_Right_270_Outbound"] call _resolveMarker;
     _ingressMarker = [_ingressMarker, ["AEON_Taxi_Right_Ingress", "T-R Ingress"], "AEON_Taxi_Right_Ingress"] call _resolveMarker;
