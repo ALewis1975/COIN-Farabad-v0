@@ -168,6 +168,9 @@ private _fnSpawnUnitsAtPos = {
     [_units] call ARC_fnc_airbaseCrewIdleStart;
     _units
 };
+
+// ---------------------------------------------------------------------------
+// Helper: create a single vehicle with optional crew, anchored to a marker.
 //
 // _marker       STRING  — anchor marker
 // _vehClass     STRING  — vehicle classname
