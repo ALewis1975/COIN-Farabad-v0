@@ -315,7 +315,7 @@ if (!_okTaxi) exitWith {
 };
 
 // --- special case: EC-130 loiter (do not despawn) ---
-// Uses `_isEC130` resolved near the top so taxi prep can also apply EC-130-specific handling.
+// Uses `_isEC130` defined with the early vehicle-type flags so taxi prep can also apply EC-130-specific handling.
 if (_isEC130) exitWith {
     _veh setVehicleRadar 1;
     _veh setVehicleReportRemoteTargets true;
