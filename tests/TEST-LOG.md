@@ -11,6 +11,35 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-05 23:45 UTC — SQF static analysis strict-compat fix (job 70027820729)
+
+**Branch/Commit:** copilot/still-not-fixed-issue @ commit: unrecoverable (pre-push; CI-fix applied on top)
+
+**Scenario:** GitHub Actions job `70027820729` failed in `SQF static analysis` because `scripts/dev/sqflint_compat_scan.py --strict` flagged parser-incompatible patterns in changed file `functions/core/fn_publicBroadcastState.sqf` (notably `#` indexing in blocked-route latest extraction, plus additional strict patterns in same file).
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `functions/core/fn_publicBroadcastState.sqf` | Converted strict-incompatible patterns to compat-safe forms in changed file: `#` → `select` (with guards where needed), `isNotEqualTo` → `!isEqualTo`, direct `trim` → compiled `_trimFn` helper |
+
+### Checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Baseline strict compat (pre-fix) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_publicBroadcastState.sqf` | FAIL | 17 strict pattern matches including `#` at blocked-route latest extraction |
+| 2 | Baseline sqflint availability | `sqflint -e w functions/core/fn_publicBroadcastState.sqf` | BLOCKED | `sqflint` binary not available in container (`command not found`) |
+| 3 | Post-fix strict compat | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_publicBroadcastState.sqf` | PASS | No known parser-compat patterns in changed file |
+| 4 | Repo diff sanity | `git --no-pager diff --check` | PASS | No whitespace/conflict marker issues |
+| 5 | Runtime validation (local MP / dedicated / JIP) | N/A | BLOCKED | No Arma runtime in container |
+
+### Outcome
+
+- The failing strict-compat path in `SQF static analysis` is addressed for the changed file.
+- `fn_publicBroadcastState.sqf` now passes strict compat scan cleanly in this environment.
+
+---
+
 ## 2026-04-05 23:45 UTC — AIR blocked-route recency filter review follow-up
 
 **Branch/Commit:** copilot/still-not-fixed-issue @ commit: unrecoverable (pre-push; review-fix applied on top)
