@@ -211,7 +211,7 @@ if (isNil { missionNamespace getVariable "airbase_v1_gnd_playerPresenceRadius_m"
     missionNamespace setVariable ["airbase_v1_gnd_playerPresenceRadius_m", 1800, false];
 };
 if (isNil { missionNamespace getVariable "airbase_v1_gnd_cleanupRadius_m" }) then {
-    missionNamespace setVariable ["airbase_v1_gnd_cleanupRadius_m", 1600, false];
+    missionNamespace setVariable ["airbase_v1_gnd_cleanupRadius_m", missionNamespace getVariable ["ARC_airbase_dynamic_radius_m", 1600], false];
 };
 if (isNil { missionNamespace getVariable "airbase_v1_gnd_cleanupDelay_s" }) then {
     missionNamespace setVariable ["airbase_v1_gnd_cleanupDelay_s", 90, false];

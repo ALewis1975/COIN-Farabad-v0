@@ -46,8 +46,11 @@ if (!(_bubbleR_air isEqualType 0)) then { _bubbleR_air = 5000; };
 _bubbleR_air = (_bubbleR_air max 200) min 8000;
 
 // ── 3. Time-of-day phase (reuse civsub_v1_activity_phase set by TrafficTick) ─
-private _phase = missionNamespace getVariable ["civsub_v1_activity_phase", "DAY"];
+private _todPolicy = [] call ARC_fnc_dynamicTodGetPolicy;
+private _phase = _todPolicy getOrDefault ["phase", missionNamespace getVariable ["civsub_v1_activity_phase", "DAY"]];
 if (!(_phase isEqualType "")) then { _phase = "DAY"; };
+private _canSpawnCivil = _todPolicy getOrDefault ["canSpawnCivil", true];
+if (!(_canSpawnCivil isEqualType true) && !(_canSpawnCivil isEqualType false)) then { _canSpawnCivil = true; };
 
 // ── 4. Global cap ────────────────────────────────────────────────────────────
 private _capG = missionNamespace getVariable ["civsub_v1_locnpc_cap_global", 32];
@@ -122,7 +125,7 @@ private _totalLive = 0;
     };
 
     // Spawn deficit (respect global cap; one per tick to avoid burst)
-    if (_cur < _desired && { _totalLive < _capG }) then {
+    if (_canSpawnCivil && { _cur < _desired } && { _totalLive < _capG }) then {
         private _u = [_siteKey, _sitePos, _clss] call ARC_fnc_civsubLocNpcSpawn;
         if (!isNull _u) then {
             _siteUnits pushBack _u;

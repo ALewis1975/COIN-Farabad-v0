@@ -62,6 +62,24 @@ if (!(_keyCached isEqualType "")) then { _keyCached = ""; };
 private _pool = missionNamespace getVariable ["civsub_v1_traffic_vehiclePool_valid", []];
 if !(_pool isEqualType []) then { _pool = []; };
 
+private _todPolicy = [] call ARC_fnc_dynamicTodRefresh;
+private _canSpawnCivil = _todPolicy getOrDefault ["canSpawnCivil", true];
+if (!(_canSpawnCivil isEqualType true) && !(_canSpawnCivil isEqualType false)) then { _canSpawnCivil = true; };
+private _phasePolicy = _todPolicy getOrDefault ["phase", "DAY"];
+if (!(_phasePolicy isEqualType "")) then { _phasePolicy = "DAY"; };
+private _todPolicyVal = _todPolicy getOrDefault ["tod", dayTime];
+if (!(_todPolicyVal isEqualType 0)) then { _todPolicyVal = dayTime; };
+
+if (!_canSpawnCivil) exitWith
+{
+    missionNamespace setVariable ["civsub_v1_activity_phase", _phasePolicy, false];
+    missionNamespace setVariable ["civsub_v1_activity_tod", _todPolicyVal, false];
+    missionNamespace setVariable ["civsub_v1_traffic_list_parked", _parked, true];
+    missionNamespace setVariable ["civsub_v1_traffic_list_moving", _moving, true];
+    if (_debug) then { diag_log format ["[CIVTRAF][TOD] spawn gate closed phase=%1", _phasePolicy]; };
+    false
+};
+
 if ((count _pool) == 0 || { !(_keyCached isEqualTo _key) }) then
 {
     _pool = [] call ARC_fnc_civsubTrafficBuildVehiclePool;
@@ -227,26 +245,9 @@ private _budgetG = missionNamespace getVariable ["civsub_v1_traffic_spawn_budget
 if (!(_budgetG isEqualType 0)) then { _budgetG = 1; };
 if (_budgetG < 0) then { _budgetG = 0; };
 
-// Time-of-day activity profile (shared multipliers configured in initServer)
-private _tod = dayTime; // 0..24
-private _nightStart = missionNamespace getVariable ["civsub_v1_activity_night_start_h", 21];
-private _nightEnd = missionNamespace getVariable ["civsub_v1_activity_night_end_h", 5];
-private _peakAM0 = missionNamespace getVariable ["civsub_v1_activity_morning_peak_start_h", 7];
-private _peakAM1 = missionNamespace getVariable ["civsub_v1_activity_morning_peak_end_h", 9];
-private _peakPM0 = missionNamespace getVariable ["civsub_v1_activity_evening_peak_start_h", 16];
-private _peakPM1 = missionNamespace getVariable ["civsub_v1_activity_evening_peak_end_h", 18];
-if !(_nightStart isEqualType 0) then { _nightStart = 21; };
-if !(_nightEnd isEqualType 0) then { _nightEnd = 5; };
-if !(_peakAM0 isEqualType 0) then { _peakAM0 = 7; };
-if !(_peakAM1 isEqualType 0) then { _peakAM1 = 9; };
-if !(_peakPM0 isEqualType 0) then { _peakPM0 = 16; };
-if !(_peakPM1 isEqualType 0) then { _peakPM1 = 18; };
-
-private _isNight = (_tod >= _nightStart) || { _tod < _nightEnd };
-private _isPeak = ((_tod >= _peakAM0) && { _tod <= _peakAM1 }) || { ((_tod >= _peakPM0) && { _tod <= _peakPM1 }) };
-private _phase = "DAY";
-if (_isNight) then { _phase = "NIGHT"; };
-if (_isPeak) then { _phase = "PEAK"; };
+// Time-of-day activity profile (shared policy)
+private _tod = _todPolicyVal;
+private _phase = _phasePolicy;
 
 private _mTraffic = missionNamespace getVariable ["civsub_v1_activity_mul_traffic_day", 1.0];
 private _mMoving = missionNamespace getVariable ["civsub_v1_activity_mul_moving_day", 1.0];

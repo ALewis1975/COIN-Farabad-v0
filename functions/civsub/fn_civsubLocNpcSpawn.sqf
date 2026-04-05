@@ -19,6 +19,10 @@ params [
     ["_npcClasses", [],      [[]]]
 ];
 
+private _todPolicy = [] call ARC_fnc_dynamicTodGetPolicy;
+private _todPhase = _todPolicy getOrDefault ["phase", "DAY"];
+if (!(_todPhase isEqualType "")) then { _todPhase = "DAY"; };
+
 if (_siteKey isEqualTo "")     exitWith { objNull };
 if ((count _sitePos) < 2)      exitWith { objNull };
 if ((count _npcClasses) == 0)  exitWith { objNull };
@@ -79,6 +83,8 @@ _unit setSpeedMode "NORMAL";
 _unit setVariable ["ARC_civloc_siteKey", _siteKey, true];
 _unit setVariable ["ARC_civloc_role",    "SITE_NPC", true];
 _unit setVariable ["civsub_v1_isCiv",    true,       true];
+_unit setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];
+_unit setVariable ["ARC_dynamic_tod_profile_spawn", _todPolicy getOrDefault ["profile", "STANDARD"], true];
 
 // Idle wander: move to a random position near the site every 30–60 s
 [_unit, _sitePos] spawn {

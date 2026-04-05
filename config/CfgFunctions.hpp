@@ -24,6 +24,8 @@ class CfgFunctions
             class stateGet {};
             class stateSet {};
             class stateSetGet {};  // legacy compatibility wrapper
+            class dynamicTodRefresh {};
+            class dynamicTodGetPolicy {};
 
             // S1 registry (server-owned personnel/unit registry)
             class s1RegistryInit {};

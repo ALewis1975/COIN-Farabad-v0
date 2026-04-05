@@ -21,6 +21,14 @@ private _dbg = missionNamespace getVariable ["civsub_v1_debug", false];
 private _players = [] call ARC_fnc_civsubBubbleGetPlayers;
 private _active = [_players] call ARC_fnc_civsubBubbleGetActiveDistricts;
 
+private _todPolicy = [] call ARC_fnc_dynamicTodRefresh;
+private _canSpawnCivil = _todPolicy getOrDefault ["canSpawnCivil", true];
+if (!(_canSpawnCivil isEqualType true) && !(_canSpawnCivil isEqualType false)) then { _canSpawnCivil = true; };
+private _phase = _todPolicy getOrDefault ["phase", "DAY"];
+if (!(_phase isEqualType "")) then { _phase = "DAY"; };
+private _tod = _todPolicy getOrDefault ["tod", dayTime];
+if (!(_tod isEqualType 0)) then { _tod = dayTime; };
+
 missionNamespace setVariable ["civsub_v1_activeDistrictIds", _active, true];
 
 // Build per-district player anchor positions (server-only; used by spawn cache)
@@ -49,27 +57,6 @@ private _capDE = if ((count _caps) > 1) then { _caps select 1 } else { 0 };
 private _capByD = missionNamespace getVariable ["civsub_v1_civ_cap_effectiveByDistrict", createHashMap];
 if !(_capByD isEqualType createHashMap) then { _capByD = createHashMap; };
 
-// Time-of-day activity profile multiplier for civilian foot traffic.
-private _tod = dayTime;
-private _nightStart = missionNamespace getVariable ["civsub_v1_activity_night_start_h", 21];
-private _nightEnd = missionNamespace getVariable ["civsub_v1_activity_night_end_h", 5];
-private _peakAM0 = missionNamespace getVariable ["civsub_v1_activity_morning_peak_start_h", 7];
-private _peakAM1 = missionNamespace getVariable ["civsub_v1_activity_morning_peak_end_h", 9];
-private _peakPM0 = missionNamespace getVariable ["civsub_v1_activity_evening_peak_start_h", 16];
-private _peakPM1 = missionNamespace getVariable ["civsub_v1_activity_evening_peak_end_h", 18];
-if !(_nightStart isEqualType 0) then { _nightStart = 21; };
-if !(_nightEnd isEqualType 0) then { _nightEnd = 5; };
-if !(_peakAM0 isEqualType 0) then { _peakAM0 = 7; };
-if !(_peakAM1 isEqualType 0) then { _peakAM1 = 9; };
-if !(_peakPM0 isEqualType 0) then { _peakPM0 = 16; };
-if !(_peakPM1 isEqualType 0) then { _peakPM1 = 18; };
-
-private _isNight = (_tod >= _nightStart) || { _tod < _nightEnd };
-private _isPeak = ((_tod >= _peakAM0) && { _tod <= _peakAM1 }) || { ((_tod >= _peakPM0) && { _tod <= _peakPM1 }) };
-private _phase = "DAY";
-if (_isNight) then { _phase = "NIGHT"; };
-if (_isPeak) then { _phase = "PEAK"; };
-
 private _mCiv = missionNamespace getVariable ["civsub_v1_activity_mul_civ_day", 1.0];
 if (_phase isEqualTo "NIGHT") then { _mCiv = missionNamespace getVariable ["civsub_v1_activity_mul_civ_night", 0.55]; };
 if (_phase isEqualTo "PEAK") then { _mCiv = missionNamespace getVariable ["civsub_v1_activity_mul_civ_peak", 1.10]; };
@@ -89,6 +76,8 @@ if (_capGE < 0) then { _capGE = 0; };
 } forEach (keys _capByD);
 
 missionNamespace setVariable ["civsub_v1_activity_mul_civ_active", _mCiv, false];
+missionNamespace setVariable ["civsub_v1_activity_phase", _phase, false];
+missionNamespace setVariable ["civsub_v1_activity_tod", _tod, false];
 
 // Publish sampler decision state for probes
 missionNamespace setVariable ["civsub_v1_civ_sampler_last_active", _active, true];
@@ -140,6 +129,7 @@ if (_dbg) then {
     if (_capThis < 0) then { _capThis = 0; };
 
     while { _total < _capGE && { _cur < _capThis } && { _spawned < _budget } } do {
+        if (!_canSpawnCivil) exitWith {};
         // Count attempt (even if spawn returns objNull)
         missionNamespace setVariable ["civsub_v1_civ_spawn_attempt_count", (missionNamespace getVariable ["civsub_v1_civ_spawn_attempt_count", 0]) + 1, true];
         missionNamespace setVariable ["civsub_v1_civ_sampler_last_attempt_did", _did, true];
