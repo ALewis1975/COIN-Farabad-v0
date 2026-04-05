@@ -11,6 +11,41 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-05 23:23 UTC — AIRBASE AWACS taxi engines-on hardening
+
+**Branch/Commit:** copilot/taxi-with-engines-on @ cef2a99
+
+**Scenario:** Ensure AWACS (`plane7`, `aws_C130_AEW`) can taxi with engines on by hardening departure prep to restore fuel before taxi start for EC-130 assets.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `functions/ambiance/fn_airbasePlaneDepart.sqf` | Added `_isEC130` detection earlier and set `setFuel 1` before taxi `engineOn true` to prevent engine-off taxi on AWACS |
+
+### Checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Baseline state migrations | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios |
+| 2 | Baseline marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | all modes passed |
+| 3 | Test-log commit guard | `bash scripts/dev/check_test_log_commits.sh` | PASS | Script reported `rg: command not found` in env but still returned PASS |
+| 4 | AIRBASE static checks | `bash tests/static/airbase_planning_mode_checks.sh` | PASS | runtime gate/planning checks clean |
+| 5 | CASREQ static checks | `bash tests/static/casreq_snapshot_contract_checks.sh` | PASS | snapshot contract checks clean |
+| 6 | Targeted compat scan (changed file) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf` | FAIL (pre-existing) | Existing parser-compat findings in unchanged sections of this file |
+| 7 | Targeted sqflint (changed file) | `sqflint -e w functions/ambiance/fn_airbasePlaneDepart.sqf` | BLOCKED | `sqflint` binary not available in this container |
+| 8 | Repo diff sanity | `git --no-pager diff --check` | PASS | no whitespace/conflict-marker issues |
+| 9 | Local MP runtime | N/A | BLOCKED | No Arma 3 runtime in container |
+| 10 | Dedicated/JIP runtime | N/A | BLOCKED | No dedicated/JIP environment in container |
+
+### Outcome
+
+- AWACS departures now explicitly restore full fuel before taxi playback begins, then issue `engineOn true`, reducing risk of engine-off taxi behavior for `aws_C130_AEW`.
+- No non-AWACS aircraft behavior was changed.
+- Dedicated/JIP runtime verification remains required for authoritative multiplayer confirmation.
+
+---
+
 ## 2026-04-04 21:16 UTC — SitePop anchor resolution fix for rectangle markers
 
 **Branch/Commit:** copilot/assess-development-state-and-plan @ 26b7a2d (pre-edit baseline; changes applied on top)
@@ -3716,4 +3751,3 @@ Branch: `copilot/align-vehicles-with-orbat`
 #### Deferred
 - Runtime smoke: **BLOCKED** (requires Arma 3 session)
 - JIP/late-client: **BLOCKED**
-
