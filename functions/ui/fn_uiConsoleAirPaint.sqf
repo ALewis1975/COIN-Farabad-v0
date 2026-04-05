@@ -116,7 +116,7 @@ private _fmtEventRow = {
     private _kind = toUpper (_ev param [1, ""]);
     private _rid  = _ev param [2, ""];
     private _meta = _ev param [5, []];
-    if !(_meta isEqualType []) then { _meta = []; };
+    if (!(_meta isEqualType [])) then { _meta = []; };
     private _ago  = [_ts] call _fmtAgo;
 
     private _lbl = format ["%1 %2 (%3)", _kind, _rid, _ago];
@@ -405,7 +405,7 @@ if (_rebuild) then {
         private _evtStart = _evtCount - _evtShow;
         for "_ei" from (_evtCount - 1) to _evtStart step -1 do {
             private _ev = _evtFiltered select _ei;
-            if !(_ev isEqualType []) then { continue; };
+            if (!(_ev isEqualType [])) then { continue; };
             private _evLbl = [_ev] call _fmtEventRow;
             private _evRow = _ctrlList lbAdd _evLbl;
             _ctrlList lbSetData [_evRow, format ["EVT|%1|%2", _ev param [1, ""], _ev param [2, ""]]];
