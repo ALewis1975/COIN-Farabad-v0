@@ -33,19 +33,8 @@ if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabl
 if (!_enabled) exitWith {false};
 
 // ---------------------------------------------------------------------------
-// Helper: pairs-array get/set (mirrors fn_threatCreateFromTask convention)
+// Helper: pairs-array set (mirrors fn_threatCreateFromTask convention)
 // ---------------------------------------------------------------------------
-private _kvGet = {
-    params ["_pairs", "_key", "_default"];
-    if (!(_pairs isEqualType [])) exitWith {_default};
-    private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { ((_x select 0) isEqualTo _key) }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
-    if (_idx < 0) exitWith {_default};
-    private _v = (_pairs select _idx) select 1;
-    if (isNil "_v") exitWith {_default};
-    _v
-};
-
 private _kvSet = {
     params ["_pairs", "_key", "_value"];
     if (!(_pairs isEqualType [])) then { _pairs = []; };
@@ -132,10 +121,10 @@ if (_basePos isEqualTo [] || { (count _basePos) < 2 }) then
     if (_mk in allMapMarkers) then { _basePos = getMarkerPos _mk; };
 };
 
-if (_basePos isEqualTo [] || { (count _basePos) < 2 }) then
+if (_basePos isEqualTo [] || { (count _basePos) < 2 }) exitWith
 {
     diag_log format ["[ARC][WARN] ARC_fnc_threatScheduleEvent: no base position for district=%1 - skipping", _districtId];
-    exitWith {false};
+    false
 };
 
 _basePos = +_basePos; _basePos resize 3; _basePos set [2, 0];
