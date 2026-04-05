@@ -3553,30 +3553,167 @@ Branch: `copilot/improve-vehicle-spawn-distance`
 
 ---
 
-## 2026-04-05 — AIRBASE DEP Route Marker defaults fixed (MISSING_ROUTE_MARKERS)
+### T12 — Airbase Ground Traffic + ORBAT Alignment (2026-04-05)
 
-**Branch/Commit:** copilot/fix-continuing-issue @ 4c56c4e (pre-edit baseline; changes applied on top)
-
-**Scenario:** `Route Validation` dashboard showed `MISSING_ROUTE_MARKERS` for `FLT-0005`. Root cause: DEP marker defaults in `fn_airbaseInit.sqf` and `fn_airbaseBuildRouteDecision.sqf` still referenced `"R-270 Outbound"`, `"T-R Ingress"`, `"T-R Egress"` — markers absent from `mission.sqm`. The previous fix (PR #440 / session 2026-04-04) corrected ARR defaults to AEON markers but left DEP defaults unchanged.
-
-### Files changed
-
-| File | Change |
-|------|--------|
-| `functions/ambiance/fn_airbaseInit.sqf` | DEP runway/egress/ingress defaults changed from `"R-270 Outbound"` / `"T-R Egress"` / `"T-R Ingress"` → `"AEON_Right_270_Outbound"` / `"AEON_Taxi_Right_Egress"` / `"AEON_Taxi_Right_Ingress"` |
-| `functions/ambiance/fn_airbaseBuildRouteDecision.sqf` | DEP `missionNamespace getVariable` inline fallbacks + `_resolveMarker` default params updated to AEON markers; DEP and ARR branches are now symmetric |
-
-### Checks
+Branch: `copilot/align-vehicles-with-orbat`
 
 | # | Check | Command | Result | Notes |
 |---|-------|---------|--------|-------|
-| 1 | Compat scan on changed files | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbaseInit.sqf functions/ambiance/fn_airbaseBuildRouteDecision.sqf` | PASS | 0 violations |
-| 2 | sqflint | `sqflint -e w <changed files>` | BLOCKED | sqflint not installed in CI environment |
-| 3 | DEP marker defaults in init | `grep "AEON_Right_270_Outbound\|AEON_Taxi_Right" functions/ambiance/fn_airbaseInit.sqf` | PASS | All six DEP+ARR marker vars now reference AEON markers |
-| 4 | Route decision code symmetry | Visual diff of DEP/ARR branches in fn_airbaseBuildRouteDecision.sqf | PASS | DEP and ARR now identical in structure; both fallback-default to AEON markers |
-| 5 | Gameplay smoke (no MISSING_ROUTE_MARKERS in Route Validation panel) | Dedicated server session | BLOCKED | Requires Arma 3 runtime |
+| 1 | Security patrol driver changed from B_Soldier_F to rhsusf_airforce_m | `grep "rhsusf_airforce_m" functions/ambiance/fn_airbaseSecurityPatrol.sqf` | PASS | ORBAT-aligned to USAF Security Forces (SENTRY) |
+| 2 | isNotEqualTo replaced with !(...isEqualTo...) in SecurityPatrol | `grep "isNotEqualTo" functions/ambiance/fn_airbaseSecurityPatrol.sqf` | PASS | Zero matches |
+| 3 | Three new ground traffic functions created | `ls functions/ambiance/fn_airbaseGroundTraffic*.sqf` | PASS | Init, BuildPool, Tick |
+| 4 | New functions registered in CfgFunctions.hpp | `grep "airbaseGroundTraffic" config/CfgFunctions.hpp` | PASS | Three entries added |
+| 5 | airbase_v1_gnd_traffic_enabled set in initServer | `grep "airbase_v1_gnd_traffic_enabled" initServer.sqf` | PASS | Enabled by default, disabled in safe mode |
+| 6 | Ground traffic init called from fn_airbasePostInit | `grep "airbaseGroundTrafficInit" functions/ambiance/fn_airbasePostInit.sqf` | PASS | Called after security init |
+| 7 | All six pool categories defined with canonical whitelist | `grep "airbase_v1_gnd_pool_" functions/ambiance/fn_airbaseGroundTrafficInit.sqf` | PASS | airfield_logistics, admin, medical, transport, support, tka |
+| 8 | Ten spawn zones defined keyed to existing airbase markers | `grep "FLIGHTLINE\|STAGING\|SUPPLY\|HQ_ADMIN\|MAYOR\|MEDICAL\|MAINT\|FUEL_DEPOT\|MAIN_GATE\|TOC" functions/ambiance/fn_airbaseGroundTrafficInit.sqf` | PASS | All markers verified in marker-index.md |
+| 9 | Compat scan clean on all changed/new files | `python3 scripts/dev/sqflint_compat_scan.py --strict <changed files>` | PASS | 0 warnings |
+| 10 | Runtime smoke (ground vehicles spawn at airbase zones) | Local/dedicated MP session | BLOCKED | Requires Arma 3 runtime |
 
 ### Deferred
 
-- T12/2: sqflint full lint pass — requires sqflint binary in environment.
-- T12/5: runtime verification that `blockedRouteAttemptsRecent` stays at 0 for DEP flights — requires dedicated server session.
+- T12/10: runtime gameplay verification — requires hosted or dedicated Arma 3 session.
+- Dedicated-server verification that pool validation correctly identifies valid classnames for all modded vehicle packs (RHS, UK3CB, Peral, d3s).
+- Editor note: Patrol_01 / Patrol_02 Eden-placed vehicle classnames may still need updating in mission.sqm to a USAF-aligned model (e.g., rhsusf_m1151_usarmy_d) in a future Eden session.
+
+---
+
+### T13 — Airbase Marker / Resident Unit Audit (2026-04-05)
+
+Branch: `copilot/align-vehicles-with-orbat`
+
+**Audit method:** Python parsing of mission.sqm (nested 3den format), cross-referenced against initServer.sqf, fn_airbaseInit.sqf, fn_airbaseSecurityInit.sqf, fn_airbaseGroundTrafficInit.sqf, ORBAT layer tree.
+
+#### PASS — All critical runtime markers present
+
+| Marker | Purpose | In SQM? |
+|--------|---------|---------|
+| `mkr_airbaseCenter` | Airbase bubble center | ✅ [6118,2281] |
+| `Main_Gate` | Security patrol waypoint + gate | ✅ [5244,2680] |
+| `North_Gate` | Security patrol waypoint | ✅ [6738,3231] |
+| `South_Gate` | Security patrol waypoint | ✅ [6220,1335] |
+| `NE_Corner` | Security patrol waypoint | ✅ [7363,2835] |
+| `NW_Corner` | Security patrol waypoint | ✅ [4889,2993] |
+| `SE_Corner` | Security patrol waypoint | ✅ [7142,1366] |
+| `SW_Corner` | Security patrol waypoint | ✅ [4854,1797] |
+| `AEON_*` (all 8) | Flight route markers | ✅ all present |
+| `arc_rotary_pad_1–7` | Rotary pad anchors | ✅ all 7 present |
+| `plane_despawn` | Fixed-wing despawn | ✅ present |
+| `mkr_arrivalRunwayStart/Stop/TaxiOut` | FW arrivals | ✅ all present |
+| `ARC_m_base_c17_parking` | Ground traffic FLIGHTLINE zone | ✅ [6368,1637] |
+| `arc_m_base_convoy_staging` | Ground traffic STAGING zone | ✅ [6631,3167] |
+| `arc_m_base_supply_depot` | Ground traffic SUPPLY zone | ✅ [5336,2617] |
+| `ARC_m_base_hq_1` | Ground traffic HQ_ADMIN zone | ✅ [6410,1585] |
+| `ARC_m_base_mayor_1` | Ground traffic MAYOR zone | ✅ [6293,1559] |
+| `arc_m_base_theater_hospital` | Ground traffic MEDICAL zone | ✅ [5714,2344] |
+| `arc_m_base_maintenance` | Ground traffic MAINT zone | ✅ [5626,2367] |
+| `arc_m_base_fuel_depot` | Ground traffic FUEL_DEPOT zone | ✅ [7157,1477] |
+| `ARC_m_base_toc` | Ground traffic TOC zone | ✅ [6237,1590] |
+
+**Marker case fix applied:** `fn_airbaseGroundTrafficInit.sqf` was using lowercase `arc_m_base_c17_parking`, `arc_m_base_hq_1`, `arc_m_base_mayor_1`, `arc_m_base_toc`. Corrected to match mission.sqm uppercase `ARC_m_base_*` names.
+
+#### PASS — Key Eden-placed asset variables present
+
+| Variable | Type | Status |
+|----------|------|--------|
+| `plane1` | USAF_C17 (C-17) | ✅ |
+| `plane2` | usaf_kc135 (KC-135) | ✅ |
+| `plane3` | USAF_C130J (C-130J) | ✅ |
+| `plane4` | FIR_A10C_FT (A-10C) | ✅ |
+| `plane5` | FIR_F16C_910379_sqd (F-16C) | ✅ |
+| `plane6` | USAF_RQ4A (RQ-4A) | ✅ |
+| `plane7` | aws_C130_AEW (EC-130H COMPASS) | ✅ |
+| `AH_64D_01` | RHS_AH64D | ✅ |
+| `CH_47F_01` | RHS_CH_47F_10 | ✅ |
+| `UH_60M_01` | RHS_UH60M_d | ✅ |
+| `OH_58D_01` | ad_oh58d | ✅ |
+| `tug4` | Peral_B600 | ✅ |
+| `tug5` | Peral_B600 | ✅ |
+| `m151` | Peral_M151 | ✅ |
+| `Patrol_01` | d3s_tundra_19_COP | ⚠️ See note |
+| `Patrol_02` | rhsusf_m1043_d | ✅ |
+| `FarabadTower_LA` | USAF tower unit | ✅ |
+| `farabad_tower_ws_ccic` | WS/CCIC | ✅ |
+| `farabad_tower_lc` | Local Controller | ✅ |
+| `farabad_6` | JTF Commander | ✅ |
+| `farabad_5` | Deputy JTF Cdr/CoS | ✅ |
+| `tf_co` | TF CO (REDFALCON 6) | ✅ |
+
+**Note — Patrol_01 vehicle:** `d3s_tundra_19_COP` is a civilian-style police car. For ORBAT alignment with USAF Security Forces (SENTRY), this should be changed in Eden to an ORBAT-appropriate type (e.g. `rhsusf_m1151_usarmy_d`). This is an Eden editor task.
+
+**Note — tug6D/7D/8D:** These are `FIR_USAF_GroundCrew_1` ambient walking figures (not vehicles), so the absence of a `tug6`/`tug7`/`tug8` vehicle variable is intentional.
+
+#### ⚠️ GAPS REQUIRING EDEN EDITOR SESSIONS
+
+The following ORBAT layers are structurally present but contain **no Eden-placed units**. These are not runtime errors (the system handles empty layers gracefully), but they represent missing ambient detail that should be added in a future Eden session:
+
+| Layer | Role | Gap |
+|-------|------|-----|
+| `01.2) 332 AEW HQ [REDTAIL]` → `REDTAIL 6 / Staff` | Wing Commander and staff | **0 units placed** |
+| `02.3) Aerial Port (cargo/pax handling)` | APOD cargo handlers | **0 units placed** |
+| `03.1) 332 EMDG / Theater Hospital [LIFELINE]` → `LIFELINE ER/SURG/WARD` | Medical personnel | **0 units placed** |
+| `03.2) Ambulances / CCPs (on-base)` | Medical vehicles | **0 units placed** |
+| `04.1.2) Flightline Security` | SENTRY flightline guards | **0 units placed** |
+| `04.1.3) QRF (on-base)` | SENTRY QRF | **0 units placed** |
+| `04.3.1) 1-73 CAV` → Troop A / Troop B | THUNDER cavalry troops | **0 units placed** (Troop C: 2 groups) |
+| `09.2.6) MEDEVAC Flight [DUSTOFF]` | DUSTOFF crew/aircraft | **0 units placed** |
+
+#### ✅ POPULATED — Key ORBAT layers confirmed present
+
+- `09.1.1) TF HQ / TOC (REDFALCON 6/5/TOC)`: 9 groups, 681 objects ✅
+- `09.1.2) A Co (REDFALCON 1)`: 6 groups ✅
+- `09.1.3) B Co (REDFALCON 2)`: 6 groups ✅
+- `09.1.4) C Co (REDFALCON 3) [player co]`: 6 groups, 259 objects ✅
+- `09.2.1–2.5) TF PEGASUS aviation`: all populated ✅
+- `09.2.7) ATLAS (aviation support)`: 6 groups ✅
+- `10.2.2) MPs [SHERIFF]`: 3 groups ✅
+- `10.2.3.1) EOD / 10.2.3.2) Route Clearance`: populated ✅
+- `04.1.1) ECPs / Gates`: 3 groups ✅
+- `04.2) USAF SF Outside Patrol [SENTRY PATROL]`: 2 groups ✅
+- `06.2.1) 407 BSB`: 4 groups ✅
+- `06.2.2) Convoy Staging Yard / MCP`: 116+ objects ✅
+- `08.1–08.4, 08.6) Flying tenants (C-17, C-130, KC-135, F-16, A-10)`: all populated ✅
+
+### Deferred
+
+- All gap closures require Eden editor sessions (unit placement in empty layers).
+- `Patrol_01` vehicle classname change to ORBAT-correct type requires Eden editor session.
+
+---
+
+### T14 — Dynamic ORBAT Population for 8 Empty Eden Layers (2026-04-05)
+
+Branch: `copilot/align-vehicles-with-orbat`
+
+**Scope:** `fn_airbaseOrbatPopulate.sqf` (new), `fn_airbasePostInit.sqf`, `CfgFunctions.hpp`, `initServer.sqf`
+
+**Problem:** T13 audit identified 8 ORBAT layers with zero Eden-placed units. Operator-requested that these be populated dynamically at mission start instead of requiring Eden editor sessions.
+
+**Solution:** `ARC_fnc_airbaseOrbatPopulate` — server-only, feature-gated, single-pass function that spawns ambient personnel and vehicles for all 8 empty layers, anchored to existing mission.sqm markers.
+
+#### Slots implemented
+
+| # | ORBAT Layer | Anchor Marker | Units | Veh |
+|---|------------|--------------|-------|-----|
+| 1 | `01.2) 332 AEW HQ [REDTAIL]` → REDTAIL 6/Staff | `ARC_m_base_avn_hq` | 4× `rhsusf_airforce_m` (Wing Cdr + staff) | — |
+| 2 | `02.3) Aerial Port` | `arc_m_base_civilian_terminal_01` | 4× `FIR_USAF_GroundCrew_*` | — |
+| 3 | `03.1) LIFELINE ER/SURG/WARD` | `arc_m_base_theater_hospital` | 6× `rhsusf_airforce_m` | — |
+| 4 | `03.2) Ambulances / CCPs` | `arc_m_base_theater_hospital` | 2× crew | 2× `UK3CB_C_Hilux_Ambulance` |
+| 5 | `04.1.2) Flightline Security` | `ARC_m_base_usaf_pilot_hangar` | 4× `rhsusf_airforce_security_force_rifleman` | — |
+| 6 | `04.1.3) SENTRY QRF` | `arc_m_base_police_hq` | 5× `rhsusf_airforce_security_force_rifleman` | 1× `rhsusf_m1043_d` |
+| 7a | `04.3.1) 1-73 CAV Troop A` | `arc_m_base_1_73_CAV_hq` (−20m NW) | 5× `rhsusf_army_ocp_*` | — |
+| 7b | `04.3.1) 1-73 CAV Troop B` | `arc_m_base_1_73_CAV_hq` (+20m SE) | 5× `rhsusf_army_ocp_*` | — |
+| 8 | `09.2.6) DUSTOFF` | `arc_rotary_pad_6` | 4× heli pilots/crew | — |
+| **Total** | | | **39 units** | **3 vehicles** |
+
+#### Feature flag
+`airbase_v1_orbat_populate_enabled = true` in initServer.sqf (disabled in safe mode)
+
+#### Static checks
+- `python3 scripts/dev/sqflint_compat_scan.py --strict` — **PASS** across all changed files
+- No temp markers (temp-marker approach for CAV troops refactored to direct-pos helper)
+
+#### Deferred
+- Runtime smoke: **BLOCKED** (requires Arma 3 session)
+- JIP/late-client: **BLOCKED**
+

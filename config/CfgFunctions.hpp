@@ -714,6 +714,12 @@ class Ops
             class airbaseSecurityInit {};
             class airbaseSecurityPatrol {};
 
+            // Ambient ground vehicle traffic (ORBAT-aligned whitelist)
+            class airbaseGroundTrafficInit {};
+            class airbaseGroundTrafficBuildPool {};
+            class airbaseGroundTrafficTick {};
+            class airbaseOrbatPopulate {};
+
             // Airbase tower control RPCs (server authority + client wrappers)
             class airbaseRequestHoldDepartures {};
             class airbaseRequestReleaseDepartures {};
