@@ -11,6 +11,30 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-06 17:53 UTC — AIR / TOWER implementation matrix completion
+
+**Branch/Commit:** copilot/develop-task-decomposition-plan @ b740f77 + docs
+
+**Scenario:** Docs-only change. Expand the AIR / TOWER implementation matrix from a sparse 9-phase summary table to a comprehensive 11-phase execution document with per-phase detail (files, acceptance criteria, risks, dependencies), audit finding linkage, file-touch heat map, acceptance test cross-references, and static validation checklist.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `docs/architecture/AIR_TOWER_Arma_Native_Implementation_Matrix.md` | Rewritten — expanded from 30 lines to full per-phase execution matrix |
+
+### Static checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Docs-only scope | Manual review | PASS | No runtime files (.sqf, .hpp, .ext) changed |
+
+### Deferred
+
+None. Docs-only change.
+
+---
+
 ## 2026-04-06 17:45 UTC — AIR / TOWER Arma-native doc sync (PR 1)
 
 **Branch/Commit:** copilot/develop-task-decomposition-plan @ 62caee7 + docs
