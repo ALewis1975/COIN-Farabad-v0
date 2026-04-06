@@ -11,6 +11,40 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-06 00:13 UTC — Pre-dedicated mission completion audit
+
+**Branch/Commit:** copilot/prepare-coin-farabad-v0-testing @ 9269449 (pre-log baseline; test-log update applied on top)
+
+**Scenario:** Implement a canonical pre-dedicated completion ledger so the mission can be treated as feature-complete before dedicated-server/JIP spend, and cross-link it from the active readiness/planning entry points.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `docs/qa/Pre_Dedicated_Mission_Completion_Audit_2026-04-06.md` | Added subsystem completion board, feature-complete gate, and pre-dedicated execution queue |
+| `docs/architecture/Architecture_and_Readiness_Plan.md` | Linked the new audit as the canonical completion ledger |
+| `docs/planning/Task_Decomposition.md` | Linked the new audit from the execution plan |
+| `README.md` | Added the new audit to QA references |
+
+### Checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Repo diff sanity | `git --no-pager diff --check` | PASS | No whitespace/conflict-marker issues in current working tree |
+| 2 | Cross-link presence | `rg -n "Pre_Dedicated_Mission_Completion_Audit_2026-04-06.md" README.md docs/architecture/Architecture_and_Readiness_Plan.md docs/planning/Task_Decomposition.md` | PASS | README and the active readiness/planning docs all reference the new audit |
+| 3 | World-gate blocker verification | `rg -n "ARC_barrier_(north\|main\|south)\|ARC_guardpost_(north\|main\|south)" mission.sqm` | PASS | No matches found; confirms the audit is correctly tracking the remaining Eden prerequisite gap |
+| 4 | Test-log commit guard | `bash scripts/dev/check_test_log_commits.sh` | PASS | Script returned PASS for commit placeholders, but the container still lacked `rg` on `PATH` during that run |
+| 5 | Local MP runtime | N/A | BLOCKED | No Arma 3 runtime in container |
+| 6 | Dedicated/JIP runtime | N/A | BLOCKED | No dedicated/JIP environment in container |
+
+### Outcome
+
+- Added a single repo-wide completion ledger that distinguishes code/content blockers from deferred runtime-only verification.
+- Recorded the world-gate Eden prerequisite as the remaining verified mission-data blocker before dedicated-server spend.
+- Reframed dedicated/JIP as a final validation phase after feature completion, not the phase where missing mission scope is discovered.
+
+---
+
 ## 2026-04-05 23:51 UTC — AIRBASE sqflint warning fix (unused `_hg`)
 
 **Branch/Commit:** copilot/taxi-with-engines-on @ 0e2caef (pre-edit baseline; unused-variable fix applied on top)

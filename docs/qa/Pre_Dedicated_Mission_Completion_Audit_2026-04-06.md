@@ -1,6 +1,6 @@
 # Pre-Dedicated Mission Completion Audit — 2026-04-06
 
-**Repository:** `ALewis1975/COIN-Farabad-v0`  
+**Repository:** `ALewis1975/COIN-Farabad-v0`
 **Purpose:** Establish the canonical “feature-complete before dedicated/JIP” ledger so dedicated-server spend is used for integration validation, not basic feature discovery.
 
 ---
