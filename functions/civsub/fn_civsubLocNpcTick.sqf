@@ -71,7 +71,6 @@ private _totalLive = 0;
     private _row = _x;
     if ((count _row) < 4) then { continue; };
     private _siteKey  = _row select 0;
-    private _siteType = _row select 1;
     private _sitePos  = _row select 2;
     private _profile  = _row select 3;
 
@@ -142,7 +141,7 @@ private _totalLive = 0;
 missionNamespace setVariable ["civsub_v1_locnpc_registry", _registry, true];
 
 if (_debug) then {
-    diag_log format ["[CIVLOC][TICK] phase=%1 totalLive=%2 sites=%3 bubbleR=%4", _phase, _totalLive, count _sites, _bubbleR];
+    diag_log format ["[CIVLOC][TICK] phase=%1 totalLive=%2 sites=%3 bubbleR=%4", _phase, _totalLive, count _sites, _bubbleR_ground];
 };
 
 true

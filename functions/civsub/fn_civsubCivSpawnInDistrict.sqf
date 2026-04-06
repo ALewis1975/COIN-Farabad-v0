@@ -25,7 +25,7 @@ if (!(_todPhase isEqualType "")) then { _todPhase = "DAY"; };
 
 // Phase 2 helpers (defined in civsubInitServer)
 private _posIsRoadish = missionNamespace getVariable ["ARC_civsub_fnc_posIsRoadish", { params ["_p"]; isOnRoad _p }];
-private _findOffRoad = missionNamespace getVariable ["ARC_civsub_fnc_findPosOffRoad", { params ["_p","_min","_max","_t"]; _p }];
+private _findOffRoad = missionNamespace getVariable ["ARC_civsub_fnc_findPosOffRoad", { params ["_p"]; _p }];
 
 private _fail = {
     params [
@@ -129,7 +129,7 @@ if !(_pos isEqualType [] && {(count _pos) >= 2} && {!(_pos isEqualTo [0,0,0])}) 
     _pos = [_center, _spawnR, _districtId] call ARC_fnc_civsubCivFindSpawnPos;
 };
 if !(_pos isEqualType [] && {(count _pos) >= 2}) then { _pos = _center; };
-if ((count _pos) == 2) then { _pos = [_pos#0, _pos#1, 0]; };
+if ((count _pos) == 2) then { _pos = [_pos select 0, _pos select 1, 0]; };
 
 // Phase 2: never spawn a civilian in the road.
 if ([_pos] call _posIsRoadish) then
@@ -164,7 +164,7 @@ if (_minSep isEqualType 0 && {_minSep > 0}) then {
                     _p2 = [_center, _spawnR, _districtId] call ARC_fnc_civsubCivFindSpawnPos;
                 };
                 if (_p2 isEqualType [] && {(count _p2) >= 2}) then {
-                    _pos = if ((count _p2) == 2) then { [_p2#0,_p2#1,0] } else { _p2 };
+                    _pos = if ((count _p2) == 2) then { [_p2 select 0, _p2 select 1, 0] } else { _p2 };
                 };
             };
         };
@@ -227,7 +227,7 @@ _u disableAI "SUPPRESSION";
 
 // Give them a small wander loop (only if we have a valid group)
 if !(isNull _grp) then {
-    private _wp = _grp addWaypoint [[(_pos#0)+random 60 - 30, (_pos#1)+random 60 - 30, 0], 0];
+    private _wp = _grp addWaypoint [[(_pos select 0)+random 60 - 30, (_pos select 1)+random 60 - 30, 0], 0];
     _wp setWaypointType "MOVE";
     _wp setWaypointSpeed "LIMITED";
     _wp setWaypointBehaviour "SAFE";
