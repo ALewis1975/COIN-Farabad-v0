@@ -19,11 +19,11 @@ if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabl
 if (!_enabled) exitWith {false};
 
 private _incTypeU = toUpper (["activeIncidentType", ""] call ARC_fnc_stateGet);
-if (_incTypeU isNotEqualTo "IED") exitWith {false};
+if (!(_incTypeU isEqualTo "IED")) exitWith {false};
 
 private _objKind = ["activeObjectiveKind", ""] call ARC_fnc_stateGet;
 if (!(_objKind isEqualType "")) then { _objKind = ""; };
-if ((toUpper _objKind) isNotEqualTo "VBIED_VEHICLE") exitWith {false};
+if (!((toUpper _objKind) isEqualTo "VBIED_VEHICLE")) exitWith {false};
 
 // ── Escalation-tier gate (VBIED requires tier ≥ 2 / HIGH_RISK) ────────────
 // Mirrors fn_threatGovernorCheck line 88: VBIED _tierMin = 2.

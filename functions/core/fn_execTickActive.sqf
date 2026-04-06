@@ -19,7 +19,7 @@ private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
 if (_taskId isEqualTo "") exitWith
 {
     // Nothing active; ensure stale execution state doesn't linger.
-    if ((["activeExecTaskId", ""] call ARC_fnc_stateGet) isNotEqualTo "") then
+    if (!((["activeExecTaskId", ""] call ARC_fnc_stateGet) isEqualTo "")) then
     {
         [] call ARC_fnc_execCleanupActive;
     };
@@ -30,7 +30,7 @@ if (_taskId isEqualTo "") exitWith
 private _execTaskId = ["activeExecTaskId", ""] call ARC_fnc_stateGet;
 private _execKind   = ["activeExecKind", ""] call ARC_fnc_stateGet;
 
-if (!(_execTaskId isEqualTo _taskId && { _execKind isNotEqualTo "" })) then
+if (!(_execTaskId isEqualTo _taskId && { !(_execKind isEqualTo "") })) then
 {
     [] call ARC_fnc_execInitActive;
     _execTaskId = ["activeExecTaskId", ""] call ARC_fnc_stateGet;
@@ -105,7 +105,7 @@ if (_execKind isEqualTo "CONVOY") exitWith
 private _mkTask = missionNamespace getVariable ["ARC_taskMarkers_taskId", ""];
 if (!(_mkTask isEqualType "")) then { _mkTask = ""; };
 
-if (_mkTask isNotEqualTo _taskId) then
+if (!(_mkTask isEqualTo _taskId)) then
 {
     // New task (or first tick). Clear any prior helper markers.
     if ("ARC_obj_actor_active" in allMapMarkers) then { deleteMarker "ARC_obj_actor_active"; };
@@ -143,7 +143,7 @@ if (!(_objNid isEqualType "")) then { _objNid = ""; };
 private _meetMkEnabled = missionNamespace getVariable ["ARC_taskMarkerMeetActorEnabled", true];
 if (!(_meetMkEnabled isEqualType true) && !(_meetMkEnabled isEqualType false)) then { _meetMkEnabled = true; };
 
-if (_meetMkEnabled && { _objKind isEqualTo "CIV_MEET" } && { _objNid isNotEqualTo "" }) then
+if (_meetMkEnabled && { _objKind isEqualTo "CIV_MEET" } && { !(_objNid isEqualTo "") }) then
 {
     private _u = objectFromNetId _objNid;
     if (!isNull _u && { alive _u } && { _u isKindOf "Man" }) then
@@ -193,7 +193,7 @@ if (_areaMkEnabled && { _incTypeU isEqualTo "IED" }) then
     private _centerTask = missionNamespace getVariable ["ARC_taskSearchMarkerTaskId", ""];
     if (!(_centerTask isEqualType "")) then { _centerTask = ""; };
 
-    if (_centerTask isNotEqualTo _taskId || { !(_center isEqualType []) } || { (count _center) < 2 }) then
+    if (!(_centerTask isEqualTo _taskId) || { !(_center isEqualType []) } || { (count _center) < 2 }) then
     {
         // Base: objective position if known; else fall back to exec AO position.
         private _basePos = ["activeObjectivePos", []] call ARC_fnc_stateGet;
@@ -238,7 +238,7 @@ private _cpEnabled = missionNamespace getVariable ["ARC_checkpointStaticCompsEna
 if (!(_cpEnabled isEqualType true) && !(_cpEnabled isEqualType false)) then { _cpEnabled = true; };
 
 // Do not spawn extra checkpoint props inside the Airbase zone (gates already have editor-placed assets).
-if (_cpEnabled && { _incTypeU isEqualTo "CHECKPOINT" } && { (toUpper _objKind) isNotEqualTo "VBIED_VEHICLE" } && { !((toUpper ([_pos] call ARC_fnc_worldGetZoneForPos)) isEqualTo "AIRBASE") }) then
+if (_cpEnabled && { _incTypeU isEqualTo "CHECKPOINT" } && { !((toUpper _objKind) isEqualTo "VBIED_VEHICLE") } && { !((toUpper ([_pos] call ARC_fnc_worldGetZoneForPos)) isEqualTo "AIRBASE") }) then
 {
     private _sites = missionNamespace getVariable ["ARC_persistentCheckpointSites", []];
     if (!(_sites isEqualType [])) then { _sites = []; };
@@ -276,7 +276,7 @@ if (_cpEnabled && { _incTypeU isEqualTo "CHECKPOINT" } && { (toUpper _objKind) i
             private _conn = roadsConnectedTo _road;
             if ((count _conn) > 0) then
             {
-                _dir = _road getDir (_conn # 0);
+                _dir = _road getDir (_conn select 0);
             };
         };
 
@@ -388,7 +388,7 @@ if (_onSite && { !_activated }) then
     if (!_armed) then
     {
         private _nid = ["activeObjectiveNetId", ""] call ARC_fnc_stateGet;
-        if (_nid isNotEqualTo "") then
+        if (!(_nid isEqualTo "")) then
         {
             private _obj = objectFromNetId _nid;
             if (!isNull _obj) then
@@ -573,7 +573,7 @@ if (_execKind isEqualTo "INTERACT") then
     private _objKind = ["activeObjectiveKind", ""] call ARC_fnc_stateGet;
     private _nid     = ["activeObjectiveNetId", ""] call ARC_fnc_stateGet;
 
-    if (_objKind isNotEqualTo "" && { _nid isNotEqualTo "" }) then
+    if (!(_objKind isEqualTo "") && { !(_nid isEqualTo "") }) then
     {
         private _obj = objectFromNetId _nid;
 
@@ -631,11 +631,11 @@ if (_execKind isEqualTo "ROUTE_RECON") exitWith
             ["activeReconRouteStartReached", true] call ARC_fnc_stateSet;
             ["activeExecLastProgressAt", _now] call ARC_fnc_stateSet;
 
-            if (_startTaskId isNotEqualTo "") then { [_startTaskId, "SUCCEEDED", true] call BIS_fnc_taskSetState; };
-            if (_endTaskId isNotEqualTo "") then { [_endTaskId, "ASSIGNED", true] call BIS_fnc_taskSetState; };
+            if (!(_startTaskId isEqualTo "")) then { [_startTaskId, "SUCCEEDED", true] call BIS_fnc_taskSetState; };
+            if (!(_endTaskId isEqualTo "")) then { [_endTaskId, "ASSIGNED", true] call BIS_fnc_taskSetState; };
 
 	            // Current task is local per-client; broadcast the switch to the end gate task.
-	            if (_endTaskId isNotEqualTo "") then
+	            if (!(_endTaskId isEqualTo "")) then
 	            {
 	                [_endTaskId] remoteExecCall ["ARC_fnc_clientSetCurrentTask", 0];
 	            };
@@ -655,7 +655,7 @@ if (_execKind isEqualTo "ROUTE_RECON") exitWith
             ["activeReconRouteEndReached", true] call ARC_fnc_stateSet;
             ["activeExecLastProgressAt", _now] call ARC_fnc_stateSet;
 
-            if (_endTaskId isNotEqualTo "") then { [_endTaskId, "SUCCEEDED", true] call BIS_fnc_taskSetState; };
+            if (!(_endTaskId isEqualTo "")) then { [_endTaskId, "SUCCEEDED", true] call BIS_fnc_taskSetState; };
 
             ["OPS", format ["Route recon complete at %1.", mapGridPosition _ePos], _ePos, [["taskId", _taskId], ["event", "ROUTE_RECON_END_REACHED"]]] call ARC_fnc_intelLog;
 

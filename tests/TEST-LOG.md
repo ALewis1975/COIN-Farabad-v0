@@ -4077,3 +4077,36 @@ sqflint -e w functions/core/fn_publicBroadcastState.sqf
 | 5 | Budget snapshot appears in debug inspector with active spend data | BLOCKED | Requires Arma 3 runtime |
 | 6 | Daily budget reset triggers at epoch rollover | BLOCKED | Requires Arma 3 runtime |
 | 7 | End-to-end: scheduler → record → activation → detonation/interdiction → lead emission | BLOCKED | Requires Arma 3 runtime |
+
+---
+
+## Entry: 2026-04-06T03:57Z — sqflint compat scan strict-mode fix
+
+**Date:** 2026-04-06
+**Branch/Commit:** copilot/assess-current-repository-state (pending commit)
+
+**Scenario:** CI job 70041047630 failing because `sqflint_compat_scan.py --strict` detected 15 disallowed patterns across 5 changed SQF files: 14 uses of `isNotEqualTo` and 1 use of `#` array indexing.
+
+**Changed files:**
+- `functions/core/fn_execTickActive.sqf` — replaced 12 `isNotEqualTo` → `!(...isEqualTo...)` and 1 `#` → `select`
+- `functions/ied/fn_vbiedSpawnTick.sqf` — replaced 2 `isNotEqualTo` → `!(...isEqualTo...)`
+
+**Commands run:**
+```bash
+python3 scripts/dev/sqflint_compat_scan.py --strict \
+    functions/core/fn_execTickActive.sqf \
+    functions/core/fn_publicBroadcastState.sqf \
+    functions/ied/fn_suicideBomberSpawnTick.sqf \
+    functions/ied/fn_vbiedDrivenSpawnTick.sqf \
+    functions/ied/fn_vbiedSpawnTick.sqf
+sqflint -e w functions/core/fn_execTickActive.sqf
+sqflint -e w functions/ied/fn_vbiedSpawnTick.sqf
+```
+
+**Results:**
+
+| # | Check | Result | Notes |
+|---|-------|--------|-------|
+| 1 | Compat scan --strict (5 files) | PASS | 0 pattern matches (was 15) |
+| 2 | sqflint fn_execTickActive.sqf | PASS | exit 0, clean |
+| 3 | sqflint fn_vbiedSpawnTick.sqf | PASS (pre-existing warnings) | 2 unused-param warnings at L188 (_actionId, _arguments) — pre-existing in hold-action callback signature |
