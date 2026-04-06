@@ -312,6 +312,58 @@ mission start → initServer/initPlayerLocal/postInit → player spawn/respawn �
 For each step: which machine executes it (server/client/HC) and what state it requires/produces.
 ```
 
+### Template F — REPOSITORY STATE + NEXT-ARCHITECTURE PLAN MODE
+Use when you need to assess current implementation state, decide what should happen next, and produce a conversion-ready architecture/vision plan.
+
+```text
+REPOSITORY STATE + NEXT-ARCHITECTURE PLAN MODE. Analysis only. No code changes.
+
+Goal:
+1) Assess current repository state against intended mission scope.
+2) Determine what is complete, partial, blocked, stale, or runtime-unverified.
+3) Identify the highest-value next development/improvement target.
+4) Produce an architecture/vision plan that can be converted into task decomposition.
+
+Context:
+- Dedicated MP mission
+- JIP required eventually, but dedicated/JIP spend is deferred until feature completeness is strong enough to justify it
+- Server is single-writer; clients request only; UI is snapshot-driven
+- Current source and mission data beat older notes
+- Fresh runtime evidence beats static inference
+- If runtime proof is missing, classify as runtime-unverified, not fixed
+
+READ THESE FIRST
+1. `docs/qa/Pre_Dedicated_Mission_Completion_Audit_2026-04-06.md`
+2. `docs/architecture/Architecture_and_Readiness_Plan.md`
+3. `docs/planning/Task_Decomposition.md`
+4. `docs/projectFiles/Farabad_COIN_Mission_Design_Guide_v0.4_2026-01-27.md`
+5. `docs/projectFiles/Farabad_Source_of_Truth_and_Workflow_Spec.md`
+6. `docs/projectFiles/farabad_project_dictionary_v_1.1.md`
+7. `docs/projectFiles/Farabad_Prompting_Integration_Playbook_Project_Standard.md`
+
+THEN USE AS NEEDED
+- Locked subsystem baselines in `docs/projectFiles/`
+- `docs/security/RemoteExec_Hardening_Plan.md` for RPC/security surface assessment
+- `docs/projectFiles/Farabad_ORBAT.md` for unit ownership, labels, and responsibility alignment
+- Current source under `functions/`, `config/`, `initServer.sqf`, `initPlayerLocal.sqf`, `mission.sqm`
+- `tests/TEST-LOG.md` and `serverRpts/` for validation/runtime evidence
+
+Required output:
+1) Executive assessment
+2) Evidence base
+3) Current-state board by subsystem
+4) Best next focus and why it outranks other work
+5) Architecture / vision plan for that focus
+6) Conversion-ready decomposition seed
+7) Dedicated/JIP gate impact
+
+Rules:
+- Separate confirmed code gaps from mission-data blockers, documentation/process gaps, and runtime-only validation gaps
+- Do not recommend broad rewrites without evidence
+- Prefer what is actually next over everything that could be improved
+- Make the result directly convertible into workstreams, deliverables, acceptance criteria, dependencies, and deferred runtime checks
+```
+
 ---
 
 ## “Golden prompt footer” (paste at the end of most requests)
