@@ -15,11 +15,20 @@ if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {false}
 if !(missionNamespace getVariable ["civsub_v1_civs_enabled", false]) exitWith {false};
 
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _hk = compile "params ['_h']; keys _h";
 
 private _dbg = missionNamespace getVariable ["civsub_v1_debug", false];
 
 private _players = [] call ARC_fnc_civsubBubbleGetPlayers;
 private _active = [_players] call ARC_fnc_civsubBubbleGetActiveDistricts;
+
+private _todPolicy = [] call ARC_fnc_dynamicTodRefresh;
+private _canSpawnCivil = [_todPolicy, "canSpawnCivil", true] call _hg;
+if (!(_canSpawnCivil isEqualType true) && !(_canSpawnCivil isEqualType false)) then { _canSpawnCivil = true; };
+private _phase = [_todPolicy, "phase", "DAY"] call _hg;
+if (!(_phase isEqualType "")) then { _phase = "DAY"; };
+private _tod = [_todPolicy, "tod", dayTime] call _hg;
+if (!(_tod isEqualType 0)) then { _tod = dayTime; };
 
 missionNamespace setVariable ["civsub_v1_activeDistrictIds", _active, true];
 
@@ -48,27 +57,7 @@ private _capDE = if ((count _caps) > 1) then { _caps select 1 } else { 0 };
 
 private _capByD = missionNamespace getVariable ["civsub_v1_civ_cap_effectiveByDistrict", createHashMap];
 if !(_capByD isEqualType createHashMap) then { _capByD = createHashMap; };
-
-// Time-of-day activity profile multiplier for civilian foot traffic.
-private _tod = dayTime;
-private _nightStart = missionNamespace getVariable ["civsub_v1_activity_night_start_h", 21];
-private _nightEnd = missionNamespace getVariable ["civsub_v1_activity_night_end_h", 5];
-private _peakAM0 = missionNamespace getVariable ["civsub_v1_activity_morning_peak_start_h", 7];
-private _peakAM1 = missionNamespace getVariable ["civsub_v1_activity_morning_peak_end_h", 9];
-private _peakPM0 = missionNamespace getVariable ["civsub_v1_activity_evening_peak_start_h", 16];
-private _peakPM1 = missionNamespace getVariable ["civsub_v1_activity_evening_peak_end_h", 18];
-if !(_nightStart isEqualType 0) then { _nightStart = 21; };
-if !(_nightEnd isEqualType 0) then { _nightEnd = 5; };
-if !(_peakAM0 isEqualType 0) then { _peakAM0 = 7; };
-if !(_peakAM1 isEqualType 0) then { _peakAM1 = 9; };
-if !(_peakPM0 isEqualType 0) then { _peakPM0 = 16; };
-if !(_peakPM1 isEqualType 0) then { _peakPM1 = 18; };
-
-private _isNight = (_tod >= _nightStart) || { _tod < _nightEnd };
-private _isPeak = ((_tod >= _peakAM0) && { _tod <= _peakAM1 }) || { ((_tod >= _peakPM0) && { _tod <= _peakPM1 }) };
-private _phase = "DAY";
-if (_isNight) then { _phase = "NIGHT"; };
-if (_isPeak) then { _phase = "PEAK"; };
+private _capKeys = [_capByD] call _hk;
 
 private _mCiv = missionNamespace getVariable ["civsub_v1_activity_mul_civ_day", 1.0];
 if (_phase isEqualTo "NIGHT") then { _mCiv = missionNamespace getVariable ["civsub_v1_activity_mul_civ_night", 0.55]; };
@@ -86,9 +75,23 @@ if (_capGE < 0) then { _capGE = 0; };
     _cap0 = floor (_cap0 * _mCiv);
     if (_cap0 < 0) then { _cap0 = 0; };
     _capByD set [_did0, _cap0];
-} forEach (keys _capByD);
+} forEach _capKeys;
 
 missionNamespace setVariable ["civsub_v1_activity_mul_civ_active", _mCiv, false];
+missionNamespace setVariable ["civsub_v1_activity_phase", _phase, false];
+missionNamespace setVariable ["civsub_v1_activity_tod", _tod, false];
+
+if (!_canSpawnCivil) exitWith
+{
+    // Enforce non-spawn window while still publishing activity/cap state for diagnostics.
+    missionNamespace setVariable ["civsub_v1_civ_sampler_last_active", _active, true];
+    missionNamespace setVariable ["civsub_v1_civ_sampler_last_capGE", _capGE, true];
+    missionNamespace setVariable ["civsub_v1_civ_sampler_last_capDE", _capDE, true];
+    missionNamespace setVariable ["civsub_v1_civ_sampler_last_capByDistrict", _capByD, true];
+    missionNamespace setVariable ["civsub_v1_civ_lastSampler_ts", serverTime, true];
+    if (_dbg) then { diag_log format ["[CIVSUB][CIVS][TOD] spawn gate closed phase=%1", _phase]; };
+    false
+};
 
 // Publish sampler decision state for probes
 missionNamespace setVariable ["civsub_v1_civ_sampler_last_active", _active, true];
@@ -102,20 +105,21 @@ if !(_reg isEqualType createHashMap) then {
     _reg = createHashMap;
     missionNamespace setVariable ["civsub_v1_civ_registry", _reg, true];
 };
+private _regKeys = [_reg] call _hk;
 
 // Count current per district
 private _counts = createHashMap;
 {
-    private _row = _reg get _x;
+    private _row = [_reg, _x, createHashMap] call _hg;
     if (_row isEqualType createHashMap) then {
         private _did = [_row, "districtId", ""] call _hg;
         if !(_did isEqualTo "") then {
             _counts set [_did, ([_counts, _did, 0] call _hg) + 1];
         };
     };
-} forEach (keys _reg);
+} forEach _regKeys;
 
-private _total = count (keys _reg);
+private _total = count _regKeys;
 missionNamespace setVariable ["civsub_v1_civ_sampler_last_total", _total, true];
 
 if (_dbg) then {

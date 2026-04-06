@@ -13,6 +13,14 @@
 
 if (!isServer) exitWith {false};
 
+private _todPolicy = [] call ARC_fnc_dynamicTodGetPolicy;
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _canSpawnThreat = [_todPolicy, "canSpawnThreat", true] call _hg;
+if (!(_canSpawnThreat isEqualType true) && !(_canSpawnThreat isEqualType false)) then { _canSpawnThreat = true; };
+if (!_canSpawnThreat) exitWith {false};
+private _todPhase = [_todPolicy, "phase", "DAY"] call _hg;
+if (!(_todPhase isEqualType "")) then { _todPhase = "DAY"; };
+
 private _objKind = toUpper (["activeObjectiveKind", ""] call ARC_fnc_stateGet);
 if (!(_objKind isEqualTo "VBIED_DRIVEN_CHECKPOINT") && !(_objKind isEqualTo "VBIED_DRIVEN_GATE")) exitWith {false};
 
@@ -76,13 +84,12 @@ if (!(_threatId isEqualTo "")) then
 // Wait 60-120s for fairness telegraph window (non-blocking via spawn)
 private _spawnDelay = 60 + (floor (random 60));
 
-[_spawnPos, _targetPos, _threatId, _spawnDelay] spawn
+[_spawnPos, _targetPos, _threatId, _spawnDelay, _todPhase, _todPolicy, _hg] spawn
 {
-    params ["_sp", "_tp", "_tid", "_delay"];
+    params ["_sp", "_tp", "_tid", "_delay", "_todPhase", "_todPolicy", "_hg"];
     sleep _delay;
 
     // Validity gate: abort if threat was canceled or objective changed during delay
-    private _activeTaskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
     private _activeObjKind = toUpper (["activeObjectiveKind", ""] call ARC_fnc_stateGet);
     if (!(_activeObjKind isEqualTo "VBIED_DRIVEN_CHECKPOINT") && !(_activeObjKind isEqualTo "VBIED_DRIVEN_GATE")) exitWith
     {
@@ -118,11 +125,15 @@ private _spawnDelay = 60 + (floor (random 60));
 
     _veh setPos _sp;
     _veh setVariable ["ARC_isVbiedDrivenActive", true, true];
+    _veh setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];
+    _veh setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hg, true];
 
     // Spawn driver
     private _grp = createGroup [east, true];
     private _driver = _grp createUnit ["O_Soldier_F", _sp, [], 0, "NONE"];
     _driver moveInDriver _veh;
+    _driver setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];
+    _driver setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hg, true];
 
     // Assign route waypoints toward target
     private _wp1 = _grp addWaypoint [_tp, 0];

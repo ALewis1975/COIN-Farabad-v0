@@ -43,6 +43,13 @@ if (!(_callerOwner isEqualType 0)) then { _callerOwner = -1; };
 
 private _incidentTypeU = toUpper _incidentType;
 private _debug = missionNamespace getVariable ["ARC_convoyDebug", false];
+private _todPolicy = [] call ARC_fnc_dynamicTodGetPolicy;
+private _hgTod = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _canSpawnOps = [_todPolicy, "canSpawnOps", true] call _hgTod;
+if (!(_canSpawnOps isEqualType true) && !(_canSpawnOps isEqualType false)) then { _canSpawnOps = true; };
+if (!_canSpawnOps) exitWith {[]};
+private _todPhase = [_todPolicy, "phase", "DAY"] call _hgTod;
+if (!(_todPhase isEqualType "")) then { _todPhase = "DAY"; };
 
 private _log = {
     params [["_msg", "", [""]], ["_args", [], [[]]], ["_lvl", "WARN", [""]]];
@@ -88,7 +95,7 @@ _destPos = +_destPos; _destPos resize 3;
 // Link-up: read from state (planned by execInitActive). If missing/too close, fall back.
 private _linkupPos = ["activeConvoyLinkupPos", []] call ARC_fnc_stateGet;
 if (!(_linkupPos isEqualType []) || { (count _linkupPos) < 2 }) then { _linkupPos = []; };
-if (_linkupPos isNotEqualTo []) then { _linkupPos = +_linkupPos; _linkupPos resize 3; };
+if (!(_linkupPos isEqualTo [])) then { _linkupPos = +_linkupPos; _linkupPos resize 3; };
 
 private _legPos = _linkupPos;
 if (!(_legPos isEqualType []) || { (count _legPos) < 2 } || { (_spawnPos distance2D _legPos) < 60 }) then
@@ -123,9 +130,9 @@ private _rolePlanGet = {
     params ["_pairs", "_key", "_default"];
     if !(_pairs isEqualType []) exitWith {_default};
     private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { ((_x # 0) isEqualType "") && { (toLower (_x # 0)) isEqualTo (toLower _key) } }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { ((_x select 0) isEqualType "") && { (toLower (_x select 0)) isEqualTo (toLower _key) } }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) exitWith {_default};
-    (_pairs # _idx) # 1
+    ((_pairs select _idx) select 1)
 };
 
 private _roleBundleId = [_rolePlan, "bundleId", ""] call _rolePlanGet;
@@ -137,14 +144,14 @@ private _bundleMatrix = missionNamespace getVariable ["ARC_convoyBundleClassMatr
 if (!(_bundleMatrix isEqualType [])) then { _bundleMatrix = []; };
 
 private _bundleClassPool = [];
-if (_roleBundleId isNotEqualTo "") then
+if (!(_roleBundleId isEqualTo "")) then
 {
     private _idxBundle = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { ((_x # 0) isEqualType "") } && { (toUpper (_x # 0)) isEqualTo _roleBundleId }) exitWith { _idxBundle = _forEachIndex; }; } forEach _bundleMatrix;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { ((_x select 0) isEqualType "") } && { (toUpper (_x select 0)) isEqualTo _roleBundleId }) exitWith { _idxBundle = _forEachIndex; }; } forEach _bundleMatrix;
 
     if (_idxBundle >= 0) then
     {
-        private _rawPool = (_bundleMatrix # _idxBundle) # 1;
+        private _rawPool = ((_bundleMatrix select _idxBundle) select 1);
         if (_rawPool isEqualType []) then
         {
             {
@@ -309,9 +316,9 @@ private _getRoleKeyList = {
     params ["_roleName"];
     private _r = toLower _roleName;
     private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { ((_x # 0) isEqualType "") && { (toLower (_x # 0)) isEqualTo _r } }) exitWith { _idx = _forEachIndex; }; } forEach _roleMatrix;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { ((_x select 0) isEqualType "") && { (toLower (_x select 0)) isEqualTo _r } }) exitWith { _idx = _forEachIndex; }; } forEach _roleMatrix;
     if (_idx < 0) exitWith {[]};
-    private _keys = (_roleMatrix # _idx) # 1;
+    private _keys = ((_roleMatrix select _idx) select 1);
     if !(_keys isEqualType []) exitWith {[]};
     _keys select { _x isEqualType "" }
 };
@@ -396,7 +403,7 @@ switch (_incidentTypeU) do
     {
         // Lead + 3-5 logistics + tail escort
         private _lead = [_poolLeadSelect] call _pickFrom;
-        if (_lead isNotEqualTo "") then { _classes pushBack _lead; };
+        if (!(_lead isEqualTo "")) then { _classes pushBack _lead; };
 
         // Role-based selection from the matrix pool keys, with legacy fallbacks preserved.
         private _poolGen = +_poolLogSelect;
@@ -452,18 +459,18 @@ switch (_incidentTypeU) do
             };
 
             private _c = [_pickPool] call _pickFrom;
-            if (_c isNotEqualTo "") then { _classes pushBack _c; };
+            if (!(_c isEqualTo "")) then { _classes pushBack _c; };
         };
 
         private _tail = [_poolEscSelect] call _pickFrom;
-        if (_tail isNotEqualTo "") then { _classes pushBack _tail; };
+        if (!(_tail isEqualTo "")) then { _classes pushBack _tail; };
     };
 
     case "ESCORT":
     {
         // Lead + 2-4 escort vehicles (VIP variants bias toward SUVs/PMCs)
         private _lead = [_poolLeadSelect] call _pickFrom;
-        if (_lead isNotEqualTo "") then { _classes pushBack _lead; };
+        if (!(_lead isEqualTo "")) then { _classes pushBack _lead; };
 
         private _count = if (_isVIP) then { 3 + floor (random 3) } else { 2 + floor (random 3) }; // VIP 3..5, normal 2..4
         private _pSUV = if (_isVIP) then { 0.75 } else { 0.35 };
@@ -486,7 +493,7 @@ switch (_incidentTypeU) do
             };
 
             private _c = [_poolUse] call _pickFrom;
-            if (_c isNotEqualTo "") then
+            if (!(_c isEqualTo "")) then
             {
                 _classes pushBack _c;
                 if (_useSUV) then { _pickedSUV = _pickedSUV + 1; };
@@ -498,11 +505,11 @@ switch (_incidentTypeU) do
     {
         // Safe fallback: escort style
         private _lead = [_poolLeadSelect] call _pickFrom;
-        if (_lead isNotEqualTo "") then { _classes pushBack _lead; };
+        if (!(_lead isEqualTo "")) then { _classes pushBack _lead; };
         private _c = [_poolEscSelect] call _pickFrom;
-        if (_c isNotEqualTo "") then { _classes pushBack _c; };
+        if (!(_c isEqualTo "")) then { _classes pushBack _c; };
         private _c2 = [_poolEscSelect] call _pickFrom;
-        if (_c2 isNotEqualTo "") then { _classes pushBack _c2; };
+        if (!(_c2 isEqualTo "")) then { _classes pushBack _c2; };
     };
 };
 
@@ -517,7 +524,6 @@ if ((count _classes) == 0) exitWith
 
 // --- Sequential spawn --------------------------------------------------------
 private _vehicles = [];
-private _wp = objNull;
 
 // Create a dedicated convoy group up-front.
 // Relying on the first vehicle's auto-created crew group is fragile (it can leave
@@ -534,8 +540,10 @@ _grp setBehaviour "SAFE";
 _grp setSpeedMode "LIMITED";
 
 // Tag the group so watchdog/rehydration can recognize the current convoy.
-if (_taskId isNotEqualTo "") then { _grp setVariable ["ARC_convoyTaskId", _taskId, true]; };
+if (!(_taskId isEqualTo "")) then { _grp setVariable ["ARC_convoyTaskId", _taskId, true]; };
 _grp setVariable ["ARC_convoyIncidentType", _incidentTypeU, true];
+_grp setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];
+_grp setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hgTod, true];
 
 // Convoy ORBAT designation profile (drives groupId/callsigns via ARC_fnc_groupSetDesignation).
 // Profiles are defined in bootstrapServer: LONGHAUL/PROVIDER/LIFELINE... (LOGISTICS) and LAWDAWG/SAPPER... (ESCORT).
@@ -555,9 +563,9 @@ private _pickProfileByCallsign = {
     private _cU = toUpper _callsign;
 
     private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 3 } && { (toUpper (_x # 2)) isEqualTo _cU }) exitWith { _idx = _forEachIndex; }; } forEach _ps;
+    { if ((_x isEqualType []) && { (count _x) >= 3 } && { (toUpper (_x select 2)) isEqualTo _cU }) exitWith { _idx = _forEachIndex; }; } forEach _ps;
     if (_idx < 0) exitWith {[]};
-    _ps # _idx
+    (_ps select _idx)
 };
 
 private _profile = [];
@@ -607,7 +615,6 @@ if (_profile isEqualType [] && { (count _profile) >= 3 }) then
 
 private _leadLeader = objNull;
 private _prevDrv = objNull;
-private _prevPos = _spawnPos;
 
 private _isPadOccupied = {
     params ["_pos", "_r"];
@@ -668,7 +675,7 @@ if (_stageEnabled) then
         params ["_p", "_r"];
         private _near = _p nearRoads _r;
         if ((count _near) == 0) exitWith { _p };
-        private _best = _near # 0;
+        private _best = (_near select 0);
         private _bestD = (getPosATL _best) distance2D _p;
         {
             private _d = (getPosATL _x) distance2D _p;
@@ -725,9 +732,11 @@ if (_stageEnabled) then
             _veh setPosATL (_spawnPos vectorAdd [0,0,0.25]); // slight Z lift to reduce ground clipping
             _veh allowDamage false;
             _veh setVariable ["ARC_isConvoyVeh", true, true];
+            _veh setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];
+            _veh setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hgTod, true];
 
             // Tag this vehicle so we can rehydrate and enforce one-convoy-at-a-time.
-            if (_taskId isNotEqualTo "") then { _veh setVariable ["ARC_convoyTaskId", _taskId, true]; };
+            if (!(_taskId isEqualTo "")) then { _veh setVariable ["ARC_convoyTaskId", _taskId, true]; };
             _veh setVariable ["ARC_convoyIndex", _forEachIndex, true];
             private _role = "CARGO";
             if (_forEachIndex isEqualTo 0) then { _role = "LEAD"; };
@@ -823,7 +832,7 @@ if (_stageEnabled) then
                         if (!isNull _prevDrv && { _drv != _prevDrv }) then { _drv doFollow _prevDrv; };
 
                         private _tgt = _legPos;
-                        if (_stageEnabled && { (count _stagePos) > _forEachIndex }) then { _tgt = _stagePos # _forEachIndex; };
+                        if (_stageEnabled && { (count _stagePos) > _forEachIndex }) then { _tgt = (_stagePos select _forEachIndex); };
 
                         // Per-vehicle caps are more reliable during doMove than group speedMode alone.
                         _veh limitSpeed _spawnKph;
@@ -855,7 +864,6 @@ if (_stageEnabled) then
 
                     // Update previous (used for staging chaining).
                     _prevDrv = _drv;
-                    _prevPos = getPosATL _veh;
 
                     // Re-enable damage after short grace window.
                     [_veh] spawn
@@ -938,8 +946,8 @@ if (_incidentTypeU isEqualTo "ESCORT" && { _isVIP } && { !isNull _grp } && { (co
         if (!(_guardCount isEqualType 0)) then { _guardCount = 4; };
         _guardCount = (_guardCount max 0) min 20;
 
-        private _leadVeh = _vehicles # 0;
-        private _tailVeh = _vehicles # ((count _vehicles) - 1);
+        private _leadVeh = (_vehicles select 0);
+        private _tailVeh = (_vehicles select ((count _vehicles) - 1));
 
         // Choose a VIP vehicle: prefer a middle vehicle with cargo seats (keeps lead/tail as security cars).
         private _vipVeh = objNull;
@@ -947,7 +955,7 @@ if (_incidentTypeU isEqualTo "ESCORT" && { _isVIP } && { !isNull _grp } && { (co
         {
             for "_i" from 1 to ((count _vehicles) - 2) do
             {
-                private _v = _vehicles # _i;
+                private _v = (_vehicles select _i);
                 if (!isNull _v && { (_v emptyPositions "cargo") > 0 }) exitWith { _vipVeh = _v; };
             };
         };
@@ -961,20 +969,22 @@ if (_incidentTypeU isEqualTo "ESCORT" && { _isVIP } && { !isNull _grp } && { (co
         };
 
         // Spawn VIP (WEST) and seat as cargo.
-        if (_vipCls isNotEqualTo "" && { !isNull _vipVeh }) then
+        if (!(_vipCls isEqualTo "") && { !isNull _vipVeh }) then
         {
             private _vip = _grp createUnit [_vipCls, _spawnPos, [], 0, "NONE"];
             if (!isNull _vip) then
             {
                 _vip setRank "PRIVATE"; // reduce chance of taking group lead if drivers die
                 _vip setVariable ["ARC_isConvoyVIP", true, true];
+                _vip setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];
+                _vip setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hgTod, true];
                 _vip assignAsCargo _vipVeh;
                 _vip moveInCargo _vipVeh;
             };
         };
 
         // Spawn guards and distribute: VIP vehicle, lead, tail, then fill remaining cargo seats.
-        if (_guardCls isNotEqualTo "" && { _guardCount > 0 }) then
+        if (!(_guardCls isEqualTo "") && { _guardCount > 0 }) then
         {
             private _preferred = [];
             if (!isNull _vipVeh) then { _preferred pushBack _vipVeh; _preferred pushBack _vipVeh; };
@@ -991,6 +1001,8 @@ if (_incidentTypeU isEqualTo "ESCORT" && { _isVIP } && { !isNull _grp } && { (co
 
                 _u setRank "PRIVATE";
                 _u setVariable ["ARC_isConvoyVIPGuard", true, true];
+                _u setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];
+                _u setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hgTod, true];
 
                 private _seated = false;
                 {

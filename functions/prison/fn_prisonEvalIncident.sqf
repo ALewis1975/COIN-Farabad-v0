@@ -30,6 +30,11 @@
 if (!isServer) exitWith {};
 
 private _hg     = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _todPolicy = [] call ARC_fnc_dynamicTodGetPolicy;
+private _canSpawnThreat = [_todPolicy, "canSpawnThreat", true] call _hg;
+if (!(_canSpawnThreat isEqualType true) && !(_canSpawnThreat isEqualType false)) then { _canSpawnThreat = true; };
+private _todPhase = [_todPolicy, "phase", "DAY"] call _hg;
+if (!(_todPhase isEqualType "")) then { _todPhase = "DAY"; };
 private _siteId = "KarkanakPrison";
 
 // ---------------------------------------------------------------------------
@@ -117,6 +122,11 @@ _prisonState set ["activeBreakoutGroups", _liveBreakoutGroups];
 //   - Prison has reached adaptationLevel 3 (severely stressed)
 if ((count _liveBreakoutGroups) isEqualTo 0 && { _adaptLevel >= 3 }) then
 {
+    if (!_canSpawnThreat) exitWith
+    {
+        diag_log format ["[ARC][PRISON][TOD] ARC_fnc_prisonEvalIncident: breakout spawn suppressed phase=%1", _todPhase];
+    };
+
     // Resolve spawn position within the prison holding area marker (or site centre fallback).
     // prison_holding_area is a RECTANGLE shape marker; getMarkerType returns "" for shape
     // markers, so we detect it by checking whether the marker position is non-zero instead.
@@ -188,12 +198,16 @@ if ((count _liveBreakoutGroups) isEqualTo 0 && { _adaptLevel >= 3 }) then
                 _u setPosATL _uPos;
                 _u setVariable ["ARC_breakoutActor",  true,            false];
                 _u setVariable ["ARC_prisonSiteId",   _siteId,         false];
+                _u setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, false];
+                _u setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hg, false];
                 _u enableDynamicSimulation true;
             };
 
             _bg setGroupIdGlobal [format ["BREAKOUT %1 %2", _siteId, serverTime]];
             _bg setVariable ["ARC_sitePop_siteId", _siteId];
             _bg setVariable ["ARC_sitePop_role",   "breakout_actor"];
+            _bg setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase];
+            _bg setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hg];
 
             _liveBreakoutGroups pushBack _bg;
             _prisonState set ["activeBreakoutGroups", _liveBreakoutGroups];

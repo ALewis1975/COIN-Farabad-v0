@@ -32,6 +32,14 @@ params [
 if (_taskId isEqualTo "") exitWith {[]};
 if (!(_posATL isEqualType []) || { (count _posATL) < 2 }) exitWith {[]};
 
+private _todPolicy = [] call ARC_fnc_dynamicTodGetPolicy;
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _canSpawnOps = [_todPolicy, "canSpawnOps", true] call _hg;
+if (!(_canSpawnOps isEqualType true) && !(_canSpawnOps isEqualType false)) then { _canSpawnOps = true; };
+if (!_canSpawnOps) exitWith {[]};
+private _todPhase = [_todPolicy, "phase", "DAY"] call _hg;
+if (!(_todPhase isEqualType "")) then { _todPhase = "DAY"; };
+
 private _enabled = missionNamespace getVariable ["ARC_localSupportEnabled", true];
 if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabled = true; };
 if (!_enabled) exitWith {[]};
@@ -151,7 +159,7 @@ if (_reuseExisting) then
         private _q = ["cleanupQueue", []] call ARC_fnc_stateGet;
         if (_q isEqualType []) then
         {
-            _q = _q select { !((_x isEqualType []) && { (count _x) >= 1 } && { (_x # 0) in _nids }) };
+            _q = _q select { !((_x isEqualType []) && { (count _x) >= 1 } && { (_x select 0) in _nids }) };
             ["cleanupQueue", _q] call ARC_fnc_stateSet;
         };
 
@@ -173,8 +181,6 @@ private _fn_sideNum = {
     if (_s isEqualTo civilian) exitWith { 3 };
     1
 };
-
-private _sideNum = [_side] call _fn_sideNum;
 
 // Decide whether to use Police (TNP) or Army (TNA) for this site.
 private _key = toLower (format ["%1 %2", _marker, _disp]);
@@ -312,7 +318,7 @@ private _fn_buildingPositions = {
         {
             private _p = _b buildingPos _i;
             if (!(_p isEqualType []) || { (count _p) < 2 }) exitWith {};
-            if ((_p # 0) == 0 && { (_p # 1) == 0 }) exitWith {};
+            if ((_p select 0) == 0 && { (_p select 1) == 0 }) exitWith {};
             _arr pushBack _p;
         };
     };
@@ -336,6 +342,8 @@ private _fn_tagUnit = {
     _u setVariable ["ARC_localSupportTaskId", _taskId, true];
     _u setVariable ["ARC_localSupportMarker", _marker, true];
     _u setVariable ["ARC_localSupportType", _type, true];
+    _u setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];
+    _u setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hg, true];
 
     // Persist in AO like static checkpoint compositions (optional).
     if (_persistInAO) then
@@ -371,6 +379,8 @@ private _fn_initGroup = {
     _g setVariable ["ARC_localSupportMarker", _marker, true];
     _g setVariable ["ARC_localSupportType", _type, true];
     _g setVariable ["ARC_localSupportRole", _role, true];
+    _g setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];
+    _g setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hg, true];
     _g allowFleeing 0;
 
     // Start friendly locals calm unless threatened.
@@ -408,7 +418,7 @@ if (_garrisonN > 0) then
     {
         _bPos = _bPos apply { [random 1, _x] };
         _bPos sort true;
-        _bPos = _bPos apply { _x # 1 };
+        _bPos = _bPos apply { (_x select 1) };
     };
 
     for "_i" from 1 to _garrisonN do

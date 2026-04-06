@@ -39,6 +39,15 @@ params [
 
 if (_taskId isEqualTo "") exitWith {[]};
 if (!(_endPosATL isEqualType []) || { (count _endPosATL) < 2 }) exitWith {[]};
+diag_log format ["[ARC][INFO] ARC_fnc_opsSpawnRouteSupport: taskId=%1 type=%2 marker=%3 disp=%4 radius=%5", _taskId, _typeU, _marker, _disp, _radius];
+
+private _todPolicy = [] call ARC_fnc_dynamicTodGetPolicy;
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _canSpawnOps = [_todPolicy, "canSpawnOps", true] call _hg;
+if (!(_canSpawnOps isEqualType true) && !(_canSpawnOps isEqualType false)) then { _canSpawnOps = true; };
+if (!_canSpawnOps) exitWith {[]};
+private _todPhase = [_todPolicy, "phase", "DAY"] call _hg;
+if (!(_todPhase isEqualType "")) then { _todPhase = "DAY"; };
 
 private _enabled = missionNamespace getVariable ["ARC_routeSupportEnabled", true];
 if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabled = true; };
@@ -90,7 +99,7 @@ private _sites = [];
     if (!(_x isEqualType []) || { (count _x) < 2 }) then { continue; };
 
     // Legacy: position array [x,y,z]
-    if ((_x # 0) isEqualType 0) then
+    if ((_x select 0) isEqualType 0) then
     {
         private _p = +_x; _p resize 3;
         _sites pushBack [_p, _now];
@@ -98,10 +107,10 @@ private _sites = [];
     };
 
     // Timestamped: [pos, t]
-    if ((_x # 0) isEqualType []) then
+    if ((_x select 0) isEqualType []) then
     {
-        private _p = +(_x # 0); _p resize 3;
-        private _t = _x # 1;
+        private _p = +(_x select 0); _p resize 3;
+        private _t = (_x select 1);
         if (!(_t isEqualType 0)) then { _t = _now; };
 
         if (_ttl <= 0 || { (_now - _t) <= _ttl }) then
@@ -288,7 +297,7 @@ private _routeDist = if (_haveRoutePts) then
     private _sum = 0;
     for "_i" from 1 to ((count _rp) - 1) do
     {
-        _sum = _sum + ((_rp # (_i - 1)) distance2D (_rp # _i));
+        _sum = _sum + ((_rp select (_i - 1)) distance2D (_rp select _i));
     };
     _sum
 }
@@ -310,8 +319,8 @@ if (_haveRoutePts) then
 
     for "_i" from 1 to ((count _rp) - 1) do
     {
-        private _a = _rp # (_i - 1);
-        private _b = _rp # _i;
+        private _a = (_rp select (_i - 1));
+        private _b = (_rp select _i);
         private _seg = _a distance2D _b;
         if (_seg <= 0.5) then { continue; };
 
@@ -320,9 +329,9 @@ if (_haveRoutePts) then
             private _t = (_nextAt - _acc) / _seg;
             _t = (_t max 0) min 1;
             private _p = [
-                (_a # 0) + ((_b # 0) - (_a # 0)) * _t,
-                (_a # 1) + ((_b # 1) - (_a # 1)) * _t,
-                (_a # 2) + ((_b # 2) - (_a # 2)) * _t
+                (_a select 0) + ((_b select 0) - (_a select 0)) * _t,
+                (_a select 1) + ((_b select 1) - (_a select 1)) * _t,
+                (_a select 2) + ((_b select 2) - (_a select 2)) * _t
             ];
             _candidates pushBack _p;
             _nextAt = _nextAt + _spacingM;
@@ -384,7 +393,7 @@ private _fn_roadDir = {
     private _conn = roadsConnectedTo _road;
     if ((count _conn) > 0) then
     {
-        _dir = _road getDir (_conn # 0);
+        _dir = _road getDir (_conn select 0);
     };
 
     _dir
@@ -399,6 +408,8 @@ private _fn_tag = {
     _o setVariable ["ARC_routeSupportTaskId", _taskId, true];
     _o setVariable ["ARC_routeSupportIncidentType", _type, true];
     _o setVariable ["ARC_routeSupportPackage", _pkg, true];
+    _o setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];
+    _o setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hg, true];
 
     if (_persistInAO) then
     {
@@ -568,6 +579,8 @@ private _fn_spawnVehElement = {
     _grpCrew setVariable ["ARC_routeSupportTaskId", _taskId, true];
     _grpCrew setVariable ["ARC_routeSupportPackage", _pkg, true];
     _grpCrew setVariable ["ARC_routeSupportRole", "CREW", true];
+    _grpCrew setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];
+    _grpCrew setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hg, true];
     _grpCrew allowFleeing 0;
 
     // Start friendly elements calm unless threatened.
@@ -630,6 +643,8 @@ private _fn_spawnVehElement = {
         _grpSec setVariable ["ARC_routeSupportTaskId", _taskId, true];
         _grpSec setVariable ["ARC_routeSupportPackage", _pkg, true];
         _grpSec setVariable ["ARC_routeSupportRole", "SECURITY", true];
+        _grpSec setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];
+        _grpSec setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hg, true];
         _grpSec allowFleeing 0;
 
         _grpSec setBehaviour "SAFE";
@@ -692,6 +707,8 @@ private _fn_spawnFootElement = {
     _grp setVariable ["ARC_routeSupportTaskId", _taskId, true];
     _grp setVariable ["ARC_routeSupportPackage", _pkg, true];
     _grp setVariable ["ARC_routeSupportRole", "FOOT", true];
+    _grp setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];
+    _grp setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hg, true];
     _grp allowFleeing 0;
 
     // Start friendly locals calm unless threatened.
@@ -783,7 +800,7 @@ private _spawnedSites = 0;
 
     // Avoid stacking (runtime-only)
     private _dupe = false;
-    { if ((_sitePos distance2D (_x # 0)) < _dedupeR) exitWith { _dupe = true; }; } forEach _sites;
+    { if ((_sitePos distance2D (_x select 0)) < _dedupeR) exitWith { _dupe = true; }; } forEach _sites;
     if (_dupe) then { continue; };
 
     // Avoid placing inside the airbase unless explicitly allowed.

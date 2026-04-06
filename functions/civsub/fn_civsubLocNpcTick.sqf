@@ -15,23 +15,26 @@ if !(missionNamespace getVariable ["civsub_v1_locnpc_enabled", false]) exitWith 
 
 private _debug = missionNamespace getVariable ["civsub_v1_locnpc_debug", false];
 if (!(_debug isEqualType true)) then { _debug = false; };
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _hk = compile "params ['_h']; keys _h";
 
 private _sites    = missionNamespace getVariable ["civsub_v1_locnpc_sites",    []];
 private _registry = missionNamespace getVariable ["civsub_v1_locnpc_registry", createHashMap];
 if (!(_sites    isEqualType []))          then { _sites    = []; };
 if (!(_registry isEqualType createHashMap)) then { _registry = createHashMap; };
+private _registryKeys = [_registry] call _hk;
 
 // ── 1. Prune dead/null from registry ────────────────────────────────────────
 {
     private _key   = _x;
-    private _units = _registry get _key;
+    private _units = [_registry, _key, []] call _hg;
     if (!(_units isEqualType [])) then { _registry set [_key, []]; continue; };
     private _live = [];
     {
         if (!isNull _x && { alive _x }) then { _live pushBack _x; };
     } forEach _units;
     _registry set [_key, _live];
-} forEach (keys _registry);
+} forEach _registryKeys;
 
 // ── 2. Players + bubble radius ───────────────────────────────────────────────
 private _players  = [] call ARC_fnc_civsubBubbleGetPlayers;
@@ -46,8 +49,11 @@ if (!(_bubbleR_air isEqualType 0)) then { _bubbleR_air = 5000; };
 _bubbleR_air = (_bubbleR_air max 200) min 8000;
 
 // ── 3. Time-of-day phase (reuse civsub_v1_activity_phase set by TrafficTick) ─
-private _phase = missionNamespace getVariable ["civsub_v1_activity_phase", "DAY"];
+private _todPolicy = [] call ARC_fnc_dynamicTodGetPolicy;
+private _phase = [_todPolicy, "phase", missionNamespace getVariable ["civsub_v1_activity_phase", "DAY"]] call _hg;
 if (!(_phase isEqualType "")) then { _phase = "DAY"; };
+private _canSpawnCivil = [_todPolicy, "canSpawnCivil", true] call _hg;
+if (!(_canSpawnCivil isEqualType true) && !(_canSpawnCivil isEqualType false)) then { _canSpawnCivil = true; };
 
 // ── 4. Global cap ────────────────────────────────────────────────────────────
 private _capG = missionNamespace getVariable ["civsub_v1_locnpc_cap_global", 32];
@@ -56,16 +62,15 @@ if (!(_capG isEqualType 0)) then { _capG = 32; };
 // Count all currently live loc-NPC units across all sites
 private _totalLive = 0;
 {
-    private _units = _registry get _x;
+    private _units = [_registry, _x, []] call _hg;
     if (_units isEqualType []) then { _totalLive = _totalLive + (count _units); };
-} forEach (keys _registry);
+} forEach _registryKeys;
 
 // ── 5. Process each site ─────────────────────────────────────────────────────
 {
     private _row = _x;
     if ((count _row) < 4) then { continue; };
     private _siteKey  = _row select 0;
-    private _siteType = _row select 1;
     private _sitePos  = _row select 2;
     private _profile  = _row select 3;
 
@@ -109,7 +114,7 @@ private _totalLive = 0;
 
     // Current live count for this site
     private _siteUnits = [];
-    if (_siteKey in _registry) then { _siteUnits = _registry get _siteKey; };
+    if (_siteKey in _registry) then { _siteUnits = [_registry, _siteKey, []] call _hg; };
     if (!(_siteUnits isEqualType [])) then { _siteUnits = []; };
     private _cur = count _siteUnits;
 
@@ -122,7 +127,7 @@ private _totalLive = 0;
     };
 
     // Spawn deficit (respect global cap; one per tick to avoid burst)
-    if (_cur < _desired && { _totalLive < _capG }) then {
+    if (_canSpawnCivil && { _cur < _desired } && { _totalLive < _capG }) then {
         private _u = [_siteKey, _sitePos, _clss] call ARC_fnc_civsubLocNpcSpawn;
         if (!isNull _u) then {
             _siteUnits pushBack _u;
@@ -136,7 +141,7 @@ private _totalLive = 0;
 missionNamespace setVariable ["civsub_v1_locnpc_registry", _registry, true];
 
 if (_debug) then {
-    diag_log format ["[CIVLOC][TICK] phase=%1 totalLive=%2 sites=%3 bubbleR=%4", _phase, _totalLive, count _sites, _bubbleR];
+    diag_log format ["[CIVLOC][TICK] phase=%1 totalLive=%2 sites=%3 bubbleR=%4", _phase, _totalLive, count _sites, _bubbleR_ground];
 };
 
 true

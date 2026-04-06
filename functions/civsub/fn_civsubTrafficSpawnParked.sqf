@@ -28,6 +28,10 @@ if ((count _pool) == 0) exitWith {objNull};
 
 private _dbg = missionNamespace getVariable ["civsub_v1_traffic_debug", false];
 if (!(_dbg isEqualType true)) then { _dbg = false; };
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _todPolicy = [] call ARC_fnc_dynamicTodGetPolicy;
+private _todPhase = [_todPolicy, "phase", "DAY"] call _hg;
+if (!(_todPhase isEqualType "")) then { _todPhase = "DAY"; };
 
 // Phase 2 helpers (defined in civsubInitServer)
 private _posIsRoadish = missionNamespace getVariable ["ARC_civsub_fnc_posIsRoadish", { params ["_p"]; isOnRoad _p }];
@@ -43,15 +47,7 @@ private _poolFallback = missionNamespace getVariable ["civsub_v1_traffic_vehicle
 if (!(_poolPrefer isEqualType [])) then { _poolPrefer = []; };
 if (!(_poolFallback isEqualType [])) then { _poolFallback = []; };
 
-private _fnHmGet = {
-    params ["_hm", "_key", "_fallback"];
-    private _v = _hm get _key;
-    if (isNil "_v") exitWith { _fallback };
-    _v
-};
-
-private _c = [_d, "centroid", [0,0]] call _fnHmGet;
-private _r = [_d, "radius_m", 400] call _fnHmGet;
+private _c = [_d, "centroid", [0,0]] call _hg;
 if !(_c isEqualType []) exitWith {objNull};
 if ((count _c) < 2) exitWith {objNull};
 
@@ -254,6 +250,8 @@ for "_k" from 1 to _attempts do
     _veh setVariable ["ARC_civtraf_role", "PARKED", true];
     _veh setVariable ["ARC_civtraf_districtId", _districtId, true];
     _veh setVariable ["ARC_civtraf_spawnTs", serverTime, true];
+    _veh setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];
+    _veh setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hg, true];
 
     _veh setVariable ["ARC_civtraf_modelSrc", _src, true];
     missionNamespace setVariable ["civsub_v1_traffic_lastSpawnClass", _cls, false];

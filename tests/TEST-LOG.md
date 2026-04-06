@@ -11,129 +11,129 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
-## 2026-04-06 00:13 UTC — Pre-dedicated mission completion audit
+## 2026-04-06 00:12 UTC — Fix sqflint HashMap parse failures in changed CIVSUB files
 
-**Branch/Commit:** copilot/prepare-coin-farabad-v0-testing @ 9269449 (pre-log baseline; test-log update applied on top)
+**Branch/Commit:** copilot/fix-vehicle-spawn-in-buildings @ e9a4084 + local edits
 
-**Scenario:** Implement a canonical pre-dedicated completion ledger so the mission can be treated as feature-complete before dedicated-server/JIP spend, and cross-link it from the active readiness/planning entry points.
+**Scenario:** `Arma SQF + Mission Config Preflight` failed in workflow run `24013565812` / job `70028946403` during changed-file SQF linting. Local reproduction showed `sqflint` parser failures on direct `keys` and `get` usage in changed CIVSUB files. Rewrote those sites to use compiled helper wrappers (`_hk` for `keys`, existing `_hg` for HashMap reads) in the changed files only.
 
 ### Files changed
 
 | File | Change |
 |------|--------|
-| `docs/qa/Pre_Dedicated_Mission_Completion_Audit_2026-04-06.md` | Added subsystem completion board, feature-complete gate, and pre-dedicated execution queue |
-| `docs/architecture/Architecture_and_Readiness_Plan.md` | Linked the new audit as the canonical completion ledger |
-| `docs/planning/Task_Decomposition.md` | Linked the new audit from the execution plan |
-| `README.md` | Added the new audit to QA references |
+| `functions/civsub/fn_civsubCivSamplerTick.sqf` | Replaced direct `keys` / `get` parser-hostile forms with `_hk` / `_hg` helper usage |
+| `functions/civsub/fn_civsubCivSpawnInDistrict.sqf` | Replaced changed-file `keys` / `get` parser-hostile forms with `_hk` / `_hg` helper usage |
+| `functions/civsub/fn_civsubLocNpcTick.sqf` | Replaced direct `keys` / `get` parser-hostile forms with `_hk` / `_hg` helper usage |
+| `functions/civsub/fn_civsubTrafficSpawnParked.sqf` | Replaced direct HashMap `get` helper with `_hg` call form |
+| `functions/civsub/fn_civsubTrafficTick.sqf` | Replaced direct HashMap `get` reads in changed code paths with `_hg` call form |
 
 ### Checks
 
 | # | Check | Command | Result | Notes |
 |---|-------|---------|--------|-------|
-| 1 | Repo diff sanity | `git --no-pager diff --check` | PASS | No whitespace/conflict-marker issues in current working tree |
-| 2 | Cross-link presence | `rg -n "Pre_Dedicated_Mission_Completion_Audit_2026-04-06.md" README.md docs/architecture/Architecture_and_Readiness_Plan.md docs/planning/Task_Decomposition.md` | PASS | README and the active readiness/planning docs all reference the new audit |
-| 3 | World-gate blocker verification | `rg -n "ARC_barrier_(north\|main\|south)\|ARC_guardpost_(north\|main\|south)" mission.sqm` | PASS | No matches found; confirms the audit is correctly tracking the remaining Eden prerequisite gap |
-| 4 | Test-log commit guard | `bash scripts/dev/check_test_log_commits.sh` | PASS | Script returned PASS for commit placeholders, but the container still lacked `rg` on `PATH` during that run |
-| 5 | Local MP runtime | N/A | BLOCKED | No Arma 3 runtime in container |
-| 6 | Dedicated/JIP runtime | N/A | BLOCKED | No dedicated/JIP environment in container |
+| 1 | State migration validation | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios passed |
+| 2 | Marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | off/auto/auto-no-rg modes passed |
+| 3 | Strict compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict <changed .sqf files>` | PASS | 23 changed SQF files, 0 parser-compat matches |
+| 4 | Changed-file SQF lint | `sqflint -e w <changed .sqf files>` | PASS | No parse errors remain; warnings only |
+| 5 | Diff whitespace check | `git diff --check` | PASS | Clean |
+| 6 | Local MP runtime smoke | N/A | BLOCKED | No Arma 3 runtime in container |
+| 7 | Dedicated/JIP runtime smoke | N/A | BLOCKED | No dedicated/JIP environment in container |
 
 ### Outcome
 
-- Added a single repo-wide completion ledger that distinguishes code/content blockers from deferred runtime-only verification.
-- Recorded the world-gate Eden prerequisite as the remaining verified mission-data blocker before dedicated-server spend.
-- Reframed dedicated/JIP as a final validation phase after feature completion, not the phase where missing mission scope is discovered.
+- Cleared the `sqflint` parse errors that were failing workflow job `70028946403`.
+- Local workflow-equivalent SQF checks now pass for all changed `.sqf` files.
 
 ---
 
-## 2026-04-05 23:51 UTC — AIRBASE sqflint warning fix (unused `_hg`)
+## 2026-04-06 00:01 UTC — Fix sqflint strict compat scan failures (CI job 70028396521)
 
-**Branch/Commit:** copilot/taxi-with-engines-on @ 0e2caef (pre-edit baseline; unused-variable fix applied on top)
+**Branch/Commit:** copilot/fix-vehicle-spawn-in-buildings @ HEAD (post-merge with main)
 
-**Scenario:** Resolve CI `sqflint -e w` failure in `functions/ambiance/fn_airbasePlaneDepart.sqf` caused by warning `[29,8]: Variable "_hg" not used` by removing the unused local helper declaration.
+**Scenario:** CI job 70028396521 failing in "SQF static analysis (changed *.sqf files only)" step — `sqflint_compat_scan.py --strict` reported 55 pattern matches across changed files. Fix all flagged patterns: `#` indexing → `select`, `isNotEqualTo` → `!(_a isEqualTo _b)`, method-style `getOrDefault` → call form via `_hg` helper.
 
 ### Files changed
 
 | File | Change |
 |------|--------|
-| `functions/ambiance/fn_airbasePlaneDepart.sqf` | Removed unused local variable `_hg` compile helper |
+| `functions/civsub/fn_civsubCivSpawnInDistrict.sqf` | 5× getOrDefault method→call form via `_hg` |
+| `functions/civsub/fn_civsubTrafficSpawnMoving.sqf` | 2× getOrDefault method→call form + 4× `#`→`select` |
+| `functions/civsub/fn_civsubTrafficTick.sqf` | 2× getOrDefault method→call form via `_hg` |
+| `functions/logistics/fn_execSpawnConvoy.sqf` | 12× `isNotEqualTo`→`!(...isEqualTo...)` + 11× `#`→`select` |
+| `functions/ops/fn_opsSpawnLocalSupport.sqf` | 3× `#`→`select` |
+| `functions/ops/fn_opsSpawnRouteSupport.sqf` | 12× `#`→`select` |
 
 ### Checks
 
 | # | Check | Command | Result | Notes |
 |---|-------|---------|--------|-------|
-| 1 | Targeted strict compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf` | PASS | File remains strict-compat clean |
-| 2 | Targeted sqflint warnings-as-errors | `sqflint -e w functions/ambiance/fn_airbasePlaneDepart.sqf` | BLOCKED | `sqflint` binary not available in container; validation deferred to GitHub workflow environment where sqflint is installed |
-| 3 | Repo diff sanity | `git --no-pager diff --check` | PASS | No whitespace/conflict-marker issues |
-| 4 | Local MP runtime | N/A | BLOCKED | No Arma 3 runtime in container |
-| 5 | Dedicated/JIP runtime | N/A | BLOCKED | No dedicated/JIP environment in container |
+| 1 | Strict compat scan (all 23 changed SQF files) | `python3 scripts/dev/sqflint_compat_scan.py --strict <23 files>` | PASS | 0 pattern matches found |
+| 2 | Local MP runtime smoke | N/A | BLOCKED | No Arma 3 runtime in container |
+| 3 | Dedicated/JIP runtime smoke | N/A | BLOCKED | No dedicated/JIP environment in container |
 
 ### Outcome
 
-- Removed the single unused `_hg` declaration that triggered warnings-as-errors failure in CI; final confirmation is expected from the GitHub workflow sqflint step.
-- `fn_airbasePlaneDepart.sqf` remains compatible with strict compat scan after the change.
+- All 55 strict-compat pattern matches resolved across 6 files.
+- CI `arma-preflight` job should now pass the SQF static analysis step.
 
 ---
 
-## 2026-04-05 23:37 UTC — AIRBASE sqflint compat remediation for fn_airbasePlaneDepart
+## 2026-04-05 23:52 UTC — Dynamic TOD policy sync + shared airbase boundary constant
 
-**Branch/Commit:** copilot/taxi-with-engines-on @ 5576210 (pre-edit baseline; compat remediation applied on top)
+**Branch/Commit:** copilot/fix-vehicle-spawn-in-buildings @ 6cf053f (pre-edit baseline; changes applied on top)
 
-**Scenario:** Resolve CI sqflint compatibility scan failure on `functions/ambiance/fn_airbasePlaneDepart.sqf` by converting method-form `getOrDefault` to call-form and clearing remaining strict-compat findings in the same changed file.
-
-### Files changed
-
-| File | Change |
-|------|--------|
-| `functions/ambiance/fn_airbasePlaneDepart.sqf` | Replaced method-form `getOrDefault` with call-form `[_map, key, default] call getOrDefault`; replaced `#` indexing with `select`; replaced `isNotEqualTo` with `!isEqualTo` equivalents |
-
-### Checks
-
-| # | Check | Command | Result | Notes |
-|---|-------|---------|--------|-------|
-| 1 | Targeted strict compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf` | PASS | No known parser-compat patterns remain in file |
-| 2 | Repo diff sanity | `git --no-pager diff --check` | PASS | No whitespace/conflict-marker issues |
-| 3 | Local MP runtime | N/A | BLOCKED | No Arma 3 runtime in container |
-| 4 | Dedicated/JIP runtime | N/A | BLOCKED | No dedicated/JIP environment in container |
-
-### Outcome
-
-- Compatibility failure mode reported by CI for method-form `getOrDefault` is resolved in `fn_airbasePlaneDepart.sqf`.
-- Additional strict-compat patterns in that file were remediated to avoid repeat CI failure on the same job step.
-
----
-
-## 2026-04-05 23:23 UTC — AIRBASE AWACS taxi engines-on hardening
-
-**Branch/Commit:** copilot/taxi-with-engines-on @ cef2a99
-
-**Scenario:** Ensure AWACS (`plane7`, `aws_C130_AEW`) can taxi with engines on by hardening departure prep to restore fuel before taxi start for EC-130 assets.
+**Scenario:** Implement shared server-authoritative dynamic TOD policy/state, wire major dynamic spawn/despawn paths to consume it, standardize TOD spawn metadata tags, and lock airbase/civ exclusion radius to a single mission-level constant.
 
 ### Files changed
 
 | File | Change |
 |------|--------|
-| `functions/ambiance/fn_airbasePlaneDepart.sqf` | Added `_isEC130` detection earlier and set `setFuel 1` before taxi `engineOn true` to prevent engine-off taxi on AWACS |
+| `initServer.sqf` | Added `ARC_airbase_dynamic_radius_m`; wired civ traffic airbase exclusion + airbase ground cleanup radius to shared constant; added TOD gating defaults |
+| `config/CfgFunctions.hpp` | Registered `dynamicTodRefresh` and `dynamicTodGetPolicy` |
+| `functions/core/fn_dynamicTodRefresh.sqf` | Added canonical server-side TOD phase/profile policy writer and replicated policy state |
+| `functions/core/fn_dynamicTodGetPolicy.sqf` | Added shared TOD policy reader |
+| `functions/ambiance/fn_airbaseGroundTrafficInit.sqf` | Default cleanup radius now sources shared airbase boundary constant |
+| `functions/ambiance/fn_airbaseGroundTrafficTick.sqf` | Uses TOD policy spawn gate; adds TOD metadata tags on spawned vehicles |
+| `functions/ambiance/fn_airbaseSpawnArrival.sqf` | Uses TOD policy spawn gate; tags spawned arrival aircraft with TOD metadata |
+| `functions/civsub/fn_civsubTrafficTick.sqf` | Replaced local TOD derivation with shared TOD refresh; enforces civil spawn gate |
+| `functions/civsub/fn_civsubSchedulerTick.sqf` | Uses shared TOD phase/tod state |
+| `functions/civsub/fn_civsubCivSamplerTick.sqf` | Uses shared TOD phase/tod state; enforces civil spawn gate |
+| `functions/civsub/fn_civsubLocNpcTick.sqf` | Uses shared TOD phase; enforces civil spawn gate for loc-NPC spawning |
+| `functions/civsub/fn_civsubTrafficSpawnParked.sqf` | Adds TOD metadata tags on parked vehicle spawns |
+| `functions/civsub/fn_civsubTrafficSpawnMoving.sqf` | Adds TOD metadata tags on moving vehicle spawns |
+| `functions/civsub/fn_civsubLocNpcSpawn.sqf` | Adds TOD metadata tags on loc-NPC spawns |
+| `functions/civsub/fn_civsubCivSpawnInDistrict.sqf` | Adds TOD metadata tags on civ spawns |
+| `functions/sitepop/fn_sitePopSpawnSite.sqf` | Uses TOD civil spawn gate |
+| `functions/sitepop/fn_sitePopBuildGroup.sqf` | Adds TOD metadata tags on sitepop groups/units/vehicles |
+| `functions/ied/fn_suicideBomberSpawnTick.sqf` | Uses TOD threat spawn gate; adds TOD metadata tags |
+| `functions/ied/fn_vbiedDrivenSpawnTick.sqf` | Uses TOD threat spawn gate; adds TOD metadata tags |
+| `functions/prison/fn_prisonEvalIncident.sqf` | Uses TOD threat spawn gate for breakout spawn; adds TOD metadata tags |
+| `functions/ops/fn_opsSpawnLocalSupport.sqf` | Uses TOD ops spawn gate; adds TOD metadata tags on support groups/units |
+| `functions/ops/fn_opsSpawnRouteSupport.sqf` | Uses TOD ops spawn gate; adds TOD metadata tags on support objects/groups |
+| `functions/logistics/fn_execSpawnConvoy.sqf` | Uses TOD ops spawn gate; adds TOD metadata tags on convoy assets |
+| `functions/threat/fn_threatVirtualPoolTick.sqf` | Uses TOD threat spawn gate for VIRTUAL_ACTIVE→PHYSICAL spawn path; tags spawned units |
 
 ### Checks
 
 | # | Check | Command | Result | Notes |
 |---|-------|---------|--------|-------|
-| 1 | Baseline state migrations | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios |
-| 2 | Baseline marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | all modes passed |
-| 3 | Test-log commit guard | `bash scripts/dev/check_test_log_commits.sh` | PASS | Script reported `rg: command not found` in env but still returned PASS |
-| 4 | AIRBASE static checks | `bash tests/static/airbase_planning_mode_checks.sh` | PASS | runtime gate/planning checks clean |
-| 5 | CASREQ static checks | `bash tests/static/casreq_snapshot_contract_checks.sh` | PASS | snapshot contract checks clean |
-| 6 | Targeted compat scan (changed file) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf` | FAIL (pre-existing) | Existing parser-compat findings in unchanged sections of this file |
-| 7 | Targeted sqflint (changed file) | `sqflint -e w functions/ambiance/fn_airbasePlaneDepart.sqf` | BLOCKED | `sqflint` binary not available in this container |
-| 8 | Repo diff sanity | `git --no-pager diff --check` | PASS | no whitespace/conflict-marker issues |
-| 9 | Local MP runtime | N/A | BLOCKED | No Arma 3 runtime in container |
-| 10 | Dedicated/JIP runtime | N/A | BLOCKED | No dedicated/JIP environment in container |
+| 1 | Baseline state migration validation | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios |
+| 2 | Baseline marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | All modes passed |
+| 3 | Baseline static AIRBASE + CASREQ checks | `bash tests/static/airbase_planning_mode_checks.sh && bash tests/static/casreq_snapshot_contract_checks.sh` | PASS | Runtime-gate and CASREQ snapshot checks clean |
+| 4 | Targeted compat scan (changed files) | `python3 scripts/dev/sqflint_compat_scan.py --strict <changed files>` | FAIL (pre-existing) | Existing repo-wide compat hotspots remain in touched files (`#`, `isNotEqualTo`, direct hashmap method form) |
+| 5 | sqflint installation | `python3 -m pip install --user sqflint` | PASS | Installed v0.3.2 under `/home/runner/.local/bin` |
+| 6 | Targeted sqflint (changed SQF files) | `/home/runner/.local/bin/sqflint -e w <each changed .sqf file>` | FAIL (pre-existing/tool limits) | Current sqflint parser reports existing legacy syntax patterns in multiple touched files; not introduced by this pass |
+| 7 | Post-change static validation | `python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && bash tests/static/airbase_planning_mode_checks.sh && bash tests/static/casreq_snapshot_contract_checks.sh` | PASS | Static regression checks passed after edits |
+| 8 | Repo diff sanity | `git --no-pager diff --check` | PASS | No whitespace/conflict-marker issues |
+| 9 | Local MP runtime smoke | N/A | BLOCKED | No Arma 3 runtime in container |
+| 10 | Dedicated/JIP runtime smoke | N/A | BLOCKED | No dedicated/JIP environment in container |
 
 ### Outcome
 
-- AWACS departures now explicitly restore full fuel before taxi playback begins, then issue `engineOn true`, reducing risk of engine-off taxi behavior for `aws_C130_AEW`.
-- No non-AWACS aircraft behavior was changed.
-- Dedicated/JIP runtime verification remains required for authoritative multiplayer confirmation.
+- Airbase dynamic boundary now has a single mission-level constant used by both airbase cleanup and civ exclusion radius logic.
+- Dynamic TOD policy is server-authoritative and shared via replicated missionNamespace keys; CIVSUB phase windows are the canonical source.
+- Major dynamic spawn systems now consume shared TOD policy and tag spawned entities/groups with TOD phase/profile metadata for observability.
+- Dedicated/JIP runtime verification remains required for persistence, synchronization, and reconnect/respawn edge-case confirmation.
 
 ---
 

@@ -15,12 +15,17 @@
 */
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _hk = compile "params ['_h']; keys _h";
 
 private _dbg = missionNamespace getVariable ["civsub_v1_debug", false];
+private _todPolicy = [] call ARC_fnc_dynamicTodGetPolicy;
+private _todPhase = [_todPolicy, "phase", "DAY"] call _hg;
+if (!(_todPhase isEqualType "")) then { _todPhase = "DAY"; };
 
 // Phase 2 helpers (defined in civsubInitServer)
 private _posIsRoadish = missionNamespace getVariable ["ARC_civsub_fnc_posIsRoadish", { params ["_p"]; isOnRoad _p }];
-private _findOffRoad = missionNamespace getVariable ["ARC_civsub_fnc_findPosOffRoad", { params ["_p","_min","_max","_t"]; _p }];
+private _findOffRoad = missionNamespace getVariable ["ARC_civsub_fnc_findPosOffRoad", { params ["_p"]; _p }];
 
 private _fail = {
     params [
@@ -61,10 +66,10 @@ if (_densityModEnabled) then
     private _districts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
     if (_districts isEqualType createHashMap) then
     {
-        private _dMap = _districts getOrDefault [_districtId, createHashMap];
+        private _dMap = [_districts, _districtId, createHashMap] call _hg;
         if (_dMap isEqualType createHashMap) then
         {
-            private _scoreR = _dMap getOrDefault ["R", 35];
+            private _scoreR = [_dMap, "R", 35] call _hg;
             if (!(_scoreR isEqualType 0)) then { _scoreR = 35; };
             _scoreR = (_scoreR max 0) min 100;
 
@@ -107,8 +112,8 @@ if (_district isEqualType createHashMap) then {
     };
 };
 
-private _center = _d getOrDefault ["centroid", [0,0]];
-private _radius = _d getOrDefault ["radius_m", 500];
+private _center = [_d, "centroid", [0,0]] call _hg;
+private _radius = [_d, "radius_m", 500] call _hg;
 
 if !(_center isEqualType []) exitWith { ["center_not_array","district_data"] call _fail };
 if ((count _center) < 2) exitWith { ["center_bad","district_data"] call _fail };
@@ -124,7 +129,7 @@ if !(_pos isEqualType [] && {(count _pos) >= 2} && {!(_pos isEqualTo [0,0,0])}) 
     _pos = [_center, _spawnR, _districtId] call ARC_fnc_civsubCivFindSpawnPos;
 };
 if !(_pos isEqualType [] && {(count _pos) >= 2}) then { _pos = _center; };
-if ((count _pos) == 2) then { _pos = [_pos#0, _pos#1, 0]; };
+if ((count _pos) == 2) then { _pos = [_pos select 0, _pos select 1, 0]; };
 
 // Phase 2: never spawn a civilian in the road.
 if ([_pos] call _posIsRoadish) then
@@ -137,28 +142,29 @@ if ([_pos] call _posIsRoadish) then
 private _minSep = missionNamespace getVariable ["civsub_v1_civ_minSeparation_m", 20];
 if (_minSep isEqualType 0 && {_minSep > 0}) then {
     private _reg = missionNamespace getVariable ["civsub_v1_civ_registry", createHashMap];
-    if (_reg isEqualType createHashMap && {(count (keys _reg)) > 0}) then {
+    private _regKeys = [_reg] call _hk;
+    if (_reg isEqualType createHashMap && {(count _regKeys) > 0}) then {
         private _tries = 0;
         private _ok = false;
         while {!_ok && {_tries < 10}} do {
             _tries = _tries + 1;
             _ok = true;
             {
-                private _row = _reg get _x;
+                private _row = [_reg, _x, createHashMap] call _hg;
                 if (_row isEqualType createHashMap) then {
-                    private _u2 = _row getOrDefault ["unit", objNull];
+                    private _u2 = [_row, "unit", objNull] call _hg;
                     if (!isNull _u2 && {(_pos distance2D (getPosATL _u2)) < _minSep}) exitWith {
                         _ok = false;
                     };
                 };
-            } forEach (keys _reg);
+            } forEach _regKeys;
             if (!_ok) then {
                 private _p2 = [_districtId] call ARC_fnc_civsubCivPickSpawnPos;
                 if !(_p2 isEqualType [] && {(count _p2) >= 2} && {!(_p2 isEqualTo [0,0,0])}) then {
                     _p2 = [_center, _spawnR, _districtId] call ARC_fnc_civsubCivFindSpawnPos;
                 };
                 if (_p2 isEqualType [] && {(count _p2) >= 2}) then {
-                    _pos = if ((count _p2) == 2) then { [_p2#0,_p2#1,0] } else { _p2 };
+                    _pos = if ((count _p2) == 2) then { [_p2 select 0, _p2 select 1, 0] } else { _p2 };
                 };
             };
         };
@@ -221,7 +227,7 @@ _u disableAI "SUPPRESSION";
 
 // Give them a small wander loop (only if we have a valid group)
 if !(isNull _grp) then {
-    private _wp = _grp addWaypoint [[(_pos#0)+random 60 - 30, (_pos#1)+random 60 - 30, 0], 0];
+    private _wp = _grp addWaypoint [[(_pos select 0)+random 60 - 30, (_pos select 1)+random 60 - 30, 0], 0];
     _wp setWaypointType "MOVE";
     _wp setWaypointSpeed "LIMITED";
     _wp setWaypointBehaviour "SAFE";
@@ -231,6 +237,8 @@ if !(isNull _grp) then {
 missionNamespace setVariable ["civsub_v1_civ_lastSpawnStage", "identity", true];
 
 [_u, _districtId] call ARC_fnc_civsubCivAssignIdentity;
+_u setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];
+_u setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hg, true];
 [_u, _districtId] call ARC_fnc_civsubCivRegisterSpawn;
 
 missionNamespace setVariable ["civsub_v1_civ_lastSpawnFail", "", true];
