@@ -364,10 +364,11 @@ private _composeAircraftLabel = {
     private _callsignLabel = [_callsign, ""] call _normalizeAirText;
     private _typeLabel = [_aircraftType, ""] call _normalizeAirText;
     private _hasCallsign = !([_callsignLabel] call _isOpaqueAirId);
+    private _hasValidType = !(_typeLabel isEqualTo "") && { !(_typeLabel isEqualTo "-") };
 
-    if (_hasCallsign && { !(_typeLabel isEqualTo "") }) exitWith { format ["%1 (%2)", _callsignLabel, _typeLabel] };
+    if (_hasCallsign && { _hasValidType }) exitWith { format ["%1 (%2)", _callsignLabel, _typeLabel] };
     if (_hasCallsign) exitWith { _callsignLabel };
-    if (!(_typeLabel isEqualTo "")) exitWith { format ["%1 / %2", _typeLabel, _fidLabel] };
+    if (_hasValidType) exitWith { format ["%1 / %2", _typeLabel, _fidLabel] };
     if (_callsignLabel isEqualTo "") exitWith { _fidLabel };
     format ["%1 / %2", _callsignLabel, _fidLabel]
 };
@@ -578,8 +579,12 @@ private _uiDecisionQueue = [];
     if !(_meta isEqualType []) then { _meta = []; };
 
     private _callsign = [_meta, "pilotCallsign", ""] call _metaValue;
-    if ([_callsign] call _isOpaqueAirId) then { _callsign = [_meta, "pilotGroupName", ""] call _metaValue; };
-    if ([_callsign] call _isOpaqueAirId) then { _callsign = _pilotName; };
+    private _pilotCallsignOpaque = [_callsign] call _isOpaqueAirId;
+    if (_pilotCallsignOpaque) then {
+        _callsign = [_meta, "pilotGroupName", ""] call _metaValue;
+    };
+    private _groupCallsignOpaque = [_callsign] call _isOpaqueAirId;
+    if (_groupCallsignOpaque) then { _callsign = _pilotName; };
     if (_callsign isEqualTo "") then { _callsign = _requestId; };
 
     private _decisionNeeded = _status in ["PENDING", "AWAITING_TOWER_DECISION", "QUEUED"];
@@ -763,15 +768,12 @@ private _runwayOwnerFlightId = [_runwayOwner, ""] call _normalizeAirText;
 private _runwayOwnerCallsign = "";
 private _runwayOwnerDisplay = "";
 if !(_runwayOwnerFlightId isEqualTo "") then {
-    private _ownerRec = [_uiDepartures, _runwayOwnerFlightId] call _findFlightPreview;
-    if !(_ownerRec isEqualType [] && { (count _ownerRec) >= 3 }) then {
-        _ownerRec = [_uiArrivals, _runwayOwnerFlightId] call _findFlightPreview;
-    };
+    private _ownerRec = [(_uiDepartures + _uiArrivals), _runwayOwnerFlightId] call _findFlightPreview;
     if (_ownerRec isEqualType [] && { (count _ownerRec) >= 3 }) then {
         _runwayOwnerCallsign = _ownerRec param [1, ""];
         _runwayOwnerDisplay = [_runwayOwnerFlightId, _runwayOwnerCallsign, _ownerRec param [2, ""]] call _composeAircraftLabel;
     } else {
-        _runwayOwnerCallsign = _runwayOwnerFlightId;
+        _runwayOwnerCallsign = "";
         _runwayOwnerDisplay = _runwayOwnerFlightId;
     };
     if ([_runwayOwnerCallsign] call _isOpaqueAirId) then { _runwayOwnerCallsign = ""; };

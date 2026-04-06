@@ -100,12 +100,13 @@ private _flightLabel = {
     private _callsignLabel = [_callsign, ""] call _cleanAirText;
     private _categoryLabel = [_category, ""] call _cleanAirText;
     private _hasCallsign = !([_callsignLabel] call _isOpaqueAirId);
+    private _hasValidCategory = !(_categoryLabel isEqualTo "") && { !(_categoryLabel isEqualTo "-") };
 
-    if (_hasCallsign && { !(_categoryLabel isEqualTo "") && { !(_categoryLabel isEqualTo "-") } }) exitWith {
+    if (_hasCallsign && { _hasValidCategory }) exitWith {
         format ["%1 (%2)", _callsignLabel, _categoryLabel]
     };
     if (_hasCallsign) exitWith { _callsignLabel };
-    if (!(_categoryLabel isEqualTo "") && { !(_categoryLabel isEqualTo "-") }) exitWith {
+    if (_hasValidCategory) exitWith {
         format ["%1 / %2", _categoryLabel, _fidLabel]
     };
     if (_callsignLabel isEqualTo "") exitWith { _fidLabel };
@@ -215,7 +216,8 @@ private _runwayOwnerDisplay = [_runway, "ownerDisplay", ""] call _getPair;
 private _activeMovement = [_runway, "activeMovement", "CLEAR"] call _getPair;
 private _holdDepartures = [_runway, "holdState", false] call _getPair;
 if (!(_holdDepartures isEqualType true) && !(_holdDepartures isEqualType false)) then { _holdDepartures = false; };
-if (_runwayOwnerDisplay isEqualTo "" && { !(_runwayOwnerFlightId isEqualTo "") || { !(_runwayOwner isEqualTo "") } }) then {
+private _hasRunwayOwnerData = !(_runwayOwnerFlightId isEqualTo "") || { !(_runwayOwner isEqualTo "") };
+if (_runwayOwnerDisplay isEqualTo "" && { _hasRunwayOwnerData }) then {
     _runwayOwnerDisplay = [_runwayOwnerFlightId, _runwayOwner, ""] call _flightLabel;
 };
 uiNamespace setVariable ["ARC_console_airHoldDepartures", _holdDepartures];
@@ -294,10 +296,10 @@ if (_rebuild) then {
         };
     } else {
         private _modeRow = _ctrlList lbAdd format [
-            "View: %1 — %2  |  Secondary: %3",
+            "View: %1 - %2  |  Secondary: %3",
             _airSubmode,
             [_airSubmode] call _modeSummary,
-            if (_nextMode isEqualTo _airSubmode) then {"REFRESH"} else {_nextMode}
+            (if (_nextMode isEqualTo _airSubmode) then {"REFRESH"} else {_nextMode})
         ];
         _ctrlList lbSetData [_modeRow, format ["MODE|%1", _airSubmode]];
 
@@ -689,10 +691,18 @@ switch (_rowType) do
     {
         private _rid = _parts param [1, ""];
         private _rec = [_decisionQueue, _rid] call _findById;
+        private _reqRec = [_pendingClearances, _rid] call _findById;
+        private _reqMeta = if (_reqRec isEqualType []) then { _reqRec param [7, []] } else { [] };
+        if !(_reqMeta isEqualType []) then { _reqMeta = []; };
+        private _decisionLabel = [
+            _rid,
+            if (_reqRec isEqualType []) then { _reqRec param [2, _parts param [2, ""]] } else { _parts param [2, ""] },
+            [_reqMeta, "aircraftType", ""] call _metaGet
+        ] call _flightLabel;
         _selectionHeading = "Decision Required";
         _detailLines = [
             format ["Request id: <t color='#FFFFFF'>%1</t>", _rid],
-            format ["Aircraft: <t color='#FFFFFF'>%1</t>", _parts param [2, ""]],
+            format ["Aircraft: <t color='#FFFFFF'>%1</t>", _decisionLabel],
             format ["Priority: <t color='#FFFFFF'>%1</t>", if (_rec isEqualType []) then { _rec param [3, 0] } else { 0 }],
             format ["Guidance: <t color='#FFFFFF'>Use CLEARANCES view to decide this request.</t>"]
         ];
