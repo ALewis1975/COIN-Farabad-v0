@@ -70,6 +70,10 @@ private _fnSpawnUnitsAtMarker = {
         []
     };
 
+    // getMarkerPos may return Position2D [x,y] or Position3D [x,0,z]
+    private _east  = _pos select 0;
+    private _north = if (count _pos > 2) then { _pos select 2 } else { _pos select 1 };
+
     private _units = [];
     private _nCls  = count _classArray;
     if (_nCls == 0) exitWith { [] };
@@ -82,9 +86,9 @@ private _fnSpawnUnitsAtMarker = {
         // Scatter placement within spread radius
         private _angle   = _i * (360 / _count);
         private _dist    = linearConversion [0, _count - 1, _i, 2, _spreadRadius, false];
-        private _offset  = [(_pos select 0) + (_dist * sin _angle),
-                            (_pos select 1) + (_dist * cos _angle),
-                            _pos select 2];
+        private _offset  = [_east  + (_dist * sin _angle),
+                            0,
+                            _north + (_dist * cos _angle)];
 
         // Prefer surface-snapped empty position, fall back to raw offset
         private _spawnPos = [_offset, 1, 3, 1, 0, 0.5, 0] call BIS_fnc_findSafePos;
@@ -136,6 +140,10 @@ private _fnSpawnUnitsAtPos = {
     if (_nCls == 0) exitWith { [] };
     if (_pos isEqualTo [0,0,0]) exitWith { [] };
 
+    // _pos is Position3D [east, alt, north]; extract horizontal components
+    private _east  = _pos select 0;
+    private _north = if (count _pos > 2) then { _pos select 2 } else { _pos select 1 };
+
     private _grp = createGroup [west, true];
 
     for "_i" from 0 to (_count - 1) do {
@@ -143,9 +151,9 @@ private _fnSpawnUnitsAtPos = {
 
         private _angle   = _i * (360 / _count);
         private _dist    = linearConversion [0, _count - 1, _i, 2, _spreadRadius, false];
-        private _offset  = [(_pos select 0) + (_dist * sin _angle),
-                            (_pos select 1) + (_dist * cos _angle),
-                            _pos select 2];
+        private _offset  = [_east  + (_dist * sin _angle),
+                            0,
+                            _north + (_dist * cos _angle)];
 
         private _spawnPos = [_offset, 1, 3, 1, 0, 0.5, 0] call BIS_fnc_findSafePos;
         if (_spawnPos isEqualTo [] || { _spawnPos isEqualTo [0,0,0] }) then {
@@ -197,10 +205,14 @@ private _fnSpawnVehicleAtMarker = {
         [objNull, []]
     };
 
+    // getMarkerPos may return Position2D [x,y] or Position3D [x,0,z]
+    private _east  = _pos select 0;
+    private _north = if (count _pos > 2) then { _pos select 2 } else { _pos select 1 };
+
     private _spawnPos = [
-        (_pos select 0) + (_offsetVec select 0),
-        (_pos select 1) + (_offsetVec select 1),
-        _pos select 2
+        _east + (_offsetVec select 0),
+        0,
+        _north + (_offsetVec select 1)
     ];
 
     private _veh = createVehicle [_vehClass, _spawnPos, [], 0, "NONE"];
@@ -307,7 +319,7 @@ private _amb1Result = [
     "UK3CB_C_Hilux_Ambulance",
     "rhsusf_airforce_security_force_rifleman",
     ["rhsusf_airforce_security_force_rifleman"],
-    [15, 5],
+    [25, 5],
     270
 ] call _fnSpawnVehicleAtMarker;
 
@@ -316,7 +328,7 @@ private _amb2Result = [
     "UK3CB_C_Hilux_Ambulance",
     "rhsusf_airforce_security_force_rifleman",
     ["rhsusf_airforce_security_force_rifleman"],
-    [15, -5],
+    [25, -5],
     270
 ] call _fnSpawnVehicleAtMarker;
 
@@ -396,8 +408,12 @@ private _cavClassPool = [
 
 // Troop A — offset north-west of CAV HQ
 private _cavHQPos = getMarkerPos "arc_m_base_1_73_CAV_hq";
+// getMarkerPos may return Position2D [x,y] or Position3D [x,0,z]
+private _cavE = _cavHQPos select 0;
+private _cavN = if (count _cavHQPos > 2) then { _cavHQPos select 2 } else { _cavHQPos select 1 };
+
 if (!(_cavHQPos isEqualTo [0,0,0])) then {
-    private _troopAPos = [(_cavHQPos select 0) - 20, (_cavHQPos select 1) + 15, 0];
+    private _troopAPos = [_cavE - 20, 0, _cavN + 15];
     private _troopAUnits = [
         _troopAPos,
         _cavClassPool,
@@ -413,7 +429,7 @@ if (!(_cavHQPos isEqualTo [0,0,0])) then {
 
 // Troop B — offset south-east of CAV HQ
 if (!(_cavHQPos isEqualTo [0,0,0])) then {
-    private _troopBPos = [(_cavHQPos select 0) + 20, (_cavHQPos select 1) - 15, 0];
+    private _troopBPos = [_cavE + 20, 0, _cavN - 15];
     private _troopBUnits = [
         _troopBPos,
         _cavClassPool,
