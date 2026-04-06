@@ -134,11 +134,11 @@ if (_allowed) then {
 
 | # | Finding | Severity | Layer | Status |
 |---|---|---|---|---|
-| F1 | `fn_threatScheduleEvent` is a stub (logs only; no world spawn or state change) | P2 | Scheduling | **OPEN** — spawn ticks are wired separately; stub must be expanded to write a threat record or the two-layer design must be formally documented as the intent |
-| F2 | VBIED execution path does not enforce escalation-tier gate (tier≥2) at spawn time | P2 | Execution | **OPEN** — if VBIED incident bypasses scheduler, tier not enforced |
-| F3 | Suicide Bomber execution path does not enforce escalation-tier gate (tier≥3) at spawn time | P2 | Execution | **OPEN** — same gap as F2 |
-| F4 | `fn_vbiedDrivenSpawnTick` is referenced in stub but not found in active execution wiring (`fn_execTickActive`) | P2 | Execution | **OPEN** — path may be missing or not yet activated |
-| F5 | `threat_v0_attack_budget[districtId].spent_today` never incremented — budget gate is effectively disabled | P1 | Scheduling | **OPEN** — budget counter must be incremented in `fn_threatSchedulerTick` after allow, or in `fn_threatScheduleEvent` when expanded |
+| F1 | `fn_threatScheduleEvent` is a stub (logs only; no world spawn or state change) | P2 | Scheduling | **CLOSED** — `fn_threatScheduleEvent` now creates a full ThreatRecord (pairs-array format) with links, classification, area, world-refs, and emits an IED Warning Lead via `fn_iedEmitLeads`. The two-layer model is formally documented as intentional: the scheduler approves via the governor and writes a threat record; execution-layer spawn ticks operate on the active incident using their own guards. |
+| F2 | VBIED execution path does not enforce escalation-tier gate (tier≥2) at spawn time | P2 | Execution | **CLOSED** — `fn_vbiedSpawnTick` now reads `activeIncidentCivsubDistrictId` → `ARC_district_{id}_secLevel`, derives a tier (0/1/2), and exits with a structured `ESCALATION_TIER` deny log if `tier < 2`. Mirrors `fn_threatGovernorCheck` line 88. |
+| F3 | Suicide Bomber execution path does not enforce escalation-tier gate (tier≥3) at spawn time | P2 | Execution | **CLOSED** — `fn_suicideBomberSpawnTick` now reads district security level, derives tier (0/1/2/3 including future CRITICAL level), and exits with a structured `ESCALATION_TIER` deny log if `tier < 3`. Mirrors `fn_threatGovernorCheck` line 89. |
+| F4 | `fn_vbiedDrivenSpawnTick` is referenced in stub but not found in active execution wiring (`fn_execTickActive`) | P2 | Execution | **CLOSED** — `fn_vbiedDrivenSpawnTick` and `fn_suicideBomberSpawnTick` are now called from `fn_execTickActive` inside the `_incTypeU isEqualTo "IED"` block, alongside `fn_iedSpawnTick` and `fn_vbiedSpawnTick`. Each function gates itself by `activeObjectiveKind`. |
+| F5 | `threat_v0_attack_budget[districtId].spent_today` never incremented — budget gate is effectively disabled | P1 | Scheduling | **CLOSED** — `fn_threatSchedulerTick` lines 113-126 now increment `spent_today` after each successful `fn_threatScheduleEvent` call, with a daily reset mechanism (lines 21-49). |
 
 ---
 
@@ -202,10 +202,12 @@ Verify whether `fn_vbiedDrivenSpawnTick` should be called from `fn_execTickActiv
 - [x] `fn_threatGovernorCheck` called in `fn_threatSchedulerTick` (confirmed line 76)
 - [x] Governor checks: global cooldown, district cooldown, budget, escalation tier, CIVSUB GREEN gate
 - [x] `fn_iedSpawnTick` gated by incident type + objective kind + AO activation (no governor required)
-- [x] `fn_vbiedSpawnTick` has own cooldown (ARC_vbiedCooldownSeconds), but no tier check
-- [x] `fn_suicideBomberSpawnTick` has fairness gate (no players near path), but no tier check
-- [ ] `spent_today` increment after successful schedule (F5 — NOT PRESENT)
-- [ ] `fn_vbiedDrivenSpawnTick` wired into execution tick (F4 — NOT CONFIRMED)
+- [x] `fn_vbiedSpawnTick` has own cooldown (ARC_vbiedCooldownSeconds) + escalation-tier gate (tier≥2)
+- [x] `fn_vbiedDrivenSpawnTick` has fairness gate (500m player radius) + escalation-tier gate (tier≥2)
+- [x] `fn_suicideBomberSpawnTick` has fairness gate (no players near path) + escalation-tier gate (tier≥3)
+- [x] `spent_today` increment after successful schedule (F5 — wired in fn_threatSchedulerTick lines 113-126)
+- [x] `fn_vbiedDrivenSpawnTick` wired into execution tick (F4 — called from fn_execTickActive)
+- [x] `fn_suicideBomberSpawnTick` wired into execution tick (called from fn_execTickActive)
 
 ---
 
