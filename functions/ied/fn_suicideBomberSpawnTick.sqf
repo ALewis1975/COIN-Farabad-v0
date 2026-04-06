@@ -25,6 +25,27 @@ private _objKind = toUpper (["activeObjectiveKind", ""] call ARC_fnc_stateGet);
 private _validKinds = ["SB_MARKET_APPROACH","SB_CHECKPOINT_APPROACH","SB_SHURA_APPROACH"];
 if (!(_objKind in _validKinds)) exitWith {false};
 
+// ── Escalation-tier gate (Suicide Bomber requires tier ≥ 3) ────────────────
+// Mirrors fn_threatGovernorCheck line 89: SUICIDE _tierMin = 3.
+// With the current 0-2 tier range this means SB is locked out until a
+// CRITICAL (tier 3) posture level is added — which is the design intent.
+private _districtId = ["activeIncidentCivsubDistrictId", ""] call ARC_fnc_stateGet;
+if (!(_districtId isEqualType "")) then { _districtId = ""; };
+if (!(_districtId isEqualTo "")) then
+{
+    private _secLevel = missionNamespace getVariable [format ["ARC_district_%1_secLevel", _districtId], "NORMAL"];
+    if (!(_secLevel isEqualType "")) then { _secLevel = "NORMAL"; };
+    private _tier = 0;
+    if (_secLevel isEqualTo "ELEVATED") then { _tier = 1; };
+    if (_secLevel isEqualTo "HIGH_RISK") then { _tier = 2; };
+    if (_secLevel isEqualTo "CRITICAL") then { _tier = 3; };
+    if (_tier < 3) exitWith
+    {
+        diag_log format ["[ARC][THREAT] ARC_fnc_suicideBomberSpawnTick: ESCALATION_TIER deny district=%1 tier=%2 required=3", _districtId, _tier];
+        false
+    };
+};
+
 private _enabled = missionNamespace getVariable ["ARC_suicideBomberEnabled", true];
 if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabled = true; };
 if (!_enabled) exitWith {false};

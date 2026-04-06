@@ -19,11 +19,31 @@ if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabl
 if (!_enabled) exitWith {false};
 
 private _incTypeU = toUpper (["activeIncidentType", ""] call ARC_fnc_stateGet);
-if (_incTypeU isNotEqualTo "IED") exitWith {false};
+if (!(_incTypeU isEqualTo "IED")) exitWith {false};
 
 private _objKind = ["activeObjectiveKind", ""] call ARC_fnc_stateGet;
 if (!(_objKind isEqualType "")) then { _objKind = ""; };
-if ((toUpper _objKind) isNotEqualTo "VBIED_VEHICLE") exitWith {false};
+if (!((toUpper _objKind) isEqualTo "VBIED_VEHICLE")) exitWith {false};
+
+// ── Escalation-tier gate (VBIED requires tier ≥ 2 / HIGH_RISK) ────────────
+// Mirrors fn_threatGovernorCheck line 88: VBIED _tierMin = 2.
+// Prevents execution-layer bypass if an incident reaches this path without
+// passing through the scheduler (e.g. direct mission event or debug spawn).
+private _districtId = ["activeIncidentCivsubDistrictId", ""] call ARC_fnc_stateGet;
+if (!(_districtId isEqualType "")) then { _districtId = ""; };
+if (!(_districtId isEqualTo "")) then
+{
+    private _secLevel = missionNamespace getVariable [format ["ARC_district_%1_secLevel", _districtId], "NORMAL"];
+    if (!(_secLevel isEqualType "")) then { _secLevel = "NORMAL"; };
+    private _tier = 0;
+    if (_secLevel isEqualTo "ELEVATED") then { _tier = 1; };
+    if (_secLevel isEqualTo "HIGH_RISK") then { _tier = 2; };
+    if (_tier < 2) exitWith
+    {
+        diag_log format ["[ARC][THREAT] ARC_fnc_vbiedSpawnTick: ESCALATION_TIER deny district=%1 tier=%2 required=2", _districtId, _tier];
+        false
+    };
+};
 
 private _vehNid = ["activeObjectiveNetId", ""] call ARC_fnc_stateGet;
 if (!(_vehNid isEqualType "")) then { _vehNid = ""; };
@@ -165,7 +185,7 @@ if (_enableDef) then
             {},
             // completion: mark defused (broadcast) and mark the objective complete (server-authoritative close-ready)
             {
-                params ["_target", "_caller", "_actionId", "_arguments"];
+                params ["_target", "_caller"];
                 _target setVariable ["ARC_vbiedDefused", true, true];
                 ["VBIED_VEHICLE", _target, _caller, "Suspicious vehicle rendered safe.", "", "COMPLETE"] remoteExec ["ARC_fnc_execObjectiveComplete", 2];
             },

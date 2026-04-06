@@ -24,6 +24,24 @@ if (!(_todPhase isEqualType "")) then { _todPhase = "DAY"; };
 private _objKind = toUpper (["activeObjectiveKind", ""] call ARC_fnc_stateGet);
 if (!(_objKind isEqualTo "VBIED_DRIVEN_CHECKPOINT") && !(_objKind isEqualTo "VBIED_DRIVEN_GATE")) exitWith {false};
 
+// ── Escalation-tier gate (VBIED driven requires tier ≥ 2 / HIGH_RISK) ─────
+// Mirrors fn_threatGovernorCheck line 88: VBIED _tierMin = 2.
+private _districtId = ["activeIncidentCivsubDistrictId", ""] call ARC_fnc_stateGet;
+if (!(_districtId isEqualType "")) then { _districtId = ""; };
+if (!(_districtId isEqualTo "")) then
+{
+    private _secLevel = missionNamespace getVariable [format ["ARC_district_%1_secLevel", _districtId], "NORMAL"];
+    if (!(_secLevel isEqualType "")) then { _secLevel = "NORMAL"; };
+    private _tier = 0;
+    if (_secLevel isEqualTo "ELEVATED") then { _tier = 1; };
+    if (_secLevel isEqualTo "HIGH_RISK") then { _tier = 2; };
+    if (_tier < 2) exitWith
+    {
+        diag_log format ["[ARC][THREAT] ARC_fnc_vbiedDrivenSpawnTick: ESCALATION_TIER deny district=%1 tier=%2 required=2", _districtId, _tier];
+        false
+    };
+};
+
 private _enabled = missionNamespace getVariable ["ARC_vbiedDrivenEnabled", true];
 if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabled = true; };
 if (!_enabled) exitWith {false};
