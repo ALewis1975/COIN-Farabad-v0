@@ -176,7 +176,19 @@ This decomposition supersedes older phase/task narratives that are now stale rel
 
 ---
 
-## 6) Notes on scope control
+## 6) AIR / TOWER PR roadmap
+
+The AIR / TOWER subsystem has its own narrow PR-by-PR execution plan:
+
+- **Audit matrix:** `docs/architecture/AIR_TOWER_Arma_Native_Audit_Matrix.md`
+- **Implementation matrix:** `docs/architecture/AIR_TOWER_Arma_Native_Implementation_Matrix.md`
+- **PR breakdown:** `docs/architecture/AIR_TOWER_PR_BY_PR_BREAKDOWN.md`
+
+Execution order: PR 1 (docs) → PR 2 (shell scaffold) → PR 3 (ops board) → PR 4 (clearances safety) → PR 5 (input flow) → PR 6 (snapshot freshness) → PR 7 (DASH air summary) → PR 8 (map pane) → PR 9 (RemoteExec hardening) → PR 10 (world overlay) → PR 11 (debug cleanup).
+
+---
+
+## 7) Notes on scope control
 
 - This document defines **what** to execute, not implementation-level code steps.
 - Use subsystem baselines and security/QA guides as authoritative references during execution.

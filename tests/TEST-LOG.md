@@ -11,6 +11,33 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-06 17:45 UTC — AIR / TOWER Arma-native doc sync (PR 1)
+
+**Branch/Commit:** copilot/develop-task-decomposition-plan @ 62caee7 + docs
+
+**Scenario:** Docs-only change. Publish the Arma-native AIR / TOWER audit matrix, implementation matrix, and PR-by-PR roadmap into `docs/architecture/`. Update `docs/planning/Task_Decomposition.md` to reference the new roadmap.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `docs/architecture/AIR_TOWER_Arma_Native_Audit_Matrix.md` | New — Arma-native capability scoring |
+| `docs/architecture/AIR_TOWER_Arma_Native_Implementation_Matrix.md` | New — Phase-by-phase implementation plan |
+| `docs/architecture/AIR_TOWER_PR_BY_PR_BREAKDOWN.md` | New — 11-PR work breakdown with modes, scopes, and acceptance criteria |
+| `docs/planning/Task_Decomposition.md` | Added section 6 (AIR / TOWER PR roadmap) referencing the three new docs |
+
+### Static checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Docs-only scope | Manual review | PASS | No runtime files (.sqf, .hpp, .ext) changed |
+
+### Deferred
+
+None. Docs-only change.
+
+---
+
 ## 2026-04-06 02:50 UTC — Fix invalid setUnitRank string
 
 **Branch/Commit:** copilot/fix-unit-rank-error @ ada0a87 + fix
