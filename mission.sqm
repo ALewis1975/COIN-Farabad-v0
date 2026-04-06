@@ -12,7 +12,7 @@ class EditorData
 	};
 	class ItemIDProvider
 	{
-		nextID=4837;
+		nextID=4841;
 	};
 	class MarkerIDProvider
 	{
@@ -31590,7 +31590,7 @@ class Mission
 											name="Main Gate";
 											class Entities
 											{
-												items=4;
+												items=5;
 												class Item0
 												{
 													dataType="Layer";
@@ -33825,7 +33825,7 @@ class Mission
 															flags=5;
 															class Attributes
 															{
-																name="gate_01";
+																name="ARC_barrier_main";
 															};
 															id=352;
 															type="Land_BarGate_F";
@@ -33962,8 +33962,8 @@ class Mission
 													position[]={5213.6694,8.9861374,2668.6111};
 													class Attributes
 													{
-														onActivation="gate_01 animateSource [""Door_1_source"", 1];";
-														onDeactivation="gate_01 animateSource [""Door_1_source"", 0];";
+														onActivation="ARC_barrier_main animateSource [""Door_1_source"", 1];";
+														onDeactivation="ARC_barrier_main animateSource [""Door_1_source"", 0];";
 														sizeA=12.368;
 														sizeB=2.987;
 														timeout[]={3,4,5};
@@ -33992,6 +33992,22 @@ class Mission
 													id=355;
 													type="EmptyDetector";
 												};
+												class Item4
+												{
+													dataType="Object";
+													class PositionInfo
+													{
+														position[]={5218,13.03,2679};
+													};
+													side="Empty";
+													flags=4;
+													class Attributes
+													{
+														name="ARC_guardpost_main";
+													};
+													id=4838;
+													type="Land_HelipadEmpty_F";
+												};
 											};
 											id=291;
 											atlOffset=0.46806622;
@@ -34002,7 +34018,7 @@ class Mission
 											name="North Gate";
 											class Entities
 											{
-												items=4;
+												items=5;
 												class Item0
 												{
 													dataType="Object";
@@ -34015,7 +34031,7 @@ class Mission
 													flags=5;
 													class Attributes
 													{
-														name="gate_03";
+														name="ARC_barrier_north";
 													};
 													id=1712;
 													type="Land_BarGate_F";
@@ -34056,8 +34072,8 @@ class Mission
 													position[]={6737.355,9.7049799,3284.9199};
 													class Attributes
 													{
-														onActivation="gate_03 animate [""Door_1_rot"", 1];";
-														onDeactivation="gate_03 animate [""Door_1_rot"", 0];";
+														onActivation="ARC_barrier_north animate [""Door_1_rot"", 1];";
+														onDeactivation="ARC_barrier_north animate [""Door_1_rot"", 0];";
 														sizeA=3.5209999;
 														sizeB=47.854;
 														repeatable=1;
@@ -34161,6 +34177,22 @@ class Mission
 														nAttributes=2;
 													};
 												};
+												class Item4
+												{
+													dataType="Object";
+													class PositionInfo
+													{
+														position[]={6735,13.5,3240};
+													};
+													side="Empty";
+													flags=4;
+													class Attributes
+													{
+														name="ARC_guardpost_north";
+													};
+													id=4839;
+													type="Land_HelipadEmpty_F";
+												};
 											};
 											id=1938;
 											atlOffset=-0.022079468;
@@ -34171,7 +34203,7 @@ class Mission
 											name="South Gate";
 											class Entities
 											{
-												items=20;
+												items=22;
 												class Item0
 												{
 													dataType="Object";
@@ -34718,6 +34750,69 @@ class Mission
 													id=4518;
 													type="Land_WaterTank_F";
 													atlOffset=-0.0001282692;
+												};
+												class Item20
+												{
+													dataType="Object";
+													class PositionInfo
+													{
+														position[]={6220,7.5,1335.5};
+														angles[]={0,1.309088,0};
+													};
+													side="Empty";
+													flags=5;
+													class Attributes
+													{
+														name="ARC_barrier_south";
+													};
+													id=4837;
+													type="Land_BarGate_F";
+													class CustomAttributes
+													{
+														class Attribute0
+														{
+															property="ObjectCollision";
+															expression="[_this, 	(			[false,true] select (if 		(_value in [true,false]) 	then 	{parseNumber _value} else {_value # 0}		 ) ) 	] remoteExecCall ['setPhysicsCollisionFlag', 0, _this];";
+															class Value
+															{
+																class data
+																{
+																	singleType="BOOL";
+																	value=1;
+																};
+															};
+														};
+														class Attribute1
+														{
+															property="allowDamage";
+															expression="_this allowdamage _value;";
+															class Value
+															{
+																class data
+																{
+																	singleType="BOOL";
+																	value=0;
+																};
+															};
+														};
+														nAttributes=2;
+													};
+												};
+												class Item21
+												{
+													dataType="Object";
+													class PositionInfo
+													{
+														position[]={6218,7.5,1333};
+													};
+													side="Empty";
+													flags=4;
+													class Attributes
+													{
+														name="ARC_guardpost_south";
+													};
+													id=4840;
+													type="Land_HelipadEmpty_F";
 												};
 											};
 											id=3932;
