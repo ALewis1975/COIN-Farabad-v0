@@ -11,41 +11,41 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
-## 2026-04-06 02:18 UTC — Fix civilian vehicle exclusions for airbase and theater hospital
+## 2026-04-06 02:35 UTC — AIR / TOWER operator-clarity pass
 
-**Branch/Commit:** copilot/fix-civilian-vehicle-spawning @ 180f8fa + local edits
+**Branch/Commit:** copilot/improve-airfield-ops-ui @ 1929475 + local review fixes
 
-**Scenario:** Player report: civilian traffic still spawns inside the airbase, and airbase medical vehicles stack near/on top of each other at the theater hospital. Merged the canonical civ traffic exclusion list into the resolved exclusion-zone cache so roadside picks honor the existing airbase exclusion as well as the prison exclusion, and disabled dynamic hospital-zone medical traffic because fixed ORBAT ambulances already occupy that footprint.
+**Scenario:** Improve AIR / TOWER usability after operator feedback: make AIRFIELD OPS vs CLEARANCES self-explanatory, replace raw flight-ID-first labels with aircraft-first labels, and expose runway ownership with both operator-facing labels and raw flight IDs for cross-reference.
 
 ### Files changed
 
 | File | Change |
 |------|--------|
-| `functions/civsub/fn_civsubTrafficInit.sqf` | Merge marker-based civ traffic exclusions into the resolved exclusion-zone cache and persist the prison exclusion alongside the airbase exclusion |
-| `functions/ambiance/fn_airbaseGroundTrafficInit.sqf` | Disable dynamic MEDICAL-zone ground traffic at the theater hospital to prevent stacked ambulance spawns |
+| `docs/architecture/AIR_TOWER_UI_Snapshot_Contract_v1.md` | Documented runway owner display fields and clarified callsign fallback semantics |
+| `functions/core/fn_publicBroadcastState.sqf` | Normalized aircraft display labels, operator-friendly decision text, and runway owner display metadata |
+| `functions/ui/fn_uiConsoleAirPaint.sqf` | Reworded AIRFIELD OPS / CLEARANCES guidance, changed list/detail labels to aircraft-first presentation, and surfaced runway owner flight IDs |
 
 ### Checks
 
 | # | Check | Command | Result | Notes |
 |---|-------|---------|--------|-------|
 | 1 | Baseline state migrations | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios passed before edits |
-| 2 | Baseline strict compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubTrafficInit.sqf functions/ambiance/fn_airbaseGroundTrafficInit.sqf` | PASS | 2 target files, 0 parser-compat matches |
-| 3 | Baseline sqflint | `sqflint -e w functions/civsub/fn_civsubTrafficInit.sqf && sqflint -e w functions/ambiance/fn_airbaseGroundTrafficInit.sqf` | PASS | Both target SQF files lint clean |
-| 4 | Post-change strict compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubTrafficInit.sqf functions/ambiance/fn_airbaseGroundTrafficInit.sqf` | PASS | 2 changed SQF files, 0 parser-compat matches |
-| 5 | Post-change sqflint | `sqflint -e w functions/civsub/fn_civsubTrafficInit.sqf && sqflint -e w functions/ambiance/fn_airbaseGroundTrafficInit.sqf` | PASS | Both changed SQF files lint clean |
-| 6 | Post-change state migrations | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios passed after edits |
-| 7 | Post-change marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | off/on/auto-no-rg modes passed |
-| 8 | Test-log placeholder guard | `bash scripts/dev/check_test_log_commits.sh` | PASS | No pending placeholders |
-| 9 | Repo diff sanity | `git --no-pager diff --check` | PASS | No whitespace/conflict-marker issues |
-| 10 | Local MP runtime smoke | N/A | BLOCKED | No Arma 3 runtime in container |
-| 11 | Dedicated/JIP runtime smoke | N/A | BLOCKED | No dedicated/JIP environment in container |
+| 2 | Baseline marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | All modes passed before edits |
+| 3 | Targeted strict compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_publicBroadcastState.sqf functions/ui/fn_uiConsoleAirPaint.sqf` | PASS | 2 modified SQF files, 0 parser-compat matches |
+| 4 | Targeted sqflint | `sqflint -e w functions/core/fn_publicBroadcastState.sqf` + `sqflint -e w functions/ui/fn_uiConsoleAirPaint.sqf` | BLOCKED | `sqflint` binary not installed in this container (`bash: sqflint: command not found`) |
+| 5 | Post-change state migrations | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios passed after edits |
+| 6 | Post-change marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | All modes passed after edits |
+| 7 | Test log commit references | `scripts/dev/check_test_log_commits.sh` | PASS | No pending commit placeholders; script emitted `rg: command not found` in this container but still completed successfully |
+| 8 | Repo diff sanity | `git --no-pager diff --check` | PASS | No whitespace/conflict-marker issues |
+| 9 | Local MP runtime smoke | N/A | BLOCKED | No Arma 3 runtime in container |
+| 10 | Dedicated/JIP runtime smoke | N/A | BLOCKED | No dedicated/JIP environment in container |
 
 ### Outcome
 
-- Civilian traffic roadside picks now inherit the existing airbase no-spawn exclusion instead of only the prison exclusion cache.
-- The prison exclusion is kept in the canonical marker/radius list, so both cached and fallback civ traffic paths share the same protected compounds.
-- Theater hospital dynamic medical traffic is disabled because the fixed ORBAT ambulances already satisfy that ambience need without stacking.
-- Runtime validation in local MP and dedicated/JIP remains required outside the container.
+- AIRFIELD OPS now reads like a traffic picture instead of a raw queue dump.
+- CLEARANCES now explains that it is the action queue for approvals, queue management, and lane control.
+- Runway ownership and queued traffic now surface operator-facing aircraft labels with the raw flight ID still available for troubleshooting.
+- Dedicated-server, JIP, and in-engine UI validation remain required before operational sign-off.
 
 ---
 

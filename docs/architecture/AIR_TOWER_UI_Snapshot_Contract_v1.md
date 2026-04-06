@@ -59,7 +59,9 @@ The payload is a SQF key/value-pair array so it remains compatible with existing
 | Key | Type | Notes |
 |---|---|---|
 | `state` | STRING | `OPEN`, `RESERVED`, `OCCUPIED`, `BLOCKED` |
-| `ownerCallsign` | STRING | Empty string when unowned |
+| `ownerCallsign` | STRING | Best available callsign when known; empty string when unowned or only an internal ID is available |
+| `ownerFlightId` | STRING | Raw internal flight ID (`FLT-####`) for cross-reference |
+| `ownerDisplay` | STRING | Operator-facing aircraft label combining callsign/type/flight ID when needed |
 | `activeMovement` | STRING | `CLEAR`, `DEPARTING`, `LANDING`, `BLOCKED` |
 | `holdState` | BOOL | `true` when departure hold is active |
 | `age` | NUMBER | Seconds since last replicated update |
@@ -91,6 +93,8 @@ Each row:
 [flightId, callsign, category, phase, ageS, priority, status]
 ```
 
+- `callsign` is the best available identity string; UI readers should combine it with `category` and `flightId` when the callsign is missing or only an internal ID.
+
 ### `departures[]`
 
 Each row:
@@ -98,6 +102,8 @@ Each row:
 ```sqf
 [flightId, callsign, category, state, ageS, priority, status]
 ```
+
+- `callsign` is the best available identity string; UI readers should combine it with `category` and `flightId` when the callsign is missing or only an internal ID.
 
 ### `pendingClearances[]`
 
@@ -228,4 +234,3 @@ Each row:
 - `Updated 8s ago` means freshness
 - `State unchanged for 45m` means stability
 - The UI must not conflate those two concepts
-

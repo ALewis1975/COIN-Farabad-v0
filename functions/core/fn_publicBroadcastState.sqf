@@ -312,6 +312,78 @@ private _metaValue = {
     (_meta select _idx) select 1
 };
 
+private _normalizeAirText = {
+    params ["_value", ["_default", ""]];
+    if !(_value isEqualType "") then { _value = str _value; };
+    private _out = [_value] call _trimFn;
+    if (_out isEqualTo "") exitWith { _default };
+    _out
+};
+
+private _isOpaqueAirId = {
+    params ["_value"];
+    private _txt = toUpper ([_value, ""] call _normalizeAirText);
+    if (_txt isEqualTo "") exitWith { true };
+    ((_txt find "FLT-") == 0) || { ((_txt find "CLR-") == 0) || { ((_txt find "REQ-") == 0) } }
+};
+
+private _requestTypeLabel = {
+    params ["_requestType"];
+    private _rt = toUpper ([_requestType, "REQUEST"] call _normalizeAirText);
+    switch (_rt) do
+    {
+        case "REQ_TAXI": { "Taxi" };
+        case "REQ_TAKEOFF": { "Takeoff" };
+        case "REQ_INBOUND": { "Inbound" };
+        case "REQ_LAND": { "Landing" };
+        case "REQ_EMERGENCY": { "Emergency" };
+        default { _rt }
+    }
+};
+
+private _resolveAircraftDisplay = {
+    params ["_raw"];
+    private _cls = [_raw, ""] call _normalizeAirText;
+    if (_cls isEqualTo "") exitWith { "" };
+    private _display = "";
+    if (isClass (configFile >> "CfgVehicles" >> _cls)) then {
+        _display = getText (configFile >> "CfgVehicles" >> _cls >> "displayName");
+    };
+    _display = [_display, _cls] call _normalizeAirText;
+    _display
+};
+
+private _composeAircraftLabel = {
+    params [
+        ["_fid", "", [""]],
+        ["_callsign", "", [""]],
+        ["_aircraftType", "", [""]]
+    ];
+
+    private _fidLabel = [_fid, "UNKNOWN"] call _normalizeAirText;
+    private _callsignLabel = [_callsign, ""] call _normalizeAirText;
+    private _typeLabel = [_aircraftType, ""] call _normalizeAirText;
+    private _hasCallsign = !([_callsignLabel] call _isOpaqueAirId);
+    private _hasValidType = !(_typeLabel isEqualTo "") && { !(_typeLabel isEqualTo "-") };
+
+    if (_hasCallsign && { _hasValidType }) exitWith { format ["%1 (%2)", _callsignLabel, _typeLabel] };
+    if (_hasCallsign) exitWith { _callsignLabel };
+    if (_hasValidType) exitWith { format ["%1 / %2", _typeLabel, _fidLabel] };
+    if (_callsignLabel isEqualTo "") exitWith { _fidLabel };
+    format ["%1 / %2", _callsignLabel, _fidLabel]
+};
+
+private _findFlightPreview = {
+    params ["_rows", "_fid"];
+    private _out = [];
+    {
+        if (_x isEqualType [] && { (_x param [0, ""]) isEqualTo _fid }) exitWith {
+            _out = _x;
+        };
+    } forEach _rows;
+    _out
+};
+
 private _blockedRouteTail = [];
 
 {
@@ -507,8 +579,12 @@ private _uiDecisionQueue = [];
     if !(_meta isEqualType []) then { _meta = []; };
 
     private _callsign = [_meta, "pilotCallsign", ""] call _metaValue;
-    if (_callsign isEqualTo "") then { _callsign = [_meta, "pilotGroupName", ""] call _metaValue; };
-    if (_callsign isEqualTo "") then { _callsign = _pilotName; };
+    private _pilotCallsignOpaque = [_callsign] call _isOpaqueAirId;
+    if (_pilotCallsignOpaque) then {
+        _callsign = [_meta, "pilotGroupName", ""] call _metaValue;
+    };
+    private _groupCallsignOpaque = [_callsign] call _isOpaqueAirId;
+    if (_groupCallsignOpaque) then { _callsign = _pilotName; };
     if (_callsign isEqualTo "") then { _callsign = _requestId; };
 
     private _decisionNeeded = _status in ["PENDING", "AWAITING_TOWER_DECISION", "QUEUED"];
@@ -517,8 +593,14 @@ private _uiDecisionQueue = [];
     };
 
     if (_decisionNeeded && { (count _uiDecisionQueue) < 5 }) then {
+        private _decisionType = [_meta, "aircraftType", ""] call _metaValue;
+        _decisionType = [_decisionType] call _resolveAircraftDisplay;
         _uiDecisionQueue pushBack [
-            format ["Decision required: %1 %2", _requestType, _callsign],
+            format [
+                "Decision required: %1 %2",
+                [_requestType] call _requestTypeLabel,
+                [_requestId, _callsign, _decisionType] call _composeAircraftLabel
+            ],
             _requestId,
             _callsign,
             _priority,
@@ -542,6 +624,7 @@ private _uiDepartures = [];
     if !(_queuedAt isEqualType 0) then { _queuedAt = -1; };
     private _aircraftType = [_routeMeta, "aircraftType", ""] call _metaValue;
     if (_aircraftType isEqualTo "") then { _aircraftType = _asset; };
+    _aircraftType = [_aircraftType] call _resolveAircraftDisplay;
     if (_aircraftType isEqualTo "") then { _aircraftType = "-"; };
 
     private _matchedReq = [];
@@ -560,6 +643,7 @@ private _uiDepartures = [];
             _ageS = round ((serverTime - _requestedAt) max 0);
         };
     };
+    _callsign = [_callsign, _fid] call _normalizeAirText;
 
     if (_kind isEqualTo "ARR") then {
         if ((count _uiArrivals) < 6) then {
@@ -680,6 +764,21 @@ if ((toUpper _runwayState) in ["OCCUPIED", "BLOCKED"]) then {
     _runwayMovement = if (_execActive) then { "DEPARTING" } else { "BLOCKED" };
 };
 
+private _runwayOwnerFlightId = [_runwayOwner, ""] call _normalizeAirText;
+private _runwayOwnerCallsign = "";
+private _runwayOwnerDisplay = "";
+if !(_runwayOwnerFlightId isEqualTo "") then {
+    private _ownerRec = [(_uiDepartures + _uiArrivals), _runwayOwnerFlightId] call _findFlightPreview;
+    if (_ownerRec isEqualType [] && { (count _ownerRec) >= 3 }) then {
+        _runwayOwnerCallsign = _ownerRec param [1, ""];
+        _runwayOwnerDisplay = [_runwayOwnerFlightId, _runwayOwnerCallsign, _ownerRec param [2, ""]] call _composeAircraftLabel;
+    } else {
+        _runwayOwnerCallsign = "";
+        _runwayOwnerDisplay = _runwayOwnerFlightId;
+    };
+    if ([_runwayOwnerCallsign] call _isOpaqueAirId) then { _runwayOwnerCallsign = ""; };
+};
+
 private _casTiming = [
     ["casreqId", _casreqId],
     ["rev", missionNamespace getVariable ["ARC_casreq_rev", 0]],
@@ -722,7 +821,9 @@ private _airbaseUiSnapshot = [
     ["freshnessState", "FRESH"],
     ["runway", [
         ["state", _runwayState],
-        ["ownerCallsign", _runwayOwner],
+        ["ownerCallsign", _runwayOwnerCallsign],
+        ["ownerFlightId", _runwayOwnerFlightId],
+        ["ownerDisplay", _runwayOwnerDisplay],
         ["activeMovement", _runwayMovement],
         ["holdState", _holdDepartures],
         ["age", 0]

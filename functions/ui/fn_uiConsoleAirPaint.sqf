@@ -74,6 +74,79 @@ private _fmtSeconds = {
     format ["%1m %2s", floor (_v / 60), (round _v) mod 60]
 };
 
+private _cleanAirText = {
+    params ["_value", ["_default", ""]];
+    if !(_value isEqualType "") then { _value = str _value; };
+    private _out = [_value] call _trimFn;
+    if (_out isEqualTo "") exitWith { _default };
+    _out
+};
+
+private _isOpaqueAirId = {
+    params ["_value"];
+    private _txt = toUpper ([_value, ""] call _cleanAirText);
+    if (_txt isEqualTo "") exitWith { true };
+    ((_txt find "FLT-") == 0) || { ((_txt find "CLR-") == 0) || { ((_txt find "REQ-") == 0) } }
+};
+
+private _flightLabel = {
+    params [
+        ["_fid", "", [""]],
+        ["_callsign", "", [""]],
+        ["_category", "", [""]]
+    ];
+
+    private _fidLabel = [_fid, "UNKNOWN"] call _cleanAirText;
+    private _callsignLabel = [_callsign, ""] call _cleanAirText;
+    private _categoryLabel = [_category, ""] call _cleanAirText;
+    private _hasCallsign = !([_callsignLabel] call _isOpaqueAirId);
+    private _hasValidCategory = !(_categoryLabel isEqualTo "") && { !(_categoryLabel isEqualTo "-") };
+
+    if (_hasCallsign && { _hasValidCategory }) exitWith {
+        format ["%1 (%2)", _callsignLabel, _categoryLabel]
+    };
+    if (_hasCallsign) exitWith { _callsignLabel };
+    if (_hasValidCategory) exitWith {
+        format ["%1 / %2", _categoryLabel, _fidLabel]
+    };
+    if (_callsignLabel isEqualTo "") exitWith { _fidLabel };
+    format ["%1 / %2", _callsignLabel, _fidLabel]
+};
+
+private _requestTypeLabel = {
+    params ["_requestType"];
+    private _rt = toUpper ([_requestType, "REQUEST"] call _cleanAirText);
+    switch (_rt) do
+    {
+        case "REQ_TAXI": { "Taxi" };
+        case "REQ_TAKEOFF": { "Takeoff" };
+        case "REQ_INBOUND": { "Inbound" };
+        case "REQ_LAND": { "Landing" };
+        case "REQ_EMERGENCY": { "Emergency" };
+        default { _rt }
+    }
+};
+
+private _modeSummary = {
+    params ["_mode"];
+    switch (toUpper _mode) do
+    {
+        case "CLEARANCES": { "tower action queue" };
+        case "DEBUG": { "technical telemetry" };
+        default { "traffic picture" };
+    }
+};
+
+private _modeGuidance = {
+    params ["_mode"];
+    switch (toUpper _mode) do
+    {
+        case "CLEARANCES": { "Use this view to approve or deny requests, manage queued departures, and claim or release controller lanes." };
+        case "DEBUG": { "Use this view for snapshot internals, route-validation failures, and controller debug telemetry." };
+        default { "Use this view to understand runway status, inbound traffic, outbound traffic, and immediate risks in one glance." };
+    }
+};
+
 private _statusColor = {
     params ["_status"];
     private _s = toUpper _status;
@@ -138,9 +211,15 @@ if (!(_debug isEqualType [])) then { _debug = []; };
 
 private _runwayState = [_runway, "state", "UNKNOWN"] call _getPair;
 private _runwayOwner = [_runway, "ownerCallsign", ""] call _getPair;
+private _runwayOwnerFlightId = [_runway, "ownerFlightId", ""] call _getPair;
+private _runwayOwnerDisplay = [_runway, "ownerDisplay", ""] call _getPair;
 private _activeMovement = [_runway, "activeMovement", "CLEAR"] call _getPair;
 private _holdDepartures = [_runway, "holdState", false] call _getPair;
 if (!(_holdDepartures isEqualType true) && !(_holdDepartures isEqualType false)) then { _holdDepartures = false; };
+private _hasRunwayOwnerData = !(_runwayOwnerFlightId isEqualTo "") || { !(_runwayOwner isEqualTo "") };
+if (_runwayOwnerDisplay isEqualTo "" && { _hasRunwayOwnerData }) then {
+    _runwayOwnerDisplay = [_runwayOwnerFlightId, _runwayOwner, ""] call _flightLabel;
+};
 uiNamespace setVariable ["ARC_console_airHoldDepartures", _holdDepartures];
 
 private _canAirHold = ["ARC_console_airCanHold", false] call ARC_fnc_uiNsGetBool;
@@ -216,15 +295,25 @@ if (_rebuild) then {
             } forEach _myArrivals;
         };
     } else {
-        private _modeRow = _ctrlList lbAdd format ["View: %1  |  Next: %2", _airSubmode, _nextMode];
+        private _modeRow = _ctrlList lbAdd format [
+            "View: %1 - %2  |  Secondary: %3",
+            _airSubmode,
+            [_airSubmode] call _modeSummary,
+            (if (_nextMode isEqualTo _airSubmode) then {"REFRESH"} else {_nextMode})
+        ];
         _ctrlList lbSetData [_modeRow, format ["MODE|%1", _airSubmode]];
 
         switch (_airSubmode) do
         {
             case "CLEARANCES":
             {
+                private _guideRow = _ctrlList lbAdd ([ _airSubmode ] call _modeGuidance);
+                _ctrlList lbSetData [_guideRow, "CSTATUS|GUIDE"];
+
                 private _summaryRow = _ctrlList lbAdd format [
-                    "Timeouts T/G/A %1/%2/%3  |  Auto %4/%5/%6",
+                    "Pending %1  |  Queue %2  |  Timers T/G/A %3/%4/%5  |  Auto %6/%7/%8",
+                    count _pendingClearances,
+                    count _departures,
                     [ [_timeouts, "tower", 0] call _getPair ] call _fmtSeconds,
                     [ [_timeouts, "ground", 0] call _getPair ] call _fmtSeconds,
                     [ [_timeouts, "arrival", 0] call _getPair ] call _fmtSeconds,
@@ -245,8 +334,12 @@ if (_rebuild) then {
                         private _rid = _x param [0, ""];
                         private _rtype = _x param [1, ""];
                         private _callsign = _x param [2, _rid];
+                        private _meta = _x param [7, []];
+                        if !(_meta isEqualType []) then { _meta = []; };
+                        private _aircraftType = [_meta, "aircraftType", ""] call _metaGet;
+                        private _trackLabel = [_rid, _callsign, _aircraftType] call _flightLabel;
                         private _prio = _x param [4, 0];
-                        private _lbl = format ["%1 %2  |  %3", _rid, _rtype, _callsign];
+                        private _lbl = format ["%1  |  %2  |  %3", _trackLabel, [_rtype] call _requestTypeLabel, _rid];
                         if (_prio >= 100) then { _lbl = _lbl + "  |  !EMERGENCY!"; };
                         private _row = _ctrlList lbAdd _lbl;
                         _ctrlList lbSetData [_row, format ["REQ|%1|%2|%3|%4", _rid, _rtype, _callsign, _prio]];
@@ -262,8 +355,10 @@ if (_rebuild) then {
                     {
                         private _fid = _x param [0, ""];
                         private _callsign = _x param [1, _fid];
+                        private _aircraftType = _x param [2, ""];
                         private _state = _x param [3, "QUEUED"];
-                        private _row = _ctrlList lbAdd format ["%1  |  %2  |  %3", _fid, _callsign, _state];
+                        private _trackLabel = [_fid, _callsign, _aircraftType] call _flightLabel;
+                        private _row = _ctrlList lbAdd format ["%1  |  %2", _trackLabel, _state];
                         _ctrlList lbSetData [_row, format ["FLT|%1|%2|%3", _fid, _callsign, _state]];
                     } forEach _departures;
                 };
@@ -320,10 +415,10 @@ if (_rebuild) then {
             {
                 private _alertState = if ((count _alerts) == 0) then { "NONE" } else { toUpper ((_alerts select 0) param [1, "INFO"]) };
                 private _statusRow = _ctrlList lbAdd format [
-                    "● RUNWAY %1  |  ● ARRIVALS %2  |  ● DEPARTURES %3  |  ● TOWER %4  |  ● ALERTS %5",
+                    "RUNWAY %1  |  ARR %2  |  DEP %3  |  TOWER %4  |  ALERTS %5",
                     _runwayState,
-                    if ((count _arrivals) == 0) then {"NONE"} else { (_arrivals select 0) param [6, "NORMAL"] },
-                    if ((count _departures) == 0) then {"NONE"} else { (_departures select 0) param [6, "NORMAL"] },
+                    format ["%1 inbound", count _arrivals],
+                    format ["%1 queued", count _departures],
                     if (((_towerLane param [1, "AUTO"]) isEqualTo "MANNED") || { ((_groundLane param [1, "AUTO"]) isEqualTo "MANNED") }) then {"MANNED"} else {"AUTO"},
                     _alertState
                 ];
@@ -348,20 +443,22 @@ if (_rebuild) then {
                     {
                         private _fid = _x param [0, ""];
                         private _callsign = _x param [1, _fid];
+                        private _aircraftType = _x param [2, ""];
                         private _phase = _x param [3, "INBOUND"];
                         private _status = _x param [6, "NORMAL"];
-                        private _row = _ctrlList lbAdd format ["%1  |  %2  |  %3", _callsign, _phase, _status];
+                        private _trackLabel = [_fid, _callsign, _aircraftType] call _flightLabel;
+                        private _row = _ctrlList lbAdd format ["%1  |  %2  |  %3", _trackLabel, _phase, _status];
                         _ctrlList lbSetData [_row, format ["ARR|%1|%2|%3|%4", _fid, _callsign, _phase, _status]];
                     } forEach _arrivals;
                 };
 
                 private _runwayRow = _ctrlList lbAdd format [
-                    "RUNWAY %1  |  OWNER %2  |  %3",
+                    "RUNWAY %1  |  ACTIVE %2  |  %3",
                     _runwayState,
-                    if (_runwayOwner isEqualTo "") then {"-"} else {_runwayOwner},
+                    if (_runwayOwnerDisplay isEqualTo "") then {"-"} else {_runwayOwnerDisplay},
                     if (_holdDepartures) then {"HOLD ACTIVE"} else {_activeMovement}
                 ];
-                _ctrlList lbSetData [_runwayRow, format ["RWY|%1|%2|%3", _runwayState, _runwayOwner, _activeMovement]];
+                _ctrlList lbSetData [_runwayRow, format ["RWY|%1|%2|%3", _runwayState, _runwayOwnerFlightId, _activeMovement]];
 
                 private _hdrDep = _ctrlList lbAdd "-- DEPARTURES --";
                 _ctrlList lbSetData [_hdrDep, "HDR|DEP"];
@@ -372,9 +469,11 @@ if (_rebuild) then {
                     {
                         private _fid = _x param [0, ""];
                         private _callsign = _x param [1, _fid];
+                        private _aircraftType = _x param [2, ""];
                         private _state = _x param [3, "QUEUED"];
                         private _status = _x param [6, "NORMAL"];
-                        private _row = _ctrlList lbAdd format ["%1  |  %2  |  %3", _callsign, _state, _status];
+                        private _trackLabel = [_fid, _callsign, _aircraftType] call _flightLabel;
+                        private _row = _ctrlList lbAdd format ["%1  |  %2  |  %3", _trackLabel, _state, _status];
                         _ctrlList lbSetData [_row, format ["DEP|%1|%2|%3|%4", _fid, _callsign, _state, _status]];
                     } forEach _departures;
                 };
@@ -558,6 +657,7 @@ switch (_rowType) do
         _selectionHeading = "View Control";
         _detailLines = [
             format ["Current view: <t color='#FFFFFF'>%1</t>", _airSubmode],
+            format ["Purpose: <t color='#FFFFFF'>%1</t>", [_airSubmode] call _modeGuidance],
             format ["Next secondary action: <t color='#FFFFFF'>%1</t>", if (_nextMode isEqualTo _airSubmode) then {"REFRESH"} else {_nextMode}],
             format ["Snapshot: <t color='#FFFFFF'>%1</t>", _freshnessText]
         ];
@@ -573,14 +673,36 @@ switch (_rowType) do
             format ["Alerts: <t color='#FFFFFF'>%1</t>", count _alerts]
         ];
     };
+    case "CSTATUS":
+    {
+        _selectionHeading = "Clearances";
+        _detailLines = [
+            format ["Purpose: <t color='#FFFFFF'>%1</t>", ["CLEARANCES"] call _modeGuidance],
+            format ["Pending requests: <t color='#FFFFFF'>%1</t>", count _pendingClearances],
+            format ["Queued departures: <t color='#FFFFFF'>%1</t>", count _departures],
+            format ["Controller timers T/G/A: <t color='#FFFFFF'>%1 / %2 / %3</t>",
+                [[_timeouts, "tower", 0] call _getPair] call _fmtSeconds,
+                [[_timeouts, "ground", 0] call _getPair] call _fmtSeconds,
+                [[_timeouts, "arrival", 0] call _getPair] call _fmtSeconds
+            ]
+        ];
+    };
     case "DECISION":
     {
         private _rid = _parts param [1, ""];
         private _rec = [_decisionQueue, _rid] call _findById;
+        private _reqRec = [_pendingClearances, _rid] call _findById;
+        private _reqMeta = if (_reqRec isEqualType []) then { _reqRec param [7, []] } else { [] };
+        if !(_reqMeta isEqualType []) then { _reqMeta = []; };
+        private _decisionLabel = [
+            _rid,
+            if (_reqRec isEqualType []) then { _reqRec param [2, _parts param [2, ""]] } else { _parts param [2, ""] },
+            [_reqMeta, "aircraftType", ""] call _metaGet
+        ] call _flightLabel;
         _selectionHeading = "Decision Required";
         _detailLines = [
             format ["Request id: <t color='#FFFFFF'>%1</t>", _rid],
-            format ["Callsign: <t color='#FFFFFF'>%1</t>", _parts param [2, ""]],
+            format ["Aircraft: <t color='#FFFFFF'>%1</t>", _decisionLabel],
             format ["Priority: <t color='#FFFFFF'>%1</t>", if (_rec isEqualType []) then { _rec param [3, 0] } else { 0 }],
             format ["Guidance: <t color='#FFFFFF'>Use CLEARANCES view to decide this request.</t>"]
         ];
@@ -593,9 +715,11 @@ switch (_rowType) do
             _selectionHeading = "Arrivals";
             _detailLines = ["<t color='#FFFFFF'>No arrivals inbound.</t>"];
         } else {
-            _selectionHeading = format ["Arrival %1", _fid];
+            private _trackLabel = [_fid, _rec param [1, _fid], _rec param [2, ""]] call _flightLabel;
+            _selectionHeading = format ["Arrival %1", _trackLabel];
             _detailLines = [
-                format ["Callsign: <t color='#FFFFFF'>%1</t>", _rec param [1, _fid]],
+                format ["Aircraft: <t color='#FFFFFF'>%1</t>", _trackLabel],
+                format ["Flight ID: <t color='#FFFFFF'>%1</t>", _fid],
                 format ["Type: <t color='#FFFFFF'>%1</t>", _rec param [2, "-"]],
                 format ["Phase: <t color='#FFFFFF'>%1</t>", _rec param [3, "INBOUND"]],
                 format ["Age: <t color='#FFFFFF'>%1</t>", [(_rec param [4, -1])] call _fmtSeconds],
@@ -609,7 +733,8 @@ switch (_rowType) do
         _selectionHeading = "Runway";
         _detailLines = [
             format ["State: <t color='%1'>%2</t>", [_runwayState] call _statusColor, _runwayState],
-            format ["Owner: <t color='#FFFFFF'>%1</t>", if (_runwayOwner isEqualTo "") then {"-"} else {_runwayOwner}],
+            format ["Active aircraft: <t color='#FFFFFF'>%1</t>", if (_runwayOwnerDisplay isEqualTo "") then {"-"} else {_runwayOwnerDisplay}],
+            format ["Flight ID: <t color='#FFFFFF'>%1</t>", if (_runwayOwnerFlightId isEqualTo "") then {"-"} else {_runwayOwnerFlightId}],
             format ["Active movement: <t color='#FFFFFF'>%1</t>", _activeMovement],
             format ["Hold state: <t color='#FFFFFF'>%1</t>", if (_holdDepartures) then {"HOLD ACTIVE"} else {"OPEN"}]
         ];
@@ -622,9 +747,11 @@ switch (_rowType) do
             _selectionHeading = "Departures";
             _detailLines = ["<t color='#FFFFFF'>No departures queued.</t>"];
         } else {
-            _selectionHeading = format ["Departure %1", _fid];
+            private _trackLabel = [_fid, _rec param [1, _fid], _rec param [2, ""]] call _flightLabel;
+            _selectionHeading = format ["Departure %1", _trackLabel];
             _detailLines = [
-                format ["Callsign: <t color='#FFFFFF'>%1</t>", _rec param [1, _fid]],
+                format ["Aircraft: <t color='#FFFFFF'>%1</t>", _trackLabel],
+                format ["Flight ID: <t color='#FFFFFF'>%1</t>", _fid],
                 format ["Type: <t color='#FFFFFF'>%1</t>", _rec param [2, "-"]],
                 format ["State: <t color='#FFFFFF'>%1</t>", _rec param [3, "QUEUED"]],
                 format ["Age: <t color='#FFFFFF'>%1</t>", [(_rec param [4, -1])] call _fmtSeconds],
@@ -641,10 +768,14 @@ switch (_rowType) do
             _selectionHeading = "Pending Clearances";
             _detailLines = ["<t color='#FFFFFF'>No pending clearances.</t>"];
         } else {
+            private _meta = _rec param [7, []];
+            if !(_meta isEqualType []) then { _meta = []; };
+            private _aircraftType = [_meta, "aircraftType", ""] call _metaGet;
+            private _trackLabel = [_rid, _rec param [2, "-"], _aircraftType] call _flightLabel;
             _selectionHeading = format ["Clearance %1", _rid];
             _detailLines = [
-                format ["Type: <t color='#FFFFFF'>%1</t>", _rec param [1, "-"]],
-                format ["Callsign: <t color='#FFFFFF'>%1</t>", _rec param [2, "-"]],
+                format ["Request: <t color='#FFFFFF'>%1</t>", [(_rec param [1, "-"])] call _requestTypeLabel],
+                format ["Aircraft: <t color='#FFFFFF'>%1</t>", _trackLabel],
                 format ["Requested: <t color='#FFFFFF'>%1</t>", [(_rec param [3, -1])] call _fmtAgo],
                 format ["Priority: <t color='#FFFFFF'>%1</t>", _rec param [4, 0]],
                 format ["Decision needed: <t color='#FFFFFF'>%1</t>", if (_rec param [5, false]) then {"YES"} else {"NO"}],
@@ -665,9 +796,11 @@ switch (_rowType) do
             _selectionHeading = "Departure Queue";
             _detailLines = ["<t color='#FFFFFF'>No departures queued.</t>"];
         } else {
-            _selectionHeading = format ["Queued Flight %1", _fid];
+            private _trackLabel = [_fid, _rec param [1, _fid], _rec param [2, ""]] call _flightLabel;
+            _selectionHeading = format ["Queued Flight %1", _trackLabel];
             _detailLines = [
-                format ["Callsign: <t color='#FFFFFF'>%1</t>", _rec param [1, _fid]],
+                format ["Aircraft: <t color='#FFFFFF'>%1</t>", _trackLabel],
+                format ["Flight ID: <t color='#FFFFFF'>%1</t>", _fid],
                 format ["Type: <t color='#FFFFFF'>%1</t>", _rec param [2, "-"]],
                 format ["State: <t color='#FFFFFF'>%1</t>", _rec param [3, "QUEUED"]],
                 format ["Age: <t color='#FFFFFF'>%1</t>", [(_rec param [4, -1])] call _fmtSeconds],
@@ -681,7 +814,7 @@ switch (_rowType) do
         _detailLines = [
             format ["Mode: <t color='#FFFFFF'>%1</t>", _parts param [2, "AUTO"]],
             format ["Operator: <t color='#FFFFFF'>%1</t>", _parts param [3, "AUTO"]],
-            format ["Use CLEARANCES view to claim or release staffing for this lane.</t>"]
+            "Use CLEARANCES view to claim or release staffing for this lane."
         ];
     };
     case "EVT":
@@ -748,7 +881,8 @@ private _detailHtml = format ["<t size='1.05' color='#B89B6B'>%1</t>", _selectio
 if (_airMode != "PILOT" && { _airSubmode != "DEBUG" }) then {
     _detailHtml = _detailHtml
         + "<br/><br/><t size='1.05' color='#B89B6B'>Operational Summary</t>"
-        + format ["<br/>Runway owner: <t color='#FFFFFF'>%1</t>", if (_runwayOwner isEqualTo "") then {"-"} else {_runwayOwner}]
+        + format ["<br/>Runway owner: <t color='#FFFFFF'>%1</t>", if (_runwayOwnerDisplay isEqualTo "") then {"-"} else {_runwayOwnerDisplay}]
+        + format ["<br/>Runway flight ID: <t color='#FFFFFF'>%1</t>", if (_runwayOwnerFlightId isEqualTo "") then {"-"} else {_runwayOwnerFlightId}]
         + format ["<br/>Decision queue: <t color='#FFFFFF'>%1</t>", count _decisionQueue]
         + format ["<br/>Arrivals / Departures: <t color='#FFFFFF'>%1 / %2</t>", count _arrivals, count _departures]
         + format ["<br/>CAS timing: <t color='#FFFFFF'>%1</t> / <t color='#FFFFFF'>%2</t>",
