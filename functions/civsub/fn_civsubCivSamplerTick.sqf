@@ -15,6 +15,7 @@ if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {false}
 if !(missionNamespace getVariable ["civsub_v1_civs_enabled", false]) exitWith {false};
 
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _hk = compile "params ['_h']; keys _h";
 
 private _dbg = missionNamespace getVariable ["civsub_v1_debug", false];
 
@@ -56,6 +57,7 @@ private _capDE = if ((count _caps) > 1) then { _caps select 1 } else { 0 };
 
 private _capByD = missionNamespace getVariable ["civsub_v1_civ_cap_effectiveByDistrict", createHashMap];
 if !(_capByD isEqualType createHashMap) then { _capByD = createHashMap; };
+private _capKeys = [_capByD] call _hk;
 
 private _mCiv = missionNamespace getVariable ["civsub_v1_activity_mul_civ_day", 1.0];
 if (_phase isEqualTo "NIGHT") then { _mCiv = missionNamespace getVariable ["civsub_v1_activity_mul_civ_night", 0.55]; };
@@ -73,7 +75,7 @@ if (_capGE < 0) then { _capGE = 0; };
     _cap0 = floor (_cap0 * _mCiv);
     if (_cap0 < 0) then { _cap0 = 0; };
     _capByD set [_did0, _cap0];
-} forEach (keys _capByD);
+} forEach _capKeys;
 
 missionNamespace setVariable ["civsub_v1_activity_mul_civ_active", _mCiv, false];
 missionNamespace setVariable ["civsub_v1_activity_phase", _phase, false];
@@ -103,20 +105,21 @@ if !(_reg isEqualType createHashMap) then {
     _reg = createHashMap;
     missionNamespace setVariable ["civsub_v1_civ_registry", _reg, true];
 };
+private _regKeys = [_reg] call _hk;
 
 // Count current per district
 private _counts = createHashMap;
 {
-    private _row = _reg get _x;
+    private _row = [_reg, _x, createHashMap] call _hg;
     if (_row isEqualType createHashMap) then {
         private _did = [_row, "districtId", ""] call _hg;
         if !(_did isEqualTo "") then {
             _counts set [_did, ([_counts, _did, 0] call _hg) + 1];
         };
     };
-} forEach (keys _reg);
+} forEach _regKeys;
 
-private _total = count (keys _reg);
+private _total = count _regKeys;
 missionNamespace setVariable ["civsub_v1_civ_sampler_last_total", _total, true];
 
 if (_dbg) then {
