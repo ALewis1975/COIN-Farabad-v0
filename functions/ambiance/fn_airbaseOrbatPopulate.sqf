@@ -249,7 +249,7 @@ private _fnSpawnVehicleAtMarker = {
 // ===========================================================================
 private _redtailUnits = [
     "ARC_m_base_avn_hq",
-    ["rhsusf_airforce_m", "rhsusf_airforce_m", "rhsusf_airforce_m", "rhsusf_airforce_m"],
+    ["rhsusf_airforce_security_force_rifleman", "rhsusf_airforce_security_force_rifleman", "rhsusf_airforce_security_force_rifleman", "rhsusf_airforce_security_force_rifleman"],
     4, 5, 180
 ] call _fnSpawnUnitsAtMarker;
 
@@ -286,8 +286,8 @@ _allUnits append _portUnits;
 // ===========================================================================
 private _lifelineUnits = [
     "arc_m_base_theater_hospital",
-    ["rhsusf_airforce_m", "rhsusf_airforce_m", "rhsusf_airforce_m",
-     "rhsusf_airforce_m", "rhsusf_airforce_m", "rhsusf_airforce_m"],
+    ["rhsusf_airforce_security_force_rifleman", "rhsusf_airforce_security_force_rifleman", "rhsusf_airforce_security_force_rifleman",
+     "rhsusf_airforce_security_force_rifleman", "rhsusf_airforce_security_force_rifleman", "rhsusf_airforce_security_force_rifleman"],
     6, 12, 90
 ] call _fnSpawnUnitsAtMarker;
 
@@ -305,8 +305,8 @@ _allUnits append _lifelineUnits;
 private _amb1Result = [
     "arc_m_base_theater_hospital",
     "UK3CB_C_Hilux_Ambulance",
-    "rhsusf_airforce_m",
-    ["rhsusf_airforce_m"],
+    "rhsusf_airforce_security_force_rifleman",
+    ["rhsusf_airforce_security_force_rifleman"],
     [15, 5],
     270
 ] call _fnSpawnVehicleAtMarker;
@@ -314,8 +314,8 @@ private _amb1Result = [
 private _amb2Result = [
     "arc_m_base_theater_hospital",
     "UK3CB_C_Hilux_Ambulance",
-    "rhsusf_airforce_m",
-    ["rhsusf_airforce_m"],
+    "rhsusf_airforce_security_force_rifleman",
+    ["rhsusf_airforce_security_force_rifleman"],
     [15, -5],
     270
 ] call _fnSpawnVehicleAtMarker;
