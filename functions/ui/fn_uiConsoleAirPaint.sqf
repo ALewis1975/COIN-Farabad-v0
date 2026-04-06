@@ -270,11 +270,13 @@ private _rwyChipText = format ["<t size='0.85' color='%1'>&#x25CF;</t> <t size='
 if (!isNull _airChipRunway) then { _airChipRunway ctrlSetStructuredText parseText _rwyChipText; };
 
 // --- Arrivals chip ---
+// Snapshot Contract v1 tuple indices: [flightId(0), callsign(1), category(2), phase(3), ageS(4), priority(5), status(6)]
+private _IDX_FLIGHT_STATUS = 6;
 private _arrCount = count _arrivals;
 private _arrStatus = "NORMAL";
 {
-    if (_x isEqualType [] && { (count _x) >= 7 }) then {
-        private _rowStatus = _x select 6;
+    if (_x isEqualType [] && { (count _x) > _IDX_FLIGHT_STATUS }) then {
+        private _rowStatus = _x select _IDX_FLIGHT_STATUS;
         if (_rowStatus isEqualType "" && { toUpper _rowStatus in ["CRITICAL", "CONFLICT", "RED"] }) exitWith { _arrStatus = "CONFLICT"; };
         if (_rowStatus isEqualType "" && { toUpper _rowStatus in ["HOLDING", "PRIORITY", "AMBER", "CAUTION"] }) then { _arrStatus = "HOLDING"; };
     };
@@ -286,11 +288,12 @@ private _arrChipText = format ["<t size='0.85' color='%1'>&#x25CF;</t> <t size='
 if (!isNull _airChipArrivals) then { _airChipArrivals ctrlSetStructuredText parseText _arrChipText; };
 
 // --- Departures chip ---
+// Same tuple layout: [flightId(0), callsign(1), category(2), state(3), ageS(4), priority(5), status(6)]
 private _depCount = count _departures;
 private _depStatus = if (_holdDepartures) then { "HOLD" } else { "NORMAL" };
 {
-    if (_x isEqualType [] && { (count _x) >= 7 }) then {
-        private _rowStatus = _x select 6;
+    if (_x isEqualType [] && { (count _x) > _IDX_FLIGHT_STATUS }) then {
+        private _rowStatus = _x select _IDX_FLIGHT_STATUS;
         if (_rowStatus isEqualType "" && { toUpper _rowStatus in ["CRITICAL", "BLOCKED", "RED"] }) exitWith { _depStatus = "BLOCKED"; };
     };
 } forEach _departures;
@@ -315,13 +318,15 @@ private _towerChipText = format ["<t size='0.85' color='%1'>&#x25CF;</t> <t size
 if (!isNull _airChipTowerMode) then { _airChipTowerMode ctrlSetStructuredText parseText _towerChipText; };
 
 // --- Alerts chip ---
+// Alert tuple: [text(0), severity(1), sourceId(2)]
+private _IDX_ALERT_SEVERITY = 1;
 private _alertCount = count _alerts;
 private _alertSeverity = "NONE";
 {
-    if (_x isEqualType [] && { (count _x) >= 2 }) then {
-        private _sev = _x select 1;
+    if (_x isEqualType [] && { (count _x) > _IDX_ALERT_SEVERITY }) then {
+        private _sev = _x select _IDX_ALERT_SEVERITY;
         if (_sev isEqualType "" && { toUpper _sev isEqualTo "CRITICAL" }) exitWith { _alertSeverity = "CRITICAL"; };
-        if (_sev isEqualType "" && { toUpper _sev isEqualTo "CAUTION" }) then { if !(_alertSeverity isEqualTo "CRITICAL") then { _alertSeverity = "CAUTION"; }; };
+        if (_sev isEqualType "" && { toUpper _sev isEqualTo "CAUTION" } && { !(_alertSeverity isEqualTo "CRITICAL") }) then { _alertSeverity = "CAUTION"; };
     };
 } forEach _alerts;
 private _alertChipColor = [_alertSeverity] call _statusColor;

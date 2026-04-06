@@ -13,7 +13,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-04-06 18:01 UTC — Phase 1: AIR shell scaffold (CT_CONTROLS_GROUP + status strip)
 
-**Branch/Commit:** copilot/develop-task-decomposition-plan @ pending
+**Branch/Commit:** copilot/develop-task-decomposition-plan @ 336cfab
 
 **Scenario:** Phase 1 implementation — add AIR-dedicated `CT_CONTROLS_GROUP` (IDC 78130) with 5 R/A/G status strip chip controls (78131–78135) and decision band (78136) inside the existing Farabad Console shell. No user-visible behavior change: scaffold only. Existing list/detail rendering path preserved.
 
