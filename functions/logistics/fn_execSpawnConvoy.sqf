@@ -524,7 +524,6 @@ if ((count _classes) == 0) exitWith
 
 // --- Sequential spawn --------------------------------------------------------
 private _vehicles = [];
-private _wp = objNull;
 
 // Create a dedicated convoy group up-front.
 // Relying on the first vehicle's auto-created crew group is fragile (it can leave
@@ -616,7 +615,6 @@ if (_profile isEqualType [] && { (count _profile) >= 3 }) then
 
 private _leadLeader = objNull;
 private _prevDrv = objNull;
-private _prevPos = _spawnPos;
 
 private _isPadOccupied = {
     params ["_pos", "_r"];
@@ -866,7 +864,6 @@ if (_stageEnabled) then
 
                     // Update previous (used for staging chaining).
                     _prevDrv = _drv;
-                    _prevPos = getPosATL _veh;
 
                     // Re-enable damage after short grace window.
                     [_veh] spawn

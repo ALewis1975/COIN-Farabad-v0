@@ -182,8 +182,6 @@ private _fn_sideNum = {
     1
 };
 
-private _sideNum = [_side] call _fn_sideNum;
-
 // Decide whether to use Police (TNP) or Army (TNA) for this site.
 private _key = toLower (format ["%1 %2", _marker, _disp]);
 private _useArmy = false;

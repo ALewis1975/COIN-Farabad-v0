@@ -39,6 +39,7 @@ params [
 
 if (_taskId isEqualTo "") exitWith {[]};
 if (!(_endPosATL isEqualType []) || { (count _endPosATL) < 2 }) exitWith {[]};
+diag_log format ["[ARC][INFO] ARC_fnc_opsSpawnRouteSupport: taskId=%1 type=%2 marker=%3 disp=%4 radius=%5", _taskId, _typeU, _marker, _disp, _radius];
 
 private _todPolicy = [] call ARC_fnc_dynamicTodGetPolicy;
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";

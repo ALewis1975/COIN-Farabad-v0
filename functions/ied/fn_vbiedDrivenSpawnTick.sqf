@@ -84,13 +84,12 @@ if (!(_threatId isEqualTo "")) then
 // Wait 60-120s for fairness telegraph window (non-blocking via spawn)
 private _spawnDelay = 60 + (floor (random 60));
 
-[_spawnPos, _targetPos, _threatId, _spawnDelay] spawn
+[_spawnPos, _targetPos, _threatId, _spawnDelay, _todPhase, _todPolicy, _hg] spawn
 {
-    params ["_sp", "_tp", "_tid", "_delay"];
+    params ["_sp", "_tp", "_tid", "_delay", "_todPhase", "_todPolicy", "_hg"];
     sleep _delay;
 
     // Validity gate: abort if threat was canceled or objective changed during delay
-    private _activeTaskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
     private _activeObjKind = toUpper (["activeObjectiveKind", ""] call ARC_fnc_stateGet);
     if (!(_activeObjKind isEqualTo "VBIED_DRIVEN_CHECKPOINT") && !(_activeObjKind isEqualTo "VBIED_DRIVEN_GATE")) exitWith
     {
