@@ -11,6 +11,31 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-06 02:50 UTC — Fix invalid setUnitRank string
+
+**Branch/Commit:** copilot/fix-unit-rank-error @ ada0a87 + fix
+
+**Scenario:** Fix runtime "Error in expression" caused by invalid `setUnitRank "LIEUTENANT COLONEL"` in `fn_airbaseOrbatPopulate.sqf` line 258. "LIEUTENANT COLONEL" is not a valid Arma 3 rank enum; valid values are: PRIVATE, CORPORAL, SERGEANT, LIEUTENANT, CAPTAIN, MAJOR, COLONEL.
+
+### Files changed
+- `functions/ambiance/fn_airbaseOrbatPopulate.sqf` — line 258: `"LIEUTENANT COLONEL"` → `"MAJOR"`
+
+### Static checks
+
+| # | Check | Command | Result |
+|---|-------|---------|--------|
+| 1 | sqflint compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbaseOrbatPopulate.sqf` | PASS |
+| 2 | sqflint lint | `sqflint -e w functions/ambiance/fn_airbaseOrbatPopulate.sqf` | PASS |
+
+### Deferred
+
+| # | Check | Status | Reason |
+|---|-------|--------|--------|
+| 1 | Verify Deputy Wing Cdr gets rank MAJOR in RPT | BLOCKED | Requires Arma 3 runtime |
+| 2 | Verify no "Error in expression" for setUnitRank | BLOCKED | Requires Arma 3 runtime |
+
+---
+
 ## 2026-04-06 02:35 UTC — AIR / TOWER operator-clarity pass
 
 **Branch/Commit:** copilot/improve-airfield-ops-ui @ 1929475 + local review fixes
