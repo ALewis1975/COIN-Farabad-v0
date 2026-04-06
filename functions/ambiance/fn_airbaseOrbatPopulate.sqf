@@ -140,6 +140,10 @@ private _fnSpawnUnitsAtPos = {
     if (_nCls == 0) exitWith { [] };
     if (_pos isEqualTo [0,0,0]) exitWith { [] };
 
+    // _pos is Position3D [east, alt, north]; extract horizontal components
+    private _east  = _pos select 0;
+    private _north = if (count _pos > 2) then { _pos select 2 } else { _pos select 1 };
+
     private _grp = createGroup [west, true];
 
     for "_i" from 0 to (_count - 1) do {
@@ -147,9 +151,9 @@ private _fnSpawnUnitsAtPos = {
 
         private _angle   = _i * (360 / _count);
         private _dist    = linearConversion [0, _count - 1, _i, 2, _spreadRadius, false];
-        private _offset  = [(_pos select 0) + (_dist * sin _angle),
+        private _offset  = [_east  + (_dist * sin _angle),
                             0,
-                            (_pos select 2) + (_dist * cos _angle)];
+                            _north + (_dist * cos _angle)];
 
         private _spawnPos = [_offset, 1, 3, 1, 0, 0.5, 0] call BIS_fnc_findSafePos;
         if (_spawnPos isEqualTo [] || { _spawnPos isEqualTo [0,0,0] }) then {
