@@ -11,6 +11,38 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-06 18:01 UTC — Phase 1: AIR shell scaffold (CT_CONTROLS_GROUP + status strip)
+
+**Branch/Commit:** copilot/develop-task-decomposition-plan @ pending
+
+**Scenario:** Phase 1 implementation — add AIR-dedicated `CT_CONTROLS_GROUP` (IDC 78130) with 5 R/A/G status strip chip controls (78131–78135) and decision band (78136) inside the existing Farabad Console shell. No user-visible behavior change: scaffold only. Existing list/detail rendering path preserved.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `config/CfgDialogs.hpp` | Added `AirStatusStripGroup` (78130) with 5 `RscStructuredText` chips (78131–78135) and `AirDecisionBand` (78136) |
+| `functions/ui/fn_uiConsoleRefresh.sqf` | Added baseline hide for AIR controls; show in AIR case |
+| `functions/ui/fn_uiConsoleAirPaint.sqf` | Added status strip population: runway/arrivals/departures/tower-mode/alerts chips + decision band |
+
+### Static checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict <changed .sqf files>` | PASS | No compat violations |
+| 2 | sqflint | `sqflint -e w functions/ui/fn_uiConsoleAirPaint.sqf` | PASS | Clean |
+| 3 | sqflint | `sqflint -e w functions/ui/fn_uiConsoleRefresh.sqf` | PASS | Clean |
+| 4 | State migrations | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios |
+| 5 | Marker index | `python3 scripts/dev/validate_marker_index.py` | PASS | 177 markers all modes |
+
+### Deferred
+
+- Runtime smoke test (local MP): BLOCKED — no Arma 3 runtime in CI
+- Layout stability (16:9, 16:10, 4:3): BLOCKED — requires visual verification in-game
+- JIP safety: BLOCKED — requires dedicated server
+
+---
+
 ## 2026-04-06 17:53 UTC — AIR / TOWER implementation matrix completion
 
 **Branch/Commit:** copilot/develop-task-decomposition-plan @ b740f77 + docs

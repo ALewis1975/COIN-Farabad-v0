@@ -67,6 +67,12 @@ if (!isNull _ctrlDetailsGrp) then { _ctrlDetailsGrp ctrlShow false; };
 if (!isNull _ctrlDetails) then { _ctrlDetails ctrlShow false; };
 { if (!isNull _x) then { _x ctrlShow false; }; } forEach _opsCtrls;
 
+// Baseline: hide AIR / TOWER dedicated controls (shown only on AIR tab)
+private _airStripGroup = _display displayCtrl 78130;
+private _airDecisionBand = _display displayCtrl 78136;
+private _airDedicatedCtrls = [_airStripGroup, _airDecisionBand];
+{ if (!isNull _x) then { _x ctrlShow false; }; } forEach _airDedicatedCtrls;
+
 // Baseline: hide S2 workflow controls (shown only on Intelligence tab)
 private _s2Ctrls = [
     _display displayCtrl 78050,
@@ -232,6 +238,9 @@ case "DASH":
         if (!isNull _ctrlList) then { _ctrlList ctrlShow true; };
         if (!isNull _ctrlDetailsGrp) then { _ctrlDetailsGrp ctrlShow true; };
         if (!isNull _ctrlDetails) then { _ctrlDetails ctrlShow true; };
+
+        // Show AIR-dedicated controls (Phase 1 scaffold)
+        { if (!isNull _x) then { _x ctrlShow true; }; } forEach _airDedicatedCtrls;
 
         private _canAirHoldRelease = ["ARC_console_airCanHoldRelease", false] call ARC_fnc_uiNsGetBool;
         private _canAirQueueManage = ["ARC_console_airCanQueueManage", false] call ARC_fnc_uiNsGetBool;

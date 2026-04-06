@@ -882,6 +882,85 @@ text = "FARABAD CONSOLE";
         };
 
         // -------------------------------------------------------------------
+        // AIR / TOWER tab: dedicated grouped controls (Phase 1 scaffold)
+        // Hidden by default; shown/managed by ARC_fnc_uiConsoleRefresh
+        // and populated by ARC_fnc_uiConsoleAirPaint.
+        // IDC range: 78130–78149 (AIR-dedicated)
+        // -------------------------------------------------------------------
+
+        // AIR status strip container — sits above the shared list, full width
+        class AirStatusStripGroup: RscControlsGroup
+        {
+            idc = 78130;
+            x = safeZoneX + (0.242 * safeZoneW);
+            y = safeZoneY + (0.082 * safeZoneH);
+            w = (0.756 * safeZoneW);
+            h = (0.035 * safeZoneH);
+
+            class controls
+            {
+                // Five R/A/G status chips — evenly spaced across the strip
+                class AirChipRunway: RscStructuredText
+                {
+                    idc = 78131;
+                    x = 0.000;
+                    y = 0.000;
+                    w = 0.195;
+                    h = 1.0;
+                    colorBackground[] = {0.05,0.05,0.05,0.80};
+                };
+                class AirChipArrivals: RscStructuredText
+                {
+                    idc = 78132;
+                    x = 0.200;
+                    y = 0.000;
+                    w = 0.195;
+                    h = 1.0;
+                    colorBackground[] = {0.05,0.05,0.05,0.80};
+                };
+                class AirChipDepartures: RscStructuredText
+                {
+                    idc = 78133;
+                    x = 0.400;
+                    y = 0.000;
+                    w = 0.195;
+                    h = 1.0;
+                    colorBackground[] = {0.05,0.05,0.05,0.80};
+                };
+                class AirChipTowerMode: RscStructuredText
+                {
+                    idc = 78134;
+                    x = 0.600;
+                    y = 0.000;
+                    w = 0.195;
+                    h = 1.0;
+                    colorBackground[] = {0.05,0.05,0.05,0.80};
+                };
+                class AirChipAlerts: RscStructuredText
+                {
+                    idc = 78135;
+                    x = 0.800;
+                    y = 0.000;
+                    w = 0.195;
+                    h = 1.0;
+                    colorBackground[] = {0.05,0.05,0.05,0.80};
+                };
+            };
+        };
+
+        // AIR decision band — narrow strip below status chips, above list
+        class AirDecisionBand: RscStructuredText
+        {
+            idc = 78136;
+            x = safeZoneX + (0.242 * safeZoneW);
+            y = safeZoneY + (0.119 * safeZoneH);
+            w = (0.756 * safeZoneW);
+            h = (0.028 * safeZoneH);
+            colorBackground[] = {0.12,0.08,0.02,0.85};
+            colorText[] = {0.722,0.608,0.420,1};
+        };
+
+        // -------------------------------------------------------------------
         // Operations (S3) tab: 3 frames (Incidents / Orders / Leads)
         // Hidden by default; shown/managed by ARC_fnc_uiConsoleOpsPaint.
         // -------------------------------------------------------------------

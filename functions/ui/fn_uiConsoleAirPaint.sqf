@@ -253,6 +253,94 @@ private _freshnessText = if (_stateUpdatedAt < 0) then { "Snapshot unavailable" 
 private _towerLane = [_staffing, "tower"] call _findById;
 private _groundLane = [_staffing, "ground"] call _findById;
 
+// -----------------------------------------------------------------------
+// Phase 1 scaffold: populate AIR-dedicated status strip controls (78131–78136)
+// These run every paint cycle regardless of rebuild.
+// -----------------------------------------------------------------------
+private _airChipRunway = _display displayCtrl 78131;
+private _airChipArrivals = _display displayCtrl 78132;
+private _airChipDepartures = _display displayCtrl 78133;
+private _airChipTowerMode = _display displayCtrl 78134;
+private _airChipAlerts = _display displayCtrl 78135;
+private _airDecBand = _display displayCtrl 78136;
+
+// --- Runway chip ---
+private _rwyChipColor = [_runwayState] call _statusColor;
+private _rwyChipText = format ["<t size='0.85' color='%1'>&#x25CF;</t> <t size='0.85'>RWY: %2</t>", _rwyChipColor, _runwayState];
+if (!isNull _airChipRunway) then { _airChipRunway ctrlSetStructuredText parseText _rwyChipText; };
+
+// --- Arrivals chip ---
+private _arrCount = count _arrivals;
+private _arrStatus = "NORMAL";
+{
+    if (_x isEqualType [] && { (count _x) >= 7 }) then {
+        private _rowStatus = _x select 6;
+        if (_rowStatus isEqualType "" && { toUpper _rowStatus in ["CRITICAL", "CONFLICT", "RED"] }) exitWith { _arrStatus = "CONFLICT"; };
+        if (_rowStatus isEqualType "" && { toUpper _rowStatus in ["HOLDING", "PRIORITY", "AMBER", "CAUTION"] }) then { _arrStatus = "HOLDING"; };
+    };
+} forEach _arrivals;
+if (_arrCount == 0) then { _arrStatus = "NORMAL"; };
+private _arrChipColor = [_arrStatus] call _statusColor;
+private _arrChipLabel = if (_arrCount == 0) then { "NONE" } else { format ["%1", _arrCount] };
+private _arrChipText = format ["<t size='0.85' color='%1'>&#x25CF;</t> <t size='0.85'>ARR: %2</t>", _arrChipColor, _arrChipLabel];
+if (!isNull _airChipArrivals) then { _airChipArrivals ctrlSetStructuredText parseText _arrChipText; };
+
+// --- Departures chip ---
+private _depCount = count _departures;
+private _depStatus = if (_holdDepartures) then { "HOLD" } else { "NORMAL" };
+{
+    if (_x isEqualType [] && { (count _x) >= 7 }) then {
+        private _rowStatus = _x select 6;
+        if (_rowStatus isEqualType "" && { toUpper _rowStatus in ["CRITICAL", "BLOCKED", "RED"] }) exitWith { _depStatus = "BLOCKED"; };
+    };
+} forEach _departures;
+private _depChipColor = [_depStatus] call _statusColor;
+private _depChipLabel = if (_depCount == 0) then { "NONE" } else { format ["%1", _depCount] };
+if (_holdDepartures) then { _depChipLabel = _depChipLabel + " HOLD"; };
+private _depChipText = format ["<t size='0.85' color='%1'>&#x25CF;</t> <t size='0.85'>DEP: %2</t>", _depChipColor, _depChipLabel];
+if (!isNull _airChipDepartures) then { _airChipDepartures ctrlSetStructuredText parseText _depChipText; };
+
+// --- Tower Mode chip ---
+private _freshnessState = [_snapshot, "freshnessState", "UNKNOWN"] call _getPair;
+if (!(_freshnessState isEqualType "")) then { _freshnessState = "UNKNOWN"; };
+private _towerModeStatus = switch (toUpper _freshnessState) do {
+    case "FRESH": { "GREEN" };
+    case "STALE": { "AMBER" };
+    case "DEGRADED": { "RED" };
+    default { "AMBER" };
+};
+private _towerModeLabel = if (_freshnessState isEqualTo "UNKNOWN") then { "UNKNOWN" } else { _freshnessState };
+private _towerChipColor = [_towerModeStatus] call _statusColor;
+private _towerChipText = format ["<t size='0.85' color='%1'>&#x25CF;</t> <t size='0.85'>TWR: %2</t>", _towerChipColor, _towerModeLabel];
+if (!isNull _airChipTowerMode) then { _airChipTowerMode ctrlSetStructuredText parseText _towerChipText; };
+
+// --- Alerts chip ---
+private _alertCount = count _alerts;
+private _alertSeverity = "NONE";
+{
+    if (_x isEqualType [] && { (count _x) >= 2 }) then {
+        private _sev = _x select 1;
+        if (_sev isEqualType "" && { toUpper _sev isEqualTo "CRITICAL" }) exitWith { _alertSeverity = "CRITICAL"; };
+        if (_sev isEqualType "" && { toUpper _sev isEqualTo "CAUTION" }) then { if !(_alertSeverity isEqualTo "CRITICAL") then { _alertSeverity = "CAUTION"; }; };
+    };
+} forEach _alerts;
+private _alertChipColor = [_alertSeverity] call _statusColor;
+private _alertChipLabel = if (_alertCount == 0) then { "NONE" } else { format ["%1", _alertCount] };
+private _alertChipText = format ["<t size='0.85' color='%1'>&#x25CF;</t> <t size='0.85'>ALT: %2</t>", _alertChipColor, _alertChipLabel];
+if (!isNull _airChipAlerts) then { _airChipAlerts ctrlSetStructuredText parseText _alertChipText; };
+
+// --- Decision band ---
+private _decCount = count _decisionQueue;
+if (_decCount > 0 && { !isNull _airDecBand }) then {
+    private _topDec = _decisionQueue select 0;
+    private _decText = if (_topDec isEqualType [] && { (count _topDec) >= 1 }) then { _topDec select 0 } else { "Decision required" };
+    if (!(_decText isEqualType "")) then { _decText = "Decision required"; };
+    _airDecBand ctrlSetStructuredText parseText format ["<t size='0.90' color='#FFB833'>&#x26A0; %1</t>", _decText];
+    _airDecBand ctrlShow true;
+} else {
+    if (!isNull _airDecBand) then { _airDecBand ctrlShow false; };
+};
+
 if (_rebuild) then {
     lbClear _ctrlList;
 
