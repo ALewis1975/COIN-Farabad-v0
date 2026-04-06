@@ -255,7 +255,7 @@ private _redtailUnits = [
 
 if (count _redtailUnits > 0) then {
     (_redtailUnits select 0) setUnitRank "COLONEL";
-    if (count _redtailUnits > 1) then { (_redtailUnits select 1) setUnitRank "LIEUTENANT COLONEL"; };
+    if (count _redtailUnits > 1) then { (_redtailUnits select 1) setUnitRank "MAJOR"; };
     diag_log format ["[ARC][INFO] ARC_fnc_airbaseOrbatPopulate: REDTAIL staff spawned (%1 units)", count _redtailUnits];
 };
 _allUnits append _redtailUnits;
