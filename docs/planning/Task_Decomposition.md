@@ -4,6 +4,8 @@
 **Date:** 2026-04-04  
 **Source:** Revised Architecture Assessment (`docs/architecture/Architecture_and_Readiness_Plan.md`)
 
+**Canonical completion ledger:** `/home/runner/work/COIN-Farabad-v0/COIN-Farabad-v0/docs/qa/Pre_Dedicated_Mission_Completion_Audit_2026-04-06.md`
+
 ---
 
 ## 1) Objective
@@ -178,4 +180,5 @@ This decomposition supersedes older phase/task narratives that are now stale rel
 
 - This document defines **what** to execute, not implementation-level code steps.
 - Use subsystem baselines and security/QA guides as authoritative references during execution.
+- Use the pre-dedicated completion audit as the canonical “complete vs missing” board before scheduling dedicated/JIP validation.
 - If new requirements materially expand scope, update this decomposition before executing expanded work.

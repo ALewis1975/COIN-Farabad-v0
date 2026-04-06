@@ -344,6 +344,7 @@ COIN-Farabad-v0/
 **Quality Assurance:**
 - `docs/qa/QA_Audit_Executive_Summary.md` — Latest QA status (Score: 7.6/10, Production Ready)
 - `docs/qa/Comprehensive_QA_Audit_2026-02-18.md` — Full audit report (425 files, ~57k LOC)
+- `docs/qa/Pre_Dedicated_Mission_Completion_Audit_2026-04-06.md` — Canonical subsystem completion ledger before dedicated/JIP spend
 - `docs/qa/SQFLINT_COMPAT_GUIDE.md` — Compile helper reference and banned pattern mapping
 - `tests/TEST-LOG.md` — Canonical validation log
 
