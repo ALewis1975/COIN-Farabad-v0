@@ -26,7 +26,8 @@ if (!(_asset isEqualType createHashMap)) exitWith { false };
 
 private _debug    = missionNamespace getVariable ["airbase_v1_debug", false];
 private _debugOps = missionNamespace getVariable ["airbase_v1_debugOpsLog", false];
-private _veh = [_asset, "veh", objNull] call getOrDefault;
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _veh = [_asset, "veh", objNull] call _hg;
 if (isNull _veh) exitWith {
     _asset set ["state", "PARKED"];
     _asset set ["activeFlight", ""];
@@ -127,7 +128,7 @@ private _fnAbortToIdle = {
 };
 
 // --- resolve crew ---
-private _crew = [_asset, "crew", []] call getOrDefault;
+private _crew = [_asset, "crew", []] call _hg;
 if (!(_crew isEqualType [])) then { _crew = []; };
 private _crewLive = _crew select { !isNull _x && alive _x };
 
@@ -230,7 +231,7 @@ if (!(_prepDelay isEqualType 0) || { _prepDelay < 0 }) then { _prepDelay = 15; }
 if (_prepDelay > 0) then { sleep _prepDelay; };
 
 // --- taxi playback ---
-private _taxiVar = [_asset, "taxiPathVar", ""] call getOrDefault;
+private _taxiVar = [_asset, "taxiPathVar", ""] call _hg;
 private _taxiData = missionNamespace getVariable [_taxiVar, []];
 private _taxiFrames = [_taxiData] call _fnNormalize;
 
@@ -675,10 +676,10 @@ private _toDelete = [];
 if (!isNull _veh) then { deleteVehicle _veh; };
 
 // Clear missionNamespace vars so a clean respawn can occur on return.
-private _vehVar = [_asset, "vehVar", ""] call getOrDefault;
+private _vehVar = [_asset, "vehVar", ""] call _hg;
 if (_vehVar != "") then { missionNamespace setVariable [_vehVar, objNull, true]; };
 
-private _crewVars = [_asset, "crewVars", []] call getOrDefault;
+private _crewVars = [_asset, "crewVars", []] call _hg;
 {
     if (_x isEqualType "") then { missionNamespace setVariable [_x, objNull, true]; };
 } forEach _crewVars;
@@ -696,7 +697,7 @@ _asset set ["availableAt", _returnAt];
 
 if (_debugOps) then {
     ["OPS", format ["AIRBASE: %1 departed (%2) - return ETA in ~%3s", _fid, _vehType, round (_returnAt - serverTime)], _despawnPos, 0, [
-        ["assetId", ([_asset, "id", ""] call getOrDefault)],
+        ["assetId", ([_asset, "id", ""] call _hg)],
         ["vehType", _vehType],
         ["returnAt", _returnAt]
     ]] call ARC_fnc_intelLog;
