@@ -185,7 +185,7 @@ if (_enableDef) then
             {},
             // completion: mark defused (broadcast) and mark the objective complete (server-authoritative close-ready)
             {
-                params ["_target", "_caller", "_actionId", "_arguments"];
+                params ["_target", "_caller"];
                 _target setVariable ["ARC_vbiedDefused", true, true];
                 ["VBIED_VEHICLE", _target, _caller, "Suspicious vehicle rendered safe.", "", "COMPLETE"] remoteExec ["ARC_fnc_execObjectiveComplete", 2];
             },

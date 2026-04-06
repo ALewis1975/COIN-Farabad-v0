@@ -4109,4 +4109,4 @@ sqflint -e w functions/ied/fn_vbiedSpawnTick.sqf
 |---|-------|--------|-------|
 | 1 | Compat scan --strict (5 files) | PASS | 0 pattern matches (was 15) |
 | 2 | sqflint fn_execTickActive.sqf | PASS | exit 0, clean |
-| 3 | sqflint fn_vbiedSpawnTick.sqf | PASS (pre-existing warnings) | 2 unused-param warnings at L188 (_actionId, _arguments) — pre-existing in hold-action callback signature |
+| 3 | sqflint fn_vbiedSpawnTick.sqf | PASS | Removed unused `_actionId`/`_arguments` from hold-action completion params (L188); exit 0, clean |
