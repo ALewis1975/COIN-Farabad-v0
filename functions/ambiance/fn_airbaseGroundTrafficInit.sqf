@@ -177,9 +177,9 @@ private _zones = [
     // Anchor: 332 EMSG (Base Mayor) marker
     ["MAYOR",        "ARC_m_base_mayor_1",             100, ["admin"],                       2],
 
-    // Theater hospital: medical vehicles
-    // Anchor: theater hospital marker
-    ["MEDICAL",      "arc_m_base_theater_hospital",     80, ["medical"],                     2],
+    // Theater hospital: fixed ORBAT ambulances already occupy this footprint.
+    // Keep the zone defined but disable dynamic medical spawns to prevent stacking.
+    ["MEDICAL",      "arc_m_base_theater_hospital",     80, ["medical"],                     0],
 
     // Maintenance / motor pool: support, recovery, repair vehicles
     // Anchor: base maintenance marker

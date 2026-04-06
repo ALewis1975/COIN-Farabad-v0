@@ -11,6 +11,44 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-06 02:18 UTC — Fix civilian vehicle exclusions for airbase and theater hospital
+
+**Branch/Commit:** copilot/fix-civilian-vehicle-spawning @ 180f8fa + local edits
+
+**Scenario:** Player report: civilian traffic still spawns inside the airbase, and airbase medical vehicles stack near/on top of each other at the theater hospital. Merged the canonical civ traffic exclusion list into the resolved exclusion-zone cache so roadside picks honor the existing airbase exclusion as well as the prison exclusion, and disabled dynamic hospital-zone medical traffic because fixed ORBAT ambulances already occupy that footprint.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `functions/civsub/fn_civsubTrafficInit.sqf` | Merge marker-based civ traffic exclusions into the resolved exclusion-zone cache and persist the prison exclusion alongside the airbase exclusion |
+| `functions/ambiance/fn_airbaseGroundTrafficInit.sqf` | Disable dynamic MEDICAL-zone ground traffic at the theater hospital to prevent stacked ambulance spawns |
+
+### Checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Baseline state migrations | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios passed before edits |
+| 2 | Baseline strict compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubTrafficInit.sqf functions/ambiance/fn_airbaseGroundTrafficInit.sqf` | PASS | 2 target files, 0 parser-compat matches |
+| 3 | Baseline sqflint | `sqflint -e w functions/civsub/fn_civsubTrafficInit.sqf && sqflint -e w functions/ambiance/fn_airbaseGroundTrafficInit.sqf` | PASS | Both target SQF files lint clean |
+| 4 | Post-change strict compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubTrafficInit.sqf functions/ambiance/fn_airbaseGroundTrafficInit.sqf` | PASS | 2 changed SQF files, 0 parser-compat matches |
+| 5 | Post-change sqflint | `sqflint -e w functions/civsub/fn_civsubTrafficInit.sqf && sqflint -e w functions/ambiance/fn_airbaseGroundTrafficInit.sqf` | PASS | Both changed SQF files lint clean |
+| 6 | Post-change state migrations | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios passed after edits |
+| 7 | Post-change marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | off/on/auto-no-rg modes passed |
+| 8 | Test-log placeholder guard | `bash scripts/dev/check_test_log_commits.sh` | PASS | No pending placeholders |
+| 9 | Repo diff sanity | `git --no-pager diff --check` | PASS | No whitespace/conflict-marker issues |
+| 10 | Local MP runtime smoke | N/A | BLOCKED | No Arma 3 runtime in container |
+| 11 | Dedicated/JIP runtime smoke | N/A | BLOCKED | No dedicated/JIP environment in container |
+
+### Outcome
+
+- Civilian traffic roadside picks now inherit the existing airbase no-spawn exclusion instead of only the prison exclusion cache.
+- The prison exclusion is kept in the canonical marker/radius list, so both cached and fallback civ traffic paths share the same protected compounds.
+- Theater hospital dynamic medical traffic is disabled because the fixed ORBAT ambulances already satisfy that ambience need without stacking.
+- Runtime validation in local MP and dedicated/JIP remains required outside the container.
+
+---
+
 ## 2026-04-06 02:00 UTC — AIR / TOWER full-phase implementation
 
 **Branch/Commit:** copilot/create-task-decomposition-plan @ aff3d09 + local edits

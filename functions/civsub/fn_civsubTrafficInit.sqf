@@ -40,22 +40,50 @@ missionNamespace setVariable ["civsub_v1_traffic_vehiclePool_valid", _pool, true
 
 // ---------------------------------------------------------------------------
 // Register static traffic exclusion zones (areas where civ vehicles must not spawn).
-// Format: [[x,y,z], radiusM]   — position from getMarkerPos, radius in metres.
-// Karkanak Prison: vehicles spawning inside the prison compound break immersion.
-// Use the central guard tower marker as the compound centroid (250 m covers the
-// full footprint including the dorms, hospital, and entry office).
+// Keep the canonical marker/radius list in civsub_v1_traffic_exclusions and also
+// publish a resolved position/radius list for roadside pickers.
 // ---------------------------------------------------------------------------
-private _trafficExclZones = [];
+private _markerExclusions = missionNamespace getVariable ["civsub_v1_traffic_exclusions", []];
+if (!(_markerExclusions isEqualType [])) then { _markerExclusions = []; };
+
 private _prisonAnchorMkr = "prison_central_guard_tower";
-if (!((getMarkerType _prisonAnchorMkr) isEqualTo "")) then
+private _prisonExclusionPresent = false;
 {
-    _trafficExclZones pushBack [getMarkerPos _prisonAnchorMkr, 250];
-    diag_log format ["[CIVTRAF][INIT] exclusion zone registered: marker=%1 radius=250 m", _prisonAnchorMkr];
-}
-else
+    private _row = _x;
+    if (!(_row isEqualType []) || { (count _row) < 2 }) then { continue; };
+    private _markerName = _row select 0;
+    if ((_markerName isEqualType "") && { _markerName isEqualTo _prisonAnchorMkr }) exitWith
+    {
+        _prisonExclusionPresent = true;
+    };
+} forEach _markerExclusions;
+
+if (!_prisonExclusionPresent) then
 {
-    diag_log "[CIVTRAF][INIT] WARN: prison_central_guard_tower not found — prison compound not excluded from civ traffic.";
+    _markerExclusions pushBack [_prisonAnchorMkr, 250];
 };
+
+private _trafficExclZones = [];
+{
+    private _row = _x;
+    if (!(_row isEqualType []) || { (count _row) < 2 }) then { continue; };
+
+    private _markerName = _row select 0;
+    private _radius = _row select 1;
+    if !(_markerName isEqualType "") then { continue; };
+    if !(_radius isEqualType 0) then { continue; };
+
+    if ((getMarkerType _markerName) isEqualTo "") then
+    {
+        diag_log format ["[CIVTRAF][WARN] ARC_fnc_civsubTrafficInit: exclusion marker '%1' missing; civ traffic exclusion skipped.", _markerName];
+        continue;
+    };
+
+    _trafficExclZones pushBack [getMarkerPos _markerName, _radius];
+    diag_log format ["[CIVTRAF][INIT] ARC_fnc_civsubTrafficInit: exclusion zone registered marker=%1 radius=%2 m", _markerName, _radius];
+} forEach _markerExclusions;
+
+missionNamespace setVariable ["civsub_v1_traffic_exclusions", _markerExclusions, true];
 missionNamespace setVariable ["ARC_trafficExclusionZones", _trafficExclZones];
 
 private _tickS = missionNamespace getVariable ["civsub_v1_traffic_tick_s", 30];
