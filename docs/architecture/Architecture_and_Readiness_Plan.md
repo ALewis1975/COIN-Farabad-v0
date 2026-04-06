@@ -111,5 +111,7 @@ Required for “healthy readiness”:
 Execution details are now canonicalized in:
 
 - `/home/runner/work/COIN-Farabad-v0/COIN-Farabad-v0/docs/planning/Task_Decomposition.md`
+- `/home/runner/work/COIN-Farabad-v0/COIN-Farabad-v0/docs/qa/Pre_Dedicated_Mission_Completion_Audit_2026-04-06.md`
 
 This architecture assessment defines the risk model and controls; the decomposition document defines implementation order and work packages.
+The pre-dedicated completion audit is the canonical subsystem-by-subsystem ledger for deciding whether the mission is feature-complete enough to spend dedicated/JIP time and money.
