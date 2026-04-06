@@ -1042,6 +1042,8 @@ if (_dbgEnabled) then
                 if (!(_budgetMap isEqualType createHashMap)) exitWith { [] };
                 private _rows = [];
                 private _hgSnap = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+                // sqflint cannot trace `call _variable` references; this guard provides
+                // a direct reference so sqflint recognises _hgSnap as used.
                 if (!(_hgSnap isEqualType {})) exitWith { [] };
                 {
                     private _did = _x;
