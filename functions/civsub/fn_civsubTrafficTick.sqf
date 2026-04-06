@@ -145,7 +145,7 @@ private _playerDistrictPositions = createHashMap; // districtId -> [playerPositi
         _playerDistrictCounts set [_idx, _row];
     };
 
-    private _existingPositions = _playerDistrictPositions getOrDefault [_did, []];
+    private _existingPositions = [_playerDistrictPositions, _did, []] call _hg;
     _existingPositions pushBack _ppos;
     _playerDistrictPositions set [_did, _existingPositions];
 } forEach _players;
@@ -221,7 +221,7 @@ private _opCenters = createHashMap;
 {
     private _did = _x select 1;
     private _d = _x select 2;
-    private _playerPosForDid = _playerDistrictPositions getOrDefault [_did, []];
+    private _playerPosForDid = [_playerDistrictPositions, _did, []] call _hg;
     private _op = [_did, _d, _playerPosForDid] call ARC_fnc_civsubTrafficResolveSpawnCenter;
     _opCenters set [_did, _op];
 } forEach _act;

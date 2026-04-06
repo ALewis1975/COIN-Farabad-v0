@@ -11,6 +11,38 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-06 00:01 UTC — Fix sqflint strict compat scan failures (CI job 70028396521)
+
+**Branch/Commit:** copilot/fix-vehicle-spawn-in-buildings @ HEAD (post-merge with main)
+
+**Scenario:** CI job 70028396521 failing in "SQF static analysis (changed *.sqf files only)" step — `sqflint_compat_scan.py --strict` reported 55 pattern matches across changed files. Fix all flagged patterns: `#` indexing → `select`, `isNotEqualTo` → `!(_a isEqualTo _b)`, method-style `getOrDefault` → call form via `_hg` helper.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `functions/civsub/fn_civsubCivSpawnInDistrict.sqf` | 5× getOrDefault method→call form via `_hg` |
+| `functions/civsub/fn_civsubTrafficSpawnMoving.sqf` | 2× getOrDefault method→call form + 4× `#`→`select` |
+| `functions/civsub/fn_civsubTrafficTick.sqf` | 2× getOrDefault method→call form via `_hg` |
+| `functions/logistics/fn_execSpawnConvoy.sqf` | 12× `isNotEqualTo`→`!(...isEqualTo...)` + 11× `#`→`select` |
+| `functions/ops/fn_opsSpawnLocalSupport.sqf` | 3× `#`→`select` |
+| `functions/ops/fn_opsSpawnRouteSupport.sqf` | 12× `#`→`select` |
+
+### Checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Strict compat scan (all 23 changed SQF files) | `python3 scripts/dev/sqflint_compat_scan.py --strict <23 files>` | PASS | 0 pattern matches found |
+| 2 | Local MP runtime smoke | N/A | BLOCKED | No Arma 3 runtime in container |
+| 3 | Dedicated/JIP runtime smoke | N/A | BLOCKED | No dedicated/JIP environment in container |
+
+### Outcome
+
+- All 55 strict-compat pattern matches resolved across 6 files.
+- CI `arma-preflight` job should now pass the SQF static analysis step.
+
+---
+
 ## 2026-04-05 23:52 UTC — Dynamic TOD policy sync + shared airbase boundary constant
 
 **Branch/Commit:** copilot/fix-vehicle-spawn-in-buildings @ 6cf053f (pre-edit baseline; changes applied on top)
