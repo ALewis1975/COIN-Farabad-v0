@@ -48,6 +48,17 @@ private _trimText = {
     _s
 };
 
+private _getPair = {
+    params ["_pairs", "_k", "_def"];
+    private _v = _def;
+    {
+        if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x select 0)) isEqualTo _k }) exitWith {
+            _v = _x select 1;
+        };
+    } forEach _pairs;
+    _v
+};
+
 private _ctrlMain = _display displayCtrl 78010;
 if (isNull _ctrlMain) exitWith {false};
 
@@ -194,11 +205,6 @@ private _qPendingArr = missionNamespace getVariable ["ARC_pub_queuePending", []]
 if (!(_qPendingArr isEqualType [])) then { _qPendingArr = []; };
 if ((count _qPendingArr) > _rxMaxItems) then { _qPendingArr = _qPendingArr select [0, _rxMaxItems]; };
 private _qPendingCnt = count _qPendingArr;
-private _qPendingColor = "#FFFFFF";
-if (_qPendingCnt >= 5) then { _qPendingColor = "#FF7A7A"; } else {
-    if (_qPendingCnt >= 3) then { _qPendingColor = "#FFD166"; };
-};
-private _qPending = format ["<t color='%1'>%2</t>", _qPendingColor, _qPendingCnt];
 private _statusRows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
 if (!(_statusRows isEqualType [])) then { _statusRows = []; };
 if ((count _statusRows) > _rxMaxItems) then { _statusRows = _statusRows select [0, _rxMaxItems]; };
@@ -246,11 +252,27 @@ if (_useVm && { !isNil "ARC_fnc_consoleVmAdapterV1" }) then
     // Recompute derived values from VM data
     _incGrid     = if (_incPos isEqualType [] && { (count _incPos) >= 2 }) then { mapGridPosition _incPos } else { "" };
     _qPendingCnt = count _qPendingArr;
-    _qPendingColor = "#FFFFFF";
-    if (_qPendingCnt >= 5) then { _qPendingColor = "#FF7A7A"; } else {
-        if (_qPendingCnt >= 3) then { _qPendingColor = "#FFD166"; };
-    };
-    _qPending = format ["<t color='%1'>%2</t>", _qPendingColor, _qPendingCnt];
+};
+
+private _airSnap = missionNamespace getVariable ["ARC_pub_airbaseUiSnapshot", []];
+if (!(_airSnap isEqualType [])) then { _airSnap = []; };
+private _airRunway = [_airSnap, "runway", []] call _getPair;
+if (!(_airRunway isEqualType [])) then { _airRunway = []; };
+private _airArrivals = [_airSnap, "arrivals", []] call _getPair;
+if (!(_airArrivals isEqualType [])) then { _airArrivals = []; };
+private _airDepartures = [_airSnap, "departures", []] call _getPair;
+if (!(_airDepartures isEqualType [])) then { _airDepartures = []; };
+private _airAlerts = [_airSnap, "alerts", []] call _getPair;
+if (!(_airAlerts isEqualType [])) then { _airAlerts = []; };
+private _airRunwayState = [_airRunway, "state", "UNKNOWN"] call _getPair;
+private _airNextArrival = if ((count _airArrivals) > 0) then { _airArrivals select 0 } else { [] };
+private _airNextDeparture = if ((count _airDepartures) > 0) then { _airDepartures select 0 } else { [] };
+private _airAlertLabel = if ((count _airAlerts) > 0) then { (_airAlerts select 0) param [0, "NONE"] } else { "NONE" };
+private _airAlertColor = _tshGreen;
+if ((count _airAlerts) > 0) then {
+    private _severity = toUpper ((_airAlerts select 0) param [1, "INFO"]);
+    if (_severity isEqualTo "CAUTION") then { _airAlertColor = _tshAmber; };
+    if (_severity isEqualTo "CRITICAL") then { _airAlertColor = _tshRed; };
 };
 
 private _unitLines = [];
@@ -282,13 +304,14 @@ private _accessLine = format [
 ];
 
 private _hdr = format [
-    "<t size='1.15' font='PuristaMedium' color='#B89B6B'>COP / Dashboard</t><br/>" +
-    "<t size='0.9'><t color='#B89B6B'>Role:</t> <t color='#FFFFFF'>%1</t> <t color='#B89B6B'>| Group:</t> <t color='#FFFFFF'>%2</t> <t color='#B89B6B'>| Tag:</t> <t color='#FFFFFF'>%3</t></t><br/>" +
-    "<t size='0.85' color='#AAAAAA'>Your grid: %4 | Station: %5</t><br/>",
+    "<t size='1.15' font='PuristaMedium' color='%5'>COP / Dashboard</t><br/>" +
+    "<t size='0.9'><t color='%5'>Role:</t> <t color='#FFFFFF'>%1</t> <t color='%5'>| Group:</t> <t color='#FFFFFF'>%2</t> <t color='%5'>| Tag:</t> <t color='#FFFFFF'>%3</t></t><br/>" +
+    "<t size='0.85' color='#AAAAAA'>Your grid: %4 | Station: %6</t><br/>",
     _roleCat,
     if (_gid isEqualTo "") then {"(none)"} else {_gid},
     _tag,
     _grid,
+    _tshCoyote,
     if (_atStation) then {"YES"} else {"NO"}
 ];
 
@@ -331,6 +354,21 @@ private _secIntel    = format [
     _lastIntel
 ];
 private _secUnits = "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Unit Availability</t><br/>" + _unitsBlock + "<br/><br/>";
+private _secAir = format [
+    "<t size='1.0' font='PuristaMedium' color='%1'>Air Summary</t><br/>" +
+    "<t color='#DDDDDD'>Runway:</t> <t color='%2'>%3</t><br/>" +
+    "<t color='#DDDDDD'>Next inbound:</t> <t color='%4'>%5</t><br/>" +
+    "<t color='#DDDDDD'>Next outbound:</t> <t color='%4'>%6</t><br/>" +
+    "<t color='#DDDDDD'>Air alerts:</t> <t color='%7'>%8</t><br/><br/>",
+    _tshCoyote,
+    if ((toUpper _airRunwayState) in ["OPEN"]) then { _tshGreen } else { if ((toUpper _airRunwayState) in ["RESERVED"]) then { _tshAmber } else { _tshRed } },
+    _airRunwayState,
+    _tshBody,
+    if (_airNextArrival isEqualType [] && { (count _airNextArrival) >= 2 }) then { _airNextArrival param [1, "NONE"] } else { "NONE" },
+    if (_airNextDeparture isEqualType [] && { (count _airNextDeparture) >= 2 }) then { _airNextDeparture param [1, "NONE"] } else { "NONE" },
+    _airAlertColor,
+    _airAlertLabel
+];
 
 // Next Actions: workflow coaching / blocker visibility
 private _secNext = "";
@@ -359,6 +397,7 @@ switch (_roleCat) do
 {
     case "TOC-CMD":
     {
+        _sections pushBack _secAir;
         _sections pushBack _secIntel;
         _sections pushBack _secIncident;
         _sections pushBack _secOrders;
@@ -366,6 +405,7 @@ switch (_roleCat) do
     };
     case "TOC-S3":
     {
+        _sections pushBack _secAir;
         _sections pushBack _secIncident;
         _sections pushBack _secOrders;
         _sections pushBack _secUnits;
@@ -421,12 +461,20 @@ if (!isNull _ctrlDetailsGrp && { !isNull _ctrlDetails }) then
     private _qColor = if (_qPendingCnt >= 5) then {"#FF7A7A"} else { if (_qPendingCnt >= 3) then {"#FFD166"} else {"#9FE870"} };
 
     private _rTxt =
-        "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Quick Status</t><br/>" +
+        format ["<t size='1.0' font='PuristaMedium' color='%1'>Quick Status</t><br/>", _tshCoyote] +
         format ["<t size='0.9' color='#BDBDBD'>Incident:</t> <t size='0.9' color='%1'>%2</t><br/>", _incStatusColor, _incStatusText] +
         format ["<t size='0.9' color='#BDBDBD'>Queue pending:</t> <t size='0.9' color='%1'>%2</t><br/>", _qColor, _qPendingCnt] +
+        format ["<t size='0.9' color='#BDBDBD'>Runway:</t> <t size='0.9' color='%1'>%2</t><br/>",
+            if ((toUpper _airRunwayState) in ["OPEN"]) then { _tshGreen } else { if ((toUpper _airRunwayState) in ["RESERVED"]) then { _tshAmber } else { _tshRed } },
+            _airRunwayState
+        ] +
+        format ["<t size='0.9' color='#BDBDBD'>Next inbound/outbound:</t> <t size='0.9'>%1 / %2</t><br/>",
+            if (_airNextArrival isEqualType [] && { (count _airNextArrival) >= 2 }) then { _airNextArrival param [1, "NONE"] } else { "NONE" },
+            if (_airNextDeparture isEqualType [] && { (count _airNextDeparture) >= 2 }) then { _airNextDeparture param [1, "NONE"] } else { "NONE" }
+        ] +
         format ["<t size='0.9' color='#BDBDBD'>Unit reports:</t> <t size='0.9'>%1</t><br/>", count _statusRows] +
         format ["<t size='0.9' color='#BDBDBD'>Intel leads:</t> <t size='0.9'>%1</t><br/>", count _leadPool] +
-        "<br/><t size='1.0' font='PuristaMedium' color='#B89B6B'>Quick Reference</t><br/>" +
+        format ["<br/><t size='1.0' font='PuristaMedium' color='%1'>Quick Reference</t><br/>", _tshCoyote] +
         "<t size='0.85' color='#DDDDDD'>DASH  — at-a-glance COP / status</t><br/>" +
         "<t size='0.85' color='#DDDDDD'>OPS   — submit/track field actions</t><br/>" +
         "<t size='0.85' color='#DDDDDD'>INTEL — leads, briefs, EPW</t><br/>" +

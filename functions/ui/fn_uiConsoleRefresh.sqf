@@ -239,6 +239,8 @@ case "DASH":
         private _canAirRead = ["ARC_console_airCanRead", false] call ARC_fnc_uiNsGetBool;
         private _canAirPilot = ["ARC_console_airCanPilot", false] call ARC_fnc_uiNsGetBool;
         private _canAirControl = _canAirHoldRelease || _canAirQueueManage || _canAirStaff;
+        private _debugAir = missionNamespace getVariable ["ARC_debugInspectorEnabled", false];
+        if (!(_debugAir isEqualType true) && !(_debugAir isEqualType false)) then { _debugAir = false; };
 
         private _airMode = ["ARC_console_airMode", if (_canAirPilot && !_canAirControl) then {"PILOT"} else {"TOWER"}] call ARC_fnc_uiNsGetString;
         _airMode = toUpper _airMode;
@@ -246,31 +248,29 @@ case "DASH":
         if !(_airMode in ["TOWER", "PILOT"]) then { _airMode = if (_canAirPilot && !_canAirControl) then {"PILOT"} else {"TOWER"}; };
         uiNamespace setVariable ["ARC_console_airMode", _airMode];
 
+        private _airSubmode = ["ARC_console_airSubmode", "AIRFIELD_OPS"] call ARC_fnc_uiNsGetString;
+        _airSubmode = toUpper _airSubmode;
+        _airSubmode = (_airSubmode splitString " ") joinString "";
+        if !(_airSubmode in ["AIRFIELD_OPS", "CLEARANCES", "DEBUG"]) then { _airSubmode = "AIRFIELD_OPS"; };
+        if (!_canAirControl && { _airSubmode isEqualTo "CLEARANCES" }) then { _airSubmode = "AIRFIELD_OPS"; };
+        if (!_debugAir && { _airSubmode isEqualTo "DEBUG" }) then { _airSubmode = "AIRFIELD_OPS"; };
+        uiNamespace setVariable ["ARC_console_airSubmode", _airSubmode];
+
         if (!isNull _b1) then {
             _b1 ctrlShow true;
-            if (_airMode isEqualTo "PILOT") then {
-                _b1 ctrlEnable _canAirPilot;
-                _b1 ctrlSetText (if (_canAirPilot) then {"SEND REQUEST"} else {"NO PILOT AUTH"});
-            } else {
-                _b1 ctrlEnable _canAirHoldRelease;
-                _b1 ctrlSetText (if (_canAirHoldRelease) then {"HOLD/RELEASE"} else {"NO HOLD AUTH"});
-            };
+            _b1 ctrlEnable true;
+            _b1 ctrlSetText (if (_airMode isEqualTo "PILOT") then {"SEND REQUEST"} else {"AIR ACTION"});
         };
         if (!isNull _b2) then {
             _b2 ctrlShow true;
-            if (_airMode isEqualTo "PILOT") then {
-                _b2 ctrlEnable (_canAirPilot || _canAirControl);
-                _b2 ctrlSetText (if (_canAirControl) then {"MODE: TOWER"} else {"REFRESH"});
-            } else {
-                _b2 ctrlEnable _canAirQueueManage;
-                _b2 ctrlSetText (if (_canAirQueueManage) then {"EXPEDITE/CANCEL"} else {"NO QUEUE AUTH"});
-            };
+            _b2 ctrlEnable true;
+            _b2 ctrlSetText (if (_airMode isEqualTo "PILOT") then {"REFRESH"} else {"VIEW"});
         };
 
         if (!_canAirRead && !_canAirControl && !_canAirPilot) then
         {
-            if (!isNull _b1) then { _b1 ctrlEnable false; _b1 ctrlSetText "NO ACCESS"; };
-            if (!isNull _b2) then { _b2 ctrlEnable false; _b2 ctrlSetText "NO ACCESS"; };
+            if (!isNull _b1) then { _b1 ctrlEnable false; _b1 ctrlSetText "READ-ONLY"; };
+            if (!isNull _b2) then { _b2 ctrlEnable false; _b2 ctrlSetText "READ-ONLY"; };
         };
 
         [_display, false] call ARC_fnc_uiConsoleAirPaint;
