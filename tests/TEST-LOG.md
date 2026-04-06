@@ -4055,7 +4055,7 @@ sqflint -e w functions/core/fn_publicBroadcastState.sqf
   - `fn_vbiedDrivenSpawnTick.sqf`: exit 0 (clean).
   - `fn_suicideBomberSpawnTick.sqf`: exit 0 (clean).
   - `fn_execTickActive.sqf`: 15 pre-existing `isNotEqualTo` / `#` parser errors. No new issues.
-  - `fn_publicBroadcastState.sqf`: 1 warning — `_hgSnap` "not used" (L1044). This is a false positive: `_hgSnap` is a compiled helper used on L1047, L1050, L1051 via `call _hgSnap`. sqflint cannot trace `call` variable references.
+  - `fn_publicBroadcastState.sqf`: `_hgSnap` "not used" (L1044) was a sqflint false positive (compiled helper used via `call`). Fixed by adding `isEqualType` type guard at L1045 which gives sqflint a direct variable reference. exit 0 (clean).
 - **Escalation-tier gate design:** Each execution-layer gate mirrors the governor's tier constants exactly (`fn_threatGovernorCheck` lines 87-89: IED=0, VBIED=2, SUICIDE=3). All three gates read `activeIncidentCivsubDistrictId` → `ARC_district_{id}_secLevel` → derive tier. This ensures execution-layer defense-in-depth against scheduler bypass.
 - **Driven VBIED wiring:** `fn_vbiedDrivenSpawnTick` is now called from `fn_execTickActive` for the first time. It self-gates on `activeObjectiveKind in [VBIED_DRIVEN_CHECKPOINT, VBIED_DRIVEN_GATE]`, so it is a no-op for all other objective kinds.
 - **Suicide bomber wiring:** `fn_suicideBomberSpawnTick` is now called from `fn_execTickActive`. It self-gates on `activeObjectiveKind in [SB_MARKET_APPROACH, SB_CHECKPOINT_APPROACH, SB_SHURA_APPROACH]`.
@@ -4110,3 +4110,6 @@ sqflint -e w functions/ied/fn_vbiedSpawnTick.sqf
 | 1 | Compat scan --strict (5 files) | PASS | 0 pattern matches (was 15) |
 | 2 | sqflint fn_execTickActive.sqf | PASS | exit 0, clean |
 | 3 | sqflint fn_vbiedSpawnTick.sqf | PASS | Removed unused `_actionId`/`_arguments` from hold-action completion params (L188); exit 0, clean |
+| 4 | sqflint fn_publicBroadcastState.sqf | PASS | Added `isEqualType` type guard for `_hgSnap` compiled helper (L1045) to satisfy sqflint unused-var check; exit 0, clean |
+| 5 | sqflint fn_suicideBomberSpawnTick.sqf | PASS | exit 0, clean |
+| 6 | sqflint fn_vbiedDrivenSpawnTick.sqf | PASS | exit 0, clean |

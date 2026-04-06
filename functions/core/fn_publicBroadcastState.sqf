@@ -1042,6 +1042,7 @@ if (_dbgEnabled) then
                 if (!(_budgetMap isEqualType createHashMap)) exitWith { [] };
                 private _rows = [];
                 private _hgSnap = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+                if (!(_hgSnap isEqualType {})) exitWith { [] };
                 {
                     private _did = _x;
                     private _b = [_budgetMap, _did, createHashMap] call _hgSnap;
