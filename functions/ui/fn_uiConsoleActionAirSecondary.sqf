@@ -1,10 +1,7 @@
 /*
     ARC_fnc_uiConsoleActionAirSecondary
 
-    AIR secondary action (row-aware):
-      - REQ row: DENY selected clearance request
-      - FLT row: CANCEL selected queued flight
-      - Other rows: global RELEASE departures
+    AIR secondary action.
 */
 
 if (!hasInterface) exitWith {false};
@@ -19,13 +16,20 @@ private _sel = lbCurSel _ctrlList;
 private _data = if (_sel >= 0) then { _ctrlList lbData _sel } else { "" };
 if (!(_data isEqualType "")) then { _data = ""; };
 private _parts = _data splitString "|";
-private _rowType = if ((count _parts) > 0) then { _parts select 0 } else { "" };
+private _rowType = toUpper (_parts param [0, ""]);
 
-private _casreqSnapshot = uiNamespace getVariable ["ARC_console_casreqSnapshot", []];
-if !(_casreqSnapshot isEqualType []) then { _casreqSnapshot = []; };
-private _casreqId = uiNamespace getVariable ["ARC_console_casreqId", ""];
-if !(_casreqId isEqualType "") then { _casreqId = ""; };
-// AIR actions consume only server-published CASREQ snapshot contract.
+private _debugAir = missionNamespace getVariable ["ARC_debugInspectorEnabled", false];
+if (!(_debugAir isEqualType true) && !(_debugAir isEqualType false)) then { _debugAir = false; };
+
+private _cycleModes = {
+    params ["_current", "_canControl", "_debugEnabled"];
+    private _modes = ["AIRFIELD_OPS"];
+    if (_canControl) then { _modes pushBack "CLEARANCES"; };
+    if (_debugEnabled) then { _modes pushBack "DEBUG"; };
+    private _idx = _modes find _current;
+    if (_idx < 0) exitWith { _modes select 0 };
+    _modes select ((_idx + 1) mod (count _modes))
+};
 
 private _airMode = ["ARC_console_airMode", "TOWER"] call ARC_fnc_uiNsGetString;
 _airMode = toUpper _airMode;
@@ -34,7 +38,8 @@ if (_airMode isEqualTo "PILOT") exitWith {
     private _canAirControl = ["ARC_console_airCanControl", false] call ARC_fnc_uiNsGetBool;
     if (_canAirControl) then {
         uiNamespace setVariable ["ARC_console_airMode", "TOWER"];
-        ["AIR", "Switched AIR submode to TOWER."] call ARC_fnc_clientToast;
+        uiNamespace setVariable ["ARC_console_airSubmode", "AIRFIELD_OPS"];
+        ["AIR", "Switched AIR mode to TOWER."] call ARC_fnc_clientToast;
     } else {
         ["AIR", "Pilot submode refreshed."] call ARC_fnc_clientToast;
     };
@@ -42,97 +47,101 @@ if (_airMode isEqualTo "PILOT") exitWith {
     true
 };
 
-private _canAirPilot = ["ARC_console_airCanPilot", false] call ARC_fnc_uiNsGetBool;
-if (_canAirPilot && { _rowType isEqualTo "HDR" }) exitWith {
-    uiNamespace setVariable ["ARC_console_airMode", "PILOT"];
-    ["AIR", "Switched AIR submode to PILOT."] call ARC_fnc_clientToast;
-    [_disp] call ARC_fnc_uiConsoleRefresh;
-    true
-};
+private _canAirControl = ["ARC_console_airCanControl", false] call ARC_fnc_uiNsGetBool;
+private _airSubmode = ["ARC_console_airSubmode", "AIRFIELD_OPS"] call ARC_fnc_uiNsGetString;
+_airSubmode = toUpper _airSubmode;
+_airSubmode = (_airSubmode splitString " ") joinString "";
+if !(_airSubmode in ["AIRFIELD_OPS", "CLEARANCES", "DEBUG"]) then { _airSubmode = "AIRFIELD_OPS"; };
 
-switch (_rowType) do
+switch (_airSubmode) do
 {
-    case "REQ":
+    case "CLEARANCES":
     {
-        private _rid = _parts param [1, ""];
-        if (_rid isEqualTo "" || { _rid isEqualTo "NONE" }) exitWith {
-            ["AIR", "Select a pending clearance request first."] call ARC_fnc_clientToast;
-            false
-        };
-
-        private _canAirQueueManage = ["ARC_console_airCanQueueManage", false] call ARC_fnc_uiNsGetBool;
-        if (!_canAirQueueManage) exitWith
+        switch (_rowType) do
         {
-            [_disp, false] call ARC_fnc_uiConsoleAirPaint;
-            ["AIR", "No queue authorization for clearance denials."] call ARC_fnc_clientToast;
-            true
-        };
+            case "REQ":
+            {
+                private _rid = _parts param [1, ""];
+                if (_rid isEqualTo "" || { _rid isEqualTo "NONE" }) exitWith {
+                    ["AIR", "Select a pending clearance request first."] call ARC_fnc_clientToast;
+                    false
+                };
 
-        [_rid, false, "UI_SECONDARY_DENY"] call ARC_fnc_airbaseClientRequestClearanceDecision;
-        ["AIR", format ["Deny request sent: %1", _rid]] call ARC_fnc_clientToast;
+                private _canAirQueueManage = ["ARC_console_airCanQueueManage", false] call ARC_fnc_uiNsGetBool;
+                if (!_canAirQueueManage) exitWith
+                {
+                    ["AIR", "READ-ONLY: no queue authorization for denials."] call ARC_fnc_clientToast;
+                    true
+                };
+
+                [_rid, false, "UI_SECONDARY_DENY"] call ARC_fnc_airbaseClientRequestClearanceDecision;
+                ["AIR", format ["Deny request sent: %1", _rid]] call ARC_fnc_clientToast;
+            };
+
+            case "FLT":
+            {
+                private _fid = _parts param [1, ""];
+                if (_fid isEqualTo "" || { _fid isEqualTo "NONE" }) exitWith {
+                    ["AIR", "Select a queued flight first."] call ARC_fnc_clientToast;
+                    false
+                };
+
+                private _canAirQueueManage = ["ARC_console_airCanQueueManage", false] call ARC_fnc_uiNsGetBool;
+                private _canCancel = ["ARC_console_airCanCancel", false] call ARC_fnc_uiNsGetBool;
+                if (!_canAirQueueManage || !_canCancel) exitWith
+                {
+                    ["AIR", "READ-ONLY: no permission to cancel queued flights."] call ARC_fnc_clientToast;
+                    true
+                };
+
+                [_fid] call ARC_fnc_airbaseClientRequestCancelQueuedFlight;
+                ["AIR", format ["Cancel request sent: %1", _fid]] call ARC_fnc_clientToast;
+            };
+
+            case "LANE":
+            {
+                private _lane = _parts param [1, ""];
+                if (_lane isEqualTo "") exitWith {
+                    ["AIR", "Select an ATC lane first."] call ARC_fnc_clientToast;
+                    false
+                };
+
+                private _canAirStaff = ["ARC_console_airCanStaff", false] call ARC_fnc_uiNsGetBool;
+                if (!_canAirStaff) exitWith
+                {
+                    ["AIR", "READ-ONLY: no permission to release lane staffing."] call ARC_fnc_clientToast;
+                    true
+                };
+
+                [_lane, false] call ARC_fnc_airbaseClientRequestSetLaneStaffing;
+                ["AIR", format ["Release request sent for %1 lane.", toUpper _lane]] call ARC_fnc_clientToast;
+            };
+
+            default
+            {
+                private _nextMode = [_airSubmode, _canAirControl, _debugAir] call _cycleModes;
+                uiNamespace setVariable ["ARC_console_airSubmode", _nextMode];
+                ["AIR", format ["Switched AIR view to %1.", _nextMode]] call ARC_fnc_clientToast;
+            };
+        };
     };
 
-    case "LANE":
+    case "DEBUG":
     {
-        private _lane = _parts param [1, ""];
-        if (_lane isEqualTo "") exitWith {
-            ["AIR", "Select an ATC lane first."] call ARC_fnc_clientToast;
-            false
-        };
-
-        private _canAirStaff = ["ARC_console_airCanStaff", false] call ARC_fnc_uiNsGetBool;
-        if (!_canAirStaff) exitWith
-        {
-            [_disp, false] call ARC_fnc_uiConsoleAirPaint;
-            ["AIR", "No permission to release lane staffing."] call ARC_fnc_clientToast;
-            true
-        };
-
-        [_lane, false] call ARC_fnc_airbaseClientRequestSetLaneStaffing;
-        ["AIR", format ["Release request sent for %1 lane.", toUpper _lane]] call ARC_fnc_clientToast;
-    };
-
-    case "FLT":
-    {
-        private _fid = _parts param [1, ""];
-        if (_fid isEqualTo "" || { _fid isEqualTo "NONE" }) exitWith {
-            ["AIR", "Select a queued flight first."] call ARC_fnc_clientToast;
-            false
-        };
-
-        private _canAirQueueManage = ["ARC_console_airCanQueueManage", false] call ARC_fnc_uiNsGetBool;
-        private _canCancel = ["ARC_console_airCanCancel", false] call ARC_fnc_uiNsGetBool;
-        if (!_canAirQueueManage || !_canCancel) exitWith
-        {
-            [_disp, false] call ARC_fnc_uiConsoleAirPaint;
-            ["AIR", "No permission to cancel queued flights."] call ARC_fnc_clientToast;
-            true
-        };
-
-        [_fid] call ARC_fnc_airbaseClientRequestCancelQueuedFlight;
-        ["AIR", format ["Cancel request sent: %1", _fid]] call ARC_fnc_clientToast;
+        private _nextMode = [_airSubmode, _canAirControl, _debugAir] call _cycleModes;
+        uiNamespace setVariable ["ARC_console_airSubmode", _nextMode];
+        ["AIR", format ["Switched AIR view to %1.", _nextMode]] call ARC_fnc_clientToast;
     };
 
     default
     {
-        private _canAirHoldRelease = ["ARC_console_airCanHoldRelease", false] call ARC_fnc_uiNsGetBool;
-        if (!_canAirHoldRelease) exitWith
-        {
-            [_disp, false] call ARC_fnc_uiConsoleAirPaint;
-            ["AIR", "No RELEASE permission."] call ARC_fnc_clientToast;
-            true
+        private _nextMode = [_airSubmode, _canAirControl, _debugAir] call _cycleModes;
+        if (_nextMode isEqualTo _airSubmode) then {
+            ["AIR", "AIRFIELD OPS refreshed."] call ARC_fnc_clientToast;
+        } else {
+            uiNamespace setVariable ["ARC_console_airSubmode", _nextMode];
+            ["AIR", format ["Switched AIR view to %1.", _nextMode]] call ARC_fnc_clientToast;
         };
-
-        private _canRelease = ["ARC_console_airCanRelease", false] call ARC_fnc_uiNsGetBool;
-        if (!_canRelease) exitWith
-        {
-            [_disp, false] call ARC_fnc_uiConsoleAirPaint;
-            ["AIR", "No RELEASE permission."] call ARC_fnc_clientToast;
-            true
-        };
-
-        [] call ARC_fnc_airbaseClientRequestReleaseDepartures;
-        ["AIR", format ["Release request sent to tower control. CASREQ=%1", if (_casreqId isEqualTo "") then {"-"} else {_casreqId}]] call ARC_fnc_clientToast;
     };
 };
 

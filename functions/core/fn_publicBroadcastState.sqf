@@ -478,6 +478,279 @@ private _airbasePub = [
     ["automationDelayArrivalS", _autoDelayArrivalS]
 ];
 
+private _uiPushAlert = {
+    params [
+        ["_rows", [], [[]]],
+        ["_text", "", [""]],
+        ["_severity", "INFO", [""]],
+        ["_sourceId", "", [""]]
+    ];
+    if (_text isEqualTo "") exitWith {};
+    _severity = toUpper _severity;
+    if !(_severity in ["INFO", "CAUTION", "CRITICAL"]) then { _severity = "INFO"; };
+    if ((count _rows) >= 5) exitWith {};
+    _rows pushBack [_text, _severity, _sourceId];
+};
+
+private _uiPendingClearances = [];
+private _uiDecisionQueue = [];
+{
+    if !(_x isEqualType []) then { continue; };
+    private _requestId = _x param [0, ""];
+    private _requestType = toUpper (_x param [1, ""]);
+    private _pilotName = _x param [2, ""];
+    private _requestedAt = _x param [3, -1];
+    private _priority = _x param [4, 0];
+    private _status = toUpper (_x param [5, ""]);
+    private _ownerName = _x param [6, ""];
+    private _meta = _x param [9, []];
+    if !(_meta isEqualType []) then { _meta = []; };
+
+    private _callsign = [_meta, "pilotCallsign", ""] call _metaValue;
+    if (_callsign isEqualTo "") then { _callsign = [_meta, "pilotGroupName", ""] call _metaValue; };
+    if (_callsign isEqualTo "") then { _callsign = _pilotName; };
+    if (_callsign isEqualTo "") then { _callsign = _requestId; };
+
+    private _decisionNeeded = _status in ["PENDING", "AWAITING_TOWER_DECISION", "QUEUED"];
+    if ((count _uiPendingClearances) < 6) then {
+        _uiPendingClearances pushBack [_requestId, _requestType, _callsign, _requestedAt, _priority, _decisionNeeded, _ownerName, _meta];
+    };
+
+    if (_decisionNeeded && { (count _uiDecisionQueue) < 5 }) then {
+        _uiDecisionQueue pushBack [
+            format ["Decision required: %1 %2", _requestType, _callsign],
+            _requestId,
+            _callsign,
+            _priority,
+            _requestType
+        ];
+    };
+} forEach _clearancePending;
+
+private _uiArrivals = [];
+private _uiDepartures = [];
+{
+    if !(_x isEqualType []) then { continue; };
+    private _fid = _x param [0, ""];
+    private _kind = toUpper (_x param [1, ""]);
+    private _asset = _x param [2, ""];
+    private _routeMeta = _x param [3, []];
+    if !(_routeMeta isEqualType []) then { _routeMeta = []; };
+
+    private _sourceRequestId = [_routeMeta, "sourceRequestId", ""] call _metaValue;
+    private _queuedAt = [_routeMeta, "queuedAt", -1] call _metaValue;
+    if !(_queuedAt isEqualType 0) then { _queuedAt = -1; };
+    private _aircraftType = [_routeMeta, "aircraftType", ""] call _metaValue;
+    if (_aircraftType isEqualTo "") then { _aircraftType = _asset; };
+    if (_aircraftType isEqualTo "") then { _aircraftType = "-"; };
+
+    private _matchedReq = [];
+    {
+        if ((_x param [0, ""]) isEqualTo _sourceRequestId) exitWith { _matchedReq = _x; };
+    } forEach _uiPendingClearances;
+
+    private _callsign = _fid;
+    private _priority = 0;
+    private _ageS = if (_queuedAt >= 0) then { round ((serverTime - _queuedAt) max 0) } else { -1 };
+    if (_matchedReq isEqualType [] && { (count _matchedReq) >= 8 }) then {
+        _callsign = _matchedReq param [2, _fid];
+        _priority = _matchedReq param [4, 0];
+        private _requestedAt = _matchedReq param [3, -1];
+        if (_requestedAt isEqualType 0 && { _requestedAt >= 0 }) then {
+            _ageS = round ((serverTime - _requestedAt) max 0);
+        };
+    };
+
+    if (_kind isEqualTo "ARR") then {
+        if ((count _uiArrivals) < 6) then {
+            private _phase = "INBOUND";
+            private _status = "NORMAL";
+            if (_priority >= 100) then { _phase = "PRIORITY"; _status = "CONFLICT"; } else {
+                if ((toUpper _runwayState) in ["OCCUPIED", "BLOCKED"]) then {
+                    _phase = "HOLDING";
+                    _status = "HOLDING";
+                };
+            };
+            _uiArrivals pushBack [_fid, _callsign, _aircraftType, _phase, _ageS, _priority, _status];
+        };
+    };
+
+    if (_kind isEqualTo "DEP") then {
+        if ((count _uiDepartures) < 6) then {
+            private _depState = "QUEUED";
+            private _depStatus = "NORMAL";
+            if (_holdDepartures) then { _depState = "HOLD"; _depStatus = "HOLD"; };
+            if (_execActive && { _execFid isEqualTo _fid }) then { _depState = "CLEARED"; _depStatus = "NORMAL"; };
+            if ((count _blockedRouteTailView) > 0) then {
+                private _lastBlocked = _blockedRouteTailView select ((count _blockedRouteTailView) - 1);
+                if ((_lastBlocked param [2, ""]) isEqualTo _fid) then {
+                    _depState = "BLOCKED";
+                    _depStatus = "BLOCKED";
+                };
+            };
+            _uiDepartures pushBack [_fid, _callsign, _aircraftType, _depState, _ageS, _priority, _depStatus];
+        };
+    };
+} forEach _nextItems;
+
+{
+    if ((count _uiArrivals) >= 6) exitWith {};
+    if !(_x isEqualType []) then { continue; };
+    private _requestType = toUpper (_x param [1, ""]);
+    if !(_requestType in ["REQ_INBOUND", "REQ_LAND"]) then { continue; };
+    private _requestId = _x param [0, ""];
+    private _callsign = _x param [2, _requestId];
+    private _requestedAt = _x param [3, -1];
+    private _priority = _x param [4, 0];
+    private _alreadyPresent = false;
+    {
+        if ((_x param [0, ""]) isEqualTo _requestId) exitWith { _alreadyPresent = true; };
+    } forEach _uiArrivals;
+    if (_alreadyPresent) then { continue; };
+    _uiArrivals pushBack [
+        _requestId,
+        _callsign,
+        "PENDING",
+        "AWAITING DECISION",
+        if (_requestedAt isEqualType 0 && { _requestedAt >= 0 }) then { round ((serverTime - _requestedAt) max 0) } else { -1 },
+        _priority,
+        if (_priority >= 100) then { "CONFLICT" } else { "HOLDING" }
+    ];
+} forEach _uiPendingClearances;
+
+private _uiStaffing = [];
+{
+    if !(_x isEqualType []) then { continue; };
+    if ((count _uiStaffing) >= 3) exitWith {};
+    private _lane = _x param [0, ""];
+    private _mode = toUpper (_x param [1, "AUTO"]);
+    private _operator = _x param [2, ""];
+    _uiStaffing pushBack [_lane, _mode, if (_operator isEqualTo "") then { "AUTO" } else { _operator }];
+} forEach _staffingView;
+
+private _uiRecentEvents = [];
+{
+    if !(_x isEqualType []) then { continue; };
+    if ((count _uiRecentEvents) >= 8) exitWith {};
+    private _eventTs = _x param [0, -1];
+    private _eventKind = toUpper (_x param [1, ""]);
+    private _eventSubject = _x param [2, ""];
+    private _label = if (_eventSubject isEqualTo "") then { _eventKind } else { format ["%1 %2", _eventKind, _eventSubject] };
+    _uiRecentEvents pushBack [_eventTs, _label];
+} forEach _eventsView;
+
+private _uiClearanceHistory = [];
+for "_histIdx" from ((count _clearanceHistoryTail) - 1) to 0 step -1 do {
+    private _histRow = _clearanceHistoryTail select _histIdx;
+    if !(_histRow isEqualType []) then { continue; };
+    private _status = toUpper (_histRow param [6, ""]);
+    if !(_status in ["APPROVED", "DENIED", "CANCELED"]) then { continue; };
+    if ((count _uiClearanceHistory) >= 5) exitWith {};
+    private _decision = _histRow param [9, []];
+    _uiClearanceHistory pushBack [
+        _histRow param [0, ""],
+        _status,
+        _histRow param [8, -1],
+        if (_decision isEqualType []) then { _decision param [0, "SYSTEM"] } else { "SYSTEM" },
+        if (_decision isEqualType []) then { _decision param [3, ""] } else { "" }
+    ];
+};
+
+private _uiAlerts = [];
+if ((toUpper _runwayState) in ["OCCUPIED", "BLOCKED"]) then {
+    [_uiAlerts, format ["Runway %1", toUpper _runwayState], "CRITICAL", _runwayOwner] call _uiPushAlert;
+};
+if (_holdDepartures) then {
+    [_uiAlerts, "Departure hold active", "CAUTION", "HOLD"] call _uiPushAlert;
+};
+if ((count _clearanceEmergency) > 0) then {
+    private _emReq = _clearanceEmergency select 0;
+    [_uiAlerts, format ["Emergency inbound %1", _emReq param [0, ""]], "CRITICAL", _emReq param [0, ""]] call _uiPushAlert;
+};
+if (_blockedRouteLatestReason != "-") then {
+    [_uiAlerts, format ["Blocked route %1", _blockedRouteLatestReason], "CAUTION", _blockedRouteLatestSourceId] call _uiPushAlert;
+};
+if ((count _uiDecisionQueue) > 0) then {
+    private _firstDecision = _uiDecisionQueue select 0;
+    [_uiAlerts, _firstDecision param [0, "Decision required"], "CAUTION", _firstDecision param [1, ""]] call _uiPushAlert;
+};
+
+private _runwayMovement = "CLEAR";
+if ((toUpper _runwayState) in ["OCCUPIED", "BLOCKED"]) then {
+    _runwayMovement = if (_execActive) then { "DEPARTING" } else { "BLOCKED" };
+};
+
+private _casTiming = [
+    ["casreqId", _casreqId],
+    ["rev", missionNamespace getVariable ["ARC_casreq_rev", 0]],
+    ["district", if (_casreqSnapshot isEqualType []) then { [_casreqSnapshot, "district_id", ""] call _metaValue } else { "" }],
+    ["state", if (_casreqSnapshot isEqualType []) then { [_casreqSnapshot, "state", ""] call _metaValue } else { "" }]
+];
+
+private _uiDebugEnabled = missionNamespace getVariable ["ARC_debugInspectorEnabled", false];
+if (!(_uiDebugEnabled isEqualType true) && !(_uiDebugEnabled isEqualType false)) then { _uiDebugEnabled = false; };
+private _uiDebug = [];
+if (_uiDebugEnabled) then {
+    private _rawOwnerIds = [];
+    {
+        if (_x isEqualType [] && { (count _x) >= 4 }) then {
+            private _uid = _x param [3, ""];
+            if !(_uid isEqualTo "") then { _rawOwnerIds pushBack _uid; };
+        };
+    } forEach _staffingView;
+
+    _uiDebug = [
+        ["snapshotRev", 0],
+        ["snapshotAge", 0],
+        ["blockedRouteCount", count _blockedRouteTailView],
+        ["blockedRouteReason", _blockedRouteLatestReason],
+        ["blockedRouteSource", _blockedRouteLatestSourceId],
+        ["blockedRouteTail", _blockedRouteTailView],
+        ["rawOwnerIds", _rawOwnerIds],
+        ["routeValidation", _blockedRouteTailView],
+        ["casreqId", _casreqId],
+        ["casreqRev", missionNamespace getVariable ["ARC_casreq_rev", 0]],
+        ["casreqDistrict", [_casreqSnapshot, "district_id", ""] call _metaValue],
+        ["casreqState", [_casreqSnapshot, "state", ""] call _metaValue]
+    ];
+};
+
+private _airbaseUiSnapshot = [
+    ["v", 1],
+    ["rev", 0],
+    ["updatedAt", serverTime],
+    ["freshnessState", "FRESH"],
+    ["runway", [
+        ["state", _runwayState],
+        ["ownerCallsign", _runwayOwner],
+        ["activeMovement", _runwayMovement],
+        ["holdState", _holdDepartures],
+        ["age", 0]
+    ]],
+    ["alerts", _uiAlerts],
+    ["decisionQueue", _uiDecisionQueue],
+    ["arrivals", _uiArrivals],
+    ["departures", _uiDepartures],
+    ["pendingClearances", _uiPendingClearances],
+    ["staffing", _uiStaffing],
+    ["recentEvents", _uiRecentEvents],
+    ["clearanceHistory", _uiClearanceHistory],
+    ["controllerTimeouts", [
+        ["tower", _controllerTimeoutTowerS],
+        ["ground", _controllerTimeoutGroundS],
+        ["arrival", _controllerTimeoutArrivalS]
+    ]],
+    ["automationDelays", [
+        ["tower", _autoDelayTowerS],
+        ["ground", _autoDelayGroundS],
+        ["arrival", _autoDelayArrivalS]
+    ]],
+    ["casTiming", _casTiming]
+];
+if ((count _uiDebug) > 0) then {
+    _airbaseUiSnapshot pushBack ["debug", _uiDebug];
+};
+
 private _pub = [
     ["insurgentPressure", _p],
     ["corruption", _c],
@@ -502,6 +775,14 @@ private _pub = [
 
 private _didPublish = [_pub, "publicBroadcastState", false, 0.25] call ARC_fnc_statePublishPublic;
 if (!_didPublish) exitWith { false };
+
+private _uiRev = missionNamespace getVariable ["ARC_pub_airbaseUiSnapshotRev", 0];
+if (!(_uiRev isEqualType 0)) then { _uiRev = 0; };
+_uiRev = _uiRev + 1;
+_airbaseUiSnapshot set [1, ["rev", _uiRev]];
+missionNamespace setVariable ["ARC_pub_airbaseUiSnapshotRev", _uiRev];
+missionNamespace setVariable ["ARC_pub_airbaseUiSnapshot", _airbaseUiSnapshot, true];
+missionNamespace setVariable ["ARC_pub_airbaseUiSnapshotUpdatedAt", serverTime, true];
 
 private _companySnapshot = [
     ["companyCommandNodes", ["companyCommandNodes", []] call ARC_fnc_stateGet],

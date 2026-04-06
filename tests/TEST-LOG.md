@@ -11,6 +11,49 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-06 02:00 UTC — AIR / TOWER full-phase implementation
+
+**Branch/Commit:** copilot/create-task-decomposition-plan @ aff3d09 + local edits
+
+**Scenario:** Implement all AIR/TOWER phases from the architecture plan in one pass: add Phase 1 contract docs, publish the normalized `ARC_pub_airbaseUiSnapshot`, replace the AIR painter with AIRFIELD_OPS / CLEARANCES / DEBUG submodes, clean button behavior, preserve PILOT mode, and add the commander air summary widget to the dashboard.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `docs/architecture/AIR_TOWER_UI_Snapshot_Contract_v1.md` | Added locked snapshot contract and R/A/G rules |
+| `docs/architecture/AIR_TOWER_Button_Behavior_Matrix.md` | Added locked AIR/TOWER button behavior matrix |
+| `functions/core/fn_publicBroadcastState.sqf` | Added `ARC_pub_airbaseUiSnapshot` translation/publication alongside existing raw airbase block |
+| `functions/ui/fn_uiConsoleAirPaint.sqf` | Replaced raw AIR painter with snapshot-driven AIRFIELD_OPS / CLEARANCES / DEBUG implementation |
+| `functions/ui/fn_uiConsoleRefresh.sqf` | Added AIR submode normalization and clean read-only labels |
+| `functions/ui/fn_uiConsoleActionAirPrimary.sqf` | Reworked primary AIR action for submode-aware behavior and pilot cancellation via snapshot |
+| `functions/ui/fn_uiConsoleActionAirSecondary.sqf` | Reworked secondary AIR action for mode cycling and submode-aware queue/staffing actions |
+| `functions/ui/fn_uiConsoleDashboardPaint.sqf` | Added commander Air Summary widget and quick-status air fields |
+
+### Checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Baseline state migrations | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios passed before edits |
+| 2 | Baseline marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | All modes passed before edits |
+| 3 | Targeted strict compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_publicBroadcastState.sqf functions/ui/fn_uiConsoleAirPaint.sqf functions/ui/fn_uiConsoleRefresh.sqf functions/ui/fn_uiConsoleActionAirPrimary.sqf functions/ui/fn_uiConsoleActionAirSecondary.sqf functions/ui/fn_uiConsoleDashboardPaint.sqf` | PASS | 6 modified AIR/TOWER files, 0 parser-compat matches |
+| 4 | Targeted sqflint | `sqflint -e w <each modified AIR/TOWER file>` | PASS | Clean on all 6 modified SQF files |
+| 5 | Post-change state migrations | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios passed after edits |
+| 6 | Post-change marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | All modes passed after edits |
+| 7 | Repo diff sanity | `git --no-pager diff --check` | PASS | No whitespace/conflict-marker issues |
+| 8 | Local MP runtime smoke | N/A | BLOCKED | No Arma 3 runtime in container |
+| 9 | Dedicated/JIP runtime smoke | N/A | BLOCKED | No dedicated/JIP environment in container |
+
+### Outcome
+
+- AIR/TOWER now has a dedicated normalized UI snapshot contract published separately from the legacy raw airbase public block.
+- The AIR tab now supports AIRFIELD_OPS, CLEARANCES, and DEBUG tower submodes while preserving PILOT mode.
+- Default operator view no longer dumps blocked-route/CASREQ contract internals; those move to the debug surface.
+- The dashboard now exposes a compact command-facing air summary.
+- Local runtime, dedicated-server, and JIP validation remain required before operational sign-off.
+
+---
+
 ## 2026-04-06 00:12 UTC — Fix sqflint HashMap parse failures in changed CIVSUB files
 
 **Branch/Commit:** copilot/fix-vehicle-spawn-in-buildings @ e9a4084 + local edits
