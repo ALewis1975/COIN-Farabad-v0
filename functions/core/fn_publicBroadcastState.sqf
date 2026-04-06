@@ -486,6 +486,8 @@ private _uiPushAlert = {
         ["_sourceId", "", [""]]
     ];
     if (_text isEqualTo "") exitWith {};
+    _severity = toUpper _severity;
+    if !(_severity in ["INFO", "CAUTION", "CRITICAL"]) then { _severity = "INFO"; };
     if ((count _rows) >= 5) exitWith {};
     _rows pushBack [_text, _severity, _sourceId];
 };

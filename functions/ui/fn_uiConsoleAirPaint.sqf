@@ -309,7 +309,7 @@ if (_rebuild) then {
                         if !(_x isEqualType []) then { continue; };
                         private _key = _x param [0, ""];
                         private _value = _x param [1, ""];
-                        private _rowText = format ["%1: %2", _key, if (_value isEqualType []) then { str _value } else { str _value }];
+                        private _rowText = format ["%1: %2", _key, str _value];
                         private _row = _ctrlList lbAdd _rowText;
                         _ctrlList lbSetData [_row, format ["DBG|%1", _key]];
                     } forEach _debug;
