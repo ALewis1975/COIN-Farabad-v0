@@ -16,6 +16,7 @@
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _hk = compile "params ['_h']; keys _h";
 
 private _dbg = missionNamespace getVariable ["civsub_v1_debug", false];
 private _todPolicy = [] call ARC_fnc_dynamicTodGetPolicy;
@@ -141,21 +142,22 @@ if ([_pos] call _posIsRoadish) then
 private _minSep = missionNamespace getVariable ["civsub_v1_civ_minSeparation_m", 20];
 if (_minSep isEqualType 0 && {_minSep > 0}) then {
     private _reg = missionNamespace getVariable ["civsub_v1_civ_registry", createHashMap];
-    if (_reg isEqualType createHashMap && {(count (keys _reg)) > 0}) then {
+    private _regKeys = [_reg] call _hk;
+    if (_reg isEqualType createHashMap && {(count _regKeys) > 0}) then {
         private _tries = 0;
         private _ok = false;
         while {!_ok && {_tries < 10}} do {
             _tries = _tries + 1;
             _ok = true;
             {
-                private _row = _reg get _x;
+                private _row = [_reg, _x, createHashMap] call _hg;
                 if (_row isEqualType createHashMap) then {
                     private _u2 = [_row, "unit", objNull] call _hg;
                     if (!isNull _u2 && {(_pos distance2D (getPosATL _u2)) < _minSep}) exitWith {
                         _ok = false;
                     };
                 };
-            } forEach (keys _reg);
+            } forEach _regKeys;
             if (!_ok) then {
                 private _p2 = [_districtId] call ARC_fnc_civsubCivPickSpawnPos;
                 if !(_p2 isEqualType [] && {(count _p2) >= 2} && {!(_p2 isEqualTo [0,0,0])}) then {

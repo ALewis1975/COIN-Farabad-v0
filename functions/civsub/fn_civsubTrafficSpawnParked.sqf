@@ -47,15 +47,8 @@ private _poolFallback = missionNamespace getVariable ["civsub_v1_traffic_vehicle
 if (!(_poolPrefer isEqualType [])) then { _poolPrefer = []; };
 if (!(_poolFallback isEqualType [])) then { _poolFallback = []; };
 
-private _fnHmGet = {
-    params ["_hm", "_key", "_fallback"];
-    private _v = _hm get _key;
-    if (isNil "_v") exitWith { _fallback };
-    _v
-};
-
-private _c = [_d, "centroid", [0,0]] call _fnHmGet;
-private _r = [_d, "radius_m", 400] call _fnHmGet;
+private _c = [_d, "centroid", [0,0]] call _hg;
+private _r = [_d, "radius_m", 400] call _hg;
 if !(_c isEqualType []) exitWith {objNull};
 if ((count _c) < 2) exitWith {objNull};
 

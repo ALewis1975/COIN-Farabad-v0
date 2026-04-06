@@ -11,6 +11,41 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-06 00:12 UTC — Fix sqflint HashMap parse failures in changed CIVSUB files
+
+**Branch/Commit:** copilot/fix-vehicle-spawn-in-buildings @ e9a4084 + local edits
+
+**Scenario:** `Arma SQF + Mission Config Preflight` failed in workflow run `24013565812` / job `70028946403` during changed-file SQF linting. Local reproduction showed `sqflint` parser failures on direct `keys` and `get` usage in changed CIVSUB files. Rewrote those sites to use compiled helper wrappers (`_hk` for `keys`, existing `_hg` for HashMap reads) in the changed files only.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `functions/civsub/fn_civsubCivSamplerTick.sqf` | Replaced direct `keys` / `get` parser-hostile forms with `_hk` / `_hg` helper usage |
+| `functions/civsub/fn_civsubCivSpawnInDistrict.sqf` | Replaced changed-file `keys` / `get` parser-hostile forms with `_hk` / `_hg` helper usage |
+| `functions/civsub/fn_civsubLocNpcTick.sqf` | Replaced direct `keys` / `get` parser-hostile forms with `_hk` / `_hg` helper usage |
+| `functions/civsub/fn_civsubTrafficSpawnParked.sqf` | Replaced direct HashMap `get` helper with `_hg` call form |
+| `functions/civsub/fn_civsubTrafficTick.sqf` | Replaced direct HashMap `get` reads in changed code paths with `_hg` call form |
+
+### Checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | State migration validation | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios passed |
+| 2 | Marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | off/auto/auto-no-rg modes passed |
+| 3 | Strict compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict <changed .sqf files>` | PASS | 23 changed SQF files, 0 parser-compat matches |
+| 4 | Changed-file SQF lint | `sqflint -e w <changed .sqf files>` | PASS | No parse errors remain; warnings only |
+| 5 | Diff whitespace check | `git diff --check` | PASS | Clean |
+| 6 | Local MP runtime smoke | N/A | BLOCKED | No Arma 3 runtime in container |
+| 7 | Dedicated/JIP runtime smoke | N/A | BLOCKED | No dedicated/JIP environment in container |
+
+### Outcome
+
+- Cleared the `sqflint` parse errors that were failing workflow job `70028946403`.
+- Local workflow-equivalent SQF checks now pass for all changed `.sqf` files.
+
+---
+
 ## 2026-04-06 00:01 UTC — Fix sqflint strict compat scan failures (CI job 70028396521)
 
 **Branch/Commit:** copilot/fix-vehicle-spawn-in-buildings @ HEAD (post-merge with main)
