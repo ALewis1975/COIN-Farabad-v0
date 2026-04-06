@@ -25,6 +25,26 @@ private _objKind = ["activeObjectiveKind", ""] call ARC_fnc_stateGet;
 if (!(_objKind isEqualType "")) then { _objKind = ""; };
 if ((toUpper _objKind) isNotEqualTo "VBIED_VEHICLE") exitWith {false};
 
+// ── Escalation-tier gate (VBIED requires tier ≥ 2 / HIGH_RISK) ────────────
+// Mirrors fn_threatGovernorCheck line 88: VBIED _tierMin = 2.
+// Prevents execution-layer bypass if an incident reaches this path without
+// passing through the scheduler (e.g. direct mission event or debug spawn).
+private _districtId = ["activeIncidentCivsubDistrictId", ""] call ARC_fnc_stateGet;
+if (!(_districtId isEqualType "")) then { _districtId = ""; };
+if (!(_districtId isEqualTo "")) then
+{
+    private _secLevel = missionNamespace getVariable [format ["ARC_district_%1_secLevel", _districtId], "NORMAL"];
+    if (!(_secLevel isEqualType "")) then { _secLevel = "NORMAL"; };
+    private _tier = 0;
+    if (_secLevel isEqualTo "ELEVATED") then { _tier = 1; };
+    if (_secLevel isEqualTo "HIGH_RISK") then { _tier = 2; };
+    if (_tier < 2) exitWith
+    {
+        diag_log format ["[ARC][THREAT] ARC_fnc_vbiedSpawnTick: ESCALATION_TIER deny district=%1 tier=%2 required=2", _districtId, _tier];
+        false
+    };
+};
+
 private _vehNid = ["activeObjectiveNetId", ""] call ARC_fnc_stateGet;
 if (!(_vehNid isEqualType "")) then { _vehNid = ""; };
 if (_vehNid isEqualTo "") exitWith {false};

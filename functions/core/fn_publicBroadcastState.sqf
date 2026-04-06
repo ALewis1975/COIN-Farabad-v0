@@ -1023,7 +1023,50 @@ if (_dbgEnabled) then
             ["activeVbiedSafe", ["activeVbiedSafe", false] call ARC_fnc_stateGet],
             ["activeVbiedDisposed", ["activeVbiedDisposed", false] call ARC_fnc_stateGet],
             ["activeVbiedDestroyedCause", ["activeVbiedDestroyedCause", ""] call ARC_fnc_stateGet],
-            ["vbiedPhase3RecordsCount", count (missionNamespace getVariable ["ARC_vbiedPhase3_deviceRecords", []])]
+            ["vbiedPhase3RecordsCount", count (missionNamespace getVariable ["ARC_vbiedPhase3_deviceRecords", []])],
+
+            // VBIED Driven
+            ["vbiedDrivenEnabled", missionNamespace getVariable ["ARC_vbiedDrivenEnabled", true]],
+            ["vbiedDrivenSpawned", missionNamespace getVariable ["ARC_vbiedDrivenSpawned", false]],
+            ["vbiedDrivenNetId", missionNamespace getVariable ["ARC_vbiedDrivenNetId", ""]],
+
+            // Suicide Bomber
+            ["suicideBomberEnabled", missionNamespace getVariable ["ARC_suicideBomberEnabled", true]],
+            ["suicideBomberSpawned", missionNamespace getVariable ["ARC_suicideBomberSpawned", false]],
+            ["suicideBomberNetId", missionNamespace getVariable ["ARC_suicideBomberNetId", ""]],
+            ["suicideBomberDetonated", missionNamespace getVariable ["ARC_suicideBomberDetonated", false]],
+
+            // Threat Economy budget snapshot (bounded to 5 districts with highest spend)
+            ["threatBudgetSnapshot", [] call {
+                private _budgetMap = ["threat_v0_attack_budget", createHashMap] call ARC_fnc_stateGet;
+                if (!(_budgetMap isEqualType createHashMap)) exitWith { [] };
+                private _rows = [];
+                private _hgSnap = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+                {
+                    private _did = _x;
+                    private _b = [_budgetMap, _did, createHashMap] call _hgSnap;
+                    if (_b isEqualType createHashMap) then
+                    {
+                        private _sp = [_b, "spent_today", 0] call _hgSnap;
+                        private _bp = [_b, "budget_points", 3] call _hgSnap;
+                        if ((_sp isEqualType 0) && { _sp > 0 }) then
+                        {
+                            _rows pushBack [_did, _sp, _bp];
+                        };
+                    };
+                } forEach ["D01","D02","D03","D04","D05","D06","D07","D08","D09","D10","D11","D12","D13","D14","D15","D16","D17","D18","D19","D20"];
+                _rows sort false;
+                if ((count _rows) > 5) then { _rows resize 5; };
+                _rows
+            }],
+
+            // Global cooldown remaining (seconds; 0 = none)
+            ["threatGlobalCooldownRemaining", [] call {
+                private _gc = ["threat_v0_global_cooldown_until", -1] call ARC_fnc_stateGet;
+                if (!(_gc isEqualType 0)) exitWith { 0 };
+                if (_gc > serverTime) exitWith { _gc - serverTime };
+                0
+            }]
         ];
 
         // CIVSUB v1 (only when enabled)

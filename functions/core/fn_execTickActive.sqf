@@ -127,6 +127,10 @@ if (_incTypeU isEqualTo "IED") then
     [] call ARC_fnc_iedSpawnTick;
     // IED Phase 3: VBIED (parked) trigger + record (no-op unless objectiveKind is VBIED_VEHICLE).
     [] call ARC_fnc_vbiedSpawnTick;
+    // VBIED Driven: checkpoint/gate rush (no-op unless objectiveKind is VBIED_DRIVEN_*).
+    [] call ARC_fnc_vbiedDrivenSpawnTick;
+    // Suicide Bomber: approach spawn (no-op unless objectiveKind is SB_*_APPROACH).
+    [] call ARC_fnc_suicideBomberSpawnTick;
 };
 
 // Objective context (if any)
