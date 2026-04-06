@@ -58,7 +58,7 @@ This audit supersedes mixed “what is left?” reasoning spread across those do
 | Threat / IED / VBIED | runtime-only unverified | Threat/IED scope is locked in `/home/runner/work/COIN-Farabad-v0/COIN-Farabad-v0/docs/projectFiles/Farabad_THREAT_v0_IED_P1_Baseline_regen.md`; coupling audit exists in `/home/runner/work/COIN-Farabad-v0/COIN-Farabad-v0/docs/qa/IED_Threat_Economy_Coupling_Audit.md` | Needs fresh live proof for threat economy, spawn/disposal flow, and post-incident linkage | dedicated/JIP validation |
 | AIRBASE / CASREQ | runtime-only unverified | Arrival/taxi defaults point to existing AEON markers in `/home/runner/work/COIN-Farabad-v0/COIN-Farabad-v0/functions/ambiance/fn_airbaseInit.sqf:64-107,134-141`; current source status is already tracked as “code-fixed, runtime-unverified” in `/home/runner/work/COIN-Farabad-v0/COIN-Farabad-v0/docs/qa/Development_State_Assessment_2026-04-04.md:73-74` | Dedicated smoke must confirm route-marker errors are gone and live airbase flow still works | dedicated/JIP validation |
 | SitePop / Prison | runtime-only unverified | Current anchor resolution accepts any existing marker via `/home/runner/work/COIN-Farabad-v0/COIN-Farabad-v0/functions/sitepop/fn_sitePopBuildGroup.sqf:68-81`; prison/sitepop verification remains an explicit runtime task in `/home/runner/work/COIN-Farabad-v0/COIN-Farabad-v0/docs/qa/Development_State_Assessment_2026-04-04.md:115-124` | Needs live verification of prison interactions, staffing, and mod-dependent faction availability | dedicated/JIP validation |
-| World / base ambience | blocked by mission data | Gate system requires named Eden objects in `/home/runner/work/COIN-Farabad-v0/COIN-Farabad-v0/functions/world/fn_worldGateBarrierInit.sqf:8-15,44-58` | `/home/runner/work/COIN-Farabad-v0/COIN-Farabad-v0/mission.sqm` still has no `ARC_barrier_*` or `ARC_guardpost_*` matches | mission data / Eden |
+| World / base ambience | runtime-only unverified | Gate system objects placed in `mission.sqm`: `ARC_barrier_main` (renamed from `gate_01`), `ARC_barrier_north` (renamed from `gate_03`), `ARC_barrier_south` (new `Land_BarGate_F`), plus guardpost anchors `ARC_guardpost_main/north/south` (`Land_HelipadEmpty_F`). Init code in `fn_worldGateBarrierInit.sqf:44-58` resolves these by name. | Gate open/close behavior, threat-posture barrier response, and guardpost anchor usage need live runtime proof | dedicated/JIP validation |
 | UI / console tabs | runtime-only unverified | Dashboard and Ops VM flags are enabled in `/home/runner/work/COIN-Farabad-v0/COIN-Farabad-v0/initServer.sqf:103-110`; command tab VM path exists but remains opt-in in `/home/runner/work/COIN-Farabad-v0/COIN-Farabad-v0/functions/ui/fn_uiConsoleCommandPaint.sqf:105-113` | Dedicated parity decision is still required for the command tab VM path before that flag should be enabled | dedicated/JIP validation |
 
 ---
@@ -67,9 +67,9 @@ This audit supersedes mixed “what is left?” reasoning spread across those do
 
 These are the only currently verified blockers that should stop “ready for dedicated” claims:
 
-1. **World gate Eden prerequisites are still missing**
-   - Required objects are defined in `/home/runner/work/COIN-Farabad-v0/COIN-Farabad-v0/functions/world/fn_worldGateBarrierInit.sqf:8-15`.
-   - `mission.sqm` currently contains no matching `ARC_barrier_*` or `ARC_guardpost_*` names.
+1. **~~World gate Eden prerequisites are still missing~~ — CLOSED**
+   - Required objects are now placed and named in `mission.sqm`: `ARC_barrier_main`, `ARC_barrier_north`, `ARC_barrier_south`, `ARC_guardpost_main`, `ARC_guardpost_north`, `ARC_guardpost_south`.
+   - Remaining obligation: runtime proof that `fn_worldGateBarrierInit` resolves all three gates (deferred to dedicated/JIP validation).
 
 2. **Fresh runtime evidence is still missing for most complete subsystems**
    - The repo already treats local MP, dedicated, JIP, reconnect, and respawn as deferred runtime checks in `/home/runner/work/COIN-Farabad-v0/COIN-Farabad-v0/docs/qa/Company_Command_Dedicated_Server_Static_QA_Plan.md:86-90`.
@@ -85,7 +85,7 @@ These are the only currently verified blockers that should stop “ready for ded
 
 Do not schedule dedicated/JIP or external playtest activity until all of the following are true:
 
-- [ ] The completion board above has no remaining `blocked by mission data` subsystem.
+- [x] The completion board above has no remaining `blocked by mission data` subsystem.
 - [ ] No active subsystem is missing a known intended v1 behavior in its locked baseline.
 - [ ] Touched SQF/config paths are static-clean for compat/lint/validation.
 - [ ] Console/operator workflows are documented well enough that missing behavior is not being confused with hidden feature flags.
@@ -95,7 +95,7 @@ Do not schedule dedicated/JIP or external playtest activity until all of the fol
 
 ## 6) Immediate execution queue
 
-1. **Mission-data PR:** place and name the six required world-gate objects in Eden.
+1. **~~Mission-data PR:~~ place and name the six required world-gate objects in Eden.** — DONE (objects placed in `mission.sqm` via direct edit; runtime proof deferred to dedicated).
 2. **Documentation pass:** treat this audit as canonical and cross-link it from readiness/planning entry points.
 3. **Static completion pass:** keep compat, sqflint, marker/state validation, and RPC audits current as bounded fixes land.
 4. **Release-candidate freeze:** once the board is clear of known code/content blockers.

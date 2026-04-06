@@ -3842,3 +3842,67 @@ Branch: `copilot/align-vehicles-with-orbat`
 #### Deferred
 - Runtime smoke: **BLOCKED** (requires Arma 3 session)
 - JIP/late-client: **BLOCKED**
+
+---
+
+## 2026-04-06 02:14 UTC — World Gate Mission-Data Closure
+
+Branch: `copilot/assess-repo-implementation-state`
+
+**Scope:** `mission.sqm` — place and name the six required ARC gate/guardpost objects to close the "blocked by mission data" status for World / base ambience.
+
+### Changes
+
+| Object | Variable name | Type | Position | Layer | Action |
+|--------|--------------|------|----------|-------|--------|
+| Main Gate barrier | `ARC_barrier_main` | `Land_BarGate_F` | [5213.9771, 13.034684, 2668.156] | Main Gate / Simple | Renamed from `gate_01` (id=352) |
+| North Gate barrier | `ARC_barrier_north` | `Land_BarGate_F` | [6737.125, 13.755041, 3242.75] | North Gate | Renamed from `gate_03` (id=1712) |
+| South Gate barrier | `ARC_barrier_south` | `Land_BarGate_F` | [6220, 7.5, 1335.5] | South Gate | New object (id=4837) |
+| Main Gate guardpost | `ARC_guardpost_main` | `Land_HelipadEmpty_F` | [5218, 13.03, 2679] | Main Gate | New anchor (id=4838) |
+| North Gate guardpost | `ARC_guardpost_north` | `Land_HelipadEmpty_F` | [6735, 13.5, 3240] | North Gate | New anchor (id=4839) |
+| South Gate guardpost | `ARC_guardpost_south` | `Land_HelipadEmpty_F` | [6218, 7.5, 1333] | South Gate | New anchor (id=4840) |
+
+### Trigger references updated
+
+| Old reference | New reference | Line (original) |
+|--------------|--------------|-----------------|
+| `gate_01 animateSource` | `ARC_barrier_main animateSource` | 34000, 34001 |
+| `gate_03 animate` | `ARC_barrier_north animate` | 34094, 34095 |
+
+### Items counts updated
+
+| Layer | Old count | New count | Reason |
+|-------|-----------|-----------|--------|
+| Main Gate | items=4 | items=5 | +ARC_guardpost_main |
+| North Gate | items=4 | items=5 | +ARC_guardpost_north |
+| South Gate | items=20 | items=22 | +ARC_barrier_south, +ARC_guardpost_south |
+
+### EditorData
+
+- `nextID`: 4837 → 4841 (4 new object IDs consumed)
+
+### Static validation
+
+| # | Check | Command / evidence | Result |
+|---|-------|--------------------|--------|
+| 1 | ARC_barrier_* presence | `grep 'ARC_barrier_' mission.sqm` | PASS — 3 barrier names (main, north, south) plus 3 trigger refs |
+| 2 | ARC_guardpost_* presence | `grep 'ARC_guardpost_' mission.sqm` | PASS — 3 guardpost names (main, north, south) |
+| 3 | Old gate_01/gate_03 name removal | `grep 'name="gate_01"\|name="gate_03"' mission.sqm` | PASS — 0 matches (renamed) |
+| 4 | gate_02 preserved | `grep 'name="gate_02"' mission.sqm` | PASS — 1 match (secondary Main Gate lane, unmodified) |
+| 5 | Brace balance | Python count of `{` vs `}` | PASS — 30333 open, 30333 close |
+| 6 | nextID updated | `grep 'nextID' mission.sqm` | PASS — 4841 |
+
+### Deferred
+
+| # | Check | Status | Reason |
+|---|-------|--------|--------|
+| 1 | Gate init count > 0 in RPT | BLOCKED | Requires Arma 3 runtime |
+| 2 | BLUFOR vehicle approach opens barrier | BLOCKED | Requires Arma 3 runtime |
+| 3 | Auto-close after vehicle passes | BLOCKED | Requires Arma 3 runtime |
+| 4 | Threat posture barrier response | BLOCKED | Requires Arma 3 runtime |
+| 5 | JIP: gates show correct physical state | BLOCKED | Requires dedicated server |
+
+### Audit impact
+
+- Pre-Dedicated Mission Completion Audit: World / base ambience reclassified from `blocked by mission data` → `runtime-only unverified`.
+- Gate 1 of the "done enough for dedicated" checklist is now checked: no remaining `blocked by mission data` subsystem.
