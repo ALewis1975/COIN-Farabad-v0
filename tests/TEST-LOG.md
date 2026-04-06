@@ -129,67 +129,93 @@ This avoids parse-time command validation while preserving identical runtime beh
 
 ## 2026-04-05 23:35 UTC — CI strict compat fix for Job 70027406617 (airbase files)
 
-**Branch/Commit:** copilot/fix-ah-64-takeoff-behavior @ dd995d8 (pre-edit baseline; strict-compat fix applied on top)
+**Branch/Commit:** copilot/taxi-with-engines-on @ 0e2caef (pre-edit baseline; unused-variable fix applied on top)
 
-**Scenario:** GitHub Actions job `70027406617` failed in strict mode (`python3 scripts/dev/sqflint_compat_scan.py --strict ...`) due to parser-compat pattern matches in the airbase changed set, primarily method-style `getOrDefault`, `#` indexing, and `isNotEqualTo` in `fn_airbasePlaneDepart.sqf`.
-
-### Files changed
-
-| File | Change |
-|------|--------|
-| `functions/ambiance/fn_airbasePlaneDepart.sqf` | Replaced strict-flagged method-style HashMap access with `_hg` call-form, replaced strict-flagged `#` usages with `select`, replaced strict-flagged `isNotEqualTo` with `!(... isEqualTo ...)` |
-
-### Checks
-
-| # | Check | Command | Result | Notes |
-|---|-------|---------|--------|-------|
-| 1 | Strict compat scan (airbase set) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbaseInit.sqf functions/ambiance/fn_airbasePlaneDepart.sqf functions/ambiance/fn_airbaseSpawnArrival.sqf` | PASS | No known parser-compat patterns found |
-| 2 | Repo diff sanity | `git --no-pager diff --check` | PASS | No whitespace/conflict-marker issues |
-| 3 | Local MP runtime | N/A | BLOCKED | No Arma 3 runtime in container |
-| 4 | Dedicated/JIP runtime | N/A | BLOCKED | No dedicated/JIP environment in container |
-
-### Outcome
-
-- The strict compat scan now passes for the same three-file set used by the failing workflow step.
-- This addresses the immediate CI blocker for strict-mode compatibility scanning on this PR path.
-
----
-
-## 2026-04-05 23:18 UTC — AH-64 rotary-wing takeoff/arrival smoothing (airbase ambient)
-
-**Branch/Commit:** copilot/fix-ah-64-takeoff-behavior @ 7277e75 (pre-edit baseline; changes applied on top)
-
-**Scenario:** Address reported AH-64 behavior where departure liftoff climbed too vertically and arrival runway landing looked abrupt. Added helicopter-only climb-profile smoothing for departures and staged approach profile for arrivals.
+**Scenario:** Resolve CI `sqflint -e w` failure in `functions/ambiance/fn_airbasePlaneDepart.sqf` caused by warning `[29,8]: Variable "_hg" not used` by removing the unused local helper declaration.
 
 ### Files changed
 
 | File | Change |
 |------|--------|
-| `functions/ambiance/fn_airbasePlaneDepart.sqf` | Replaced one-shot RW climb command with stepped climb profile (bounded altitude increments + interval + forward velocity kick), including marker-missing fallback profile |
-| `functions/ambiance/fn_airbaseSpawnArrival.sqf` | Added RW staged arrival profile (final approach + flare heights by distance), delayed `land "LAND"` to runway-stop waypoint, tightened RW runway-stop completion radius |
-| `functions/ambiance/fn_airbaseInit.sqf` | Added/validated missionNamespace tunables for RW climb profile and RW arrival profile |
+| `functions/ambiance/fn_airbasePlaneDepart.sqf` | Removed unused local variable `_hg` compile helper |
 
 ### Checks
 
 | # | Check | Command | Result | Notes |
 |---|-------|---------|--------|-------|
-| 1 | Targeted compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf functions/ambiance/fn_airbaseSpawnArrival.sqf functions/ambiance/fn_airbaseInit.sqf` | FAIL (pre-existing in touched file) | Existing `fn_airbasePlaneDepart.sqf` compat patterns (`#`, `getOrDefault`, `isNotEqualTo`) still present; this pass did not introduce new patterns outside that file’s existing baseline style |
-| 2 | Targeted sqflint | `sqflint -e w functions/ambiance/fn_airbasePlaneDepart.sqf && sqflint -e w functions/ambiance/fn_airbaseSpawnArrival.sqf && sqflint -e w functions/ambiance/fn_airbaseInit.sqf` | BLOCKED | `sqflint: command not found` in container environment |
+| 1 | Targeted strict compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf` | PASS | File remains strict-compat clean |
+| 2 | Targeted sqflint warnings-as-errors | `sqflint -e w functions/ambiance/fn_airbasePlaneDepart.sqf` | BLOCKED | `sqflint` binary not available in container; validation deferred to GitHub workflow environment where sqflint is installed |
 | 3 | Repo diff sanity | `git --no-pager diff --check` | PASS | No whitespace/conflict-marker issues |
 | 4 | Local MP runtime | N/A | BLOCKED | No Arma 3 runtime in container |
 | 5 | Dedicated/JIP runtime | N/A | BLOCKED | No dedicated/JIP environment in container |
 
 ### Outcome
 
-- Rotary-wing departure now uses progressive altitude commands instead of an immediate jump to cruise, reducing near-vertical AH-64 climb behavior after taxi.
-- Rotary-wing arrival now keeps approach in `land "NONE"` with staged altitude control before issuing `land "LAND"` closer to runway-stop, improving touchdown behavior.
-- Dedicated/local MP validation is still required to tune final values (`airbase_v1_rw_climb_*`, `airbase_v1_rw_arrival_*`) against live AI flight behavior.
+- Removed the single unused `_hg` declaration that triggered warnings-as-errors failure in CI; final confirmation is expected from the GitHub workflow sqflint step.
+- `fn_airbasePlaneDepart.sqf` remains compatible with strict compat scan after the change.
 
-### Follow-up adjustments (post-review)
+---
 
-- Removed unnecessary global replication (`public=true`) from the new RW arrival tuning missionNamespace writes so these server-owned tuning values remain server-local by default.
-- Added a timeout guard to the RW arrival approach control loop (`900s`) to prevent runaway helper loops if AI never reaches the flare threshold.
-- Replaced hardcoded RW helper timeout values with named tunables (`airbase_v1_rw_arrival_approach_timeout_s`, `airbase_v1_rw_climb_profile_timeout_s`) and reused the climb timeout in both departure climb paths.
+## 2026-04-05 23:37 UTC — AIRBASE sqflint compat remediation for fn_airbasePlaneDepart
+
+**Branch/Commit:** copilot/taxi-with-engines-on @ 5576210 (pre-edit baseline; compat remediation applied on top)
+
+**Scenario:** Resolve CI sqflint compatibility scan failure on `functions/ambiance/fn_airbasePlaneDepart.sqf` by converting method-form `getOrDefault` to call-form and clearing remaining strict-compat findings in the same changed file.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `functions/ambiance/fn_airbasePlaneDepart.sqf` | Replaced method-form `getOrDefault` with call-form `[_map, key, default] call getOrDefault`; replaced `#` indexing with `select`; replaced `isNotEqualTo` with `!isEqualTo` equivalents |
+
+### Checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Targeted strict compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf` | PASS | No known parser-compat patterns remain in file |
+| 2 | Repo diff sanity | `git --no-pager diff --check` | PASS | No whitespace/conflict-marker issues |
+| 3 | Local MP runtime | N/A | BLOCKED | No Arma 3 runtime in container |
+| 4 | Dedicated/JIP runtime | N/A | BLOCKED | No dedicated/JIP environment in container |
+
+### Outcome
+
+- Compatibility failure mode reported by CI for method-form `getOrDefault` is resolved in `fn_airbasePlaneDepart.sqf`.
+- Additional strict-compat patterns in that file were remediated to avoid repeat CI failure on the same job step.
+
+---
+
+## 2026-04-05 23:23 UTC — AIRBASE AWACS taxi engines-on hardening
+
+**Branch/Commit:** copilot/taxi-with-engines-on @ cef2a99
+
+**Scenario:** Ensure AWACS (`plane7`, `aws_C130_AEW`) can taxi with engines on by hardening departure prep to restore fuel before taxi start for EC-130 assets.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `functions/ambiance/fn_airbasePlaneDepart.sqf` | Added `_isEC130` detection earlier and set `setFuel 1` before taxi `engineOn true` to prevent engine-off taxi on AWACS |
+
+### Checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Baseline state migrations | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios |
+| 2 | Baseline marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | all modes passed |
+| 3 | Test-log commit guard | `bash scripts/dev/check_test_log_commits.sh` | PASS | Script reported `rg: command not found` in env but still returned PASS |
+| 4 | AIRBASE static checks | `bash tests/static/airbase_planning_mode_checks.sh` | PASS | runtime gate/planning checks clean |
+| 5 | CASREQ static checks | `bash tests/static/casreq_snapshot_contract_checks.sh` | PASS | snapshot contract checks clean |
+| 6 | Targeted compat scan (changed file) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf` | FAIL (pre-existing) | Existing parser-compat findings in unchanged sections of this file |
+| 7 | Targeted sqflint (changed file) | `sqflint -e w functions/ambiance/fn_airbasePlaneDepart.sqf` | BLOCKED | `sqflint` binary not available in this container |
+| 8 | Repo diff sanity | `git --no-pager diff --check` | PASS | no whitespace/conflict-marker issues |
+| 9 | Local MP runtime | N/A | BLOCKED | No Arma 3 runtime in container |
+| 10 | Dedicated/JIP runtime | N/A | BLOCKED | No dedicated/JIP environment in container |
+
+### Outcome
+
+- AWACS departures now explicitly restore full fuel before taxi playback begins, then issue `engineOn true`, reducing risk of engine-off taxi behavior for `aws_C130_AEW`.
+- No non-AWACS aircraft behavior was changed.
+- Dedicated/JIP runtime verification remains required for authoritative multiplayer confirmation.
 
 ---
 
