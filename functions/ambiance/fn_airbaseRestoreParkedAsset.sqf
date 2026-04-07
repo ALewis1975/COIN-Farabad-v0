@@ -64,7 +64,7 @@ private _grpCrew = createGroup [_crewSide, true];
 
 // Name restored crew group from the asset's callsign (e.g., PEGASUS, GRYPHON, DUSTOFF).
 private _assetCallsign = [_asset, "callsign", ""] call _hg;
-if (_assetCallsign isEqualType "" && { _assetCallsign isNotEqualTo "" }) then {
+if (_assetCallsign isEqualType "" && { !(_assetCallsign isEqualTo "") }) then {
     _grpCrew setGroupIdGlobal [format ["%1 Crew", _assetCallsign]];
 } else {
     _grpCrew setGroupIdGlobal ["FARABAD Ramp Crew"];

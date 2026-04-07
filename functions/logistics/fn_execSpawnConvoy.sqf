@@ -611,6 +611,9 @@ if (_profile isEqualTo [] && { _profiles isEqualType [] } && { (count _profiles)
 if (_profile isEqualType [] && { (count _profile) >= 3 }) then
 {
     _grp setVariable ["ARC_designationProfile", _profile, true];
+    // Persist profile to mission state so convoy tick fallback paths can recover it
+    // when a new group must be created (original group may be destroyed).
+    ["activeConvoyDesignationProfile", _profile] call ARC_fnc_stateSet;
 };
 
 private _leadLeader = objNull;

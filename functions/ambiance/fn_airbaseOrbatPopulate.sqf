@@ -80,7 +80,7 @@ private _fnSpawnUnitsAtMarker = {
     if (_nCls == 0) exitWith { [] };
 
     private _grp = createGroup [west, true];
-    if (_groupName isNotEqualTo "") then { _grp setGroupIdGlobal [_groupName]; };
+    if (!(_groupName isEqualTo "")) then { _grp setGroupIdGlobal [_groupName]; };
 
     for "_i" from 0 to (_count - 1) do {
         private _cls = _classArray select (_i mod _nCls);
@@ -148,7 +148,7 @@ private _fnSpawnUnitsAtPos = {
     private _north = if (count _pos > 2) then { _pos select 2 } else { _pos select 1 };
 
     private _grp = createGroup [west, true];
-    if (_groupName isNotEqualTo "") then { _grp setGroupIdGlobal [_groupName]; };
+    if (!(_groupName isEqualTo "")) then { _grp setGroupIdGlobal [_groupName]; };
 
     for "_i" from 0 to (_count - 1) do {
         private _cls = _classArray select (_i mod _nCls);
@@ -227,7 +227,7 @@ private _fnSpawnVehicleAtMarker = {
     _veh setVelocity [0,0,0];
 
     private _grp   = createGroup [west, true];
-    if (_groupName isNotEqualTo "") then { _grp setGroupIdGlobal [_groupName]; };
+    if (!(_groupName isEqualTo "")) then { _grp setGroupIdGlobal [_groupName]; };
     private _units = [];
 
     // Driver

@@ -1175,7 +1175,16 @@ if (!_started) exitWith
         // Never rename a player group; keep TOC/role gating stable even if a player drives convoy assets.
         private _hasPlayerL = false;
         { if (isPlayer _x) exitWith { _hasPlayerL = true; }; } forEach (units _grpL);
-        if (!_hasPlayerL) then { [_grpL, "CONVOY"] call ARC_fnc_groupSetDesignation; };
+        if (!_hasPlayerL) then {
+            // Recover ORBAT profile persisted at spawn time so the fallback group gets the correct designation.
+            private _savedProfile = ["activeConvoyDesignationProfile", []] call ARC_fnc_stateGet;
+            if (_savedProfile isEqualType [] && { (count _savedProfile) >= 3 }) then {
+                _grpL setVariable ["ARC_designationProfile", _savedProfile, true];
+            };
+            private _convoyRole = toUpper (["activeIncidentType", "LOGISTICS"] call ARC_fnc_stateGet);
+            if (!(_convoyRole isEqualType "")) then { _convoyRole = "LOGISTICS"; };
+            [_grpL, _convoyRole] call ARC_fnc_groupSetDesignation;
+        };
 
         // Drive each vehicle into a unique slot at the link-up point.
         // This avoids group waypoint "wait for formation" behavior, and keeps the column clean.
@@ -1393,7 +1402,15 @@ if (!_started) exitWith
         // Never rename a player group; keep TOC/role gating stable even if a player drives convoy assets.
         private _hasPlayerD = false;
         { if (isPlayer _x) exitWith { _hasPlayerD = true; }; } forEach (units _grp);
-        if (!_hasPlayerD) then { [_grp, "CONVOY"] call ARC_fnc_groupSetDesignation; };
+        if (!_hasPlayerD) then {
+            private _savedProfileD = ["activeConvoyDesignationProfile", []] call ARC_fnc_stateGet;
+            if (_savedProfileD isEqualType [] && { (count _savedProfileD) >= 3 }) then {
+                _grp setVariable ["ARC_designationProfile", _savedProfileD, true];
+            };
+            private _convoyRoleD = toUpper (["activeIncidentType", "LOGISTICS"] call ARC_fnc_stateGet);
+            if (!(_convoyRoleD isEqualType "")) then { _convoyRoleD = "LOGISTICS"; };
+            [_grp, _convoyRoleD] call ARC_fnc_groupSetDesignation;
+        };
 
         // Keep the convoy on roads.
         if (_forceRoad && { !_bypassActiveP }) then
@@ -1522,7 +1539,15 @@ _grpW setSpeedMode "LIMITED";
 // Never rename a player group; keep TOC/role gating stable even if a player drives convoy assets.
 private _hasPlayerW = false;
 { if (isPlayer _x) exitWith { _hasPlayerW = true; }; } forEach (units _grpW);
-if (!_hasPlayerW) then { [_grpW, "CONVOY"] call ARC_fnc_groupSetDesignation; };
+if (!_hasPlayerW) then {
+    private _savedProfileW = ["activeConvoyDesignationProfile", []] call ARC_fnc_stateGet;
+    if (_savedProfileW isEqualType [] && { (count _savedProfileW) >= 3 }) then {
+        _grpW setVariable ["ARC_designationProfile", _savedProfileW, true];
+    };
+    private _convoyRoleW = toUpper (["activeIncidentType", "LOGISTICS"] call ARC_fnc_stateGet);
+    if (!(_convoyRoleW isEqualType "")) then { _convoyRoleW = "LOGISTICS"; };
+    [_grpW, _convoyRoleW] call ARC_fnc_groupSetDesignation;
+};
 
 // Keep the group leader in the lead vehicle when possible (helps formation consistency).
 if ((count _aliveVeh) > 0) then
