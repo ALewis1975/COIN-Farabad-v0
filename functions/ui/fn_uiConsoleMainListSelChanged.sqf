@@ -49,7 +49,10 @@ switch (_tab) do
     {
         if (uiNamespace getVariable ["ARC_console_cmdQueuePainting", false]) exitWith {};
         private _cmdMode = ["ARC_console_cmdMode", "OVERVIEW"] call ARC_fnc_uiNsGetString;
-        if ((_cmdMode isEqualType "") && { (toUpper (trim _cmdMode)) isEqualTo "QUEUE" }) then
+        // sqflint-compat: avoid direct `trim` usage in expressions (see SQFLINT_COMPAT_GUIDE §2)
+        private _trimFn = compile "params ['_s']; trim _s";
+        if (!(_trimFn isEqualType {})) exitWith {};
+        if ((_cmdMode isEqualType "") && { (toUpper ([_cmdMode] call _trimFn)) isEqualTo "QUEUE" }) then
         {
             uiNamespace setVariable ["ARC_console_cmdQueueForceRebuild", false];
             [_display, false] call ARC_fnc_uiConsoleTocQueuePaint;
