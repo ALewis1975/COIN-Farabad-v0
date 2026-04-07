@@ -131,9 +131,9 @@ private _modeSummary = {
     params ["_mode"];
     switch (toUpper _mode) do
     {
-        case "CLEARANCES": { "tower action queue" };
-        case "DEBUG": { "technical telemetry" };
-        default { "traffic picture" };
+        case "CLEARANCES": { "Clearance decisions" };
+        case "DEBUG": { "Debug telemetry" };
+        default { "Airfield operations" };
     }
 };
 
@@ -141,9 +141,9 @@ private _modeGuidance = {
     params ["_mode"];
     switch (toUpper _mode) do
     {
-        case "CLEARANCES": { "Use this view to approve or deny requests, manage queued departures, and claim or release controller lanes." };
-        case "DEBUG": { "Use this view for snapshot internals, route-validation failures, and controller debug telemetry." };
-        default { "Use this view to understand runway status, inbound traffic, outbound traffic, and immediate risks in one glance." };
+        case "CLEARANCES": { "Approve or deny requests, manage departures, and assign controller lanes." };
+        case "DEBUG": { "Snapshot internals, route failures, and controller telemetry." };
+        default { "Runway status, inbound and outbound traffic, and immediate risks at a glance." };
     }
 };
 
@@ -402,10 +402,9 @@ if (_rebuild) then {
         // CLEARANCES / DEBUG: mode row stays at top (specialist views).
         if (_airSubmode != "AIRFIELD_OPS") then {
             private _modeRow = _ctrlList lbAdd format [
-                "View: %1 - %2  |  Secondary: %3",
+                "%1  |  %2",
                 _airSubmode,
-                [_airSubmode] call _modeSummary,
-                (if (_nextMode isEqualTo _airSubmode) then {"REFRESH"} else {_nextMode})
+                [_airSubmode] call _modeSummary
             ];
             _ctrlList lbSetData [_modeRow, format ["MODE|%1", _airSubmode]];
         };
@@ -616,12 +615,11 @@ if (_rebuild) then {
             };
         };
 
-        // AIRFIELD_OPS: mode/view indicator at bottom — keeps operational data first
+        // AIRFIELD_OPS: view indicator at bottom — keeps operational data first
         if (_airSubmode isEqualTo "AIRFIELD_OPS") then {
             private _modeRowBottom = _ctrlList lbAdd format [
-                "[View: %1]  |  Secondary: %2",
-                [_airSubmode] call _modeSummary,
-                (if (_nextMode isEqualTo _airSubmode) then {"REFRESH"} else {_nextMode})
+                "[%1]",
+                [_airSubmode] call _modeSummary
             ];
             _ctrlList lbSetData [_modeRowBottom, format ["MODE|%1", _airSubmode]];
         };
@@ -797,8 +795,7 @@ switch (_rowType) do
         _selectionHeading = "View Control";
         _detailLines = [
             format ["Current view: <t color='#FFFFFF'>%1</t>", _airSubmode],
-            format ["Purpose: <t color='#FFFFFF'>%1</t>", [_airSubmode] call _modeGuidance],
-            format ["Next secondary action: <t color='#FFFFFF'>%1</t>", if (_nextMode isEqualTo _airSubmode) then {"REFRESH"} else {_nextMode}],
+            format ["<t color='#FFFFFF'>%1</t>", [_airSubmode] call _modeGuidance],
             format ["Snapshot: <t color='#FFFFFF'>%1</t>", _freshnessText]
         ];
     };
