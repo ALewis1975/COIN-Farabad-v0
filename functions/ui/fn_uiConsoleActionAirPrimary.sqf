@@ -163,8 +163,9 @@ switch (_airSubmode) do
             default
             {
                 // Phase 3 safety: non-action rows must not fire global hold/release.
-                // Only MODE rows (which represent the view-indicator in CLEARANCES)
-                // are eligible for hold/release when no action-specific row is selected.
+                // Only MODE rows (the view-indicator in CLEARANCES) and empty-string
+                // (defensive: unrecognized/missing lbData) are eligible for the
+                // global hold/release fallback.
                 if !(_rowType in ["MODE", ""]) exitWith {
                     ["AIR", "Selection is read-only."] call ARC_fnc_clientToast;
                     true

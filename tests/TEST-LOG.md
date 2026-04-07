@@ -13,7 +13,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-04-07 14:56 UTC — Phase 3: CLEARANCES safety hardening
 
-**Branch/Commit:** copilot/develop-task-decomposition-plan @ pending
+**Branch/Commit:** copilot/develop-task-decomposition-plan @ 047e376
 
 **Scenario:** Phase 3 implementation — remove unsafe global actions from inert/header CLEARANCES and AIRFIELD_OPS selections. Guard non-action row types from firing HOLD/RELEASE or queue actions in both primary and secondary action handlers. Update button labels so HDR rows always show READ-ONLY. Initialize `ARC_console_airSubmode` default in OnLoad.
 
