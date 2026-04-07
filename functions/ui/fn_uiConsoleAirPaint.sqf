@@ -668,15 +668,19 @@ if (!isNull _ctrlMap) then {
 };
 
 private _primaryLabel = "READ-ONLY";
-private _secondaryLabel = "REFRESH";
+private _secondaryLabel = "UPDATE";
 private _primaryEnabled = false;
 private _secondaryEnabled = true;
 private _primaryTooltip = "No action available.";
-private _secondaryTooltip = "Refresh AIR view.";
+private _secondaryTooltip = "Refresh airfield data.";
 
 if (!_canAirRead && !_canAirControl && !_canAirPilot) then {
     _secondaryEnabled = false;
 };
+
+// Helper: build secondary label based on available view switching.
+private _nextViewLabel = if (_nextMode isEqualTo _airSubmode) then {"UPDATE"} else { _nextMode };
+private _nextViewTooltip = if (_nextMode isEqualTo _airSubmode) then { "Refresh airfield data." } else { format ["Switch to %1 view.", _nextMode] };
 
 if (_airMode isEqualTo "PILOT") then {
     _primaryLabel = "SEND REQUEST";
@@ -731,8 +735,8 @@ if (_airMode isEqualTo "PILOT") then {
                             _primaryEnabled = false;
                         };
                     };
-                    _secondaryLabel = if (_nextMode isEqualTo _airSubmode) then {"REFRESH"} else { format ["VIEW: %1", _nextMode] };
-                    _secondaryTooltip = if (_nextMode isEqualTo _airSubmode) then { "Refresh AIR view." } else { format ["Switch to %1.", _nextMode] };
+                    _secondaryLabel = _nextViewLabel;
+                    _secondaryTooltip = _nextViewTooltip;
                 };
             };
         };
@@ -740,8 +744,8 @@ if (_airMode isEqualTo "PILOT") then {
         {
             _primaryLabel = "READ-ONLY";
             _primaryEnabled = false;
-            _secondaryLabel = if (_nextMode isEqualTo _airSubmode) then {"REFRESH"} else { format ["VIEW: %1", _nextMode] };
-            _secondaryTooltip = if (_nextMode isEqualTo _airSubmode) then { "Refresh AIR view." } else { format ["Switch to %1.", _nextMode] };
+            _secondaryLabel = _nextViewLabel;
+            _secondaryTooltip = _nextViewTooltip;
         };
         default
         {
@@ -758,8 +762,8 @@ if (_airMode isEqualTo "PILOT") then {
                     _primaryEnabled = false;
                 };
             };
-            _secondaryLabel = if (_nextMode isEqualTo _airSubmode) then {"REFRESH"} else { format ["VIEW: %1", _nextMode] };
-            _secondaryTooltip = if (_nextMode isEqualTo _airSubmode) then { "Refresh AIR view." } else { format ["Switch to %1.", _nextMode] };
+            _secondaryLabel = _nextViewLabel;
+            _secondaryTooltip = _nextViewTooltip;
         };
     };
 };
