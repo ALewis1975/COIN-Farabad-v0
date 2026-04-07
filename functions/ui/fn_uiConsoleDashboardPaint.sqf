@@ -93,12 +93,11 @@ private _pos = getPosATL player;
 private _grid = mapGridPosition _pos;
 
 // ── Console VM v1 shadow-mode (Item 8: Dashboard tab migration) ─────────────
-// When ARC_console_dashboard_v2 is true, state vars below are sourced from the
-// VM payload via ARC_fnc_consoleVmAdapterV1 instead of direct missionNamespace
-// reads. Default: false (legacy path). Set true after parity testing on a
-// dedicated server with live traffic.
-private _useVm = missionNamespace getVariable ["ARC_console_dashboard_v2", false];
-if (!(_useVm isEqualType true) && !(_useVm isEqualType false)) then { _useVm = false; };
+// Console VM v2: state vars are sourced from the VM payload via
+// ARC_fnc_consoleVmAdapterV1 (Refactor Plan §PR4: feature flags removed,
+// VM is the only path). Direct missionNamespace reads kept as fallback
+// only when VM adapter is unavailable.
+private _useVm = (!isNil "ARC_fnc_consoleVmAdapterV1");
 
 // Active incident summary
 private _taskId = missionNamespace getVariable ["ARC_activeTaskId", ""]; if (!(_taskId isEqualType "")) then { _taskId = ""; };
@@ -209,12 +208,10 @@ private _statusRows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
 if (!(_statusRows isEqualType [])) then { _statusRows = []; };
 if ((count _statusRows) > _rxMaxItems) then { _statusRows = _statusRows select [0, _rxMaxItems]; };
 
-// ── VM v2 path override (shadow-mode) ──────────────────────────────────────
-// When ARC_console_dashboard_v2 is true: re-read incident, follow-on, ops, and
-// queue fields from the VM payload (ARC_fnc_consoleVmAdapterV1) rather than
-// from raw missionNamespace vars. ARC_pub_unitStatuses has no VM equivalent
-// yet and remains on the legacy path regardless of flag.
-if (_useVm && { !isNil "ARC_fnc_consoleVmAdapterV1" }) then
+// ── VM path (primary data source) ───────────────────────────────────────────
+// Read incident, follow-on, ops, and queue fields from the VM payload.
+// ARC_pub_unitStatuses has no VM equivalent yet and remains on the legacy path.
+if (_useVm) then
 {
     _taskId      = ["incident",  "task_id",           ""]      call ARC_fnc_consoleVmAdapterV1;
     _hasIncident = (_taskId != "");
@@ -256,17 +253,17 @@ if (_useVm && { !isNil "ARC_fnc_consoleVmAdapterV1" }) then
 
 private _airSnap = missionNamespace getVariable ["ARC_pub_airbaseUiSnapshot", []];
 if (!(_airSnap isEqualType [])) then { _airSnap = []; };
-private _airRunway = [_airSnap, "runway", []] call _getPair;
+private _airRunway = [_airSnap, "runway", []] call ARC_fnc_uiConsoleGetPair;
 if (!(_airRunway isEqualType [])) then { _airRunway = []; };
-private _airArrivals = [_airSnap, "arrivals", []] call _getPair;
+private _airArrivals = [_airSnap, "arrivals", []] call ARC_fnc_uiConsoleGetPair;
 if (!(_airArrivals isEqualType [])) then { _airArrivals = []; };
-private _airDepartures = [_airSnap, "departures", []] call _getPair;
+private _airDepartures = [_airSnap, "departures", []] call ARC_fnc_uiConsoleGetPair;
 if (!(_airDepartures isEqualType [])) then { _airDepartures = []; };
-private _airAlerts = [_airSnap, "alerts", []] call _getPair;
+private _airAlerts = [_airSnap, "alerts", []] call ARC_fnc_uiConsoleGetPair;
 if (!(_airAlerts isEqualType [])) then { _airAlerts = []; };
-private _airRunwayState = [_airRunway, "state", "UNKNOWN"] call _getPair;
+private _airRunwayState = [_airRunway, "state", "UNKNOWN"] call ARC_fnc_uiConsoleGetPair;
 if (!(_airRunwayState isEqualType "")) then { _airRunwayState = "UNKNOWN"; };
-private _airHoldState = [_airRunway, "holdState", false] call _getPair;
+private _airHoldState = [_airRunway, "holdState", false] call ARC_fnc_uiConsoleGetPair;
 if (!(_airHoldState isEqualType true) && !(_airHoldState isEqualType false)) then { _airHoldState = false; };
 
 // Phase 6: extract next inbound/outbound with callsign + phase/state.
@@ -295,7 +292,7 @@ private _airOutboundLabel = [_airNextDeparture, "No outbound"] call _fmtFlight;
 
 private _airAlertLabel = if ((count _airAlerts) > 0) then { (_airAlerts select 0) param [0, "NONE"] } else { "NONE" };
 // Phase 5: read freshness state from snapshot for dashboard display.
-private _airFreshnessState = [_airSnap, "freshnessState", "UNKNOWN"] call _getPair;
+private _airFreshnessState = [_airSnap, "freshnessState", "UNKNOWN"] call ARC_fnc_uiConsoleGetPair;
 if (!(_airFreshnessState isEqualType "")) then { _airFreshnessState = "UNKNOWN"; };
 private _airAlertColor = _tshGreen;
 private _airTopCriticalAlert = "";
@@ -310,7 +307,7 @@ if ((count _airAlerts) > 0) then {
 
 // Phase 6: compute top blocker for commander situational awareness.
 // Priority: HOLD → BLOCKED/OCCUPIED runway → CRITICAL alert → pending decision.
-private _airDecisionQueue = [_airSnap, "decisionQueue", []] call _getPair;
+private _airDecisionQueue = [_airSnap, "decisionQueue", []] call ARC_fnc_uiConsoleGetPair;
 if (!(_airDecisionQueue isEqualType [])) then { _airDecisionQueue = []; };
 private _airTopBlocker = "";
 if (_airHoldState) then {

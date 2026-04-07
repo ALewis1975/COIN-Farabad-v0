@@ -88,20 +88,17 @@ private _selLeadData = uiNamespace getVariable ["ARC_console_opsSel_lead", ""]; 
 private _focus = uiNamespace getVariable ["ARC_console_opsFocus", "INCIDENT"]; if (!(_focus isEqualType "")) then { _focus = "INCIDENT"; };
 _focus = toUpper (trim _focus);
 
-// ── Console VM v1 shadow-mode (Item 9: Ops tab migration) ──────────────────
-// When ARC_console_ops_v2 is true, the Ops paint reads shared lists from the
-// VM payload instead of raw missionNamespace. The flag is off by default; enable
-// after parity validation on a dedicated server session. Tabs that use ARC_pub_*
-// reads inside deeply nested conditional blocks override those reads locally.
-private _opsUseVm = missionNamespace getVariable ["ARC_console_ops_v2", false];
-if (!(_opsUseVm isEqualType true) && !(_opsUseVm isEqualType false)) then { _opsUseVm = false; };
+// ── Console VM (primary data source — Refactor Plan §PR4) ──────────────────
+// VM is now the primary data source; feature flag removed. Direct
+// missionNamespace reads remain as fallback only when VM adapter unavailable.
+private _opsUseVm = (!isNil "ARC_fnc_consoleVmAdapterV1");
 
-// Pre-read shared VM data when flag is on (provides cached values for use
-// inside the conditional blocks below without changing their structure).
-private _vm_orders   = if (_opsUseVm && { !isNil "ARC_fnc_consoleVmAdapterV1" }) then { ["ops", "orders",       []] call ARC_fnc_consoleVmAdapterV1 } else { [] };
-private _vm_leads    = if (_opsUseVm && { !isNil "ARC_fnc_consoleVmAdapterV1" }) then { ["ops", "lead_pool",    []] call ARC_fnc_consoleVmAdapterV1 } else { [] };
-private _vm_intelLog = if (_opsUseVm && { !isNil "ARC_fnc_consoleVmAdapterV1" }) then { ["ops", "intel_log",   []] call ARC_fnc_consoleVmAdapterV1 } else { [] };
-private _vm_queue    = if (_opsUseVm && { !isNil "ARC_fnc_consoleVmAdapterV1" }) then { ["ops", "queue_pending",[]] call ARC_fnc_consoleVmAdapterV1 } else { [] };
+// Pre-read shared VM data (provides cached values for use inside the
+// conditional blocks below without changing their structure).
+private _vm_orders   = if (_opsUseVm) then { ["ops", "orders",       []] call ARC_fnc_consoleVmAdapterV1 } else { [] };
+private _vm_leads    = if (_opsUseVm) then { ["ops", "lead_pool",    []] call ARC_fnc_consoleVmAdapterV1 } else { [] };
+private _vm_intelLog = if (_opsUseVm) then { ["ops", "intel_log",   []] call ARC_fnc_consoleVmAdapterV1 } else { [] };
+private _vm_queue    = if (_opsUseVm) then { ["ops", "queue_pending",[]] call ARC_fnc_consoleVmAdapterV1 } else { [] };
 if (!(_vm_orders   isEqualType [])) then { _vm_orders   = []; };
 if (!(_vm_leads    isEqualType [])) then { _vm_leads    = []; };
 if (!(_vm_intelLog isEqualType [])) then { _vm_intelLog = []; };
@@ -174,7 +171,7 @@ if (_rebuild) then
             if (!(_tgtGrp isEqualType "")) then { _tgtGrp = ""; };
             _tgtGrp = trim _tgtGrp;
             private _pairs = if ((count _order) >= 6) then { _order # 5 } else { [] };
-            private _purpose = [_pairs, "purpose", ""] call _pairGet;
+            private _purpose = [_pairs, "purpose", ""] call ARC_fnc_uiConsoleGetPair;
             if (!(_purpose isEqualType "")) then { _purpose = ""; };
             _purpose = trim _purpose;
 
@@ -457,11 +454,11 @@ else
                 private _pairs = if ((count _order) >= 6) then { _order # 5 } else { [] };
                 private _meta  = if ((count _order) >= 7) then { _order # 6 } else { [] };
 
-                private _purpose = [_pairs, "purpose", ""] call _pairGet;
+                private _purpose = [_pairs, "purpose", ""] call ARC_fnc_uiConsoleGetPair;
                 if (!(_purpose isEqualType "")) then { _purpose = ""; };
                 _purpose = trim _purpose;
 
-                private _note = [_meta, "note", ""] call _pairGet;
+                private _note = [_meta, "note", ""] call ARC_fnc_uiConsoleGetPair;
                 if (!(_note isEqualType "")) then { _note = ""; };
                 _note = trim _note;
 
