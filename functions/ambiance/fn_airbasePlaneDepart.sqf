@@ -28,6 +28,7 @@ private _debug    = missionNamespace getVariable ["airbase_v1_debug", false];
 private _debugOps = missionNamespace getVariable ["airbase_v1_debugOpsLog", false];
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _veh = [_asset, "veh", objNull] call _hg;
+if (isNil "_veh") then { _veh = objNull; };
 if (isNull _veh) exitWith {
     _asset set ["state", "PARKED"];
     _asset set ["activeFlight", ""];
@@ -206,12 +207,12 @@ if (!(_boardTimeout isEqualType 0) || { _boardTimeout < 30 }) then { _boardTimeo
 private _tBoard0 = time;
 waitUntil {
     sleep 1;
-    isNull _veh || {!alive _veh} || {!alive _pilot} ||
-    ((driver _veh) isEqualTo _pilot && { ({ (vehicle _x) isEqualTo _veh || {!alive _x} } count _crewLive) == (count _crewLive) }) ||
-    ((time - _tBoard0) > _boardTimeout)
+    (isNil "_veh") || {isNull _veh} || {!alive _veh} || {isNil "_pilot"} || {!alive _pilot} ||
+    {(driver _veh) isEqualTo _pilot && { ({ (vehicle _x) isEqualTo _veh || {!alive _x} } count _crewLive) == (count _crewLive) }} ||
+    {(time - _tBoard0) > _boardTimeout}
 };
 
-private _boardOk = !(isNull _veh) && {alive _veh} && {alive _pilot} && {(driver _veh) isEqualTo _pilot} && { ({ (vehicle _x) isEqualTo _veh || {!alive _x} } count _crewLive) == (count _crewLive) };
+private _boardOk = !(isNil "_veh") && {!(isNull _veh)} && {alive _veh} && {!(isNil "_pilot")} && {alive _pilot} && {(driver _veh) isEqualTo _pilot} && { ({ (vehicle _x) isEqualTo _veh || {!alive _x} } count _crewLive) == (count _crewLive) };
 
 { if (!isNull _x) then { _x forceWalk false; }; } forEach _crewLive;
 
@@ -657,9 +658,9 @@ if (_kickEnabled) then {
 private _t0 = time;
 waitUntil {
     sleep 1;
-    isNull _veh || {!alive _veh} ||
-    ((_veh distance2D _despawnPos) < 300) ||
-    ((time - _t0) > 1200)
+    (isNil "_veh") || {isNull _veh} || {!alive _veh} ||
+    {(_veh distance2D _despawnPos) < 300} ||
+    {(time - _t0) > 1200}
 };
 
 // Delete aircraft + ALL associated crew (including any that got left behind).

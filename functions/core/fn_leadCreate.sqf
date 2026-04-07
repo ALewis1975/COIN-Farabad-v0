@@ -36,6 +36,8 @@ if ((count _pos) < 2) exitWith {""};
 
 _strength = (_strength max 0) min 1;
 
+private _trimFn = compile "params ['_s']; trim _s";
+
 private _counter = ["leadCounter", 0] call ARC_fnc_stateGet;
 _counter = _counter + 1;
 ["leadCounter", _counter] call ARC_fnc_stateSet;
@@ -58,7 +60,7 @@ if ((count _leads) > _cap) then
     private _dropped = _leads deleteAt 0;
     if (_dropped isEqualType [] && { (count _dropped) >= 1 }) then
     {
-        private _did = _dropped # 0;
+        private _did = _dropped select 0;
         private _mk = format ["ARC_leadCircle_%1", _did];
         if (_mk in allMapMarkers) then { deleteMarker _mk; };
         missionNamespace setVariable [format ["ARC_leadCircleExpiresAt_%1", _did], nil];
@@ -75,7 +77,7 @@ if ((count _leads) > _cap) then
 private _circlesOn = missionNamespace getVariable ["ARC_suspiciousLeadCirclesEnabled", true];
 if (!(_circlesOn isEqualType true) && !(_circlesOn isEqualType false)) then { _circlesOn = true; };
 
-private _tU = toUpper (trim _tag);
+private _tU = toUpper ([_tag] call _trimFn);
 if (_circlesOn && { _tU find "SUS_" == 0 }) then
 {
     private _mkName = format ["ARC_leadCircle_%1", _id];
