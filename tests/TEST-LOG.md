@@ -11,6 +11,42 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-07 19:30 UTC — AIR/TOWER UX finish (PRs 1–5)
+
+**Branch/Commit:** copilot/review-air-tower-screen-again @ c16dfbf
+
+**Scenario:** UX finish pass — operator-language cleanup, detail pane enrichment, layout polish, button cleanup, traffic picture legibility.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `functions/core/fn_publicBroadcastState.sqf` | Add `_eventKindLabel` translation map for 11 raw event tokens → operator-readable labels (EXEC_START→"Movement started", etc.); sqflint compat type guard |
+| `functions/ui/fn_uiConsoleAirPaint.sqf` | Clean mode summary/guidance text; shorten mode rows; enrich ARR/DEP/RWY/REQ/FLT/DECISION/CSTATUS/PACT detail panes with who/state/constraints/action; replace all "REFRESH" with "UPDATE" or mode name; extract `_nextViewLabel`/`_nextViewTooltip` helpers; update detail pane offset for reduced map height |
+| `functions/ui/fn_uiConsoleRefresh.sqf` | Replace PILOT secondary button "REFRESH" → "UPDATE" |
+| `functions/ui/fn_uiConsoleAirMapPaint.sqf` | Selected aircraft highlighted yellow with larger marker (0.8 vs 0.6); shorten marker labels to callsign only |
+| `config/CfgDialogs.hpp` | Widen status strip chip gaps (0.190 width, ~1.3% gaps); reduce map pane height from 0.40→0.35 |
+
+### Static checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict <all changed .sqf files>` | PASS | 4 files, no compat violations |
+| 2 | State migrations | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios |
+| 3 | Marker index | `python3 scripts/dev/validate_marker_index.py` | PASS | 177 markers all modes |
+
+### Gameplay / MP checks
+
+| # | Check | Result | Notes |
+|---|-------|--------|-------|
+| 1 | AIRFIELD_OPS no debug jargon | BLOCKED | Requires in-game visual review; static analysis confirms no raw tokens in event label output |
+| 2 | 3-second scan success | BLOCKED | Requires in-game visual review; layout changes verified structurally |
+| 3 | Detail pane operator context | BLOCKED | Requires in-game visual review; all detail pane code paths produce who/state/constraints/action |
+| 4 | Map selected highlight | BLOCKED | Requires in-game visual review; code confirmed yellow + 0.8 size for selected FID |
+| 5 | JIP / dedicated server sync | BLOCKED | No dedicated server available; all changes are client-side rendering only (no authority state mutations) |
+
+---
+
 ## 2026-04-07 14:56 UTC — Phase 3: CLEARANCES safety hardening
 
 **Branch/Commit:** copilot/develop-task-decomposition-plan @ 047e376
