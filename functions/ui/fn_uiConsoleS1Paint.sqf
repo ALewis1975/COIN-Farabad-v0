@@ -67,7 +67,7 @@ uiNamespace setVariable ["ARC_console_s1ExpandToggled", false];
 private _registry = missionNamespace getVariable ["ARC_pub_s1_registry", []];
 if (!(_registry isEqualType [])) then { _registry = []; };
 
-private _schema = [_registry, "schema", ""] call _getPair;
+private _schema = [_registry, "schema", ""] call ARC_fnc_uiConsoleGetPair;
 private _isV2 = _schema isEqualTo "s1_tree_v2";
 
 private _groups   = [];
@@ -75,10 +75,10 @@ private _units    = [];
 private _catStats = [];
 private _catOrder = [];
 if (_isV2) then {
-    _groups   = [_registry, "groups",   []] call _getPair;
-    _units    = [_registry, "units",    []] call _getPair;
-    _catStats = [_registry, "catStats", []] call _getPair;
-    _catOrder = [_registry, "catOrder", []] call _getPair;
+    _groups   = [_registry, "groups",   []] call ARC_fnc_uiConsoleGetPair;
+    _units    = [_registry, "units",    []] call ARC_fnc_uiConsoleGetPair;
+    _catStats = [_registry, "catStats", []] call ARC_fnc_uiConsoleGetPair;
+    _catOrder = [_registry, "catOrder", []] call ARC_fnc_uiConsoleGetPair;
     if (!(_groups   isEqualType [])) then { _groups   = []; };
     if (!(_units    isEqualType [])) then { _units    = []; };
     if (!(_catStats isEqualType [])) then { _catStats = []; };
@@ -158,7 +158,7 @@ if (!_isV2 || { (count _catOrder) isEqualTo 0 }) then {
             private _catGroups = [];
             {
                 if (!(_x isEqualType [])) then { continue; };
-                if (!(([_x, "s1TopCategory", ""] call _getPair) isEqualTo _cat)) then { continue; };
+                if (!(([_x, "s1TopCategory", ""] call ARC_fnc_uiConsoleGetPair) isEqualTo _cat)) then { continue; };
                 _catGroups pushBack _x;
             } forEach _groups;
 
@@ -166,11 +166,11 @@ if (!_isV2 || { (count _catOrder) isEqualTo 0 }) then {
                 // BN staff (depth 0) listed first
                 {
                     if (!(_x isEqualType [])) then { continue; };
-                    if (!(([_x, "s1EchelonDepth", -1] call _getPair) isEqualTo 0)) then { continue; };
-                    private _cs  = [_x, "callsign", ""] call _getPair;
-                    private _gid = [_x, "groupId",  ""] call _getPair;
-                    private _pax = [_x, "s1PaxCount", 0] call _getPair;
-                    private _act = [_x, "s1ActivePax", 0] call _getPair;
+                    if (!(([_x, "s1EchelonDepth", -1] call ARC_fnc_uiConsoleGetPair) isEqualTo 0)) then { continue; };
+                    private _cs  = [_x, "callsign", ""] call ARC_fnc_uiConsoleGetPair;
+                    private _gid = [_x, "groupId",  ""] call ARC_fnc_uiConsoleGetPair;
+                    private _pax = [_x, "s1PaxCount", 0] call ARC_fnc_uiConsoleGetPair;
+                    private _act = [_x, "s1ActivePax", 0] call ARC_fnc_uiConsoleGetPair;
                     private _lbl = format ["    - %1 | %2/%3", if (_cs isEqualTo "") then {_gid} else {_cs}, _act, _pax];
                     private _li  = _ctrlList lbAdd _lbl;
                     _ctrlList lbSetData [_li, _gid];
@@ -181,8 +181,8 @@ if (!_isV2 || { (count _catOrder) isEqualTo 0 }) then {
                 private _companies = [];
                 {
                     if (!(_x isEqualType [])) then { continue; };
-                    if (!(([_x, "s1EchelonDepth", -1] call _getPair) isEqualTo 1)) then { continue; };
-                    private _co = [_x, "s1CompanyLetter", ""] call _getPair;
+                    if (!(([_x, "s1EchelonDepth", -1] call ARC_fnc_uiConsoleGetPair) isEqualTo 1)) then { continue; };
+                    private _co = [_x, "s1CompanyLetter", ""] call ARC_fnc_uiConsoleGetPair;
                     private _coExists = false;
                     { if (_x isEqualTo _co) exitWith { _coExists = true; }; } forEach _companies;
                     if (!_coExists) then { _companies pushBack _co; };
@@ -198,12 +198,12 @@ if (!_isV2 || { (count _catOrder) isEqualTo 0 }) then {
                     private _coCs  = format ["CO %1", _co];
                     private _coGid = "";
                     {
-                        if ((_x isEqualType []) && { ([_x, "s1EchelonDepth", -1] call _getPair) isEqualTo 1 } && { ([_x, "s1CompanyLetter", ""] call _getPair) isEqualTo _co }) exitWith {
-                            _coPax = [_x, "s1PaxCount", 0] call _getPair;
-                            _coAct = [_x, "s1ActivePax", 0] call _getPair;
-                            private _csRaw = [_x, "callsign", ""] call _getPair;
+                        if ((_x isEqualType []) && { ([_x, "s1EchelonDepth", -1] call ARC_fnc_uiConsoleGetPair) isEqualTo 1 } && { ([_x, "s1CompanyLetter", ""] call ARC_fnc_uiConsoleGetPair) isEqualTo _co }) exitWith {
+                            _coPax = [_x, "s1PaxCount", 0] call ARC_fnc_uiConsoleGetPair;
+                            _coAct = [_x, "s1ActivePax", 0] call ARC_fnc_uiConsoleGetPair;
+                            private _csRaw = [_x, "callsign", ""] call ARC_fnc_uiConsoleGetPair;
                             if (!(_csRaw isEqualTo "")) then { _coCs = _csRaw; };
-                            _coGid = [_x, "groupId", ""] call _getPair;
+                            _coGid = [_x, "groupId", ""] call ARC_fnc_uiConsoleGetPair;
                         };
                     } forEach _catGroups;
 
@@ -220,14 +220,14 @@ if (!_isV2 || { (count _catOrder) isEqualTo 0 }) then {
                         // Platoons (depth 2) under this company
                         {
                             if (!(_x isEqualType [])) then { continue; };
-                            if (!(([_x, "s1EchelonDepth", -1] call _getPair) isEqualTo 2)) then { continue; };
-                            if (!(([_x, "s1CompanyLetter", ""] call _getPair) isEqualTo _co)) then { continue; };
+                            if (!(([_x, "s1EchelonDepth", -1] call ARC_fnc_uiConsoleGetPair) isEqualTo 2)) then { continue; };
+                            if (!(([_x, "s1CompanyLetter", ""] call ARC_fnc_uiConsoleGetPair) isEqualTo _co)) then { continue; };
 
-                            private _pltGid    = [_x, "groupId",          ""] call _getPair;
-                            private _pltCs     = [_x, "callsign",         ""] call _getPair;
-                            private _pltPax    = [_x, "s1PaxCount",       0]  call _getPair;
-                            private _pltAct    = [_x, "s1ActivePax",      0]  call _getPair;
-                            private _pltPe     = [_x, "parentEchelon",    ""] call _getPair;
+                            private _pltGid    = [_x, "groupId",          ""] call ARC_fnc_uiConsoleGetPair;
+                            private _pltCs     = [_x, "callsign",         ""] call ARC_fnc_uiConsoleGetPair;
+                            private _pltPax    = [_x, "s1PaxCount",       0]  call ARC_fnc_uiConsoleGetPair;
+                            private _pltAct    = [_x, "s1ActivePax",      0]  call ARC_fnc_uiConsoleGetPair;
+                            private _pltPe     = [_x, "parentEchelon",    ""] call ARC_fnc_uiConsoleGetPair;
                             private _pltNodeId = format ["cat:REDF_PLT_%1", _pltPe];
 
                             private _pltExpanded = false;
@@ -243,14 +243,14 @@ if (!_isV2 || { (count _catOrder) isEqualTo 0 }) then {
                                 // Squads (depth >= 3) whose parent echelon matches this platoon
                                 {
                                     if (!(_x isEqualType [])) then { continue; };
-                                    if (!(([_x, "s1EchelonDepth",      -1] call _getPair) >= 3))          then { continue; };
-                                    if (!(([_x, "s1CompanyLetter",     ""] call _getPair) isEqualTo _co)) then { continue; };
-                                    if (!(([_x, "s1ParentEchelonStr",  ""] call _getPair) isEqualTo _pltPe)) then { continue; };
+                                    if (!(([_x, "s1EchelonDepth",      -1] call ARC_fnc_uiConsoleGetPair) >= 3))          then { continue; };
+                                    if (!(([_x, "s1CompanyLetter",     ""] call ARC_fnc_uiConsoleGetPair) isEqualTo _co)) then { continue; };
+                                    if (!(([_x, "s1ParentEchelonStr",  ""] call ARC_fnc_uiConsoleGetPair) isEqualTo _pltPe)) then { continue; };
 
-                                    private _sqdGid = [_x, "groupId",     ""] call _getPair;
-                                    private _sqdCs  = [_x, "callsign",    ""] call _getPair;
-                                    private _sqdPax = [_x, "s1PaxCount",  0]  call _getPair;
-                                    private _sqdAct = [_x, "s1ActivePax", 0]  call _getPair;
+                                    private _sqdGid = [_x, "groupId",     ""] call ARC_fnc_uiConsoleGetPair;
+                                    private _sqdCs  = [_x, "callsign",    ""] call ARC_fnc_uiConsoleGetPair;
+                                    private _sqdPax = [_x, "s1PaxCount",  0]  call ARC_fnc_uiConsoleGetPair;
+                                    private _sqdAct = [_x, "s1ActivePax", 0]  call ARC_fnc_uiConsoleGetPair;
                                     private _sqdLbl = format ["      - %1 | %2/%3 pax", if (_sqdCs isEqualTo "") then {_sqdGid} else {_sqdCs}, _sqdAct, _sqdPax];
                                     private _sqdIdx = _ctrlList lbAdd _sqdLbl;
                                     _ctrlList lbSetData [_sqdIdx, _sqdGid];
@@ -265,10 +265,10 @@ if (!_isV2 || { (count _catOrder) isEqualTo 0 }) then {
                 // Non-REDFALCON: flat list of groups under this category
                 {
                     if (!(_x isEqualType [])) then { continue; };
-                    private _cs  = [_x, "callsign",    ""] call _getPair;
-                    private _gid = [_x, "groupId",     ""] call _getPair;
-                    private _pax = [_x, "s1PaxCount",  0]  call _getPair;
-                    private _act = [_x, "s1ActivePax", 0]  call _getPair;
+                    private _cs  = [_x, "callsign",    ""] call ARC_fnc_uiConsoleGetPair;
+                    private _gid = [_x, "groupId",     ""] call ARC_fnc_uiConsoleGetPair;
+                    private _pax = [_x, "s1PaxCount",  0]  call ARC_fnc_uiConsoleGetPair;
+                    private _act = [_x, "s1ActivePax", 0]  call ARC_fnc_uiConsoleGetPair;
                     private _displayName = if (_cs isEqualTo "") then { _gid } else { _cs };
                     private _lbl  = format ["    - %1 | %2/%3 pax", _displayName, _act, _pax];
                     private _lIdx = _ctrlList lbAdd _lbl;
@@ -349,12 +349,12 @@ if (_selData2 isEqualTo "" || { _selData2 isEqualTo "__EMPTY__" }) then {
         _details2 = _details2 + "<br/><t color='#B89B6B' font='PuristaMedium'>Subordinate Groups</t><br/>";
         {
             if (!(_x isEqualType [])) then { continue; };
-            if (!(([_x, "s1TopCategory", ""] call _getPair) isEqualTo _catName)) then { continue; };
-            private _cs         = [_x, "callsign",    ""] call _getPair;
-            private _grpId      = [_x, "groupId",     ""] call _getPair;
-            private _pax        = [_x, "s1PaxCount",  0]  call _getPair;
-            private _act        = [_x, "s1ActivePax", 0]  call _getPair;
-            private _rd         = [_x, "s1AvgReadiness", 0] call _getPair;
+            if (!(([_x, "s1TopCategory", ""] call ARC_fnc_uiConsoleGetPair) isEqualTo _catName)) then { continue; };
+            private _cs         = [_x, "callsign",    ""] call ARC_fnc_uiConsoleGetPair;
+            private _grpId      = [_x, "groupId",     ""] call ARC_fnc_uiConsoleGetPair;
+            private _pax        = [_x, "s1PaxCount",  0]  call ARC_fnc_uiConsoleGetPair;
+            private _act        = [_x, "s1ActivePax", 0]  call ARC_fnc_uiConsoleGetPair;
+            private _rd         = [_x, "s1AvgReadiness", 0] call ARC_fnc_uiConsoleGetPair;
             private _rdTxt      = format ["%1%%", round (_rd * 100)];
             private _displayName = if (_cs isEqualTo "") then { _grpId } else { _cs };
             _details2 = _details2 + format ["<t color='#DDDDDD'>- %1 | %2/%3 pax | %4</t><br/>", _displayName, _act, _pax, _rdTxt];
@@ -370,19 +370,19 @@ if (_selData2 isEqualTo "" || { _selData2 isEqualTo "__EMPTY__" }) then {
         private _selGid = _selData2;
         private _gRec = [];
         {
-            if ((_x isEqualType []) && { ([_x, "groupId", ""] call _getPair) isEqualTo _selGid }) exitWith { _gRec = _x; };
+            if ((_x isEqualType []) && { ([_x, "groupId", ""] call ARC_fnc_uiConsoleGetPair) isEqualTo _selGid }) exitWith { _gRec = _x; };
         } forEach _groups;
 
         if ((count _gRec) isEqualTo 0) then {
             _details2 = _details2 + "<t color='#AAAAAA'>Group not found in snapshot.</t>";
         } else {
-            private _cs  = [_gRec, "callsign",       ""] call _getPair;
-            private _pax = [_gRec, "s1PaxCount",     0]  call _getPair;
-            private _act = [_gRec, "s1ActivePax",    0]  call _getPair;
-            private _kia = [_gRec, "s1KiaPax",       0]  call _getPair;
-            private _rd  = [_gRec, "s1AvgReadiness", 0]  call _getPair;
-            private _sub = [_gRec, "s1SubCategory",  ""] call _getPair;
-            private _cat = [_gRec, "s1TopCategory",  ""] call _getPair;
+            private _cs  = [_gRec, "callsign",       ""] call ARC_fnc_uiConsoleGetPair;
+            private _pax = [_gRec, "s1PaxCount",     0]  call ARC_fnc_uiConsoleGetPair;
+            private _act = [_gRec, "s1ActivePax",    0]  call ARC_fnc_uiConsoleGetPair;
+            private _kia = [_gRec, "s1KiaPax",       0]  call ARC_fnc_uiConsoleGetPair;
+            private _rd  = [_gRec, "s1AvgReadiness", 0]  call ARC_fnc_uiConsoleGetPair;
+            private _sub = [_gRec, "s1SubCategory",  ""] call ARC_fnc_uiConsoleGetPair;
+            private _cat = [_gRec, "s1TopCategory",  ""] call ARC_fnc_uiConsoleGetPair;
             private _rdPct = format ["%1%%", round (_rd * 100)];
 
             _details2 = _details2 + format ["<t color='#B89B6B'>Group:</t> <t color='#FFFFFF'>%1</t><br/>", _selGid];
@@ -395,14 +395,14 @@ if (_selData2 isEqualTo "" || { _selData2 isEqualTo "__EMPTY__" }) then {
             private _rosterRows = [];
             {
                 if (!(_x isEqualType [])) then { continue; };
-                if (!(([_x, "groupId", ""] call _getPair) isEqualTo _selGid)) then { continue; };
-                private _role  = [_x, "role",          "RIFLEMAN"] call _getPair;
+                if (!(([_x, "groupId", ""] call ARC_fnc_uiConsoleGetPair) isEqualTo _selGid)) then { continue; };
+                private _role  = [_x, "role",          "RIFLEMAN"] call ARC_fnc_uiConsoleGetPair;
                 if (!(_role  isEqualType "")) then { _role  = "RIFLEMAN"; };
-                private _state = [_x, "virtualStatus", "UNKNOWN"]  call _getPair;
+                private _state = [_x, "virtualStatus", "UNKNOWN"]  call ARC_fnc_uiConsoleGetPair;
                 if (!(_state isEqualType "")) then { _state = "UNKNOWN"; };
-                private _rdU   = [_x, "readiness",     0]          call _getPair;
+                private _rdU   = [_x, "readiness",     0]          call ARC_fnc_uiConsoleGetPair;
                 if (!(_rdU   isEqualType 0)) then { _rdU = 0; };
-                private _task  = [_x, "currentTaskId", ""]         call _getPair;
+                private _task  = [_x, "currentTaskId", ""]         call ARC_fnc_uiConsoleGetPair;
                 if (!(_task  isEqualType "")) then { _task = ""; };
                 private _rdTxt   = format ["%1%%", round (_rdU * 100)];
                 private _taskTxt = if (_task isEqualTo "") then { "None" } else { _task };
