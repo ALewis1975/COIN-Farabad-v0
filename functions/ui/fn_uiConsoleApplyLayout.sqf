@@ -1,17 +1,20 @@
 /*
     ARC_fnc_uiConsoleApplyLayout
 
-    Client: applies runtime console layout mode.
+    Client: applies runtime console layout mode with declared tab layout regions.
+
+    Refactored per Farabad Console Refactor Plan §4.1–§4.2:
+    - Each tab declares its layout needs via a tab layout config array.
+    - The shell layout engine reads the active tab's declaration and positions
+      Regions A–E accordingly.
+    - Region C (Visual Panel, IDC 78140) is shown/hidden and sized from declaration.
 
     Mission var:
       ARC_console_layoutMode = "FULL" | "DOCK_RIGHT"
 
     Params:
       0: DISPLAY
-      1: STRING (optional) — active tab key.  When the tab is one of
-         DASH | BOARDS | OPS | CMD | HQ the center and right panes are
-         given equal width (50 / 50 split).  All other tabs use the
-         default 47 / 53 split.
+      1: STRING (optional) — active tab key.
 
     Returns:
       STRING selected mode
@@ -26,6 +29,46 @@ params [
 
 if (isNull _display) exitWith {"FULL"};
 
+// -----------------------------------------------------------------------
+// Tab layout declarations (Refactor Plan §4.2)
+// [tabId, useStatusStrip, mainBoardMode, useVisualPanel, visualPanelHeightFrac, splitRatio]
+// -----------------------------------------------------------------------
+private _tabLayouts = [
+    ["DASH",    false, "STRUCTURED_TEXT", false, 0,    0.50],
+    ["BOARDS",  false, "STRUCTURED_TEXT", false, 0,    0.50],
+    ["INTEL",   false, "LIST",            false, 0,    0.47],
+    ["OPS",     false, "FRAMES_3",        false, 0,    0.50],
+    ["AIR",     true,  "LIST",            true,  0.35, 0.47],
+    ["HANDOFF", false, "STRUCTURED_TEXT", false, 0,    0.47],
+    ["CMD",     false, "STRUCTURED_TEXT", false, 0,    0.50],
+    ["HQ",      false, "LIST",            false, 0,    0.50],
+    ["S1",      false, "LIST",            false, 0,    0.47]
+];
+
+// Look up active tab's layout declaration
+private _useStatusStrip = false;
+private _mainBoardMode = "STRUCTURED_TEXT";
+private _useVisualPanel = false;
+private _visualPanelFrac = 0;
+private _splitRatio = 0.50;
+
+{
+    if (_x isEqualType [] && { (count _x) >= 6 } && { (_x select 0) isEqualTo _activeTab }) exitWith {
+        _useStatusStrip = _x select 1;
+        _mainBoardMode = _x select 2;
+        _useVisualPanel = _x select 3;
+        _visualPanelFrac = _x select 4;
+        _splitRatio = _x select 5;
+    };
+} forEach _tabLayouts;
+
+// Store layout declaration for painters to query
+uiNamespace setVariable ["ARC_console_layoutUseStatusStrip", _useStatusStrip];
+uiNamespace setVariable ["ARC_console_layoutMainBoardMode", _mainBoardMode];
+uiNamespace setVariable ["ARC_console_layoutUseVisualPanel", _useVisualPanel];
+uiNamespace setVariable ["ARC_console_layoutVisualPanelFrac", _visualPanelFrac];
+uiNamespace setVariable ["ARC_console_layoutSplitRatio", _splitRatio];
+
 private _modeRaw = missionNamespace getVariable ["ARC_console_layoutMode", "FULL"];
 if (!(_modeRaw isEqualType "")) then { _modeRaw = "FULL"; };
 private _mode = toUpper (trim _modeRaw);
@@ -39,6 +82,8 @@ private _trackedIdcs = [
     78060,78061,78062,78063,
     // nav + core panes
     78001,78015,78011,78016,
+    // Region C: Visual Panel
+    78140,
     // S2 workflow controls
     78050,78051,78052,78053,78054,78055,
     // OPS frames
@@ -103,12 +148,43 @@ private _tabsW = _fw * 0.27;
 private _gap = _fw * 0.012;
 private _mainX = _tabsX + _tabsW + _gap;
 private _mainW = (_fx + _fw - _mainX - (_fw * 0.012)) max (_fw * 0.24);
-// Equal-width (50/50) split for ops-facing screens; 47/53 for all others.
-private _equalSplitTabs = ["DASH", "BOARDS", "OPS", "CMD", "HQ"];
-private _splitRatio = if (_activeTab in _equalSplitTabs) then { 0.50 } else { 0.47 };
+// Use declared split ratio from tab layout declaration
 private _mainSplitW = _mainW * _splitRatio;
 private _detailsX = _mainX + _mainSplitW + _gap;
 private _detailsW = (_fx + _fw - _detailsX - (_fw * 0.012)) max (_fw * 0.18);
+
+// -----------------------------------------------------------------------
+// Region C: Visual Panel (IDC 78140)
+// When useVisualPanel is true, Region C occupies a declared fraction of
+// the content height.  Region B shrinks accordingly.  When false, Region C
+// is hidden with height 0.
+// -----------------------------------------------------------------------
+private _visualPanelCtrl = _display displayCtrl 78140;
+private _regionCH = 0;
+private _regionCY = _contentY;
+
+if (_useVisualPanel && { _visualPanelFrac > 0 }) then {
+    _regionCH = _contentH * _visualPanelFrac;
+    // Region C sits at the bottom of the content area, above the action row
+    _regionCY = _contentY + _contentH - _regionCH;
+
+    if (!isNull _visualPanelCtrl) then {
+        [78140, _mainX, _regionCY, _mainW + _detailsW + _gap, _regionCH] call _setPos;
+        _visualPanelCtrl ctrlShow true;
+    };
+
+    // Shrink Region B (main list) and Region D (details) to fit above Region C
+    _contentH = _contentH - _regionCH - (_fh * 0.008);
+} else {
+    if (!isNull _visualPanelCtrl) then {
+        [78140, _mainX, _contentY + _contentH, _mainW + _detailsW + _gap, 0] call _setPos;
+        _visualPanelCtrl ctrlShow false;
+    };
+};
+
+// Store computed Region C position for painters (e.g. AIR map reposition)
+uiNamespace setVariable ["ARC_console_regionCY", _regionCY];
+uiNamespace setVariable ["ARC_console_regionCH", _regionCH];
 
 // Frame + shell
 [78090, _fx, _fy, _fw, _fh] call _setPos;
