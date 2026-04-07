@@ -346,7 +346,7 @@ case "DASH":
         }
         else
         {
-            if (!isNull _b1) then { [_b1, "TOC QUEUE", true, true] call ARC_fnc_uiConsoleButtonState; };
+            [_b1, "TOC QUEUE", true, true] call ARC_fnc_uiConsoleButtonState;
             if (!isNull _b2) then
             {
                 private _taskId = missionNamespace getVariable ["ARC_activeTaskId", ""];

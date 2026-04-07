@@ -274,7 +274,7 @@ private _airChipAlerts = _display displayCtrl 78135;
 private _airDecBand = _display displayCtrl 78136;
 
 // --- Runway chip --- (abbreviated labels per Refactor Plan §PR3.4)
-private _rwyChipHtml = [["RWY", _runwayState, _runwayState]] call ARC_fnc_uiConsoleFormatStatusChip;
+private _rwyChipHtml = ["RWY", _runwayState, _runwayState] call ARC_fnc_uiConsoleFormatStatusChip;
 if (!isNull _airChipRunway) then { _airChipRunway ctrlSetStructuredText parseText _rwyChipHtml; };
 
 // --- Arrivals chip ---
@@ -294,7 +294,7 @@ private _arrStatus = "NORMAL";
 } forEach _arrivals;
 if (_arrCount == 0) then { _arrStatus = "NORMAL"; };
 private _arrChipLabel = if (_arrCount == 0) then { "0" } else { str _arrCount };
-private _arrChipHtml = [["ARR", _arrChipLabel, _arrStatus]] call ARC_fnc_uiConsoleFormatStatusChip;
+private _arrChipHtml = ["ARR", _arrChipLabel, _arrStatus] call ARC_fnc_uiConsoleFormatStatusChip;
 if (!isNull _airChipArrivals) then { _airChipArrivals ctrlSetStructuredText parseText _arrChipHtml; };
 
 // --- Departures chip ---
@@ -309,7 +309,7 @@ private _depStatus = if (_holdDepartures) then { "HOLD" } else { "NORMAL" };
 } forEach _departures;
 private _depChipLabel = if (_depCount == 0) then { "0" } else { str _depCount };
 if (_holdDepartures) then { _depChipLabel = _depChipLabel + " HOLD"; };
-private _depChipHtml = [["DEP", _depChipLabel, _depStatus]] call ARC_fnc_uiConsoleFormatStatusChip;
+private _depChipHtml = ["DEP", _depChipLabel, _depStatus] call ARC_fnc_uiConsoleFormatStatusChip;
 if (!isNull _airChipDepartures) then { _airChipDepartures ctrlSetStructuredText parseText _depChipHtml; };
 
 // --- Tower Mode chip --- (uses _freshnessState from Phase 5 block above)
@@ -320,7 +320,7 @@ private _towerModeStatus = switch (toUpper _freshnessState) do {
     default { "AMBER" };
 };
 private _towerModeLabel = if (_freshnessState isEqualTo "UNKNOWN") then { "UNKNOWN" } else { _freshnessState };
-private _towerChipHtml = [["TWR", _towerModeLabel, _towerModeStatus]] call ARC_fnc_uiConsoleFormatStatusChip;
+private _towerChipHtml = ["TWR", _towerModeLabel, _towerModeStatus] call ARC_fnc_uiConsoleFormatStatusChip;
 if (!isNull _airChipTowerMode) then { _airChipTowerMode ctrlSetStructuredText parseText _towerChipHtml; };
 
 // --- Alerts chip ---
@@ -336,7 +336,7 @@ private _alertSeverity = "NONE";
     };
 } forEach _alerts;
 private _alertChipLabel = if (_alertCount == 0) then { "NONE" } else { str _alertCount };
-private _alertChipHtml = [["ALR", _alertChipLabel, _alertSeverity]] call ARC_fnc_uiConsoleFormatStatusChip;
+private _alertChipHtml = ["ALR", _alertChipLabel, _alertSeverity] call ARC_fnc_uiConsoleFormatStatusChip;
 if (!isNull _airChipAlerts) then { _airChipAlerts ctrlSetStructuredText parseText _alertChipHtml; };
 
 // --- Decision band ---
