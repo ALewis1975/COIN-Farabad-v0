@@ -265,17 +265,73 @@ if (!(_airDepartures isEqualType [])) then { _airDepartures = []; };
 private _airAlerts = [_airSnap, "alerts", []] call _getPair;
 if (!(_airAlerts isEqualType [])) then { _airAlerts = []; };
 private _airRunwayState = [_airRunway, "state", "UNKNOWN"] call _getPair;
+if (!(_airRunwayState isEqualType "")) then { _airRunwayState = "UNKNOWN"; };
+private _airHoldState = [_airRunway, "holdState", false] call _getPair;
+if (!(_airHoldState isEqualType true) && !(_airHoldState isEqualType false)) then { _airHoldState = false; };
+
+// Phase 6: extract next inbound/outbound with callsign + phase/state.
+// Snapshot Contract v1: arrival = [fid(0), callsign(1), category(2), phase(3), ageS(4), priority(5), status(6)]
+// Snapshot Contract v1: departure = [fid(0), callsign(1), category(2), state(3), ageS(4), priority(5), status(6)]
 private _airNextArrival = if ((count _airArrivals) > 0) then { _airArrivals select 0 } else { [] };
 private _airNextDeparture = if ((count _airDepartures) > 0) then { _airDepartures select 0 } else { [] };
+
+private _airInboundLabel = "No inbound";
+if (_airNextArrival isEqualType [] && { (count _airNextArrival) >= 4 }) then {
+    private _cs = _airNextArrival param [1, ""];
+    private _ph = _airNextArrival param [3, ""];
+    if (!(_cs isEqualType "")) then { _cs = ""; };
+    if (!(_ph isEqualType "")) then { _ph = ""; };
+    if (_cs isEqualTo "") then { _cs = _airNextArrival param [0, "?"]; };
+    _airInboundLabel = if (_ph isEqualTo "") then { _cs } else { format ["%1 (%2)", _cs, _ph] };
+};
+
+private _airOutboundLabel = "No outbound";
+if (_airNextDeparture isEqualType [] && { (count _airNextDeparture) >= 4 }) then {
+    private _cs = _airNextDeparture param [1, ""];
+    private _st = _airNextDeparture param [3, ""];
+    if (!(_cs isEqualType "")) then { _cs = ""; };
+    if (!(_st isEqualType "")) then { _st = ""; };
+    if (_cs isEqualTo "") then { _cs = _airNextDeparture param [0, "?"]; };
+    _airOutboundLabel = if (_st isEqualTo "") then { _cs } else { format ["%1 (%2)", _cs, _st] };
+};
+
 private _airAlertLabel = if ((count _airAlerts) > 0) then { (_airAlerts select 0) param [0, "NONE"] } else { "NONE" };
 // Phase 5: read freshness state from snapshot for dashboard display.
 private _airFreshnessState = [_airSnap, "freshnessState", "UNKNOWN"] call _getPair;
 if (!(_airFreshnessState isEqualType "")) then { _airFreshnessState = "UNKNOWN"; };
 private _airAlertColor = _tshGreen;
+private _airTopCriticalAlert = "";
 if ((count _airAlerts) > 0) then {
     private _severity = toUpper ((_airAlerts select 0) param [1, "INFO"]);
     if (_severity isEqualTo "CAUTION") then { _airAlertColor = _tshAmber; };
-    if (_severity isEqualTo "CRITICAL") then { _airAlertColor = _tshRed; };
+    if (_severity isEqualTo "CRITICAL") then {
+        _airAlertColor = _tshRed;
+        _airTopCriticalAlert = (_airAlerts select 0) param [0, ""];
+    };
+};
+
+// Phase 6: compute top blocker for commander situational awareness.
+// Priority: HOLD → BLOCKED/OCCUPIED runway → CRITICAL alert → pending decision.
+private _airDecisionQueue = [_airSnap, "decisionQueue", []] call _getPair;
+if (!(_airDecisionQueue isEqualType [])) then { _airDecisionQueue = []; };
+private _airTopBlocker = "";
+if (_airHoldState) then {
+    _airTopBlocker = "Departures on HOLD";
+} else {
+    if ((toUpper _airRunwayState) isEqualTo "BLOCKED") then {
+        _airTopBlocker = "Runway BLOCKED";
+    } else {
+        if (_airTopCriticalAlert != "") then {
+            _airTopBlocker = _airTopCriticalAlert;
+        } else {
+            if ((count _airDecisionQueue) > 0) then {
+                private _dq0 = _airDecisionQueue select 0;
+                if (_dq0 isEqualType [] && { (count _dq0) >= 1 }) then {
+                    _airTopBlocker = _dq0 param [0, "Decision pending"];
+                };
+            };
+        };
+    };
 };
 
 private _unitLines = [];
@@ -357,9 +413,20 @@ private _secIntel    = format [
     _lastIntel
 ];
 private _secUnits = "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Unit Availability</t><br/>" + _unitsBlock + "<br/><br/>";
+// Phase 6: runway color helper — OPEN=green, RESERVED/OCCUPIED=amber, BLOCKED/UNKNOWN=red.
+private _airRunwayColor = switch (toUpper _airRunwayState) do {
+    case "OPEN": { _tshGreen };
+    case "RESERVED": { _tshAmber };
+    case "OCCUPIED": { _tshAmber };
+    default { _tshRed };
+};
 private _secAir = "";
 private _airFreshnessColor = if ((toUpper _airFreshnessState) isEqualTo "FRESH") then { _tshGreen } else { if ((toUpper _airFreshnessState) isEqualTo "STALE") then { _tshAmber } else { _tshRed } };
 private _airFreshnessLine = format ["<t color='#DDDDDD'>Data:</t> <t color='%1'>%2</t><br/>", _airFreshnessColor, _airFreshnessState];
+// Phase 6: blocker line — only shown when a blocker exists.
+private _airBlockerLine = if (_airTopBlocker isEqualTo "") then { "" } else {
+    format ["<t color='#DDDDDD'>Top blocker:</t> <t color='%1'>%2</t><br/>", _tshRed, _airTopBlocker]
+};
 _secAir = format [
     "<t size='1.0' font='PuristaMedium' color='%1'>Air Summary</t><br/>" +
     "<t color='#DDDDDD'>Runway:</t> <t color='%2'>%3</t><br/>" +
@@ -367,14 +434,14 @@ _secAir = format [
     "<t color='#DDDDDD'>Next outbound:</t> <t color='%4'>%6</t><br/>" +
     "<t color='#DDDDDD'>Air alerts:</t> <t color='%7'>%8</t><br/>",
     _tshCoyote,
-    if ((toUpper _airRunwayState) in ["OPEN"]) then { _tshGreen } else { if ((toUpper _airRunwayState) in ["RESERVED"]) then { _tshAmber } else { _tshRed } },
+    _airRunwayColor,
     _airRunwayState,
     _tshBody,
-    if (_airNextArrival isEqualType [] && { (count _airNextArrival) >= 2 }) then { _airNextArrival param [1, "NONE"] } else { "NONE" },
-    if (_airNextDeparture isEqualType [] && { (count _airNextDeparture) >= 2 }) then { _airNextDeparture param [1, "NONE"] } else { "NONE" },
+    _airInboundLabel,
+    _airOutboundLabel,
     _airAlertColor,
     _airAlertLabel
-] + _airFreshnessLine + "<br/>";
+] + _airBlockerLine + _airFreshnessLine + "<br/>";
 
 // Next Actions: workflow coaching / blocker visibility
 private _secNext = "";
@@ -471,13 +538,14 @@ if (!isNull _ctrlDetailsGrp && { !isNull _ctrlDetails }) then
         format ["<t size='0.9' color='#BDBDBD'>Incident:</t> <t size='0.9' color='%1'>%2</t><br/>", _incStatusColor, _incStatusText] +
         format ["<t size='0.9' color='#BDBDBD'>Queue pending:</t> <t size='0.9' color='%1'>%2</t><br/>", _qColor, _qPendingCnt] +
         format ["<t size='0.9' color='#BDBDBD'>Runway:</t> <t size='0.9' color='%1'>%2</t><br/>",
-            if ((toUpper _airRunwayState) in ["OPEN"]) then { _tshGreen } else { if ((toUpper _airRunwayState) in ["RESERVED"]) then { _tshAmber } else { _tshRed } },
+            _airRunwayColor,
             _airRunwayState
         ] +
-        format ["<t size='0.9' color='#BDBDBD'>Next inbound/outbound:</t> <t size='0.9'>%1 / %2</t><br/>",
-            if (_airNextArrival isEqualType [] && { (count _airNextArrival) >= 2 }) then { _airNextArrival param [1, "NONE"] } else { "NONE" },
-            if (_airNextDeparture isEqualType [] && { (count _airNextDeparture) >= 2 }) then { _airNextDeparture param [1, "NONE"] } else { "NONE" }
-        ] +
+        format ["<t size='0.9' color='#BDBDBD'>Next inbound:</t> <t size='0.9'>%1</t><br/>", _airInboundLabel] +
+        format ["<t size='0.9' color='#BDBDBD'>Next outbound:</t> <t size='0.9'>%1</t><br/>", _airOutboundLabel] +
+        (if (_airTopBlocker isEqualTo "") then { "" } else {
+            format ["<t size='0.9' color='#BDBDBD'>Blocker:</t> <t size='0.9' color='%1'>%2</t><br/>", _tshRed, _airTopBlocker]
+        }) +
         format ["<t size='0.9' color='#BDBDBD'>Air data:</t> <t size='0.9' color='%1'>%2</t><br/>", _airFreshnessColor, _airFreshnessState] +
         format ["<t size='0.9' color='#BDBDBD'>Unit reports:</t> <t size='0.9'>%1</t><br/>", count _statusRows] +
         format ["<t size='0.9' color='#BDBDBD'>Intel leads:</t> <t size='0.9'>%1</t><br/>", count _leadPool] +

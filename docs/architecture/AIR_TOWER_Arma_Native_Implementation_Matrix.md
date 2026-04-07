@@ -26,8 +26,8 @@ This document converts the AIR / TOWER Arma-native audit into a phase-by-phase i
 | 2 | 3 | B | AIRFIELD_OPS board conversion | Done | 3-second scan works; default focus on ops state |
 | 3 | 4 | A | CLEARANCES safety hardening | Done | No unsafe global action from inert selection |
 | 4 | 5 | B | AIR input flow + confirmations | Done | Narrow hotkeys; confirm destructive actions |
-| 5 | 6 | A | Snapshot freshness + degraded-state correctness | In progress | Fresh/stale/degraded real; late clients safe |
-| 6 | 7 | B | DASH air summary completion | Not started | Commanders read air status from DASH alone |
+| 5 | 6 | A | Snapshot freshness + degraded-state correctness | Done | Fresh/stale/degraded real; late clients safe |
+| 6 | 7 | B | DASH air summary completion | In progress | Commanders read air status from DASH alone |
 | 7 | 8 | B | AIR map pane integration | Not started | CT_MAP traffic pane; selection recenters map |
 | 8 | 9 | I | RemoteExec hardening completion | Not started | Allowlist complete; JIP flags explicit |
 | 9 | 10 | B | World overlay layer | Not started | Sparse in-world cues; no UI clutter |
@@ -341,13 +341,13 @@ All 35 server-side `fn_airbase*.sqf` runtime functions, all 9 `fn_airbaseClient*
 | `functions/core/fn_publicBroadcastState.sqf` | Add summary-specific fields to `ARC_pub_airbaseUiSnapshot` if not already present (e.g., `nextInboundSummary`, `nextOutboundSummary`, `topBlocker`) |
 
 **Acceptance criteria:**
-- [ ] DASH shows runway availability (OPEN/RESERVED/OCCUPIED/BLOCKED with R/A/G)
-- [ ] DASH shows next inbound callsign + phase, or "No inbound"
-- [ ] DASH shows next outbound callsign + state, or "No outbound"
-- [ ] DASH shows top blocker description if any, or nothing
-- [ ] Commander does not need to open AIR/TOWER to assess air status
-- [ ] Air summary reads from `ARC_pub_airbaseUiSnapshot`, not raw `ARC_pub_state.airbase`
-- [ ] sqflint + compat scan pass
+- [x] DASH shows runway availability (OPEN/RESERVED/OCCUPIED/BLOCKED with R/A/G)
+- [x] DASH shows next inbound callsign + phase, or "No inbound"
+- [x] DASH shows next outbound callsign + state, or "No outbound"
+- [x] DASH shows top blocker description if any, or nothing
+- [x] Commander does not need to open AIR/TOWER to assess air status
+- [x] Air summary reads from `ARC_pub_airbaseUiSnapshot`, not raw `ARC_pub_state.airbase`
+- [x] sqflint + compat scan pass
 
 **Dependencies:** Phase 5 complete (freshness must be real before surfacing to commanders).
 

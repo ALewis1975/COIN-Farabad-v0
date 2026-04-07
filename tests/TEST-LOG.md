@@ -4411,3 +4411,45 @@ python3 scripts/dev/validate_marker_index.py
 | 8 | sqflint + compat scan pass | PASS | All 4 files clean |
 | 9 | DASH shows freshness state | PASS | Both full and compact Quick Status modes |
 | 10 | Thresholds configurable | PASS | `airbase_v1_freshness_threshold_s`, `airbase_v1_degraded_threshold_s` |
+
+---
+
+### Phase 6 — DASH air summary completion (2026-04-07)
+
+**Date/Time:** 2026-04-07T17:50:00Z
+**Branch/Commit:** copilot/develop-task-decomposition-plan (pending commit for Phase 6)
+
+**Scenario:** Phase 6 implementation — commander-ready air summary on DASH/COP with callsign+phase/state, top blocker, improved runway color mapping.
+
+**Changed files:**
+- `functions/ui/fn_uiConsoleDashboardPaint.sqf` — enhanced inbound/outbound labels (callsign+phase/state), "No inbound"/"No outbound" fallback, top blocker line, OCCUPIED runway color, compact Quick Status pane updated
+- `docs/architecture/AIR_TOWER_Arma_Native_Implementation_Matrix.md` — Phase 5 → Done, Phase 6 → In progress, acceptance criteria checked
+
+**Commands run:**
+```bash
+python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleDashboardPaint.sqf
+sqflint -e w functions/ui/fn_uiConsoleDashboardPaint.sqf
+python3 scripts/dev/validate_state_migrations.py
+python3 scripts/dev/validate_marker_index.py
+```
+
+**Results:**
+
+| # | Check | Result | Notes |
+|---|-------|--------|-------|
+| 1 | Compat scan --strict (1 file) | PASS | 0 pattern matches |
+| 2 | sqflint fn_uiConsoleDashboardPaint.sqf | PASS | exit 0, clean |
+| 3 | State migration validator | PASS | 3 scenarios |
+| 4 | Marker index validator | PASS | 177 markers all modes |
+
+**Acceptance criteria (Phase 6):**
+
+| # | Criterion | Status | Notes |
+|---|-----------|--------|-------|
+| 1 | Runway availability with R/A/G | PASS | OPEN=green, RESERVED/OCCUPIED=amber, BLOCKED/UNKNOWN=red via switch |
+| 2 | Next inbound callsign + phase | PASS | Reads tuple index 1 (callsign) + index 3 (phase); shows "No inbound" when empty |
+| 3 | Next outbound callsign + state | PASS | Reads tuple index 1 (callsign) + index 3 (state); shows "No outbound" when empty |
+| 4 | Top blocker if any | PASS | Priority: HOLD → BLOCKED runway → CRITICAL alert → pending decision; hidden when no blocker |
+| 5 | Commander reads air from DASH | PASS | Air Summary in full mode; Quick Status in compact mode; no AIR tab needed |
+| 6 | Reads from ARC_pub_airbaseUiSnapshot | PASS | All data sourced from snapshot (line 257); no raw ARC_pub_state.airbase access |
+| 7 | sqflint + compat scan pass | PASS | Clean |
