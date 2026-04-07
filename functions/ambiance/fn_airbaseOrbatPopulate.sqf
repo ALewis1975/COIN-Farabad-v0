@@ -61,7 +61,8 @@ private _fnSpawnUnitsAtMarker = {
         ["_classArray",  [],  [[]]],
         ["_count",       1,   [0]],
         ["_spreadRadius", 8,  [0]],
-        ["_dir",         0,   [0]]
+        ["_dir",         0,   [0]],
+        ["_groupName",   "",  [""]]
     ];
 
     private _pos = getMarkerPos _marker;
@@ -79,6 +80,7 @@ private _fnSpawnUnitsAtMarker = {
     if (_nCls == 0) exitWith { [] };
 
     private _grp = createGroup [west, true];
+    if (_groupName isNotEqualTo "") then { _grp setGroupIdGlobal [_groupName]; };
 
     for "_i" from 0 to (_count - 1) do {
         private _cls = _classArray select (_i mod _nCls);
@@ -132,7 +134,8 @@ private _fnSpawnUnitsAtPos = {
         ["_classArray",  [],      [[]]],
         ["_count",       1,       [0]],
         ["_spreadRadius", 8,      [0]],
-        ["_dir",         0,       [0]]
+        ["_dir",         0,       [0]],
+        ["_groupName",   "",      [""]]
     ];
 
     private _units = [];
@@ -145,6 +148,7 @@ private _fnSpawnUnitsAtPos = {
     private _north = if (count _pos > 2) then { _pos select 2 } else { _pos select 1 };
 
     private _grp = createGroup [west, true];
+    if (_groupName isNotEqualTo "") then { _grp setGroupIdGlobal [_groupName]; };
 
     for "_i" from 0 to (_count - 1) do {
         private _cls = _classArray select (_i mod _nCls);
@@ -196,7 +200,8 @@ private _fnSpawnVehicleAtMarker = {
         ["_driverClass",  "",  [""]],
         ["_cargoClasses", [],  [[]]],
         ["_offsetVec",    [0,0], [[]]],
-        ["_dir",          0,   [0]]
+        ["_dir",          0,   [0]],
+        ["_groupName",    "",  [""]]
     ];
 
     private _pos = getMarkerPos _marker;
@@ -222,6 +227,7 @@ private _fnSpawnVehicleAtMarker = {
     _veh setVelocity [0,0,0];
 
     private _grp   = createGroup [west, true];
+    if (_groupName isNotEqualTo "") then { _grp setGroupIdGlobal [_groupName]; };
     private _units = [];
 
     // Driver
@@ -262,7 +268,8 @@ private _fnSpawnVehicleAtMarker = {
 private _redtailUnits = [
     "ARC_m_base_avn_hq",
     ["rhsusf_airforce_security_force_rifleman", "rhsusf_airforce_security_force_rifleman", "rhsusf_airforce_security_force_rifleman", "rhsusf_airforce_security_force_rifleman"],
-    4, 5, 180
+    4, 5, 180,
+    "REDTAIL 6 / 332 AEW Staff"
 ] call _fnSpawnUnitsAtMarker;
 
 if (count _redtailUnits > 0) then {
@@ -282,7 +289,8 @@ private _portUnits = [
     "arc_m_base_civilian_terminal_01",
     ["FIR_USAF_GroundCrew_1", "FIR_USAF_GroundCrew_2_ABU",
      "FIR_USAF_GroundCrew_1", "FIR_USAF_GroundCrew_2_ABU"],
-    4, 8, 0
+    4, 8, 0,
+    "REDTAIL Aerial Port / 332 AMXS"
 ] call _fnSpawnUnitsAtMarker;
 
 if (count _portUnits > 0) then {
@@ -300,7 +308,8 @@ private _lifelineUnits = [
     "arc_m_base_theater_hospital",
     ["rhsusf_airforce_security_force_rifleman", "rhsusf_airforce_security_force_rifleman", "rhsusf_airforce_security_force_rifleman",
      "rhsusf_airforce_security_force_rifleman", "rhsusf_airforce_security_force_rifleman", "rhsusf_airforce_security_force_rifleman"],
-    6, 12, 90
+    6, 12, 90,
+    "LIFELINE / 332 EMDG Medical"
 ] call _fnSpawnUnitsAtMarker;
 
 if (count _lifelineUnits > 0) then {
@@ -320,7 +329,8 @@ private _amb1Result = [
     "rhsusf_airforce_security_force_rifleman",
     ["rhsusf_airforce_security_force_rifleman"],
     [25, 5],
-    270
+    270,
+    "LIFELINE Ambulance 1"
 ] call _fnSpawnVehicleAtMarker;
 
 private _amb2Result = [
@@ -329,7 +339,8 @@ private _amb2Result = [
     "rhsusf_airforce_security_force_rifleman",
     ["rhsusf_airforce_security_force_rifleman"],
     [25, -5],
-    270
+    270,
+    "LIFELINE Ambulance 2"
 ] call _fnSpawnVehicleAtMarker;
 
 {
@@ -352,7 +363,8 @@ if (count _allVehicles > 0) then {
 private _sentryFlightlineUnits = [
     "ARC_m_base_usaf_pilot_hangar",
     ["rhsusf_airforce_security_force_rifleman"],
-    4, 10, 180
+    4, 10, 180,
+    "SENTRY Flightline / 332 ESFG"
 ] call _fnSpawnUnitsAtMarker;
 
 if (count _sentryFlightlineUnits > 0) then {
@@ -369,7 +381,8 @@ _allUnits append _sentryFlightlineUnits;
 private _qrfUnits = [
     "arc_m_base_police_hq",
     ["rhsusf_airforce_security_force_rifleman"],
-    5, 8, 0
+    5, 8, 0,
+    "SENTRY QRF / 332 ESFG"
 ] call _fnSpawnUnitsAtMarker;
 
 if (count _qrfUnits > 0) then {
@@ -384,7 +397,8 @@ private _qrfVehResult = [
     "",
     [],
     [12, 0],
-    0
+    0,
+    "SENTRY QRF Vic"
 ] call _fnSpawnVehicleAtMarker;
 
 if (!(isNull (_qrfVehResult select 0))) then {
@@ -417,7 +431,8 @@ if (!(_cavHQPos isEqualTo [0,0,0])) then {
     private _troopAUnits = [
         _troopAPos,
         _cavClassPool,
-        5, 7, 270
+        5, 7, 270,
+        "THUNDER / 1-73 CAV Troop A"
     ] call _fnSpawnUnitsAtPos;
 
     if (count _troopAUnits > 0) then {
@@ -433,7 +448,8 @@ if (!(_cavHQPos isEqualTo [0,0,0])) then {
     private _troopBUnits = [
         _troopBPos,
         _cavClassPool,
-        5, 7, 90
+        5, 7, 90,
+        "THUNDER / 1-73 CAV Troop B"
     ] call _fnSpawnUnitsAtPos;
 
     if (count _troopBUnits > 0) then {
@@ -453,7 +469,8 @@ private _dustoffUnits = [
     "arc_rotary_pad_6",
     ["rhsusf_army_ocp_helipilot", "rhsusf_army_ocp_helipilot",
      "rhsusf_army_ocp_helicrew",  "rhsusf_army_ocp_helicrew"],
-    4, 6, 0
+    4, 6, 0,
+    "DUSTOFF / 159 MEDEVAC Crew"
 ] call _fnSpawnUnitsAtMarker;
 
 if (count _dustoffUnits > 0) then {

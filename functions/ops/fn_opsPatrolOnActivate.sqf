@@ -217,6 +217,7 @@ if (_spawnContacts && {!(_zone in ["Airbase", "GreenZone"])}) then
         };
 
         private _grp = createGroup east;
+        _grp setGroupIdGlobal [format ["VIPER Patrol %1-%2", _taskId, _g]];
 
         for "_i" from 1 to _grpSize do
         {

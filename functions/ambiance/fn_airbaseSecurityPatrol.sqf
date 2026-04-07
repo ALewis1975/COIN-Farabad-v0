@@ -31,6 +31,7 @@ if (_markers isEqualTo []) exitWith {false};
 if (isNull (driver _vehicle)) then
 {
     private _g = createGroup west;
+    _g setGroupIdGlobal ["SENTRY Patrol / 332 ESFG"];
     private _d = _g createUnit ["rhsusf_airforce_security_force_rifleman", getPosATL _vehicle, [], 0, "NONE"];
     _vehicle lock false;
     unassignVehicle _d;

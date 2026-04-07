@@ -97,6 +97,7 @@ _veh lock 0;
 
 // Civilian driver
 private _grp = createGroup [civilian, true];
+_grp setGroupIdGlobal ["CIV Traffic"];
 private _drv = _grp createUnit [_driverCls, _pos, [], 0, "NONE"];
 if (isNull _drv) exitWith
 {

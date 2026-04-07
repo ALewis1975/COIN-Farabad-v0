@@ -66,6 +66,7 @@ _influenceDelta = (_influenceDelta max 0.01) min 0.20;
 private _elderClasses = ["C_man_1", "C_man_polo_1_F", "C_man_polo_4_F", "C_man_polo_6_F"];
 private _elderClass = _elderClasses select (floor (random (count _elderClasses)));
 private _elderGrp   = createGroup [civilian, true];
+_elderGrp setGroupIdGlobal [format ["KLE Elder %1", _taskId]];
 private _elder      = _elderGrp createUnit [_elderClass, _pos, [], 2, "NONE"];
 
 if (isNull _elder) exitWith

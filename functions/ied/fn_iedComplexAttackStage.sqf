@@ -74,6 +74,7 @@ _stagePos resize 3;
 
 // Spawn secondary ambush group (OPFOR/east)
 private _grp = createGroup [east, true];
+_grp setGroupIdGlobal [format ["COBRA Ambush %1", _threatId]];
 private _unitCount = 3 + (floor (random 2)); // 3 or 4
 
 private _unitClasses = [

@@ -188,6 +188,7 @@ if (_p isEqualTo []) then { _p = +_center; _p resize 3; };
         if (_kind isEqualTo "CIV_MEET") then
         {
             private _grp = createGroup [civilian, true];
+            _grp setGroupIdGlobal [format ["CIV Liaison %1", _taskId]];
             // Prefer 3CB Takistani Civilians (liaison) pool when available.
             private _liaPool = missionNamespace getVariable ["ARC_liaisonClassPool", []];
             if (!(_liaPool isEqualType [])) then { _liaPool = []; };

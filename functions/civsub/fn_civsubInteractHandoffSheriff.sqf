@@ -232,6 +232,7 @@ _transferDelay = (_transferDelay max 30) min 3600;
             _grp = createGroup [civilian, true];
             [_u] joinSilent _grp;
         };
+        _grp setGroupIdGlobal ["CIV Detainee"];
 
         // Keep it tight to avoid weird behavior (detainee should stay local)
         [_grp, _holdPos, _campR, [], false, true, 3, false] spawn lambs_wp_fnc_taskGarrison;

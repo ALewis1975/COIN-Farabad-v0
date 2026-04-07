@@ -148,6 +148,7 @@ private _spawnDelay = 60 + (floor (random 60));
 
     // Spawn driver
     private _grp = createGroup [east, true];
+    _grp setGroupIdGlobal [format ["COBRA VBIED %1", _threatId]];
     private _driver = _grp createUnit ["O_Soldier_F", _sp, [], 0, "NONE"];
     _driver moveInDriver _veh;
     _driver setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];

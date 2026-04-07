@@ -69,6 +69,9 @@ private _classIdx = 0;
 
     if (isNull _unit) then { continue; };
 
+    // Human-readable group designation for Zeus/debug (ORBAT: MAYOR / Base Support).
+    _grp setGroupIdGlobal [format ["MAYOR Base %1", _role]];
+
     _unit setDir _dir;
     _unit allowDamage false;
     _unit setVariable ["ARC_worldPersonnel", true, true];
