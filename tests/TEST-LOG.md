@@ -4619,3 +4619,50 @@ python3 scripts/dev/validate_marker_index.py
 | 1 | Local MP smoke | BLOCKED | No Arma 3 runtime in CI |
 | 2 | Dedicated server | BLOCKED | No dedicated server in CI |
 | 3 | JIP smoke | BLOCKED | Deferred to pre-dedicated validation |
+
+---
+
+## 2026-04-07T20:08Z — Console Architecture Refactor Plan (docs/architecture/Farabad_Console_Refactor_Plan.md)
+
+**Branch:** copilot/refactor-farabad-console  
+**Mode:** F — Documentation-Only Changes  
+**Commit:** (this session)
+
+### Scope
+
+Created the Farabad Console Refactor Plan document covering:
+- Console-wide UX principles (8 non-negotiable rules)
+- Root cause analysis of AIR/TOWER screenshot defects (15 identified problems across shell/content/data layers)
+- Target architecture with 5 declared layout regions (A–E)
+- Tab layout declaration model replacing per-tab special-casing
+- Console VM expansion plan (4 new sections: airbase, personnel, handoff, intelFeed)
+- 7 shared presentation helpers specification
+- 6-PR implementation sequence with per-PR scope, acceptance criteria, and LOC estimates
+- IDC allocation plan (78140 reserved for Region C visual panel)
+- Risk assessment (5 risks with mitigations)
+- Validation protocol (static + visual + behavioral + test-log gates)
+
+### Static checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | No merge markers | `git diff --check` | PASS | Clean |
+| 2 | Document structure | Manual review | PASS | All 11 sections + 2 appendices present |
+| 3 | IDC collision check | `rg "78140" config/CfgDialogs.hpp` | PASS | IDC 78140 not currently allocated |
+| 4 | Existing doc consistency | Cross-ref with Console_VM_v1.md, Console_Tab_Migration_Plan.md | PASS | No contradictions; relationships documented in §10 |
+
+### Acceptance criteria
+
+| # | Criterion | Result | Notes |
+|---|-----------|--------|-------|
+| 1 | Plan covers all 9 console tabs | PASS | DASH, BOARDS, INTEL, OPS, AIR, HANDOFF, CMD, HQ, S1 all addressed |
+| 2 | PR breakdown is sequenced with dependencies | PASS | 6 PRs in dependency order with scope guards |
+| 3 | Root cause analysis matches screenshot evidence | PASS | 5 visible defects mapped to 15 root causes |
+| 4 | Existing contracts preserved (no behavior changes in plan) | PASS | §1.2 hard non-goals explicit; §10 relationship table |
+| 5 | Supersedes AIR-only scope explicitly | PASS | Header + §10 declare AIR_TOWER_Vision_Architecture_Plan.md superseded for scope |
+
+### Runtime validation
+
+| # | Check | Status | Notes |
+|---|-------|--------|-------|
+| 1 | No runtime validation required | N/A | Documentation-only change |
