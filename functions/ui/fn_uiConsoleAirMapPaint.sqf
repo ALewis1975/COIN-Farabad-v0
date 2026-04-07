@@ -21,6 +21,11 @@ if (isNull _display) exitWith {false};
 private _ctrlMap = _display displayCtrl 78137;
 if (isNull _ctrlMap) exitWith {false};
 
+// Phase 7 tuple minimum length including posX/posY at indices 7-8.
+private _IDX_POS_X = 7;
+private _IDX_POS_Y = 8;
+private _TUPLE_MIN_POS_LEN = 9;
+
 // --- Read snapshot ---
 private _airSnap = missionNamespace getVariable ["ARC_pub_airbaseUiSnapshot", []];
 if (!(_airSnap isEqualType [])) then { _airSnap = []; };
@@ -56,7 +61,7 @@ private _newMarkers = [];
 
 // --- Runway center marker ---
 private _rwyMkr = format ["ARC_airmap_rwy_%1", diag_tickTime];
-createMarkerLocal [_rwyMkr, [_centerPos select 0, _centerPos select 1]];
+createMarkerLocal [_rwyMkr, _centerPos];
 _rwyMkr setMarkerTypeLocal "mil_flag";
 _rwyMkr setMarkerColorLocal "ColorWhite";
 _rwyMkr setMarkerTextLocal "RWY";
@@ -68,12 +73,12 @@ private _arrIdx = 0;
 private _centerTarget = [];
 {
     if !(_x isEqualType []) then { continue; };
-    if ((count _x) < 9) then { _arrIdx = _arrIdx + 1; continue; };
+    if ((count _x) < _TUPLE_MIN_POS_LEN) then { _arrIdx = _arrIdx + 1; continue; };
     private _fid = _x param [0, ""];
     private _callsign = _x param [1, _fid];
     private _phase = _x param [3, ""];
-    private _posX = _x param [7, 0];
-    private _posY = _x param [8, 0];
+    private _posX = _x param [_IDX_POS_X, 0];
+    private _posY = _x param [_IDX_POS_Y, 0];
     if (!(_posX isEqualType 0)) then { _posX = 0; };
     if (!(_posY isEqualType 0)) then { _posY = 0; };
 
@@ -95,12 +100,12 @@ private _centerTarget = [];
 private _depIdx = 0;
 {
     if !(_x isEqualType []) then { continue; };
-    if ((count _x) < 9) then { _depIdx = _depIdx + 1; continue; };
+    if ((count _x) < _TUPLE_MIN_POS_LEN) then { _depIdx = _depIdx + 1; continue; };
     private _fid = _x param [0, ""];
     private _callsign = _x param [1, _fid];
     private _state = _x param [3, ""];
-    private _posX = _x param [7, 0];
-    private _posY = _x param [8, 0];
+    private _posX = _x param [_IDX_POS_X, 0];
+    private _posY = _x param [_IDX_POS_Y, 0];
     if (!(_posX isEqualType 0)) then { _posX = 0; };
     if (!(_posY isEqualType 0)) then { _posY = 0; };
 
