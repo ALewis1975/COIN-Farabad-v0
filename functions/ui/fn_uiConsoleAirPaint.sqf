@@ -250,6 +250,17 @@ uiNamespace setVariable ["ARC_console_airSubmode", _airSubmode];
 private _nextMode = [_airSubmode, _canAirControl, _debugAir] call _cycleModes;
 private _freshnessText = if (_stateUpdatedAt < 0) then { "Snapshot unavailable" } else { format ["Updated %1", [_stateUpdatedAt] call _fmtAgo] };
 
+// Phase 5: read freshnessState early for degraded warning text.
+private _earlyFreshnessState = [_snapshot, "freshnessState", "UNKNOWN"] call _getPair;
+if (!(_earlyFreshnessState isEqualType "")) then { _earlyFreshnessState = "UNKNOWN"; };
+if (toUpper _earlyFreshnessState isEqualTo "DEGRADED") then {
+    _freshnessText = _freshnessText + " — DEGRADED: data may be unreliable";
+} else {
+    if (toUpper _earlyFreshnessState isEqualTo "STALE") then {
+        _freshnessText = _freshnessText + " — STALE";
+    };
+};
+
 
 // -----------------------------------------------------------------------
 // Phase 1 scaffold: populate AIR-dedicated status strip controls (78131–78136)

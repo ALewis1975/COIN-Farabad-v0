@@ -786,6 +786,27 @@ private _casTiming = [
     ["state", if (_casreqSnapshot isEqualType []) then { [_casreqSnapshot, "state", ""] call _metaValue } else { "" }]
 ];
 
+// Phase 5: compute real snapshot freshness from last airbase tick timestamp.
+// Thresholds are configurable; defaults: FRESH < 15s, STALE < 60s, DEGRADED >= 60s or missing.
+private _freshnessThresholdS = missionNamespace getVariable ["airbase_v1_freshness_threshold_s", 15];
+if (!(_freshnessThresholdS isEqualType 0) || { _freshnessThresholdS <= 0 }) then { _freshnessThresholdS = 15; };
+private _degradedThresholdS = missionNamespace getVariable ["airbase_v1_degraded_threshold_s", 60];
+if (!(_degradedThresholdS isEqualType 0) || { _degradedThresholdS <= 0 }) then { _degradedThresholdS = 60; };
+
+private _lastTickAt = missionNamespace getVariable ["airbase_v1_lastTickAt", -1];
+if (!(_lastTickAt isEqualType 0)) then { _lastTickAt = -1; };
+private _snapshotAgeS = if (_lastTickAt < 0) then { _degradedThresholdS + 1 } else { (serverTime - _lastTickAt) max 0 };
+private _freshnessState = if (_lastTickAt < 0) then {
+    "DEGRADED"
+} else {
+    if (_snapshotAgeS < _freshnessThresholdS) then { "FRESH" } else {
+        if (_snapshotAgeS < _degradedThresholdS) then { "STALE" } else { "DEGRADED" }
+    }
+};
+
+// Runway age: seconds since last runway state change (approximated by snapshot age).
+private _runwayAge = round _snapshotAgeS;
+
 private _uiDebugEnabled = missionNamespace getVariable ["ARC_debugInspectorEnabled", false];
 if (!(_uiDebugEnabled isEqualType true) && !(_uiDebugEnabled isEqualType false)) then { _uiDebugEnabled = false; };
 private _uiDebug = [];
@@ -800,7 +821,7 @@ if (_uiDebugEnabled) then {
 
     _uiDebug = [
         ["snapshotRev", 0],
-        ["snapshotAge", 0],
+        ["snapshotAge", round _snapshotAgeS],
         ["blockedRouteCount", count _blockedRouteTailView],
         ["blockedRouteReason", _blockedRouteLatestReason],
         ["blockedRouteSource", _blockedRouteLatestSourceId],
@@ -818,7 +839,7 @@ private _airbaseUiSnapshot = [
     ["v", 1],
     ["rev", 0],
     ["updatedAt", serverTime],
-    ["freshnessState", "FRESH"],
+    ["freshnessState", _freshnessState],
     ["runway", [
         ["state", _runwayState],
         ["ownerCallsign", _runwayOwnerCallsign],
@@ -826,7 +847,7 @@ private _airbaseUiSnapshot = [
         ["ownerDisplay", _runwayOwnerDisplay],
         ["activeMovement", _runwayMovement],
         ["holdState", _holdDepartures],
-        ["age", 0]
+        ["age", _runwayAge]
     ]],
     ["alerts", _uiAlerts],
     ["decisionQueue", _uiDecisionQueue],

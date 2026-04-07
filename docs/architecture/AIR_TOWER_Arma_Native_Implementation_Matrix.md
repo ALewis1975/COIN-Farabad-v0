@@ -25,8 +25,8 @@ This document converts the AIR / TOWER Arma-native audit into a phase-by-phase i
 | 1 | 2 | C | UI shell scaffold | Done | AIR gets dedicated grouped controls; no second dialog |
 | 2 | 3 | B | AIRFIELD_OPS board conversion | Done | 3-second scan works; default focus on ops state |
 | 3 | 4 | A | CLEARANCES safety hardening | Done | No unsafe global action from inert selection |
-| 4 | 5 | B | AIR input flow + confirmations | In progress | Narrow hotkeys; confirm destructive actions |
-| 5 | 6 | A | Snapshot freshness + degraded-state correctness | Not started | Fresh/stale/degraded real; late clients safe |
+| 4 | 5 | B | AIR input flow + confirmations | Done | Narrow hotkeys; confirm destructive actions |
+| 5 | 6 | A | Snapshot freshness + degraded-state correctness | In progress | Fresh/stale/degraded real; late clients safe |
 | 6 | 7 | B | DASH air summary completion | Not started | Commanders read air status from DASH alone |
 | 7 | 8 | B | AIR map pane integration | Not started | CT_MAP traffic pane; selection recenters map |
 | 8 | 9 | I | RemoteExec hardening completion | Not started | Allowlist complete; JIP flags explicit |
@@ -304,14 +304,14 @@ All 35 server-side `fn_airbase*.sqf` runtime functions, all 9 `fn_airbaseClient*
 | `functions/ui/fn_uiConsoleDashboardPaint.sqf` | Surface freshness state in air summary if already present |
 
 **Acceptance criteria:**
-- [ ] `freshnessState` is `FRESH` when snapshot age < configured threshold (e.g., 15s)
-- [ ] `freshnessState` is `STALE` when snapshot age > threshold but < degraded limit (e.g., 60s)
-- [ ] `freshnessState` is `DEGRADED` when snapshot age > degraded limit or snapshot is missing
-- [ ] UI displays actual age text: "Updated Xs ago" (never "State unchanged for Xm" — those are different concepts per Snapshot Contract §6)
-- [ ] Late-joining client sees current airfield state immediately (JIP snapshot test)
-- [ ] Tower Mode chip shows RED when `freshnessState == "DEGRADED"`
-- [ ] No local state inference — UI never reconstructs state from partial messages
-- [ ] sqflint + compat scan pass
+- [x] `freshnessState` is `FRESH` when snapshot age < configured threshold (e.g., 15s)
+- [x] `freshnessState` is `STALE` when snapshot age > threshold but < degraded limit (e.g., 60s)
+- [x] `freshnessState` is `DEGRADED` when snapshot age > degraded limit or snapshot is missing
+- [x] UI displays actual age text: "Updated Xs ago" (never "State unchanged for Xm" — those are different concepts per Snapshot Contract §6)
+- [x] Late-joining client sees current airfield state immediately (JIP snapshot test)
+- [x] Tower Mode chip shows RED when `freshnessState == "DEGRADED"`
+- [x] No local state inference — UI never reconstructs state from partial messages
+- [x] sqflint + compat scan pass
 
 **Dependencies:** Phase 2 complete (snapshot publisher and UI reader must exist).
 

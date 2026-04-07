@@ -4356,3 +4356,58 @@ python3 scripts/dev/validate_marker_index.py
 | 8 | Confirmation cleared on tab switch | PASS | `fn_uiConsoleRefresh` clears state when `_tab != "AIR"` |
 | 9 | Confirmation cleared on dialog close | PASS | `fn_uiConsoleOnUnload` clears all confirm vars |
 | 10 | No state migration changes | PASS | Validator confirms 3 scenarios |
+
+---
+
+### Phase 5 — Snapshot freshness + degraded-state correctness (2026-04-07)
+
+**Date/Time:** 2026-04-07T15:42:00Z
+**Branch/Commit:** copilot/develop-task-decomposition-plan (pending commit for Phase 5)
+
+**Scenario:** Phase 5 implementation — replace placeholder FRESH with real computed freshness; add degraded warning; surface freshness on DASH.
+
+**Changed files:**
+- `functions/ambiance/fn_airbaseTick.sqf` — store `airbase_v1_lastTickAt` timestamp on each tick
+- `functions/core/fn_publicBroadcastState.sqf` — compute `freshnessState` from `serverTime` vs last tick; compute `runway.age`; configurable thresholds
+- `functions/ui/fn_uiConsoleAirPaint.sqf` — append STALE/DEGRADED warning to freshness text
+- `functions/ui/fn_uiConsoleDashboardPaint.sqf` — show freshness state in Air Summary (full + compact modes)
+- `docs/architecture/AIR_TOWER_Arma_Native_Implementation_Matrix.md` — Phase 4 → Done, Phase 5 → In progress, acceptance criteria checked
+
+**Commands run:**
+```bash
+python3 scripts/dev/sqflint_compat_scan.py --strict \
+    functions/ambiance/fn_airbaseTick.sqf \
+    functions/core/fn_publicBroadcastState.sqf \
+    functions/ui/fn_uiConsoleAirPaint.sqf \
+    functions/ui/fn_uiConsoleDashboardPaint.sqf
+sqflint -e w <each file above>
+python3 scripts/dev/validate_state_migrations.py
+python3 scripts/dev/validate_marker_index.py
+```
+
+**Results:**
+
+| # | Check | Result | Notes |
+|---|-------|--------|-------|
+| 1 | Compat scan --strict (4 files) | PASS | 0 pattern matches |
+| 2 | sqflint fn_airbaseTick.sqf | PASS | exit 0; pre-existing hashmap warnings only |
+| 3 | sqflint fn_publicBroadcastState.sqf | PASS | exit 0, clean (moved freshness above debug block to fix scope) |
+| 4 | sqflint fn_uiConsoleAirPaint.sqf | PASS | exit 0, clean |
+| 5 | sqflint fn_uiConsoleDashboardPaint.sqf | PASS | exit 0, clean |
+| 6 | State migration validator | PASS | 3 scenarios |
+| 7 | Marker index validator | PASS | 177 markers all modes |
+
+**Acceptance criteria (Phase 5):**
+
+| # | Criterion | Status | Notes |
+|---|-----------|--------|-------|
+| 1 | FRESH when age < threshold | PASS | Computed from serverTime - lastTickAt; threshold configurable (default 15s) |
+| 2 | STALE when threshold < age < degraded | PASS | Second tier in freshness computation |
+| 3 | DEGRADED when age >= degraded or missing | PASS | Missing tick timestamp → forced DEGRADED |
+| 4 | "Updated Xs ago" text (not "State unchanged") | PASS | `_fmtAgo` helper formats as "Updated Xs ago" / "Updated Xm Ys ago" |
+| 5 | JIP snapshot safe | PASS | `setVariable [..., true]` broadcast + `_lastTickAt` replicated |
+| 6 | Tower chip RED when DEGRADED | PASS | Pre-existing Phase 1 mapping: DEGRADED → RED |
+| 7 | No local state inference | PASS | All freshness computed server-side; UI only reads published state |
+| 8 | sqflint + compat scan pass | PASS | All 4 files clean |
+| 9 | DASH shows freshness state | PASS | Both full and compact Quick Status modes |
+| 10 | Thresholds configurable | PASS | `airbase_v1_freshness_threshold_s`, `airbase_v1_degraded_threshold_s` |

@@ -26,6 +26,8 @@ if (!([_rt, "initialized", false] call _fnHmGet)) exitWith {};
 ["tick", false] call ARC_fnc_airbaseRunwayLockSweep;
 
 private _nowTs = serverTime;
+// Phase 5: publish last tick time for snapshot freshness computation.
+missionNamespace setVariable ["airbase_v1_lastTickAt", _nowTs, true];
 private _tickS = missionNamespace getVariable ["airbase_v1_tick_s", 2];
 
 private _center = [_rt, "bubbleCenter", getMarkerPos "mkr_airbaseCenter"] call _fnHmGet;

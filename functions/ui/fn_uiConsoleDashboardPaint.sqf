@@ -268,6 +268,9 @@ private _airRunwayState = [_airRunway, "state", "UNKNOWN"] call _getPair;
 private _airNextArrival = if ((count _airArrivals) > 0) then { _airArrivals select 0 } else { [] };
 private _airNextDeparture = if ((count _airDepartures) > 0) then { _airDepartures select 0 } else { [] };
 private _airAlertLabel = if ((count _airAlerts) > 0) then { (_airAlerts select 0) param [0, "NONE"] } else { "NONE" };
+// Phase 5: read freshness state from snapshot for dashboard display.
+private _airFreshnessState = [_airSnap, "freshnessState", "UNKNOWN"] call _getPair;
+if (!(_airFreshnessState isEqualType "")) then { _airFreshnessState = "UNKNOWN"; };
 private _airAlertColor = _tshGreen;
 if ((count _airAlerts) > 0) then {
     private _severity = toUpper ((_airAlerts select 0) param [1, "INFO"]);
@@ -354,12 +357,15 @@ private _secIntel    = format [
     _lastIntel
 ];
 private _secUnits = "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Unit Availability</t><br/>" + _unitsBlock + "<br/><br/>";
-private _secAir = format [
+private _secAir = "";
+private _airFreshnessColor = if ((toUpper _airFreshnessState) isEqualTo "FRESH") then { _tshGreen } else { if ((toUpper _airFreshnessState) isEqualTo "STALE") then { _tshAmber } else { _tshRed } };
+private _airFreshnessLine = format ["<t color='#DDDDDD'>Data:</t> <t color='%1'>%2</t><br/>", _airFreshnessColor, _airFreshnessState];
+_secAir = format [
     "<t size='1.0' font='PuristaMedium' color='%1'>Air Summary</t><br/>" +
     "<t color='#DDDDDD'>Runway:</t> <t color='%2'>%3</t><br/>" +
     "<t color='#DDDDDD'>Next inbound:</t> <t color='%4'>%5</t><br/>" +
     "<t color='#DDDDDD'>Next outbound:</t> <t color='%4'>%6</t><br/>" +
-    "<t color='#DDDDDD'>Air alerts:</t> <t color='%7'>%8</t><br/><br/>",
+    "<t color='#DDDDDD'>Air alerts:</t> <t color='%7'>%8</t><br/>",
     _tshCoyote,
     if ((toUpper _airRunwayState) in ["OPEN"]) then { _tshGreen } else { if ((toUpper _airRunwayState) in ["RESERVED"]) then { _tshAmber } else { _tshRed } },
     _airRunwayState,
@@ -368,7 +374,7 @@ private _secAir = format [
     if (_airNextDeparture isEqualType [] && { (count _airNextDeparture) >= 2 }) then { _airNextDeparture param [1, "NONE"] } else { "NONE" },
     _airAlertColor,
     _airAlertLabel
-];
+] + _airFreshnessLine + "<br/>";
 
 // Next Actions: workflow coaching / blocker visibility
 private _secNext = "";
@@ -472,6 +478,7 @@ if (!isNull _ctrlDetailsGrp && { !isNull _ctrlDetails }) then
             if (_airNextArrival isEqualType [] && { (count _airNextArrival) >= 2 }) then { _airNextArrival param [1, "NONE"] } else { "NONE" },
             if (_airNextDeparture isEqualType [] && { (count _airNextDeparture) >= 2 }) then { _airNextDeparture param [1, "NONE"] } else { "NONE" }
         ] +
+        format ["<t size='0.9' color='#BDBDBD'>Air data:</t> <t size='0.9' color='%1'>%2</t><br/>", _airFreshnessColor, _airFreshnessState] +
         format ["<t size='0.9' color='#BDBDBD'>Unit reports:</t> <t size='0.9'>%1</t><br/>", count _statusRows] +
         format ["<t size='0.9' color='#BDBDBD'>Intel leads:</t> <t size='0.9'>%1</t><br/>", count _leadPool] +
         format ["<br/><t size='1.0' font='PuristaMedium' color='%1'>Quick Reference</t><br/>", _tshCoyote] +
