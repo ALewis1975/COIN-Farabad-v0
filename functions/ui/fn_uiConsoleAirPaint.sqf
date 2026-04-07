@@ -250,13 +250,13 @@ uiNamespace setVariable ["ARC_console_airSubmode", _airSubmode];
 private _nextMode = [_airSubmode, _canAirControl, _debugAir] call _cycleModes;
 private _freshnessText = if (_stateUpdatedAt < 0) then { "Snapshot unavailable" } else { format ["Updated %1", [_stateUpdatedAt] call _fmtAgo] };
 
-// Phase 5: read freshnessState early for degraded warning text.
-private _earlyFreshnessState = [_snapshot, "freshnessState", "UNKNOWN"] call _getPair;
-if (!(_earlyFreshnessState isEqualType "")) then { _earlyFreshnessState = "UNKNOWN"; };
-if (toUpper _earlyFreshnessState isEqualTo "DEGRADED") then {
+// Phase 5: read freshnessState once — reused for warning text and tower chip below.
+private _freshnessState = [_snapshot, "freshnessState", "UNKNOWN"] call _getPair;
+if (!(_freshnessState isEqualType "")) then { _freshnessState = "UNKNOWN"; };
+if (toUpper _freshnessState isEqualTo "DEGRADED") then {
     _freshnessText = _freshnessText + " — DEGRADED: data may be unreliable";
 } else {
-    if (toUpper _earlyFreshnessState isEqualTo "STALE") then {
+    if (toUpper _freshnessState isEqualTo "STALE") then {
         _freshnessText = _freshnessText + " — STALE";
     };
 };
@@ -315,9 +315,7 @@ if (_holdDepartures) then { _depChipLabel = _depChipLabel + " HOLD"; };
 private _depChipText = format ["<t size='0.85' color='%1'>&#x25CF;</t> <t size='0.85'>DEP: %2</t>", _depChipColor, _depChipLabel];
 if (!isNull _airChipDepartures) then { _airChipDepartures ctrlSetStructuredText parseText _depChipText; };
 
-// --- Tower Mode chip ---
-private _freshnessState = [_snapshot, "freshnessState", "UNKNOWN"] call _getPair;
-if (!(_freshnessState isEqualType "")) then { _freshnessState = "UNKNOWN"; };
+// --- Tower Mode chip --- (uses _freshnessState from Phase 5 block above)
 private _towerModeStatus = switch (toUpper _freshnessState) do {
     case "FRESH": { "GREEN" };
     case "STALE": { "AMBER" };

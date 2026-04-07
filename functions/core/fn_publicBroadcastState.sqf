@@ -795,6 +795,7 @@ if (!(_degradedThresholdS isEqualType 0) || { _degradedThresholdS <= 0 }) then {
 
 private _lastTickAt = missionNamespace getVariable ["airbase_v1_lastTickAt", -1];
 if (!(_lastTickAt isEqualType 0)) then { _lastTickAt = -1; };
+// When no tick has ever run (_lastTickAt < 0), force age past the degraded limit to guarantee DEGRADED state.
 private _snapshotAgeS = if (_lastTickAt < 0) then { _degradedThresholdS + 1 } else { (serverTime - _lastTickAt) max 0 };
 private _freshnessState = if (_lastTickAt < 0) then {
     "DEGRADED"

@@ -4362,7 +4362,7 @@ python3 scripts/dev/validate_marker_index.py
 ### Phase 5 — Snapshot freshness + degraded-state correctness (2026-04-07)
 
 **Date/Time:** 2026-04-07T15:42:00Z
-**Branch/Commit:** copilot/develop-task-decomposition-plan (pending commit for Phase 5)
+**Branch/Commit:** copilot/develop-task-decomposition-plan @ d851c90
 
 **Scenario:** Phase 5 implementation — replace placeholder FRESH with real computed freshness; add degraded warning; surface freshness on DASH.
 
