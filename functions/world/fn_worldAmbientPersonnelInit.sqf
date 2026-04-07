@@ -54,7 +54,7 @@ private _spawned = 0;
 private _classIdx = 0;
 
 {
-    _x params ["_mkr", "_role", "_anim"];
+    _x params ["_mkr", "_role"];
 
     private _pos = getMarkerPos _mkr;
     if (_pos isEqualTo [0,0,0]) then { continue; };

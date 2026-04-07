@@ -37,8 +37,7 @@ if (_callerOwner > 2) exitWith
 };
 
 params [
-    ["_now", 0],
-    ["_dt", 0]
+    ["_now", 0]
 ];
 
 private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
@@ -79,6 +78,7 @@ private _fn_applyRouteWps = {
         ["_forcedPos", []]
     ];
     if (isNull _grp) exitWith {};
+    _destRad;
 
     // Clear any existing waypoints.
     while { (count waypoints _grp) > 0 } do { deleteWaypoint ((waypoints _grp) select 0); };
@@ -334,7 +334,7 @@ if ((count _nids) isEqualTo 0) then
     {
         // Keep lead/tail ordering stable using the stored spawn index.
         private _pairs = _existing apply { [ _x getVariable ["ARC_convoyIndex", 999], _x ] };
-        _pairs = [_pairs, [], { _x select 0 }, "ASCEND"] call BIS_fnc_sortBy;
+        _pairs = [_pairs, [], compile "(_x select 0)", "ASCEND"] call BIS_fnc_sortBy;
         _existing = _pairs apply { _x select 1 };
 
         private _ids = _existing apply { netId _x };
@@ -355,12 +355,10 @@ if ((count _nids) isEqualTo 0) then
     // Hard lock: prevents double convoy spawns even if state gets rebuilt mid-spawn.
     private _lock = missionNamespace getVariable ["ARC_convoySpawnLock", []];
     private _lockTask = "";
-    private _lockIdExisting = "";
     private _lockAt = -1;
     if (_lock isEqualType [] && { (count _lock) >= 3 }) then
     {
         _lockTask = _lock select 0;
-        _lockIdExisting = _lock select 1;
         _lockAt = _lock select 2;
     };
 
@@ -894,7 +892,7 @@ private _fn_bridgeAssistPoints = {
 
     private _pts = [];
     {
-        _x params ["_t", "_p"];
+        private _p = _x select 1;
         if ((count _pts) isEqualTo 0 || { (_p distance2D (_pts select ((count _pts) - 1))) > 8 }) then
         {
             _pts pushBack _p;
@@ -968,7 +966,7 @@ private _fn_normalizeConvoyGroups = {
     _gLead
 };
 
-private _leadGrp = [_vehicles, _lead] call _fn_normalizeConvoyGroups;
+[_vehicles, _lead] call _fn_normalizeConvoyGroups;
 
 // Start condition: friendly players near convoy start or lead vehicle.
 private _startedAt = ["activeConvoyStartedAt", -1] call ARC_fnc_stateGet;
@@ -1995,8 +1993,6 @@ if (_fRec && { (count _aliveVeh) >= 2 }
 
         _gapTrigger = ((_spacing max 20) * 3.0) max _bridgeGapFloor;
     };
-
-    private _ldrU = leader _grpW;
 
     for "_i" from 1 to ((count _aliveVeh) - 1) do
     {

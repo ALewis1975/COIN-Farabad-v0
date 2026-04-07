@@ -80,7 +80,8 @@ if (!(_patrolRings isEqualTo createHashMap)) then {
     private _nearPos = [];
     private _nearD   = 1e12;
     {
-        _x params [["_lid", "", [""]], ["_ldisplay", "", [""]], ["_lpos", [], [[]]]];
+        private _lid = _x select 0;
+        private _lpos = if (_x isEqualType [] && { (count _x) >= 3 }) then { _x select 2 } else { [] };
         if ((count _lpos) >= 2) then {
             private _d = _posATL distance2D _lpos;
             if (_d < _nearD && {_d < 600}) then {

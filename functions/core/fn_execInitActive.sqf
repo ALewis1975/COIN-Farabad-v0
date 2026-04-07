@@ -250,7 +250,7 @@ if (_kind isEqualTo "VBIED_VEHICLE") then
     if (_failOnKilled) then
     {
         _obj addEventHandler ["Killed", {
-            params ["_killed", "_killer", "_instigator", "_useEffects"];
+            params ["_killed"];
 
             // TOC controls closure; recommend failure.
             // Special case: if this was an IED objective that detonated while no friendly element
@@ -1723,7 +1723,7 @@ if (_showSpawnMarker) then
         ["activeConvoyRouteLenM",    -1] call ARC_fnc_stateSet;
 
         private _routeStart = if (_linkupPos isEqualType [] && { (count _linkupPos) >= 2 }) then { _linkupPos } else { _spawnPos };
-        private _routeEnd   = if (_destWp isEqualType [] && { (count _destWp) >= 2 }) then { _destWp } else { _destPos };
+        private _routeEnd   = if (_destWp isEqualType [] && { (count _destWp) >= 2 }) then { _destWp } else { _pos };
 
         // Airbase ingress control:
         // For inbound convoys whose destination is inside the Airbase zone, force the route to pass through the
@@ -1778,6 +1778,21 @@ if (_showSpawnMarker) then
             private _diagAStarSucceeded = false;
             private _diagFallbackUsed = false;
 
+            private _fn_routeLen = {
+                params ["_pts"];
+
+                private _len = 0;
+                if (_pts isEqualType [] && { (count _pts) >= 2 }) then
+                {
+                    for "_li" from 1 to ((count _pts) - 1) do
+                    {
+                        _len = _len + ((_pts select (_li - 1)) distance2D (_pts select _li));
+                    };
+                };
+
+                _len
+            };
+
             private _fn_logRouteResult = {
                 params ["_aStarOk", "_fallbackUsed", "_pts", ["_reason", ""]];
 
@@ -1795,21 +1810,6 @@ if (_showSpawnMarker) then
                     round _lenM,
                     _reason
                 ];
-            };
-
-            private _fn_routeLen = {
-                params ["_pts"];
-
-                private _len = 0;
-                if (_pts isEqualType [] && { (count _pts) >= 2 }) then
-                {
-                    for "_li" from 1 to ((count _pts) - 1) do
-                    {
-                        _len = _len + ((_pts select (_li - 1)) distance2D (_pts select _li));
-                    };
-                };
-
-                _len
             };
 
             private _fn_fallbackRoute = {
