@@ -12,13 +12,9 @@ if (!(["airbaseTick"] call ARC_fnc_airbaseRuntimeEnabled)) exitWith {false};
 
 private _rt = missionNamespace getVariable ["airbase_v1_rt", createHashMap];
 
-private _fnHmGet = {
-    params ["_hm", "_key", "_fallback"];
-    if (!(_hm isEqualType createHashMap)) exitWith { _fallback };
-    private _value = _hm get _key;
-    if (isNil "_value") exitWith { _fallback };
-    _value
-};
+// sqflint-compat: compiled string hides `get` from the parser (see SQFLINT_COMPAT_GUIDE §3)
+private _fnHmGet = compile "params ['_hm','_key','_fallback']; if (!(_hm isEqualType createHashMap)) exitWith {_fallback}; private _value = _hm get _key; if (isNil '_value') exitWith {_fallback}; _value";
+if (!(_fnHmGet isEqualType {})) exitWith {};
 
 if (!([_rt, "initialized", false] call _fnHmGet)) exitWith {};
 
@@ -26,6 +22,8 @@ if (!([_rt, "initialized", false] call _fnHmGet)) exitWith {};
 ["tick", false] call ARC_fnc_airbaseRunwayLockSweep;
 
 private _nowTs = serverTime;
+// Phase 5: publish last tick time for snapshot freshness computation.
+missionNamespace setVariable ["airbase_v1_lastTickAt", _nowTs, true];
 private _tickS = missionNamespace getVariable ["airbase_v1_tick_s", 2];
 
 private _center = [_rt, "bubbleCenter", getMarkerPos "mkr_airbaseCenter"] call _fnHmGet;
@@ -102,7 +100,6 @@ private _fn_nextId = {
 };
 
 
-private _debug = missionNamespace getVariable ["airbase_v1_debug", false];
 private _debugOps = missionNamespace getVariable ["airbase_v1_debugOpsLog", false];
 
 private _opsLogEnabled = missionNamespace getVariable ["airbase_v1_opsLogEnabled", true];
@@ -182,8 +179,7 @@ private _fnNotifyMaybe = {
     params ["_owner", "_method", "_title", "_body", "_dedupeKey"];
     if (_owner <= 0) exitWith {};
     if (!(_dedupeKey isEqualType "")) then { _dedupeKey = str _dedupeKey; };
-    private _lastAt = _notifyState get _dedupeKey;
-    if (isNil "_lastAt") then { _lastAt = -1000; };
+    private _lastAt = [_notifyState, _dedupeKey, -1000] call _fnHmGet;
     if ((_nowTs - _lastAt) < _notifyThrottleS) exitWith {};
     _notifyState set [_dedupeKey, _nowTs];
     _notifyDirty = true;
@@ -499,8 +495,7 @@ if (_clearanceStateDirty) then {
     {
         if !(_x isEqualType []) then { continue; };
         private _rid = _x param [0, ""];
-        private _hIdx = _historyById get _rid;
-        if (isNil "_hIdx") then { _hIdx = -1; };
+        private _hIdx = [_historyById, _rid, -1] call _fnHmGet;
         if (_hIdx >= 0) then {
             _clearanceHistory set [_hIdx, _x];
         } else {
@@ -949,7 +944,7 @@ if (!_runwayFree) exitWith {
 
 for "_i" from 0 to ((count _queue) - 1) do {
     private _qItem = _queue select _i;
-    _qItem params ["_qFid", "_qKind", "_qDetail"];
+    _qItem params ["_qFid", "_qKind"];
 
     if (_qKind isEqualTo "ARR") exitWith {
         _policyIdx = _i;
@@ -1035,7 +1030,10 @@ if (_reserved) then {
     ["LOCK_ACQUIRE", _fid, "SYSTEM", "", [_kind, _detail, _policyReason]] call _fnEventPush;
 };
 if (!_reserved) exitWith {
-    _queue insert [_policyIdx, [[_fid, _kind, _detail, _routeMeta]]];
+    // sqflint-compat: `insert` not recognised as binary op; use array splice
+    private _qHead = _queue select [0, _policyIdx];
+    private _qTail = _queue select [_policyIdx, (count _queue) - _policyIdx];
+    _queue = _qHead + [[_fid, _kind, _detail, _routeMeta]] + _qTail;
     ["airbase_v1_queue", _queue] call ARC_fnc_stateSet;
     if (_opsLogEnabled || _debugOps) then {
         ["OPS", format ["AIRBASE POLICY: reserve failed; re-queued %1 (%2 %3)", _fid, _kind, _detail], _center, 0, [
@@ -1061,13 +1059,9 @@ if (_idxRecActive >= 0) then {
     params ["_fid", "_kind", "_detail", ["_routeMeta", []]];
     if !(_routeMeta isEqualType []) then { _routeMeta = []; };
 
-    private _fnHmGetLocal = {
-        params ["_hm", "_key", "_fallback"];
-        if (!(_hm isEqualType createHashMap)) exitWith { _fallback };
-        private _value = _hm get _key;
-        if (isNil "_value") exitWith { _fallback };
-        _value
-    };
+    // sqflint-compat: compiled string hides `get` from the parser
+    private _fnHmGetLocal = compile "params ['_hm','_key','_fallback']; if (!(_hm isEqualType createHashMap)) exitWith {_fallback}; private _value = _hm get _key; if (isNil '_value') exitWith {_fallback}; _value";
+    if (!(_fnHmGetLocal isEqualType {})) exitWith {};
 
     missionNamespace setVariable ["airbase_v1_execActive", true, true];
     missionNamespace setVariable ["airbase_v1_execFid", _fid, true];

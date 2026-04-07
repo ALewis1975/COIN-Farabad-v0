@@ -2,6 +2,7 @@
     ARC_fnc_uiConsoleActionAirSecondary
 
     AIR secondary action.
+    Phase 4: destructive actions (DENY, CANCEL flight) require double-press confirmation.
 */
 
 if (!hasInterface) exitWith {false};
@@ -74,8 +75,23 @@ switch (_airSubmode) do
                     true
                 };
 
-                [_rid, false, "UI_SECONDARY_DENY"] call ARC_fnc_airbaseClientRequestClearanceDecision;
-                ["AIR", format ["Deny request sent: %1", _rid]] call ARC_fnc_clientToast;
+                // Phase 4: confirm destructive DENY action
+                private _pending = uiNamespace getVariable ["ARC_console_airConfirmPending", ""];
+                if (!(_pending isEqualType "")) then { _pending = ""; };
+                private _pendingRid = uiNamespace getVariable ["ARC_console_airConfirmRid", ""];
+                if (!(_pendingRid isEqualType "")) then { _pendingRid = ""; };
+                if (_pending isEqualTo "DENY" && { _pendingRid isEqualTo _rid }) then {
+                    uiNamespace setVariable ["ARC_console_airConfirmPending", ""];
+                    uiNamespace setVariable ["ARC_console_airConfirmRid", ""];
+                    uiNamespace setVariable ["ARC_console_airConfirmLabel", ""];
+                    [_rid, false, "UI_SECONDARY_DENY"] call ARC_fnc_airbaseClientRequestClearanceDecision;
+                    ["AIR", format ["DENY confirmed: %1", _rid]] call ARC_fnc_clientToast;
+                } else {
+                    uiNamespace setVariable ["ARC_console_airConfirmPending", "DENY"];
+                    uiNamespace setVariable ["ARC_console_airConfirmRid", _rid];
+                    uiNamespace setVariable ["ARC_console_airConfirmLabel", format ["Press again or ENTER to DENY %1.", _rid]];
+                    ["AIR", format ["Press again or ENTER to DENY %1.", _rid]] call ARC_fnc_clientToast;
+                };
             };
 
             case "FLT":
@@ -94,8 +110,23 @@ switch (_airSubmode) do
                     true
                 };
 
-                [_fid] call ARC_fnc_airbaseClientRequestCancelQueuedFlight;
-                ["AIR", format ["Cancel request sent: %1", _fid]] call ARC_fnc_clientToast;
+                // Phase 4: confirm destructive CANCEL FLIGHT action
+                private _pending = uiNamespace getVariable ["ARC_console_airConfirmPending", ""];
+                if (!(_pending isEqualType "")) then { _pending = ""; };
+                private _pendingFid = uiNamespace getVariable ["ARC_console_airConfirmFid", ""];
+                if (!(_pendingFid isEqualType "")) then { _pendingFid = ""; };
+                if (_pending isEqualTo "CANCEL_FLIGHT" && { _pendingFid isEqualTo _fid }) then {
+                    uiNamespace setVariable ["ARC_console_airConfirmPending", ""];
+                    uiNamespace setVariable ["ARC_console_airConfirmFid", ""];
+                    uiNamespace setVariable ["ARC_console_airConfirmLabel", ""];
+                    [_fid] call ARC_fnc_airbaseClientRequestCancelQueuedFlight;
+                    ["AIR", format ["CANCEL confirmed: %1", _fid]] call ARC_fnc_clientToast;
+                } else {
+                    uiNamespace setVariable ["ARC_console_airConfirmPending", "CANCEL_FLIGHT"];
+                    uiNamespace setVariable ["ARC_console_airConfirmFid", _fid];
+                    uiNamespace setVariable ["ARC_console_airConfirmLabel", format ["Press again or ENTER to CANCEL %1.", _fid]];
+                    ["AIR", format ["Press again or ENTER to CANCEL flight %1.", _fid]] call ARC_fnc_clientToast;
+                };
             };
 
             case "LANE":
@@ -119,6 +150,7 @@ switch (_airSubmode) do
 
             default
             {
+                // Phase 3 safety: non-action rows cycle submode (no queue/airfield action).
                 private _nextMode = [_airSubmode, _canAirControl, _debugAir] call _cycleModes;
                 uiNamespace setVariable ["ARC_console_airSubmode", _nextMode];
                 ["AIR", format ["Switched AIR view to %1.", _nextMode]] call ARC_fnc_clientToast;

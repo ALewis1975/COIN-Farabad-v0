@@ -250,8 +250,111 @@ uiNamespace setVariable ["ARC_console_airSubmode", _airSubmode];
 private _nextMode = [_airSubmode, _canAirControl, _debugAir] call _cycleModes;
 private _freshnessText = if (_stateUpdatedAt < 0) then { "Snapshot unavailable" } else { format ["Updated %1", [_stateUpdatedAt] call _fmtAgo] };
 
-private _towerLane = [_staffing, "tower"] call _findById;
-private _groundLane = [_staffing, "ground"] call _findById;
+// Phase 5: read freshnessState once — reused for warning text and tower chip below.
+private _freshnessState = [_snapshot, "freshnessState", "UNKNOWN"] call _getPair;
+if (!(_freshnessState isEqualType "")) then { _freshnessState = "UNKNOWN"; };
+if (toUpper _freshnessState isEqualTo "DEGRADED") then {
+    _freshnessText = _freshnessText + " — DEGRADED: data may be unreliable";
+} else {
+    if (toUpper _freshnessState isEqualTo "STALE") then {
+        _freshnessText = _freshnessText + " — STALE";
+    };
+};
+
+
+// -----------------------------------------------------------------------
+// Phase 1 scaffold: populate AIR-dedicated status strip controls (78131–78136)
+// These run every paint cycle regardless of rebuild.
+// -----------------------------------------------------------------------
+private _airChipRunway = _display displayCtrl 78131;
+private _airChipArrivals = _display displayCtrl 78132;
+private _airChipDepartures = _display displayCtrl 78133;
+private _airChipTowerMode = _display displayCtrl 78134;
+private _airChipAlerts = _display displayCtrl 78135;
+private _airDecBand = _display displayCtrl 78136;
+
+// --- Runway chip ---
+private _rwyChipColor = [_runwayState] call _statusColor;
+private _rwyChipText = format ["<t size='0.85' color='%1'>&#x25CF;</t> <t size='0.85'>RWY: %2</t>", _rwyChipColor, _runwayState];
+if (!isNull _airChipRunway) then { _airChipRunway ctrlSetStructuredText parseText _rwyChipText; };
+
+// --- Arrivals chip ---
+// Snapshot Contract v1 tuple indices: [flightId(0), callsign(1), category(2), phase(3), ageS(4), priority(5), status(6)]
+private _IDX_FLIGHT_STATUS = 6;
+// Priority thresholds (shared between arrivals + departures)
+private _PRIO_EMERGENCY = 100;
+private _PRIO_ELEVATED = 1;
+private _arrCount = count _arrivals;
+private _arrStatus = "NORMAL";
+{
+    if (_x isEqualType [] && { (count _x) > _IDX_FLIGHT_STATUS }) then {
+        private _rowStatus = _x select _IDX_FLIGHT_STATUS;
+        if (_rowStatus isEqualType "" && { toUpper _rowStatus in ["CRITICAL", "CONFLICT", "RED"] }) exitWith { _arrStatus = "CONFLICT"; };
+        if (_rowStatus isEqualType "" && { toUpper _rowStatus in ["HOLDING", "PRIORITY", "AMBER", "CAUTION"] }) then { _arrStatus = "HOLDING"; };
+    };
+} forEach _arrivals;
+if (_arrCount == 0) then { _arrStatus = "NORMAL"; };
+private _arrChipColor = [_arrStatus] call _statusColor;
+private _arrChipLabel = if (_arrCount == 0) then { "NONE" } else { format ["%1", _arrCount] };
+private _arrChipText = format ["<t size='0.85' color='%1'>&#x25CF;</t> <t size='0.85'>ARR: %2</t>", _arrChipColor, _arrChipLabel];
+if (!isNull _airChipArrivals) then { _airChipArrivals ctrlSetStructuredText parseText _arrChipText; };
+
+// --- Departures chip ---
+// Same tuple layout: [flightId(0), callsign(1), category(2), state(3), ageS(4), priority(5), status(6)]
+private _depCount = count _departures;
+private _depStatus = if (_holdDepartures) then { "HOLD" } else { "NORMAL" };
+{
+    if (_x isEqualType [] && { (count _x) > _IDX_FLIGHT_STATUS }) then {
+        private _rowStatus = _x select _IDX_FLIGHT_STATUS;
+        if (_rowStatus isEqualType "" && { toUpper _rowStatus in ["CRITICAL", "BLOCKED", "RED"] }) exitWith { _depStatus = "BLOCKED"; };
+    };
+} forEach _departures;
+private _depChipColor = [_depStatus] call _statusColor;
+private _depChipLabel = if (_depCount == 0) then { "NONE" } else { format ["%1", _depCount] };
+if (_holdDepartures) then { _depChipLabel = _depChipLabel + " HOLD"; };
+private _depChipText = format ["<t size='0.85' color='%1'>&#x25CF;</t> <t size='0.85'>DEP: %2</t>", _depChipColor, _depChipLabel];
+if (!isNull _airChipDepartures) then { _airChipDepartures ctrlSetStructuredText parseText _depChipText; };
+
+// --- Tower Mode chip --- (uses _freshnessState from Phase 5 block above)
+private _towerModeStatus = switch (toUpper _freshnessState) do {
+    case "FRESH": { "GREEN" };
+    case "STALE": { "AMBER" };
+    case "DEGRADED": { "RED" };
+    default { "AMBER" };
+};
+private _towerModeLabel = if (_freshnessState isEqualTo "UNKNOWN") then { "UNKNOWN" } else { _freshnessState };
+private _towerChipColor = [_towerModeStatus] call _statusColor;
+private _towerChipText = format ["<t size='0.85' color='%1'>&#x25CF;</t> <t size='0.85'>TWR: %2</t>", _towerChipColor, _towerModeLabel];
+if (!isNull _airChipTowerMode) then { _airChipTowerMode ctrlSetStructuredText parseText _towerChipText; };
+
+// --- Alerts chip ---
+// Alert tuple: [text(0), severity(1), sourceId(2)]
+private _IDX_ALERT_SEVERITY = 1;
+private _alertCount = count _alerts;
+private _alertSeverity = "NONE";
+{
+    if (_x isEqualType [] && { (count _x) > _IDX_ALERT_SEVERITY }) then {
+        private _sev = _x select _IDX_ALERT_SEVERITY;
+        if (_sev isEqualType "" && { toUpper _sev isEqualTo "CRITICAL" }) exitWith { _alertSeverity = "CRITICAL"; };
+        if (_sev isEqualType "" && { toUpper _sev isEqualTo "CAUTION" } && { !(_alertSeverity isEqualTo "CRITICAL") }) then { _alertSeverity = "CAUTION"; };
+    };
+} forEach _alerts;
+private _alertChipColor = [_alertSeverity] call _statusColor;
+private _alertChipLabel = if (_alertCount == 0) then { "NONE" } else { format ["%1", _alertCount] };
+private _alertChipText = format ["<t size='0.85' color='%1'>&#x25CF;</t> <t size='0.85'>ALT: %2</t>", _alertChipColor, _alertChipLabel];
+if (!isNull _airChipAlerts) then { _airChipAlerts ctrlSetStructuredText parseText _alertChipText; };
+
+// --- Decision band ---
+private _decCount = count _decisionQueue;
+if (_decCount > 0 && { !isNull _airDecBand }) then {
+    private _topDec = _decisionQueue select 0;
+    private _decText = if (_topDec isEqualType [] && { (count _topDec) >= 1 }) then { _topDec select 0 } else { "Decision required" };
+    if (!(_decText isEqualType "")) then { _decText = "Decision required"; };
+    _airDecBand ctrlSetStructuredText parseText format ["<t size='0.90' color='#FFB833'>&#x26A0; %1</t>", _decText];
+    _airDecBand ctrlShow true;
+} else {
+    if (!isNull _airDecBand) then { _airDecBand ctrlShow false; };
+};
 
 if (_rebuild) then {
     lbClear _ctrlList;
@@ -295,13 +398,17 @@ if (_rebuild) then {
             } forEach _myArrivals;
         };
     } else {
-        private _modeRow = _ctrlList lbAdd format [
-            "View: %1 - %2  |  Secondary: %3",
-            _airSubmode,
-            [_airSubmode] call _modeSummary,
-            (if (_nextMode isEqualTo _airSubmode) then {"REFRESH"} else {_nextMode})
-        ];
-        _ctrlList lbSetData [_modeRow, format ["MODE|%1", _airSubmode]];
+        // AIRFIELD_OPS: mode row goes at bottom (operational data leads).
+        // CLEARANCES / DEBUG: mode row stays at top (specialist views).
+        if (_airSubmode != "AIRFIELD_OPS") then {
+            private _modeRow = _ctrlList lbAdd format [
+                "View: %1 - %2  |  Secondary: %3",
+                _airSubmode,
+                [_airSubmode] call _modeSummary,
+                (if (_nextMode isEqualTo _airSubmode) then {"REFRESH"} else {_nextMode})
+            ];
+            _ctrlList lbSetData [_modeRow, format ["MODE|%1", _airSubmode]];
+        };
 
         switch (_airSubmode) do
         {
@@ -413,28 +520,15 @@ if (_rebuild) then {
 
             default
             {
-                private _alertState = if ((count _alerts) == 0) then { "NONE" } else { toUpper ((_alerts select 0) param [1, "INFO"]) };
-                private _statusRow = _ctrlList lbAdd format [
-                    "RUNWAY %1  |  ARR %2  |  DEP %3  |  TOWER %4  |  ALERTS %5",
-                    _runwayState,
-                    format ["%1 inbound", count _arrivals],
-                    format ["%1 queued", count _departures],
-                    if (((_towerLane param [1, "AUTO"]) isEqualTo "MANNED") || { ((_groundLane param [1, "AUTO"]) isEqualTo "MANNED") }) then {"MANNED"} else {"AUTO"},
-                    _alertState
-                ];
-                _ctrlList lbSetData [_statusRow, "STATUS|OPS"];
+                // ---------------------------------------------------------------
+                // Phase 2: AIRFIELD_OPS operational board layout
+                // Vision Plan §4.4 — Arrivals → Runway → Departures
+                // Status strip + decision band are handled by Phase 1 controls.
+                // Default focus lands on first operational row (not metadata).
+                // ---------------------------------------------------------------
 
-                if ((count _decisionQueue) > 0) then {
-                    private _hdrBand = _ctrlList lbAdd "-- DECISION BAND --";
-                    _ctrlList lbSetData [_hdrBand, "HDR|DECISION"];
-                    {
-                        if !(_x isEqualType []) then { continue; };
-                        private _row = _ctrlList lbAdd (_x param [0, "Decision required"]);
-                        _ctrlList lbSetData [_row, format ["DECISION|%1|%2", _x param [1, ""], _x param [2, ""]]];
-                    } forEach _decisionQueue;
-                };
-
-                private _hdrArr = _ctrlList lbAdd "-- ARRIVALS --";
+                // --- Arrivals block ---
+                private _hdrArr = _ctrlList lbAdd "ARRIVALS";
                 _ctrlList lbSetData [_hdrArr, "HDR|ARR"];
                 if ((count _arrivals) == 0) then {
                     private _noneA = _ctrlList lbAdd "No arrivals inbound";
@@ -445,22 +539,23 @@ if (_rebuild) then {
                         private _callsign = _x param [1, _fid];
                         private _aircraftType = _x param [2, ""];
                         private _phase = _x param [3, "INBOUND"];
+                        private _prio = _x param [5, 0];
                         private _status = _x param [6, "NORMAL"];
                         private _trackLabel = [_fid, _callsign, _aircraftType] call _flightLabel;
-                        private _row = _ctrlList lbAdd format ["%1  |  %2  |  %3", _trackLabel, _phase, _status];
+                        private _prioTag = if (_prio >= _PRIO_EMERGENCY) then { " !EMERGENCY!" } else { if (_prio >= _PRIO_ELEVATED) then { " [PRI]" } else { "" } };
+                        private _row = _ctrlList lbAdd format ["%1  |  %2  |  %3%4", _trackLabel, _phase, _status, _prioTag];
                         _ctrlList lbSetData [_row, format ["ARR|%1|%2|%3|%4", _fid, _callsign, _phase, _status]];
                     } forEach _arrivals;
                 };
 
-                private _runwayRow = _ctrlList lbAdd format [
-                    "RUNWAY %1  |  ACTIVE %2  |  %3",
-                    _runwayState,
-                    if (_runwayOwnerDisplay isEqualTo "") then {"-"} else {_runwayOwnerDisplay},
-                    if (_holdDepartures) then {"HOLD ACTIVE"} else {_activeMovement}
-                ];
+                // --- Runway / active movement block ---
+                private _holdTag = if (_holdDepartures) then { "HOLD ACTIVE" } else { _activeMovement };
+                private _rwyOwnerTag = if (_runwayOwnerDisplay isEqualTo "") then { "none" } else { _runwayOwnerDisplay };
+                private _runwayRow = _ctrlList lbAdd format ["RUNWAY %1  |  %2  |  %3", _runwayState, _rwyOwnerTag, _holdTag];
                 _ctrlList lbSetData [_runwayRow, format ["RWY|%1|%2|%3", _runwayState, _runwayOwnerFlightId, _activeMovement]];
 
-                private _hdrDep = _ctrlList lbAdd "-- DEPARTURES --";
+                // --- Departures block ---
+                private _hdrDep = _ctrlList lbAdd "DEPARTURES";
                 _ctrlList lbSetData [_hdrDep, "HDR|DEP"];
                 if ((count _departures) == 0) then {
                     private _noneDep = _ctrlList lbAdd "No departures queued";
@@ -471,19 +566,19 @@ if (_rebuild) then {
                         private _callsign = _x param [1, _fid];
                         private _aircraftType = _x param [2, ""];
                         private _state = _x param [3, "QUEUED"];
+                        private _prio = _x param [5, 0];
                         private _status = _x param [6, "NORMAL"];
                         private _trackLabel = [_fid, _callsign, _aircraftType] call _flightLabel;
-                        private _row = _ctrlList lbAdd format ["%1  |  %2  |  %3", _trackLabel, _state, _status];
+                        private _prioTag = if (_prio >= _PRIO_EMERGENCY) then { " !EMERGENCY!" } else { if (_prio >= _PRIO_ELEVATED) then { " [PRI]" } else { "" } };
+                        private _row = _ctrlList lbAdd format ["%1  |  %2  |  %3%4", _trackLabel, _state, _status, _prioTag];
                         _ctrlList lbSetData [_row, format ["DEP|%1|%2|%3|%4", _fid, _callsign, _state, _status]];
                     } forEach _departures;
                 };
 
-                private _hdrEvt = _ctrlList lbAdd "-- RECENT EVENTS --";
-                _ctrlList lbSetData [_hdrEvt, "HDR|EVT"];
-                if ((count _recentEvents) == 0) then {
-                    private _noneEvt = _ctrlList lbAdd "No recent events";
-                    _ctrlList lbSetData [_noneEvt, "EVT|NONE"];
-                } else {
+                // --- Lower priority sections (below operational board) ---
+                if ((count _recentEvents) > 0) then {
+                    private _hdrEvt = _ctrlList lbAdd "RECENT EVENTS";
+                    _ctrlList lbSetData [_hdrEvt, "HDR|EVT"];
                     {
                         private _eventTs = _x param [0, -1];
                         private _eventLabel = _x param [1, ""];
@@ -492,33 +587,43 @@ if (_rebuild) then {
                     } forEach _recentEvents;
                 };
 
-                private _hdrLane = _ctrlList lbAdd "-- STAFFING --";
-                _ctrlList lbSetData [_hdrLane, "HDR|LANE"];
-                {
-                    if !(_x isEqualType []) then { continue; };
-                    private _lane = _x param [0, ""];
-                    private _mode = _x param [1, "AUTO"];
-                    private _operator = _x param [2, "AUTO"];
-                    private _row = _ctrlList lbAdd format ["%1: %2", toUpper _lane, _operator];
-                    _ctrlList lbSetData [_row, format ["LANE|%1|%2|%3", _lane, _mode, _operator]];
-                } forEach _staffing;
+                if ((count _staffing) > 0) then {
+                    private _hdrLane = _ctrlList lbAdd "STAFFING";
+                    _ctrlList lbSetData [_hdrLane, "HDR|LANE"];
+                    {
+                        if !(_x isEqualType []) then { continue; };
+                        private _lane = _x param [0, ""];
+                        private _mode = _x param [1, "AUTO"];
+                        private _operator = _x param [2, "AUTO"];
+                        private _row = _ctrlList lbAdd format ["%1: %2", toUpper _lane, _operator];
+                        _ctrlList lbSetData [_row, format ["LANE|%1|%2|%3", _lane, _mode, _operator]];
+                    } forEach _staffing;
+                };
 
-                private _hdrHist = _ctrlList lbAdd "-- CLEARANCE HISTORY --";
-                _ctrlList lbSetData [_hdrHist, "HDR|DEC"];
-                if ((count _clearanceHistory) == 0) then {
-                    private _noneHist = _ctrlList lbAdd "No clearance history";
-                    _ctrlList lbSetData [_noneHist, "DEC|NONE"];
-                } else {
+                if ((count _clearanceHistory) > 0) then {
+                    private _hdrHist = _ctrlList lbAdd "CLEARANCE HISTORY";
+                    _ctrlList lbSetData [_hdrHist, "HDR|DEC"];
                     {
                         if !(_x isEqualType []) then { continue; };
                         private _rid = _x param [0, ""];
                         private _status = _x param [1, ""];
                         private _ts = _x param [2, -1];
-                        private _row = _ctrlList lbAdd format ["%1 %2 (%3)", _rid, _status, [_ts] call _fmtAgo];
+                        private _by = _x param [3, "SYSTEM"];
+                        private _row = _ctrlList lbAdd format ["%1 %2 by %3 (%4)", _rid, _status, _by, [_ts] call _fmtAgo];
                         _ctrlList lbSetData [_row, format ["DEC|%1|%2|%3", _rid, _status, _ts]];
                     } forEach _clearanceHistory;
                 };
             };
+        };
+
+        // AIRFIELD_OPS: mode/view indicator at bottom — keeps operational data first
+        if (_airSubmode isEqualTo "AIRFIELD_OPS") then {
+            private _modeRowBottom = _ctrlList lbAdd format [
+                "[View: %1]  |  Secondary: %2",
+                [_airSubmode] call _modeSummary,
+                (if (_nextMode isEqualTo _airSubmode) then {"REFRESH"} else {_nextMode})
+            ];
+            _ctrlList lbSetData [_modeRowBottom, format ["MODE|%1", _airSubmode]];
         };
     };
 
@@ -552,6 +657,17 @@ private _selectedFid = if (_rowType in ["DEP", "ARR", "FLT"]) then { _parts para
 uiNamespace setVariable ["ARC_console_airSelectedFid", _selectedFid];
 uiNamespace setVariable ["ARC_console_airSelectedRow", _parts];
 uiNamespace setVariable ["ARC_console_airSelectedRowType", _rowType];
+
+// Phase 7: paint traffic map markers and optionally center on selected flight.
+private _ctrlMap = _display displayCtrl 78137;
+if (!isNull _ctrlMap) then {
+    if (_airSubmode isEqualTo "AIRFIELD_OPS") then {
+        _ctrlMap ctrlShow true;
+        [_display, _selectedFid] call ARC_fnc_uiConsoleAirMapPaint;
+    } else {
+        _ctrlMap ctrlShow false;
+    };
+};
 
 private _primaryLabel = "READ-ONLY";
 private _secondaryLabel = "REFRESH";
@@ -604,11 +720,18 @@ if (_airMode isEqualTo "PILOT") then {
                     _secondaryTooltip = "Release selected lane.";
                 };
                 default {
-                    _primaryLabel = if (_holdDepartures) then {"RELEASE"} else {"HOLD"};
-                    _primaryEnabled = if (_holdDepartures) then { _canAirRelease } else { _canAirHold };
-                    if (!_canAirHoldRelease) then {
+                    // Phase 3 safety: HDR rows are always inert.
+                    if (_rowType isEqualTo "HDR") then {
                         _primaryLabel = "READ-ONLY";
                         _primaryEnabled = false;
+                        _primaryTooltip = "Header row — no action available.";
+                    } else {
+                        _primaryLabel = if (_holdDepartures) then {"RELEASE"} else {"HOLD"};
+                        _primaryEnabled = if (_holdDepartures) then { _canAirRelease } else { _canAirHold };
+                        if (!_canAirHoldRelease) then {
+                            _primaryLabel = "READ-ONLY";
+                            _primaryEnabled = false;
+                        };
                     };
                     _secondaryLabel = if (_nextMode isEqualTo _airSubmode) then {"REFRESH"} else { format ["VIEW: %1", _nextMode] };
                     _secondaryTooltip = if (_nextMode isEqualTo _airSubmode) then { "Refresh AIR view." } else { format ["Switch to %1.", _nextMode] };
@@ -624,16 +747,33 @@ if (_airMode isEqualTo "PILOT") then {
         };
         default
         {
-            _primaryLabel = if (_holdDepartures) then {"RELEASE"} else {"HOLD"};
-            _primaryEnabled = if (_holdDepartures) then { _canAirRelease } else { _canAirHold };
-            if (!_canAirHoldRelease) then {
+            // Phase 3 safety: HDR rows are always inert.
+            if (_rowType isEqualTo "HDR") then {
                 _primaryLabel = "READ-ONLY";
                 _primaryEnabled = false;
+                _primaryTooltip = "Header row — no action available.";
+            } else {
+                _primaryLabel = if (_holdDepartures) then {"RELEASE"} else {"HOLD"};
+                _primaryEnabled = if (_holdDepartures) then { _canAirRelease } else { _canAirHold };
+                if (!_canAirHoldRelease) then {
+                    _primaryLabel = "READ-ONLY";
+                    _primaryEnabled = false;
+                };
             };
             _secondaryLabel = if (_nextMode isEqualTo _airSubmode) then {"REFRESH"} else { format ["VIEW: %1", _nextMode] };
             _secondaryTooltip = if (_nextMode isEqualTo _airSubmode) then { "Refresh AIR view." } else { format ["Switch to %1.", _nextMode] };
         };
     };
+};
+
+// Phase 4: if a confirmation is pending, override primary button label.
+private _confirmPending = uiNamespace getVariable ["ARC_console_airConfirmPending", ""];
+if (!(_confirmPending isEqualType "")) then { _confirmPending = ""; };
+if (_confirmPending != "") then {
+    _primaryLabel = format ["CONFIRM: %1", _confirmPending];
+    _primaryEnabled = true;
+    _primaryTooltip = uiNamespace getVariable ["ARC_console_airConfirmLabel", "Press again to confirm."];
+    if (!(_primaryTooltip isEqualType "")) then { _primaryTooltip = "Press again to confirm."; };
 };
 
 if (!isNull _btnPrimary) then {
@@ -660,17 +800,6 @@ switch (_rowType) do
             format ["Purpose: <t color='#FFFFFF'>%1</t>", [_airSubmode] call _modeGuidance],
             format ["Next secondary action: <t color='#FFFFFF'>%1</t>", if (_nextMode isEqualTo _airSubmode) then {"REFRESH"} else {_nextMode}],
             format ["Snapshot: <t color='#FFFFFF'>%1</t>", _freshnessText]
-        ];
-    };
-    case "STATUS":
-    {
-        _selectionHeading = "Airfield Status";
-        _detailLines = [
-            format ["Runway: <t color='%1'>%2</t>", [_runwayState] call _statusColor, _runwayState],
-            format ["Arrivals tracked: <t color='#FFFFFF'>%1</t>", count _arrivals],
-            format ["Departures tracked: <t color='#FFFFFF'>%1</t>", count _departures],
-            format ["Tower state: <t color='#FFFFFF'>%1</t>", if (((_towerLane param [1, "AUTO"]) isEqualTo "MANNED") || { ((_groundLane param [1, "AUTO"]) isEqualTo "MANNED") }) then {"MANNED"} else {"AUTO"}],
-            format ["Alerts: <t color='#FFFFFF'>%1</t>", count _alerts]
         ];
     };
     case "CSTATUS":
@@ -880,15 +1009,7 @@ private _detailHtml = format ["<t size='1.05' color='#B89B6B'>%1</t>", _selectio
 
 if (_airMode != "PILOT" && { _airSubmode != "DEBUG" }) then {
     _detailHtml = _detailHtml
-        + "<br/><br/><t size='1.05' color='#B89B6B'>Operational Summary</t>"
-        + format ["<br/>Runway owner: <t color='#FFFFFF'>%1</t>", if (_runwayOwnerDisplay isEqualTo "") then {"-"} else {_runwayOwnerDisplay}]
-        + format ["<br/>Runway flight ID: <t color='#FFFFFF'>%1</t>", if (_runwayOwnerFlightId isEqualTo "") then {"-"} else {_runwayOwnerFlightId}]
-        + format ["<br/>Decision queue: <t color='#FFFFFF'>%1</t>", count _decisionQueue]
-        + format ["<br/>Arrivals / Departures: <t color='#FFFFFF'>%1 / %2</t>", count _arrivals, count _departures]
-        + format ["<br/>CAS timing: <t color='#FFFFFF'>%1</t> / <t color='#FFFFFF'>%2</t>",
-            [_casTiming, "casreqId", "-"] call _getPair,
-            [_casTiming, "state", "-"] call _getPair
-        ];
+        + format ["<br/><br/><t size='0.85' color='#888888'>%1</t>", _freshnessText];
 };
 
 if (_airSubmode isEqualTo "DEBUG") then {
@@ -912,7 +1033,20 @@ private _airGrp = _display displayCtrl 78016;
 private _airMinH = if (!isNull _airGrp) then { (ctrlPosition _airGrp) select 3 } else { 0.74 };
 private _airP = ctrlPosition _ctrlDetails;
 _airP set [0, _defaultPosAir select 0];
-_airP set [1, _defaultPosAir select 1];
+
+// Phase 7: when map is visible (AIRFIELD_OPS), shift detail pane below map.
+private _mapVisible = false;
+private _ctrlMapCheck = _display displayCtrl 78137;
+if (!isNull _ctrlMapCheck) then {
+    _mapVisible = ctrlShown _ctrlMapCheck;
+};
+if (_mapVisible) then {
+    // Map ends at 0.082 + 0.40 = 0.482 of safeZoneH. Detail starts just below with small gap.
+    _airP set [1, 0.005 + (0.40 * ((ctrlPosition _airGrp) select 3))];
+} else {
+    _airP set [1, _defaultPosAir select 1];
+};
+
 _airP set [2, _defaultPosAir select 2];
 _airP set [3, (_airP select 3) max _airMinH];
 _ctrlDetails ctrlSetPosition _airP;

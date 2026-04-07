@@ -29,6 +29,14 @@ if (_tab isEqualTo "AIR") then
 
     uiNamespace setVariable ["ARC_console_airSelectedRow", _parts];
     uiNamespace setVariable ["ARC_console_airSelectedRowType", _kind];
+
+    // Phase 7: recenter map on selected traffic position.
+    if (_kind in ["ARR", "DEP"]) then {
+        private _selFid = if ((count _parts) > 1) then { _parts select 1 } else { "" };
+        if (!(_selFid isEqualTo "")) then {
+            [_display, _selFid] call ARC_fnc_uiConsoleAirMapPaint;
+        };
+    };
 };
 
 switch (_tab) do
@@ -41,7 +49,10 @@ switch (_tab) do
     {
         if (uiNamespace getVariable ["ARC_console_cmdQueuePainting", false]) exitWith {};
         private _cmdMode = ["ARC_console_cmdMode", "OVERVIEW"] call ARC_fnc_uiNsGetString;
-        if ((_cmdMode isEqualType "") && { (toUpper (trim _cmdMode)) isEqualTo "QUEUE" }) then
+        // sqflint-compat: avoid direct `trim` usage in expressions (see SQFLINT_COMPAT_GUIDE §2)
+        private _trimFn = compile "params ['_s']; trim _s";
+        if (!(_trimFn isEqualType {})) exitWith {};
+        if ((_cmdMode isEqualType "") && { (toUpper ([_cmdMode] call _trimFn)) isEqualTo "QUEUE" }) then
         {
             uiNamespace setVariable ["ARC_console_cmdQueueForceRebuild", false];
             [_display, false] call ARC_fnc_uiConsoleTocQueuePaint;

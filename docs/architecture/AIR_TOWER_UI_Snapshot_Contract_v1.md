@@ -90,20 +90,22 @@ Each row:
 Each row:
 
 ```sqf
-[flightId, callsign, category, phase, ageS, priority, status]
+[flightId, callsign, category, phase, ageS, priority, status, posX, posY]
 ```
 
 - `callsign` is the best available identity string; UI readers should combine it with `category` and `flightId` when the callsign is missing or only an internal ID.
+- `posX` (index 7) / `posY` (index 8): world position for CT_MAP display. Defaults to airbase center when vehicle position unavailable. Added in Phase 7.
 
 ### `departures[]`
 
 Each row:
 
 ```sqf
-[flightId, callsign, category, state, ageS, priority, status]
+[flightId, callsign, category, state, ageS, priority, status, posX, posY]
 ```
 
 - `callsign` is the best available identity string; UI readers should combine it with `category` and `flightId` when the callsign is missing or only an internal ID.
+- `posX` (index 7) / `posY` (index 8): world position for CT_MAP display. Defaults to airbase center when vehicle position unavailable. Added in Phase 7.
 
 ### `pendingClearances[]`
 
@@ -161,6 +163,10 @@ Each row:
 | `rev` | NUMBER | CASREQ public revision |
 | `district` | STRING | AIR-facing district reference only |
 | `state` | STRING | AIR-facing CAS state only |
+
+### `airbaseCenterPos`
+
+Added Phase 7. Array `[posX, posY]` — airfield reference center in world coordinates. Used by CT_MAP for default centering and as fallback position for flights without vehicle data.
 
 ### `debug`
 

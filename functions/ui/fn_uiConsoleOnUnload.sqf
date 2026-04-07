@@ -38,4 +38,11 @@ uiNamespace setVariable ["ARC_console_intelSelData", ""];
 uiNamespace setVariable ["ARC_console_activeTab", nil];
 uiNamespace setVariable ["ARC_console_tabIds", nil];
 
+// Phase 4: clear AIR key-down confirmation state
+uiNamespace setVariable ["ARC_console_airConfirmPending", ""];
+uiNamespace setVariable ["ARC_console_airConfirmLabel", ""];
+uiNamespace setVariable ["ARC_console_airConfirmRid", ""];
+uiNamespace setVariable ["ARC_console_airConfirmFid", ""];
+uiNamespace setVariable ["ARC_console_airKeyDownEH", nil];
+
 true

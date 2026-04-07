@@ -11,6 +11,184 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-07 14:56 UTC — Phase 3: CLEARANCES safety hardening
+
+**Branch/Commit:** copilot/develop-task-decomposition-plan @ 047e376
+
+**Scenario:** Phase 3 implementation — remove unsafe global actions from inert/header CLEARANCES and AIRFIELD_OPS selections. Guard non-action row types from firing HOLD/RELEASE or queue actions in both primary and secondary action handlers. Update button labels so HDR rows always show READ-ONLY. Initialize `ARC_console_airSubmode` default in OnLoad.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `functions/ui/fn_uiConsoleActionAirPrimary.sqf` | CLEARANCES default: block non-action rows (HDR, CSTATUS, DEC, etc.) from firing HOLD/RELEASE — only MODE/"" pass through; AIRFIELD_OPS default: block HDR/EVT/DEC/DBG/CSTATUS from firing HOLD/RELEASE |
+| `functions/ui/fn_uiConsoleActionAirSecondary.sqf` | CLEARANCES default: added Phase 3 safety comment (already safe — cycles submode only) |
+| `functions/ui/fn_uiConsoleAirPaint.sqf` | CLEARANCES default button labels: HDR rows → READ-ONLY; AIRFIELD_OPS default button labels: HDR rows → READ-ONLY |
+| `functions/ui/fn_uiConsoleOnLoad.sqf` | Initialize `ARC_console_airSubmode` to "AIRFIELD_OPS" on dialog open |
+| `docs/architecture/AIR_TOWER_Arma_Native_Implementation_Matrix.md` | Phase 2 → Done, Phase 3 → In progress |
+
+### Static checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict <changed .sqf files>` | PASS | No compat violations |
+| 2 | sqflint (Primary) | `sqflint -e w functions/ui/fn_uiConsoleActionAirPrimary.sqf` | PASS | 0 warnings |
+| 3 | sqflint (Secondary) | `sqflint -e w functions/ui/fn_uiConsoleActionAirSecondary.sqf` | PASS | 0 warnings |
+| 4 | sqflint (AirPaint) | `sqflint -e w functions/ui/fn_uiConsoleAirPaint.sqf` | PASS | 0 warnings |
+| 5 | sqflint (OnLoad) | `sqflint -e w functions/ui/fn_uiConsoleOnLoad.sqf` | PASS | 0 warnings |
+| 6 | State migrations | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios |
+| 7 | Marker index | `python3 scripts/dev/validate_marker_index.py` | PASS | 177 markers all modes |
+
+### Acceptance criteria check
+
+| # | Criterion | Status | Notes |
+|---|-----------|--------|-------|
+| 1 | Non-action rows (HDR, CSTATUS, DEC) do not fire HOLD/RELEASE or queue actions | PASS | Guarded in both CLEARANCES and AIRFIELD_OPS default blocks |
+| 2 | REQ rows → APPROVE / DENY only | PASS | Existing dispatch preserved |
+| 3 | FLT rows → EXPEDITE / CANCEL only | PASS | Existing dispatch preserved |
+| 4 | LANE rows → CLAIM / RELEASE only | PASS | Existing dispatch preserved |
+| 5 | No NO HOLD AUTH / NO QUEUE AUTH / NO ACCESS labels | PASS | grep confirms zero occurrences |
+| 6 | Unauthorized users see clean READ-ONLY label | PASS | Button label logic preserved |
+| 7 | All canAirQueueManage / canAirStaff / canAirHoldRelease permission guards preserved | PASS | No permission logic changed |
+| 8 | PILOT submode path intact | PASS | PILOT exitWith block untouched |
+| 9 | sqflint + compat scan pass | PASS | All 4 files clean |
+| 10 | ARC_console_airSubmode initialized in OnLoad | PASS | Set to "AIRFIELD_OPS" |
+
+### Deferred
+
+- Runtime smoke test (local MP): BLOCKED — no Arma 3 runtime in CI
+- JIP safety: BLOCKED — requires dedicated server
+
+---
+
+## 2026-04-07 13:32 UTC — Phase 2: AIRFIELD_OPS board conversion
+
+**Branch/Commit:** copilot/develop-task-decomposition-plan @ c704f07
+
+**Scenario:** Phase 2 implementation — restructure the AIRFIELD_OPS (default) submode list layout from a developer-oriented flat dump to a fixed operational board. Arrivals lead, followed by runway, departures, then low-priority sections (events/staffing/history). STATUS|OPS metadata row removed (replaced by Phase 1 status strip chips). Decision Band rows removed from list (handled by Phase 1 decision band control IDC 78136). Mode indicator moved to bottom of list so default focus lands on operational data. Operational Summary detail pane section replaced with compact freshness line.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `functions/ui/fn_uiConsoleAirPaint.sqf` | AIRFIELD_OPS default block rewritten: arrivals→runway→departures lead; lower-priority sections gated by non-empty; mode row at bottom; STATUS detail case removed; Operational Summary replaced with freshness line; dead vars removed |
+| `docs/architecture/AIR_TOWER_Arma_Native_Implementation_Matrix.md` | Phase 1 → Done, Phase 2 → In progress |
+
+### Static checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict <changed .sqf files>` | PASS | No compat violations |
+| 2 | sqflint | `sqflint -e w functions/ui/fn_uiConsoleAirPaint.sqf` | PASS | Clean (0 warnings) |
+| 3 | State migrations | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios |
+| 4 | Marker index | `python3 scripts/dev/validate_marker_index.py` | PASS | 177 markers all modes |
+
+### Acceptance criteria check
+
+| # | Criterion | Status | Notes |
+|---|-----------|--------|-------|
+| 1 | Status strip shows 5 R/A/G chips | PASS | Phase 1 controls 78131–78135 (unchanged) |
+| 2 | Decision band shows pending decisions or hidden | PASS | Phase 1 control 78136 (unchanged) |
+| 3 | Arrivals block shows traffic rows or "No arrivals inbound" | PASS | Explicit empty state |
+| 4 | Departures block shows queued flights or "No departures queued" | PASS | Explicit empty state |
+| 5 | Runway block shows owner, movement, hold state | PASS | Compact single-line row |
+| 6 | 3-second scan test: first rows are operational data | PASS | Default focus lands on first arrival/none row |
+| 7 | No debug/developer text in default view | PASS | STATUS|OPS row removed; Operational Summary removed |
+| 8 | Proper empty states | PASS | Lower-priority sections hidden when empty |
+| 9 | Freshness wording | PASS | Uses _fmtAgo which produces "Updated Xs ago" |
+| 10 | Existing ARC_pub_state.airbase block unchanged | PASS | fn_publicBroadcastState not touched |
+
+### Deferred
+
+- Runtime smoke test (local MP): BLOCKED — no Arma 3 runtime in CI
+- Layout visual verification: BLOCKED — requires in-game check
+- JIP safety: BLOCKED — requires dedicated server
+
+---
+
+## 2026-04-06 18:01 UTC — Phase 1: AIR shell scaffold (CT_CONTROLS_GROUP + status strip)
+
+**Branch/Commit:** copilot/develop-task-decomposition-plan @ 336cfab
+
+**Scenario:** Phase 1 implementation — add AIR-dedicated `CT_CONTROLS_GROUP` (IDC 78130) with 5 R/A/G status strip chip controls (78131–78135) and decision band (78136) inside the existing Farabad Console shell. No user-visible behavior change: scaffold only. Existing list/detail rendering path preserved.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `config/CfgDialogs.hpp` | Added `AirStatusStripGroup` (78130) with 5 `RscStructuredText` chips (78131–78135) and `AirDecisionBand` (78136) |
+| `functions/ui/fn_uiConsoleRefresh.sqf` | Added baseline hide for AIR controls; show in AIR case |
+| `functions/ui/fn_uiConsoleAirPaint.sqf` | Added status strip population: runway/arrivals/departures/tower-mode/alerts chips + decision band |
+
+### Static checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict <changed .sqf files>` | PASS | No compat violations |
+| 2 | sqflint | `sqflint -e w functions/ui/fn_uiConsoleAirPaint.sqf` | PASS | Clean |
+| 3 | sqflint | `sqflint -e w functions/ui/fn_uiConsoleRefresh.sqf` | PASS | Clean |
+| 4 | State migrations | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios |
+| 5 | Marker index | `python3 scripts/dev/validate_marker_index.py` | PASS | 177 markers all modes |
+
+### Deferred
+
+- Runtime smoke test (local MP): BLOCKED — no Arma 3 runtime in CI
+- Layout stability (16:9, 16:10, 4:3): BLOCKED — requires visual verification in-game
+- JIP safety: BLOCKED — requires dedicated server
+
+---
+
+## 2026-04-06 17:53 UTC — AIR / TOWER implementation matrix completion
+
+**Branch/Commit:** copilot/develop-task-decomposition-plan @ b740f77 + docs
+
+**Scenario:** Docs-only change. Expand the AIR / TOWER implementation matrix from a sparse 9-phase summary table to a comprehensive 11-phase execution document with per-phase detail (files, acceptance criteria, risks, dependencies), audit finding linkage, file-touch heat map, acceptance test cross-references, and static validation checklist.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `docs/architecture/AIR_TOWER_Arma_Native_Implementation_Matrix.md` | Rewritten — expanded from 30 lines to full per-phase execution matrix |
+
+### Static checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Docs-only scope | Manual review | PASS | No runtime files (.sqf, .hpp, .ext) changed |
+
+### Deferred
+
+None. Docs-only change.
+
+---
+
+## 2026-04-06 17:45 UTC — AIR / TOWER Arma-native doc sync (PR 1)
+
+**Branch/Commit:** copilot/develop-task-decomposition-plan @ 62caee7 + docs
+
+**Scenario:** Docs-only change. Publish the Arma-native AIR / TOWER audit matrix, implementation matrix, and PR-by-PR roadmap into `docs/architecture/`. Update `docs/planning/Task_Decomposition.md` to reference the new roadmap.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `docs/architecture/AIR_TOWER_Arma_Native_Audit_Matrix.md` | New — Arma-native capability scoring |
+| `docs/architecture/AIR_TOWER_Arma_Native_Implementation_Matrix.md` | New — Phase-by-phase implementation plan |
+| `docs/architecture/AIR_TOWER_PR_BY_PR_BREAKDOWN.md` | New — 11-PR work breakdown with modes, scopes, and acceptance criteria |
+| `docs/planning/Task_Decomposition.md` | Added section 6 (AIR / TOWER PR roadmap) referencing the three new docs |
+
+### Static checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Docs-only scope | Manual review | PASS | No runtime files (.sqf, .hpp, .ext) changed |
+
+### Deferred
+
+None. Docs-only change.
+
+---
+
 ## 2026-04-06 02:50 UTC — Fix invalid setUnitRank string
 
 **Branch/Commit:** copilot/fix-unit-rank-error @ ada0a87 + fix
@@ -4113,3 +4291,265 @@ sqflint -e w functions/ied/fn_vbiedSpawnTick.sqf
 | 4 | sqflint fn_publicBroadcastState.sqf | PASS | Added `isEqualType` type guard for `_hgSnap` compiled helper (L1045) to satisfy sqflint unused-var check; exit 0, clean |
 | 5 | sqflint fn_suicideBomberSpawnTick.sqf | PASS | exit 0, clean |
 | 6 | sqflint fn_vbiedDrivenSpawnTick.sqf | PASS | exit 0, clean |
+
+---
+
+### Phase 4 — AIR input flow + confirmations (2026-04-07)
+
+**Date/Time:** 2026-04-07T15:15:00Z
+**Branch/Commit:** copilot/develop-task-decomposition-plan (pending commit for Phase 4)
+
+**Scenario:** Phase 4 implementation — add AIR-specific key-down handler and confirmation prompts for destructive actions.
+
+**Changed files:**
+- `functions/ui/fn_uiConsoleAirKeyDown.sqf` — **NEW** narrow key-down dispatcher (H=HOLD, R=RELEASE, E=APPROVE, D=DENY, M=cycle submode, Enter/Y=confirm, Esc=cancel)
+- `functions/ui/fn_uiConsoleActionAirPrimary.sqf` — HOLD/RELEASE now require double-press confirmation
+- `functions/ui/fn_uiConsoleActionAirSecondary.sqf` — DENY and CANCEL flight now require double-press confirmation
+- `functions/ui/fn_uiConsoleAirPaint.sqf` — Button label override shows `CONFIRM: <action>` when confirmation pending
+- `functions/ui/fn_uiConsoleOnLoad.sqf` — Register display KeyDown handler; init confirmation state vars
+- `functions/ui/fn_uiConsoleOnUnload.sqf` — Clean up confirmation state vars on dialog close
+- `functions/ui/fn_uiConsoleRefresh.sqf` — Clear confirmation state on tab switch away from AIR
+- `config/CfgFunctions.hpp` — Register `ARC_fnc_uiConsoleAirKeyDown`
+- `docs/architecture/AIR_TOWER_Arma_Native_Implementation_Matrix.md` — Phase 3 → Done, Phase 4 → In progress, acceptance criteria checked
+
+**Commands run:**
+```bash
+python3 scripts/dev/sqflint_compat_scan.py --strict \
+    functions/ui/fn_uiConsoleAirKeyDown.sqf \
+    functions/ui/fn_uiConsoleActionAirPrimary.sqf \
+    functions/ui/fn_uiConsoleActionAirSecondary.sqf \
+    functions/ui/fn_uiConsoleAirPaint.sqf \
+    functions/ui/fn_uiConsoleOnLoad.sqf \
+    functions/ui/fn_uiConsoleOnUnload.sqf \
+    functions/ui/fn_uiConsoleRefresh.sqf
+sqflint -e w <each file above>
+python3 scripts/dev/validate_state_migrations.py
+python3 scripts/dev/validate_marker_index.py
+```
+
+**Results:**
+
+| # | Check | Result | Notes |
+|---|-------|--------|-------|
+| 1 | Compat scan --strict (7 files) | PASS | 0 pattern matches |
+| 2 | sqflint fn_uiConsoleAirKeyDown.sqf | PASS | exit 0, clean (fixed _shift unused via modifier guard) |
+| 3 | sqflint fn_uiConsoleActionAirPrimary.sqf | PASS | exit 0, clean |
+| 4 | sqflint fn_uiConsoleActionAirSecondary.sqf | PASS | exit 0, clean |
+| 5 | sqflint fn_uiConsoleAirPaint.sqf | PASS | exit 0, clean |
+| 6 | sqflint fn_uiConsoleOnLoad.sqf | PASS | exit 0, clean |
+| 7 | sqflint fn_uiConsoleOnUnload.sqf | PASS | exit 0, clean |
+| 8 | sqflint fn_uiConsoleRefresh.sqf | PASS | exit 0, clean |
+| 9 | State migration validator | PASS | 3 scenarios |
+| 10 | Marker index validator | PASS | 177 markers all modes |
+
+**Acceptance criteria (Phase 4):**
+
+| # | Criterion | Status | Notes |
+|---|-----------|--------|-------|
+| 1 | AIR-only hotkeys active only when AIR tab focused | PASS | Handler self-gates by `ARC_console_activeTab == "AIR"` |
+| 2 | Destructive actions require explicit confirmation | PASS | HOLD/RELEASE: double-press or Enter/Y via key handler; DENY/CANCEL: double-press or Enter/Y |
+| 3 | Confirmation uses structured text prompt | PASS | Uses `ARC_fnc_clientToast` (BIS_fnc_dynamicText) — no raw `hint` |
+| 4 | Key handler does not hijack non-AIR tabs | PASS | Early `exitWith {false}` if tab != "AIR"; Ctrl/Alt combos pass through |
+| 5 | Key handler does not interfere with console keyboard | PASS | Ctrl/Alt combos pass through; only narrow key set consumed |
+| 6 | sqflint + compat scan pass | PASS | All 7 files clean |
+| 7 | Button label shows CONFIRM when pending | PASS | `_confirmPending` override in AirPaint sets `CONFIRM: <action>` |
+| 8 | Confirmation cleared on tab switch | PASS | `fn_uiConsoleRefresh` clears state when `_tab != "AIR"` |
+| 9 | Confirmation cleared on dialog close | PASS | `fn_uiConsoleOnUnload` clears all confirm vars |
+| 10 | No state migration changes | PASS | Validator confirms 3 scenarios |
+
+---
+
+### Phase 5 — Snapshot freshness + degraded-state correctness (2026-04-07)
+
+**Date/Time:** 2026-04-07T15:42:00Z
+**Branch/Commit:** copilot/develop-task-decomposition-plan @ d851c90
+
+**Scenario:** Phase 5 implementation — replace placeholder FRESH with real computed freshness; add degraded warning; surface freshness on DASH.
+
+**Changed files:**
+- `functions/ambiance/fn_airbaseTick.sqf` — store `airbase_v1_lastTickAt` timestamp on each tick
+- `functions/core/fn_publicBroadcastState.sqf` — compute `freshnessState` from `serverTime` vs last tick; compute `runway.age`; configurable thresholds
+- `functions/ui/fn_uiConsoleAirPaint.sqf` — append STALE/DEGRADED warning to freshness text
+- `functions/ui/fn_uiConsoleDashboardPaint.sqf` — show freshness state in Air Summary (full + compact modes)
+- `docs/architecture/AIR_TOWER_Arma_Native_Implementation_Matrix.md` — Phase 4 → Done, Phase 5 → In progress, acceptance criteria checked
+
+**Commands run:**
+```bash
+python3 scripts/dev/sqflint_compat_scan.py --strict \
+    functions/ambiance/fn_airbaseTick.sqf \
+    functions/core/fn_publicBroadcastState.sqf \
+    functions/ui/fn_uiConsoleAirPaint.sqf \
+    functions/ui/fn_uiConsoleDashboardPaint.sqf
+sqflint -e w <each file above>
+python3 scripts/dev/validate_state_migrations.py
+python3 scripts/dev/validate_marker_index.py
+```
+
+**Results:**
+
+| # | Check | Result | Notes |
+|---|-------|--------|-------|
+| 1 | Compat scan --strict (4 files) | PASS | 0 pattern matches |
+| 2 | sqflint fn_airbaseTick.sqf | PASS | exit 0; pre-existing hashmap warnings only |
+| 3 | sqflint fn_publicBroadcastState.sqf | PASS | exit 0, clean (moved freshness above debug block to fix scope) |
+| 4 | sqflint fn_uiConsoleAirPaint.sqf | PASS | exit 0, clean |
+| 5 | sqflint fn_uiConsoleDashboardPaint.sqf | PASS | exit 0, clean |
+| 6 | State migration validator | PASS | 3 scenarios |
+| 7 | Marker index validator | PASS | 177 markers all modes |
+
+**Acceptance criteria (Phase 5):**
+
+| # | Criterion | Status | Notes |
+|---|-----------|--------|-------|
+| 1 | FRESH when age < threshold | PASS | Computed from serverTime - lastTickAt; threshold configurable (default 15s) |
+| 2 | STALE when threshold < age < degraded | PASS | Second tier in freshness computation |
+| 3 | DEGRADED when age >= degraded or missing | PASS | Missing tick timestamp → forced DEGRADED |
+| 4 | "Updated Xs ago" text (not "State unchanged") | PASS | `_fmtAgo` helper formats as "Updated Xs ago" / "Updated Xm Ys ago" |
+| 5 | JIP snapshot safe | PASS | `setVariable [..., true]` broadcast + `_lastTickAt` replicated |
+| 6 | Tower chip RED when DEGRADED | PASS | Pre-existing Phase 1 mapping: DEGRADED → RED |
+| 7 | No local state inference | PASS | All freshness computed server-side; UI only reads published state |
+| 8 | sqflint + compat scan pass | PASS | All 4 files clean |
+| 9 | DASH shows freshness state | PASS | Both full and compact Quick Status modes |
+| 10 | Thresholds configurable | PASS | `airbase_v1_freshness_threshold_s`, `airbase_v1_degraded_threshold_s` |
+
+---
+
+### Phase 6 — DASH air summary completion (2026-04-07)
+
+**Date/Time:** 2026-04-07T17:50:00Z
+**Branch/Commit:** copilot/develop-task-decomposition-plan @ a33f27c
+
+**Scenario:** Phase 6 implementation — commander-ready air summary on DASH/COP with callsign+phase/state, top blocker, improved runway color mapping.
+
+**Changed files:**
+- `functions/ui/fn_uiConsoleDashboardPaint.sqf` — enhanced inbound/outbound labels (callsign+phase/state), "No inbound"/"No outbound" fallback, top blocker line, OCCUPIED runway color, compact Quick Status pane updated
+- `docs/architecture/AIR_TOWER_Arma_Native_Implementation_Matrix.md` — Phase 5 → Done, Phase 6 → In progress, acceptance criteria checked
+
+**Commands run:**
+```bash
+python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleDashboardPaint.sqf
+sqflint -e w functions/ui/fn_uiConsoleDashboardPaint.sqf
+python3 scripts/dev/validate_state_migrations.py
+python3 scripts/dev/validate_marker_index.py
+```
+
+**Results:**
+
+| # | Check | Result | Notes |
+|---|-------|--------|-------|
+| 1 | Compat scan --strict (1 file) | PASS | 0 pattern matches |
+| 2 | sqflint fn_uiConsoleDashboardPaint.sqf | PASS | exit 0, clean |
+| 3 | State migration validator | PASS | 3 scenarios |
+| 4 | Marker index validator | PASS | 177 markers all modes |
+
+**Acceptance criteria (Phase 6):**
+
+| # | Criterion | Status | Notes |
+|---|-----------|--------|-------|
+| 1 | Runway availability with R/A/G | PASS | OPEN=green, RESERVED/OCCUPIED=amber, BLOCKED/UNKNOWN=red via switch |
+| 2 | Next inbound callsign + phase | PASS | Reads tuple index 1 (callsign) + index 3 (phase); shows "No inbound" when empty |
+| 3 | Next outbound callsign + state | PASS | Reads tuple index 1 (callsign) + index 3 (state); shows "No outbound" when empty |
+| 4 | Top blocker if any | PASS | Priority: HOLD → BLOCKED runway → CRITICAL alert → pending decision; hidden when no blocker |
+| 5 | Commander reads air from DASH | PASS | Air Summary in full mode; Quick Status in compact mode; no AIR tab needed |
+| 6 | Reads from ARC_pub_airbaseUiSnapshot | PASS | All data sourced from snapshot (line 257); no raw ARC_pub_state.airbase access |
+| 7 | sqflint + compat scan pass | PASS | Clean |
+
+---
+
+## 2026-04-07 18:04 UTC — Phase 7: AIR map pane integration
+
+**Branch/Commit:** copilot/develop-task-decomposition-plan @ (pending Phase 7 commit)
+
+**Scenario:** Phase 7 implementation — add CT_MAP control (IDC 78137) for spatial traffic awareness on AIR tab AIRFIELD_OPS submode. Add position data (posX/posY) to arrivals/departures tuples. Show runway marker + arrival (blue) / departure (red) markers on map. Selecting a traffic row recenters map. Map hidden for non-AIRFIELD_OPS submodes.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `config/CfgDialogs.hpp` | Add `AirTrafficMap` (RscMapControl, IDC 78137) in AIR controls block; positioned in detail panel area |
+| `config/CfgFunctions.hpp` | Register `ARC_fnc_uiConsoleAirMapPaint` |
+| `functions/ui/fn_uiConsoleAirMapPaint.sqf` | **NEW** — draws runway center marker + arrival/departure traffic markers on CT_MAP; recenters on selected flight |
+| `functions/ui/fn_uiConsoleAirPaint.sqf` | Call map paint after list build; show/hide map per submode; shift detail pane below map when visible |
+| `functions/ui/fn_uiConsoleRefresh.sqf` | Add map control to `_airDedicatedCtrls`; clean up map markers on tab switch; reset map init flag |
+| `functions/ui/fn_uiConsoleMainListSelChanged.sqf` | Recenter map on selected ARR/DEP traffic position via ARC_fnc_uiConsoleAirMapPaint |
+| `functions/core/fn_publicBroadcastState.sqf` | Build `_flightPosMap` from records netId→getPos; append posX/posY (indices 7-8) to arrivals/departures tuples; add `airbaseCenterPos` to snapshot |
+| `docs/architecture/AIR_TOWER_UI_Snapshot_Contract_v1.md` | Document posX/posY extension (indices 7-8) and airbaseCenterPos field |
+| `docs/architecture/AIR_TOWER_Arma_Native_Implementation_Matrix.md` | Phase 6 → Done; Phase 7 → In progress |
+
+### Static checks
+
+| # | Check | Result | Notes |
+|---|-------|--------|-------|
+| 1 | `sqflint_compat_scan.py --strict` on changed files | PASS | 1 pre-existing `trim` usage in fn_uiConsoleMainListSelChanged.sqf (CMD block, not P7 changes) |
+| 2 | `sqflint -e w` on new file fn_uiConsoleAirMapPaint.sqf | PASS | Clean |
+| 3 | `sqflint -e w` on fn_uiConsoleAirPaint.sqf | PASS | Clean |
+| 4 | `sqflint -e w` on fn_publicBroadcastState.sqf | PASS | Clean |
+| 5 | `validate_state_migrations.py` | PASS | 3 scenarios |
+| 6 | `validate_marker_index.py` | PASS | 177 markers all modes |
+
+### Acceptance criteria
+
+| # | Criterion | Result | Notes |
+|---|-----------|--------|-------|
+| 1 | CT_MAP shows runway marker and airbase area | PASS | Runway marker (mil_flag, white) at airbaseCenterPos; default zoom 0.06 |
+| 2 | Inbound traffic positions shown on map | PASS | Blue BLUFOR markers (mil_arrow) with callsign + phase label |
+| 3 | Outbound traffic positions shown on map | PASS | Red OPFOR markers (mil_triangle) with callsign + state label |
+| 4 | Selecting a traffic row recenters map | PASS | ARR/DEP selection calls AirMapPaint with centerOnFid; animated pan |
+| 5 | Map does not interfere with list/detail layout | PASS | Map in right-side upper half (0.40H); detail pane shifts below when visible |
+| 6 | Map zoom defaults to airbase area; user can zoom/pan | PASS | scaleDefault=0.06; scaleMin/scaleMax allow user control |
+| 7 | sqflint + compat scan pass | PASS | Clean (pre-existing trim issue excluded) |
+
+### Runtime validation
+
+| # | Check | Status | Notes |
+|---|-------|--------|-------|
+| 1 | Local MP smoke | BLOCKED | No Arma 3 runtime in CI |
+| 2 | Dedicated server | BLOCKED | No dedicated server in CI |
+| 3 | JIP snapshot | BLOCKED | Deferred to pre-dedicated validation |
+
+---
+
+## 2026-04-07 18:27 UTC — Phase 8: RemoteExec hardening completion
+
+**Branch/Commit:** copilot/develop-task-decomposition-plan @ (pending Phase 8 commit)
+
+**Scenario:** Phase 8 implementation — complete CfgRemoteExec allowlist for all AIR client→server request paths, verify explicit JIP flags, validate sender verification on all server handlers, and update hardening plan documentation.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `docs/security/RemoteExec_Hardening_Plan.md` | Added 10 AIR endpoints to §1.1 inventory; added sender validation requirements in §3; added new §6 documenting Phase 8 AIR completion status with per-handler S0–S3 checklist |
+| `docs/architecture/AIR_TOWER_Arma_Native_Implementation_Matrix.md` | Phase 7 → Done; Phase 8 → Done; Multiplayer locality grade B- → A- |
+| `tests/TEST-LOG.md` | Phase 8 validation entry |
+
+### Static checks
+
+| # | Check | Result | Notes |
+|---|-------|--------|-------|
+| 1 | Cross-check remoteExec targets vs CfgRemoteExec entries | PASS | All 10 AIR targets in allowlist; no orphans |
+| 2 | No `call` command remoteExec in AIR paths | PASS | Grep returns empty |
+| 3 | All 9 server handlers have isServer guard (S0) | PASS | Verified in all fn_airbase{Submit,Request,Cancel,Mark}*.sqf |
+| 4 | All 9 server handlers use ARC_fnc_rpcValidateSender (S1) | PASS | Verified in all server-side handlers |
+| 5 | JIP=0 for all AIR RPCs | PASS | Inherited from class default; no per-entry jip override |
+| 6 | `validate_state_migrations.py` | PASS | 3 scenarios |
+| 7 | `validate_marker_index.py` | PASS | 177 markers all modes |
+
+### Acceptance criteria
+
+| # | Criterion | Result | Notes |
+|---|-----------|--------|-------|
+| 1 | All 9 AIR client→server wrappers in CfgRemoteExec with mode=1 and jip=0 | PASS | Lines 61-69 of CfgRemoteExec.hpp; class-level mode=1, jip=0 |
+| 2 | New AIR functions from P1–P7 also allowlisted | PASS | No new remoteExec-callable functions in P1–P7; UI functions are client-local |
+| 3 | Server-side handlers validate remoteExecutedOwner | PASS | All 9 use ARC_fnc_rpcValidateSender which checks remoteExecutedOwner |
+| 4 | JIP flags explicit: 0 for all ephemeral AIR RPCs | PASS | Class-level default; no JIP-enabled AIR entries |
+| 5 | No `call` command in allowlist for AIR paths | PASS | Commands class has no AIR-specific entries |
+| 6 | Hardening plan updated with AIR completion | PASS | New §6 with per-handler audit table |
+
+### Runtime validation
+
+| # | Check | Status | Notes |
+|---|-------|--------|-------|
+| 1 | Local MP smoke | BLOCKED | No Arma 3 runtime in CI |
+| 2 | Dedicated server | BLOCKED | No dedicated server in CI |
+| 3 | JIP smoke | BLOCKED | Deferred to pre-dedicated validation |

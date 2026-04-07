@@ -67,6 +67,13 @@ if (!isNull _ctrlDetailsGrp) then { _ctrlDetailsGrp ctrlShow false; };
 if (!isNull _ctrlDetails) then { _ctrlDetails ctrlShow false; };
 { if (!isNull _x) then { _x ctrlShow false; }; } forEach _opsCtrls;
 
+// Baseline: hide AIR / TOWER dedicated controls (shown only on AIR tab)
+private _airStripGroup = _display displayCtrl 78130;
+private _airDecisionBand = _display displayCtrl 78136;
+private _airTrafficMap = _display displayCtrl 78137;
+private _airDedicatedCtrls = [_airStripGroup, _airDecisionBand, _airTrafficMap];
+{ if (!isNull _x) then { _x ctrlShow false; }; } forEach _airDedicatedCtrls;
+
 // Baseline: hide S2 workflow controls (shown only on Intelligence tab)
 private _s2Ctrls = [
     _display displayCtrl 78050,
@@ -85,6 +92,22 @@ private _tab = ["ARC_console_activeTab", "DASH"] call ARC_fnc_uiNsGetString;
 _tab = toUpper _tab;
 
 private _prevRefreshTab = ["ARC_console_prevRefreshTab", "", false] call ARC_fnc_uiNsGetString;
+
+// Phase 4: clear AIR confirmation state when switching away from AIR tab.
+if (_tab != "AIR") then {
+    uiNamespace setVariable ["ARC_console_airConfirmPending", ""];
+    uiNamespace setVariable ["ARC_console_airConfirmLabel", ""];
+    uiNamespace setVariable ["ARC_console_airConfirmRid", ""];
+    uiNamespace setVariable ["ARC_console_airConfirmFid", ""];
+    // Phase 7: reset map initialization flag so it re-centers on next AIR tab entry.
+    uiNamespace setVariable ["ARC_console_airMapInitialized", false];
+    // Phase 7: clean up map markers when leaving AIR tab.
+    private _mapMarkers = uiNamespace getVariable ["ARC_console_airMapMarkers", []];
+    if (_mapMarkers isEqualType []) then {
+        { if (_x isEqualType "") then { deleteMarkerLocal _x; }; } forEach _mapMarkers;
+    };
+    uiNamespace setVariable ["ARC_console_airMapMarkers", []];
+};
 
 // ---------------------------------------------------------------------------
 
@@ -232,6 +255,9 @@ case "DASH":
         if (!isNull _ctrlList) then { _ctrlList ctrlShow true; };
         if (!isNull _ctrlDetailsGrp) then { _ctrlDetailsGrp ctrlShow true; };
         if (!isNull _ctrlDetails) then { _ctrlDetails ctrlShow true; };
+
+        // Show AIR-dedicated controls (Phase 1 scaffold)
+        { if (!isNull _x) then { _x ctrlShow true; }; } forEach _airDedicatedCtrls;
 
         private _canAirHoldRelease = ["ARC_console_airCanHoldRelease", false] call ARC_fnc_uiNsGetBool;
         private _canAirQueueManage = ["ARC_console_airCanQueueManage", false] call ARC_fnc_uiNsGetBool;
