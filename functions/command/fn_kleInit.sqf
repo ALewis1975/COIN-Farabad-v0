@@ -66,6 +66,7 @@ _influenceDelta = (_influenceDelta max 0.01) min 0.20;
 private _elderClasses = ["C_man_1", "C_man_polo_1_F", "C_man_polo_4_F", "C_man_polo_6_F"];
 private _elderClass = _elderClasses select (floor (random (count _elderClasses)));
 private _elderGrp   = createGroup [civilian, true];
+_elderGrp setGroupIdGlobal [format ["KLE Elder %1", _taskId]];
 private _elder      = _elderGrp createUnit [_elderClass, _pos, [], 2, "NONE"];
 
 if (isNull _elder) exitWith
@@ -90,12 +91,12 @@ _elder setName _elderName;
 private _elderNid = netId _elder;
 missionNamespace setVariable ["kle_v0_elderNetId", _elderNid, true];
 
-diag_log format ["[ARC][KLE] kleInit: elder '%1' spawned at %2 (taskId=%3).", _elderName, mapGridPosition _pos, _taskId];
+diag_log format ["[ARC][KLE] kleInit: elder '%1' spawned at %2 (taskId=%3, disp=%4).", _elderName, mapGridPosition _pos, _taskId, _disp];
 
 // ── KLE engagement monitor (spawned loop) ──────────────────────────────────
-[_taskId, _pos, _proxRadiusM, _engageTimeS, _influenceDelta, _elderNid, _elderName] spawn
+[_taskId, _pos, _proxRadiusM, _engageTimeS, _influenceDelta, _elderName] spawn
 {
-    params ["_taskId", "_pos", "_proxRadiusM", "_engageTimeS", "_influenceDelta", "_elderNid", "_elderName"];
+    params ["_taskId", "_pos", "_proxRadiusM", "_engageTimeS", "_influenceDelta", "_elderName"];
 
     private _startTs = serverTime;
     private _dwellAccum = 0;
@@ -136,15 +137,16 @@ diag_log format ["[ARC][KLE] kleInit: elder '%1' spawned at %2 (taskId=%3).", _e
                 if (!isNil "ARC_fnc_civsubDistrictsFindByPos") then
                 {
                     private _dr = [_pos] call ARC_fnc_civsubDistrictsFindByPos;
-                    if (_dr isEqualType [] && { (count _dr) >= 1 }) then { _districtId = _dr # 0; };
+                    if (_dr isEqualType [] && { (count _dr) >= 1 }) then { _districtId = _dr select 0; };
                 };
 
-                if (_districtId isNotEqualTo "") then
+                if (!(_districtId isEqualTo "")) then
                 {
                     private _bundle = createHashMap;
                     _bundle set ["districtId",     _districtId];
-                    _bundle set ["source",         createHashMap];
-                    (_bundle get "source") set ["event", "KLE_SUCCESS"];
+                    private _sourceMap = createHashMap;
+                    _sourceMap set ["event", "KLE_SUCCESS"];
+                    _bundle set ["source", _sourceMap];
                     _bundle set ["G_delta",  _influenceDelta];
                     _bundle set ["W_delta",  _influenceDelta * 0.5];
                     _bundle set ["R_delta",  -(_influenceDelta * 0.3)];
@@ -171,7 +173,7 @@ diag_log format ["[ARC][KLE] kleInit: elder '%1' spawned at %2 (taskId=%3).", _e
             ["activeIncidentCloseReady", true] call ARC_fnc_stateSet;
             missionNamespace setVariable ["ARC_activeIncidentCloseReady", true, true];
 
-            diag_log format ["[ARC][KLE] kleWatch: SUCCESS — taskId=%1 elder=%2 dwell=%3s.", _taskId, _elderName, _dwellAccum];
+            diag_log format ["[ARC][KLE] kleWatch: SUCCESS — taskId=%1 elder=%2 dwell=%3s elapsed=%4s.", _taskId, _elderName, _dwellAccum, serverTime - _startTs];
         };
     };
 };

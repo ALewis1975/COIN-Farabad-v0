@@ -191,6 +191,7 @@ missionNamespace setVariable ["civsub_v1_civ_lastSpawnStage", "create_group", tr
 // Prefer createUnit in a civilian group (waypoints), but fall back to createAgent if createUnit fails.
 private _grp = createGroup [civilian, true];
 if (isNull _grp) exitWith { ["createGroup_null","create_group"] call _fail };
+_grp setGroupIdGlobal [format ["CIV %1", _districtId]];
 
 missionNamespace setVariable ["civsub_v1_civ_lastSpawnStage", "create_unit", true];
 

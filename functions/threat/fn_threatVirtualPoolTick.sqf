@@ -247,6 +247,7 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
                             _vgPatrolWaypointN = (_vgPatrolWaypointN max 3) min 10;
 
                             private _grp           = createGroup east;
+                            _grp setGroupIdGlobal [format ["VIPER %1", _vgId]];
                             private _spawnedNetIds = [];
 
                             for "_i" from 1 to _strength do {

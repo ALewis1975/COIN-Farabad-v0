@@ -54,7 +54,7 @@ private _spawned = 0;
 private _classIdx = 0;
 
 {
-    _x params ["_mkr", "_role", "_anim"];
+    _x params ["_mkr", "_role"];
 
     private _pos = getMarkerPos _mkr;
     if (_pos isEqualTo [0,0,0]) then { continue; };
@@ -68,6 +68,9 @@ private _classIdx = 0;
     private _unit = _grp createUnit [_cls, _pos, [], 0, "NONE"];
 
     if (isNull _unit) then { continue; };
+
+    // Human-readable group designation for Zeus/debug (ORBAT: MAYOR / Base Support).
+    _grp setGroupIdGlobal [format ["MAYOR Base %1", _role]];
 
     _unit setDir _dir;
     _unit allowDamage false;

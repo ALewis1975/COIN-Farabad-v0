@@ -65,6 +65,7 @@ if (!_found) exitWith { objNull };
 
 private _cls = selectRandom _npcClasses;
 private _grp = createGroup [civilian, true];
+_grp setGroupIdGlobal [format ["CIV NPC %1", _siteKey]];
 private _unit = _grp createUnit [_cls, _spawnPos, [], 0, "NONE"];
 if (isNull _unit) exitWith {
     diag_log format ["[CIVLOC][SPAWN] createUnit failed cls=%1 siteKey=%2", _cls, _siteKey];

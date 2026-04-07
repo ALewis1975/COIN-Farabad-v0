@@ -80,7 +80,8 @@ if (!(_patrolRings isEqualTo createHashMap)) then {
     private _nearPos = [];
     private _nearD   = 1e12;
     {
-        _x params [["_lid", "", [""]], ["_ldisplay", "", [""]], ["_lpos", [], [[]]]];
+        private _lid = _x select 0;
+        private _lpos = if (_x isEqualType [] && { (count _x) >= 3 }) then { _x select 2 } else { [] };
         if ((count _lpos) >= 2) then {
             private _d = _posATL distance2D _lpos;
             if (_d < _nearD && {_d < 600}) then {
@@ -206,8 +207,8 @@ if (_spawnContacts && {!(_zone in ["Airbase", "GreenZone"])}) then
             private _ang = random 360;
             private _dist = _routeRadius * (0.6 + random 0.35);
             _spawnPos = [
-                (_posATL # 0) + (sin _ang) * _dist,
-                (_posATL # 1) + (cos _ang) * _dist,
+                (_posATL select 0) + (sin _ang) * _dist,
+                (_posATL select 1) + (cos _ang) * _dist,
                 0
             ];
 
@@ -217,6 +218,7 @@ if (_spawnContacts && {!(_zone in ["Airbase", "GreenZone"])}) then
         };
 
         private _grp = createGroup east;
+        _grp setGroupIdGlobal [format ["VIPER Patrol %1-%2", _taskId, _g]];
 
         for "_i" from 1 to _grpSize do
         {
@@ -246,8 +248,8 @@ if (_spawnContacts && {!(_zone in ["Airbase", "GreenZone"])}) then
                 private _ang = random 360;
                 private _dist = _routeRadius * random 1;
                 private _wpPos = [
-                    (_posATL # 0) + (sin _ang) * _dist,
-                    (_posATL # 1) + (cos _ang) * _dist,
+                    (_posATL select 0) + (sin _ang) * _dist,
+                    (_posATL select 1) + (cos _ang) * _dist,
                     0
                 ];
                 private _wp = _grp addWaypoint [_wpPos, 0];

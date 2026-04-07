@@ -109,6 +109,7 @@ if (!(_threatId isEqualTo "")) then
 
 // Spawn bomber unit
 private _grp = createGroup [east, true];
+_grp setGroupIdGlobal [format ["COBRA SB %1", _threatId]];
 private _bomber = _grp createUnit ["O_Soldier_F", _spawnPos, [], 0, "NONE"];
 _bomber setPos _spawnPos;
 _bomber setVariable ["ARC_isSuicideBomber", true, true];
