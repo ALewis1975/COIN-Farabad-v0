@@ -1037,7 +1037,12 @@ if (_arcProfileDevMode) then {
 
 // Faction units spawn with guardpost.sqf
 private _targetFactions = ["rhs_faction_usaf", "rhs_faction_usarmy_d"];
-private _unitsNeedingGuardPost = allUnits select { (faction _x) in _targetFactions };
+private _unitsNeedingGuardPost = [];
+{
+    if ((faction _x) in _targetFactions) then {
+        _unitsNeedingGuardPost pushBack _x;
+    };
+} forEach allUnits;
 { [_x] spawn ARC_fnc_guardPost; } forEach _unitsNeedingGuardPost;
 
 
