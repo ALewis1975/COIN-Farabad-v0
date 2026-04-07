@@ -13,7 +13,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-04-07 13:32 UTC — Phase 2: AIRFIELD_OPS board conversion
 
-**Branch/Commit:** copilot/develop-task-decomposition-plan @ pending
+**Branch/Commit:** copilot/develop-task-decomposition-plan @ c704f07
 
 **Scenario:** Phase 2 implementation — restructure the AIRFIELD_OPS (default) submode list layout from a developer-oriented flat dump to a fixed operational board. Arrivals lead, followed by runway, departures, then low-priority sections (events/staffing/history). STATUS|OPS metadata row removed (replaced by Phase 1 status strip chips). Decision Band rows removed from list (handled by Phase 1 decision band control IDC 78136). Mode indicator moved to bottom of list so default focus lands on operational data. Operational Summary detail pane section replaced with compact freshness line.
 

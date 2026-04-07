@@ -270,6 +270,9 @@ if (!isNull _airChipRunway) then { _airChipRunway ctrlSetStructuredText parseTex
 // --- Arrivals chip ---
 // Snapshot Contract v1 tuple indices: [flightId(0), callsign(1), category(2), phase(3), ageS(4), priority(5), status(6)]
 private _IDX_FLIGHT_STATUS = 6;
+// Priority thresholds (shared between arrivals + departures)
+private _PRIO_EMERGENCY = 100;
+private _PRIO_ELEVATED = 1;
 private _arrCount = count _arrivals;
 private _arrStatus = "NORMAL";
 {
@@ -530,7 +533,7 @@ if (_rebuild) then {
                         private _prio = _x param [5, 0];
                         private _status = _x param [6, "NORMAL"];
                         private _trackLabel = [_fid, _callsign, _aircraftType] call _flightLabel;
-                        private _prioTag = if (_prio >= 100) then { " !EMERGENCY!" } else { if (_prio >= 1) then { " [PRI]" } else { "" } };
+                        private _prioTag = if (_prio >= _PRIO_EMERGENCY) then { " !EMERGENCY!" } else { if (_prio >= _PRIO_ELEVATED) then { " [PRI]" } else { "" } };
                         private _row = _ctrlList lbAdd format ["%1  |  %2  |  %3%4", _trackLabel, _phase, _status, _prioTag];
                         _ctrlList lbSetData [_row, format ["ARR|%1|%2|%3|%4", _fid, _callsign, _phase, _status]];
                     } forEach _arrivals;
@@ -557,7 +560,7 @@ if (_rebuild) then {
                         private _prio = _x param [5, 0];
                         private _status = _x param [6, "NORMAL"];
                         private _trackLabel = [_fid, _callsign, _aircraftType] call _flightLabel;
-                        private _prioTag = if (_prio >= 100) then { " !EMERGENCY!" } else { if (_prio >= 1) then { " [PRI]" } else { "" } };
+                        private _prioTag = if (_prio >= _PRIO_EMERGENCY) then { " !EMERGENCY!" } else { if (_prio >= _PRIO_ELEVATED) then { " [PRI]" } else { "" } };
                         private _row = _ctrlList lbAdd format ["%1  |  %2  |  %3%4", _trackLabel, _state, _status, _prioTag];
                         _ctrlList lbSetData [_row, format ["DEP|%1|%2|%3|%4", _fid, _callsign, _state, _status]];
                     } forEach _departures;
