@@ -15,6 +15,7 @@ import RscListbox;
 import RscCombo;
 import RscStructuredText;
 import RscControlsGroup;
+import RscMapControl;
 
 class ARC_IntelReportDialog
 {
