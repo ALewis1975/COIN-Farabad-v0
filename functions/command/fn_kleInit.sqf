@@ -144,8 +144,9 @@ diag_log format ["[ARC][KLE] kleInit: elder '%1' spawned at %2 (taskId=%3).", _e
                 {
                     private _bundle = createHashMap;
                     _bundle set ["districtId",     _districtId];
-                    _bundle set ["source",         createHashMap];
-                    (_bundle get "source") set ["event", "KLE_SUCCESS"];
+                    private _sourceMap = createHashMap;
+                    _sourceMap set ["event", "KLE_SUCCESS"];
+                    _bundle set ["source", _sourceMap];
                     _bundle set ["G_delta",  _influenceDelta];
                     _bundle set ["W_delta",  _influenceDelta * 0.5];
                     _bundle set ["R_delta",  -(_influenceDelta * 0.3)];
