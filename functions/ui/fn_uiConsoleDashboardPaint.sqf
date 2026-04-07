@@ -275,25 +275,23 @@ if (!(_airHoldState isEqualType true) && !(_airHoldState isEqualType false)) the
 private _airNextArrival = if ((count _airArrivals) > 0) then { _airArrivals select 0 } else { [] };
 private _airNextDeparture = if ((count _airDepartures) > 0) then { _airDepartures select 0 } else { [] };
 
-private _airInboundLabel = "No inbound";
-if (_airNextArrival isEqualType [] && { (count _airNextArrival) >= 4 }) then {
-    private _cs = _airNextArrival param [1, ""];
-    private _ph = _airNextArrival param [3, ""];
+// Phase 6: helper — format a flight tuple as "callsign (phase/state)" or just callsign.
+// Falls back to flightId (index 0) when callsign is empty.
+// tuple: [flightId(0), callsign(1), category(2), phase/state(3), ...]
+private _fmtFlight = {
+    params [["_tuple", [], [[]]], ["_fallback", "?", [""]]];
+    if (!(_tuple isEqualType []) || { (count _tuple) < 4 }) exitWith { _fallback };
+    private _cs = _tuple param [1, ""];
+    private _ph = _tuple param [3, ""];
     if (!(_cs isEqualType "")) then { _cs = ""; };
     if (!(_ph isEqualType "")) then { _ph = ""; };
-    if (_cs isEqualTo "") then { _cs = _airNextArrival param [0, "?"]; };
-    _airInboundLabel = if (_ph isEqualTo "") then { _cs } else { format ["%1 (%2)", _cs, _ph] };
+    if (_cs isEqualTo "") then { _cs = _tuple param [0, "?"]; };
+    if (_ph isEqualTo "") then { _cs } else { format ["%1 (%2)", _cs, _ph] }
 };
+if (!(_fmtFlight isEqualType {})) exitWith { false };
 
-private _airOutboundLabel = "No outbound";
-if (_airNextDeparture isEqualType [] && { (count _airNextDeparture) >= 4 }) then {
-    private _cs = _airNextDeparture param [1, ""];
-    private _st = _airNextDeparture param [3, ""];
-    if (!(_cs isEqualType "")) then { _cs = ""; };
-    if (!(_st isEqualType "")) then { _st = ""; };
-    if (_cs isEqualTo "") then { _cs = _airNextDeparture param [0, "?"]; };
-    _airOutboundLabel = if (_st isEqualTo "") then { _cs } else { format ["%1 (%2)", _cs, _st] };
-};
+private _airInboundLabel  = [_airNextArrival, "No inbound"] call _fmtFlight;
+private _airOutboundLabel = [_airNextDeparture, "No outbound"] call _fmtFlight;
 
 private _airAlertLabel = if ((count _airAlerts) > 0) then { (_airAlerts select 0) param [0, "NONE"] } else { "NONE" };
 // Phase 5: read freshness state from snapshot for dashboard display.

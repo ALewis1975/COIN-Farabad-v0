@@ -4417,7 +4417,7 @@ python3 scripts/dev/validate_marker_index.py
 ### Phase 6 — DASH air summary completion (2026-04-07)
 
 **Date/Time:** 2026-04-07T17:50:00Z
-**Branch/Commit:** copilot/develop-task-decomposition-plan (pending commit for Phase 6)
+**Branch/Commit:** copilot/develop-task-decomposition-plan @ a33f27c
 
 **Scenario:** Phase 6 implementation — commander-ready air summary on DASH/COP with callsign+phase/state, top blocker, improved runway color mapping.
 
