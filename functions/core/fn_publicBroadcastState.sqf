@@ -118,6 +118,11 @@ private _arrQueued = 0;
 // Departures on ground can also be resolved from parked assets via routeMeta.assetId.
 private _airbaseCenterMarker = missionNamespace getVariable ["airbase_v1_arrival_runway_marker", "L-270 Inbound"];
 private _airbaseCenterPos = getMarkerPos _airbaseCenterMarker;
+if (!(_airbaseCenterPos isEqualType []) || { (count _airbaseCenterPos) < 2 }) then {
+    _airbaseCenterPos = [0, 0];
+};
+private _airbaseCenterX = _airbaseCenterPos select 0;
+private _airbaseCenterY = _airbaseCenterPos select 1;
 private _flightPosMap = [];
 {
     if !(_x isEqualType []) then { continue; };
@@ -678,8 +683,8 @@ private _uiDepartures = [];
                 };
             };
             // Phase 7: append posX/posY for CT_MAP (indices 7-8); default airbase center.
-            private _posX = _airbaseCenterPos select 0;
-            private _posY = if (count _airbaseCenterPos > 2) then { _airbaseCenterPos select 2 } else { _airbaseCenterPos select 1 };
+            private _posX = _airbaseCenterX;
+            private _posY = _airbaseCenterY;
             {
                 if ((_x select 0) isEqualTo _fid) exitWith { _posX = _x select 1; _posY = _x select 2; };
             } forEach _flightPosMap;
@@ -701,8 +706,8 @@ private _uiDepartures = [];
                 };
             };
             // Phase 7: append posX/posY for CT_MAP (indices 7-8); default airbase center.
-            private _posX = _airbaseCenterPos select 0;
-            private _posY = if (count _airbaseCenterPos > 2) then { _airbaseCenterPos select 2 } else { _airbaseCenterPos select 1 };
+            private _posX = _airbaseCenterX;
+            private _posY = _airbaseCenterY;
             {
                 if ((_x select 0) isEqualTo _fid) exitWith { _posX = _x select 1; _posY = _x select 2; };
             } forEach _flightPosMap;
@@ -726,8 +731,8 @@ private _uiDepartures = [];
     } forEach _uiArrivals;
     if (_alreadyPresent) then { continue; };
     // Phase 7: resolve position for pending clearance arrivals from records.
-    private _pendPosX = _airbaseCenterPos select 0;
-    private _pendPosY = if (count _airbaseCenterPos > 2) then { _airbaseCenterPos select 2 } else { _airbaseCenterPos select 1 };
+    private _pendPosX = _airbaseCenterX;
+    private _pendPosY = _airbaseCenterY;
     {
         if ((_x select 0) isEqualTo _requestId) exitWith { _pendPosX = _x select 1; _pendPosY = _x select 2; };
     } forEach _flightPosMap;
@@ -933,7 +938,7 @@ private _airbaseUiSnapshot = [
         ["arrival", _autoDelayArrivalS]
     ]],
     ["casTiming", _casTiming],
-    ["airbaseCenterPos", [_airbaseCenterPos select 0, if (count _airbaseCenterPos > 2) then { _airbaseCenterPos select 2 } else { _airbaseCenterPos select 1 }]]
+    ["airbaseCenterPos", [_airbaseCenterX, _airbaseCenterY]]
 ];
 if ((count _uiDebug) > 0) then {
     _airbaseUiSnapshot pushBack ["debug", _uiDebug];

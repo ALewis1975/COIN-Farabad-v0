@@ -11,6 +11,36 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-07 20:08 UTC — AIR map bottom-edge rendering fix
+
+**Branch/Commit:** copilot/fix-map-screen-bottom @ 86e880e
+
+**Scenario:** Fix AIR/TOWER traffic map snapshot coordinates so the CT_MAP centers on valid world X/Y positions instead of using marker altitude as the Y axis fallback.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `functions/core/fn_publicBroadcastState.sqf` | Normalize runway marker position to X/Y, reuse those defaults for arrivals/departures/pending arrivals, and publish `airbaseCenterPos` as `[x, y]` |
+
+### Static checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_publicBroadcastState.sqf` | PASS | No parser-compat violations |
+| 2 | sqflint | `~/.local/bin/sqflint -e w functions/core/fn_publicBroadcastState.sqf` | PASS | Installed locally in CI container because `sqflint` was not preinstalled |
+| 3 | State migrations | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios |
+| 4 | Marker index | `python3 scripts/dev/validate_marker_index.py` | PASS | 177 markers all modes |
+
+### Gameplay / MP checks
+
+| # | Check | Result | Notes |
+|---|-------|--------|-------|
+| 1 | AIRFIELD_OPS traffic map centers on runway/traffic without black off-map panel | BLOCKED | Requires in-game visual verification in Arma 3 runtime |
+| 2 | Dedicated server / JIP sync | BLOCKED | No dedicated server or Arma runtime available in CI container |
+
+---
+
 ## 2026-04-07 19:30 UTC — AIR/TOWER UX finish (PRs 1–5)
 
 **Branch/Commit:** copilot/review-air-tower-screen-again @ c16dfbf
