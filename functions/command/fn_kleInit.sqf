@@ -91,12 +91,12 @@ _elder setName _elderName;
 private _elderNid = netId _elder;
 missionNamespace setVariable ["kle_v0_elderNetId", _elderNid, true];
 
-diag_log format ["[ARC][KLE] kleInit: elder '%1' spawned at %2 (taskId=%3).", _elderName, mapGridPosition _pos, _taskId];
+diag_log format ["[ARC][KLE] kleInit: elder '%1' spawned at %2 (taskId=%3, disp=%4).", _elderName, mapGridPosition _pos, _taskId, _disp];
 
 // ── KLE engagement monitor (spawned loop) ──────────────────────────────────
-[_taskId, _pos, _proxRadiusM, _engageTimeS, _influenceDelta, _elderNid, _elderName] spawn
+[_taskId, _pos, _proxRadiusM, _engageTimeS, _influenceDelta, _elderName] spawn
 {
-    params ["_taskId", "_pos", "_proxRadiusM", "_engageTimeS", "_influenceDelta", "_elderNid", "_elderName"];
+    params ["_taskId", "_pos", "_proxRadiusM", "_engageTimeS", "_influenceDelta", "_elderName"];
 
     private _startTs = serverTime;
     private _dwellAccum = 0;
@@ -173,7 +173,7 @@ diag_log format ["[ARC][KLE] kleInit: elder '%1' spawned at %2 (taskId=%3).", _e
             ["activeIncidentCloseReady", true] call ARC_fnc_stateSet;
             missionNamespace setVariable ["ARC_activeIncidentCloseReady", true, true];
 
-            diag_log format ["[ARC][KLE] kleWatch: SUCCESS — taskId=%1 elder=%2 dwell=%3s.", _taskId, _elderName, _dwellAccum];
+            diag_log format ["[ARC][KLE] kleWatch: SUCCESS — taskId=%1 elder=%2 dwell=%3s elapsed=%4s.", _taskId, _elderName, _dwellAccum, serverTime - _startTs];
         };
     };
 };
