@@ -754,6 +754,27 @@ private _uiStaffing = [];
     _uiStaffing pushBack [_lane, _mode, if (_operator isEqualTo "") then { "AUTO" } else { _operator }];
 } forEach _staffingView;
 
+// Translate raw event tokens to operator-readable labels (Vision Plan §2.1 Rule 5).
+private _eventKindLabel = {
+    params ["_kind"];
+    switch (toUpper _kind) do
+    {
+        case "EXEC_START":            { "Movement started" };
+        case "EXEC_END":              { "Movement complete" };
+        case "LOCK_ACQUIRE":          { "Runway reserved" };
+        case "LOCK_RELEASE":          { "Runway released" };
+        case "AUTO_QUEUE":            { "Auto-queued" };
+        case "SUBMIT":                { "Request submitted" };
+        case "CANCEL":                { "Request cancelled" };
+        case "APPROVE":               { "Clearance approved" };
+        case "DENY":                  { "Clearance denied" };
+        case "ESCALATE":              { "Priority escalated" };
+        case "LIFECYCLE_LAND_GATE":   { "On final approach" };
+        default                       { _kind };
+    }
+};
+if (!(_eventKindLabel isEqualType {})) exitWith { false };
+
 private _uiRecentEvents = [];
 {
     if !(_x isEqualType []) then { continue; };
@@ -761,7 +782,8 @@ private _uiRecentEvents = [];
     private _eventTs = _x param [0, -1];
     private _eventKind = toUpper (_x param [1, ""]);
     private _eventSubject = _x param [2, ""];
-    private _label = if (_eventSubject isEqualTo "") then { _eventKind } else { format ["%1 %2", _eventKind, _eventSubject] };
+    private _kindLabel = [_eventKind] call _eventKindLabel;
+    private _label = if (_eventSubject isEqualTo "") then { _kindLabel } else { format ["%1: %2", _kindLabel, _eventSubject] };
     _uiRecentEvents pushBack [_eventTs, _label];
 } forEach _eventsView;
 

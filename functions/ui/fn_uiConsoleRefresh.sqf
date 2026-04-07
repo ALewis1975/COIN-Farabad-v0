@@ -290,7 +290,7 @@ case "DASH":
         if (!isNull _b2) then {
             _b2 ctrlShow true;
             _b2 ctrlEnable true;
-            _b2 ctrlSetText (if (_airMode isEqualTo "PILOT") then {"REFRESH"} else {"VIEW"});
+            _b2 ctrlSetText (if (_airMode isEqualTo "PILOT") then {"UPDATE"} else {"VIEW"});
         };
 
         if (!_canAirRead && !_canAirControl && !_canAirPilot) then

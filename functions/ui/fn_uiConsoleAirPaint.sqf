@@ -131,9 +131,9 @@ private _modeSummary = {
     params ["_mode"];
     switch (toUpper _mode) do
     {
-        case "CLEARANCES": { "tower action queue" };
-        case "DEBUG": { "technical telemetry" };
-        default { "traffic picture" };
+        case "CLEARANCES": { "Clearance decisions" };
+        case "DEBUG": { "Debug telemetry" };
+        default { "Airfield operations" };
     }
 };
 
@@ -141,9 +141,9 @@ private _modeGuidance = {
     params ["_mode"];
     switch (toUpper _mode) do
     {
-        case "CLEARANCES": { "Use this view to approve or deny requests, manage queued departures, and claim or release controller lanes." };
-        case "DEBUG": { "Use this view for snapshot internals, route-validation failures, and controller debug telemetry." };
-        default { "Use this view to understand runway status, inbound traffic, outbound traffic, and immediate risks in one glance." };
+        case "CLEARANCES": { "Approve or deny requests, manage departures, and assign controller lanes." };
+        case "DEBUG": { "Snapshot internals, route failures, and controller telemetry." };
+        default { "Runway status, inbound and outbound traffic, and immediate risks at a glance." };
     }
 };
 
@@ -402,10 +402,9 @@ if (_rebuild) then {
         // CLEARANCES / DEBUG: mode row stays at top (specialist views).
         if (_airSubmode != "AIRFIELD_OPS") then {
             private _modeRow = _ctrlList lbAdd format [
-                "View: %1 - %2  |  Secondary: %3",
+                "%1  |  %2",
                 _airSubmode,
-                [_airSubmode] call _modeSummary,
-                (if (_nextMode isEqualTo _airSubmode) then {"REFRESH"} else {_nextMode})
+                [_airSubmode] call _modeSummary
             ];
             _ctrlList lbSetData [_modeRow, format ["MODE|%1", _airSubmode]];
         };
@@ -616,12 +615,11 @@ if (_rebuild) then {
             };
         };
 
-        // AIRFIELD_OPS: mode/view indicator at bottom — keeps operational data first
+        // AIRFIELD_OPS: view indicator at bottom — keeps operational data first
         if (_airSubmode isEqualTo "AIRFIELD_OPS") then {
             private _modeRowBottom = _ctrlList lbAdd format [
-                "[View: %1]  |  Secondary: %2",
-                [_airSubmode] call _modeSummary,
-                (if (_nextMode isEqualTo _airSubmode) then {"REFRESH"} else {_nextMode})
+                "[%1]",
+                [_airSubmode] call _modeSummary
             ];
             _ctrlList lbSetData [_modeRowBottom, format ["MODE|%1", _airSubmode]];
         };
@@ -670,15 +668,19 @@ if (!isNull _ctrlMap) then {
 };
 
 private _primaryLabel = "READ-ONLY";
-private _secondaryLabel = "REFRESH";
+private _secondaryLabel = "UPDATE";
 private _primaryEnabled = false;
 private _secondaryEnabled = true;
 private _primaryTooltip = "No action available.";
-private _secondaryTooltip = "Refresh AIR view.";
+private _secondaryTooltip = "Refresh airfield data.";
 
 if (!_canAirRead && !_canAirControl && !_canAirPilot) then {
     _secondaryEnabled = false;
 };
+
+// Helper: build secondary label based on available view switching.
+private _nextViewLabel = if (_nextMode isEqualTo _airSubmode) then {"UPDATE"} else { _nextMode };
+private _nextViewTooltip = if (_nextMode isEqualTo _airSubmode) then { "Refresh airfield data." } else { format ["Switch to %1 view.", _nextMode] };
 
 if (_airMode isEqualTo "PILOT") then {
     _primaryLabel = "SEND REQUEST";
@@ -733,8 +735,8 @@ if (_airMode isEqualTo "PILOT") then {
                             _primaryEnabled = false;
                         };
                     };
-                    _secondaryLabel = if (_nextMode isEqualTo _airSubmode) then {"REFRESH"} else { format ["VIEW: %1", _nextMode] };
-                    _secondaryTooltip = if (_nextMode isEqualTo _airSubmode) then { "Refresh AIR view." } else { format ["Switch to %1.", _nextMode] };
+                    _secondaryLabel = _nextViewLabel;
+                    _secondaryTooltip = _nextViewTooltip;
                 };
             };
         };
@@ -742,8 +744,8 @@ if (_airMode isEqualTo "PILOT") then {
         {
             _primaryLabel = "READ-ONLY";
             _primaryEnabled = false;
-            _secondaryLabel = if (_nextMode isEqualTo _airSubmode) then {"REFRESH"} else { format ["VIEW: %1", _nextMode] };
-            _secondaryTooltip = if (_nextMode isEqualTo _airSubmode) then { "Refresh AIR view." } else { format ["Switch to %1.", _nextMode] };
+            _secondaryLabel = _nextViewLabel;
+            _secondaryTooltip = _nextViewTooltip;
         };
         default
         {
@@ -760,8 +762,8 @@ if (_airMode isEqualTo "PILOT") then {
                     _primaryEnabled = false;
                 };
             };
-            _secondaryLabel = if (_nextMode isEqualTo _airSubmode) then {"REFRESH"} else { format ["VIEW: %1", _nextMode] };
-            _secondaryTooltip = if (_nextMode isEqualTo _airSubmode) then { "Refresh AIR view." } else { format ["Switch to %1.", _nextMode] };
+            _secondaryLabel = _nextViewLabel;
+            _secondaryTooltip = _nextViewTooltip;
         };
     };
 };
@@ -797,24 +799,21 @@ switch (_rowType) do
         _selectionHeading = "View Control";
         _detailLines = [
             format ["Current view: <t color='#FFFFFF'>%1</t>", _airSubmode],
-            format ["Purpose: <t color='#FFFFFF'>%1</t>", [_airSubmode] call _modeGuidance],
-            format ["Next secondary action: <t color='#FFFFFF'>%1</t>", if (_nextMode isEqualTo _airSubmode) then {"REFRESH"} else {_nextMode}],
+            format ["<t color='#FFFFFF'>%1</t>", [_airSubmode] call _modeGuidance],
             format ["Snapshot: <t color='#FFFFFF'>%1</t>", _freshnessText]
         ];
     };
     case "CSTATUS":
     {
-        _selectionHeading = "Clearances";
+        _selectionHeading = "Clearances Overview";
         _detailLines = [
-            format ["Purpose: <t color='#FFFFFF'>%1</t>", ["CLEARANCES"] call _modeGuidance],
+            format ["<t color='#FFFFFF'>%1</t>", ["CLEARANCES"] call _modeGuidance],
             format ["Pending requests: <t color='#FFFFFF'>%1</t>", count _pendingClearances],
-            format ["Queued departures: <t color='#FFFFFF'>%1</t>", count _departures],
-            format ["Controller timers T/G/A: <t color='#FFFFFF'>%1 / %2 / %3</t>",
-                [[_timeouts, "tower", 0] call _getPair] call _fmtSeconds,
-                [[_timeouts, "ground", 0] call _getPair] call _fmtSeconds,
-                [[_timeouts, "arrival", 0] call _getPair] call _fmtSeconds
-            ]
+            format ["Queued departures: <t color='#FFFFFF'>%1</t>", count _departures]
         ];
+        if (_canAirQueueManage) then {
+            _detailLines pushBack "Select a request below to approve or deny.";
+        };
     };
     case "DECISION":
     {
@@ -828,13 +827,18 @@ switch (_rowType) do
             if (_reqRec isEqualType []) then { _reqRec param [2, _parts param [2, ""]] } else { _parts param [2, ""] },
             [_reqMeta, "aircraftType", ""] call _metaGet
         ] call _flightLabel;
+        private _decPrio = if (_rec isEqualType []) then { _rec param [3, 0] } else { 0 };
+        private _decPrioLabel = if (_decPrio >= _PRIO_EMERGENCY) then {"EMERGENCY"} else { if (_decPrio >= _PRIO_ELEVATED) then {"PRIORITY"} else {"Normal"} };
         _selectionHeading = "Decision Required";
         _detailLines = [
-            format ["Request id: <t color='#FFFFFF'>%1</t>", _rid],
             format ["Aircraft: <t color='#FFFFFF'>%1</t>", _decisionLabel],
-            format ["Priority: <t color='#FFFFFF'>%1</t>", if (_rec isEqualType []) then { _rec param [3, 0] } else { 0 }],
-            format ["Guidance: <t color='#FFFFFF'>Use CLEARANCES view to decide this request.</t>"]
+            format ["Priority: <t color='#FFFFFF'>%1</t>", _decPrioLabel]
         ];
+        if (_canAirQueueManage) then {
+            _detailLines pushBack "Switch to CLEARANCES view to decide this request.";
+        } else {
+            _detailLines pushBack "A tower controller needs to decide this request.";
+        };
     };
     case "ARR":
     {
@@ -845,28 +849,51 @@ switch (_rowType) do
             _detailLines = ["<t color='#FFFFFF'>No arrivals inbound.</t>"];
         } else {
             private _trackLabel = [_fid, _rec param [1, _fid], _rec param [2, ""]] call _flightLabel;
-            _selectionHeading = format ["Arrival %1", _trackLabel];
+            private _phase = _rec param [3, "INBOUND"];
+            private _prio = _rec param [5, 0];
+            private _status = _rec param [6, "NORMAL"];
+            private _prioLabel = if (_prio >= _PRIO_EMERGENCY) then {"EMERGENCY"} else { if (_prio >= _PRIO_ELEVATED) then {"PRIORITY"} else {"Normal"} };
+            _selectionHeading = format ["Arrival: %1", _trackLabel];
             _detailLines = [
                 format ["Aircraft: <t color='#FFFFFF'>%1</t>", _trackLabel],
-                format ["Flight ID: <t color='#FFFFFF'>%1</t>", _fid],
-                format ["Type: <t color='#FFFFFF'>%1</t>", _rec param [2, "-"]],
-                format ["Phase: <t color='#FFFFFF'>%1</t>", _rec param [3, "INBOUND"]],
-                format ["Age: <t color='#FFFFFF'>%1</t>", [(_rec param [4, -1])] call _fmtSeconds],
-                format ["Priority: <t color='#FFFFFF'>%1</t>", _rec param [5, 0]],
-                format ["Status: <t color='%1'>%2</t>", [(_rec param [6, "NORMAL"])] call _statusColor, _rec param [6, "NORMAL"]]
+                format ["Phase: <t color='#FFFFFF'>%1</t>", _phase],
+                format ["Time tracked: <t color='#FFFFFF'>%1</t>", [(_rec param [4, -1])] call _fmtSeconds],
+                format ["Priority: <t color='#FFFFFF'>%1</t>", _prioLabel],
+                format ["Status: <t color='%1'>%2</t>", [_status] call _statusColor, _status]
             ];
+            // Constraints and action context
+            if (_holdDepartures) then {
+                _detailLines pushBack "<t color='#F5A623'>Departures on HOLD — runway priority for arrivals.</t>";
+            };
+            if (_prio >= _PRIO_EMERGENCY) then {
+                _detailLines pushBack "<t color='#E74C3C'>EMERGENCY traffic — all other movement yields.</t>";
+            };
+            if (_canAirControl) then {
+                _detailLines pushBack "Action: Use CLEARANCES view to manage this arrival.";
+            };
         };
     };
     case "RWY":
     {
         _selectionHeading = "Runway";
+        private _holdLabel = if (_holdDepartures) then {"HOLD ACTIVE"} else {"OPEN"};
+        private _holdColor = if (_holdDepartures) then {"#E74C3C"} else {"#4CAF50"};
         _detailLines = [
             format ["State: <t color='%1'>%2</t>", [_runwayState] call _statusColor, _runwayState],
-            format ["Active aircraft: <t color='#FFFFFF'>%1</t>", if (_runwayOwnerDisplay isEqualTo "") then {"-"} else {_runwayOwnerDisplay}],
-            format ["Flight ID: <t color='#FFFFFF'>%1</t>", if (_runwayOwnerFlightId isEqualTo "") then {"-"} else {_runwayOwnerFlightId}],
-            format ["Active movement: <t color='#FFFFFF'>%1</t>", _activeMovement],
-            format ["Hold state: <t color='#FFFFFF'>%1</t>", if (_holdDepartures) then {"HOLD ACTIVE"} else {"OPEN"}]
+            format ["Current aircraft: <t color='#FFFFFF'>%1</t>", if (_runwayOwnerDisplay isEqualTo "") then {"None"} else {_runwayOwnerDisplay}],
+            format ["Movement: <t color='#FFFFFF'>%1</t>", _activeMovement],
+            format ["Departure hold: <t color='%1'>%2</t>", _holdColor, _holdLabel]
         ];
+        // Constraints
+        if (_holdDepartures && { _canAirHoldRelease }) then {
+            _detailLines pushBack "Action: Press RELEASE to reopen departures.";
+        };
+        if (!_holdDepartures && { _canAirHoldRelease }) then {
+            _detailLines pushBack "Action: Press HOLD to pause departures.";
+        };
+        if (!_canAirHoldRelease) then {
+            _detailLines pushBack "Read-only: no hold/release authority on this account.";
+        };
     };
     case "DEP":
     {
@@ -877,16 +904,24 @@ switch (_rowType) do
             _detailLines = ["<t color='#FFFFFF'>No departures queued.</t>"];
         } else {
             private _trackLabel = [_fid, _rec param [1, _fid], _rec param [2, ""]] call _flightLabel;
-            _selectionHeading = format ["Departure %1", _trackLabel];
+            private _state = _rec param [3, "QUEUED"];
+            private _prio = _rec param [5, 0];
+            private _status = _rec param [6, "NORMAL"];
+            private _prioLabel = if (_prio >= _PRIO_EMERGENCY) then {"EMERGENCY"} else { if (_prio >= _PRIO_ELEVATED) then {"PRIORITY"} else {"Normal"} };
+            _selectionHeading = format ["Departure: %1", _trackLabel];
             _detailLines = [
                 format ["Aircraft: <t color='#FFFFFF'>%1</t>", _trackLabel],
-                format ["Flight ID: <t color='#FFFFFF'>%1</t>", _fid],
-                format ["Type: <t color='#FFFFFF'>%1</t>", _rec param [2, "-"]],
-                format ["State: <t color='#FFFFFF'>%1</t>", _rec param [3, "QUEUED"]],
-                format ["Age: <t color='#FFFFFF'>%1</t>", [(_rec param [4, -1])] call _fmtSeconds],
-                format ["Priority: <t color='#FFFFFF'>%1</t>", _rec param [5, 0]],
-                format ["Status: <t color='%1'>%2</t>", [(_rec param [6, "NORMAL"])] call _statusColor, _rec param [6, "NORMAL"]]
+                format ["State: <t color='#FFFFFF'>%1</t>", _state],
+                format ["Time in queue: <t color='#FFFFFF'>%1</t>", [(_rec param [4, -1])] call _fmtSeconds],
+                format ["Priority: <t color='#FFFFFF'>%1</t>", _prioLabel],
+                format ["Status: <t color='%1'>%2</t>", [_status] call _statusColor, _status]
             ];
+            if (_holdDepartures) then {
+                _detailLines pushBack "<t color='#F5A623'>Departures on HOLD — this aircraft is waiting.</t>";
+            };
+            if (_canAirControl) then {
+                _detailLines pushBack "Action: Use CLEARANCES view to expedite or cancel.";
+            };
         };
     };
     case "REQ":
@@ -901,20 +936,25 @@ switch (_rowType) do
             if !(_meta isEqualType []) then { _meta = []; };
             private _aircraftType = [_meta, "aircraftType", ""] call _metaGet;
             private _trackLabel = [_rid, _rec param [2, "-"], _aircraftType] call _flightLabel;
-            _selectionHeading = format ["Clearance %1", _rid];
+            private _prio = _rec param [4, 0];
+            private _prioLabel = if (_prio >= _PRIO_EMERGENCY) then {"EMERGENCY"} else { if (_prio >= _PRIO_ELEVATED) then {"PRIORITY"} else {"Normal"} };
+            _selectionHeading = format ["Clearance: %1", _trackLabel];
             _detailLines = [
                 format ["Request: <t color='#FFFFFF'>%1</t>", [(_rec param [1, "-"])] call _requestTypeLabel],
                 format ["Aircraft: <t color='#FFFFFF'>%1</t>", _trackLabel],
                 format ["Requested: <t color='#FFFFFF'>%1</t>", [(_rec param [3, -1])] call _fmtAgo],
-                format ["Priority: <t color='#FFFFFF'>%1</t>", _rec param [4, 0]],
+                format ["Priority: <t color='#FFFFFF'>%1</t>", _prioLabel],
                 format ["Decision needed: <t color='#FFFFFF'>%1</t>", if (_rec param [5, false]) then {"YES"} else {"NO"}],
-                format ["Current owner: <t color='#FFFFFF'>%1</t>", if ((_rec param [6, ""]) isEqualTo "") then {"UNCLAIMED"} else {_rec param [6, ""]}],
-                format ["Fallback timers T/G/A: <t color='#FFFFFF'>%1 / %2 / %3</t>",
-                    [[_timeouts, "tower", 0] call _getPair] call _fmtSeconds,
-                    [[_timeouts, "ground", 0] call _getPair] call _fmtSeconds,
-                    [[_timeouts, "arrival", 0] call _getPair] call _fmtSeconds
-                ]
+                format ["Assigned to: <t color='#FFFFFF'>%1</t>", if ((_rec param [6, ""]) isEqualTo "") then {"Unassigned"} else {_rec param [6, ""]}]
             ];
+            if (_prio >= _PRIO_EMERGENCY) then {
+                _detailLines pushBack "<t color='#E74C3C'>EMERGENCY — requires immediate decision.</t>";
+            };
+            if (_canAirQueueManage) then {
+                _detailLines pushBack "Action: APPROVE or DENY this request.";
+            } else {
+                _detailLines pushBack "Read-only: no clearance authority on this account.";
+            };
         };
     };
     case "FLT":
@@ -926,15 +966,22 @@ switch (_rowType) do
             _detailLines = ["<t color='#FFFFFF'>No departures queued.</t>"];
         } else {
             private _trackLabel = [_fid, _rec param [1, _fid], _rec param [2, ""]] call _flightLabel;
-            _selectionHeading = format ["Queued Flight %1", _trackLabel];
+            private _state = _rec param [3, "QUEUED"];
+            private _prio = _rec param [5, 0];
+            private _prioLabel = if (_prio >= _PRIO_EMERGENCY) then {"EMERGENCY"} else { if (_prio >= _PRIO_ELEVATED) then {"PRIORITY"} else {"Normal"} };
+            _selectionHeading = format ["Queued: %1", _trackLabel];
             _detailLines = [
                 format ["Aircraft: <t color='#FFFFFF'>%1</t>", _trackLabel],
-                format ["Flight ID: <t color='#FFFFFF'>%1</t>", _fid],
-                format ["Type: <t color='#FFFFFF'>%1</t>", _rec param [2, "-"]],
-                format ["State: <t color='#FFFFFF'>%1</t>", _rec param [3, "QUEUED"]],
-                format ["Age: <t color='#FFFFFF'>%1</t>", [(_rec param [4, -1])] call _fmtSeconds],
-                format ["Priority: <t color='#FFFFFF'>%1</t>", _rec param [5, 0]]
+                format ["State: <t color='#FFFFFF'>%1</t>", _state],
+                format ["Time in queue: <t color='#FFFFFF'>%1</t>", [(_rec param [4, -1])] call _fmtSeconds],
+                format ["Priority: <t color='#FFFFFF'>%1</t>", _prioLabel]
             ];
+            if (_holdDepartures) then {
+                _detailLines pushBack "<t color='#F5A623'>Departures on HOLD — this aircraft is waiting.</t>";
+            };
+            if (_canAirQueueManage) then {
+                _detailLines pushBack "Action: EXPEDITE or CANCEL this flight.";
+            };
         };
     };
     case "LANE":
@@ -979,9 +1026,11 @@ switch (_rowType) do
         _selectionHeading = "Pilot Action";
         _detailLines = [
             format ["Action: <t color='#FFFFFF'>%1</t>", _parts param [1, ""]],
-            format ["Primary: <t color='#FFFFFF'>SEND REQUEST</t>"],
-            format ["Secondary: <t color='#FFFFFF'>%1</t>", if (_canAirControl) then {"MODE: TOWER"} else {"REFRESH"}]
+            "Press primary button to send this request to tower."
         ];
+        if (_canAirControl) then {
+            _detailLines pushBack "You also have tower authority — use secondary button to switch.";
+        };
     };
     case "PWRN":
     {
@@ -1041,8 +1090,8 @@ if (!isNull _ctrlMapCheck) then {
     _mapVisible = ctrlShown _ctrlMapCheck;
 };
 if (_mapVisible) then {
-    // Map ends at 0.082 + 0.40 = 0.482 of safeZoneH. Detail starts just below with small gap.
-    _airP set [1, 0.005 + (0.40 * ((ctrlPosition _airGrp) select 3))];
+    // Map ends at 0.082 + 0.35 = 0.432 of safeZoneH. Detail starts just below with small gap.
+    _airP set [1, 0.005 + (0.35 * ((ctrlPosition _airGrp) select 3))];
 } else {
     _airP set [1, _defaultPosAir select 1];
 };
