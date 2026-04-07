@@ -273,10 +273,9 @@ private _airChipTowerMode = _display displayCtrl 78134;
 private _airChipAlerts = _display displayCtrl 78135;
 private _airDecBand = _display displayCtrl 78136;
 
-// --- Runway chip ---
-private _rwyChipColor = [_runwayState] call _statusColor;
-private _rwyChipText = format ["<t size='0.85' color='%1'>&#x25CF;</t> <t size='0.85'>RWY: %2</t>", _rwyChipColor, _runwayState];
-if (!isNull _airChipRunway) then { _airChipRunway ctrlSetStructuredText parseText _rwyChipText; };
+// --- Runway chip --- (abbreviated labels per Refactor Plan §PR3.4)
+private _rwyChipHtml = [["RWY", _runwayState, _runwayState]] call ARC_fnc_uiConsoleFormatStatusChip;
+if (!isNull _airChipRunway) then { _airChipRunway ctrlSetStructuredText parseText _rwyChipHtml; };
 
 // --- Arrivals chip ---
 // Snapshot Contract v1 tuple indices: [flightId(0), callsign(1), category(2), phase(3), ageS(4), priority(5), status(6)]
@@ -294,10 +293,9 @@ private _arrStatus = "NORMAL";
     };
 } forEach _arrivals;
 if (_arrCount == 0) then { _arrStatus = "NORMAL"; };
-private _arrChipColor = [_arrStatus] call _statusColor;
-private _arrChipLabel = if (_arrCount == 0) then { "NONE" } else { format ["%1", _arrCount] };
-private _arrChipText = format ["<t size='0.85' color='%1'>&#x25CF;</t> <t size='0.85'>ARR: %2</t>", _arrChipColor, _arrChipLabel];
-if (!isNull _airChipArrivals) then { _airChipArrivals ctrlSetStructuredText parseText _arrChipText; };
+private _arrChipLabel = if (_arrCount == 0) then { "0" } else { str _arrCount };
+private _arrChipHtml = [["ARR", _arrChipLabel, _arrStatus]] call ARC_fnc_uiConsoleFormatStatusChip;
+if (!isNull _airChipArrivals) then { _airChipArrivals ctrlSetStructuredText parseText _arrChipHtml; };
 
 // --- Departures chip ---
 // Same tuple layout: [flightId(0), callsign(1), category(2), state(3), ageS(4), priority(5), status(6)]
@@ -309,11 +307,10 @@ private _depStatus = if (_holdDepartures) then { "HOLD" } else { "NORMAL" };
         if (_rowStatus isEqualType "" && { toUpper _rowStatus in ["CRITICAL", "BLOCKED", "RED"] }) exitWith { _depStatus = "BLOCKED"; };
     };
 } forEach _departures;
-private _depChipColor = [_depStatus] call _statusColor;
-private _depChipLabel = if (_depCount == 0) then { "NONE" } else { format ["%1", _depCount] };
+private _depChipLabel = if (_depCount == 0) then { "0" } else { str _depCount };
 if (_holdDepartures) then { _depChipLabel = _depChipLabel + " HOLD"; };
-private _depChipText = format ["<t size='0.85' color='%1'>&#x25CF;</t> <t size='0.85'>DEP: %2</t>", _depChipColor, _depChipLabel];
-if (!isNull _airChipDepartures) then { _airChipDepartures ctrlSetStructuredText parseText _depChipText; };
+private _depChipHtml = [["DEP", _depChipLabel, _depStatus]] call ARC_fnc_uiConsoleFormatStatusChip;
+if (!isNull _airChipDepartures) then { _airChipDepartures ctrlSetStructuredText parseText _depChipHtml; };
 
 // --- Tower Mode chip --- (uses _freshnessState from Phase 5 block above)
 private _towerModeStatus = switch (toUpper _freshnessState) do {
@@ -323,9 +320,8 @@ private _towerModeStatus = switch (toUpper _freshnessState) do {
     default { "AMBER" };
 };
 private _towerModeLabel = if (_freshnessState isEqualTo "UNKNOWN") then { "UNKNOWN" } else { _freshnessState };
-private _towerChipColor = [_towerModeStatus] call _statusColor;
-private _towerChipText = format ["<t size='0.85' color='%1'>&#x25CF;</t> <t size='0.85'>TWR: %2</t>", _towerChipColor, _towerModeLabel];
-if (!isNull _airChipTowerMode) then { _airChipTowerMode ctrlSetStructuredText parseText _towerChipText; };
+private _towerChipHtml = [["TWR", _towerModeLabel, _towerModeStatus]] call ARC_fnc_uiConsoleFormatStatusChip;
+if (!isNull _airChipTowerMode) then { _airChipTowerMode ctrlSetStructuredText parseText _towerChipHtml; };
 
 // --- Alerts chip ---
 // Alert tuple: [text(0), severity(1), sourceId(2)]
@@ -339,10 +335,9 @@ private _alertSeverity = "NONE";
         if (_sev isEqualType "" && { toUpper _sev isEqualTo "CAUTION" } && { !(_alertSeverity isEqualTo "CRITICAL") }) then { _alertSeverity = "CAUTION"; };
     };
 } forEach _alerts;
-private _alertChipColor = [_alertSeverity] call _statusColor;
-private _alertChipLabel = if (_alertCount == 0) then { "NONE" } else { format ["%1", _alertCount] };
-private _alertChipText = format ["<t size='0.85' color='%1'>&#x25CF;</t> <t size='0.85'>ALT: %2</t>", _alertChipColor, _alertChipLabel];
-if (!isNull _airChipAlerts) then { _airChipAlerts ctrlSetStructuredText parseText _alertChipText; };
+private _alertChipLabel = if (_alertCount == 0) then { "NONE" } else { str _alertCount };
+private _alertChipHtml = [["ALR", _alertChipLabel, _alertSeverity]] call ARC_fnc_uiConsoleFormatStatusChip;
+if (!isNull _airChipAlerts) then { _airChipAlerts ctrlSetStructuredText parseText _alertChipHtml; };
 
 // --- Decision band ---
 private _decCount = count _decisionQueue;
@@ -432,8 +427,7 @@ if (_rebuild) then {
                 private _hdrReq = _ctrlList lbAdd "-- PENDING CLEARANCES --";
                 _ctrlList lbSetData [_hdrReq, "HDR|REQ"];
                 if ((count _pendingClearances) == 0) then {
-                    private _noneReq = _ctrlList lbAdd "No pending clearances";
-                    _ctrlList lbSetData [_noneReq, "REQ|NONE"];
+                    [_ctrlList, "No pending clearances"] call ARC_fnc_uiConsoleFormatEmptyState;
                 } else {
                     {
                         if (!(_x isEqualType [])) then { continue; };
@@ -455,8 +449,7 @@ if (_rebuild) then {
                 private _hdrFlt = _ctrlList lbAdd "-- DEPARTURE QUEUE --";
                 _ctrlList lbSetData [_hdrFlt, "HDR|FLT"];
                 if ((count _departures) == 0) then {
-                    private _noneF = _ctrlList lbAdd "No departures queued";
-                    _ctrlList lbSetData [_noneF, "FLT|NONE"];
+                    [_ctrlList, "No departures queued"] call ARC_fnc_uiConsoleFormatEmptyState;
                 } else {
                     {
                         private _fid = _x param [0, ""];
@@ -483,8 +476,7 @@ if (_rebuild) then {
                 private _hdrDec = _ctrlList lbAdd "-- RECENT DECISIONS --";
                 _ctrlList lbSetData [_hdrDec, "HDR|DEC"];
                 if ((count _clearanceHistory) == 0) then {
-                    private _noneD = _ctrlList lbAdd "No recent decisions";
-                    _ctrlList lbSetData [_noneD, "DEC|NONE"];
+                    [_ctrlList, "No recent decisions"] call ARC_fnc_uiConsoleFormatEmptyState;
                 } else {
                     {
                         if !(_x isEqualType []) then { continue; };
@@ -503,8 +495,7 @@ if (_rebuild) then {
                 private _hdrDbg = _ctrlList lbAdd "-- DEBUG OVERLAY --";
                 _ctrlList lbSetData [_hdrDbg, "HDR|DBG"];
                 if ((count _debug) == 0) then {
-                    private _noneDbg = _ctrlList lbAdd "Debug overlay unavailable";
-                    _ctrlList lbSetData [_noneDbg, "DBG|NONE"];
+                    [_ctrlList, "Debug overlay unavailable"] call ARC_fnc_uiConsoleFormatEmptyState;
                 } else {
                     {
                         if !(_x isEqualType []) then { continue; };
@@ -530,8 +521,7 @@ if (_rebuild) then {
                 private _hdrArr = _ctrlList lbAdd "ARRIVALS";
                 _ctrlList lbSetData [_hdrArr, "HDR|ARR"];
                 if ((count _arrivals) == 0) then {
-                    private _noneA = _ctrlList lbAdd "No arrivals inbound";
-                    _ctrlList lbSetData [_noneA, "ARR|NONE"];
+                    [_ctrlList, "No arrivals inbound"] call ARC_fnc_uiConsoleFormatEmptyState;
                 } else {
                     {
                         private _fid = _x param [0, ""];
@@ -557,8 +547,7 @@ if (_rebuild) then {
                 private _hdrDep = _ctrlList lbAdd "DEPARTURES";
                 _ctrlList lbSetData [_hdrDep, "HDR|DEP"];
                 if ((count _departures) == 0) then {
-                    private _noneDep = _ctrlList lbAdd "No departures queued";
-                    _ctrlList lbSetData [_noneDep, "DEP|NONE"];
+                    [_ctrlList, "No departures queued"] call ARC_fnc_uiConsoleFormatEmptyState;
                 } else {
                     {
                         private _fid = _x param [0, ""];
@@ -575,15 +564,51 @@ if (_rebuild) then {
                 };
 
                 // --- Lower priority sections (below operational board) ---
+                // RECENT EVENTS: resolve FLT-xxxx to callsigns, limit to 5 (Refactor Plan §PR3.5)
                 if ((count _recentEvents) > 0) then {
                     private _hdrEvt = _ctrlList lbAdd "RECENT EVENTS";
                     _ctrlList lbSetData [_hdrEvt, "HDR|EVT"];
-                    {
-                        private _eventTs = _x param [0, -1];
-                        private _eventLabel = _x param [1, ""];
-                        private _row = _ctrlList lbAdd format ["%1 (%2)", _eventLabel, [_eventTs] call _fmtAgo];
+                    private _evtLimit = (count _recentEvents) min 5;
+                    for "_i" from 0 to (_evtLimit - 1) do {
+                        private _evt = _recentEvents select _i;
+                        private _eventTs = _evt param [0, -1];
+                        private _eventLabel = _evt param [1, ""];
+                        // Resolve FLT-xxxx identifiers to callsigns from arrivals/departures
+                        private _resolvedLabel = _eventLabel;
+                        if (_eventLabel isEqualType "") then {
+                            private _parts = _eventLabel splitString " ";
+                            private _resolvedParts = [];
+                            {
+                                private _token = _x;
+                                private _resolved = _token;
+                                if (((toUpper _token) find "FLT-") == 0) then {
+                                    // Search arrivals then departures for matching flightId
+                                    {
+                                        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _token }) exitWith {
+                                            private _cs = _x select 1;
+                                            if (_cs isEqualType "" && { !(_cs isEqualTo "") }) then { _resolved = _cs; };
+                                        };
+                                    } forEach (_arrivals + _departures);
+                                };
+                                _resolvedParts pushBack _resolved;
+                            } forEach _parts;
+                            _resolvedLabel = _resolvedParts joinString " ";
+                        };
+                        // Format timestamp as "Xm Ys" not "Xm Ys ago" (Refactor Plan §PR3.5)
+                        private _ageStr = "-";
+                        if (_eventTs isEqualType 0 && { _eventTs >= 0 }) then {
+                            private _age = (serverTime - _eventTs) max 0;
+                            if (_age < 5) then { _ageStr = "now"; }
+                            else { if (_age < 60) then { _ageStr = format ["%1s", round _age]; }
+                            else { _ageStr = format ["%1m %2s", floor (_age / 60), (round _age) mod 60]; }; };
+                        };
+                        private _row = _ctrlList lbAdd format ["%1 (%2)", _resolvedLabel, _ageStr];
                         _ctrlList lbSetData [_row, format ["EVT|%1|%2", _eventTs, _eventLabel]];
-                    } forEach _recentEvents;
+                    };
+                } else {
+                    private _hdrEvt = _ctrlList lbAdd "RECENT EVENTS";
+                    _ctrlList lbSetData [_hdrEvt, "HDR|EVT"];
+                    [_ctrlList, "No recent events"] call ARC_fnc_uiConsoleFormatEmptyState;
                 };
 
                 if ((count _staffing) > 0) then {
@@ -1083,15 +1108,22 @@ private _airMinH = if (!isNull _airGrp) then { (ctrlPosition _airGrp) select 3 }
 private _airP = ctrlPosition _ctrlDetails;
 _airP set [0, _defaultPosAir select 0];
 
-// Phase 7: when map is visible (AIRFIELD_OPS), shift detail pane below map.
+// Phase 7 + Refactor: when map is visible (AIRFIELD_OPS), shift detail pane below Region C.
+// Region C position is now computed by the layout engine and stored in uiNamespace.
 private _mapVisible = false;
 private _ctrlMapCheck = _display displayCtrl 78137;
 if (!isNull _ctrlMapCheck) then {
     _mapVisible = ctrlShown _ctrlMapCheck;
 };
 if (_mapVisible) then {
-    // Map ends at 0.082 + 0.35 = 0.432 of safeZoneH. Detail starts just below with small gap.
-    _airP set [1, 0.005 + (0.35 * ((ctrlPosition _airGrp) select 3))];
+    private _regionCH = uiNamespace getVariable ["ARC_console_regionCH", 0];
+    if (_regionCH > 0) then {
+        // Detail starts below Region C with a small gap
+        _airP set [1, 0.005 + (_regionCH * 0.95)];
+    } else {
+        // Fallback to legacy calculation
+        _airP set [1, 0.005 + (0.35 * ((ctrlPosition _airGrp) select 3))];
+    };
 } else {
     _airP set [1, _defaultPosAir select 1];
 };
