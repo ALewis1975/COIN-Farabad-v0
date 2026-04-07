@@ -2,6 +2,7 @@
     ARC_fnc_uiConsoleActionAirPrimary
 
     AIR primary action.
+    Phase 4: destructive actions (HOLD/RELEASE) require double-press confirmation.
 */
 
 if (!hasInterface) exitWith {false};
@@ -186,15 +187,37 @@ switch (_airSubmode) do
                         ["AIR", "READ-ONLY: no release authority."] call ARC_fnc_clientToast;
                         true
                     };
-                    [] call ARC_fnc_airbaseClientRequestReleaseDepartures;
-                    ["AIR", "Release request sent to tower control."] call ARC_fnc_clientToast;
+                    // Phase 4: confirm destructive RELEASE action
+                    private _pending = uiNamespace getVariable ["ARC_console_airConfirmPending", ""];
+                    if (!(_pending isEqualType "")) then { _pending = ""; };
+                    if (_pending isEqualTo "RELEASE") then {
+                        uiNamespace setVariable ["ARC_console_airConfirmPending", ""];
+                        uiNamespace setVariable ["ARC_console_airConfirmLabel", ""];
+                        [] call ARC_fnc_airbaseClientRequestReleaseDepartures;
+                        ["AIR", "RELEASE confirmed — departures released."] call ARC_fnc_clientToast;
+                    } else {
+                        uiNamespace setVariable ["ARC_console_airConfirmPending", "RELEASE"];
+                        uiNamespace setVariable ["ARC_console_airConfirmLabel", "Press again or ENTER to confirm RELEASE."];
+                        ["AIR", "Press again or ENTER to confirm RELEASE departures."] call ARC_fnc_clientToast;
+                    };
                 } else {
                     if (!_canHold) exitWith {
                         ["AIR", "READ-ONLY: no hold authority."] call ARC_fnc_clientToast;
                         true
                     };
-                    [] call ARC_fnc_airbaseClientRequestHoldDepartures;
-                    ["AIR", "Hold request sent to tower control."] call ARC_fnc_clientToast;
+                    // Phase 4: confirm destructive HOLD action
+                    private _pending = uiNamespace getVariable ["ARC_console_airConfirmPending", ""];
+                    if (!(_pending isEqualType "")) then { _pending = ""; };
+                    if (_pending isEqualTo "HOLD") then {
+                        uiNamespace setVariable ["ARC_console_airConfirmPending", ""];
+                        uiNamespace setVariable ["ARC_console_airConfirmLabel", ""];
+                        [] call ARC_fnc_airbaseClientRequestHoldDepartures;
+                        ["AIR", "HOLD confirmed — departures held."] call ARC_fnc_clientToast;
+                    } else {
+                        uiNamespace setVariable ["ARC_console_airConfirmPending", "HOLD"];
+                        uiNamespace setVariable ["ARC_console_airConfirmLabel", "Press again or ENTER to confirm HOLD."];
+                        ["AIR", "Press again or ENTER to confirm HOLD departures."] call ARC_fnc_clientToast;
+                    };
                 };
             };
         };
@@ -231,16 +254,38 @@ switch (_airSubmode) do
                 ["AIR", "READ-ONLY: no release authority."] call ARC_fnc_clientToast;
                 true
             };
-            [] call ARC_fnc_airbaseClientRequestReleaseDepartures;
-            ["AIR", "Release request sent to tower control."] call ARC_fnc_clientToast;
+            // Phase 4: confirm destructive RELEASE action
+            private _pending = uiNamespace getVariable ["ARC_console_airConfirmPending", ""];
+            if (!(_pending isEqualType "")) then { _pending = ""; };
+            if (_pending isEqualTo "RELEASE") then {
+                uiNamespace setVariable ["ARC_console_airConfirmPending", ""];
+                uiNamespace setVariable ["ARC_console_airConfirmLabel", ""];
+                [] call ARC_fnc_airbaseClientRequestReleaseDepartures;
+                ["AIR", "RELEASE confirmed — departures released."] call ARC_fnc_clientToast;
+            } else {
+                uiNamespace setVariable ["ARC_console_airConfirmPending", "RELEASE"];
+                uiNamespace setVariable ["ARC_console_airConfirmLabel", "Press again or ENTER to confirm RELEASE."];
+                ["AIR", "Press again or ENTER to confirm RELEASE departures."] call ARC_fnc_clientToast;
+            };
         } else {
             if (!_canHold) exitWith
             {
                 ["AIR", "READ-ONLY: no hold authority."] call ARC_fnc_clientToast;
                 true
             };
-            [] call ARC_fnc_airbaseClientRequestHoldDepartures;
-            ["AIR", "Hold request sent to tower control."] call ARC_fnc_clientToast;
+            // Phase 4: confirm destructive HOLD action
+            private _pending = uiNamespace getVariable ["ARC_console_airConfirmPending", ""];
+            if (!(_pending isEqualType "")) then { _pending = ""; };
+            if (_pending isEqualTo "HOLD") then {
+                uiNamespace setVariable ["ARC_console_airConfirmPending", ""];
+                uiNamespace setVariable ["ARC_console_airConfirmLabel", ""];
+                [] call ARC_fnc_airbaseClientRequestHoldDepartures;
+                ["AIR", "HOLD confirmed — departures held."] call ARC_fnc_clientToast;
+            } else {
+                uiNamespace setVariable ["ARC_console_airConfirmPending", "HOLD"];
+                uiNamespace setVariable ["ARC_console_airConfirmLabel", "Press again or ENTER to confirm HOLD."];
+                ["AIR", "Press again or ENTER to confirm HOLD departures."] call ARC_fnc_clientToast;
+            };
         };
     };
 };

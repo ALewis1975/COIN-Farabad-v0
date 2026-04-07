@@ -24,8 +24,8 @@ This document converts the AIR / TOWER Arma-native audit into a phase-by-phase i
 | 0 | 1 | F | Baseline + scope lock | Done | Agreed scope, branch order, acceptance gates |
 | 1 | 2 | C | UI shell scaffold | Done | AIR gets dedicated grouped controls; no second dialog |
 | 2 | 3 | B | AIRFIELD_OPS board conversion | Done | 3-second scan works; default focus on ops state |
-| 3 | 4 | A | CLEARANCES safety hardening | In progress | No unsafe global action from inert selection |
-| 4 | 5 | B | AIR input flow + confirmations | Not started | Narrow hotkeys; confirm destructive actions |
+| 3 | 4 | A | CLEARANCES safety hardening | Done | No unsafe global action from inert selection |
+| 4 | 5 | B | AIR input flow + confirmations | In progress | Narrow hotkeys; confirm destructive actions |
 | 5 | 6 | A | Snapshot freshness + degraded-state correctness | Not started | Fresh/stale/degraded real; late clients safe |
 | 6 | 7 | B | DASH air summary completion | Not started | Commanders read air status from DASH alone |
 | 7 | 8 | B | AIR map pane integration | Not started | CT_MAP traffic pane; selection recenters map |
@@ -268,12 +268,12 @@ All 35 server-side `fn_airbase*.sqf` runtime functions, all 9 `fn_airbaseClient*
 | AIR action handlers (minimal) | Add confirmation prompt before destructive actions (HOLD, queue cancel, emergency) |
 
 **Acceptance criteria:**
-- [ ] AIR-only hotkeys (e.g., H=HOLD, R=RELEASE, Enter=CONFIRM) active only when AIR tab is focused
-- [ ] Destructive actions (HOLD departures, cancel queued flight, emergency mark) require explicit confirmation
-- [ ] Confirmation uses structured text prompt, not raw `hint`
-- [ ] Key handler does not hijack keys when non-AIR tabs are active
-- [ ] Key handler does not interfere with existing console keyboard behavior
-- [ ] sqflint + compat scan pass
+- [x] AIR-only hotkeys (e.g., H=HOLD, R=RELEASE, Enter=CONFIRM) active only when AIR tab is focused
+- [x] Destructive actions (HOLD departures, cancel queued flight, emergency mark) require explicit confirmation
+- [x] Confirmation uses structured text prompt, not raw `hint`
+- [x] Key handler does not hijack keys when non-AIR tabs are active
+- [x] Key handler does not interfere with existing console keyboard behavior
+- [x] sqflint + compat scan pass
 
 **Dependencies:** Phase 3 complete (action dispatch structure must be stable).
 

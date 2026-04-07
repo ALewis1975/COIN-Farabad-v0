@@ -746,6 +746,16 @@ if (_airMode isEqualTo "PILOT") then {
     };
 };
 
+// Phase 4: if a confirmation is pending, override primary button label.
+private _confirmPending = uiNamespace getVariable ["ARC_console_airConfirmPending", ""];
+if (!(_confirmPending isEqualType "")) then { _confirmPending = ""; };
+if (_confirmPending != "") then {
+    _primaryLabel = format ["CONFIRM: %1", _confirmPending];
+    _primaryEnabled = true;
+    _primaryTooltip = uiNamespace getVariable ["ARC_console_airConfirmLabel", "Press again to confirm."];
+    if (!(_primaryTooltip isEqualType "")) then { _primaryTooltip = "Press again to confirm."; };
+};
+
 if (!isNull _btnPrimary) then {
     _btnPrimary ctrlSetText _primaryLabel;
     _btnPrimary ctrlEnable _primaryEnabled;

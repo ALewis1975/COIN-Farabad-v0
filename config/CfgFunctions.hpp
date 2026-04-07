@@ -596,6 +596,7 @@ class CfgFunctions
             class uiConsoleActionHQPrimary {};
             class uiConsoleActionAirPrimary {};
             class uiConsoleActionAirSecondary {};
+            class uiConsoleAirKeyDown {};
 
             // Structured SITREP dialog helpers (UI09)
             class uiSitrepDialogOnLoad {};

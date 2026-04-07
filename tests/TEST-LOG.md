@@ -4291,3 +4291,68 @@ sqflint -e w functions/ied/fn_vbiedSpawnTick.sqf
 | 4 | sqflint fn_publicBroadcastState.sqf | PASS | Added `isEqualType` type guard for `_hgSnap` compiled helper (L1045) to satisfy sqflint unused-var check; exit 0, clean |
 | 5 | sqflint fn_suicideBomberSpawnTick.sqf | PASS | exit 0, clean |
 | 6 | sqflint fn_vbiedDrivenSpawnTick.sqf | PASS | exit 0, clean |
+
+---
+
+### Phase 4 — AIR input flow + confirmations (2026-04-07)
+
+**Date/Time:** 2026-04-07T15:15:00Z
+**Branch/Commit:** copilot/develop-task-decomposition-plan (pending commit for Phase 4)
+
+**Scenario:** Phase 4 implementation — add AIR-specific key-down handler and confirmation prompts for destructive actions.
+
+**Changed files:**
+- `functions/ui/fn_uiConsoleAirKeyDown.sqf` — **NEW** narrow key-down dispatcher (H=HOLD, R=RELEASE, E=APPROVE, D=DENY, M=cycle submode, Enter/Y=confirm, Esc=cancel)
+- `functions/ui/fn_uiConsoleActionAirPrimary.sqf` — HOLD/RELEASE now require double-press confirmation
+- `functions/ui/fn_uiConsoleActionAirSecondary.sqf` — DENY and CANCEL flight now require double-press confirmation
+- `functions/ui/fn_uiConsoleAirPaint.sqf` — Button label override shows `CONFIRM: <action>` when confirmation pending
+- `functions/ui/fn_uiConsoleOnLoad.sqf` — Register display KeyDown handler; init confirmation state vars
+- `functions/ui/fn_uiConsoleOnUnload.sqf` — Clean up confirmation state vars on dialog close
+- `functions/ui/fn_uiConsoleRefresh.sqf` — Clear confirmation state on tab switch away from AIR
+- `config/CfgFunctions.hpp` — Register `ARC_fnc_uiConsoleAirKeyDown`
+- `docs/architecture/AIR_TOWER_Arma_Native_Implementation_Matrix.md` — Phase 3 → Done, Phase 4 → In progress, acceptance criteria checked
+
+**Commands run:**
+```bash
+python3 scripts/dev/sqflint_compat_scan.py --strict \
+    functions/ui/fn_uiConsoleAirKeyDown.sqf \
+    functions/ui/fn_uiConsoleActionAirPrimary.sqf \
+    functions/ui/fn_uiConsoleActionAirSecondary.sqf \
+    functions/ui/fn_uiConsoleAirPaint.sqf \
+    functions/ui/fn_uiConsoleOnLoad.sqf \
+    functions/ui/fn_uiConsoleOnUnload.sqf \
+    functions/ui/fn_uiConsoleRefresh.sqf
+sqflint -e w <each file above>
+python3 scripts/dev/validate_state_migrations.py
+python3 scripts/dev/validate_marker_index.py
+```
+
+**Results:**
+
+| # | Check | Result | Notes |
+|---|-------|--------|-------|
+| 1 | Compat scan --strict (7 files) | PASS | 0 pattern matches |
+| 2 | sqflint fn_uiConsoleAirKeyDown.sqf | PASS | exit 0, clean (fixed _shift unused via modifier guard) |
+| 3 | sqflint fn_uiConsoleActionAirPrimary.sqf | PASS | exit 0, clean |
+| 4 | sqflint fn_uiConsoleActionAirSecondary.sqf | PASS | exit 0, clean |
+| 5 | sqflint fn_uiConsoleAirPaint.sqf | PASS | exit 0, clean |
+| 6 | sqflint fn_uiConsoleOnLoad.sqf | PASS | exit 0, clean |
+| 7 | sqflint fn_uiConsoleOnUnload.sqf | PASS | exit 0, clean |
+| 8 | sqflint fn_uiConsoleRefresh.sqf | PASS | exit 0, clean |
+| 9 | State migration validator | PASS | 3 scenarios |
+| 10 | Marker index validator | PASS | 177 markers all modes |
+
+**Acceptance criteria (Phase 4):**
+
+| # | Criterion | Status | Notes |
+|---|-----------|--------|-------|
+| 1 | AIR-only hotkeys active only when AIR tab focused | PASS | Handler self-gates by `ARC_console_activeTab == "AIR"` |
+| 2 | Destructive actions require explicit confirmation | PASS | HOLD/RELEASE: double-press or Enter/Y via key handler; DENY/CANCEL: double-press or Enter/Y |
+| 3 | Confirmation uses structured text prompt | PASS | Uses `ARC_fnc_clientToast` (BIS_fnc_dynamicText) — no raw `hint` |
+| 4 | Key handler does not hijack non-AIR tabs | PASS | Early `exitWith {false}` if tab != "AIR"; Ctrl/Alt combos pass through |
+| 5 | Key handler does not interfere with console keyboard | PASS | Ctrl/Alt combos pass through; only narrow key set consumed |
+| 6 | sqflint + compat scan pass | PASS | All 7 files clean |
+| 7 | Button label shows CONFIRM when pending | PASS | `_confirmPending` override in AirPaint sets `CONFIRM: <action>` |
+| 8 | Confirmation cleared on tab switch | PASS | `fn_uiConsoleRefresh` clears state when `_tab != "AIR"` |
+| 9 | Confirmation cleared on dialog close | PASS | `fn_uiConsoleOnUnload` clears all confirm vars |
+| 10 | No state migration changes | PASS | Validator confirms 3 scenarios |

@@ -92,6 +92,14 @@ _tab = toUpper _tab;
 
 private _prevRefreshTab = ["ARC_console_prevRefreshTab", "", false] call ARC_fnc_uiNsGetString;
 
+// Phase 4: clear AIR confirmation state when switching away from AIR tab.
+if (_tab != "AIR") then {
+    uiNamespace setVariable ["ARC_console_airConfirmPending", ""];
+    uiNamespace setVariable ["ARC_console_airConfirmLabel", ""];
+    uiNamespace setVariable ["ARC_console_airConfirmRid", ""];
+    uiNamespace setVariable ["ARC_console_airConfirmFid", ""];
+};
+
 // ---------------------------------------------------------------------------
 
 // Hide S2 category panels (if present) when leaving INTEL to prevent cross-tab UI leak.

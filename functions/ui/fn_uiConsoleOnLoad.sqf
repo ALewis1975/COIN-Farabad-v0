@@ -316,6 +316,19 @@ else
 // Refresh loop (event-first + fallback polling)
 uiNamespace setVariable ["ARC_console_refreshLoop", true];
 uiNamespace setVariable ["ARC_console_dirty", false];
+
+// Phase 4: register AIR-specific key-down handler on the console display.
+// The handler self-gates by active tab — only processes keys when AIR tab is focused.
+// Clears any lingering confirmation state from a prior session.
+uiNamespace setVariable ["ARC_console_airConfirmPending", ""];
+uiNamespace setVariable ["ARC_console_airConfirmLabel", ""];
+uiNamespace setVariable ["ARC_console_airConfirmRid", ""];
+uiNamespace setVariable ["ARC_console_airConfirmFid", ""];
+private _airKeyEH = _display displayAddEventHandler ["KeyDown", {
+    _this call ARC_fnc_uiConsoleAirKeyDown
+}];
+uiNamespace setVariable ["ARC_console_airKeyDownEH", _airKeyEH];
+
 [_display] spawn {
     params ["_display"];
 
