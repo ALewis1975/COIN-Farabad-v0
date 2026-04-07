@@ -113,6 +113,28 @@ private _arrQueued = 0;
     };
 } forEach _airQueue;
 
+// Phase 7: build flightId → position lookup from records (for CT_MAP traffic markers).
+// Records hold netId at index 4; resolve to vehicle getPos when available.
+// Departures on ground can also be resolved from parked assets via routeMeta.assetId.
+private _airbaseCenterMarker = missionNamespace getVariable ["airbase_v1_arrival_runway_marker", "L-270 Inbound"];
+private _airbaseCenterPos = getMarkerPos _airbaseCenterMarker;
+private _flightPosMap = [];
+{
+    if !(_x isEqualType []) then { continue; };
+    private _fid = _x param [0, ""];
+    if (_fid isEqualTo "") then { continue; };
+    private _netId = _x param [4, ""];
+    if (_netId isEqualType "" && { !(_netId isEqualTo "") }) then {
+        private _veh = objectFromNetId _netId;
+        if (!isNull _veh) then {
+            private _p = getPosATL _veh;
+            if (_p isEqualType [] && { (count _p) >= 2 }) then {
+                _flightPosMap pushBack [_fid, _p select 0, _p select 1];
+            };
+        };
+    };
+} forEach _airRecs;
+
 private _execActive = missionNamespace getVariable ["airbase_v1_execActive", false];
 if (!(_execActive isEqualType true) && !(_execActive isEqualType false)) then { _execActive = false; };
 
@@ -655,7 +677,13 @@ private _uiDepartures = [];
                     _status = "HOLDING";
                 };
             };
-            _uiArrivals pushBack [_fid, _callsign, _aircraftType, _phase, _ageS, _priority, _status];
+            // Phase 7: append posX/posY for CT_MAP (indices 7-8); default airbase center.
+            private _posX = _airbaseCenterPos select 0;
+            private _posY = if (count _airbaseCenterPos > 2) then { _airbaseCenterPos select 2 } else { _airbaseCenterPos select 1 };
+            {
+                if ((_x select 0) isEqualTo _fid) exitWith { _posX = _x select 1; _posY = _x select 2; };
+            } forEach _flightPosMap;
+            _uiArrivals pushBack [_fid, _callsign, _aircraftType, _phase, _ageS, _priority, _status, _posX, _posY];
         };
     };
 
@@ -672,7 +700,13 @@ private _uiDepartures = [];
                     _depStatus = "BLOCKED";
                 };
             };
-            _uiDepartures pushBack [_fid, _callsign, _aircraftType, _depState, _ageS, _priority, _depStatus];
+            // Phase 7: append posX/posY for CT_MAP (indices 7-8); default airbase center.
+            private _posX = _airbaseCenterPos select 0;
+            private _posY = if (count _airbaseCenterPos > 2) then { _airbaseCenterPos select 2 } else { _airbaseCenterPos select 1 };
+            {
+                if ((_x select 0) isEqualTo _fid) exitWith { _posX = _x select 1; _posY = _x select 2; };
+            } forEach _flightPosMap;
+            _uiDepartures pushBack [_fid, _callsign, _aircraftType, _depState, _ageS, _priority, _depStatus, _posX, _posY];
         };
     };
 } forEach _nextItems;
@@ -691,6 +725,12 @@ private _uiDepartures = [];
         if ((_x param [0, ""]) isEqualTo _requestId) exitWith { _alreadyPresent = true; };
     } forEach _uiArrivals;
     if (_alreadyPresent) then { continue; };
+    // Phase 7: resolve position for pending clearance arrivals from records.
+    private _pendPosX = _airbaseCenterPos select 0;
+    private _pendPosY = if (count _airbaseCenterPos > 2) then { _airbaseCenterPos select 2 } else { _airbaseCenterPos select 1 };
+    {
+        if ((_x select 0) isEqualTo _requestId) exitWith { _pendPosX = _x select 1; _pendPosY = _x select 2; };
+    } forEach _flightPosMap;
     _uiArrivals pushBack [
         _requestId,
         _callsign,
@@ -698,7 +738,9 @@ private _uiDepartures = [];
         "AWAITING DECISION",
         if (_requestedAt isEqualType 0 && { _requestedAt >= 0 }) then { round ((serverTime - _requestedAt) max 0) } else { -1 },
         _priority,
-        if (_priority >= 100) then { "CONFLICT" } else { "HOLDING" }
+        if (_priority >= 100) then { "CONFLICT" } else { "HOLDING" },
+        _pendPosX,
+        _pendPosY
     ];
 } forEach _uiPendingClearances;
 
@@ -868,7 +910,8 @@ private _airbaseUiSnapshot = [
         ["ground", _autoDelayGroundS],
         ["arrival", _autoDelayArrivalS]
     ]],
-    ["casTiming", _casTiming]
+    ["casTiming", _casTiming],
+    ["airbaseCenterPos", [_airbaseCenterPos select 0, if (count _airbaseCenterPos > 2) then { _airbaseCenterPos select 2 } else { _airbaseCenterPos select 1 }]]
 ];
 if ((count _uiDebug) > 0) then {
     _airbaseUiSnapshot pushBack ["debug", _uiDebug];

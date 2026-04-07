@@ -29,6 +29,14 @@ if (_tab isEqualTo "AIR") then
 
     uiNamespace setVariable ["ARC_console_airSelectedRow", _parts];
     uiNamespace setVariable ["ARC_console_airSelectedRowType", _kind];
+
+    // Phase 7: recenter map on selected traffic position.
+    if (_kind in ["ARR", "DEP"]) then {
+        private _selFid = if ((count _parts) > 1) then { _parts select 1 } else { "" };
+        if (!(_selFid isEqualTo "")) then {
+            [_display, _selFid] call ARC_fnc_uiConsoleAirMapPaint;
+        };
+    };
 };
 
 switch (_tab) do

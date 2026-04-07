@@ -27,8 +27,8 @@ This document converts the AIR / TOWER Arma-native audit into a phase-by-phase i
 | 3 | 4 | A | CLEARANCES safety hardening | Done | No unsafe global action from inert selection |
 | 4 | 5 | B | AIR input flow + confirmations | Done | Narrow hotkeys; confirm destructive actions |
 | 5 | 6 | A | Snapshot freshness + degraded-state correctness | Done | Fresh/stale/degraded real; late clients safe |
-| 6 | 7 | B | DASH air summary completion | In progress | Commanders read air status from DASH alone |
-| 7 | 8 | B | AIR map pane integration | Not started | CT_MAP traffic pane; selection recenters map |
+| 6 | 7 | B | DASH air summary completion | Done | Commanders read air status from DASH alone |
+| 7 | 8 | B | AIR map pane integration | In progress | CT_MAP traffic pane; selection recenters map |
 | 8 | 9 | I | RemoteExec hardening completion | Not started | Allowlist complete; JIP flags explicit |
 | 9 | 10 | B | World overlay layer | Not started | Sparse in-world cues; no UI clutter |
 | 10 | 11 | C | Debug isolation + legacy cleanup | Not started | Operator view clean; debug isolated; legacy retired |

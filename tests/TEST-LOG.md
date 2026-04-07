@@ -4453,3 +4453,56 @@ python3 scripts/dev/validate_marker_index.py
 | 5 | Commander reads air from DASH | PASS | Air Summary in full mode; Quick Status in compact mode; no AIR tab needed |
 | 6 | Reads from ARC_pub_airbaseUiSnapshot | PASS | All data sourced from snapshot (line 257); no raw ARC_pub_state.airbase access |
 | 7 | sqflint + compat scan pass | PASS | Clean |
+
+---
+
+## 2026-04-07 18:04 UTC — Phase 7: AIR map pane integration
+
+**Branch/Commit:** copilot/develop-task-decomposition-plan @ (pending Phase 7 commit)
+
+**Scenario:** Phase 7 implementation — add CT_MAP control (IDC 78137) for spatial traffic awareness on AIR tab AIRFIELD_OPS submode. Add position data (posX/posY) to arrivals/departures tuples. Show runway marker + arrival (blue) / departure (red) markers on map. Selecting a traffic row recenters map. Map hidden for non-AIRFIELD_OPS submodes.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `config/CfgDialogs.hpp` | Add `AirTrafficMap` (RscMapControl, IDC 78137) in AIR controls block; positioned in detail panel area |
+| `config/CfgFunctions.hpp` | Register `ARC_fnc_uiConsoleAirMapPaint` |
+| `functions/ui/fn_uiConsoleAirMapPaint.sqf` | **NEW** — draws runway center marker + arrival/departure traffic markers on CT_MAP; recenters on selected flight |
+| `functions/ui/fn_uiConsoleAirPaint.sqf` | Call map paint after list build; show/hide map per submode; shift detail pane below map when visible |
+| `functions/ui/fn_uiConsoleRefresh.sqf` | Add map control to `_airDedicatedCtrls`; clean up map markers on tab switch; reset map init flag |
+| `functions/ui/fn_uiConsoleMainListSelChanged.sqf` | Recenter map on selected ARR/DEP traffic position via ARC_fnc_uiConsoleAirMapPaint |
+| `functions/core/fn_publicBroadcastState.sqf` | Build `_flightPosMap` from records netId→getPos; append posX/posY (indices 7-8) to arrivals/departures tuples; add `airbaseCenterPos` to snapshot |
+| `docs/architecture/AIR_TOWER_UI_Snapshot_Contract_v1.md` | Document posX/posY extension (indices 7-8) and airbaseCenterPos field |
+| `docs/architecture/AIR_TOWER_Arma_Native_Implementation_Matrix.md` | Phase 6 → Done; Phase 7 → In progress |
+
+### Static checks
+
+| # | Check | Result | Notes |
+|---|-------|--------|-------|
+| 1 | `sqflint_compat_scan.py --strict` on changed files | PASS | 1 pre-existing `trim` usage in fn_uiConsoleMainListSelChanged.sqf (CMD block, not P7 changes) |
+| 2 | `sqflint -e w` on new file fn_uiConsoleAirMapPaint.sqf | PASS | Clean |
+| 3 | `sqflint -e w` on fn_uiConsoleAirPaint.sqf | PASS | Clean |
+| 4 | `sqflint -e w` on fn_publicBroadcastState.sqf | PASS | Clean |
+| 5 | `validate_state_migrations.py` | PASS | 3 scenarios |
+| 6 | `validate_marker_index.py` | PASS | 177 markers all modes |
+
+### Acceptance criteria
+
+| # | Criterion | Result | Notes |
+|---|-----------|--------|-------|
+| 1 | CT_MAP shows runway marker and airbase area | PASS | Runway marker (mil_flag, white) at airbaseCenterPos; default zoom 0.06 |
+| 2 | Inbound traffic positions shown on map | PASS | Blue BLUFOR markers (mil_arrow) with callsign + phase label |
+| 3 | Outbound traffic positions shown on map | PASS | Red OPFOR markers (mil_triangle) with callsign + state label |
+| 4 | Selecting a traffic row recenters map | PASS | ARR/DEP selection calls AirMapPaint with centerOnFid; animated pan |
+| 5 | Map does not interfere with list/detail layout | PASS | Map in right-side upper half (0.40H); detail pane shifts below when visible |
+| 6 | Map zoom defaults to airbase area; user can zoom/pan | PASS | scaleDefault=0.06; scaleMin/scaleMax allow user control |
+| 7 | sqflint + compat scan pass | PASS | Clean (pre-existing trim issue excluded) |
+
+### Runtime validation
+
+| # | Check | Status | Notes |
+|---|-------|--------|-------|
+| 1 | Local MP smoke | BLOCKED | No Arma 3 runtime in CI |
+| 2 | Dedicated server | BLOCKED | No dedicated server in CI |
+| 3 | JIP snapshot | BLOCKED | Deferred to pre-dedicated validation |

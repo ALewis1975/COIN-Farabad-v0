@@ -658,6 +658,17 @@ uiNamespace setVariable ["ARC_console_airSelectedFid", _selectedFid];
 uiNamespace setVariable ["ARC_console_airSelectedRow", _parts];
 uiNamespace setVariable ["ARC_console_airSelectedRowType", _rowType];
 
+// Phase 7: paint traffic map markers and optionally center on selected flight.
+private _ctrlMap = _display displayCtrl 78137;
+if (!isNull _ctrlMap) then {
+    if (_airSubmode isEqualTo "AIRFIELD_OPS") then {
+        _ctrlMap ctrlShow true;
+        [_display, _selectedFid] call ARC_fnc_uiConsoleAirMapPaint;
+    } else {
+        _ctrlMap ctrlShow false;
+    };
+};
+
 private _primaryLabel = "READ-ONLY";
 private _secondaryLabel = "REFRESH";
 private _primaryEnabled = false;
@@ -1022,7 +1033,20 @@ private _airGrp = _display displayCtrl 78016;
 private _airMinH = if (!isNull _airGrp) then { (ctrlPosition _airGrp) select 3 } else { 0.74 };
 private _airP = ctrlPosition _ctrlDetails;
 _airP set [0, _defaultPosAir select 0];
-_airP set [1, _defaultPosAir select 1];
+
+// Phase 7: when map is visible (AIRFIELD_OPS), shift detail pane below map.
+private _mapVisible = false;
+private _ctrlMapCheck = _display displayCtrl 78137;
+if (!isNull _ctrlMapCheck) then {
+    _mapVisible = ctrlShown _ctrlMapCheck;
+};
+if (_mapVisible) then {
+    // Map ends at 0.082 + 0.40 = 0.482 of safeZoneH. Detail starts just below with small gap.
+    _airP set [1, 0.005 + (0.40 * ((ctrlPosition _airGrp) select 3))];
+} else {
+    _airP set [1, _defaultPosAir select 1];
+};
+
 _airP set [2, _defaultPosAir select 2];
 _airP set [3, (_airP select 3) max _airMinH];
 _ctrlDetails ctrlSetPosition _airP;

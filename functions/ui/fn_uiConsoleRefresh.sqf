@@ -70,7 +70,8 @@ if (!isNull _ctrlDetails) then { _ctrlDetails ctrlShow false; };
 // Baseline: hide AIR / TOWER dedicated controls (shown only on AIR tab)
 private _airStripGroup = _display displayCtrl 78130;
 private _airDecisionBand = _display displayCtrl 78136;
-private _airDedicatedCtrls = [_airStripGroup, _airDecisionBand];
+private _airTrafficMap = _display displayCtrl 78137;
+private _airDedicatedCtrls = [_airStripGroup, _airDecisionBand, _airTrafficMap];
 { if (!isNull _x) then { _x ctrlShow false; }; } forEach _airDedicatedCtrls;
 
 // Baseline: hide S2 workflow controls (shown only on Intelligence tab)
@@ -98,6 +99,14 @@ if (_tab != "AIR") then {
     uiNamespace setVariable ["ARC_console_airConfirmLabel", ""];
     uiNamespace setVariable ["ARC_console_airConfirmRid", ""];
     uiNamespace setVariable ["ARC_console_airConfirmFid", ""];
+    // Phase 7: reset map initialization flag so it re-centers on next AIR tab entry.
+    uiNamespace setVariable ["ARC_console_airMapInitialized", false];
+    // Phase 7: clean up map markers when leaving AIR tab.
+    private _mapMarkers = uiNamespace getVariable ["ARC_console_airMapMarkers", []];
+    if (_mapMarkers isEqualType []) then {
+        { if (_x isEqualType "") then { deleteMarkerLocal _x; }; } forEach _mapMarkers;
+    };
+    uiNamespace setVariable ["ARC_console_airMapMarkers", []];
 };
 
 // ---------------------------------------------------------------------------

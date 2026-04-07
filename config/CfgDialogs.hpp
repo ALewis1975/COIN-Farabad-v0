@@ -960,6 +960,22 @@ text = "FARABAD CONSOLE";
             colorText[] = {0.722,0.608,0.420,1};
         };
 
+        // Phase 7: AIR traffic map — CT_MAP in detail panel area (right side, upper half)
+        // Hidden by default; shown only on AIR tab AIRFIELD_OPS submode.
+        // Managed by ARC_fnc_uiConsoleAirMapPaint.
+        class AirTrafficMap: RscMapControl
+        {
+            idc = 78137;
+            x = safeZoneX + (0.516 * safeZoneW);
+            y = safeZoneY + (0.082 * safeZoneH);
+            w = (0.482 * safeZoneW);
+            h = (0.40 * safeZoneH);
+            colorBackground[] = {0.05,0.05,0.05,0.80};
+            scaleMin = 0.001;
+            scaleMax = 1.0;
+            scaleDefault = 0.06;
+        };
+
         // -------------------------------------------------------------------
         // Operations (S3) tab: 3 frames (Incidents / Orders / Leads)
         // Hidden by default; shown/managed by ARC_fnc_uiConsoleOpsPaint.
