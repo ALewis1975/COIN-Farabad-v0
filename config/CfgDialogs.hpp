@@ -900,49 +900,49 @@ text = "FARABAD CONSOLE";
 
             class controls
             {
-                // Five R/A/G status chips — evenly spaced across the strip
+                // Five R/A/G status chips — evenly spaced with visible gaps
                 class AirChipRunway: RscStructuredText
                 {
                     idc = 78131;
                     x = 0.000;
                     y = 0.000;
-                    w = 0.195;
+                    w = 0.190;
                     h = 1.0;
                     colorBackground[] = {0.05,0.05,0.05,0.80};
                 };
                 class AirChipArrivals: RscStructuredText
                 {
                     idc = 78132;
-                    x = 0.200;
+                    x = 0.203;
                     y = 0.000;
-                    w = 0.195;
+                    w = 0.190;
                     h = 1.0;
                     colorBackground[] = {0.05,0.05,0.05,0.80};
                 };
                 class AirChipDepartures: RscStructuredText
                 {
                     idc = 78133;
-                    x = 0.400;
+                    x = 0.406;
                     y = 0.000;
-                    w = 0.195;
+                    w = 0.190;
                     h = 1.0;
                     colorBackground[] = {0.05,0.05,0.05,0.80};
                 };
                 class AirChipTowerMode: RscStructuredText
                 {
                     idc = 78134;
-                    x = 0.600;
+                    x = 0.609;
                     y = 0.000;
-                    w = 0.195;
+                    w = 0.190;
                     h = 1.0;
                     colorBackground[] = {0.05,0.05,0.05,0.80};
                 };
                 class AirChipAlerts: RscStructuredText
                 {
                     idc = 78135;
-                    x = 0.800;
+                    x = 0.810;
                     y = 0.000;
-                    w = 0.195;
+                    w = 0.190;
                     h = 1.0;
                     colorBackground[] = {0.05,0.05,0.05,0.80};
                 };
@@ -961,7 +961,7 @@ text = "FARABAD CONSOLE";
             colorText[] = {0.722,0.608,0.420,1};
         };
 
-        // Phase 7: AIR traffic map — CT_MAP in detail panel area (right side, upper half)
+        // Phase 7: AIR traffic map — CT_MAP in detail panel area (right side, upper portion)
         // Hidden by default; shown only on AIR tab AIRFIELD_OPS submode.
         // Managed by ARC_fnc_uiConsoleAirMapPaint.
         class AirTrafficMap: RscMapControl
@@ -970,7 +970,7 @@ text = "FARABAD CONSOLE";
             x = safeZoneX + (0.516 * safeZoneW);
             y = safeZoneY + (0.082 * safeZoneH);
             w = (0.482 * safeZoneW);
-            h = (0.40 * safeZoneH);
+            h = (0.35 * safeZoneH);
             colorBackground[] = {0.05,0.05,0.05,0.80};
             scaleMin = 0.001;
             scaleMax = 1.0;

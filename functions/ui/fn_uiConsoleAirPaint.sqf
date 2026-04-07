@@ -1086,8 +1086,8 @@ if (!isNull _ctrlMapCheck) then {
     _mapVisible = ctrlShown _ctrlMapCheck;
 };
 if (_mapVisible) then {
-    // Map ends at 0.082 + 0.40 = 0.482 of safeZoneH. Detail starts just below with small gap.
-    _airP set [1, 0.005 + (0.40 * ((ctrlPosition _airGrp) select 3))];
+    // Map ends at 0.082 + 0.35 = 0.432 of safeZoneH. Detail starts just below with small gap.
+    _airP set [1, 0.005 + (0.35 * ((ctrlPosition _airGrp) select 3))];
 } else {
     _airP set [1, _defaultPosAir select 1];
 };
