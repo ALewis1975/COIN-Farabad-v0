@@ -137,10 +137,10 @@ diag_log format ["[ARC][KLE] kleInit: elder '%1' spawned at %2 (taskId=%3).", _e
                 if (!isNil "ARC_fnc_civsubDistrictsFindByPos") then
                 {
                     private _dr = [_pos] call ARC_fnc_civsubDistrictsFindByPos;
-                    if (_dr isEqualType [] && { (count _dr) >= 1 }) then { _districtId = _dr # 0; };
+                    if (_dr isEqualType [] && { (count _dr) >= 1 }) then { _districtId = _dr select 0; };
                 };
 
-                if (_districtId isNotEqualTo "") then
+                if (!(_districtId isEqualTo "")) then
                 {
                     private _bundle = createHashMap;
                     _bundle set ["districtId",     _districtId];

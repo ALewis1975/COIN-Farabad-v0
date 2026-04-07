@@ -206,8 +206,8 @@ if (_spawnContacts && {!(_zone in ["Airbase", "GreenZone"])}) then
             private _ang = random 360;
             private _dist = _routeRadius * (0.6 + random 0.35);
             _spawnPos = [
-                (_posATL # 0) + (sin _ang) * _dist,
-                (_posATL # 1) + (cos _ang) * _dist,
+                (_posATL select 0) + (sin _ang) * _dist,
+                (_posATL select 1) + (cos _ang) * _dist,
                 0
             ];
 
@@ -247,8 +247,8 @@ if (_spawnContacts && {!(_zone in ["Airbase", "GreenZone"])}) then
                 private _ang = random 360;
                 private _dist = _routeRadius * random 1;
                 private _wpPos = [
-                    (_posATL # 0) + (sin _ang) * _dist,
-                    (_posATL # 1) + (cos _ang) * _dist,
+                    (_posATL select 0) + (sin _ang) * _dist,
+                    (_posATL select 1) + (cos _ang) * _dist,
                     0
                 ];
                 private _wp = _grp addWaypoint [_wpPos, 0];
