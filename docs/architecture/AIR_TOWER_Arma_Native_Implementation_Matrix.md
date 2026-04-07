@@ -22,8 +22,8 @@ This document converts the AIR / TOWER Arma-native audit into a phase-by-phase i
 | Phase | PR | Mode | Goal | Status | Exit gate |
 |:-----:|:--:|:----:|------|:------:|-----------|
 | 0 | 1 | F | Baseline + scope lock | Done | Agreed scope, branch order, acceptance gates |
-| 1 | 2 | C | UI shell scaffold | In progress | AIR gets dedicated grouped controls; no second dialog |
-| 2 | 3 | B | AIRFIELD_OPS board conversion | Not started | 3-second scan works; default focus on ops state |
+| 1 | 2 | C | UI shell scaffold | Done | AIR gets dedicated grouped controls; no second dialog |
+| 2 | 3 | B | AIRFIELD_OPS board conversion | In progress | 3-second scan works; default focus on ops state |
 | 3 | 4 | A | CLEARANCES safety hardening | Not started | No unsafe global action from inert selection |
 | 4 | 5 | B | AIR input flow + confirmations | Not started | Narrow hotkeys; confirm destructive actions |
 | 5 | 6 | A | Snapshot freshness + degraded-state correctness | Not started | Fresh/stale/degraded real; late clients safe |

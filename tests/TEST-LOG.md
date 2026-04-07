@@ -11,6 +11,51 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-07 13:32 UTC — Phase 2: AIRFIELD_OPS board conversion
+
+**Branch/Commit:** copilot/develop-task-decomposition-plan @ pending
+
+**Scenario:** Phase 2 implementation — restructure the AIRFIELD_OPS (default) submode list layout from a developer-oriented flat dump to a fixed operational board. Arrivals lead, followed by runway, departures, then low-priority sections (events/staffing/history). STATUS|OPS metadata row removed (replaced by Phase 1 status strip chips). Decision Band rows removed from list (handled by Phase 1 decision band control IDC 78136). Mode indicator moved to bottom of list so default focus lands on operational data. Operational Summary detail pane section replaced with compact freshness line.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `functions/ui/fn_uiConsoleAirPaint.sqf` | AIRFIELD_OPS default block rewritten: arrivals→runway→departures lead; lower-priority sections gated by non-empty; mode row at bottom; STATUS detail case removed; Operational Summary replaced with freshness line; dead vars removed |
+| `docs/architecture/AIR_TOWER_Arma_Native_Implementation_Matrix.md` | Phase 1 → Done, Phase 2 → In progress |
+
+### Static checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict <changed .sqf files>` | PASS | No compat violations |
+| 2 | sqflint | `sqflint -e w functions/ui/fn_uiConsoleAirPaint.sqf` | PASS | Clean (0 warnings) |
+| 3 | State migrations | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios |
+| 4 | Marker index | `python3 scripts/dev/validate_marker_index.py` | PASS | 177 markers all modes |
+
+### Acceptance criteria check
+
+| # | Criterion | Status | Notes |
+|---|-----------|--------|-------|
+| 1 | Status strip shows 5 R/A/G chips | PASS | Phase 1 controls 78131–78135 (unchanged) |
+| 2 | Decision band shows pending decisions or hidden | PASS | Phase 1 control 78136 (unchanged) |
+| 3 | Arrivals block shows traffic rows or "No arrivals inbound" | PASS | Explicit empty state |
+| 4 | Departures block shows queued flights or "No departures queued" | PASS | Explicit empty state |
+| 5 | Runway block shows owner, movement, hold state | PASS | Compact single-line row |
+| 6 | 3-second scan test: first rows are operational data | PASS | Default focus lands on first arrival/none row |
+| 7 | No debug/developer text in default view | PASS | STATUS|OPS row removed; Operational Summary removed |
+| 8 | Proper empty states | PASS | Lower-priority sections hidden when empty |
+| 9 | Freshness wording | PASS | Uses _fmtAgo which produces "Updated Xs ago" |
+| 10 | Existing ARC_pub_state.airbase block unchanged | PASS | fn_publicBroadcastState not touched |
+
+### Deferred
+
+- Runtime smoke test (local MP): BLOCKED — no Arma 3 runtime in CI
+- Layout visual verification: BLOCKED — requires in-game check
+- JIP safety: BLOCKED — requires dedicated server
+
+---
+
 ## 2026-04-06 18:01 UTC — Phase 1: AIR shell scaffold (CT_CONTROLS_GROUP + status strip)
 
 **Branch/Commit:** copilot/develop-task-decomposition-plan @ 336cfab
