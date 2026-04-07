@@ -82,15 +82,17 @@ private _centerTarget = [];
     if (!(_posX isEqualType 0)) then { _posX = 0; };
     if (!(_posY isEqualType 0)) then { _posY = 0; };
 
+    private _isSelected = (_centerOnFid != "" && { _fid isEqualTo _centerOnFid });
+
     private _mkr = format ["ARC_airmap_arr_%1_%2", _arrIdx, diag_tickTime];
     createMarkerLocal [_mkr, [_posX, _posY]];
     _mkr setMarkerTypeLocal "mil_arrow";
-    _mkr setMarkerColorLocal "ColorBLUFOR";
-    _mkr setMarkerTextLocal format ["%1 %2", _callsign, _phase];
-    _mkr setMarkerSizeLocal [0.6, 0.6];
+    _mkr setMarkerColorLocal (if (_isSelected) then {"ColorYellow"} else {"ColorBLUFOR"});
+    _mkr setMarkerTextLocal _callsign;
+    _mkr setMarkerSizeLocal (if (_isSelected) then {[0.8, 0.8]} else {[0.6, 0.6]});
     _newMarkers pushBack _mkr;
 
-    if (_centerOnFid != "" && { _fid isEqualTo _centerOnFid }) then {
+    if (_isSelected) then {
         _centerTarget = [_posX, _posY];
     };
     _arrIdx = _arrIdx + 1;
@@ -109,15 +111,17 @@ private _depIdx = 0;
     if (!(_posX isEqualType 0)) then { _posX = 0; };
     if (!(_posY isEqualType 0)) then { _posY = 0; };
 
+    private _isSelected = (_centerOnFid != "" && { _fid isEqualTo _centerOnFid });
+
     private _mkr = format ["ARC_airmap_dep_%1_%2", _depIdx, diag_tickTime];
     createMarkerLocal [_mkr, [_posX, _posY]];
     _mkr setMarkerTypeLocal "mil_triangle";
-    _mkr setMarkerColorLocal "ColorOPFOR";
-    _mkr setMarkerTextLocal format ["%1 %2", _callsign, _state];
-    _mkr setMarkerSizeLocal [0.6, 0.6];
+    _mkr setMarkerColorLocal (if (_isSelected) then {"ColorYellow"} else {"ColorOPFOR"});
+    _mkr setMarkerTextLocal _callsign;
+    _mkr setMarkerSizeLocal (if (_isSelected) then {[0.8, 0.8]} else {[0.6, 0.6]});
     _newMarkers pushBack _mkr;
 
-    if (_centerOnFid != "" && { _fid isEqualTo _centerOnFid }) then {
+    if (_isSelected) then {
         _centerTarget = [_posX, _posY];
     };
     _depIdx = _depIdx + 1;
