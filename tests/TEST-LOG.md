@@ -4506,3 +4506,50 @@ python3 scripts/dev/validate_marker_index.py
 | 1 | Local MP smoke | BLOCKED | No Arma 3 runtime in CI |
 | 2 | Dedicated server | BLOCKED | No dedicated server in CI |
 | 3 | JIP snapshot | BLOCKED | Deferred to pre-dedicated validation |
+
+---
+
+## 2026-04-07 18:27 UTC — Phase 8: RemoteExec hardening completion
+
+**Branch/Commit:** copilot/develop-task-decomposition-plan @ (pending Phase 8 commit)
+
+**Scenario:** Phase 8 implementation — complete CfgRemoteExec allowlist for all AIR client→server request paths, verify explicit JIP flags, validate sender verification on all server handlers, and update hardening plan documentation.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `docs/security/RemoteExec_Hardening_Plan.md` | Added 10 AIR endpoints to §1.1 inventory; added sender validation requirements in §3; added new §6 documenting Phase 8 AIR completion status with per-handler S0–S3 checklist |
+| `docs/architecture/AIR_TOWER_Arma_Native_Implementation_Matrix.md` | Phase 7 → Done; Phase 8 → Done; Multiplayer locality grade B- → A- |
+| `tests/TEST-LOG.md` | Phase 8 validation entry |
+
+### Static checks
+
+| # | Check | Result | Notes |
+|---|-------|--------|-------|
+| 1 | Cross-check remoteExec targets vs CfgRemoteExec entries | PASS | All 10 AIR targets in allowlist; no orphans |
+| 2 | No `call` command remoteExec in AIR paths | PASS | Grep returns empty |
+| 3 | All 9 server handlers have isServer guard (S0) | PASS | Verified in all fn_airbase{Submit,Request,Cancel,Mark}*.sqf |
+| 4 | All 9 server handlers use ARC_fnc_rpcValidateSender (S1) | PASS | Verified in all server-side handlers |
+| 5 | JIP=0 for all AIR RPCs | PASS | Inherited from class default; no per-entry jip override |
+| 6 | `validate_state_migrations.py` | PASS | 3 scenarios |
+| 7 | `validate_marker_index.py` | PASS | 177 markers all modes |
+
+### Acceptance criteria
+
+| # | Criterion | Result | Notes |
+|---|-----------|--------|-------|
+| 1 | All 9 AIR client→server wrappers in CfgRemoteExec with mode=1 and jip=0 | PASS | Lines 61-69 of CfgRemoteExec.hpp; class-level mode=1, jip=0 |
+| 2 | New AIR functions from P1–P7 also allowlisted | PASS | No new remoteExec-callable functions in P1–P7; UI functions are client-local |
+| 3 | Server-side handlers validate remoteExecutedOwner | PASS | All 9 use ARC_fnc_rpcValidateSender which checks remoteExecutedOwner |
+| 4 | JIP flags explicit: 0 for all ephemeral AIR RPCs | PASS | Class-level default; no JIP-enabled AIR entries |
+| 5 | No `call` command in allowlist for AIR paths | PASS | Commands class has no AIR-specific entries |
+| 6 | Hardening plan updated with AIR completion | PASS | New §6 with per-handler audit table |
+
+### Runtime validation
+
+| # | Check | Status | Notes |
+|---|-------|--------|-------|
+| 1 | Local MP smoke | BLOCKED | No Arma 3 runtime in CI |
+| 2 | Dedicated server | BLOCKED | No dedicated server in CI |
+| 3 | JIP smoke | BLOCKED | Deferred to pre-dedicated validation |

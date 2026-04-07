@@ -52,6 +52,16 @@ These are the highest-risk endpoints because any connected client can attempt to
 | `ARC_fnc_uiConsoleQAAuditServer` | HQ UI QA tool | Server-side QA audit runner. |
 | `ARC_fnc_uiCoverageAuditServer` | HQ UI QA tool | Coverage/audit scan runner. |
 | `ARC_fnc_vbiedServerDetonate` | VBIED disposition action | Server detonation of VBIED. |
+| `ARC_fnc_airbaseSubmitClearanceRequest` | AIR/TOWER client wrapper | Submit new clearance request to ATC queue. (Phase 8) |
+| `ARC_fnc_airbaseRequestClearanceDecision` | AIR/TOWER client wrapper | Approve/deny a queued clearance request. (Phase 8) |
+| `ARC_fnc_airbaseRequestPrioritizeFlight` | AIR/TOWER client wrapper | Reprioritize a queued flight. (Phase 8) |
+| `ARC_fnc_airbaseCancelClearanceRequest` | AIR/TOWER client wrapper | Cancel own clearance request. (Phase 8) |
+| `ARC_fnc_airbaseRequestCancelQueuedFlight` | AIR/TOWER client wrapper | Cancel a queued flight (tower authority). (Phase 8) |
+| `ARC_fnc_airbaseMarkClearanceEmergency` | AIR/TOWER client wrapper | Escalate clearance to emergency priority. (Phase 8) |
+| `ARC_fnc_airbaseRequestSetLaneStaffing` | AIR/TOWER client wrapper | Claim/release tower lane staffing. (Phase 8) |
+| `ARC_fnc_airbaseRequestHoldDepartures` | AIR/TOWER client wrapper | Issue departure hold. (Phase 8) |
+| `ARC_fnc_airbaseRequestReleaseDepartures` | AIR/TOWER client wrapper | Release departure hold. (Phase 8) |
+| `ARC_fnc_tocRequestAirbaseResetControlState` | HQ UI admin | Full airbase control-state reset. (Phase 8) |
 
 ### 1.2 Server → Client ARC RPC endpoints
 
@@ -207,6 +217,16 @@ For each client→server endpoint in **1.1**, enforce (or keep enforcing) the fo
 | `ARC_fnc_uiConsoleQAAuditServer` | S0, S1, S2, S3, S5 |
 | `ARC_fnc_uiCoverageAuditServer` | S0, S1, S2, S3, S5 |
 | `ARC_fnc_vbiedServerDetonate` | S0, S1, S2, S3, S4, S5 |
+| `ARC_fnc_airbaseSubmitClearanceRequest` | S0, S1, S2, S3, S4, S5 |
+| `ARC_fnc_airbaseRequestClearanceDecision` | S0, S1, S2, S3, S4, S5 |
+| `ARC_fnc_airbaseRequestPrioritizeFlight` | S0, S1, S2, S3, S4, S5 |
+| `ARC_fnc_airbaseCancelClearanceRequest` | S0, S1, S2, S4, S5 |
+| `ARC_fnc_airbaseRequestCancelQueuedFlight` | S0, S1, S2, S3, S4, S5 |
+| `ARC_fnc_airbaseMarkClearanceEmergency` | S0, S1, S2, S4, S5 |
+| `ARC_fnc_airbaseRequestSetLaneStaffing` | S0, S1, S2, S3, S4, S5 |
+| `ARC_fnc_airbaseRequestHoldDepartures` | S0, S1, S2, S3, S5 |
+| `ARC_fnc_airbaseRequestReleaseDepartures` | S0, S1, S2, S3, S5 |
+| `ARC_fnc_tocRequestAirbaseResetControlState` | S0, S1, S2, S3, S5 |
 
 Implementation note: standardize all S1 gates to `ARC_fnc_rpcValidateSender` for consistency, then layer endpoint-specific checks.
 
@@ -246,3 +266,46 @@ Implementation note: standardize all S1 gates to `ARC_fnc_rpcValidateSender` for
 3. Normalize sender validation (S1) across all section 1.1 endpoints.
 4. Add denied-call telemetry counters and review logs in multiplayer test sessions.
 5. Run dedicated server smoke tests with at least one JIP client.
+
+---
+
+## 6) AIR/TOWER subsystem hardening status (Phase 8)
+
+**Date:** 2026-04-07  
+**Status:** COMPLETE
+
+### Allowlist entries (CfgRemoteExec.hpp)
+
+All 9 AIR client→server RPC wrappers are allowlisted with `allowedTargets = 2` and inherit `jip = 0` from the class default:
+
+| Allowlist entry | Server handler | S0 | S1 | S2 | S3 |
+|---|---|:---:|:---:|:---:|:---:|
+| `ARC_fnc_airbaseSubmitClearanceRequest` | fn_airbaseSubmitClearanceRequest.sqf | ✅ | ✅ | ✅ | ✅ |
+| `ARC_fnc_airbaseRequestClearanceDecision` | fn_airbaseRequestClearanceDecision.sqf | ✅ | ✅ | ✅ | ✅ |
+| `ARC_fnc_airbaseRequestPrioritizeFlight` | fn_airbaseRequestPrioritizeFlight.sqf | ✅ | ✅ | ✅ | ✅ |
+| `ARC_fnc_airbaseCancelClearanceRequest` | fn_airbaseCancelClearanceRequest.sqf | ✅ | ✅ | ✅ | — |
+| `ARC_fnc_airbaseRequestCancelQueuedFlight` | fn_airbaseRequestCancelQueuedFlight.sqf | ✅ | ✅ | ✅ | ✅ |
+| `ARC_fnc_airbaseMarkClearanceEmergency` | fn_airbaseMarkClearanceEmergency.sqf | ✅ | ✅ | ✅ | — |
+| `ARC_fnc_airbaseRequestSetLaneStaffing` | fn_airbaseRequestSetLaneStaffing.sqf | ✅ | ✅ | ✅ | ✅ |
+| `ARC_fnc_airbaseRequestHoldDepartures` | fn_airbaseRequestHoldDepartures.sqf | ✅ | ✅ | ✅ | ✅ |
+| `ARC_fnc_airbaseRequestReleaseDepartures` | fn_airbaseRequestReleaseDepartures.sqf | ✅ | ✅ | ✅ | ✅ |
+
+Additional AIR-related entries:
+| `ARC_fnc_tocRequestAirbaseResetControlState` | fn_tocRequestAirbaseResetControlState.sqf | ✅ | ✅ | ✅ | ✅ |
+| `ARC_fnc_airbaseDiaryUpdate` | Server→client broadcast (allowedTargets=0) | n/a | n/a | n/a | n/a |
+
+### JIP policy
+
+All AIR RPCs use `jip = 0` (inherited from class default). No AIR endpoint requires JIP replay — tower state is fully reconstructed from snapshot publication (ARC_pub_airbaseUiSnapshot), not RPC replay.
+
+### Sender validation
+
+All 9 server-side handlers use `ARC_fnc_rpcValidateSender` which checks `remoteExecutedOwner` against the first-parameter caller object's `owner`. Mismatch produces `[ARC][SEC]` structured log + early exit.
+
+### Functions added in Phases 1–7
+
+No new `remoteExec`-callable functions were introduced in Phases 1–7. All AIR UI functions (ARC_fnc_uiConsoleAir*) are client-local and do not appear in any remoteExec callsite. Phase 7's `ARC_fnc_uiConsoleAirMapPaint` uses only local markers (`createMarkerLocal`/`deleteMarkerLocal`).
+
+### `call` command policy
+
+No `call` command entry exists in the `Commands` class for AIR paths. All AIR RPCs use named function allowlist entries exclusively.

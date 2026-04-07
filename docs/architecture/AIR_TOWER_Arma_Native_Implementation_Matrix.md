@@ -28,8 +28,8 @@ This document converts the AIR / TOWER Arma-native audit into a phase-by-phase i
 | 4 | 5 | B | AIR input flow + confirmations | Done | Narrow hotkeys; confirm destructive actions |
 | 5 | 6 | A | Snapshot freshness + degraded-state correctness | Done | Fresh/stale/degraded real; late clients safe |
 | 6 | 7 | B | DASH air summary completion | Done | Commanders read air status from DASH alone |
-| 7 | 8 | B | AIR map pane integration | In progress | CT_MAP traffic pane; selection recenters map |
-| 8 | 9 | I | RemoteExec hardening completion | Not started | Allowlist complete; JIP flags explicit |
+| 7 | 8 | B | AIR map pane integration | Done | CT_MAP traffic pane; selection recenters map |
+| 8 | 9 | I | RemoteExec hardening completion | Done | Allowlist complete; JIP flags explicit |
 | 9 | 10 | B | World overlay layer | Not started | Sparse in-world cues; no UI clutter |
 | 10 | 11 | C | Debug isolation + legacy cleanup | Not started | Operator view clean; debug isolated; legacy retired |
 
@@ -50,7 +50,7 @@ The Arma-native audit (`AIR_TOWER_Arma_Native_Audit_Matrix.md`) identified six d
 | Control choice (CT_LISTNBOX, CT_TREE, CT_MAP, CT_CONTROLS_GROUP) | C | Phase 1 (shell scaffold) | Phase 2 (ops board), Phase 7 (map pane) |
 | SafeZone behavior (GUI_GRID review) | C | Phase 1 (shell scaffold) | — |
 | Event flow (keyboard, confirmations) | C+ | Phase 4 (input flow) | Phase 3 (clearances safety) |
-| Multiplayer locality (stale-state, RemoteExec) | B- | Phase 5 (snapshot freshness) | Phase 8 (RemoteExec hardening) |
+| Multiplayer locality (stale-state, RemoteExec) | A- | Phase 5 (snapshot freshness) | Phase 8 (RemoteExec hardening — complete) |
 | World-space overlays (Draw3D) | D | Phase 9 (world overlay) | — |
 | Map integration (CT_MAP traffic) | D+ | Phase 7 (map pane) | — |
 
