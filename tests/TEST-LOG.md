@@ -11,6 +11,56 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-04-07 14:56 UTC — Phase 3: CLEARANCES safety hardening
+
+**Branch/Commit:** copilot/develop-task-decomposition-plan @ pending
+
+**Scenario:** Phase 3 implementation — remove unsafe global actions from inert/header CLEARANCES and AIRFIELD_OPS selections. Guard non-action row types from firing HOLD/RELEASE or queue actions in both primary and secondary action handlers. Update button labels so HDR rows always show READ-ONLY. Initialize `ARC_console_airSubmode` default in OnLoad.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `functions/ui/fn_uiConsoleActionAirPrimary.sqf` | CLEARANCES default: block non-action rows (HDR, CSTATUS, DEC, etc.) from firing HOLD/RELEASE — only MODE/"" pass through; AIRFIELD_OPS default: block HDR/EVT/DEC/DBG/CSTATUS from firing HOLD/RELEASE |
+| `functions/ui/fn_uiConsoleActionAirSecondary.sqf` | CLEARANCES default: added Phase 3 safety comment (already safe — cycles submode only) |
+| `functions/ui/fn_uiConsoleAirPaint.sqf` | CLEARANCES default button labels: HDR rows → READ-ONLY; AIRFIELD_OPS default button labels: HDR rows → READ-ONLY |
+| `functions/ui/fn_uiConsoleOnLoad.sqf` | Initialize `ARC_console_airSubmode` to "AIRFIELD_OPS" on dialog open |
+| `docs/architecture/AIR_TOWER_Arma_Native_Implementation_Matrix.md` | Phase 2 → Done, Phase 3 → In progress |
+
+### Static checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict <changed .sqf files>` | PASS | No compat violations |
+| 2 | sqflint (Primary) | `sqflint -e w functions/ui/fn_uiConsoleActionAirPrimary.sqf` | PASS | 0 warnings |
+| 3 | sqflint (Secondary) | `sqflint -e w functions/ui/fn_uiConsoleActionAirSecondary.sqf` | PASS | 0 warnings |
+| 4 | sqflint (AirPaint) | `sqflint -e w functions/ui/fn_uiConsoleAirPaint.sqf` | PASS | 0 warnings |
+| 5 | sqflint (OnLoad) | `sqflint -e w functions/ui/fn_uiConsoleOnLoad.sqf` | PASS | 0 warnings |
+| 6 | State migrations | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios |
+| 7 | Marker index | `python3 scripts/dev/validate_marker_index.py` | PASS | 177 markers all modes |
+
+### Acceptance criteria check
+
+| # | Criterion | Status | Notes |
+|---|-----------|--------|-------|
+| 1 | Non-action rows (HDR, CSTATUS, DEC) do not fire HOLD/RELEASE or queue actions | PASS | Guarded in both CLEARANCES and AIRFIELD_OPS default blocks |
+| 2 | REQ rows → APPROVE / DENY only | PASS | Existing dispatch preserved |
+| 3 | FLT rows → EXPEDITE / CANCEL only | PASS | Existing dispatch preserved |
+| 4 | LANE rows → CLAIM / RELEASE only | PASS | Existing dispatch preserved |
+| 5 | No NO HOLD AUTH / NO QUEUE AUTH / NO ACCESS labels | PASS | grep confirms zero occurrences |
+| 6 | Unauthorized users see clean READ-ONLY label | PASS | Button label logic preserved |
+| 7 | All canAirQueueManage / canAirStaff / canAirHoldRelease permission guards preserved | PASS | No permission logic changed |
+| 8 | PILOT submode path intact | PASS | PILOT exitWith block untouched |
+| 9 | sqflint + compat scan pass | PASS | All 4 files clean |
+| 10 | ARC_console_airSubmode initialized in OnLoad | PASS | Set to "AIRFIELD_OPS" |
+
+### Deferred
+
+- Runtime smoke test (local MP): BLOCKED — no Arma 3 runtime in CI
+- JIP safety: BLOCKED — requires dedicated server
+
+---
+
 ## 2026-04-07 13:32 UTC — Phase 2: AIRFIELD_OPS board conversion
 
 **Branch/Commit:** copilot/develop-task-decomposition-plan @ c704f07

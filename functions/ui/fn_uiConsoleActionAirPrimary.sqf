@@ -162,6 +162,14 @@ switch (_airSubmode) do
 
             default
             {
+                // Phase 3 safety: non-action rows must not fire global hold/release.
+                // Only MODE rows (which represent the view-indicator in CLEARANCES)
+                // are eligible for hold/release when no action-specific row is selected.
+                if !(_rowType in ["MODE", ""]) exitWith {
+                    ["AIR", "Selection is read-only."] call ARC_fnc_clientToast;
+                    true
+                };
+
                 private _holdState = ["ARC_console_airHoldDepartures", false] call ARC_fnc_uiNsGetBool;
                 private _canAirHoldRelease = ["ARC_console_airCanHoldRelease", false] call ARC_fnc_uiNsGetBool;
                 private _canHold = ["ARC_console_airCanHold", false] call ARC_fnc_uiNsGetBool;
@@ -198,6 +206,13 @@ switch (_airSubmode) do
 
     default
     {
+        // Phase 3 safety: non-action rows (HDR, EVT, DEC, MODE, etc.) must not
+        // fire global hold/release. Only operational rows are eligible.
+        if (_rowType in ["HDR", "EVT", "DEC", "DBG", "CSTATUS"]) exitWith {
+            ["AIR", "Selection is read-only."] call ARC_fnc_clientToast;
+            true
+        };
+
         private _holdState = ["ARC_console_airHoldDepartures", false] call ARC_fnc_uiNsGetBool;
         private _canAirHoldRelease = ["ARC_console_airCanHoldRelease", false] call ARC_fnc_uiNsGetBool;
         private _canHold = ["ARC_console_airCanHold", false] call ARC_fnc_uiNsGetBool;

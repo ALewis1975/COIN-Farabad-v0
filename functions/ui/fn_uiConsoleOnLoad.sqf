@@ -203,6 +203,7 @@ uiNamespace setVariable ["ARC_console_airCanRead", _canAirRead];
 uiNamespace setVariable ["ARC_console_airCanControl", _canAirControl];
 uiNamespace setVariable ["ARC_console_airCanPilot", _canAirPilot];
 uiNamespace setVariable ["ARC_console_airMode", if (_canAirPilot && !_canAirControl) then {"PILOT"} else {"TOWER"}];
+uiNamespace setVariable ["ARC_console_airSubmode", "AIRFIELD_OPS"];
 
 // Farabad Tower staff (canAirControl) and pilots (canAirPilot) also need S3/OPS visibility.
 _canOps = _canOps || _canAirControl || _canAirPilot;

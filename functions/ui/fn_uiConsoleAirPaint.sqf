@@ -700,11 +700,18 @@ if (_airMode isEqualTo "PILOT") then {
                     _secondaryTooltip = "Release selected lane.";
                 };
                 default {
-                    _primaryLabel = if (_holdDepartures) then {"RELEASE"} else {"HOLD"};
-                    _primaryEnabled = if (_holdDepartures) then { _canAirRelease } else { _canAirHold };
-                    if (!_canAirHoldRelease) then {
+                    // Phase 3 safety: HDR rows are always inert.
+                    if (_rowType isEqualTo "HDR") then {
                         _primaryLabel = "READ-ONLY";
                         _primaryEnabled = false;
+                        _primaryTooltip = "Header row — no action available.";
+                    } else {
+                        _primaryLabel = if (_holdDepartures) then {"RELEASE"} else {"HOLD"};
+                        _primaryEnabled = if (_holdDepartures) then { _canAirRelease } else { _canAirHold };
+                        if (!_canAirHoldRelease) then {
+                            _primaryLabel = "READ-ONLY";
+                            _primaryEnabled = false;
+                        };
                     };
                     _secondaryLabel = if (_nextMode isEqualTo _airSubmode) then {"REFRESH"} else { format ["VIEW: %1", _nextMode] };
                     _secondaryTooltip = if (_nextMode isEqualTo _airSubmode) then { "Refresh AIR view." } else { format ["Switch to %1.", _nextMode] };
@@ -720,11 +727,18 @@ if (_airMode isEqualTo "PILOT") then {
         };
         default
         {
-            _primaryLabel = if (_holdDepartures) then {"RELEASE"} else {"HOLD"};
-            _primaryEnabled = if (_holdDepartures) then { _canAirRelease } else { _canAirHold };
-            if (!_canAirHoldRelease) then {
+            // Phase 3 safety: HDR rows are always inert.
+            if (_rowType isEqualTo "HDR") then {
                 _primaryLabel = "READ-ONLY";
                 _primaryEnabled = false;
+                _primaryTooltip = "Header row — no action available.";
+            } else {
+                _primaryLabel = if (_holdDepartures) then {"RELEASE"} else {"HOLD"};
+                _primaryEnabled = if (_holdDepartures) then { _canAirRelease } else { _canAirHold };
+                if (!_canAirHoldRelease) then {
+                    _primaryLabel = "READ-ONLY";
+                    _primaryEnabled = false;
+                };
             };
             _secondaryLabel = if (_nextMode isEqualTo _airSubmode) then {"REFRESH"} else { format ["VIEW: %1", _nextMode] };
             _secondaryTooltip = if (_nextMode isEqualTo _airSubmode) then { "Refresh AIR view." } else { format ["Switch to %1.", _nextMode] };

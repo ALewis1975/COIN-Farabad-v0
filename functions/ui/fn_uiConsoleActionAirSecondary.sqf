@@ -119,6 +119,7 @@ switch (_airSubmode) do
 
             default
             {
+                // Phase 3 safety: non-action rows cycle submode (no queue/airfield action).
                 private _nextMode = [_airSubmode, _canAirControl, _debugAir] call _cycleModes;
                 uiNamespace setVariable ["ARC_console_airSubmode", _nextMode];
                 ["AIR", format ["Switched AIR view to %1.", _nextMode]] call ARC_fnc_clientToast;
