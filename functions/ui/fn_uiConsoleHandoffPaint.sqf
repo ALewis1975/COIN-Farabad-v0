@@ -83,7 +83,7 @@ private _findAcceptedRtb = {
         if ((toUpper _status) isNotEqualTo "ACCEPTED") then { continue; };
         if ((toUpper _orderType) isNotEqualTo "RTB") then { continue; };
         if (_targetGroup isNotEqualTo _focusGid) then { continue; };
-        private _p = toUpper ([_data, "purpose", "REFIT"] call _getPair);
+        private _p = toUpper ([_data, "purpose", "REFIT"] call ARC_fnc_uiConsoleGetPair);
         if (_p isEqualTo _purposeU) exitWith { _out = _x; };
     } forEach _orders;
     _out
@@ -109,19 +109,19 @@ private _isArrived = {
     _ord params ["_oid", "_iat", "_st", "_ot", "_tg", "_data", "_meta"]; 
 
     // Primary: server arrival state
-    private _arrivedAt = [_meta, "arrivedAt", -1] call _getPair;
+    private _arrivedAt = [_meta, "arrivedAt", -1] call ARC_fnc_uiConsoleGetPair;
     if (!(_arrivedAt isEqualType 0)) then { _arrivedAt = -1; };
     if (_arrivedAt >= 0) exitWith {true};
 
     private _k = if (_purposeU isEqualTo "INTEL") then {"awaitingDebrief"} else {"awaitingEpwProcessing"};
-    private _aw = [_meta, _k, false] call _getPair;
+    private _aw = [_meta, _k, false] call ARC_fnc_uiConsoleGetPair;
     if (!(_aw isEqualType true)) then { _aw = false; };
     if (_aw) exitWith {true};
 
     // UX: if the player is physically at the destination, treat as arrived even before the
     // 60s order tick marks arrivedAt.
-    private _destPos = [_data, "destPos", []] call _getPair;
-    private _destRad = [_data, "destRadius", 30] call _getPair;
+    private _destPos = [_data, "destPos", []] call ARC_fnc_uiConsoleGetPair;
+    private _destRad = [_data, "destRadius", 30] call ARC_fnc_uiConsoleGetPair;
     if (!(_destRad isEqualType 0)) then { _destRad = 30; };
 
     // Intel debrief destination radius is intentionally generous (players use different consoles/boards).
@@ -215,8 +215,8 @@ private _intelDest = "";
 if (_intelAccepted) then
 {
     _intelOrd params ["_oid", "_iat", "_st", "_ot", "_tg", "_data", "_meta"]; 
-    private _lbl = [_data, "destLabel", "Destination"] call _getPair;
-    private _pos = [_data, "destPos", []] call _getPair;
+    private _lbl = [_data, "destLabel", "Destination"] call ARC_fnc_uiConsoleGetPair;
+    private _pos = [_data, "destPos", []] call ARC_fnc_uiConsoleGetPair;
     private _grid = if (_pos isEqualType [] && { (count _pos) >= 2 }) then { mapGridPosition _pos } else { "" };
     _intelDest = format ["<t size='0.9' color='#CCCCCC'>%1 %2</t>", _lbl, if (_grid isEqualTo "") then {""} else {format ["(@ %1)", _grid]}];
 };
@@ -225,8 +225,8 @@ private _epwDest = "";
 if (_epwAccepted) then
 {
     _epwOrd params ["_oid", "_iat", "_st", "_ot", "_tg", "_data", "_meta"]; 
-    private _lbl = [_data, "destLabel", "Destination"] call _getPair;
-    private _pos = [_data, "destPos", []] call _getPair;
+    private _lbl = [_data, "destLabel", "Destination"] call ARC_fnc_uiConsoleGetPair;
+    private _pos = [_data, "destPos", []] call ARC_fnc_uiConsoleGetPair;
     private _grid = if (_pos isEqualType [] && { (count _pos) >= 2 }) then { mapGridPosition _pos } else { "" };
     _epwDest = format ["<t size='0.9' color='#CCCCCC'>%1 %2</t>", _lbl, if (_grid isEqualTo "") then {""} else {format ["(@ %1)", _grid]}];
 };

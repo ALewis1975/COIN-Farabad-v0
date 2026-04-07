@@ -104,13 +104,12 @@ private _sysFoLeadPos = missionNamespace getVariable ["ARC_activeIncidentFollowO
 
 // ── Console VM v1 opt-in (Command tab) ──────────────────────────────────────
 // When ARC_console_command_v2 is true, the incident, follow-on, and queue fields
-// above are re-sourced from the VM payload via ARC_fnc_consoleVmAdapterV1 rather
-// than from raw missionNamespace vars. Defaults to false (legacy path).
-// Set true after parity testing on a dedicated server with live traffic.
-private _cmdUseVm = missionNamespace getVariable ["ARC_console_command_v2", false];
-if (!(_cmdUseVm isEqualType true) && { !(_cmdUseVm isEqualType false) }) then { _cmdUseVm = false; };
+// Console VM (primary data source — Refactor Plan §PR4, feature flag removed).
+// When VM adapter available, re-source incident/followOn from payload.
+// Direct missionNamespace reads remain as fallback only when unavailable.
+private _cmdUseVm = (!isNil "ARC_fnc_consoleVmAdapterV1");
 
-if (_cmdUseVm && { !isNil "ARC_fnc_consoleVmAdapterV1" }) then
+if (_cmdUseVm) then
 {
     _taskId     = ["incident", "task_id",           ""]      call ARC_fnc_consoleVmAdapterV1;
     _dispName   = ["incident", "display_name",       "(none)"] call ARC_fnc_consoleVmAdapterV1;
@@ -409,7 +408,7 @@ if (!isNull _ctrlDetailsGrp && { !isNull _ctrlDetails }) then
     };
 
     // Per-group order state breakdown (all groups)
-    private _ordersR = if (_cmdUseVm && { !isNil "ARC_fnc_consoleVmAdapterV1" }) then
+    private _ordersR = if (_cmdUseVm) then
     {
         private _vmOrders = ["ops", "orders", []] call ARC_fnc_consoleVmAdapterV1;
         if (!(_vmOrders isEqualType [])) then { _vmOrders = []; };

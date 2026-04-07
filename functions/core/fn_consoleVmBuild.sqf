@@ -228,6 +228,69 @@ private _civsubSection = [
 ];
 
 // ---------------------------------------------------------------------------
+// Section: airbase — pass-through of ARC_pub_airbaseUiSnapshot with freshness
+// ---------------------------------------------------------------------------
+private _airSnapshot = missionNamespace getVariable ["ARC_pub_airbaseUiSnapshot", []];
+if (!(_airSnapshot isEqualType [])) then { _airSnapshot = []; };
+
+private _airSnapshotAt = missionNamespace getVariable ["ARC_pub_airbaseUiSnapshotUpdatedAt", -1];
+if (!(_airSnapshotAt isEqualType 0)) then { _airSnapshotAt = -1; };
+
+private _airbaseData = [
+    ["snapshot", _airSnapshot]
+];
+
+private _airbaseSection = [
+    ["data",      _airbaseData],
+    ["freshness", [["updatedAt", if (_airSnapshotAt > 0) then {_airSnapshotAt} else {_now}], ["staleAfterS", 30]]]
+];
+
+// ---------------------------------------------------------------------------
+// Section: personnel — S1 registry snapshot (stub; full data in future PR)
+// ---------------------------------------------------------------------------
+private _s1Snapshot = missionNamespace getVariable ["ARC_pub_s1Registry", []];
+if (!(_s1Snapshot isEqualType [])) then { _s1Snapshot = []; };
+
+private _personnelData = [
+    ["registry", _s1Snapshot]
+];
+
+private _personnelSection = [
+    ["data",      _personnelData],
+    ["freshness", [["updatedAt", _now], ["staleAfterS", 60]]]
+];
+
+// ---------------------------------------------------------------------------
+// Section: handoff — handoff state (stub; full data in future PR)
+// ---------------------------------------------------------------------------
+private _handoffState = missionNamespace getVariable ["ARC_pub_handoffState", []];
+if (!(_handoffState isEqualType [])) then { _handoffState = []; };
+
+private _handoffData = [
+    ["state", _handoffState]
+];
+
+private _handoffSection = [
+    ["data",      _handoffData],
+    ["freshness", [["updatedAt", _now], ["staleAfterS", 120]]]
+];
+
+// ---------------------------------------------------------------------------
+// Section: intelFeed — intelligence log with freshness (stub; full data in future PR)
+// ---------------------------------------------------------------------------
+private _intelLogFeed = missionNamespace getVariable ["ARC_pub_intelLog", []];
+if (!(_intelLogFeed isEqualType [])) then { _intelLogFeed = []; };
+
+private _intelFeedData = [
+    ["log", _intelLogFeed]
+];
+
+private _intelFeedSection = [
+    ["data",      _intelFeedData],
+    ["freshness", [["updatedAt", _now], ["staleAfterS", 60]]]
+];
+
+// ---------------------------------------------------------------------------
 // Assemble final payload
 // ---------------------------------------------------------------------------
 [
@@ -241,6 +304,10 @@ private _civsubSection = [
         ["ops",          _opsSection],
         ["stateSummary", _statSection],
         ["access",       _accessSection],
-        ["civsub",       _civsubSection]
+        ["civsub",       _civsubSection],
+        ["airbase",      _airbaseSection],
+        ["personnel",    _personnelSection],
+        ["handoff",      _handoffSection],
+        ["intelFeed",    _intelFeedSection]
     ]]
 ]

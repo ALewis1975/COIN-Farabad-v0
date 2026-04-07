@@ -543,6 +543,15 @@ class CfgFunctions
             class uiNsGetArray {};
             class uiNsGetBool {};
 
+            // Console shared helpers (Refactor Plan §4.4)
+            class uiConsoleGetPair {};
+            class uiConsoleFormatAgo {};
+            class uiConsoleFormatEmptyState {};
+            class uiConsoleFormatRow {};
+            class uiConsoleFormatDetail {};
+            class uiConsoleFormatStatusChip {};
+            class uiConsoleButtonState {};
+
             // UI09 tab painters
             class uiConsoleDashboardPaint {};
             class uiConsoleBoardsPaint {};

@@ -4666,3 +4666,54 @@ Created the Farabad Console Refactor Plan document covering:
 | # | Check | Status | Notes |
 |---|-------|--------|-------|
 | 1 | No runtime validation required | N/A | Documentation-only change |
+
+---
+
+## 2026-04-07 20:22 UTC — Farabad Console Refactor (PRs 1–6)
+
+**Branch/Commit:** copilot/farabad-console-refactor @ (current HEAD)
+
+**Scenario:** Implement the Farabad Console Refactor Plan: shell layout contract with tab layout declarations, Region C (IDC 78140), 7 shared helpers, 4 new Console VM sections, AIR painter rebuild, DASH/OPS/CMD VM migration, remaining painter cleanup, and static validation.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `config/CfgDialogs.hpp` | Added IDC 78140 (ConsoleVisualPanel, Region C) |
+| `config/CfgFunctions.hpp` | Registered 7 shared helper functions |
+| `functions/ui/fn_uiConsoleApplyLayout.sqf` | Tab layout declarations, Region C positioning, split ratio from declarations |
+| `functions/ui/fn_uiConsoleRefresh.sqf` | Region C baseline hide, ButtonState helper adoption |
+| `functions/ui/fn_uiConsoleGetPair.sqf` | NEW: shared pair-array lookup helper |
+| `functions/ui/fn_uiConsoleFormatAgo.sqf` | NEW: shared "Xs ago" formatter |
+| `functions/ui/fn_uiConsoleFormatEmptyState.sqf` | NEW: shared empty-state row renderer |
+| `functions/ui/fn_uiConsoleFormatRow.sqf` | NEW: shared column-aligned row formatter |
+| `functions/ui/fn_uiConsoleFormatDetail.sqf` | NEW: shared detail pane HTML builder |
+| `functions/ui/fn_uiConsoleFormatStatusChip.sqf` | NEW: shared R/A/G chip HTML builder |
+| `functions/ui/fn_uiConsoleButtonState.sqf` | NEW: shared button state setter |
+| `functions/core/fn_consoleVmBuild.sqf` | Added airbase, personnel, handoff, intelFeed VM sections |
+| `functions/ui/fn_uiConsoleAirPaint.sqf` | Status chips via FormatStatusChip, events resolve FLT-xxxx, empty states via FormatEmptyState, Region C detail pane positioning |
+| `functions/ui/fn_uiConsoleDashboardPaint.sqf` | VM as primary source (feature flag removed), _getPair → shared helper |
+| `functions/ui/fn_uiConsoleOpsPaint.sqf` | VM as primary source (feature flag removed), _pairGet → shared helper |
+| `functions/ui/fn_uiConsoleCommandPaint.sqf` | VM as primary source (feature flag removed) |
+| `functions/ui/fn_uiConsoleBoardsPaint.sqf` | _getPair → shared helper |
+| `functions/ui/fn_uiConsoleHandoffPaint.sqf` | _getPair → shared helper |
+| `functions/ui/fn_uiConsoleS1Paint.sqf` | _getPair → shared helper |
+| `scripts/dev/check_console_conflicts.sh` | NEW: IDC collision check + painter contract check |
+
+### Static checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | IDC collision check | `bash scripts/dev/check_console_conflicts.sh` | PASS (pre-existing) | 3 pre-existing duplicate IDCs in Follow-On/Closeout dialogs (78201, 78202, 78211) — separate dialog classes, not true collisions. IDC 78140 unique. |
+| 2 | Shared helper adoption | grep count | PASS | 79+ shared helper calls across 7 painters |
+| 3 | Feature flag removal | grep | PASS | dashboard_v2, ops_v2, command_v2 flags removed; VM is primary source |
+| 4 | Region C IDC unique | grep | PASS | IDC 78140 appears exactly once |
+
+### Deferred / BLOCKED
+
+| # | Check | Status | Reason |
+|---|-------|--------|--------|
+| 1 | Multiplayer layout regression | BLOCKED | Requires dedicated server + JIP |
+| 2 | Region C visual validation | BLOCKED | Requires Arma 3 client with DOCK_RIGHT mode |
+| 3 | VM freshness badges | BLOCKED | Requires live mission with stale data |
+| 4 | Empty state visual check | BLOCKED | Requires Arma 3 client |

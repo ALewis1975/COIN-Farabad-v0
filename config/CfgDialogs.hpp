@@ -978,6 +978,23 @@ text = "FARABAD CONSOLE";
         };
 
         // -------------------------------------------------------------------
+        // Region C: Visual Panel container (Refactor Plan §4.1, IDC 78140)
+        // Generic container for optional visual content (map, chart, image).
+        // Hidden by default; height 0 when unused.
+        // Positioned by the shell layout engine (fn_uiConsoleApplyLayout).
+        // On AIR tab, AirTrafficMap (78137) is moved into this region slot.
+        // -------------------------------------------------------------------
+        class ConsoleVisualPanel: RscControlsGroup
+        {
+            idc = 78140;
+            x = safeZoneX + (0.242 * safeZoneW);
+            y = safeZoneY + (0.50 * safeZoneH);
+            w = (0.756 * safeZoneW);
+            h = 0;
+            colorBackground[] = {0,0,0,0};
+        };
+
+        // -------------------------------------------------------------------
         // Operations (S3) tab: 3 frames (Incidents / Orders / Leads)
         // Hidden by default; shown/managed by ARC_fnc_uiConsoleOpsPaint.
         // -------------------------------------------------------------------

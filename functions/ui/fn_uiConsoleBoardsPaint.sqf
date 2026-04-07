@@ -141,7 +141,7 @@ private _ordLines = [];
 {
     if (!(_x isEqualType []) || { (count _x) < 7 }) then { continue; };
     _x params ["_oid", "_iat", "_st", "_ty", "_tg", "_data", "_meta"]; 
-    private _note = [_meta, "note", ""] call _getPair;
+    private _note = [_meta, "note", ""] call ARC_fnc_uiConsoleGetPair;
     if (!(_note isEqualType "")) then { _note = ""; };
     private _suffix = if (_note isEqualTo "") then { "" } else { format [" - <t color='#FFFFFF'>%1</t>", _note] };
     _ordLines pushBack format ["- <t color='#B89B6B'>%1</t> to <t color='#DDDDDD'>%2</t>%3", toUpper _ty, _tg, _suffix];
@@ -160,7 +160,7 @@ for "_i" from ((count _ops) - 1) to 0 step -1 do
     private _e = _ops # _i;
     if (!(_e isEqualType []) || { (count _e) < 6 }) then { continue; };
     _e params ["_id", "_ts", "_cat", "_summary", "_pos", "_meta"]; 
-    private _evt = [_meta, "event", ""] call _getPair;
+    private _evt = [_meta, "event", ""] call ARC_fnc_uiConsoleGetPair;
     if (!(_evt isEqualType "")) then { _evt = ""; };
     if (toUpper _evt isEqualTo "SITREP") exitWith { _sit = _e; };
 };
@@ -169,9 +169,9 @@ private _sitTxt = "<t color='#FFFFFF'>(none)</t>";
 if (_sit isNotEqualTo []) then
 {
     _sit params ["_id", "_ts", "_cat", "_summary", "_pos", "_meta"]; 
-    private _from = [_meta, "from", ""] call _getPair;
+    private _from = [_meta, "from", ""] call ARC_fnc_uiConsoleGetPair;
     if (!(_from isEqualType "")) then { _from = ""; };
-    private _rec = [_meta, "recommend", ""] call _getPair;
+    private _rec = [_meta, "recommend", ""] call ARC_fnc_uiConsoleGetPair;
     if (!(_rec isEqualType "")) then { _rec = ""; };
 
     private _grid2 = if (_pos isEqualType [] && { (count _pos) >= 2 }) then { mapGridPosition _pos } else { "" };

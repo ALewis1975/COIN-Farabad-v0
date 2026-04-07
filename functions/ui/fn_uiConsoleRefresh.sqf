@@ -74,6 +74,10 @@ private _airTrafficMap = _display displayCtrl 78137;
 private _airDedicatedCtrls = [_airStripGroup, _airDecisionBand, _airTrafficMap];
 { if (!isNull _x) then { _x ctrlShow false; }; } forEach _airDedicatedCtrls;
 
+// Baseline: hide Region C Visual Panel (shown only when tab declares useVisualPanel)
+private _visualPanel = _display displayCtrl 78140;
+if (!isNull _visualPanel) then { _visualPanel ctrlShow false; };
+
 // Baseline: hide S2 workflow controls (shown only on Intelligence tab)
 private _s2Ctrls = [
     _display displayCtrl 78050,
@@ -224,8 +228,8 @@ case "DASH":
         if (!isNull _ctrlDetailsGrp) then { _ctrlDetailsGrp ctrlShow true; };
         if (!isNull _ctrlDetails) then { _ctrlDetails ctrlShow true; };
 
-        if (!isNull _b1) then { _b1 ctrlShow true; _b1 ctrlEnable true; _b1 ctrlSetText "EXECUTE"; };
-        if (!isNull _b2) then { _b2 ctrlShow true; _b2 ctrlEnable true; _b2 ctrlSetText "TOC QUEUE"; };
+        [_b1, "EXECUTE", true, true] call ARC_fnc_uiConsoleButtonState;
+        [_b2, "TOC QUEUE", true, true] call ARC_fnc_uiConsoleButtonState;
 
         [_display, false] call ARC_fnc_uiConsoleIntelPaint;
     };
@@ -240,8 +244,8 @@ case "DASH":
         if (!isNull _ctrlDetails) then { _ctrlDetails ctrlShow true; };
         { if (!isNull _x) then { _x ctrlShow true; }; } forEach _opsCtrls;
 
-        if (!isNull _b1) then { _b1 ctrlShow true; _b1 ctrlEnable true; _b1 ctrlSetText "ACTION"; };
-        if (!isNull _b2) then { _b2 ctrlShow true; _b2 ctrlEnable false; _b2 ctrlSetText _opsSecondaryLabel; };
+        [_b1, "ACTION", true, true] call ARC_fnc_uiConsoleButtonState;
+        [_b2, _opsSecondaryLabel, false, true] call ARC_fnc_uiConsoleButtonState;
 
         [_display, true] call ARC_fnc_uiConsoleOpsPaint;
     };
@@ -282,29 +286,21 @@ case "DASH":
         if (!_debugAir && { _airSubmode isEqualTo "DEBUG" }) then { _airSubmode = "AIRFIELD_OPS"; };
         uiNamespace setVariable ["ARC_console_airSubmode", _airSubmode];
 
-        if (!isNull _b1) then {
-            _b1 ctrlShow true;
-            _b1 ctrlEnable true;
-            _b1 ctrlSetText (if (_airMode isEqualTo "PILOT") then {"SEND REQUEST"} else {"AIR ACTION"});
-        };
-        if (!isNull _b2) then {
-            _b2 ctrlShow true;
-            _b2 ctrlEnable true;
-            _b2 ctrlSetText (if (_airMode isEqualTo "PILOT") then {"UPDATE"} else {"VIEW"});
-        };
+        [_b1, (if (_airMode isEqualTo "PILOT") then {"SEND REQUEST"} else {"AIR ACTION"}), true, true] call ARC_fnc_uiConsoleButtonState;
+        [_b2, (if (_airMode isEqualTo "PILOT") then {"UPDATE"} else {"VIEW"}), true, true] call ARC_fnc_uiConsoleButtonState;
 
         if (!_canAirRead && !_canAirControl && !_canAirPilot) then
         {
-            if (!isNull _b1) then { _b1 ctrlEnable false; _b1 ctrlSetText "READ-ONLY"; };
-            if (!isNull _b2) then { _b2 ctrlEnable false; _b2 ctrlSetText "READ-ONLY"; };
+            [_b1, "READ-ONLY", false, true] call ARC_fnc_uiConsoleButtonState;
+            [_b2, "READ-ONLY", false, true] call ARC_fnc_uiConsoleButtonState;
         };
 
         [_display, false] call ARC_fnc_uiConsoleAirPaint;
     };
     case "HANDOFF":
     {
-        if (!isNull _b1) then { _b1 ctrlShow true; _b1 ctrlSetText "INTEL DEBRIEF"; };
-        if (!isNull _b2) then { _b2 ctrlShow true; _b2 ctrlSetText "EPW PROCESS"; };
+        [_b1, "INTEL DEBRIEF", true, true] call ARC_fnc_uiConsoleButtonState;
+        [_b2, "EPW PROCESS", true, true] call ARC_fnc_uiConsoleButtonState;
         [_display] call ARC_fnc_uiConsoleHandoffPaint;
     };
 
@@ -339,18 +335,18 @@ case "DASH":
             private _canDecide = [player] call ARC_fnc_rolesCanApproveQueue;
             if (_canDecide && _selectedPending) then
             {
-                if (!isNull _b1) then { _b1 ctrlShow true; _b1 ctrlEnable true; _b1 ctrlSetText "APPROVE"; };
-                if (!isNull _b2) then { _b2 ctrlShow true; _b2 ctrlEnable true; _b2 ctrlSetText "REJECT"; };
+                [_b1, "APPROVE", true, true] call ARC_fnc_uiConsoleButtonState;
+                [_b2, "REJECT", true, true] call ARC_fnc_uiConsoleButtonState;
             }
             else
             {
-                if (!isNull _b1) then { _b1 ctrlShow true; _b1 ctrlEnable true; _b1 ctrlSetText "REFRESH"; };
-                if (!isNull _b2) then { _b2 ctrlShow true; _b2 ctrlEnable true; _b2 ctrlSetText "BACK"; };
+                [_b1, "REFRESH", true, true] call ARC_fnc_uiConsoleButtonState;
+                [_b2, "BACK", true, true] call ARC_fnc_uiConsoleButtonState;
             };
         }
         else
         {
-            if (!isNull _b1) then { _b1 ctrlShow true; _b1 ctrlEnable true; _b1 ctrlSetText "TOC QUEUE"; };
+            [_b1, "TOC QUEUE", true, true] call ARC_fnc_uiConsoleButtonState;
             if (!isNull _b2) then
             {
                 private _taskId = missionNamespace getVariable ["ARC_activeTaskId", ""];
@@ -390,8 +386,8 @@ case "DASH":
         if (!isNull _ctrlDetailsGrp) then { _ctrlDetailsGrp ctrlShow true; };
         if (!isNull _ctrlDetails) then { _ctrlDetails ctrlShow true; };
 
-        if (!isNull _b1) then { _b1 ctrlShow true; _b1 ctrlEnable true; _b1 ctrlSetText "REFRESH"; };
-        if (!isNull _b2) then { _b2 ctrlShow true; _b2 ctrlEnable false; _b2 ctrlSetText "READ-ONLY"; };
+        [_b1, "REFRESH", true, true] call ARC_fnc_uiConsoleButtonState;
+        [_b2, "READ-ONLY", false, true] call ARC_fnc_uiConsoleButtonState;
 
         [_display] call ARC_fnc_uiConsoleS1Paint;
     };
