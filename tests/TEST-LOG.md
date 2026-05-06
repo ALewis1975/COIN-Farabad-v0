@@ -4717,3 +4717,43 @@ Created the Farabad Console Refactor Plan document covering:
 | 2 | Region C visual validation | BLOCKED | Requires Arma 3 client with DOCK_RIGHT mode |
 | 3 | VM freshness badges | BLOCKED | Requires live mission with stale data |
 | 4 | Empty state visual check | BLOCKED | Requires Arma 3 client |
+
+---
+
+## 2026-05-06 — Branch: copilot/review-server-report-errors
+
+### Source
+RPT: `serverRpts/Arma3_x64_2026-05-06_14-40-47.rpt`
+
+### Bug identified
+`fn_publicBroadcastState.sqf` line 637 iterated `_clearancePending` (raw clearance request records) using param indices that match the `_clearancePendingView` schema, not the raw schema.
+
+Raw record index 5 = `_priority` (Number), but the loop called `toUpper (_x param [5, ""])` expecting a String status — causing a runtime crash on every broadcast tick when clearance requests were pending.
+
+RPT entries:
+```
+Error in expression <ty = _x param [4, 0]; private _status = toUpper (_x param [5, ""]);>
+Error toupper: Type Number, expected String
+File ...\fn_publicBroadcastState.sqf..., line 603
+```
+Occurred twice: 14:45:40 and 14:45:54.
+
+### Fix applied
+Changed `forEach _clearancePending` → `forEach _clearancePendingView` at line 637 of `fn_publicBroadcastState.sqf`.
+
+`_clearancePendingView` remaps raw record indices so that [4]=priority (Number) and [5]=status (String), matching the loop's expectations. It also correctly maps [9]=full meta array (raw[10]) which is needed for callsign resolution.
+
+### Static checks
+
+| # | Check | Result | Notes |
+|---|-------|--------|-------|
+| 1 | sqflint compat | BLOCKED | No Arma 3 toolchain in CI |
+| 2 | Confirmed `_clearancePendingView` defined before forEach | PASS | Defined at line ~224, used at line 637 |
+| 3 | No crash on non-string type | PASS | View[5] = raw[6] = status string guaranteed by `_x param [6, ""]` with string default |
+
+### Deferred / BLOCKED
+
+| # | Check | Status | Reason |
+|---|-------|--------|--------|
+| 1 | Dedicated server regression test | BLOCKED | Requires dedicated server + active clearance requests |
+| 2 | "Assigned to" display correctness | BLOCKED | View[6]=raw[7]=timestamp shows as number; semantic fix deferred (separate issue) |

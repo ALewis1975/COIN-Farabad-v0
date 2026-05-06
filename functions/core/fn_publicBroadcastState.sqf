@@ -634,7 +634,7 @@ private _uiDecisionQueue = [];
             _requestType
         ];
     };
-} forEach _clearancePending;
+} forEach _clearancePendingView;
 
 private _uiArrivals = [];
 private _uiDepartures = [];
