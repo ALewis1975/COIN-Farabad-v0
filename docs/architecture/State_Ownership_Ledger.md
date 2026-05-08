@@ -116,7 +116,7 @@ All writers in this ledger are required to be **server-side only**. Any client-s
 | Key | Status | Writer(s) | Reset / init writer | Purpose |
 |---|:---:|---|---|---|
 | `ARC_pub_s1_registry` | ✅ | `functions/core/fn_s1RegistrySnapshot.sqf:190` | — | Replicated S1 unit-roster snapshot. |
-| `ARC_pub_s1_registryUpdatedAt` | ⚠️ | `functions/core/fn_s1RegistrySnapshot.sqf:191` | `functions/core/fn_s1RegistryInit.sqf:50`, `functions/core/fn_resetAll.sqf:342` | Freshness signal. Three writers, all server-owned: init seeds `-1`, snapshot updates with `serverTime`, reset path resets to current `serverTime`. Acceptable but worth a future single-writer extraction (S-OWN-4). |
+| `ARC_pub_s1_registryUpdatedAt` | ⚠️ | `functions/core/fn_s1RegistrySnapshot.sqf:191` | `functions/core/fn_s1RegistryInit.sqf:50`, `functions/core/fn_resetAll.sqf:342` | Freshness signal. Three writers, all server-owned and part of one registry lifecycle: init seeds `-1`, snapshot updates with `serverTime`, reset path resets to current `serverTime`. Acceptable for Phase 2 closure (multi-writer pattern matches S-OWN-1..3). Single-writer extraction tracked as S-OWN-4 (P2, non-blocking). |
 
 ---
 
@@ -163,9 +163,9 @@ These rows do not block Phase 2 closure but are worth tracking so the ledger rem
 
 | ID | Status | Description | Recommendation |
 |---|:---:|---|---|
-| S-OWN-4 | Open | `ARC_pub_s1_registryUpdatedAt` has three writers (init / snapshot / reset). All server-owned and part of the same registry lifecycle. | Funnel through a single `ARC_fnc_s1RegistryBroadcast` (or absorb the freshness write into `ARC_fnc_s1RegistrySnapshot`). |
-| S-OWN-5 | Open | `airbase_v1_rt` runtime hashmap is written from five sites within the airbase subsystem. All server-owned and in-subsystem; no client-side writers. | Optional consolidation — extract a single `ARC_fnc_airbaseRtUpdate` helper used by all five sites. |
-| S-OWN-6 | Open | Many `civsub_v1_*` and `airbase_v1_*` tuning constants currently live in `initServer.sqf` and are written with the replicated `true` flag even though clients only read them as constants. | Wave 7-T2 relocates these to `data/ARC_ConfigData.sqf` or subsystem `*Init` files. The replicated-flag itself is correct (clients do read them). |
+| S-OWN-4 | Open (P2, non-blocking) | `ARC_pub_s1_registryUpdatedAt` has three writers (init / snapshot / reset). All server-owned and part of the same registry lifecycle. Same pattern shape as S-OWN-1..3; does not block Phase 2 closure. | Funnel through a single `ARC_fnc_s1RegistryBroadcast` (or absorb the freshness write into `ARC_fnc_s1RegistrySnapshot`). |
+| S-OWN-5 | Open (P3, non-blocking) | `airbase_v1_rt` runtime hashmap is written from five sites within the airbase subsystem. All server-owned and in-subsystem; no client-side writers. | Optional consolidation — extract a single `ARC_fnc_airbaseRtUpdate` helper used by all five sites. |
+| S-OWN-6 | Open (P2, non-blocking) | Many `civsub_v1_*` and `airbase_v1_*` tuning constants currently live in `initServer.sqf` and are written with the replicated `true` flag even though clients only read them as constants. | Wave 7-T2 relocates these to `data/ARC_ConfigData.sqf` or subsystem `*Init` files. The replicated-flag itself is correct (clients do read them). |
 
 ---
 

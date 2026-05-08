@@ -54,7 +54,7 @@ A variable that fits more than one class is classified by its **operator-facing 
 | `ARC_safeModeEnabled` | Posture toggle | `initServer.sqf` | In audit catalog as `SafeMode`. |
 | `ARC_debugLogEnabled`, `ARC_debugLogToChat` | Posture toggle (debug) | `initServer.sqf` | Server-authoritative debug flags; explicitly listed in `_arcDeclaredServerToggles` hygiene array. |
 | `ARC_devDebugInspectorEnabled`, `ARC_debugInspectorEnabled` | Posture toggle (debug) | `initServer.sqf` | Inspector diary gate. |
-| `FARABAD_log_enabled`, `FARABAD_log_minLevel`, `FARABAD_log_toRPT`, `FARABAD_log_toExtension` | Posture toggle (logger) | `initServer.sqf` | Logger rollout posture. Add to `ARC_operatorToggleAuditCatalog` (W7-T3). |
+| `FARABAD_log_enabled`, `FARABAD_log_minLevel`, `FARABAD_log_toRPT`, `FARABAD_log_toExtension` | Posture toggle (logger) | `initServer.sqf` | Logger rollout posture. The `FARABAD_` prefix is intentional and pre-existing: the logger is a separate, mod-independent subsystem (see `docs/qa/FARABAD_Logger_Dual_Write_Runbook.md`) whose namespace must remain stable for downstream consumers. Renaming to `ARC_log_*` is **out of scope** for this Mode F PR. Add to `ARC_operatorToggleAuditCatalog` (W7-T3). |
 
 ### 3.3 Core dev posture — scaffolding (lines ~84–99)
 
