@@ -425,6 +425,7 @@ missionNamespace setVariable ["civsub_v1_traffic_cap_moving_global", 6, true];
 missionNamespace setVariable ["civsub_v1_traffic_prob_moving", 0.40, true];
 missionNamespace setVariable ["civsub_v1_traffic_moving_spawnMaxDistrictAttempts", 3, true];
 missionNamespace setVariable ["civsub_v1_traffic_moving_maxSpeed", 35, true];
+// Moving waypoint distances: min clamps to 1000-3000m; search clamps to min+100..4000m.
 missionNamespace setVariable ["civsub_v1_traffic_moving_waypointMinDistance_m", 1000, true];
 missionNamespace setVariable ["civsub_v1_traffic_moving_waypointSearchRadius_m", 1800, true];
 missionNamespace setVariable ["civsub_v1_traffic_driverClass", "C_man_1", true];

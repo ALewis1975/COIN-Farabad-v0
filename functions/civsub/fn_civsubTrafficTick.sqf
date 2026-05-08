@@ -397,6 +397,8 @@ if (_allowMoving) then
     if (!(_wpSearch isEqualType 0)) then { _wpSearch = 1800; };
     _wpSearch = (_wpSearch max (_wpMin + 100)) min 4000;
 
+    private _roadTargetZ = 0;
+
     // maintain moving destinations (long road-to-road legs)
     {
         private _veh = _x;
@@ -434,8 +436,7 @@ if (_allowMoving) then
 
         private _r = selectRandom _candidates;
         private _destPos = getPosATL _r;
-        // Normalize road-object ATL for doMove/replicated debug state.
-        _destPos set [2, 0];
+        _destPos set [2, _roadTargetZ];
 
         _veh forceFollowRoad true;
         _drv doMove _destPos;
