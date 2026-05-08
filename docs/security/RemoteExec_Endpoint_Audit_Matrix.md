@@ -1,9 +1,9 @@
 # RemoteExec Endpoint Audit Matrix
 
-**Version:** 1.0 (initial scaffold)
+**Version:** 1.3
 **Date:** 2026-05-08
 **Status:** Live audit ledger — populated as Phase 1 of `docs/architecture/Architecture_Plan_2026-05-08.md` proceeds.
-**Mode:** F — Documentation-Only Changes (this scaffold)
+**Mode:** F — Documentation-Only Changes
 **Companion:** `docs/security/RemoteExec_Hardening_Plan.md` (policy + endpoint inventory)
 
 ---
@@ -112,20 +112,33 @@ Audited 2026-05-08 against current head (Wave 3 / batch 2). Two objective endpoi
 
 ### 3.5 Airbase / TOWER endpoints
 
-Status verified by Phase 8 hardening pass (see `docs/security/RemoteExec_Hardening_Plan.md` §6). Re-verify on each AIR/TOWER PR.
+Audited 2026-05-08 against current head (Wave 3 / batch 3). Prior S0–S3 verification from Phase 8 remains valid; this pass closes S4/S5 status for all 10 Airbase/TOWER client→server endpoints.
 
 | Endpoint | S0 | S1 | S2 | S3 | S4 | S5 | JIP | Last verified | Notes |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|---|---|
-| `ARC_fnc_airbaseSubmitClearanceRequest` | ✅ | ✅ | ✅ | ✅ | ? | ? | 0 | 2026-04-07 | S4/S5 not formally re-verified in this ledger. |
-| `ARC_fnc_airbaseRequestClearanceDecision` | ✅ | ✅ | ✅ | ✅ | ? | ? | 0 | 2026-04-07 | |
-| `ARC_fnc_airbaseRequestPrioritizeFlight` | ✅ | ✅ | ✅ | ✅ | ? | ? | 0 | 2026-04-07 | |
-| `ARC_fnc_airbaseCancelClearanceRequest` | ✅ | ✅ | ✅ | n/a | ? | ? | 0 | 2026-04-07 | Self-cancel. |
-| `ARC_fnc_airbaseRequestCancelQueuedFlight` | ✅ | ✅ | ✅ | ✅ | ? | ? | 0 | 2026-04-07 | Tower authority. |
-| `ARC_fnc_airbaseMarkClearanceEmergency` | ✅ | ✅ | ✅ | n/a | ? | ? | 0 | 2026-04-07 | |
-| `ARC_fnc_airbaseRequestSetLaneStaffing` | ✅ | ✅ | ✅ | ✅ | ? | ? | 0 | 2026-04-07 | |
-| `ARC_fnc_airbaseRequestHoldDepartures` | ✅ | ✅ | ✅ | ✅ | n/a | ? | 0 | 2026-04-07 | |
-| `ARC_fnc_airbaseRequestReleaseDepartures` | ✅ | ✅ | ✅ | ✅ | n/a | ? | 0 | 2026-04-07 | |
-| `ARC_fnc_tocRequestAirbaseResetControlState` | ✅ | ✅ | ✅ | ✅ | n/a | ? | 0 | 2026-04-07 | Admin reset. |
+| `ARC_fnc_airbaseSubmitClearanceRequest` | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ | 0 | 2026-05-08 | Rich world/state invariants (caller↔aircraft owner/distance/seat + route validation). No explicit caller debounce/rate-limit. |
+| `ARC_fnc_airbaseRequestClearanceDecision` | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ | 0 | 2026-05-08 | Pending-state + route/runway-lock invariants. No explicit caller debounce/rate-limit. |
+| `ARC_fnc_airbaseRequestPrioritizeFlight` | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ | 0 | 2026-05-08 | Queue-membership invariant enforced. No explicit caller debounce/rate-limit. |
+| `ARC_fnc_airbaseCancelClearanceRequest` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | State + requester/override invariants enforced. No explicit caller debounce/rate-limit. |
+| `ARC_fnc_airbaseRequestCancelQueuedFlight` | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ | 0 | 2026-05-08 | Queue/record execution guards + return-asset restore invariants. No explicit caller debounce/rate-limit. |
+| `ARC_fnc_airbaseMarkClearanceEmergency` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | Pending-state + requester/override invariants enforced. No explicit caller debounce/rate-limit. |
+| `ARC_fnc_airbaseRequestSetLaneStaffing` | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ | 0 | 2026-05-08 | Lane/value invariants + staffing state consistency enforced. No explicit caller debounce/rate-limit. |
+| `ARC_fnc_airbaseRequestHoldDepartures` | ✅ | ✅ | ✅ | ✅ | n/a | ⚠️ | 0 | 2026-05-08 | Privileged state flip with structured denial logging; no debounce/rate-limit. |
+| `ARC_fnc_airbaseRequestReleaseDepartures` | ✅ | ✅ | ✅ | ✅ | n/a | ⚠️ | 0 | 2026-05-08 | Privileged state flip with structured denial logging; no debounce/rate-limit. |
+| `ARC_fnc_tocRequestAirbaseResetControlState` | ✅ | ✅ | ✅ | ✅ | n/a | ⚠️ | 0 | 2026-05-08 | Strong S1/S3 and security intel logging; no explicit debounce/rate-limit on reset trigger. |
+
+### 3.6 CASREQ / Logistics / Medical / CASEVAC endpoints
+
+Audited 2026-05-08 against current head (Wave 3 / batch 3). CASREQ handlers are mostly aligned on S0–S4; two non-CASREQ endpoints (`execSpawnConvoy`, `medicalCasevacRequest`) remain allowlisted client→server surfaces without sender binding.
+
+| Endpoint | S0 | S1 | S2 | S3 | S4 | S5 | JIP | Last verified | Notes |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|---|---|
+| `ARC_fnc_casreqOpen` | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ | 0 | 2026-05-08 | Sender validation + role gate + subsystem/world guards. No per-caller cooldown. |
+| `ARC_fnc_casreqDecide` | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ | 0 | 2026-05-08 | Role-gated decision path with OPEN-state invariant. No per-caller cooldown. |
+| `ARC_fnc_casreqExecute` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | APPROVED→EXECUTING invariant; sender-bound. No explicit role gate and no per-caller cooldown. |
+| `ARC_fnc_casreqClose` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | Result/state/index invariants present; sender-bound. No explicit role gate and no per-caller cooldown. |
+| `ARC_fnc_execSpawnConvoy` | ⚠️ | ❌ | ✅ | ❌ | ⚠️ | ⚠️ | 0 | 2026-05-08 | Non-server path relays to server, but server path has no sender validation/role gate (F-LOG-1). |
+| `ARC_fnc_medicalCasevacRequest` | ✅ | ❌ | ✅ | ❌ | ✅ | ✅ | 0 | 2026-05-08 | World-state + cooldown guard is present, but no sender binding/role gate despite allowlisted client→server exposure (F-MED-1). |
 
 ---
 
@@ -184,7 +197,7 @@ Non-`ARC_fnc_*` entries in `CfgRemoteExec.Commands`. Each entry should have a ju
 
 Per pass:
 
-1. Pick a section (3.1 – 3.5, 4, 5).
+1. Pick a section (3.1 – 3.6, 4, 5).
 2. For each endpoint, open the implementing function and confirm the corresponding check.
 3. Record `✅ / ⚠️ / ❌ / n/a` plus the audit date or short SHA in **Last verified**.
 4. For any `❌` or `⚠️`, open a Mode I PR with the remediation; reference this matrix in the PR description.
@@ -194,7 +207,7 @@ Per pass:
 
 ## 6) Findings — open remediation items
 
-These findings were recorded by the 2026-05-08 audit pass (Wave 1, batch 1). Each must be resolved by a follow-on Mode I PR with tightly scoped changes.
+These findings were recorded by the 2026-05-08 audit passes (Wave 1 + Wave 3 batches). Each must be resolved by a follow-on Mode I PR with tightly scoped changes.
 
 ### 6.1 CIVSUB findings
 
@@ -221,7 +234,16 @@ These findings were recorded by the 2026-05-08 audit pass (Wave 1, batch 1). Eac
 | F-IED-2 | `ARC_fnc_vbiedServerDetonate` | S1, S3 | P1 | Same shape as F-IED-1: remote-owner logged but not validated; no role gate. Same idempotency guards (`activeVbiedDetonated`, `activeVbiedSafe`). | Same remediation as F-IED-1. If the only legitimate caller is the in-world VBIED proximity trigger, prefer removing from `CfgRemoteExec` allowlist over adding a role check. |
 | F-IED-3 | `ARC_fnc_execObjectiveComplete`, `ARC_fnc_iedCollectEvidence` | S5 | P2 | Sender-validated and state-validated, but no per-actor rate-limit. A misbehaving client can replay the call rapidly until idempotency kicks in. | Add a per-owner cooldown (≥1s) keyed on `getPlayerUID _caller` / `_collector`; rejection logged once per cooldown window. |
 
-Each finding above is the seed for a Mode I PR. Open issues / PRs must reference the finding ID (F-CIV-#, F-DEV-#) and update this section to `RESOLVED` with the merge SHA when remediation lands.
+### 6.4 Airbase / CASREQ / Logistics / Medical findings
+
+| ID | Endpoint(s) | Check | Severity | Description | Remediation |
+|---|---|:---:|:---:|---|---|
+| F-AIR-1 | `ARC_fnc_airbaseSubmitClearanceRequest`, `ARC_fnc_airbaseRequestClearanceDecision`, `ARC_fnc_airbaseRequestPrioritizeFlight`, `ARC_fnc_airbaseCancelClearanceRequest`, `ARC_fnc_airbaseRequestCancelQueuedFlight`, `ARC_fnc_airbaseMarkClearanceEmergency`, `ARC_fnc_airbaseRequestSetLaneStaffing`, `ARC_fnc_airbaseRequestHoldDepartures`, `ARC_fnc_airbaseRequestReleaseDepartures`, `ARC_fnc_tocRequestAirbaseResetControlState` | S5 | P2 | All 10 Airbase/TOWER client→server endpoints now verify S4, but none applies per-caller cooldown/debounce. Repeated spam calls can still consume server cycles and log bandwidth. | Add a shared per-owner/per-endpoint cooldown helper (0.25–1.0s by action class) and emit structured denial logs once per cooldown window. |
+| F-CAS-1 | `ARC_fnc_casreqExecute`, `ARC_fnc_casreqClose` | S3 | P2 | Both endpoints are sender-validated but lack explicit role/ownership authorization. Any authenticated client with a valid CASREQ ID can transition lifecycle state. | Gate execute/close to requester UID, assigned pilot role, or TOC approver/OMNI; reject and log unauthorized transitions with `[ARC][SEC]` event codes. |
+| F-LOG-1 | `ARC_fnc_execSpawnConvoy` | S1, S3 | P1 | Endpoint is allowlisted client→server but server path does not validate sender identity and has no role gate. Non-server calls are relayed to server asynchronously, allowing any client to request convoy spawn attempts. | Add `ARC_fnc_rpcValidateSender` + privileged role/invariant gate (or remove from client allowlist if this should be server-internal only). Keep relay path non-authoritative. |
+| F-MED-1 | `ARC_fnc_medicalCasevacRequest` | S1, S3 | P1 | Endpoint is allowlisted client→server yet has no sender validation or authorization gate; clients can request CASEVAC lead creation directly by passing `west`. Cooldown reduces spam but does not enforce caller legitimacy. | Prefer removing the endpoint from `CfgRemoteExec` allowlist and invoking server-side from trusted medical handlers only; if kept allowlisted, add sender validation + role/invariant gate. |
+
+Each finding above is the seed for a Mode I PR. Open issues / PRs must reference the finding ID (F-CIV-#, F-DEV-#, F-IED-#, F-AIR-#, F-CAS-#, F-LOG-#, F-MED-#) and update this section to `RESOLVED` with the merge SHA when remediation lands.
 
 ---
 
@@ -234,6 +256,13 @@ Each finding above is the seed for a Mode I PR. Open issues / PRs must reference
 ---
 
 ## Change log
+
+### v1.3 — 2026-05-08
+- Wave 3 / batch 3 audit pass completed:
+  - §3.5 Airbase/TOWER endpoints re-verified for S4/S5 (all 10 rows moved from `?` to explicit statuses).
+  - New §3.6 added for CASREQ + Logistics/Medical/CASEVAC endpoints (`casreqOpen/Decide/Execute/Close`, `execSpawnConvoy`, `medicalCasevacRequest`).
+- Added §6.4 findings for this batch: F-AIR-1, F-CAS-1, F-LOG-1, F-MED-1.
+- Truth-status: branch-local. Findings derived from current cloned working branch; not yet `origin/main`-confirmed per `Farabad_Source_of_Truth_and_Workflow_Spec.md`.
 
 ### v1.2 — 2026-05-08
 - Wave 3 / batch 2 audit pass: §3.3 (Objective / IED / VBIED) populated with verified S0–S5 status against current head.
