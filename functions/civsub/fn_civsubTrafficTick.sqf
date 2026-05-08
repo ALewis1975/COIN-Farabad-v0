@@ -431,16 +431,21 @@ if (_allowMoving) then
         };
 
         private _candidates = [];
+        // Cap candidate collection to bound road-density cost while keeping route variety.
         private _candidateLimit = 15;
+        private _roadCount = count _roads;
+        private _roadIdx = 0;
+        while { _roadIdx < _roadCount && { (count _candidates) < _candidateLimit } } do
         {
-            if ((count _candidates) >= _candidateLimit) exitWith {};
-            if (isNull _x) then { continue; };
-            private _roadPos = getPosATL _x;
+            private _road = _roads select _roadIdx;
+            _roadIdx = _roadIdx + 1;
+            if (isNull _road) then { continue; };
+            private _roadPos = getPosATL _road;
             if ((_curPos distance2D _roadPos) >= _wpMin) then
             {
-                _candidates pushBack _x;
+                _candidates pushBack _road;
             };
-        } forEach _roads;
+        };
 
         if ((count _candidates) == 0) then
         {
