@@ -1,6 +1,6 @@
 # Farabad COIN v0 — Architecture Plan
 
-**Version:** 1.1
+**Version:** 1.2
 **Date:** 2026-05-08
 **Status:** Active architecture plan (current-clone analysis; not yet main-confirmed)
 **Mode:** F — Documentation-Only Changes
@@ -309,7 +309,8 @@ Acceptance:
 | `docs/planning/Task_Decomposition.md` | Workstream / track decomposition. Phases here map to its tracks 1–7. |
 | `docs/security/RemoteExec_Hardening_Plan.md` | Policy definition for the RPC surface. |
 | `docs/security/RemoteExec_Endpoint_Audit_Matrix.md` | Phase 1 live audit ledger derived from the hardening plan. |
-| `docs/architecture/State_Ownership_Ledger.md` | Phase 2 single-writer ledger for replicated `ARC_pub_*` keys. |
+| `docs/architecture/State_Ownership_Ledger.md` | Phase 2 single-writer ledger for replicated `ARC_pub_*` keys and subsystem-runtime replicated state. |
+| `docs/architecture/Configuration_Ownership_Ledger.md` | Wave 7-T1 classification of every operator-visible variable in `initServer.sqf` (R5 mitigation per §3). |
 | `docs/qa/Dedicated_JIP_Validation_Matrix.md` | Phase 5 release-candidate smoke checklist (dedicated/JIP/persistence/recovery). |
 | `docs/architecture/Farabad_Console_Refactor_Plan.md` + `Console_VM_v1.md` + `docs/planning/Console_Tab_Migration_Plan.md` | Phase 3 implementation references. |
 | `docs/projectFiles/Farabad_COIN_Mission_Design_Guide_v0.4_2026-01-27.md` | Mission intent and cross-cutting standards. Architectural changes must remain consistent with this guide unless it is version-bumped. |
@@ -335,6 +336,14 @@ Process:
 ---
 
 ## Change log
+
+### v1.2 — 2026-05-08
+- Wave 3-T1 / Wave 4-T1 / Wave 7-T1 deliverables landed (next-wave Mode F batch):
+  - `docs/security/RemoteExec_Endpoint_Audit_Matrix.md` v1.2 — §3.3 Objective / IED / VBIED endpoints audited (S0–S5). Three new findings (F-IED-1..3).
+  - `docs/architecture/State_Ownership_Ledger.md` v1.1 — extended with §3.10 (S1 registry) and §3a (subsystem-runtime replicated state for `airbase_v1_*`, `civsub_v1_*`, `casreq_v1_*`). Three new findings (S-OWN-4..6).
+  - `docs/architecture/Configuration_Ownership_Ledger.md` v1.0 — new doc; classifies all 242 operator-visible variables in `initServer.sqf` per §3. Four open findings (C-OWN-1..4) seeding Wave 7-T2 / W7-T3.
+- Cross-references in §8 updated to point at the Configuration Ownership Ledger.
+- No phase / scope / non-goal changes.
 
 ### v1.1 — 2026-05-08
 - Added cross-references to two new Wave 2 / Wave 5 deliverables produced as part of "implement the plan" execution:

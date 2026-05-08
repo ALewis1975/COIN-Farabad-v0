@@ -11,6 +11,40 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-08 — Wave 3-T1 / Wave 4-T1 / Wave 7-T1 (next-wave Mode F batch)
+
+**Branch/Commit:** copilot/next-wave-feature-development @ HEAD
+
+**Scenario:** Implement the "Next Wave Task Decomposition" plan. Doc-only Mode F PR producing the three deliverables flagged as the recommended immediate next actions: RemoteExec audit batch 2 (Objective/IED/VBIED), State Ownership Ledger extension, and the new Configuration Ownership Ledger.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `docs/security/RemoteExec_Endpoint_Audit_Matrix.md` | §3.3 (Objective / IED / VBIED) populated with verified S0–S5 status; added §6.3 findings (F-IED-1..3); bumped to v1.2. |
+| `docs/architecture/State_Ownership_Ledger.md` | Added §3.10 (S1 registry) and new §3a (subsystem-runtime replicated state for `airbase_v1_*`, `civsub_v1_*`, `casreq_v1_*`). Three new findings (S-OWN-4..6). Bumped to v1.1. |
+| `docs/architecture/Configuration_Ownership_Ledger.md` | New file. Classifies all 242 operator-visible variables in `initServer.sqf` per Architecture Plan §3 four-class scheme. Four open findings (C-OWN-1..4). |
+| `docs/architecture/Architecture_Plan_2026-05-08.md` | Cross-linked the new Configuration Ownership Ledger; bumped to v1.2. |
+
+### Static checks
+
+| # | Check | Result | Notes |
+|---|-------|--------|-------|
+| 1 | sqflint compat | n/a | Mode F PR — no SQF changed. |
+| 2 | Doc cross-references resolve | PASS | New ledger linked from Architecture Plan §8; back-reference into Wave 7 row of Architecture Plan §6 already present. |
+| 3 | Truth-status discipline | PASS | Each new doc records "branch-local" status per `Farabad_Source_of_Truth_and_Workflow_Spec.md`. |
+
+### Deferred / BLOCKED
+
+| # | Check | Status | Reason |
+|---|-------|--------|--------|
+| 1 | `origin/main`-confirmation of audit findings | BLOCKED | Requires `git fetch --unshallow origin` + diff of head against `main`; current sandbox is shallow clone of feature branch. Findings will be re-confirmed by the Mode I follow-on PRs that consume them. |
+| 2 | Wave 3-T2 (CASREQ/Airbase + Logistics/Medical/CASEVAC audit batch 3) | DEFERRED | Out of scope for this PR; tracked as a separate Mode F PR per the plan. |
+| 3 | Wave 7-T2 (relocation of tuning constants and class pools) | DEFERRED | Mode C PR; gated on this Mode F ledger landing. |
+| 4 | Wave 7-T3 (audit-catalog coverage of all posture toggles) | DEFERRED | Mode C PR; gated on this Mode F ledger landing. |
+
+---
+
 ## 2026-05-08 — Wave 1 RemoteExec audit batch 1 (CIVSUB + dev/admin) + Wave 2 / Wave 5 ledger scaffolds
 
 **Branch/Commit:** copilot/vision-architecture-plan-development @ HEAD

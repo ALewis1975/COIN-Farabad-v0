@@ -1,8 +1,8 @@
 # State Ownership Ledger
 
-**Version:** 1.0
+**Version:** 1.1
 **Date:** 2026-05-08
-**Status:** Active. Wave 2 deliverable of `docs/architecture/Architecture_Plan_2026-05-08.md`.
+**Status:** Active. Wave 2 / Wave 4-T1 deliverable of `docs/architecture/Architecture_Plan_2026-05-08.md`.
 **Mode:** F — Documentation-Only Changes
 
 ---
@@ -111,6 +111,62 @@ All writers in this ledger are required to be **server-side only**. Any client-s
 | `ARC_pub_debug` | ✅ | `functions/core/fn_publicBroadcastState.sqf:1175` | — | Debug snapshot; only emitted when `ARC_profile_devMode` is true. |
 | `ARC_pub_debugUpdatedAt` | ✅ | `functions/core/fn_publicBroadcastState.sqf:1177` | — | Freshness signal. |
 
+### 3.10 S1 (Section 1) registry
+
+| Key | Status | Writer(s) | Reset / init writer | Purpose |
+|---|:---:|---|---|---|
+| `ARC_pub_s1_registry` | ✅ | `functions/core/fn_s1RegistrySnapshot.sqf:190` | — | Replicated S1 unit-roster snapshot. |
+| `ARC_pub_s1_registryUpdatedAt` | ⚠️ | `functions/core/fn_s1RegistrySnapshot.sqf:191` | `functions/core/fn_s1RegistryInit.sqf:50`, `functions/core/fn_resetAll.sqf:342` | Freshness signal. Three writers, all server-owned: init seeds `-1`, snapshot updates with `serverTime`, reset path resets to current `serverTime`. Acceptable but worth a future single-writer extraction (S-OWN-4). |
+
+---
+
+## 3a) Subsystem-runtime replicated state (non-`ARC_pub_*`)
+
+This section covers replicated `missionNamespace` keys outside the `ARC_pub_*` family that act as cross-machine subsystem state. They are intentionally replicated (clients read them for UI gating, AI behavior, or scheduler awareness) but are not part of the public-snapshot contract.
+
+The bar is lower here than for `ARC_pub_*`: a single documented server writer per **logical group** is sufficient (e.g. `airbase_v1_runwayState/Owner/Until` are written from the same lock-state-machine). Multi-writer rows are acceptable when they belong to the same state machine; cross-subsystem writes are not.
+
+### 3a.1 Airbase v1 runtime
+
+| Key group | Status | Writer(s) | Purpose |
+|---|:---:|---|---|
+| `airbase_v1_*` configuration constants (`airbase_v1_opsStatusInterval_s`, `airbase_v1_controller_timeout_*`, `airbase_v1_arrival_*`, `airbase_v1_depart_*`, `airbase_v1_runwayReserveWindow_*`, `airbase_v1_runwayOccupyTimeout_*`, `airbase_v1_taxi_center_connectors`, `airbase_v1_inbound_taxi_markers`, `airbase_v1_diaryEnabled`, `airbase_v1_firstDepartureDelay*`, `airbase_v1_p_return`, `airbase_v1_fw_depart_*`, `airbase_v1_debug_forceAiOnly`) | ✅ | `functions/ambiance/fn_airbaseInit.sqf:29..292` | Tuning constants seeded at airbase init from `initServer.sqf`/`ARC_ConfigData.sqf`. Single writer (`airbaseInit`). |
+| `airbase_v1_rt` | ⚠️ | `functions/ambiance/fn_airbaseInit.sqf:230,477,617`, `functions/ambiance/fn_airbaseAdminResetControlState.sqf:61`, `functions/ambiance/fn_airbaseSpawnArrival.sqf:230` | Airbase runtime hashmap. Multiple writers all in the airbase subsystem (init, admin reset, spawn-arrival side-effect). All server-owned. Future single-writer extraction is worth tracking (S-OWN-5). |
+| `airbase_v1_execActive`, `airbase_v1_execFid` | ✅ | `functions/ambiance/fn_airbaseInit.sqf:478,479` (init) + airbase exec lifecycle | Runtime exec gating. Server-only. |
+| `airbase_v1_runwayState`, `airbase_v1_runwayOwner`, `airbase_v1_runwayUntil` | ⚠️ | `functions/ambiance/fn_airbaseRunwayLockReserve.sqf:48..50`, `fn_airbaseRunwayLockOccupy.sqf:50..52`, `fn_airbaseRunwayLockRelease.sqf:47..49`, `fn_airbaseRunwayLockSweep.sqf:53..55`, `fn_airbaseAdminResetControlState.sqf:70..72`, `fn_airbaseInit.sqf:482..484` | Runway lock state machine. Three transitions (RESERVE / OCCUPY / RELEASE) plus init / admin-reset / sweep recovery — same state machine across multiple file boundaries. Acceptable but worth documenting as a single writer family. |
+| `airbase_v1_lastTickAt`, `airbase_v1_bubble_active` | ✅ | `functions/ambiance/fn_airbaseTick.sqf:26,40` | Tick freshness + bubble flag. |
+
+### 3a.2 CIVSUB v1 runtime
+
+| Key group | Status | Writer(s) | Purpose |
+|---|:---:|---|---|
+| `civsub_v1_*` configuration constants (`civsub_v1_enabled`, `civsub_v1_persist`, `civsub_v1_seed`, `civsub_v1_tick_s`, `civsub_v1_version`, `civsub_v1_civs_enabled`, `civsub_v1_civ_tick_s`, `civsub_v1_civ_cap_*`, `civsub_v1_civ_minSeparation_m`, `civsub_v1_spawn_cache_locRadius_m`, `civsub_v1_civ_preferredFaction`, `civsub_v1_civ_classPool*`, `civsub_v1_scheduler_*`, `civsub_v1_rumor_enabled`, `civsub_v1_debug`, `civsub_v1_showPapers_forceCoop`, `civsub_v1_editorTestCivs*`) | ✅ | `initServer.sqf:199..257` (current home; relocation pending W7-T2) | Tuning constants seeded by mission init. Single writer (`initServer`). |
+| `civsub_v1_traffic_*` configuration constants | ✅ | `initServer.sqf:291..430`, `functions/civsub/fn_civsubTrafficInit.sqf:19..93` | Tuning constants split between mission init and traffic init. Both are server-only and run once at boot; relocation pending W7-T2. |
+| `civsub_v1_locnpc_*` configuration constants | ✅ | `initServer.sqf:437..` | Tuning constants for location NPC scheduler. |
+| `civsub_v1_schedulerThreadRunning`, `civsub_v1_scheduler_lastTick_ts` | ⚠️ | `functions/civsub/fn_civsubSchedulerInit.sqf:15,24,34` | Thread-running flag set at start (true) and shutdown (false) by the same scheduler init function. Single writer-file. |
+| `civsub_v1_traffic_threadRunning` | ✅ | `functions/civsub/fn_civsubTrafficInit.sqf:19,113` | Same pattern: start / shutdown in one file. |
+| `civsub_v1_civs_enabled` | ⚠️ | `initServer.sqf:211` (init), `functions/civsub/fn_civsubCivSamplerStop.sqf:9` (stop) | Init seeds true; stop function disables. Two writers, both server-owned, one logical state machine. |
+| `civsub_v1_civ_registry`, `civsub_v1_civ_despawnQueue`, `civsub_v1_civ_cleanup_last_ts` | ✅ | `functions/civsub/fn_civsubCivCleanupTick.sqf:74..76` (cleanup); `civsub_v1_civ_despawnQueue` also written by `fn_civsubCivSamplerStop.sqf:18` (drain on stop) | Civ-cleanup tick is the single steady-state writer; sampler-stop drains the queue at shutdown. Acceptable. |
+| `civsub_v1_locnpc_registry` | ✅ | `functions/civsub/fn_civsubLocNpcTick.sqf:141` | Per-tick registry recompute. |
+| `civsub_v1_lastSave_ts` | ✅ | `functions/civsub/fn_civsubPersistSave.sqf:157` | Persistence timestamp. |
+| `civsub_v1_traffic_dbg_*` debug counters | ✅ | `initServer.sqf:426..430` (seeded) + traffic spawn paths (incremented) | Debug-only diagnostics; bounded counters reset on init. |
+
+### 3a.3 CASREQ v1 runtime
+
+| Key | Status | Writer(s) | Purpose |
+|---|:---:|---|---|
+| `casreq_v1_enabled`, `casreq_v1_schemaVersion`, `casreq_v1_idPattern` | ✅ | `functions/casreq/fn_casreqInitServer.sqf:11,16,19` | Subsystem identity / schema constants. Single writer (init). |
+
+### 3a.4 Findings — non-`ARC_pub_*` runtime state
+
+These rows do not block Phase 2 closure but are worth tracking so the ledger remains current.
+
+| ID | Status | Description | Recommendation |
+|---|:---:|---|---|
+| S-OWN-4 | Open | `ARC_pub_s1_registryUpdatedAt` has three writers (init / snapshot / reset). All server-owned and part of the same registry lifecycle. | Funnel through a single `ARC_fnc_s1RegistryBroadcast` (or absorb the freshness write into `ARC_fnc_s1RegistrySnapshot`). |
+| S-OWN-5 | Open | `airbase_v1_rt` runtime hashmap is written from five sites within the airbase subsystem. All server-owned and in-subsystem; no client-side writers. | Optional consolidation — extract a single `ARC_fnc_airbaseRtUpdate` helper used by all five sites. |
+| S-OWN-6 | Open | Many `civsub_v1_*` and `airbase_v1_*` tuning constants currently live in `initServer.sqf` and are written with the replicated `true` flag even though clients only read them as constants. | Wave 7-T2 relocates these to `data/ARC_ConfigData.sqf` or subsystem `*Init` files. The replicated-flag itself is correct (clients do read them). |
+
 ---
 
 ## 4) Findings
@@ -143,6 +199,14 @@ Process:
 ---
 
 ## 6) Change log
+
+### v1.1 — 2026-05-08
+
+- Wave 4-T1 extension: §3.10 added for the S1 registry replicated keys (`ARC_pub_s1_registry`, `ARC_pub_s1_registryUpdatedAt`).
+- Added new §3a covering subsystem-runtime replicated state outside the `ARC_pub_*` family (`airbase_v1_*`, `civsub_v1_*`, `casreq_v1_*`).
+- Three new findings (S-OWN-4..6); none are blocking. S-OWN-6 is closed by Wave 7-T2 (config relocation), not by code changes inside this ledger.
+- Truth-status: branch-local. Findings derived from current cloned working branch; not yet `origin/main`-confirmed per `Farabad_Source_of_Truth_and_Workflow_Spec.md`.
+- Acceptance criterion (Wave 4-T1): every `ARC_pub_*` key reachable from `grep -n "setVariable .*true\]"` is now in §3 with a single writer or documented multi-writer rationale.
 
 ### v1.0 — 2026-05-08
 
