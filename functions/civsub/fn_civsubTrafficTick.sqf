@@ -389,7 +389,34 @@ if (_allowMoving) then
     missionNamespace setVariable ["civsub_v1_traffic_dbg_moving_spawnFail_playerTooNear", _spawnPlayerNear, false];
     missionNamespace setVariable ["civsub_v1_traffic_dbg_moving_spawnFail_createFail", _spawnCreateFail, false];
 
-    // maintain moving destinations (simple hop between roads)
+    private _wpMin = missionNamespace getVariable ["civsub_v1_traffic_moving_waypointMinDistance_m", 1000];
+    if (!(_wpMin isEqualType 0)) then { _wpMin = 1000; };
+    _wpMin = (_wpMin max 1000) min 3000;
+
+    private _wpSearch = missionNamespace getVariable ["civsub_v1_traffic_moving_waypointSearchRadius_m", 1800];
+    if (!(_wpSearch isEqualType 0)) then { _wpSearch = 1800; };
+    _wpSearch = (_wpSearch max (_wpMin + 100)) min 4000;
+
+    private _wpRefreshBase = missionNamespace getVariable ["civsub_v1_traffic_moving_waypointRefreshBase_s", 90];
+    if (!(_wpRefreshBase isEqualType 0)) then { _wpRefreshBase = 90; };
+    _wpRefreshBase = (_wpRefreshBase max 30) min 600;
+
+    private _wpRefreshJitter = missionNamespace getVariable ["civsub_v1_traffic_moving_waypointRefreshJitter_s", 60];
+    if (!(_wpRefreshJitter isEqualType 0)) then { _wpRefreshJitter = 60; };
+    _wpRefreshJitter = (_wpRefreshJitter max 0) min 300;
+
+    private _wpRetryDelay = missionNamespace getVariable ["civsub_v1_traffic_moving_waypointRetryDelay_s", 30];
+    if (!(_wpRetryDelay isEqualType 0)) then { _wpRetryDelay = 30; };
+    _wpRetryDelay = (_wpRetryDelay max 10) min 120;
+
+    private _candidateLimit = missionNamespace getVariable ["civsub_v1_traffic_moving_waypointCandidateLimit", 15];
+    if (!(_candidateLimit isEqualType 0)) then { _candidateLimit = 15; };
+    _candidateLimit = (_candidateLimit max 4) min 40;
+
+    // Road objects can report non-zero ATL; ground-level targets avoid vehicle path-finding issues.
+    private _roadTargetZ = 0;
+
+    // maintain moving destinations (long road-to-road legs)
     {
         private _veh = _x;
         if (isNull _veh || { !alive _veh }) then { continue; };
@@ -401,25 +428,42 @@ if (_allowMoving) then
         if (isNull _drv || { !alive _drv }) then { continue; };
 
         private _curPos = getPosATL _veh;
-        private _roads = _curPos nearRoads 120;
+        private _roads = _curPos nearRoads _wpSearch;
         if ((count _roads) == 0) then
         {
-            _veh setVariable ["ARC_civtraf_nextMoveTs", serverTime + 10, true];
+            _veh setVariable ["ARC_civtraf_nextMoveTs", serverTime + _wpRetryDelay, true];
             continue;
         };
 
-        private _r = selectRandom _roads;
-        private _conn = roadsConnectedTo _r;
-        private _destPos = getPosATL _r;
-        if ((count _conn) > 0) then
+        private _candidates = [];
+        private _roadCount = count _roads;
+        private _roadIdx = 0;
+        while { _roadIdx < _roadCount && { (count _candidates) < _candidateLimit } } do
         {
-            private _r2 = selectRandom _conn;
-            if (!isNull _r2) then { _destPos = getPosATL _r2; };
+            private _road = _roads select _roadIdx;
+            _roadIdx = _roadIdx + 1;
+            if (isNull _road) then { continue; };
+            private _roadPos = getPosATL _road;
+            if ((_curPos distance2D _roadPos) >= _wpMin) then
+            {
+                _candidates pushBack _road;
+            };
         };
 
+        if ((count _candidates) == 0) then
+        {
+            _veh setVariable ["ARC_civtraf_nextMoveTs", serverTime + _wpRetryDelay, true];
+            continue;
+        };
+
+        private _r = selectRandom _candidates;
+        private _destPos = getPosATL _r;
+        _destPos set [2, _roadTargetZ];
+
+        _veh forceFollowRoad true;
         _drv doMove _destPos;
         _veh setVariable ["ARC_civtraf_moveTarget", _destPos, true];
-        _veh setVariable ["ARC_civtraf_nextMoveTs", serverTime + (10 + random 15), true];
+        _veh setVariable ["ARC_civtraf_nextMoveTs", serverTime + (_wpRefreshBase + random _wpRefreshJitter), true];
     } forEach _moving;
 };
 

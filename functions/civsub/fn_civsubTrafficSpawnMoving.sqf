@@ -115,6 +115,7 @@ _veh setDir _dir;
 _veh setPosATL _pos;
 _veh setVectorUp (surfaceNormal _pos);
 _veh lock 0;
+_veh forceFollowRoad true;
 
 // Civilian driver
 private _grp = createGroup [civilian, true];
