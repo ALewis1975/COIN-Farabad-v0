@@ -35,7 +35,9 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | 14 | Bounded candidate scan sqflint | `sqflint -e w functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf initServer.sqf` | BLOCKED | `sqflint` is unavailable in this container (`command not found`). |
 | 15 | Bounded loop compat scan + whitespace | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf initServer.sqf && git diff --check` | PASS | Explicit bounded road candidate loop remains scanner-clean; diff whitespace check passed. |
 | 16 | Bounded loop sqflint | `sqflint -e w functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf initServer.sqf` | BLOCKED | `sqflint` is unavailable in this container (`command not found`). |
-| 17 | Live MP behavior | Spawn moving CIVTRAF and observe road-following with ≥1 km destination spacing | BLOCKED | Requires Arma 3 hosted/dedicated MP runtime; sandbox supports static validation only. |
+| 17 | Candidate-limit tunable compat scan + whitespace | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf initServer.sqf && git diff --check` | PASS | Configurable road candidate cap remains scanner-clean; diff whitespace check passed. |
+| 18 | Candidate-limit tunable sqflint | `sqflint -e w functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf initServer.sqf` | BLOCKED | `sqflint` is unavailable in this container (`command not found`). |
+| 19 | Live MP behavior | Spawn moving CIVTRAF and observe road-following with ≥1 km destination spacing | BLOCKED | Requires Arma 3 hosted/dedicated MP runtime; sandbox supports static validation only. |
 
 ---
 

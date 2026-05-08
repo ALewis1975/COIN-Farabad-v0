@@ -430,6 +430,8 @@ missionNamespace setVariable ["civsub_v1_traffic_moving_maxSpeed", 35, true];
 // Search radius must exceed minimum distance so the road-distance filter can produce candidates.
 missionNamespace setVariable ["civsub_v1_traffic_moving_waypointMinDistance_m", 1000, true];
 missionNamespace setVariable ["civsub_v1_traffic_moving_waypointSearchRadius_m", 1800, true];
+// Moving route candidate cap clamps to 4-40 road objects per vehicle route refresh.
+missionNamespace setVariable ["civsub_v1_traffic_moving_waypointCandidateLimit", 15, true];
 // Moving route refresh: retry clamps to 10-120s; base clamps to 30-600s; jitter clamps to 0-300s.
 missionNamespace setVariable ["civsub_v1_traffic_moving_waypointRetryDelay_s", 30, true];
 missionNamespace setVariable ["civsub_v1_traffic_moving_waypointRefreshBase_s", 90, true];

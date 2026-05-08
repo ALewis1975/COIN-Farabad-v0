@@ -20,8 +20,6 @@ if !(missionNamespace getVariable ["civsub_v1_traffic_enabled", false]) exitWith
 private _debug = missionNamespace getVariable ["civsub_v1_traffic_debug", false];
 if (!(_debug isEqualType true)) then { _debug = false; };
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
-// Road objects can report non-zero ATL; ground-level targets avoid vehicle path-finding issues.
-private _roadTargetZ = 0;
 
 private _parked = missionNamespace getVariable ["civsub_v1_traffic_list_parked", []];
 private _moving = missionNamespace getVariable ["civsub_v1_traffic_list_moving", []];
@@ -411,6 +409,13 @@ if (_allowMoving) then
     if (!(_wpRetryDelay isEqualType 0)) then { _wpRetryDelay = 30; };
     _wpRetryDelay = (_wpRetryDelay max 10) min 120;
 
+    private _candidateLimit = missionNamespace getVariable ["civsub_v1_traffic_moving_waypointCandidateLimit", 15];
+    if (!(_candidateLimit isEqualType 0)) then { _candidateLimit = 15; };
+    _candidateLimit = (_candidateLimit max 4) min 40;
+
+    // Road objects can report non-zero ATL; ground-level targets avoid vehicle path-finding issues.
+    private _roadTargetZ = 0;
+
     // maintain moving destinations (long road-to-road legs)
     {
         private _veh = _x;
@@ -431,8 +436,6 @@ if (_allowMoving) then
         };
 
         private _candidates = [];
-        // Cap candidate collection to bound road-density cost while keeping route variety.
-        private _candidateLimit = 15;
         private _roadCount = count _roads;
         private _roadIdx = 0;
         while { _roadIdx < _roadCount && { (count _candidates) < _candidateLimit } } do
