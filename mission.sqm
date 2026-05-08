@@ -20,14 +20,14 @@ class EditorData
 	};
 	class LayerIndexProvider
 	{
-		nextID=113684;
+		nextID=114281;
 	};
 	class Camera
 	{
-		pos[]={6804.1216,44.145107,1474.8534};
-		dir[]={-0.26887089,-0.76930642,0.57954812};
-		up[]={-0.32376054,0.63887995,0.69786209};
-		aside[]={0.90713143,1.4901161e-08,0.4208473};
+		pos[]={6815.772,128.98318,1437.4027};
+		dir[]={-0.52105516,-0.57608557,0.62978435};
+		up[]={-0.36723328,0.8173883,0.44386441};
+		aside[]={0.77048308,3.9930455e-08,0.63746202};
 	};
 };
 binarizationWanted=0;
@@ -1280,19 +1280,6 @@ class CustomAttributes
 		name="Multiplayer";
 		class Attribute0
 		{
-			property="ENH_saveLoadout";
-			expression="if (!isMultiplayer || !_value || is3DEN || !hasInterface) exitWith {};        0 spawn        {            waitUntil {sleep 1; !isNull player};            player setVariable ['ENH_savedLoadout', getUnitloadout player];            player addMPEventHandler ['MPRespawn',            {                params ['_unit'];                private _loadout = _unit getVariable ['ENH_savedLoadout', []];                if (_loadout isNotEqualTo []) then {_unit setUnitLoadout _loadout};            }];        };";
-			class Value
-			{
-				class data
-				{
-					singleType="BOOL";
-					value=1;
-				};
-			};
-		};
-		class Attribute1
-		{
 			property="RespawnTemplates";
 			expression="true";
 			class Value
@@ -1312,6 +1299,19 @@ class CustomAttributes
 							};
 						};
 					};
+				};
+			};
+		};
+		class Attribute1
+		{
+			property="ENH_saveLoadout";
+			expression="if (!isMultiplayer || !_value || is3DEN || !hasInterface) exitWith {};        0 spawn        {            waitUntil {sleep 1; !isNull player};            player setVariable ['ENH_savedLoadout', getUnitloadout player];            player addMPEventHandler ['MPRespawn',            {                params ['_unit'];                private _loadout = _unit getVariable ['ENH_savedLoadout', []];                if (_loadout isNotEqualTo []) then {_unit setUnitLoadout _loadout};            }];        };";
+			class Value
+			{
+				class data
+				{
+					singleType="BOOL";
+					value=1;
 				};
 			};
 		};
@@ -12678,7 +12678,7 @@ class Mission
 								{
 									dataType="Trigger";
 									position[]={6789.0059,8.4914999,1504.0695};
-									angle=3.6098666;
+									angle=3.6098657;
 									class Attributes
 									{
 										onActivation="[m151, 600, 30, false, 0] spawn BIS_fnc_unitCapture;";
@@ -30810,8 +30810,8 @@ class Mission
 											{
 												class Attribute0
 												{
-													property="ENH_doStop";
-													expression="if (!is3DEN && _value) then {doStop _this}";
+													property="ENH_enableHeadlights";
+													expression="[_this, _value] remoteExec ['setPilotLight', _this]";
 													class Value
 													{
 														class data
@@ -30862,8 +30862,8 @@ class Mission
 												};
 												class Attribute4
 												{
-													property="ENH_enableHeadlights";
-													expression="[_this, _value] remoteExec ['setPilotLight', _this]";
+													property="ENH_doStop";
+													expression="if (!is3DEN && _value) then {doStop _this}";
 													class Value
 													{
 														class data
