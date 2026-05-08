@@ -47,28 +47,32 @@ A non-applicable check is recorded as `n/a`. An unverified check is recorded as 
 
 ### 3.1 CIVSUB endpoints
 
+Audited 2026-05-08 against current head. CIVSUB endpoints share an inline owner-match pattern (`remoteExecutedOwner` vs `owner _actor`) rather than calling `ARC_fnc_rpcValidateSender`, with structured `[CIVSUB][SEC]` logging on rejection. See §6.1 for findings.
+
 | Endpoint | S0 | S1 | S2 | S3 | S4 | S5 | JIP | Last verified | Notes |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|---|---|
-| `ARC_fnc_civsubContactReqAction` | ? | ? | ? | n/a | ? | ? | 0 | | |
-| `ARC_fnc_civsubContactReqSnapshot` | ? | ? | ? | n/a | ? | ? | 0 | | |
-| `ARC_fnc_civsubInteractCheckPapers` | ? | ? | ? | n/a | ? | ? | 0 | | |
-| `ARC_fnc_civsubInteractDetain` | ? | ? | ? | n/a | ? | ? | 0 | | |
-| `ARC_fnc_civsubInteractEndSession` | ? | ? | ? | n/a | ? | ? | 0 | | |
-| `ARC_fnc_civsubInteractHandoffSheriff` | ? | ? | ? | n/a | ? | ? | 0 | | |
-| `ARC_fnc_civsubInteractOrderStop` | ? | ? | ? | n/a | ? | ? | 0 | | |
-| `ARC_fnc_civsubInteractRelease` | ? | ? | ? | n/a | ? | ? | 0 | | |
-| `ARC_fnc_civsubInteractShowPapers` | ? | ? | ? | n/a | ? | ? | 0 | | |
-| `ARC_fnc_civsubRunMdtByNetId` | ? | ? | ? | ? | ? | ? | 0 | | TOC role gate required. |
+| `ARC_fnc_civsubContactReqAction` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | 6m proximity gate; per-action dispatch validates state; no rate-limit. |
+| `ARC_fnc_civsubContactReqSnapshot` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | Read-only snapshot; no rate-limit. |
+| `ARC_fnc_civsubInteractCheckPapers` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | Compliance precondition (uncon/cuffed/surrender); no rate-limit. |
+| `ARC_fnc_civsubInteractDetain` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | Requires civ districtId; no rate-limit. |
+| `ARC_fnc_civsubInteractEndSession` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | Stop-owner UID match; **no `civsub_v1_enabled` gate** (F-CIV-1). |
+| `ARC_fnc_civsubInteractHandoffSheriff` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | 25m sheriff-holding gate; cuffs-removed gate; no rate-limit. |
+| `ARC_fnc_civsubInteractOrderStop` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | UID populated; **no `civsub_v1_enabled` gate** (F-CIV-1). |
+| `ARC_fnc_civsubInteractRelease` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | Requires civ districtId + civUid; no rate-limit. |
+| `ARC_fnc_civsubInteractShowPapers` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | Probabilistic cooperation gate; no rate-limit. |
+| `ARC_fnc_civsubRunMdtByNetId` | ✅ | ✅ | ✅ | ❌ | ⚠️ | ⚠️ | 0 | 2026-05-08 | **TOC role gate missing** (F-CIV-2). Delegates to checkPapers without role check. |
 
 ### 3.2 Dev / admin endpoints
 
+Audited 2026-05-08 against current head. Most use `ARC_fnc_rpcValidateSender` + `OMNI || canApproveQueue` role gate; two endpoints (`devToggleDebugMode`, `uiCoverageAuditServer`) are missing privileged gates. See §6.2 for findings.
+
 | Endpoint | S0 | S1 | S2 | S3 | S4 | S5 | JIP | Last verified | Notes |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|---|---|
-| `ARC_fnc_devCompileAuditServer` | ? | ? | ? | ? | n/a | ? | 0 | | Admin only. |
-| `ARC_fnc_devDiagnosticsSnapshot` | ? | ? | ? | ? | n/a | ? | 0 | | Admin only. |
-| `ARC_fnc_devToggleDebugMode` | ? | ? | ? | ? | n/a | ? | 0 | | Admin only. |
-| `ARC_fnc_uiConsoleQAAuditServer` | ? | ? | ? | ? | n/a | ? | 0 | | Admin only. |
-| `ARC_fnc_uiCoverageAuditServer` | ? | ? | ? | ? | n/a | ? | 0 | | Admin only. |
+| `ARC_fnc_devCompileAuditServer` | ✅ | ✅ | ✅ | ✅ | n/a | ✅ | 0 | 2026-05-08 | 15s debounce; OMNI/approver gate via `rpcValidateSender`. |
+| `ARC_fnc_devDiagnosticsSnapshot` | ✅ | ✅ | ✅ | ✅ | n/a | ⚠️ | 0 | 2026-05-08 | Read-only; OMNI/approver gate; no rate-limit. |
+| `ARC_fnc_devToggleDebugMode` | ✅ | ❌ | ✅ | ❌ | n/a | ⚠️ | 0 | 2026-05-08 | **No sender validation, no role gate** (F-DEV-1). Toggles seven global debug flags + log level via `publicVariable true`. Privileged. |
+| `ARC_fnc_uiConsoleQAAuditServer` | ✅ | ✅ | ✅ | ✅ | n/a | ⚠️ | 0 | 2026-05-08 | Read-only; OMNI/approver gate; no rate-limit. |
+| `ARC_fnc_uiCoverageAuditServer` | ✅ | ⚠️ | n/a | ❌ | n/a | ⚠️ | 0 | 2026-05-08 | **No sender validation enforcement, no role gate** (F-DEV-2). Logs remote owner only. Writes `ARC_uiCoverageMap` (`publicVariable true`). Static content, but allowlisted from clients. |
 
 ### 3.3 Objective / IED / VBIED endpoints
 
@@ -186,6 +190,31 @@ Per pass:
 
 ---
 
+## 6) Findings — open remediation items
+
+These findings were recorded by the 2026-05-08 audit pass (Wave 1, batch 1). Each must be resolved by a follow-on Mode I PR with tightly scoped changes.
+
+### 6.1 CIVSUB findings
+
+| ID | Endpoint(s) | Check | Severity | Description | Remediation |
+|---|---|:---:|:---:|---|---|
+| F-CIV-1 | `ARC_fnc_civsubInteractEndSession`, `ARC_fnc_civsubInteractOrderStop` | S4 | P2 | Both endpoints lack the `civsub_v1_enabled` mission-toggle gate that every other CIVSUB endpoint enforces. Side effects are bounded (movement freeze / restore on a CIVSUB-managed civilian) but execution should not proceed when the subsystem is disabled. | Add `if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {false};` after the S0 guard. |
+| F-CIV-2 | `ARC_fnc_civsubRunMdtByNetId` | S3 | P1 | Matrix scaffold notes "TOC role gate required" but the implementation has **no role check** — any authenticated player can run the MDT crime DB pipeline against any civilian by netId. Delegates to `civsubInteractCheckPapers` with `requireCompliance=false`. | Add a TOC/S2 role gate (e.g. `[_actor] call ARC_fnc_rolesCanApproveQueue` or an MDT-specific role check) before delegating. |
+| F-CIV-3 | All CIVSUB client→server endpoints | S5 | P2 | Inline `remoteExecutedOwner`/`owner _actor` validation pattern is correct but is duplicated in nine functions instead of routing through `ARC_fnc_rpcValidateSender`. Drift risk over time. | Migrate to `ARC_fnc_rpcValidateSender` in a single Mode I PR; preserve `[CIVSUB][SEC]` log prefix via a thin wrapper or pass-through `_event` codes. |
+| F-CIV-4 | All CIVSUB client→server endpoints | S5 | P2 | No per-actor rate-limit / idempotency on dialog-action and snapshot endpoints. A misbehaving client can flood the server. | Add a per-owner cooldown (≥250ms for snapshot; ≥1s for state-mutating actions) keyed on `getPlayerUID _actor`, with rejection logged once per cooldown window. |
+
+### 6.2 Dev / admin findings
+
+| ID | Endpoint | Check | Severity | Description | Remediation |
+|---|---|:---:|:---:|---|---|
+| F-DEV-1 | `ARC_fnc_devToggleDebugMode` | S1, S3 | P1 | Globally toggles seven debug flags and `FARABAD_log_minLevel` via `publicVariable true` with no sender validation and no role check. Any client on the allowlist can flip global debug state. | Add `ARC_fnc_rpcValidateSender` call and the same `OMNI \|\| canApproveQueue` gate used by sibling dev/admin endpoints; reject with `[ARC][SEC] DEBUG_TOGGLE_DENIED` log. |
+| F-DEV-2 | `ARC_fnc_uiCoverageAuditServer` | S1, S3 | P2 | Logs `remoteExecutedOwner` only — does not validate or reject. No role gate. Writes `ARC_uiCoverageMap` with `publicVariable true`. Content is static, but the side effect is global. | Add sender validation + admin role gate; or remove the endpoint from `CfgRemoteExec` allowlist and call it server-side only. |
+| F-DEV-3 | `ARC_fnc_devDiagnosticsSnapshot`, `ARC_fnc_uiConsoleQAAuditServer` | S5 | P3 | Read-only audit endpoints have no debounce. Approver-gated, so risk is low; consider matching the 15s debounce already used by `devCompileAuditServer` for consistency. | Add 15s debounce keyed on requester UID. |
+
+Each finding above is the seed for a Mode I PR. Open issues / PRs must reference the finding ID (F-CIV-#, F-DEV-#) and update this section to `RESOLVED` with the merge SHA when remediation lands.
+
+---
+
 ## 7) Out-of-scope for this ledger
 
 - New endpoint additions (covered by `RemoteExec_Hardening_Plan.md` §2 + `CfgRemoteExec.hpp` review).
@@ -195,6 +224,11 @@ Per pass:
 ---
 
 ## Change log
+
+### v1.1 — 2026-05-08
+- Wave 1 / batch 1 audit pass: CIVSUB endpoints (§3.1) and dev/admin endpoints (§3.2) populated with verified S0–S5 status.
+- Added §6 (findings ledger) capturing seven open remediation items (F-CIV-1..4, F-DEV-1..3). Each item becomes a follow-on Mode I PR.
+- Out-of-scope sections renumbered to §7; this change log moved under §8.
 
 ### v1.0 — 2026-05-08
 - Initial scaffold derived from `RemoteExec_Hardening_Plan.md`. All client→server entries seeded with `?` except AIR/TOWER (verified 2026-04-07). Server→client entries seeded from §1.2 of the hardening plan with JIP intent preserved.

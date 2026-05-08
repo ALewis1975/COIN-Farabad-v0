@@ -11,6 +11,55 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-08 — Wave 1 RemoteExec audit batch 1 (CIVSUB + dev/admin) + Wave 2 / Wave 5 ledger scaffolds
+
+**Branch/Commit:** copilot/vision-architecture-plan-development @ HEAD
+
+**Scenario:** Implement the "Next development wave" plan. Doc-only Mode F PR producing the audit and ledger artifacts that operationalize Wave 1 / Wave 2 / Wave 5 of `docs/architecture/Architecture_Plan_2026-05-08.md`.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `docs/security/RemoteExec_Endpoint_Audit_Matrix.md` | Populated §3.1 (CIVSUB) and §3.2 (dev/admin) with verified S0–S5 status; added §6 findings ledger (F-CIV-1..4, F-DEV-1..3); bumped to v1.1. |
+| `docs/architecture/State_Ownership_Ledger.md` | New file. Maps every replicated `ARC_pub_*` key to its single writer. Three open findings (S-OWN-1..3); zero ❌. |
+| `docs/qa/Dedicated_JIP_Validation_Matrix.md` | New file. Release-candidate smoke checklist for dedicated/JIP/persistence/recovery. |
+| `docs/architecture/Architecture_Plan_2026-05-08.md` | Cross-linked the two new ledger / matrix files; bumped to v1.1. |
+
+### Static checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict` | n/a | No SQF changes in this PR. |
+| 2 | sqflint | `sqflint -e w` | n/a | No SQF changes in this PR. |
+
+### Audit findings recorded (require follow-on Mode I PRs)
+
+| ID | Severity | Endpoint(s) | Summary |
+|----|:---:|---|---|
+| F-CIV-1 | P2 | `civsubInteractEndSession`, `civsubInteractOrderStop` | Missing `civsub_v1_enabled` mission-toggle gate. |
+| F-CIV-2 | P1 | `civsubRunMdtByNetId` | TOC role gate missing despite matrix annotation. |
+| F-CIV-3 | P2 | All CIVSUB client→server endpoints | Inline sender validation duplicated nine times instead of routing through `ARC_fnc_rpcValidateSender`. |
+| F-CIV-4 | P2 | All CIVSUB client→server endpoints | No per-actor rate-limit / idempotency. |
+| F-DEV-1 | P1 | `devToggleDebugMode` | No sender validation, no role gate; toggles seven global debug flags via `publicVariable true`. |
+| F-DEV-2 | P2 | `uiCoverageAuditServer` | Logs remote owner only; no rejection or role gate; writes `ARC_uiCoverageMap` via `publicVariable true`. |
+| F-DEV-3 | P3 | `devDiagnosticsSnapshot`, `uiConsoleQAAuditServer` | No debounce; consider matching the 15s pattern used by `devCompileAuditServer`. |
+
+### Gameplay / MP checks
+
+| # | Check | Result | Notes |
+|---|-------|--------|-------|
+| 1 | Dedicated server fresh start (D-1..D-4) | BLOCKED | No dedicated server in this environment. Tracked in `docs/qa/Dedicated_JIP_Validation_Matrix.md`. |
+| 2 | Persistence save/load (P-1..P-5) | BLOCKED | Same. |
+| 3 | JIP late-join (J-1..J-6) | BLOCKED | Same. |
+| 4 | RemoteExec rejection RX-1..RX-5 | BLOCKED | Same. |
+
+### Outcome
+
+PASS for the documentation deliverables. All runtime validation rows remain BLOCKED pending dedicated-server access; the new validation matrix is the canonical checklist for that pass.
+
+---
+
 ## 2026-04-07 20:08 UTC — AIR map bottom-edge rendering fix
 
 **Branch/Commit:** copilot/fix-map-screen-bottom @ 86e880e

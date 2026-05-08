@@ -1,6 +1,6 @@
 # Farabad COIN v0 — Architecture Plan
 
-**Version:** 1.0
+**Version:** 1.1
 **Date:** 2026-05-08
 **Status:** Active architecture plan (current-clone analysis; not yet main-confirmed)
 **Mode:** F — Documentation-Only Changes
@@ -309,6 +309,8 @@ Acceptance:
 | `docs/planning/Task_Decomposition.md` | Workstream / track decomposition. Phases here map to its tracks 1–7. |
 | `docs/security/RemoteExec_Hardening_Plan.md` | Policy definition for the RPC surface. |
 | `docs/security/RemoteExec_Endpoint_Audit_Matrix.md` | Phase 1 live audit ledger derived from the hardening plan. |
+| `docs/architecture/State_Ownership_Ledger.md` | Phase 2 single-writer ledger for replicated `ARC_pub_*` keys. |
+| `docs/qa/Dedicated_JIP_Validation_Matrix.md` | Phase 5 release-candidate smoke checklist (dedicated/JIP/persistence/recovery). |
 | `docs/architecture/Farabad_Console_Refactor_Plan.md` + `Console_VM_v1.md` + `docs/planning/Console_Tab_Migration_Plan.md` | Phase 3 implementation references. |
 | `docs/projectFiles/Farabad_COIN_Mission_Design_Guide_v0.4_2026-01-27.md` | Mission intent and cross-cutting standards. Architectural changes must remain consistent with this guide unless it is version-bumped. |
 | `docs/projectFiles/Farabad_Source_of_Truth_and_Workflow_Spec.md` | Branch-truth and workflow governance. Phase 0 discipline lives here. |
@@ -333,6 +335,12 @@ Process:
 ---
 
 ## Change log
+
+### v1.1 — 2026-05-08
+- Added cross-references to two new Wave 2 / Wave 5 deliverables produced as part of "implement the plan" execution:
+  - `docs/architecture/State_Ownership_Ledger.md` (Phase 2 single-writer ledger).
+  - `docs/qa/Dedicated_JIP_Validation_Matrix.md` (Phase 5 release-candidate smoke checklist).
+- No phase / scope / non-goal changes.
 
 ### v1.0 — 2026-05-08
 - Initial issuance. Captures current-clone architecture posture, target architecture, ownership boundaries, configuration ownership policy, acceptance criteria, non-goals, and 6-phase roadmap (Phase 0 → Phase 5).
