@@ -4840,3 +4840,21 @@ Changed `forEach _clearancePending` → `forEach _clearancePendingView` at line 
 |---|-------|--------|--------|
 | 1 | Dedicated server regression test | BLOCKED | Requires dedicated server + active clearance requests |
 | 2 | "Assigned to" display correctness | BLOCKED | View[6]=raw[7]=timestamp shows as number; semantic fix deferred (separate issue) |
+
+---
+
+### T-CIVTRAF-Convoy — Civilian traffic excludes active convoy proximity (2026-05-08)
+
+Branch: `copilot/fix-traffic-spawn-issues`
+Mode: A (Bug Fix)
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | `civsub_v1_traffic_convoyMinDistance_m` declared in `initServer.sqf` (default 1050) | `grep convoyMinDistance_m initServer.sqf` | PASS | New tunable added next to `playerMinDistance_m` |
+| 2 | Moving spawn rejects positions within convoy distance (uses `ARC_activeConvoyNetIds` → `objectFromNetId`) | `grep -n convoyTooNear functions/civsub/fn_civsubTrafficSpawnMoving.sqf` | PASS | New `lastMovingSpawnFail = "convoyTooNear"` reason wired |
+| 3 | Player-near + convoy-near checks restructured so `exitWith` operates at function scope (was nested in `then` block, did not return early) | View `functions/civsub/fn_civsubTrafficSpawnMoving.sqf` lines 72–104 | PASS | Pre-existing latent bug in player gate fixed by lifting `if (_nearP) exitWith {...}` to top-level scope |
+| 4 | Parked spawn loop rejects candidates within convoy distance, increments `_fail_convoyNear`, logged in `[CIVTRAF][SPAWN_FAIL]` | `grep -n _fail_convoyNear functions/civsub/fn_civsubTrafficSpawnParked.sqf` | PASS | Counter declared, incremented, included in debug log |
+| 5 | sqflint compat scan on changed files | `python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf functions/civsub/fn_civsubTrafficSpawnParked.sqf` | PASS | 0 violations |
+| 6 | sqflint warnings | `sqflint -e w <changed files>` | BLOCKED | sqflint binary not available in this environment |
+| 7 | Local MP smoke: no civilian vehicle spawns within 1050 m of any active convoy vehicle while convoy is en route | Hosted/local MP run | BLOCKED | Requires Arma 3 runtime |
+| 8 | Dedicated server + JIP: same exclusion holds for late-joiners and across convoy task hand-offs | Dedicated server run | BLOCKED | Requires dedicated server rig |

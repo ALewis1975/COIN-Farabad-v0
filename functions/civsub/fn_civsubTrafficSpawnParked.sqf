@@ -101,6 +101,7 @@ _fallbackWaterEdgeReject = (_fallbackWaterEdgeReject max 4) min 40;
 private _fail_noPos = 0;
 private _fail_excl = 0;
 private _fail_playerNear = 0;
+private _fail_convoyNear = 0;
 private _fail_createNull = 0;
 private _fail_emptyPos = 0;
 private _fail_fallbackContext = 0;
@@ -220,6 +221,25 @@ for "_k" from 1 to _attempts do
         if (_nearP) then { _fail_playerNear = _fail_playerNear + 1; continue; };
     };
 
+    // Convoy safety distance. Active convoy vehicles are tagged ARC_isConvoyVeh
+    // and tracked in ARC_activeConvoyNetIds; they may be AI-led, so the player
+    // distance gate above is not sufficient when the player is mounted with the
+    // convoy or trailing it.
+    private _convoyMin = missionNamespace getVariable ["civsub_v1_traffic_convoyMinDistance_m", 1050];
+    if (!(_convoyMin isEqualType 0)) then { _convoyMin = 1050; };
+    _convoyMin = (_convoyMin max 0) min 1500;
+    if (_convoyMin > 0) then
+    {
+        private _cIds = missionNamespace getVariable ["ARC_activeConvoyNetIds", []];
+        if (!(_cIds isEqualType [])) then { _cIds = []; };
+        private _nearC = false;
+        {
+            private _cv = objectFromNetId _x;
+            if (!isNull _cv && { alive _cv } && { (getPosATL _cv) distance2D _pos <= _convoyMin }) exitWith { _nearC = true; };
+        } forEach _cIds;
+        if (_nearC) then { _fail_convoyNear = _fail_convoyNear + 1; continue; };
+    };
+
     // Exclusion zones (marker, radius)
     private _ex = missionNamespace getVariable ["civsub_v1_traffic_exclusions", []];
     if (_ex isEqualType []) then
@@ -271,7 +291,7 @@ if (isNull _veh) then
 {
     if (_dbg) then
     {
-        diag_log format ["[CIVTRAF][SPAWN_FAIL] did=%1 noPos=%2 emptyPos=%3 fbCtx=%4 waterEdge=%5 excl=%6 playerNear=%7 createNull=%8 preferW=%9 preferN=%10 fallN=%11", _districtId, _fail_noPos, _fail_emptyPos, _fail_fallbackContext, _fail_waterEdge, _fail_excl, _fail_playerNear, _fail_createNull, _preferW, count _poolPrefer, count _poolFallback];
+        diag_log format ["[CIVTRAF][SPAWN_FAIL] did=%1 noPos=%2 emptyPos=%3 fbCtx=%4 waterEdge=%5 excl=%6 playerNear=%7 convoyNear=%8 createNull=%9 preferW=%10 preferN=%11 fallN=%12", _districtId, _fail_noPos, _fail_emptyPos, _fail_fallbackContext, _fail_waterEdge, _fail_excl, _fail_playerNear, _fail_convoyNear, _fail_createNull, _preferW, count _poolPrefer, count _poolFallback];
     };
 };
 
