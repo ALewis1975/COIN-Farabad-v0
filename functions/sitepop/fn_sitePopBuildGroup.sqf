@@ -371,7 +371,7 @@ if (_isPrisonerRole) then
     private _prisonerUnits = units _grp select { _x getVariable ["ARC_prisoner", false] };
     if ((count _prisonerUnits) > 0) then
     {
-        _prisonerUnits spawn
+        [_prisonerUnits] spawn
         {
             params [["_unitList", [], [[]]]];
             sleep 0.1;
