@@ -31,11 +31,25 @@ if (!isServer) exitWith
     private _ownerTxt = if (_clientOwner isEqualType 0) then { str _clientOwner } else { "local" };
     private _ctxTaskId = if (_taskId isEqualType "") then { _taskId } else { "" };
 
-    diag_log format ["[ARC][CONVOY][AUTH] Rejected non-server call to execSpawnConvoy (task=%1, clientOwner=%2). Relaying request to server.", _ctxTaskId, _ownerTxt];
+    diag_log format ["[ARC][CONVOY][AUTH] Rejected non-server call to execSpawnConvoy (task=%1, clientOwner=%2). Convoy spawn is server-internal only; non-server callers are not relayed.", _ctxTaskId, _ownerTxt];
 
-    // Non-authoritative callers must never mutate shared convoy state directly.
-    // Relay to the server path; return value is intentionally empty because remoteExecCall is async.
-    [_incidentType, _spawnPos, _destPos, _speedKph, _spawnDir, _taskId] remoteExecCall ["ARC_fnc_execSpawnConvoy", 2];
+    // Convoy spawning is server-internal only (F-LOG-1). Do NOT relay to the
+    // server: legitimate server-side callers (execTickConvoy) already invoke
+    // this function with a `call`. Relaying client requests would expose an
+    // un-authenticated convoy-spawn surface even though the endpoint is
+    // allowlisted in CfgRemoteExec.
+    []
+};
+
+// F-LOG-1: server path is reachable only by server-internal callers.
+// Reject any remote-originated invocation regardless of the allowlist.
+if (!isNil "remoteExecutedOwner" && { _callerOwner isEqualType 0 } && { _callerOwner > 0 }) exitWith
+{
+    diag_log format ["[ARC][SEC] ARC_fnc_execSpawnConvoy: CONVOY_SPAWN_REMOTE_DENIED remoteOwner=%1 incidentType=%2 task=%3",
+        _callerOwner,
+        if (_incidentType isEqualType "") then { _incidentType } else { "" },
+        if (_taskId isEqualType "") then { _taskId } else { "" }
+    ];
     []
 };
 

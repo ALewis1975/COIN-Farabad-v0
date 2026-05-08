@@ -64,13 +64,13 @@ Audited 2026-05-08 against current head. CIVSUB endpoints share an inline owner-
 
 ### 3.2 Dev / admin endpoints
 
-Audited 2026-05-08 against current head. Most use `ARC_fnc_rpcValidateSender` + `OMNI || canApproveQueue` role gate; two endpoints (`devToggleDebugMode`, `uiCoverageAuditServer`) are missing privileged gates. See §6.2 for findings.
+Audited 2026-05-08 against current head. Most use `ARC_fnc_rpcValidateSender` + `OMNI || canApproveQueue` role gate. F-DEV-1 (devToggleDebugMode) RESOLVED in v1.4. `uiCoverageAuditServer` (F-DEV-2) is still missing privileged gates — see §6.2.
 
 | Endpoint | S0 | S1 | S2 | S3 | S4 | S5 | JIP | Last verified | Notes |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|---|---|
 | `ARC_fnc_devCompileAuditServer` | ✅ | ✅ | ✅ | ✅ | n/a | ✅ | 0 | 2026-05-08 | 15s debounce; OMNI/approver gate via `rpcValidateSender`. |
 | `ARC_fnc_devDiagnosticsSnapshot` | ✅ | ✅ | ✅ | ✅ | n/a | ⚠️ | 0 | 2026-05-08 | Read-only; OMNI/approver gate; no rate-limit. |
-| `ARC_fnc_devToggleDebugMode` | ✅ | ❌ | ✅ | ❌ | n/a | ⚠️ | 0 | 2026-05-08 | **No sender validation, no role gate** (F-DEV-1). Toggles seven global debug flags + log level via `publicVariable true`. Privileged. |
+| `ARC_fnc_devToggleDebugMode` | ✅ | ✅ | ✅ | ✅ | n/a | ⚠️ | 0 | 2026-05-08 | F-DEV-1 RESOLVED — `ARC_fnc_rpcValidateSender` + `OMNI \|\| canApproveQueue` gate; `[ARC][SEC] DEBUG_TOGGLE_DENIED` log on rejection. |
 | `ARC_fnc_uiConsoleQAAuditServer` | ✅ | ✅ | ✅ | ✅ | n/a | ⚠️ | 0 | 2026-05-08 | Read-only; OMNI/approver gate; no rate-limit. |
 | `ARC_fnc_uiCoverageAuditServer` | ✅ | ⚠️ | n/a | ❌ | n/a | ⚠️ | 0 | 2026-05-08 | **No sender validation enforcement, no role gate** (F-DEV-2). Logs remote owner only. Writes `ARC_uiCoverageMap` (`publicVariable true`). Static content, but allowlisted from clients. |
 
@@ -129,7 +129,7 @@ Audited 2026-05-08 against current head (Wave 3 / batch 3). Prior S0–S3 verifi
 
 ### 3.6 CASREQ / Logistics / Medical / CASEVAC endpoints
 
-Audited 2026-05-08 against current head (Wave 3 / batch 3). CASREQ handlers are mostly aligned on S0–S4; two non-CASREQ endpoints (`execSpawnConvoy`, `medicalCasevacRequest`) remain allowlisted client→server surfaces without sender binding.
+Audited 2026-05-08 against current head (Wave 3 / batch 3). CASREQ handlers are mostly aligned on S0–S4. F-LOG-1 (`execSpawnConvoy`) and F-MED-1 (`medicalCasevacRequest`) RESOLVED in v1.4 — both now bind sender identity to authoritative invocation paths.
 
 | Endpoint | S0 | S1 | S2 | S3 | S4 | S5 | JIP | Last verified | Notes |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|---|---|
@@ -137,8 +137,8 @@ Audited 2026-05-08 against current head (Wave 3 / batch 3). CASREQ handlers are 
 | `ARC_fnc_casreqDecide` | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ | 0 | 2026-05-08 | Role-gated decision path with OPEN-state invariant. No per-caller cooldown. |
 | `ARC_fnc_casreqExecute` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | APPROVED→EXECUTING invariant; sender-bound. No explicit role gate and no per-caller cooldown. |
 | `ARC_fnc_casreqClose` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | Result/state/index invariants present; sender-bound. No explicit role gate and no per-caller cooldown. |
-| `ARC_fnc_execSpawnConvoy` | ⚠️ | ❌ | ✅ | ❌ | ⚠️ | ⚠️ | 0 | 2026-05-08 | Non-server path relays to server, but server path has no sender validation/role gate (F-LOG-1). |
-| `ARC_fnc_medicalCasevacRequest` | ✅ | ❌ | ✅ | ❌ | ✅ | ✅ | 0 | 2026-05-08 | World-state + cooldown guard is present, but no sender binding/role gate despite allowlisted client→server exposure (F-MED-1). |
+| `ARC_fnc_execSpawnConvoy` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | F-LOG-1 RESOLVED — server path now rejects any remote-originated invocation (`[ARC][SEC] CONVOY_SPAWN_REMOTE_DENIED`); non-server callers no longer relay. Server-internal only. |
+| `ARC_fnc_medicalCasevacRequest` | ✅ | ✅ | ✅ | n/a | ✅ | ✅ | 0 | 2026-05-08 | F-MED-1 RESOLVED — `ARC_fnc_rpcValidateSender` enforces `owner _unit == remoteExecutedOwner` for remote calls; server-internal `medicalOnCasualty` path unchanged. |
 
 ---
 
@@ -222,7 +222,7 @@ These findings were recorded by the 2026-05-08 audit passes (Wave 1 + Wave 3 bat
 
 | ID | Endpoint | Check | Severity | Description | Remediation |
 |---|---|:---:|:---:|---|---|
-| F-DEV-1 | `ARC_fnc_devToggleDebugMode` | S1, S3 | P1 | Globally toggles seven debug flags and `FARABAD_log_minLevel` via `publicVariable true` with no sender validation and no role check. Any client on the allowlist can flip global debug state. | Add `ARC_fnc_rpcValidateSender` call and the same `OMNI \|\| canApproveQueue` gate used by sibling dev/admin endpoints; reject with `[ARC][SEC] DEBUG_TOGGLE_DENIED` log. |
+| F-DEV-1 | `ARC_fnc_devToggleDebugMode` | S1, S3 | P1 | **RESOLVED 2026-05-08** — `ARC_fnc_rpcValidateSender` + `OMNI \|\| canApproveQueue` gate added; emits `[ARC][SEC] DEBUG_TOGGLE_DENIED` and `clientHint` on rejection. (Original: globally toggled seven debug flags and `FARABAD_log_minLevel` via `publicVariable true` with no sender validation and no role check.) | Closed in this Mode I batch. |
 | F-DEV-2 | `ARC_fnc_uiCoverageAuditServer` | S1, S3 | P2 | Logs `remoteExecutedOwner` only — does not validate or reject. No role gate. Writes `ARC_uiCoverageMap` with `publicVariable true`. Content is static, but the side effect is global. | Add sender validation + admin role gate; or remove the endpoint from `CfgRemoteExec` allowlist and call it server-side only. |
 | F-DEV-3 | `ARC_fnc_devDiagnosticsSnapshot`, `ARC_fnc_uiConsoleQAAuditServer` | S5 | P3 | Read-only audit endpoints have no debounce. Approver-gated, so risk is low; consider matching the 15s debounce already used by `devCompileAuditServer` for consistency. | Add 15s debounce keyed on requester UID. |
 
@@ -240,8 +240,8 @@ These findings were recorded by the 2026-05-08 audit passes (Wave 1 + Wave 3 bat
 |---|---|:---:|:---:|---|---|
 | F-AIR-1 | `ARC_fnc_airbaseSubmitClearanceRequest`, `ARC_fnc_airbaseRequestClearanceDecision`, `ARC_fnc_airbaseRequestPrioritizeFlight`, `ARC_fnc_airbaseCancelClearanceRequest`, `ARC_fnc_airbaseRequestCancelQueuedFlight`, `ARC_fnc_airbaseMarkClearanceEmergency`, `ARC_fnc_airbaseRequestSetLaneStaffing`, `ARC_fnc_airbaseRequestHoldDepartures`, `ARC_fnc_airbaseRequestReleaseDepartures`, `ARC_fnc_tocRequestAirbaseResetControlState` | S5 | P2 | All 10 Airbase/TOWER client→server endpoints now verify S4, but none applies per-caller cooldown/debounce. Repeated spam calls can still consume server cycles and log bandwidth. | Add a shared per-owner/per-endpoint cooldown helper (0.25–1.0s by action class) and emit structured denial logs once per cooldown window. |
 | F-CAS-1 | `ARC_fnc_casreqExecute`, `ARC_fnc_casreqClose` | S3 | P2 | Both endpoints are sender-validated but lack explicit role/ownership authorization. Any authenticated client with a valid CASREQ ID can transition lifecycle state. | Gate execute/close to requester UID, assigned pilot role, or TOC approver/OMNI; reject and log unauthorized transitions with `[ARC][SEC]` event codes. |
-| F-LOG-1 | `ARC_fnc_execSpawnConvoy` | S1, S3 | P1 | Endpoint is allowlisted client→server but server path does not validate sender identity and has no role gate. Non-server calls are relayed to server asynchronously, allowing any client to request convoy spawn attempts. | Add `ARC_fnc_rpcValidateSender` + privileged role/invariant gate (or remove from client allowlist if this should be server-internal only). Keep relay path non-authoritative. |
-| F-MED-1 | `ARC_fnc_medicalCasevacRequest` | S1, S3 | P1 | Endpoint is allowlisted client→server yet has no sender validation or authorization gate; clients can request CASEVAC lead creation directly by passing `west`. Cooldown reduces spam but does not enforce caller legitimacy. | Prefer removing the endpoint from `CfgRemoteExec` allowlist and invoking server-side from trusted medical handlers only; if kept allowlisted, add sender validation + role/invariant gate. |
+| F-LOG-1 | `ARC_fnc_execSpawnConvoy` | S1, S3 | P1 | **RESOLVED 2026-05-08** — server path rejects any invocation with `remoteExecutedOwner > 0` (`[ARC][SEC] CONVOY_SPAWN_REMOTE_DENIED`); non-server branch no longer relays to the server. Endpoint kept in CfgRemoteExec for compatibility but is functionally server-internal only. | Closed in this Mode I batch. |
+| F-MED-1 | `ARC_fnc_medicalCasevacRequest` | S1, S3 | P1 | **RESOLVED 2026-05-08** — `ARC_fnc_rpcValidateSender` enforces `owner _unit == remoteExecutedOwner` for remote calls (`MEDICAL_CASEVAC_DENIED`); server-internal call from `ARC_fnc_medicalOnCasualty` is unaffected because `remoteExecutedOwner` is unset. | Closed in this Mode I batch. |
 
 Each finding above is the seed for a Mode I PR. Open issues / PRs must reference the finding ID (F-CIV-#, F-DEV-#, F-IED-#, F-AIR-#, F-CAS-#, F-LOG-#, F-MED-#) and update this section to `RESOLVED` with the merge SHA when remediation lands.
 
@@ -256,6 +256,14 @@ Each finding above is the seed for a Mode I PR. Open issues / PRs must reference
 ---
 
 ## Change log
+
+### v1.4 — 2026-05-08
+- Mode I RemoteExec hardening batch (F-DEV-1, F-LOG-1, F-MED-1) closed:
+  - `ARC_fnc_devToggleDebugMode`: added `ARC_fnc_rpcValidateSender` + `OMNI || canApproveQueue` gate with `[ARC][SEC] DEBUG_TOGGLE_DENIED` log.
+  - `ARC_fnc_execSpawnConvoy`: server path now rejects remote-originated invocations (`CONVOY_SPAWN_REMOTE_DENIED`); non-server branch no longer relays to server.
+  - `ARC_fnc_medicalCasevacRequest`: added sender validation via `ARC_fnc_rpcValidateSender` against `_unit` ownership; server-internal `medicalOnCasualty` path unchanged.
+- §3.2, §3.6, §6.2 and §6.4 entries flipped to RESOLVED with current-head verification.
+- Truth-status: branch-local. Resolutions derived from current cloned working branch.
 
 ### v1.3 — 2026-05-08
 - Wave 3 / batch 3 audit pass completed:

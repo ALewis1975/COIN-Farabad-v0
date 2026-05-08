@@ -18,10 +18,28 @@
 
 if (!isServer) exitWith {""};
 
+if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\core\fn_rpcValidateSender.sqf"; };
+
 params [
     ["_unit", objNull, [objNull]],
     ["_side", sideEmpty]
 ];
+
+// S1: sender validation (F-MED-1). The legitimate remote caller is
+// ARC_fnc_medicalAceIncapHandler, which forwards the unconscious player as
+// `_unit` from the player's machine. When invoked from a remote client,
+// `_unit` must be local to the caller (i.e. owner _unit == remoteExecutedOwner).
+// Server-internal calls (medicalOnCasualty) leave remoteExecutedOwner unset
+// and are accepted unconditionally by rpcValidateSender.
+private _isRemoteRpc = !isNil "remoteExecutedOwner";
+private _senderOk = if (_isRemoteRpc) then {
+    [_unit, "ARC_fnc_medicalCasevacRequest", "CASEVAC request denied: sender verification failed.", "MEDICAL_CASEVAC_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender
+} else { true };
+if (!_senderOk) exitWith
+{
+    diag_log format ["[ARC][SEC] ARC_fnc_medicalCasevacRequest: MEDICAL_CASEVAC_DENIED remoteOwner=%1", remoteExecutedOwner];
+    ""
+};
 
 if !(_side isEqualTo west) exitWith {""};
 

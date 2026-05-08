@@ -4916,3 +4916,23 @@ Mode: A (Bug Fix)
 | 6 | sqflint warnings | `sqflint -e w <changed files>` | BLOCKED | sqflint binary not available in this environment |
 | 7 | Local MP smoke: no civilian vehicle spawns within 1050 m of any active convoy vehicle while convoy is en route | Hosted/local MP run | BLOCKED | Requires Arma 3 runtime |
 | 8 | Dedicated server + JIP: same exclusion holds for late-joiners and across convoy task hand-offs | Dedicated server run | BLOCKED | Requires dedicated server rig |
+
+---
+
+### T-SEC-RemoteExec-Batch1 — Mode I RemoteExec hardening: F-DEV-1, F-LOG-1, F-MED-1 (2026-05-08)
+
+Branch: `copilot/develop-new-features`
+Mode: I (Security Hardening)
+
+Scope: `functions/core/fn_devToggleDebugMode.sqf`, `functions/logistics/fn_execSpawnConvoy.sqf`, `functions/medical/fn_medicalCasevacRequest.sqf`, `docs/security/RemoteExec_Endpoint_Audit_Matrix.md`.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|---------------|--------|-------|
+| 1 | F-DEV-1: `devToggleDebugMode` adds `ARC_fnc_rpcValidateSender` + `OMNI \|\| canApproveQueue` gate | `grep -n "ARC_fnc_rpcValidateSender\|rolesCanApproveQueue\|DEBUG_TOGGLE_DENIED" functions/core/fn_devToggleDebugMode.sqf` | PASS | Authorization checks placed at top-level scope (not inside `then { … exitWith }`) so denial actually short-circuits the function |
+| 2 | F-LOG-1: `execSpawnConvoy` rejects remote-originated server invocations | `grep -n "CONVOY_SPAWN_REMOTE_DENIED" functions/logistics/fn_execSpawnConvoy.sqf` | PASS | Non-server branch no longer relays to server; server branch denies any `remoteExecutedOwner > 0` invocation. Server-internal `execTickConvoy` call path unaffected. |
+| 3 | F-MED-1: `medicalCasevacRequest` validates remote sender against `_unit` ownership | `grep -n "MEDICAL_CASEVAC_DENIED\|ARC_fnc_rpcValidateSender" functions/medical/fn_medicalCasevacRequest.sqf` | PASS | Server-internal `medicalOnCasualty` path unaffected (`remoteExecutedOwner` unset). Remote calls require `owner _unit == remoteExecutedOwner`. |
+| 4 | sqflint compat scan on changed files | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_devToggleDebugMode.sqf functions/logistics/fn_execSpawnConvoy.sqf functions/medical/fn_medicalCasevacRequest.sqf` | PASS | 0 violations |
+| 5 | sqflint warnings | `sqflint -e w <changed files>` | BLOCKED | sqflint binary not available in this environment |
+| 6 | Audit matrix updated to reflect resolutions | `grep -n "F-DEV-1\|F-LOG-1\|F-MED-1\|RESOLVED" docs/security/RemoteExec_Endpoint_Audit_Matrix.md` | PASS | §3.2, §3.6, §6.2, §6.4 entries flipped to RESOLVED; v1.4 change log added |
+| 7 | Local MP smoke (HQ tab → Diagnostics: Toggle Debug as approver vs non-approver) | Hosted/local MP run | BLOCKED | Requires Arma 3 runtime |
+| 8 | Dedicated server + JIP: hostile/non-approver client cannot toggle debug, spawn convoy, or fabricate CASEVAC | Dedicated server run | BLOCKED | Requires dedicated server rig |

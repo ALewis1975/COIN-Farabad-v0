@@ -15,9 +15,53 @@
 
 if (!isServer) exitWith { false };
 
+if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\core\fn_rpcValidateSender.sqf"; };
+
 params [
     ["_requester", objNull, [objNull]]
 ];
+
+// S1 + S3: sender validation and HQ role gate (privileged dev/admin tool — F-DEV-1).
+// NOTE: `exitWith` nested inside an `if … then { … }` block exits ONLY that block,
+// not the surrounding function. Authorization checks therefore live at top-level
+// scope so a denied request actually short-circuits the function.
+private _isRemoteRpc = !isNil "remoteExecutedOwner";
+private _reoOwner = if (_isRemoteRpc) then { remoteExecutedOwner } else { -1 };
+
+private _requestor = _requester;
+if (_isRemoteRpc && { isNull _requestor } && { _reoOwner > 0 }) then
+{
+    { if (owner _x == _reoOwner) exitWith { _requestor = _x; }; } forEach allPlayers;
+};
+
+if (_isRemoteRpc) then { _requester = _requestor; };
+
+private _senderOk = if (_isRemoteRpc) then {
+    [_requestor, "ARC_fnc_devToggleDebugMode", "Debug toggle denied: sender verification failed.", "DEBUG_TOGGLE_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender
+} else { true };
+if (!_senderOk) exitWith
+{
+    diag_log format ["[ARC][SEC] ARC_fnc_devToggleDebugMode: DEBUG_TOGGLE_DENIED sender verification failed remoteOwner=%1", _reoOwner];
+    false
+};
+
+private _authOk = if (_isRemoteRpc) then {
+    private _isOmni = [_requestor, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
+    _isOmni || { [_requestor] call ARC_fnc_rolesCanApproveQueue }
+} else { true };
+if (!_authOk) exitWith
+{
+    diag_log format ["[ARC][SEC] ARC_fnc_devToggleDebugMode: DEBUG_TOGGLE_DENIED unauthorized caller owner=%1 uid=%2 name=%3",
+        _reoOwner,
+        if (isNull _requestor) then { "" } else { getPlayerUID _requestor },
+        if (isNull _requestor) then { "unknown" } else { name _requestor }
+    ];
+    if (_reoOwner > 0) then
+    {
+        ["Debug toggle denied: insufficient role."] remoteExec ["ARC_fnc_clientHint", _reoOwner];
+    };
+    false
+};
 
 // Current state: check if debug is currently on
 private _wasOn = missionNamespace getVariable ["ARC_debugLogEnabled", false];
