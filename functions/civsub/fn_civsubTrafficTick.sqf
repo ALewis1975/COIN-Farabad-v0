@@ -397,6 +397,15 @@ if (_allowMoving) then
     if (!(_wpSearch isEqualType 0)) then { _wpSearch = 1800; };
     _wpSearch = (_wpSearch max (_wpMin + 100)) min 4000;
 
+    private _wpRefreshBase = missionNamespace getVariable ["civsub_v1_traffic_moving_waypointRefreshBase_s", 90];
+    if (!(_wpRefreshBase isEqualType 0)) then { _wpRefreshBase = 90; };
+    _wpRefreshBase = (_wpRefreshBase max 30) min 600;
+
+    private _wpRefreshJitter = missionNamespace getVariable ["civsub_v1_traffic_moving_waypointRefreshJitter_s", 60];
+    if (!(_wpRefreshJitter isEqualType 0)) then { _wpRefreshJitter = 60; };
+    _wpRefreshJitter = (_wpRefreshJitter max 0) min 300;
+
+    // Road objects can report non-zero ATL; doMove targets are normalized to ground level.
     private _roadTargetZ = 0;
 
     // maintain moving destinations (long road-to-road legs)
@@ -441,7 +450,7 @@ if (_allowMoving) then
         _veh forceFollowRoad true;
         _drv doMove _destPos;
         _veh setVariable ["ARC_civtraf_moveTarget", _destPos, true];
-        _veh setVariable ["ARC_civtraf_nextMoveTs", serverTime + (90 + random 60), true];
+        _veh setVariable ["ARC_civtraf_nextMoveTs", serverTime + (_wpRefreshBase + random _wpRefreshJitter), true];
     } forEach _moving;
 };
 
