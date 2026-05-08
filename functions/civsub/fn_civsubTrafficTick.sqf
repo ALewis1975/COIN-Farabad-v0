@@ -389,7 +389,7 @@ if (_allowMoving) then
     missionNamespace setVariable ["civsub_v1_traffic_dbg_moving_spawnFail_playerTooNear", _spawnPlayerNear, false];
     missionNamespace setVariable ["civsub_v1_traffic_dbg_moving_spawnFail_createFail", _spawnCreateFail, false];
 
-    // maintain moving destinations (simple hop between roads)
+    // maintain moving destinations (long road-to-road legs)
     {
         private _veh = _x;
         if (isNull _veh || { !alive _veh }) then { continue; };
@@ -401,25 +401,45 @@ if (_allowMoving) then
         if (isNull _drv || { !alive _drv }) then { continue; };
 
         private _curPos = getPosATL _veh;
-        private _roads = _curPos nearRoads 120;
+        private _wpMin = missionNamespace getVariable ["civsub_v1_traffic_moving_waypointMinDistance_m", 1000];
+        if (!(_wpMin isEqualType 0)) then { _wpMin = 1000; };
+        _wpMin = (_wpMin max 1000) min 3000;
+
+        private _wpSearch = missionNamespace getVariable ["civsub_v1_traffic_moving_waypointSearchRadius_m", 1800];
+        if (!(_wpSearch isEqualType 0)) then { _wpSearch = 1800; };
+        _wpSearch = (_wpSearch max (_wpMin + 100)) min 4000;
+
+        private _roads = _curPos nearRoads _wpSearch;
         if ((count _roads) == 0) then
         {
-            _veh setVariable ["ARC_civtraf_nextMoveTs", serverTime + 10, true];
+            _veh setVariable ["ARC_civtraf_nextMoveTs", serverTime + 30, true];
             continue;
         };
 
-        private _r = selectRandom _roads;
-        private _conn = roadsConnectedTo _r;
-        private _destPos = getPosATL _r;
-        if ((count _conn) > 0) then
+        private _candidates = [];
         {
-            private _r2 = selectRandom _conn;
-            if (!isNull _r2) then { _destPos = getPosATL _r2; };
+            if (isNull _x) then { continue; };
+            private _roadPos = getPosATL _x;
+            if ((_curPos distance2D _roadPos) >= _wpMin) then
+            {
+                _candidates pushBack _x;
+            };
+        } forEach _roads;
+
+        if ((count _candidates) == 0) then
+        {
+            _veh setVariable ["ARC_civtraf_nextMoveTs", serverTime + 30, true];
+            continue;
         };
 
+        private _r = selectRandom _candidates;
+        private _destPos = getPosATL _r;
+        _destPos set [2, 0];
+
+        _veh forceFollowRoad true;
         _drv doMove _destPos;
         _veh setVariable ["ARC_civtraf_moveTarget", _destPos, true];
-        _veh setVariable ["ARC_civtraf_nextMoveTs", serverTime + (10 + random 15), true];
+        _veh setVariable ["ARC_civtraf_nextMoveTs", serverTime + (90 + random 60), true];
     } forEach _moving;
 };
 
