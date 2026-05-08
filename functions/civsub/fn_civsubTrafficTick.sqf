@@ -20,6 +20,8 @@ if !(missionNamespace getVariable ["civsub_v1_traffic_enabled", false]) exitWith
 private _debug = missionNamespace getVariable ["civsub_v1_traffic_debug", false];
 if (!(_debug isEqualType true)) then { _debug = false; };
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+// Road objects can report non-zero ATL; ground-level targets avoid vehicle path-finding issues.
+private _roadTargetZ = 0;
 
 private _parked = missionNamespace getVariable ["civsub_v1_traffic_list_parked", []];
 private _moving = missionNamespace getVariable ["civsub_v1_traffic_list_moving", []];
@@ -409,9 +411,6 @@ if (_allowMoving) then
     if (!(_wpRetryDelay isEqualType 0)) then { _wpRetryDelay = 30; };
     _wpRetryDelay = (_wpRetryDelay max 10) min 120;
 
-    // Road objects can report non-zero ATL; ground-level targets avoid vehicle path-finding issues.
-    private _roadTargetZ = 0;
-
     // maintain moving destinations (long road-to-road legs)
     {
         private _veh = _x;
@@ -432,7 +431,9 @@ if (_allowMoving) then
         };
 
         private _candidates = [];
+        private _candidateLimit = 15;
         {
+            if ((count _candidates) >= _candidateLimit) exitWith {};
             if (isNull _x) then { continue; };
             private _roadPos = getPosATL _x;
             if ((_curPos distance2D _roadPos) >= _wpMin) then
