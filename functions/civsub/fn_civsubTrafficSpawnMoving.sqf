@@ -69,17 +69,38 @@ private _pMin = missionNamespace getVariable ["civsub_v1_traffic_playerMinDistan
 if (!(_pMin isEqualType 0)) then { _pMin = 60; };
 // Upper bound raised to 1200 to allow out-of-view-distance enforcement (1 km view).
 _pMin = (_pMin max 50) min 1200;
+private _nearP = false;
 if (_pMin > 0) then
 {
-    private _nearP = false;
     {
         if ((getPosATL _x) distance2D _pos <= _pMin) exitWith { _nearP = true; };
     } forEach allPlayers;
-    if (_nearP) exitWith
+};
+if (_nearP) exitWith
+{
+    missionNamespace setVariable ["civsub_v1_traffic_lastMovingSpawnFail", "playerTooNear", false];
+    [objNull, objNull]
+};
+
+// Reject if too close to any active convoy vehicle. Convoy vehicles may be AI-led
+// (no player aboard) so the player-distance gate above is not sufficient.
+private _convoyMin = missionNamespace getVariable ["civsub_v1_traffic_convoyMinDistance_m", 1050];
+if (!(_convoyMin isEqualType 0)) then { _convoyMin = 1050; };
+_convoyMin = (_convoyMin max 0) min 1500;
+private _nearC = false;
+if (_convoyMin > 0) then
+{
+    private _cIds = missionNamespace getVariable ["ARC_activeConvoyNetIds", []];
+    if (!(_cIds isEqualType [])) then { _cIds = []; };
     {
-        missionNamespace setVariable ["civsub_v1_traffic_lastMovingSpawnFail", "playerTooNear", false];
-        [objNull, objNull]
-    };
+        private _cv = objectFromNetId _x;
+        if (!isNull _cv && { alive _cv } && { (getPosATL _cv) distance2D _pos <= _convoyMin }) exitWith { _nearC = true; };
+    } forEach _cIds;
+};
+if (_nearC) exitWith
+{
+    missionNamespace setVariable ["civsub_v1_traffic_lastMovingSpawnFail", "convoyTooNear", false];
+    [objNull, objNull]
 };
 
 private _cls = selectRandom _pool;

@@ -314,6 +314,11 @@ missionNamespace setVariable ["ARC_airbase_dynamic_radius_m", 1600, true];
 missionNamespace setVariable ["civsub_v1_traffic_minSeparation_m", 35, true];
 missionNamespace setVariable ["civsub_v1_traffic_spawnRadius_m", 1400, true];
 missionNamespace setVariable ["civsub_v1_traffic_playerMinDistance_m", 1050, true];
+// convoyMinDistance_m: hard minimum distance from any active convoy vehicle (tagged
+//   ARC_isConvoyVeh and tracked in ARC_activeConvoyNetIds). Mirrors playerMinDistance
+//   so traffic does not pop into existence inside or just ahead of a moving convoy
+//   even when no human is nearby (e.g. AI-led convoy elements).
+missionNamespace setVariable ["civsub_v1_traffic_convoyMinDistance_m", 1050, true];
 missionNamespace setVariable ["civsub_v1_traffic_roadside_offset_m", 4, true];            // shoulder offset baseline
 missionNamespace setVariable ["civsub_v1_traffic_fallback_roadsideMin_m", 8, true];      // fallback: nearest-road shoulder band min
 missionNamespace setVariable ["civsub_v1_traffic_fallback_roadsideMax_m", 20, true];     // fallback: nearest-road shoulder band max
