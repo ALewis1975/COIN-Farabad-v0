@@ -5,6 +5,8 @@
 **Assessment Baseline:** **B-**  
 **Reason for revision:** Fact correction quality was acceptable, but response hygiene and scope control were inconsistent with requested deliverable shape.
 
+> **Status note (2026-05-08):** The forward-roadmap portions of this document are superseded by `docs/architecture/Architecture_Plan_2026-05-08.md`. This file is retained as the historical assessment baseline and governance framing referenced by the new plan (see Architecture Plan §8 for the document-relationship table).
+
 ---
 
 ## 1) Executive assessment (revised)
