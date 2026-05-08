@@ -39,6 +39,33 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | 1 | `origin/main`-confirmation of new findings | BLOCKED | Requires full-history/main fetch in a follow-on hardening pass; this ledger update is branch-local by policy. |
 | 2 | Dedicated/JIP runtime rejection tests | BLOCKED | Requires Arma dedicated + client runtime environment unavailable in this sandbox. |
 | 3 | Mode I remediation for F-AIR-1 / F-CAS-1 / F-LOG-1 / F-MED-1 | DEFERRED | Findings intentionally documented here for follow-on security-hardening implementation PRs. |
+## 2026-05-08 — CIVTRAF moving waypoint road discipline
+
+**Branch/Commit:** copilot/conduct-systems-integration-check-again @ fc21681
+
+**Scenario:** Ambient moving civilian traffic now uses long road-object destinations and forces vehicles to follow roads.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Pre-change compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf initServer.sqf` | PASS | No known parser-compat patterns found before edit. |
+| 2 | Pre-change sqflint | `sqflint -e w functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf initServer.sqf` | BLOCKED | `sqflint` is unavailable in this container (`command not found`). |
+| 3 | Post-change compat scan + whitespace | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf initServer.sqf && git diff --check` | PASS | Changed SQF files remain scanner-clean; diff whitespace check passed. |
+| 4 | Post-change sqflint | `sqflint -e w functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf initServer.sqf` | BLOCKED | `sqflint` is unavailable in this container (`command not found`). |
+| 5 | Post-review compat scan + whitespace | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf initServer.sqf && git diff --check` | PASS | Review fix remains scanner-clean; diff whitespace check passed. |
+| 6 | Post-review sqflint | `sqflint -e w functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf initServer.sqf` | BLOCKED | `sqflint` is unavailable in this container (`command not found`). |
+| 7 | Final review-clarification compat scan + whitespace | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf initServer.sqf && git diff --check` | PASS | Named road target Z and tunable range comments remain scanner-clean; diff whitespace check passed. |
+| 8 | Final review-clarification sqflint | `sqflint -e w functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf initServer.sqf` | BLOCKED | `sqflint` is unavailable in this container (`command not found`). |
+| 9 | Route-refresh tunable compat scan + whitespace | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf initServer.sqf && git diff --check` | PASS | Refresh interval tunables and road target Z explanation remain scanner-clean; diff whitespace check passed. |
+| 10 | Route-refresh tunable sqflint | `sqflint -e w functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf initServer.sqf` | BLOCKED | `sqflint` is unavailable in this container (`command not found`). |
+| 11 | Retry-delay tunable compat scan + whitespace | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf initServer.sqf && git diff --check` | PASS | Retry-delay tunable and clarified routing comments remain scanner-clean; diff whitespace check passed. |
+| 12 | Retry-delay tunable sqflint | `sqflint -e w functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf initServer.sqf` | BLOCKED | `sqflint` is unavailable in this container (`command not found`). |
+| 13 | Bounded candidate scan compat scan + whitespace | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf initServer.sqf && git diff --check` | PASS | Candidate filtering cap and top-level road target Z remain scanner-clean; diff whitespace check passed. |
+| 14 | Bounded candidate scan sqflint | `sqflint -e w functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf initServer.sqf` | BLOCKED | `sqflint` is unavailable in this container (`command not found`). |
+| 15 | Bounded loop compat scan + whitespace | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf initServer.sqf && git diff --check` | PASS | Explicit bounded road candidate loop remains scanner-clean; diff whitespace check passed. |
+| 16 | Bounded loop sqflint | `sqflint -e w functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf initServer.sqf` | BLOCKED | `sqflint` is unavailable in this container (`command not found`). |
+| 17 | Candidate-limit tunable compat scan + whitespace | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf initServer.sqf && git diff --check` | PASS | Configurable road candidate cap remains scanner-clean; diff whitespace check passed. |
+| 18 | Candidate-limit tunable sqflint | `sqflint -e w functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf initServer.sqf` | BLOCKED | `sqflint` is unavailable in this container (`command not found`). |
+| 19 | Live MP behavior | Spawn moving CIVTRAF and observe road-following with ≥1 km destination spacing | BLOCKED | Requires Arma 3 hosted/dedicated MP runtime; sandbox supports static validation only. |
 
 ---
 
@@ -4871,3 +4898,21 @@ Changed `forEach _clearancePending` → `forEach _clearancePendingView` at line 
 |---|-------|--------|--------|
 | 1 | Dedicated server regression test | BLOCKED | Requires dedicated server + active clearance requests |
 | 2 | "Assigned to" display correctness | BLOCKED | View[6]=raw[7]=timestamp shows as number; semantic fix deferred (separate issue) |
+
+---
+
+### T-CIVTRAF-Convoy — Civilian traffic excludes active convoy proximity (2026-05-08)
+
+Branch: `copilot/fix-traffic-spawn-issues`
+Mode: A (Bug Fix)
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | `civsub_v1_traffic_convoyMinDistance_m` declared in `initServer.sqf` (default 1050) | `grep convoyMinDistance_m initServer.sqf` | PASS | New tunable added next to `playerMinDistance_m` |
+| 2 | Moving spawn rejects positions within convoy distance (uses `ARC_activeConvoyNetIds` → `objectFromNetId`) | `grep -n convoyTooNear functions/civsub/fn_civsubTrafficSpawnMoving.sqf` | PASS | New `lastMovingSpawnFail = "convoyTooNear"` reason wired |
+| 3 | Player-near + convoy-near checks restructured so `exitWith` operates at function scope (was nested in `then` block, did not return early) | View `functions/civsub/fn_civsubTrafficSpawnMoving.sqf` lines 72–104 | PASS | Pre-existing latent bug in player gate fixed by lifting `if (_nearP) exitWith {...}` to top-level scope |
+| 4 | Parked spawn loop rejects candidates within convoy distance, increments `_fail_convoyNear`, logged in `[CIVTRAF][SPAWN_FAIL]` | `grep -n _fail_convoyNear functions/civsub/fn_civsubTrafficSpawnParked.sqf` | PASS | Counter declared, incremented, included in debug log |
+| 5 | sqflint compat scan on changed files | `python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf functions/civsub/fn_civsubTrafficSpawnParked.sqf` | PASS | 0 violations |
+| 6 | sqflint warnings | `sqflint -e w <changed files>` | BLOCKED | sqflint binary not available in this environment |
+| 7 | Local MP smoke: no civilian vehicle spawns within 1050 m of any active convoy vehicle while convoy is en route | Hosted/local MP run | BLOCKED | Requires Arma 3 runtime |
+| 8 | Dedicated server + JIP: same exclusion holds for late-joiners and across convoy task hand-offs | Dedicated server run | BLOCKED | Requires dedicated server rig |

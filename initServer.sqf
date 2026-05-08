@@ -314,6 +314,11 @@ missionNamespace setVariable ["ARC_airbase_dynamic_radius_m", 1600, true];
 missionNamespace setVariable ["civsub_v1_traffic_minSeparation_m", 35, true];
 missionNamespace setVariable ["civsub_v1_traffic_spawnRadius_m", 1400, true];
 missionNamespace setVariable ["civsub_v1_traffic_playerMinDistance_m", 1050, true];
+// convoyMinDistance_m: hard minimum distance from any active convoy vehicle (tagged
+//   ARC_isConvoyVeh and tracked in ARC_activeConvoyNetIds). Mirrors playerMinDistance
+//   so traffic does not pop into existence inside or just ahead of a moving convoy
+//   even when no human is nearby (e.g. AI-led convoy elements).
+missionNamespace setVariable ["civsub_v1_traffic_convoyMinDistance_m", 1050, true];
 missionNamespace setVariable ["civsub_v1_traffic_roadside_offset_m", 4, true];            // shoulder offset baseline
 missionNamespace setVariable ["civsub_v1_traffic_fallback_roadsideMin_m", 8, true];      // fallback: nearest-road shoulder band min
 missionNamespace setVariable ["civsub_v1_traffic_fallback_roadsideMax_m", 20, true];     // fallback: nearest-road shoulder band max
@@ -420,6 +425,17 @@ missionNamespace setVariable ["civsub_v1_traffic_cap_moving_global", 6, true];
 missionNamespace setVariable ["civsub_v1_traffic_prob_moving", 0.40, true];
 missionNamespace setVariable ["civsub_v1_traffic_moving_spawnMaxDistrictAttempts", 3, true];
 missionNamespace setVariable ["civsub_v1_traffic_moving_maxSpeed", 35, true];
+// Moving waypoint distances: min clamps to 1000-3000m; search clamps to min+100..4000m.
+// The 100m gap prevents near-duplicate road picks; 4000m upper bound preserves district locality.
+// Search radius must exceed minimum distance so the road-distance filter can produce candidates.
+missionNamespace setVariable ["civsub_v1_traffic_moving_waypointMinDistance_m", 1000, true];
+missionNamespace setVariable ["civsub_v1_traffic_moving_waypointSearchRadius_m", 1800, true];
+// Moving route candidate cap clamps to 4-40 road objects per vehicle route refresh.
+missionNamespace setVariable ["civsub_v1_traffic_moving_waypointCandidateLimit", 15, true];
+// Moving route refresh: retry clamps to 10-120s; base clamps to 30-600s; jitter clamps to 0-300s.
+missionNamespace setVariable ["civsub_v1_traffic_moving_waypointRetryDelay_s", 30, true];
+missionNamespace setVariable ["civsub_v1_traffic_moving_waypointRefreshBase_s", 90, true];
+missionNamespace setVariable ["civsub_v1_traffic_moving_waypointRefreshJitter_s", 60, true];
 missionNamespace setVariable ["civsub_v1_traffic_driverClass", "C_man_1", true];
 
 // Moving spawn diagnostics (cumulative counters)
