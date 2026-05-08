@@ -389,6 +389,14 @@ if (_allowMoving) then
     missionNamespace setVariable ["civsub_v1_traffic_dbg_moving_spawnFail_playerTooNear", _spawnPlayerNear, false];
     missionNamespace setVariable ["civsub_v1_traffic_dbg_moving_spawnFail_createFail", _spawnCreateFail, false];
 
+    private _wpMin = missionNamespace getVariable ["civsub_v1_traffic_moving_waypointMinDistance_m", 1000];
+    if (!(_wpMin isEqualType 0)) then { _wpMin = 1000; };
+    _wpMin = (_wpMin max 1000) min 3000;
+
+    private _wpSearch = missionNamespace getVariable ["civsub_v1_traffic_moving_waypointSearchRadius_m", 1800];
+    if (!(_wpSearch isEqualType 0)) then { _wpSearch = 1800; };
+    _wpSearch = (_wpSearch max (_wpMin + 100)) min 4000;
+
     // maintain moving destinations (long road-to-road legs)
     {
         private _veh = _x;
@@ -401,14 +409,6 @@ if (_allowMoving) then
         if (isNull _drv || { !alive _drv }) then { continue; };
 
         private _curPos = getPosATL _veh;
-        private _wpMin = missionNamespace getVariable ["civsub_v1_traffic_moving_waypointMinDistance_m", 1000];
-        if (!(_wpMin isEqualType 0)) then { _wpMin = 1000; };
-        _wpMin = (_wpMin max 1000) min 3000;
-
-        private _wpSearch = missionNamespace getVariable ["civsub_v1_traffic_moving_waypointSearchRadius_m", 1800];
-        if (!(_wpSearch isEqualType 0)) then { _wpSearch = 1800; };
-        _wpSearch = (_wpSearch max (_wpMin + 100)) min 4000;
-
         private _roads = _curPos nearRoads _wpSearch;
         if ((count _roads) == 0) then
         {
@@ -434,6 +434,7 @@ if (_allowMoving) then
 
         private _r = selectRandom _candidates;
         private _destPos = getPosATL _r;
+        // Normalize road-object ATL for doMove/replicated debug state.
         _destPos set [2, 0];
 
         _veh forceFollowRoad true;
