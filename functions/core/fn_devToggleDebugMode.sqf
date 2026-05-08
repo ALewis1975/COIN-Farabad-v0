@@ -28,16 +28,15 @@ params [
 private _isRemoteRpc = !isNil "remoteExecutedOwner";
 private _reoOwner = if (_isRemoteRpc) then { remoteExecutedOwner } else { -1 };
 
-private _requestor = _requester;
-if (_isRemoteRpc && { isNull _requestor } && { _reoOwner > 0 }) then
+// If the client did not pass its player object (or passed objNull), resolve it
+// from the remote owner so downstream sender validation and role checks can run.
+if (_isRemoteRpc && { isNull _requester } && { _reoOwner > 0 }) then
 {
-    { if (owner _x == _reoOwner) exitWith { _requestor = _x; }; } forEach allPlayers;
+    { if (owner _x == _reoOwner) exitWith { _requester = _x; }; } forEach allPlayers;
 };
 
-if (_isRemoteRpc) then { _requester = _requestor; };
-
 private _senderOk = if (_isRemoteRpc) then {
-    [_requestor, "ARC_fnc_devToggleDebugMode", "Debug toggle denied: sender verification failed.", "DEBUG_TOGGLE_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender
+    [_requester, "ARC_fnc_devToggleDebugMode", "Debug toggle denied: sender verification failed.", "DEBUG_TOGGLE_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender
 } else { true };
 if (!_senderOk) exitWith
 {
@@ -46,15 +45,15 @@ if (!_senderOk) exitWith
 };
 
 private _authOk = if (_isRemoteRpc) then {
-    private _isOmni = [_requestor, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
-    _isOmni || { [_requestor] call ARC_fnc_rolesCanApproveQueue }
+    private _isOmni = [_requester, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
+    _isOmni || { [_requester] call ARC_fnc_rolesCanApproveQueue }
 } else { true };
 if (!_authOk) exitWith
 {
     diag_log format ["[ARC][SEC] ARC_fnc_devToggleDebugMode: DEBUG_TOGGLE_DENIED unauthorized caller owner=%1 uid=%2 name=%3",
         _reoOwner,
-        if (isNull _requestor) then { "" } else { getPlayerUID _requestor },
-        if (isNull _requestor) then { "unknown" } else { name _requestor }
+        if (isNull _requester) then { "" } else { getPlayerUID _requester },
+        if (isNull _requester) then { "unknown" } else { name _requester }
     ];
     if (_reoOwner > 0) then
     {
