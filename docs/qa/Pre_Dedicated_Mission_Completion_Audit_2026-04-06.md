@@ -40,9 +40,11 @@ Use these as the primary definition of intended system scope:
 
 ### Planning / execution control docs
 
-- `/home/runner/work/COIN-Farabad-v0/COIN-Farabad-v0/docs/architecture/Architecture_and_Readiness_Plan.md`
+- `/home/runner/work/COIN-Farabad-v0/COIN-Farabad-v0/docs/architecture/Architecture_Plan_2026-05-08.md` (**active forward roadmap**)
+- `/home/runner/work/COIN-Farabad-v0/COIN-Farabad-v0/docs/architecture/Architecture_and_Readiness_Plan.md` (historical assessment baseline)
 - `/home/runner/work/COIN-Farabad-v0/COIN-Farabad-v0/docs/planning/Task_Decomposition.md`
 - `/home/runner/work/COIN-Farabad-v0/COIN-Farabad-v0/docs/qa/Development_State_Assessment_2026-04-04.md`
+- `/home/runner/work/COIN-Farabad-v0/COIN-Farabad-v0/docs/security/RemoteExec_Endpoint_Audit_Matrix.md` (Phase 1 audit ledger)
 
 This audit supersedes mixed “what is left?” reasoning spread across those documents by collapsing it into one subsystem board.
 

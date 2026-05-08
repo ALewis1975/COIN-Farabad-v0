@@ -349,9 +349,11 @@ COIN-Farabad-v0/
 - `tests/TEST-LOG.md` — Canonical validation log
 
 **Architecture & Planning:**
-- `docs/architecture/Architecture_and_Readiness_Plan.md` — System map, authority model, findings, and 4-phase forward plan
+- `docs/architecture/Architecture_Plan_2026-05-08.md` — **Active architecture plan** (target architecture, ownership boundaries, 6-phase roadmap)
+- `docs/architecture/Architecture_and_Readiness_Plan.md` — Historical assessment baseline and governance framing
 - `docs/planning/Task_Decomposition.md` — PR-sized work packages with dependency graph and acceptance criteria
 - `docs/security/RemoteExec_Hardening_Plan.md` — RPC endpoint inventory and allowlist policy
+- `docs/security/RemoteExec_Endpoint_Audit_Matrix.md` — Live RPC endpoint audit ledger (Phase 1)
 
 ### Marker Index
 
