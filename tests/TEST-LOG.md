@@ -11,6 +11,34 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-08 — Wave 3-T2 RemoteExec audit batch 3 (CASREQ/Airbase + Logistics/Medical/CASEVAC)
+
+**Branch/Commit:** copilot/implement-next-batch-of-updates @ HEAD
+
+**Scenario:** Implement the next batch from the most recent decomposition plan by completing Wave 3-T2 in the RemoteExec audit ledger (CASREQ/Airbase + Logistics/Medical/CASEVAC).
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `docs/security/RemoteExec_Endpoint_Audit_Matrix.md` | Bumped to v1.3; completed §3.5 S4/S5 verification for all Airbase/TOWER rows; added §3.6 CASREQ/Logistics/Medical/CASEVAC endpoint ledger; added §6.4 findings (F-AIR-1, F-CAS-1, F-LOG-1, F-MED-1). |
+| `docs/architecture/Architecture_Plan_2026-05-08.md` | Added v1.3 change-log entry documenting Wave 3-T2 completion. |
+
+### Static checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Whitespace / patch sanity | `git --no-pager diff --check` | PASS | No whitespace or conflict markers. |
+| 2 | Wave 3-T2 coverage spot-check | `rg -n "### 3.5 Airbase / TOWER endpoints|### 3.6 CASREQ / Logistics / Medical / CASEVAC endpoints|### 6.4 Airbase / CASREQ / Logistics / Medical findings|### v1.3 — 2026-05-08" docs/security/RemoteExec_Endpoint_Audit_Matrix.md docs/architecture/Architecture_Plan_2026-05-08.md` | PASS | Expected new sections and version bump present. |
+| 3 | sqflint compat | n/a | n/a | Mode F PR — no SQF changed. |
+
+### Deferred / BLOCKED
+
+| # | Check | Status | Reason |
+|---|-------|--------|--------|
+| 1 | `origin/main`-confirmation of new findings | BLOCKED | Requires full-history/main fetch in a follow-on hardening pass; this ledger update is branch-local by policy. |
+| 2 | Dedicated/JIP runtime rejection tests | BLOCKED | Requires Arma dedicated + client runtime environment unavailable in this sandbox. |
+| 3 | Mode I remediation for F-AIR-1 / F-CAS-1 / F-LOG-1 / F-MED-1 | DEFERRED | Findings intentionally documented here for follow-on security-hardening implementation PRs. |
 ## 2026-05-08 — CIVTRAF moving waypoint road discipline
 
 **Branch/Commit:** copilot/conduct-systems-integration-check-again @ fc21681

@@ -337,6 +337,13 @@ Process:
 
 ## Change log
 
+### v1.3 — 2026-05-08
+- Wave 3-T2 deliverable landed (next-wave Mode F batch continuation):
+  - `docs/security/RemoteExec_Endpoint_Audit_Matrix.md` v1.3 — completed audit batch 3 for CASREQ/Airbase + Logistics/Medical/CASEVAC endpoint set.
+  - §3.5 S4/S5 statuses for all Airbase/TOWER client→server endpoints are now explicit.
+  - New §3.6 endpoint group added for CASREQ + Logistics/Medical/CASEVAC with four new findings (F-AIR-1, F-CAS-1, F-LOG-1, F-MED-1).
+- No phase / scope / non-goal changes.
+
 ### v1.2 — 2026-05-08
 - Wave 3-T1 / Wave 4-T1 / Wave 7-T1 deliverables landed (next-wave Mode F batch):
   - `docs/security/RemoteExec_Endpoint_Audit_Matrix.md` v1.2 — §3.3 Objective / IED / VBIED endpoints audited (S0–S5). Three new findings (F-IED-1..3).
