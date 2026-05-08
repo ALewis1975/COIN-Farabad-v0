@@ -76,12 +76,14 @@ Audited 2026-05-08 against current head. Most use `ARC_fnc_rpcValidateSender` + 
 
 ### 3.3 Objective / IED / VBIED endpoints
 
+Audited 2026-05-08 against current head (Wave 3 / batch 2). Two objective endpoints (`execObjectiveComplete`, `iedCollectEvidence`) implement the inline `remoteExecutedOwner` vs `owner _caller` pattern with structured `[ARC][SEC]` rejection logging. The two server-detonate endpoints log the remote-owner but do **not** validate or reject — they rely on incident-state idempotency, not sender authority. See §6.3 for findings.
+
 | Endpoint | S0 | S1 | S2 | S3 | S4 | S5 | JIP | Last verified | Notes |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|---|---|
-| `ARC_fnc_execObjectiveComplete` | ? | ? | ? | n/a | ? | ? | 0 | | |
-| `ARC_fnc_iedCollectEvidence` | ? | ? | ? | n/a | ? | ? | 0 | | |
-| `ARC_fnc_iedServerDetonate` | ? | ? | ? | ? | ? | ? | 0 | | EOD authority required. |
-| `ARC_fnc_vbiedServerDetonate` | ? | ? | ? | ? | ? | ? | 0 | | EOD authority required. |
+| `ARC_fnc_execObjectiveComplete` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | Sender-owner match; `isPlayer _caller` gate; active-task / objective-match invariants; no rate-limit. |
+| `ARC_fnc_iedCollectEvidence` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | Sender-owner match (when `_collector` provided); netId resolves and not-already-collected invariants; no rate-limit. |
+| `ARC_fnc_iedServerDetonate` | ✅ | ❌ | ✅ | ❌ | ✅ | ⚠️ | 0 | 2026-05-08 | **No sender validation, no EOD role gate** (F-IED-1). State-guarded against double-fire (`activeIedDetonationHandled`). Logs remote-owner only. |
+| `ARC_fnc_vbiedServerDetonate` | ✅ | ❌ | ✅ | ❌ | ✅ | ⚠️ | 0 | 2026-05-08 | **No sender validation, no EOD role gate** (F-IED-2). State-guarded by `activeVbiedDetonated` / `activeVbiedSafe`. Logs remote-owner only. |
 
 ### 3.4 Intel / order / TOC endpoints
 
@@ -211,6 +213,14 @@ These findings were recorded by the 2026-05-08 audit pass (Wave 1, batch 1). Eac
 | F-DEV-2 | `ARC_fnc_uiCoverageAuditServer` | S1, S3 | P2 | Logs `remoteExecutedOwner` only — does not validate or reject. No role gate. Writes `ARC_uiCoverageMap` with `publicVariable true`. Content is static, but the side effect is global. | Add sender validation + admin role gate; or remove the endpoint from `CfgRemoteExec` allowlist and call it server-side only. |
 | F-DEV-3 | `ARC_fnc_devDiagnosticsSnapshot`, `ARC_fnc_uiConsoleQAAuditServer` | S5 | P3 | Read-only audit endpoints have no debounce. Approver-gated, so risk is low; consider matching the 15s debounce already used by `devCompileAuditServer` for consistency. | Add 15s debounce keyed on requester UID. |
 
+### 6.3 Objective / IED / VBIED findings
+
+| ID | Endpoint(s) | Check | Severity | Description | Remediation |
+|---|---|:---:|:---:|---|---|
+| F-IED-1 | `ARC_fnc_iedServerDetonate` | S1, S3 | P1 | Function logs `remoteExecutedOwner` but does not validate or reject; there is no EOD role gate. The endpoint deletes the IED prop, deletes the trigger, creates a `Bo_Mk82` explosion at the active objective position, and marks `activeIedTriggerEnabled=false`. State guard (`activeIedDetonationHandled`) prevents double-fire but does not constrain who initiates the first fire. Trigger collision in normal play makes this low-impact in steady state, but the RPC is callable from any allowlisted client. | Add `ARC_fnc_rpcValidateSender` (or inline owner-match) + reject when caller is not the proximity-trigger source. Confirm only the proximity trigger / EOD pathway can invoke this. Add `[ARC][SEC] IED_SERVER_DETONATE_DENIED` log on rejection. Consider removing from `CfgRemoteExec` allowlist if the trigger is server-spawned (no remote caller required). |
+| F-IED-2 | `ARC_fnc_vbiedServerDetonate` | S1, S3 | P1 | Same shape as F-IED-1: remote-owner logged but not validated; no role gate. Same idempotency guards (`activeVbiedDetonated`, `activeVbiedSafe`). | Same remediation as F-IED-1. If the only legitimate caller is the in-world VBIED proximity trigger, prefer removing from `CfgRemoteExec` allowlist over adding a role check. |
+| F-IED-3 | `ARC_fnc_execObjectiveComplete`, `ARC_fnc_iedCollectEvidence` | S5 | P2 | Sender-validated and state-validated, but no per-actor rate-limit. A misbehaving client can replay the call rapidly until idempotency kicks in. | Add a per-owner cooldown (≥1s) keyed on `getPlayerUID _caller` / `_collector`; rejection logged once per cooldown window. |
+
 Each finding above is the seed for a Mode I PR. Open issues / PRs must reference the finding ID (F-CIV-#, F-DEV-#) and update this section to `RESOLVED` with the merge SHA when remediation lands.
 
 ---
@@ -224,6 +234,11 @@ Each finding above is the seed for a Mode I PR. Open issues / PRs must reference
 ---
 
 ## Change log
+
+### v1.2 — 2026-05-08
+- Wave 3 / batch 2 audit pass: §3.3 (Objective / IED / VBIED) populated with verified S0–S5 status against current head.
+- Added §6.3 (Objective / IED / VBIED findings) capturing three open remediation items (F-IED-1..3). F-IED-1 / F-IED-2 are P1 Mode I follow-ons; F-IED-3 is a P2 rate-limit gap shared with `execObjectiveComplete` and `iedCollectEvidence`.
+- Truth-status: branch-local. Findings derived from current cloned working branch; not yet `origin/main`-confirmed per `Farabad_Source_of_Truth_and_Workflow_Spec.md`.
 
 ### v1.1 — 2026-05-08
 - Wave 1 / batch 1 audit pass: CIVSUB endpoints (§3.1) and dev/admin endpoints (§3.2) populated with verified S0–S5 status.
