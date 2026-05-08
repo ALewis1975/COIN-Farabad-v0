@@ -405,7 +405,11 @@ if (_allowMoving) then
     if (!(_wpRefreshJitter isEqualType 0)) then { _wpRefreshJitter = 60; };
     _wpRefreshJitter = (_wpRefreshJitter max 0) min 300;
 
-    // Road objects can report non-zero ATL; doMove targets are normalized to ground level.
+    private _wpRetryDelay = missionNamespace getVariable ["civsub_v1_traffic_moving_waypointRetryDelay_s", 30];
+    if (!(_wpRetryDelay isEqualType 0)) then { _wpRetryDelay = 30; };
+    _wpRetryDelay = (_wpRetryDelay max 10) min 120;
+
+    // Road objects can report non-zero ATL; ground-level targets avoid vehicle path-finding issues.
     private _roadTargetZ = 0;
 
     // maintain moving destinations (long road-to-road legs)
@@ -423,7 +427,7 @@ if (_allowMoving) then
         private _roads = _curPos nearRoads _wpSearch;
         if ((count _roads) == 0) then
         {
-            _veh setVariable ["ARC_civtraf_nextMoveTs", serverTime + 30, true];
+            _veh setVariable ["ARC_civtraf_nextMoveTs", serverTime + _wpRetryDelay, true];
             continue;
         };
 
@@ -439,7 +443,7 @@ if (_allowMoving) then
 
         if ((count _candidates) == 0) then
         {
-            _veh setVariable ["ARC_civtraf_nextMoveTs", serverTime + 30, true];
+            _veh setVariable ["ARC_civtraf_nextMoveTs", serverTime + _wpRetryDelay, true];
             continue;
         };
 

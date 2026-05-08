@@ -29,7 +29,9 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | 8 | Final review-clarification sqflint | `sqflint -e w functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf initServer.sqf` | BLOCKED | `sqflint` is unavailable in this container (`command not found`). |
 | 9 | Route-refresh tunable compat scan + whitespace | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf initServer.sqf && git diff --check` | PASS | Refresh interval tunables and road target Z explanation remain scanner-clean; diff whitespace check passed. |
 | 10 | Route-refresh tunable sqflint | `sqflint -e w functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf initServer.sqf` | BLOCKED | `sqflint` is unavailable in this container (`command not found`). |
-| 11 | Live MP behavior | Spawn moving CIVTRAF and observe road-following with ≥1 km destination spacing | BLOCKED | Requires Arma 3 hosted/dedicated MP runtime; sandbox supports static validation only. |
+| 11 | Retry-delay tunable compat scan + whitespace | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf initServer.sqf && git diff --check` | PASS | Retry-delay tunable and clarified routing comments remain scanner-clean; diff whitespace check passed. |
+| 12 | Retry-delay tunable sqflint | `sqflint -e w functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf initServer.sqf` | BLOCKED | `sqflint` is unavailable in this container (`command not found`). |
+| 13 | Live MP behavior | Spawn moving CIVTRAF and observe road-following with ≥1 km destination spacing | BLOCKED | Requires Arma 3 hosted/dedicated MP runtime; sandbox supports static validation only. |
 
 ---
 
