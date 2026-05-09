@@ -311,13 +311,13 @@ switch (_type) do
         private _leadType = "";
         if (_leadRec isEqualType [] && { (count _leadRec) >= 4 }) then
         {
-            private _dn = _leadRec # 2;
+            private _dn = _leadRec select 2;
             if (_dn isEqualType "" && { _dn isNotEqualTo "" }) then { _leadName = _dn; };
 
-            private _p = _leadRec # 3;
+            private _p = _leadRec select 3;
             if (_p isEqualType [] && { (count _p) >= 2 }) then { _leadPos = _p; };
 
-            private _lt = _leadRec # 1;
+            private _lt = _leadRec select 1;
             if (_lt isEqualType "") then { _leadType = toUpper (trim _lt); };
         };
 

@@ -210,20 +210,20 @@ if (_rebuild) then
     {
         if (_x isEqualType [] && { (count _x) >= 6 }) then
         {
-            private _oSt = toUpper (trim (_x # 2));
-            private _oTy = toUpper (trim (_x # 3));
-            private _oTg = _x # 4;
+            private _oSt = toUpper (trim (_x select 2));
+            private _oTy = toUpper (trim (_x select 3));
+            private _oTg = _x select 4;
             if (!(_oTg isEqualType "")) then { _oTg = ""; };
             if (_oTy isEqualTo "LEAD" && { _oSt in ["ISSUED","ACCEPTED"] }) then
             {
-                private _oData = _x # 5;
+                private _oData = _x select 5;
                 if (_oData isEqualType []) then
                 {
                     private _embeddedId = "";
                     {
-                        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo "leadId" }) exitWith
+                        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo "leadId" }) exitWith
                         {
-                            if ((_x # 1) isEqualType "") then { _embeddedId = _x # 1; };
+                            if ((_x select 1) isEqualType "") then { _embeddedId = _x select 1; };
                         };
                     } forEach _oData;
                     if (_embeddedId isNotEqualTo "") then
@@ -245,17 +245,17 @@ if (_rebuild) then
         {
             private _lead = _x;
             if (!(_lead isEqualType []) || { (count _lead) < 4 }) then { continue };
-            private _id = _lead # 0;
-            private _typ = toUpper (trim (_lead # 1));
-            private _name = _lead # 2;
+            private _id = _lead select 0;
+            private _typ = toUpper (trim (_lead select 1));
+            private _name = _lead select 2;
             if (!(_name isEqualType "")) then { _name = "Lead"; };
 
             // UX-02: TTL + strength badge.
-            private _strength = if ((count _lead) >= 5) then { _lead # 4 } else { 0.5 };
+            private _strength = if ((count _lead) >= 5) then { _lead select 4 } else { 0.5 };
             if (!(_strength isEqualType 0)) then { _strength = 0.5; };
             _strength = (_strength max 0) min 1;
 
-            private _expiresAt = if ((count _lead) >= 7) then { _lead # 6 } else { -1 };
+            private _expiresAt = if ((count _lead) >= 7) then { _lead select 6 } else { -1 };
             if (!(_expiresAt isEqualType 0)) then { _expiresAt = -1; };
             private _ttlMin = -1;
             if (_expiresAt > 0) then { _ttlMin = floor ((_expiresAt - serverTime) / 60); };
@@ -267,10 +267,10 @@ if (_rebuild) then
             // makes the lead's order state visible without a context switch.
             private _assignTag = "";
             {
-                if (_x isEqualType [] && { (count _x) >= 3 } && { (_x # 0) isEqualTo _id }) exitWith
+                if (_x isEqualType [] && { (count _x) >= 3 } && { (_x select 0) isEqualTo _id }) exitWith
                 {
-                    private _aSt = _x # 1;
-                    private _aGrp = _x # 2;
+                    private _aSt = _x select 1;
+                    private _aGrp = _x select 2;
                     private _grpStr = if ((_aGrp isEqualType "") && { _aGrp isNotEqualTo "" }) then { format [" → %1", _aGrp] } else { "" };
                     _assignTag = switch (_aSt) do
                     {
