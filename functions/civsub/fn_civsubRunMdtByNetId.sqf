@@ -38,6 +38,22 @@ if (!isNil "remoteExecutedOwner") then
     };
 };
 
+// S3: TOC/S2/Command role gate — MDT crime DB is a privileged TOC tool.
+// Server-internal invocations (no remoteExecutedOwner) bypass; only allowlisted
+// remote calls require the role check.
+if (!isNil "remoteExecutedOwner" && { remoteExecutedOwner > 0 }) then
+{
+    private _isS2 = [_actor] call ARC_fnc_rolesIsTocS2;
+    private _canApprove = [_actor] call ARC_fnc_rolesCanApproveQueue;
+    if (!(_isS2 || _canApprove)) exitWith
+    {
+        diag_log format ["[CIVSUB][SEC] ARC_fnc_civsubRunMdtByNetId: MDT_RUN_DENIED unauthorized caller owner=%1 name=%2 uid=%3 netId=%4",
+            remoteExecutedOwner, name _actor, getPlayerUID _actor, _netId];
+        ["CIVSUB: MDT access denied — TOC role required.", "CHAT"] remoteExecCall ["ARC_fnc_civsubClientMessage", _actor];
+        false
+    };
+};
+
 private _civ = objectFromNetId _netId;
 if (isNull _civ) exitWith {
     ["CIVSUB: No target (ID no longer valid).", "CHAT"] remoteExecCall ["ARC_fnc_civsubClientMessage", _actor];

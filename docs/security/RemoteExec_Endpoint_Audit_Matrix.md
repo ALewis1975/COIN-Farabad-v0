@@ -60,7 +60,7 @@ Audited 2026-05-08 against current head. CIVSUB endpoints share an inline owner-
 | `ARC_fnc_civsubInteractOrderStop` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | UID populated; **no `civsub_v1_enabled` gate** (F-CIV-1). |
 | `ARC_fnc_civsubInteractRelease` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | Requires civ districtId + civUid; no rate-limit. |
 | `ARC_fnc_civsubInteractShowPapers` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | Probabilistic cooperation gate; no rate-limit. |
-| `ARC_fnc_civsubRunMdtByNetId` | ✅ | ✅ | ✅ | ❌ | ⚠️ | ⚠️ | 0 | 2026-05-08 | **TOC role gate missing** (F-CIV-2). Delegates to checkPapers without role check. |
+| `ARC_fnc_civsubRunMdtByNetId` | ✅ | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | 0 | 2026-05-09 | TOC role gate added (F-CIV-2 RESOLVED): rejects callers that fail `rolesIsTocS2 \|\| rolesCanApproveQueue` with `[CIVSUB][SEC] MDT_RUN_DENIED` + client toast. |
 
 ### 3.2 Dev / admin endpoints
 
@@ -70,7 +70,7 @@ Audited 2026-05-08 against current head. Most use `ARC_fnc_rpcValidateSender` + 
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|---|---|
 | `ARC_fnc_devCompileAuditServer` | ✅ | ✅ | ✅ | ✅ | n/a | ✅ | 0 | 2026-05-08 | 15s debounce; OMNI/approver gate via `rpcValidateSender`. |
 | `ARC_fnc_devDiagnosticsSnapshot` | ✅ | ✅ | ✅ | ✅ | n/a | ⚠️ | 0 | 2026-05-08 | Read-only; OMNI/approver gate; no rate-limit. |
-| `ARC_fnc_devToggleDebugMode` | ✅ | ❌ | ✅ | ❌ | n/a | ⚠️ | 0 | 2026-05-08 | **No sender validation, no role gate** (F-DEV-1). Toggles seven global debug flags + log level via `publicVariable true`. Privileged. |
+| `ARC_fnc_devToggleDebugMode` | ✅ | ✅ | ✅ | ✅ | n/a | ⚠️ | 0 | 2026-05-09 | Sender validation + `OMNI \|\| canApproveQueue` role gate added (F-DEV-1 RESOLVED); rejects with `[ARC][SEC] DEBUG_TOGGLE_DENIED`. |
 | `ARC_fnc_uiConsoleQAAuditServer` | ✅ | ✅ | ✅ | ✅ | n/a | ⚠️ | 0 | 2026-05-08 | Read-only; OMNI/approver gate; no rate-limit. |
 | `ARC_fnc_uiCoverageAuditServer` | ✅ | ⚠️ | n/a | ❌ | n/a | ⚠️ | 0 | 2026-05-08 | **No sender validation enforcement, no role gate** (F-DEV-2). Logs remote owner only. Writes `ARC_uiCoverageMap` (`publicVariable true`). Static content, but allowlisted from clients. |
 
@@ -82,8 +82,8 @@ Audited 2026-05-08 against current head (Wave 3 / batch 2). Two objective endpoi
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|---|---|
 | `ARC_fnc_execObjectiveComplete` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | Sender-owner match; `isPlayer _caller` gate; active-task / objective-match invariants; no rate-limit. |
 | `ARC_fnc_iedCollectEvidence` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | Sender-owner match (when `_collector` provided); netId resolves and not-already-collected invariants; no rate-limit. |
-| `ARC_fnc_iedServerDetonate` | ✅ | ❌ | ✅ | ❌ | ✅ | ⚠️ | 0 | 2026-05-08 | **No sender validation, no EOD role gate** (F-IED-1). State-guarded against double-fire (`activeIedDetonationHandled`). Logs remote-owner only. |
-| `ARC_fnc_vbiedServerDetonate` | ✅ | ❌ | ✅ | ❌ | ✅ | ⚠️ | 0 | 2026-05-08 | **No sender validation, no EOD role gate** (F-IED-2). State-guarded by `activeVbiedDetonated` / `activeVbiedSafe`. Logs remote-owner only. |
+| `ARC_fnc_iedServerDetonate` | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ | 0 | 2026-05-09 | F-IED-1 RESOLVED: client-driven calls (`remoteExecutedOwner > 0`) now require a TOC EOD `DET_IN_PLACE` approval in `ARC_pub_eodDispoApprovals` for the active task; rejects with `[ARC][SEC] IED_DETONATE_DENIED`. Server-internal trigger and tick paths (no `remoteExecutedOwner`) bypass the gate. State guard (`activeIedDetonationHandled`) preserved. |
+| `ARC_fnc_vbiedServerDetonate` | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ | 0 | 2026-05-09 | F-IED-2 RESOLVED: same EOD-approval gate for client-driven calls; rejects with `[ARC][SEC] VBIED_DETONATE_DENIED`. Server-internal proximity-tick / driven-spawn paths bypass. State guards (`activeVbiedDetonated`, `activeVbiedSafe`) preserved. |
 
 ### 3.4 Intel / order / TOC endpoints
 
@@ -137,8 +137,8 @@ Audited 2026-05-08 against current head (Wave 3 / batch 3). CASREQ handlers are 
 | `ARC_fnc_casreqDecide` | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ | 0 | 2026-05-08 | Role-gated decision path with OPEN-state invariant. No per-caller cooldown. |
 | `ARC_fnc_casreqExecute` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | APPROVED→EXECUTING invariant; sender-bound. No explicit role gate and no per-caller cooldown. |
 | `ARC_fnc_casreqClose` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | Result/state/index invariants present; sender-bound. No explicit role gate and no per-caller cooldown. |
-| `ARC_fnc_execSpawnConvoy` | ⚠️ | ❌ | ✅ | ❌ | ⚠️ | ⚠️ | 0 | 2026-05-08 | Non-server path relays to server, but server path has no sender validation/role gate (F-LOG-1). |
-| `ARC_fnc_medicalCasevacRequest` | ✅ | ❌ | ✅ | ❌ | ✅ | ✅ | 0 | 2026-05-08 | World-state + cooldown guard is present, but no sender binding/role gate despite allowlisted client→server exposure (F-MED-1). |
+| `ARC_fnc_execSpawnConvoy` | n/a | n/a | n/a | n/a | n/a | n/a | n/a | 2026-05-09 | F-LOG-1 RESOLVED by allowlist removal — `ARC_fnc_execSpawnConvoy` is no longer in `CfgRemoteExec.Functions`; server-internal only. Function body relay path is dormant (engine blocks any client `remoteExec`). |
+| `ARC_fnc_medicalCasevacRequest` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 0 | 2026-05-09 | F-MED-1 RESOLVED: client-driven calls require `owner _unit == remoteExecutedOwner` (ACE incap handler runs on the casualty's machine; sender must own the casualty). Server-internal `medicalOnCasualty` direct call bypasses (no `remoteExecutedOwner`). Rejects with `[ARC][SEC] CASEVAC_DENIED`. |
 
 ---
 
@@ -214,7 +214,7 @@ These findings were recorded by the 2026-05-08 audit passes (Wave 1 + Wave 3 bat
 | ID | Endpoint(s) | Check | Severity | Description | Remediation |
 |---|---|:---:|:---:|---|---|
 | F-CIV-1 | `ARC_fnc_civsubInteractEndSession`, `ARC_fnc_civsubInteractOrderStop` | S4 | P2 | Both endpoints lack the `civsub_v1_enabled` mission-toggle gate that every other CIVSUB endpoint enforces. Side effects are bounded (movement freeze / restore on a CIVSUB-managed civilian) but execution should not proceed when the subsystem is disabled. | Add `if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {false};` after the S0 guard. |
-| F-CIV-2 | `ARC_fnc_civsubRunMdtByNetId` | S3 | P1 | Matrix scaffold notes "TOC role gate required" but the implementation has **no role check** — any authenticated player can run the MDT crime DB pipeline against any civilian by netId. Delegates to `civsubInteractCheckPapers` with `requireCompliance=false`. | Add a TOC/S2 role gate (e.g. `[_actor] call ARC_fnc_rolesCanApproveQueue` or an MDT-specific role check) before delegating. |
+| F-CIV-2 | `ARC_fnc_civsubRunMdtByNetId` | S3 | P1 | **RESOLVED 2026-05-09** (Phase 0 / E1-T2). TOC role gate added: rejects callers that fail `[_actor] call ARC_fnc_rolesIsTocS2 \|\| [_actor] call ARC_fnc_rolesCanApproveQueue`. Logs `[CIVSUB][SEC] MDT_RUN_DENIED` and sends a chat hint to the rejected client. Server-internal callers (no `remoteExecutedOwner`) bypass the gate. | Add a TOC/S2 role gate (e.g. `[_actor] call ARC_fnc_rolesCanApproveQueue` or an MDT-specific role check) before delegating. |
 | F-CIV-3 | All CIVSUB client→server endpoints | S5 | P2 | Inline `remoteExecutedOwner`/`owner _actor` validation pattern is correct but is duplicated in nine functions instead of routing through `ARC_fnc_rpcValidateSender`. Drift risk over time. | Migrate to `ARC_fnc_rpcValidateSender` in a single Mode I PR; preserve `[CIVSUB][SEC]` log prefix via a thin wrapper or pass-through `_event` codes. |
 | F-CIV-4 | All CIVSUB client→server endpoints | S5 | P2 | No per-actor rate-limit / idempotency on dialog-action and snapshot endpoints. A misbehaving client can flood the server. | Add a per-owner cooldown (≥250ms for snapshot; ≥1s for state-mutating actions) keyed on `getPlayerUID _actor`, with rejection logged once per cooldown window. |
 
@@ -222,7 +222,7 @@ These findings were recorded by the 2026-05-08 audit passes (Wave 1 + Wave 3 bat
 
 | ID | Endpoint | Check | Severity | Description | Remediation |
 |---|---|:---:|:---:|---|---|
-| F-DEV-1 | `ARC_fnc_devToggleDebugMode` | S1, S3 | P1 | Globally toggles seven debug flags and `FARABAD_log_minLevel` via `publicVariable true` with no sender validation and no role check. Any client on the allowlist can flip global debug state. | Add `ARC_fnc_rpcValidateSender` call and the same `OMNI \|\| canApproveQueue` gate used by sibling dev/admin endpoints; reject with `[ARC][SEC] DEBUG_TOGGLE_DENIED` log. |
+| F-DEV-1 | `ARC_fnc_devToggleDebugMode` | S1, S3 | P1 | **RESOLVED 2026-05-09** (Phase 0 / E1-T1). Adds `ARC_fnc_rpcValidateSender` call with `requireRemoteContext=true` and the `OMNI \|\| [_requestor] call ARC_fnc_rolesCanApproveQueue` gate used by sibling dev/admin endpoints; rejects with `[ARC][SEC] DEBUG_TOGGLE_DENIED`. Server-internal callers (no `remoteExecutedOwner`) bypass. | Add `ARC_fnc_rpcValidateSender` call and the same `OMNI \|\| canApproveQueue` gate used by sibling dev/admin endpoints; reject with `[ARC][SEC] DEBUG_TOGGLE_DENIED` log. |
 | F-DEV-2 | `ARC_fnc_uiCoverageAuditServer` | S1, S3 | P2 | Logs `remoteExecutedOwner` only — does not validate or reject. No role gate. Writes `ARC_uiCoverageMap` with `publicVariable true`. Content is static, but the side effect is global. | Add sender validation + admin role gate; or remove the endpoint from `CfgRemoteExec` allowlist and call it server-side only. |
 | F-DEV-3 | `ARC_fnc_devDiagnosticsSnapshot`, `ARC_fnc_uiConsoleQAAuditServer` | S5 | P3 | Read-only audit endpoints have no debounce. Approver-gated, so risk is low; consider matching the 15s debounce already used by `devCompileAuditServer` for consistency. | Add 15s debounce keyed on requester UID. |
 
@@ -230,8 +230,8 @@ These findings were recorded by the 2026-05-08 audit passes (Wave 1 + Wave 3 bat
 
 | ID | Endpoint(s) | Check | Severity | Description | Remediation |
 |---|---|:---:|:---:|---|---|
-| F-IED-1 | `ARC_fnc_iedServerDetonate` | S1, S3 | P1 | Function logs `remoteExecutedOwner` but does not validate or reject; there is no EOD role gate. The endpoint deletes the IED prop, deletes the trigger, creates a `Bo_Mk82` explosion at the active objective position, and marks `activeIedTriggerEnabled=false`. State guard (`activeIedDetonationHandled`) prevents double-fire but does not constrain who initiates the first fire. Trigger collision in normal play makes this low-impact in steady state, but the RPC is callable from any allowlisted client. | Add `ARC_fnc_rpcValidateSender` (or inline owner-match) + reject when caller is not the proximity-trigger source. Confirm only the proximity trigger / EOD pathway can invoke this. Add `[ARC][SEC] IED_SERVER_DETONATE_DENIED` log on rejection. Consider removing from `CfgRemoteExec` allowlist if the trigger is server-spawned (no remote caller required). |
-| F-IED-2 | `ARC_fnc_vbiedServerDetonate` | S1, S3 | P1 | Same shape as F-IED-1: remote-owner logged but not validated; no role gate. Same idempotency guards (`activeVbiedDetonated`, `activeVbiedSafe`). | Same remediation as F-IED-1. If the only legitimate caller is the in-world VBIED proximity trigger, prefer removing from `CfgRemoteExec` allowlist over adding a role check. |
+| F-IED-1 | `ARC_fnc_iedServerDetonate` | S1, S3 | P1 | **RESOLVED 2026-05-09** (Phase 0 / E1-T3). Client-driven invocations (`remoteExecutedOwner > 0`) now require a matching TOC EOD `DET_IN_PLACE` approval entry in `ARC_pub_eodDispoApprovals` for the active task; otherwise rejected with `[ARC][SEC] IED_DETONATE_DENIED`. Server-internal trigger and tick paths (no `remoteExecutedOwner`) bypass the gate. State guard (`activeIedDetonationHandled`) preserved. | Add `ARC_fnc_rpcValidateSender` (or inline owner-match) + reject when caller is not the proximity-trigger source. Confirm only the proximity trigger / EOD pathway can invoke this. Add `[ARC][SEC] IED_SERVER_DETONATE_DENIED` log on rejection. Consider removing from `CfgRemoteExec` allowlist if the trigger is server-spawned (no remote caller required). |
+| F-IED-2 | `ARC_fnc_vbiedServerDetonate` | S1, S3 | P1 | **RESOLVED 2026-05-09** (Phase 0 / E1-T3). Same EOD-approval gate as F-IED-1; rejects with `[ARC][SEC] VBIED_DETONATE_DENIED`. Server-internal proximity-tick / driven-spawn paths bypass. | Same remediation as F-IED-1. If the only legitimate caller is the in-world VBIED proximity trigger, prefer removing from `CfgRemoteExec` allowlist over adding a role check. |
 | F-IED-3 | `ARC_fnc_execObjectiveComplete`, `ARC_fnc_iedCollectEvidence` | S5 | P2 | Sender-validated and state-validated, but no per-actor rate-limit. A misbehaving client can replay the call rapidly until idempotency kicks in. | Add a per-owner cooldown (≥1s) keyed on `getPlayerUID _caller` / `_collector`; rejection logged once per cooldown window. |
 
 ### 6.4 Airbase / CASREQ / Logistics / Medical findings
@@ -240,8 +240,8 @@ These findings were recorded by the 2026-05-08 audit passes (Wave 1 + Wave 3 bat
 |---|---|:---:|:---:|---|---|
 | F-AIR-1 | `ARC_fnc_airbaseSubmitClearanceRequest`, `ARC_fnc_airbaseRequestClearanceDecision`, `ARC_fnc_airbaseRequestPrioritizeFlight`, `ARC_fnc_airbaseCancelClearanceRequest`, `ARC_fnc_airbaseRequestCancelQueuedFlight`, `ARC_fnc_airbaseMarkClearanceEmergency`, `ARC_fnc_airbaseRequestSetLaneStaffing`, `ARC_fnc_airbaseRequestHoldDepartures`, `ARC_fnc_airbaseRequestReleaseDepartures`, `ARC_fnc_tocRequestAirbaseResetControlState` | S5 | P2 | All 10 Airbase/TOWER client→server endpoints now verify S4, but none applies per-caller cooldown/debounce. Repeated spam calls can still consume server cycles and log bandwidth. | Add a shared per-owner/per-endpoint cooldown helper (0.25–1.0s by action class) and emit structured denial logs once per cooldown window. |
 | F-CAS-1 | `ARC_fnc_casreqExecute`, `ARC_fnc_casreqClose` | S3 | P2 | Both endpoints are sender-validated but lack explicit role/ownership authorization. Any authenticated client with a valid CASREQ ID can transition lifecycle state. | Gate execute/close to requester UID, assigned pilot role, or TOC approver/OMNI; reject and log unauthorized transitions with `[ARC][SEC]` event codes. |
-| F-LOG-1 | `ARC_fnc_execSpawnConvoy` | S1, S3 | P1 | Endpoint is allowlisted client→server but server path does not validate sender identity and has no role gate. Non-server calls are relayed to server asynchronously, allowing any client to request convoy spawn attempts. | Add `ARC_fnc_rpcValidateSender` + privileged role/invariant gate (or remove from client allowlist if this should be server-internal only). Keep relay path non-authoritative. |
-| F-MED-1 | `ARC_fnc_medicalCasevacRequest` | S1, S3 | P1 | Endpoint is allowlisted client→server yet has no sender validation or authorization gate; clients can request CASEVAC lead creation directly by passing `west`. Cooldown reduces spam but does not enforce caller legitimacy. | Prefer removing the endpoint from `CfgRemoteExec` allowlist and invoking server-side from trusted medical handlers only; if kept allowlisted, add sender validation + role/invariant gate. |
+| F-LOG-1 | `ARC_fnc_execSpawnConvoy` | S1, S3 | P1 | **RESOLVED 2026-05-09** (Phase 0 / E1-T4). `ARC_fnc_execSpawnConvoy` removed from `CfgRemoteExec.Functions`; server-internal only. Verified no client-side `remoteExec [..., 2]` callers exist; only server-side direct `call` from `execTickConvoy.sqf` (and `bootstrapServer.sqf` reference comments). The in-function relay path (`if (!isServer)`) is dormant — engine blocks client `remoteExec` since the function is no longer allowlisted. | Add `ARC_fnc_rpcValidateSender` + privileged role/invariant gate (or remove from client allowlist if this should be server-internal only). Keep relay path non-authoritative. |
+| F-MED-1 | `ARC_fnc_medicalCasevacRequest` | S1, S3 | P1 | **RESOLVED 2026-05-09** (Phase 0 / E1-T5). Added inline sender validation: when invoked remotely (`remoteExecutedOwner > 0`), requires `owner _unit == remoteExecutedOwner` — i.e. only the casualty's owning client can request CASEVAC for that casualty (matches the legitimate ACE incap handler path on the casualty's machine). Server-internal `medicalOnCasualty.sqf` direct call bypasses (no `remoteExecutedOwner`). Rejects with `[ARC][SEC] CASEVAC_DENIED`. Cooldown + side guard preserved. | Prefer removing the endpoint from `CfgRemoteExec` allowlist and invoking server-side from trusted medical handlers only; if kept allowlisted, add sender validation + role/invariant gate. |
 
 Each finding above is the seed for a Mode I PR. Open issues / PRs must reference the finding ID (F-CIV-#, F-DEV-#, F-IED-#, F-AIR-#, F-CAS-#, F-LOG-#, F-MED-#) and update this section to `RESOLVED` with the merge SHA when remediation lands.
 
@@ -256,6 +256,17 @@ Each finding above is the seed for a Mode I PR. Open issues / PRs must reference
 ---
 
 ## Change log
+
+### v1.4 — 2026-05-09
+- Phase 0 / Epic 1 (E1-T1..T5) Mode I PR landing closes all six P1 client→server RemoteExec findings:
+  - **F-DEV-1** `devToggleDebugMode` — sender validation + OMNI/canApproveQueue role gate.
+  - **F-CIV-2** `civsubRunMdtByNetId` — TOC/S2 role gate (`rolesIsTocS2 || rolesCanApproveQueue`).
+  - **F-IED-1** `iedServerDetonate` — EOD-approval gate for client-driven calls (server-internal callers bypass).
+  - **F-IED-2** `vbiedServerDetonate` — EOD-approval gate for client-driven calls (server-internal callers bypass).
+  - **F-LOG-1** `execSpawnConvoy` — removed from `CfgRemoteExec.Functions` allowlist (no legitimate client caller in codebase).
+  - **F-MED-1** `medicalCasevacRequest` — sender validation requires caller-owns-casualty (ACE incap legit path).
+- Tightly-coupled compat-clean fixes in touched IED/VBIED files (pre-existing `trim`/`isNotEqualTo`/`#` patterns replaced with compat-safe equivalents to satisfy `sqflint_compat_scan --strict`).
+- Truth-status: branch-local. Findings derived from current cloned working branch; not yet `origin/main`-confirmed per `Farabad_Source_of_Truth_and_Workflow_Spec.md`. Merge SHA pending.
 
 ### v1.3 — 2026-05-08
 - Wave 3 / batch 3 audit pass completed:

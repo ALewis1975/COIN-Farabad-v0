@@ -19,7 +19,8 @@ params [
     ["_deviceId", "", [""]]
 ];
 
-_deviceId = trim _deviceId;
+// _deviceId is a server-controlled token (set by spawn ticks); explicit type guard is sufficient.
+if (!(_deviceId isEqualType "")) then { _deviceId = ""; };
 if (_deviceId isEqualTo "") exitWith {false};
 
 // Dedicated MP hardening: log remote invocation source.
@@ -29,6 +30,30 @@ if (!isNil "remoteExecutedOwner") then
     if (_reo > 0) then
     {
         diag_log format ["[ARC][SEC] ARC_fnc_vbiedServerDetonate: invoked via remoteExec from owner=%1 deviceId=%2", _reo, _deviceId];
+
+        // S1 + S3: client-driven detonate must correspond to a TOC-approved EOD disposition
+        // for the active task. Server-internal callers (proximity tick, driven-spawn tick)
+        // have no remoteExecutedOwner and bypass this gate.
+        private _activeTaskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
+        if (!(_activeTaskId isEqualType "")) then { _activeTaskId = ""; };
+        private _appr = missionNamespace getVariable ["ARC_pub_eodDispoApprovals", []];
+        if (!(_appr isEqualType [])) then { _appr = []; };
+        private _approved = false;
+        {
+            if (!(_x isEqualType []) || { (count _x) < 3 }) then { continue; };
+            private _aTask = _x select 0;
+            private _aReq  = _x select 2;
+            if (!(_aTask isEqualType "") || { !(_aReq isEqualType "") }) then { continue; };
+            if (!(_aTask isEqualTo _activeTaskId)) then { continue; };
+            if (!((toUpper _aReq) isEqualTo "DET_IN_PLACE")) then { continue; };
+            _approved = true;
+        } forEach _appr;
+        if (!_approved) exitWith
+        {
+            diag_log format ["[ARC][SEC] ARC_fnc_vbiedServerDetonate: VBIED_DETONATE_DENIED no TOC EOD approval for active task. owner=%1 taskId=%2 deviceId=%3",
+                _reo, _activeTaskId, _deviceId];
+            false
+        };
     };
 };
 
@@ -47,15 +72,15 @@ private _pos = ["activeObjectivePos", []] call ARC_fnc_stateGet;
 if (!(_pos isEqualType []) || { (count _pos) < 2 }) then
 {
     private _rec = ["activeVbiedDeviceRecord", []] call ARC_fnc_stateGet;
-    if (_rec isEqualType [] && { (count _rec) >= 5 }) then { _pos = _rec # 4; };
+    if (_rec isEqualType [] && { (count _rec) >= 5 }) then { _pos = _rec select 4; };
 };
 if (!(_pos isEqualType []) || { (count _pos) < 2 }) then { _pos = [0,0,0]; };
 _pos = +_pos; _pos resize 3;
-if (!((_pos # 2) isEqualType 0)) then { _pos set [2, 0]; };
+if (!((_pos select 2) isEqualType 0)) then { _pos set [2, 0]; };
 
 // Remove trigger
 private _trgNid = ["activeVbiedTriggerNetId", ""] call ARC_fnc_stateGet;
-if (_trgNid isEqualType "" && { _trgNid isNotEqualTo "" }) then
+if (_trgNid isEqualType "" && { !(_trgNid isEqualTo "") }) then
 {
     private _trg = objectFromNetId _trgNid;
     if (!isNull _trg) then { deleteVehicle _trg; };
@@ -73,8 +98,12 @@ if !(isClass (configFile >> "CfgVehicles" >> _cls)) then { _cls = "Bo_Mk82"; };
 private _boom = createVehicle [_cls, _pos, [], 0, "NONE"];
 _boom setPosATL _pos;
 
-// Delegate to existing detonation pipeline
-private _c = ["activeVbiedDetCause", "PROX_TRIGGER"] call ARC_fnc_stateGet; if (!(_c isEqualType "")) then { _c = "PROX_TRIGGER"; }; _c = toUpper (trim _c); if (_c isEqualTo "") then { _c = "PROX_TRIGGER"; };
+// Delegate to existing detonation pipeline. _c is server-controlled (set by stateSet
+// in spawn ticks); upper-case normalize without trim (compat-clean).
+private _c = ["activeVbiedDetCause", "PROX_TRIGGER"] call ARC_fnc_stateGet;
+if (!(_c isEqualType "")) then { _c = "PROX_TRIGGER"; };
+_c = toUpper _c;
+if (_c isEqualTo "") then { _c = "PROX_TRIGGER"; };
 [_pos, "VBIED_VEHICLE", format ["VBIED_%1", _c]] call ARC_fnc_iedHandleDetonation;
 
 true

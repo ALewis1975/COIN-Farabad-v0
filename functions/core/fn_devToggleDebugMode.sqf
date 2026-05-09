@@ -15,9 +15,30 @@
 
 if (!isServer) exitWith { false };
 
+if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\core\fn_rpcValidateSender.sqf"; };
+
 params [
     ["_requester", objNull, [objNull]]
 ];
+
+// S1 + S3: sender validation and HQ role gate (debug toggle is admin-only).
+// Server-internal invocations (no remoteExecutedOwner) bypass the gate.
+private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { 0 };
+if (_reoOwner > 0) then
+{
+    private _requestor = _requester;
+    if (isNull _requestor) then
+    {
+        { if (owner _x == _reoOwner) exitWith { _requestor = _x; }; } forEach allPlayers;
+    };
+    if (!([_requestor, "ARC_fnc_devToggleDebugMode", "Debug toggle denied: sender verification failed.", "DEBUG_TOGGLE_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
+    private _isOmni = [_requestor, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
+    private _can = _isOmni || { [_requestor] call ARC_fnc_rolesCanApproveQueue };
+    if (!_can) exitWith {
+        diag_log format ["[ARC][SEC] ARC_fnc_devToggleDebugMode: DEBUG_TOGGLE_DENIED unauthorized caller owner=%1 name=%2 uid=%3", _reoOwner, name _requestor, getPlayerUID _requestor];
+        false
+    };
+};
 
 // Current state: check if debug is currently on
 private _wasOn = missionNamespace getVariable ["ARC_debugLogEnabled", false];

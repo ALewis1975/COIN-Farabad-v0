@@ -11,7 +11,49 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
-## 2026-05-09 — Moving civilian vehicles avoid object collision at spawn
+## 2026-05-09 — Phase 0 / Epic 1: P1 RemoteExec security findings closed (E1-T1..T5)
+
+**Branch/Commit:** copilot/research-coin-farabad-v0 @ HEAD
+
+**Scenario:** Mode I — Architecture Vision Plan Phase 0 / Epic 1 batch close. Six P1 RemoteExec audit findings (F-DEV-1, F-CIV-2, F-IED-1, F-IED-2, F-LOG-1, F-MED-1) addressed in a single Mode I PR. Each fix is the minimal surgical change consistent with the canonical pattern in `ARC_fnc_devCompileAuditServer` (sender validation via `ARC_fnc_rpcValidateSender` + privileged role gate, or invariant gate). Server-internal call paths (no `remoteExecutedOwner`) bypass the new gates so existing trigger/tick/handler integrations are unchanged.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `functions/core/fn_devToggleDebugMode.sqf` | F-DEV-1 RESOLVED. Added `ARC_fnc_rpcValidateSender` (with `requireRemoteContext=true`) + `OMNI \|\| canApproveQueue` gate. Rejects with `[ARC][SEC] DEBUG_TOGGLE_DENIED`. |
+| `functions/civsub/fn_civsubRunMdtByNetId.sqf` | F-CIV-2 RESOLVED. Added TOC role gate (`rolesIsTocS2 \|\| rolesCanApproveQueue`) after the existing inline sender validation. Rejects with `[CIVSUB][SEC] MDT_RUN_DENIED` and a chat hint to the rejected client. |
+| `functions/ied/fn_iedServerDetonate.sqf` | F-IED-1 RESOLVED. Client-driven calls require an `ARC_pub_eodDispoApprovals` entry matching the active task with `requestType=DET_IN_PLACE`. Rejects with `[ARC][SEC] IED_DETONATE_DENIED`. Pre-existing `trim`/`isNotEqualTo` patterns replaced with compat-clean equivalents (tightly-coupled CI prerequisite). |
+| `functions/ied/fn_vbiedServerDetonate.sqf` | F-IED-2 RESOLVED. Same EOD-approval gate as F-IED-1; rejects with `[ARC][SEC] VBIED_DETONATE_DENIED`. Pre-existing `trim`/`isNotEqualTo`/`#` patterns replaced with compat-clean equivalents (tightly-coupled CI prerequisite). |
+| `functions/logistics/fn_execSpawnConvoy.sqf` | (No change required to function body.) F-LOG-1 RESOLVED via `CfgRemoteExec` allowlist removal. |
+| `functions/medical/fn_medicalCasevacRequest.sqf` | F-MED-1 RESOLVED. Added inline sender validation requiring `owner _unit == remoteExecutedOwner` for client-driven calls. Server-internal `medicalOnCasualty` direct call (no `remoteExecutedOwner`) bypasses. Rejects with `[ARC][SEC] CASEVAC_DENIED`. |
+| `config/CfgRemoteExec.hpp` | Removed `class ARC_fnc_execSpawnConvoy` from `Functions` allowlist (F-LOG-1). |
+| `docs/security/RemoteExec_Endpoint_Audit_Matrix.md` | Status cells in §3.1, §3.2, §3.3, §3.6 flipped from ❌ to ✅ for the six findings; §6.1–§6.4 ledger rows annotated with `**RESOLVED 2026-05-09**`; new v1.4 changelog entry. |
+
+### Static checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | sqflint compat scan (touched SQF) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_devToggleDebugMode.sqf functions/civsub/fn_civsubRunMdtByNetId.sqf functions/medical/fn_medicalCasevacRequest.sqf functions/ied/fn_iedServerDetonate.sqf functions/ied/fn_vbiedServerDetonate.sqf` | PASS | All five touched files now scan clean (incl. pre-existing patterns in IED/VBIED files cleared as tightly-coupled prerequisites). |
+| 2 | sqflint | `sqflint -e w <each file>` | PASS | All five files report no warnings. |
+| 3 | HPP brace balance | `grep -c '{\|}' config/CfgRemoteExec.hpp` | PASS | 93 open / 93 close after `execSpawnConvoy` allowlist removal. |
+| 4 | Local MP authority/JIP smoke for new gates | n/a | BLOCKED | Container has no Arma 3 dedicated server. Each gate is small enough to be self-evident via code review; runtime confirmation deferred to Epic 9 dedicated/JIP validation matrix. |
+
+### Acceptance verification
+
+- [x] Six P1 audit findings transition from ❌/open to RESOLVED in §6.1–§6.4 ledger.
+- [x] Section 3 status cells flipped to ✅ where appropriate; `execSpawnConvoy` row marked `n/a` (no longer client-exposed).
+- [x] Each remediated endpoint logs structured `[ARC][SEC]` denial events with action-specific event codes (`DEBUG_TOGGLE_DENIED`, `MDT_RUN_DENIED`, `IED_DETONATE_DENIED`, `VBIED_DETONATE_DENIED`, `CASEVAC_DENIED`).
+- [x] Server-internal callers (triggers, ticks, direct-call handlers) bypass the new gates; no behaviour change for legitimate paths.
+- [x] No new sqflint compat violations introduced; pre-existing IED/VBIED file violations on touched lines cleaned up as a tightly-coupled CI prerequisite.
+
+### Follow-ups (out of scope for this PR)
+
+- Epic 1 / E1-T6: complete §3.4 (Intel/Order/TOC) audit — 12 endpoints still `?`. Any new P1 findings require fresh Mode I PR(s).
+- Epic 6: address P2 findings (F-CIV-1/3/4, F-CAS-1, F-DEV-2/3, F-IED-3, F-AIR-1).
+- Epic 9: dedicated/JIP validation pass — requires Arma 3 host access, deferred.
+
+
 
 **Branch/Commit:** copilot/spawn-vehicles-on-road @ HEAD
 

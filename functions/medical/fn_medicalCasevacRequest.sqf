@@ -25,6 +25,25 @@ params [
 
 if !(_side isEqualTo west) exitWith {""};
 
+// S1: client-driven CASEVAC requests must be initiated by the casualty's owning client
+// (ACE incap handler runs on the casualty's machine). Server-internal callers
+// (medicalOnCasualty direct call) have no remoteExecutedOwner and bypass this gate.
+if (!isNil "remoteExecutedOwner" && { remoteExecutedOwner > 0 }) then
+{
+    private _reo = remoteExecutedOwner;
+    if (isNull _unit) exitWith
+    {
+        diag_log format ["[ARC][SEC] ARC_fnc_medicalCasevacRequest: CASEVAC_DENIED null casualty from owner=%1", _reo];
+        ""
+    };
+    if ((owner _unit) != _reo) exitWith
+    {
+        diag_log format ["[ARC][SEC] ARC_fnc_medicalCasevacRequest: CASEVAC_DENIED sender-owner mismatch reo=%1 unitOwner=%2 unit=%3",
+            _reo, owner _unit, name _unit];
+        ""
+    };
+};
+
 // Per-district cooldown — avoid flooding the lead pool when several BLUFOR
 // fall in the same AO in quick succession.
 private _cooldownS = missionNamespace getVariable ["ARC_casevacLeadCooldownS", 180];
