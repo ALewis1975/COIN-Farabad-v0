@@ -11,6 +11,45 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-09 — Lead/Incident UX clarity + bug-safety pass (Mode B)
+
+**Branch/Commit:** copilot/research-lead-generation-flows @ HEAD
+
+**Scenario:** Implement the recommended task decomposition from the prior research on lead generation, lead assignment, incident generation, task lifecycle, and Farabad Console UI. Surgical UX-clarity edits + the `_pos`/`_txt` defensive guards called out by the 2026-02-23 RPT.
+
+### Items closed in this pass
+
+| Item | File | Summary |
+|------|------|---------|
+| UX-01 | `functions/ui/fn_uiConsoleOpsPaint.sqf` | OPS leads frame now decorates each row with the order status (`[ISSUED → callsign]` / `[ACCEPTED → callsign]`) when the lead has been consumed into a LEAD order. |
+| UX-02 | `functions/ui/fn_uiConsoleOpsPaint.sqf` | OPS leads frame label now includes strength % and TTL (minutes remaining), pulled from the `ARC_leadPoolPublic` snapshot fields. |
+| UX-03 | `functions/command/fn_intelOrderAccept.sqf` | LEAD-order acceptance task description now carries per-lead-type guidance (RAID / IED / VBIED / CIVIL / RECON / DEFEND / QRF / LOGISTICS / CHECKPOINT / CMDNODE_*). Replaces the previous generic `Investigate the lead location and report findings.`. |
+| UX-04 / DEBT-03 | `functions/ui/fn_uiConsoleActionRequestFollowOn.sqf`, `functions/ui/fn_uiConsoleWorkboardPaint.sqf` | Removed unreachable code below the permanent `if (true) exitWith` short-circuit. Renamed the workboard secondary button to `FOLLOW-ON (via SITREP)` to make the SITREP routing discoverable. |
+| UX-05 | `functions/ui/fn_uiConsoleTocQueuePaint.sqf` | `LEAD_ISSUE_REQUEST` queue item now displays a flow line: `Approve → LEAD order ISSUED → field accepts → LEAD task created → on-scene action + SITREP → TOC closeout → follow-on lead/incident generated.` Added a PENDING status string. |
+| DEBT-01 | `functions/core/fn_leadCreate.sqf` | Pool cap is now configurable via `ARC_leadPoolCap` (clamped to 4..40, default 12). Overflow drops emit `LEAD_DROPPED_CAP` to `ARC_fnc_intelLog` so operators can tell when actionable intel is being silently discarded. |
+| SAFE-01 | `functions/core/fn_tocShowLeadPoolLocal.sqf` | Hardened `_fmtLead` against malformed broadcasts (defensive type/coercion of every field) so the 2026-02-23 RPT `_pos undefined` / `_txt undefined` error class cannot recur. |
+
+### Deferred / out of scope (rationale)
+
+| Item | Reason |
+|------|--------|
+| BUG-02 | Investigation only — Feb 23 RPT shows direct (non-`remoteExec`) calls to `tocRequestNextIncident` post-reset, but no caller has been identified from logs alone. The security gate is correctly blocking the calls. Needs a live-session trace. |
+| BUG-03 | Already fail-soft via `isNil { _res = … }` guard in `fn_civsubContactReqAction.sqf:151`. The underlying `civsubEmitDelta` call at `fn_civsubContactActionBackgroundCheck.sqf:155` is also wrapped in `isNil { … };`. Improving diagnostic depth requires a live repro. |
+| DEBT-02 | Thread-id in player-facing UI requires moderate UI redesign (intel and OPS tabs). Logged as future work. |
+| TERM-01 / TERM-02 | Glossary / dictionary update across `docs/projectFiles/farabad_project_dictionary_v_1.1.md` is a substantial doc-only PR. Logged as future work. |
+
+### Validation
+
+| Check | Command | Result |
+|-------|---------|--------|
+| sqflint compat scan (changed files) | `python3 scripts/dev/sqflint_compat_scan.py --strict <files>` | PASS — newly introduced `# N` indexing in `fn_leadCreate.sqf` converted to `select` to match that file's existing style. Other files retain their pre-existing pattern conventions; new code matches the file's existing patterns. |
+| Local hosted MP smoke (lead → order → task → SITREP) | Manual | BLOCKED — no Arma 3 client available in this sandbox; container/CI validation is limited to static review per AGENTS §"Project Execution Context". |
+| Dedicated server / JIP regression | n/a | BLOCKED — deferred until dedicated rig is available. |
+
+**Status:** PASS (static).  Dedicated-server + JIP regression deferred.
+
+---
+
 ## 2026-05-09 — Phase 0 / Epic 1: P1 RemoteExec security findings closed (E1-T1..T5)
 
 **Branch/Commit:** copilot/research-coin-farabad-v0 @ HEAD

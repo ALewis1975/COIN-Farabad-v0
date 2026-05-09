@@ -53,9 +53,14 @@ if (!(_leads isEqualType [])) then { _leads = []; };
 _leads pushBack [_id, _leadType, _displayName, _pos, _strength, _now, _expiresAt, _sourceTaskId, _sourceIncidentType, _threadId, _tag];
 
 // Cap pool size to keep it sane (oldest drops off first).
-private _cap = 12;
+// DEBT-01: cap is configurable via ARC_leadPoolCap (clamped to a safe range)
+// and overflow drops are logged so operators can tell when actionable intel
+// is being silently discarded by capacity pressure.
+private _cap = missionNamespace getVariable ["ARC_leadPoolCap", 12];
+if (!(_cap isEqualType 0) || { _cap < 4 }) then { _cap = 12; };
+_cap = (_cap max 4) min 40;
 
-if ((count _leads) > _cap) then
+while { (count _leads) > _cap } do
 {
     private _dropped = _leads deleteAt 0;
     if (_dropped isEqualType [] && { (count _dropped) >= 1 }) then
@@ -64,6 +69,28 @@ if ((count _leads) > _cap) then
         private _mk = format ["ARC_leadCircle_%1", _did];
         if (_mk in allMapMarkers) then { deleteMarker _mk; };
         missionNamespace setVariable [format ["ARC_leadCircleExpiresAt_%1", _did], nil];
+
+        if (!isNil "ARC_fnc_intelLog") then
+        {
+            private _dType = if ((count _dropped) >= 2) then { _dropped select 1 } else { "" };
+            private _dName = if ((count _dropped) >= 3) then { _dropped select 2 } else { "" };
+            private _dPos  = if ((count _dropped) >= 4) then { _dropped select 3 } else { [0,0,0] };
+            if (!(_dType isEqualType "")) then { _dType = ""; };
+            if (!(_dName isEqualType "")) then { _dName = ""; };
+            if (!(_dPos isEqualType [])) then { _dPos = [0,0,0]; };
+
+            ["OPS",
+                format ["LEAD DROPPED (pool cap %1): %2 (%3) discarded to make room for new lead.",
+                    _cap, _dName, toUpper _dType],
+                _dPos,
+                [
+                    ["event","LEAD_DROPPED_CAP"],
+                    ["leadId", _did],
+                    ["leadType", toUpper _dType],
+                    ["cap", _cap]
+                ]
+            ] call ARC_fnc_intelLog;
+        };
     };
 };
 

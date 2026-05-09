@@ -175,10 +175,14 @@ switch (_kind) do
             };
         };
 
-        // Secondary: Request Follow-on (requires SITREP + no pending orders)
+        // Secondary: Follow-on requests are captured by the SITREP wizard.
+        // The button stays visible (and disabled when not applicable) so
+        // staff can see at a glance whether a follow-on is currently
+        // permitted. Label spells the routing out so players don't expect a
+        // standalone follow-on dialog.
         if (!isNull _b2) then
         {
-            _b2 ctrlSetText "FOLLOW-ON REQUEST";
+            _b2 ctrlSetText "FOLLOW-ON (via SITREP)";
             _b2 ctrlEnable (call ARC_fnc_intelClientCanRequestFollowOn);
         };
 

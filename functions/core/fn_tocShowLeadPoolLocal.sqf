@@ -38,7 +38,18 @@ private _fmtLead = {
     private _createdAt = if ((count _entry) >= 6) then { _entry select 5 } else { -1 };
     private _expiresAt = if ((count _entry) >= 7) then { _entry select 6 } else { -1 };
 
-    private _grid = if (_pos isEqualType [] && { (count _pos) >= 2 }) then { mapGridPosition _pos } else { "????" };
+    // SAFE-01: defensive normalization so a malformed broadcast (nil/wrong-typed
+    // fields) cannot leak undefined-variable errors into the RPT (see Feb 23
+    // 2026 RPT lines 8884–8907).  Each field is coerced or replaced with a
+    // safe default before use.
+    if (!(_id isEqualType "")) then { _id = ""; };
+    if (!(_type isEqualType "")) then { _type = ""; };
+    if (!(_disp isEqualType "")) then { _disp = ""; };
+    if (!(_pos isEqualType [])) then { _pos = []; };
+    if (!(_strength isEqualType 0)) then { _strength = 0.5; };
+    if (!(_expiresAt isEqualType 0)) then { _expiresAt = -1; };
+
+    private _grid = if ((count _pos) >= 2) then { mapGridPosition _pos } else { "????" };
 
     private _mins = -1;
     if (_expiresAt > 0) then { _mins = floor ((_expiresAt - serverTime) / 60); };

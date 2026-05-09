@@ -214,6 +214,11 @@ switch (_kindU) do
         _payloadTxt = format ["Lead Issue Request: <t color='#FFD700'>%1</t><br/>Lead: %2<br/>Grid: %3 | Zone: %4<br/>Lead ID: %5",
             toUpper (trim _leadType), trim _dispName, _grid, _zone, trim _leadId2];
 
+        // UX-05: surface the full lead-loop downstream of approval so TOC
+        // staff and S2/S3 supervisors see the chain at a glance and field
+        // units understand what they are accepting.
+        private _flowHint = "<br/><br/><t color='#A8C5FF'>Flow:</t> Approve → LEAD order ISSUED to field group → field accepts on OPS tab → LEAD task created at lead grid → on-scene action + SITREP → TOC closeout → follow-on lead/incident generated.";
+
         if (_stU isEqualTo "APPROVED") then
         {
             _statusTxt = "Lead Status: APPROVED — PROCEED order issued to field group.";
@@ -222,6 +227,12 @@ switch (_kindU) do
         {
             _statusTxt = "Lead Status: REJECTED — lead remains in pool.";
         };
+        if (_stU isEqualTo "PENDING") then
+        {
+            _statusTxt = "Lead Status: PENDING — awaiting TOC review.";
+        };
+
+        _payloadTxt = _payloadTxt + _flowHint;
     };
 
     case "LEAD_REQUEST":

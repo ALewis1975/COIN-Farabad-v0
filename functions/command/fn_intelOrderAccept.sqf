@@ -308,6 +308,7 @@ switch (_type) do
 
         private _leadPos = [];
         private _leadName = "Investigate Lead";
+        private _leadType = "";
         if (_leadRec isEqualType [] && { (count _leadRec) >= 4 }) then
         {
             private _dn = _leadRec # 2;
@@ -315,6 +316,9 @@ switch (_type) do
 
             private _p = _leadRec # 3;
             if (_p isEqualType [] && { (count _p) >= 2 }) then { _leadPos = _p; };
+
+            private _lt = _leadRec # 1;
+            if (_lt isEqualType "") then { _leadType = toUpper (trim _lt); };
         };
 
         if !(_leadPos isEqualType [] && { (count _leadPos) >= 2 }) then
@@ -327,8 +331,31 @@ switch (_type) do
         private _note = [_meta, "note", ""] call _getPair;
 
         private _title = format ["LEAD: %1", _leadName];
+
+        // UX-03: role-specific guidance per lead incident type so field elements
+        // know what action to take on arrival, rather than the previous generic
+        // "Investigate the lead location and report findings."
+        private _guidance = switch (_leadType) do
+        {
+            case "RAID": { "Search structures, secure the area, detain suspects, and collect any EPW or document/material intel. Submit SITREP on completion." };
+            case "IED";
+            case "VBIED": { "Establish cordon, request EOD if not present, conduct render-safe procedures, and collect evidence/site exploitation. Submit SITREP on completion." };
+            case "CIVIL";
+            case "CMDNODE_MEET": { "Conduct liaison engagement, gather information, and submit a debrief at an Intel station. Submit SITREP when departing." };
+            case "RECON": { "Conduct pattern-of-life observation. Avoid contact unless self-defence is required. Submit SITREP on departure." };
+            case "DEFEND": { "Hold the location, repel hostile action, and protect any friendly assets/civilians on site. Submit SITREP on completion." };
+            case "QRF";
+            case "CMDNODE_INTERCEPT": { "Move with speed, make contact, neutralize the threat, and submit SITREP on completion." };
+            case "LOGISTICS";
+            case "ESCORT": { "Link up with the convoy element, conduct movement to the destination, and submit SITREP on completion." };
+            case "CHECKPOINT": { "Establish a checkpoint, screen traffic, and submit SITREP on completion or relief." };
+            case "CMDNODE_RAID": { "Strike the command node target, exploit the site for intel, and submit SITREP on completion." };
+            default { "Move to the lead location, develop the situation, and submit a SITREP on completion." };
+        };
+
         private _desc = format [
-            "Investigate the lead location and report findings.%1",
+            "Investigate the lead location and report findings.\n\nGuidance: %1%2",
+            _guidance,
             if (_note isEqualTo "") then { "" } else { format ["\n\nTOC Note: %1", _note] }
         ];
 

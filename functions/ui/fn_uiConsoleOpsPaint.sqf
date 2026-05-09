@@ -188,11 +188,52 @@ if (_rebuild) then
 
     // -------------------------------
     // Leads
+    //
+    // Each label encodes lead-pool entries plus, when applicable, the assignment
+    // status drawn from the orders snapshot (UX-01) and the time-to-expiry +
+    // strength badge (UX-02). Assignment lookup uses the lead record embedded
+    // in LEAD-order data pairs (key "lead").
     // -------------------------------
     lbClear _cLead;
     private _leads = if (_opsUseVm && { (count _vm_leads) > 0 }) then { _vm_leads } else { missionNamespace getVariable ["ARC_leadPoolPublic", []] };
     if (!(_leads isEqualType [])) then { _leads = []; };
     if ((count _leads) > _rxMaxItems) then { _leads = _leads select [0, _rxMaxItems]; };
+
+    // Build a fast leadId → [status, targetGroup] lookup from the orders snapshot.
+    // Pool leads are unassigned by definition, but consumed leads still keep
+    // their broadcast tail until the pool pruner removes them; the lookup
+    // lets us distinguish the two states even if the broadcast is briefly
+    // stale.  Only ISSUED / ACCEPTED LEAD orders are considered.
+    private _leadAssignLookup = [];
+    private _ordersSnap = missionNamespace getVariable ["ARC_pub_orders", []];
+    if (!(_ordersSnap isEqualType [])) then { _ordersSnap = []; };
+    {
+        if (_x isEqualType [] && { (count _x) >= 6 }) then
+        {
+            private _oSt = toUpper (trim (_x # 2));
+            private _oTy = toUpper (trim (_x # 3));
+            private _oTg = _x # 4;
+            if (!(_oTg isEqualType "")) then { _oTg = ""; };
+            if (_oTy isEqualTo "LEAD" && { _oSt in ["ISSUED","ACCEPTED"] }) then
+            {
+                private _oData = _x # 5;
+                if (_oData isEqualType []) then
+                {
+                    private _embeddedId = "";
+                    {
+                        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo "leadId" }) exitWith
+                        {
+                            if ((_x # 1) isEqualType "") then { _embeddedId = _x # 1; };
+                        };
+                    } forEach _oData;
+                    if (_embeddedId isNotEqualTo "") then
+                    {
+                        _leadAssignLookup pushBack [_embeddedId, _oSt, _oTg];
+                    };
+                };
+            };
+        };
+    } forEach _ordersSnap;
 
     if ((count _leads) isEqualTo 0) then
     {
@@ -208,7 +249,39 @@ if (_rebuild) then
             private _typ = toUpper (trim (_lead # 1));
             private _name = _lead # 2;
             if (!(_name isEqualType "")) then { _name = "Lead"; };
-            private _label = format ["[%1] %2", _typ, _name];
+
+            // UX-02: TTL + strength badge.
+            private _strength = if ((count _lead) >= 5) then { _lead # 4 } else { 0.5 };
+            if (!(_strength isEqualType 0)) then { _strength = 0.5; };
+            _strength = (_strength max 0) min 1;
+
+            private _expiresAt = if ((count _lead) >= 7) then { _lead # 6 } else { -1 };
+            if (!(_expiresAt isEqualType 0)) then { _expiresAt = -1; };
+            private _ttlMin = -1;
+            if (_expiresAt > 0) then { _ttlMin = floor ((_expiresAt - serverTime) / 60); };
+            private _ttlTxt = if (_ttlMin < 0) then { "?m" } else { format ["%1m", _ttlMin max 0] };
+
+            private _strPct = round (_strength * 100);
+
+            // UX-01: assignment indicator.  An "ASSIGNED" or "ISSUED" prefix
+            // makes the lead's order state visible without a context switch.
+            private _assignTag = "";
+            {
+                if (_x isEqualType [] && { (count _x) >= 3 } && { (_x # 0) isEqualTo _id }) exitWith
+                {
+                    private _aSt = _x # 1;
+                    private _aGrp = _x # 2;
+                    private _grpStr = if ((_aGrp isEqualType "") && { _aGrp isNotEqualTo "" }) then { format [" → %1", _aGrp] } else { "" };
+                    _assignTag = switch (_aSt) do
+                    {
+                        case "ISSUED": { format ["[ISSUED%1] ", _grpStr] };
+                        case "ACCEPTED": { format ["[ACCEPTED%1] ", _grpStr] };
+                        default { "" };
+                    };
+                };
+            } forEach _leadAssignLookup;
+
+            private _label = format ["%1[%2] %3 | STR %4%5 | %6", _assignTag, _typ, _name, _strPct, "%", _ttlTxt];
             private _idx = _cLead lbAdd _label;
             _cLead lbSetData [_idx, format ["LEAD|%1", _id]];
         } forEach _leads;
