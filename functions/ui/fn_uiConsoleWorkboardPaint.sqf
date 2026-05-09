@@ -69,7 +69,7 @@ if (_rebuild) then
 
     {
         if (!(_x isEqualType []) || { (count _x) < 4 }) then { continue; };
-        _x params ["_id", "_leadType", "_displayName", "_pos", "_strength", "_createdAt", "_expiresAt", "_sourceTaskId", "_sourceIncidentType", "_threadId", "_tag"];
+        _x params ["_id", "_leadType", "_displayName", "_pos"];
 
         private _grid = "";
         if (_pos isEqualType [] && { (count _pos) >= 2 }) then { _grid = mapGridPosition _pos; };
