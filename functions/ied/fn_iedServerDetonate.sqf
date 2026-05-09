@@ -17,7 +17,8 @@ params [
     ["_deviceId", "", [""]]
 ];
 
-_deviceId = trim _deviceId;
+// _deviceId is a server-controlled token (set by spawn ticks); explicit type guard is sufficient.
+if (!(_deviceId isEqualType "")) then { _deviceId = ""; };
 if (_deviceId isEqualTo "") exitWith {false};
 
 // Dedicated MP hardening: log remote invocation source.
@@ -27,6 +28,30 @@ if (!isNil "remoteExecutedOwner") then
     if (_reo > 0) then
     {
         diag_log format ["[ARC][SEC] ARC_fnc_iedServerDetonate: invoked via remoteExec from owner=%1 deviceId=%2", _reo, _deviceId];
+
+        // S1 + S3: client-driven detonate must correspond to a TOC-approved EOD disposition
+        // for the active task. Server-internal callers (proximity trigger, ticks) have no
+        // remoteExecutedOwner and bypass this gate.
+        private _activeTaskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
+        if (!(_activeTaskId isEqualType "")) then { _activeTaskId = ""; };
+        private _appr = missionNamespace getVariable ["ARC_pub_eodDispoApprovals", []];
+        if (!(_appr isEqualType [])) then { _appr = []; };
+        private _approved = false;
+        {
+            if (!(_x isEqualType []) || { (count _x) < 3 }) then { continue; };
+            private _aTask = _x select 0;
+            private _aReq  = _x select 2;
+            if (!(_aTask isEqualType "") || { !(_aReq isEqualType "") }) then { continue; };
+            if (!(_aTask isEqualTo _activeTaskId)) then { continue; };
+            if (!((toUpper _aReq) isEqualTo "DET_IN_PLACE")) then { continue; };
+            _approved = true;
+        } forEach _appr;
+        if (!_approved) exitWith
+        {
+            diag_log format ["[ARC][SEC] ARC_fnc_iedServerDetonate: IED_DETONATE_DENIED no TOC EOD approval for active task. owner=%1 taskId=%2 deviceId=%3",
+                _reo, _activeTaskId, _deviceId];
+            false
+        };
     };
 };
 
@@ -38,7 +63,7 @@ private _nid = ["activeObjectiveNetId", ""] call ARC_fnc_stateGet;
 if (!(_nid isEqualType "")) then { _nid = ""; };
 
 private _obj = objNull;
-if (_nid isNotEqualTo "") then { _obj = objectFromNetId _nid; };
+if (_nid isEqualType "" && { !(_nid isEqualTo "") }) then { _obj = objectFromNetId _nid; };
 
 private _pos = if (!isNull _obj) then { getPosATL _obj } else { ["activeObjectivePos", []] call ARC_fnc_stateGet };
 if (!(_pos isEqualType []) || { (count _pos) < 2 }) then { _pos = ["activeExecPos", []] call ARC_fnc_stateGet; };

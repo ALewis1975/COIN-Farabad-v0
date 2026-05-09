@@ -69,7 +69,7 @@ class CfgRemoteExec
         class ARC_fnc_airbaseRequestReleaseDepartures   { allowedTargets = 2; };
 
         // Logistics relay + AIRBASE admin RPCs
-        class ARC_fnc_execSpawnConvoy                   { allowedTargets = 2; };
+        // (ARC_fnc_execSpawnConvoy intentionally NOT allowlisted — server-internal only; F-LOG-1.)
         class ARC_fnc_tocRequestAirbaseResetControlState{ allowedTargets = 2; };
 
         // IED / VBIED RPCs
