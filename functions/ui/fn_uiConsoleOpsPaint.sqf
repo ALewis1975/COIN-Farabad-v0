@@ -209,6 +209,7 @@ if (_rebuild) then
     private _leadAssignLookup = [];
     private _ordersSnap = missionNamespace getVariable ["ARC_pub_orders", []];
     if (!(_ordersSnap isEqualType [])) then { _ordersSnap = []; };
+    if ((count _ordersSnap) > _rxMaxItems) then { _ordersSnap = _ordersSnap select [0, _rxMaxItems]; };
     {
         if (_x isEqualType [] && { (count _x) >= 6 }) then
         {
