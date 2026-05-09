@@ -182,8 +182,8 @@ if (_rebuild) then
     //
     // Each label encodes lead-pool entries plus, when applicable, the assignment
     // status drawn from the orders snapshot (UX-01) and the time-to-expiry +
-    // strength badge (UX-02). Assignment lookup uses the lead record embedded
-    // in LEAD-order data pairs (key "lead").
+    // strength badge (UX-02). Assignment lookup uses the lead identifier stored
+    // in LEAD-order data pairs (key "leadId").
     // -------------------------------
     lbClear _cLead;
     private _leads = if (_opsUseVm && { (count _vm_leads) > 0 }) then { _vm_leads } else { missionNamespace getVariable ["ARC_leadPoolPublic", []] };
