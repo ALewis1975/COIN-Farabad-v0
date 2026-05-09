@@ -114,7 +114,6 @@ switch (_type) do
         {
             if (!(_x isEqualType []) || { (count _x) < 7 }) then { continue; };
 
-            private _oId = _x select 0;
             private _oSt = toUpper (_x select 2);
             private _oTy = toUpper (_x select 3);
             private _oTg = _x select 4;
@@ -211,7 +210,6 @@ switch (_type) do
 
         private _taskId = format ["%1_task", _orderId];
 
-        private _issuer = [_meta, "issuedBy", "TOC"] call _getPair;
         private _note   = [_meta, "note", ""] call _getPair;
 
         private _title = format ["RTB: %1 (%2)", _destLbl, _purpose];
@@ -264,7 +262,6 @@ switch (_type) do
 
     case "HOLD":
     {
-        private _issuer = [_meta, "issuedBy", "TOC"] call _getPair;
         private _note   = [_meta, "note", ""] call _getPair;
 
         private _holdPos = getPosATL _acceptor;
