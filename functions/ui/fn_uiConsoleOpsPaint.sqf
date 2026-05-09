@@ -71,17 +71,6 @@ private _safeStr = {
     if (_s isEqualTo "") then {_fallback} else {_s};
 };
 
-private _pairGet = {
-    params ["_pairs", "_key", ["_def", ""]];
-    if (!(_pairs isEqualType [])) exitWith {_def};
-    private _idx = -1;
-    { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x#0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
-    if (_idx < 0) exitWith {_def};
-    private _v = (_pairs select _idx) select 1;
-    if (isNil "_v") exitWith {_def};
-    _v
-};
-
 // Persist selection + focus across rebuilds
 private _selIncData = uiNamespace getVariable ["ARC_console_opsSel_inc", ""]; if (!(_selIncData isEqualType "")) then { _selIncData = ""; };
 private _selOrdData = uiNamespace getVariable ["ARC_console_opsSel_ord", ""]; if (!(_selOrdData isEqualType "")) then { _selOrdData = ""; };
@@ -384,7 +373,6 @@ else
 {
     private _parts = _focusData splitString "|";
     private _kind = toUpper (([_parts select 0] call _trimFn));
-    private _id = if ((count _parts) > 1) then { _parts select 1 } else { "" };
 
     switch (_kind) do
     {
@@ -510,6 +498,7 @@ else
 
         case "ORDER":
         {
+            private _id = if ((count _parts) > 1) then { _parts select 1 } else { "" };
             private _orders = missionNamespace getVariable ["ARC_pub_orders", []]; if (!(_orders isEqualType [])) then { _orders = []; };
             if ((count _orders) > _rxMaxItems) then { _orders = _orders select [((count _orders) - _rxMaxItems) max 0, _rxMaxItems]; };
             private _o = -1;
@@ -574,6 +563,7 @@ else
 
         case "LEAD":
         {
+            private _id = if ((count _parts) > 1) then { _parts select 1 } else { "" };
             private _leads = missionNamespace getVariable ["ARC_leadPoolPublic", []]; if (!(_leads isEqualType [])) then { _leads = []; };
             if ((count _leads) > _rxMaxItems) then { _leads = _leads select [0, _rxMaxItems]; };
             private _idx = -1;
