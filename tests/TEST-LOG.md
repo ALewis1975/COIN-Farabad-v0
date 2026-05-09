@@ -11,6 +11,50 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-09 — Moving civilian vehicles avoid object collision at spawn
+
+**Branch/Commit:** copilot/spawn-vehicles-on-road @ HEAD
+
+**Scenario:** Mode A bug fix follow-up. The previous change made MOVING ambient civilian vehicles spawn on the road centre facing direction of travel, but the picker only rejected nearby `LandVehicle`s for clustering separation. It did not reject road segments where wrecks, dropped weapons, fence/barrier props, dead bodies, animals, or editor-placed map clutter (signs, bollards) intersected the spawn point — those would cause the spawned vehicle to explode or tilt into terrain. New behaviour: picker rejects any non-`Road`, non-empty-typeOf object within a configurable clearance radius (`civsub_v1_traffic_moving_spawnClearance_m`, default 7 m, clamped 4–25 m), and the spawner performs a final post-`createVehicle` bounding-box check using the actual vehicle's `boundingBoxReal`, deleting the vehicle and bailing with a new `spawnCollision` failure reason if any non-road object intersects.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `functions/civsub/fn_civsubTrafficPickRoadDrivePos.sqf` | Added object-collision clearance check in addition to the existing vehicle-separation check. |
+| `functions/civsub/fn_civsubTrafficSpawnMoving.sqf` | Added post-`createVehicle` bounding-box clearance gate; on collision, deletes vehicle and records `spawnCollision`. |
+
+### Static checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | sqflint compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubTrafficPickRoadDrivePos.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf` | PASS | No banned constructs detected. |
+| 2 | sqflint | `sqflint -e w …` | BLOCKED | Not installed in container. |
+| 3 | Local MP / dedicated / JIP collision-avoidance smoke | Spawn ambient traffic near map clutter | BLOCKED | Requires Arma 3 host. |
+
+## 2026-05-09 — Ambient civilian moving vehicles spawn on road in direction of travel
+
+**Branch/Commit:** copilot/spawn-vehicles-on-road @ HEAD
+
+**Scenario:** Mode A bug fix. Ambient civilian vehicles spawned in MOVING role were placed on the off-road shoulder (via `ARC_fnc_civsubTrafficPickRoadsidePos`) and oriented parallel to the road, which sometimes resulted in vehicles starting on the road's lateral edge or facing away from their next waypoint. New behavior: pick a road segment that has a connected neighbour (with onward connections — avoids dead-end segments), set spawn pos to the segment centre and heading to the bearing toward the connected neighbour, and seed an immediate `doMove` to that neighbour so the AI begins driving in the faced direction.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `functions/civsub/fn_civsubTrafficPickRoadDrivePos.sqf` | New picker for on-road moving spawns with edge-avoidance (rejects dead-end segments). |
+| `functions/civsub/fn_civsubTrafficSpawnMoving.sqf` | Switched from `PickRoadsidePos` to `PickRoadDrivePos`; seeds initial `doMove` toward next road segment; sets `nextMoveTs` forward by the configured refresh window so the next tick does not immediately retarget behind the vehicle. |
+| `config/CfgFunctions.hpp` | Registered `civsubTrafficPickRoadDrivePos`. |
+
+### Static checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | sqflint compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubTrafficPickRoadDrivePos.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf` | PASS | No banned constructs detected. |
+| 2 | sqflint | `sqflint -e w functions/civsub/fn_civsubTrafficPickRoadDrivePos.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf` | BLOCKED | `sqflint` not installed in container. Run locally before merge. |
+| 3 | Local MP smoke (moving spawn placement + heading) | Host MP, observe ambient MOVING spawns | BLOCKED | Requires Arma 3 host. Deferred. |
+| 4 | Dedicated server / JIP placement validation | Run on dedicated; JIP a client | BLOCKED | Requires dedicated rig. Deferred. |
+
 ## 2026-05-08 — Wave 3-T2 RemoteExec audit batch 3 (CASREQ/Airbase + Logistics/Medical/CASEVAC)
 
 **Branch/Commit:** copilot/implement-next-batch-of-updates @ HEAD
