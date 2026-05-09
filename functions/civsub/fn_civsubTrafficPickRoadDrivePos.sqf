@@ -77,9 +77,34 @@ for "_i" from 1 to _tries do
     private _slope = acos ((_n vectorDotProduct [0,0,1]) max -1 min 1);
     if (_slope > 0.35) then { continue; };
 
-    // Vehicle separation — avoid stacking on top of another vehicle.
+    // Vehicle separation — avoid clustering on top of another vehicle.
     private _near = nearestObjects [_rPos, ["LandVehicle"], _minSep];
     if ((count _near) > 0) then { continue; };
+
+    // Object-collision clearance — moving vehicles must spawn into clear road
+    // space. The road's lane centre commonly has nothing on it, but wrecks,
+    // dropped weapons, fence/barrier props, dead bodies, animals, and
+    // editor-placed map clutter (signs, bollards) can intersect a road-segment
+    // node and would cause the spawned vehicle to explode or tilt into terrain.
+    // We reject any candidate where a non-road object lies within `_clearR` of
+    // the spawn point. Vehicle separation above already covers LandVehicle at
+    // a wider radius, so the inner LandVehicle check here is redundant but
+    // harmless.
+    private _clearR = missionNamespace getVariable ["civsub_v1_traffic_moving_spawnClearance_m", 7];
+    if (!(_clearR isEqualType 0)) then { _clearR = 7; };
+    _clearR = (_clearR max 4) min 25;
+    private _blocked = false;
+    {
+        if (_blocked) then { continue; };
+        if (isNull _x) then { continue; };
+        if (_x isEqualTo _r) then { continue; };
+        // `Road` covers all road-segment objects on terrain; they are not blockers.
+        if (_x isKindOf "Road") then { continue; };
+        // Ignore objects with empty type (fake/terrain-internal objects).
+        if ((typeOf _x) isEqualTo "") then { continue; };
+        _blocked = true;
+    } forEach (_rPos nearObjects _clearR);
+    if (_blocked) then { continue; };
 
     // Exclusion zone check (mirrors fn_civsubTrafficPickRoadsidePos)
     private _exclZones = missionNamespace getVariable ["ARC_trafficExclusionZones", []];

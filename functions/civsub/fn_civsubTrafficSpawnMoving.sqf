@@ -124,6 +124,32 @@ _veh setVectorUp (surfaceNormal _pos);
 _veh lock 0;
 _veh forceFollowRoad true;
 
+// Final post-create collision check using the actual vehicle bounding box.
+// The picker reserves clearance against pre-existing scenery, but another
+// subsystem may have spawned an object at the same position between pick
+// and create. Compute the half-diagonal of the bounding box and reject if
+// any non-road / non-self / non-driver object intersects that radius.
+private _bb = boundingBoxReal _veh;
+private _bbMin = _bb select 0;
+private _bbMax = _bb select 1;
+private _bbR = (((_bbMax select 0) - (_bbMin select 0)) max ((_bbMax select 1) - (_bbMin select 1))) * 0.6;
+_bbR = (_bbR max 3) min 10;
+private _collide = false;
+{
+    if (_collide) then { continue; };
+    if (isNull _x) then { continue; };
+    if (_x isEqualTo _veh) then { continue; };
+    if (_x isKindOf "Road") then { continue; };
+    if ((typeOf _x) isEqualTo "") then { continue; };
+    _collide = true;
+} forEach (_pos nearObjects _bbR);
+if (_collide) exitWith
+{
+    deleteVehicle _veh;
+    missionNamespace setVariable ["civsub_v1_traffic_lastMovingSpawnFail", "spawnCollision", false];
+    [objNull, objNull]
+};
+
 // Civilian driver
 private _grp = createGroup [civilian, true];
 _grp setGroupIdGlobal ["CIV Traffic"];
