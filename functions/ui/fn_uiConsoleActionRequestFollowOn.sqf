@@ -19,4 +19,4 @@ if (!hasInterface) exitWith {false};
     "Follow-on requests are now collected as part of the SITREP submission flow. Use SEND SITREP to request a follow-on."
 ] call ARC_fnc_clientToast;
 
-false
+true
