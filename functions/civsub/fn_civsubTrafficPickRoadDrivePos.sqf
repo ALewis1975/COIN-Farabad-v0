@@ -1,0 +1,111 @@
+/*
+    ARC_fnc_civsubTrafficPickRoadDrivePos
+
+    Pick an on-road spawn position for a MOVING ambient civilian vehicle.
+
+    The returned position is the centre of a road segment (lane line) that:
+      - Has at least one connected neighbour segment (so the vehicle has
+        somewhere to drive to immediately).
+      - Whose chosen neighbour itself has further connections (so we do not
+        spawn at the very last segment / dead-end of the road network — i.e.
+        we avoid the longitudinal "edges" of a road).
+      - Is not on water, not on a steep slope, not inside a registered
+        traffic-exclusion zone, and not within `_minSep` of another land
+        vehicle.
+
+    The returned direction is the bearing from the chosen road segment toward
+    its picked connected neighbour — the direction the vehicle will drive in.
+
+    Params:
+      0: centerPosATL [x,y,z]
+      1: searchRadius (meters)
+      2: minSeparation (meters) - avoid existing vehicles nearby
+
+    Returns:
+      [posATL, dirDeg, nextRoadPosATL] on success, or [] on failure.
+*/
+
+params [
+    ["_center", [0,0,0], [[]]],
+    ["_searchR", 600, [0]],
+    ["_minSep", 30, [0]]
+];
+
+if (!(_center isEqualType []) || { (count _center) < 2 }) exitWith {[]};
+
+private _tries = 28;
+
+private _foundPos = [];
+private _foundDir = 0;
+private _foundNext = [];
+
+for "_i" from 1 to _tries do
+{
+    private _probe = _center getPos [random _searchR, random 360];
+    private _roads = _probe nearRoads 220;
+    if ((count _roads) == 0) then { continue; };
+
+    private _r = selectRandom _roads;
+    if (isNull _r) then { continue; };
+
+    // Edge-avoidance: candidate road must have at least one connected neighbour,
+    // and that neighbour must itself be connected onward — keeps spawns off the
+    // very last segment of a road network (dead-end / map edge).
+    private _conn = roadsConnectedTo _r;
+    if ((count _conn) == 0) then { continue; };
+
+    private _r2 = objNull;
+    {
+        if (isNull _x) then { continue; };
+        private _onward = roadsConnectedTo _x;
+        if ((count _onward) > 0) exitWith { _r2 = _x; };
+    } forEach _conn;
+    if (isNull _r2) then { continue; };
+
+    private _rPos = getPosATL _r;
+    _rPos set [2, 0];
+
+    if (surfaceIsWater _rPos) then { continue; };
+
+    private _r2Pos = getPosATL _r2;
+    _r2Pos set [2, 0];
+
+    private _dir = _r getDir _r2;
+
+    // Slope guard — avoid extreme grades that would tip the vehicle.
+    private _n = surfaceNormal _rPos;
+    private _slope = acos ((_n vectorDotProduct [0,0,1]) max -1 min 1);
+    if (_slope > 0.35) then { continue; };
+
+    // Vehicle separation — avoid stacking on top of another vehicle.
+    private _near = nearestObjects [_rPos, ["LandVehicle"], _minSep];
+    if ((count _near) > 0) then { continue; };
+
+    // Exclusion zone check (mirrors fn_civsubTrafficPickRoadsidePos)
+    private _exclZones = missionNamespace getVariable ["ARC_trafficExclusionZones", []];
+    if ((_exclZones isEqualType []) && { (count _exclZones) > 0 }) then
+    {
+        private _excluded = false;
+        {
+            if (_excluded) then { continue; };
+            if (_x isEqualType [] && { (count _x) >= 2 }) then
+            {
+                private _zp = _x select 0;
+                private _zr = _x select 1;
+                if ((_zp isEqualType []) && { (count _zp) >= 2 } && { (_zr isEqualType 0) }) then
+                {
+                    if ((_rPos distance2D _zp) <= _zr) then { _excluded = true; };
+                };
+            };
+        } forEach _exclZones;
+        if (_excluded) then { continue; };
+    };
+
+    _foundPos = _rPos;
+    _foundDir = _dir;
+    _foundNext = _r2Pos;
+    break;
+};
+
+if ((count _foundPos) == 0) exitWith { [] };
+[_foundPos, _foundDir, _foundNext]
