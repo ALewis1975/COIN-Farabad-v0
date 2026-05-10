@@ -48,20 +48,22 @@ switch (_req) do
             true
         }
         else
-        if (_kind isEqualTo "VBIED_VEHICLE") then
         {
-            private _did = ["activeVbiedDeviceId", ""] call ARC_fnc_stateGet;
-            if (!(_did isEqualType "")) then { _did = ""; };
-            _did = trim _did;
-            if (_did isEqualTo "") exitWith { ["EOD", "No active VBIED vehicle."] call ARC_fnc_clientToast; false };
-            [_did] remoteExec ["ARC_fnc_vbiedServerDetonate", 2];
-            ["EOD", "Detonation requested (TOC approved)."] call ARC_fnc_clientToast;
-            true
-        }
-        else
-        {
-            ["EOD", "No supported EOD objective active."] call ARC_fnc_clientToast;
-            false
+            if (_kind isEqualTo "VBIED_VEHICLE") then
+            {
+                private _did = ["activeVbiedDeviceId", ""] call ARC_fnc_stateGet;
+                if (!(_did isEqualType "")) then { _did = ""; };
+                _did = trim _did;
+                if (_did isEqualTo "") exitWith { ["EOD", "No active VBIED vehicle."] call ARC_fnc_clientToast; false };
+                [_did] remoteExec ["ARC_fnc_vbiedServerDetonate", 2];
+                ["EOD", "Detonation requested (TOC approved)."] call ARC_fnc_clientToast;
+                true
+            }
+            else
+            {
+                ["EOD", "No supported EOD objective active."] call ARC_fnc_clientToast;
+                false
+            };
         };
     };
 
