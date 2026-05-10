@@ -111,26 +111,19 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
 
         uiNamespace setVariable ["ARC_clientSnapshotRefreshCount", 0];
 
-        // Single refresh contract: keep TOC + briefing parity when any client snapshot signal changes.
-        private _refreshClientSnapshotView = {
-            if (!isNil "ARC_fnc_clientSnapshotRefresh") then
-            {
-                [] call ARC_fnc_clientSnapshotRefresh;
-            };
-        };
-
         // Wait for server readiness gate + first snapshot
         private _snapshotGateWarnIntervalS = 45;
         private _snapshotGateWarnAt = diag_tickTime + _snapshotGateWarnIntervalS;
         waitUntil {
-            private _ready = (missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false]) &&
-                { !isNil { missionNamespace getVariable "ARC_pub_state" } };
+            private _refreshEnabled = missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false];
+            private _hasState = !isNil { missionNamespace getVariable "ARC_pub_state" };
+            private _ready = _refreshEnabled && { _hasState };
             if (!_ready && { diag_tickTime >= _snapshotGateWarnAt }) then
             {
                 diag_log format [
                     "[ARC][WARN] initPlayerLocal snapshot watcher: waiting for initial state gate=%1 hasState=%2",
-                    missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false],
-                    !isNil { missionNamespace getVariable "ARC_pub_state" }
+                    _refreshEnabled,
+                    _hasState
                 ];
                 _snapshotGateWarnAt = diag_tickTime + _snapshotGateWarnIntervalS;
             };
@@ -138,7 +131,7 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
         };
 
         // Initial refresh for JIP
-        call _refreshClientSnapshotView;
+        if (!isNil "ARC_fnc_clientSnapshotRefresh") then { [] call ARC_fnc_clientSnapshotRefresh; };
 
         private _lastState = missionNamespace getVariable ["ARC_pub_stateUpdatedAt", -1];
         private _lastS1 = missionNamespace getVariable ["ARC_pub_s1_registryUpdatedAt", -1];
@@ -200,7 +193,7 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
             {
                 _lastState = missionNamespace getVariable ["ARC_pub_stateUpdatedAt", _lastState];
                 _stateFallbackRefreshed = true;
-                call _refreshClientSnapshotView;
+                if (!isNil "ARC_fnc_clientSnapshotRefresh") then { [] call ARC_fnc_clientSnapshotRefresh; };
             };
 
             private _nowState = missionNamespace getVariable ["ARC_pub_stateUpdatedAt", _lastState];
@@ -222,7 +215,7 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
             if (_nowAirbase isEqualType 0 && { _nowAirbase != _lastAirbase }) then { _lastAirbase = _nowAirbase; _changed = true; };
             if (_nowEodDispo isEqualType 0 && { _nowEodDispo != _lastEodDispo }) then { _lastEodDispo = _nowEodDispo; _changed = true; };
 
-            if (_changed) then { call _refreshClientSnapshotView; };
+            if (_changed && { !isNil "ARC_fnc_clientSnapshotRefresh" }) then { [] call ARC_fnc_clientSnapshotRefresh; };
 
             if (missionNamespace getVariable ["ARC_debugLogEnabled", false]) then
             {
