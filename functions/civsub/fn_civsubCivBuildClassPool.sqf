@@ -13,6 +13,8 @@
     Cache is keyed by preferred faction (or EXPLICIT/KNOWN/ANY3CB/FALLBACK) to avoid stale pools.
 */
 
+if (!isServer) exitWith {[]};
+
 private _explicit = missionNamespace getVariable ["civsub_v1_civ_classPool", []];
 if (_explicit isEqualType [] && {count _explicit > 0}) exitWith {
     missionNamespace setVariable ["civsub_v1_civ_classPool_cached", _explicit, true];

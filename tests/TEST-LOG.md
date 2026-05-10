@@ -3993,6 +3993,23 @@ Contrast with the correct pattern used in the background check handler itself:
 | F11 | P2 | CBA / ACE compat | `BIS_fnc_holdActionAdd`/`Remove` do not exist at PreInit — ACE3 replaces them; cosmetic noise only | 3 | No action; mod version alignment if persistent |
 | F12 | P2 | Engine / Spawn | `Setting invalid pitch 0.0000` for 4 BLUFOR units (B Delta 3-3:1, B Charlie 1-4:1, B Charlie 1-5:1, B Delta 3-4:1) — cosmetic voice pitch | 4 | Add guard or explicit `setPitch` for affected placed units |
 | F13 | P2 | USAF Mod | `USAF_C130J` turret body/gun not found in model — mod config/model version mismatch; 4 errors at load | 4 | Update USAF Mod |
+
+---
+
+## [2026-05-10] Sprint 1 authority hardening — helper/server write guards
+
+**Branch:** copilot/implement-sprint-1-safety-harden
+**Commit:** 7ba8337
+
+**Scenario:** Added defensive server-authority guards to shared-state helper functions used by CIVSUB and legacy state compatibility code so clients cannot finalize replicated mission state through helper/local fallback paths.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | GitHub Actions audit | Reviewed workflow run `25633799529` via GitHub MCP tools (`Arma SQF + Mission Config Preflight`) | BLOCKED | Run conclusion was `action_required` with zero jobs, so no server-side logs were available to inspect. |
+| 2 | Compat scan (changed SQF) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubDeltaApplyToDistrict.sqf functions/civsub/fn_civsubCivFindSpawnPos.sqf functions/civsub/fn_civsubCivBuildClassPool.sqf functions/civsub/fn_civsubTrafficBuildVehiclePool.sqf functions/core/fn_stateSetGet.sqf` | PASS | No compat-scan violations after adding guards and replacing warned indexing in the touched CIVSUB helper. |
+| 3 | sqflint (changed SQF) | `~/.local/bin/sqflint -e w <each changed file above>` | PASS | No warnings or errors across all 5 changed SQF files. |
+| 4 | Repo static validation | `python3 scripts/dev/validate_state_migrations.py && bash scripts/dev/check_test_log_commits.sh && python3 scripts/dev/validate_marker_index.py && tests/static/airbase_planning_mode_checks.sh && tests/static/casreq_snapshot_contract_checks.sh` | PASS | Existing static checks remained green after authority-hardening edits. |
+| 5 | Dedicated-server runtime / JIP | N/A | BLOCKED | No Arma 3 dedicated/JIP environment in container; still needs live MP verification that CIVSUB spawn helpers and replicated snapshots behave unchanged on dedicated server. |
 | F14 | P2 | FIR AWC Mod | Pylon weapon creation failures for `FIR_F16C_Fueltank_P_1rnd_M`, `FIR_F16C_center_Fueltank_P_1rnd_M`, `FIR_Empty_P_1rnd_M` — FIR AWC config error | 24 | Update FIR AWC mod |
 | F15 | P2 | BABE Mod | `Ref to nonnetwork object babe_helper` — expected BABE AI mod behaviour, not a bug | 468 | No action; known noise |
 | F16 | P2 | Terrain / AI | `No more slot to add connection` at grid 046054 / 051057 — terrain road network too dense at 2 nodes; AI pathfinding degraded there | 2 | Not actionable from mission; report to terrain author |

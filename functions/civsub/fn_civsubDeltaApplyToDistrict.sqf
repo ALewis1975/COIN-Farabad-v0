@@ -7,6 +7,8 @@
       0: bundle hashmap
 */
 
+if (!isServer) exitWith {false};
+
 params [["_bundle", createHashMap, [createHashMap]]];
 if !(_bundle isEqualType createHashMap) exitWith {false};
 
