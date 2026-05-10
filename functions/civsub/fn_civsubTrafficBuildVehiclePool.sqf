@@ -21,6 +21,8 @@
     Returns: array of strings (combined prefer + fallback, unique)
 */
 
+if (!isServer) exitWith {[]};
+
 private _prefer = missionNamespace getVariable ["civsub_v1_traffic_vehiclePool_prefer", []];
 private _fallback = missionNamespace getVariable ["civsub_v1_traffic_vehiclePool_fallback", []];
 

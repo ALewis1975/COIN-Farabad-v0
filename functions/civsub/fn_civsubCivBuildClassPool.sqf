@@ -10,8 +10,10 @@
       4) config scan for any UK3CB civilian man classes
       5) vanilla fallback
 
-    Cache is keyed by preferred faction (or EXPLICIT/KNOWN/ANY3CB/FALLBACK) to avoid stale pools.
+     Cache is keyed by preferred faction (or EXPLICIT/KNOWN/ANY3CB/FALLBACK) to avoid stale pools.
 */
+
+if (!isServer) exitWith {[]};
 
 private _explicit = missionNamespace getVariable ["civsub_v1_civ_classPool", []];
 if (_explicit isEqualType [] && {count _explicit > 0}) exitWith {

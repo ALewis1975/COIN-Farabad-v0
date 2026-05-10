@@ -31,6 +31,8 @@ if ((count _args) >= 3) then
 
 if (_doSet) then
 {
+    if (!isServer) exitWith { false };
+
     private _value = _args param [1, nil];
 
     if !(isNil "ARC_fnc_stateSet") exitWith
