@@ -252,9 +252,9 @@ if (
         if (!(_retryFastS isEqualType 0)) then { _retryFastS = 5; };
         _retryFastS = (_retryFastS max 2) min 15;
 
-        private _steadyS = missionNamespace getVariable ["ARC_clientKeepaliveSteadyRetryS", 45];
-        if (!(_steadyS isEqualType 0)) then { _steadyS = 45; };
-        _steadyS = (_steadyS max 15) min 180;
+        private _steadyRetryS = missionNamespace getVariable ["ARC_clientKeepaliveSteadyRetryS", 45];
+        if (!(_steadyRetryS isEqualType 0)) then { _steadyRetryS = 45; };
+        _steadyRetryS = (_steadyRetryS max 15) min 180;
 
         private _loopSleepS = missionNamespace getVariable ["ARC_clientKeepaliveLoopSleepS", 1];
         if (!(_loopSleepS isEqualType 0)) then { _loopSleepS = 1; };
@@ -265,7 +265,7 @@ if (
             diag_log format [
                 "[ARC][CLIENT][SCHED] initPlayerLocal keepalive scheduler: fast=%1s steady=%2s loopSleep=%3s",
                 _retryFastS,
-                _steadyS,
+                _steadyRetryS,
                 _loopSleepS
             ];
         };
@@ -294,7 +294,7 @@ if (
                 }
                 else
                 {
-                    _nextConsoleAt = _now + _steadyS;
+                    _nextConsoleAt = _now + _steadyRetryS;
                 };
             };
 
@@ -313,7 +313,7 @@ if (
                 }
                 else
                 {
-                    _nextTocAt = _now + _steadyS;
+                    _nextTocAt = _now + _steadyRetryS;
                 };
             };
 

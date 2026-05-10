@@ -1241,7 +1241,7 @@ if (isServer) then
             private _interval = missionNamespace getVariable ["ARC_worldTime_broadcastIntervalSec", 30];
             if (!(_interval isEqualType 0) || { _interval < 10 }) then { _interval = 30; };
             diag_log format ["[ARC][GOVSTATS] aggregate loop start (interval=%1s)", _interval];
-            while { missionNamespace getVariable ["ARC_govStatsLoopRunning", false] } do
+            while { missionNamespace getVariable ["ARC_govStatsLoopRunning", true] } do
             {
                 [] call ARC_fnc_govStatsCompute;
                 sleep _interval;

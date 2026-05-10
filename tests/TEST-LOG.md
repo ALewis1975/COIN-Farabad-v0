@@ -22,11 +22,13 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | # | Check | Command | Result | Notes |
 |---|-------|---------|--------|-------|
 | 1 | Baseline repo-wide sqflint compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict $(git --no-pager ls-files '*.sqf')` | FAIL (pre-existing) | Existing repository compat violations are present outside Sprint 3 scope; no changes made to those files. |
-| 2 | State migration validation | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios passed. |
-| 3 | Marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | Full mode coverage passed (`off`, `auto`, `auto-no-rg`). |
-| 4 | AIRBASE planning-mode static checks | `tests/static/airbase_planning_mode_checks.sh` | PASS | Runtime gate checks passed. |
-| 5 | CASREQ snapshot contract checks | `tests/static/casreq_snapshot_contract_checks.sh` | PASS | Snapshot contract checks passed. |
-| 6 | Dedicated-server / JIP runtime scheduler soak | n/a | BLOCKED | Arma 3 dedicated + client runtime unavailable in this container. |
+| 2 | Changed-file sqflint compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict initPlayerLocal.sqf functions/sitepop/fn_sitePopTick.sqf scripts/worldtime/worldtime_events_server.sqf initServer.sqf` | PASS | Sprint 3 changed SQF files scanned clean. |
+| 3 | Changed-file sqflint | `sqflint -e w initPlayerLocal.sqf functions/sitepop/fn_sitePopTick.sqf scripts/worldtime/worldtime_events_server.sqf initServer.sqf` | BLOCKED | `sqflint` is unavailable in this container (`command not found`). |
+| 4 | State migration validation | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios passed (including post-review rerun). |
+| 5 | Marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | Full mode coverage passed (`off`, `auto`, `auto-no-rg`). |
+| 6 | AIRBASE planning-mode static checks | `tests/static/airbase_planning_mode_checks.sh` | PASS | Runtime gate checks passed. |
+| 7 | CASREQ snapshot contract checks | `tests/static/casreq_snapshot_contract_checks.sh` | PASS | Snapshot contract checks passed. |
+| 8 | Dedicated-server / JIP runtime scheduler soak | n/a | BLOCKED | Arma 3 dedicated + client runtime unavailable in this container. |
 
 ### Scheduler inventory (touched this sprint)
 - `initPlayerLocal.sqf`: snapshot watcher fallback poll + keepalive scheduler cadence/tunables/diagnostics.
