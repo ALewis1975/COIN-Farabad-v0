@@ -5102,3 +5102,12 @@ Mode: A (Bug Fix)
 |-------|---------|--------|
 | sqflint compat + lint (changed SQF) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/logistics/fn_execSpawnConvoy.sqf functions/sitepop/fn_sitePopSpawnSite.sqf functions/threat/fn_threatVirtualPoolInit.sqf initServer.sqf && sqflint -e w <same files>` | PASS |
 | Dedicated/JIP runtime checks | Manual | BLOCKED |
+
+## 2026-05-10 — Sprint 2 hardening post-review consistency pass
+
+**Branch/Commit:** copilot/implement-sprint-2-ai-objects-cleanup @ HEAD
+
+| Check | Command | Result |
+|-------|---------|--------|
+| Changed-file compat + sqflint | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/logistics/fn_execSpawnConvoy.sqf functions/sitepop/fn_sitePopSpawnSite.sqf functions/threat/fn_threatVirtualPoolInit.sqf initServer.sqf && sqflint -e w <same files>` | PASS |
+| Dedicated/JIP validation | Manual | BLOCKED |

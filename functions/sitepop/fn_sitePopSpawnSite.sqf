@@ -34,7 +34,8 @@ if (!_canSpawnCivil) exitWith
 
 private _registry = missionNamespace getVariable ["ARC_sitePopRegistry", createHashMap];
 private _active   = missionNamespace getVariable ["ARC_sitePopActive",   createHashMap];
-private _hk       = compile "params ['_h']; keys _h";
+// sqflint-compat helper wrapper for hash-map key enumeration.
+private _keysHelper = compile "params ['_h']; keys _h";
 
 // Guard: already active (non-empty sentinel)
 private _existing = [_active, _siteId, []] call _hg;
@@ -55,7 +56,7 @@ private _activeCount = 0;
     {
         _activeCount = _activeCount + 1;
     };
-} forEach ([_active] call _hk);
+} forEach ([_active] call _keysHelper);
 
 if (_activeCount >= _activeCap) exitWith
 {

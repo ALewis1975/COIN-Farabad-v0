@@ -161,6 +161,7 @@ private _processedLocations = 0;
             ["pos",                _vgPos],
             ["strength",           _strength],
             ["anchorLocationId",   _id],
+            // Human-readable location label for diagnostics/AAR correlation.
             ["anchorLocationName", _displayName],
             ["spawnedUnits",       []],
             ["lastMoved",          _now],
