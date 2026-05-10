@@ -8,7 +8,7 @@
       0: center (array [x,y] or [x,y,z])
       1: radius (number)
 
-    Returns: position array [x,y,z]
+   Returns: position array [x,y,z]
 */
 
 if (!isServer) exitWith {[0,0,0]};
