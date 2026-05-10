@@ -113,6 +113,7 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
         if (isNil "ARC_fnc_clientSnapshotRefresh") exitWith
         {
             diag_log "[ARC][WARN] initPlayerLocal snapshot watcher: ARC_fnc_clientSnapshotRefresh missing; watcher aborted.";
+            false
         };
 
         // Wait for server readiness gate + first snapshot
