@@ -13,7 +13,11 @@
 if (!isServer) exitWith {0};
 
 private _leads = ["leadPool", []] call ARC_fnc_stateGet;
-if (!(_leads isEqualType [])) then { _leads = []; };
+if (!(_leads isEqualType [])) then
+{
+    diag_log format ["[ARC][WARN] ARC_fnc_leadPrune: leadPool state was not an array (type=%1) — resetting to []", typeName _leads];
+    _leads = [];
+};
 
 private _now = serverTime;
 private _before = count _leads;
@@ -36,6 +40,11 @@ _leads = _leads select
 {
     _x params ["_id", "_type", "_disp", "_pos", ["_strength", 0.5], ["_createdAt", -1], ["_expiresAt", -1]];
     (_expiresAt <= 0) || { _expiresAt > _now }
+};
+if (!(_leads isEqualType [])) then
+{
+    diag_log format ["[ARC][WARN] ARC_fnc_leadPrune: select pipeline produced non-array (type=%1) — resetting leadPool working copy to []", typeName _leads];
+    _leads = [];
 };
 
 // ── Confidence (strength) decay ───────────────────────────────────────────
@@ -91,6 +100,11 @@ if (_decayEnabled) then
         }
         else { _entry };
     };
+    if (!(_leads isEqualType [])) then
+    {
+        diag_log format ["[ARC][WARN] ARC_fnc_leadPrune: apply pipeline produced non-array (type=%1) — resetting leadPool working copy to []", typeName _leads];
+        _leads = [];
+    };
 
     if (_decayChanged) then { ["leadPool", _leads] call ARC_fnc_stateSet; };
 };
@@ -98,6 +112,7 @@ if (_decayEnabled) then
 
 
 // Safety net: if a suspicious lead circle has a TTL, remove its marker even if the lead itself does not expire.
+if (!(_leads isEqualType [])) then { _leads = []; };
 {
     if (!(_x isEqualType []) || { (count _x) < 11 }) then { continue; };
     private _id = _x # 0;
