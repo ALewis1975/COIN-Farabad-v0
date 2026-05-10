@@ -519,6 +519,17 @@ if ((count _classes) == 0) exitWith
     []
 };
 
+private _maxVehicles = missionNamespace getVariable ["ARC_convoyMaxVehicles", 10];
+if (!(_maxVehicles isEqualType 0)) then { _maxVehicles = 10; };
+_maxVehicles = (_maxVehicles max 1) min 20;
+
+if ((count _classes) > _maxVehicles) then
+{
+    ["[ARC][CONVOY][WARN] ARC_fnc_execSpawnConvoy: vehicle cap hit task=%1 requested=%2 cap=%3; truncating convoy class list.",
+        [_taskId, count _classes, _maxVehicles], "WARN"] call _log;
+    _classes = _classes select [0, _maxVehicles];
+};
+
 // Startup breadcrumbs (low-volume): final selected class list after policy filtering.
 ["[ARC][CONVOY][BOOT] task=%1 type=%2 selectedClassesAfterFiltering=%3 count=%4", [_taskId, _incidentTypeU, _classes, count _classes], "WARN"] call _log;
 

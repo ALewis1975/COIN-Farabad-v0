@@ -103,10 +103,19 @@ if (!(_records isEqualType [])) then { _records = []; };
 private _seq    = ["threat_v0_seq", 0] call ARC_fnc_stateGet;
 if (!(_seq isEqualType 0)) then { _seq = 0; };
 
+private _maxGroups = missionNamespace getVariable ["ARC_threatVirtualPoolMaxGroups", 96];
+if (!(_maxGroups isEqualType 0)) then { _maxGroups = 96; };
+_maxGroups = (_maxGroups max 8) min 400;
+
 private _created = 0;
 private _now     = serverTime;
+private _capReached = false;
+private _processedLocations = 0;
 
 {
+    if (_capReached) exitWith {};
+    _processedLocations = _processedLocations + 1;
+
     _x params [["_id", "", [""]], ["_displayName", "", [""]], ["_pos", [], [[]]]];
 
     if (!(_pos isEqualType []) || {(count _pos) < 2}) then { continue; };
@@ -132,6 +141,8 @@ private _now     = serverTime;
     };
 
     for "_g" from 1 to _groupCount do {
+        if (_created >= _maxGroups) exitWith { _capReached = true; };
+
         _seq = _seq + 1;
         private _vgId = format ["vg_%1_%2", _seq, floor (random 1e5)];
 
@@ -150,6 +161,8 @@ private _now     = serverTime;
             ["pos",                _vgPos],
             ["strength",           _strength],
             ["anchorLocationId",   _id],
+            // Human-readable location label for diagnostics/AAR correlation.
+            ["anchorLocationName", _displayName],
             ["spawnedUnits",       []],
             ["lastMoved",          _now],
             ["lastPlayerNearTs",   -1]
@@ -161,11 +174,18 @@ private _now     = serverTime;
 
 } forEach _locations;
 
+if (_capReached) then
+{
+    private _skippedLocations = ((count _locations) - _processedLocations) max 0;
+    diag_log format ["[ARC][VPOOL][WARN] ARC_fnc_threatVirtualPoolInit: cap reached at %1/%2 virtual groups; skippedLocations=%3.",
+        _created, _maxGroups, _skippedLocations];
+};
+
 ["threat_v0_seq",              _seq]    call ARC_fnc_stateSet;
 ["threat_v0_records",          _records] call ARC_fnc_stateSet;
 ["threat_v0_vgroup_active_index", []]   call ARC_fnc_stateSet;
 
-diag_log format ["[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolInit: created %1 virtual group record(s).", _created];
+diag_log format ["[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolInit: created %1 virtual group record(s) (cap=%2).", _created, _maxGroups];
 
 // Start the recurring pool tick loop
 [] call ARC_fnc_threatVirtualPoolTick;
