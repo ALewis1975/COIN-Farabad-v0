@@ -3999,7 +3999,7 @@ Contrast with the correct pattern used in the background check handler itself:
 ## [2026-05-10] Sprint 1 authority hardening — helper/server write guards
 
 **Branch:** copilot/implement-sprint-1-safety-harden
-**Commit:** d78d8b0 (working tree)
+**Commit:** 7ba8337
 
 **Scenario:** Added defensive server-authority guards to shared-state helper functions used by CIVSUB and legacy state compatibility code so clients cannot finalize replicated mission state through helper/local fallback paths.
 

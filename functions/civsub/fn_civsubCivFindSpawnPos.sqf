@@ -8,6 +8,8 @@
       0: center (array [x,y] or [x,y,z])
       1: radius (number)
 
+   Extra args are ignored for backward compatibility.
+
    Returns: position array [x,y,z]
 */
 
