@@ -112,8 +112,8 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
         uiNamespace setVariable ["ARC_clientSnapshotRefreshCount", 0];
 
         // Wait for server readiness gate + first snapshot
-        private _snapshotGateWarnIntervalS = 45;
-        private _snapshotGateWarnAt = diag_tickTime + _snapshotGateWarnIntervalS;
+        private _snapshotGateWarnIntervalSec = 45;
+        private _snapshotGateWarnAt = diag_tickTime + _snapshotGateWarnIntervalSec;
         waitUntil {
             private _refreshEnabled = missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false];
             private _hasState = !isNil { missionNamespace getVariable "ARC_pub_state" };
@@ -125,7 +125,7 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
                     _refreshEnabled,
                     _hasState
                 ];
-                _snapshotGateWarnAt = diag_tickTime + _snapshotGateWarnIntervalS;
+                _snapshotGateWarnAt = diag_tickTime + _snapshotGateWarnIntervalSec;
             };
             _ready
         };
@@ -160,8 +160,6 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
                 ["_signalVarName", "", [""]],
                 ["_ehIdVarName", "", [""]]
             ];
-
-            if (_signalVarName isEqualTo "" || { _ehIdVarName isEqualTo "" }) then { continue; };
 
             private _existingEhId = missionNamespace getVariable [_ehIdVarName, -1];
             if (_existingEhId isEqualType 0 && { _existingEhId >= 0 }) then { continue; };
