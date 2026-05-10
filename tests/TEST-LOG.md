@@ -11,6 +11,32 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-10 — Sprint 3 scheduler optimization (Mode C)
+
+**Branch/Commit:** copilot/sprint-3-scheduler-optimization @ HEAD
+
+**Scenario:** Targeted scheduler/perf pass for dedicated-server readiness: reduce duplicated polling/global scans, add duplicate-loop guards, and add low-risk cadence tunables/diagnostics without changing mission semantics.
+
+### Static checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Baseline repo-wide sqflint compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict $(git --no-pager ls-files '*.sqf')` | FAIL (pre-existing) | Existing repository compat violations are present outside Sprint 3 scope; no changes made to those files. |
+| 2 | State migration validation | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios passed. |
+| 3 | Marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | Full mode coverage passed (`off`, `auto`, `auto-no-rg`). |
+| 4 | AIRBASE planning-mode static checks | `tests/static/airbase_planning_mode_checks.sh` | PASS | Runtime gate checks passed. |
+| 5 | CASREQ snapshot contract checks | `tests/static/casreq_snapshot_contract_checks.sh` | PASS | Snapshot contract checks passed. |
+| 6 | Dedicated-server / JIP runtime scheduler soak | n/a | BLOCKED | Arma 3 dedicated + client runtime unavailable in this container. |
+
+### Scheduler inventory (touched this sprint)
+- `initPlayerLocal.sqf`: snapshot watcher fallback poll + keepalive scheduler cadence/tunables/diagnostics.
+- `functions/sitepop/fn_sitePopTick.sqf`: per-tick alive-player cache reused across site trigger/despawn checks.
+- `scripts/worldtime/worldtime_events_server.sqf`: publish-on-change and live interval reload.
+- `initServer.sqf` gov-stats loop: duplicate-start guard (`ARC_govStatsLoopRunning`) and live interval reload.
+
+### Remaining heavy loops (documented/deferred)
+- Airbase ambient tick (2s), threat virtual pool tick, and active incident/convoy execution scans remain intentionally unchanged pending dedicated 32-player profiling.
+
 ## 2026-05-09 — Lead/Incident UX clarity + bug-safety pass (Mode B)
 
 **Branch/Commit:** copilot/research-lead-generation-flows @ HEAD
