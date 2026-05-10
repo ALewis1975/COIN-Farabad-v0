@@ -19,7 +19,6 @@ params [
     ["_r", 200, [0]],
     ["_districtId", "", [""]]
 ];
-if !(_districtId isEqualType "") then { _districtId = ""; };
 
 // Phase 2 helpers (defined in civsubInitServer)
 private _posIsRoadish = missionNamespace getVariable ["ARC_civsub_fnc_posIsRoadish", { params ["_p"]; isOnRoad _p }];
@@ -28,7 +27,13 @@ private _findOffRoad = missionNamespace getVariable ["ARC_civsub_fnc_findPosOffR
 private _c = _center;
 if ((count _c) == 2) then { _c = [_c select 0, _c select 1, 0]; };
 
-private _zones = missionNamespace getVariable ["civsub_v1_civ_exclusion_zones", []];
+private _zonesVar = "civsub_v1_civ_exclusion_zones";
+if !(_districtId isEqualTo "") then {
+    // Keep the optional districtId param in the contract without changing
+    // Sprint 1 behavior: exclusion-zone storage remains global.
+    _zonesVar = "civsub_v1_civ_exclusion_zones";
+};
+private _zones = missionNamespace getVariable [_zonesVar, []];
 if !(_zones isEqualType []) then { _zones = []; };
 
 // Default exclusion: airbase flightline

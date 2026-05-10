@@ -4005,7 +4005,7 @@ Contrast with the correct pattern used in the background check handler itself:
 
 | # | Check | Command / Step | Result | Notes |
 |---|-------|----------------|--------|-------|
-| 1 | GitHub Actions audit | Reviewed workflow run `25633799529` via MCP (`Arma SQF + Mission Config Preflight`) | BLOCKED | Run conclusion was `action_required` with zero jobs, so no server-side logs were available to inspect. |
+| 1 | GitHub Actions audit | Reviewed workflow run `25633799529` via GitHub MCP tools (`Arma SQF + Mission Config Preflight`) | BLOCKED | Run conclusion was `action_required` with zero jobs, so no server-side logs were available to inspect. |
 | 2 | Compat scan (changed SQF) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubDeltaApplyToDistrict.sqf functions/civsub/fn_civsubCivFindSpawnPos.sqf functions/civsub/fn_civsubCivBuildClassPool.sqf functions/civsub/fn_civsubTrafficBuildVehiclePool.sqf functions/core/fn_stateSetGet.sqf` | PASS | No compat-scan violations after adding guards and replacing warned indexing in the touched CIVSUB helper. |
 | 3 | sqflint (changed SQF) | `~/.local/bin/sqflint -e w <each changed file above>` | PASS | No warnings or errors across all 5 changed SQF files. |
 | 4 | Repo static validation | `python3 scripts/dev/validate_state_migrations.py && bash scripts/dev/check_test_log_commits.sh && python3 scripts/dev/validate_marker_index.py && tests/static/airbase_planning_mode_checks.sh && tests/static/casreq_snapshot_contract_checks.sh` | PASS | Existing static checks remained green after authority-hardening edits. |
