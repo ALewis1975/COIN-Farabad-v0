@@ -10,11 +10,12 @@ if (isNil "ARC_fnc_briefingUpdateClient") exitWith
     false
 };
 
-// Debounce: skip if a refresh already ran within the last second.
+private _debounceIntervalSec = 1;
+// Debounce: skip if a refresh already ran within the configured interval.
 private _pendingAt = uiNamespace getVariable ["ARC_clientSnapshotRefreshPendingAt", -1];
 if (!(_pendingAt isEqualType 0)) then { _pendingAt = -1; };
 private _now = diag_tickTime;
-if ((_now - _pendingAt) < 1) exitWith { false };
+if ((_now - _pendingAt) < _debounceIntervalSec) exitWith { false };
 uiNamespace setVariable ["ARC_clientSnapshotRefreshPendingAt", _now];
 
 [] call ARC_fnc_briefingUpdateClient;

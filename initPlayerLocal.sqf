@@ -158,6 +158,7 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
             ["ARC_pub_airbaseUiSnapshotUpdatedAt", "ARC_clientAirbaseSnapshotPvEhId"],
             ["ARC_pub_eodDispoApprovalsUpdatedAt", "ARC_clientEodDispoSnapshotPvEhId"]
         ];
+        private _registeredSnapshotEhCount = 0;
 
         {
             _x params [
@@ -172,14 +173,16 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
             private _newEhId = _signalVarName addPublicVariableEventHandler {
                 if (missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false]) then
                 {
-                    [] call ARC_fnc_clientSnapshotRefresh;
+                    [] spawn ARC_fnc_clientSnapshotRefresh;
                 };
             };
             missionNamespace setVariable [_ehIdVarName, _newEhId];
+            _registeredSnapshotEhCount = _registeredSnapshotEhCount + 1;
         } forEach _snapshotSignalEhBindings;
 
         diag_log format [
-            "[ARC][INFO] initPlayerLocal snapshot watcher: registered PV handlers=%1",
+            "[ARC][INFO] initPlayerLocal snapshot watcher: registered PV handlers=%1/%2",
+            _registeredSnapshotEhCount,
             count _snapshotSignalEhBindings
         ];
 
