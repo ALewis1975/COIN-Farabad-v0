@@ -167,6 +167,8 @@ missionNamespace setVariable ["ARC_threatVirtualRepositionS",       600,  true];
 missionNamespace setVariable ["ARC_threatVirtualPoolTickS",         60,   true]; // pool tick cadence (seconds)
 missionNamespace setVariable ["ARC_threatVirtualPatrolRadiusM",    200,  true]; // physical group patrol radius when spawned (metres)
 missionNamespace setVariable ["ARC_threatVirtualPatrolWaypointN",  5,    true]; // waypoint count for physical group patrol task
+missionNamespace setVariable ["ARC_threatVirtualPoolMaxGroups",    96,   true]; // hard cap on seeded virtual OpFor groups across all locations
+missionNamespace setVariable ["ARC_sitePopActiveSitesCap",          6,   true]; // max simultaneous active SitePop sites
 
 // OPFOR unit class pool — 3CB Middle Eastern Insurgents (MEI) + Extremists (MEE), OPFOR side.
 // Use _O_ (East/OPFOR) variants so faction side in CfgVehicles matches createGroup east.

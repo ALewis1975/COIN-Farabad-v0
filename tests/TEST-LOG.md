@@ -5058,3 +5058,25 @@ Mode: A (Bug Fix)
 | 6 | sqflint warnings | `sqflint -e w <changed files>` | BLOCKED | sqflint binary not available in this environment |
 | 7 | Local MP smoke: no civilian vehicle spawns within 1050 m of any active convoy vehicle while convoy is en route | Hosted/local MP run | BLOCKED | Requires Arma 3 runtime |
 | 8 | Dedicated server + JIP: same exclusion holds for late-joiners and across convoy task hand-offs | Dedicated server run | BLOCKED | Requires dedicated server rig |
+
+## 2026-05-10 — Sprint 2 hardening: AI/object caps + spawn denials (Mode A)
+
+**Branch/Commit:** copilot/implement-sprint-2-ai-objects-cleanup @ a02675f
+
+**Scenario:** Server-authority hardening for Sprint 2 growth controls with minimal behavior change: enforce convoy vehicle cap, cap concurrent SitePop activations, and cap seeded virtual threat groups.
+
+### Static checks
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | sqflint compat scan (changed SQF) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/logistics/fn_execSpawnConvoy.sqf functions/sitepop/fn_sitePopSpawnSite.sqf functions/threat/fn_threatVirtualPoolInit.sqf initServer.sqf` | PASS | No banned parser-compat patterns in touched files. |
+| 2 | sqflint (warnings as errors) | `sqflint -e w functions/logistics/fn_execSpawnConvoy.sqf && sqflint -e w functions/sitepop/fn_sitePopSpawnSite.sqf && sqflint -e w functions/threat/fn_threatVirtualPoolInit.sqf && sqflint -e w initServer.sqf` | PASS | `sqflint` installed in container and all touched files lint clean. |
+| 3 | Repo static preflight set | `python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && bash tests/static/airbase_planning_mode_checks.sh && bash tests/static/casreq_snapshot_contract_checks.sh` | PASS | No regressions in migration/index/AIRBASE/CASREQ static checks. |
+| 4 | Local MP smoke (spawn/cleanup behavior under load) | Manual | BLOCKED | Arma runtime unavailable in this sandbox. |
+| 5 | Dedicated server + JIP authority/cleanup verification | Manual | BLOCKED | Requires dedicated server + client environment. |
+
+### Remaining scalability gaps identified (deferred this sprint)
+
+- `ARC_fnc_airbaseOrbatPopulate` is one-shot and bounded by static role templates, but does not yet expose a dedicated missionNamespace cap override for per-role ORBAT counts.
+- IED evidence/incident object lifecycle remains primarily objective-state-driven; broad historical evidence pruning policies were not refactored in this pass to avoid gameplay-semantics drift.
+- SitePop proximity tick still evaluates `allPlayers` per site on its 30s cadence; this pass focused only on hard active-site cap enforcement, not loop architecture changes.

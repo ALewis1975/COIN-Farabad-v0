@@ -34,6 +34,7 @@ if (!_canSpawnCivil) exitWith
 
 private _registry = missionNamespace getVariable ["ARC_sitePopRegistry", createHashMap];
 private _active   = missionNamespace getVariable ["ARC_sitePopActive",   createHashMap];
+private _hk       = compile "params ['_h']; keys _h";
 
 // Guard: already active (non-empty sentinel)
 private _existing = [_active, _siteId, []] call _hg;
@@ -41,6 +42,26 @@ if ((count _existing) > 0) exitWith
 {
     diag_log format ["[ARC][SITEPOP][INFO] ARC_fnc_sitePopSpawnSite: '%1' already active — no-op.", _siteId];
     true
+};
+
+private _activeCap = missionNamespace getVariable ["ARC_sitePopActiveSitesCap", 6];
+if (!(_activeCap isEqualType 0)) then { _activeCap = 6; };
+_activeCap = (_activeCap max 1) min 32;
+
+private _activeCount = 0;
+{
+    private _row = [_active, _x, []] call _hg;
+    if (_row isEqualType [] && { (count _row) > 0 }) then
+    {
+        _activeCount = _activeCount + 1;
+    };
+} forEach ([_active] call _hk);
+
+if (_activeCount >= _activeCap) exitWith
+{
+    diag_log format ["[ARC][SITEPOP][WARN] ARC_fnc_sitePopSpawnSite: spawn denied site='%1' activeSites=%2 cap=%3.",
+        _siteId, _activeCount, _activeCap];
+    false
 };
 
 // Resolve template
