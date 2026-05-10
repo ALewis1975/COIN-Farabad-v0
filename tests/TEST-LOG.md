@@ -5080,3 +5080,16 @@ Mode: A (Bug Fix)
 - `ARC_fnc_airbaseOrbatPopulate` is one-shot and bounded by static role templates, but does not yet expose a dedicated missionNamespace cap override for per-role ORBAT counts.
 - IED evidence/incident object lifecycle remains primarily objective-state-driven; broad historical evidence pruning policies were not refactored in this pass to avoid gameplay-semantics drift.
 - SitePop proximity tick still evaluates `allPlayers` per site on its 30s cadence; this pass focused only on hard active-site cap enforcement, not loop architecture changes.
+
+## 2026-05-10 — Sprint 2 hardening follow-up validation (review feedback pass)
+
+**Branch/Commit:** copilot/implement-sprint-2-ai-objects-cleanup @ HEAD
+
+**Scenario:** Post-review micro-adjustments (log prefix normalization, SitePop key helper compatibility, virtual-pool record metadata usage) with full static re-validation.
+
+| # | Check | Command | Result |
+|---|-------|---------|--------|
+| 1 | sqflint compat scan (changed SQF) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/logistics/fn_execSpawnConvoy.sqf functions/sitepop/fn_sitePopSpawnSite.sqf functions/threat/fn_threatVirtualPoolInit.sqf initServer.sqf` | PASS |
+| 2 | sqflint (warnings as errors) | `sqflint -e w functions/logistics/fn_execSpawnConvoy.sqf && sqflint -e w functions/sitepop/fn_sitePopSpawnSite.sqf && sqflint -e w functions/threat/fn_threatVirtualPoolInit.sqf && sqflint -e w initServer.sqf` | PASS |
+| 3 | Repo static preflight set | `python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && bash tests/static/airbase_planning_mode_checks.sh && bash tests/static/casreq_snapshot_contract_checks.sh` | PASS |
+| 4 | Dedicated/JIP runtime validation | Manual | BLOCKED |

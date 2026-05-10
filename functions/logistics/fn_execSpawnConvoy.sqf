@@ -525,7 +525,7 @@ _maxVehicles = (_maxVehicles max 1) min 20;
 
 if ((count _classes) > _maxVehicles) then
 {
-    ["[ARC][WARN] ARC_fnc_execSpawnConvoy: vehicle cap hit task=%1 requested=%2 cap=%3; truncating convoy class list.",
+    ["[ARC] ARC_fnc_execSpawnConvoy: vehicle cap hit task=%1 requested=%2 cap=%3; truncating convoy class list.",
         [_taskId, count _classes, _maxVehicles], "WARN"] call _log;
     _classes = _classes select [0, _maxVehicles];
 };

@@ -115,7 +115,6 @@ private _capReached = false;
     if (_capReached) exitWith {};
 
     _x params [["_id", "", [""]], ["_displayName", "", [""]], ["_pos", [], [[]]]];
-    if (!(_displayName isEqualType "")) then { _displayName = ""; };
 
     if (!(_pos isEqualType []) || {(count _pos) < 2}) then { continue; };
 
@@ -160,6 +159,7 @@ private _capReached = false;
             ["pos",                _vgPos],
             ["strength",           _strength],
             ["anchorLocationId",   _id],
+            ["anchorLocationName", _displayName],
             ["spawnedUnits",       []],
             ["lastMoved",          _now],
             ["lastPlayerNearTs",   -1]
