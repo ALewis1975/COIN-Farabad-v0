@@ -11,6 +11,26 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-10 — Sprint 4 JIP/networking polish (Mode A)
+
+**Branch/Commit:** copilot/sprint-4-jip-networking-polish @ HEAD
+
+**Scenario:** Harden client JIP snapshot rehydration/watchers in `initPlayerLocal.sqf` so late joiners refresh on additional replicated update tokens (intel/queue/orders/airbase/EOD), avoid missing refresh handlers, and emit structured diagnostics when initial replicated state is delayed.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Changed-file sqflint compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict initPlayerLocal.sqf` | PASS | No banned parser-compat patterns found. |
+| 2 | Changed-file sqflint | `sqflint -e w initPlayerLocal.sqf` | PASS | Parser/lint passed after watcher hardening edits. |
+| 3 | State migration validation | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios passed. |
+| 4 | Marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | `off`, `auto`, and `auto-no-rg` all passed. |
+| 5 | AIRBASE planning-mode static checks | `tests/static/airbase_planning_mode_checks.sh` | PASS | Runtime gates/checks passed. |
+| 6 | CASREQ snapshot contract checks | `tests/static/casreq_snapshot_contract_checks.sh` | PASS | Snapshot keys/metadata checks passed. |
+| 7 | Dedicated server + JIP runtime rehydration validation | Host dedicated, join late client, verify briefing/TOC/intel refresh | BLOCKED | Arma 3 dedicated/JIP runtime unavailable in this container. |
+
+### Deferred JIP/networking risks (dedicated-only validation required)
+- PV EH ID stale-reuse after unusual client lifecycle transitions still depends on Arma runtime behavior and should be verified on a dedicated server with reconnect/JIP loops.
+- Live validation is still required for end-to-end late-join parity across all objective/action-heavy scenarios (incident lifecycle, evidence interactions, and TOC-heavy intel churn).
+
 ## 2026-05-10 — Sprint 3 scheduler optimization (Mode C)
 
 **Branch/Commit:** copilot/sprint-3-scheduler-optimization @ HEAD

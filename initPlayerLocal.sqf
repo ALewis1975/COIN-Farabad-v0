@@ -127,11 +127,43 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
             if (!(_refreshCount isEqualType 0)) then { _refreshCount = 0; };
             uiNamespace setVariable ["ARC_clientSnapshotRefreshCount", _refreshCount + 1];
         };
+        missionNamespace setVariable ["ARC_clientSnapshotRefreshFn", _refreshClientSnapshotView];
+
+        private _queueSnapshotRefresh = {
+            private _refreshEnabled = missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false];
+            if (!_refreshEnabled) exitWith {};
+
+            private _refreshFn = missionNamespace getVariable ["ARC_clientSnapshotRefreshFn", {}];
+            if (!(_refreshFn isEqualType {})) exitWith
+            {
+                if (!(missionNamespace getVariable ["ARC_clientSnapshotRefreshFnWarned", false])) then
+                {
+                    missionNamespace setVariable ["ARC_clientSnapshotRefreshFnWarned", true];
+                    diag_log "[ARC][WARN] initPlayerLocal snapshot watcher: refresh fn missing/invalid; skipping event-driven refresh.";
+                };
+            };
+
+            [] spawn _refreshFn;
+        };
+        missionNamespace setVariable ["ARC_clientSnapshotQueueRefreshFn", _queueSnapshotRefresh];
+        missionNamespace setVariable ["ARC_clientSnapshotRefreshFnWarned", false];
 
         // Wait for server readiness gate + first snapshot
+        private _snapshotGateWarnIntervalS = 45;
+        private _snapshotGateWarnAt = diag_tickTime + _snapshotGateWarnIntervalS;
         waitUntil {
-            (missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false]) &&
-            { !isNil { missionNamespace getVariable "ARC_pub_state" } }
+            private _ready = (missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false]) &&
+                { !isNil { missionNamespace getVariable "ARC_pub_state" } };
+            if (!_ready && { diag_tickTime >= _snapshotGateWarnAt }) then
+            {
+                diag_log format [
+                    "[ARC][WARN] initPlayerLocal snapshot watcher: waiting for initial state gate=%1 hasState=%2",
+                    missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false],
+                    !isNil { missionNamespace getVariable "ARC_pub_state" }
+                ];
+                _snapshotGateWarnAt = diag_tickTime + _snapshotGateWarnIntervalS;
+            };
+            _ready
         };
 
         // Initial refresh for JIP
@@ -140,36 +172,47 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
         private _lastState = missionNamespace getVariable ["ARC_pub_stateUpdatedAt", -1];
         private _lastS1 = missionNamespace getVariable ["ARC_pub_s1_registryUpdatedAt", -1];
         private _lastCompany = missionNamespace getVariable ["ARC_pub_companyCommandUpdatedAt", -1];
+        private _lastIntel = missionNamespace getVariable ["ARC_pub_intelUpdatedAt", -1];
+        private _lastQueue = missionNamespace getVariable ["ARC_pub_queueUpdatedAt", -1];
+        private _lastOrders = missionNamespace getVariable ["ARC_pub_ordersUpdatedAt", -1];
+        private _lastAirbase = missionNamespace getVariable ["ARC_pub_airbaseUiSnapshotUpdatedAt", -1];
+        private _lastEodDispo = missionNamespace getVariable ["ARC_pub_eodDispoApprovalsUpdatedAt", -1];
         private _stateFallbackRefreshed = false;
 
         // Preferred path: react immediately to server snapshot publish events.
-        private _existingStateEhId = missionNamespace getVariable ["ARC_clientSnapshotPvEhId", -1];
-        if (_existingStateEhId < 0) then
-        {
-            missionNamespace setVariable ["ARC_clientSnapshotPvEhId", "ARC_pub_stateUpdatedAt" addPublicVariableEventHandler {
-                private _refreshEnabled = missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false];
-                // Race-avoidance contract: PV event handlers must only run refresh after client readiness gate is lifted.
-                if (_refreshEnabled) then { [] spawn _refreshClientSnapshotView; };
-            }];
-        };
+        private _snapshotSignalEhBindings = [
+            ["ARC_pub_stateUpdatedAt", "ARC_clientSnapshotPvEhId"],
+            ["ARC_pub_s1_registryUpdatedAt", "ARC_clientS1SnapshotPvEhId"],
+            ["ARC_pub_companyCommandUpdatedAt", "ARC_clientCompanySnapshotPvEhId"],
+            ["ARC_pub_intelUpdatedAt", "ARC_clientIntelSnapshotPvEhId"],
+            ["ARC_pub_queueUpdatedAt", "ARC_clientQueueSnapshotPvEhId"],
+            ["ARC_pub_ordersUpdatedAt", "ARC_clientOrdersSnapshotPvEhId"],
+            ["ARC_pub_airbaseUiSnapshotUpdatedAt", "ARC_clientAirbaseSnapshotPvEhId"],
+            ["ARC_pub_eodDispoApprovalsUpdatedAt", "ARC_clientEodDispoSnapshotPvEhId"]
+        ];
 
-        private _existingS1EhId = missionNamespace getVariable ["ARC_clientS1SnapshotPvEhId", -1];
-        if (_existingS1EhId < 0) then
         {
-            missionNamespace setVariable ["ARC_clientS1SnapshotPvEhId", "ARC_pub_s1_registryUpdatedAt" addPublicVariableEventHandler {
-                private _refreshEnabled = missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false];
-                if (_refreshEnabled) then { [] spawn _refreshClientSnapshotView; };
-            }];
-        };
+            _x params [
+                ["_signalVarName", "", [""]],
+                ["_ehIdVarName", "", [""]]
+            ];
 
-        private _existingCompanyEhId = missionNamespace getVariable ["ARC_clientCompanySnapshotPvEhId", -1];
-        if (_existingCompanyEhId < 0) then
-        {
-            missionNamespace setVariable ["ARC_clientCompanySnapshotPvEhId", "ARC_pub_companyCommandUpdatedAt" addPublicVariableEventHandler {
-                private _refreshEnabled = missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false];
-                if (_refreshEnabled) then { [] spawn _refreshClientSnapshotView; };
-            }];
-        };
+            if (_signalVarName isEqualTo "" || { _ehIdVarName isEqualTo "" }) then { continue; };
+
+            private _existingEhId = missionNamespace getVariable [_ehIdVarName, -1];
+            if (_existingEhId isEqualType 0 && { _existingEhId >= 0 }) then { continue; };
+
+            private _newEhId = _signalVarName addPublicVariableEventHandler {
+                private _queueFn = missionNamespace getVariable ["ARC_clientSnapshotQueueRefreshFn", {}];
+                if (_queueFn isEqualType {}) then { call _queueFn; };
+            };
+            missionNamespace setVariable [_ehIdVarName, _newEhId];
+        } forEach _snapshotSignalEhBindings;
+
+        diag_log format [
+            "[ARC][INFO] initPlayerLocal snapshot watcher: registered PV handlers=%1",
+            count _snapshotSignalEhBindings
+        ];
 
         // Fallback resilience path: if PV events are missed in edge cases, poll less frequently.
         while {true} do
@@ -187,11 +230,21 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
             private _nowState = missionNamespace getVariable ["ARC_pub_stateUpdatedAt", _lastState];
             private _nowS1 = missionNamespace getVariable ["ARC_pub_s1_registryUpdatedAt", _lastS1];
             private _nowCompany = missionNamespace getVariable ["ARC_pub_companyCommandUpdatedAt", _lastCompany];
+            private _nowIntel = missionNamespace getVariable ["ARC_pub_intelUpdatedAt", _lastIntel];
+            private _nowQueue = missionNamespace getVariable ["ARC_pub_queueUpdatedAt", _lastQueue];
+            private _nowOrders = missionNamespace getVariable ["ARC_pub_ordersUpdatedAt", _lastOrders];
+            private _nowAirbase = missionNamespace getVariable ["ARC_pub_airbaseUiSnapshotUpdatedAt", _lastAirbase];
+            private _nowEodDispo = missionNamespace getVariable ["ARC_pub_eodDispoApprovalsUpdatedAt", _lastEodDispo];
 
             private _changed = false;
             if (_nowState isEqualType 0 && { _nowState != _lastState }) then { _lastState = _nowState; _changed = true; };
             if (_nowS1 isEqualType 0 && { _nowS1 != _lastS1 }) then { _lastS1 = _nowS1; _changed = true; };
             if (_nowCompany isEqualType 0 && { _nowCompany != _lastCompany }) then { _lastCompany = _nowCompany; _changed = true; };
+            if (_nowIntel isEqualType 0 && { _nowIntel != _lastIntel }) then { _lastIntel = _nowIntel; _changed = true; };
+            if (_nowQueue isEqualType 0 && { _nowQueue != _lastQueue }) then { _lastQueue = _nowQueue; _changed = true; };
+            if (_nowOrders isEqualType 0 && { _nowOrders != _lastOrders }) then { _lastOrders = _nowOrders; _changed = true; };
+            if (_nowAirbase isEqualType 0 && { _nowAirbase != _lastAirbase }) then { _lastAirbase = _nowAirbase; _changed = true; };
+            if (_nowEodDispo isEqualType 0 && { _nowEodDispo != _lastEodDispo }) then { _lastEodDispo = _nowEodDispo; _changed = true; };
 
             if (_changed) then { call _refreshClientSnapshotView; };
 
