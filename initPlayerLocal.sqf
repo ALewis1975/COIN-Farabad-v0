@@ -166,13 +166,13 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
             ];
 
             private _existingEhId = missionNamespace getVariable [_ehIdVarName, -1];
-            if !(_existingEhId isEqualType 0) then { _existingEhId = -1; };
+            if (!(_existingEhId isEqualType 0)) then { _existingEhId = -1; };
             if (_existingEhId >= 0) then { continue; };
 
             private _newEhId = _signalVarName addPublicVariableEventHandler {
                 if (missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false]) then
                 {
-                    [] spawn ARC_fnc_clientSnapshotRefresh;
+                    [] call ARC_fnc_clientSnapshotRefresh;
                 };
             };
             missionNamespace setVariable [_ehIdVarName, _newEhId];

@@ -24,4 +24,4 @@ uiNamespace setVariable ["ARC_console_dirty", true];
 private _refreshCount = uiNamespace getVariable ["ARC_clientSnapshotRefreshCount", 0];
 if (!(_refreshCount isEqualType 0)) then { _refreshCount = 0; };
 uiNamespace setVariable ["ARC_clientSnapshotRefreshCount", _refreshCount + 1];
-true;
+true
