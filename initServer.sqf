@@ -1238,6 +1238,7 @@ if (isServer) then
         [] spawn
         {
             waitUntil { missionNamespace getVariable ["ARC_serverReady", false] };
+            // Intentionally share cadence with worldtime_server.sqf for synchronized low-frequency broadcasts.
             private _interval = missionNamespace getVariable ["ARC_worldTime_broadcastIntervalSec", 30];
             if (!(_interval isEqualType 0) || { _interval < 10 }) then { _interval = 30; };
             diag_log format ["[ARC][GOVSTATS] aggregate loop start (interval=%1s)", _interval];

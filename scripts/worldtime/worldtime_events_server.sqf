@@ -172,8 +172,8 @@ private _fnComputeEvents = {
             {
                 missionNamespace setVariable ["ARC_worldTimeEvents",    _active, true];
                 missionNamespace setVariable ["ARC_worldTimeNextEvent", _next,   true];
-                _lastActive = +_active;
-                _lastNext = +_next;
+                _lastActive = _active;
+                _lastNext = _next;
             };
 
             if (missionNamespace getVariable ["ARC_debugLogEnabled", false]) then

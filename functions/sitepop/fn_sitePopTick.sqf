@@ -46,7 +46,7 @@ while {true} do
     if ((count _siteIds) isEqualTo 0) then { continue; };
 
     private _alivePlayers = allPlayers select {
-        alive _x && { !(_x isEqualTo objNull) }
+        alive _x
     };
 
     {
