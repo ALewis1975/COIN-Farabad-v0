@@ -110,9 +110,11 @@ _maxGroups = (_maxGroups max 8) min 400;
 private _created = 0;
 private _now     = serverTime;
 private _capReached = false;
+private _processedLocations = 0;
 
 {
     if (_capReached) exitWith {};
+    _processedLocations = _processedLocations + 1;
 
     _x params [["_id", "", [""]], ["_displayName", "", [""]], ["_pos", [], [[]]]];
 
@@ -173,8 +175,9 @@ private _capReached = false;
 
 if (_capReached) then
 {
-    diag_log format ["[ARC][VPOOL][WARN] ARC_fnc_threatVirtualPoolInit: cap reached at %1/%2 virtual groups; remaining locations skipped.",
-        _created, _maxGroups];
+    private _skippedLocations = ((count _locations) - _processedLocations) max 0;
+    diag_log format ["[ARC][VPOOL][WARN] ARC_fnc_threatVirtualPoolInit: cap reached at %1/%2 virtual groups; skippedLocations=%3.",
+        _created, _maxGroups, _skippedLocations];
 };
 
 ["threat_v0_seq",              _seq]    call ARC_fnc_stateSet;

@@ -5093,3 +5093,12 @@ Mode: A (Bug Fix)
 | 2 | sqflint (warnings as errors) | `sqflint -e w functions/logistics/fn_execSpawnConvoy.sqf && sqflint -e w functions/sitepop/fn_sitePopSpawnSite.sqf && sqflint -e w functions/threat/fn_threatVirtualPoolInit.sqf && sqflint -e w initServer.sqf` | PASS |
 | 3 | Repo static preflight set | `python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && bash tests/static/airbase_planning_mode_checks.sh && bash tests/static/casreq_snapshot_contract_checks.sh` | PASS |
 | 4 | Dedicated/JIP runtime validation | Manual | BLOCKED |
+
+## 2026-05-10 — Sprint 2 hardening final lint pass
+
+**Branch/Commit:** copilot/implement-sprint-2-ai-objects-cleanup @ HEAD
+
+| Check | Command | Result |
+|-------|---------|--------|
+| sqflint compat + lint (changed SQF) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/logistics/fn_execSpawnConvoy.sqf functions/sitepop/fn_sitePopSpawnSite.sqf functions/threat/fn_threatVirtualPoolInit.sqf initServer.sqf && sqflint -e w <same files>` | PASS |
+| Dedicated/JIP runtime checks | Manual | BLOCKED |
