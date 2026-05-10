@@ -15,7 +15,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 **Branch/Commit:** copilot/sprint-4-jip-networking-polish @ HEAD
 
-**Scenario:** Harden client JIP snapshot rehydration/watchers in `initPlayerLocal.sqf` so late joiners refresh on additional replicated update tokens (intel/queue/orders/airbase/EOD), avoid missing refresh handlers, and emit structured diagnostics when initial replicated state is delayed.
+**Scenario:** Harden client JIP snapshot rehydration/watchers in `initPlayerLocal.sqf` so late joiners refresh on additional replicated update tokens (intel/queue/orders/airbase/EOD), route refresh through named `ARC_fnc_clientSnapshotRefresh` (registered in `config/CfgFunctions.hpp`) to avoid stale local-closure handler references, and emit structured diagnostics when initial replicated state is delayed.
 
 | # | Check | Command / Step | Result | Notes |
 |---|-------|----------------|--------|-------|

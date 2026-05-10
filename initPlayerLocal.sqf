@@ -113,40 +113,11 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
 
         // Single refresh contract: keep TOC + briefing parity when any client snapshot signal changes.
         private _refreshClientSnapshotView = {
-            // Debounce: skip if a refresh already ran within the last second
-            private _pendingAt = uiNamespace getVariable ["ARC_clientSnapshotRefreshPendingAt", -1];
-            if (!(_pendingAt isEqualType 0)) then { _pendingAt = -1; };
-            private _now = diag_tickTime;
-            if ((_now - _pendingAt) < 1) exitWith {};
-            uiNamespace setVariable ["ARC_clientSnapshotRefreshPendingAt", _now];
-
-            [] call ARC_fnc_briefingUpdateClient;
-            if (!isNil "ARC_fnc_tocRefreshClient") then { [] call ARC_fnc_tocRefreshClient; };
-            uiNamespace setVariable ["ARC_console_dirty", true];
-            private _refreshCount = uiNamespace getVariable ["ARC_clientSnapshotRefreshCount", 0];
-            if (!(_refreshCount isEqualType 0)) then { _refreshCount = 0; };
-            uiNamespace setVariable ["ARC_clientSnapshotRefreshCount", _refreshCount + 1];
-        };
-        missionNamespace setVariable ["ARC_clientSnapshotRefreshFn", _refreshClientSnapshotView];
-
-        private _queueSnapshotRefresh = {
-            private _refreshEnabled = missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false];
-            if (!_refreshEnabled) exitWith {};
-
-            private _refreshFn = missionNamespace getVariable ["ARC_clientSnapshotRefreshFn", {}];
-            if (!(_refreshFn isEqualType {})) exitWith
+            if (!isNil "ARC_fnc_clientSnapshotRefresh") then
             {
-                if (!(missionNamespace getVariable ["ARC_clientSnapshotRefreshFnWarned", false])) then
-                {
-                    missionNamespace setVariable ["ARC_clientSnapshotRefreshFnWarned", true];
-                    diag_log "[ARC][WARN] initPlayerLocal snapshot watcher: refresh fn missing/invalid; skipping event-driven refresh.";
-                };
+                [] call ARC_fnc_clientSnapshotRefresh;
             };
-
-            [] spawn _refreshFn;
         };
-        missionNamespace setVariable ["ARC_clientSnapshotQueueRefreshFn", _queueSnapshotRefresh];
-        missionNamespace setVariable ["ARC_clientSnapshotRefreshFnWarned", false];
 
         // Wait for server readiness gate + first snapshot
         private _snapshotGateWarnIntervalS = 45;
@@ -203,8 +174,13 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
             if (_existingEhId isEqualType 0 && { _existingEhId >= 0 }) then { continue; };
 
             private _newEhId = _signalVarName addPublicVariableEventHandler {
-                private _queueFn = missionNamespace getVariable ["ARC_clientSnapshotQueueRefreshFn", {}];
-                if (_queueFn isEqualType {}) then { call _queueFn; };
+                if (
+                    (missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false]) &&
+                    { !isNil "ARC_fnc_clientSnapshotRefresh" }
+                ) then
+                {
+                    [] spawn ARC_fnc_clientSnapshotRefresh;
+                };
             };
             missionNamespace setVariable [_ehIdVarName, _newEhId];
         } forEach _snapshotSignalEhBindings;

@@ -150,6 +150,7 @@ class CfgFunctions
             class clientIntelPrompt {};
             class clientSitrepPrompt {};
             class clientLogCursorSighting {};
+            class clientSnapshotRefresh {};
             class clientHint {};
             class clientToast {};
             class clientNotifyGate {};
