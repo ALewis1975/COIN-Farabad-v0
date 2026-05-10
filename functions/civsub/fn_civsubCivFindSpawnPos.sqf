@@ -5,19 +5,17 @@
      - Enforce exclusion zones (default: airbase marker)
 
    Params:
-     0: center (array [x,y] or [x,y,z])
-     1: radius (number)
-     2: districtId (string, optional)
+      0: center (array [x,y] or [x,y,z])
+      1: radius (number)
 
-   Returns: position array [x,y,z]
+    Returns: position array [x,y,z]
 */
 
 if (!isServer) exitWith {[0,0,0]};
 
 params [
     ["_center", [0,0,0], [[]]],
-    ["_r", 200, [0]],
-    ["_districtId", "", [""]]
+    ["_r", 200, [0]]
 ];
 
 // Phase 2 helpers (defined in civsubInitServer)
@@ -27,13 +25,7 @@ private _findOffRoad = missionNamespace getVariable ["ARC_civsub_fnc_findPosOffR
 private _c = _center;
 if ((count _c) == 2) then { _c = [_c select 0, _c select 1, 0]; };
 
-private _zonesVar = "civsub_v1_civ_exclusion_zones";
-if !(_districtId isEqualTo "") then {
-    // Keep the optional districtId param in the contract without changing
-    // Sprint 1 behavior: exclusion-zone storage remains global.
-    _zonesVar = "civsub_v1_civ_exclusion_zones";
-};
-private _zones = missionNamespace getVariable [_zonesVar, []];
+private _zones = missionNamespace getVariable ["civsub_v1_civ_exclusion_zones", []];
 if !(_zones isEqualType []) then { _zones = []; };
 
 // Default exclusion: airbase flightline
