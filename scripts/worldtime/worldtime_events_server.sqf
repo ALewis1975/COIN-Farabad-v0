@@ -140,11 +140,18 @@ private _fnComputeEvents = {
 
     private _interval = missionNamespace getVariable ["ARC_worldTimeEvents_broadcastIntervalSec", 30];
     if (!(_interval isEqualType 0) || { _interval < 5 }) then { _interval = 30; };
+    private _lastActive = missionNamespace getVariable ["ARC_worldTimeEvents", []];
+    if (!(_lastActive isEqualType [])) then { _lastActive = []; };
+    private _lastNext = missionNamespace getVariable ["ARC_worldTimeNextEvent", ["", 25.0]];
+    if (!(_lastNext isEqualType []) || { (count _lastNext) < 2 }) then { _lastNext = ["", 25.0]; };
 
     diag_log format ["[ARC][WORLDTIME EVENTS] loop start (interval=%1s)", _interval];
 
     while { missionNamespace getVariable ["ARC_worldTimeEvents_running", false] } do
     {
+        _interval = missionNamespace getVariable ["ARC_worldTimeEvents_broadcastIntervalSec", _interval];
+        if (!(_interval isEqualType 0) || { _interval < 5 }) then { _interval = 30; };
+
         private _snap = missionNamespace getVariable ["ARC_worldTimeSnap", []];
 
         if (_snap isEqualType [] && { (count _snap) >= 2 }) then
@@ -161,8 +168,13 @@ private _fnComputeEvents = {
             private _active = _result select 0;
             private _next   = _result select 1;
 
-            missionNamespace setVariable ["ARC_worldTimeEvents",     _active, true];
-            missionNamespace setVariable ["ARC_worldTimeNextEvent",  _next,   true];
+            if (!(_active isEqualTo _lastActive) || { !(_next isEqualTo _lastNext) }) then
+            {
+                missionNamespace setVariable ["ARC_worldTimeEvents",    _active, true];
+                missionNamespace setVariable ["ARC_worldTimeNextEvent", _next,   true];
+                _lastActive = +_active;
+                _lastNext = +_next;
+            };
 
             if (missionNamespace getVariable ["ARC_debugLogEnabled", false]) then
             {

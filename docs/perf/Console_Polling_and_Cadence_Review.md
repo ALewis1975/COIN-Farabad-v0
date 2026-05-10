@@ -39,7 +39,7 @@ This review inventories recurring loops that directly power the Farabad Console 
 - Console repaint still pauses while edit/combo controls are focused to preserve current UX.
 
 ### Fallback resilience retained
-- Snapshot watcher keeps a 2s polling check as a backstop if PV events are missed.
+- Snapshot watcher keeps a configurable fallback poll (`ARC_clientSnapshotFallbackPollS`, default 3s) as a backstop if PV events are missed.
 - Console repaint keeps a 3s fallback refresh even with no dirty event, to recover from missed signal delivery.
 
 ### Qualitative workload comparison
@@ -47,6 +47,27 @@ This review inventories recurring loops that directly power the Farabad Console 
   - Snapshot watcher: fixed 0.5s polling (`~2 checks/sec/client`, continuous mission lifetime).
   - Console repaint loop: fixed 1.2s repaint eligibility check (`~0.83 checks/sec` while dialog open).
 - **After:**
-  - Snapshot watcher: event-driven refresh on publish + 2s fallback (`~0.5 checks/sec/client` fallback path, most updates now event-triggered).
+  - Snapshot watcher: event-driven refresh on publish + 3s fallback (`~0.33 checks/sec/client` fallback path by default, most updates now event-triggered).
   - Console repaint loop: event-driven dirty refresh + 3s fallback (`~0.33 fallback refresh windows/sec` while open, with lightweight 0.2s gate checks but no paint unless dirty/fallback).
 - **Expected impact:** Lower full refresh/paint frequency during quiet periods and improved responsiveness on real state changes.
+
+## 2026-05-10 Sprint 3 follow-up (scheduler optimization)
+
+### Applied in this sprint
+- `initPlayerLocal.sqf`
+  - Snapshot fallback polling moved to tunable `ARC_clientSnapshotFallbackPollS` (default 3s, clamped 1..10).
+  - Added optional scheduler diagnostics (under `ARC_debugLogEnabled`) for snapshot refresh counts.
+  - Keepalive scheduler cadence made tunable (`ARC_clientKeepaliveFastRetryS`, `ARC_clientKeepaliveSteadyRetryS`, `ARC_clientKeepaliveLoopSleepS`) with a slower steady-state default (45s).
+- `functions/sitepop/fn_sitePopTick.sqf`
+  - Added tunable tick cadence `ARC_sitePopTickIntervalSec` (default 30s, clamped 10..120).
+  - Cached alive-player list once per tick and reused it for trigger/despawn checks to avoid duplicate `allPlayers` scans per site.
+- `scripts/worldtime/worldtime_events_server.sqf`
+  - Worldtime publishes now occur only when active/next event payloads actually change, reducing repeated network broadcasts.
+  - Broadcast interval now re-reads `ARC_worldTimeEvents_broadcastIntervalSec` each cycle for live tuning.
+- `initServer.sqf`
+  - Added `ARC_govStatsLoopRunning` guard to prevent duplicate GovStats loop startup and made interval re-readable each cycle.
+
+### Remaining heavy loops/global scans (deferred)
+- `functions/ambiance/fn_airbaseInit.sqf` / `ARC_fnc_airbaseTick` (2s ambient scheduler): high-feature coupling; needs dedicated-server profiling before cadence changes.
+- `functions/threat/fn_threatVirtualPoolTick.sqf`: scans virtual groups against all alive players each tick; safe to optimize further with spatial bucketing, deferred to avoid behavior drift.
+- `functions/core/fn_execTickActive.sqf` and convoy tick paths: multiple intentional mission-state scans tied to incident responsiveness; requires dedicated 32-player soak metrics before throttling.

@@ -23,10 +23,13 @@
 
 if (!isServer) exitWith {};
 
-private _hg    = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
-private _tickS = 30;
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
-diag_log "[ARC][SITEPOP][INFO] ARC_fnc_sitePopTick: proximity tick loop started.";
+private _tickS = missionNamespace getVariable ["ARC_sitePopTickIntervalSec", 30];
+if (!(_tickS isEqualType 0)) then { _tickS = 30; };
+_tickS = (_tickS max 10) min 120;
+
+diag_log format ["[ARC][SITEPOP][INFO] ARC_fnc_sitePopTick: proximity tick loop started (tick=%1s).", _tickS];
 
 while {true} do
 {
@@ -41,6 +44,10 @@ while {true} do
 
     if (!(_siteIds isEqualType []) || { !(_registry isEqualType createHashMap) }) then { continue; };
     if ((count _siteIds) isEqualTo 0) then { continue; };
+
+    private _alivePlayers = allPlayers select {
+        alive _x && { !(_x isEqualTo objNull) }
+    };
 
     {
         private _siteId = _x;
@@ -69,8 +76,8 @@ while {true} do
 
         // Player proximity check against despawnRadius (covers both spawn and despawn logic)
         private _nearCount = {
-            alive _x && { !(_x isEqualTo objNull) } && { (_x distance2D _sitePos) < _despawnR }
-        } count allPlayers;
+            (_x distance2D _sitePos) < _despawnR
+        } count _alivePlayers;
         private _hasNearPlayers = (_nearCount > 0);
 
         if (_isActive) then
@@ -114,8 +121,8 @@ while {true} do
             if (!_inLockout) then
             {
                 private _trigCount = {
-                    alive _x && { !(_x isEqualTo objNull) } && { (_x distance2D _sitePos) < _trigR }
-                } count allPlayers;
+                    (_x distance2D _sitePos) < _trigR
+                } count _alivePlayers;
 
                 if (_trigCount > 0) then
                 {
@@ -125,4 +132,8 @@ while {true} do
         };
 
     } forEach _siteIds;
+
+    private _nextTickS = missionNamespace getVariable ["ARC_sitePopTickIntervalSec", _tickS];
+    if (!(_nextTickS isEqualType 0)) then { _nextTickS = _tickS; };
+    _tickS = (_nextTickS max 10) min 120;
 };

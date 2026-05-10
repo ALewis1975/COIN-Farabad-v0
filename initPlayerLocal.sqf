@@ -100,6 +100,17 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
     missionNamespace setVariable ["ARC_clientSnapshotWatcherRunning", true];
 
     [] spawn {
+        private _snapshotPollS = missionNamespace getVariable ["ARC_clientSnapshotFallbackPollS", 3];
+        if (!(_snapshotPollS isEqualType 0)) then { _snapshotPollS = 3; };
+        _snapshotPollS = (_snapshotPollS max 1) min 10;
+
+        private _snapshotDiagS = missionNamespace getVariable ["ARC_clientSnapshotDiagIntervalS", 120];
+        if (!(_snapshotDiagS isEqualType 0)) then { _snapshotDiagS = 120; };
+        _snapshotDiagS = (_snapshotDiagS max 30) min 600;
+        private _lastSnapshotDiagAt = diag_tickTime;
+
+        uiNamespace setVariable ["ARC_clientSnapshotRefreshCount", 0];
+
         // Single refresh contract: keep TOC + briefing parity when any client snapshot signal changes.
         private _refreshClientSnapshotView = {
             // Debounce: skip if a refresh already ran within the last second
@@ -112,6 +123,9 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
             [] call ARC_fnc_briefingUpdateClient;
             if (!isNil "ARC_fnc_tocRefreshClient") then { [] call ARC_fnc_tocRefreshClient; };
             uiNamespace setVariable ["ARC_console_dirty", true];
+            private _refreshCount = uiNamespace getVariable ["ARC_clientSnapshotRefreshCount", 0];
+            if (!(_refreshCount isEqualType 0)) then { _refreshCount = 0; };
+            uiNamespace setVariable ["ARC_clientSnapshotRefreshCount", _refreshCount + 1];
         };
 
         // Wait for server readiness gate + first snapshot
@@ -160,7 +174,7 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
         // Fallback resilience path: if PV events are missed in edge cases, poll less frequently.
         while {true} do
         {
-            uiSleep 2;
+            uiSleep _snapshotPollS;
 
             // Snapshot fallback belongs in polling (not PV EH gating): recover if state arrives before/update token propagation.
             if ((missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false]) && { !isNil { missionNamespace getVariable "ARC_pub_state" } } && { _lastState < 0 } && { !_stateFallbackRefreshed }) then
@@ -180,6 +194,21 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
             if (_nowCompany isEqualType 0 && { _nowCompany != _lastCompany }) then { _lastCompany = _nowCompany; _changed = true; };
 
             if (_changed) then { call _refreshClientSnapshotView; };
+
+            if (missionNamespace getVariable ["ARC_debugLogEnabled", false]) then
+            {
+                if ((diag_tickTime - _lastSnapshotDiagAt) >= _snapshotDiagS) then
+                {
+                    private _refreshes = uiNamespace getVariable ["ARC_clientSnapshotRefreshCount", 0];
+                    if (!(_refreshes isEqualType 0)) then { _refreshes = 0; };
+                    diag_log format [
+                        "[ARC][CLIENT][SCHED] initPlayerLocal snapshot watcher: poll=%1s refreshes=%2",
+                        _snapshotPollS,
+                        _refreshes
+                    ];
+                    _lastSnapshotDiagAt = diag_tickTime;
+                };
+            };
         };
     };
 };
@@ -219,8 +248,30 @@ if (
     missionNamespace setVariable ["ARC_clientKeepaliveSchedulerRunning", true];
 
     [] spawn {
-        private _nextConsoleAt = diag_tickTime + 5;
-        private _nextTocAt = diag_tickTime + 5;
+        private _retryFastS = missionNamespace getVariable ["ARC_clientKeepaliveFastRetryS", 5];
+        if (!(_retryFastS isEqualType 0)) then { _retryFastS = 5; };
+        _retryFastS = (_retryFastS max 2) min 15;
+
+        private _steadyRetryS = missionNamespace getVariable ["ARC_clientKeepaliveSteadyRetryS", 45];
+        if (!(_steadyRetryS isEqualType 0)) then { _steadyRetryS = 45; };
+        _steadyRetryS = (_steadyRetryS max 15) min 180;
+
+        private _loopSleepS = missionNamespace getVariable ["ARC_clientKeepaliveLoopSleepS", 1];
+        if (!(_loopSleepS isEqualType 0)) then { _loopSleepS = 1; };
+        _loopSleepS = (_loopSleepS max 0.25) min 5;
+
+        if (missionNamespace getVariable ["ARC_debugLogEnabled", false]) then
+        {
+            diag_log format [
+                "[ARC][CLIENT][SCHED] initPlayerLocal keepalive scheduler: fast=%1s steady=%2s loopSleep=%3s",
+                _retryFastS,
+                _steadyRetryS,
+                _loopSleepS
+            ];
+        };
+
+        private _nextConsoleAt = diag_tickTime + _retryFastS;
+        private _nextTocAt = diag_tickTime + _retryFastS;
         private _consoleFastRetriesLeft = 12;
         private _tocFastRetriesLeft = 12;
 
@@ -239,11 +290,11 @@ if (
 
                 if (_consoleFastRetriesLeft > 0) then
                 {
-                    _nextConsoleAt = _now + 5;
+                    _nextConsoleAt = _now + _retryFastS;
                 }
                 else
                 {
-                    _nextConsoleAt = _now + 30;
+                    _nextConsoleAt = _now + _steadyRetryS;
                 };
             };
 
@@ -258,15 +309,15 @@ if (
 
                 if (_tocFastRetriesLeft > 0) then
                 {
-                    _nextTocAt = _now + 5;
+                    _nextTocAt = _now + _retryFastS;
                 }
                 else
                 {
-                    _nextTocAt = _now + 30;
+                    _nextTocAt = _now + _steadyRetryS;
                 };
             };
 
-            uiSleep 0.25;
+            uiSleep _loopSleepS;
         };
     };
 };
