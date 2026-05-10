@@ -138,6 +138,11 @@ Any code change after validation invalidates the affected section. Use judgement
 
 ## 7) Change log
 
+### v1.1 — 2026-05-10
+
+- Added Sprint 5 diagnostics guidance: use `ARC_fnc_devDiagnosticsSnapshot` counters (players/AI/groups, CIVSUB registries, traffic lists, SitePop, convoy index, leads/threads/orders/queue, IED/VBIED device records, snapshot ages) as pre-check evidence before dedicated/JIP execution.
+- Remaining gap unchanged: all §3 rows still require dedicated server + JIP runtime validation and cannot be closed via static/container checks.
+
 ### v1.0 — 2026-05-08
 
 - Initial issuance. Captures the seven validation sections required before release-candidate declaration. Cross-linked from Architecture Plan §6 (Phase 5) and Pre-Dedicated Audit §5.

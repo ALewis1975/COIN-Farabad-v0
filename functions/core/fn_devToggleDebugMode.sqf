@@ -61,14 +61,14 @@ if (_newState) then {
 };
 
 diag_log format [
-    "[ARC][DIAG] Debug mode toggled %1 by %2 (uid=%3)",
+    "[ARC][INFO] ARC_fnc_devToggleDebugMode: debug mode toggled %1 by %2 (uid=%3)",
     if (_newState) then { "ON" } else { "OFF" },
     if (isNull _requester) then { "unknown" } else { name _requester },
     if (isNull _requester) then { "" } else { getPlayerUID _requester }
 ];
 
 diag_log format [
-    "[ARC][DEBUG] Effective toggles | ARC_debugLogEnabled=%1 | ARC_debugLogToChat=%2 | ARC_debugInspectorEnabled=%3 | FARABAD_log_minLevel=%4",
+    "[ARC][INFO] ARC_fnc_devToggleDebugMode: effective toggles ARC_debugLogEnabled=%1 ARC_debugLogToChat=%2 ARC_debugInspectorEnabled=%3 FARABAD_log_minLevel=%4",
     _newState,
     _newState,
     _newState,

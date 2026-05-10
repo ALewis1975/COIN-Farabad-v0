@@ -26,6 +26,6 @@ if (!isNull _disp) then {
 
 hintSilent "Diagnostics snapshot received. See HQ console for details.";
 
-diag_log "[ARC][DIAG] Diagnostics snapshot received on client.";
+diag_log "[ARC][INFO] ARC_fnc_devDiagnosticsClientReceive: diagnostics snapshot received on client.";
 
 true

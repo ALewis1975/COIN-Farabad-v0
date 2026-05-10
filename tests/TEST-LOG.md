@@ -11,6 +11,28 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-10 — Sprint 5 code standards + diagnostics (Mode A)
+
+**Branch/Commit:** copilot/sprint-5-code-standards-diagnostics @ HEAD
+
+**Scenario:** Targeted standards/diagnostics pass in dev/admin multiplayer paths. Added low-noise dedicated-server snapshot counters/freshness in `ARC_fnc_devDiagnosticsSnapshot`, standardized diagnostics logs to structured `[ARC][INFO]/[ARC][WARN]`, and documented remaining dedicated/JIP validation gaps.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Changed-file sqflint compat scan (baseline) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_devDiagnosticsSnapshot.sqf functions/core/fn_devToggleDebugMode.sqf functions/core/fn_devDiagnosticsClientReceive.sqf` | PASS | No banned parser-compat patterns detected before edits. |
+| 2 | Changed-file sqflint (baseline) | `sqflint -e w functions/core/fn_devDiagnosticsSnapshot.sqf functions/core/fn_devToggleDebugMode.sqf functions/core/fn_devDiagnosticsClientReceive.sqf` | BLOCKED | `sqflint` unavailable in container (`command not found`). |
+| 3 | Changed-file sqflint compat scan (post-change) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_devDiagnosticsSnapshot.sqf functions/core/fn_devToggleDebugMode.sqf functions/core/fn_devDiagnosticsClientReceive.sqf` | PASS | Post-change scan remained clean. |
+| 4 | Changed-file sqflint (post-change) | `sqflint -e w functions/core/fn_devDiagnosticsSnapshot.sqf functions/core/fn_devToggleDebugMode.sqf functions/core/fn_devDiagnosticsClientReceive.sqf` | BLOCKED | `sqflint` unavailable in container (`command not found`). |
+| 5 | State migration validation | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios passed (baseline and post-change rerun). |
+| 6 | Marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | `off`, `auto`, and `auto-no-rg` modes passed (baseline and post-change rerun). |
+| 7 | AIRBASE planning-mode static checks | `tests/static/airbase_planning_mode_checks.sh` | PASS | Runtime gate static checks passed (baseline and post-change rerun). |
+| 8 | CASREQ snapshot contract checks | `tests/static/casreq_snapshot_contract_checks.sh` | PASS | Snapshot contract checks passed (baseline and post-change rerun). |
+| 9 | Dedicated server 32-player diagnostics soak + JIP rehydration checks | Run matrix in `docs/qa/Dedicated_JIP_Validation_Matrix.md` with dedicated + late join clients | BLOCKED | Arma 3 dedicated/JIP runtime unavailable in this container. |
+
+### Remaining Sprint 5 validation risks (deferred to dedicated environment)
+- Diagnostic counters rely on mission registries being populated under real gameplay load; counter fidelity still needs dedicated 32-player verification.
+- Snapshot freshness values (`*_UpdatedAt` age) need live JIP/reconnect checks to validate monotonic update behavior during incident/order churn.
+
 ## 2026-05-10 — Sprint 4 JIP/networking polish (Mode A)
 
 **Branch/Commit:** copilot/sprint-4-jip-networking-polish @ HEAD
