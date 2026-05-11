@@ -13,7 +13,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-05-11 — Virtual OPFOR physical spawn caps (Mode A)
 
-**Branch/Commit:** copilot/fix-opfor-spawn-issues @ 1e24e02
+**Branch/Commit:** copilot/fix-opfor-spawn-issues @ ee4101e
 
 **Scenario:** Investigated reports that OPFOR were spawning excessively, especially in Farabad City. Added server-side virtual OPFOR materialization caps so existing/persisted virtual groups cannot all become physical at once during city combat incidents.
 
