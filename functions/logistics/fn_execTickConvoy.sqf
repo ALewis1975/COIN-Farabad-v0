@@ -612,6 +612,8 @@ if ((count _vehicles) isEqualTo 0) exitWith
 
 private _aliveVehAll = _vehicles select { alive _x };
 private _aliveVeh = _aliveVehAll select { canMove _x };
+// Fallback to the first alive vehicle so helper telemetry/threat checks still have a valid anchor
+// before we early-exit as CONVOY_IMMOBILIZED when no drivable vehicles remain.
 private _lead = if ((count _aliveVeh) > 0) then { _aliveVeh select 0 } else { objNull };
 if (isNull _lead && { (count _aliveVehAll) > 0 }) then { _lead = _aliveVehAll select 0; };
 
@@ -1986,11 +1988,17 @@ _grpW setSpeedMode (if (_contactActive) then { "FULL" } else { "NORMAL" });
     if (!isNull _d && { !isPlayer _d }) then
     {
         _d stop false;
-        _d disableAI "AUTOCOMBAT";
-        _d disableAI "COVER";
-        _d disableAI "SUPPRESSION";
+        private _driverProfileApplied = _d getVariable ["ARC_convoyDriverMoveProfileApplied", false];
+        if (!(_driverProfileApplied isEqualType true) && !(_driverProfileApplied isEqualType false)) then { _driverProfileApplied = false; };
+        if (!_driverProfileApplied) then
+        {
+            _d disableAI "AUTOCOMBAT";
+            _d disableAI "COVER";
+            _d disableAI "SUPPRESSION";
+            _d setVariable ["ARC_convoyDriverMoveProfileApplied", true];
+        };
     };
-    if (_contactActive) then { _x forceSpeed -1; };
+    _x forceSpeed -1;
 } forEach _aliveVeh;
 
 ["activeConvoySpeedCapKph", _capFinal] call ARC_fnc_stateSet;
