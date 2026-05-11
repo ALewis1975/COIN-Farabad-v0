@@ -691,6 +691,7 @@ class Ops
             class medicalOnCasualty {};
             class medicalTick {};
             class medicalSnapshot {};
+            class medicalBroadcast {};
 
             // CASEVAC loop hook + ACE medical integration (Items 5, 21)
             class medicalCasevacRequest {};

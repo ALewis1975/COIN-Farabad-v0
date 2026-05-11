@@ -24,13 +24,28 @@
 
 if (!isServer) exitWith {false};
 
-// Dedicated MP hardening: log remote invocation source.
-if (!isNil "remoteExecutedOwner") then
+if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\core\fn_rpcValidateSender.sqf"; };
+
+params [
+    ["_requester", objNull, [objNull]]
+];
+
+// S1 + S3: sender validation and HQ role gate (audit tools are approver-only).
+// Server-internal invocations (no remoteExecutedOwner) bypass the gate.
+private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { 0 };
+if (_reoOwner > 0) then
 {
-    private _reo = remoteExecutedOwner;
-    if (_reo > 0) then
+    private _requestor = _requester;
+    if (isNull _requestor) then
     {
-        diag_log format ["[ARC][SEC] ARC_fnc_uiCoverageAuditServer: invoked via remoteExec from owner=%1", _reo];
+        { if (owner _x == _reoOwner) exitWith { _requestor = _x; }; } forEach allPlayers;
+    };
+    if (!([_requestor, "ARC_fnc_uiCoverageAuditServer", "Coverage audit denied: sender verification failed.", "COVERAGE_AUDIT_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
+    private _isOmni = [_requestor, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
+    private _can = _isOmni || { [_requestor] call ARC_fnc_rolesCanApproveQueue };
+    if (!_can) exitWith {
+        diag_log format ["[ARC][SEC] ARC_fnc_uiCoverageAuditServer: COVERAGE_AUDIT_DENIED unauthorized caller owner=%1 name=%2 uid=%3", _reoOwner, name _requestor, getPlayerUID _requestor];
+        false
     };
 };
 

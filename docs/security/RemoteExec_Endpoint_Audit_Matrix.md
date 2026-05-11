@@ -55,9 +55,9 @@ Audited 2026-05-08 against current head. CIVSUB endpoints share an inline owner-
 | `ARC_fnc_civsubContactReqSnapshot` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | Read-only snapshot; no rate-limit. |
 | `ARC_fnc_civsubInteractCheckPapers` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | Compliance precondition (uncon/cuffed/surrender); no rate-limit. |
 | `ARC_fnc_civsubInteractDetain` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | Requires civ districtId; no rate-limit. |
-| `ARC_fnc_civsubInteractEndSession` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | Stop-owner UID match; **no `civsub_v1_enabled` gate** (F-CIV-1). |
+| `ARC_fnc_civsubInteractEndSession` | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ | 0 | 2026-05-11 | F-CIV-1 RESOLVED: `civsub_v1_enabled` mission-toggle gate added; stop-owner UID match preserved; no per-actor rate-limit. |
 | `ARC_fnc_civsubInteractHandoffSheriff` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | 25m sheriff-holding gate; cuffs-removed gate; no rate-limit. |
-| `ARC_fnc_civsubInteractOrderStop` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | UID populated; **no `civsub_v1_enabled` gate** (F-CIV-1). |
+| `ARC_fnc_civsubInteractOrderStop` | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ | 0 | 2026-05-11 | F-CIV-1 RESOLVED: `civsub_v1_enabled` mission-toggle gate added; UID populated; no per-actor rate-limit. |
 | `ARC_fnc_civsubInteractRelease` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | Requires civ districtId + civUid; no rate-limit. |
 | `ARC_fnc_civsubInteractShowPapers` | ✅ | ✅ | ✅ | n/a | ✅ | ⚠️ | 0 | 2026-05-08 | Probabilistic cooperation gate; no rate-limit. |
 | `ARC_fnc_civsubRunMdtByNetId` | ✅ | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | 0 | 2026-05-09 | TOC role gate added (F-CIV-2 RESOLVED): rejects callers that fail `rolesIsTocS2 \|\| rolesCanApproveQueue` with `[CIVSUB][SEC] MDT_RUN_DENIED` + client toast. |
@@ -72,7 +72,7 @@ Audited 2026-05-08 against current head. Most use `ARC_fnc_rpcValidateSender` + 
 | `ARC_fnc_devDiagnosticsSnapshot` | ✅ | ✅ | ✅ | ✅ | n/a | ⚠️ | 0 | 2026-05-08 | Read-only; OMNI/approver gate; no rate-limit. |
 | `ARC_fnc_devToggleDebugMode` | ✅ | ✅ | ✅ | ✅ | n/a | ⚠️ | 0 | 2026-05-09 | Sender validation + `OMNI \|\| canApproveQueue` role gate added (F-DEV-1 RESOLVED); rejects with `[ARC][SEC] DEBUG_TOGGLE_DENIED`. |
 | `ARC_fnc_uiConsoleQAAuditServer` | ✅ | ✅ | ✅ | ✅ | n/a | ⚠️ | 0 | 2026-05-08 | Read-only; OMNI/approver gate; no rate-limit. |
-| `ARC_fnc_uiCoverageAuditServer` | ✅ | ⚠️ | n/a | ❌ | n/a | ⚠️ | 0 | 2026-05-08 | **No sender validation enforcement, no role gate** (F-DEV-2). Logs remote owner only. Writes `ARC_uiCoverageMap` (`publicVariable true`). Static content, but allowlisted from clients. |
+| `ARC_fnc_uiCoverageAuditServer` | ✅ | ✅ | ✅ | ✅ | n/a | ⚠️ | 0 | 2026-05-11 | F-DEV-2 RESOLVED: sender validation + `OMNI \|\| canApproveQueue` role gate added (mirrors `uiConsoleQAAuditServer`); rejects with `[ARC][SEC] COVERAGE_AUDIT_DENIED`. HQ-tab caller now passes `player`. Server-internal `bootstrapServer.sqf` call still bypasses (no `remoteExecutedOwner`). |
 
 ### 3.3 Objective / IED / VBIED endpoints
 
@@ -213,7 +213,7 @@ These findings were recorded by the 2026-05-08 audit passes (Wave 1 + Wave 3 bat
 
 | ID | Endpoint(s) | Check | Severity | Description | Remediation |
 |---|---|:---:|:---:|---|---|
-| F-CIV-1 | `ARC_fnc_civsubInteractEndSession`, `ARC_fnc_civsubInteractOrderStop` | S4 | P2 | Both endpoints lack the `civsub_v1_enabled` mission-toggle gate that every other CIVSUB endpoint enforces. Side effects are bounded (movement freeze / restore on a CIVSUB-managed civilian) but execution should not proceed when the subsystem is disabled. | Add `if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {false};` after the S0 guard. |
+| F-CIV-1 | `ARC_fnc_civsubInteractEndSession`, `ARC_fnc_civsubInteractOrderStop` | S4 | P2 | **RESOLVED 2026-05-11.** Added `if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {false};` immediately after the `isServer` guard in both endpoints, matching the pattern used by every other CIVSUB client→server endpoint. | — |
 | F-CIV-2 | `ARC_fnc_civsubRunMdtByNetId` | S3 | P1 | **RESOLVED 2026-05-09** (Phase 0 / E1-T2). TOC role gate added: rejects callers that fail `[_actor] call ARC_fnc_rolesIsTocS2 \|\| [_actor] call ARC_fnc_rolesCanApproveQueue`. Logs `[CIVSUB][SEC] MDT_RUN_DENIED` and sends a chat hint to the rejected client. Server-internal callers (no `remoteExecutedOwner`) bypass the gate. | Add a TOC/S2 role gate (e.g. `[_actor] call ARC_fnc_rolesCanApproveQueue` or an MDT-specific role check) before delegating. |
 | F-CIV-3 | All CIVSUB client→server endpoints | S5 | P2 | Inline `remoteExecutedOwner`/`owner _actor` validation pattern is correct but is duplicated in nine functions instead of routing through `ARC_fnc_rpcValidateSender`. Drift risk over time. | Migrate to `ARC_fnc_rpcValidateSender` in a single Mode I PR; preserve `[CIVSUB][SEC]` log prefix via a thin wrapper or pass-through `_event` codes. |
 | F-CIV-4 | All CIVSUB client→server endpoints | S5 | P2 | No per-actor rate-limit / idempotency on dialog-action and snapshot endpoints. A misbehaving client can flood the server. | Add a per-owner cooldown (≥250ms for snapshot; ≥1s for state-mutating actions) keyed on `getPlayerUID _actor`, with rejection logged once per cooldown window. |
@@ -223,7 +223,7 @@ These findings were recorded by the 2026-05-08 audit passes (Wave 1 + Wave 3 bat
 | ID | Endpoint | Check | Severity | Description | Remediation |
 |---|---|:---:|:---:|---|---|
 | F-DEV-1 | `ARC_fnc_devToggleDebugMode` | S1, S3 | P1 | **RESOLVED 2026-05-09** (Phase 0 / E1-T1). Adds `ARC_fnc_rpcValidateSender` call with `requireRemoteContext=true` and the `OMNI \|\| [_requestor] call ARC_fnc_rolesCanApproveQueue` gate used by sibling dev/admin endpoints; rejects with `[ARC][SEC] DEBUG_TOGGLE_DENIED`. Server-internal callers (no `remoteExecutedOwner`) bypass. | Add `ARC_fnc_rpcValidateSender` call and the same `OMNI \|\| canApproveQueue` gate used by sibling dev/admin endpoints; reject with `[ARC][SEC] DEBUG_TOGGLE_DENIED` log. |
-| F-DEV-2 | `ARC_fnc_uiCoverageAuditServer` | S1, S3 | P2 | Logs `remoteExecutedOwner` only — does not validate or reject. No role gate. Writes `ARC_uiCoverageMap` with `publicVariable true`. Content is static, but the side effect is global. | Add sender validation + admin role gate; or remove the endpoint from `CfgRemoteExec` allowlist and call it server-side only. |
+| F-DEV-2 | `ARC_fnc_uiCoverageAuditServer` | S1, S3 | P2 | **RESOLVED 2026-05-11.** Added `ARC_fnc_rpcValidateSender` (with `requireRemoteContext=true`) plus the `OMNI \|\| canApproveQueue` role gate used by sibling dev/admin endpoints; rejects with `[ARC][SEC] COVERAGE_AUDIT_DENIED`. HQ-tab caller (`fn_uiConsoleActionHQPrimary.sqf`) updated to pass `player` so the binding can be verified. Server-internal `bootstrapServer.sqf` invocation still bypasses (no `remoteExecutedOwner`). | — |
 | F-DEV-3 | `ARC_fnc_devDiagnosticsSnapshot`, `ARC_fnc_uiConsoleQAAuditServer` | S5 | P3 | Read-only audit endpoints have no debounce. Approver-gated, so risk is low; consider matching the 15s debounce already used by `devCompileAuditServer` for consistency. | Add 15s debounce keyed on requester UID. |
 
 ### 6.3 Objective / IED / VBIED findings
@@ -256,6 +256,13 @@ Each finding above is the seed for a Mode I PR. Open issues / PRs must reference
 ---
 
 ## Change log
+
+### v1.5 — 2026-05-11
+- Mode I PR (priority-queue items 1 & 4) closes two open findings:
+  - **F-CIV-1** `civsubInteractEndSession` / `civsubInteractOrderStop` — added `civsub_v1_enabled` mission-toggle gate; rows in §3.1 updated to ✅.
+  - **F-DEV-2** `uiCoverageAuditServer` — added `rpcValidateSender` + `OMNI || canApproveQueue` role gate; HQ-tab caller now passes `player`; row in §3.2 updated to ✅.
+- Tightly-coupled compat-clean fixes in touched files (pre-existing `getOrDefault` method form in `civsubInteractEndSession`, `#` indexing + `isNotEqualTo` in `uiConsoleActionHQPrimary`) replaced with sqflint-safe equivalents.
+- Truth-status: branch-local. Findings derived from current cloned working branch; not yet `origin/main`-confirmed per `Farabad_Source_of_Truth_and_Workflow_Spec.md`. Merge SHA pending.
 
 ### v1.4 — 2026-05-09
 - Phase 0 / Epic 1 (E1-T1..T5) Mode I PR landing closes all six P1 client→server RemoteExec findings:
