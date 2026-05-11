@@ -168,7 +168,8 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
             ];
 
             private _existingEhId = missionNamespace getVariable [_ehIdVarName, -1];
-            if ((_existingEhId isEqualType 0) && { _existingEhId >= 0 }) then { continue; };
+            if (!(_existingEhId isEqualType 0)) then { _existingEhId = -1; };
+            if (_existingEhId >= 0) then { continue; };
 
             missionNamespace setVariable [
                 _ehIdVarName,
