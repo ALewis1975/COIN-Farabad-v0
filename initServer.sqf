@@ -168,6 +168,9 @@ missionNamespace setVariable ["ARC_threatVirtualPoolTickS",         60,   true];
 missionNamespace setVariable ["ARC_threatVirtualPatrolRadiusM",    200,  true]; // physical group patrol radius when spawned (metres)
 missionNamespace setVariable ["ARC_threatVirtualPatrolWaypointN",  5,    true]; // waypoint count for physical group patrol task
 missionNamespace setVariable ["ARC_threatVirtualPoolMaxGroups",    96,   true]; // hard cap on seeded virtual OPFOR groups across all locations
+missionNamespace setVariable ["ARC_threatVirtualPhysicalMaxGroups", 8,   true]; // hard cap on simultaneous physical virtual-OPFOR groups
+missionNamespace setVariable ["ARC_threatVirtualPhysicalMaxGroups_FarabadCity", 4, true]; // tighter simultaneous cap inside Farabad City
+missionNamespace setVariable ["ARC_threatVirtualSpawnBudgetPerTick", 2,  true]; // max virtual-OPFOR groups allowed to materialize per pool tick
 missionNamespace setVariable ["ARC_sitePopActiveSitesCap",          6,   true]; // max simultaneous active SitePop sites
 
 // OPFOR unit class pool — 3CB Middle Eastern Insurgents (MEI) + Extremists (MEE), OPFOR side.

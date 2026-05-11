@@ -30,6 +30,14 @@
             ARC_threatVirtualDespawnDelayS (default 90 s) → delete group, transition
             to VIRTUAL_DORMANT.
 
+    Spawn throttles:
+        ARC_threatVirtualPhysicalMaxGroups limits simultaneous physical virtual
+        OPFOR groups globally.
+        ARC_threatVirtualPhysicalMaxGroups_FarabadCity applies a tighter cap to
+        groups anchored in the broad Farabad City zone.
+        ARC_threatVirtualSpawnBudgetPerTick limits how many groups can materialize
+        during one scheduler tick.
+
     Returns: BOOL (true if loop started, false if already running)
 */
 
@@ -143,6 +151,18 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
         private _activeVgIndex = ["threat_v0_vgroup_active_index", []] call ARC_fnc_stateGet;
         if (!(_activeVgIndex isEqualType [])) then { _activeVgIndex = []; };
 
+        private _physicalMaxGroups = missionNamespace getVariable ["ARC_threatVirtualPhysicalMaxGroups", 8];
+        if (!(_physicalMaxGroups isEqualType 0)) then { _physicalMaxGroups = 8; };
+        _physicalMaxGroups = (_physicalMaxGroups max 0) min 64;
+
+        private _cityPhysicalMaxGroups = missionNamespace getVariable ["ARC_threatVirtualPhysicalMaxGroups_FarabadCity", 4];
+        if (!(_cityPhysicalMaxGroups isEqualType 0)) then { _cityPhysicalMaxGroups = 4; };
+        _cityPhysicalMaxGroups = (_cityPhysicalMaxGroups max 0) min _physicalMaxGroups;
+
+        private _spawnBudgetPerTick = missionNamespace getVariable ["ARC_threatVirtualSpawnBudgetPerTick", 2];
+        if (!(_spawnBudgetPerTick isEqualType 0)) then { _spawnBudgetPerTick = 2; };
+        _spawnBudgetPerTick = (_spawnBudgetPerTick max 0) min 16;
+
         private _dirty      = false;
         private _now        = serverTime;
 
@@ -163,6 +183,25 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
             if (_idx < 0) then { _pairs pushBack [_key, _value]; } else { _pairs set [_idx, [_key, _value]]; };
             _pairs
         };
+
+        private _physicalCount = 0;
+        private _cityPhysicalCount = 0;
+        {
+            private _capRec = _x;
+            if (!(([_capRec, "type", ""] call _kvGet) isEqualTo "VIRTUAL_OPFOR")) then { continue; };
+            if (!(([_capRec, "state", ""] call _kvGet) isEqualTo "PHYSICAL")) then { continue; };
+
+            _physicalCount = _physicalCount + 1;
+
+            private _capPos = [_capRec, "pos", []] call _kvGet;
+            if (_capPos isEqualType [] && { (count _capPos) >= 2 } && { ([_capPos] call ARC_fnc_worldGetZoneForPos) isEqualTo "FarabadCity" }) then
+            {
+                _cityPhysicalCount = _cityPhysicalCount + 1;
+            };
+        } forEach _records;
+
+        private _spawnedThisTick = 0;
+        private _capLogEmitted = false;
 
         {
             private _rec = _x;
@@ -235,7 +274,14 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
                     } else {
                         // Spawn gate: player very nearby AND there is an active combat incident
                         private _combatIncidentActive = !((_activeTaskId isEqualTo "") || {_activeIncidentZone in ["Airbase", "GreenZone", ""]});
-                        if (_playerVeryNearby && { _combatIncidentActive } && { _canSpawnThreat }) then {
+                        private _vgZone = [_vgPos] call ARC_fnc_worldGetZoneForPos;
+                        private _spawnCapAllows = (_spawnedThisTick < _spawnBudgetPerTick) && { _physicalCount < _physicalMaxGroups };
+                        if (_vgZone isEqualTo "FarabadCity") then
+                        {
+                            _spawnCapAllows = _spawnCapAllows && { _cityPhysicalCount < _cityPhysicalMaxGroups };
+                        };
+
+                        if (_playerVeryNearby && { _combatIncidentActive } && { _canSpawnThreat } && { _spawnCapAllows }) then {
                             // Physically spawn group
                             private _spawnPos          = _vgPos;
                             private _vgPatrolRadiusM   = missionNamespace getVariable ["ARC_threatVirtualPatrolRadiusM", 200];
@@ -293,6 +339,12 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
                             _dirty = true;
 
                             _activeVgIndex pushBackUnique _vgId;
+                            _spawnedThisTick = _spawnedThisTick + 1;
+                            _physicalCount = _physicalCount + 1;
+                            if (_vgZone isEqualTo "FarabadCity") then
+                            {
+                                _cityPhysicalCount = _cityPhysicalCount + 1;
+                            };
 
                             diag_log format ["[ARC][VPOOL][INFO] %1 spawned PHYSICAL (%2 units) at %3", _vgId, count _spawnedNetIds, _spawnPos];
 
@@ -300,6 +352,11 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
                         } else {
                             if (_playerVeryNearby && { _combatIncidentActive } && { !_canSpawnThreat }) then {
                                 diag_log format ["[ARC][VPOOL][TOD] %1 spawn suppressed phase=%2", _vgId, _todPhase];
+                            };
+                            if (_playerVeryNearby && { _combatIncidentActive } && { _canSpawnThreat } && { !_spawnCapAllows } && { !_capLogEmitted }) then {
+                                diag_log format ["[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: spawn capped at vg=%1 zone=%2 active=%3/%4 city=%5/%6 budget=%7/%8",
+                                    _vgId, _vgZone, _physicalCount, _physicalMaxGroups, _cityPhysicalCount, _cityPhysicalMaxGroups, _spawnedThisTick, _spawnBudgetPerTick];
+                                _capLogEmitted = true;
                             };
                         };
                     };
