@@ -105,10 +105,8 @@ if (_alreadySeeded) exitWith {
         private _migAnchorPos = [];
         if (!(_migAnchorId isEqualTo "")) then {
             {
-                if (!(_x isEqualType []) || { (count _x) < 3 }) then { continue; };
-                private _mlid = _x select 0;
-                private _mlpos = _x select 2;
-                if (!(_mlid isEqualType "") || { !(_mlpos isEqualType []) }) then { continue; };
+                _x params [["_mlid", "", [""]], ["_mlDisplayName", "", [""]], ["_mlpos", [], [[]]]];
+                if (!(_mlDisplayName isEqualType "")) then { continue; };
                 if (_mlid isEqualTo _migAnchorId) exitWith { _migAnchorPos = +_mlpos; };
             } forEach _migLocs;
         };
