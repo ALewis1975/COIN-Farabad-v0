@@ -208,8 +208,8 @@ private _fn_applyRouteWps = {
     {
         private _wp = _grp addWaypoint [_x, 0];
         _wp setWaypointType "MOVE";
-        _wp setWaypointSpeed "LIMITED";
-        _wp setWaypointBehaviour "SAFE";
+        _wp setWaypointSpeed "NORMAL";
+        _wp setWaypointBehaviour "AWARE";
         _wp setWaypointCombatMode "YELLOW";
         _wp setWaypointFormation "COLUMN";
         _wp setWaypointCompletionRadius 45;
@@ -610,8 +610,10 @@ if ((count _vehicles) isEqualTo 0) exitWith
     true
 };
 
-private _lead = _vehicles select 0;
-private _aliveVeh = _vehicles select { alive _x };
+private _aliveVehAll = _vehicles select { alive _x };
+private _aliveVeh = _aliveVehAll select { canMove _x };
+private _lead = if ((count _aliveVeh) > 0) then { _aliveVeh select 0 } else { objNull };
+if (isNull _lead && { (count _aliveVehAll) > 0 }) then { _lead = _aliveVehAll select 0; };
 
 // T10: MSR threat awareness — check for CONVOY-targeted threat records near the route.
 // Rate-limited internally; read-only (no convoy state mutation).
@@ -901,18 +903,30 @@ private _fn_bridgeAssistPoints = {
 
     _pts
 };
-if (!alive _lead) exitWith
+if ((count _aliveVehAll) isEqualTo 0) exitWith
 {
     ["FAILED"] call _setLinkupTaskState;
-    ["FAILED", "CONVOY_LEAD_KILLED", "Convoy lead vehicle destroyed. Recommend closing this incident as FAILED.", getPosATL _lead] call ARC_fnc_incidentMarkReadyToClose;
+    ["FAILED", "CONVOY_DESTROYED", "Convoy destroyed. Recommend closing this incident as FAILED.", _startPos] call ARC_fnc_incidentMarkReadyToClose;
     true
 };
 
 if ((count _aliveVeh) isEqualTo 0) exitWith
 {
     ["FAILED"] call _setLinkupTaskState;
-    ["FAILED", "CONVOY_DESTROYED", "Convoy destroyed. Recommend closing this incident as FAILED.", _startPos] call ARC_fnc_incidentMarkReadyToClose;
+    ["FAILED", "CONVOY_IMMOBILIZED", "Convoy vehicles are immobilized and cannot continue. Recommend closing this incident as FAILED.", _startPos] call ARC_fnc_incidentMarkReadyToClose;
     true
+};
+
+private _leadNetId = netId _lead;
+private _prevLeadNetId = ["activeConvoyLeadNetId", ""] call ARC_fnc_stateGet;
+if (!(_prevLeadNetId isEqualType "")) then { _prevLeadNetId = ""; };
+if (!(_leadNetId isEqualTo _prevLeadNetId)) then
+{
+    ["activeConvoyLeadNetId", _leadNetId] call ARC_fnc_stateSet;
+    if (!(_prevLeadNetId isEqualTo "")) then
+    {
+        diag_log format ["[ARC][WARN][CONVOY] ARC_fnc_execTickConvoy: lead promoted old=%1 new=%2", _prevLeadNetId, _leadNetId];
+    };
 };
 
 // Normalize convoy groups (critical reliability fix)
@@ -1533,7 +1547,7 @@ if (isNull _grpW) then
 
 // Watchdog: enforce column formation
 _grpW setFormation "COLUMN";
-_grpW setSpeedMode "LIMITED";
+_grpW setSpeedMode "NORMAL";
 // Never rename a player group; keep TOC/role gating stable even if a player drives convoy assets.
 private _hasPlayerW = false;
 { if (isPlayer _x) exitWith { _hasPlayerW = true; }; } forEach (units _grpW);
@@ -1856,16 +1870,91 @@ if (_catchup && { (count _aliveVeh) >= 2 }
 };
 
 
+// Contact profile: convoy must keep moving under fire.
+private _contactRadius = missionNamespace getVariable ["ARC_convoyContactDetectRadiusM", 500];
+if (!(_contactRadius isEqualType 0)) then { _contactRadius = 500; };
+_contactRadius = (_contactRadius max 120) min 1500;
+
+private _contactImmediate = missionNamespace getVariable ["ARC_convoyContactImmediateRadiusM", 180];
+if (!(_contactImmediate isEqualType 0)) then { _contactImmediate = 180; };
+_contactImmediate = (_contactImmediate max 60) min 500;
+
+private _contactKnows = missionNamespace getVariable ["ARC_convoyContactKnowsAboutThreshold", 1.5];
+if (!(_contactKnows isEqualType 0)) then { _contactKnows = 1.5; };
+_contactKnows = (_contactKnows max 0.8) min 4;
+
+private _contactSustain = missionNamespace getVariable ["ARC_convoyContactSustainSec", 45];
+if (!(_contactSustain isEqualType 0)) then { _contactSustain = 45; };
+_contactSustain = (_contactSustain max 10) min 180;
+
+private _contactBoost = missionNamespace getVariable ["ARC_convoyContactBoostKph", 15];
+if (!(_contactBoost isEqualType 0)) then { _contactBoost = 15; };
+_contactBoost = (_contactBoost max 4) min 35;
+
+private _contactSpacing = missionNamespace getVariable ["ARC_convoyContactSeparationM", 15];
+if (!(_contactSpacing isEqualType 0)) then { _contactSpacing = 15; };
+_contactSpacing = (_contactSpacing max 10) min 80;
+
+private _contactDetected = false;
+private _grpSide = side _grpW;
+private _leadPosContact = getPosATL _lead;
+_leadPosContact resize 3;
+
+private _nearThreats = _leadPosContact nearEntities [["CAManBase", "LandVehicle"], _contactRadius];
+{
+    if (_x in _vehicles) then { continue; };
+    if (!alive _x) then { continue; };
+
+    private _hostileSide = side group _x;
+    if (_hostileSide isEqualTo civilian) then { continue; };
+    if ((_grpSide getFriend _hostileSide) >= 0.6) then { continue; };
+
+    if ((_lead distance2D _x) <= _contactImmediate || { (_grpW knowsAbout _x) >= _contactKnows }) exitWith
+    {
+        _contactDetected = true;
+    };
+} forEach _nearThreats;
+
+private _contactUntil = ["activeConvoyContactUntil", -1] call ARC_fnc_stateGet;
+if (!(_contactUntil isEqualType 0)) then { _contactUntil = -1; };
+if (_contactDetected) then
+{
+    _contactUntil = _now + _contactSustain;
+    ["activeConvoyContactUntil", _contactUntil] call ARC_fnc_stateSet;
+};
+
+private _contactActive = (_contactUntil > 0 && { _now < _contactUntil });
+private _prevContactActive = ["activeConvoyContactActive", false] call ARC_fnc_stateGet;
+if (!(_prevContactActive isEqualType true) && !(_prevContactActive isEqualType false)) then { _prevContactActive = false; };
+if (_contactActive != _prevContactActive) then
+{
+    ["activeConvoyContactActive", _contactActive] call ARC_fnc_stateSet;
+    if (_contactActive) then
+    {
+        diag_log format ["[ARC][INFO][CONVOY] ARC_fnc_execTickConvoy: contact profile active task=%1 lead=%2 speedMode=FULL", _taskId, netId _lead];
+    }
+    else
+    {
+        diag_log format ["[ARC][INFO][CONVOY] ARC_fnc_execTickConvoy: contact profile cleared task=%1 lead=%2", _taskId, netId _lead];
+    };
+};
+
 // Apply final speed + spacing every tick.
 // - catch-up writes into _capWanted (default = _speedKph)
+// - contact raises speed/urgency while preserving route
 // - bridge zones clamp speed + spacing further
 private _capFinal = _capWanted;
+if (_contactActive) then
+{
+    _capFinal = (_capFinal max (_speedKph + _contactBoost)) min _kMax;
+};
 if (_bridgeMode) then
 {
     _capFinal = _capFinal min _bridgeSpeedKph;
 };
 
 private _spacingFinal = if (_bridgeMode) then { (_spacing min _bridgeSpacingM) } else { _spacing };
+if (_contactActive) then { _spacingFinal = _spacingFinal min _contactSpacing; };
 
 {
     if (alive _x) then
@@ -1885,6 +1974,24 @@ private _spacingFinal = if (_bridgeMode) then { (_spacing min _bridgeSpacingM) }
         };
     };
 } forEach _vehicles;
+
+_grpW allowFleeing 0;
+_grpW setFormation "COLUMN";
+_grpW setCombatMode "YELLOW";
+_grpW setBehaviour "AWARE";
+_grpW setSpeedMode (if (_contactActive) then { "FULL" } else { "NORMAL" });
+
+{
+    private _d = driver _x;
+    if (!isNull _d && { !isPlayer _d }) then
+    {
+        _d stop false;
+        _d disableAI "AUTOCOMBAT";
+        _d disableAI "COVER";
+        _d disableAI "SUPPRESSION";
+    };
+    if (_contactActive) then { _x forceSpeed -1; };
+} forEach _aliveVeh;
 
 ["activeConvoySpeedCapKph", _capFinal] call ARC_fnc_stateSet;
 
@@ -2391,8 +2498,8 @@ else
                         {
                             private _wp = _grpW addWaypoint [_x, 0];
                             _wp setWaypointType "MOVE";
-                            _wp setWaypointSpeed "LIMITED";
-                            _wp setWaypointBehaviour "SAFE";
+                            _wp setWaypointSpeed "NORMAL";
+                            _wp setWaypointBehaviour "AWARE";
                             _wp setWaypointCombatMode "YELLOW";
                             _wp setWaypointFormation "COLUMN";
                             _wp setWaypointCompletionRadius 12;
@@ -2403,8 +2510,8 @@ else
                         {
                             private _wpG = _grpW addWaypoint [_ingressPos, 0];
                             _wpG setWaypointType "MOVE";
-                            _wpG setWaypointSpeed "LIMITED";
-                            _wpG setWaypointBehaviour "SAFE";
+                            _wpG setWaypointSpeed "NORMAL";
+                            _wpG setWaypointBehaviour "AWARE";
                             _wpG setWaypointCombatMode "YELLOW";
                             _wpG setWaypointFormation "COLUMN";
                             _wpG setWaypointCompletionRadius 40;
@@ -2412,8 +2519,8 @@ else
 
                         private _wpD = _grpW addWaypoint [_destWpPos, 0];
                         _wpD setWaypointType "MOVE";
-                        _wpD setWaypointSpeed "LIMITED";
-                        _wpD setWaypointBehaviour "SAFE";
+                        _wpD setWaypointSpeed "NORMAL";
+                        _wpD setWaypointBehaviour "AWARE";
                         _wpD setWaypointCombatMode "YELLOW";
                         _wpD setWaypointFormation "COLUMN";
                         _wpD setWaypointCompletionRadius (_destRad max 40);
@@ -2495,14 +2602,14 @@ else
             {
                 private _wpA = _grpW addWaypoint [_pBy, 0];
                 _wpA setWaypointType "MOVE";
-                _wpA setWaypointSpeed "LIMITED";
-                _wpA setWaypointBehaviour "SAFE";
+                _wpA setWaypointSpeed "NORMAL";
+                _wpA setWaypointBehaviour "AWARE";
                 _wpA setWaypointCompletionRadius 25;
 
                 private _wpB = _grpW addWaypoint [_destWpPos, 0];
                 _wpB setWaypointType "MOVE";
-                _wpB setWaypointSpeed "LIMITED";
-                _wpB setWaypointBehaviour "SAFE";
+                _wpB setWaypointSpeed "NORMAL";
+                _wpB setWaypointBehaviour "AWARE";
                 _wpB setWaypointCompletionRadius (_destRad max 40);
 
                 _grpW setCurrentWaypoint _wpA;
@@ -2531,9 +2638,9 @@ else
         } forEach _vehicles;
 
         _grpW setFormation "COLUMN";
-        _grpW setBehaviour "SAFE";
+        _grpW setBehaviour "AWARE";
         _grpW setCombatMode "YELLOW";
-        _grpW setSpeedMode "LIMITED";
+        _grpW setSpeedMode (if (_contactActive) then { "FULL" } else { "NORMAL" });
 
         if (!(_stage isEqualTo _prevRecoveryStage)) then
         {

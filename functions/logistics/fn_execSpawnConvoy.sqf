@@ -546,9 +546,10 @@ if (isNull _grp) then
     _grp = createGroup [west, true];
 };
 _grp setFormation "COLUMN";
-_grp setCombatMode "BLUE";
-_grp setBehaviour "SAFE";
-_grp setSpeedMode "LIMITED";
+_grp setCombatMode "YELLOW";
+_grp setBehaviour "AWARE";
+_grp setSpeedMode "NORMAL";
+_grp allowFleeing 0;
 
 // Tag the group so watchdog/rehydration can recognize the current convoy.
 if (!(_taskId isEqualTo "")) then { _grp setVariable ["ARC_convoyTaskId", _taskId, true]; };
