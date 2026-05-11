@@ -2140,6 +2140,11 @@ if (_fRec && { (count _aliveVeh) >= 2 }
         _gapTrigger = ((_spacing max 20) * 3.0) max _bridgeGapFloor;
     };
 
+    // Recovery telemetry aggregators (reported on stage transition below).
+    private _worstFollowerGap = 0;
+    private _worstFollowerNetId = "";
+    private _followerRecoverCount = 0;
+
     for "_i" from 1 to ((count _aliveVeh) - 1) do
     {
         private _v = _aliveVeh select _i;
@@ -2180,6 +2185,19 @@ if (_fRec && { (count _aliveVeh) >= 2 }
             {
                 _didFollowerRecover = true;
                 _v setVariable ["ARC_convoyLastRecoverAt", _now];
+
+                _followerRecoverCount = _followerRecoverCount + 1;
+                if (_gap > _worstFollowerGap) then
+                {
+                    _worstFollowerGap = _gap;
+                    _worstFollowerNetId = netId _v;
+                };
+
+                private _vRouteIdx = if ((count _routePts) > 0) then { [_routePts, _vPos, 0] call _fn_nearRouteIdx } else { -1 };
+                diag_log format [
+                    "[ARC][CONVOY][RECOVER] task=%1 role=follower netId=%2 idx=%3 gapM=%4 stallSec=%5 mode=%6",
+                    _taskId, netId _v, _vRouteIdx, round _gap, round _stuckForV, if (_bridgeMode) then { "bridge" } else { "open" }
+                ];
 
                 // Ensure it can move.
                 _v setFuel 1;
@@ -2317,7 +2335,16 @@ else
             default { "Follower recovery stage: off." };
         };
 
-        ["OPS", _msg, getPosATL _lead, [["event", _evt], ["stage", _followerStage], ["taskId", _taskId]]] call ARC_fnc_intelLog;
+        ["OPS", _msg, getPosATL _lead, [
+            ["event", _evt],
+            ["stage", _followerStage],
+            ["role", "follower"],
+            ["followersRecovering", _followerRecoverCount],
+            ["worstGapM", round _worstFollowerGap],
+            ["worstNetId", _worstFollowerNetId],
+            ["mode", if (_bridgeMode) then { "bridge" } else { "open" }],
+            ["taskId", _taskId]
+        ]] call ARC_fnc_intelLog;
     };
 }
 else
@@ -2684,7 +2711,26 @@ else
         if (!(_stage isEqualTo _prevRecoveryStage)) then
         {
             ["activeConvoyRecoveryLastStageLogged", _stage] call ARC_fnc_stateSet;
-            ["OPS", format ["Convoy recovery executed (stage %1) after %2s stall.", _stage, round _stuckFor], _curPos, [["event", "CONVOY_RECOVER"], ["stage", _stage], ["taskId", _taskId]]] call ARC_fnc_intelLog;
+
+            // Augmented recovery telemetry: lead identification, route progress, bridge mode.
+            private _leadNidLog = if (!isNull _lead) then { netId _lead } else { "" };
+            private _routeIdxLog = if ((count _routePts) > 0) then { [_routePts, _curPos, 0] call _fn_nearRouteIdx } else { -1 };
+            private _bridgeFlag = if (_bridgeMode) then { "bridge" } else { "open" };
+
+            ["OPS", format ["Convoy recovery executed (stage %1) after %2s stall.", _stage, round _stuckFor], _curPos, [
+                ["event", "CONVOY_RECOVER"],
+                ["stage", _stage],
+                ["role", "lead"],
+                ["leadNetId", _leadNidLog],
+                ["routeIdx", _routeIdxLog],
+                ["mode", _bridgeFlag],
+                ["taskId", _taskId]
+            ]] call ARC_fnc_intelLog;
+
+            diag_log format [
+                "[ARC][CONVOY][RECOVER] task=%1 role=lead stage=%2 stallSec=%3 leadNetId=%4 routeIdx=%5 mode=%6",
+                _taskId, _stage, round _stuckFor, _leadNidLog, _routeIdxLog, _bridgeFlag
+            ];
         };
 
         private _bridgeRecoverState = if (_bridgeMode) then

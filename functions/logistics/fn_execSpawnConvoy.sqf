@@ -164,6 +164,26 @@ if (!(_roleBundleId isEqualTo "")) then
     };
 };
 
+// Bundle category: payload-only bundles drive ONLY the cargo/payload slots; lead/tail fall
+// back to the legacy security-capable role pools. This prevents (e.g.) a fuel convoy from
+// using a fuel truck as its lead/security vehicle. Default list is set in initServer.sqf
+// under ARC_convoyBundlePayloadOnly and may be overridden by mission authors.
+private _bundlePayloadOnlyList = missionNamespace getVariable ["ARC_convoyBundlePayloadOnly", []];
+if (!(_bundlePayloadOnlyList isEqualType [])) then { _bundlePayloadOnlyList = []; };
+
+// Normalize the payload-only list to uppercase once so the membership check is O(n) string
+// compares with no per-iteration toUpper cost.
+private _bundlePayloadOnlyUpper = [];
+{
+    if (_x isEqualType "") then { _bundlePayloadOnlyUpper pushBackUnique (toUpper _x); };
+} forEach _bundlePayloadOnlyList;
+
+private _bundleIsPayloadOnly = false;
+if (!(_roleBundleId isEqualTo "")) then
+{
+    _bundleIsPayloadOnly = (_roleBundleId in _bundlePayloadOnlyUpper);
+};
+
 // Incident metadata (used for VIP motorcades, supply-kind selection, etc.)
 private _incidentMarker = ["activeIncidentMarker", ""] call ARC_fnc_stateGet;
 if (!(_incidentMarker isEqualType "")) then { _incidentMarker = ""; };
@@ -363,8 +383,21 @@ private _resolveRolePool = {
 };
 
 private _bundleOrLegacy = {
-    params ["_legacyPool"];
-    if ((count _bundleClassPool) > 0) exitWith { +_bundleClassPool };
+    params ["_legacyPool", ["_roleNameLower", ""]];
+
+    // Payload-only bundles do not override security-capable roles (lead/escort/tail).
+    // They drive cargo/payload selection only; lead/escort fall back to legacy security pools.
+    // Caller is expected to pass _roleNameLower already lowercased.
+    private _useBundle = ((count _bundleClassPool) > 0);
+    if (_useBundle && _bundleIsPayloadOnly) then
+    {
+        if (_roleNameLower isEqualTo "lead" || { _roleNameLower isEqualTo "escort" } || { _roleNameLower isEqualTo "tail" }) then
+        {
+            _useBundle = false;
+        };
+    };
+
+    if (_useBundle) exitWith { +_bundleClassPool };
 
     private _out = [];
     if (_legacyPool isEqualType []) then
@@ -383,18 +416,19 @@ private _poolLeadRole = ["lead", _poolLead] call _resolveRolePool;
 private _poolEscRole = ["escort", _poolEsc] call _resolveRolePool;
 private _poolLogRole = ["logistics", _poolLog] call _resolveRolePool;
 
-private _poolLeadSelect = [_poolLeadRole] call _bundleOrLegacy;
-private _poolEscSelect = [_poolEscRole] call _bundleOrLegacy;
-private _poolLogSelect = [_poolLogRole] call _bundleOrLegacy;
+private _poolLeadSelect = [_poolLeadRole, "lead"] call _bundleOrLegacy;
+private _poolEscSelect = [_poolEscRole, "escort"] call _bundleOrLegacy;
+private _poolLogSelect = [_poolLogRole, "logistics"] call _bundleOrLegacy;
 
 // Startup breadcrumbs (low-volume): capture role bundle + resolved class pools used for this spawn pass.
 private _roleBundleLog = if (_roleBundleId isEqualTo "") then {"<none>"} else {_roleBundleId};
+private _bundleCategory = if (_roleBundleId isEqualTo "") then { "none" } else { if (_bundleIsPayloadOnly) then { "payloadOnly" } else { "fullBody" } };
 private _classesPreview = [
     ["lead", +_poolLeadSelect],
     ["escort", +_poolEscSelect],
     ["logistics", +_poolLogSelect]
 ];
-["[ARC][CONVOY][BOOT] task=%1 type=%2 bundle=%3 supply=%4 vip=%5 rolePools=%6", [_taskId, _incidentTypeU, _roleBundleLog, _supplyKind, _isVIP, _classesPreview], "WARN"] call _log;
+["[ARC][CONVOY][BOOT] task=%1 type=%2 bundle=%3 category=%4 supply=%5 vip=%6 rolePools=%7", [_taskId, _incidentTypeU, _roleBundleLog, _bundleCategory, _supplyKind, _isVIP, _classesPreview], "WARN"] call _log;
 
 // Build the convoy class list.
 switch (_incidentTypeU) do
@@ -485,11 +519,17 @@ switch (_incidentTypeU) do
 
             private _useSUV = _forceSUV || { (random 1) < _pSUV };
 
-            private _poolUse = _poolEscRole;
+            private _poolUse = _poolEscSelect;
             if (_useSUV) then
             {
                 // VIP: bias toward ION SUVs (PMC crews). Otherwise use the broader SUV/Police pool.
-                _poolUse = if (_isVIP && { (random 1) < 0.70 }) then { _poolVIP } else { _poolSUV };
+                // The SUV/VIP overlay only applies when no escort bundle is constraining the body;
+                // resolved bundles (ESCORT_VIP / LOGI_GOVERNMENT / LOGI_PRIVATE_SECURITY / etc.)
+                // already curate the SUV/PMC mix, so we keep their constraint intact.
+                if ((count _bundleClassPool) isEqualTo 0) then
+                {
+                    _poolUse = if (_isVIP && { (random 1) < 0.70 }) then { _poolVIP } else { _poolSUV };
+                };
             };
 
             private _c = [_poolUse] call _pickFrom;

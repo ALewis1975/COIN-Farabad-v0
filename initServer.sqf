@@ -915,6 +915,10 @@ missionNamespace setVariable ["ARC_convoyBundleClassMatrix", [
         "rhsusf_M1232_M2_usarmy_d",
         "rhsusf_M1232_MK19_usarmy_d"
     ]],
+    ["LOGI_CONVOY_SECURITY", [
+        "rhsusf_M1232_M2_usarmy_d",
+        "rhsusf_M1232_MK19_usarmy_d"
+    ]],
     ["LOGI_TRANSPORT", [
         "rhsusf_m1083a1p2_d_fmtv_usarmy",
         "rhsusf_m1083a1p2_d_open_fmtv_usarmy",
@@ -991,6 +995,19 @@ missionNamespace setVariable ["ARC_convoyBundleClassMatrix", [
         "rhsusf_M1232_M2_usarmy_d",
         "rhsusf_m1083a1p2_d_fmtv_usarmy"
     ]]
+], true];
+
+// Payload-only bundles: when resolved, the bundle pool ONLY drives the cargo/payload slots.
+// Lead and tail vehicles fall back to the legacy security-capable role pools so e.g. a fuel
+// convoy does not place a fuel truck as its lead/security vehicle. Mission authors can
+// override this list before bootstrap if a bundle should also drive lead/tail.
+missionNamespace setVariable ["ARC_convoyBundlePayloadOnly", [
+    "LOGI_HEADQUARTERS",
+    "LOGI_TRANSPORT",
+    "LOGI_MEDICAL",
+    "LOGI_AMMO",
+    "LOGI_REPAIR",
+    "LOGI_FUEL"
 ], true];
 
 // Side/faction policy for allowed convoy classes (crew defaults preserve WEST join safety; vehicle side is open for contractor/government bundles).
