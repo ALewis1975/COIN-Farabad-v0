@@ -11,6 +11,20 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-11 — Virtual OPFOR protected-zone sqflint warning fix (Mode A)
+
+**Branch/Commit:** copilot/fix-opfor-spawn-airfield-issue @ HEAD
+
+**Scenario:** Fixed CI preflight failure from unused `_mldn` binding in the Virtual OPFOR protected-zone migration lookup.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Failed CI log review | GitHub Actions run `25677406343`, job `75379698849` | PASS | Confirmed `sqflint -e w` failed only on `[108,49]: warning: Variable "_mldn" not used`. |
+| 2 | Changed-file sqflint compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_incidentPreCache.sqf functions/threat/fn_threatVirtualPoolInit.sqf functions/threat/fn_threatVirtualPoolTick.sqf` | PASS | No banned parser-compat patterns detected. |
+| 3 | Changed-file sqflint | `sqflint -e w functions/core/fn_incidentPreCache.sqf && sqflint -e w functions/threat/fn_threatVirtualPoolInit.sqf && sqflint -e w functions/threat/fn_threatVirtualPoolTick.sqf` | PASS | Installed `sqflint` locally via pip to match CI behavior; unused `_mldn` warning is gone. |
+| 4 | Whitespace diff check | `git diff --check` | PASS | No whitespace errors. |
+| 5 | Review follow-up lint sanity | Repeat checks #2-4 after replacing `select`-based lookup with guarded `params` using `_mlDisplayName` | PASS | Compat scan, sqflint, and whitespace check remain clean. |
+
 ## 2026-05-11 — Convoy moving-under-fire + lead promotion hardening (Mode A)
 
 **Branch/Commit:** copilot/move-convoy-under-fire @ HEAD

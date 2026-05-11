@@ -141,9 +141,16 @@ private _bx = _incPos  select 0;
 private _by = _incPos  select 1;
 
 // ---------------------------------------------------------------------------
-// Find candidates: DORMANT VIRTUAL_OPFOR groups within corridor
+// Find candidates: DORMANT VIRTUAL_OPFOR groups within corridor,
+// excluding any that sit inside a protected zone (Airbase, GreenZone).
+// Intentional — pre-caching a group inside the airfield would allow it to
+// physically spawn there when players approach along the route.
 // ---------------------------------------------------------------------------
 private _candidates = [];  // [[index, distToLine, distToFrom], ...]
+
+// Protected zones config — mirrors ARC_fnc_threatVirtualPoolInit and tick guards
+private _preCacheProtectedZones = missionNamespace getVariable ["ARC_threatVirtualProtectedZones", ["Airbase", "GreenZone"]];
+if (!(_preCacheProtectedZones isEqualType [])) then { _preCacheProtectedZones = ["Airbase", "GreenZone"]; };
 
 {
     private _rec = _x;
@@ -157,6 +164,10 @@ private _candidates = [];  // [[index, distToLine, distToFrom], ...]
 
     private _px = _pos select 0;
     private _py = _pos select 1;
+
+    // Protected-zone guard: never pre-cache a group whose position is inside a protected zone
+    private _preZone = [_pos] call ARC_fnc_worldGetZoneForPos;
+    if (_preZone in _preCacheProtectedZones) then { continue; };
 
     private _distToLine = [_ax, _ay, _bx, _by, _px, _py] call _fnDistToSegment;
     if (_distToLine > _corridorRadius) then { continue; };
