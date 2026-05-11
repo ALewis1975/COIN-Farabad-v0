@@ -1897,25 +1897,41 @@ private _contactSpacing = missionNamespace getVariable ["ARC_convoyContactSepara
 if (!(_contactSpacing isEqualType 0)) then { _contactSpacing = 15; };
 _contactSpacing = (_contactSpacing max 10) min 80;
 
-private _contactDetected = false;
+private _contactScanEvery = missionNamespace getVariable ["ARC_convoyContactScanIntervalSec", 2];
+if (!(_contactScanEvery isEqualType 0)) then { _contactScanEvery = 2; };
+_contactScanEvery = (_contactScanEvery max 1) min 10;
+
+private _contactDetected = ["activeConvoyContactDetected", false] call ARC_fnc_stateGet;
+if (!(_contactDetected isEqualType true) && !(_contactDetected isEqualType false)) then { _contactDetected = false; };
+
 private _grpSide = side _grpW;
 private _leadPosContact = getPosATL _lead;
 _leadPosContact resize 3;
+private _lastContactScanAt = ["activeConvoyContactScanAt", -1] call ARC_fnc_stateGet;
+if (!(_lastContactScanAt isEqualType 0)) then { _lastContactScanAt = -1; };
 
-private _nearThreats = _leadPosContact nearEntities [["CAManBase", "LandVehicle"], _contactRadius];
+if (_lastContactScanAt < 0 || { (_now - _lastContactScanAt) >= _contactScanEvery }) then
 {
-    if (_x in _vehicles) then { continue; };
-    if (!alive _x) then { continue; };
-
-    private _hostileSide = side group _x;
-    if (_hostileSide isEqualTo civilian) then { continue; };
-    if ((_grpSide getFriend _hostileSide) >= 0.6) then { continue; };
-
-    if ((_lead distance2D _x) <= _contactImmediate || { (_grpW knowsAbout _x) >= _contactKnows }) exitWith
+    _contactDetected = false;
+    private _nearThreats = _leadPosContact nearEntities [["CAManBase", "LandVehicle"], _contactRadius];
     {
-        _contactDetected = true;
-    };
-} forEach _nearThreats;
+        if (_x in _vehicles) then { continue; };
+        if (!alive _x) then { continue; };
+
+        private _hostileSide = side group _x;
+        if (_hostileSide isEqualTo civilian) then { continue; };
+        if ((_grpSide getFriend _hostileSide) >= 0.6) then { continue; };
+
+        // Distance check is intentionally first (cheap), then knowsAbout (more expensive).
+        if ((_lead distance2D _x) <= _contactImmediate || { (_grpW knowsAbout _x) >= _contactKnows }) exitWith
+        {
+            _contactDetected = true;
+        };
+    } forEach _nearThreats;
+
+    ["activeConvoyContactDetected", _contactDetected] call ARC_fnc_stateSet;
+    ["activeConvoyContactScanAt", _now] call ARC_fnc_stateSet;
+};
 
 private _contactUntil = ["activeConvoyContactUntil", -1] call ARC_fnc_stateGet;
 if (!(_contactUntil isEqualType 0)) then { _contactUntil = -1; };
@@ -1985,20 +2001,22 @@ _grpW setSpeedMode (if (_contactActive) then { "FULL" } else { "NORMAL" });
 
 {
     private _d = driver _x;
+    private _stoppedSpeedThreshold = 1.5;
     if (!isNull _d && { !isPlayer _d }) then
     {
-        if ((speed _x) < 1.5) then { _d stop false; };
+        if ((speed _x) < _stoppedSpeedThreshold) then { _d stop false; };
         private _driverProfileApplied = _d getVariable ["ARC_convoyDriverMoveProfileApplied", false];
         if (!(_driverProfileApplied isEqualType true) && !(_driverProfileApplied isEqualType false)) then { _driverProfileApplied = false; };
         if (!_driverProfileApplied) then
         {
+            // Keep drivers in continuous movement mode; turret crews stay fully combat-capable.
             _d disableAI "AUTOCOMBAT";
             _d disableAI "COVER";
             _d disableAI "SUPPRESSION";
             _d setVariable ["ARC_convoyDriverMoveProfileApplied", true];
         };
     };
-    _x forceSpeed -1; // release forced speed constraint
+    _x forceSpeed -1; // defensive cleanup: release any temporary forced speed from staging/recovery
 } forEach _aliveVeh;
 
 ["activeConvoySpeedCapKph", _capFinal] call ARC_fnc_stateSet;

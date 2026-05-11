@@ -6,7 +6,7 @@ Convoy execution remains server-authoritative in `ARC_fnc_execTickConvoy` and `A
 The convoy now prioritizes forward movement under threat:
 - Contact near the lead vehicle activates a temporary **contact profile**.
 - Contact profile raises speed cap, tightens separation, and sets group behavior to `AWARE` with `FULL` speed mode.
-- Drivers are kept in movement mode (`AUTOCOMBAT`/`COVER`/`SUPPRESSION` disabled for drivers only), while turret crews remain free to engage.
+- Driver AI is configured for continuous movement (`AUTOCOMBAT`/`COVER`/`SUPPRESSION` disabled for drivers only), while turret crews remain free to engage.
 
 ## Waypoint / Route Continuity
 The convoy route is reapplied by watchdog logic when waypoints are missing, and all recovery branches reapply route waypoints with `AWARE` behavior to avoid stop-and-engage stalls.
