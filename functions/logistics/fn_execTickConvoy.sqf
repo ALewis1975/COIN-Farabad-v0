@@ -1987,7 +1987,7 @@ _grpW setSpeedMode (if (_contactActive) then { "FULL" } else { "NORMAL" });
     private _d = driver _x;
     if (!isNull _d && { !isPlayer _d }) then
     {
-        _d stop false;
+        if ((speed _x) < 1.5) then { _d stop false; };
         private _driverProfileApplied = _d getVariable ["ARC_convoyDriverMoveProfileApplied", false];
         if (!(_driverProfileApplied isEqualType true) && !(_driverProfileApplied isEqualType false)) then { _driverProfileApplied = false; };
         if (!_driverProfileApplied) then
@@ -1998,7 +1998,7 @@ _grpW setSpeedMode (if (_contactActive) then { "FULL" } else { "NORMAL" });
             _d setVariable ["ARC_convoyDriverMoveProfileApplied", true];
         };
     };
-    _x forceSpeed -1;
+    _x forceSpeed -1; // release forced speed constraint
 } forEach _aliveVeh;
 
 ["activeConvoySpeedCapKph", _capFinal] call ARC_fnc_stateSet;
