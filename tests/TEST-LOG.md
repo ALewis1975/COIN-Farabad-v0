@@ -11,6 +11,28 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-11 — Virtual OPFOR physical spawn caps (Mode A)
+
+**Branch/Commit:** copilot/fix-opfor-spawn-issues @ ee4101e
+
+**Scenario:** Investigated reports that OPFOR were spawning excessively, especially in Farabad City. Added server-side virtual OPFOR materialization caps so existing/persisted virtual groups cannot all become physical at once during city combat incidents.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Changed-file sqflint compat scan (baseline) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatVirtualPoolTick.sqf initServer.sqf` | PASS | No banned parser-compat patterns detected before edits. |
+| 2 | Changed-file sqflint (baseline) | `sqflint -e w functions/threat/fn_threatVirtualPoolTick.sqf initServer.sqf` | BLOCKED | `sqflint` unavailable in container (`command not found`). |
+| 3 | Baseline static validations | `python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && tests/static/airbase_planning_mode_checks.sh && tests/static/casreq_snapshot_contract_checks.sh && git diff --check` | PASS | State migrations, marker index, AIRBASE static checks, CASREQ static checks, and whitespace diff check passed before edits. |
+| 4 | Changed-file sqflint compat scan (post-change) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatVirtualPoolTick.sqf initServer.sqf` | PASS | No banned parser-compat patterns detected after edits. |
+| 5 | Changed-file sqflint (post-change) | `sqflint -e w functions/threat/fn_threatVirtualPoolTick.sqf initServer.sqf` | BLOCKED | `sqflint` unavailable in container (`command not found`). |
+| 6 | Post-change static validations | `python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && tests/static/airbase_planning_mode_checks.sh && tests/static/casreq_snapshot_contract_checks.sh && git diff --check` | PASS | State migrations, marker index, AIRBASE static checks, CASREQ static checks, and whitespace diff check passed after edits. |
+| 7 | Parallel validation | `parallel_validation` | PASS | Code Review returned maintainability suggestions; CodeQL had no analyzable languages for these SQF changes. |
+| 8 | Review follow-up validation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatVirtualPoolTick.sqf initServer.sqf && sqflint -e w functions/threat/fn_threatVirtualPoolTick.sqf initServer.sqf` | BLOCKED | Compat scan passed; `sqflint` unavailable in container (`command not found`). |
+| 9 | Review follow-up static validations | `python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && tests/static/airbase_planning_mode_checks.sh && tests/static/casreq_snapshot_contract_checks.sh && git diff --check` | PASS | State migrations, marker index, AIRBASE static checks, CASREQ static checks, and whitespace diff check passed after review follow-up edits. |
+| 10 | Parallel validation rerun | `parallel_validation` | PASS | Code Review returned two small clarity suggestions; CodeQL had no analyzable languages for these SQF changes. |
+| 11 | Final review-tweak validation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatVirtualPoolTick.sqf initServer.sqf && python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && tests/static/airbase_planning_mode_checks.sh && tests/static/casreq_snapshot_contract_checks.sh && git diff --check` | PASS | Compat scan, state migrations, marker index, AIRBASE static checks, CASREQ static checks, and whitespace diff check passed after final review tweaks. |
+| 12 | Final changed-file sqflint | `sqflint -e w functions/threat/fn_threatVirtualPoolTick.sqf initServer.sqf` | BLOCKED | `sqflint` unavailable in container (`command not found`). |
+| 13 | Dedicated server city combat soak | Host dedicated server, trigger Farabad City combat incident, verify virtual OPFOR physical groups stay within global/city/per-tick caps and no RPT errors appear | BLOCKED | Arma 3 dedicated/JIP runtime unavailable in this container. |
+
 ## 2026-05-11 — Client snapshot PV handler RPT fix (Mode A)
 
 **Branch/Commit:** copilot/fix-undefined-variable-error-one-more-time @ HEAD
