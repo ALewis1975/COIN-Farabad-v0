@@ -258,25 +258,25 @@ private _processedLocations = 0;
             diag_log format ["[ARC][VPOOL][WARN] ARC_fnc_threatVirtualPoolInit: %1 all offset candidates in protected zone — skipping virtual group.", _id];
         } else {
 
-        private _strength = 2 + (round (random 3)); // 2–5 units
+            private _strength = 2 + (round (random 3)); // 2–5 units
 
-        private _rec = [
-            ["vgroup_id",          _vgId],
-            ["type",               "VIRTUAL_OPFOR"],
-            ["state",              "VIRTUAL_DORMANT"],
-            ["faction",            "OPFOR_INS"],
-            ["pos",                _vgPos],
-            ["strength",           _strength],
-            ["anchorLocationId",   _id],
-            // Human-readable location label for diagnostics/AAR correlation.
-            ["anchorLocationName", _displayName],
-            ["spawnedUnits",       []],
-            ["lastMoved",          _now],
-            ["lastPlayerNearTs",   -1]
-        ];
+            private _rec = [
+                ["vgroup_id",          _vgId],
+                ["type",               "VIRTUAL_OPFOR"],
+                ["state",              "VIRTUAL_DORMANT"],
+                ["faction",            "OPFOR_INS"],
+                ["pos",                _vgPos],
+                ["strength",           _strength],
+                ["anchorLocationId",   _id],
+                // Human-readable location label for diagnostics/AAR correlation.
+                ["anchorLocationName", _displayName],
+                ["spawnedUnits",       []],
+                ["lastMoved",          _now],
+                ["lastPlayerNearTs",   -1]
+            ];
 
-        _records pushBack _rec;
-        _created = _created + 1;
+            _records pushBack _rec;
+            _created = _created + 1;
 
         }; // end protected-zone guard
     };
