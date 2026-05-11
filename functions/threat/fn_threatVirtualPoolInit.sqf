@@ -54,7 +54,96 @@ private _alreadySeeded = false;
 } forEach _existing;
 
 if (_alreadySeeded) exitWith {
-    diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolInit: pool already seeded — starting tick loop.";
+    diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolInit: pool already seeded — running protected-zone sanitize pass.";
+
+    // Protected zones list (configurable; defaults cover airfield and green zone)
+    private _pzMig = missionNamespace getVariable ["ARC_threatVirtualProtectedZones", ["Airbase", "GreenZone"]];
+    if (!(_pzMig isEqualType [])) then { _pzMig = ["Airbase", "GreenZone"]; };
+
+    // Named locations for anchor-position lookup during relocation
+    private _migLocs = missionNamespace getVariable ["ARC_worldNamedLocations", []];
+    if (!(_migLocs isEqualType [])) then { _migLocs = []; };
+
+    // KV helpers (pairs-array pattern, sqflint compat — no HashMap methods)
+    private _migKvGet = {
+        params ["_pairs", "_key", "_default"];
+        if (!(_pairs isEqualType [])) exitWith { _default };
+        private _val = _default;
+        { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key })
+            exitWith { _val = _x select 1; }; } forEach _pairs;
+        _val
+    };
+    private _migKvSet = {
+        params ["_pairs", "_key", "_value"];
+        if (!(_pairs isEqualType [])) then { _pairs = []; };
+        private _idx = -1;
+        { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key })
+            exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+        if (_idx < 0) then { _pairs pushBack [_key, _value]; } else { _pairs set [_idx, [_key, _value]]; };
+        _pairs
+    };
+
+    private _migDirty = false;
+
+    {
+        if (!(_x isEqualType [])) then { continue; };
+        private _migRec = _x;
+        private _migRi  = _forEachIndex;
+
+        // Only process VIRTUAL_OPFOR records
+        private _migType = [_migRec, "type", ""] call _migKvGet;
+        if (!(_migType isEqualTo "VIRTUAL_OPFOR")) then { continue; };
+
+        private _migPos = [_migRec, "pos", []] call _migKvGet;
+        if (!(_migPos isEqualType []) || { (count _migPos) < 2 }) then { continue; };
+
+        private _migPosZone = [_migPos] call ARC_fnc_worldGetZoneForPos;
+        if (!(_migPosZone in _pzMig)) then { continue; };
+
+        // This record sits inside a protected zone — attempt relocation
+        private _migAnchorId = [_migRec, "anchorLocationId", ""] call _migKvGet;
+        private _migAnchorPos = [];
+        if (!(_migAnchorId isEqualTo "")) then {
+            {
+                _x params [["_mlid", "", [""]], ["_mldn", "", [""]], ["_mlpos", [], [[]]]];
+                if (_mlid isEqualTo _migAnchorId) exitWith { _migAnchorPos = +_mlpos; };
+            } forEach _migLocs;
+        };
+
+        // Base position for offset search: anchor if available, else current (bad) pos
+        private _migBaseP3 = if ((count _migAnchorPos) >= 2) then { +_migAnchorPos } else { +_migPos };
+        if ((count _migBaseP3) == 2) then { _migBaseP3 pushBack 0; };
+
+        // Try up to 10 random offsets to find a position outside every protected zone
+        private _migSafePos = [];
+        for "_migAttempt" from 1 to 10 do {
+            if ((count _migSafePos) >= 2) exitWith {};
+            private _mox = random 300 - 150;
+            private _moy = random 300 - 150;
+            private _mCand = [(_migBaseP3 select 0) + _mox, (_migBaseP3 select 1) + _moy, 0];
+            private _mCandZone = [_mCand] call ARC_fnc_worldGetZoneForPos;
+            if (!(_mCandZone in _pzMig)) then { _migSafePos = _mCand; };
+        };
+
+        private _migVgId = [_migRec, "vgroup_id", "?"] call _migKvGet;
+        if ((count _migSafePos) < 2) then {
+            // Could not relocate — log warning; drift/spawn guards will prevent materialisation
+            diag_log format ["[ARC][VPOOL][WARN] ARC_fnc_threatVirtualPoolInit: migration — no safe position found for %1 (zone=%2); spawn/drift guards will suppress.",
+                _migVgId, _migPosZone];
+        } else {
+            _migRec = [_migRec, "pos", _migSafePos] call _migKvSet;
+            _existing set [_migRi, _migRec];
+            _migDirty = true;
+            diag_log format ["[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolInit: migration — relocated %1 out of protected zone=%2 to %3",
+                _migVgId, _migPosZone, _migSafePos];
+        };
+    } forEach _existing;
+
+    if (_migDirty) then {
+        ["threat_v0_records", _existing] call ARC_fnc_stateSet;
+    };
+
+    diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolInit: sanitize pass complete — starting tick loop.";
     [] call ARC_fnc_threatVirtualPoolTick;
     0
 };
@@ -73,7 +162,12 @@ if (!(_objIndex isEqualType createHashMap)) then { _objIndex = createHashMap; };
 
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
-// Airbase exclusion: skip locations inside the Airbase zone
+// Protected zones: VIRTUAL_OPFOR must never seed, drift into, or spawn inside these zones.
+// Configurable via ARC_threatVirtualProtectedZones; defaults cover airfield and coalition green zone.
+private _protectedZones = missionNamespace getVariable ["ARC_threatVirtualProtectedZones", ["Airbase", "GreenZone"]];
+if (!(_protectedZones isEqualType [])) then { _protectedZones = ["Airbase", "GreenZone"]; };
+
+// Airbase exclusion: skip locations inside any protected zone
 private _zones = missionNamespace getVariable ["ARC_worldZones", []];
 if (!(_zones isEqualType [])) then { _zones = []; };
 
@@ -123,9 +217,9 @@ private _processedLocations = 0;
     private _p3 = +_pos;
     if ((count _p3) == 2) then { _p3 pushBack 0; };
 
-    // Skip if inside Airbase zone
+    // Skip if inside any protected zone (intentional: OPFOR must not seed near airbase/green zone)
     private _zone = [_p3] call ARC_fnc_worldGetZoneForPos;
-    if (_zone isEqualTo "Airbase") then { continue; };
+    if (_zone in _protectedZones) then { continue; };
 
     // Determine group count from strategic tier
     private _groupCount = 1;
@@ -146,10 +240,23 @@ private _processedLocations = 0;
         _seq = _seq + 1;
         private _vgId = format ["vg_%1_%2", _seq, floor (random 1e5)];
 
-        // Small random position offset so groups don't all stack at the exact location centre
-        private _offX = random 200 - 100;
-        private _offY = random 200 - 100;
-        private _vgPos = [(_p3 select 0) + _offX, (_p3 select 1) + _offY, 0];
+        // Offset position so groups don't stack at the exact location centre.
+        // Retry up to 5 times to ensure the final position is outside all protected zones.
+        // (A named location just outside a zone boundary could otherwise drift a group inside.)
+        private _vgPos = [];
+        for "_seedAttempt" from 1 to 5 do {
+            if ((count _vgPos) >= 2) exitWith {};
+            private _offX = random 200 - 100;
+            private _offY = random 200 - 100;
+            private _cand = [(_p3 select 0) + _offX, (_p3 select 1) + _offY, 0];
+            private _cZone = [_cand] call ARC_fnc_worldGetZoneForPos;
+            if (!(_cZone in _protectedZones)) then { _vgPos = _cand; };
+        };
+
+        if ((count _vgPos) < 2) then {
+            // All offset candidates landed in a protected zone — skip this group
+            diag_log format ["[ARC][VPOOL][WARN] ARC_fnc_threatVirtualPoolInit: %1 all offset candidates in protected zone — skipping virtual group.", _id];
+        } else {
 
         private _strength = 2 + (round (random 3)); // 2–5 units
 
@@ -170,6 +277,8 @@ private _processedLocations = 0;
 
         _records pushBack _rec;
         _created = _created + 1;
+
+        }; // end protected-zone guard
     };
 
 } forEach _locations;

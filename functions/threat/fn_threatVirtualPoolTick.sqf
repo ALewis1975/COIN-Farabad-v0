@@ -166,6 +166,11 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
         private _dirty      = false;
         private _now        = serverTime;
 
+        // Protected zones: VIRTUAL_OPFOR must not drift into or physically spawn inside these zones.
+        // Intentional suppression — mirrors the guard in ARC_fnc_threatVirtualPoolInit.
+        private _protectedZones = missionNamespace getVariable ["ARC_threatVirtualProtectedZones", ["Airbase", "GreenZone"]];
+        if (!(_protectedZones isEqualType [])) then { _protectedZones = ["Airbase", "GreenZone"]; };
+
         // Helpers for pairs-array read/write (using select for sqflint compat)
         private _kvGet = {
             params ["_pairs", "_key", "_default"];
@@ -258,14 +263,23 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
                         _dirty  = true;
                         diag_log format ["[ARC][VPOOL][INFO] %1 activated (dist=%2 m)", _vgId, round _nearestPlayerD];
                     } else {
-                        // Drift patrol: offset position when stale
+                        // Drift patrol: offset position when stale.
+                        // Protected-zone guard: discard candidate if it would drift into a protected zone.
                         if ((_now - _lastMoved) > _repositionS) then {
                             private _driftX = random 200 - 100;
                             private _driftY = random 200 - 100;
                             private _newPos = [(_vgPos select 0) + _driftX, (_vgPos select 1) + _driftY, 0];
-                            _rec   = [_rec, "pos",       _newPos] call _kvSet;
-                            _rec   = [_rec, "lastMoved", _now]    call _kvSet;
-                            _dirty = true;
+                            private _driftZone = [_newPos] call _fnZoneForPos;
+                            if (_driftZone in _protectedZones) then {
+                                // Drift would enter a protected zone — suppress and reset timer to avoid log floods
+                                diag_log format ["[ARC][VPOOL][WARN] %1 drift suppressed — candidate pos in protected zone=%2", _vgId, _driftZone];
+                                _rec   = [_rec, "lastMoved", _now] call _kvSet;
+                                _dirty = true;
+                            } else {
+                                _rec   = [_rec, "pos",       _newPos] call _kvSet;
+                                _rec   = [_rec, "lastMoved", _now]    call _kvSet;
+                                _dirty = true;
+                            };
                         };
                     };
                 };
@@ -288,6 +302,12 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
                             && { !(_vgIsFarabadCity) || (_cityPhysicalCount < _cityPhysicalMaxGroups) };
 
                         if (_playerVeryNearby && { _combatIncidentActive } && { _canSpawnThreat } && { _spawnCapAllows }) then {
+                            // Protected-zone spawn guard: never materialise a virtual group inside Airbase or GreenZone.
+                            // This is the last line of defence; positions should already be sanitized by init/drift guards.
+                            if (_vgZone in _protectedZones) then {
+                                diag_log format ["[ARC][VPOOL][WARN] %1 physical spawn suppressed — pos in protected zone=%2 pos=%3", _vgId, _vgZone, _vgPos];
+                                continue;
+                            };
                             // Physically spawn group
                             private _spawnPos          = _vgPos;
                             private _vgPatrolRadiusM   = missionNamespace getVariable ["ARC_threatVirtualPatrolRadiusM", 200];
