@@ -1920,12 +1920,11 @@ if (!(_lastContactScanAt isEqualType 0)) then { _lastContactScanAt = -1; };
 if (_lastContactScanAt < 0 || { (_now - _lastContactScanAt) >= _contactScanEvery }) then
 {
     _contactDetected = false;
-    private _convoyVehicleNetIds = createHashMap;
-    { _convoyVehicleNetIds set [netId _x, true]; } forEach _vehicles;
+    private _convoyVehicleNetIds = _vehicles apply { netId _x };
     private _nearThreats = _leadPosContact nearEntities [["CAManBase", "LandVehicle"], _contactRadius];
     {
-        // Hash-map membership check: skip convoy vehicles to avoid self-triggering contact.
-        if (!isNil { _convoyVehicleNetIds get (netId _x) }) then { continue; };
+        // NetId membership check: skip convoy vehicles to avoid self-triggering contact.
+        if ((_convoyVehicleNetIds find (netId _x)) >= 0) then { continue; };
         if (!alive _x) then { continue; };
 
         private _hostileSide = side group _x;
@@ -1954,7 +1953,7 @@ if (_contactDetected) then
 private _contactActive = (_contactUntil > 0 && { _now < _contactUntil });
 private _prevContactActive = ["activeConvoyContactActive", false] call ARC_fnc_stateGet;
 if (!(_prevContactActive isEqualType true) && !(_prevContactActive isEqualType false)) then { _prevContactActive = false; };
-if (_contactActive != _prevContactActive) then
+if (!(_contactActive isEqualTo _prevContactActive)) then
 {
     ["activeConvoyContactActive", _contactActive] call ARC_fnc_stateSet;
     if (_contactActive) then

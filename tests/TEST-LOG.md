@@ -32,6 +32,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | 11 | Final contact-scan/perf polish lint sanity | Repeat checks #1-2 + `git diff --check` after contact-scan cadence update | PASS | Compat scan clean; `sqflint` still unavailable; no whitespace regressions. |
 | 12 | Hashmap membership + stop-threshold tunable lint sanity | Repeat checks #1-2 + `git diff --check` after final review feedback integration | PASS | Compat scan clean; `sqflint` still unavailable; no whitespace regressions. |
 | 13 | Readability/comment final lint sanity | Repeat checks #1-2 + `git diff --check` after readability/comment follow-ups | PASS | Compat scan clean; `sqflint` still unavailable; no whitespace regressions. |
+| 14 | CI sqflint parser-failure fix | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/logistics/fn_execTickConvoy.sqf`; `~/.local/bin/sqflint -e w functions/logistics/fn_execTickConvoy.sqf`; `python3 scripts/dev/validate_state_migrations.py`; `python3 scripts/dev/validate_marker_index.py`; `tests/static/airbase_planning_mode_checks.sh`; `tests/static/casreq_snapshot_contract_checks.sh`; `git diff --check` | PASS | Replaced HashMap `get` membership and boolean `!=` with sqflint-compatible forms; installed `sqflint` locally via pip for parity with CI. |
 
 ## 2026-05-11 — Client snapshot PV handler RPT fix (Mode A)
 
