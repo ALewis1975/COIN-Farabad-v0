@@ -5259,3 +5259,34 @@ Mode: A (Bug Fix)
 |-------|---------|--------|
 | Changed-file compat + sqflint | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/logistics/fn_execSpawnConvoy.sqf functions/sitepop/fn_sitePopSpawnSite.sqf functions/threat/fn_threatVirtualPoolInit.sqf initServer.sqf && sqflint -e w <same files>` | PASS |
 | Dedicated/JIP validation | Manual | BLOCKED |
+
+## 2026-05-11 — Convoy prioritized improvements (role bundles, route diagnostics, recovery logging)
+
+**Branch/Commit:** copilot/research-convoy-system @ HEAD
+
+**Scenario:** Implement prioritized convoy improvement plan:
+- P1: role-aware convoy bundle resolution; payload-only bundles (LOGI_FUEL/AMMO/MEDICAL/REPAIR/TRANSPORT/HEADQUARTERS) no longer drive lead/tail slots; resolved ESCORT bundles (ESCORT_VIP / LOGI_GOVERNMENT / LOGI_PRIVATE_SECURITY / LOGI_CONTRACTOR_SECURITY) constrain all body vehicles in ESCORT convoys, not just the lead; missing `LOGI_CONVOY_SECURITY` mirrored into `initServer.sqf` bundle matrix; startup breadcrumb now includes bundle category.
+- P2: post-route adherence sanity checks in `fn_execInitActive.sqf` (too-few points, fallback usage, shortcut-ratio risk, Airbase ingress consistency vs `North_Gate`).
+- P3: lead and follower stuck-recovery logs now identify role (lead/follower), vehicle netId, nearest route index, gap distance, and bridge/open mode.
+- P4: existing bridge tunables already runtime-clamped (`max/min`) in `fn_execTickConvoy.sqf` — no change required.
+
+| # | Check | Command | Result |
+|---|-------|---------|--------|
+| 1 | sqflint compat scan (changed SQF) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/logistics/fn_execSpawnConvoy.sqf functions/logistics/fn_execTickConvoy.sqf functions/core/fn_execInitActive.sqf initServer.sqf` | PASS |
+| 2 | sqflint (warnings as errors) | `sqflint -e w <each changed .sqf>` | PASS |
+| 3 | State migration validator | `python3 scripts/dev/validate_state_migrations.py` | PASS (3 scenarios) |
+| 4 | Marker index validator | `python3 scripts/dev/validate_marker_index.py` | PASS (177 markers, all modes) |
+| 5 | AIRBASE planning-mode static checks | `bash tests/static/airbase_planning_mode_checks.sh` | PASS |
+| 6 | CASREQ snapshot contract static checks | `bash tests/static/casreq_snapshot_contract_checks.sh` | PASS |
+| 7 | Logistics FUEL/AMMO/MEDICAL convoys: payload-only vehicles in body, security-capable lead/tail | Runtime in dedicated MP | BLOCKED (deferred — needs dedicated server) |
+| 8 | VIP escort convoy: SUV/PMC bundle drives all body vehicles | Runtime in dedicated MP | BLOCKED (deferred) |
+| 9 | Convoy follows road route to AO; route shortcut warnings absent for valid routes | Runtime + RPT inspection | BLOCKED (deferred) |
+| 10 | Lead recovery and follower recovery logs emit role/netId/routeIdx/mode | Runtime + RPT inspection | BLOCKED (deferred) |
+| 11 | Bridge crossing without off-road bypass on marked `arc_bridge_*` zones | Runtime + RPT inspection | BLOCKED (deferred) |
+| 12 | JIP / late-client convoy route + marker sync | Runtime in dedicated MP with late client | BLOCKED (deferred) |
+| 13 | Long-session convoy persistence + reconnect/respawn while convoy in motion | Runtime in dedicated MP | BLOCKED (deferred) |
+
+**Notes:**
+- The role-aware bundle resolution is purely additive on top of the existing flat-list matrix: bundles outside the `ARC_convoyBundlePayloadOnly` list keep their previous behavior (drive all roles), so escort-style bundles already curating SUV/PMC vehicles remain unaffected.
+- Mission authors can override `ARC_convoyBundlePayloadOnly` before bootstrap to add/remove payload-only bundle IDs without touching code.
+- Route adherence sanity checks are read-only log warnings; they do not mutate the route. Operations will see them in RPT when a convoy is at risk of shortcutting or weak-A*-fallback routing.

@@ -2157,6 +2157,56 @@ if (_showSpawnMarker) then
             count _routePts,
             round _routeLen
         ];
+
+        // Route adherence sanity checks (low-volume, server-authoritative).
+        // Surfaces weak/fallback routes, too-few-points routes, straight-line shortcut risk,
+        // and Airbase avoidance / North Gate ingress consistency. Read-only; does not mutate route.
+        private _straightLen = _routeStart distance2D _routeEnd;
+        private _shortcutRatio = if (_routeLen > 1) then { _straightLen / _routeLen } else { 1 };
+
+        if ((count _routePts) < 3) then
+        {
+            diag_log format [
+                "[ARC][ConvoyRoute][WARN] Route has too few points (count=%1) for task=%2 zoneStart=%3 zoneEnd=%4; convoy may shortcut.",
+                count _routePts, _taskId, _zStart, _zEnd
+            ];
+        };
+        if (_routeUsedFallbackAny) then
+        {
+            diag_log format [
+                "[ARC][ConvoyRoute][WARN] Route used straight-line/sample fallback for task=%1 zoneStart=%2 zoneEnd=%3; expect reduced road adherence.",
+                _taskId, _zStart, _zEnd
+            ];
+        };
+        if (_shortcutRatio > 0.97 && { _straightLen > 600 } && { (count _routePts) < 6 }) then
+        {
+            diag_log format [
+                "[ARC][ConvoyRoute][WARN] Route shortcut risk: straight=%1m routeLen=%2m ratioPct=%3 task=%4; route may bypass road network.",
+                round _straightLen, round _routeLen, round (_shortcutRatio * 100), _taskId
+            ];
+        };
+        if (_useIngress) then
+        {
+            // Allow a small tolerance for the ingress proximity check: the gate marker may
+            // sit slightly off the snapped road centerline, and A* outputs include nearby
+            // road nodes rather than the marker itself. Tunable via ARC_convoyIngressRouteProxM.
+            private _ingressRouteProxM = missionNamespace getVariable ["ARC_convoyIngressRouteProxM", 80];
+            if (!(_ingressRouteProxM isEqualType 0)) then { _ingressRouteProxM = 80; };
+            _ingressRouteProxM = (_ingressRouteProxM max 30) min 200;
+
+            private _hasIngressPoint = false;
+            {
+                if (_x isEqualType [] && { (count _x) >= 2 } && { (_x distance2D _ingressPos) < _ingressRouteProxM }) exitWith { _hasIngressPoint = true; };
+            } forEach _routePts;
+            if (!_hasIngressPoint) then
+            {
+                diag_log format [
+                    "[ARC][ConvoyRoute][WARN] Airbase ingress requested but no route point within %1m of North_Gate (ingress=%2) for task=%3; gate enforcement may be weak.",
+                    _ingressRouteProxM, _ingressPos, _taskId
+                ];
+            };
+        };
+
         ["activeConvoyRoutePoints", _routePts] call ARC_fnc_stateSet;
         ["activeConvoyRouteLenM", _routeLen] call ARC_fnc_stateSet;
 
