@@ -41,6 +41,18 @@ if (!isNil "remoteExecutedOwner" && { _owner > 0 }) then
 };
 
 private _lines = [];
+private _fncCountContainer = {
+    params [["_value", nil]];
+    if (_value isEqualType []) exitWith { count _value };
+    if (_value isEqualType createHashMap) exitWith { count _value };
+    -1
+};
+private _fncSnapshotAge = {
+    params [["_updatedAt", -1]];
+    if (!(_updatedAt isEqualType 0)) exitWith { -1 };
+    if (_updatedAt < 0) exitWith { -1 };
+    serverTime - _updatedAt
+};
 
 _lines pushBack "<t size='1.2' font='PuristaMedium'>Debug / Diagnostics Snapshot</t>";
 _lines pushBack format ["<t size='0.9' color='#BDBDBD'>Server time:</t> <t size='0.9'>%1</t>", serverTime];
@@ -140,26 +152,78 @@ _lines pushBack format ["<t size='0.9'>Active Task: %1</t>", if (_activeTask isE
 
 private _pubUpdatedAt = missionNamespace getVariable ["ARC_pub_stateUpdatedAt", -1];
 _lines pushBack format ["<t size='0.9'>Last Snapshot Broadcast: %1</t>", _pubUpdatedAt];
+_lines pushBack format ["<t size='0.9'>Snapshot age (s): %1</t>", [_pubUpdatedAt] call _fncSnapshotAge];
 
 private _civIds = missionNamespace getVariable ["civsub_v1_identities", createHashMap];
-private _civIdCount = if (_civIds isEqualType createHashMap) then { count _civIds } else {
-    if (_civIds isEqualType []) then { count _civIds } else { -1 }
-};
+private _civIdCount = [_civIds] call _fncCountContainer;
 _lines pushBack format ["<t size='0.9'>CIVSUB Identities: %1</t>", _civIdCount];
 
 private _playersOnline = count (allPlayers - entities "HeadlessClient_F");
+private _aiUnitsCount = 0;
+{
+    if (!isPlayer _x) then { _aiUnitsCount = _aiUnitsCount + 1; };
+} forEach allUnits;
 _lines pushBack format ["<t size='0.9'>Players Online: %1</t>", _playersOnline];
+_lines pushBack format ["<t size='0.9'>AI Units: %1</t>", _aiUnitsCount];
+_lines pushBack format ["<t size='0.9'>Active Groups: %1</t>", count allGroups];
 _lines pushBack format ["<t size='0.9'>All Units: %1</t>", count allUnits];
 _lines pushBack format ["<t size='0.9'>Server FPS: %1</t>", diag_fps];
 
 _lines pushBack "";
+_lines pushBack "<t size='1.05' font='PuristaMedium'>RUNTIME REGISTRIES</t>";
+
+private _civRegistry = missionNamespace getVariable ["civsub_v1_civ_registry", []];
+_lines pushBack format ["<t size='0.9'>CIVSUB Civ Registry: %1</t>", [_civRegistry] call _fncCountContainer];
+
+private _trafficMoving = missionNamespace getVariable ["civsub_v1_traffic_list_moving", []];
+private _trafficParked = missionNamespace getVariable ["civsub_v1_traffic_list_parked", []];
+_lines pushBack format ["<t size='0.9'>Traffic Moving: %1</t>", [_trafficMoving] call _fncCountContainer];
+_lines pushBack format ["<t size='0.9'>Traffic Parked: %1</t>", [_trafficParked] call _fncCountContainer];
+_lines pushBack format ["<t size='0.9'>Traffic Thread Running: %1</t>", missionNamespace getVariable ["civsub_v1_traffic_threadRunning", false]];
+
+private _sitePopRegistry = missionNamespace getVariable ["ARC_sitePopRegistry", createHashMap];
+_lines pushBack format ["<t size='0.9'>SitePop Registry: %1</t>", [_sitePopRegistry] call _fncCountContainer];
+
+private _convoyIndex = missionNamespace getVariable ["ARC_convoyIndex", []];
+_lines pushBack format ["<t size='0.9'>Convoy Index: %1</t>", [_convoyIndex] call _fncCountContainer];
+
+private _leadPoolPublic = missionNamespace getVariable ["ARC_leadPoolPublic", []];
+private _threadsPublic = missionNamespace getVariable ["ARC_threadsPublic", []];
+private _queuePending = missionNamespace getVariable ["ARC_pub_queuePending", []];
+private _ordersPublic = missionNamespace getVariable ["ARC_pub_orders", []];
+_lines pushBack format ["<t size='0.9'>Active Leads: %1</t>", [_leadPoolPublic] call _fncCountContainer];
+_lines pushBack format ["<t size='0.9'>Active Threads: %1</t>", [_threadsPublic] call _fncCountContainer];
+_lines pushBack format ["<t size='0.9'>Queue Pending: %1</t>", [_queuePending] call _fncCountContainer];
+_lines pushBack format ["<t size='0.9'>Published Orders: %1</t>", [_ordersPublic] call _fncCountContainer];
+
+private _iedRecords = missionNamespace getVariable ["ARC_iedPhase1_deviceRecords", []];
+private _vbiedRecords = missionNamespace getVariable ["ARC_vbiedPhase3_deviceRecords", []];
+_lines pushBack format ["<t size='0.9'>IED Device Records: %1</t>", [_iedRecords] call _fncCountContainer];
+_lines pushBack format ["<t size='0.9'>VBIED Device Records: %1</t>", [_vbiedRecords] call _fncCountContainer];
+
+_lines pushBack "";
+_lines pushBack "<t size='1.05' font='PuristaMedium'>SNAPSHOT FRESHNESS</t>";
+private _ordersUpdatedAt = missionNamespace getVariable ["ARC_pub_ordersUpdatedAt", -1];
+private _queueUpdatedAt = missionNamespace getVariable ["ARC_pub_queueUpdatedAt", -1];
+private _intelUpdatedAt = missionNamespace getVariable ["ARC_pub_intelUpdatedAt", -1];
+private _threadsUpdatedAt = missionNamespace getVariable ["ARC_threadsPublicUpdatedAt", -1];
+private _leadsUpdatedAt = missionNamespace getVariable ["ARC_leadPoolPublicUpdatedAt", -1];
+_lines pushBack format ["<t size='0.9'>Orders age (s): %1</t>", [_ordersUpdatedAt] call _fncSnapshotAge];
+_lines pushBack format ["<t size='0.9'>Queue age (s): %1</t>", [_queueUpdatedAt] call _fncSnapshotAge];
+_lines pushBack format ["<t size='0.9'>Intel age (s): %1</t>", [_intelUpdatedAt] call _fncSnapshotAge];
+_lines pushBack format ["<t size='0.9'>Threads age (s): %1</t>", [_threadsUpdatedAt] call _fncSnapshotAge];
+_lines pushBack format ["<t size='0.9'>Leads age (s): %1</t>", [_leadsUpdatedAt] call _fncSnapshotAge];
+
+_lines pushBack "";
 _lines pushBack format ["<t size='0.9' color='#BDBDBD'>Generated at serverTime %1</t>", serverTime];
 
-diag_log format ["[ARC][DIAG] Diagnostics snapshot requested by owner=%1", _owner];
+diag_log format ["[ARC][INFO] ARC_fnc_devDiagnosticsSnapshot: diagnostics snapshot requested by owner=%1", _owner];
 
 private _report = _lines joinString "<br/>";
 if (_owner > 0) then {
     [_report] remoteExecCall ["ARC_fnc_devDiagnosticsClientReceive", _owner];
+} else {
+    diag_log "[ARC][WARN] ARC_fnc_devDiagnosticsSnapshot: snapshot generated but no valid owner target found.";
 };
 
 true
