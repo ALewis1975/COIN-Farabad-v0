@@ -184,6 +184,12 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
             _pairs
         };
 
+        private _fnZoneForPos = {
+            params [["_pos", [], [[]]]];
+            if (!(_pos isEqualType []) || { (count _pos) < 2 }) exitWith { "" };
+            [_pos] call ARC_fnc_worldGetZoneForPos
+        };
+
         private _physicalCount = 0;
         private _cityPhysicalCount = 0;
         {
@@ -194,13 +200,14 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
             _physicalCount = _physicalCount + 1;
 
             private _capPos = [_capRec, "pos", []] call _kvGet;
-            if (_capPos isEqualType [] && { (count _capPos) >= 2 } && { ([_capPos] call ARC_fnc_worldGetZoneForPos) isEqualTo "FarabadCity" }) then
+            if (([_capPos] call _fnZoneForPos) isEqualTo "FarabadCity") then
             {
                 _cityPhysicalCount = _cityPhysicalCount + 1;
             };
         } forEach _records;
 
         private _spawnedThisTick = 0;
+        // Cap denial can affect many nearby city records; emit one diagnostic per tick to avoid log floods.
         private _capLogEmitted = false;
 
         {
@@ -274,12 +281,11 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
                     } else {
                         // Spawn gate: player very nearby AND there is an active combat incident
                         private _combatIncidentActive = !((_activeTaskId isEqualTo "") || {_activeIncidentZone in ["Airbase", "GreenZone", ""]});
-                        private _vgZone = [_vgPos] call ARC_fnc_worldGetZoneForPos;
-                        private _spawnCapAllows = (_spawnedThisTick < _spawnBudgetPerTick) && { _physicalCount < _physicalMaxGroups };
-                        if (_vgZone isEqualTo "FarabadCity") then
-                        {
-                            _spawnCapAllows = _spawnCapAllows && { _cityPhysicalCount < _cityPhysicalMaxGroups };
-                        };
+                        private _vgZone = [_vgPos] call _fnZoneForPos;
+                        private _vgIsFarabadCity = (_vgZone isEqualTo "FarabadCity");
+                        private _spawnCapAllows = (_spawnedThisTick < _spawnBudgetPerTick)
+                            && { _physicalCount < _physicalMaxGroups }
+                            && { !(_vgIsFarabadCity) || { _cityPhysicalCount < _cityPhysicalMaxGroups } };
 
                         if (_playerVeryNearby && { _combatIncidentActive } && { _canSpawnThreat } && { _spawnCapAllows }) then {
                             // Physically spawn group
