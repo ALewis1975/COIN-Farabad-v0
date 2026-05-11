@@ -168,9 +168,7 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
             ];
 
             private _existingEhRegistered = missionNamespace getVariable [_ehIdVarName, false];
-            if (_existingEhRegistered isEqualType 0) then { _existingEhRegistered = (_existingEhRegistered >= 0); };
-            if (!(_existingEhRegistered isEqualType true)) then { _existingEhRegistered = false; };
-            if (_existingEhRegistered) then { continue; };
+            if ((_existingEhRegistered isEqualType true) && { _existingEhRegistered }) then { continue; };
 
             _signalVarName addPublicVariableEventHandler {
                 if (missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false]) then

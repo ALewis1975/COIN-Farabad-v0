@@ -19,7 +19,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 | # | Check | Command / Step | Result | Notes |
 |---|-------|----------------|--------|-------|
-| 1 | RPT error scan | `grep -nE "Error in expression|Error position|Error |File .* line|Undefined variable" /tmp/1778503356203-copilot-tool-output-v7aycd.txt` | PASS | RPT identified eight repeated `_newEhId` undefined-variable errors at `initPlayerLocal.sqf` line 180. |
+| 1 | RPT error scan | `grep -nE "Error in expression|Error position|Error |File .* line|Undefined variable" serverRpts/Arma3_x64_2026-05-11_08-19-16.rpt` | PASS | RPT identified eight repeated `_newEhId` undefined-variable errors at `initPlayerLocal.sqf` line 180. |
 | 2 | Changed-file sqflint compat scan (baseline) | `python3 scripts/dev/sqflint_compat_scan.py --strict initPlayerLocal.sqf` | PASS | No banned parser-compat patterns detected before edits. |
 | 3 | Changed-file sqflint (baseline) | `sqflint -e w initPlayerLocal.sqf` | BLOCKED | `sqflint` unavailable in container (`command not found`). |
 | 4 | Changed-file sqflint compat scan (post-change) | `python3 scripts/dev/sqflint_compat_scan.py --strict initPlayerLocal.sqf` | PASS | No banned parser-compat patterns detected after edits. |
