@@ -11,6 +11,26 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-11 — Client snapshot PV handler RPT fix (Mode A)
+
+**Branch/Commit:** copilot/fix-undefined-variable-error-one-more-time @ HEAD
+
+**Scenario:** Investigated `serverRpts/Arma3_x64_2026-05-11_08-19-16.rpt`, which reported repeated `Undefined variable in expression: _newehid` faults at `initPlayerLocal.sqf` line 180 during client snapshot public-variable event handler registration. Updated handler registration to store the event-handler ID directly without an intermediate local and retain duplicate-handler protection.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | RPT error scan | `grep -nE "Error in expression|Error position|Error |File .* line|Undefined variable" serverRpts/Arma3_x64_2026-05-11_08-19-16.rpt` | PASS | RPT identified eight repeated `_newEhId` undefined-variable errors at `initPlayerLocal.sqf` line 180. |
+| 2 | Changed-file sqflint compat scan (baseline) | `python3 scripts/dev/sqflint_compat_scan.py --strict initPlayerLocal.sqf` | PASS | No banned parser-compat patterns detected before edits. |
+| 3 | Changed-file sqflint (baseline) | `sqflint -e w initPlayerLocal.sqf` | BLOCKED | `sqflint` unavailable in container (`command not found`). |
+| 4 | Changed-file sqflint compat scan (post-change) | `python3 scripts/dev/sqflint_compat_scan.py --strict initPlayerLocal.sqf` | PASS | No banned parser-compat patterns detected after edits. |
+| 5 | Changed-file sqflint (post-change) | `sqflint -e w initPlayerLocal.sqf` | BLOCKED | `sqflint` unavailable in container (`command not found`). |
+| 6 | State migration validation | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios passed. |
+| 7 | Marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | `off`, `auto`, and `auto-no-rg` modes passed. |
+| 8 | AIRBASE planning-mode static checks | `tests/static/airbase_planning_mode_checks.sh` | PASS | Runtime gate static checks passed. |
+| 9 | CASREQ snapshot contract checks | `tests/static/casreq_snapshot_contract_checks.sh` | PASS | Snapshot contract checks passed. |
+| 10 | Whitespace diff check | `git diff --check` | PASS | No whitespace errors. |
+| 11 | Dedicated server + JIP runtime verification | Host dedicated server, join/rejoin client, verify no `_newEhId` RPT error and snapshot refreshes on PV updates | BLOCKED | Arma 3 dedicated/JIP runtime unavailable in this container. |
+
 ## 2026-05-10 — Sprint 5 code standards + diagnostics (Mode A)
 
 **Branch/Commit:** copilot/sprint-5-code-standards-diagnostics @ HEAD
