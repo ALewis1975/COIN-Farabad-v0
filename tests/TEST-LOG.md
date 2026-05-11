@@ -15,7 +15,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 **Branch/Commit:** copilot/fix-undefined-variable-error-one-more-time @ HEAD
 
-**Scenario:** Investigated `serverRpts/Arma3_x64_2026-05-11_08-19-16.rpt`, which reported repeated `Undefined variable in expression: _newehid` faults at `initPlayerLocal.sqf` line 180 during client snapshot public-variable event handler registration. Updated the registration sentinel to avoid storing a transient undefined local and retain duplicate-handler protection.
+**Scenario:** Investigated `serverRpts/Arma3_x64_2026-05-11_08-19-16.rpt`, which reported repeated `Undefined variable in expression: _newehid` faults at `initPlayerLocal.sqf` line 180 during client snapshot public-variable event handler registration. Updated handler registration to store the event-handler ID directly without an intermediate local and retain duplicate-handler protection.
 
 | # | Check | Command / Step | Result | Notes |
 |---|-------|----------------|--------|-------|

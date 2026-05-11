@@ -167,16 +167,18 @@ if (!(missionNamespace getVariable ["ARC_clientSnapshotWatcherRunning", false]))
                 ["_ehIdVarName", "", [""]]
             ];
 
-            private _existingEhRegistered = missionNamespace getVariable [_ehIdVarName, false];
-            if ((_existingEhRegistered isEqualType true) && { _existingEhRegistered }) then { continue; };
+            private _existingEhId = missionNamespace getVariable [_ehIdVarName, -1];
+            if ((_existingEhId isEqualType 0) && { _existingEhId >= 0 }) then { continue; };
 
-            _signalVarName addPublicVariableEventHandler {
-                if (missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false]) then
-                {
-                    [] spawn ARC_fnc_clientSnapshotRefresh;
-                };
-            };
-            missionNamespace setVariable [_ehIdVarName, true];
+            missionNamespace setVariable [
+                _ehIdVarName,
+                _signalVarName addPublicVariableEventHandler {
+                    if (missionNamespace getVariable ["ARC_clientStateRefreshEnabled", false]) then
+                    {
+                        [] spawn ARC_fnc_clientSnapshotRefresh;
+                    };
+                }
+            ];
             _registeredSnapshotEhCount = _registeredSnapshotEhCount + 1;
         } forEach _snapshotSignalEhBindings;
 
