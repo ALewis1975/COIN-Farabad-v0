@@ -614,8 +614,7 @@ private _aliveVehAll = _vehicles select { alive _x };
 private _aliveVeh = _aliveVehAll select { canMove _x };
 // Fallback to the first alive vehicle so helper telemetry/threat checks still have a valid anchor
 // before we early-exit as CONVOY_IMMOBILIZED when no drivable vehicles remain.
-private _lead = if ((count _aliveVeh) > 0) then { _aliveVeh select 0 } else { objNull };
-if (isNull _lead && { (count _aliveVehAll) > 0 }) then { _lead = _aliveVehAll select 0; };
+private _lead = if ((count _aliveVeh) > 0) then { _aliveVeh select 0 } else { if ((count _aliveVehAll) > 0) then { _aliveVehAll select 0 } else { objNull } };
 
 // T10: MSR threat awareness — check for CONVOY-targeted threat records near the route.
 // Rate-limited internally; read-only (no convoy state mutation).
@@ -1913,9 +1912,11 @@ if (!(_lastContactScanAt isEqualType 0)) then { _lastContactScanAt = -1; };
 if (_lastContactScanAt < 0 || { (_now - _lastContactScanAt) >= _contactScanEvery }) then
 {
     _contactDetected = false;
+    private _convoyVehicleNetIds = createHashMap;
+    { _convoyVehicleNetIds set [netId _x, true]; } forEach _vehicles;
     private _nearThreats = _leadPosContact nearEntities [["CAManBase", "LandVehicle"], _contactRadius];
     {
-        if (_x in _vehicles) then { continue; };
+        if (!isNil { _convoyVehicleNetIds get (netId _x) }) then { continue; };
         if (!alive _x) then { continue; };
 
         private _hostileSide = side group _x;
@@ -1999,11 +2000,15 @@ _grpW setCombatMode "YELLOW";
 _grpW setBehaviour "AWARE";
 _grpW setSpeedMode (if (_contactActive) then { "FULL" } else { "NORMAL" });
 
+private _stoppedSpeedThreshold = missionNamespace getVariable ["ARC_convoyDriverStopReleaseSpeedKph", 1.5];
+if (!(_stoppedSpeedThreshold isEqualType 0)) then { _stoppedSpeedThreshold = 1.5; };
+_stoppedSpeedThreshold = (_stoppedSpeedThreshold max 0.2) min 8;
+
 {
     private _d = driver _x;
-    private _stoppedSpeedThreshold = 1.5;
     if (!isNull _d && { !isPlayer _d }) then
     {
+        // Explicitly clear lingering STOP orders once speed drops near standstill.
         if ((speed _x) < _stoppedSpeedThreshold) then { _d stop false; };
         private _driverProfileApplied = _d getVariable ["ARC_convoyDriverMoveProfileApplied", false];
         if (!(_driverProfileApplied isEqualType true) && !(_driverProfileApplied isEqualType false)) then { _driverProfileApplied = false; };
@@ -2016,7 +2021,7 @@ _grpW setSpeedMode (if (_contactActive) then { "FULL" } else { "NORMAL" });
             _d setVariable ["ARC_convoyDriverMoveProfileApplied", true];
         };
     };
-    _x forceSpeed -1; // defensive cleanup: release any temporary forced speed from staging/recovery
+    _x forceSpeed -1; // run each tick: staging/recovery branches can reapply forceSpeed at any time
 } forEach _aliveVeh;
 
 ["activeConvoySpeedCapKph", _capFinal] call ARC_fnc_stateSet;

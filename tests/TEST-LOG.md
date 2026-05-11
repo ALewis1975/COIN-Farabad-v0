@@ -30,6 +30,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | 9 | Post-review static validation rerun | Repeat checks #1-7 after review adjustments | PASS | Results unchanged; no new static regressions after driver-profile/application updates. |
 | 10 | Final changed-file lint sanity | Repeat checks #1-2 + `git diff --check` after final review tweaks | PASS | Compat scan clean; `sqflint` still unavailable; no whitespace regressions. |
 | 11 | Final contact-scan/perf polish lint sanity | Repeat checks #1-2 + `git diff --check` after contact-scan cadence update | PASS | Compat scan clean; `sqflint` still unavailable; no whitespace regressions. |
+| 12 | Hashmap membership + stop-threshold tunable lint sanity | Repeat checks #1-2 + `git diff --check` after final review feedback integration | PASS | Compat scan clean; `sqflint` still unavailable; no whitespace regressions. |
 
 ## 2026-05-11 — Client snapshot PV handler RPT fix (Mode A)
 
