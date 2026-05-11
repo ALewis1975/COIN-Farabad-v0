@@ -285,7 +285,7 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
                         private _vgIsFarabadCity = (_vgZone isEqualTo "FarabadCity");
                         private _spawnCapAllows = (_spawnedThisTick < _spawnBudgetPerTick)
                             && { _physicalCount < _physicalMaxGroups }
-                            && { !(_vgIsFarabadCity) || { _cityPhysicalCount < _cityPhysicalMaxGroups } };
+                            && { !(_vgIsFarabadCity) || (_cityPhysicalCount < _cityPhysicalMaxGroups) };
 
                         if (_playerVeryNearby && { _combatIncidentActive } && { _canSpawnThreat } && { _spawnCapAllows }) then {
                             // Physically spawn group
@@ -347,7 +347,7 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
                             _activeVgIndex pushBackUnique _vgId;
                             _spawnedThisTick = _spawnedThisTick + 1;
                             _physicalCount = _physicalCount + 1;
-                            if (_vgZone isEqualTo "FarabadCity") then
+                            if (_vgIsFarabadCity) then
                             {
                                 _cityPhysicalCount = _cityPhysicalCount + 1;
                             };
