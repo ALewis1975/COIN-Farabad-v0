@@ -13,7 +13,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-05-12 — Convoy endpoint file/dismount staging (Mode A)
 
-**Branch/Commit:** copilot/form-convoy-at-end-point @ caa22a8
+**Branch/Commit:** copilot/form-convoy-at-end-point @ c80cbae
 
 **Scenario:** Updated convoy arrival handling so lead proximity to the endpoint marker marks the task ready for SITREP, then the convoy forms a tight file near the marker, pauses, dismounts non-gunner AI crew/passengers, and applies LAMBS camp ambiance when available.
 
@@ -26,7 +26,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | 5 | Marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | `off`, `auto`, and `auto-no-rg` modes passed (177 markers). |
 | 6 | AIRBASE planning-mode static checks | `tests/static/airbase_planning_mode_checks.sh` | PASS | Runtime gate/static checks passed. |
 | 7 | CASREQ snapshot contract checks | `tests/static/casreq_snapshot_contract_checks.sh` | PASS | Snapshot payload and metadata contract checks passed. |
-| 8 | Whitespace diff check | `git diff --check HEAD~1..HEAD` | PASS | No whitespace errors in committed convoy diff. |
+| 8 | Whitespace diff check | `git diff --check` | PASS | No whitespace errors in final working diff. |
 | 9 | Runtime convoy endpoint behavior | Local/dedicated MP: spawn logistics/escort convoys, confirm lead proximity marks close-ready, vehicles form ~10m endpoint file, non-gunners dismount after ~10s, gunners stay mounted, and dismount group camps around endpoint marker | BLOCKED | Arma 3 runtime (hosted + dedicated + JIP) unavailable in this sandbox. |
 
 ---
