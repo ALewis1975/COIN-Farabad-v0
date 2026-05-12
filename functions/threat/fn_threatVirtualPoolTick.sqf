@@ -19,7 +19,7 @@
             If no player is within ARC_threatVirtualActivationRadiusM → revert to
             VIRTUAL_DORMANT.
             If a player is within ARC_threatVirtualSpawnRadiusM (default 400 m) AND
-            there is an active incident in a non-Airbase/GreenZone area → physically
+            there is an active incident outside protected BLUFOR zones → physically
             spawn the group and transition to PHYSICAL.
 
         PHYSICAL
@@ -168,8 +168,8 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
 
         // Protected zones: VIRTUAL_OPFOR must not drift into or physically spawn inside these zones.
         // Intentional suppression — mirrors the guard in ARC_fnc_threatVirtualPoolInit.
-        private _protectedZones = missionNamespace getVariable ["ARC_threatVirtualProtectedZones", ["Airbase", "GreenZone"]];
-        if (!(_protectedZones isEqualType [])) then { _protectedZones = ["Airbase", "GreenZone"]; };
+        private _protectedZones = missionNamespace getVariable ["ARC_threatVirtualProtectedZones", ["Airbase", "GreenZone", "MilitaryBase"]];
+        if (!(_protectedZones isEqualType [])) then { _protectedZones = ["Airbase", "GreenZone", "MilitaryBase"]; };
 
         // Helpers for pairs-array read/write (using select for sqflint compat)
         private _kvGet = {
@@ -294,7 +294,7 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
                         diag_log format ["[ARC][VPOOL][INFO] %1 reverted to DORMANT (dist=%2 m)", _vgId, round _nearestPlayerD];
                     } else {
                         // Spawn gate: player very nearby AND there is an active combat incident
-                        private _combatIncidentActive = !((_activeTaskId isEqualTo "") || {_activeIncidentZone in ["Airbase", "GreenZone", ""]});
+                        private _combatIncidentActive = !((_activeTaskId isEqualTo "") || {_activeIncidentZone in (_protectedZones + [""])});
                         private _vgZone = [_vgPos] call _fnZoneForPos;
                         private _vgIsFarabadCity = (_vgZone isEqualTo "FarabadCity");
                         private _spawnCapAllows = (_spawnedThisTick < _spawnBudgetPerTick)

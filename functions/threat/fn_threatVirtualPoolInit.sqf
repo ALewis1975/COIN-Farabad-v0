@@ -2,8 +2,8 @@
     ARC_fnc_threatVirtualPoolInit
 
     Server-only. Initialises the virtual OpFor group pool at mission startup.
-    For every named location (from ARC_worldNamedLocations) outside the airbase
-    exclusion zone, one or more virtual group records are appended to the existing
+    For every named location (from ARC_worldNamedLocations) outside protected
+    BLUFOR zones, one or more virtual group records are appended to the existing
     threat_v0_records pairs-array store.
 
     Virtual group records are identified by:
@@ -56,9 +56,9 @@ private _alreadySeeded = false;
 if (_alreadySeeded) exitWith {
     diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolInit: pool already seeded — running protected-zone sanitize pass.";
 
-    // Protected zones list (configurable; defaults cover airfield and green zone)
-    private _pzMig = missionNamespace getVariable ["ARC_threatVirtualProtectedZones", ["Airbase", "GreenZone"]];
-    if (!(_pzMig isEqualType [])) then { _pzMig = ["Airbase", "GreenZone"]; };
+    // Protected zones list (configurable; defaults cover BLUFOR-controlled zones)
+    private _pzMig = missionNamespace getVariable ["ARC_threatVirtualProtectedZones", ["Airbase", "GreenZone", "MilitaryBase"]];
+    if (!(_pzMig isEqualType [])) then { _pzMig = ["Airbase", "GreenZone", "MilitaryBase"]; };
 
     // Named locations for anchor-position lookup during relocation
     private _migLocs = missionNamespace getVariable ["ARC_worldNamedLocations", []];
@@ -164,9 +164,9 @@ if (!(_objIndex isEqualType createHashMap)) then { _objIndex = createHashMap; };
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 // Protected zones: VIRTUAL_OPFOR must never seed, drift into, or spawn inside these zones.
-// Configurable via ARC_threatVirtualProtectedZones; defaults cover airfield and coalition green zone.
-private _protectedZones = missionNamespace getVariable ["ARC_threatVirtualProtectedZones", ["Airbase", "GreenZone"]];
-if (!(_protectedZones isEqualType [])) then { _protectedZones = ["Airbase", "GreenZone"]; };
+// Configurable via ARC_threatVirtualProtectedZones; defaults cover BLUFOR-controlled zones.
+private _protectedZones = missionNamespace getVariable ["ARC_threatVirtualProtectedZones", ["Airbase", "GreenZone", "MilitaryBase"]];
+if (!(_protectedZones isEqualType [])) then { _protectedZones = ["Airbase", "GreenZone", "MilitaryBase"]; };
 
 // Airbase exclusion: skip locations inside any protected zone
 private _zones = missionNamespace getVariable ["ARC_worldZones", []];
