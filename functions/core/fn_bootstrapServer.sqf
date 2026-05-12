@@ -252,6 +252,8 @@ if (isNil { missionNamespace getVariable "ARC_convoySpeedKphMax" }) then { missi
 
 if (isNil { missionNamespace getVariable "ARC_convoyDriverSpotDistance" }) then { missionNamespace setVariable ["ARC_convoyDriverSpotDistance", 1]; };
 if (isNil { missionNamespace getVariable "ARC_convoyDriverSpotTime" }) then { missionNamespace setVariable ["ARC_convoyDriverSpotTime", 1]; };
+// Contact-spacing clamp (meters): set 10-80 to tighten spacing under fire, or -1 to keep baseline spacing.
+if (isNil { missionNamespace getVariable "ARC_convoyContactSeparationM" }) then { missionNamespace setVariable ["ARC_convoyContactSeparationM", -1]; };
 
 // Reset behavior: reroll strategic levers on ResetAll (testing convenience)
 if (isNil { missionNamespace getVariable "ARC_resetRerollEnvironment" }) then { missionNamespace setVariable ["ARC_resetRerollEnvironment", true]; };

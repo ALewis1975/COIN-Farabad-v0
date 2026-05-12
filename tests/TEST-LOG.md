@@ -11,6 +11,25 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-12 — Convoy spacing/road-follow regression hardening (Mode A)
+
+**Branch/Commit:** copilot/fix-convoy-system-issues @ a59b0cb
+
+**Scenario:** Audited recent convoy changes against prior convoy behavior and tuned contact-mode spacing so default convoy separation is preserved unless explicitly overridden, while persisting the force-road setting to authoritative convoy state for easier runtime auditing.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Changed-file sqflint compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_bootstrapServer.sqf functions/logistics/fn_execSpawnConvoy.sqf functions/logistics/fn_execTickConvoy.sqf` | PASS | No parser-compat violations in changed SQF files. |
+| 2 | Changed-file sqflint | `~/.local/bin/sqflint -e w functions/core/fn_bootstrapServer.sqf && ~/.local/bin/sqflint -e w functions/logistics/fn_execSpawnConvoy.sqf && ~/.local/bin/sqflint -e w functions/logistics/fn_execTickConvoy.sqf` | PASS | All changed SQF files lint clean with warnings enabled. |
+| 3 | State migration validation | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios passed. |
+| 4 | Marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | `off`, `auto`, and `auto-no-rg` modes all passed (177 markers). |
+| 5 | AIRBASE planning-mode static checks | `tests/static/airbase_planning_mode_checks.sh` | PASS | Runtime gate/static checks passed. |
+| 6 | CASREQ snapshot contract checks | `tests/static/casreq_snapshot_contract_checks.sh` | PASS | Snapshot payload and metadata contract checks passed. |
+| 7 | Convoy runtime smoke (spacing + force-road) | Dedicated/local MP: spawn logistics/escort convoys, confirm post-linkup separation baseline is retained under contact unless `ARC_convoyContactSeparationM > 0`, and verify `activeConvoyForceRoadEnabled` state tracks runtime road-follow mode | BLOCKED | Arma 3 runtime (hosted + dedicated + JIP) unavailable in this sandbox. |
+| 8 | Post-review follow-up lint/compat sanity | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_bootstrapServer.sqf functions/logistics/fn_execSpawnConvoy.sqf && ~/.local/bin/sqflint -e w functions/core/fn_bootstrapServer.sqf && ~/.local/bin/sqflint -e w functions/logistics/fn_execSpawnConvoy.sqf && git diff --check` | PASS | Review-follow-up comments/docs only; compat scan and lint remained clean with no whitespace regressions. |
+
+---
+
 ## 2026-05-11 — Priority queue items 1–4: security hardening + medical single-writer (Mode I)
 
 **Branch/Commit:** copilot/audit-repo-quality-and-progress @ HEAD
