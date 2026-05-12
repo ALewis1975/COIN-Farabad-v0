@@ -11,6 +11,26 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-12 — Convoy endpoint file/dismount staging (Mode A)
+
+**Branch/Commit:** copilot/form-convoy-at-end-point @ caa22a8
+
+**Scenario:** Updated convoy arrival handling so lead proximity to the endpoint marker marks the task ready for SITREP, then the convoy forms a tight file near the marker, pauses, dismounts non-gunner AI crew/passengers, and applies LAMBS camp ambiance when available.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Pre-change changed-file sqflint compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/logistics/fn_execTickConvoy.sqf` | PASS | No parser-compat violations before editing the convoy tick file. |
+| 2 | Post-change changed-file sqflint compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/logistics/fn_execTickConvoy.sqf` | PASS | No parser-compat violations after endpoint staging changes. |
+| 3 | Changed-file sqflint | `~/.local/bin/sqflint -e w functions/logistics/fn_execTickConvoy.sqf` | PASS | Installed `sqflint` locally via pip; convoy tick file linted clean. |
+| 4 | State migration validation | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios passed. |
+| 5 | Marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | `off`, `auto`, and `auto-no-rg` modes passed (177 markers). |
+| 6 | AIRBASE planning-mode static checks | `tests/static/airbase_planning_mode_checks.sh` | PASS | Runtime gate/static checks passed. |
+| 7 | CASREQ snapshot contract checks | `tests/static/casreq_snapshot_contract_checks.sh` | PASS | Snapshot payload and metadata contract checks passed. |
+| 8 | Whitespace diff check | `git diff --check HEAD~1..HEAD` | PASS | No whitespace errors in committed convoy diff. |
+| 9 | Runtime convoy endpoint behavior | Local/dedicated MP: spawn logistics/escort convoys, confirm lead proximity marks close-ready, vehicles form ~10m endpoint file, non-gunners dismount after ~10s, gunners stay mounted, and dismount group camps around endpoint marker | BLOCKED | Arma 3 runtime (hosted + dedicated + JIP) unavailable in this sandbox. |
+
+---
+
 ## 2026-05-12 — Convoy spacing/road-follow regression hardening (Mode A)
 
 **Branch/Commit:** copilot/fix-convoy-system-issues @ a59b0cb
