@@ -2792,6 +2792,7 @@ if (_leadArrived) then
     if (!(_arrivedAt isEqualType 0) || { _arrivedAt < 0 }) then
     {
         ["activeConvoyArrivedAt", _now] call ARC_fnc_stateSet;
+        _arrivedAt = _now;
         private _gridA = mapGridPosition _destPos;
         ["OPS", format ["Convoy lead reached destination marker vicinity at %1. Task ready for SITREP while vehicles form final file.", _gridA], _destPos, [["taskId", _taskId], ["event", "CONVOY_ARRIVED"], ["leadNetId", netId _lead]]] call ARC_fnc_intelLog;
         ["SUCCEEDED"] call _setLinkupTaskState;
