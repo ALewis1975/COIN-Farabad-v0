@@ -95,7 +95,7 @@ All writers in this ledger are required to be **server-side only**. Any client-s
 
 | Key | Status | Writer(s) | Reset / init writer | Purpose |
 |---|:---:|---|---|---|
-| `ARC_pub_baseMed` | ⚠️ | `functions/medical/fn_medicalTick.sqf:37`, `functions/medical/fn_medicalOnCasualty.sqf:56` | — | Two writers: tick recomputes; casualty handler updates immediately. **Both server-owned and intentional**, but a single publisher (e.g. `ARC_fnc_medicalBroadcast`) called from both sites would simplify ownership. |
+| `ARC_pub_baseMed` | ✅ | `functions/medical/fn_medicalBroadcast.sqf:42` | — | Single-writer publisher invoked from both `fn_medicalTick.sqf` (slow recovery) and `fn_medicalOnCasualty.sqf` (immediate KIA drop). Clamps to [0, 1] before replication. S-OWN-2 resolved 2026-05-11. |
 
 ### 3.8 IED / EOD
 
@@ -174,7 +174,7 @@ These rows do not block Phase 2 closure but are worth tracking so the ledger rem
 | ID | Status | Description | Recommendation |
 |---|:---:|---|---|
 | S-OWN-1 | Open | `ARC_pub_unitStatuses` has three writer call-sites (incident accept / mark-ready / close). All are server-owned, but maintaining identical recompute logic in three places risks drift. | Extract a single `ARC_fnc_unitStatusBroadcast` publisher; the three call-sites invoke it. Defer to Wave 2 follow-on PR. |
-| S-OWN-2 | Open | `ARC_pub_baseMed` has two writers (tick + casualty handler). | Funnel both sites through `ARC_fnc_medicalBroadcast` (or rename existing publisher) so the writer table collapses to one row. |
+| S-OWN-2 | Resolved 2026-05-11 | `ARC_pub_baseMed` had two writers (tick + casualty handler). | Resolved by introducing `ARC_fnc_medicalBroadcast` as the single publisher; both call-sites now route through it. |
 | S-OWN-3 | Open | `ARC_pub_intelLog` / `ARC_pub_opsLog` have a steady-state writer (`intelBroadcast`) and a reset writer (`resetAll`). Acceptable pattern, but document explicitly so future writers do not creep in. | This ledger entry IS the documentation. Add a comment in `fn_intelBroadcast.sqf` referencing this file. |
 
 None of the findings above are P1; the ledger has no ❌ entries on current head.
@@ -199,6 +199,10 @@ Process:
 ---
 
 ## 6) Change log
+
+### v1.2 — 2026-05-11
+
+- S-OWN-2 resolved: `ARC_pub_baseMed` now has a single writer (`ARC_fnc_medicalBroadcast`); both `medicalTick` and `medicalOnCasualty` route through the new publisher. §3.7 row updated from ⚠️ to ✅; §4 finding marked resolved.
 
 ### v1.1 — 2026-05-08
 

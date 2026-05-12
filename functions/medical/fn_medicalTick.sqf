@@ -34,6 +34,7 @@ _step = (_step max 0) min 0.05;
 
 _med = (_med + _step) min _ceiling;
 ["baseMed", _med] call ARC_fnc_stateSet;
-missionNamespace setVariable ["ARC_pub_baseMed", _med, true];
+// S-OWN-2: replicate via single writer.
+[_med] call ARC_fnc_medicalBroadcast;
 
 true

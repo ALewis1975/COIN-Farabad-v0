@@ -52,8 +52,9 @@ if (!(_med isEqualType 0)) then { _med = 0.57; };
 _med = (_med - _step) max 0;
 ["baseMed", _med] call ARC_fnc_stateSet;
 
-// Replicate immediately so clients see updated value (not waiting for next tick)
-missionNamespace setVariable ["ARC_pub_baseMed", _med, true];
+// Replicate immediately so clients see updated value (not waiting for next tick).
+// S-OWN-2: replicate via single writer.
+[_med] call ARC_fnc_medicalBroadcast;
 
 diag_log format ["[ARC][MEDICAL] medicalOnCasualty: baseMed drop by %1 → %2", _step, _med];
 

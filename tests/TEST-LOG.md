@@ -11,6 +11,28 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-11 — Priority queue items 1–4: security hardening + medical single-writer (Mode I)
+
+**Branch/Commit:** copilot/audit-repo-quality-and-progress @ HEAD
+
+**Scenario:** Closes F-CIV-1 and F-DEV-2 from the RemoteExec endpoint audit, extracts `ARC_fnc_medicalBroadcast` as the single writer for `ARC_pub_baseMed` (S-OWN-2), and records dedicated/JIP rows as BLOCKED per `docs/qa/Dedicated_JIP_Validation_Matrix.md`.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Changed-file sqflint compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict <7 touched .sqf files>` | PASS | Touched files: `fn_uiCoverageAuditServer`, `fn_uiConsoleActionHQPrimary`, `fn_civsubInteractEndSession`, `fn_civsubInteractOrderStop`, `fn_medicalBroadcast` (new), `fn_medicalTick`, `fn_medicalOnCasualty`. Pre-existing `getOrDefault` method form and `# N` / `isNotEqualTo` patterns in two of the touched files were replaced with sqflint-safe equivalents (tightly coupled to the security edits). |
+| 2 | Changed-file sqflint | `~/.local/bin/sqflint -e w <each of the 7 files>` | PASS | All seven files clean under `-e w`. |
+| 3 | State migration validation | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios passed. |
+| 4 | Marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | `off`, `auto`, and `auto-no-rg` modes passed (177 markers across all modes). |
+| 5 | AIRBASE planning-mode static checks | `tests/static/airbase_planning_mode_checks.sh` | PASS | All runtime entrypoint gates present. |
+| 6 | CASREQ snapshot contract checks | `tests/static/casreq_snapshot_contract_checks.sh` | PASS | Bundle payload, metadata, and public state shape verified. |
+| 7 | Whitespace diff check | `git diff --check` | PASS | No whitespace errors. |
+| 8 | F-CIV-1 runtime gate behaviour | Local hosted/dedicated MP: with `civsub_v1_enabled=false`, attempt `ARC_fnc_civsubInteractOrderStop` and `ARC_fnc_civsubInteractEndSession` via the civilian interact menu; expect no state mutation and `false` return | BLOCKED | Arma 3 runtime (hosted + dedicated + JIP) unavailable in this sandbox. Static reading of both functions confirms the `civsub_v1_enabled` exit guard is the first statement after `isServer`. |
+| 9 | F-DEV-2 runtime gate behaviour | Local hosted/dedicated MP: from a non-approver client, invoke HQ-tab "UI coverage audit"; expect `[ARC][SEC] COVERAGE_AUDIT_DENIED` in RPT and no `ARC_uiCoverageMap` update; from an approver client, expect success | BLOCKED | Same runtime gap. Static reading confirms `ARC_fnc_rpcValidateSender` + `OMNI \|\| canApproveQueue` gate mirrors `uiConsoleQAAuditServer` exactly. HQ-tab caller now passes `player` so the binding is verifiable. |
+| 10 | S-OWN-2 single-writer behaviour | Local hosted/dedicated MP: trigger BLUFOR/civilian KIA + medical tick; verify `ARC_pub_baseMed` updates exactly once per source, clamped to [0, 1] | BLOCKED | Same runtime gap. Static reading confirms both `medicalTick` and `medicalOnCasualty` route through `ARC_fnc_medicalBroadcast`; ledger updated to single writer at §3.7. |
+| 11 | Dedicated / JIP matrix rows | `docs/qa/Dedicated_JIP_Validation_Matrix.md` rows for CIVSUB interact and HQ-tab admin actions | BLOCKED | Tracked; requires dedicated server + ≥1 JIP client to execute. |
+
+---
+
 ## 2026-05-11 — Virtual OPFOR protected-zone sqflint warning fix (Mode A)
 
 **Branch/Commit:** copilot/fix-opfor-spawn-airfield-issue @ HEAD

@@ -15,6 +15,10 @@
 
 if (!isServer) exitWith {false};
 
+// F-CIV-1: CIVSUB subsystem master toggle — bail out before any state mutation
+// when the subsystem is disabled. Mirrors every other CIVSUB endpoint.
+if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {false};
+
 params [
     ["_civ", objNull, [objNull]],
     ["_actor", objNull, [objNull]]
