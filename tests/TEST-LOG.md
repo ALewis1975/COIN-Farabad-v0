@@ -26,6 +26,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | 5 | AIRBASE planning-mode static checks | `tests/static/airbase_planning_mode_checks.sh` | PASS | Runtime gate/static checks passed. |
 | 6 | CASREQ snapshot contract checks | `tests/static/casreq_snapshot_contract_checks.sh` | PASS | Snapshot payload and metadata contract checks passed. |
 | 7 | Convoy runtime smoke (spacing + force-road) | Dedicated/local MP: spawn logistics/escort convoys, confirm post-linkup separation baseline is retained under contact unless `ARC_convoyContactSeparationM > 0`, and verify `activeConvoyForceRoadEnabled` state tracks runtime road-follow mode | BLOCKED | Arma 3 runtime (hosted + dedicated + JIP) unavailable in this sandbox. |
+| 8 | Post-review follow-up lint/compat sanity | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_bootstrapServer.sqf functions/logistics/fn_execSpawnConvoy.sqf && ~/.local/bin/sqflint -e w functions/core/fn_bootstrapServer.sqf && ~/.local/bin/sqflint -e w functions/logistics/fn_execSpawnConvoy.sqf && git diff --check` | PASS | Review-follow-up comments/docs only; compat scan and lint remained clean with no whitespace regressions. |
 
 ---
 
