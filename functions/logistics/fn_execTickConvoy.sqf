@@ -1444,6 +1444,10 @@ if (!_started) exitWith
 
         ["activeConvoyStartedAt", _now] call ARC_fnc_stateSet;
         ["activeConvoyArrivedAt", -1] call ARC_fnc_stateSet;
+        ["activeConvoyFileFormedAt", -1] call ARC_fnc_stateSet;
+        ["activeConvoyDismountStartedAt", -1] call ARC_fnc_stateSet;
+        ["activeConvoyDismountComplete", false] call ARC_fnc_stateSet;
+        ["activeConvoyArrivalCampApplied", false] call ARC_fnc_stateSet;
         ["activeConvoyLastProg", -1] call ARC_fnc_stateSet;
 
         ["activeConvoyLastMoveAt", _now] call ARC_fnc_stateSet;
@@ -2772,59 +2776,199 @@ if (_bucket > _lastBucket && { _bucket in [1,2,3] }) then
     ["OPS", format ["Convoy progress: %1%2 complete (lead at %3).", _pct, "%", _grid], getPosATL _lead, [["taskId", _taskId], ["event", "CONVOY_PROGRESS"], ["pct", _pct]]] call ARC_fnc_intelLog;
 };
 
-// Arrival: require a short dwell inside destination AO.
-// For larger convoys, require most of the column to be inside the AO before closing the incident.
+// Arrival: lead proximity marks the convoy task ready for SITREP, then the column tightens
+// into a final file near the end-point marker before non-gunners dismount into camp ambiance.
 private _arrivedAt = ["activeConvoyArrivedAt", -1] call ARC_fnc_stateGet;
 
-private _arriveRad = (_destRad max 60);
-private _needFrac = missionNamespace getVariable ["ARC_convoyArrivalFraction", 0.75];
-if (!(_needFrac isEqualType 0)) then { _needFrac = 0.75; };
-_needFrac = (_needFrac max 0.5) min 1;
+private _arriveRadDefault = (_destRad max 60) min 120;
+private _arriveRad = missionNamespace getVariable ["ARC_convoyArrivalVicinityM", _arriveRadDefault];
+if (!(_arriveRad isEqualType 0)) then { _arriveRad = _arriveRadDefault; };
+_arriveRad = (_arriveRad max 35) min 180;
 
-private _needMin = missionNamespace getVariable ["ARC_convoyArrivalMinVehicles", 2];
-if (!(_needMin isEqualType 0)) then { _needMin = 2; };
-_needMin = (_needMin max 1) min 999;
-
-private _aliveN = count _aliveVeh;
-private _needN = _needMin;
-if (_aliveN > 0) then { _needN = (_needMin max (ceil (_aliveN * _needFrac))) min _aliveN; };
-
-private _arrivedN = 0;
-{ if ((_x distance2D _destPos) <= _arriveRad) then { _arrivedN = _arrivedN + 1; }; } forEach _aliveVeh;
 private _leadArrived = ((_lead distance2D _destPos) <= _arriveRad);
 
-if (_leadArrived && { _arrivedN >= _needN }) then
+if (_leadArrived) then
 {
     if (!(_arrivedAt isEqualType 0) || { _arrivedAt < 0 }) then
     {
         ["activeConvoyArrivedAt", _now] call ARC_fnc_stateSet;
         private _gridA = mapGridPosition _destPos;
-        ["OPS", format ["Convoy reached destination AO at %1 (%2/%3 vehicles present). Establish local security and complete handoff.", _gridA, _arrivedN, _aliveN], _destPos, [["taskId", _taskId], ["event", "CONVOY_ARRIVED"], ["arrived", _arrivedN], ["alive", _aliveN]]] call ARC_fnc_intelLog;
+        ["OPS", format ["Convoy lead reached destination marker vicinity at %1. Task ready for SITREP while vehicles form final file.", _gridA], _destPos, [["taskId", _taskId], ["event", "CONVOY_ARRIVED"], ["leadNetId", netId _lead]]] call ARC_fnc_intelLog;
+        ["SUCCEEDED"] call _setLinkupTaskState;
+        ["SUCCEEDED", "CONVOY_ARRIVED", "Lead convoy vehicle reached the destination marker vicinity. Recommend closing this incident as SUCCEEDED after SITREP.", _destPos] call ARC_fnc_incidentMarkReadyToClose;
+    };
+};
+
+if (_arrivedAt isEqualType 0 && { _arrivedAt > 0 }) then
+{
+    private _fileSpacing = missionNamespace getVariable ["ARC_convoyArrivalFileSpacingM", 10];
+    if (!(_fileSpacing isEqualType 0)) then { _fileSpacing = 10; };
+    _fileSpacing = (_fileSpacing max 8) min 15;
+
+    private _fileSlotRad = missionNamespace getVariable ["ARC_convoyArrivalFileSlotRadiusM", 9];
+    if (!(_fileSlotRad isEqualType 0)) then { _fileSlotRad = 9; };
+    _fileSlotRad = (_fileSlotRad max 5) min 18;
+
+    private _fileSnapR = missionNamespace getVariable ["ARC_convoyArrivalRoadSnapM", 45];
+    if (!(_fileSnapR isEqualType 0)) then { _fileSnapR = 45; };
+    _fileSnapR = (_fileSnapR max 0) min 120;
+
+    private _fileSpeed = missionNamespace getVariable ["ARC_convoyArrivalFileSpeedKph", 10];
+    if (!(_fileSpeed isEqualType 0)) then { _fileSpeed = 10; };
+    _fileSpeed = (_fileSpeed max 4) min 18;
+
+    private _dismountDelay = missionNamespace getVariable ["ARC_convoyArrivalDismountDelaySec", 10];
+    if (!(_dismountDelay isEqualType 0)) then { _dismountDelay = 10; };
+    _dismountDelay = (_dismountDelay max 0) min 60;
+
+    private _campRadius = missionNamespace getVariable ["ARC_convoyArrivalCampRadiusM", 45];
+    if (!(_campRadius isEqualType 0)) then { _campRadius = 45; };
+    _campRadius = (_campRadius max 15) min 120;
+
+    private _anchor = +_destPos;
+    _anchor resize 3;
+
+    if (_fileSnapR > 0) then
+    {
+        private _roadsA = _destPos nearRoads _fileSnapR;
+        if ((count _roadsA) > 0) then
+        {
+            private _bestRoad = objNull;
+            private _bestRoadD = 1e12;
+            {
+                private _rp = getPosATL _x;
+                private _dRoad = _destPos distance2D _rp;
+                if (_dRoad < _bestRoadD) then { _bestRoadD = _dRoad; _bestRoad = _x; };
+            } forEach _roadsA;
+            if (!isNull _bestRoad) then
+            {
+                _anchor = getPosATL _bestRoad;
+                _anchor resize 3;
+            };
+        };
+    };
+
+    private _fileDir = -1;
+    if (_routePts isEqualType [] && { (count _routePts) >= 2 }) then
+    {
+        private _pPrev = _routePts select ((count _routePts) - 2);
+        private _pLast = _routePts select ((count _routePts) - 1);
+        if (_pPrev isEqualType [] && { _pLast isEqualType [] }) then { _fileDir = _pPrev getDir _pLast; };
+    };
+    if (!(_fileDir isEqualType 0) || { _fileDir < 0 }) then { _fileDir = _start getDir _destPos; };
+    if (!(_fileDir isEqualType 0) || { _fileDir < 0 }) then { _fileDir = _startDir; };
+    if (!(_fileDir isEqualType 0) || { _fileDir < 0 }) then { _fileDir = getDir _lead; };
+    _fileDir = _fileDir % 360;
+
+    while { (count waypoints _grpW) > 0 } do { deleteWaypoint ((waypoints _grpW) select 0); };
+    _grpW setFormation "FILE";
+    _grpW setSpeedMode "LIMITED";
+    _grpW setBehaviour "SAFE";
+    _grpW setCombatMode "YELLOW";
+
+    private _allSlotted = ((count _aliveVeh) > 0);
+    for "_i" from 0 to ((count _aliveVeh) - 1) do
+    {
+        private _vF = _aliveVeh select _i;
+        if (isNull _vF || { !alive _vF }) then { continue; };
+
+        private _slot = +_anchor;
+        if (_i > 0) then
+        {
+            _slot = _anchor getPos [_fileSpacing * _i, (_fileDir + 180) % 360];
+            _slot resize 3;
+        };
+
+        private _dF = driver _vF;
+        if (isNull _dF) then
+        {
+            createVehicleCrew _vF;
+            _dF = driver _vF;
+        };
+
+        _vF setConvoySeparation _fileSpacing;
+        private _distSlot = _vF distance2D _slot;
+        if (_distSlot <= _fileSlotRad) then
+        {
+            _vF limitSpeed 0;
+            _vF setFuel 0;
+            _vF setDir _fileDir;
+            if (!isNull _dF && { !isPlayer _dF }) then { _dF stop true; };
+        }
+        else
+        {
+            _allSlotted = false;
+            _vF setFuel 1;
+            _vF limitSpeed _fileSpeed;
+            if (!isNull _dF && { !isPlayer _dF }) then
+            {
+                _dF stop false;
+                _dF forceFollowRoad false;
+                _dF doMove _slot;
+            };
+        };
+    };
+
+    private _fileFormedAt = ["activeConvoyFileFormedAt", -1] call ARC_fnc_stateGet;
+    if (!(_fileFormedAt isEqualType 0)) then { _fileFormedAt = -1; };
+
+    if (_allSlotted) then
+    {
+        if (_fileFormedAt < 0) then
+        {
+            ["activeConvoyFileFormedAt", _now] call ARC_fnc_stateSet;
+            ["OPS", "Convoy vehicles formed final file at destination marker. Preparing dismount.", _destPos, [["taskId", _taskId], ["event", "CONVOY_FILE_FORMED"], ["spacingM", _fileSpacing]]] call ARC_fnc_intelLog;
+            _fileFormedAt = _now;
+        };
     }
     else
     {
-        if ((_now - _arrivedAt) >= 25) then
-        {
-            // Freeze convoy at destination so it can be inspected / secured.
-            {
-                if (!isNull _x) then
-                {
-                    _x setFuel 0;
-                    _x limitSpeed 0;
-                };
-            } forEach _aliveVeh;
-
-            ["SUCCEEDED"] call _setLinkupTaskState;
-            ["SUCCEEDED", "CONVOY_ARRIVED", "Convoy arrived and completed handoff. Recommend closing this incident as SUCCEEDED.", _destPos] call ARC_fnc_incidentMarkReadyToClose;
-        };
+        if (_fileFormedAt >= 0) then { ["activeConvoyFileFormedAt", -1] call ARC_fnc_stateSet; };
+        _fileFormedAt = -1;
     };
-}
-else
-{
-    // Reset dwell if convoy leaves the AO.
-    if (_arrivedAt isEqualType 0 && { _arrivedAt > 0 }) then
+
+    private _dismountComplete = ["activeConvoyDismountComplete", false] call ARC_fnc_stateGet;
+    if (!(_dismountComplete isEqualType true) && !(_dismountComplete isEqualType false)) then { _dismountComplete = false; };
+
+    if (!_dismountComplete && { _fileFormedAt >= 0 } && { (_now - _fileFormedAt) >= _dismountDelay }) then
     {
-        ["activeConvoyArrivedAt", -1] call ARC_fnc_stateSet;
+        ["activeConvoyDismountStartedAt", _now] call ARC_fnc_stateSet;
+
+        private _dismountUnits = [];
+        {
+            private _vehD = _x;
+            {
+                private _u = _x;
+                if (isNull _u || { !alive _u } || { isPlayer _u }) then { continue; };
+                private _role = assignedVehicleRole _u;
+                private _roleName = "";
+                if (_role isEqualType [] && { (count _role) > 0 } && { (_role select 0) isEqualType "" }) then
+                {
+                    _roleName = toUpper (_role select 0);
+                };
+                if (_roleName isEqualTo "TURRET") then { continue; };
+
+                unassignVehicle _u;
+                doGetOut [_u];
+                _dismountUnits pushBackUnique _u;
+            } forEach (crew _vehD);
+        } forEach _aliveVeh;
+
+        if ((count _dismountUnits) > 0) then
+        {
+            private _grpDismount = createGroup [side _grpW, true];
+            _dismountUnits joinSilent _grpDismount;
+            _grpDismount setGroupIdGlobal ["Convoy Dismounts"];
+            [_grpDismount, "camp", _destPos, _campRadius, ""] call ARC_fnc_sitePopApplyAmbiance;
+            ["OPS", format ["Convoy dismounted %1 non-gunner crew/passenger(s) into camp ambiance at endpoint marker.", count _dismountUnits], _destPos, [["taskId", _taskId], ["event", "CONVOY_DISMOUNTED"], ["dismounted", count _dismountUnits]]] call ARC_fnc_intelLog;
+        }
+        else
+        {
+            ["OPS", "Convoy final file complete; no non-gunner AI crew/passengers available to dismount.", _destPos, [["taskId", _taskId], ["event", "CONVOY_DISMOUNTED"], ["dismounted", 0]]] call ARC_fnc_intelLog;
+        };
+
+        ["activeConvoyDismountComplete", true] call ARC_fnc_stateSet;
+        ["activeConvoyArrivalCampApplied", true] call ARC_fnc_stateSet;
     };
 };
 
