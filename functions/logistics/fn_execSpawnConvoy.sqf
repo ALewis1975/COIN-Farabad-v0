@@ -682,6 +682,7 @@ private _isPadOccupied = {
 
 private _forceRoad = missionNamespace getVariable ["ARC_convoyForceFollowRoad", true];
 if (!(_forceRoad isEqualType true) && !(_forceRoad isEqualType false)) then { _forceRoad = true; };
+["activeConvoyForceRoadEnabled", _forceRoad] call ARC_fnc_stateSet;
 
 // Spawn pad kick: optionally force newly spawned vehicles to move off the pad quickly.
 // This prevents long pad-blocking stalls where subsequent vehicles cannot spawn.

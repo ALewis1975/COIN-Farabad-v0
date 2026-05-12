@@ -1900,9 +1900,9 @@ private _contactBoost = missionNamespace getVariable ["ARC_convoyContactBoostKph
 if (!(_contactBoost isEqualType 0)) then { _contactBoost = 15; };
 _contactBoost = (_contactBoost max 4) min 35;
 
-private _contactSpacing = missionNamespace getVariable ["ARC_convoyContactSeparationM", 15];
-if (!(_contactSpacing isEqualType 0)) then { _contactSpacing = 15; };
-_contactSpacing = (_contactSpacing max 10) min 80;
+private _contactSpacing = missionNamespace getVariable ["ARC_convoyContactSeparationM", -1];
+if (!(_contactSpacing isEqualType 0)) then { _contactSpacing = -1; };
+if (_contactSpacing > 0) then { _contactSpacing = (_contactSpacing max 10) min 80; };
 
 private _contactScanEvery = missionNamespace getVariable ["ARC_convoyContactScanIntervalSec", 2];
 if (!(_contactScanEvery isEqualType 0)) then { _contactScanEvery = 2; };
@@ -1981,7 +1981,7 @@ if (_bridgeMode) then
 };
 
 private _spacingFinal = if (_bridgeMode) then { (_spacing min _bridgeSpacingM) } else { _spacing };
-if (_contactActive) then { _spacingFinal = _spacingFinal min _contactSpacing; };
+if (_contactActive && { _contactSpacing > 0 }) then { _spacingFinal = _spacingFinal min _contactSpacing; };
 
 {
     if (alive _x) then
