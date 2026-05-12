@@ -13,7 +13,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-05-12 — Military Base / Logistics 01 OPFOR spawn exclusion (Mode A)
 
-**Branch/Commit:** copilot/fix-opfor-spawn-issue @ 2b3ecf8
+**Branch/Commit:** copilot/fix-opfor-spawn-issue @ 3423be7
 
 **Scenario:** Added the B-2-325 AIR HQ / Logistics 01 military base to protected world zones and extended OPFOR materialization/contact guards so virtual and patrol OPFOR cannot seed, pre-cache, drift, or spawn inside that BLUFOR-controlled base area.
 
@@ -26,6 +26,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | 5 | Changed-file sqflint | `~/.local/bin/sqflint -e w data/farabad_world_zones.sqf && ~/.local/bin/sqflint -e w functions/threat/fn_threatVirtualPoolInit.sqf && ~/.local/bin/sqflint -e w functions/threat/fn_threatVirtualPoolTick.sqf && ~/.local/bin/sqflint -e w functions/core/fn_incidentPreCache.sqf && ~/.local/bin/sqflint -e w functions/ops/fn_opsPatrolOnActivate.sqf` | PASS | Installed `sqflint` locally with `python3 -m pip install --user sqflint`; all changed SQF files lint clean. |
 | 6 | Post-change static validations | `python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && tests/static/airbase_planning_mode_checks.sh && tests/static/casreq_snapshot_contract_checks.sh && git diff --check` | PASS | State migrations, marker index, AIRBASE static checks, CASREQ static checks, and whitespace diff check passed after edits. |
 | 7 | Military base OPFOR runtime smoke | Dedicated/local MP: start at `ARC_m_logistics_01` / military base, activate nearby incidents, and verify no virtual/patrol OPFOR spawn within the `MilitaryBase` protected zone and no RPT errors appear | BLOCKED | Arma 3 hosted/dedicated/JIP runtime unavailable in this sandbox. |
+| 8 | Parallel validation | `parallel_validation` | PASS | Code Review returned two P2 suggestions (zone ID naming and possible shared protected-zone helper); CodeQL had no analyzable languages for SQF changes. |
 
 ---
 
