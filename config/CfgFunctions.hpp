@@ -636,6 +636,7 @@ class CfgFunctions
         class Logistics
         {
             file = "functions\logistics";
+            class convoyStartupConfig {};
             class execSpawnConvoy {};
             class execTickConvoy {};
             class execMsrThreatCheck {};  // T10: MSR/convoy threat awareness
