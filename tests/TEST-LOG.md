@@ -11,6 +11,20 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-13 — initServer convoy bootstrap/config extraction (Mode A)
+
+**Branch/Commit:** copilot/cleanup-initserver-responsibilities @ commit: unrecoverable (authoring validation log before commit SHA assignment)
+
+**Scenario:** Split the convoy bootstrap/config section out of `initServer.sqf` into `ARC_fnc_convoyStartupConfig`, registered in `CfgFunctions`, and switched extracted convoy startup keys to server-local missionNamespace writes to reduce startup replication noise while preserving server-owned spawn/runtime behavior.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | Changed-file compat + lint | `python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf functions/logistics/fn_convoyStartupConfig.sqf && ~/.local/bin/sqflint -e w initServer.sqf && ~/.local/bin/sqflint -e w functions/logistics/fn_convoyStartupConfig.sqf` | PASS | Extracted/orchestrator SQF files pass compat scan and sqflint. |
+| 2 | Repository static validations | `python3 scripts/dev/validate_state_migrations.py && bash scripts/dev/check_test_log_commits.sh && python3 scripts/dev/validate_marker_index.py && tests/static/airbase_planning_mode_checks.sh && tests/static/casreq_snapshot_contract_checks.sh` | PASS | Existing static validation suite passed after the extraction. |
+| 3 | Startup wiring/static reference check | `rg -n "ARC_fnc_convoyStartupConfig|convoyStartupConfig" initServer.sqf config/CfgFunctions.hpp functions/logistics/fn_convoyStartupConfig.sqf` | PASS | New named function is registered and called from `initServer.sqf`; no missing references found. |
+| 4 | Runtime local MP + dedicated/JIP startup verification | Manual server startup and convoy spawn checks in local MP + dedicated/JIP environment | BLOCKED | Arma 3 runtime is unavailable in this sandbox. Validate convoy startup behavior parity and late-join/reconnect expectations in a dedicated/JIP environment. |
+| 5 | Review-fix revalidation | `python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf functions/logistics/fn_convoyStartupConfig.sqf && ~/.local/bin/sqflint -e w initServer.sqf && ~/.local/bin/sqflint -e w functions/logistics/fn_convoyStartupConfig.sqf && git diff --check` | PASS | Revalidated after aligning server-only guard style in `ARC_fnc_convoyStartupConfig` (`exitWith {}`) and removing unused boolean return semantics. |
+
 ## 2026-05-13 — Public broadcast authority hardening + dead world-time consumer cleanup (Mode I)
 
 **Branch/Commit:** copilot/p0-1-harden-public-broadcast-state @ 36b88c1
