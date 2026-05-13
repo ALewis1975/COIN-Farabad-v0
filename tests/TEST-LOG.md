@@ -11,7 +11,25 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
-## 2026-05-13 — Threat Epic 3 TOC/S2 threat surfacing implementation (Mode B)
+## 2026-05-13 — Threat Epic 2 completion: IED lifecycle contract (Mode B)
+
+**Branch/Commit:** copilot/alewis1975-complete-epic-2-runtime-gaps @ HEAD
+
+**Scenario:** Completed the deferred Epic 2 runtime gaps: explicit IED suspicious-object spawn idempotency guardrails, deterministic spawn token persistence, duplicate spawn denial with structured event evidence, cleanup synchronization convergence (`ARC_fnc_threatIedCleanupSync`), and stale close detection with `THREAT_CLOSED_STALE` evidence emission. Added `tests/static/threat_ied_lifecycle_contract_checks.sh` (24 checks). Registered two new functions in `CfgFunctions.hpp`. Added `docs/planning/threat/Threat_IED_Lifecycle_Implementation_v1.md`.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatOnAOActivated.sqf functions/threat/fn_threatOnIncidentClosed.sqf functions/threat/fn_threatIedSpawnRequest.sqf functions/threat/fn_threatIedCleanupSync.sqf config/CfgFunctions.hpp` | PASS | No parser-compat patterns; also fixed pre-existing `#` indexing, direct `trim`, and `isNotEqualTo` compat issues in fully-rewritten files. |
+| 2 | Changed-file sqflint | `for f in functions/threat/fn_threatOnAOActivated.sqf functions/threat/fn_threatOnIncidentClosed.sqf functions/threat/fn_threatIedSpawnRequest.sqf functions/threat/fn_threatIedCleanupSync.sqf; do ~/.local/bin/sqflint -e w "$f"; done` | PASS | All four changed SQF files lint clean. |
+| 3 | Repository static validations | `python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && tests/static/airbase_planning_mode_checks.sh && tests/static/casreq_snapshot_contract_checks.sh && tests/static/threat_family_normalization_contract_checks.sh && tests/static/threat_ui_snapshot_contract_checks.sh && git diff --check` | PASS | All existing static checks passed. |
+| 4 | Epic 2 lifecycle contract checks | `bash tests/static/threat_ied_lifecycle_contract_checks.sh` | PASS | All 24 new Epic 2 contract checks passed: spawn idempotency token, duplicate spawn denial, stale close detection, cleanup convergence markers, server authority, and doc coverage. |
+| 5 | IED spawn idempotency smoke | Local MP: trigger AO activation twice for same IED threat; confirm second spawn attempt yields DENY_DUPLICATE_SPAWN in RPT and THREAT_SPAWN_DENIED event; no duplicate manifestation | BLOCKED | Arma 3 runtime unavailable in this sandbox. Owner: validate in local MP before Epic 5. |
+| 6 | Stale close evidence smoke | Local MP: close incident after threat reaches CLEANED; confirm THREAT_CLOSED_STALE event in RPT; state unchanged | BLOCKED | Arma 3 runtime unavailable. Owner: validate in local MP. |
+| 7 | Dedicated / JIP / restart | Dedicated server: mission restart mid-IED incident; confirm spawn_token rehydration prevents duplicate spawn; JIP client reads consistent threat state | BLOCKED | Requires dedicated + restart environment. Owner: validate before Epic 5 persistence/migration work. |
+
+---
+
+
 
 **Branch/Commit:** copilot/add-threat-ui-surfacing-epic-3 @ HEAD
 
