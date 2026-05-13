@@ -5742,7 +5742,7 @@ Mode: A (Bug Fix)
 
 ## 2026-05-13 — PR 9: Client/UI performance cleanup (Mode D)
 
-**Branch/Commit:** copilot/cleanup-client-ui-performance @ commit: unrecoverable (final validation entry updated pre-commit after review-driven follow-up tweaks)
+**Branch/Commit:** copilot/cleanup-client-ui-performance @ 38bf17ae0cb6026a385c39190b7995d3d2718731
 
 **Scenario:** Reduced avoidable client-side refresh cost in `fn_briefingUpdateClient.sqf` by replacing repeated pair-array linear scans with per-update hash-map lookups, and added a conservative `uiNamespace` static-signature fast-path in `fn_uiConsoleIntelPaint.sqf` to skip redundant repaint work for unchanged static tool/detail selections.
 
