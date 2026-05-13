@@ -678,6 +678,7 @@ class CfgFunctions
             // Virtual OpFor group pool (persistent enemy presence between incidents)
             class threatVirtualPoolInit {};
             class threatVirtualPoolTick {};
+            class threatVirtualPoolSnapshotBuild {};
         };
 
 class Ops

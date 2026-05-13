@@ -11,6 +11,29 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-13 — Threat Epic 8 virtual OpFor observability/docs/debug snapshot (Mode B)
+
+**Branch/Commit:** copilot/alewis1975-virtual-opfor-observability @ HEAD
+
+**Scenario:** Implemented Epic 8 non-dedicated slice by adding a server-built read-only Virtual OpFor observability snapshot (`threat_virtual_opfor_obs_v1`) and publishing it in public state + Console VM threat section. Added implementation documentation and static contract checks for state model/caps/protected-zone/locality interpretation and evidence-gap framing.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict config/CfgFunctions.hpp functions/core/fn_publicBroadcastState.sqf functions/core/fn_consoleVmBuild.sqf functions/threat/fn_threatVirtualPoolSnapshotBuild.sqf` | PASS | No parser-compatibility patterns in changed SQF files. |
+| 2 | Changed-file sqflint | `python3 -m pip install --user sqflint && ~/.local/bin/sqflint -e w functions/core/fn_publicBroadcastState.sqf && ~/.local/bin/sqflint -e w functions/core/fn_consoleVmBuild.sqf && ~/.local/bin/sqflint -e w functions/threat/fn_threatVirtualPoolSnapshotBuild.sqf` | PASS | Installed `sqflint` in sandbox and linted all changed SQF files clean. |
+| 3 | Repository static validations | `python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && tests/static/airbase_planning_mode_checks.sh && tests/static/casreq_snapshot_contract_checks.sh && bash tests/static/threat_family_normalization_contract_checks.sh && bash tests/static/threat_ied_lifecycle_contract_checks.sh && bash tests/static/threat_ui_snapshot_contract_checks.sh && bash tests/static/threat_economy_operator_tooling_contract_checks.sh && git diff --check` | PASS | Existing static checks and whitespace guard passed with Epic 8 edits. |
+| 4 | Epic 8 virtual OpFor observability contract checks | `bash tests/static/threat_virtual_opfor_observability_contract_checks.sh` | PASS | New static checks passed: registration, snapshot schema/fields, public replication, Console VM embedding, and implementation doc coverage. |
+| 5 | Local MP pool observability smoke | Local MP: inspect `ARC_pub_threatVirtualPoolSnapshot`, `ARC_pub_state.threatVirtualPool`, and `Console_VM_v1.sections.threat.data.virtualPool` during dormant→active→physical→despawn flow | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 6 | Dedicated / JIP / restart locality proof | Dedicated server + JIP/restart: verify single-writer locality, late-join snapshot consistency, and materialization/despawn correctness over restart | BLOCKED | Requires dedicated/JIP/restart environment outside this sandbox. |
+| 7 | Review-fix revalidation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatVirtualPoolSnapshotBuild.sqf && ~/.local/bin/sqflint -e w functions/threat/fn_threatVirtualPoolSnapshotBuild.sqf && bash tests/static/threat_virtual_opfor_observability_contract_checks.sh && git diff --check` | PASS | Revalidated after extracting shared boolean guard helper in snapshot builder for clarity/consistency. |
+| 8 | Review-fix revalidation (truncation visibility) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatVirtualPoolSnapshotBuild.sqf && ~/.local/bin/sqflint -e w functions/threat/fn_threatVirtualPoolSnapshotBuild.sqf && bash tests/static/threat_virtual_opfor_observability_contract_checks.sh && git diff --check` | PASS | Revalidated after adding `materialized_group_rows_truncated` and clarifying bounded-scan assumptions in snapshot comments. |
+| 9 | Review-fix revalidation (comment/pattern precision) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatVirtualPoolSnapshotBuild.sqf && ~/.local/bin/sqflint -e w functions/threat/fn_threatVirtualPoolSnapshotBuild.sqf && bash tests/static/threat_virtual_opfor_observability_contract_checks.sh && git diff --check` | PASS | Revalidated after tightening static check registration pattern and clarifying snapshot helper/per-record scan comments. |
+| 10 | Review-fix revalidation (regex robustness) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatVirtualPoolSnapshotBuild.sqf && ~/.local/bin/sqflint -e w functions/threat/fn_threatVirtualPoolSnapshotBuild.sqf && bash tests/static/threat_virtual_opfor_observability_contract_checks.sh && git diff --check` | PASS | Revalidated after making CfgFunctions static-check pattern whitespace-tolerant with `grep -E` matching. |
+| 11 | Review-fix revalidation (row-cap configurability) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatVirtualPoolSnapshotBuild.sqf && ~/.local/bin/sqflint -e w functions/threat/fn_threatVirtualPoolSnapshotBuild.sqf && bash tests/static/threat_virtual_opfor_observability_contract_checks.sh && git diff --check` | PASS | Revalidated after making materialized-row cap configurable (`ARC_threatVirtualSnapshotRowCap`) and simplifying static registration regex. |
+| 12 | Review-fix revalidation (final polish) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatVirtualPoolSnapshotBuild.sqf && ~/.local/bin/sqflint -e w functions/threat/fn_threatVirtualPoolSnapshotBuild.sqf && bash tests/static/threat_virtual_opfor_observability_contract_checks.sh && git diff --check` | PASS | Revalidated after allowing flexible whitespace in static registration regex and documenting row-cap upper-bound rationale. |
+
+---
+
 ## 2026-05-13 — Threat Epic 7 economy observability tooling implementation (Mode B)
 
 **Branch/Commit:** copilot/alewis1975-implement-epic-7-tooling @ HEAD
