@@ -26,6 +26,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | 5 | Local MP pool observability smoke | Local MP: inspect `ARC_pub_threatVirtualPoolSnapshot`, `ARC_pub_state.threatVirtualPool`, and `Console_VM_v1.sections.threat.data.virtualPool` during dormant→active→physical→despawn flow | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
 | 6 | Dedicated / JIP / restart locality proof | Dedicated server + JIP/restart: verify single-writer locality, late-join snapshot consistency, and materialization/despawn correctness over restart | BLOCKED | Requires dedicated/JIP/restart environment outside this sandbox. |
 | 7 | Review-fix revalidation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatVirtualPoolSnapshotBuild.sqf && ~/.local/bin/sqflint -e w functions/threat/fn_threatVirtualPoolSnapshotBuild.sqf && bash tests/static/threat_virtual_opfor_observability_contract_checks.sh && git diff --check` | PASS | Revalidated after extracting shared boolean guard helper in snapshot builder for clarity/consistency. |
+| 8 | Review-fix revalidation (truncation visibility) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatVirtualPoolSnapshotBuild.sqf && ~/.local/bin/sqflint -e w functions/threat/fn_threatVirtualPoolSnapshotBuild.sqf && bash tests/static/threat_virtual_opfor_observability_contract_checks.sh && git diff --check` | PASS | Revalidated after adding `materialized_group_rows_truncated` and clarifying bounded-scan assumptions in snapshot comments. |
 
 ---
 

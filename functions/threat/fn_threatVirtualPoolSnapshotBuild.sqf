@@ -26,6 +26,7 @@ private _kvGet = {
     _value
 };
 
+// Local helper intentionally kept in-file (bounded use, max pool size clamp below).
 private _boolOrDefault = {
     params ["_value", "_default"];
     if ((_value isEqualType true) || (_value isEqualType false)) exitWith { _value };
@@ -86,16 +87,20 @@ private _physicalInProtectedCount = 0;
 private _physicalGroupIds = [];
 private _rowCap = 12;
 private _materializedGroupRows = [];
+private _materializedRowsTruncated = false;
 
 {
     private _rec = _x;
     if (!(_rec isEqualType [])) then { continue; };
 
     private _type = [_rec, "type", ""] call _kvGet;
+    // Only virtual OpFor records participate in this snapshot.
     if (!(_type isEqualTo "VIRTUAL_OPFOR")) then { continue; };
 
     _virtualCount = _virtualCount + 1;
 
+    // Defensive normalization: runtime writes uppercase state strings, but snapshots
+    // guard against mixed-case drift from legacy or hand-edited state.
     private _state = toUpper ([_rec, "state", "VIRTUAL_DORMANT"] call _kvGet);
     private _vgId = [_rec, "vgroup_id", ""] call _kvGet;
     private _pos = [_rec, "pos", []] call _kvGet;
@@ -133,6 +138,7 @@ private _materializedGroupRows = [];
             if (!(_spawned isEqualType [])) then { _spawned = []; };
 
             private _aliveUnits = 0;
+            // Bounded by virtual-group strength (2-5 units by default); linear scan is acceptable.
             {
                 private _u = objectFromNetId _x;
                 if (!isNull _u && { alive _u }) then
@@ -154,6 +160,8 @@ private _materializedGroupRows = [];
                     ["anchor_location_id", [_rec, "anchorLocationId", ""] call _kvGet],
                     ["anchor_location_name", [_rec, "anchorLocationName", ""] call _kvGet]
                 ];
+            } else {
+                _materializedRowsTruncated = true;
             };
         };
         default
@@ -219,6 +227,7 @@ if (!(_threatUiSnapshotAt isEqualType 0)) then { _threatUiSnapshotAt = -1; };
     ["materialization", [
         ["active_index_orphans", _activeIndexOrphans],
         ["materialized_group_row_cap", _rowCap],
+        ["materialized_group_rows_truncated", _materializedRowsTruncated],
         ["materialized_group_rows", _materializedGroupRows]
     ]],
     ["locality", [

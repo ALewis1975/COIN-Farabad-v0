@@ -21,6 +21,7 @@ check() {
 check 'class threatVirtualPoolSnapshotBuild {}' "config/CfgFunctions.hpp" "CfgFunctions registers threatVirtualPoolSnapshotBuild"
 check 'threat_virtual_opfor_obs_v1' "functions/threat/fn_threatVirtualPoolSnapshotBuild.sqf" "Virtual OpFor snapshot builder publishes threat_virtual_opfor_obs_v1 schema"
 check 'active_index_orphan_count' "functions/threat/fn_threatVirtualPoolSnapshotBuild.sqf" "Virtual OpFor snapshot includes active index orphan diagnostics"
+check 'materialized_group_rows_truncated' "functions/threat/fn_threatVirtualPoolSnapshotBuild.sqf" "Virtual OpFor snapshot exposes row truncation visibility"
 check 'protectedZones' "functions/threat/fn_threatVirtualPoolSnapshotBuild.sqf" "Virtual OpFor snapshot includes protected-zone observability block"
 check 'locality' "functions/threat/fn_threatVirtualPoolSnapshotBuild.sqf" "Virtual OpFor snapshot includes locality interpretation block"
 check '\["threatVirtualPool", _threatVirtualPoolPub\]' "functions/core/fn_publicBroadcastState.sqf" "Public state includes threatVirtualPool snapshot"
