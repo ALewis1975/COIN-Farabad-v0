@@ -13,7 +13,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-05-13 — Public state broadcast RemoteExec hardening (Mode I)
 
-**Branch/Commit:** copilot/audit-repo-optimization-issues @ commit: unrecoverable (the commit is created by `report_progress` after this log entry is staged, so the resulting SHA is unavailable while authoring the entry)
+**Branch/Commit:** copilot/audit-repo-optimization-issues @ commit: unrecoverable (commit SHA unavailable while authoring pre-commit validation log entry)
 
 **Scenario:** Hardened `ARC_fnc_publicBroadcastState` so remote client invocations must provide a requester object, pass sender-owner validation, and satisfy the HQ/approver role gate before forcing a server state broadcast. Updated the HQ console admin broadcast action to send `player` as the requester.
 
@@ -24,6 +24,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | 3 | Repository static validations | `python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && tests/static/airbase_planning_mode_checks.sh && tests/static/casreq_snapshot_contract_checks.sh && git diff --check` | PASS | Existing static validation suite passed. |
 | 4 | Runtime RemoteExec/HQ role verification | Dedicated server test: unauthorized client calls `ARC_fnc_publicBroadcastState`; authorized HQ/OMNI console action requests broadcast | BLOCKED | Arma 3 dedicated/JIP runtime is unavailable in this sandbox. Validate that unauthorized calls log `[ARC][SEC]` denial and authorized HQ/OMNI calls publish snapshots. |
 | 5 | Review comment revalidation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_publicBroadcastState.sqf functions/ui/fn_uiConsoleActionHQPrimary.sqf && ~/.local/bin/sqflint -e w functions/core/fn_publicBroadcastState.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleActionHQPrimary.sqf && git diff --check` | PASS | Revalidated after documenting requester fallback and HQ/approver authorization policy. |
+| 6 | Second review cleanup revalidation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_publicBroadcastState.sqf functions/ui/fn_uiConsoleActionHQPrimary.sqf && ~/.local/bin/sqflint -e w functions/core/fn_publicBroadcastState.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleActionHQPrimary.sqf && python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && tests/static/airbase_planning_mode_checks.sh && tests/static/casreq_snapshot_contract_checks.sh && git diff --check` | PASS | Revalidated after removing runtime compile fallback, logging requester fallback usage, and avoiding ambiguous lazy role-check syntax. |
 
 ---
 

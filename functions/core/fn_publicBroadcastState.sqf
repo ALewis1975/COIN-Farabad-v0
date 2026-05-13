@@ -24,15 +24,16 @@ if (!isNil "remoteExecutedOwner") then
         if (isNull _requester) then
         {
             { if (owner _x == _reo) exitWith { _requester = _x; }; } forEach allPlayers;
+            diag_log format ["[ARC][WARN] ARC_fnc_publicBroadcastState: requester fallback used for remote owner=%1", _reo];
         };
 
-        if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\core\fn_rpcValidateSender.sqf"; };
         if (!([_requester, "ARC_fnc_publicBroadcastState", "State broadcast rejected: sender verification failed.", "PUBLIC_BROADCAST_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
         private _isOmni = [_requester, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
         // Match other HQ/admin audit tools: OMNI users and queue approvers may
         // force an immediate public snapshot rebroadcast.
-        private _canBroadcast = _isOmni || { [_requester] call ARC_fnc_rolesCanApproveQueue };
+        private _canBroadcast = _isOmni;
+        if (!_canBroadcast) then { _canBroadcast = [_requester] call ARC_fnc_rolesCanApproveQueue; };
         if (!_canBroadcast) exitWith
         {
             diag_log format ["[ARC][SEC] ARC_fnc_publicBroadcastState: unauthorized remote broadcast owner=%1 caller=%2", _reo, name _requester];
