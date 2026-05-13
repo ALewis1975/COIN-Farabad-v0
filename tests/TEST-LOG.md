@@ -13,7 +13,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-05-13 — Threat Epic 2 lifecycle transition guard implementation (Mode B)
 
-**Branch/Commit:** copilot/docs-only-update-epic-2-lifecycle @ b3fb8dfc
+**Branch/Commit:** copilot/docs-only-update-epic-2-lifecycle @ 70a18d8a
 
 **Scenario:** Implemented the first Epic 2 runtime slice by adding server-side lifecycle transition guards to `ARC_fnc_threatUpdateState`, denying invalid target states and stale/backward transitions while preserving idempotent same-state no-ops and cleanup closure paths.
 
@@ -26,7 +26,8 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | 5 | Changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatUpdateState.sqf` | PASS | No known parser-compatibility patterns found in the changed SQF file. |
 | 6 | Changed-file sqflint | `~/.local/bin/sqflint -e w functions/threat/fn_threatUpdateState.sqf` | PASS | Installed `sqflint` locally via `python3 -m pip install --user sqflint`; changed SQF file linted clean. |
 | 7 | Post-change repository static validations | `git diff --check && python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py` | PASS | Whitespace diff, state migration validation, and marker index validation passed after edits. |
-| 8 | Threat Epic 2 runtime smoke | Local/dedicated MP: exercise create -> active/staged -> discovered/neutralized -> closed/cleaned and stale transition denial paths | BLOCKED | Arma 3 hosted/dedicated/JIP runtime unavailable in this sandbox. |
+| 8 | Review-fix changed-file validation | `git diff --check && python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatUpdateState.sqf && ~/.local/bin/sqflint -e w functions/threat/fn_threatUpdateState.sqf` | PASS | Revalidated after clarifying docs/runtime state vocabulary, logging empty-state legacy transitions, and removing direct `CREATED -> CLEANED`. |
+| 9 | Threat Epic 2 runtime smoke | Local/dedicated MP: exercise create -> active/staged -> discovered/neutralized -> closed/cleaned and stale transition denial paths | BLOCKED | Arma 3 hosted/dedicated/JIP runtime unavailable in this sandbox. |
 
 ---
 
