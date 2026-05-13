@@ -86,7 +86,9 @@ private _materializedAliveUnitCount = 0;
 private _protectedIntersectionCount = 0;
 private _physicalInProtectedCount = 0;
 private _physicalGroupIds = [];
-private _rowCap = 12;
+private _rowCap = missionNamespace getVariable ["ARC_threatVirtualSnapshotRowCap", 12];
+if (!(_rowCap isEqualType 0)) then { _rowCap = 12; };
+_rowCap = (_rowCap max 1) min 50;
 private _materializedGroupRows = [];
 private _materializedRowsTruncated = false;
 
