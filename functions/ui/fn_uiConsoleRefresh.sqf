@@ -107,6 +107,8 @@ private _tab = ["ARC_console_activeTab", "DASH"] call ARC_fnc_uiNsGetString;
 _tab = toUpper _tab;
 
 private _prevRefreshTab = ["ARC_console_prevRefreshTab", "", false] call ARC_fnc_uiNsGetString;
+// Shared tab-difference flag drives both diagnostics/refresh forcing and
+// stale-state cleanup; cleanup intentionally excludes the first empty->tab pass.
 private _tabDiffers = !(_prevRefreshTab isEqualTo _tab);
 // Exclude initial empty -> first tab from stale-state cleanup; include it in tab-entry diagnostics.
 private _tabChanged = !(_prevRefreshTab isEqualTo "") && { _tabDiffers };
@@ -237,6 +239,8 @@ if (!isNull _ctrlMainGrp) then {
 private _clampMainGroupToListRegion = {
     // Clamp MainGroup (78015) to the center/list region so structured text
     // tabs with a visible right details pane cannot overlap MainDetailsGroup.
+    // Uses outer-scope _ctrlMainGrp/_ctrlList; returns true on successful
+    // reposition and false when required controls/positions are unavailable.
     if (isNull _ctrlMainGrp || { isNull _ctrlList }) exitWith { false };
 
     private _lp = ctrlPosition _ctrlList;
