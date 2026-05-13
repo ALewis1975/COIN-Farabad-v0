@@ -13,7 +13,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-05-13 — Farabad Console UI cleanup/state normalization (Mode A)
 
-**Branch/Commit:** copilot/farabad-console-ui-research @ 3b63de1
+**Branch/Commit:** copilot/farabad-console-ui-research @ 2519e40
 
 **Branch note:** This branch name was inherited from the preceding research task; the work recorded here is the Mode A bug-fix implementation on that branch.
 
