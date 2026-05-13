@@ -964,28 +964,4 @@ private _arcKnownToggleConsumers = [
 // Government stats aggregate loop (low-frequency, same cadence as worldtime).
 // Publishes ARC_govStats for client UI (Government Status / S2 sub-panels).
 // ---------------------------------------------------------------------------
-if (isServer) then
-{
-    if (missionNamespace getVariable ["ARC_govStatsLoopRunning", false]) then
-    {
-        diag_log "[ARC][GOVSTATS] aggregate loop already running — no-op";
-    }
-    else
-    {
-        missionNamespace setVariable ["ARC_govStatsLoopRunning", true];
-        [] spawn
-        {
-            waitUntil { missionNamespace getVariable ["ARC_serverReady", false] };
-            private _interval = missionNamespace getVariable ["ARC_worldTime_broadcastIntervalSec", 30];
-            if (!(_interval isEqualType 0) || { _interval < 10 }) then { _interval = 30; };
-            diag_log format ["[ARC][GOVSTATS] aggregate loop start (interval=%1s)", _interval];
-            while { missionNamespace getVariable ["ARC_govStatsLoopRunning", true] } do
-            {
-                [] call ARC_fnc_govStatsCompute;
-                sleep _interval;
-                _interval = missionNamespace getVariable ["ARC_worldTime_broadcastIntervalSec", _interval];
-                if (!(_interval isEqualType 0) || { _interval < 10 }) then { _interval = 30; };
-            };
-        };
-    };
-};
+[] call ARC_fnc_govStatsScheduler;

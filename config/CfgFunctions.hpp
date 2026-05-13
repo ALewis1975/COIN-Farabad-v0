@@ -86,6 +86,7 @@ class CfgFunctions
             // User-friendly tasks + intel feed
             class publicBroadcastState {};
             class govStatsCompute {};
+            class govStatsScheduler {};
             class consoleVmBuild {};
             class consoleVmAdapterV1 {};
             class statePublishPublic {};

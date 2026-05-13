@@ -11,6 +11,25 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-13 — PR 7: Register gov stats scheduler as a function (Mode C)
+
+**Branch/Commit:** copilot/p1-7-register-gov-stats-scheduler @ commit: unrecoverable (committed in same session)
+
+**Scenario:** Extracted inline gov stats spawn block from `initServer.sqf` (lines 967–991) into `functions/core/fn_govStatsScheduler.sqf`, registered as `ARC_fnc_govStatsScheduler` in `config/CfgFunctions.hpp`, and replaced the inline block with `[] call ARC_fnc_govStatsScheduler;`. No behavior change; same guard variable (`ARC_govStatsLoopRunning`), same interval logic, same call to `ARC_fnc_govStatsCompute`.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | SQF compat scan (new function) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_govStatsScheduler.sqf` | PASS | No known parser-compat patterns found. |
+| 2 | SQF compat scan (modified initServer) | `python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf` | PASS | No known parser-compat patterns found. |
+| 3 | State migration validation | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios, no regressions. |
+| 4 | Marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | 177 markers validated across all modes. |
+| 5 | Static contract checks | `bash tests/static/airbase_planning_mode_checks.sh && bash tests/static/casreq_snapshot_contract_checks.sh` | PASS | All static checks green. |
+| 6 | SQF lint (`sqflint`) | `sqflint -e w functions/core/fn_govStatsScheduler.sqf` | BLOCKED | `sqflint` not installed in this sandbox; compat scan passed. |
+| 7 | Gov stats loop runtime smoke | Start mission, confirm `[ARC][GOVSTATS] aggregate loop start` log appears once in RPT | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 8 | Duplicate-start guard smoke | Call `[] call ARC_fnc_govStatsScheduler;` twice from server; confirm second call logs no-op and returns false | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+
+---
+
 ## 2026-05-13 — PR 6: Reduce heavy tick frequency / repeated scans (Mode A)
 
 **Branch/Commit:** copilot/cleanup-increase-tick-intervals @ 8b42d3cd56f17e8678d3ded5063e824c05d3dd23
