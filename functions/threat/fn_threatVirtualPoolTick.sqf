@@ -314,7 +314,9 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
                         diag_log format ["[ARC][VPOOL][INFO] %1 reverted to DORMANT (dist=%2 m)", _vgId, round _nearestPlayerD];
                     } else {
                         // Spawn gate: player very nearby AND there is an active combat incident
-                        private _combatIncidentActive = !((_activeTaskId isEqualTo "") || {_activeIncidentZone in (_protectedZones + [""])} || {_activeIncidentProtected});
+                        private _hasActiveTask = !(_activeTaskId isEqualTo "");
+                        private _activeIncidentZoneProtected = _activeIncidentZone in (_protectedZones + [""]);
+                        private _combatIncidentActive = _hasActiveTask && {!_activeIncidentZoneProtected} && {!_activeIncidentProtected};
                         private _vgZone = [_vgPos] call _fnZoneForPos;
                         private _vgIsFarabadCity = (_vgZone isEqualTo "FarabadCity");
                         private _spawnCapAllows = (_spawnedThisTick < _spawnBudgetPerTick)
@@ -426,15 +428,17 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
                         _activeVgIndex = _activeVgIndex - [_vgId];
                         diag_log format ["[ARC][VPOOL][INFO] %1 all units gone — reverted to DORMANT", _vgId];
                     } else {
-                        private _liveInsideProtected = false;
+                        private _liveInsideProtected = _vgProtected;
                         // Check actual unit positions, not only the cached vgroup position,
                         // so a patrol that walks into the airbase bubble is removed.
-                        {
-                            private _liveUnit = objectFromNetId _x;
-                            if (!isNull _liveUnit && { [getPosATL _liveUnit, _protectedZones, _protectedMarkers] call ARC_fnc_threatIsProtectedSpawnPos }) exitWith {
-                                _liveInsideProtected = true;
-                            };
-                        } forEach _liveNetIds;
+                        if (!_liveInsideProtected) then {
+                            {
+                                private _liveUnit = objectFromNetId _x;
+                                if (!isNull _liveUnit && { [getPosATL _liveUnit, _protectedZones, _protectedMarkers] call ARC_fnc_threatIsProtectedSpawnPos }) exitWith {
+                                    _liveInsideProtected = true;
+                                };
+                            } forEach _liveNetIds;
+                        };
 
                         if (_liveInsideProtected) then {
                             {

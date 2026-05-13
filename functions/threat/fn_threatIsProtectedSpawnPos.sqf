@@ -21,9 +21,11 @@ if ((count _protectedZones) == 0) then {
     if (!(_protectedZones isEqualType [])) then { _protectedZones = ["Airbase", "GreenZone", "MilitaryBase"]; };
 };
 
-// Bootstrap should publish ARC_threatProtectedSpawnMarkers. This fallback mirrors
-// the current airbase bubble so guards remain safe if called before config init.
-private _defaultProtectedMarkers = [["mkr_airbaseCenter", missionNamespace getVariable ["ARC_airbase_dynamic_radius_m", 1600]]];
+// Bootstrap should publish ARC_threatProtectedSpawnMarkers. If unavailable, fall
+// back to the shared airbase dynamic radius instead of duplicating the literal.
+private _defaultAirbaseRadius = missionNamespace getVariable ["ARC_airbase_dynamic_radius_m", 0];
+if (!(_defaultAirbaseRadius isEqualType 0)) then { _defaultAirbaseRadius = 0; };
+private _defaultProtectedMarkers = if (_defaultAirbaseRadius > 0) then { [["mkr_airbaseCenter", _defaultAirbaseRadius]] } else { [] };
 if ((count _protectedMarkers) == 0) then {
     _protectedMarkers = missionNamespace getVariable ["ARC_threatProtectedSpawnMarkers", _defaultProtectedMarkers];
     if (!(_protectedMarkers isEqualType [])) then {
