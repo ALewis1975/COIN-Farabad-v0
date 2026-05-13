@@ -449,42 +449,42 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
 
                             diag_log format ["[ARC][VPOOL][WARN] %1 deleted — live unit entered protected spawn bubble", _vgId];
                         } else {
-                        // Update live unit list
-                        if ((count _liveNetIds) != (count _spawnedU)) then {
-                            _rec   = [_rec, "spawnedUnits", _liveNetIds] call _kvSet;
-                            _dirty = true;
-                        };
-
-                        // Despawn if players have been out of range long enough
-                        if (!_playerFar) then {
-                            _rec   = [_rec, "lastPlayerNearTs", _now] call _kvSet;
-                            _dirty = true;
-                        } else {
-                            if (_lastNear > 0 && { (_now - _lastNear) >= _despawnDelayS }) then {
-                                // Despawn: delete all live units
-                                {
-                                    private _u = objectFromNetId _x;
-                                    if (!isNull _u) then { deleteVehicle _u; };
-                                } forEach _liveNetIds;
-
-                                // Update position to last known group position
-                                if ((count _liveNetIds) > 0) then {
-                                    private _lastUnit = objectFromNetId (_liveNetIds select 0);
-                                    if (!isNull _lastUnit) then {
-                                        _rec = [_rec, "pos", getPosATL _lastUnit] call _kvSet;
-                                    };
-                                };
-
-                                _rec   = [_rec, "state",          "VIRTUAL_DORMANT"] call _kvSet;
-                                _rec   = [_rec, "spawnedUnits",   []]                call _kvSet;
-                                _rec   = [_rec, "lastPlayerNearTs", -1]              call _kvSet;
-                                _rec   = [_rec, "lastMoved",       _now]             call _kvSet;
+                            // Update live unit list
+                            if ((count _liveNetIds) != (count _spawnedU)) then {
+                                _rec   = [_rec, "spawnedUnits", _liveNetIds] call _kvSet;
                                 _dirty = true;
-                                _activeVgIndex = _activeVgIndex - [_vgId];
-
-                                diag_log format ["[ARC][VPOOL][INFO] %1 despawned (no players for %2 s)", _vgId, _despawnDelayS];
                             };
-                        };
+
+                            // Despawn if players have been out of range long enough
+                            if (!_playerFar) then {
+                                _rec   = [_rec, "lastPlayerNearTs", _now] call _kvSet;
+                                _dirty = true;
+                            } else {
+                                if (_lastNear > 0 && { (_now - _lastNear) >= _despawnDelayS }) then {
+                                    // Despawn: delete all live units
+                                    {
+                                        private _u = objectFromNetId _x;
+                                        if (!isNull _u) then { deleteVehicle _u; };
+                                    } forEach _liveNetIds;
+
+                                    // Update position to last known group position
+                                    if ((count _liveNetIds) > 0) then {
+                                        private _lastUnit = objectFromNetId (_liveNetIds select 0);
+                                        if (!isNull _lastUnit) then {
+                                            _rec = [_rec, "pos", getPosATL _lastUnit] call _kvSet;
+                                        };
+                                    };
+
+                                    _rec   = [_rec, "state",          "VIRTUAL_DORMANT"] call _kvSet;
+                                    _rec   = [_rec, "spawnedUnits",   []]                call _kvSet;
+                                    _rec   = [_rec, "lastPlayerNearTs", -1]              call _kvSet;
+                                    _rec   = [_rec, "lastMoved",       _now]             call _kvSet;
+                                    _dirty = true;
+                                    _activeVgIndex = _activeVgIndex - [_vgId];
+
+                                    diag_log format ["[ARC][VPOOL][INFO] %1 despawned (no players for %2 s)", _vgId, _despawnDelayS];
+                                };
+                            };
                         };
                     };
                 };

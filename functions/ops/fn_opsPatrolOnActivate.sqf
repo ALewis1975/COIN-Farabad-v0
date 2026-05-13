@@ -219,7 +219,7 @@ if (_spawnContacts && {!_posProtected}) then
             ];
 
             private _nearPlayers = allPlayers select { alive _x && { (_x distance2D _spawnPos) < 150 } };
-            if ((count _nearPlayers) == 0 && {!([_spawnPos, _protectedZones, _protectedMarkers] call ARC_fnc_threatIsProtectedSpawnPos)}) exitWith {};
+            if ((count _nearPlayers) == 0 || { [_spawnPos, _protectedZones, _protectedMarkers] call ARC_fnc_threatIsProtectedSpawnPos }) exitWith {};
             _tries = _tries + 1;
         };
 
