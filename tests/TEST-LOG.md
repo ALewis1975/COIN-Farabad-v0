@@ -13,9 +13,9 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-05-13 — QA audit task decomposition implementation (Mode I)
 
-**Branch/Commit:** copilot/qa-audit-recent-cleanup-changes @ c6359e6e6c47e4918a2b6a3fa44a77f0ec5b4425
+**Branch/Commit:** copilot/qa-audit-recent-cleanup-changes @ 8f12075294feab9f05ec8a3316c4567435685925 (post-review working tree validated in-session)
 
-**Scenario:** Implemented the QA audit's highest-priority follow-ups: added server-side per-owner cooldown to `ARC_fnc_tocRequestPublicBroadcast`, removed the misleading client-side relay fallback from server-internal convoy spawning, and replaced the remaining convoy side `typeName` check with `isEqualType`. No client-side UI cooldown was added because the authoritative server throttle covers the abuse path. Historical worldtime cleanup was audited and left unchanged because live references were already clean.
+**Scenario:** Implemented the QA audit's highest-priority follow-ups: added server-side per-owner cooldown to `ARC_fnc_tocRequestPublicBroadcast` with stale cooldown-entry cleanup, removed the misleading client-side relay fallback from server-internal convoy spawning, and replaced the remaining convoy side `typeName` check with `isEqualType`. No client-side UI cooldown was added because the authoritative server throttle covers the abuse path. Historical worldtime cleanup was audited and left unchanged because live references were already clean.
 
 | # | Check | Command / Step | Result | Notes |
 |---|-------|----------------|--------|-------|
