@@ -11,18 +11,22 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
-## 2026-05-13 — CASREQ ID builder padNumber fix (Mode A)
+## 2026-05-13 — Public state broadcast RemoteExec hardening (Mode I)
 
-**Branch/Commit:** copilot/fix-undefined-variable-bis-fnc-padnumber @ 98db6a7 (pre-fix); fix commit forthcoming.
+**Branch/Commit:** copilot/audit-repo-optimization-issues @ commit: unrecoverable (commit SHA unavailable while authoring pre-commit validation log entry)
 
-**Scenario:** Reproduced the runtime error `Error in expression <%2", _district, [_seq, 6, 0, true] call BIS_fnc_padNumber]>` during `ARC_fnc_casreqOpen` flow (hosted-server self-call by MAJ.Lewis.A). The 4-argument `BIS_fnc_padNumber` invocation in `functions/casreq/fn_casreqBuildId.sqf` failed under the active build. Replaced with local zero-padding (mirrors prior fix in `fn_worldIsValidDistrictId.sqf`) and wrapped the pre-existing direct `trim` in the approved compiled-helper pattern so the changed file passes the strict compat scanner.
+**Scenario:** Hardened `ARC_fnc_publicBroadcastState` so remote client invocations must provide a requester object, pass sender-owner validation, and satisfy the HQ/approver role gate before forcing a server state broadcast. Updated the HQ console admin broadcast action to send `player` as the requester.
 
 | # | Check | Command / Step | Result | Notes |
 |---|---|---|---|---|
-| 1 | Changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/casreq/fn_casreqBuildId.sqf` | PASS | No parser-compat patterns remain. |
-| 2 | sqflint on changed file | `sqflint -e w functions/casreq/fn_casreqBuildId.sqf` | BLOCKED | `sqflint` not installed in this sandbox; CI preflight will run it. |
-| 3 | Live CASREQ ID unit tests (UT-CASREQ-001..007) | `tests/run_all.sqf` against a running mission | BLOCKED | Requires Arma 3 mission environment. |
-| 4 | Dedicated/JIP/reconnect QA | Dedicated server + JIP coverage for CASREQ open/state replication | BLOCKED | Requires dedicated/JIP-capable Arma 3 environment. |
+| 1 | Pre-change target compat/lint | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_publicBroadcastState.sqf && sqflint -e w functions/core/fn_publicBroadcastState.sqf` | BLOCKED | Compat scan passed; `sqflint` was not installed in the sandbox before changes, so this was an environment/tooling limitation rather than a code failure. |
+| 2 | Changed-file compat + sqflint + whitespace | `python3 -m pip install --user sqflint && python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_publicBroadcastState.sqf functions/ui/fn_uiConsoleActionHQPrimary.sqf && ~/.local/bin/sqflint -e w functions/core/fn_publicBroadcastState.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleActionHQPrimary.sqf && git diff --check` | PASS | Changed SQF files pass compat scan and sqflint after installing sqflint in the sandbox. |
+| 3 | Repository static validations | `python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && tests/static/airbase_planning_mode_checks.sh && tests/static/casreq_snapshot_contract_checks.sh && git diff --check` | PASS | Existing static validation suite passed. |
+| 4 | Runtime RemoteExec/HQ role verification | Dedicated server test: unauthorized client calls `ARC_fnc_publicBroadcastState`; authorized HQ/OMNI console action requests broadcast | BLOCKED | Arma 3 dedicated/JIP runtime is unavailable in this sandbox. Validate that unauthorized calls log `[ARC][SEC]` denial and authorized HQ/OMNI calls publish snapshots. |
+| 5 | Review comment revalidation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_publicBroadcastState.sqf functions/ui/fn_uiConsoleActionHQPrimary.sqf && ~/.local/bin/sqflint -e w functions/core/fn_publicBroadcastState.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleActionHQPrimary.sqf && git diff --check` | PASS | Revalidated after documenting requester fallback and HQ/approver authorization policy. |
+| 6 | Second review cleanup revalidation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_publicBroadcastState.sqf functions/ui/fn_uiConsoleActionHQPrimary.sqf && ~/.local/bin/sqflint -e w functions/core/fn_publicBroadcastState.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleActionHQPrimary.sqf && python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && tests/static/airbase_planning_mode_checks.sh && tests/static/casreq_snapshot_contract_checks.sh && git diff --check` | PASS | Revalidated after removing runtime compile fallback, logging requester fallback usage, and avoiding ambiguous lazy role-check syntax. |
+| 7 | Final review cleanup revalidation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_publicBroadcastState.sqf functions/ui/fn_uiConsoleActionHQPrimary.sqf && ~/.local/bin/sqflint -e w functions/core/fn_publicBroadcastState.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleActionHQPrimary.sqf && git diff --check` | PASS | Revalidated after marking the requester fallback as deprecated and expanding the authorization branch for clarity. |
+| 8 | Style cleanup revalidation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_publicBroadcastState.sqf functions/ui/fn_uiConsoleActionHQPrimary.sqf && ~/.local/bin/sqflint -e w functions/core/fn_publicBroadcastState.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleActionHQPrimary.sqf && git diff --check` | PASS | Revalidated after extracting sender validation into a named local and simplifying the requester fallback loop. |
 
 ---
 
