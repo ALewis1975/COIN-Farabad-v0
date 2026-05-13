@@ -26,6 +26,9 @@ if ((count _protectedZones) == 0) then {
 private _defaultAirbaseRadius = missionNamespace getVariable ["ARC_airbase_dynamic_radius_m", 0];
 if (!(_defaultAirbaseRadius isEqualType 0)) then { _defaultAirbaseRadius = 0; };
 private _defaultProtectedMarkers = if (_defaultAirbaseRadius > 0) then { [["mkr_airbaseCenter", _defaultAirbaseRadius]] } else { [] };
+if ((count _defaultProtectedMarkers) == 0) then {
+    diag_log "[ARC][VPOOL][WARN] ARC_fnc_threatIsProtectedSpawnPos: no protected marker fallback available; relying on protected zones only.";
+};
 if ((count _protectedMarkers) == 0) then {
     _protectedMarkers = missionNamespace getVariable ["ARC_threatProtectedSpawnMarkers", _defaultProtectedMarkers];
     if (!(_protectedMarkers isEqualType [])) then {
@@ -48,6 +51,7 @@ private _protected = false;
         _resolvedMarker = [_markerName] call ARC_fnc_worldResolveMarker;
     };
     if (!(_resolvedMarker in allMapMarkers)) then {
+        // Server-local scratch only: suppress repeated marker-resolution warnings without replication.
         private _warnedMarkers = missionNamespace getVariable ["ARC_threatProtectedMarkerWarned", []];
         if (!(_warnedMarkers isEqualType [])) then { _warnedMarkers = []; };
         if (!(_markerName in _warnedMarkers)) then {

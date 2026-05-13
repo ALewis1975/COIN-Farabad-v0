@@ -207,6 +207,7 @@ if (_spawnContacts && {!_posProtected}) then
     {
         // Pick a spawn point away from players.
         private _spawnPos = _posATL;
+        // Safe default: suppress contact if every candidate remains protected.
         private _spawnPosProtected = true;
         private _tries = 0;
         while {_tries < 25} do

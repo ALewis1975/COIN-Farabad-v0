@@ -315,6 +315,7 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
                     } else {
                         // Spawn gate: player very nearby AND there is an active combat incident
                         private _hasActiveTask = !(_activeTaskId isEqualTo "");
+                        // Empty zone means the marker did not resolve to a known AO; keep that protected-by-default.
                         private _activeIncidentZoneProtected = _activeIncidentZone in (_protectedZones + [""]);
                         private _combatIncidentActive = _hasActiveTask && {!_activeIncidentZoneProtected} && {!_activeIncidentProtected};
                         private _vgZone = [_vgPos] call _fnZoneForPos;
@@ -430,7 +431,8 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
                     } else {
                         private _liveInsideProtected = _vgProtected;
                         // Check actual unit positions, not only the cached vgroup position,
-                        // so a patrol that walks into the airbase bubble is removed.
+                        // so a dispersed patrol that walks into the airbase bubble is removed.
+                        // VPOOL group sizes are capped small, so this favors correctness over batching.
                         if (!_liveInsideProtected) then {
                             {
                                 private _liveUnit = objectFromNetId _x;
