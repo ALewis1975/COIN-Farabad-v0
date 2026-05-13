@@ -11,6 +11,24 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-13 — Console INTEL tab HashMap lookup RPT fix (Mode A)
+
+**Branch/Commit:** copilot/fix-undefined-variable-error-please-work @ 9090857 (post-fix working tree validated in-session)
+
+**Scenario:** Investigated the reported console refresh failure when switching from BOARDS to INTEL. `functions/ui/fn_uiConsoleIntelPaint.sqf` still used invalid runtime `[_map, key, default] call getOrDefault` lookups; replaced them with the repo-standard compiled HashMap helper so INTEL paint no longer evaluates `getOrDefault` as missing code.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline targeted compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleIntelPaint.sqf functions/ui/fn_uiConsoleBoardsPaint.sqf` | FAIL | Scanner reported pre-existing BOARDS compat issues (`#`, direct `trim`, `isNotEqualTo`). INTEL was not flagged because the scanner does not catch runtime `call getOrDefault` misuse. |
+| 2 | Baseline targeted SQF lint | `sqflint -e w functions/ui/fn_uiConsoleIntelPaint.sqf functions/ui/fn_uiConsoleBoardsPaint.sqf` | BLOCKED | `sqflint` was not installed before the edit (`command not found`). |
+| 3 | Changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleIntelPaint.sqf` | PASS | No known parser-compat patterns found in the changed file. |
+| 4 | Changed-file SQF lint | `python3 -m pip install --user sqflint && /home/runner/.local/bin/sqflint -e w functions/ui/fn_uiConsoleIntelPaint.sqf` | PASS | `sqflint -e w` completed cleanly for the changed file. |
+| 5 | Repository static validations | `python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && for f in tests/static/*.sh; do bash "$f"; done && git --no-pager diff --check` | PASS | State migration, marker index, static contract checks, and whitespace check passed. |
+| 6 | Runtime smoke: BOARDS→INTEL console tab switch | Open console in local MP/dedicated-like mission, switch BOARDS then INTEL, and confirm no `ARC_fnc_uiConsoleRefresh`/`getOrDefault` expression errors recur in RPT | BLOCKED | Arma 3 runtime unavailable in this sandbox; requires local MP/dedicated-like mission session. |
+| 7 | Dedicated/JIP UI replication check | Dedicated server with at least one JIP client; verify INTEL tab paints from replicated public state without client-side shared-state writes | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+
+---
+
 ## 2026-05-13 — Briefing startup RPT error cleanup (Mode A)
 
 **Branch/Commit:** copilot/review-arma3-errors-report @ 1314b03 (post-fix working tree validated in-session)
