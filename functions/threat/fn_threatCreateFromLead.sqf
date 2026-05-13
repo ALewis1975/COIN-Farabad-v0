@@ -17,7 +17,7 @@
 if (!isServer) exitWith {""};
 
 params [
-    ["_leadInput", []],
+    ["_leadInput", [], [[], ""]],
     ["_ctx", [], [[]]]
 ];
 
@@ -109,6 +109,8 @@ _pos = +_pos;
 _pos resize 3;
 
 private _leadTypeU = toUpper ([_leadType] call _trimFn);
+// Epic 1 only completes the API/event contract. Non-IED lead family normalization
+// remains intentionally deferred to Threat Epic 4.
 private _type = "OTHER";
 private _subtype = "OTHER";
 if (_leadTypeU isEqualTo "IED") then
@@ -133,7 +135,11 @@ _ctx = [_ctx, "thread_id", _threadId] call _kvSet;
 _ctx = [_ctx, "tag", _tag] call _kvSet;
 
 private _threatId = [_sourceTaskId, _type, _subtype, _ctx] call ARC_fnc_threatCreateFromTask;
-if (_threatId isEqualTo "") exitWith {""};
+if (_threatId isEqualTo "") exitWith
+{
+    diag_log format ["[ARC][WARN] ARC_fnc_threatCreateFromLead: failed lead-to-threat conversion lead_id=%1 lead_type=%2 source_task_id=%3", _leadId, _leadTypeU, _sourceTaskId];
+    ""
+};
 
 [
     "THREAT_CREATED_FROM_LEAD",
