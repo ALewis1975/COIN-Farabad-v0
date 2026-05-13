@@ -110,7 +110,7 @@ _pos resize 3;
 
 private _leadTypeU = toUpper ([_leadType] call _trimFn);
 // Epic 1 only completes the API/event contract. Non-IED lead family normalization
-// remains intentionally deferred to Threat Epic 4.
+// (CACHE, AMBUSH, MORTAR, RAID, RECON, QRF, and related tags) remains deferred.
 private _type = "OTHER";
 private _subtype = "OTHER";
 if (_leadTypeU isEqualTo "IED") then

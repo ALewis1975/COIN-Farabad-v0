@@ -13,6 +13,8 @@
     Notes:
         - Server-only single writer.
         - Replicates a bounded public tail for JIP-safe read-only clients.
+        - Envelope v=1 is append-only: consumers must ignore unknown keys; removing
+          or renaming existing top-level keys requires a future version number.
 */
 
 if (!isServer) exitWith {[]};
@@ -64,6 +66,8 @@ private _rev = [_opts, "rev", 0] call _kvGet;
 if (!(_rev isEqualType 0)) then { _rev = 0; };
 
 private _now = serverTime;
+// Keep common filter keys at the top level for low-cost UI scans while retaining
+// the complete producer payload for audit/debug detail.
 private _districtIdSource = [_payload, "district_id_source", ""] call _kvGet;
 if (!(_districtIdSource isEqualType "")) then { _districtIdSource = ""; };
 private _districtId = [_payload, "district_id", ""] call _kvGet;
