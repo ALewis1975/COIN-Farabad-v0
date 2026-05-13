@@ -11,6 +11,23 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-13 — Farabad Console UI cleanup/state normalization (Mode A)
+
+**Branch/Commit:** copilot/farabad-console-ui-research @ 5c9fa1e
+
+**Scenario:** Implemented console UI cleanup fixes for tab-switch disabled-state leakage, structured-text clipping in S-1, shared main/details pane overlap mitigation, and opt-in layout diagnostics.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | Pre-change relevant SQF static checks | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleRefresh.sqf functions/ui/fn_uiConsoleS1Paint.sqf functions/ui/fn_uiConsoleApplyLayout.sqf functions/ui/fn_uiConsoleAirPaint.sqf functions/ui/fn_uiConsoleAirMapPaint.sqf functions/ui/fn_uiConsoleIntelPaint.sqf functions/ui/fn_uiConsoleHQPaint.sqf && sqflint -e w ...` | FAIL | Pre-existing scanner issues were present outside the final edited set (`fn_uiConsoleS1Paint.sqf`, `fn_uiConsoleApplyLayout.sqf`, `fn_uiConsoleIntelPaint.sqf`); `sqflint` was also absent initially in the sandbox. |
+| 2 | Changed-file compat scan and sqflint | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleRefresh.sqf functions/ui/fn_uiConsoleS1Paint.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleRefresh.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleS1Paint.sqf` | PASS | Installed `sqflint` locally in the sandbox via `python3 -m pip install --user sqflint`; final changed SQF files pass. |
+| 3 | Console conflict/IDC guard | `scripts/dev/check_console_conflicts.sh` | FAIL | Script reports pre-existing duplicate IDCs in `config/CfgDialogs.hpp`: 78201, 78202, 78211. This task did not modify `config/CfgDialogs.hpp`. |
+| 4 | Repository static validations | `python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && tests/static/airbase_planning_mode_checks.sh && tests/static/casreq_snapshot_contract_checks.sh && git diff --check` | PASS | Existing static checks passed after console UI changes. |
+| 5 | Local MP tab-switch/layout QA | Manual Arma 3 local MP: INTEL(TOOLS) → AIR/S1, HQ(TOOLS) → AIR/S1, rapid INTEL ↔ HQ ↔ AIR, low-height/wide layout checks | BLOCKED | Arma 3 runtime is unavailable in this sandbox. Exercise with `ARC_console_layout_audit=true` and confirm no persistent `[ARC][UI][CONSOLE_LAYOUT_AUDIT_FAIL]`. |
+| 6 | Dedicated/JIP/reconnect QA | Dedicated server + JIP/reconnect coverage for console state replication and late-client UI recovery | BLOCKED | Requires dedicated/JIP-capable Arma 3 environment outside this sandbox. |
+
+---
+
 ## 2026-05-13 — Threat Epic 6 validation framework implementation (Mode E)
 
 **Branch/Commit:** copilot/alewis1975-epic-6-validation-framework @ 0a96a10
