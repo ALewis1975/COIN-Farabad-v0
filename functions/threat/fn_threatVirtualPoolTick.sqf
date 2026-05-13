@@ -427,6 +427,8 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
                         diag_log format ["[ARC][VPOOL][INFO] %1 all units gone — reverted to DORMANT", _vgId];
                     } else {
                         private _liveInsideProtected = false;
+                        // Check actual unit positions, not only the cached vgroup position,
+                        // so a patrol that walks into the airbase bubble is removed.
                         {
                             private _liveUnit = objectFromNetId _x;
                             if (!isNull _liveUnit && { [getPosATL _liveUnit, _protectedZones, _protectedMarkers] call ARC_fnc_threatIsProtectedSpawnPos }) exitWith {

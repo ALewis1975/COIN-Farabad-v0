@@ -207,6 +207,7 @@ if (_spawnContacts && {!_posProtected}) then
     {
         // Pick a spawn point away from players.
         private _spawnPos = _posATL;
+        private _spawnPosProtected = true;
         private _tries = 0;
         while {_tries < 25} do
         {
@@ -219,11 +220,12 @@ if (_spawnContacts && {!_posProtected}) then
             ];
 
             private _nearPlayers = allPlayers select { alive _x && { (_x distance2D _spawnPos) < 150 } };
-            if ((count _nearPlayers) == 0 || { [_spawnPos, _protectedZones, _protectedMarkers] call ARC_fnc_threatIsProtectedSpawnPos }) exitWith {};
+            _spawnPosProtected = [_spawnPos, _protectedZones, _protectedMarkers] call ARC_fnc_threatIsProtectedSpawnPos;
+            if ((count _nearPlayers) == 0 && {!_spawnPosProtected}) exitWith {};
             _tries = _tries + 1;
         };
 
-        if ([_spawnPos, _protectedZones, _protectedMarkers] call ARC_fnc_threatIsProtectedSpawnPos) then {
+        if (_spawnPosProtected) then {
             diag_log format ["[ARC][OPS][WARN] ARC_fnc_opsPatrolOnActivate: OPFOR contact spawn suppressed in protected spawn bubble task=%1 pos=%2", _taskId, _spawnPos];
             continue;
         };
