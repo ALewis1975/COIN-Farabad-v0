@@ -55,8 +55,8 @@ if (_routeRadius <= 0) then
 // Secure zones should not encourage wandering routes.
 private _protectedZones = missionNamespace getVariable ["ARC_threatVirtualProtectedZones", ["Airbase", "GreenZone", "MilitaryBase"]];
 if (!(_protectedZones isEqualType [])) then { _protectedZones = ["Airbase", "GreenZone", "MilitaryBase"]; };
-private _protectedMarkers = missionNamespace getVariable ["ARC_threatProtectedSpawnMarkers", [["mkr_airbaseCenter", missionNamespace getVariable ["ARC_airbase_dynamic_radius_m", 1600]]]];
-if (!(_protectedMarkers isEqualType [])) then { _protectedMarkers = [["mkr_airbaseCenter", missionNamespace getVariable ["ARC_airbase_dynamic_radius_m", 1600]]]; };
+private _protectedMarkers = missionNamespace getVariable ["ARC_threatProtectedSpawnMarkers", []];
+if (!(_protectedMarkers isEqualType [])) then { _protectedMarkers = []; };
 private _posProtected = [_posATL, _protectedZones, _protectedMarkers] call ARC_fnc_threatIsProtectedSpawnPos;
 
 if (_posProtected) then

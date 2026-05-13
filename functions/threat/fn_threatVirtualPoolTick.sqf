@@ -171,8 +171,8 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
         // Intentional suppression — mirrors the guard in ARC_fnc_threatVirtualPoolInit.
         private _protectedZones = missionNamespace getVariable ["ARC_threatVirtualProtectedZones", ["Airbase", "GreenZone", "MilitaryBase"]];
         if (!(_protectedZones isEqualType [])) then { _protectedZones = ["Airbase", "GreenZone", "MilitaryBase"]; };
-        private _protectedMarkers = missionNamespace getVariable ["ARC_threatProtectedSpawnMarkers", [["mkr_airbaseCenter", missionNamespace getVariable ["ARC_airbase_dynamic_radius_m", 1600]]]];
-        if (!(_protectedMarkers isEqualType [])) then { _protectedMarkers = [["mkr_airbaseCenter", missionNamespace getVariable ["ARC_airbase_dynamic_radius_m", 1600]]]; };
+        private _protectedMarkers = missionNamespace getVariable ["ARC_threatProtectedSpawnMarkers", []];
+        if (!(_protectedMarkers isEqualType [])) then { _protectedMarkers = []; };
 
         if (!(_activeMarker isEqualTo "")) then {
             private _mPosProtected = getMarkerPos _activeMarker;
@@ -428,16 +428,16 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
                     } else {
                         private _liveInsideProtected = false;
                         {
-                            private _uProtected = objectFromNetId _x;
-                            if (!isNull _uProtected && { [getPosATL _uProtected, _protectedZones, _protectedMarkers] call ARC_fnc_threatIsProtectedSpawnPos }) exitWith {
+                            private _liveUnit = objectFromNetId _x;
+                            if (!isNull _liveUnit && { [getPosATL _liveUnit, _protectedZones, _protectedMarkers] call ARC_fnc_threatIsProtectedSpawnPos }) exitWith {
                                 _liveInsideProtected = true;
                             };
                         } forEach _liveNetIds;
 
                         if (_liveInsideProtected) then {
                             {
-                                private _uDeleteProtected = objectFromNetId _x;
-                                if (!isNull _uDeleteProtected) then { deleteVehicle _uDeleteProtected; };
+                                private _unitToDelete = objectFromNetId _x;
+                                if (!isNull _unitToDelete) then { deleteVehicle _unitToDelete; };
                             } forEach _liveNetIds;
 
                             _rec   = [_rec, "state",          "VIRTUAL_DORMANT"] call _kvSet;

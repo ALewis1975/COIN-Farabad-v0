@@ -151,8 +151,8 @@ private _candidates = [];  // [[index, distToLine, distToFrom], ...]
 // Protected zones config — mirrors ARC_fnc_threatVirtualPoolInit and tick guards
 private _preCacheProtectedZones = missionNamespace getVariable ["ARC_threatVirtualProtectedZones", ["Airbase", "GreenZone", "MilitaryBase"]];
 if (!(_preCacheProtectedZones isEqualType [])) then { _preCacheProtectedZones = ["Airbase", "GreenZone", "MilitaryBase"]; };
-private _preCacheProtectedMarkers = missionNamespace getVariable ["ARC_threatProtectedSpawnMarkers", [["mkr_airbaseCenter", missionNamespace getVariable ["ARC_airbase_dynamic_radius_m", 1600]]]];
-if (!(_preCacheProtectedMarkers isEqualType [])) then { _preCacheProtectedMarkers = [["mkr_airbaseCenter", missionNamespace getVariable ["ARC_airbase_dynamic_radius_m", 1600]]]; };
+private _preCacheProtectedMarkers = missionNamespace getVariable ["ARC_threatProtectedSpawnMarkers", []];
+if (!(_preCacheProtectedMarkers isEqualType [])) then { _preCacheProtectedMarkers = []; };
 
 {
     private _rec = _x;

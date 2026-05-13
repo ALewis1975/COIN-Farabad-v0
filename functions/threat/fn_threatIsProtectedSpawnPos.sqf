@@ -21,13 +21,11 @@ if ((count _protectedZones) == 0) then {
     if (!(_protectedZones isEqualType [])) then { _protectedZones = ["Airbase", "GreenZone", "MilitaryBase"]; };
 };
 
+private _defaultProtectedMarkers = [["mkr_airbaseCenter", missionNamespace getVariable ["ARC_airbase_dynamic_radius_m", 1600]]];
 if ((count _protectedMarkers) == 0) then {
-    _protectedMarkers = missionNamespace getVariable [
-        "ARC_threatProtectedSpawnMarkers",
-        [["mkr_airbaseCenter", missionNamespace getVariable ["ARC_airbase_dynamic_radius_m", 1600]]]
-    ];
+    _protectedMarkers = missionNamespace getVariable ["ARC_threatProtectedSpawnMarkers", _defaultProtectedMarkers];
     if (!(_protectedMarkers isEqualType [])) then {
-        _protectedMarkers = [["mkr_airbaseCenter", missionNamespace getVariable ["ARC_airbase_dynamic_radius_m", 1600]]];
+        _protectedMarkers = _defaultProtectedMarkers;
     };
 };
 
@@ -45,7 +43,16 @@ private _protected = false;
     if (!isNil "ARC_fnc_worldResolveMarker") then {
         _resolvedMarker = [_markerName] call ARC_fnc_worldResolveMarker;
     };
-    if (!(_resolvedMarker in allMapMarkers)) then { continue; };
+    if (!(_resolvedMarker in allMapMarkers)) then {
+        private _warnedMarkers = missionNamespace getVariable ["ARC_threatProtectedMarkerWarned", []];
+        if (!(_warnedMarkers isEqualType [])) then { _warnedMarkers = []; };
+        if (!(_markerName in _warnedMarkers)) then {
+            diag_log format ["[ARC][VPOOL][WARN] ARC_fnc_threatIsProtectedSpawnPos: protected marker unavailable marker=%1 resolved=%2", _markerName, _resolvedMarker];
+            _warnedMarkers pushBack _markerName;
+            missionNamespace setVariable ["ARC_threatProtectedMarkerWarned", _warnedMarkers, false];
+        };
+        continue;
+    };
 
     if ((_pos distance2D (getMarkerPos _resolvedMarker)) <= _radiusM) exitWith {
         _protected = true;

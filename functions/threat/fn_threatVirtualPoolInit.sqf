@@ -59,8 +59,8 @@ if (_alreadySeeded) exitWith {
     // Protected zones list (configurable; defaults cover BLUFOR-controlled zones)
     private _pzMig = missionNamespace getVariable ["ARC_threatVirtualProtectedZones", ["Airbase", "GreenZone", "MilitaryBase"]];
     if (!(_pzMig isEqualType [])) then { _pzMig = ["Airbase", "GreenZone", "MilitaryBase"]; };
-    private _pmMig = missionNamespace getVariable ["ARC_threatProtectedSpawnMarkers", [["mkr_airbaseCenter", missionNamespace getVariable ["ARC_airbase_dynamic_radius_m", 1600]]]];
-    if (!(_pmMig isEqualType [])) then { _pmMig = [["mkr_airbaseCenter", missionNamespace getVariable ["ARC_airbase_dynamic_radius_m", 1600]]]; };
+    private _pmMig = missionNamespace getVariable ["ARC_threatProtectedSpawnMarkers", []];
+    if (!(_pmMig isEqualType [])) then { _pmMig = []; };
 
     // Named locations for anchor-position lookup during relocation
     private _migLocs = missionNamespace getVariable ["ARC_worldNamedLocations", []];
@@ -168,8 +168,8 @@ private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 // Configurable via ARC_threatVirtualProtectedZones; defaults cover BLUFOR-controlled zones.
 private _protectedZones = missionNamespace getVariable ["ARC_threatVirtualProtectedZones", ["Airbase", "GreenZone", "MilitaryBase"]];
 if (!(_protectedZones isEqualType [])) then { _protectedZones = ["Airbase", "GreenZone", "MilitaryBase"]; };
-private _protectedMarkers = missionNamespace getVariable ["ARC_threatProtectedSpawnMarkers", [["mkr_airbaseCenter", missionNamespace getVariable ["ARC_airbase_dynamic_radius_m", 1600]]]];
-if (!(_protectedMarkers isEqualType [])) then { _protectedMarkers = [["mkr_airbaseCenter", missionNamespace getVariable ["ARC_airbase_dynamic_radius_m", 1600]]]; };
+private _protectedMarkers = missionNamespace getVariable ["ARC_threatProtectedSpawnMarkers", []];
+if (!(_protectedMarkers isEqualType [])) then { _protectedMarkers = []; };
 
 // Airbase exclusion: skip locations inside any protected zone
 private _zones = missionNamespace getVariable ["ARC_worldZones", []];
