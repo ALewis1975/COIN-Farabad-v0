@@ -12,8 +12,8 @@
     Notes:
         - Server-only single-writer.
         - Guards lifecycle transitions: if state_to == current_state or transition is invalid, no-op and returns false.
-        - ACTIVE and STAGED both represent current runtime "spawned active" manifestations; STAGED is preserved
-          for family-specific spawn ticks (VBIED/suicide) that stage directly from CREATED.
+        - ACTIVE is the generic spawned manifestation state; STAGED is the family-specific spawned-active
+          state used by VBIED/suicide spawn ticks that stage directly from CREATED.
 */
 
 if (!isServer) exitWith {false};
@@ -80,7 +80,7 @@ if (_stateFromU isEqualTo _stateToU) exitWith {false};
 private _allowedNext = switch (_stateFromU) do
 {
     case "CREATED": { ["ACTIVE", "STAGED", "CLOSED", "EXPIRED"] };
-    case "ACTIVE": { ["STAGED", "DISCOVERED", "NEUTRALIZED", "DETONATED", "INTERDICTED", "CLOSED", "EXPIRED"] };
+    case "ACTIVE": { ["DISCOVERED", "NEUTRALIZED", "DETONATED", "INTERDICTED", "CLOSED", "EXPIRED"] };
     case "STAGED": { ["DISCOVERED", "NEUTRALIZED", "DETONATED", "INTERDICTED", "CLOSED", "EXPIRED"] };
     case "DISCOVERED": { ["NEUTRALIZED", "DETONATED", "INTERDICTED", "CLOSED", "EXPIRED"] };
     case "NEUTRALIZED": { ["CLOSED"] };
