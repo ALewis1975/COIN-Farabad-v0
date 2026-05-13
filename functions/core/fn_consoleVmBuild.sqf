@@ -302,9 +302,13 @@ if (!(_threatSnapshotAt isEqualType 0)) then { _threatSnapshotAt = -1; };
 private _threatEconomySnapshot = missionNamespace getVariable ["ARC_pub_threatEconomySnapshot", []];
 if (!(_threatEconomySnapshot isEqualType [])) then { _threatEconomySnapshot = []; };
 
+private _threatVirtualPoolSnapshot = missionNamespace getVariable ["ARC_pub_threatVirtualPoolSnapshot", []];
+if (!(_threatVirtualPoolSnapshot isEqualType [])) then { _threatVirtualPoolSnapshot = []; };
+
 private _threatData = [
     ["snapshot", _threatSnapshot],
-    ["economy", _threatEconomySnapshot]
+    ["economy", _threatEconomySnapshot],
+    ["virtualPool", _threatVirtualPoolSnapshot]
 ];
 
 private _threatSection = [

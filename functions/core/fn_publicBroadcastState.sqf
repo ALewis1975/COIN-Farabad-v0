@@ -956,6 +956,12 @@ if (!isNil "ARC_fnc_threatEconomySnapshotBuild") then {
 };
 if (!(_threatEconomyPub isEqualType [])) then { _threatEconomyPub = []; };
 
+private _threatVirtualPoolPub = [];
+if (!isNil "ARC_fnc_threatVirtualPoolSnapshotBuild") then {
+    _threatVirtualPoolPub = [] call ARC_fnc_threatVirtualPoolSnapshotBuild;
+};
+if (!(_threatVirtualPoolPub isEqualType [])) then { _threatVirtualPoolPub = []; };
+
 private _pub = [
     ["insurgentPressure", _p],
     ["corruption", _c],
@@ -977,7 +983,8 @@ private _pub = [
     ["casreq", _casreqPub],
     ["airbase", _airbasePub],
     ["threat", _threatPub],
-    ["threatEconomy", _threatEconomyPub]
+    ["threatEconomy", _threatEconomyPub],
+    ["threatVirtualPool", _threatVirtualPoolPub]
 ];
 
 private _didPublish = [_pub, "publicBroadcastState", false, 0.25] call ARC_fnc_statePublishPublic;
@@ -994,6 +1001,8 @@ missionNamespace setVariable ["ARC_pub_threatUiSnapshot", _threatPub, true];
 missionNamespace setVariable ["ARC_pub_threatUiSnapshotUpdatedAt", serverTime, true];
 missionNamespace setVariable ["ARC_pub_threatEconomySnapshot", _threatEconomyPub, true];
 missionNamespace setVariable ["ARC_pub_threatEconomySnapshotUpdatedAt", serverTime, true];
+missionNamespace setVariable ["ARC_pub_threatVirtualPoolSnapshot", _threatVirtualPoolPub, true];
+missionNamespace setVariable ["ARC_pub_threatVirtualPoolSnapshotUpdatedAt", serverTime, true];
 
 private _companySnapshot = [
     ["companyCommandNodes", ["companyCommandNodes", []] call ARC_fnc_stateGet],
