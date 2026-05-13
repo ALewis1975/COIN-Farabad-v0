@@ -39,12 +39,20 @@ private _ctrlDetailsGrp = _display displayCtrl 78016;
 private _ctrlDetails = _display displayCtrl 78012;
 private _b1 = _display displayCtrl 78021;
 private _b2 = _display displayCtrl 78022;
+private _ctrlTabs = _display displayCtrl 78001;
 
 
 private _statusNet  = _display displayCtrl 78060;
 private _statusGps  = _display displayCtrl 78061;
 private _statusBatt = _display displayCtrl 78062;
 private _statusSync = _display displayCtrl 78063;
+
+private _ctrlEnabledFn = compile "params ['_ctrl']; ctrlEnabled _ctrl";
+private _ctrlState = {
+    params ["_ctrl"];
+    if (isNull _ctrl) exitWith { [false, false, []] };
+    [ctrlShown _ctrl, [_ctrl] call _ctrlEnabledFn, ctrlPosition _ctrl]
+};
 
 // Ops frame controls
 private _opsCtrls = [
@@ -59,12 +67,16 @@ private _opsCtrls = [
     _display displayCtrl 78038
 ];
 
-// Baseline: main panel on, everything else off
-if (!isNull _ctrlMainGrp) then { _ctrlMainGrp ctrlShow true; };
-if (!isNull _ctrlMain) then { _ctrlMain ctrlShow true; };
-if (!isNull _ctrlList) then { _ctrlList ctrlShow false; };
-if (!isNull _ctrlDetailsGrp) then { _ctrlDetailsGrp ctrlShow false; };
-if (!isNull _ctrlDetails) then { _ctrlDetails ctrlShow false; };
+// Baseline: main panel on, everything else off.
+// Re-enable shared controls here so tabs that temporarily disable the shared
+// MainList as a hidden master (INTEL/HQ tool modes) cannot leak disabled state
+// into list-driven tabs after a tab switch.
+if (!isNull _ctrlTabs) then { _ctrlTabs ctrlShow true; _ctrlTabs ctrlEnable true; };
+if (!isNull _ctrlMainGrp) then { _ctrlMainGrp ctrlShow true; _ctrlMainGrp ctrlEnable true; };
+if (!isNull _ctrlMain) then { _ctrlMain ctrlShow true; _ctrlMain ctrlEnable true; };
+if (!isNull _ctrlList) then { _ctrlList ctrlShow false; _ctrlList ctrlEnable true; };
+if (!isNull _ctrlDetailsGrp) then { _ctrlDetailsGrp ctrlShow false; _ctrlDetailsGrp ctrlEnable true; };
+if (!isNull _ctrlDetails) then { _ctrlDetails ctrlShow false; _ctrlDetails ctrlEnable true; };
 { if (!isNull _x) then { _x ctrlShow false; }; } forEach _opsCtrls;
 
 // Baseline: hide AIR / TOWER dedicated controls (shown only on AIR tab)
@@ -96,6 +108,29 @@ private _tab = ["ARC_console_activeTab", "DASH"] call ARC_fnc_uiNsGetString;
 _tab = toUpper _tab;
 
 private _prevRefreshTab = ["ARC_console_prevRefreshTab", "", false] call ARC_fnc_uiNsGetString;
+private _tabEntered = (_prevRefreshTab isEqualTo "") || { !(_prevRefreshTab isEqualTo _tab) };
+private _tabChanged = !(_prevRefreshTab isEqualTo "") && { !(_prevRefreshTab isEqualTo _tab) };
+
+if (_tabChanged) then
+{
+    uiNamespace setVariable ["ARC_console_mainListOwner", ""];
+    uiNamespace setVariable ["ARC_s2_catPanels_suppressSel", false];
+    uiNamespace setVariable ["ARC_hq_subPanels_suppressSel", false];
+    uiNamespace setVariable ["ARC_console_cmdQueuePainting", false];
+};
+
+if (_tabEntered) then
+{
+    diag_log format [
+        "[ARC][UI] ARC_fnc_uiConsoleRefresh: tab enter prev=%1 tab=%2 tabs=%3 main=%4 list=%5 details=%6",
+        _prevRefreshTab,
+        _tab,
+        [_ctrlTabs] call _ctrlState,
+        [_ctrlMainGrp] call _ctrlState,
+        [_ctrlList] call _ctrlState,
+        [_ctrlDetailsGrp] call _ctrlState
+    ];
+};
 
 // Phase 4: clear AIR confirmation state when switching away from AIR tab.
 if (_tab != "AIR") then {
@@ -199,6 +234,63 @@ if (!isNull _ctrlMainGrp) then {
 // This runs after the regression guards so it wins over any stale restored positions.
 [_display, _tab] call ARC_fnc_uiConsoleApplyLayout;
 
+private _clampMainGroupToListRegion = {
+    if (isNull _ctrlMainGrp || { isNull _ctrlList }) exitWith { false };
+
+    private _lp = ctrlPosition _ctrlList;
+    private _gp = ctrlPosition _ctrlMainGrp;
+    if (!(_lp isEqualType []) || { !(_gp isEqualType []) }) exitWith { false };
+    if ((count _lp) != 4 || { (count _gp) != 4 }) exitWith { false };
+
+    _ctrlMainGrp ctrlSetPosition [_lp select 0, _gp select 1, _lp select 2, _gp select 3];
+    _ctrlMainGrp ctrlCommit 0;
+    true
+};
+
+private _auditLayout = {
+    if !(missionNamespace getVariable ["ARC_console_layout_audit", false]) exitWith { true };
+
+    private _failures = [];
+    private _overlaps = {
+        params ["_a", "_b"];
+        if (!(_a isEqualType []) || { !(_b isEqualType []) }) exitWith { false };
+        if ((count _a) != 4 || { (count _b) != 4 }) exitWith { false };
+        private _ax1 = _a select 0;
+        private _ay1 = _a select 1;
+        private _ax2 = _ax1 + (_a select 2);
+        private _ay2 = _ay1 + (_a select 3);
+        private _bx1 = _b select 0;
+        private _by1 = _b select 1;
+        private _bx2 = _bx1 + (_b select 2);
+        private _by2 = _by1 + (_b select 3);
+        (_ax1 < _bx2) && { _ax2 > _bx1 } && { _ay1 < _by2 } && { _ay2 > _by1 }
+    };
+
+    private _addOverlap = {
+        params ["_labelA", "_ctrlA", "_labelB", "_ctrlB"];
+        if (isNull _ctrlA || { isNull _ctrlB }) exitWith {};
+        if (!(ctrlShown _ctrlA) || { !(ctrlShown _ctrlB) }) exitWith {};
+        if ([ctrlPosition _ctrlA, ctrlPosition _ctrlB] call _overlaps) then {
+            _failures pushBack format ["overlap %1/%2 a=%3 b=%4", _labelA, _labelB, ctrlPosition _ctrlA, ctrlPosition _ctrlB];
+        };
+    };
+
+    ["MainGroup", _ctrlMainGrp, "DetailsGroup", _ctrlDetailsGrp] call _addOverlap;
+    ["MainList", _ctrlList, "DetailsGroup", _ctrlDetailsGrp] call _addOverlap;
+    ["AirMap", _airTrafficMap, "DetailsGroup", _ctrlDetailsGrp] call _addOverlap;
+
+    if ((count _failures) > 0) then
+    {
+        diag_log format ["[ARC][UI][CONSOLE_LAYOUT_AUDIT_FAIL] tab=%1 failures=%2", _tab, _failures];
+    }
+    else
+    {
+        diag_log format ["[ARC][UI][CONSOLE_LAYOUT_AUDIT_OK] tab=%1 main=%2 list=%3 details=%4 map=%5", _tab, ctrlPosition _ctrlMainGrp, ctrlPosition _ctrlList, ctrlPosition _ctrlDetailsGrp, ctrlPosition _airTrafficMap];
+    };
+
+    (count _failures) isEqualTo 0
+};
+
 switch (_tab) do
 {
     case "BOARDS":
@@ -206,6 +298,7 @@ switch (_tab) do
         // Snapshot view (read-only)
         if (!isNull _b1) then { _b1 ctrlShow false; _b1 ctrlEnable false; _b1 ctrlSetText ""; };
         if (!isNull _b2) then { _b2 ctrlShow false; _b2 ctrlEnable false; _b2 ctrlSetText ""; };
+        call _clampMainGroupToListRegion;
 
         [_display] call ARC_fnc_uiConsoleBoardsPaint;
     };
@@ -216,6 +309,7 @@ case "DASH":
         // Show right details panel (populated by the painter).
         if (!isNull _ctrlDetailsGrp) then { _ctrlDetailsGrp ctrlShow true; };
         if (!isNull _ctrlDetails) then { _ctrlDetails ctrlShow true; };
+        call _clampMainGroupToListRegion;
         [_display] call ARC_fnc_uiConsoleDashboardPaint;
     };
 
@@ -359,18 +453,7 @@ case "DASH":
             // Show right panel (populated by the painter).
             if (!isNull _ctrlDetailsGrp) then { _ctrlDetailsGrp ctrlShow true; };
             if (!isNull _ctrlDetails) then { _ctrlDetails ctrlShow true; };
-
-            // Clamp MainGroup (78015) to the middle-panel width so its content (including
-            // the TOC Queue section) does not extend into the right-panel area occupied by
-            // MainDetailsGroup (78016).  Use MainList (78011) as the middle-panel reference.
-            if (!isNull _ctrlMainGrp && { !isNull _ctrlList }) then {
-                private _lp = ctrlPosition _ctrlList;
-                private _gp = ctrlPosition _ctrlMainGrp;
-                if ((count _lp) == 4 && { (count _gp) == 4 }) then {
-                    _ctrlMainGrp ctrlSetPosition [_lp select 0, _gp select 1, _lp select 2, _gp select 3];
-                    _ctrlMainGrp ctrlCommit 0;
-                };
-            };
+            call _clampMainGroupToListRegion;
 
             [_display] call ARC_fnc_uiConsoleCommandPaint;
         };
@@ -389,6 +472,7 @@ case "DASH":
         [_b1, "REFRESH", true, true] call ARC_fnc_uiConsoleButtonState;
         [_b2, "READ-ONLY", false, true] call ARC_fnc_uiConsoleButtonState;
 
+        if (_tabEntered) then { uiNamespace setVariable ["ARC_console_s1ExpandToggled", true]; };
         [_display] call ARC_fnc_uiConsoleS1Paint;
     };
 
@@ -439,6 +523,8 @@ case "DASH":
         [_display] call ARC_fnc_uiConsoleDashboardPaint;
     };
 };
+
+call _auditLayout;
 
 uiNamespace setVariable ["ARC_console_prevRefreshTab", _tab];
 

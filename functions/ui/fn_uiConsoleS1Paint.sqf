@@ -28,14 +28,32 @@ private _ctrlList    = _display displayCtrl 78011;
 private _ctrlDetails = _display displayCtrl 78012;
 if (isNull _ctrlMain || { isNull _ctrlList } || { isNull _ctrlDetails }) exitWith { false };
 
-// --- Pair accessor: get field value from a pairs record (avoids findIf) ---
-private _getPair = {
-    params ["_pairs", "_key", "_default"];
-    if (!(_pairs isEqualType [])) exitWith { _default };
-    private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { ((_x # 0) isEqualTo _key) }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
-    if (_idx < 0) exitWith { _default };
-    (_pairs # _idx) # 1
+private _fitStructuredInGroup = {
+    params [
+        ["_ctrl", controlNull, [controlNull]],
+        ["_grp", controlNull, [controlNull]],
+        ["_defaultsKey", "", [""]]
+    ];
+    if (isNull _ctrl) exitWith { false };
+
+    private _defaultPos = uiNamespace getVariable [_defaultsKey, []];
+    if (!(_defaultPos isEqualType []) || { (count _defaultPos) < 4 }) then
+    {
+        _defaultPos = ctrlPosition _ctrl;
+        uiNamespace setVariable [_defaultsKey, +_defaultPos];
+    };
+
+    [_ctrl] call BIS_fnc_ctrlFitToTextHeight;
+
+    private _minH = if (!isNull _grp) then { (ctrlPosition _grp) select 3 } else { 0.20 };
+    private _p = ctrlPosition _ctrl;
+    _p set [0, _defaultPos select 0];
+    _p set [1, _defaultPos select 1];
+    _p set [2, _defaultPos select 2];
+    _p set [3, (_p select 3) max _minH];
+    _ctrl ctrlSetPosition _p;
+    _ctrl ctrlCommit 0;
+    true
 };
 
 // --- Rev-check inputs ---
@@ -306,6 +324,7 @@ if (_updatedAt < 0 || { !_isV2 } || { (count _catOrder) isEqualTo 0 }) then {
     _main = _main + "<t color='#AAAAAA'>Click category to expand/collapse. Click group for roster.</t><br/>";
 };
 _ctrlMain ctrlSetStructuredText parseText _main;
+[_ctrlMain, _display displayCtrl 78015, "ARC_console_s1MainDefaultPos"] call _fitStructuredInGroup;
 
 // --- Paint right panel (detail for selected node) ---
 private _selIdx2 = lbCurSel _ctrlList;
@@ -419,6 +438,7 @@ if (_selData2 isEqualTo "" || { _selData2 isEqualTo "__EMPTY__" }) then {
 };
 
 _ctrlDetails ctrlSetStructuredText parseText _details2;
+[_ctrlDetails, _display displayCtrl 78016, "ARC_console_s1DetailsDefaultPos"] call _fitStructuredInGroup;
 
 // --- Update rev + selection trackers ---
 uiNamespace setVariable ["ARC_console_s1LastRev",     _updatedAt];
