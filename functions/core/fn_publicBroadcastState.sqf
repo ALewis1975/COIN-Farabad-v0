@@ -950,6 +950,12 @@ if (!isNil "ARC_fnc_threatUiSnapshotBuild") then {
 };
 if (!(_threatPub isEqualType [])) then { _threatPub = []; };
 
+private _threatEconomyPub = [];
+if (!isNil "ARC_fnc_threatEconomySnapshotBuild") then {
+    _threatEconomyPub = [] call ARC_fnc_threatEconomySnapshotBuild;
+};
+if (!(_threatEconomyPub isEqualType [])) then { _threatEconomyPub = []; };
+
 private _pub = [
     ["insurgentPressure", _p],
     ["corruption", _c],
@@ -970,7 +976,8 @@ private _pub = [
     ["companyVirtualOps", ["companyVirtualOps", []] call ARC_fnc_stateGet],
     ["casreq", _casreqPub],
     ["airbase", _airbasePub],
-    ["threat", _threatPub]
+    ["threat", _threatPub],
+    ["threatEconomy", _threatEconomyPub]
 ];
 
 private _didPublish = [_pub, "publicBroadcastState", false, 0.25] call ARC_fnc_statePublishPublic;
@@ -985,6 +992,8 @@ missionNamespace setVariable ["ARC_pub_airbaseUiSnapshot", _airbaseUiSnapshot, t
 missionNamespace setVariable ["ARC_pub_airbaseUiSnapshotUpdatedAt", serverTime, true];
 missionNamespace setVariable ["ARC_pub_threatUiSnapshot", _threatPub, true];
 missionNamespace setVariable ["ARC_pub_threatUiSnapshotUpdatedAt", serverTime, true];
+missionNamespace setVariable ["ARC_pub_threatEconomySnapshot", _threatEconomyPub, true];
+missionNamespace setVariable ["ARC_pub_threatEconomySnapshotUpdatedAt", serverTime, true];
 
 private _companySnapshot = [
     ["companyCommandNodes", ["companyCommandNodes", []] call ARC_fnc_stateGet],

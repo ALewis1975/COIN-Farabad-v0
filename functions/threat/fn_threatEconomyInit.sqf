@@ -70,6 +70,38 @@ private _stExisting = ["threat_v0_scheduler_last_ts", -1] call ARC_fnc_stateGet;
 if (!(_stExisting isEqualType 0)) then { _stExisting = -1; };
 ["threat_v0_scheduler_last_ts", _stExisting] call ARC_fnc_stateSet;
 
+// ── Economy observability state (Epic 7) ────────────────────────────────────
+["threat_v0_economy_deny_reason_enum", [
+    "THREAT_DISABLED",
+    "GLOBAL_COOLDOWN",
+    "DISTRICT_COOLDOWN",
+    "BUDGET_EXHAUSTED",
+    "ESCALATION_TIER",
+    "BAD_DISTRICT",
+    "NOT_SERVER"
+]] call ARC_fnc_stateSet;
+
+private _denyCounts = ["threat_v0_economy_deny_counts", createHashMap] call ARC_fnc_stateGet;
+if (!(_denyCounts isEqualType createHashMap)) then { _denyCounts = createHashMap; };
+{
+    private _reason = _x;
+    private _seen = [_denyCounts, _reason, -1] call _hg;
+    if (!(_seen isEqualType 0) || { _seen < 0 }) then { _denyCounts set [_reason, 0]; };
+} forEach ["THREAT_DISABLED", "GLOBAL_COOLDOWN", "DISTRICT_COOLDOWN", "BUDGET_EXHAUSTED", "ESCALATION_TIER", "BAD_DISTRICT", "NOT_SERVER"];
+["threat_v0_economy_deny_counts", _denyCounts] call ARC_fnc_stateSet;
+
+private _lastDecision = ["threat_v0_economy_last_decision", []] call ARC_fnc_stateGet;
+if (!(_lastDecision isEqualType [])) then { _lastDecision = []; };
+["threat_v0_economy_last_decision", _lastDecision] call ARC_fnc_stateSet;
+
+private _lastAllowedDecision = ["threat_v0_economy_last_allowed_decision", []] call ARC_fnc_stateGet;
+if (!(_lastAllowedDecision isEqualType [])) then { _lastAllowedDecision = []; };
+["threat_v0_economy_last_allowed_decision", _lastAllowedDecision] call ARC_fnc_stateSet;
+
+private _lastDeniedDecision = ["threat_v0_economy_last_denied_decision", []] call ARC_fnc_stateGet;
+if (!(_lastDeniedDecision isEqualType [])) then { _lastDeniedDecision = []; };
+["threat_v0_economy_last_denied_decision", _lastDeniedDecision] call ARC_fnc_stateSet;
+
 diag_log format ["[ARC][INFO] ARC_fnc_threatEconomyInit: economy keys seeded for %1 districts.", count _districtIds];
 
 true
