@@ -24,7 +24,20 @@ params [
     ["_ctx", []]
 ];
 
-if (_taskId isEqualTo "") exitWith {""};
+private _leadIdCtxRaw = "";
+if (_ctx isEqualType []) then
+{
+    {
+        if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo "lead_id" }) exitWith
+        {
+            private _candidate = _x select 1;
+            if (_candidate isEqualType "") then { _leadIdCtxRaw = _candidate; };
+        };
+    } forEach _ctx;
+};
+
+if (_taskId isEqualTo "" && { _leadIdCtxRaw isEqualTo "" }) exitWith {""};
+// Normally task-linked; lead-only callers may omit task_id when lead_id is present.
 
 private _enabled = ["threat_v0_enabled", true] call ARC_fnc_stateGet;
 if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabled = true; };
@@ -32,15 +45,17 @@ if (!_enabled) exitWith {""};
 
 private _typeU = toUpper _type;
 private _subtypeU = toUpper _subtype;
+private _trimFn = compile "params ['_s']; trim _s";
 
 // Small helpers for "pairs arrays"
 private _kvGet = {
     params ["_pairs", "_key", "_default"];
     if (!(_pairs isEqualType [])) exitWith {_default};
     private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) exitWith {_default};
-    private _v = (_pairs # _idx) # 1;
+    private _entry = _pairs select _idx;
+    private _v = _entry select 1;
     if (isNil "_v") exitWith {_default};
     _v
 };
@@ -49,10 +64,13 @@ private _kvSet = {
     params ["_pairs", "_key", "_value"];
     if (!(_pairs isEqualType [])) then { _pairs = []; };
     private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) then { _pairs pushBack [_key, _value]; } else { _pairs set [_idx, [_key, _value]]; };
     _pairs
 };
+
+private _leadIdCtx = _leadIdCtxRaw;
+_leadIdCtx = [_leadIdCtx] call _trimFn;
 
 // Load records
 private _records = ["threat_v0_records", []] call ARC_fnc_stateGet;
@@ -63,12 +81,19 @@ private _existingIdx = -1;
 {
     private _rec = _x;
     private _links = [_rec, "links", []] call _kvGet;
-    if (([_links, "task_id", ""] call _kvGet) isEqualTo _taskId) exitWith { _existingIdx = _forEachIndex; };
+    if (!(_leadIdCtx isEqualTo "")) then
+    {
+        if (([_links, "lead_id", ""] call _kvGet) isEqualTo _leadIdCtx) exitWith { _existingIdx = _forEachIndex; };
+    }
+    else
+    {
+        if (([_links, "task_id", ""] call _kvGet) isEqualTo _taskId) exitWith { _existingIdx = _forEachIndex; };
+    };
 } forEach _records;
 
 if (_existingIdx >= 0) then
 {
-    private _rec = _records # _existingIdx;
+    private _rec = _records select _existingIdx;
     private _tid = [_rec, "threat_id", ""] call _kvGet;
     _tid
 }
@@ -99,7 +124,7 @@ else
 
     private _districtIdSource = [_ctx, "district_id", ""] call _kvGet;
     if !(_districtIdSource isEqualType "") then { _districtIdSource = ""; };
-    _districtIdSource = toUpper (trim _districtIdSource);
+    _districtIdSource = toUpper ([_districtIdSource] call _trimFn);
 
     private _districtId = _districtIdSource;
     if !([_districtId] call ARC_fnc_worldIsValidDistrictId) then
@@ -126,7 +151,7 @@ else
     private _aoId = [_ctx, "ao_id", _taskId] call _kvGet;
     if (!(_aoId isEqualType "")) then { _aoId = _taskId; };
 
-    private _leadId = [_ctx, "lead_id", ""] call _kvGet;
+    private _leadId = _leadIdCtx;
     if (!(_leadId isEqualType "")) then { _leadId = ""; };
 
     private _incidentId = [_ctx, "incident_id", ""] call _kvGet;
@@ -246,7 +271,7 @@ else
     ];
 
     // Attach log ref (best-effort)
-    if (_intelId isNotEqualTo "") then
+    if (!(_intelId isEqualTo "")) then
     {
         private _a = [_rec, "audit", []] call _kvGet;
         private _refs = [_a, "log_refs", []] call _kvGet;
@@ -261,6 +286,13 @@ else
     };
 
     [] call ARC_fnc_threatDebugSnapshot;
+
+    [
+        "THREAT_CREATED",
+        _threatId,
+        _meta,
+        [["producer", "ARC_fnc_threatCreateFromTask"], ["rev", 1]]
+    ] call ARC_fnc_threatEmitEvent;
 
     _threatId
 };

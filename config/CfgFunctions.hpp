@@ -647,6 +647,8 @@ class CfgFunctions
 
             class threatInit {};
             class threatCreateFromTask {};
+            class threatCreateFromLead {};
+            class threatEmitEvent {};
             class threatUpdateState {};
             class threatOnAOActivated {};
             class threatOnIncidentClosed {};

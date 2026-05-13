@@ -46,6 +46,20 @@ private _closedMax = ["threat_v0_closed_max", 200] call ARC_fnc_stateGet;
 if (!(_closedMax isEqualType 0) || { _closedMax < 50 }) then { _closedMax = 200; };
 ["threat_v0_closed_max", _closedMax] call ARC_fnc_stateSet;
 
+// Event buffer (bounded public delta feed for UI/ops consumers)
+private _eventSeq = ["threat_v0_event_seq", 0] call ARC_fnc_stateGet;
+if (!(_eventSeq isEqualType 0) || { _eventSeq < 0 }) then { _eventSeq = 0; };
+["threat_v0_event_seq", _eventSeq] call ARC_fnc_stateSet;
+
+private _events = ["threat_v0_events", []] call ARC_fnc_stateGet;
+if (!(_events isEqualType [])) then { _events = []; ["threat_v0_events", _events] call ARC_fnc_stateSet; };
+
+private _eventsMax = ["threat_v0_events_max", 64] call ARC_fnc_stateGet;
+if (!(_eventsMax isEqualType 0) || { _eventsMax < 16 }) then { _eventsMax = 64; };
+_eventsMax = (_eventsMax max 16) min 256;
+["threat_v0_events_max", _eventsMax] call ARC_fnc_stateSet;
+missionNamespace setVariable ["threat_v0_events_public", _events, true];
+
 // Virtual group pool active index (IDs of vgroups currently PHYSICAL)
 private _vgActive = ["threat_v0_vgroup_active_index", []] call ARC_fnc_stateGet;
 if (!(_vgActive isEqualType [])) then { _vgActive = []; ["threat_v0_vgroup_active_index", _vgActive] call ARC_fnc_stateSet; };
