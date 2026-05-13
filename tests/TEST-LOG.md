@@ -13,7 +13,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-05-13 — Farabad Console UI cleanup/state normalization (Mode A)
 
-**Branch/Commit:** copilot/farabad-console-ui-research @ 2519e40
+**Branch/Commit:** copilot/farabad-console-ui-research @ e923bc9
 
 **Branch note:** This branch name was inherited from the preceding research task; the work recorded here is the Mode A bug-fix implementation on that branch.
 
@@ -30,6 +30,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | 7 | Review-fix revalidation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleRefresh.sqf functions/ui/fn_uiConsoleS1Paint.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleRefresh.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleS1Paint.sqf && git diff --check` | PASS | Revalidated after addressing review feedback on direct `ctrlEnabled`, helper comments, duplicated tab comparison, and audit guard style. |
 | 8 | Final review cleanup revalidation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleRefresh.sqf functions/ui/fn_uiConsoleS1Paint.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleRefresh.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleS1Paint.sqf && git diff --check` | PASS | Revalidated after simplifying tab-change locals and documenting the S1 fallback minimum height. |
 | 9 | Final review simplification revalidation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleRefresh.sqf functions/ui/fn_uiConsoleS1Paint.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleRefresh.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleS1Paint.sqf && git diff --check` | PASS | Revalidated after applying the final tab-change simplification and clarifying that the fallback height is roughly 20% of screen height. |
+| 10 | Helper-contract comment revalidation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleRefresh.sqf functions/ui/fn_uiConsoleS1Paint.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleRefresh.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleS1Paint.sqf && git diff --check` | PASS | Revalidated after documenting the shared tab-difference flag and main-group clamp helper contract. |
 
 ---
 
