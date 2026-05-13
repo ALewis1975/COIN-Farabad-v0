@@ -1394,58 +1394,8 @@ if (!(_objKind isEqualTo "")) then
             };
         };
 
-        // Helper: nearest road within radius (optionally avoid a named zone).
-        // We heavily prefer road segments that are actually connected to the road graph.
-        private _fn_nearestRoad = {
-            params [
-                ["_p", [0,0,0]],
-                ["_rad", 120],
-                ["_avoidZone", ""],
-                ["_avoidNear", []],
-                ["_avoidNearR", 220]
-            ];
-
-            if (!(_p isEqualType []) || { (count _p) < 2 }) exitWith { objNull };
-
-            private _pos = +_p;
-            _pos resize 3;
-
-            private _roads = _pos nearRoads _rad;
-            if ((count _roads) isEqualTo 0) exitWith { objNull };
-
-            private _best = objNull;
-            private _bestScore = 1e12;
-
-            {
-                private _rp = getPosATL _x;
-                private _ok = true;
-
-                if (!(_avoidZone isEqualTo "")) then
-                {
-                    private _z = [_rp] call ARC_fnc_worldGetZoneForPos;
-                    if ((toUpper _z) isEqualTo (toUpper _avoidZone)) then
-                    {
-                        private _nearOk = (_avoidNear isEqualType [] && { (count _avoidNear) >= 2 } && { (_rp distance2D _avoidNear) <= _avoidNearR });
-                        if (!_nearOk) then { _ok = false; };
-                    };
-                };
-
-                if (_ok) then
-                {
-                    private _d = _pos distance2D _rp;
-
-                    // Some map road objects (taxiways/parking/service segments) can be disconnected.
-                    // If we snap to those, A* can't build a real route and you get a single straight-line leg.
-                    private _conN = count (roadsConnectedTo _x);
-                    private _conPen = if (_conN isEqualTo 0) then { 5000 } else { 0 };
-
-                    private _score = _d + _conPen;
-                    if (_score < _bestScore) then { _bestScore = _score; _best = _x; };
-                };
-            } forEach _roads;
-
-            _best
-        };
+        // ARC_fnc_convoyNearestRoad: nearest connected road with optional zone avoidance.
+        // Extracted to functions/logistics/fn_convoyNearestRoad.sqf (PR 8).
 
         // Snap convoy destination waypoint to a nearby road to reduce cross-country cutting.
         private _destWp = +_pos;
@@ -1453,7 +1403,7 @@ if (!(_objKind isEqualTo "")) then
         private _snapR = missionNamespace getVariable ["ARC_convoyDestSnapM", 150];
         if (!(_snapR isEqualType 0)) then { _snapR = 150; };
         _snapR = (_snapR max 30) min 600;
-        private _rD = [_pos, _snapR] call _fn_nearestRoad;
+        private _rD = [_pos, _snapR] call ARC_fnc_convoyNearestRoad;
         if (!isNull _rD) then
         {
             _destWp = getPosATL _rD;
@@ -1520,7 +1470,7 @@ if (!(_objKind isEqualTo "")) then
 
         for "_k" from 0 to 2 do
         {
-            _spawnRoad = [_spawnPos, _rTry, "Airbase"] call _fn_nearestRoad;
+            _spawnRoad = [_spawnPos, _rTry, "Airbase"] call ARC_fnc_convoyNearestRoad;
             if (!isNull _spawnRoad) exitWith {};
             _rTry = _rTry * 1.75;
         };
@@ -1528,7 +1478,7 @@ if (!(_objKind isEqualTo "")) then
         if (isNull _spawnRoad) then
         {
             // Fallback (rare): accept any road rather than spawning off-road.
-            _spawnRoad = [_spawnPos, _rTry] call _fn_nearestRoad;
+            _spawnRoad = [_spawnPos, _rTry] call ARC_fnc_convoyNearestRoad;
         };
 
         if (!isNull _spawnRoad) then
@@ -1588,7 +1538,7 @@ if (!(_objKind isEqualTo "")) then
 
                 // Snap preset to the road network (avoid Airbase roads for base-starts).
                 private _snapR3 = (_roadSnap max 60) min 500;
-                private _rL = if (_isBaseStart2) then { [_presetLinkPos, _snapR3, "Airbase"] call _fn_nearestRoad } else { [_presetLinkPos, _snapR3] call _fn_nearestRoad };
+                private _rL = if (_isBaseStart2) then { [_presetLinkPos, _snapR3, "Airbase"] call ARC_fnc_convoyNearestRoad } else { [_presetLinkPos, _snapR3] call ARC_fnc_convoyNearestRoad };
                 if (!isNull _rL) then { _presetLinkPos = getPosATL _rL; _presetLinkPos resize 3; };
 
                 // Sanity: ensure it is far enough away to let vehicles clear the pad.
@@ -1643,7 +1593,7 @@ if (!(_objKind isEqualTo "")) then
             _p set [1, ((_p select 1) max _margin) min (_ws - _margin)];
 
             private _snapR2 = (_roadSnap max 100) min 500;
-            private _rL = if (_isBaseStart2) then { [_p, _snapR2, "Airbase"] call _fn_nearestRoad } else { [_p, _snapR2] call _fn_nearestRoad };
+            private _rL = if (_isBaseStart2) then { [_p, _snapR2, "Airbase"] call ARC_fnc_convoyNearestRoad } else { [_p, _snapR2] call ARC_fnc_convoyNearestRoad };
             if (!isNull _rL) then { _p = getPosATL _rL; _p resize 3; };
 
             _linkupPos = _p;
@@ -1660,7 +1610,7 @@ if (!(_objKind isEqualTo "")) then
                 {
                     private _p2 = _linkupPos getPos [_step, _markerDir];
                     _p2 resize 3;
-                    private _r2 = [_p2, (_roadSnap max 150) min 600, "Airbase"] call _fn_nearestRoad;
+                    private _r2 = [_p2, (_roadSnap max 150) min 600, "Airbase"] call ARC_fnc_convoyNearestRoad;
                     if (!isNull _r2) then { _linkupPos = getPosATL _r2; _linkupPos resize 3; };
                     private _z2 = [_linkupPos] call ARC_fnc_worldGetZoneForPos;
                     if (!((toUpper _z2) isEqualTo "AIRBASE")) exitWith {};
@@ -1752,7 +1702,7 @@ if (_showSpawnMarker) then
         // Snap ingress to the road network (marker may sit slightly off the asphalt).
         if (_useIngress) then
         {
-            private _rG = [_ingressPos, _snapM] call _fn_nearestRoad;
+            private _rG = [_ingressPos, _snapM] call ARC_fnc_convoyNearestRoad;
             if (!isNull _rG) then
             {
                 _ingressPos = getPosATL _rG;
@@ -1839,11 +1789,11 @@ if (_showSpawnMarker) then
 
                     private _r = if (!(_avoidZoneLocal isEqualTo "")) then
                     {
-                        [_probe, _hardSnap, _avoidZoneLocal, _avoidNearLocal, _avoidNearRLocal] call _fn_nearestRoad
+                        [_probe, _hardSnap, _avoidZoneLocal, _avoidNearLocal, _avoidNearRLocal] call ARC_fnc_convoyNearestRoad
                     }
                     else
                     {
-                        [_probe, _hardSnap] call _fn_nearestRoad
+                        [_probe, _hardSnap] call ARC_fnc_convoyNearestRoad
                     };
 
                     private _pt = +_probe;
@@ -1868,20 +1818,20 @@ if (_showSpawnMarker) then
                 // Snap endpoints to nearby roads (if available) so fallback remains road-biased.
                 private _rStart = if (!(_avoidZoneLocal isEqualTo "")) then
                 {
-                    [_s, _hardSnap, _avoidZoneLocal, _avoidNearLocal, _avoidNearRLocal] call _fn_nearestRoad
+                    [_s, _hardSnap, _avoidZoneLocal, _avoidNearLocal, _avoidNearRLocal] call ARC_fnc_convoyNearestRoad
                 }
                 else
                 {
-                    [_s, _hardSnap] call _fn_nearestRoad
+                    [_s, _hardSnap] call ARC_fnc_convoyNearestRoad
                 };
 
                 private _rEnd = if (!(_avoidZoneLocal isEqualTo "")) then
                 {
-                    [_e, _hardSnap, _avoidZoneLocal, _avoidNearLocal, _avoidNearRLocal] call _fn_nearestRoad
+                    [_e, _hardSnap, _avoidZoneLocal, _avoidNearLocal, _avoidNearRLocal] call ARC_fnc_convoyNearestRoad
                 }
                 else
                 {
-                    [_e, _hardSnap] call _fn_nearestRoad
+                    [_e, _hardSnap] call ARC_fnc_convoyNearestRoad
                 };
 
                 if ((count _fallback) > 0) then
@@ -1905,20 +1855,20 @@ if (_showSpawnMarker) then
             // When we're avoiding a zone (ex: Airbase), also avoid snapping the start/end to a road inside that zone.
             private _r0 = if (!(_avoidZone isEqualTo "")) then
             {
-                [_pStart, _snap, _avoidZone, _avoidNear, _avoidNearR] call _fn_nearestRoad
+                [_pStart, _snap, _avoidZone, _avoidNear, _avoidNearR] call ARC_fnc_convoyNearestRoad
             }
             else
             {
-                [_pStart, _snap] call _fn_nearestRoad
+                [_pStart, _snap] call ARC_fnc_convoyNearestRoad
             };
 
             private _r1 = if (!(_avoidZone isEqualTo "")) then
             {
-                [_pEnd, _snap, _avoidZone, _avoidNear, _avoidNearR] call _fn_nearestRoad
+                [_pEnd, _snap, _avoidZone, _avoidNear, _avoidNearR] call ARC_fnc_convoyNearestRoad
             }
             else
             {
-                [_pEnd, _snap] call _fn_nearestRoad
+                [_pEnd, _snap] call ARC_fnc_convoyNearestRoad
             };
 
             if (isNull _r0 || { isNull _r1 }) exitWith

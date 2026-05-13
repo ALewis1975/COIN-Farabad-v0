@@ -641,6 +641,12 @@ class CfgFunctions
             class execSpawnConvoy {};
             class execTickConvoy {};
             class execMsrThreatCheck {};  // T10: MSR/convoy threat awareness
+
+            // Helpers extracted from execTickConvoy / execInitActive (PR 8)
+            class convoyApplyRouteWps {};     // apply multi-wp road route to convoy group
+            class convoyNearRouteIdx {};      // nearest index in route pts to a position
+            class convoyNormalizeGroups {};   // merge convoy vehicle crews into lead group
+            class convoyNearestRoad {};       // nearest connected road with optional zone avoidance
         };
 
         // Reserved layers (future expansion)
