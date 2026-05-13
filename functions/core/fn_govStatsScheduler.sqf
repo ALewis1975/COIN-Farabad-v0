@@ -46,4 +46,5 @@ missionNamespace setVariable ["ARC_govStatsLoopRunning", true];
     };
 };
 
+// true is the function return value (spawn runs asynchronously; script handle is discarded).
 true
