@@ -11,6 +11,25 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-13 — Threat Economy scheduler/schema QA fix (Mode A)
+
+**Branch/Commit:** copilot/qa-review-threat-system-updates @ c8874ed
+
+**Scenario:** Fixed QA findings H-1/H-2 from the Threat System repository review: Threat Economy scheduler/risk/posture ticks now continue after bootstrap via a server-side loop, and economy-scheduled threat records now use the canonical top-level ThreatRecord schema while preserving convoy/MSR observability.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Pre-change threat static contracts | `for t in tests/static/threat_ied_lifecycle_contract_checks.sh tests/static/threat_family_normalization_contract_checks.sh tests/static/threat_ui_snapshot_contract_checks.sh tests/static/threat_economy_operator_tooling_contract_checks.sh tests/static/threat_persistence_migration_contract_checks.sh tests/static/threat_virtual_opfor_observability_contract_checks.sh tests/static/threat_validation_framework_contract_checks.sh; do bash "$t"; done` | PASS | Existing Threat Epic static contracts were green before edits. |
+| 2 | Pre-change compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_incidentTick.sqf functions/threat/fn_threatScheduleEvent.sqf functions/threat/fn_threatSchedulerTick.sqf functions/threat/fn_threatDistrictRiskDecay.sqf functions/threat/fn_threatAoPostureUpdate.sqf` | FAIL | Existing unrelated `isNotEqualTo` compat warning in `functions/core/fn_incidentTick.sqf`; avoided editing that file in this Mode A fix. |
+| 3 | Changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_bootstrapServer.sqf functions/threat/fn_threatScheduleEvent.sqf functions/logistics/fn_execMsrThreatCheck.sqf` | PASS | No known parser-compatibility patterns in changed SQF files. |
+| 4 | Changed-file sqflint | `python3 -m pip install --user sqflint && ~/.local/bin/sqflint -e w functions/core/fn_bootstrapServer.sqf && ~/.local/bin/sqflint -e w functions/threat/fn_threatScheduleEvent.sqf && ~/.local/bin/sqflint -e w functions/logistics/fn_execMsrThreatCheck.sqf` | PASS | Installed `sqflint` in the sandbox and linted changed SQF files one file at a time. |
+| 5 | Threat static contracts | `for t in tests/static/threat_ied_lifecycle_contract_checks.sh tests/static/threat_family_normalization_contract_checks.sh tests/static/threat_ui_snapshot_contract_checks.sh tests/static/threat_economy_operator_tooling_contract_checks.sh tests/static/threat_persistence_migration_contract_checks.sh tests/static/threat_virtual_opfor_observability_contract_checks.sh tests/static/threat_validation_framework_contract_checks.sh; do bash "$t"; done` | PASS | All Threat Epic static checks remained green after scheduler/schema fixes. |
+| 6 | Threat migration scenarios | `python3 scripts/dev/validate_state_migrations.py --scenarios tests/migrations/threat_persistence_schema_scenarios.json` | PASS | Threat persistence schema scenarios passed. |
+| 7 | Marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | Marker index validation completed across modes. |
+| 8 | Local MP / dedicated / JIP runtime proof | Exercise repeated economy tick cadence, scheduled threat row rendering, convoy MSR threat detection, and late-client snapshot consumption in Arma runtime | BLOCKED | Arma 3 runtime/dedicated/JIP environment unavailable in this sandbox. |
+
+---
+
 ## 2026-05-13 — Threat Epic 6 validation framework implementation (Mode E)
 
 **Branch/Commit:** copilot/alewis1975-epic-6-validation-framework @ 0a96a10
