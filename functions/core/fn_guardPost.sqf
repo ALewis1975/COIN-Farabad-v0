@@ -30,6 +30,7 @@ if (isNull _unit) exitWith {
     diag_log "[ARC][WARN] ARC_fnc_guardPost: called with null unit — exiting.";
 };
 
+// Opposing side: guards are expected to be east or west only (covers all RHS USAF/USARMY units).
 private _enemy    = if (side _unit == east) then {west} else {east};
 private _startdir = getDir _unit;
 private _zaxis    = 0;
@@ -70,6 +71,7 @@ while {alive _unit} do
 
     // Combat check: nearEntities pre-filters by radius using the engine spatial index,
     // avoiding a full allUnits scan (O(N)) per guard unit each tick.
+    // allUnits returns only Man-type units; nearEntities ["Man"] is equivalent in unit coverage.
     private _nearUnits = _unit nearEntities [["Man"], _detectRadius];
     private _engaging = false;
     {
@@ -81,11 +83,11 @@ while {alive _unit} do
         // Poll at 5 s intervals (reduced from 1 s) to limit server cost during sustained combat.
         waitUntil {
             sleep 5;
-            private _nearUnits2 = _unit nearEntities [["Man"], _detectRadius];
+            private _nearUnitsPoll = _unit nearEntities [["Man"], _detectRadius];
             private _anyLow = false;
             {
                 if ((side _x == _enemy) && { _unit knowsAbout _x < 4 }) exitWith { _anyLow = true; };
-            } forEach _nearUnits2;
+            } forEach _nearUnitsPoll;
             _anyLow
         };
     };
