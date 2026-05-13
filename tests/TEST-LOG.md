@@ -13,7 +13,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-05-13 — Farabad Console UI cleanup/state normalization (Mode A)
 
-**Branch/Commit:** copilot/farabad-console-ui-research @ 4efe851
+**Branch/Commit:** copilot/farabad-console-ui-research @ 3b63de1
 
 **Scenario:** Implemented console UI cleanup fixes for tab-switch disabled-state leakage, structured-text clipping in S-1, shared main/details pane overlap mitigation, and opt-in layout diagnostics.
 
@@ -27,6 +27,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | 6 | Dedicated/JIP/reconnect QA | Dedicated server + JIP/reconnect coverage for console state replication and late-client UI recovery | BLOCKED | Requires dedicated/JIP-capable Arma 3 environment outside this sandbox. |
 | 7 | Review-fix revalidation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleRefresh.sqf functions/ui/fn_uiConsoleS1Paint.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleRefresh.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleS1Paint.sqf && git diff --check` | PASS | Revalidated after addressing review feedback on direct `ctrlEnabled`, helper comments, duplicated tab comparison, and audit guard style. |
 | 8 | Final review cleanup revalidation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleRefresh.sqf functions/ui/fn_uiConsoleS1Paint.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleRefresh.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleS1Paint.sqf && git diff --check` | PASS | Revalidated after simplifying tab-change locals and documenting the S1 fallback minimum height. |
+| 9 | Final review simplification revalidation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleRefresh.sqf functions/ui/fn_uiConsoleS1Paint.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleRefresh.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleS1Paint.sqf && git diff --check` | PASS | Revalidated after applying the final tab-change simplification and clarifying that the fallback height is roughly 20% of screen height. |
 
 ---
 
