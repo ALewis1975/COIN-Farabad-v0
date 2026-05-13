@@ -8,16 +8,8 @@
 if (!isServer) exitWith {false};
 if (!isNil "remoteExecutedOwner") exitWith
 {
-    private _reo = remoteExecutedOwner;
-    if (_reo > 0) then
-    {
-        diag_log format ["[ARC][SEC] ARC_fnc_publicBroadcastState: rejected remote caller owner=%1", _reo];
-        false
-    }
-    else
-    {
-        true
-    };
+    diag_log format ["[ARC][SEC] ARC_fnc_publicBroadcastState: rejected remote execution owner=%1", remoteExecutedOwner];
+    false
 };
 
 private _trimFn = compile "params ['_s']; trim _s";

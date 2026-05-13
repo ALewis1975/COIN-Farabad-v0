@@ -11,7 +11,7 @@ params [
     ["_requester", objNull, [objNull]]
 ];
 
-private _owner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+private _owner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { 0 };
 private _requesterObj = _requester;
 
 if (_owner > 0) then
@@ -21,6 +21,12 @@ if (_owner > 0) then
         {
             if (owner _x == _owner) exitWith { _requesterObj = _x; };
         } forEach allPlayers;
+    };
+
+    if (isNull _requesterObj) exitWith
+    {
+        diag_log format ["[ARC][SEC] ARC_fnc_tocRequestPublicBroadcast: denied owner=%1 caller=<unresolved>", _owner];
+        false
     };
 
     private _senderValid = [
