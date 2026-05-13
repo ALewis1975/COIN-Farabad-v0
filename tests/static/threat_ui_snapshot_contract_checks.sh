@@ -25,7 +25,7 @@ check 'ARC_pub_threatUiSnapshot' "functions/core/fn_publicBroadcastState.sqf" "T
 check '\["threat",       _threatSection\]' "functions/core/fn_consoleVmBuild.sqf" "Console VM publishes threat section"
 check 'ARC_fnc_threatUiDiaryRefresh' "functions/core/fn_clientSnapshotRefresh.sqf" "Client snapshot refresh calls threat diary refresh"
 check 'Read-only operator surface' "functions/core/fn_threatUiDiaryRefresh.sqf" "Threat diary refresh renders read-only operator surface"
-check 'schema", "threat_ui_v1' "functions/threat/fn_threatUiSnapshotBuild.sqf" "Threat UI snapshot builder publishes threat_ui_v1 schema"
+check '\["schema", "threat_ui_v1"\]' "functions/threat/fn_threatUiSnapshotBuild.sqf" "Threat UI snapshot builder publishes threat_ui_v1 schema"
 
 if [[ "$pass" != true ]]; then
   exit 1

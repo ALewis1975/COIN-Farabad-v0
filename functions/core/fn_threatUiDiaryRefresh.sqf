@@ -111,7 +111,7 @@ private _snapshot = missionNamespace getVariable ["ARC_pub_threatUiSnapshot", []
 if (!(_snapshot isEqualType [])) then { _snapshot = []; };
 
 private _text = "<t size='1.2'>Threat Picture</t><br/>";
-_text = _text + "<t color='#A0A0A0'>Read-only operator surface. Clients never finalize threat state.</t><br/><br/>";
+_text = _text + "<t color='#A0A0A0'>Read-only operator surface. Clients are read-only and cannot modify threat state.</t><br/><br/>";
 
 if ((count _snapshot) == 0) then {
     _text = _text + "<t color='#FF7A7A'>No data yet.</t><br/>";
