@@ -67,12 +67,12 @@ private _recSoI = ["ARC_diary_rec_soi", "Diary", "SOI"] call _ensureRecord;
 private _pub = missionNamespace getVariable ["ARC_pub_state", []];
 if (!(_pub isEqualType [])) then { _pub = []; };
 
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+private _pubMap = [_pub] call _hmCreate;
+
 private _get = {
     params ["_k", "_def"];
-    private _idx = -1;
-    { if ((_x # 0) isEqualTo _k) exitWith { _idx = _forEachIndex; }; } forEach _pub;
-    if (_idx < 0) exitWith {_def};
-    (_pub # _idx) # 1
+    [_pubMap, _k, _def] call getOrDefault
 };
 
 private _p = ["insurgentPressure", 0.60] call _get;
@@ -106,7 +106,7 @@ if (_posATL isEqualType [] && { (count _posATL) >= 2 }) then
 };
 
 private _locLine = "";
-if (_taskId isNotEqualTo "") then
+if (_taskId != "") then
 {
     if (_mkr isEqualTo "") then
     {
@@ -128,7 +128,7 @@ if (_taskId isEqualTo "") then
 }
 else
 {
-    if (_mkr isNotEqualTo "") then
+    if (_mkr != "") then
     {
         _zoneA = [_mkr] call ARC_fnc_worldGetZoneForMarker;
     }
@@ -146,7 +146,7 @@ if (_zoneA isEqualTo "") then { _zoneA = "Unzoned"; };
 private _taskingFrom = "";
 private _supporting = "";
 private _constraints = "";
-if (_taskId isNotEqualTo "" && { _type isNotEqualTo "" }) then
+if (_taskId != "" && { _type != "" }) then
 {
     private _t = [_type, _zoneA] call ARC_fnc_orbatPickTasking;
     if (_t isEqualType [] && { (count _t) >= 3 }) then
@@ -166,7 +166,7 @@ if (_acceptedByGrp isEqualTo "") then { _acceptedByGrp = "UNASSIGNED"; };
 private _statusA = "";
 private _linkupWith = "None";
 
-if (_taskId isNotEqualTo "") then
+if (_taskId != "") then
 {
     private _accepted = missionNamespace getVariable ["ARC_activeIncidentAccepted", false];
     if (!(_accepted isEqualType true) && !(_accepted isEqualType false)) then { _accepted = false; };
@@ -232,7 +232,7 @@ if (_taskId isNotEqualTo "") then
         private _nids = missionNamespace getVariable ["ARC_activeConvoyNetIds", []];
         if (_nids isEqualType [] && { (count _nids) > 0 }) then
         {
-            private _leadVeh = objectFromNetId (_nids # 0);
+            private _leadVeh = objectFromNetId (_nids select 0);
             if (!isNull _leadVeh) then
             {
                 private _drv = driver _leadVeh;
@@ -241,7 +241,7 @@ if (_taskId isNotEqualTo "") then
                 if (!isNull _drv) then
                 {
                     private _gid = groupId (group _drv);
-                    if (_gid isEqualType "" && { _gid isNotEqualTo "" }) then
+                    if (_gid isEqualType "" && { _gid != "" }) then
                     {
                         _linkupWith = _gid;
                         _got = true;
@@ -252,7 +252,7 @@ if (_taskId isNotEqualTo "") then
 
         if (!_got) then
         {
-            _linkupWith = if ((toUpper _type) isEqualTo "ESCORT" && { _taskingFrom isNotEqualTo "" }) then { _taskingFrom } else { "Friendly convoy element" };
+            _linkupWith = if ((toUpper _type) isEqualTo "ESCORT" && { _taskingFrom != "" }) then { _taskingFrom } else { "Friendly convoy element" };
         };
     };
 };
@@ -269,7 +269,7 @@ else
         "<t size='1.05'>%1</t><br/>Type: %2<br/>Status: %3<br/>%4<br/>Zone: %5<br/>Task ID: %6<br/>Tasking From: %7<br/>Linking up with: %8<br/>Supported by: %9<br/>Assigned Unit: %10<br/><br/>",
         _disp, _type, _statusA, _locLine, _zoneA, _taskId, _taskingFrom, _linkupWith, _supporting, _acceptedByGrp
     ];
-    if (_constraints isNotEqualTo "") then
+    if (_constraints != "") then
     {
         _opsText = _opsText + format ["<t size='0.9' color='#C0C0C0'>Constraints: %1</t><br/><br/>", _constraints];
     };
@@ -295,7 +295,11 @@ if ((count _histTail) isEqualTo 0) then
 else
 {
     {
-        _x params ["_tId", "_marker", "_tType", "_tDisp", "_res", "_created", "_closed"];
+        if !(_x isEqualType [] && { (count _x) >= 5 }) then { continue; };
+        private _tId = _x select 0;
+        private _tType = _x select 2;
+        private _tDisp = _x select 3;
+        private _res = _x select 4;
         _opsText = _opsText + format ["%1: %2 (%3) - <t color='#A0A0A0'>%4</t><br/>", _tId, _tDisp, _tType, _res];
     } forEach _histTail;
 };
@@ -314,9 +318,9 @@ private _qMetaGet = {
     if (!(_meta isEqualType [])) exitWith { _d };
     private _out = _d;
     {
-        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith
+        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith
         {
-            _out = _x # 1;
+            _out = _x select 1;
         };
     } forEach _meta;
     _out
@@ -346,21 +350,14 @@ else
     private _shown = 0;
     {
         if !(_x isEqualType [] && { (count _x) >= 12 }) then { continue; };
-        _x params [
-            "_qid",
-            "_qt",
-            "_qst",
-            "_qkind",
-            "_qfrom",
-            "_qfromGroup",
-            "_qfromUID",
-            "_qpos",
-            "_qsum",
-            "_qdet",
-            "_qpayload",
-            "_qmeta",
-            ["_qdec", []]
-        ];
+        private _qid = _x select 0;
+        private _qt = _x select 1;
+        private _qkind = _x select 3;
+        private _qfrom = _x select 4;
+        private _qfromGroup = _x select 5;
+        private _qpos = _x select 7;
+        private _qsum = _x select 8;
+        private _qmeta = _x select 11;
 
         private _age = 0;
         if (_qt isEqualType 0) then { _age = floor ((serverTime - _qt) / 60); };
@@ -376,7 +373,7 @@ else
         if ((count _sumQ) > 64) then { _sumQ = (_sumQ select [0, 64]) + "..."; };
 
         _opsText = _opsText + format ["<t color='#FFD700'>%1</t> | %2 | %3m | %4 | %5 | %6<br/>", _qid, _qkind, _age, _whoQ, _zoneQ, _gridQ];
-        if (_sumQ isNotEqualTo "") then { _opsText = _opsText + format ["<t color='#A0A0A0'>%1</t><br/>", _sumQ]; };
+        if (_sumQ != "") then { _opsText = _opsText + format ["<t color='#A0A0A0'>%1</t><br/>", _sumQ]; };
 
         _shown = _shown + 1;
         if (_shown >= _showN) exitWith {};
@@ -392,7 +389,7 @@ else
 private _decisions = [];
 {
     if !(_x isEqualType [] && { (count _x) >= 13 }) then { continue; };
-    private _st = _x # 2;
+    private _st = _x select 2;
     if (_st isEqualType "") then
     {
         private _u = toUpper _st;
@@ -407,24 +404,14 @@ if ((count _decisions) > 0) then
     private _start = ((count _decisions) - _n) max 0;
     for "_i" from _start to ((count _decisions) - 1) do
     {
-        private _it = _decisions # _i;
-        _it params [
-            "_qid",
-            "_qt",
-            "_qst",
-            "_qkind",
-            "_qfrom",
-            "_qfromGroup",
-            "_qfromUID",
-            "_qpos",
-            "_qsum",
-            "_qdet",
-            "_qpayload",
-            "_qmeta",
-            ["_qdec", []]
-        ];
+        private _it = _decisions select _i;
+        if !(_it isEqualType [] && { (count _it) >= 6 }) then { continue; };
+        private _qid = _it select 0;
+        private _qst = _it select 2;
+        private _qkind = _it select 3;
+        private _who = _it select 5;
 
-        private _who = if (_qfromGroup isEqualTo "") then { _qfrom } else { _qfromGroup };
+        if (_who isEqualTo "") then { _who = _it select 4; };
         private _stU = toUpper _qst;
         private _col = if (_stU isEqualTo "APPROVED") then { "#00FF00" } else { "#FF6666" };
         _opsText = _opsText + format ["%1 | <t color='%2'>%3</t> | %4 | %5<br/>", _qid, _col, _stU, _qkind, _who];
@@ -451,32 +438,24 @@ else
     private _startOps = ((count _opsLog) - 20) max 0;
     private _sliceOps = _opsLog select [_startOps, (count _opsLog) - _startOps];
 
-    private _metaGetOps = {
-        params ["_meta", "_k", "_def"];
-        if (!(_meta isEqualType [])) exitWith {_def};
-        private _idx = -1;
-        { if ((_x # 0) isEqualTo _k) exitWith { _idx = _forEachIndex; }; } forEach _meta;
-        if (_idx < 0) exitWith {_def};
-        (_meta # _idx) # 1
-    };
-
     {
         _x params ["_iid", "_t", "_cat", "_sum", "_posATL", "_meta"];
         private _mins = round (_t / 60);
+        private _metaMap = if (_meta isEqualType [] && { (count _meta) > 0 }) then { [_meta] call _hmCreate } else { createHashMap };
 
-        private _grid = [_meta, "grid", ""] call _metaGetOps;
+        private _grid = [_metaMap, "grid", ""] call getOrDefault;
         if (_grid isEqualTo "" && {_posATL isEqualType [] && { (count _posATL) >= 2 }}) then { _grid = mapGridPosition _posATL; };
 
-        private _event = [_meta, "event", ""] call _metaGetOps;
+        private _event = [_metaMap, "event", ""] call getOrDefault;
         if (!(_event isEqualType "")) then { _event = ""; };
 
-        private _from = [_meta, "from", ""] call _metaGetOps;
+        private _from = [_metaMap, "from", ""] call getOrDefault;
         if (!(_from isEqualType "")) then { _from = ""; };
 
-        private _details = [_meta, "details", ""] call _metaGetOps;
+        private _details = [_metaMap, "details", ""] call getOrDefault;
         if (!(_details isEqualType "")) then { _details = ""; };
-        _details = trim _details;
-        if (_details isNotEqualTo "") then
+        _details = [_details] call (compile "params ['_s']; trim _s");
+        if (_details != "") then
         {
             _details = (_details splitString (toString [10])) joinString "<br/>";
             _details = format ["<br/><t color='#A0A0A0'>%1</t>", _details];
@@ -526,15 +505,6 @@ if ((count _snapTail) < 2) then
 }
 else
 {
-    private _pairGet = {
-        params ["_pairs", "_k", "_def"];
-        if (!(_pairs isEqualType [])) exitWith { _def };
-        private _idx = -1;
-        { if ((_x # 0) isEqualTo _k) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
-        if (_idx < 0) exitWith { _def };
-        (_pairs # _idx) # 1
-    };
-
     private _fmtPctDelta = {
         params ["_d"];
         if (!(_d isEqualType 0)) exitWith { "0%" };
@@ -556,23 +526,25 @@ else
     private _startIdx = ((_n - _maxLines) max 1);
     for "_i" from _startIdx to (_n - 1) do
     {
-        private _a = _snapTail # (_i - 1);
-        private _b = _snapTail # _i;
+        private _a = _snapTail select (_i - 1);
+        private _b = _snapTail select _i;
         if (!(_a isEqualType []) || { !(_b isEqualType []) } || { (count _a) < 2 } || { (count _b) < 2 }) then { continue; };
-        private _tB = _b # 0;
+        private _tB = _b select 0;
         private _minsB = round (_tB / 60);
-        private _pA = _a # 1;
-        private _pB = _b # 1;
+        private _pA = _a select 1;
+        private _pB = _b select 1;
+        private _pAMap = if (_pA isEqualType [] && { (count _pA) > 0 }) then { [_pA] call _hmCreate } else { createHashMap };
+        private _pBMap = if (_pB isEqualType [] && { (count _pB) > 0 }) then { [_pB] call _hmCreate } else { createHashMap };
 
-        private _dPress = ([_pB, "insurgentPressure", 0] call _pairGet) - ([_pA, "insurgentPressure", 0] call _pairGet);
-        private _dSent  = ([_pB, "civSentiment", 0] call _pairGet) - ([_pA, "civSentiment", 0] call _pairGet);
-        private _dLeg   = ([_pB, "govLegitimacy", 0] call _pairGet) - ([_pA, "govLegitimacy", 0] call _pairGet);
-        private _dCorr  = ([_pB, "corruption", 0] call _pairGet) - ([_pA, "corruption", 0] call _pairGet);
-        private _dInf   = ([_pB, "infiltration", 0] call _pairGet) - ([_pA, "infiltration", 0] call _pairGet);
-        private _dFuel  = ([_pB, "baseFuel", 0] call _pairGet) - ([_pA, "baseFuel", 0] call _pairGet);
-        private _dAmmo  = ([_pB, "baseAmmo", 0] call _pairGet) - ([_pA, "baseAmmo", 0] call _pairGet);
-        private _dMed   = ([_pB, "baseMed", 0] call _pairGet) - ([_pA, "baseMed", 0] call _pairGet);
-        private _dCas   = ([_pB, "civCasualties", 0] call _pairGet) - ([_pA, "civCasualties", 0] call _pairGet);
+        private _dPress = ([_pBMap, "insurgentPressure", 0] call getOrDefault) - ([_pAMap, "insurgentPressure", 0] call getOrDefault);
+        private _dSent  = ([_pBMap, "civSentiment", 0] call getOrDefault) - ([_pAMap, "civSentiment", 0] call getOrDefault);
+        private _dLeg   = ([_pBMap, "govLegitimacy", 0] call getOrDefault) - ([_pAMap, "govLegitimacy", 0] call getOrDefault);
+        private _dCorr  = ([_pBMap, "corruption", 0] call getOrDefault) - ([_pAMap, "corruption", 0] call getOrDefault);
+        private _dInf   = ([_pBMap, "infiltration", 0] call getOrDefault) - ([_pAMap, "infiltration", 0] call getOrDefault);
+        private _dFuel  = ([_pBMap, "baseFuel", 0] call getOrDefault) - ([_pAMap, "baseFuel", 0] call getOrDefault);
+        private _dAmmo  = ([_pBMap, "baseAmmo", 0] call getOrDefault) - ([_pAMap, "baseAmmo", 0] call getOrDefault);
+        private _dMed   = ([_pBMap, "baseMed", 0] call getOrDefault) - ([_pAMap, "baseMed", 0] call getOrDefault);
+        private _dCas   = ([_pBMap, "civCasualties", 0] call getOrDefault) - ([_pAMap, "civCasualties", 0] call getOrDefault);
 
         _opsText = _opsText + format [
             "T+%1m: Pressure %2 | Sentiment %3 | Legitimacy %4 | Corruption %5 | Infil %6<br/>Fuel %7 | Ammo %8 | Med %9 | CivCas %10<br/>",
@@ -611,19 +583,11 @@ else
     private _shown = 0;
     {
         if !(_x isEqualType [] && { (count _x) >= 11 }) then { continue; };
-        _x params [
-            "_lid",
-            "_lType",
-            "_lDisp",
-            "_lPos",
-            ["_lStrength", 0.5],
-            ["_lCreated", -1],
-            ["_lExpires", -1],
-            ["_lSourceTask", ""],
-            ["_lSourceType", ""],
-            ["_lThread", ""],
-            ["_lTag", ""]
-        ];
+        private _lid = _x select 0;
+        private _lType = _x select 1;
+        private _lPos = _x select 3;
+        private _lExpires = _x select 6;
+        private _lTag = _x select 10;
 
         private _gridL = "";
         if (_lPos isEqualType [] && { (count _lPos) >= 2 }) then { _gridL = mapGridPosition _lPos; };
@@ -642,7 +606,7 @@ else
         };
 
         private _tagTxt = "";
-        if (_lTag isEqualType "" && { _lTag isNotEqualTo "" }) then
+        if (_lTag isEqualType "" && { _lTag != "" }) then
         {
             _tagTxt = format [" <t color='#A0A0A0'>[%1]</t>", _lTag];
         };
@@ -675,32 +639,29 @@ else
     private _start = ((count _intelLog) - 20) max 0;
     private _slice = _intelLog select [_start, (count _intelLog) - _start];
 
-    private _metaGet = {
-        params ["_meta", "_k", "_def"];
-        if (!(_meta isEqualType [])) exitWith {_def};
-        private _idx = -1;
-        { if ((_x # 0) isEqualTo _k) exitWith { _idx = _forEachIndex; }; } forEach _meta;
-        if (_idx < 0) exitWith {_def};
-        (_meta # _idx) # 1
-    };
-
     {
-        _x params ["_iid", "_t", "_cat", "_sum", "_posATL", "_meta"];
+        if !(_x isEqualType [] && { (count _x) >= 6 }) then { continue; };
+        private _iid = _x select 0;
+        private _t = _x select 1;
+        private _cat = _x select 2;
+        private _sum = _x select 3;
+        private _meta = _x select 5;
         private _mins = round (_t / 60);
+        private _metaMap = if (_meta isEqualType [] && { (count _meta) > 0 }) then { [_meta] call _hmCreate } else { createHashMap };
 
-        private _grid = [_meta, "grid", ""] call _metaGet;
+        private _grid = [_metaMap, "grid", ""] call getOrDefault;
         if (_grid isEqualTo "" && {_posATL isEqualType [] && { (count _posATL) >= 2 }}) then { _grid = mapGridPosition _posATL; };
 
-        private _zone = [_meta, "zone", ""] call _metaGet;
+        private _zone = [_metaMap, "zone", ""] call getOrDefault;
         if (_zone isEqualTo "") then { _zone = "Unzoned"; };
 
-        private _conf = [_meta, "confidence", ""] call _metaGet;
+        private _conf = [_metaMap, "confidence", ""] call getOrDefault;
         private _confTxt = if (_conf isEqualTo "") then { "" } else { format [" <t color='#A0A0A0'>(%1)</t>", _conf] };
 
-        private _details = [_meta, "details", ""] call _metaGet;
+        private _details = [_metaMap, "details", ""] call getOrDefault;
         if (!(_details isEqualType "")) then { _details = ""; };
-        _details = trim _details;
-        if (_details isNotEqualTo "") then
+        _details = [_details] call (compile "params ['_s']; trim _s");
+        if (_details != "") then
         {
             // Convert any newline characters to <br/> for structured text output
             _details = (_details splitString (toString [10])) joinString "<br/>";
@@ -885,9 +846,9 @@ if (_dbgEnabled) then
     private _getDbg = {
         params ["_k", "_def"];
         private _idx = -1;
-        { if ((_x # 0) isEqualTo _k) exitWith { _idx = _forEachIndex; }; } forEach _dbgPub;
+        { if ((_x select 0) isEqualTo _k) exitWith { _idx = _forEachIndex; }; } forEach _dbgPub;
         if (_idx < 0) exitWith { _def };
-        (_dbgPub # _idx) # 1
+        (_dbgPub select _idx) select 1
     };
 
     // Server publishes this using serverTime; treat as display/change token, not wall-clock age.
@@ -1012,9 +973,9 @@ private _s1Get = {
     params ["_pairs", "_key", "_default"];
     if (!(_pairs isEqualType [])) exitWith { _default };
     private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { ((_x # 0) isEqualTo _key) }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { ((_x select 0) isEqualTo _key) }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) exitWith { _default };
-    (_pairs # _idx) # 1
+    (_pairs select _idx) select 1
 };
 private _s1Groups = [_s1Registry, "groups", []] call _s1Get;
 private _s1Units = [_s1Registry, "units", []] call _s1Get;
@@ -1043,50 +1004,56 @@ else
 };
 
 // Apply updates (setDiaryRecordText)
-if (_recOps isNotEqualTo diaryRecordNull) then
+// sqflint 0.3.2 cannot parse direct command-form setDiaryRecordText calls.
+private _setDiaryRecordTextCompat = compileFinal "
+    params ['_unit', '_recordRef', '_recordText'];
+    _unit setDiaryRecordText [_recordRef, _recordText];
+";
+
+if (_recOps != diaryRecordNull) then
 {
-    player setDiaryRecordText [["ARC_OPS", _recOps], ["OPS Dashboard", _opsText, ""]];
+    [player, ["ARC_OPS", _recOps], ["OPS Dashboard", _opsText, ""]] call _setDiaryRecordTextCompat;
 };
 
-if (_recIntel isNotEqualTo diaryRecordNull) then
+if (_recIntel != diaryRecordNull) then
 {
-    player setDiaryRecordText [["ARC_INTEL", _recIntel], ["Intel Feed", _intelText, ""]];
+    [player, ["ARC_INTEL", _recIntel], ["Intel Feed", _intelText, ""]] call _setDiaryRecordTextCompat;
 };
 
-if (_recSitrep isNotEqualTo diaryRecordNull) then
+if (_recSitrep != diaryRecordNull) then
 {
-    player setDiaryRecordText [["ARC_SITREP", _recSitrep], ["SITREP", _sitrepText, ""]];
+    [player, ["ARC_SITREP", _recSitrep], ["SITREP", _sitrepText, ""]] call _setDiaryRecordTextCompat;
 };
 
-if (_recS1 isNotEqualTo diaryRecordNull) then
+if (_recS1 != diaryRecordNull) then
 {
-    player setDiaryRecordText [["ARC_S1", _recS1], ["Personnel Snapshot", _s1Text, ""]];
+    [player, ["ARC_S1", _recS1], ["Personnel Snapshot", _s1Text, ""]] call _setDiaryRecordTextCompat;
 };
 
-if (_recDebug isNotEqualTo diaryRecordNull) then
+if (_recDebug != diaryRecordNull) then
 {
-    player setDiaryRecordText [["ARC_DEBUG", _recDebug], ["Debug Inspector", _dbgText, ""]];
+    [player, ["ARC_DEBUG", _recDebug], ["Debug Inspector", _dbgText, ""]] call _setDiaryRecordTextCompat;
 };
 
-if (_recOpord isNotEqualTo diaryRecordNull) then
+if (_recOpord != diaryRecordNull) then
 {
-    player setDiaryRecordText [["Diary", _recOpord], ["OPORD", _opordText, ""]];
+    [player, ["Diary", _recOpord], ["OPORD", _opordText, ""]] call _setDiaryRecordTextCompat;
 };
 
 
-if (_recRoles isNotEqualTo diaryRecordNull) then
+if (_recRoles != diaryRecordNull) then
 {
-    player setDiaryRecordText [["Diary", _recRoles], ["ROLES & CAPABILITIES", _rolesText, ""]];
+    [player, ["Diary", _recRoles], ["ROLES & CAPABILITIES", _rolesText, ""]] call _setDiaryRecordTextCompat;
 };
 
-if (_recOrbat isNotEqualTo diaryRecordNull) then
+if (_recOrbat != diaryRecordNull) then
 {
-    player setDiaryRecordText [["Diary", _recOrbat], ["ORBAT", _orbatText, ""]];
+    [player, ["Diary", _recOrbat], ["ORBAT", _orbatText, ""]] call _setDiaryRecordTextCompat;
 };
 
-if (_recSoI isNotEqualTo diaryRecordNull) then
+if (_recSoI != diaryRecordNull) then
 {
-    player setDiaryRecordText [["Diary", _recSoI], ["SOI", _soiText, ""]];
+    [player, ["Diary", _recSoI], ["SOI", _soiText, ""]] call _setDiaryRecordTextCompat;
 };
 
 true
