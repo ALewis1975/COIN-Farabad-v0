@@ -140,6 +140,10 @@ if (_iedPos isEqualTo [] || { (count _iedPos) < 2 }) then { _iedPos = _basePos; 
 // ---------------------------------------------------------------------------
 private _now = serverTime;
 
+private _typeU = "IED";
+private _subtypeU = "IED_EMPLACED_SINGLE";
+private _familyU = [_typeU, _subtypeU] call ARC_fnc_threatInferFamily;
+
 private _area = [];
 _area = [_area, "pos", _iedPos] call _kvSet;
 _area = [_area, "grid", mapGridPosition _iedPos] call _kvSet;
@@ -147,13 +151,17 @@ _area = [_area, "radius_m", 80] call _kvSet;
 _area = [_area, "despawn_m", 600] call _kvSet;
 
 private _links = [];
+_links = [_links, "ao_id", ""] call _kvSet;
+_links = [_links, "district_id_source", _districtId] call _kvSet;
 _links = [_links, "district_id", _districtId] call _kvSet;
 _links = [_links, "task_id", ""] call _kvSet;
+_links = [_links, "lead_id", ""] call _kvSet;
+_links = [_links, "incident_id", ""] call _kvSet;
 _links = [_links, "target_profile", _targetProfile] call _kvSet;
 
 private _classification = [];
-_classification = [_classification, "type", "IED"] call _kvSet;
-_classification = [_classification, "subtype", "IED_EMPLACED_SINGLE"] call _kvSet;
+_classification = [_classification, "type", _typeU] call _kvSet;
+_classification = [_classification, "subtype", _subtypeU] call _kvSet;
 _classification = [_classification, "escalation_tier", _tier] call _kvSet;
 _classification = [_classification, "priority", ((_tier min 4) + 1)] call _kvSet;
 
@@ -162,25 +170,49 @@ _world = [_world, "spawned", false] call _kvSet;
 _world = [_world, "objects_net_ids", []] call _kvSet;
 _world = [_world, "groups_net_ids", []] call _kvSet;
 _world = [_world, "units_net_ids", []] call _kvSet;
+_world = [_world, "cleanup_label", ""] call _kvSet;
 
 private _stateTsNew = [];
-_stateTsNew = [_stateTsNew, "planned", _now] call _kvSet;
+_stateTsNew = [_stateTsNew, "created", _now] call _kvSet;
+_stateTsNew = [_stateTsNew, "active", -1] call _kvSet;
+_stateTsNew = [_stateTsNew, "discovered", -1] call _kvSet;
+_stateTsNew = [_stateTsNew, "neutralized", -1] call _kvSet;
+_stateTsNew = [_stateTsNew, "closed", -1] call _kvSet;
+_stateTsNew = [_stateTsNew, "cleaned", -1] call _kvSet;
+_stateTsNew = [_stateTsNew, "expired", -1] call _kvSet;
+
+private _tele = [];
+_tele = [_tele, "intel_level", 0] call _kvSet;
+_tele = [_tele, "cues_enabled", true] call _kvSet;
+
+private _outcome = [];
+_outcome = [_outcome, "result", "NONE"] call _kvSet;
+_outcome = [_outcome, "notes", ""] call _kvSet;
 
 private _audit = [];
-_audit = [_audit, "created_at", _now] call _kvSet;
 _audit = [_audit, "created_by", "SYSTEM"] call _kvSet;
-_audit = [_audit, "last_updated_at", _now] call _kvSet;
+_audit = [_audit, "last_updated_by", "SYSTEM"] call _kvSet;
+_audit = [_audit, "log_refs", []] call _kvSet;
 
 private _rec = [];
+_rec = [_rec, "v", 0] call _kvSet;
 _rec = [_rec, "threat_id", _threatId] call _kvSet;
+_rec = [_rec, "campaign_id", _campaignId] call _kvSet;
+_rec = [_rec, "rev", 1] call _kvSet;
+_rec = [_rec, "created_ts", _now] call _kvSet;
+_rec = [_rec, "updated_ts", _now] call _kvSet;
+_rec = [_rec, "family", _familyU] call _kvSet;
+_rec = [_rec, "type", _typeU] call _kvSet;
+_rec = [_rec, "subtype", _subtypeU] call _kvSet;
+_rec = [_rec, "state", "CREATED"] call _kvSet;
+_rec = [_rec, "state_ts", _stateTsNew] call _kvSet;
 _rec = [_rec, "links", _links] call _kvSet;
 _rec = [_rec, "area", _area] call _kvSet;
 _rec = [_rec, "classification", _classification] call _kvSet;
 _rec = [_rec, "world", _world] call _kvSet;
-_rec = [_rec, "state", "PLANNED"] call _kvSet;
-_rec = [_rec, "state_ts", _stateTsNew] call _kvSet;
+_rec = [_rec, "telegraphing", _tele] call _kvSet;
+_rec = [_rec, "outcome", _outcome] call _kvSet;
 _rec = [_rec, "audit", _audit] call _kvSet;
-_rec = [_rec, "rev", 1] call _kvSet;
 
 // ---------------------------------------------------------------------------
 // Persist record and update open index
@@ -196,8 +228,8 @@ _open pushBackUnique _threatId;
 ["threat_v0_open_index", _open] call ARC_fnc_stateSet;
 
 diag_log format [
-    "[ARC][THREAT] ARC_fnc_threatScheduleEvent: scheduled threat_id=%1 district=%2 tier=%3 target=%4 pos=%5",
-    _threatId, _districtId, _tier, _targetProfile, _iedPos
+    "[ARC][THREAT] ARC_fnc_threatScheduleEvent: scheduled threat_id=%1 district=%2 family=%3 tier=%4 target=%5 pos=%6",
+    _threatId, _districtId, _familyU, _tier, _targetProfile, _iedPos
 ];
 
 // ---------------------------------------------------------------------------

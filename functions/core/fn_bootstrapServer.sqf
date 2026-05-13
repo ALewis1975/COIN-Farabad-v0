@@ -834,9 +834,39 @@ missionNamespace setVariable ["ARC_activeConvoyNetIds", ["activeConvoyNetIds", [
 [] call ARC_fnc_companyCommandVirtualOpsTick;
 
 // Threat Economy v0: scheduler + risk decay ticks
-[] call ARC_fnc_threatSchedulerTick;
-[] call ARC_fnc_threatDistrictRiskDecay;
-[] call ARC_fnc_threatAoPostureUpdate;
+if (!_safeModeEnabled) then
+{
+    [] call ARC_fnc_threatSchedulerTick;
+    [] call ARC_fnc_threatDistrictRiskDecay;
+    [] call ARC_fnc_threatAoPostureUpdate;
+
+    if (isNil { missionNamespace getVariable "ARC_threatEconomyLoopRunning" }) then
+    {
+        missionNamespace setVariable ["ARC_threatEconomyLoopRunning", true];
+
+        [] spawn
+        {
+            while {true} do
+            {
+                private _tickS = missionNamespace getVariable ["ARC_threatEconomyLoopTickS", 60];
+                if (!(_tickS isEqualType 0) || { _tickS < 10 }) then { _tickS = 60; };
+                _tickS = (_tickS max 10) min 600;
+                sleep _tickS;
+
+                if (!isServer) exitWith {};
+                private _ready = missionNamespace getVariable ["ARC_serverReady", false];
+                if (!(_ready isEqualType true) && !(_ready isEqualType false)) then { _ready = false; };
+
+                if (_ready) then
+                {
+                    [] call ARC_fnc_threatSchedulerTick;
+                    [] call ARC_fnc_threatDistrictRiskDecay;
+                    [] call ARC_fnc_threatAoPostureUpdate;
+                };
+            };
+        };
+    };
+};
 
 // Medical subsystem (casualty tracking, baseMed events)
 [] call ARC_fnc_medicalInit;
