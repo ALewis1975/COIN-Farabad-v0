@@ -59,6 +59,8 @@ if (_alreadySeeded) exitWith {
     // Protected zones list (configurable; defaults cover BLUFOR-controlled zones)
     private _pzMig = missionNamespace getVariable ["ARC_threatVirtualProtectedZones", ["Airbase", "GreenZone", "MilitaryBase"]];
     if (!(_pzMig isEqualType [])) then { _pzMig = ["Airbase", "GreenZone", "MilitaryBase"]; };
+    private _pmMig = missionNamespace getVariable ["ARC_threatProtectedSpawnMarkers", [["mkr_airbaseCenter", missionNamespace getVariable ["ARC_airbase_dynamic_radius_m", 1600]]]];
+    if (!(_pmMig isEqualType [])) then { _pmMig = [["mkr_airbaseCenter", missionNamespace getVariable ["ARC_airbase_dynamic_radius_m", 1600]]]; };
 
     // Named locations for anchor-position lookup during relocation
     private _migLocs = missionNamespace getVariable ["ARC_worldNamedLocations", []];
@@ -98,7 +100,7 @@ if (_alreadySeeded) exitWith {
         if (!(_migPos isEqualType []) || { (count _migPos) < 2 }) then { continue; };
 
         private _migPosZone = [_migPos] call ARC_fnc_worldGetZoneForPos;
-        if (!(_migPosZone in _pzMig)) then { continue; };
+        if (!([_migPos, _pzMig, _pmMig] call ARC_fnc_threatIsProtectedSpawnPos)) then { continue; };
 
         // This record sits inside a protected zone — attempt relocation
         private _migAnchorId = [_migRec, "anchorLocationId", ""] call _migKvGet;
@@ -122,8 +124,7 @@ if (_alreadySeeded) exitWith {
             private _mox = random 300 - 150;
             private _moy = random 300 - 150;
             private _mCand = [(_migBaseP3 select 0) + _mox, (_migBaseP3 select 1) + _moy, 0];
-            private _mCandZone = [_mCand] call ARC_fnc_worldGetZoneForPos;
-            if (!(_mCandZone in _pzMig)) then { _migSafePos = _mCand; };
+            if (!([_mCand, _pzMig, _pmMig] call ARC_fnc_threatIsProtectedSpawnPos)) then { _migSafePos = _mCand; };
         };
 
         private _migVgId = [_migRec, "vgroup_id", "?"] call _migKvGet;
@@ -167,6 +168,8 @@ private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 // Configurable via ARC_threatVirtualProtectedZones; defaults cover BLUFOR-controlled zones.
 private _protectedZones = missionNamespace getVariable ["ARC_threatVirtualProtectedZones", ["Airbase", "GreenZone", "MilitaryBase"]];
 if (!(_protectedZones isEqualType [])) then { _protectedZones = ["Airbase", "GreenZone", "MilitaryBase"]; };
+private _protectedMarkers = missionNamespace getVariable ["ARC_threatProtectedSpawnMarkers", [["mkr_airbaseCenter", missionNamespace getVariable ["ARC_airbase_dynamic_radius_m", 1600]]]];
+if (!(_protectedMarkers isEqualType [])) then { _protectedMarkers = [["mkr_airbaseCenter", missionNamespace getVariable ["ARC_airbase_dynamic_radius_m", 1600]]]; };
 
 // Airbase exclusion: skip locations inside any protected zone
 private _zones = missionNamespace getVariable ["ARC_worldZones", []];
@@ -220,7 +223,7 @@ private _processedLocations = 0;
 
     // Skip if inside any protected zone (intentional: OPFOR must not seed near airbase/green zone)
     private _zone = [_p3] call ARC_fnc_worldGetZoneForPos;
-    if (_zone in _protectedZones) then { continue; };
+    if ([_p3, _protectedZones, _protectedMarkers] call ARC_fnc_threatIsProtectedSpawnPos) then { continue; };
 
     // Determine group count from strategic tier
     private _groupCount = 1;
@@ -250,8 +253,7 @@ private _processedLocations = 0;
             private _offX = random 200 - 100;
             private _offY = random 200 - 100;
             private _cand = [(_p3 select 0) + _offX, (_p3 select 1) + _offY, 0];
-            private _cZone = [_cand] call ARC_fnc_worldGetZoneForPos;
-            if (!(_cZone in _protectedZones)) then { _vgPos = _cand; };
+            if (!([_cand, _protectedZones, _protectedMarkers] call ARC_fnc_threatIsProtectedSpawnPos)) then { _vgPos = _cand; };
         };
 
         if ((count _vgPos) < 2) then {

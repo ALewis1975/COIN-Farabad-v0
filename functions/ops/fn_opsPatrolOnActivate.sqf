@@ -55,8 +55,11 @@ if (_routeRadius <= 0) then
 // Secure zones should not encourage wandering routes.
 private _protectedZones = missionNamespace getVariable ["ARC_threatVirtualProtectedZones", ["Airbase", "GreenZone", "MilitaryBase"]];
 if (!(_protectedZones isEqualType [])) then { _protectedZones = ["Airbase", "GreenZone", "MilitaryBase"]; };
+private _protectedMarkers = missionNamespace getVariable ["ARC_threatProtectedSpawnMarkers", [["mkr_airbaseCenter", missionNamespace getVariable ["ARC_airbase_dynamic_radius_m", 1600]]]];
+if (!(_protectedMarkers isEqualType [])) then { _protectedMarkers = [["mkr_airbaseCenter", missionNamespace getVariable ["ARC_airbase_dynamic_radius_m", 1600]]]; };
+private _posProtected = [_posATL, _protectedZones, _protectedMarkers] call ARC_fnc_threatIsProtectedSpawnPos;
 
-if (_zone in _protectedZones) then
+if (_posProtected) then
 {
     _routeRadius = (_routeRadius min (_routeCap min 300));
 };
@@ -175,7 +178,7 @@ if (!(_spawnContacts isEqualType true)) then { _spawnContacts = true; };
 
 private _spawnedNetIds = [];
 
-if (_spawnContacts && {!(_zone in _protectedZones)}) then
+if (_spawnContacts && {!_posProtected}) then
 {
     private _press = ["insurgentPressure", 0.35] call ARC_fnc_stateGet;
     if (!(_press isEqualType 0)) then { _press = 0.35; };
@@ -216,8 +219,13 @@ if (_spawnContacts && {!(_zone in _protectedZones)}) then
             ];
 
             private _nearPlayers = allPlayers select { alive _x && { (_x distance2D _spawnPos) < 150 } };
-            if ((count _nearPlayers) == 0) exitWith {};
+            if ((count _nearPlayers) == 0 && {!([_spawnPos, _protectedZones, _protectedMarkers] call ARC_fnc_threatIsProtectedSpawnPos)}) exitWith {};
             _tries = _tries + 1;
+        };
+
+        if ([_spawnPos, _protectedZones, _protectedMarkers] call ARC_fnc_threatIsProtectedSpawnPos) then {
+            diag_log format ["[ARC][OPS][WARN] ARC_fnc_opsPatrolOnActivate: OPFOR contact spawn suppressed in protected spawn bubble task=%1 pos=%2", _taskId, _spawnPos];
+            continue;
         };
 
         private _grp = createGroup east;

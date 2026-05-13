@@ -151,6 +151,8 @@ private _candidates = [];  // [[index, distToLine, distToFrom], ...]
 // Protected zones config — mirrors ARC_fnc_threatVirtualPoolInit and tick guards
 private _preCacheProtectedZones = missionNamespace getVariable ["ARC_threatVirtualProtectedZones", ["Airbase", "GreenZone", "MilitaryBase"]];
 if (!(_preCacheProtectedZones isEqualType [])) then { _preCacheProtectedZones = ["Airbase", "GreenZone", "MilitaryBase"]; };
+private _preCacheProtectedMarkers = missionNamespace getVariable ["ARC_threatProtectedSpawnMarkers", [["mkr_airbaseCenter", missionNamespace getVariable ["ARC_airbase_dynamic_radius_m", 1600]]]];
+if (!(_preCacheProtectedMarkers isEqualType [])) then { _preCacheProtectedMarkers = [["mkr_airbaseCenter", missionNamespace getVariable ["ARC_airbase_dynamic_radius_m", 1600]]]; };
 
 {
     private _rec = _x;
@@ -166,8 +168,7 @@ if (!(_preCacheProtectedZones isEqualType [])) then { _preCacheProtectedZones = 
     private _py = _pos select 1;
 
     // Protected-zone guard: never pre-cache a group whose position is inside a protected zone
-    private _preZone = [_pos] call ARC_fnc_worldGetZoneForPos;
-    if (_preZone in _preCacheProtectedZones) then { continue; };
+    if ([_pos, _preCacheProtectedZones, _preCacheProtectedMarkers] call ARC_fnc_threatIsProtectedSpawnPos) then { continue; };
 
     private _distToLine = [_ax, _ay, _bx, _by, _px, _py] call _fnDistToSegment;
     if (_distToLine > _corridorRadius) then { continue; };

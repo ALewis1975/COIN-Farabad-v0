@@ -171,6 +171,7 @@ missionNamespace setVariable ["ARC_threatVirtualPoolMaxGroups",    96,   true]; 
 missionNamespace setVariable ["ARC_threatVirtualPhysicalMaxGroups", 8,   true]; // hard cap on simultaneous physical virtual-OPFOR groups
 missionNamespace setVariable ["ARC_threatVirtualPhysicalMaxGroups_FarabadCity", 4, true]; // tighter simultaneous cap inside Farabad City
 missionNamespace setVariable ["ARC_threatVirtualSpawnBudgetPerTick", 2,  true]; // max virtual-OPFOR groups allowed to materialize per pool tick
+missionNamespace setVariable ["ARC_threatProtectedSpawnMarkers", [["mkr_airbaseCenter", 1600]], true]; // marker-radius hostile no-spawn bubbles
 missionNamespace setVariable ["ARC_sitePopActiveSitesCap",          6,   true]; // max simultaneous active SitePop sites
 
 // OPFOR unit class pool — 3CB Middle Eastern Insurgents (MEI) + Extremists (MEE), OPFOR side.

@@ -114,6 +114,7 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
         if (!(_activeMarker isEqualType "")) then { _activeMarker = ""; };
 
         private _activeIncidentZone = "";
+        private _activeIncidentProtected = false;
         if (!(_activeMarker isEqualTo "")) then {
             private _mPos = getMarkerPos _activeMarker;
             if (_mPos isEqualType [] && {(count _mPos) >= 2}) then {
@@ -170,6 +171,15 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
         // Intentional suppression — mirrors the guard in ARC_fnc_threatVirtualPoolInit.
         private _protectedZones = missionNamespace getVariable ["ARC_threatVirtualProtectedZones", ["Airbase", "GreenZone", "MilitaryBase"]];
         if (!(_protectedZones isEqualType [])) then { _protectedZones = ["Airbase", "GreenZone", "MilitaryBase"]; };
+        private _protectedMarkers = missionNamespace getVariable ["ARC_threatProtectedSpawnMarkers", [["mkr_airbaseCenter", missionNamespace getVariable ["ARC_airbase_dynamic_radius_m", 1600]]]];
+        if (!(_protectedMarkers isEqualType [])) then { _protectedMarkers = [["mkr_airbaseCenter", missionNamespace getVariable ["ARC_airbase_dynamic_radius_m", 1600]]]; };
+
+        if (!(_activeMarker isEqualTo "")) then {
+            private _mPosProtected = getMarkerPos _activeMarker;
+            if (_mPosProtected isEqualType [] && {(count _mPosProtected) >= 2}) then {
+                _activeIncidentProtected = [_mPosProtected, _protectedZones, _protectedMarkers] call ARC_fnc_threatIsProtectedSpawnPos;
+            };
+        };
 
         // Helpers for pairs-array read/write (using select for sqflint compat)
         private _kvGet = {
@@ -231,6 +241,16 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
             private _spawnedU  = [_rec, "spawnedUnits", []]           call _kvGet;
 
             if (!(_vgPos isEqualType []) || {(count _vgPos) < 2}) then { continue; };
+            private _vgProtected = [_vgPos, _protectedZones, _protectedMarkers] call ARC_fnc_threatIsProtectedSpawnPos;
+            if (_vgProtected && {!(_state isEqualTo "PHYSICAL")}) then {
+                if (!(_state isEqualTo "VIRTUAL_DORMANT")) then {
+                    _rec = [_rec, "state", "VIRTUAL_DORMANT"] call _kvSet;
+                    _dirty = true;
+                    diag_log format ["[ARC][VPOOL][WARN] %1 forced DORMANT — pos inside protected spawn bubble pos=%2", _vgId, _vgPos];
+                };
+                if (_dirty) then { _records set [_ri, _rec]; };
+                continue;
+            };
 
             // Nearest player distance + platform type (air vs ground)
             private _nearestPlayerD = 1e12;
@@ -270,7 +290,7 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
                             private _driftY = random 200 - 100;
                             private _newPos = [(_vgPos select 0) + _driftX, (_vgPos select 1) + _driftY, 0];
                             private _driftZone = [_newPos] call _fnZoneForPos;
-                            if (_driftZone in _protectedZones) then {
+                            if ([_newPos, _protectedZones, _protectedMarkers] call ARC_fnc_threatIsProtectedSpawnPos) then {
                                 // Drift would enter a protected zone — suppress and reset timer to avoid log floods
                                 diag_log format ["[ARC][VPOOL][WARN] %1 drift suppressed — candidate pos in protected zone=%2", _vgId, _driftZone];
                                 _rec   = [_rec, "lastMoved", _now] call _kvSet;
@@ -294,7 +314,7 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
                         diag_log format ["[ARC][VPOOL][INFO] %1 reverted to DORMANT (dist=%2 m)", _vgId, round _nearestPlayerD];
                     } else {
                         // Spawn gate: player very nearby AND there is an active combat incident
-                        private _combatIncidentActive = !((_activeTaskId isEqualTo "") || {_activeIncidentZone in (_protectedZones + [""])});
+                        private _combatIncidentActive = !((_activeTaskId isEqualTo "") || {_activeIncidentZone in (_protectedZones + [""])} || {_activeIncidentProtected});
                         private _vgZone = [_vgPos] call _fnZoneForPos;
                         private _vgIsFarabadCity = (_vgZone isEqualTo "FarabadCity");
                         private _spawnCapAllows = (_spawnedThisTick < _spawnBudgetPerTick)
@@ -304,7 +324,7 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
                         if (_playerVeryNearby && { _combatIncidentActive } && { _canSpawnThreat } && { _spawnCapAllows }) then {
                             // Protected-zone spawn guard: never materialise a virtual group inside Airbase or GreenZone.
                             // This is the last line of defence; positions should already be sanitized by init/drift guards.
-                            if (_vgZone in _protectedZones) then {
+                            if ([_vgPos, _protectedZones, _protectedMarkers] call ARC_fnc_threatIsProtectedSpawnPos) then {
                                 diag_log format ["[ARC][VPOOL][WARN] %1 physical spawn suppressed — pos in protected zone=%2 pos=%3", _vgId, _vgZone, _vgPos];
                                 continue;
                             };
@@ -406,6 +426,29 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
                         _activeVgIndex = _activeVgIndex - [_vgId];
                         diag_log format ["[ARC][VPOOL][INFO] %1 all units gone — reverted to DORMANT", _vgId];
                     } else {
+                        private _liveInsideProtected = false;
+                        {
+                            private _uProtected = objectFromNetId _x;
+                            if (!isNull _uProtected && { [getPosATL _uProtected, _protectedZones, _protectedMarkers] call ARC_fnc_threatIsProtectedSpawnPos }) exitWith {
+                                _liveInsideProtected = true;
+                            };
+                        } forEach _liveNetIds;
+
+                        if (_liveInsideProtected) then {
+                            {
+                                private _uDeleteProtected = objectFromNetId _x;
+                                if (!isNull _uDeleteProtected) then { deleteVehicle _uDeleteProtected; };
+                            } forEach _liveNetIds;
+
+                            _rec   = [_rec, "state",          "VIRTUAL_DORMANT"] call _kvSet;
+                            _rec   = [_rec, "spawnedUnits",   []]                call _kvSet;
+                            _rec   = [_rec, "lastPlayerNearTs", -1]              call _kvSet;
+                            _rec   = [_rec, "lastMoved",       _now]             call _kvSet;
+                            _dirty = true;
+                            _activeVgIndex = _activeVgIndex - [_vgId];
+
+                            diag_log format ["[ARC][VPOOL][WARN] %1 deleted — live unit entered protected spawn bubble", _vgId];
+                        } else {
                         // Update live unit list
                         if ((count _liveNetIds) != (count _spawnedU)) then {
                             _rec   = [_rec, "spawnedUnits", _liveNetIds] call _kvSet;
@@ -441,6 +484,7 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
 
                                 diag_log format ["[ARC][VPOOL][INFO] %1 despawned (no players for %2 s)", _vgId, _despawnDelayS];
                             };
+                        };
                         };
                     };
                 };
