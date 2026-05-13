@@ -8,13 +8,34 @@
 if (!isServer) exitWith {false};
 private _trimFn = compile "params ['_s']; trim _s";
 
-// Dedicated MP hardening: require valid remoteExec context when invoked remotely.
+params [
+    ["_requester", objNull, [objNull]]
+];
+
+// Dedicated MP hardening: server-internal calls are allowed; remote callers must
+// prove sender ownership and hold an HQ/approver role before forcing a broadcast.
 if (!isNil "remoteExecutedOwner") then
 {
     private _reo = remoteExecutedOwner;
     if (_reo > 0) then
     {
-        diag_log format ["[ARC][SEC] ARC_fnc_publicBroadcastState: invoked via remoteExec from owner=%1", _reo];
+        if (isNull _requester) then
+        {
+            { if (owner _x == _reo) exitWith { _requester = _x; }; } forEach allPlayers;
+        };
+
+        if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\core\fn_rpcValidateSender.sqf"; };
+        if (!([_requester, "ARC_fnc_publicBroadcastState", "State broadcast rejected: sender verification failed.", "PUBLIC_BROADCAST_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
+
+        private _isOmni = [_requester, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
+        private _canBroadcast = _isOmni || { [_requester] call ARC_fnc_rolesCanApproveQueue };
+        if (!_canBroadcast) exitWith
+        {
+            diag_log format ["[ARC][SEC] ARC_fnc_publicBroadcastState: unauthorized remote broadcast owner=%1 caller=%2", _reo, name _requester];
+            false
+        };
+
+        diag_log format ["[ARC][SEC] ARC_fnc_publicBroadcastState: authorized remote broadcast owner=%1 caller=%2", _reo, name _requester];
     };
 };
 
