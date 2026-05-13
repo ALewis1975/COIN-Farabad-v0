@@ -11,19 +11,22 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
-## 2026-05-13 — initServer convoy bootstrap/config extraction (Mode A)
+## 2026-05-13 — Airbase OPFOR protected bubble hardening (Mode A)
 
-**Branch/Commit:** copilot/cleanup-initserver-responsibilities @ commit: unrecoverable (authoring validation log before commit SHA assignment)
+**Branch/Commit:** copilot/fix-opfor-issue-in-airbase @ 73ae111
 
-**Scenario:** Split the convoy bootstrap/config section out of `initServer.sqf` into `ARC_fnc_convoyStartupConfig`, registered in `CfgFunctions`, and switched extracted convoy startup keys to server-local missionNamespace writes to reduce startup replication noise while preserving server-owned spawn/runtime behavior.
+**Scenario:** Fixed reports of OPFOR appearing inside the Farabad airbase shortly after mission start by adding a shared hostile protected-position guard, applying the airbase marker-radius bubble to virtual OPFOR seed/sanitize/activate/materialize/drift paths, incident pre-cache, and patrol contact spawning, and deleting live virtual OPFOR units that enter the protected bubble.
 
 | # | Check | Command / Step | Result | Notes |
 |---|---|---|---|---|
-| 1 | Changed-file compat + lint | `python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf functions/logistics/fn_convoyStartupConfig.sqf && ~/.local/bin/sqflint -e w initServer.sqf && ~/.local/bin/sqflint -e w functions/logistics/fn_convoyStartupConfig.sqf` | PASS | Extracted/orchestrator SQF files pass compat scan and sqflint. |
-| 2 | Repository static validations | `python3 scripts/dev/validate_state_migrations.py && bash scripts/dev/check_test_log_commits.sh && python3 scripts/dev/validate_marker_index.py && tests/static/airbase_planning_mode_checks.sh && tests/static/casreq_snapshot_contract_checks.sh` | PASS | Existing static validation suite passed after the extraction. |
-| 3 | Startup wiring/static reference check | `rg -n "ARC_fnc_convoyStartupConfig|convoyStartupConfig" initServer.sqf config/CfgFunctions.hpp functions/logistics/fn_convoyStartupConfig.sqf` | PASS | New named function is registered and called from `initServer.sqf`; no missing references found. |
-| 4 | Runtime local MP + dedicated/JIP startup verification | Manual server startup and convoy spawn checks in local MP + dedicated/JIP environment | BLOCKED | Arma 3 runtime is unavailable in this sandbox. Validate convoy startup behavior parity and late-join/reconnect expectations in a dedicated/JIP environment. |
-| 5 | Review-fix revalidation | `python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf functions/logistics/fn_convoyStartupConfig.sqf && ~/.local/bin/sqflint -e w initServer.sqf && ~/.local/bin/sqflint -e w functions/logistics/fn_convoyStartupConfig.sqf && git diff --check` | PASS | Revalidated after aligning server-only guard style in `ARC_fnc_convoyStartupConfig` (`exitWith {}`) and removing unused boolean return semantics. |
+| 1 | Baseline static validation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatVirtualPoolInit.sqf functions/threat/fn_threatVirtualPoolTick.sqf functions/core/fn_incidentPreCache.sqf functions/ops/fn_opsPatrolOnActivate.sqf config/CfgFunctions.hpp initServer.sqf && python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && tests/static/airbase_planning_mode_checks.sh && tests/static/casreq_snapshot_contract_checks.sh && git diff --check` | PASS | Baseline changed-file compat and repository static validations passed before edits. |
+| 2 | Changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatIsProtectedSpawnPos.sqf functions/threat/fn_threatVirtualPoolInit.sqf functions/threat/fn_threatVirtualPoolTick.sqf functions/core/fn_incidentPreCache.sqf functions/ops/fn_opsPatrolOnActivate.sqf initServer.sqf config/CfgFunctions.hpp` | PASS | No known sqflint parser-compat patterns in changed files. |
+| 3 | Changed-file sqflint | `sqflint -e w functions/threat/fn_threatIsProtectedSpawnPos.sqf && sqflint -e w functions/threat/fn_threatVirtualPoolInit.sqf && sqflint -e w functions/threat/fn_threatVirtualPoolTick.sqf && sqflint -e w functions/core/fn_incidentPreCache.sqf && sqflint -e w functions/ops/fn_opsPatrolOnActivate.sqf` | PASS | Installed `sqflint` locally via `python3 -m pip install --user sqflint`; all changed SQF files lint clean. |
+| 4 | Repository static validations | `python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && tests/static/airbase_planning_mode_checks.sh && tests/static/casreq_snapshot_contract_checks.sh && git diff --check` | PASS | State migrations, marker index, AIRBASE planning-mode checks, CASREQ snapshot checks, and whitespace diff check passed after edits. |
+| 5 | Parallel validation | `parallel_validation` | BLOCKED | Code Review completed successfully but left low-risk maintainability suggestions; CodeQL found 0 alerts but could not build a C++ database for this SQF mission repository. |
+| 6 | Airbase OPFOR runtime smoke | Dedicated/local MP: start at `mkr_airbaseCenter`, activate early airbase-adjacent incidents, confirm no virtual/patrol OPFOR spawn or remain within the 1600 m protected bubble and no RPT errors appear | BLOCKED | Arma 3 hosted/dedicated/JIP runtime unavailable in this sandbox. |
+
+---
 
 ## 2026-05-13 — Public broadcast authority hardening + dead world-time consumer cleanup (Mode I)
 
