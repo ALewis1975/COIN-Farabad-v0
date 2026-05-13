@@ -658,6 +658,8 @@ class CfgFunctions
             class threatUiSnapshotBuild {};
             class threatGetCleanupLabelForTask {};
             class threatMarkCleanedByLabel {};
+            class threatIedSpawnRequest {};
+            class threatIedCleanupSync {};
 
             // Threat Economy v0 (S1-S5)
             class threatEconomyInit {};

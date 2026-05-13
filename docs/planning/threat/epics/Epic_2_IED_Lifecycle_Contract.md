@@ -6,8 +6,11 @@ create -> spawn path -> discovery/interaction -> neutralization -> cleanup -> cl
 
 ## Status framing
 - **Implemented:** threat creation/update/incident-close hooks and cleanup labeling utilities.
-- **Partially implemented:** explicit suspicious-object spawn contract and restart-safe rehydration evidence.
-- **Validation-only:** dedicated/JIP/restart proof for lifecycle correctness.
+- **Implemented:** explicit suspicious-object spawn idempotency guardrails (`ARC_fnc_threatIedSpawnRequest`).
+- **Implemented:** cleanup synchronization convergence (`ARC_fnc_threatIedCleanupSync`).
+- **Implemented:** stale close detection and `THREAT_CLOSED_STALE` evidence emission.
+- **Implemented:** spawn linkage metadata fields (`spawn_token`, `spawn_intent_ts`, `spawned_at`) for restart-safe rehydration.
+- **Validation-only (BLOCKED):** dedicated/JIP/restart proof for lifecycle correctness requires Arma 3 runtime.
 
 ## Deliverables
 1. Lifecycle sequence spec (authoritative transitions + allowed state changes).
@@ -75,11 +78,11 @@ Normalizing those collapsed states into explicit spawn-path fields remains E2-WP
 | Neutralization race (multiple close/neutralize actions) | First valid server transition wins; subsequent actions become idempotent no-op/evidence-only updates. | Local MP + dedicated run shows single terminal state and stable task/incident linkage. |
 | Stale incident close (late close after cleanup) | Record stale close attempt as non-authoritative evidence (`CLOSED_STALE`) without mutating closed lifecycle outcome. | JIP/restart evidence confirms late join reads unchanged terminal state. |
 
-## PR-sized work packages (future implementation)
-- **E2-WP1:** Build lifecycle state machine table and transition guards.
-- **E2-WP2:** Implement/normalize explicit suspicious-object spawn path contract.
-- **E2-WP3:** Harden cleanup synchronization between threat/task/incident records.
-- **E2-WP4:** Add restart and duplicate-spawn regression checks.
+## PR-sized work packages
+- **E2-WP1:** Build lifecycle state machine table and transition guards. ✅ Implemented PR #506.
+- **E2-WP2:** Implement/normalize explicit suspicious-object spawn path contract. ✅ Implemented in this PR.
+- **E2-WP3:** Harden cleanup synchronization between threat/task/incident records. ✅ Implemented in this PR.
+- **E2-WP4:** Add restart and duplicate-spawn regression checks. ✅ Implemented in this PR (static checks + spawn_token metadata for Epic 5 rehydration).
 
 ## Dependencies
 - Epic 1 event/schema contract should be available for transition telemetry.
