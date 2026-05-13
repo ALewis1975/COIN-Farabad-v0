@@ -26,8 +26,14 @@ private _kvGet = {
     _value
 };
 
+private _boolOrDefault = {
+    params ["_value", "_default"];
+    if ((_value isEqualType true) || (_value isEqualType false)) exitWith { _value };
+    _default
+};
+
 private _enabled = ["threat_v0_enabled", true] call ARC_fnc_stateGet;
-if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabled = true; };
+_enabled = [_enabled, true] call _boolOrDefault;
 
 private _records = ["threat_v0_records", []] call ARC_fnc_stateGet;
 if (!(_records isEqualType [])) then { _records = []; };
@@ -166,7 +172,7 @@ private _activeIndexOrphans = [];
 } forEach _activeVgIndex;
 
 private _loopRunning = missionNamespace getVariable ["ARC_virtualPoolLoopRunning", false];
-if (!(_loopRunning isEqualType true) && !(_loopRunning isEqualType false)) then { _loopRunning = false; };
+_loopRunning = [_loopRunning, false] call _boolOrDefault;
 
 private _lastThreatEvent = missionNamespace getVariable ["threat_v0_debug_last_event", []];
 if (!(_lastThreatEvent isEqualType [])) then { _lastThreatEvent = []; };
