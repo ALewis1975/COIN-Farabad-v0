@@ -11,6 +11,23 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-13 — Threat review Epic 1 API/event contract implementation (Mode B)
+
+**Branch/Commit:** copilot/implement-prs-in-sequence @ HEAD
+
+**Scenario:** Implemented the first follow-on slice from `docs/planning/threat/Threat_System_Review_Decomposition_2026-05-13.md`: server-only `ARC_fnc_threatCreateFromLead`, bounded/JIP-safe `ARC_fnc_threatEmitEvent`, registration in `CfgFunctions`, and event emission from threat create/update paths.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatCreateFromTask.sqf functions/threat/fn_threatUpdateState.sqf functions/threat/fn_threatInit.sqf config/CfgFunctions.hpp` | FAIL | Pre-existing parser-compat patterns in `fn_threatCreateFromTask.sqf` and `fn_threatUpdateState.sqf` (`#`, direct `trim`, `isNotEqualTo`) would fail once touched. |
+| 2 | Baseline sqflint availability | `sqflint -e w functions/threat/fn_threatCreateFromTask.sqf functions/threat/fn_threatUpdateState.sqf functions/threat/fn_threatInit.sqf config/CfgFunctions.hpp` | BLOCKED | `sqflint` was not installed in the sandbox before local tool installation. |
+| 3 | Changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict config/CfgFunctions.hpp functions/threat/fn_threatInit.sqf functions/threat/fn_threatCreateFromTask.sqf functions/threat/fn_threatUpdateState.sqf functions/threat/fn_threatCreateFromLead.sqf functions/threat/fn_threatEmitEvent.sqf` | PASS | No known parser-compat patterns in changed SQF files after replacing touched legacy patterns. |
+| 4 | Changed-file sqflint | `for f in functions/threat/fn_threatInit.sqf functions/threat/fn_threatCreateFromTask.sqf functions/threat/fn_threatUpdateState.sqf functions/threat/fn_threatCreateFromLead.sqf functions/threat/fn_threatEmitEvent.sqf; do ~/.local/bin/sqflint -e w "$f"; done` | PASS | Installed `sqflint` locally with `python3 -m pip install --user sqflint`; all changed SQF files lint clean. |
+| 5 | Repository static validations | `python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && tests/static/airbase_planning_mode_checks.sh && tests/static/casreq_snapshot_contract_checks.sh && git diff --check` | PASS | State migrations, marker index, AIRBASE static checks, CASREQ static checks, and whitespace diff check passed. |
+| 6 | Threat API runtime smoke | Local/dedicated MP: create task-linked and lead-linked threats, update state, verify bounded `threat_v0_events_public` replication and RPT event logs | BLOCKED | Arma 3 hosted/dedicated/JIP runtime unavailable in this sandbox. |
+
+---
+
 ## 2026-05-12 — Military Base / Logistics 01 OPFOR spawn exclusion (Mode A)
 
 **Branch/Commit:** copilot/fix-opfor-spawn-issue @ 3423be7

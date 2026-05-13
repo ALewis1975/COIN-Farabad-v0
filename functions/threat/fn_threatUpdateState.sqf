@@ -30,15 +30,17 @@ if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabl
 if (!_enabled) exitWith {false};
 
 private _stateToU = toUpper _stateTo;
+private _trimFn = compile "params ['_s']; trim _s";
 
 // Small helpers for "pairs arrays"
 private _kvGet = {
     params ["_pairs", "_key", "_default"];
     if (!(_pairs isEqualType [])) exitWith {_default};
     private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) exitWith {_default};
-    private _v = (_pairs # _idx) # 1;
+    private _entry = _pairs select _idx;
+    private _v = _entry select 1;
     if (isNil "_v") exitWith {_default};
     _v
 };
@@ -47,7 +49,7 @@ private _kvSet = {
     params ["_pairs", "_key", "_value"];
     if (!(_pairs isEqualType [])) then { _pairs = []; };
     private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
     if (_idx < 0) then { _pairs pushBack [_key, _value]; } else { _pairs set [_idx, [_key, _value]]; };
     _pairs
 };
@@ -60,7 +62,7 @@ private _idxRec = -1;
 { if (([_x, "threat_id", ""] call _kvGet) isEqualTo _threatId) exitWith { _idxRec = _forEachIndex; }; } forEach _records;
 if (_idxRec < 0) exitWith {false};
 
-private _rec = _records # _idxRec;
+private _rec = _records select _idxRec;
 
 private _stateFrom = [_rec, "state", ""] call _kvGet;
 private _stateFromU = toUpper _stateFrom;
@@ -176,15 +178,16 @@ private _meta = [
 ];
 
 private _summary = format ["%1: %2 %3→%4", _event, _threatId, _stateFromU, _stateToU];
-if ((trim _note) isNotEqualTo "") then
+private _noteTrimmed = [_note] call _trimFn;
+if (!(_noteTrimmed isEqualTo "")) then
 {
-    _summary = _summary + format [" (%1)", trim _note];
+    _summary = _summary + format [" (%1)", _noteTrimmed];
 };
 
 private _intelId = ["OPS", _summary, _pos, _meta] call ARC_fnc_intelLog;
 
 // Attach log ref (best-effort)
-if (_intelId isNotEqualTo "") then
+if (!(_intelId isEqualTo "")) then
 {
     private _audit = [_rec, "audit", []] call _kvGet;
     private _refs = [_audit, "log_refs", []] call _kvGet;
@@ -220,6 +223,13 @@ missionNamespace setVariable [
 ];
 
 [] call ARC_fnc_threatDebugSnapshot;
+
+[
+    _event,
+    _threatId,
+    _meta,
+    [["producer", "ARC_fnc_threatUpdateState"], ["rev", _rev]]
+] call ARC_fnc_threatEmitEvent;
 
 // Lead emission router: fire on key tactical transitions
 if (_stateToU in ["DISCOVERED", "STAGED", "DETONATED", "NEUTRALIZED", "INTERDICTED"]) then
