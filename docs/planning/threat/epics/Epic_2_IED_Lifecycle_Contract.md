@@ -21,6 +21,8 @@ This table defines the **target contract vocabulary** for Epic 2 planning. The f
 
 Current runtime mapping for this PR:
 
+Collapsed target states are distinguished today by existing record metadata (`links`, `world`, `outcome`, `audit`, and OPS/event notes), not by separate persisted runtime states. Normalizing those collapsed states into explicit spawn-path fields remains E2-WP2 follow-up work.
+
 | Target contract state | Current runtime state(s) enforced in this PR |
 |---|---|
 | `LEAD_INGESTED` | `CREATED` |
