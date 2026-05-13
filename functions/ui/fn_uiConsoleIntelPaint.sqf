@@ -304,7 +304,7 @@ private _layoutS2CatPanels = {
 };
 
 private _renderS2CatPanelsFromMaster = {
-    params ["_display", "_listMaster", "_panels"];
+    params ["_listMaster", "_panels"];
 
     { lbClear (_x select 2); } forEach _panels;
 
@@ -439,7 +439,6 @@ private _inCivCtx = !(isNull _civCtxTarget);
 private _s2Split = [_display, _list] call _ensureS2Split;
 private _xCtlBase = _s2Split select 0;
 private _wCtlBase = _s2Split select 1;
-private _xRBase   = _s2Split select 2;
 if (!(_mode isEqualType "")) then { _mode = "TOOLS"; };
 _mode = toUpper ([_mode] call (compile "params ['_s']; trim _s"));
 
@@ -557,11 +556,6 @@ if (_rebuild) then
 
                     private _kia = 0;
                     private _wia = 0;
-                    private _hits = 0;
-                    private _detI = 0;
-                    private _detH = 0;
-                    private _aid = 0;
-                    private _ts = 0;
                     private _popVal = -1;
 
                     if ((count _pub) > 0) then
@@ -573,11 +567,6 @@ if (_rebuild) then
 
                         _kia = [_ph, "civ_cas_kia", 0] call getOrDefault;
                         _wia = [_ph, "civ_cas_wia", 0] call getOrDefault;
-                        _hits = [_ph, "crime_db_hits", 0] call getOrDefault;
-                        _detI = [_ph, "detentions_initiated", 0] call getOrDefault;
-                        _detH = [_ph, "detentions_handed_off", 0] call getOrDefault;
-                        _aid = [_ph, "aid_events", 0] call getOrDefault;
-                        _ts = [_ph, "ts", 0] call getOrDefault;
                         _popVal = [_ph, "population", -1] call getOrDefault;
                     };
 
@@ -714,7 +703,10 @@ if (_rebuild) then
         {
             private _e = _intelLog select _i;
             if (!(_e isEqualType [] && { (count _e) >= 6 })) then { continue; };
-            _e params ["_id", "_t", "_cat", "_sum", "_p", "_meta"];
+            private _id = _e select 0;
+            private _cat = _e select 2;
+            private _sum = _e select 3;
+            private _p = _e select 4;
             _sum = [_sum, ""] call _trimRxText;
             private _g = if (_p isEqualType [] && { (count _p) >= 2 }) then { mapGridPosition _p } else { "" };
             private _label = format ["[%1] %2%3", toUpper _cat, _sum, if (_g isEqualTo "") then {""} else {format [" @ %1", _g]}];
@@ -995,7 +987,7 @@ else
                 "<t color='#AAAAAA'>What this means</t><br/>" + _what +
                 "<br/><br/><t size='1.05' font='PuristaMedium'>Raw Metrics</t><br/><br/>" +
                 format ["<t color='#AAAAAA'>Centroid:</t> %1  <t color='#AAAAAA'>Grid:</t> %2  <t color='#AAAAAA'>Radius:</t> %3m<br/>",
-                        if (_centroid isEqualType [] && { (count _centroid) >= 2 }) then { format ['[%1,%2]', (_centroid#0) toFixed 0, (_centroid#1) toFixed 0] } else { "(n/a)" },
+                        if (_centroid isEqualType [] && { (count _centroid) >= 2 }) then { format ['[%1,%2]', (_centroid select 0) toFixed 0, (_centroid select 1) toFixed 0] } else { "(n/a)" },
                         if (_grid isEqualTo "") then {"(n/a)"} else {_grid},
                         _rad
                 ] +
@@ -1130,9 +1122,6 @@ else
             // Layout: stack lead request dropdown under its label and constrain left of details pane.
             private _grpDetails = _display displayCtrl 78016;
             if (!isNull _grpDetails) then {
-                private _pG = ctrlPosition _grpDetails;
-                private _xR = _pG select 0;
-
                                 // Control column anchor comes from the S2 split layout.
                 private _xL = _xCtlBase;
                 private _wCtl = _wCtlBase;
@@ -1212,7 +1201,11 @@ else
             }
             else
             {
-                _match params ["_iid", "_t", "_cat", "_sum", "_p", "_meta"];
+                private _iid = _match select 0;
+                private _cat = _match select 2;
+                private _sum = _match select 3;
+                private _p = _match select 4;
+                private _meta = _match select 5;
                 _sum = [_sum, ""] call _trimRxText;
                 private _g = if (_p isEqualType [] && { (count _p) >= 2 }) then { mapGridPosition _p } else { "" };
 
@@ -1774,7 +1767,7 @@ if (_useCatPanels) then {
 
         private _panels = [_display] call _ensureS2CatPanels;
         [_display, _list, _panels] call _layoutS2CatPanels;
-        [_display, _list, _panels] call _renderS2CatPanelsFromMaster;
+        [_list, _panels] call _renderS2CatPanelsFromMaster;
 
         { (_x select 0) ctrlShow true; (_x select 1) ctrlShow true; (_x select 2) ctrlShow true; } forEach _panels;
     };

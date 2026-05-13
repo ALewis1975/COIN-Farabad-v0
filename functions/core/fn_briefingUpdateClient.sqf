@@ -295,7 +295,11 @@ if ((count _histTail) isEqualTo 0) then
 else
 {
     {
-        _x params ["_tId", "_marker", "_tType", "_tDisp", "_res", "_created", "_closed"];
+        if !(_x isEqualType [] && { (count _x) >= 5 }) then { continue; };
+        private _tId = _x select 0;
+        private _tType = _x select 2;
+        private _tDisp = _x select 3;
+        private _res = _x select 4;
         _opsText = _opsText + format ["%1: %2 (%3) - <t color='#A0A0A0'>%4</t><br/>", _tId, _tDisp, _tType, _res];
     } forEach _histTail;
 };
@@ -346,21 +350,14 @@ else
     private _shown = 0;
     {
         if !(_x isEqualType [] && { (count _x) >= 12 }) then { continue; };
-        _x params [
-            "_qid",
-            "_qt",
-            "_qst",
-            "_qkind",
-            "_qfrom",
-            "_qfromGroup",
-            "_qfromUID",
-            "_qpos",
-            "_qsum",
-            "_qdet",
-            "_qpayload",
-            "_qmeta",
-            ["_qdec", []]
-        ];
+        private _qid = _x select 0;
+        private _qt = _x select 1;
+        private _qkind = _x select 3;
+        private _qfrom = _x select 4;
+        private _qfromGroup = _x select 5;
+        private _qpos = _x select 7;
+        private _qsum = _x select 8;
+        private _qmeta = _x select 11;
 
         private _age = 0;
         if (_qt isEqualType 0) then { _age = floor ((serverTime - _qt) / 60); };
@@ -408,23 +405,13 @@ if ((count _decisions) > 0) then
     for "_i" from _start to ((count _decisions) - 1) do
     {
         private _it = _decisions select _i;
-        _it params [
-            "_qid",
-            "_qt",
-            "_qst",
-            "_qkind",
-            "_qfrom",
-            "_qfromGroup",
-            "_qfromUID",
-            "_qpos",
-            "_qsum",
-            "_qdet",
-            "_qpayload",
-            "_qmeta",
-            ["_qdec", []]
-        ];
+        if !(_it isEqualType [] && { (count _it) >= 6 }) then { continue; };
+        private _qid = _it select 0;
+        private _qst = _it select 2;
+        private _qkind = _it select 3;
+        private _who = _it select 5;
 
-        private _who = if (_qfromGroup isEqualTo "") then { _qfrom } else { _qfromGroup };
+        if (_who isEqualTo "") then { _who = _it select 4; };
         private _stU = toUpper _qst;
         private _col = if (_stU isEqualTo "APPROVED") then { "#00FF00" } else { "#FF6666" };
         _opsText = _opsText + format ["%1 | <t color='%2'>%3</t> | %4 | %5<br/>", _qid, _col, _stU, _qkind, _who];
@@ -596,19 +583,11 @@ else
     private _shown = 0;
     {
         if !(_x isEqualType [] && { (count _x) >= 11 }) then { continue; };
-        _x params [
-            "_lid",
-            "_lType",
-            "_lDisp",
-            "_lPos",
-            ["_lStrength", 0.5],
-            ["_lCreated", -1],
-            ["_lExpires", -1],
-            ["_lSourceTask", ""],
-            ["_lSourceType", ""],
-            ["_lThread", ""],
-            ["_lTag", ""]
-        ];
+        private _lid = _x select 0;
+        private _lType = _x select 1;
+        private _lPos = _x select 3;
+        private _lExpires = _x select 6;
+        private _lTag = _x select 10;
 
         private _gridL = "";
         if (_lPos isEqualType [] && { (count _lPos) >= 2 }) then { _gridL = mapGridPosition _lPos; };
@@ -661,7 +640,12 @@ else
     private _slice = _intelLog select [_start, (count _intelLog) - _start];
 
     {
-        _x params ["_iid", "_t", "_cat", "_sum", "_posATL", "_meta"];
+        if !(_x isEqualType [] && { (count _x) >= 6 }) then { continue; };
+        private _iid = _x select 0;
+        private _t = _x select 1;
+        private _cat = _x select 2;
+        private _sum = _x select 3;
+        private _meta = _x select 5;
         private _mins = round (_t / 60);
         private _metaMap = if (_meta isEqualType [] && { (count _meta) > 0 }) then { [_meta] call _hmCreate } else { createHashMap };
 
@@ -1020,50 +1004,55 @@ else
 };
 
 // Apply updates (setDiaryRecordText)
+private _setDiaryRecordTextCompat = compileFinal "
+    params ['_unit', '_recordRef', '_recordText'];
+    _unit setDiaryRecordText [_recordRef, _recordText];
+";
+
 if (_recOps != diaryRecordNull) then
 {
-    player setDiaryRecordText [["ARC_OPS", _recOps], ["OPS Dashboard", _opsText, ""]];
+    [player, ["ARC_OPS", _recOps], ["OPS Dashboard", _opsText, ""]] call _setDiaryRecordTextCompat;
 };
 
 if (_recIntel != diaryRecordNull) then
 {
-    player setDiaryRecordText [["ARC_INTEL", _recIntel], ["Intel Feed", _intelText, ""]];
+    [player, ["ARC_INTEL", _recIntel], ["Intel Feed", _intelText, ""]] call _setDiaryRecordTextCompat;
 };
 
 if (_recSitrep != diaryRecordNull) then
 {
-    player setDiaryRecordText [["ARC_SITREP", _recSitrep], ["SITREP", _sitrepText, ""]];
+    [player, ["ARC_SITREP", _recSitrep], ["SITREP", _sitrepText, ""]] call _setDiaryRecordTextCompat;
 };
 
 if (_recS1 != diaryRecordNull) then
 {
-    player setDiaryRecordText [["ARC_S1", _recS1], ["Personnel Snapshot", _s1Text, ""]];
+    [player, ["ARC_S1", _recS1], ["Personnel Snapshot", _s1Text, ""]] call _setDiaryRecordTextCompat;
 };
 
 if (_recDebug != diaryRecordNull) then
 {
-    player setDiaryRecordText [["ARC_DEBUG", _recDebug], ["Debug Inspector", _dbgText, ""]];
+    [player, ["ARC_DEBUG", _recDebug], ["Debug Inspector", _dbgText, ""]] call _setDiaryRecordTextCompat;
 };
 
 if (_recOpord != diaryRecordNull) then
 {
-    player setDiaryRecordText [["Diary", _recOpord], ["OPORD", _opordText, ""]];
+    [player, ["Diary", _recOpord], ["OPORD", _opordText, ""]] call _setDiaryRecordTextCompat;
 };
 
 
 if (_recRoles != diaryRecordNull) then
 {
-    player setDiaryRecordText [["Diary", _recRoles], ["ROLES & CAPABILITIES", _rolesText, ""]];
+    [player, ["Diary", _recRoles], ["ROLES & CAPABILITIES", _rolesText, ""]] call _setDiaryRecordTextCompat;
 };
 
 if (_recOrbat != diaryRecordNull) then
 {
-    player setDiaryRecordText [["Diary", _recOrbat], ["ORBAT", _orbatText, ""]];
+    [player, ["Diary", _recOrbat], ["ORBAT", _orbatText, ""]] call _setDiaryRecordTextCompat;
 };
 
 if (_recSoI != diaryRecordNull) then
 {
-    player setDiaryRecordText [["Diary", _recSoI], ["SOI", _soiText, ""]];
+    [player, ["Diary", _recSoI], ["SOI", _soiText, ""]] call _setDiaryRecordTextCompat;
 };
 
 true
