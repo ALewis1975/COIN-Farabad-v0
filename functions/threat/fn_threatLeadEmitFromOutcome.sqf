@@ -124,6 +124,7 @@ private _emittedLeads = switch (_family) do
             };
             _out
     };
+    case "NON_IED": { [] };
     default
     {
         diag_log format ["[ARC][WARN] ARC_fnc_threatLeadEmitFromOutcome: unknown family=%1 type=%2 subtype=%3 transition=%4", _family, _typeU, _subtypeU, _transition];

@@ -72,35 +72,24 @@ private _kvSet = {
 private _leadIdCtx = _leadIdCtxRaw;
 _leadIdCtx = [_leadIdCtx] call _trimFn;
 
-private _normalizeFamily = {
-    params ["_typeRaw", "_subtypeRaw"];
+private _typeU = toUpper ([_type] call _trimFn);
+if (_typeU isEqualTo "") then { _typeU = "OTHER"; };
 
-    private _typeU = toUpper ([_typeRaw] call _trimFn);
-    private _subtypeU = toUpper ([_subtypeRaw] call _trimFn);
-    if (_typeU isEqualTo "") then { _typeU = "OTHER"; };
-
-    if (_subtypeU isEqualTo "") then
+private _subtypeU = toUpper ([_subtype] call _trimFn);
+if (_subtypeU isEqualTo "") then
+{
+    // Create-path defaulting: callers may omit subtype and still need
+    // deterministic persisted records; other readers use inference only.
+    _subtypeU = switch (_typeU) do
     {
-        // Create-path defaulting: callers may omit subtype and still need
-        // deterministic persisted records; other readers use inference only.
-        _subtypeU = switch (_typeU) do
-        {
-            case "IED": { "IED_SUSPICIOUS_OBJECT" };
-            case "VBIED": { "VBIED" };
-            case "SUICIDE": { "SUICIDE" };
-            default { "OTHER" };
-        };
+        case "IED": { "IED_SUSPICIOUS_OBJECT" };
+        case "VBIED": { "VBIED" };
+        case "SUICIDE": { "SUICIDE" };
+        default { "OTHER" };
     };
-
-    private _familyU = [_typeU, _subtypeU] call ARC_fnc_threatInferFamily;
-
-    [_familyU, _typeU, _subtypeU]
 };
 
-private _normalized = [_type, _subtype] call _normalizeFamily;
-private _familyU = _normalized select 0;
-private _typeU = _normalized select 1;
-private _subtypeU = _normalized select 2;
+private _familyU = [_typeU, _subtypeU] call ARC_fnc_threatInferFamily;
 
 // Load records
 private _records = ["threat_v0_records", []] call ARC_fnc_stateGet;
