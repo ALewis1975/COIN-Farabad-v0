@@ -14,7 +14,7 @@ params [
 private _owner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
 private _requesterObj = _requester;
 
-if (!isNil "remoteExecutedOwner" && { _owner > 0 }) then
+if (_owner > 0) then
 {
     if (isNull _requesterObj) then
     {
@@ -23,7 +23,14 @@ if (!isNil "remoteExecutedOwner" && { _owner > 0 }) then
         } forEach allPlayers;
     };
 
-    if (!([_requesterObj, "ARC_fnc_tocRequestPublicBroadcast", "Public broadcast rejected: sender verification failed.", "PUBLIC_BROADCAST_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith { false };
+    private _senderValid = [
+        _requesterObj,
+        "ARC_fnc_tocRequestPublicBroadcast",
+        "Public broadcast rejected: sender verification failed.",
+        "PUBLIC_BROADCAST_SECURITY_DENIED",
+        true
+    ] call ARC_fnc_rpcValidateSender;
+    if (!_senderValid) exitWith { false };
 
     private _isOmni = [_requesterObj, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
     private _can = _isOmni || { [_requesterObj] call ARC_fnc_rolesCanApproveQueue };
