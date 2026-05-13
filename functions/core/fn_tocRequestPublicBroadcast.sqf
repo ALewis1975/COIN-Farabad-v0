@@ -63,7 +63,7 @@ if (_owner > 0) then
             {
                 private _entryOwner = _entry select 0;
                 private _entryLastAt = _entry select 1;
-                if ((_entryOwner isEqualType 0) && { _entryLastAt isEqualType 0 } && { (_now - _entryLastAt) < _cooldownS }) then
+                if ((_entryOwner isEqualType 0) && { (_entryLastAt isEqualType 0) && { (_now - _entryLastAt) < _cooldownS } }) then
                 {
                     _lastByOwnerClean pushBack [_entryOwner, _entryLastAt];
                 };
@@ -78,7 +78,7 @@ if (_owner > 0) then
         if ((count _entry) >= 2) then
         {
             private _entryOwner = _entry select 0;
-            if (_idx < 0 && { _entryOwner isEqualTo _owner }) then
+            if ((_idx < 0) && { _entryOwner isEqualTo _owner }) then
             {
                 _idx = _forEachIndex;
             };
@@ -93,7 +93,7 @@ if (_owner > 0) then
         if (_rawLastAt isEqualType 0) then { _lastAt = _rawLastAt; };
     };
 
-    if (_lastAt >= 0 && { (_now - _lastAt) < _cooldownS }) exitWith
+    if ((_lastAt >= 0) && { (_now - _lastAt) < _cooldownS }) exitWith
     {
         private _remaining = (_cooldownS - (_now - _lastAt)) max 0;
         private _requesterName = if (isNull _requesterObj) then { "<unknown>" } else { name _requesterObj };
