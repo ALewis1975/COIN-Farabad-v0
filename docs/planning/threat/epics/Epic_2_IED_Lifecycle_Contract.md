@@ -15,6 +15,43 @@ create -> spawn path -> discovery/interaction -> neutralization -> cleanup -> cl
 3. Cleanup/close contract aligning threat record, task linkage, and labels.
 4. Failure-path matrix (spawn denied, neutralization race, stale incident close).
 
+## Lifecycle sequence spec (authoritative transitions)
+
+| State | Entry trigger | Server-authoritative transition(s) | Allowed state change | Notes |
+|---|---|---|---|---|
+| `LEAD_INGESTED` | Lead/task evidence reaches threat intake | `LEAD_INGESTED -> SPAWN_ELIGIBLE` or `LEAD_INGESTED -> CLOSED_NO_SPAWN` | Threat record create/update only | No client-side lifecycle writes. |
+| `SPAWN_ELIGIBLE` | Eligibility checks pass (AO/time/limit gates) | `SPAWN_ELIGIBLE -> SPAWN_REQUESTED` or `SPAWN_ELIGIBLE -> SPAWN_DENIED` | Threat + incident pre-spawn metadata | Deny path must log reason code. |
+| `SPAWN_REQUESTED` | Spawn request issued by server path | `SPAWN_REQUESTED -> SPAWNED_ACTIVE` or `SPAWN_REQUESTED -> SPAWN_DENIED` | Spawn-attempt metadata and idempotency token | Duplicate request resolves by token check. |
+| `SPAWNED_ACTIVE` | Suspicious object manifestation exists | `SPAWNED_ACTIVE -> DISCOVERED` or `SPAWNED_ACTIVE -> CLEANUP_PENDING` | Manifest/object linkage and active flag | Client interactions are requests only. |
+| `DISCOVERED` | Discovery/interaction evidence recorded | `DISCOVERED -> NEUTRALIZED` or `DISCOVERED -> CLEANUP_PENDING` | Interaction metadata and timestamps | Preserve actor and evidence references. |
+| `NEUTRALIZED` | Neutralization succeeds | `NEUTRALIZED -> CLEANUP_PENDING` | Neutralization outcome and close intent | Race-safe close should remain idempotent. |
+| `CLEANUP_PENDING` | Cleanup requested after neutralize/timeout | `CLEANUP_PENDING -> CLOSED_COMPLETE` or `CLEANUP_PENDING -> CLOSED_STALE` | Threat/task/incident cleanup markers | Single owner performs final cleanup write. |
+| `SPAWN_DENIED` / `CLOSED_NO_SPAWN` / `CLOSED_STALE` / `CLOSED_COMPLETE` | Denial or closure path reached | Terminal unless explicitly reopened by server migration tool | Closure evidence + reason labels | Terminal states are append-only evidence updates. |
+
+## Spawn-path contract
+
+- **Who can spawn:** server-authoritative threat lifecycle path only; clients may request actions but cannot commit spawn state.
+- **When spawn is allowed:** only from `SPAWN_ELIGIBLE` with required gates (valid threat record, AO eligibility, and no active manifestation already linked).
+- **Idempotency key shape:** use a deterministic spawn token derived from stable threat identity + lifecycle epoch so retried requests map to a single manifestation intent.
+- **Duplicate/retry behavior:** duplicate request with same token is a no-op update; conflicting token for an active threat is denied and logged as lifecycle drift risk.
+- **Restart expectations (partial today):** restart-safe rehydration must restore token/manifest linkage before any new spawn request is accepted.
+
+## Cleanup/close contract (threat/task/incident alignment)
+
+- Cleanup writes are server-owned and applied once per lifecycle token.
+- Threat closure state, linked task closure intent, and incident-close labels must converge in one deterministic close path.
+- Cleanup completion requires evidence fields for: close reason, actor/source, timestamp, and manifestation disposition.
+- Labeling utilities are treated as supporting metadata and cannot represent closure without aligned threat/task/incident terminal state.
+- Stale or late close attempts after terminal closure are recorded as evidence-only updates (`CLOSED_STALE`) and must not reopen active lifecycle.
+
+## Failure-path matrix
+
+| Failure condition | Expected handling contract | Evidence gate |
+|---|---|---|
+| Spawn denied (`SPAWN_ELIGIBLE -> SPAWN_DENIED`) | Keep threat record open for future eligibility or close-no-spawn based on policy; emit deny reason and authority context. | Dedicated + restart run shows no duplicate manifestation after retry. |
+| Neutralization race (multiple close/neutralize actions) | First valid server transition wins; subsequent actions become idempotent no-op/evidence-only updates. | Local MP + dedicated run shows single terminal state and stable task/incident linkage. |
+| Stale incident close (late close after cleanup) | Record stale close attempt as non-authoritative evidence (`CLOSED_STALE`) without mutating closed lifecycle outcome. | JIP/restart evidence confirms late join reads unchanged terminal state. |
+
 ## PR-sized work packages (future implementation)
 - **E2-WP1:** Build lifecycle state machine table and transition guards.
 - **E2-WP2:** Implement/normalize explicit suspicious-object spawn path contract.
@@ -30,11 +67,13 @@ create -> spawn path -> discovery/interaction -> neutralization -> cleanup -> cl
 - Spawn path cannot duplicate active manifestations across restart/recovery.
 - Cleanup semantics are deterministic and logged.
 - Incident closure and threat closure behavior are consistent.
+- Failure-path handling is defined for spawn denied, neutralization race, and stale incident close.
 
 ## Validation & evidence requirements
 - Static: compat scan + sqflint on touched SQF.
 - Local MP smoke: create, discover, neutralize, cleanup sequences.
 - Dedicated/JIP/restart: no duplicate spawn, no orphaned threat state, late join consistency.
+- Closure gate rule: no runtime lifecycle completion claim without dedicated/JIP/restart evidence artifacts.
 
 ## Non-goals
 - Threat-family expansion beyond suspicious-object IED path (Epic 4).
