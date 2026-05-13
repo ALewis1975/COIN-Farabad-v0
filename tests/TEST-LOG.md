@@ -5755,4 +5755,4 @@ Mode: A (Bug Fix)
 | 5 | Post-change sqflint | `~/.local/bin/sqflint -e w functions/core/fn_briefingUpdateClient.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleIntelPaint.sqf` | FAIL (pre-existing) | Same parser limitations/findings remain in these legacy files after edits; no new hard syntax failures outside existing baseline class. |
 | 6 | Patch formatting sanity | `git --no-pager diff --check` | PASS | No whitespace or patch-format issues introduced. |
 | 7 | Runtime UI behavior and screenshot verification | Local MP/Arma UI exercise of INTEL painter and briefing refresh paths + screenshot capture | BLOCKED | Arma 3 runtime/UI is unavailable in this sandbox, so in-engine rendering and screenshot capture cannot be executed here. |
-
+| 8 | Follow-up revalidation after review-driven trim adjustment | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleIntelPaint.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleIntelPaint.sqf && git --no-pager diff --check` | FAIL (pre-existing), PASS (format) | Compat/sqflint remain in the same pre-existing-finding class for this legacy file; whitespace check stays clean. |

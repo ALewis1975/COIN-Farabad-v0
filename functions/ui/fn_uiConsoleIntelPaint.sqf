@@ -81,7 +81,7 @@ if (isNull _list || { isNull _details }) exitWith {false};
 // is known to be driven by stable local UI state.
 private _modeHint = uiNamespace getVariable ["ARC_console_intelMode", "TOOLS"];
 if (!(_modeHint isEqualType "")) then { _modeHint = "TOOLS"; };
-_modeHint = toUpper (trim _modeHint);
+_modeHint = toUpper _modeHint;
 if (_modeHint isEqualTo "") then { _modeHint = "TOOLS"; };
 
 private _selIdxHint = lbCurSel _list;
