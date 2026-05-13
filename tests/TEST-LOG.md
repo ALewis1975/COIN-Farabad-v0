@@ -11,6 +11,24 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-13 — Threat Epic 7 economy observability tooling implementation (Mode B)
+
+**Branch/Commit:** copilot/alewis1975-implement-epic-7-tooling @ HEAD
+
+**Scenario:** Added a server-built Threat Economy observability snapshot (`threat_economy_obs_v1`) and replicated read-only operator fields (risk/budget/cooldown/scheduler/deny reasons/last decision) into public state + Console VM threat section. Added static contract checks and Epic 7 implementation runbook/completion rubric documentation.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_consoleVmBuild.sqf functions/core/fn_publicBroadcastState.sqf functions/threat/fn_threatEconomyInit.sqf functions/threat/fn_threatSchedulerTick.sqf functions/threat/fn_threatEconomySnapshotBuild.sqf` | PASS | No parser-compatibility patterns found in changed SQF files. |
+| 2 | Changed-file sqflint | `~/.local/bin/sqflint -e w functions/core/fn_consoleVmBuild.sqf && ~/.local/bin/sqflint -e w functions/core/fn_publicBroadcastState.sqf && ~/.local/bin/sqflint -e w functions/threat/fn_threatEconomyInit.sqf && ~/.local/bin/sqflint -e w functions/threat/fn_threatSchedulerTick.sqf && ~/.local/bin/sqflint -e w functions/threat/fn_threatEconomySnapshotBuild.sqf` | PASS | Installed `sqflint` via `python3 -m pip install --user sqflint`; all changed SQF files lint clean. |
+| 3 | Repository static validations | `python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && tests/static/airbase_planning_mode_checks.sh && tests/static/casreq_snapshot_contract_checks.sh && bash tests/static/threat_family_normalization_contract_checks.sh && bash tests/static/threat_ied_lifecycle_contract_checks.sh && bash tests/static/threat_ui_snapshot_contract_checks.sh && git diff --check` | PASS | Existing static checks and whitespace guard passed after Epic 7 edits. |
+| 4 | Epic 7 operator tooling contract checks | `bash tests/static/threat_economy_operator_tooling_contract_checks.sh` | PASS | New static contract checks passed: CfgFunctions registration, scheduler decision tracking, snapshot schema/fields, public replication, console embedding, and doc coverage. |
+| 5 | Scheduler decision observability smoke | Local MP: run scheduler ticks across districts and verify last decision/deny count/risk-budget rows in `ARC_pub_threatEconomySnapshot` + RPT decision logs | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 6 | Operator read-model smoke | Local MP: verify `ARC_pub_state.threatEconomy` and `Console_VM_v1.sections.threat.data.economy` remain read-only and explain allow/deny causes | BLOCKED | Requires Arma 3 runtime. |
+| 7 | Dedicated / JIP consistency | Dedicated server + late join client: verify Threat Economy snapshot consistency for JIP observers and no client authoritative writes | BLOCKED | Requires dedicated/JIP environment outside this sandbox. |
+
+---
+
 ## 2026-05-13 — Threat Epic 2 completion: IED lifecycle contract (Mode B)
 
 **Branch/Commit:** copilot/alewis1975-complete-epic-2-runtime-gaps @ HEAD

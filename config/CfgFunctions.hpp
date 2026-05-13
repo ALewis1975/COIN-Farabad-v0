@@ -663,6 +663,7 @@ class CfgFunctions
 
             // Threat Economy v0 (S1-S5)
             class threatEconomyInit {};
+            class threatEconomySnapshotBuild {};
             class threatGovernorCheck {};
             class threatSchedulerTick {};
             class threatScheduleEvent {};

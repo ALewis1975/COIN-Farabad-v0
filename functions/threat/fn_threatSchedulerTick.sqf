@@ -105,9 +105,24 @@ private _scheduledAny = false;
 
     private _govResult = [_districtId, "IED", _tier] call ARC_fnc_threatGovernorCheck;
     private _allowed   = _govResult select 0;
+    private _denyReason = _govResult select 1;
+    if (!(_denyReason isEqualType "")) then { _denyReason = ""; };
 
     if (_allowed) then
     {
+        private _allowDecision = [
+            ["decision", "ALLOWED"],
+            ["deny_reason", ""],
+            ["district_id", _districtId],
+            ["threat_type", "IED"],
+            ["tier", _tier],
+            ["ts", _now],
+            ["source", "ARC_fnc_threatSchedulerTick"]
+        ];
+        ["threat_v0_economy_last_decision", _allowDecision] call ARC_fnc_stateSet;
+        ["threat_v0_economy_last_allowed_decision", _allowDecision] call ARC_fnc_stateSet;
+        diag_log format ["[ARC][THREAT] ARC_fnc_threatSchedulerTick: governor allowed district=%1 type=%2 tier=%3", _districtId, "IED", _tier];
+
         [_districtId, _tier] call ARC_fnc_threatScheduleEvent;
 
         // Increment per-district attack budget spend_today counter (TEA-F5 fix).
@@ -126,6 +141,30 @@ private _scheduledAny = false;
         diag_log format ["[ARC][THREAT] ARC_fnc_threatSchedulerTick: budget spend did=%1 tier=%2 spent=%3 cost=%4", _districtId, _tier, _spentNow + _spendCost, _spendCost];
 
         _scheduledAny = true;
+    } else {
+        private _denyDecision = [
+            ["decision", "DENIED"],
+            ["deny_reason", _denyReason],
+            ["district_id", _districtId],
+            ["threat_type", "IED"],
+            ["tier", _tier],
+            ["ts", _now],
+            ["source", "ARC_fnc_threatSchedulerTick"]
+        ];
+        ["threat_v0_economy_last_decision", _denyDecision] call ARC_fnc_stateSet;
+        ["threat_v0_economy_last_denied_decision", _denyDecision] call ARC_fnc_stateSet;
+
+        if !(_denyReason isEqualTo "") then
+        {
+            private _denyCounts = ["threat_v0_economy_deny_counts", createHashMap] call ARC_fnc_stateGet;
+            if (!(_denyCounts isEqualType createHashMap)) then { _denyCounts = createHashMap; };
+            private _denySeen = [_denyCounts, _denyReason, 0] call _hg;
+            if (!(_denySeen isEqualType 0)) then { _denySeen = 0; };
+            _denyCounts set [_denyReason, _denySeen + 1];
+            ["threat_v0_economy_deny_counts", _denyCounts] call ARC_fnc_stateSet;
+        };
+
+        diag_log format ["[ARC][THREAT] ARC_fnc_threatSchedulerTick: governor denied district=%1 type=%2 tier=%3 reason=%4", _districtId, "IED", _tier, _denyReason];
     };
 } forEach _districtIds;
 
