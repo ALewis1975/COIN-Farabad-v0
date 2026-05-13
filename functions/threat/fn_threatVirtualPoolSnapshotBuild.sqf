@@ -26,7 +26,8 @@ private _kvGet = {
     _value
 };
 
-// Local helper intentionally kept in-file for this single snapshot builder scope.
+// Local helper intentionally kept in-file for this single snapshot builder scope
+// to avoid cross-subsystem helper churn in this focused Epic 8 slice.
 private _boolOrDefault = {
     params ["_value", "_default"];
     if ((_value isEqualType true) || (_value isEqualType false)) exitWith { _value };
@@ -138,7 +139,8 @@ private _materializedRowsTruncated = false;
             if (!(_spawned isEqualType [])) then { _spawned = []; };
 
             private _aliveUnits = 0;
-            // Bounded by per-record spawned-unit refs; linear scan is acceptable for this read-model snapshot.
+            // Bounded by per-record spawned-unit refs; current runtime group strengths are
+            // typically small (virtual pool defaults seed 2-5 units), so linear scan is acceptable.
             {
                 private _u = objectFromNetId _x;
                 if (!isNull _u && { alive _u }) then
