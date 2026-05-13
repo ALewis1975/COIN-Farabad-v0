@@ -11,6 +11,21 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-13 — CASREQ ID builder padNumber fix (Mode A)
+
+**Branch/Commit:** copilot/fix-undefined-variable-bis-fnc-padnumber @ 98db6a7 (pre-fix); fix commit forthcoming.
+
+**Scenario:** Reproduced the runtime error `Error in expression <%2", _district, [_seq, 6, 0, true] call BIS_fnc_padNumber]>` during `ARC_fnc_casreqOpen` flow (hosted-server self-call by MAJ.Lewis.A). The 4-argument `BIS_fnc_padNumber` invocation in `functions/casreq/fn_casreqBuildId.sqf` failed under the active build. Replaced with local zero-padding (mirrors prior fix in `fn_worldIsValidDistrictId.sqf`) and wrapped the pre-existing direct `trim` in the approved compiled-helper pattern so the changed file passes the strict compat scanner.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | Changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/casreq/fn_casreqBuildId.sqf` | PASS | No parser-compat patterns remain. |
+| 2 | sqflint on changed file | `sqflint -e w functions/casreq/fn_casreqBuildId.sqf` | BLOCKED | `sqflint` not installed in this sandbox; CI preflight will run it. |
+| 3 | Live CASREQ ID unit tests (UT-CASREQ-001..007) | `tests/run_all.sqf` against a running mission | BLOCKED | Requires Arma 3 mission environment. |
+| 4 | Dedicated/JIP/reconnect QA | Dedicated server + JIP coverage for CASREQ open/state replication | BLOCKED | Requires dedicated/JIP-capable Arma 3 environment. |
+
+---
+
 ## 2026-05-13 — Farabad Console UI cleanup/state normalization (Mode A)
 
 **Branch/Commit:** copilot/farabad-console-ui-research @ e923bc9
