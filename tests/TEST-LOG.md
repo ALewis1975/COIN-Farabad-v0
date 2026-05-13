@@ -11,6 +11,23 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-13 — Briefing startup RPT error cleanup (Mode A)
+
+**Branch/Commit:** copilot/review-arma3-errors-report @ 1314b03 (post-fix working tree validated in-session)
+
+**Scenario:** Reviewed `serverRpts/Arma3_x64_2026-05-13_19-27-15.rpt` for mission-start errors. The only mission-file script errors all referenced `functions/core/fn_briefingUpdateClient.sqf` and stemmed from invalid runtime `call getOrDefault` usage; replaced those calls with the repo-standard compiled HashMap helper and reused a compiled trim helper.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | RPT error triage | `python3` one-off parser over `serverRpts/Arma3_x64_2026-05-13_19-27-15.rpt` plus targeted `rg` review | PASS | Found 154 mission file refs, all to `fn_briefingUpdateClient.sqf`; repeated undefined-variable fallout from `getOrDefault` caused 203 expression errors. Other high-volume entries are external mod/engine warnings. |
+| 2 | Baseline changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_briefingUpdateClient.sqf` | PASS | Pre-edit compat scan passed; runtime RPT still showed invalid `call getOrDefault` because the scanner only catches method-form patterns. |
+| 3 | Baseline changed-file SQF lint | `sqflint -e w functions/core/fn_briefingUpdateClient.sqf` | BLOCKED | `sqflint` was not installed before the edit (`command not found`). |
+| 4 | Post-fix changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_briefingUpdateClient.sqf` | PASS | No known parser-compat patterns found. |
+| 5 | Post-fix changed-file SQF lint | `python3 -m pip install --user sqflint && /home/runner/.local/bin/sqflint -e w functions/core/fn_briefingUpdateClient.sqf` | PASS | `sqflint 0.3.2` installed in sandbox and the changed SQF file linted clean. |
+| 6 | Runtime smoke: briefing refresh on mission start | Start mission locally and confirm no `fn_briefingUpdateClient.sqf` `getOrDefault`/undefined-variable errors recur in RPT | BLOCKED | Arma 3 runtime unavailable in this sandbox; requires local MP/dedicated-like mission start. |
+
+---
+
 ## 2026-05-13 — QA audit task decomposition implementation (Mode I)
 
 **Branch/Commit:** copilot/qa-audit-recent-cleanup-changes @ 8f12075294feab9f05ec8a3316c4567435685925 (post-review working tree validated in-session)
