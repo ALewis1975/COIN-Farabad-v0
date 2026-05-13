@@ -106,6 +106,8 @@ while { (count _events) > _max } do
 };
 
 ["threat_v0_events", _events] call ARC_fnc_stateSet;
+// Server-local debug breadcrumb; clients should consume the replicated
+// threat_v0_events_public tail instead of this non-public variable.
 missionNamespace setVariable ["threat_v0_debug_last_event", _envelope];
 missionNamespace setVariable ["threat_v0_events_public", _events, true];
 

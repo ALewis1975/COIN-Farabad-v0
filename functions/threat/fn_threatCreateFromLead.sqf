@@ -109,8 +109,9 @@ _pos = +_pos;
 _pos resize 3;
 
 private _leadTypeU = toUpper ([_leadType] call _trimFn);
-// Epic 1 only completes the API/event contract. Non-IED lead family normalization
-// (CACHE, AMBUSH, MORTAR, RAID, RECON, QRF, and related tags) remains deferred.
+// Epic 1 only completes the API/event contract and handles IED first because it
+// is the locked P1 threat family. Non-IED lead family normalization (CACHE,
+// AMBUSH, MORTAR, RAID, RECON, QRF, and related tags) remains deferred.
 private _type = "OTHER";
 private _subtype = "OTHER";
 if (_leadTypeU isEqualTo "IED") then

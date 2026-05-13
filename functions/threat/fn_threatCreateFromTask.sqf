@@ -24,6 +24,20 @@ params [
     ["_ctx", []]
 ];
 
+private _leadIdCtxRaw = "";
+if (_ctx isEqualType []) then
+{
+    {
+        if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo "lead_id" }) exitWith
+        {
+            private _candidate = _x select 1;
+            if (_candidate isEqualType "") then { _leadIdCtxRaw = _candidate; };
+        };
+    } forEach _ctx;
+};
+
+if (_taskId isEqualTo "" && { _leadIdCtxRaw isEqualTo "" }) exitWith {""};
+
 private _enabled = ["threat_v0_enabled", true] call ARC_fnc_stateGet;
 if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabled = true; };
 if (!_enabled) exitWith {""};
@@ -54,11 +68,8 @@ private _kvSet = {
     _pairs
 };
 
-private _leadIdCtx = [_ctx, "lead_id", ""] call _kvGet;
-if (!(_leadIdCtx isEqualType "")) then { _leadIdCtx = ""; };
+private _leadIdCtx = _leadIdCtxRaw;
 _leadIdCtx = [_leadIdCtx] call _trimFn;
-
-if (_taskId isEqualTo "" && { _leadIdCtx isEqualTo "" }) exitWith {""};
 
 // Load records
 private _records = ["threat_v0_records", []] call ARC_fnc_stateGet;
