@@ -5642,3 +5642,21 @@ Mode: A (Bug Fix)
 | 4 | Follow-up targeted checks after review remediation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatInferFamily.sqf functions/threat/fn_threatCreateFromTask.sqf functions/threat/fn_threatUpdateState.sqf functions/threat/fn_threatUiSnapshotBuild.sqf functions/threat/fn_threatLeadEmitFromOutcome.sqf && ~/.local/bin/sqflint -e w <same files> && bash tests/static/threat_family_normalization_contract_checks.sh && bash tests/static/threat_ui_snapshot_contract_checks.sh && python3 scripts/dev/validate_state_migrations.py` | PASS | Addressed review consistency findings and reconfirmed threat-family/static contracts. |
 | 5 | Follow-up lint/static pass after minor cleanup | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatUpdateState.sqf functions/threat/fn_threatLeadEmitFromOutcome.sqf && ~/.local/bin/sqflint -e w <same files> && bash tests/static/threat_family_normalization_contract_checks.sh` | PASS | Confirmed no regressions after small maintainability cleanups. |
 | 6 | Follow-up infer/dispatch cleanup checks | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatInferFamily.sqf functions/threat/fn_threatCreateFromTask.sqf functions/threat/fn_threatLeadEmitFromOutcome.sqf && ~/.local/bin/sqflint -e w <same files> && bash tests/static/threat_family_normalization_contract_checks.sh` | PASS | Simplified family inference ordering, removed create-path duplication, and made NON_IED lead dispatch explicit no-op. |
+
+---
+
+## 2026-05-13 — PR 4: Deduplicate convoy pool initialization (Mode A)
+
+**Branch/Commit:** copilot/cleanup-deduplicate-convoy-pool-init @ 63a3b9edd160cb4a1ae46ea8bcad8b4c6827e39a
+
+**Scenario:** Removed dead duplicate `isNil`-guarded convoy pool blocks from `fn_bootstrapServer.sqf`, normalized inconsistent RHS classname casing in `fn_convoyStartupConfig.sqf` (authoritative source), and removed 4 legacy convoy pool variables (`ARC_convoyCarPool`, `ARC_convoyTruckPool`, `ARC_convoyFuelPool`, `ARC_convoySecurityPool`) from `data/ARC_ConfigData.sqf` (no live consumers confirmed by repo-wide grep).
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | SQF compat scan (changed files) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_bootstrapServer.sqf functions/logistics/fn_convoyStartupConfig.sqf data/ARC_ConfigData.sqf` | PASS | No banned compat patterns found in touched files. |
+| 2 | SQF lint (warnings as errors) | `sqflint -e w functions/core/fn_bootstrapServer.sqf && sqflint -e w functions/logistics/fn_convoyStartupConfig.sqf` | PASS | Both changed SQF files lint clean. |
+| 3 | State migration validation | `python3 scripts/dev/validate_state_migrations.py` | PASS | No regressions to state schema. |
+| 4 | Marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | 177 markers validated across all modes. |
+| 5 | Consumer audit for removed legacy pool vars | Repo-wide grep for `ARC_convoyCarPool`, `ARC_convoyTruckPool`, `ARC_convoyFuelPool`, `ARC_convoySecurityPool` | PASS | No live consumers found; only definition sites in `ARC_ConfigData.sqf` and references in docs/architecture. Safe to remove. |
+| 6 | Local MP convoy smoke test | Hosted/local MP run exercising convoy spawn/tick | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 7 | Dedicated server + JIP/restart consistency | Dedicated session validation | BLOCKED | Dedicated/JIP environment unavailable in this sandbox. |

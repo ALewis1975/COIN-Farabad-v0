@@ -10,44 +10,8 @@
     - Server is authoritative writer; broadcast with public=true when clients need visibility.
 
     Suggested workflow:
-    - Modify pools here (convoy, civilian, etc.), not inside core logic functions.
+    - Modify classname pools here (civilian, etc.), not inside core logic functions.
 */
-
-// --- Convoy pools -------------------------------------------------------------
-if (isNil "ARC_convoyCarPool") then {
-    missionNamespace setVariable ["ARC_convoyCarPool", [
-        "C_Offroad_01_F",
-        "C_Offroad_01_repair_F",
-        "C_SUV_01_F",
-        "C_Van_01_transport_F",
-        "C_Van_01_box_F",
-        "C_Hatchback_01_F",
-        "C_Hatchback_01_sport_F"
-    ], true];
-};
-
-if (isNil "ARC_convoyTruckPool") then {
-    missionNamespace setVariable ["ARC_convoyTruckPool", [
-        "C_Van_01_box_F",
-        "C_Truck_02_transport_F",
-        "C_Truck_02_covered_F"
-    ], true];
-};
-
-if (isNil "ARC_convoyFuelPool") then {
-    missionNamespace setVariable ["ARC_convoyFuelPool", [
-        "C_Van_01_fuel_F",
-        "C_Truck_02_fuel_F"
-    ], true];
-};
-
-if (isNil "ARC_convoySecurityPool") then {
-    missionNamespace setVariable ["ARC_convoySecurityPool", [
-        "B_MRAP_01_F",
-        "B_MRAP_01_gmg_F",
-        "B_MRAP_01_hmg_F"
-    ], true];
-};
 
 // --- Console terminal proximity classes --------------------------------------
 // If a player lacks a tablet, being within range of ANY of these objects allows opening the Console.

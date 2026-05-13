@@ -60,7 +60,7 @@ missionNamespace setVariable ["ARC_convoyPool_Transport", [
     "rhsusf_M1083A1P2_B_D_fmtv_usarmy",
     "rhsusf_M1083A1P2_B_D_flatbed_fmtv_usarmy",
     "rhsusf_M1084A1P2_B_D_fmtv_usarmy",
-    "rhsusf_M977A4_usarmy_d",
+    "rhsusf_m977a4_usarmy_d",
     "B_Truck_01_mover_F",
     "B_Truck_01_cargo_F",
     "B_Truck_01_box_F",
@@ -74,16 +74,16 @@ missionNamespace setVariable ["ARC_convoyPool_Medical", [
     "rhsusf_M1085A1P2_B_D_Medical_fmtv_usarmy"
 ]];
 missionNamespace setVariable ["ARC_convoyPool_Ammo", [
-    "rhsusf_M977A4_AMMO_BKIT_usarmy_d",
+    "rhsusf_m977a4_ammo_bkit_usarmy_d",
     "rhsusf_m1152_rsv_usarmy_d",
     "B_Truck_01_ammo_F"
 ]];
 missionNamespace setVariable ["ARC_convoyPool_Repair", [
-    "rhsusf_M977A4_REPAIR_BKIT_usarmy_d",
+    "rhsusf_m977a4_repair_bkit_usarmy_d",
     "B_Truck_01_Repair_F"
 ]];
 missionNamespace setVariable ["ARC_convoyPool_Fuel", [
-    "rhsusf_M978A4_BKIT_usarmy_d",
+    "rhsusf_m978a4_bkit_usarmy_d",
     "B_Truck_01_fuel_F"
 ]];
 missionNamespace setVariable ["ARC_convoyPool_Government", [
@@ -181,7 +181,7 @@ missionNamespace setVariable ["ARC_convoyBundleClassMatrix", [
     ]],
     ["LOGI_FUEL", [
         "rhsusf_m978a4_usarmy_d",
-        "rhsusf_M978A4_BKIT_usarmy_d"
+        "rhsusf_m978a4_bkit_usarmy_d"
     ]],
     ["LOGI_GOVERNMENT", [
         "UK3CB_TKC_B_SUV",
