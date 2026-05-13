@@ -78,7 +78,7 @@ if (_owner > 0) then
         if ((count _entry) >= 2) then
         {
             private _entryOwner = _entry select 0;
-            if (_entryOwner isEqualTo _owner) exitWith
+            if (_idx < 0 && { _entryOwner isEqualTo _owner }) then
             {
                 _idx = _forEachIndex;
             };
