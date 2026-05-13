@@ -76,6 +76,20 @@ private _stateFrom = [_payload, "state_from", ""] call _kvGet;
 if (!(_stateFrom isEqualType "")) then { _stateFrom = ""; };
 private _stateTo = [_payload, "state_to", ""] call _kvGet;
 if (!(_stateTo isEqualType "")) then { _stateTo = ""; };
+private _family = [_payload, "family", ""] call _kvGet;
+if (!(_family isEqualType "")) then { _family = ""; };
+if (_family isEqualTo "") then
+{
+    private _typeU = toUpper ([_payload, "type", ""] call _kvGet);
+    private _subtypeU = toUpper ([_payload, "subtype", ""] call _kvGet);
+    if (_typeU in ["IED", "VBIED", "SUICIDE"]) then { _family = _typeU; };
+    if ((_subtypeU find "IED_") isEqualTo 0 || { _subtypeU isEqualTo "IED_SUSPICIOUS_OBJECT" }) then { _family = "IED"; };
+    if (_subtypeU isEqualTo "VBIED" || { (_subtypeU find "VBIED_") isEqualTo 0 }) then { _family = "VBIED"; };
+    if (_subtypeU isEqualTo "SUICIDE" || { (_subtypeU find "SUICIDE_") isEqualTo 0 } || { (_subtypeU find "SB_") isEqualTo 0 }) then { _family = "SUICIDE"; };
+    if (_family isEqualTo "") then { _family = "NON_IED"; };
+};
+private _denyReason = [_payload, "deny_reason", ""] call _kvGet;
+if (!(_denyReason isEqualType "")) then { _denyReason = ""; };
 
 private _envelope = [
     ["v", 1],
@@ -85,8 +99,10 @@ private _envelope = [
     ["threat_id", _threatId],
     ["district_id_source", _districtIdSource],
     ["district_id", _districtId],
+    ["family", _family],
     ["state_from", _stateFrom],
     ["state_to", _stateTo],
+    ["deny_reason", _denyReason],
     ["rev", _rev],
     ["producer", _producer],
     ["payload", _payload]
@@ -111,6 +127,6 @@ if ((count _events) > _max) then
 missionNamespace setVariable ["threat_v0_debug_last_event", _envelope];
 missionNamespace setVariable ["threat_v0_events_public", _events, true];
 
-diag_log format ["[ARC][INFO] ARC_fnc_threatEmitEvent: event=%1 threat_id=%2 seq=%3 producer=%4", _eventName, _threatId, _seq, _producer];
+diag_log format ["[ARC][INFO] ARC_fnc_threatEmitEvent: event=%1 threat_id=%2 family=%3 deny_reason=%4 seq=%5 producer=%6", _eventName, _threatId, _family, _denyReason, _seq, _producer];
 
 _envelope

@@ -36,21 +36,31 @@ private _kvGet = {
 };
 
 private _typeU = toUpper ([_rec, "type", ""] call _kvGet);
+private _subtypeU = toUpper ([_rec, "subtype", ""] call _kvGet);
+private _familyU = toUpper ([_rec, "family", ""] call _kvGet);
+if (_familyU isEqualTo "") then
+{
+    if (_typeU in ["IED", "VBIED", "SUICIDE"]) then { _familyU = _typeU; };
+    if ((_subtypeU find "IED_") isEqualTo 0 || { _subtypeU isEqualTo "IED_SUSPICIOUS_OBJECT" }) then { _familyU = "IED"; };
+    if (_subtypeU isEqualTo "VBIED" || { (_subtypeU find "VBIED_") isEqualTo 0 }) then { _familyU = "VBIED"; };
+    if (_subtypeU isEqualTo "SUICIDE" || { (_subtypeU find "SUICIDE_") isEqualTo 0 } || { (_subtypeU find "SB_") isEqualTo 0 }) then { _familyU = "SUICIDE"; };
+    if (_familyU isEqualTo "") then { _familyU = "NON_IED"; };
+};
 private _emittedLeads = [];
 
-if (_typeU isEqualTo "IED") then
+if (_familyU isEqualTo "IED") then
 {
     _emittedLeads = [_rec, _transition] call ARC_fnc_iedEmitLeads;
 }
 else
 {
-    if (_typeU isEqualTo "VBIED") then
+    if (_familyU isEqualTo "VBIED") then
     {
         _emittedLeads = [_rec, _transition] call ARC_fnc_vbiedEmitLeads;
     }
     else
     {
-        if (_typeU isEqualTo "SUICIDE") then
+        if (_familyU isEqualTo "SUICIDE") then
         {
             // SUICIDE lead dispatch (inline emitter per Task 020 spec)
             private _links      = [_rec, "links", []] call _kvGet;
@@ -128,7 +138,7 @@ else
         }
         else
         {
-            diag_log format ["[ARC][WARN] ARC_fnc_threatLeadEmitFromOutcome: unknown type=%1 transition=%2", _typeU, _transition];
+            diag_log format ["[ARC][WARN] ARC_fnc_threatLeadEmitFromOutcome: unknown family=%1 type=%2 subtype=%3 transition=%4", _familyU, _typeU, _subtypeU, _transition];
         };
     };
 };

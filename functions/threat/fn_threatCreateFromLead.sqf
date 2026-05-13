@@ -110,16 +110,37 @@ _pos = +_pos;
 _pos resize 3;
 
 private _leadTypeU = toUpper ([_leadType] call _trimFn);
-// See docs/planning/threat/Threat_System_Review_Decomposition_2026-05-13.md:
-// this slice completes the API/event contract and handles IED first because it is
-// the locked P1 threat family. Non-IED lead family normalization (CACHE, AMBUSH,
-// MORTAR, RAID, RECON, QRF, and related tags) remains deferred.
 private _type = "OTHER";
 private _subtype = "OTHER";
+
 if (_leadTypeU isEqualTo "IED") then
 {
     _type = "IED";
     _subtype = "IED_SUSPICIOUS_OBJECT";
+};
+if (_leadTypeU isEqualTo "VBIED") then
+{
+    _type = "IED";
+    _subtype = "VBIED";
+};
+if (_leadTypeU in ["SUICIDE", "SUICIDE_BOMBER", "SB"]) then
+{
+    _type = "IED";
+    _subtype = "SUICIDE";
+};
+if (!(_tag isEqualTo "")) then
+{
+    private _tagU = toUpper ([_tag] call _trimFn);
+    if (_tagU find "VBIED" >= 0) then
+    {
+        _type = "IED";
+        _subtype = "VBIED";
+    };
+    if (_tagU find "SUICIDE" >= 0 || { _tagU find "SB_" >= 0 }) then
+    {
+        _type = "IED";
+        _subtype = "SUICIDE";
+    };
 };
 
 private _radiusM = [_ctx, "radius_m", 150] call _kvGet;
@@ -144,11 +165,17 @@ if (_threatId isEqualTo "") exitWith
     ""
 };
 
+private _threatFamily = "NON_IED";
+if (_subtype isEqualTo "VBIED") then { _threatFamily = "VBIED"; };
+if (_subtype isEqualTo "SUICIDE") then { _threatFamily = "SUICIDE"; };
+if (_subtype isEqualTo "IED_SUSPICIOUS_OBJECT") then { _threatFamily = "IED"; };
+
 [
     "THREAT_CREATED_FROM_LEAD",
     _threatId,
     [
         ["lead_id", _leadId],
+        ["family", _threatFamily],
         ["lead_type", _leadTypeU],
         ["display_name", _displayName],
         ["source_task_id", _sourceTaskId],

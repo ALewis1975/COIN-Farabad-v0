@@ -31,8 +31,21 @@ private _enabled = ["threat_v0_enabled", true] call ARC_fnc_stateGet;
 if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabled = true; };
 if (!_enabled) exitWith {false};
 
-private _stateToU = toUpper _stateTo;
 private _trimFn = compile "params ['_s']; trim _s";
+private _normalizeState = {
+    params ["_stateRaw"];
+    private _stateU = toUpper ([_stateRaw] call _trimFn);
+    switch (_stateU) do
+    {
+        case "PLANNED": { "CREATED" };
+        case "FAILED": { "EXPIRED" };
+        default { _stateU };
+    }
+};
+
+private _stateToU = [_stateTo] call _normalizeState;
+private _denyReason = "";
+private _knownStates = ["CREATED","ACTIVE","STAGED","DISCOVERED","NEUTRALIZED","DETONATED","INTERDICTED","CLOSED","CLEANED","EXPIRED"];
 
 // Small helpers for "pairs arrays"
 private _kvGet = {
@@ -62,20 +75,69 @@ if (!(_records isEqualType [])) exitWith {false};
 
 private _idxRec = -1;
 { if (([_x, "threat_id", ""] call _kvGet) isEqualTo _threatId) exitWith { _idxRec = _forEachIndex; }; } forEach _records;
-if (_idxRec < 0) exitWith {false};
-
-private _rec = _records select _idxRec;
-
-private _stateFrom = [_rec, "state", ""] call _kvGet;
-private _stateFromU = toUpper _stateFrom;
-
-if (_stateFromU isEqualTo "") exitWith
+if (_idxRec < 0) exitWith
 {
-    diag_log format ["[ARC][WARN] ARC_fnc_threatUpdateState: denied empty-state transition threat_id=%1 to=%2 note=%3", _threatId, _stateToU, _note];
+    _denyReason = "DENY_THREAT_NOT_FOUND";
+    diag_log format ["[ARC][WARN] ARC_fnc_threatUpdateState: denied transition threat_id=%1 from=%2 to=%3 family=%4 deny_reason=%5 note=%6", _threatId, "", _stateToU, "UNKNOWN", _denyReason, _note];
     false
 };
 
-if (_stateFromU isEqualTo _stateToU) exitWith {false};
+private _rec = _records select _idxRec;
+private _type = [_rec, "type", ""] call _kvGet;
+private _subtype = [_rec, "subtype", ""] call _kvGet;
+private _family = [_rec, "family", ""] call _kvGet;
+if (!(_family isEqualType "")) then { _family = ""; };
+if (_family isEqualTo "") then
+{
+    private _typeU = toUpper _type;
+    private _subtypeU = toUpper _subtype;
+    if (_typeU in ["IED", "VBIED", "SUICIDE"]) then { _family = _typeU; };
+    if ((_subtypeU find "IED_") isEqualTo 0 || { _subtypeU isEqualTo "IED_SUSPICIOUS_OBJECT" }) then { _family = "IED"; };
+    if (_subtypeU isEqualTo "VBIED" || { (_subtypeU find "VBIED_") isEqualTo 0 }) then { _family = "VBIED"; };
+    if (_subtypeU isEqualTo "SUICIDE" || { (_subtypeU find "SUICIDE_") isEqualTo 0 } || { (_subtypeU find "SB_") isEqualTo 0 }) then { _family = "SUICIDE"; };
+    if (_family isEqualTo "") then { _family = "NON_IED"; };
+};
+_rec = [_rec, "family", _family] call _kvSet;
+
+private _stateFrom = [_rec, "state", ""] call _kvGet;
+private _stateFromU = [_stateFrom] call _normalizeState;
+
+if (_stateFromU isEqualTo "") exitWith
+{
+    _denyReason = "DENY_STATE_FROM_EMPTY";
+    diag_log format ["[ARC][WARN] ARC_fnc_threatUpdateState: denied transition threat_id=%1 from=%2 to=%3 family=%4 deny_reason=%5 note=%6", _threatId, _stateFromU, _stateToU, _family, _denyReason, _note];
+    false
+};
+
+if (!(_stateToU in _knownStates)) exitWith
+{
+    _denyReason = "DENY_STATE_TO_UNKNOWN";
+    diag_log format ["[ARC][WARN] ARC_fnc_threatUpdateState: denied transition threat_id=%1 from=%2 to=%3 family=%4 deny_reason=%5 note=%6", _threatId, _stateFromU, _stateToU, _family, _denyReason, _note];
+    [
+        "THREAT_STATE_CHANGE_DENIED",
+        _threatId,
+        [
+            ["event", "THREAT_STATE_CHANGE_DENIED"],
+            ["threat_id", _threatId],
+            ["family", _family],
+            ["type", _type],
+            ["subtype", _subtype],
+            ["state_from", _stateFromU],
+            ["state_to", _stateToU],
+            ["deny_reason", _denyReason],
+            ["note", _note]
+        ],
+        [["producer", "ARC_fnc_threatUpdateState"], ["rev", [_rec, "rev", 1] call _kvGet]]
+    ] call ARC_fnc_threatEmitEvent;
+    false
+};
+
+if (_stateFromU isEqualTo _stateToU) exitWith
+{
+    _denyReason = "DENY_STATE_NOOP";
+    diag_log format ["[ARC][INFO] ARC_fnc_threatUpdateState: denied transition threat_id=%1 from=%2 to=%3 family=%4 deny_reason=%5 note=%6", _threatId, _stateFromU, _stateToU, _family, _denyReason, _note];
+    false
+};
 
 private _allowedNext = switch (_stateFromU) do
 {
@@ -94,7 +156,24 @@ private _allowedNext = switch (_stateFromU) do
 
 if (!(_stateToU in _allowedNext)) exitWith
 {
-    diag_log format ["[ARC][WARN] ARC_fnc_threatUpdateState: denied invalid transition threat_id=%1 from=%2 to=%3 note=%4", _threatId, _stateFromU, _stateToU, _note];
+    _denyReason = "DENY_TRANSITION_INVALID";
+    diag_log format ["[ARC][WARN] ARC_fnc_threatUpdateState: denied transition threat_id=%1 from=%2 to=%3 family=%4 deny_reason=%5 note=%6", _threatId, _stateFromU, _stateToU, _family, _denyReason, _note];
+    [
+        "THREAT_STATE_CHANGE_DENIED",
+        _threatId,
+        [
+            ["event", "THREAT_STATE_CHANGE_DENIED"],
+            ["threat_id", _threatId],
+            ["family", _family],
+            ["type", _type],
+            ["subtype", _subtype],
+            ["state_from", _stateFromU],
+            ["state_to", _stateToU],
+            ["deny_reason", _denyReason],
+            ["note", _note]
+        ],
+        [["producer", "ARC_fnc_threatUpdateState"], ["rev", [_rec, "rev", 1] call _kvGet]]
+    ] call ARC_fnc_threatEmitEvent;
     false
 };
 
@@ -168,9 +247,6 @@ _records set [_idxRec, _rec];
 ["threat_v0_records", _records] call ARC_fnc_stateSet;
 
 // OPS logging (single event)
-private _type = [_rec, "type", ""] call _kvGet;
-private _subtype = [_rec, "subtype", ""] call _kvGet;
-
 private _links = [_rec, "links", []] call _kvGet;
 private _area = [_rec, "area", []] call _kvGet;
 private _world = [_rec, "world", []] call _kvGet;
@@ -189,6 +265,7 @@ if (!(_objs isEqualType [])) then { _objs = []; };
 private _meta = [
     ["event", _event],
     ["threat_id", _threatId],
+    ["family", _family],
     ["type", _type],
     ["subtype", _subtype],
     ["state_from", _stateFromU],
@@ -203,6 +280,7 @@ private _meta = [
     ["rev", _rev],
     ["world_spawned", [_world, "spawned", false] call _kvGet],
     ["world_object_count", count _objs],
+    ["deny_reason", ""],
     ["note", _note]
 ];
 
@@ -243,6 +321,7 @@ missionNamespace setVariable [
         ["ts", _now],
         ["event", _event],
         ["threat_id", _threatId],
+        ["family", _family],
         ["district_id_source", [_links, "district_id_source", ""] call _kvGet],
         ["district_id", [_links, "district_id", ""] call _kvGet],
         ["state_from", _stateFromU],

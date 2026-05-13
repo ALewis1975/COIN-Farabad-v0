@@ -72,6 +72,38 @@ private _kvSet = {
 private _leadIdCtx = _leadIdCtxRaw;
 _leadIdCtx = [_leadIdCtx] call _trimFn;
 
+private _normalizeFamily = {
+    params ["_typeRaw", "_subtypeRaw"];
+
+    private _typeU = toUpper ([_typeRaw] call _trimFn);
+    private _subtypeU = toUpper ([_subtypeRaw] call _trimFn);
+    if (_typeU isEqualTo "") then { _typeU = "OTHER"; };
+
+    if (_subtypeU isEqualTo "") then
+    {
+        _subtypeU = switch (_typeU) do
+        {
+            case "IED": { "IED_SUSPICIOUS_OBJECT" };
+            case "VBIED": { "VBIED" };
+            case "SUICIDE": { "SUICIDE" };
+            default { "OTHER" };
+        };
+    };
+
+    private _familyU = "NON_IED";
+    if (_typeU in ["IED", "VBIED", "SUICIDE"]) then { _familyU = _typeU; };
+    if ((_subtypeU find "IED_") isEqualTo 0 || { _subtypeU isEqualTo "IED_SUSPICIOUS_OBJECT" }) then { _familyU = "IED"; };
+    if (_subtypeU isEqualTo "VBIED" || { (_subtypeU find "VBIED_") isEqualTo 0 }) then { _familyU = "VBIED"; };
+    if (_subtypeU isEqualTo "SUICIDE" || { (_subtypeU find "SUICIDE_") isEqualTo 0 } || { (_subtypeU find "SB_") isEqualTo 0 }) then { _familyU = "SUICIDE"; };
+
+    [_familyU, _typeU, _subtypeU]
+};
+
+private _normalized = [_type, _subtype] call _normalizeFamily;
+private _familyU = _normalized select 0;
+private _typeU = _normalized select 1;
+private _subtypeU = _normalized select 2;
+
 // Load records
 private _records = ["threat_v0_records", []] call ARC_fnc_stateGet;
 if (!(_records isEqualType [])) then { _records = []; };
@@ -216,6 +248,7 @@ else
         ["rev", 1],
         ["created_ts", _now],
         ["updated_ts", _now],
+        ["family", _familyU],
         ["type", _typeU],
         ["subtype", _subtypeU],
         ["state", "CREATED"],
@@ -241,6 +274,7 @@ else
     private _meta = [
         ["event", "THREAT_CREATED"],
         ["threat_id", _threatId],
+        ["family", _familyU],
         ["type", _typeU],
         ["subtype", _subtypeU],
         ["state_from", ""],
@@ -257,7 +291,7 @@ else
         ["note", ""]
     ];
 
-    private _intelId = ["OPS", format ["THREAT_CREATED: %1 (%2/%3)", _threatId, _typeU, _subtypeU], _pos, _meta] call ARC_fnc_intelLog;
+    private _intelId = ["OPS", format ["THREAT_CREATED: %1 (%2/%3/%4)", _threatId, _familyU, _typeU, _subtypeU], _pos, _meta] call ARC_fnc_intelLog;
 
     missionNamespace setVariable [
         "threat_v0_debug_last_event",
@@ -265,6 +299,7 @@ else
             ["ts", _now],
             ["event", "THREAT_CREATED"],
             ["threat_id", _threatId],
+            ["family", _familyU],
             ["district_id_source", _districtIdSource],
             ["district_id", _districtId]
         ]

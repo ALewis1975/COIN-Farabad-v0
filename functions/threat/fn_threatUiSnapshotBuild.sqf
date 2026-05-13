@@ -62,6 +62,19 @@ private _typeLabel = {
     }
 };
 
+private _familyLabel = {
+    params ["_family"];
+    private _familyU = toUpper ([_family] call _trimFn);
+    switch (_familyU) do
+    {
+        case "IED": { "IED" };
+        case "VBIED": { "VBIED" };
+        case "SUICIDE": { "Suicide Bomber" };
+        case "NON_IED": { "Non-IED" };
+        default { if (_familyU isEqualTo "") then { "Unknown" } else { _familyU } };
+    }
+};
+
 private _eventBucket = {
     params ["_eventName", "_stateTo"];
     private _eventU = toUpper ([_eventName] call _trimFn);
@@ -110,14 +123,28 @@ private _buildThreatRow = {
 
     private _state = [_rec, "state", ""] call _kvGet;
     private _type = [_rec, "type", ""] call _kvGet;
+    private _subtype = [_rec, "subtype", ""] call _kvGet;
+    private _family = [_rec, "family", ""] call _kvGet;
+    if (_family isEqualTo "") then
+    {
+        private _typeU = toUpper ([_type] call _trimFn);
+        private _subtypeU = toUpper ([_subtype] call _trimFn);
+        if (_typeU in ["IED", "VBIED", "SUICIDE"]) then { _family = _typeU; };
+        if ((_subtypeU find "IED_") isEqualTo 0 || { _subtypeU isEqualTo "IED_SUSPICIOUS_OBJECT" }) then { _family = "IED"; };
+        if (_subtypeU isEqualTo "VBIED" || { (_subtypeU find "VBIED_") isEqualTo 0 }) then { _family = "VBIED"; };
+        if (_subtypeU isEqualTo "SUICIDE" || { (_subtypeU find "SUICIDE_") isEqualTo 0 } || { (_subtypeU find "SB_") isEqualTo 0 }) then { _family = "SUICIDE"; };
+        if (_family isEqualTo "") then { _family = "NON_IED"; };
+    };
 
     [
         ["threat_id", [_rec, "threat_id", ""] call _kvGet],
         ["state", _state],
         ["state_label", [_state] call _stateLabel],
+        ["family", _family],
+        ["family_label", [_family] call _familyLabel],
         ["type", _type],
         ["type_label", [_type] call _typeLabel],
-        ["subtype", [_rec, "subtype", ""] call _kvGet],
+        ["subtype", _subtype],
         ["district_id", [_links, "district_id", "D00"] call _kvGet],
         ["task_id", [_links, "task_id", ""] call _kvGet],
         ["lead_id", [_links, "lead_id", ""] call _kvGet],
@@ -138,6 +165,7 @@ private _buildEventRow = {
     params ["_evt"];
 
     private _eventName = [_evt, "event", ""] call _kvGet;
+    private _family = [_evt, "family", "NON_IED"] call _kvGet;
     private _stateFrom = [_evt, "state_from", ""] call _kvGet;
     private _stateTo = [_evt, "state_to", ""] call _kvGet;
     private _bucket = [_eventName, _stateTo] call _eventBucket;
@@ -154,6 +182,7 @@ private _buildEventRow = {
         ["seq", [_evt, "seq", -1] call _kvGet],
         ["ts", [_evt, "ts", -1] call _kvGet],
         ["event", _eventName],
+        ["family", _family],
         ["bucket", _bucket],
         ["label", [_bucket, _eventName, _stateFrom, _stateTo] call _eventLabel],
         ["summary", _summary],
@@ -194,6 +223,7 @@ private _followOnRows = [];
 private _closedRows = [];
 private _stateFilters = [];
 private _typeFilters = [];
+private _familyFilters = [];
 private _districtFilters = [];
 
 {
@@ -202,10 +232,12 @@ private _districtFilters = [];
     private _threatId = [_row, "threat_id", ""] call _kvGet;
     private _state = [_row, "state", ""] call _kvGet;
     private _type = [_row, "type", ""] call _kvGet;
+    private _family = [_row, "family", "NON_IED"] call _kvGet;
     private _districtId = [_row, "district_id", "D00"] call _kvGet;
 
     if (!(_state isEqualTo "")) then { _stateFilters pushBackUnique _state; };
     if (!(_type isEqualTo "")) then { _typeFilters pushBackUnique _type; };
+    if (!(_family isEqualTo "")) then { _familyFilters pushBackUnique _family; };
     if (!(_districtId isEqualTo "")) then { _districtFilters pushBackUnique _districtId; };
 
     if (_threatId in _openIds) then {
@@ -283,6 +315,7 @@ if (!_enabled) then {
         ["sort", [["primary", "updated_at"], ["direction", "DESC"]]],
         ["filters", [
             ["states", _stateFilters],
+            ["families", _familyFilters],
             ["types", _typeFilters],
             ["districts", _districtFilters]
         ]]

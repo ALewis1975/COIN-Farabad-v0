@@ -5438,3 +5438,20 @@ Mode: A (Bug Fix)
 | 1 | Baseline static validations (pre-change) | `python3 scripts/dev/validate_state_migrations.py && bash scripts/dev/check_test_log_commits.sh && python3 scripts/dev/validate_marker_index.py && tests/static/airbase_planning_mode_checks.sh && tests/static/casreq_snapshot_contract_checks.sh` | PASS | All checks passed before docs edits; `check_test_log_commits.sh` reported missing `rg` but fallback behavior still passed. |
 | 2 | Post-change static validations | `python3 scripts/dev/validate_state_migrations.py && bash scripts/dev/check_test_log_commits.sh && python3 scripts/dev/validate_marker_index.py && tests/static/airbase_planning_mode_checks.sh && tests/static/casreq_snapshot_contract_checks.sh && git --no-pager diff --check` | PASS | All checks passed after docs edits; no whitespace diff issues. |
 | 3 | Dedicated/JIP/runtime threat behavior | Local hosted + dedicated MP run with JIP/restart threat lifecycle/economy/virtual-pool checks | BLOCKED | Arma 3 runtime environments are unavailable in this sandbox; this PR is docs-only planning and does not claim runtime completion. |
+
+---
+
+## 2026-05-13 — Epic 4 threat family normalization implementation (Mode B)
+
+**Branch/Commit:** copilot/epic-4-threat-family-normalization @ HEAD
+
+**Scenario:** Implemented Epic 4 normalization for threat family contracts across IED/VBIED/SUICIDE/non-IED in server-authoritative create/update/event/UI paths, added normalized deny reasons/events, and published implementation matrix/schema semantics.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | SQF compat scan (changed files) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatCreateFromLead.sqf functions/threat/fn_threatCreateFromTask.sqf functions/threat/fn_threatEmitEvent.sqf functions/threat/fn_threatInit.sqf functions/threat/fn_threatLeadEmitFromOutcome.sqf functions/threat/fn_threatUiSnapshotBuild.sqf functions/threat/fn_threatUpdateState.sqf` | PASS | No banned compat patterns in touched SQF files. |
+| 2 | SQF lint (warnings as errors) | `~/.local/bin/sqflint -e w <changed threat .sqf files>` | PASS | All touched threat files lint clean. |
+| 3 | Repo static validation set | `python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && bash scripts/dev/check_test_log_commits.sh && bash tests/static/airbase_planning_mode_checks.sh && bash tests/static/casreq_snapshot_contract_checks.sh && bash tests/static/threat_ui_snapshot_contract_checks.sh` | PASS | Existing static checks remain green; `check_test_log_commits.sh` still reports missing `rg` but passes fallback checks. |
+| 4 | Epic 4 cross-family static contract checks | `bash tests/static/threat_family_normalization_contract_checks.sh` | PASS | New static checklist validates family/deny-reason/additive schema contract and implementation doc presence. |
+| 5 | Local MP smoke (one scenario per family) | Hosted/local MP run for IED, VBIED, SUICIDE, non-IED create/update/close | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 6 | Dedicated server + JIP/restart consistency | Dedicated session with late-join and restart persistence checks | BLOCKED | Dedicated/JIP environment unavailable in this sandbox. |
