@@ -37,6 +37,7 @@ if (_ctx isEqualType []) then
 };
 
 if (_taskId isEqualTo "" && { _leadIdCtxRaw isEqualTo "" }) exitWith {""};
+// Normally task-linked; lead-only callers may omit task_id when lead_id is present.
 
 private _enabled = ["threat_v0_enabled", true] call ARC_fnc_stateGet;
 if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabled = true; };

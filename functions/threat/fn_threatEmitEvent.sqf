@@ -100,9 +100,9 @@ private _max = ["threat_v0_events_max", 64] call ARC_fnc_stateGet;
 if (!(_max isEqualType 0) || { _max < 16 }) then { _max = 64; };
 _max = (_max max 16) min 256;
 
-while { (count _events) > _max } do
+if ((count _events) > _max) then
 {
-    _events deleteAt 0;
+    _events = _events select [((count _events) - _max), _max];
 };
 
 ["threat_v0_events", _events] call ARC_fnc_stateSet;

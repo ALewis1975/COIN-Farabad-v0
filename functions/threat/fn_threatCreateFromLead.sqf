@@ -67,6 +67,7 @@ else
         private _leadIdWanted = [_leadInput] call _trimFn;
         if (_leadIdWanted isEqualTo "") exitWith {};
 
+        // These are existing core lead-system state keys, not new threat_v0 keys.
         private _last = ["lastLeadConsumed", []] call ARC_fnc_stateGet;
         if (_last isEqualType [] && { (count _last) >= 1 } && { (_last select 0) isEqualTo _leadIdWanted }) then
         {
@@ -109,9 +110,10 @@ _pos = +_pos;
 _pos resize 3;
 
 private _leadTypeU = toUpper ([_leadType] call _trimFn);
-// Epic 1 only completes the API/event contract and handles IED first because it
-// is the locked P1 threat family. Non-IED lead family normalization (CACHE,
-// AMBUSH, MORTAR, RAID, RECON, QRF, and related tags) remains deferred.
+// See docs/planning/threat/Threat_System_Review_Decomposition_2026-05-13.md:
+// this slice completes the API/event contract and handles IED first because it is
+// the locked P1 threat family. Non-IED lead family normalization (CACHE, AMBUSH,
+// MORTAR, RAID, RECON, QRF, and related tags) remains deferred.
 private _type = "OTHER";
 private _subtype = "OTHER";
 if (_leadTypeU isEqualTo "IED") then
