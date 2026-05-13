@@ -151,6 +151,7 @@ class CfgFunctions
             class clientSitrepPrompt {};
             class clientLogCursorSighting {};
             class clientSnapshotRefresh {};
+            class threatUiDiaryRefresh {};
             class clientHint {};
             class clientToast {};
             class clientNotifyGate {};
@@ -653,6 +654,7 @@ class CfgFunctions
             class threatOnAOActivated {};
             class threatOnIncidentClosed {};
             class threatDebugSnapshot {};
+            class threatUiSnapshotBuild {};
             class threatGetCleanupLabelForTask {};
             class threatMarkCleanedByLabel {};
 
