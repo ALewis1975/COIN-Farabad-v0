@@ -11,6 +11,25 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-13 — Public broadcast authority hardening + dead world-time consumer cleanup (Mode I)
+
+**Branch/Commit:** copilot/p0-1-harden-public-broadcast-state @ 36b88c1
+
+**Scenario:** Removed direct RemoteExec exposure for `ARC_fnc_publicBroadcastState`, routed the HQ admin broadcast action through a dedicated authorized server RPC, and removed the dead `scripts/worldtime/worldtime_server.sqf` path while repointing the toggle-consumer registry at the live world-time startup in `functions/core/fn_bootstrapServer.sqf`.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | Changed-file compat + lint | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_publicBroadcastState.sqf functions/core/fn_tocRequestPublicBroadcast.sqf functions/ui/fn_uiConsoleActionHQPrimary.sqf initServer.sqf && ~/.local/bin/sqflint -e w functions/core/fn_publicBroadcastState.sqf && ~/.local/bin/sqflint -e w functions/core/fn_tocRequestPublicBroadcast.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleActionHQPrimary.sqf && ~/.local/bin/sqflint -e w initServer.sqf && git diff --check` | PASS | Changed SQF files pass compat scan and sqflint after installing `sqflint` in the sandbox. |
+| 2 | Repository static validations | `python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && bash tests/static/airbase_planning_mode_checks.sh && bash tests/static/casreq_snapshot_contract_checks.sh` | PASS | Existing static validation suite passed after the authority hardening and world-time cleanup changes. |
+| 3 | Live reference audit | Searched config/function/init references for `ARC_fnc_publicBroadcastState`, `ARC_fnc_tocRequestPublicBroadcast`, and `scripts/worldtime/worldtime_server.sqf` | PASS | Live code now routes client broadcast requests through `ARC_fnc_tocRequestPublicBroadcast`; only historical `tests/TEST-LOG.md` entries still mention the deleted world-time script. |
+| 4 | Runtime authority verification | Dedicated/local MP exercise: unauthorized client tries to force a public broadcast; authorized HQ/admin action requests one through the new server RPC | BLOCKED | Arma 3 runtime is unavailable in this sandbox. In multiplayer, confirm direct client RemoteExec to `ARC_fnc_publicBroadcastState` is denied and that HQ/admin requests still publish the global snapshot. |
+| 5 | Runtime world-time verification | Server startup + toggle-consumer review for world-time registry | BLOCKED | Static inspection confirms the registry now points at `functions/core/fn_bootstrapServer.sqf`; dedicated/JIP runtime is still required to confirm startup, late-join, and reconnect behavior. |
+| 6 | Review-fix revalidation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_publicBroadcastState.sqf functions/core/fn_tocRequestPublicBroadcast.sqf && ~/.local/bin/sqflint -e w functions/core/fn_publicBroadcastState.sqf && ~/.local/bin/sqflint -e w functions/core/fn_tocRequestPublicBroadcast.sqf && python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && bash tests/static/airbase_planning_mode_checks.sh && bash tests/static/casreq_snapshot_contract_checks.sh && git diff --check` | PASS | Revalidated after fixing the remote-caller early exit in `ARC_fnc_publicBroadcastState` and removing the lazy `rpcValidateSender` compile fallback from `ARC_fnc_tocRequestPublicBroadcast`. |
+| 7 | Final review-fix revalidation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_publicBroadcastState.sqf functions/core/fn_tocRequestPublicBroadcast.sqf && ~/.local/bin/sqflint -e w functions/core/fn_publicBroadcastState.sqf && ~/.local/bin/sqflint -e w functions/core/fn_tocRequestPublicBroadcast.sqf && git diff --check` | PASS | Revalidated after simplifying the `remoteExecutedOwner` rejection path so remote callers cannot fall through the guard and after breaking the sender-validation call into a readable local assignment. |
+| 8 | Final hardening revalidation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_publicBroadcastState.sqf functions/core/fn_tocRequestPublicBroadcast.sqf && ~/.local/bin/sqflint -e w functions/core/fn_publicBroadcastState.sqf && ~/.local/bin/sqflint -e w functions/core/fn_tocRequestPublicBroadcast.sqf && git diff --check` | PASS | Revalidated after changing `ARC_fnc_publicBroadcastState` to reject any RemoteExec context outright and after adding an explicit unresolved-requester rejection before sender validation in `ARC_fnc_tocRequestPublicBroadcast`. |
+
+---
+
 ## 2026-05-13 — Public state broadcast RemoteExec hardening (Mode I)
 
 **Branch/Commit:** copilot/audit-repo-optimization-issues @ commit: unrecoverable (commit SHA unavailable while authoring pre-commit validation log entry)
