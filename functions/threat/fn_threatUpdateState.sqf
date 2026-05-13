@@ -3,7 +3,7 @@
 
     Params:
         0: STRING threat_id (required)
-        1: STRING state_to (required) ["CREATED","ACTIVE","DISCOVERED","NEUTRALIZED","CLOSED","CLEANED","EXPIRED"]
+        1: STRING state_to (required) ["CREATED","ACTIVE","STAGED","DISCOVERED","NEUTRALIZED","DETONATED","INTERDICTED","CLOSED","CLEANED","EXPIRED"]
         2: STRING note (optional)
 
     Returns:
@@ -11,7 +11,7 @@
 
     Notes:
         - Server-only single-writer.
-        - Guards state transitions: if state_to == current_state, no-op and returns false.
+        - Guards lifecycle transitions: if state_to == current_state or transition is invalid, no-op and returns false.
 */
 
 if (!isServer) exitWith {false};
@@ -68,6 +68,35 @@ private _stateFrom = [_rec, "state", ""] call _kvGet;
 private _stateFromU = toUpper _stateFrom;
 
 if (_stateFromU isEqualTo _stateToU) exitWith {false};
+
+private _validStates = ["CREATED", "ACTIVE", "STAGED", "DISCOVERED", "NEUTRALIZED", "DETONATED", "INTERDICTED", "CLOSED", "CLEANED", "EXPIRED"];
+if (!(_stateToU in _validStates)) exitWith
+{
+    diag_log format ["[ARC][WARN] ARC_fnc_threatUpdateState: denied invalid state threat_id=%1 from=%2 to=%3 note=%4", _threatId, _stateFromU, _stateToU, _note];
+    false
+};
+
+private _allowedNext = switch (_stateFromU) do
+{
+    case "": { _validStates };
+    case "CREATED": { ["ACTIVE", "STAGED", "DISCOVERED", "NEUTRALIZED", "CLOSED", "CLEANED", "EXPIRED"] };
+    case "ACTIVE": { ["STAGED", "DISCOVERED", "NEUTRALIZED", "DETONATED", "INTERDICTED", "CLOSED", "CLEANED", "EXPIRED"] };
+    case "STAGED": { ["DISCOVERED", "NEUTRALIZED", "DETONATED", "INTERDICTED", "CLOSED", "CLEANED", "EXPIRED"] };
+    case "DISCOVERED": { ["NEUTRALIZED", "DETONATED", "INTERDICTED", "CLOSED", "CLEANED", "EXPIRED"] };
+    case "NEUTRALIZED": { ["CLOSED", "CLEANED"] };
+    case "DETONATED": { ["CLOSED", "CLEANED"] };
+    case "INTERDICTED": { ["CLOSED", "CLEANED"] };
+    case "CLOSED": { ["CLEANED"] };
+    case "EXPIRED": { ["CLEANED"] };
+    case "CLEANED": { [] };
+    default { [] };
+};
+
+if (!(_stateToU in _allowedNext)) exitWith
+{
+    diag_log format ["[ARC][WARN] ARC_fnc_threatUpdateState: denied invalid transition threat_id=%1 from=%2 to=%3 note=%4", _threatId, _stateFromU, _stateToU, _note];
+    false
+};
 
 private _now = serverTime;
 
