@@ -12,6 +12,8 @@
     Notes:
         - Server-only single-writer.
         - Guards lifecycle transitions: if state_to == current_state or transition is invalid, no-op and returns false.
+        - ACTIVE and STAGED both represent current runtime "spawned active" manifestations; STAGED is preserved
+          for family-specific spawn ticks (VBIED/suicide) that stage directly from CREATED.
 */
 
 if (!isServer) exitWith {false};

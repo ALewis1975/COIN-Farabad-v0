@@ -13,7 +13,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-05-13 — Threat Epic 2 lifecycle transition guard implementation (Mode B)
 
-**Branch/Commit:** copilot/docs-only-update-epic-2-lifecycle @ 47c54a99
+**Branch/Commit:** copilot/docs-only-update-epic-2-lifecycle @ 47c54a99 (active agent branch name is inherited from the prior planning branch; this entry records Mode B runtime implementation work)
 
 **Scenario:** Implemented the first Epic 2 runtime slice by adding server-side lifecycle transition guards to `ARC_fnc_threatUpdateState`, denying invalid target states and stale/backward transitions while preserving idempotent same-state no-ops and cleanup closure paths.
 
