@@ -38,7 +38,7 @@ check 'Reconnect/respawn procedure' "$DOC" "Framework includes reconnect procedu
 check 'In-flight lifecycle edge procedure' "$DOC" "Framework includes in-flight lifecycle edge procedure"
 check 'tests/TEST-LOG.md' "$DOC" "Framework documents TEST-LOG evidence updates"
 check 'Final validation closure MUST NOT be claimed unless every required evidence row is PASS with linked artifacts.' "$DOC" "Framework forbids closure claim without evidence"
-check 'No new runtime threat features are introduced in this PR\.' "$DOC" "Framework explicitly scopes out runtime threat features"
+check 'No new runtime threat features are introduced in this PR.' "$DOC" "Framework explicitly scopes out runtime threat features"
 
 if [[ "$pass" != true ]]; then
   exit 1

@@ -13,7 +13,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-05-13 — Threat Epic 6 validation framework implementation (Mode E)
 
-**Branch/Commit:** copilot/alewis1975-epic-6-validation-framework @ HEAD
+**Branch/Commit:** copilot/alewis1975-epic-6-validation-framework @ 0a96a10
 
 **Scenario:** Implemented Epic 6 validation-framework-only slice: threat validation evidence matrix, procedure/checklist framework, closure report template, unresolved-risk ledger format, and static contract checks. No runtime threat behavior changes were introduced.
 
@@ -28,6 +28,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | 7 | Restart/save-load validation pass | Controlled save/load + restart integrity checks with in-flight threat lifecycle edges | BLOCKED | Owner: Threat QA. Date: 2026-05-13. Requires: dedicated restart-capable environment and persistence harness. Next step: execute restart procedure and compare before/after artifacts. |
 | 8 | Reconnect/respawn validation pass | Active-incident reconnect checks for continuity and no duplicate side effects | BLOCKED | Owner: Threat QA. Date: 2026-05-13. Requires: multiplayer reconnect/respawn runtime environment. Next step: execute reconnect procedure and append evidence rows. |
 | 9 | Review-fix revalidation | `bash tests/static/threat_validation_framework_contract_checks.sh && git diff --check` | PASS | Revalidated after tightening static check pattern style in Epic 6 contract script. |
+| 10 | Review-fix revalidation (commit/pattern hygiene) | `bash tests/static/threat_validation_framework_contract_checks.sh && git diff --check` | PASS | Revalidated after removing redundant regex escaping and replacing `HEAD` with concrete commit SHA in this TEST-LOG entry. |
 
 ---
 
