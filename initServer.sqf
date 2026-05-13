@@ -937,7 +937,7 @@ private _arcKnownToggleConsumers = [
 ];
 
 private _arcKnownToggleConsumerIndex = createHashMap;
-private _arcMapGet = compile "params ['_h','_k']; _h get _k";
+private _arcHashGetOrDefault = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 {
     if (_x isEqualType [] && { (count _x) > 0 }) then
     {
@@ -950,7 +950,7 @@ private _arcMapGet = compile "params ['_h','_k']; _h get _k";
 
 {
     private _toggle = _x;
-    if (isNil { [_arcKnownToggleConsumerIndex, _toggle] call _arcMapGet }) then {
+    if (!([_arcKnownToggleConsumerIndex, _toggle, false] call _arcHashGetOrDefault)) then {
         diag_log format ["[ARC][CONFIG][WARN] Toggle '%1' is declared in initServer.sqf but missing from the known-consumer registry.", _toggle];
     };
 } forEach _arcDeclaredServerToggles;
