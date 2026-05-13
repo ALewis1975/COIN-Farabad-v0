@@ -11,6 +11,24 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-13 — QA audit task decomposition implementation (Mode I)
+
+**Branch/Commit:** copilot/qa-audit-recent-cleanup-changes @ c6359e6e6c47e4918a2b6a3fa44a77f0ec5b4425
+
+**Scenario:** Implemented the QA audit's highest-priority follow-ups: added server-side per-owner cooldown to `ARC_fnc_tocRequestPublicBroadcast`, removed the misleading client-side relay fallback from server-internal convoy spawning, and replaced the remaining convoy side `typeName` check with `isEqualType`. No client-side UI cooldown was added because the authoritative server throttle covers the abuse path. Historical worldtime cleanup was audited and left unchanged because live references were already clean.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline targeted/static checks | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_tocRequestPublicBroadcast.sqf functions/logistics/fn_execSpawnConvoy.sqf functions/ui/fn_uiConsoleActionHQPrimary.sqf && if command -v sqflint ...; then sqflint ...; else echo 'sqflint not installed'; fi && python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && for f in tests/static/*.sh; do bash "$f"; done && git --no-pager diff --check` | PASS | Pre-edit baseline was clean; `sqflint` was not installed in the sandbox at baseline time. |
+| 2 | Changed-file compat + lint | `python3 -m pip install --user sqflint && python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_tocRequestPublicBroadcast.sqf functions/logistics/fn_execSpawnConvoy.sqf && sqflint -e w functions/core/fn_tocRequestPublicBroadcast.sqf && sqflint -e w functions/logistics/fn_execSpawnConvoy.sqf` | PASS | Changed SQF files pass compat scan and `sqflint -e w`. |
+| 3 | Repository static validations | `python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && for f in tests/static/*.sh; do bash "$f"; done && git --no-pager diff --check` | PASS | Static migration, marker, threat, AIRBASE, CASREQ, and whitespace checks passed. |
+| 4 | Convoy remoteExec/static authority audit | `! grep -RInE 'remoteExec(Call)? \\["ARC_fnc_execSpawnConvoy"|typeName _grpSide' functions config initServer.sqf && grep -RIn 'ARC_fnc_execSpawnConvoy' config/CfgRemoteExec.hpp functions/logistics/fn_execSpawnConvoy.sqf functions/logistics/fn_execTickConvoy.sqf tests/run_all.sqf` | PASS | No remoteExec relay or `typeName _grpSide` remains; `CfgRemoteExec.hpp` still documents `ARC_fnc_execSpawnConvoy` as intentionally not allowlisted, and runtime call sites remain server-owned. |
+| 5 | Historical worldtime reference audit | `grep -RIn 'worldtime_server\\.sqf' . --exclude-dir=.git` | PASS | Only historical `tests/TEST-LOG.md` entries mention the deleted script; no live config/function/init references require docs cleanup. |
+| 6 | Runtime smoke: public broadcast cooldown/authorization, convoy spawn/link-up/tick, guard post scanning, AIRBASE player cache/tick, UI refresh/dirty flags | Start mission in local hosted MP/dedicated-like environment and exercise listed paths while checking RPT for script errors | BLOCKED | Arma 3 runtime is unavailable in this sandbox; requires local MP/dedicated server environment. |
+| 7 | Dedicated/JIP validation | Dedicated server with at least one JIP/reconnect client; verify authoritative state replication and no client-side shared-state writes | BLOCKED | Dedicated server and JIP rig are unavailable in this sandbox. |
+
+---
+
 ## 2026-05-13 — PR 10: Minor registry/config hygiene (Mode C)
 
 **Branch/Commit:** copilot/cleanup-registry-config-hygiene @ commit: unrecoverable (pre-commit working tree validated in-session)
