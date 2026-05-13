@@ -40,7 +40,6 @@ class CfgRemoteExec
 
         // Core / TOC RPCs
         class ARC_fnc_execObjectiveComplete         { allowedTargets = 2; };
-        class ARC_fnc_publicBroadcastState          { allowedTargets = 2; };
         class ARC_fnc_tocReceiveSitrep              { allowedTargets = 2; };
         class ARC_fnc_tocRequestAcceptIncident      { allowedTargets = 2; };
         class ARC_fnc_tocRequestCivsubReset         { allowedTargets = 2; };
@@ -50,6 +49,7 @@ class CfgRemoteExec
         class ARC_fnc_tocRequestForceIncident       { allowedTargets = 2; };
         class ARC_fnc_tocRequestLogIntel            { allowedTargets = 2; };
         class ARC_fnc_tocRequestNextIncident        { allowedTargets = 2; };
+        class ARC_fnc_tocRequestPublicBroadcast     { allowedTargets = 2; };
         class ARC_fnc_tocRequestRebuildActive       { allowedTargets = 2; };
         class ARC_fnc_tocRequestRefreshIntel        { allowedTargets = 2; };
         class ARC_fnc_tocRequestResetAll            { allowedTargets = 2; };

@@ -186,6 +186,7 @@ class CfgFunctions
             class tocRequestCivsubSave {};
             class tocRequestCivsubReset {};
             class tocRequestLogIntel {};
+            class tocRequestPublicBroadcast {};
             class tocRequestRefreshIntel {};
             class tocRequestShowLeads {};
             class tocShowLatestIntel {};

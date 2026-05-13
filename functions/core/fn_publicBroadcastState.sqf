@@ -6,17 +6,13 @@
 */
 
 if (!isServer) exitWith {false};
-private _trimFn = compile "params ['_s']; trim _s";
-
-// Dedicated MP hardening: require valid remoteExec context when invoked remotely.
-if (!isNil "remoteExecutedOwner") then
+if (!isNil "remoteExecutedOwner") exitWith
 {
-    private _reo = remoteExecutedOwner;
-    if (_reo > 0) then
-    {
-        diag_log format ["[ARC][SEC] ARC_fnc_publicBroadcastState: invoked via remoteExec from owner=%1", _reo];
-    };
+    diag_log format ["[ARC][SEC] ARC_fnc_publicBroadcastState: rejected remote execution owner=%1", remoteExecutedOwner];
+    false
 };
+
+private _trimFn = compile "params ['_s']; trim _s";
 
 private _p = ["insurgentPressure", 0.35] call ARC_fnc_stateGet;
 private _c = ["corruption", 0.55] call ARC_fnc_stateGet;
