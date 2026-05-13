@@ -5367,3 +5367,17 @@ Mode: A (Bug Fix)
 - The role-aware bundle resolution is purely additive on top of the existing flat-list matrix: bundles outside the `ARC_convoyBundlePayloadOnly` list keep their previous behavior (drive all roles), so escort-style bundles already curating SUV/PMC vehicles remain unaffected.
 - Mission authors can override `ARC_convoyBundlePayloadOnly` before bootstrap to add/remove payload-only bundle IDs without touching code.
 - Route adherence sanity checks are read-only log warnings; they do not mutate the route. Operations will see them in RPT when a convoy is at risk of shortcutting or weak-A*-fallback routing.
+
+---
+
+## 2026-05-13 — Threat review decomposition + epic planning package (Mode F)
+
+**Branch/Commit:** copilot/add-task-decomposition-plan @ e3c1333
+
+**Scenario:** Added a docs-only threat-system review decomposition package with one epic planning artifact per epic plus docs-only PR templates; no runtime SQF/config behavior changes.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline static validations (pre-change) | `python3 scripts/dev/validate_state_migrations.py && bash scripts/dev/check_test_log_commits.sh && python3 scripts/dev/validate_marker_index.py && tests/static/airbase_planning_mode_checks.sh && tests/static/casreq_snapshot_contract_checks.sh` | PASS | All checks passed before docs edits; `check_test_log_commits.sh` reported missing `rg` but fallback behavior still passed. |
+| 2 | Post-change static validations | `python3 scripts/dev/validate_state_migrations.py && bash scripts/dev/check_test_log_commits.sh && python3 scripts/dev/validate_marker_index.py && tests/static/airbase_planning_mode_checks.sh && tests/static/casreq_snapshot_contract_checks.sh && git --no-pager diff --check` | PASS | All checks passed after docs edits; no whitespace diff issues. |
+| 3 | Dedicated/JIP/runtime threat behavior | Local hosted + dedicated MP run with JIP/restart threat lifecycle/economy/virtual-pool checks | BLOCKED | Arma 3 runtime environments are unavailable in this sandbox; this PR is docs-only planning and does not claim runtime completion. |
