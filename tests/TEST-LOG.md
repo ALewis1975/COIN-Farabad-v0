@@ -11,6 +11,24 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-13 — PR 6: Reduce heavy tick frequency / repeated scans (Mode A)
+
+**Branch/Commit:** copilot/cleanup-increase-tick-intervals @ 8b42d3cd56f17e8678d3ded5063e824c05d3dd23
+
+**Scenario:** Increased `civsub_v1_traffic_tick_s` from 2 s to 5 s in `initServer.sqf` (P1-5 high-priority tick audit). Cached `allPlayers` once per airbase tick in `fn_airbaseTick.sqf` and replaced the three inline `allPlayers` scans with the single cached `_allPlayers` variable (P1-6: allPlayers evaluated 3x per tick). Airbase tick interval (`airbase_v1_tick_s = 2 s`) was not changed because the per-tick departure/arrival probability calculations scale with `_tickS` and changing it would alter expected flight cadence; a comment documents this rationale.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | SQF compat scan (changed files) | `python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf functions/ambiance/fn_airbaseTick.sqf` | PASS | No known parser-compat patterns found. |
+| 2 | State migration validation | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios, no regressions. |
+| 3 | Marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | 177 markers validated. |
+| 4 | Static contract checks | `bash tests/static/airbase_planning_mode_checks.sh && bash tests/static/casreq_snapshot_contract_checks.sh` | PASS | All static checks green. |
+| 5 | SQF lint (`sqflint`) | `sqflint -e w initServer.sqf && sqflint -e w functions/ambiance/fn_airbaseTick.sqf` | BLOCKED | `sqflint` not installed in this sandbox; compat scan passed. |
+| 6 | Civ traffic tick runtime smoke | Start mission, observe civilian traffic spawn cadence at the new 5 s interval | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 7 | Airbase tick allPlayers cache smoke | Start mission, exercise airbase clearance/departure logic, confirm no `allPlayers` per-tick RPT spikes | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+
+---
+
 ## 2026-05-13 — PR 5: Fix guard post combat loop scaling (Mode A)
 
 **Branch/Commit:** copilot/fix-guard-post-combat-loop @ 493f19308a2c83860f9a17f51f36a3f3fb5d68b0

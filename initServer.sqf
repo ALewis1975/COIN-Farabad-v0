@@ -297,7 +297,7 @@ missionNamespace setVariable ["airbase_v1_tower_lcTokens", [
 missionNamespace setVariable ["civsub_v1_traffic_enabled", true, true];
 
 // Cadence and budgets (no burst spawns)
-missionNamespace setVariable ["civsub_v1_traffic_tick_s", 2, true];                       // 1–2s recommended
+missionNamespace setVariable ["civsub_v1_traffic_tick_s", 5, true];                       // 5s recommended; 2s was too aggressive for the 498-line tick function
 missionNamespace setVariable ["civsub_v1_traffic_spawn_budget_globalPerTick", 1, true];
 missionNamespace setVariable ["civsub_v1_traffic_spawn_budget_perDistrictPerTick", 1, true];
 
