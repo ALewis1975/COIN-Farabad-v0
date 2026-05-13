@@ -11,6 +11,28 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-13 — Threat Epic 2 lifecycle transition guard implementation (Mode B)
+
+**Branch/Commit:** copilot/docs-only-update-epic-2-lifecycle @ 47c54a99 (active agent branch name is inherited from the prior planning branch; this entry records Mode B runtime implementation work)
+
+**Scenario:** Implemented the first Epic 2 runtime slice by adding server-side lifecycle transition guards to `ARC_fnc_threatUpdateState`, denying invalid target states and stale/backward transitions while preserving idempotent same-state no-ops and cleanup closure paths.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Pre-change whitespace/status check | `git --no-pager status --short && git diff --check` | PASS | Clean implementation branch/status before runtime edits. |
+| 2 | Pre-change state migration validation | `python3 scripts/dev/validate_state_migrations.py` | PASS | State migration validation passed (3 scenarios). |
+| 3 | Pre-change remoteExec contract script | `scripts/dev/check_remoteexec_contract.sh` | BLOCKED | Script was not present in the working tree. |
+| 4 | Pre-change console conflict check | `scripts/dev/check_console_conflicts.sh` | FAIL | Pre-existing duplicate console IDCs reported (`78201`, `78202`, `78211`); unrelated to this Threat change. |
+| 5 | Changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatUpdateState.sqf` | PASS | No known parser-compatibility patterns found in the changed SQF file. |
+| 6 | Changed-file sqflint | `~/.local/bin/sqflint -e w functions/threat/fn_threatUpdateState.sqf` | PASS | Installed `sqflint` locally via `python3 -m pip install --user sqflint`; changed SQF file linted clean. |
+| 7 | Post-change repository static validations | `git diff --check && python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py` | PASS | Whitespace diff, state migration validation, and marker index validation passed after edits. |
+| 8 | Review-fix changed-file validation | `git diff --check && python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatUpdateState.sqf && ~/.local/bin/sqflint -e w functions/threat/fn_threatUpdateState.sqf` | PASS | Revalidated after clarifying docs/runtime state vocabulary, logging empty-state legacy transitions, and removing direct `CREATED -> CLEANED`. |
+| 9 | Stricter guard validation | `git diff --check && python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatUpdateState.sqf && ~/.local/bin/sqflint -e w functions/threat/fn_threatUpdateState.sqf` | PASS | Revalidated after denying empty-state transitions, requiring `CREATED` to progress through active/staged or terminal close/expire, and requiring cleanup via `CLOSED`/`EXPIRED`. |
+| 10 | Final guard-cleanup validation | `git diff --check && python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatUpdateState.sqf && ~/.local/bin/sqflint -e w functions/threat/fn_threatUpdateState.sqf` | PASS | Revalidated after removing redundant valid-state list and making empty-state denial a single-log early exit. |
+| 11 | Threat Epic 2 runtime smoke | Local/dedicated MP: exercise create -> active/staged -> discovered/neutralized -> closed/cleaned and stale transition denial paths | BLOCKED | Arma 3 hosted/dedicated/JIP runtime unavailable in this sandbox. |
+
+---
+
 ## 2026-05-13 — Threat review Epic 1 API/event contract implementation (Mode B)
 
 **Branch/Commit:** copilot/implement-prs-in-sequence @ HEAD
