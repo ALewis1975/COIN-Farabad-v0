@@ -27,6 +27,23 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | 6 | Post-change static validations | `python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && tests/static/airbase_planning_mode_checks.sh && tests/static/casreq_snapshot_contract_checks.sh && git diff --check` | PASS | State migrations, marker index, AIRBASE static checks, CASREQ static checks, and whitespace diff check passed after edits. |
 | 7 | Military base OPFOR runtime smoke | Dedicated/local MP: start at `ARC_m_logistics_01` / military base, activate nearby incidents, and verify no virtual/patrol OPFOR spawn within the `MilitaryBase` protected zone and no RPT errors appear | BLOCKED | Arma 3 hosted/dedicated/JIP runtime unavailable in this sandbox. |
 | 8 | Parallel validation | `parallel_validation` | PASS | Code Review returned two P2 suggestions (zone ID naming and possible shared protected-zone helper); CodeQL had no analyzable languages for SQF changes. |
+## 2026-05-12 — Convoy endpoint file/dismount staging (Mode A)
+
+**Branch/Commit:** copilot/form-convoy-at-end-point @ c80cbae
+
+**Scenario:** Updated convoy arrival handling so lead proximity to the endpoint marker marks the task ready for SITREP, then the convoy forms a tight file near the marker, pauses, dismounts non-gunner AI crew/passengers, and applies LAMBS camp ambiance when available.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Pre-change changed-file sqflint compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/logistics/fn_execTickConvoy.sqf` | PASS | No parser-compat violations before editing the convoy tick file. |
+| 2 | Post-change changed-file sqflint compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/logistics/fn_execTickConvoy.sqf` | PASS | No parser-compat violations after endpoint staging changes. |
+| 3 | Changed-file sqflint | `~/.local/bin/sqflint -e w functions/logistics/fn_execTickConvoy.sqf` | PASS | Installed `sqflint` locally via pip; convoy tick file linted clean. |
+| 4 | State migration validation | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios passed. |
+| 5 | Marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | `off`, `auto`, and `auto-no-rg` modes passed (177 markers). |
+| 6 | AIRBASE planning-mode static checks | `tests/static/airbase_planning_mode_checks.sh` | PASS | Runtime gate/static checks passed. |
+| 7 | CASREQ snapshot contract checks | `tests/static/casreq_snapshot_contract_checks.sh` | PASS | Snapshot payload and metadata contract checks passed. |
+| 8 | Whitespace diff check | `git diff --check` | PASS | No whitespace errors in final working diff. |
+| 9 | Runtime convoy endpoint behavior | Local/dedicated MP: spawn logistics/escort convoys, confirm lead proximity marks close-ready, vehicles form ~10m endpoint file, non-gunners dismount after ~10s, gunners stay mounted, and dismount group camps around endpoint marker | BLOCKED | Arma 3 runtime (hosted + dedicated + JIP) unavailable in this sandbox. |
 
 ---
 
