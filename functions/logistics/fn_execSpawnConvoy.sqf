@@ -31,11 +31,7 @@ if (!isServer) exitWith
     private _ownerTxt = if (_clientOwner isEqualType 0) then { str _clientOwner } else { "local" };
     private _ctxTaskId = if (_taskId isEqualType "") then { _taskId } else { "" };
 
-    diag_log format ["[ARC][CONVOY][AUTH] Rejected non-server call to execSpawnConvoy (task=%1, clientOwner=%2). Relaying request to server.", _ctxTaskId, _ownerTxt];
-
-    // Non-authoritative callers must never mutate shared convoy state directly.
-    // Relay to the server path; return value is intentionally empty because remoteExecCall is async.
-    [_incidentType, _spawnPos, _destPos, _speedKph, _spawnDir, _taskId] remoteExecCall ["ARC_fnc_execSpawnConvoy", 2];
+    diag_log format ["[ARC][CONVOY][AUTH] Rejected non-server call to execSpawnConvoy (task=%1, clientOwner=%2). Server-internal only; not relaying.", _ctxTaskId, _ownerTxt];
     []
 };
 
@@ -253,7 +249,7 @@ private _poolVIP = missionNamespace getVariable ["ARC_convoyVehiclesEscortVIP", 
 
 // Convoy group side is also used as a class policy gate (vehicle crew must be join-compatible).
 private _grpSide = missionNamespace getVariable ["ARC_convoySide", west];
-if !(typeName _grpSide isEqualTo "SIDE") then { _grpSide = west; };
+if (!(_grpSide isEqualType west)) then { _grpSide = west; };
 
 private _sideToNumber = {
     params ["_s"];
