@@ -47,11 +47,10 @@ private _statusGps  = _display displayCtrl 78061;
 private _statusBatt = _display displayCtrl 78062;
 private _statusSync = _display displayCtrl 78063;
 
-private _ctrlEnabledFn = compile "params ['_ctrl']; ctrlEnabled _ctrl";
 private _ctrlState = {
     params ["_ctrl"];
     if (isNull _ctrl) exitWith { [false, false, []] };
-    [ctrlShown _ctrl, [_ctrl] call _ctrlEnabledFn, ctrlPosition _ctrl]
+    [ctrlShown _ctrl, ctrlEnabled _ctrl, ctrlPosition _ctrl]
 };
 
 // Ops frame controls
@@ -108,8 +107,9 @@ private _tab = ["ARC_console_activeTab", "DASH"] call ARC_fnc_uiNsGetString;
 _tab = toUpper _tab;
 
 private _prevRefreshTab = ["ARC_console_prevRefreshTab", "", false] call ARC_fnc_uiNsGetString;
-private _tabEntered = (_prevRefreshTab isEqualTo "") || { !(_prevRefreshTab isEqualTo _tab) };
-private _tabChanged = !(_prevRefreshTab isEqualTo "") && { !(_prevRefreshTab isEqualTo _tab) };
+private _isDifferentTab = !(_prevRefreshTab isEqualTo _tab);
+private _tabEntered = (_prevRefreshTab isEqualTo "") || { _isDifferentTab };
+private _tabChanged = !(_prevRefreshTab isEqualTo "") && { _isDifferentTab };
 
 if (_tabChanged) then
 {
@@ -235,6 +235,8 @@ if (!isNull _ctrlMainGrp) then {
 [_display, _tab] call ARC_fnc_uiConsoleApplyLayout;
 
 private _clampMainGroupToListRegion = {
+    // Clamp MainGroup (78015) to the center/list region so structured text
+    // tabs with a visible right details pane cannot overlap MainDetailsGroup.
     if (isNull _ctrlMainGrp || { isNull _ctrlList }) exitWith { false };
 
     private _lp = ctrlPosition _ctrlList;
@@ -248,7 +250,7 @@ private _clampMainGroupToListRegion = {
 };
 
 private _auditLayout = {
-    if !(missionNamespace getVariable ["ARC_console_layout_audit", false]) exitWith { true };
+    if (!(missionNamespace getVariable ["ARC_console_layout_audit", false])) exitWith { true };
 
     private _failures = [];
     private _overlaps = {

@@ -28,6 +28,9 @@ private _ctrlList    = _display displayCtrl 78011;
 private _ctrlDetails = _display displayCtrl 78012;
 if (isNull _ctrlMain || { isNull _ctrlList } || { isNull _ctrlDetails }) exitWith { false };
 
+// Fit a structured-text child control to its rendered content while preserving
+// the designed x/y/w defaults and keeping minimum height aligned with its
+// parent controls-group so vertical scrolling remains available.
 private _fitStructuredInGroup = {
     params [
         ["_ctrl", controlNull, [controlNull]],
