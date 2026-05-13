@@ -234,6 +234,7 @@ if ((count _closedRows) > _closedCap) then { _closedRows resize _closedCap; };
 private _eventCap = missionNamespace getVariable ["threat_v0_ui_event_cap", 8];
 if (!(_eventCap isEqualType 0) || { _eventCap < 1 }) then { _eventCap = 8; };
 if ((count _events) > _eventCap) then {
+    // Keep only the most recent N events for the operator-facing tail/feed.
     _events = _events select [(count _events) - _eventCap, _eventCap];
 };
 

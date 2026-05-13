@@ -60,6 +60,8 @@ private _renderThreatRows = {
         private _updatedAt = [_x, "updated_at", -1] call _kvGet;
         private _spawned = [_x, "world_spawned", false] call _kvGet;
         private _objectCount = [_x, "world_object_count", 0] call _kvGet;
+        private _gridLabel = if (_grid isEqualTo "") then { "-" } else { _grid };
+        private _taskLabel = if (_taskId isEqualTo "") then { "-" } else { _taskId };
 
         private _line = format [
             "<t color='#FFD166'>%1</t> — %2 / %3 / %4",
@@ -69,7 +71,7 @@ private _renderThreatRows = {
             _districtId
         ];
 
-        private _detail = format ["Grid %1 | Task %2 | Updated %3", if (_grid isEqualTo "") then { "-" } else { _grid }, if (_taskId isEqualTo "") then { "-" } else { _taskId }, [_updatedAt] call _fmtAgo];
+        private _detail = format ["Grid %1 | Task %2 | Updated %3", _gridLabel, _taskLabel, [_updatedAt] call _fmtAgo];
         if (_spawned isEqualType true && { _spawned }) then {
             _detail = _detail + format [" | World objs %1", _objectCount];
         };
