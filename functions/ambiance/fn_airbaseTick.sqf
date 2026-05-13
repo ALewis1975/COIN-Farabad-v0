@@ -29,11 +29,14 @@ private _tickS = missionNamespace getVariable ["airbase_v1_tick_s", 2];
 private _center = [_rt, "bubbleCenter", getMarkerPos "mkr_airbaseCenter"] call _fnHmGet;
 private _radius = [_rt, "bubbleRadius", 2500] call _fnHmGet;
 
+// Cache allPlayers once per tick — reused for bubble check, UID→owner map, and tower controller scan.
+private _allPlayers = allPlayers;
+
 // Player bubble check
 private _bubbleActive = false;
 {
     if (isPlayer _x && { alive _x } && { (_x distance2D _center) < _radius }) exitWith { _bubbleActive = true; };
-} forEach allPlayers;
+} forEach _allPlayers;
 
 private _wasActive = [_rt, "bubbleActive", false] call _fnHmGet;
 _rt set ["bubbleActive", _bubbleActive];
@@ -191,10 +194,10 @@ private _fnNotifyMaybe = {
     };
 };
 
-// UID → owner cache: built once per tick, replaces 4 inline allPlayers scans
+// UID → owner cache: built once per tick from the cached _allPlayers snapshot above.
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
 private _uidOwnerPairs = [];
-{ _uidOwnerPairs pushBack [getPlayerUID _x, owner _x]; } forEach allPlayers;
+{ _uidOwnerPairs pushBack [getPlayerUID _x, owner _x]; } forEach _allPlayers;
 private _uidOwnerCache = [_uidOwnerPairs] call _hmCreate;
 private _hgOwner = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
@@ -217,7 +220,7 @@ if (!_forceAiOnly) then {
         };
 
         _towerControllers pushBack [name _x, getPlayerUID _x, _level];
-    } forEach allPlayers;
+    } forEach _allPlayers;
 };
 
 private _towerStaffing = ["airbase_v1_towerStaffing", []] call ARC_fnc_stateGet;
