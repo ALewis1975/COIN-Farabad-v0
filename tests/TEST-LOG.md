@@ -5737,3 +5737,22 @@ Mode: A (Bug Fix)
 | 5 | Consumer audit for removed legacy pool vars | Repo-wide grep for `ARC_convoyCarPool`, `ARC_convoyTruckPool`, `ARC_convoyFuelPool`, `ARC_convoySecurityPool` | PASS | No live consumers found; only definition sites in `ARC_ConfigData.sqf` and references in docs/architecture. Safe to remove. |
 | 6 | Local MP convoy smoke test | Hosted/local MP run exercising convoy spawn/tick | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
 | 7 | Dedicated server + JIP/restart consistency | Dedicated session validation | BLOCKED | Dedicated/JIP environment unavailable in this sandbox. |
+
+---
+
+## 2026-05-13 — PR 9: Client/UI performance cleanup (Mode D)
+
+**Branch/Commit:** copilot/cleanup-client-ui-performance @ 0bdd1f667df65f57474d45ccf113f8eb34e0d8dd
+
+**Scenario:** Reduced avoidable client-side refresh cost in `fn_briefingUpdateClient.sqf` by replacing repeated pair-array linear scans with per-update hash-map lookups, and added a conservative `uiNamespace` static-signature fast-path in `fn_uiConsoleIntelPaint.sqf` to skip redundant repaint work for unchanged static tool/detail selections.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | CI workflow run triage | `list_workflow_runs` + `get_workflow_run` + `list_workflow_jobs` + `get_job_logs` for run `25829134403` | BLOCKED | Latest preflight run is `action_required` with zero jobs emitted; no failed job logs available from the run metadata at triage time. |
+| 2 | Pre-change compat baseline | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_briefingUpdateClient.sqf functions/ui/fn_uiConsoleIntelPaint.sqf` | FAIL (pre-existing) | Existing parser-compat findings were already present in both large legacy files prior to this PR. |
+| 3 | Pre-change sqflint baseline | `~/.local/bin/sqflint -e w functions/core/fn_briefingUpdateClient.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleIntelPaint.sqf` | FAIL (pre-existing) | `sqflint` parser errors are pre-existing in these files (`isNotEqualTo`, `#`, etc.); used as baseline only. |
+| 4 | Post-change compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_briefingUpdateClient.sqf functions/ui/fn_uiConsoleIntelPaint.sqf` | FAIL (pre-existing) | Scan still reports known legacy patterns; no new subsystem/files were introduced. |
+| 5 | Post-change sqflint | `~/.local/bin/sqflint -e w functions/core/fn_briefingUpdateClient.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleIntelPaint.sqf` | FAIL (pre-existing) | Same parser limitations/findings remain in these legacy files after edits; no new hard syntax failures outside existing baseline class. |
+| 6 | Patch formatting sanity | `git --no-pager diff --check` | PASS | No whitespace or patch-format issues introduced. |
+| 7 | Runtime UI behavior and screenshot verification | Local MP/Arma UI exercise of INTEL painter and briefing refresh paths + screenshot capture | BLOCKED | Arma 3 runtime/UI is unavailable in this sandbox, so in-engine rendering and screenshot capture cannot be executed here. |
+
