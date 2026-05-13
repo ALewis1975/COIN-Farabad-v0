@@ -69,13 +69,13 @@ private _rec = _records select _idxRec;
 private _stateFrom = [_rec, "state", ""] call _kvGet;
 private _stateFromU = toUpper _stateFrom;
 
-if (_stateFromU isEqualTo _stateToU) exitWith {false};
-
 if (_stateFromU isEqualTo "") exitWith
 {
     diag_log format ["[ARC][WARN] ARC_fnc_threatUpdateState: denied empty-state transition threat_id=%1 to=%2 note=%3", _threatId, _stateToU, _note];
     false
 };
+
+if (_stateFromU isEqualTo _stateToU) exitWith {false};
 
 private _allowedNext = switch (_stateFromU) do
 {
