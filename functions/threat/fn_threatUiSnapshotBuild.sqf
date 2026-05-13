@@ -235,7 +235,9 @@ private _eventCap = missionNamespace getVariable ["threat_v0_ui_event_cap", 8];
 if (!(_eventCap isEqualType 0) || { _eventCap < 1 }) then { _eventCap = 8; };
 if ((count _events) > _eventCap) then {
     // Keep only the most recent N events for the operator-facing tail/feed.
-    _events = _events select [(count _events) - _eventCap, _eventCap];
+    private _eventStart = (count _events) - _eventCap;
+    if (_eventStart < 0) then { _eventStart = 0; };
+    _events = _events select [_eventStart, _eventCap];
 };
 
 private _eventRows = _events apply { [_x] call _buildEventRow };

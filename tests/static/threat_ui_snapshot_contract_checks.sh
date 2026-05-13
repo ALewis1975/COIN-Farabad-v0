@@ -10,7 +10,7 @@ check() {
   local pattern="$1"
   local file="$2"
   local label="$3"
-  if grep "$pattern" "$file" >/dev/null; then
+  if grep -q "$pattern" "$file"; then
     echo "[PASS] $label"
   else
     echo "[FAIL] $label"
