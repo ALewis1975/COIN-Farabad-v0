@@ -11,6 +11,24 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-13 — Threat Epic 5 migration/reset static harness implementation (Mode B)
+
+**Branch/Commit:** copilot/implement-epic-5-threat-persistence @ HEAD
+
+**Scenario:** Implemented Epic 5 non-dedicated slice with explicit threat persistence schema/version documentation, migration matrix + idempotency rules, reset/rebuild bounded-state contract framing, restart invariants checklist, static migration fixtures, and a new static contract check script.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline state migration validation | `python3 scripts/dev/validate_state_migrations.py` | PASS | Existing migration harness passed before changes. |
+| 2 | Baseline threat static contracts | `bash tests/static/threat_ui_snapshot_contract_checks.sh && bash tests/static/threat_ied_lifecycle_contract_checks.sh && bash tests/static/threat_family_normalization_contract_checks.sh && bash tests/static/threat_economy_operator_tooling_contract_checks.sh && bash tests/static/threat_virtual_opfor_observability_contract_checks.sh` | PASS | Existing Threat Epics 2/3/4/7/8 static checks were green before Epic 5 slice changes. |
+| 3 | Epic 5 threat migration/reset contract checks | `bash tests/static/threat_persistence_migration_contract_checks.sh` | PASS | New checks passed for docs/runtime-contract anchors and threat migration fixture execution. |
+| 4 | Threat migration fixture validation | `python3 scripts/dev/validate_state_migrations.py --scenarios tests/migrations/threat_persistence_schema_scenarios.json` | PASS | New Epic 5 migration vectors validated (legacy defaulting, replay-safe partial, idempotent v0 no-op). |
+| 5 | Existing repository static validations | `python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && tests/static/airbase_planning_mode_checks.sh && tests/static/casreq_snapshot_contract_checks.sh && bash tests/static/threat_ui_snapshot_contract_checks.sh && bash tests/static/threat_ied_lifecycle_contract_checks.sh && bash tests/static/threat_family_normalization_contract_checks.sh && bash tests/static/threat_economy_operator_tooling_contract_checks.sh && bash tests/static/threat_virtual_opfor_observability_contract_checks.sh && bash tests/static/threat_persistence_migration_contract_checks.sh && git diff --check` | PASS | Static regression suite remained green with Epic 5 additions only. |
+| 6 | Controlled restart determinism proof | Dedicated-like controlled restart test: load persisted threat/economy/pool state, restart, verify deterministic recovery and migration replay behavior | BLOCKED | Dedicated/restart Arma runtime unavailable in this sandbox. |
+| 7 | Dedicated + JIP post-restart proof | Dedicated server with late-join client after restart to verify threat/economy/virtual-pool snapshot consistency and single-writer guarantees | BLOCKED | Requires dedicated/JIP environment outside this sandbox. |
+
+---
+
 ## 2026-05-13 — Threat Epic 8 virtual OpFor observability/docs/debug snapshot (Mode B)
 
 **Branch/Commit:** copilot/alewis1975-virtual-opfor-observability @ HEAD
