@@ -26,7 +26,7 @@ private _kvGet = {
     _value
 };
 
-// Local helper intentionally kept in-file (bounded use, max pool size clamp below).
+// Local helper intentionally kept in-file for this single snapshot builder scope.
 private _boolOrDefault = {
     params ["_value", "_default"];
     if ((_value isEqualType true) || (_value isEqualType false)) exitWith { _value };
@@ -138,7 +138,7 @@ private _materializedRowsTruncated = false;
             if (!(_spawned isEqualType [])) then { _spawned = []; };
 
             private _aliveUnits = 0;
-            // Bounded by virtual-group strength (2-5 units by default); linear scan is acceptable.
+            // Bounded by per-record spawned-unit refs; linear scan is acceptable for this read-model snapshot.
             {
                 private _u = objectFromNetId _x;
                 if (!isNull _u && { alive _u }) then
