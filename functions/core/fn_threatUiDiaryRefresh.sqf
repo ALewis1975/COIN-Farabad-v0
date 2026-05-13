@@ -103,7 +103,7 @@ private _renderEventRows = {
 };
 
 private _subjId = "ARC_THREAT";
-if !(player diarySubjectExists _subjId) then {
+if (!(player diarySubjectExists _subjId)) then {
     player createDiarySubject [_subjId, "THREAT", ""];
 };
 

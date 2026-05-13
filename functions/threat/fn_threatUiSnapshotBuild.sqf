@@ -214,7 +214,7 @@ private _districtFilters = [];
     if (_state in ["STAGED", "DISCOVERED", "DETONATED", "NEUTRALIZED", "INTERDICTED"]) then {
         _followOnRows pushBack _row;
     };
-    if (_threatId in _closedIds || { _state in ["CLOSED", "CLEANED", "EXPIRED"] }) then {
+    if (_state in ["CLOSED", "CLEANED", "EXPIRED"]) then {
         _closedRows pushBack _row;
     };
 } forEach _sortedRecords;
