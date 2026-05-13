@@ -944,6 +944,12 @@ if ((count _uiDebug) > 0) then {
     _airbaseUiSnapshot pushBack ["debug", _uiDebug];
 };
 
+private _threatPub = [];
+if (!isNil "ARC_fnc_threatUiSnapshotBuild") then {
+    _threatPub = [] call ARC_fnc_threatUiSnapshotBuild;
+};
+if (!(_threatPub isEqualType [])) then { _threatPub = []; };
+
 private _pub = [
     ["insurgentPressure", _p],
     ["corruption", _c],
@@ -963,7 +969,8 @@ private _pub = [
     ["companyCommandTasking", ["companyCommandTasking", []] call ARC_fnc_stateGet],
     ["companyVirtualOps", ["companyVirtualOps", []] call ARC_fnc_stateGet],
     ["casreq", _casreqPub],
-    ["airbase", _airbasePub]
+    ["airbase", _airbasePub],
+    ["threat", _threatPub]
 ];
 
 private _didPublish = [_pub, "publicBroadcastState", false, 0.25] call ARC_fnc_statePublishPublic;
@@ -976,6 +983,8 @@ _airbaseUiSnapshot set [1, ["rev", _uiRev]];
 missionNamespace setVariable ["ARC_pub_airbaseUiSnapshotRev", _uiRev];
 missionNamespace setVariable ["ARC_pub_airbaseUiSnapshot", _airbaseUiSnapshot, true];
 missionNamespace setVariable ["ARC_pub_airbaseUiSnapshotUpdatedAt", serverTime, true];
+missionNamespace setVariable ["ARC_pub_threatUiSnapshot", _threatPub, true];
+missionNamespace setVariable ["ARC_pub_threatUiSnapshotUpdatedAt", serverTime, true];
 
 private _companySnapshot = [
     ["companyCommandNodes", ["companyCommandNodes", []] call ARC_fnc_stateGet],

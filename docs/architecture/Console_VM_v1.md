@@ -122,6 +122,21 @@ Recommended envelope fields:
 | `enabled` | `civsub_v1_enabled` | `BOOL` | `false` |
 | `districtSnapshots` | `civsub_v1_districts` | `HASHMAP` | `createHashMap` / empty map |
 
+### 2.8 Threat surfacing section (`sections.threat`)
+| VM field | Source key(s) | Type | Default/fallback |
+|---|---|---|---|
+| `snapshot.schema` | literal | `STRING` | `"threat_ui_v1"` |
+| `snapshot.updatedAt` | `ARC_pub_threatUiSnapshotUpdatedAt` | `SCALAR` | VM build time |
+| `snapshot.summary.open_count` | `threat_v0_open_index` | `SCALAR` | `0` |
+| `snapshot.summary.closed_count` | `threat_v0_closed_index` | `SCALAR` | `0` |
+| `snapshot.views.available` | literal | `ARRAY` | `["OPEN","FOLLOW_ON","RECENTLY_CLOSED","EVENT_FEED"]` |
+| `snapshot.list.open` | `threat_v0_records` filtered by `threat_v0_open_index` | `ARRAY[pairs]` | `[]` |
+| `snapshot.list.follow_on` | `threat_v0_records` filtered by follow-on states | `ARRAY[pairs]` | `[]` |
+| `snapshot.list.recently_closed` | `threat_v0_records` filtered by terminal states / closed index | `ARRAY[pairs]` | `[]` |
+| `snapshot.events` | `threat_v0_events_public` | `ARRAY[pairs]` | `[]` |
+| `snapshot.emptyState` | literal + threat availability checks | `ARRAY[pairs]` | explicit no-data guidance |
+| `snapshot.errorState` | literal | `ARRAY[pairs]` | explicit stale/error guidance |
+
 ---
 
 ## 3) Freshness metadata rules
@@ -157,6 +172,7 @@ Example section wrapper:
 - `stateSummary`: `20s`
 - `access/config`: `60s`
 - `civsub district snapshots`: `2 * civsub_v1_tick_s` (if available), else `120s`
+- `threat`: `30s`
 
 ### 3.4 Staleness handling
 - If `(clientNowServerEstimate - updatedAt) > staleAfterS`:
@@ -231,4 +247,3 @@ If regression appears:
 - At least one tab (recommended: Dashboard) can run VM-first with no user-visible regression.
 - Feature flags allow immediate rollback to legacy read paths.
 - Debug logs show section freshness and stale-state decisions.
-

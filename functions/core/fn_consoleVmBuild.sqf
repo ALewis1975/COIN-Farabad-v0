@@ -291,6 +291,24 @@ private _intelFeedSection = [
 ];
 
 // ---------------------------------------------------------------------------
+// Section: threat — read-only threat surfacing snapshot for TOC/S2/player views
+// ---------------------------------------------------------------------------
+private _threatSnapshot = missionNamespace getVariable ["ARC_pub_threatUiSnapshot", []];
+if (!(_threatSnapshot isEqualType [])) then { _threatSnapshot = []; };
+
+private _threatSnapshotAt = missionNamespace getVariable ["ARC_pub_threatUiSnapshotUpdatedAt", -1];
+if (!(_threatSnapshotAt isEqualType 0)) then { _threatSnapshotAt = -1; };
+
+private _threatData = [
+    ["snapshot", _threatSnapshot]
+];
+
+private _threatSection = [
+    ["data",      _threatData],
+    ["freshness", [["updatedAt", if (_threatSnapshotAt > 0) then { _threatSnapshotAt } else { _now }], ["staleAfterS", 30]]]
+];
+
+// ---------------------------------------------------------------------------
 // Assemble final payload
 // ---------------------------------------------------------------------------
 [
@@ -306,6 +324,7 @@ private _intelFeedSection = [
         ["access",       _accessSection],
         ["civsub",       _civsubSection],
         ["airbase",      _airbaseSection],
+        ["threat",       _threatSection],
         ["personnel",    _personnelSection],
         ["handoff",      _handoffSection],
         ["intelFeed",    _intelFeedSection]

@@ -20,6 +20,7 @@ uiNamespace setVariable ["ARC_clientSnapshotRefreshPendingAt", _now];
 
 [] call ARC_fnc_briefingUpdateClient;
 if (!isNil "ARC_fnc_tocRefreshClient") then { [] call ARC_fnc_tocRefreshClient; };
+if (!isNil "ARC_fnc_threatUiDiaryRefresh") then { [] call ARC_fnc_threatUiDiaryRefresh; };
 uiNamespace setVariable ["ARC_console_dirty", true];
 
 private _refreshCount = uiNamespace getVariable ["ARC_clientSnapshotRefreshCount", 0];

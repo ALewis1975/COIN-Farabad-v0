@@ -11,6 +11,24 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-13 — Threat Epic 3 TOC/S2 threat surfacing implementation (Mode B)
+
+**Branch/Commit:** copilot/add-threat-ui-surfacing-epic-3 @ HEAD
+
+**Scenario:** Added a server-built read-only threat UI snapshot, mirrored it into `ARC_pub_state` + `Console_VM_v1.sections.threat`, and rendered an operator-facing `ARC_THREAT` diary surface with stale/no-data guidance, event feed summaries, and triage checklist text.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Pre-change threat subsystem static scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/*.sqf` | FAIL | Pre-existing parser-compat patterns exist in untouched threat files; implementation stayed narrowly scoped to new clean files and clean existing hooks. |
+| 2 | Changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict config/CfgFunctions.hpp functions/core/fn_clientSnapshotRefresh.sqf functions/core/fn_publicBroadcastState.sqf functions/core/fn_consoleVmBuild.sqf functions/core/fn_threatUiDiaryRefresh.sqf functions/threat/fn_threatUiSnapshotBuild.sqf` | PASS | No parser-compatibility patterns in the changed SQF/config files. |
+| 3 | Changed-file sqflint | `for f in functions/core/fn_clientSnapshotRefresh.sqf functions/core/fn_publicBroadcastState.sqf functions/core/fn_consoleVmBuild.sqf functions/core/fn_threatUiDiaryRefresh.sqf functions/threat/fn_threatUiSnapshotBuild.sqf; do ~/.local/bin/sqflint -e w "$f"; done` | PASS | Installed `sqflint` locally via `python3 -m pip install --user sqflint`; new threat surfacing files lint clean. |
+| 4 | Repository static validations | `git diff --check && python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && tests/static/airbase_planning_mode_checks.sh && tests/static/casreq_snapshot_contract_checks.sh && bash tests/static/threat_ui_snapshot_contract_checks.sh` | PASS | Whitespace diff, state migrations, marker index, AIRBASE, CASREQ, and new threat snapshot contract checks passed. |
+| 5 | Documentation contract review | Static review of `docs/planning/threat/Threat_UI_Surfacing_Implementation_v1.md` and `docs/architecture/Console_VM_v1.md` | PASS | Field mapping, freshness, event buckets, read-only boundary, and operator runbook guidance documented. |
+| 6 | Local MP / TOC-S2 render smoke | Hosted/local MP: open briefing/diary after snapshot refresh, confirm `ARC_THREAT` record updates with stale/no-data handling and read-only guidance | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 7 | Dedicated / JIP threat visibility | Dedicated server + late joiner: verify replicated threat snapshot and diary visibility for join-in-progress clients | BLOCKED | Requires dedicated/JIP environment outside this sandbox. |
+
+---
+
 ## 2026-05-13 — Threat Epic 2 lifecycle transition guard implementation (Mode B)
 
 **Branch/Commit:** copilot/docs-only-update-epic-2-lifecycle @ 47c54a99 (active agent branch name is inherited from the prior planning branch; this entry records Mode B runtime implementation work)
