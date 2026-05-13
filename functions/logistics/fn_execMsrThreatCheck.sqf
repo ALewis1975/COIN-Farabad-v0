@@ -88,7 +88,7 @@ if (!(_records isEqualType [])) then { _records = []; };
 private _openIds = ["threat_v0_open_index", []] call ARC_fnc_stateGet;
 if (!(_openIds isEqualType [])) then { _openIds = []; };
 
-private _openStates = ["PLANNED", "ACTIVE", "STAGED"];
+private _openStates = ["CREATED", "PLANNED", "ACTIVE", "STAGED"];
 
 private _found = [];
 
