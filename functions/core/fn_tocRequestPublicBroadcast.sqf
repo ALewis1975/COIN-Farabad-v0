@@ -96,7 +96,8 @@ if (_owner > 0) then
     if (_lastAt >= 0 && { (_now - _lastAt) < _cooldownS }) exitWith
     {
         private _remaining = (_cooldownS - (_now - _lastAt)) max 0;
-        diag_log format ["[ARC][WARN] ARC_fnc_tocRequestPublicBroadcast: throttled owner=%1 caller=%2 remaining=%3", _owner, name _requesterObj, _remaining];
+        private _requesterName = if (isNull _requesterObj) then { "<unknown>" } else { name _requesterObj };
+        diag_log format ["[ARC][WARN] ARC_fnc_tocRequestPublicBroadcast: throttled owner=%1 caller=%2 remaining=%3", _owner, _requesterName, _remaining];
         false
     };
 
