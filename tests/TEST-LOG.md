@@ -5742,7 +5742,7 @@ Mode: A (Bug Fix)
 
 ## 2026-05-13 — PR 9: Client/UI performance cleanup (Mode D)
 
-**Branch/Commit:** copilot/cleanup-client-ui-performance @ 0bdd1f667df65f57474d45ccf113f8eb34e0d8dd
+**Branch/Commit:** copilot/cleanup-client-ui-performance @ commit: unrecoverable (final validation entry updated pre-commit after review-driven follow-up tweaks)
 
 **Scenario:** Reduced avoidable client-side refresh cost in `fn_briefingUpdateClient.sqf` by replacing repeated pair-array linear scans with per-update hash-map lookups, and added a conservative `uiNamespace` static-signature fast-path in `fn_uiConsoleIntelPaint.sqf` to skip redundant repaint work for unchanged static tool/detail selections.
 
@@ -5756,3 +5756,4 @@ Mode: A (Bug Fix)
 | 6 | Patch formatting sanity | `git --no-pager diff --check` | PASS | No whitespace or patch-format issues introduced. |
 | 7 | Runtime UI behavior and screenshot verification | Local MP/Arma UI exercise of INTEL painter and briefing refresh paths + screenshot capture | BLOCKED | Arma 3 runtime/UI is unavailable in this sandbox, so in-engine rendering and screenshot capture cannot be executed here. |
 | 8 | Follow-up revalidation after review-driven trim adjustment | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleIntelPaint.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleIntelPaint.sqf && git --no-pager diff --check` | FAIL (pre-existing), PASS (format) | Compat/sqflint remain in the same pre-existing-finding class for this legacy file; whitespace check stays clean. |
+| 9 | Follow-up revalidation after briefing hash-map helper adjustment | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_briefingUpdateClient.sqf && ~/.local/bin/sqflint -e w functions/core/fn_briefingUpdateClient.sqf && git --no-pager diff --check` | FAIL (pre-existing), PASS (format) | Compat/sqflint findings remained in the existing legacy class after replacing repeated scans with hash-map lookups and retaining compat helper wrapping for `createHashMapFromArray`. |

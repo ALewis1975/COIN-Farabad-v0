@@ -68,12 +68,11 @@ private _pub = missionNamespace getVariable ["ARC_pub_state", []];
 if (!(_pub isEqualType [])) then { _pub = []; };
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
-private _hmGetOrDefault = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k,_d]";
-private _pubMap = if ((count _pub) > 0) then { [_pub] call _hmCreate } else { createHashMap };
+private _pubMap = [_pub] call _hmCreate;
 
 private _get = {
     params ["_k", "_def"];
-    [_pubMap, _k, _def] call _hmGetOrDefault
+    [_pubMap, _k, _def] call getOrDefault
 };
 
 private _p = ["insurgentPressure", 0.60] call _get;
@@ -457,16 +456,16 @@ else
         private _mins = round (_t / 60);
         private _metaMap = if (_meta isEqualType [] && { (count _meta) > 0 }) then { [_meta] call _hmCreate } else { createHashMap };
 
-        private _grid = [_metaMap, "grid", ""] call _hmGetOrDefault;
+        private _grid = [_metaMap, "grid", ""] call getOrDefault;
         if (_grid isEqualTo "" && {_posATL isEqualType [] && { (count _posATL) >= 2 }}) then { _grid = mapGridPosition _posATL; };
 
-        private _event = [_metaMap, "event", ""] call _hmGetOrDefault;
+        private _event = [_metaMap, "event", ""] call getOrDefault;
         if (!(_event isEqualType "")) then { _event = ""; };
 
-        private _from = [_metaMap, "from", ""] call _hmGetOrDefault;
+        private _from = [_metaMap, "from", ""] call getOrDefault;
         if (!(_from isEqualType "")) then { _from = ""; };
 
-        private _details = [_metaMap, "details", ""] call _hmGetOrDefault;
+        private _details = [_metaMap, "details", ""] call getOrDefault;
         if (!(_details isEqualType "")) then { _details = ""; };
         _details = trim _details;
         if (_details isNotEqualTo "") then
@@ -550,15 +549,15 @@ else
         private _pAMap = if (_pA isEqualType [] && { (count _pA) > 0 }) then { [_pA] call _hmCreate } else { createHashMap };
         private _pBMap = if (_pB isEqualType [] && { (count _pB) > 0 }) then { [_pB] call _hmCreate } else { createHashMap };
 
-        private _dPress = ([_pBMap, "insurgentPressure", 0] call _hmGetOrDefault) - ([_pAMap, "insurgentPressure", 0] call _hmGetOrDefault);
-        private _dSent  = ([_pBMap, "civSentiment", 0] call _hmGetOrDefault) - ([_pAMap, "civSentiment", 0] call _hmGetOrDefault);
-        private _dLeg   = ([_pBMap, "govLegitimacy", 0] call _hmGetOrDefault) - ([_pAMap, "govLegitimacy", 0] call _hmGetOrDefault);
-        private _dCorr  = ([_pBMap, "corruption", 0] call _hmGetOrDefault) - ([_pAMap, "corruption", 0] call _hmGetOrDefault);
-        private _dInf   = ([_pBMap, "infiltration", 0] call _hmGetOrDefault) - ([_pAMap, "infiltration", 0] call _hmGetOrDefault);
-        private _dFuel  = ([_pBMap, "baseFuel", 0] call _hmGetOrDefault) - ([_pAMap, "baseFuel", 0] call _hmGetOrDefault);
-        private _dAmmo  = ([_pBMap, "baseAmmo", 0] call _hmGetOrDefault) - ([_pAMap, "baseAmmo", 0] call _hmGetOrDefault);
-        private _dMed   = ([_pBMap, "baseMed", 0] call _hmGetOrDefault) - ([_pAMap, "baseMed", 0] call _hmGetOrDefault);
-        private _dCas   = ([_pBMap, "civCasualties", 0] call _hmGetOrDefault) - ([_pAMap, "civCasualties", 0] call _hmGetOrDefault);
+        private _dPress = ([_pBMap, "insurgentPressure", 0] call getOrDefault) - ([_pAMap, "insurgentPressure", 0] call getOrDefault);
+        private _dSent  = ([_pBMap, "civSentiment", 0] call getOrDefault) - ([_pAMap, "civSentiment", 0] call getOrDefault);
+        private _dLeg   = ([_pBMap, "govLegitimacy", 0] call getOrDefault) - ([_pAMap, "govLegitimacy", 0] call getOrDefault);
+        private _dCorr  = ([_pBMap, "corruption", 0] call getOrDefault) - ([_pAMap, "corruption", 0] call getOrDefault);
+        private _dInf   = ([_pBMap, "infiltration", 0] call getOrDefault) - ([_pAMap, "infiltration", 0] call getOrDefault);
+        private _dFuel  = ([_pBMap, "baseFuel", 0] call getOrDefault) - ([_pAMap, "baseFuel", 0] call getOrDefault);
+        private _dAmmo  = ([_pBMap, "baseAmmo", 0] call getOrDefault) - ([_pAMap, "baseAmmo", 0] call getOrDefault);
+        private _dMed   = ([_pBMap, "baseMed", 0] call getOrDefault) - ([_pAMap, "baseMed", 0] call getOrDefault);
+        private _dCas   = ([_pBMap, "civCasualties", 0] call getOrDefault) - ([_pAMap, "civCasualties", 0] call getOrDefault);
 
         _opsText = _opsText + format [
             "T+%1m: Pressure %2 | Sentiment %3 | Legitimacy %4 | Corruption %5 | Infil %6<br/>Fuel %7 | Ammo %8 | Med %9 | CivCas %10<br/>",
@@ -666,16 +665,16 @@ else
         private _mins = round (_t / 60);
         private _metaMap = if (_meta isEqualType [] && { (count _meta) > 0 }) then { [_meta] call _hmCreate } else { createHashMap };
 
-        private _grid = [_metaMap, "grid", ""] call _hmGetOrDefault;
+        private _grid = [_metaMap, "grid", ""] call getOrDefault;
         if (_grid isEqualTo "" && {_posATL isEqualType [] && { (count _posATL) >= 2 }}) then { _grid = mapGridPosition _posATL; };
 
-        private _zone = [_metaMap, "zone", ""] call _hmGetOrDefault;
+        private _zone = [_metaMap, "zone", ""] call getOrDefault;
         if (_zone isEqualTo "") then { _zone = "Unzoned"; };
 
-        private _conf = [_metaMap, "confidence", ""] call _hmGetOrDefault;
+        private _conf = [_metaMap, "confidence", ""] call getOrDefault;
         private _confTxt = if (_conf isEqualTo "") then { "" } else { format [" <t color='#A0A0A0'>(%1)</t>", _conf] };
 
-        private _details = [_metaMap, "details", ""] call _hmGetOrDefault;
+        private _details = [_metaMap, "details", ""] call getOrDefault;
         if (!(_details isEqualType "")) then { _details = ""; };
         _details = trim _details;
         if (_details isNotEqualTo "") then
