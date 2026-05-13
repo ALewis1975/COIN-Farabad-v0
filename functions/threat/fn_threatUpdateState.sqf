@@ -44,9 +44,10 @@ private _normalizeState = {
 };
 
 private _stateToU = [_stateTo] call _normalizeState;
+private _defaultStates = ["CREATED","ACTIVE","STAGED","DISCOVERED","NEUTRALIZED","DETONATED","INTERDICTED","CLOSED","CLEANED","EXPIRED"];
+private _knownStates = ["threat_v0_state_enum", _defaultStates] call ARC_fnc_stateGet;
+if (!(_knownStates isEqualType [])) then { _knownStates = _defaultStates; };
 private _denyReason = "";
-private _knownStates = ["threat_v0_state_enum", ["CREATED","ACTIVE","STAGED","DISCOVERED","NEUTRALIZED","DETONATED","INTERDICTED","CLOSED","CLEANED","EXPIRED"]] call ARC_fnc_stateGet;
-if (!(_knownStates isEqualType [])) then { _knownStates = ["CREATED","ACTIVE","STAGED","DISCOVERED","NEUTRALIZED","DETONATED","INTERDICTED","CLOSED","CLEANED","EXPIRED"]; };
 
 // Small helpers for "pairs arrays"
 private _kvGet = {

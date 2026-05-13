@@ -37,12 +37,12 @@ private _kvGet = {
 
 private _typeU = toUpper ([_rec, "type", ""] call _kvGet);
 private _subtypeU = toUpper ([_rec, "subtype", ""] call _kvGet);
-private _familyU = toUpper ([_rec, "family", ""] call _kvGet);
-if (_familyU isEqualTo "") then
+private _family = toUpper ([_rec, "family", ""] call _kvGet);
+if (_family isEqualTo "") then
 {
-    _familyU = [_typeU, _subtypeU] call ARC_fnc_threatInferFamily;
+    _family = [_typeU, _subtypeU] call ARC_fnc_threatInferFamily;
 };
-private _emittedLeads = switch (_familyU) do
+private _emittedLeads = switch (_family) do
 {
     case "IED": { [_rec, _transition] call ARC_fnc_iedEmitLeads };
     case "VBIED": { [_rec, _transition] call ARC_fnc_vbiedEmitLeads };
@@ -126,7 +126,7 @@ private _emittedLeads = switch (_familyU) do
     };
     default
     {
-        diag_log format ["[ARC][WARN] ARC_fnc_threatLeadEmitFromOutcome: unknown family=%1 type=%2 subtype=%3 transition=%4", _familyU, _typeU, _subtypeU, _transition];
+        diag_log format ["[ARC][WARN] ARC_fnc_threatLeadEmitFromOutcome: unknown family=%1 type=%2 subtype=%3 transition=%4", _family, _typeU, _subtypeU, _transition];
         []
     };
 };
