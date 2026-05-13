@@ -81,7 +81,7 @@ private _rec = _records select _idxRec;
 private _stateTs = [_rec, "state_ts", []] call _kvGet;
 private _createdTs = [_stateTs, "created", 0] call _kvGet;
 if (!(_createdTs isEqualType 0)) then { _createdTs = 0; };
-private _token = format ["SPTOKEN:%1:%2", _threatId, floor _createdTs];
+private _token = format ["SPTOKEN:%1:%2", _threatId, (floor _createdTs)];
 
 private _world = [_rec, "world", []] call _kvGet;
 private _existingToken = [_world, "spawn_token", ""] call _kvGet;

@@ -111,7 +111,7 @@ if ((count _closeIds) > 0) then
 
         // Find world info entry for this threat
         private _wi = -1;
-        { if (((_x select 0) isEqualTo _tid) && { _wi < 0 }) exitWith { _wi = _forEachIndex; }; } forEach _worldInfo;
+        { if ((_x select 0) isEqualTo _tid) exitWith { _wi = _forEachIndex; }; } forEach _worldInfo;
 
         private _stateCapture = "";
         private _spawned = false;
