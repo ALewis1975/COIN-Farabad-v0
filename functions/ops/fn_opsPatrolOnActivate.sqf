@@ -53,7 +53,10 @@ if (_routeRadius <= 0) then
 };
 
 // Secure zones should not encourage wandering routes.
-if (_zone in ["Airbase", "GreenZone"]) then
+private _protectedZones = missionNamespace getVariable ["ARC_threatVirtualProtectedZones", ["Airbase", "GreenZone", "MilitaryBase"]];
+if (!(_protectedZones isEqualType [])) then { _protectedZones = ["Airbase", "GreenZone", "MilitaryBase"]; };
+
+if (_zone in _protectedZones) then
 {
     _routeRadius = (_routeRadius min (_routeCap min 300));
 };
@@ -172,7 +175,7 @@ if (!(_spawnContacts isEqualType true)) then { _spawnContacts = true; };
 
 private _spawnedNetIds = [];
 
-if (_spawnContacts && {!(_zone in ["Airbase", "GreenZone"])}) then
+if (_spawnContacts && {!(_zone in _protectedZones)}) then
 {
     private _press = ["insurgentPressure", 0.35] call ARC_fnc_stateGet;
     if (!(_press isEqualType 0)) then { _press = 0.35; };
