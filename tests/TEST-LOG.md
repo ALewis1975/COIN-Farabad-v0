@@ -11,6 +11,27 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-13 — Threat Epic 6 validation framework implementation (Mode E)
+
+**Branch/Commit:** copilot/alewis1975-epic-6-validation-framework @ 0a96a10
+
+**Scenario:** Implemented Epic 6 validation-framework-only slice: threat validation evidence matrix, procedure/checklist framework, closure report template, unresolved-risk ledger format, and static contract checks. No runtime threat behavior changes were introduced.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | Baseline repository static validations | `python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && tests/static/airbase_planning_mode_checks.sh && tests/static/casreq_snapshot_contract_checks.sh && bash tests/static/threat_ui_snapshot_contract_checks.sh && bash tests/static/threat_ied_lifecycle_contract_checks.sh && bash tests/static/threat_family_normalization_contract_checks.sh && bash tests/static/threat_economy_operator_tooling_contract_checks.sh && bash tests/static/threat_virtual_opfor_observability_contract_checks.sh` | PASS | Baseline static suite was green before Epic 6 framework edits. |
+| 2 | Epic 6 framework contract checks | `bash tests/static/threat_validation_framework_contract_checks.sh` | PASS | New static checks pass: doc exists, matrix/procedures/status semantics are explicit, TEST-LOG requirements are documented, and closure claim guard is present. |
+| 3 | Framework-only scope guard | `git --no-pager diff --name-only` review | PASS | Changed files are docs/tests-only (`docs/planning/threat/Threat_Validation_Evidence_Framework_v1.md`, `tests/static/threat_validation_framework_contract_checks.sh`, `tests/TEST-LOG.md`). |
+| 4 | Local MP validation pass | Local MP run of threat lifecycle/economy/virtual-pool matrix procedures from Epic 6 framework doc | BLOCKED | Owner: Threat QA. Date: 2026-05-13. Requires: Arma 3 runtime/local MP environment. Next step: execute Local MP procedure and attach evidence rows in TEST-LOG. |
+| 5 | Dedicated server validation pass | Dedicated run of matrix rows and authority/snapshot checks | BLOCKED | Owner: Threat QA. Date: 2026-05-13. Requires: dedicated server environment with matching mod stack. Next step: execute dedicated procedure and record evidence artifacts in TEST-LOG. |
+| 6 | JIP late-join validation pass | Dedicated + fresh client late-join checks for threat/economy/virtual snapshots | BLOCKED | Owner: Threat QA. Date: 2026-05-13. Requires: dedicated + JIP-capable client environment. Next step: execute JIP procedure with evidence capture. |
+| 7 | Restart/save-load validation pass | Controlled save/load + restart integrity checks with in-flight threat lifecycle edges | BLOCKED | Owner: Threat QA. Date: 2026-05-13. Requires: dedicated restart-capable environment and persistence harness. Next step: execute restart procedure and compare before/after artifacts. |
+| 8 | Reconnect/respawn validation pass | Active-incident reconnect checks for continuity and no duplicate side effects | BLOCKED | Owner: Threat QA. Date: 2026-05-13. Requires: multiplayer reconnect/respawn runtime environment. Next step: execute reconnect procedure and append evidence rows. |
+| 9 | Review-fix revalidation | `bash tests/static/threat_validation_framework_contract_checks.sh && git diff --check` | PASS | Revalidated after tightening static check pattern style in Epic 6 contract script. |
+| 10 | Review-fix revalidation (commit/pattern hygiene) | `bash tests/static/threat_validation_framework_contract_checks.sh && git diff --check` | PASS | Revalidated after removing redundant regex escaping and replacing `HEAD` with concrete commit SHA in this TEST-LOG entry. |
+
+---
+
 ## 2026-05-13 — Threat Epic 5 migration/reset static harness implementation (Mode B)
 
 **Branch/Commit:** copilot/implement-epic-5-threat-persistence @ HEAD
