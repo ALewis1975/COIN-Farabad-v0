@@ -11,6 +11,23 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-13 — PR 5: Fix guard post combat loop scaling (Mode A)
+
+**Branch/Commit:** copilot/fix-guard-post-combat-loop @ 493f19308a2c83860f9a17f51f36a3f3fb5d68b0
+
+**Scenario:** Replaced per-unit `forEach allUnits` combat polling in `fn_guardPost.sqf` with engine-side `nearEntities` spatial query (avoids O(N²) full unit scan); increased `waitUntil` poll interval from 1 s to 5 s; replaced bare `_this select N` with `params` type guards; added null-check early-exit and structured warning log.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | SQF compat scan (changed file) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_guardPost.sqf` | PASS | No known parser-compat patterns found. |
+| 2 | State migration validation | `python3 scripts/dev/validate_state_migrations.py` | PASS | No regressions. |
+| 3 | Marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | 177 markers validated. |
+| 4 | Static contract checks | `bash tests/static/airbase_planning_mode_checks.sh && bash tests/static/casreq_snapshot_contract_checks.sh && bash tests/static/threat_family_normalization_contract_checks.sh` | PASS | All static checks green. |
+| 5 | SQF lint (`sqflint`) | `~/.local/bin/sqflint -e w functions/core/fn_guardPost.sqf` | BLOCKED | `sqflint` not installed in this sandbox; compat scan passed. |
+| 6 | Guard post runtime smoke | Start mission with RHS faction units, confirm guard post scanning loop starts, units face random directions, combat detection pauses scan, scan resumes | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+
+---
+
 ## 2026-05-13 — Airbase OPFOR protected bubble hardening (Mode A)
 
 **Branch/Commit:** copilot/fix-opfor-issue-in-airbase @ 73ae111

@@ -1,85 +1,97 @@
-//	Simple Guard Post Script 1.0
-//	by Tophe of �stg�ta Ops
-//
-//	Usage with default values:
-//	nul = [this] execVM "GuardPost.sqf"
-//
-//	Optional settings:
-//	nul = [unit, range in degrees, behaviour, stance (up/down/middle/auto), look up/down, min delay] execVM "GuardPost.sqf"
-//
-//	Default values:
-//	nul = [this, 360, "SAFE", "AUTO", false, 1] execVM "GuardPost.sqf";
-//  nul = [this, 360, "AWARE", "AUTO", false, 1] execVM "GuardPost.sqf";
-//	For feedback and support - check thread in the BIS forums. 
-//	http://forums.bistudio.com/showthread.php?p=1681721
+/*
+    ARC_fnc_guardPost
 
+    Per-unit guard post scanning loop. Server-owned.
+    Spawned once per qualifying unit at mission start.
 
+    Parameters:
+        _unit   - Object : unit to guard [<OBJECT>]
+        _range  - Number : scan arc in degrees 0-360 [180]
+        _beh    - String : initial behaviour (CARELESS/SAFE/AWARE/COMBAT/STEALTH) ["CARELESS"]
+        _stance - String : unit stance (UP/DOWN/MIDDLE/AUTO) ["AUTO"]
+        _height - Bool   : allow vertical look variation [false]
+        _delay  - Number : minimum sleep between scans in seconds [1]
+
+    Returns: Nothing
+*/
 
 if (!isServer) exitWith {};
 
-private _unit 		= _this select 0;
-private _range	 	= if (count _this > 1) then {_this select 1} else {180};
-private _beh		= if (count _this > 2) then {_this select 2} else {"CARELESS"};
-private _stance		= if (count _this > 3) then {_this select 3} else {"AUTO"};
-private _height		= if (count _this > 4) then {_this select 4} else {false};
-private _delay 		= if (count _this > 5) then {_this select 5} else {1};	
+params [
+    ["_unit",   objNull, [objNull]],
+    ["_range",  180,     [0]],
+    ["_beh",    "CARELESS", [""]],
+    ["_stance", "AUTO",  [""]],
+    ["_height", false,   [false]],
+    ["_delay",  1,       [0]]
+];
 
-private _enemy 		= if (side _unit == east) then {west} else {east};
-private _startdir	= getDir _unit;
-private _zaxis 		= 0;
+if (isNull _unit) exitWith {
+    diag_log "[ARC][WARN] ARC_fnc_guardPost: called with null unit — exiting.";
+};
 
-// Detection radius: knowsAbout is expensive, skip units beyond this range
+// Opposing side: guards are expected to be east or west only (covers all RHS USAF/USARMY units).
+private _enemy    = if (side _unit == east) then {west} else {east};
+private _startdir = getDir _unit;
+private _zaxis    = 0;
+
+// Detection radius used for nearEntities spatial pre-filter.
 private _detectRadius = 500;
 
 if (_range < 0) then {_range = 0};
 if (_range > 360) then {_range = 360};
 
-if 	(_beh == "CARELESS" || _beh == "SAFE" || _beh == "AWARE" || _beh == "COMBAT" || _beh == "STEALTH") 
-	then 
-	{_unit setBehaviour _beh} else {_unit setBehaviour "SAFE"};
+if (_beh in ["CARELESS", "SAFE", "AWARE", "COMBAT", "STEALTH"])
+    then {_unit setBehaviour _beh}
+    else {_unit setBehaviour "SAFE"};
 
 _unit setUnitPos _stance;
 
 
-// Start scanning 
+// Start scanning
 while {alive _unit} do
 {
-	private _left = _startdir - (_range/2);
-	private _right = _startdir + (_range/2);
+    private _left  = _startdir - (_range / 2);
+    private _right = _startdir + (_range / 2);
 
-	if (_left > _right) then {_left = _startdir - (_range/2); _right = _startdir + (_range/2)};	
+    if (_left > _right) then {_left = _startdir - (_range / 2); _right = _startdir + (_range / 2)};
 
-	_left = round _left;
-	_right = round _right;
+    _left  = round _left;
+    _right = round _right;
 
-	private _dir = random (_right - _left) + _left;
-	if (_dir < 0) then {_dir = _dir + 360}; 
+    private _dir = random (_right - _left) + _left;
+    if (_dir < 0) then {_dir = _dir + 360};
 
-	private _pos  = position _unit;
-	if (_height) then {_zaxis = random 20};
-	if (!_height) then {_zaxis = _pos select 2};
-	_pos = [(_pos select 0) + 50*sin _dir, (_pos select 1) + 50*cos _dir, _zaxis];
+    private _pos = position _unit;
+    if (_height) then {_zaxis = random 20};
+    if (!_height) then {_zaxis = _pos select 2};
+    _pos = [(_pos select 0) + 50 * sin _dir, (_pos select 1) + 50 * cos _dir, _zaxis];
 
-	_unit doWatch _pos;
+    _unit doWatch _pos;
 
-	// Pause if unit is engaging — pre-filter by side + distance before expensive knowsAbout
-	private _engaging = false;
-	{
-		if ((side _x == _enemy) && {(_unit distance _x) < _detectRadius} && {_unit knowsAbout _x > 1.4}) exitWith { _engaging = true; };
-	} forEach allUnits;
+    // Combat check: nearEntities pre-filters by radius using the engine spatial index,
+    // avoiding a full allUnits scan (O(N)) per guard unit each tick.
+    // allUnits returns only Man-type units; nearEntities ["Man"] is equivalent in unit coverage.
+    private _nearUnits = _unit nearEntities [["Man"], _detectRadius];
+    private _engaging = false;
+    {
+        if ((side _x == _enemy) && { _unit knowsAbout _x > 1.4 }) exitWith { _engaging = true; };
+    } forEach _nearUnits;
 
-	if (_engaging) then
-	{
-		waitUntil {
-			sleep 1;
-			private _anyLow = false;
-			{
-				if ((side _x == _enemy) && {(_unit distance _x) < _detectRadius} && {_unit knowsAbout _x < 4}) exitWith { _anyLow = true; };
-			} forEach allUnits;
-			_anyLow
-		};
-	};
-	
-	private _wait = (random 10) + _delay;
-	sleep _wait;
+    if (_engaging) then
+    {
+        // Poll at 5 s intervals (reduced from 1 s) to limit server cost during sustained combat.
+        waitUntil {
+            sleep 5;
+            private _nearUnitsPoll = _unit nearEntities [["Man"], _detectRadius];
+            private _anyLow = false;
+            {
+                if ((side _x == _enemy) && { _unit knowsAbout _x < 4 }) exitWith { _anyLow = true; };
+            } forEach _nearUnitsPoll;
+            _anyLow
+        };
+    };
+
+    private _wait = (random 10) + _delay;
+    sleep _wait;
 };
