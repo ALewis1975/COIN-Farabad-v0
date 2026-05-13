@@ -722,8 +722,8 @@ class Ops
             file = "functions\ambiance";
 
             // AIRBASESUB (Airbase ambience + schedule scaffold)
-            // Server-only entrypoint; waits for ARC bootstrap/state load before starting.
-            class airbasePostInit { postInit = 1; };
+            // Server-only entrypoint; called explicitly from initServer.sqf.
+            class airbasePostInit {};
             class airbaseInit {};
             class airbaseTick {};
             class airbaseRuntimeEnabled {};

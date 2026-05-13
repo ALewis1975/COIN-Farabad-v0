@@ -1,7 +1,7 @@
 /*
     AIRBASESUB v1 scaffold (server-only)
 
-    PostInit entrypoint.
+    Server bootstrap entrypoint.
     Waits for ARC bootstrap to create/load persistent state, then starts AIRBASESUB.
 
     Notes:

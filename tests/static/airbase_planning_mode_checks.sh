@@ -19,7 +19,8 @@ require_pattern() {
 }
 
 require_pattern 'missionNamespace setVariable \["airbase_v1_runtime_enabled", true, true\];' initServer.sqf "AIRBASE runtime gate defaults to enabled (true)"
-require_pattern 'class airbasePostInit \{ postInit = 1; \};' config/CfgFunctions.hpp "AIRBASE postInit registration exists and is subject to runtime gate"
+require_pattern 'class airbasePostInit \{\};' config/CfgFunctions.hpp "AIRBASE post-init entry is registered in CfgFunctions"
+require_pattern '\[\] call ARC_fnc_airbasePostInit;' initServer.sqf "AIRBASE post-init startup is explicitly owned by initServer"
 
 entry_files=(
   functions/ambiance/fn_airbasePostInit.sqf

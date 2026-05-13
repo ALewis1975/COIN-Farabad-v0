@@ -11,6 +11,21 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-13 — PR 10: Minor registry/config hygiene (Mode C)
+
+**Branch/Commit:** copilot/cleanup-registry-config-hygiene @ commit: unrecoverable (pre-commit working tree validated in-session)
+
+**Scenario:** Removed unnecessary replication for two future-feature objective toggles with no live consumers, replaced AIRBASE `postInit = 1` registration with explicit server-owned startup call in `initServer.sqf`, and replaced toggle-consumer nested startup scans with a hash index lookup while preserving warning behavior.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline CI/workflow triage | GitHub MCP `list_workflow_runs` + `list_workflow_jobs`/`get_job_logs` for run `25831217890` | PASS | Latest preflight on this branch is `action_required` with zero jobs started (no failing job logs available). |
+| 2 | Changed-file compat + lint | `python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf functions/ambiance/fn_airbasePostInit.sqf && ~/.local/bin/sqflint -e w initServer.sqf && ~/.local/bin/sqflint -e w functions/ambiance/fn_airbasePostInit.sqf` | PASS | `sqflint` installed via `python3 -m pip install --user sqflint`; changed SQF files lint clean. |
+| 3 | Repository static validations | `python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && bash tests/static/airbase_planning_mode_checks.sh && bash tests/static/casreq_snapshot_contract_checks.sh && git --no-pager diff --check` | PASS | Static checks and formatting/whitespace diff check passed after edits. |
+| 4 | Dedicated/local MP runtime smoke (authority/ordering/JIP) | Start mission in local MP/dedicated-like host and verify AIRBASE startup + config replication behavior | BLOCKED | Arma 3 runtime unavailable in this sandbox; requires dedicated server and JIP environment. |
+
+---
+
 ## 2026-05-13 — PR 7: Register gov stats scheduler as a function (Mode C)
 
 **Branch/Commit:** copilot/p1-7-register-gov-stats-scheduler @ commit: unrecoverable (committed in same session)
