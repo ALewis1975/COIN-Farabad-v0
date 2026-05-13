@@ -67,12 +67,13 @@ private _recSoI = ["ARC_diary_rec_soi", "Diary", "SOI"] call _ensureRecord;
 private _pub = missionNamespace getVariable ["ARC_pub_state", []];
 if (!(_pub isEqualType [])) then { _pub = []; };
 
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+private _hmGetOrDefault = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k,_d]";
+private _pubMap = if ((count _pub) > 0) then { [_pub] call _hmCreate } else { createHashMap };
+
 private _get = {
     params ["_k", "_def"];
-    private _idx = -1;
-    { if ((_x # 0) isEqualTo _k) exitWith { _idx = _forEachIndex; }; } forEach _pub;
-    if (_idx < 0) exitWith {_def};
-    (_pub # _idx) # 1
+    [_pubMap, _k, _def] call _hmGetOrDefault
 };
 
 private _p = ["insurgentPressure", 0.60] call _get;
@@ -451,29 +452,21 @@ else
     private _startOps = ((count _opsLog) - 20) max 0;
     private _sliceOps = _opsLog select [_startOps, (count _opsLog) - _startOps];
 
-    private _metaGetOps = {
-        params ["_meta", "_k", "_def"];
-        if (!(_meta isEqualType [])) exitWith {_def};
-        private _idx = -1;
-        { if ((_x # 0) isEqualTo _k) exitWith { _idx = _forEachIndex; }; } forEach _meta;
-        if (_idx < 0) exitWith {_def};
-        (_meta # _idx) # 1
-    };
-
     {
         _x params ["_iid", "_t", "_cat", "_sum", "_posATL", "_meta"];
         private _mins = round (_t / 60);
+        private _metaMap = if (_meta isEqualType [] && { (count _meta) > 0 }) then { [_meta] call _hmCreate } else { createHashMap };
 
-        private _grid = [_meta, "grid", ""] call _metaGetOps;
+        private _grid = [_metaMap, "grid", ""] call _hmGetOrDefault;
         if (_grid isEqualTo "" && {_posATL isEqualType [] && { (count _posATL) >= 2 }}) then { _grid = mapGridPosition _posATL; };
 
-        private _event = [_meta, "event", ""] call _metaGetOps;
+        private _event = [_metaMap, "event", ""] call _hmGetOrDefault;
         if (!(_event isEqualType "")) then { _event = ""; };
 
-        private _from = [_meta, "from", ""] call _metaGetOps;
+        private _from = [_metaMap, "from", ""] call _hmGetOrDefault;
         if (!(_from isEqualType "")) then { _from = ""; };
 
-        private _details = [_meta, "details", ""] call _metaGetOps;
+        private _details = [_metaMap, "details", ""] call _hmGetOrDefault;
         if (!(_details isEqualType "")) then { _details = ""; };
         _details = trim _details;
         if (_details isNotEqualTo "") then
@@ -526,15 +519,6 @@ if ((count _snapTail) < 2) then
 }
 else
 {
-    private _pairGet = {
-        params ["_pairs", "_k", "_def"];
-        if (!(_pairs isEqualType [])) exitWith { _def };
-        private _idx = -1;
-        { if ((_x # 0) isEqualTo _k) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
-        if (_idx < 0) exitWith { _def };
-        (_pairs # _idx) # 1
-    };
-
     private _fmtPctDelta = {
         params ["_d"];
         if (!(_d isEqualType 0)) exitWith { "0%" };
@@ -563,16 +547,18 @@ else
         private _minsB = round (_tB / 60);
         private _pA = _a # 1;
         private _pB = _b # 1;
+        private _pAMap = if (_pA isEqualType [] && { (count _pA) > 0 }) then { [_pA] call _hmCreate } else { createHashMap };
+        private _pBMap = if (_pB isEqualType [] && { (count _pB) > 0 }) then { [_pB] call _hmCreate } else { createHashMap };
 
-        private _dPress = ([_pB, "insurgentPressure", 0] call _pairGet) - ([_pA, "insurgentPressure", 0] call _pairGet);
-        private _dSent  = ([_pB, "civSentiment", 0] call _pairGet) - ([_pA, "civSentiment", 0] call _pairGet);
-        private _dLeg   = ([_pB, "govLegitimacy", 0] call _pairGet) - ([_pA, "govLegitimacy", 0] call _pairGet);
-        private _dCorr  = ([_pB, "corruption", 0] call _pairGet) - ([_pA, "corruption", 0] call _pairGet);
-        private _dInf   = ([_pB, "infiltration", 0] call _pairGet) - ([_pA, "infiltration", 0] call _pairGet);
-        private _dFuel  = ([_pB, "baseFuel", 0] call _pairGet) - ([_pA, "baseFuel", 0] call _pairGet);
-        private _dAmmo  = ([_pB, "baseAmmo", 0] call _pairGet) - ([_pA, "baseAmmo", 0] call _pairGet);
-        private _dMed   = ([_pB, "baseMed", 0] call _pairGet) - ([_pA, "baseMed", 0] call _pairGet);
-        private _dCas   = ([_pB, "civCasualties", 0] call _pairGet) - ([_pA, "civCasualties", 0] call _pairGet);
+        private _dPress = ([_pBMap, "insurgentPressure", 0] call _hmGetOrDefault) - ([_pAMap, "insurgentPressure", 0] call _hmGetOrDefault);
+        private _dSent  = ([_pBMap, "civSentiment", 0] call _hmGetOrDefault) - ([_pAMap, "civSentiment", 0] call _hmGetOrDefault);
+        private _dLeg   = ([_pBMap, "govLegitimacy", 0] call _hmGetOrDefault) - ([_pAMap, "govLegitimacy", 0] call _hmGetOrDefault);
+        private _dCorr  = ([_pBMap, "corruption", 0] call _hmGetOrDefault) - ([_pAMap, "corruption", 0] call _hmGetOrDefault);
+        private _dInf   = ([_pBMap, "infiltration", 0] call _hmGetOrDefault) - ([_pAMap, "infiltration", 0] call _hmGetOrDefault);
+        private _dFuel  = ([_pBMap, "baseFuel", 0] call _hmGetOrDefault) - ([_pAMap, "baseFuel", 0] call _hmGetOrDefault);
+        private _dAmmo  = ([_pBMap, "baseAmmo", 0] call _hmGetOrDefault) - ([_pAMap, "baseAmmo", 0] call _hmGetOrDefault);
+        private _dMed   = ([_pBMap, "baseMed", 0] call _hmGetOrDefault) - ([_pAMap, "baseMed", 0] call _hmGetOrDefault);
+        private _dCas   = ([_pBMap, "civCasualties", 0] call _hmGetOrDefault) - ([_pAMap, "civCasualties", 0] call _hmGetOrDefault);
 
         _opsText = _opsText + format [
             "T+%1m: Pressure %2 | Sentiment %3 | Legitimacy %4 | Corruption %5 | Infil %6<br/>Fuel %7 | Ammo %8 | Med %9 | CivCas %10<br/>",
@@ -675,29 +661,21 @@ else
     private _start = ((count _intelLog) - 20) max 0;
     private _slice = _intelLog select [_start, (count _intelLog) - _start];
 
-    private _metaGet = {
-        params ["_meta", "_k", "_def"];
-        if (!(_meta isEqualType [])) exitWith {_def};
-        private _idx = -1;
-        { if ((_x # 0) isEqualTo _k) exitWith { _idx = _forEachIndex; }; } forEach _meta;
-        if (_idx < 0) exitWith {_def};
-        (_meta # _idx) # 1
-    };
-
     {
         _x params ["_iid", "_t", "_cat", "_sum", "_posATL", "_meta"];
         private _mins = round (_t / 60);
+        private _metaMap = if (_meta isEqualType [] && { (count _meta) > 0 }) then { [_meta] call _hmCreate } else { createHashMap };
 
-        private _grid = [_meta, "grid", ""] call _metaGet;
+        private _grid = [_metaMap, "grid", ""] call _hmGetOrDefault;
         if (_grid isEqualTo "" && {_posATL isEqualType [] && { (count _posATL) >= 2 }}) then { _grid = mapGridPosition _posATL; };
 
-        private _zone = [_meta, "zone", ""] call _metaGet;
+        private _zone = [_metaMap, "zone", ""] call _hmGetOrDefault;
         if (_zone isEqualTo "") then { _zone = "Unzoned"; };
 
-        private _conf = [_meta, "confidence", ""] call _metaGet;
+        private _conf = [_metaMap, "confidence", ""] call _hmGetOrDefault;
         private _confTxt = if (_conf isEqualTo "") then { "" } else { format [" <t color='#A0A0A0'>(%1)</t>", _conf] };
 
-        private _details = [_meta, "details", ""] call _metaGet;
+        private _details = [_metaMap, "details", ""] call _hmGetOrDefault;
         if (!(_details isEqualType "")) then { _details = ""; };
         _details = trim _details;
         if (_details isNotEqualTo "") then

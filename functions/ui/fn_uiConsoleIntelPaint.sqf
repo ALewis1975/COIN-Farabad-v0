@@ -76,6 +76,54 @@ private _cmbLead   = _display displayCtrl 78055;
 
 if (isNull _list || { isNull _details }) exitWith {false};
 
+// Fast-path repaint skip for static tool/detail selections.
+// Keep this conservative: only skip when not rebuilding and the selection content
+// is known to be driven by stable local UI state.
+private _modeHint = uiNamespace getVariable ["ARC_console_intelMode", "TOOLS"];
+if (!(_modeHint isEqualType "")) then { _modeHint = "TOOLS"; };
+_modeHint = toUpper (trim _modeHint);
+if (_modeHint isEqualTo "") then { _modeHint = "TOOLS"; };
+
+private _selIdxHint = lbCurSel _list;
+private _selDataHint = "";
+if (_selIdxHint >= 0) then { _selDataHint = _list lbData _selIdxHint; };
+if (!(_selDataHint isEqualType "")) then { _selDataHint = ""; };
+
+private _isStaticDetailSel = _selDataHint in ["", "HDR", "SEP", "INTEL_LOG", "LEAD_REQ", "REFRESH_INTEL", "S2_SHOW_LEADS", "S2_SHOW_THREADS", "S2_SHOW_INTEL", "CIV_CENSUS_OPEN", "CIV_CENSUS_BACK"];
+if ((_selDataHint find "CIV_CONTACT_") isEqualTo 0) then { _isStaticDetailSel = true; };
+
+if (!_rebuild && { _isStaticDetailSel }) then
+{
+    private _civCtxTargetHint = uiNamespace getVariable ["ARC_civsubInteract_target", objNull];
+    private _civResultHint = uiNamespace getVariable ["ARC_console_civsubLastResult", createHashMap];
+    private _civResultStamp = "";
+    if (_civResultHint isEqualType createHashMap) then
+    {
+        _civResultStamp = _civResultHint getOrDefault ["updatedAtText", ""];
+        if (!(_civResultStamp isEqualType "")) then { _civResultStamp = ""; };
+    };
+
+    private _staticSig = [
+        _modeHint,
+        _selDataHint,
+        uiNamespace getVariable ["ARC_console_s2_intelMethod", "MAP"],
+        uiNamespace getVariable ["ARC_console_s2_intelCategory", "SIGHTING"],
+        uiNamespace getVariable ["ARC_console_s2_leadType", "RECON"],
+        missionNamespace getVariable ["ARC_pub_intelUpdatedAt", -1],
+        missionNamespace getVariable ["ARC_pub_stateUpdatedAt", -1],
+        !(isNull _civCtxTargetHint),
+        _civResultStamp
+    ];
+
+    private _lastStaticSig = uiNamespace getVariable ["ARC_console_intelStaticSig", []];
+    if (_lastStaticSig isEqualType [] && { _lastStaticSig isEqualTo _staticSig }) exitWith { true };
+    uiNamespace setVariable ["ARC_console_intelStaticSig", +_staticSig];
+}
+else
+{
+    uiNamespace setVariable ["ARC_console_intelStaticSig", []];
+};
+
 // ---------------------------------------------------------------------------
 // S2 layout support: split the middle pane into two sub-panels (like OPS):
 //   - Left: tool/feed list (MainList)
