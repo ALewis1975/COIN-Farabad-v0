@@ -13,7 +13,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-05-13 — Threat Epic 2 lifecycle transition guard implementation (Mode B)
 
-**Branch/Commit:** copilot/docs-only-update-epic-2-lifecycle @ 1fb43b9b
+**Branch/Commit:** copilot/docs-only-update-epic-2-lifecycle @ 47c54a99
 
 **Scenario:** Implemented the first Epic 2 runtime slice by adding server-side lifecycle transition guards to `ARC_fnc_threatUpdateState`, denying invalid target states and stale/backward transitions while preserving idempotent same-state no-ops and cleanup closure paths.
 
@@ -28,7 +28,8 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | 7 | Post-change repository static validations | `git diff --check && python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py` | PASS | Whitespace diff, state migration validation, and marker index validation passed after edits. |
 | 8 | Review-fix changed-file validation | `git diff --check && python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatUpdateState.sqf && ~/.local/bin/sqflint -e w functions/threat/fn_threatUpdateState.sqf` | PASS | Revalidated after clarifying docs/runtime state vocabulary, logging empty-state legacy transitions, and removing direct `CREATED -> CLEANED`. |
 | 9 | Stricter guard validation | `git diff --check && python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatUpdateState.sqf && ~/.local/bin/sqflint -e w functions/threat/fn_threatUpdateState.sqf` | PASS | Revalidated after denying empty-state transitions, requiring `CREATED` to progress through active/staged or terminal close/expire, and requiring cleanup via `CLOSED`/`EXPIRED`. |
-| 10 | Threat Epic 2 runtime smoke | Local/dedicated MP: exercise create -> active/staged -> discovered/neutralized -> closed/cleaned and stale transition denial paths | BLOCKED | Arma 3 hosted/dedicated/JIP runtime unavailable in this sandbox. |
+| 10 | Final guard-cleanup validation | `git diff --check && python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatUpdateState.sqf && ~/.local/bin/sqflint -e w functions/threat/fn_threatUpdateState.sqf` | PASS | Revalidated after removing redundant valid-state list and making empty-state denial a single-log early exit. |
+| 11 | Threat Epic 2 runtime smoke | Local/dedicated MP: exercise create -> active/staged -> discovered/neutralized -> closed/cleaned and stale transition denial paths | BLOCKED | Arma 3 hosted/dedicated/JIP runtime unavailable in this sandbox. |
 
 ---
 
