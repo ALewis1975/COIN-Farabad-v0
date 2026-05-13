@@ -24,7 +24,7 @@ if (!isNil "remoteExecutedOwner") then
         if (isNull _requester) then
         {
             { if (owner _x == _reo) exitWith { _requester = _x; }; } forEach allPlayers;
-            diag_log format ["[ARC][WARN] ARC_fnc_publicBroadcastState: deprecated requester fallback used for remote owner=%1; callers should pass requester object.", _reo];
+            diag_log format ["[ARC][WARN] ARC_fnc_publicBroadcastState: MIGRATION deprecated requester fallback used for remote owner=%1; callers should pass requester object.", _reo];
         };
 
         if (!([_requester, "ARC_fnc_publicBroadcastState", "State broadcast rejected: sender verification failed.", "PUBLIC_BROADCAST_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
