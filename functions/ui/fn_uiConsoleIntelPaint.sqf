@@ -38,6 +38,7 @@ params [
 if (isNull _display) exitWith {false};
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 private _rxMaxItems = missionNamespace getVariable ["ARC_consoleRxMaxItems", 80];
 if (!(_rxMaxItems isEqualType 0) || { _rxMaxItems < 10 }) then { _rxMaxItems = 80; };
@@ -99,7 +100,7 @@ if (!_rebuild && { _isStaticDetailSel }) then
     private _civResultStamp = "";
     if (_civResultHint isEqualType createHashMap) then
     {
-        _civResultStamp = [_civResultHint, "updatedAtText", ""] call getOrDefault;
+        _civResultStamp = [_civResultHint, "updatedAtText", ""] call _hg;
         if (!(_civResultStamp isEqualType "")) then { _civResultStamp = ""; };
     };
 
@@ -326,12 +327,12 @@ private _renderS2CatPanelsFromMaster = {
                 _sectionCandidate = "INTEL / LEADS";
             };
 
-            if (!isNull ([_map, _sectionCandidate, controlNull] call getOrDefault)) then {
+            if (!isNull ([_map, _sectionCandidate, controlNull] call _hg)) then {
                 _section = _sectionCandidate;
             };
         } else {
             if (_section isEqualTo "") then { continue; };
-            private _lb = [_map, _section, controlNull] call getOrDefault;
+            private _lb = [_map, _section, controlNull] call _hg;
             if (isNull _lb) then { continue; };
             if (!(_d isEqualType "")) then { continue; };
             if (_d in ["", "HDR", "SEP"]) then { continue; };
@@ -561,13 +562,13 @@ if (_rebuild) then
                     if ((count _pub) > 0) then
                     {
                         private _ph = [_pub] call _hmCreate;
-                        _W = [_ph, "W", _W] call getOrDefault;
-                        _R = [_ph, "R", _R] call getOrDefault;
-                        _G = [_ph, "G", _G] call getOrDefault;
+                        _W = [_ph, "W", _W] call _hg;
+                        _R = [_ph, "R", _R] call _hg;
+                        _G = [_ph, "G", _G] call _hg;
 
-                        _kia = [_ph, "civ_cas_kia", 0] call getOrDefault;
-                        _wia = [_ph, "civ_cas_wia", 0] call getOrDefault;
-                        _popVal = [_ph, "population", -1] call getOrDefault;
+                        _kia = [_ph, "civ_cas_kia", 0] call _hg;
+                        _wia = [_ph, "civ_cas_wia", 0] call _hg;
+                        _popVal = [_ph, "population", -1] call _hg;
                     };
 
                     // Derived scores (locked v1 math, using W/R/G from pub snapshot)
@@ -654,7 +655,7 @@ if (_rebuild) then
 
             private _detained = false;
             private _snap = uiNamespace getVariable ["ARC_civsubInteract_snapshot", createHashMap];
-            if (_snap isEqualType createHashMap) then { _detained = [_snap, "detained", false] call getOrDefault; };
+            if (_snap isEqualType createHashMap) then { _detained = [_snap, "detained", false] call _hg; };
 
             if (_detained) then {
                 ["Release", "CIV_CONTACT_RELEASE"] call _addTool;
@@ -790,18 +791,18 @@ private _appendCivsubResult = {
     private _rs = uiNamespace getVariable ["ARC_console_civsubLastResult", createHashMap];
     if !(_rs isEqualType createHashMap) exitWith { _txtOut };
 
-    private _type = [_rs, "type", ""] call getOrDefault;
+    private _type = [_rs, "type", ""] call _hg;
     if !(_type isEqualType "") then { _type = ""; };
     _type = toUpper ([_type] call (compile "params ['_s']; trim _s"));
     if (_type isEqualTo "" || {_typeExpect isEqualTo ""} || {_type != _typeExpect}) exitWith { _txtOut };
 
-    private _html = [_rs, "html", ""] call getOrDefault;
+    private _html = [_rs, "html", ""] call _hg;
     if !(_html isEqualType "") then { _html = ""; };
 
-    private _ok = [_rs, "ok", false] call getOrDefault;
+    private _ok = [_rs, "ok", false] call _hg;
     if !(_ok isEqualType true) then { _ok = false; };
 
-    private _updatedAt = [_rs, "updatedAtText", "--:--:--"] call getOrDefault;
+    private _updatedAt = [_rs, "updatedAtText", "--:--:--"] call _hg;
     if !(_updatedAt isEqualType "") then { _updatedAt = "--:--:--"; };
 
     private _statusLbl = if (_ok) then { "COMPLETE" } else { "WARNING" };
@@ -867,20 +868,20 @@ else
             if (!(_pub isEqualType [])) then { _pub = []; };
             private _ph = if ((count _pub) > 0) then { [_pub] call _hmCreate } else { createHashMap };
 
-            private _W = [_ph, "W", 45] call getOrDefault;
-            private _R = [_ph, "R", 55] call getOrDefault;
-            private _G = [_ph, "G", 35] call getOrDefault;
+            private _W = [_ph, "W", 45] call _hg;
+            private _R = [_ph, "R", 55] call _hg;
+            private _G = [_ph, "G", 35] call _hg;
 
-            private _kia = [_ph, "civ_cas_kia", 0] call getOrDefault;
-            private _wia = [_ph, "civ_cas_wia", 0] call getOrDefault;
-            private _hits = [_ph, "crime_db_hits", 0] call getOrDefault;
-            private _detI = [_ph, "detentions_initiated", 0] call getOrDefault;
-            private _detH = [_ph, "detentions_handed_off", 0] call getOrDefault;
-            private _aid  = [_ph, "aid_events", 0] call getOrDefault;
-            private _ts   = [_ph, "ts", 0] call getOrDefault;
-            _centroid = [_ph, "centroid", []] call getOrDefault;
-            _rad      = [_ph, "radius", 0] call getOrDefault;
-            _pop      = [_ph, "population", -1] call getOrDefault;
+            private _kia = [_ph, "civ_cas_kia", 0] call _hg;
+            private _wia = [_ph, "civ_cas_wia", 0] call _hg;
+            private _hits = [_ph, "crime_db_hits", 0] call _hg;
+            private _detI = [_ph, "detentions_initiated", 0] call _hg;
+            private _detH = [_ph, "detentions_handed_off", 0] call _hg;
+            private _aid  = [_ph, "aid_events", 0] call _hg;
+            private _ts   = [_ph, "ts", 0] call _hg;
+            _centroid = [_ph, "centroid", []] call _hg;
+            _rad      = [_ph, "radius", 0] call _hg;
+            _pop      = [_ph, "population", -1] call _hg;
 
             private _Scoop = (0.55 * _W) + (0.35 * _G) - (0.70 * _R);
             private _Sthreat = (1.00 * _R) - (0.35 * _W) - (0.25 * _G);
@@ -928,7 +929,7 @@ else
                 ["D20", []]
             ]] call _hmCreate;
 
-            private _sett = [_settByDid, _did, []] call getOrDefault;
+            private _sett = [_settByDid, _did, []] call _hg;
             private _settLine = if ((count _sett) > 0) then { _sett joinString "; " } else { "None (rural / dispersed)" };
 
 // -------------------------------------------------------------------
@@ -1316,7 +1317,7 @@ else
                 ["Q_OP_US", "What is your opinion of us?"],
                 ["Q_OP_AREA", "What is the overall opinion of us in the area?"]
             ]] call _hmCreate;
-            private _qlbl = [_qMap, _qid, _qid] call getOrDefault;
+            private _qlbl = [_qMap, _qid, _qid] call _hg;
 
             _txt = format [
                 "<t size='1.1' font='PuristaMedium'>CIVSUB: Ask Question</t><br/><br/>" +
@@ -1363,14 +1364,14 @@ else
             private _mixedCnt = 0;
 
             {
-                private _did = [_x, "districtId", ""] call getOrDefault;
+                private _did = [_x, "districtId", ""] call _hg;
                 if (_did isEqualTo "") then { continue; };
 
-                private _W = [_x, "W", 0] call getOrDefault;
-                private _R = [_x, "R", 0] call getOrDefault;
-                private _G = [_x, "G", 0] call getOrDefault;
-                private _pop = [_x, "population", 0] call getOrDefault;
-                private _alive = [_x, "alive", 0] call getOrDefault;
+                private _W = [_x, "W", 0] call _hg;
+                private _R = [_x, "R", 0] call _hg;
+                private _G = [_x, "G", 0] call _hg;
+                private _pop = [_x, "population", 0] call _hg;
+                private _alive = [_x, "alive", 0] call _hg;
 
                 // Locked v1 math
                 private _Scoop = 0;
@@ -1469,7 +1470,7 @@ else
                 if (!(_pub2 isEqualType [])) then { continue; };
                 if ((count _pub2) == 0) then { continue; };
                 private _ph2 = [_pub2] call _hmCreate;
-                private _G2  = [_ph2, "G", 35] call getOrDefault;
+                private _G2  = [_ph2, "G", 35] call _hg;
                 if (!(_G2 isEqualType 0)) then { _G2 = 35; };
                 _govTotal = _govTotal + _G2;
                 _govCnt   = _govCnt + 1;
@@ -1515,11 +1516,11 @@ else
             {
                 private _hmGs = compile "params ['_a']; createHashMapFromArray _a";
                 private _gsMap = [_gs] call _hmGs;
-                private _secEff    = [_gsMap, "security_effectiveness", -1] call getOrDefault;
-                private _secRating = [_gsMap, "security_rating", ""] call getOrDefault;
-                private _aidTotal  = [_gsMap, "aid_events_total", -1] call getOrDefault;
-                private _closed    = [_gsMap, "incidents_closed", -1] call getOrDefault;
-                private _total     = [_gsMap, "incidents_total",  -1] call getOrDefault;
+                private _secEff    = [_gsMap, "security_effectiveness", -1] call _hg;
+                private _secRating = [_gsMap, "security_rating", ""] call _hg;
+                private _aidTotal  = [_gsMap, "aid_events_total", -1] call _hg;
+                private _closed    = [_gsMap, "incidents_closed", -1] call _hg;
+                private _total     = [_gsMap, "incidents_total",  -1] call _hg;
                 if (_secEff isEqualType 0 && { _secEff >= 0 }) then
                 {
                     private _secCol = "#FFD166";
@@ -1568,9 +1569,9 @@ else
                 private _pub3 = missionNamespace getVariable [format ["%1%2", _prefix3, _did3], []];
                 if (!(_pub3 isEqualType []) || { (count _pub3) == 0 }) then { continue; };
                 private _ph3 = [_pub3] call _hmCreate;
-                private _W3  = [_ph3, "W", 45] call getOrDefault; if (!(_W3  isEqualType 0)) then { _W3  = 45; };
-                private _R3  = [_ph3, "R", 55] call getOrDefault; if (!(_R3  isEqualType 0)) then { _R3  = 55; };
-                private _G3  = [_ph3, "G", 35] call getOrDefault; if (!(_G3  isEqualType 0)) then { _G3  = 35; };
+                private _W3  = [_ph3, "W", 45] call _hg; if (!(_W3  isEqualType 0)) then { _W3  = 45; };
+                private _R3  = [_ph3, "R", 55] call _hg; if (!(_R3  isEqualType 0)) then { _R3  = 55; };
+                private _G3  = [_ph3, "G", 35] call _hg; if (!(_G3  isEqualType 0)) then { _G3  = 35; };
                 private _St3 = ((1.00 * _R3) - (0.35 * _W3) - (0.25 * _G3)) max 0 min 100;
                 _threatSum = _threatSum + _St3;
                 _threatCnt = _threatCnt + 1;
