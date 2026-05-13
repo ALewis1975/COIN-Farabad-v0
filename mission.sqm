@@ -20,11 +20,11 @@ class EditorData
 	};
 	class LayerIndexProvider
 	{
-		nextID=117465;
+		nextID=117863;
 	};
 	class Camera
 	{
-		pos[]={6247.8877,39.48875,1318.1453};
+		pos[]={6249.1094,26.009102,1551.4326};
 		dir[]={-1.2363449e-07,-0.70710683,0.70710683};
 		up[]={-1.2363449e-07,0.70710671,0.70710683};
 		aside[]={1,0,1.7484557e-07};
@@ -26800,7 +26800,7 @@ class Mission
 														angles[]={0,4.7120719,0};
 													};
 													side="West";
-													flags=5;
+													flags=1;
 													class Attributes
 													{
 														skill=0.2;
@@ -26907,6 +26907,7 @@ class Mission
 													};
 													id=119;
 													type="rhsusf_airforce_security_force_rifleman";
+													atlOffset=0.38735962;
 													class CustomAttributes
 													{
 														class Attribute0
@@ -27105,6 +27106,7 @@ class Mission
 													};
 													id=120;
 													type="rhsusf_airforce_security_force_rifleman";
+													atlOffset=-1.6212463e-05;
 													class CustomAttributes
 													{
 														class Attribute0
@@ -27197,7 +27199,7 @@ class Mission
 														angles[]={0,4.7120719,0};
 													};
 													side="West";
-													flags=5;
+													flags=1;
 													class Attributes
 													{
 														skill=0.2;
@@ -27303,6 +27305,7 @@ class Mission
 													};
 													id=121;
 													type="rhsusf_airforce_security_force_rifleman";
+													atlOffset=0.38735962;
 													class CustomAttributes
 													{
 														class Attribute0
@@ -27486,7 +27489,7 @@ class Mission
 													};
 													id=122;
 													type="rhsusf_airforce_security_force_rifleman";
-													atlOffset=8.9645386e-05;
+													atlOffset=0.11466312;
 													class CustomAttributes
 													{
 														class Attribute0
@@ -27888,7 +27891,6 @@ class Mission
 													};
 													id=124;
 													type="rhsusf_airforce_security_force_rifleman";
-													atlOffset=-1.6212463e-05;
 													class CustomAttributes
 													{
 														class Attribute0
@@ -27981,7 +27983,7 @@ class Mission
 														angles[]={0,4.7120719,0};
 													};
 													side="West";
-													flags=5;
+													flags=1;
 													class Attributes
 													{
 														skill=0.2;
@@ -28088,7 +28090,7 @@ class Mission
 													};
 													id=125;
 													type="rhsusf_airforce_security_force_rifleman";
-													atlOffset=-1.6212463e-05;
+													atlOffset=0.38979912;
 													class CustomAttributes
 													{
 														class Attribute0
@@ -28181,7 +28183,7 @@ class Mission
 														angles[]={0,4.7120719,0};
 													};
 													side="West";
-													flags=5;
+													flags=1;
 													class Attributes
 													{
 														skill=0.2;
@@ -28287,7 +28289,7 @@ class Mission
 													};
 													id=126;
 													type="rhsusf_airforce_security_force_rifleman";
-													atlOffset=-1.6212463e-05;
+													atlOffset=0.38979912;
 													class CustomAttributes
 													{
 														class Attribute0
@@ -28878,7 +28880,7 @@ class Mission
 														angles[]={6.2527204,4.7120719,0.0076193968};
 													};
 													side="West";
-													flags=5;
+													flags=1;
 													class Attributes
 													{
 														skill=0.2;
@@ -28985,7 +28987,7 @@ class Mission
 													};
 													id=241;
 													type="rhsusf_airforce_security_force_rifleman";
-													atlOffset=-0.0016794205;
+													atlOffset=0.30136251;
 													class CustomAttributes
 													{
 														class Attribute0
@@ -29184,7 +29186,7 @@ class Mission
 													};
 													id=242;
 													type="rhsusf_airforce_security_force_rifleman";
-													atlOffset=-0.0016794205;
+													atlOffset=-0.082568169;
 													class CustomAttributes
 													{
 														class Attribute0
@@ -29277,7 +29279,7 @@ class Mission
 														angles[]={6.2527204,4.7120719,0.0076193968};
 													};
 													side="West";
-													flags=5;
+													flags=1;
 													class Attributes
 													{
 														skill=0.2;
@@ -29383,7 +29385,7 @@ class Mission
 													};
 													id=243;
 													type="rhsusf_airforce_security_force_rifleman";
-													atlOffset=-0.0016794205;
+													atlOffset=0.30136251;
 													class CustomAttributes
 													{
 														class Attribute0
@@ -30343,7 +30345,7 @@ class Mission
 														angles[]={0,5.7603893,0};
 													};
 													side="West";
-													flags=5;
+													flags=1;
 													class Attributes
 													{
 														skill=0.2;
@@ -30450,7 +30452,7 @@ class Mission
 													};
 													id=253;
 													type="rhsusf_airforce_security_force_rifleman";
-													atlOffset=-0.010922432;
+													atlOffset=0.30724669;
 													class CustomAttributes
 													{
 														class Attribute0
@@ -30543,7 +30545,7 @@ class Mission
 														angles[]={0,5.7603893,0};
 													};
 													side="West";
-													flags=5;
+													flags=1;
 													class Attributes
 													{
 														skill=0.2;
@@ -30649,7 +30651,7 @@ class Mission
 													};
 													id=254;
 													type="rhsusf_airforce_security_force_rifleman";
-													atlOffset=-0.010922432;
+													atlOffset=0.30724669;
 													class CustomAttributes
 													{
 														class Attribute0
@@ -34758,7 +34760,7 @@ class Mission
 													class PositionInfo
 													{
 														position[]={6236.8408,11.6236,1354.1001};
-														angles[]={0,0.85772419,-0};
+														angles[]={0,0.85772419,0};
 													};
 													side="Empty";
 													flags=5;
@@ -34768,6 +34770,7 @@ class Mission
 													};
 													id=4837;
 													type="Land_BarGate_F";
+													atlOffset=-4.7683716e-07;
 													class CustomAttributes
 													{
 														class Attribute0
@@ -34817,7 +34820,7 @@ class Mission
 												};
 											};
 											id=3932;
-											atlOffset=-0.43780994;
+											atlOffset=-0.43781042;
 										};
 									};
 									id=482;
@@ -37053,7 +37056,7 @@ class Mission
 													};
 													id=2044;
 													type="rhsusf_army_ocp_engineer";
-													atlOffset=-0.0090475082;
+													atlOffset=0.008433342;
 													class CustomAttributes
 													{
 														class Attribute0
@@ -37214,7 +37217,7 @@ class Mission
 													};
 													id=2043;
 													type="rhsusf_army_ocp_medic";
-													atlOffset=-0.0068035126;
+													atlOffset=0.0033655167;
 													class CustomAttributes
 													{
 														class Attribute0
@@ -37375,7 +37378,7 @@ class Mission
 													};
 													id=1544;
 													type="rhsusf_army_ocp_driver_armored";
-													atlOffset=-0.0093860626;
+													atlOffset=-4.7683716e-07;
 												};
 												class Item1
 												{
@@ -37467,7 +37470,7 @@ class Mission
 													};
 													id=1560;
 													type="rhsusf_army_ocp_driver_armored";
-													atlOffset=-0.015376091;
+													atlOffset=0.0032453537;
 												};
 												class Item1
 												{
@@ -73771,8 +73774,8 @@ class Mission
 															dataType="Object";
 															class PositionInfo
 															{
-																position[]={6236.7139,10.135789,1548.4988};
-																angles[]={0,3.1414924,0};
+																position[]={6245.2231,10.134471,1568.999};
+																angles[]={-0,1.584161,0};
 															};
 															side="Empty";
 															flags=4;
@@ -73783,7 +73786,6 @@ class Mission
 															};
 															id=2172;
 															type="d3s_tundra_19_UNM";
-															atlOffset=0.0013179779;
 															class CustomAttributes
 															{
 																class Attribute0
@@ -74278,7 +74280,7 @@ class Mission
 														};
 													};
 													id=1528;
-													atlOffset=0.00082015991;
+													atlOffset=0.0004901886;
 												};
 												class Item5
 												{
@@ -109153,6 +109155,7 @@ class Mission
 											};
 											id=4546;
 											type="UK3CB_MEC_C_DOC";
+											atlOffset=4.7683716e-07;
 										};
 										class Item1
 										{
@@ -109169,6 +109172,7 @@ class Mission
 											};
 											id=4547;
 											type="UK3CB_MEC_C_DOC";
+											atlOffset=4.7683716e-07;
 										};
 										class Item2
 										{
@@ -109248,6 +109252,7 @@ class Mission
 											};
 											id=4553;
 											type="UK3CB_MEC_C_DOC";
+											atlOffset=0.010010242;
 										};
 										class Item1
 										{
@@ -109264,6 +109269,7 @@ class Mission
 											};
 											id=4554;
 											type="UK3CB_MEC_C_DOC";
+											atlOffset=0.010010242;
 										};
 										class Item2
 										{
@@ -109343,6 +109349,7 @@ class Mission
 											};
 											id=4557;
 											type="UK3CB_MEC_C_DOC";
+											atlOffset=0.040009975;
 										};
 										class Item1
 										{
@@ -110417,7 +110424,6 @@ class Mission
 					};
 					id=4433;
 					type="B_Deck_Crew_F";
-					atlOffset=0.001458168;
 					class CustomAttributes
 					{
 						class Attribute0
@@ -110614,8 +110620,8 @@ class Mission
 			dataType="Logic";
 			class PositionInfo
 			{
-				position[]={6237.0464,8.4899998,1546.3666};
-				angles[]={0,1.5707965,0};
+				position[]={6245.0986,8.4899998,1569.6908};
+				angles[]={-0,1.5707965,0};
 			};
 			id=4606;
 			type="ACE_VehicleLock_ModuleSyncedAssign";
@@ -110813,13 +110819,13 @@ class Mission
 						angles[]={0,0.018976273,0};
 					};
 					side="West";
-					flags=4;
 					class Attributes
 					{
 						name="plane6G";
 					};
 					id=4709;
 					type="B_UAV_AI";
+					atlOffset=1.7972841;
 				};
 			};
 			class Attributes
