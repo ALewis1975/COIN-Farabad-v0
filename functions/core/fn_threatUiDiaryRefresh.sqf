@@ -31,7 +31,6 @@ private _fmtAgo = {
     params ["_ts"];
     if (!(_ts isEqualType 0) || { _ts < 0 }) exitWith { "n/a" };
     private _delta = serverTime - _ts;
-    if (!(_delta isEqualType 0)) exitWith { "n/a" };
     if (_delta < 0) then { _delta = 0; };
     if (_delta < 60) exitWith { format ["%1s ago", floor _delta] };
     if (_delta < 3600) exitWith { format ["%1m ago", floor (_delta / 60)] };
@@ -72,7 +71,7 @@ private _renderThreatRows = {
         ];
 
         private _detail = format ["Grid %1 | Task %2 | Updated %3", _gridLabel, _taskLabel, [_updatedAt] call _fmtAgo];
-        if (_spawned isEqualType true && { _spawned }) then {
+        if (_spawned isEqualType true && _spawned) then {
             _detail = _detail + format [" | World objs %1", _objectCount];
         };
 
@@ -119,6 +118,8 @@ if ((count _snapshot) == 0) then {
     _text = _text + "<t color='#FF7A7A'>No data yet.</t><br/>";
     _text = _text + "<t color='#DDDDDD'>Waiting for the first server-published threat snapshot. Keep the last known picture elsewhere and do not infer write authority from this client view.</t><br/>";
     private _oldText = player getVariable ["ARC_diary_rec_threat_lastText", ""];
+    // Preserve the last diary record when text is unchanged to avoid duplicate
+    // append-only entries during steady-state snapshot refreshes.
     if (_text isEqualTo _oldText) exitWith { true };
 
     private _record = player createDiaryRecord [_subjId, ["Threat Picture", _text]];
@@ -224,6 +225,8 @@ if ((count _snapshot) == 0) then {
     ];
 
     private _oldText = player getVariable ["ARC_diary_rec_threat_lastText", ""];
+    // Preserve the last diary record when text is unchanged to avoid duplicate
+    // append-only entries during steady-state snapshot refreshes.
     if (_text isEqualTo _oldText) exitWith { true };
 
     private _record = player createDiaryRecord [_subjId, ["Threat Picture", _text]];
