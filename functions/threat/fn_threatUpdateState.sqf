@@ -80,16 +80,16 @@ private _allowedNext = switch (_stateFromU) do
 {
     case "":
     {
-        diag_log format ["[ARC][WARN] ARC_fnc_threatUpdateState: allowing legacy empty-state transition threat_id=%1 to=%2 note=%3", _threatId, _stateToU, _note];
-        _validStates
+        diag_log format ["[ARC][WARN] ARC_fnc_threatUpdateState: denied empty-state transition threat_id=%1 to=%2 note=%3", _threatId, _stateToU, _note];
+        []
     };
-    case "CREATED": { ["ACTIVE", "STAGED", "DISCOVERED", "NEUTRALIZED", "CLOSED", "EXPIRED"] };
-    case "ACTIVE": { ["STAGED", "DISCOVERED", "NEUTRALIZED", "DETONATED", "INTERDICTED", "CLOSED", "CLEANED", "EXPIRED"] };
-    case "STAGED": { ["DISCOVERED", "NEUTRALIZED", "DETONATED", "INTERDICTED", "CLOSED", "CLEANED", "EXPIRED"] };
-    case "DISCOVERED": { ["NEUTRALIZED", "DETONATED", "INTERDICTED", "CLOSED", "CLEANED", "EXPIRED"] };
-    case "NEUTRALIZED": { ["CLOSED", "CLEANED"] };
-    case "DETONATED": { ["CLOSED", "CLEANED"] };
-    case "INTERDICTED": { ["CLOSED", "CLEANED"] };
+    case "CREATED": { ["ACTIVE", "STAGED", "CLOSED", "EXPIRED"] };
+    case "ACTIVE": { ["STAGED", "DISCOVERED", "NEUTRALIZED", "DETONATED", "INTERDICTED", "CLOSED", "EXPIRED"] };
+    case "STAGED": { ["DISCOVERED", "NEUTRALIZED", "DETONATED", "INTERDICTED", "CLOSED", "EXPIRED"] };
+    case "DISCOVERED": { ["NEUTRALIZED", "DETONATED", "INTERDICTED", "CLOSED", "EXPIRED"] };
+    case "NEUTRALIZED": { ["CLOSED"] };
+    case "DETONATED": { ["CLOSED"] };
+    case "INTERDICTED": { ["CLOSED"] };
     case "CLOSED": { ["CLEANED"] };
     case "EXPIRED": { ["CLEANED"] };
     case "CLEANED": { [] };

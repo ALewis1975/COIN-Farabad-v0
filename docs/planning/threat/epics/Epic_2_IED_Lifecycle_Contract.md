@@ -19,6 +19,18 @@ create -> spawn path -> discovery/interaction -> neutralization -> cleanup -> cl
 
 This table defines the **target contract vocabulary** for Epic 2 planning. The first implementation slice enforces the current coarse runtime state vocabulary in `ARC_fnc_threatUpdateState` (`CREATED`, `ACTIVE`, `STAGED`, `DISCOVERED`, `NEUTRALIZED`, `DETONATED`, `INTERDICTED`, `CLOSED`, `CLEANED`, `EXPIRED`) while later E2 work packages normalize explicit spawn-path states such as `SPAWN_ELIGIBLE`, `SPAWN_REQUESTED`, and `CLEANUP_PENDING`.
 
+Current runtime mapping for this PR:
+
+| Target contract state | Current runtime state(s) enforced in this PR |
+|---|---|
+| `LEAD_INGESTED` | `CREATED` |
+| `SPAWN_ELIGIBLE` / `SPAWN_REQUESTED` | `CREATED` (spawn contract metadata remains future E2-WP2 work) |
+| `SPAWNED_ACTIVE` | `ACTIVE` / `STAGED` |
+| `DISCOVERED` | `DISCOVERED` |
+| `NEUTRALIZED` | `NEUTRALIZED` / `INTERDICTED` / `DETONATED` |
+| `CLEANUP_PENDING` | `CLOSED` |
+| `SPAWN_DENIED` / `CLOSED_NO_SPAWN` / `CLOSED_STALE` / `CLOSED_COMPLETE` | `EXPIRED` / `CLOSED` / `CLEANED` |
+
 | State | Entry trigger | Server-authoritative transition(s) | Allowed state change | Notes |
 |---|---|---|---|---|
 | `LEAD_INGESTED` | Lead/task evidence reaches threat intake | `LEAD_INGESTED -> SPAWN_ELIGIBLE` or `LEAD_INGESTED -> CLOSED_NO_SPAWN` | Threat record create/update only | No client-side lifecycle writes. |
