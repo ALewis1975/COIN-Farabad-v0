@@ -81,6 +81,8 @@ private _normalizeFamily = {
 
     if (_subtypeU isEqualTo "") then
     {
+        // Create-path defaulting: callers may omit subtype and still need
+        // deterministic persisted records; other readers use inference only.
         _subtypeU = switch (_typeU) do
         {
             case "IED": { "IED_SUSPICIOUS_OBJECT" };
@@ -90,11 +92,7 @@ private _normalizeFamily = {
         };
     };
 
-    private _familyU = "NON_IED";
-    if (_typeU in ["IED", "VBIED", "SUICIDE"]) then { _familyU = _typeU; };
-    if ((_subtypeU find "IED_") isEqualTo 0 || { _subtypeU isEqualTo "IED_SUSPICIOUS_OBJECT" }) then { _familyU = "IED"; };
-    if (_subtypeU isEqualTo "VBIED" || { (_subtypeU find "VBIED_") isEqualTo 0 }) then { _familyU = "VBIED"; };
-    if (_subtypeU isEqualTo "SUICIDE" || { (_subtypeU find "SUICIDE_") isEqualTo 0 } || { (_subtypeU find "SB_") isEqualTo 0 }) then { _familyU = "SUICIDE"; };
+    private _familyU = [_typeU, _subtypeU] call ARC_fnc_threatInferFamily;
 
     [_familyU, _typeU, _subtypeU]
 };

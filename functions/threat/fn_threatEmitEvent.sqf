@@ -80,13 +80,7 @@ private _family = [_payload, "family", ""] call _kvGet;
 if (!(_family isEqualType "")) then { _family = ""; };
 if (_family isEqualTo "") then
 {
-    private _typeU = toUpper ([_payload, "type", ""] call _kvGet);
-    private _subtypeU = toUpper ([_payload, "subtype", ""] call _kvGet);
-    if (_typeU in ["IED", "VBIED", "SUICIDE"]) then { _family = _typeU; };
-    if ((_subtypeU find "IED_") isEqualTo 0 || { _subtypeU isEqualTo "IED_SUSPICIOUS_OBJECT" }) then { _family = "IED"; };
-    if (_subtypeU isEqualTo "VBIED" || { (_subtypeU find "VBIED_") isEqualTo 0 }) then { _family = "VBIED"; };
-    if (_subtypeU isEqualTo "SUICIDE" || { (_subtypeU find "SUICIDE_") isEqualTo 0 } || { (_subtypeU find "SB_") isEqualTo 0 }) then { _family = "SUICIDE"; };
-    if (_family isEqualTo "") then { _family = "NON_IED"; };
+    _family = [[_payload, "type", ""] call _kvGet, [_payload, "subtype", ""] call _kvGet] call ARC_fnc_threatInferFamily;
 };
 private _denyReason = [_payload, "deny_reason", ""] call _kvGet;
 if (!(_denyReason isEqualType "")) then { _denyReason = ""; };

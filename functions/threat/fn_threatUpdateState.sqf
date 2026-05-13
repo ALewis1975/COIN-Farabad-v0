@@ -45,7 +45,8 @@ private _normalizeState = {
 
 private _stateToU = [_stateTo] call _normalizeState;
 private _denyReason = "";
-private _knownStates = ["CREATED","ACTIVE","STAGED","DISCOVERED","NEUTRALIZED","DETONATED","INTERDICTED","CLOSED","CLEANED","EXPIRED"];
+private _knownStates = ["threat_v0_state_enum", ["CREATED","ACTIVE","STAGED","DISCOVERED","NEUTRALIZED","DETONATED","INTERDICTED","CLOSED","CLEANED","EXPIRED"]] call ARC_fnc_stateGet;
+if (!(_knownStates isEqualType [])) then { _knownStates = ["CREATED","ACTIVE","STAGED","DISCOVERED","NEUTRALIZED","DETONATED","INTERDICTED","CLOSED","CLEANED","EXPIRED"]; };
 
 // Small helpers for "pairs arrays"
 private _kvGet = {
@@ -89,15 +90,8 @@ private _family = [_rec, "family", ""] call _kvGet;
 if (!(_family isEqualType "")) then { _family = ""; };
 if (_family isEqualTo "") then
 {
-    private _typeU = toUpper _type;
-    private _subtypeU = toUpper _subtype;
-    if (_typeU in ["IED", "VBIED", "SUICIDE"]) then { _family = _typeU; };
-    if ((_subtypeU find "IED_") isEqualTo 0 || { _subtypeU isEqualTo "IED_SUSPICIOUS_OBJECT" }) then { _family = "IED"; };
-    if (_subtypeU isEqualTo "VBIED" || { (_subtypeU find "VBIED_") isEqualTo 0 }) then { _family = "VBIED"; };
-    if (_subtypeU isEqualTo "SUICIDE" || { (_subtypeU find "SUICIDE_") isEqualTo 0 } || { (_subtypeU find "SB_") isEqualTo 0 }) then { _family = "SUICIDE"; };
-    if (_family isEqualTo "") then { _family = "NON_IED"; };
+    _family = [_type, _subtype] call ARC_fnc_threatInferFamily;
 };
-_rec = [_rec, "family", _family] call _kvSet;
 
 private _stateFrom = [_rec, "state", ""] call _kvGet;
 private _stateFromU = [_stateFrom] call _normalizeState;
@@ -213,6 +207,7 @@ _rev = _rev + 1;
 _rec = [_rec, "rev", _rev] call _kvSet;
 _rec = [_rec, "state", _stateToU] call _kvSet;
 _rec = [_rec, "updated_ts", _now] call _kvSet;
+_rec = [_rec, "family", _family] call _kvSet;
 
 // Index maintenance (bounded history)
 private _open = ["threat_v0_open_index", []] call ARC_fnc_stateGet;

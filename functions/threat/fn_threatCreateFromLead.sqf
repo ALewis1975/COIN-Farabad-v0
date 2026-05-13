@@ -165,10 +165,7 @@ if (_threatId isEqualTo "") exitWith
     ""
 };
 
-private _threatFamily = "NON_IED";
-if (_subtype isEqualTo "VBIED") then { _threatFamily = "VBIED"; };
-if (_subtype isEqualTo "SUICIDE") then { _threatFamily = "SUICIDE"; };
-if (_subtype isEqualTo "IED_SUSPICIOUS_OBJECT") then { _threatFamily = "IED"; };
+private _threatFamily = [_type, _subtype] call ARC_fnc_threatInferFamily;
 
 [
     "THREAT_CREATED_FROM_LEAD",

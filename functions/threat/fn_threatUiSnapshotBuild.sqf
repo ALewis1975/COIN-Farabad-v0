@@ -127,13 +127,7 @@ private _buildThreatRow = {
     private _family = [_rec, "family", ""] call _kvGet;
     if (_family isEqualTo "") then
     {
-        private _typeU = toUpper ([_type] call _trimFn);
-        private _subtypeU = toUpper ([_subtype] call _trimFn);
-        if (_typeU in ["IED", "VBIED", "SUICIDE"]) then { _family = _typeU; };
-        if ((_subtypeU find "IED_") isEqualTo 0 || { _subtypeU isEqualTo "IED_SUSPICIOUS_OBJECT" }) then { _family = "IED"; };
-        if (_subtypeU isEqualTo "VBIED" || { (_subtypeU find "VBIED_") isEqualTo 0 }) then { _family = "VBIED"; };
-        if (_subtypeU isEqualTo "SUICIDE" || { (_subtypeU find "SUICIDE_") isEqualTo 0 } || { (_subtypeU find "SB_") isEqualTo 0 }) then { _family = "SUICIDE"; };
-        if (_family isEqualTo "") then { _family = "NON_IED"; };
+        _family = [_type, _subtype] call ARC_fnc_threatInferFamily;
     };
 
     [
@@ -165,7 +159,7 @@ private _buildEventRow = {
     params ["_evt"];
 
     private _eventName = [_evt, "event", ""] call _kvGet;
-    private _family = [_evt, "family", "NON_IED"] call _kvGet;
+    private _family = [_evt, "family", "UNKNOWN"] call _kvGet;
     private _stateFrom = [_evt, "state_from", ""] call _kvGet;
     private _stateTo = [_evt, "state_to", ""] call _kvGet;
     private _bucket = [_eventName, _stateTo] call _eventBucket;
@@ -232,7 +226,7 @@ private _districtFilters = [];
     private _threatId = [_row, "threat_id", ""] call _kvGet;
     private _state = [_row, "state", ""] call _kvGet;
     private _type = [_row, "type", ""] call _kvGet;
-    private _family = [_row, "family", "NON_IED"] call _kvGet;
+    private _family = [_row, "family", "UNKNOWN"] call _kvGet;
     private _districtId = [_row, "district_id", "D00"] call _kvGet;
 
     if (!(_state isEqualTo "")) then { _stateFilters pushBackUnique _state; };

@@ -20,6 +20,8 @@ check() {
 
 check 'threat_v0_family_enum' "functions/threat/fn_threatInit.sqf" "Threat init seeds family enum"
 check 'threat_v0_deny_reason_enum' "functions/threat/fn_threatInit.sqf" "Threat init seeds deny-reason enum"
+check 'class threatInferFamily {}' "config/CfgFunctions.hpp" "CfgFunctions registers threatInferFamily helper"
+check 'ARC_fnc_threatInferFamily' "functions/threat/fn_threatCreateFromTask.sqf" "Threat create uses shared family inference helper"
 check '\["family", _familyU\]' "functions/threat/fn_threatCreateFromTask.sqf" "Threat create writes normalized family field"
 check 'THREAT_STATE_CHANGE_DENIED' "functions/threat/fn_threatUpdateState.sqf" "Threat update emits denied transition event"
 check '\["deny_reason", _denyReason\]' "functions/threat/fn_threatUpdateState.sqf" "Threat update payload carries deny reason"
