@@ -87,13 +87,13 @@ diag_log "FARABAD_MIG_S0_hotfix04_convoy_startup_breadcrumbs loaded";
 
 // Scaffold core objectives first (object-first posture)
 // declared for future feature; currently not consumed
-missionNamespace setVariable ["ARC_objectiveScaffoldEnabled", true, true];
+missionNamespace setVariable ["ARC_objectiveScaffoldEnabled", true, false];
 
 // Debug inspector diary is controlled by ARC_devDebugInspectorEnabled (see debug toggles above)
 
 // Meetings: enable the liaison NPC so the meeting marker can track them
 // declared for future feature; currently not consumed
-missionNamespace setVariable ["ARC_objectiveMeetUseAI", true, true];
+missionNamespace setVariable ["ARC_objectiveMeetUseAI", true, false];
 
 // Hostile contact AI enabled; object systems and markers are stable
 missionNamespace setVariable ["ARC_patrolSpawnContactsEnabled", true, true];
@@ -936,21 +936,27 @@ private _arcKnownToggleConsumers = [
     ["airbase_v1_runtime_enabled", "functions/ambiance/fn_airbaseRuntimeEnabled.sqf"]
 ];
 
+private _arcKnownToggleConsumerIndex = createHashMap;
+private _arcMapGet = compile "params ['_h','_k']; _h get _k";
+{
+    if (_x isEqualType [] && { (count _x) > 0 }) then
+    {
+        private _key = _x select 0;
+        if (_key isEqualType "") then {
+            _arcKnownToggleConsumerIndex set [_key, true];
+        };
+    };
+} forEach _arcKnownToggleConsumers;
+
 {
     private _toggle = _x;
-    private _hasConsumer = false;
-    {
-        if (_x isEqualType [] && { (count _x) > 0 }) then
-        {
-            private _key = _x select 0;
-            if (_key isEqualType "" && { _key isEqualTo _toggle }) exitWith { _hasConsumer = true; };
-        };
-    } forEach _arcKnownToggleConsumers;
-
-    if (!_hasConsumer) then {
+    if (isNil { [_arcKnownToggleConsumerIndex, _toggle] call _arcMapGet }) then {
         diag_log format ["[ARC][CONFIG][WARN] Toggle '%1' is declared in initServer.sqf but missing from the known-consumer registry.", _toggle];
     };
 } forEach _arcDeclaredServerToggles;
+
+// Explicit server bootstrap ownership for AIRBASE scheduler startup.
+[] call ARC_fnc_airbasePostInit;
 
 [] call ARC_fnc_bootstrapServer;
 
