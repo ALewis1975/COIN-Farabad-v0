@@ -88,6 +88,7 @@ private _physicalInProtectedCount = 0;
 private _physicalGroupIds = [];
 private _rowCap = missionNamespace getVariable ["ARC_threatVirtualSnapshotRowCap", 12];
 if (!(_rowCap isEqualType 0)) then { _rowCap = 12; };
+// Keep bounded to avoid oversize debug payloads while still allowing larger inspection windows.
 _rowCap = (_rowCap max 1) min 50;
 private _materializedGroupRows = [];
 private _materializedRowsTruncated = false;
