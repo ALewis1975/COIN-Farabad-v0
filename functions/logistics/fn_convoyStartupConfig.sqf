@@ -4,7 +4,7 @@
     non-replicated to avoid startup broadcast noise.
 */
 
-if (!isServer) exitWith {false};
+if (!isServer) exitWith {};
 
 // ============================================================================
 // CONVOY FEATURES (do not modify spawn logic here)
@@ -295,6 +295,3 @@ missionNamespace setVariable ["ARC_routeReconMinLengthM", 700];
 missionNamespace setVariable ["ARC_routeReconRoadSnapM", 140];
 missionNamespace setVariable ["ARC_routeReconStartRadiusM", 75];
 missionNamespace setVariable ["ARC_routeReconEndRadiusM", 75];
-
-
-true
