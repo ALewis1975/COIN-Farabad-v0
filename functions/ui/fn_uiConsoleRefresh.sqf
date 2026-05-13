@@ -107,10 +107,8 @@ private _tab = ["ARC_console_activeTab", "DASH"] call ARC_fnc_uiNsGetString;
 _tab = toUpper _tab;
 
 private _prevRefreshTab = ["ARC_console_prevRefreshTab", "", false] call ARC_fnc_uiNsGetString;
-private _hasPrevRefreshTab = !(_prevRefreshTab isEqualTo "");
-private _isDifferentTab = !(_prevRefreshTab isEqualTo _tab);
-private _tabEntered = !_hasPrevRefreshTab || { _isDifferentTab };
-private _tabChanged = _hasPrevRefreshTab && { _isDifferentTab };
+private _tabEntered = !(_prevRefreshTab isEqualTo _tab);
+private _tabChanged = !(_prevRefreshTab isEqualTo "") && { !(_prevRefreshTab isEqualTo _tab) };
 
 if (_tabChanged) then
 {

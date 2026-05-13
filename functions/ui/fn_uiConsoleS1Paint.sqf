@@ -48,7 +48,9 @@ private _fitStructuredInGroup = {
 
     [_ctrl] call BIS_fnc_ctrlFitToTextHeight;
 
-    private _fallbackMinH = 0.20; // Fallback screen-space height when parent group is unavailable.
+    // Fallback is roughly 20% of screen height: enough to keep a readable
+    // scrollable text region if the parent group cannot be queried.
+    private _fallbackMinH = 0.20;
     private _minH = if (!isNull _grp) then { (ctrlPosition _grp) select 3 } else { _fallbackMinH };
     private _p = ctrlPosition _ctrl;
     _p set [0, _defaultPos select 0];
