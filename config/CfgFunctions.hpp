@@ -647,6 +647,7 @@ class CfgFunctions
             file = "functions\threat";
 
             class threatInit {};
+            class threatInferFamily {};
             class threatCreateFromTask {};
             class threatCreateFromLead {};
             class threatEmitEvent {};

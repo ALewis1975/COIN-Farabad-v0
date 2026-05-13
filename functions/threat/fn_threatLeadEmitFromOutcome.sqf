@@ -36,22 +36,19 @@ private _kvGet = {
 };
 
 private _typeU = toUpper ([_rec, "type", ""] call _kvGet);
-private _emittedLeads = [];
-
-if (_typeU isEqualTo "IED") then
+private _subtypeU = toUpper ([_rec, "subtype", ""] call _kvGet);
+private _family = toUpper ([_rec, "family", ""] call _kvGet);
+if (_family isEqualTo "") then
 {
-    _emittedLeads = [_rec, _transition] call ARC_fnc_iedEmitLeads;
-}
-else
+    _family = [_typeU, _subtypeU] call ARC_fnc_threatInferFamily;
+};
+private _emittedLeads = switch (_family) do
 {
-    if (_typeU isEqualTo "VBIED") then
+    case "IED": { [_rec, _transition] call ARC_fnc_iedEmitLeads };
+    case "VBIED": { [_rec, _transition] call ARC_fnc_vbiedEmitLeads };
+    case "SUICIDE":
     {
-        _emittedLeads = [_rec, _transition] call ARC_fnc_vbiedEmitLeads;
-    }
-    else
-    {
-        if (_typeU isEqualTo "SUICIDE") then
-        {
+            private _out = [];
             // SUICIDE lead dispatch (inline emitter per Task 020 spec)
             private _links      = [_rec, "links", []] call _kvGet;
             private _area       = [_rec, "area", []] call _kvGet;
@@ -80,7 +77,7 @@ else
 
                 if (!(_rrId isEqualTo "")) then
                 {
-                    _emittedLeads pushBack _rrId;
+                    _out pushBack _rrId;
                     diag_log format ["[ARC][INFO] ARC_fnc_threatLeadEmitFromOutcome: SUICIDE DETONATED → retaliation_risk lead=%1", _rrId];
                 };
 
@@ -99,7 +96,7 @@ else
 
                 if (!(_rpId isEqualTo "")) then
                 {
-                    _emittedLeads pushBack _rpId;
+                    _out pushBack _rpId;
                     diag_log format ["[ARC][INFO] ARC_fnc_threatLeadEmitFromOutcome: SUICIDE DETONATED → recruitment_pressure lead=%1", _rpId];
                 };
             };
@@ -121,15 +118,17 @@ else
 
                 if (!(_staId isEqualTo "")) then
                 {
-                    _emittedLeads pushBack _staId;
+                    _out pushBack _staId;
                     diag_log format ["[ARC][INFO] ARC_fnc_threatLeadEmitFromOutcome: SUICIDE STAGED → sb_threat_advisory lead=%1", _staId];
                 };
             };
-        }
-        else
-        {
-            diag_log format ["[ARC][WARN] ARC_fnc_threatLeadEmitFromOutcome: unknown type=%1 transition=%2", _typeU, _transition];
-        };
+            _out
+    };
+    case "NON_IED": { [] };
+    default
+    {
+        diag_log format ["[ARC][WARN] ARC_fnc_threatLeadEmitFromOutcome: unknown family=%1 type=%2 subtype=%3 transition=%4", _family, _typeU, _subtypeU, _transition];
+        []
     };
 };
 

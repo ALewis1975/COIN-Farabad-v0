@@ -16,6 +16,10 @@ if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabl
 private _ver = ["threat_v0_version", 0] call ARC_fnc_stateGet;
 if (!(_ver isEqualType 0)) then { _ver = 0; };
 ["threat_v0_version", _ver] call ARC_fnc_stateSet;
+["threat_v0_family_contract_v", 1] call ARC_fnc_stateSet;
+["threat_v0_family_enum", ["IED", "VBIED", "SUICIDE", "NON_IED"]] call ARC_fnc_stateSet;
+["threat_v0_state_enum", ["CREATED", "ACTIVE", "STAGED", "DISCOVERED", "NEUTRALIZED", "DETONATED", "INTERDICTED", "CLOSED", "CLEANED", "EXPIRED"]] call ARC_fnc_stateSet;
+["threat_v0_deny_reason_enum", ["DENY_THREAT_NOT_FOUND", "DENY_STATE_FROM_EMPTY", "DENY_STATE_TO_UNKNOWN", "DENY_STATE_NOOP", "DENY_TRANSITION_INVALID"]] call ARC_fnc_stateSet;
 
 // Campaign ID (stable per persistence reset)
 private _cid = ["threat_v0_campaign_id", ""] call ARC_fnc_stateGet;

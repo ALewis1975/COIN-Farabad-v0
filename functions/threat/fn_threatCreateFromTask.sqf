@@ -72,6 +72,25 @@ private _kvSet = {
 private _leadIdCtx = _leadIdCtxRaw;
 _leadIdCtx = [_leadIdCtx] call _trimFn;
 
+private _typeU = toUpper ([_type] call _trimFn);
+if (_typeU isEqualTo "") then { _typeU = "OTHER"; };
+
+private _subtypeU = toUpper ([_subtype] call _trimFn);
+if (_subtypeU isEqualTo "") then
+{
+    // Create-path defaulting: callers may omit subtype and still need
+    // deterministic persisted records; other readers use inference only.
+    _subtypeU = switch (_typeU) do
+    {
+        case "IED": { "IED_SUSPICIOUS_OBJECT" };
+        case "VBIED": { "VBIED" };
+        case "SUICIDE": { "SUICIDE" };
+        default { "OTHER" };
+    };
+};
+
+private _familyU = [_typeU, _subtypeU] call ARC_fnc_threatInferFamily;
+
 // Load records
 private _records = ["threat_v0_records", []] call ARC_fnc_stateGet;
 if (!(_records isEqualType [])) then { _records = []; };
@@ -216,6 +235,7 @@ else
         ["rev", 1],
         ["created_ts", _now],
         ["updated_ts", _now],
+        ["family", _familyU],
         ["type", _typeU],
         ["subtype", _subtypeU],
         ["state", "CREATED"],
@@ -241,6 +261,7 @@ else
     private _meta = [
         ["event", "THREAT_CREATED"],
         ["threat_id", _threatId],
+        ["family", _familyU],
         ["type", _typeU],
         ["subtype", _subtypeU],
         ["state_from", ""],
@@ -257,7 +278,7 @@ else
         ["note", ""]
     ];
 
-    private _intelId = ["OPS", format ["THREAT_CREATED: %1 (%2/%3)", _threatId, _typeU, _subtypeU], _pos, _meta] call ARC_fnc_intelLog;
+    private _intelId = ["OPS", format ["THREAT_CREATED: %1 (%2/%3/%4)", _threatId, _familyU, _typeU, _subtypeU], _pos, _meta] call ARC_fnc_intelLog;
 
     missionNamespace setVariable [
         "threat_v0_debug_last_event",
@@ -265,6 +286,7 @@ else
             ["ts", _now],
             ["event", "THREAT_CREATED"],
             ["threat_id", _threatId],
+            ["family", _familyU],
             ["district_id_source", _districtIdSource],
             ["district_id", _districtId]
         ]
