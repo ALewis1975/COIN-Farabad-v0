@@ -63,14 +63,19 @@ if (_owner > 0) then
             {
                 private _entryOwner = _entry select 0;
                 private _entryLastAt = _entry select 1;
-                if ((_entryOwner isEqualType 0) && { (_entryLastAt isEqualType 0) && { (_now - _entryLastAt) < _cooldownS } }) then
+                if ((_entryOwner isEqualType 0) && { _entryLastAt isEqualType 0 }) then
                 {
-                    _lastByOwnerClean pushBack [_entryOwner, _entryLastAt];
+                    private _entryAge = _now - _entryLastAt;
+                    if (_entryAge < _cooldownS) then
+                    {
+                        _lastByOwnerClean pushBack [_entryOwner, _entryLastAt];
+                    };
                 };
             };
         };
     } forEach _lastByOwner;
     _lastByOwner = _lastByOwnerClean;
+    missionNamespace setVariable ["ARC_tocPublicBroadcastLastByOwner", _lastByOwner, false];
 
     private _idx = -1;
     {
