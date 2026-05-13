@@ -15,6 +15,8 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 **Branch/Commit:** copilot/farabad-console-ui-research @ 3b63de1
 
+**Branch note:** This branch name was inherited from the preceding research task; the work recorded here is the Mode A bug-fix implementation on that branch.
+
 **Scenario:** Implemented console UI cleanup fixes for tab-switch disabled-state leakage, structured-text clipping in S-1, shared main/details pane overlap mitigation, and opt-in layout diagnostics.
 
 | # | Check | Command / Step | Result | Notes |

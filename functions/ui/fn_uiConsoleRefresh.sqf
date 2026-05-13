@@ -107,8 +107,9 @@ private _tab = ["ARC_console_activeTab", "DASH"] call ARC_fnc_uiNsGetString;
 _tab = toUpper _tab;
 
 private _prevRefreshTab = ["ARC_console_prevRefreshTab", "", false] call ARC_fnc_uiNsGetString;
-private _tabEntered = !(_prevRefreshTab isEqualTo _tab);
-private _tabChanged = !(_prevRefreshTab isEqualTo "") && { !(_prevRefreshTab isEqualTo _tab) };
+private _tabDiffers = !(_prevRefreshTab isEqualTo _tab);
+// Exclude initial empty -> first tab from stale-state cleanup; include it in tab-entry diagnostics.
+private _tabChanged = !(_prevRefreshTab isEqualTo "") && { _tabDiffers };
 
 if (_tabChanged) then
 {
@@ -118,7 +119,7 @@ if (_tabChanged) then
     uiNamespace setVariable ["ARC_console_cmdQueuePainting", false];
 };
 
-if (_tabEntered) then
+if (_tabDiffers) then
 {
     diag_log format [
         "[ARC][UI] ARC_fnc_uiConsoleRefresh: tab enter prev=%1 tab=%2 tabs=%3 main=%4 list=%5 details=%6",
@@ -473,7 +474,7 @@ case "DASH":
         [_b1, "REFRESH", true, true] call ARC_fnc_uiConsoleButtonState;
         [_b2, "READ-ONLY", false, true] call ARC_fnc_uiConsoleButtonState;
 
-        if (_tabEntered) then { uiNamespace setVariable ["ARC_console_s1ExpandToggled", true]; };
+        if (_tabDiffers) then { uiNamespace setVariable ["ARC_console_s1ExpandToggled", true]; };
         [_display] call ARC_fnc_uiConsoleS1Paint;
     };
 
