@@ -5742,7 +5742,7 @@ Mode: A (Bug Fix)
 
 ## 2026-05-13 — PR 9: Client/UI performance cleanup (Mode D)
 
-**Branch/Commit:** copilot/cleanup-client-ui-performance @ 38bf17ae0cb6026a385c39190b7995d3d2718731
+**Branch/Commit:** copilot/cleanup-client-ui-performance @ 171b00461695503f532d939e6edcb8717e2beebf
 
 **Scenario:** Reduced avoidable client-side refresh cost in `fn_briefingUpdateClient.sqf` by replacing repeated pair-array linear scans with per-update hash-map lookups, and added a conservative `uiNamespace` static-signature fast-path in `fn_uiConsoleIntelPaint.sqf` to skip redundant repaint work for unchanged static tool/detail selections.
 
@@ -5759,3 +5759,6 @@ Mode: A (Bug Fix)
 | 9 | Follow-up revalidation after briefing hash-map helper adjustment | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_briefingUpdateClient.sqf && ~/.local/bin/sqflint -e w functions/core/fn_briefingUpdateClient.sqf && git --no-pager diff --check` | FAIL (pre-existing), PASS (format) | Compat/sqflint findings remained in the existing legacy class after replacing repeated scans with hash-map lookups and retaining compat helper wrapping for `createHashMapFromArray`. |
 | 10 | Strict compat scan after mechanical rewrite of legacy parser-blocking patterns | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_briefingUpdateClient.sqf functions/ui/fn_uiConsoleIntelPaint.sqf` | PASS | All 158 prior matches resolved: `_a # _i` → `_a select _i`; `isNotEqualTo` → `!=`; `_m getOrDefault [k,d]` → `[_m,k,d] call getOrDefault`; `trim X` → `[X] call (compile "params ['_s']; trim _s")` inlined per call site. |
 | 11 | sqflint after mechanical rewrite | `~/.local/bin/sqflint -e w functions/core/fn_briefingUpdateClient.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleIntelPaint.sqf` | FAIL (pre-existing) | Findings reduced from 154→13 (intel) and 80→28 (briefing); all remaining issues are unused-variable warnings and `setDiaryRecordText` parser limitations present on `origin/main`. No new findings introduced. |
+| 12 | CI failure triage for run 25830509339 | `list_workflow_runs` + `list_workflow_jobs` + `get_job_logs` for **Arma SQF + Mission Config Preflight** at `389a63511d6b7b35f0c8e3639697213e3dafc208` | FAIL (reproduced) | Strict compat scan passed, then `sqflint -e w` failed on nine direct `player setDiaryRecordText ...` parse errors in `functions/core/fn_briefingUpdateClient.sqf`. |
+| 13 | Follow-up sqflint after `setDiaryRecordText` compat wrapper | `sqflint -e w functions/core/fn_briefingUpdateClient.sqf && sqflint -e w functions/ui/fn_uiConsoleIntelPaint.sqf` | PASS | Wrapped diary record text updates behind a compiled helper and removed remaining warnings in the two changed SQF files; both files now exit 0 under `sqflint -e w`. |
+| 14 | Follow-up strict compat scan after sqflint cleanup | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_briefingUpdateClient.sqf functions/ui/fn_uiConsoleIntelPaint.sqf` | PASS | No known parser-compat patterns found in either changed SQF file. |
