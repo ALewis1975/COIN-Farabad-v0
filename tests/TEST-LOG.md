@@ -30,7 +30,30 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
-## 2026-05-13 — PR 6: Reduce heavy tick frequency / repeated scans (Mode A)
+## 2026-05-13 — PR 8: Break up largest monolithic functions (Mode C)
+
+**Branch/Commit:** copilot/break-up-largest-functions @ commit: 82a30956aeff1f1ecc99a24eac20a27567726352 (pre-commit; first diff)
+
+**Scenario:** Extracted four private inline helper blocks from `fn_execTickConvoy.sqf` and `fn_execInitActive.sqf` into registered `ARC_fnc_convoy*` helper functions. Replaced all private definition sites and all call sites. No behavior change; call order preserved.
+
+Extractions:
+- `_fn_applyRouteWps` (~157 lines) → `ARC_fnc_convoyApplyRouteWps` (`functions/logistics/fn_convoyApplyRouteWps.sqf`)
+- `_fn_nearRouteIdx` (~21 lines) → `ARC_fnc_convoyNearRouteIdx` (`functions/logistics/fn_convoyNearRouteIdx.sqf`)
+- `_fn_normalizeConvoyGroups` (~43 lines) → `ARC_fnc_convoyNormalizeGroups` (`functions/logistics/fn_convoyNormalizeGroups.sqf`)
+- `_fn_nearestRoad` (~49 lines) → `ARC_fnc_convoyNearestRoad` (`functions/logistics/fn_convoyNearestRoad.sqf`)
+
+Size reductions: `fn_execTickConvoy.sqf` 2976→2756 lines (−220); `fn_execInitActive.sqf` 2633→2583 lines (−50).
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | SQF compat scan (all changed files) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/logistics/fn_execTickConvoy.sqf functions/core/fn_execInitActive.sqf functions/logistics/fn_convoyApplyRouteWps.sqf functions/logistics/fn_convoyNearRouteIdx.sqf functions/logistics/fn_convoyNormalizeGroups.sqf functions/logistics/fn_convoyNearestRoad.sqf` | PASS | No known parser-compat patterns found. |
+| 2 | sqflint (each changed file) | `for f in ...; do sqflint -e w "$f"; done` | PASS | All 6 files clean; no warnings. |
+| 3 | No stale private references | `grep -rn "_fn_applyRouteWps\|_fn_nearRouteIdx\|_fn_normalizeConvoyGroups\|_fn_nearestRoad" *.sqf *.hpp` | PASS | Zero stale `_fn_*` call sites remaining. |
+| 4 | State migration validation | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios, no regressions. |
+| 5 | Marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | 177 markers validated across all modes. |
+| 6 | Static contract checks | `bash tests/static/airbase_planning_mode_checks.sh && bash tests/static/casreq_snapshot_contract_checks.sh` | PASS | All static checks green. |
+| 7 | CfgFunctions.hpp registration | Manual review: 4 new entries under `class Logistics` | PASS | `convoyApplyRouteWps`, `convoyNearRouteIdx`, `convoyNormalizeGroups`, `convoyNearestRoad` all registered. |
+| 8 | Convoy init/tick runtime smoke | Start mission, spawn a LOGISTICS/ESCORT convoy, confirm normal routing and link-up behaviour | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
 
 **Branch/Commit:** copilot/cleanup-increase-tick-intervals @ 8b42d3cd56f17e8678d3ded5063e824c05d3dd23
 

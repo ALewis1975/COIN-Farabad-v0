@@ -67,189 +67,11 @@ private _spacing = ["activeConvoySpacingM", missionNamespace getVariable ["ARC_c
 if (!(_spacing isEqualType 0)) then { _spacing = missionNamespace getVariable ["ARC_convoySpacingM", 59]; };
 _spacing = (_spacing max 20) min 150;
 
-// Apply a multi-waypoint road route (reduces bridge issues and end-of-route shortcutting).
-// NOTE: Defined early so both the depart block and later watchdog/recovery can use it.
-private _fn_applyRouteWps = {
-    params [
-        "_grp",
-        "_routePtsIn",
-        "_destWp",
-        "_destRad",
-        ["_forcedPos", []]
-    ];
-    if (isNull _grp) exitWith {};
-    _destRad;
+// ARC_fnc_convoyApplyRouteWps: apply a multi-waypoint road route to a convoy group.
+// Extracted to functions/logistics/fn_convoyApplyRouteWps.sqf (PR 8).
 
-    // Clear any existing waypoints.
-    while { (count waypoints _grp) > 0 } do { deleteWaypoint ((waypoints _grp) select 0); };
-
-    private _minWpsUser = missionNamespace getVariable ["ARC_convoyWaypointMin", 8];
-    if (!(_minWpsUser isEqualType 0)) then { _minWpsUser = 8; };
-    _minWpsUser = (_minWpsUser max 3) min 25;
-
-    private _maxWpsUser = missionNamespace getVariable ["ARC_convoyWaypointMax", 12];
-    if (!(_maxWpsUser isEqualType 0)) then { _maxWpsUser = 12; };
-    _maxWpsUser = (_maxWpsUser max _minWpsUser) min 25;
-
-    // Waypoint interval is derived from the remaining road-route length so we consistently land
-    // in the 8-12 waypoint window (per design). Falls back to a tunable interval if route length is unknown.
-    private _interval = missionNamespace getVariable ["ARC_convoyWaypointIntervalM", 450];
-    if (!(_interval isEqualType 0)) then { _interval = 450; };
-    _interval = (_interval max 150) min 2000;
-
-    private _maxWps = _maxWpsUser;
-
-    private _finalWpRad = missionNamespace getVariable ["ARC_convoyFinalWpRadiusM", 45];
-    if (!(_finalWpRad isEqualType 0)) then { _finalWpRad = 45; };
-    _finalWpRad = (_finalWpRad max 25) min 150;
-
-    private _wps = [];
-
-    // Find the nearest route index to the current lead position, so we can start sampling forward.
-    private _nearIdx = 0;
-    if (_routePtsIn isEqualType [] && { (count _routePtsIn) >= 2 }) then
-    {
-        private _vehL = vehicle (leader _grp);
-        private _lp = getPosATL _vehL; _lp resize 3;
-
-        private _bestD = 1e12;
-        for "_i" from 0 to ((count _routePtsIn) - 1) do
-        {
-            private _d = (_routePtsIn select _i) distance2D _lp;
-            if (_d < _bestD) then { _bestD = _d; _nearIdx = _i; };
-        };
-    };
-
-    // Identify a forced index for ingress (closest route point to forcedPos).
-    private _forceIdx = -1;
-    if (_forcedPos isEqualType [] && { (count _forcedPos) >= 2 } && { _routePtsIn isEqualType [] && { (count _routePtsIn) >= 2 } }) then
-    {
-        private _bestDg = 1e12;
-        for "_i" from 0 to ((count _routePtsIn) - 1) do
-        {
-            private _d = (_routePtsIn select _i) distance2D _forcedPos;
-            if (_d < _bestDg) then { _bestDg = _d; _forceIdx = _i; };
-        };
-        // If we're already beyond the ingress point, don't force it.
-        if (_forceIdx <= _nearIdx) then { _forceIdx = -1; };
-    };
-
-    // Compute remaining road-route length from our current position to the end, then
-    // derive waypoint count/interval so the convoy commits to the road chain (bridge reliability).
-    private _remLen = 0;
-    if (_routePtsIn isEqualType [] && { (count _routePtsIn) >= 2 }) then
-    {
-        for "_j" from (_nearIdx + 1) to ((count _routePtsIn) - 1) do
-        {
-            _remLen = _remLen + ((_routePtsIn select (_j - 1)) distance2D (_routePtsIn select _j));
-        };
-    };
-
-    if (_remLen > 0) then
-    {
-        // Desired total waypoint count (including final): 8-12.
-        private _desired = round((_remLen / 700) + 2);
-        _desired = (_desired max _minWpsUser) min _maxWpsUser;
-        _maxWps = _desired;
-
-        // Interval derived from desired count. Clamp to keep AI from over-steering on short routes.
-        _interval = _remLen / ((_maxWps - 1) max 1);
-        _interval = (_interval max 180) min 1200;
-    };
-
-    // If we have a forced ingress point (gate), tighten waypoint spacing so the AI commits to the road chain.
-    if (_forcedPos isEqualType [] && { (count _forcedPos) >= 2 }) then
-    {
-        _interval = _interval min 420;
-    };
-
-    private _forcedAdded = false;
-
-    // Sample forward along the route.
-    if (_routePtsIn isEqualType [] && { (count _routePtsIn) >= 2 }) then
-    {
-        private _acc = 0;
-        private _last = _routePtsIn select _nearIdx;
-        for "_i" from (_nearIdx + 1) to ((count _routePtsIn) - 1) do
-        {
-            private _p = _routePtsIn select _i;
-            _acc = _acc + (_last distance2D _p);
-
-            // Force-add ingress point when we reach its index.
-            if (!_forcedAdded && { _forceIdx >= 0 } && { _i == _forceIdx }) then
-            {
-                if ((count _wps) isEqualTo 0 || { (_p distance2D (_wps select ((count _wps) - 1))) > 40 }) then
-                {
-                    _wps pushBack _p;
-                };
-                _forcedAdded = true;
-                _acc = 0;
-            };
-
-            if (_acc >= _interval) then
-            {
-                if ((count _wps) isEqualTo 0 || { (_p distance2D (_wps select ((count _wps) - 1))) > 40 }) then
-                {
-                    _wps pushBack _p;
-                };
-                _acc = 0;
-                if ((count _wps) >= (_maxWps - 1)) exitWith {};
-            };
-            _last = _p;
-        };
-    };
-
-    // Always add the final waypoint (dedupe if already close).
-    if ((count _wps) isEqualTo 0 || { ((_wps select ((count _wps) - 1)) distance2D _destWp) > 60 }) then
-    {
-        _wps pushBack _destWp;
-    };
-
-    {
-        private _wp = _grp addWaypoint [_x, 0];
-        _wp setWaypointType "MOVE";
-        _wp setWaypointSpeed "NORMAL";
-        _wp setWaypointBehaviour "AWARE";
-        _wp setWaypointCombatMode "YELLOW";
-        _wp setWaypointFormation "COLUMN";
-        _wp setWaypointCompletionRadius 45;
-
-        // Final wp uses a small radius so the lead stays on-road longer.
-        if (_forEachIndex isEqualTo ((count _wps) - 1)) then
-        {
-            _wp setWaypointCompletionRadius _finalWpRad;
-        };
-    } forEach _wps;
-
-    if ((count waypoints _grp) > 0) then
-    {
-        _grp setCurrentWaypoint ((waypoints _grp) select 0);
-    };
-};
-
-// Helper: find nearest route point index to a given position.
-// Used for follower recovery (e.g., u-turn deadlocks) without relying on waypoint indices.
-private _fn_nearRouteIdx = {
-    params [
-        ["_pts", []],
-        ["_pos", []],
-        ["_default", 0]
-    ];
-
-    if (!(_pts isEqualType []) || { (count _pts) == 0 }) exitWith { _default };
-    if (!(_pos isEqualType []) || { (count _pos) < 2 }) exitWith { _default };
-
-    private _bestI = _default;
-    private _bestD = 1e12;
-
-    for "_i" from 0 to ((count _pts) - 1) do
-    {
-        private _d = (_pts select _i) distance2D _pos;
-        if (_d < _bestD) then { _bestD = _d; _bestI = _i; };
-    };
-
-    _bestI
-};
+// ARC_fnc_convoyNearRouteIdx: find nearest index in route pts array to a position.
+// Extracted to functions/logistics/fn_convoyNearRouteIdx.sqf (PR 8).
 
 private _speedKph = ["activeConvoySpeedKph", missionNamespace getVariable ["ARC_convoySpeedKph", 25]] call ARC_fnc_stateGet;
 if (!(_speedKph isEqualType 0)) then { _speedKph = missionNamespace getVariable ["ARC_convoySpeedKph", 25]; };
@@ -739,13 +561,13 @@ private _fn_bridgeFallbackRoutePoints = {
     private _nearIdx = 0;
     if (_fromPos isEqualType [] && { (count _fromPos) >= 2 }) then
     {
-        _nearIdx = [_routePts, _fromPos, 0] call _fn_nearRouteIdx;
+        _nearIdx = [_routePts, _fromPos, 0] call ARC_fnc_convoyNearRouteIdx;
     };
 
     private _exitIdx = ((count _routePts) - 1) min (_nearIdx + 8);
     if (_toPos isEqualType [] && { (count _toPos) >= 2 }) then
     {
-        private _toIdx = [_routePts, _toPos, ((count _routePts) - 1)] call _fn_nearRouteIdx;
+        private _toIdx = [_routePts, _toPos, ((count _routePts) - 1)] call ARC_fnc_convoyNearRouteIdx;
         _exitIdx = (_toIdx max (_nearIdx + 2)) min ((count _routePts) - 1);
     };
 
@@ -945,51 +767,9 @@ if (!(_leadNetId isEqualTo _prevLeadNetId)) then
 //
 // We ensure every convoy vehicle's crew is merged into the lead vehicle's group.
 // This makes convoy routing and link-up phase logic deterministic.
-private _fn_normalizeConvoyGroups = {
-    params ["_vehArr", "_leadVeh"];
+// ARC_fnc_convoyNormalizeGroups: extracted to functions/logistics/fn_convoyNormalizeGroups.sqf (PR 8).
 
-    if (!(_vehArr isEqualType []) || { (count _vehArr) == 0 } || { isNull _leadVeh }) exitWith { grpNull };
-
-    // Ensure lead has crew and an accessible commander unit.
-    if (isNull (driver _leadVeh)) then { createVehicleCrew _leadVeh; };
-    private _ld = driver _leadVeh;
-    if (isNull _ld) then { _ld = effectiveCommander _leadVeh; };
-    if (isNull _ld) exitWith { grpNull };
-
-    private _gLead = group _ld;
-    if (isNull _gLead) exitWith { grpNull };
-
-    {
-        private _veh = _x;
-        if (!isNull _veh && { alive _veh }) then
-        {
-            if (isNull (driver _veh)) then { createVehicleCrew _veh; };
-            private _d = driver _veh;
-            if (isNull _d) then { _d = effectiveCommander _veh; };
-
-            if (!isNull _d) then
-            {
-                private _g = group _d;
-                if (!(_g isEqualTo _gLead)) then
-                {
-                    private _crew = crew _veh;
-                    private _crewAI = _crew select { !isPlayer _x };
-                    if ((count _crewAI) > 0) then { _crewAI joinSilent _gLead; };
-
-                    // Clean up empty transient groups to reduce clutter.
-                    if (!isNull _g && { !(_g isEqualTo _gLead) } && { (count units _g) == 0 }) then
-                    {
-                        deleteGroup _g;
-                    };
-                };
-            };
-        };
-    } forEach _vehArr;
-
-    _gLead
-};
-
-[_vehicles, _lead] call _fn_normalizeConvoyGroups;
+[_vehicles, _lead] call ARC_fnc_convoyNormalizeGroups;
 
 // Start condition: friendly players near convoy start or lead vehicle.
 private _startedAt = ["activeConvoyStartedAt", -1] call ARC_fnc_stateGet;
@@ -1440,7 +1220,7 @@ if (!_started) exitWith
         };
 
         // Push a multi-waypoint road route.
-        [_grp, _routePts, _destWpPos, _destRad, _ingressPos] call _fn_applyRouteWps;
+        [_grp, _routePts, _destWpPos, _destRad, _ingressPos] call ARC_fnc_convoyApplyRouteWps;
 
         ["activeConvoyStartedAt", _now] call ARC_fnc_stateSet;
         ["activeConvoyArrivedAt", -1] call ARC_fnc_stateSet;
@@ -1824,7 +1604,7 @@ private _assistFQ = _assistFollowersEnabled;
 if ((count waypoints _grpW) isEqualTo 0) then
 {
     diag_log "[ARC][CONVOY] Watchdog: convoy group has no waypoints; re-applying route.";
-    [_grpW, _routePts, _destWpPos, _destRad, _ingressPos] call _fn_applyRouteWps;
+    [_grpW, _routePts, _destWpPos, _destRad, _ingressPos] call ARC_fnc_convoyApplyRouteWps;
 };
 
 // Cohesion controller: if a vehicle falls behind, slow the convoy so it can close distance.
@@ -2197,7 +1977,7 @@ if (_fRec && { (count _aliveVeh) >= 2 }
                     _worstFollowerNetId = netId _v;
                 };
 
-                private _vRouteIdx = if ((count _routePts) > 0) then { [_routePts, _vPos, 0] call _fn_nearRouteIdx } else { -1 };
+                private _vRouteIdx = if ((count _routePts) > 0) then { [_routePts, _vPos, 0] call ARC_fnc_convoyNearRouteIdx } else { -1 };
                 diag_log format [
                     "[ARC][CONVOY][RECOVER] task=%1 role=follower netId=%2 idx=%3 gapM=%4 stallSec=%5 mode=%6",
                     _taskId, netId _v, _vRouteIdx, round _gap, round _stuckForV, if (_bridgeMode) then { "bridge" } else { "open" }
@@ -2288,8 +2068,8 @@ else
                     private _target = _prevPos;
                     if (_routePts isEqualType [] && { (count _routePts) >= 2 }) then
                     {
-                        private _idxV = [_routePts, _vPos, 0] call _fn_nearRouteIdx;
-                        private _idxP = [_routePts, _prevPos, 0] call _fn_nearRouteIdx;
+                        private _idxV = [_routePts, _vPos, 0] call ARC_fnc_convoyNearRouteIdx;
+                        private _idxP = [_routePts, _prevPos, 0] call ARC_fnc_convoyNearRouteIdx;
 
                         // If predecessor is "behind" on the route chain, aim forward instead.
                         if (_idxP < _idxV) then
@@ -2640,7 +2420,7 @@ else
             if (!_didBridgeAssist) then
             {
                 // Re-apply the intended road route.
-                [_grpW, _routePts, _destWpPos, _destRad, _ingressPos] call _fn_applyRouteWps;
+                [_grpW, _routePts, _destWpPos, _destRad, _ingressPos] call ARC_fnc_convoyApplyRouteWps;
             };
         }
         else
@@ -2692,7 +2472,7 @@ else
             }
             else
             {
-                [_grpW, _routePts, _destWpPos, _destRad, _ingressPos] call _fn_applyRouteWps;
+                [_grpW, _routePts, _destWpPos, _destRad, _ingressPos] call ARC_fnc_convoyApplyRouteWps;
             };
         };
 
@@ -2718,7 +2498,7 @@ else
 
             // Augmented recovery telemetry: lead identification, route progress, bridge mode.
             private _leadNidLog = if (!isNull _lead) then { netId _lead } else { "" };
-            private _routeIdxLog = if ((count _routePts) > 0) then { [_routePts, _curPos, 0] call _fn_nearRouteIdx } else { -1 };
+            private _routeIdxLog = if ((count _routePts) > 0) then { [_routePts, _curPos, 0] call ARC_fnc_convoyNearRouteIdx } else { -1 };
             private _bridgeFlag = if (_bridgeMode) then { "bridge" } else { "open" };
 
             ["OPS", format ["Convoy recovery executed (stage %1) after %2s stall.", _stage, round _stuckFor], _curPos, [
