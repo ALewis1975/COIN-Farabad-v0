@@ -221,8 +221,7 @@ private _processedLocations = 0;
     private _p3 = +_pos;
     if ((count _p3) == 2) then { _p3 pushBack 0; };
 
-    // Skip if inside any protected zone (intentional: OPFOR must not seed near airbase/green zone)
-    private _zone = [_p3] call ARC_fnc_worldGetZoneForPos;
+    // Skip if inside any protected zone/bubble (intentional: OPFOR must not seed near BLUFOR-controlled areas)
     if ([_p3, _protectedZones, _protectedMarkers] call ARC_fnc_threatIsProtectedSpawnPos) then { continue; };
 
     // Determine group count from strategic tier
