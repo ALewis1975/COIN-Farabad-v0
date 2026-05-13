@@ -6,57 +6,17 @@
 */
 
 if (!isServer) exitWith {false};
-private _trimFn = compile "params ['_s']; trim _s";
-
-params [
-    ["_requester", objNull, [objNull]]
-];
-
-// Dedicated MP hardening: server-internal calls are allowed; remote callers must
-// prove sender ownership and hold an HQ/approver role before forcing a broadcast.
 if (!isNil "remoteExecutedOwner") then
 {
     private _reo = remoteExecutedOwner;
-    if (_reo > 0) then
+    if (_reo > 0) exitWith
     {
-        // Backward-compatible fallback for any legacy remote call that omitted
-        // the requester object; owner binding is still enforced below.
-        if (isNull _requester) then
-        {
-            { if (owner _x == _reo) exitWith { _requester = _x } } forEach allPlayers;
-            diag_log format ["[ARC][WARN] ARC_fnc_publicBroadcastState: MIGRATION deprecated requester fallback used for remote owner=%1; callers should pass requester object.", _reo];
-        };
-
-        private _senderValid = [
-            _requester,
-            "ARC_fnc_publicBroadcastState",
-            "State broadcast rejected: sender verification failed.",
-            "PUBLIC_BROADCAST_SECURITY_DENIED",
-            true
-        ] call ARC_fnc_rpcValidateSender;
-        if (!_senderValid) exitWith {false};
-
-        private _isOmni = [_requester, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
-        // Match other HQ/admin audit tools: OMNI users and queue approvers may
-        // force an immediate public snapshot rebroadcast.
-        private _canBroadcast = false;
-        if (_isOmni) then
-        {
-            _canBroadcast = true;
-        }
-        else
-        {
-            _canBroadcast = [_requester] call ARC_fnc_rolesCanApproveQueue;
-        };
-        if (!_canBroadcast) exitWith
-        {
-            diag_log format ["[ARC][SEC] ARC_fnc_publicBroadcastState: unauthorized remote broadcast owner=%1 caller=%2", _reo, name _requester];
-            false
-        };
-
-        diag_log format ["[ARC][SEC] ARC_fnc_publicBroadcastState: authorized remote broadcast owner=%1 caller=%2", _reo, name _requester];
+        diag_log format ["[ARC][SEC] ARC_fnc_publicBroadcastState: rejected remote caller owner=%1", _reo];
+        false
     };
 };
+
+private _trimFn = compile "params ['_s']; trim _s";
 
 private _p = ["insurgentPressure", 0.35] call ARC_fnc_stateGet;
 private _c = ["corruption", 0.55] call ARC_fnc_stateGet;

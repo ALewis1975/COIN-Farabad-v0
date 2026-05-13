@@ -177,7 +177,7 @@ switch (_data) do
 
     case "ADMIN_BROADCAST":
     {
-        [player] remoteExec ["ARC_fnc_publicBroadcastState", 2];
+        [player] remoteExec ["ARC_fnc_tocRequestPublicBroadcast", 2];
         ["HQ", "Broadcast requested."] call ARC_fnc_clientToast;
     };
 
