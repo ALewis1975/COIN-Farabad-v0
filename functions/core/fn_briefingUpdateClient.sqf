@@ -1004,6 +1004,7 @@ else
 };
 
 // Apply updates (setDiaryRecordText)
+// sqflint 0.3.2 cannot parse direct command-form setDiaryRecordText calls.
 private _setDiaryRecordTextCompat = compileFinal "
     params ['_unit', '_recordRef', '_recordText'];
     _unit setDiaryRecordText [_recordRef, _recordText];
