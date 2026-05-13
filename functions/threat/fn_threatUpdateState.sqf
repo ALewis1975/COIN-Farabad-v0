@@ -78,8 +78,12 @@ if (!(_stateToU in _validStates)) exitWith
 
 private _allowedNext = switch (_stateFromU) do
 {
-    case "": { _validStates };
-    case "CREATED": { ["ACTIVE", "STAGED", "DISCOVERED", "NEUTRALIZED", "CLOSED", "CLEANED", "EXPIRED"] };
+    case "":
+    {
+        diag_log format ["[ARC][WARN] ARC_fnc_threatUpdateState: allowing legacy empty-state transition threat_id=%1 to=%2 note=%3", _threatId, _stateToU, _note];
+        _validStates
+    };
+    case "CREATED": { ["ACTIVE", "STAGED", "DISCOVERED", "NEUTRALIZED", "CLOSED", "EXPIRED"] };
     case "ACTIVE": { ["STAGED", "DISCOVERED", "NEUTRALIZED", "DETONATED", "INTERDICTED", "CLOSED", "CLEANED", "EXPIRED"] };
     case "STAGED": { ["DISCOVERED", "NEUTRALIZED", "DETONATED", "INTERDICTED", "CLOSED", "CLEANED", "EXPIRED"] };
     case "DISCOVERED": { ["NEUTRALIZED", "DETONATED", "INTERDICTED", "CLOSED", "CLEANED", "EXPIRED"] };

@@ -17,6 +17,8 @@ create -> spawn path -> discovery/interaction -> neutralization -> cleanup -> cl
 
 ## Lifecycle sequence spec (authoritative transitions)
 
+This table defines the **target contract vocabulary** for Epic 2 planning. The first implementation slice enforces the current coarse runtime state vocabulary in `ARC_fnc_threatUpdateState` (`CREATED`, `ACTIVE`, `STAGED`, `DISCOVERED`, `NEUTRALIZED`, `DETONATED`, `INTERDICTED`, `CLOSED`, `CLEANED`, `EXPIRED`) while later E2 work packages normalize explicit spawn-path states such as `SPAWN_ELIGIBLE`, `SPAWN_REQUESTED`, and `CLEANUP_PENDING`.
+
 | State | Entry trigger | Server-authoritative transition(s) | Allowed state change | Notes |
 |---|---|---|---|---|
 | `LEAD_INGESTED` | Lead/task evidence reaches threat intake | `LEAD_INGESTED -> SPAWN_ELIGIBLE` or `LEAD_INGESTED -> CLOSED_NO_SPAWN` | Threat record create/update only | No client-side lifecycle writes. |
