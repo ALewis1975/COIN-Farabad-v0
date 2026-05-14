@@ -11,6 +11,21 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-14 — Subsystem reliability and adaptive COIN planning (Mode F)
+
+**Branch/Commit:** copilot/review-farabad-coin-repositories @ 4544af8 (docs working tree validated in-session)
+
+**Scenario:** Added a docs-only execution contract for Phase 4 subsystem reliability sweeps and the follow-on adaptive enemy/population behavior track. No SQF, config, mission data, or runtime behavior changed.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Documentation scope review | Reviewed `docs/architecture/Architecture_Plan_2026-05-08.md`, `docs/qa/Pre_Dedicated_Mission_Completion_Audit_2026-04-06.md`, `docs/planning/Task_Decomposition.md`, and threat economy planning docs | PASS | Confirmed this PR should remain Mode F and should not implement runtime behavior. |
+| 2 | Whitespace check | `git --no-pager diff --check` | PASS | No whitespace errors after docs updates. |
+| 3 | SQF/static lint | Not run | Docs-only planning change; no `.sqf`, `.hpp`, `.ext`, or mission data touched. |
+| 4 | Runtime validation | Not run | Docs-only planning change; no behavior-changing SQF or runtime content touched. |
+
+---
+
 ## 2026-05-14 — AIRBASE ORBAT CAV coordinate fix (Mode A)
 
 **Branch/Commit:** copilot/fix-count-type-error @ cff9650
