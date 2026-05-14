@@ -462,8 +462,7 @@ if (_allowMoving) then
                 if (_hwyDir >= 0) then
                 {
                     private _roadDir = _curPos getDir _roadPos;
-                    // Normalize angular delta to the shortest signed bearing difference.
-                    private _delta = abs (((_roadDir - _hwyDir + 540) % 360) - 180);
+                    private _delta = [_roadDir, _hwyDir] call ARC_fnc_worldBearingDelta;
                     if (_delta <= _hwyAlignDeg) then
                     {
                         _candidates pushBack _road;

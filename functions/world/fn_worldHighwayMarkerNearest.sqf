@@ -56,8 +56,7 @@ private _bestScore = 1e12;
     private _score = _dist;
     if (_preferredDir >= 0) then
     {
-        // Normalize angular delta to the shortest signed bearing difference.
-        private _delta = abs (((_dir - _preferredDir + 540) % 360) - 180);
+        private _delta = [_dir, _preferredDir] call ARC_fnc_worldBearingDelta;
         _score = _score + (_delta * _dirWeight);
     };
 

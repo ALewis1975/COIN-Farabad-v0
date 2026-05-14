@@ -68,8 +68,7 @@ for "_i" from 1 to _tries do
     };
 
     private _r2 = objNull;
-    private _sentinelDelta = 1e12;
-    private _bestDelta = _sentinelDelta;
+    private _bestDelta = 1e12; // larger than any bearing delta (0..180)
     {
         if (isNull _x) then { continue; };
         private _onward = roadsConnectedTo _x;
@@ -78,8 +77,7 @@ for "_i" from 1 to _tries do
             if (_hwyDir >= 0) then
             {
                 private _candDir = _r getDir _x;
-                // Normalize angular delta to the shortest signed bearing difference.
-                private _delta = abs (((_candDir - _hwyDir + 540) % 360) - 180);
+                private _delta = [_candDir, _hwyDir] call ARC_fnc_worldBearingDelta;
                 if (_delta < _bestDelta) then
                 {
                     _bestDelta = _delta;
