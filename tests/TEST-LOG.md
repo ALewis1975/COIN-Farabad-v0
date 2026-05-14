@@ -13,7 +13,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-05-14 — CIVSUB cap enforcement parser-conservative sort fix (Mode A)
 
-**Branch/Commit:** copilot/fix-type-bool-error @ 3bff3ec (working tree change validated before commit)
+**Branch/Commit:** copilot/fix-type-bool-error @ e22f41e
 
 **Scenario:** Reworked CIVSUB civilian cap enforcement global/per-district sort construction to avoid `apply` blocks at the reported runtime parse location while preserving oldest-first despawn queue behavior.
 
