@@ -12,7 +12,7 @@ class EditorData
 	};
 	class ItemIDProvider
 	{
-		nextID=4841;
+		nextID=4948;
 	};
 	class MarkerIDProvider
 	{
@@ -20,13 +20,14 @@ class EditorData
 	};
 	class LayerIndexProvider
 	{
-		nextID=118261;
+		nextID=118461;
 	};
 	class Camera
 	{
-		pos[]={6249.1094,25.949759,1551.4326};
-		dir[]={0,-0.70710683,0.70710683};
-		up[]={0,0.70710671,0.70710683};
+		pos[]={6319.5728,1736.5294,319.9006};
+		dir[]={-1.2363449e-07,-0.70710683,0.70710683};
+		up[]={-1.2363449e-07,0.70710671,0.70710683};
+		aside[]={1,0,1.7484557e-07};
 	};
 };
 binarizationWanted=0;
@@ -1279,6 +1280,19 @@ class CustomAttributes
 		name="Multiplayer";
 		class Attribute0
 		{
+			property="ENH_saveLoadout";
+			expression="if (!isMultiplayer || !_value || is3DEN || !hasInterface) exitWith {};        0 spawn        {            waitUntil {sleep 1; !isNull player};            player setVariable ['ENH_savedLoadout', getUnitloadout player];            player addMPEventHandler ['MPRespawn',            {                params ['_unit'];                private _loadout = _unit getVariable ['ENH_savedLoadout', []];                if (_loadout isNotEqualTo []) then {_unit setUnitLoadout _loadout};            }];        };";
+			class Value
+			{
+				class data
+				{
+					singleType="BOOL";
+					value=1;
+				};
+			};
+		};
+		class Attribute1
+		{
 			property="RespawnTemplates";
 			expression="true";
 			class Value
@@ -1298,19 +1312,6 @@ class CustomAttributes
 							};
 						};
 					};
-				};
-			};
-		};
-		class Attribute1
-		{
-			property="ENH_saveLoadout";
-			expression="if (!isMultiplayer || !_value || is3DEN || !hasInterface) exitWith {};        0 spawn        {            waitUntil {sleep 1; !isNull player};            player setVariable ['ENH_savedLoadout', getUnitloadout player];            player addMPEventHandler ['MPRespawn',            {                params ['_unit'];                private _loadout = _unit getVariable ['ENH_savedLoadout', []];                if (_loadout isNotEqualTo []) then {_unit setUnitLoadout _loadout};            }];        };";
-			class Value
-			{
-				class data
-				{
-					singleType="BOOL";
-					value=1;
 				};
 			};
 		};
@@ -6291,7 +6292,7 @@ class Mission
 									name="arc_m_base_civilian_terminal_01";
 									type="Empty";
 									id=376;
-									atlOffset=0.12930012;
+									atlOffset=0.00045394897;
 									class CustomAttributes
 									{
 										class Attribute0
@@ -6450,7 +6451,7 @@ class Mission
 									text=" 1-73 CAV HQ";
 									type="Empty";
 									id=561;
-									atlOffset=6.1260004;
+									atlOffset=6.1052198;
 									class CustomAttributes
 									{
 										class Attribute0
@@ -9921,7 +9922,7 @@ class Mission
 							a=0.5;
 							b=0.5;
 							id=3726;
-							atlOffset=4.3870001;
+							atlOffset=4.3662195;
 							class CustomAttributes
 							{
 								class Attribute0
@@ -14760,7 +14761,7 @@ class Mission
 										};
 									};
 									id=455;
-									atlOffset=35;
+									atlOffset=0.00046157837;
 								};
 								class Item1
 								{
@@ -15291,7 +15292,6 @@ class Mission
 										};
 									};
 									id=456;
-									atlOffset=35;
 								};
 								class Item2
 								{
@@ -16293,7 +16293,7 @@ class Mission
 								};
 							};
 							id=454;
-							atlOffset=-0.52662611;
+							atlOffset=0.40768719;
 						};
 						class Item1
 						{
@@ -16916,7 +16916,7 @@ class Mission
 										};
 									};
 									id=460;
-									atlOffset=35;
+									atlOffset=0.01190567;
 								};
 								class Item1
 								{
@@ -17128,7 +17128,7 @@ class Mission
 										};
 									};
 									id=461;
-									atlOffset=35;
+									atlOffset=0.013526917;
 								};
 								class Item2
 								{
@@ -17290,7 +17290,7 @@ class Mission
 										};
 									};
 									id=462;
-									atlOffset=35;
+									atlOffset=0.01348877;
 								};
 								class Item3
 								{
@@ -17488,7 +17488,7 @@ class Mission
 										};
 									};
 									id=463;
-									atlOffset=35;
+									atlOffset=0.013370514;
 								};
 								class Item4
 								{
@@ -18140,7 +18140,7 @@ class Mission
 										};
 									};
 									id=3566;
-									atlOffset=35;
+									atlOffset=0.23038673;
 								};
 								class Item6
 								{
@@ -18672,11 +18672,11 @@ class Mission
 								};
 							};
 							id=459;
-							atlOffset=-8.9038353;
+							atlOffset=0.2223196;
 						};
 					};
 					id=453;
-					atlOffset=0.98401809;
+					atlOffset=0.54565811;
 				};
 				class Item2
 				{
@@ -19444,7 +19444,7 @@ class Mission
 										};
 									};
 									id=466;
-									atlOffset=13.028786;
+									atlOffset=0.15119743;
 								};
 								class Item1
 								{
@@ -20163,7 +20163,7 @@ class Mission
 										};
 									};
 									id=467;
-									atlOffset=-4.4172068;
+									atlOffset=0.029987335;
 								};
 								class Item2
 								{
@@ -20519,11 +20519,11 @@ class Mission
 										};
 									};
 									id=468;
-									atlOffset=-3.9527788;
+									atlOffset=3.2297144;
 								};
 							};
 							id=465;
-							atlOffset=1.6209688;
+							atlOffset=3.5326958;
 						};
 						class Item1
 						{
@@ -21553,7 +21553,7 @@ class Mission
 								};
 							};
 							id=469;
-							atlOffset=-21.709385;
+							atlOffset=0.0018138885;
 						};
 						class Item2
 						{
@@ -21790,7 +21790,7 @@ class Mission
 						};
 					};
 					id=464;
-					atlOffset=-2.9960394;
+					atlOffset=-26.739445;
 				};
 				class Item3
 				{
@@ -30995,8 +30995,8 @@ class Mission
 											{
 												class Attribute0
 												{
-													property="ENH_enableHeadlights";
-													expression="[_this, _value] remoteExec ['setPilotLight', _this]";
+													property="ENH_doStop";
+													expression="if (!is3DEN && _value) then {doStop _this}";
 													class Value
 													{
 														class data
@@ -31047,8 +31047,8 @@ class Mission
 												};
 												class Attribute4
 												{
-													property="ENH_doStop";
-													expression="if (!is3DEN && _value) then {doStop _this}";
+													property="ENH_enableHeadlights";
+													expression="[_this, _value] remoteExec ['setPilotLight', _this]";
 													class Value
 													{
 														class data
@@ -34822,7 +34822,7 @@ class Mission
 										};
 									};
 									id=482;
-									atlOffset=0.48975086;
+									atlOffset=0.49028778;
 								};
 								class Item1
 								{
@@ -35131,7 +35131,7 @@ class Mission
 								};
 							};
 							id=481;
-							atlOffset=24.070883;
+							atlOffset=-20.199539;
 						};
 						class Item1
 						{
@@ -36030,7 +36030,7 @@ class Mission
 								};
 							};
 							id=485;
-							atlOffset=1.3518147;
+							atlOffset=0.064483643;
 						};
 						class Item2
 						{
@@ -36077,7 +36077,7 @@ class Mission
 						};
 					};
 					id=480;
-					atlOffset=18.93606;
+					atlOffset=-2.3701243;
 				};
 				class Item5
 				{
@@ -37728,7 +37728,7 @@ class Mission
 										};
 									};
 									id=501;
-									atlOffset=-2.21278;
+									atlOffset=0.026860237;
 								};
 								class Item1
 								{
@@ -41981,7 +41981,7 @@ class Mission
 								};
 							};
 							id=500;
-							atlOffset=-1.3871222;
+							atlOffset=-0.10676765;
 						};
 						class Item2
 						{
@@ -41992,7 +41992,7 @@ class Mission
 						};
 					};
 					id=498;
-					atlOffset=-0.6370182;
+					atlOffset=-2.9570942;
 				};
 				class Item7
 				{
@@ -42722,7 +42722,6 @@ class Mission
 										};
 									};
 									id=506;
-									atlOffset=-1.1483846;
 								};
 								class Item1
 								{
@@ -42733,7 +42732,7 @@ class Mission
 								};
 							};
 							id=505;
-							atlOffset=37.122875;
+							atlOffset=-1.1510286;
 						};
 						class Item1
 						{
@@ -42744,7 +42743,7 @@ class Mission
 						};
 					};
 					id=504;
-					atlOffset=36.061436;
+					atlOffset=37.122875;
 				};
 				class Item8
 				{
@@ -43210,7 +43209,7 @@ class Mission
 								};
 							};
 							id=510;
-							atlOffset=-0.11787891;
+							atlOffset=0.00074958801;
 						};
 						class Item1
 						{
@@ -44240,7 +44239,7 @@ class Mission
 								};
 							};
 							id=511;
-							atlOffset=37.122532;
+							atlOffset=-2.4872589;
 						};
 						class Item2
 						{
@@ -44702,7 +44701,6 @@ class Mission
 								};
 							};
 							id=512;
-							atlOffset=-0.31144905;
 						};
 						class Item3
 						{
@@ -45409,7 +45407,7 @@ class Mission
 								};
 							};
 							id=513;
-							atlOffset=1.8959663;
+							atlOffset=0.0022163391;
 						};
 						class Item4
 						{
@@ -46121,7 +46119,7 @@ class Mission
 								};
 							};
 							id=515;
-							atlOffset=1.8959622;
+							atlOffset=0.0022125244;
 						};
 						class Item6
 						{
@@ -47688,7 +47686,7 @@ class Mission
 						};
 					};
 					id=509;
-					atlOffset=-10.553034;
+					atlOffset=-13.704599;
 				};
 				class Item9
 				{
@@ -50279,7 +50277,6 @@ class Mission
 												};
 											};
 											id=397;
-											atlOffset=35;
 										};
 										class Item1
 										{
@@ -50497,7 +50494,6 @@ class Mission
 												};
 											};
 											id=399;
-											atlOffset=35;
 										};
 										class Item2
 										{
@@ -50768,7 +50764,6 @@ class Mission
 												};
 											};
 											id=400;
-											atlOffset=35;
 										};
 										class Item3
 										{
@@ -51164,7 +51159,6 @@ class Mission
 												};
 											};
 											id=401;
-											atlOffset=35;
 										};
 										class Item4
 										{
@@ -51383,7 +51377,6 @@ class Mission
 												};
 											};
 											id=398;
-											atlOffset=35;
 										};
 										class Item5
 										{
@@ -51603,7 +51596,6 @@ class Mission
 												};
 											};
 											id=1447;
-											atlOffset=35;
 										};
 										class Item6
 										{
@@ -76936,7 +76928,6 @@ class Mission
 														};
 													};
 													id=3149;
-													atlOffset=37.122501;
 												};
 												class Item8
 												{
@@ -78349,7 +78340,7 @@ class Mission
 										};
 									};
 									id=518;
-									atlOffset=-1.1280313;
+									atlOffset=6.1035156e-05;
 								};
 								class Item1
 								{
@@ -78950,7 +78941,7 @@ class Mission
 												};
 											};
 											id=3342;
-											atlOffset=35;
+											atlOffset=0.074996948;
 										};
 										class Item1
 										{
@@ -80330,7 +80321,7 @@ class Mission
 														};
 													};
 													id=3374;
-													atlOffset=35;
+													atlOffset=1.5258789e-05;
 												};
 												class Item2
 												{
@@ -81185,7 +81176,6 @@ class Mission
 														};
 													};
 													id=3385;
-													atlOffset=35;
 												};
 												class Item3
 												{
@@ -82037,7 +82027,6 @@ class Mission
 														};
 													};
 													id=3397;
-													atlOffset=35;
 												};
 												class Item4
 												{
@@ -83102,11 +83091,10 @@ class Mission
 														};
 													};
 													id=3398;
-													atlOffset=35;
 												};
 											};
 											id=3353;
-											atlOffset=35;
+											atlOffset=3.2304764;
 										};
 										class Item2
 										{
@@ -83473,7 +83461,7 @@ class Mission
 										};
 									};
 									id=520;
-									atlOffset=18.565147;
+									atlOffset=5.9769897;
 								};
 								class Item3
 								{
@@ -84261,7 +84249,7 @@ class Mission
 												};
 											};
 											id=837;
-											atlOffset=35;
+											atlOffset=-9.5367432e-07;
 										};
 										class Item1
 										{
@@ -85203,7 +85191,7 @@ class Mission
 														};
 													};
 													id=841;
-													atlOffset=35;
+													atlOffset=-9.5367432e-07;
 												};
 												class Item1
 												{
@@ -86138,7 +86126,7 @@ class Mission
 														};
 													};
 													id=842;
-													atlOffset=35;
+													atlOffset=-9.5367432e-07;
 												};
 												class Item2
 												{
@@ -87073,7 +87061,7 @@ class Mission
 														};
 													};
 													id=843;
-													atlOffset=35;
+													atlOffset=-9.5367432e-07;
 												};
 												class Item3
 												{
@@ -88164,7 +88152,7 @@ class Mission
 														};
 													};
 													id=844;
-													atlOffset=35;
+													atlOffset=-9.5367432e-07;
 												};
 												class Item4
 												{
@@ -88646,7 +88634,7 @@ class Mission
 												};
 											};
 											id=838;
-											atlOffset=35;
+											atlOffset=-9.5367432e-07;
 										};
 										class Item2
 										{
@@ -97987,7 +97975,7 @@ class Mission
 										};
 									};
 									id=521;
-									atlOffset=-0.06485343;
+									atlOffset=-5.0257883;
 								};
 								class Item4
 								{
@@ -97998,7 +97986,7 @@ class Mission
 								};
 							};
 							id=517;
-							atlOffset=7.9358535;
+							atlOffset=10.689838;
 						};
 						class Item1
 						{
@@ -98705,7 +98693,7 @@ class Mission
 										};
 									};
 									id=525;
-									atlOffset=1.3577361;
+									atlOffset=0.1974678;
 								};
 								class Item2
 								{
@@ -99400,7 +99388,7 @@ class Mission
 										};
 									};
 									id=526;
-									atlOffset=-0.13094521;
+									atlOffset=0.07833004;
 								};
 								class Item3
 								{
@@ -100673,7 +100661,7 @@ class Mission
 										};
 									};
 									id=527;
-									atlOffset=-0.13215637;
+									atlOffset=0.0005235672;
 								};
 								class Item4
 								{
@@ -101540,7 +101528,7 @@ class Mission
 										};
 									};
 									id=528;
-									atlOffset=-4.9008789;
+									atlOffset=0.049553871;
 								};
 								class Item5
 								{
@@ -101558,11 +101546,11 @@ class Mission
 								};
 							};
 							id=523;
-							atlOffset=36.878212;
+							atlOffset=37.001839;
 						};
 					};
 					id=516;
-					atlOffset=12.568545;
+					atlOffset=5.8857679;
 				};
 				class Item10
 				{
@@ -102140,7 +102128,6 @@ class Mission
 										};
 									};
 									id=533;
-									atlOffset=0.5726018;
 								};
 								class Item1
 								{
@@ -102151,7 +102138,7 @@ class Mission
 								};
 							};
 							id=532;
-							atlOffset=0.66058707;
+							atlOffset=-3.5005198;
 						};
 						class Item1
 						{
@@ -106966,11 +106953,10 @@ class Mission
 												};
 											};
 											id=434;
-											atlOffset=35;
 										};
 									};
 									id=491;
-									atlOffset=36.349728;
+									atlOffset=0.32432652;
 								};
 								class Item1
 								{
@@ -107960,7 +107946,7 @@ class Mission
 												};
 											};
 											id=3668;
-											atlOffset=-20.733971;
+											atlOffset=5.3818388;
 										};
 										class Item1
 										{
@@ -108611,7 +108597,6 @@ class Mission
 												};
 											};
 											id=3669;
-											atlOffset=-1.3112926;
 										};
 										class Item2
 										{
@@ -108706,15 +108691,15 @@ class Mission
 										};
 									};
 									id=3667;
-									atlOffset=0.140481;
+									atlOffset=0.16253948;
 								};
 							};
 							id=3665;
-							atlOffset=-2.2467141;
+							atlOffset=-6.5715852;
 						};
 					};
 					id=531;
-					atlOffset=-0.94129467;
+					atlOffset=-24.97611;
 				};
 				class Item11
 				{
@@ -109139,7 +109124,6 @@ class Mission
 								};
 							};
 							id=4512;
-							atlOffset=-1.2604728;
 						};
 						class Item2
 						{
@@ -109576,15 +109560,14 @@ class Mission
 								};
 							};
 							id=4560;
-							atlOffset=0.48762822;
 						};
 					};
 					id=540;
-					atlOffset=-1.4000349;
+					atlOffset=-55.803593;
 				};
 			};
 			id=448;
-			atlOffset=-11.133939;
+			atlOffset=0.67101097;
 		};
 		class Item3
 		{
@@ -110930,7 +110913,7 @@ class Mission
 			name="Location_Markers";
 			class Entities
 			{
-				items=5;
+				items=6;
 				class Item0
 				{
 					dataType="Layer";
@@ -113600,9 +113583,7038 @@ class Mission
 					id=4750;
 					atlOffset=0.26414537;
 				};
+				class Item5
+				{
+					dataType="Layer";
+					name="Highway Markers";
+					class Entities
+					{
+						items=106;
+						class Item0
+						{
+							dataType="Marker";
+							position[]={5746.5664,8.5932722,1052.0616};
+							name="mkr_highway_002";
+							type="Empty";
+							angle=90.57872;
+							id=4843;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item1
+						{
+							dataType="Marker";
+							position[]={5747.2715,8.58253,1077.7534};
+							name="mkr_highway_001";
+							type="Empty";
+							angle=269.87598;
+							id=4842;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item2
+						{
+							dataType="Marker";
+							position[]={5249.0244,5.8625684,1077.8406};
+							name="mkr_highway_003";
+							type="Empty";
+							angle=269.87595;
+							id=4844;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item3
+						{
+							dataType="Marker";
+							position[]={5248.3193,5.8635974,1052.1488};
+							name="mkr_highway_004";
+							type="Empty";
+							angle=90.578712;
+							id=4845;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item4
+						{
+							dataType="Marker";
+							position[]={4714.9565,5.9117398,1224.9063};
+							name="mkr_highway_005";
+							type="Empty";
+							angle=129.4066;
+							id=4846;
+							atlOffset=4.7683716e-07;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item5
+						{
+							dataType="Marker";
+							position[]={4731.853,5.9099998,1244.2731};
+							name="mkr_highway_006";
+							type="Empty";
+							angle=310.10938;
+							id=4847;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item6
+						{
+							dataType="Marker";
+							position[]={4596.7998,5.5588236,1660.4669};
+							name="mkr_highway_007";
+							type="Empty";
+							angle=354.64581;
+							id=4848;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item7
+						{
+							dataType="Marker";
+							position[]={4571.1509,5.5513177,1658.8271};
+							name="mkr_highway_008";
+							type="Empty";
+							angle=175.3486;
+							id=4849;
+							atlOffset=4.7683716e-07;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item8
+						{
+							dataType="Marker";
+							position[]={4522.6978,4.6399999,2154.5791};
+							name="mkr_highway_009";
+							type="Empty";
+							angle=345.25003;
+							id=4850;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item9
+						{
+							dataType="Marker";
+							position[]={4497.6606,4.6400003,2148.7742};
+							name="mkr_highway_010";
+							type="Empty";
+							angle=165.95284;
+							id=4851;
+							atlOffset=4.7683716e-07;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item10
+						{
+							dataType="Marker";
+							position[]={4452.1167,2.9316914,2654.3188};
+							name="mkr_highway_011";
+							type="Empty";
+							angle=358.21948;
+							id=4852;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item11
+						{
+							dataType="Marker";
+							position[]={4426.4155,2.9315472,2654.281};
+							name="mkr_highway_012";
+							type="Empty";
+							angle=178.92232;
+							id=4853;
+							atlOffset=4.7683716e-07;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item12
+						{
+							dataType="Marker";
+							position[]={4511.6621,6.9699998,3148.3408};
+							name="mkr_highway_013";
+							type="Empty";
+							angle=10.814493;
+							id=4854;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item13
+						{
+							dataType="Marker";
+							position[]={4486.5713,6.9700003,3153.9084};
+							name="mkr_highway_014";
+							type="Empty";
+							angle=191.5173;
+							id=4855;
+							atlOffset=4.7683716e-07;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item14
+						{
+							dataType="Marker";
+							position[]={4747.668,6.4498658,3658.0779};
+							name="mkr_highway_015";
+							type="Empty";
+							angle=54.891705;
+							id=4856;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item15
+						{
+							dataType="Marker";
+							position[]={4733.5156,6.4105911,3679.5315};
+							name="mkr_highway_016";
+							type="Empty";
+							angle=235.59453;
+							id=4857;
+							atlOffset=4.7683716e-07;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item16
+						{
+							dataType="Marker";
+							position[]={5255.1147,6.6500001,3848.9619};
+							name="mkr_highway_017";
+							type="Empty";
+							angle=69.339928;
+							id=4858;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item17
+						{
+							dataType="Marker";
+							position[]={5246.7627,6.6500006,3873.2683};
+							name="mkr_highway_018";
+							type="Empty";
+							angle=250.04272;
+							id=4859;
+							atlOffset=4.7683716e-07;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item18
+						{
+							dataType="Marker";
+							position[]={5658.0332,3.9400001,4257.1221};
+							name="mkr_highway_019";
+							type="Empty";
+							angle=40.051498;
+							id=4860;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item19
+						{
+							dataType="Marker";
+							position[]={5638.8579,3.9400005,4274.2354};
+							name="mkr_highway_020";
+							type="Empty";
+							angle=220.75432;
+							id=4861;
+							atlOffset=4.7683716e-07;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item20
+						{
+							dataType="Marker";
+							position[]={5945.7388,12.677663,4853.0112};
+							name="mkr_highway_021";
+							type="Empty";
+							angle=7.5365491;
+							id=4862;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item21
+						{
+							dataType="Marker";
+							position[]={5920.3706,12.680535,4857.1348};
+							name="mkr_highway_022";
+							type="Empty";
+							angle=188.23936;
+							id=4863;
+							atlOffset=9.5367432e-07;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item22
+						{
+							dataType="Marker";
+							position[]={5852.9824,12.93,5351.0967};
+							name="mkr_highway_023";
+							type="Empty";
+							angle=331.642;
+							id=4864;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item23
+						{
+							dataType="Marker";
+							position[]={5830.0137,12.930001,5339.564};
+							name="mkr_highway_024";
+							type="Empty";
+							angle=152.3448;
+							id=4865;
+							atlOffset=9.5367432e-07;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item24
+						{
+							dataType="Marker";
+							position[]={5363.2573,-0.6550256,5711.8989};
+							name="mkr_highway_025";
+							type="Empty";
+							angle=293.42377;
+							id=4866;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item25
+						{
+							dataType="Marker";
+							position[]={5352.3467,0.56888723,5688.6284};
+							name="mkr_highway_026";
+							type="Empty";
+							angle=114.12656;
+							id=4867;
+							atlOffset=5.9604645e-07;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item26
+						{
+							dataType="Marker";
+							position[]={5065.6104,9.8344193,5835.895};
+							name="mkr_highway_027";
+							type="Empty";
+							angle=294.33191;
+							id=4868;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item27
+						{
+							dataType="Marker";
+							position[]={5059.7856,9.8346252,5823.0615};
+							name="mkr_highway_028";
+							type="Empty";
+							angle=115.03472;
+							id=4869;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item28
+						{
+							dataType="Marker";
+							position[]={4720.0723,9.8900003,5996.5288};
+							name="mkr_highway_029";
+							type="Empty";
+							angle=294.65585;
+							id=4870;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item29
+						{
+							dataType="Marker";
+							position[]={4712.0527,9.8900003,5981.1382};
+							name="mkr_highway_030";
+							type="Empty";
+							angle=115.35865;
+							id=4871;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item30
+						{
+							dataType="Marker";
+							position[]={4253.2583,9.8900003,6156.9253};
+							name="mkr_highway_031";
+							type="Empty";
+							angle=277.55457;
+							id=4872;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item31
+						{
+							dataType="Marker";
+							position[]={4250.1191,9.8900003,6139.8569};
+							name="mkr_highway_032";
+							type="Empty";
+							angle=98.257324;
+							id=4873;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item32
+						{
+							dataType="Marker";
+							position[]={3728.5195,18.479794,6377.1333};
+							name="mkr_highway_033";
+							type="Empty";
+							angle=294.65585;
+							id=4874;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item33
+						{
+							dataType="Marker";
+							position[]={3720.5,18.526243,6361.7427};
+							name="mkr_highway_034";
+							type="Empty";
+							angle=115.35863;
+							id=4875;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item34
+						{
+							dataType="Marker";
+							position[]={3201.1455,23.394051,6604.791};
+							name="mkr_highway_035";
+							type="Empty";
+							angle=280.95486;
+							id=4876;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item35
+						{
+							dataType="Marker";
+							position[]={3196.9995,23.40691,6587.939};
+							name="mkr_highway_036";
+							type="Empty";
+							angle=101.65765;
+							id=4877;
+							atlOffset=-1.9073486e-06;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item36
+						{
+							dataType="Marker";
+							position[]={2751.137,24.190001,6602.0654};
+							name="mkr_highway_037";
+							type="Empty";
+							angle=262.44238;
+							id=4878;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item37
+						{
+							dataType="Marker";
+							position[]={2752.5562,24.190001,6588.3003};
+							name="mkr_highway_038";
+							type="Empty";
+							angle=83.145164;
+							id=4879;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item38
+						{
+							dataType="Marker";
+							position[]={2277.6514,25.83293,6801.1802};
+							name="mkr_highway_039";
+							type="Empty";
+							angle=294.65585;
+							id=4880;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item39
+						{
+							dataType="Marker";
+							position[]={2270.5859,25.828989,6788.8203};
+							name="mkr_highway_040";
+							type="Empty";
+							angle=115.35863;
+							id=4881;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item40
+						{
+							dataType="Marker";
+							position[]={1840.8507,27.567234,7001.3232};
+							name="mkr_highway_041";
+							type="Empty";
+							angle=289.19025;
+							id=4882;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item41
+						{
+							dataType="Marker";
+							position[]={1834.9946,27.569544,6988.3467};
+							name="mkr_highway_042";
+							type="Empty";
+							angle=109.89301;
+							id=4883;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item42
+						{
+							dataType="Marker";
+							position[]={1356.3577,28.703953,7167.2876};
+							name="mkr_highway_043";
+							type="Empty";
+							angle=289.0798;
+							id=4884;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item43
+						{
+							dataType="Marker";
+							position[]={1350.5266,28.709999,7154.2998};
+							name="mkr_highway_044";
+							type="Empty";
+							angle=109.78255;
+							id=4885;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item44
+						{
+							dataType="Marker";
+							position[]={912.99579,31.200001,7320.7676};
+							name="mkr_highway_045";
+							type="Empty";
+							angle=288.93417;
+							id=4886;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item45
+						{
+							dataType="Marker";
+							position[]={907.19781,31.200001,7307.7651};
+							name="mkr_highway_046";
+							type="Empty";
+							angle=109.63693;
+							id=4887;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item46
+						{
+							dataType="Marker";
+							position[]={581.92535,37.455074,7566.8159};
+							name="mkr_highway_047";
+							type="Empty";
+							angle=313.1391;
+							id=4888;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item47
+						{
+							dataType="Marker";
+							position[]={571.30597,37.429523,7557.3335};
+							name="mkr_highway_048";
+							type="Empty";
+							angle=133.84187;
+							id=4889;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item48
+						{
+							dataType="Marker";
+							position[]={269.02335,40.935745,7816.7715};
+							name="mkr_highway_049";
+							type="Empty";
+							angle=288.77667;
+							id=4890;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item49
+						{
+							dataType="Marker";
+							position[]={263.26111,40.948494,7803.7529};
+							name="mkr_highway_050";
+							type="Empty";
+							angle=109.47944;
+							id=4891;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item50
+						{
+							dataType="Marker";
+							position[]={6248.1211,8.1800003,1051.1439};
+							name="mkr_highway_051";
+							type="Empty";
+							angle=90.578712;
+							id=4892;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item51
+						{
+							dataType="Marker";
+							position[]={6248.8262,8.1822309,1076.8357};
+							name="mkr_highway_052";
+							type="Empty";
+							angle=269.87595;
+							id=4893;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item52
+						{
+							dataType="Marker";
+							position[]={6743.9922,5.3060522,889.54047};
+							name="mkr_highway_053";
+							type="Empty";
+							angle=142.28925;
+							id=4894;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item53
+						{
+							dataType="Marker";
+							position[]={6764.5942,5.2946439,904.90656};
+							name="mkr_highway_054";
+							type="Empty";
+							angle=321.58649;
+							id=4895;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item54
+						{
+							dataType="Marker";
+							position[]={7156.314,4.9405246,461.49307};
+							name="mkr_highway_055";
+							type="Empty";
+							angle=90.578712;
+							id=4896;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item55
+						{
+							dataType="Marker";
+							position[]={7157.019,4.9133935,487.18484};
+							name="mkr_highway_056";
+							type="Empty";
+							angle=269.87595;
+							id=4897;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item56
+						{
+							dataType="Marker";
+							position[]={7385.5181,6.7712502,857.19879};
+							name="mkr_highway_057";
+							type="Empty";
+							angle=170.55649;
+							id=4898;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item57
+						{
+							dataType="Marker";
+							position[]={7410.9404,6.7674732,860.97565};
+							name="mkr_highway_058";
+							type="Empty";
+							angle=349.85373;
+							id=4899;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item58
+						{
+							dataType="Marker";
+							position[]={7922.002,10.103279,1054.3893};
+							name="mkr_highway_059";
+							type="Empty";
+							angle=90.578712;
+							id=4900;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item59
+						{
+							dataType="Marker";
+							position[]={7924.5342,10.106677,1075.7188};
+							name="mkr_highway_060";
+							type="Empty";
+							angle=269.87595;
+							id=4901;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item60
+						{
+							dataType="Marker";
+							position[]={8475.7422,9.5270853,885.55359};
+							name="mkr_highway_061";
+							type="Empty";
+							angle=114.53022;
+							id=4902;
+							atlOffset=9.5367432e-07;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item61
+						{
+							dataType="Marker";
+							position[]={8483.3369,9.5249519,904.35291};
+							name="mkr_highway_062";
+							type="Empty";
+							angle=293.82745;
+							id=4903;
+							atlOffset=9.5367432e-07;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item62
+						{
+							dataType="Marker";
+							position[]={8969.083,5.1079369,822.2851};
+							name="mkr_highway_063";
+							type="Empty";
+							angle=65.098434;
+							id=4904;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item63
+						{
+							dataType="Marker";
+							position[]={8961.1875,5.1078591,837.74963};
+							name="mkr_highway_064";
+							type="Empty";
+							angle=244.39566;
+							id=4905;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item64
+						{
+							dataType="Marker";
+							position[]={9455.1914,6.2600002,1123.4333};
+							name="mkr_highway_065";
+							type="Empty";
+							angle=83.649399;
+							id=4906;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item65
+						{
+							dataType="Marker";
+							position[]={9452.626,6.2600002,1140.6062};
+							name="mkr_highway_066";
+							type="Empty";
+							angle=262.94666;
+							id=4907;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item66
+						{
+							dataType="Marker";
+							position[]={9936.5967,6.0993476,845.42114};
+							name="mkr_highway_067";
+							type="Empty";
+							angle=113.0075;
+							id=4908;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item67
+						{
+							dataType="Marker";
+							position[]={9943.1064,6.090364,863.13599};
+							name="mkr_highway_068";
+							type="Empty";
+							angle=292.30472;
+							id=4909;
+							atlOffset=4.7683716e-07;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item68
+						{
+							dataType="Marker";
+							position[]={10458.15,21.535164,883.38043};
+							name="mkr_highway_069";
+							type="Empty";
+							angle=90.549866;
+							id=4910;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item69
+						{
+							dataType="Marker";
+							position[]={10457.667,21.518597,901.82281};
+							name="mkr_highway_070";
+							type="Empty";
+							angle=269.84711;
+							id=4911;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item70
+						{
+							dataType="Marker";
+							position[]={4049.1858,6.6599998,2670.3652};
+							name="mkr_highway_071";
+							type="Empty";
+							angle=90.549866;
+							id=4912;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item71
+						{
+							dataType="Marker";
+							position[]={4048.7024,6.6599998,2688.8076};
+							name="mkr_highway_072";
+							type="Empty";
+							angle=269.84711;
+							id=4913;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item72
+						{
+							dataType="Marker";
+							position[]={3518.9004,8.7487822,2670.2319};
+							name="mkr_highway_073";
+							type="Empty";
+							angle=51.926109;
+							id=4914;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item73
+						{
+							dataType="Marker";
+							position[]={3507.2349,8.7283182,2684.3386};
+							name="mkr_highway_074";
+							type="Empty";
+							angle=231.22336;
+							id=4915;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item74
+						{
+							dataType="Marker";
+							position[]={3241.0322,10.786121,2359.8296};
+							name="mkr_highway_075";
+							type="Empty";
+							angle=32.904995;
+							id=4916;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item75
+						{
+							dataType="Marker";
+							position[]={3224.2322,10.766383,2369.291};
+							name="mkr_highway_076";
+							type="Empty";
+							angle=212.20224;
+							id=4917;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item76
+						{
+							dataType="Marker";
+							position[]={3048.3635,4.9638767,1933.0177};
+							name="mkr_highway_077";
+							type="Empty";
+							angle=2.9269073;
+							id=4918;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item77
+						{
+							dataType="Marker";
+							position[]={3029.0835,4.9631195,1932.8188};
+							name="mkr_highway_078";
+							type="Empty";
+							angle=182.22415;
+							id=4919;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item78
+						{
+							dataType="Marker";
+							position[]={3020.1858,5.2374339,1382.7014};
+							name="mkr_highway_079";
+							type="Empty";
+							angle=32.904995;
+							id=4920;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item79
+						{
+							dataType="Marker";
+							position[]={3003.3857,5.2334781,1392.1628};
+							name="mkr_highway_080";
+							type="Empty";
+							angle=212.20222;
+							id=4921;
+							atlOffset=4.7683716e-07;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item80
+						{
+							dataType="Marker";
+							position[]={2654.2014,5.3000002,1178.8987};
+							name="mkr_highway_081";
+							type="Empty";
+							angle=78.091431;
+							id=4922;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item81
+						{
+							dataType="Marker";
+							position[]={2649.0728,5.3000002,1197.4851};
+							name="mkr_highway_082";
+							type="Empty";
+							angle=257.38867;
+							id=4923;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item82
+						{
+							dataType="Marker";
+							position[]={2156.1836,8.0462933,1165.0457};
+							name="mkr_highway_083";
+							type="Empty";
+							angle=90.935471;
+							id=4924;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item83
+						{
+							dataType="Marker";
+							position[]={2155.3149,8.0065145,1184.3071};
+							name="mkr_highway_084";
+							type="Empty";
+							angle=270.2327;
+							id=4925;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item84
+						{
+							dataType="Marker";
+							position[]={1646.0028,4.4299998,1104.8373};
+							name="mkr_highway_085";
+							type="Empty";
+							angle=83.111969;
+							id=4926;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item85
+						{
+							dataType="Marker";
+							position[]={1642.5203,4.4299998,1123.8013};
+							name="mkr_highway_086";
+							type="Empty";
+							angle=262.40921;
+							id=4927;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item86
+						{
+							dataType="Marker";
+							position[]={1130.818,4.4299998,1310.0481};
+							name="mkr_highway_087";
+							type="Empty";
+							angle=121.36448;
+							id=4928;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item87
+						{
+							dataType="Marker";
+							position[]={1139.8243,4.4299998,1327.0964};
+							name="mkr_highway_088";
+							type="Empty";
+							angle=300.66171;
+							id=4929;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item88
+						{
+							dataType="Marker";
+							position[]={650.599,4.4299998,1409.7673};
+							name="mkr_highway_089";
+							type="Empty";
+							angle=90.406158;
+							id=4930;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item89
+						{
+							dataType="Marker";
+							position[]={649.55243,4.4299998,1429.02};
+							name="mkr_highway_090";
+							type="Empty";
+							angle=269.7034;
+							id=4931;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item90
+						{
+							dataType="Marker";
+							position[]={153.69904,4.4299998,1385.3976};
+							name="mkr_highway_091";
+							type="Empty";
+							angle=79.333534;
+							id=4932;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item91
+						{
+							dataType="Marker";
+							position[]={148.97441,4.4299998,1404.0908};
+							name="mkr_highway_092";
+							type="Empty";
+							angle=258.63077;
+							id=4933;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item92
+						{
+							dataType="Marker";
+							position[]={4835.5283,5.2520609,5705.4985};
+							name="mkr_highway_093";
+							type="Empty";
+							angle=32.904995;
+							id=4934;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item93
+						{
+							dataType="Marker";
+							position[]={4818.728,5.230195,5714.9595};
+							name="mkr_highway_094";
+							type="Empty";
+							angle=212.20222;
+							id=4935;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item94
+						{
+							dataType="Marker";
+							position[]={4871.814,4.1500001,5400.6709};
+							name="mkr_highway_095";
+							type="Empty";
+							angle=117.8489;
+							id=4936;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item95
+						{
+							dataType="Marker";
+							position[]={4879.7573,4.1500006,5418.2397};
+							name="mkr_highway_096";
+							type="Empty";
+							angle=297.14615;
+							id=4937;
+							atlOffset=4.7683716e-07;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item96
+						{
+							dataType="Marker";
+							position[]={5178.6196,4.1399999,5237.5884};
+							name="mkr_highway_097";
+							type="Empty";
+							angle=142.41496;
+							id=4938;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item97
+						{
+							dataType="Marker";
+							position[]={5193.1479,4.1400003,5250.2642};
+							name="mkr_highway_098";
+							type="Empty";
+							angle=321.71219;
+							id=4939;
+							atlOffset=4.7683716e-07;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item98
+						{
+							dataType="Marker";
+							position[]={5177.397,4.1399999,4909.8643};
+							name="mkr_highway_099";
+							type="Empty";
+							angle=46.269787;
+							id=4940;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item99
+						{
+							dataType="Marker";
+							position[]={5163.2388,4.1400003,4922.9521};
+							name="mkr_highway_100";
+							type="Empty";
+							angle=225.56702;
+							id=4941;
+							atlOffset=4.7683716e-07;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item100
+						{
+							dataType="Marker";
+							position[]={4852.3799,4.1399999,4671.8169};
+							name="mkr_highway_101";
+							type="Empty";
+							angle=56.23074;
+							id=4942;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item101
+						{
+							dataType="Marker";
+							position[]={4840.6987,4.1400003,4687.1567};
+							name="mkr_highway_102";
+							type="Empty";
+							angle=235.52797;
+							id=4943;
+							atlOffset=4.7683716e-07;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item102
+						{
+							dataType="Marker";
+							position[]={5446.7422,8.9776678,2669.4719};
+							name="mkr_highway_103";
+							type="Empty";
+							angle=91.561913;
+							id=4944;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item103
+						{
+							dataType="Marker";
+							position[]={5446.0835,8.9801903,2688.7417};
+							name="mkr_highway_104";
+							type="Empty";
+							angle=270.85913;
+							id=4945;
+							atlOffset=9.5367432e-07;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item104
+						{
+							dataType="Marker";
+							position[]={4749.6982,9.0524874,2668.5322};
+							name="mkr_highway_105";
+							type="Empty";
+							angle=91.561905;
+							id=4946;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+						class Item105
+						{
+							dataType="Marker";
+							position[]={4749.0396,8.9799299,2687.802};
+							name="mkr_highway_106";
+							type="Empty";
+							angle=270.8591;
+							id=4947;
+							atlOffset=1.9073486e-06;
+							class CustomAttributes
+							{
+								class Attribute0
+								{
+									property="markerblink";
+									expression="if ((_value # 0 isNotEqualTo 0) || (_value # 1 isNotEqualTo 0)) then {[_this, _value # 0, _value # 1] spawn BIS_fnc_blinkMarker};";
+									class Value
+									{
+										class data
+										{
+											singleType="ARRAY";
+											class value
+											{
+												items=3;
+												class Item0
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item1
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+												class Item2
+												{
+													class data
+													{
+														singleType="SCALAR";
+														value=0;
+													};
+												};
+											};
+										};
+									};
+								};
+								class Attribute1
+								{
+									property="ENH_markerShape";
+									expression="if (_value != 'NONE' && isServer) then {_this setMarkerShape _value}";
+									class Value
+									{
+										class data
+										{
+											singleType="STRING";
+											value="NONE";
+										};
+									};
+								};
+								nAttributes=2;
+							};
+						};
+					};
+					id=4841;
+					atlOffset=0.37665653;
+				};
 			};
 			id=4725;
-			atlOffset=0.30991983;
+			atlOffset=0.28524637;
 		};
 		class Item16
 		{
