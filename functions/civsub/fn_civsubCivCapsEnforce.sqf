@@ -57,8 +57,7 @@ private _keysEvictable = _keys select {
 // Enable by setting civsub_v1_civ_recycleDistance_m > 0 (recommended start: 1100).
 private _recycleDist = missionNamespace getVariable ["civsub_v1_civ_recycleDistance_m", 0];
 if (!(_recycleDist isEqualType 0)) then { _recycleDist = 0; };
-private _hasEvictable = (count _keysEvictable) > 0;
-if (_recycleDist > 0 && { _hasEvictable }) then
+if (_recycleDist > 0 && { (count _keysEvictable) > 0 }) then
 {
     private _players = allPlayers;
     if ((count _players) > 0) then
@@ -100,6 +99,7 @@ if (_recycleDist > 0 && { _hasEvictable }) then
 
 // Global cap
 private _isGlobalOverCap = (count _keys) > _capGE;
+private _hasEvictable = (count _keysEvictable) > 0;
 if (_isGlobalOverCap && { _hasEvictable }) then
 {
     // sort by spawnTs ascending

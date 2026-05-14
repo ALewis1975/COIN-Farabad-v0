@@ -26,6 +26,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | 5 | Whitespace check | `git --no-pager diff --check` | PASS | No whitespace errors. |
 | 6 | Runtime smoke: CIVSUB civilian cap enforcement | Local MP or dedicated-like Arma 3 session with CIVSUB cap pressure | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
 | 7 | Dedicated/JIP validation | Dedicated server with at least one JIP client; verify server-owned despawn queue remains authoritative | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+| 8 | Review follow-up validation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubCivCapsEnforce.sqf && git --no-pager diff --check` | PASS | Moved the evictable-count boolean next to the global cap branch to keep the guard local to its use. |
 
 ---
 
