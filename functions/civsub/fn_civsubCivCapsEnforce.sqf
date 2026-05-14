@@ -16,6 +16,7 @@ params [
     ["_capGE", 0, [0]],
     ["_capDE", 0, [0]]
 ];
+if !(_active isEqualType []) exitWith {false};
 
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _keysFn = compile "params ['_m']; keys _m";
@@ -36,7 +37,7 @@ private _keys = [_reg] call _keysFn;
 
 // Only evict non-protected civilians (detained/captive/pinned civilians must persist)
 private _keysEvictable = _keys select {
-    private _row = _reg get _x;
+    private _row = [_reg, _x, createHashMap] call _hg;
     if !(_row isEqualType createHashMap) exitWith {false};
     private _u = [_row, "unit", objNull] call _hg;
     if (isNull _u) exitWith {false};
@@ -56,7 +57,7 @@ if (_recycleDist > 0 && { (count _keysEvictable) > 0 }) then
         private _cands = [];
         {
             private _k = _x;
-            private _row = _reg get _k;
+            private _row = [_reg, _k, createHashMap] call _hg;
             if !(_row isEqualType createHashMap) then { continue; };
             private _u = [_row, "unit", objNull] call _hg;
             if (isNull _u || { !alive _u }) then { continue; };
@@ -93,7 +94,7 @@ if ((count _keys) > _capGE && { (count _keysEvictable) > 0 }) then
 {
     // sort by spawnTs ascending
     private _sorted = _keysEvictable apply {
-        private _row = _reg get _x;
+        private _row = [_reg, _x, createHashMap] call _hg;
         private _ts = 0;
         if (_row isEqualType createHashMap) then { _ts = [_row, "spawnTs", 0] call _hg; };
         [_ts, _x]
@@ -112,7 +113,7 @@ if ((count _keys) > _capGE && { (count _keysEvictable) > 0 }) then
 // Per-district cap
 private _byD = createHashMap;
 {
-    private _row = _reg get _x;
+    private _row = [_reg, _x, createHashMap] call _hg;
     if (_row isEqualType createHashMap) then {
         private _did = [_row, "districtId", ""] call _hg;
         if !(_did isEqualTo "") then {
@@ -125,7 +126,7 @@ private _byD = createHashMap;
 
 {
     private _did = _x;
-    private _arr = _byD get _did;
+    private _arr = [_byD, _did, []] call _hg;
     private _capDDefault = [_capByD, _did, _capDE] call _hg;
     private _capDThis = [_ovMap, _did, _capDDefault] call _hg;
     if !(_capDThis isEqualType 0) then { _capDThis = _capDE; };
@@ -134,7 +135,7 @@ private _byD = createHashMap;
     if ((count _arr) > _capDThis) then {
         // sort by spawnTs
         private _sorted = _arr apply {
-            private _row = _reg get _x;
+            private _row = [_reg, _x, createHashMap] call _hg;
             private _ts = 0;
             if (_row isEqualType createHashMap) then { _ts = [_row, "spawnTs", 0] call _hg; };
             [_ts, _x]
