@@ -477,10 +477,10 @@ if (_allowMoving) then
                     _candidates pushBack _road;
                 };
             };
-        }; // while road candidates remain
+        }; // end road candidate search loop
 
-        // All-or-nothing fallback: prefer forward highway-aligned targets, but
-        // accept any distant road if no forward candidates are available.
+        // All-or-nothing fallback: prefer highway-direction-aligned targets, but
+        // accept any distant road if no aligned candidates are available.
         if ((count _candidates) == 0 && { (count _fallbackCandidates) > 0 }) then
         {
             _candidates = _fallbackCandidates;

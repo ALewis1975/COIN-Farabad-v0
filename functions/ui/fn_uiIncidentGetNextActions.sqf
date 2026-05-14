@@ -18,7 +18,7 @@ params [
 ];
 
 private _lines = [];
-// sqflint-compatible trim wrapper reused throughout this helper.
+// sqflint-compatible trim wrapper for local string normalization.
 private _trimFn = compile "params ['_s']; trim _s";
 
 private _roleCatNorm = toUpper ([_roleCat] call _trimFn);

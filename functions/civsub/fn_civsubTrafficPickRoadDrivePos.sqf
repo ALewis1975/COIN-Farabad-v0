@@ -95,7 +95,7 @@ for "_i" from 1 to _tries do
     private _r2Pos = getPosATL _r2;
     _r2Pos set [2, 0];
 
-    // Highway side marker direction is authoritative when present; otherwise
+    // Highway side marker direction takes precedence when present; otherwise
     // use the road-to-road bearing toward the selected connected segment.
     private _dir = if (_hwyDir >= 0) then { _hwyDir } else { _r getDir _r2 };
 
