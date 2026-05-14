@@ -13,7 +13,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-05-14 — AIR/TOWER map fallback layout fix (Mode A)
 
-**Branch/Commit:** copilot/fix-air-tower-screen-issues @ 0a05be3b96db1b6d17f1f6f86d012ea0dcd7ce93 (post-fix working tree validated in-session)
+**Branch/Commit:** copilot/fix-air-tower-screen-issues @ 7d8a08de17c4f052dc2d4d56083746862aafe5d0 (post-fix working tree validated in-session)
 
 **Scenario:** Fixed AIR/TOWER AIRFIELD_OPS full-console layout so the CT_MAP control reserves a bottom visual pane when Region C is not active, preventing the map from rendering over the right-side detail card.
 
