@@ -422,12 +422,17 @@ private _cavClassPool = [
 
 // Troop A — offset north-west of CAV HQ
 private _cavHQPos = getMarkerPos "arc_m_base_1_73_CAV_hq";
-// getMarkerPos may return Position2D [x,y] or Position3D [x,0,z]
-private _cavE = _cavHQPos select 0;
-private _cavN = if (count _cavHQPos > 2) then { _cavHQPos select 2 } else { _cavHQPos select 1 };
+if ((count _cavHQPos) < 2) then {
+    diag_log "[ARC][WARN] ARC_fnc_airbaseOrbatPopulate: marker 'arc_m_base_1_73_CAV_hq' returned insufficient coordinates — CAV troops skipped";
+} else {
+    private _cavE = _cavHQPos select 0;
+    private _cavN = _cavHQPos select 1;
 
-if (!(_cavHQPos isEqualTo [0,0,0])) then {
-    private _troopAPos = [_cavE - 20, 0, _cavN + 15];
+    if ((_cavE == 0) && { _cavN == 0 }) exitWith {
+        diag_log "[ARC][WARN] ARC_fnc_airbaseOrbatPopulate: marker 'arc_m_base_1_73_CAV_hq' absent — CAV troops skipped";
+    };
+
+    private _troopAPos = [_cavE - 20, _cavN + 15, 0];
     private _troopAUnits = [
         _troopAPos,
         _cavClassPool,
@@ -440,11 +445,9 @@ if (!(_cavHQPos isEqualTo [0,0,0])) then {
         diag_log format ["[ARC][INFO] ARC_fnc_airbaseOrbatPopulate: 1-73 CAV Troop A spawned (%1 units)", count _troopAUnits];
     };
     _allUnits append _troopAUnits;
-};
 
-// Troop B — offset south-east of CAV HQ
-if (!(_cavHQPos isEqualTo [0,0,0])) then {
-    private _troopBPos = [_cavE + 20, 0, _cavN - 15];
+    // Troop B — offset south-east of CAV HQ
+    private _troopBPos = [_cavE + 20, _cavN - 15, 0];
     private _troopBUnits = [
         _troopBPos,
         _cavClassPool,
