@@ -62,7 +62,7 @@ if (isNil { missionNamespace getVariable "ARC_civsub_fnc_findPosOffRoad" }) then
         if (!(_seed isEqualType []) || { (count _seed) < 2 }) exitWith { [0,0,0] };
 
         private _p0 = _seed;
-        if ((count _p0) == 2) then { _p0 = [_p0#0,_p0#1,0]; };
+        if ((count _p0) == 2) then { _p0 = [_p0 select 0, _p0 select 1, 0]; };
 
         _minOff = (_minOff max 0.5) min 6;
         _maxOff = (_maxOff max (_minOff + 0.5)) min 30;
@@ -96,6 +96,8 @@ if (isNil { missionNamespace getVariable "ARC_civsub_fnc_findPosOffRoad" }) then
     false];
 };
 
+private _keysFn = compile "params ['_m']; keys _m";
+
 // Ensure persistence keys exist / campaign id seeded.
 private _persist = missionNamespace getVariable ["civsub_v1_persist", true];
 if (!(_persist isEqualType true)) then { _persist = true; };
@@ -117,17 +119,71 @@ if (!_ok) then
     missionNamespace setVariable ["civsub_v1_crimedb", createHashMap, true];
     missionNamespace setVariable ["civsub_v1_version", missionNamespace getVariable ["civsub_v1_version", 1], true];
 
-    diag_log format ["[CIVSUB][INIT] Fresh state created (districts=%1)", count (keys _districts)];
+    diag_log format ["[CIVSUB][INIT] Fresh state created (districts=%1)", count ([_districts] call _keysFn)];
 }
 else
 {
     private _d = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
-    diag_log format ["[CIVSUB][INIT] State loaded (districts=%1)", count (keys _d)];
+    diag_log format ["[CIVSUB][INIT] State loaded (districts=%1)", count ([_d] call _keysFn)];
 };
 
 // Phase 3: identity + crime DB init (self-contained, no gameplay integration yet)
 [] call ARC_fnc_civsubIdentityInit;
 [] call ARC_fnc_civsubCrimeDbInit;
+
+// Mission-wide civilian hookup: connect existing and newly spawned civilian AI
+// to CIVSUB identity, interaction, and registry state from the server only.
+{
+    if (!isNull _x && { alive _x } && { !isPlayer _x } && { side _x isEqualTo civilian }) then
+    {
+        [_x, "", "INIT_SCAN"] call ARC_fnc_civsubCivConnect;
+    };
+} forEach allUnits;
+
+if (isNil { missionNamespace getVariable "civsub_v1_eh_entityCreated" }) then
+{
+    private _createdEhId = addMissionEventHandler ["EntityCreated", {
+        params ["_entity"];
+        if (!isServer) exitWith {};
+        if (isNull _entity) exitWith {};
+        if !(_entity isKindOf "CAManBase") exitWith {};
+
+        [_entity] spawn
+        {
+            params [["_unit", objNull, [objNull]]];
+            uiSleep 0.1;
+            if (!isServer) exitWith {};
+            if (isNull _unit) exitWith {};
+            if !(alive _unit) exitWith {};
+            if (isPlayer _unit) exitWith {};
+            if !(side _unit isEqualTo civilian) exitWith {};
+            [_unit, "", "ENTITY_CREATED"] call ARC_fnc_civsubCivConnect;
+        };
+    }];
+
+    missionNamespace setVariable ["civsub_v1_eh_entityCreated", _createdEhId, true];
+    diag_log format ["[CIVSUB][INIT] EntityCreated civilian hookup EH installed (%1)", _createdEhId];
+};
+
+if (!(missionNamespace getVariable ["civsub_v1_autoConnectThreadRunning", false])) then
+{
+    missionNamespace setVariable ["civsub_v1_autoConnectThreadRunning", true, true];
+    [] spawn
+    {
+        while { isServer && { missionNamespace getVariable ["civsub_v1_enabled", false] } } do
+        {
+            uiSleep 30;
+            {
+                if (!isNull _x && { alive _x } && { !isPlayer _x } && { side _x isEqualTo civilian } && { !(_x getVariable ["civsub_v1_isCiv", false]) }) then
+                {
+                    [_x, "", "PERIODIC_SCAN"] call ARC_fnc_civsubCivConnect;
+                };
+            } forEach allUnits;
+        };
+
+        missionNamespace setVariable ["civsub_v1_autoConnectThreadRunning", false, true];
+    };
+};
 
 // Phase 4 defaults + sampler init (off by default)
 if (isNil { missionNamespace getVariable "civsub_v1_civs_enabled" }) then { missionNamespace setVariable ["civsub_v1_civs_enabled", false, true]; };
@@ -167,6 +223,7 @@ if ((missionNamespace getVariable ["civsub_v1_harm_enabled", true]) && { mission
         [] spawn
         {
             private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+            private _keysThreadFn = compile "params ['_m']; keys _m";
             while { isServer && { missionNamespace getVariable ["civsub_v1_enabled", false] } && { missionNamespace getVariable ["civsub_v1_harm_enabled", true] } && { missionNamespace getVariable ["civsub_v1_wia_enabled", true] } } do
             {
                 uiSleep 2;
@@ -189,7 +246,7 @@ if ((missionNamespace getVariable ["civsub_v1_harm_enabled", true]) && { mission
                         _u setVariable ["civsub_v1_wia_counted", true, true];
                         [_u] call ARC_fnc_civsubOnCivWia;
                     };
-                } forEach (keys _reg);
+                } forEach ([_reg] call _keysThreadFn);
             };
 
             missionNamespace setVariable ["civsub_v1_wiaThreadRunning", false, true];

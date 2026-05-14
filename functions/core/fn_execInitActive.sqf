@@ -204,6 +204,7 @@ if (_p isEqualTo []) then { _p = +_center; _p resize 3; };
             _obj setBehaviour "CARELESS";
             _obj setCombatMode "BLUE";
             _obj setCaptive true;
+            [_obj, "", "INCIDENT_CIV_MEET"] call ARC_fnc_civsubCivConnect;
             // Protect liaison until players arrive (prevents random early failures).
             _obj allowDamage (!_failOnKilled);
         }

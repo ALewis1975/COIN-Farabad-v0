@@ -87,6 +87,7 @@ _unit setVariable ["ARC_civloc_role",    "SITE_NPC", true];
 _unit setVariable ["civsub_v1_isCiv",    true,       true];
 _unit setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];
 _unit setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hg, true];
+[_unit, "", "CIVLOC"] call ARC_fnc_civsubCivConnect;
 
 // Idle wander: move to a random position near the site every 30–60 s
 [_unit, _sitePos] spawn {
