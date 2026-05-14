@@ -1,3 +1,6 @@
+/* Client wrapper: request server clearance decision (approve/deny). */
+if (!hasInterface) exitWith {false};
+
 params [
     ["_requestId", "", [""]],
     ["_approve", true, [true]],
