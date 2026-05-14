@@ -237,10 +237,9 @@ if !(isNull _grp) then {
 
 missionNamespace setVariable ["civsub_v1_civ_lastSpawnStage", "identity", true];
 
-[_u, _districtId] call ARC_fnc_civsubCivAssignIdentity;
 _u setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];
 _u setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hg, true];
-[_u, _districtId] call ARC_fnc_civsubCivRegisterSpawn;
+[_u, _districtId, "CIVSUB_SAMPLER"] call ARC_fnc_civsubCivConnect;
 
 missionNamespace setVariable ["civsub_v1_civ_lastSpawnFail", "", true];
 missionNamespace setVariable ["civsub_v1_civ_lastSpawnStage", "ok", true];

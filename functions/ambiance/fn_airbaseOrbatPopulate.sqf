@@ -71,9 +71,9 @@ private _fnSpawnUnitsAtMarker = {
         []
     };
 
-    // getMarkerPos may return Position2D [x,y] or Position3D [x,0,z]
+    // getMarkerPos returns map coordinates [x,y,z]; keep y as northing.
     private _east  = _pos select 0;
-    private _north = if (count _pos > 2) then { _pos select 2 } else { _pos select 1 };
+    private _north = _pos select 1;
 
     private _units = [];
     private _nCls  = count _classArray;
@@ -89,8 +89,8 @@ private _fnSpawnUnitsAtMarker = {
         private _angle   = _i * (360 / _count);
         private _dist    = linearConversion [0, _count - 1, _i, 2, _spreadRadius, false];
         private _offset  = [_east  + (_dist * sin _angle),
-                            0,
-                            _north + (_dist * cos _angle)];
+                            _north + (_dist * cos _angle),
+                            0];
 
         // Prefer surface-snapped empty position, fall back to raw offset
         private _spawnPos = [_offset, 1, 3, 1, 0, 0.5, 0] call BIS_fnc_findSafePos;
@@ -143,9 +143,9 @@ private _fnSpawnUnitsAtPos = {
     if (_nCls == 0) exitWith { [] };
     if (_pos isEqualTo [0,0,0]) exitWith { [] };
 
-    // _pos is Position3D [east, alt, north]; extract horizontal components
+    // _pos is Position2D/3D [x,y,z]; extract horizontal components
     private _east  = _pos select 0;
-    private _north = if (count _pos > 2) then { _pos select 2 } else { _pos select 1 };
+    private _north = _pos select 1;
 
     private _grp = createGroup [west, true];
     if (!(_groupName isEqualTo "")) then { _grp setGroupIdGlobal [_groupName]; };
@@ -156,8 +156,8 @@ private _fnSpawnUnitsAtPos = {
         private _angle   = _i * (360 / _count);
         private _dist    = linearConversion [0, _count - 1, _i, 2, _spreadRadius, false];
         private _offset  = [_east  + (_dist * sin _angle),
-                            0,
-                            _north + (_dist * cos _angle)];
+                            _north + (_dist * cos _angle),
+                            0];
 
         private _spawnPos = [_offset, 1, 3, 1, 0, 0.5, 0] call BIS_fnc_findSafePos;
         if (_spawnPos isEqualTo [] || { _spawnPos isEqualTo [0,0,0] }) then {
@@ -210,14 +210,14 @@ private _fnSpawnVehicleAtMarker = {
         [objNull, []]
     };
 
-    // getMarkerPos may return Position2D [x,y] or Position3D [x,0,z]
+    // getMarkerPos returns map coordinates [x,y,z]; keep y as northing.
     private _east  = _pos select 0;
-    private _north = if (count _pos > 2) then { _pos select 2 } else { _pos select 1 };
+    private _north = _pos select 1;
 
     private _spawnPos = [
         _east + (_offsetVec select 0),
-        0,
-        _north + (_offsetVec select 1)
+        _north + (_offsetVec select 1),
+        0
     ];
 
     private _veh = createVehicle [_vehClass, _spawnPos, [], 0, "NONE"];

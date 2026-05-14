@@ -11,25 +11,23 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
-## 2026-05-14 — Helicopter runway departure climb fix (Mode A)
+## 2026-05-14 — CIVSUB civilian auto-hookup and airbase BLUFOR spawn fix (Mode A)
 
-**Branch/Commit:** copilot/fix-helicopter-takeoff-issue @ b2500af
+**Branch/Commit:** copilot/ensure-civs-connected-to-civsub @ be11faf (post-fix working tree validated in-session)
 
-**Scenario:** Adjusted rotary-wing airbase departures so post-taxi climb guidance uses the outbound runway axis and explicit upward velocity instead of model-space nudges that could keep helicopters low and drifting right. Follow-up review feedback kept the stalled-departure kick target at the nearby outbound marker, clarified helper naming, added helper guards, and reused configurable climb kick values.
+**Scenario:** Added a server-side CIVSUB civilian hookup helper plus init/event/periodic scan coverage for spawned civilian AI, routed key civilian spawn paths through it, and fixed AIRBASE ORBAT spawn coordinates so marker Y is used as map northing instead of altitude/Z.
 
 | # | Check | Command / Step | Result | Notes |
 |---|-------|----------------|--------|-------|
-| 1 | Initial changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf functions/ambiance/fn_airbaseInit.sqf` | PASS | No known parser-compat patterns before editing. |
-| 2 | Initial changed-file sqflint | `sqflint -e w functions/ambiance/fn_airbasePlaneDepart.sqf functions/ambiance/fn_airbaseInit.sqf` | BLOCKED | `sqflint` was not installed in the sandbox at initial baseline. |
-| 3 | Initial AIRBASE planning-mode checks | `tests/static/airbase_planning_mode_checks.sh` | PASS | Existing planning-mode static checks passed before editing. |
-| 4 | Initial Air/Tower queue lifecycle checks | `tests/static/airbase_queue_lifecycle_contract_checks.sh` | BLOCKED | Direct execution was not permitted; rerun with `bash` after changes. |
-| 5 | Changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf` | PASS | No known parser-compat patterns in the changed SQF file. |
-| 6 | AIRBASE planning-mode checks | `bash tests/static/airbase_planning_mode_checks.sh` | PASS | Runtime gate and airbase entrypoint registration checks passed. |
-| 7 | Air/Tower queue lifecycle checks | `bash tests/static/airbase_queue_lifecycle_contract_checks.sh` | PASS | Runway lock, queue lifecycle, public snapshot, and CT_MAP static contracts passed. |
-| 8 | Changed-file sqflint | `python3 -m pip install --user sqflint && /home/runner/.local/bin/sqflint -e w functions/ambiance/fn_airbasePlaneDepart.sqf` | PASS | `sqflint 0.3.2` installed locally and passed the changed SQF file. |
-| 9 | Whitespace check | `git --no-pager diff --check` | PASS | No whitespace errors. |
-| 10 | Runtime smoke: helicopter outbound runway climb | Local MP/dedicated-like Arma 3 session; queue a rotary-wing departure after taxi and observe climb along `AEON_Right_270_Outbound` toward clear marker | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
-| 11 | Dedicated/JIP replication check | Dedicated server with at least one JIP client; verify airbase queue/departure state remains authoritative and replicated | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+| 1 | Baseline targeted compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubInitServer.sqf functions/civsub/fn_civsubCivRegisterSpawn.sqf functions/civsub/fn_civsubCivAssignIdentity.sqf functions/ambiance/fn_airbaseOrbatPopulate.sqf` | FAIL | Pre-existing direct `trim` in `fn_civsubCivRegisterSpawn.sqf`; fixed as part of touched-file compatibility. |
+| 2 | Changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict <9 changed SQF files>` | PASS | No known parser-compat patterns. |
+| 3 | Changed-file sqflint | `python3 -m pip install --user sqflint && for f in <9 changed SQF files>; do /home/runner/.local/bin/sqflint -e w "$f"; done` | PASS | Fixed touched pre-existing `keys`/`#` parser issues in `fn_civsubInitServer.sqf`; all changed SQF files lint clean. |
+| 4 | Whitespace check | `git --no-pager diff --check` | PASS | No whitespace errors. |
+| 5 | CIVSUB hookup static contract | `test -f functions/civsub/fn_civsubCivConnect.sqf && grep -q 'class civsubCivConnect' config/CfgFunctions.hpp && grep -q 'EntityCreated' functions/civsub/fn_civsubInitServer.sqf && grep -q 'PERIODIC_SCAN' functions/civsub/fn_civsubInitServer.sqf && grep -q 'ARC_fnc_civsubCivConnect' <explicit spawn-path files>` | PASS | Helper is registered; startup scan, EntityCreated, periodic scan, and explicit spawn-path calls are present. |
+| 6 | AIRBASE planning-mode checks | `bash tests/static/airbase_planning_mode_checks.sh` | PASS | Existing AIRBASE static gates/registration checks passed. |
+| 7 | Console conflict check | `bash scripts/dev/check_console_conflicts.sh` | FAIL | Pre-existing duplicate IDC failures (`78201`, `78202`, `78211`) unrelated to this change. |
+| 8 | Runtime smoke: spawned civilians and BLUFOR positions | Local MP/dedicated-like Arma 3 session; spawn CIVSUB sampler, CIVLOC, CIVTRAF, CIV_MEET/sitepop civilians; verify CIVSUB interactions/registry and AIRBASE BLUFOR map positions | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 9 | Dedicated/JIP replication check | Dedicated server with at least one JIP client; verify CIVSUB action JIP and registry replication for late clients | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
 
 ---
 
