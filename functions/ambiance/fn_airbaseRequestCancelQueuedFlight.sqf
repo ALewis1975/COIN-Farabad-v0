@@ -103,7 +103,12 @@ if (_qKind isEqualTo "ARR" && { _qDetail isEqualType "" && { !(_qDetail isEqualT
         private _meta = _rec param [7, []];
         if (_meta isEqualType []) then {
             private _modeIdx = -1;
-            { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo "mode" } && { (_x select 1) isEqualTo "RETURN" }) exitWith { _modeIdx = _forEachIndex; }; } forEach _meta;
+            {
+                if !(_x isEqualType []) then { continue; };
+                if ((count _x) < 2) then { continue; };
+                if (!((_x select 0) isEqualTo "mode")) then { continue; };
+                if ((_x select 1) isEqualTo "RETURN") exitWith { _modeIdx = _forEachIndex; };
+            } forEach _meta;
             _isReturn = (_modeIdx >= 0);
         };
     };

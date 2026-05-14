@@ -1153,8 +1153,9 @@ if (_idxRecActive >= 0) then {
         ["airbase_v1_records", _recs2] call ARC_fnc_stateSet;
     };
 
-    if (!_ok && { _kind isEqualTo "ARR" } && { _detail isEqualType "" } && { !(_detail isEqualTo "INBOUND") }) then {
-        // Queue detail is "INBOUND" for random arrivals and the source assetId for RETURN arrivals.
+    private _inboundArrivalDetail = "INBOUND";
+    if (!_ok && { _kind isEqualTo "ARR" } && { _detail isEqualType "" } && { !(_detail isEqualTo _inboundArrivalDetail) }) then {
+        // Queue detail is the source assetId for RETURN arrivals; random arrivals use _inboundArrivalDetail.
         private _returnAssetIdx = -1;
         { if (([_x, "id", ""] call _fnHmGetLocal) isEqualTo _detail) exitWith { _returnAssetIdx = _forEachIndex; }; } forEach _assetsL;
         if (_returnAssetIdx >= 0) then {

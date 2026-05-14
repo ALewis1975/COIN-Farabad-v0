@@ -612,7 +612,8 @@ private _uiDecisionQueue = [];
     if (_callsign isEqualTo "") then { _callsign = _requestId; };
 
     private _ownerName = "";
-    private _decisionLane = [_meta, "decisionLane", [_meta, "lane", ""] call _metaValue] call _metaValue;
+    private _decisionLane = [_meta, "lane", ""] call _metaValue;
+    _decisionLane = [_meta, "decisionLane", _decisionLane] call _metaValue;
     if (!(_decisionLane isEqualType "")) then { _decisionLane = ""; };
     _decisionLane = toLower _decisionLane;
     {
