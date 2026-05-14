@@ -38,7 +38,9 @@ private _tabLayouts = [
     ["BOARDS",  false, "STRUCTURED_TEXT", false, 0,    0.50],
     ["INTEL",   false, "LIST",            false, 0,    0.47],
     ["OPS",     false, "FRAMES_3",        false, 0,    0.50],
-    ["AIR",     true,  "LIST",            true,  0.35, 0.47],
+    // AIR needs a deliberate bottom visual region for the CT_MAP pane so it
+    // does not share screen space with the selected-detail card.
+    ["AIR",     true,  "LIST",            true,  0.42, 0.47],
     ["HANDOFF", false, "STRUCTURED_TEXT", false, 0,    0.47],
     ["CMD",     false, "STRUCTURED_TEXT", false, 0,    0.50],
     ["HQ",      false, "LIST",            false, 0,    0.50],
@@ -82,8 +84,8 @@ private _trackedIdcs = [
     78060,78061,78062,78063,
     // nav + core panes
     78001,78015,78011,78016,
-    // Region C: Visual Panel
-    78140,
+    // AIR/TOWER dedicated panes + Region C visual panel
+    78130,78136,78137,78140,
     // S2 workflow controls
     78050,78051,78052,78053,78054,78055,
     // OPS frames
@@ -182,9 +184,14 @@ if (_useVisualPanel && { _visualPanelFrac > 0 }) then {
     };
 };
 
-// Store computed Region C position for painters (e.g. AIR map reposition)
+// Store computed layout positions for painters (e.g. AIR map reposition)
+uiNamespace setVariable ["ARC_console_contentX", _mainX];
+uiNamespace setVariable ["ARC_console_contentY", _contentY];
+uiNamespace setVariable ["ARC_console_contentW", _mainW + _detailsW + _gap];
+uiNamespace setVariable ["ARC_console_contentH", _contentH];
 uiNamespace setVariable ["ARC_console_regionCY", _regionCY];
 uiNamespace setVariable ["ARC_console_regionCH", _regionCH];
+uiNamespace setVariable ["ARC_console_layoutGap", _gap];
 
 // Frame + shell
 [78090, _fx, _fy, _fw, _fh] call _setPos;
