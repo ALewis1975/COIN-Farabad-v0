@@ -14,6 +14,8 @@ params [
     ["_flightId", "", [""]]
 ];
 
+private _trimFn = compile "params ['_s']; trim _s";
+
 if (!([_caller, "ARC_fnc_airbaseRequestPrioritizeFlight", "Airbase prioritize request rejected: sender verification failed.", "AIRBASE_PRIORITIZE_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 private _auth = [_caller, "PRIORITIZE"] call ARC_fnc_airbaseTowerAuthorize;
@@ -34,7 +36,7 @@ if (!_ok) exitWith {
 };
 
 if (!(_flightId isEqualType "")) then { _flightId = ""; };
-_flightId = trim _flightId;
+_flightId = [_flightId] call _trimFn;
 if (_flightId isEqualTo "") exitWith {false};
 
 private _queue = ["airbase_v1_queue", []] call ARC_fnc_stateGet;
@@ -61,7 +63,7 @@ _recs = _updated param [0, []];
 
 private _manualPriority = ["airbase_v1_manualPriority", []] call ARC_fnc_stateGet;
 if (!(_manualPriority isEqualType [])) then { _manualPriority = []; };
-_manualPriority = _manualPriority select { _x isEqualType "" && { _x isNotEqualTo _flightId } };
+_manualPriority = _manualPriority select { _x isEqualType "" && { !(_x isEqualTo _flightId) } };
 _manualPriority pushBack _flightId;
 ["airbase_v1_manualPriority", _manualPriority] call ARC_fnc_stateSet;
 

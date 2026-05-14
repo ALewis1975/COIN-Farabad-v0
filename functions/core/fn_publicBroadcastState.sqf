@@ -594,10 +594,10 @@ private _uiDecisionQueue = [];
     private _requestId = _x param [0, ""];
     private _requestType = toUpper (_x param [1, ""]);
     private _pilotName = _x param [2, ""];
-    private _requestedAt = _x param [3, -1];
+    private _requestedAt = _x param [6, -1];
     private _priority = _x param [4, 0];
     private _status = toUpper (_x param [5, ""]);
-    private _ownerName = _x param [6, ""];
+    private _ownerName = _x param [2, ""];
     private _meta = _x param [9, []];
     if !(_meta isEqualType []) then { _meta = []; };
 

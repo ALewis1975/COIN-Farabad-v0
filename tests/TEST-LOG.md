@@ -11,6 +11,27 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-14 — Air/Tower queue recovery and snapshot mapping fixes (Mode A)
+
+**Branch/Commit:** copilot/research-air-tower-system @ a8c3544 (post-fix working tree validated in-session)
+
+**Scenario:** Fixed AIR/TOWER public snapshot pending-clearance timestamp/owner mapping, added RETURN-arrival failure recovery so assets do not remain stuck in `RETURN_QUEUED`, and cleaned touched Air/Tower RPC files for sqflint compatibility.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline targeted compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_publicBroadcastState.sqf functions/ambiance/fn_airbaseTick.sqf functions/ambiance/fn_airbaseRequestPrioritizeFlight.sqf functions/ambiance/fn_airbaseRequestCancelQueuedFlight.sqf functions/ambiance/fn_airbaseRequestClearanceDecision.sqf functions/ambiance/fn_airbaseRunwayLockReserve.sqf functions/ambiance/fn_airbaseRunwayLockRelease.sqf` | FAIL | Pre-existing compat findings in Air/Tower RPC files: direct `trim`, `#` indexing, and `isNotEqualTo`. |
+| 2 | Changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_publicBroadcastState.sqf functions/ambiance/fn_airbaseTick.sqf functions/ambiance/fn_airbaseRequestPrioritizeFlight.sqf functions/ambiance/fn_airbaseRequestCancelQueuedFlight.sqf functions/ambiance/fn_airbaseRequestClearanceDecision.sqf` | PASS | No known parser-compat patterns remain in changed SQF files. |
+| 3 | Changed-file sqflint | `python3 -m pip install --user sqflint && for f in <5 changed SQF files>; do /home/runner/.local/bin/sqflint -e w "$f"; done` | PASS | `sqflint 0.3.2` passed one changed SQF file at a time. |
+| 4 | Whitespace check | `git --no-pager diff --check` | PASS | No whitespace errors. |
+| 5 | AIRBASE static contracts | `bash tests/static/airbase_planning_mode_checks.sh` | PASS | AIRBASE runtime gates and registration checks passed. |
+| 6 | State migration validation | `python3 scripts/dev/validate_state_migrations.py` | PASS | State migration validation passed (3 scenarios). |
+| 7 | Console conflict check | `bash scripts/dev/check_console_conflicts.sh` | FAIL | Pre-existing duplicate IDC failures (`78201`, `78202`, `78211`) unrelated to this Air/Tower queue fix. |
+| 8 | RemoteExec contract script | `scripts/dev/check_remoteexec_contract.sh` | BLOCKED | Script referenced by PR template is not present in this checkout. |
+| 9 | Runtime smoke: Air/Tower queue recovery and public snapshot paint | Local MP/dedicated-like Arma 3 session with RETURN arrival failure and pending clearance row age/owner display | BLOCKED | Arma 3 runtime unavailable in this sandbox; requires local MP/dedicated-like validation. |
+| 10 | Dedicated/JIP replication check | Dedicated server with at least one JIP client; verify `ARC_pub_airbaseUiSnapshot` freshness and queue recovery after failed RETURN arrival | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+
+---
+
 ## 2026-05-14 — AIRFIELD_OPS decision-board layout refactor (Mode A)
 
 **Branch/Commit:** copilot/refactor-airfield-ops-layout @ fa317a5 (post-review working tree validated in-session)
