@@ -67,7 +67,7 @@ private _shortText = {
     private _txt = _s;
     if (_txt isEqualTo "") exitWith { "" };
     if ((count _txt) > _maxLen) then {
-        _txt = (_txt select [0, _maxLen]) + "…";
+        _txt = (_txt select [0, _maxLen]) + "...";
     };
     _txt
 };

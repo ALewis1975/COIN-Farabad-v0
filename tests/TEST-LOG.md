@@ -26,6 +26,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | 5 | AIRBASE static contracts | `bash tests/static/airbase_planning_mode_checks.sh` | PASS | AIRBASE planning-mode static checks passed. |
 | 6 | AIRFIELD_OPS runtime UI smoke + screenshot | Open AIR/TOWER in Arma 3, validate no overlap with `ARC_console_layout_audit = true`, capture screenshot | BLOCKED | Arma 3 runtime and UI renderer are unavailable in this sandbox; requires local MP/dedicated-like client session. |
 | 7 | Post-review changed-file compat + sqflint | `python3 scripts/dev/sqflint_compat_scan.py --strict <4 changed sqf files> && ~/.local/bin/sqflint -e w <4 changed sqf files>` | PASS | Re-validated after review-feedback constants/comments updates. |
+| 8 | Marker-label fallback validation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleAirMapPaint.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleAirMapPaint.sqf` | PASS | Switched ellipsis glyph to `...` fallback and re-linted cleanly. |
 
 ---
 
