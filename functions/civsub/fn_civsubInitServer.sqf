@@ -140,29 +140,74 @@ else
     };
 } forEach allUnits;
 
-if (isNil { missionNamespace getVariable "civsub_v1_eh_entityCreated" }) then
+if ((isNil { missionNamespace getVariable "civsub_v1_eh_entityCreated" }) && { !(missionNamespace getVariable ["civsub_v1_eh_entityCreatedInstalling", false]) }) then
 {
+    missionNamespace setVariable ["civsub_v1_eh_entityCreatedInstalling", true, false];
     private _createdEhId = addMissionEventHandler ["EntityCreated", {
         params ["_entity"];
         if (!isServer) exitWith {};
         if (isNull _entity) exitWith {};
         if !(_entity isKindOf "CAManBase") exitWith {};
 
-        [_entity] spawn
-        {
-            params [["_unit", objNull, [objNull]]];
-            uiSleep 0.25;
-            if (!isServer) exitWith {};
-            if (isNull _unit) exitWith {};
-            if !(alive _unit) exitWith {};
-            if (isPlayer _unit) exitWith {};
-            if !(side _unit isEqualTo civilian) exitWith {};
-            [_unit, "", "ENTITY_CREATED"] call ARC_fnc_civsubCivConnect;
-        };
+        private _queue = missionNamespace getVariable ["civsub_v1_autoConnectQueue", []];
+        if !(_queue isEqualType []) then { _queue = []; };
+        _queue pushBack [_entity, serverTime + 0.25];
+        missionNamespace setVariable ["civsub_v1_autoConnectQueue", _queue, false];
     }];
 
     missionNamespace setVariable ["civsub_v1_eh_entityCreated", _createdEhId, true];
+    missionNamespace setVariable ["civsub_v1_eh_entityCreatedInstalling", false, false];
     diag_log format ["[CIVSUB][INIT] EntityCreated civilian hookup EH installed (%1)", _createdEhId];
+};
+
+if (!(missionNamespace getVariable ["civsub_v1_autoConnectQueueThreadRunning", false])) then
+{
+    missionNamespace setVariable ["civsub_v1_autoConnectQueueThreadRunning", true, true];
+    [] spawn
+    {
+        while { isServer && { missionNamespace getVariable ["civsub_v1_enabled", false] } } do
+        {
+            uiSleep 0.5;
+            private _queue = missionNamespace getVariable ["civsub_v1_autoConnectQueue", []];
+            if !(_queue isEqualType []) then { _queue = []; };
+
+            private _keep = [];
+            private _processed = 0;
+            private _max = missionNamespace getVariable ["civsub_v1_autoConnectQueueMaxPerTick", 20];
+            if (!(_max isEqualType 0)) then { _max = 20; };
+            _max = (_max max 5) min 100;
+
+            {
+                if (!(_x isEqualType []) || { (count _x) < 2 }) then
+                {
+                    // drop malformed queue entries
+                }
+                else
+                {
+                    private _unit = _x select 0;
+                    private _due = _x select 1;
+                    if (!(_due isEqualType 0)) then { _due = serverTime; };
+
+                    if ((serverTime >= _due) && { _processed < _max }) then
+                    {
+                        _processed = _processed + 1;
+                        if (!isNull _unit && { alive _unit } && { !isPlayer _unit } && { side _unit isEqualTo civilian }) then
+                        {
+                            [_unit, "", "ENTITY_CREATED"] call ARC_fnc_civsubCivConnect;
+                        };
+                    }
+                    else
+                    {
+                        _keep pushBack _x;
+                    };
+                };
+            } forEach _queue;
+
+            missionNamespace setVariable ["civsub_v1_autoConnectQueue", _keep, false];
+        };
+
+        missionNamespace setVariable ["civsub_v1_autoConnectQueueThreadRunning", false, true];
+    };
 };
 
 if (!(missionNamespace getVariable ["civsub_v1_autoConnectThreadRunning", false])) then
@@ -172,27 +217,35 @@ if (!(missionNamespace getVariable ["civsub_v1_autoConnectThreadRunning", false]
     {
         while { isServer && { missionNamespace getVariable ["civsub_v1_enabled", false] } } do
         {
-            uiSleep 30;
+            private _baseSleep = missionNamespace getVariable ["civsub_v1_autoConnectScanInterval_s", 30];
+            if (!(_baseSleep isEqualType 0)) then { _baseSleep = 30; };
+            _baseSleep = (_baseSleep max 15) min 300;
+            uiSleep _baseSleep;
             private _units = +allUnits;
             private _total = count _units;
             if (_total > 0) then
             {
-                private _scanMax = missionNamespace getVariable ["civsub_v1_autoConnectScanMaxPerTick", 50];
-                if (!(_scanMax isEqualType 0)) then { _scanMax = 50; };
+                private _scanMax = missionNamespace getVariable ["civsub_v1_autoConnectScanMaxPerTick", 25];
+                if (!(_scanMax isEqualType 0)) then { _scanMax = 25; };
                 _scanMax = (_scanMax max 10) min 200;
+                if (_total > 200) then { _scanMax = _scanMax min 25; };
 
                 private _startIdx = missionNamespace getVariable ["civsub_v1_autoConnectScanIndex", 0];
                 if (!(_startIdx isEqualType 0)) then { _startIdx = 0; };
                 if (_startIdx < 0 || { _startIdx >= _total }) then { _startIdx = 0; };
 
                 private _limit = _scanMax min _total;
+                private _timeBudgetEnd = diag_tickTime + 0.01;
                 for "_scanOffset" from 0 to (_limit - 1) do
                 {
-                    private _idx = (_startIdx + _scanOffset) mod _total;
-                    private _unit = _units select _idx;
-                    if (!isNull _unit && { alive _unit } && { !isPlayer _unit } && { side _unit isEqualTo civilian }) then
+                    if (diag_tickTime <= _timeBudgetEnd) then
                     {
-                        [_unit, "", "PERIODIC_SCAN"] call ARC_fnc_civsubCivConnect;
+                        private _idx = (_startIdx + _scanOffset) mod _total;
+                        private _unit = _units select _idx;
+                        if (!isNull _unit && { alive _unit } && { !isPlayer _unit } && { side _unit isEqualTo civilian }) then
+                        {
+                            [_unit, "", "PERIODIC_SCAN"] call ARC_fnc_civsubCivConnect;
+                        };
                     };
                 };
 
