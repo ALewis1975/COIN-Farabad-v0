@@ -77,7 +77,7 @@ if (_typeU isEqualTo "IED") then
         || { (_d2 find "vehicle") >= 0 && { (_d2 find "bomb") >= 0 } };
 };
 
-private _iedLeadAndDispUpper = toUpper (format ["%1 %2", _leadTagU, _disp]);
+private _iedLeadTagAndDisplayNameUpper = toUpper (format ["%1 %2", _leadTagU, _disp]);
 private _iedTierKnown = false;
 private _iedTier = 0;
 private _iedDistrictId = ["activeIncidentCivsubDistrictId", ""] call ARC_fnc_stateGet;
@@ -562,28 +562,28 @@ case "IED":
     _radius = 120;
     _deadlineSec = 20 * 60;
 
-    private _hasDrivenKeyword = ((_iedLeadAndDispUpper find "VBIED_DRIVEN") >= 0) || { (_iedLeadAndDispUpper find "DRIVEN") >= 0 };
-    private _hasVbiedKeyword = ((_iedLeadAndDispUpper find "VBIED") >= 0) || { (_iedLeadAndDispUpper find "VEHICLE BOMB") >= 0 };
+    private _hasDrivenKeyword = ((_iedLeadTagAndDisplayNameUpper find "VBIED_DRIVEN") >= 0) || { (_iedLeadTagAndDisplayNameUpper find "DRIVEN") >= 0 };
+    private _hasVbiedKeyword = ((_iedLeadTagAndDisplayNameUpper find "VBIED") >= 0) || { (_iedLeadTagAndDisplayNameUpper find "VEHICLE BOMB") >= 0 };
     private _isDrivenLeadTag = _leadTagU in ["VBIED_DRIVEN_CHECKPOINT", "VBIED_DRIVEN_GATE"];
     private _isDrivenVbied = (_hasDrivenKeyword && { _hasVbiedKeyword }) || { _isDrivenLeadTag };
 
-    private _hasSuicideKeyword = ((_iedLeadAndDispUpper find "SUICIDE") >= 0) || { (_iedLeadAndDispUpper find "SB_") >= 0 };
+    private _hasSuicideKeyword = ((_iedLeadTagAndDisplayNameUpper find "SUICIDE") >= 0) || { (_iedLeadTagAndDisplayNameUpper find "SB_") >= 0 };
     private _isSuicideLeadTag = _leadTagU in ["SB_MARKET_APPROACH", "SB_CHECKPOINT_APPROACH", "SB_SHURA_APPROACH"];
     private _isSuicideBomber = _hasSuicideKeyword || { _isSuicideLeadTag };
 
-    private _canProduceDriven = (!_iedTierKnown) || { _iedTier >= 2 };
-    private _canProduceSuicide = _iedTierKnown && { _iedTier >= 3 };
+    private _canProduceDrivenVbied = (!_iedTierKnown) || { _iedTier >= 2 };
+    private _canProduceSuicideBomber = _iedTierKnown && { _iedTier >= 3 };
 
     // VBIED variants: swap prop objective to a vehicle placeholder
-    if (_isSuicideBomber && { _canProduceSuicide }) then
+    if (_isSuicideBomber && { _canProduceSuicideBomber }) then
     {
-        if ((_iedLeadAndDispUpper find "SHURA") >= 0) then
+        if ((_iedLeadTagAndDisplayNameUpper find "SHURA") >= 0) then
         {
             _objKind = "SB_SHURA_APPROACH";
         }
         else
         {
-            if ((_iedLeadAndDispUpper find "CHECKPOINT") >= 0) then { _objKind = "SB_CHECKPOINT_APPROACH"; } else { _objKind = "SB_MARKET_APPROACH"; };
+            if ((_iedLeadTagAndDisplayNameUpper find "CHECKPOINT") >= 0) then { _objKind = "SB_CHECKPOINT_APPROACH"; } else { _objKind = "SB_MARKET_APPROACH"; };
         };
         _objClass = "";
         _objRadius = 220;
@@ -592,9 +592,9 @@ case "IED":
     }
     else
     {
-    if (_isDrivenVbied && { _vbiedEnabled } && { _canProduceDriven }) then
+    if (_isDrivenVbied && { _vbiedEnabled } && { _canProduceDrivenVbied }) then
     {
-        if (((_iedLeadAndDispUpper find "GATE") >= 0) || { (_leadTagU isEqualTo "VBIED_DRIVEN_GATE") }) then { _objKind = "VBIED_DRIVEN_GATE"; } else { _objKind = "VBIED_DRIVEN_CHECKPOINT"; };
+        if (((_iedLeadTagAndDisplayNameUpper find "GATE") >= 0) || { (_leadTagU isEqualTo "VBIED_DRIVEN_GATE") }) then { _objKind = "VBIED_DRIVEN_GATE"; } else { _objKind = "VBIED_DRIVEN_CHECKPOINT"; };
         _objClass = "";
         _objRadius = 500;
         _objAction = "";
@@ -1051,7 +1051,7 @@ case "IED":
     ["activeObjectiveClass", ""] call ARC_fnc_stateSet;
     ["activeObjectivePos", []] call ARC_fnc_stateSet;
     ["activeObjectiveNetId", ""] call ARC_fnc_stateSet;
-    // Dynamic IED variants use activeObjectiveMarker as an optional target marker, so reset it with objective state.
+    // Reset any optional target marker from the previous objective package.
     ["activeObjectiveMarker", ""] call ARC_fnc_stateSet;
     ["activeObjectiveArmed", true] call ARC_fnc_stateSet;
 
@@ -1328,6 +1328,7 @@ if (!(_objKind isEqualTo "")) then
 
     if (_objKind in ["VBIED_DRIVEN_CHECKPOINT", "VBIED_DRIVEN_GATE", "SB_MARKET_APPROACH", "SB_CHECKPOINT_APPROACH", "SB_SHURA_APPROACH"]) then
     {
+        // Dynamic IED variants use activeObjectiveMarker as an optional target marker.
         private _objectiveMarkerName = _marker;
         ["activeObjectiveKind", _objKind] call ARC_fnc_stateSet;
         ["activeObjectiveClass", _objClass] call ARC_fnc_stateSet;

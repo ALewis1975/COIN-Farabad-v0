@@ -95,7 +95,8 @@ if (!isNull _vehObj) then
     private _storedPos = +_pos;
     _storedPos resize 3;
     _pos = getPosATL _vehObj;
-    if ((_storedPos distance2D _pos) > 25) then
+    private _positionAuditThresholdM = 25;
+    if ((_storedPos distance2D _pos) > _positionAuditThresholdM) then
     {
         diag_log format ["[ARC][INFO] ARC_fnc_vbiedServerOnDestroyed: using live vehicle position over stored objective position deltaM=%1 veh=%2", round (_storedPos distance2D _pos), _vehNid];
     };

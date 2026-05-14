@@ -123,7 +123,7 @@ check 'SB_CHECKPOINT_APPROACH' "functions/core/fn_execInitActive.sqf" \
 check 'SB_SHURA_APPROACH' "functions/core/fn_execInitActive.sqf" \
   "Exec init can produce suicide bomber shura objective kind"
 
-check '_canProduceSuicide = _iedTierKnown && { _iedTier >= 3 }' "functions/core/fn_execInitActive.sqf" \
+check '_canProduceSuicideBomber = _iedTierKnown && { _iedTier >= 3 }' "functions/core/fn_execInitActive.sqf" \
   "Suicide bomber production remains CRITICAL-tier gated"
 
 # --- Stale close detection in incident closed hook ---
