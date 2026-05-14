@@ -21,7 +21,7 @@ private _lines = [];
 private _trimFn = compile "params ['_s']; trim _s";
 
 private _roleCatNorm = toUpper ([_roleCat] call _trimFn);
-private _canActOnIncident = !(_roleCatNorm isEqualTo 'GUEST');
+private _canActOnIncident = !(_roleCatNorm isEqualTo "GUEST");
 
 private _taskId = missionNamespace getVariable ['ARC_activeTaskId',''];
 if (!(_taskId isEqualType '')) then { _taskId = ''; };

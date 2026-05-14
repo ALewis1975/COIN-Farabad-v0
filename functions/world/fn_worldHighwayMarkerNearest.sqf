@@ -30,6 +30,7 @@ if (_preferredDir >= 0) then { _preferredDir = _preferredDir % 360; };
 
 private _prefix = "mkr_highway_";
 
+// Converts heading mismatch degrees into a meter-equivalent score penalty.
 private _dirWeight = missionNamespace getVariable ["ARC_highwayMarkerDirScoreWeightM", 0.45];
 if (!(_dirWeight isEqualType 0)) then { _dirWeight = 0.45; };
 _dirWeight = (_dirWeight max 0) min 3;

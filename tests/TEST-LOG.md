@@ -26,6 +26,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | 5 | Changed-file sqflint | `sqflint -e w functions/ui/fn_uiIncidentGetNextActions.sqf` | PASS | Failing warnings resolved. |
 | 6 | Whitespace check | `git --no-pager diff --check` | PASS | No whitespace errors. |
 | 7 | CI changed SQF lint set | `python3 scripts/dev/sqflint_compat_scan.py --strict <10 CI-changed SQF files> && sqflint -e w <each CI-changed SQF file>` | PASS | Matched the failed workflow's changed SQF file list from job logs; all lint clean after fix. |
+| 8 | Review follow-up compat/lint | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiIncidentGetNextActions.sqf functions/world/fn_worldHighwayMarkerNearest.sqf functions/world/fn_worldBearingDelta.sqf && sqflint -e w <same files> && git --no-pager diff --check` | PASS | Addressed validation review comments for string literal and highway helper comments. |
 
 ---
 
