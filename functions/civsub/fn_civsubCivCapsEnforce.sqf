@@ -98,15 +98,18 @@ if (_recycleDist > 0 && { (count _keysEvictable) > 0 }) then
 };
 
 // Global cap
-if ((count _keys) > _capGE && { (count _keysEvictable) > 0 }) then
+private _isGlobalOverCap = (count _keys) > _capGE;
+private _hasEvictable = (count _keysEvictable) > 0;
+if (_isGlobalOverCap && { _hasEvictable }) then
 {
     // sort by spawnTs ascending
-    private _sorted = _keysEvictable apply {
+    private _sorted = [];
+    {
         private _row = [_reg, _x, createHashMap] call _hg;
         private _ts = 0;
         if (_row isEqualType createHashMap) then { _ts = [_row, "spawnTs", 0] call _hg; };
-        [_ts, _x]
-    };
+        _sorted pushBack [_ts, _x];
+    } forEach _keysEvictable;
     _sorted sort true;
 
     private _over = (count _keys) - _capGE;
@@ -142,12 +145,13 @@ private _byD = createHashMap;
 
     if ((count _arr) > _capDThis) then {
         // sort by spawnTs
-        private _sorted = _arr apply {
+        private _sorted = [];
+        {
             private _row = [_reg, _x, createHashMap] call _hg;
             private _ts = 0;
             if (_row isEqualType createHashMap) then { _ts = [_row, "spawnTs", 0] call _hg; };
-            [_ts, _x]
-        };
+            _sorted pushBack [_ts, _x];
+        } forEach _arr;
         _sorted sort true;
         private _over = (count _arr) - _capDThis;
         if (_over > (count _sorted)) then { _over = count _sorted; };
