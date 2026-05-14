@@ -422,12 +422,12 @@ private _cavClassPool = [
 
 // Troop A — offset north-west of CAV HQ
 private _cavHQPos = getMarkerPos "arc_m_base_1_73_CAV_hq";
-// getMarkerPos may return Position2D [x,y] or Position3D [x,0,z]
+// getMarkerPos returns map coordinates [x,y,z]; keep y as northing.
 private _cavE = _cavHQPos select 0;
-private _cavN = if (count _cavHQPos > 2) then { _cavHQPos select 2 } else { _cavHQPos select 1 };
+private _cavN = _cavHQPos select 1;
 
 if (!(_cavHQPos isEqualTo [0,0,0])) then {
-    private _troopAPos = [_cavE - 20, 0, _cavN + 15];
+    private _troopAPos = [_cavE - 20, _cavN + 15, 0];
     private _troopAUnits = [
         _troopAPos,
         _cavClassPool,
@@ -444,7 +444,7 @@ if (!(_cavHQPos isEqualTo [0,0,0])) then {
 
 // Troop B — offset south-east of CAV HQ
 if (!(_cavHQPos isEqualTo [0,0,0])) then {
-    private _troopBPos = [_cavE + 20, 0, _cavN - 15];
+    private _troopBPos = [_cavE + 20, _cavN - 15, 0];
     private _troopBUnits = [
         _troopBPos,
         _cavClassPool,

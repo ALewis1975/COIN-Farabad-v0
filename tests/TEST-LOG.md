@@ -11,6 +11,24 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-14 — AIRBASE ORBAT CAV coordinate fix (Mode A)
+
+**Branch/Commit:** copilot/fix-count-type-error @ 74c95ab + fix
+
+**Scenario:** Fixed 1-73 CAV Troop A/B dynamic ORBAT placement in `fn_airbaseOrbatPopulate.sqf` by using the marker Y/northing coordinate from `getMarkerPos` instead of treating Z/altitude as northing. This prevents CAV troops from being generated near map Y=0 when `arc_m_base_1_73_CAV_hq` exists.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline targeted compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbaseOrbatPopulate.sqf` | PASS | No known parser-compat patterns before edits. |
+| 2 | Baseline targeted sqflint | `sqflint -e w functions/ambiance/fn_airbaseOrbatPopulate.sqf` | BLOCKED | `sqflint` is not installed in the sandbox. |
+| 3 | Changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbaseOrbatPopulate.sqf` | PASS | No known parser-compat patterns after coordinate fix. |
+| 4 | Changed-file sqflint | `sqflint -e w functions/ambiance/fn_airbaseOrbatPopulate.sqf` | BLOCKED | `sqflint` is not installed in the sandbox. |
+| 5 | Whitespace check | `git --no-pager diff --check` | PASS | No whitespace errors. |
+| 6 | Runtime smoke: AIRBASE ORBAT population | Local MP or dedicated-like Arma 3 session; verify 1-73 CAV Troop A/B spawn around `arc_m_base_1_73_CAV_hq` and no RPT `Error in expression` follows ORBAT population | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 7 | Dedicated/JIP validation | Dedicated server with at least one JIP client; verify server-owned ORBAT population remains one-shot and non-authoritative clients only observe spawned entities | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+
+---
+
 ## 2026-05-14 — CIVSUB cap enforcement parser-conservative sort fix (Mode A)
 
 **Branch/Commit:** copilot/fix-type-bool-error @ e22f41e
