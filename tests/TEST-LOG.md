@@ -13,9 +13,9 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-05-14 — Helicopter runway departure climb fix (Mode A)
 
-**Branch/Commit:** copilot/fix-helicopter-takeoff-issue @ 96cf850
+**Branch/Commit:** copilot/fix-helicopter-takeoff-issue @ adb12cf
 
-**Scenario:** Adjusted rotary-wing airbase departures so post-taxi climb guidance uses the outbound runway axis and explicit upward velocity instead of model-space nudges that could keep helicopters low and drifting right.
+**Scenario:** Adjusted rotary-wing airbase departures so post-taxi climb guidance uses the outbound runway axis and explicit upward velocity instead of model-space nudges that could keep helicopters low and drifting right. Follow-up review feedback kept the stalled-departure kick target at the nearby outbound marker and clarified helper naming.
 
 | # | Check | Command / Step | Result | Notes |
 |---|-------|----------------|--------|-------|
