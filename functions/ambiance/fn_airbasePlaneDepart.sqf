@@ -129,24 +129,37 @@ private _fnAbortToIdle = {
 };
 
 private _fnGetDirectionBetween = {
-    params ["_fromPos", "_toPos", "_fallbackDir"];
+    params [
+        ["_fromPos", [], [[]]],
+        ["_toPos", [], [[]]],
+        ["_fallbackDir", 0, [0]]
+    ];
+    if ((count _fromPos) < 2) exitWith { _fallbackDir };
+    if ((count _toPos) < 2) exitWith { _fallbackDir };
+
     private _dir = _fallbackDir;
 
-    if (_fromPos isEqualType [] && { _toPos isEqualType [] } && { (count _fromPos) >= 2 } && { (count _toPos) >= 2 }) then {
-        private _dx = (_toPos select 0) - (_fromPos select 0);
-        private _dy = (_toPos select 1) - (_fromPos select 1);
-        if (((abs _dx) + (abs _dy)) > 0.1) then {
-            _dir = _dx atan2 _dy;
-            if (_dir < 0) then { _dir = _dir + 360; };
-        };
+    private _dx = (_toPos select 0) - (_fromPos select 0);
+    private _dy = (_toPos select 1) - (_fromPos select 1);
+    if (((abs _dx) + (abs _dy)) > 0.1) then {
+        _dir = _dx atan2 _dy;
+        if (_dir < 0) then { _dir = _dir + 360; };
     };
 
     _dir
 };
 
 private _fnSetRunwayClimbVelocity = {
-    params ["_vehLocal", "_dir", "_fwdMps", "_upMps"];
+    params [
+        ["_vehLocal", objNull, [objNull]],
+        ["_dir", 0, [0]],
+        ["_fwdMps", 0, [0]],
+        ["_upMps", 0, [0]]
+    ];
     if (isNull _vehLocal) exitWith { false };
+    if (!(_dir isEqualType 0)) exitWith { false };
+    if (!(_fwdMps isEqualType 0)) exitWith { false };
+    if (!(_upMps isEqualType 0)) exitWith { false };
 
     _vehLocal setDir _dir;
     _vehLocal setVelocity [
@@ -449,6 +462,8 @@ if (_isHeli) then {
 
 private _kickPos = _despawnPos;
 private _takeoffKickDir = getDir _veh;
+private _takeoffKickFwdMps = 18;
+private _takeoffKickUpMps = 5;
 
 if (_isHeli) then {
     private _altLow = missionNamespace getVariable ["airbase_v1_rw_takeoff_alt_low_m", 3];
@@ -461,6 +476,8 @@ if (_isHeli) then {
     if (!(_rwClimbKickFwd isEqualType 0) || { _rwClimbKickFwd < 6 }) then { _rwClimbKickFwd = 18; };
     private _rwClimbKickUp = missionNamespace getVariable ["airbase_v1_rw_climb_kick_up_mps", 5];
     if (!(_rwClimbKickUp isEqualType 0) || { _rwClimbKickUp < 1 }) then { _rwClimbKickUp = 5; };
+    _takeoffKickFwdMps = _rwClimbKickFwd;
+    _takeoffKickUpMps = _rwClimbKickUp;
     private _rwClimbProfileTimeoutS = missionNamespace getVariable ["airbase_v1_rw_climb_profile_timeout_s", 240];
     if (!(_rwClimbProfileTimeoutS isEqualType 0) || { _rwClimbProfileTimeoutS < 30 }) then { _rwClimbProfileTimeoutS = 240; };
 
@@ -478,7 +495,8 @@ if (_isHeli) then {
 
     if (_hasOut) then { _kickPos = _outPos; };
 
-    private _runwayDir = if (_hasOut && { _hasClear }) then { [_outPos, _clearPos, getDir _veh] call _fnGetDirectionBetween } else { getDir _veh };
+    private _fallbackRunwayDir = getDir _veh;
+    private _runwayDir = if (_hasOut && { _hasClear }) then { [_outPos, _clearPos, _fallbackRunwayDir] call _fnGetDirectionBetween } else { _fallbackRunwayDir };
     _takeoffKickDir = _runwayDir;
 
     _veh engineOn true;
@@ -643,8 +661,8 @@ private _kickTimeout = missionNamespace getVariable ["airbase_v1_takeoffKickTime
 if (!(_kickTimeout isEqualType 0) || { _kickTimeout < 10 }) then { _kickTimeout = 45; };
 
 if (_kickEnabled) then {
-    [_fid, _veh, _pilot, _grp, _kickPos, _takeoffKickDir, _fnSetRunwayClimbVelocity, _isHeli, _kickTimeout, _debugOps] spawn {
-        params ["_fidL", "_vehL", "_pilotL", "_grpL", "_kickPosL", "_kickDirL", "_setRunwayClimbVelocityL", "_isHeliL", "_timeoutS", "_debugOpsL"];
+    [_fid, _veh, _pilot, _grp, _kickPos, _takeoffKickDir, _takeoffKickFwdMps, _takeoffKickUpMps, _fnSetRunwayClimbVelocity, _isHeli, _kickTimeout, _debugOps] spawn {
+        params ["_fidL", "_vehL", "_pilotL", "_grpL", "_kickPosL", "_kickDirL", "_kickFwdMpsL", "_kickUpMpsL", "_setRunwayClimbVelocityL", "_isHeliL", "_timeoutS", "_debugOpsL"];
         if (isNull _vehL || {!alive _vehL}) exitWith {};
         private _tStart = time;
         private _d0 = _vehL distance2D _kickPosL;
@@ -666,7 +684,7 @@ if (_kickEnabled) then {
             if (_isHeliL) then {
                 _vehL land "NONE";
                 _vehL flyInHeight 10;
-                [_vehL, _kickDirL, 18, 5] call _setRunwayClimbVelocityL;
+                [_vehL, _kickDirL, _kickFwdMpsL, _kickUpMpsL] call _setRunwayClimbVelocityL;
                 _pilotL doMove _kickPosL;
             } else {
                 _vehL land "NONE";
