@@ -495,8 +495,7 @@ if (_isHeli) then {
 
     if (_hasOut) then { _kickPos = _outPos; };
 
-    private _fallbackRunwayDir = getDir _veh;
-    private _runwayDir = if (_hasOut && { _hasClear }) then { [_outPos, _clearPos, _fallbackRunwayDir] call _fnGetDirectionBetween } else { _fallbackRunwayDir };
+    private _runwayDir = if (_hasOut && { _hasClear }) then { [_outPos, _clearPos, _takeoffKickDir] call _fnGetDirectionBetween } else { _takeoffKickDir };
     _takeoffKickDir = _runwayDir;
 
     _veh engineOn true;
