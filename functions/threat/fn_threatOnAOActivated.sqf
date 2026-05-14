@@ -56,20 +56,35 @@ _pos = +_pos; _pos resize 3;
 private _radius = [_ctx, "radius_m", 0] call _kvGet;
 if (!(_radius isEqualType 0) || { _radius < 0 }) then { _radius = 0; };
 
+private _objKindForSubtype = toUpper (["activeObjectiveKind", ""] call ARC_fnc_stateGet);
+private _subtype = switch (_objKindForSubtype) do
+{
+    case "VBIED_VEHICLE": { "VBIED" };
+    case "VBIED_DRIVEN_CHECKPOINT": { "VBIED_DRIVEN_CHECKPOINT" };
+    case "VBIED_DRIVEN_GATE": { "VBIED_DRIVEN_GATE" };
+    case "SB_MARKET_APPROACH": { "SUICIDE_BOMBER_MARKET" };
+    case "SB_CHECKPOINT_APPROACH": { "SUICIDE_BOMBER_CHECKPOINT" };
+    case "SB_SHURA_APPROACH": { "SUICIDE_BOMBER_SHURA" };
+    default { "IED_SUSPICIOUS_OBJECT" };
+};
+
 // Create (idempotent)
-private _tid = [_taskId, "IED", "IED_SUSPICIOUS_OBJECT", _ctx] call ARC_fnc_threatCreateFromTask;
+private _tid = [_taskId, "IED", _subtype, _ctx] call ARC_fnc_threatCreateFromTask;
 if (_tid isEqualTo "") exitWith {false};
+
+["activeIedThreatId", _tid] call ARC_fnc_stateSet;
+missionNamespace setVariable ["ARC_activeIedThreatId", _tid, true];
 
 // Attempt to link the currently active objective object as the "manifestation" (Phase 1).
 // Guard against duplicate spawn via idempotency token before writing world.spawned.
 private _linked = false;
-private _objKind = ["activeObjectiveKind", ""] call ARC_fnc_stateGet;
-private _objNid = ["activeObjectiveNetId", ""] call ARC_fnc_stateGet;
+    private _objKind = ["activeObjectiveKind", ""] call ARC_fnc_stateGet;
+    private _objNid = ["activeObjectiveNetId", ""] call ARC_fnc_stateGet;
 
-if (
-    (!(_objNid isEqualTo ""))
-    && { (toUpper _objKind) in ["IED_DEVICE", "VBIED_VEHICLE"] }
-) then
+    if (
+        (!(_objNid isEqualTo ""))
+        && { (toUpper _objKind) in ["IED_DEVICE", "VBIED_VEHICLE"] }
+    ) then
 {
     // Request spawn token (idempotency guard).
     private _spawnResult = [_tid] call ARC_fnc_threatIedSpawnRequest;

@@ -34,21 +34,20 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-05-14 — CIVSUB civilian auto-hookup and airbase BLUFOR spawn fix (Mode A)
 
-**Branch/Commit:** copilot/ensure-civs-connected-to-civsub @ be11faf (post-fix working tree validated in-session)
+**Branch/Commit:** copilot/research-ied-system-assessment @ 8111863
 
-**Scenario:** Added a server-side CIVSUB civilian hookup helper plus init/event/periodic scan coverage for spawned civilian AI, routed key civilian spawn paths through it, and fixed AIRBASE ORBAT spawn coordinates so marker Y is used as map northing instead of altitude/Z.
+**Scenario:** Implemented IED incomplete/stubbed area decomposition: active IED threat linkage, detonation-to-threat lifecycle updates, RTB/TOW EOD disposition server RPC, driven VBIED / suicide objective-kind production, and explicit deferred status for complex/chain IED modules.
 
 | # | Check | Command / Step | Result | Notes |
 |---|-------|----------------|--------|-------|
-| 1 | Baseline targeted compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubInitServer.sqf functions/civsub/fn_civsubCivRegisterSpawn.sqf functions/civsub/fn_civsubCivAssignIdentity.sqf functions/ambiance/fn_airbaseOrbatPopulate.sqf` | FAIL | Pre-existing direct `trim` in `fn_civsubCivRegisterSpawn.sqf`; fixed as part of touched-file compatibility. |
-| 2 | Changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict <9 changed SQF files>` | PASS | No known parser-compat patterns. |
-| 3 | Changed-file sqflint | `python3 -m pip install --user sqflint && for f in <9 changed SQF files>; do /home/runner/.local/bin/sqflint -e w "$f"; done` | PASS | Fixed touched pre-existing `keys`/`#` parser issues in `fn_civsubInitServer.sqf`; all changed SQF files lint clean. |
-| 4 | Whitespace check | `git --no-pager diff --check` | PASS | No whitespace errors. |
-| 5 | CIVSUB hookup static contract | `test -f functions/civsub/fn_civsubCivConnect.sqf && grep -q 'class civsubCivConnect' config/CfgFunctions.hpp && grep -q 'EntityCreated' functions/civsub/fn_civsubInitServer.sqf && grep -q 'PERIODIC_SCAN' functions/civsub/fn_civsubInitServer.sqf && grep -q 'ARC_fnc_civsubCivConnect' <explicit spawn-path files>` | PASS | Helper is registered; startup scan, EntityCreated, periodic scan, and explicit spawn-path calls are present. |
-| 6 | AIRBASE planning-mode checks | `bash tests/static/airbase_planning_mode_checks.sh` | PASS | Existing AIRBASE static gates/registration checks passed. |
-| 7 | Console conflict check | `bash scripts/dev/check_console_conflicts.sh` | FAIL | Pre-existing duplicate IDC failures (`78201`, `78202`, `78211`) unrelated to this change. |
-| 8 | Runtime smoke: spawned civilians and BLUFOR positions | Local MP/dedicated-like Arma 3 session; spawn CIVSUB sampler, CIVLOC, CIVTRAF, CIV_MEET/sitepop civilians; verify CIVSUB interactions/registry and AIRBASE BLUFOR map positions | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
-| 9 | Dedicated/JIP replication check | Dedicated server with at least one JIP client; verify CIVSUB action JIP and registry replication for late clients | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+| 1 | Baseline IED lifecycle static contract check | `bash tests/static/threat_ied_lifecycle_contract_checks.sh` | PASS | Existing pre-change contract checks passed. Direct execution was blocked by file mode; running through `bash` succeeded. |
+| 2 | SQF compat scan on changed SQF files | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ied/fn_iedClientExecuteDisposition.sqf functions/ied/fn_iedServerRequestDisposition.sqf functions/ied/fn_vbiedServerOnDestroyed.sqf functions/ied/fn_iedComplexAttackStage.sqf functions/ied/fn_iedChainEmplace.sqf functions/core/fn_execInitActive.sqf functions/core/fn_iedHandleDetonation.sqf functions/core/fn_publicBroadcastState.sqf functions/threat/fn_threatOnAOActivated.sqf functions/ui/fn_uiIncidentGetNextActions.sqf` | PASS | Initial run found parser-compat issues in touched files; fixed and reran clean. |
+| 3 | sqflint on changed SQF files | `sqflint -e w ...changed SQF files...` | BLOCKED | `sqflint: command not found` in sandbox. |
+| 4 | IED lifecycle static contract check | `bash tests/static/threat_ied_lifecycle_contract_checks.sh` | PASS | Covers active threat linkage, detonation lifecycle, RTB/TOW disposition RPC, advanced objective production, and complex/chain deferred status. |
+| 5 | Whitespace check | `git --no-pager diff --check` | PASS | No whitespace errors. |
+| 6 | Review-fix targeted compat/static check | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_execInitActive.sqf functions/ied/fn_vbiedServerOnDestroyed.sqf functions/ui/fn_uiIncidentGetNextActions.sqf && bash tests/static/threat_ied_lifecycle_contract_checks.sh && git --no-pager diff --check` | PASS | Review readability/naming/comment/position-audit/status-text fixes stayed compat-clean and static contracts still pass. |
+| 7 | Runtime smoke: RTB_IED evidence delivery, TOW_VBIED disposal, driven VBIED, suicide bomber objective flow | Local MP / hosted Arma 3 session | BLOCKED | Arma 3 runtime unavailable in sandbox. |
+| 8 | Dedicated/JIP/reconnect validation | Dedicated server with JIP client and reconnect cycle | BLOCKED | Dedicated server/JIP rig unavailable in sandbox. |
 
 ---
 
