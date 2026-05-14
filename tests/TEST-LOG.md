@@ -13,7 +13,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-05-14 — Subsystem reliability and adaptive COIN planning (Mode F)
 
-**Branch/Commit:** copilot/review-farabad-coin-repositories @ b865f21 (docs working tree validated in-session)
+**Branch/Commit:** copilot/review-farabad-coin-repositories @ ea86dcf (docs working tree validated in-session)
 
 **Scenario:** Added a docs-only execution contract for Phase 4 subsystem reliability sweeps and the follow-on adaptive enemy/population behavior track. No SQF, config, mission data, or runtime behavior changed.
 
@@ -23,6 +23,10 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | 2 | Whitespace check | `git --no-pager diff --check` | PASS | No whitespace errors after docs updates. |
 | 3 | SQF/static lint | Not run | Docs-only planning change; no `.sqf`, `.hpp`, `.ext`, or mission data touched. |
 | 4 | Runtime validation | Not run | Docs-only planning change; no behavior-changing SQF or runtime content touched. |
+| 5 | Committed diff whitespace check | `git --no-pager diff --check HEAD~2..HEAD` | PASS | No whitespace errors in the two committed docs-only changes. |
+| 6 | RemoteExec contract check | `bash scripts/dev/check_remoteexec_contract.sh` | PASS | Air/Tower RemoteExec contract checks passed; no RemoteExec changes in this PR. |
+| 7 | State migration validation | `python3 scripts/dev/validate_state_migrations.py` | PASS | State migration validation passed (3 scenarios); no state schema changes in this PR. |
+| 8 | Console conflict check | `bash scripts/dev/check_console_conflicts.sh` | FAIL | Pre-existing duplicate IDC findings in console definitions (`78201`, `78202`, `78211`) plus documented range warnings; this docs-only PR does not touch console UI files. |
 
 ---
 
