@@ -11,6 +11,24 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-14 — CIVSUB cap enforcement parse fix (Mode A)
+
+**Branch/Commit:** copilot/fix-civsub-caps-enforce-error @ 7f91039
+
+**Scenario:** Fixed a CIVSUB civilian cap enforcement SQF parse/runtime error around the global-cap evictable-count guard, and removed same-file sqflint compatibility hazards in HashMap defaults, `keys`, and `#` indexing.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline targeted compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubCivCapsEnforce.sqf` | FAIL | Reproduced 10 existing parser-compat findings: method-form `getOrDefault` and `#` indexing. |
+| 2 | Baseline targeted sqflint | `sqflint -e w functions/civsub/fn_civsubCivCapsEnforce.sqf` | BLOCKED | `sqflint` is not installed in the sandbox. |
+| 3 | Changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubCivCapsEnforce.sqf` | PASS | No known parser-compat patterns after the fix. |
+| 4 | Changed-file sqflint | `sqflint -e w functions/civsub/fn_civsubCivCapsEnforce.sqf` | BLOCKED | `sqflint` is not installed in the sandbox. |
+| 5 | Whitespace check | `git --no-pager diff --check HEAD~2..HEAD` | PASS | Final two commits are whitespace-clean. |
+| 6 | Runtime smoke: CIVSUB civilian sampler/cap enforcement | Local MP or dedicated-like Arma 3 session with CIVSUB civilian cap pressure | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 7 | Dedicated/JIP validation | Dedicated server with at least one JIP client; verify server-owned cap/despawn state remains authoritative | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+
+---
+
 ## 2026-05-14 — UI incident next-actions lint fix (Mode A)
 
 **Branch/Commit:** copilot/add-empty-markers-highways @ 1040591 (post-fix working tree validated in-session)
