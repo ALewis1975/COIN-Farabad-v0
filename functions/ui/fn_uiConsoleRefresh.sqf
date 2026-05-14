@@ -422,24 +422,29 @@ case "DASH":
             private _regionCW = _paneW;
             private _regionCH = 0;
             private _layoutModeActive = uiNamespace getVariable ["ARC_console_layoutModeActive", "FULL"];
-            if (!(_layoutModeActive isEqualType "")) then { _layoutModeActive = "FULL"; };
+            if (!(_layoutModeActive isEqualType "")) then {
+                diag_log format ["[ARC][WARN] ARC_fnc_uiConsoleRefresh: invalid layoutModeActive type value=%1", _layoutModeActive];
+                _layoutModeActive = "FULL";
+            };
+            private _numOrDefault = {
+                params ["_value", "_default"];
+                if (_value isEqualType 0) exitWith { _value };
+                diag_log format ["[ARC][WARN] ARC_fnc_uiConsoleRefresh: invalid Region C numeric value=%1 default=%2", _value, _default];
+                _default
+            };
             if (_layoutModeActive isEqualTo "DOCK_RIGHT") then {
-                _regionCX = uiNamespace getVariable ["ARC_console_regionCX", _paneX];
-                _regionCY = uiNamespace getVariable ["ARC_console_regionCY", _boardY + _boardH];
-                _regionCW = uiNamespace getVariable ["ARC_console_regionCW", _paneW];
-                _regionCH = uiNamespace getVariable ["ARC_console_regionCH", 0];
-                if (!(_regionCX isEqualType 0)) then { _regionCX = _paneX; };
-                if (!(_regionCY isEqualType 0)) then { _regionCY = _boardY + _boardH; };
-                if (!(_regionCW isEqualType 0)) then { _regionCW = _paneW; };
-                if (!(_regionCH isEqualType 0)) then { _regionCH = 0; };
+                _regionCX = [uiNamespace getVariable ["ARC_console_regionCX", _paneX], _paneX] call _numOrDefault;
+                _regionCY = [uiNamespace getVariable ["ARC_console_regionCY", _boardY + _boardH], _boardY + _boardH] call _numOrDefault;
+                _regionCW = [uiNamespace getVariable ["ARC_console_regionCW", _paneW], _paneW] call _numOrDefault;
+                _regionCH = [uiNamespace getVariable ["ARC_console_regionCH", 0], 0] call _numOrDefault;
             };
 
             // FULL layout does not activate Region C, so reserve a local bottom
             // pane to keep the CT_MAP from using its config-time detail overlay.
             if (_regionCH <= 0) then {
                 private _paneBottom = _paneY + _paneH;
-                private _maxMapRegionH = (_paneBottom - _boardY - _AIR_BOARD_H_MIN - _AIR_MAP_PAD) max 0;
-                _regionCH = ((_paneH * _AIR_MAP_REGION_FRAC) max _AIR_MAP_MIN_H) min _maxMapRegionH;
+                private _availableMapRegionH = (_paneBottom - _boardY - _AIR_BOARD_H_MIN - _AIR_MAP_PAD) max 0;
+                _regionCH = ((_paneH * _AIR_MAP_REGION_FRAC) max _AIR_MAP_MIN_H) min _availableMapRegionH;
                 if (_regionCH > 0) then {
                     _regionCX = _paneX;
                     _regionCW = _paneW;
