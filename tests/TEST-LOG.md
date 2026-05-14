@@ -13,7 +13,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-05-14 — CIVSUB cap enforcement parse fix (Mode A)
 
-**Branch/Commit:** copilot/fix-civsub-caps-enforce-error @ d3412ba
+**Branch/Commit:** copilot/fix-civsub-caps-enforce-error @ 264c725
 
 **Scenario:** Fixed a CIVSUB civilian cap enforcement SQF parse/runtime error around the global-cap evictable-count guard, and removed same-file sqflint compatibility hazards in HashMap defaults, `keys`, and `#` indexing.
 
