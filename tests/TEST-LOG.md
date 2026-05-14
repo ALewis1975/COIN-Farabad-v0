@@ -11,6 +11,25 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-14 — Air/Tower validation coverage follow-up (Mode E/G/I)
+
+**Branch/Commit:** copilot/address-air-tower-recommendations @ 3492b7a
+
+**Scenario:** Implemented the Air/Tower validation follow-up items not covered by PR #533: added RemoteExec contract validation script, static queue lifecycle contract checks, and a runtime QA checklist. Also fixed a missing `hasInterface` guard in `fn_airbaseClientRequestClearanceDecision.sqf` (correctness bug found during analysis).
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Compat scan on changed SQF file | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbaseClientRequestClearanceDecision.sqf` | PASS | No known parser-compat patterns. |
+| 2 | Whitespace check | `git --no-pager diff --check` | PASS | No whitespace errors. |
+| 3 | Air/Tower RemoteExec contract check | `bash scripts/dev/check_remoteexec_contract.sh` | PASS | All 9 client wrappers have `hasInterface` guard; all use named remoteExec targets; all 10 server handlers have `isServer` guard; 9 main RPC handlers call `ARC_fnc_rpcValidateSender`; no anonymous remoteExec blocks across 45 Air/Tower files; all 10 CfgRemoteExec allowlist entries present. |
+| 4 | Air/Tower queue lifecycle contract checks | `bash tests/static/airbase_queue_lifecycle_contract_checks.sh` | PASS | Runway lock helpers registered and guarded; departure queue mutation helpers registered; RETURN-failure recovery (PR #533) present; public UI snapshot publishes all expected top-level fields with JIP replication; CT_MAP position-tuple safety confirmed via named index constants. |
+| 5 | AIRBASE planning-mode checks | `bash tests/static/airbase_planning_mode_checks.sh` | PASS | Existing planning-mode static checks unaffected. |
+| 6 | Console conflict check | `bash scripts/dev/check_console_conflicts.sh` | FAIL | Pre-existing duplicate IDC failures (`78201`, `78202`, `78211`) unrelated to this change. Documented in `docs/qa/AirTower_Runtime_QA_Checklist.md` under known issues. |
+| 7 | Runtime smoke: Air/Tower queue and snapshot behaviour | Open AIRFIELD_OPS in local MP/dedicated Arma 3 session, exercise all scenarios in `docs/qa/AirTower_Runtime_QA_Checklist.md` | BLOCKED | Arma 3 runtime unavailable in this sandbox. Full 12-scenario checklist documented for mission testers. |
+| 8 | JIP / dedicated server replication check | Dedicated server + at least one JIP client; verify `ARC_pub_airbaseUiSnapshot` freshness | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+
+---
+
 ## 2026-05-14 — Air/Tower queue recovery and snapshot mapping fixes (Mode A)
 
 **Branch/Commit:** copilot/research-air-tower-system @ fb36154 (post-fix working tree validated in-session)
