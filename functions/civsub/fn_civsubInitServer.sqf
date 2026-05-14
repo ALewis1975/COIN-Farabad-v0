@@ -229,13 +229,16 @@ if (!(missionNamespace getVariable ["civsub_v1_autoConnectThreadRunning", false]
                 if (!(_scanMax isEqualType 0)) then { _scanMax = 25; };
                 _scanMax = (_scanMax max 10) min 200;
                 if (_total > 200) then { _scanMax = _scanMax min 25; };
+                private _scanBudgetS = missionNamespace getVariable ["civsub_v1_autoConnectScanBudget_s", 0.01];
+                if (!(_scanBudgetS isEqualType 0)) then { _scanBudgetS = 0.01; };
+                _scanBudgetS = (_scanBudgetS max 0.002) min 0.05;
 
                 private _startIdx = missionNamespace getVariable ["civsub_v1_autoConnectScanIndex", 0];
                 if (!(_startIdx isEqualType 0)) then { _startIdx = 0; };
                 if (_startIdx < 0 || { _startIdx >= _total }) then { _startIdx = 0; };
 
                 private _limit = _scanMax min _total;
-                private _timeBudgetEnd = diag_tickTime + 0.01;
+                private _timeBudgetEnd = diag_tickTime + _scanBudgetS;
                 for "_scanOffset" from 0 to (_limit - 1) do
                 {
                     if (diag_tickTime <= _timeBudgetEnd) then
