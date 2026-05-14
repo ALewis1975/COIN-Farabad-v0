@@ -117,6 +117,7 @@ if (_qKind isEqualTo "ARR" && { _qDetail isEqualType "" && { !(_qDetail isEqualT
         };
 
         private _aIdx = -1;
+        // Runtime assets are HashMaps; use the compiled helper so sqflint never parses direct HashMap `get`.
         {
             private _assetId = "";
             if (_x isEqualType createHashMap) then {

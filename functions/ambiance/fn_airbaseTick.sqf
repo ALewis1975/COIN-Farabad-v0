@@ -1158,9 +1158,10 @@ if (_idxRecActive >= 0) then {
         { if (([_x, "id", ""] call _fnHmGetLocal) isEqualTo _detail) exitWith { _returnAssetIdx = _forEachIndex; }; } forEach _assetsL;
         if (_returnAssetIdx >= 0) then {
             private _returnAsset = _assetsL select _returnAssetIdx;
+            private _returnFailureRetryS = 60;
             _returnAsset set ["state", "COOLDOWN"];
             _returnAsset set ["activeFlight", ""];
-            _returnAsset set ["availableAt", serverTime + 60];
+            _returnAsset set ["availableAt", serverTime + _returnFailureRetryS];
             missionNamespace setVariable ["airbase_v1_rt", _rtL, true];
 
             ["OPS", format ["AIRBASE: RETURN arrival %1 failed; asset %2 reset to cooldown", _fid, _detail], getMarkerPos "mkr_airbaseCenter", 0, [
