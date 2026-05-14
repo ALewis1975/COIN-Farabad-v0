@@ -68,7 +68,8 @@ for "_i" from 1 to _tries do
     };
 
     private _r2 = objNull;
-    private _bestDelta = 1e12;
+    private _noDirectionMatch = 1e12;
+    private _bestDelta = _noDirectionMatch;
     {
         if (isNull _x) then { continue; };
         private _onward = roadsConnectedTo _x;
