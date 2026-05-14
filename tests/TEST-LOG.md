@@ -13,7 +13,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-05-14 — Air/Tower validation coverage follow-up (Mode E/G/I)
 
-**Branch/Commit:** copilot/address-air-tower-recommendations @ 679e292
+**Branch/Commit:** copilot/address-air-tower-recommendations @ 3492b7a
 
 **Scenario:** Implemented the Air/Tower validation follow-up items not covered by PR #533: added RemoteExec contract validation script, static queue lifecycle contract checks, and a runtime QA checklist. Also fixed a missing `hasInterface` guard in `fn_airbaseClientRequestClearanceDecision.sqf` (correctness bug found during analysis).
 
