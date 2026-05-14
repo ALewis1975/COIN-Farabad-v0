@@ -28,7 +28,7 @@ _radius = (_radius max 20) min 500;
 if (!(_preferredDir isEqualType 0)) then { _preferredDir = -1; };
 if (_preferredDir >= 0) then { _preferredDir = _preferredDir % 360; };
 
-private _prefix = "mkr_highway_";
+private _prefix = "mkr_highway_"; // Mission.sqm highway direction marker naming convention.
 
 // Converts heading mismatch degrees into a meter-equivalent score penalty.
 private _dirWeight = missionNamespace getVariable ["ARC_highwayMarkerDirScoreWeightM", 0.45];
