@@ -13,7 +13,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-05-14 — IED lifecycle completion hooks (Mode B)
 
-**Branch/Commit:** copilot/research-ied-system-assessment @ 7b764a4
+**Branch/Commit:** copilot/research-ied-system-assessment @ 8111863
 
 **Scenario:** Implemented IED incomplete/stubbed area decomposition: active IED threat linkage, detonation-to-threat lifecycle updates, RTB/TOW EOD disposition server RPC, driven VBIED / suicide objective-kind production, and explicit deferred status for complex/chain IED modules.
 
@@ -24,7 +24,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | 3 | sqflint on changed SQF files | `sqflint -e w ...changed SQF files...` | BLOCKED | `sqflint: command not found` in sandbox. |
 | 4 | IED lifecycle static contract check | `bash tests/static/threat_ied_lifecycle_contract_checks.sh` | PASS | Covers active threat linkage, detonation lifecycle, RTB/TOW disposition RPC, advanced objective production, and complex/chain deferred status. |
 | 5 | Whitespace check | `git --no-pager diff --check` | PASS | No whitespace errors. |
-| 6 | Review-fix targeted compat/static check | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_execInitActive.sqf functions/ied/fn_vbiedServerOnDestroyed.sqf && bash tests/static/threat_ied_lifecycle_contract_checks.sh && git --no-pager diff --check` | PASS | Review readability/naming/comment/position-audit fixes stayed compat-clean and static contracts still pass. |
+| 6 | Review-fix targeted compat/static check | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_execInitActive.sqf functions/ied/fn_vbiedServerOnDestroyed.sqf functions/ui/fn_uiIncidentGetNextActions.sqf && bash tests/static/threat_ied_lifecycle_contract_checks.sh && git --no-pager diff --check` | PASS | Review readability/naming/comment/position-audit/status-text fixes stayed compat-clean and static contracts still pass. |
 | 7 | Runtime smoke: RTB_IED evidence delivery, TOW_VBIED disposal, driven VBIED, suicide bomber objective flow | Local MP / hosted Arma 3 session | BLOCKED | Arma 3 runtime unavailable in sandbox. |
 | 8 | Dedicated/JIP/reconnect validation | Dedicated server with JIP client and reconnect cycle | BLOCKED | Dedicated server/JIP rig unavailable in sandbox. |
 
