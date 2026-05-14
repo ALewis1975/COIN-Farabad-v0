@@ -390,6 +390,7 @@ case "DASH":
         if (!_canAirControl && { _airSubmode isEqualTo "CLEARANCES" }) then { _airSubmode = "AIRFIELD_OPS"; };
         if (!_debugAir && { _airSubmode isEqualTo "DEBUG" }) then { _airSubmode = "AIRFIELD_OPS"; };
         uiNamespace setVariable ["ARC_console_airSubmode", _airSubmode];
+        private _layoutModeActive = uiNamespace getVariable ["ARC_console_layoutModeActive", "FULL"];
 
         // AIRFIELD_OPS runtime layout pass:
         // chips + decision band above the board, map in dedicated Region C.
@@ -421,7 +422,6 @@ case "DASH":
             private _regionCY = _boardY + _boardH;
             private _regionCW = _paneW;
             private _regionCH = 0;
-            private _layoutModeActive = uiNamespace getVariable ["ARC_console_layoutModeActive", "FULL"];
             if (_layoutModeActive isEqualTo "DOCK_RIGHT") then {
                 _regionCX = uiNamespace getVariable ["ARC_console_regionCX", _paneX];
                 _regionCY = uiNamespace getVariable ["ARC_console_regionCY", _boardY + _boardH];
@@ -435,7 +435,8 @@ case "DASH":
                 private _paneBottom = _paneY + _paneH;
                 // Leave at least _AIR_BOARD_H_MIN above the fallback map pane.
                 private _availableMapRegionH = (_paneBottom - _boardY - _AIR_BOARD_H_MIN - _AIR_MAP_PAD) max 0;
-                _regionCH = ((_paneH * _AIR_MAP_REGION_FRAC) max _AIR_MAP_MIN_H) min _availableMapRegionH;
+                private _desiredMapRegionH = (_paneH * _AIR_MAP_REGION_FRAC) max _AIR_MAP_MIN_H;
+                _regionCH = _desiredMapRegionH min _availableMapRegionH;
                 if (_regionCH > 0) then {
                     _regionCX = _paneX;
                     _regionCW = _paneW;
