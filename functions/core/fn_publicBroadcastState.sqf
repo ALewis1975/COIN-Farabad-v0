@@ -594,10 +594,11 @@ private _uiDecisionQueue = [];
     private _requestId = _x param [0, ""];
     private _requestType = toUpper (_x param [1, ""]);
     private _pilotName = _x param [2, ""];
-    private _requestedAt = _x param [3, -1];
+    // _clearancePendingView is built earlier in this function from raw clearance records:
+    // view index 3 is aircraftNetId; view index 6 is the original createdAt timestamp.
+    private _requestedAt = _x param [6, -1];
     private _priority = _x param [4, 0];
     private _status = toUpper (_x param [5, ""]);
-    private _ownerName = _x param [6, ""];
     private _meta = _x param [9, []];
     if !(_meta isEqualType []) then { _meta = []; };
 
@@ -609,6 +610,20 @@ private _uiDecisionQueue = [];
     private _groupCallsignOpaque = [_callsign] call _isOpaqueAirId;
     if (_groupCallsignOpaque) then { _callsign = _pilotName; };
     if (_callsign isEqualTo "") then { _callsign = _requestId; };
+
+    private _ownerName = "";
+    private _decisionLane = [_meta, "lane", ""] call _metaValue;
+    _decisionLane = [_meta, "decisionLane", _decisionLane] call _metaValue;
+    if (!(_decisionLane isEqualType "")) then { _decisionLane = ""; };
+    _decisionLane = toLower _decisionLane;
+    {
+        if !(_x isEqualType []) then { continue; };
+        private _staffLane = toLower (_x param [0, ""]);
+        if (_staffLane isEqualTo _decisionLane) exitWith {
+            private _staffMode = toUpper (_x param [1, "AUTO"]);
+            if (_staffMode isEqualTo "MANNED") then { _ownerName = _x param [2, ""]; };
+        };
+    } forEach _staffingView;
 
     private _decisionNeeded = _status in ["PENDING", "AWAITING_TOWER_DECISION", "QUEUED"];
     if ((count _uiPendingClearances) < 6) then {

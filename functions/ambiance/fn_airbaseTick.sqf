@@ -1153,6 +1153,28 @@ if (_idxRecActive >= 0) then {
         ["airbase_v1_records", _recs2] call ARC_fnc_stateSet;
     };
 
+    private _inboundArrivalDetail = "INBOUND";
+    if (!_ok && { _kind isEqualTo "ARR" } && { _detail isEqualType "" } && { !(_detail isEqualTo _inboundArrivalDetail) }) then {
+        // Queue detail is the source assetId for RETURN arrivals; random arrivals use _inboundArrivalDetail.
+        private _returnAssetIdx = -1;
+        { if (([_x, "id", ""] call _fnHmGetLocal) isEqualTo _detail) exitWith { _returnAssetIdx = _forEachIndex; }; } forEach _assetsL;
+        if (_returnAssetIdx >= 0) then {
+            private _returnAsset = _assetsL select _returnAssetIdx;
+            private _returnFailureRetryS = missionNamespace getVariable ["airbase_v1_returnFailureRetry_s", 60];
+            if (!(_returnFailureRetryS isEqualType 0) || { _returnFailureRetryS < 1 }) then { _returnFailureRetryS = 60; };
+            _returnAsset set ["state", "COOLDOWN"];
+            _returnAsset set ["activeFlight", ""];
+            _returnAsset set ["availableAt", serverTime + _returnFailureRetryS];
+            missionNamespace setVariable ["airbase_v1_rt", _rtL, true];
+
+            ["OPS", format ["AIRBASE: RETURN arrival %1 failed; asset %2 reset to cooldown", _fid, _detail], getMarkerPos "mkr_airbaseCenter", 0, [
+                ["event", "AIRBASE_RETURN_FAILURE_RECOVERED"],
+                ["flightId", _fid],
+                ["assetId", _detail]
+            ]] call ARC_fnc_intelLog;
+        };
+    };
+
     missionNamespace setVariable ["airbase_v1_execFid", "", true];
 
     [_fid, _kind, _detail, if (_ok) then {"COMPLETE"} else {"FAILED"}, false, "EXEC_FINISH"] call ARC_fnc_airbaseRunwayLockRelease;
