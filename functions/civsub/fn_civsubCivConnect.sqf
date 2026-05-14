@@ -80,4 +80,4 @@ if (_reg isEqualType createHashMap) then
 };
 
 _unit setVariable ["civsub_v1_connectSource", _source, true];
-true
+if (true) exitWith {true};
