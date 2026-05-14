@@ -13,7 +13,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-05-14 — Highway marker direction integration (Mode B)
 
-**Branch/Commit:** copilot/add-empty-markers-highways (actual task branch) @ 5c27f6c (post-fix working tree validated in-session)
+**Branch/Commit:** use-highway-direction-markers (task branch: copilot/add-empty-markers-highways) @ 5c27f6c (post-fix working tree validated in-session)
 
 **Scenario:** Added shared `mkr_highway_*` marker direction resolution and wired it into CIVTRAF parked/moving placement plus convoy spawn direction planning.
 

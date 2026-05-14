@@ -34,13 +34,39 @@ private _dirWeight = missionNamespace getVariable ["ARC_highwayMarkerDirScoreWei
 if (!(_dirWeight isEqualType 0)) then { _dirWeight = 0.45; };
 _dirWeight = (_dirWeight max 0) min 3;
 
+private _markers = [];
+if (isServer) then
+{
+    private _allCount = count allMapMarkers;
+    private _cache = missionNamespace getVariable ["ARC_highwayMarkerCache", []];
+    private _cacheCount = missionNamespace getVariable ["ARC_highwayMarkerCacheAllCount", -1];
+    if (!(_cache isEqualType []) || { !(_cacheCount isEqualType 0) } || { !(_cacheCount isEqualTo _allCount) }) then
+    {
+        _cache = [];
+        {
+            private _markerName = _x;
+            if (!(_markerName isEqualType "")) then { continue; };
+            if ((_markerName find _prefix) isEqualTo 0) then { _cache pushBack _markerName; };
+        } forEach allMapMarkers;
+        missionNamespace setVariable ["ARC_highwayMarkerCache", _cache, false];
+        missionNamespace setVariable ["ARC_highwayMarkerCacheAllCount", _allCount, false];
+    };
+    _markers = _cache;
+}
+else
+{
+    {
+        private _markerName = _x;
+        if (!(_markerName isEqualType "")) then { continue; };
+        if ((_markerName find _prefix) isEqualTo 0) then { _markers pushBack _markerName; };
+    } forEach allMapMarkers;
+};
+
 private _best = [];
 private _bestScore = 1e12;
 
 {
     private _markerName = _x;
-    if (!(_markerName isEqualType "")) then { continue; };
-    if (!((_markerName find _prefix) isEqualTo 0)) then { continue; };
 
     private _markerPos = getMarkerPos _markerName;
     if (!(_markerPos isEqualType []) || { (count _markerPos) < 2 }) then { continue; };
@@ -65,6 +91,6 @@ private _bestScore = 1e12;
         _bestScore = _score;
         _best = [_markerName, _markerPos, _dir, _dist];
     };
-} forEach allMapMarkers;
+} forEach _markers;
 
 _best

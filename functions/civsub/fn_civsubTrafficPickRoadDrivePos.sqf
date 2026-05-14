@@ -59,7 +59,7 @@ for "_i" from 1 to _tries do
 
     if (surfaceIsWater _rPos) then { continue; };
 
-    private _hwyMarker = [_rPos, (missionNamespace getVariable ["civsub_v1_traffic_highwayMarkerRadius_m", 85])] call ARC_fnc_worldHighwayMarkerNearest;
+    private _hwyMarker = [_rPos, (missionNamespace getVariable ["civsub_v1_traffic_highwayMarkerRadius_m", 85]), -1] call ARC_fnc_worldHighwayMarkerNearest;
     private _hwyDir = -1;
     if (_hwyMarker isEqualType [] && { (count _hwyMarker) >= 3 }) then
     {

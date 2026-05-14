@@ -435,7 +435,7 @@ if (_allowMoving) then
             continue;
         };
 
-        private _hwyMarker = [_curPos, (missionNamespace getVariable ["civsub_v1_traffic_highwayMarkerRadius_m", 85])] call ARC_fnc_worldHighwayMarkerNearest;
+        private _hwyMarker = [_curPos, (missionNamespace getVariable ["civsub_v1_traffic_highwayMarkerRadius_m", 85]), (getDir _veh)] call ARC_fnc_worldHighwayMarkerNearest;
         private _hwyDir = -1;
         if (_hwyMarker isEqualType [] && { (count _hwyMarker) >= 3 }) then
         {
