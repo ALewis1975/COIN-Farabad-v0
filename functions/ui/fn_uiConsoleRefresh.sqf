@@ -405,6 +405,7 @@ case "DASH":
             private _AIR_MAP_PAD = safeZoneH * 0.004;
             private _AIR_MAP_MIN_W = safeZoneW * 0.12;
             private _AIR_MAP_MIN_H = safeZoneH * 0.08;
+            private _AIR_MAP_REGION_FRAC = 0.42;
 
             private _listP = ctrlPosition _ctrlList;
             private _detailsP = ctrlPosition _ctrlDetailsGrp;
@@ -416,6 +417,28 @@ case "DASH":
             private _bandH = (_paneH * _AIR_BAND_H_FRAC) max _AIR_BAND_H_MIN;
             private _boardY = _paneY + _stripH + _AIR_PAD_Y + _bandH + _AIR_PAD_Y;
             private _boardH = ((_paneY + _paneH) - _boardY) max _AIR_BOARD_H_MIN;
+            private _regionCX = uiNamespace getVariable ["ARC_console_regionCX", _paneX];
+            private _regionCY = uiNamespace getVariable ["ARC_console_regionCY", _boardY + _boardH];
+            private _regionCW = uiNamespace getVariable ["ARC_console_regionCW", _paneW];
+            private _regionCH = uiNamespace getVariable ["ARC_console_regionCH", 0];
+            if (!(_regionCX isEqualType 0)) then { _regionCX = _paneX; };
+            if (!(_regionCY isEqualType 0)) then { _regionCY = _boardY + _boardH; };
+            if (!(_regionCW isEqualType 0)) then { _regionCW = _paneW; };
+            if (!(_regionCH isEqualType 0)) then { _regionCH = 0; };
+
+            // FULL layout does not activate Region C, so reserve a local bottom
+            // pane to keep the CT_MAP from using its config-time detail overlay.
+            if (_regionCH <= 0) then {
+                private _paneBottom = _paneY + _paneH;
+                private _maxMapRegionH = (_paneBottom - _boardY - _AIR_BOARD_H_MIN - _AIR_MAP_PAD) max 0;
+                _regionCH = ((_paneH * _AIR_MAP_REGION_FRAC) max _AIR_MAP_MIN_H) min _maxMapRegionH;
+                if (_regionCH > 0) then {
+                    _regionCX = _paneX;
+                    _regionCW = _paneW;
+                    _regionCY = _paneBottom - _regionCH;
+                    _boardH = (_regionCY - _AIR_MAP_PAD - _boardY) max _AIR_BOARD_H_MIN;
+                };
+            };
 
             _airStripGroup ctrlSetPosition [_paneX, _paneY, _paneW, _stripH];
             _airStripGroup ctrlCommit 0;
@@ -432,10 +455,6 @@ case "DASH":
             };
 
             if (!isNull _airTrafficMap) then {
-                private _regionCX = uiNamespace getVariable ["ARC_console_regionCX", _paneX];
-                private _regionCY = uiNamespace getVariable ["ARC_console_regionCY", _boardY + _boardH];
-                private _regionCW = uiNamespace getVariable ["ARC_console_regionCW", _paneW];
-                private _regionCH = uiNamespace getVariable ["ARC_console_regionCH", 0];
                 if (_regionCH > 0) then {
                     private _mapW = (_regionCW - (2 * _AIR_MAP_PAD)) max _AIR_MAP_MIN_W;
                     private _mapH = (_regionCH - (2 * _AIR_MAP_PAD)) max _AIR_MAP_MIN_H;
