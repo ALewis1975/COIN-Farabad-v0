@@ -594,7 +594,8 @@ private _uiDecisionQueue = [];
     private _requestId = _x param [0, ""];
     private _requestType = toUpper (_x param [1, ""]);
     private _pilotName = _x param [2, ""];
-    // _clearancePendingView remaps request records: index 3 is aircraftNetId, index 6 is createdAt.
+    // _clearancePendingView is built earlier in this function from raw clearance records:
+    // view index 3 is aircraftNetId; view index 6 is the original createdAt timestamp.
     private _requestedAt = _x param [6, -1];
     private _priority = _x param [4, 0];
     private _status = toUpper (_x param [5, ""]);
