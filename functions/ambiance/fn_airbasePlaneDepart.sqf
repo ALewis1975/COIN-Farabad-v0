@@ -128,6 +128,49 @@ private _fnAbortToIdle = {
     [_crewL] call ARC_fnc_airbaseCrewIdleStart;
 };
 
+private _fnGetDirectionBetween = {
+    params [
+        ["_fromPos", [], [[]]],
+        ["_toPos", [], [[]]],
+        ["_fallbackDir", 0, [0]]
+    ];
+    if ((count _fromPos) < 2) exitWith { _fallbackDir };
+    if ((count _toPos) < 2) exitWith { _fallbackDir };
+
+    private _dir = _fallbackDir;
+
+    private _dx = (_toPos select 0) - (_fromPos select 0);
+    private _dy = (_toPos select 1) - (_fromPos select 1);
+    if (((abs _dx) + (abs _dy)) > 0.1) then {
+        _dir = _dx atan2 _dy;
+        if (_dir < 0) then { _dir = _dir + 360; };
+    };
+
+    _dir
+};
+
+private _fnSetRunwayClimbVelocity = {
+    params [
+        ["_vehLocal", objNull, [objNull]],
+        ["_dir", 0, [0]],
+        ["_fwdMps", 0, [0]],
+        ["_upMps", 0, [0]]
+    ];
+    if (isNull _vehLocal) exitWith { false };
+    if (!(_dir isEqualType 0)) exitWith { false };
+    if (!(_fwdMps isEqualType 0)) exitWith { false };
+    if (!(_upMps isEqualType 0)) exitWith { false };
+
+    _vehLocal setDir _dir;
+    _vehLocal setVelocity [
+        (sin _dir) * _fwdMps,
+        (cos _dir) * _fwdMps,
+        _upMps
+    ];
+
+    true
+};
+
 // --- resolve crew ---
 private _crew = [_asset, "crew", []] call _hg;
 if (!(_crew isEqualType [])) then { _crew = []; };
@@ -418,6 +461,9 @@ if (_isHeli) then {
 };
 
 private _kickPos = _despawnPos;
+private _takeoffKickDir = getDir _veh;
+private _takeoffKickFwdMps = 18;
+private _takeoffKickUpMps = 5;
 
 if (_isHeli) then {
     private _altLow = missionNamespace getVariable ["airbase_v1_rw_takeoff_alt_low_m", 3];
@@ -428,6 +474,10 @@ if (_isHeli) then {
     if (!(_rwClimbStepIntervalS isEqualType 0) || { _rwClimbStepIntervalS < 1 }) then { _rwClimbStepIntervalS = 4; };
     private _rwClimbKickFwd = missionNamespace getVariable ["airbase_v1_rw_climb_kick_forward_mps", 18];
     if (!(_rwClimbKickFwd isEqualType 0) || { _rwClimbKickFwd < 6 }) then { _rwClimbKickFwd = 18; };
+    private _rwClimbKickUp = missionNamespace getVariable ["airbase_v1_rw_climb_kick_up_mps", 5];
+    if (!(_rwClimbKickUp isEqualType 0) || { _rwClimbKickUp < 1 }) then { _rwClimbKickUp = 5; };
+    _takeoffKickFwdMps = _rwClimbKickFwd;
+    _takeoffKickUpMps = _rwClimbKickUp;
     private _rwClimbProfileTimeoutS = missionNamespace getVariable ["airbase_v1_rw_climb_profile_timeout_s", 240];
     if (!(_rwClimbProfileTimeoutS isEqualType 0) || { _rwClimbProfileTimeoutS < 30 }) then { _rwClimbProfileTimeoutS = 240; };
 
@@ -444,6 +494,9 @@ if (_isHeli) then {
     private _hasClear = !(_clearPos isEqualTo [0,0,0]);
 
     if (_hasOut) then { _kickPos = _outPos; };
+
+    private _runwayDir = if (_hasOut && { _hasClear }) then { [_outPos, _clearPos, _takeoffKickDir] call _fnGetDirectionBetween } else { _takeoffKickDir };
+    _takeoffKickDir = _runwayDir;
 
     _veh engineOn true;
     _veh land "NONE";
@@ -464,8 +517,8 @@ if (_isHeli) then {
         if (!(_climbTrig isEqualType 0) || { _climbTrig < 3 }) then { _climbTrig = 15; };
 
         // Near runway start marker: begin climb to departure altitude (default ~500ft).
-        [_fid, _veh, _outPos, _cruiseAlt, _climbTrig, _rwClimbStepAlt, _rwClimbStepIntervalS, _rwClimbKickFwd, _rwClimbProfileTimeoutS, _debugOps] spawn {
-            params ["_fidL", "_vehL", "_outPosL", "_altTargetL", "_trigL", "_stepAltL", "_stepIntervalSL", "_kickForwardL", "_profileTimeoutSL", "_dbgOpsL"];
+        [_fid, _veh, _outPos, _cruiseAlt, _climbTrig, _rwClimbStepAlt, _rwClimbStepIntervalS, _rwClimbKickFwd, _rwClimbKickUp, _rwClimbProfileTimeoutS, _runwayDir, _fnSetRunwayClimbVelocity, _debugOps] spawn {
+            params ["_fidL", "_vehL", "_outPosL", "_altTargetL", "_trigL", "_stepAltL", "_stepIntervalSL", "_kickForwardL", "_kickUpL", "_profileTimeoutSL", "_runwayDirL", "_setRunwayClimbVelocityL", "_dbgOpsL"];
             private _t0 = time;
             waitUntil {
                 sleep 1;
@@ -476,36 +529,36 @@ if (_isHeli) then {
             if (isNull _vehL || {!alive _vehL}) exitWith {};
 
             _vehL land "NONE";
-            _vehL flyInHeight _altTargetL;
+            private _cmdAlt = (_stepAltL min _altTargetL) max 8;
+            _vehL flyInHeight _cmdAlt;
+            [_vehL, _runwayDirL, _kickForwardL, _kickUpL] call _setRunwayClimbVelocityL;
 
-            // Nudge climb: AI sometimes skims the runway after a unitPlay taxi.
-            _vehL setVelocityModelSpace [0, 25, 0];
+            private _tRamp0 = time;
+            while { !isNull _vehL && {alive _vehL} && {_cmdAlt < _altTargetL} && {(time - _tRamp0) < _profileTimeoutSL} } do {
+                sleep _stepIntervalSL;
+                _cmdAlt = (_cmdAlt + _stepAltL) min _altTargetL;
+                _vehL land "NONE";
+                _vehL flyInHeight _cmdAlt;
+                [_vehL, _runwayDirL, _kickForwardL, _kickUpL] call _setRunwayClimbVelocityL;
+            };
 
-            // If it's still low after a few seconds, nudge again.
-            sleep 5;
-            if (!isNull _vehL && {alive _vehL}) then {
+            if (_dbgOpsL) then {
                 private _altNow = (getPosATL _vehL) select 2;
-                if (_altNow < (10 max (_altTargetL * 0.25))) then {
-                    _vehL land "NONE";
-                    _vehL flyInHeight _altTargetL;
-                    _vehL setVelocityModelSpace [0, 25, 0];
-
-                    if (_dbgOpsL) then {
-                        ["OPS", format ["AIRBASE: %1 climb nudge (alt=%2m target=%3m)", _fidL, round _altNow, _altTargetL], getPosATL _vehL, 0, []] call ARC_fnc_intelLog;
-                    };
-                };
+                ["OPS", format ["AIRBASE: %1 helo runway climb profile active (alt=%2m target=%3m)", _fidL, round _altNow, _altTargetL], getPosATL _vehL, 0, [
+                    ["runwayDir", _runwayDirL]
+                ]] call ARC_fnc_intelLog;
             };
         };
     } else {
         // Missing outbound marker: start a progressive climb immediately.
-        [_fid, _veh, _cruiseAlt, _rwClimbStepAlt, _rwClimbStepIntervalS, _rwClimbKickFwd, _rwClimbProfileTimeoutS, _debugOps] spawn {
-            params ["_fidL", "_vehL", "_altTargetL", "_stepAltL", "_stepIntervalSL", "_kickForwardL", "_profileTimeoutSL", "_dbgOpsL"];
+        [_fid, _veh, _cruiseAlt, _rwClimbStepAlt, _rwClimbStepIntervalS, _rwClimbKickFwd, _rwClimbKickUp, _rwClimbProfileTimeoutS, _runwayDir, _fnSetRunwayClimbVelocity, _debugOps] spawn {
+            params ["_fidL", "_vehL", "_altTargetL", "_stepAltL", "_stepIntervalSL", "_kickForwardL", "_kickUpL", "_profileTimeoutSL", "_runwayDirL", "_setRunwayClimbVelocityL", "_dbgOpsL"];
             if (isNull _vehL || {!alive _vehL}) exitWith {};
 
             _vehL land "NONE";
             private _cmdAlt = (_stepAltL min _altTargetL) max 5;
             _vehL flyInHeight _cmdAlt;
-            _vehL setVelocityModelSpace [0, _kickForwardL, 0];
+            [_vehL, _runwayDirL, _kickForwardL, _kickUpL] call _setRunwayClimbVelocityL;
 
             private _tRamp0 = time;
             // Timeout keeps the helper from running forever; when reached, AI continues on existing waypoints at last commanded altitude.
@@ -514,7 +567,7 @@ if (_isHeli) then {
                 _cmdAlt = (_cmdAlt + _stepAltL) min _altTargetL;
                 _vehL land "NONE";
                 _vehL flyInHeight _cmdAlt;
-                _vehL setVelocityModelSpace [0, _kickForwardL, 0];
+                [_vehL, _runwayDirL, _kickForwardL, _kickUpL] call _setRunwayClimbVelocityL;
             };
 
             if (_dbgOpsL) then {
@@ -607,8 +660,8 @@ private _kickTimeout = missionNamespace getVariable ["airbase_v1_takeoffKickTime
 if (!(_kickTimeout isEqualType 0) || { _kickTimeout < 10 }) then { _kickTimeout = 45; };
 
 if (_kickEnabled) then {
-    [_fid, _veh, _pilot, _grp, _kickPos, _isHeli, _kickTimeout, _debugOps] spawn {
-        params ["_fidL", "_vehL", "_pilotL", "_grpL", "_kickPosL", "_isHeliL", "_timeoutS", "_debugOpsL"];
+    [_fid, _veh, _pilot, _grp, _kickPos, _takeoffKickDir, _takeoffKickFwdMps, _takeoffKickUpMps, _fnSetRunwayClimbVelocity, _isHeli, _kickTimeout, _debugOps] spawn {
+        params ["_fidL", "_vehL", "_pilotL", "_grpL", "_kickPosL", "_kickDirL", "_kickFwdMpsL", "_kickUpMpsL", "_setRunwayClimbVelocityL", "_isHeliL", "_timeoutS", "_debugOpsL"];
         if (isNull _vehL || {!alive _vehL}) exitWith {};
         private _tStart = time;
         private _d0 = _vehL distance2D _kickPosL;
@@ -629,8 +682,8 @@ if (_kickEnabled) then {
 
             if (_isHeliL) then {
                 _vehL land "NONE";
-                _vehL flyInHeight 5;
-                _vehL setVelocityModelSpace [0, 10, 0];
+                _vehL flyInHeight 10;
+                [_vehL, _kickDirL, _kickFwdMpsL, _kickUpMpsL] call _setRunwayClimbVelocityL;
                 _pilotL doMove _kickPosL;
             } else {
                 _vehL land "NONE";

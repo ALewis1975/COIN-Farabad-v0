@@ -399,7 +399,7 @@ if (_isPrisonerRole && { missionNamespace getVariable ["civsub_v1_enabled", fals
         {
             if (!isNull _x && { _x getVariable ["ARC_prisoner", false] }) then
             {
-                [_x, _prisonDistrictId] call ARC_fnc_civsubCivAssignIdentity;
+                [_x, _prisonDistrictId, "SITEPOP_PRISONER"] call ARC_fnc_civsubCivConnect;
             };
         } forEach (units _grp);
         diag_log format ["[ARC][SITEPOP][INFO] ARC_fnc_sitePopBuildGroup: site '%1' role '%2' — CIVSUB identities assigned (district=%3).", _siteId, _roleTag, _prisonDistrictId];

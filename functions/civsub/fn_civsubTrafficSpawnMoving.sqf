@@ -188,6 +188,7 @@ _drv doMove _nextRoadPos;
 // Tags
 _veh setVariable ["ARC_civtraf_role", "MOVING", true];
 _veh setVariable ["ARC_civtraf_districtId", _districtId, true];
+[_drv, _districtId, "CIVTRAF_MOVING"] call ARC_fnc_civsubCivConnect;
 _veh setVariable ["ARC_civtraf_spawnTs", serverTime, true];
 _veh setVariable ["ARC_civtraf_nextMoveTs", serverTime + (_wpRefreshBase + random _wpRefreshJitter), true];
 _veh setVariable ["ARC_civtraf_moveTarget", _nextRoadPos, true];

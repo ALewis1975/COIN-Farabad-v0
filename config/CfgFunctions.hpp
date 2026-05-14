@@ -367,6 +367,7 @@ class CfgFunctions
             class civsubDistrictsFindByPosLocal {};
 
             class civsubCivSpawnInDistrict {};
+            class civsubCivConnect {};
             class civsubCivAssignIdentity {};
             class civsubRegisterEditorCivs {};
 
