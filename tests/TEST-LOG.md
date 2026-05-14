@@ -13,7 +13,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-05-14 — CIVSUB cap enforcement parse fix (Mode A)
 
-**Branch/Commit:** copilot/fix-civsub-caps-enforce-error @ 264c725
+**Branch/Commit:** copilot/fix-civsub-caps-enforce-error @ 54e15db
 
 **Scenario:** Fixed a CIVSUB civilian cap enforcement SQF parse/runtime error around the global-cap evictable-count guard, and removed same-file sqflint compatibility hazards in HashMap defaults, `keys`, and `#` indexing.
 
@@ -32,6 +32,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | 11 | Follow-up changed-file sqflint | `sqflint -e w functions/civsub/fn_civsubCivCapsEnforce.sqf` | BLOCKED | `sqflint` is not installed in the sandbox. |
 | 12 | Follow-up whitespace check | `git --no-pager diff --check` | PASS | No whitespace errors after direct `get` follow-up fix. |
 | 13 | Review follow-up active district validation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubCivCapsEnforce.sqf && git --no-pager diff --check` | PASS | Replaced the redundant `_active` type guard with active district ID element validation; sqflint remains blocked locally because it is not installed. |
+| 14 | Review follow-up validation style | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubCivCapsEnforce.sqf && git --no-pager diff --check` | PASS | Reworked active district ID validation to use a short-circuit `while` loop with parser-safe `select` indexing. |
 
 ---
 
