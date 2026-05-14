@@ -117,7 +117,14 @@ if (_qKind isEqualTo "ARR" && { _qDetail isEqualType "" && { !(_qDetail isEqualT
         };
 
         private _aIdx = -1;
-        { private _assetId = ""; if (_x isEqualType createHashMap) then { _assetId = [_x, "id", ""] call _hg; if (isNil "_assetId" || {!(_assetId isEqualType "")}) then { _assetId = ""; }; }; if (_assetId isEqualTo _qDetail) exitWith { _aIdx = _forEachIndex; }; } forEach _assets;
+        {
+            private _assetId = "";
+            if (_x isEqualType createHashMap) then {
+                _assetId = [_x, "id", ""] call _hg;
+                if (isNil "_assetId" || {!(_assetId isEqualType "")}) then { _assetId = ""; };
+            };
+            if (_assetId isEqualTo _qDetail) exitWith { _aIdx = _forEachIndex; };
+        } forEach _assets;
 
         if (_aIdx < 0) exitWith {
             private _owner = owner _caller;
