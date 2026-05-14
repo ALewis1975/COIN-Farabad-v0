@@ -75,6 +75,7 @@ class CfgRemoteExec
         // IED / VBIED RPCs
         class ARC_fnc_iedCollectEvidence            { allowedTargets = 2; };
         class ARC_fnc_iedServerDetonate             { allowedTargets = 2; };
+        class ARC_fnc_iedServerRequestDisposition   { allowedTargets = 2; };
         class ARC_fnc_vbiedServerDetonate           { allowedTargets = 2; };
         class ARC_fnc_suicideBomberOnDetonate       { allowedTargets = 2; };
 

@@ -1139,6 +1139,7 @@ if (_dbgEnabled) then
 
 ["activeIedEvidenceNetId", ["activeIedEvidenceNetId", ""] call ARC_fnc_stateGet],
 ["activeIedEvidenceCollected", ["activeIedEvidenceCollected", false] call ARC_fnc_stateGet],
+["activeIedEvidenceRtbRequested", ["activeIedEvidenceRtbRequested", false] call ARC_fnc_stateGet],
 ["activeIedEvidenceTransportEnabled", ["activeIedEvidenceTransportEnabled", false] call ARC_fnc_stateGet],
 ["activeIedEvidenceDelivered", ["activeIedEvidenceDelivered", false] call ARC_fnc_stateGet],
 ["activeIedEvidenceLeadId", ["activeIedEvidenceLeadId", ""] call ARC_fnc_stateGet],
@@ -1151,6 +1152,7 @@ if (_dbgEnabled) then
             ["activeVbiedDeviceId", ["activeVbiedDeviceId", ""] call ARC_fnc_stateGet],
             ["activeVbiedDetonated", ["activeVbiedDetonated", false] call ARC_fnc_stateGet],
             ["activeVbiedSafe", ["activeVbiedSafe", false] call ARC_fnc_stateGet],
+            ["activeVbiedTowRequested", ["activeVbiedTowRequested", false] call ARC_fnc_stateGet],
             ["activeVbiedDisposed", ["activeVbiedDisposed", false] call ARC_fnc_stateGet],
             ["activeVbiedDestroyedCause", ["activeVbiedDestroyedCause", ""] call ARC_fnc_stateGet],
             ["vbiedPhase3RecordsCount", count (missionNamespace getVariable ["ARC_vbiedPhase3_deviceRecords", []])],
