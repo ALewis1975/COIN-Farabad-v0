@@ -20,6 +20,9 @@ params [
 private _lines = [];
 private _trimFn = compile "params ['_s']; trim _s";
 
+private _roleCatNorm = toUpper ([_roleCat] call _trimFn);
+private _canActOnIncident = !(_roleCatNorm isEqualTo 'GUEST');
+
 private _taskId = missionNamespace getVariable ['ARC_activeTaskId',''];
 if (!(_taskId isEqualType '')) then { _taskId = ''; };
 _taskId = [_taskId] call _trimFn;
@@ -48,7 +51,6 @@ private _issuedCount = 0;
 } forEach _orders;
 
 // EOD disposition approvals / gates
-private _eodApproved = false;
 private _appr = missionNamespace getVariable ['ARC_pub_eodDispoApprovals', []];
 if (!(_appr isEqualType [])) then { _appr = []; };
 
@@ -93,7 +95,14 @@ if (_hasIncident) then
 {
     if (!_accepted) then
     {
-        _lines pushBack "<t color='#FFFFA0'>Blocked:</t> Incident not accepted. <t color='#DDDDDD'>Next:</t> S3 / OPS tab <t color='#B89B6B'>→ ACCEPT ORDER</t>";
+        if (_canActOnIncident) then
+        {
+            _lines pushBack "<t color='#FFFFA0'>Blocked:</t> Incident not accepted. <t color='#DDDDDD'>Next:</t> S3 / OPS tab <t color='#B89B6B'>→ ACCEPT ORDER</t>";
+        }
+        else
+        {
+            _lines pushBack "<t color='#FFFFA0'>Blocked:</t> Incident not accepted. <t color='#DDDDDD'>Next:</t> Ask S3 / OPS to accept the order.";
+        };
     }
     else
     {
