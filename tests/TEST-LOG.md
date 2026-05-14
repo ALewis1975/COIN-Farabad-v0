@@ -11,6 +11,27 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-14 — AIR/TOWER map fallback layout fix (Mode A)
+
+**Branch/Commit:** copilot/fix-air-tower-screen-issues @ 7d8a08de17c4f052dc2d4d56083746862aafe5d0 (post-fix working tree validated in-session)
+
+**Scenario:** Fixed AIR/TOWER AIRFIELD_OPS full-console layout so the CT_MAP control reserves a bottom visual pane when Region C is not active, preventing the map from rendering over the right-side detail card.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline targeted compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleApplyLayout.sqf functions/ui/fn_uiConsoleRefresh.sqf functions/ui/fn_uiConsoleAirPaint.sqf functions/ui/fn_uiConsoleAirMapPaint.sqf` | PASS | No known parser-compat patterns before edits. |
+| 2 | Baseline targeted sqflint | `sqflint -e w <4 AIR/TOWER UI files>` | BLOCKED | `sqflint` was not installed in the sandbox before edits. |
+| 3 | Changed-file compat + sqflint | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleRefresh.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleRefresh.sqf` | PASS | Installed `sqflint` with `python3 -m pip install --user sqflint`; changed UI file linted clean. |
+| 4 | AIRBASE static contracts | `bash tests/static/airbase_queue_lifecycle_contract_checks.sh` | PASS | Queue lifecycle and CT_MAP tuple-index contracts passed. |
+| 5 | Targeted AIR/TOWER UI compat + sqflint | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleApplyLayout.sqf functions/ui/fn_uiConsoleRefresh.sqf functions/ui/fn_uiConsoleAirPaint.sqf functions/ui/fn_uiConsoleAirMapPaint.sqf && ~/.local/bin/sqflint -e w <4 AIR/TOWER UI files>` | PASS | All relevant AIR/TOWER UI files linted clean after the layout fix. |
+| 6 | Console conflict check | `bash scripts/dev/check_console_conflicts.sh` | FAIL | Pre-existing duplicate IDC failures (`78201`, `78202`, `78211`) remain unrelated to this AIR/TOWER map placement fix. |
+| 7 | Whitespace check | `git --no-pager diff --check` | PASS | No whitespace errors. |
+| 8 | Validation review follow-up | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleRefresh.sqf functions/ui/fn_uiConsoleApplyLayout.sqf functions/ui/fn_uiConsoleAirPaint.sqf functions/ui/fn_uiConsoleAirMapPaint.sqf && ~/.local/bin/sqflint -e w <4 AIR/TOWER UI files> && bash tests/static/airbase_queue_lifecycle_contract_checks.sh && git --no-pager diff --check` | PASS | Region C values are used only in DOCK_RIGHT; FULL layout computes the local fallback pane from current control positions. Removed one-off helper, documented the fallback board-height reservation, and renamed the fallback height variable for clarity. |
+| 9 | Runtime smoke: AIR/TOWER AIRFIELD_OPS full-console map placement | Open AIR/TOWER in Arma 3 full console layout and verify map sits below list/details without obscuring text | BLOCKED | Arma 3 runtime/UI renderer unavailable in sandbox. |
+| 10 | Dedicated/JIP replication check | Dedicated server with at least one JIP client; verify AIR/TOWER snapshot/map state remains client-rendered from server-published state | BLOCKED | Dedicated server and JIP rig unavailable in sandbox. |
+
+---
+
 ## 2026-05-14 — UI incident next-actions lint fix (Mode A)
 
 **Branch/Commit:** copilot/add-empty-markers-highways @ 1040591 (post-fix working tree validated in-session)
