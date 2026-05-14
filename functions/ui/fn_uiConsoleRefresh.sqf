@@ -284,6 +284,11 @@ private _auditLayout = {
     ["MainGroup", _ctrlMainGrp, "DetailsGroup", _ctrlDetailsGrp] call _addOverlap;
     ["MainList", _ctrlList, "DetailsGroup", _ctrlDetailsGrp] call _addOverlap;
     ["AirMap", _airTrafficMap, "DetailsGroup", _ctrlDetailsGrp] call _addOverlap;
+    if (_tab isEqualTo "AIR") then {
+        ["AirStatusStrip", _airStripGroup, "MainList", _ctrlList] call _addOverlap;
+        ["AirDecisionBand", _airDecisionBand, "MainList", _ctrlList] call _addOverlap;
+        ["AirMap", _airTrafficMap, "MainList", _ctrlList] call _addOverlap;
+    };
 
     if ((count _failures) > 0) then
     {
@@ -385,6 +390,60 @@ case "DASH":
         if (!_canAirControl && { _airSubmode isEqualTo "CLEARANCES" }) then { _airSubmode = "AIRFIELD_OPS"; };
         if (!_debugAir && { _airSubmode isEqualTo "DEBUG" }) then { _airSubmode = "AIRFIELD_OPS"; };
         uiNamespace setVariable ["ARC_console_airSubmode", _airSubmode];
+
+        // AIRFIELD_OPS runtime layout pass:
+        // chips + decision band above the board, map in dedicated Region C.
+        if (!isNull _ctrlList && { !isNull _ctrlDetailsGrp } && { !isNull _airStripGroup } && { !isNull _airDecisionBand }) then
+        {
+            private _AIR_MIN_PANE_H = safeZoneH * 0.10;
+            private _AIR_PAD_Y = safeZoneH * 0.004;
+            private _AIR_STRIP_H_FRAC = 0.08;
+            private _AIR_STRIP_H_MIN = safeZoneH * 0.024;
+            private _AIR_BAND_H_FRAC = 0.06;
+            private _AIR_BAND_H_MIN = safeZoneH * 0.020;
+            private _AIR_BOARD_H_MIN = safeZoneH * 0.08;
+            private _AIR_MAP_PAD = safeZoneH * 0.004;
+            private _AIR_MAP_MIN_W = safeZoneW * 0.12;
+            private _AIR_MAP_MIN_H = safeZoneH * 0.08;
+
+            private _listP = ctrlPosition _ctrlList;
+            private _detailsP = ctrlPosition _ctrlDetailsGrp;
+            private _paneX = _listP select 0;
+            private _paneY = _listP select 1;
+            private _paneW = ((_detailsP select 0) + (_detailsP select 2)) - _paneX;
+            private _paneH = ((_listP select 3) max (_detailsP select 3)) max _AIR_MIN_PANE_H;
+            private _stripH = (_paneH * _AIR_STRIP_H_FRAC) max _AIR_STRIP_H_MIN;
+            private _bandH = (_paneH * _AIR_BAND_H_FRAC) max _AIR_BAND_H_MIN;
+            private _boardY = _paneY + _stripH + _AIR_PAD_Y + _bandH + _AIR_PAD_Y;
+            private _boardH = ((_paneY + _paneH) - _boardY) max _AIR_BOARD_H_MIN;
+
+            _airStripGroup ctrlSetPosition [_paneX, _paneY, _paneW, _stripH];
+            _airStripGroup ctrlCommit 0;
+            _airDecisionBand ctrlSetPosition [_paneX, _paneY + _stripH + _AIR_PAD_Y, _paneW, _bandH];
+            _airDecisionBand ctrlCommit 0;
+
+            _ctrlList ctrlSetPosition [_listP select 0, _boardY, _listP select 2, _boardH];
+            _ctrlList ctrlCommit 0;
+            _ctrlDetailsGrp ctrlSetPosition [_detailsP select 0, _boardY, _detailsP select 2, _boardH];
+            _ctrlDetailsGrp ctrlCommit 0;
+            if (!isNull _ctrlDetails) then {
+                _ctrlDetails ctrlSetPosition [0.005, 0.005, 0.99, 0.99];
+                _ctrlDetails ctrlCommit 0;
+            };
+
+            if (!isNull _airTrafficMap) then {
+                private _regionCX = uiNamespace getVariable ["ARC_console_regionCX", _paneX];
+                private _regionCY = uiNamespace getVariable ["ARC_console_regionCY", _boardY + _boardH];
+                private _regionCW = uiNamespace getVariable ["ARC_console_regionCW", _paneW];
+                private _regionCH = uiNamespace getVariable ["ARC_console_regionCH", 0];
+                if (_regionCH > 0) then {
+                    private _mapW = (_regionCW - (2 * _AIR_MAP_PAD)) max _AIR_MAP_MIN_W;
+                    private _mapH = (_regionCH - (2 * _AIR_MAP_PAD)) max _AIR_MAP_MIN_H;
+                    _airTrafficMap ctrlSetPosition [_regionCX + _AIR_MAP_PAD, _regionCY + _AIR_MAP_PAD, _mapW, _mapH];
+                    _airTrafficMap ctrlCommit 0;
+                };
+            };
+        };
 
         [_b1, (if (_airMode isEqualTo "PILOT") then {"SEND REQUEST"} else {"AIR ACTION"}), true, true] call ARC_fnc_uiConsoleButtonState;
         [_b2, (if (_airMode isEqualTo "PILOT") then {"UPDATE"} else {"VIEW"}), true, true] call ARC_fnc_uiConsoleButtonState;

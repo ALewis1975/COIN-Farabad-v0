@@ -11,6 +11,26 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-14 — AIRFIELD_OPS decision-board layout refactor (Mode A)
+
+**Branch/Commit:** copilot/refactor-airfield-ops-layout @ fa317a5 (post-review working tree validated in-session)
+
+**Scenario:** Refactored AIR/TOWER AIRFIELD_OPS runtime placement so status chips and decision band sit above the traffic board, moved `AirTrafficMap` into Region C visual space, removed map/detail overlap behavior, and simplified default scan rows to ARRIVALS / RUNWAY / DEPARTURES with lower-priority counts in the detail card.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | CI/workflow triage | GitHub MCP `list_workflow_runs`, `list_workflow_jobs`, `get_job_logs` on failed run `25863326818` | PASS | Failure cause was sqflint compat (`trim` operator in `fn_uiConsoleApplyLayout.sqf`). |
+| 2 | Baseline targeted compat/lint | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleApplyLayout.sqf functions/ui/fn_uiConsoleRefresh.sqf functions/ui/fn_uiConsoleAirPaint.sqf functions/ui/fn_uiConsoleAirMapPaint.sqf` | FAIL | Baseline compat scan failed on direct `trim` in `fn_uiConsoleApplyLayout.sqf`. |
+| 3 | Changed-file compat + sqflint | `python3 scripts/dev/sqflint_compat_scan.py --strict <4 changed sqf files> && ~/.local/bin/sqflint -e w <4 changed sqf files>` | PASS | Added compiled trim/getOrDefault helpers and validated all changed SQF files lint clean. |
+| 4 | Console layout static audit | `bash scripts/dev/check_console_conflicts.sh` | FAIL | Pre-existing duplicate IDC failures (`78201`, `78202`, `78211`) unrelated to this AIR/TOWER layout change. |
+| 5 | AIRBASE static contracts | `bash tests/static/airbase_planning_mode_checks.sh` | PASS | AIRBASE planning-mode static checks passed. |
+| 6 | AIRFIELD_OPS runtime UI smoke + screenshot | Open AIR/TOWER in Arma 3, validate no overlap with `ARC_console_layout_audit = true`, capture screenshot | BLOCKED | Arma 3 runtime and UI renderer are unavailable in this sandbox; requires local MP/dedicated-like client session. |
+| 7 | Post-review changed-file compat + sqflint | `python3 scripts/dev/sqflint_compat_scan.py --strict <4 changed sqf files> && ~/.local/bin/sqflint -e w <4 changed sqf files>` | PASS | Re-validated after review-feedback constants/comments updates. |
+| 8 | Marker-label fallback validation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleAirMapPaint.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleAirMapPaint.sqf` | PASS | Switched ellipsis glyph to `...` fallback and re-linted cleanly. |
+| 9 | Cached helper + marker-size constants validation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleApplyLayout.sqf functions/ui/fn_uiConsoleAirMapPaint.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleApplyLayout.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleAirMapPaint.sqf` | PASS | Revalidated after caching compile helpers and lifting marker sizes into named constants. |
+
+---
+
 ## 2026-05-13 — Console INTEL tab HashMap lookup RPT fix (Mode A)
 
 **Branch/Commit:** copilot/fix-undefined-variable-error-please-work @ 9090857 (post-fix working tree validated in-session)
