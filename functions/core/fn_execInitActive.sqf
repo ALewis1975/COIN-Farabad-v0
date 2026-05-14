@@ -77,7 +77,7 @@ if (_typeU isEqualTo "IED") then
         || { (_d2 find "vehicle") >= 0 && { (_d2 find "bomb") >= 0 } };
 };
 
-private _iedLeadTagAndDisplayNameUpper = toUpper (format ["%1 %2", _leadTagU, _disp]);
+private _iedLeadTextUpper = toUpper (format ["%1 %2", _leadTagU, _disp]);
 private _iedTierKnown = false;
 private _iedTier = 0;
 private _iedDistrictId = ["activeIncidentCivsubDistrictId", ""] call ARC_fnc_stateGet;
@@ -562,12 +562,22 @@ case "IED":
     _radius = 120;
     _deadlineSec = 20 * 60;
 
-    private _hasDrivenKeyword = ((_iedLeadTagAndDisplayNameUpper find "VBIED_DRIVEN") >= 0) || { (_iedLeadTagAndDisplayNameUpper find "DRIVEN") >= 0 };
-    private _hasVbiedKeyword = ((_iedLeadTagAndDisplayNameUpper find "VBIED") >= 0) || { (_iedLeadTagAndDisplayNameUpper find "VEHICLE BOMB") >= 0 };
+    private _drivenKeywords = ["VBIED_DRIVEN", "DRIVEN"];
+    private _vbiedKeywords = ["VBIED", "VEHICLE BOMB"];
+    private _suicideKeywords = ["SUICIDE", "SB_"];
+
+    private _hasDrivenKeyword = false;
+    { if ((_iedLeadTextUpper find _x) >= 0) exitWith { _hasDrivenKeyword = true; }; } forEach _drivenKeywords;
+
+    private _hasVbiedKeyword = false;
+    { if ((_iedLeadTextUpper find _x) >= 0) exitWith { _hasVbiedKeyword = true; }; } forEach _vbiedKeywords;
+
     private _isDrivenLeadTag = _leadTagU in ["VBIED_DRIVEN_CHECKPOINT", "VBIED_DRIVEN_GATE"];
     private _isDrivenVbied = (_hasDrivenKeyword && { _hasVbiedKeyword }) || { _isDrivenLeadTag };
 
-    private _hasSuicideKeyword = ((_iedLeadTagAndDisplayNameUpper find "SUICIDE") >= 0) || { (_iedLeadTagAndDisplayNameUpper find "SB_") >= 0 };
+    private _hasSuicideKeyword = false;
+    { if ((_iedLeadTextUpper find _x) >= 0) exitWith { _hasSuicideKeyword = true; }; } forEach _suicideKeywords;
+
     private _isSuicideLeadTag = _leadTagU in ["SB_MARKET_APPROACH", "SB_CHECKPOINT_APPROACH", "SB_SHURA_APPROACH"];
     private _isSuicideBomber = _hasSuicideKeyword || { _isSuicideLeadTag };
 
@@ -577,13 +587,13 @@ case "IED":
     // VBIED variants: swap prop objective to a vehicle placeholder
     if (_isSuicideBomber && { _canProduceSuicideBomber }) then
     {
-        if ((_iedLeadTagAndDisplayNameUpper find "SHURA") >= 0) then
+        if ((_iedLeadTextUpper find "SHURA") >= 0) then
         {
             _objKind = "SB_SHURA_APPROACH";
         }
         else
         {
-            if ((_iedLeadTagAndDisplayNameUpper find "CHECKPOINT") >= 0) then { _objKind = "SB_CHECKPOINT_APPROACH"; } else { _objKind = "SB_MARKET_APPROACH"; };
+            if ((_iedLeadTextUpper find "CHECKPOINT") >= 0) then { _objKind = "SB_CHECKPOINT_APPROACH"; } else { _objKind = "SB_MARKET_APPROACH"; };
         };
         _objClass = "";
         _objRadius = 220;
@@ -594,7 +604,7 @@ case "IED":
     {
     if (_isDrivenVbied && { _vbiedEnabled } && { _canProduceDrivenVbied }) then
     {
-        if (((_iedLeadTagAndDisplayNameUpper find "GATE") >= 0) || { (_leadTagU isEqualTo "VBIED_DRIVEN_GATE") }) then { _objKind = "VBIED_DRIVEN_GATE"; } else { _objKind = "VBIED_DRIVEN_CHECKPOINT"; };
+        if (((_iedLeadTextUpper find "GATE") >= 0) || { (_leadTagU isEqualTo "VBIED_DRIVEN_GATE") }) then { _objKind = "VBIED_DRIVEN_GATE"; } else { _objKind = "VBIED_DRIVEN_CHECKPOINT"; };
         _objClass = "";
         _objRadius = 500;
         _objAction = "";
@@ -1051,7 +1061,7 @@ case "IED":
     ["activeObjectiveClass", ""] call ARC_fnc_stateSet;
     ["activeObjectivePos", []] call ARC_fnc_stateSet;
     ["activeObjectiveNetId", ""] call ARC_fnc_stateSet;
-    // Reset any optional target marker from the previous objective package.
+    // Reset the dynamic-objective target marker; driven VBIED/SB objectives set it below from the active incident marker.
     ["activeObjectiveMarker", ""] call ARC_fnc_stateSet;
     ["activeObjectiveArmed", true] call ARC_fnc_stateSet;
 

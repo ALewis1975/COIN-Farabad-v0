@@ -117,7 +117,7 @@ if (_hasIncident && {_accepted}) then
     {
         if (!_evCollected && {_evRtbRequested}) then
         {
-            _lines pushBack "<t color='#FFFFA0'>Pending:</t> RTB evidence approved. <t color='#DDDDDD'>Next:</t> Collect evidence, then transport to EOD site.";
+            _lines pushBack "<t color='#A0FFA0'>Approved:</t> RTB evidence. <t color='#DDDDDD'>Next:</t> Collect evidence, then transport to EOD site.";
         };
         if (_evCollected && {!_evDelivered}) then
         {

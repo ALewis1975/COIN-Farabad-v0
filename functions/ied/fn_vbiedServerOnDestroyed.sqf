@@ -95,7 +95,8 @@ if (!isNull _vehObj) then
     private _storedPos = +_pos;
     _storedPos resize 3;
     _pos = getPosATL _vehObj;
-    private _positionAuditThresholdM = 25;
+    private _positionAuditThresholdM = missionNamespace getVariable ['ARC_vbiedDestroyPositionAuditThresholdM', 25];
+    if (!(_positionAuditThresholdM isEqualType 0) || { _positionAuditThresholdM < 1 }) then { _positionAuditThresholdM = 25; };
     if ((_storedPos distance2D _pos) > _positionAuditThresholdM) then
     {
         diag_log format ["[ARC][INFO] ARC_fnc_vbiedServerOnDestroyed: using live vehicle position over stored objective position deltaM=%1 veh=%2", round (_storedPos distance2D _pos), _vehNid];
@@ -147,6 +148,7 @@ if (_hasApproval && _safe && _atSite) then
     if (_thr isEqualTo '') then { _thr = [_taskId, 'IED', 'VBIED', [['pos', _pos]]] call ARC_fnc_threatCreateFromTask; };
     if (!(_thr isEqualTo '')) then
     {
+        // Disposal can be the first concrete evidence for legacy/recovered VBIED records; backfill discovery before neutralization.
         [_thr, 'DISCOVERED', 'VBIED_DISPOSAL_FALLBACK_DISCOVERY'] call ARC_fnc_threatUpdateState;
         [_thr, 'NEUTRALIZED', _cause] call ARC_fnc_threatUpdateState;
     };
