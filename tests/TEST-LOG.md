@@ -11,6 +11,28 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-14 — Helicopter runway departure climb fix (Mode A)
+
+**Branch/Commit:** copilot/fix-helicopter-takeoff-issue @ b2500af
+
+**Scenario:** Adjusted rotary-wing airbase departures so post-taxi climb guidance uses the outbound runway axis and explicit upward velocity instead of model-space nudges that could keep helicopters low and drifting right. Follow-up review feedback kept the stalled-departure kick target at the nearby outbound marker, clarified helper naming, added helper guards, and reused configurable climb kick values.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Initial changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf functions/ambiance/fn_airbaseInit.sqf` | PASS | No known parser-compat patterns before editing. |
+| 2 | Initial changed-file sqflint | `sqflint -e w functions/ambiance/fn_airbasePlaneDepart.sqf functions/ambiance/fn_airbaseInit.sqf` | BLOCKED | `sqflint` was not installed in the sandbox at initial baseline. |
+| 3 | Initial AIRBASE planning-mode checks | `tests/static/airbase_planning_mode_checks.sh` | PASS | Existing planning-mode static checks passed before editing. |
+| 4 | Initial Air/Tower queue lifecycle checks | `tests/static/airbase_queue_lifecycle_contract_checks.sh` | BLOCKED | Direct execution was not permitted; rerun with `bash` after changes. |
+| 5 | Changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf` | PASS | No known parser-compat patterns in the changed SQF file. |
+| 6 | AIRBASE planning-mode checks | `bash tests/static/airbase_planning_mode_checks.sh` | PASS | Runtime gate and airbase entrypoint registration checks passed. |
+| 7 | Air/Tower queue lifecycle checks | `bash tests/static/airbase_queue_lifecycle_contract_checks.sh` | PASS | Runway lock, queue lifecycle, public snapshot, and CT_MAP static contracts passed. |
+| 8 | Changed-file sqflint | `python3 -m pip install --user sqflint && /home/runner/.local/bin/sqflint -e w functions/ambiance/fn_airbasePlaneDepart.sqf` | PASS | `sqflint 0.3.2` installed locally and passed the changed SQF file. |
+| 9 | Whitespace check | `git --no-pager diff --check` | PASS | No whitespace errors. |
+| 10 | Runtime smoke: helicopter outbound runway climb | Local MP/dedicated-like Arma 3 session; queue a rotary-wing departure after taxi and observe climb along `AEON_Right_270_Outbound` toward clear marker | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 11 | Dedicated/JIP replication check | Dedicated server with at least one JIP client; verify airbase queue/departure state remains authoritative and replicated | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+
+---
+
 ## 2026-05-14 — Air/Tower validation coverage follow-up (Mode E/G/I)
 
 **Branch/Commit:** copilot/address-air-tower-recommendations @ 3492b7a
