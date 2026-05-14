@@ -250,6 +250,7 @@ class CfgFunctions
             class iedDispoBroadcast {};
             class iedClientHasEodApproval {};
             class iedClientExecuteDisposition {};
+            class iedServerRequestDisposition {};
     
     		// Phase 3 (VBIED v1)
 	    	class vbiedPickSite {};

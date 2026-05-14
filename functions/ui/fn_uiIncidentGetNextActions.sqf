@@ -68,6 +68,8 @@ private _hasTowVbiedApproval = false;
 // Evidence / VBIED Phase 5 state mirrors (set by server)
 private _evCollected = missionNamespace getVariable ['ARC_activeIedEvidenceCollected', false];
 if (!(_evCollected isEqualType true) && !(_evCollected isEqualType false)) then { _evCollected = false; };
+private _evRtbRequested = missionNamespace getVariable ['ARC_activeIedEvidenceRtbRequested', false];
+if (!(_evRtbRequested isEqualType true) && !(_evRtbRequested isEqualType false)) then { _evRtbRequested = false; };
 private _evTransport = missionNamespace getVariable ['ARC_activeIedEvidenceTransportEnabled', false];
 if (!(_evTransport isEqualType true) && !(_evTransport isEqualType false)) then { _evTransport = false; };
 private _evDelivered = missionNamespace getVariable ['ARC_activeIedEvidenceDelivered', false];
@@ -75,6 +77,8 @@ if (!(_evDelivered isEqualType true) && !(_evDelivered isEqualType false)) then 
 
 private _vbSafe = missionNamespace getVariable ['ARC_activeVbiedSafe', false];
 if (!(_vbSafe isEqualType true) && !(_vbSafe isEqualType false)) then { _vbSafe = false; };
+private _vbTowRequested = missionNamespace getVariable ['ARC_activeVbiedTowRequested', false];
+if (!(_vbTowRequested isEqualType true) && !(_vbTowRequested isEqualType false)) then { _vbTowRequested = false; };
 private _vbDisposed = missionNamespace getVariable ['ARC_activeVbiedDisposed', false];
 if (!(_vbDisposed isEqualType true) && !(_vbDisposed isEqualType false)) then { _vbDisposed = false; };
 private _vbCause = missionNamespace getVariable ['ARC_activeVbiedDestroyedCause', ''];
@@ -108,6 +112,10 @@ if (_hasIncident && {_accepted}) then
 {
     if (_hasRtbEvidenceApproval) then
     {
+        if (!_evCollected && {_evRtbRequested}) then
+        {
+            _lines pushBack "<t color='#FFFFA0'>Pending:</t> RTB evidence approved. <t color='#DDDDDD'>Next:</t> Collect evidence, then transport to EOD site.";
+        };
         if (_evCollected && {!_evDelivered}) then
         {
             _lines pushBack "<t color='#A0FFA0'>Approved:</t> RTB evidence. <t color='#DDDDDD'>Next:</t> Transport evidence to EOD site (mkr_eod_disposal).";
@@ -120,6 +128,10 @@ if (_hasIncident && {_accepted}) then
 
     if (_hasTowVbiedApproval) then
     {
+        if (!_vbSafe && {_vbTowRequested}) then
+        {
+            _lines pushBack "<t color='#FFFFA0'>Pending:</t> Tow VBIED approved. <t color='#DDDDDD'>Next:</t> Render vehicle safe before towing/disposal.";
+        };
         if (_vbSafe && {!_vbDisposed} && {_vbCause isEqualTo ''}) then
         {
             _lines pushBack "<t color='#A0FFA0'>Approved:</t> Tow VBIED. <t color='#DDDDDD'>Next:</t> Move VBIED to EOD site, then dispose.";

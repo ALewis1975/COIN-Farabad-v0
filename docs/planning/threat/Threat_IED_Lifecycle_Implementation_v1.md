@@ -14,6 +14,10 @@ Implementation completion for Epic 2 runtime gaps deferred from PR #506.
 | Spawn linkage metadata (restart-safe) | Implemented (this PR) |
 | Cleanup sync convergence | Implemented (this PR) |
 | Stale close detection / CLOSED_STALE evidence | Implemented (this PR) |
+| Active IED threat linkage | Implemented (current PR) |
+| EOD RTB/TOW disposition lifecycle request | Implemented (current PR) |
+| Driven VBIED / suicide objective production | Implemented (current PR) |
+| Complex/chain IED status | Deferred — modules are registered but intentionally unreachable without future runtime-validation PR |
 | Static contract checks | Implemented (this PR) |
 | Local MP runtime smoke | BLOCKED — Arma 3 runtime unavailable in sandbox |
 | Dedicated / JIP / restart validation | BLOCKED — requires dedicated server environment |
@@ -156,6 +160,10 @@ Checks cover:
 - Spawn idempotency token derivation and metadata fields
 - Duplicate spawn denial and event emission
 - Object spawn-token tagging
+- Active IED threat linkage and detonation-to-`DETONATED` lifecycle updates
+- EOD RTB/TOW disposition RPC registration, sender validation, and lifecycle flags
+- Driven VBIED and suicide bomber objective-kind production gates
+- Explicit deferred status for complex/chain IED modules
 - Cleanup convergence markers
 - Stale close detection and evidence emission
 - CfgFunctions registration
@@ -174,6 +182,11 @@ CI/static sandbox:
 | Stale incident close evidence appears in RPT | BLOCKED | Local MP / Dedicated |
 | Cleanup sync convergence in JIP session | BLOCKED | Dedicated + JIP |
 | Cleanup_completed field persists across reconnect | BLOCKED | Dedicated + reconnect |
+| RTB_IED approval, collection, transport, and delivery | BLOCKED | Local MP / Dedicated |
+| TOW_VBIED safe tow, at-site destruction, and disposal credit | BLOCKED | Local MP / Dedicated |
+| Driven VBIED objective production and spawn tick staging | BLOCKED | Dedicated + player near spawn path |
+| Suicide bomber CRITICAL-tier objective production and spawn denial below CRITICAL | BLOCKED | Dedicated + district posture setup |
+| activeIedThreatId clears on new package and rehydrates correctly for JIP readers | BLOCKED | Dedicated + JIP/reconnect |
 
 Owner follow-up: validate above in dedicated environment before Epic 5 persistence/migration work
 relies on these fields.

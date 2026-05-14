@@ -75,6 +75,57 @@ check 'THREAT_CLEANUP_STALE' "functions/threat/fn_threatIedCleanupSync.sqf" \
 check 'if (!isServer) exitWith' "functions/threat/fn_threatIedCleanupSync.sqf" \
   "Cleanup sync is server-only"
 
+# --- Active threat linkage + detonation outcomes ---
+check 'activeIedThreatId' "functions/threat/fn_threatOnAOActivated.sqf" \
+  "AO activated hook writes canonical activeIedThreatId"
+
+check 'ARC_activeIedThreatId' "functions/threat/fn_threatOnAOActivated.sqf" \
+  "AO activated hook publishes active IED threat ID mirror"
+
+check '"DETONATED"' "functions/core/fn_iedHandleDetonation.sqf" \
+  "IED detonation handler drives Threat lifecycle to DETONATED"
+
+check 'ARC_fnc_threatUpdateState' "functions/core/fn_iedHandleDetonation.sqf" \
+  "IED detonation handler calls threatUpdateState"
+
+# --- EOD disposition lifecycle RPC ---
+check 'class iedServerRequestDisposition {}' "config/CfgFunctions.hpp" \
+  "CfgFunctions registers iedServerRequestDisposition"
+
+check 'class ARC_fnc_iedServerRequestDisposition' "config/CfgRemoteExec.hpp" \
+  "CfgRemoteExec allowlists iedServerRequestDisposition to server"
+
+check 'activeIedEvidenceRtbRequested' "functions/ied/fn_iedServerRequestDisposition.sqf" \
+  "RTB_IED request records server-side lifecycle flag"
+
+check 'activeVbiedTowRequested' "functions/ied/fn_iedServerRequestDisposition.sqf" \
+  "TOW_VBIED request records server-side lifecycle flag"
+
+check 'ARC_fnc_iedServerCheckDisposal' "functions/ied/fn_iedServerRequestDisposition.sqf" \
+  "RTB_IED request invokes disposal-site logistics check"
+
+check 'sender-owner/group mismatch' "functions/ied/fn_iedServerRequestDisposition.sqf" \
+  "Disposition RPC validates sender ownership/group"
+
+# --- Advanced IED objective production ---
+check 'VBIED_DRIVEN_CHECKPOINT' "functions/core/fn_execInitActive.sqf" \
+  "Exec init can produce driven VBIED checkpoint objective kind"
+
+check 'VBIED_DRIVEN_GATE' "functions/core/fn_execInitActive.sqf" \
+  "Exec init can produce driven VBIED gate objective kind"
+
+check 'SB_MARKET_APPROACH' "functions/core/fn_execInitActive.sqf" \
+  "Exec init can produce suicide bomber market objective kind"
+
+check 'SB_CHECKPOINT_APPROACH' "functions/core/fn_execInitActive.sqf" \
+  "Exec init can produce suicide bomber checkpoint objective kind"
+
+check 'SB_SHURA_APPROACH' "functions/core/fn_execInitActive.sqf" \
+  "Exec init can produce suicide bomber shura objective kind"
+
+check '_canProduceSuicide = _iedTierKnown && { _iedTier >= 3 }' "functions/core/fn_execInitActive.sqf" \
+  "Suicide bomber production remains CRITICAL-tier gated"
+
 # --- Stale close detection in incident closed hook ---
 check 'THREAT_CLOSED_STALE' "functions/threat/fn_threatOnIncidentClosed.sqf" \
   "Incident closed hook emits THREAT_CLOSED_STALE for already-CLEANED threats"
@@ -94,6 +145,15 @@ check 'CLOSED_STALE' "docs/planning/threat/Threat_IED_Lifecycle_Implementation_v
 
 check 'spawn_token' "docs/planning/threat/Threat_IED_Lifecycle_Implementation_v1.md" \
   "Epic 2 implementation doc documents spawn_token field"
+
+check 'Complex/chain IED status' "docs/planning/threat/Threat_IED_Lifecycle_Implementation_v1.md" \
+  "Epic 2 implementation doc declares complex/chain IED status"
+
+check 'Deferred module' "functions/ied/fn_iedComplexAttackStage.sqf" \
+  "Complex attack module is explicitly marked deferred"
+
+check 'Deferred module' "functions/ied/fn_iedChainEmplace.sqf" \
+  "Chain IED module is explicitly marked deferred"
 
 if [[ "$pass" != true ]]; then
   exit 1

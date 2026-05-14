@@ -167,6 +167,13 @@ private _snapPairs = [
 // Publish full detonation snapshot for UI/TOC tools (pairs array; safe for presentation).
 missionNamespace setVariable ["ARC_activeIedDetonationSnapshot", _snapPairs, true];
 
+private _threatId = ["activeIedThreatId", ""] call ARC_fnc_stateGet;
+if (!(_threatId isEqualType "")) then { _threatId = ""; };
+if (_threatId isNotEqualTo "") then
+{
+    [_threatId, "DETONATED", _causeU] call ARC_fnc_threatUpdateState;
+};
+
 // Queue a post-blast response lead (TOC priority). This does NOT create a parallel incident.
 private _leadId = [_p, _objKind, _causeU, _snapPairs] call ARC_fnc_iedQueueDetonationResponse;
 

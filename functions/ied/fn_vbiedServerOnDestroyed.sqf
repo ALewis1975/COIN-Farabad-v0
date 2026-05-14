@@ -86,6 +86,8 @@ if (_appr isEqualType [] && { _gid isNotEqualTo '' }) then
 // Determine location using last-known vehicle position (fallback to stored objective pos)
 private _pos = ['activeObjectivePos', []] call ARC_fnc_stateGet;
 if !(_pos isEqualType [] && { (count _pos) >= 2 }) then { _pos = [0,0,0]; };
+private _vehObj = objectFromNetId _vehNid;
+if (!isNull _vehObj) then { _pos = getPosATL _vehObj; };
 _pos = +_pos; _pos resize 3;
 _pos set [2, 0];
 
@@ -127,8 +129,14 @@ if (_hasApproval && _safe && _atSite) then
         ]
     ] call ARC_fnc_intelLog;
 
-    private _thr = [_taskId, 'IED', 'VBIED', [['pos', _pos]]] call ARC_fnc_threatCreateFromTask;
-    if (_thr isNotEqualTo '') then { [_thr, 'NEUTRALIZED', _cause] call ARC_fnc_threatUpdateState; };
+    private _thr = ['activeIedThreatId', ''] call ARC_fnc_stateGet;
+    if (!(_thr isEqualType '')) then { _thr = ''; };
+    if (_thr isEqualTo '') then { _thr = [_taskId, 'IED', 'VBIED', [['pos', _pos]]] call ARC_fnc_threatCreateFromTask; };
+    if (_thr isNotEqualTo '') then
+    {
+        [_thr, 'DISCOVERED', 'VBIED_DISPOSAL_BACKFILL_DISCOVERED'] call ARC_fnc_threatUpdateState;
+        [_thr, 'NEUTRALIZED', _cause] call ARC_fnc_threatUpdateState;
+    };
 
     [] call ARC_fnc_threatDebugSnapshot;
 
@@ -158,7 +166,9 @@ else
         ]
     ] call ARC_fnc_intelLog;
 
-    private _thr = [_taskId, 'IED', 'VBIED', [['pos', _pos]]] call ARC_fnc_threatCreateFromTask;
+    private _thr = ['activeIedThreatId', ''] call ARC_fnc_stateGet;
+    if (!(_thr isEqualType '')) then { _thr = ''; };
+    if (_thr isEqualTo '') then { _thr = [_taskId, 'IED', 'VBIED', [['pos', _pos]]] call ARC_fnc_threatCreateFromTask; };
     if (_thr isNotEqualTo '') then { [_thr, 'CLOSED', _cause] call ARC_fnc_threatUpdateState; };
 
     [] call ARC_fnc_threatDebugSnapshot;

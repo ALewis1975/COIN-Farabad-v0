@@ -3,9 +3,9 @@
 
     Client: execute an approved EOD disposition action.
 
-    Phase 4:
+    Phase 5:
       - DET_IN_PLACE: server detonation for active IED device / VBIED vehicle.
-      - RTB_IED / TOW_VBIED: placeholder (Phase 5 will implement).
+      - RTB_IED / TOW_VBIED: server-authoritative logistics lifecycle request.
 
     Params:
       0: STRING requestType (DET_IN_PLACE|RTB_IED|TOW_VBIED)
@@ -69,13 +69,15 @@ switch (_req) do
 
     case "RTB_IED":
     {
-        ["EOD", "RTB evidence approved. Transport evidence to the EOD site."] call ARC_fnc_clientToast;
+        [_req] remoteExec ["ARC_fnc_iedServerRequestDisposition", 2];
+        ["EOD", "RTB evidence approved. Server is enabling evidence transport / delivery tracking."] call ARC_fnc_clientToast;
         true
     };
 
     case "TOW_VBIED":
     {
-        ["EOD", "Tow disposition approved. Move the VBIED to the EOD site, then dispose."] call ARC_fnc_clientToast;
+        [_req] remoteExec ["ARC_fnc_iedServerRequestDisposition", 2];
+        ["EOD", "Tow disposition approved. Server is enabling VBIED tow / disposal tracking."] call ARC_fnc_clientToast;
         true
     };
 };
