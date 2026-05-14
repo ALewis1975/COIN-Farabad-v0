@@ -84,7 +84,7 @@ check 'setVariable\s*\["airbase_v1_runwayState".*true\]' \
     "airbaseRunwayLockReserve: replicates runwayState to clients"
 
 # Release must reset to OPEN and replicate
-check '"OPEN".*true' \
+check 'setVariable\s*\["airbase_v1_runwayState",\s*"OPEN",\s*true\]' \
     "functions/ambiance/fn_airbaseRunwayLockRelease.sqf" \
     "airbaseRunwayLockRelease: resets runwayState to OPEN with replication"
 
@@ -120,10 +120,13 @@ check '"CANCELED".*"PRIORITIZED"' "functions/ambiance/fn_airbaseRecordSetQueuedS
 check 'ARC_fnc_airbaseQueueMoveToFront' \
     "functions/ambiance/fn_airbaseRequestPrioritizeFlight.sqf" \
     "airbaseRequestPrioritizeFlight: calls airbaseQueueMoveToFront"
-# Cancel uses direct deleteAt rather than the helper; check for queue-state write and event log
-check 'deleteAt.*_idx|AIRBASE_QUEUE_CANCEL' \
+# Cancel uses direct deleteAt rather than the helper; verify both queue mutation and event log
+check 'deleteAt\s*_idx' \
     "functions/ambiance/fn_airbaseRequestCancelQueuedFlight.sqf" \
-    "airbaseRequestCancelQueuedFlight: mutates queue (deleteAt) and emits AIRBASE_QUEUE_CANCEL event"
+    "airbaseRequestCancelQueuedFlight: removes flight from queue (deleteAt _idx)"
+check 'AIRBASE_QUEUE_CANCEL' \
+    "functions/ambiance/fn_airbaseRequestCancelQueuedFlight.sqf" \
+    "airbaseRequestCancelQueuedFlight: emits AIRBASE_QUEUE_CANCEL event"
 
 # ── 3. Failed RETURN-arrival recovery (PR #533) ───────────────────────────────
 
@@ -176,10 +179,11 @@ check '\["holdState",'                      "$SNAP_FILE" "runway block: 'holdSta
 echo ""
 echo "=== 5. CT_MAP position-field safety (tuple indexes 7/8) ==="
 
-# publicBroadcastState appends posX/posY at the end of arrival and departure tuples
-check 'Phase 7|posX.*posY|CT_MAP' \
+# publicBroadcastState appends posX/posY at the end of arrival and departure tuples (Phase 7)
+# Check for the comment documenting this extension in the snapshot builder
+check 'Phase 7.*posX.*posY|posX.*posY.*CT_MAP|append posX.*posY' \
     "$SNAP_FILE" \
-    "snapshot: arrival/departure tuples document posX/posY for CT_MAP (comment or field)"
+    "snapshot: Phase 7 posX/posY extension documented in fn_publicBroadcastState.sqf"
 
 # UI map painter declares named index constants for posX/posY to avoid magic-number indexing
 check '_IDX_POS_X\s*=\s*7' \

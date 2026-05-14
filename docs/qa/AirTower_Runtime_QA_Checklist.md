@@ -174,7 +174,9 @@ its position to `[0, 0]` or removing from queue externally. (Can be simulated vi
 
 ## Scenario 12 — AIRFIELD\_OPS visual overlap audit
 
-**Setup:** Enable layout audit mode before opening the console:
+**Setup:** Enable layout audit mode before opening the console.
+Execute the following in the Arma 3 debug console on the server or client machine
+(shift-click the execute button to run server-side, or use the in-game debug console):
 ```sqf
 ARC_console_layout_audit = true;
 ```
