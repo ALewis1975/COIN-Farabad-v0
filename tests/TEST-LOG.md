@@ -13,7 +13,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-05-14 — Subsystem reliability and adaptive COIN planning (Mode F)
 
-**Branch/Commit:** copilot/review-farabad-coin-repositories @ 4544af8 (docs working tree validated in-session)
+**Branch/Commit:** copilot/review-farabad-coin-repositories @ b865f21 (docs working tree validated in-session)
 
 **Scenario:** Added a docs-only execution contract for Phase 4 subsystem reliability sweeps and the follow-on adaptive enemy/population behavior track. No SQF, config, mission data, or runtime behavior changed.
 
