@@ -11,6 +11,24 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-14 — UI incident next-actions lint fix (Mode A)
+
+**Branch/Commit:** copilot/add-empty-markers-highways @ 1040591 (post-fix working tree validated in-session)
+
+**Scenario:** Investigated failed GitHub Actions job `76044900176` in `Arma SQF + Mission Config Preflight` and fixed sqflint warning-as-error failures in `functions/ui/fn_uiIncidentGetNextActions.sqf` by using the documented `roleCat` parameter for guest-safe messaging and removing unused EOD approval dead code.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | CI failure investigation | GitHub Actions job `76044900176` logs for `SQF static analysis (changed *.sqf files only)` | FAIL | Confirmed warnings-as-errors: `_roleCat` unused at line 17 and `_eodApproved` unused at line 51. |
+| 2 | Baseline targeted compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiIncidentGetNextActions.sqf` | PASS | No known parser-compat patterns before edits. |
+| 3 | Baseline targeted sqflint | `sqflint -e w functions/ui/fn_uiIncidentGetNextActions.sqf` | FAIL | Reproduced CI warnings for `_roleCat` and `_eodApproved`. |
+| 4 | Changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiIncidentGetNextActions.sqf` | PASS | No known parser-compat patterns after edits. |
+| 5 | Changed-file sqflint | `sqflint -e w functions/ui/fn_uiIncidentGetNextActions.sqf` | PASS | Failing warnings resolved. |
+| 6 | Whitespace check | `git --no-pager diff --check` | PASS | No whitespace errors. |
+| 7 | CI changed SQF lint set | `python3 scripts/dev/sqflint_compat_scan.py --strict <10 CI-changed SQF files> && sqflint -e w <each CI-changed SQF file>` | PASS | Matched the failed workflow's changed SQF file list from job logs; all lint clean after fix. |
+
+---
+
 ## 2026-05-14 — Highway marker direction integration (Mode B)
 
 **Branch/Commit:** use-highway-direction-markers (task branch: copilot/add-empty-markers-highways) @ 5c27f6c (post-fix working tree validated in-session)
