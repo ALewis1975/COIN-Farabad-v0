@@ -13,7 +13,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-05-14 — AIRBASE ORBAT CAV coordinate fix (Mode A)
 
-**Branch/Commit:** copilot/fix-count-type-error @ 74c95ab + fix
+**Branch/Commit:** copilot/fix-count-type-error @ 684260b
 
 **Scenario:** Fixed 1-73 CAV Troop A/B dynamic ORBAT placement in `fn_airbaseOrbatPopulate.sqf` by using the marker Y/northing coordinate from `getMarkerPos` instead of treating Z/altitude as northing. This prevents CAV troops from being generated near map Y=0 when `arc_m_base_1_73_CAV_hq` exists.
 
