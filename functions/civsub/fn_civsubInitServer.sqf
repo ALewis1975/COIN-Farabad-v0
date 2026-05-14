@@ -151,7 +151,8 @@ if (isNil { missionNamespace getVariable "civsub_v1_eh_entityCreated" }) then
         [_entity] spawn
         {
             params [["_unit", objNull, [objNull]]];
-            uiSleep 0.1;
+            private _deadline = serverTime + 2;
+            waitUntil { uiSleep 0.05; isNull _unit || { !alive _unit } || { side _unit isEqualTo civilian } || { serverTime >= _deadline } };
             if (!isServer) exitWith {};
             if (isNull _unit) exitWith {};
             if !(alive _unit) exitWith {};
@@ -173,12 +174,30 @@ if (!(missionNamespace getVariable ["civsub_v1_autoConnectThreadRunning", false]
         while { isServer && { missionNamespace getVariable ["civsub_v1_enabled", false] } } do
         {
             uiSleep 30;
+            private _units = +allUnits;
+            private _total = count _units;
+            if (_total <= 0) then { continue; };
+
+            private _scanMax = missionNamespace getVariable ["civsub_v1_autoConnectScanMaxPerTick", 50];
+            if (!(_scanMax isEqualType 0)) then { _scanMax = 50; };
+            _scanMax = (_scanMax max 10) min 200;
+
+            private _startIdx = missionNamespace getVariable ["civsub_v1_autoConnectScanIndex", 0];
+            if (!(_startIdx isEqualType 0)) then { _startIdx = 0; };
+            if (_startIdx < 0 || { _startIdx >= _total }) then { _startIdx = 0; };
+
+            private _limit = _scanMax min _total;
+            for "_scanOffset" from 0 to (_limit - 1) do
             {
-                if (!isNull _x && { alive _x } && { !isPlayer _x } && { side _x isEqualTo civilian } && { !(_x getVariable ["civsub_v1_isCiv", false]) }) then
+                private _idx = (_startIdx + _scanOffset) mod _total;
+                private _unit = _units select _idx;
+                if (!isNull _unit && { alive _unit } && { !isPlayer _unit } && { side _unit isEqualTo civilian } && { !(_unit getVariable ["civsub_v1_isCiv", false]) }) then
                 {
-                    [_x, "", "PERIODIC_SCAN"] call ARC_fnc_civsubCivConnect;
+                    [_unit, "", "PERIODIC_SCAN"] call ARC_fnc_civsubCivConnect;
                 };
-            } forEach allUnits;
+            };
+
+            missionNamespace setVariable ["civsub_v1_autoConnectScanIndex", (_startIdx + _limit) mod _total, false];
         };
 
         missionNamespace setVariable ["civsub_v1_autoConnectThreadRunning", false, true];
