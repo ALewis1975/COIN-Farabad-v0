@@ -114,7 +114,7 @@ private _byD = createHashMap;
 {
     private _row = _reg get _x;
     if (_row isEqualType createHashMap) then {
-        private _did = [_row, "districtId", ""] call _hg; 
+        private _did = [_row, "districtId", ""] call _hg;
         if !(_did isEqualTo "") then {
             private _arr = [_byD, _did, []] call _hg;
             _arr pushBack _x;
