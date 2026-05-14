@@ -417,14 +417,22 @@ case "DASH":
             private _bandH = (_paneH * _AIR_BAND_H_FRAC) max _AIR_BAND_H_MIN;
             private _boardY = _paneY + _stripH + _AIR_PAD_Y + _bandH + _AIR_PAD_Y;
             private _boardH = ((_paneY + _paneH) - _boardY) max _AIR_BOARD_H_MIN;
-            private _regionCX = uiNamespace getVariable ["ARC_console_regionCX", _paneX];
-            private _regionCY = uiNamespace getVariable ["ARC_console_regionCY", _boardY + _boardH];
-            private _regionCW = uiNamespace getVariable ["ARC_console_regionCW", _paneW];
-            private _regionCH = uiNamespace getVariable ["ARC_console_regionCH", 0];
-            if (!(_regionCX isEqualType 0)) then { _regionCX = _paneX; };
-            if (!(_regionCY isEqualType 0)) then { _regionCY = _boardY + _boardH; };
-            if (!(_regionCW isEqualType 0)) then { _regionCW = _paneW; };
-            if (!(_regionCH isEqualType 0)) then { _regionCH = 0; };
+            private _regionCX = _paneX;
+            private _regionCY = _boardY + _boardH;
+            private _regionCW = _paneW;
+            private _regionCH = 0;
+            private _layoutModeActive = uiNamespace getVariable ["ARC_console_layoutModeActive", "FULL"];
+            if (!(_layoutModeActive isEqualType "")) then { _layoutModeActive = "FULL"; };
+            if (_layoutModeActive isEqualTo "DOCK_RIGHT") then {
+                _regionCX = uiNamespace getVariable ["ARC_console_regionCX", _paneX];
+                _regionCY = uiNamespace getVariable ["ARC_console_regionCY", _boardY + _boardH];
+                _regionCW = uiNamespace getVariable ["ARC_console_regionCW", _paneW];
+                _regionCH = uiNamespace getVariable ["ARC_console_regionCH", 0];
+                if (!(_regionCX isEqualType 0)) then { _regionCX = _paneX; };
+                if (!(_regionCY isEqualType 0)) then { _regionCY = _boardY + _boardH; };
+                if (!(_regionCW isEqualType 0)) then { _regionCW = _paneW; };
+                if (!(_regionCH isEqualType 0)) then { _regionCH = 0; };
+            };
 
             // FULL layout does not activate Region C, so reserve a local bottom
             // pane to keep the CT_MAP from using its config-time detail overlay.
