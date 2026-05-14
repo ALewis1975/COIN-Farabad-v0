@@ -82,7 +82,7 @@ private _iedTierKnown = false;
 private _iedTier = 0;
 private _iedDistrictId = ["activeIncidentCivsubDistrictId", ""] call ARC_fnc_stateGet;
 if (!(_iedDistrictId isEqualType "")) then { _iedDistrictId = ""; };
-if (_iedDistrictId isNotEqualTo "") then
+if (!(_iedDistrictId isEqualTo "")) then
 {
     _iedTierKnown = true;
     private _secLevel = missionNamespace getVariable [format ["ARC_district_%1_secLevel", _iedDistrictId], "NORMAL"];

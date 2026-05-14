@@ -16,7 +16,8 @@ params [
     ["_req", "", [""]]
 ];
 
-_req = toUpper (trim _req);
+private _trimFn = compile "params ['_s']; trim _s";
+_req = toUpper ([_req] call _trimFn);
 if (!(_req in ["RTB_IED", "TOW_VBIED"])) exitWith {false};
 
 private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
@@ -35,7 +36,7 @@ if (!isNil "remoteExecutedOwner") then
         private _senderOk = false;
         {
             if (!isPlayer _x) then { continue; };
-            if ((owner _x) isNotEqualTo _reo) then { continue; };
+            if (!((owner _x) isEqualTo _reo)) then { continue; };
             if ((groupId (group _x)) isEqualTo _gid) exitWith { _senderOk = true; };
         } forEach allPlayers;
 
@@ -53,11 +54,11 @@ if (!(_appr isEqualType [])) then { _appr = []; };
 
 {
     if (!(_x isEqualType [] && { (count _x) >= 6 })) then { continue; };
-    if ((_x select 0) isNotEqualTo _taskId) then { continue; };
-    if ((_x select 1) isNotEqualTo _gid) then { continue; };
+    if (!((_x select 0) isEqualTo _taskId)) then { continue; };
+    if (!((_x select 1) isEqualTo _gid)) then { continue; };
     private _rt = _x select 2;
     if (!(_rt isEqualType "")) then { _rt = ""; };
-    if ((toUpper (trim _rt)) isNotEqualTo _req) then { continue; };
+    if (!((toUpper ([_rt] call _trimFn)) isEqualTo _req)) then { continue; };
     private _exp = _x select 5;
     if (!(_exp isEqualType 0)) then { _exp = -1; };
     if (_exp >= 0 && { serverTime > _exp }) then { continue; };
@@ -73,7 +74,7 @@ if (!_hasApproval) exitWith
 
 private _objKind = ["activeObjectiveKind", ""] call ARC_fnc_stateGet;
 if (!(_objKind isEqualType "")) then { _objKind = ""; };
-_objKind = toUpper (trim _objKind);
+_objKind = toUpper ([_objKind] call _trimFn);
 
 if (_req isEqualTo "RTB_IED") exitWith
 {
