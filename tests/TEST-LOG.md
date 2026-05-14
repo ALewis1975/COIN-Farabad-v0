@@ -13,7 +13,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-05-14 — Air/Tower queue recovery and snapshot mapping fixes (Mode A)
 
-**Branch/Commit:** copilot/research-air-tower-system @ a8c3544 (post-fix working tree validated in-session)
+**Branch/Commit:** copilot/research-air-tower-system @ fb36154 (post-fix working tree validated in-session)
 
 **Scenario:** Fixed AIR/TOWER public snapshot pending-clearance timestamp/owner mapping, added RETURN-arrival failure recovery so assets do not remain stuck in `RETURN_QUEUED`, and cleaned touched Air/Tower RPC files for sqflint compatibility.
 
