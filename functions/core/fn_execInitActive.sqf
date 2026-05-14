@@ -1488,8 +1488,25 @@ if (!(_objKind isEqualTo "")) then
             _spawnPos resize 3;
         };
 
+        private _hwySpawnMarkerName = "";
+        private _useHwyMarkers = missionNamespace getVariable ["ARC_convoyUseHighwayMarkers", true];
+        if (!(_useHwyMarkers isEqualType true) && !(_useHwyMarkers isEqualType false)) then { _useHwyMarkers = true; };
+        if (_useHwyMarkers) then
+        {
+            private _hwyRadius = missionNamespace getVariable ["ARC_convoyHighwayMarkerRadiusM", 120];
+            if (!(_hwyRadius isEqualType 0)) then { _hwyRadius = 120; };
+            private _hwySpawnMarker = [_spawnPos, _hwyRadius, _cDir] call ARC_fnc_worldHighwayMarkerNearest;
+            if (_hwySpawnMarker isEqualType [] && { (count _hwySpawnMarker) >= 3 }) then
+            {
+                _hwySpawnMarkerName = _hwySpawnMarker select 0;
+                _cDir = _hwySpawnMarker select 2;
+            };
+        };
+        ["activeConvoyHighwayMarker", _hwySpawnMarkerName] call ARC_fnc_stateSet;
+
         // 2) Spawn direction policy
-        // Vehicles should spawn facing the editor marker direction.
+        // Vehicles should spawn facing the editor marker direction, unless a nearby highway
+        // side marker provides a more specific direction-of-travel hint.
         // (Road-axis alignment can be useful, but it frequently causes tight-pad spawns to yaw into barriers.)
         private _markerDir = (_cDir % 360);
         private _spawnDir  = _markerDir;

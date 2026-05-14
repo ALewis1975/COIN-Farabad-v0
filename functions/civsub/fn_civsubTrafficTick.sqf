@@ -435,7 +435,16 @@ if (_allowMoving) then
             continue;
         };
 
+        private _hwyMarker = [_curPos, (missionNamespace getVariable ["civsub_v1_traffic_highwayMarkerRadius_m", 85])] call ARC_fnc_worldHighwayMarkerNearest;
+        private _hwyDir = -1;
+        if (_hwyMarker isEqualType [] && { (count _hwyMarker) >= 3 }) then
+        {
+            _hwyDir = _hwyMarker select 2;
+            if (!(_hwyDir isEqualType 0)) then { _hwyDir = -1; };
+        };
+
         private _candidates = [];
+        private _fallbackCandidates = [];
         private _roadCount = count _roads;
         private _roadIdx = 0;
         while { _roadIdx < _roadCount && { (count _candidates) < _candidateLimit } } do
@@ -446,8 +455,29 @@ if (_allowMoving) then
             private _roadPos = getPosATL _road;
             if ((_curPos distance2D _roadPos) >= _wpMin) then
             {
-                _candidates pushBack _road;
+                if (_hwyDir >= 0) then
+                {
+                    private _roadDir = _curPos getDir _roadPos;
+                    private _delta = abs (((_roadDir - _hwyDir + 540) % 360) - 180);
+                    if (_delta <= 75) then
+                    {
+                        _candidates pushBack _road;
+                    }
+                    else
+                    {
+                        if ((count _fallbackCandidates) < _candidateLimit) then { _fallbackCandidates pushBack _road; };
+                    };
+                }
+                else
+                {
+                    _candidates pushBack _road;
+                };
             };
+        };
+
+        if ((count _candidates) == 0 && { (count _fallbackCandidates) > 0 }) then
+        {
+            _candidates = _fallbackCandidates;
         };
 
         if ((count _candidates) == 0) then

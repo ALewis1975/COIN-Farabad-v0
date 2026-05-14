@@ -64,7 +64,17 @@ for "_i" from 1 to _tries do
         if (!isNull _r2) then { _dir = _r getDir _r2; };
     };
 
+    private _hwyMarker = [_rPos, (missionNamespace getVariable ["civsub_v1_traffic_highwayMarkerRadius_m", 85]), _dir] call ARC_fnc_worldHighwayMarkerNearest;
     private _perp = _dir + (selectRandom [90, -90]);
+    if (_hwyMarker isEqualType [] && { (count _hwyMarker) >= 3 }) then
+    {
+        private _markerPos = _hwyMarker select 1;
+        _dir = _hwyMarker select 2;
+        if (_markerPos isEqualType [] && { (count _markerPos) >= 2 }) then
+        {
+            _perp = _rPos getDir _markerPos;
+        };
+    };
 
     // Try adaptive offsets to find a shoulder position.
     private _pos = [];
