@@ -562,13 +562,14 @@ case "IED":
     _radius = 120;
     _deadlineSec = 20 * 60;
 
-    private _isDrivenVbied = ((_iedVariantText find "VBIED_DRIVEN") >= 0)
-        || { ((_iedVariantText find "DRIVEN") >= 0) && { ((_iedVariantText find "VBIED") >= 0) || { (_iedVariantText find "VEHICLE BOMB") >= 0 } } }
-        || { (_leadTagU in ["VBIED_DRIVEN_CHECKPOINT", "VBIED_DRIVEN_GATE"]) };
+    private _hasDrivenToken = ((_iedVariantText find "VBIED_DRIVEN") >= 0) || { (_iedVariantText find "DRIVEN") >= 0 };
+    private _hasVbiedToken = ((_iedVariantText find "VBIED") >= 0) || { (_iedVariantText find "VEHICLE BOMB") >= 0 };
+    private _hasDrivenLeadTag = _leadTagU in ["VBIED_DRIVEN_CHECKPOINT", "VBIED_DRIVEN_GATE"];
+    private _isDrivenVbied = (_hasDrivenToken && { _hasVbiedToken }) || { _hasDrivenLeadTag };
 
-    private _isSuicideBomber = ((_iedVariantText find "SUICIDE") >= 0)
-        || { (_iedVariantText find "SB_") >= 0 }
-        || { (_leadTagU in ["SB_MARKET_APPROACH", "SB_CHECKPOINT_APPROACH", "SB_SHURA_APPROACH"]) };
+    private _hasSuicideToken = ((_iedVariantText find "SUICIDE") >= 0) || { (_iedVariantText find "SB_") >= 0 };
+    private _hasSuicideLeadTag = _leadTagU in ["SB_MARKET_APPROACH", "SB_CHECKPOINT_APPROACH", "SB_SHURA_APPROACH"];
+    private _isSuicideBomber = _hasSuicideToken || { _hasSuicideLeadTag };
 
     private _canProduceDriven = (!_iedTierKnown) || { _iedTier >= 2 };
     private _canProduceSuicide = _iedTierKnown && { _iedTier >= 3 };

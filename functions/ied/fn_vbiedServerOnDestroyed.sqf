@@ -137,7 +137,7 @@ if (_hasApproval && _safe && _atSite) then
     if (_thr isEqualTo '') then { _thr = [_taskId, 'IED', 'VBIED', [['pos', _pos]]] call ARC_fnc_threatCreateFromTask; };
     if (!(_thr isEqualTo '')) then
     {
-        [_thr, 'DISCOVERED', 'VBIED_DISPOSAL_BACKFILL_DISCOVERED'] call ARC_fnc_threatUpdateState;
+        [_thr, 'DISCOVERED', 'VBIED_DISPOSAL_FALLBACK_DISCOVERY'] call ARC_fnc_threatUpdateState;
         [_thr, 'NEUTRALIZED', _cause] call ARC_fnc_threatUpdateState;
     };
 
