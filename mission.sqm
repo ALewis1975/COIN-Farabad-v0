@@ -24,10 +24,10 @@ class EditorData
 	};
 	class Camera
 	{
-		pos[]={6319.5728,1736.5294,319.9006};
-		dir[]={-1.2363449e-07,-0.70710683,0.70710683};
-		up[]={-1.2363449e-07,0.70710671,0.70710683};
-		aside[]={1,0,1.7484557e-07};
+		pos[]={2230.5398,29.178146,1416.1276};
+		dir[]={0,-0.70710683,0.70710683};
+		up[]={0,0.70710677,0.70710677};
+		aside[]={0.99999994,0,-0};
 	};
 };
 binarizationWanted=0;
@@ -2019,7 +2019,7 @@ class Mission
 	};
 	class Entities
 	{
-		items=17;
+		items=16;
 		class Item0
 		{
 			dataType="Layer";
@@ -3980,7 +3980,7 @@ class Mission
 						class Item2
 						{
 							dataType="Marker";
-							position[]={218.80875,43.882961,8633.2549};
+							position[]={-1405.1591,41.210945,8757.6592};
 							name="plane_despawn";
 							type="Empty";
 							id=84;
@@ -4135,7 +4135,7 @@ class Mission
 						};
 					};
 					id=81;
-					atlOffset=4.3003836;
+					atlOffset=3.9075098;
 				};
 				class Item1
 				{
@@ -6169,7 +6169,7 @@ class Mission
 								class Item9
 								{
 									dataType="Marker";
-									position[]={5280.9199,8.5,2628.0791};
+									position[]={5281.042,8.5,2628.1025};
 									name="arc_m_base_police_hq";
 									text=" USAF Security Forces HQ";
 									type="Empty";
@@ -8039,7 +8039,7 @@ class Mission
 						class Item3
 						{
 							dataType="Marker";
-							position[]={218.80875,58.870594,9494.4219};
+							position[]={-1490.0623,38.968647,6611.7817};
 							name="mkr_arrivalSpawn";
 							type="Empty";
 							id=101;
@@ -8090,7 +8090,7 @@ class Mission
 						};
 					};
 					id=363;
-					atlOffset=16.144938;
+					atlOffset=-30.147522;
 				};
 				class Item5
 				{
@@ -12838,7 +12838,7 @@ class Mission
 				};
 			};
 			id=80;
-			atlOffset=-39.450577;
+			atlOffset=-39.52327;
 		};
 		class Item2
 		{
@@ -110920,7 +110920,7 @@ class Mission
 					name="Karkanak Prison";
 					class Entities
 					{
-						items=14;
+						items=15;
 						class Item0
 						{
 							dataType="Marker";
@@ -111838,9 +111838,25 @@ class Mission
 								nAttributes=2;
 							};
 						};
+						class Item14
+						{
+							dataType="Object";
+							class PositionInfo
+							{
+								position[]={2230.5398,4.1781464,1441.1276};
+								angles[]={6.2717605,4.7687492,6.2717605};
+							};
+							side="Empty";
+							flags=4;
+							class Attributes
+							{
+							};
+							id=4836;
+							type="Land_HelipadSquare_F";
+						};
 					};
 					id=4726;
-					atlOffset=-0.13025808;
+					atlOffset=1.4493048;
 				};
 				class Item1
 				{
@@ -120614,23 +120630,7 @@ class Mission
 				};
 			};
 			id=4725;
-			atlOffset=0.28524637;
-		};
-		class Item16
-		{
-			dataType="Object";
-			class PositionInfo
-			{
-				position[]={2230.5398,4.1781464,1441.1276};
-				angles[]={6.2717605,4.7687492,6.2717605};
-			};
-			side="Empty";
-			flags=4;
-			class Attributes
-			{
-			};
-			id=4836;
-			type="Land_HelipadSquare_F";
+			atlOffset=0.1704731;
 		};
 	};
 	class Connections
