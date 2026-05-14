@@ -128,7 +128,7 @@ private _fnAbortToIdle = {
     [_crewL] call ARC_fnc_airbaseCrewIdleStart;
 };
 
-private _fnDirBetween = {
+private _fnGetDirectionBetween = {
     params ["_fromPos", "_toPos", "_fallbackDir"];
     private _dir = _fallbackDir;
 
@@ -145,14 +145,14 @@ private _fnDirBetween = {
 };
 
 private _fnSetRunwayClimbVelocity = {
-    params ["_vehL", "_dirL", "_fwdMpsL", "_upMpsL"];
-    if (isNull _vehL) exitWith { false };
+    params ["_vehLocal", "_dir", "_fwdMps", "_upMps"];
+    if (isNull _vehLocal) exitWith { false };
 
-    _vehL setDir _dirL;
-    _vehL setVelocity [
-        (sin _dirL) * _fwdMpsL,
-        (cos _dirL) * _fwdMpsL,
-        _upMpsL
+    _vehLocal setDir _dir;
+    _vehLocal setVelocity [
+        (sin _dir) * _fwdMps,
+        (cos _dir) * _fwdMps,
+        _upMps
     ];
 
     true
@@ -477,15 +477,13 @@ if (_isHeli) then {
     private _hasClear = !(_clearPos isEqualTo [0,0,0]);
 
     if (_hasOut) then { _kickPos = _outPos; };
-    if (_hasClear) then { _kickPos = _clearPos; };
 
-    private _runwayDir = if (_hasOut && { _hasClear }) then { [_outPos, _clearPos, getDir _veh] call _fnDirBetween } else { getDir _veh };
+    private _runwayDir = if (_hasOut && { _hasClear }) then { [_outPos, _clearPos, getDir _veh] call _fnGetDirectionBetween } else { getDir _veh };
     _takeoffKickDir = _runwayDir;
 
     _veh engineOn true;
     _veh land "NONE";
     _veh flyInHeight _altLow;
-    if (_hasOut && { _hasClear }) then { _veh setDir _runwayDir; };
 
     if (_hasOut) then {
         private _wpO = _grp addWaypoint [_outPos, 0];
