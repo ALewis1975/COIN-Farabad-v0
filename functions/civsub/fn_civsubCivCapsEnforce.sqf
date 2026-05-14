@@ -18,10 +18,13 @@ params [
 ];
 
 private _activeValid = true;
-{
-    if !(_x isEqualType "") then { _activeValid = false; };
-} forEach _active;
-if (!_activeValid) exitWith {false};
+private _activeIdx = 0;
+while { _activeValid && { _activeIdx < (count _active) } } do {
+    private _activeDid = _active select _activeIdx;
+    if (!(_activeDid isEqualType "")) then { _activeValid = false; };
+    _activeIdx = _activeIdx + 1;
+};
+if (!_activeValid) exitWith { false };
 
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _keysFn = compile "params ['_m']; keys _m";
