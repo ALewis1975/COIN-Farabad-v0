@@ -73,7 +73,11 @@ uiNamespace setVariable ["ARC_console_layoutSplitRatio", _splitRatio];
 
 private _modeRaw = missionNamespace getVariable ["ARC_console_layoutMode", "FULL"];
 if (!(_modeRaw isEqualType "")) then { _modeRaw = "FULL"; };
-private _trimFn = compile "params ['_s']; trim _s";
+private _trimFn = uiNamespace getVariable ["ARC_console_trimFn", objNull];
+if !(_trimFn isEqualType {}) then {
+    _trimFn = compile "params ['_s']; trim _s";
+    uiNamespace setVariable ["ARC_console_trimFn", _trimFn];
+};
 private _mode = toUpper ([_modeRaw] call _trimFn);
 if !(_mode in ["FULL", "DOCK_RIGHT"]) then { _mode = "FULL"; };
 
@@ -100,7 +104,11 @@ private _trackedIdcs = [
 private _defaultsKey = "ARC_ui_consoleLayoutDefaults";
 private _defaults = uiNamespace getVariable [_defaultsKey, createHashMap];
 if !(_defaults isEqualType createHashMap) then { _defaults = createHashMap; };
-private _hashGet = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _hashGet = uiNamespace getVariable ["ARC_console_hashGetOrDefaultFn", objNull];
+if !(_hashGet isEqualType {}) then {
+    _hashGet = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+    uiNamespace setVariable ["ARC_console_hashGetOrDefaultFn", _hashGet];
+};
 
 {
     private _idc = _x;

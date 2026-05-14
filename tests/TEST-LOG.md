@@ -27,6 +27,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | 6 | AIRFIELD_OPS runtime UI smoke + screenshot | Open AIR/TOWER in Arma 3, validate no overlap with `ARC_console_layout_audit = true`, capture screenshot | BLOCKED | Arma 3 runtime and UI renderer are unavailable in this sandbox; requires local MP/dedicated-like client session. |
 | 7 | Post-review changed-file compat + sqflint | `python3 scripts/dev/sqflint_compat_scan.py --strict <4 changed sqf files> && ~/.local/bin/sqflint -e w <4 changed sqf files>` | PASS | Re-validated after review-feedback constants/comments updates. |
 | 8 | Marker-label fallback validation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleAirMapPaint.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleAirMapPaint.sqf` | PASS | Switched ellipsis glyph to `...` fallback and re-linted cleanly. |
+| 9 | Cached helper + marker-size constants validation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleApplyLayout.sqf functions/ui/fn_uiConsoleAirMapPaint.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleApplyLayout.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleAirMapPaint.sqf` | PASS | Revalidated after caching compile helpers and lifting marker sizes into named constants. |
 
 ---
 

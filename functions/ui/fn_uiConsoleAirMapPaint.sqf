@@ -61,6 +61,9 @@ private _newMarkers = [];
 private _LABEL_LEN_SELECTED_CALLSIGN = 12;
 private _LABEL_LEN_SELECTED_FID = 8;
 private _LABEL_LEN_UNSELECTED_CALLSIGN = 6;
+private _MARKER_SIZE_RUNWAY = [0.55, 0.55];
+private _MARKER_SIZE_SELECTED = [0.52, 0.52];
+private _MARKER_SIZE_DEFAULT = [0.38, 0.38];
 private _shortText = {
     params ["_s", "_maxLen"];
     if (!(_s isEqualType "")) exitWith { "" };
@@ -92,7 +95,7 @@ createMarkerLocal [_rwyMkr, _centerPos];
 _rwyMkr setMarkerTypeLocal "mil_flag";
 _rwyMkr setMarkerColorLocal "ColorWhite";
 _rwyMkr setMarkerTextLocal "RWY";
-_rwyMkr setMarkerSizeLocal [0.55, 0.55];
+_rwyMkr setMarkerSizeLocal _MARKER_SIZE_RUNWAY;
 _newMarkers pushBack _rwyMkr;
 
 // --- Arrival markers (blue) ---
@@ -116,7 +119,7 @@ private _centerTarget = [];
     _mkr setMarkerTypeLocal "mil_arrow";
     _mkr setMarkerColorLocal (if (_isSelected) then {"ColorYellow"} else {"ColorBLUFOR"});
     _mkr setMarkerTextLocal _label;
-    _mkr setMarkerSizeLocal (if (_isSelected) then {[0.52, 0.52]} else {[0.38, 0.38]});
+    _mkr setMarkerSizeLocal (if (_isSelected) then {_MARKER_SIZE_SELECTED} else {_MARKER_SIZE_DEFAULT});
     _newMarkers pushBack _mkr;
 
     if (_isSelected) then {
@@ -145,7 +148,7 @@ private _depIdx = 0;
     _mkr setMarkerTypeLocal "mil_triangle";
     _mkr setMarkerColorLocal (if (_isSelected) then {"ColorYellow"} else {"ColorOPFOR"});
     _mkr setMarkerTextLocal _label;
-    _mkr setMarkerSizeLocal (if (_isSelected) then {[0.52, 0.52]} else {[0.38, 0.38]});
+    _mkr setMarkerSizeLocal (if (_isSelected) then {_MARKER_SIZE_SELECTED} else {_MARKER_SIZE_DEFAULT});
     _newMarkers pushBack _mkr;
 
     if (_isSelected) then {
