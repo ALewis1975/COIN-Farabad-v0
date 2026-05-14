@@ -19,7 +19,7 @@ params [
 
 private _activeValid = true;
 {
-    if !(_x isEqualType "") exitWith { _activeValid = false; };
+    if !(_x isEqualType "") then { _activeValid = false; };
 } forEach _active;
 if (!_activeValid) exitWith {false};
 
