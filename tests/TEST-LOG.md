@@ -11,6 +11,24 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-14 — IED lifecycle completion hooks (Mode B)
+
+**Branch/Commit:** copilot/research-ied-system-assessment @ 97df775
+
+**Scenario:** Implemented IED incomplete/stubbed area decomposition: active IED threat linkage, detonation-to-threat lifecycle updates, RTB/TOW EOD disposition server RPC, driven VBIED / suicide objective-kind production, and explicit deferred status for complex/chain IED modules.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline IED lifecycle static contract check | `bash tests/static/threat_ied_lifecycle_contract_checks.sh` | PASS | Existing pre-change contract checks passed. Direct execution was blocked by file mode; running through `bash` succeeded. |
+| 2 | SQF compat scan on changed SQF files | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ied/fn_iedClientExecuteDisposition.sqf functions/ied/fn_iedServerRequestDisposition.sqf functions/ied/fn_vbiedServerOnDestroyed.sqf functions/ied/fn_iedComplexAttackStage.sqf functions/ied/fn_iedChainEmplace.sqf functions/core/fn_execInitActive.sqf functions/core/fn_iedHandleDetonation.sqf functions/core/fn_publicBroadcastState.sqf functions/threat/fn_threatOnAOActivated.sqf functions/ui/fn_uiIncidentGetNextActions.sqf` | PASS | Initial run found parser-compat issues in touched files; fixed and reran clean. |
+| 3 | sqflint on changed SQF files | `sqflint -e w ...changed SQF files...` | BLOCKED | `sqflint: command not found` in sandbox. |
+| 4 | IED lifecycle static contract check | `bash tests/static/threat_ied_lifecycle_contract_checks.sh` | PASS | Covers active threat linkage, detonation lifecycle, RTB/TOW disposition RPC, advanced objective production, and complex/chain deferred status. |
+| 5 | Whitespace check | `git --no-pager diff --check` | PASS | No whitespace errors. |
+| 6 | Runtime smoke: RTB_IED evidence delivery, TOW_VBIED disposal, driven VBIED, suicide bomber objective flow | Local MP / hosted Arma 3 session | BLOCKED | Arma 3 runtime unavailable in sandbox. |
+| 7 | Dedicated/JIP/reconnect validation | Dedicated server with JIP client and reconnect cycle | BLOCKED | Dedicated server/JIP rig unavailable in sandbox. |
+
+---
+
 ## 2026-05-14 — Air/Tower validation coverage follow-up (Mode E/G/I)
 
 **Branch/Commit:** copilot/address-air-tower-recommendations @ 3492b7a
