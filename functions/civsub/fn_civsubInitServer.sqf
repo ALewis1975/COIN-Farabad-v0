@@ -152,7 +152,7 @@ if (isNil { missionNamespace getVariable "civsub_v1_eh_entityCreated" }) then
         {
             params [["_unit", objNull, [objNull]]];
             private _deadline = serverTime + 2;
-            waitUntil { uiSleep 0.05; isNull _unit || { !alive _unit } || { side _unit isEqualTo civilian } || { serverTime >= _deadline } };
+            waitUntil { uiSleep 0.15; isNull _unit || { !alive _unit } || { side _unit isEqualTo civilian } || { serverTime >= _deadline } };
             if (!isServer) exitWith {};
             if (isNull _unit) exitWith {};
             if !(alive _unit) exitWith {};
@@ -191,7 +191,7 @@ if (!(missionNamespace getVariable ["civsub_v1_autoConnectThreadRunning", false]
             {
                 private _idx = (_startIdx + _scanOffset) mod _total;
                 private _unit = _units select _idx;
-                if (!isNull _unit && { alive _unit } && { !isPlayer _unit } && { side _unit isEqualTo civilian } && { !(_unit getVariable ["civsub_v1_isCiv", false]) }) then
+                if (!isNull _unit && { !(_unit getVariable ["civsub_v1_isCiv", false]) } && { alive _unit } && { !isPlayer _unit } && { side _unit isEqualTo civilian }) then
                 {
                     [_unit, "", "PERIODIC_SCAN"] call ARC_fnc_civsubCivConnect;
                 };
