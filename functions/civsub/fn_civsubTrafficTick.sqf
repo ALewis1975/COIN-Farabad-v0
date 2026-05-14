@@ -475,6 +475,8 @@ if (_allowMoving) then
             };
         };
 
+        // All-or-nothing fallback: prefer forward highway-aligned targets, but
+        // accept any distant road if no forward candidates are available.
         if ((count _candidates) == 0 && { (count _fallbackCandidates) > 0 }) then
         {
             _candidates = _fallbackCandidates;

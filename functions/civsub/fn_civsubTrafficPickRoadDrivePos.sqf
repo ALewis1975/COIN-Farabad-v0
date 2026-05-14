@@ -68,8 +68,8 @@ for "_i" from 1 to _tries do
     };
 
     private _r2 = objNull;
-    private _noDirectionMatch = 1e12;
-    private _bestDelta = _noDirectionMatch;
+    private _sentinelDelta = 1e12;
+    private _bestDelta = _sentinelDelta;
     {
         if (isNull _x) then { continue; };
         private _onward = roadsConnectedTo _x;
@@ -96,8 +96,9 @@ for "_i" from 1 to _tries do
     private _r2Pos = getPosATL _r2;
     _r2Pos set [2, 0];
 
-    private _dir = _r getDir _r2;
-    if (_hwyDir >= 0) then { _dir = _hwyDir; };
+    // Highway side marker direction is authoritative when present; otherwise
+    // use the road-to-road bearing toward the selected connected segment.
+    private _dir = if (_hwyDir >= 0) then { _hwyDir } else { _r getDir _r2 };
 
     // Slope guard — avoid extreme grades that would tip the vehicle.
     private _n = surfaceNormal _rPos;

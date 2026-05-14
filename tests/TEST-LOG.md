@@ -28,7 +28,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | 7 | Mission marker inventory | `python3 - <<'PY' ... verify mission.sqm contains name=\"mkr_highway_001\" through name=\"mkr_highway_106\" ... PY` | PASS | Found all 106 expected highway direction markers. |
 | 8 | Runtime smoke: CIVTRAF direction and convoy highway start | Local MP/dedicated-like Arma 3 session; spawn moving/static civilian traffic near both highway sides and a convoy near highway markers; verify direction-of-travel and no U-turn/pileup regression | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
 | 9 | Dedicated/JIP replication check | Dedicated server with at least one JIP client; verify server-owned traffic/convoy state remains authoritative and late clients render replicated vehicles/markers consistently | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
-| 10 | Review follow-up compat/lint | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/world/fn_worldHighwayMarkerNearest.sqf functions/civsub/fn_civsubTrafficPickRoadDrivePos.sqf && sqflint -e w <same files> && git --no-pager diff --check` | PASS | Review nits addressed; changed follow-up files lint clean. |
+| 10 | Review follow-up compat/lint | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/world/fn_worldHighwayMarkerNearest.sqf functions/civsub/fn_civsubTrafficPickRoadDrivePos.sqf functions/civsub/fn_civsubTrafficTick.sqf && sqflint -e w <same files> && git --no-pager diff --check` | PASS | Review nits addressed; changed follow-up files lint clean. |
 
 ---
 

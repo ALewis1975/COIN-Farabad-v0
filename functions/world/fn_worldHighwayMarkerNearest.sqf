@@ -28,9 +28,7 @@ _radius = (_radius max 20) min 500;
 if (!(_preferredDir isEqualType 0)) then { _preferredDir = -1; };
 if (_preferredDir >= 0) then { _preferredDir = _preferredDir % 360; };
 
-private _prefix = missionNamespace getVariable ["ARC_highwayMarkerPrefix", "mkr_highway_"];
-// Empty prefix would match every mission marker; fall back to the highway prefix.
-if (!(_prefix isEqualType "") || { _prefix isEqualTo "" }) then { _prefix = "mkr_highway_"; };
+private _prefix = "mkr_highway_";
 
 private _dirWeight = missionNamespace getVariable ["ARC_highwayMarkerDirScoreWeightM", 0.45];
 if (!(_dirWeight isEqualType 0)) then { _dirWeight = 0.45; };
