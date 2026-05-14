@@ -11,7 +11,47 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
-## 2026-05-14 — IED lifecycle completion hooks (Mode B)
+## 2026-05-14 — UI incident next-actions lint fix (Mode A)
+
+**Branch/Commit:** copilot/add-empty-markers-highways @ 1040591 (post-fix working tree validated in-session)
+
+**Scenario:** Investigated failed GitHub Actions job `76044900176` in `Arma SQF + Mission Config Preflight` and fixed sqflint warning-as-error failures in `functions/ui/fn_uiIncidentGetNextActions.sqf` by using the documented `roleCat` parameter for guest-safe messaging and removing unused EOD approval dead code.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | CI failure investigation | GitHub Actions job `76044900176` logs for `SQF static analysis (changed *.sqf files only)` | FAIL | Confirmed warnings-as-errors: `_roleCat` unused at line 17 and `_eodApproved` unused at line 51. |
+| 2 | Baseline targeted compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiIncidentGetNextActions.sqf` | PASS | No known parser-compat patterns before edits. |
+| 3 | Baseline targeted sqflint | `sqflint -e w functions/ui/fn_uiIncidentGetNextActions.sqf` | FAIL | Reproduced CI warnings for `_roleCat` and `_eodApproved`. |
+| 4 | Changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiIncidentGetNextActions.sqf` | PASS | No known parser-compat patterns after edits. |
+| 5 | Changed-file sqflint | `sqflint -e w functions/ui/fn_uiIncidentGetNextActions.sqf` | PASS | Failing warnings resolved. |
+| 6 | Whitespace check | `git --no-pager diff --check` | PASS | No whitespace errors. |
+| 7 | CI changed SQF lint set | `python3 scripts/dev/sqflint_compat_scan.py --strict <10 CI-changed SQF files> && sqflint -e w <each CI-changed SQF file>` | PASS | Matched the failed workflow's changed SQF file list from job logs; all lint clean after fix. |
+| 8 | Review follow-up compat/lint | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiIncidentGetNextActions.sqf functions/world/fn_worldHighwayMarkerNearest.sqf functions/world/fn_worldBearingDelta.sqf && sqflint -e w <same files> && git --no-pager diff --check` | PASS | Addressed validation review comments for string literal and highway helper comments. |
+
+---
+
+## 2026-05-14 — Highway marker direction integration (Mode B)
+
+**Branch/Commit:** use-highway-direction-markers (task branch: copilot/add-empty-markers-highways) @ 5c27f6c (post-fix working tree validated in-session)
+
+**Scenario:** Added shared `mkr_highway_*` marker direction resolution and wired it into CIVTRAF parked/moving placement plus convoy spawn direction planning.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline targeted compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubTrafficPickRoadsidePos.sqf functions/civsub/fn_civsubTrafficPickRoadDrivePos.sqf functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf functions/core/fn_execInitActive.sqf functions/logistics/fn_execSpawnConvoy.sqf functions/logistics/fn_convoyApplyRouteWps.sqf config/CfgFunctions.hpp` | PASS | No known parser-compat patterns in target SQF files before edits. |
+| 2 | Baseline targeted sqflint | `for f in functions/civsub/fn_civsubTrafficPickRoadsidePos.sqf functions/civsub/fn_civsubTrafficPickRoadDrivePos.sqf functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf functions/core/fn_execInitActive.sqf functions/logistics/fn_execSpawnConvoy.sqf functions/logistics/fn_convoyApplyRouteWps.sqf; do sqflint -e w "$f"; done` | PASS | Target files linted clean before edits. |
+| 3 | Changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/world/fn_worldHighwayMarkerNearest.sqf functions/civsub/fn_civsubTrafficPickRoadsidePos.sqf functions/civsub/fn_civsubTrafficPickRoadDrivePos.sqf functions/civsub/fn_civsubTrafficTick.sqf functions/core/fn_execInitActive.sqf` | PASS | No known parser-compat patterns in changed SQF files. |
+| 4 | Changed-file sqflint | `for f in functions/world/fn_worldHighwayMarkerNearest.sqf functions/civsub/fn_civsubTrafficPickRoadsidePos.sqf functions/civsub/fn_civsubTrafficPickRoadDrivePos.sqf functions/civsub/fn_civsubTrafficTick.sqf functions/core/fn_execInitActive.sqf; do sqflint -e w "$f"; done` | PASS | All changed SQF files lint clean. |
+| 5 | Whitespace check | `git --no-pager diff --check` | PASS | No whitespace errors. |
+| 6 | Highway marker static contract | `grep -q 'class worldHighwayMarkerNearest' config/CfgFunctions.hpp && grep -q 'mkr_highway_' functions/world/fn_worldHighwayMarkerNearest.sqf && grep -q 'ARC_fnc_worldHighwayMarkerNearest' <changed call-site files>` | PASS | Helper registered and referenced by CIVTRAF and convoy planning call sites. |
+| 7 | Mission marker inventory | `python3 - <<'PY' ... verify mission.sqm contains name=\"mkr_highway_001\" through name=\"mkr_highway_106\" ... PY` | PASS | Found all 106 expected highway direction markers. |
+| 8 | Runtime smoke: CIVTRAF direction and convoy highway start | Local MP/dedicated-like Arma 3 session; spawn moving/static civilian traffic near both highway sides and a convoy near highway markers; verify direction-of-travel and no U-turn/pileup regression | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 9 | Dedicated/JIP replication check | Dedicated server with at least one JIP client; verify server-owned traffic/convoy state remains authoritative and late clients render replicated vehicles/markers consistently | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+| 10 | Review follow-up compat/lint | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/world/fn_worldBearingDelta.sqf functions/world/fn_worldHighwayMarkerNearest.sqf functions/civsub/fn_civsubTrafficPickRoadDrivePos.sqf functions/civsub/fn_civsubTrafficTick.sqf && sqflint -e w <same files> && git --no-pager diff --check && grep -q 'class worldBearingDelta' config/CfgFunctions.hpp` | PASS | Review nits addressed; changed follow-up files lint clean. |
+
+---
+
+## 2026-05-14 — CIVSUB civilian auto-hookup and airbase BLUFOR spawn fix (Mode A)
 
 **Branch/Commit:** copilot/research-ied-system-assessment @ 8111863
 

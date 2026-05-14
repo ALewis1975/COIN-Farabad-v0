@@ -54,23 +54,50 @@ for "_i" from 1 to _tries do
     private _conn = roadsConnectedTo _r;
     if ((count _conn) == 0) then { continue; };
 
-    private _r2 = objNull;
-    {
-        if (isNull _x) then { continue; };
-        private _onward = roadsConnectedTo _x;
-        if ((count _onward) > 0) exitWith { _r2 = _x; };
-    } forEach _conn;
-    if (isNull _r2) then { continue; };
-
     private _rPos = getPosATL _r;
     _rPos set [2, 0];
 
     if (surfaceIsWater _rPos) then { continue; };
 
+    private _hwyMarker = [_rPos, (missionNamespace getVariable ["civsub_v1_traffic_highwayMarkerRadius_m", 85]), -1] call ARC_fnc_worldHighwayMarkerNearest;
+    private _hwyDir = -1;
+    if (_hwyMarker isEqualType [] && { (count _hwyMarker) >= 3 }) then
+    {
+        _hwyDir = _hwyMarker select 2;
+        if (!(_hwyDir isEqualType 0)) then { _hwyDir = -1; };
+    };
+
+    private _r2 = objNull;
+    private _bestDelta = 1e12; // larger than any bearing delta (0..180)
+    {
+        if (isNull _x) then { continue; };
+        private _onward = roadsConnectedTo _x;
+        if ((count _onward) > 0) then
+        {
+            if (_hwyDir >= 0) then
+            {
+                private _candDir = _r getDir _x;
+                private _delta = [_candDir, _hwyDir] call ARC_fnc_worldBearingDelta;
+                if (_delta < _bestDelta) then
+                {
+                    _bestDelta = _delta;
+                    _r2 = _x;
+                };
+            }
+            else
+            {
+                if (isNull _r2) then { _r2 = _x; };
+            };
+        };
+    } forEach _conn;
+    if (isNull _r2) then { continue; };
+
     private _r2Pos = getPosATL _r2;
     _r2Pos set [2, 0];
 
-    private _dir = _r getDir _r2;
+    // Highway side marker direction takes precedence when present; otherwise
+    // use the road-to-road bearing toward the selected connected segment.
+    private _dir = if (_hwyDir >= 0) then { _hwyDir } else { _r getDir _r2 };
 
     // Slope guard — avoid extreme grades that would tip the vehicle.
     private _n = surfaceNormal _rPos;

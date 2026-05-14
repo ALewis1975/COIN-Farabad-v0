@@ -214,6 +214,8 @@ class CfgFunctions
 
             class worldPickEnterablePosNear {};
             class worldPickConvoySpawnAndLink {};
+            class worldHighwayMarkerNearest {};
+            class worldBearingDelta {};
             class worldRegisterLocations {};
 
             // Startup world scans (building slots, patrol rings, objective index)

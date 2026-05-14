@@ -435,7 +435,20 @@ if (_allowMoving) then
             continue;
         };
 
+        private _hwyMarker = [_curPos, (missionNamespace getVariable ["civsub_v1_traffic_highwayMarkerRadius_m", 85]), (getDir _veh)] call ARC_fnc_worldHighwayMarkerNearest;
+        private _hwyDir = -1;
+        if (_hwyMarker isEqualType [] && { (count _hwyMarker) >= 3 }) then
+        {
+            _hwyDir = _hwyMarker select 2;
+            if (!(_hwyDir isEqualType 0)) then { _hwyDir = -1; };
+        };
+
+        private _hwyAlignDeg = missionNamespace getVariable ["civsub_v1_traffic_highwayAlignmentThreshold_deg", 75];
+        if (!(_hwyAlignDeg isEqualType 0)) then { _hwyAlignDeg = 75; };
+        _hwyAlignDeg = (_hwyAlignDeg max 15) min 140;
+
         private _candidates = [];
+        private _fallbackCandidates = [];
         private _roadCount = count _roads;
         private _roadIdx = 0;
         while { _roadIdx < _roadCount && { (count _candidates) < _candidateLimit } } do
@@ -446,8 +459,31 @@ if (_allowMoving) then
             private _roadPos = getPosATL _road;
             if ((_curPos distance2D _roadPos) >= _wpMin) then
             {
-                _candidates pushBack _road;
+                if (_hwyDir >= 0) then
+                {
+                    private _roadDir = _curPos getDir _roadPos;
+                    private _delta = [_roadDir, _hwyDir] call ARC_fnc_worldBearingDelta;
+                    if (_delta <= _hwyAlignDeg) then
+                    {
+                        _candidates pushBack _road;
+                    }
+                    else
+                    {
+                        if ((count _fallbackCandidates) < _candidateLimit) then { _fallbackCandidates pushBack _road; };
+                    };
+                }
+                else
+                {
+                    _candidates pushBack _road;
+                };
             };
+        }; // end road candidate search loop
+
+        // All-or-nothing fallback: prefer highway-direction-aligned targets, but
+        // accept any distant road if no aligned candidates are available.
+        if ((count _candidates) == 0 && { (count _fallbackCandidates) > 0 }) then
+        {
+            _candidates = _fallbackCandidates;
         };
 
         if ((count _candidates) == 0) then
