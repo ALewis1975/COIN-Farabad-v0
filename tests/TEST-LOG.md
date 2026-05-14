@@ -11,6 +11,26 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-14 — Highway marker direction integration (Mode B)
+
+**Branch/Commit:** copilot/add-empty-markers-highways @ 5c27f6c (post-fix working tree validated in-session)
+
+**Scenario:** Added shared `mkr_highway_*` marker direction resolution and wired it into CIVTRAF parked/moving placement plus convoy spawn direction planning.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline targeted compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubTrafficPickRoadsidePos.sqf functions/civsub/fn_civsubTrafficPickRoadDrivePos.sqf functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf functions/core/fn_execInitActive.sqf functions/logistics/fn_execSpawnConvoy.sqf functions/logistics/fn_convoyApplyRouteWps.sqf config/CfgFunctions.hpp` | PASS | No known parser-compat patterns in target SQF files before edits. |
+| 2 | Baseline targeted sqflint | `for f in functions/civsub/fn_civsubTrafficPickRoadsidePos.sqf functions/civsub/fn_civsubTrafficPickRoadDrivePos.sqf functions/civsub/fn_civsubTrafficTick.sqf functions/civsub/fn_civsubTrafficSpawnMoving.sqf functions/core/fn_execInitActive.sqf functions/logistics/fn_execSpawnConvoy.sqf functions/logistics/fn_convoyApplyRouteWps.sqf; do sqflint -e w "$f"; done` | PASS | Target files linted clean before edits. |
+| 3 | Changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/world/fn_worldHighwayMarkerNearest.sqf functions/civsub/fn_civsubTrafficPickRoadsidePos.sqf functions/civsub/fn_civsubTrafficPickRoadDrivePos.sqf functions/civsub/fn_civsubTrafficTick.sqf functions/core/fn_execInitActive.sqf` | PASS | No known parser-compat patterns in changed SQF files. |
+| 4 | Changed-file sqflint | `for f in functions/world/fn_worldHighwayMarkerNearest.sqf functions/civsub/fn_civsubTrafficPickRoadsidePos.sqf functions/civsub/fn_civsubTrafficPickRoadDrivePos.sqf functions/civsub/fn_civsubTrafficTick.sqf functions/core/fn_execInitActive.sqf; do sqflint -e w "$f"; done` | PASS | All changed SQF files lint clean. |
+| 5 | Whitespace check | `git --no-pager diff --check` | PASS | No whitespace errors. |
+| 6 | Highway marker static contract | `grep -q 'class worldHighwayMarkerNearest' config/CfgFunctions.hpp && grep -q 'mkr_highway_' functions/world/fn_worldHighwayMarkerNearest.sqf && grep -q 'ARC_fnc_worldHighwayMarkerNearest' <changed call-site files>` | PASS | Helper registered and referenced by CIVTRAF and convoy planning call sites. |
+| 7 | Mission marker inventory | `python3 - <<'PY' ... verify mission.sqm contains name=\"mkr_highway_001\" through name=\"mkr_highway_106\" ... PY` | PASS | Found all 106 expected highway direction markers. |
+| 8 | Runtime smoke: CIVTRAF direction and convoy highway start | Local MP/dedicated-like Arma 3 session; spawn moving/static civilian traffic near both highway sides and a convoy near highway markers; verify direction-of-travel and no U-turn/pileup regression | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 9 | Dedicated/JIP replication check | Dedicated server with at least one JIP client; verify server-owned traffic/convoy state remains authoritative and late clients render replicated vehicles/markers consistently | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+
+---
+
 ## 2026-05-14 — CIVSUB civilian auto-hookup and airbase BLUFOR spawn fix (Mode A)
 
 **Branch/Commit:** copilot/ensure-civs-connected-to-civsub @ be11faf (post-fix working tree validated in-session)
