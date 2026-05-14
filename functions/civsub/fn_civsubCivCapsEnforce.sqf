@@ -16,7 +16,12 @@ params [
     ["_capGE", 0, [0]],
     ["_capDE", 0, [0]]
 ];
-if !(_active isEqualType []) exitWith {false};
+
+private _activeValid = true;
+{
+    if !(_x isEqualType "") exitWith { _activeValid = false; };
+} forEach _active;
+if (!_activeValid) exitWith {false};
 
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _keysFn = compile "params ['_m']; keys _m";
