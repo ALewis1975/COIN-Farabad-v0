@@ -1,7 +1,9 @@
 /*
     ARC_fnc_iedChainEmplace
 
-    IED subsystem: spawn secondary chain IED devices linked to a primary device.
+    Deferred module: spawn secondary chain IED devices linked to a primary device.
+    Intentionally not called by the active incident runtime unless a future PR
+    explicitly enables chain IEDs with runtime validation.
     Detonated in sequence after primary detonation.
 
     Params:

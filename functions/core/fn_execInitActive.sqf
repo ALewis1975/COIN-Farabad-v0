@@ -77,6 +77,22 @@ if (_typeU isEqualTo "IED") then
         || { (_d2 find "vehicle") >= 0 && { (_d2 find "bomb") >= 0 } };
 };
 
+private _iedLeadTextUpper = toUpper (format ["%1 %2", _leadTagU, _disp]);
+private _iedTierKnown = false;
+private _iedTier = 0;
+private _iedDistrictId = ["activeIncidentCivsubDistrictId", ""] call ARC_fnc_stateGet;
+if (!(_iedDistrictId isEqualType "")) then { _iedDistrictId = ""; };
+if (!(_iedDistrictId isEqualTo "")) then
+{
+    _iedTierKnown = true;
+    private _secLevel = missionNamespace getVariable [format ["ARC_district_%1_secLevel", _iedDistrictId], "NORMAL"];
+    if (!(_secLevel isEqualType "")) then { _secLevel = "NORMAL"; };
+    _secLevel = toUpper _secLevel;
+    if (_secLevel isEqualTo "ELEVATED") then { _iedTier = 1; };
+    if (_secLevel isEqualTo "HIGH_RISK") then { _iedTier = 2; };
+    if (_secLevel isEqualTo "CRITICAL") then { _iedTier = 3; };
+};
+
 // RAID tasks: some should scaffold a cache search instead of a single intel prop.
 private _isCacheRaid = false;
 if (_typeU isEqualTo "RAID") then
@@ -547,7 +563,56 @@ case "IED":
     _radius = 120;
     _deadlineSec = 20 * 60;
 
+    private _drivenKeywords = ["VBIED_DRIVEN", "DRIVEN"];
+    private _vbiedKeywords = ["VBIED", "VEHICLE BOMB"];
+    private _suicideKeywords = ["SUICIDE", "SB_"];
+
+    private _hasDrivenKeyword = false;
+    { if ((_iedLeadTextUpper find _x) >= 0) exitWith { _hasDrivenKeyword = true; }; } forEach _drivenKeywords;
+
+    private _hasVbiedKeyword = false;
+    { if ((_iedLeadTextUpper find _x) >= 0) exitWith { _hasVbiedKeyword = true; }; } forEach _vbiedKeywords;
+
+    private _isDrivenLeadTag = _leadTagU in ["VBIED_DRIVEN_CHECKPOINT", "VBIED_DRIVEN_GATE"];
+    private _isDrivenVbied = (_hasDrivenKeyword && { _hasVbiedKeyword }) || { _isDrivenLeadTag };
+
+    private _hasSuicideKeyword = false;
+    { if ((_iedLeadTextUpper find _x) >= 0) exitWith { _hasSuicideKeyword = true; }; } forEach _suicideKeywords;
+
+    private _isSuicideLeadTag = _leadTagU in ["SB_MARKET_APPROACH", "SB_CHECKPOINT_APPROACH", "SB_SHURA_APPROACH"];
+    private _isSuicideBomber = _hasSuicideKeyword || { _isSuicideLeadTag };
+
+    private _canProduceDrivenVbied = (!_iedTierKnown) || { _iedTier >= 2 };
+    private _canProduceSuicideBomber = _iedTierKnown && { _iedTier >= 3 };
+
     // VBIED variants: swap prop objective to a vehicle placeholder
+    if (_isSuicideBomber && { _canProduceSuicideBomber }) then
+    {
+        if ((_iedLeadTextUpper find "SHURA") >= 0) then
+        {
+            _objKind = "SB_SHURA_APPROACH";
+        }
+        else
+        {
+            if ((_iedLeadTextUpper find "CHECKPOINT") >= 0) then { _objKind = "SB_CHECKPOINT_APPROACH"; } else { _objKind = "SB_MARKET_APPROACH"; };
+        };
+        _objClass = "";
+        _objRadius = 220;
+        _objAction = "";
+        _failOnKilled = false;
+    }
+    else
+    {
+    if (_isDrivenVbied && { _vbiedEnabled } && { _canProduceDrivenVbied }) then
+    {
+        if (((_iedLeadTextUpper find "GATE") >= 0) || { (_leadTagU isEqualTo "VBIED_DRIVEN_GATE") }) then { _objKind = "VBIED_DRIVEN_GATE"; } else { _objKind = "VBIED_DRIVEN_CHECKPOINT"; };
+        _objClass = "";
+        _objRadius = 500;
+        _objAction = "";
+        _failOnKilled = false;
+    }
+    else
+    {
     if (_isVbied && { _vbiedEnabled }) then
     {
         _objKind = "VBIED_VEHICLE";
@@ -619,6 +684,8 @@ case "IED":
         _objRadius = 250;
         _objAction = "Clear / render safe";
         _failOnKilled = true;
+    };
+    };
     };
 };
 
@@ -995,7 +1062,17 @@ case "IED":
     ["activeObjectiveClass", ""] call ARC_fnc_stateSet;
     ["activeObjectivePos", []] call ARC_fnc_stateSet;
     ["activeObjectiveNetId", ""] call ARC_fnc_stateSet;
+    // Reset the dynamic-objective target marker; driven VBIED/SB objectives set it below from the active incident marker.
+    ["activeObjectiveMarker", ""] call ARC_fnc_stateSet;
     ["activeObjectiveArmed", true] call ARC_fnc_stateSet;
+
+    ["activeIedThreatId", ""] call ARC_fnc_stateSet;
+    missionNamespace setVariable ["ARC_activeIedThreatId", "", true];
+    missionNamespace setVariable ["ARC_vbiedDrivenSpawned", false, true];
+    missionNamespace setVariable ["ARC_vbiedDrivenNetId", "", true];
+    missionNamespace setVariable ["ARC_suicideBomberSpawned", false, true];
+    missionNamespace setVariable ["ARC_suicideBomberNetId", "", true];
+    missionNamespace setVariable ["ARC_suicideBomberDetonated", false, true];
 
     // Cache objective bookkeeping (multi-container)
     ["activeCacheContainerNetIds", []] call ARC_fnc_stateSet;
@@ -1260,6 +1337,20 @@ if (!(_objKind isEqualTo "")) then
 {
     private _spawned = [];
 
+    if (_objKind in ["VBIED_DRIVEN_CHECKPOINT", "VBIED_DRIVEN_GATE", "SB_MARKET_APPROACH", "SB_CHECKPOINT_APPROACH", "SB_SHURA_APPROACH"]) then
+    {
+        // Dynamic IED variants use activeObjectiveMarker as an optional target marker.
+        private _objectiveMarkerName = _marker;
+        ["activeObjectiveKind", _objKind] call ARC_fnc_stateSet;
+        ["activeObjectiveClass", _objClass] call ARC_fnc_stateSet;
+        ["activeObjectivePos", _pos] call ARC_fnc_stateSet;
+        ["activeObjectiveNetId", ""] call ARC_fnc_stateSet;
+        ["activeObjectiveMarker", _objectiveMarkerName] call ARC_fnc_stateSet;
+        ["activeObjectiveArmed", true] call ARC_fnc_stateSet;
+        missionNamespace setVariable ["ARC_activeObjective", objNull, true];
+    }
+    else
+    {
     // Cache objectives use multiple containers; they are not a single netId objective.
     if (_objKind isEqualTo "CACHE_SEARCH") then
     {
@@ -1301,6 +1392,7 @@ if (!(_objKind isEqualTo "")) then
 
             missionNamespace setVariable ["ARC_activeObjective", _obj, true];
         };
+    };
     };
 };
 

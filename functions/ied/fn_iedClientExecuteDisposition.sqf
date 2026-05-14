@@ -3,9 +3,9 @@
 
     Client: execute an approved EOD disposition action.
 
-    Phase 4:
+    Phase 5:
       - DET_IN_PLACE: server detonation for active IED device / VBIED vehicle.
-      - RTB_IED / TOW_VBIED: placeholder (Phase 5 will implement).
+      - RTB_IED / TOW_VBIED: server-authoritative logistics lifecycle request.
 
     Params:
       0: STRING requestType (DET_IN_PLACE|RTB_IED|TOW_VBIED)
@@ -20,7 +20,8 @@ params [
     ["_req", "DET_IN_PLACE", [""]]
 ];
 
-_req = toUpper (trim _req);
+private _trimFn = compile "params ['_s']; trim _s";
+_req = toUpper ([_req] call _trimFn);
 if !(_req in ["DET_IN_PLACE","RTB_IED","TOW_VBIED"]) then { _req = "DET_IN_PLACE"; };
 
 if (!([_req] call ARC_fnc_iedClientHasEodApproval)) exitWith
@@ -31,7 +32,7 @@ if (!([_req] call ARC_fnc_iedClientHasEodApproval)) exitWith
 
 private _kind = ["activeObjectiveKind", ""] call ARC_fnc_stateGet;
 if (!(_kind isEqualType "")) then { _kind = ""; };
-_kind = toUpper (trim _kind);
+_kind = toUpper ([_kind] call _trimFn);
 
 switch (_req) do
 {
@@ -41,7 +42,7 @@ switch (_req) do
         {
             private _did = ["activeIedDeviceId", ""] call ARC_fnc_stateGet;
             if (!(_did isEqualType "")) then { _did = ""; };
-            _did = trim _did;
+            _did = [_did] call _trimFn;
             if (_did isEqualTo "") exitWith { ["EOD", "No active IED device."] call ARC_fnc_clientToast; false };
             [_did] remoteExec ["ARC_fnc_iedServerDetonate", 2];
             ["EOD", "Detonation requested (TOC approved)."] call ARC_fnc_clientToast;
@@ -53,7 +54,7 @@ switch (_req) do
             {
                 private _did = ["activeVbiedDeviceId", ""] call ARC_fnc_stateGet;
                 if (!(_did isEqualType "")) then { _did = ""; };
-                _did = trim _did;
+                _did = [_did] call _trimFn;
                 if (_did isEqualTo "") exitWith { ["EOD", "No active VBIED vehicle."] call ARC_fnc_clientToast; false };
                 [_did] remoteExec ["ARC_fnc_vbiedServerDetonate", 2];
                 ["EOD", "Detonation requested (TOC approved)."] call ARC_fnc_clientToast;
@@ -69,13 +70,15 @@ switch (_req) do
 
     case "RTB_IED":
     {
-        ["EOD", "RTB evidence approved. Transport evidence to the EOD site."] call ARC_fnc_clientToast;
+        [_req] remoteExec ["ARC_fnc_iedServerRequestDisposition", 2];
+        ["EOD", "RTB evidence approved. Server is enabling evidence transport / delivery tracking."] call ARC_fnc_clientToast;
         true
     };
 
     case "TOW_VBIED":
     {
-        ["EOD", "Tow disposition approved. Move the VBIED to the EOD site, then dispose."] call ARC_fnc_clientToast;
+        [_req] remoteExec ["ARC_fnc_iedServerRequestDisposition", 2];
+        ["EOD", "Tow disposition approved. Server is enabling VBIED tow / disposal tracking."] call ARC_fnc_clientToast;
         true
     };
 };

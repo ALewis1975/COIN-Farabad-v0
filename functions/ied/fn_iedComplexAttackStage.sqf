@@ -2,7 +2,8 @@
     ARC_fnc_iedComplexAttackStage
 
     IED subsystem: stage a secondary ambush group linked to an IED complex attack.
-    Called when threatRecord.execution.hasSecondaryAttack = true and complexity >= 3.
+    Deferred module: intentionally not called by the active incident runtime unless a
+    future PR explicitly enables complex attacks with runtime validation.
 
     Params:
       0: ARRAY threatRecord (pairs array)
