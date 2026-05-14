@@ -90,7 +90,16 @@ if (_appr isEqualType [] && { !(_gid isEqualTo '') }) then
 private _pos = ['activeObjectivePos', []] call ARC_fnc_stateGet;
 if !(_pos isEqualType [] && { (count _pos) >= 2 }) then { _pos = [0,0,0]; };
 private _vehObj = objectFromNetId _vehNid;
-if (!isNull _vehObj) then { _pos = getPosATL _vehObj; };
+if (!isNull _vehObj) then
+{
+    private _storedPos = +_pos;
+    _storedPos resize 3;
+    _pos = getPosATL _vehObj;
+    if ((_storedPos distance2D _pos) > 25) then
+    {
+        diag_log format ["[ARC][INFO] ARC_fnc_vbiedServerOnDestroyed: using live vehicle position over stored objective position deltaM=%1 veh=%2", round (_storedPos distance2D _pos), _vehNid];
+    };
+};
 _pos = +_pos; _pos resize 3;
 _pos set [2, 0];
 
