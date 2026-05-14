@@ -443,6 +443,10 @@ if (_allowMoving) then
             if (!(_hwyDir isEqualType 0)) then { _hwyDir = -1; };
         };
 
+        private _hwyAlignDeg = missionNamespace getVariable ["civsub_v1_traffic_highwayAlignmentThreshold_deg", 75];
+        if (!(_hwyAlignDeg isEqualType 0)) then { _hwyAlignDeg = 75; };
+        _hwyAlignDeg = (_hwyAlignDeg max 15) min 140;
+
         private _candidates = [];
         private _fallbackCandidates = [];
         private _roadCount = count _roads;
@@ -458,8 +462,9 @@ if (_allowMoving) then
                 if (_hwyDir >= 0) then
                 {
                     private _roadDir = _curPos getDir _roadPos;
+                    // Normalize angular delta to the shortest signed bearing difference.
                     private _delta = abs (((_roadDir - _hwyDir + 540) % 360) - 180);
-                    if (_delta <= 75) then
+                    if (_delta <= _hwyAlignDeg) then
                     {
                         _candidates pushBack _road;
                     }
@@ -473,7 +478,7 @@ if (_allowMoving) then
                     _candidates pushBack _road;
                 };
             };
-        };
+        }; // while road candidates remain
 
         // All-or-nothing fallback: prefer forward highway-aligned targets, but
         // accept any distant road if no forward candidates are available.

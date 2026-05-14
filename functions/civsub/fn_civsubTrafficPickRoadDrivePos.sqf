@@ -78,6 +78,7 @@ for "_i" from 1 to _tries do
             if (_hwyDir >= 0) then
             {
                 private _candDir = _r getDir _x;
+                // Normalize angular delta to the shortest signed bearing difference.
                 private _delta = abs (((_candDir - _hwyDir + 540) % 360) - 180);
                 if (_delta < _bestDelta) then
                 {
