@@ -38,6 +38,8 @@ private _tabLayouts = [
     ["BOARDS",  false, "STRUCTURED_TEXT", false, 0,    0.50],
     ["INTEL",   false, "LIST",            false, 0,    0.47],
     ["OPS",     false, "FRAMES_3",        false, 0,    0.50],
+    // AIR: reserve a larger Region C visual pane so map placement no longer
+    // overlays AIRFIELD_OPS detail-card content.
     ["AIR",     true,  "LIST",            true,  0.42, 0.47],
     ["HANDOFF", false, "STRUCTURED_TEXT", false, 0,    0.47],
     ["CMD",     false, "STRUCTURED_TEXT", false, 0,    0.50],

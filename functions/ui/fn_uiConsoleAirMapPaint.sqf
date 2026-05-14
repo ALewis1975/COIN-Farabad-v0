@@ -58,6 +58,9 @@ if (!(_prevMarkers isEqualType [])) then { _prevMarkers = []; };
 } forEach _prevMarkers;
 
 private _newMarkers = [];
+private _LABEL_LEN_SELECTED_CALLSIGN = 12;
+private _LABEL_LEN_SELECTED_FID = 8;
+private _LABEL_LEN_UNSELECTED_CALLSIGN = 6;
 private _shortText = {
     params ["_s", "_maxLen"];
     if (!(_s isEqualType "")) exitWith { "" };
@@ -72,13 +75,13 @@ private _markerLabel = {
     params ["_fid", "_callsign", "_isSelected"];
     if (_isSelected) exitWith {
         if (_callsign isEqualType "" && { !(_callsign isEqualTo "") } && { ((toUpper _callsign) find "FLT-") != 0 }) then {
-            [_callsign, 12] call _shortText
+            [_callsign, _LABEL_LEN_SELECTED_CALLSIGN] call _shortText
         } else {
-            [_fid, 8] call _shortText
+            [_fid, _LABEL_LEN_SELECTED_FID] call _shortText
         };
     };
     if (_callsign isEqualType "" && { !(_callsign isEqualTo "") } && { ((toUpper _callsign) find "FLT-") != 0 }) exitWith {
-        [_callsign, 6] call _shortText
+        [_callsign, _LABEL_LEN_UNSELECTED_CALLSIGN] call _shortText
     };
     ""
 };
