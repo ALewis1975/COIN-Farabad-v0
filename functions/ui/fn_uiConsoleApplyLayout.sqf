@@ -38,7 +38,7 @@ private _tabLayouts = [
     ["BOARDS",  false, "STRUCTURED_TEXT", false, 0,    0.50],
     ["INTEL",   false, "LIST",            false, 0,    0.47],
     ["OPS",     false, "FRAMES_3",        false, 0,    0.50],
-    ["AIR",     true,  "LIST",            true,  0.35, 0.47],
+    ["AIR",     true,  "LIST",            true,  0.42, 0.47],
     ["HANDOFF", false, "STRUCTURED_TEXT", false, 0,    0.47],
     ["CMD",     false, "STRUCTURED_TEXT", false, 0,    0.50],
     ["HQ",      false, "LIST",            false, 0,    0.50],
@@ -71,7 +71,8 @@ uiNamespace setVariable ["ARC_console_layoutSplitRatio", _splitRatio];
 
 private _modeRaw = missionNamespace getVariable ["ARC_console_layoutMode", "FULL"];
 if (!(_modeRaw isEqualType "")) then { _modeRaw = "FULL"; };
-private _mode = toUpper (trim _modeRaw);
+private _trimFn = compile "params ['_s']; trim _s";
+private _mode = toUpper ([_modeRaw] call _trimFn);
 if !(_mode in ["FULL", "DOCK_RIGHT"]) then { _mode = "FULL"; };
 
 uiNamespace setVariable ["ARC_console_layoutModeActive", _mode];
@@ -84,6 +85,8 @@ private _trackedIdcs = [
     78001,78015,78011,78016,
     // Region C: Visual Panel
     78140,
+    // AIR / TOWER dedicated
+    78130,78136,78137,
     // S2 workflow controls
     78050,78051,78052,78053,78054,78055,
     // OPS frames
@@ -95,13 +98,15 @@ private _trackedIdcs = [
 private _defaultsKey = "ARC_ui_consoleLayoutDefaults";
 private _defaults = uiNamespace getVariable [_defaultsKey, createHashMap];
 if !(_defaults isEqualType createHashMap) then { _defaults = createHashMap; };
+private _hashGet = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
 {
     private _idc = _x;
     private _ctrl = _display displayCtrl _idc;
     if (!isNull _ctrl) then {
         private _k = str _idc;
-        if (isNil { _defaults get _k }) then {
+        private _existing = [_defaults, _k, "__MISSING__"] call _hashGet;
+        if (_existing isEqualTo "__MISSING__") then {
             _defaults set [_k, ctrlPosition _ctrl];
         };
     };
@@ -120,8 +125,7 @@ if (_mode isEqualTo "FULL") exitWith {
     {
         private _ctrl = _display displayCtrl _x;
         if (!isNull _ctrl) then {
-            private _p = _defaults get (str _x);
-            if (isNil "_p") then { _p = []; };
+            private _p = [_defaults, str _x, []] call _hashGet;
             if (_p isEqualType [] && { (count _p) == 4 }) then {
                 _ctrl ctrlSetPosition _p;
                 _ctrl ctrlCommit 0;
@@ -160,8 +164,10 @@ private _detailsW = (_fx + _fw - _detailsX - (_fw * 0.012)) max (_fw * 0.18);
 // is hidden with height 0.
 // -----------------------------------------------------------------------
 private _visualPanelCtrl = _display displayCtrl 78140;
+private _regionCX = _mainX;
 private _regionCH = 0;
 private _regionCY = _contentY;
+private _regionCW = _mainW + _detailsW + _gap;
 
 if (_useVisualPanel && { _visualPanelFrac > 0 }) then {
     _regionCH = _contentH * _visualPanelFrac;
@@ -169,7 +175,7 @@ if (_useVisualPanel && { _visualPanelFrac > 0 }) then {
     _regionCY = _contentY + _contentH - _regionCH;
 
     if (!isNull _visualPanelCtrl) then {
-        [78140, _mainX, _regionCY, _mainW + _detailsW + _gap, _regionCH] call _setPos;
+        [78140, _regionCX, _regionCY, _regionCW, _regionCH] call _setPos;
         _visualPanelCtrl ctrlShow true;
     };
 
@@ -177,13 +183,15 @@ if (_useVisualPanel && { _visualPanelFrac > 0 }) then {
     _contentH = _contentH - _regionCH - (_fh * 0.008);
 } else {
     if (!isNull _visualPanelCtrl) then {
-        [78140, _mainX, _contentY + _contentH, _mainW + _detailsW + _gap, 0] call _setPos;
+        [78140, _regionCX, _contentY + _contentH, _regionCW, 0] call _setPos;
         _visualPanelCtrl ctrlShow false;
     };
 };
 
 // Store computed Region C position for painters (e.g. AIR map reposition)
+uiNamespace setVariable ["ARC_console_regionCX", _regionCX];
 uiNamespace setVariable ["ARC_console_regionCY", _regionCY];
+uiNamespace setVariable ["ARC_console_regionCW", _regionCW];
 uiNamespace setVariable ["ARC_console_regionCH", _regionCH];
 
 // Frame + shell

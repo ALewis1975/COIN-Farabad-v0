@@ -961,7 +961,7 @@ text = "FARABAD CONSOLE";
             colorText[] = {0.722,0.608,0.420,1};
         };
 
-        // Phase 7: AIR traffic map — CT_MAP in detail panel area (right side, upper portion)
+        // Phase 7: AIR traffic map — CT_MAP runtime-positioned into Region C visual pane.
         // Hidden by default; shown only on AIR tab AIRFIELD_OPS submode.
         // Managed by ARC_fnc_uiConsoleAirMapPaint.
         class AirTrafficMap: RscMapControl

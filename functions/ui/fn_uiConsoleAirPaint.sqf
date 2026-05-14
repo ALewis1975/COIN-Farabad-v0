@@ -537,10 +537,12 @@ if (_rebuild) then {
                     } forEach _arrivals;
                 };
 
-                // --- Runway / active movement block ---
+                // --- Runway block ---
+                private _hdrRwy = _ctrlList lbAdd "RUNWAY";
+                _ctrlList lbSetData [_hdrRwy, "HDR|RWY"];
                 private _holdTag = if (_holdDepartures) then { "HOLD ACTIVE" } else { _activeMovement };
                 private _rwyOwnerTag = if (_runwayOwnerDisplay isEqualTo "") then { "none" } else { _runwayOwnerDisplay };
-                private _runwayRow = _ctrlList lbAdd format ["RUNWAY %1  |  %2  |  %3", _runwayState, _rwyOwnerTag, _holdTag];
+                private _runwayRow = _ctrlList lbAdd format ["%1  |  %2  |  %3", _runwayState, _rwyOwnerTag, _holdTag];
                 _ctrlList lbSetData [_runwayRow, format ["RWY|%1|%2|%3", _runwayState, _runwayOwnerFlightId, _activeMovement]];
 
                 // --- Departures block ---
@@ -563,90 +565,7 @@ if (_rebuild) then {
                     } forEach _departures;
                 };
 
-                // --- Lower priority sections (below operational board) ---
-                // RECENT EVENTS: resolve FLT-xxxx to callsigns, limit to 5 (Refactor Plan §PR3.5)
-                if ((count _recentEvents) > 0) then {
-                    private _hdrEvt = _ctrlList lbAdd "RECENT EVENTS";
-                    _ctrlList lbSetData [_hdrEvt, "HDR|EVT"];
-                    private _evtLimit = (count _recentEvents) min 5;
-                    for "_i" from 0 to (_evtLimit - 1) do {
-                        private _evt = _recentEvents select _i;
-                        private _eventTs = _evt param [0, -1];
-                        private _eventLabel = _evt param [1, ""];
-                        // Resolve FLT-xxxx identifiers to callsigns from arrivals/departures
-                        private _resolvedLabel = _eventLabel;
-                        if (_eventLabel isEqualType "") then {
-                            private _parts = _eventLabel splitString " ";
-                            private _resolvedParts = [];
-                            {
-                                private _token = _x;
-                                private _resolved = _token;
-                                if (((toUpper _token) find "FLT-") == 0) then {
-                                    // Search arrivals then departures for matching flightId
-                                    {
-                                        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _token }) exitWith {
-                                            private _cs = _x select 1;
-                                            if (_cs isEqualType "" && { !(_cs isEqualTo "") }) then { _resolved = _cs; };
-                                        };
-                                    } forEach (_arrivals + _departures);
-                                };
-                                _resolvedParts pushBack _resolved;
-                            } forEach _parts;
-                            _resolvedLabel = _resolvedParts joinString " ";
-                        };
-                        // Format timestamp as "Xm Ys" not "Xm Ys ago" (Refactor Plan §PR3.5)
-                        private _ageStr = "-";
-                        if (_eventTs isEqualType 0 && { _eventTs >= 0 }) then {
-                            private _age = (serverTime - _eventTs) max 0;
-                            if (_age < 5) then { _ageStr = "now"; }
-                            else { if (_age < 60) then { _ageStr = format ["%1s", round _age]; }
-                            else { _ageStr = format ["%1m %2s", floor (_age / 60), (round _age) mod 60]; }; };
-                        };
-                        private _row = _ctrlList lbAdd format ["%1 (%2)", _resolvedLabel, _ageStr];
-                        _ctrlList lbSetData [_row, format ["EVT|%1|%2", _eventTs, _eventLabel]];
-                    };
-                } else {
-                    private _hdrEvt = _ctrlList lbAdd "RECENT EVENTS";
-                    _ctrlList lbSetData [_hdrEvt, "HDR|EVT"];
-                    [_ctrlList, "No recent events"] call ARC_fnc_uiConsoleFormatEmptyState;
-                };
-
-                if ((count _staffing) > 0) then {
-                    private _hdrLane = _ctrlList lbAdd "STAFFING";
-                    _ctrlList lbSetData [_hdrLane, "HDR|LANE"];
-                    {
-                        if !(_x isEqualType []) then { continue; };
-                        private _lane = _x param [0, ""];
-                        private _mode = _x param [1, "AUTO"];
-                        private _operator = _x param [2, "AUTO"];
-                        private _row = _ctrlList lbAdd format ["%1: %2", toUpper _lane, _operator];
-                        _ctrlList lbSetData [_row, format ["LANE|%1|%2|%3", _lane, _mode, _operator]];
-                    } forEach _staffing;
-                };
-
-                if ((count _clearanceHistory) > 0) then {
-                    private _hdrHist = _ctrlList lbAdd "CLEARANCE HISTORY";
-                    _ctrlList lbSetData [_hdrHist, "HDR|DEC"];
-                    {
-                        if !(_x isEqualType []) then { continue; };
-                        private _rid = _x param [0, ""];
-                        private _status = _x param [1, ""];
-                        private _ts = _x param [2, -1];
-                        private _by = _x param [3, "SYSTEM"];
-                        private _row = _ctrlList lbAdd format ["%1 %2 by %3 (%4)", _rid, _status, _by, [_ts] call _fmtAgo];
-                        _ctrlList lbSetData [_row, format ["DEC|%1|%2|%3", _rid, _status, _ts]];
-                    } forEach _clearanceHistory;
-                };
             };
-        };
-
-        // AIRFIELD_OPS: view indicator at bottom — keeps operational data first
-        if (_airSubmode isEqualTo "AIRFIELD_OPS") then {
-            private _modeRowBottom = _ctrlList lbAdd format [
-                "[%1]",
-                [_airSubmode] call _modeSummary
-            ];
-            _ctrlList lbSetData [_modeRowBottom, format ["MODE|%1", _airSubmode]];
         };
     };
 
@@ -1071,7 +990,13 @@ switch (_rowType) do
         _detailLines = [
             format ["View: <t color='#FFFFFF'>%1</t>", if (_airMode isEqualTo "PILOT") then {"PILOT"} else {_airSubmode}],
             format ["Snapshot: <t color='#FFFFFF'>%1</t>", _freshnessText],
-            format ["Runway: <t color='%1'>%2</t>", [_runwayState] call _statusColor, _runwayState]
+            format ["Runway: <t color='%1'>%2</t>", [_runwayState] call _statusColor, _runwayState],
+            format ["Inbound: <t color='#FFFFFF'>%1</t>", count _arrivals],
+            format ["Outbound: <t color='#FFFFFF'>%1</t>", count _departures],
+            format ["Decisions pending: <t color='#FFFFFF'>%1</t>", count _decisionQueue],
+            format ["Recent events: <t color='#FFFFFF'>%1</t>", count _recentEvents],
+            format ["Staffing lanes: <t color='#FFFFFF'>%1</t>", count _staffing],
+            format ["Clearance history: <t color='#FFFFFF'>%1</t>", count _clearanceHistory]
         ];
     };
 };
@@ -1108,25 +1033,7 @@ private _airMinH = if (!isNull _airGrp) then { (ctrlPosition _airGrp) select 3 }
 private _airP = ctrlPosition _ctrlDetails;
 _airP set [0, _defaultPosAir select 0];
 
-// Phase 7 + Refactor: when map is visible (AIRFIELD_OPS), shift detail pane below Region C.
-// Region C position is now computed by the layout engine and stored in uiNamespace.
-private _mapVisible = false;
-private _ctrlMapCheck = _display displayCtrl 78137;
-if (!isNull _ctrlMapCheck) then {
-    _mapVisible = ctrlShown _ctrlMapCheck;
-};
-if (_mapVisible) then {
-    private _regionCH = uiNamespace getVariable ["ARC_console_regionCH", 0];
-    if (_regionCH > 0) then {
-        // Detail starts below Region C with a small gap
-        _airP set [1, 0.005 + (_regionCH * 0.95)];
-    } else {
-        // Fallback to legacy calculation
-        _airP set [1, 0.005 + (0.35 * ((ctrlPosition _airGrp) select 3))];
-    };
-} else {
-    _airP set [1, _defaultPosAir select 1];
-};
+_airP set [1, _defaultPosAir select 1];
 
 _airP set [2, _defaultPosAir select 2];
 _airP set [3, (_airP select 3) max _airMinH];
