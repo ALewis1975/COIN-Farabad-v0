@@ -2,7 +2,8 @@
     ARC_fnc_recruitClientInit
 
     Client: discover configured Huron cargo recruitment containers and attach
-    local addActions. Containers must be class-whitelisted and opt-in via:
+    local addActions. Containers must be class-whitelisted and opt-in via
+    server-published netId or replicated object variable:
       this setVariable ["ARC_isRecruitContainer", true, true]
 
     Returns:
@@ -17,6 +18,18 @@ private _classes = missionNamespace getVariable ["ARC_recruitContainerClasses", 
 if (!(_classes isEqualType [])) then { _classes = ["B_Slingload_01_Cargo_F"]; };
 
 private _containers = [];
+
+private _publishedNetIds = missionNamespace getVariable ["ARC_recruitContainerNetIds", []];
+if (_publishedNetIds isEqualType []) then
+{
+    {
+        if (!(_x isEqualType "")) then { continue; };
+        private _container = objectFromNetId _x;
+        if (isNull _container) then { continue; };
+        _containers pushBackUnique _container;
+    } forEach _publishedNetIds;
+};
+
 {
     private _class = _x;
     if (!(_class isEqualType "")) then { continue; };

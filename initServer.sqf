@@ -141,6 +141,7 @@ missionNamespace setVariable ["ARC_sitrepInWorldActionsEnabled", true, false];
 // };
 missionNamespace setVariable ["ARC_recruitContainerEnabled", true, true];
 missionNamespace setVariable ["ARC_recruitContainerClasses", ["B_Slingload_01_Cargo_F"], true];
+missionNamespace setVariable ["ARC_recruitContainerNetIds", [], true];
 missionNamespace setVariable ["ARC_recruitActionRangeM", 6, true];
 missionNamespace setVariable ["ARC_recruitGroupMaxUnits", 12, true];
 missionNamespace setVariable ["ARC_recruitRequireSameFaction", true, true];
@@ -164,6 +165,22 @@ missionNamespace setVariable ["ARC_recruitUnitWhitelist", [
     ["rhsusf_army_ocp_javelin_assistant", "Javelin Assistant"],
     ["rhsusf_army_ocp_jfo", "Joint Fires Observer"]
 ], true];
+
+[] spawn {
+    if (!isServer) exitWith {};
+    uiSleep 1;
+
+    private _attempt = 0;
+    while { _attempt < 12 } do
+    {
+        if (!isNil "ARC_fnc_recruitServerPublishContainers") then
+        {
+            [] call ARC_fnc_recruitServerPublishContainers;
+        };
+        _attempt = _attempt + 1;
+        uiSleep 5;
+    };
+};
 
 // Intel props spawn radius (meters)
 missionNamespace setVariable ["ARC_intelPropSpawnRadiusM", 10, true];
@@ -940,6 +957,7 @@ missionNamespace setVariable ["ARC_operatorToggleAuditCatalog", [
         ["ARC_recruitAddActionsEnabled", "bool"],
         ["ARC_sitrepInWorldActionsEnabled", "bool"],
         ["ARC_recruitContainerEnabled", "bool"],
+        ["ARC_recruitContainerNetIds", "array"],
         ["ARC_recruitActionRangeM", "number"],
         ["ARC_recruitGroupMaxUnits", "number"],
         ["ARC_recruitRequireSameFaction", "bool"],
@@ -968,6 +986,7 @@ private _arcDeclaredServerToggles = [
     "ARC_sitrepInWorldActionsEnabled",
     "ARC_recruitContainerEnabled",
     "ARC_recruitContainerClasses",
+    "ARC_recruitContainerNetIds",
     "ARC_recruitActionRangeM",
     "ARC_recruitGroupMaxUnits",
     "ARC_recruitRequireSameFaction",
@@ -1007,6 +1026,7 @@ private _arcKnownToggleConsumers = [
     ["ARC_sitrepInWorldActionsEnabled", "functions/core/fn_tocInitPlayer.sqf"],
     ["ARC_recruitContainerEnabled", "functions/logistics/fn_recruitClientInit.sqf + functions/logistics/fn_recruitSpawnRequest.sqf"],
     ["ARC_recruitContainerClasses", "functions/logistics/fn_recruitClientInit.sqf + functions/logistics/fn_recruitSpawnRequest.sqf"],
+    ["ARC_recruitContainerNetIds", "functions/logistics/fn_recruitServerPublishContainers.sqf + functions/logistics/fn_recruitClientInit.sqf"],
     ["ARC_recruitActionRangeM", "functions/logistics/fn_recruitClientAddActions.sqf + functions/logistics/fn_recruitSpawnRequest.sqf"],
     ["ARC_recruitGroupMaxUnits", "functions/logistics/fn_recruitSpawnRequest.sqf"],
     ["ARC_recruitRequireSameFaction", "functions/logistics/fn_recruitSpawnRequest.sqf"],
