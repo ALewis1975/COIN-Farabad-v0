@@ -150,7 +150,6 @@ Server→client endpoints are not subject to S1–S4 in the same way (the server
 |---|:---:|:---:|:---:|---|---|
 | `ARC_fnc_airbaseDiaryUpdate` | 0 | ? | n/a | | Live update; no JIP replay needed. |
 | `ARC_fnc_briefingHardResetClient` | 0 | ? | n/a | | Reset pulse. |
-| `ARC_fnc_civsubCivAddAceActions` | 1 | ? | ✅ | | Object-keyed (per-civilian). |
 | `ARC_fnc_civsubCivAddContactActions` | 1 | ? | ✅ | | Object-keyed (per-civilian). |
 | `ARC_fnc_civsubClientMessage` | 0 | n/a | n/a | | Ephemeral. |
 | `ARC_fnc_civsubClientShowIdCard` | 0 | n/a | n/a | | Ephemeral. |

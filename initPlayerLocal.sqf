@@ -62,7 +62,6 @@ else
 // ---------------------------------------------------------------------------
 // Client init (keep this deterministic)
 // ---------------------------------------------------------------------------
-[] call ARC_fnc_aceClientVerifyInteractions;
 [] call ARC_fnc_intelInit;
 [] call ARC_fnc_briefingInitClient;
 [] call ARC_fnc_tocInitPlayer;

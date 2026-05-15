@@ -17,9 +17,6 @@ class CfgFunctions
             class farabadWarn {};
             class farabadError {};
             class paramAssert {};
-            class aceClientWaitInteractionsReady {};
-            class aceClientVerifyInteractions {};
-
             class stateInit {};
             class stateLoad {};
             class stateSave {};
@@ -401,8 +398,6 @@ class CfgFunctions
             class civsubInteractUpdateHeaderStats {};
             class civsubContactClientReceiveSnapshot {};
             class civsubContactClientReceiveResult {};
-            // Phase 7: ACE interactions (client + server)
-            class civsubCivAddAceActions {};
             class civsubClientMessage {};
             class civsubClientShowIdCard {};
             class civsubClientGetCurrentDistrictPubSnapshot {};

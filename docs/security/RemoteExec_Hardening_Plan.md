@@ -69,7 +69,6 @@ These are the highest-risk endpoints because any connected client can attempt to
 |---|---|---|
 | `ARC_fnc_airbaseDiaryUpdate` | Broadcast/targeted UI text | Non-JIP (live update). |
 | `ARC_fnc_briefingHardResetClient` | Broadcast | Non-JIP reset pulse. |
-| `ARC_fnc_civsubCivAddAceActions` | Object-bound broadcast | JIP via object key (`_unit`). |
 | `ARC_fnc_civsubCivAddContactActions` | Object-bound broadcast | JIP via object key (`_unit`). |
 | `ARC_fnc_civsubClientMessage` | Targeted client | Non-JIP ephemeral. |
 | `ARC_fnc_civsubClientShowIdCard` | Targeted client | Non-JIP ephemeral. |
@@ -142,7 +141,6 @@ class CfgRemoteExec
    - `ARC_fnc_iedClientAddEvidenceAction`
    - `ARC_fnc_iedClientEnableEvidenceLogistics`
    - `ARC_fnc_civsubCivAddContactActions` (object-keyed)
-   - `ARC_fnc_civsubCivAddAceActions` (object-keyed)
 4. **Do not allow** arbitrary utility/dev function execution on clients by default.
 
 ### 2.3 Commands allowlist (recommended)

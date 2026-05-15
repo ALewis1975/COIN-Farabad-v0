@@ -51,9 +51,9 @@ if (_kindU in ["IED_DEVICE", "VBIED_VEHICLE"]) then
     if (_kindU isEqualTo "IED_DEVICE") then { _inspectText = "Inspect device"; };
     if (_kindU isEqualTo "VBIED_VEHICLE") then { _inspectText = "Inspect vehicle"; };
 
-    // "Scan" is optional. Default is disabled so ACE tools are the primary discovery method.
-    private _scanEnabled = missionNamespace getVariable ["ARC_iedScanActionEnabled", false];
-    if (!(_scanEnabled isEqualType true) && !(_scanEnabled isEqualType false)) then { _scanEnabled = false; };
+    // "Scan" is optional, but defaults on for the vanilla addAction posture.
+    private _scanEnabled = missionNamespace getVariable ["ARC_iedScanActionEnabled", true];
+    if (!(_scanEnabled isEqualType true) && !(_scanEnabled isEqualType false)) then { _scanEnabled = true; };
 
     private _idScan = -1;
 

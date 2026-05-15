@@ -4,8 +4,8 @@
     Server-side: initialize a Key Leader Engagement (KLE) task.
 
     Called when a KLE incident is created by ARC_fnc_incidentCreate. Spawns
-    a named elder NPC at the task position, adds an ACE interaction menu, and
-    starts a session-watch tick. When the player element completes the engagement
+    a named elder NPC at the task position and starts a session-watch tick.
+    When the player element completes the engagement
     (proximity + time threshold) the server applies the outcome influence delta.
 
     Params:

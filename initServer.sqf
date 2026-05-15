@@ -113,29 +113,24 @@ missionNamespace setVariable ["ARC_console_dashboard_v2", true, true];
 // UI / IN-WORLD ACTIONS
 // ============================================================================
 
-// Vanilla addActions are disabled by default; ACE interactions remain the
-// supported in-world interaction surface.
-missionNamespace setVariable ["ARC_vanillaAddActionsEnabled", false, true];
+// Vanilla addActions are the required in-world interaction surface.
+missionNamespace setVariable ["ARC_vanillaAddActionsEnabled", true, true];
 
 // RTB in-world actions legacy umbrella: kept as a fallback for older callers.
-missionNamespace setVariable ["ARC_rtbInWorldActionsEnabled", false, true];
-// Separate in-world interaction toggles so vanilla addActions can stay disabled
-// without removing ACE self/interact alternatives.
-missionNamespace setVariable ["ARC_tocAddActionsEnabled", false, true];
+missionNamespace setVariable ["ARC_rtbInWorldActionsEnabled", true, true];
+// Separate in-world interaction toggles keep Mobile Ops vehicle actions opt-in
+// while fixed TOC, RTB, CIVSUB, objective, evidence, SITREP, scan, and recruit
+// addActions are enabled by default.
+missionNamespace setVariable ["ARC_tocAddActionsEnabled", true, true];
 missionNamespace setVariable ["ARC_mobileTocAddActionsEnabled", false, true];
-missionNamespace setVariable ["ARC_tocAceInteractionsEnabled", true, true];
-missionNamespace setVariable ["ARC_rtbAddActionsEnabled", false, true];
-missionNamespace setVariable ["ARC_rtbAceInteractionsEnabled", true, true];
-missionNamespace setVariable ["ARC_civsubContactAddActionsEnabled", false, true];
-missionNamespace setVariable ["ARC_civsubAceInteractionsEnabled", true, true];
-missionNamespace setVariable ["ARC_objectiveAddActionsEnabled", false, true];
-missionNamespace setVariable ["ARC_iedEvidenceAddActionsEnabled", false, true];
-missionNamespace setVariable ["ARC_recruitAddActionsEnabled", false, true];
-missionNamespace setVariable ["ARC_aceInteractionsRequired", true, true];
-missionNamespace setVariable ["ARC_aceInteractionReadyTimeoutS", 45, true];
+missionNamespace setVariable ["ARC_rtbAddActionsEnabled", true, true];
+missionNamespace setVariable ["ARC_civsubContactAddActionsEnabled", true, true];
+missionNamespace setVariable ["ARC_objectiveAddActionsEnabled", true, true];
+missionNamespace setVariable ["ARC_iedEvidenceAddActionsEnabled", true, true];
+missionNamespace setVariable ["ARC_recruitAddActionsEnabled", true, true];
 
-// SITREP in-world action (dismounted): vanilla addAction disabled by default.
-missionNamespace setVariable ["ARC_sitrepInWorldActionsEnabled", false, false];
+// SITREP in-world action (dismounted): vanilla addAction enabled by default.
+missionNamespace setVariable ["ARC_sitrepInWorldActionsEnabled", true, false];
 
 // Command-gated AI recruitment from Huron Cargo Containers.
 // Clients only render actions; the server validates role, sender, class whitelist,
@@ -554,8 +549,8 @@ missionNamespace setVariable ["ARC_iedSiteSearchRadiusM", 350, true];
 
 missionNamespace setVariable ["ARC_iedProxRadiusM", 7, true];
 
-// ACE-first detection UX
-missionNamespace setVariable ["ARC_iedScanActionEnabled", false, true];      // legacy scan action (default off)
+// Vanilla-first detection UX
+missionNamespace setVariable ["ARC_iedScanActionEnabled", true, true];       // scan addAction (default on)
 missionNamespace setVariable ["ARC_iedPassiveDetectEnabled", true, true];   // passive detector discovery (default on)
 missionNamespace setVariable ["ARC_iedPassiveDetectRadiusM", 12, true];
 
@@ -938,16 +933,11 @@ missionNamespace setVariable ["ARC_operatorToggleAuditCatalog", [
         ["ARC_rtbInWorldActionsEnabled", "bool"],
         ["ARC_tocAddActionsEnabled", "bool"],
         ["ARC_mobileTocAddActionsEnabled", "bool"],
-        ["ARC_tocAceInteractionsEnabled", "bool"],
         ["ARC_rtbAddActionsEnabled", "bool"],
-        ["ARC_rtbAceInteractionsEnabled", "bool"],
         ["ARC_civsubContactAddActionsEnabled", "bool"],
-        ["ARC_civsubAceInteractionsEnabled", "bool"],
         ["ARC_objectiveAddActionsEnabled", "bool"],
         ["ARC_iedEvidenceAddActionsEnabled", "bool"],
         ["ARC_recruitAddActionsEnabled", "bool"],
-        ["ARC_aceInteractionsRequired", "bool"],
-        ["ARC_aceInteractionReadyTimeoutS", "number"],
         ["ARC_sitrepInWorldActionsEnabled", "bool"],
         ["ARC_recruitContainerEnabled", "bool"],
         ["ARC_recruitActionRangeM", "number"],
@@ -970,16 +960,11 @@ private _arcDeclaredServerToggles = [
     "ARC_rtbInWorldActionsEnabled",
     "ARC_tocAddActionsEnabled",
     "ARC_mobileTocAddActionsEnabled",
-    "ARC_tocAceInteractionsEnabled",
     "ARC_rtbAddActionsEnabled",
-    "ARC_rtbAceInteractionsEnabled",
     "ARC_civsubContactAddActionsEnabled",
-    "ARC_civsubAceInteractionsEnabled",
     "ARC_objectiveAddActionsEnabled",
     "ARC_iedEvidenceAddActionsEnabled",
     "ARC_recruitAddActionsEnabled",
-    "ARC_aceInteractionsRequired",
-    "ARC_aceInteractionReadyTimeoutS",
     "ARC_sitrepInWorldActionsEnabled",
     "ARC_recruitContainerEnabled",
     "ARC_recruitContainerClasses",
@@ -1014,16 +999,11 @@ private _arcKnownToggleConsumers = [
     ["ARC_rtbInWorldActionsEnabled", "legacy fallback for split RTB/TOC action toggles"],
     ["ARC_tocAddActionsEnabled", "functions/core/fn_tocInitPlayer.sqf"],
     ["ARC_mobileTocAddActionsEnabled", "functions/core/fn_tocInitPlayer.sqf (remote_ops_vehicle only)"],
-    ["ARC_tocAceInteractionsEnabled", "functions/core/fn_tocInitPlayer.sqf"],
     ["ARC_rtbAddActionsEnabled", "functions/intel/fn_intelInitClient.sqf"],
-    ["ARC_rtbAceInteractionsEnabled", "functions/intel/fn_intelInitClient.sqf"],
     ["ARC_civsubContactAddActionsEnabled", "functions/civsub/fn_civsubCivAddContactActions.sqf"],
-    ["ARC_civsubAceInteractionsEnabled", "functions/civsub/fn_civsubCivAddAceActions.sqf"],
     ["ARC_objectiveAddActionsEnabled", "functions/core/fn_clientAddObjectiveAction.sqf"],
     ["ARC_iedEvidenceAddActionsEnabled", "functions/ied/fn_iedClientAddEvidenceAction.sqf"],
     ["ARC_recruitAddActionsEnabled", "functions/logistics/fn_recruitClientAddActions.sqf"],
-    ["ARC_aceInteractionsRequired", "functions/core/fn_aceClientVerifyInteractions.sqf"],
-    ["ARC_aceInteractionReadyTimeoutS", "functions/core/fn_aceClientVerifyInteractions.sqf"],
     ["ARC_sitrepInWorldActionsEnabled", "functions/core/fn_tocInitPlayer.sqf"],
     ["ARC_recruitContainerEnabled", "functions/logistics/fn_recruitClientInit.sqf + functions/logistics/fn_recruitSpawnRequest.sqf"],
     ["ARC_recruitContainerClasses", "functions/logistics/fn_recruitClientInit.sqf + functions/logistics/fn_recruitSpawnRequest.sqf"],

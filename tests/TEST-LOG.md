@@ -11,6 +11,22 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-15 — Vanilla addActions required posture (Mode A)
+
+**Branch/Commit:** copilot/check-ace-interactions @ cde91f1 (working tree validated in-session)
+
+**Scenario:** Switched interaction defaults to vanilla addActions-first, enabled all addAction paths by default except the Mobile Ops vehicle, and removed ACE interaction-menu registration/wiring where addActions cover the same gameplay actions.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline status + compatibility scan | `git status --short && git rev-parse --short HEAD && git diff --check && python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf initPlayerLocal.sqf functions/core/fn_tocInitPlayer.sqf functions/intel/fn_intelInitClient.sqf functions/civsub/fn_civsubCivAssignIdentity.sqf functions/civsub/fn_civsubCivAddContactActions.sqf functions/core/fn_clientAddObjectiveAction.sqf functions/ied/fn_iedClientAddEvidenceAction.sqf functions/logistics/fn_recruitClientAddActions.sqf` | PASS | Baseline compatibility scan passed before edits. |
+| 2 | Baseline static contracts | `bash scripts/dev/check_remoteexec_contract.sh && bash tests/static/recruitment_container_contract_checks.sh` | PASS | RemoteExec and recruitment contracts passed; pre-edit sqflint was blocked because `sqflint` was not installed before the final validation step installed it. |
+| 3 | Final changed-file validation | `python3 -m pip install --user sqflint==0.3.2 && git diff --check && python3 scripts/dev/sqflint_compat_scan.py --strict <changed SQF files> && sqflint -e w <changed SQF files> && bash scripts/dev/check_remoteexec_contract.sh && bash tests/static/recruitment_container_contract_checks.sh && python3 scripts/dev/validate_state_migrations.py` | PASS | Whitespace, parser-compat, changed-file sqflint, RemoteExec, recruitment, and state migration checks passed. |
+| 4 | Runtime smoke: addAction posture | Hosted/local MP with required mods; verify TOC/RTB/CIVSUB/objective/evidence/recruit/SITREP/scan addActions appear by default and Mobile Ops vehicle actions remain hidden until enabled | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 5 | Dedicated/JIP validation | Dedicated server with at least one JIP client; verify late-client addAction replay for object-bound actions and no ACE interaction-menu registration | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+
+---
+
 ## 2026-05-15 — Mobile TOC addAction default (Mode A)
 
 **Branch/Commit:** copilot/investigate-ace-interaction-problem @ 6dbe786 (working tree validated in-session)
