@@ -11,6 +11,22 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-15 — Recruitment dialog config placement (Mode A)
+
+**Branch/Commit:** copilot/fix-arc-recruiting-dialogue @ ad94f5a (working tree included TEST-LOG update)
+
+**Scenario:** Fixed `createDialog "ARC_RecruitDialog"` failing because `ARC_RecruitDialog` was nested inside the CIVSUB interact dialog controls instead of being a top-level dialog config class. Moved the recruit dialog class after the CIVSUB dialog closes and added a static contract check that fails if `ARC_RecruitDialog` is not top-level in `config/CfgDialogs.hpp`.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline recruitment validation | `git diff --check && bash tests/static/recruitment_container_contract_checks.sh && python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf functions/logistics/fn_recruitClientInit.sqf functions/logistics/fn_recruitClientAddActions.sqf functions/logistics/fn_recruitDialogOpen.sqf functions/logistics/fn_recruitDialogOnLoad.sqf functions/logistics/fn_recruitDialogRecruitSelected.sqf functions/logistics/fn_recruitServerPublishContainers.sqf functions/logistics/fn_recruitSpawnRequest.sqf` | PASS | Baseline recruitment contract and SQF compat checks passed before the config move. |
+| 2 | Static regression check | `git diff --check && bash tests/static/recruitment_container_contract_checks.sh` | PASS | Confirms `ARC_RecruitDialog` exists at top-level brace depth so `createDialog` can resolve it. |
+| 3 | Final static validation | `git diff --check && bash -n tests/static/recruitment_container_contract_checks.sh && bash tests/static/recruitment_container_contract_checks.sh && python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf functions/logistics/fn_recruitClientInit.sqf functions/logistics/fn_recruitClientAddActions.sqf functions/logistics/fn_recruitDialogOpen.sqf functions/logistics/fn_recruitDialogOnLoad.sqf functions/logistics/fn_recruitDialogRecruitSelected.sqf functions/logistics/fn_recruitServerPublishContainers.sqf functions/logistics/fn_recruitSpawnRequest.sqf && bash scripts/dev/check_remoteexec_contract.sh` | PASS | Contract, shell syntax, SQF compat, and RemoteExec checks passed. |
+| 4 | Runtime smoke: recruit action opens dialog | Hosted/local MP: activate `Recruit AI` on `recruitment_01` and verify the `ARC_RecruitDialog` opens. | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 5 | Dedicated/JIP validation | Dedicated server with a late-joining client: confirm object-bound recruitment addAction replay and dialog open for JIP clients. | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+
+---
+
 ## 2026-05-15 — Simple Recruit AI dialog on `recruitment_01` (Mode A)
 
 **Branch/Commit:** copilot/refactor-ai-recruitment-action @ 545caff (working tree included follow-up init/static-test updates)

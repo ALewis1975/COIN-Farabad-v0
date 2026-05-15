@@ -1631,6 +1631,63 @@ class ARC_CivsubInteractDialog
     };
 };
 
+
+        // --- ID CARD OVERLAY (shown when Check ID succeeds) --------------------
+        class IdOverlayBG: RscText
+        {
+            idc = 78360;
+            x = 0.19;
+            y = 0.23;
+            w = 0.62;
+            h = 0.61;
+            colorBackground[] = {0,0,0,0.92};
+        };
+
+        class IdOverlayCard: RscStructuredText
+        {
+            idc = 78361;
+            x = 0.205;
+            y = 0.285;
+            w = 0.59;
+            h = 0.44;
+            colorBackground[] = {0.96,0.95,0.90,1};
+        };
+
+        class IdOverlayBack: RscButton
+        {
+            idc = 78362;
+            text = "Back";
+            x = 0.51;
+            y = 0.81;
+            w = 0.30;
+            h = 0.03;
+            action = "[] call ARC_fnc_civsubContactDialogHideIdOverlay;";
+        };
+
+class BtnExecute: RscButton
+        {
+            idc = 78330;
+            text = "Execute";
+            x = 0.19;
+            y = 0.85;
+            w = 0.30;
+            h = 0.04;
+            action = "[] call ARC_fnc_civsubContactDialogExecute;";
+        };
+
+        class BtnClose: RscButton
+        {
+            idc = 78331;
+            text = "Close";
+            x = 0.51;
+            y = 0.85;
+            w = 0.30;
+            h = 0.04;
+            action = "closeDialog 0;";
+        };
+    };
+};
+
 class ARC_RecruitDialog
 {
     idd = 78400;
@@ -1734,64 +1791,6 @@ class ARC_RecruitDialog
             x = 0.51;
             y = 0.705;
             w = 0.22;
-            h = 0.04;
-            action = "closeDialog 0;";
-        };
-    };
-};
-
-
-        
-        // --- ID CARD OVERLAY (shown when Check ID succeeds) --------------------
-        class IdOverlayBG: RscText
-        {
-            idc = 78360;
-            x = 0.19;
-            y = 0.23;
-            w = 0.62;
-            h = 0.61;
-            colorBackground[] = {0,0,0,0.92};
-        };
-
-        class IdOverlayCard: RscStructuredText
-        {
-            idc = 78361;
-            x = 0.205;
-            y = 0.285;
-            w = 0.59;
-            h = 0.44;
-            colorBackground[] = {0.96,0.95,0.90,1};
-        };
-
-        class IdOverlayBack: RscButton
-        {
-            idc = 78362;
-            text = "Back";
-            x = 0.51;
-            y = 0.81;
-            w = 0.30;
-            h = 0.03;
-            action = "[] call ARC_fnc_civsubContactDialogHideIdOverlay;";
-        };
-
-class BtnExecute: RscButton
-        {
-            idc = 78330;
-            text = "Execute";
-            x = 0.19;
-            y = 0.85;
-            w = 0.30;
-            h = 0.04;
-            action = "[] call ARC_fnc_civsubContactDialogExecute;";
-        };
-
-        class BtnClose: RscButton
-        {
-            idc = 78331;
-            text = "Close";
-            x = 0.51;
-            y = 0.85;
-            w = 0.30;
             h = 0.04;
             action = "closeDialog 0;";
         };

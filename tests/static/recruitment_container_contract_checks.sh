@@ -28,6 +28,71 @@ grep -q 'class recruitSpawnRequest' config/CfgFunctions.hpp
 grep -q 'class ARC_fnc_recruitSpawnRequest[[:space:]]*{ allowedTargets = 2; };' config/CfgRemoteExec.hpp
 grep -q 'class ARC_fnc_recruitClientAddActions[[:space:]]*{ allowedTargets = 0; jip = 1; };' config/CfgRemoteExec.hpp
 grep -q 'class ARC_RecruitDialog' config/CfgDialogs.hpp
+python3 - <<'PY'
+from pathlib import Path
+import sys
+
+text = Path("config/CfgDialogs.hpp").read_text()
+needle = "class ARC_RecruitDialog"
+idx = text.find(needle)
+if idx < 0:
+    sys.exit("ARC_RecruitDialog missing from config/CfgDialogs.hpp")
+
+depth = 0
+in_string = None
+in_line_comment = False
+in_block_comment = False
+escaped = False
+pos = 0
+while pos < idx:
+    ch = text[pos]
+    nxt = text[pos + 1] if pos + 1 < idx else ""
+
+    if in_line_comment:
+        if ch == "\n":
+            in_line_comment = False
+        pos += 1
+        continue
+    if in_block_comment:
+        if ch == "*" and nxt == "/":
+            in_block_comment = False
+            pos += 2
+        else:
+            pos += 1
+        continue
+    if in_string:
+        if escaped:
+            escaped = False
+        elif ch == "\\":
+            escaped = True
+        elif ch == in_string:
+            in_string = None
+        pos += 1
+        continue
+
+    if ch == "/" and nxt == "/":
+        in_line_comment = True
+        pos += 2
+        continue
+    if ch == "/" and nxt == "*":
+        in_block_comment = True
+        pos += 2
+        continue
+    if ch in ("'", '"'):
+        in_string = ch
+        pos += 1
+        continue
+    if ch == "{":
+        depth += 1
+    elif ch == "}":
+        depth -= 1
+        if depth < 0:
+            sys.exit("config/CfgDialogs.hpp has an unexpected closing brace before ARC_RecruitDialog")
+    pos += 1
+
+if depth != 0:
+    sys.exit(f"ARC_RecruitDialog is not top-level in config/CfgDialogs.hpp (brace depth {depth})")
+PY
 
 grep -q 'ARC_recruitContainerEnabled' initServer.sqf
 grep -q 'ARC_recruitContainerNetIds' initServer.sqf
