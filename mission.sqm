@@ -20,14 +20,14 @@ class EditorData
 	};
 	class LayerIndexProvider
 	{
-		nextID=121261;
+		nextID=122261;
 	};
 	class Camera
 	{
-		pos[]={6264.8154,30.796946,1578.2404};
-		dir[]={-0.71277672,-0.68235946,-0.16228047};
-		up[]={-0.66533345,0.73101681,-0.15147889};
-		aside[]={-0.22199281,0,0.9750483};
+		pos[]={6266.1211,32.27327,1582.465};
+		dir[]={-0.7127769,-0.68235934,-0.16228051};
+		up[]={-0.66533339,0.73101687,-0.15147889};
+		aside[]={-0.22199282,0,0.97504842};
 	};
 };
 binarizationWanted=0;
@@ -1286,19 +1286,6 @@ class CustomAttributes
 		name="Multiplayer";
 		class Attribute0
 		{
-			property="ENH_saveLoadout";
-			expression="if (!isMultiplayer || !_value || is3DEN || !hasInterface) exitWith {};        0 spawn        {            waitUntil {sleep 1; !isNull player};            player setVariable ['ENH_savedLoadout', getUnitloadout player];            player addMPEventHandler ['MPRespawn',            {                params ['_unit'];                private _loadout = _unit getVariable ['ENH_savedLoadout', []];                if (_loadout isNotEqualTo []) then {_unit setUnitLoadout _loadout};            }];        };";
-			class Value
-			{
-				class data
-				{
-					singleType="BOOL";
-					value=1;
-				};
-			};
-		};
-		class Attribute1
-		{
 			property="RespawnTemplates";
 			expression="true";
 			class Value
@@ -1318,6 +1305,19 @@ class CustomAttributes
 							};
 						};
 					};
+				};
+			};
+		};
+		class Attribute1
+		{
+			property="ENH_saveLoadout";
+			expression="if (!isMultiplayer || !_value || is3DEN || !hasInterface) exitWith {};        0 spawn        {            waitUntil {sleep 1; !isNull player};            player setVariable ['ENH_savedLoadout', getUnitloadout player];            player addMPEventHandler ['MPRespawn',            {                params ['_unit'];                private _loadout = _unit getVariable ['ENH_savedLoadout', []];                if (_loadout isNotEqualTo []) then {_unit setUnitLoadout _loadout};            }];        };";
+			class Value
+			{
+				class data
+				{
+					singleType="BOOL";
+					value=1;
 				};
 			};
 		};
@@ -1800,8 +1800,8 @@ class Mission
 		year=2011;
 		month=4;
 		day=20;
-		hour=5;
-		minute=0;
+		hour=6;
+		minute=-30;
 		startFogDecay=0.1;
 		forecastFogDecay=0.1;
 		class CustomAttributes
@@ -31001,8 +31001,8 @@ class Mission
 											{
 												class Attribute0
 												{
-													property="ENH_doStop";
-													expression="if (!is3DEN && _value) then {doStop _this}";
+													property="ENH_enableHeadlights";
+													expression="[_this, _value] remoteExec ['setPilotLight', _this]";
 													class Value
 													{
 														class data
@@ -31053,8 +31053,8 @@ class Mission
 												};
 												class Attribute4
 												{
-													property="ENH_enableHeadlights";
-													expression="[_this, _value] remoteExec ['setPilotLight', _this]";
+													property="ENH_doStop";
+													expression="if (!is3DEN && _value) then {doStop _this}";
 													class Value
 													{
 														class data
@@ -115597,7 +115597,7 @@ class Mission
 							position[]={5352.3467,0.56888723,5688.6284};
 							name="mkr_highway_026";
 							type="Empty";
-							angle=114.12639;
+							angle=114.12633;
 							id=4867;
 							atlOffset=5.9604645e-07;
 							class CustomAttributes
@@ -117909,7 +117909,7 @@ class Mission
 							position[]={8475.7422,9.5270853,885.55359};
 							name="mkr_highway_061";
 							type="Empty";
-							angle=114.5301;
+							angle=114.53004;
 							id=4902;
 							atlOffset=9.5367432e-07;
 							class CustomAttributes
@@ -118307,7 +118307,7 @@ class Mission
 							position[]={9936.5967,6.0993476,845.42114};
 							name="mkr_highway_067";
 							type="Empty";
-							angle=113.00738;
+							angle=113.00732;
 							id=4908;
 							class CustomAttributes
 							{
@@ -120489,7 +120489,7 @@ class Mission
 							position[]={5163.2388,4.1400003,4922.9521};
 							name="mkr_highway_100";
 							type="Empty";
-							angle=225.56668;
+							angle=225.56656;
 							id=4941;
 							atlOffset=4.7683716e-07;
 							class CustomAttributes
