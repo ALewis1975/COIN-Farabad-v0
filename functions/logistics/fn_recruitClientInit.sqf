@@ -12,7 +12,15 @@
 
 if (!hasInterface) exitWith {false};
 
-if (!(missionNamespace getVariable ["ARC_recruitContainerEnabled", true])) exitWith {false};
+if (!(missionNamespace getVariable ["ARC_recruitContainerEnabled", true])) exitWith
+{
+    if (isNil "ARC_recruit_diagInitDisabledLogged") then
+    {
+        ARC_recruit_diagInitDisabledLogged = true;
+        diag_log "[ARC][INFO][RECRUIT] ARC_fnc_recruitClientInit: skipped, ARC_recruitContainerEnabled=false";
+    };
+    false
+};
 
 private _classes = missionNamespace getVariable ["ARC_recruitContainerClasses", ["B_Slingload_01_Cargo_F"]];
 if (!(_classes isEqualType [])) then { _classes = ["B_Slingload_01_Cargo_F"]; };
@@ -44,5 +52,7 @@ if (_publishedNetIds isEqualType []) then
 {
     [_x] call ARC_fnc_recruitClientAddActions;
 } forEach _containers;
+
+diag_log format ["[ARC][INFO][RECRUIT] ARC_fnc_recruitClientInit: discovered containers count=%1 publishedNetIds=%2 classes=%3", count _containers, if (_publishedNetIds isEqualType []) then { count _publishedNetIds } else { -1 }, _classes];
 
 true

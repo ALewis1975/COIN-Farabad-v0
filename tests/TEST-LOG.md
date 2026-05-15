@@ -6203,3 +6203,18 @@ Mode: A (Bug Fix)
 | 12 | CI failure triage for run 25830509339 | `list_workflow_runs` + `list_workflow_jobs` + `get_job_logs` for **Arma SQF + Mission Config Preflight** at `389a63511d6b7b35f0c8e3639697213e3dafc208` | FAIL (reproduced) | Strict compat scan passed, then `sqflint -e w` failed on nine direct `player setDiaryRecordText ...` parse errors in `functions/core/fn_briefingUpdateClient.sqf`. |
 | 13 | Follow-up sqflint after `setDiaryRecordText` compat wrapper | `sqflint -e w functions/core/fn_briefingUpdateClient.sqf && sqflint -e w functions/ui/fn_uiConsoleIntelPaint.sqf` | PASS | Wrapped diary record text updates behind a compiled helper and removed remaining warnings in the two changed SQF files; both files now exit 0 under `sqflint -e w`. |
 | 14 | Follow-up strict compat scan after sqflint cleanup | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_briefingUpdateClient.sqf functions/ui/fn_uiConsoleIntelPaint.sqf` | PASS | No known parser-compat patterns found in either changed SQF file. |
+
+---
+
+## 2026-05-15 — Recruit container diagnostic logging (Mode A)
+
+**Branch/Commit:** copilot/debug-addaction-recruit @ d2ca104
+
+**Scenario:** Added structured `[ARC][INFO|WARN][RECRUIT]` `diag_log` lines at silent early-exit paths in `ARC_fnc_recruitClientInit` and `ARC_fnc_recruitClientAddActions` so users can diagnose missing recruit addActions from the RPT without inferring which gate denied.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Static contract + compat scan | `bash tests/static/recruitment_container_contract_checks.sh && python3 scripts/dev/sqflint_compat_scan.py --strict functions/logistics/fn_recruitClientAddActions.sqf functions/logistics/fn_recruitClientInit.sqf` | PASS | Contract assertions still met; no parser-compat patterns introduced. |
+| 2 | sqflint on changed files | `sqflint -e w functions/logistics/fn_recruitClientAddActions.sqf && sqflint -e w functions/logistics/fn_recruitClientInit.sqf` | PASS | Both files exit 0 under `sqflint==0.3.2`. |
+| 3 | Runtime smoke (in-world recruit actions) | Hosted/local MP: verify diag_log lines appear in RPT for each denial path (containerEnabled=false, recruitActionsEnabled=false, empty whitelist, no valid CfgVehicles classes) and INFO summary fires when ≥1 action attaches | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 4 | Dedicated/JIP validation | Dedicated server + JIP client: confirm one-shot session flags suppress repeated logs across JIP and respawn re-runs, and that RPT shows accurate container/netId counts | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
