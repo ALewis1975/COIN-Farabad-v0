@@ -17,18 +17,42 @@ params [
 ];
 
 if (isNull _container) exitWith {false};
-if (!(missionNamespace getVariable ["ARC_recruitContainerEnabled", true])) exitWith {false};
+if (!(missionNamespace getVariable ["ARC_recruitContainerEnabled", true])) exitWith
+{
+    if (isNil "ARC_recruit_diagContainerDisabledLogged") then
+    {
+        ARC_recruit_diagContainerDisabledLogged = true;
+        diag_log "[ARC][INFO][RECRUIT] ARC_fnc_recruitClientAddActions: skipped, ARC_recruitContainerEnabled=false";
+    };
+    false
+};
 
 private _vanillaActionsEnabled = missionNamespace getVariable ["ARC_vanillaAddActionsEnabled", false];
 if (!(_vanillaActionsEnabled isEqualType true)) then { _vanillaActionsEnabled = false; };
 
 private _recruitActionsEnabled = missionNamespace getVariable ["ARC_recruitAddActionsEnabled", _vanillaActionsEnabled];
 if (!(_recruitActionsEnabled isEqualType true)) then { _recruitActionsEnabled = _vanillaActionsEnabled; };
-if (!_recruitActionsEnabled) exitWith {false};
+if (!_recruitActionsEnabled) exitWith
+{
+    if (isNil "ARC_recruit_diagActionsDisabledLogged") then
+    {
+        ARC_recruit_diagActionsDisabledLogged = true;
+        diag_log format ["[ARC][INFO][RECRUIT] ARC_fnc_recruitClientAddActions: skipped, ARC_recruitAddActionsEnabled=false (vanilla=%1)", _vanillaActionsEnabled];
+    };
+    false
+};
 
 private _whitelist = missionNamespace getVariable ["ARC_recruitUnitWhitelist", []];
 if (!(_whitelist isEqualType [])) then { _whitelist = []; };
-if ((count _whitelist) isEqualTo 0) exitWith {false};
+if ((count _whitelist) isEqualTo 0) exitWith
+{
+    if (isNil "ARC_recruit_diagWhitelistEmptyLogged") then
+    {
+        ARC_recruit_diagWhitelistEmptyLogged = true;
+        diag_log "[ARC][WARN][RECRUIT] ARC_fnc_recruitClientAddActions: skipped, ARC_recruitUnitWhitelist is empty";
+    };
+    false
+};
 
 private _signature = str _whitelist;
 if ((_container getVariable ["ARC_recruitActionsSignature", ""]) isEqualTo _signature) exitWith {true};
@@ -112,5 +136,18 @@ private _ids = [];
 
 _container setVariable ["ARC_recruitActionIds", _ids, false];
 _container setVariable ["ARC_recruitActionsSignature", _signature, false];
+
+if ((count _ids) isEqualTo 0) then
+{
+    if (isNil "ARC_recruit_diagNoValidClassesLogged") then
+    {
+        ARC_recruit_diagNoValidClassesLogged = true;
+        diag_log format ["[ARC][WARN][RECRUIT] ARC_fnc_recruitClientAddActions: 0 valid classes resolved from whitelist (count=%1); required mod/CfgVehicles classes likely missing", count _whitelist];
+    };
+}
+else
+{
+    diag_log format ["[ARC][INFO][RECRUIT] ARC_fnc_recruitClientAddActions: attached %1 actions to container netId=%2 rangeM=%3", count _ids, netId _container, _range];
+};
 
 (count _ids) > 0

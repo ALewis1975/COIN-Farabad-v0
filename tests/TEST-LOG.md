@@ -6206,28 +6206,15 @@ Mode: A (Bug Fix)
 
 ---
 
-## 2026-05-15 19:20 UTC — Bug fix: CH-47 frozen at taxi end with crew suspended outside
+## 2026-05-15 — Recruit container diagnostic logging (Mode A)
 
-**Branch/Commit:** copilot/debug-chinook-freeze-issue @ 113963c
+**Branch/Commit:** copilot/debug-addaction-recruit @ d2ca104
 
-**Scenario:** Uploaded test-session screenshot showed the CH-47 frozen at the taxi end with aircrew suspended outside the aircraft. The likely failure point is the transition from `BIS_fnc_unitPlay` taxi playback back to AI-controlled outbound waypoints.
+**Scenario:** Added structured `[ARC][INFO|WARN][RECRUIT]` `diag_log` lines at silent early-exit paths in `ARC_fnc_recruitClientInit` and `ARC_fnc_recruitClientAddActions` so users can diagnose missing recruit addActions from the RPT without inferring which gate denied.
 
-### Changes made
-
-| File | Change |
-|------|--------|
-| `functions/ambiance/fn_airbasePlaneDepart.sqf` | Added post-taxi crew-seat recovery that reseats any crew member left outside the aircraft according to its assigned vehicle role and ensures the pilot is in the driver seat. |
-| `functions/ambiance/fn_airbasePlaneDepart.sqf` | Explicitly activates the first outbound waypoint after taxi playback and again when the takeoff kick watchdog fires, so the group resumes the runway departure route instead of idling at taxi end. |
-
-### Static Validation
-
-| # | Check | Command | Result | Notes |
-|---|-------|---------|--------|-------|
-| 1 | Pre-change airbase planning static checks | `bash tests/static/airbase_planning_mode_checks.sh` | PASS | Existing checks passed before edits. |
-| 2 | Pre-change airbase queue lifecycle checks | `bash tests/static/airbase_queue_lifecycle_contract_checks.sh` | PASS | Existing checks passed before edits. |
-| 3 | Pre-change compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf functions/ambiance/fn_airbaseInit.sqf` | PASS | No known parser-compat patterns found. |
-| 4 | Changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf` | PASS | No known parser-compat patterns found. |
-| 5 | Airbase planning static checks | `bash tests/static/airbase_planning_mode_checks.sh` | PASS | Runtime entrypoint contracts still present. |
-| 6 | Airbase queue lifecycle checks | `bash tests/static/airbase_queue_lifecycle_contract_checks.sh` | PASS | Queue/runway/snapshot contracts still present. |
-| 7 | sqflint | `python3 -m pip install --user sqflint && /home/runner/.local/bin/sqflint -e w functions/ambiance/fn_airbasePlaneDepart.sqf` | PASS | No sqflint diagnostics emitted. |
-| 8 | Hosted/dedicated gameplay verification | N/A | BLOCKED | No Arma 3 runtime in container; follow-up required: observe CH-47 departure through taxi end and confirm crew remain seated and aircraft continues outbound/climb. |
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Static contract + compat scan | `bash tests/static/recruitment_container_contract_checks.sh && python3 scripts/dev/sqflint_compat_scan.py --strict functions/logistics/fn_recruitClientAddActions.sqf functions/logistics/fn_recruitClientInit.sqf` | PASS | Contract assertions still met; no parser-compat patterns introduced. |
+| 2 | sqflint on changed files | `sqflint -e w functions/logistics/fn_recruitClientAddActions.sqf && sqflint -e w functions/logistics/fn_recruitClientInit.sqf` | PASS | Both files exit 0 under `sqflint==0.3.2`. |
+| 3 | Runtime smoke (in-world recruit actions) | Hosted/local MP: verify diag_log lines appear in RPT for each denial path (containerEnabled=false, recruitActionsEnabled=false, empty whitelist, no valid CfgVehicles classes) and INFO summary fires when ≥1 action attaches | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 4 | Dedicated/JIP validation | Dedicated server + JIP client: confirm one-shot session flags suppress repeated logs across JIP and respawn re-runs, and that RPT shows accurate container/netId counts | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
