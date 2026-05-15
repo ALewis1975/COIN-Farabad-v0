@@ -171,6 +171,53 @@ private _fnSetRunwayClimbVelocity = {
     true
 };
 
+private _fnRecoverCrewSeats = {
+    params [
+        ["_crewLocal", [], [[]]],
+        ["_vehLocal", objNull, [objNull]],
+        ["_pilotLocal", objNull, [objNull]]
+    ];
+    if (isNull _vehLocal) exitWith { 0 };
+
+    private _fixed = 0;
+    {
+        private _unit = _x;
+        if (isNull _unit) then { continue; };
+        if (!alive _unit) then { continue; };
+        if ((vehicle _unit) isEqualTo _vehLocal) then { continue; };
+
+        private _role = assignedVehicleRole _unit;
+        private _roleName = "";
+        if ((count _role) > 0 && { (_role select 0) isEqualType "" }) then {
+            _roleName = toLower (_role select 0);
+        };
+
+        switch (_roleName) do {
+            case "driver": { _unit moveInDriver _vehLocal; };
+            case "commander": { _unit moveInCommander _vehLocal; };
+            case "gunner": { _unit moveInGunner _vehLocal; };
+            case "turret": {
+                if ((count _role) > 1 && { (_role select 1) isEqualType [] }) then {
+                    _unit moveInTurret [_vehLocal, (_role select 1)];
+                } else {
+                    _unit moveInAny _vehLocal;
+                };
+            };
+            case "cargo": { _unit moveInCargo _vehLocal; };
+            default { _unit moveInAny _vehLocal; };
+        };
+
+        if ((vehicle _unit) isEqualTo _vehLocal) then { _fixed = _fixed + 1; };
+    } forEach _crewLocal;
+
+    if (!isNull _pilotLocal && { alive _pilotLocal } && { !((driver _vehLocal) isEqualTo _pilotLocal) }) then {
+        _pilotLocal moveInDriver _vehLocal;
+        if ((driver _vehLocal) isEqualTo _pilotLocal) then { _fixed = _fixed + 1; };
+    };
+
+    _fixed
+};
+
 // --- resolve crew ---
 private _crew = [_asset, "crew", []] call _hg;
 if (!(_crew isEqualType [])) then { _crew = []; };
@@ -330,6 +377,14 @@ if (_veh isKindOf "Air") then { _veh setCollisionLight true; _veh setPilotLight 
 private _okTaxi = [_veh, _taxiFrames] call _fnUnitPlayBlocking;
 
 { _x enableAI "PATH"; _x enableAI "MOVE"; _x enableAI "FSM"; } forEach _crewLive;
+
+private _recoveredSeats = [_crewLive, _veh, _pilot] call _fnRecoverCrewSeats;
+if (_debugOps && { _recoveredSeats > 0 }) then {
+    ["OPS", format ["AIRBASE: %1 recovered %2 crew seat(s) after taxi playback", _fid, _recoveredSeats], getPosATL _veh, 0, [
+        ["vehType", _vehType],
+        ["isHeli", _isHeli]
+    ]] call ARC_fnc_intelLog;
+};
 
 _veh enableSimulationGlobal true;
 _veh engineOn true;
@@ -654,6 +709,11 @@ if (_isHeli) then {
     _wpD setWaypointCompletionRadius 150;
 };
 
+private _outboundWps = waypoints _grp;
+if ((count _outboundWps) > 0) then {
+    _grp setCurrentWaypoint (_outboundWps select 0);
+};
+
 // Post-taxi takeoff watchdog: unitPlay can leave AI stuck at taxi end.
 private _kickEnabled = missionNamespace getVariable ["airbase_v1_takeoffKickEnabled", true];
 private _kickTimeout = missionNamespace getVariable ["airbase_v1_takeoffKickTimeout_s", 45];
@@ -696,6 +756,10 @@ if (_kickEnabled) then {
             _grpL setSpeedMode "FULL";
             _grpL setBehaviour "CARELESS";
             _grpL setCombatMode "BLUE";
+            private _kickWps = waypoints _grpL;
+            if ((count _kickWps) > 0) then {
+                _grpL setCurrentWaypoint (_kickWps select 0);
+            };
 
             if (_debugOpsL) then {
                 ["OPS", format ["AIRBASE: %1 TAKEOFF KICK applied", _fidL], getPosATL _vehL, 0, [
