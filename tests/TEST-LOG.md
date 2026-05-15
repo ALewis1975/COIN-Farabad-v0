@@ -11,6 +11,22 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-15 — Simple Recruit AI dialog on `recruitment_01` (Mode A)
+
+**Branch/Commit:** copilot/refactor-ai-recruitment-action @ 545caff (working tree included follow-up init/static-test updates)
+
+**Scenario:** Refactored AI recruitment to the requested simple flow: a named Eden object `recruitment_01` receives one `Recruit AI` addAction, which opens a dialog listing public infantry classes from the player's faction. The server validates sender identity, registered recruitment object, public `CAManBase` class, side/faction match, and a 12 recruited-AI cap before spawning units into the caller's group. Role, explicit proximity, and unit-whitelist gates were removed from the spawn path.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline recruitment validation | `bash tests/static/recruitment_container_contract_checks.sh && python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf functions/logistics/fn_recruitClientInit.sqf functions/logistics/fn_recruitClientAddActions.sqf functions/logistics/fn_recruitServerPublishContainers.sqf functions/logistics/fn_recruitSpawnRequest.sqf && sqflint -e w ...` | BLOCKED/PASS | Direct script execution was blocked by file permissions (`Permission denied`); running via `bash` passed. Compat scan passed. `sqflint` was initially unavailable in the sandbox. |
+| 2 | Updated static contract + compat + RemoteExec checks | `git diff --check && bash tests/static/recruitment_container_contract_checks.sh && python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf functions/logistics/fn_recruitClientInit.sqf functions/logistics/fn_recruitClientAddActions.sqf functions/logistics/fn_recruitDialogOpen.sqf functions/logistics/fn_recruitDialogOnLoad.sqf functions/logistics/fn_recruitDialogRecruitSelected.sqf functions/logistics/fn_recruitServerPublishContainers.sqf functions/logistics/fn_recruitSpawnRequest.sqf && bash scripts/dev/check_remoteexec_contract.sh` | PASS | Confirms dialog functions are registered, `ARC_RecruitDialog` exists, the client action calls `ARC_fnc_recruitDialogOpen`, and the spawn request no longer references role/whitelist gates. |
+| 3 | sqflint on changed SQF | `python3 -m pip install --user sqflint==0.3.2 && for f in initServer.sqf functions/logistics/fn_recruitClientInit.sqf functions/logistics/fn_recruitClientAddActions.sqf functions/logistics/fn_recruitDialogOpen.sqf functions/logistics/fn_recruitDialogOnLoad.sqf functions/logistics/fn_recruitDialogRecruitSelected.sqf functions/logistics/fn_recruitServerPublishContainers.sqf functions/logistics/fn_recruitSpawnRequest.sqf; do sqflint -e w "$f"; done` | PASS | Installed `sqflint==0.3.2` in the sandbox because it was not preinstalled. |
+| 4 | Runtime smoke: `recruitment_01` addAction and dialog | Hosted/local MP: verify `Recruit AI` appears on the Eden object named `recruitment_01`, opens the dialog, lists only the player's faction infantry, and recruits up to 12 AI into the player's group. | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 5 | Dedicated/JIP validation | Dedicated server with a late-joining client: confirm named object publication, object-bound JIP action replay, dialog use, server-side spawn validation, and cap enforcement. | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+
+---
+
 
 ## 2026-05-15 — Recruit container Eden variable-name opt-in (Mode A)
 

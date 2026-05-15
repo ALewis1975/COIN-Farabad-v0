@@ -132,45 +132,17 @@ missionNamespace setVariable ["ARC_recruitAddActionsEnabled", true, true];
 // SITREP in-world action (dismounted): vanilla addAction enabled by default.
 missionNamespace setVariable ["ARC_sitrepInWorldActionsEnabled", true, false];
 
-// Command-gated AI recruitment from Huron Cargo Containers.
-// Clients only render actions; the server validates role, sender, class whitelist,
-// Object Init opt-in, and range.
-// Two opt-in paths are supported on the server:
-//   1) Eden Object Init (per-container):
-//      if (isServer) then {
-//          this setVariable ["ARC_isRecruitContainer", true, true];
-//      };
-//   2) Eden Variable Name (preferred, no Init code required):
-//      Give the container the Variable Name "recruitment_01" (or another entry
-//      listed in ARC_recruitContainerNames below) and the server publisher will
-//      mark it automatically.
+// Simple AI recruitment from the named Eden object "recruitment_01".
+// Clients render one "Recruit AI" action; the server validates sender identity,
+// registered recruitment object, public infantry class, side/faction match, and
+// the per-player recruited-AI cap. Existing Object Init opt-in remains supported
+// for Huron cargo containers:
+//   if (isServer) then { this setVariable ["ARC_isRecruitContainer", true, true]; };
 missionNamespace setVariable ["ARC_recruitContainerEnabled", true, true];
 missionNamespace setVariable ["ARC_recruitContainerClasses", ["B_Slingload_01_Cargo_F"], true];
 missionNamespace setVariable ["ARC_recruitContainerNames", ["recruitment_01"], true];
 missionNamespace setVariable ["ARC_recruitContainerNetIds", [], true];
-missionNamespace setVariable ["ARC_recruitActionRangeM", 6, true];
 missionNamespace setVariable ["ARC_recruitGroupMaxUnits", 12, true];
-missionNamespace setVariable ["ARC_recruitRequireSameFaction", true, true];
-missionNamespace setVariable ["ARC_recruitCompanyCommandGroupIds", [
-    "A-2-325 AIR | REDFALCON 1",
-    "B-2-325 AIR | REDFALCON 2",
-    "B-2-325 AIR | REDFALCON 3",
-    "C-2-325 AIR | REDFALCON 3"
-], true];
-missionNamespace setVariable ["ARC_recruitCommandRoleTokens", [], true];
-missionNamespace setVariable ["ARC_recruitUnitWhitelist", [
-    ["rhsusf_army_ocp_rifleman", "Rifleman"],
-    ["rhsusf_army_ocp_grenadier", "Grenadier"],
-    ["rhsusf_army_ocp_autorifleman", "Autorifleman"],
-    ["rhsusf_army_ocp_riflemanat", "Rifleman (AT)"],
-    ["rhsusf_army_ocp_teamleader", "Team Leader"],
-    ["rhsusf_army_ocp_medic", "Combat Medic"],
-    ["rhsusf_army_ocp_machinegunner", "Machine Gunner"],
-    ["rhsusf_army_ocp_machinegunnera", "Machine Gunner Assistant"],
-    ["rhsusf_army_ocp_javelin", "Javelin Gunner"],
-    ["rhsusf_army_ocp_javelin_assistant", "Javelin Assistant"],
-    ["rhsusf_army_ocp_jfo", "Joint Fires Observer"]
-], true];
 
 [] spawn {
     if (!isServer) exitWith {};
