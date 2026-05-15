@@ -11,34 +11,24 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
-## 2026-05-15 — Huron cargo AI recruitment container (Mode B)
+## 2026-05-15 — In-world action toggle split (Mode B)
 
-**Branch/Commit:** copilot/add-huron-cargo-container @ 5f80ab9
+**Branch/Commit:** copilot/explain-repository-structure-again @ 82c9c39 (working tree validated in-session)
 
-**Scenario:** Added command-gated AI recruitment actions to configured Huron Cargo Containers. Client actions request a server-authoritative spawn; the server validates sender ownership, Battalion/Company command role gate, container registration, unit whitelist, side/faction match, and group size cap before joining one AI unit to the requester's group.
-
-| # | Check | Command / Step | Result | Notes |
-|---|-------|----------------|--------|-------|
-| 1 | Baseline static validation | `python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf initPlayerLocal.sqf functions/core/fn_rolesIsAuthorized.sqf functions/core/fn_rolesCanApproveQueue.sqf functions/core/fn_rpcValidateSender.sqf && bash scripts/dev/check_remoteexec_contract.sh && python3 scripts/dev/validate_state_migrations.py && git --no-pager diff --check` | PASS | RemoteExec contract, migration validation, and whitespace checks passed. Compat scanner reported pre-existing `isNotEqualTo` warnings in `functions/core/fn_rpcValidateSender.sqf`; that file was not modified. |
-| 2 | Changed-file compat/static contracts | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_rolesCanRecruitAI.sqf functions/logistics/fn_recruitClientInit.sqf functions/logistics/fn_recruitClientAddActions.sqf functions/logistics/fn_recruitSpawnRequest.sqf initPlayerLocal.sqf initServer.sqf && bash tests/static/recruitment_container_contract_checks.sh && bash scripts/dev/check_remoteexec_contract.sh && python3 scripts/dev/validate_state_migrations.py && git --no-pager diff --check HEAD~1..HEAD` | PASS | New recruitment contract check passed; RemoteExec and state migration checks remained clean. |
-| 3 | Changed-file sqflint | `for f in functions/core/fn_rolesCanRecruitAI.sqf functions/logistics/fn_recruitClientInit.sqf functions/logistics/fn_recruitClientAddActions.sqf functions/logistics/fn_recruitSpawnRequest.sqf initPlayerLocal.sqf initServer.sqf; do ~/.local/bin/sqflint -e w "$f"; done` | PASS | Installed `sqflint==0.3.2` in the sandbox with `python3 -m pip install --user sqflint`; fixed one warning in the client action handler and reran clean. |
-| 4 | Runtime smoke: Huron container recruitment | Local hosted/dedicated-like Arma 3 session; use a configured `B_Slingload_01_Cargo_F` as Battalion/Company command and verify whitelist actions, one-unit spawn, faction match, and group cap | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
-| 5 | Dedicated/JIP validation | Dedicated server with at least one JIP client; verify late client actions and server-only spawn authority | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
-
----
-
-## 2026-05-15 — CIVSUB cap enforcement runtime-safe evictable-key builder (Mode A)
-
-**Branch/Commit:** copilot/fix-civsub-caps-enforcement-error @ fdd9f08
-
-**Scenario:** Replaced CIVSUB cap enforcement `_keysEvictable` `select {}` filter with an explicit `forEach`/`pushBack` builder and added an unreachable defensive type guard to prevent hard runtime type errors when counting evictable keys.
+**Scenario:** Split TOC/RTB vanilla addAction controls from ACE interaction controls so operators can disable TOC-related scroll-menu actions without hiding ACE self/interact alternatives.
 
 | # | Check | Command / Step | Result | Notes |
 |---|-------|----------------|--------|-------|
-| 1 | Baseline targeted compat scan + sqflint | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubCivCapsEnforce.sqf && sqflint -e w functions/civsub/fn_civsubCivCapsEnforce.sqf` | BLOCKED | Compat scan passed; `sqflint` is unavailable in this sandbox (`sqflint: command not found`). |
-| 2 | Changed-file compat scan + sqflint + whitespace check | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubCivCapsEnforce.sqf && sqflint -e w functions/civsub/fn_civsubCivCapsEnforce.sqf ; git --no-pager diff --check` | BLOCKED | Compat scan passed and whitespace check was clean; `sqflint` remains unavailable in this sandbox. |
-| 3 | Runtime smoke: CIVSUB civilian cap enforcement | Local MP or dedicated-like Arma 3 session with cap pressure and protected civilians present | BLOCKED | Arma 3 runtime is unavailable in this sandbox. |
-| 4 | Dedicated/JIP validation | Dedicated server with at least one JIP client; verify authoritative server-owned despawn queue behavior | BLOCKED | Dedicated server + JIP validation environment unavailable in this sandbox. |
+| 1 | Baseline changed-file static checks | `git diff --check && python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf functions/core/fn_tocInitPlayer.sqf functions/intel/fn_intelInitClient.sqf` | PASS | No whitespace or sqflint-compat issues before edits. |
+| 2 | Baseline sqflint | `sqflint -e w initServer.sqf functions/core/fn_tocInitPlayer.sqf functions/intel/fn_intelInitClient.sqf` | BLOCKED | `sqflint` is not installed in this sandbox. |
+| 3 | Changed-file static checks | `git diff --check && python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf functions/core/fn_tocInitPlayer.sqf functions/intel/fn_intelInitClient.sqf` | PASS | No whitespace or known parser-compat patterns found after edits. |
+| 4 | Changed-file sqflint | `sqflint -e w initServer.sqf functions/core/fn_tocInitPlayer.sqf functions/intel/fn_intelInitClient.sqf` | BLOCKED | `sqflint` is not installed in this sandbox. |
+| 5 | Final static validation | `git diff --check && python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf functions/core/fn_tocInitPlayer.sqf functions/intel/fn_intelInitClient.sqf && bash scripts/dev/check_remoteexec_contract.sh && python3 scripts/dev/validate_state_migrations.py` | PASS | Whitespace, parser-compat, Air/Tower RemoteExec contract, and state migration checks passed. |
+| 6 | Final sqflint | `sqflint -e w initServer.sqf functions/core/fn_tocInitPlayer.sqf functions/intel/fn_intelInitClient.sqf` | BLOCKED | `sqflint` is not installed in this sandbox. |
+| 7 | Runtime smoke: action toggles | Hosted/local MP: toggle `ARC_tocAddActionsEnabled`, `ARC_tocAceInteractionsEnabled`, `ARC_rtbAddActionsEnabled`, and `ARC_rtbAceInteractionsEnabled`; verify TOC/Mobile Ops scroll actions hide independently from ACE RTB/field-command self actions | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 8 | Dedicated/JIP validation | Dedicated server with at least one JIP client; verify replicated toggle values and late-client interaction visibility | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+| 9 | Follow-up sqflint cleanup | `python3 -m pip install --user sqflint==0.3.2 && git diff --check && python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_tocInitPlayer.sqf functions/intel/fn_intelInitClient.sqf initServer.sqf && sqflint -e w functions/core/fn_tocInitPlayer.sqf && sqflint -e w functions/intel/fn_intelInitClient.sqf && sqflint -e w initServer.sqf && bash scripts/dev/check_remoteexec_contract.sh && python3 scripts/dev/validate_state_migrations.py` | PASS | Removed unused callback parameter bindings in `functions/intel/fn_intelInitClient.sqf`; all changed SQF files lint clean with warnings treated as errors. |
+| 10 | CfgFunctions/initServer regression sweep | `git diff --check && python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_tocInitPlayer.sqf functions/intel/fn_intelInitClient.sqf initServer.sqf && sqflint -e w functions/core/fn_tocInitPlayer.sqf && sqflint -e w functions/intel/fn_intelInitClient.sqf && sqflint -e w initServer.sqf && <config delimiter sanity for config/CfgFunctions.hpp and description.ext> && bash scripts/dev/check_remoteexec_contract.sh && bash scripts/dev/check_test_log_commits.sh && python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && for s in tests/static/*.sh; do bash "$s"; done` | PASS | Added targeted regression confidence for recent `initServer.sqf`/`CfgFunctions.hpp` work; config delimiter sanity passed, test-log guard passed with `rg` installed, and all static contract scripts passed. |
 
 ---
 
