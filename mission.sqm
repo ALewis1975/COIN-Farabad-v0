@@ -20,14 +20,14 @@ class EditorData
 	};
 	class LayerIndexProvider
 	{
-		nextID=118461;
+		nextID=120261;
 	};
 	class Camera
 	{
-		pos[]={2230.5398,29.178146,1416.1276};
-		dir[]={0,-0.70710683,0.70710683};
-		up[]={0,0.70710677,0.70710677};
-		aside[]={0.99999994,0,-0};
+		pos[]={6664.8394,33.489998,1653.4305};
+		dir[]={-0.28367689,-0.53745395,-0.79415673};
+		up[]={-0.180794,0.84328967,-0.50613445};
+		aside[]={-0.94172662,-2.2409949e-08,0.33638963};
 	};
 };
 binarizationWanted=0;
@@ -1280,19 +1280,6 @@ class CustomAttributes
 		name="Multiplayer";
 		class Attribute0
 		{
-			property="ENH_saveLoadout";
-			expression="if (!isMultiplayer || !_value || is3DEN || !hasInterface) exitWith {};        0 spawn        {            waitUntil {sleep 1; !isNull player};            player setVariable ['ENH_savedLoadout', getUnitloadout player];            player addMPEventHandler ['MPRespawn',            {                params ['_unit'];                private _loadout = _unit getVariable ['ENH_savedLoadout', []];                if (_loadout isNotEqualTo []) then {_unit setUnitLoadout _loadout};            }];        };";
-			class Value
-			{
-				class data
-				{
-					singleType="BOOL";
-					value=1;
-				};
-			};
-		};
-		class Attribute1
-		{
 			property="RespawnTemplates";
 			expression="true";
 			class Value
@@ -1312,6 +1299,19 @@ class CustomAttributes
 							};
 						};
 					};
+				};
+			};
+		};
+		class Attribute1
+		{
+			property="ENH_saveLoadout";
+			expression="if (!isMultiplayer || !_value || is3DEN || !hasInterface) exitWith {};        0 spawn        {            waitUntil {sleep 1; !isNull player};            player setVariable ['ENH_savedLoadout', getUnitloadout player];            player addMPEventHandler ['MPRespawn',            {                params ['_unit'];                private _loadout = _unit getVariable ['ENH_savedLoadout', []];                if (_loadout isNotEqualTo []) then {_unit setUnitLoadout _loadout};            }];        };";
+			class Value
+			{
+				class data
+				{
+					singleType="BOOL";
+					value=1;
 				};
 			};
 		};
@@ -30995,8 +30995,8 @@ class Mission
 											{
 												class Attribute0
 												{
-													property="ENH_doStop";
-													expression="if (!is3DEN && _value) then {doStop _this}";
+													property="ENH_enableHeadlights";
+													expression="[_this, _value] remoteExec ['setPilotLight', _this]";
 													class Value
 													{
 														class data
@@ -31047,8 +31047,8 @@ class Mission
 												};
 												class Attribute4
 												{
-													property="ENH_enableHeadlights";
-													expression="[_this, _value] remoteExec ['setPilotLight', _this]";
+													property="ENH_doStop";
+													expression="if (!is3DEN && _value) then {doStop _this}";
 													class Value
 													{
 														class data
@@ -43166,7 +43166,7 @@ class Mission
 									dataType="Object";
 									class PositionInfo
 									{
-										position[]={6608.7378,8.5045214,1659.0719};
+										position[]={6606.9297,8.5045214,1656.2521};
 									};
 									side="Empty";
 									flags=4;
@@ -43180,14 +43180,14 @@ class Mission
 									{
 										class Attribute0
 										{
-											property="attachMarker";
-											expression="if (_value isNotEqualTo '') then {[_this, _value] spawn expEden_fnc_markerAttachToObject}";
+											property="allowDamage";
+											expression="_this allowdamage _value;";
 											class Value
 											{
 												class data
 												{
-													singleType="STRING";
-													value="";
+													singleType="BOOL";
+													value=0;
 												};
 											};
 										};
@@ -43204,7 +43204,20 @@ class Mission
 												};
 											};
 										};
-										nAttributes=2;
+										class Attribute2
+										{
+											property="attachMarker";
+											expression="if (_value isNotEqualTo '') then {[_this, _value] spawn expEden_fnc_markerAttachToObject}";
+											class Value
+											{
+												class data
+												{
+													singleType="STRING";
+													value="";
+												};
+											};
+										};
+										nAttributes=3;
 									};
 								};
 							};
@@ -44645,7 +44658,7 @@ class Mission
 									dataType="Object";
 									class PositionInfo
 									{
-										position[]={6545.6685,10.021654,1658.2799};
+										position[]={6547.9556,10.021654,1658.1484};
 									};
 									side="Empty";
 									flags=4;
@@ -44685,6 +44698,19 @@ class Mission
 										};
 										class Attribute2
 										{
+											property="allowDamage";
+											expression="_this allowdamage _value;";
+											class Value
+											{
+												class data
+												{
+													singleType="BOOL";
+													value=0;
+												};
+											};
+										};
+										class Attribute3
+										{
 											property="attachMarker";
 											expression="if (_value isNotEqualTo '') then {[_this, _value] spawn expEden_fnc_markerAttachToObject}";
 											class Value
@@ -44696,7 +44722,7 @@ class Mission
 												};
 											};
 										};
-										nAttributes=3;
+										nAttributes=4;
 									};
 								};
 							};
@@ -47686,7 +47712,7 @@ class Mission
 						};
 					};
 					id=509;
-					atlOffset=-13.704599;
+					atlOffset=-13.704889;
 				};
 				class Item9
 				{
@@ -109567,7 +109593,7 @@ class Mission
 				};
 			};
 			id=448;
-			atlOffset=0.67101097;
+			atlOffset=0.67109346;
 		};
 		class Item3
 		{
@@ -110794,7 +110820,7 @@ class Mission
 					class PositionInfo
 					{
 						position[]={6616.2881,9.749074,1503.7585};
-						angles[]={0,0.018976273,0};
+						angles[]={-0,0.22336347,0};
 					};
 					side="West";
 					flags=6;
@@ -110811,7 +110837,7 @@ class Mission
 					class PositionInfo
 					{
 						position[]={6616.3013,11.478354,1505.4994};
-						angles[]={0,0.018976273,0};
+						angles[]={-0,0.22336347,0};
 					};
 					side="West";
 					flags=4;
@@ -110865,8 +110891,8 @@ class Mission
 			dataType="Object";
 			class PositionInfo
 			{
-				position[]={6641.4292,10.292194,1602.5822};
-				angles[]={0,0.018976273,0};
+				position[]={6644.4839,10.292194,1605.7592};
+				angles[]={-0,0.22336347,0};
 			};
 			side="West";
 			flags=6;
@@ -110911,6 +110937,7 @@ class Mission
 		{
 			dataType="Layer";
 			name="Location_Markers";
+			state=2;
 			class Entities
 			{
 				items=6;
@@ -111856,7 +111883,7 @@ class Mission
 						};
 					};
 					id=4726;
-					atlOffset=1.4493048;
+					atlOffset=35;
 				};
 				class Item1
 				{
@@ -112193,7 +112220,7 @@ class Mission
 						};
 					};
 					id=4727;
-					atlOffset=-0.44811773;
+					atlOffset=35;
 				};
 				class Item2
 				{
@@ -112856,7 +112883,7 @@ class Mission
 						};
 					};
 					id=4733;
-					atlOffset=0.096838474;
+					atlOffset=35;
 				};
 				class Item3
 				{
@@ -113129,7 +113156,7 @@ class Mission
 						};
 					};
 					id=4745;
-					atlOffset=0.068251133;
+					atlOffset=35;
 				};
 				class Item4
 				{
@@ -113597,7 +113624,7 @@ class Mission
 						};
 					};
 					id=4750;
-					atlOffset=0.26414537;
+					atlOffset=35;
 				};
 				class Item5
 				{
@@ -113612,7 +113639,7 @@ class Mission
 							position[]={5746.5664,8.5932722,1052.0616};
 							name="mkr_highway_002";
 							type="Empty";
-							angle=90.57872;
+							angle=90.578682;
 							id=4843;
 							class CustomAttributes
 							{
@@ -113678,7 +113705,7 @@ class Mission
 							position[]={5747.2715,8.58253,1077.7534};
 							name="mkr_highway_001";
 							type="Empty";
-							angle=269.87598;
+							angle=269.87585;
 							id=4842;
 							class CustomAttributes
 							{
@@ -113744,7 +113771,7 @@ class Mission
 							position[]={5249.0244,5.8625684,1077.8406};
 							name="mkr_highway_003";
 							type="Empty";
-							angle=269.87595;
+							angle=269.87585;
 							id=4844;
 							class CustomAttributes
 							{
@@ -113810,7 +113837,7 @@ class Mission
 							position[]={5248.3193,5.8635974,1052.1488};
 							name="mkr_highway_004";
 							type="Empty";
-							angle=90.578712;
+							angle=90.578682;
 							id=4845;
 							class CustomAttributes
 							{
@@ -113876,7 +113903,7 @@ class Mission
 							position[]={4714.9565,5.9117398,1224.9063};
 							name="mkr_highway_005";
 							type="Empty";
-							angle=129.4066;
+							angle=129.40654;
 							id=4846;
 							atlOffset=4.7683716e-07;
 							class CustomAttributes
@@ -114009,7 +114036,7 @@ class Mission
 							position[]={4596.7998,5.5588236,1660.4669};
 							name="mkr_highway_007";
 							type="Empty";
-							angle=354.64581;
+							angle=354.6456;
 							id=4848;
 							class CustomAttributes
 							{
@@ -114142,7 +114169,7 @@ class Mission
 							position[]={4522.6978,4.6399999,2154.5791};
 							name="mkr_highway_009";
 							type="Empty";
-							angle=345.25003;
+							angle=345.24994;
 							id=4850;
 							class CustomAttributes
 							{
@@ -114208,7 +114235,7 @@ class Mission
 							position[]={4497.6606,4.6400003,2148.7742};
 							name="mkr_highway_010";
 							type="Empty";
-							angle=165.95284;
+							angle=165.95279;
 							id=4851;
 							atlOffset=4.7683716e-07;
 							class CustomAttributes
@@ -114341,7 +114368,7 @@ class Mission
 							position[]={4426.4155,2.9315472,2654.281};
 							name="mkr_highway_012";
 							type="Empty";
-							angle=178.92232;
+							angle=178.92223;
 							id=4853;
 							atlOffset=4.7683716e-07;
 							class CustomAttributes
@@ -114408,7 +114435,7 @@ class Mission
 							position[]={4511.6621,6.9699998,3148.3408};
 							name="mkr_highway_013";
 							type="Empty";
-							angle=10.814493;
+							angle=10.814489;
 							id=4854;
 							class CustomAttributes
 							{
@@ -114474,7 +114501,7 @@ class Mission
 							position[]={4486.5713,6.9700003,3153.9084};
 							name="mkr_highway_014";
 							type="Empty";
-							angle=191.5173;
+							angle=191.51726;
 							id=4855;
 							atlOffset=4.7683716e-07;
 							class CustomAttributes
@@ -114541,7 +114568,7 @@ class Mission
 							position[]={4747.668,6.4498658,3658.0779};
 							name="mkr_highway_015";
 							type="Empty";
-							angle=54.891705;
+							angle=54.891647;
 							id=4856;
 							class CustomAttributes
 							{
@@ -114807,7 +114834,7 @@ class Mission
 							position[]={5658.0332,3.9400001,4257.1221};
 							name="mkr_highway_019";
 							type="Empty";
-							angle=40.051498;
+							angle=40.051495;
 							id=4860;
 							class CustomAttributes
 							{
@@ -115006,7 +115033,7 @@ class Mission
 							position[]={5920.3706,12.680535,4857.1348};
 							name="mkr_highway_022";
 							type="Empty";
-							angle=188.23936;
+							angle=188.23927;
 							id=4863;
 							atlOffset=9.5367432e-07;
 							class CustomAttributes
@@ -115073,7 +115100,7 @@ class Mission
 							position[]={5852.9824,12.93,5351.0967};
 							name="mkr_highway_023";
 							type="Empty";
-							angle=331.642;
+							angle=331.64191;
 							id=4864;
 							class CustomAttributes
 							{
@@ -115139,7 +115166,7 @@ class Mission
 							position[]={5830.0137,12.930001,5339.564};
 							name="mkr_highway_024";
 							type="Empty";
-							angle=152.3448;
+							angle=152.34477;
 							id=4865;
 							atlOffset=9.5367432e-07;
 							class CustomAttributes
@@ -115206,7 +115233,7 @@ class Mission
 							position[]={5363.2573,-0.6550256,5711.8989};
 							name="mkr_highway_025";
 							type="Empty";
-							angle=293.42377;
+							angle=293.42358;
 							id=4866;
 							class CustomAttributes
 							{
@@ -115272,7 +115299,7 @@ class Mission
 							position[]={5352.3467,0.56888723,5688.6284};
 							name="mkr_highway_026";
 							type="Empty";
-							angle=114.12656;
+							angle=114.12644;
 							id=4867;
 							atlOffset=5.9604645e-07;
 							class CustomAttributes
@@ -115339,7 +115366,7 @@ class Mission
 							position[]={5065.6104,9.8344193,5835.895};
 							name="mkr_highway_027";
 							type="Empty";
-							angle=294.33191;
+							angle=294.33173;
 							id=4868;
 							class CustomAttributes
 							{
@@ -115405,7 +115432,7 @@ class Mission
 							position[]={5059.7856,9.8346252,5823.0615};
 							name="mkr_highway_028";
 							type="Empty";
-							angle=115.03472;
+							angle=115.0347;
 							id=4869;
 							class CustomAttributes
 							{
@@ -115537,7 +115564,7 @@ class Mission
 							position[]={4712.0527,9.8900003,5981.1382};
 							name="mkr_highway_030";
 							type="Empty";
-							angle=115.35865;
+							angle=115.35863;
 							id=4871;
 							class CustomAttributes
 							{
@@ -115669,7 +115696,7 @@ class Mission
 							position[]={4250.1191,9.8900003,6139.8569};
 							name="mkr_highway_032";
 							type="Empty";
-							angle=98.257324;
+							angle=98.257317;
 							id=4873;
 							class CustomAttributes
 							{
@@ -115867,7 +115894,7 @@ class Mission
 							position[]={3201.1455,23.394051,6604.791};
 							name="mkr_highway_035";
 							type="Empty";
-							angle=280.95486;
+							angle=280.9548;
 							id=4876;
 							class CustomAttributes
 							{
@@ -115933,7 +115960,7 @@ class Mission
 							position[]={3196.9995,23.40691,6587.939};
 							name="mkr_highway_036";
 							type="Empty";
-							angle=101.65765;
+							angle=101.65763;
 							id=4877;
 							atlOffset=-1.9073486e-06;
 							class CustomAttributes
@@ -116000,7 +116027,7 @@ class Mission
 							position[]={2751.137,24.190001,6602.0654};
 							name="mkr_highway_037";
 							type="Empty";
-							angle=262.44238;
+							angle=262.44223;
 							id=4878;
 							class CustomAttributes
 							{
@@ -116066,7 +116093,7 @@ class Mission
 							position[]={2752.5562,24.190001,6588.3003};
 							name="mkr_highway_038";
 							type="Empty";
-							angle=83.145164;
+							angle=83.145142;
 							id=4879;
 							class CustomAttributes
 							{
@@ -116264,7 +116291,7 @@ class Mission
 							position[]={1840.8507,27.567234,7001.3232};
 							name="mkr_highway_041";
 							type="Empty";
-							angle=289.19025;
+							angle=289.19012;
 							id=4882;
 							class CustomAttributes
 							{
@@ -116330,7 +116357,7 @@ class Mission
 							position[]={1834.9946,27.569544,6988.3467};
 							name="mkr_highway_042";
 							type="Empty";
-							angle=109.89301;
+							angle=109.89297;
 							id=4883;
 							class CustomAttributes
 							{
@@ -116462,7 +116489,7 @@ class Mission
 							position[]={1350.5266,28.709999,7154.2998};
 							name="mkr_highway_044";
 							type="Empty";
-							angle=109.78255;
+							angle=109.78245;
 							id=4885;
 							class CustomAttributes
 							{
@@ -116528,7 +116555,7 @@ class Mission
 							position[]={912.99579,31.200001,7320.7676};
 							name="mkr_highway_045";
 							type="Empty";
-							angle=288.93417;
+							angle=288.93402;
 							id=4886;
 							class CustomAttributes
 							{
@@ -116594,7 +116621,7 @@ class Mission
 							position[]={907.19781,31.200001,7307.7651};
 							name="mkr_highway_046";
 							type="Empty";
-							angle=109.63693;
+							angle=109.63685;
 							id=4887;
 							class CustomAttributes
 							{
@@ -116660,7 +116687,7 @@ class Mission
 							position[]={581.92535,37.455074,7566.8159};
 							name="mkr_highway_047";
 							type="Empty";
-							angle=313.1391;
+							angle=313.13901;
 							id=4888;
 							class CustomAttributes
 							{
@@ -116858,7 +116885,7 @@ class Mission
 							position[]={263.26111,40.948494,7803.7529};
 							name="mkr_highway_050";
 							type="Empty";
-							angle=109.47944;
+							angle=109.47939;
 							id=4891;
 							class CustomAttributes
 							{
@@ -116924,7 +116951,7 @@ class Mission
 							position[]={6248.1211,8.1800003,1051.1439};
 							name="mkr_highway_051";
 							type="Empty";
-							angle=90.578712;
+							angle=90.578682;
 							id=4892;
 							class CustomAttributes
 							{
@@ -116990,7 +117017,7 @@ class Mission
 							position[]={6248.8262,8.1822309,1076.8357};
 							name="mkr_highway_052";
 							type="Empty";
-							angle=269.87595;
+							angle=269.87585;
 							id=4893;
 							class CustomAttributes
 							{
@@ -117122,7 +117149,7 @@ class Mission
 							position[]={6764.5942,5.2946439,904.90656};
 							name="mkr_highway_054";
 							type="Empty";
-							angle=321.58649;
+							angle=321.5864;
 							id=4895;
 							class CustomAttributes
 							{
@@ -117188,7 +117215,7 @@ class Mission
 							position[]={7156.314,4.9405246,461.49307};
 							name="mkr_highway_055";
 							type="Empty";
-							angle=90.578712;
+							angle=90.578682;
 							id=4896;
 							class CustomAttributes
 							{
@@ -117254,7 +117281,7 @@ class Mission
 							position[]={7157.019,4.9133935,487.18484};
 							name="mkr_highway_056";
 							type="Empty";
-							angle=269.87595;
+							angle=269.87585;
 							id=4897;
 							class CustomAttributes
 							{
@@ -117452,7 +117479,7 @@ class Mission
 							position[]={7922.002,10.103279,1054.3893};
 							name="mkr_highway_059";
 							type="Empty";
-							angle=90.578712;
+							angle=90.578682;
 							id=4900;
 							class CustomAttributes
 							{
@@ -117518,7 +117545,7 @@ class Mission
 							position[]={7924.5342,10.106677,1075.7188};
 							name="mkr_highway_060";
 							type="Empty";
-							angle=269.87595;
+							angle=269.87585;
 							id=4901;
 							class CustomAttributes
 							{
@@ -117584,7 +117611,7 @@ class Mission
 							position[]={8475.7422,9.5270853,885.55359};
 							name="mkr_highway_061";
 							type="Empty";
-							angle=114.53022;
+							angle=114.53011;
 							id=4902;
 							atlOffset=9.5367432e-07;
 							class CustomAttributes
@@ -117651,7 +117678,7 @@ class Mission
 							position[]={8483.3369,9.5249519,904.35291};
 							name="mkr_highway_062";
 							type="Empty";
-							angle=293.82745;
+							angle=293.82733;
 							id=4903;
 							atlOffset=9.5367432e-07;
 							class CustomAttributes
@@ -117850,7 +117877,7 @@ class Mission
 							position[]={9455.1914,6.2600002,1123.4333};
 							name="mkr_highway_065";
 							type="Empty";
-							angle=83.649399;
+							angle=83.649353;
 							id=4906;
 							class CustomAttributes
 							{
@@ -117982,7 +118009,7 @@ class Mission
 							position[]={9936.5967,6.0993476,845.42114};
 							name="mkr_highway_067";
 							type="Empty";
-							angle=113.0075;
+							angle=113.00739;
 							id=4908;
 							class CustomAttributes
 							{
@@ -118379,7 +118406,7 @@ class Mission
 							position[]={3518.9004,8.7487822,2670.2319};
 							name="mkr_highway_073";
 							type="Empty";
-							angle=51.926109;
+							angle=51.926105;
 							id=4914;
 							class CustomAttributes
 							{
@@ -118445,7 +118472,7 @@ class Mission
 							position[]={3507.2349,8.7283182,2684.3386};
 							name="mkr_highway_074";
 							type="Empty";
-							angle=231.22336;
+							angle=231.22334;
 							id=4915;
 							class CustomAttributes
 							{
@@ -118577,7 +118604,7 @@ class Mission
 							position[]={3224.2322,10.766383,2369.291};
 							name="mkr_highway_076";
 							type="Empty";
-							angle=212.20224;
+							angle=212.20222;
 							id=4917;
 							class CustomAttributes
 							{
@@ -118643,7 +118670,7 @@ class Mission
 							position[]={3048.3635,4.9638767,1933.0177};
 							name="mkr_highway_077";
 							type="Empty";
-							angle=2.9269073;
+							angle=2.9269061;
 							id=4918;
 							class CustomAttributes
 							{
@@ -118709,7 +118736,7 @@ class Mission
 							position[]={3029.0835,4.9631195,1932.8188};
 							name="mkr_highway_078";
 							type="Empty";
-							angle=182.22415;
+							angle=182.22408;
 							id=4919;
 							class CustomAttributes
 							{
@@ -118908,7 +118935,7 @@ class Mission
 							position[]={2654.2014,5.3000002,1178.8987};
 							name="mkr_highway_081";
 							type="Empty";
-							angle=78.091431;
+							angle=78.091423;
 							id=4922;
 							class CustomAttributes
 							{
@@ -118974,7 +119001,7 @@ class Mission
 							position[]={2649.0728,5.3000002,1197.4851};
 							name="mkr_highway_082";
 							type="Empty";
-							angle=257.38867;
+							angle=257.38852;
 							id=4923;
 							class CustomAttributes
 							{
@@ -119106,7 +119133,7 @@ class Mission
 							position[]={2155.3149,8.0065145,1184.3071};
 							name="mkr_highway_084";
 							type="Empty";
-							angle=270.2327;
+							angle=270.23264;
 							id=4925;
 							class CustomAttributes
 							{
@@ -119172,7 +119199,7 @@ class Mission
 							position[]={1646.0028,4.4299998,1104.8373};
 							name="mkr_highway_085";
 							type="Empty";
-							angle=83.111969;
+							angle=83.111954;
 							id=4926;
 							class CustomAttributes
 							{
@@ -119238,7 +119265,7 @@ class Mission
 							position[]={1642.5203,4.4299998,1123.8013};
 							name="mkr_highway_086";
 							type="Empty";
-							angle=262.40921;
+							angle=262.40912;
 							id=4927;
 							class CustomAttributes
 							{
@@ -119370,7 +119397,7 @@ class Mission
 							position[]={1139.8243,4.4299998,1327.0964};
 							name="mkr_highway_088";
 							type="Empty";
-							angle=300.66171;
+							angle=300.66159;
 							id=4929;
 							class CustomAttributes
 							{
@@ -120031,7 +120058,7 @@ class Mission
 							position[]={5193.1479,4.1400003,5250.2642};
 							name="mkr_highway_098";
 							type="Empty";
-							angle=321.71219;
+							angle=321.7121;
 							id=4939;
 							atlOffset=4.7683716e-07;
 							class CustomAttributes
@@ -120164,7 +120191,7 @@ class Mission
 							position[]={5163.2388,4.1400003,4922.9521};
 							name="mkr_highway_100";
 							type="Empty";
-							angle=225.56702;
+							angle=225.56677;
 							id=4941;
 							atlOffset=4.7683716e-07;
 							class CustomAttributes
@@ -120231,7 +120258,7 @@ class Mission
 							position[]={4852.3799,4.1399999,4671.8169};
 							name="mkr_highway_101";
 							type="Empty";
-							angle=56.23074;
+							angle=56.230679;
 							id=4942;
 							class CustomAttributes
 							{
@@ -120297,7 +120324,7 @@ class Mission
 							position[]={4840.6987,4.1400003,4687.1567};
 							name="mkr_highway_102";
 							type="Empty";
-							angle=235.52797;
+							angle=235.52789;
 							id=4943;
 							atlOffset=4.7683716e-07;
 							class CustomAttributes
@@ -120364,7 +120391,7 @@ class Mission
 							position[]={5446.7422,8.9776678,2669.4719};
 							name="mkr_highway_103";
 							type="Empty";
-							angle=91.561913;
+							angle=91.561867;
 							id=4944;
 							class CustomAttributes
 							{
@@ -120430,7 +120457,7 @@ class Mission
 							position[]={5446.0835,8.9801903,2688.7417};
 							name="mkr_highway_104";
 							type="Empty";
-							angle=270.85913;
+							angle=270.8591;
 							id=4945;
 							atlOffset=9.5367432e-07;
 							class CustomAttributes
@@ -120497,7 +120524,7 @@ class Mission
 							position[]={4749.6982,9.0524874,2668.5322};
 							name="mkr_highway_105";
 							type="Empty";
-							angle=91.561905;
+							angle=91.561867;
 							id=4946;
 							class CustomAttributes
 							{
@@ -120626,7 +120653,7 @@ class Mission
 						};
 					};
 					id=4841;
-					atlOffset=0.37665653;
+					atlOffset=35;
 				};
 			};
 			id=4725;
