@@ -11,6 +11,21 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-15 — CIVSUB cap enforcement runtime-safe evictable-key builder (Mode A)
+
+**Branch/Commit:** copilot/fix-civsub-caps-enforcement-error @ fdd9f08
+
+**Scenario:** Replaced CIVSUB cap enforcement `_keysEvictable` `select {}` filter with an explicit `forEach`/`pushBack` builder and added an unreachable defensive type guard to prevent hard runtime type errors when counting evictable keys.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline targeted compat scan + sqflint | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubCivCapsEnforce.sqf && sqflint -e w functions/civsub/fn_civsubCivCapsEnforce.sqf` | BLOCKED | Compat scan passed; `sqflint` is unavailable in this sandbox (`sqflint: command not found`). |
+| 2 | Changed-file compat scan + sqflint + whitespace check | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubCivCapsEnforce.sqf && sqflint -e w functions/civsub/fn_civsubCivCapsEnforce.sqf ; git --no-pager diff --check` | BLOCKED | Compat scan passed and whitespace check was clean; `sqflint` remains unavailable in this sandbox. |
+| 3 | Runtime smoke: CIVSUB civilian cap enforcement | Local MP or dedicated-like Arma 3 session with cap pressure and protected civilians present | BLOCKED | Arma 3 runtime is unavailable in this sandbox. |
+| 4 | Dedicated/JIP validation | Dedicated server with at least one JIP client; verify authoritative server-owned despawn queue behavior | BLOCKED | Dedicated server + JIP validation environment unavailable in this sandbox. |
+
+---
+
 ## 2026-05-15 — Threat economy district-posture coupling (Mode B)
 
 **Branch/Commit:** copilot/strengthen-threat-economy @ 4c5e2be

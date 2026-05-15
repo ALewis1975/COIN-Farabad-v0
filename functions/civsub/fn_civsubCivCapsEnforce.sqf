@@ -44,12 +44,25 @@ if !(_q isEqualType []) then { _q = []; };
 private _keys = [_reg] call _keysFn;
 
 // Only evict non-protected civilians (detained/captive/pinned civilians must persist)
-private _keysEvictable = _keys select {
+private _keysEvictable = [];
+{
     private _row = [_reg, _x, createHashMap] call _hg;
-    if !(_row isEqualType createHashMap) exitWith {false};
-    private _u = [_row, "unit", objNull] call _hg;
-    if (isNull _u) exitWith {false};
-    !([_u] call ARC_fnc_civsubCivIsProtected)
+    if (_row isEqualType createHashMap) then {
+        private _u = [_row, "unit", objNull] call _hg;
+        if (!isNull _u) then {
+            if (!([_u] call ARC_fnc_civsubCivIsProtected)) then {
+                _keysEvictable pushBack _x;
+            };
+        };
+    };
+} forEach _keys;
+
+if (!(_keysEvictable isEqualType [])) exitWith {
+    diag_log format [
+        "[CIVSUB][WARN] ARC_fnc_civsubCivCapsEnforce: _keysEvictable type invalid value=%1",
+        _keysEvictable
+    ];
+    false
 };
 
 
