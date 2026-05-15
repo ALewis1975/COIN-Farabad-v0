@@ -32,8 +32,17 @@ private _setsRepair = [
     if (isNull _u) then { continue; };
     if (!alive _u) then { continue; };
 
-    // Ensure the unit is on-foot (ambient anim won't play in-vehicle).
-    if (vehicle _u != _u) then { moveOut _u; };
+    // Ensure the unit is on-foot (ambient anim won't play in-vehicle). Never
+    // eject airborne aircrew; a late abort/re-idle path should fail safe instead.
+    if (vehicle _u != _u) then {
+        private _veh = vehicle _u;
+        private _vehAlt = (getPosATL _veh) select 2;
+        if ((_veh isKindOf "Air") && { _vehAlt > 1.5 || { (speed _veh) > 5 } }) then {
+            diag_log format ["[AIRBASESUB][WARN] ARC_fnc_airbaseCrewIdleStart: skipped airborne in-vehicle crew unit=%1 vehicle=%2 alt=%3 speed=%4", _u, _veh, _vehAlt, speed _veh];
+            continue;
+        };
+        moveOut _u;
+    };
 
     doStop _u;
 

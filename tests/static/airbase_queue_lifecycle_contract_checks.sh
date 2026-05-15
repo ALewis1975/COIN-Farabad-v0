@@ -46,6 +46,23 @@ check_cfg() {
     fi
 }
 
+check_order() {
+    local first="$1"
+    local second="$2"
+    local file="$3"
+    local label="$4"
+    local first_line
+    local second_line
+    first_line="$(grep -nE "$first" "$file" | head -n1 | cut -d: -f1 || true)"
+    second_line="$(grep -nE "$second" "$file" | head -n1 | cut -d: -f1 || true)"
+    if [[ -n "$first_line" && -n "$second_line" && "$first_line" -lt "$second_line" ]]; then
+        echo "[PASS] $label"
+    else
+        echo "[FAIL] $label"
+        pass=false
+    fi
+}
+
 # ── 1. Runway lock helpers: file existence + CfgFunctions registration ─────────
 
 echo "=== 1. Runway lock helpers ==="
@@ -144,6 +161,14 @@ check '"activeFlight",\s*""' \
 check '"availableAt"' \
     "functions/ambiance/fn_airbaseTick.sqf" \
     "airbaseTick: sets availableAt cooldown on failed RETURN asset"
+
+check_order 'airbase_v1_plane_despawn_marker' 'ARC_fnc_airbaseCrewIdleStop' \
+    "functions/ambiance/fn_airbasePlaneDepart.sqf" \
+    "airbasePlaneDepart: validates despawn marker before crew leaves idle"
+
+check 'skipped airborne in-vehicle crew' \
+    "functions/ambiance/fn_airbaseCrewIdleStart.sqf" \
+    "airbaseCrewIdleStart: refuses to ambient-idle airborne in-vehicle crew"
 
 # ── 4. Public UI snapshot expected top-level fields ───────────────────────────
 
