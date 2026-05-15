@@ -69,6 +69,7 @@ class CfgFunctions
             class rolesIsTocCommand {};
             class rolesCanApproveQueue {};
             class rolesCanUseMobileOps {};
+            class rolesCanRecruitAI {};
             class rpcValidateSender {};
             class airbaseTowerAuthorize {};
 
@@ -651,6 +652,9 @@ class CfgFunctions
             class convoyNearRouteIdx {};      // nearest index in route pts to a position
             class convoyNormalizeGroups {};   // merge convoy vehicle crews into lead group
             class convoyNearestRoad {};       // nearest connected road with optional zone avoidance
+            class recruitClientInit {};
+            class recruitClientAddActions {};
+            class recruitSpawnRequest {};
         };
 
         // Reserved layers (future expansion)

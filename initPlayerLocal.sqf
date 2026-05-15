@@ -65,6 +65,7 @@ else
 [] call ARC_fnc_intelInit;
 [] call ARC_fnc_briefingInitClient;
 [] call ARC_fnc_tocInitPlayer;
+[] call ARC_fnc_recruitClientInit;
 
 // Farabad Console (tablet UI) - keybind + client init
 [] call ARC_fnc_uiConsoleInitClient;
@@ -329,6 +330,7 @@ if (
             if (_now >= _nextTocAt) then
             {
                 if (!isNil "ARC_fnc_tocInitPlayer") then { [] call ARC_fnc_tocInitPlayer; };
+                if (!isNil "ARC_fnc_recruitClientInit") then { [] call ARC_fnc_recruitClientInit; };
 
                 if (_tocFastRetriesLeft > 0) then
                 {
