@@ -11,6 +11,22 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-15 — Recruit container Object Init activation (Mode A)
+
+**Branch/Commit:** copilot/implement-object-init-recruitment @ 6fd9f1c (working tree validated in-session)
+
+**Scenario:** Replaced recruitment container coordinate/radius whitelisting with per-object Object Init opt-in via `ARC_isRecruitContainer`, preserving existing server-side recruitment security/role/range/unit checks.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline recruitment contract + lint preflight | `bash tests/static/recruitment_container_contract_checks.sh && python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf functions/logistics/fn_recruitClientInit.sqf functions/logistics/fn_recruitSpawnRequest.sqf` | PASS | Baseline recruitment static contract and compat scan passed before edits. |
+| 2 | Baseline sqflint | `sqflint -e w initServer.sqf && sqflint -e w functions/logistics/fn_recruitClientInit.sqf && sqflint -e w functions/logistics/fn_recruitSpawnRequest.sqf` | PASS | Installed `sqflint==0.3.2` in the sandbox user environment; sqflint requires one-file-per-invocation. |
+| 3 | Post-change recruitment contract + compat + sqflint | `bash tests/static/recruitment_container_contract_checks.sh && python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf functions/logistics/fn_recruitClientInit.sqf functions/logistics/fn_recruitSpawnRequest.sqf && sqflint -e w initServer.sqf && sqflint -e w functions/logistics/fn_recruitClientInit.sqf && sqflint -e w functions/logistics/fn_recruitSpawnRequest.sqf` | PASS | Contract checks now assert `ARC_isRecruitContainer` gates and absence of coordinate/radius filtering in active recruitment flow. |
+| 4 | Runtime smoke: recruitment actions and spawn gates | Hosted/local MP session: verify non-opt-in Huron has no recruit actions, opt-in Huron has actions, and role/range/whitelist constraints still apply | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 5 | Dedicated/JIP validation | Dedicated server with at least one JIP client: verify replicated Object Init opt-in state and server authoritative acceptance/rejection behavior | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+
+---
+
 ## 2026-05-15 — QA diagnostic sweep for recent changes (Mode G)
 
 **Branch/Commit:** copilot/qa-diagnostic-check-recent-changes @ 1c2c804

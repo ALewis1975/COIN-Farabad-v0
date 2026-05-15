@@ -126,14 +126,14 @@ missionNamespace setVariable ["ARC_rtbAceInteractionsEnabled", true, true];
 missionNamespace setVariable ["ARC_sitrepInWorldActionsEnabled", true, false];
 
 // Command-gated AI recruitment from Huron Cargo Containers.
-// Clients only render actions; the server validates role, sender, container and class whitelist.
+// Clients only render actions; the server validates role, sender, class whitelist,
+// Object Init opt-in, and range.
+// To enable a specific container as a recruiter, use this exact Eden Object Init:
+// if (isServer) then {
+//     this setVariable ["ARC_isRecruitContainer", true, true];
+// };
 missionNamespace setVariable ["ARC_recruitContainerEnabled", true, true];
 missionNamespace setVariable ["ARC_recruitContainerClasses", ["B_Slingload_01_Cargo_F"], true];
-missionNamespace setVariable ["ARC_recruitContainerPositions", [
-    [6595.5903, 3200.8215, 0],
-    [6204.75, 1603.5, 0]
-], true];
-missionNamespace setVariable ["ARC_recruitContainerPositionRadiusM", 18, true];
 missionNamespace setVariable ["ARC_recruitActionRangeM", 6, true];
 missionNamespace setVariable ["ARC_recruitGroupMaxUnits", 12, true];
 missionNamespace setVariable ["ARC_recruitRequireSameFaction", true, true];
@@ -953,8 +953,6 @@ private _arcDeclaredServerToggles = [
     "ARC_sitrepInWorldActionsEnabled",
     "ARC_recruitContainerEnabled",
     "ARC_recruitContainerClasses",
-    "ARC_recruitContainerPositions",
-    "ARC_recruitContainerPositionRadiusM",
     "ARC_recruitActionRangeM",
     "ARC_recruitGroupMaxUnits",
     "ARC_recruitRequireSameFaction",
@@ -990,8 +988,6 @@ private _arcKnownToggleConsumers = [
     ["ARC_sitrepInWorldActionsEnabled", "functions/core/fn_tocInitPlayer.sqf"],
     ["ARC_recruitContainerEnabled", "functions/logistics/fn_recruitClientInit.sqf + functions/logistics/fn_recruitSpawnRequest.sqf"],
     ["ARC_recruitContainerClasses", "functions/logistics/fn_recruitClientInit.sqf + functions/logistics/fn_recruitSpawnRequest.sqf"],
-    ["ARC_recruitContainerPositions", "functions/logistics/fn_recruitClientInit.sqf + functions/logistics/fn_recruitSpawnRequest.sqf"],
-    ["ARC_recruitContainerPositionRadiusM", "functions/logistics/fn_recruitClientInit.sqf + functions/logistics/fn_recruitSpawnRequest.sqf"],
     ["ARC_recruitActionRangeM", "functions/logistics/fn_recruitClientAddActions.sqf + functions/logistics/fn_recruitSpawnRequest.sqf"],
     ["ARC_recruitGroupMaxUnits", "functions/logistics/fn_recruitSpawnRequest.sqf"],
     ["ARC_recruitRequireSameFaction", "functions/logistics/fn_recruitSpawnRequest.sqf"],
