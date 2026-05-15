@@ -11,6 +11,21 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+
+## 2026-05-15 — Recruitment container JIP addAction replay (Mode A)
+
+**Branch/Commit:** copilot/fix-ai-recruitment-spawner @ 822ce7a (working tree validated in-session)
+
+**Scenario:** Added server-authoritative object-bound JIP replay for `ARC_fnc_recruitClientAddActions` so opt-in Huron Cargo Container recruitment actions are pushed to clients instead of relying only on client polling of replicated object variables/netIds.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline recruitment validation | `bash tests/static/recruitment_container_contract_checks.sh && python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf initPlayerLocal.sqf functions/core/fn_rolesCanRecruitAI.sqf functions/core/fn_rolesHasGroupIdToken.sqf functions/core/fn_rolesIsTocCommand.sqf functions/logistics/fn_recruitClientInit.sqf functions/logistics/fn_recruitClientAddActions.sqf functions/logistics/fn_recruitServerPublishContainers.sqf functions/logistics/fn_recruitSpawnRequest.sqf && sqflint -e w ...` | FAIL | Contract passed, but the baseline compat scan reported pre-existing `trim`/`isNotEqualTo` compatibility warnings in `functions/core/fn_rolesHasGroupIdToken.sqf`; no edits were made to that file. |
+| 2 | Targeted static validation | `git diff --check HEAD~1..HEAD && bash tests/static/recruitment_container_contract_checks.sh && python3 scripts/dev/sqflint_compat_scan.py --strict functions/logistics/fn_recruitClientAddActions.sqf functions/logistics/fn_recruitServerPublishContainers.sqf && sqflint -e w functions/logistics/fn_recruitClientAddActions.sqf && sqflint -e w functions/logistics/fn_recruitServerPublishContainers.sqf && bash scripts/dev/check_remoteexec_contract.sh` | PASS | Installed `sqflint==0.3.2` in the sandbox because it was not preinstalled; recruitment contract, compat scan, lint, and RemoteExec checks passed. |
+| 3 | Runtime smoke: recruitment addAction near opt-in Huron Cargo Container | Hosted/local MP with required mods as Battalion CO: verify the server publishes the opt-in container and clients receive `[Recruit]` addActions within configured range. | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 4 | Dedicated/JIP validation | Dedicated server with a late-joining client: verify object-bound JIP replay attaches recruitment actions and server-side spawn gates still enforce role/range/class checks. | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+
+---
 ## 2026-05-15 — Recruitment container netId replay (Mode A)
 
 **Branch/Commit:** copilot/fix-recruitment-addaction @ a895c9a (working tree validated in-session)

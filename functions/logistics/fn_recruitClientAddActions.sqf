@@ -11,6 +11,13 @@
 */
 
 if (!hasInterface) exitWith {false};
+private _remoteOwner = -1;
+if (!isNil "remoteExecutedOwner") then { _remoteOwner = remoteExecutedOwner; };
+if (_remoteOwner > 0 && { _remoteOwner != 2 }) exitWith
+{
+    diag_log format ["[ARC][SEC][RECRUIT] ARC_fnc_recruitClientAddActions: denied non-server remoteExec sender=%1", _remoteOwner];
+    false
+};
 
 params [
     ["_container", objNull, [objNull]]
