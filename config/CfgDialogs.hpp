@@ -1631,6 +1631,115 @@ class ARC_CivsubInteractDialog
     };
 };
 
+class ARC_RecruitDialog
+{
+    idd = 78400;
+    movingEnable = 0;
+    enableSimulation = 1;
+
+    onLoad = "uiNamespace setVariable ['ARC_recruitDialog_display', _this select 0]; [_this select 0] call ARC_fnc_recruitDialogOnLoad;";
+    onUnload = "uiNamespace setVariable ['ARC_recruitDialog_display', displayNull];";
+
+    class controlsBackground
+    {
+        class BG: RscText
+        {
+            idc = 78490;
+            x = 0.26;
+            y = 0.18;
+            w = 0.48;
+            h = 0.58;
+            colorBackground[] = {0,0,0,0.85};
+        };
+
+        class TitleBar: RscText
+        {
+            idc = 78491;
+            text = "RECRUIT AI";
+            x = 0.26;
+            y = 0.18;
+            w = 0.48;
+            h = 0.04;
+            colorBackground[] = {0.05,0.05,0.05,0.92};
+        };
+    };
+
+    class controls
+    {
+        class Header: RscStructuredText
+        {
+            idc = 78411;
+            x = 0.27;
+            y = 0.235;
+            w = 0.46;
+            h = 0.07;
+            colorBackground[] = {0.05,0.05,0.05,0.65};
+        };
+
+        class UnitList: RscListbox
+        {
+            idc = 78410;
+            x = 0.27;
+            y = 0.32;
+            w = 0.46;
+            h = 0.27;
+            rowHeight = 0.035;
+            sizeEx = 0.035;
+        };
+
+        class QtyLabel: RscText
+        {
+            idc = 78419;
+            text = "Quantity";
+            x = 0.27;
+            y = 0.605;
+            w = 0.12;
+            h = 0.035;
+        };
+
+        class Quantity: RscCombo
+        {
+            idc = 78420;
+            x = 0.39;
+            y = 0.605;
+            w = 0.10;
+            h = 0.035;
+        };
+
+        class Status: RscStructuredText
+        {
+            idc = 78412;
+            x = 0.27;
+            y = 0.65;
+            w = 0.46;
+            h = 0.045;
+            colorBackground[] = {0.05,0.05,0.05,0.65};
+        };
+
+        class BtnRecruit: RscButton
+        {
+            idc = 78430;
+            text = "Recruit";
+            x = 0.27;
+            y = 0.705;
+            w = 0.22;
+            h = 0.04;
+            action = "[] call ARC_fnc_recruitDialogRecruitSelected;";
+        };
+
+        class BtnClose: RscButton
+        {
+            idc = 78431;
+            text = "Close";
+            x = 0.51;
+            y = 0.705;
+            w = 0.22;
+            h = 0.04;
+            action = "closeDialog 0;";
+        };
+    };
+};
+
 
         
         // --- ID CARD OVERLAY (shown when Check ID succeeds) --------------------

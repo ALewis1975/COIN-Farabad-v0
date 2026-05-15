@@ -1,13 +1,14 @@
 /*
     ARC_fnc_recruitSpawnRequest
 
-    Server: validate a player recruitment request and spawn one whitelisted,
-    same-faction AI unit into the player's group.
+    Server: validate a player recruitment request and spawn same-faction
+    infantry AI into the player's group.
 
     Params:
       0: OBJECT caller
-      1: OBJECT container
+      1: OBJECT recruitment object
       2: STRING unit classname
+      3: NUMBER count
 
     Returns:
       BOOL
@@ -18,7 +19,8 @@ if (!isServer) exitWith {false};
 params [
     ["_caller", objNull, [objNull]],
     ["_container", objNull, [objNull]],
-    ["_unitClass", "", [""]]
+    ["_unitClass", "", [""]],
+    ["_count", 1, [0]]
 ];
 
 private _owner = -1;
@@ -30,81 +32,25 @@ if (!(missionNamespace getVariable ["ARC_recruitContainerEnabled", true])) exitW
 if (isNull _caller || { isNull _container }) exitWith {false};
 if !(isPlayer _caller) exitWith {false};
 
-if (!([_caller] call ARC_fnc_rolesCanRecruitAI)) exitWith
-{
-    diag_log format ["[ARC][SEC] ARC_fnc_recruitSpawnRequest: role denied caller=%1 uid=%2", name _caller, getPlayerUID _caller];
-    if (_owner > 0) then { ["Recruitment", "Recruitment is restricted to Battalion/Company command."] remoteExec ["ARC_fnc_clientToast", _owner]; };
-    false
-};
-
-private _classes = missionNamespace getVariable ["ARC_recruitContainerClasses", ["B_Slingload_01_Cargo_F"]];
-if (!(_classes isEqualType [])) then { _classes = ["B_Slingload_01_Cargo_F"]; };
-if (!((typeOf _container) in _classes)) exitWith
-{
-    diag_log format ["[ARC][SEC] ARC_fnc_recruitSpawnRequest: invalid container type=%1 caller=%2", typeOf _container, name _caller];
-    false
-};
-
 if (!(_container getVariable ["ARC_isRecruitContainer", false])) exitWith
 {
-    diag_log format ["[ARC][SEC] ARC_fnc_recruitSpawnRequest: unregistered recruitment container netId=%1 type=%2 caller=%3", netId _container, typeOf _container, name _caller];
+    diag_log format ["[ARC][SEC] ARC_fnc_recruitSpawnRequest: unregistered recruitment object netId=%1 type=%2 caller=%3", netId _container, typeOf _container, name _caller];
     false
 };
 
-private _range = missionNamespace getVariable ["ARC_recruitActionRangeM", 6];
-if (!(_range isEqualType 0)) then { _range = 6; };
-_range = (_range max 2) min 15;
-if ((_caller distance2D _container) > (_range + 1)) exitWith
-{
-    if (_owner > 0) then { ["Recruitment", "Move closer to the recruitment container."] remoteExec ["ARC_fnc_clientToast", _owner]; };
-    false
-};
-
-private _whitelist = missionNamespace getVariable ["ARC_recruitUnitWhitelist", []];
-if (!(_whitelist isEqualType [])) then { _whitelist = []; };
-
-private _allowed = false;
-private _label = _unitClass;
-{
-    private _class = "";
-    private _display = "";
-
-    if (_x isEqualType "") then
-    {
-        _class = _x;
-    }
-    else
-    {
-        if (_x isEqualType [] && { (count _x) >= 1 }) then
-        {
-            private _c0 = _x select 0;
-            if (_c0 isEqualType "") then { _class = _c0; };
-            if ((count _x) >= 2) then
-            {
-                private _c1 = _x select 1;
-                if (_c1 isEqualType "") then { _display = _c1; };
-            };
-        };
-    };
-
-    if (_class isEqualTo _unitClass) exitWith
-    {
-        _allowed = true;
-        if (!(_display isEqualTo "")) then { _label = _display; };
-    };
-} forEach _whitelist;
-
-if (!_allowed) exitWith
-{
-    diag_log format ["[ARC][SEC] ARC_fnc_recruitSpawnRequest: class not whitelisted class=%1 caller=%2", _unitClass, name _caller];
-    if (_owner > 0) then { ["Recruitment", "Requested unit type is not whitelisted."] remoteExec ["ARC_fnc_clientToast", _owner]; };
-    false
-};
+_count = floor _count;
+if (_count < 1) then { _count = 1; };
+if (_count > 12) then { _count = 12; };
 
 private _cfg = configFile >> "CfgVehicles" >> _unitClass;
-if (!isClass _cfg || { !(_unitClass isKindOf "Man") }) exitWith
+if (!isClass _cfg || { !(_unitClass isKindOf "CAManBase") }) exitWith
 {
     diag_log format ["[ARC][WARN] ARC_fnc_recruitSpawnRequest: invalid unit class=%1", _unitClass];
+    false
+};
+if ((getNumber (_cfg >> "scope")) < 2) exitWith
+{
+    diag_log format ["[ARC][SEC] ARC_fnc_recruitSpawnRequest: non-public unit class=%1 caller=%2", _unitClass, name _caller];
     false
 };
 
@@ -125,16 +71,9 @@ if ((getNumber (_cfg >> "side")) != _sideNum) exitWith
     false
 };
 
-private _requireSameFaction = missionNamespace getVariable ["ARC_recruitRequireSameFaction", true];
-if (!(_requireSameFaction isEqualType true) && !(_requireSameFaction isEqualType false)) then { _requireSameFaction = true; };
-private _factionOk = true;
 private _callerFaction = faction _caller;
 private _unitFaction = getText (_cfg >> "faction");
-if (_requireSameFaction) then
-{
-    _factionOk = _unitFaction isEqualTo _callerFaction;
-};
-if (!_factionOk) exitWith
+if (!(_unitFaction isEqualTo _callerFaction)) exitWith
 {
     diag_log format ["[ARC][SEC] ARC_fnc_recruitSpawnRequest: faction mismatch class=%1 unitFaction=%2 callerFaction=%3", _unitClass, _unitFaction, _callerFaction];
     if (_owner > 0) then { ["Recruitment", "Requested unit type is not from your faction."] remoteExec ["ARC_fnc_clientToast", _owner]; };
@@ -143,46 +82,61 @@ if (!_factionOk) exitWith
 
 private _maxGroupUnits = missionNamespace getVariable ["ARC_recruitGroupMaxUnits", 12];
 if (!(_maxGroupUnits isEqualType 0)) then { _maxGroupUnits = 12; };
-_maxGroupUnits = (_maxGroupUnits max 2) min 24;
+_maxGroupUnits = (_maxGroupUnits max 1) min 24;
 
-private _groupUnits = units _callerGroup;
-if ((count _groupUnits) >= _maxGroupUnits) exitWith
+private _currentRecruits = 0;
 {
-    if (_owner > 0) then { ["Recruitment", format ["Group is already at the recruitment cap (%1).", _maxGroupUnits]] remoteExec ["ARC_fnc_clientToast", _owner]; };
+    if (alive _x && { _x getVariable ["ARC_recruitedAI", false] }) then
+    {
+        _currentRecruits = _currentRecruits + 1;
+    };
+} forEach (units _callerGroup);
+
+private _remaining = _maxGroupUnits - _currentRecruits;
+if (_remaining <= 0) exitWith
+{
+    if (_owner > 0) then { ["Recruitment", format ["Recruitment cap reached (%1 AI).", _maxGroupUnits]] remoteExec ["ARC_fnc_clientToast", _owner]; };
     false
 };
-
-private _spawnPos = (getPosATL _container) getPos [4 + random 2, random 360];
-_spawnPos resize 3;
-_spawnPos set [2, 0];
+private _spawnCount = _count min _remaining;
 
 private _spawnGroup = createGroup [_side, true];
-private _unit = _spawnGroup createUnit [_unitClass, _spawnPos, [], 0, "NONE"];
-if (isNull _unit) exitWith
+private _spawned = [];
+for "_i" from 1 to _spawnCount do
 {
-    deleteGroup _spawnGroup;
-    diag_log format ["[ARC][WARN] ARC_fnc_recruitSpawnRequest: createUnit failed class=%1", _unitClass];
+    private _spawnPos = (getPosATL _container) getPos [4 + random 2, random 360];
+    _spawnPos resize 3;
+    _spawnPos set [2, 0];
+
+    private _unit = _spawnGroup createUnit [_unitClass, _spawnPos, [], 0, "NONE"];
+    if (isNull _unit) then
+    {
+        diag_log format ["[ARC][WARN] ARC_fnc_recruitSpawnRequest: createUnit failed class=%1", _unitClass];
+        continue;
+    };
+
+    _unit setPosATL _spawnPos;
+    [_unit] joinSilent _callerGroup;
+
+    _unit setVariable ["ARC_recruitedAI", true, true];
+    _unit setVariable ["ARC_recruitedByUid", getPlayerUID _caller, true];
+    _unit setVariable ["ARC_recruitedByName", name _caller, true];
+    _unit setVariable ["ARC_recruitContainerNetId", netId _container, true];
+    _unit setVariable ["ARC_recruitSpawnedAt", serverTime, true];
+    _spawned pushBack _unit;
+};
+deleteGroup _spawnGroup;
+
+if ((count _spawned) <= 0) exitWith
+{
     if (_owner > 0) then { ["Recruitment", "Unable to spawn that unit type."] remoteExec ["ARC_fnc_clientToast", _owner]; };
     false
 };
 
-_unit setPosATL _spawnPos;
-[_unit] joinSilent _callerGroup;
-deleteGroup _spawnGroup;
+private _label = getText (_cfg >> "displayName");
+if (_label isEqualTo "") then { _label = _unitClass; };
 
-_unit setVariable ["ARC_recruitedAI", true, true];
-_unit setVariable ["ARC_recruitedByUid", getPlayerUID _caller, true];
-_unit setVariable ["ARC_recruitedByName", name _caller, true];
-_unit setVariable ["ARC_recruitContainerNetId", netId _container, true];
-_unit setVariable ["ARC_recruitSpawnedAt", serverTime, true];
-
-if (_label isEqualTo _unitClass) then
-{
-    private _displayName = getText (_cfg >> "displayName");
-    if (!(_displayName isEqualTo "")) then { _label = _displayName; };
-};
-
-diag_log format ["[ARC][INFO] ARC_fnc_recruitSpawnRequest: spawned class=%1 caller=%2 group=%3", _unitClass, name _caller, groupId _callerGroup];
-if (_owner > 0) then { ["Recruitment", format ["%1 joined your group.", _label]] remoteExec ["ARC_fnc_clientToast", _owner]; };
+diag_log format ["[ARC][INFO] ARC_fnc_recruitSpawnRequest: spawned count=%1 class=%2 caller=%3 group=%4", count _spawned, _unitClass, name _caller, groupId _callerGroup];
+if (_owner > 0) then { ["Recruitment", format ["%1 x %2 joined your group.", count _spawned, _label]] remoteExec ["ARC_fnc_clientToast", _owner]; };
 
 true

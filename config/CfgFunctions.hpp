@@ -651,6 +651,9 @@ class CfgFunctions
             class convoyNearestRoad {};       // nearest connected road with optional zone avoidance
             class recruitClientInit {};
             class recruitClientAddActions {};
+            class recruitDialogOpen {};
+            class recruitDialogOnLoad {};
+            class recruitDialogRecruitSelected {};
             class recruitServerPublishContainers {};
             class recruitSpawnRequest {};
         };
