@@ -317,6 +317,158 @@ private _threatSection = [
 ];
 
 // ---------------------------------------------------------------------------
+// Section: medical — ACE/KAT/CASEVAC command snapshot (server-owned)
+// ---------------------------------------------------------------------------
+private _medicalSnapshot = [];
+if (!isNil "ARC_fnc_medicalSnapshot") then
+{
+    _medicalSnapshot = [] call ARC_fnc_medicalSnapshot;
+};
+if (!(_medicalSnapshot isEqualType [])) then { _medicalSnapshot = []; };
+
+private _casevacLastId = missionNamespace getVariable ["ARC_casevacLeadLastId", ""];
+if (!(_casevacLastId isEqualType "")) then { _casevacLastId = ""; };
+
+private _casevacLastAt = missionNamespace getVariable ["ARC_casevacLeadLastTs", -1];
+if (!(_casevacLastAt isEqualType 0)) then { _casevacLastAt = -1; };
+
+private _casevacCooldownS = missionNamespace getVariable ["ARC_casevacLeadCooldownS", 180];
+if (!(_casevacCooldownS isEqualType 0)) then { _casevacCooldownS = 180; };
+_casevacCooldownS = (_casevacCooldownS max 30) min 600;
+private _casevacCooldownRemaining = 0;
+if (_casevacLastAt > 0) then
+{
+    _casevacCooldownRemaining = (_casevacCooldownS - (_now - _casevacLastAt)) max 0;
+};
+
+private _activeCasevac = [];
+{
+    if (!(_x isEqualType []) || { (count _x) < 11 }) then { continue; };
+    private _leadType = _x select 1;
+    private _tag = _x select 10;
+    if (!(_leadType isEqualType "")) then { _leadType = ""; };
+    if (!(_tag isEqualType "")) then { _tag = ""; };
+    if ((toUpper _leadType) isEqualTo "QRF" && { (toUpper _tag) isEqualTo "CASEVAC" }) then
+    {
+        _activeCasevac pushBack _x;
+    };
+} forEach _leadPool;
+
+private _recentMedicalEvents = [];
+{
+    if (!(_x isEqualType []) || { (count _x) < 6 }) then { continue; };
+    private _cat = _x select 2;
+    if (!(_cat isEqualType "")) then { _cat = ""; };
+    private _meta = _x select 5;
+    if (!(_meta isEqualType [])) then { _meta = []; };
+    private _event = "";
+    {
+        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo "event" }) exitWith
+        {
+            if ((_x select 1) isEqualType "") then { _event = _x select 1; };
+        };
+    } forEach _meta;
+    if ((toUpper _cat) isEqualTo "MED" || { (toUpper _event) isEqualTo "CASEVAC_REQUEST" }) then
+    {
+        _recentMedicalEvents pushBack _x;
+    };
+} forEach _intelLog;
+if ((count _recentMedicalEvents) > 5) then
+{
+    _recentMedicalEvents = _recentMedicalEvents select [((count _recentMedicalEvents) - 5) max 0, 5];
+};
+
+private _medicalData = [
+    ["snapshot", _medicalSnapshot],
+    ["active_casevac", _activeCasevac],
+    ["casevac_last_id", _casevacLastId],
+    ["casevac_last_at", _casevacLastAt],
+    ["casevac_cooldown_remaining", _casevacCooldownRemaining],
+    ["recent_events", _recentMedicalEvents]
+];
+
+private _medicalSection = [
+    ["data",      _medicalData],
+    ["freshness", [["updatedAt", if (_casevacLastAt > 0) then { _casevacLastAt } else { _now }], ["staleAfterS", 30]]]
+];
+
+// ---------------------------------------------------------------------------
+// Section: comms — ACRE/SOI read-only command-and-signal reference
+// ---------------------------------------------------------------------------
+private _commandNets = missionNamespace getVariable ["ARC_commsCommandNets", [
+    ["001", "BCT CMD", "FALCON"],
+    ["002", "TF CMD", "REDFALCON"],
+    ["003", "BN CMD", "2-325 AIR"],
+    ["008", "CAV SQDN CMD", "THUNDER"],
+    ["041", "FIRES CMD", "BLACKFALCON"],
+    ["043", "ISR UAS OPS", "SHADOW"],
+    ["050", "AVIATION CMD", "PEGASUS"],
+    ["052", "MEDEVAC AIR", "DUSTOFF"],
+    ["060", "MP CMD", "SHERIFF"],
+    ["070", "BSB CMD", "GRIFFIN"],
+    ["084", "FARABAD TOWER", "TOWER"],
+    ["085", "FARABAD GROUND", "GROUND"]
+]];
+if (!(_commandNets isEqualType [])) then { _commandNets = []; };
+
+private _prc152 = missionNamespace getVariable ["ARC_commsPrc152Plan", [
+    "Charlie: 010 1PLT | 011 2PLT | 012 3PLT",
+    "Bravo: 020 1PLT | 021 2PLT | 022 3PLT",
+    "Alpha: 030 1PLT | 031 2PLT | 032 3PLT",
+    "WPN: 040 2-325 TAC",
+    "THUNDER: 050/051/052 A/B/C TAC",
+    "SHERIFF: 060 TAC",
+    "GRIFFIN: 070 CONVOY TAC",
+    "SENTRY: 080 TAC"
+]];
+if (!(_prc152 isEqualType [])) then { _prc152 = []; };
+
+private _prc343 = missionNamespace getVariable ["ARC_commsPrc343Buckets", [
+    "1 C 1PLT | 2 C 2PLT | 3 C 3PLT",
+    "4 B 1PLT | 5 B 2PLT | 6 B 3PLT",
+    "7 A 1PLT | 8 A 2PLT | 9 A 3PLT",
+    "10 WPN | 11 THUNDER A | 12 THUNDER B | 13 THUNDER C",
+    "14 SHERIFF MP | 15 GRIFFIN convoys | 16 SENTRY SECFO"
+]];
+if (!(_prc343 isEqualType [])) then { _prc343 = []; };
+
+private _commsData = [
+    ["acre_required", isClass (configFile >> "CfgPatches" >> "acre_main")],
+    ["command_nets", _commandNets],
+    ["prc152_plan", _prc152],
+    ["prc343_buckets", _prc343],
+    ["radio_crates", ["ACRE_RadioSupplyCrate"]],
+    ["role_hint", "Soft guidance only: use ACRE nets to support TOC workflow; mission state remains server-owned."]
+];
+
+private _commsSection = [
+    ["data",      _commsData],
+    ["freshness", [["updatedAt", _now], ["staleAfterS", 300]]]
+];
+
+// ---------------------------------------------------------------------------
+// Section: cTab — device/marker interoperability hints, not authoritative state
+// ---------------------------------------------------------------------------
+private _casevacMarker = missionNamespace getVariable ["ARC_casevacLatestMarker", ""];
+if (!(_casevacMarker isEqualType "")) then { _casevacMarker = ""; };
+
+private _activeTaskMarker = missionNamespace getVariable ["ARC_activeIncidentMarker", ""];
+if (!(_activeTaskMarker isEqualType "")) then { _activeTaskMarker = ""; };
+
+private _ctabData = [
+    ["required_items", missionNamespace getVariable ["ARC_consoleRequiredItems", ["ItemcTab", "ItemAndroid", "ItemcTabHCam", "ItemMicroDAGR", "ACE_DAGR"]]],
+    ["active_task_marker", _activeTaskMarker],
+    ["casevac_marker", _casevacMarker],
+    ["lead_pool", _leadPool],
+    ["note", "cTab/map markers are read-only presentation aids; TOC actions still route through validated server functions."]
+];
+
+private _ctabSection = [
+    ["data",      _ctabData],
+    ["freshness", [["updatedAt", _now], ["staleAfterS", 60]]]
+];
+
+// ---------------------------------------------------------------------------
 // Assemble final payload
 // ---------------------------------------------------------------------------
 [
@@ -335,6 +487,9 @@ private _threatSection = [
         ["threat",       _threatSection],
         ["personnel",    _personnelSection],
         ["handoff",      _handoffSection],
-        ["intelFeed",    _intelFeedSection]
+        ["intelFeed",    _intelFeedSection],
+        ["medical",      _medicalSection],
+        ["comms",        _commsSection],
+        ["ctab",         _ctabSection]
     ]]
 ]

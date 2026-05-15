@@ -69,6 +69,13 @@ switch (_tab) do
 
     case "BOARDS":  { [] spawn ARC_fnc_uiConsoleActionOpenTocQueue; };
 
+    case "COMMS":
+    {
+        private _disp = findDisplay 78000;
+        if (!isNull _disp) then { [_disp] call ARC_fnc_uiConsoleRefresh; };
+        ["COMMS", "SOI and medical C2 snapshot refreshed."] call ARC_fnc_clientToast;
+    };
+
     case "HQ":      { [] spawn ARC_fnc_uiConsoleActionHQPrimary; };
 
     case "S1":

@@ -150,6 +150,11 @@ switch (_tab) do
 
     case "BOARDS":  { [] spawn ARC_fnc_uiConsoleActionTocSecondary; };
 
+    case "COMMS":
+    {
+        ["COMMS", "Read-only panel. Use OPS/TOC to action CASEVAC or tasking."] call ARC_fnc_clientHint;
+    };
+
     case "S1":
     {
         ["S-1", "Panel is read-only. Use REFRESH to pull the latest snapshot."] call ARC_fnc_clientHint;
