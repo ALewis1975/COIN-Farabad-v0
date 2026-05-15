@@ -13,7 +13,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-05-15 — Threat economy district-posture coupling (Mode B)
 
-**Branch/Commit:** copilot/strengthen-threat-economy @ 43c1618
+**Branch/Commit:** copilot/strengthen-threat-economy @ a91daa6
 
 **Scenario:** Strengthened the threat economy so scheduler choices, budget spend, record metadata, non-IED ambush leads, and operator read models are driven by district posture/risk and CIVSUB GREEN signal rather than a single hard-coded IED profile.
 
@@ -24,8 +24,9 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | 3 | Changed-file sqflint | `~/.local/bin/sqflint -e w <each changed threat .sqf file>` | PASS | Installed `sqflint` with `python3 -m pip install --user sqflint`; this sqflint version accepts one file per invocation, and all five changed SQF files linted clean. |
 | 4 | Threat economy/static regression contracts | `bash tests/static/threat_economy_operator_tooling_contract_checks.sh && bash tests/static/threat_ied_lifecycle_contract_checks.sh && bash tests/static/threat_family_normalization_contract_checks.sh` | PASS | Added checks for posture-selected threat subtype, intel quality metadata, ambush network leads, posture tier snapshot rows, and threat cost taxonomy. |
 | 5 | Threat persistence migration scenarios | `python3 scripts/dev/validate_state_migrations.py --scenarios tests/migrations/threat_persistence_schema_scenarios.json` | PASS | State migration validation passed (3 scenarios). |
-| 6 | Runtime smoke: posture-driven scheduling | Local MP or dedicated-like Arma 3 session; drive districts through NORMAL/ELEVATED/HIGH_RISK/CRITICAL and verify IED/ambush/VBIED/suicide profiles, budget costs, and intel quality in `threat_v0_records` and console read model | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
-| 7 | Dedicated/JIP validation | Dedicated server with at least one JIP client; verify server-only writes to threat economy state and replicated district posture/read-model consistency for late joiners | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+| 6 | Review follow-up validation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatAoPostureUpdate.sqf functions/threat/fn_threatScheduleEvent.sqf functions/threat/fn_threatSchedulerTick.sqf && ~/.local/bin/sqflint -e w <each changed follow-up .sqf file> && bash tests/static/threat_economy_operator_tooling_contract_checks.sh` | PASS | Confirmed condition-style, warning-log, non-IED lead readability, and posture-order follow-ups remain lint/static clean. |
+| 7 | Runtime smoke: posture-driven scheduling | Local MP or dedicated-like Arma 3 session; drive districts through NORMAL/ELEVATED/HIGH_RISK/CRITICAL and verify IED/ambush/VBIED/suicide profiles, budget costs, and intel quality in `threat_v0_records` and console read model | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 8 | Dedicated/JIP validation | Dedicated server with at least one JIP client; verify server-only writes to threat economy state and replicated district posture/read-model consistency for late joiners | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
 
 ---
 
