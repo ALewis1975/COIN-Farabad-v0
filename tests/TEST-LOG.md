@@ -6203,3 +6203,31 @@ Mode: A (Bug Fix)
 | 12 | CI failure triage for run 25830509339 | `list_workflow_runs` + `list_workflow_jobs` + `get_job_logs` for **Arma SQF + Mission Config Preflight** at `389a63511d6b7b35f0c8e3639697213e3dafc208` | FAIL (reproduced) | Strict compat scan passed, then `sqflint -e w` failed on nine direct `player setDiaryRecordText ...` parse errors in `functions/core/fn_briefingUpdateClient.sqf`. |
 | 13 | Follow-up sqflint after `setDiaryRecordText` compat wrapper | `sqflint -e w functions/core/fn_briefingUpdateClient.sqf && sqflint -e w functions/ui/fn_uiConsoleIntelPaint.sqf` | PASS | Wrapped diary record text updates behind a compiled helper and removed remaining warnings in the two changed SQF files; both files now exit 0 under `sqflint -e w`. |
 | 14 | Follow-up strict compat scan after sqflint cleanup | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_briefingUpdateClient.sqf functions/ui/fn_uiConsoleIntelPaint.sqf` | PASS | No known parser-compat patterns found in either changed SQF file. |
+
+---
+
+## 2026-05-15 19:20 UTC — Bug fix: CH-47 frozen at taxi end with crew suspended outside
+
+**Branch/Commit:** copilot/debug-chinook-freeze-issue @ 113963c
+
+**Scenario:** Uploaded test-session screenshot showed the CH-47 frozen at the taxi end with aircrew suspended outside the aircraft. The likely failure point is the transition from `BIS_fnc_unitPlay` taxi playback back to AI-controlled outbound waypoints.
+
+### Changes made
+
+| File | Change |
+|------|--------|
+| `functions/ambiance/fn_airbasePlaneDepart.sqf` | Added post-taxi crew-seat recovery that reseats any crew member left outside the aircraft according to its assigned vehicle role and ensures the pilot is in the driver seat. |
+| `functions/ambiance/fn_airbasePlaneDepart.sqf` | Explicitly activates the first outbound waypoint after taxi playback and again when the takeoff kick watchdog fires, so the group resumes the runway departure route instead of idling at taxi end. |
+
+### Static Validation
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | Pre-change airbase planning static checks | `bash tests/static/airbase_planning_mode_checks.sh` | PASS | Existing checks passed before edits. |
+| 2 | Pre-change airbase queue lifecycle checks | `bash tests/static/airbase_queue_lifecycle_contract_checks.sh` | PASS | Existing checks passed before edits. |
+| 3 | Pre-change compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf functions/ambiance/fn_airbaseInit.sqf` | PASS | No known parser-compat patterns found. |
+| 4 | Changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf` | PASS | No known parser-compat patterns found. |
+| 5 | Airbase planning static checks | `bash tests/static/airbase_planning_mode_checks.sh` | PASS | Runtime entrypoint contracts still present. |
+| 6 | Airbase queue lifecycle checks | `bash tests/static/airbase_queue_lifecycle_contract_checks.sh` | PASS | Queue/runway/snapshot contracts still present. |
+| 7 | sqflint | `python3 -m pip install --user sqflint && /home/runner/.local/bin/sqflint -e w functions/ambiance/fn_airbasePlaneDepart.sqf` | PASS | No sqflint diagnostics emitted. |
+| 8 | Hosted/dedicated gameplay verification | N/A | BLOCKED | No Arma 3 runtime in container; follow-up required: observe CH-47 departure through taxi end and confirm crew remain seated and aircraft continues outbound/climb. |
