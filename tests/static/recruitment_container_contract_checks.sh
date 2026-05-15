@@ -27,6 +27,8 @@ grep -q 'class ARC_fnc_recruitClientAddActions[[:space:]]*{ allowedTargets = 0; 
 grep -q 'ARC_recruitContainerEnabled' initServer.sqf
 grep -q 'ARC_recruitUnitWhitelist' initServer.sqf
 grep -q 'ARC_recruitContainerNetIds' initServer.sqf
+grep -q 'ARC_recruitContainerNames' initServer.sqf
+grep -q 'recruitment_01' initServer.sqf
 grep -q 'B_Slingload_01_Cargo_F' initServer.sqf
 grep -q 'ARC_isRecruitContainer' initServer.sqf
 grep -q 'ARC_fnc_recruitClientInit' initPlayerLocal.sqf
@@ -39,6 +41,7 @@ grep -q 'createUnit' functions/logistics/fn_recruitSpawnRequest.sqf
 grep -q 'joinSilent' functions/logistics/fn_recruitSpawnRequest.sqf
 grep -q 'ARC_recruitRequireSameFaction' functions/logistics/fn_recruitSpawnRequest.sqf
 grep -q 'ARC_recruitContainerNetIds' functions/logistics/fn_recruitServerPublishContainers.sqf
+grep -q 'ARC_recruitContainerNames' functions/logistics/fn_recruitServerPublishContainers.sqf
 grep -q 'ARC_isRecruitContainer' functions/logistics/fn_recruitServerPublishContainers.sqf
 grep -q 'allMissionObjects' functions/logistics/fn_recruitServerPublishContainers.sqf
 grep -q 'remoteExec \["ARC_fnc_recruitClientAddActions", 0, _container\]' functions/logistics/fn_recruitServerPublishContainers.sqf

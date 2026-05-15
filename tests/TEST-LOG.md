@@ -12,6 +12,21 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 ---
 
 
+## 2026-05-15 — Recruit container Eden variable-name opt-in (Mode A)
+
+**Branch/Commit:** copilot/fix-ai-recruitment-spawner-again (working tree validated in-session)
+
+**Scenario:** The Battalion CO reported the AI recruitment addAction still did not appear after the per-object `this setVariable ["ARC_isRecruitContainer", true, true]` Init line was removed from the spawn container (now identified only by its Eden Variable Name `recruitment_01`). Added a new variable-name opt-in path: `ARC_recruitContainerNames` (default `["recruitment_01"]`). On the server, `ARC_fnc_recruitServerPublishContainers` resolves each name via `missionNamespace getVariable`, validates the container type is in `ARC_recruitContainerClasses`, and marks the object `ARC_isRecruitContainer=true` (replicated) so the existing publish → client replay → spawn-request validation pipeline accepts the container with no per-object Init script.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Static contract + compat + lint + remoteExec contract | `bash tests/static/recruitment_container_contract_checks.sh && python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf functions/logistics/fn_recruitServerPublishContainers.sqf functions/logistics/fn_recruitClientInit.sqf functions/logistics/fn_recruitSpawnRequest.sqf functions/logistics/fn_recruitClientAddActions.sqf && sqflint -e w functions/logistics/fn_recruitServerPublishContainers.sqf && sqflint -e w initServer.sqf && bash scripts/dev/check_remoteexec_contract.sh` | PASS | Installed `sqflint==0.3.2` in the sandbox. Contract test extended to assert `ARC_recruitContainerNames` / `recruitment_01` in `initServer.sqf` and `ARC_recruitContainerNames` in the publisher. |
+| 2 | Runtime smoke: recruitment addAction near `recruitment_01` Huron container | Hosted/local MP as Battalion CO: verify `[Recruit]` actions appear within `ARC_recruitActionRangeM` of the container with Variable Name `recruitment_01`, and that spawn requests succeed for whitelisted classes. | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 3 | Dedicated/JIP validation | Dedicated server with a late-joining client: confirm server marks the named container at boot, publishes its netId, replays addActions to JIP clients, and server-side gates (role, range, class, faction) still apply. | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+
+---
+
+
 ## 2026-05-15 — Recruitment container JIP addAction replay (Mode A)
 
 **Branch/Commit:** copilot/fix-ai-recruitment-spawner @ 822ce7a (working tree validated in-session)
