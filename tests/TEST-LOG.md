@@ -11,6 +11,22 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-15 — AH-64 departure abort / ambient-idle guard (Mode A)
+
+**Branch/Commit:** copilot/fix-ah-64-animation-issue @ b6dac2c (working tree included TEST-LOG update)
+
+**Scenario:** Fixed the AH-64 taxi→takeoff failure where the pilot could be returned to ambient animation while airborne. The departure despawn-marker validation now runs before crew leave idle and before taxi playback, avoiding abort-to-idle after the helicopter is already airborne. `ARC_fnc_airbaseCrewIdleStart` also refuses to move out / ambient-idle crew who are still inside airborne aircraft.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline airbase static validation | `git diff --check && bash tests/static/airbase_planning_mode_checks.sh && bash tests/static/airbase_queue_lifecycle_contract_checks.sh && python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf functions/ambiance/fn_airbaseCrewIdleStart.sqf functions/ambiance/fn_airbaseCrewIdleStop.sqf` | PASS | Baseline planning-mode, queue lifecycle, and compat checks passed before edits. |
+| 2 | Baseline changed-file sqflint | `python3 -m pip install --user sqflint==0.3.2 && sqflint -e w functions/ambiance/fn_airbasePlaneDepart.sqf && sqflint -e w functions/ambiance/fn_airbaseCrewIdleStart.sqf && sqflint -e w functions/ambiance/fn_airbaseCrewIdleStop.sqf` | PASS | Installed `sqflint==0.3.2` in the sandbox because it was not preinstalled. |
+| 3 | Final airbase static validation | `git diff --check && bash -n tests/static/airbase_queue_lifecycle_contract_checks.sh && bash tests/static/airbase_planning_mode_checks.sh && bash tests/static/airbase_queue_lifecycle_contract_checks.sh && python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf functions/ambiance/fn_airbaseCrewIdleStart.sqf functions/ambiance/fn_airbaseCrewIdleStop.sqf && sqflint -e w functions/ambiance/fn_airbasePlaneDepart.sqf && sqflint -e w functions/ambiance/fn_airbaseCrewIdleStart.sqf && sqflint -e w functions/ambiance/fn_airbaseCrewIdleStop.sqf` | PASS | Confirms early despawn-marker validation, airborne crew idle-start guard, parser compatibility, and SQF lint. |
+| 4 | Runtime smoke: AH-64 departure | Hosted/local MP: trigger `RW-AH64D-01`, observe taxi completion and takeoff transition. Expect no pilot ejection and no airborne ambient animation. | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 5 | Dedicated/JIP validation | Dedicated server with a JIP client: run a full AH-64 departure and confirm late clients do not see crew ejection / frozen ambient-animation artifacts. | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+
+---
+
 ## 2026-05-15 — Recruitment dialog config placement (Mode A)
 
 **Branch/Commit:** copilot/fix-arc-recruiting-dialogue @ ad94f5a (working tree included TEST-LOG update)
