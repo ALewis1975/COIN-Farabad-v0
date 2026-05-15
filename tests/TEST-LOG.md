@@ -11,6 +11,23 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-15 — Console cTab / ACRE / ACE Medical integration (Mode B)
+
+**Branch/Commit:** copilot/integrate-ctab-acre-ace-medical @ 3337440 (working tree included follow-up comment and TEST-LOG updates)
+
+**Scenario:** Added server-owned Console VM sections for medical/CASEVAC, comms/SOI, and cTab interoperability hints; added a read-only COMMS/MED console tab; and publishes the latest CASEVAC marker as a cTab/map presentation aid while keeping mission state authoritative on the server.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline changed-file compatibility scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_consoleVmBuild.sqf functions/medical/fn_medicalCasevacRequest.sqf functions/ui/fn_uiConsoleOnLoad.sqf functions/ui/fn_uiConsoleRefresh.sqf functions/ui/fn_uiConsoleApplyLayout.sqf functions/ui/fn_uiConsoleClickPrimary.sqf functions/ui/fn_uiConsoleClickSecondary.sqf config/CfgFunctions.hpp` | PASS | Baseline scan passed before edits. |
+| 2 | Baseline changed-file sqflint | `python3 -m pip install --user --upgrade sqflint && for f in functions/core/fn_consoleVmBuild.sqf functions/medical/fn_medicalCasevacRequest.sqf functions/ui/fn_uiConsoleOnLoad.sqf functions/ui/fn_uiConsoleRefresh.sqf functions/ui/fn_uiConsoleApplyLayout.sqf functions/ui/fn_uiConsoleClickPrimary.sqf functions/ui/fn_uiConsoleClickSecondary.sqf; do sqflint -e w "$f"; done` | PASS | Installed `sqflint==0.3.2` in the sandbox because it was not preinstalled. |
+| 3 | Final changed-file compatibility, lint, and whitespace checks | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_consoleVmBuild.sqf functions/medical/fn_medicalCasevacRequest.sqf functions/ui/fn_uiConsoleCommsPaint.sqf functions/ui/fn_uiConsoleOnLoad.sqf functions/ui/fn_uiConsoleRefresh.sqf functions/ui/fn_uiConsoleApplyLayout.sqf functions/ui/fn_uiConsoleClickPrimary.sqf functions/ui/fn_uiConsoleClickSecondary.sqf functions/ui/fn_uiConsoleSelectTab.sqf config/CfgFunctions.hpp && for f in functions/core/fn_consoleVmBuild.sqf functions/medical/fn_medicalCasevacRequest.sqf functions/ui/fn_uiConsoleCommsPaint.sqf functions/ui/fn_uiConsoleOnLoad.sqf functions/ui/fn_uiConsoleRefresh.sqf functions/ui/fn_uiConsoleApplyLayout.sqf functions/ui/fn_uiConsoleClickPrimary.sqf functions/ui/fn_uiConsoleClickSecondary.sqf functions/ui/fn_uiConsoleSelectTab.sqf; do sqflint -e w "$f"; done && git diff --check` | PASS | Changed SQF files scan and lint clean. |
+| 4 | Console static conflict check | `scripts/dev/check_console_conflicts.sh` | FAIL | Existing duplicate IDC findings for 78201, 78202, and 78211 remain; this change did not edit `config/CfgDialogs.hpp` or add new IDCs. Painter contract output did not include the new COMMS painter because the script has a fixed painter list. |
+| 5 | Runtime smoke: COMMS/MED console panel | Hosted/local MP with cTab, ACRE, ACE/KAT loaded: open Farabad Console from tablet/terminal, select COMMS/MED, verify SOI, CASEVAC data, and latest CASEVAC marker display. | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 6 | Dedicated/JIP validation | Dedicated server with a JIP client: trigger ACE unconscious CASEVAC, verify server emits VM medical snapshot and clients receive COMMS/MED data and latest map marker. | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+
+---
+
 ## 2026-05-15 — AH-64 departure abort / ambient-idle guard (Mode A)
 
 **Branch/Commit:** copilot/fix-ah-64-animation-issue @ b6dac2c (working tree included TEST-LOG update)
