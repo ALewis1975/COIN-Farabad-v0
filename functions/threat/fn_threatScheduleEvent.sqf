@@ -65,6 +65,9 @@ if (!(_intelQuality isEqualType 0) || { _intelQuality < 0 }) then
 };
 _intelQuality = (_intelQuality max 0) min 1;
 if (!(_budgetCost isEqualType 0) || { _budgetCost < 1 }) then { _budgetCost = 1; };
+// Below this quality, leads remain recorded but omit extra telegraphing cues.
+private _cueIntelMin = 0.35;
+private _nonIedLeadTtlS = 2700;
 
 // ---------------------------------------------------------------------------
 // Helper: pairs-array set (mirrors fn_threatCreateFromTask convention)
@@ -221,7 +224,7 @@ private _tele = [];
 // Keep legacy intel_level while adding explicit intel_quality for economy views.
 _tele = [_tele, "intel_level", _intelQuality] call _kvSet;
 _tele = [_tele, "intel_quality", _intelQuality] call _kvSet;
-_tele = [_tele, "cues_enabled", _intelQuality >= 0.35] call _kvSet;
+_tele = [_tele, "cues_enabled", _intelQuality >= _cueIntelMin] call _kvSet;
 
 private _outcome = [];
 _outcome = [_outcome, "result", "NONE"] call _kvSet;
@@ -280,7 +283,7 @@ switch (_familyU) do
     case "SUICIDE": { [_rec, "STAGED"] call ARC_fnc_threatLeadEmitFromOutcome; };
     default
     {
-        private _isAmbush = (_intentU find "AMBUSH") >= 0;
+        private _isAmbush = _intentU isEqualTo "AMBUSH";
         private _leadType = if (_isAmbush) then { "RAID" } else { "QRF" };
         private _tag = if (_isAmbush) then { "AMBUSH_NETWORK" } else { "DISTRICT_ATTACK" };
         private _disp = if (_isAmbush) then
@@ -291,7 +294,7 @@ switch (_familyU) do
         {
             format ["District Attack Network — %1", _districtId]
         };
-        private _leadId = [_leadType, _disp, _iedPos, _intelQuality, 2700, "", _typeU, "", _tag] call ARC_fnc_leadCreate;
+        private _leadId = [_leadType, _disp, _iedPos, _intelQuality, _nonIedLeadTtlS, "", _typeU, "", _tag] call ARC_fnc_leadCreate;
         if (!(_leadId isEqualTo "")) then
         {
             diag_log format ["[ARC][INFO] ARC_fnc_threatScheduleEvent: NON_IED lead=%1 threat=%2 intent=%3", _leadId, _threatId, _intentU];

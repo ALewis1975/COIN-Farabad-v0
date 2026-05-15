@@ -70,6 +70,13 @@ if (!(_riskMapSched isEqualType createHashMap)) then { _riskMapSched = createHas
 private _civDistricts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
 if (!(_civDistricts isEqualType createHashMap)) then { _civDistricts = createHashMap; };
 
+// GREEN score only nudges intel quality; posture still owns threat selection.
+private _greenStrongMin = 70;
+private _greenWeakMax = 25;
+private _intelGreenAdjust = 0.10;
+private _intelMaxFromGreen = 0.90;
+private _intelMinFromGreen = 0.25;
+
 // Build open threat district index (quick look-up to skip already-open districts)
 private _records = ["threat_v0_records", []] call ARC_fnc_stateGet;
 if (!(_records isEqualType [])) then { _records = []; };
@@ -159,8 +166,8 @@ private _scheduledAny = false;
         _threatIntent = "SUICIDE_ATTACK";
     };
 
-    if (_greenScore >= 70) then { _intelQuality = (_intelQuality + 0.10) min 0.90; };
-    if (_greenScore < 25) then { _intelQuality = (_intelQuality - 0.10) max 0.25; };
+    if (_greenScore >= _greenStrongMin) then { _intelQuality = (_intelQuality + _intelGreenAdjust) min _intelMaxFromGreen; };
+    if (_greenScore < _greenWeakMax) then { _intelQuality = (_intelQuality - _intelGreenAdjust) max _intelMinFromGreen; };
 
     private _govResult = [_districtId, _threatType, _tier] call ARC_fnc_threatGovernorCheck;
     private _allowed   = _govResult select 0;

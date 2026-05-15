@@ -41,6 +41,14 @@ private _districtIds = [
     "D11","D12","D13","D14","D15","D16","D17","D18","D19","D20"
 ];
 
+// Posture bands are deliberately coarse so single incidents do not whipsaw district posture.
+private _attacksElevatedMin = 2;
+private _attacksHighMin = 5;
+private _attacksCriticalMin = 8;
+private _riskHighMin = 70;
+private _riskCriticalMin = 85;
+private _riskHighFloor = 60;
+
 {
     private _id = _x;
     private _dEntry = [_riskMap, _id, createHashMap] call _hg;
@@ -54,19 +62,19 @@ private _districtIds = [
 
     // Determine security level from observed attacks plus district risk.
     private _secLevel = "NORMAL";
-    if (_attackCount >= 8 || { _riskLevel >= 85 }) then
+    if (_attackCount >= _attacksCriticalMin || { _riskLevel >= _riskCriticalMin }) then
     {
         _secLevel = "CRITICAL";
     }
     else
     {
-        if (_attackCount >= 5 || { _riskLevel >= 70 }) then
+        if (_attackCount >= _attacksHighMin || { _riskLevel >= _riskHighMin }) then
         {
             _secLevel = "HIGH_RISK";
         }
         else
         {
-            if (_attackCount >= 2) then { _secLevel = "ELEVATED"; };
+            if (_attackCount >= _attacksElevatedMin) then { _secLevel = "ELEVATED"; };
         };
     };
 
@@ -94,7 +102,7 @@ private _districtIds = [
     // Budget floor for HIGH_RISK/CRITICAL: keep scheduler posture aligned with AO posture.
     if (_secLevel in ["HIGH_RISK", "CRITICAL"]) then
     {
-        private _riskFloor = if (_secLevel isEqualTo "CRITICAL") then { 85 } else { 60 };
+        private _riskFloor = if (_secLevel isEqualTo "CRITICAL") then { _riskCriticalMin } else { _riskHighFloor };
         if (_riskLevel < _riskFloor) then
         {
             _dEntry set ["risk_level", _riskFloor];
