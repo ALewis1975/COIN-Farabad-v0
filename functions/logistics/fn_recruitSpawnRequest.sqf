@@ -45,29 +45,9 @@ if (!((typeOf _container) in _classes)) exitWith
     false
 };
 
-private _positions = missionNamespace getVariable ["ARC_recruitContainerPositions", []];
-if (!(_positions isEqualType [])) then { _positions = []; };
-
-private _radius = missionNamespace getVariable ["ARC_recruitContainerPositionRadiusM", 18];
-if (!(_radius isEqualType 0)) then { _radius = 18; };
-_radius = (_radius max 2) min 50;
-
-private _validContainer = (count _positions) isEqualTo 0;
-if (!_validContainer) then
+if (!(_container getVariable ["ARC_isRecruitContainer", false])) exitWith
 {
-    {
-        if (_x isEqualType [] && { (count _x) >= 2 }) then
-        {
-            private _p = +_x;
-            _p resize 3;
-            if ((_container distance2D _p) <= _radius) exitWith { _validContainer = true; };
-        };
-    } forEach _positions;
-};
-
-if (!_validContainer) exitWith
-{
-    diag_log format ["[ARC][SEC] ARC_fnc_recruitSpawnRequest: unregistered container netId=%1 caller=%2", netId _container, name _caller];
+    diag_log format ["[ARC][SEC] ARC_fnc_recruitSpawnRequest: unregistered recruitment container netId=%1 type=%2 caller=%3", netId _container, typeOf _container, name _caller];
     false
 };
 
