@@ -29,6 +29,9 @@ if (!(_legacyInWorldActionsEnabled isEqualType true)) then { _legacyInWorldActio
 private _tocAddActionsEnabled = missionNamespace getVariable ["ARC_tocAddActionsEnabled", _legacyInWorldActionsEnabled];
 if (!(_tocAddActionsEnabled isEqualType true)) then { _tocAddActionsEnabled = _legacyInWorldActionsEnabled; };
 
+private _mobileTocAddActionsEnabled = missionNamespace getVariable ["ARC_mobileTocAddActionsEnabled", false];
+if (!(_mobileTocAddActionsEnabled isEqualType true)) then { _mobileTocAddActionsEnabled = false; };
+
 private _tocVars = allVariables missionNamespace select { (toLower _x) find "arc_toc_" isEqualTo 0 };
 
 // Optional mobile TOC (Ops) vehicle for testing / gameplay
@@ -87,7 +90,7 @@ if (!(_mobileOpsVar in _tocVars)) then
     private _stored = _obj getVariable ["ARC_toc_actionIds", []];
     if (!(_stored isEqualType [])) then { _stored = []; };
 
-    if (!_tocAddActionsEnabled) then
+    if (!_tocAddActionsEnabled || { _isMobileOpsVehicle && { !_mobileTocAddActionsEnabled } }) then
     {
         if (_isMobileOpsVehicle) then
         {
