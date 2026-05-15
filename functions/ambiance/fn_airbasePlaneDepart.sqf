@@ -376,6 +376,35 @@ if (_veh isKindOf "Air") then { _veh setCollisionLight true; _veh setPilotLight 
 
 private _okTaxi = [_veh, _taxiFrames] call _fnUnitPlayBlocking;
 
+// Rotary-wing handoff: commit the helicopter to a hover *before* AI is re-enabled
+// and *before* the physics engine can drop a near-zero-velocity helo into the ground.
+// BIS_fnc_unitPlay restores the vehicle to the last frame's velocity (typically ~0
+// for taxi recordings), so without an immediate hover directive the helo dips,
+// clips terrain, and the AI crew bails out. (Crew bailout from a "crashing" helo
+// also produces the apparent mid-air freeze when their parachute deploys at low alt.)
+if (_isHeli && {!isNull _veh} && {alive _veh} && {_okTaxi}) then {
+    private _altLowHandoff = missionNamespace getVariable ["airbase_v1_rw_takeoff_alt_low_m", 3];
+    if (!(_altLowHandoff isEqualType 0) || { _altLowHandoff < 2 }) then { _altLowHandoff = 3; };
+    private _handoffFwdMps = missionNamespace getVariable ["airbase_v1_rw_handoff_forward_mps", 6];
+    if (!(_handoffFwdMps isEqualType 0) || { _handoffFwdMps < 0 }) then { _handoffFwdMps = 6; };
+    private _handoffUpMps = missionNamespace getVariable ["airbase_v1_rw_handoff_up_mps", 3];
+    if (!(_handoffUpMps isEqualType 0) || { _handoffUpMps < 0 }) then { _handoffUpMps = 3; };
+
+    _veh enableSimulationGlobal true;
+    _veh engineOn true;
+    _veh land "NONE";
+    _veh flyInHeight _altLowHandoff;
+    // Forward velocity in vehicle model space keeps the helo aligned to its current
+    // heading; upward component ensures positive lift through the handoff frame.
+    _veh setVelocityModelSpace [0, _handoffFwdMps, _handoffUpMps];
+
+    if (_debugOps) then {
+        ["OPS", format ["AIRBASE: %1 helo taxi->takeoff handoff (alt=%2m fwd=%3 up=%4)", _fid, _altLowHandoff, _handoffFwdMps, _handoffUpMps], getPosATL _veh, 0, [
+            ["vehType", _vehType]
+        ]] call ARC_fnc_intelLog;
+    };
+};
+
 { _x enableAI "PATH"; _x enableAI "MOVE"; _x enableAI "FSM"; } forEach _crewLive;
 
 private _recoveredSeats = [_crewLive, _veh, _pilot] call _fnRecoverCrewSeats;
@@ -389,18 +418,6 @@ if (_debugOps && { _recoveredSeats > 0 }) then {
 _veh enableSimulationGlobal true;
 _veh engineOn true;
 if (_veh isKindOf "Air") then { _veh setCollisionLight true; _veh setPilotLight true; };
-
-// If a rotary-wing asset is still skimming the ground at taxi end, nudge it into a hover before outbound waypoints.
-if (_isHeli) then
-{
-    private _a0 = (getPosATL _veh) select 2;
-    if (_a0 < 1.5) then
-    {
-        _veh land "NONE";
-        _veh flyInHeight 5;
-        _veh setVelocityModelSpace [0, 6, 0];
-    };
-};
 
 if (!_okTaxi) exitWith {
     if (_debug) then { diag_log format ["[AIRBASESUB] %1 taxi playback failed/aborted (%2)", _fid, _vehType]; };
