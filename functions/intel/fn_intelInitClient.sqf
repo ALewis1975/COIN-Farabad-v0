@@ -78,7 +78,7 @@ player setVariable ["ARC_intelInitClient_done", true];
         private _aid = _station addAction [
             "Intel Debrief (Complete RTB - INTEL)",
             {
-                params ["_target", "_caller", "_actionId", "_args"]; 
+                params ["_target", "_caller", "", ""];
                 [_target, _caller] call ARC_fnc_intelClientDebriefIntel;
             },
             [],
@@ -118,7 +118,7 @@ player setVariable ["ARC_intelInitClient_done", true];
     private _aid = player addAction [
         "Intel Debrief (Complete RTB - INTEL) [Fallback]",
         {
-            params ["_target", "_caller", "_actionId", "_args"]; 
+            params ["", "_caller", "", ""];
             [objNull, _caller] call ARC_fnc_intelClientDebriefIntel;
         },
         [],
@@ -188,7 +188,7 @@ player setVariable ["ARC_intelInitClient_done", true];
         private _aid = _station addAction [
             "Process EPW (Complete RTB - EPW)",
             {
-                params ["_target", "_caller", "_actionId", "_args"]; 
+                params ["_target", "_caller"];
                 [_target, _caller] call ARC_fnc_intelClientProcessEpw;
             },
             [],
@@ -228,7 +228,7 @@ player setVariable ["ARC_intelInitClient_done", true];
     private _aid = player addAction [
         "Process EPW (Complete RTB - EPW) [Fallback]",
         {
-            params ["_target", "_caller", "_actionId", "_args"]; 
+            params ["", "_caller"];
             [objNull, _caller] call ARC_fnc_intelClientProcessEpw;
         },
         [],
@@ -263,11 +263,11 @@ player setVariable ["ARC_intelInitClient_done", true];
         "ARC: Intel Debrief (RTB)",
         "",
         {
-            params ["_target", "_player", "_params"];
+            params ["", "_player", ""];
             [objNull, _player] call ARC_fnc_intelClientDebriefIntel;
         },
         {
-            params ["_target", "_player", "_params"];
+            params ["", "_player", ""];
             ((missionNamespace getVariable ["ARC_rtbAceInteractionsEnabled", true]) isEqualTo true)
             && { alive _player }
             && { [_player] call ARC_fnc_intelClientCanDebriefIntelHere }
@@ -281,11 +281,11 @@ player setVariable ["ARC_intelInitClient_done", true];
         "ARC: Process EPW (RTB)",
         "",
         {
-            params ["_target", "_player", "_params"];
+            params ["", "_player", ""];
             [objNull, _player] call ARC_fnc_intelClientProcessEpw;
         },
         {
-            params ["_target", "_player", "_params"];
+            params ["", "_player", ""];
             ((missionNamespace getVariable ["ARC_rtbAceInteractionsEnabled", true]) isEqualTo true)
             && { alive _player }
             && { [_player] call ARC_fnc_intelClientCanProcessEpwHere }
