@@ -24,10 +24,10 @@ class EditorData
 	};
 	class Camera
 	{
-		pos[]={6387.126,49.56992,1606.3483};
-		dir[]={-0.20087409,-0.73702788,0.64536226};
-		up[]={-0.21904515,0.67583609,0.70374358};
-		aside[]={0.95484102,-2.8844079e-07,0.29720199};
+		pos[]={6264.8154,30.796946,1578.2404};
+		dir[]={-0.7128064,-0.68238801,-0.16228741};
+		up[]={-0.66539294,0.73095137,-0.15149274};
+		aside[]={-0.22200374,-4.9571827e-07,0.9750886};
 	};
 };
 binarizationWanted=0;
@@ -78529,15 +78529,46 @@ class Mission
 													dataType="Object";
 													class PositionInfo
 													{
-														position[]={6254.3423,9.8520374,1575.4475};
+														position[]={6254.3418,9.8520374,1575.448};
 													};
 													side="Empty";
 													flags=4;
 													class Attributes
 													{
+														init="if (isServer) then { " \n "    this setVariable [""ARC_isRecruitContainer"", true, true]; " \n "};";
 													};
 													id=4948;
 													type="B_Slingload_01_Cargo_F";
+													class CustomAttributes
+													{
+														class Attribute0
+														{
+															property="ObjectCollision";
+															expression="[_this, 	(			[false,true] select (if 		(_value in [true,false]) 	then 	{parseNumber _value} else {_value # 0}		 ) ) 	] remoteExecCall ['setPhysicsCollisionFlag', 0, _this];";
+															class Value
+															{
+																class data
+																{
+																	singleType="BOOL";
+																	value=1;
+																};
+															};
+														};
+														class Attribute1
+														{
+															property="ammoBox";
+															expression="[_this,_value] call bis_fnc_initAmmoBox;";
+															class Value
+															{
+																class data
+																{
+																	singleType="STRING";
+																	value="[[[[""launch_NLAW_F"",""arifle_MX_F"",""arifle_MX_SW_F""],[2,4,2]],[[""30Rnd_65x39_caseless_mag"",""16Rnd_9x21_Mag"",""30Rnd_45ACP_Mag_SMG_01"",""20Rnd_762x51_Mag"",""100Rnd_65x39_caseless_mag"",""1Rnd_HE_Grenade_shell"",""1Rnd_Smoke_Grenade_shell"",""1Rnd_SmokeGreen_Grenade_shell"",""Chemlight_green"",""NLAW_F"",""Laserbatteries"",""HandGrenade"",""MiniGrenade"",""SmokeShell"",""SmokeShellGreen"",""UGL_FlareWhite_F"",""UGL_FlareGreen_F""],[48,12,12,12,12,12,4,4,12,6,4,12,12,4,4,4,4]],[[""Laserdesignator"",""FirstAidKit"",""acc_flashlight""],[2,20,4]],[[""B_Kitbag_mcamo""],[4]]],false]";
+																};
+															};
+														};
+														nAttributes=2;
+													};
 												};
 												class Item70
 												{
