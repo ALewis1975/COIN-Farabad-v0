@@ -13,7 +13,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-05-15 — In-world action toggle split (Mode B)
 
-**Branch/Commit:** copilot/explain-repository-structure-again @ 84d80cb (working tree validated in-session)
+**Branch/Commit:** copilot/explain-repository-structure-again @ 82c9c39 (working tree validated in-session)
 
 **Scenario:** Split TOC/RTB vanilla addAction controls from ACE interaction controls so operators can disable TOC-related scroll-menu actions without hiding ACE self/interact alternatives.
 
@@ -28,6 +28,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | 7 | Runtime smoke: action toggles | Hosted/local MP: toggle `ARC_tocAddActionsEnabled`, `ARC_tocAceInteractionsEnabled`, `ARC_rtbAddActionsEnabled`, and `ARC_rtbAceInteractionsEnabled`; verify TOC/Mobile Ops scroll actions hide independently from ACE RTB/field-command self actions | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
 | 8 | Dedicated/JIP validation | Dedicated server with at least one JIP client; verify replicated toggle values and late-client interaction visibility | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
 | 9 | Follow-up sqflint cleanup | `python3 -m pip install --user sqflint==0.3.2 && git diff --check && python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_tocInitPlayer.sqf functions/intel/fn_intelInitClient.sqf initServer.sqf && sqflint -e w functions/core/fn_tocInitPlayer.sqf && sqflint -e w functions/intel/fn_intelInitClient.sqf && sqflint -e w initServer.sqf && bash scripts/dev/check_remoteexec_contract.sh && python3 scripts/dev/validate_state_migrations.py` | PASS | Removed unused callback parameter bindings in `functions/intel/fn_intelInitClient.sqf`; all changed SQF files lint clean with warnings treated as errors. |
+| 10 | CfgFunctions/initServer regression sweep | `git diff --check && python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_tocInitPlayer.sqf functions/intel/fn_intelInitClient.sqf initServer.sqf && sqflint -e w functions/core/fn_tocInitPlayer.sqf && sqflint -e w functions/intel/fn_intelInitClient.sqf && sqflint -e w initServer.sqf && <config delimiter sanity for config/CfgFunctions.hpp and description.ext> && bash scripts/dev/check_remoteexec_contract.sh && bash scripts/dev/check_test_log_commits.sh && python3 scripts/dev/validate_state_migrations.py && python3 scripts/dev/validate_marker_index.py && for s in tests/static/*.sh; do bash "$s"; done` | PASS | Added targeted regression confidence for recent `initServer.sqf`/`CfgFunctions.hpp` work; config delimiter sanity passed, test-log guard passed with `rg` installed, and all static contract scripts passed. |
 
 ---
 
