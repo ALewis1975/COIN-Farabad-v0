@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # check_console_conflicts.sh — Static IDC collision check for Farabad Console
 #
-# Scans CfgDialogs.hpp for duplicate IDC values in the 78xxx range.
-# Also checks that IDC 78140 (Region C) is not reused.
+# Scans CfgDialogs.hpp for duplicate IDC values in the 78xxx range within
+# each top-level dialog/display class. Reusing an IDC in separate dialogs is
+# valid; reusing an IDC inside the same dialog is a collision.
 #
 # Part of: Farabad Console Refactor Plan §9.1 static checks
 # Usage: scripts/dev/check_console_conflicts.sh
@@ -19,19 +20,47 @@ fi
 
 echo "=== Farabad Console IDC collision check ==="
 
-# Extract all IDC values in the 78xxx range
-IDCS=$(grep -oP 'idc\s*=\s*\K78\d+' "$DIALOG_FILE" | sort)
-DUPES=$(echo "$IDCS" | uniq -d)
+# Extract all IDC values in the 78xxx range with their enclosing top-level dialog.
+IDC_ROWS=$(awk '
+    BEGIN { depth = 0; top = "<global>"; }
+    {
+        line = $0;
+        if (depth == 0 && match(line, /^[[:space:]]*class[[:space:]]+[A-Za-z0-9_]+/)) {
+            top = line;
+            sub(/^[[:space:]]*class[[:space:]]+/, "", top);
+            sub(/[[:space:]:{].*$/, "", top);
+        }
+        if (match(line, /idc[[:space:]]*=[[:space:]]*78[0-9]+/)) {
+            idc = line;
+            sub(/^.*idc[[:space:]]*=[[:space:]]*/, "", idc);
+            sub(/[^0-9].*$/, "", idc);
+            print top ":" idc ":" NR;
+        }
+        opens = gsub(/\{/, "{", line);
+        closes = gsub(/\}/, "}", line);
+        depth += opens - closes;
+        if (depth < 0) { depth = 0; }
+    }
+' "$DIALOG_FILE")
+
+if [ -z "$IDC_ROWS" ]; then
+    echo "[PASS] No 78xxx IDCs found"
+    IDCS=""
+else
+    IDCS=$(echo "$IDC_ROWS" | awk -F: '{print $2}' | sort)
+fi
+
+DUPES=$(echo "$IDC_ROWS" | awk -F: '{print $1 ":" $2}' | sort | uniq -d)
 
 if [ -n "$DUPES" ]; then
-    echo "[FAIL] Duplicate IDCs found:"
-    echo "$DUPES" | while read idc; do
-        echo "  IDC $idc appears $(echo "$IDCS" | grep -c "^${idc}$") times"
-        grep -n "idc *= *$idc" "$DIALOG_FILE" | head -5
+    echo "[FAIL] Duplicate IDCs found within a dialog:"
+    echo "$DUPES" | while IFS=: read -r dialog idc; do
+        echo "  ${dialog}: IDC $idc appears more than once"
+        echo "$IDC_ROWS" | awk -F: -v d="$dialog" -v i="$idc" '$1 == d && $2 == i {print "    line " $3}'
     done
     EXIT_CODE=1
 else
-    echo "[PASS] No duplicate IDCs in 78xxx range"
+    echo "[PASS] No duplicate IDCs within any top-level dialog"
 fi
 
 # Check reserved IDC ranges
@@ -45,10 +74,12 @@ echo "  78090-78099: Shell frame"
 echo "  78130-78137: AIR/TOWER"
 echo "  78140:       Region C (Visual Panel)"
 echo "  78141-78149: Reserved (future AIR/Region)"
+echo "  78200-78299: Modal action dialogs (EOD, closeout)"
+echo "  78300-78499: Recruit dialog"
 echo ""
 
 # Check for any IDC outside known ranges
-UNKNOWN=$(echo "$IDCS" | grep -vE '^(78001|7801[0-6]|7802[1-4]|7803[0-8]|7805[0-5]|7806[0-3]|7809[0-9]|7813[0-7]|78140)$' || true)
+UNKNOWN=$(echo "$IDCS" | grep -vE '^(78001|7801[0-6]|7802[1-4]|7803[0-8]|7805[0-5]|7806[0-3]|7809[0-9]|7810[1-9]|7811[0-8]|7812[0-1]|7813[0-7]|78140|7819[0-2]|782[0-9][0-9]|783[0-9][0-9]|784[0-9][0-9])$' || true)
 if [ -n "$UNKNOWN" ]; then
     echo "[WARN] IDCs outside documented ranges:"
     echo "$UNKNOWN" | while read idc; do
@@ -66,6 +97,7 @@ PAINTERS=(
     "functions/ui/fn_uiConsoleDashboardPaint.sqf"
     "functions/ui/fn_uiConsoleOpsPaint.sqf"
     "functions/ui/fn_uiConsoleCommandPaint.sqf"
+    "functions/ui/fn_uiConsoleCommsPaint.sqf"
     "functions/ui/fn_uiConsoleAirPaint.sqf"
     "functions/ui/fn_uiConsoleBoardsPaint.sqf"
     "functions/ui/fn_uiConsoleIntelPaint.sqf"

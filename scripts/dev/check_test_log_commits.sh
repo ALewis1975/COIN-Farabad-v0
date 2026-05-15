@@ -3,7 +3,7 @@ set -euo pipefail
 
 log_file="tests/TEST-LOG.md"
 
-if rg -n "commit:\s*<pending>|@\s*pending|<pending>\s*@|copilot/<pending>|<current branch>\s*@\s*pending" "$log_file"; then
+if grep -En "commit:[[:space:]]*<pending>|@[[:space:]]*pending|<pending>[[:space:]]*@|copilot/<pending>|<current branch>[[:space:]]*@[[:space:]]*pending" "$log_file"; then
   echo "ERROR: $log_file contains pending commit placeholders. Replace with a real SHA or 'commit: unrecoverable' + rationale." >&2
   exit 1
 fi

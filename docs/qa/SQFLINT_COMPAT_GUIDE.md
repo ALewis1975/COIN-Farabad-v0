@@ -16,6 +16,7 @@ Use this mapping before running `sqflint -e w` so compatibility issues are fixed
 | Bare `keys _map` | sqflint cannot parse `keys` as an operator. | `_keysFn` compile helper (see §5). |
 | Direct `trim _value` | `trim` parsing can fail in sqflint compatibility mode. | `_trimFn` compile helper (see §2). |
 | Direct `fileExists _path` | Similar parser-compat issue as `trim`. | `_fileExistsFn` compile helper (see §2). |
+| HashMap method form `_map get key` | Method-style parsing can fail. | `_hget` compile helper (see §3). |
 | HashMap method form `_map getOrDefault [k, d]` | Method-style parsing can fail. | `_hg` compile helper (see §3). |
 | `isNotEqualTo` | sqflint does not recognise this operator. | `!(_a isEqualTo _b)` |
 
@@ -29,6 +30,7 @@ Every helper is declared at the top of the file (after `exitWith` guards, before
 |---|---|---|
 | `_trimFn` | `compile "params ['_s']; trim _s"` | `[_value] call _trimFn` |
 | `_fileExistsFn` | `compile "params ['_p']; fileExists _p"` | `[_path] call _fileExistsFn` |
+| `_hget` | `compile "params ['_h','_k']; (_h) get _k"` | `[_map, _key] call _hget` |
 | `_hg` | `compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]"` | `[_map, _key, _default] call _hg` |
 | `_hmCreate` | `compile "params ['_a']; createHashMapFromArray _a"` | `[[key1,val1,...]] call _hmCreate` |
 | `_hmFrom` | `compile "private _pairs = _this; createHashMapFromArray _pairs"` | `[[k,v],[k,v]] call _hmFrom` |
