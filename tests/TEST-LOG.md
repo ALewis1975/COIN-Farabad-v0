@@ -26,6 +26,22 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | 4 | Dedicated/JIP validation | Dedicated server with a late-joining client: verify object-bound JIP replay attaches recruitment actions and server-side spawn gates still enforce role/range/class checks. | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
 
 ---
+
+
+## 2026-05-15 — Helicopter taxi→takeoff dip / crew bailout fix (Mode A)
+
+**Branch/Commit:** copilot/fix-helicopter-takeoff-issue-again (working tree validated in-session)
+
+**Scenario:** Helicopter departures from the ambient airbase were dipping into the ground at the seam between `BIS_fnc_unitPlay` taxi playback and AI-controlled takeoff. The dip caused crew to bail out and the resulting parachuting AI appeared frozen mid-air. Fix: in `functions/ambiance/fn_airbasePlaneDepart.sqf`, immediately after `unitPlay` returns and **before** AI `PATH`/`MOVE`/`FSM` is re-enabled, unconditionally commit the helo to a hover with `engineOn`, `land "NONE"`, `flyInHeight` (tunable `airbase_v1_rw_takeoff_alt_low_m`, default 3 m), and a forward+upward `setVelocityModelSpace` kick (new tunables `airbase_v1_rw_handoff_forward_mps`/`airbase_v1_rw_handoff_up_mps`). Removed the earlier gated `if (_a0 < 1.5)` nudge since the new path is unconditional and runs earlier in the transition window.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Compat scan on changed file | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf` | PASS | No banned constructs introduced. |
+| 2 | sqflint lint on changed file | `sqflint -e w functions/ambiance/fn_airbasePlaneDepart.sqf` | BLOCKED | sqflint not installed in this sandbox; compat scan covers the parser-compat surface. |
+| 3 | Runtime smoke: rotary-wing departure | Hosted/local MP: trigger an airbase rotary-wing departure and observe the taxi→takeoff seam. Expect no ground impact, no crew bailout, and a smooth climb-out following the existing outbound markers / climb profile. | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 4 | Dedicated/JIP validation | Dedicated server: run a full airbase rotary-wing rotation with a JIP client to confirm the handoff behavior replicates and no late-join clients see crew-bailout artifacts. | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+
+---
 ## 2026-05-15 — Recruitment container netId replay (Mode A)
 
 **Branch/Commit:** copilot/fix-recruitment-addaction @ a895c9a (working tree validated in-session)
