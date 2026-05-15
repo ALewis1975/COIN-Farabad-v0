@@ -252,6 +252,8 @@ Acceptance:
 
 **Goal:** prove lifecycle loops in representative scenarios.
 
+Execution detail for the Phase 4 sweep and the follow-on adaptive COIN behavior track is captured in `docs/planning/Subsystem_Reliability_and_Adaptive_COIN_Plan.md`.
+
 Priority order:
 
 1. AIRBASE / CASREQ
@@ -307,6 +309,7 @@ Acceptance:
 | `docs/architecture/Architecture_and_Readiness_Plan.md` | Historical assessment baseline (B-) and governance framing. Still relevant for §1 context; this plan is the active forward roadmap. |
 | `docs/qa/Pre_Dedicated_Mission_Completion_Audit_2026-04-06.md` | Canonical subsystem completion ledger. Phases 4–5 close items off this board. |
 | `docs/planning/Task_Decomposition.md` | Workstream / track decomposition. Phases here map to its tracks 1–7. |
+| `docs/planning/Subsystem_Reliability_and_Adaptive_COIN_Plan.md` | Phase 4 reliability-sweep execution contract plus the follow-on adaptive enemy/population behavior track. |
 | `docs/security/RemoteExec_Hardening_Plan.md` | Policy definition for the RPC surface. |
 | `docs/security/RemoteExec_Endpoint_Audit_Matrix.md` | Phase 1 live audit ledger derived from the hardening plan. |
 | `docs/architecture/State_Ownership_Ledger.md` | Phase 2 single-writer ledger for replicated `ARC_pub_*` keys and subsystem-runtime replicated state. |
@@ -342,6 +345,10 @@ Process:
   - `docs/security/RemoteExec_Endpoint_Audit_Matrix.md` v1.3 — completed audit batch 3 for CASREQ/Airbase + Logistics/Medical/CASEVAC endpoint set.
   - §3.5 S4/S5 statuses for all Airbase/TOWER client→server endpoints are now explicit.
   - New §3.6 endpoint group added for CASREQ + Logistics/Medical/CASEVAC with four new findings (F-AIR-1, F-CAS-1, F-LOG-1, F-MED-1).
+- No phase / scope / non-goal changes.
+
+### v1.4 — 2026-05-14
+- Added `docs/planning/Subsystem_Reliability_and_Adaptive_COIN_Plan.md` as the Phase 4 execution contract for subsystem reliability sweeps and the follow-on adaptive COIN behavior track.
 - No phase / scope / non-goal changes.
 
 ### v1.2 — 2026-05-08
