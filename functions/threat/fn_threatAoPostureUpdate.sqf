@@ -42,6 +42,7 @@ private _districtIds = [
 ];
 
 // Posture bands are deliberately coarse so single incidents do not whipsaw district posture.
+// Keep these thresholds aligned with threatEconomySnapshotBuild threshold metadata.
 private _attacksElevatedMin = 2;
 private _attacksHighMin = 5;
 private _attacksCriticalMin = 8;

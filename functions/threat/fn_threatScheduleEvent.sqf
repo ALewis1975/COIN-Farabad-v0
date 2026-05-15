@@ -20,6 +20,7 @@
       5: NUMBER budgetCost (default 1)
       6: STRING district posture (default "NORMAL")
       7: STRING threat intent (default "IED_PRESSURE")
+          Known intents: IED_PRESSURE, AMBUSH, VBIED_ATTACK, SUICIDE_ATTACK.
 
     Returns:
       BOOL (true = record scheduled, false = skipped/error)

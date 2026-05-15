@@ -64,8 +64,8 @@ private _districtIds = [
     "D11","D12","D13","D14","D15","D16","D17","D18","D19","D20"
 ];
 
-private _riskMapSched = ["threat_v0_district_risk", createHashMap] call ARC_fnc_stateGet;
-if (!(_riskMapSched isEqualType createHashMap)) then { _riskMapSched = createHashMap; };
+private _riskMap = ["threat_v0_district_risk", createHashMap] call ARC_fnc_stateGet;
+if (!(_riskMap isEqualType createHashMap)) then { _riskMap = createHashMap; };
 
 private _civDistricts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
 if (!(_civDistricts isEqualType createHashMap)) then { _civDistricts = createHashMap; };
@@ -118,7 +118,7 @@ private _scheduledAny = false;
     if (_secLevel isEqualTo "HIGH_RISK") then { _tier = 2; };
     if (_secLevel isEqualTo "CRITICAL") then { _tier = 3; };
 
-    private _rEntry = [_riskMapSched, _districtId, createHashMap] call _hg;
+    private _rEntry = [_riskMap, _districtId, createHashMap] call _hg;
     if (!(_rEntry isEqualType createHashMap)) then { _rEntry = createHashMap; };
     private _riskLevel = [_rEntry, "risk_level", 30] call _hg;
     if (!(_riskLevel isEqualType 0)) then { _riskLevel = 30; };
@@ -197,6 +197,7 @@ private _scheduledAny = false;
         ["threat_v0_economy_last_allowed_decision", _allowDecision] call ARC_fnc_stateSet;
         diag_log format ["[ARC][THREAT] ARC_fnc_threatSchedulerTick: governor allowed district=%1 posture=%2 type=%3 subtype=%4 tier=%5 cost=%6 intel=%7", _districtId, _secLevel, _threatType, _threatSubtype, _tier, _spendCost, _intelQuality];
 
+        // ARC_fnc_threatScheduleEvent args: district, tier, type, subtype, intelQuality, budgetCost, posture, intent.
         private _scheduled = [_districtId, _tier, _threatType, _threatSubtype, _intelQuality, _spendCost, _secLevel, _threatIntent] call ARC_fnc_threatScheduleEvent;
 
         if (_scheduled) then

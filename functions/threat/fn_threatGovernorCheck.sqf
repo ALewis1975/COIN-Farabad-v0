@@ -33,6 +33,7 @@ if (!_enabled) exitWith {[false, "THREAT_DISABLED"]};
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _now = serverTime;
 private _typeU = toUpper _threatType;
+// Keep threat-cost bands aligned with threatEconomySnapshotBuild threshold metadata.
 private _spendCost = 1;
 if (_typeU in ["RAID", "AMBUSH", "ATTACK", "VBIED"]) then { _spendCost = 2; };
 if (_typeU isEqualTo "SUICIDE") then { _spendCost = 3; };
