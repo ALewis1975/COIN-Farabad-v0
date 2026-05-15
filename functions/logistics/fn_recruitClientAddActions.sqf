@@ -83,7 +83,8 @@ private _ids = [];
     private _id = _container addAction [
         _text,
         {
-            params ["_target", "_caller", "_actionId", "_args"];
+            params ["_target", "_caller", ["_actionId", -1, [0]], "_args"];
+            if (_actionId < 0) exitWith {false};
             _args params [
                 ["_class", "", [""]]
             ];
