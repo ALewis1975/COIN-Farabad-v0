@@ -19,6 +19,13 @@ params [
 if (isNull _obj) exitWith {false};
 if !(_obj getVariable ["ARC_isIedEvidence", false]) exitWith {false};
 
+private _vanillaActionsEnabled = missionNamespace getVariable ["ARC_vanillaAddActionsEnabled", false];
+if (!(_vanillaActionsEnabled isEqualType true)) then { _vanillaActionsEnabled = false; };
+
+private _evidenceActionsEnabled = missionNamespace getVariable ["ARC_iedEvidenceAddActionsEnabled", _vanillaActionsEnabled];
+if (!(_evidenceActionsEnabled isEqualType true)) then { _evidenceActionsEnabled = _vanillaActionsEnabled; };
+if (!_evidenceActionsEnabled) exitWith {false};
+
 private _nid = netId _obj;
 if (_nid isEqualTo "") exitWith {false};
 
@@ -28,7 +35,7 @@ if (!isNil { missionNamespace getVariable _key }) exitWith {true};
 private _id = _obj addAction [
     "Collect evidence",
     {
-        params ["_target", "_caller", "_actionId", "_args"];
+        params ["", "_caller", "", "_args"];
         _args params ["_nid"];
 
         [_nid, _caller] remoteExec ["ARC_fnc_iedCollectEvidence", 2];

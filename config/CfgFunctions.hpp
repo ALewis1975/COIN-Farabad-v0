@@ -17,6 +17,7 @@ class CfgFunctions
             class farabadWarn {};
             class farabadError {};
             class paramAssert {};
+            class aceClientVerifyInteractions {};
 
             class stateInit {};
             class stateLoad {};

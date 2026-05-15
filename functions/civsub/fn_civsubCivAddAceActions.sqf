@@ -25,8 +25,41 @@ params [
 if (isNull _civ) exitWith {false};
 if !(side _civ isEqualTo civilian) exitWith {false};
 
-// ACE present?
-if (isNil "ace_interact_menu_fnc_createAction" || {isNil "ace_interact_menu_fnc_addActionToObject"}) exitWith {false};
+private _aceInteractionsEnabled = missionNamespace getVariable ["ARC_civsubAceInteractionsEnabled", true];
+if (!(_aceInteractionsEnabled isEqualType true)) then { _aceInteractionsEnabled = true; };
+if (!_aceInteractionsEnabled) exitWith {false};
+
+// ACE may still be compiling when JIP/client-side remoteExec actions arrive.
+if (isNil "ace_interact_menu_fnc_createAction" || {isNil "ace_interact_menu_fnc_addActionToObject"}) exitWith
+{
+    if !(_civ getVariable ["civsub_v1_ace_actions_retrying", false]) then
+    {
+        _civ setVariable ["civsub_v1_ace_actions_retrying", true, false];
+        [_civ] spawn {
+            params [
+                ["_retryCiv", objNull, [objNull]]
+            ];
+
+            for "_i" from 1 to 45 do
+            {
+                if (isNull _retryCiv) exitWith {};
+                if (!isNil "ace_interact_menu_fnc_createAction" && {!isNil "ace_interact_menu_fnc_addActionToObject"}) exitWith {};
+                uiSleep 1;
+            };
+
+            _retryCiv setVariable ["civsub_v1_ace_actions_retrying", false, false];
+            if (isNull _retryCiv) exitWith {};
+
+            if (isNil "ace_interact_menu_fnc_createAction" || {isNil "ace_interact_menu_fnc_addActionToObject"}) exitWith
+            {
+                diag_log format ["[CIVSUB][ACE][WARN] ARC_fnc_civsubCivAddAceActions: ACE interact menu functions not ready for civ netId=%1", netId _retryCiv];
+            };
+
+            [_retryCiv] call ARC_fnc_civsubCivAddAceActions;
+        };
+    };
+    false
+};
 
 if (_civ getVariable ["civsub_v1_ace_actions_added", false]) exitWith {true};
 _civ setVariable ["civsub_v1_ace_actions_added", true];
@@ -42,6 +75,7 @@ if (_legacy) then {
         "CIVSUB: Show Papers",
         "",
         {
+            params ["_target"];
             [player, _target] remoteExecCall ["ARC_fnc_civsubInteractShowPapers", 2];
         },
         {true}
@@ -53,6 +87,7 @@ if (_legacy) then {
         "CIVSUB: Search & Check Papers",
         "",
         {
+            params ["_target"];
             [player, _target] remoteExecCall ["ARC_fnc_civsubInteractCheckPapers", 2];
         },
         {true}
@@ -64,6 +99,7 @@ if (_legacy) then {
         "CIVSUB: Mark Detained",
         "",
         {
+            params ["_target"];
             [player, _target] remoteExecCall ["ARC_fnc_civsubInteractDetain", 2];
         },
         {true}
@@ -75,6 +111,7 @@ if (_legacy) then {
         "CIVSUB: Release Civilian",
         "",
         {
+            params ["_target"];
             [player, _target] remoteExecCall ["ARC_fnc_civsubInteractRelease", 2];
         },
         {true}
@@ -88,6 +125,7 @@ private _aHandoff = [
     "CIVSUB: Handoff to SHERIFF",
     "",
     {
+        params ["_target"];
         [player, _target] remoteExecCall ["ARC_fnc_civsubInteractHandoffSheriff", 2];
     },
     {true}

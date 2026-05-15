@@ -14,6 +14,8 @@
 
 if (!hasInterface) exitWith {false};
 
+private _trimFn = compile "params ['_s']; trim _s";
+
 params [
     ["_obj", objNull],
     ["_actionText", ""],
@@ -23,13 +25,20 @@ params [
 if (isNull _obj) exitWith {false};
 if (_actionText isEqualTo "" || _kind isEqualTo "") exitWith {false};
 
+private _vanillaActionsEnabled = missionNamespace getVariable ["ARC_vanillaAddActionsEnabled", false];
+if (!(_vanillaActionsEnabled isEqualType true)) then { _vanillaActionsEnabled = false; };
+
+private _objectiveActionsEnabled = missionNamespace getVariable ["ARC_objectiveAddActionsEnabled", _vanillaActionsEnabled];
+if (!(_objectiveActionsEnabled isEqualType true)) then { _objectiveActionsEnabled = _vanillaActionsEnabled; };
+if (!_objectiveActionsEnabled) exitWith {false};
+
 private _nid = netId _obj;
 if (_nid isEqualTo "") exitWith {false};
 
 private _key = format ["ARC_objAct_%1", _nid];
 if (!isNil { missionNamespace getVariable _key }) exitWith {true};
 
-private _kindU = toUpper (trim _kind);
+private _kindU = toUpper ([_kind] call _trimFn);
 
 // IED Phase 1: suspicious-object objectives use a two-step interaction:
 //   1) DISCOVER / INSPECT (sets discovered state; reveals the "render safe" action)
@@ -51,7 +60,7 @@ if (_kindU in ["IED_DEVICE", "VBIED_VEHICLE"]) then
     private _idInspect = _obj addAction [
         _inspectText,
         {
-            params ["_target", "_caller", "_actionId", "_args"];
+            params ["_target", "_caller", "", "_args"];
             _args params ["_kind"]; // objectiveKind
             [_target, _caller, _kind, "DISCOVER"] call ARC_fnc_clientObjectiveInteract;
         },
@@ -70,7 +79,7 @@ if (_kindU in ["IED_DEVICE", "VBIED_VEHICLE"]) then
         _idScan = _obj addAction [
             _scanText,
             {
-                params ["_target", "_caller", "_actionId", "_args"];
+                params ["_target", "_caller", "", "_args"];
                 _args params ["_kind"]; // objectiveKind
                 [_target, _caller, _kind, "DISCOVER_SCAN"] call ARC_fnc_clientObjectiveInteract;
             },
@@ -87,7 +96,7 @@ if (_kindU in ["IED_DEVICE", "VBIED_VEHICLE"]) then
     private _idComplete = _obj addAction [
         _actionText,
         {
-            params ["_target", "_caller", "_actionId", "_args"];
+            params ["_target", "_caller", "", "_args"];
             _args params ["_kind"]; // objectiveKind
             [_target, _caller, _kind, "COMPLETE"] call ARC_fnc_clientObjectiveInteract;
         },
@@ -104,7 +113,7 @@ if (_kindU in ["IED_DEVICE", "VBIED_VEHICLE"]) then
     private _idDet = _obj addAction [
         "Detonate in place (TOC approved)",
         {
-            params ["_target", "_caller", "_actionId", "_args"];
+            params ["_target", "_caller", "", "_args"];
             _args params ["_kind"];
             ["DET_IN_PLACE"] call ARC_fnc_iedClientExecuteDisposition;
         },
@@ -125,7 +134,7 @@ else
     private _id = _obj addAction [
         _actionText,
         {
-            params ["_target", "_caller", "_actionId", "_args"];
+            params ["_target", "_caller", "", "_args"];
             _args params ["_kind"]; // objectiveKind
 
             [_target, _caller, _kind, "COMPLETE"] call ARC_fnc_clientObjectiveInteract;
