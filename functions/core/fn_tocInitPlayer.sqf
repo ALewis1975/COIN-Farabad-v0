@@ -731,7 +731,7 @@ _obj addAction ["[MOBILE OPS] Open Ops Screen", { [] call ARC_fnc_uiOpenOpsScree
                 if (!(_log isEqualType []) || {(count _log) isEqualTo 0}) exitWith { ["No intel entries yet.", "INFO", "TOAST"] call ARC_fnc_clientHint; };
 
                 private _last = _log select ((count _log) - 1);
-                _last params ["_iid", "_t", "_cat", "_sum", "_p", "_meta"];
+                _last params ["_iid", "", "_cat", "_sum", "", ""];
                 [format ["%1 (%2)\n%3", _iid, _cat, _sum], "INFO", "HINT"] call ARC_fnc_clientHint;
             }];
 
@@ -847,7 +847,7 @@ if (!(player getVariable ['ARC_fieldSitrepActionsAdded', false])) then
     private _pfx = format ['[Player] Actions [%1]:', _tag];
 
     private _condSitrep  = "((missionNamespace getVariable ['ARC_sitrepInWorldActionsEnabled', false]) isEqualTo true) && {[player] call ARC_fnc_clientCanSendSitrep}";
-    private _condFollow  = "[] call ARC_fnc_intelClientCanRequestFollowOn";
+    // Follow-on requests are captured inside the SITREP workflow; no standalone condition needed.
     private _condAccept  = "((missionNamespace getVariable ['ARC_sitrepInWorldActionsEnabled', false]) isEqualTo true) && {[] call ARC_fnc_intelClientCanAcceptOrder}";
     private _condIncAcc  = "((missionNamespace getVariable ['ARC_sitrepInWorldActionsEnabled', false]) isEqualTo true) && {([player] call ARC_fnc_rolesIsAuthorized)} && { (missionNamespace getVariable ['ARC_activeTaskId','']) != '' } && { !(missionNamespace getVariable ['ARC_activeIncidentAccepted', false]) }";
 
@@ -917,11 +917,11 @@ if (!(player getVariable ['ARC_fieldSitrepActionsAdded', false])) then
         "ARC: Accept TOC Order",
         "",
         {
-            params ["_target", "_player", "_params"];
+            params ["", "", ""];
             [] spawn ARC_fnc_intelClientAcceptOrder;
         },
         {
-            params ["_target", "_player", "_params"];
+            params ["", "", ""];
             ((missionNamespace getVariable ["ARC_tocAceInteractionsEnabled", true]) isEqualTo true)
             && { [] call ARC_fnc_intelClientCanAcceptOrder }
         }
@@ -933,11 +933,11 @@ if (!(player getVariable ['ARC_fieldSitrepActionsAdded', false])) then
         "ARC: Accept Active Incident",
         "",
         {
-            params ["_target", "_player", "_params"];
+            params ["", "_player", ""];
             [_player] remoteExec ["ARC_fnc_tocRequestAcceptIncident", 2];
         },
         {
-            params ["_target", "_player", "_params"];
+            params ["", "_player", ""];
             ((missionNamespace getVariable ["ARC_tocAceInteractionsEnabled", true]) isEqualTo true)
             && { [_player] call ARC_fnc_rolesIsAuthorized }
             && { (missionNamespace getVariable ["ARC_activeTaskId", ""]) != "" }
