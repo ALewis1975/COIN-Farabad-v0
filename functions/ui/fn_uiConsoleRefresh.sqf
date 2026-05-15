@@ -5,6 +5,7 @@
 
     UI09 tab model:
       DASH      - Dashboard
+      COMMS     - ACRE/SOI + ACE/KAT CASEVAC integration
       INTEL     - Intelligence (S2)
       OPS       - Operations (S3)
       AIR       - Airbase snapshot + tower controls
@@ -314,6 +315,14 @@ switch (_tab) do
         [_display] call ARC_fnc_uiConsoleBoardsPaint;
     };
 
+    case "COMMS":
+    {
+        if (!isNull _ctrlDetailsGrp) then { _ctrlDetailsGrp ctrlShow true; };
+        if (!isNull _ctrlDetails) then { _ctrlDetails ctrlShow true; };
+        call _clampMainGroupToListRegion;
+
+        [_display] call ARC_fnc_uiConsoleCommsPaint;
+    };
 
 case "DASH":
     {

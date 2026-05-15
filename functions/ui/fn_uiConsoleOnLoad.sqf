@@ -218,6 +218,9 @@ lbClear _ctrlTabs;
 _tabIds pushBack "DASH";
 _ctrlTabs lbAdd "COP / DASH";
 
+_tabIds pushBack "COMMS";
+_ctrlTabs lbAdd "COMMS / MED";
+
 // TOC snapshot board (queue + orders + incident)
 if (_canTocTab) then
 {

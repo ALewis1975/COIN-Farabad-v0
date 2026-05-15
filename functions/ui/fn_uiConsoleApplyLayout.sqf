@@ -35,6 +35,7 @@ if (isNull _display) exitWith {"FULL"};
 // -----------------------------------------------------------------------
 private _tabLayouts = [
     ["DASH",    false, "STRUCTURED_TEXT", false, 0,    0.50],
+    ["COMMS",   false, "STRUCTURED_TEXT", false, 0,    0.47],
     ["BOARDS",  false, "STRUCTURED_TEXT", false, 0,    0.50],
     ["INTEL",   false, "LIST",            false, 0,    0.47],
     ["OPS",     false, "FRAMES_3",        false, 0,    0.50],
