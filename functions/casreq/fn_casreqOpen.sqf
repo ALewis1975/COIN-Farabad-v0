@@ -85,6 +85,7 @@ private _record = [
     // Extended fields
     ["incident_id", _incidentId],
     ["nine_line",   _safeNine],
+    ["remarks",     _safeRemarks],
     ["result",      ""],
     ["closed_at",   -1]
 ];
