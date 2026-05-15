@@ -11,6 +11,25 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-15 — Disable vanilla addActions / enable ACE interactions (Mode A)
+
+**Branch/Commit:** copilot/disable-addactions-enable-ace-interactions @ 485aff4
+
+**Scenario:** Disabled vanilla in-game addAction defaults, kept ACE interaction toggles enabled, added client-side ACE interaction readiness logging, and guarded remaining vanilla addAction attachment points.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline changed-file compatibility scan | `python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf initPlayerLocal.sqf functions/core/fn_tocInitPlayer.sqf functions/intel/fn_intelInitClient.sqf functions/civsub/fn_civsubCivAddAceActions.sqf` | PASS | Baseline scan passed before edits. |
+| 2 | Baseline changed-file sqflint | `sqflint -e w <file>` per touched startup/interaction file | FAIL | Existing `functions/civsub/fn_civsubCivAddAceActions.sqf` ACE statement `_target` scope warnings caused sqflint exit 1 before edits. |
+| 3 | Final compatibility scan | `python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf initPlayerLocal.sqf config/CfgFunctions.hpp functions/core/fn_aceClientVerifyInteractions.sqf functions/core/fn_tocInitPlayer.sqf functions/intel/fn_intelInitClient.sqf functions/civsub/fn_civsubCivAddAceActions.sqf functions/civsub/fn_civsubCivAddContactActions.sqf functions/core/fn_clientAddObjectiveAction.sqf functions/ied/fn_iedClientAddEvidenceAction.sqf functions/logistics/fn_recruitClientAddActions.sqf` | PASS | No known parser-compat patterns found. |
+| 4 | Final sqflint | `sqflint -e w <file>` per changed SQF file | PASS | All changed SQF files passed after one-file-per-invocation validation. |
+| 5 | Recruitment static contract | `bash tests/static/recruitment_container_contract_checks.sh` | PASS | Direct script execution is not executable in this sandbox (`Permission denied`); running via `bash` passed. |
+| 6 | Whitespace check | `git --no-pager diff --check` | PASS | No whitespace errors in the working diff. |
+| 7 | Runtime ACE/addAction smoke | Hosted/local MP session with ACE loaded: verify vanilla addActions do not attach and ACE self/object interactions appear after readiness log | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 8 | Dedicated/JIP validation | Dedicated server with at least one JIP client: verify ACE interaction retry paths and replicated toggle state | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+
+---
+
 ## 2026-05-15 — Recruit container Object Init activation (Mode A)
 
 **Branch/Commit:** copilot/implement-object-init-recruitment @ 6fd9f1c (working tree validated in-session)
