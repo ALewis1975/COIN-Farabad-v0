@@ -11,6 +11,32 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-15 — QA diagnostic sweep for recent changes (Mode G)
+
+**Branch/Commit:** copilot/qa-diagnostic-check-recent-changes @ 1c2c804
+
+**Scenario:** Ran static QA and diagnostic checks against the recent merged changes touching TOC/intel in-world actions, recruitment container configuration, and test-log coverage.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Recent diff review | `git status --short --branch && git log --oneline --decorate -8 && git diff --stat HEAD~1..HEAD` | PASS | Working tree started clean; recent diff includes `docs/architecture/Configuration_Ownership_Ledger.md`, `functions/core/fn_tocInitPlayer.sqf`, `functions/intel/fn_intelInitClient.sqf`, `initServer.sqf`, and `tests/TEST-LOG.md`. |
+| 2 | Whitespace and conflict diagnostics | `git diff --check HEAD~1..HEAD && find . -path ./.git -prune -o -type f ! -name "*.md" -print0 \| xargs -0 grep -nE "^(<<<<<<< .+\|=======\|>>>>>>> .+)$"` | PASS | No whitespace errors or unresolved merge conflict markers in non-markdown files. |
+| 3 | Changed-file SQF compatibility | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_tocInitPlayer.sqf functions/intel/fn_intelInitClient.sqf initServer.sqf` | PASS | No known parser-compat patterns found. |
+| 4 | Changed-file sqflint | `sqflint -e w functions/core/fn_tocInitPlayer.sqf && sqflint -e w functions/intel/fn_intelInitClient.sqf && sqflint -e w initServer.sqf` | PASS | Installed `sqflint==0.3.2` in the sandbox user environment; changed SQF files linted clean. |
+| 5 | RemoteExec contract | `bash scripts/dev/check_remoteexec_contract.sh` | PASS | Air/Tower RemoteExec guard and allowlist contract checks passed. |
+| 6 | Test-log commit guard | `bash scripts/dev/check_test_log_commits.sh` | PASS | No pending commit placeholders found after installing `ripgrep` in the sandbox. |
+| 7 | State migration validation | `python3 scripts/dev/validate_state_migrations.py` | PASS | State migration validation passed. |
+| 8 | Marker index validation | `python3 scripts/dev/validate_marker_index.py` | PASS | Marker index validation passed. |
+| 9 | Static contract tests | `for s in tests/static/*.sh; do bash "$s"; done` | PASS | All static contract scripts passed, including recruitment container, airbase, CASREQ, threat, persistence, and validation framework checks. |
+| 10 | Console conflict diagnostic | `bash scripts/dev/check_console_conflicts.sh` | FAIL | Pre-existing duplicate console IDCs remain: `78201`, `78202`, and `78211`, plus documented range warnings. This branch did not modify `config/CfgDialogs.hpp`. |
+| 11 | Runtime smoke validation | Hosted/local MP with required mods; verify recent TOC/intel action toggles and Huron recruitment container addActions/spawn flow in-game | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 12 | Dedicated/JIP validation | Dedicated server with at least one JIP client; verify server-authoritative recruitment spawning, replicated settings, and late-client action initialization | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+| 13 | ACE interaction follow-up fix | Static review of `functions/core/fn_tocInitPlayer.sqf` and `functions/intel/fn_intelInitClient.sqf` after report that ACE interactions were not working | PASS | Reworked ARC ACE self-interact registration to wait/retry for ACE interact menu functions and avoid empty `params` bindings in ACE action callbacks. |
+| 14 | ACE fix changed-file validation | `git diff --check && python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_tocInitPlayer.sqf functions/intel/fn_intelInitClient.sqf && sqflint -e w functions/core/fn_tocInitPlayer.sqf && sqflint -e w functions/intel/fn_intelInitClient.sqf && bash scripts/dev/check_remoteexec_contract.sh && bash scripts/dev/check_test_log_commits.sh` | PASS | Changed SQF files lint clean and existing RemoteExec/test-log diagnostics remain clean. |
+| 15 | Runtime smoke: ACE interactions | Hosted/local MP with ACE loaded; verify ACE self actions show under self-interact for Accept TOC Order, Accept Active Incident, Intel Debrief RTB, and Process EPW RTB when conditions are satisfied | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+
+---
+
 ## 2026-05-15 — In-world action toggle split (Mode B)
 
 **Branch/Commit:** copilot/explain-repository-structure-again @ 82c9c39 (working tree validated in-session)
