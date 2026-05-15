@@ -135,12 +135,18 @@ missionNamespace setVariable ["ARC_sitrepInWorldActionsEnabled", true, false];
 // Command-gated AI recruitment from Huron Cargo Containers.
 // Clients only render actions; the server validates role, sender, class whitelist,
 // Object Init opt-in, and range.
-// To enable a specific container as a recruiter, use this exact Eden Object Init:
-// if (isServer) then {
-//     this setVariable ["ARC_isRecruitContainer", true, true];
-// };
+// Two opt-in paths are supported on the server:
+//   1) Eden Object Init (per-container):
+//      if (isServer) then {
+//          this setVariable ["ARC_isRecruitContainer", true, true];
+//      };
+//   2) Eden Variable Name (preferred, no Init code required):
+//      Give the container the Variable Name "recruitment_01" (or another entry
+//      listed in ARC_recruitContainerNames below) and the server publisher will
+//      mark it automatically.
 missionNamespace setVariable ["ARC_recruitContainerEnabled", true, true];
 missionNamespace setVariable ["ARC_recruitContainerClasses", ["B_Slingload_01_Cargo_F"], true];
+missionNamespace setVariable ["ARC_recruitContainerNames", ["recruitment_01"], true];
 missionNamespace setVariable ["ARC_recruitContainerNetIds", [], true];
 missionNamespace setVariable ["ARC_recruitActionRangeM", 6, true];
 missionNamespace setVariable ["ARC_recruitGroupMaxUnits", 12, true];
@@ -958,6 +964,7 @@ missionNamespace setVariable ["ARC_operatorToggleAuditCatalog", [
         ["ARC_sitrepInWorldActionsEnabled", "bool"],
         ["ARC_recruitContainerEnabled", "bool"],
         ["ARC_recruitContainerNetIds", "array"],
+        ["ARC_recruitContainerNames", "array"],
         ["ARC_recruitActionRangeM", "number"],
         ["ARC_recruitGroupMaxUnits", "number"],
         ["ARC_recruitRequireSameFaction", "bool"],
@@ -987,6 +994,7 @@ private _arcDeclaredServerToggles = [
     "ARC_recruitContainerEnabled",
     "ARC_recruitContainerClasses",
     "ARC_recruitContainerNetIds",
+    "ARC_recruitContainerNames",
     "ARC_recruitActionRangeM",
     "ARC_recruitGroupMaxUnits",
     "ARC_recruitRequireSameFaction",
@@ -1027,6 +1035,7 @@ private _arcKnownToggleConsumers = [
     ["ARC_recruitContainerEnabled", "functions/logistics/fn_recruitClientInit.sqf + functions/logistics/fn_recruitSpawnRequest.sqf"],
     ["ARC_recruitContainerClasses", "functions/logistics/fn_recruitClientInit.sqf + functions/logistics/fn_recruitSpawnRequest.sqf"],
     ["ARC_recruitContainerNetIds", "functions/logistics/fn_recruitServerPublishContainers.sqf + functions/logistics/fn_recruitClientInit.sqf"],
+    ["ARC_recruitContainerNames", "functions/logistics/fn_recruitServerPublishContainers.sqf (Eden variable-name opt-in)"],
     ["ARC_recruitActionRangeM", "functions/logistics/fn_recruitClientAddActions.sqf + functions/logistics/fn_recruitSpawnRequest.sqf"],
     ["ARC_recruitGroupMaxUnits", "functions/logistics/fn_recruitSpawnRequest.sqf"],
     ["ARC_recruitRequireSameFaction", "functions/logistics/fn_recruitSpawnRequest.sqf"],
