@@ -71,6 +71,8 @@ private _civDistricts = missionNamespace getVariable ["civsub_v1_districts", cre
 if (!(_civDistricts isEqualType createHashMap)) then { _civDistricts = createHashMap; };
 
 // GREEN score only nudges intel quality; posture still owns threat selection.
+// >=70 means strong civil cooperation, <25 means weak civil cooperation;
+// the +/-0.10 adjustment is bounded so posture remains the dominant signal.
 private _greenStrongMin = 70;
 private _greenWeakMax = 25;
 private _intelGreenAdjust = 0.10;
@@ -197,8 +199,16 @@ private _scheduledAny = false;
         ["threat_v0_economy_last_allowed_decision", _allowDecision] call ARC_fnc_stateSet;
         diag_log format ["[ARC][THREAT] ARC_fnc_threatSchedulerTick: governor allowed district=%1 posture=%2 type=%3 subtype=%4 tier=%5 cost=%6 intel=%7", _districtId, _secLevel, _threatType, _threatSubtype, _tier, _spendCost, _intelQuality];
 
-        // ARC_fnc_threatScheduleEvent args: district, tier, type, subtype, intelQuality, budgetCost, posture, intent.
-        private _scheduled = [_districtId, _tier, _threatType, _threatSubtype, _intelQuality, _spendCost, _secLevel, _threatIntent] call ARC_fnc_threatScheduleEvent;
+        private _scheduled = [
+            _districtId,     // district
+            _tier,           // tier
+            _threatType,     // type
+            _threatSubtype,  // subtype
+            _intelQuality,   // intelQuality
+            _spendCost,      // budgetCost
+            _secLevel,       // posture
+            _threatIntent    // intent
+        ] call ARC_fnc_threatScheduleEvent;
 
         if (_scheduled) then
         {
