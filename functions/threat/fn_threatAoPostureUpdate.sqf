@@ -54,9 +54,21 @@ private _districtIds = [
 
     // Determine security level from observed attacks plus district risk.
     private _secLevel = "NORMAL";
-    if (_attackCount >= 5 || { _riskLevel >= 70 }) then { _secLevel = "HIGH_RISK"; };
-    if (_attackCount >= 2 && { _attackCount < 5 } && { _riskLevel < 70 }) then { _secLevel = "ELEVATED"; };
-    if (_attackCount >= 8 || { _riskLevel >= 85 }) then { _secLevel = "CRITICAL"; };
+    if (_attackCount >= 8 || { _riskLevel >= 85 }) then
+    {
+        _secLevel = "CRITICAL";
+    }
+    else
+    {
+        if (_attackCount >= 5 || { _riskLevel >= 70 }) then
+        {
+            _secLevel = "HIGH_RISK";
+        }
+        else
+        {
+            if (_attackCount >= 2) then { _secLevel = "ELEVATED"; };
+        };
+    };
 
     // Publish security level (replicated to all clients)
     missionNamespace setVariable [format ["ARC_district_%1_secLevel", _id], _secLevel, true];

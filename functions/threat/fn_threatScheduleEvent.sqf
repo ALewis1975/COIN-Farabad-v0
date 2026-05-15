@@ -50,7 +50,7 @@ if (_typeU isEqualTo "") then { _typeU = "IED"; };
 private _subtypeU = toUpper ([_threatSubtype] call _trimFn);
 if (_subtypeU isEqualTo "") then { _subtypeU = "IED_EMPLACED_SINGLE"; };
 private _postureU = toUpper ([_districtPosture] call _trimFn);
-if !(_postureU in ["NORMAL", "ELEVATED", "HIGH_RISK", "CRITICAL"]) then { _postureU = "NORMAL"; };
+if (!(_postureU in ["NORMAL", "ELEVATED", "HIGH_RISK", "CRITICAL"])) then { _postureU = "NORMAL"; };
 private _intentU = toUpper ([_threatIntent] call _trimFn);
 if (_intentU isEqualTo "") then { _intentU = "IED_PRESSURE"; };
 if (!(_intelQuality isEqualType 0) || { _intelQuality < 0 }) then
@@ -218,6 +218,7 @@ _stateTsNew = [_stateTsNew, "cleaned", -1] call _kvSet;
 _stateTsNew = [_stateTsNew, "expired", -1] call _kvSet;
 
 private _tele = [];
+// Keep legacy intel_level while adding explicit intel_quality for economy views.
 _tele = [_tele, "intel_level", _intelQuality] call _kvSet;
 _tele = [_tele, "intel_quality", _intelQuality] call _kvSet;
 _tele = [_tele, "cues_enabled", _intelQuality >= 0.35] call _kvSet;
@@ -279,9 +280,10 @@ switch (_familyU) do
     case "SUICIDE": { [_rec, "STAGED"] call ARC_fnc_threatLeadEmitFromOutcome; };
     default
     {
-        private _leadType = if ((_intentU find "AMBUSH") >= 0) then { "RAID" } else { "QRF" };
-        private _tag = if ((_intentU find "AMBUSH") >= 0) then { "AMBUSH_NETWORK" } else { "DISTRICT_ATTACK" };
-        private _disp = if ((_intentU find "AMBUSH") >= 0) then
+        private _isAmbush = (_intentU find "AMBUSH") >= 0;
+        private _leadType = if (_isAmbush) then { "RAID" } else { "QRF" };
+        private _tag = if (_isAmbush) then { "AMBUSH_NETWORK" } else { "DISTRICT_ATTACK" };
+        private _disp = if (_isAmbush) then
         {
             format ["Ambush Network Activity — %1", _districtId]
         }

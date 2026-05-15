@@ -206,6 +206,10 @@ private _scheduledAny = false;
             diag_log format ["[ARC][THREAT] ARC_fnc_threatSchedulerTick: budget spend did=%1 posture=%2 tier=%3 spent=%4 cost=%5", _districtId, _secLevel, _tier, _spentNow + _spendCost, _spendCost];
 
             _scheduledAny = true;
+        }
+        else
+        {
+            diag_log format ["[ARC][WARN] ARC_fnc_threatSchedulerTick: governor allowed but schedule failed district=%1 posture=%2 type=%3 subtype=%4 tier=%5", _districtId, _secLevel, _threatType, _threatSubtype, _tier];
         };
     } else {
         private _denyDecision = [
