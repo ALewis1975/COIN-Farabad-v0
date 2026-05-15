@@ -24,7 +24,7 @@ params [
     ["_taskId", "", [""]]
 ];
 
-private _callerOwner = remoteExecutedOwner;
+private _callerOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { 0 };
 if (!isServer) exitWith
 {
     private _clientOwner = clientOwner;

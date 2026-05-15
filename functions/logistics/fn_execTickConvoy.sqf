@@ -20,7 +20,7 @@
 // - ARC_convoy_departing_now: departure hint dedupe (10s)
 // - ARC_convoy_autolaunch_now: auto-launch hint dedupe (15s)
 
-private _callerOwner = remoteExecutedOwner;
+private _callerOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { 0 };
 if (!isServer) exitWith
 {
     private _clientOwner = clientOwner;
