@@ -387,7 +387,7 @@ if (_isPrisonerRole) then
 
 // ---------------------------------------------------------------------------
 // CIVSUB identity and interaction registration for prisoner units.
-// Assigns a CIVSUB uid and queues ACE/addAction interactions on clients so
+// Assigns a CIVSUB uid and queues vanilla addAction interactions on clients so
 // players can question and interact with prisoners via the contact dialog.
 // Guarded: only runs when CIVSUB is enabled and functions are compiled.
 // ---------------------------------------------------------------------------

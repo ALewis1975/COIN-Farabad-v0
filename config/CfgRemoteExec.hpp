@@ -122,7 +122,6 @@ class CfgRemoteExec
         class ARC_fnc_uiConsoleQAAuditClientReceive        { allowedTargets = 0; };
 
         // Persistent / JIP-critical (late joiners need these actions)
-        class ARC_fnc_civsubCivAddAceActions        { allowedTargets = 0; jip = 1; };
         class ARC_fnc_civsubCivAddContactActions    { allowedTargets = 0; jip = 1; };
         class ARC_fnc_clientAddObjectiveAction      { allowedTargets = 0; jip = 1; };
         class ARC_fnc_iedClientAddEvidenceAction    { allowedTargets = 0; jip = 1; };

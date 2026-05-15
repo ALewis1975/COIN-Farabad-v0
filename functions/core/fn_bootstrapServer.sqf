@@ -153,8 +153,8 @@ if (isNil { missionNamespace getVariable "ARC_iedProxRadiusM" }) then { missionN
 if (isNil { missionNamespace getVariable "ARC_iedPhase1_recordsCap" }) then { missionNamespace setVariable ["ARC_iedPhase1_recordsCap", 24]; };
 
 // IED discovery UX controls
-// - Keep "Scan" disabled by default; ACE tools + passive detection become the primary discovery method.
-if (isNil { missionNamespace getVariable "ARC_iedScanActionEnabled" }) then { missionNamespace setVariable ["ARC_iedScanActionEnabled", false, true]; };
+// - Keep "Scan" enabled by default for vanilla addAction discovery; passive detection remains available.
+if (isNil { missionNamespace getVariable "ARC_iedScanActionEnabled" }) then { missionNamespace setVariable ["ARC_iedScanActionEnabled", true, true]; };
 if (isNil { missionNamespace getVariable "ARC_iedPassiveDetectEnabled" }) then { missionNamespace setVariable ["ARC_iedPassiveDetectEnabled", true, true]; };
 if (isNil { missionNamespace getVariable "ARC_iedPassiveDetectRadiusM" }) then { missionNamespace setVariable ["ARC_iedPassiveDetectRadiusM", 12, true]; };
 
