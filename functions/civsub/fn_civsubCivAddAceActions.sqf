@@ -29,8 +29,11 @@ private _aceInteractionsEnabled = missionNamespace getVariable ["ARC_civsubAceIn
 if (!(_aceInteractionsEnabled isEqualType true)) then { _aceInteractionsEnabled = true; };
 if (!_aceInteractionsEnabled) exitWith {false};
 
-// ACE may still be compiling when JIP/client-side remoteExec actions arrive.
-if (isNil "ace_interact_menu_fnc_createAction" || {isNil "ace_interact_menu_fnc_addActionToObject"}) exitWith
+// ACE/CBA may still be initializing when JIP/client-side remoteExec actions arrive.
+private _readyNow = (uiNamespace getVariable ["ARC_aceInteractionsReady", false])
+    && { !isNil "ace_interact_menu_fnc_createAction" }
+    && { !isNil "ace_interact_menu_fnc_addActionToObject" };
+if (!_readyNow) exitWith
 {
     if !(_civ getVariable ["civsub_v1_ace_actions_retrying", false]) then
     {
@@ -40,20 +43,16 @@ if (isNil "ace_interact_menu_fnc_createAction" || {isNil "ace_interact_menu_fnc_
                 ["_retryCiv", objNull, [objNull]]
             ];
 
-            for "_i" from 1 to 45 do
+            if (isNull _retryCiv) exitWith {};
+
+            if (!([] call ARC_fnc_aceClientWaitInteractionsReady)) exitWith
             {
-                if (isNull _retryCiv) exitWith {};
-                if (!isNil "ace_interact_menu_fnc_createAction" && {!isNil "ace_interact_menu_fnc_addActionToObject"}) exitWith {};
-                uiSleep 1;
+                _retryCiv setVariable ["civsub_v1_ace_actions_retrying", false, false];
+                diag_log format ["[CIVSUB][ACE][WARN] ARC_fnc_civsubCivAddAceActions: ACE/CBA readiness timeout for civ netId=%1", netId _retryCiv];
             };
 
             _retryCiv setVariable ["civsub_v1_ace_actions_retrying", false, false];
             if (isNull _retryCiv) exitWith {};
-
-            if (isNil "ace_interact_menu_fnc_createAction" || {isNil "ace_interact_menu_fnc_addActionToObject"}) exitWith
-            {
-                diag_log format ["[CIVSUB][ACE][WARN] ARC_fnc_civsubCivAddAceActions: ACE interact menu functions not ready for civ netId=%1", netId _retryCiv];
-            };
 
             [_retryCiv] call ARC_fnc_civsubCivAddAceActions;
         };
