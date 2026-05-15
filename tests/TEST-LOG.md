@@ -31,6 +31,9 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | 10 | Console conflict diagnostic | `bash scripts/dev/check_console_conflicts.sh` | FAIL | Pre-existing duplicate console IDCs remain: `78201`, `78202`, and `78211`, plus documented range warnings. This branch did not modify `config/CfgDialogs.hpp`. |
 | 11 | Runtime smoke validation | Hosted/local MP with required mods; verify recent TOC/intel action toggles and Huron recruitment container addActions/spawn flow in-game | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
 | 12 | Dedicated/JIP validation | Dedicated server with at least one JIP client; verify server-authoritative recruitment spawning, replicated settings, and late-client action initialization | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+| 13 | ACE interaction follow-up fix | Static review of `functions/core/fn_tocInitPlayer.sqf` and `functions/intel/fn_intelInitClient.sqf` after report that ACE interactions were not working | PASS | Reworked ARC ACE self-interact registration to wait/retry for ACE interact menu functions and avoid empty `params` bindings in ACE action callbacks. |
+| 14 | ACE fix changed-file validation | `git diff --check && python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_tocInitPlayer.sqf functions/intel/fn_intelInitClient.sqf && sqflint -e w functions/core/fn_tocInitPlayer.sqf && sqflint -e w functions/intel/fn_intelInitClient.sqf && bash scripts/dev/check_remoteexec_contract.sh && bash scripts/dev/check_test_log_commits.sh` | PASS | Changed SQF files lint clean and existing RemoteExec/test-log diagnostics remain clean. |
+| 15 | Runtime smoke: ACE interactions | Hosted/local MP with ACE loaded; verify ACE self actions show under self-interact for Accept TOC Order, Accept Active Incident, Intel Debrief RTB, and Process EPW RTB when conditions are satisfied | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
 
 ---
 

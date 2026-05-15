@@ -907,21 +907,35 @@ if (!(player getVariable ['ARC_fieldSitrepActionsAdded', false])) then
 // This remains independent from vanilla addActions so ACE can stay enabled.
 [] spawn {
     uiSleep 0.5;
-    if (isNil "ace_interact_menu_fnc_createAction" || { isNil "ace_interact_menu_fnc_addActionToObject" }) exitWith {};
-
     if (player getVariable ["ARC_aceFieldCommandActionsAdded", false]) exitWith {};
-    player setVariable ["ARC_aceFieldCommandActionsAdded", true];
+    if (player getVariable ["ARC_aceFieldCommandActionsInitRunning", false]) exitWith {};
+    player setVariable ["ARC_aceFieldCommandActionsInitRunning", true];
+
+    for "_i" from 1 to 30 do
+    {
+        if (!isNil "ace_interact_menu_fnc_createAction" && { !isNil "ace_interact_menu_fnc_addActionToObject" }) exitWith {};
+        uiSleep 1;
+    };
+
+    if (isNil "ace_interact_menu_fnc_createAction" || { isNil "ace_interact_menu_fnc_addActionToObject" }) exitWith
+    {
+        player setVariable ["ARC_aceFieldCommandActionsInitRunning", false];
+        diag_log "[ARC][ACE][WARN] Field command ACE self-interact actions unavailable: ACE interact menu functions not ready.";
+    };
+
+    if (player getVariable ["ARC_aceFieldCommandActionsAdded", false]) exitWith
+    {
+        player setVariable ["ARC_aceFieldCommandActionsInitRunning", false];
+    };
 
     private _aAcceptOrder = [
         "ARC_ACCEPT_TOC_ORDER",
         "ARC: Accept TOC Order",
         "",
         {
-            params ["", "", ""];
             [] spawn ARC_fnc_intelClientAcceptOrder;
         },
         {
-            params ["", "", ""];
             ((missionNamespace getVariable ["ARC_tocAceInteractionsEnabled", true]) isEqualTo true)
             && { [] call ARC_fnc_intelClientCanAcceptOrder }
         }
@@ -933,13 +947,11 @@ if (!(player getVariable ['ARC_fieldSitrepActionsAdded', false])) then
         "ARC: Accept Active Incident",
         "",
         {
-            params ["", "_player", ""];
-            [_player] remoteExec ["ARC_fnc_tocRequestAcceptIncident", 2];
+            [player] remoteExec ["ARC_fnc_tocRequestAcceptIncident", 2];
         },
         {
-            params ["", "_player", ""];
             ((missionNamespace getVariable ["ARC_tocAceInteractionsEnabled", true]) isEqualTo true)
-            && { [_player] call ARC_fnc_rolesIsAuthorized }
+            && { [player] call ARC_fnc_rolesIsAuthorized }
             && { (missionNamespace getVariable ["ARC_activeTaskId", ""]) != "" }
             && { !(missionNamespace getVariable ["ARC_activeIncidentAccepted", false]) }
         }
@@ -947,6 +959,8 @@ if (!(player getVariable ['ARC_fieldSitrepActionsAdded', false])) then
     [player, 1, ["ACE_SelfActions"], _aAcceptInc] call ace_interact_menu_fnc_addActionToObject;
 
     diag_log "[ARC][ACE] Added field command ACE self-interact actions (accept order / accept incident).";
+    player setVariable ["ARC_aceFieldCommandActionsAdded", true];
+    player setVariable ["ARC_aceFieldCommandActionsInitRunning", false];
 };
 
 true
