@@ -22,6 +22,7 @@ grep -q 'class recruitClientAddActions' config/CfgFunctions.hpp
 grep -q 'class recruitServerPublishContainers' config/CfgFunctions.hpp
 grep -q 'class recruitSpawnRequest' config/CfgFunctions.hpp
 grep -q 'class ARC_fnc_recruitSpawnRequest[[:space:]]*{ allowedTargets = 2; };' config/CfgRemoteExec.hpp
+grep -q 'class ARC_fnc_recruitClientAddActions[[:space:]]*{ allowedTargets = 0; jip = 1; };' config/CfgRemoteExec.hpp
 
 grep -q 'ARC_recruitContainerEnabled' initServer.sqf
 grep -q 'ARC_recruitUnitWhitelist' initServer.sqf
@@ -40,6 +41,7 @@ grep -q 'ARC_recruitRequireSameFaction' functions/logistics/fn_recruitSpawnReque
 grep -q 'ARC_recruitContainerNetIds' functions/logistics/fn_recruitServerPublishContainers.sqf
 grep -q 'ARC_isRecruitContainer' functions/logistics/fn_recruitServerPublishContainers.sqf
 grep -q 'allMissionObjects' functions/logistics/fn_recruitServerPublishContainers.sqf
+grep -q 'remoteExec \["ARC_fnc_recruitClientAddActions", 0, _container\]' functions/logistics/fn_recruitServerPublishContainers.sqf
 grep -q 'objectFromNetId' functions/logistics/fn_recruitClientInit.sqf
 grep -q 'ARC_recruitContainerNetIds' functions/logistics/fn_recruitClientInit.sqf
 grep -q 'ARC_isRecruitContainer' functions/logistics/fn_recruitClientInit.sqf

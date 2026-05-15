@@ -126,6 +126,7 @@ class CfgRemoteExec
         class ARC_fnc_clientAddObjectiveAction      { allowedTargets = 0; jip = 1; };
         class ARC_fnc_iedClientAddEvidenceAction    { allowedTargets = 0; jip = 1; };
         class ARC_fnc_iedClientEnableEvidenceLogistics { allowedTargets = 0; jip = 1; };
+        class ARC_fnc_recruitClientAddActions       { allowedTargets = 0; jip = 1; };
     };
 
     class Commands
