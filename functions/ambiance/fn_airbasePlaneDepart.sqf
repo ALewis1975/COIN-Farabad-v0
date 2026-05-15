@@ -246,6 +246,19 @@ private _grp = group _pilot;
 } forEach _crewLive;
 if (!((leader _grp) isEqualTo _pilot)) then { _grp selectLeader _pilot; };
 
+// Validate despawn marker before disturbing idle crew. If this check runs after
+// taxi playback, rotary-wing aircraft may already be airborne and abort-to-idle
+// can eject crew into frozen ambient animations.
+private _despawnMkr = missionNamespace getVariable ["airbase_v1_plane_despawn_marker", "plane_despawn"];
+private _despawnPos = getMarkerPos _despawnMkr;
+private _despawnX = _despawnPos select 0;
+if (_despawnPos isEqualTo [0,0,0] || { _despawnX < 0 }) exitWith {
+    diag_log format ["[AIRBASESUB] %1 ABORT: despawn marker '%2' is missing or off-map (pos=%3). Place the marker anywhere on-map (x >= 0) along the departure flight path and restart.", _fid, _despawnMkr, _despawnPos];
+    _asset set ["state", "PARKED"];
+    _asset set ["activeFlight", ""];
+    false
+};
+
 // Stop idle animations and order a real walk-up boarding (NO moveIn)
 _veh lock false;
 
@@ -505,22 +518,6 @@ if (_isUAS) exitWith {
 };
 
 // --- takeoff / fly-out ---
-private _despawnMkr = missionNamespace getVariable ["airbase_v1_plane_despawn_marker", "plane_despawn"]; 
-private _despawnPos = getMarkerPos _despawnMkr;
-
-// Validate despawn marker position. A position at [0,0,0] means the marker is
-// missing; a negative x means the marker is off the west edge of the map (x < 0).
-// Either case will cause aircraft to fly off-map, hit the boundary, and freeze.
-// Abort to idle so a corrected marker can be placed.
-private _despawnX = _despawnPos select 0;
-if (_despawnPos isEqualTo [0,0,0] || { _despawnX < 0 }) exitWith {
-    diag_log format ["[AIRBASESUB] %1 ABORT: despawn marker '%2' is missing or off-map (pos=%3). Place the marker anywhere on-map (x >= 0) along the departure flight path and restart.", _fid, _despawnMkr, _despawnPos];
-    [_crewLive, _veh] call _fnAbortToIdle;
-    _asset set ["state", "PARKED"];
-    _asset set ["activeFlight", ""];
-    false
-};
-
 while { (count (waypoints _grp)) > 0 } do { deleteWaypoint ((waypoints _grp) select 0); };
 _grp setSpeedMode "FULL";
 _grp setBehaviour "CARELESS";
