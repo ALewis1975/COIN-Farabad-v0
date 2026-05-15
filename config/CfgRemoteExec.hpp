@@ -88,6 +88,9 @@ class CfgRemoteExec
         // CASEVAC RPC (Item 5 — client → server request)
         class ARC_fnc_medicalCasevacRequest         { allowedTargets = 2; };
 
+        // AI recruitment container RPC
+        class ARC_fnc_recruitSpawnRequest           { allowedTargets = 2; };
+
         // Mission scoring (Item 22 — TOC operator trigger)
         class ARC_fnc_missionScoreGenerate          { allowedTargets = 2; };
 

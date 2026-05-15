@@ -125,6 +125,39 @@ missionNamespace setVariable ["ARC_rtbAceInteractionsEnabled", true, true];
 // SITREP in-world action (dismounted): enable addAction
 missionNamespace setVariable ["ARC_sitrepInWorldActionsEnabled", true, false];
 
+// Command-gated AI recruitment from Huron Cargo Containers.
+// Clients only render actions; the server validates role, sender, container and class whitelist.
+missionNamespace setVariable ["ARC_recruitContainerEnabled", true, true];
+missionNamespace setVariable ["ARC_recruitContainerClasses", ["B_Slingload_01_Cargo_F"], true];
+missionNamespace setVariable ["ARC_recruitContainerPositions", [
+    [6595.5903, 3200.8215, 0],
+    [6204.75, 1603.5, 0]
+], true];
+missionNamespace setVariable ["ARC_recruitContainerPositionRadiusM", 18, true];
+missionNamespace setVariable ["ARC_recruitActionRangeM", 6, true];
+missionNamespace setVariable ["ARC_recruitGroupMaxUnits", 12, true];
+missionNamespace setVariable ["ARC_recruitRequireSameFaction", true, true];
+missionNamespace setVariable ["ARC_recruitCompanyCommandGroupIds", [
+    "A-2-325 AIR | REDFALCON 1",
+    "B-2-325 AIR | REDFALCON 2",
+    "B-2-325 AIR | REDFALCON 3",
+    "C-2-325 AIR | REDFALCON 3"
+], true];
+missionNamespace setVariable ["ARC_recruitCommandRoleTokens", [], true];
+missionNamespace setVariable ["ARC_recruitUnitWhitelist", [
+    ["rhsusf_army_ocp_rifleman", "Rifleman"],
+    ["rhsusf_army_ocp_grenadier", "Grenadier"],
+    ["rhsusf_army_ocp_autorifleman", "Autorifleman"],
+    ["rhsusf_army_ocp_riflemanat", "Rifleman (AT)"],
+    ["rhsusf_army_ocp_teamleader", "Team Leader"],
+    ["rhsusf_army_ocp_medic", "Combat Medic"],
+    ["rhsusf_army_ocp_machinegunner", "Machine Gunner"],
+    ["rhsusf_army_ocp_machinegunnera", "Machine Gunner Assistant"],
+    ["rhsusf_army_ocp_javelin", "Javelin Gunner"],
+    ["rhsusf_army_ocp_javelin_assistant", "Javelin Assistant"],
+    ["rhsusf_army_ocp_jfo", "Joint Fires Observer"]
+], true];
+
 // Intel props spawn radius (meters)
 missionNamespace setVariable ["ARC_intelPropSpawnRadiusM", 10, true];
 
@@ -895,6 +928,10 @@ missionNamespace setVariable ["ARC_operatorToggleAuditCatalog", [
         ["ARC_rtbAddActionsEnabled", "bool"],
         ["ARC_rtbAceInteractionsEnabled", "bool"],
         ["ARC_sitrepInWorldActionsEnabled", "bool"],
+        ["ARC_recruitContainerEnabled", "bool"],
+        ["ARC_recruitActionRangeM", "number"],
+        ["ARC_recruitGroupMaxUnits", "number"],
+        ["ARC_recruitRequireSameFaction", "bool"],
         ["ARC_intelPropSpawnRadiusM", "number"]
     ]]
 ], true];
@@ -914,6 +951,16 @@ private _arcDeclaredServerToggles = [
     "ARC_rtbAddActionsEnabled",
     "ARC_rtbAceInteractionsEnabled",
     "ARC_sitrepInWorldActionsEnabled",
+    "ARC_recruitContainerEnabled",
+    "ARC_recruitContainerClasses",
+    "ARC_recruitContainerPositions",
+    "ARC_recruitContainerPositionRadiusM",
+    "ARC_recruitActionRangeM",
+    "ARC_recruitGroupMaxUnits",
+    "ARC_recruitRequireSameFaction",
+    "ARC_recruitCompanyCommandGroupIds",
+    "ARC_recruitCommandRoleTokens",
+    "ARC_recruitUnitWhitelist",
     "ARC_allowIncidentDuringAcceptedRtb",
     "ARC_safeModeEnabled",
     "ARC_worldTime_enabled",
@@ -941,6 +988,16 @@ private _arcKnownToggleConsumers = [
     ["ARC_rtbAddActionsEnabled", "functions/intel/fn_intelInitClient.sqf"],
     ["ARC_rtbAceInteractionsEnabled", "functions/intel/fn_intelInitClient.sqf"],
     ["ARC_sitrepInWorldActionsEnabled", "functions/core/fn_tocInitPlayer.sqf"],
+    ["ARC_recruitContainerEnabled", "functions/logistics/fn_recruitClientInit.sqf + functions/logistics/fn_recruitSpawnRequest.sqf"],
+    ["ARC_recruitContainerClasses", "functions/logistics/fn_recruitClientInit.sqf + functions/logistics/fn_recruitSpawnRequest.sqf"],
+    ["ARC_recruitContainerPositions", "functions/logistics/fn_recruitClientInit.sqf + functions/logistics/fn_recruitSpawnRequest.sqf"],
+    ["ARC_recruitContainerPositionRadiusM", "functions/logistics/fn_recruitClientInit.sqf + functions/logistics/fn_recruitSpawnRequest.sqf"],
+    ["ARC_recruitActionRangeM", "functions/logistics/fn_recruitClientAddActions.sqf + functions/logistics/fn_recruitSpawnRequest.sqf"],
+    ["ARC_recruitGroupMaxUnits", "functions/logistics/fn_recruitSpawnRequest.sqf"],
+    ["ARC_recruitRequireSameFaction", "functions/logistics/fn_recruitSpawnRequest.sqf"],
+    ["ARC_recruitCompanyCommandGroupIds", "functions/core/fn_rolesCanRecruitAI.sqf"],
+    ["ARC_recruitCommandRoleTokens", "functions/core/fn_rolesCanRecruitAI.sqf"],
+    ["ARC_recruitUnitWhitelist", "functions/logistics/fn_recruitClientAddActions.sqf + functions/logistics/fn_recruitSpawnRequest.sqf"],
     ["ARC_allowIncidentDuringAcceptedRtb", "functions/core/fn_tocRequestNextIncident.sqf"],
     ["ARC_safeModeEnabled", "initServer.sqf + functions/core/fn_bootstrapServer.sqf + functions/core/fn_incidentCreate.sqf"],
     ["ARC_worldTime_enabled", "functions/core/fn_bootstrapServer.sqf"],
