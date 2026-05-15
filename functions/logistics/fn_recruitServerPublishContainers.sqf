@@ -26,6 +26,8 @@ private _ids = [];
         private _netId = netId _container;
         if (!(_netId isEqualType "") || { _netId isEqualTo "" }) then { continue; };
         _ids pushBackUnique _netId;
+
+        [_container] remoteExec ["ARC_fnc_recruitClientAddActions", 0, _container];
     } forEach (allMissionObjects _class);
 } forEach _classes;
 
