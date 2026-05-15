@@ -122,6 +122,7 @@ missionNamespace setVariable ["ARC_rtbInWorldActionsEnabled", false, true];
 // Separate in-world interaction toggles so vanilla addActions can stay disabled
 // without removing ACE self/interact alternatives.
 missionNamespace setVariable ["ARC_tocAddActionsEnabled", false, true];
+missionNamespace setVariable ["ARC_mobileTocAddActionsEnabled", false, true];
 missionNamespace setVariable ["ARC_tocAceInteractionsEnabled", true, true];
 missionNamespace setVariable ["ARC_rtbAddActionsEnabled", false, true];
 missionNamespace setVariable ["ARC_rtbAceInteractionsEnabled", true, true];
@@ -936,6 +937,7 @@ missionNamespace setVariable ["ARC_operatorToggleAuditCatalog", [
         ["ARC_vanillaAddActionsEnabled", "bool"],
         ["ARC_rtbInWorldActionsEnabled", "bool"],
         ["ARC_tocAddActionsEnabled", "bool"],
+        ["ARC_mobileTocAddActionsEnabled", "bool"],
         ["ARC_tocAceInteractionsEnabled", "bool"],
         ["ARC_rtbAddActionsEnabled", "bool"],
         ["ARC_rtbAceInteractionsEnabled", "bool"],
@@ -967,6 +969,7 @@ private _arcDeclaredServerToggles = [
     "ARC_vanillaAddActionsEnabled",
     "ARC_rtbInWorldActionsEnabled",
     "ARC_tocAddActionsEnabled",
+    "ARC_mobileTocAddActionsEnabled",
     "ARC_tocAceInteractionsEnabled",
     "ARC_rtbAddActionsEnabled",
     "ARC_rtbAceInteractionsEnabled",
@@ -1010,6 +1013,7 @@ private _arcKnownToggleConsumers = [
     ["ARC_vanillaAddActionsEnabled", "global default inherited by vanilla addAction clients"],
     ["ARC_rtbInWorldActionsEnabled", "legacy fallback for split RTB/TOC action toggles"],
     ["ARC_tocAddActionsEnabled", "functions/core/fn_tocInitPlayer.sqf"],
+    ["ARC_mobileTocAddActionsEnabled", "functions/core/fn_tocInitPlayer.sqf (remote_ops_vehicle only)"],
     ["ARC_tocAceInteractionsEnabled", "functions/core/fn_tocInitPlayer.sqf"],
     ["ARC_rtbAddActionsEnabled", "functions/intel/fn_intelInitClient.sqf"],
     ["ARC_rtbAceInteractionsEnabled", "functions/intel/fn_intelInitClient.sqf"],

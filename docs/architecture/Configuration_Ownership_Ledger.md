@@ -74,7 +74,7 @@ A variable that fits more than one class is classified by its **operator-facing 
 | Variable | Class | Target home | Notes |
 |---|---|---|---|
 | `ARC_rtbInWorldActionsEnabled` | Posture toggle | `initServer.sqf` | Legacy fallback for split RTB/TOC interaction toggles. In audit catalog as `UI/actions`. |
-| `ARC_tocAddActionsEnabled`, `ARC_rtbAddActionsEnabled` | Posture toggle | `initServer.sqf` | Vanilla scroll-menu action toggles for TOC/Mobile Ops and RTB Intel/EPW. In audit catalog as `UI/actions`. |
+| `ARC_tocAddActionsEnabled`, `ARC_mobileTocAddActionsEnabled`, `ARC_rtbAddActionsEnabled` | Posture toggle | `initServer.sqf` | Vanilla scroll-menu action toggles for fixed TOC terminals, Mobile Ops vehicle, and RTB Intel/EPW. Mobile TOC addActions default disabled to avoid vehicle interaction clutter. In audit catalog as `UI/actions`. |
 | `ARC_tocAceInteractionsEnabled`, `ARC_rtbAceInteractionsEnabled` | Posture toggle | `initServer.sqf` | ACE self/interact toggles kept separate from vanilla addActions. In audit catalog as `UI/actions`. |
 | `ARC_sitrepInWorldActionsEnabled` | Posture toggle | `initServer.sqf` | Dismounted SITREP/field-command addAction toggle. In audit catalog as `UI/actions`. |
 | `ARC_intelPropSpawnRadiusM` | Tuning constant | `data/ARC_ConfigData.sqf` | Currently surfaced in audit catalog as a `number`, but it is a tuning value, not a posture flip. Acceptable to keep in catalog for operator visibility; relocation is optional (W7-T2 will decide). |

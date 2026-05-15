@@ -11,6 +11,23 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-15 — Mobile TOC addAction default (Mode A)
+
+**Branch/Commit:** copilot/investigate-ace-interaction-problem @ 6dbe786 (working tree validated in-session)
+
+**Scenario:** Added a separate Mobile TOC scroll-action posture toggle so fixed TOC terminal addActions can be controlled independently while the `remote_ops_vehicle` addActions remain disabled by default to avoid vehicle interaction clutter.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline compatibility scan | `python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf functions/core/fn_tocInitPlayer.sqf` | PASS | No known parser-compat patterns found before edits. |
+| 2 | Baseline sqflint availability | `command -v sqflint` | BLOCKED | `sqflint` is not installed in this sandbox. |
+| 3 | Post-change compatibility scan | `python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf functions/core/fn_tocInitPlayer.sqf` | PASS | No known parser-compat patterns found after edits. |
+| 4 | Post-change sqflint | `python3 -m pip install --user sqflint && sqflint -e w initServer.sqf && sqflint -e w functions/core/fn_tocInitPlayer.sqf` | PASS | Installed documented `sqflint==0.3.2` into the sandbox user environment because it was not preinstalled. |
+| 5 | Whitespace check | `git --no-pager diff --check` | PASS | No whitespace errors in the working diff. |
+| 6 | Runtime mobile TOC smoke | Hosted/local MP: enable `ARC_tocAddActionsEnabled`, leave `ARC_mobileTocAddActionsEnabled=false`, verify fixed TOC terminal actions appear while `remote_ops_vehicle` Mobile Ops scroll actions do not. | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+
+---
+
 ## 2026-05-15 — ACE interaction readiness gate (Mode A)
 
 **Branch/Commit:** copilot/review-server-rpt-file-again @ 3ea2429 (working tree validated in-session)
