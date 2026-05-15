@@ -11,6 +11,23 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-15 — Recruitment container netId replay (Mode A)
+
+**Branch/Commit:** copilot/fix-recruitment-addaction @ cdb7aaf (working tree validated in-session)
+
+**Scenario:** Added server-published recruitment container netIds so Eden Object Init opt-in Huron Cargo Containers are replayed to clients even if replicated object variables are late during client addAction discovery.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline recruitment compatibility scan | `python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf initPlayerLocal.sqf functions/core/fn_rolesCanRecruitAI.sqf functions/logistics/fn_recruitClientInit.sqf functions/logistics/fn_recruitClientAddActions.sqf functions/logistics/fn_recruitSpawnRequest.sqf` | PASS | No known parser-compat patterns found before edits. |
+| 2 | Baseline recruitment contract | `tests/static/recruitment_container_contract_checks.sh` then `bash tests/static/recruitment_container_contract_checks.sh` | PASS | Direct script execution is blocked by file permissions (`Permission denied`); running via `bash` passed. |
+| 3 | Baseline changed-file sqflint | `python3 -m pip install --user sqflint==0.3.2 && sqflint -e w initServer.sqf && sqflint -e w initPlayerLocal.sqf && sqflint -e w functions/core/fn_rolesCanRecruitAI.sqf && sqflint -e w functions/logistics/fn_recruitClientInit.sqf && sqflint -e w functions/logistics/fn_recruitClientAddActions.sqf && sqflint -e w functions/logistics/fn_recruitSpawnRequest.sqf` | PASS | Installed documented sqflint version in the sandbox because it was not preinstalled. |
+| 4 | Post-change recruitment static validation | `git diff --check && python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf functions/logistics/fn_recruitClientInit.sqf functions/logistics/fn_recruitServerPublishContainers.sqf functions/logistics/fn_recruitSpawnRequest.sqf && bash tests/static/recruitment_container_contract_checks.sh && sqflint -e w functions/logistics/fn_recruitServerPublishContainers.sqf && sqflint -e w functions/logistics/fn_recruitClientInit.sqf && sqflint -e w initServer.sqf` | PASS | NetId publisher, client replay, config registration, and contract checks passed. |
+| 5 | Runtime smoke: recruitment container addActions | Hosted/local MP with required mods: verify the Object Init opt-in Huron Cargo Container publishes a netId, clients attach recruitment addActions, and command/range/whitelist gates still apply | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 6 | Dedicated/JIP validation | Dedicated server with at least one JIP client: verify late-client replay from `ARC_recruitContainerNetIds` and server-authoritative rejection paths | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+
+---
+
 ## 2026-05-15 — Vanilla addActions required posture (Mode A)
 
 **Branch/Commit:** copilot/check-ace-interactions @ cde91f1 (working tree validated in-session)
