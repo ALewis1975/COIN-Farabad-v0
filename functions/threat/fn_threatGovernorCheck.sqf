@@ -32,6 +32,10 @@ if (!_enabled) exitWith {[false, "THREAT_DISABLED"]};
 
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _now = serverTime;
+private _typeU = toUpper _threatType;
+private _spendCost = 1;
+if (_typeU in ["RAID", "AMBUSH", "ATTACK", "VBIED"]) then { _spendCost = 2; };
+if (_typeU isEqualTo "SUICIDE") then { _spendCost = 3; };
 
 // ── 2. Global cooldown ─────────────────────────────────────────────────────
 private _gc = ["threat_v0_global_cooldown_until", -1] call ARC_fnc_stateGet;
@@ -59,6 +63,8 @@ if (!(_budgetMap isEqualType createHashMap)) then { _budgetMap = createHashMap; 
 private _bEntry = [_budgetMap, _districtId, createHashMap] call _hg;
 private _bPoints = [_bEntry, "budget_points", 3] call _hg;
 private _spent   = [_bEntry, "spent_today", 0] call _hg;
+if (!(_bPoints isEqualType 0)) then { _bPoints = 3; };
+if (!(_spent isEqualType 0)) then { _spent = 0; };
 
 // Roadmap #15 — Apply facilitator disruption penalty when active.
 private _penaltyUntil = [_bEntry, "disruption_penalty_until", -1] call _hg;
@@ -76,14 +82,13 @@ if (_penaltyUntil > 0 && { _now < _penaltyUntil }) then
     };
 };
 
-if (_spent >= _bPoints) exitWith
+if ((_spent + _spendCost) > _bPoints) exitWith
 {
-    diag_log format ["[ARC][WARN] ARC_fnc_threatGovernorCheck: BUDGET_EXHAUSTED district=%1 type=%2 spent=%3 budget=%4", _districtId, _threatType, _spent, _bPoints];
+    diag_log format ["[ARC][WARN] ARC_fnc_threatGovernorCheck: BUDGET_EXHAUSTED district=%1 type=%2 spent=%3 budget=%4 cost=%5", _districtId, _threatType, _spent, _bPoints, _spendCost];
     [false, "BUDGET_EXHAUSTED"]
 };
 
 // ── 5. Escalation tier requirement ────────────────────────────────────────
-private _typeU = toUpper _threatType;
 private _tierMin = 0;
 if (_typeU isEqualTo "VBIED")   then { _tierMin = 2; };
 if (_typeU isEqualTo "SUICIDE") then { _tierMin = 3; };

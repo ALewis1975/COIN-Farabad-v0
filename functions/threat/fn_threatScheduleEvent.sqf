@@ -4,7 +4,7 @@
     Threat Economy v0: schedule a new standalone threat record for a district.
     Called by ARC_fnc_threatSchedulerTick when the governor clears a district.
 
-    Creates a ThreatRecord in the threat_v0_records bank and emits an IED Warning Lead.
+    Creates a posture-driven ThreatRecord in the threat_v0_records bank and emits a lead.
     If a convoy is currently active on the MSR, the threat targets the convoy route;
     otherwise it targets a generic FOOT_PATROL pattern within the district.
 
@@ -14,6 +14,12 @@
     Params:
       0: STRING districtId
       1: NUMBER escalationTier (0..n)
+      2: STRING threatType (default "IED")
+      3: STRING threatSubtype (default "IED_EMPLACED_SINGLE")
+      4: NUMBER intelQuality (0..1, default derived from tier)
+      5: NUMBER budgetCost (default 1)
+      6: STRING district posture (default "NORMAL")
+      7: STRING threat intent (default "IED_PRESSURE")
 
     Returns:
       BOOL (true = record scheduled, false = skipped/error)
@@ -23,7 +29,13 @@ if (!isServer) exitWith {false};
 
 params [
     ["_districtId", "", [""]],
-    ["_tier", 0, [0]]
+    ["_tier", 0, [0]],
+    ["_threatType", "IED", [""]],
+    ["_threatSubtype", "IED_EMPLACED_SINGLE", [""]],
+    ["_intelQuality", -1, [0]],
+    ["_budgetCost", 1, [0]],
+    ["_districtPosture", "NORMAL", [""]],
+    ["_threatIntent", "IED_PRESSURE", [""]]
 ];
 
 if (_districtId isEqualTo "") exitWith {false};
@@ -31,6 +43,28 @@ if (_districtId isEqualTo "") exitWith {false};
 private _enabled = ["threat_v0_enabled", true] call ARC_fnc_stateGet;
 if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabled = true; };
 if (!_enabled) exitWith {false};
+
+private _trimFn = compile "params ['_s']; trim _s";
+private _typeU = toUpper ([_threatType] call _trimFn);
+if (_typeU isEqualTo "") then { _typeU = "IED"; };
+private _subtypeU = toUpper ([_threatSubtype] call _trimFn);
+if (_subtypeU isEqualTo "") then { _subtypeU = "IED_EMPLACED_SINGLE"; };
+private _postureU = toUpper ([_districtPosture] call _trimFn);
+if !(_postureU in ["NORMAL", "ELEVATED", "HIGH_RISK", "CRITICAL"]) then { _postureU = "NORMAL"; };
+private _intentU = toUpper ([_threatIntent] call _trimFn);
+if (_intentU isEqualTo "") then { _intentU = "IED_PRESSURE"; };
+if (!(_intelQuality isEqualType 0) || { _intelQuality < 0 }) then
+{
+    _intelQuality = switch (_postureU) do
+    {
+        case "CRITICAL": { 0.38 };
+        case "HIGH_RISK": { 0.48 };
+        case "ELEVATED": { 0.60 };
+        default { 0.70 };
+    };
+};
+_intelQuality = (_intelQuality max 0) min 1;
+if (!(_budgetCost isEqualType 0) || { _budgetCost < 1 }) then { _budgetCost = 1; };
 
 // ---------------------------------------------------------------------------
 // Helper: pairs-array set (mirrors fn_threatCreateFromTask convention)
@@ -140,8 +174,6 @@ if (_iedPos isEqualTo [] || { (count _iedPos) < 2 }) then { _iedPos = _basePos; 
 // ---------------------------------------------------------------------------
 private _now = serverTime;
 
-private _typeU = "IED";
-private _subtypeU = "IED_EMPLACED_SINGLE";
 private _familyU = [_typeU, _subtypeU] call ARC_fnc_threatInferFamily;
 
 private _area = [];
@@ -163,6 +195,10 @@ private _classification = [];
 _classification = [_classification, "type", _typeU] call _kvSet;
 _classification = [_classification, "subtype", _subtypeU] call _kvSet;
 _classification = [_classification, "escalation_tier", _tier] call _kvSet;
+_classification = [_classification, "district_posture", _postureU] call _kvSet;
+_classification = [_classification, "threat_intent", _intentU] call _kvSet;
+_classification = [_classification, "budget_cost", _budgetCost] call _kvSet;
+_classification = [_classification, "intel_quality", _intelQuality] call _kvSet;
 _classification = [_classification, "priority", ((_tier min 4) + 1)] call _kvSet;
 
 private _world = [];
@@ -182,8 +218,9 @@ _stateTsNew = [_stateTsNew, "cleaned", -1] call _kvSet;
 _stateTsNew = [_stateTsNew, "expired", -1] call _kvSet;
 
 private _tele = [];
-_tele = [_tele, "intel_level", 0] call _kvSet;
-_tele = [_tele, "cues_enabled", true] call _kvSet;
+_tele = [_tele, "intel_level", _intelQuality] call _kvSet;
+_tele = [_tele, "intel_quality", _intelQuality] call _kvSet;
+_tele = [_tele, "cues_enabled", _intelQuality >= 0.35] call _kvSet;
 
 private _outcome = [];
 _outcome = [_outcome, "result", "NONE"] call _kvSet;
@@ -228,13 +265,36 @@ _open pushBackUnique _threatId;
 ["threat_v0_open_index", _open] call ARC_fnc_stateSet;
 
 diag_log format [
-    "[ARC][THREAT] ARC_fnc_threatScheduleEvent: scheduled threat_id=%1 district=%2 family=%3 tier=%4 target=%5 pos=%6",
-    _threatId, _districtId, _familyU, _tier, _targetProfile, _iedPos
+    "[ARC][THREAT] ARC_fnc_threatScheduleEvent: scheduled threat_id=%1 district=%2 posture=%3 family=%4 type=%5 subtype=%6 tier=%7 target=%8 intel=%9 pos=%10",
+    _threatId, _districtId, _postureU, _familyU, _typeU, _subtypeU, _tier, _targetProfile, _intelQuality, _iedPos
 ];
 
 // ---------------------------------------------------------------------------
-// Emit IED Warning Lead (gives players a first intel cue about the threat)
+// Emit the first intel cue about the threat.
 // ---------------------------------------------------------------------------
-[_rec, "DISCOVERED"] call ARC_fnc_iedEmitLeads;
+switch (_familyU) do
+{
+    case "IED": { [_rec, "DISCOVERED"] call ARC_fnc_iedEmitLeads; };
+    case "VBIED": { [_rec, "STAGED"] call ARC_fnc_vbiedEmitLeads; };
+    case "SUICIDE": { [_rec, "STAGED"] call ARC_fnc_threatLeadEmitFromOutcome; };
+    default
+    {
+        private _leadType = if ((_intentU find "AMBUSH") >= 0) then { "RAID" } else { "QRF" };
+        private _tag = if ((_intentU find "AMBUSH") >= 0) then { "AMBUSH_NETWORK" } else { "DISTRICT_ATTACK" };
+        private _disp = if ((_intentU find "AMBUSH") >= 0) then
+        {
+            format ["Ambush Network Activity — %1", _districtId]
+        }
+        else
+        {
+            format ["District Attack Network — %1", _districtId]
+        };
+        private _leadId = [_leadType, _disp, _iedPos, _intelQuality, 2700, "", _typeU, "", _tag] call ARC_fnc_leadCreate;
+        if (!(_leadId isEqualTo "")) then
+        {
+            diag_log format ["[ARC][INFO] ARC_fnc_threatScheduleEvent: NON_IED lead=%1 threat=%2 intent=%3", _leadId, _threatId, _intentU];
+        };
+    };
+};
 
 true

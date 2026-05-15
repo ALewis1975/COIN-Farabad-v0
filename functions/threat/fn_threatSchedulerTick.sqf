@@ -64,6 +64,12 @@ private _districtIds = [
     "D11","D12","D13","D14","D15","D16","D17","D18","D19","D20"
 ];
 
+private _riskMapSched = ["threat_v0_district_risk", createHashMap] call ARC_fnc_stateGet;
+if (!(_riskMapSched isEqualType createHashMap)) then { _riskMapSched = createHashMap; };
+
+private _civDistricts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
+if (!(_civDistricts isEqualType createHashMap)) then { _civDistricts = createHashMap; };
+
 // Build open threat district index (quick look-up to skip already-open districts)
 private _records = ["threat_v0_records", []] call ARC_fnc_stateGet;
 if (!(_records isEqualType [])) then { _records = []; };
@@ -97,13 +103,66 @@ private _scheduledAny = false;
     // Skip if already has an open threat
     if (_districtId in _openDistricts) then { continue; };
 
-    // Read posture for tier
+    // Read posture for tier and derive a network-driven threat profile.
     private _secLevel = missionNamespace getVariable [format ["ARC_district_%1_secLevel", _districtId], "NORMAL"];
+    if (!(_secLevel isEqualType "")) then { _secLevel = "NORMAL"; };
     private _tier = 0;
     if (_secLevel isEqualTo "ELEVATED") then { _tier = 1; };
     if (_secLevel isEqualTo "HIGH_RISK") then { _tier = 2; };
+    if (_secLevel isEqualTo "CRITICAL") then { _tier = 3; };
 
-    private _govResult = [_districtId, "IED", _tier] call ARC_fnc_threatGovernorCheck;
+    private _rEntry = [_riskMapSched, _districtId, createHashMap] call _hg;
+    if (!(_rEntry isEqualType createHashMap)) then { _rEntry = createHashMap; };
+    private _riskLevel = [_rEntry, "risk_level", 30] call _hg;
+    if (!(_riskLevel isEqualType 0)) then { _riskLevel = 30; };
+    private _attackCount30d = [_rEntry, "attack_count_30d", 0] call _hg;
+    if (!(_attackCount30d isEqualType 0)) then { _attackCount30d = 0; };
+
+    private _greenScore = 35;
+    private _civD = [_civDistricts, _districtId, createHashMap] call _hg;
+    if (_civD isEqualType createHashMap) then
+    {
+        _greenScore = [_civD, "G", 35] call _hg;
+        if (!(_greenScore isEqualType 0)) then { _greenScore = 35; };
+    };
+
+    private _threatType = "IED";
+    private _threatSubtype = "IED_EMPLACED_SINGLE";
+    private _spendCost = 1;
+    private _intelQuality = 0.70;
+    private _threatIntent = "IED_PRESSURE";
+
+    if (_tier isEqualTo 1) then
+    {
+        _threatType = "RAID";
+        _threatSubtype = "AMBUSH_ROADSIDE";
+        _spendCost = 2;
+        _intelQuality = 0.60;
+        _threatIntent = "AMBUSH";
+    };
+
+    if (_tier isEqualTo 2) then
+    {
+        _threatType = "VBIED";
+        _threatSubtype = "VBIED";
+        _spendCost = 2;
+        _intelQuality = 0.48;
+        _threatIntent = "VBIED_ATTACK";
+    };
+
+    if (_tier >= 3) then
+    {
+        _threatType = "SUICIDE";
+        _threatSubtype = "SB_CHECKPOINT_APPROACH";
+        _spendCost = 3;
+        _intelQuality = 0.38;
+        _threatIntent = "SUICIDE_ATTACK";
+    };
+
+    if (_greenScore >= 70) then { _intelQuality = (_intelQuality + 0.10) min 0.90; };
+    if (_greenScore < 25) then { _intelQuality = (_intelQuality - 0.10) max 0.25; };
+
+    private _govResult = [_districtId, _threatType, _tier] call ARC_fnc_threatGovernorCheck;
     private _allowed   = _govResult select 0;
     private _denyReason = _govResult select 1;
     if (!(_denyReason isEqualType "")) then { _denyReason = ""; };
@@ -114,40 +173,55 @@ private _scheduledAny = false;
             ["decision", "ALLOWED"],
             ["deny_reason", ""],
             ["district_id", _districtId],
-            ["threat_type", "IED"],
+            ["district_sec_level", _secLevel],
+            ["risk_level", _riskLevel],
+            ["attack_count_30d", _attackCount30d],
+            ["green_score", _greenScore],
+            ["threat_type", _threatType],
+            ["threat_subtype", _threatSubtype],
+            ["threat_intent", _threatIntent],
             ["tier", _tier],
+            ["budget_cost", _spendCost],
+            ["intel_quality", _intelQuality],
             ["ts", _now],
             ["source", "ARC_fnc_threatSchedulerTick"]
         ];
         ["threat_v0_economy_last_decision", _allowDecision] call ARC_fnc_stateSet;
         ["threat_v0_economy_last_allowed_decision", _allowDecision] call ARC_fnc_stateSet;
-        diag_log format ["[ARC][THREAT] ARC_fnc_threatSchedulerTick: governor allowed district=%1 type=%2 tier=%3", _districtId, "IED", _tier];
+        diag_log format ["[ARC][THREAT] ARC_fnc_threatSchedulerTick: governor allowed district=%1 posture=%2 type=%3 subtype=%4 tier=%5 cost=%6 intel=%7", _districtId, _secLevel, _threatType, _threatSubtype, _tier, _spendCost, _intelQuality];
 
-        [_districtId, _tier] call ARC_fnc_threatScheduleEvent;
+        private _scheduled = [_districtId, _tier, _threatType, _threatSubtype, _intelQuality, _spendCost, _secLevel, _threatIntent] call ARC_fnc_threatScheduleEvent;
 
-        // Increment per-district attack budget spend_today counter (TEA-F5 fix).
-        // IED=1pt, VBIED would be 2pt, SUICIDE would be 3pt; scheduler always passes
-        // "IED" as the type here; subtypes are resolved at execution layer.
-        private _spendCost = 1;
-        private _budgetMap2 = ["threat_v0_attack_budget", createHashMap] call ARC_fnc_stateGet;
-        if (!(_budgetMap2 isEqualType createHashMap)) then { _budgetMap2 = createHashMap; };
-        private _bEntry2 = [_budgetMap2, _districtId, createHashMap] call _hg;
-        if (!(_bEntry2 isEqualType createHashMap)) then { _bEntry2 = createHashMap; };
-        private _spentNow = [_bEntry2, "spent_today", 0] call _hg;
-        if (!(_spentNow isEqualType 0)) then { _spentNow = 0; };
-        _bEntry2 set ["spent_today", _spentNow + _spendCost];
-        _budgetMap2 set [_districtId, _bEntry2];
-        ["threat_v0_attack_budget", _budgetMap2] call ARC_fnc_stateSet;
-        diag_log format ["[ARC][THREAT] ARC_fnc_threatSchedulerTick: budget spend did=%1 tier=%2 spent=%3 cost=%4", _districtId, _tier, _spentNow + _spendCost, _spendCost];
+        if (_scheduled) then
+        {
+            private _budgetMap2 = ["threat_v0_attack_budget", createHashMap] call ARC_fnc_stateGet;
+            if (!(_budgetMap2 isEqualType createHashMap)) then { _budgetMap2 = createHashMap; };
+            private _bEntry2 = [_budgetMap2, _districtId, createHashMap] call _hg;
+            if (!(_bEntry2 isEqualType createHashMap)) then { _bEntry2 = createHashMap; };
+            private _spentNow = [_bEntry2, "spent_today", 0] call _hg;
+            if (!(_spentNow isEqualType 0)) then { _spentNow = 0; };
+            _bEntry2 set ["spent_today", _spentNow + _spendCost];
+            _budgetMap2 set [_districtId, _bEntry2];
+            ["threat_v0_attack_budget", _budgetMap2] call ARC_fnc_stateSet;
+            diag_log format ["[ARC][THREAT] ARC_fnc_threatSchedulerTick: budget spend did=%1 posture=%2 tier=%3 spent=%4 cost=%5", _districtId, _secLevel, _tier, _spentNow + _spendCost, _spendCost];
 
-        _scheduledAny = true;
+            _scheduledAny = true;
+        };
     } else {
         private _denyDecision = [
             ["decision", "DENIED"],
             ["deny_reason", _denyReason],
             ["district_id", _districtId],
-            ["threat_type", "IED"],
+            ["district_sec_level", _secLevel],
+            ["risk_level", _riskLevel],
+            ["attack_count_30d", _attackCount30d],
+            ["green_score", _greenScore],
+            ["threat_type", _threatType],
+            ["threat_subtype", _threatSubtype],
+            ["threat_intent", _threatIntent],
             ["tier", _tier],
+            ["budget_cost", _spendCost],
+            ["intel_quality", _intelQuality],
             ["ts", _now],
             ["source", "ARC_fnc_threatSchedulerTick"]
         ];
@@ -164,7 +238,7 @@ private _scheduledAny = false;
             ["threat_v0_economy_deny_counts", _denyCounts] call ARC_fnc_stateSet;
         };
 
-        diag_log format ["[ARC][THREAT] ARC_fnc_threatSchedulerTick: governor denied district=%1 type=%2 tier=%3 reason=%4", _districtId, "IED", _tier, _denyReason];
+        diag_log format ["[ARC][THREAT] ARC_fnc_threatSchedulerTick: governor denied district=%1 posture=%2 type=%3 subtype=%4 tier=%5 reason=%6", _districtId, _secLevel, _threatType, _threatSubtype, _tier, _denyReason];
     };
 } forEach _districtIds;
 
