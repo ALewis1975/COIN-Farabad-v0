@@ -251,11 +251,27 @@ player setVariable ["ARC_intelInitClient_done", true];
 [] spawn {
     uiSleep 2;
 
-    // Only run if ACE interact menu is present
-    if (isNil "ace_interact_menu_fnc_createAction" || { isNil "ace_interact_menu_fnc_addActionToObject" }) exitWith {};
-
     if (player getVariable ["ARC_aceRtbActionsAdded", false]) exitWith {};
-    player setVariable ["ARC_aceRtbActionsAdded", true];
+    if (player getVariable ["ARC_aceRtbActionsInitRunning", false]) exitWith {};
+    player setVariable ["ARC_aceRtbActionsInitRunning", true];
+
+    // Only run if ACE interact menu is present. ACE may finish compiling after mission client init.
+    for "_i" from 1 to 30 do
+    {
+        if (!isNil "ace_interact_menu_fnc_createAction" && { !isNil "ace_interact_menu_fnc_addActionToObject" }) exitWith {};
+        uiSleep 1;
+    };
+
+    if (isNil "ace_interact_menu_fnc_createAction" || { isNil "ace_interact_menu_fnc_addActionToObject" }) exitWith
+    {
+        player setVariable ["ARC_aceRtbActionsInitRunning", false];
+        diag_log "[ARC][ACE][WARN] RTB Intel/EPW ACE self-interact actions unavailable: ACE interact menu functions not ready.";
+    };
+
+    if (player getVariable ["ARC_aceRtbActionsAdded", false]) exitWith
+    {
+        player setVariable ["ARC_aceRtbActionsInitRunning", false];
+    };
 
     // Intel Debrief (RTB INTEL)
     private _aIntel = [
@@ -263,14 +279,12 @@ player setVariable ["ARC_intelInitClient_done", true];
         "ARC: Intel Debrief (RTB)",
         "",
         {
-            params ["", "_player", ""];
-            [objNull, _player] call ARC_fnc_intelClientDebriefIntel;
+            [objNull, player] call ARC_fnc_intelClientDebriefIntel;
         },
         {
-            params ["", "_player", ""];
             ((missionNamespace getVariable ["ARC_rtbAceInteractionsEnabled", true]) isEqualTo true)
-            && { alive _player }
-            && { [_player] call ARC_fnc_intelClientCanDebriefIntelHere }
+            && { alive player }
+            && { [player] call ARC_fnc_intelClientCanDebriefIntelHere }
         }
     ] call ace_interact_menu_fnc_createAction;
     [player, 1, ["ACE_SelfActions"], _aIntel] call ace_interact_menu_fnc_addActionToObject;
@@ -281,19 +295,19 @@ player setVariable ["ARC_intelInitClient_done", true];
         "ARC: Process EPW (RTB)",
         "",
         {
-            params ["", "_player", ""];
-            [objNull, _player] call ARC_fnc_intelClientProcessEpw;
+            [objNull, player] call ARC_fnc_intelClientProcessEpw;
         },
         {
-            params ["", "_player", ""];
             ((missionNamespace getVariable ["ARC_rtbAceInteractionsEnabled", true]) isEqualTo true)
-            && { alive _player }
-            && { [_player] call ARC_fnc_intelClientCanProcessEpwHere }
+            && { alive player }
+            && { [player] call ARC_fnc_intelClientCanProcessEpwHere }
         }
     ] call ace_interact_menu_fnc_createAction;
     [player, 1, ["ACE_SelfActions"], _aEpw] call ace_interact_menu_fnc_addActionToObject;
 
     diag_log "[ARC][ACE] Added RTB Intel/EPW ACE self-interact actions.";
+    player setVariable ["ARC_aceRtbActionsAdded", true];
+    player setVariable ["ARC_aceRtbActionsInitRunning", false];
 };
 
 
