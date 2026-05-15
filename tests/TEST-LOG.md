@@ -11,6 +11,22 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-15 — Huron cargo AI recruitment container (Mode B)
+
+**Branch/Commit:** copilot/add-huron-cargo-container @ 5f80ab9
+
+**Scenario:** Added command-gated AI recruitment actions to configured Huron Cargo Containers. Client actions request a server-authoritative spawn; the server validates sender ownership, Battalion/Company command role gate, container registration, unit whitelist, side/faction match, and group size cap before joining one AI unit to the requester's group.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline static validation | `python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf initPlayerLocal.sqf functions/core/fn_rolesIsAuthorized.sqf functions/core/fn_rolesCanApproveQueue.sqf functions/core/fn_rpcValidateSender.sqf && bash scripts/dev/check_remoteexec_contract.sh && python3 scripts/dev/validate_state_migrations.py && git --no-pager diff --check` | PASS | RemoteExec contract, migration validation, and whitespace checks passed. Compat scanner reported pre-existing `isNotEqualTo` warnings in `functions/core/fn_rpcValidateSender.sqf`; that file was not modified. |
+| 2 | Changed-file compat/static contracts | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_rolesCanRecruitAI.sqf functions/logistics/fn_recruitClientInit.sqf functions/logistics/fn_recruitClientAddActions.sqf functions/logistics/fn_recruitSpawnRequest.sqf initPlayerLocal.sqf initServer.sqf && bash tests/static/recruitment_container_contract_checks.sh && bash scripts/dev/check_remoteexec_contract.sh && python3 scripts/dev/validate_state_migrations.py && git --no-pager diff --check HEAD~1..HEAD` | PASS | New recruitment contract check passed; RemoteExec and state migration checks remained clean. |
+| 3 | Changed-file sqflint | `for f in functions/core/fn_rolesCanRecruitAI.sqf functions/logistics/fn_recruitClientInit.sqf functions/logistics/fn_recruitClientAddActions.sqf functions/logistics/fn_recruitSpawnRequest.sqf initPlayerLocal.sqf initServer.sqf; do ~/.local/bin/sqflint -e w "$f"; done` | PASS | Installed `sqflint==0.3.2` in the sandbox with `python3 -m pip install --user sqflint`; fixed one warning in the client action handler and reran clean. |
+| 4 | Runtime smoke: Huron container recruitment | Local hosted/dedicated-like Arma 3 session; use a configured `B_Slingload_01_Cargo_F` as Battalion/Company command and verify whitelist actions, one-unit spawn, faction match, and group cap | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 5 | Dedicated/JIP validation | Dedicated server with at least one JIP client; verify late client actions and server-only spawn authority | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+
+---
+
 ## 2026-05-15 — CIVSUB cap enforcement runtime-safe evictable-key builder (Mode A)
 
 **Branch/Commit:** copilot/fix-civsub-caps-enforcement-error @ fdd9f08
