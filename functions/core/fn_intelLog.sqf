@@ -15,25 +15,31 @@ if (!isServer) exitWith {""};
 
 params ["_category", "_summary", ["_posATL", [0,0,0]], ["_meta", []]];
 
+if ((count _this) > 4 && { (_this select 3) isEqualType 0 } && { (_this select 4) isEqualType [] }) then
+{
+    _meta = _this select 4;
+};
+
 if (_category isEqualTo "") then { _category = "GEN"; };
 if (_summary isEqualTo "") then { _summary = "No details provided."; };
 if (!(_posATL isEqualType [])) then { _posATL = [0,0,0]; };
+if ((count _posATL) < 2) then { _posATL = [0,0,0]; };
 if (!(_meta isEqualType [])) then { _meta = []; };
 
 // Enrich meta with grid/zone when possible (helps UI formatting)
-if !((_posATL # 0) isEqualTo 0 && {(_posATL # 1) isEqualTo 0}) then
+if !((_posATL select 0) isEqualTo 0 && {(_posATL select 1) isEqualTo 0}) then
 {
     private _grid = mapGridPosition _posATL;
     private _zone = [_posATL] call ARC_fnc_worldGetZoneForPos;
 
     private _foundGrid = false;
-    { if ((_x # 0) isEqualTo "grid") exitWith { _foundGrid = true; }; } forEach _meta;
+    { if (_x isEqualType [] && { (count _x) > 0 } && { (_x select 0) isEqualTo "grid" }) exitWith { _foundGrid = true; }; } forEach _meta;
     if (!_foundGrid) then
     {
         _meta pushBack ["grid", _grid];
     };
     private _foundZone = false;
-    { if ((_x # 0) isEqualTo "zone") exitWith { _foundZone = true; }; } forEach _meta;
+    { if (_x isEqualType [] && { (count _x) > 0 } && { (_x select 0) isEqualTo "zone" }) exitWith { _foundZone = true; }; } forEach _meta;
     if (!_foundZone) then
     {
         _meta pushBack ["zone", _zone];
@@ -74,7 +80,7 @@ if (_rptOps && { _catU isEqualTo "OPS" }) then
 {
     private _grid = "";
     private _zone = "";
-    if !((_posATL # 0) isEqualTo 0 && {(_posATL # 1) isEqualTo 0}) then
+    if !((_posATL select 0) isEqualTo 0 && {(_posATL select 1) isEqualTo 0}) then
     {
         _grid = mapGridPosition _posATL;
         _zone = [_posATL] call ARC_fnc_worldGetZoneForPos;
@@ -86,7 +92,7 @@ if (_rptOps && { _catU isEqualTo "OPS" }) then
 
 // Create/update a map marker so players can navigate to intel items while testing.
 // Do NOT create markers for OPS entries (tasks already have map context; OPS markers create clutter).
-if (_catU isNotEqualTo "OPS") then
+if (!(_catU isEqualTo "OPS")) then
 {
     [_id, _catU, _posATL] call ARC_fnc_intelCreateMarker;
 };

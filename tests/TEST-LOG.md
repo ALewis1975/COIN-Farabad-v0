@@ -25,6 +25,20 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | 4 | Console static conflict check | `scripts/dev/check_console_conflicts.sh` | FAIL | Existing duplicate IDC findings for 78201, 78202, and 78211 remain; this change did not edit `config/CfgDialogs.hpp` or add new IDCs. Painter contract output did not include the new COMMS painter because the script has a fixed painter list. |
 | 5 | Runtime smoke: COMMS/MED console panel | Hosted/local MP with cTab, ACRE, ACE/KAT loaded: open Farabad Console from tablet/terminal, select COMMS/MED, verify SOI, CASEVAC data, and latest CASEVAC marker display. | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
 | 6 | Dedicated/JIP validation | Dedicated server with a JIP client: trigger ACE unconscious CASEVAC, verify server emits VM medical snapshot and clients receive COMMS/MED data and latest map marker. | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+## 2026-05-15 — Focused repository bug-fix pass (Mode A)
+
+**Branch/Commit:** copilot/review-repository-for-bugs @ c83fa43 (working tree included CASREQ remarks lint fix and TEST-LOG update)
+
+**Scenario:** Fixed focused findings from the repository review: BIS function RemoteExec allowlist entries for VBIED/suicide-bomber client effects, guarded convoy server-internal `remoteExecutedOwner` reads, moved CASREQ sender validation after guarded `params`, and preserved legacy AIRBASE 5-argument `ARC_fnc_intelLog` metadata centrally.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline broad ambiance compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/logistics/fn_execTickConvoy.sqf functions/logistics/fn_execSpawnConvoy.sqf functions/casreq/fn_casreqOpen.sqf functions/casreq/fn_casreqDecide.sqf functions/ied/fn_suicideBomberOnDetonate.sqf functions/ambiance/*.sqf` | FAIL | Pre-existing AIRBASE parser-compat findings in untouched ambiance files (`trim`, `#`, `isNotEqualTo`, HashMap method form); used a focused changed-file validation set afterward. |
+| 2 | Focused compat + sqflint + diff validation | `git diff --check && python3 scripts/dev/sqflint_compat_scan.py --strict functions/logistics/fn_execTickConvoy.sqf functions/logistics/fn_execSpawnConvoy.sqf functions/casreq/fn_casreqOpen.sqf functions/casreq/fn_casreqDecide.sqf functions/core/fn_intelLog.sqf && sqflint -e w ... && bash scripts/dev/check_remoteexec_contract.sh` | PASS | Installed `sqflint==0.3.2` in the sandbox because it was not preinstalled. Changed SQF files are compat/lint clean; RemoteExec contract and `git diff --check` passed at commit `80022d0`. |
+| 3 | Static pattern verification | `git grep -n -E "BIS_fnc_explosionEffects|BIS_fnc_holdActionAdd|remoteExecutedOwner|CASREQ_OPEN_SEC_DENIED|CASREQ_DECIDE_SEC_DENIED|_safeRemarks|count _this" -- config/CfgRemoteExec.hpp functions/logistics/fn_execTickConvoy.sqf functions/logistics/fn_execSpawnConvoy.sqf functions/casreq/fn_casreqOpen.sqf functions/casreq/fn_casreqDecide.sqf functions/core/fn_intelLog.sqf` | PASS | Confirms expected allowlist entries, guarded RemoteExec owner reads, post-`params` CASREQ validation, remarks preservation, and legacy intel metadata handling. |
+| 4 | CodeQL security scan | `codeql_checker` | PASS | 0 alerts reported; CodeQL database creation for `cpp` was unavailable in this SQF/config repository. |
+| 5 | Runtime smoke | Hosted/local MP: verify VBIED hold action appears, suicide-bomber explosion effects render, convoy tasks tick/spawn without undefined `remoteExecutedOwner`, CASREQ open/decide accepts valid callers, and AIRBASE control intel entries retain metadata. | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 6 | Dedicated/JIP validation | Dedicated server with at least one JIP client: confirm function allowlist behavior, JIP hold-action replay, and no client-authority regressions. | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
 
 ---
 
