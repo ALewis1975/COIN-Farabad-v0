@@ -16,9 +16,6 @@
 
 if (!isServer) exitWith {""};
 
-// Sender validation
-if (!([_this select 0, "ARC_fnc_casreqOpen", "CASREQ open rejected: sender mismatch.", "CASREQ_OPEN_SEC_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {""};
-
 params [
     ["_unit",       objNull, [objNull]],
     ["_districtId", "",      [""]],
@@ -26,6 +23,9 @@ params [
     ["_nineLine",   [],      [[]]],
     ["_remarks",    "",      [""]]
 ];
+
+// Sender validation
+if (!([_unit, "ARC_fnc_casreqOpen", "CASREQ open rejected: sender mismatch.", "CASREQ_OPEN_SEC_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {""};
 
 if (isNull _unit) exitWith
 {
@@ -85,6 +85,7 @@ private _record = [
     // Extended fields
     ["incident_id", _incidentId],
     ["nine_line",   _safeNine],
+    ["remarks",     _safeRemarks],
     ["result",      ""],
     ["closed_at",   -1]
 ];

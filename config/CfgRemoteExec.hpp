@@ -127,6 +127,11 @@ class CfgRemoteExec
         class ARC_fnc_iedClientAddEvidenceAction    { allowedTargets = 0; jip = 1; };
         class ARC_fnc_iedClientEnableEvidenceLogistics { allowedTargets = 0; jip = 1; };
         class ARC_fnc_recruitClientAddActions       { allowedTargets = 0; jip = 1; };
+
+        // BIS functions invoked via remoteExec as functions.
+        class BIS_fnc_explosionEffects              { allowedTargets = 0; };
+        class BIS_fnc_holdActionAdd                 { allowedTargets = 0; jip = 1; };
+        class BIS_fnc_holdActionRemove              { allowedTargets = 0; };
     };
 
     class Commands
@@ -134,8 +139,6 @@ class CfgRemoteExec
         mode = 1;
         jip  = 0;
 
-        class BIS_fnc_holdActionAdd     { allowedTargets = 0; jip = 1; };
-        class BIS_fnc_holdActionRemove  { allowedTargets = 0; };
         class disableAI                 { allowedTargets = 0; };
         class enableAudioFeature        { allowedTargets = 0; };
         class forceWalk                 { allowedTargets = 0; };
