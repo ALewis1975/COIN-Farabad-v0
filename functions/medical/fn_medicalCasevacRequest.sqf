@@ -111,6 +111,28 @@ if (_leadId isEqualTo "") exitWith
 missionNamespace setVariable ["ARC_casevacLeadLastTs", serverTime];
 missionNamespace setVariable ["ARC_casevacLeadLastId", _leadId, true];
 
+private _ctabCasevacMarkers = missionNamespace getVariable ["ARC_casevacCtabMarkersEnabled", true];
+if (!(_ctabCasevacMarkers isEqualType true) && !(_ctabCasevacMarkers isEqualType false)) then { _ctabCasevacMarkers = true; };
+if (_ctabCasevacMarkers) then
+{
+    private _mkName = "ARC_casevac_latest";
+    private _p2 = +_pos;
+    _p2 resize 2;
+    if !(_mkName in allMapMarkers) then
+    {
+        createMarker [_mkName, _p2];
+    }
+    else
+    {
+        _mkName setMarkerPos _p2;
+    };
+    _mkName setMarkerType "mil_dot";
+    _mkName setMarkerColor "ColorRed";
+    _mkName setMarkerText format ["CASEVAC %1 %2", _whoName, _grid];
+    _mkName setMarkerAlpha 0.85;
+    missionNamespace setVariable ["ARC_casevacLatestMarker", _mkName, true];
+};
+
 diag_log format ["[ARC][MEDICAL] ARC_fnc_medicalCasevacRequest: CASEVAC lead=%1 unit=%2 grid=%3 strength=%4", _leadId, _whoName, _grid, round (_strength * 100) / 100];
 
 // Intel log so TOC can see it in the feed

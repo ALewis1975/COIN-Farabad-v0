@@ -561,6 +561,7 @@ class CfgFunctions
 
             // UI09 tab painters
             class uiConsoleDashboardPaint {};
+            class uiConsoleCommsPaint {};
             class uiConsoleBoardsPaint {};
             class uiConsoleIntelPaint {};
             class uiConsoleOpsPaint {};

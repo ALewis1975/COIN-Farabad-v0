@@ -137,6 +137,35 @@ Recommended envelope fields:
 | `snapshot.emptyState` | literal + threat availability checks | `ARRAY[pairs]` | explicit no-data guidance |
 | `snapshot.errorState` | literal | `ARRAY[pairs]` | explicit stale/error guidance |
 
+### 2.9 Medical command section (`sections.medical`)
+| VM field | Source key(s) | Type | Default/fallback |
+|---|---|---|---|
+| `snapshot` | `ARC_fnc_medicalSnapshot` | `ARRAY[pairs]` | `[]` |
+| `active_casevac` | `ARC_leadPoolPublic` filtered to CASEVAC QRF leads | `ARRAY` | `[]` |
+| `casevac_last_id` | `ARC_casevacLeadLastId` | `STRING` | `""` |
+| `casevac_last_at` | `ARC_casevacLeadLastTs` | `SCALAR` | `-1` |
+| `casevac_cooldown_remaining` | `ARC_casevacLeadCooldownS`, `ARC_casevacLeadLastTs` | `SCALAR` | `0` |
+| `recent_events` | `ARC_pub_intelLog` MED / CASEVAC entries | `ARRAY` | `[]` |
+
+### 2.10 Communications/SOI section (`sections.comms`)
+| VM field | Source key(s) | Type | Default/fallback |
+|---|---|---|---|
+| `acre_required` | `CfgPatches >> acre_main` presence check | `BOOL` | `false` |
+| `command_nets` | `ARC_commsCommandNets` | `ARRAY` | built-in SOI quick plan |
+| `prc152_plan` | `ARC_commsPrc152Plan` | `ARRAY` | built-in SOI quick plan |
+| `prc343_buckets` | `ARC_commsPrc343Buckets` | `ARRAY` | built-in SOI quick plan |
+| `radio_crates` | literal | `ARRAY` | `["ACRE_RadioSupplyCrate"]` |
+| `role_hint` | literal | `STRING` | soft-enforcement guidance |
+
+### 2.11 cTab interoperability section (`sections.ctab`)
+| VM field | Source key(s) | Type | Default/fallback |
+|---|---|---|---|
+| `required_items` | `ARC_consoleRequiredItems` | `ARRAY` | cTab/Android/DAGR defaults |
+| `active_task_marker` | `ARC_activeIncidentMarker` | `STRING` | `""` |
+| `casevac_marker` | `ARC_casevacLatestMarker` | `STRING` | `""` |
+| `lead_pool` | `ARC_leadPoolPublic` | `ARRAY` | `[]` |
+| `note` | literal | `STRING` | presentation-only warning |
+
 ---
 
 ## 3) Freshness metadata rules
