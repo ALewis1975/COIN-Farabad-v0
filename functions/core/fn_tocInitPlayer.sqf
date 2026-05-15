@@ -911,16 +911,10 @@ if (!(player getVariable ['ARC_fieldSitrepActionsAdded', false])) then
     if (player getVariable ["ARC_aceFieldCommandActionsInitRunning", false]) exitWith {};
     player setVariable ["ARC_aceFieldCommandActionsInitRunning", true];
 
-    for "_i" from 1 to 30 do
-    {
-        if (!isNil "ace_interact_menu_fnc_createAction" && { !isNil "ace_interact_menu_fnc_addActionToObject" }) exitWith {};
-        uiSleep 1;
-    };
-
-    if (isNil "ace_interact_menu_fnc_createAction" || { isNil "ace_interact_menu_fnc_addActionToObject" }) exitWith
+    if (!([] call ARC_fnc_aceClientWaitInteractionsReady)) exitWith
     {
         player setVariable ["ARC_aceFieldCommandActionsInitRunning", false];
-        diag_log "[ARC][ACE][WARN] Field command ACE self-interact actions unavailable: ACE interact menu functions not ready.";
+        diag_log "[ARC][ACE][WARN] Field command ACE self-interact actions unavailable: ACE/CBA readiness timeout.";
     };
 
     if (player getVariable ["ARC_aceFieldCommandActionsAdded", false]) exitWith

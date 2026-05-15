@@ -255,17 +255,10 @@ player setVariable ["ARC_intelInitClient_done", true];
     if (player getVariable ["ARC_aceRtbActionsInitRunning", false]) exitWith {};
     player setVariable ["ARC_aceRtbActionsInitRunning", true];
 
-    // Only run if ACE interact menu is present. ACE may finish compiling after mission client init.
-    for "_i" from 1 to 30 do
-    {
-        if (!isNil "ace_interact_menu_fnc_createAction" && { !isNil "ace_interact_menu_fnc_addActionToObject" }) exitWith {};
-        uiSleep 1;
-    };
-
-    if (isNil "ace_interact_menu_fnc_createAction" || { isNil "ace_interact_menu_fnc_addActionToObject" }) exitWith
+    if (!([] call ARC_fnc_aceClientWaitInteractionsReady)) exitWith
     {
         player setVariable ["ARC_aceRtbActionsInitRunning", false];
-        diag_log "[ARC][ACE][WARN] RTB Intel/EPW ACE self-interact actions unavailable: ACE interact menu functions not ready.";
+        diag_log "[ARC][ACE][WARN] RTB Intel/EPW ACE self-interact actions unavailable: ACE/CBA readiness timeout.";
     };
 
     if (player getVariable ["ARC_aceRtbActionsAdded", false]) exitWith

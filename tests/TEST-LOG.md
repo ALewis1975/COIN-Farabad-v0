@@ -11,6 +11,24 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-15 — ACE interaction readiness gate (Mode A)
+
+**Branch/Commit:** copilot/review-server-rpt-file-again @ 3ea2429 (working tree validated in-session)
+
+**Scenario:** Delayed mission ACE interaction registration until CBA settings initialization and ACE interact menu functions are ready, addressing RPT evidence that field command ACE self-actions registered before CBA/ACE post-init completed.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline compatibility scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_aceClientVerifyInteractions.sqf functions/core/fn_tocInitPlayer.sqf functions/intel/fn_intelInitClient.sqf functions/civsub/fn_civsubCivAddAceActions.sqf config/CfgFunctions.hpp` | PASS | No known parser-compat patterns found before edits. |
+| 2 | Baseline sqflint | `sqflint -e w functions/core/fn_aceClientVerifyInteractions.sqf && sqflint -e w functions/core/fn_tocInitPlayer.sqf && sqflint -e w functions/intel/fn_intelInitClient.sqf && sqflint -e w functions/civsub/fn_civsubCivAddAceActions.sqf` | PASS | `sqflint==0.3.2` installed into the sandbox user environment because it was not preinstalled. |
+| 3 | Post-change compatibility scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_aceClientWaitInteractionsReady.sqf functions/core/fn_aceClientVerifyInteractions.sqf functions/core/fn_tocInitPlayer.sqf functions/intel/fn_intelInitClient.sqf functions/civsub/fn_civsubCivAddAceActions.sqf config/CfgFunctions.hpp` | PASS | New readiness helper and touched ACE registration paths passed compat scan. |
+| 4 | Post-change sqflint | `sqflint -e w functions/core/fn_aceClientWaitInteractionsReady.sqf && sqflint -e w functions/core/fn_aceClientVerifyInteractions.sqf && sqflint -e w functions/core/fn_tocInitPlayer.sqf && sqflint -e w functions/intel/fn_intelInitClient.sqf && sqflint -e w functions/civsub/fn_civsubCivAddAceActions.sqf` | PASS | All changed SQF files passed one-file-per-invocation lint. |
+| 5 | Whitespace check | `git --no-pager diff --check` | PASS | No whitespace errors in the working diff. |
+| 6 | Runtime ACE smoke | Hosted/local MP with ACE loaded: verify `[ARC][ACE][INFO] CBA_settingsInitialized observed` precedes mission ACE action add logs and TOC/RTB/CIVSUB ACE actions appear when conditions are met | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 7 | Dedicated/JIP validation | Dedicated server with JIP client: verify delayed CIVSUB object ACE actions attach after CBA/ACE readiness and remain JIP-safe | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+
+---
+
 ## 2026-05-15 — Disable vanilla addActions / enable ACE interactions (Mode A)
 
 **Branch/Commit:** copilot/disable-addactions-enable-ace-interactions @ 485aff4
