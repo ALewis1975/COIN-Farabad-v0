@@ -6359,3 +6359,19 @@ Mode: A (Bug Fix)
 | 2 | sqflint on changed files | `sqflint -e w functions/logistics/fn_recruitClientAddActions.sqf && sqflint -e w functions/logistics/fn_recruitClientInit.sqf` | PASS | Both files exit 0 under `sqflint==0.3.2`. |
 | 3 | Runtime smoke (in-world recruit actions) | Hosted/local MP: verify diag_log lines appear in RPT for each denial path (containerEnabled=false, recruitActionsEnabled=false, empty whitelist, no valid CfgVehicles classes) and INFO summary fires when ≥1 action attaches | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
 | 4 | Dedicated/JIP validation | Dedicated server + JIP client: confirm one-shot session flags suppress repeated logs across JIP and respawn re-runs, and that RPT shows accurate container/netId counts | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+
+---
+
+## 2026-05-15 — Systems integration QA tooling and compat cleanup (Mode G)
+
+**Branch/Commit:** copilot/systems-integration-check @ c5cc243 (TEST-LOG update committed in follow-up)
+
+**Scenario:** Implemented the systems-integration follow-ups from the QA review: scoped console IDC collision checks to each top-level dialog, added COMMS/MED painter coverage to the console static QA script, made the TEST-LOG commit-placeholder check independent of the `rg` CLI, cleaned focused SQF parser-compat debt in selected core/CIVSUB files, and refreshed the RemoteExec hardening plan against the current allowlist/JIP posture.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline static QA and compat review | `bash scripts/dev/check_console_conflicts.sh; bash scripts/dev/check_remoteexec_contract.sh; python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_companyCommandInit.sqf functions/core/fn_iedQueueDetonationResponse.sqf functions/core/fn_tocRequestAcceptIncident.sqf functions/civsub/fn_civsubDistrictsFindByPos.sqf functions/civsub/fn_civsubTrafficResolveSpawnCenter.sqf functions/civsub/fn_civsubCivPickSpawnPos.sqf` | FAIL/PASS | Baseline console check failed on cross-dialog duplicate IDCs `78201`, `78202`, and `78211`; RemoteExec contract passed; targeted compat scan reported 67 pre-existing parser-compat findings across six files. |
+| 2 | Post-edit static QA and targeted compat | `git diff --check && bash scripts/dev/check_console_conflicts.sh && bash scripts/dev/check_remoteexec_contract.sh && bash scripts/dev/check_test_log_commits.sh && python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_companyCommandInit.sqf functions/core/fn_iedQueueDetonationResponse.sqf functions/core/fn_tocRequestAcceptIncident.sqf functions/civsub/fn_civsubDistrictsFindByPos.sqf functions/civsub/fn_civsubTrafficResolveSpawnCenter.sqf functions/civsub/fn_civsubCivPickSpawnPos.sqf` | PASS | Console checker now passes with per-dialog IDC scoping and includes `fn_uiConsoleCommsPaint.sqf`; RemoteExec static contract, TEST-LOG placeholder check, and targeted compat scan pass. |
+| 3 | sqflint on changed SQF files | `python3 -m pip install --user sqflint==0.3.2` then `sqflint -e w` on the six changed SQF files | PASS | Initial run exposed one direct HashMap `get` parser issue and two unused-variable warnings; follow-up edits resolved them and all changed SQF files exit 0. |
+| 4 | Runtime smoke | Hosted/local MP: open Farabad Console, verify COMMS/MED tab still paints, modal dialogs still resolve their own controls, and incident acceptance / detonation follow-on / CIVSUB district spawn paths retain behavior. | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 5 | Dedicated/JIP validation | Dedicated server with at least one JIP client: verify RemoteExec/JIP allowlist behavior, object-bound action replay, and late-client snapshot behavior. | BLOCKED | User confirmed no dedicated server access for this action. |
