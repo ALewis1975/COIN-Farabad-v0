@@ -7,6 +7,8 @@ This document inventories current RemoteExec usage and defines a hardening plan 
 
 ## 1) Full RPC endpoint inventory
 
+**Current source of truth:** `config/CfgRemoteExec.hpp` (reviewed 2026-05-15).
+
 ### 1.1 Client → Server (`target = 2`) ARC RPC endpoints
 
 These are the highest-risk endpoints because any connected client can attempt to invoke them.
@@ -35,7 +37,7 @@ These are the highest-risk endpoints because any connected client can attempt to
 | `ARC_fnc_intelQueueDecide` | TOC queue manager | Approve/reject queued requests. |
 | `ARC_fnc_intelQueueSubmit` | Field lead/follow-on UI | Submits queue request payloads. |
 | `ARC_fnc_intelTocIssueOrder` | TOC issue order prompt | Issues order from TOC to unit. |
-| `ARC_fnc_publicBroadcastState` | HQ UI | Re-broadcast public state snapshot. |
+| `ARC_fnc_intelTocIssueLead` | TOC issue lead prompt | Issues lead/tasking from TOC to a unit. |
 | `ARC_fnc_tocReceiveSitrep` | SITREP submit UI | Primary SITREP ingress endpoint. |
 | `ARC_fnc_tocRequestAcceptIncident` | TOC/field UI | Accept current incident tasking. |
 | `ARC_fnc_tocRequestCivsubReset` | HQ UI | Admin reset CIVSUB state. |
@@ -45,13 +47,23 @@ These are the highest-risk endpoints because any connected client can attempt to
 | `ARC_fnc_tocRequestForceIncident` | HQ UI | Force-spawn specific incident. |
 | `ARC_fnc_tocRequestLogIntel` | Intel logging UI | Manual intel log ingestion. |
 | `ARC_fnc_tocRequestNextIncident` | TOC UI | Request next incident from queue. |
+| `ARC_fnc_tocRequestPublicBroadcast` | HQ/UI refresh action | Server-side wrapper to re-broadcast public state snapshots. |
 | `ARC_fnc_tocRequestRebuildActive` | HQ UI | Rebuild active incident state. |
 | `ARC_fnc_tocRequestRefreshIntel` | Intel/TOC UI | Refresh intel feed/state. |
 | `ARC_fnc_tocRequestResetAll` | HQ UI | Full admin reset. |
 | `ARC_fnc_tocRequestSave` | HQ UI | Save operation trigger. |
 | `ARC_fnc_uiConsoleQAAuditServer` | HQ UI QA tool | Server-side QA audit runner. |
 | `ARC_fnc_uiCoverageAuditServer` | HQ UI QA tool | Coverage/audit scan runner. |
+| `ARC_fnc_iedServerRequestDisposition` | EOD disposition workflow | Server-side approval request for IED/VBIED disposition. |
 | `ARC_fnc_vbiedServerDetonate` | VBIED disposition action | Server detonation of VBIED. |
+| `ARC_fnc_suicideBomberOnDetonate` | Suicide bomber detonation path | Server-side detonation entrypoint/effects trigger. |
+| `ARC_fnc_casreqOpen` | CASREQ UI | Open/create CAS request. |
+| `ARC_fnc_casreqDecide` | CASREQ approver UI | Approve/deny CAS request. |
+| `ARC_fnc_casreqExecute` | CASREQ execution UI | Execute approved CAS request. |
+| `ARC_fnc_casreqClose` | CASREQ UI | Close CAS request lifecycle. |
+| `ARC_fnc_medicalCasevacRequest` | CASEVAC/medical workflow | Client-submitted CASEVAC request. |
+| `ARC_fnc_recruitSpawnRequest` | Recruitment dialog | Server-validated recruit AI spawn request. |
+| `ARC_fnc_missionScoreGenerate` | TOC operator trigger | Server-side mission score generation. |
 | `ARC_fnc_airbaseSubmitClearanceRequest` | AIR/TOWER client wrapper | Submit new clearance request to ATC queue. (Phase 8) |
 | `ARC_fnc_airbaseRequestClearanceDecision` | AIR/TOWER client wrapper | Approve/deny a queued clearance request. (Phase 8) |
 | `ARC_fnc_airbaseRequestPrioritizeFlight` | AIR/TOWER client wrapper | Reprioritize a queued flight. (Phase 8) |
@@ -86,6 +98,8 @@ These are the highest-risk endpoints because any connected client can attempt to
 | `ARC_fnc_uiConsoleCompileAuditClientReceive` | Targeted | Non-JIP request/response. |
 | `ARC_fnc_uiConsoleQAAuditClientReceive` | Targeted | Non-JIP request/response. |
 | `ARC_fnc_devDiagnosticsClientReceive` | Targeted | Non-JIP request/response. |
+| `ARC_fnc_uiConsoleOpsActionStatus` | Targeted | Non-JIP action status response. |
+| `ARC_fnc_recruitClientAddActions` | Object-bound broadcast | JIP=true (late joiners need recruitment action). |
 
 ### 1.3 Non-ARC / engine command remoteExec targets in repository
 
@@ -93,7 +107,7 @@ These are also part of the executable RemoteExec surface and must be explicitly 
 
 - `BIS_fnc_holdActionAdd`
 - `BIS_fnc_holdActionRemove`
-- `call` (high risk; should be removed or heavily constrained)
+- `BIS_fnc_explosionEffects`
 - `disableAI`
 - `enableAudioFeature`
 - `forceWalk`
@@ -104,6 +118,8 @@ These are also part of the executable RemoteExec surface and must be explicitly 
 - `setUnitTrait`
 - `switchMove`
 - `systemChat`
+
+`call` is intentionally not allowlisted. Dynamic `remoteExec ["call", ...]` must remain banned; use named `ARC_fnc_*` functions instead.
 
 ---
 
@@ -137,10 +153,12 @@ class CfgRemoteExec
 1. **Allow (JIP=0)** all client→server RPC endpoints listed in **1.1**.
 2. **Allow (JIP=0)** targeted/ephemeral server→client endpoints in **1.2**.
 3. **Allow (JIP=1)** only persistent late-join critical endpoints:
-   - `ARC_fnc_clientAddObjectiveAction`
-   - `ARC_fnc_iedClientAddEvidenceAction`
-   - `ARC_fnc_iedClientEnableEvidenceLogistics`
-   - `ARC_fnc_civsubCivAddContactActions` (object-keyed)
+    - `ARC_fnc_clientAddObjectiveAction`
+    - `ARC_fnc_iedClientAddEvidenceAction`
+    - `ARC_fnc_iedClientEnableEvidenceLogistics`
+    - `ARC_fnc_civsubCivAddContactActions` (object-keyed)
+    - `ARC_fnc_recruitClientAddActions` (object-keyed)
+    - `BIS_fnc_holdActionAdd` (object-bound hold actions only)
 4. **Do not allow** arbitrary utility/dev function execution on clients by default.
 
 ### 2.3 Commands allowlist (recommended)
@@ -149,6 +167,7 @@ Allow only the specific non-ARC targets currently required by mission/editor log
 
 - `BIS_fnc_holdActionAdd` (JIP as needed by object-bound hold actions)
 - `BIS_fnc_holdActionRemove`
+- `BIS_fnc_explosionEffects`
 - `disableAI`
 - `enableAudioFeature`
 - `forceWalk`
@@ -160,7 +179,7 @@ Allow only the specific non-ARC targets currently required by mission/editor log
 - `switchMove`
 - `systemChat`
 
-**Explicitly disallow** `call` if at all possible (replace with named function wrapper). Dynamic `remoteExec ["call", ...]` materially increases exploitability.
+**Explicitly disallow** `call` (replace with named function wrapper). Dynamic `remoteExec ["call", ...]` materially increases exploitability.
 
 ---
 
@@ -198,7 +217,7 @@ For each client→server endpoint in **1.1**, enforce (or keep enforcing) the fo
 | `ARC_fnc_intelQueueDecide` | S0, S1, S2, S3, S4, S5 |
 | `ARC_fnc_intelQueueSubmit` | S0, S1, S2, S4, S5 |
 | `ARC_fnc_intelTocIssueOrder` | S0, S1, S2, S3, S4, S5 |
-| `ARC_fnc_publicBroadcastState` | S0, S1, S2, S3, S5 |
+| `ARC_fnc_tocRequestPublicBroadcast` | S0, S1, S2, S3, S5 |
 | `ARC_fnc_tocReceiveSitrep` | S0, S1, S2, S4, S5 |
 | `ARC_fnc_tocRequestAcceptIncident` | S0, S1, S2, S4, S5 |
 | `ARC_fnc_tocRequestCivsubReset` | S0, S1, S2, S3, S5 |
@@ -214,7 +233,16 @@ For each client→server endpoint in **1.1**, enforce (or keep enforcing) the fo
 | `ARC_fnc_tocRequestSave` | S0, S1, S2, S3, S5 |
 | `ARC_fnc_uiConsoleQAAuditServer` | S0, S1, S2, S3, S5 |
 | `ARC_fnc_uiCoverageAuditServer` | S0, S1, S2, S3, S5 |
+| `ARC_fnc_iedServerRequestDisposition` | S0, S1, S2, S3, S4, S5 |
 | `ARC_fnc_vbiedServerDetonate` | S0, S1, S2, S3, S4, S5 |
+| `ARC_fnc_suicideBomberOnDetonate` | S0, S1, S2, S3, S4, S5 |
+| `ARC_fnc_casreqOpen` | S0, S1, S2, S3, S4, S5 |
+| `ARC_fnc_casreqDecide` | S0, S1, S2, S3, S4, S5 |
+| `ARC_fnc_casreqExecute` | S0, S1, S2, S3, S4, S5 |
+| `ARC_fnc_casreqClose` | S0, S1, S2, S3, S4, S5 |
+| `ARC_fnc_medicalCasevacRequest` | S0, S1, S2, S3, S4, S5 |
+| `ARC_fnc_recruitSpawnRequest` | S0, S1, S2, S4, S5 |
+| `ARC_fnc_missionScoreGenerate` | S0, S1, S2, S3, S5 |
 | `ARC_fnc_airbaseSubmitClearanceRequest` | S0, S1, S2, S3, S4, S5 |
 | `ARC_fnc_airbaseRequestClearanceDecision` | S0, S1, S2, S3, S4, S5 |
 | `ARC_fnc_airbaseRequestPrioritizeFlight` | S0, S1, S2, S3, S4, S5 |
@@ -235,7 +263,7 @@ Implementation note: standardize all S1 gates to `ARC_fnc_rpcValidateSender` for
 ### 4.1 Expected JIP behavior
 
 1. **Only persistent state reconstruction RPCs should use JIP.**
-   - Objective actions, evidence actions, and civ interaction action attachments are valid JIP candidates.
+   - Objective actions, evidence actions, civ interaction action attachments, recruitment object actions, and object-bound hold actions are valid JIP candidates.
 2. **Ephemeral UX signals should not use JIP.**
    - Toasts/hints/one-shot result notifications should remain non-JIP.
 3. **Client init should be deterministic without relying on JIP replay of transient events.**
@@ -251,7 +279,7 @@ Implementation note: standardize all S1 gates to `ARC_fnc_rpcValidateSender` for
 ### 4.3 Mitigations
 
 - Keep JIP allowlist minimal and object-keyed where possible.
-- Ensure all JIP handlers are idempotent (safe reapply).
+- Ensure all JIP handlers are idempotent (safe reapply), especially `ARC_fnc_recruitClientAddActions` and object-bound hold-action attach paths.
 - Add object existence/type guards before client-side action registration.
 - Add regression tests for: fresh join, reconnect, and join-after-reset cases.
 
@@ -259,11 +287,11 @@ Implementation note: standardize all S1 gates to `ARC_fnc_rpcValidateSender` for
 
 ## 5) Rollout sequence (recommended)
 
-1. Add `CfgRemoteExec` whitelist with explicit `Functions` + `Commands` entries.
-2. Enable only required JIP entries from section 2.2.
-3. Normalize sender validation (S1) across all section 1.1 endpoints.
-4. Add denied-call telemetry counters and review logs in multiplayer test sessions.
-5. Run dedicated server smoke tests with at least one JIP client.
+1. `CfgRemoteExec` whitelist with explicit `Functions` + `Commands` entries is active.
+2. Required JIP entries from section 2.2 are allowlisted; JIP defaults remain deny-by-default.
+3. Sender validation (S1) is standardized around `ARC_fnc_rpcValidateSender` or endpoint-specific owner checks.
+4. Denied-call telemetry should continue to be reviewed in hosted/dedicated multiplayer test sessions.
+5. Dedicated server smoke tests with at least one JIP client remain required before release; current sandbox validation cannot complete this step.
 
 ---
 

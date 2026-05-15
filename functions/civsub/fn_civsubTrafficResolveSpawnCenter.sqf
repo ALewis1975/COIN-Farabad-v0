@@ -23,14 +23,15 @@ params [
     ["_playerPositions", [], [[]]]
 ];
 
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _center = [0,0,0];
 
 if (_d isEqualType createHashMap) then
 {
-    private _c = _d getOrDefault ["centroid", [0,0]];
+    private _c = [_d, "centroid", [0,0]] call _hg;
     if (_c isEqualType [] && { (count _c) >= 2 }) then
     {
-        _center = [_c # 0, _c # 1, 0];
+        _center = [_c select 0, _c select 1, 0];
     };
 };
 
@@ -42,11 +43,11 @@ private _anchorFound = false;
 private _anchorResult = [0,0,0];
 if (_anchors isEqualType createHashMap) then
 {
-    private _anchor = _anchors getOrDefault [_districtId, []];
+    private _anchor = [_anchors, _districtId, []] call _hg;
     if (_anchor isEqualType [] && { (count _anchor) >= 2 }) then
     {
         _anchorFound = true;
-        _anchorResult = [_anchor # 0, _anchor # 1, if ((count _anchor) >= 3) then { _anchor # 2 } else { 0 }];
+        _anchorResult = [_anchor select 0, _anchor select 1, if ((count _anchor) >= 3) then { _anchor select 2 } else { 0 }];
     };
 };
 if (_anchorFound) exitWith { _anchorResult };
@@ -59,8 +60,8 @@ if ((count _playerPositions) > 0) exitWith
     {
         if (_x isEqualType [] && { (count _x) >= 2 }) then
         {
-            _sx = _sx + (_x # 0);
-            _sy = _sy + (_x # 1);
+            _sx = _sx + (_x select 0);
+            _sy = _sy + (_x select 1);
         };
     } forEach _playerPositions;
     [_sx / (count _playerPositions), _sy / (count _playerPositions), 0]
@@ -68,4 +69,3 @@ if ((count _playerPositions) > 0) exitWith
 
 // Priority 3: district centroid
 _center
-
