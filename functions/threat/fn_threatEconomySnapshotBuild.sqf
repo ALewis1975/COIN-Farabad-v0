@@ -74,6 +74,13 @@ private _totalSpentToday = 0;
 
 {
     private _districtId = _x;
+    private _secLevel = missionNamespace getVariable [format ["ARC_district_%1_secLevel", _districtId], "NORMAL"];
+    if (!(_secLevel isEqualType "")) then { _secLevel = "NORMAL"; };
+    private _postureTier = 0;
+    if (_secLevel isEqualTo "ELEVATED") then { _postureTier = 1; };
+    if (_secLevel isEqualTo "HIGH_RISK") then { _postureTier = 2; };
+    if (_secLevel isEqualTo "CRITICAL") then { _postureTier = 3; };
+
     private _r = [_riskMap, _districtId, createHashMap] call _hg;
     if (!(_r isEqualType createHashMap)) then { _r = createHashMap; };
     private _b = [_budgetMap, _districtId, createHashMap] call _hg;
@@ -104,6 +111,8 @@ private _totalSpentToday = 0;
 
     _rows pushBack [
         ["district_id", _districtId],
+        ["district_sec_level", _secLevel],
+        ["posture_tier", _postureTier],
         ["risk_level", _riskLevel],
         ["attack_count_30d", _attackCount30d],
         ["last_attack_ts", _lastAttackTs],
@@ -168,7 +177,9 @@ private _denyRows = [];
     ["thresholds", [
         ["risk_hot_gte", 70],
         ["risk_critical_gte", 85],
-        ["budget_exhausted_when_spent_gte_budget", true]
+        ["budget_exhausted_when_spent_plus_cost_gt_budget", true],
+        ["posture_tiers", [["NORMAL", 0], ["ELEVATED", 1], ["HIGH_RISK", 2], ["CRITICAL", 3]]],
+        ["threat_costs", [["IED", 1], ["RAID", 2], ["AMBUSH", 2], ["ATTACK", 2], ["VBIED", 2], ["SUICIDE", 3]]]
     ]],
     ["denyReasonTaxonomy", _denyTaxonomy],
     ["denyReasonCounts", _denyRows],

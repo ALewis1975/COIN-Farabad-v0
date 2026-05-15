@@ -1,17 +1,18 @@
 /*
     ARC_fnc_threatAoPostureUpdate
 
-    Threat Economy v0: update per-district security level based on cumulative attack_count_30d.
+    Threat Economy v0: update per-district security level based on cumulative attack_count_30d and risk posture.
     Slow cadence tick (>= 600s).
 
     Security levels:
       NORMAL   (0-1 attacks)
       ELEVATED (2-4 attacks)
-      HIGH_RISK (5+ attacks)
+      HIGH_RISK (5-7 attacks or risk >= 70)
+      CRITICAL (8+ attacks or risk >= 85)
 
     Also applies:
-      - Checkpoint alert level for HIGH_RISK districts
-      - Scheduler budget floor for HIGH_RISK districts (risk_level min 60)
+      - Checkpoint alert level for HIGH_RISK/CRITICAL districts
+      - Scheduler budget floor for HIGH_RISK/CRITICAL districts
 
     Returns:
       BOOL (false = not fired this tick)
@@ -40,6 +41,15 @@ private _districtIds = [
     "D11","D12","D13","D14","D15","D16","D17","D18","D19","D20"
 ];
 
+// Posture bands are deliberately coarse so single incidents do not whipsaw district posture.
+// Keep these thresholds aligned with threatEconomySnapshotBuild threshold metadata.
+private _attacksElevatedMin = 2;
+private _attacksHighMin = 5;
+private _attacksCriticalMin = 8;
+private _riskHighMin = 70;
+private _riskCriticalMin = 85;
+private _riskHighFloor = 60;
+
 {
     private _id = _x;
     private _dEntry = [_riskMap, _id, createHashMap] call _hg;
@@ -48,18 +58,35 @@ private _districtIds = [
     private _attackCount = [_dEntry, "attack_count_30d", 0] call _hg;
     if (!(_attackCount isEqualType 0)) then { _attackCount = 0; };
 
-    // Determine security level
+    private _riskLevel = [_dEntry, "risk_level", 30] call _hg;
+    if (!(_riskLevel isEqualType 0)) then { _riskLevel = 30; };
+
+    // Determine security level from observed attacks plus district risk.
     private _secLevel = "NORMAL";
-    if (_attackCount >= 5) then { _secLevel = "HIGH_RISK"; };
-    if (_attackCount >= 2 && { _attackCount < 5 }) then { _secLevel = "ELEVATED"; };
+    if (_attackCount >= _attacksCriticalMin || { _riskLevel >= _riskCriticalMin }) then
+    {
+        _secLevel = "CRITICAL";
+    }
+    else
+    {
+        if (_attackCount >= _attacksHighMin || { _riskLevel >= _riskHighMin }) then
+        {
+            _secLevel = "HIGH_RISK";
+        }
+        else
+        {
+            if (_attackCount >= _attacksElevatedMin) then { _secLevel = "ELEVATED"; };
+        };
+    };
 
     // Publish security level (replicated to all clients)
     missionNamespace setVariable [format ["ARC_district_%1_secLevel", _id], _secLevel, true];
 
     // Checkpoint alert level
-    if (_secLevel isEqualTo "HIGH_RISK") then
+    if (_secLevel in ["HIGH_RISK", "CRITICAL"]) then
     {
-        missionNamespace setVariable [format ["ARC_checkpointAlertLevel_%1", _id], 2, true];
+        private _alertLevel = if (_secLevel isEqualTo "CRITICAL") then { 3 } else { 2 };
+        missionNamespace setVariable [format ["ARC_checkpointAlertLevel_%1", _id], _alertLevel, true];
     }
     else
     {
@@ -73,19 +100,18 @@ private _districtIds = [
         };
     };
 
-    // Budget floor for HIGH_RISK: set risk_level min 60
-    if (_secLevel isEqualTo "HIGH_RISK") then
+    // Budget floor for HIGH_RISK/CRITICAL: keep scheduler posture aligned with AO posture.
+    if (_secLevel in ["HIGH_RISK", "CRITICAL"]) then
     {
-        private _riskLevel = [_dEntry, "risk_level", 30] call _hg;
-        if (!(_riskLevel isEqualType 0)) then { _riskLevel = 30; };
-        if (_riskLevel < 60) then
+        private _riskFloor = if (_secLevel isEqualTo "CRITICAL") then { _riskCriticalMin } else { _riskHighFloor };
+        if (_riskLevel < _riskFloor) then
         {
-            _dEntry set ["risk_level", 60];
+            _dEntry set ["risk_level", _riskFloor];
             _riskMap set [_id, _dEntry];
         };
     };
 
-    diag_log format ["[ARC][INFO] ARC_fnc_threatAoPostureUpdate: district=%1 attacks=%2 secLevel=%3", _id, _attackCount, _secLevel];
+    diag_log format ["[ARC][INFO] ARC_fnc_threatAoPostureUpdate: district=%1 attacks=%2 risk=%3 secLevel=%4", _id, _attackCount, _riskLevel, _secLevel];
 
 } forEach _districtIds;
 
