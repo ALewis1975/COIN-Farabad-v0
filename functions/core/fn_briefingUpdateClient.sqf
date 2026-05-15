@@ -61,6 +61,7 @@ if (_dbgEnabled) then
 private _recOpord = ["ARC_diary_rec_opord", "Diary", "OPORD"] call _ensureRecord;
 private _recRoles = ["ARC_diary_rec_roles", "Diary", "ROLES & CAPABILITIES"] call _ensureRecord;
 private _recOrbat = ["ARC_diary_rec_orbat", "Diary", "ORBAT"] call _ensureRecord;
+private _recModCompat = ["ARC_diary_rec_modcompat", "Diary", "MOD COMPAT & KNOWN ISSUES"] call _ensureRecord;
 private _recSoI = ["ARC_diary_rec_soi", "Diary", "SOI"] call _ensureRecord;
 
 
@@ -789,6 +790,36 @@ _soiText = _soiText + "14 SHERIFF MP | 15 GRIFFIN convoys | 16 SENTRY SECFO<br/>
 _soiText = _soiText + "<t color='#A0A0A0'>PRC-343 default blocks: BLK1 squad net, BLK2/3 Team A/B, BLK4+ additional squads/weapons. Full block callsign mapping is in the SOI doc.</t><br/>";
 
 
+private _modCompatText = "";
+_modCompatText = _modCompatText + "<t size='1.2'>MOD COMPATIBILITY &amp; KNOWN ISSUES</t><br/>";
+_modCompatText = _modCompatText + "<t color='#A0A0A0'>Source: docs/operations/ModStackGovernance.md. This client-local diary entry is a quick in-game reference only.</t><br/><br/>";
+
+_modCompatText = _modCompatText + "<t size='1.05'>Locked standard stack</t><br/>";
+_modCompatText = _modCompatText + "Sessions must launch with the approved Farabad v0 preset. Mod additions/removals require Mission Commander approval and a ModStackGovernance changelog entry before use.<br/><br/>";
+
+_modCompatText = _modCompatText + "<t size='1.05'>Required core/framework mods</t><br/>";
+_modCompatText = _modCompatText + "- CBA_A3: scripting framework prerequisite.<br/>";
+_modCompatText = _modCompatText + "- ACE3: medical system, interactions, captive state.<br/>";
+_modCompatText = _modCompatText + "- ACRE2: radio communications.<br/>";
+_modCompatText = _modCompatText + "- KAT - Advanced Medical: ACE3 medical extension.<br/><br/>";
+
+_modCompatText = _modCompatText + "<t size='1.05'>Required content/behavior/admin mods</t><br/>";
+_modCompatText = _modCompatText + "- RHSUSAF, RHSAFRF, RHSGREF, RHSSAF: BLUFOR/OPFOR/additional faction assets.<br/>";
+_modCompatText = _modCompatText + "- 3CB Factions: civilian/insurgent factions.<br/>";
+_modCompatText = _modCompatText + "- CUP Terrains - Core and Global Ops Terrains: terrain dependencies.<br/>";
+_modCompatText = _modCompatText + "- LAMBS_Danger.fsm: AI behavior improvement.<br/>";
+_modCompatText = _modCompatText + "- Zeus Enhanced: game master tools.<br/><br/>";
+
+_modCompatText = _modCompatText + "<t size='1.05'>Known interoperability caveats</t><br/>";
+_modCompatText = _modCompatText + "- No automated CI enforcement verifies the mod preset. Server operators must run a pre-session mod-stack compliance check.<br/>";
+_modCompatText = _modCompatText + "- Mismatched or missing framework/content mods are unsupported and may remove assets, interactions, radios, medical behavior, or terrain dependencies.<br/>";
+_modCompatText = _modCompatText + "- KAT depends on ACE3 medical behavior; treat ACE/KAT version drift as a medical-system compatibility risk.<br/>";
+_modCompatText = _modCompatText + "- ACRE2 radio plans depend on the approved preset and SOI. If radios/channels differ, confirm the preset before troubleshooting mission logic.<br/>";
+_modCompatText = _modCompatText + "- The governance changelog records the full authorized stack/preset; the table above is the standard in-game quick reference.<br/><br/>";
+
+_modCompatText = _modCompatText + "<t color='#FFD700'>Action for players:</t> If you notice missing actions, broken radios, absent medical options, or missing assets, report your loaded preset to the TOC/Zeus before assuming a mission-script fault.<br/>";
+
+
 private _rolesText = "";
 _rolesText = _rolesText + "<t size='1.2'>ROLES &amp; MISSION CAPABILITIES</t><br/>";
 _rolesText = _rolesText + "<t color='#A0A0A0'>Quick reference for who does what, and who can drive the mission tasking loop.</t><br/><br/>";
@@ -1051,6 +1082,11 @@ if (_recRoles != diaryRecordNull) then
 if (_recOrbat != diaryRecordNull) then
 {
     [player, ["Diary", _recOrbat], ["ORBAT", _orbatText, ""]] call _setDiaryRecordTextCompat;
+};
+
+if (_recModCompat != diaryRecordNull) then
+{
+    [player, ["Diary", _recModCompat], ["MOD COMPAT & KNOWN ISSUES", _modCompatText, ""]] call _setDiaryRecordTextCompat;
 };
 
 if (_recSoI != diaryRecordNull) then

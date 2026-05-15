@@ -54,6 +54,7 @@ private _ensureRecord = {
 ["ARC_diary_rec_s1", "ARC_S1", "Personnel Snapshot", "Initializing..."] call _ensureRecord;
 ["ARC_diary_rec_opord", "Diary", "OPORD", "Initializing..."] call _ensureRecord;
 ["ARC_diary_rec_orbat", "Diary", "ORBAT", "Initializing..."] call _ensureRecord;
+["ARC_diary_rec_modcompat", "Diary", "MOD COMPAT & KNOWN ISSUES", "Initializing..."] call _ensureRecord;
 // SOI (Signal Operating Instructions) integrated into the same Diary schema as OPORD/ORBAT.
 ["ARC_diary_rec_soi", "Diary", "SOI", "Initializing..."] call _ensureRecord;
 

@@ -11,6 +11,22 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-15 — Mod compatibility diary record (Mode B)
+
+**Branch/Commit:** copilot/add-mod-compatibility-dialogue @ c070d94 (working tree included diary record and TEST-LOG update)
+
+**Scenario:** Added a client-local Diary record for mod compatibility and known interoperability issues, sourced from `docs/operations/ModStackGovernance.md`, so players can review the locked standard stack and caveats from the map screen.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline diary compat + sqflint | `git diff --check && python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_briefingInitClient.sqf functions/core/fn_briefingUpdateClient.sqf && python3 -m pip install --user sqflint==0.3.2 && sqflint -e w functions/core/fn_briefingInitClient.sqf && sqflint -e w functions/core/fn_briefingUpdateClient.sqf` | PASS | Baseline targeted diary files were compat/lint clean before edits. Installed `sqflint==0.3.2` in the sandbox because it was not preinstalled. |
+| 2 | BI wiki reference fetch | `web_fetch https://community.bistudio.com/wiki/createDiaryRecord`, `web_fetch https://community.bistudio.com/wiki/setDiaryRecordText`, `web_fetch https://community.bistudio.com/wiki/createDiarySubject` | BLOCKED | Sandbox fetch failed; implementation followed existing in-repo diary command usage. |
+| 3 | Final diary compat + sqflint | `git diff --check && python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_briefingInitClient.sqf functions/core/fn_briefingUpdateClient.sqf && sqflint -e w functions/core/fn_briefingInitClient.sqf && sqflint -e w functions/core/fn_briefingUpdateClient.sqf` | PASS | Confirms the new diary handle and refresh text are parser-compatible and lint clean. |
+| 4 | Runtime smoke: map diary entry | Hosted/local MP: open map Diary and verify `MOD COMPAT & KNOWN ISSUES` appears with required stack and caveats. | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 5 | Dedicated/JIP validation | Dedicated server with a JIP client: confirm the client-local record is created/recreated after briefing UI refreshes. | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+
+---
+
 ## 2026-05-15 — Console cTab / ACRE / ACE Medical integration (Mode B)
 
 **Branch/Commit:** copilot/integrate-ctab-acre-ace-medical @ 3337440 (working tree included follow-up comment and TEST-LOG updates)
