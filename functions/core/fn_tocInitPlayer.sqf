@@ -23,6 +23,12 @@ if (isNil "ARC_fnc_rolesIsTocS3") then { ARC_fnc_rolesIsTocS3 = compile preproce
 if (isNil "ARC_fnc_rolesIsTocCommand") then { ARC_fnc_rolesIsTocCommand = compile preprocessFileLineNumbers "functions\\core\\fn_rolesIsTocCommand.sqf"; };
 if (isNil "ARC_fnc_rolesCanApproveQueue") then { ARC_fnc_rolesCanApproveQueue = compile preprocessFileLineNumbers "functions\\core\\fn_rolesCanApproveQueue.sqf"; };
 
+private _legacyInWorldActionsEnabled = missionNamespace getVariable ["ARC_rtbInWorldActionsEnabled", true];
+if (!(_legacyInWorldActionsEnabled isEqualType true)) then { _legacyInWorldActionsEnabled = true; };
+
+private _tocAddActionsEnabled = missionNamespace getVariable ["ARC_tocAddActionsEnabled", _legacyInWorldActionsEnabled];
+if (!(_tocAddActionsEnabled isEqualType true)) then { _tocAddActionsEnabled = _legacyInWorldActionsEnabled; };
+
 private _tocVars = allVariables missionNamespace select { (toLower _x) find "arc_toc_" isEqualTo 0 };
 
 // Optional mobile TOC (Ops) vehicle for testing / gameplay
@@ -80,6 +86,41 @@ if (!(_mobileOpsVar in _tocVars)) then
 
     private _stored = _obj getVariable ["ARC_toc_actionIds", []];
     if (!(_stored isEqualType [])) then { _stored = []; };
+
+    if (!_tocAddActionsEnabled) then
+    {
+        if (_isMobileOpsVehicle) then
+        {
+            private _curIds = actionIDs _obj;
+            private _mine = [];
+
+            {
+                private _p = _obj actionParams _x;
+                if (_p isEqualType [] && {(count _p) > 0}) then
+                {
+                    private _t = _p select 0;
+                    if (_t isEqualType "") then
+                    {
+                        private _tU = toUpper _t;
+                        if ((_tU find "[MOBILE OPS]") == 0 || (_tU find "[MOBILE QUEUE]") == 0 || (_tU find "[MOBILE ORDER]") == 0) then
+                        {
+                            _mine pushBack _x;
+                        };
+                    };
+                };
+            } forEach _curIds;
+
+            { _obj removeAction _x; } forEach _mine;
+            _obj setVariable ["ARC_mobOps_actIds", [], false];
+        }
+        else
+        {
+            { _obj removeAction _x; } forEach _stored;
+            _obj setVariable ["ARC_toc_actionIds", [], false];
+        };
+
+        continue;
+    };
 
     private _needBind = true;
 
@@ -399,9 +440,6 @@ if (!(_mobileOpsVar in _tocVars)) then
                 if (_x isEqualType 0 && { _x >= 0 } && { _x in (actionIDs _obj) }) then { _obj removeAction _x; };
             } forEach _oldIds;
             _obj setVariable [_actKey, [], false];
-
-            // Feature toggle: when disabled, do not add any Mobile Ops/Mobile Orders actions.
-            if (!(missionNamespace getVariable ["ARC_rtbInWorldActionsEnabled", false])) exitWith { true };
 
             private _beforeIds = actionIDs _obj;
 
@@ -808,10 +846,10 @@ if (!(player getVariable ['ARC_fieldSitrepActionsAdded', false])) then
     private _tag = [player] call ARC_fnc_rolesGetTag;
     private _pfx = format ['[Player] Actions [%1]:', _tag];
 
-    private _condSitrep  = "[player] call ARC_fnc_clientCanSendSitrep";
+    private _condSitrep  = "((missionNamespace getVariable ['ARC_sitrepInWorldActionsEnabled', false]) isEqualTo true) && {[player] call ARC_fnc_clientCanSendSitrep}";
     private _condFollow  = "[] call ARC_fnc_intelClientCanRequestFollowOn";
-    private _condAccept  = "[] call ARC_fnc_intelClientCanAcceptOrder";
-    private _condIncAcc  = "([player] call ARC_fnc_rolesIsAuthorized) && { (missionNamespace getVariable ['ARC_activeTaskId','']) != '' } && { !(missionNamespace getVariable ['ARC_activeIncidentAccepted', false]) }";
+    private _condAccept  = "((missionNamespace getVariable ['ARC_sitrepInWorldActionsEnabled', false]) isEqualTo true) && {[] call ARC_fnc_intelClientCanAcceptOrder}";
+    private _condIncAcc  = "((missionNamespace getVariable ['ARC_sitrepInWorldActionsEnabled', false]) isEqualTo true) && {([player] call ARC_fnc_rolesIsAuthorized)} && { (missionNamespace getVariable ['ARC_activeTaskId','']) != '' } && { !(missionNamespace getVariable ['ARC_activeIncidentAccepted', false]) }";
 
     // Accept outstanding TOC order (if any)
     player addAction [
@@ -836,50 +874,6 @@ if (!(player getVariable ['ARC_fieldSitrepActionsAdded', false])) then
         '',
         _condIncAcc
     ];
-
-    // ACE3 parity: add the same acceptance actions into the ACE self-interact menu.
-    // This removes dependence on the vanilla scroll menu for core command-cycle steps.
-    [] spawn {
-        uiSleep 0.5;
-        if (isNil "ace_interact_menu_fnc_createAction" || { isNil "ace_interact_menu_fnc_addActionToObject" }) exitWith {};
-
-        if (player getVariable ["ARC_aceFieldCommandActionsAdded", false]) exitWith {};
-        player setVariable ["ARC_aceFieldCommandActionsAdded", true];
-
-        private _aAcceptOrder = [
-            "ARC_ACCEPT_TOC_ORDER",
-            "ARC: Accept TOC Order",
-            "",
-            {
-                params ["_target", "_player", "_params"];
-                [] spawn ARC_fnc_intelClientAcceptOrder;
-            },
-            {
-                params ["_target", "_player", "_params"];
-                [] call ARC_fnc_intelClientCanAcceptOrder
-            }
-        ] call ace_interact_menu_fnc_createAction;
-        [player, 1, ["ACE_SelfActions"], _aAcceptOrder] call ace_interact_menu_fnc_addActionToObject;
-
-        private _aAcceptInc = [
-            "ARC_ACCEPT_ACTIVE_INCIDENT",
-            "ARC: Accept Active Incident",
-            "",
-            {
-                params ["_target", "_player", "_params"];
-                [_player] remoteExec ["ARC_fnc_tocRequestAcceptIncident", 2];
-            },
-            {
-                params ["_target", "_player", "_params"];
-                ([_player] call ARC_fnc_rolesIsAuthorized)
-                && { (missionNamespace getVariable ["ARC_activeTaskId", ""]) != "" }
-                && { !(missionNamespace getVariable ["ARC_activeIncidentAccepted", false]) }
-            }
-        ] call ace_interact_menu_fnc_createAction;
-        [player, 1, ["ACE_SelfActions"], _aAcceptInc] call ace_interact_menu_fnc_addActionToObject;
-
-        diag_log "[ARC][ACE] Added field command ACE self-interact actions (accept order / accept incident).";
-    };
 
     // SITREP recommendations
     player addAction [
@@ -907,6 +901,52 @@ if (!(player getVariable ['ARC_fieldSitrepActionsAdded', false])) then
     // Follow-on requests are captured inside the SITREP workflow (no separate request actions).
 
 };
+};
+
+// ACE3 parity: add the same acceptance actions into the ACE self-interact menu.
+// This remains independent from vanilla addActions so ACE can stay enabled.
+[] spawn {
+    uiSleep 0.5;
+    if (isNil "ace_interact_menu_fnc_createAction" || { isNil "ace_interact_menu_fnc_addActionToObject" }) exitWith {};
+
+    if (player getVariable ["ARC_aceFieldCommandActionsAdded", false]) exitWith {};
+    player setVariable ["ARC_aceFieldCommandActionsAdded", true];
+
+    private _aAcceptOrder = [
+        "ARC_ACCEPT_TOC_ORDER",
+        "ARC: Accept TOC Order",
+        "",
+        {
+            params ["_target", "_player", "_params"];
+            [] spawn ARC_fnc_intelClientAcceptOrder;
+        },
+        {
+            params ["_target", "_player", "_params"];
+            ((missionNamespace getVariable ["ARC_tocAceInteractionsEnabled", true]) isEqualTo true)
+            && { [] call ARC_fnc_intelClientCanAcceptOrder }
+        }
+    ] call ace_interact_menu_fnc_createAction;
+    [player, 1, ["ACE_SelfActions"], _aAcceptOrder] call ace_interact_menu_fnc_addActionToObject;
+
+    private _aAcceptInc = [
+        "ARC_ACCEPT_ACTIVE_INCIDENT",
+        "ARC: Accept Active Incident",
+        "",
+        {
+            params ["_target", "_player", "_params"];
+            [_player] remoteExec ["ARC_fnc_tocRequestAcceptIncident", 2];
+        },
+        {
+            params ["_target", "_player", "_params"];
+            ((missionNamespace getVariable ["ARC_tocAceInteractionsEnabled", true]) isEqualTo true)
+            && { [_player] call ARC_fnc_rolesIsAuthorized }
+            && { (missionNamespace getVariable ["ARC_activeTaskId", ""]) != "" }
+            && { !(missionNamespace getVariable ["ARC_activeIncidentAccepted", false]) }
+        }
+    ] call ace_interact_menu_fnc_createAction;
+    [player, 1, ["ACE_SelfActions"], _aAcceptInc] call ace_interact_menu_fnc_addActionToObject;
+
+    diag_log "[ARC][ACE] Added field command ACE self-interact actions (accept order / accept incident).";
 };
 
 true

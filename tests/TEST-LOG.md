@@ -11,6 +11,25 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-15 — In-world action toggle split (Mode B)
+
+**Branch/Commit:** copilot/explain-repository-structure-again @ 2ce9ae9 (working tree validated in-session)
+
+**Scenario:** Split TOC/RTB vanilla addAction controls from ACE interaction controls so operators can disable TOC-related scroll-menu actions without hiding ACE self/interact alternatives.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline changed-file static checks | `git diff --check && python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf functions/core/fn_tocInitPlayer.sqf functions/intel/fn_intelInitClient.sqf` | PASS | No whitespace or sqflint-compat issues before edits. |
+| 2 | Baseline sqflint | `sqflint -e w initServer.sqf functions/core/fn_tocInitPlayer.sqf functions/intel/fn_intelInitClient.sqf` | BLOCKED | `sqflint` is not installed in this sandbox. |
+| 3 | Changed-file static checks | `git diff --check && python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf functions/core/fn_tocInitPlayer.sqf functions/intel/fn_intelInitClient.sqf` | PASS | No whitespace or known parser-compat patterns found after edits. |
+| 4 | Changed-file sqflint | `sqflint -e w initServer.sqf functions/core/fn_tocInitPlayer.sqf functions/intel/fn_intelInitClient.sqf` | BLOCKED | `sqflint` is not installed in this sandbox. |
+| 5 | Final static validation | `git diff --check && python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf functions/core/fn_tocInitPlayer.sqf functions/intel/fn_intelInitClient.sqf && bash scripts/dev/check_remoteexec_contract.sh && python3 scripts/dev/validate_state_migrations.py` | PASS | Whitespace, parser-compat, Air/Tower RemoteExec contract, and state migration checks passed. |
+| 6 | Final sqflint | `sqflint -e w initServer.sqf functions/core/fn_tocInitPlayer.sqf functions/intel/fn_intelInitClient.sqf` | BLOCKED | `sqflint` is not installed in this sandbox. |
+| 7 | Runtime smoke: action toggles | Hosted/local MP: toggle `ARC_tocAddActionsEnabled`, `ARC_tocAceInteractionsEnabled`, `ARC_rtbAddActionsEnabled`, and `ARC_rtbAceInteractionsEnabled`; verify TOC/Mobile Ops scroll actions hide independently from ACE RTB/field-command self actions | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 8 | Dedicated/JIP validation | Dedicated server with at least one JIP client; verify replicated toggle values and late-client interaction visibility | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+
+---
+
 ## 2026-05-15 — Threat economy district-posture coupling (Mode B)
 
 **Branch/Commit:** copilot/strengthen-threat-economy @ 4c5e2be

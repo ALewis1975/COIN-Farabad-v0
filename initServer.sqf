@@ -113,8 +113,14 @@ missionNamespace setVariable ["ARC_console_dashboard_v2", true, true];
 // UI / IN-WORLD ACTIONS
 // ============================================================================
 
-// RTB in-world actions (Intel/EPW): enable addActions + ACE interact
+// RTB in-world actions legacy umbrella: kept as a fallback for older callers.
 missionNamespace setVariable ["ARC_rtbInWorldActionsEnabled", true, true];
+// Separate in-world interaction toggles so vanilla addActions can be disabled
+// without removing ACE self/interact alternatives.
+missionNamespace setVariable ["ARC_tocAddActionsEnabled", true, true];
+missionNamespace setVariable ["ARC_tocAceInteractionsEnabled", true, true];
+missionNamespace setVariable ["ARC_rtbAddActionsEnabled", true, true];
+missionNamespace setVariable ["ARC_rtbAceInteractionsEnabled", true, true];
 
 // SITREP in-world action (dismounted): enable addAction
 missionNamespace setVariable ["ARC_sitrepInWorldActionsEnabled", true, false];
@@ -884,6 +890,10 @@ missionNamespace setVariable ["ARC_operatorToggleAuditCatalog", [
     ]],
     ["UI/actions", [
         ["ARC_rtbInWorldActionsEnabled", "bool"],
+        ["ARC_tocAddActionsEnabled", "bool"],
+        ["ARC_tocAceInteractionsEnabled", "bool"],
+        ["ARC_rtbAddActionsEnabled", "bool"],
+        ["ARC_rtbAceInteractionsEnabled", "bool"],
         ["ARC_sitrepInWorldActionsEnabled", "bool"],
         ["ARC_intelPropSpawnRadiusM", "number"]
     ]]
@@ -899,6 +909,10 @@ private _arcDeclaredServerToggles = [
     "ARC_objectiveMeetUseAI",
     "ARC_patrolSpawnContactsEnabled",
     "ARC_rtbInWorldActionsEnabled",
+    "ARC_tocAddActionsEnabled",
+    "ARC_tocAceInteractionsEnabled",
+    "ARC_rtbAddActionsEnabled",
+    "ARC_rtbAceInteractionsEnabled",
     "ARC_sitrepInWorldActionsEnabled",
     "ARC_allowIncidentDuringAcceptedRtb",
     "ARC_safeModeEnabled",
@@ -921,7 +935,11 @@ private _arcKnownToggleConsumers = [
     ["ARC_objectiveScaffoldEnabled", "initServer.sqf (declared for future feature; not yet consumed)"],
     ["ARC_objectiveMeetUseAI", "initServer.sqf (declared for future feature; not yet consumed)"],
     ["ARC_patrolSpawnContactsEnabled", "functions/ops/fn_opsPatrolOnActivate.sqf"],
-    ["ARC_rtbInWorldActionsEnabled", "functions/core/fn_tocInitPlayer.sqf"],
+    ["ARC_rtbInWorldActionsEnabled", "legacy fallback for split RTB/TOC action toggles"],
+    ["ARC_tocAddActionsEnabled", "functions/core/fn_tocInitPlayer.sqf"],
+    ["ARC_tocAceInteractionsEnabled", "functions/core/fn_tocInitPlayer.sqf"],
+    ["ARC_rtbAddActionsEnabled", "functions/intel/fn_intelInitClient.sqf"],
+    ["ARC_rtbAceInteractionsEnabled", "functions/intel/fn_intelInitClient.sqf"],
     ["ARC_sitrepInWorldActionsEnabled", "functions/core/fn_tocInitPlayer.sqf"],
     ["ARC_allowIncidentDuringAcceptedRtb", "functions/core/fn_tocRequestNextIncident.sqf"],
     ["ARC_safeModeEnabled", "initServer.sqf + functions/core/fn_bootstrapServer.sqf + functions/core/fn_incidentCreate.sqf"],

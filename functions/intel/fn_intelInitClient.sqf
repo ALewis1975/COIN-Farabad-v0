@@ -16,7 +16,6 @@ if (!hasInterface) exitWith {false};
 if (player getVariable ["ARC_intelInitClient_done", false]) exitWith {true};
 player setVariable ["ARC_intelInitClient_done", true];
 
-
 // ---------------------------------------------------------------------------
 // Intel Debrief station interaction (RTB purpose INTEL)
 // ---------------------------------------------------------------------------
@@ -88,7 +87,7 @@ player setVariable ["ARC_intelInitClient_done", true];
             true,
             "",
             // RTB(INTEL) is group-scoped; allow any group member to submit the debrief.
-            "[_this] call ARC_fnc_intelClientHasAcceptedRtbIntel",
+            "((missionNamespace getVariable ['ARC_rtbAddActionsEnabled', true]) isEqualTo true) && {[_this] call ARC_fnc_intelClientHasAcceptedRtbIntel}",
             6
         ];
 
@@ -127,7 +126,7 @@ player setVariable ["ARC_intelInitClient_done", true];
         false,
         true,
         "",
-        "alive _this && {[_this] call ARC_fnc_intelClientCanDebriefIntelHere}",
+        "((missionNamespace getVariable ['ARC_rtbAddActionsEnabled', true]) isEqualTo true) && {alive _this} && {[_this] call ARC_fnc_intelClientCanDebriefIntelHere}",
         3
     ];
 
@@ -198,7 +197,7 @@ player setVariable ["ARC_intelInitClient_done", true];
             true,
             "",
             // Slightly larger radius than debrief; players may park a vehicle inside the building.
-            "(_this distance _target < 6) && {(damage _target) < 0.95} && {[_this] call ARC_fnc_intelClientHasAcceptedRtbEpw}",
+            "((missionNamespace getVariable ['ARC_rtbAddActionsEnabled', true]) isEqualTo true) && {(_this distance _target < 6)} && {(damage _target) < 0.95} && {[_this] call ARC_fnc_intelClientHasAcceptedRtbEpw}",
             6
         ];
 
@@ -237,7 +236,7 @@ player setVariable ["ARC_intelInitClient_done", true];
         false,
         true,
         "",
-        "alive _this && {[_this] call ARC_fnc_intelClientCanProcessEpwHere}",
+        "((missionNamespace getVariable ['ARC_rtbAddActionsEnabled', true]) isEqualTo true) && {alive _this} && {[_this] call ARC_fnc_intelClientCanProcessEpwHere}",
         3
     ];
 
@@ -269,7 +268,9 @@ player setVariable ["ARC_intelInitClient_done", true];
         },
         {
             params ["_target", "_player", "_params"];
-            alive _player && { [_player] call ARC_fnc_intelClientCanDebriefIntelHere }
+            ((missionNamespace getVariable ["ARC_rtbAceInteractionsEnabled", true]) isEqualTo true)
+            && { alive _player }
+            && { [_player] call ARC_fnc_intelClientCanDebriefIntelHere }
         }
     ] call ace_interact_menu_fnc_createAction;
     [player, 1, ["ACE_SelfActions"], _aIntel] call ace_interact_menu_fnc_addActionToObject;
@@ -285,7 +286,9 @@ player setVariable ["ARC_intelInitClient_done", true];
         },
         {
             params ["_target", "_player", "_params"];
-            alive _player && { [_player] call ARC_fnc_intelClientCanProcessEpwHere }
+            ((missionNamespace getVariable ["ARC_rtbAceInteractionsEnabled", true]) isEqualTo true)
+            && { alive _player }
+            && { [_player] call ARC_fnc_intelClientCanProcessEpwHere }
         }
     ] call ace_interact_menu_fnc_createAction;
     [player, 1, ["ACE_SelfActions"], _aEpw] call ace_interact_menu_fnc_addActionToObject;
