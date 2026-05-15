@@ -22,6 +22,14 @@ params [
 ];
 if (isNull _civ) exitWith {false};
 if !(side _civ isEqualTo civilian) exitWith {false};
+
+private _vanillaActionsEnabled = missionNamespace getVariable ["ARC_vanillaAddActionsEnabled", false];
+if (!(_vanillaActionsEnabled isEqualType true)) then { _vanillaActionsEnabled = false; };
+
+private _civsubActionsEnabled = missionNamespace getVariable ["ARC_civsubContactAddActionsEnabled", _vanillaActionsEnabled];
+if (!(_civsubActionsEnabled isEqualType true)) then { _civsubActionsEnabled = _vanillaActionsEnabled; };
+if (!_civsubActionsEnabled) exitWith {false};
+
 if !(_civ getVariable ["civsub_v1_isCiv", false]) exitWith {
     diag_log format ["[CIVSUB][CONTACT] Skipping addAction attach for unit netId=%1 reason=civsub_v1_isCiv false", netId _civ];
     false

@@ -19,6 +19,13 @@ params [
 if (isNull _container) exitWith {false};
 if (!(missionNamespace getVariable ["ARC_recruitContainerEnabled", true])) exitWith {false};
 
+private _vanillaActionsEnabled = missionNamespace getVariable ["ARC_vanillaAddActionsEnabled", false];
+if (!(_vanillaActionsEnabled isEqualType true)) then { _vanillaActionsEnabled = false; };
+
+private _recruitActionsEnabled = missionNamespace getVariable ["ARC_recruitAddActionsEnabled", _vanillaActionsEnabled];
+if (!(_recruitActionsEnabled isEqualType true)) then { _recruitActionsEnabled = _vanillaActionsEnabled; };
+if (!_recruitActionsEnabled) exitWith {false};
+
 private _whitelist = missionNamespace getVariable ["ARC_recruitUnitWhitelist", []];
 if (!(_whitelist isEqualType [])) then { _whitelist = []; };
 if ((count _whitelist) isEqualTo 0) exitWith {false};
