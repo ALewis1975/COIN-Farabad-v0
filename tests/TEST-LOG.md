@@ -11,6 +11,24 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-16 — AIR/TOWER render stabilization (Mode A)
+
+**Branch/Commit:** copilot/fix-console-refresh-issue @ c9488d0 (working tree includes AIR paint, map paint, refresh, broadcast, and TEST-LOG updates)
+
+**Scenario:** Stabilize the Farabad Console AIR/TOWER refresh lifecycle by replacing timestamp-driven list rebuilds with snapshot revision checks, throttling AIR UI snapshot publication by semantic queue/runway changes or publish interval, preserving local map markers across paints, and avoiding steady AIR refresh hide/show layout churn.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleAirPaint.sqf functions/ui/fn_uiConsoleAirMapPaint.sqf functions/ui/fn_uiConsoleRefresh.sqf functions/core/fn_publicBroadcastState.sqf` | PASS | No banned constructs before edits. |
+| 2 | Baseline sqflint | `sqflint -e w functions/ui/fn_uiConsoleAirPaint.sqf functions/ui/fn_uiConsoleAirMapPaint.sqf functions/ui/fn_uiConsoleRefresh.sqf functions/core/fn_publicBroadcastState.sqf` | BLOCKED | `sqflint` is not preinstalled in this sandbox. |
+| 3 | BI wiki reference fetch | `web_fetch https://community.bistudio.com/wiki/Multiplayer_Scripting`, `web_fetch https://community.bistudio.com/wiki/createMarkerLocal`, `web_fetch https://community.bistudio.com/wiki/deleteMarkerLocal` | BLOCKED | Sandbox fetch failed; implementation followed existing in-repo marker and client-local UI patterns. |
+| 4 | Final compat + whitespace | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleAirPaint.sqf functions/ui/fn_uiConsoleAirMapPaint.sqf functions/ui/fn_uiConsoleRefresh.sqf functions/core/fn_publicBroadcastState.sqf && git diff --check` | PASS | Changed files remain parser-compatible; no whitespace errors. |
+| 5 | Final sqflint | `python3 -m pip install --user sqflint==0.3.2 && for f in functions/ui/fn_uiConsoleAirPaint.sqf functions/ui/fn_uiConsoleAirMapPaint.sqf functions/ui/fn_uiConsoleRefresh.sqf functions/core/fn_publicBroadcastState.sqf; do sqflint -e w "$f" || exit $?; done` | PASS | Installed `sqflint==0.3.2` in the sandbox because it was not preinstalled; all changed SQF files lint clean. |
+| 6 | Runtime smoke | Hosted/local MP: open AIR/TOWER for 60s, queue one departure, verify no flashing, stable departure row, stable selection, and marker updates without delete/recreate flicker. | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 7 | Dedicated/JIP validation | Dedicated server with a JIP client: verify AIR snapshot publish cadence, authority, and late-client UI state. | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+
+---
+
 ## 2026-05-16 — AIR/TOWER idle visibility (Mode B)
 
 **Branch/Commit:** copilot/update-air-tower-screenshot @ <pending> (working tree included AIR paint + broadcast snapshot updates and TEST-LOG entry)
