@@ -44,6 +44,6 @@ private _last = missionNamespace getVariable ["airbase_v1_diary_lastText", ""];
 if (_text isEqualTo _last) exitWith {};
 missionNamespace setVariable ["airbase_v1_diary_lastText", _text];
 
-if (_rec != diaryRecordNull) then {
+if (_rec isNotEqualTo diaryRecordNull) then {
     [player, [_subjId, _rec], [_title, _text, ""]] call _setDiaryRecordTextCompat;
 };
