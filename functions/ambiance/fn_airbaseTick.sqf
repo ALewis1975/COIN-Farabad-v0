@@ -735,6 +735,7 @@ if (_rollArr) then {
 ["airbase_v1_queue", _queue] call ARC_fnc_stateSet;
 ["airbase_v1_records", _recs] call ARC_fnc_stateSet;
 missionNamespace setVariable ["airbase_v1_rt", _rt, true];
+if (!isNil "ARC_fnc_publicBroadcastState") then { [] call ARC_fnc_publicBroadcastState; };
 
 // Queue snapshot broadcast (OPS + Diary)
 // Purpose: give players a heads-up (pending departures/arrivals) even before a flight starts taxi/takeoff.

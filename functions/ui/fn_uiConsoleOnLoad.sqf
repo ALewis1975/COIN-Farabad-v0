@@ -158,6 +158,8 @@ private _canOps = _isOmni || _isCmd || _isTocS3 || _isAuth;
 private _towerAllowsAction = {
     params ["_action"];
 
+    if (_isOmni) exitWith { true };
+
     private _ok = false;
     private _auth = [player, _action] call ARC_fnc_airbaseTowerAuthorize;
     if (_auth isEqualType [] && { (count _auth) > 0 }) then
@@ -182,9 +184,9 @@ private _canAirControl = _canAirHoldRelease || _canAirQueueManage || _canAirStaf
 private _canAirRead = _canAirControl || _isOmni || _canTocFull || _isBnCmd;
 private _pilotTokens = missionNamespace getVariable ["airbase_v1_pilotGroupTokens", ["EFS", "HAWG", "VIPER", "PILOT"]];
 if (!(_pilotTokens isEqualType [])) then { _pilotTokens = ["EFS", "HAWG", "VIPER", "PILOT"]; };
-private _canAirPilot = false;
+private _canAirPilot = _isOmni;
 {
-    if (_x isEqualType "" && { [player, _x] call ARC_fnc_rolesHasGroupIdToken }) exitWith { _canAirPilot = true; };
+    if (!_canAirPilot && { _x isEqualType "" } && { [player, _x] call ARC_fnc_rolesHasGroupIdToken }) exitWith { _canAirPilot = true; };
 } forEach _pilotTokens;
 // Supplement: if the player is currently in an air vehicle (e.g. after FIR pilot replacement),
 // preserve pilot status so AIR/TOWER options remain visible in the console.

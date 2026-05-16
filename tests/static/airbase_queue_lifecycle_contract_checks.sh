@@ -183,6 +183,7 @@ check '\["freshnessState",'       "$SNAP_FILE" "snapshot: 'freshnessState' field
 check '\["runway",'               "$SNAP_FILE" "snapshot: 'runway' block present"
 check '\["arrivals",'             "$SNAP_FILE" "snapshot: 'arrivals' field present"
 check '\["departures",'           "$SNAP_FILE" "snapshot: 'departures' field present"
+check '\["queueCounts",'          "$SNAP_FILE" "snapshot: 'queueCounts' field present"
 check '\["pendingClearances",'    "$SNAP_FILE" "snapshot: 'pendingClearances' field present"
 check '\["alerts",'               "$SNAP_FILE" "snapshot: 'alerts' field present"
 check '\["decisionQueue",'        "$SNAP_FILE" "snapshot: 'decisionQueue' field present"
@@ -193,6 +194,14 @@ check '\["clearanceHistory",'     "$SNAP_FILE" "snapshot: 'clearanceHistory' fie
 # Snapshot is broadcast with JIP replication
 check 'missionNamespace setVariable \["ARC_pub_airbaseUiSnapshot".*true\]' \
     "$SNAP_FILE" "snapshot: published with global replication (true)"
+check '\} forEach _airQueue;' \
+    "$SNAP_FILE" "snapshot: AIR/TOWER lists are built from full authoritative queue"
+check 'ARC_fnc_publicBroadcastState' \
+    "functions/ambiance/fn_airbaseTick.sqf" \
+    "airbaseTick: republishes public console snapshot after queue/record persistence"
+check 'ARC_fnc_publicBroadcastState' \
+    "functions/ambiance/fn_airbaseInit.sqf" \
+    "airbaseInit: publishes seeded departures immediately"
 
 # Runway sub-block carries expected fields
 check '\["state", _runwayState\]'           "$SNAP_FILE" "runway block: 'state' field"

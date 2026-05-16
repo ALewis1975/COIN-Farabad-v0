@@ -615,6 +615,7 @@ if ((count _initSeedQueue) == 0) then
         ["airbase_v1_seq", _initSeq] call ARC_fnc_stateSet;
         _rt set ["firstDepartureDone", true];
         missionNamespace setVariable ["airbase_v1_rt", _rt, true];
+        if (!isNil "ARC_fnc_publicBroadcastState") then { [] call ARC_fnc_publicBroadcastState; };
     };
 };
 

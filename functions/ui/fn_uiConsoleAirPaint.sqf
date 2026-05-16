@@ -192,6 +192,8 @@ private _arrivals = [_snapshot, "arrivals", []] call _getPair;
 if (!(_arrivals isEqualType [])) then { _arrivals = []; };
 private _departures = [_snapshot, "departures", []] call _getPair;
 if (!(_departures isEqualType [])) then { _departures = []; };
+private _queueCounts = [_snapshot, "queueCounts", []] call _getPair;
+if (!(_queueCounts isEqualType [])) then { _queueCounts = []; };
 private _pendingClearances = [_snapshot, "pendingClearances", []] call _getPair;
 if (!(_pendingClearances isEqualType [])) then { _pendingClearances = []; };
 private _staffing = [_snapshot, "staffing", []] call _getPair;
@@ -283,7 +285,8 @@ private _IDX_FLIGHT_STATUS = 6;
 // Priority thresholds (shared between arrivals + departures)
 private _PRIO_EMERGENCY = 100;
 private _PRIO_ELEVATED = 1;
-private _arrCount = count _arrivals;
+private _arrCount = [_queueCounts, "arrivals", count _arrivals] call _getPair;
+if (!(_arrCount isEqualType 0)) then { _arrCount = count _arrivals; };
 private _arrStatus = "NORMAL";
 {
     if (_x isEqualType [] && { (count _x) > _IDX_FLIGHT_STATUS }) then {
@@ -299,7 +302,8 @@ if (!isNull _airChipArrivals) then { _airChipArrivals ctrlSetStructuredText pars
 
 // --- Departures chip ---
 // Same tuple layout: [flightId(0), callsign(1), category(2), state(3), ageS(4), priority(5), status(6)]
-private _depCount = count _departures;
+private _depCount = [_queueCounts, "departures", count _departures] call _getPair;
+if (!(_depCount isEqualType 0)) then { _depCount = count _departures; };
 private _depStatus = if (_holdDepartures) then { "HOLD" } else { "NORMAL" };
 {
     if (_x isEqualType [] && { (count _x) > _IDX_FLIGHT_STATUS }) then {
@@ -991,8 +995,8 @@ switch (_rowType) do
             format ["View: <t color='#FFFFFF'>%1</t>", if (_airMode isEqualTo "PILOT") then {"PILOT"} else {_airSubmode}],
             format ["Snapshot: <t color='#FFFFFF'>%1</t>", _freshnessText],
             format ["Runway: <t color='%1'>%2</t>", [_runwayState] call _statusColor, _runwayState],
-            format ["Inbound: <t color='#FFFFFF'>%1</t>", count _arrivals],
-            format ["Outbound: <t color='#FFFFFF'>%1</t>", count _departures],
+            format ["Inbound: <t color='#FFFFFF'>%1</t>", _arrCount],
+            format ["Outbound: <t color='#FFFFFF'>%1</t>", _depCount],
             format ["Decisions pending: <t color='#FFFFFF'>%1</t>", count _decisionQueue],
             format ["Recent events: <t color='#FFFFFF'>%1</t>", count _recentEvents],
             format ["Staffing lanes: <t color='#FFFFFF'>%1</t>", count _staffing],

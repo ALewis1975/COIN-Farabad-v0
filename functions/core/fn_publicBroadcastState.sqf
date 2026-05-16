@@ -725,7 +725,7 @@ private _uiDepartures = [];
             _uiDepartures pushBack [_fid, _callsign, _aircraftType, _depState, _ageS, _priority, _depStatus, _posX, _posY];
         };
     };
-} forEach _nextItems;
+} forEach _airQueue;
 
 {
     if ((count _uiArrivals) >= 6) exitWith {};
@@ -932,6 +932,11 @@ private _airbaseUiSnapshot = [
     ]],
     ["alerts", _uiAlerts],
     ["decisionQueue", _uiDecisionQueue],
+    ["queueCounts", [
+        ["departures", _depQueued],
+        ["arrivals", _arrQueued],
+        ["total", count _airQueue]
+    ]],
     ["arrivals", _uiArrivals],
     ["departures", _uiDepartures],
     ["pendingClearances", _uiPendingClearances],
