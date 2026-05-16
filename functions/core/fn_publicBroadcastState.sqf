@@ -653,6 +653,15 @@ if (!(_airUiDecisionCap isEqualType 0) || { _airUiDecisionCap < 5 }) then { _air
 
 private _uiArrivals = [];
 private _uiDepartures = [];
+// Tunable per-kind sequence spacing for AIR queue ETA/ETD slots. Defaults preserve
+// the previous 120s estimate but track ARR and DEP independently so the Nth queued
+// departure no longer inherits ARR slot indices when the queue interleaves kinds.
+private _airUiArrSlotSpacing_s = missionNamespace getVariable ["airbase_v1_uiArrSlotSpacing_s", 120];
+if (!(_airUiArrSlotSpacing_s isEqualType 0)) then { _airUiArrSlotSpacing_s = 120; };
+private _airUiDepSlotSpacing_s = missionNamespace getVariable ["airbase_v1_uiDepSlotSpacing_s", 120];
+if (!(_airUiDepSlotSpacing_s isEqualType 0)) then { _airUiDepSlotSpacing_s = 120; };
+private _arrSlot = 0;
+private _depSlot = 0;
 {
     if !(_x isEqualType []) then { continue; };
     private _fid = _x param [0, ""];
@@ -662,7 +671,6 @@ private _uiDepartures = [];
     if !(_routeMeta isEqualType []) then { _routeMeta = []; };
 
     private _sourceRequestId = [_routeMeta, "sourceRequestId", ""] call _metaValue;
-    private _sequenceEtaS = (_forEachIndex + 1) * 120;
     private _queuedAt = [_routeMeta, "queuedAt", -1] call _metaValue;
     if !(_queuedAt isEqualType 0) then { _queuedAt = -1; };
     private _aircraftType = [_routeMeta, "aircraftType", ""] call _metaValue;
@@ -690,6 +698,8 @@ private _uiDepartures = [];
 
     if (_kind isEqualTo "ARR") then {
         if ((count _uiArrivals) < _airUiListCap) then {
+            _arrSlot = _arrSlot + 1;
+            private _sequenceEtaS = _arrSlot * _airUiArrSlotSpacing_s;
             private _phase = "INBOUND";
             private _status = "NORMAL";
             if (_priority >= 100) then { _phase = "PRIORITY"; _status = "CONFLICT"; } else {
@@ -710,6 +720,8 @@ private _uiDepartures = [];
 
     if (_kind isEqualTo "DEP") then {
         if ((count _uiDepartures) < _airUiListCap) then {
+            _depSlot = _depSlot + 1;
+            private _sequenceEtaS = _depSlot * _airUiDepSlotSpacing_s;
             private _depState = "QUEUED";
             private _depStatus = "NORMAL";
             if (_holdDepartures) then { _depState = "HOLD"; _depStatus = "HOLD"; };
@@ -1006,6 +1018,9 @@ private _pub = [
 
 private _didPublish = [_pub, "publicBroadcastState", false, 0.25] call ARC_fnc_statePublishPublic;
 
+// Always bump the AIR UI snapshot (cheap, scoped to airbase) so AIR/TOWER stays fresh
+// even when the main public state publish is rate-limited. All other downstream
+// broadcasts and recomputes below are gated on _didPublish to preserve prior behavior.
 private _uiRev = missionNamespace getVariable ["ARC_pub_airbaseUiSnapshotRev", 0];
 if (!(_uiRev isEqualType 0)) then { _uiRev = 0; };
 _uiRev = _uiRev + 1;
@@ -1013,6 +1028,9 @@ _airbaseUiSnapshot set [1, ["rev", _uiRev]];
 missionNamespace setVariable ["ARC_pub_airbaseUiSnapshotRev", _uiRev];
 missionNamespace setVariable ["ARC_pub_airbaseUiSnapshot", _airbaseUiSnapshot, true];
 missionNamespace setVariable ["ARC_pub_airbaseUiSnapshotUpdatedAt", serverTime, true];
+
+if (!_didPublish) exitWith { false };
+
 missionNamespace setVariable ["ARC_pub_threatUiSnapshot", _threatPub, true];
 missionNamespace setVariable ["ARC_pub_threatUiSnapshotUpdatedAt", serverTime, true];
 missionNamespace setVariable ["ARC_pub_threatEconomySnapshot", _threatEconomyPub, true];

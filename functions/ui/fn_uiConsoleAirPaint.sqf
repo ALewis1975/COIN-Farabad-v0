@@ -255,8 +255,25 @@ private _freshnessState = [_snapshot, "freshnessState", "UNKNOWN"] call _getPair
 if (!(_freshnessState isEqualType "")) then { _freshnessState = "UNKNOWN"; };
 if (_stateUpdatedAt >= 0) then {
     private _snapAge = (serverTime - _stateUpdatedAt) max 0;
-    if (_snapAge > 90) then { _freshnessState = "DEGRADED"; } else {
-        if (_snapAge > 30 && { !(toUpper _freshnessState isEqualTo "DEGRADED") }) then { _freshnessState = "STALE"; };
+    // Age-based proposed state; only ever escalate the server-supplied value so a
+    // server-classified DEGRADED snapshot can never be silently downgraded by client age math.
+    private _proposed = "";
+    if (_snapAge > 90) then { _proposed = "DEGRADED"; } else {
+        if (_snapAge > 30) then { _proposed = "STALE"; };
+    };
+    if !(_proposed isEqualTo "") then {
+        private _rank = {
+            params ["_s"];
+            switch (toUpper _s) do {
+                case "DEGRADED": { 3 };
+                case "STALE":    { 2 };
+                case "OK":       { 1 };
+                default          { 0 };
+            }
+        };
+        if (([_proposed] call _rank) > ([_freshnessState] call _rank)) then {
+            _freshnessState = _proposed;
+        };
     };
 };
 if (toUpper _freshnessState isEqualTo "DEGRADED") then {

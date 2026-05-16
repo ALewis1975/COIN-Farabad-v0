@@ -39,6 +39,13 @@ if (_rec isEqualTo diaryRecordNull) then {
     player setVariable [_recVar, _rec];
 };
 
+// If we still don't have a valid record handle (subject not visible yet, briefing
+// mid-rebuild, etc.), clear the dedupe cache so the next tick retries record creation
+// instead of short-circuiting on a stale "lastText" match.
+if (_rec isEqualTo diaryRecordNull) exitWith {
+    missionNamespace setVariable ["airbase_v1_diary_lastText", ""];
+};
+
 // De-dupe identical consecutive updates (helps when multiple ticks fire quickly)
 private _last = missionNamespace getVariable ["airbase_v1_diary_lastText", ""];
 if (_text isEqualTo _last) exitWith {};
