@@ -209,6 +209,35 @@ if (!(_casTiming isEqualType [])) then { _casTiming = []; };
 private _debug = [_snapshot, "debug", []] call _getPair;
 if (!(_debug isEqualType [])) then { _debug = []; };
 
+// Runtime block exposes airbase ambiance state + UI tuning so the AIR/TOWER
+// idle summary stays informative even when no traffic is queued.
+private _runtime = [_snapshot, "runtime", []] call _getPair;
+if (!(_runtime isEqualType [])) then { _runtime = []; };
+private _runtimeEnabled = [_runtime, "enabled", false] call _getPair;
+if (!(_runtimeEnabled isEqualType true) && !(_runtimeEnabled isEqualType false)) then { _runtimeEnabled = false; };
+private _runtimeExecActive = [_runtime, "execActive", false] call _getPair;
+if (!(_runtimeExecActive isEqualType true) && !(_runtimeExecActive isEqualType false)) then { _runtimeExecActive = false; };
+private _runtimeExecFid = [_runtime, "execFid", ""] call _getPair;
+if (!(_runtimeExecFid isEqualType "")) then { _runtimeExecFid = ""; };
+private _runtimeDepQueued = [_runtime, "depQueued", 0] call _getPair;
+if (!(_runtimeDepQueued isEqualType 0)) then { _runtimeDepQueued = 0; };
+private _runtimeArrQueued = [_runtime, "arrQueued", 0] call _getPair;
+if (!(_runtimeArrQueued isEqualType 0)) then { _runtimeArrQueued = 0; };
+private _runtimeTotalQueued = [_runtime, "totalQueued", 0] call _getPair;
+if (!(_runtimeTotalQueued isEqualType 0)) then { _runtimeTotalQueued = 0; };
+private _runtimeListMax = [_runtime, "listMax", 0] call _getPair;
+if (!(_runtimeListMax isEqualType 0)) then { _runtimeListMax = 0; };
+private _runtimeArrSlot = [_runtime, "arrSlotSpacingS", 0] call _getPair;
+if (!(_runtimeArrSlot isEqualType 0)) then { _runtimeArrSlot = 0; };
+private _runtimeDepSlot = [_runtime, "depSlotSpacingS", 0] call _getPair;
+if (!(_runtimeDepSlot isEqualType 0)) then { _runtimeDepSlot = 0; };
+private _runtimePublishInterval = [_runtime, "publishIntervalS", 0] call _getPair;
+if (!(_runtimePublishInterval isEqualType 0)) then { _runtimePublishInterval = 0; };
+private _runtimeEnabledLabel = if (_runtimeEnabled) then { "ENABLED" } else { "DISABLED" };
+private _runtimeMovementLabel = if (_runtimeExecActive) then {
+    if (_runtimeExecFid isEqualTo "") then { "ACTIVE" } else { format ["ACTIVE (%1)", _runtimeExecFid] }
+} else { "IDLE" };
+
 private _runwayState = [_runway, "state", "UNKNOWN"] call _getPair;
 private _runwayOwner = [_runway, "ownerCallsign", ""] call _getPair;
 private _runwayOwnerFlightId = [_runway, "ownerFlightId", ""] call _getPair;
@@ -548,6 +577,10 @@ if (_rebuild) then {
                 _ctrlList lbSetData [_hdrArr, "HDR|ARR"];
                 if ((count _arrivals) == 0) then {
                     [_ctrlList, "No arrivals inbound"] call ARC_fnc_uiConsoleFormatEmptyState;
+                    private _arrHintBits = [format ["Runtime %1", _runtimeEnabledLabel], format ["Movement %1", _runtimeMovementLabel]];
+                    if (_runtimeListMax > 0) then { _arrHintBits pushBack format ["Capacity %1", _runtimeListMax]; };
+                    if (_runtimeArrSlot > 0) then { _arrHintBits pushBack format ["Slot %1s", _runtimeArrSlot]; };
+                    [_ctrlList, _arrHintBits joinString " · "] call ARC_fnc_uiConsoleFormatEmptyState;
                 } else {
                     {
                         private _fid = _x param [0, ""];
@@ -570,7 +603,11 @@ if (_rebuild) then {
                 _ctrlList lbSetData [_hdrRwy, "HDR|RWY"];
                 private _holdTag = if (_holdDepartures) then { "HOLD ACTIVE" } else { _activeMovement };
                 private _rwyOwnerTag = if (_runwayOwnerDisplay isEqualTo "") then { "none" } else { _runwayOwnerDisplay };
-                private _runwayRow = _ctrlList lbAdd format ["%1  |  %2  |  %3", _runwayState, _rwyOwnerTag, _holdTag];
+                // Append runtime indicator so operators see ambiance ENABLED/DISABLED
+                // and current movement (IDLE vs. ACTIVE) on the runway row itself,
+                // even when no traffic is queued (idle visibility).
+                private _runtimeRowTag = format ["RUNTIME %1 · %2", _runtimeEnabledLabel, _runtimeMovementLabel];
+                private _runwayRow = _ctrlList lbAdd format ["%1  |  %2  |  %3  |  %4", _runwayState, _rwyOwnerTag, _holdTag, _runtimeRowTag];
                 _ctrlList lbSetData [_runwayRow, format ["RWY|%1|%2|%3", _runwayState, _runwayOwnerFlightId, _activeMovement]];
 
                 // --- Departures block ---
@@ -578,6 +615,11 @@ if (_rebuild) then {
                 _ctrlList lbSetData [_hdrDep, "HDR|DEP"];
                 if ((count _departures) == 0) then {
                     [_ctrlList, "No departures queued"] call ARC_fnc_uiConsoleFormatEmptyState;
+                    private _depHintBits = [format ["Runtime %1", _runtimeEnabledLabel]];
+                    if (_holdDepartures) then { _depHintBits pushBack "Hold ACTIVE"; };
+                    if (_runtimeListMax > 0) then { _depHintBits pushBack format ["Capacity %1", _runtimeListMax]; };
+                    if (_runtimeDepSlot > 0) then { _depHintBits pushBack format ["Slot %1s", _runtimeDepSlot]; };
+                    [_ctrlList, _depHintBits joinString " · "] call ARC_fnc_uiConsoleFormatEmptyState;
                 } else {
                     {
                         private _fid = _x param [0, ""];
@@ -853,11 +895,13 @@ switch (_rowType) do
         _selectionHeading = "Runway";
         private _holdLabel = if (_holdDepartures) then {"HOLD ACTIVE"} else {"OPEN"};
         private _holdColor = if (_holdDepartures) then {"#E74C3C"} else {"#4CAF50"};
+        private _runtimeColor = if (_runtimeEnabled) then {"#4CAF50"} else {"#E74C3C"};
         _detailLines = [
             format ["State: <t color='%1'>%2</t>", [_runwayState] call _statusColor, _runwayState],
             format ["Current aircraft: <t color='#FFFFFF'>%1</t>", if (_runwayOwnerDisplay isEqualTo "") then {"None"} else {_runwayOwnerDisplay}],
-            format ["Movement: <t color='#FFFFFF'>%1</t>", _activeMovement],
-            format ["Departure hold: <t color='%1'>%2</t>", _holdColor, _holdLabel]
+            format ["Movement: <t color='#FFFFFF'>%1</t>", _runtimeMovementLabel],
+            format ["Departure hold: <t color='%1'>%2</t>", _holdColor, _holdLabel],
+            format ["Runtime: <t color='%1'>%2</t>", _runtimeColor, _runtimeEnabledLabel]
         ];
         // Constraints
         if (_holdDepartures && { _canAirHoldRelease }) then {
@@ -1022,10 +1066,14 @@ switch (_rowType) do
     default
     {
         _selectionHeading = "AIR / TOWER";
+        private _runtimeColor = if (_runtimeEnabled) then {"#4CAF50"} else {"#E74C3C"};
         _detailLines = [
             format ["View: <t color='#FFFFFF'>%1</t>", if (_airMode isEqualTo "PILOT") then {"PILOT"} else {_airSubmode}],
             format ["Snapshot: <t color='#FFFFFF'>%1</t>", _freshnessText],
             format ["Runway: <t color='%1'>%2</t>", [_runwayState] call _statusColor, _runwayState],
+            format ["Runtime: <t color='%1'>%2</t>", _runtimeColor, _runtimeEnabledLabel],
+            format ["Current movement: <t color='#FFFFFF'>%1</t>", _runtimeMovementLabel],
+            format ["Queue: <t color='#FFFFFF'>ARR %1 / DEP %2 / Total %3</t>", _runtimeArrQueued, _runtimeDepQueued, _runtimeTotalQueued],
             format ["Inbound: <t color='#FFFFFF'>%1</t>", count _arrivals],
             format ["Outbound: <t color='#FFFFFF'>%1</t>", count _departures],
             format ["Decisions pending: <t color='#FFFFFF'>%1</t>", count _decisionQueue],
@@ -1033,6 +1081,14 @@ switch (_rowType) do
             format ["Staffing lanes: <t color='#FFFFFF'>%1</t>", count _staffing],
             format ["Clearance history: <t color='#FFFFFF'>%1</t>", count _clearanceHistory]
         ];
+        private _capacityBits = [];
+        if (_runtimeListMax > 0) then { _capacityBits pushBack format ["List %1", _runtimeListMax]; };
+        if (_runtimeArrSlot > 0) then { _capacityBits pushBack format ["ARR slot %1s", _runtimeArrSlot]; };
+        if (_runtimeDepSlot > 0) then { _capacityBits pushBack format ["DEP slot %1s", _runtimeDepSlot]; };
+        if (_runtimePublishInterval > 0) then { _capacityBits pushBack format ["Refresh %1s", _runtimePublishInterval]; };
+        if ((count _capacityBits) > 0) then {
+            _detailLines pushBack format ["Capacity: <t color='#8FA8C0'>%1</t>", _capacityBits joinString " · "];
+        };
     };
 };
 
