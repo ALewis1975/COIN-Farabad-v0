@@ -11,6 +11,23 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+
+## 2026-05-16 — AIR/TOWER console queue sync and omni access (Mode A)
+
+**Branch/Commit:** copilot/review-air-tower-system @ 8efdfe7 (working tree includes TEST-LOG update)
+
+**Scenario:** Reviewed AIRBASE queue publication and AIR/TOWER console access after the console showed no departures while the Airbase diary reported queued traffic. The fix makes the console snapshot publish from the authoritative server queue after AIRBASE mutations, exposes authoritative inbound/outbound queue counts, and prevents OMNI console users from being downgraded to read-only AIR/TOWER controls.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline AIRBASE static checks | `bash tests/static/airbase_planning_mode_checks.sh && bash tests/static/airbase_queue_lifecycle_contract_checks.sh` | PASS | Baseline AIRBASE planning and queue lifecycle contracts passed before edits. |
+| 2 | Baseline changed-file compat + sqflint | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_publicBroadcastState.sqf functions/ui/fn_uiConsoleAirPaint.sqf functions/ui/fn_uiConsoleOnLoad.sqf functions/ambiance/fn_airbaseTick.sqf functions/ambiance/fn_airbaseInit.sqf && sqflint -e w ...` | BLOCKED/PASS | Compat scan passed; `sqflint` command was unavailable in this sandbox. |
+| 3 | Final AIRBASE static and compat checks | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_publicBroadcastState.sqf functions/ui/fn_uiConsoleAirPaint.sqf functions/ui/fn_uiConsoleOnLoad.sqf functions/ambiance/fn_airbaseTick.sqf functions/ambiance/fn_airbaseInit.sqf && bash tests/static/airbase_planning_mode_checks.sh && bash tests/static/airbase_queue_lifecycle_contract_checks.sh` | PASS | Confirms queueCounts snapshot contract, full authoritative queue source for AIR/TOWER lists, and public snapshot republish hooks from AIRBASE init/tick. |
+| 4 | Final changed-file sqflint | `sqflint -e w functions/core/fn_publicBroadcastState.sqf functions/ui/fn_uiConsoleAirPaint.sqf functions/ui/fn_uiConsoleOnLoad.sqf functions/ambiance/fn_airbaseTick.sqf functions/ambiance/fn_airbaseInit.sqf` | BLOCKED | `sqflint` is not installed in this sandbox (`command not found`). |
+| 5 | Runtime smoke: BN CO AIR/TOWER console | Hosted/local MP as BN CO/OMNI: open Farabad Console, select AIR/TOWER, compare departure queue/counts to Airbase diary and verify HOLD/RELEASE/CLEARANCES controls are not read-only. | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 6 | Dedicated/JIP validation | Dedicated server with a JIP client: confirm AIRBASE snapshot replication stays aligned with diary queue updates and late clients receive current queue counts. | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+
+---
 ## 2026-05-15 — Mod compatibility diary record (Mode B)
 
 **Branch/Commit:** copilot/add-mod-compatibility-dialogue @ c070d94 (working tree included diary record and TEST-LOG update)
