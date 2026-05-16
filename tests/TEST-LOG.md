@@ -11,6 +11,21 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-16 — AIR/TOWER idle visibility (Mode B)
+
+**Branch/Commit:** copilot/update-air-tower-screenshot @ <pending> (working tree included AIR paint + broadcast snapshot updates and TEST-LOG entry)
+
+**Scenario:** Surface airbase ambiance runtime status (ENABLED/DISABLED, current movement IDLE/ACTIVE) and UI capacity tuning (list cap, ARR/DEP slot spacing, refresh interval) directly on the AIR/TOWER console so the panel is informative when no traffic is queued. Adds a server-published `runtime` block to `ARC_pub_airbaseUiSnapshot`, an extra "RUNTIME …" tag on the RUNWAY row, capacity hints on the Arrivals/Departures empty-state rows, and a richer default-view detail panel.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleAirPaint.sqf functions/core/fn_publicBroadcastState.sqf` | PASS | No banned constructs introduced. |
+| 2 | sqflint | `sqflint -e w functions/ui/fn_uiConsoleAirPaint.sqf functions/core/fn_publicBroadcastState.sqf` | BLOCKED | `sqflint` is not preinstalled in this sandbox image and pip install was not available; compat scan acts as the static gate. |
+| 3 | Hosted/local MP smoke | Open Farabad Console → AIR/TOWER on an idle airbase; confirm Runway row shows `RUNTIME ENABLED · IDLE`, the empty-state rows under Arrivals/Departures show `Runtime ENABLED · Movement IDLE · Capacity N · Slot Ms`, and the default right-pane summary lists Runtime, Current movement, Queue, and Capacity. | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 4 | Dedicated/JIP | Dedicated server with a JIP client: verify the new `runtime` snapshot block replicates and stays current as `airbase_v1_runtime_enabled` / `airbase_v1_execActive` change. | BLOCKED | Dedicated server unavailable in this sandbox. |
+
+---
+
 ## 2026-05-15 — Mod compatibility diary record (Mode B)
 
 **Branch/Commit:** copilot/add-mod-compatibility-dialogue @ c070d94 (working tree included diary record and TEST-LOG update)

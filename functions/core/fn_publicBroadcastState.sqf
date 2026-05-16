@@ -967,7 +967,22 @@ private _airbaseUiSnapshot = [
         ["arrival", _autoDelayArrivalS]
     ]],
     ["casTiming", _casTiming],
-    ["airbaseCenterPos", [_airbaseCenterX, _airbaseCenterY]]
+    ["airbaseCenterPos", [_airbaseCenterX, _airbaseCenterY]],
+    // Runtime / capacity block — surfaces airbase ambiance state and UI tuning
+    // so the AIR/TOWER console can render an informative idle summary without
+    // requiring traffic to be in the queue. Read-only for clients.
+    ["runtime", [
+        ["enabled", (missionNamespace getVariable ["airbase_v1_runtime_enabled", false])],
+        ["execActive", _execActive],
+        ["execFid", _execFid],
+        ["depQueued", _depQueued],
+        ["arrQueued", _arrQueued],
+        ["totalQueued", count _airQueue],
+        ["listMax", _airUiListCap],
+        ["arrSlotSpacingS", _airUiArrSlotSpacing_s],
+        ["depSlotSpacingS", _airUiDepSlotSpacing_s],
+        ["publishIntervalS", (missionNamespace getVariable ["airbase_v1_uiPublishInterval_s", 5])]
+    ]]
 ];
 if ((count _uiDebug) > 0) then {
     _airbaseUiSnapshot pushBack ["debug", _uiDebug];
