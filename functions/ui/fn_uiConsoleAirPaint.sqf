@@ -167,11 +167,13 @@ private _cycleModes = {
 
 private _snapshot = missionNamespace getVariable ["ARC_pub_airbaseUiSnapshot", []];
 if (!(_snapshot isEqualType [])) then { _snapshot = []; };
+private _snapshotRev = [_snapshot, "rev", -1] call _getPair;
+if (!(_snapshotRev isEqualType 0)) then { _snapshotRev = -1; };
+private _lastRev = uiNamespace getVariable ["ARC_console_airLastRev", -2];
+if (!(_lastRev isEqualType 0)) then { _lastRev = -2; };
+if (_snapshotRev != _lastRev) then { _rebuild = true; };
 private _stateUpdatedAt = missionNamespace getVariable ["ARC_pub_airbaseUiSnapshotUpdatedAt", -1];
 if (!(_stateUpdatedAt isEqualType 0)) then { _stateUpdatedAt = -1; };
-private _lastStateUpdatedAt = uiNamespace getVariable ["ARC_console_airLastStateUpdatedAt", -2];
-if (!(_lastStateUpdatedAt isEqualType 0)) then { _lastStateUpdatedAt = -2; };
-if (_stateUpdatedAt != _lastStateUpdatedAt) then { _rebuild = true; };
 
 private _prevSelData = "";
 if (_rebuild) then {
@@ -1132,4 +1134,5 @@ _ctrlDetails ctrlSetPosition _airP;
 _ctrlDetails ctrlCommit 0;
 
 uiNamespace setVariable ["ARC_console_airLastStateUpdatedAt", _stateUpdatedAt];
+uiNamespace setVariable ["ARC_console_airLastRev", _snapshotRev];
 true

@@ -1033,16 +1033,85 @@ private _pub = [
 
 private _didPublish = [_pub, "publicBroadcastState", false, 0.25] call ARC_fnc_statePublishPublic;
 
-// Always bump the AIR UI snapshot (cheap, scoped to airbase) so AIR/TOWER stays fresh
-// even when the main public state publish is rate-limited. All other downstream
-// broadcasts and recomputes below are gated on _didPublish to preserve prior behavior.
-private _uiRev = missionNamespace getVariable ["ARC_pub_airbaseUiSnapshotRev", 0];
-if (!(_uiRev isEqualType 0)) then { _uiRev = 0; };
-_uiRev = _uiRev + 1;
-_airbaseUiSnapshot set [1, ["rev", _uiRev]];
-missionNamespace setVariable ["ARC_pub_airbaseUiSnapshotRev", _uiRev];
-missionNamespace setVariable ["ARC_pub_airbaseUiSnapshot", _airbaseUiSnapshot, true];
-missionNamespace setVariable ["ARC_pub_airbaseUiSnapshotUpdatedAt", serverTime, true];
+private _uiPublishIntervalS = missionNamespace getVariable ["airbase_v1_uiPublishInterval_s", 5];
+if (!(_uiPublishIntervalS isEqualType 0) || { _uiPublishIntervalS < 1 }) then { _uiPublishIntervalS = 5; };
+private _lastAirUiPublishAt = missionNamespace getVariable ["ARC_pub_airbaseUiSnapshotPublishAt", -1];
+if (!(_lastAirUiPublishAt isEqualType 0)) then { _lastAirUiPublishAt = -1; };
+private _uiArrivalsKey = [];
+{
+    if (_x isEqualType []) then {
+        _uiArrivalsKey pushBack [
+            _x param [0, ""],
+            _x param [1, ""],
+            _x param [2, ""],
+            _x param [3, ""],
+            _x param [5, 0],
+            _x param [6, ""],
+            _x param [7, 0],
+            _x param [8, 0],
+            _x param [9, -1]
+        ];
+    };
+} forEach _uiArrivals;
+private _uiDeparturesKey = [];
+{
+    if (_x isEqualType []) then {
+        _uiDeparturesKey pushBack [
+            _x param [0, ""],
+            _x param [1, ""],
+            _x param [2, ""],
+            _x param [3, ""],
+            _x param [5, 0],
+            _x param [6, ""],
+            _x param [7, 0],
+            _x param [8, 0],
+            _x param [9, -1]
+        ];
+    };
+} forEach _uiDepartures;
+private _uiPendingClearancesKey = [];
+{
+    if (_x isEqualType []) then {
+        _uiPendingClearancesKey pushBack [
+            _x param [0, ""],
+            _x param [1, ""],
+            _x param [2, ""],
+            _x param [4, 0],
+            _x param [5, false],
+            _x param [6, ""],
+            _x param [7, []]
+        ];
+    };
+} forEach _uiPendingClearances;
+private _airUiKey = str [
+    _runwayState,
+    _runwayOwner,
+    _holdDepartures,
+    _execActive,
+    _execFid,
+    _freshnessState,
+    _uiAlerts,
+    _uiDecisionQueue,
+    _uiArrivalsKey,
+    _uiDeparturesKey,
+    _uiPendingClearancesKey,
+    _uiStaffing
+];
+private _lastAirUiKey = missionNamespace getVariable ["ARC_pub_airbaseUiSnapshotKey", ""];
+if (!(_lastAirUiKey isEqualType "")) then { _lastAirUiKey = ""; };
+private _semanticChanged = !(_airUiKey isEqualTo _lastAirUiKey);
+private _publishDue = (_lastAirUiPublishAt < 0) || { (serverTime - _lastAirUiPublishAt) >= _uiPublishIntervalS };
+if (_semanticChanged || { _publishDue }) then {
+    private _uiRev = missionNamespace getVariable ["ARC_pub_airbaseUiSnapshotRev", 0];
+    if (!(_uiRev isEqualType 0)) then { _uiRev = 0; };
+    _uiRev = _uiRev + 1;
+    _airbaseUiSnapshot set [1, ["rev", _uiRev]];
+    missionNamespace setVariable ["ARC_pub_airbaseUiSnapshotRev", _uiRev];
+    missionNamespace setVariable ["ARC_pub_airbaseUiSnapshotKey", _airUiKey];
+    missionNamespace setVariable ["ARC_pub_airbaseUiSnapshotPublishAt", serverTime];
+    missionNamespace setVariable ["ARC_pub_airbaseUiSnapshot", _airbaseUiSnapshot, true];
+    missionNamespace setVariable ["ARC_pub_airbaseUiSnapshotUpdatedAt", serverTime, true];
+};
 
 if (!_didPublish) exitWith { false };
 

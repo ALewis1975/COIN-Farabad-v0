@@ -50,12 +50,20 @@ private _centerPos = [_airSnap, "airbaseCenterPos", [0,0]] call _getPair;
 if (!(_centerPos isEqualType [])) then { _centerPos = [0,0]; };
 if ((count _centerPos) < 2) then { _centerPos = [0,0]; };
 
-// --- Clear previous map markers ---
+private _mapKey = str [
+    _centerOnFid,
+    _centerPos,
+    _arrivals,
+    _departures
+];
+private _lastMapKey = uiNamespace getVariable ["ARC_console_airMapLastKey", ""];
+if (!(_lastMapKey isEqualType "")) then { _lastMapKey = ""; };
+if (_mapKey isEqualTo _lastMapKey) exitWith { true };
+uiNamespace setVariable ["ARC_console_airMapLastKey", _mapKey];
+
+// --- Track previous map markers for stale cleanup ---
 private _prevMarkers = uiNamespace getVariable ["ARC_console_airMapMarkers", []];
 if (!(_prevMarkers isEqualType [])) then { _prevMarkers = []; };
-{
-    if (_x isEqualType "") then { deleteMarkerLocal _x; };
-} forEach _prevMarkers;
 
 private _newMarkers = [];
 private _LABEL_LEN_SELECTED_CALLSIGN = 12;
@@ -90,8 +98,9 @@ private _markerLabel = {
 };
 
 // --- Runway center marker ---
-private _rwyMkr = format ["ARC_airmap_rwy_%1", diag_tickTime];
-createMarkerLocal [_rwyMkr, _centerPos];
+private _rwyMkr = "ARC_airmap_rwy";
+if ((markerType _rwyMkr) isEqualTo "") then { createMarkerLocal [_rwyMkr, _centerPos]; };
+_rwyMkr setMarkerPosLocal _centerPos;
 _rwyMkr setMarkerTypeLocal "mil_flag";
 _rwyMkr setMarkerColorLocal "ColorWhite";
 _rwyMkr setMarkerTextLocal "RWY";
@@ -105,6 +114,8 @@ private _centerTarget = [];
     if !(_x isEqualType []) then { continue; };
     if ((count _x) < _TUPLE_MIN_POS_LEN) then { _arrIdx = _arrIdx + 1; continue; };
     private _fid = _x param [0, ""];
+    if (!(_fid isEqualType "")) then { _fid = str _fid; };
+    if (_fid isEqualTo "") then { _fid = format ["IDX%1", _arrIdx]; };
     private _callsign = _x param [1, _fid];
     private _posX = _x param [_IDX_POS_X, 0];
     private _posY = _x param [_IDX_POS_Y, 0];
@@ -114,8 +125,9 @@ private _centerTarget = [];
     private _isSelected = (_centerOnFid != "" && { _fid isEqualTo _centerOnFid });
     private _label = [_fid, _callsign, _isSelected] call _markerLabel;
 
-    private _mkr = format ["ARC_airmap_arr_%1_%2", _arrIdx, diag_tickTime];
-    createMarkerLocal [_mkr, [_posX, _posY]];
+    private _mkr = format ["ARC_airmap_arr_%1", _fid];
+    if ((markerType _mkr) isEqualTo "") then { createMarkerLocal [_mkr, [_posX, _posY]]; };
+    _mkr setMarkerPosLocal [_posX, _posY];
     _mkr setMarkerTypeLocal "mil_arrow";
     _mkr setMarkerColorLocal (if (_isSelected) then {"ColorYellow"} else {"ColorBLUFOR"});
     _mkr setMarkerTextLocal _label;
@@ -134,6 +146,8 @@ private _depIdx = 0;
     if !(_x isEqualType []) then { continue; };
     if ((count _x) < _TUPLE_MIN_POS_LEN) then { _depIdx = _depIdx + 1; continue; };
     private _fid = _x param [0, ""];
+    if (!(_fid isEqualType "")) then { _fid = str _fid; };
+    if (_fid isEqualTo "") then { _fid = format ["IDX%1", _depIdx]; };
     private _callsign = _x param [1, _fid];
     private _posX = _x param [_IDX_POS_X, 0];
     private _posY = _x param [_IDX_POS_Y, 0];
@@ -143,8 +157,9 @@ private _depIdx = 0;
     private _isSelected = (_centerOnFid != "" && { _fid isEqualTo _centerOnFid });
     private _label = [_fid, _callsign, _isSelected] call _markerLabel;
 
-    private _mkr = format ["ARC_airmap_dep_%1_%2", _depIdx, diag_tickTime];
-    createMarkerLocal [_mkr, [_posX, _posY]];
+    private _mkr = format ["ARC_airmap_dep_%1", _fid];
+    if ((markerType _mkr) isEqualTo "") then { createMarkerLocal [_mkr, [_posX, _posY]]; };
+    _mkr setMarkerPosLocal [_posX, _posY];
     _mkr setMarkerTypeLocal "mil_triangle";
     _mkr setMarkerColorLocal (if (_isSelected) then {"ColorYellow"} else {"ColorOPFOR"});
     _mkr setMarkerTextLocal _label;
@@ -158,6 +173,9 @@ private _depIdx = 0;
 } forEach _departures;
 
 uiNamespace setVariable ["ARC_console_airMapMarkers", _newMarkers];
+{
+    if (_x isEqualType "" && { !(_x in _newMarkers) }) then { deleteMarkerLocal _x; };
+} forEach _prevMarkers;
 
 // --- Center map ---
 if ((count _centerTarget) >= 2) then {

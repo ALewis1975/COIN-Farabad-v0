@@ -67,16 +67,27 @@ private _opsCtrls = [
     _display displayCtrl 78038
 ];
 
+private _tab = ["ARC_console_activeTab", "DASH"] call ARC_fnc_uiNsGetString;
+_tab = toUpper _tab;
+
 // Baseline: main panel on, everything else off.
 // Re-enable shared controls here so tabs that temporarily disable the shared
 // MainList as a hidden master (INTEL/HQ tool modes) cannot leak disabled state
 // into list-driven tabs after a tab switch.
 if (!isNull _ctrlTabs) then { _ctrlTabs ctrlShow true; _ctrlTabs ctrlEnable true; };
-if (!isNull _ctrlMainGrp) then { _ctrlMainGrp ctrlShow true; _ctrlMainGrp ctrlEnable true; };
-if (!isNull _ctrlMain) then { _ctrlMain ctrlShow true; _ctrlMain ctrlEnable true; };
-if (!isNull _ctrlList) then { _ctrlList ctrlShow false; _ctrlList ctrlEnable true; };
-if (!isNull _ctrlDetailsGrp) then { _ctrlDetailsGrp ctrlShow false; _ctrlDetailsGrp ctrlEnable true; };
-if (!isNull _ctrlDetails) then { _ctrlDetails ctrlShow false; _ctrlDetails ctrlEnable true; };
+if (_tab isEqualTo "AIR") then {
+    if (!isNull _ctrlMainGrp) then { _ctrlMainGrp ctrlEnable true; };
+    if (!isNull _ctrlMain) then { _ctrlMain ctrlEnable true; };
+    if (!isNull _ctrlList) then { _ctrlList ctrlShow true; _ctrlList ctrlEnable true; };
+    if (!isNull _ctrlDetailsGrp) then { _ctrlDetailsGrp ctrlShow true; _ctrlDetailsGrp ctrlEnable true; };
+    if (!isNull _ctrlDetails) then { _ctrlDetails ctrlShow true; _ctrlDetails ctrlEnable true; };
+} else {
+    if (!isNull _ctrlMainGrp) then { _ctrlMainGrp ctrlShow true; _ctrlMainGrp ctrlEnable true; };
+    if (!isNull _ctrlMain) then { _ctrlMain ctrlShow true; _ctrlMain ctrlEnable true; };
+    if (!isNull _ctrlList) then { _ctrlList ctrlShow false; _ctrlList ctrlEnable true; };
+    if (!isNull _ctrlDetailsGrp) then { _ctrlDetailsGrp ctrlShow false; _ctrlDetailsGrp ctrlEnable true; };
+    if (!isNull _ctrlDetails) then { _ctrlDetails ctrlShow false; _ctrlDetails ctrlEnable true; };
+};
 { if (!isNull _x) then { _x ctrlShow false; }; } forEach _opsCtrls;
 
 // Baseline: hide AIR / TOWER dedicated controls (shown only on AIR tab)
@@ -84,7 +95,9 @@ private _airStripGroup = _display displayCtrl 78130;
 private _airDecisionBand = _display displayCtrl 78136;
 private _airTrafficMap = _display displayCtrl 78137;
 private _airDedicatedCtrls = [_airStripGroup, _airDecisionBand, _airTrafficMap];
-{ if (!isNull _x) then { _x ctrlShow false; }; } forEach _airDedicatedCtrls;
+if (_tab != "AIR") then {
+    { if (!isNull _x) then { _x ctrlShow false; }; } forEach _airDedicatedCtrls;
+};
 
 // Baseline: hide Region C Visual Panel (shown only when tab declares useVisualPanel)
 private _visualPanel = _display displayCtrl 78140;
@@ -102,10 +115,9 @@ private _s2Ctrls = [
 { if (!isNull _x) then { _x ctrlShow false; }; } forEach _s2Ctrls;
 
 // Baseline: hide action buttons
-{ if (!isNull _x) then { _x ctrlShow false; _x ctrlEnable false; }; } forEach [_b1, _b2];
-
-private _tab = ["ARC_console_activeTab", "DASH"] call ARC_fnc_uiNsGetString;
-_tab = toUpper _tab;
+if (_tab != "AIR") then {
+    { if (!isNull _x) then { _x ctrlShow false; _x ctrlEnable false; }; } forEach [_b1, _b2];
+};
 
 private _prevRefreshTab = ["ARC_console_prevRefreshTab", "", false] call ARC_fnc_uiNsGetString;
 // Shared tab-difference flag drives both diagnostics/refresh forcing and
@@ -149,6 +161,7 @@ if (_tab != "AIR") then {
         { if (_x isEqualType "") then { deleteMarkerLocal _x; }; } forEach _mapMarkers;
     };
     uiNamespace setVariable ["ARC_console_airMapMarkers", []];
+    uiNamespace setVariable ["ARC_console_airMapLastKey", ""];
 };
 
 // ---------------------------------------------------------------------------
@@ -235,7 +248,9 @@ if (!isNull _ctrlMainGrp) then {
 // Re-apply layout with the current tab so the correct center/right split ratio
 // is used (equal-width for DASH/BOARDS/OPS/CMD/HQ; default 47/53 for others).
 // This runs after the regression guards so it wins over any stale restored positions.
-[_display, _tab] call ARC_fnc_uiConsoleApplyLayout;
+if (!(_tab isEqualTo "AIR" && { !_tabDiffers })) then {
+    [_display, _tab] call ARC_fnc_uiConsoleApplyLayout;
+};
 
 private _clampMainGroupToListRegion = {
     // Clamp MainGroup (78015) to the center/list region so structured text
