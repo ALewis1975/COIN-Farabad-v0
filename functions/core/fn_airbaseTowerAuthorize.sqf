@@ -82,10 +82,11 @@ if (_hayNorm isEqualTo "") exitWith {
 private _omniTokens = missionNamespace getVariable ["ARC_consoleOmniTokens", ["OMNI"]];
 if (!(_omniTokens isEqualType [])) then { _omniTokens = ["OMNI"]; };
 private _hasOmniToken = false;
+private _hayNormPadded = " " + _hayNorm + " ";
 {
     private _tok = [_x] call _normalizeAuthText;
     if (_tok isEqualTo "") then { continue; };
-    if ((_hayNorm find _tok) >= 0) exitWith { _hasOmniToken = true; };
+    if ((_hayNormPadded find (" " + _tok + " ")) >= 0) exitWith { _hasOmniToken = true; };
 } forEach _omniTokens;
 if (_hasOmniToken) exitWith {[true, "OMNI", "TOKEN_OMNI"]};
 
