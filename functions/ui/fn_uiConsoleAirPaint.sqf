@@ -253,6 +253,12 @@ private _freshnessText = if (_stateUpdatedAt < 0) then { "Snapshot unavailable" 
 // Phase 5: read freshnessState once — reused for warning text and tower chip below.
 private _freshnessState = [_snapshot, "freshnessState", "UNKNOWN"] call _getPair;
 if (!(_freshnessState isEqualType "")) then { _freshnessState = "UNKNOWN"; };
+if (_stateUpdatedAt >= 0) then {
+    private _snapAge = (serverTime - _stateUpdatedAt) max 0;
+    if (_snapAge > 90) then { _freshnessState = "DEGRADED"; } else {
+        if (_snapAge > 30 && { !(toUpper _freshnessState isEqualTo "DEGRADED") }) then { _freshnessState = "STALE"; };
+    };
+};
 if (toUpper _freshnessState isEqualTo "DEGRADED") then {
     _freshnessText = _freshnessText + " — DEGRADED: data may be unreliable";
 } else {
@@ -439,7 +445,10 @@ if (_rebuild) then {
                         private _aircraftType = [_meta, "aircraftType", ""] call _metaGet;
                         private _trackLabel = [_rid, _callsign, _aircraftType] call _flightLabel;
                         private _prio = _x param [4, 0];
+                        private _autoEta = [_meta, "automationEtaS", -1] call _metaGet;
+                        if (!(_autoEta isEqualType 0)) then { _autoEta = -1; };
                         private _lbl = format ["%1  |  %2  |  %3", _trackLabel, [_rtype] call _requestTypeLabel, _rid];
+                        if (_autoEta >= 0) then { _lbl = _lbl + format ["  |  AUTO %1", [_autoEta] call _fmtSeconds]; };
                         if (_prio >= 100) then { _lbl = _lbl + "  |  !EMERGENCY!"; };
                         private _row = _ctrlList lbAdd _lbl;
                         _ctrlList lbSetData [_row, format ["REQ|%1|%2|%3|%4", _rid, _rtype, _callsign, _prio]];
@@ -530,9 +539,11 @@ if (_rebuild) then {
                         private _phase = _x param [3, "INBOUND"];
                         private _prio = _x param [5, 0];
                         private _status = _x param [6, "NORMAL"];
+                        private _etaS = _x param [9, -1];
                         private _trackLabel = [_fid, _callsign, _aircraftType] call _flightLabel;
                         private _prioTag = if (_prio >= _PRIO_EMERGENCY) then { " !EMERGENCY!" } else { if (_prio >= _PRIO_ELEVATED) then { " [PRI]" } else { "" } };
-                        private _row = _ctrlList lbAdd format ["%1  |  %2  |  %3%4", _trackLabel, _phase, _status, _prioTag];
+                        private _etaTag = if (_etaS isEqualType 0 && { _etaS >= 0 }) then { format ["  |  ETA %1", [_etaS] call _fmtSeconds] } else { "" };
+                        private _row = _ctrlList lbAdd format ["%1  |  %2  |  %3%4%5", _trackLabel, _phase, _status, _etaTag, _prioTag];
                         _ctrlList lbSetData [_row, format ["ARR|%1|%2|%3|%4", _fid, _callsign, _phase, _status]];
                     } forEach _arrivals;
                 };
@@ -558,9 +569,11 @@ if (_rebuild) then {
                         private _state = _x param [3, "QUEUED"];
                         private _prio = _x param [5, 0];
                         private _status = _x param [6, "NORMAL"];
+                        private _etaS = _x param [9, -1];
                         private _trackLabel = [_fid, _callsign, _aircraftType] call _flightLabel;
                         private _prioTag = if (_prio >= _PRIO_EMERGENCY) then { " !EMERGENCY!" } else { if (_prio >= _PRIO_ELEVATED) then { " [PRI]" } else { "" } };
-                        private _row = _ctrlList lbAdd format ["%1  |  %2  |  %3%4", _trackLabel, _state, _status, _prioTag];
+                        private _etaTag = if (_etaS isEqualType 0 && { _etaS >= 0 }) then { format ["  |  ETD %1", [_etaS] call _fmtSeconds] } else { "" };
+                        private _row = _ctrlList lbAdd format ["%1  |  %2  |  %3%4%5", _trackLabel, _state, _status, _etaTag, _prioTag];
                         _ctrlList lbSetData [_row, format ["DEP|%1|%2|%3|%4", _fid, _callsign, _state, _status]];
                     } forEach _departures;
                 };
@@ -802,6 +815,7 @@ switch (_rowType) do
                 format ["Aircraft: <t color='#FFFFFF'>%1</t>", _trackLabel],
                 format ["Phase: <t color='#FFFFFF'>%1</t>", _phase],
                 format ["Time tracked: <t color='#FFFFFF'>%1</t>", [(_rec param [4, -1])] call _fmtSeconds],
+                format ["ETA: <t color='#FFFFFF'>%1</t>", [(_rec param [9, -1])] call _fmtSeconds],
                 format ["Priority: <t color='#FFFFFF'>%1</t>", _prioLabel],
                 format ["Status: <t color='%1'>%2</t>", [_status] call _statusColor, _status]
             ];
@@ -857,6 +871,7 @@ switch (_rowType) do
                 format ["Aircraft: <t color='#FFFFFF'>%1</t>", _trackLabel],
                 format ["State: <t color='#FFFFFF'>%1</t>", _state],
                 format ["Time in queue: <t color='#FFFFFF'>%1</t>", [(_rec param [4, -1])] call _fmtSeconds],
+                format ["ETD: <t color='#FFFFFF'>%1</t>", [(_rec param [9, -1])] call _fmtSeconds],
                 format ["Priority: <t color='#FFFFFF'>%1</t>", _prioLabel],
                 format ["Status: <t color='%1'>%2</t>", [_status] call _statusColor, _status]
             ];
@@ -889,6 +904,8 @@ switch (_rowType) do
                 format ["Requested: <t color='#FFFFFF'>%1</t>", [(_rec param [3, -1])] call _fmtAgo],
                 format ["Priority: <t color='#FFFFFF'>%1</t>", _prioLabel],
                 format ["Decision needed: <t color='#FFFFFF'>%1</t>", if (_rec param [5, false]) then {"YES"} else {"NO"}],
+                format ["Automation: <t color='#FFFFFF'>%1</t>", [_meta, "automationStatus", "Awaiting controller/automation"] call _metaGet],
+                format ["Auto ETA: <t color='#FFFFFF'>%1</t>", [[_meta, "automationEtaS", -1] call _metaGet] call _fmtSeconds],
                 format ["Assigned to: <t color='#FFFFFF'>%1</t>", if ((_rec param [6, ""]) isEqualTo "") then {"Unassigned"} else {_rec param [6, ""]}]
             ];
             if (_prio >= _PRIO_EMERGENCY) then {
@@ -918,6 +935,7 @@ switch (_rowType) do
                 format ["Aircraft: <t color='#FFFFFF'>%1</t>", _trackLabel],
                 format ["State: <t color='#FFFFFF'>%1</t>", _state],
                 format ["Time in queue: <t color='#FFFFFF'>%1</t>", [(_rec param [4, -1])] call _fmtSeconds],
+                format ["ETD: <t color='#FFFFFF'>%1</t>", [(_rec param [9, -1])] call _fmtSeconds],
                 format ["Priority: <t color='#FFFFFF'>%1</t>", _prioLabel]
             ];
             if (_holdDepartures) then {

@@ -3,14 +3,14 @@
     Author: ARC / Ambient Airbase Subsystem
 
     Description:
-      Client-side helper to create an "Airbase" diary subject and append queue snapshots.
+      Client-side helper to create/update one rolling "Airbase" diary status record.
 
     Params:
       0: STRING - record title
       1: STRING - record text (structured text / HTML)
 
     Notes:
-      - Diary records cannot be edited in-place; we append new records when the queue changes.
+      - Uses setDiaryRecordText through a compiled helper for sqflint compatibility.
 */
 
 if (!hasInterface) exitWith {};
@@ -20,11 +20,23 @@ params ["_title", "_text"];
 if (!(_title isEqualType "") || {!(_text isEqualType "")}) exitWith {};
 
 private _subjId = "ARC_AIRBASE";
+private _recVar = "airbase_v1_diary_status_record";
+private _setDiaryRecordTextCompat = compileFinal "
+    params ['_unit', '_recordRef', '_recordText'];
+    _unit setDiaryRecordText [_recordRef, _recordText];
+";
 
-// Create subject once per client
-if (isNil { missionNamespace getVariable "airbase_v1_diary_subject_created" }) then {
+// Create subject once per client; recreate if another briefing script resets diary subjects.
+if ((isNil { missionNamespace getVariable "airbase_v1_diary_subject_created" }) || { !(player diarySubjectExists _subjId) }) then {
     player createDiarySubject [_subjId, "Airbase"];
     missionNamespace setVariable ["airbase_v1_diary_subject_created", true];
+    player setVariable [_recVar, diaryRecordNull];
+};
+
+private _rec = player getVariable [_recVar, diaryRecordNull];
+if (_rec isEqualTo diaryRecordNull) then {
+    _rec = player createDiaryRecord [_subjId, [_title, _text]];
+    player setVariable [_recVar, _rec];
 };
 
 // De-dupe identical consecutive updates (helps when multiple ticks fire quickly)
@@ -32,5 +44,6 @@ private _last = missionNamespace getVariable ["airbase_v1_diary_lastText", ""];
 if (_text isEqualTo _last) exitWith {};
 missionNamespace setVariable ["airbase_v1_diary_lastText", _text];
 
-// Append record
-player createDiaryRecord [_subjId, [_title, _text]];
+if (_rec != diaryRecordNull) then {
+    [player, [_subjId, _rec], [_title, _text, ""]] call _setDiaryRecordTextCompat;
+};

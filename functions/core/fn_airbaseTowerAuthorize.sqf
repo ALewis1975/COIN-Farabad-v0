@@ -19,14 +19,15 @@ params [
 
 private _towerAuthDebug = missionNamespace getVariable ["airbase_v1_tower_authDebug", false];
 if (!(_towerAuthDebug isEqualType true) && !(_towerAuthDebug isEqualType false)) then { _towerAuthDebug = false; };
+private _trimFn = compile "params ['_s']; trim _s";
 
 private _normalizeAuthText = {
     params [["_text", "", [""]]];
 
     if (!(_text isEqualType "")) then { _text = ""; };
 
-    private _parts = ((toUpper (trim _text)) splitString (" .:-_/" + toString [9,10,13])) select {
-        _x isNotEqualTo ""
+    private _parts = ((toUpper ([_text] call _trimFn)) splitString (" .:-_/" + toString [9,10,13])) select {
+        !(_x isEqualTo "")
     };
     _parts joinString " "
 };
@@ -53,7 +54,7 @@ if (isNull _unit) exitWith {
     [false, "", "NULL_UNIT"]
 };
 
-private _actionU = toUpper (trim _action);
+private _actionU = toUpper ([_action] call _trimFn);
 if (_actionU isEqualTo "") exitWith {
     ["INVALID_ACTION", "", _unit, _actionU, "", ""] call _logAuthDeny;
     [false, "", "INVALID_ACTION"]
@@ -63,12 +64,12 @@ private _hay = "";
 private _grp = group _unit;
 if (!isNull _grp) then { _hay = groupId _grp; };
 if (!(_hay isEqualType "")) then { _hay = ""; };
-_hay = trim _hay;
+_hay = [_hay] call _trimFn;
 
 private _role = roleDescription _unit;
 if (!(_role isEqualType "")) then { _role = ""; };
-_role = trim _role;
-if (_role isNotEqualTo "") then {
+_role = [_role] call _trimFn;
+if (!(_role isEqualTo "")) then {
     if (_hay isEqualTo "") then { _hay = _role; } else { _hay = _hay + " " + _role; };
 };
 
@@ -77,6 +78,16 @@ if (_hayNorm isEqualTo "") exitWith {
     ["NO_ROLE_BINDING", "", _unit, _actionU, _hay, _hayNorm] call _logAuthDeny;
     [false, "", "NO_ROLE_BINDING"]
 };
+
+private _omniTokens = missionNamespace getVariable ["ARC_consoleOmniTokens", ["OMNI"]];
+if (!(_omniTokens isEqualType [])) then { _omniTokens = ["OMNI"]; };
+private _hasOmniToken = false;
+{
+    private _tok = [_x] call _normalizeAuthText;
+    if (_tok isEqualTo "") then { continue; };
+    if ((_hayNorm find _tok) >= 0) exitWith { _hasOmniToken = true; };
+} forEach _omniTokens;
+if (_hasOmniToken) exitWith {[true, "OMNI", "TOKEN_OMNI"]};
 
 private _ccicTokens = missionNamespace getVariable [
     "airbase_v1_tower_ccicTokens",
@@ -170,7 +181,7 @@ if (_hasLcToken) then {
     private _allowedU = _allowed apply {
         private _v = _x;
         if (!(_v isEqualType "")) then { _v = ""; };
-        toUpper (trim _v)
+        toUpper ([_v] call _trimFn)
     };
 
     if (_actionU in _allowedU) exitWith {[true, "LC", "TOKEN_LC"]};

@@ -25,11 +25,11 @@ private _ok = ([_unit] call ARC_fnc_rolesIsTocS3) || ([_unit] call ARC_fnc_roles
 // BN command roles are allowed to execute TOC/CMD queue actions from the console.
 private _bnTokens = missionNamespace getVariable [
     "ARC_consoleHQTokens",
-    ["BNCMD", "BN COMMAND", "BNHQ", "BN CO", "BNCO", "BN CDR", "REDFALCON 6", "REDFALCON6", "FALCON 6", "FALCON6"]
+    ["BNCMD", "BN COMMAND", "BNHQ", "BN HQ", "BN CO", "BNCO", "BN CDR", "BNCDR", "BN CMDR", "BATTALION CO", "BATTALION CDR", "REDFALCON 6", "REDFALCON6", "RED FALCON 6", "FALCON 6", "FALCON6"]
 ];
 if (!(_bnTokens isEqualType [])) then
 {
-    _bnTokens = ["BNCMD", "BN COMMAND", "BNHQ", "BN CO", "BNCO", "BN CDR", "REDFALCON 6", "REDFALCON6", "FALCON 6", "FALCON6"];
+    _bnTokens = ["BNCMD", "BN COMMAND", "BNHQ", "BN HQ", "BN CO", "BNCO", "BN CDR", "BNCDR", "BN CMDR", "BATTALION CO", "BATTALION CDR", "REDFALCON 6", "REDFALCON6", "RED FALCON 6", "FALCON 6", "FALCON6"];
 };
 
 _ok = _ok || ([_unit, _bnTokens] call ARC_fnc_rolesHasGroupIdToken);

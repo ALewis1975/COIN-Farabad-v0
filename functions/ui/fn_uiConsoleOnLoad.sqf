@@ -130,8 +130,8 @@ private _canTocTab  = _canTocFull || { _atStation && _isAuth };
 private _canIntel = _canTocFull || _isAuth || _isOmni;
 
 // Headquarters (Admin) tab access (S3, TOC Command, BN Command group, OMNI)
-private _hqTokens = missionNamespace getVariable ["ARC_consoleHQTokens", ["BNCMD", "BN COMMAND", "BNHQ", "BN CO", "BNCO", "BN CDR", "REDFALCON 6", "REDFALCON6", "FALCON 6", "FALCON6"]];
-if (!(_hqTokens isEqualType [])) then { _hqTokens = ["BNCMD", "BN COMMAND", "BNHQ"]; };
+private _hqTokens = missionNamespace getVariable ["ARC_consoleHQTokens", ["BNCMD", "BN COMMAND", "BNHQ", "BN HQ", "BN CO", "BNCO", "BN CDR", "BNCDR", "BN CMDR", "BATTALION CO", "BATTALION CDR", "REDFALCON 6", "REDFALCON6", "RED FALCON 6", "FALCON 6", "FALCON6"]];
+if (!(_hqTokens isEqualType [])) then { _hqTokens = ["BNCMD", "BN COMMAND", "BNHQ", "BN HQ", "BN CO", "BNCO", "BN CDR", "BNCDR", "BN CMDR", "BATTALION CO", "BATTALION CDR", "REDFALCON 6", "REDFALCON6", "RED FALCON 6", "FALCON 6", "FALCON6"]; };
 
 private _isBnCmd = false;
 {

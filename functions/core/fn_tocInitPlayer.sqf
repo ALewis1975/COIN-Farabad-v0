@@ -812,11 +812,9 @@ _obj addAction ["[MOBILE OPS] Open Ops Screen", { [] call ARC_fnc_uiOpenOpsScree
 
         case "arc_toc_air_1":
         {
-            _obj addAction ["AIR: Open Ops Screen", { [] call ARC_fnc_uiOpenOpsScreen; }];
+            _obj addAction ["AIR: Open AIR / TOWER", { [] call ARC_fnc_uiOpenAirScreen; }];
             _obj addAction ["AIR: Open SITREP Screen", { [] call ARC_fnc_uiOpenSitrepScreen; }];
-            _obj addAction ["AIR: (Placeholder) Air tasking not implemented yet", {
-                ["Air tasking screen is reserved for a later iteration (AFCENT / CAOC hooks, CAS requests, etc.).", "INFO", "TOAST"] call ARC_fnc_clientHint;
-            }];
+            _obj addAction ["AIR: Open Ops Screen", { [] call ARC_fnc_uiOpenOpsScreen; }];
         };
 
         default
