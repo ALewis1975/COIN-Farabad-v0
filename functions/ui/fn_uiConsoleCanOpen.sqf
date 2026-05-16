@@ -26,24 +26,9 @@ params [
 
 if (isNull _unit) exitWith {[false, "No unit"]};
 
-private _hasGroupToken = {
-    params ["_tokens"];
-    private _ok = false;
-    {
-        if (_x isEqualType "" && { [_unit, _x] call ARC_fnc_rolesHasGroupIdToken }) exitWith { _ok = true; };
-    } forEach _tokens;
-    _ok
-};
-
-private _omniTokens = missionNamespace getVariable ["ARC_consoleOmniTokens", ["OMNI"]];
-if (!(_omniTokens isEqualType [])) then { _omniTokens = ["OMNI"]; };
-private _bnTokens = missionNamespace getVariable ["ARC_consoleHQTokens", ["BNCMD", "BN COMMAND", "BNHQ", "BN HQ", "BN CO", "BNCO", "BN CDR", "BNCDR", "BN CMDR", "BATTALION CO", "BATTALION CDR", "REDFALCON 6", "REDFALCON6", "RED FALCON 6", "FALCON 6", "FALCON6"]];
-if (!(_bnTokens isEqualType [])) then { _bnTokens = ["BNCMD", "BN COMMAND", "BNHQ", "BN HQ", "BN CO", "BNCO", "BN CDR", "BNCDR", "BN CMDR", "BATTALION CO", "BATTALION CDR", "REDFALCON 6", "REDFALCON6", "RED FALCON 6", "FALCON 6", "FALCON6"]; };
-
-if ([_omniTokens] call _hasGroupToken) exitWith {[true, ""]};
-if ([_bnTokens] call _hasGroupToken) exitWith {[true, ""]};
-
 // Dev override (debug)
+// Do not grant a separate HQ / OMNI token bypass here; all non-debug access
+// must continue through the standard item / proximity flow below.
 private _noReq = missionNamespace getVariable ["ARC_consoleNoItemRequired", false];
 if (!(_noReq isEqualType true)) then { _noReq = false; };
 if (_noReq) exitWith {[true, ""]};
