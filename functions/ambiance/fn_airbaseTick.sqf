@@ -767,13 +767,20 @@ if (!(_queueSig isEqualTo _lastSig)) then {
     private _execFid = missionNamespace getVariable ["airbase_v1_execFid", ""];
     if (!(_execFid isEqualType "")) then { _execFid = ""; };
 
-    // Preview first few items (human-readable)
+    // Preview first few items (operator-readable)
     private _previewParts = [];
     private _nPrev = 6 min (count _queue);
     for "_i" from 0 to (_nPrev - 1) do {
         private _it = _queue select _i;
-        _it params ["_pfid", "_pk", "_pdet"];
-        _previewParts pushBack format ["%1 %2 %3", _pfid, _pk, _pdet];
+        _it params ["_pfid", "_pk", "_pdet", ["_pRouteMeta", []]];
+        if !(_pRouteMeta isEqualType []) then { _pRouteMeta = []; };
+        private _pAircraft = [_pRouteMeta, "aircraftType", _pdet] call _metaGet;
+        if (!(_pAircraft isEqualType "")) then { _pAircraft = str _pAircraft; };
+        private _pLane = [_pRouteMeta, "runwayLaneDecision", ""] call _metaGet;
+        if (!(_pLane isEqualType "")) then { _pLane = ""; };
+        private _pKind = if (_pk isEqualTo "DEP") then {"Departure"} else { if (_pk isEqualTo "ARR") then {"Arrival"} else {_pk} };
+        private _pLaneText = if (_pLane isEqualTo "") then { "" } else { format [" | Lane %1", _pLane] };
+        _previewParts pushBack format ["%1: %2 (%3)%4", _pKind, _pAircraft, _pfid, _pLaneText];
     };
 
     private _preview = if ((count _previewParts) > 0) then { _previewParts joinString "<br/>" } else { "(empty)" };
@@ -783,9 +790,10 @@ if (!(_queueSig isEqualTo _lastSig)) then {
     private _stamp = format ["%1-%2-%3 %4:%5", (_st select 0), (_st select 1), (_st select 2), (_st select 3), (_st select 4)];
 
     private _diaryText = format [
-        "<t size='1.05'>Airbase Queue Snapshot</t><br/>Time: %1<br/>Exec: %2%3<br/>Queued: DEP %4 | ARR %5 | TOTAL %6<br/><br/><t size='0.95'>Next:</t><br/>%7",
+        "<t size='1.05'>Airbase Status</t><br/>Time: %1<br/>Runtime: %2<br/>Current Movement: %3%4<br/>Queued: DEP %5 | ARR %6 | TOTAL %7<br/><br/><t size='0.95'>Next planned movements:</t><br/>%8",
         _stamp,
-        if (_execNow) then {"ON"} else {"OFF"},
+        if (missionNamespace getVariable ["airbase_v1_runtime_enabled", false]) then {"ENABLED"} else {"DISABLED"},
+        if (_execNow) then {"ACTIVE"} else {"IDLE"},
         if (_execFid isEqualTo "") then {""} else { format [" (%1)", _execFid] },
         _qDepNow,
         _qArrNow,
@@ -804,6 +812,15 @@ if (!(_queueSig isEqualTo _lastSig)) then {
             ["preview", (_previewParts joinString " | ")]
         ]] call ARC_fnc_intelLog;
     };
+};
+
+private _nextAirPublishAt = [_rt, "nextAirUiPublishTs", 0] call _fnHmGet;
+private _airPublishIntervalS = missionNamespace getVariable ["airbase_v1_uiPublishInterval_s", 5];
+if (!(_airPublishIntervalS isEqualType 0) || { _airPublishIntervalS < 1 }) then { _airPublishIntervalS = 5; };
+if (_nowTs >= _nextAirPublishAt) then {
+    _rt set ["nextAirUiPublishTs", _nowTs + _airPublishIntervalS];
+    missionNamespace setVariable ["airbase_v1_rt", _rt, true];
+    if (!isNil "ARC_fnc_publicBroadcastState") then { [] call ARC_fnc_publicBroadcastState; };
 };
 
 

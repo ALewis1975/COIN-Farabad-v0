@@ -108,6 +108,13 @@ missionNamespace setVariable ["ARC_patrolSpawnContactsEnabled", true, true];
 // publishing is confirmed stable on this server.
 missionNamespace setVariable ["ARC_console_ops_v2",       true, true];
 missionNamespace setVariable ["ARC_console_dashboard_v2", true, true];
+private _arcConsoleHQTokensDefault = [
+    "BNCMD", "BN COMMAND", "BNHQ", "BN HQ", "BN CO", "BNCO",
+    "BN CDR", "BNCDR", "BN CMDR", "BATTALION CO", "BATTALION CDR",
+    "REDFALCON 6", "REDFALCON6", "RED FALCON 6", "FALCON 6", "FALCON6"
+];
+missionNamespace setVariable ["ARC_consoleHQTokensDefault", _arcConsoleHQTokensDefault, true];
+missionNamespace setVariable ["ARC_consoleHQTokens", _arcConsoleHQTokensDefault, true];
 
 // ============================================================================
 // UI / IN-WORLD ACTIONS

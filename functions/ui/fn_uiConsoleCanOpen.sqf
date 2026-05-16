@@ -27,6 +27,8 @@ params [
 if (isNull _unit) exitWith {[false, "No unit"]};
 
 // Dev override (debug)
+// Do not grant a separate HQ / OMNI token bypass here; all non-debug access
+// must continue through the standard item / proximity flow below.
 private _noReq = missionNamespace getVariable ["ARC_consoleNoItemRequired", false];
 if (!(_noReq isEqualType true)) then { _noReq = false; };
 if (_noReq) exitWith {[true, ""]};

@@ -146,6 +146,7 @@ class CfgFunctions
             class uiOpenIntelScreen {};
             class uiOpenS1Screen {};
             class uiOpenSitrepScreen {};
+            class uiOpenAirScreen {};
             class uiTaskTimersInitClient {};
             class clientBeginIntelMapClick {};
             class clientIntelPrompt {};

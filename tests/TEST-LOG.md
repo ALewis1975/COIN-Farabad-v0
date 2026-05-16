@@ -6375,3 +6375,22 @@ Mode: A (Bug Fix)
 | 3 | sqflint on changed SQF files | `python3 -m pip install --user sqflint==0.3.2` then `sqflint -e w` on the six changed SQF files | PASS | Initial run exposed one direct HashMap `get` parser issue and two unused-variable warnings; follow-up edits resolved them and all changed SQF files exit 0. |
 | 4 | Runtime smoke | Hosted/local MP: open Farabad Console, verify COMMS/MED tab still paints, modal dialogs still resolve their own controls, and incident acceptance / detonation follow-on / CIVSUB district spawn paths retain behavior. | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
 | 5 | Dedicated/JIP validation | Dedicated server with at least one JIP client: verify RemoteExec/JIP allowlist behavior, object-bound action replay, and late-client snapshot behavior. | BLOCKED | User confirmed no dedicated server access for this action. |
+
+---
+
+
+---
+
+## 2026-05-16 — AIR/TOWER operational UX and Battalion CO access (Mode B)
+
+**Branch/Commit:** copilot/review-airbase-ambiance-system @ 3fbad1d (working tree includes AIR/TOWER implementation and this TEST-LOG update)
+
+**Scenario:** Implemented AIR/TOWER operational UX improvements: rolling Airbase Status diary record, clearer runtime/current-movement wording, broader AIR public snapshot visibility/timing fields, direct AIR tab station entry, and Battalion CO/OMNI console/tower access.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline airbase static checks | `bash tests/static/airbase_planning_mode_checks.sh && bash tests/static/airbase_queue_lifecycle_contract_checks.sh` | PASS | Baseline static airbase planning and queue lifecycle contracts passed before edits. |
+| 2 | Focused compat + static + whitespace | `python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf functions/ambiance/fn_airbaseDiaryUpdate.sqf functions/ambiance/fn_airbaseTick.sqf functions/core/fn_airbaseTowerAuthorize.sqf functions/core/fn_publicBroadcastState.sqf functions/core/fn_rolesCanApproveQueue.sqf functions/core/fn_tocInitPlayer.sqf functions/core/fn_uiOpenAirScreen.sqf functions/ui/fn_uiConsoleAirPaint.sqf functions/ui/fn_uiConsoleCanOpen.sqf functions/ui/fn_uiConsoleOnLoad.sqf && bash tests/static/airbase_planning_mode_checks.sh && bash tests/static/airbase_queue_lifecycle_contract_checks.sh && git diff --check` | PASS | Changed SQF/config paths are parser-compatible; airbase static checks and whitespace check passed. |
+| 3 | Changed-file sqflint | `for f in initServer.sqf functions/ambiance/fn_airbaseDiaryUpdate.sqf functions/ambiance/fn_airbaseTick.sqf functions/core/fn_airbaseTowerAuthorize.sqf functions/core/fn_publicBroadcastState.sqf functions/core/fn_rolesCanApproveQueue.sqf functions/core/fn_tocInitPlayer.sqf functions/core/fn_uiOpenAirScreen.sqf functions/ui/fn_uiConsoleAirPaint.sqf functions/ui/fn_uiConsoleCanOpen.sqf functions/ui/fn_uiConsoleOnLoad.sqf; do sqflint -e w "$f"; done` | PASS | Installed `sqflint==0.3.2` if unavailable; all changed SQF files linted clean. |
+| 4 | Runtime smoke: AIR/TOWER console + diary | Hosted/local MP: open Farabad Console as Battalion CO without tablet/proximity, open `arc_toc_air_1` AIR/TOWER action, verify Airbase diary has one updating `Airbase Status` record, queue rows show ETA/ETD, and tower controls work. | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 5 | Dedicated/JIP validation | Dedicated server with one JIP client: validate AIR snapshot freshness, late-client diary record, direct AIR tab station entry, Battalion CO/OMNI control authority, and server-only state writes. | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
