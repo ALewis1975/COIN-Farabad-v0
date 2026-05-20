@@ -11,6 +11,26 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-20 — CIVSUB editor test civ pin idempotency (Mode A)
+
+**Branch/Commit:** copilot/fix-ai-civilians-despawn @ 6893352 (pre-edit baseline; edit appends to this log)
+
+**Scenario:** Editor-placed `civsub_test_01` was disappearing on mission start. Root cause: `fn_civsubInitServer.sqf:136-141` runs an `INIT_SCAN` `forEach allUnits` that calls `ARC_fnc_civsubCivConnect` and inserts the editor civ into `civsub_v1_civ_registry` *before* `ARC_fnc_civsubRegisterEditorCivs` runs. The editor registrar then hits its duplicate-guard at line ~111 and exits without applying `civsub_v1_pinned` / `civsub_v1_editorTestCiv` tags, leaving the unit unprotected. `ARC_fnc_civsubCivCleanupTick` and `ARC_fnc_civsubCivCapsEnforce` then evict it (D14 per-district cap override = 2 in `initServer.sqf:279`). RPT evidence: `serverRpts/Arma3_x64_2026-05-15_11-58-53.rpt:9745` and `Arma3_x64_2026-05-15_14-15-48.rpt:8019` both show "duplicate already registered" failures for `civsub_test_01`. Fix: in `_already` branch of `ARC_fnc_civsubRegisterEditorCivs`, still apply pin + editor tags and log a "Pinned existing registry entry" line, making editor pin/tag application idempotent regardless of which CIVSUB path inserted the unit first.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | sqflint compat scan (post-edit) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubRegisterEditorCivs.sqf` | PASS | Also replaced two pre-existing method-style `getOrDefault` calls in the duplicate-detection block with the local `_hg` compiled helper to keep the file parser-compatible. |
+| 2 | sqflint | `sqflint -e w functions/civsub/fn_civsubRegisterEditorCivs.sqf` | BLOCKED | `sqflint` not installed in sandbox. |
+| 3 | Whitespace | `git --no-pager diff --check` | PASS | No whitespace errors. |
+| 4 | Dedicated MP — editor civ persists at mission start without players nearby | Manual run on dedicated server | BLOCKED | Dedicated server unavailable in sandbox; deferred to operator validation. Expect log line `[CIVSUB][EDITOR] Pinned existing registry entry 'civsub_test_01' (district=D14, pinned=true)` and `civsub_v1_pinned`/`civsub_v1_editorTestCiv` set on the unit. |
+| 5 | JIP — late client sees editor civ in D14 | Manual JIP test | BLOCKED | Same as above. |
+
+**Risk Notes:** Behavior change limited to the `_already` branch in one server-only function; other registration paths and the success path are unchanged. The `_registered` counter now also includes pin-only passes, which is logged distinctly.
+
+**Rollback:** Revert the change to `functions/civsub/fn_civsubRegisterEditorCivs.sqf`.
+
+---
+
 ## 2026-05-16 — AIR/TOWER render stabilization (Mode A)
 
 **Branch/Commit:** copilot/fix-console-refresh-issue @ c9488d0 (working tree includes AIR paint, map paint, refresh, broadcast, and TEST-LOG updates)

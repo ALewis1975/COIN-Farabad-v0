@@ -101,16 +101,27 @@ private _skipped = 0;
 
     private _already = false;
     if !(_key isEqualTo "") then {
-        private _row = _reg getOrDefault [_key, createHashMap];
+        private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+        private _row = [_reg, _key, createHashMap] call _hg;
         if (_row isEqualType createHashMap) then {
-            private _existing = _row getOrDefault ["unit", objNull];
+            private _existing = [_row, "unit", objNull] call _hg;
             _already = (!isNull _existing) && { _existing isEqualTo _unit };
         };
     };
 
     if (_already) then {
-        _skipped = _skipped + 1;
-        diag_log format ["[CIVSUB][EDITOR] Registration failed (var='%1', reason=duplicate already registered)", _varName];
+        // Unit was already inserted into the registry by another path (e.g., INIT_SCAN
+        // forEach allUnits in fn_civsubInitServer). Editor pin/tags are still required
+        // so cleanup/cap-enforce paths recognize this as a protected editor test civ.
+        if (_pin) then {
+            _unit setVariable ["civsub_v1_pinned", true, true];
+            _unit setVariable ["civsub_v1_editorTestPinned", true, true];
+        };
+        _unit setVariable ["civsub_v1_editorTestCiv", true, true];
+        _unit setVariable ["civsub_v1_editorVarName", _varName, true];
+
+        _registered = _registered + 1;
+        diag_log format ["[CIVSUB][EDITOR] Pinned existing registry entry '%1' (district=%2, pinned=%3)", _varName, _districtId, _pin];
         continue;
     };
 
