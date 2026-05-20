@@ -156,7 +156,8 @@ diag_log format ["[CIVSUB][EDITOR] Registration pass complete (registered=%1 ski
 private _finalRegistry = missionNamespace getVariable ["civsub_v1_civ_registry", createHashMap];
 private _finalKeys = [];
 if (_finalRegistry isEqualType createHashMap) then {
-    _finalKeys = keys _finalRegistry;
+    private _hk = compile "params ['_h']; keys _h";
+    _finalKeys = [_finalRegistry] call _hk;
 };
 diag_log format ["[CIVSUB][EDITOR] Final registered unit keys: %1", _finalKeys];
 
