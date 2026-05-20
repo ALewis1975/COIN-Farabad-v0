@@ -28,6 +28,18 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 **Risk Notes:** Behavior change limited to the `_already` branch in one server-only function; other registration paths and the success path are unchanged. The `_registered` counter now also includes pin-only passes, which is logged distinctly.
 
 **Rollback:** Revert the change to `functions/civsub/fn_civsubRegisterEditorCivs.sqf`.
+## 2026-05-20 — Airbase ORBAT spawn fallback fix (Mode A)
+
+**Branch/Commit:** copilot/explain-unit-spawning-north-farabad @ 6893352 (pre-fix baseline; fix commit appended on push)
+
+**Scenario:** ORBAT layers (REDTAIL staff, Aerial Port, LIFELINE, SENTRY Flightline, SENTRY QRF, THUNDER Troop A/B, DUSTOFF) were observed spawning ~9 km north of the airbase. Root cause: in `ARC_fnc_airbaseOrbatPopulate`, the `_fnSpawnUnitsAtMarker` and `_fnSpawnUnitsAtPos` helpers fall back from `BIS_fnc_findSafePos` only when the result is `[]` or `[0,0,0]`, but on failure `BIS_fnc_findSafePos` returns the world's `safePositionAnchor` (a wilderness point on Farabad), so the fallback was never taken and units were created at the world anchor. Fix: also reject results whose 2D distance from the intended `_offset` exceeds 50 m and use `_offset` instead.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbaseOrbatPopulate.sqf` | PASS | No banned constructs introduced. |
+| 2 | sqflint | `sqflint -e w functions/ambiance/fn_airbaseOrbatPopulate.sqf` | BLOCKED | `sqflint` not preinstalled in this sandbox. |
+| 3 | Runtime smoke | Local MP: load mission, observe ORBAT log lines, walk airbase to confirm each layer spawned at its anchor marker (no ~9 km offset). | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 4 | Dedicated/JIP validation | Dedicated server: verify ORBAT placement on fresh load and after restart. | BLOCKED | Dedicated server unavailable in this sandbox. |
 
 ---
 
