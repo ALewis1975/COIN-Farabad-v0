@@ -92,9 +92,11 @@ private _fnSpawnUnitsAtMarker = {
                             _north + (_dist * cos _angle),
                             0];
 
-        // Prefer surface-snapped empty position, fall back to raw offset
+        // Prefer surface-snapped empty position, fall back to raw offset.
+        // BIS_fnc_findSafePos returns the world's safePositionAnchor on failure
+        // (not [] or [0,0,0]), so also reject results far from the intended offset.
         private _spawnPos = [_offset, 1, 3, 1, 0, 0.5, 0] call BIS_fnc_findSafePos;
-        if (_spawnPos isEqualTo [] || { _spawnPos isEqualTo [0,0,0] }) then {
+        if (_spawnPos isEqualTo [] || { _spawnPos isEqualTo [0,0,0] } || { (_spawnPos distance2D _offset) > 50 }) then {
             _spawnPos = _offset;
         };
 
@@ -159,8 +161,10 @@ private _fnSpawnUnitsAtPos = {
                             _north + (_dist * cos _angle),
                             0];
 
+        // BIS_fnc_findSafePos returns the world's safePositionAnchor on failure
+        // (not [] or [0,0,0]), so also reject results far from the intended offset.
         private _spawnPos = [_offset, 1, 3, 1, 0, 0.5, 0] call BIS_fnc_findSafePos;
-        if (_spawnPos isEqualTo [] || { _spawnPos isEqualTo [0,0,0] }) then {
+        if (_spawnPos isEqualTo [] || { _spawnPos isEqualTo [0,0,0] } || { (_spawnPos distance2D _offset) > 50 }) then {
             _spawnPos = _offset;
         };
 
