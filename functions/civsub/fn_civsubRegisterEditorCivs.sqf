@@ -29,6 +29,8 @@ if !(_defaultPin isEqualType true) then { _defaultPin = true; };
 private _registered = 0;
 private _skipped = 0;
 
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+
 {
     private _entry = _x;
 
@@ -101,7 +103,6 @@ private _skipped = 0;
 
     private _already = false;
     if !(_key isEqualTo "") then {
-        private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
         private _row = [_reg, _key, createHashMap] call _hg;
         if (_row isEqualType createHashMap) then {
             private _existing = [_row, "unit", objNull] call _hg;
