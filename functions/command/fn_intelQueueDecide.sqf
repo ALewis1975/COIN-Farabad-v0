@@ -44,8 +44,8 @@ if (!(_q isEqualType [])) exitWith {false};
 private _idx = -1;
 for "_i" from 0 to ((count _q) - 1) do
 {
-    private _it = _q # _i;
-    if (_it isEqualType [] && { (count _it) >= 12 } && { (_it # 0) isEqualTo _qid }) exitWith
+    private _it = _q select _i;
+    if (_it isEqualType [] && { (count _it) >= 12 } && { (_it select 0) isEqualTo _qid }) exitWith
     {
         _idx = _i;
     };
@@ -53,7 +53,7 @@ for "_i" from 0 to ((count _q) - 1) do
 
 if (_idx < 0) exitWith {false};
 
-private _item = _q # _idx;
+private _item = _q select _idx;
 _item params [
     "_id",
     "_createdAt",
@@ -87,7 +87,7 @@ if (!isNull _approver) then
     };
 };
 
-if (!(_status isEqualType "") || { toUpper _status isNotEqualTo "PENDING" }) exitWith {false};
+if (!(_status isEqualType "") || { !(toUpper _status isEqualTo "PENDING") }) exitWith {false};
 
 private _newStatus = if (_approve) then {"APPROVED"} else {"REJECTED"};
 private _dec = [serverTime, _by, _approve, trim _note];
@@ -107,9 +107,9 @@ private _getP = {
     if (!(_pairs isEqualType [])) exitWith { _d };
     private _out = _d;
     {
-        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith
+        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith
         {
-            _out = _x # 1;
+            _out = _x select 1;
         };
     } forEach _pairs;
     _out
@@ -123,7 +123,7 @@ private _setPair = {
     if (!(_k isEqualType "")) then { _k = str _k; };
 
     private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
 
     if (_idx < 0) then
     {
@@ -160,7 +160,7 @@ if (_approve) then
             if (!(_disp isEqualType "")) then { _disp = _summary; };
             _disp = trim _disp;
             if (_disp isEqualTo "") then { _disp = "Lead: S2 Requested Collection"; };
-            if ((toLower _disp) find "lead:" isNotEqualTo 0) then { _disp = format ["Lead: %1", _disp]; };
+            if (!((toLower _disp) find "lead:" isEqualTo 0)) then { _disp = format ["Lead: %1", _disp]; };
 
             if (!(_strength isEqualType 0)) then { _strength = 0.55; };
             _strength = (_strength max 0.05) min 0.95;
@@ -268,7 +268,7 @@ if (_approve) then
                 if (_x isEqualType "") then
                 {
                     private _lid = trim _x;
-                    if (_lid isNotEqualTo "") then { _approved pushBackUnique _lid; };
+                    if (!(_lid isEqualTo "")) then { _approved pushBackUnique _lid; };
                 };
             } forEach _leadIds;
 
@@ -297,7 +297,7 @@ if (_approve) then
             if (!isNil "ARC_fnc_tocBacklogEnqueue") then
             {
                 {
-                    if (_x isEqualType "" && { _x isNotEqualTo "" }) then
+                    if (_x isEqualType "" && { !(_x isEqualTo "") }) then
                     {
                         [_x, 3, _id, _by, _summary] call ARC_fnc_tocBacklogEnqueue;
                     };
@@ -348,9 +348,9 @@ if (_approve) then
             _holdMinutes = (_holdMinutes max 0) min 240;
 
             private _seed = [];
-            if (trim _rationale isNotEqualTo "") then { _seed pushBack ["rationale", trim _rationale]; };
-            if (trim _constraints isNotEqualTo "") then { _seed pushBack ["constraints", trim _constraints]; };
-            if (trim _support isNotEqualTo "") then { _seed pushBack ["support", trim _support]; };
+            if (!(trim _rationale isEqualTo "")) then { _seed pushBack ["rationale", trim _rationale]; };
+            if (!(trim _constraints isEqualTo "")) then { _seed pushBack ["constraints", trim _constraints]; };
+            if (!(trim _support isEqualTo "")) then { _seed pushBack ["support", trim _support]; };
 
             private _issueOk = false;
 
@@ -365,7 +365,7 @@ if (_approve) then
                 case "HOLD":
                 {
                     _seed pushBack ["purpose", "HOLD"];
-                    if (trim _holdIntent isNotEqualTo "") then { _seed pushBack ["holdIntent", trim _holdIntent]; };
+                    if (!(trim _holdIntent isEqualTo "")) then { _seed pushBack ["holdIntent", trim _holdIntent]; };
                     if (_holdMinutes > 0) then { _seed pushBack ["holdMinutes", _holdMinutes]; };
                     _issueOk = ["HOLD", _fromGroup, _seed, _approver, _note2, _id] call ARC_fnc_intelOrderIssue;
                 };
@@ -373,7 +373,7 @@ if (_approve) then
                 case "PROCEED":
                 {
                     // PROCEED becomes a LEAD assignment when possible; otherwise STANDBY.
-                    if (trim _proceedIntent isNotEqualTo "") then { _seed pushBack ["proceedIntent", trim _proceedIntent]; };
+                    if (!(trim _proceedIntent isEqualTo "")) then { _seed pushBack ["proceedIntent", trim _proceedIntent]; };
                     _issueOk = ["LEAD", _fromGroup, _seed, _approver, _note2, _id] call ARC_fnc_intelOrderIssue;
                 };
 
@@ -475,7 +475,7 @@ if (_approve) then
             if (!(_lid isEqualType "")) then { _lid = ""; };
 
             // Attach the leadId to the queue item meta for UI traceability.
-            if (_lid isNotEqualTo "") then
+            if (!(_lid isEqualTo "")) then
             {
                 _meta = [_meta, "leadId", _lid] call _setPair;
                 _meta = [_meta, "marker", _marker] call _setPair;
@@ -489,7 +489,7 @@ if (_approve) then
             // fn_incidentCreate does not need to consult the backlog or pool.
             private _activeTaskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
             if (!(_activeTaskId isEqualType "")) then { _activeTaskId = ""; };
-            if (_activeTaskId isEqualTo "" && { _lid isNotEqualTo "" }) then
+            if (_activeTaskId isEqualTo "" && { !(_lid isEqualTo "") }) then
             {
                 [_lid] call ARC_fnc_incidentCreate;
             };
@@ -527,7 +527,7 @@ else
         if (!(_rejLeadId isEqualType "")) then { _rejLeadId = ""; };
         _rejLeadId = trim _rejLeadId;
 
-        if (_rejLeadId isNotEqualTo "") then
+        if (!(_rejLeadId isEqualTo "")) then
         {
             private _lh = ["leadHistory", []] call ARC_fnc_stateGet;
             if (!(_lh isEqualType [])) then { _lh = []; };

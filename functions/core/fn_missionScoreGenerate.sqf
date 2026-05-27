@@ -41,8 +41,8 @@ private _now = serverTime;
 private _hist = ["incidentHistory", []] call ARC_fnc_stateGet;
 if (!(_hist isEqualType [])) then { _hist = []; };
 
-private _tasksCompleted = count (_hist select { _x isEqualType [] && { (count _x) >= 2 } && { (toUpper (_x # 1)) isEqualTo "SUCCESS" } });
-private _tasksFailed    = count (_hist select { _x isEqualType [] && { (count _x) >= 2 } && { (toUpper (_x # 1)) isEqualTo "FAIL" } });
+private _tasksCompleted = count (_hist select { _x isEqualType [] && { (count _x) >= 2 } && { (toUpper (_x select 1)) isEqualTo "SUCCESS" } });
+private _tasksFailed    = count (_hist select { _x isEqualType [] && { (count _x) >= 2 } && { (toUpper (_x select 1)) isEqualTo "FAIL" } });
 private _tasksTotal     = count _hist;
 
 // ── SITREPs ────────────────────────────────────────────────────────────────
@@ -70,7 +70,7 @@ private _casreqCompleted = count (_casreqs select
 {
     _x isEqualType []
     && { (count _x) >= 3 }
-    && { (toUpper (_x # 2)) isEqualTo "CLOSED" }
+    && { (toUpper (_x select 2)) isEqualTo "CLOSED" }
 });
 
 // ── Lead actions ───────────────────────────────────────────────────────────
@@ -78,11 +78,11 @@ private _leadHistory = ["leadHistory", []] call ARC_fnc_stateGet;
 if (!(_leadHistory isEqualType [])) then { _leadHistory = []; };
 private _leadsActioned = count (_leadHistory select
 {
-    _x isEqualType [] && { (count _x) >= 2 } && { (toUpper (_x # 1)) isEqualTo "CONSUMED" }
+    _x isEqualType [] && { (count _x) >= 2 } && { (toUpper (_x select 1)) isEqualTo "CONSUMED" }
 });
 private _leadsExpired  = count (_leadHistory select
 {
-    _x isEqualType [] && { (count _x) >= 2 } && { (toUpper (_x # 1)) isEqualTo "EXPIRED" }
+    _x isEqualType [] && { (count _x) >= 2 } && { (toUpper (_x select 1)) isEqualTo "EXPIRED" }
 });
 
 // ── Sustainment snapshot ───────────────────────────────────────────────────

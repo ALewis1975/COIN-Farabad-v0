@@ -35,7 +35,7 @@ private _deny = {
         [["event", "TOC_CIVSUB_RESET_SECURITY_DENIED"], ["rpc", _rpc], ["reason", _reason], ["remoteOwner", _owner], ["callerName", _who], ["callerUID", _uid]] + _details
     ] call ARC_fnc_intelLog;
 
-    if (_notify isNotEqualTo "" && { !isNull _requester }) then {
+    if (!(_notify isEqualTo "") && { !isNull _requester }) then {
         private _requestOwner = owner _requester;
         if (_requestOwner > 0) then { [_notify] remoteExec ["ARC_fnc_clientHint", _requestOwner]; };
     };

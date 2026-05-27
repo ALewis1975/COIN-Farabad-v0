@@ -224,7 +224,7 @@ if (missionNamespace getVariable ["civsub_v1_enabled", false]) then
         _didC = toUpper (trim _didC);
     };
 
-    if (_didC isNotEqualTo "") then
+    if (!(_didC isEqualTo "")) then
     {
         _civAnnex = [_didC, _pos] call ARC_fnc_civsubSitrepAnnexBuild;
         if (!(_civAnnex isEqualType "")) then { _civAnnex = ""; };
@@ -304,7 +304,7 @@ if (_foRequest isEqualType "") then
     if !(_foReqU in ["RTB", "HOLD", "PROCEED"]) then { _foReqU = ""; };
 };
 
-if (!_updateOnly && { _foReqU isNotEqualTo "" }) then
+if (!_updateOnly && { !(_foReqU isEqualTo "") }) then
 {
     // Use the SITREP reporting group string as the follow-on "from group" identifier.
     private _groupId = _grpId;
@@ -315,7 +315,7 @@ if (!_updateOnly && { _foReqU isNotEqualTo "" }) then
     private _setPair = {
         params ["_arr", "_k", "_v"];
         private _i = -1;
-        { if (_x isEqualType [] && { (count _x) == 2 } && { (_x # 0) isEqualTo _k }) exitWith { _i = _forEachIndex; }; } forEach _arr;
+        { if (_x isEqualType [] && { (count _x) == 2 } && { (_x select 0) isEqualTo _k }) exitWith { _i = _forEachIndex; }; } forEach _arr;
         if (_i >= 0) then { _arr set [_i, [_k, _v]]; } else { _arr pushBack [_k, _v]; };
         _arr
     };
@@ -329,18 +329,18 @@ if (!_updateOnly && { _foReqU isNotEqualTo "" }) then
         _pU = toUpper (trim _foPurpose);
         if !(_pU in ["REFIT", "INTEL", "EPW"]) then { _pU = ""; };
     };
-    if (_pU isNotEqualTo "") then { _fo = [_fo, "purpose", _pU] call _setPair; };
+    if (!(_pU isEqualTo "")) then { _fo = [_fo, "purpose", _pU] call _setPair; };
 
     // Optional narrative fields
-    if (_foRationale isEqualType "" && { (trim _foRationale) isNotEqualTo "" }) then { _fo = [_fo, "rationale", trim _foRationale] call _setPair; };
-    if (_foConstraints isEqualType "" && { (trim _foConstraints) isNotEqualTo "" }) then { _fo = [_fo, "constraints", trim _foConstraints] call _setPair; };
-    if (_foSupport isEqualType "" && { (trim _foSupport) isNotEqualTo "" }) then { _fo = [_fo, "support", trim _foSupport] call _setPair; };
-    if (_foNotes isEqualType "" && { (trim _foNotes) isNotEqualTo "" }) then { _fo = [_fo, "notes", trim _foNotes] call _setPair; };
+    if (_foRationale isEqualType "" && { !((trim _foRationale) isEqualTo "") }) then { _fo = [_fo, "rationale", trim _foRationale] call _setPair; };
+    if (_foConstraints isEqualType "" && { !((trim _foConstraints) isEqualTo "") }) then { _fo = [_fo, "constraints", trim _foConstraints] call _setPair; };
+    if (_foSupport isEqualType "" && { !((trim _foSupport) isEqualTo "") }) then { _fo = [_fo, "support", trim _foSupport] call _setPair; };
+    if (_foNotes isEqualType "" && { !((trim _foNotes) isEqualTo "") }) then { _fo = [_fo, "notes", trim _foNotes] call _setPair; };
 
     // HOLD/PROCEED specifics
-    if (_foHoldIntent isEqualType "" && { (trim _foHoldIntent) isNotEqualTo "" }) then { _fo = [_fo, "holdIntent", trim _foHoldIntent] call _setPair; };
+    if (_foHoldIntent isEqualType "" && { !((trim _foHoldIntent) isEqualTo "") }) then { _fo = [_fo, "holdIntent", trim _foHoldIntent] call _setPair; };
     if (_foHoldMinutes isEqualType 0 && { _foHoldMinutes > 0 }) then { _fo = [_fo, "holdMinutes", _foHoldMinutes] call _setPair; };
-    if (_foProceedIntent isEqualType "" && { (trim _foProceedIntent) isNotEqualTo "" }) then { _fo = [_fo, "proceedIntent", trim _foProceedIntent] call _setPair; };
+    if (_foProceedIntent isEqualType "" && { !((trim _foProceedIntent) isEqualTo "") }) then { _fo = [_fo, "proceedIntent", trim _foProceedIntent] call _setPair; };
 
     // Keep a server-side copy for TOC closeout logic + UI display.
     ["activeIncidentFollowOnRequest", _fo] call ARC_fnc_stateSet;
@@ -350,7 +350,7 @@ if (!_updateOnly && { _foReqU isNotEqualTo "" }) then
         "FOLLOW-ON REQUEST (%1): %2%3",
         _groupId,
         _foReqU,
-        if (_foReqU isEqualTo "RTB" && { _pU isNotEqualTo "" }) then { format [" (%1)", _pU] } else { "" }
+        if (_foReqU isEqualTo "RTB" && { !(_pU isEqualTo "") }) then { format [" (%1)", _pU] } else { "" }
     ];
 
     // Compose details from the structured fields.
@@ -358,9 +358,9 @@ if (!_updateOnly && { _foReqU isNotEqualTo "" }) then
     {
         if (_x isEqualType [] && { (count _x) == 2 }) then
         {
-            private _k = _x # 0;
-            private _v = _x # 1;
-            if (_v isEqualType "" && { (trim _v) isNotEqualTo "" }) then
+            private _k = _x select 0;
+            private _v = _x select 1;
+            if (_v isEqualType "" && { !((trim _v) isEqualTo "") }) then
             {
                 _foDet = _foDet + format ["%1: %2\n", toUpper _k, trim _v];
             }
@@ -420,8 +420,8 @@ private _meta = [
     ["fromSide", _sideTxt]
 ];
 
-if (_recU isNotEqualTo "") then { _meta pushBack ["recommend", _recU]; };
-if (_details isNotEqualTo "") then { _meta pushBack ["details", _details]; };
+if (!(_recU isEqualTo "")) then { _meta pushBack ["recommend", _recU]; };
+if (!(_details isEqualTo "")) then { _meta pushBack ["details", _details]; };
 
 // Log to OPS (OPS entries have no marker clutter; now displayed in ARC_OPS dashboard)
 ["OPS", _line, _pos, _meta] call ARC_fnc_intelLog;

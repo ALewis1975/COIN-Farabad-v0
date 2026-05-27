@@ -20,13 +20,13 @@ private _payloadMalformed = !(_rawPayload isEqualType []);
 
 if (!_payloadMalformed) then
 {
-    if ((count _payload) > 0 && {!((_payload # 0) isEqualType objNull)}) then { _payloadMalformed = true; };
-    if ((count _payload) > 1 && {!((_payload # 1) isEqualType "")}) then { _payloadMalformed = true; };
-    if ((count _payload) > 2 && {!((_payload # 2) isEqualType "")}) then { _payloadMalformed = true; };
-    if ((count _payload) > 3 && {!((_payload # 3) isEqualType [])}) then { _payloadMalformed = true; };
-    if ((count _payload) > 4 && {!((_payload # 4) isEqualType "")}) then { _payloadMalformed = true; };
-    if ((count _payload) > 5 && {!((_payload # 5) isEqualType "")}) then { _payloadMalformed = true; };
-    if ((count _payload) > 6 && {!((_payload # 6) isEqualType [])}) then { _payloadMalformed = true; };
+    if ((count _payload) > 0 && {!((_payload select 0) isEqualType objNull)}) then { _payloadMalformed = true; };
+    if ((count _payload) > 1 && {!((_payload select 1) isEqualType "")}) then { _payloadMalformed = true; };
+    if ((count _payload) > 2 && {!((_payload select 2) isEqualType "")}) then { _payloadMalformed = true; };
+    if ((count _payload) > 3 && {!((_payload select 3) isEqualType [])}) then { _payloadMalformed = true; };
+    if ((count _payload) > 4 && {!((_payload select 4) isEqualType "")}) then { _payloadMalformed = true; };
+    if ((count _payload) > 5 && {!((_payload select 5) isEqualType "")}) then { _payloadMalformed = true; };
+    if ((count _payload) > 6 && {!((_payload select 6) isEqualType [])}) then { _payloadMalformed = true; };
 };
 
 if (_payloadMalformed) then
@@ -34,13 +34,13 @@ if (_payloadMalformed) then
     diag_log format ["[ARC][INTEL][LOG] Malformed payload received for ARC_fnc_tocRequestLogIntel; raw=%1", str _rawPayload];
 };
 
-if ((count _payload) <= 0 || {!((_payload # 0) isEqualType objNull)}) then { _payload set [0, objNull]; };
-if ((count _payload) <= 1 || {!((_payload # 1) isEqualType "")}) then { _payload set [1, "UNKNOWN"]; };
-if ((count _payload) <= 2 || {!((_payload # 2) isEqualType "")}) then { _payload set [2, "SIGHTING"]; };
-if ((count _payload) <= 3 || {!((_payload # 3) isEqualType [])}) then { _payload set [3, [0,0,0]]; };
-if ((count _payload) <= 4 || {!((_payload # 4) isEqualType "")}) then { _payload set [4, ""]; };
-if ((count _payload) <= 5 || {!((_payload # 5) isEqualType "")}) then { _payload set [5, ""]; };
-if ((count _payload) <= 6 || {!((_payload # 6) isEqualType [])}) then { _payload set [6, []]; };
+if ((count _payload) <= 0 || {!((_payload select 0) isEqualType objNull)}) then { _payload set [0, objNull]; };
+if ((count _payload) <= 1 || {!((_payload select 1) isEqualType "")}) then { _payload set [1, "UNKNOWN"]; };
+if ((count _payload) <= 2 || {!((_payload select 2) isEqualType "")}) then { _payload set [2, "SIGHTING"]; };
+if ((count _payload) <= 3 || {!((_payload select 3) isEqualType [])}) then { _payload set [3, [0,0,0]]; };
+if ((count _payload) <= 4 || {!((_payload select 4) isEqualType "")}) then { _payload set [4, ""]; };
+if ((count _payload) <= 5 || {!((_payload select 5) isEqualType "")}) then { _payload set [5, ""]; };
+if ((count _payload) <= 6 || {!((_payload select 6) isEqualType [])}) then { _payload set [6, []]; };
 
 _payload params [
     ["_caller", objNull, [objNull]],
@@ -61,11 +61,11 @@ if (_pos isEqualType []) then
 {
     if ((count _pos) >= 2) then
     {
-        _posATL set [0, if ((_pos # 0) isEqualType 0) then { _pos # 0 } else { 0 }];
-        _posATL set [1, if ((_pos # 1) isEqualType 0) then { _pos # 1 } else { 0 }];
-        _posATL set [2, if ((count _pos) > 2 && {(_pos # 2) isEqualType 0}) then { _pos # 2 } else { 0 }];
+        _posATL set [0, if ((_pos select 0) isEqualType 0) then { _pos select 0 } else { 0 }];
+        _posATL set [1, if ((_pos select 1) isEqualType 0) then { _pos select 1 } else { 0 }];
+        _posATL set [2, if ((count _pos) > 2 && {(_pos select 2) isEqualType 0}) then { _pos select 2 } else { 0 }];
 
-        if (!((_pos # 0) isEqualType 0) || {!((_pos # 1) isEqualType 0)} || {((count _pos) > 2) && {!((_pos # 2) isEqualType 0)}}) then
+        if (!((_pos select 0) isEqualType 0) || {!((_pos select 1) isEqualType 0)} || {((count _pos) > 2) && {!((_pos select 2) isEqualType 0)}}) then
         {
             diag_log format ["[ARC][INTEL][LOG] Invalid numeric position payload normalized to [0,0,0] | caller=%1 | uid=%2 | rawPos=%3", _callerName, _callerUID, str _pos];
         };
@@ -114,7 +114,7 @@ private _catU = toUpper _category;
 private _summary = "";
 
 // If a note was provided, use it as the human-readable core of the entry.
-if ((trim _noteSummary) isNotEqualTo "") then
+if (!((trim _noteSummary) isEqualTo "")) then
 {
     private _prefix = switch (_catU) do
     {
@@ -141,7 +141,7 @@ private _meta = [
     ["callerUID", _callerUID]
 ];
 
-if ((trim _noteDetails) isNotEqualTo "") then
+if (!((trim _noteDetails) isEqualTo "")) then
 {
     _meta pushBack ["details", trim _noteDetails];
 };
@@ -150,7 +150,7 @@ if ((trim _noteDetails) isNotEqualTo "") then
 {
     if (_x isEqualType [] && { (count _x) >= 2 }) then
     {
-        _meta pushBack [_x # 0, _x # 1];
+        _meta pushBack [_x select 0, _x select 1];
     };
 } forEach _metaExtra;
 
@@ -158,7 +158,7 @@ if ((trim _noteDetails) isNotEqualTo "") then
 private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
 private _marker = ["activeIncidentMarker", ""] call ARC_fnc_stateGet;
 
-if (_taskId isNotEqualTo "" && {_marker isNotEqualTo ""}) then
+if (!(_taskId isEqualTo "") && {!(_marker isEqualTo "")}) then
 {
     private _m = [_marker] call ARC_fnc_worldResolveMarker;
     if (_m in allMapMarkers) then
@@ -174,7 +174,7 @@ if (_taskId isNotEqualTo "" && {_marker isNotEqualTo ""}) then
 };
 
 private _foundConfidence = false;
-{ if ((_x # 0) isEqualTo "confidence") exitWith { _foundConfidence = true; }; } forEach _meta;
+{ if ((_x select 0) isEqualTo "confidence") exitWith { _foundConfidence = true; }; } forEach _meta;
 if (!_foundConfidence) then
 {
     _meta pushBack ["confidence", "UNVERIFIED"]; // TOC reports outside the active incident area
