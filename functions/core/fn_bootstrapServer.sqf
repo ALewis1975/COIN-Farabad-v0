@@ -482,10 +482,12 @@ missionNamespace setVariable ["ARC_activeIncidentSitrepAnnexCivsub", ["activeInc
 
 // If state says we had an active incident but tasks were wiped by a restart,
 // recreate the task now.
-[] call ARC_fnc_taskRehydrateActive;
+diag_log "[ARC][TASK][INIT] bootstrap start";
+private _taskRehydrateOk = [] call ARC_fnc_taskRehydrateActive;
 
 // Ensure the active incident has an execution plan (objective + timers).
-[] call ARC_fnc_execInitActive;
+private _taskExecInitOk = [] call ARC_fnc_execInitActive;
+diag_log format ["[ARC][TASK][INIT] bootstrap post rehydrate=%1 execInit=%2", _taskRehydrateOk, _taskExecInitOk];
 
 // ---------------------------------------------------------------------------
 // Global IED detonation catcher (disabled)

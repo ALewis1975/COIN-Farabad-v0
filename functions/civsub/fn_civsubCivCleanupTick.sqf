@@ -6,8 +6,17 @@
     Processes a bounded number of despawns per tick.
 */
 
-if (!isServer) exitWith {false};
-if !(missionNamespace getVariable ["civsub_v1_civs_enabled", false]) exitWith {false};
+if (!isServer) exitWith {
+    diag_log "[CIVSUB][CIVS][CLEANUP] GUARD FAIL not_server";
+    false
+};
+if !(missionNamespace getVariable ["civsub_v1_civs_enabled", false]) exitWith {
+    diag_log "[CIVSUB][CIVS][CLEANUP] GUARD FAIL civsub_v1_civs_enabled=false";
+    false
+};
+
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _keysFn = compile "params ['_m']; keys _m";
 
 private _reg = missionNamespace getVariable ["civsub_v1_civ_registry", createHashMap];
 if !(_reg isEqualType createHashMap) then { _reg = createHashMap; };
@@ -21,12 +30,12 @@ if !(_q isEqualType []) then { _q = []; };
 // Scan registry for invalid or out-of-scope
 {
     private _k = _x;
-    private _row = _reg get _k;
+    private _row = [_reg, _k, createHashMap] call _hg;
     if !(_row isEqualType createHashMap) then {
         _reg deleteAt _k;
     } else {
-        private _u = _row getOrDefault ["unit", objNull];
-        private _did = _row getOrDefault ["districtId", ""]; 
+        private _u = [_row, "unit", objNull] call _hg;
+        private _did = [_row, "districtId", ""] call _hg;
 
         if (isNull _u) then {
             _reg deleteAt _k;
@@ -47,7 +56,7 @@ if !(_q isEqualType []) then { _q = []; };
             };
         };
     };
-} forEach (keys _reg);
+} forEach ([_reg] call _keysFn);
 
 // Process a bounded number per tick to avoid spikes
 private _max = 6;
@@ -60,9 +69,9 @@ if (_n > 0) then
     for "_i" from 0 to (_take - 1) do
     {
         private _k = _q deleteAt 0;
-        private _row = _reg getOrDefault [_k, createHashMap];
+        private _row = [_reg, _k, createHashMap] call _hg;
         if (_row isEqualType createHashMap) then {
-            private _u = _row getOrDefault ["unit", objNull];
+            private _u = [_row, "unit", objNull] call _hg;
             if (!isNull _u) then {
                 [_u] call ARC_fnc_civsubCivDespawnUnit;
             };

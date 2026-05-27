@@ -33,19 +33,22 @@ private _fail = {
         ["_stage","",[""]]
     ];
 
-    missionNamespace setVariable ["civsub_v1_civ_lastSpawnFail", _reason, true];
-    missionNamespace setVariable ["civsub_v1_civ_lastSpawnStage", _stage, true];
-    missionNamespace setVariable ["civsub_v1_civ_spawn_fail_count", (missionNamespace getVariable ["civsub_v1_civ_spawn_fail_count", 0]) + 1, true];
-
-    if (_dbg) then {
-        diag_log format ["[CIVSUB][CIVS][SPAWN] FAIL stage=%1 reason=%2", _stage, _reason];
+    if (isServer) then {
+        missionNamespace setVariable ["civsub_v1_civ_lastSpawnFail", _reason, true];
+        missionNamespace setVariable ["civsub_v1_civ_lastSpawnStage", _stage, true];
+        missionNamespace setVariable ["civsub_v1_civ_spawn_fail_count", (missionNamespace getVariable ["civsub_v1_civ_spawn_fail_count", 0]) + 1, true];
     };
+
+    diag_log format ["[CIVSUB][CIVS][SPAWN] FAIL stage=%1 reason=%2", _stage, _reason];
 
     objNull
 };
 
 // Guard rails
-if (!isServer) exitWith { ["not_server","guard"] call _fail };
+if (!isServer) exitWith {
+    diag_log "[CIVSUB][CIVS][SPAWN] GUARD FAIL not_server";
+    objNull
+};
 if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith { ["civsub_disabled","guard"] call _fail };
 if !(missionNamespace getVariable ["civsub_v1_civs_enabled", false]) exitWith { ["civs_disabled","guard"] call _fail };
 
@@ -245,5 +248,6 @@ missionNamespace setVariable ["civsub_v1_civ_lastSpawnFail", "", true];
 missionNamespace setVariable ["civsub_v1_civ_lastSpawnStage", "ok", true];
 missionNamespace setVariable ["civsub_v1_civ_lastSpawn_ts", serverTime, true];
 missionNamespace setVariable ["civsub_v1_civ_spawn_ok_count", (missionNamespace getVariable ["civsub_v1_civ_spawn_ok_count", 0]) + 1, true];
+diag_log format ["[CIVSUB][CIVS][SPAWN] OK district=%1 unit=%2 pos=%3", _districtId, _u, getPosATL _u];
 
 _u
