@@ -87,7 +87,8 @@ if (!_posIsRecoverable) then
 };
 
 // RemoteExec-only validation path: requires remoteExecutedOwner context.
-if (!([_caller, "ARC_fnc_tocRequestLogIntel", "Intel log rejected: sender verification failed.", "TOC_LOG_INTEL_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
+private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+if (!([_caller, "ARC_fnc_tocRequestLogIntel", "Intel log rejected: sender verification failed.", "TOC_LOG_INTEL_SECURITY_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 if (!_posIsRecoverable && {_callerName isEqualTo "UNKNOWN" && {_callerUID isEqualTo ""}}) exitWith
 {

@@ -16,7 +16,8 @@ params [
 
 private _trimFn = compile "params ['_s']; trim _s";
 
-if (!([_caller, "ARC_fnc_airbaseRequestPrioritizeFlight", "Airbase prioritize request rejected: sender verification failed.", "AIRBASE_PRIORITIZE_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
+private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+if (!([_caller, "ARC_fnc_airbaseRequestPrioritizeFlight", "Airbase prioritize request rejected: sender verification failed.", "AIRBASE_PRIORITIZE_SECURITY_DENIED", _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 private _auth = [_caller, "PRIORITIZE"] call ARC_fnc_airbaseTowerAuthorize;
 _auth params ["_ok", "_level", "_reason"];

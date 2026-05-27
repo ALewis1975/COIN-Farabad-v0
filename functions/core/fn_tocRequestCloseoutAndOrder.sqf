@@ -69,7 +69,8 @@ if (isNull _caller && { !isNil "remoteExecutedOwner" }) then
 if (isNull _caller) exitWith {false};
 
 // RemoteExec-only validation path: requires remoteExecutedOwner context.
-if (!([_caller, "ARC_fnc_tocRequestCloseoutAndOrder", "Closeout rejected: sender verification failed.", "TOC_CLOSEOUT_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
+private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+if (!([_caller, "ARC_fnc_tocRequestCloseoutAndOrder", "Closeout rejected: sender verification failed.", "TOC_CLOSEOUT_SECURITY_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 private _owner = 0;
 if (!isNull _caller) then { _owner = owner _caller; };

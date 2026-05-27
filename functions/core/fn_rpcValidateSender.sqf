@@ -9,6 +9,12 @@
       2: STRING notify message (optional; sent only to requesting owner when available).
       3: STRING security event code (optional).
       4: BOOL requireRemoteContext (optional; when true, reject non-RemoteExec invocation).
+      5: SCALAR callerOwner (optional; explicit remoteExecutedOwner captured at the
+         outer remoteExec frame by the calling handler). Required on dedicated servers
+         because `remoteExecutedOwner` is only defined in the directly remoteExec'd
+         function's scope and does NOT propagate into nested `call` frames — leaving
+         the validator unable to read it itself. Pass -1 (or omit) to let the validator
+         fall back to its own scope read for legacy/hosted self-call paths.
 
     Returns:
       BOOL true when sender/object binding is valid; false when rejected.
@@ -21,10 +27,23 @@ params [
     ["_rpc", "RPC"],
     ["_notify", ""],
     ["_event", "RPC_SENDER_REJECTED"],
-    ["_requireRemoteContext", false]
+    ["_requireRemoteContext", false],
+    ["_callerOwner", -1, [0]]
 ];
 
-private _isRemoteRpc = !isNil "remoteExecutedOwner";
+// Resolve the effective remote-execution owner.
+//
+// Preferred path: the calling handler captured `remoteExecutedOwner` at its own top
+// frame and passed it explicitly as `_callerOwner`. This is the only reliable path on
+// dedicated servers — see header comment.
+//
+// Fallback path: legacy callers that have not yet been updated may pass -1; in that
+// case we try to read `remoteExecutedOwner` from this scope, which works for hosted
+// (non-dedicated) self-calls and for the older single-frame remoteExec flow.
+private _hasExplicitOwner = (_callerOwner isEqualType 0) && { _callerOwner > 0 };
+private _scopeOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+private _isRemoteRpc = _hasExplicitOwner || { (_scopeOwner isEqualType 0) && { _scopeOwner > 0 } };
+
 if (!_isRemoteRpc) exitWith
 {
     // Hosted-server self-call detection:
@@ -50,7 +69,7 @@ if (!_isRemoteRpc) exitWith
     true
 };
 
-private _actualOwner = remoteExecutedOwner;
+private _actualOwner = if (_hasExplicitOwner) then { _callerOwner } else { _scopeOwner };
 
 if (isNull _caller) exitWith
 {

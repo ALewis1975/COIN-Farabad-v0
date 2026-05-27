@@ -15,7 +15,8 @@ params [
     ["_claim", true, [true]]
 ];
 
-if (!([_caller, "ARC_fnc_airbaseRequestSetLaneStaffing", "Airbase lane staffing request rejected: sender verification failed.", "AIRBASE_STAFFING_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
+private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+if (!([_caller, "ARC_fnc_airbaseRequestSetLaneStaffing", "Airbase lane staffing request rejected: sender verification failed.", "AIRBASE_STAFFING_SECURITY_DENIED", _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 private _auth = [_caller, "STAFF"] call ARC_fnc_airbaseTowerAuthorize;
 _auth params ["_ok", "_level", "_reason"];

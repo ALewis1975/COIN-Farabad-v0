@@ -17,17 +17,41 @@ if ($LASTEXITCODE -gt 7) {
     throw "robocopy failed with exit code $LASTEXITCODE"
 }
 
-$repoFile = Join-Path $RepoMissionPath "functions/core/fn_intelBroadcast.sqf"
-$armaFile = Join-Path $ArmaMissionPath "functions/core/fn_intelBroadcast.sqf"
+$verifiedFiles = @(
+    "functions/core/fn_intelBroadcast.sqf",
+    "functions/core/fn_rpcValidateSender.sqf",
+    "functions/core/fn_tocRequestNextIncident.sqf",
+    "initServer.sqf",
+    "config/CfgRemoteExec.hpp"
+)
 
-$repoHash = (Get-FileHash -Algorithm SHA256 -Path $repoFile).Hash
-$armaHash = (Get-FileHash -Algorithm SHA256 -Path $armaFile).Hash
+$mismatches = @()
+foreach ($rel in $verifiedFiles) {
+    $repoFile = Join-Path $RepoMissionPath $rel
+    $armaFile = Join-Path $ArmaMissionPath $rel
 
-Write-Host "repo fn_intelBroadcast.sqf sha256: $repoHash"
-Write-Host "arma fn_intelBroadcast.sqf sha256: $armaHash"
+    if (!(Test-Path -Path $repoFile)) {
+        Write-Host "SKIP (missing in repo): $rel"
+        continue
+    }
+    if (!(Test-Path -Path $armaFile)) {
+        $mismatches += "$rel (missing in arma profile after sync)"
+        continue
+    }
 
-if ($repoHash -ne $armaHash) {
-    throw "SYNC MISMATCH: fn_intelBroadcast.sqf differs after copy"
+    $repoHash = (Get-FileHash -Algorithm SHA256 -Path $repoFile).Hash
+    $armaHash = (Get-FileHash -Algorithm SHA256 -Path $armaFile).Hash
+
+    Write-Host "repo $rel sha256: $repoHash"
+    Write-Host "arma $rel sha256: $armaHash"
+
+    if ($repoHash -ne $armaHash) {
+        $mismatches += $rel
+    }
 }
 
-Write-Host "SYNC OK: mission profile copy matches repo for fn_intelBroadcast.sqf"
+if ($mismatches.Count -gt 0) {
+    throw "SYNC MISMATCH after copy for: $($mismatches -join ', ')"
+}
+
+Write-Host "SYNC OK: mission profile copy matches repo for $($verifiedFiles.Count) security-critical files."

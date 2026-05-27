@@ -58,7 +58,8 @@ if (isNull _caller && { !isNil "remoteExecutedOwner" }) then
 private _callerName = if (isNull _caller) then {"<unknown>"} else { name _caller };
 
 // RemoteExec-only validation path: requires remoteExecutedOwner context.
-if (!([_caller, "ARC_fnc_tocRequestCloseIncident", "Close incident rejected: sender verification failed.", "TOC_CLOSE_INCIDENT_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
+private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+if (!([_caller, "ARC_fnc_tocRequestCloseIncident", "Close incident rejected: sender verification failed.", "TOC_CLOSE_INCIDENT_SECURITY_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 // Authorization
 private _callerOk = false;

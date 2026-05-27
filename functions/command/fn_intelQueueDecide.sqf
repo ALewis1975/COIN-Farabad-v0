@@ -25,7 +25,8 @@ params [
 ];
 
 // RemoteExec-only validation path: requires remoteExecutedOwner context.
-if (!([_approver, "ARC_fnc_intelQueueDecide", "Queue decision rejected: sender verification failed.", "TOC_QUEUE_DECIDE_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
+private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+if (!([_approver, "ARC_fnc_intelQueueDecide", "Queue decision rejected: sender verification failed.", "TOC_QUEUE_DECIDE_SECURITY_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 if (!(_qid isEqualType "")) then { _qid = ""; };
 _qid = trim _qid;

@@ -33,7 +33,8 @@ private _trimFn  = compile "params ['_s']; trim _s";
 private _hmFrom  = compile "private _pairs = _this; private _r = createHashMap; { _r set [_x select 0, _x select 1]; } forEach _pairs; _r";
 private _mapGet  = compile "params ['_h','_k']; _h get _k";
 
-if (!([_caller, "ARC_fnc_airbaseSubmitClearanceRequest", "Airbase clearance request rejected: sender verification failed.", "AIRBASE_CLEARANCE_SUBMIT_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
+private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+if (!([_caller, "ARC_fnc_airbaseSubmitClearanceRequest", "Airbase clearance request rejected: sender verification failed.", "AIRBASE_CLEARANCE_SUBMIT_SECURITY_DENIED", _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 private _pilotTokens = missionNamespace getVariable ["airbase_v1_pilotGroupTokens", ["EFS", "HAWG", "VIPER", "PILOT"]];
 if (!(_pilotTokens isEqualType [])) then { _pilotTokens = ["EFS", "HAWG", "VIPER", "PILOT"]; };

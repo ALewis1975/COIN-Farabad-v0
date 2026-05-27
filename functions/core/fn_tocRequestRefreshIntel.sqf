@@ -29,7 +29,8 @@ if (_isRemoteRpc) then
         };
 
         // RemoteExec-only validation path: requires remoteExecutedOwner context.
-        if (!([_caller, "ARC_fnc_tocRequestRefreshIntel", "Intel refresh rejected: sender verification failed.", "TOC_REFRESH_INTEL_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
+        private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+        if (!([_caller, "ARC_fnc_tocRequestRefreshIntel", "Intel refresh rejected: sender verification failed.", "TOC_REFRESH_INTEL_SECURITY_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
         private _isOmni = [_caller, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
         private _canRefresh = _isOmni || { [_caller] call ARC_fnc_rolesIsTocS2 } || { [_caller] call ARC_fnc_rolesIsTocCommand };

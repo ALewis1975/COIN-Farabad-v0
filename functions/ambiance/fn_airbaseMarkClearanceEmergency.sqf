@@ -13,7 +13,8 @@ params [
     ["_requestId", "", [""]]
 ];
 
-if (!([_caller, "ARC_fnc_airbaseMarkClearanceEmergency", "Airbase emergency escalation rejected: sender verification failed.", "AIRBASE_CLEARANCE_EMERGENCY_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
+private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+if (!([_caller, "ARC_fnc_airbaseMarkClearanceEmergency", "Airbase emergency escalation rejected: sender verification failed.", "AIRBASE_CLEARANCE_EMERGENCY_SECURITY_DENIED", _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 if (!(_requestId isEqualType "")) then { _requestId = ""; };
 _requestId = trim _requestId;

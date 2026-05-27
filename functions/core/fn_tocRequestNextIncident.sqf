@@ -45,7 +45,8 @@ private _publishResult = {
 };
 
 // RemoteExec-only validation path: requires remoteExecutedOwner context.
-if (!([_caller, "ARC_fnc_tocRequestNextIncident", "Incident generation rejected: sender verification failed.", "TOC_NEXT_INCIDENT_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith
+private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+if (!([_caller, "ARC_fnc_tocRequestNextIncident", "Incident generation rejected: sender verification failed.", "TOC_NEXT_INCIDENT_SECURITY_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith
 {
     if (_owner > 0) then
     {

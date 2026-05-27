@@ -18,7 +18,8 @@ params [
 private _trimFn = compile "params ['_s']; trim _s";
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
-if (!([_caller, "ARC_fnc_airbaseRequestCancelQueuedFlight", "Airbase cancel request rejected: sender verification failed.", "AIRBASE_CANCEL_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
+private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+if (!([_caller, "ARC_fnc_airbaseRequestCancelQueuedFlight", "Airbase cancel request rejected: sender verification failed.", "AIRBASE_CANCEL_SECURITY_DENIED", _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 private _auth = [_caller, "CANCEL"] call ARC_fnc_airbaseTowerAuthorize;
 _auth params ["_ok", "_level", "_reason"];

@@ -50,7 +50,8 @@ if (!isNil "remoteExecutedOwner" && { _owner > 0 }) then
         } forEach allPlayers;
     };
 
-    if (!([_requester, _rpc, "CIVSUB save rejected: sender verification failed.", "TOC_CIVSUB_SAVE_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
+    private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+    if (!([_requester, _rpc, "CIVSUB save rejected: sender verification failed.", "TOC_CIVSUB_SAVE_SECURITY_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
     private _isOmni = [_requester, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
     private _can = _isOmni || { [_requester] call ARC_fnc_rolesCanApproveQueue };
