@@ -14,7 +14,7 @@ params [
 ];
 
 private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
-if (!([_caller, "ARC_fnc_airbaseCancelClearanceRequest", "Airbase clearance cancel rejected: sender verification failed.", "AIRBASE_CLEARANCE_CANCEL_SECURITY_DENIED", _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
+if (!([_caller, "ARC_fnc_airbaseCancelClearanceRequest", "Airbase clearance cancel rejected: sender verification failed.", "AIRBASE_CLEARANCE_CANCEL_SECURITY_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 if (!(_requestId isEqualType "")) then { _requestId = ""; };
 _requestId = trim _requestId;
