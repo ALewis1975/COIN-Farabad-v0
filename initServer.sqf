@@ -1054,7 +1054,9 @@ private _arcHashGetOrDefault = compile "params ['_h','_k','_d']; (_h) getOrDefau
 } forEach _arcDeclaredServerToggles;
 
 // Explicit server bootstrap ownership for AIRBASE scheduler startup.
-[] call ARC_fnc_airbasePostInit;
+diag_log "[ARC][AIRBASE][INIT] trigger start (initServer -> airbasePostInit)";
+private _airbasePostInitOk = [] call ARC_fnc_airbasePostInit;
+diag_log format ["[ARC][AIRBASE][INIT] trigger post result=%1", _airbasePostInitOk];
 
 [] call ARC_fnc_bootstrapServer;
 

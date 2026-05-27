@@ -5,9 +5,17 @@
       Initializes airbase ambient flights. Loads taxi path capture files and builds asset runtime config.
 */
 
-if (!isServer) exitWith {};
+if (!isServer) exitWith {
+    diag_log "[ARC][AIRBASE][INIT] GUARD FAIL airbaseInit not_server";
+    false
+};
 
-if (!(["airbaseInit"] call ARC_fnc_airbaseRuntimeEnabled)) exitWith {false};
+if (!(["airbaseInit"] call ARC_fnc_airbaseRuntimeEnabled)) exitWith {
+    diag_log "[ARC][AIRBASE][INIT] GUARD FAIL airbase runtime disabled (airbaseInit)";
+    false
+};
+
+diag_log "[ARC][AIRBASE][INIT] airbaseInit start";
 
 private _debug = missionNamespace getVariable ["airbase_v1_debug", false];
 if (!(_debug isEqualType true) && !(_debug isEqualType false)) then { _debug = false; };
@@ -625,6 +633,8 @@ if (_opsLogEnabled || _debugOps) then {
         ["turnJit_s", _turnJit]
     ]] call ARC_fnc_intelLog;
 };
+
+diag_log format ["[ARC][AIRBASE][INIT] airbaseInit post assets=%1 tick_s=%2", count _assets, _tickS];
 
 // Start the ticking loop
 [] spawn {

@@ -10,9 +10,18 @@
         buildings/roads around settlement anchors (including where players are).
 */
 
-if (!isServer) exitWith {false};
-if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {false};
-if !(missionNamespace getVariable ["civsub_v1_civs_enabled", false]) exitWith {false};
+if (!isServer) exitWith {
+    diag_log "[CIVSUB][CIVS][SAMPLER] GUARD FAIL not_server";
+    false
+};
+if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {
+    diag_log "[CIVSUB][CIVS][SAMPLER] GUARD FAIL civsub_v1_enabled=false";
+    false
+};
+if !(missionNamespace getVariable ["civsub_v1_civs_enabled", false]) exitWith {
+    diag_log "[CIVSUB][CIVS][SAMPLER] GUARD FAIL civsub_v1_civs_enabled=false";
+    false
+};
 
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _hk = compile "params ['_h']; keys _h";

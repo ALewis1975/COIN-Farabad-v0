@@ -13,6 +13,11 @@
         BOOL
 */
 
+if (!isServer) exitWith {
+    diag_log format ["[ARC][TASK][INIT] GUARD FAIL taskCreateIncident on non-server taskId=%1", _this param [0, "", [""]]];
+    false
+};
+
 params [
     "_taskId",
     ["_markerName", ""],
@@ -25,7 +30,7 @@ params [
 private _pos = [];
 private _m = "";
 
-if (_markerName isNotEqualTo "") then
+if !(_markerName isEqualTo "") then
 {
     _m = [_markerName] call ARC_fnc_worldResolveMarker;
     if (_m in allMapMarkers) then
@@ -47,11 +52,11 @@ private _desc = [_taskId, _m, _displayName, _incidentType, _pos] call ARC_fnc_ta
 
 // Case/task nesting for intel threads
 private _taskIdParam = _taskId;
-if (_threadId isNotEqualTo "") then
+if !(_threadId isEqualTo "") then
 {
     private _zoneBias = [_pos] call ARC_fnc_worldGetZoneForPos;
     private _parent = [_threadId, "GENERIC", _zoneBias, _pos] call ARC_fnc_taskEnsureThreadParent;
-    if (_parent isNotEqualTo "") then
+    if !(_parent isEqualTo "") then
     {
         _taskIdParam = [_taskId, _parent];
     };
@@ -89,4 +94,5 @@ if (_taskId isEqualTo _activeId && { _accepted isEqualType true && { _accepted }
 
 // Syntax per Task Framework: [owner, taskId, description, destination, state, priority, showNotification, type, shared] call BIS_fnc_taskCreate
 [true, _taskIdParam, [_desc, _title, ""], _pos, _initState, 1, true, _taskType, false] call BIS_fnc_taskCreate;
+diag_log format ["[ARC][TASK][INIT] taskCreateIncident created taskId=%1 type=%2 state=%3 marker=%4", _taskId, _incidentType, _initState, _m];
 true
