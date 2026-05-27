@@ -27,10 +27,13 @@ private _publishResult = {
         ["_allowed", false, [true]]
     ];
 
+private _trimFn = compile "params ['_s']; trim _s";
+
+
     private _stamp = diag_tickTime;
     missionNamespace setVariable [
         "ARC_pub_nextIncidentResult",
-        [_stamp, _ownerId, toUpper (trim _resultCode), _title, _detail, _allowed],
+        [_stamp, _ownerId, toUpper (([_resultCode] call _trimFn)), _title, _detail, _allowed],
         true
     ];
 
@@ -38,14 +41,15 @@ private _publishResult = {
     {
         missionNamespace setVariable [
             "ARC_pub_nextIncidentLastDenied",
-            [_stamp, toUpper (trim _resultCode), _detail],
+            [_stamp, toUpper (([_resultCode] call _trimFn)), _detail],
             true
         ];
     };
 };
 
 // RemoteExec-only validation path: requires remoteExecutedOwner context.
-if (!([_caller, "ARC_fnc_tocRequestNextIncident", "Incident generation rejected: sender verification failed.", "TOC_NEXT_INCIDENT_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith
+private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+if (!([_caller, "ARC_fnc_tocRequestNextIncident", "Incident generation rejected: sender verification failed.", "TOC_NEXT_INCIDENT_SECURITY_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith
 {
     if (_owner > 0) then
     {
@@ -85,9 +89,9 @@ if (_taskId isEqualTo "") then
             {
                 if (_x isEqualType [] && { (count _x) >= 5 }) then
                 {
-                    private _st = toUpper (_x # 2);
-                    private _typ = toUpper (_x # 3);
-                    private _tg = _x # 4;
+                    private _st = toUpper (_x select 2);
+                    private _typ = toUpper (_x select 3);
+                    private _tg = _x select 4;
 
                     // Any ISSUED order for the last tasked group should block new incident creation.
                     // This enforces the command cycle: TOC issues -> unit accepts -> execute.

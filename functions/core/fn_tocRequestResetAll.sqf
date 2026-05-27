@@ -23,7 +23,8 @@ if (!isNil "remoteExecutedOwner" && { _owner > 0 }) then
     };
 
     // RemoteExec-only validation path: requires remoteExecutedOwner context.
-    if (!([_requestor, "ARC_fnc_tocRequestResetAll", "Reset rejected: sender verification failed.", "TOC_RESET_ALL_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
+    private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+    if (!([_requestor, "ARC_fnc_tocRequestResetAll", "Reset rejected: sender verification failed.", "TOC_RESET_ALL_SECURITY_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
     // Reset is a privileged command: TOC approver (S3/Command) or OMNI only.
     private _isOmni = [_requestor, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;

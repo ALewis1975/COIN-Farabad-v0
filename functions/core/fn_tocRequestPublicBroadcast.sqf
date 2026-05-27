@@ -34,7 +34,8 @@ if (_owner > 0) then
         "ARC_fnc_tocRequestPublicBroadcast",
         "Public broadcast rejected: sender verification failed.",
         "PUBLIC_BROADCAST_SECURITY_DENIED",
-        true
+        true,
+        _owner
     ] call ARC_fnc_rpcValidateSender;
     if (!_senderValid) exitWith { false };
 

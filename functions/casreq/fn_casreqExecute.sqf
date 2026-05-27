@@ -19,7 +19,8 @@ params [
     ["_ttt",    -1,      [0]]
 ];
 
-if (!([_unit, "ARC_fnc_casreqExecute", "CASREQ execute rejected: sender mismatch.", "CASREQ_EXECUTE_SEC_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
+private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+if (!([_unit, "ARC_fnc_casreqExecute", "CASREQ execute rejected: sender mismatch.", "CASREQ_EXECUTE_SEC_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 if (_id isEqualTo "") exitWith {false};
 

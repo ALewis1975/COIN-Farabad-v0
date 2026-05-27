@@ -28,7 +28,8 @@ if (!isNil "remoteExecutedOwner") then
         };
 
         // RemoteExec-only validation path: requires remoteExecutedOwner context.
-        if (!([_requestor, "ARC_fnc_tocRequestSave", "Save rejected: sender verification failed.", "TOC_SAVE_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
+        private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+        if (!([_requestor, "ARC_fnc_tocRequestSave", "Save rejected: sender verification failed.", "TOC_SAVE_SECURITY_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
         private _isOmni = [_requestor, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
         private _can = _isOmni || { [_requestor] call ARC_fnc_rolesCanApproveQueue };

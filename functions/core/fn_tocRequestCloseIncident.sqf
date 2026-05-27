@@ -33,13 +33,16 @@ params [
     ["_callerParam", objNull, [objNull]]
 ];
 
+private _trimFn = compile "params ['_s']; trim _s";
+
+
 private _force = false;
 private _requestor = objNull;
 if (_arg2 isEqualType true) then { _force = _arg2; } else { _requestor = _arg2; };
 
 
 // Normalize + validate
-_result = toUpper (trim _result);
+_result = toUpper (([_result] call _trimFn));
 if !(_result in ["SUCCEEDED", "FAILED", "CANCELED"]) exitWith {false};
 
 // Identify caller (prefer explicit)
@@ -58,7 +61,8 @@ if (isNull _caller && { !isNil "remoteExecutedOwner" }) then
 private _callerName = if (isNull _caller) then {"<unknown>"} else { name _caller };
 
 // RemoteExec-only validation path: requires remoteExecutedOwner context.
-if (!([_caller, "ARC_fnc_tocRequestCloseIncident", "Close incident rejected: sender verification failed.", "TOC_CLOSE_INCIDENT_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
+private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+if (!([_caller, "ARC_fnc_tocRequestCloseIncident", "Close incident rejected: sender verification failed.", "TOC_CLOSE_INCIDENT_SECURITY_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 // Authorization
 private _callerOk = false;
@@ -101,14 +105,14 @@ if (!_sitrepSent) exitWith
 // Active context
 private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
 if (!(_taskId isEqualType "")) then { _taskId = ""; };
-_taskId = trim _taskId;
+_taskId = ([_taskId] call _trimFn);
 
 if (_taskId isEqualTo "") then
 {
     [] call ARC_fnc_taskRehydrateActive;
     _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
     if (!(_taskId isEqualType "")) then { _taskId = ""; };
-    _taskId = trim _taskId;
+    _taskId = ([_taskId] call _trimFn);
 };
 
 // Determine the assigned group.
@@ -116,15 +120,15 @@ if (_taskId isEqualTo "") then
 // Fallbacks: accepted-by group (if no SITREP), lastTaskingGroup (last resort).
 private _gidSitrep = ["activeIncidentSitrepFromGroup", ""] call ARC_fnc_stateGet;
 if (!(_gidSitrep isEqualType "")) then { _gidSitrep = ""; };
-_gidSitrep = trim _gidSitrep;
+_gidSitrep = ([_gidSitrep] call _trimFn);
 
 private _gidAccepted = ["activeIncidentAcceptedByGroup", ""] call ARC_fnc_stateGet;
 if (!(_gidAccepted isEqualType "")) then { _gidAccepted = ""; };
-_gidAccepted = trim _gidAccepted;
+_gidAccepted = ([_gidAccepted] call _trimFn);
 
 private _gidLastTask = ["lastTaskingGroup", ""] call ARC_fnc_stateGet;
 if (!(_gidLastTask isEqualType "")) then { _gidLastTask = ""; };
-_gidLastTask = trim _gidLastTask;
+_gidLastTask = ([_gidLastTask] call _trimFn);
 
 private _gid = _gidSitrep;
 if (_gid isEqualTo "") then { _gid = _gidAccepted; };
@@ -161,7 +165,7 @@ private _bestAt = -1;
 } forEach _orders;
 
 if (!(_issuedId isEqualType "")) then { _issuedId = ""; };
-_issuedId = trim _issuedId;
+_issuedId = ([_issuedId] call _trimFn);
 
 if (_issuedId isEqualTo "") then
 {
@@ -195,7 +199,7 @@ if (_issuedId isEqualTo "") then
     } forEach _orders;
 
     if (!(_issuedId isEqualType "")) then { _issuedId = ""; };
-    _issuedId = trim _issuedId;
+    _issuedId = ([_issuedId] call _trimFn);
 
     if (_issuedId isEqualTo "") exitWith
     {

@@ -21,7 +21,8 @@ params [
     ["_notes",  "",      [""]]
 ];
 
-if (!([_unit, "ARC_fnc_casreqClose", "CASREQ close rejected: sender mismatch.", "CASREQ_CLOSE_SEC_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
+private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+if (!([_unit, "ARC_fnc_casreqClose", "CASREQ close rejected: sender mismatch.", "CASREQ_CLOSE_SEC_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 if (_id isEqualTo "") exitWith {false};
 

@@ -15,7 +15,8 @@ params [
     ["_claim", true, [true]]
 ];
 
-if (!([_caller, "ARC_fnc_airbaseRequestSetLaneStaffing", "Airbase lane staffing request rejected: sender verification failed.", "AIRBASE_STAFFING_SECURITY_DENIED"] call ARC_fnc_rpcValidateSender)) exitWith {false};
+private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+if (!([_caller, "ARC_fnc_airbaseRequestSetLaneStaffing", "Airbase lane staffing request rejected: sender verification failed.", "AIRBASE_STAFFING_SECURITY_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 private _auth = [_caller, "STAFF"] call ARC_fnc_airbaseTowerAuthorize;
 _auth params ["_ok", "_level", "_reason"];
@@ -36,7 +37,8 @@ if (!_ok) exitWith {
 };
 
 if (!(_laneId isEqualType "")) then { _laneId = ""; };
-_laneId = toLower (trim _laneId);
+private _trimFn = compile "params ['_s']; trim _s";
+_laneId = toLower (([_laneId] call _trimFn));
 if !(_laneId in ["tower", "ground", "arrival"]) exitWith {
     private _owner = owner _caller;
     if (_owner > 0) then { [format ["Invalid lane '%1'.", _laneId]] remoteExec ["ARC_fnc_clientHint", _owner]; };
@@ -50,6 +52,7 @@ if (!(_staffing isEqualType [])) then { _staffing = []; };
 
 private _findLane = {
     params ["_rows", "_lane"];
+
     private _idx = -1;
     { if ((_x isEqualType []) && { (count _x) >= 5 } && { ((_x param [0, ""]) isEqualTo _lane) }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
     _idx
@@ -63,7 +66,7 @@ if (_idx < 0) then {
 
 if (_idx < 0) exitWith {false};
 
-private _rec = _staffing # _idx;
+private _rec = _staffing select _idx;
 private _now = serverTime;
 private _name = name _caller;
 private _uid = getPlayerUID _caller;

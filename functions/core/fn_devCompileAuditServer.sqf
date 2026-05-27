@@ -46,7 +46,8 @@ if (!isNil "remoteExecutedOwner" && { _owner > 0 }) then
     {
         { if (owner _x == _owner) exitWith { _requestor = _x; }; } forEach allPlayers;
     };
-    if (!([_requestor, "ARC_fnc_devCompileAuditServer", "Compile audit denied: sender verification failed.", "COMPILE_AUDIT_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
+    private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+    if (!([_requestor, "ARC_fnc_devCompileAuditServer", "Compile audit denied: sender verification failed.", "COMPILE_AUDIT_SECURITY_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
     private _isOmni = [_requestor, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
     private _can = _isOmni || { [_requestor] call ARC_fnc_rolesCanApproveQueue };
     if (!_can) exitWith {

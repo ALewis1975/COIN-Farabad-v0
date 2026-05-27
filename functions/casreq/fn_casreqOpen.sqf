@@ -25,7 +25,8 @@ params [
 ];
 
 // Sender validation
-if (!([_unit, "ARC_fnc_casreqOpen", "CASREQ open rejected: sender mismatch.", "CASREQ_OPEN_SEC_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {""};
+private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+if (!([_unit, "ARC_fnc_casreqOpen", "CASREQ open rejected: sender mismatch.", "CASREQ_OPEN_SEC_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {""};
 
 if (isNull _unit) exitWith
 {

@@ -26,7 +26,8 @@ params [
 private _owner = -1;
 if (!isNil "remoteExecutedOwner") then { _owner = remoteExecutedOwner; };
 
-if (!([_caller, "ARC_fnc_recruitSpawnRequest", "Recruit request rejected: sender verification failed.", "RECRUIT_SECURITY_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith {false};
+private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+if (!([_caller, "ARC_fnc_recruitSpawnRequest", "Recruit request rejected: sender verification failed.", "RECRUIT_SECURITY_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 if (!(missionNamespace getVariable ["ARC_recruitContainerEnabled", true])) exitWith {false};
 if (isNull _caller || { isNull _container }) exitWith {false};

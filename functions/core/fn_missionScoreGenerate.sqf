@@ -28,10 +28,14 @@ if (!isServer) exitWith {[]};
 // Optional caller unit (provided when invoked via remoteExec from a TOC operator).
 params [["_unit", objNull, [objNull]]];
 
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+
+
 // Validate sender when invoked via RPC.
 if (!isNull _unit) then
 {
-    if (!([_unit, "ARC_fnc_missionScoreGenerate", "Score generate rejected: sender mismatch.", "SCORE_GEN_SEC_DENIED", true] call ARC_fnc_rpcValidateSender)) exitWith { [] };
+    private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+    if (!([_unit, "ARC_fnc_missionScoreGenerate", "Score generate rejected: sender mismatch.", "SCORE_GEN_SEC_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith { [] };
 };
 
 private _now = serverTime;
@@ -40,8 +44,8 @@ private _now = serverTime;
 private _hist = ["incidentHistory", []] call ARC_fnc_stateGet;
 if (!(_hist isEqualType [])) then { _hist = []; };
 
-private _tasksCompleted = count (_hist select { _x isEqualType [] && { (count _x) >= 2 } && { (toUpper (_x # 1)) isEqualTo "SUCCESS" } });
-private _tasksFailed    = count (_hist select { _x isEqualType [] && { (count _x) >= 2 } && { (toUpper (_x # 1)) isEqualTo "FAIL" } });
+private _tasksCompleted = count (_hist select { _x isEqualType [] && { (count _x) >= 2 } && { (toUpper (_x select 1)) isEqualTo "SUCCESS" } });
+private _tasksFailed    = count (_hist select { _x isEqualType [] && { (count _x) >= 2 } && { (toUpper (_x select 1)) isEqualTo "FAIL" } });
 private _tasksTotal     = count _hist;
 
 // ── SITREPs ────────────────────────────────────────────────────────────────
@@ -69,7 +73,7 @@ private _casreqCompleted = count (_casreqs select
 {
     _x isEqualType []
     && { (count _x) >= 3 }
-    && { (toUpper (_x # 2)) isEqualTo "CLOSED" }
+    && { (toUpper (_x select 2)) isEqualTo "CLOSED" }
 });
 
 // ── Lead actions ───────────────────────────────────────────────────────────
@@ -77,11 +81,11 @@ private _leadHistory = ["leadHistory", []] call ARC_fnc_stateGet;
 if (!(_leadHistory isEqualType [])) then { _leadHistory = []; };
 private _leadsActioned = count (_leadHistory select
 {
-    _x isEqualType [] && { (count _x) >= 2 } && { (toUpper (_x # 1)) isEqualTo "CONSUMED" }
+    _x isEqualType [] && { (count _x) >= 2 } && { (toUpper (_x select 1)) isEqualTo "CONSUMED" }
 });
 private _leadsExpired  = count (_leadHistory select
 {
-    _x isEqualType [] && { (count _x) >= 2 } && { (toUpper (_x # 1)) isEqualTo "EXPIRED" }
+    _x isEqualType [] && { (count _x) >= 2 } && { (toUpper (_x select 1)) isEqualTo "EXPIRED" }
 });
 
 // ── Sustainment snapshot ───────────────────────────────────────────────────
@@ -103,9 +107,9 @@ if (missionNamespace getVariable ["civsub_v1_enabled", false]) then
             private _did   = _x;
             private _d     = _y;
             if (!(_d isEqualType createHashMap)) then { continue; };
-            private _r = _d getOrDefault ["R", 35];
-            private _g = _d getOrDefault ["G", 35];
-            private _w = _d getOrDefault ["W", 30];
+            private _r = [_d, "R", 35] call _hg;
+            private _g = [_d, "G", 35] call _hg;
+            private _w = [_d, "W", 30] call _hg;
             if (!(_r isEqualType 0)) then { _r = 35; };
             if (!(_g isEqualType 0)) then { _g = 35; };
             if (!(_w isEqualType 0)) then { _w = 30; };
