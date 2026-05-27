@@ -18,7 +18,7 @@ params [
 private _trimFn = compile "params ['_s']; trim _s";
 
 private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
-if (!([_caller, "ARC_fnc_airbaseRequestClearanceDecision", "Airbase clearance decision rejected: sender verification failed.", "AIRBASE_CLEARANCE_DECISION_SECURITY_DENIED", _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
+if (!([_caller, "ARC_fnc_airbaseRequestClearanceDecision", "Airbase clearance decision rejected: sender verification failed.", "AIRBASE_CLEARANCE_DECISION_SECURITY_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 
 private _callerCheck = [_caller, "OBJECT_NOT_NULL", "caller", [objNull]] call ARC_fnc_paramAssert;
