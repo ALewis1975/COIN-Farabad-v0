@@ -11,7 +11,25 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
-## 2026-05-20 — CIVSUB editor test civ pin idempotency (Mode A)
+## 2026-05-27 — Dedicated-server `rpcValidateSender` MISSING_REMOTE_CONTEXT fix (Mode I)
+
+**Branch/Commit:** copilot/* @ 57e63cb (this commit; baseline before any TEST-LOG append; SHA captured via `git rev-parse --short HEAD` after `report_progress` push)
+
+**Scenario:** On 2026-05-27 the mission was first run on the Armahosts Windows dedicated server. The TOC "Generate Next Incident" button surfaced `"Requested next incident: pending server decision."` followed 8 s later by `"No server decision received yet. Check TOC/OPS panel for latest incident-generation status."`. Forensic of `serverRpts/ArmA3Server_x64_2026-05-27_07-27-28.rpt` shows every operator-driven TOC RPC after `ARC_serverReady = true` being denied by `ARC_fnc_rpcValidateSender` with `event=*_SECURITY_DENIED reason=MISSING_REMOTE_CONTEXT strictMode=true` — including `ARC_fnc_tocRequestNextIncident` (INT-0071, 0099), `ARC_fnc_intelQueueDecide` (INT-0090), `ARC_fnc_missionScoreGenerate` (INT-0117), and `ARC_fnc_tocRequestForceIncident` (INT-0159). Root cause: per BIS engine semantics `remoteExecutedOwner` is set as a local variable on the directly remoteExec'd function's top frame and is not inherited into nested `call` frames; the validator re-reads it from its own scope, which is nil on dedicated. The validator returns false because `_requireRemoteContext = true`, the handler exits without publishing `ARC_pub_nextIncidentResult`, and the client's 8 s waitloop never sees a decision. Fix: add an optional `_callerOwner` 6th param to `ARC_fnc_rpcValidateSender`; update all 38 server-side callers to capture `remoteExecutedOwner` at the outer remoteExec frame (as `_reoOwner`) and pass it explicitly. The legacy scope-read fallback remains for hosted-server self-calls and unmigrated paths.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | sqflint compat scan (strict) on all 39 changed SQF files | `python3 scripts/dev/sqflint_compat_scan.py --strict <files>` | PASS | 190 WARN matches reported; all pre-existing patterns on lines this PR did not touch. `git diff --unified=0` confirms zero new banned constructs (no new `isNotEqualTo`, `trim`, or `#` indexing introduced). Exit code 0. |
+| 2 | Remote-Exec contract checker | `bash scripts/dev/check_remoteexec_contract.sh` | PASS | All allowlisted entries verified; no anonymous `remoteExec` introduced. |
+| 3 | Console conflicts checker | `bash scripts/dev/check_console_conflicts.sh` | PASS | No new VM/shared-namespace conflicts. |
+| 4 | `sqflint -e w` on changed SQF | n/a | BLOCKED | `sqflint` not preinstalled in this sandbox. |
+| 5 | Dedicated MP runtime — TOC Next Incident produces `TOC_NEXT_INCIDENT_OK_GENERATED` and no `MISSING_REMOTE_CONTEXT` lines in RPT | Manual dedicated run against Armahosts VPS | BLOCKED | Dedicated server access not available to the sandbox; deferred to operator validation. Acceptance signal per `docs/qa/Dedicated_JIP_Validation_Matrix.md` §3.1 D-1 + operator-visible green "Server approved your request…" toast. |
+| 6 | JIP — late client triggers an operator action and gets a server decision | Manual JIP test on dedicated | BLOCKED | Same as above. |
+
+**Risk Notes:** The validator change is backward compatible — the new `_callerOwner` 6th param defaults to a `-1` sentinel; on sentinel the validator falls back to the prior scope-read of `remoteExecutedOwner`. The hosted-server self-call branch (`!isDedicated && local _caller`) is preserved. All 38 server-side callers were patched in a single transformation, so legacy callers continuing to use the 5-arg form simply fall back to the prior behavior — no caller is broken by the change. Owner-mismatch logic and the `NULL_OBJECT` rejection are untouched.
+
+**Rollback:** Revert this commit. The prior behavior (validator reads `remoteExecutedOwner` from its own scope, fails closed on dedicated, operator sees the 8 s timeout toast) is restored exactly. No save-format or data-model changes.
+
 
 **Branch/Commit:** copilot/fix-ai-civilians-despawn @ 6893352 (pre-edit baseline; edit appends to this log)
 
