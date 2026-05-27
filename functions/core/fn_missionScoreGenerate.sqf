@@ -28,6 +28,9 @@ if (!isServer) exitWith {[]};
 // Optional caller unit (provided when invoked via remoteExec from a TOC operator).
 params [["_unit", objNull, [objNull]]];
 
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+
+
 // Validate sender when invoked via RPC.
 if (!isNull _unit) then
 {
@@ -104,9 +107,9 @@ if (missionNamespace getVariable ["civsub_v1_enabled", false]) then
             private _did   = _x;
             private _d     = _y;
             if (!(_d isEqualType createHashMap)) then { continue; };
-            private _r = _d getOrDefault ["R", 35];
-            private _g = _d getOrDefault ["G", 35];
-            private _w = _d getOrDefault ["W", 30];
+            private _r = [_d, "R", 35] call _hg;
+            private _g = [_d, "G", 35] call _hg;
+            private _w = [_d, "W", 30] call _hg;
             if (!(_r isEqualType 0)) then { _r = 35; };
             if (!(_g isEqualType 0)) then { _g = 35; };
             if (!(_w isEqualType 0)) then { _w = 30; };

@@ -14,6 +14,9 @@ if (!isServer) exitWith {false};
 
 if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\\core\\fn_rpcValidateSender.sqf"; };
 
+private _trimFn = compile "params ['_s']; trim _s";
+
+
 private _rawPayload = _this;
 private _payload = if (_rawPayload isEqualType []) then { +_rawPayload } else { [] };
 private _payloadMalformed = !(_rawPayload isEqualType []);
@@ -114,7 +117,7 @@ private _catU = toUpper _category;
 private _summary = "";
 
 // If a note was provided, use it as the human-readable core of the entry.
-if (!((trim _noteSummary) isEqualTo "")) then
+if (!((([_noteSummary] call _trimFn)) isEqualTo "")) then
 {
     private _prefix = switch (_catU) do
     {
@@ -124,7 +127,7 @@ if (!((trim _noteSummary) isEqualTo "")) then
         default { _catU };
     };
 
-    _summary = format ["%1: %2 (Reported by %3). Grid %4. Zone: %5.", _prefix, trim _noteSummary, _reporter, _grid, _zone];
+    _summary = format ["%1: %2 (Reported by %3). Grid %4. Zone: %5.", _prefix, ([_noteSummary] call _trimFn), _reporter, _grid, _zone];
 }
 else
 {
@@ -141,9 +144,9 @@ private _meta = [
     ["callerUID", _callerUID]
 ];
 
-if (!((trim _noteDetails) isEqualTo "")) then
+if (!((([_noteDetails] call _trimFn)) isEqualTo "")) then
 {
-    _meta pushBack ["details", trim _noteDetails];
+    _meta pushBack ["details", ([_noteDetails] call _trimFn)];
 };
 
 // Merge any additional meta pairs

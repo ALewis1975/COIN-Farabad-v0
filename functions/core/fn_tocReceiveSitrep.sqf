@@ -215,20 +215,20 @@ if (missionNamespace getVariable ["civsub_v1_enabled", false]) then
     //  3) explicit UNKNOWN-district fallback annex (never empty)
     private _didC = [_pos] call ARC_fnc_civsubDistrictsFindByPos;
     if (!(_didC isEqualType "")) then { _didC = ""; };
-    _didC = toUpper (trim _didC);
+    _didC = toUpper (([_didC] call _trimFn));
 
     if (_didC isEqualTo "") then
     {
         _didC = ["activeIncidentCivsubDistrictId", ""] call ARC_fnc_stateGet;
         if (!(_didC isEqualType "")) then { _didC = ""; };
-        _didC = toUpper (trim _didC);
+        _didC = toUpper (([_didC] call _trimFn));
     };
 
     if (!(_didC isEqualTo "")) then
     {
         _civAnnex = [_didC, _pos] call ARC_fnc_civsubSitrepAnnexBuild;
         if (!(_civAnnex isEqualType "")) then { _civAnnex = ""; };
-        _civAnnex = trim _civAnnex;
+        _civAnnex = ([_civAnnex] call _trimFn);
     };
 
     // Contract-safe fallback when district cannot be resolved or builder returns blank.
@@ -300,7 +300,7 @@ missionNamespace setVariable ["ARC_activeIncidentSitrepDetails", _details, true]
 private _foReqU = "";
 if (_foRequest isEqualType "") then
 {
-    _foReqU = toUpper (trim _foRequest);
+    _foReqU = toUpper (([_foRequest] call _trimFn));
     if !(_foReqU in ["RTB", "HOLD", "PROCEED"]) then { _foReqU = ""; };
 };
 
@@ -326,21 +326,21 @@ if (!_updateOnly && { !(_foReqU isEqualTo "") }) then
     private _pU = "";
     if (_foPurpose isEqualType "") then
     {
-        _pU = toUpper (trim _foPurpose);
+        _pU = toUpper (([_foPurpose] call _trimFn));
         if !(_pU in ["REFIT", "INTEL", "EPW"]) then { _pU = ""; };
     };
     if (!(_pU isEqualTo "")) then { _fo = [_fo, "purpose", _pU] call _setPair; };
 
     // Optional narrative fields
-    if (_foRationale isEqualType "" && { !((trim _foRationale) isEqualTo "") }) then { _fo = [_fo, "rationale", trim _foRationale] call _setPair; };
-    if (_foConstraints isEqualType "" && { !((trim _foConstraints) isEqualTo "") }) then { _fo = [_fo, "constraints", trim _foConstraints] call _setPair; };
-    if (_foSupport isEqualType "" && { !((trim _foSupport) isEqualTo "") }) then { _fo = [_fo, "support", trim _foSupport] call _setPair; };
-    if (_foNotes isEqualType "" && { !((trim _foNotes) isEqualTo "") }) then { _fo = [_fo, "notes", trim _foNotes] call _setPair; };
+    if (_foRationale isEqualType "" && { !((([_foRationale] call _trimFn)) isEqualTo "") }) then { _fo = [_fo, "rationale", ([_foRationale] call _trimFn)] call _setPair; };
+    if (_foConstraints isEqualType "" && { !((([_foConstraints] call _trimFn)) isEqualTo "") }) then { _fo = [_fo, "constraints", ([_foConstraints] call _trimFn)] call _setPair; };
+    if (_foSupport isEqualType "" && { !((([_foSupport] call _trimFn)) isEqualTo "") }) then { _fo = [_fo, "support", ([_foSupport] call _trimFn)] call _setPair; };
+    if (_foNotes isEqualType "" && { !((([_foNotes] call _trimFn)) isEqualTo "") }) then { _fo = [_fo, "notes", ([_foNotes] call _trimFn)] call _setPair; };
 
     // HOLD/PROCEED specifics
-    if (_foHoldIntent isEqualType "" && { !((trim _foHoldIntent) isEqualTo "") }) then { _fo = [_fo, "holdIntent", trim _foHoldIntent] call _setPair; };
+    if (_foHoldIntent isEqualType "" && { !((([_foHoldIntent] call _trimFn)) isEqualTo "") }) then { _fo = [_fo, "holdIntent", ([_foHoldIntent] call _trimFn)] call _setPair; };
     if (_foHoldMinutes isEqualType 0 && { _foHoldMinutes > 0 }) then { _fo = [_fo, "holdMinutes", _foHoldMinutes] call _setPair; };
-    if (_foProceedIntent isEqualType "" && { !((trim _foProceedIntent) isEqualTo "") }) then { _fo = [_fo, "proceedIntent", trim _foProceedIntent] call _setPair; };
+    if (_foProceedIntent isEqualType "" && { !((([_foProceedIntent] call _trimFn)) isEqualTo "") }) then { _fo = [_fo, "proceedIntent", ([_foProceedIntent] call _trimFn)] call _setPair; };
 
     // Keep a server-side copy for TOC closeout logic + UI display.
     ["activeIncidentFollowOnRequest", _fo] call ARC_fnc_stateSet;
@@ -360,9 +360,9 @@ if (!_updateOnly && { !(_foReqU isEqualTo "") }) then
         {
             private _k = _x select 0;
             private _v = _x select 1;
-            if (_v isEqualType "" && { !((trim _v) isEqualTo "") }) then
+            if (_v isEqualType "" && { !((([_v] call _trimFn)) isEqualTo "") }) then
             {
-                _foDet = _foDet + format ["%1: %2\n", toUpper _k, trim _v];
+                _foDet = _foDet + format ["%1: %2\n", toUpper _k, ([_v] call _trimFn)];
             }
             else
             {
@@ -373,7 +373,7 @@ if (!_updateOnly && { !(_foReqU isEqualTo "") }) then
             };
         };
     } forEach _fo;
-    _foDet = trim _foDet;
+    _foDet = ([_foDet] call _trimFn);
 
     // Informational only: store with the incident so TOC can review during closeout.
     // Do NOT create a TOC approval queue item.

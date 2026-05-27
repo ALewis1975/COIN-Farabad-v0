@@ -26,6 +26,9 @@ params [
     ["_incidentType", "", [""]]
 ];
 
+private _trimFn = compile "params ['_s']; trim _s";
+
+
 private _owner = -1;
 if (!isNil "remoteExecutedOwner") then { _owner = remoteExecutedOwner; };
 
@@ -33,9 +36,9 @@ if (!isNil "remoteExecutedOwner") then { _owner = remoteExecutedOwner; };
 private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
 if (!([_caller, "ARC_fnc_tocRequestForceIncident", "Force incident rejected: sender verification failed.", "TOC_FORCE_INCIDENT_SECURITY_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
-_markerRaw = trim _markerRaw;
-_displayName = trim _displayName;
-_incidentType = trim _incidentType;
+_markerRaw = ([_markerRaw] call _trimFn);
+_displayName = ([_displayName] call _trimFn);
+_incidentType = ([_incidentType] call _trimFn);
 
 if (_markerRaw isEqualTo "" || { _displayName isEqualTo "" } || { _incidentType isEqualTo "" }) exitWith
 {

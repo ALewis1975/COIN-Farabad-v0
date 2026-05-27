@@ -13,11 +13,14 @@ params [
     ["_requestId", "", [""]]
 ];
 
+private _trimFn = compile "params ['_s']; trim _s";
+
+
 private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
 if (!([_caller, "ARC_fnc_airbaseMarkClearanceEmergency", "Airbase emergency escalation rejected: sender verification failed.", "AIRBASE_CLEARANCE_EMERGENCY_SECURITY_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 if (!(_requestId isEqualType "")) then { _requestId = ""; };
-_requestId = trim _requestId;
+_requestId = ([_requestId] call _trimFn);
 if (_requestId isEqualTo "") exitWith {false};
 
 private _requests = ["airbase_v1_clearanceRequests", []] call ARC_fnc_stateGet;
