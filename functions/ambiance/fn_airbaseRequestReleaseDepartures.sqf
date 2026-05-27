@@ -12,7 +12,7 @@ if (isNil "ARC_fnc_airbaseTowerAuthorize") then { ARC_fnc_airbaseTowerAuthorize 
 params [["_caller", objNull, [objNull]]];
 
 private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
-if (!([_caller, "ARC_fnc_airbaseRequestReleaseDepartures", "Airbase release request rejected: sender verification failed.", "AIRBASE_RELEASE_SECURITY_DENIED", _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
+if (!([_caller, "ARC_fnc_airbaseRequestReleaseDepartures", "Airbase release request rejected: sender verification failed.", "AIRBASE_RELEASE_SECURITY_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 private _auth = [_caller, "RELEASE"] call ARC_fnc_airbaseTowerAuthorize;
 _auth params ["_ok", "_level", "_reason"];
