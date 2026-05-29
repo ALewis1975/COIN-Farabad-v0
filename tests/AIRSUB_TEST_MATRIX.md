@@ -20,9 +20,12 @@ Focused AIRSUB control-plane validation for:
 | AIRSUB-RWY-001 | Runway lock lifecycle | Queue has executable flight; runway open | Let scheduler reserve + occupy runway; let completion release | Runway transitions `OPEN -> RESERVED -> OCCUPIED -> OPEN`; owner/until fields update and clear | Local MP smoke + dedicated follow-up |
 | AIRSUB-AI-001 | Timeout-to-AI fallback | `airbase_v1_controller_timeout_s` small; fallback enabled; pending request exists | Keep tower idle beyond timeout | Request moves to `APPROVED` with AI decision tuple `[AI, AI, ts, APPROVE, TIMEOUT]`; timeout event logged | Local MP smoke + dedicated follow-up |
 
-## Dedicated-Server-Only Deferred Cases
+## Dedicated-Server-Only Cases (rig now available — run and log)
 
-The following are **deferred** until dedicated server validation is available:
+A dedicated server is now available (see
+`docs/architecture/Dedicated_Server_Activation_Plan_2026-05-27.md`). Run the
+following on the dedicated server and record `PASS`/`FAIL` with RPT evidence in
+`tests/TEST-LOG.md`:
 
 1. **JIP controller continuity**: new CCIC/LC client joining mid-pending request receives accurate pending/awaiting rows and can decide without duplicate notifications.
 2. **Ownership and remoteExec edge cases**: verify `remoteExecutedOwner` sender validation under reconnect/respawn and owner migration.
