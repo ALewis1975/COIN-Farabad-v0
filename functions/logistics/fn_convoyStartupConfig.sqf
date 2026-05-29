@@ -293,6 +293,10 @@ missionNamespace setVariable ["ARC_convoyFollowerRejoinPointRadiusM", 26];
 // Contact profile: keep convoy crews mounted and vehicles moving while turrets engage.
 missionNamespace setVariable ["ARC_convoyPreventCombatDismount", true];
 missionNamespace setVariable ["ARC_convoyContactNoStopEnabled", true];
+missionNamespace setVariable ["ARC_convoyDisableLAMBSDuringMovement", true];
+missionNamespace setVariable ["ARC_convoyDisablePassengerFSM", true];
+missionNamespace setVariable ["ARC_convoyGunnerSectorScanEnabled", true];
+missionNamespace setVariable ["ARC_convoyGunnerSectorScanEverySec", 6];
 
 // Route recon parameters
 missionNamespace setVariable ["ARC_routeReconStartOffsetM", 450];

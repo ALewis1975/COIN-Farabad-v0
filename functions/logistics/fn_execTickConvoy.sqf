@@ -116,6 +116,140 @@ private _roleBundleId = [_rolePlan, "bundleId", ""] call _rolePlanGet;
 if (!(_roleBundleId isEqualType "")) then { _roleBundleId = ""; };
 _roleBundleId = toUpper _roleBundleId;
 
+private _fn_convoyCrewRoleName = {
+    params [
+        ["_unit", objNull]
+    ];
+
+    if (isNull _unit) exitWith { "" };
+    private _role = assignedVehicleRole _unit;
+    private _roleName = "";
+    if (_role isEqualType [] && { (count _role) > 0 } && { (_role select 0) isEqualType "" }) then
+    {
+        _roleName = toUpper (_role select 0);
+    };
+    _roleName
+};
+
+private _fn_applyConvoyAiProfile = {
+    params [
+        ["_vehArr", []],
+        ["_disableLambs", true],
+        ["_disablePassengerFsm", true]
+    ];
+
+    if (!(_vehArr isEqualType [])) exitWith {};
+
+    private _seenGroups = [];
+    {
+        private _veh = _x;
+        if (isNull _veh) then { continue; };
+
+        {
+            private _unit = _x;
+            if (isNull _unit || { !alive _unit } || { isPlayer _unit }) then { continue; };
+
+            private _grp = group _unit;
+            if (!isNull _grp && { !(_grp in _seenGroups) }) then
+            {
+                if (_disableLambs) then { _grp setVariable ["lambs_danger_disableGroupAI", true]; };
+                _seenGroups pushBack _grp;
+            };
+
+            if (_disableLambs) then { _unit setVariable ["lambs_danger_disableAI", true]; };
+
+            private _roleName = [_unit] call _fn_convoyCrewRoleName;
+            private _isTurret = (_roleName isEqualTo "TURRET");
+            if (!_isTurret && { _disablePassengerFsm }) then
+            {
+                _unit disableAI "FSM";
+            };
+        } forEach (crew _veh);
+    } forEach _vehArr;
+};
+
+private _fn_restoreConvoyAmbianceAi = {
+    params [
+        ["_units", []],
+        ["_grp", grpNull]
+    ];
+
+    if (!(_units isEqualType [])) exitWith {};
+
+    if (!isNull _grp) then { _grp setVariable ["lambs_danger_disableGroupAI", false]; };
+    {
+        private _unit = _x;
+        if (isNull _unit || { !alive _unit } || { isPlayer _unit }) then { continue; };
+        _unit setVariable ["lambs_danger_disableAI", false];
+        _unit enableAI "FSM";
+        _unit enableAI "AUTOCOMBAT";
+        _unit enableAI "TARGET";
+        _unit enableAI "AUTOTARGET";
+        _unit enableAI "COVER";
+        _unit enableAI "SUPPRESSION";
+    } forEach _units;
+};
+
+private _fn_convoyGunnerSectorScan = {
+    params [
+        ["_vehArr", []],
+        ["_nowScan", 0]
+    ];
+
+    private _scanEnabled = missionNamespace getVariable ["ARC_convoyGunnerSectorScanEnabled", true];
+    if (!(_scanEnabled isEqualType true) && !(_scanEnabled isEqualType false)) then { _scanEnabled = true; };
+    if (!_scanEnabled) exitWith {};
+    if (!(_vehArr isEqualType []) || { (count _vehArr) == 0 }) exitWith {};
+
+    private _scanEvery = missionNamespace getVariable ["ARC_convoyGunnerSectorScanEverySec", 6];
+    if (!(_scanEvery isEqualType 0)) then { _scanEvery = 6; };
+    _scanEvery = (_scanEvery max 2) min 30;
+
+    private _lastScan = ["activeConvoyGunnerSectorScanAt", -1] call ARC_fnc_stateGet;
+    if (!(_lastScan isEqualType 0)) then { _lastScan = -1; };
+    if (_lastScan > 0 && { (_nowScan - _lastScan) < _scanEvery }) exitWith {};
+    ["activeConvoyGunnerSectorScanAt", _nowScan] call ARC_fnc_stateSet;
+
+    private _lastIdx = (count _vehArr) - 1;
+    private _offsets = [-75, 0, 75, 0];
+    {
+        private _veh = _x;
+        if (isNull _veh || { !alive _veh }) then { continue; };
+
+        private _center = getDir _veh;
+        if (_forEachIndex isEqualTo 0) then
+        {
+            _center = getDir _veh;
+        }
+        else
+        {
+            if (_forEachIndex isEqualTo _lastIdx) then
+            {
+                _center = (getDir _veh + 180) % 360;
+            }
+            else
+            {
+                _center = (getDir _veh + (if ((_forEachIndex % 2) isEqualTo 1) then { 270 } else { 90 })) % 360;
+            };
+        };
+
+        {
+            private _unit = _x;
+            if (isNull _unit || { !alive _unit } || { isPlayer _unit }) then { continue; };
+            if (!(([_unit] call _fn_convoyCrewRoleName) isEqualTo "TURRET")) then { continue; };
+
+            private _phase = _unit getVariable ["ARC_convoyGunnerSectorScanPhase", 0];
+            if (!(_phase isEqualType 0)) then { _phase = 0; };
+            private _offset = _offsets select (_phase % (count _offsets));
+            private _scanDir = (_center + _offset + 360) % 360;
+            private _watchPos = (getPosATL _veh) getPos [800, _scanDir];
+            _watchPos set [2, ((getPosATL _veh) select 2) + 1.8];
+            _unit doWatch _watchPos;
+            _unit setVariable ["ARC_convoyGunnerSectorScanPhase", _phase + 1];
+        } forEach (crew _veh);
+    } forEach _vehArr;
+};
+
 // Optional link-up subtask (created in execInitActive for edge-start convoys)
 private _linkTaskId = ["activeConvoyLinkupTaskId", ""] call ARC_fnc_stateGet;
 if (!(_linkTaskId isEqualType "")) then { _linkTaskId = ""; };
@@ -445,6 +579,15 @@ else
 {
     if ((count _aliveVehAll) > 0) then { _lead = _aliveVehAll select 0; };
 };
+
+private _disableConvoyLambs = missionNamespace getVariable ["ARC_convoyDisableLAMBSDuringMovement", true];
+if (!(_disableConvoyLambs isEqualType true) && !(_disableConvoyLambs isEqualType false)) then { _disableConvoyLambs = true; };
+
+private _disableConvoyPassengerFsm = missionNamespace getVariable ["ARC_convoyDisablePassengerFSM", true];
+if (!(_disableConvoyPassengerFsm isEqualType true) && !(_disableConvoyPassengerFsm isEqualType false)) then { _disableConvoyPassengerFsm = true; };
+
+[_aliveVehAll, _disableConvoyLambs, _disableConvoyPassengerFsm] call _fn_applyConvoyAiProfile;
+[_aliveVeh, _now] call _fn_convoyGunnerSectorScan;
 
 // T10: MSR threat awareness — check for CONVOY-targeted threat records near the route.
 // Rate-limited internally; read-only (no convoy state mutation).
@@ -2803,6 +2946,7 @@ if (_arrivedAt isEqualType 0 && { _arrivedAt > 0 }) then
                 };
                 if (_roleName isEqualTo "TURRET") then { continue; };
 
+                [[_u], grpNull] call _fn_restoreConvoyAmbianceAi;
                 unassignVehicle _u;
                 doGetOut [_u];
                 _dismountUnits pushBackUnique _u;
@@ -2814,6 +2958,7 @@ if (_arrivedAt isEqualType 0 && { _arrivedAt > 0 }) then
             private _grpDismount = createGroup [side _grpW, true];
             _dismountUnits joinSilent _grpDismount;
             _grpDismount setGroupIdGlobal ["Convoy Dismounts"];
+            [_dismountUnits, _grpDismount] call _fn_restoreConvoyAmbianceAi;
             [_grpDismount, "camp", _destPos, _campRadius, ""] call ARC_fnc_sitePopApplyAmbiance;
             ["OPS", format ["Convoy dismounted %1 non-gunner crew/passenger(s) into camp ambiance at endpoint marker.", count _dismountUnits], _destPos, [["taskId", _taskId], ["event", "CONVOY_DISMOUNTED"], ["dismounted", count _dismountUnits]]] call ARC_fnc_intelLog;
         }
