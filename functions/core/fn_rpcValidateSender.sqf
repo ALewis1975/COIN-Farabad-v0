@@ -61,7 +61,14 @@ if (!_isRemoteRpc) exitWith
     // player object but without remoteExecutedOwner. Treat only player-owned
     // client objects as trusted local server requests; clients still cannot
     // forge this path without executing code on the server.
-    if (isDedicated && {!isNull _caller} && {isPlayer _caller} && {(owner _caller) > 2}) exitWith
+    if (
+        isDedicated
+        && {!isNull _caller}
+        && {isPlayer _caller}
+        && {_caller in allPlayers}
+        && {!((getPlayerUID _caller) isEqualTo "")}
+        && {(owner _caller) > 0}
+    ) exitWith
     {
         diag_log format ["[ARC][INFO] %1: dedicated-server local player call detected for %2 owner=%3 — allowing.", _rpc, name _caller, owner _caller];
         true

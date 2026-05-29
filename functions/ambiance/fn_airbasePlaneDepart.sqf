@@ -252,11 +252,26 @@ if (!((leader _grp) isEqualTo _pilot)) then { _grp selectLeader _pilot; };
 private _despawnMkr = missionNamespace getVariable ["airbase_v1_plane_despawn_marker", "plane_despawn"];
 private _despawnPos = getMarkerPos _despawnMkr;
 private _despawnX = _despawnPos select 0;
-if (_despawnPos isEqualTo [0,0,0] || { _despawnX < 0 }) exitWith {
-    diag_log format ["[AIRBASESUB] %1 ABORT: despawn marker '%2' is missing or off-map (pos=%3). Place the marker anywhere on-map (x >= 0) along the departure flight path and restart.", _fid, _despawnMkr, _despawnPos];
-    _asset set ["state", "PARKED"];
-    _asset set ["activeFlight", ""];
-    false
+private _despawnY = _despawnPos select 1;
+private _ws = worldSize;
+private _despawnOffMap = (_despawnPos isEqualTo [0,0,0]) || { _despawnX < 0 } || { _despawnY < 0 } || { _despawnX > _ws } || { _despawnY > _ws };
+if (_despawnOffMap) then {
+    private _rawDespawnPos = +_despawnPos;
+    private _edgeMargin = 250;
+    private _maxCoord = (_ws - _edgeMargin) max _edgeMargin;
+
+    if (_despawnPos isEqualTo [0,0,0]) then {
+        private _basePos = getMarkerPos "mkr_airbaseCenter";
+        if (_basePos isEqualTo [0,0,0]) then { _basePos = [_ws / 2, _ws / 2, 0]; };
+        _despawnX = (_basePos select 0) + 2500;
+        _despawnY = _basePos select 1;
+    };
+
+    _despawnX = (_despawnX max _edgeMargin) min _maxCoord;
+    _despawnY = (_despawnY max _edgeMargin) min _maxCoord;
+    _despawnPos = [_despawnX, _despawnY, 0];
+
+    diag_log format ["[AIRBASESUB] %1 WARN: despawn marker '%2' resolved off-map (pos=%3); using on-map fallback %4.", _fid, _despawnMkr, _rawDespawnPos, _despawnPos];
 };
 
 // Stop idle animations and order a real walk-up boarding (NO moveIn)
