@@ -6477,3 +6477,19 @@ Mode: A (Bug Fix)
 | 3 | Changed-file sqflint | `for f in initServer.sqf functions/ambiance/fn_airbaseDiaryUpdate.sqf functions/ambiance/fn_airbaseTick.sqf functions/core/fn_airbaseTowerAuthorize.sqf functions/core/fn_publicBroadcastState.sqf functions/core/fn_rolesCanApproveQueue.sqf functions/core/fn_tocInitPlayer.sqf functions/core/fn_uiOpenAirScreen.sqf functions/ui/fn_uiConsoleAirPaint.sqf functions/ui/fn_uiConsoleCanOpen.sqf functions/ui/fn_uiConsoleOnLoad.sqf; do sqflint -e w "$f"; done` | PASS | Installed `sqflint==0.3.2` if unavailable; all changed SQF files linted clean. |
 | 4 | Runtime smoke: AIR/TOWER console + diary | Hosted/local MP: open Farabad Console as Battalion CO without tablet/proximity, open `arc_toc_air_1` AIR/TOWER action, verify Airbase diary has one updating `Airbase Status` record, queue rows show ETA/ETD, and tower controls work. | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
 | 5 | Dedicated/JIP validation | Dedicated server with one JIP client: validate AIR snapshot freshness, late-client diary record, direct AIR tab station entry, Battalion CO/OMNI control authority, and server-only state writes. | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+
+---
+
+## 2026-05-29 — RPT triage: Task RPC and Airbase departure recovery
+
+**Branch/Commit:** work @ a61e44870e1c
+
+**Scenario:** Reviewed `serverRpts/ArmA3Server_x64_2026-05-28_18-45-40.rpt`; fixed missing-RemoteExec-context task/queue RPC denials for trusted player-owned server-local calls and moved `plane_despawn` on-map so Airbase departure execution no longer aborts on the off-map marker guard.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Baseline RemoteExec + Airbase static contracts | `bash scripts/dev/check_remoteexec_contract.sh && bash tests/static/airbase_queue_lifecycle_contract_checks.sh` | PASS | Both checks passed before edits. |
+| 2 | Post-change RemoteExec + Airbase static contracts | `bash scripts/dev/check_remoteexec_contract.sh && bash tests/static/airbase_queue_lifecycle_contract_checks.sh` | PASS | No regressions in RemoteExec allowlist/wrapper contracts or Airbase queue lifecycle static contracts. |
+| 3 | `plane_despawn` mission marker sanity | Python marker-position assertion against `mission.sqm` | PASS | `plane_despawn` now resolves to `position[]={250,41.210945,8757.6592};` (x >= 0). |
+| 4 | Patch formatting sanity | `git diff --check` | PASS | No whitespace or patch-format issues introduced. |
+| 5 | Runtime smoke | Dedicated Arma server: request next incident/queue decision and run Airbase departures from the RPT scenario | BLOCKED | Arma 3 dedicated runtime unavailable in this sandbox. |
