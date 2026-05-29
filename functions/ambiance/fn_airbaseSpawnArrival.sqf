@@ -79,6 +79,63 @@ private _rwyStop  = getMarkerPos _mRwyE;
 private _taxiOut  = getMarkerPos _mTaxi;
 private _runwayDir = markerDir _mRwyS;
 
+private _fnValidMarkerPos = {
+    params ["_markerName", "_pos"];
+
+    if (!(_markerName in allMapMarkers)) exitWith { false };
+    if !(_pos isEqualType [] && { count _pos >= 2 }) exitWith { false };
+
+    private _x = _pos select 0;
+    private _y = _pos select 1;
+    private _ws = worldSize;
+
+    !(_pos isEqualTo [0,0,0])
+    && { _x >= 0 }
+    && { _y >= 0 }
+    && { _x <= _ws }
+    && { _y <= _ws }
+};
+
+if !([_mSpawn, _spawnPos] call _fnValidMarkerPos) exitWith {
+    diag_log format [
+        "[AIRBASESUB] %1 ABORT: arrival spawn marker '%2' invalid or off-map pos=%3",
+        _fid,
+        _mSpawn,
+        _spawnPos
+    ];
+    false
+};
+
+if !([_mRwyS, _rwyStart] call _fnValidMarkerPos) exitWith {
+    diag_log format [
+        "[AIRBASESUB] %1 ABORT: arrival runway start marker '%2' invalid or off-map pos=%3",
+        _fid,
+        _mRwyS,
+        _rwyStart
+    ];
+    false
+};
+
+if !([_mRwyE, _rwyStop] call _fnValidMarkerPos) exitWith {
+    diag_log format [
+        "[AIRBASESUB] %1 ABORT: arrival runway stop marker '%2' invalid or off-map pos=%3",
+        _fid,
+        _mRwyE,
+        _rwyStop
+    ];
+    false
+};
+
+if !([_mTaxi, _taxiOut] call _fnValidMarkerPos) exitWith {
+    diag_log format [
+        "[AIRBASESUB] %1 ABORT: arrival taxi-out marker '%2' invalid or off-map pos=%3",
+        _fid,
+        _mTaxi,
+        _taxiOut
+    ];
+    false
+};
+
 private _airportId = [_rt, "airportId", 0] call _hg;
 
 private _altSpawn = if (_category isEqualTo "RW") then { 250 } else { 3048 }; // 10,000 ft for fixed-wing arrivals

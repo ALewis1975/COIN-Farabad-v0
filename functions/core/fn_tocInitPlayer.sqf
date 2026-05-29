@@ -190,7 +190,7 @@ if (!(_mobileOpsVar in _tocVars)) then
             // Assignment / acceptance workflow
             _obj addAction [
                 "[TOC OPS] Generate Next Incident",
-                { [player] remoteExec ["ARC_fnc_tocRequestNextIncident", 2]; },
+                { [] call ARC_fnc_uiConsoleActionRequestNextIncident; },
                 [],
                 1.6,
                 true,
@@ -451,7 +451,7 @@ _obj addAction ["[MOBILE OPS] Open Ops Screen", { [] call ARC_fnc_uiOpenOpsScree
             // Assignment / acceptance workflow
             _obj addAction [
                 "[MOBILE OPS] Generate Next Incident",
-                { [player] remoteExec ["ARC_fnc_tocRequestNextIncident", 2]; },
+                { [] call ARC_fnc_uiConsoleActionRequestNextIncident; },
                 [],
                 1.6,
                 true,

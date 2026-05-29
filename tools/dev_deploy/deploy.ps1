@@ -1,7 +1,7 @@
 param(
     [Parameter(Mandatory = $true)][string]$RepoPath,
     [Parameter(Mandatory = $true)][string]$ArmaMissionPath,
-    [string]$Branch = "dev",
+    [Parameter(Mandatory = $true)][string]$Branch,
     [switch]$SkipPull
 )
 
@@ -25,6 +25,15 @@ try {
 
     $head = (git rev-parse --short HEAD).Trim()
     Write-Host "HEAD: $head"
+
+    $stamp = "COIN_Farabad_v0.Farabad-$Branch-$(Get-Date -AsUTC -Format 'yyyyMMdd-HHmmss')-$head"
+    $initServer = Join-Path $RepoPath "initServer.sqf"
+    if (!(Test-Path $initServer)) { throw "initServer.sqf missing: $initServer" }
+    $initText = Get-Content -Raw -Path $initServer
+    $stampLine = "missionNamespace setVariable [`"ARC_buildStamp`", `"$stamp`", true];"
+    $initText = $initText -replace 'missionNamespace setVariable \["ARC_buildStamp", "[^"]*", true\];', $stampLine
+    Set-Content -NoNewline -Path $initServer -Value $initText
+    Write-Host "Build stamp: $stamp"
 
     $sync = Join-Path $RepoPath "tools/sync_mission_to_arma_profile.ps1"
     if (!(Test-Path $sync)) { throw "sync script missing: $sync" }

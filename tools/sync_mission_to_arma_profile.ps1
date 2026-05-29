@@ -12,18 +12,43 @@ if (!(Test-Path -Path $RepoMissionPath)) {
 
 New-Item -ItemType Directory -Force -Path $ArmaMissionPath | Out-Null
 
-robocopy $RepoMissionPath $ArmaMissionPath /MIR /R:2 /W:1 /NFL /NDL /NP /XD .git .github docs data tests .vscode
+robocopy $RepoMissionPath $ArmaMissionPath /MIR /R:2 /W:1 /NFL /NDL /NP /XD .git .github docs tests .vscode
 if ($LASTEXITCODE -gt 7) {
     throw "robocopy failed with exit code $LASTEXITCODE"
 }
 
 $verifiedFiles = @(
+    "description.ext",
+    "mission.sqm",
+    "initServer.sqf",
+    "config/CfgFunctions.hpp",
+    "config/CfgRemoteExec.hpp",
+
     "functions/core/fn_intelBroadcast.sqf",
     "functions/core/fn_rpcValidateSender.sqf",
     "functions/core/fn_tocRequestNextIncident.sqf",
-    "initServer.sqf",
-    "config/CfgRemoteExec.hpp"
+    "functions/ui/fn_uiConsoleActionRequestNextIncident.sqf",
+    "functions/core/fn_taskCreateIncident.sqf",
+    "functions/core/fn_taskRehydrateActive.sqf",
+
+    "functions/ambiance/fn_airbaseInit.sqf",
+    "functions/ambiance/fn_airbaseTick.sqf",
+    "functions/ambiance/fn_airbasePlaneDepart.sqf",
+    "functions/ambiance/fn_airbaseSpawnArrival.sqf",
+
+    "data\incident_markers.sqf",
+    "data\ARC_ConfigData.sqf"
 )
+
+$pathDir = Join-Path $RepoMissionPath "data\paths"
+if (Test-Path -Path $pathDir) {
+    $pathFiles = Get-ChildItem -Path $pathDir -Filter "*.sqf" -File
+    foreach ($f in $pathFiles) {
+        $verifiedFiles += $f.FullName.Substring($RepoMissionPath.Length + 1)
+    }
+}
+
+$verifiedFiles = $verifiedFiles | Sort-Object -Unique
 
 $mismatches = @()
 foreach ($rel in $verifiedFiles) {

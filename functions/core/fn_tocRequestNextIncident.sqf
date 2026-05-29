@@ -18,6 +18,17 @@ params [ ["_caller", objNull, [objNull]] ];
 private _owner = -1;
 if (!isNil "remoteExecutedOwner") then { _owner = remoteExecutedOwner; };
 
+private _remoteOwnerDbg = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+diag_log format [
+    "[ARC][RPCDBG] NextIncident callerNull=%1 caller=%2 isPlayer=%3 callerOwner=%4 remoteExecutedOwner=%5 uid=%6",
+    isNull _caller,
+    if (isNull _caller) then {"<null>"} else {name _caller},
+    if (isNull _caller) then {false} else {isPlayer _caller},
+    if (isNull _caller) then {-1} else {owner _caller},
+    _remoteOwnerDbg,
+    if (isNull _caller) then {""} else {getPlayerUID _caller}
+];
+
 private _publishResult = {
     params [
         ["_ownerId", -1, [0]],
