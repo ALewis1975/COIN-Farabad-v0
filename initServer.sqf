@@ -263,7 +263,7 @@ missionNamespace setVariable ["civsub_v1_showPapers_forceCoop", true, true];
 
 // Physical civilians (sampler)
 missionNamespace setVariable ["civsub_v1_civs_enabled", true, true];
-missionNamespace setVariable ["civsub_v1_civ_tick_s", 20, true];
+missionNamespace setVariable ["civsub_v1_civ_tick_s", 30, true];   // sampler cadence (s); 30 balances CPU vs. town-population latency (was 20). See docs/perf/Tick_Cadence_Review.md
 
 // Optional editor-placed CIVSUB test civilians (3DEN variable names)
 // Accepted entry forms:
@@ -306,7 +306,7 @@ missionNamespace setVariable ["civsub_v1_civ_classPool", [
 
 // Scheduler (rumors / ambient emissions, etc.)
 missionNamespace setVariable ["civsub_v1_scheduler_enabled", true, true];
-missionNamespace setVariable ["civsub_v1_scheduler_s", 120, true];        // baseline cadence (set to 30 for rapid testing)
+missionNamespace setVariable ["civsub_v1_scheduler_s", 240, true];        // baseline cadence; self-scaling via fn_civsubProbHourToTick so events/hr unchanged (was 120; set to 30 for rapid testing). See docs/perf/Tick_Cadence_Review.md
 missionNamespace setVariable ["civsub_v1_rumor_enabled", true, true];     // set false to disable rumors
 missionNamespace setVariable ["civsub_v1_debug", false, true];           // enables scheduler/diag logs (if present)
 
