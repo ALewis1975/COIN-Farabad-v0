@@ -220,9 +220,15 @@ Run this minimum flow locally before merging:
 
 ---
 
-## 10) Deferred checks (must run in dedicated server + JIP environment)
+## 10) Dedicated server + JIP checks (rig now available — run and log)
 
-These are not complete in basic local runs and must be validated separately:
+These are not complete in basic local runs and must be validated on the dedicated
+server. A dedicated Armahosts VPS is now available
+(see `docs/architecture/Dedicated_Server_Activation_Plan_2026-05-27.md`); once
+that plan's Track 2/Track 4 prerequisites are satisfied, run these checks there
+and record `PASS`/`FAIL` with RPT evidence in `tests/TEST-LOG.md`.
+The agent/CI sandbox still cannot run the Arma 3 runtime, so they stay `BLOCKED`
+for sandbox runs and require an operator pass on the dedicated rig:
 - Dedicated server persistence/ownership behavior over longer sessions.
 - Join-in-progress (JIP) synchronization for all changed state/UI.
 - Late-client recovery for in-flight events and mission variables.

@@ -204,9 +204,12 @@ sqflint -e w functions/path/to/changed_file.sqf
 # - Check RPT logs for errors
 ```
 
-### Deferred Validations (Dedicated Server Required)
+### Dedicated Server Validations (rig now available — run and log)
 
-These checks require a true dedicated server environment:
+A dedicated Armahosts VPS is now available (see
+`docs/architecture/Dedicated_Server_Activation_Plan_2026-05-27.md`). Once that
+plan's Track 2/Track 4 prerequisites are satisfied, run these checks on the
+dedicated server and record the results:
 - Persistence durability across server restarts
 - Join-in-progress (JIP) synchronization
 - Late-client state recovery
