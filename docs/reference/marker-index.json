@@ -22,7 +22,15 @@
       "aliases": [],
       "alpha": 0.5,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "docs/serverRpts/Arma3_x64_2026-03-29_10-57-25.rpt",
+        "functions/ambiance/fn_airbaseBuildRouteDecision.sqf",
+        "functions/ambiance/fn_airbaseInit.sqf",
+        "functions/ambiance/fn_airbasePlaneDepart.sqf",
+        "functions/ambiance/fn_airbaseTick.sqf",
+        "serverRpts/ArmA3Server_x64_2026-05-28_22-00-58.rpt",
+        "tests/TEST-LOG.md"
+      ],
       "name": "AEON_Right_270_Outbound",
       "pos": [
         5126.4092,
@@ -40,7 +48,10 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "functions/ambiance/fn_airbaseInit.sqf",
+        "functions/ambiance/fn_airbasePlaneDepart.sqf"
+      ],
       "name": "AEON_Right_270_Outbound_Clear",
       "pos": [
         7272.646,
@@ -130,7 +141,11 @@
       "aliases": [],
       "alpha": 0.5,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "functions/ambiance/fn_airbaseBuildRouteDecision.sqf",
+        "functions/ambiance/fn_airbaseInit.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "AEON_Taxi_Right_Egress",
       "pos": [
         5575.0171,
@@ -148,7 +163,11 @@
       "aliases": [],
       "alpha": 0.5,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "functions/ambiance/fn_airbaseBuildRouteDecision.sqf",
+        "functions/ambiance/fn_airbaseInit.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "AEON_Taxi_Right_Ingress",
       "pos": [
         7040.6211,
@@ -238,7 +257,9 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "functions/core/fn_execInitActive.sqf"
+      ],
       "name": "ARC_convoy_linkup_airbase",
       "pos": [
         6736.3511,
@@ -256,7 +277,12 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "functions/core/fn_execCleanupActive.sqf",
+        "functions/core/fn_execInitActive.sqf",
+        "functions/core/fn_resetAll.sqf",
+        "functions/ops/fn_opsSpawnLocalSupport.sqf"
+      ],
       "name": "ARC_convoy_start",
       "pos": [
         6736.75,
@@ -348,7 +374,11 @@
       ],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/farabad_marker_aliases.sqf",
+        "data/incident_markers.sqf",
+        "functions/ops/fn_opsSpawnLocalSupport.sqf"
+      ],
       "name": "ARC_loc_BelleFoilleHotel",
       "pos": [
         5349.7939,
@@ -368,7 +398,10 @@
       ],
       "alpha": 0.5,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/farabad_marker_aliases.sqf",
+        "data/incident_markers.sqf"
+      ],
       "name": "ARC_loc_FortKelati",
       "pos": [
         6292.2148,
@@ -388,7 +421,11 @@
       ],
       "alpha": 0.5,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/farabad_marker_aliases.sqf",
+        "data/incident_markers.sqf",
+        "functions/ops/fn_opsSpawnLocalSupport.sqf"
+      ],
       "name": "ARC_loc_JaziraOilField",
       "pos": [
         6220.3008,
@@ -408,7 +445,11 @@
       ],
       "alpha": 0.5,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/farabad_marker_aliases.sqf",
+        "data/incident_markers.sqf",
+        "functions/ops/fn_opsSpawnLocalSupport.sqf"
+      ],
       "name": "ARC_loc_JaziraOilRefinery",
       "pos": [
         6737.1758,
@@ -428,7 +469,10 @@
       ],
       "alpha": 0.5,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/farabad_marker_aliases.sqf",
+        "data/incident_markers.sqf"
+      ],
       "name": "ARC_loc_Junkyard",
       "pos": [
         5209.2402,
@@ -448,7 +492,12 @@
       ],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/farabad_marker_aliases.sqf",
+        "data/farabad_site_templates.sqf",
+        "data/incident_markers.sqf",
+        "functions/ops/fn_opsSpawnLocalSupport.sqf"
+      ],
       "name": "ARC_loc_KarkanakPrison",
       "pos": [
         10949.0,
@@ -468,7 +517,11 @@
       ],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/farabad_marker_aliases.sqf",
+        "data/incident_markers.sqf",
+        "functions/ops/fn_opsSpawnLocalSupport.sqf"
+      ],
       "name": "ARC_loc_hospital",
       "pos": [
         5350.0811,
@@ -488,7 +541,11 @@
       ],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/farabad_marker_aliases.sqf",
+        "data/incident_markers.sqf",
+        "functions/ops/fn_opsSpawnLocalSupport.sqf"
+      ],
       "name": "ARC_loc_industrial022",
       "pos": [
         -249.2251,
@@ -509,7 +566,13 @@
       ],
       "alpha": 0.5,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/farabad_marker_aliases.sqf",
+        "data/incident_markers.sqf",
+        "docs/projectFiles/Farabad_ORBAT.md",
+        "functions/ops/fn_opsSpawnRouteSupport.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "ARC_loc_military",
       "pos": [
         6236.9531,
@@ -530,7 +593,13 @@
       ],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/farabad_marker_aliases.sqf",
+        "data/incident_markers.sqf",
+        "docs/projectFiles/Farabad_ORBAT.md",
+        "functions/ops/fn_opsSpawnRouteSupport.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "ARC_loc_military",
       "pos": [
         7703.9258,
@@ -566,7 +635,10 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "functions/ambiance/fn_airbaseOrbatPopulate.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "ARC_m_base_avn_hq",
       "pos": [
         6690.438,
@@ -602,7 +674,10 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "functions/ambiance/fn_airbaseGroundTrafficInit.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "ARC_m_base_c17_parking",
       "pos": [
         6368.3877,
@@ -638,7 +713,11 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "functions/ambiance/fn_airbaseGroundTrafficInit.sqf",
+        "functions/ops/fn_opsSpawnRouteSupport.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "ARC_m_base_hq_1",
       "pos": [
         6409.7266,
@@ -674,7 +753,10 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "functions/ambiance/fn_airbaseGroundTrafficInit.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "ARC_m_base_mayor_1",
       "pos": [
         6293.228,
@@ -692,7 +774,13 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/incident_markers.sqf",
+        "functions/ambiance/fn_airbaseGroundTrafficInit.sqf",
+        "functions/ops/fn_opsSpawnLocalSupport.sqf",
+        "functions/ui/fn_uiConsoleInitClient.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "ARC_m_base_toc",
       "pos": [
         6237.0,
@@ -728,7 +816,10 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "functions/ambiance/fn_airbaseOrbatPopulate.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "ARC_m_base_usaf_pilot_hangar",
       "pos": [
         6559.1079,
@@ -746,7 +837,10 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "functions/command/fn_intelResolveRtbDestination.sqf",
+        "functions/ops/fn_opsSpawnRouteSupport.sqf"
+      ],
       "name": "ARC_m_charlie_2_325AIR",
       "pos": [
         5894.0,
@@ -764,7 +858,9 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/incident_markers.sqf"
+      ],
       "name": "ARC_m_civil_01",
       "pos": [
         8120.0439,
@@ -782,7 +878,9 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/incident_markers.sqf"
+      ],
       "name": "ARC_m_ied_01",
       "pos": [
         5118.0,
@@ -800,7 +898,9 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/incident_markers.sqf"
+      ],
       "name": "ARC_m_patrol_01",
       "pos": [
         8970.6133,
@@ -818,7 +918,9 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/incident_markers.sqf"
+      ],
       "name": "ARC_m_patrol_02",
       "pos": [
         514.91968,
@@ -836,7 +938,9 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/incident_markers.sqf"
+      ],
       "name": "ARC_m_patrol_03",
       "pos": [
         8914.458,
@@ -854,7 +958,12 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/incident_markers.sqf",
+        "functions/ambiance/fn_airbaseGroundTrafficInit.sqf",
+        "functions/ambiance/fn_airbaseSecurityInit.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "Main_Gate",
       "pos": [
         5244.375,
@@ -872,7 +981,10 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "functions/ambiance/fn_airbaseSecurityInit.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "NE_Corner",
       "pos": [
         7362.7529,
@@ -890,7 +1002,10 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "functions/ambiance/fn_airbaseSecurityInit.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "NW_Corner",
       "pos": [
         4888.5781,
@@ -908,7 +1023,16 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/incident_markers.sqf",
+        "docs/projectFiles/Farabad_AIRBASESUB_Airbase_Ambience_Planning_Spec.md",
+        "docs/projectFiles/Farabad_CIVSUBv1_Development_Baseline (1).md",
+        "docs/projectFiles/Farabad_COIN_Mission_Design_Guide_v0.4_2026-01-27.md",
+        "docs/projectFiles/farabad_project_dictionary_v_1.1.md",
+        "functions/ambiance/fn_airbaseSecurityInit.sqf",
+        "functions/core/fn_execInitActive.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "North_Gate",
       "pos": [
         6737.875,
@@ -926,7 +1050,10 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "functions/ambiance/fn_airbaseSecurityInit.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "SE_Corner",
       "pos": [
         7141.8027,
@@ -944,7 +1071,10 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "functions/ambiance/fn_airbaseSecurityInit.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "SW_Corner",
       "pos": [
         4854.4731,
@@ -962,12 +1092,16 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/incident_markers.sqf",
+        "functions/ambiance/fn_airbaseSecurityInit.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "South_Gate",
       "pos": [
-        6220.125,
-        7.2114286,
-        1335.375
+        6220.6304,
+        7.1980739,
+        1334.2064
       ],
       "shape": "",
       "source": "mission.sqm:Airbase Patrol Markers",
@@ -980,7 +1114,11 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "docs/serverRpts/Arma3_x64_2026-03-29_10-57-25.rpt",
+        "functions/logistics/fn_execTickConvoy.sqf",
+        "serverRpts/ArmA3Server_x64_2026-05-28_22-00-58.rpt"
+      ],
       "name": "arc_bridge_01",
       "pos": [
         2493.8643,
@@ -998,7 +1136,11 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "docs/serverRpts/Arma3_x64_2026-03-29_10-57-25.rpt",
+        "functions/logistics/fn_execTickConvoy.sqf",
+        "serverRpts/ArmA3Server_x64_2026-05-28_22-00-58.rpt"
+      ],
       "name": "arc_bridge_02",
       "pos": [
         4082.7329,
@@ -1016,7 +1158,10 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "docs/serverRpts/Arma3_x64_2026-03-29_10-57-25.rpt",
+        "serverRpts/ArmA3Server_x64_2026-05-28_22-00-58.rpt"
+      ],
       "name": "arc_bridge_03",
       "pos": [
         5436.6704,
@@ -1034,7 +1179,10 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "docs/serverRpts/Arma3_x64_2026-03-29_10-57-25.rpt",
+        "serverRpts/ArmA3Server_x64_2026-05-28_22-00-58.rpt"
+      ],
       "name": "arc_bridge_04",
       "pos": [
         7464.2456,
@@ -1052,7 +1200,10 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "docs/serverRpts/Arma3_x64_2026-03-29_10-57-25.rpt",
+        "serverRpts/ArmA3Server_x64_2026-05-28_22-00-58.rpt"
+      ],
       "name": "arc_bridge_05",
       "pos": [
         8010.8086,
@@ -1070,7 +1221,10 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "docs/serverRpts/Arma3_x64_2026-03-29_10-57-25.rpt",
+        "serverRpts/ArmA3Server_x64_2026-05-28_22-00-58.rpt"
+      ],
       "name": "arc_bridge_06",
       "pos": [
         4449.8975,
@@ -1088,7 +1242,10 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "docs/serverRpts/Arma3_x64_2026-03-29_10-57-25.rpt",
+        "serverRpts/ArmA3Server_x64_2026-05-28_22-00-58.rpt"
+      ],
       "name": "arc_bridge_07",
       "pos": [
         2235.6318,
@@ -1106,7 +1263,10 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "docs/serverRpts/Arma3_x64_2026-03-29_10-57-25.rpt",
+        "serverRpts/ArmA3Server_x64_2026-05-28_22-00-58.rpt"
+      ],
       "name": "arc_bridge_08",
       "pos": [
         5739.5752,
@@ -1124,7 +1284,10 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "docs/serverRpts/Arma3_x64_2026-03-29_10-57-25.rpt",
+        "serverRpts/ArmA3Server_x64_2026-05-28_22-00-58.rpt"
+      ],
       "name": "arc_bridge_09",
       "pos": [
         5881.1152,
@@ -1142,7 +1305,10 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "docs/serverRpts/Arma3_x64_2026-03-29_10-57-25.rpt",
+        "serverRpts/ArmA3Server_x64_2026-05-28_22-00-58.rpt"
+      ],
       "name": "arc_bridge_10",
       "pos": [
         5259.1226,
@@ -1160,7 +1326,10 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "docs/serverRpts/Arma3_x64_2026-03-29_10-57-25.rpt",
+        "serverRpts/ArmA3Server_x64_2026-05-28_22-00-58.rpt"
+      ],
       "name": "arc_bridge_11",
       "pos": [
         4955.4595,
@@ -1178,7 +1347,10 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "docs/serverRpts/Arma3_x64_2026-03-29_10-57-25.rpt",
+        "serverRpts/ArmA3Server_x64_2026-05-28_22-00-58.rpt"
+      ],
       "name": "arc_bridge_12",
       "pos": [
         3868.0471,
@@ -1196,7 +1368,10 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "docs/serverRpts/Arma3_x64_2026-03-29_10-57-25.rpt",
+        "serverRpts/ArmA3Server_x64_2026-05-28_22-00-58.rpt"
+      ],
       "name": "arc_bridge_13",
       "pos": [
         2844.7629,
@@ -1214,7 +1389,10 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "docs/serverRpts/Arma3_x64_2026-03-29_10-57-25.rpt",
+        "serverRpts/ArmA3Server_x64_2026-05-28_22-00-58.rpt"
+      ],
       "name": "arc_bridge_14",
       "pos": [
         2695.1616,
@@ -1232,7 +1410,10 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "docs/serverRpts/Arma3_x64_2026-03-29_10-57-25.rpt",
+        "serverRpts/ArmA3Server_x64_2026-05-28_22-00-58.rpt"
+      ],
       "name": "arc_bridge_15",
       "pos": [
         5467.6216,
@@ -1250,7 +1431,10 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "docs/serverRpts/Arma3_x64_2026-03-29_10-57-25.rpt",
+        "serverRpts/ArmA3Server_x64_2026-05-28_22-00-58.rpt"
+      ],
       "name": "arc_bridge_16",
       "pos": [
         4586.9097,
@@ -1268,7 +1452,10 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "docs/serverRpts/Arma3_x64_2026-03-29_10-57-25.rpt",
+        "serverRpts/ArmA3Server_x64_2026-05-28_22-00-58.rpt"
+      ],
       "name": "arc_bridge_17",
       "pos": [
         8274.3721,
@@ -1286,7 +1473,10 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "docs/serverRpts/Arma3_x64_2026-03-29_10-57-25.rpt",
+        "serverRpts/ArmA3Server_x64_2026-05-28_22-00-58.rpt"
+      ],
       "name": "arc_bridge_18",
       "pos": [
         7524.9277,
@@ -1304,7 +1494,10 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "docs/serverRpts/Arma3_x64_2026-03-29_10-57-25.rpt",
+        "serverRpts/ArmA3Server_x64_2026-05-28_22-00-58.rpt"
+      ],
       "name": "arc_bridge_19",
       "pos": [
         9184.04,
@@ -1322,7 +1515,10 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "docs/serverRpts/Arma3_x64_2026-03-29_10-57-25.rpt",
+        "serverRpts/ArmA3Server_x64_2026-05-28_22-00-58.rpt"
+      ],
       "name": "arc_bridge_20",
       "pos": [
         2186.2583,
@@ -1484,7 +1680,10 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "functions/ambiance/fn_airbaseOrbatPopulate.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "arc_m_base_1_73_CAV_hq",
       "pos": [
         6142.0122,
@@ -1574,7 +1773,10 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "functions/ambiance/fn_airbaseOrbatPopulate.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "arc_m_base_civilian_terminal_01",
       "pos": [
         5947.292,
@@ -1592,7 +1794,10 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "functions/ambiance/fn_airbaseGroundTrafficInit.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "arc_m_base_convoy_staging",
       "pos": [
         6631.3921,
@@ -1628,7 +1833,10 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "functions/ambiance/fn_airbaseGroundTrafficInit.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "arc_m_base_fuel_depot",
       "pos": [
         7157.1929,
@@ -1646,7 +1854,10 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "functions/ambiance/fn_airbaseGroundTrafficInit.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "arc_m_base_maintenance",
       "pos": [
         5625.5884,
@@ -1682,12 +1893,15 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "functions/ambiance/fn_airbaseOrbatPopulate.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "arc_m_base_police_hq",
       "pos": [
-        5280.9199,
+        5281.042,
         8.5,
-        2628.0791
+        2628.1025
       ],
       "shape": "",
       "source": "mission.sqm:Empty / System",
@@ -1700,7 +1914,10 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "functions/ambiance/fn_airbaseGroundTrafficInit.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "arc_m_base_supply_depot",
       "pos": [
         5335.5571,
@@ -1718,7 +1935,11 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "functions/ambiance/fn_airbaseGroundTrafficInit.sqf",
+        "functions/ambiance/fn_airbaseOrbatPopulate.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "arc_m_base_theater_hospital",
       "pos": [
         5714.25,
@@ -1736,7 +1957,9 @@
       "aliases": [],
       "alpha": 0.5,
       "color": "ColorWEST",
-      "consumers": [],
+      "consumers": [
+        "tests/TEST-LOG.md"
+      ],
       "name": "arc_rotary_pad_1",
       "pos": [
         6849.123,
@@ -1775,9 +1998,9 @@
       "consumers": [],
       "name": "arc_rotary_pad_3",
       "pos": [
-        6882.7173,
-        8.4914999,
-        1532.2246
+        -7248.0,
+        52.9855,
+        12050.586
       ],
       "shape": "",
       "source": "mission.sqm:Helo Pads",
@@ -1826,7 +2049,10 @@
       "aliases": [],
       "alpha": 0.5,
       "color": "ColorWEST",
-      "consumers": [],
+      "consumers": [
+        "functions/ambiance/fn_airbaseOrbatPopulate.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "arc_rotary_pad_6",
       "pos": [
         6884.9102,
@@ -1862,7 +2088,9 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/farabad_world_zones.sqf"
+      ],
       "name": "arc_zone_NorthEast",
       "pos": [
         8079.5059,
@@ -1880,7 +2108,9 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/farabad_world_zones.sqf"
+      ],
       "name": "arc_zone_NorthWest",
       "pos": [
         2703.28,
@@ -1898,7 +2128,9 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/farabad_world_zones.sqf"
+      ],
       "name": "arc_zone_SouthEast",
       "pos": [
         8064.0,
@@ -1916,7 +2148,9 @@
       "aliases": [],
       "alpha": 0.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/farabad_world_zones.sqf"
+      ],
       "name": "arc_zone_SouthWest",
       "pos": [
         2688.0,
@@ -1973,7 +2207,16 @@
       ],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/farabad_marker_aliases.sqf",
+        "docs/qa/Dedicated_JIP_Validation_Matrix.md",
+        "functions/civsub/fn_civsubInteractHandoffSheriff.sqf",
+        "functions/command/fn_intelClientCanProcessEpwHere.sqf",
+        "functions/command/fn_intelOrderCompleteRtbEpw.sqf",
+        "functions/command/fn_intelResolveRtbDestination.sqf",
+        "scripts/dev/validate_marker_index.py",
+        "tests/TEST-LOG.md"
+      ],
       "name": "epw_holding",
       "pos": [
         6292.145,
@@ -2153,7 +2396,10 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/incident_markers.sqf",
+        "functions/ops/fn_opsSpawnLocalSupport.sqf"
+      ],
       "name": "marker_14",
       "pos": [
         2468.0039,
@@ -2171,7 +2417,9 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/incident_markers.sqf"
+      ],
       "name": "marker_16",
       "pos": [
         5974.5332,
@@ -2189,7 +2437,9 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/incident_markers.sqf"
+      ],
       "name": "marker_18",
       "pos": [
         3660.427,
@@ -2207,7 +2457,9 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/incident_markers.sqf"
+      ],
       "name": "marker_19",
       "pos": [
         3021.792,
@@ -2225,7 +2477,9 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/incident_markers.sqf"
+      ],
       "name": "marker_20",
       "pos": [
         5468.5742,
@@ -2243,7 +2497,9 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/incident_markers.sqf"
+      ],
       "name": "marker_21",
       "pos": [
         3131.905,
@@ -2459,7 +2715,15 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "docs/projectFiles/Farabad_CIVSUBv1_Development_Baseline (1).md",
+        "docs/projectFiles/farabad_project_dictionary_v_1.1.md",
+        "docs/qa/Dedicated_JIP_Validation_Matrix.md",
+        "functions/civsub/fn_civsubInteractHandoffSheriff.sqf",
+        "functions/command/fn_intelClientCanProcessEpwHere.sqf",
+        "functions/command/fn_intelOrderCompleteRtbEpw.sqf",
+        "functions/command/fn_intelResolveRtbDestination.sqf"
+      ],
       "name": "mkr_SHERIFF_HOLDING",
       "pos": [
         6299.4312,
@@ -2479,7 +2743,35 @@
       ],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/farabad_marker_aliases.sqf",
+        "data/incident_markers.sqf",
+        "docs/architecture/AIR_TOWER_Phase0_Audit.md",
+        "docs/projectFiles/Farabad_AIRBASESUB_Airbase_Ambience_Planning_Spec.md",
+        "docs/projectFiles/Farabad_COIN_Mission_Design_Guide_v0.4_2026-01-27.md",
+        "docs/projectFiles/farabad_project_dictionary_v_1.1.md",
+        "docs/serverRpts/Arma3_x64_2026-03-29_10-57-25.rpt",
+        "functions/ambiance/fn_airbaseAdminResetControlState.sqf",
+        "functions/ambiance/fn_airbaseBuildRouteDecision.sqf",
+        "functions/ambiance/fn_airbaseInit.sqf",
+        "functions/ambiance/fn_airbasePlaneDepart.sqf",
+        "functions/ambiance/fn_airbaseRunwayLockOccupy.sqf",
+        "functions/ambiance/fn_airbaseRunwayLockRelease.sqf",
+        "functions/ambiance/fn_airbaseRunwayLockReserve.sqf",
+        "functions/ambiance/fn_airbaseRunwayLockSweep.sqf",
+        "functions/ambiance/fn_airbaseTick.sqf",
+        "functions/civsub/fn_civsubCivFindSpawnPos.sqf",
+        "functions/civsub/fn_civsubSpawnCacheEnsure.sqf",
+        "functions/command/fn_intelOrderCompleteRtbEpw.sqf",
+        "functions/command/fn_intelResolveRtbDestination.sqf",
+        "functions/core/fn_companyCommandInit.sqf",
+        "functions/core/fn_execInitActive.sqf",
+        "functions/ops/fn_opsSpawnLocalSupport.sqf",
+        "functions/threat/fn_threatIsProtectedSpawnPos.sqf",
+        "initServer.sqf",
+        "serverRpts/ArmA3Server_x64_2026-05-28_22-00-58.rpt",
+        "tests/TEST-LOG.md"
+      ],
       "name": "mkr_airbaseCenter",
       "pos": [
         6117.9551,
@@ -2497,7 +2789,11 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "functions/ambiance/fn_airbaseInit.sqf",
+        "functions/ambiance/fn_airbaseSpawnArrival.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "mkr_arrivalRunwayStart",
       "pos": [
         5168.8018,
@@ -2515,7 +2811,10 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "functions/ambiance/fn_airbaseInit.sqf",
+        "functions/ambiance/fn_airbaseSpawnArrival.sqf"
+      ],
       "name": "mkr_arrivalRunwayStop",
       "pos": [
         6129.2188,
@@ -2533,7 +2832,10 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "functions/ambiance/fn_airbaseInit.sqf",
+        "functions/ambiance/fn_airbaseSpawnArrival.sqf"
+      ],
       "name": "mkr_arrivalRunwayTaxiOut",
       "pos": [
         6302.9102,
@@ -2551,12 +2853,15 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "functions/ambiance/fn_airbaseInit.sqf",
+        "functions/ambiance/fn_airbaseSpawnArrival.sqf"
+      ],
       "name": "mkr_arrivalSpawn",
       "pos": [
-        -3252.3577,
-        29.542564,
-        7963.6963
+        249.22614,
+        91.536743,
+        9656.1416
       ],
       "shape": "",
       "source": "mission.sqm:Arrival Markers",
@@ -2569,7 +2874,12 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "functions/ied/fn_iedServerCheckDisposal.sqf",
+        "functions/ied/fn_vbiedServerOnDestroyed.sqf",
+        "functions/ui/fn_uiIncidentGetNextActions.sqf",
+        "initServer.sqf"
+      ],
       "name": "mkr_eod_disposal",
       "pos": [
         6856.167,
@@ -2578,6 +2888,1918 @@
       ],
       "shape": "",
       "source": "mission.sqm:Empty / System",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [
+        "tests/TEST-LOG.md"
+      ],
+      "name": "mkr_highway_001",
+      "pos": [
+        5747.2715,
+        8.58253,
+        1077.7534
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_002",
+      "pos": [
+        5746.5664,
+        8.5932722,
+        1052.0616
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_003",
+      "pos": [
+        5249.0244,
+        5.8625684,
+        1077.8406
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_004",
+      "pos": [
+        5248.3193,
+        5.8635974,
+        1052.1488
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_005",
+      "pos": [
+        4714.9565,
+        5.9117398,
+        1224.9063
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_006",
+      "pos": [
+        4731.853,
+        5.9099998,
+        1244.2731
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_007",
+      "pos": [
+        4596.7998,
+        5.5588236,
+        1660.4669
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_008",
+      "pos": [
+        4571.1509,
+        5.5513177,
+        1658.8271
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_009",
+      "pos": [
+        4522.6978,
+        4.6399999,
+        2154.5791
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_010",
+      "pos": [
+        4497.6606,
+        4.6400003,
+        2148.7742
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_011",
+      "pos": [
+        4452.1167,
+        2.9316914,
+        2654.3188
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_012",
+      "pos": [
+        4426.4155,
+        2.9315472,
+        2654.281
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_013",
+      "pos": [
+        4511.6621,
+        6.9699998,
+        3148.3408
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_014",
+      "pos": [
+        4486.5713,
+        6.9700003,
+        3153.9084
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_015",
+      "pos": [
+        4747.668,
+        6.4498658,
+        3658.0779
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_016",
+      "pos": [
+        4733.5156,
+        6.4105911,
+        3679.5315
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_017",
+      "pos": [
+        5255.1147,
+        6.6500001,
+        3848.9619
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_018",
+      "pos": [
+        5246.7627,
+        6.6500006,
+        3873.2683
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_019",
+      "pos": [
+        5658.0332,
+        3.9400001,
+        4257.1221
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_020",
+      "pos": [
+        5638.8579,
+        3.9400005,
+        4274.2354
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_021",
+      "pos": [
+        5945.7388,
+        12.677663,
+        4853.0112
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_022",
+      "pos": [
+        5920.3706,
+        12.680535,
+        4857.1348
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_023",
+      "pos": [
+        5852.9824,
+        12.93,
+        5351.0967
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_024",
+      "pos": [
+        5830.0137,
+        12.930001,
+        5339.564
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_025",
+      "pos": [
+        5363.2573,
+        -0.6550256,
+        5711.8989
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_026",
+      "pos": [
+        5352.3467,
+        0.56888723,
+        5688.6284
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_027",
+      "pos": [
+        5065.6104,
+        9.8344193,
+        5835.895
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_028",
+      "pos": [
+        5059.7856,
+        9.8346252,
+        5823.0615
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_029",
+      "pos": [
+        4720.0723,
+        9.8900003,
+        5996.5288
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_030",
+      "pos": [
+        4712.0527,
+        9.8900003,
+        5981.1382
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_031",
+      "pos": [
+        4253.2583,
+        9.8900003,
+        6156.9253
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_032",
+      "pos": [
+        4250.1191,
+        9.8900003,
+        6139.8569
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_033",
+      "pos": [
+        3728.5195,
+        18.479794,
+        6377.1333
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_034",
+      "pos": [
+        3720.5,
+        18.526243,
+        6361.7427
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_035",
+      "pos": [
+        3201.1455,
+        23.394051,
+        6604.791
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_036",
+      "pos": [
+        3196.9995,
+        23.40691,
+        6587.939
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_037",
+      "pos": [
+        2751.137,
+        24.190001,
+        6602.0654
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_038",
+      "pos": [
+        2752.5562,
+        24.190001,
+        6588.3003
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_039",
+      "pos": [
+        2277.6514,
+        25.83293,
+        6801.1802
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_040",
+      "pos": [
+        2270.5859,
+        25.828989,
+        6788.8203
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_041",
+      "pos": [
+        1840.8507,
+        27.567234,
+        7001.3232
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_042",
+      "pos": [
+        1834.9946,
+        27.569544,
+        6988.3467
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_043",
+      "pos": [
+        1356.3577,
+        28.703953,
+        7167.2876
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_044",
+      "pos": [
+        1350.5266,
+        28.709999,
+        7154.2998
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_045",
+      "pos": [
+        912.99579,
+        31.200001,
+        7320.7676
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_046",
+      "pos": [
+        907.19781,
+        31.200001,
+        7307.7651
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_047",
+      "pos": [
+        581.92535,
+        37.455074,
+        7566.8159
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_048",
+      "pos": [
+        571.30597,
+        37.429523,
+        7557.3335
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_049",
+      "pos": [
+        269.02335,
+        40.935745,
+        7816.7715
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_050",
+      "pos": [
+        263.26111,
+        40.948494,
+        7803.7529
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_051",
+      "pos": [
+        6248.1211,
+        8.1800003,
+        1051.1439
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_052",
+      "pos": [
+        6248.8262,
+        8.1822309,
+        1076.8357
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_053",
+      "pos": [
+        6743.9922,
+        5.3060522,
+        889.54047
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_054",
+      "pos": [
+        6764.5942,
+        5.2946439,
+        904.90656
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_055",
+      "pos": [
+        7156.314,
+        4.9405246,
+        461.49307
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_056",
+      "pos": [
+        7157.019,
+        4.9133935,
+        487.18484
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_057",
+      "pos": [
+        7385.5181,
+        6.7712502,
+        857.19879
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_058",
+      "pos": [
+        7410.9404,
+        6.7674732,
+        860.97565
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_059",
+      "pos": [
+        7922.002,
+        10.103279,
+        1054.3893
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_060",
+      "pos": [
+        7924.5342,
+        10.106677,
+        1075.7188
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_061",
+      "pos": [
+        8475.7422,
+        9.5270853,
+        885.55359
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_062",
+      "pos": [
+        8483.3369,
+        9.5249519,
+        904.35291
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_063",
+      "pos": [
+        8969.083,
+        5.1079369,
+        822.2851
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_064",
+      "pos": [
+        8961.1875,
+        5.1078591,
+        837.74963
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_065",
+      "pos": [
+        9455.1914,
+        6.2600002,
+        1123.4333
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_066",
+      "pos": [
+        9452.626,
+        6.2600002,
+        1140.6062
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_067",
+      "pos": [
+        9936.5967,
+        6.0993476,
+        845.42114
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_068",
+      "pos": [
+        9943.1064,
+        6.090364,
+        863.13599
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_069",
+      "pos": [
+        10458.15,
+        21.535164,
+        883.38043
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_070",
+      "pos": [
+        10457.667,
+        21.518597,
+        901.82281
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_071",
+      "pos": [
+        4049.1858,
+        6.6599998,
+        2670.3652
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_072",
+      "pos": [
+        4048.7024,
+        6.6599998,
+        2688.8076
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_073",
+      "pos": [
+        3518.9004,
+        8.7487822,
+        2670.2319
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_074",
+      "pos": [
+        3507.2349,
+        8.7283182,
+        2684.3386
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_075",
+      "pos": [
+        3241.0322,
+        10.786121,
+        2359.8296
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_076",
+      "pos": [
+        3224.2322,
+        10.766383,
+        2369.291
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_077",
+      "pos": [
+        3048.3635,
+        4.9638767,
+        1933.0177
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_078",
+      "pos": [
+        3029.0835,
+        4.9631195,
+        1932.8188
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_079",
+      "pos": [
+        3020.1858,
+        5.2374339,
+        1382.7014
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_080",
+      "pos": [
+        3003.3857,
+        5.2334781,
+        1392.1628
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_081",
+      "pos": [
+        2654.2014,
+        5.3000002,
+        1178.8987
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_082",
+      "pos": [
+        2649.0728,
+        5.3000002,
+        1197.4851
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_083",
+      "pos": [
+        2156.1836,
+        8.0462933,
+        1165.0457
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_084",
+      "pos": [
+        2155.3149,
+        8.0065145,
+        1184.3071
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_085",
+      "pos": [
+        1646.0028,
+        4.4299998,
+        1104.8373
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_086",
+      "pos": [
+        1642.5203,
+        4.4299998,
+        1123.8013
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_087",
+      "pos": [
+        1130.818,
+        4.4299998,
+        1310.0481
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_088",
+      "pos": [
+        1139.8243,
+        4.4299998,
+        1327.0964
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_089",
+      "pos": [
+        650.599,
+        4.4299998,
+        1409.7673
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_090",
+      "pos": [
+        649.55243,
+        4.4299998,
+        1429.02
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_091",
+      "pos": [
+        153.69904,
+        4.4299998,
+        1385.3976
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_092",
+      "pos": [
+        148.97441,
+        4.4299998,
+        1404.0908
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_093",
+      "pos": [
+        4835.5283,
+        5.2520609,
+        5705.4985
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_094",
+      "pos": [
+        4818.728,
+        5.230195,
+        5714.9595
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_095",
+      "pos": [
+        4871.814,
+        4.1500001,
+        5400.6709
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_096",
+      "pos": [
+        4879.7573,
+        4.1500006,
+        5418.2397
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_097",
+      "pos": [
+        5178.6196,
+        4.1399999,
+        5237.5884
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_098",
+      "pos": [
+        5193.1479,
+        4.1400003,
+        5250.2642
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_099",
+      "pos": [
+        5177.397,
+        4.1399999,
+        4909.8643
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_100",
+      "pos": [
+        5163.2388,
+        4.1400003,
+        4922.9521
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_101",
+      "pos": [
+        4852.3799,
+        4.1399999,
+        4671.8169
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_102",
+      "pos": [
+        4840.6987,
+        4.1400003,
+        4687.1567
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_103",
+      "pos": [
+        5446.7422,
+        8.9776678,
+        2669.4719
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_104",
+      "pos": [
+        5446.0835,
+        8.9801903,
+        2688.7417
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "mkr_highway_105",
+      "pos": [
+        4749.6982,
+        9.0524874,
+        2668.5322
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
+      "status": "unresolved",
+      "text": "",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [
+        "tests/TEST-LOG.md"
+      ],
+      "name": "mkr_highway_106",
+      "pos": [
+        4749.0396,
+        8.9799299,
+        2687.802
+      ],
+      "shape": "",
+      "source": "mission.sqm:Highway Markers",
       "status": "unresolved",
       "text": "",
       "type": "Empty",
@@ -2767,25 +4989,35 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "docs/qa/Development_State_Assessment_2026-04-04.md",
+        "functions/ambiance/fn_airbaseInit.sqf",
+        "functions/ambiance/fn_airbasePlaneDepart.sqf",
+        "serverRpts/ArmA3Server_x64_2026-05-28_22-00-58.rpt",
+        "tests/TEST-LOG.md",
+        "tests/static/airbase_queue_lifecycle_contract_checks.sh"
+      ],
       "name": "plane_despawn",
       "pos": [
-        250,
+        250.0,
         41.210945,
         8757.6592
       ],
       "shape": "",
       "source": "mission.sqm:Flight Scheduler",
-      "status": "valid",
+      "status": "unresolved",
       "text": "",
       "type": "Empty",
-      "usageNotes": "On-map departure/despawn marker (x >= 0)."
+      "usageNotes": ""
     },
     {
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/farabad_site_templates.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "prison_admin_offices",
       "pos": [
         2085.0149,
@@ -2803,7 +5035,12 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/farabad_site_templates.sqf",
+        "functions/civsub/fn_civsubTrafficInit.sqf",
+        "serverRpts/ArmA3Server_x64_2026-05-28_22-00-58.rpt",
+        "tests/TEST-LOG.md"
+      ],
       "name": "prison_central_guard_tower",
       "pos": [
         2145.729,
@@ -2821,7 +5058,10 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/farabad_site_templates.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "prison_dorm_01",
       "pos": [
         2143.2229,
@@ -2839,7 +5079,9 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/farabad_site_templates.sqf"
+      ],
       "name": "prison_dorm_02",
       "pos": [
         2171.9604,
@@ -2857,7 +5099,9 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/farabad_site_templates.sqf"
+      ],
       "name": "prison_dorm_03",
       "pos": [
         2147.5881,
@@ -2875,7 +5119,9 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/farabad_site_templates.sqf"
+      ],
       "name": "prison_dorm_04",
       "pos": [
         2119.5784,
@@ -2893,7 +5139,10 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/farabad_site_templates.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "prison_entry_office",
       "pos": [
         2259.7739,
@@ -2911,7 +5160,10 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/farabad_site_templates.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "prison_guard_tower_1",
       "pos": [
         2083.114,
@@ -2929,7 +5181,10 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/farabad_site_templates.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "prison_guard_tower_2",
       "pos": [
         2261.3252,
@@ -2947,7 +5202,12 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/farabad_site_templates.sqf",
+        "docs/qa/Development_State_Assessment_2026-04-04.md",
+        "functions/prison/fn_prisonEvalIncident.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "prison_holding_area",
       "pos": [
         2133.3813,
@@ -2965,7 +5225,10 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/farabad_site_templates.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "prison_hospital",
       "pos": [
         2161.6389,
@@ -2983,7 +5246,10 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "data/farabad_site_templates.sqf",
+        "tests/TEST-LOG.md"
+      ],
       "name": "prison_intake_01",
       "pos": [
         2221.574,
@@ -3022,9 +5288,9 @@
       "consumers": [],
       "name": "prison_intake_03",
       "pos": [
-        2209.1799,
-        4.3569999,
-        1544.109
+        6443.5713,
+        8.4899998,
+        1702.472
       ],
       "shape": "",
       "source": "mission.sqm:Karkanak Prison",
@@ -3037,7 +5303,9 @@
       "aliases": [],
       "alpha": 1.0,
       "color": "",
-      "consumers": [],
+      "consumers": [
+        "functions/core/fn_execInitActive.sqf"
+      ],
       "name": "respawn_west",
       "pos": [
         5725.5,
@@ -3215,6 +5483,6 @@
     }
   ],
   "summary": {
-    "total": 177
+    "total": 283
   }
 }
