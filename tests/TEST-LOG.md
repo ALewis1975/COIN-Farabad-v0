@@ -11,6 +11,19 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-29 — Convoy force-follow and mounted contact behavior (Mode D)
+
+**Branch/Commit:** copilot/* @ 3d5e1da (convoy code commit; TEST-LOG appended afterward)
+
+**Scenario:** Improve dedicated-server convoy behavior so followers keep force-following the vehicle ahead, convoy vehicles do not stop under OPFOR contact, and AI crew/passengers remain mounted unless their vehicle is no longer movable.
+
+| # | Validation | Command / Steps | Result | Notes |
+|---|---|---|---|---|
+| 1 | Baseline convoy compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/logistics/fn_execSpawnConvoy.sqf functions/logistics/fn_execTickConvoy.sqf functions/logistics/fn_convoyApplyRouteWps.sqf` | PASS | No known parser-compat patterns before edits. |
+| 2 | Baseline convoy sqflint | `sqflint -e w functions/logistics/fn_execSpawnConvoy.sqf functions/logistics/fn_execTickConvoy.sqf functions/logistics/fn_convoyApplyRouteWps.sqf` | BLOCKED | `sqflint` was not installed before the edit pass. |
+| 3 | Final convoy static validation | `git diff --check && python3 scripts/dev/sqflint_compat_scan.py --strict functions/logistics/fn_convoyStartupConfig.sqf functions/logistics/fn_execSpawnConvoy.sqf functions/logistics/fn_execTickConvoy.sqf && sqflint -e w functions/logistics/fn_convoyStartupConfig.sqf && sqflint -e w functions/logistics/fn_execSpawnConvoy.sqf && sqflint -e w functions/logistics/fn_execTickConvoy.sqf` | PASS | Installed `sqflint==0.3.2` in the sandbox because it was not preinstalled. Changed convoy files are compat/lint clean. |
+| 4 | Dedicated runtime convoy contact smoke | Dedicated server playtest with OPFOR contact: verify convoy drivers keep moving, turrets/armed seats engage, and AI occupants stay mounted unless their vehicle cannot move. | BLOCKED | Arma 3 dedicated server runtime unavailable in sandbox; requires operator validation. |
+
 ## 2026-05-27 — Dedicated-server `rpcValidateSender` MISSING_REMOTE_CONTEXT fix (Mode I)
 
 **Branch/Commit:** copilot/* @ 57e63cb (this commit; baseline before any TEST-LOG append; SHA captured via `git rev-parse --short HEAD` after `report_progress` push)
