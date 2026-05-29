@@ -26,7 +26,8 @@ try {
     $head = (git rev-parse --short HEAD).Trim()
     Write-Host "HEAD: $head"
 
-    $stamp = "COIN_Farabad_v0.Farabad-$Branch-$(Get-Date -AsUTC -Format 'yyyyMMdd-HHmmss')-$head"
+    $stampTime = (Get-Date).ToUniversalTime().ToString("yyyyMMdd-HHmmss")
+    $stamp = "COIN_Farabad_v0.Farabad-$Branch-$stampTime-$head"
     $initServer = Join-Path $RepoPath "initServer.sqf"
     if (!(Test-Path $initServer)) { throw "initServer.sqf missing: $initServer" }
     $initText = Get-Content -Raw -Path $initServer
