@@ -795,11 +795,13 @@ if (_stageEnabled) then
             if (_forEachIndex isEqualTo 0) then { _role = "LEAD"; };
             if (_forEachIndex isEqualTo ((count _classes) - 1)) then { _role = "TAIL"; };
             _veh setVariable ["ARC_convoyRole", _role, true];
+            _veh setUnloadInCombat [false, false];
 
             // Crew + group join (hardened: validate runtime crew side + join success)
             createVehicleCrew _veh;
 
             private _crew = crew _veh;
+            { if (!isNull _x) then { _x allowGetIn true; }; } forEach _crew;
             private _drv = driver _veh;
             if (isNull _drv) then { _drv = effectiveCommander _veh; };
 
