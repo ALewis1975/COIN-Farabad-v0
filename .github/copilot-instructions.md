@@ -224,8 +224,9 @@ Run this minimum flow locally before merging:
 
 These are not complete in basic local runs and must be validated on the dedicated
 server. A dedicated Armahosts VPS is now available
-(see `docs/architecture/Dedicated_Server_Activation_Plan_2026-05-27.md`); run these
-checks there and record `PASS`/`FAIL` with RPT evidence in `tests/TEST-LOG.md`.
+(see `docs/architecture/Dedicated_Server_Activation_Plan_2026-05-27.md`); once
+that plan's Track 2/Track 4 prerequisites are satisfied, run these checks there
+and record `PASS`/`FAIL` with RPT evidence in `tests/TEST-LOG.md`.
 The agent/CI sandbox still cannot run the Arma 3 runtime, so they stay `BLOCKED`
 for sandbox runs and require an operator pass on the dedicated rig:
 - Dedicated server persistence/ownership behavior over longer sessions.
