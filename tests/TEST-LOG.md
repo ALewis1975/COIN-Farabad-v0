@@ -11,6 +11,23 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-29 — CIVSUB scheduler/sampler tick cadence relaxation (Mode D)
+
+**Branch/Commit:** copilot/fix-mission-jerkiness-issues @ 105a056 (cadence config commit; TEST-LOG appended afterward)
+
+**Scenario:** System-wide tick-cadence audit for server performance and gameplay. Applied two "safe to change now" cadence relaxations in `initServer.sqf`: `civsub_v1_scheduler_s` 120 → 240 (scheduler is self-scaling via `ARC_fnc_civsubProbHourToTick`, so events-per-hour is preserved and only timing granularity coarsens) and `civsub_v1_civ_tick_s` 20 → 30 (the sampler is the heaviest CIVSUB loop; +CPU headroom at the cost of mildly higher civilian-population reaction latency). Documented the full per-system review and the explicit decision to leave the main tick (`civsub_v1_tick_s`=60, fixed-fraction decay) and airbase tick (`airbase_v1_tick_s`=2, flight probabilities derived from tick length) unchanged in `docs/perf/Tick_Cadence_Review.md`.
+
+| # | Validation | Command / Steps | Result | Notes |
+|---|---|---|---|---|
+| 1 | Whitespace check | `git --no-pager diff --check` | PASS | No whitespace errors. |
+| 2 | sqflint compat scan (strict) | `python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf` | PASS | No known parser-compat patterns; only literal value + comment changes. |
+| 3 | CodeQL security check | `codeql_checker` | PASS | No CodeQL-supported language changes detected. |
+| 4 | Dedicated runtime cadence smoke | Dedicated server playtest: confirm ambient lead/rumor/contact emission rate is unchanged at 240 s scheduler cadence and civilian population still fills districts acceptably at 30 s sampler cadence. | BLOCKED | Arma 3 dedicated server runtime unavailable in sandbox; requires operator validation. |
+
+**Risk Notes:** Both changes are tuning-constant edits to the authoritative single writer (`initServer.sqf`). Scheduler change is rate-neutral by construction (self-scaling probability). Sampler change increases population reaction latency by ~10 s. Nil-fallback defaults in `fn_civsubInitServer.sqf`/`fn_civsubCivSamplerInit.sqf` are unused because `initServer` always seeds the broadcast values first.
+
+**Rollback:** Revert this commit to restore `civsub_v1_scheduler_s`=120 and `civsub_v1_civ_tick_s`=20.
+
 ## 2026-05-29 — Convoy LAMBS/FSM suppression and gunner sector scan (Mode B)
 
 **Branch/Commit:** copilot/* @ 8d44f38 (convoy behavior commit; TEST-LOG appended afterward)
