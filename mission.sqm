@@ -12,7 +12,7 @@ class EditorData
 	};
 	class ItemIDProvider
 	{
-		nextID=4964;
+		nextID=4968;
 	};
 	class MarkerIDProvider
 	{
@@ -20,11 +20,11 @@ class EditorData
 	};
 	class LayerIndexProvider
 	{
-		nextID=125861;
+		nextID=126661;
 	};
 	class Camera
 	{
-		pos[]={6266.1211,32.27327,1582.465};
+		pos[]={6270.1367,40.515606,1588.6296};
 		dir[]={-0.7127769,-0.68235934,-0.16228051};
 		up[]={-0.66533339,0.73101687,-0.15147889};
 		aside[]={-0.22199282,0,0.97504842};
@@ -104,6 +104,7 @@ addons[]=
 	"ace_intelitems",
 	"ace_flashlights",
 	"ace_maptools",
+	"jsrs2025_compat_rhs_usf",
 	"rhsgref_c_weapons",
 	"rhsusf_c_m1117",
 	"rhsusf_vehicles",
@@ -1185,7 +1186,8 @@ class ScenarioData
 {
 	author="=7Cav=MAJ.Lewis.A";
 	disabledAI=1;
-	respawn=2;
+	respawn=3;
+	respawnDelay=5;
 	class Header
 	{
 		gameType="Sandbox";
@@ -1723,11 +1725,60 @@ class CustomAttributes
 				};
 			};
 		};
-		nAttributes=2;
+		class Attribute2
+		{
+			property="ShowLawOfWar_G_property";
+			expression="missionNamespace setVariable ['Globe_ShowLoW', [   (_value # 0),     (_value # 1),     (_value # 2),    (_value # 3)       ]];";
+			class Value
+			{
+				class data
+				{
+					singleType="ARRAY";
+					class value
+					{
+						items=4;
+						class Item0
+						{
+							class data
+							{
+								singleType="BOOL";
+								value=1;
+							};
+						};
+						class Item1
+						{
+							class data
+							{
+								singleType="BOOL";
+								value=0;
+							};
+						};
+						class Item2
+						{
+							class data
+							{
+								singleType="BOOL";
+								value=0;
+							};
+						};
+						class Item3
+						{
+							class data
+							{
+								singleType="BOOL";
+								value=0;
+							};
+						};
+					};
+				};
+			};
+		};
+		nAttributes=3;
 	};
 };
 class Mission
 {
+	assetType="Free";
 	class Intel
 	{
 		timeOfChanges=1800.0002;
@@ -1970,7 +2021,7 @@ class Mission
 	};
 	class Entities
 	{
-		items=15;
+		items=19;
 		class Item0
 		{
 			dataType="Layer";
@@ -112369,7 +112420,7 @@ class Mission
 							position[]={5352.3467,0.56888723,5688.6284};
 							name="mkr_highway_026";
 							type="Empty";
-							angle=114.12605;
+							angle=114.126;
 							id=4867;
 							atlOffset=5.9604645e-07;
 							class CustomAttributes
@@ -117261,7 +117312,7 @@ class Mission
 							position[]={5163.2388,4.1400003,4922.9521};
 							name="mkr_highway_100";
 							type="Empty";
-							angle=225.56599;
+							angle=225.5659;
 							id=4941;
 							atlOffset=4.7683716e-07;
 							class CustomAttributes
@@ -117728,6 +117779,59 @@ class Mission
 			};
 			id=4725;
 			atlOffset=0.1704731;
+		};
+		class Item15
+		{
+			dataType="Logic";
+			class PositionInfo
+			{
+				position[]={363.60294,163.06198,10402.331};
+				angles[]={6.1543798,0,6.2185144};
+			};
+			name="hc1";
+			isPlayable=1;
+			id=4964;
+			type="HeadlessClient_F";
+			atlOffset=-1.5258789e-05;
+		};
+		class Item16
+		{
+			dataType="Logic";
+			class PositionInfo
+			{
+				position[]={363.60294,142.60681,10274.553};
+				angles[]={5.826416,0,6.2299027};
+			};
+			name="hc2";
+			isPlayable=1;
+			id=4965;
+			type="HeadlessClient_F";
+		};
+		class Item17
+		{
+			dataType="Logic";
+			class PositionInfo
+			{
+				position[]={364.26114,116.61646,10169.264};
+				angles[]={0.072255768,0,5.9426975};
+			};
+			name="hc3";
+			isPlayable=1;
+			id=4966;
+			type="HeadlessClient_F";
+		};
+		class Item18
+		{
+			dataType="Logic";
+			class PositionInfo
+			{
+				position[]={364.26114,82.69236,10041.485};
+				angles[]={0.049483143,0,6.0512447};
+			};
+			name="hc4";
+			isPlayable=1;
+			id=4967;
+			type="HeadlessClient_F";
 		};
 	};
 	class Connections
