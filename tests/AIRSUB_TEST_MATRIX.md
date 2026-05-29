@@ -23,8 +23,9 @@ Focused AIRSUB control-plane validation for:
 ## Dedicated-Server-Only Cases (rig now available — run and log)
 
 A dedicated server is now available (see
-`docs/architecture/Dedicated_Server_Activation_Plan_2026-05-27.md`). Run the
-following on the dedicated server and record `PASS`/`FAIL` with RPT evidence in
+`docs/architecture/Dedicated_Server_Activation_Plan_2026-05-27.md`). Once that
+plan's Track 2/Track 4 prerequisites are satisfied, run the following on the
+dedicated server and record `PASS`/`FAIL` with RPT evidence in
 `tests/TEST-LOG.md`:
 
 1. **JIP controller continuity**: new CCIC/LC client joining mid-pending request receives accurate pending/awaiting rows and can decide without duplicate notifications.
