@@ -11,6 +11,20 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-29 — Convoy LAMBS/FSM suppression and gunner sector scan (Mode B)
+
+**Branch/Commit:** copilot/* @ 8d44f38 (convoy behavior commit; TEST-LOG appended afterward)
+
+**Scenario:** Keep convoy AI predictable until arrival by disabling LAMBS group/individual AI for convoy occupants, disabling vanilla FSM for non-turret crew/passengers, preserving turret crew combat behavior, and steering gunners to scan TACSOP sectors (lead front 180, tail rear 180, middle vehicles alternating left/right 180). Re-enable dismounted non-gunners before applying destination camp ambiance.
+
+| # | Validation | Command / Steps | Result | Notes |
+|---|---|---|---|---|
+| 1 | Baseline convoy compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/logistics/fn_convoyStartupConfig.sqf functions/logistics/fn_execTickConvoy.sqf` | PASS | No known parser-compat patterns before edits. |
+| 2 | Baseline convoy sqflint | `sqflint -e w functions/logistics/fn_convoyStartupConfig.sqf` and `sqflint -e w functions/logistics/fn_execTickConvoy.sqf` | PASS | Installed `sqflint==0.3.2` in the sandbox because it was not preinstalled. |
+| 3 | Final convoy static validation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/logistics/fn_convoyStartupConfig.sqf functions/logistics/fn_execTickConvoy.sqf && sqflint -e w functions/logistics/fn_convoyStartupConfig.sqf && sqflint -e w functions/logistics/fn_execTickConvoy.sqf` | PASS | Changed convoy files are compat/lint clean. |
+| 4 | CodeQL security check | `codeql_checker` | PASS | No CodeQL-supported language changes detected, so no analysis was performed. |
+| 5 | Dedicated runtime convoy smoke | Dedicated server playtest: verify drivers keep moving dumb, passengers stay mounted, LAMBS does not retask the convoy before arrival, gunners scan assigned sectors, and dismounted non-gunners enter camp behavior at destination. | BLOCKED | Arma 3 dedicated server runtime unavailable in sandbox; requires operator validation. |
+
 ## 2026-05-29 — Convoy force-follow and mounted contact behavior (Mode D)
 
 **Branch/Commit:** copilot/* @ 3d5e1da (convoy code commit; TEST-LOG appended afterward)
