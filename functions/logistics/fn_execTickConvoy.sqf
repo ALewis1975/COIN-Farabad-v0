@@ -1318,6 +1318,41 @@ if (_forceRoadW) then
     } forEach _vehicles;
 };
 
+private _forceFollowEnabled = missionNamespace getVariable ["ARC_convoyForceFollowEnabled", true];
+if (!(_forceFollowEnabled isEqualType true) && !(_forceFollowEnabled isEqualType false)) then { _forceFollowEnabled = true; };
+
+private _forceFollowReissueSec = missionNamespace getVariable ["ARC_convoyForceFollowReissueSec", 4];
+if (!(_forceFollowReissueSec isEqualType 0)) then { _forceFollowReissueSec = 4; };
+_forceFollowReissueSec = (_forceFollowReissueSec max 1) min 15;
+
+if (_forceFollowEnabled && { (count _aliveVeh) >= 2 }) then
+{
+    for "_i" from 1 to ((count _aliveVeh) - 1) do
+    {
+        private _vFf = _aliveVeh select _i;
+        private _prevFf = _aliveVeh select (_i - 1);
+        if (isNull _vFf || { isNull _prevFf }) then { continue; };
+
+        private _dFf = driver _vFf;
+        private _pFf = driver _prevFf;
+        if (isNull _dFf || { isNull _pFf } || { isPlayer _dFf }) then { continue; };
+
+        private _assistPtsFf = _vFf getVariable ["ARC_convoyBridgeAssistPts", []];
+        private _rejoinTargetFf = _vFf getVariable ["ARC_convoyFollowerRejoinTarget", []];
+        if ((_assistPtsFf isEqualType []) && { (count _assistPtsFf) > 0 }) then { continue; };
+        if ((_rejoinTargetFf isEqualType []) && { (count _rejoinTargetFf) >= 2 }) then { continue; };
+
+        private _lastFf = _vFf getVariable ["ARC_convoyForceFollowLastOrderAt", -1];
+        if (!(_lastFf isEqualType 0)) then { _lastFf = -1; };
+
+        if (_lastFf < 0 || { (_now - _lastFf) >= _forceFollowReissueSec }) then
+        {
+            _dFf doFollow _pFf;
+            _vFf setVariable ["ARC_convoyForceFollowLastOrderAt", _now];
+        };
+    };
+};
+
 private _drvW = driver _lead;
 if (isNull _drvW) then
 {
@@ -1735,6 +1770,12 @@ if (_contactDetected) then
 };
 
 private _contactActive = (_contactUntil > 0 && { _now < _contactUntil });
+private _preventCombatDismount = missionNamespace getVariable ["ARC_convoyPreventCombatDismount", true];
+if (!(_preventCombatDismount isEqualType true) && !(_preventCombatDismount isEqualType false)) then { _preventCombatDismount = true; };
+
+private _contactNoStop = missionNamespace getVariable ["ARC_convoyContactNoStopEnabled", true];
+if (!(_contactNoStop isEqualType true) && !(_contactNoStop isEqualType false)) then { _contactNoStop = true; };
+
 private _prevContactActive = ["activeConvoyContactActive", false] call ARC_fnc_stateGet;
 if (!(_prevContactActive isEqualType true) && !(_prevContactActive isEqualType false)) then { _prevContactActive = false; };
 if (!(_contactActive isEqualTo _prevContactActive)) then
@@ -1770,8 +1811,30 @@ if (_contactActive && { _contactSpacing > 0 }) then { _spacingFinal = _spacingFi
 {
     if (alive _x) then
     {
+        private _canMoveX = canMove _x;
+        if (_preventCombatDismount) then
+        {
+            private _allowUnload = !_canMoveX;
+            _x setUnloadInCombat [_allowUnload, _allowUnload];
+        };
+
         _x limitSpeed _capFinal;
         _x setConvoySeparation _spacingFinal;
+
+        if (_contactActive && { _contactNoStop } && { _canMoveX }) then
+        {
+            _x setFuel 1;
+            _x forceSpeed -1;
+            private _dC = driver _x;
+            if (!isNull _dC && { !isPlayer _dC }) then
+            {
+                _dC stop false;
+                _dC disableAI "AUTOCOMBAT";
+                _dC disableAI "COVER";
+                _dC disableAI "SUPPRESSION";
+                if (_forceRoadW && { !_bridgeMode }) then { _dC forceFollowRoad true; };
+            };
+        };
 
         if (_bridgeMode) then
         {
@@ -1812,6 +1875,16 @@ _stoppedSpeedThreshold = (_stoppedSpeedThreshold max 0.2) min 8;
             _d disableAI "SUPPRESSION";
             _d setVariable ["ARC_convoyDriverMoveProfileApplied", true];
         };
+    };
+
+    if (_preventCombatDismount && { canMove _x }) then
+    {
+        {
+            if (!isNull _x && { !isPlayer _x }) then
+            {
+                _x allowGetIn true;
+            };
+        } forEach (crew _x);
     };
     _x forceSpeed -1; // run each tick: staging/recovery branches can reapply forceSpeed at any time
 } forEach _aliveVeh;
@@ -2718,6 +2791,7 @@ if (_arrivedAt isEqualType 0 && { _arrivedAt > 0 }) then
         private _dismountUnits = [];
         {
             private _vehD = _x;
+            if (canMove _vehD) then { continue; };
             {
                 private _u = _x;
                 if (isNull _u || { !alive _u } || { isPlayer _u }) then { continue; };

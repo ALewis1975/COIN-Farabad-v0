@@ -282,11 +282,17 @@ missionNamespace setVariable ["ARC_convoyBridgeFollowerDoMoveReissueSec", 3.5];
 missionNamespace setVariable ["ARC_convoyBridgeAssistPointRadiusM", 16];
 
 // General follower rejoin tightening (all disruptions, not bridge-only)
+missionNamespace setVariable ["ARC_convoyForceFollowEnabled", true];
+missionNamespace setVariable ["ARC_convoyForceFollowReissueSec", 4];
 missionNamespace setVariable ["ARC_convoyFollowerRecoveryCooldownSec", 50];
 missionNamespace setVariable ["ARC_convoyFollowerGapTriggerMinM", 180];
 missionNamespace setVariable ["ARC_convoyFollowerDoMoveReissueSec", 5];
 missionNamespace setVariable ["ARC_convoyFollowerRejoinOrderTtlSec", 50];
 missionNamespace setVariable ["ARC_convoyFollowerRejoinPointRadiusM", 26];
+
+// Contact profile: keep convoy crews mounted and vehicles moving while turrets engage.
+missionNamespace setVariable ["ARC_convoyPreventCombatDismount", true];
+missionNamespace setVariable ["ARC_convoyContactNoStopEnabled", true];
 
 // Route recon parameters
 missionNamespace setVariable ["ARC_routeReconStartOffsetM", 450];
