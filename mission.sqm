@@ -3981,7 +3981,7 @@ class Mission
 						class Item2
 						{
 							dataType="Marker";
-							position[]={-1405.1591,41.210945,8757.6592};
+							position[]={250,41.210945,8757.6592};
 							name="plane_despawn";
 							type="Empty";
 							id=84;

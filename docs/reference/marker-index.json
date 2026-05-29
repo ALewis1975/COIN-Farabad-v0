@@ -2770,16 +2770,16 @@
       "consumers": [],
       "name": "plane_despawn",
       "pos": [
-        -3252.3577,
-        41.396038,
-        11384.788
+        250,
+        41.210945,
+        8757.6592
       ],
       "shape": "",
       "source": "mission.sqm:Flight Scheduler",
-      "status": "unresolved",
+      "status": "valid",
       "text": "",
       "type": "Empty",
-      "usageNotes": ""
+      "usageNotes": "On-map departure/despawn marker (x >= 0)."
     },
     {
       "aliases": [],

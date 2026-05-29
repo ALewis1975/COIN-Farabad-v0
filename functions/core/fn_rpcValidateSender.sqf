@@ -56,6 +56,17 @@ if (!_isRemoteRpc) exitWith
         true
     };
 
+    // Dedicated-server local call detection:
+    // Some UI/admin pathways can arrive as a server-local call with a valid
+    // player object but without remoteExecutedOwner. Treat only player-owned
+    // client objects as trusted local server requests; clients still cannot
+    // forge this path without executing code on the server.
+    if (isDedicated && {!isNull _caller} && {isPlayer _caller} && {(owner _caller) > 2}) exitWith
+    {
+        diag_log format ["[ARC][INFO] %1: dedicated-server local player call detected for %2 owner=%3 — allowing.", _rpc, name _caller, owner _caller];
+        true
+    };
+
     ["OPS", format ["SECURITY: %1 invoked without RemoteExec context (remoteExecutedOwner missing).", _rpc], [0,0,0],
         [
             ["event", _event],
