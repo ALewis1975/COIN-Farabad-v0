@@ -20,11 +20,11 @@ class EditorData
 	};
 	class LayerIndexProvider
 	{
-		nextID=126661;
+		nextID=126861;
 	};
 	class Camera
 	{
-		pos[]={6270.1367,40.515606,1588.6296};
+		pos[]={6270.1367,40.51368,1588.6296};
 		dir[]={-0.7127769,-0.68235934,-0.16228051};
 		up[]={-0.66533339,0.73101687,-0.15147889};
 		aside[]={-0.22199282,0,0.97504842};
@@ -104,7 +104,6 @@ addons[]=
 	"ace_intelitems",
 	"ace_flashlights",
 	"ace_maptools",
-	"jsrs2025_compat_rhs_usf",
 	"rhsgref_c_weapons",
 	"rhsusf_c_m1117",
 	"rhsusf_vehicles",
@@ -1233,6 +1232,19 @@ class CustomAttributes
 		name="Multiplayer";
 		class Attribute0
 		{
+			property="ENH_saveLoadout";
+			expression="if (!isMultiplayer || !_value || is3DEN || !hasInterface) exitWith {};        0 spawn        {            waitUntil {sleep 1; !isNull player};            player setVariable ['ENH_savedLoadout', getUnitloadout player];            player addMPEventHandler ['MPRespawn',            {                params ['_unit'];                private _loadout = _unit getVariable ['ENH_savedLoadout', []];                if (_loadout isNotEqualTo []) then {_unit setUnitLoadout _loadout};            }];        };";
+			class Value
+			{
+				class data
+				{
+					singleType="BOOL";
+					value=1;
+				};
+			};
+		};
+		class Attribute1
+		{
 			property="RespawnTemplates";
 			expression="true";
 			class Value
@@ -1252,19 +1264,6 @@ class CustomAttributes
 							};
 						};
 					};
-				};
-			};
-		};
-		class Attribute1
-		{
-			property="ENH_saveLoadout";
-			expression="if (!isMultiplayer || !_value || is3DEN || !hasInterface) exitWith {};        0 spawn        {            waitUntil {sleep 1; !isNull player};            player setVariable ['ENH_savedLoadout', getUnitloadout player];            player addMPEventHandler ['MPRespawn',            {                params ['_unit'];                private _loadout = _unit getVariable ['ENH_savedLoadout', []];                if (_loadout isNotEqualTo []) then {_unit setUnitLoadout _loadout};            }];        };";
-			class Value
-			{
-				class data
-				{
-					singleType="BOOL";
-					value=1;
 				};
 			};
 		};
@@ -30060,8 +30059,8 @@ class Mission
 											{
 												class Attribute0
 												{
-													property="ENH_enableHeadlights";
-													expression="[_this, _value] remoteExec ['setPilotLight', _this]";
+													property="ENH_doStop";
+													expression="if (!is3DEN && _value) then {doStop _this}";
 													class Value
 													{
 														class data
@@ -30112,8 +30111,8 @@ class Mission
 												};
 												class Attribute4
 												{
-													property="ENH_doStop";
-													expression="if (!is3DEN && _value) then {doStop _this}";
+													property="ENH_enableHeadlights";
+													expression="[_this, _value] remoteExec ['setPilotLight', _this]";
 													class Value
 													{
 														class data
@@ -112420,7 +112419,7 @@ class Mission
 							position[]={5352.3467,0.56888723,5688.6284};
 							name="mkr_highway_026";
 							type="Empty";
-							angle=114.126;
+							angle=114.12599;
 							id=4867;
 							atlOffset=5.9604645e-07;
 							class CustomAttributes
@@ -117312,7 +117311,7 @@ class Mission
 							position[]={5163.2388,4.1400003,4922.9521};
 							name="mkr_highway_100";
 							type="Empty";
-							angle=225.5659;
+							angle=225.56589;
 							id=4941;
 							atlOffset=4.7683716e-07;
 							class CustomAttributes
