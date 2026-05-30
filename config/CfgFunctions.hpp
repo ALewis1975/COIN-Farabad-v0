@@ -368,6 +368,7 @@ class CfgFunctions
             class civsubBubbleGetActiveDistricts {};
             class civsubDistrictsFindByPos {};
             class civsubDistrictsFindByPosLocal {};
+            class civsubDistrictsWithinBuffer {};
 
             class civsubCivSpawnInDistrict {};
             class civsubCivConnect {};
