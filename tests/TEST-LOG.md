@@ -11,6 +11,21 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-30 — Make Arma SQF preflight green: clear sqflint compat + lint findings on changed files (Mode B)
+
+**Branch/Commit:** copilot/prevent-assigning-leads-as-tasks @ 5f9db0f (compat fixes) + d2eb603 (lint-warning cleanup); TEST-LOG appended afterward
+
+**Scenario:** Job `78682576587` in the **Arma SQF + Mission Config Preflight** workflow failed at the **SQF static analysis** step: `python3 scripts/dev/sqflint_compat_scan.py --strict $sqf_files` reported `19 pattern match(es) across 13 file(s)` and exited 1. Replaced every disallowed compat pattern in the changed SQF files with the scanner-approved equivalents: `#` indexing → guarded `select`; bare `trim` → compiled `_trimFn` helper; `isNotEqualTo` → `!(_a isEqualTo _b)`. Files touched for compat: `fn_tocBacklogEnqueue.sqf`, `fn_uiConsoleActionOpsPrimary.sqf`, `fn_resetAll.sqf`, `fn_incidentTick.sqf`. Because the same step then runs `sqflint -e w` on each changed file (warnings fail the build), also cleared the pre-existing warnings those changed files carried so the step reaches exit 0: skipped unused positional `params` slots via `""` in `fn_intelQueueDecide.sqf`, reduced an unused destructure to `_x params ["_tId"]` in `fn_resetAll.sqf`, removed a dead unused `_getPair` helper in `fn_uiConsoleDashboardPaint.sqf`, and converted two `BIS_fnc_sortBy` lambdas to the repo's sqflint-clean `compile "_x select 1"` form in `fn_uiConsoleTocQueuePaint.sqf`. No runtime behaviour changed.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Strict compat scan on changed files | `python3 scripts/dev/sqflint_compat_scan.py --strict $(git diff origin/main...HEAD --name-only -- '*.sqf')` | PASS | `scanned 13 file(s); no known parser-compat patterns found` (was 19 findings). |
+| 2 | Full static-analysis step logic | Reproduced step: `set -euo pipefail`; compat scan then `sqflint -e w` loop over each changed file | PASS | Step exits 0; every changed file is clean under `sqflint 0.3.2 -e w`. |
+| 3 | Semantic guard | `grep` confirmed removed vars (`_createdAt`/`_details`/`_decision`, `_getPair`) are unreferenced; bracket balance verified on all edited files | PASS | Edits are equivalence-preserving (skip placeholders, dead-code removal, compiled sort lambda). |
+| 4 | Runtime smoke | Hosted/dedicated MP exercise of lead→TOC-Queue flow | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+
+---
+
 ## 2026-05-30 — Wire TOC backlog consumer into incident generation + prune tick (Mode B)
 
 **Branch/Commit:** copilot/prevent-assigning-leads-as-tasks @ 5d5d8dc
