@@ -6543,3 +6543,9 @@ Mode: A (Bug Fix)
 ## 2026-05-30 — CIVSUB active-district cap recency priority (Mode D)
 
 - 2026-05-30T20:09Z | commit: f4452592 | Scenario: `ARC_fnc_civsubBubbleGetActiveDistricts` keeps the most-recently-seen districts (where players are now) when more than `civsub_v1_civ_cap_activeDistrictsMax` districts are within the grace window, instead of the lowest-ID ones | Steps: `git --no-pager diff --check` + Python simulation (20 districts D01..D20, maxD=3, grace=180s; player in D14 having recently passed D01/D02/D03) asserting D14 is retained in the active set | Result: PASS | Notes: Old ID-sort selected [D01,D02,D03] (far from player); new recency-sort selects [D14,D03,D02], keeping the player's current district. Fixes civs spawning far from players and active-set flicker (despawn/respawn churn). Arma 3 dedicated runtime smoke unavailable in this sandbox.
+
+---
+
+## 2026-05-30 — CIVSUB stationary-player district presence buffer (Mode D)
+
+- 2026-05-30T20:18Z | commit: 088cc344 | Scenario: `ARC_fnc_civsubBubbleGetActiveDistricts` refreshes district last-seen for every district within `radius_m + civsub_v1_activeDistrict_buffer_m` (default 200) of a player, matching the canonical `ARC_fnc_civsubIsDistrictActive` definition, so stationary players just outside a small district radius keep the district active | Steps: `git --no-pager diff --check` + Python geometry assertion (D15 Kala Outpost, radius 47; player parked 120m from centroid → outside strict radius but inside radius+200) | Result: PASS | Notes: Old strict `FindByPos` containment left last-seen un-refreshed for a stationary player at 120m, so the district expired after the 180s grace and `ARC_fnc_civsubCivCleanupTick` despawned its civilians; new buffered scan keeps last-seen fresh. Arma 3 dedicated runtime smoke unavailable in this sandbox.
