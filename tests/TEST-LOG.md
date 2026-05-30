@@ -6537,3 +6537,9 @@ Mode: A (Bug Fix)
 | 3 | `plane_despawn` mission marker sanity | Python marker-position assertion against `mission.sqm` | PASS | `plane_despawn` now resolves to `position[]={250,41.210945,8757.6592};` (x >= 0). |
 | 4 | Patch formatting sanity | `git diff --check` | PASS | No whitespace or patch-format issues introduced. |
 | 5 | Runtime smoke | Dedicated Arma server: request next incident/queue decision and run Airbase departures from the RPT scenario | BLOCKED | Arma 3 dedicated runtime unavailable in this sandbox. |
+
+---
+
+## 2026-05-30 — CIVSUB active-district cap recency priority (Mode D)
+
+- 2026-05-30T20:09Z | commit: f4452592 | Scenario: `ARC_fnc_civsubBubbleGetActiveDistricts` keeps the most-recently-seen districts (where players are now) when more than `civsub_v1_civ_cap_activeDistrictsMax` districts are within the grace window, instead of the lowest-ID ones | Steps: `git --no-pager diff --check` + Python simulation (20 districts D01..D20, maxD=3, grace=180s; player in D14 having recently passed D01/D02/D03) asserting D14 is retained in the active set | Result: PASS | Notes: Old ID-sort selected [D01,D02,D03] (far from player); new recency-sort selects [D14,D03,D02], keeping the player's current district. Fixes civs spawning far from players and active-set flicker (despawn/respawn churn). Arma 3 dedicated runtime smoke unavailable in this sandbox.
