@@ -19,7 +19,9 @@
       0: position [x,y,z] (or [x,y])
       1: buffer (number, optional) — defaults to civsub_v1_activeDistrict_buffer_m (200)
 
-    Returns: array of districtId strings (may be empty)
+    Returns: array of districtId strings (may be empty). Returns [] when civsub is
+    disabled or the position is in the AIRBASE zone, matching the guards in
+    ARC_fnc_civsubDistrictsFindByPos.
 */
 
 if (!isServer) exitWith {[]};
@@ -30,6 +32,17 @@ params [
 ];
 
 if (!(_pos isEqualType []) || { (count _pos) < 2 }) exitWith {[]};
+
+// Guard parity with ARC_fnc_civsubDistrictsFindByPos: skip when civsub is
+// disabled, and exclude airbase positions (no civilian districts at the airbase)
+// so a player parked at the airbase cannot keep an adjacent district active.
+if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {[]};
+
+private _zone = "";
+if (!isNil "ARC_fnc_worldGetZoneForPos") then {
+    _zone = toUpper ([_pos] call ARC_fnc_worldGetZoneForPos);
+};
+if (_zone isEqualTo "AIRBASE") exitWith {[]};
 
 if (_buffer < 0) then {
     _buffer = missionNamespace getVariable ["civsub_v1_activeDistrict_buffer_m", 200];
