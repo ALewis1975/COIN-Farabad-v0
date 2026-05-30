@@ -66,11 +66,11 @@ private _decided = _items select { (toUpper (_x param [2, "", [""]])) != "PENDIN
 
 if ((count _pending) > 1) then
 {
-    _pending = [_pending, [], { _x select 1 }, "ASCEND"] call BIS_fnc_sortBy;
+    _pending = [_pending, [], compile "_x select 1", "ASCEND"] call BIS_fnc_sortBy;
 };
 if ((count _decided) > 1) then
 {
-    _decided = [_decided, [], { _x select 1 }, "DESCEND"] call BIS_fnc_sortBy;
+    _decided = [_decided, [], compile "_x select 1", "DESCEND"] call BIS_fnc_sortBy;
 };
 _items = _pending + _decided;
 

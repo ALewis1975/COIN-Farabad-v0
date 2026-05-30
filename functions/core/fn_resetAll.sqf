@@ -45,7 +45,7 @@ private _hist = ["incidentHistory", []] call ARC_fnc_stateGet;
 if (_hist isEqualType []) then
 {
     {
-        _x params ["_tId", "_marker", "_tType", "_tDisp", "_res", "_created", "_closed"];
+        _x params ["_tId"];
         [_tId] call _pushId;
         private _lk = format ["%1_LINKUP", _tId];
         [_lk] call _pushId;

@@ -48,17 +48,6 @@ private _trimText = {
     _s
 };
 
-private _getPair = {
-    params ["_pairs", "_k", "_def"];
-    private _v = _def;
-    {
-        if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x select 0)) isEqualTo _k }) exitWith {
-            _v = _x select 1;
-        };
-    } forEach _pairs;
-    _v
-};
-
 private _ctrlMain = _display displayCtrl 78010;
 if (isNull _ctrlMain) exitWith {false};
 

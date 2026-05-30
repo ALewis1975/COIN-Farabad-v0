@@ -57,7 +57,7 @@ if (_idx < 0) exitWith {false};
 private _item = _q select _idx;
 _item params [
     "_id",
-    "_createdAt",
+    "",
     "_status",
     "_kind",
     "_from",
@@ -65,10 +65,9 @@ _item params [
     "_fromUID",
     "_posATL",
     "_summary",
-    "_details",
+    "",
     "_payload",
-    "_meta",
-    ["_decision", []]
+    "_meta"
 ];
 
 // Server-side authority check (do not rely on client-side addAction gating)
