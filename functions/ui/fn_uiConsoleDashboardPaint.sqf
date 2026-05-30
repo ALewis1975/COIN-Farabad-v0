@@ -398,12 +398,18 @@ if (_qPendingCnt > 0) then
     };
 };
 
+private _backlogArr = missionNamespace getVariable ["ARC_pub_tocBacklog", []];
+if (!(_backlogArr isEqualType [])) then { _backlogArr = []; };
+private _backlogCnt = count _backlogArr;
+
 private _secIntel    = format [
     "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Intel / Leads</t><br/>" +
     "<t color='#DDDDDD'>Lead pool:</t> %1<br/>" +
-    "<t color='#DDDDDD'>Queue oldest:</t> %2<br/>" +
-    "<t color='#DDDDDD'>Latest intel:</t> %3<br/><br/>",
+    "<t color='#DDDDDD'>TOC Queue (follow-up):</t> %2<br/>" +
+    "<t color='#DDDDDD'>Queue oldest:</t> %3<br/>" +
+    "<t color='#DDDDDD'>Latest intel:</t> %4<br/><br/>",
     count _leadPool,
+    _backlogCnt,
     _qOldestDesc,
     _lastIntel
 ];

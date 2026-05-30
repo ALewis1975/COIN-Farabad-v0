@@ -223,7 +223,20 @@ switch (_kindU) do
 
         if (_stU isEqualTo "APPROVED") then
         {
-            _statusTxt = "Lead Status: APPROVED — added to the TOC Queue for incident creation.";
+            private _backlog = missionNamespace getVariable ["ARC_pub_tocBacklog", []];
+            if (!(_backlog isEqualType [])) then { _backlog = []; };
+            private _lidTrim = ([_leadId2] call _trimFn);
+            private _inBacklog = false;
+            { if (_x isEqualType [] && { (count _x) >= 1 } && { (_x select 0) isEqualTo _lidTrim }) exitWith { _inBacklog = true; }; } forEach _backlog;
+
+            if (_inBacklog) then
+            {
+                _statusTxt = "Lead Status: APPROVED — in the TOC Queue (backlog), awaiting follow-up.";
+            }
+            else
+            {
+                _statusTxt = "Lead Status: APPROVED — added to the TOC Queue (since pulled for incident creation).";
+            };
         };
         if (_stU isEqualTo "REJECTED") then
         {

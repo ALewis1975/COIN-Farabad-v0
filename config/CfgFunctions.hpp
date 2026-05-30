@@ -115,6 +115,7 @@ class CfgFunctions
             // TOC backlog (approved lead triage)
             class tocBacklogEnqueue {};
             class tocBacklogPopNext {};
+            class tocBacklogBroadcast {};
 
 
             // Threads / cases

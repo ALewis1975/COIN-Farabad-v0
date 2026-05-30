@@ -139,6 +139,29 @@ private _setPair = {
     _pairs
 };
 
+// Helper: push a clear "lead is in the TOC Queue for follow-up" indication to
+// the submitting field unit (resolved by UID) and to the approving TOC operator.
+// Field consoles also surface this persistently via the published backlog, but a
+// toast makes the hand-off obvious the moment it happens.
+private _notifyLeadQueued = {
+    params ["_subUid", "_fieldMsg", "_tocMsg"];
+
+    if (_subUid isEqualType "" && { !(_subUid isEqualTo "") }) then
+    {
+        private _tgt = objNull;
+        { if ((getPlayerUID _x) isEqualTo _subUid) exitWith { _tgt = _x; }; } forEach allPlayers;
+        if (!isNull _tgt && { _fieldMsg isEqualType "" } && { !(_fieldMsg isEqualTo "") }) then
+        {
+            ["TOC QUEUE", _fieldMsg] remoteExec ["ARC_fnc_clientToast", owner _tgt];
+        };
+    };
+
+    if (!isNull _approver && { _tocMsg isEqualType "" } && { !(_tocMsg isEqualTo "") }) then
+    {
+        ["TOC QUEUE", _tocMsg] remoteExec ["ARC_fnc_clientToast", owner _approver];
+    };
+};
+
 
 private _kindU = toUpper _kind;
 
@@ -240,13 +263,27 @@ if (_approve) then
                 // fn_intelTocIssueLead adds the approved lead to the TOC Queue (backlog)
                 // for TOC-driven incident creation.
                 private _issueNote = ([_note] call _trimFn);
-                [_approver, _leadId2, _issueNote] call ARC_fnc_intelTocIssueLead;
+                private _queued = [_approver, _leadId2, _issueNote] call ARC_fnc_intelTocIssueLead;
 
                 _meta = [_meta, "leadId", _leadId2] call _setPair;
                 _item set [11, _meta];
                 _q set [_idx, _item];
                 ["tocQueue", _q] call ARC_fnc_stateSet;
                 [] call ARC_fnc_intelQueueBroadcast;
+
+                // Clear hand-off indication for the field unit that worked the lead
+                // and for the approving TOC operator.
+                private _qLeadType = [_payload, "leadType", "LEAD"] call _getP;
+                if (!(_qLeadType isEqualType "")) then { _qLeadType = "LEAD"; };
+                _qLeadType = toUpper (([_qLeadType] call _trimFn));
+                if (_queued isEqualTo true) then
+                {
+                    [
+                        _fromUID,
+                        format ["Lead %1 (%2) approved by TOC — now in the TOC Queue for follow-up.", _leadId2, _qLeadType],
+                        format ["Lead %1 (%2) added to the TOC Queue for follow-up.", _leadId2, _qLeadType]
+                    ] call _notifyLeadQueued;
+                };
 
                 ["OPS", format ["QUEUE: %1 approved %2 (%3). Lead %4 added to TOC queue.", _by, _id, _kindU, _leadId2], _posATL,
                     [
@@ -306,6 +343,18 @@ if (_approve) then
                         [_x, 3, _id, _by, _summary] call ARC_fnc_tocBacklogEnqueue;
                     };
                 } forEach _approved;
+            };
+
+            // Clear hand-off indication for the requesting field unit and the approver.
+            if ((count _approved) > 0) then
+            {
+                private _nLeads = count _approved;
+                private _leadWord = if (_nLeads isEqualTo 1) then { "lead" } else { "leads" };
+                [
+                    _fromUID,
+                    format ["%1 %2 approved by TOC — now in the TOC Queue for follow-up.", _nLeads, _leadWord],
+                    format ["%1 %2 added to the TOC Queue for follow-up.", _nLeads, _leadWord]
+                ] call _notifyLeadQueued;
             };
 
             ["OPS", format ["QUEUE: %1 approved %2 (%3). TOC triaged leads: %4", _by, _id, _kindU, if ((count _approved) > 0) then { _approved joinString ", " } else { "None" }], _posATL,

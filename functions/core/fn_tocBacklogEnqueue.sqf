@@ -97,4 +97,8 @@ if ((count _back) > _cap) then
 
 ["tocBacklog", _back] call ARC_fnc_stateSet;
 
+// Publish the updated backlog read model so field + TOC consoles can show that
+// this lead is now in the TOC Queue for follow-up.
+if (!isNil "ARC_fnc_tocBacklogBroadcast") then { [] call ARC_fnc_tocBacklogBroadcast; };
+
 true

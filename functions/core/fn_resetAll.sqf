@@ -413,6 +413,7 @@ if (!isNil "ARC_fnc_intelOrderBroadcast") then { [] call ARC_fnc_intelOrderBroad
 
 [] call ARC_fnc_leadBroadcast;
 [] call ARC_fnc_threadBroadcast;
+if (!isNil "ARC_fnc_tocBacklogBroadcast") then { [] call ARC_fnc_tocBacklogBroadcast; };
 
 // Best-effort client cleanup
 [_ids] remoteExec ["ARC_fnc_clientPurgeArcTasks", 0];

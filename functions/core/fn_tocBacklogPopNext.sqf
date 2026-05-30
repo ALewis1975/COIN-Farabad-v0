@@ -69,6 +69,7 @@ for "_i" from ((count _back) - 1) to 0 step -1 do
 if (_changed) then
 {
     ["tocBacklog", _back] call ARC_fnc_stateSet;
+    if (!isNil "ARC_fnc_tocBacklogBroadcast") then { [] call ARC_fnc_tocBacklogBroadcast; };
 };
 
 if (_back isEqualTo []) exitWith {[]};
@@ -137,5 +138,6 @@ if (_bestIdx < 0) exitWith {[]};
 
 private _picked = _back deleteAt _bestIdx;
 ["tocBacklog", _back] call ARC_fnc_stateSet;
+if (!isNil "ARC_fnc_tocBacklogBroadcast") then { [] call ARC_fnc_tocBacklogBroadcast; };
 
 _picked
