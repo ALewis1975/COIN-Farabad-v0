@@ -51,8 +51,8 @@ private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _keysFn = compile "params ['_m']; keys _m";
 
 // Update last-seen for districts within the activation buffer of any player.
-// Matches the canonical activation definition in ARC_fnc_civsubIsDistrictActive
-// (dist <= radius_m + buffer). Using the same buffer here (rather than strict
+// Matches the locked v1 activation definition in ARC_fnc_civsubIsDistrictActive
+// (dist <= radius_m + 200). Using a buffered scan here (rather than strict
 // centroid+radius containment via FindByPos) prevents civilians despawning when
 // a stationary player sits just outside a — often small — district radius: their
 // presence keeps refreshing last-seen so the grace window never expires.
