@@ -235,7 +235,7 @@ switch (_kindU) do
             }
             else
             {
-                _statusTxt = "Lead Status: APPROVED — added to the TOC Queue (since pulled for incident creation).";
+                _statusTxt = "Lead Status: APPROVED — pulled from the TOC Queue to seed incident creation.";
             };
         };
         if (_stU isEqualTo "REJECTED") then
