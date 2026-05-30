@@ -58,6 +58,7 @@ for "_i" from ((count _back) - 1) to 0 step -1 do
 
     private _li = -1;
     { if (_x isEqualType [] && { (count _x) >= 1 } && { (_x select 0) isEqualTo _lid }) exitWith { _li = _forEachIndex; }; } forEach _pool;
+    if (_li < 0) then
     {
         // Lead expired/consumed; drop backlog entry.
         _back deleteAt _i;
