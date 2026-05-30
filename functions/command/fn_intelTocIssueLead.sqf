@@ -1,18 +1,19 @@
 /*
     ARC_fnc_intelTocIssueLead
 
-    Server: helper for TOC/S2 staff to issue a specific lead from the lead pool
-    as a LEAD order without going through the queue wizard.
+    Server: helper for TOC/S2 staff to triage a specific lead from the lead pool
+    into the TOC Queue (backlog) for later TOC-driven incident creation.
+
+    Leads (e.g. HUMINT follow-up) have no on-scene completion gates such as a
+    Civ/liaison interaction, so they must NOT be issued as a PROCEED order that
+    becomes an assigned field task. Instead, an approved lead is added to the TOC
+    Queue (backlog) and only becomes actionable through the normal incident
+    workflow, which carries proper completion gates.
 
     Params:
       0: OBJECT issuer
-      1: STRING leadId  (specific lead to consume; "" = consume next available)
+      1: STRING leadId  (specific lead to triage)
       2: STRING note    (optional note)
-
-    Target group resolution (priority):
-      1) activeIncidentAcceptedByGroup
-      2) lastTaskingGroup
-      3) issuer's own group
 
     Returns:
       BOOL
@@ -49,23 +50,13 @@ _leadId = [_leadId] call _trimFn;
 if (!(_note isEqualType "")) then { _note = ""; };
 _note = [_note] call _trimFn;
 
-// Resolve target group
-private _targetGroup = ["activeIncidentAcceptedByGroup", ""] call ARC_fnc_stateGet;
-if (!(_targetGroup isEqualType "") || { _targetGroup isEqualTo "" }) then
-{
-    _targetGroup = ["lastTaskingGroup", ""] call ARC_fnc_stateGet;
-};
-if (!(_targetGroup isEqualType "") || { _targetGroup isEqualTo "" }) then
-{
-    _targetGroup = groupId (group _issuer);
-};
+if (_leadId isEqualTo "") exitWith {false};
 
-// Build data seed: include specific lead ID if provided so fn_intelOrderIssue
-// consumes that exact lead rather than the next available one.
-private _seed = [];
-if (!(_leadId isEqualTo "")) then
-{
-    _seed = [["leadId", _leadId]];
-};
+// Leads must never be assigned as field tasks; route the approved lead into the
+// TOC Queue (backlog) for TOC-driven incident creation instead of issuing a LEAD order.
+if (isNil "ARC_fnc_tocBacklogEnqueue") exitWith {false};
 
-["LEAD", _targetGroup, _seed, _issuer, _note, ""] call ARC_fnc_intelOrderIssue;
+private _by = "SYSTEM";
+if (!isNil "ARC_fnc_rolesFormatUnit") then { _by = [_issuer] call ARC_fnc_rolesFormatUnit; };
+
+[_leadId, 3, "", _by, _note] call ARC_fnc_tocBacklogEnqueue

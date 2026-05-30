@@ -30,7 +30,8 @@ switch (_focus) do
     case "LEAD":
     {
         // Submit the selected lead to the TOC queue as a LEAD_ISSUE_REQUEST.
-        // TOC must approve before a PROCEED order is issued to the field group.
+        // Leads are never assigned as field tasks; on approval the lead is added to
+        // the TOC Queue (backlog) for TOC-driven incident creation.
         private _disp = findDisplay 78000;
         private _cLead = if (!isNull _disp) then { _disp displayCtrl 78038 } else { controlNull };
         private _sel = if (!isNull _cLead) then { lbCurSel _cLead } else { -1 };

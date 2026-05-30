@@ -592,7 +592,7 @@ else
                 {
                     _primaryLabel = "SUBMIT TO TOC QUEUE";
                     _primaryEnabled = true;
-                    _details = _details + "SUBMIT TO TOC QUEUE: send this lead to the TOC for review and approval before a PROCEED order is issued.";
+                    _details = _details + "SUBMIT TO TOC QUEUE: send this lead to the TOC for review and approval. Approved leads are added to the TOC Queue for incident creation — leads are never assigned directly as field tasks.";
                 }
                 else
                 {

@@ -235,8 +235,10 @@ if (_approve) then
             }
             else
             {
-                // Issue the LEAD order for this specific lead.
-                // fn_intelTocIssueLead consumes the lead from the pool and creates the PROCEED order.
+                // Leads have no on-scene completion gates (e.g. HUMINT follow-up has no
+                // Civ/liaison interaction), so they are NOT issued as an assigned task.
+                // fn_intelTocIssueLead adds the approved lead to the TOC Queue (backlog)
+                // for TOC-driven incident creation.
                 private _issueNote = ([_note] call _trimFn);
                 [_approver, _leadId2, _issueNote] call ARC_fnc_intelTocIssueLead;
 
@@ -246,7 +248,7 @@ if (_approve) then
                 ["tocQueue", _q] call ARC_fnc_stateSet;
                 [] call ARC_fnc_intelQueueBroadcast;
 
-                ["OPS", format ["QUEUE: %1 approved %2 (%3). PROCEED order issued for lead %4.", _by, _id, _kindU, _leadId2], _posATL,
+                ["OPS", format ["QUEUE: %1 approved %2 (%3). Lead %4 added to TOC queue.", _by, _id, _kindU, _leadId2], _posATL,
                     [
                         ["event", "TOC_QUEUE_APPROVED"],
                         ["queueId", _id],

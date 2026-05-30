@@ -219,11 +219,11 @@ switch (_kindU) do
         // UX-05: surface the full lead-loop downstream of approval so TOC
         // staff and S2/S3 supervisors see the chain at a glance and field
         // units understand what they are accepting.
-        private _flowHint = "<br/><br/><t color='#A8C5FF'>Flow:</t> Approve → LEAD order ISSUED to field group → field accepts on OPS tab → LEAD task created at lead grid → on-scene action + SITREP → TOC closeout → follow-on lead/incident generated.";
+        private _flowHint = "<br/><br/><t color='#A8C5FF'>Flow:</t> Approve → lead added to the TOC Queue (backlog) → TOC generates an incident from the queue → incident accepted on OPS tab → on-scene action + SITREP → TOC closeout. Leads are never assigned directly as field tasks.";
 
         if (_stU isEqualTo "APPROVED") then
         {
-            _statusTxt = "Lead Status: APPROVED — PROCEED order issued to field group.";
+            _statusTxt = "Lead Status: APPROVED — added to the TOC Queue for incident creation.";
         };
         if (_stU isEqualTo "REJECTED") then
         {
