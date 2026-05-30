@@ -43,16 +43,21 @@ for "_i" from ((count _back) - 1) to 0 step -1 do
     };
 
     private _lid = _e select 0;
-    if !(_lid isEqualType "" && { ([_lid] call _trimFn) != "" }) then
+    if (!(_lid isEqualType "")) then { _lid = ""; };
+    _lid = ([_lid] call _trimFn);
+    if (_lid isEqualTo "") then
     {
         _back deleteAt _i;
         _changed = true;
         continue;
     };
 
+    // Persist normalized leadId back into the backlog record.
+    _e set [0, _lid];
+    _back set [_i, _e];
+
     private _li = -1;
     { if (_x isEqualType [] && { (count _x) >= 1 } && { (_x select 0) isEqualTo _lid }) exitWith { _li = _forEachIndex; }; } forEach _pool;
-    if (_li < 0) then
     {
         // Lead expired/consumed; drop backlog entry.
         _back deleteAt _i;
