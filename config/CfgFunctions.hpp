@@ -370,6 +370,7 @@ class CfgFunctions
             class civsubBubbleGetActiveDistricts {};
             class civsubDistrictsFindByPos {};
             class civsubDistrictsFindByPosLocal {};
+            class civsubDistrictsWithinBuffer {};
 
             class civsubCivSpawnInDistrict {};
             class civsubCivConnect {};
@@ -699,6 +700,7 @@ class CfgFunctions
 
             // Virtual OpFor group pool (persistent enemy presence between incidents)
             class threatIsProtectedSpawnPos {};
+            class threatSpawnPosClear {};
             class threatVirtualPoolInit {};
             class threatVirtualPoolTick {};
             class threatVirtualPoolSnapshotBuild {};
