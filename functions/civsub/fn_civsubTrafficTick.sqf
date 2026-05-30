@@ -116,38 +116,45 @@ private _act = [];
 private _trafficDistrictSource = "PLAYER_BUBBLE";
 
 // Primary source: districts derived directly from player positions.
+// Buffered activation (radius_m + civsub_v1_activeDistrict_buffer_m) matches the
+// canonical ARC_fnc_civsubIsDistrictActive definition and the civ sampler's
+// ARC_fnc_civsubBubbleGetActiveDistricts. Using strict containment here
+// (ARC_fnc_civsubDistrictsFindByPos, dist <= radius_m) let a stationary player
+// just outside a small district radius drop that district from the primary set,
+// so traffic never spawned near a parked player on a district edge.
 private _playerDistrictCounts = []; // [[districtId, count], ...]
 private _playerDistrictPositions = createHashMap; // districtId -> [playerPositions]
 {
     if (isNull _x) then { continue; };
 
     private _ppos = getPosATL _x;
-    private _did = [_ppos] call ARC_fnc_civsubDistrictsFindByPos;
-    if (_did isEqualTo "") then { continue; };
-
-    private _idx = -1;
-    for "_i" from 0 to ((count _playerDistrictCounts) - 1) do
     {
-        private _row = _playerDistrictCounts select _i;
-        if (_row isEqualType [] && { (count _row) >= 2 } && { (_row select 0) isEqualTo _did }) exitWith
+        private _did = _x;
+
+        private _idx = -1;
+        for "_i" from 0 to ((count _playerDistrictCounts) - 1) do
         {
-            _idx = _i;
+            private _row = _playerDistrictCounts select _i;
+            if (_row isEqualType [] && { (count _row) >= 2 } && { (_row select 0) isEqualTo _did }) exitWith
+            {
+                _idx = _i;
+            };
         };
-    };
 
-    if (_idx < 0) then {
-        _playerDistrictCounts pushBack [_did, 1];
-    } else {
-        private _row = _playerDistrictCounts select _idx;
-        private _cnt = _row select 1;
-        if !(_cnt isEqualType 0) then { _cnt = 0; };
-        _row set [1, _cnt + 1];
-        _playerDistrictCounts set [_idx, _row];
-    };
+        if (_idx < 0) then {
+            _playerDistrictCounts pushBack [_did, 1];
+        } else {
+            private _row = _playerDistrictCounts select _idx;
+            private _cnt = _row select 1;
+            if !(_cnt isEqualType 0) then { _cnt = 0; };
+            _row set [1, _cnt + 1];
+            _playerDistrictCounts set [_idx, _row];
+        };
 
-    private _existingPositions = [_playerDistrictPositions, _did, []] call _hg;
-    _existingPositions pushBack _ppos;
-    _playerDistrictPositions set [_did, _existingPositions];
+        private _existingPositions = [_playerDistrictPositions, _did, []] call _hg;
+        _existingPositions pushBack _ppos;
+        _playerDistrictPositions set [_did, _existingPositions];
+    } forEach ([_ppos] call ARC_fnc_civsubDistrictsWithinBuffer);
 } forEach _players;
 
 private _playerDistrictKeys = _playerDistrictCounts apply { _x select 0 };

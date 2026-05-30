@@ -45,6 +45,11 @@ if (_grace < 0) then { _grace = 0; };
 private _last = missionNamespace getVariable ["civsub_v1_activeDistrictLastSeen", createHashMap];
 if !(_last isEqualType createHashMap) then { _last = createHashMap; };
 
+// Compiled HashMap helpers (sqflint parser-compat: avoid bare method-style
+// getOrDefault / keys, matching the SQFLINT_COMPAT_GUIDE convention).
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _keysFn = compile "params ['_m']; keys _m";
+
 // Update last-seen for districts within the activation buffer of any player.
 // Matches the canonical activation definition in ARC_fnc_civsubIsDistrictActive
 // (dist <= radius_m + buffer). Using the same buffer here (rather than strict
@@ -55,29 +60,11 @@ private _buffer = missionNamespace getVariable ["civsub_v1_activeDistrict_buffer
 if (!(_buffer isEqualType 0)) then { _buffer = 200; };
 if (_buffer < 0) then { _buffer = 0; };
 
-private _hgD = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
-private _hmCreateD = compile "params ['_a']; createHashMapFromArray _a";
-private _keysFnD = compile "params ['_m']; keys _m";
-
-private _districts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
-if !(_districts isEqualType createHashMap) then { _districts = createHashMap; };
-
 {
     private _pPos = getPosATL _x;
     {
-        private _did2 = _x;
-        private _rec = [_districts, _did2, createHashMap] call _hgD;
-        if (_rec isEqualType []) then { _rec = [_rec] call _hmCreateD; };
-        if (_rec isEqualType createHashMap) then {
-            private _c = [_rec, "centroid", [0,0]] call _hgD;
-            private _r = [_rec, "radius_m", 0] call _hgD;
-            if ((_c isEqualType []) && {(count _c) >= 2} && {_r > 0}) then {
-                if ((_pPos distance2D [_c # 0, _c # 1, 0]) <= (_r + _buffer)) then {
-                    _last set [_did2, _now];
-                };
-            };
-        };
-    } forEach ([_districts] call _keysFnD);
+        _last set [_x, _now];
+    } forEach ([_pPos, _buffer] call ARC_fnc_civsubDistrictsWithinBuffer);
 } forEach _players;
 
 // Compute active districts as those seen within grace window.
@@ -86,11 +73,11 @@ if !(_districts isEqualType createHashMap) then { _districts = createHashMap; };
 private _cand = [];
 {
     private _did = _x;
-    private _ts = _last getOrDefault [_did, -1];
+    private _ts = [_last, _did, -1] call _hg;
     if (_ts >= 0 && {(_now - _ts) <= _grace}) then {
         _cand pushBack [(_now - _ts), _did];
     };
-} forEach (keys _last);
+} forEach ([_last] call _keysFn);
 
 // Prioritise by recency so the cap never evicts a player's own district (age ~0)
 // in favour of stale lower-ID districts. Sort by age ascending (most recent
