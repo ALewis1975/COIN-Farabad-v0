@@ -182,7 +182,29 @@ if (_taskId isEqualTo "") then
         };
     };
 
-    [] call ARC_fnc_incidentCreate;
+    // Consume the highest-priority approved lead from the TOC Queue (backlog) to
+    // seed the next incident. The pop happens here, AFTER all blocking guards
+    // (RTB/ISSUED-order checks above), so a blocked request never silently drains
+    // the backlog. PopNext already prunes entries whose lead has aged out of the
+    // pool, so any returned leadId resolves to a live lead that incidentCreate
+    // consumes via ARC_fnc_leadConsumeById.
+    //
+    // forceLogistics is passed false here (minimal change): incidentCreate still
+    // applies its own supply-critical filter once a lead is seeded. A future
+    // follow-up could compute the real supply-critical flag here and pass it so
+    // the backlog won't surface a non-logistics lead while base stocks are critical.
+    private _seedLeadId = "";
+    if (!isNil "ARC_fnc_tocBacklogPopNext") then
+    {
+        private _trimFn2 = compile "params ['_s']; trim _s";
+        private _picked = [false] call ARC_fnc_tocBacklogPopNext;
+        if (_picked isEqualType [] && { (count _picked) >= 1 } && { (_picked select 0) isEqualType "" }) then
+        {
+            _seedLeadId = ([_picked select 0] call _trimFn2);
+        };
+    };
+
+    [_seedLeadId] call ARC_fnc_incidentCreate;
 
     if (_owner > 0) then
     {
