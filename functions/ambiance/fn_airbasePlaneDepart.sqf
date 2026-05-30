@@ -625,9 +625,13 @@ if (_isHeli) then {
             [_vehL, _runwayDirL, _kickForwardL, _kickUpL] call _setRunwayClimbVelocityL;
         };
 
+        private _timedOut = ((time - _tRamp0) >= _profileTimeoutSL) && { _cmdAlt < _altTargetL };
         if (_dbgOpsL) then {
             private _altNow = (getPosATL _vehL) select 2;
-            ["OPS", format ["AIRBASE: %1 helo climb profile complete (alt=%2m target=%3m)", _fidL, round _altNow, _altTargetL], getPosATL _vehL, 0, []] call ARC_fnc_intelLog;
+            private _status = if (_timedOut) then { "TIMED OUT" } else { "complete" };
+            ["OPS", format ["AIRBASE: %1 helo climb profile %2 (alt=%3m cmd=%4m target=%5m)", _fidL, _status, round _altNow, round _cmdAlt, _altTargetL], getPosATL _vehL, 0, [
+                ["timedOut", _timedOut]
+            ]] call ARC_fnc_intelLog;
         };
     };
 
