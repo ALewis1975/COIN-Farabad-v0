@@ -116,12 +116,12 @@ private _act = [];
 private _trafficDistrictSource = "PLAYER_BUBBLE";
 
 // Primary source: districts derived directly from player positions.
-// Buffered activation (radius_m + civsub_v1_activeDistrict_buffer_m) matches the
-// canonical ARC_fnc_civsubIsDistrictActive definition and the civ sampler's
+// Primary source: districts derived directly from player positions.
+// Buffered activation (radius_m + 200) matches the locked v1
+// ARC_fnc_civsubIsDistrictActive definition and the civ sampler's
 // ARC_fnc_civsubBubbleGetActiveDistricts. Using strict containment here
 // (ARC_fnc_civsubDistrictsFindByPos, dist <= radius_m) let a stationary player
 // just outside a small district radius drop that district from the primary set,
-// so traffic never spawned near a parked player on a district edge.
 private _playerDistrictCounts = []; // [[districtId, count], ...]
 private _playerDistrictPositions = createHashMap; // districtId -> [playerPositions]
 {
