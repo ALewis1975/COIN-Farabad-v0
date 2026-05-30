@@ -4,10 +4,10 @@
     Buffered, multi-match analogue of ARC_fnc_civsubDistrictsFindByPos.
     Returns every district whose activation area contains the given position,
     where the activation area is the district centroid expanded by
-    (radius_m + buffer). This matches the canonical activation definition in
-    ARC_fnc_civsubIsDistrictActive (dist <= radius_m + 200) so that a stationary
-    player just outside a — often small — district radius still counts as present
-    in that district. Unlike ARC_fnc_civsubDistrictsFindByPos (which returns only
+    (radius_m + buffer). This matches the locked v1 activation definition in
+    ARC_fnc_civsubIsDistrictActive (dist <= radius_m + 200) when buffer is 200,
+    so a stationary player just outside a — often small — district radius still
+    counts as present in that district. Unlike ARC_fnc_civsubDistrictsFindByPos (which returns only
     the single strictly-containing district, dist <= radius_m), this returns ALL
     buffer-adjacent districts.
 
