@@ -11,7 +11,22 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
-## 2026-05-29 — CIVSUB scheduler/sampler tick cadence relaxation (Mode D)
+## 2026-05-30 — Lead-in-TOC-Queue indications for field units and TOC (Mode B)
+
+**Branch/Commit:** copilot/prevent-assigning-leads-as-tasks @ 1d64dda (TEST-LOG appended afterward)
+
+**Scenario:** Made it clear to both field player units and the TOC when a lead has been generated and is sitting in the TOC Queue (backlog) for follow-up. Added `ARC_fnc_tocBacklogBroadcast` to publish a compact backlog read model (`ARC_pub_tocBacklog`) on enqueue/pop/reset; pushed a "now in the TOC Queue for follow-up" toast to the submitting field unit and the approving TOC operator from `fn_intelQueueDecide` (LEAD_ISSUE_REQUEST + FOLLOWON_PACKAGE); added a persistent queue-status line on the field OPS lead panel (`IN TOC QUEUE — awaiting follow-up` / `SUBMITTED — pending TOC review`); confirmed backlog presence on the TOC queue console; and surfaced a `TOC Queue (follow-up)` count on the TOC dashboard.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | New file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_tocBacklogBroadcast.sqf` | PASS | New broadcast helper is parser-compatible (no `#`/raw-`trim` patterns). |
+| 2 | Changed-line compat audit | `git diff -U0 | grep '^+' | grep -E '[)\]] # [0-9]| trim '` | PASS | No added line introduces `#` indexing or raw `trim`; all use `select` + `_trimFn`. |
+| 3 | sqflint error-regression | `sqflint -e w` on each changed file vs `HEAD` baseline | PASS | Error counts unchanged (enqueue 14/14, popNext 15/15, decide 0/0, opsPaint/tocQueuePaint/dashboard 0/0) — pre-existing `#` errors only, no new errors. |
+| 4 | RemoteExec contract | `bash scripts/dev/check_remoteexec_contract.sh` | PASS | `ARC_fnc_clientToast` server→client toasts use the existing allowlisted handler (allowedTargets=0). |
+| 5 | Runtime smoke: field + TOC indications | Hosted/dedicated MP: field unit submits a lead on OPS; TOC approves; verify field + approver toasts, persistent `IN TOC QUEUE` status on the field lead panel, TOC queue item shows backlog confirmation, and dashboard `TOC Queue (follow-up)` count increments. | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 6 | Dedicated/JIP validation | Dedicated server + late-joining client: confirm `ARC_pub_tocBacklog` freshness, JIP visibility of backlog status, and correct submitter resolution by UID. | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+
+---
 
 **Branch/Commit:** copilot/fix-mission-jerkiness-issues @ 105a056 (cadence config commit; TEST-LOG appended afterward)
 
