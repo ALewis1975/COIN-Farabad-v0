@@ -16,6 +16,14 @@
         keep the most-recently-seen districts (where players are now) instead of the
         lowest-ID ones. Prevents civs spawning far from players and active-set churn
         (despawn/respawn flicker) as players move across the map's 20 districts.
+
+    Hotfix12 (Stationary presence buffer):
+      - Refresh last-seen for every district within radius_m + buffer of a player
+        (buffer = civsub_v1_activeDistrict_buffer_m, default 200) to match the
+        canonical ARC_fnc_civsubIsDistrictActive definition. Without this, a
+        stationary player just outside a (often small) district radius never
+        refreshed last-seen, so the district expired after the grace window and its
+        civilians despawned even though the player had not moved.
 */
 
 if (!isServer) exitWith {[]};
@@ -37,12 +45,39 @@ if (_grace < 0) then { _grace = 0; };
 private _last = missionNamespace getVariable ["civsub_v1_activeDistrictLastSeen", createHashMap];
 if !(_last isEqualType createHashMap) then { _last = createHashMap; };
 
-// Update last-seen for districts containing current players
+// Update last-seen for districts within the activation buffer of any player.
+// Matches the canonical activation definition in ARC_fnc_civsubIsDistrictActive
+// (dist <= radius_m + buffer). Using the same buffer here (rather than strict
+// centroid+radius containment via FindByPos) prevents civilians despawning when
+// a stationary player sits just outside a — often small — district radius: their
+// presence keeps refreshing last-seen so the grace window never expires.
+private _buffer = missionNamespace getVariable ["civsub_v1_activeDistrict_buffer_m", 200];
+if (!(_buffer isEqualType 0)) then { _buffer = 200; };
+if (_buffer < 0) then { _buffer = 0; };
+
+private _hgD = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _hmCreateD = compile "params ['_a']; createHashMapFromArray _a";
+private _keysFnD = compile "params ['_m']; keys _m";
+
+private _districts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
+if !(_districts isEqualType createHashMap) then { _districts = createHashMap; };
+
 {
-    private _did = [getPosATL _x] call ARC_fnc_civsubDistrictsFindByPos;
-    if !(_did isEqualTo "") then {
-        _last set [_did, _now];
-    };
+    private _pPos = getPosATL _x;
+    {
+        private _did2 = _x;
+        private _rec = [_districts, _did2, createHashMap] call _hgD;
+        if (_rec isEqualType []) then { _rec = [_rec] call _hmCreateD; };
+        if (_rec isEqualType createHashMap) then {
+            private _c = [_rec, "centroid", [0,0]] call _hgD;
+            private _r = [_rec, "radius_m", 0] call _hgD;
+            if ((_c isEqualType []) && {(count _c) >= 2} && {_r > 0}) then {
+                if ((_pPos distance2D [_c # 0, _c # 1, 0]) <= (_r + _buffer)) then {
+                    _last set [_did2, _now];
+                };
+            };
+        };
+    } forEach ([_districts] call _keysFnD);
 } forEach _players;
 
 // Compute active districts as those seen within grace window.
