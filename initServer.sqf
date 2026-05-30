@@ -210,6 +210,7 @@ missionNamespace setVariable ["ARC_threatVirtualDespawnRadiusM_air",       6000,
 missionNamespace setVariable ["ARC_threatVirtualActivationRadiusM", 2200, true];
 missionNamespace setVariable ["ARC_threatVirtualSpawnRadiusM",      2000, true];
 missionNamespace setVariable ["ARC_threatVirtualDespawnRadiusM",    2400, true];
+missionNamespace setVariable ["ARC_threatVirtualMinSpawnDistM",     300,  true]; // ACTIVE -> PHYSICAL — minimum standoff from the nearest player; spawns inside this bubble are pushed outward (or deferred) so OPFOR never materialise on top of holders
 missionNamespace setVariable ["ARC_threatVirtualDespawnDelayS",     90,   true]; // seconds beyond despawn radius before group is deleted
 missionNamespace setVariable ["ARC_threatVirtualRepositionS",       600,  true]; // drift interval for DORMANT groups (seconds)
 missionNamespace setVariable ["ARC_threatVirtualPoolTickS",         60,   true]; // pool tick cadence (seconds)

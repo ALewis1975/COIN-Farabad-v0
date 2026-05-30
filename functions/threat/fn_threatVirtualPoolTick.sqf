@@ -20,7 +20,10 @@
             VIRTUAL_DORMANT.
             If a player is within ARC_threatVirtualSpawnRadiusM (default 400 m) AND
             there is an active incident outside protected BLUFOR zones → physically
-            spawn the group and transition to PHYSICAL.
+            spawn the group and transition to PHYSICAL. Spawns that fall within
+            ARC_threatVirtualMinSpawnDistM of the nearest player are pushed outward to
+            that standoff distance (or deferred if no safe position exists) so groups
+            never materialise on top of players holding a co-located objective.
 
         PHYSICAL
             Track "last player nearby" timestamp.
@@ -106,6 +109,15 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
         private _repositionS = missionNamespace getVariable ["ARC_threatVirtualRepositionS", 600];
         if (!(_repositionS isEqualType 0)) then { _repositionS = 600; };
         _repositionS = (_repositionS max 60) min 3600;
+
+        // Minimum standoff between a materialising virtual group and the nearest player.
+        // Virtual groups are seeded at named locations; when players hold an objective
+        // co-located with a group's anchor (e.g. Raid: Interdict Smuggling at Port), the
+        // group would otherwise spawn on top of the holders. Spawns inside this bubble are
+        // pushed outward to the standoff distance (or deferred if no safe position exists).
+        private _minSpawnDistM = missionNamespace getVariable ["ARC_threatVirtualMinSpawnDistM", 300];
+        if (!(_minSpawnDistM isEqualType 0)) then { _minSpawnDistM = 300; };
+        _minSpawnDistM = (_minSpawnDistM max 0) min 2000;
 
         // Determine active incident zone (for spawn gating)
         private _activeTaskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
@@ -332,7 +344,30 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
                                 continue;
                             };
                             // Physically spawn group
-                            private _spawnPos          = _vgPos;
+                            private _spawnPos          = +_vgPos;
+                            if ((count _spawnPos) < 3) then { _spawnPos resize 3; };
+
+                            // Minimum standoff guard: never materialise a virtual group on top
+                            // of players. When the seeded position sits inside the standoff bubble
+                            // of the nearest player (common when players hold an objective that is
+                            // co-located with this group's anchor), push the spawn point outward to
+                            // the standoff distance along the player -> group bearing so the group
+                            // walks in instead of appearing on station. Defer the spawn if no safe,
+                            // sufficiently-distant position can be found this tick.
+                            if (_minSpawnDistM > 0 && { !isNull _nearestPlayer } && { _nearestPlayerD < _minSpawnDistM }) then {
+                                private _npPos   = getPosATL _nearestPlayer;
+                                private _bearing = if (_nearestPlayerD > 1) then { _npPos getDir _vgPos } else { random 360 };
+                                private _cand    = _npPos getPos [_minSpawnDistM + 25, _bearing];
+                                _cand set [2, 0];
+                                private _blocked = ([_cand, _protectedZones, _protectedMarkers] call ARC_fnc_threatIsProtectedSpawnPos)
+                                    || { (_alivePlayers findIf { (_x distance2D _cand) < _minSpawnDistM }) >= 0 };
+                                if (_blocked) then {
+                                    diag_log format ["[ARC][VPOOL][INFO] %1 spawn deferred — within %2 m standoff and relocation blocked (dist=%3 m)", _vgId, _minSpawnDistM, round _nearestPlayerD];
+                                    continue;
+                                };
+                                _spawnPos = _cand;
+                                diag_log format ["[ARC][VPOOL][INFO] %1 spawn pushed to %2 m standoff (was %3 m) pos=%4", _vgId, _minSpawnDistM, round _nearestPlayerD, _spawnPos];
+                            };
                             private _vgPatrolRadiusM   = missionNamespace getVariable ["ARC_threatVirtualPatrolRadiusM", 200];
                             if (!(_vgPatrolRadiusM isEqualType 0)) then { _vgPatrolRadiusM = 200; };
                             _vgPatrolRadiusM = (_vgPatrolRadiusM max 50) min 600;
