@@ -205,10 +205,16 @@ if (_spawnContacts && {!_posProtected}) then
 
     for "_g" from 1 to _groupsN do
     {
-        // Pick a spawn point away from players.
+        // Pick a spawn point away from players, sharing the standoff/protected-zone
+        // rule with the virtual pool via ARC_fnc_threatSpawnPosClear. Ops contacts
+        // intentionally spawn closer than the pool, so a smaller standoff is used.
+        private _contactStandoffM = missionNamespace getVariable ["ARC_patrolContactStandoffM", 150];
+        if (!(_contactStandoffM isEqualType 0)) then { _contactStandoffM = 150; };
+        _contactStandoffM = (_contactStandoffM max 0) min 2000;
+        private _alivePlayers = allPlayers select { alive _x };
         private _spawnPos = _posATL;
-        // Safe default: suppress contact if every candidate remains protected.
-        private _spawnPosProtected = true;
+        // Safe default: suppress contact if every candidate remains unclear.
+        private _spawnPosClear = false;
         private _tries = 0;
         while {_tries < 25} do
         {
@@ -220,14 +226,13 @@ if (_spawnContacts && {!_posProtected}) then
                 0
             ];
 
-            private _nearPlayers = allPlayers select { alive _x && { (_x distance2D _spawnPos) < 150 } };
-            _spawnPosProtected = [_spawnPos, _protectedZones, _protectedMarkers] call ARC_fnc_threatIsProtectedSpawnPos;
-            if ((count _nearPlayers) == 0 && {!_spawnPosProtected}) exitWith {};
+            _spawnPosClear = [_spawnPos, _alivePlayers, _contactStandoffM, _protectedZones, _protectedMarkers] call ARC_fnc_threatSpawnPosClear;
+            if (_spawnPosClear) exitWith {};
             _tries = _tries + 1;
         };
 
-        if (_spawnPosProtected) then {
-            diag_log format ["[ARC][OPS][WARN] ARC_fnc_opsPatrolOnActivate: OPFOR contact spawn suppressed in protected spawn bubble task=%1 pos=%2", _taskId, _spawnPos];
+        if (!_spawnPosClear) then {
+            diag_log format ["[ARC][OPS][WARN] ARC_fnc_opsPatrolOnActivate: OPFOR contact spawn suppressed — no clear standoff position task=%1 pos=%2", _taskId, _spawnPos];
             continue;
         };
 
