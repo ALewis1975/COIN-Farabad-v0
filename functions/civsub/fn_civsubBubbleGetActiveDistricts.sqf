@@ -18,9 +18,8 @@
         (despawn/respawn flicker) as players move across the map's 20 districts.
 
     Hotfix12 (Stationary presence buffer):
-      - Refresh last-seen for every district within radius_m + buffer of a player
-        (buffer = civsub_v1_activeDistrict_buffer_m, default 200) to match the
-        canonical ARC_fnc_civsubIsDistrictActive definition. Without this, a
+      - Refresh last-seen for every district within radius_m + 200 of a player
+        to match the locked v1 ARC_fnc_civsubIsDistrictActive definition. Without this,
         stationary player just outside a (often small) district radius never
         refreshed last-seen, so the district expired after the grace window and its
         civilians despawned even though the player had not moved.
