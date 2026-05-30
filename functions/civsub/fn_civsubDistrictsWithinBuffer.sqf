@@ -16,9 +16,9 @@
       - ARC_fnc_civsubTrafficTick (traffic district activation)
 
     Params:
+    Params:
       0: position [x,y,z] (or [x,y])
-      1: buffer (number, optional) — defaults to civsub_v1_activeDistrict_buffer_m (200)
-
+      1: buffer (number, optional) — defaults to civsub_v1_activeDistrict_buffer_m (should be 200 to match ARC_fnc_civsubIsDistrictActive)
     Returns: array of districtId strings (may be empty). Returns [] when civsub is
     disabled or the position is in the AIRBASE zone, matching the guards in
     ARC_fnc_civsubDistrictsFindByPos.
