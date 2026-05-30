@@ -11,7 +11,27 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
-## 2026-05-29 — CIVSUB scheduler/sampler tick cadence relaxation (Mode D)
+## 2026-05-30 — Unify OPFOR spawn standoff rule + multi-bearing pool relocation (Mode B)
+
+**Branch/Commit:** copilot/raid-interdict-smuggling-port-issue @ e281f66 (code commit; TEST-LOG appended afterward)
+
+**Scenario:** Follow-up to the virtual-pool minimum-spawn-standoff fix. Centralised the duplicated "is this a safe spawn position?" rule into a new shared predicate `ARC_fnc_threatSpawnPosClear` (player standoff + protected-zone guard), consumed by both `fn_threatVirtualPoolTick.sqf` and `fn_opsPatrolOnActivate.sqf`. Replaced the pool tick's single-bearing push/defer with a multi-bearing sweep (0/±30/±60/±90/±120/±150/180) so groups still materialise when players ring a co-located objective, deferring only when no bearing is clear. Fixed stale default distances in the pool-tick header docstring (activation 600→2200, spawn 400→2000, despawn 700→2400) and documented the patrol-radius/standoff coupling.
+
+| # | Validation | Command / Steps | Result | Notes |
+|---|---|---|---|---|
+| 1 | Whitespace check | `git --no-pager diff --check` | PASS | No whitespace errors. |
+| 2 | sqflint compat scan (strict) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatSpawnPosClear.sqf functions/threat/fn_threatVirtualPoolTick.sqf functions/ops/fn_opsPatrolOnActivate.sqf` | PASS | No known parser-compat patterns (predicate uses explicit forEach search, not findIf). |
+| 3 | sqflint static analysis | `sqflint -e w` on the three changed SQF files | PASS | Installed `sqflint` in sandbox; no warnings/errors. |
+| 4 | Standoff contract checks | `bash tests/static/threat_virtual_opfor_spawn_standoff_checks.sh` | PASS | Extended to cover the shared predicate, multi-bearing sweep, and ops consumption. |
+| 5 | Full static suite | `for t in tests/static/*.sh; do bash "$t"; done` | PASS | All static contract scripts pass. |
+| 6 | CodeQL security check | `codeql_checker` | PASS | See finalize notes. |
+| 7 | Dedicated runtime spawn behaviour | Dedicated playtest: hold "Raid: Interdict Smuggling at Port" objective; confirm OPFOR relocate to ~300 m standoff and still engage rather than spawning on holders or going silent. | BLOCKED | Arma 3 dedicated runtime unavailable in sandbox; requires operator validation. |
+
+**Risk Notes:** Ops patrol behaviour is preserved (standoff defaults to the prior 150 m via new optional `ARC_patrolContactStandoffM`); only the shared rule is refactored. Pool relocation is strictly more permissive than the previous single-bearing defer, reducing "dead incident" cases without weakening the on-top-of-players guard (every candidate is re-validated through the predicate).
+
+**Rollback:** Revert commit e281f66 to restore the single-bearing pool relocation and the inline ops standoff check.
+
+
 
 **Branch/Commit:** copilot/fix-mission-jerkiness-issues @ 105a056 (cadence config commit; TEST-LOG appended afterward)
 

@@ -84,7 +84,7 @@ A variable that fits more than one class is classified by its **operator-facing 
 | Variable | Class | Target home | Notes |
 |---|---|---|---|
 | `ARC_worldIndex_weights`, `ARC_worldIndex_tierThresholds` | Tuning constant | `data/ARC_ConfigData.sqf` | Pure tuning numbers; not operator-facing posture. **Relocate (W7-T2).** |
-| `ARC_threatVirtualActivationRadiusM*`, `ARC_threatVirtualSpawnRadiusM*`, `ARC_threatVirtualDespawnRadiusM*`, `ARC_threatVirtualDespawnDelayS`, `ARC_threatVirtualRepositionS`, `ARC_threatVirtualPoolTickS`, `ARC_threatVirtualPatrolRadiusM`, `ARC_threatVirtualPatrolWaypointN` | Tuning constant | `data/ARC_ConfigData.sqf` | Twelve threat-pool tuning constants. **Relocate as a single block (W7-T2).** |
+| `ARC_threatVirtualActivationRadiusM*`, `ARC_threatVirtualSpawnRadiusM*`, `ARC_threatVirtualMinSpawnDistM`, `ARC_threatVirtualDespawnRadiusM*`, `ARC_threatVirtualDespawnDelayS`, `ARC_threatVirtualRepositionS`, `ARC_threatVirtualPoolTickS`, `ARC_threatVirtualPatrolRadiusM`, `ARC_threatVirtualPatrolWaypointN` | Tuning constant | `data/ARC_ConfigData.sqf` | Threat-pool tuning constants (incl. minimum player standoff for physical spawns). **Relocate as a single block (W7-T2).** |
 
 ### 3.7 OPFOR class pool (lines ~171–191)
 
