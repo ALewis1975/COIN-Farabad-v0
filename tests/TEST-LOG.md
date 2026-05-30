@@ -11,7 +11,22 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
-## 2026-05-30 — Lead-in-TOC-Queue indications for field units and TOC (Mode B)
+## 2026-05-30 — Wire TOC backlog consumer into incident generation + prune tick (Mode B)
+
+**Branch/Commit:** copilot/prevent-assigning-leads-as-tasks @ 5d5d8dc
+
+**Scenario:** Closed the loop on the TOC Queue (backlog). Previously `ARC_fnc_tocBacklogPopNext` and the backlog's prune logic had zero callers, so approved leads were enqueued but never consumed, and stale entries were never reconciled against the lead pool. Extracted the non-destructive reconcile into a new server helper `ARC_fnc_tocBacklogPrune` (drops entries with bad shape, empty leadId, or no matching lead in `leadPool`; persists + rebroadcasts `ARC_pub_tocBacklog` on change); refactored `fn_tocBacklogPopNext` to delegate its first pass to the helper (single source of truth) and made the whole file sqflint-clean (`select` + compiled `_trimFn`); wired `fn_tocRequestNextIncident` to pop the best backlog entry (after all blocking guards) and pass its leadId as `seedLeadId` to `ARC_fnc_incidentCreate`, falling through to the existing no-seed catalog path when the backlog is empty; and called `ARC_fnc_tocBacklogPrune` from `fn_incidentTick` right after `ARC_fnc_leadPrune` so the backlog stays consistent every ~60 s tick. Registered `tocBacklogPrune` in `CfgFunctions.hpp`. `forceLogistics` is passed `false` to `PopNext` for now (minimal change); `incidentCreate` still applies its own supply-critical filter once a lead is seeded.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | New file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_tocBacklogPrune.sqf` | PASS | New prune helper is parser-compatible (`select` + compiled `_trimFn`). |
+| 2 | Changed-line compat audit | `git diff HEAD~1 -U0 -- '*.sqf' \| grep '^+' \| grep -E '[)\]] # [0-9]\| # _\| trim '` | PASS | No added line introduces `#` indexing or raw `trim` outside a compiled wrapper. |
+| 3 | sqflint on changed/new files | `sqflint -e w` on fn_tocBacklogPrune / fn_tocBacklogPopNext / fn_tocRequestNextIncident | PASS | All three parse clean (rc=0). PopNext fully converted off `#`/raw-`trim`. |
+| 4 | sqflint error-regression (incidentTick) | `sqflint -e w functions/core/fn_incidentTick.sqf` vs `HEAD` baseline | PASS | Sole error is pre-existing line 89 `isNotEqualTo` (unchanged, far from the added 3-line prune call); no new errors introduced. |
+| 5 | Runtime smoke: backlog consumption | Hosted/dedicated MP: approve a lead into the TOC Queue, request next incident, confirm the incident is seeded from that lead and the backlog entry is removed (`ARC_pub_tocBacklog` no longer lists it). | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 6 | Runtime smoke: prune tick | Let a backlogged lead expire from `leadPool` via TTL; confirm the next `fn_incidentTick` drops its backlog entry and rebroadcasts so consoles stop showing "in the TOC Queue". | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+
+---
 
 **Branch/Commit:** copilot/prevent-assigning-leads-as-tasks @ 1d64dda (TEST-LOG appended afterward)
 
