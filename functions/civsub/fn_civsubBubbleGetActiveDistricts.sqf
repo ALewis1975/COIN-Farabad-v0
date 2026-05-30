@@ -10,6 +10,12 @@
       - Prevents rapid district flips when players stand near district borders.
       - A district remains "active" for a grace period after the last player was seen inside it.
       - Default grace is controlled by civsub_v1_activeDistrict_grace_s (seconds).
+
+    Hotfix11 (Recency-priority cap):
+      - When more districts are within the grace window than the active cap allows,
+        keep the most-recently-seen districts (where players are now) instead of the
+        lowest-ID ones. Prevents civs spawning far from players and active-set churn
+        (despawn/respawn flicker) as players move across the map's 20 districts.
 */
 
 if (!isServer) exitWith {[]};
@@ -39,18 +45,28 @@ if !(_last isEqualType createHashMap) then { _last = createHashMap; };
     };
 } forEach _players;
 
-// Compute active districts as those seen within grace window
-private _active = [];
+// Compute active districts as those seen within grace window.
+// Pair each candidate with its age (now - lastSeen) so we can prioritise the
+// districts players currently/most-recently occupy.
+private _cand = [];
 {
     private _did = _x;
     private _ts = _last getOrDefault [_did, -1];
     if (_ts >= 0 && {(_now - _ts) <= _grace}) then {
-        _active pushBack _did;
+        _cand pushBack [(_now - _ts), _did];
     };
 } forEach (keys _last);
 
-// Stable sort by ID (D01..)
-_active sort true;
+// Prioritise by recency so the cap never evicts a player's own district (age ~0)
+// in favour of stale lower-ID districts. Sort by age ascending (most recent
+// first); ties (e.g. districts occupied this tick) break by ID ascending for a
+// stable, deterministic result.
+_cand sort true;
+
+private _active = [];
+{
+    _active pushBack (_x select 1);
+} forEach _cand;
 
 if ((count _active) > _maxD) then {
     _active resize _maxD;
