@@ -30,7 +30,8 @@ switch (_focus) do
     case "LEAD":
     {
         // Submit the selected lead to the TOC queue as a LEAD_ISSUE_REQUEST.
-        // TOC must approve before a PROCEED order is issued to the field group.
+        // Leads are never assigned as field tasks; on approval the lead is added to
+        // the TOC Queue (backlog) for TOC-driven incident creation.
         private _disp = findDisplay 78000;
         private _cLead = if (!isNull _disp) then { _disp displayCtrl 78038 } else { controlNull };
         private _sel = if (!isNull _cLead) then { lbCurSel _cLead } else { -1 };
@@ -45,13 +46,14 @@ switch (_focus) do
             private _leads = missionNamespace getVariable ["ARC_leadPoolPublic", []];
             if (!(_leads isEqualType [])) then { _leads = []; };
 
+            private _trimFn = compile "params ['_s']; trim _s";
             private _leadRec = [];
-            { if (_x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _leadId }) exitWith { _leadRec = _x; }; } forEach _leads;
+            { if (_x isEqualType [] && { (count _x) >= 1 } && { (_x select 0) isEqualTo _leadId }) exitWith { _leadRec = _x; }; } forEach _leads;
 
-            private _leadType = if ((count _leadRec) >= 2) then { toUpper (trim (_leadRec # 1)) } else { "LEAD" };
-            private _leadName = if ((count _leadRec) >= 3) then { _leadRec # 2 } else { "Lead" };
+            private _leadType = if ((count _leadRec) >= 2 && { (_leadRec select 1) isEqualType "" }) then { toUpper ([_leadRec select 1] call _trimFn) } else { "LEAD" };
+            private _leadName = if ((count _leadRec) >= 3) then { _leadRec select 2 } else { "Lead" };
             if (!(_leadName isEqualType "")) then { _leadName = "Lead"; };
-            private _leadPos  = if ((count _leadRec) >= 4) then { _leadRec # 3 } else { [] };
+            private _leadPos  = if ((count _leadRec) >= 4) then { _leadRec select 3 } else { [] };
             if (!(_leadPos isEqualType []) || { (count _leadPos) < 2 }) then { _leadPos = getPosATL player; };
 
             private _summary = format ["LEAD ISSUE: %1 - %2", _leadType, _leadName];

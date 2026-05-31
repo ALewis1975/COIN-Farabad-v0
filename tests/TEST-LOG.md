@@ -11,6 +11,52 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-05-30 — Make Arma SQF preflight green: clear sqflint compat + lint findings on changed files (Mode B)
+
+**Branch/Commit:** copilot/prevent-assigning-leads-as-tasks @ 5f9db0f (compat fixes) + d2eb603 (lint-warning cleanup); TEST-LOG appended afterward
+
+**Scenario:** Job `78682576587` in the **Arma SQF + Mission Config Preflight** workflow failed at the **SQF static analysis** step: `python3 scripts/dev/sqflint_compat_scan.py --strict $sqf_files` reported `19 pattern match(es) across 13 file(s)` and exited 1. Replaced every disallowed compat pattern in the changed SQF files with the scanner-approved equivalents: `#` indexing → guarded `select`; bare `trim` → compiled `_trimFn` helper; `isNotEqualTo` → `!(_a isEqualTo _b)`. Files touched for compat: `fn_tocBacklogEnqueue.sqf`, `fn_uiConsoleActionOpsPrimary.sqf`, `fn_resetAll.sqf`, `fn_incidentTick.sqf`. Because the same step then runs `sqflint -e w` on each changed file (warnings fail the build), also cleared the pre-existing warnings those changed files carried so the step reaches exit 0: skipped unused positional `params` slots via `""` in `fn_intelQueueDecide.sqf`, reduced an unused destructure to `_x params ["_tId"]` in `fn_resetAll.sqf`, removed a dead unused `_getPair` helper in `fn_uiConsoleDashboardPaint.sqf`, and converted two `BIS_fnc_sortBy` lambdas to the repo's sqflint-clean `compile "_x select 1"` form in `fn_uiConsoleTocQueuePaint.sqf`. No runtime behaviour changed.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Strict compat scan on changed files | `python3 scripts/dev/sqflint_compat_scan.py --strict $(git diff origin/main...HEAD --name-only -- '*.sqf')` | PASS | `scanned 13 file(s); no known parser-compat patterns found` (was 19 findings). |
+| 2 | Full static-analysis step logic | Reproduced step: `set -euo pipefail`; compat scan then `sqflint -e w` loop over each changed file | PASS | Step exits 0; every changed file is clean under `sqflint 0.3.2 -e w`. |
+| 3 | Semantic guard | `grep` confirmed removed vars (`_createdAt`/`_details`/`_decision`, `_getPair`) are unreferenced; bracket balance verified on all edited files | PASS | Edits are equivalence-preserving (skip placeholders, dead-code removal, compiled sort lambda). |
+| 4 | Runtime smoke | Hosted/dedicated MP exercise of lead→TOC-Queue flow | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+
+---
+
+## 2026-05-30 — Wire TOC backlog consumer into incident generation + prune tick (Mode B)
+
+**Branch/Commit:** copilot/prevent-assigning-leads-as-tasks @ 5d5d8dc
+
+**Scenario:** Closed the loop on the TOC Queue (backlog). Previously `ARC_fnc_tocBacklogPopNext` and the backlog's prune logic had zero callers, so approved leads were enqueued but never consumed, and stale entries were never reconciled against the lead pool. Extracted the non-destructive reconcile into a new server helper `ARC_fnc_tocBacklogPrune` (drops entries with bad shape, empty leadId, or no matching lead in `leadPool`; persists + rebroadcasts `ARC_pub_tocBacklog` on change); refactored `fn_tocBacklogPopNext` to delegate its first pass to the helper (single source of truth) and made the whole file sqflint-clean (`select` + compiled `_trimFn`); wired `fn_tocRequestNextIncident` to pop the best backlog entry (after all blocking guards) and pass its leadId as `seedLeadId` to `ARC_fnc_incidentCreate`, falling through to the existing no-seed catalog path when the backlog is empty; and called `ARC_fnc_tocBacklogPrune` from `fn_incidentTick` right after `ARC_fnc_leadPrune` so the backlog stays consistent every ~60 s tick. Registered `tocBacklogPrune` in `CfgFunctions.hpp`. `forceLogistics` is passed `false` to `PopNext` for now (minimal change); `incidentCreate` still applies its own supply-critical filter once a lead is seeded.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | New file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_tocBacklogPrune.sqf` | PASS | New prune helper is parser-compatible (`select` + compiled `_trimFn`). |
+| 2 | Changed-line compat audit | `git diff HEAD~1 -U0 -- '*.sqf' \| grep '^+' \| grep -E '[)\]] # [0-9]\| # _\| trim '` | PASS | No added line introduces `#` indexing or raw `trim` outside a compiled wrapper. |
+| 3 | sqflint on changed/new files | `sqflint -e w` on fn_tocBacklogPrune / fn_tocBacklogPopNext / fn_tocRequestNextIncident | PASS | All three parse clean (rc=0). PopNext fully converted off `#`/raw-`trim`. |
+| 4 | sqflint error-regression (incidentTick) | `sqflint -e w functions/core/fn_incidentTick.sqf` vs `HEAD` baseline | PASS | Sole error is pre-existing line 89 `isNotEqualTo` (unchanged, far from the added 3-line prune call); no new errors introduced. |
+| 5 | Runtime smoke: backlog consumption | Hosted/dedicated MP: approve a lead into the TOC Queue, request next incident, confirm the incident is seeded from that lead and the backlog entry is removed (`ARC_pub_tocBacklog` no longer lists it). | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 6 | Runtime smoke: prune tick | Let a backlogged lead expire from `leadPool` via TTL; confirm the next `fn_incidentTick` drops its backlog entry and rebroadcasts so consoles stop showing "in the TOC Queue". | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+
+---
+
+**Branch/Commit:** copilot/prevent-assigning-leads-as-tasks @ 1d64dda (TEST-LOG appended afterward)
+
+**Scenario:** Made it clear to both field player units and the TOC when a lead has been generated and is sitting in the TOC Queue (backlog) for follow-up. Added `ARC_fnc_tocBacklogBroadcast` to publish a compact backlog read model (`ARC_pub_tocBacklog`) on enqueue/pop/reset; pushed a "now in the TOC Queue for follow-up" toast to the submitting field unit and the approving TOC operator from `fn_intelQueueDecide` (LEAD_ISSUE_REQUEST + FOLLOWON_PACKAGE); added a persistent queue-status line on the field OPS lead panel (`IN TOC QUEUE — awaiting follow-up` / `SUBMITTED — pending TOC review`); confirmed backlog presence on the TOC queue console; and surfaced a `TOC Queue (follow-up)` count on the TOC dashboard.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | New file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_tocBacklogBroadcast.sqf` | PASS | New broadcast helper is parser-compatible (no `#`/raw-`trim` patterns). |
+| 2 | Changed-line compat audit | `git diff -U0 | grep '^+' | grep -E '[)\]] # [0-9]| trim '` | PASS | No added line introduces `#` indexing or raw `trim`; all use `select` + `_trimFn`. |
+| 3 | sqflint error-regression | `sqflint -e w` on each changed file vs `HEAD` baseline | PASS | Error counts unchanged (enqueue 14/14, popNext 15/15, decide 0/0, opsPaint/tocQueuePaint/dashboard 0/0) — pre-existing `#` errors only, no new errors. |
+| 4 | RemoteExec contract | `bash scripts/dev/check_remoteexec_contract.sh` | PASS | `ARC_fnc_clientToast` server→client toasts use the existing allowlisted handler (allowedTargets=0). |
+| 5 | Runtime smoke: field + TOC indications | Hosted/dedicated MP: field unit submits a lead on OPS; TOC approves; verify field + approver toasts, persistent `IN TOC QUEUE` status on the field lead panel, TOC queue item shows backlog confirmation, and dashboard `TOC Queue (follow-up)` count increments. | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 6 | Dedicated/JIP validation | Dedicated server + late-joining client: confirm `ARC_pub_tocBacklog` freshness, JIP visibility of backlog status, and correct submitter resolution by UID. | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+
+---
 ## 2026-05-30 — Unify OPFOR spawn standoff rule + multi-bearing pool relocation (Mode B)
 
 **Branch/Commit:** copilot/raid-interdict-smuggling-port-issue @ e281f66 (code commit; TEST-LOG appended afterward)

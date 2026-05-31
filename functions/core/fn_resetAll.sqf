@@ -26,7 +26,7 @@ private _ids = [];
 
 private _pushId = {
     params ["_id"]; 
-    if (_id isEqualType "" && {_id isNotEqualTo ""}) then { _ids pushBackUnique _id; };
+    if (_id isEqualType "" && {!(_id isEqualTo "")}) then { _ids pushBackUnique _id; };
 };
 
 private _active = ["activeTaskId", ""] call ARC_fnc_stateGet;
@@ -45,7 +45,7 @@ private _hist = ["incidentHistory", []] call ARC_fnc_stateGet;
 if (_hist isEqualType []) then
 {
     {
-        _x params ["_tId", "_marker", "_tType", "_tDisp", "_res", "_created", "_closed"];
+        _x params ["_tId"];
         [_tId] call _pushId;
         private _lk = format ["%1_LINKUP", _tId];
         [_lk] call _pushId;
@@ -63,7 +63,8 @@ if (_threads isEqualType []) then
     {
         private _thr = [_x] call ARC_fnc_threadNormalizeRecord;
         if (_thr isEqualTo []) then { continue; };
-        private _parent = _thr # 13;
+        private _parent = "";
+        if ((count _thr) > 13) then { _parent = _thr select 13; };
         [_parent] call _pushId;
     } forEach _threads;
 };
@@ -413,6 +414,7 @@ if (!isNil "ARC_fnc_intelOrderBroadcast") then { [] call ARC_fnc_intelOrderBroad
 
 [] call ARC_fnc_leadBroadcast;
 [] call ARC_fnc_threadBroadcast;
+if (!isNil "ARC_fnc_tocBacklogBroadcast") then { [] call ARC_fnc_tocBacklogBroadcast; };
 
 // Best-effort client cleanup
 [_ids] remoteExec ["ARC_fnc_clientPurgeArcTasks", 0];

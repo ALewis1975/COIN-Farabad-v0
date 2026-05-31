@@ -66,11 +66,11 @@ private _decided = _items select { (toUpper (_x param [2, "", [""]])) != "PENDIN
 
 if ((count _pending) > 1) then
 {
-    _pending = [_pending, [], { _x select 1 }, "ASCEND"] call BIS_fnc_sortBy;
+    _pending = [_pending, [], compile "_x select 1", "ASCEND"] call BIS_fnc_sortBy;
 };
 if ((count _decided) > 1) then
 {
-    _decided = [_decided, [], { _x select 1 }, "DESCEND"] call BIS_fnc_sortBy;
+    _decided = [_decided, [], compile "_x select 1", "DESCEND"] call BIS_fnc_sortBy;
 };
 _items = _pending + _decided;
 
@@ -219,11 +219,24 @@ switch (_kindU) do
         // UX-05: surface the full lead-loop downstream of approval so TOC
         // staff and S2/S3 supervisors see the chain at a glance and field
         // units understand what they are accepting.
-        private _flowHint = "<br/><br/><t color='#A8C5FF'>Flow:</t> Approve → LEAD order ISSUED to field group → field accepts on OPS tab → LEAD task created at lead grid → on-scene action + SITREP → TOC closeout → follow-on lead/incident generated.";
+        private _flowHint = "<br/><br/><t color='#A8C5FF'>Flow:</t> Approve → lead added to the TOC Queue (backlog) → TOC generates an incident from the queue → incident accepted on OPS tab → on-scene action + SITREP → TOC closeout. Leads are never assigned directly as field tasks.";
 
         if (_stU isEqualTo "APPROVED") then
         {
-            _statusTxt = "Lead Status: APPROVED — PROCEED order issued to field group.";
+            private _backlog = missionNamespace getVariable ["ARC_pub_tocBacklog", []];
+            if (!(_backlog isEqualType [])) then { _backlog = []; };
+            private _lidTrim = ([_leadId2] call _trimFn);
+            private _inBacklog = false;
+            { if (_x isEqualType [] && { (count _x) >= 1 } && { (_x select 0) isEqualTo _lidTrim }) exitWith { _inBacklog = true; }; } forEach _backlog;
+
+            if (_inBacklog) then
+            {
+                _statusTxt = "Lead Status: APPROVED — in the TOC Queue (backlog), awaiting follow-up.";
+            }
+            else
+            {
+                _statusTxt = "Lead Status: APPROVED — pulled from the TOC Queue to seed incident creation.";
+            };
         };
         if (_stU isEqualTo "REJECTED") then
         {
