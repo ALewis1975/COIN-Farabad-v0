@@ -26,7 +26,7 @@ if !(_records isEqualType []) then { _records = []; };
 if ((count _records) isEqualTo 0) exitWith {""};
 
 // Pair lookup over an array-of-pairs record.
-private _pget = compile "params ['_arr','_key','_def']; private _r = _def; { if ((_x select 0) isEqualTo _key) exitWith { _r = _x select 1 }; } forEach _arr; _r";
+private _pget = compile "params ['_arr','_key','_def']; if (!(_arr isEqualType [])) exitWith { _def }; private _r = _def; { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _r = _x select 1 }; } forEach _arr; _r";
 
 private _lines = [];
 {
