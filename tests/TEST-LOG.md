@@ -11,7 +11,21 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
-## 2026-06-01 — Threat scheduler district base-position fallback + SITEPOP guard class pool resolution (Mode D)
+## 2026-06-01 — Step 6 / Lane A (Stabilize & harden): RPC owner-capture static gate + dedicated runtime QA checklist
+
+**Branch/Commit:** copilot/read-only-architecture-audit @ 42f753d; TEST-LOG appended afterward
+
+**Scenario:** Step 6, Lane A. **A2** lands a static gate enforcing that every server-side handler calling `ARC_fnc_rpcValidateSender` captures `remoteExecutedOwner` at its own top frame and passes it explicitly as the 6th positional argument (`_callerOwner`) — the only reliable owner read on a dedicated server. The new guard `tests/static/rpc_owner_capture_conformance_checks.sh` parses each call's argument array, fails on <6 args / bare-literal owner / missing `remoteExecutedOwner` read, and enforces a minimum handler floor to catch silent coverage loss; it is wired into `.github/workflows/arma-preflight.yml`. **A1** (command cycle on dedicated) and **A3** (base gates + rotary/fixed-wing ATC parity) are runtime proofs documented in `docs/qa/Command_Cycle_Dedicated_Runtime_QA_Checklist.md` for execution on the dedicated rig.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | RPC owner-capture conformance gate | `tests/static/rpc_owner_capture_conformance_checks.sh` | PASS | 38 handlers enumerated; all pass an explicit `_callerOwner` (>= floor 38). |
+| 2 | Negative-case guard behaviour | Inject a 5-arg `call ARC_fnc_rpcValidateSender` handler and re-run | PASS | Guard reports `[FAIL] … missing explicit _callerOwner (6th arg)` and exits 1. |
+| 3 | A1 command cycle on dedicated (task→SITREP→follow-on→close) | `docs/qa/Command_Cycle_Dedicated_Runtime_QA_Checklist.md` Scenarios 1–6 | BLOCKED | Arma 3 dedicated runtime unavailable in this sandbox. |
+| 4 | A3 base gates + ATC parity | `docs/qa/Command_Cycle_Dedicated_Runtime_QA_Checklist.md` Scenarios 7–9 | BLOCKED | Arma 3 dedicated runtime unavailable in this sandbox. |
+
+---
+
 
 **Branch/Commit:** copilot/fix-threat-baseposition-guard-pool @ 09dcbe9; TEST-LOG appended afterward
 
