@@ -49,24 +49,58 @@
 // Shared unit class pools
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Resolve host-nation (3CB) infantry pools directly from CfgVehicles.
+//
+// The 3CB Factions BLUFOR infantry classnames are abbreviated (e.g.
+// UK3CB_TKA_B_AR / _TL / _OFF), not the *_Soldier / *_NCO names some pools
+// historically assumed. A static list of the wrong names silently filters to
+// zero valid classes at spawn time, so the guard group is skipped even though
+// the faction mod is loaded. Enumerating the faction here keeps the pools
+// correct regardless of the mod's exact roster; the hardcoded lists below
+// remain as a graceful fallback for when the faction is genuinely absent.
+// ---------------------------------------------------------------------------
+private _tkaFound = [];
+private _tkpFound = [];
+{
+    if (getNumber (_x >> "scope") != 2) then { continue; };
+    if (getNumber (_x >> "side") != 1) then { continue; }; // 1 = west / BLUFOR
+    private _cn = configName _x;
+    if !(_cn isKindOf "Man") then { continue; };
+    switch (getText (_x >> "faction")) do
+    {
+        case "UK3CB_TKA_B": { _tkaFound pushBack _cn; };
+        case "UK3CB_TKP_B": { _tkpFound pushBack _cn; };
+    };
+} forEach ("true" configClasses (configFile >> "CfgVehicles"));
+
 // Takistan National Police (3CB UK3CB_TKP_B faction, BLUFOR)
 // No vanilla fallbacks: if 3CB TKP classes are absent from CfgVehicles the
 // group will not spawn rather than substituting wrong-faction units.
-private _tnpPool = [
-    "UK3CB_TKP_B_Soldier",
-    "UK3CB_TKP_B_Soldier_L",
-    "UK3CB_TKP_B_Soldier_AR",
-    "UK3CB_TKP_B_Soldier_GL",
-    "UK3CB_TKP_B_NCO"
-];
+private _tnpPool = if ((count _tkpFound) > 0) then { +_tkpFound } else {
+    [
+        "UK3CB_TKP_B_Soldier",
+        "UK3CB_TKP_B_Soldier_L",
+        "UK3CB_TKP_B_Soldier_AR",
+        "UK3CB_TKP_B_Soldier_GL",
+        "UK3CB_TKP_B_NCO"
+    ]
+};
 
-// Takistan National Police — medical/escort role.
+// Takistan National Police — medical/escort role. Prefers medic/doctor classes
+// from the resolved faction roster, falling back to the general TNP pool (then
+// to the hardcoded list) so the escort still spawns if no medic class exists.
 // No vanilla fallbacks: group skips gracefully if 3CB TKP classes are absent.
-private _tnpMedPool = [
-    "UK3CB_TKP_B_Medic",
-    "UK3CB_TKP_B_Soldier",
-    "UK3CB_TKP_B_NCO"
-];
+private _tnpMedPool = if ((count _tkpFound) > 0) then {
+    private _meds = _tkpFound select { ((toLower _x) find "medic") >= 0 || { ((toLower _x) find "doc") >= 0 } };
+    if ((count _meds) > 0) then { _meds } else { +_tkpFound }
+} else {
+    [
+        "UK3CB_TKP_B_Medic",
+        "UK3CB_TKP_B_Soldier",
+        "UK3CB_TKP_B_NCO"
+    ]
+};
 
 // Civilian medical personnel: doctors, nurses, paramedics (3CB + IDAP).
 // Invalid classes are silently skipped at spawn time.
@@ -90,13 +124,15 @@ private _ambVehiclePool = [
 
 // Takistan National Army (3CB UK3CB_TKA_B faction, BLUFOR)
 // No vanilla fallbacks: group skips gracefully if 3CB TKA classes are absent.
-private _tnaPool = [
-    "UK3CB_TKA_B_Soldier",
-    "UK3CB_TKA_B_Soldier_L",
-    "UK3CB_TKA_B_Soldier_AR",
-    "UK3CB_TKA_B_Soldier_LAT",
-    "UK3CB_TKA_B_NCO"
-];
+private _tnaPool = if ((count _tkaFound) > 0) then { +_tkaFound } else {
+    [
+        "UK3CB_TKA_B_Soldier",
+        "UK3CB_TKA_B_Soldier_L",
+        "UK3CB_TKA_B_Soldier_AR",
+        "UK3CB_TKA_B_Soldier_LAT",
+        "UK3CB_TKA_B_NCO"
+    ]
+};
 
 // Civilian population: common civs from 3CB MEC, TKC, and ADC factions.
 // Invalid classes are silently skipped at spawn time.
