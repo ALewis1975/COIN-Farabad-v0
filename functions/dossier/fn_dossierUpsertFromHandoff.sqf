@@ -130,18 +130,49 @@ private _leadId = [
 if (isNil "_leadId" || {!(_leadId isEqualType "")}) then { _leadId = ""; };
 
 // ---- Build / append record (array-of-pairs, serialization-safe) ---------
-private _seq = ["dossier_v0_seq", 0] call ARC_fnc_stateGet;
-if !(_seq isEqualType 0) then { _seq = 0; };
-_seq = _seq + 1;
-private _seqStr = str _seq;
-while {(count _seqStr) < 6} do { _seqStr = "0" + _seqStr; };
-private _dossierId = format ["DOS:%1", _seqStr];
+private _records = ["dossier_v0_records", []] call ARC_fnc_stateGet;
+if !(_records isEqualType []) then { _records = []; };
+
+// Upsert by detainee civ_uid: merge an existing open record rather than duplicate.
+private _pget = compile "params ['_arr','_key','_def']; private _r = _def; { if ((_x select 0) isEqualTo _key) exitWith { _r = _x select 1 }; } forEach _arr; _r";
+private _idx = -1;
+{
+    private _exIdentity = [_x, "identity", []] call _pget;
+    if !(_exIdentity isEqualType []) then { _exIdentity = []; };
+    private _exUid = [_exIdentity, "civ_uid", ""] call _pget;
+    if (_exUid isEqualTo _civUid) exitWith { _idx = _forEachIndex; };
+} forEach _records;
 
 private _now = serverTime;
+
+// Identity continuity: preserve dossier_id + created_ts when merging an existing record,
+// only consuming a new sequence id (and timestamp) for a genuinely new dossier.
+private _dossierId = "";
+private _createdTs = _now;
+private _seq = ["dossier_v0_seq", 0] call ARC_fnc_stateGet;
+if !(_seq isEqualType 0) then { _seq = 0; };
+
+if (_idx >= 0) then {
+    private _prev = _records select _idx;
+    private _prevId = [_prev, "dossier_id", ""] call _pget;
+    if ((_prevId isEqualType "") && {!(_prevId isEqualTo "")}) then { _dossierId = _prevId; };
+    private _prevCreated = [_prev, "created_ts", _now] call _pget;
+    if (_prevCreated isEqualType 0) then { _createdTs = _prevCreated; };
+};
+
+if (_dossierId isEqualTo "") then {
+    // New dossier: allocate the next sequence id.
+    _seq = _seq + 1;
+    private _seqStr = str _seq;
+    while {(count _seqStr) < 6} do { _seqStr = "0" + _seqStr; };
+    _dossierId = format ["DOS:%1", _seqStr];
+    ["dossier_v0_seq", _seq] call ARC_fnc_stateSet;
+};
+
 private _record = [
     ["dossier_id",  _dossierId],
     ["v",           0],
-    ["created_ts",  _now],
+    ["created_ts",  _createdTs],
     ["updated_ts",  _now],
     ["task_id",     _taskId],
     ["incident_type", _incType],
@@ -160,19 +191,6 @@ private _record = [
     ["lead_id",     _leadId]
 ];
 
-private _records = ["dossier_v0_records", []] call ARC_fnc_stateGet;
-if !(_records isEqualType []) then { _records = []; };
-
-// Upsert by detainee civ_uid: merge an existing open record rather than duplicate.
-private _pget = compile "params ['_arr','_key','_def']; private _r = _def; { if ((_x select 0) isEqualTo _key) exitWith { _r = _x select 1 }; } forEach _arr; _r";
-private _idx = -1;
-{
-    private _exIdentity = [_x, "identity", []] call _pget;
-    if !(_exIdentity isEqualType []) then { _exIdentity = []; };
-    private _exUid = [_exIdentity, "civ_uid", ""] call _pget;
-    if (_exUid isEqualTo _civUid) exitWith { _idx = _forEachIndex; };
-} forEach _records;
-
 if (_idx >= 0) then {
     _records set [_idx, _record];
 } else {
@@ -185,7 +203,6 @@ if !(_maxRec isEqualType 0) then { _maxRec = 100; };
 if (_maxRec < 1) then { _maxRec = 1; };
 while {(count _records) > _maxRec} do { _records deleteAt 0; };
 
-["dossier_v0_seq", _seq] call ARC_fnc_stateSet;
 ["dossier_v0_records", _records] call ARC_fnc_stateSet;
 
 // ---- OPS lifecycle log + read-model publish -----------------------------
