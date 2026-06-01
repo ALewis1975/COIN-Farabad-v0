@@ -11,7 +11,25 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
-## 2026-06-01 — Lane B / B2: Add OPS lifecycle logging to convoy subsystem
+## 2026-06-01 — Lane B / B3: Unify EPW detainee and SSE evidence into one auditable record
+
+**Branch/Commit:** copilot/read-only-architecture-audit @ a0d7628; TEST-LOG appended afterward
+
+**Scenario:** Lane B item **B3**. Detention and SSE/evidence were separate half-records. Introduced one auditable SHERIFF/SSE dossier joining CIVSUB identity (name/charges/wanted) with IED/SSE evidence (`ied_v0_case_files` matching the active incident task), emitting a confidence-weighted lead and feeding the SITREP. New server functions under `functions/dossier/` (registered in `CfgFunctions.hpp` as class `Dossier`): `ARC_fnc_dossierUpsertFromHandoff` (build/merge by `civ_uid`, combined confidence `0.6*idConf + 0.4*evConf`, emits a `RECON` lead via `ARC_fnc_leadCreate` with `strength = confidence`, OPS log `DOSSIER_OPENED`, persisted array-of-pairs in state key `dossier_v0_records`), `ARC_fnc_dossierBroadcast` (bounded JIP read model `ARC_pub_dossier`), and `ARC_fnc_dossierAnnexBuild` (SITREP annex). Hooked into `fn_civsubInteractHandoffSheriff` after the `DETENTION_HANDOFF` bundle emit; SITREP annex integrated in `fn_tocReceiveSitrep` parallel to the CIVSUB annex; state seeds added in `fn_stateInit`, reset clearing in `fn_resetAll`, and an initial publish in `fn_bootstrapServer`.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | sqflint parser-compat scan (strict) | `python3 scripts/dev/sqflint_compat_scan.py --strict <8 changed *.sqf>` | PASS | No known parser-compat patterns; uses `_hg`/`_keysFn`/`_pget` compiled helpers, `select` indexing |
+| 2 | sqflint warnings-as-errors | `sqflint -e w <each changed *.sqf>` | PASS | All 8 files exit 0 |
+| 3 | RPC owner-capture conformance | `bash tests/static/rpc_owner_capture_conformance_checks.sh` | PASS | 38/38 handlers; no regression from civsub handoff edit |
+| 4 | Acceptance — handoff captures evidence + confidence-weighted lead + SITREP annex | Static review of `fn_dossierUpsertFromHandoff` / `fn_dossierAnnexBuild` / `fn_tocReceiveSitrep` | BLOCKED | Logic verified by inspection; runtime BLOCKED (no Arma dedicated rig in sandbox) |
+| 5 | Dedicated/JIP — dossier reconstructs from server snapshot | Review `ARC_pub_dossier` published `setVariable [...,true]` on upsert/reset/bootstrap | BLOCKED | JIP-safe publish verified by inspection; runtime BLOCKED |
+| 6 | Persistence — versioned + reset-safe | Review `dossier_v0_*` seeds in `fn_stateInit` + clearing in `fn_resetAll` | PASS | Array-of-pairs serialization; new keys merge via `fn_stateLoad` without version bump |
+| 7 | Cleanup — pinned detainee transfer respects bubble | Review handoff hook placement (non-fatal, before pin block) | PASS | Existing `civsub_v1_pinned` transfer logic unchanged |
+
+**Result:** PASS (static/contract) / BLOCKED (runtime) — sqflint compat + warnings clean on all 8 changed SQF; RPC conformance unaffected; runtime acceptance BLOCKED pending an Arma dedicated rig.
+
+
 
 **Branch/Commit:** copilot/read-only-architecture-audit @ 678e2af; TEST-LOG appended afterward
 
