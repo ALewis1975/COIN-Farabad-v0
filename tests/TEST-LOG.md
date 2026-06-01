@@ -13,14 +13,16 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-06-01 — Fix TKP_B (Takistan National Police) hardcoded fallback pool classnames
 
-**Branch/Commit:** copilot/fix-tkp-fallback-pool @ 374ae2d; TEST-LOG appended afterward
+**Branch/Commit:** copilot/read-only-architecture-audit @ 09f2477 (initial fix); evidence-grounding revision + this TEST-LOG update appended afterward
 
-**Scenario:** Follow-up to the TKA guard-pool fix. The `_tnpPool`/`_tnpMedPool` hardcoded fallbacks in `data/farabad_site_templates.sqf` still used fabricated `*_Soldier`/`*_Soldier_L`/`*_Soldier_AR`/`*_Soldier_GL`/`*_NCO`/`*_Medic` names that do not exist in CfgVehicles, so when the 3CB TKP faction is absent (or enumeration yields nothing) the fallback would itself filter to an empty pool and skip prison/police guard groups. Replaced the fallbacks with the real abbreviated UK3CB_TKP_B roster (`_TL`, `_SL`, `_RIF_2`, `_RIF_1`, `_OFF`, `_MD`, `_MK`, `_MG`, `_ENG`, `_AR`, `_AT`) and pointed the medic fallback at `_MD`; also widened the dynamic medic filter to recognise the `_MD` suffix.
+**Scenario:** Follow-up to the TKA guard-pool fix. The `_tnpPool`/`_tnpMedPool` hardcoded fallbacks in `data/farabad_site_templates.sqf` still used fabricated `*_Soldier`/`*_Soldier_L`/`*_Soldier_AR`/`*_Soldier_GL`/`*_NCO`/`*_Medic` names that do not exist in CfgVehicles, so when the 3CB TKP faction is absent (or enumeration yields nothing) the fallback would itself filter to an empty pool and skip prison/police guard groups. Replaced the fallbacks with the real abbreviated UK3CB_TKP_B roster and pointed the medic fallback at `_MD`; also widened the dynamic medic filter to recognise the `_MD` suffix.
+
+**Evidence grounding (revision):** Every fallback classname is now corroborated by an external source rather than asserted. The infantry roles `_RIF_1`/`_RIF_2`/`_SL`/`_TL`/`_MK`/`_MD`/`_AR`/`_ENG`/`_MG` match the 3CB Takistan Police faction template (`Sparker95/Vindicta:src/Templates/Factions/3CB_TPD.sqf`); `_OFF` and `_Officer_U` appear in the live server RPT CfgVehicles deinit log (`serverRpts/ArmA3Server_x64_2026-05-30_12-27-09.rpt`) and `_OFF` is also placed in `docs/reference/unit-index.json`. The previously-listed `_AT` was removed because it appears in **no** source (not RHS/3CB police template, not the RPT); the RPT-confirmed `_Officer_U` was added.
 
 | # | Check | Command / Step | Result | Notes |
 |---|-------|----------------|--------|-------|
 | 1 | SQF parser-compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict data/farabad_site_templates.sqf` | PASS | No known parser-compat patterns. |
-| 2 | Template structural sanity | Bracket/brace/paren balance | PASS | `[`/`]` 73/73, `{`/`}` 18/18, `(`/`)` 85/85 balanced. |
+| 2 | Template structural sanity | Bracket/brace/paren balance | PASS | `[`/`]` 73/73, `{`/`}` 18/18, `(`/`)` 87/87 balanced. |
 | 3 | Runtime smoke | Dedicated Arma server: confirm TNP guards spawn at KarkanakPrison with 3CB TKP loaded | BLOCKED | Arma 3 dedicated runtime unavailable in this sandbox. |
 
 ---

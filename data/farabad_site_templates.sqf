@@ -79,8 +79,10 @@ private _tkpFound = [];
 // group will not spawn rather than substituting wrong-faction units.
 // Fallback classnames use the 3CB abbreviated roster (e.g. _AR/_TL/_OFF), NOT
 // the *_Soldier/*_NCO names — the latter do not exist in CfgVehicles and would
-// filter to an empty pool at spawn time, skipping the guard group. The classes
-// below are confirmed present in the live server CfgVehicles roster.
+// filter to an empty pool at spawn time, skipping the guard group. Every class
+// below is corroborated by an external source: the infantry roles (_RIF_1/_RIF_2/
+// _SL/_TL/_MK/_MD/_AR/_ENG/_MG) match the 3CB Takistan Police faction template,
+// and _OFF/_Officer_U appear in the live server RPT (CfgVehicles deinit log).
 private _tnpPool = if ((count _tkpFound) > 0) then { +_tkpFound } else {
     [
         "UK3CB_TKP_B_TL",
@@ -88,12 +90,12 @@ private _tnpPool = if ((count _tkpFound) > 0) then { +_tkpFound } else {
         "UK3CB_TKP_B_RIF_2",
         "UK3CB_TKP_B_RIF_1",
         "UK3CB_TKP_B_OFF",
+        "UK3CB_TKP_B_Officer_U",
         "UK3CB_TKP_B_MD",
         "UK3CB_TKP_B_MK",
         "UK3CB_TKP_B_MG",
         "UK3CB_TKP_B_ENG",
-        "UK3CB_TKP_B_AR",
-        "UK3CB_TKP_B_AT"
+        "UK3CB_TKP_B_AR"
     ]
 };
 
