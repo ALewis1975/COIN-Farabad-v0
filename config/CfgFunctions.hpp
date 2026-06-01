@@ -645,6 +645,7 @@ class CfgFunctions
         {
             file = "functions\logistics";
             class convoyStartupConfig {};
+            class convoyOpsLog {};            // uniform convoy lifecycle OPS logging (id+grid+actor)
             class execSpawnConvoy {};
             class execTickConvoy {};
             class execMsrThreatCheck {};  // T10: MSR/convoy threat awareness

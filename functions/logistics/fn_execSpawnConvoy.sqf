@@ -1078,4 +1078,21 @@ if (_incidentTypeU isEqualTo "ESCORT" && { _isVIP } && { !isNull _grp } && { (co
 };
 
 // Return netIds (lead first)
-(_vehicles apply { netId _x })
+private _spawnNetIds = (_vehicles apply { netId _x });
+
+// Lifecycle OPS log: convoy spawned (id + grid + actor), per Design Guide §4.6.
+if ((count _vehicles) > 0) then
+{
+    private _leadForLog = _vehicles select 0;
+    private _logPosSpawn = if (!isNull _leadForLog) then { getPosATL _leadForLog } else { _spawnPos };
+    [
+        "CONVOY_SPAWNED",
+        format ["Convoy spawned: %1 vehicle(s) for task %2.", count _vehicles, _taskId],
+        _logPosSpawn,
+        _taskId,
+        "",
+        [["vehicleCount", count _vehicles], ["type", _incidentTypeU]]
+    ] call ARC_fnc_convoyOpsLog;
+};
+
+_spawnNetIds
