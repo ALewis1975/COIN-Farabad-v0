@@ -11,6 +11,22 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-06-01 — Threat scheduler district base-position fallback + SITEPOP guard class pool resolution (Mode D)
+
+**Branch/Commit:** copilot/fix-threat-baseposition-guard-pool @ 09dcbe9; TEST-LOG appended afterward
+
+**Scenario:** Triage of playtest RPT `serverRpts/ArmA3Server_x64_2026-05-30_12-27-09.rpt`. Command cycle (lead → TOC queue → incident → close) confirmed working (49 `LEAD_CREATED`, 7 `TOC_QUEUE_SUBMIT`, 6 `INCIDENT_CLOSED` all `SUCCEEDED`, zero SQF runtime/`[ARC]…ERROR` entries). Two non-fatal warnings fixed: (1) 160× `ARC_fnc_threatScheduleEvent: no base position for district=DXX - skipping` — the base-position fallback chain only checked a non-existent `district_<id>_obj` marker, so districts were skipped whenever no convoy/active-incident position was available; added the canonical `civsub_v1_districts` centroid (keys `D01`..`D20`, `[x,y]`) as the per-district fallback. (2) `ARC_fnc_sitePopBuildGroup: site 'PresidentialPalace'/'EmbassyCompound' role 'guard' — no valid classes in pool; group skipped` — the `_tnaPool`/`_tnpPool` classnames (`UK3CB_TKA_B_Soldier`, `_NCO`, …) are fabricated; the RPT proves the 3CB faction IS loaded but uses abbreviated names (`UK3CB_TKA_B_AR`/`_TL`/`_OFF`). Guard pools now enumerate scope=2 BLUFOR `Man` classes by faction from `CfgVehicles` (same pattern as `ARC_fnc_opsSpawnLocalSupport`), keeping the hardcoded lists as a graceful fallback when the faction is absent.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | SQF parser-compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatScheduleEvent.sqf data/farabad_site_templates.sqf` | PASS | No known parser-compat patterns. |
+| 2 | SQF lint (warnings fail) | `sqflint -e w` on both changed files | PASS | Exit 0, no warnings. |
+| 3 | Template structural sanity | Bracket/brace/paren balance + returns top-level ARRAY | PASS | `[`/`]`, `{`/`}`, `(`/`)` balanced; pools still referenced 16×. |
+| 4 | RPT evidence cross-check | Grep proven TKA/TKP man classes in RPT | PASS | `UK3CB_TKA_B_AR`/`_TL`/`_OFF` etc. present; `*_Soldier`/`*_NCO` absent. |
+| 5 | Runtime smoke | Dedicated Arma server: confirm guards spawn at palace/embassy and threats schedule per district | BLOCKED | Arma 3 dedicated runtime unavailable in this sandbox. |
+
+---
+
 ## 2026-05-30 — Make Arma SQF preflight green: clear sqflint compat + lint findings on changed files (Mode B)
 
 **Branch/Commit:** copilot/prevent-assigning-leads-as-tasks @ 5f9db0f (compat fixes) + d2eb603 (lint-warning cleanup); TEST-LOG appended afterward
