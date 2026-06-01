@@ -25,6 +25,23 @@ grep -q 'activeIncidentMissionMeta' "$CREATE" || fail "incidentCreate does not p
 grep -q 'activeIncidentMissionMeta' "$ROOT/functions/core/fn_stateInit.sqf" || fail "stateInit lacks activeIncidentMissionMeta default"
 pass "selected civic mission metadata is persisted with active incidents"
 
+# Mission metadata must survive the queue -> lead -> incident path so that
+# METT-TC-seeded and TOC-approved civic missions keep their structured metadata,
+# not only directly auto-rolled incidents.
+LEADCREATE="$ROOT/functions/core/fn_leadCreate.sqf"
+LEADBYID="$ROOT/functions/core/fn_leadConsumeById.sqf"
+LEADNEXT="$ROOT/functions/core/fn_leadConsumeNext.sqf"
+DECIDE="$ROOT/functions/command/fn_intelQueueDecide.sqf"
+
+grep -q '_missionMeta' "$LEADCREATE" || fail "leadCreate does not accept civic mission metadata"
+grep -q '_missionMeta\]' "$LEADCREATE" || fail "leadCreate does not append mission metadata to the lead record"
+grep -q '_missionMeta\]' "$LEADBYID" || fail "leadConsumeById drops mission metadata when rebuilding the lead"
+grep -q '_missionMeta\]' "$LEADNEXT" || fail "leadConsumeNext drops mission metadata when rebuilding the lead"
+grep -q '"missionMeta"' "$DECIDE" || fail "intelQueueDecide INCIDENT case does not forward payload missionMeta"
+grep -q 'TOC_INCIDENT", _civicMeta' "$DECIDE" || fail "intelQueueDecide does not pass missionMeta into the seed lead"
+grep -q '_lMeta' "$CREATE" || fail "incidentCreate lead branch does not read mission metadata from the lead"
+pass "civic mission metadata flows through the queue/lead path end-to-end"
+
 for field in id missionSet subtype incidentType displayName locations siteTypes districts civsubFactors endState threatHooks outcomeDeltas; do
     grep -q "\[\"$field\"" "$CAT" || fail "catalog missing required field: $field"
 done

@@ -10,13 +10,14 @@
       ARRAY - lead entry (same structure as leadConsumeNext), or [] if not found.
 
     Lead entry format:
-      [id, incidentType, displayName, pos, strength, createdAt, expiresAt, sourceTaskId, sourceIncidentType, threadId, tag]
+      [id, incidentType, displayName, pos, strength, createdAt, expiresAt, sourceTaskId, sourceIncidentType, threadId, tag, missionMeta]
 */
 
 if (!isServer) exitWith {[]};
 
 params [ ["_leadId", "", [""]] ];
-_leadId = trim _leadId;
+private _trimFn = compile "params ['_s']; trim _s";
+_leadId = [_leadId] call _trimFn;
 if (_leadId isEqualTo "") exitWith {[]};
 
 // Prune expired leads first.
@@ -28,7 +29,7 @@ if (!(_leads isEqualType [])) then { _leads = []; };
 if (_leads isEqualTo []) exitWith {[]};
 
 private _idx = -1;
-{ if (_x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _leadId }) exitWith { _idx = _forEachIndex; }; } forEach _leads;
+{ if (_x isEqualType [] && { (count _x) >= 1 } && { (_x select 0) isEqualTo _leadId }) exitWith { _idx = _forEachIndex; }; } forEach _leads;
 
 if (_idx < 0) exitWith {[]};
 
@@ -38,7 +39,7 @@ private _lead = _leads deleteAt _idx;
 // If this lead had an approximate circle marker, remove it once consumed into a task.
 if (_lead isEqualType [] && { (count _lead) >= 1 }) then
 {
-    private _lid = _lead # 0;
+    private _lid = _lead select 0;
     private _mk = format ["ARC_leadCircle_%1", _lid];
     if (_mk in allMapMarkers) then { deleteMarker _mk; };
     missionNamespace setVariable [format ["ARC_leadCircleExpiresAt_%1", _lid], nil];
@@ -61,9 +62,11 @@ if (_lead isEqualType [] && { (count _lead) >= 4 }) then
         ["_sourceTaskId", ""],
         ["_sourceType", ""],
         ["_threadId", ""],
-        ["_tag", ""]
+        ["_tag", ""],
+        ["_missionMeta", []]
     ];
 
+    if (!(_missionMeta isEqualType [])) then { _missionMeta = []; };
     private _typeU = toUpper _type;
     private _sourceU = toUpper _sourceType;
 
@@ -90,7 +93,7 @@ if (_lead isEqualType [] && { (count _lead) >= 4 }) then
     };
 
     // Rebuild lead entry with any edits
-    _lead = [_id, _type, _disp, _pos, _strength, _createdAt, _expiresAt, _sourceTaskId, _sourceType, _threadId, _tag];
+    _lead = [_id, _type, _disp, _pos, _strength, _createdAt, _expiresAt, _sourceTaskId, _sourceType, _threadId, _tag, _missionMeta];
 };
 
 // Breadcrumbs for TOC/debug
@@ -99,7 +102,7 @@ if (_lead isEqualType [] && { (count _lead) >= 4 }) then
 // Track lead end-state (consumed into an actionable task)
 if (_lead isEqualType [] && { (count _lead) >= 1 }) then
 {
-    private _lid = _lead # 0;
+    private _lid = _lead select 0;
     private _lh = ["leadHistory", []] call ARC_fnc_stateGet;
     if (!(_lh isEqualType [])) then { _lh = []; };
     _lh pushBack [_lid, "CONSUMED", serverTime];

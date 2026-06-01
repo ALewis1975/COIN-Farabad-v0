@@ -316,7 +316,7 @@ private _missionMeta = [];
 if (_useLead) then
 {
     // Lead entry format:
-    // [id, incidentType, displayName, pos, strength, createdAt, expiresAt, sourceTaskId, sourceIncidentType, threadId, tag]
+    // [id, incidentType, displayName, pos, strength, createdAt, expiresAt, sourceTaskId, sourceIncidentType, threadId, tag, missionMeta]
     _lead params [
         ["_lId", ""],
         ["_lType", ""],
@@ -328,7 +328,8 @@ if (_useLead) then
         "",
         "",
         ["_lThread", ""],
-        ["_lTag", ""]
+        ["_lTag", ""],
+        ["_lMeta", []]
     ];
 
     _leadId = _lId;
@@ -340,7 +341,7 @@ if (_useLead) then
     _threadId = _lThread;
     _leadTag = _lTag;
     _markerName = ""; // lead-driven incidents may not align with a named Eden marker
-    _missionMeta = [];
+    _missionMeta = if (_lMeta isEqualType []) then { +_lMeta } else { [] };
 }
 else
 {
