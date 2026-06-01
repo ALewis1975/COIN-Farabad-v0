@@ -11,6 +11,21 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-06-01 — Lane B / B2: Add OPS lifecycle logging to convoy subsystem
+
+**Branch/Commit:** copilot/read-only-architecture-audit @ 678e2af; TEST-LOG appended afterward
+
+**Scenario:** Lane B item **B2**. Convoy lifecycle transitions partly bypassed the OPS/intel log (Design Guide §4.6) and existing OPS lines lacked a uniform `id`/`actor` signature. Added a server helper `ARC_fnc_convoyOpsLog` (registered in `CfgFunctions.hpp` under Logistics) that routes a convoy transition through `ARC_fnc_intelLog` category `OPS` with a consistent meta of `id` (active convoy task id, resolved from `activeTaskId`), `actor` (convoy callsign resolved from `activeConvoyDesignationProfile[2]`, default `CONVOY`), plus `event`/`lifecycle`. Grid is auto-added by `intelLog`. Wired the four lifecycle points: **spawn** (`CONVOY_SPAWNED`, new, was diag_log-only in `fn_execSpawnConvoy`), **leg** (`CONVOY_DEPARTED`, converted existing call to the helper so it now carries actor), **ambush** (`CONVOY_AMBUSH` / `CONVOY_AMBUSH_CLEAR`, new at contact onset/clear, was diag_log-only), and **complete** (`CONVOY_COMPLETE`, new terminal at dismount-complete). Entries land in `ARC_pub_opsLog`, which `ARC_fnc_intelBroadcast` already bounds to the most-recent 40 OPS entries (≤80) and broadcasts JIP-safe via `setVariable [...,true]`.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | SQF parser-compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/logistics/fn_convoyOpsLog.sqf functions/logistics/fn_execSpawnConvoy.sqf functions/logistics/fn_execTickConvoy.sqf` | PASS | `scanned 3 file(s); no known parser-compat patterns found`. |
+| 2 | SQF lint (warnings fail) | `sqflint -e w` on all three changed SQF files | PASS | Exit 0 on each; no warnings. |
+| 3 | OPS → ARC_pub_opsLog flow | Verified `fn_intelBroadcast.sqf:16,24,27` selects OPS-category entries, bounds to last 40, and `setVariable ["ARC_pub_opsLog", _opsSlice, true]` | PASS | id+grid+actor present; bounded & JIP-visible. |
+| 4 | Runtime smoke | Dedicated Arma server: drive a convoy and confirm CONVOY_SPAWNED/DEPARTED/AMBUSH/COMPLETE appear in OPS board | BLOCKED | Arma 3 dedicated runtime unavailable in this sandbox. |
+
+---
+
 ## 2026-06-01 — Lane B / B1: Re-baseline Threat v0/IED docs to shipped implementation (Mode F, docs-only)
 
 **Branch/Commit:** copilot/read-only-architecture-audit @ 0e1ee35; TEST-LOG appended afterward
