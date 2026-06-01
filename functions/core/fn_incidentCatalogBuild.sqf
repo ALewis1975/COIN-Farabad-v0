@@ -9,22 +9,24 @@
 */
 
 private _catalog = [];
+
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _trimFn = compile "params ['_s']; trim _s";
+private _fileExistsFn = compile "params ['_p']; fileExists _p";
+
 private _basePath = "data\incident_markers.sqf";
-if (fileExists _basePath) then
+if ([_basePath] call _fileExistsFn) then
 {
     private _base = call compile preprocessFileLineNumbers _basePath;
     if (_base isEqualType []) then { _catalog append _base; };
 };
 
 private _civicPath = "data\coin_civic_mission_catalog.sqf";
-if !(fileExists _civicPath) exitWith { _catalog };
+if !([_civicPath] call _fileExistsFn) exitWith { _catalog };
 
 private _records = call compile preprocessFileLineNumbers _civicPath;
 if (!(_records isEqualType [])) exitWith { _catalog };
-
-private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
-private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
-private _trimFn = compile "params ['_s']; trim _s";
 
 private _siteMarkerMap = missionNamespace getVariable ["ARC_worldTerrainSiteMarkers", createHashMap];
 if (!(_siteMarkerMap isEqualType createHashMap)) then { _siteMarkerMap = createHashMap; };
@@ -42,7 +44,7 @@ private _getDistrict = {
     if ((!(_d isEqualType createHashMap) || { (count _d) == 0 }) && { !isNil "ARC_fnc_civsubDistrictsCreateDefaults" }) then
     {
         if ((count _districtDefaults) == 0) then { _districtDefaults = call ARC_fnc_civsubDistrictsCreateDefaults; };
-        if (_districtDefaults isEqualType createHashMap) then { _d = _districtDefaults getOrDefault [_did, createHashMap]; };
+        if (_districtDefaults isEqualType createHashMap) then { _d = [_districtDefaults, _did, createHashMap] call _hg; };
     };
 
     if (!(_d isEqualType createHashMap)) then { createHashMap } else { _d }

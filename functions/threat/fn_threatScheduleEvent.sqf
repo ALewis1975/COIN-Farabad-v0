@@ -46,6 +46,7 @@ if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabl
 if (!_enabled) exitWith {false};
 
 private _trimFn = compile "params ['_s']; trim _s";
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _typeU = toUpper ([_threatType] call _trimFn);
 if (_typeU isEqualTo "") then { _typeU = "IED"; };
 private _subtypeU = toUpper ([_threatSubtype] call _trimFn);
@@ -165,7 +166,7 @@ if (_basePos isEqualTo [] || { (count _basePos) < 2 }) then
 
     if (_d isEqualType createHashMap && { (count _d) > 0 }) then
     {
-        private _centroid = _d getOrDefault ["centroid", []];
+        private _centroid = [_d, "centroid", []] call _hg;
         if (_centroid isEqualType [] && { (count _centroid) >= 2 }) then
         {
             _basePos = +_centroid;

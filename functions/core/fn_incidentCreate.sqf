@@ -11,11 +11,12 @@ if (!isServer) exitWith {false};
 
 params [ ["_seedLeadId", "", [""]] ];
 if (!(_seedLeadId isEqualType "")) then { _seedLeadId = ""; };
-_seedLeadId = trim _seedLeadId;
+private _trimFn = compile "params ['_s']; trim _s";
+_seedLeadId = [_seedLeadId] call _trimFn;
 
 // Prevent overlapping incidents
 private _activeTaskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
-if (_activeTaskId isNotEqualTo "") exitWith {false};
+if (!(_activeTaskId isEqualTo "")) exitWith {false};
 
 private _catalog = if (!isNil "ARC_fnc_incidentCatalogBuild") then {
     [] call ARC_fnc_incidentCatalogBuild
@@ -81,7 +82,7 @@ if (_orders isEqualType [] && { (count _orders) > 0 }) then
 
     for "_i" from 0 to ((count _orders) - 1) do
     {
-        private _o = _orders # _i;
+        private _o = _orders select _i;
         if !(_o isEqualType [] && { (count _o) >= 7 }) then { continue; };
         _o params ["_oid", "_issuedAt", "_status", "_orderType", "_targetGroup", "_data", "_meta"];
         if !(_orderType isEqualType "") then { continue; };
@@ -94,10 +95,10 @@ if (_orders isEqualType [] && { (count _orders) > 0 }) then
         if (_meta isEqualType []) then
         {
             private _idxA = -1;
-            { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo "acceptedAt" }) exitWith { _idxA = _forEachIndex; }; } forEach _meta;
+            { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo "acceptedAt" }) exitWith { _idxA = _forEachIndex; }; } forEach _meta;
             if (_idxA >= 0) then
             {
-                private _v = (_meta # _idxA) # 1;
+                private _v = (_meta select _idxA) select 1;
                 if (_v isEqualType 0) then { _acceptedAt = _v; };
             };
         };
@@ -120,8 +121,8 @@ if (_leadOrderIdx >= 0) then
     if (_leadOrderData isEqualType []) then
     {
         private _idxL = -1;
-        { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo "lead" }) exitWith { _idxL = _forEachIndex; }; } forEach _leadOrderData;
-        if (_idxL >= 0) then { _leadRec = (_leadOrderData # _idxL) # 1; };
+        { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo "lead" }) exitWith { _idxL = _forEachIndex; }; } forEach _leadOrderData;
+        if (_idxL >= 0) then { _leadRec = (_leadOrderData select _idxL) select 1; };
     };
 
     if (_leadRec isEqualType [] && { (count _leadRec) > 0 }) then
@@ -142,7 +143,7 @@ if (_leadOrderIdx >= 0) then
 
 // Seed lead from INCIDENT queue handler (TOC approved a specific incident directly).
 // This is the only remaining path that consumes a lead without a prior accepted LEAD order.
-if (!_useLead && { _seedLeadId isNotEqualTo "" }) then
+if (!_useLead && { !(_seedLeadId isEqualTo "") }) then
 {
     private _tmp = [_seedLeadId] call ARC_fnc_leadConsumeById;
     if (_tmp isEqualType [] && { (count _tmp) > 0 }) then
@@ -187,8 +188,8 @@ if (_hist isEqualType [] && { (count _hist) > 0 }) then
     private _last = _hist select ((count _hist) - 1);
     if (_last isEqualType [] && { (count _last) >= 3 }) then
     {
-        _lastMarker = _last # 1;
-        _lastTypeU = toUpper (_last # 2);
+        _lastMarker = _last select 1;
+        _lastTypeU = toUpper (_last select 2);
     };
 };
 
@@ -305,7 +306,7 @@ if (!_useLead) then
         private _acc = 0;
 
         {
-            _acc = _acc + (_weights # _forEachIndex);
+            _acc = _acc + (_weights select _forEachIndex);
             if (_r <= _acc) exitWith { _idx = _forEachIndex; };
         } forEach _choices;
     };
@@ -352,7 +353,7 @@ if (_useLead) then
 }
 else
 {
-    private _pick = _choices # _idx;
+    private _pick = _choices select _idx;
     _pick params ["_mkr", "_disp", "_t", ["_meta", []]]; 
 
     _markerName = _mkr;
@@ -463,7 +464,7 @@ if (!(_threadId isEqualTo "")) then
 // If this incident was generated from an accepted LEAD order, mark that order as completed (consumed into this task).
 if (_leadOrderIdx >= 0 && { _leadOrderIdx < (count _orders) }) then
 {
-    private _ord = _orders # _leadOrderIdx;
+    private _ord = _orders select _leadOrderIdx;
     if (_ord isEqualType [] && { (count _ord) >= 7 }) then
     {
         _ord params ["_oid", "_issuedAt", "_status", "_orderType", "_targetGroup", "_data", "_meta"];
@@ -472,7 +473,7 @@ if (_leadOrderIdx >= 0 && { _leadOrderIdx < (count _orders) }) then
             params ["_pairs", "_k", "_v"];
             if !(_pairs isEqualType []) then { _pairs = []; };
             private _j = -1;
-            { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _j = _forEachIndex; }; } forEach _pairs;
+            { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _j = _forEachIndex; }; } forEach _pairs;
             if (_j < 0) then { _pairs pushBack [_k, _v]; } else { _pairs set [_j, [_k, _v]]; };
             _pairs
         };
