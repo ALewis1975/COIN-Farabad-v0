@@ -26,6 +26,7 @@
     ["activeIncidentMarker", ""],
     ["activeIncidentDisplayName", ""],
     ["activeIncidentCreatedAt", -1],
+    ["activeIncidentMissionMeta", []],
 
     // Assignment/acceptance workflow
     ["activeIncidentAccepted", false],

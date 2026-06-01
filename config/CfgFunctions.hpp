@@ -33,6 +33,7 @@ class CfgFunctions
             class s1EchelonClassify {};
 
             class incidentLoop {};
+            class incidentCatalogBuild {};
             class incidentTick {};
             class incidentCreate {};
             class incidentSeedQueue {};

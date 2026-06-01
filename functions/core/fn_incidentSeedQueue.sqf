@@ -46,7 +46,11 @@ private _safeModeEnabled = missionNamespace getVariable ["ARC_safeModeEnabled", 
 if (!(_safeModeEnabled isEqualType true) && !(_safeModeEnabled isEqualType false)) then { _safeModeEnabled = false; };
 
 // Load incident catalog
-private _catalog = call compile preprocessFileLineNumbers "data\incident_markers.sqf";
+private _catalog = if (!isNil "ARC_fnc_incidentCatalogBuild") then {
+    [] call ARC_fnc_incidentCatalogBuild
+} else {
+    call compile preprocessFileLineNumbers "data\incident_markers.sqf"
+};
 if (!(_catalog isEqualType [])) exitWith {false};
 
 // Campaign stage: fresh mission = 0 (favours mundane tasks).
@@ -66,7 +70,7 @@ private _hgObj       = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, 
 
 {
     if !(_x isEqualType []) then { continue; };
-    _x params ["_rawMarker", "_displayName", "_incidentType"];
+    _x params ["_rawMarker", "_displayName", "_incidentType", ["_missionMeta", []]];
 
     private _m = [_rawMarker] call ARC_fnc_worldResolveMarker;
     if (!(_m in allMapMarkers)) then { continue; };
@@ -134,7 +138,7 @@ private _hgObj       = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, 
         private _nearObjId = "";
         private _nearObjD  = 1e12;
         {
-            _x params [["_lid", "", [""]], ["_ldisplay", "", [""]], ["_lpos", [], [[]]]];
+            _x params [["_lid", "", [""]], "", ["_lpos", [], [[]]]];
             if ((count _lpos) >= 2) then {
                 private _d = _mPos distance2D _lpos;
                 if (_d < _nearObjD && {_d < 800}) then {
@@ -159,7 +163,7 @@ private _hgObj       = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, 
 
     if (_w <= 0) then { continue; };
 
-    _choices pushBack [_m, _displayName, _incidentType];
+    _choices pushBack [_m, _displayName, _incidentType, _missionMeta];
     _weights pushBack _w;
 
 } forEach _catalog;
@@ -194,7 +198,7 @@ for "_i" from 0 to (_seedCount - 1) do
     };
 
     private _pick = _choices select _idx;
-    _pick params ["_mkr", "_disp", "_incType"];
+    _pick params ["_mkr", "_disp", "_incType", ["_missionMeta", []]];
 
     private _pos = getMarkerPos ([_mkr] call ARC_fnc_worldResolveMarker);
     private _posATL = +_pos;
@@ -207,7 +211,8 @@ for "_i" from 0 to (_seedCount - 1) do
         ["marker",      _mkr],
         ["incidentType",_incType],
         ["displayName", _disp],
-        ["pos",         _posATL]
+        ["pos",         _posATL],
+        ["missionMeta", _missionMeta]
     ];
 
     [

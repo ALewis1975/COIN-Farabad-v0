@@ -193,6 +193,7 @@ if (_rerollEnv) then
 ["activeIncidentMarker", ""] call ARC_fnc_stateSet;
 ["activeIncidentDisplayName", ""] call ARC_fnc_stateSet;
 ["activeIncidentCreatedAt", -1] call ARC_fnc_stateSet;
+["activeIncidentMissionMeta", []] call ARC_fnc_stateSet;
 ["activeIncidentAccepted", false] call ARC_fnc_stateSet;
 ["activeIncidentAcceptedAt", -1] call ARC_fnc_stateSet;
 
@@ -385,6 +386,7 @@ missionNamespace setVariable ["ARC_activeIncidentMarker", "", true];
 missionNamespace setVariable ["ARC_activeIncidentType", "", true];
 missionNamespace setVariable ["ARC_activeIncidentDisplayName", "", true];
 missionNamespace setVariable ["ARC_activeIncidentPos", [], true];
+missionNamespace setVariable ["ARC_activeIncidentMissionMeta", [], true];
 missionNamespace setVariable ["ARC_activeIncidentAccepted", false, true];
 missionNamespace setVariable ["ARC_activeIncidentAcceptedAt", -1, true];
 missionNamespace setVariable ["ARC_activeIncidentAcceptedByGroup", "", true];

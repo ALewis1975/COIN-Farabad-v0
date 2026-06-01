@@ -11,6 +11,9 @@
         6: STRING - (optional) source incident type
         7: STRING - (optional) threadId ("ARC_thr_#")
         8: STRING - (optional) tag (e.g. "CMDNODE")
+        9: ARRAY  - (optional) civic mission metadata (pairs array; passed
+                    through to the resulting incident so catalog-seeded missions
+                    keep their structured metadata across the queue/lead path)
 
     Returns:
         STRING - leadId ("" if failed)
@@ -27,12 +30,14 @@ params [
     ["_sourceTaskId", ""],
     ["_sourceIncidentType", ""],
     ["_threadId", ""],
-    ["_tag", ""]
+    ["_tag", ""],
+    ["_missionMeta", []]
 ];
 
 if (_leadType isEqualTo "" || _displayName isEqualTo "") exitWith {""};
 if !(_pos isEqualType []) exitWith {""};
 if ((count _pos) < 2) exitWith {""};
+if (!(_missionMeta isEqualType [])) then { _missionMeta = []; };
 
 _strength = (_strength max 0) min 1;
 
@@ -50,7 +55,7 @@ private _expiresAt = if (_expiresIn > 0) then { _now + _expiresIn } else { -1 };
 private _leads = ["leadPool", []] call ARC_fnc_stateGet;
 if (!(_leads isEqualType [])) then { _leads = []; };
 
-_leads pushBack [_id, _leadType, _displayName, _pos, _strength, _now, _expiresAt, _sourceTaskId, _sourceIncidentType, _threadId, _tag];
+_leads pushBack [_id, _leadType, _displayName, _pos, _strength, _now, _expiresAt, _sourceTaskId, _sourceIncidentType, _threadId, _tag, _missionMeta];
 
 // Cap pool size to keep it sane (oldest drops off first).
 // DEBT-01: cap is configurable via ARC_leadPoolCap (clamped to a safe range)
