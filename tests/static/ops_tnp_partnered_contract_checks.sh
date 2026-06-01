@@ -52,6 +52,20 @@ check "ARC_opsTnpPartneredRequestEnabled" "initServer.sqf" "ARC_opsTnpPartneredR
 check "ARC_fnc_opsTnpPartneredRequest" "functions/core/fn_tocInitPlayer.sqf" "TNP partnered request wired as a player addAction"
 check "class opsTnpPartneredRequest" "config/CfgFunctions.hpp" "opsTnpPartneredRequest registered in CfgFunctions"
 
+# Consumer: the TNP_PARTNERED lead tag is carried onto the active incident and
+# forces host-nation local support to spawn regardless of incident type.
+LS="functions/ops/fn_opsSpawnLocalSupport.sqf"
+check "activeLeadTag" "$LS" "Local-support spawn reads the active incident lead tag"
+check "TNP_PARTNERED" "$LS" "Local-support spawn recognises the TNP_PARTNERED lead tag"
+check "_isTnpPartnered" "$LS" "Local-support spawn forces eligibility for TNP_PARTNERED leads"
+
+# Prompts: selections use two-button guiMessage choices (reliably captured), and
+# the dead free-text/parseNumber override pattern is gone.
+check "TNP Partnered Ops — Task" "$REQ" "Partnered task type captured via a two-button choice"
+check "TNP Partnered Ops — Urgency" "$REQ" "Urgency captured via a two-button choice"
+check_absent "parseNumber" "$REQ" "No illusory free-text priority parse remains"
+check_absent "isEqualType \"\") then" "$REQ" "No illusory guiMessage free-text capture remains"
+
 if [[ "$pass" != true ]]; then
   exit 1
 fi

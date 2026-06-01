@@ -7,15 +7,23 @@
     Police PARTNERED element — a partnered patrol or a partnered checkpoint — at a
     location, without manual map-clicking. Derives the request position from the
     operator's marking context (cursor target, then own position), lets the
-    operator confirm/override the partnered task type, priority and remarks, then
-    remoteExecs the existing, unchanged ARC_fnc_intelQueueSubmit path so the
-    LEAD_REQUEST lands in the TOC queue for S3/Command approval.
+    operator pick the partnered task type (PATROL/CHECKPOINT) and urgency via
+    button choices, then remoteExecs the existing, unchanged ARC_fnc_intelQueueSubmit
+    path so the LEAD_REQUEST lands in the TOC queue for S3/Command approval.
+
+    Selections use BIS_fnc_guiMessage two-button prompts (which return a Boolean),
+    so every choice is actually captured; remarks are composed from the marking
+    context. (Free-text capture is not attempted, as BIS_fnc_guiMessage cannot
+    return typed text.)
 
     Doctrine: partnered-ops requests are never assigned directly as field tasks.
     They enter the TOC queue (PENDING) and, once approved, flow through the
     standard lead → TOC backlog path (ARC_fnc_intelQueueDecide → ARC_fnc_leadCreate).
-    The partnered lead is tagged TNP_PARTNERED so the incident generator can prefer
-    it and stand up host-nation support (e.g. checkpoint garrison/patrol).
+    The partnered lead is tagged TNP_PARTNERED, which is carried end-to-end onto the
+    active incident (activeLeadTag) and consumed by ARC_fnc_opsSpawnLocalSupport to
+    force host-nation police/army support to stand up at the incident regardless of
+    the incident type (so the PATROL variant gets a partnered element too, not just
+    the CHECKPOINT variant which is already eligible).
 
     Reuses (does not duplicate) the server-side sender validation, queue id
     allocation, broadcast and approval plumbing already provided by the TOC queue
@@ -66,50 +74,41 @@ private _lines = [
     format ["Mark: %1", _markMethod],
     format ["Grid: %1", _grid],
     "",
-    "Confirm or override partnered task, priority and remarks when prompted."
+    "Pick the partnered task and urgency when prompted."
 ];
 private _summaryText = _lines joinString "\n";
 
 private _ok = [_summaryText, "TNP Partnered Ops", true, true] call BIS_fnc_guiMessage;
 if (!_ok) exitWith { false };
 
-private _trimFn = compile "params ['_s']; trim _s";
-
-// Editable default: partnered task type (PATROL / CHECKPOINT).
-// Drives the lead type so the incident generator can stand up the right
-// host-nation support (CHECKPOINT garrison/patrol or partnered patrol).
-private _task = "PATROL";
-private _taskPrompt = ["Partnered task PATROL / CHECKPOINT (default: PATROL):", _task] call BIS_fnc_guiMessage;
-if (_taskPrompt isEqualType "") then
-{
-    private _tU = toUpper ([_taskPrompt] call _trimFn);
-    if (_tU find "CHECKPOINT" >= 0) then { _task = "CHECKPOINT"; };
-    if (_tU find "PATROL" >= 0) then { _task = "PATROL"; };
-};
+// Partnered task type (PATROL / CHECKPOINT). A two-button BIS_fnc_guiMessage
+// returns TRUE for the first button and FALSE for the second, so the choice is
+// reliably captured. Drives the lead type so the incident generator stands up the
+// right host-nation support (CHECKPOINT garrison/patrol or partnered patrol).
+private _taskIsPatrol = [
+    "Select the partnered task type:",
+    "TNP Partnered Ops — Task",
+    "PATROL",
+    "CHECKPOINT"
+] call BIS_fnc_guiMessage;
+private _task = if (_taskIsPatrol) then { "PATROL" } else { "CHECKPOINT" };
 private _leadType = _task;
 
-// Editable default: priority (1 highest .. 5 lowest).
-private _pri = 3;
-private _priPrompt = ["Priority 1 (high) .. 5 (low) (default: 3):", "3"] call BIS_fnc_guiMessage;
-if (_priPrompt isEqualType "") then
-{
-    private _pTrim = [_priPrompt] call _trimFn;
-    private _pNum = parseNumber _pTrim;
-    if (_pNum >= 1 && { _pNum <= 5 }) then { _pri = round _pNum; };
-};
+// Urgency. Two reliable button choices (BIS_fnc_guiMessage cannot return a typed
+// number): PRIORITY (1) or ROUTINE (3). Maps to the lead priority and strength.
+private _isPriority = [
+    "Select urgency:",
+    "TNP Partnered Ops — Urgency",
+    "PRIORITY (1)",
+    "ROUTINE (3)"
+] call BIS_fnc_guiMessage;
+private _pri = if (_isPriority) then { 1 } else { 3 };
 
-private _strength = switch (_pri) do
-{
-    case 1: { 0.80 };
-    case 2: { 0.70 };
-    case 4: { 0.45 };
-    case 5: { 0.35 };
-    default { 0.55 };
-};
+private _strength = if (_isPriority) then { 0.80 } else { 0.55 };
 
-// Remarks (optional).
-private _remarksPrompt = ["Remarks (optional):", ""] call BIS_fnc_guiMessage;
-private _remarks = if (_remarksPrompt isEqualType "") then { [_remarksPrompt] call _trimFn } else { "" };
+// Remarks are composed from the marking context (free text cannot be captured via
+// BIS_fnc_guiMessage).
+private _remarks = format ["Partnered %1 requested via %2.", _task, _markMethod];
 
 private _ttl = 3600;
 
