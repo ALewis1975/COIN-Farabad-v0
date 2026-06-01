@@ -801,7 +801,7 @@ if (_stageEnabled) then
             createVehicleCrew _veh;
 
             private _crew = crew _veh;
-            { if (!isNull _x) then { _x allowGetIn true; }; } forEach _crew;
+            { if (!isNull _x) then { [_x] allowGetIn true; }; } forEach _crew;
             private _drv = driver _veh;
             if (isNull _drv) then { _drv = effectiveCommander _veh; };
 
