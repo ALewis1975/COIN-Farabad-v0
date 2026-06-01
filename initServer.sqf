@@ -142,6 +142,9 @@ missionNamespace setVariable ["ARC_sitrepInWorldActionsEnabled", true, false];
 // RAVEN JTAC → CASREQ 9-line prefill field action: enabled by default.
 missionNamespace setVariable ["ARC_casreqJtacPrefillEnabled", true, true];
 
+// SHADOW ISR → lead bridge field action: enabled by default.
+missionNamespace setVariable ["ARC_isrShadowLeadBridgeEnabled", true, true];
+
 // Simple AI recruitment from the named Eden object "recruitment_01".
 // Clients render one "Recruit AI" action; the server validates sender identity,
 // registered recruitment object, public infantry class, side/faction match, and

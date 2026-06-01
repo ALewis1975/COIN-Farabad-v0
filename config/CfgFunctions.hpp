@@ -522,6 +522,7 @@ class CfgFunctions
             class intelOrderCompleteRtbEpw {};
 
             class intelClientBeginLeadRequestMapClick {};
+            class intelShadowLeadBridge {};
 
             class mapClick_arm {};
             class mapClick_disarm {};

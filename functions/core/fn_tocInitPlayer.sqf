@@ -929,4 +929,29 @@ if (!(player getVariable ['ARC_casreqJtacPrefillActionAdded', false])) then
 };
 };
 
+// SHADOW ISR → lead bridge (independent of the SITREP in-world flag).
+if (missionNamespace getVariable ["ARC_isrShadowLeadBridgeEnabled", true]) then
+{
+if (!(player getVariable ['ARC_isrShadowLeadBridgeActionAdded', false])) then
+{
+    player setVariable ['ARC_isrShadowLeadBridgeActionAdded', true];
+
+    private _tagIsr = [player] call ARC_fnc_rolesGetTag;
+    private _pfxIsr = format ['[Player] Actions [%1]:', _tagIsr];
+
+    private _condIsr = "((missionNamespace getVariable ['ARC_isrShadowLeadBridgeEnabled', true]) isEqualTo true) && {([player, 'SHADOW'] call ARC_fnc_rolesHasGroupIdToken) || ([player] call ARC_fnc_rolesIsTocS2) || ([player] call ARC_fnc_rolesIsTocCommand)}";
+
+    player addAction [
+        format ['%1 SHADOW ISR: Bridge Observation to Lead (Lase/Cursor)', _pfxIsr],
+        { [] spawn ARC_fnc_intelShadowLeadBridge; },
+        [],
+        1.29,
+        true,
+        true,
+        '',
+        _condIsr
+    ];
+};
+};
+
 true
