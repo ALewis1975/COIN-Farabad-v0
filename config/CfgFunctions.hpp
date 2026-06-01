@@ -306,6 +306,15 @@ class CfgFunctions
             class casreqClientSubmit {};
         };
 
+        class Dossier
+        {
+            file = "functions\dossier";
+
+            class dossierUpsertFromHandoff {};
+            class dossierBroadcast {};
+            class dossierAnnexBuild {};
+        };
+
         class CIVSUB
         {
             file = "functions\civsub";

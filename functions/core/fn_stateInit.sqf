@@ -245,6 +245,15 @@
     ["threat_v0_closed_index", []],
     ["threat_v0_closed_max", 200],
 
+    // SHERIFF/SSE Unified Dossier v0 (server-only persistent state).
+    // One auditable record per detainee handoff: identity + charges + evidence + handoff.
+    // Records are an array of dossier objects (pairs arrays) for safe serialization.
+    ["dossier_v0_enabled", true],
+    ["dossier_v0_version", 0],
+    ["dossier_v0_seq", 0],
+    ["dossier_v0_records", []],
+    ["dossier_v0_max", 100],
+
     // IED detonation follow-on (legacy key kept for backward compatibility)
     // NOTE: This used to hold a TOC queueId. New code prefers the leadId key below.
     ["activeIedDetonationQueueId", ""],

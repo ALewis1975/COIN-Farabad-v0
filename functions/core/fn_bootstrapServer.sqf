@@ -562,6 +562,7 @@ if (!_safeModeEnabled) then
 [] call ARC_fnc_iedDispoBroadcast;
 [] call ARC_fnc_leadBroadcast;
 [] call ARC_fnc_threadBroadcast;
+if (!isNil "ARC_fnc_dossierBroadcast") then { [] call ARC_fnc_dossierBroadcast; };
 
 // UI coverage audit (publishes ARC_uiCoverageMap)
 [] call ARC_fnc_uiCoverageAuditServer;

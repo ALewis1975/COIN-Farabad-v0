@@ -349,6 +349,11 @@ missionNamespace setVariable ["ARC_pub_s1_registryUpdatedAt", serverTime, true];
 ["threat_v0_open_index", []] call ARC_fnc_stateSet;
 ["threat_v0_closed_index", []] call ARC_fnc_stateSet;
 
+// SHERIFF/SSE Unified Dossier v0: reset dossier store (persistence-safe)
+["dossier_v0_seq", 0] call ARC_fnc_stateSet;
+["dossier_v0_records", []] call ARC_fnc_stateSet;
+if (!isNil "ARC_fnc_dossierBroadcast") then { [] call ARC_fnc_dossierBroadcast; };
+
 // Re-init threat blob (regenerates campaign id and debug snapshot)
 if (!isNil "ARC_fnc_threatInit") then { [] call ARC_fnc_threatInit; };
 
