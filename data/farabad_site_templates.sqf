@@ -77,13 +77,23 @@ private _tkpFound = [];
 // Takistan National Police (3CB UK3CB_TKP_B faction, BLUFOR)
 // No vanilla fallbacks: if 3CB TKP classes are absent from CfgVehicles the
 // group will not spawn rather than substituting wrong-faction units.
+// Fallback classnames use the 3CB abbreviated roster (e.g. _AR/_TL/_OFF), NOT
+// the *_Soldier/*_NCO names — the latter do not exist in CfgVehicles and would
+// filter to an empty pool at spawn time, skipping the guard group. The classes
+// below are confirmed present in the live server CfgVehicles roster.
 private _tnpPool = if ((count _tkpFound) > 0) then { +_tkpFound } else {
     [
-        "UK3CB_TKP_B_Soldier",
-        "UK3CB_TKP_B_Soldier_L",
-        "UK3CB_TKP_B_Soldier_AR",
-        "UK3CB_TKP_B_Soldier_GL",
-        "UK3CB_TKP_B_NCO"
+        "UK3CB_TKP_B_TL",
+        "UK3CB_TKP_B_SL",
+        "UK3CB_TKP_B_RIF_2",
+        "UK3CB_TKP_B_RIF_1",
+        "UK3CB_TKP_B_OFF",
+        "UK3CB_TKP_B_MD",
+        "UK3CB_TKP_B_MK",
+        "UK3CB_TKP_B_MG",
+        "UK3CB_TKP_B_ENG",
+        "UK3CB_TKP_B_AR",
+        "UK3CB_TKP_B_AT"
     ]
 };
 
@@ -91,14 +101,16 @@ private _tnpPool = if ((count _tkpFound) > 0) then { +_tkpFound } else {
 // from the resolved faction roster, falling back to the general TNP pool (then
 // to the hardcoded list) so the escort still spawns if no medic class exists.
 // No vanilla fallbacks: group skips gracefully if 3CB TKP classes are absent.
+// The hardcoded medic uses the abbreviated _MD classname (the *_Medic name does
+// not exist in CfgVehicles); _TL/_SL keep the escort viable if it is absent.
 private _tnpMedPool = if ((count _tkpFound) > 0) then {
-    private _meds = _tkpFound select { ((toLower _x) find "medic") >= 0 || { ((toLower _x) find "doc") >= 0 } };
+    private _meds = _tkpFound select { ((toLower _x) find "medic") >= 0 || { ((toLower _x) find "doc") >= 0 } || { ((_x select [(count _x) - 3]) == "_MD") } };
     if ((count _meds) > 0) then { _meds } else { +_tkpFound }
 } else {
     [
-        "UK3CB_TKP_B_Medic",
-        "UK3CB_TKP_B_Soldier",
-        "UK3CB_TKP_B_NCO"
+        "UK3CB_TKP_B_MD",
+        "UK3CB_TKP_B_TL",
+        "UK3CB_TKP_B_SL"
     ]
 };
 
