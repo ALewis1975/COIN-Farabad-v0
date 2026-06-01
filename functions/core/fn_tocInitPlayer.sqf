@@ -954,4 +954,29 @@ if (!(player getVariable ['ARC_isrShadowLeadBridgeActionAdded', false])) then
 };
 };
 
+// TNP partnered ops → lead request (independent of the SITREP in-world flag).
+if (missionNamespace getVariable ["ARC_opsTnpPartneredRequestEnabled", true]) then
+{
+if (!(player getVariable ['ARC_opsTnpPartneredRequestActionAdded', false])) then
+{
+    player setVariable ['ARC_opsTnpPartneredRequestActionAdded', true];
+
+    private _tagTnp = [player] call ARC_fnc_rolesGetTag;
+    private _pfxTnp = format ['[Player] Actions [%1]:', _tagTnp];
+
+    private _condTnp = "((missionNamespace getVariable ['ARC_opsTnpPartneredRequestEnabled', true]) isEqualTo true) && {([player, 'TNP'] call ARC_fnc_rolesHasGroupIdToken) || ([player] call ARC_fnc_rolesIsTocS3) || ([player] call ARC_fnc_rolesIsTocCommand)}";
+
+    player addAction [
+        format ['%1 TNP: Request Partnered Ops (Cursor/Self)', _pfxTnp],
+        { [] spawn ARC_fnc_opsTnpPartneredRequest; },
+        [],
+        1.28,
+        true,
+        true,
+        '',
+        _condTnp
+    ];
+};
+};
+
 true

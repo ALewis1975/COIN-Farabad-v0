@@ -11,6 +11,29 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-06-01 — C3: TNP partnered ops → lead request
+
+**Branch/Commit:** copilot/read-only-architecture-audit @ 833f4c3 (base); feature commit appended afterward
+
+**Scenario:** Lane C feature (Mode B), item **C3**. Added a TNP partnered-ops field action that lets a TNP Liaison Officer (or TOC S3 / Command) request a Takistan National Police PARTNERED element — a partnered patrol or partnered checkpoint — at a location without manual map-clicking. New client function `ARC_fnc_opsTnpPartneredRequest` derives the request position from the operator's marking context (`cursorTarget`, then own position), lets the operator confirm/override the partnered task type (PATROL/CHECKPOINT → lead type), priority (1–5 → strength) and remarks, then remoteExecs the **existing, unchanged** `ARC_fnc_intelQueueSubmit` path with a `LEAD_REQUEST` kind tagged `TNP_PARTNERED`. No new server RPC handler was introduced — the request lands in the TOC queue (PENDING) and, once approved, flows through the standard `ARC_fnc_intelQueueDecide → ARC_fnc_leadCreate → TOC backlog` path; the `TNP_PARTNERED` tag lets the incident generator prefer the lead and stand up host-nation support. Per doctrine, the action never assigns a field task or creates a lead directly from the client. Wired a TNP/S3/Command + flag-gated `player addAction` in `fn_tocInitPlayer.sqf`, registered the function in `CfgFunctions.hpp` (Ops class), and seeded the `ARC_opsTnpPartneredRequestEnabled` feature flag (default true) in `initServer.sqf`.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | sqflint parser-compat scan (strict) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ops/fn_opsTnpPartneredRequest.sqf functions/core/fn_tocInitPlayer.sqf` | PASS | No known parser-compat patterns. |
+| 2 | sqflint lint (warnings fail) | `sqflint -e w functions/ops/fn_opsTnpPartneredRequest.sqf` and `… functions/core/fn_tocInitPlayer.sqf` | PASS | Both exit 0; no warnings/errors. |
+| 3 | Structural sanity | Bracket/brace/paren balance | PASS | request `[]`34/34 `{}`27/27 `()`43/43. |
+| 4 | TNP partnered-ops contract | `bash tests/static/ops_tnp_partnered_contract_checks.sh` | PASS | 13/13 incl. reuse of `intelQueueSubmit`, LEAD_REQUEST payload shape, TNP_PARTNERED tag/source, no direct leadCreate/backlog/validateSender. |
+| 5 | RPC owner-capture conformance | `bash tests/static/rpc_owner_capture_conformance_checks.sh` | PASS | 38/38; no new server handler added (reuses sender-validated `intelQueueSubmit`). |
+| 6 | RemoteExec contract | `ARC_fnc_intelQueueSubmit` already allowlisted (`allowedTargets = 2`) | PASS | No new CfgRemoteExec entry required. |
+| 7 | Regression — SHADOW ISR (C2) contract unaffected | `bash tests/static/intel_shadow_lead_bridge_contract_checks.sh` | PASS | 13/13; C2 path untouched. |
+| 8 | Regression — CASREQ (C1) contract unaffected | `bash tests/static/casreq_snapshot_contract_checks.sh` | PASS | 9/9; C1 path untouched. |
+| 9 | Acceptance — TNP action submits LEAD_REQUEST to TOC queue; approval flows to lead/backlog | Static review: action builds payload + remoteExecs unchanged `ARC_fnc_intelQueueSubmit`; queue approval reuses existing `intelQueueDecide` LEAD_REQUEST branch | PASS | Logic verified by inspection. |
+| 10 | Runtime — request partnered ops, fire action, verify TOC queue PENDING then approve → lead on dedicated | Dedicated Arma server | BLOCKED | Arma 3 dedicated runtime unavailable in this sandbox. |
+
+**Result:** PASS (static/contract) / BLOCKED (runtime).
+
+---
+
 ## 2026-06-01 — C2: SHADOW ISR → lead bridge
 
 **Branch/Commit:** copilot/read-only-architecture-audit @ 8aa7f9e

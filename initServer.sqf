@@ -145,6 +145,9 @@ missionNamespace setVariable ["ARC_casreqJtacPrefillEnabled", true, true];
 // SHADOW ISR → lead bridge field action: enabled by default.
 missionNamespace setVariable ["ARC_isrShadowLeadBridgeEnabled", true, true];
 
+// TNP partnered ops → lead request field action: enabled by default.
+missionNamespace setVariable ["ARC_opsTnpPartneredRequestEnabled", true, true];
+
 // Simple AI recruitment from the named Eden object "recruitment_01".
 // Clients render one "Recruit AI" action; the server validates sender identity,
 // registered recruitment object, public infantry class, side/faction match, and

@@ -728,6 +728,7 @@ class Ops
             class opsSpawnLeadComposition {};
             class opsSpawnLocalSupport {};
             class opsSpawnRouteSupport {};
+            class opsTnpPartneredRequest {};
         };
 
         class Medical
