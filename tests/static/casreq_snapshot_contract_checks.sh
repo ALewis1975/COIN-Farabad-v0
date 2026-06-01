@@ -25,6 +25,11 @@ check "\[\"actor\", _actor\]" "functions/casreq/fn_casreqBroadcastDelta.sqf" "CA
 check "\[\"casreq\", _casreqPub\]" "functions/core/fn_publicBroadcastState.sqf" "Public state includes casreq block"
 check "\[\"casreq_snapshot\", _casreqSnapshot\]" "functions/core/fn_publicBroadcastState.sqf" "Public casreq block includes full snapshot key"
 
+# C1 — RAVEN JTAC → CASREQ 9-line prefill reuses the existing casreqOpen path
+check "remoteExec \[\"ARC_fnc_casreqOpen\", 2\]" "functions/casreq/fn_casreqJtacPrefill.sqf" "JTAC prefill submits via existing ARC_fnc_casreqOpen RPC path"
+check "line6_type_mark" "functions/casreq/fn_casreqJtacPrefill.sqf" "JTAC prefill seeds 9-line marking method"
+check "line7_location_friendlies" "functions/casreq/fn_casreqJtacPrefill.sqf" "JTAC prefill seeds 9-line line-of-friendlies default"
+
 if [[ "$pass" != true ]]; then
   exit 1
 fi

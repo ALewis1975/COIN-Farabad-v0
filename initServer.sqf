@@ -139,6 +139,9 @@ missionNamespace setVariable ["ARC_recruitAddActionsEnabled", true, true];
 // SITREP in-world action (dismounted): vanilla addAction enabled by default.
 missionNamespace setVariable ["ARC_sitrepInWorldActionsEnabled", true, false];
 
+// RAVEN JTAC → CASREQ 9-line prefill field action: enabled by default.
+missionNamespace setVariable ["ARC_casreqJtacPrefillEnabled", true, true];
+
 // Simple AI recruitment from the named Eden object "recruitment_01".
 // Clients render one "Recruit AI" action; the server validates sender identity,
 // registered recruitment object, public infantry class, side/faction match, and

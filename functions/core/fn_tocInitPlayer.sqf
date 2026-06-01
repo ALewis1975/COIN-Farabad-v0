@@ -904,4 +904,29 @@ if (!(player getVariable ['ARC_fieldSitrepActionsAdded', false])) then
 };
 };
 
+// RAVEN JTAC → CASREQ 9-line prefill (independent of the SITREP in-world flag).
+if (missionNamespace getVariable ["ARC_casreqJtacPrefillEnabled", true]) then
+{
+if (!(player getVariable ['ARC_casreqJtacPrefillActionAdded', false])) then
+{
+    player setVariable ['ARC_casreqJtacPrefillActionAdded', true];
+
+    private _tag = [player] call ARC_fnc_rolesGetTag;
+    private _pfx = format ['[Player] Actions [%1]:', _tag];
+
+    private _condJtac = "((missionNamespace getVariable ['ARC_casreqJtacPrefillEnabled', true]) isEqualTo true) && {([player] call ARC_fnc_rolesIsAuthorized) || ([player] call ARC_fnc_rolesCanApproveQueue)}";
+
+    player addAction [
+        format ['%1 JTAC: Prefill CAS Request (Lase/Mark)', _pfx],
+        { [] spawn ARC_fnc_casreqJtacPrefill; },
+        [],
+        1.30,
+        true,
+        true,
+        '',
+        _condJtac
+    ];
+};
+};
+
 true

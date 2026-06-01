@@ -305,6 +305,7 @@ class CfgFunctions
             class casreqExecute {};
             class casreqClose {};
             class casreqClientSubmit {};
+            class casreqJtacPrefill {};
         };
 
         class Dossier

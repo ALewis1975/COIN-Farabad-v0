@@ -11,7 +11,25 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
-## 2026-06-01 — Fix dossier upsert: preserve dossier_id + created_ts on merge
+## 2026-06-01 — C1: RAVEN JTAC → CASREQ 9-line prefill
+
+**Branch/Commit:** copilot/read-only-architecture-audit @ 261905c (base); feature commit appended afterward
+
+**Scenario:** Mode B feature. Added a JTAC field action that prefills a CASREQ 9-line from the JTAC marking context instead of manual entry. New client function `ARC_fnc_casreqJtacPrefill` derives the target position from the active laser-designator target (`laserTarget`), falling back to `cursorTarget`, seeds an editable 9-line (target grid/elevation, marking method in `line6_type_mark`, line-of-friendlies default in `line7_location_friendlies` computed from the JTAC's own position), lets the JTAC confirm/override description, friendlies and remarks, then remoteExecs the **existing, unchanged** `ARC_fnc_casreqOpen` path. No new server RPC handler was introduced — the prefilled `CAS:Dxx` record reaches pilots via `ARC_pub_casreqBundle` and closes via the unchanged `ARC_fnc_casreqClose` BDA path. Wired a role+flag-gated `player addAction` in `fn_tocInitPlayer.sqf`, registered the function in `CfgFunctions.hpp`, and seeded the `ARC_casreqJtacPrefillEnabled` feature flag (default true) in `initServer.sqf`.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | sqflint parser-compat scan (strict) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/casreq/fn_casreqJtacPrefill.sqf functions/core/fn_tocInitPlayer.sqf` | PASS | No known parser-compat patterns. |
+| 2 | sqflint lint (warnings fail) | `sqflint -e w functions/casreq/fn_casreqJtacPrefill.sqf` and `… functions/core/fn_tocInitPlayer.sqf` | PASS | No warnings/errors. |
+| 3 | Structural sanity | Bracket/brace/paren balance | PASS | prefill `[]`42/42 `{}`44/44 `()`65/65; tocInitPlayer `[]`474/474 `{}`221/221 `()`283/283. |
+| 4 | CASREQ snapshot contract (extended) | `bash tests/static/casreq_snapshot_contract_checks.sh` | PASS | 9/9 incl. 3 new C1 checks (reuse of casreqOpen RPC, line6/line7 seeding). |
+| 5 | RPC owner-capture conformance | `bash tests/static/rpc_owner_capture_conformance_checks.sh` | PASS | 38/38; no new server handler added (reuses casreqOpen). |
+| 6 | Acceptance — JTAC action opens prefilled CAS:Dxx; pilot sees it; BDA closes it | Static review: prefill builds 9-line + remoteExecs unchanged `ARC_fnc_casreqOpen`; record broadcast via `ARC_pub_casreqBundle`; close path untouched | PASS | Logic verified by inspection. |
+| 7 | Runtime — lase target, fire action, verify pilot inbox + BDA close on dedicated | Dedicated Arma server | BLOCKED | Arma 3 dedicated runtime unavailable in this sandbox. |
+
+**Result:** PASS (static/contract) / BLOCKED (runtime).
+
+---
 
 **Branch/Commit:** copilot/read-only-architecture-audit @ 8c5d041; TEST-LOG appended afterward
 
