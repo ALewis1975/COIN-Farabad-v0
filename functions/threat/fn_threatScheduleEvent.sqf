@@ -153,7 +153,7 @@ if (_basePos isEqualTo [] || { (count _basePos) < 2 }) then
 };
 
 // Last-resort: use the CIVSUB district centroid. Do not fall back to legacy
-// district_<id>_obj markers; those can drift away from the authoritative
+// old district objective markers; those can drift away from the authoritative
 // CIVSUB district model.
 if (_basePos isEqualTo [] || { (count _basePos) < 2 }) then
 {
