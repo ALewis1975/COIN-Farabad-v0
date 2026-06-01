@@ -11,13 +11,18 @@ if (!isServer) exitWith {false};
 
 params [ ["_seedLeadId", "", [""]] ];
 if (!(_seedLeadId isEqualType "")) then { _seedLeadId = ""; };
-_seedLeadId = trim _seedLeadId;
+private _trimFn = compile "params ['_s']; trim _s";
+_seedLeadId = [_seedLeadId] call _trimFn;
 
 // Prevent overlapping incidents
 private _activeTaskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
-if (_activeTaskId isNotEqualTo "") exitWith {false};
+if (!(_activeTaskId isEqualTo "")) exitWith {false};
 
-private _catalog = call compile preprocessFileLineNumbers "data\incident_markers.sqf";
+private _catalog = if (!isNil "ARC_fnc_incidentCatalogBuild") then {
+    [] call ARC_fnc_incidentCatalogBuild
+} else {
+    call compile preprocessFileLineNumbers "data\incident_markers.sqf"
+};
 if (!(_catalog isEqualType [])) exitWith {
     diag_log format ["[ARC][INC][ERR] incidentCreate: catalog load failed. type=%1", typeName _catalog];
     false
@@ -66,10 +71,7 @@ private _useLead = false;
 // This prevents the lead from "disappearing" (it was removed from the lead pool when the LEAD order was issued).
 private _orders = ["tocOrders", []] call ARC_fnc_stateGet;
 private _leadOrderIdx = -1;
-private _leadOrderId = "";
-private _leadOrderTarget = "";
 private _leadOrderData = [];
-private _leadOrderMeta = [];
 
 if (_orders isEqualType [] && { (count _orders) > 0 }) then
 {
@@ -77,9 +79,9 @@ if (_orders isEqualType [] && { (count _orders) > 0 }) then
 
     for "_i" from 0 to ((count _orders) - 1) do
     {
-        private _o = _orders # _i;
+        private _o = _orders select _i;
         if !(_o isEqualType [] && { (count _o) >= 7 }) then { continue; };
-        _o params ["_oid", "_issuedAt", "_status", "_orderType", "_targetGroup", "_data", "_meta"];
+        _o params ["", "_issuedAt", "_status", "_orderType", "", "_data", "_meta"];
         if !(_orderType isEqualType "") then { continue; };
         if !(_status isEqualType "") then { continue; };
         if !((toUpper _orderType) isEqualTo "LEAD") then { continue; };
@@ -90,10 +92,10 @@ if (_orders isEqualType [] && { (count _orders) > 0 }) then
         if (_meta isEqualType []) then
         {
             private _idxA = -1;
-            { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo "acceptedAt" }) exitWith { _idxA = _forEachIndex; }; } forEach _meta;
+            { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo "acceptedAt" }) exitWith { _idxA = _forEachIndex; }; } forEach _meta;
             if (_idxA >= 0) then
             {
-                private _v = (_meta # _idxA) # 1;
+                private _v = (_meta select _idxA) select 1;
                 if (_v isEqualType 0) then { _acceptedAt = _v; };
             };
         };
@@ -102,10 +104,7 @@ if (_orders isEqualType [] && { (count _orders) > 0 }) then
         {
             _bestAt = _acceptedAt;
             _leadOrderIdx = _i;
-            _leadOrderId = _oid;
-            _leadOrderTarget = _targetGroup;
             _leadOrderData = _data;
-            _leadOrderMeta = _meta;
         };
     };
 };
@@ -116,8 +115,8 @@ if (_leadOrderIdx >= 0) then
     if (_leadOrderData isEqualType []) then
     {
         private _idxL = -1;
-        { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo "lead" }) exitWith { _idxL = _forEachIndex; }; } forEach _leadOrderData;
-        if (_idxL >= 0) then { _leadRec = (_leadOrderData # _idxL) # 1; };
+        { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo "lead" }) exitWith { _idxL = _forEachIndex; }; } forEach _leadOrderData;
+        if (_idxL >= 0) then { _leadRec = (_leadOrderData select _idxL) select 1; };
     };
 
     if (_leadRec isEqualType [] && { (count _leadRec) > 0 }) then
@@ -129,16 +128,13 @@ if (_leadOrderIdx >= 0) then
     {
         // Invalid payload; clear order reference so catalog selection runs below.
         _leadOrderIdx = -1;
-        _leadOrderId = "";
-        _leadOrderTarget = "";
         _leadOrderData = [];
-        _leadOrderMeta = [];
     };
 };
 
 // Seed lead from INCIDENT queue handler (TOC approved a specific incident directly).
 // This is the only remaining path that consumes a lead without a prior accepted LEAD order.
-if (!_useLead && { _seedLeadId isNotEqualTo "" }) then
+if (!_useLead && { !(_seedLeadId isEqualTo "") }) then
 {
     private _tmp = [_seedLeadId] call ARC_fnc_leadConsumeById;
     if (_tmp isEqualType [] && { (count _tmp) > 0 }) then
@@ -183,8 +179,8 @@ if (_hist isEqualType [] && { (count _hist) > 0 }) then
     private _last = _hist select ((count _hist) - 1);
     if (_last isEqualType [] && { (count _last) >= 3 }) then
     {
-        _lastMarker = _last # 1;
-        _lastTypeU = toUpper (_last # 2);
+        _lastMarker = _last select 1;
+        _lastTypeU = toUpper (_last select 2);
     };
 };
 
@@ -194,7 +190,7 @@ private _weights = [];
 
 {
     if !(_x isEqualType []) then { continue; };
-    _x params ["_rawMarker", "_displayName", "_incidentType"];
+    _x params ["_rawMarker", "_displayName", "_incidentType", ["_missionMeta", []]];
 
     private _m = [_rawMarker] call ARC_fnc_worldResolveMarker;
     if (!(_m in allMapMarkers)) then { continue; };
@@ -273,7 +269,7 @@ if (_forceLogistics && { !_useLead } && { !(_typeU in ["LOGISTICS","ESCORT"]) })
 
     if (_w <= 0) then { continue; };
 
-    _choices pushBack [_m, _displayName, _incidentType];
+    _choices pushBack [_m, _displayName, _incidentType, _missionMeta];
     _weights pushBack _w;
 
 } forEach _catalog;
@@ -301,7 +297,7 @@ if (!_useLead) then
         private _acc = 0;
 
         {
-            _acc = _acc + (_weights # _forEachIndex);
+            _acc = _acc + (_weights select _forEachIndex);
             if (_r <= _acc) exitWith { _idx = _forEachIndex; };
         } forEach _choices;
     };
@@ -315,23 +311,25 @@ private _zone = "";
 private _leadId = "";
 private _threadId = "";
 private _leadTag = "";
+private _missionMeta = [];
 
 if (_useLead) then
 {
     // Lead entry format:
-    // [id, incidentType, displayName, pos, strength, createdAt, expiresAt, sourceTaskId, sourceIncidentType, threadId, tag]
+    // [id, incidentType, displayName, pos, strength, createdAt, expiresAt, sourceTaskId, sourceIncidentType, threadId, tag, missionMeta]
     _lead params [
         ["_lId", ""],
         ["_lType", ""],
         ["_lDisp", ""],
         ["_lPos", []],
-        ["_lStrength", 0.5],
-        ["_lCreated", -1],
-        ["_lExpires", -1],
-        ["_lSourceTask", ""],
-        ["_lSourceIncType", ""],
+        "",
+        "",
+        "",
+        "",
+        "",
         ["_lThread", ""],
-        ["_lTag", ""]
+        ["_lTag", ""],
+        ["_lMeta", []]
     ];
 
     _leadId = _lId;
@@ -343,15 +341,17 @@ if (_useLead) then
     _threadId = _lThread;
     _leadTag = _lTag;
     _markerName = ""; // lead-driven incidents may not align with a named Eden marker
+    _missionMeta = if (_lMeta isEqualType []) then { +_lMeta } else { [] };
 }
 else
 {
-    private _pick = _choices # _idx;
-    _pick params ["_mkr", "_disp", "_t"]; 
+    private _pick = _choices select _idx;
+    _pick params ["_mkr", "_disp", "_t", ["_meta", []]]; 
 
     _markerName = _mkr;
     _displayName = _disp;
     _incidentType = _t;
+    if (_meta isEqualType []) then { _missionMeta = +_meta; };
 
     private _pos = getMarkerPos ([_markerName] call ARC_fnc_worldResolveMarker);
     _posATL = +_pos;
@@ -372,6 +372,7 @@ private _taskId = format ["ARC_inc_%1", _counter];
 ["activeIncidentCreatedAt", serverTime] call ARC_fnc_stateSet;
 	["activeIncidentZone", _zone] call ARC_fnc_stateSet;
 ["activeIncidentPos", _posATL] call ARC_fnc_stateSet;
+["activeIncidentMissionMeta", _missionMeta] call ARC_fnc_stateSet;
 
 // Lifecycle log (cheap; gated by ARC_debugLogEnabled)
 ["INC", "Created incident %1 (%2) zone=%3 marker=%4 pos=%5",
@@ -455,7 +456,7 @@ if (!(_threadId isEqualTo "")) then
 // If this incident was generated from an accepted LEAD order, mark that order as completed (consumed into this task).
 if (_leadOrderIdx >= 0 && { _leadOrderIdx < (count _orders) }) then
 {
-    private _ord = _orders # _leadOrderIdx;
+    private _ord = _orders select _leadOrderIdx;
     if (_ord isEqualType [] && { (count _ord) >= 7 }) then
     {
         _ord params ["_oid", "_issuedAt", "_status", "_orderType", "_targetGroup", "_data", "_meta"];
@@ -464,7 +465,7 @@ if (_leadOrderIdx >= 0 && { _leadOrderIdx < (count _orders) }) then
             params ["_pairs", "_k", "_v"];
             if !(_pairs isEqualType []) then { _pairs = []; };
             private _j = -1;
-            { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _j = _forEachIndex; }; } forEach _pairs;
+            { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _j = _forEachIndex; }; } forEach _pairs;
             if (_j < 0) then { _pairs pushBack [_k, _v]; } else { _pairs set [_j, [_k, _v]]; };
             _pairs
         };
@@ -538,6 +539,7 @@ missionNamespace setVariable ["ARC_activeIncidentMarker", _markerName, true];
 missionNamespace setVariable ["ARC_activeIncidentType", _incidentType, true];
 missionNamespace setVariable ["ARC_activeIncidentDisplayName", _displayName, true];
 missionNamespace setVariable ["ARC_activeIncidentPos", _posATL, true];
+missionNamespace setVariable ["ARC_activeIncidentMissionMeta", _missionMeta, true];
 missionNamespace setVariable ["ARC_activeIncidentAccepted", false, true];
 missionNamespace setVariable ["ARC_activeIncidentAcceptedAt", -1, true];
 missionNamespace setVariable ["ARC_activeIncidentAcceptedByGroup", "", true];

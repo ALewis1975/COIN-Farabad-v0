@@ -46,6 +46,7 @@ if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabl
 if (!_enabled) exitWith {false};
 
 private _trimFn = compile "params ['_s']; trim _s";
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _typeU = toUpper ([_threatType] call _trimFn);
 if (_typeU isEqualTo "") then { _typeU = "IED"; };
 private _subtypeU = toUpper ([_threatSubtype] call _trimFn);
@@ -152,11 +153,27 @@ if (_basePos isEqualTo [] || { (count _basePos) < 2 }) then
     if (!(_basePos isEqualType []) || { (count _basePos) < 2 }) then { _basePos = []; };
 };
 
-// Last-resort: use district objective marker (named district_<id>_obj or similar).
+// Last-resort: use the CIVSUB district centroid. Do not fall back to legacy
+// old district objective markers; those can drift away from the authoritative
+// CIVSUB district model.
 if (_basePos isEqualTo [] || { (count _basePos) < 2 }) then
 {
-    private _mk = format ["district_%1_obj", toLower _districtId];
-    if (_mk in allMapMarkers) then { _basePos = getMarkerPos _mk; };
+    private _d = createHashMap;
+    if (!isNil "ARC_fnc_civsubDistrictsGetById") then
+    {
+        _d = [_districtId] call ARC_fnc_civsubDistrictsGetById;
+    };
+
+    if (_d isEqualType createHashMap && { (count _d) > 0 }) then
+    {
+        private _centroid = [_d, "centroid", []] call _hg;
+        if (_centroid isEqualType [] && { (count _centroid) >= 2 }) then
+        {
+            _basePos = +_centroid;
+            _basePos resize 3;
+            _basePos set [2, 0];
+        };
+    };
 };
 
 if (_basePos isEqualTo [] || { (count _basePos) < 2 }) exitWith

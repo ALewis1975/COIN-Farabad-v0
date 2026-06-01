@@ -509,6 +509,7 @@ if (_approve) then
             private _disp       = [_payload, "displayName", _summary] call _getP;
             private _marker     = [_payload, "marker", ""] call _getP;
             private _incPos     = [_payload, "pos", _posATL] call _getP;
+            private _civicMeta  = [_payload, "missionMeta", []] call _getP;
 
             if (!(_incType isEqualType "")) then { _incType = "PATROL"; };
             _incType = toUpper (([_incType] call _trimFn));
@@ -521,9 +522,12 @@ if (_approve) then
             if (!(_marker isEqualType "")) then { _marker = ""; };
             if (!(_incPos isEqualType [])) then { _incPos = _posATL; };
             if ((count _incPos) < 2) then { _incPos = _posATL; };
+            if (!(_civicMeta isEqualType [])) then { _civicMeta = []; };
 
-            // Create a high-priority seed lead for the incident generator.
-            private _lid = [_incType, _disp, _incPos, 0.80, 3600, _id, "", "", "TOC_INCIDENT"] call ARC_fnc_leadCreate;
+            // Create a high-priority seed lead for the incident generator. The
+            // civic mission metadata travels with the lead so catalog-seeded
+            // missions keep their structured metadata once the incident is built.
+            private _lid = [_incType, _disp, _incPos, 0.80, 3600, _id, "", "", "TOC_INCIDENT", _civicMeta] call ARC_fnc_leadCreate;
             if (!(_lid isEqualType "")) then { _lid = ""; };
 
             // Attach the leadId to the queue item meta for UI traceability.

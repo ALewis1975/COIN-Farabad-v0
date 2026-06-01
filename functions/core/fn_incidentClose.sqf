@@ -18,9 +18,10 @@ private _log = {
 };
 
 
-private _rawResult = if (_this isEqualType [] && { (count _this) > 0 }) then { _this # 0 } else { nil };
+private _rawResult = if (_this isEqualType [] && { (count _this) > 0 }) then { _this select 0 } else { nil };
 params [["_result", "", [""]]];
-_result = toUpper (trim _result);
+private _trimFn = compile "params ['_s']; trim _s";
+_result = toUpper ([_result] call _trimFn);
 
 private _validResults = ["SUCCEEDED", "FAILED", "CANCELED"];
 if !(_result in _validResults) exitWith
@@ -53,7 +54,7 @@ private _leadTag = ["activeLeadTag", ""] call ARC_fnc_stateGet;
 private _pos = [];
 private _m = "";
 
-if (_marker isNotEqualTo "") then
+if (!(_marker isEqualTo "")) then
 {
     _m = [_marker] call ARC_fnc_worldResolveMarker;
     if (_m in allMapMarkers) then { _pos = getMarkerPos _m; };
@@ -87,13 +88,13 @@ private _typeU = toUpper _type;
 private _childIds = [];
 
 private _lk = ["activeConvoyLinkupTaskId", ""] call ARC_fnc_stateGet;
-if (_lk isEqualType "" && { _lk isNotEqualTo "" }) then { _childIds pushBackUnique _lk; };
+if (_lk isEqualType "" && { !(_lk isEqualTo "") }) then { _childIds pushBackUnique _lk; };
 
 private _rs = ["activeReconRouteStartTaskId", ""] call ARC_fnc_stateGet;
-if (_rs isEqualType "" && { _rs isNotEqualTo "" }) then { _childIds pushBackUnique _rs; };
+if (_rs isEqualType "" && { !(_rs isEqualTo "") }) then { _childIds pushBackUnique _rs; };
 
 private _re = ["activeReconRouteEndTaskId", ""] call ARC_fnc_stateGet;
-if (_re isEqualType "" && { _re isNotEqualTo "" }) then { _childIds pushBackUnique _re; };
+if (_re isEqualType "" && { !(_re isEqualTo "") }) then { _childIds pushBackUnique _re; };
 
 {
     private _cid = _x;
@@ -337,13 +338,13 @@ else
 };
 
 // If this was a lead-driven task, update the parent thread.
-if (_threadId isNotEqualTo "") then
+if (!(_threadId isEqualTo "")) then
 {
     [_threadId, _result, _type, _leadTag, _zone, _pos, _taskId] call ARC_fnc_threadOnIncidentClosed;
 };
 
 // Track lead end-state
-if (_leadId isNotEqualTo "") then
+if (!(_leadId isEqualTo "")) then
 {
     private _lh = ["leadHistory", []] call ARC_fnc_stateGet;
     if (!(_lh isEqualType [])) then { _lh = []; };
@@ -381,18 +382,19 @@ private _thrCtx = [
 ["activeIncidentMarker", ""] call ARC_fnc_stateSet;
 ["activeIncidentDisplayName", ""] call ARC_fnc_stateSet;
 ["activeIncidentCreatedAt", -1] call ARC_fnc_stateSet;
+["activeIncidentMissionMeta", []] call ARC_fnc_stateSet;
 
 // Clear lead context + position
 ["activeIncidentPos", []] call ARC_fnc_stateSet;
 
 // Assignment/acceptance workflow
 private _prevAcceptedGroup = ["activeIncidentAcceptedByGroup", ""] call ARC_fnc_stateGet;
-if (_prevAcceptedGroup isEqualType "" && { _prevAcceptedGroup isNotEqualTo "" }) then
+if (_prevAcceptedGroup isEqualType "" && { !(_prevAcceptedGroup isEqualTo "") }) then
 {
     private _rows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
     if (!(_rows isEqualType [])) then { _rows = []; };
     private _idx = -1;
-    { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _prevAcceptedGroup }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
+    { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _prevAcceptedGroup }) exitWith { _idx = _forEachIndex; }; } forEach _rows;
     private _row = [_prevAcceptedGroup, "AVAILABLE", serverTime, "SYSTEM"];
     if (_idx < 0) then { _rows pushBack _row; } else { _rows set [_idx, _row]; };
     missionNamespace setVariable ["ARC_pub_unitStatuses", _rows, true];
@@ -516,6 +518,7 @@ missionNamespace setVariable ["ARC_activeIncidentMarker", "", true];
 missionNamespace setVariable ["ARC_activeIncidentType", "", true];
 missionNamespace setVariable ["ARC_activeIncidentDisplayName", "", true];
 missionNamespace setVariable ["ARC_activeIncidentPos", [], true];
+missionNamespace setVariable ["ARC_activeIncidentMissionMeta", [], true];
 missionNamespace setVariable ["ARC_activeIncidentAccepted", false, true];
 missionNamespace setVariable ["ARC_activeIncidentAcceptedAt", -1, true];
 missionNamespace setVariable ["ARC_activeIncidentAcceptedByGroup", "", true];
