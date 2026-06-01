@@ -62,9 +62,10 @@ private _makeDistrictMarker = {
     private _centroid = [_d, "centroid", []] call _hg;
     if (!(_centroid isEqualType []) || { (count _centroid) < 2 }) exitWith { "" };
 
-    private _pos = +_centroid;
-    _pos resize 3;
-    if (!((_pos select 2) isEqualType 0)) then { _pos set [2, 0]; };
+    private _cx = _centroid select 0;
+    private _cy = _centroid select 1;
+    if (!(_cx isEqualType 0) || { !(_cy isEqualType 0) }) exitWith { "" };
+    private _pos = [_cx, _cy, 0];
 
     private _mk = format ["ARC_civloc_%1", _did];
     if (!(_mk in allMapMarkers)) then

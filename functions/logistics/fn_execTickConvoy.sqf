@@ -2025,7 +2025,7 @@ _stoppedSpeedThreshold = (_stoppedSpeedThreshold max 0.2) min 8;
         {
             if (!isNull _x && { !isPlayer _x }) then
             {
-                _x allowGetIn true;
+                [_x] allowGetIn true;
             };
         } forEach (crew _x);
     };
