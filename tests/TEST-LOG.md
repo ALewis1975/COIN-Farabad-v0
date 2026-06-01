@@ -11,6 +11,28 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-06-01 — C3 follow-up: TNP_PARTNERED consumer + reliable prompts
+
+**Branch/Commit:** copilot/read-only-architecture-audit @ a243337
+
+**Scenario:** Closes the two gaps identified in the C3 review. (1) **Consumer:** the `TNP_PARTNERED` lead tag is now actually consumed. It is already carried end-to-end onto the active incident as `activeLeadTag`; `ARC_fnc_opsSpawnLocalSupport` now treats a `TNP_PARTNERED` active-lead tag as eligibility-forcing (like IED), so host-nation police/army support (garrison + patrol) stands up at the incident **regardless of incident type** — previously only the `CHECKPOINT` variant was eligible, so the `PATROL` variant delivered no partnered element. (2) **Prompts:** the partnered task and urgency were gathered with `BIS_fnc_guiMessage` free-text prompts whose return value is a Boolean, so the `isEqualType ""` guards never fired and the defaults were always used. Replaced them with reliable two-button `BIS_fnc_guiMessage` choices (PATROL/CHECKPOINT; PRIORITY(1)/ROUTINE(3)) that are genuinely captured, and compose remarks from the marking context. Updated the function doc comment to match. No server RPC, payload shape, doctrine routing, or feature flag changed.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | sqflint parser-compat scan (strict) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ops/fn_opsTnpPartneredRequest.sqf functions/ops/fn_opsSpawnLocalSupport.sqf` | PASS | No known parser-compat patterns. |
+| 2 | sqflint lint (warnings fail) | `sqflint -e w` on both changed files | PASS | Both exit 0; no warnings/errors. |
+| 3 | Structural sanity | Bracket/brace/paren balance | PASS | request `()`41/41; localSupport `()`191/191; braces/brackets balanced. |
+| 4 | TNP partnered-ops contract (extended) | `bash tests/static/ops_tnp_partnered_contract_checks.sh` | PASS | 20/20, incl. new consumer-wiring and reliable-prompt assertions. |
+| 5 | RPC owner-capture conformance | `bash tests/static/rpc_owner_capture_conformance_checks.sh` | PASS | 39/39; no new server handler. |
+| 6 | Regression — SHADOW ISR (C2) contract | `bash tests/static/intel_shadow_lead_bridge_contract_checks.sh` | PASS | 13/13; untouched. |
+| 7 | Acceptance — TNP_PARTNERED forces host-nation support for PATROL and CHECKPOINT | Static review: `activeLeadTag`==`TNP_PARTNERED` bypasses the type eligibility exit in `fn_opsSpawnLocalSupport` | PASS | Verified by inspection of the eligibility gate. |
+| 8 | Acceptance — task/urgency choices are actually captured | Static review: two-button `BIS_fnc_guiMessage` returns Boolean mapped to PATROL/CHECKPOINT and priority 1/3 | PASS | Dead free-text/parseNumber path removed. |
+| 9 | Runtime — fire action, approve lead, confirm TNP element spawns at PATROL incident | Dedicated Arma server | BLOCKED | Arma 3 dedicated runtime unavailable in this sandbox. |
+
+**Result:** PASS (static/contract) / BLOCKED (runtime).
+
+---
+
 ## 2026-06-01 — C3: TNP partnered ops → lead request
 
 **Branch/Commit:** copilot/read-only-architecture-audit @ 833f4c3 (base); feature commit appended afterward
