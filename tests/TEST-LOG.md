@@ -11,7 +11,21 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
-## 2026-05-30 — Make Arma SQF preflight green: clear sqflint compat + lint findings on changed files (Mode B)
+## 2026-06-01 — Civic mission catalog: clear sqflint compat-scan + lint findings on changed files so preflight is green (Mode B)
+
+**Branch/Commit:** copilot/add-additional-incidents @ c08edf1 (compat fixes 53a1d8f + lint-warning cleanup c08edf1); TEST-LOG appended afterward
+
+**Scenario:** The structured COIN civic mission catalog work (`data/coin_civic_mission_catalog.sqf` + `ARC_fnc_incidentCatalogBuild`, plus `missionMeta` plumbing) left the **Arma SQF + Mission Config Preflight** **SQF static analysis** step red on the changed `*.sqf` set. `python3 scripts/dev/sqflint_compat_scan.py --strict` reported parser-compat patterns and `sqflint -e w` then failed: the new `fn_incidentCatalogBuild.sqf` used bare `fileExists`/method-style `getOrDefault`, `fn_threatScheduleEvent.sqf`'s new CIVSUB-centroid fallback used method-style `getOrDefault`, and because the PR also touches `fn_incidentCreate.sqf`/`fn_incidentClose.sqf` the whole-file scan exposed pre-existing `#` indexing, raw `trim`, and `isNotEqualTo`. Replaced every disallowed compat pattern with the scanner-approved equivalents per `docs/qa/SQFLINT_COMPAT_GUIDE.md`: `#` indexing → `select`; bare `trim` → compiled `_trimFn` helper; bare `fileExists` → compiled `_fileExistsFn` helper; method `getOrDefault` → compiled `_hg` helper (`[map,key,default] call _hg`); `isNotEqualTo ""` → `!(_x isEqualTo "")`. Because the same step runs `sqflint -e w` (warnings fail the build), also cleared the pre-existing unused-variable warnings those changed files carried so the step reaches exit 0: skipped unused positional `params` slots via `""` in `fn_incidentCreate.sqf` (`_oid`/`_targetGroup` and the unused lead-strength/created/expires/sourceTask/sourceIncType slots) and `fn_incidentSeedQueue.sqf` (`_ldisplay`), and removed dead unused `_leadOrderId`/`_leadOrderTarget`/`_leadOrderMeta` declarations + assignments. No runtime behaviour changed.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Strict compat scan on all changed files | `python3 scripts/dev/sqflint_compat_scan.py --strict` on the 7 changed `*.sqf` files | PASS | `scanned 7 file(s); no known parser-compat patterns found.` |
+| 2 | Full static-analysis step logic | Reproduced step: compat scan then `sqflint -e w` loop over each changed file | PASS | Every changed file exits 0 under `sqflint 0.3.2 -e w` (was rc=1 with 16 parse errors on `fn_incidentCreate.sqf` + unused-var warnings). |
+| 3 | Semantic guard | `grep` confirmed removed locals (`_leadOrderId`/`_leadOrderTarget`/`_leadOrderMeta`) are unreferenced; remaining `_leadOrderIdx`/`_leadOrderData` retained; positional `params` slots preserved by `""` skips | PASS | Edits are equivalence-preserving (skip placeholders, compiled wrappers, `select`, dead-code removal). |
+| 4 | Civic catalog static contract suite | `for t in tests/static/*.sh; do bash "$t"; done` | PASS | 13/13 suites pass, incl. `civic_mission_catalog_contract_checks.sh`. |
+| 5 | Runtime smoke | Hosted/dedicated MP exercise of incident/threat civic-catalog flow | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+
+---
 
 **Branch/Commit:** copilot/prevent-assigning-leads-as-tasks @ 5f9db0f (compat fixes) + d2eb603 (lint-warning cleanup); TEST-LOG appended afterward
 
