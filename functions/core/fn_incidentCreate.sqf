@@ -17,7 +17,11 @@ _seedLeadId = trim _seedLeadId;
 private _activeTaskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
 if (_activeTaskId isNotEqualTo "") exitWith {false};
 
-private _catalog = call compile preprocessFileLineNumbers "data\incident_markers.sqf";
+private _catalog = if (!isNil "ARC_fnc_incidentCatalogBuild") then {
+    [] call ARC_fnc_incidentCatalogBuild
+} else {
+    call compile preprocessFileLineNumbers "data\incident_markers.sqf"
+};
 if (!(_catalog isEqualType [])) exitWith {
     diag_log format ["[ARC][INC][ERR] incidentCreate: catalog load failed. type=%1", typeName _catalog];
     false
@@ -194,7 +198,7 @@ private _weights = [];
 
 {
     if !(_x isEqualType []) then { continue; };
-    _x params ["_rawMarker", "_displayName", "_incidentType"];
+    _x params ["_rawMarker", "_displayName", "_incidentType", ["_missionMeta", []]];
 
     private _m = [_rawMarker] call ARC_fnc_worldResolveMarker;
     if (!(_m in allMapMarkers)) then { continue; };
@@ -273,7 +277,7 @@ if (_forceLogistics && { !_useLead } && { !(_typeU in ["LOGISTICS","ESCORT"]) })
 
     if (_w <= 0) then { continue; };
 
-    _choices pushBack [_m, _displayName, _incidentType];
+    _choices pushBack [_m, _displayName, _incidentType, _missionMeta];
     _weights pushBack _w;
 
 } forEach _catalog;
@@ -315,6 +319,7 @@ private _zone = "";
 private _leadId = "";
 private _threadId = "";
 private _leadTag = "";
+private _missionMeta = [];
 
 if (_useLead) then
 {
@@ -343,15 +348,17 @@ if (_useLead) then
     _threadId = _lThread;
     _leadTag = _lTag;
     _markerName = ""; // lead-driven incidents may not align with a named Eden marker
+    _missionMeta = [];
 }
 else
 {
     private _pick = _choices # _idx;
-    _pick params ["_mkr", "_disp", "_t"]; 
+    _pick params ["_mkr", "_disp", "_t", ["_meta", []]]; 
 
     _markerName = _mkr;
     _displayName = _disp;
     _incidentType = _t;
+    if (_meta isEqualType []) then { _missionMeta = +_meta; };
 
     private _pos = getMarkerPos ([_markerName] call ARC_fnc_worldResolveMarker);
     _posATL = +_pos;
@@ -372,6 +379,7 @@ private _taskId = format ["ARC_inc_%1", _counter];
 ["activeIncidentCreatedAt", serverTime] call ARC_fnc_stateSet;
 	["activeIncidentZone", _zone] call ARC_fnc_stateSet;
 ["activeIncidentPos", _posATL] call ARC_fnc_stateSet;
+["activeIncidentMissionMeta", _missionMeta] call ARC_fnc_stateSet;
 
 // Lifecycle log (cheap; gated by ARC_debugLogEnabled)
 ["INC", "Created incident %1 (%2) zone=%3 marker=%4 pos=%5",
@@ -538,6 +546,7 @@ missionNamespace setVariable ["ARC_activeIncidentMarker", _markerName, true];
 missionNamespace setVariable ["ARC_activeIncidentType", _incidentType, true];
 missionNamespace setVariable ["ARC_activeIncidentDisplayName", _displayName, true];
 missionNamespace setVariable ["ARC_activeIncidentPos", _posATL, true];
+missionNamespace setVariable ["ARC_activeIncidentMissionMeta", _missionMeta, true];
 missionNamespace setVariable ["ARC_activeIncidentAccepted", false, true];
 missionNamespace setVariable ["ARC_activeIncidentAcceptedAt", -1, true];
 missionNamespace setVariable ["ARC_activeIncidentAcceptedByGroup", "", true];

@@ -152,11 +152,27 @@ if (_basePos isEqualTo [] || { (count _basePos) < 2 }) then
     if (!(_basePos isEqualType []) || { (count _basePos) < 2 }) then { _basePos = []; };
 };
 
-// Last-resort: use district objective marker (named district_<id>_obj or similar).
+// Last-resort: use the CIVSUB district centroid. Do not fall back to legacy
+// district_<id>_obj markers; those can drift away from the authoritative
+// CIVSUB district model.
 if (_basePos isEqualTo [] || { (count _basePos) < 2 }) then
 {
-    private _mk = format ["district_%1_obj", toLower _districtId];
-    if (_mk in allMapMarkers) then { _basePos = getMarkerPos _mk; };
+    private _d = createHashMap;
+    if (!isNil "ARC_fnc_civsubDistrictsGetById") then
+    {
+        _d = [_districtId] call ARC_fnc_civsubDistrictsGetById;
+    };
+
+    if (_d isEqualType createHashMap && { (count _d) > 0 }) then
+    {
+        private _centroid = _d getOrDefault ["centroid", []];
+        if (_centroid isEqualType [] && { (count _centroid) >= 2 }) then
+        {
+            _basePos = +_centroid;
+            _basePos resize 3;
+            _basePos set [2, 0];
+        };
+    };
 };
 
 if (_basePos isEqualTo [] || { (count _basePos) < 2 }) exitWith
