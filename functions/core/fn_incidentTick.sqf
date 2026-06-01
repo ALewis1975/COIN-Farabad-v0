@@ -43,6 +43,9 @@ else
 // Maintain threads (confidence/heat decay) and prune expired leads.
 [] call ARC_fnc_threadTickAll;
 [] call ARC_fnc_leadPrune;
+// Reconcile the TOC backlog against the (now pruned) lead pool so stale
+// "in the TOC Queue" indications are dropped when their lead ages out.
+if (!isNil "ARC_fnc_tocBacklogPrune") then { [] call ARC_fnc_tocBacklogPrune; };
 [] call ARC_fnc_companyCommandTick;
 [] call ARC_fnc_companyCommandVirtualOpsTick;
 
@@ -83,7 +86,7 @@ else
         _scale = (_scale max 1) min 3;
 
         // Active incident multiplier (operations consume more while a mission is in-flight).
-        private _hasActive = (["activeTaskId", ""] call ARC_fnc_stateGet) isNotEqualTo "";
+        private _hasActive = !((["activeTaskId", ""] call ARC_fnc_stateGet) isEqualTo "");
         private _accepted = ["activeIncidentAccepted", false] call ARC_fnc_stateGet;
         if (_hasActive && { _accepted isEqualType true && { _accepted } }) then
         {

@@ -550,8 +550,6 @@ private _takeoffKickFwdMps = 18;
 private _takeoffKickUpMps = 5;
 
 if (_isHeli) then {
-    private _altLow = missionNamespace getVariable ["airbase_v1_rw_takeoff_alt_low_m", 3];
-    if (!(_altLow isEqualType 0) || { _altLow < 0 }) then { _altLow = 3; };
     private _rwClimbStepAlt = missionNamespace getVariable ["airbase_v1_rw_climb_step_alt_m", 30];
     if (!(_rwClimbStepAlt isEqualType 0) || { _rwClimbStepAlt < 10 }) then { _rwClimbStepAlt = 30; };
     private _rwClimbStepIntervalS = missionNamespace getVariable ["airbase_v1_rw_climb_step_interval_s", 4];
@@ -584,7 +582,15 @@ if (_isHeli) then {
 
     _veh engineOn true;
     _veh land "NONE";
-    _veh flyInHeight _altLow;
+
+    // Lift off the deck to a safe altitude IMMEDIATELY, then climb. Previously the helo
+    // was commanded to fly at ~3 m (_altLow) toward the fixed-wing outbound marker and
+    // only began climbing once it reached that marker. That left the attack helo skimming
+    // the ground, banking hard toward the offset marker, and striking terrain obstacles
+    // (rocks, perimeter fence) before it ever gained altitude. Starting the climb from the
+    // helo's current position keeps it clear of ground hazards during the outbound transit.
+    private _rwLiftAlt = (_rwClimbStepAlt min _cruiseAlt) max 8;
+    _veh flyInHeight _rwLiftAlt;
 
     if (_hasOut) then {
         private _wpO = _grp addWaypoint [_outPos, 0];
@@ -596,68 +602,36 @@ if (_isHeli) then {
         private _wpRad = missionNamespace getVariable ["airbase_v1_rw_outbound_wpRadius_m", 15];
         if (!(_wpRad isEqualType 0) || { _wpRad < 3 }) then { _wpRad = 15; };
         _wpO setWaypointCompletionRadius _wpRad;
+    };
 
-        private _climbTrig = missionNamespace getVariable ["airbase_v1_rw_climb_trigger_dist_m", 15];
-        if (!(_climbTrig isEqualType 0) || { _climbTrig < 3 }) then { _climbTrig = 15; };
+    // Progressive climb begins immediately (no longer gated on first reaching the outbound
+    // marker), so the helo gains altitude during the outbound transit instead of skimming.
+    [_fid, _veh, _cruiseAlt, _rwClimbStepAlt, _rwClimbStepIntervalS, _rwClimbKickFwd, _rwClimbKickUp, _rwClimbProfileTimeoutS, _runwayDir, _fnSetRunwayClimbVelocity, _debugOps] spawn {
+        params ["_fidL", "_vehL", "_altTargetL", "_stepAltL", "_stepIntervalSL", "_kickForwardL", "_kickUpL", "_profileTimeoutSL", "_runwayDirL", "_setRunwayClimbVelocityL", "_dbgOpsL"];
+        if (isNull _vehL || {!alive _vehL}) exitWith {};
 
-        // Near runway start marker: begin climb to departure altitude (default ~500ft).
-        [_fid, _veh, _outPos, _cruiseAlt, _climbTrig, _rwClimbStepAlt, _rwClimbStepIntervalS, _rwClimbKickFwd, _rwClimbKickUp, _rwClimbProfileTimeoutS, _runwayDir, _fnSetRunwayClimbVelocity, _debugOps] spawn {
-            params ["_fidL", "_vehL", "_outPosL", "_altTargetL", "_trigL", "_stepAltL", "_stepIntervalSL", "_kickForwardL", "_kickUpL", "_profileTimeoutSL", "_runwayDirL", "_setRunwayClimbVelocityL", "_dbgOpsL"];
-            private _t0 = time;
-            waitUntil {
-                sleep 1;
-                isNull _vehL || {!alive _vehL} ||
-                ((_vehL distance2D _outPosL) < _trigL) ||
-                ((time - _t0) > 180)
-            };
-            if (isNull _vehL || {!alive _vehL}) exitWith {};
+        _vehL land "NONE";
+        private _cmdAlt = (_stepAltL min _altTargetL) max 8;
+        _vehL flyInHeight _cmdAlt;
+        [_vehL, _runwayDirL, _kickForwardL, _kickUpL] call _setRunwayClimbVelocityL;
 
+        private _tRamp0 = time;
+        // Timeout keeps the helper from running forever; when reached, AI continues on existing waypoints at last commanded altitude.
+        while { !isNull _vehL && {alive _vehL} && {_cmdAlt < _altTargetL} && {(time - _tRamp0) < _profileTimeoutSL} } do {
+            sleep _stepIntervalSL;
+            _cmdAlt = (_cmdAlt + _stepAltL) min _altTargetL;
             _vehL land "NONE";
-            private _cmdAlt = (_stepAltL min _altTargetL) max 8;
             _vehL flyInHeight _cmdAlt;
             [_vehL, _runwayDirL, _kickForwardL, _kickUpL] call _setRunwayClimbVelocityL;
-
-            private _tRamp0 = time;
-            while { !isNull _vehL && {alive _vehL} && {_cmdAlt < _altTargetL} && {(time - _tRamp0) < _profileTimeoutSL} } do {
-                sleep _stepIntervalSL;
-                _cmdAlt = (_cmdAlt + _stepAltL) min _altTargetL;
-                _vehL land "NONE";
-                _vehL flyInHeight _cmdAlt;
-                [_vehL, _runwayDirL, _kickForwardL, _kickUpL] call _setRunwayClimbVelocityL;
-            };
-
-            if (_dbgOpsL) then {
-                private _altNow = (getPosATL _vehL) select 2;
-                ["OPS", format ["AIRBASE: %1 helo runway climb profile active (alt=%2m target=%3m)", _fidL, round _altNow, _altTargetL], getPosATL _vehL, 0, [
-                    ["runwayDir", _runwayDirL]
-                ]] call ARC_fnc_intelLog;
-            };
         };
-    } else {
-        // Missing outbound marker: start a progressive climb immediately.
-        [_fid, _veh, _cruiseAlt, _rwClimbStepAlt, _rwClimbStepIntervalS, _rwClimbKickFwd, _rwClimbKickUp, _rwClimbProfileTimeoutS, _runwayDir, _fnSetRunwayClimbVelocity, _debugOps] spawn {
-            params ["_fidL", "_vehL", "_altTargetL", "_stepAltL", "_stepIntervalSL", "_kickForwardL", "_kickUpL", "_profileTimeoutSL", "_runwayDirL", "_setRunwayClimbVelocityL", "_dbgOpsL"];
-            if (isNull _vehL || {!alive _vehL}) exitWith {};
 
-            _vehL land "NONE";
-            private _cmdAlt = (_stepAltL min _altTargetL) max 5;
-            _vehL flyInHeight _cmdAlt;
-            [_vehL, _runwayDirL, _kickForwardL, _kickUpL] call _setRunwayClimbVelocityL;
-
-            private _tRamp0 = time;
-            // Timeout keeps the helper from running forever; when reached, AI continues on existing waypoints at last commanded altitude.
-            while { !isNull _vehL && {alive _vehL} && {_cmdAlt < _altTargetL} && {(time - _tRamp0) < _profileTimeoutSL} } do {
-                sleep _stepIntervalSL;
-                _cmdAlt = (_cmdAlt + _stepAltL) min _altTargetL;
-                _vehL land "NONE";
-                _vehL flyInHeight _cmdAlt;
-                [_vehL, _runwayDirL, _kickForwardL, _kickUpL] call _setRunwayClimbVelocityL;
-            };
-
-            if (_dbgOpsL) then {
-                private _altNow = (getPosATL _vehL) select 2;
-                ["OPS", format ["AIRBASE: %1 helo climb profile complete (alt=%2m target=%3m)", _fidL, round _altNow, _altTargetL], getPosATL _vehL, 0, []] call ARC_fnc_intelLog;
-            };
+        private _timedOut = ((time - _tRamp0) >= _profileTimeoutSL) && { _cmdAlt < _altTargetL };
+        if (_dbgOpsL) then {
+            private _altNow = (getPosATL _vehL) select 2;
+            private _status = if (_timedOut) then { "TIMED OUT" } else { "complete" };
+            ["OPS", format ["AIRBASE: %1 helo climb profile %2 (alt=%3m cmd=%4m target=%5m)", _fidL, _status, round _altNow, round _cmdAlt, _altTargetL], getPosATL _vehL, 0, [
+                ["timedOut", _timedOut]
+            ]] call ARC_fnc_intelLog;
         };
     };
 

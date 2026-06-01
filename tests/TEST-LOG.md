@@ -11,7 +11,73 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
-## 2026-05-29 — CIVSUB scheduler/sampler tick cadence relaxation (Mode D)
+## 2026-05-30 — Make Arma SQF preflight green: clear sqflint compat + lint findings on changed files (Mode B)
+
+**Branch/Commit:** copilot/prevent-assigning-leads-as-tasks @ 5f9db0f (compat fixes) + d2eb603 (lint-warning cleanup); TEST-LOG appended afterward
+
+**Scenario:** Job `78682576587` in the **Arma SQF + Mission Config Preflight** workflow failed at the **SQF static analysis** step: `python3 scripts/dev/sqflint_compat_scan.py --strict $sqf_files` reported `19 pattern match(es) across 13 file(s)` and exited 1. Replaced every disallowed compat pattern in the changed SQF files with the scanner-approved equivalents: `#` indexing → guarded `select`; bare `trim` → compiled `_trimFn` helper; `isNotEqualTo` → `!(_a isEqualTo _b)`. Files touched for compat: `fn_tocBacklogEnqueue.sqf`, `fn_uiConsoleActionOpsPrimary.sqf`, `fn_resetAll.sqf`, `fn_incidentTick.sqf`. Because the same step then runs `sqflint -e w` on each changed file (warnings fail the build), also cleared the pre-existing warnings those changed files carried so the step reaches exit 0: skipped unused positional `params` slots via `""` in `fn_intelQueueDecide.sqf`, reduced an unused destructure to `_x params ["_tId"]` in `fn_resetAll.sqf`, removed a dead unused `_getPair` helper in `fn_uiConsoleDashboardPaint.sqf`, and converted two `BIS_fnc_sortBy` lambdas to the repo's sqflint-clean `compile "_x select 1"` form in `fn_uiConsoleTocQueuePaint.sqf`. No runtime behaviour changed.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Strict compat scan on changed files | `python3 scripts/dev/sqflint_compat_scan.py --strict $(git diff origin/main...HEAD --name-only -- '*.sqf')` | PASS | `scanned 13 file(s); no known parser-compat patterns found` (was 19 findings). |
+| 2 | Full static-analysis step logic | Reproduced step: `set -euo pipefail`; compat scan then `sqflint -e w` loop over each changed file | PASS | Step exits 0; every changed file is clean under `sqflint 0.3.2 -e w`. |
+| 3 | Semantic guard | `grep` confirmed removed vars (`_createdAt`/`_details`/`_decision`, `_getPair`) are unreferenced; bracket balance verified on all edited files | PASS | Edits are equivalence-preserving (skip placeholders, dead-code removal, compiled sort lambda). |
+| 4 | Runtime smoke | Hosted/dedicated MP exercise of lead→TOC-Queue flow | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+
+---
+
+## 2026-05-30 — Wire TOC backlog consumer into incident generation + prune tick (Mode B)
+
+**Branch/Commit:** copilot/prevent-assigning-leads-as-tasks @ 5d5d8dc
+
+**Scenario:** Closed the loop on the TOC Queue (backlog). Previously `ARC_fnc_tocBacklogPopNext` and the backlog's prune logic had zero callers, so approved leads were enqueued but never consumed, and stale entries were never reconciled against the lead pool. Extracted the non-destructive reconcile into a new server helper `ARC_fnc_tocBacklogPrune` (drops entries with bad shape, empty leadId, or no matching lead in `leadPool`; persists + rebroadcasts `ARC_pub_tocBacklog` on change); refactored `fn_tocBacklogPopNext` to delegate its first pass to the helper (single source of truth) and made the whole file sqflint-clean (`select` + compiled `_trimFn`); wired `fn_tocRequestNextIncident` to pop the best backlog entry (after all blocking guards) and pass its leadId as `seedLeadId` to `ARC_fnc_incidentCreate`, falling through to the existing no-seed catalog path when the backlog is empty; and called `ARC_fnc_tocBacklogPrune` from `fn_incidentTick` right after `ARC_fnc_leadPrune` so the backlog stays consistent every ~60 s tick. Registered `tocBacklogPrune` in `CfgFunctions.hpp`. `forceLogistics` is passed `false` to `PopNext` for now (minimal change); `incidentCreate` still applies its own supply-critical filter once a lead is seeded.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | New file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_tocBacklogPrune.sqf` | PASS | New prune helper is parser-compatible (`select` + compiled `_trimFn`). |
+| 2 | Changed-line compat audit | `git diff HEAD~1 -U0 -- '*.sqf' \| grep '^+' \| grep -E '[)\]] # [0-9]\| # _\| trim '` | PASS | No added line introduces `#` indexing or raw `trim` outside a compiled wrapper. |
+| 3 | sqflint on changed/new files | `sqflint -e w` on fn_tocBacklogPrune / fn_tocBacklogPopNext / fn_tocRequestNextIncident | PASS | All three parse clean (rc=0). PopNext fully converted off `#`/raw-`trim`. |
+| 4 | sqflint error-regression (incidentTick) | `sqflint -e w functions/core/fn_incidentTick.sqf` vs `HEAD` baseline | PASS | Sole error is pre-existing line 89 `isNotEqualTo` (unchanged, far from the added 3-line prune call); no new errors introduced. |
+| 5 | Runtime smoke: backlog consumption | Hosted/dedicated MP: approve a lead into the TOC Queue, request next incident, confirm the incident is seeded from that lead and the backlog entry is removed (`ARC_pub_tocBacklog` no longer lists it). | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 6 | Runtime smoke: prune tick | Let a backlogged lead expire from `leadPool` via TTL; confirm the next `fn_incidentTick` drops its backlog entry and rebroadcasts so consoles stop showing "in the TOC Queue". | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+
+---
+
+**Branch/Commit:** copilot/prevent-assigning-leads-as-tasks @ 1d64dda (TEST-LOG appended afterward)
+
+**Scenario:** Made it clear to both field player units and the TOC when a lead has been generated and is sitting in the TOC Queue (backlog) for follow-up. Added `ARC_fnc_tocBacklogBroadcast` to publish a compact backlog read model (`ARC_pub_tocBacklog`) on enqueue/pop/reset; pushed a "now in the TOC Queue for follow-up" toast to the submitting field unit and the approving TOC operator from `fn_intelQueueDecide` (LEAD_ISSUE_REQUEST + FOLLOWON_PACKAGE); added a persistent queue-status line on the field OPS lead panel (`IN TOC QUEUE — awaiting follow-up` / `SUBMITTED — pending TOC review`); confirmed backlog presence on the TOC queue console; and surfaced a `TOC Queue (follow-up)` count on the TOC dashboard.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | New file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_tocBacklogBroadcast.sqf` | PASS | New broadcast helper is parser-compatible (no `#`/raw-`trim` patterns). |
+| 2 | Changed-line compat audit | `git diff -U0 | grep '^+' | grep -E '[)\]] # [0-9]| trim '` | PASS | No added line introduces `#` indexing or raw `trim`; all use `select` + `_trimFn`. |
+| 3 | sqflint error-regression | `sqflint -e w` on each changed file vs `HEAD` baseline | PASS | Error counts unchanged (enqueue 14/14, popNext 15/15, decide 0/0, opsPaint/tocQueuePaint/dashboard 0/0) — pre-existing `#` errors only, no new errors. |
+| 4 | RemoteExec contract | `bash scripts/dev/check_remoteexec_contract.sh` | PASS | `ARC_fnc_clientToast` server→client toasts use the existing allowlisted handler (allowedTargets=0). |
+| 5 | Runtime smoke: field + TOC indications | Hosted/dedicated MP: field unit submits a lead on OPS; TOC approves; verify field + approver toasts, persistent `IN TOC QUEUE` status on the field lead panel, TOC queue item shows backlog confirmation, and dashboard `TOC Queue (follow-up)` count increments. | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
+| 6 | Dedicated/JIP validation | Dedicated server + late-joining client: confirm `ARC_pub_tocBacklog` freshness, JIP visibility of backlog status, and correct submitter resolution by UID. | BLOCKED | Dedicated server and JIP rig unavailable in this sandbox. |
+
+---
+## 2026-05-30 — Unify OPFOR spawn standoff rule + multi-bearing pool relocation (Mode B)
+
+**Branch/Commit:** copilot/raid-interdict-smuggling-port-issue @ e281f66 (code commit; TEST-LOG appended afterward)
+
+**Scenario:** Follow-up to the virtual-pool minimum-spawn-standoff fix. Centralised the duplicated "is this a safe spawn position?" rule into a new shared predicate `ARC_fnc_threatSpawnPosClear` (player standoff + protected-zone guard), consumed by both `fn_threatVirtualPoolTick.sqf` and `fn_opsPatrolOnActivate.sqf`. Replaced the pool tick's single-bearing push/defer with a multi-bearing sweep (0/±30/±60/±90/±120/±150/180) so groups still materialise when players ring a co-located objective, deferring only when no bearing is clear. Fixed stale default distances in the pool-tick header docstring (activation 600→2200, spawn 400→2000, despawn 700→2400) and documented the patrol-radius/standoff coupling.
+
+| # | Validation | Command / Steps | Result | Notes |
+|---|---|---|---|---|
+| 1 | Whitespace check | `git --no-pager diff --check` | PASS | No whitespace errors. |
+| 2 | sqflint compat scan (strict) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatSpawnPosClear.sqf functions/threat/fn_threatVirtualPoolTick.sqf functions/ops/fn_opsPatrolOnActivate.sqf` | PASS | No known parser-compat patterns (predicate uses explicit forEach search, not findIf). |
+| 3 | sqflint static analysis | `sqflint -e w` on the three changed SQF files | PASS | Installed `sqflint` in sandbox; no warnings/errors. |
+| 4 | Standoff contract checks | `bash tests/static/threat_virtual_opfor_spawn_standoff_checks.sh` | PASS | Extended to cover the shared predicate, multi-bearing sweep, and ops consumption. |
+| 5 | Full static suite | `for t in tests/static/*.sh; do bash "$t"; done` | PASS | All static contract scripts pass. |
+| 6 | CodeQL security check | `codeql_checker` | PASS | See finalize notes. |
+| 7 | Dedicated runtime spawn behaviour | Dedicated playtest: hold "Raid: Interdict Smuggling at Port" objective; confirm OPFOR relocate to ~300 m standoff and still engage rather than spawning on holders or going silent. | BLOCKED | Arma 3 dedicated runtime unavailable in sandbox; requires operator validation. |
+
+**Risk Notes:** Ops patrol behaviour is preserved (standoff defaults to the prior 150 m via new optional `ARC_patrolContactStandoffM`); only the shared rule is refactored. Pool relocation is strictly more permissive than the previous single-bearing defer, reducing "dead incident" cases without weakening the on-top-of-players guard (every candidate is re-validated through the predicate).
+
+**Rollback:** Revert commit e281f66 to restore the single-bearing pool relocation and the inline ops standoff check.
+
+
 
 **Branch/Commit:** copilot/fix-mission-jerkiness-issues @ 105a056 (cadence config commit; TEST-LOG appended afterward)
 
@@ -6537,3 +6603,27 @@ Mode: A (Bug Fix)
 | 3 | `plane_despawn` mission marker sanity | Python marker-position assertion against `mission.sqm` | PASS | `plane_despawn` now resolves to `position[]={250,41.210945,8757.6592};` (x >= 0). |
 | 4 | Patch formatting sanity | `git diff --check` | PASS | No whitespace or patch-format issues introduced. |
 | 5 | Runtime smoke | Dedicated Arma server: request next incident/queue decision and run Airbase departures from the RPT scenario | BLOCKED | Arma 3 dedicated runtime unavailable in this sandbox. |
+
+---
+
+## 2026-05-30 — CIVSUB active-district cap recency priority (Mode D)
+
+- 2026-05-30T20:09Z | commit: f4452592 | Scenario: `ARC_fnc_civsubBubbleGetActiveDistricts` keeps the most-recently-seen districts (where players are now) when more than `civsub_v1_civ_cap_activeDistrictsMax` districts are within the grace window, instead of the lowest-ID ones | Steps: `git --no-pager diff --check` + Python simulation (20 districts D01..D20, maxD=3, grace=180s; player in D14 having recently passed D01/D02/D03) asserting D14 is retained in the active set | Result: PASS | Notes: Old ID-sort selected [D01,D02,D03] (far from player); new recency-sort selects [D14,D03,D02], keeping the player's current district. Fixes civs spawning far from players and active-set flicker (despawn/respawn churn). Arma 3 dedicated runtime smoke unavailable in this sandbox.
+
+---
+
+## 2026-05-30 — CIVSUB stationary-player district presence buffer (Mode D)
+
+- 2026-05-30T20:18Z | commit: 088cc344 | Scenario: `ARC_fnc_civsubBubbleGetActiveDistricts` refreshes district last-seen for every district within `radius_m + 200` of a player, matching the canonical `ARC_fnc_civsubIsDistrictActive` definition, so stationary players just outside a small district radius keep the district active | Steps: `git --no-pager diff --check` + Python geometry assertion (D15 Kala Outpost, radius 47; player parked 120m from centroid → outside strict radius but inside radius+200) | Result: PASS | Notes: Old strict `FindByPos` containment left last-seen un-refreshed for a stationary player at 120m, so the district expired after the 180s grace and `ARC_fnc_civsubCivCleanupTick` despawned its civilians; new buffered scan keeps last-seen fresh. Arma 3 dedicated runtime smoke unavailable in this sandbox.
+
+---
+
+## 2026-05-30 — CIVTRAF traffic-side district activation buffer + shared helper (Mode D)
+
+- 2026-05-30T20:42Z | commit: aaaaa8e | Scenario: New shared helper `ARC_fnc_civsubDistrictsWithinBuffer` returns every district whose `radius_m + 200` contains a position (buffered, multi-match analogue of strict `ARC_fnc_civsubDistrictsFindByPos`). `ARC_fnc_civsubTrafficTick` primary district source now uses it instead of strict `FindByPos`, and `ARC_fnc_civsubBubbleGetActiveDistricts` is consolidated onto the same helper | Steps: `git --no-pager diff --check` (clean) + `python3 scripts/dev/sqflint_compat_scan.py --strict` on the three changed SQF files (PASS, no parser-compat patterns) + per-file `sqflint -e w` (clean) + Python geometry assertion (player parked 120m from small D15 centroid radius 47 → missed by strict `FindByPos` but caught by buffered helper) | Result: PASS | Notes: Mirrors the civ-side Hotfix12: a stationary player just outside a small district radius previously dropped that district from the traffic primary `PLAYER_BUBBLE` set, so traffic never spawned near a parked player on a district edge. Buffered activation matches `ARC_fnc_civsubIsDistrictActive`; the `IsDistrictActive` guard downstream remains as a defensive filter (consistent at the default 200 buffer). Arma 3 dedicated runtime smoke unavailable in this sandbox.
+
+---
+
+## 2026-05-30 — CIVSUB buffer helper airbase/enabled guard parity (Mode A)
+
+- 2026-05-30T20:49Z | commit: daa6d58 | Scenario: `ARC_fnc_civsubDistrictsWithinBuffer` now mirrors `ARC_fnc_civsubDistrictsFindByPos` guards — it exits early with `[]` when `civsub_v1_enabled` is false and when the query position is in the `AIRBASE` zone (via `ARC_fnc_worldGetZoneForPos`). Previously the shared buffer helper omitted both guards, so on the `ARC_fnc_civsubBubbleGetActiveDistricts` path (which has no downstream `IsDistrictActive`/airbase filter) a player parked at the airbase could refresh last-seen for an airbase-adjacent district within `radius_m + buffer` | Steps: `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubDistrictsWithinBuffer.sqf` (PASS) + `git --no-pager diff --check` (clean) | Result: PASS | Notes: Guard order matches the source functions (enabled check + airbase exclusion before the geometry scan). `ARC_fnc_civsubTrafficTick` already filtered airbase districts via its downstream `IsDistrictActive` guard; this closes the gap on the bubble path. Arma 3 dedicated runtime smoke unavailable in this sandbox.

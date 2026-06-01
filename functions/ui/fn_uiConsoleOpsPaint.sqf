@@ -587,12 +587,54 @@ else
                 _details = _details + format ["<t color='#A0A0A0'>Type:</t> %1<br/>", _typ];
                 _details = _details + format ["<t color='#A0A0A0'>Grid:</t> %1<br/>", _grid];
                 if (_tag != "") then { _details = _details + format ["<t color='#A0A0A0'>Tag:</t> %1<br/>", _tag]; };
+
+                // Persistent "in the TOC Queue for follow-up" indication so field units
+                // can see at a glance that a lead they worked has been handed to the TOC.
+                private _backlog = missionNamespace getVariable ["ARC_pub_tocBacklog", []];
+                if (!(_backlog isEqualType [])) then { _backlog = []; };
+                private _inBacklog = false;
+                private _backlogPri = 3;
+                {
+                    if (_x isEqualType [] && { (count _x) >= 1 } && { (_x select 0) isEqualTo _id }) exitWith
+                    {
+                        _inBacklog = true;
+                        if ((count _x) >= 2 && { (_x select 1) isEqualType 0 }) then { _backlogPri = _x select 1; };
+                    };
+                } forEach _backlog;
+
+                if (_inBacklog) then
+                {
+                    _details = _details + format ["<t color='#66FF99'>Status: IN TOC QUEUE — awaiting follow-up (Priority %1).</t><br/>", _backlogPri];
+                }
+                else
+                {
+                    private _pend = missionNamespace getVariable ["ARC_pub_queuePending", []];
+                    if (!(_pend isEqualType [])) then { _pend = []; };
+                    private _pendingReview = false;
+                    {
+                        if (_x isEqualType [] && { (count _x) >= 11 }) then
+                        {
+                            private _k = _x select 3;
+                            if (_k isEqualType "" && { (toUpper _k) isEqualTo "LEAD_ISSUE_REQUEST" }) then
+                            {
+                                private _pl = _x select 10;
+                                private _plLead = [_pl, "leadId", ""] call ARC_fnc_uiConsoleGetPair;
+                                if (_plLead isEqualType "" && { _plLead isEqualTo _id }) exitWith { _pendingReview = true; };
+                            };
+                        };
+                    } forEach _pend;
+                    if (_pendingReview) then
+                    {
+                        _details = _details + "<t color='#FFD700'>Status: SUBMITTED — pending TOC review.</t><br/>";
+                    };
+                };
+
                 _details = _details + "<br/>Leads are intelligence-derived opportunities.<br/>";
                 if (_isAuth) then
                 {
                     _primaryLabel = "SUBMIT TO TOC QUEUE";
                     _primaryEnabled = true;
-                    _details = _details + "SUBMIT TO TOC QUEUE: send this lead to the TOC for review and approval before a PROCEED order is issued.";
+                    _details = _details + "SUBMIT TO TOC QUEUE: send this lead to the TOC for review and approval. Approved leads are added to the TOC Queue for incident creation — leads are never assigned directly as field tasks.";
                 }
                 else
                 {
