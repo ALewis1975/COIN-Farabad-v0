@@ -52,6 +52,10 @@ if (!_recruitActionsEnabled) exitWith
 private _signature = "Recruit AI";
 if ((_container getVariable ["ARC_recruitActionsSignature", ""]) isEqualTo _signature) exitWith {true};
 
+private _actionRangeM = missionNamespace getVariable ["ARC_recruitActionRangeM", 50];
+if (!(_actionRangeM isEqualType 0)) then { _actionRangeM = 50; };
+_actionRangeM = _actionRangeM max 0;
+
 private _old = _container getVariable ["ARC_recruitActionIds", []];
 if (_old isEqualType []) then
 {
@@ -78,7 +82,7 @@ private _id = _container addAction [
     true,
     "",
     "alive _target",
-    50
+    _actionRangeM
 ];
 
 private _ids = [_id];

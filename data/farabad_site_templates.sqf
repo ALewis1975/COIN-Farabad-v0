@@ -124,13 +124,18 @@ private _ambVehiclePool = [
 
 // Takistan National Army (3CB UK3CB_TKA_B faction, BLUFOR)
 // No vanilla fallbacks: group skips gracefully if 3CB TKA classes are absent.
+// Fallback classnames use the 3CB abbreviated roster (e.g. _AR/_TL/_OFF), NOT
+// the *_Soldier/*_NCO names — the latter do not exist in CfgVehicles and would
+// filter to an empty pool at spawn time, skipping the guard group. The classes
+// below are confirmed present in the live server CfgVehicles roster.
 private _tnaPool = if ((count _tkaFound) > 0) then { +_tkaFound } else {
     [
-        "UK3CB_TKA_B_Soldier",
-        "UK3CB_TKA_B_Soldier_L",
-        "UK3CB_TKA_B_Soldier_AR",
-        "UK3CB_TKA_B_Soldier_LAT",
-        "UK3CB_TKA_B_NCO"
+        "UK3CB_TKA_B_Infantry_U_01",
+        "UK3CB_TKA_B_Infantry_U_Shortsleeve_01",
+        "UK3CB_TKA_B_AR",
+        "UK3CB_TKA_B_TL",
+        "UK3CB_TKA_B_OFF",
+        "UK3CB_TKA_B_Officer_U"
     ]
 };
 
