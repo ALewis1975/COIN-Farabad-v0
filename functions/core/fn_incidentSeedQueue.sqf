@@ -138,7 +138,7 @@ private _hgObj       = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, 
         private _nearObjId = "";
         private _nearObjD  = 1e12;
         {
-            _x params [["_lid", "", [""]], ["_ldisplay", "", [""]], ["_lpos", [], [[]]]];
+            _x params [["_lid", "", [""]], "", ["_lpos", [], [[]]]];
             if ((count _lpos) >= 2) then {
                 private _d = _mPos distance2D _lpos;
                 if (_d < _nearObjD && {_d < 800}) then {

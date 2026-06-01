@@ -71,10 +71,7 @@ private _useLead = false;
 // This prevents the lead from "disappearing" (it was removed from the lead pool when the LEAD order was issued).
 private _orders = ["tocOrders", []] call ARC_fnc_stateGet;
 private _leadOrderIdx = -1;
-private _leadOrderId = "";
-private _leadOrderTarget = "";
 private _leadOrderData = [];
-private _leadOrderMeta = [];
 
 if (_orders isEqualType [] && { (count _orders) > 0 }) then
 {
@@ -84,7 +81,7 @@ if (_orders isEqualType [] && { (count _orders) > 0 }) then
     {
         private _o = _orders select _i;
         if !(_o isEqualType [] && { (count _o) >= 7 }) then { continue; };
-        _o params ["_oid", "_issuedAt", "_status", "_orderType", "_targetGroup", "_data", "_meta"];
+        _o params ["", "_issuedAt", "_status", "_orderType", "", "_data", "_meta"];
         if !(_orderType isEqualType "") then { continue; };
         if !(_status isEqualType "") then { continue; };
         if !((toUpper _orderType) isEqualTo "LEAD") then { continue; };
@@ -107,10 +104,7 @@ if (_orders isEqualType [] && { (count _orders) > 0 }) then
         {
             _bestAt = _acceptedAt;
             _leadOrderIdx = _i;
-            _leadOrderId = _oid;
-            _leadOrderTarget = _targetGroup;
             _leadOrderData = _data;
-            _leadOrderMeta = _meta;
         };
     };
 };
@@ -134,10 +128,7 @@ if (_leadOrderIdx >= 0) then
     {
         // Invalid payload; clear order reference so catalog selection runs below.
         _leadOrderIdx = -1;
-        _leadOrderId = "";
-        _leadOrderTarget = "";
         _leadOrderData = [];
-        _leadOrderMeta = [];
     };
 };
 
@@ -331,11 +322,11 @@ if (_useLead) then
         ["_lType", ""],
         ["_lDisp", ""],
         ["_lPos", []],
-        ["_lStrength", 0.5],
-        ["_lCreated", -1],
-        ["_lExpires", -1],
-        ["_lSourceTask", ""],
-        ["_lSourceIncType", ""],
+        "",
+        "",
+        "",
+        "",
+        "",
         ["_lThread", ""],
         ["_lTag", ""]
     ];
