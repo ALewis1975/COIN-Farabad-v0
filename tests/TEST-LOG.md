@@ -11,6 +11,24 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-06-01 — Fix dossier upsert: preserve dossier_id + created_ts on merge
+
+**Branch/Commit:** copilot/read-only-architecture-audit @ 8c5d041; TEST-LOG appended afterward
+
+**Scenario:** Bug in `ARC_fnc_dossierUpsertFromHandoff`. On re-handoff of the same detainee (`civ_uid` already present), the function rebuilt the record with a freshly allocated `dossier_id` and a reset `created_ts = serverTime`, then overwrote the existing record — losing dossier-id continuity and the original open time, and needlessly consuming `dossier_v0_seq` on every update. This contradicted the function's own comment ("merge an existing open record rather than duplicate"). Reordered the logic to (1) load records and locate any existing record by `civ_uid` first, then (2) when merging, carry forward the prior `dossier_id` and `created_ts` and only bump `updated_ts = serverTime`, allocating/persisting a new `dossier_v0_seq` id **only** for a genuinely new dossier. Type-guarded the preserved fields. No change to the new-record path or to identity/evidence/confidence computation.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | sqflint parser-compat scan (strict) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/dossier/fn_dossierUpsertFromHandoff.sqf` | PASS | No known parser-compat patterns; existing `_hg`/`_keysFn`/`_pget` helpers reused. |
+| 2 | Structural sanity | Bracket/brace/paren balance | PASS | `[`/`]` 108/108, `{`/`}` 46/46, `(`/`)` 68/68 balanced. |
+| 3 | RPC owner-capture conformance | `bash tests/static/rpc_owner_capture_conformance_checks.sh` | PASS | 38/38 handlers; unaffected by this change. |
+| 4 | Acceptance — re-handoff merges in place | Static review: existing `_idx >= 0` path now reuses `_prevId`/`_prevCreated`, only `updated_ts` advances, `dossier_v0_seq` untouched | PASS | Logic verified by inspection. |
+| 5 | Runtime — re-detain same civ, confirm stable DOS id + original open time | Dedicated Arma server | BLOCKED | Arma 3 dedicated runtime unavailable in this sandbox. |
+
+**Result:** PASS (static/contract) / BLOCKED (runtime).
+
+---
+
 ## 2026-06-01 — Lane B / B3: Unify EPW detainee and SSE evidence into one auditable record
 
 **Branch/Commit:** copilot/read-only-architecture-audit @ a0d7628; TEST-LOG appended afterward
