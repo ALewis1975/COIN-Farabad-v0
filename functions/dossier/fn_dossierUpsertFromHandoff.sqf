@@ -134,7 +134,7 @@ private _records = ["dossier_v0_records", []] call ARC_fnc_stateGet;
 if !(_records isEqualType []) then { _records = []; };
 
 // Upsert by detainee civ_uid: merge an existing open record rather than duplicate.
-private _pget = compile "params ['_arr','_key','_def']; private _r = _def; { if ((_x select 0) isEqualTo _key) exitWith { _r = _x select 1 }; } forEach _arr; _r";
+private _pget = compile "params ['_arr','_key','_def']; if (!(_arr isEqualType [])) exitWith { _def }; private _r = _def; { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _r = _x select 1 }; } forEach _arr; _r";
 private _idx = -1;
 {
     private _exIdentity = [_x, "identity", []] call _pget;
