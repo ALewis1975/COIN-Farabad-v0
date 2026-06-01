@@ -176,6 +176,25 @@ if (_basePos isEqualTo [] || { (count _basePos) < 2 }) then
     };
 };
 
+// Canonical per-district fallback: the CIVSUB district centroid. Districts are
+// registered as "D01".."D20" in civsub_v1_districts with a [x,y] centroid, so
+// this resolves a valid base position whenever CIVSUB is active even when no
+// convoy or active incident is supplying one.
+if (_basePos isEqualTo [] || { (count _basePos) < 2 }) then
+{
+    private _civDistricts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
+    if (_civDistricts isEqualType createHashMap) then
+    {
+        private _hgC = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+        private _dEntry = [_civDistricts, _districtId, createHashMap] call _hgC;
+        if (_dEntry isEqualType createHashMap) then
+        {
+            private _cent = [_dEntry, "centroid", []] call _hgC;
+            if (_cent isEqualType [] && { (count _cent) >= 2 }) then { _basePos = +_cent; };
+        };
+    };
+};
+
 if (_basePos isEqualTo [] || { (count _basePos) < 2 }) exitWith
 {
     diag_log format ["[ARC][WARN] ARC_fnc_threatScheduleEvent: no base position for district=%1 - skipping", _districtId];

@@ -11,6 +11,185 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-06-01 — C3 follow-up: TNP_PARTNERED consumer + reliable prompts
+
+**Branch/Commit:** copilot/read-only-architecture-audit @ a243337
+
+**Scenario:** Closes the two gaps identified in the C3 review. (1) **Consumer:** the `TNP_PARTNERED` lead tag is now actually consumed. It is already carried end-to-end onto the active incident as `activeLeadTag`; `ARC_fnc_opsSpawnLocalSupport` now treats a `TNP_PARTNERED` active-lead tag as eligibility-forcing (like IED), so host-nation police/army support (garrison + patrol) stands up at the incident **regardless of incident type** — previously only the `CHECKPOINT` variant was eligible, so the `PATROL` variant delivered no partnered element. (2) **Prompts:** the partnered task and urgency were gathered with `BIS_fnc_guiMessage` free-text prompts whose return value is a Boolean, so the `isEqualType ""` guards never fired and the defaults were always used. Replaced them with reliable two-button `BIS_fnc_guiMessage` choices (PATROL/CHECKPOINT; PRIORITY(1)/ROUTINE(3)) that are genuinely captured, and compose remarks from the marking context. Updated the function doc comment to match. No server RPC, payload shape, doctrine routing, or feature flag changed.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | sqflint parser-compat scan (strict) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ops/fn_opsTnpPartneredRequest.sqf functions/ops/fn_opsSpawnLocalSupport.sqf` | PASS | No known parser-compat patterns. |
+| 2 | sqflint lint (warnings fail) | `sqflint -e w` on both changed files | PASS | Both exit 0; no warnings/errors. |
+| 3 | Structural sanity | Bracket/brace/paren balance | PASS | request `()`41/41; localSupport `()`191/191; braces/brackets balanced. |
+| 4 | TNP partnered-ops contract (extended) | `bash tests/static/ops_tnp_partnered_contract_checks.sh` | PASS | 20/20, incl. new consumer-wiring and reliable-prompt assertions. |
+| 5 | RPC owner-capture conformance | `bash tests/static/rpc_owner_capture_conformance_checks.sh` | PASS | 39/39; no new server handler. |
+| 6 | Regression — SHADOW ISR (C2) contract | `bash tests/static/intel_shadow_lead_bridge_contract_checks.sh` | PASS | 13/13; untouched. |
+| 7 | Acceptance — TNP_PARTNERED forces host-nation support for PATROL and CHECKPOINT | Static review: `activeLeadTag`==`TNP_PARTNERED` bypasses the type eligibility exit in `fn_opsSpawnLocalSupport` | PASS | Verified by inspection of the eligibility gate. |
+| 8 | Acceptance — task/urgency choices are actually captured | Static review: two-button `BIS_fnc_guiMessage` returns Boolean mapped to PATROL/CHECKPOINT and priority 1/3 | PASS | Dead free-text/parseNumber path removed. |
+| 9 | Runtime — fire action, approve lead, confirm TNP element spawns at PATROL incident | Dedicated Arma server | BLOCKED | Arma 3 dedicated runtime unavailable in this sandbox. |
+
+**Result:** PASS (static/contract) / BLOCKED (runtime).
+
+---
+
+## 2026-06-01 — C3: TNP partnered ops → lead request
+
+**Branch/Commit:** copilot/read-only-architecture-audit @ 833f4c3 (base); feature commit appended afterward
+
+**Scenario:** Lane C feature (Mode B), item **C3**. Added a TNP partnered-ops field action that lets a TNP Liaison Officer (or TOC S3 / Command) request a Takistan National Police PARTNERED element — a partnered patrol or partnered checkpoint — at a location without manual map-clicking. New client function `ARC_fnc_opsTnpPartneredRequest` derives the request position from the operator's marking context (`cursorTarget`, then own position), lets the operator confirm/override the partnered task type (PATROL/CHECKPOINT → lead type), priority (1–5 → strength) and remarks, then remoteExecs the **existing, unchanged** `ARC_fnc_intelQueueSubmit` path with a `LEAD_REQUEST` kind tagged `TNP_PARTNERED`. No new server RPC handler was introduced — the request lands in the TOC queue (PENDING) and, once approved, flows through the standard `ARC_fnc_intelQueueDecide → ARC_fnc_leadCreate → TOC backlog` path; the `TNP_PARTNERED` tag lets the incident generator prefer the lead and stand up host-nation support. Per doctrine, the action never assigns a field task or creates a lead directly from the client. Wired a TNP/S3/Command + flag-gated `player addAction` in `fn_tocInitPlayer.sqf`, registered the function in `CfgFunctions.hpp` (Ops class), and seeded the `ARC_opsTnpPartneredRequestEnabled` feature flag (default true) in `initServer.sqf`.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | sqflint parser-compat scan (strict) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ops/fn_opsTnpPartneredRequest.sqf functions/core/fn_tocInitPlayer.sqf` | PASS | No known parser-compat patterns. |
+| 2 | sqflint lint (warnings fail) | `sqflint -e w functions/ops/fn_opsTnpPartneredRequest.sqf` and `… functions/core/fn_tocInitPlayer.sqf` | PASS | Both exit 0; no warnings/errors. |
+| 3 | Structural sanity | Bracket/brace/paren balance | PASS | request `[]`34/34 `{}`27/27 `()`43/43. |
+| 4 | TNP partnered-ops contract | `bash tests/static/ops_tnp_partnered_contract_checks.sh` | PASS | 13/13 incl. reuse of `intelQueueSubmit`, LEAD_REQUEST payload shape, TNP_PARTNERED tag/source, no direct leadCreate/backlog/validateSender. |
+| 5 | RPC owner-capture conformance | `bash tests/static/rpc_owner_capture_conformance_checks.sh` | PASS | 38/38; no new server handler added (reuses sender-validated `intelQueueSubmit`). |
+| 6 | RemoteExec contract | `ARC_fnc_intelQueueSubmit` already allowlisted (`allowedTargets = 2`) | PASS | No new CfgRemoteExec entry required. |
+| 7 | Regression — SHADOW ISR (C2) contract unaffected | `bash tests/static/intel_shadow_lead_bridge_contract_checks.sh` | PASS | 13/13; C2 path untouched. |
+| 8 | Regression — CASREQ (C1) contract unaffected | `bash tests/static/casreq_snapshot_contract_checks.sh` | PASS | 9/9; C1 path untouched. |
+| 9 | Acceptance — TNP action submits LEAD_REQUEST to TOC queue; approval flows to lead/backlog | Static review: action builds payload + remoteExecs unchanged `ARC_fnc_intelQueueSubmit`; queue approval reuses existing `intelQueueDecide` LEAD_REQUEST branch | PASS | Logic verified by inspection. |
+| 10 | Runtime — request partnered ops, fire action, verify TOC queue PENDING then approve → lead on dedicated | Dedicated Arma server | BLOCKED | Arma 3 dedicated runtime unavailable in this sandbox. |
+
+**Result:** PASS (static/contract) / BLOCKED (runtime).
+
+---
+
+## 2026-06-01 — C2: SHADOW ISR → lead bridge
+
+**Branch/Commit:** copilot/read-only-architecture-audit @ 8aa7f9e
+
+**Scenario:** Lane C feature (Mode B). Added a SHADOW (RQ-7 UAS) field action that bridges an ISR observation into the intel pipeline without manual map-clicking. New client function `ARC_fnc_intelShadowLeadBridge` derives an observation position from the UAS sensor context (connected-UAV laser via `getConnectedUAV`, then the operator's own `laserTarget`, then `cursorTarget`), classifies the observed contact (dismount/vehicle/air), lets the operator confirm/override lead type (default RECON), confidence (LOW/MED/HIGH → strength) and remarks, then remoteExecs the **existing, unchanged** `ARC_fnc_intelQueueSubmit` path with a `LEAD_REQUEST` kind. No new server RPC handler was introduced — the request lands in the TOC queue (PENDING) and, once approved, flows through the standard `ARC_fnc_intelQueueDecide` → `ARC_fnc_leadCreate` → TOC backlog path. Per doctrine, the bridge never assigns a field task or creates a lead directly from the client. Wired a SHADOW/S2/Command + flag-gated `player addAction` in `fn_tocInitPlayer.sqf`, registered the function in `CfgFunctions.hpp` (Command class), and seeded the `ARC_isrShadowLeadBridgeEnabled` feature flag (default true) in `initServer.sqf`.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | sqflint parser-compat scan (strict) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/command/fn_intelShadowLeadBridge.sqf functions/core/fn_tocInitPlayer.sqf` | PASS | No known parser-compat patterns. |
+| 2 | sqflint lint (warnings fail) | `sqflint -e w functions/command/fn_intelShadowLeadBridge.sqf` and `… functions/core/fn_tocInitPlayer.sqf` | PASS | No warnings/errors. |
+| 3 | Structural sanity | Bracket/brace/paren balance | PASS | bridge `[]`38/38 `{}`45/45 `()`61/61; tocInitPlayer `[]`489/489 `{}`225/225 `()`293/293. |
+| 4 | SHADOW ISR lead-bridge contract | `bash tests/static/intel_shadow_lead_bridge_contract_checks.sh` | PASS | 13/13 incl. reuse of `intelQueueSubmit`, LEAD_REQUEST payload shape, no direct leadCreate/backlog/validateSender. |
+| 5 | RPC owner-capture conformance | `bash tests/static/rpc_owner_capture_conformance_checks.sh` | PASS | 38/38; no new server handler added (reuses sender-validated `intelQueueSubmit`). |
+| 6 | RemoteExec contract | `ARC_fnc_intelQueueSubmit` already allowlisted (`allowedTargets = 2`) | PASS | No new CfgRemoteExec entry required. |
+| 7 | Regression — CASREQ contract unaffected | `bash tests/static/casreq_snapshot_contract_checks.sh` | PASS | 9/9; C1 path untouched. |
+| 8 | Acceptance — SHADOW action submits LEAD_REQUEST to TOC queue; approval flows to lead/backlog | Static review: bridge builds payload + remoteExecs unchanged `ARC_fnc_intelQueueSubmit`; queue approval reuses existing `intelQueueDecide` LEAD_REQUEST branch | PASS | Logic verified by inspection. |
+| 9 | Runtime — lase/observe via UAS, fire action, verify TOC queue PENDING then approve → lead on dedicated | Dedicated Arma server | BLOCKED | Arma 3 dedicated runtime unavailable in this sandbox. |
+
+**Result:** PASS (static/contract) / BLOCKED (runtime).
+
+---
+
+**Branch/Commit:** copilot/read-only-architecture-audit @ 261905c (base); feature commit appended afterward
+
+**Scenario:** Mode B feature. Added a JTAC field action that prefills a CASREQ 9-line from the JTAC marking context instead of manual entry. New client function `ARC_fnc_casreqJtacPrefill` derives the target position from the active laser-designator target (`laserTarget`), falling back to `cursorTarget`, seeds an editable 9-line (target grid/elevation, marking method in `line6_type_mark`, line-of-friendlies default in `line7_location_friendlies` computed from the JTAC's own position), lets the JTAC confirm/override description, friendlies and remarks, then remoteExecs the **existing, unchanged** `ARC_fnc_casreqOpen` path. No new server RPC handler was introduced — the prefilled `CAS:Dxx` record reaches pilots via `ARC_pub_casreqBundle` and closes via the unchanged `ARC_fnc_casreqClose` BDA path. Wired a role+flag-gated `player addAction` in `fn_tocInitPlayer.sqf`, registered the function in `CfgFunctions.hpp`, and seeded the `ARC_casreqJtacPrefillEnabled` feature flag (default true) in `initServer.sqf`.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | sqflint parser-compat scan (strict) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/casreq/fn_casreqJtacPrefill.sqf functions/core/fn_tocInitPlayer.sqf` | PASS | No known parser-compat patterns. |
+| 2 | sqflint lint (warnings fail) | `sqflint -e w functions/casreq/fn_casreqJtacPrefill.sqf` and `… functions/core/fn_tocInitPlayer.sqf` | PASS | No warnings/errors. |
+| 3 | Structural sanity | Bracket/brace/paren balance | PASS | prefill `[]`42/42 `{}`44/44 `()`65/65; tocInitPlayer `[]`474/474 `{}`221/221 `()`283/283. |
+| 4 | CASREQ snapshot contract (extended) | `bash tests/static/casreq_snapshot_contract_checks.sh` | PASS | 9/9 incl. 3 new C1 checks (reuse of casreqOpen RPC, line6/line7 seeding). |
+| 5 | RPC owner-capture conformance | `bash tests/static/rpc_owner_capture_conformance_checks.sh` | PASS | 38/38; no new server handler added (reuses casreqOpen). |
+| 6 | Acceptance — JTAC action opens prefilled CAS:Dxx; pilot sees it; BDA closes it | Static review: prefill builds 9-line + remoteExecs unchanged `ARC_fnc_casreqOpen`; record broadcast via `ARC_pub_casreqBundle`; close path untouched | PASS | Logic verified by inspection. |
+| 7 | Runtime — lase target, fire action, verify pilot inbox + BDA close on dedicated | Dedicated Arma server | BLOCKED | Arma 3 dedicated runtime unavailable in this sandbox. |
+
+**Result:** PASS (static/contract) / BLOCKED (runtime).
+
+---
+
+**Branch/Commit:** copilot/read-only-architecture-audit @ 8c5d041; TEST-LOG appended afterward
+
+**Scenario:** Bug in `ARC_fnc_dossierUpsertFromHandoff`. On re-handoff of the same detainee (`civ_uid` already present), the function rebuilt the record with a freshly allocated `dossier_id` and a reset `created_ts = serverTime`, then overwrote the existing record — losing dossier-id continuity and the original open time, and needlessly consuming `dossier_v0_seq` on every update. This contradicted the function's own comment ("merge an existing open record rather than duplicate"). Reordered the logic to (1) load records and locate any existing record by `civ_uid` first, then (2) when merging, carry forward the prior `dossier_id` and `created_ts` and only bump `updated_ts = serverTime`, allocating/persisting a new `dossier_v0_seq` id **only** for a genuinely new dossier. Type-guarded the preserved fields. No change to the new-record path or to identity/evidence/confidence computation.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | sqflint parser-compat scan (strict) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/dossier/fn_dossierUpsertFromHandoff.sqf` | PASS | No known parser-compat patterns; existing `_hg`/`_keysFn`/`_pget` helpers reused. |
+| 2 | Structural sanity | Bracket/brace/paren balance | PASS | `[`/`]` 108/108, `{`/`}` 46/46, `(`/`)` 68/68 balanced. |
+| 3 | RPC owner-capture conformance | `bash tests/static/rpc_owner_capture_conformance_checks.sh` | PASS | 38/38 handlers; unaffected by this change. |
+| 4 | Acceptance — re-handoff merges in place | Static review: existing `_idx >= 0` path now reuses `_prevId`/`_prevCreated`, only `updated_ts` advances, `dossier_v0_seq` untouched | PASS | Logic verified by inspection. |
+| 5 | Runtime — re-detain same civ, confirm stable DOS id + original open time | Dedicated Arma server | BLOCKED | Arma 3 dedicated runtime unavailable in this sandbox. |
+
+**Result:** PASS (static/contract) / BLOCKED (runtime).
+
+---
+
+## 2026-06-01 — Lane B / B3: Unify EPW detainee and SSE evidence into one auditable record
+
+**Branch/Commit:** copilot/read-only-architecture-audit @ a0d7628; TEST-LOG appended afterward
+
+**Scenario:** Lane B item **B3**. Detention and SSE/evidence were separate half-records. Introduced one auditable SHERIFF/SSE dossier joining CIVSUB identity (name/charges/wanted) with IED/SSE evidence (`ied_v0_case_files` matching the active incident task), emitting a confidence-weighted lead and feeding the SITREP. New server functions under `functions/dossier/` (registered in `CfgFunctions.hpp` as class `Dossier`): `ARC_fnc_dossierUpsertFromHandoff` (build/merge by `civ_uid`, combined confidence `0.6*idConf + 0.4*evConf`, emits a `RECON` lead via `ARC_fnc_leadCreate` with `strength = confidence`, OPS log `DOSSIER_OPENED`, persisted array-of-pairs in state key `dossier_v0_records`), `ARC_fnc_dossierBroadcast` (bounded JIP read model `ARC_pub_dossier`), and `ARC_fnc_dossierAnnexBuild` (SITREP annex). Hooked into `fn_civsubInteractHandoffSheriff` after the `DETENTION_HANDOFF` bundle emit; SITREP annex integrated in `fn_tocReceiveSitrep` parallel to the CIVSUB annex; state seeds added in `fn_stateInit`, reset clearing in `fn_resetAll`, and an initial publish in `fn_bootstrapServer`.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | sqflint parser-compat scan (strict) | `python3 scripts/dev/sqflint_compat_scan.py --strict <8 changed *.sqf>` | PASS | No known parser-compat patterns; uses `_hg`/`_keysFn`/`_pget` compiled helpers, `select` indexing |
+| 2 | sqflint warnings-as-errors | `sqflint -e w <each changed *.sqf>` | PASS | All 8 files exit 0 |
+| 3 | RPC owner-capture conformance | `bash tests/static/rpc_owner_capture_conformance_checks.sh` | PASS | 38/38 handlers; no regression from civsub handoff edit |
+| 4 | Acceptance — handoff captures evidence + confidence-weighted lead + SITREP annex | Static review of `fn_dossierUpsertFromHandoff` / `fn_dossierAnnexBuild` / `fn_tocReceiveSitrep` | BLOCKED | Logic verified by inspection; runtime BLOCKED (no Arma dedicated rig in sandbox) |
+| 5 | Dedicated/JIP — dossier reconstructs from server snapshot | Review `ARC_pub_dossier` published `setVariable [...,true]` on upsert/reset/bootstrap | BLOCKED | JIP-safe publish verified by inspection; runtime BLOCKED |
+| 6 | Persistence — versioned + reset-safe | Review `dossier_v0_*` seeds in `fn_stateInit` + clearing in `fn_resetAll` | PASS | Array-of-pairs serialization; new keys merge via `fn_stateLoad` without version bump |
+| 7 | Cleanup — pinned detainee transfer respects bubble | Review handoff hook placement (non-fatal, before pin block) | PASS | Existing `civsub_v1_pinned` transfer logic unchanged |
+
+**Result:** PASS (static/contract) / BLOCKED (runtime) — sqflint compat + warnings clean on all 8 changed SQF; RPC conformance unaffected; runtime acceptance BLOCKED pending an Arma dedicated rig.
+
+
+
+**Branch/Commit:** copilot/read-only-architecture-audit @ 678e2af; TEST-LOG appended afterward
+
+**Scenario:** Lane B item **B2**. Convoy lifecycle transitions partly bypassed the OPS/intel log (Design Guide §4.6) and existing OPS lines lacked a uniform `id`/`actor` signature. Added a server helper `ARC_fnc_convoyOpsLog` (registered in `CfgFunctions.hpp` under Logistics) that routes a convoy transition through `ARC_fnc_intelLog` category `OPS` with a consistent meta of `id` (active convoy task id, resolved from `activeTaskId`), `actor` (convoy callsign resolved from `activeConvoyDesignationProfile[2]`, default `CONVOY`), plus `event`/`lifecycle`. Grid is auto-added by `intelLog`. Wired the four lifecycle points: **spawn** (`CONVOY_SPAWNED`, new, was diag_log-only in `fn_execSpawnConvoy`), **leg** (`CONVOY_DEPARTED`, converted existing call to the helper so it now carries actor), **ambush** (`CONVOY_AMBUSH` / `CONVOY_AMBUSH_CLEAR`, new at contact onset/clear, was diag_log-only), and **complete** (`CONVOY_COMPLETE`, new terminal at dismount-complete). Entries land in `ARC_pub_opsLog`, which `ARC_fnc_intelBroadcast` already bounds to the most-recent 40 OPS entries (≤80) and broadcasts JIP-safe via `setVariable [...,true]`.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | SQF parser-compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/logistics/fn_convoyOpsLog.sqf functions/logistics/fn_execSpawnConvoy.sqf functions/logistics/fn_execTickConvoy.sqf` | PASS | `scanned 3 file(s); no known parser-compat patterns found`. |
+| 2 | SQF lint (warnings fail) | `sqflint -e w` on all three changed SQF files | PASS | Exit 0 on each; no warnings. |
+| 3 | OPS → ARC_pub_opsLog flow | Verified `fn_intelBroadcast.sqf:16,24,27` selects OPS-category entries, bounds to last 40, and `setVariable ["ARC_pub_opsLog", _opsSlice, true]` | PASS | id+grid+actor present; bounded & JIP-visible. |
+| 4 | Runtime smoke | Dedicated Arma server: drive a convoy and confirm CONVOY_SPAWNED/DEPARTED/AMBUSH/COMPLETE appear in OPS board | BLOCKED | Arma 3 dedicated runtime unavailable in this sandbox. |
+
+---
+
+## 2026-06-01 — Lane B / B1: Re-baseline Threat v0/IED docs to shipped implementation (Mode F, docs-only)
+
+**Branch/Commit:** copilot/read-only-architecture-audit @ 0e1ee35; TEST-LOG appended afterward
+
+**Scenario:** Lane B item **B1**. The v0.1 Threat baseline (`docs/projectFiles/Farabad_THREAT_v0_IED_P1_Baseline_regen.md`) listed "no global scheduler", "no district threat economy / attack budget", and "no VBIED/Suicide logic" as non-goals — all three contradicted shipped code. Re-baselined to v0.2: added a §0.0 re-baseline note with a reality table, corrected §0 Purpose and §1.2 "out of scope", and cross-linked the Design Guide. Documented that the scheduler (`ARC_fnc_threatSchedulerTick` → `ARC_fnc_threatScheduleEvent`) is a **recordkeeping/logging stub** (writes records + emits leads, `world.spawned=false`, never spawns directly), that physical spawns are **incident-driven**, and that the **governor/budget/GREEN** coupling is **LOCKED** per Design Guide §16 decision #5. Classified **VBIED/Suicide as Scaffold pending lock** in the baseline, the Design Guide §10.2, and the IED/VBIED/Suicide planning spec header. No code changed.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Doc/reality cross-check | Verified `ARC_fnc_threatSchedulerTick` wired in `fn_bootstrapServer.sqf:524,547`; `ARC_fnc_threatScheduleEvent` sets `world.spawned=false`; `ARC_pub_threatEconomySnapshot` published in `fn_publicBroadcastState.sqf:1120`; VBIED/Suicide fns exist under `functions/ied/` | PASS | Doc statements match shipped code. |
+| 2 | §16 lock reference accuracy | Confirmed Design Guide §16 decision #5 governor/budget/GREEN lock (20/80 thresholds) | PASS | Reference is correct. |
+| 3 | Tests Run | n/a | Not run (docs-only) | Mode F — no code changes. |
+
+---
+
+## 2026-06-01 — Fix TKP_B (Takistan National Police) hardcoded fallback pool classnames
+
+**Branch/Commit:** copilot/read-only-architecture-audit @ 09f2477 (initial fix); evidence-grounding revision + this TEST-LOG update appended afterward
+
+**Scenario:** Follow-up to the TKA guard-pool fix. The `_tnpPool`/`_tnpMedPool` hardcoded fallbacks in `data/farabad_site_templates.sqf` still used fabricated `*_Soldier`/`*_Soldier_L`/`*_Soldier_AR`/`*_Soldier_GL`/`*_NCO`/`*_Medic` names that do not exist in CfgVehicles, so when the 3CB TKP faction is absent (or enumeration yields nothing) the fallback would itself filter to an empty pool and skip prison/police guard groups. Replaced the fallbacks with the real abbreviated UK3CB_TKP_B roster and pointed the medic fallback at `_MD`; also widened the dynamic medic filter to recognise the `_MD` suffix.
+
+**Evidence grounding (revision):** Every fallback classname is now corroborated by an external source rather than asserted. The infantry roles `_RIF_1`/`_RIF_2`/`_SL`/`_TL`/`_MK`/`_MD`/`_AR`/`_ENG`/`_MG` match the 3CB Takistan Police faction template (`Sparker95/Vindicta:src/Templates/Factions/3CB_TPD.sqf`); `_OFF` and `_Officer_U` appear in the live server RPT CfgVehicles deinit log (`serverRpts/ArmA3Server_x64_2026-05-30_12-27-09.rpt`) and `_OFF` is also placed in `docs/reference/unit-index.json`. The previously-listed `_AT` was removed because it appears in **no** source (not RHS/3CB police template, not the RPT); the RPT-confirmed `_Officer_U` was added.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | SQF parser-compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict data/farabad_site_templates.sqf` | PASS | No known parser-compat patterns. |
+| 2 | Template structural sanity | Bracket/brace/paren balance | PASS | `[`/`]` 73/73, `{`/`}` 18/18, `(`/`)` 87/87 balanced. |
+| 3 | Runtime smoke | Dedicated Arma server: confirm TNP guards spawn at KarkanakPrison with 3CB TKP loaded | BLOCKED | Arma 3 dedicated runtime unavailable in this sandbox. |
+
+---
+
+## 2026-06-01 — Step 6 / Lane A (Stabilize & harden): RPC owner-capture static gate + dedicated runtime QA checklist
+
+**Branch/Commit:** copilot/read-only-architecture-audit @ 42f753d; TEST-LOG appended afterward
+
+**Scenario:** Step 6, Lane A. **A2** lands a static gate enforcing that every server-side handler calling `ARC_fnc_rpcValidateSender` captures `remoteExecutedOwner` at its own top frame and passes it explicitly as the 6th positional argument (`_callerOwner`) — the only reliable owner read on a dedicated server. The new guard `tests/static/rpc_owner_capture_conformance_checks.sh` parses each call's argument array, fails on <6 args / bare-literal owner / missing `remoteExecutedOwner` read, and enforces a minimum handler floor to catch silent coverage loss; it is wired into `.github/workflows/arma-preflight.yml`. **A1** (command cycle on dedicated) and **A3** (base gates + rotary/fixed-wing ATC parity) are runtime proofs documented in `docs/qa/Command_Cycle_Dedicated_Runtime_QA_Checklist.md` for execution on the dedicated rig.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | RPC owner-capture conformance gate | `tests/static/rpc_owner_capture_conformance_checks.sh` | PASS | 38 handlers enumerated; all pass an explicit `_callerOwner` (>= floor 38). |
+| 2 | Negative-case guard behaviour | Inject a 5-arg `call ARC_fnc_rpcValidateSender` handler and re-run | PASS | Guard reports `[FAIL] … missing explicit _callerOwner (6th arg)` and exits 1. |
+| 3 | A1 command cycle on dedicated (task→SITREP→follow-on→close) | `docs/qa/Command_Cycle_Dedicated_Runtime_QA_Checklist.md` Scenarios 1–6 | BLOCKED | Arma 3 dedicated runtime unavailable in this sandbox. |
+| 4 | A3 base gates + ATC parity | `docs/qa/Command_Cycle_Dedicated_Runtime_QA_Checklist.md` Scenarios 7–9 | BLOCKED | Arma 3 dedicated runtime unavailable in this sandbox. |
+
+---
+
 ## 2026-06-01 — Civic mission catalog: integrate `missionMeta` through the queue → lead → incident path (Mode B)
 
 **Branch/Commit:** copilot/add-additional-incidents @ bfc5ed9 (metadata-through-lead integration + sqflint cleanup); TEST-LOG appended afterward
@@ -29,6 +208,22 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 ---
 
 
+**Branch/Commit:** copilot/fix-threat-baseposition-guard-pool @ 09dcbe9; TEST-LOG appended afterward
+
+**Scenario:** Triage of playtest RPT `serverRpts/ArmA3Server_x64_2026-05-30_12-27-09.rpt`. Command cycle (lead → TOC queue → incident → close) confirmed working (49 `LEAD_CREATED`, 7 `TOC_QUEUE_SUBMIT`, 6 `INCIDENT_CLOSED` all `SUCCEEDED`, zero SQF runtime/`[ARC]…ERROR` entries). Two non-fatal warnings fixed: (1) 160× `ARC_fnc_threatScheduleEvent: no base position for district=DXX - skipping` — the base-position fallback chain only checked a non-existent `district_<id>_obj` marker, so districts were skipped whenever no convoy/active-incident position was available; added the canonical `civsub_v1_districts` centroid (keys `D01`..`D20`, `[x,y]`) as the per-district fallback. (2) `ARC_fnc_sitePopBuildGroup: site 'PresidentialPalace'/'EmbassyCompound' role 'guard' — no valid classes in pool; group skipped` — the `_tnaPool`/`_tnpPool` classnames (`UK3CB_TKA_B_Soldier`, `_NCO`, …) are fabricated; the RPT proves the 3CB faction IS loaded but uses abbreviated names (`UK3CB_TKA_B_AR`/`_TL`/`_OFF`). Guard pools now enumerate scope=2 BLUFOR `Man` classes by faction from `CfgVehicles` (same pattern as `ARC_fnc_opsSpawnLocalSupport`), keeping the hardcoded lists as a graceful fallback when the faction is absent.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | SQF parser-compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/threat/fn_threatScheduleEvent.sqf data/farabad_site_templates.sqf` | PASS | No known parser-compat patterns. |
+| 2 | SQF lint (warnings fail) | `sqflint -e w` on both changed files | PASS | Exit 0, no warnings. |
+| 3 | Template structural sanity | Bracket/brace/paren balance + returns top-level ARRAY | PASS | `[`/`]`, `{`/`}`, `(`/`)` balanced; pools still referenced 16×. |
+| 4 | RPT evidence cross-check | Grep proven TKA/TKP man classes in RPT | PASS | `UK3CB_TKA_B_AR`/`_TL`/`_OFF` etc. present; `*_Soldier`/`*_NCO` absent. |
+| 5 | Runtime smoke | Dedicated Arma server: confirm guards spawn at palace/embassy and threats schedule per district | BLOCKED | Arma 3 dedicated runtime unavailable in this sandbox. |
+
+---
+
+## 2026-05-30 — Make Arma SQF preflight green: clear sqflint compat + lint findings on changed files (Mode B)
+
 **Branch/Commit:** copilot/add-additional-incidents @ c08edf1 (compat fixes 53a1d8f + lint-warning cleanup c08edf1); TEST-LOG appended afterward
 
 **Scenario:** The structured COIN civic mission catalog work (`data/coin_civic_mission_catalog.sqf` + `ARC_fnc_incidentCatalogBuild`, plus `missionMeta` plumbing) left the **Arma SQF + Mission Config Preflight** **SQF static analysis** step red on the changed `*.sqf` set. `python3 scripts/dev/sqflint_compat_scan.py --strict` reported parser-compat patterns and `sqflint -e w` then failed: the new `fn_incidentCatalogBuild.sqf` used bare `fileExists`/method-style `getOrDefault`, `fn_threatScheduleEvent.sqf`'s new CIVSUB-centroid fallback used method-style `getOrDefault`, and because the PR also touches `fn_incidentCreate.sqf`/`fn_incidentClose.sqf` the whole-file scan exposed pre-existing `#` indexing, raw `trim`, and `isNotEqualTo`. Replaced every disallowed compat pattern with the scanner-approved equivalents per `docs/qa/SQFLINT_COMPAT_GUIDE.md`: `#` indexing → `select`; bare `trim` → compiled `_trimFn` helper; bare `fileExists` → compiled `_fileExistsFn` helper; method `getOrDefault` → compiled `_hg` helper (`[map,key,default] call _hg`); `isNotEqualTo ""` → `!(_x isEqualTo "")`. Because the same step runs `sqflint -e w` (warnings fail the build), also cleared the pre-existing unused-variable warnings those changed files carried so the step reaches exit 0: skipped unused positional `params` slots via `""` in `fn_incidentCreate.sqf` (`_oid`/`_targetGroup` and the unused lead-strength/created/expires/sourceTask/sourceIncType slots) and `fn_incidentSeedQueue.sqf` (`_ldisplay`), and removed dead unused `_leadOrderId`/`_leadOrderTarget`/`_leadOrderMeta` declarations + assignments. No runtime behaviour changed.
@@ -42,6 +237,8 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | 5 | Runtime smoke | Hosted/dedicated MP exercise of incident/threat civic-catalog flow | BLOCKED | Arma 3 runtime unavailable in this sandbox. |
 
 ---
+
+## 2026-05-30 — Make Arma SQF preflight green: clear sqflint compat + lint findings on changed files (Mode B)
 
 **Branch/Commit:** copilot/prevent-assigning-leads-as-tasks @ 5f9db0f (compat fixes) + d2eb603 (lint-warning cleanup); TEST-LOG appended afterward
 

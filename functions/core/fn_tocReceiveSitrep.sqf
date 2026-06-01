@@ -251,6 +251,20 @@ if (missionNamespace getVariable ["civsub_v1_enabled", false]) then
     // Also append to details for archival
     if (_details isEqualTo "") then { _details = _civAnnex; } else { _details = _details + "\n\n" + _civAnnex; };
 
+    // Unified SHERIFF/SSE dossier annex (parallel to CIVSUB annex; appended for archival).
+    ["activeIncidentSitrepAnnexDossier", ""] call ARC_fnc_stateSet;
+    missionNamespace setVariable ["ARC_activeIncidentSitrepAnnexDossier", "", true];
+    if (isNil "ARC_fnc_dossierAnnexBuild") then { ARC_fnc_dossierAnnexBuild = compile preprocessFileLineNumbers "functions\dossier\fn_dossierAnnexBuild.sqf"; };
+    private _dosTaskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
+    if (!(_dosTaskId isEqualType "")) then { _dosTaskId = ""; };
+    private _dosAnnex = [_dosTaskId, _didC] call ARC_fnc_dossierAnnexBuild;
+    if (!(_dosAnnex isEqualType "")) then { _dosAnnex = ""; };
+    if (!(_dosAnnex isEqualTo "")) then {
+        ["activeIncidentSitrepAnnexDossier", _dosAnnex] call ARC_fnc_stateSet;
+        missionNamespace setVariable ["ARC_activeIncidentSitrepAnnexDossier", _dosAnnex, true];
+        if (_details isEqualTo "") then { _details = _dosAnnex; } else { _details = _details + "\n\n" + _dosAnnex; };
+    };
+
     // Phase 6 extension: apply per-incident-type CIVSUB influence deltas on outcome.
     // Implements the 20-row permutation matrix (CIVSUB_Incident_Lead_Permutation_Matrix.md).
     if (!(_didC isEqualTo "") && { _recU in ["SUCCEEDED", "FAILED"] }) then

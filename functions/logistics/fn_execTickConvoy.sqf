@@ -1383,7 +1383,7 @@ if (!_started) exitWith
 
         private _gridS = mapGridPosition _detectPos;
         private _gridD = mapGridPosition _destPos;
-        ["OPS", format ["Convoy departed %1 en route to %2. Task %3.", _gridS, _gridD, _taskId], _detectPos, [["event", "CONVOY_DEPARTED"], ["speedKph", round _speedKph], ["taskId", _taskId]]] call ARC_fnc_intelLog;
+        ["CONVOY_DEPARTED", format ["Convoy departed %1 en route to %2. Task %3.", _gridS, _gridD, _taskId], _detectPos, _taskId, "", [["speedKph", round _speedKph], ["destGrid", _gridD]]] call ARC_fnc_convoyOpsLog;
 
         if (missionNamespace getVariable ["ARC_debugHints", true]) then
         {
@@ -1927,10 +1927,12 @@ if (!(_contactActive isEqualTo _prevContactActive)) then
     if (_contactActive) then
     {
         diag_log format ["[ARC][INFO][CONVOY] ARC_fnc_execTickConvoy: contact profile active task=%1 lead=%2 speedMode=FULL", _taskId, netId _lead];
+        ["CONVOY_AMBUSH", "Convoy under contact (ambush). Pushing through at speed.", getPosATL _lead, _taskId, "", [["leadNetId", netId _lead], ["contact", "ACTIVE"]]] call ARC_fnc_convoyOpsLog;
     }
     else
     {
         diag_log format ["[ARC][INFO][CONVOY] ARC_fnc_execTickConvoy: contact profile cleared task=%1 lead=%2", _taskId, netId _lead];
+        ["CONVOY_AMBUSH_CLEAR", "Convoy contact cleared. Resuming normal movement profile.", getPosATL _lead, _taskId, "", [["leadNetId", netId _lead], ["contact", "CLEAR"]]] call ARC_fnc_convoyOpsLog;
     };
 };
 
@@ -2969,6 +2971,9 @@ if (_arrivedAt isEqualType 0 && { _arrivedAt > 0 }) then
 
         ["activeConvoyDismountComplete", true] call ARC_fnc_stateSet;
         ["activeConvoyArrivalCampApplied", true] call ARC_fnc_stateSet;
+
+        // Lifecycle OPS log: convoy run complete (terminal), id + grid + actor.
+        ["CONVOY_COMPLETE", format ["Convoy run complete at destination. Task %1.", _taskId], _destPos, _taskId, "", [["dismounted", count _dismountUnits]]] call ARC_fnc_convoyOpsLog;
     };
 };
 

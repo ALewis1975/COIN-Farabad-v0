@@ -139,6 +139,15 @@ missionNamespace setVariable ["ARC_recruitAddActionsEnabled", true, true];
 // SITREP in-world action (dismounted): vanilla addAction enabled by default.
 missionNamespace setVariable ["ARC_sitrepInWorldActionsEnabled", true, false];
 
+// RAVEN JTAC → CASREQ 9-line prefill field action: enabled by default.
+missionNamespace setVariable ["ARC_casreqJtacPrefillEnabled", true, true];
+
+// SHADOW ISR → lead bridge field action: enabled by default.
+missionNamespace setVariable ["ARC_isrShadowLeadBridgeEnabled", true, true];
+
+// TNP partnered ops → lead request field action: enabled by default.
+missionNamespace setVariable ["ARC_opsTnpPartneredRequestEnabled", true, true];
+
 // Simple AI recruitment from the named Eden object "recruitment_01".
 // Clients render one "Recruit AI" action; the server validates sender identity,
 // registered recruitment object, public infantry class, side/faction match, and
@@ -150,6 +159,11 @@ missionNamespace setVariable ["ARC_recruitContainerClasses", ["B_Slingload_01_Ca
 missionNamespace setVariable ["ARC_recruitContainerNames", ["recruitment_01"], true];
 missionNamespace setVariable ["ARC_recruitContainerNetIds", [], true];
 missionNamespace setVariable ["ARC_recruitGroupMaxUnits", 12, true];
+// Recruit "Recruit AI" addAction interaction range (meters) and faction gate.
+// Range default matches the historical hardcoded addAction radius; the faction
+// gate defaults to true to preserve the existing same-faction enforcement.
+missionNamespace setVariable ["ARC_recruitActionRangeM", 50, true];
+missionNamespace setVariable ["ARC_recruitRequireSameFaction", true, true];
 
 [] spawn {
     if (!isServer) exitWith {};
@@ -1016,9 +1030,9 @@ private _arcKnownToggleConsumers = [
     ["ARC_recruitContainerClasses", "functions/logistics/fn_recruitClientInit.sqf + functions/logistics/fn_recruitSpawnRequest.sqf"],
     ["ARC_recruitContainerNetIds", "functions/logistics/fn_recruitServerPublishContainers.sqf + functions/logistics/fn_recruitClientInit.sqf"],
     ["ARC_recruitContainerNames", "functions/logistics/fn_recruitServerPublishContainers.sqf (Eden variable-name opt-in)"],
-    ["ARC_recruitActionRangeM", "functions/logistics/fn_recruitClientAddActions.sqf + functions/logistics/fn_recruitSpawnRequest.sqf"],
+    ["ARC_recruitActionRangeM", "functions/logistics/fn_recruitClientAddActions.sqf"],
     ["ARC_recruitGroupMaxUnits", "functions/logistics/fn_recruitSpawnRequest.sqf"],
-    ["ARC_recruitRequireSameFaction", "functions/logistics/fn_recruitSpawnRequest.sqf"],
+    ["ARC_recruitRequireSameFaction", "declared default; fn_recruitSpawnRequest.sqf enforces same-faction unconditionally (see tests/static/recruitment_container_contract_checks.sh)"],
     ["ARC_recruitCompanyCommandGroupIds", "functions/core/fn_rolesCanRecruitAI.sqf"],
     ["ARC_recruitCommandRoleTokens", "functions/core/fn_rolesCanRecruitAI.sqf"],
     ["ARC_recruitUnitWhitelist", "functions/logistics/fn_recruitClientAddActions.sqf + functions/logistics/fn_recruitSpawnRequest.sqf"],

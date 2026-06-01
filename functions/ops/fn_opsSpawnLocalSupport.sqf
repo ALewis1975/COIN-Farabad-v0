@@ -63,7 +63,14 @@ if (!(_eligible isEqualType [])) then { _eligible = ["CIVIL","CHECKPOINT","DEFEN
 _eligible = _eligible apply { toUpper _x };
 // IED cordons are authoritative for Farabad COIN. Even if a mission overrides the allow-list,
 // IED must remain eligible.
-if !((_type in _eligible) || { _type isEqualTo "IED" }) exitWith {[]};
+// TNP partnered-ops leads (Lane C / C3) are tagged TNP_PARTNERED and carried onto the active
+// incident as activeLeadTag. Such incidents must always stand up a host-nation partnered
+// element (police/army garrison + patrol) regardless of the incident type, so the PATROL
+// variant gets a partnered presence too — not just the already-eligible CHECKPOINT variant.
+private _activeLeadTag = ["activeLeadTag", ""] call ARC_fnc_stateGet;
+if (!(_activeLeadTag isEqualType "")) then { _activeLeadTag = ""; };
+private _isTnpPartnered = (toUpper _activeLeadTag) isEqualTo "TNP_PARTNERED";
+if !((_type in _eligible) || { _type isEqualTo "IED" } || _isTnpPartnered) exitWith {[]};
 
 // Keep the Airbase/JBF clean by default.
 private _zone = [_pos] call ARC_fnc_worldGetZoneForPos;

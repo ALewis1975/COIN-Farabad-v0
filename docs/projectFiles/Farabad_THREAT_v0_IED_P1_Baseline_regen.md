@@ -2,10 +2,37 @@
 
 **Project:** COIN_Farabad (Farabad AO)  
 **Timeframe:** 2011-era COIN (Takistan AO)  
-**Doc type:** Locked baseline (implementation planning)  
-**Version:** 0.1  
-**Date:** 2026-01-02  
+**Doc type:** Locked baseline (implementation planning), re-baselined to shipped reality  
+**Version:** 0.2  
+**Date:** 2026-06-01 (re-baseline of 0.1, 2026-01-02)  
 **Owner:** Mission development (server-authoritative systems)
+
+---
+
+## 0.0) Re-baseline note (v0.2, 2026-06-01)
+
+> **Why this section exists.** The original v0.1 baseline described Threat v0 as a
+> pure recordkeeping layer with *no scheduler*, *no district threat economy /
+> attack budget*, and *no VBIED/Suicide logic*. The shipped implementation has
+> since grown past those non-goals. This re-baseline updates the document so it
+> matches reality and stops contradicting the Design Guide and shipped code.
+> No code changes accompany this re-baseline (Mode F — docs only).
+
+**What actually shipped (current reality):**
+
+| Area | v0.1 non-goal claim | Shipped reality | Status |
+|---|---|---|---|
+| Scheduler | "No global scheduler / autonomous event generator" | `ARC_fnc_threatSchedulerTick` runs on the server bootstrap tick (`fn_bootstrapServer.sqf`) at `ARC_threatSchedulerIntervalS` (default 120 s) and calls `ARC_fnc_threatScheduleEvent` per governor-cleared district. **It does not spawn world objects** — `ARC_fnc_threatScheduleEvent` writes a `ThreatRecord` with `world.spawned=false` and emits a lead. It is a **recordkeeping / logging stub** relative to world spawns. | **Shipped** |
+| Spawns | n/a (implied bubble-only IED spawn) | Physical materialisation is **incident-driven**: scheduled records emit leads → TOC Queue → incident creation → downstream spawn ticks (`fn_iedSpawnTick`, `fn_vbiedSpawnTick`, `fn_suicideBomberSpawnTick`) instantiate the world objects. The scheduler never spawns directly. | **Shipped** |
+| Threat economy | "No district 'threat economy' / attack budget" | District attack budget (`threat_v0_attack_budget`, daily `spent_today` reset), per-district risk, and a gating governor are live. Read model is published as `ARC_pub_threatEconomySnapshot` and surfaced in `Console_VM_v1` at `sections.threat.data.economy`. | **Shipped (LOCKED — see below)** |
+| Governor / budget / GREEN coupling | "No influence-driven threat probability gates" | `ARC_fnc_threatGovernorCheck` gates each scheduled event on enable flag, global/district cooldowns, district budget, and escalation tier; CIVSUB GREEN score nudges intel quality. | **LOCKED** per **Design Guide §16, decision #5** (GREEN ≥ 80 → budget bonus; < 20 → penalty; thresholds 20/80 configurable). |
+| VBIED / Suicide | "No VBIED / suicide bomber logic" | Scaffolding exists: scheduler selects `VBIED`/`SUICIDE` subtypes/intents at higher tiers; `fn_vbiedSpawnTick`, `fn_vbiedDrivenSpawnTick`, `fn_vbiedServerDetonate`, `fn_vbiedEmitLeads`, `fn_suicideBomberSpawnTick`, `fn_suicideBomberOnDetonate` exist. | **Scaffold — pending lock.** Behaviour and tuning are not yet locked; treat as in-development per `Farabad_IED_VBIED_Suicide_Subsystem_Planning.md`. |
+
+**Net effect on this document:** §1.2 ("Explicitly out of scope") below has been
+corrected — the scheduler, threat economy/budget, and governor/GREEN coupling are
+now **in scope and shipped**, while VBIED/Suicide are **Scaffold pending lock**.
+The original v0 schema, hooks, IED Phase 1 spec, and acceptance tests in §2–§9
+remain valid as the IED-record foundation those systems build on.
 
 ---
 
@@ -13,7 +40,7 @@
 
 This baseline defines the minimum viable **Threat System** for Farabad:
 
-1. **Threat v0 (Priority 1):** a thin, low-risk **recordkeeping + hook layer** that tracks “threats” as records with lifecycle states, without changing pacing (no global scheduler, no new escalation logic).
+1. **Threat v0 (Priority 1):** a thin, low-risk **recordkeeping + hook layer** that tracks “threats” as records with lifecycle states. *(Re-baseline v0.2: a governor-gated scheduler and district threat economy have since shipped on top of this layer — see §0.0. The scheduler is a recordkeeping/logging stub that emits leads and never spawns directly; world spawns remain incident-driven.)*
 2. **IED Phase 1 (Priority 2):** a single, contained “Threat package” type: **`IED_SUSPICIOUS_OBJECT`**, spawned only inside the player bubble (or after AO activation), with full logging and cleanup discipline.
 3. **CIVSUB skeleton (Priority 3):** deferred until Threat v0 + IED P1 are stable; implement district scores + identity stubs first (no spawned civilians yet).
 
@@ -41,12 +68,17 @@ This document aligns with Farabad’s cross-cutting standards:
   - spawn a single “suspicious object” manifestation
   - capture: creation → discovery/interaction → neutralization → cleanup
 
-### 1.2 Explicitly out of scope (v0)
-- No district “threat economy” / attack budget
-- No global scheduler / autonomous event generator
-- No VBIED / suicide bomber logic
-- No influence-driven threat probability gates (reserved for CIVSUB coupling later)
-- No new tasks/leads generated by Threat (v0 is read-mostly and observational)
+### 1.2 Explicitly out of scope (v0.1 — superseded; see §0.0 re-baseline)
+
+> **Re-baselined (v0.2):** The items below were the *original v0.1 non-goals*.
+> Several have since shipped and are retained here only for historical context.
+> See §0.0 for the authoritative current status.
+
+- ~~No district "threat economy" / attack budget~~ — **shipped & LOCKED** (governor/budget/GREEN per Design Guide §16 #5).
+- ~~No global scheduler / autonomous event generator~~ — **shipped** as a recordkeeping/logging stub (`ARC_fnc_threatSchedulerTick` → `ARC_fnc_threatScheduleEvent`); it records + emits leads and does **not** spawn world objects.
+- ~~No VBIED / suicide bomber logic~~ — **Scaffold pending lock** (VBIED/Suicide spawn ticks and lead emitters exist; tuning/behaviour not yet locked).
+- ~~No influence-driven threat probability gates~~ — **shipped** via `ARC_fnc_threatGovernorCheck` + CIVSUB GREEN intel-quality coupling.
+- No new tasks/leads generated by Threat — **partially superseded**: scheduled records now emit leads that feed the TOC Queue; physical spawns remain **incident-driven** (the scheduler itself spawns nothing).
 
 ---
 

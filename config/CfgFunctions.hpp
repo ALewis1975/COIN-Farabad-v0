@@ -305,6 +305,16 @@ class CfgFunctions
             class casreqExecute {};
             class casreqClose {};
             class casreqClientSubmit {};
+            class casreqJtacPrefill {};
+        };
+
+        class Dossier
+        {
+            file = "functions\dossier";
+
+            class dossierUpsertFromHandoff {};
+            class dossierBroadcast {};
+            class dossierAnnexBuild {};
         };
 
         class CIVSUB
@@ -512,6 +522,7 @@ class CfgFunctions
             class intelOrderCompleteRtbEpw {};
 
             class intelClientBeginLeadRequestMapClick {};
+            class intelShadowLeadBridge {};
 
             class mapClick_arm {};
             class mapClick_disarm {};
@@ -646,6 +657,7 @@ class CfgFunctions
         {
             file = "functions\logistics";
             class convoyStartupConfig {};
+            class convoyOpsLog {};            // uniform convoy lifecycle OPS logging (id+grid+actor)
             class execSpawnConvoy {};
             class execTickConvoy {};
             class execMsrThreatCheck {};  // T10: MSR/convoy threat awareness
@@ -716,6 +728,7 @@ class Ops
             class opsSpawnLeadComposition {};
             class opsSpawnLocalSupport {};
             class opsSpawnRouteSupport {};
+            class opsTnpPartneredRequest {};
         };
 
         class Medical

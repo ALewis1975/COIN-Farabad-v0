@@ -234,3 +234,7 @@ jobs:
       - name: CASREQ snapshot contract static validation
         run: |
           tests/static/casreq_snapshot_contract_checks.sh
+
+      - name: RPC owner-capture conformance static validation
+        run: |
+          tests/static/rpc_owner_capture_conformance_checks.sh

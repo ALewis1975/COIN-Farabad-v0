@@ -904,4 +904,79 @@ if (!(player getVariable ['ARC_fieldSitrepActionsAdded', false])) then
 };
 };
 
+// RAVEN JTAC → CASREQ 9-line prefill (independent of the SITREP in-world flag).
+if (missionNamespace getVariable ["ARC_casreqJtacPrefillEnabled", true]) then
+{
+if (!(player getVariable ['ARC_casreqJtacPrefillActionAdded', false])) then
+{
+    player setVariable ['ARC_casreqJtacPrefillActionAdded', true];
+
+    private _tag = [player] call ARC_fnc_rolesGetTag;
+    private _pfx = format ['[Player] Actions [%1]:', _tag];
+
+    private _condJtac = "((missionNamespace getVariable ['ARC_casreqJtacPrefillEnabled', true]) isEqualTo true) && {([player] call ARC_fnc_rolesIsAuthorized) || ([player] call ARC_fnc_rolesCanApproveQueue)}";
+
+    player addAction [
+        format ['%1 JTAC: Prefill CAS Request (Lase/Mark)', _pfx],
+        { [] spawn ARC_fnc_casreqJtacPrefill; },
+        [],
+        1.30,
+        true,
+        true,
+        '',
+        _condJtac
+    ];
+};
+};
+
+// SHADOW ISR → lead bridge (independent of the SITREP in-world flag).
+if (missionNamespace getVariable ["ARC_isrShadowLeadBridgeEnabled", true]) then
+{
+if (!(player getVariable ['ARC_isrShadowLeadBridgeActionAdded', false])) then
+{
+    player setVariable ['ARC_isrShadowLeadBridgeActionAdded', true];
+
+    private _tagIsr = [player] call ARC_fnc_rolesGetTag;
+    private _pfxIsr = format ['[Player] Actions [%1]:', _tagIsr];
+
+    private _condIsr = "((missionNamespace getVariable ['ARC_isrShadowLeadBridgeEnabled', true]) isEqualTo true) && {([player, 'SHADOW'] call ARC_fnc_rolesHasGroupIdToken) || ([player] call ARC_fnc_rolesIsTocS2) || ([player] call ARC_fnc_rolesIsTocCommand)}";
+
+    player addAction [
+        format ['%1 SHADOW ISR: Bridge Observation to Lead (Lase/Cursor)', _pfxIsr],
+        { [] spawn ARC_fnc_intelShadowLeadBridge; },
+        [],
+        1.29,
+        true,
+        true,
+        '',
+        _condIsr
+    ];
+};
+};
+
+// TNP partnered ops → lead request (independent of the SITREP in-world flag).
+if (missionNamespace getVariable ["ARC_opsTnpPartneredRequestEnabled", true]) then
+{
+if (!(player getVariable ['ARC_opsTnpPartneredRequestActionAdded', false])) then
+{
+    player setVariable ['ARC_opsTnpPartneredRequestActionAdded', true];
+
+    private _tagTnp = [player] call ARC_fnc_rolesGetTag;
+    private _pfxTnp = format ['[Player] Actions [%1]:', _tagTnp];
+
+    private _condTnp = "((missionNamespace getVariable ['ARC_opsTnpPartneredRequestEnabled', true]) isEqualTo true) && {([player, 'TNP'] call ARC_fnc_rolesHasGroupIdToken) || ([player] call ARC_fnc_rolesIsTocS3) || ([player] call ARC_fnc_rolesIsTocCommand)}";
+
+    player addAction [
+        format ['%1 TNP: Request Partnered Ops (Cursor/Self)', _pfxTnp],
+        { [] spawn ARC_fnc_opsTnpPartneredRequest; },
+        [],
+        1.28,
+        true,
+        true,
+        '',
+        _condTnp
+    ];
+};
+};
+
 true
