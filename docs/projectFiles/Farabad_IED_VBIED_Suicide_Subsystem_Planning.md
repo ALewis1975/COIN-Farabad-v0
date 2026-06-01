@@ -1,6 +1,14 @@
 # Farabad COIN — IED / VBIED / Suicide Bomber Sub-System (Planning Spec)
 
 **Status:** Planning-only (no mission files generated)  
+**Implementation status (2026-06-01):** **Scaffold — pending lock.** Parts of this
+spec have shipped as scaffolding — the threat scheduler selects VBIED/Suicide
+profiles at higher escalation tiers, and spawn/lead/detonation functions exist
+(`fn_vbiedSpawnTick`, `fn_vbiedDrivenSpawnTick`, `fn_vbiedServerDetonate`,
+`fn_vbiedServerOnDestroyed`, `fn_vbiedEmitLeads`, `fn_vbiedPickSite`,
+`fn_suicideBomberSpawnTick`, `fn_suicideBomberOnDetonate`). Behaviour and tuning
+are **not yet locked**; treat as in-development. See the re-baseline note (§0.0)
+in `Farabad_THREAT_v0_IED_P1_Baseline_regen.md`.  
 **Scope:** Design + integration plan for a future subsystem to layer into *Farabad COIN*  
 **Context:** 2011-era COIN, Takistan AO  
 

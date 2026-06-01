@@ -349,6 +349,15 @@ Key integration hooks are intentionally minimal:
 
 Refer to `Farabad_THREAT_v0_IED_P1_Baseline_regen.md` for exact schema, missionNamespace keys, idempotency and acceptance tests.
 
+> **Status update (2026-06-01 re-baseline):** A governor-gated **threat
+> scheduler** (`ARC_fnc_threatSchedulerTick` → `ARC_fnc_threatScheduleEvent`)
+> and a **district threat economy** (attack budget + risk + GREEN coupling) have
+> shipped on top of the v0 record layer. The scheduler is a
+> **recordkeeping/logging stub** — it writes records and emits leads but never
+> spawns world objects; physical spawns remain **incident-driven**. The
+> governor/budget/GREEN coupling is **LOCKED** per §16, decision #5. See the
+> re-baseline note (§0.0) in `Farabad_THREAT_v0_IED_P1_Baseline_regen.md`.
+
 ### 10.2 IED/VBIED/Suicide expansion (planning spec)
 The `Farabad_IED_VBIED_Suicide_Subsystem_Planning.md` document defines:
 - a persistence-first ThreatRecord schema (future version)
@@ -356,6 +365,12 @@ The `Farabad_IED_VBIED_Suicide_Subsystem_Planning.md` document defines:
 - event-to-task/lead mapping aligned to the Task/Lead/SITREP spine
 
 This module should be a **child** of the Threat System, not a standalone random spawner.
+
+> **VBIED / Suicide status (2026-06-01):** **Scaffold — pending lock.** Spawn
+> ticks and lead emitters exist (`fn_vbiedSpawnTick`, `fn_vbiedDrivenSpawnTick`,
+> `fn_vbiedServerDetonate`, `fn_vbiedEmitLeads`, `fn_suicideBomberSpawnTick`,
+> `fn_suicideBomberOnDetonate`) and the scheduler selects VBIED/Suicide profiles
+> at higher escalation tiers, but their behaviour and tuning are not yet locked.
 
 ---
 
