@@ -11,6 +11,20 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-06-01 — Lane B / B1: Re-baseline Threat v0/IED docs to shipped implementation (Mode F, docs-only)
+
+**Branch/Commit:** copilot/read-only-architecture-audit @ 0e1ee35; TEST-LOG appended afterward
+
+**Scenario:** Lane B item **B1**. The v0.1 Threat baseline (`docs/projectFiles/Farabad_THREAT_v0_IED_P1_Baseline_regen.md`) listed "no global scheduler", "no district threat economy / attack budget", and "no VBIED/Suicide logic" as non-goals — all three contradicted shipped code. Re-baselined to v0.2: added a §0.0 re-baseline note with a reality table, corrected §0 Purpose and §1.2 "out of scope", and cross-linked the Design Guide. Documented that the scheduler (`ARC_fnc_threatSchedulerTick` → `ARC_fnc_threatScheduleEvent`) is a **recordkeeping/logging stub** (writes records + emits leads, `world.spawned=false`, never spawns directly), that physical spawns are **incident-driven**, and that the **governor/budget/GREEN** coupling is **LOCKED** per Design Guide §16 decision #5. Classified **VBIED/Suicide as Scaffold pending lock** in the baseline, the Design Guide §10.2, and the IED/VBIED/Suicide planning spec header. No code changed.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Doc/reality cross-check | Verified `ARC_fnc_threatSchedulerTick` wired in `fn_bootstrapServer.sqf:524,547`; `ARC_fnc_threatScheduleEvent` sets `world.spawned=false`; `ARC_pub_threatEconomySnapshot` published in `fn_publicBroadcastState.sqf:1120`; VBIED/Suicide fns exist under `functions/ied/` | PASS | Doc statements match shipped code. |
+| 2 | §16 lock reference accuracy | Confirmed Design Guide §16 decision #5 governor/budget/GREEN lock (20/80 thresholds) | PASS | Reference is correct. |
+| 3 | Tests Run | n/a | Not run (docs-only) | Mode F — no code changes. |
+
+---
+
 ## 2026-06-01 — Fix TKP_B (Takistan National Police) hardcoded fallback pool classnames
 
 **Branch/Commit:** copilot/read-only-architecture-audit @ 09f2477 (initial fix); evidence-grounding revision + this TEST-LOG update appended afterward
