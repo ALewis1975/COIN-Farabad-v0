@@ -11,7 +11,27 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
-## 2026-06-01 — C1: RAVEN JTAC → CASREQ 9-line prefill
+## 2026-06-01 — C2: SHADOW ISR → lead bridge
+
+**Branch/Commit:** copilot/read-only-architecture-audit @ 8aa7f9e
+
+**Scenario:** Lane C feature (Mode B). Added a SHADOW (RQ-7 UAS) field action that bridges an ISR observation into the intel pipeline without manual map-clicking. New client function `ARC_fnc_intelShadowLeadBridge` derives an observation position from the UAS sensor context (connected-UAV laser via `getConnectedUAV`, then the operator's own `laserTarget`, then `cursorTarget`), classifies the observed contact (dismount/vehicle/air), lets the operator confirm/override lead type (default RECON), confidence (LOW/MED/HIGH → strength) and remarks, then remoteExecs the **existing, unchanged** `ARC_fnc_intelQueueSubmit` path with a `LEAD_REQUEST` kind. No new server RPC handler was introduced — the request lands in the TOC queue (PENDING) and, once approved, flows through the standard `ARC_fnc_intelQueueDecide` → `ARC_fnc_leadCreate` → TOC backlog path. Per doctrine, the bridge never assigns a field task or creates a lead directly from the client. Wired a SHADOW/S2/Command + flag-gated `player addAction` in `fn_tocInitPlayer.sqf`, registered the function in `CfgFunctions.hpp` (Command class), and seeded the `ARC_isrShadowLeadBridgeEnabled` feature flag (default true) in `initServer.sqf`.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | sqflint parser-compat scan (strict) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/command/fn_intelShadowLeadBridge.sqf functions/core/fn_tocInitPlayer.sqf` | PASS | No known parser-compat patterns. |
+| 2 | sqflint lint (warnings fail) | `sqflint -e w functions/command/fn_intelShadowLeadBridge.sqf` and `… functions/core/fn_tocInitPlayer.sqf` | PASS | No warnings/errors. |
+| 3 | Structural sanity | Bracket/brace/paren balance | PASS | bridge `[]`38/38 `{}`45/45 `()`61/61; tocInitPlayer `[]`489/489 `{}`225/225 `()`293/293. |
+| 4 | SHADOW ISR lead-bridge contract | `bash tests/static/intel_shadow_lead_bridge_contract_checks.sh` | PASS | 13/13 incl. reuse of `intelQueueSubmit`, LEAD_REQUEST payload shape, no direct leadCreate/backlog/validateSender. |
+| 5 | RPC owner-capture conformance | `bash tests/static/rpc_owner_capture_conformance_checks.sh` | PASS | 38/38; no new server handler added (reuses sender-validated `intelQueueSubmit`). |
+| 6 | RemoteExec contract | `ARC_fnc_intelQueueSubmit` already allowlisted (`allowedTargets = 2`) | PASS | No new CfgRemoteExec entry required. |
+| 7 | Regression — CASREQ contract unaffected | `bash tests/static/casreq_snapshot_contract_checks.sh` | PASS | 9/9; C1 path untouched. |
+| 8 | Acceptance — SHADOW action submits LEAD_REQUEST to TOC queue; approval flows to lead/backlog | Static review: bridge builds payload + remoteExecs unchanged `ARC_fnc_intelQueueSubmit`; queue approval reuses existing `intelQueueDecide` LEAD_REQUEST branch | PASS | Logic verified by inspection. |
+| 9 | Runtime — lase/observe via UAS, fire action, verify TOC queue PENDING then approve → lead on dedicated | Dedicated Arma server | BLOCKED | Arma 3 dedicated runtime unavailable in this sandbox. |
+
+**Result:** PASS (static/contract) / BLOCKED (runtime).
+
+---
 
 **Branch/Commit:** copilot/read-only-architecture-audit @ 261905c (base); feature commit appended afterward
 
