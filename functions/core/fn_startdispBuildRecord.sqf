@@ -42,9 +42,7 @@ _seq = _seq + 1;
 private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
 private _district = ["activeIncidentCivsubDistrictId", ""] call ARC_fnc_stateGet;
 if (!(_district isEqualType "") || { _district isEqualTo "" }) then { _district = "D00"; };
-private _seqStr = str _seq;
-while { (count _seqStr) < 6 } do { _seqStr = "0" + _seqStr; };
-private _sid = format ["SDISP:%1:%2", _district, _seqStr];
+private _sid = format ["SDISP:%1:%2", _district, [_seq, 6] call BIS_fnc_padNumber];
 
 private _uid = getPlayerUID _caller;
 private _grp = group _caller;
