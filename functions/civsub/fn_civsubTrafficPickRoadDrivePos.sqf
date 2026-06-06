@@ -59,34 +59,41 @@ for "_i" from 1 to _tries do
 
     if (surfaceIsWater _rPos) then { continue; };
 
-    private _hwyMarker = [_rPos, (missionNamespace getVariable ["civsub_v1_traffic_highwayMarkerRadius_m", 85]), -1] call ARC_fnc_worldHighwayMarkerNearest;
-    private _hwyDir = -1;
-    if (_hwyMarker isEqualType [] && { (count _hwyMarker) >= 3 }) then
-    {
-        _hwyDir = _hwyMarker select 2;
-        if (!(_hwyDir isEqualType 0)) then { _hwyDir = -1; };
-    };
-
     private _r2 = objNull;
-    private _bestDelta = 1e12; // larger than any bearing delta (0..180)
+    private _hwyDir = -1;
+    private _bestScore = 1e12; // larger than any bearing + marker-distance score.
+    private _hwyRadius = missionNamespace getVariable ["civsub_v1_traffic_highwayMarkerRadius_m", 85];
+    if (!(_hwyRadius isEqualType 0)) then { _hwyRadius = 85; };
+    _hwyRadius = (_hwyRadius max 20) min 500;
     {
         if (isNull _x) then { continue; };
         private _onward = roadsConnectedTo _x;
         if ((count _onward) > 0) then
         {
-            if (_hwyDir >= 0) then
+            private _candDir = _r getDir _x;
+            private _candHwyDir = -1;
+            private _candMarkerDist = _hwyRadius;
+            private _hwyMarker = [_rPos, _hwyRadius, _candDir] call ARC_fnc_worldHighwayMarkerNearest;
+            if (_hwyMarker isEqualType [] && { (count _hwyMarker) >= 4 }) then
             {
-                private _candDir = _r getDir _x;
-                private _delta = [_candDir, _hwyDir] call ARC_fnc_worldBearingDelta;
-                if (_delta < _bestDelta) then
-                {
-                    _bestDelta = _delta;
-                    _r2 = _x;
-                };
-            }
-            else
+                _candHwyDir = _hwyMarker select 2;
+                if (!(_candHwyDir isEqualType 0)) then { _candHwyDir = -1; };
+                _candMarkerDist = _hwyMarker select 3;
+                if (!(_candMarkerDist isEqualType 0)) then { _candMarkerDist = _hwyRadius; };
+            };
+
+            private _score = 500;
+            if (_candHwyDir >= 0) then
             {
-                if (isNull _r2) then { _r2 = _x; };
+                private _delta = [_candDir, _candHwyDir] call ARC_fnc_worldBearingDelta;
+                _score = _delta + (_candMarkerDist * 0.05);
+            };
+
+            if (_score < _bestScore) then
+            {
+                _bestScore = _score;
+                _r2 = _x;
+                _hwyDir = _candHwyDir;
             };
         };
     } forEach _conn;

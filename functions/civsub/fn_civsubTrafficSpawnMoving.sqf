@@ -151,9 +151,32 @@ if (_collide) exitWith
 };
 
 // Civilian driver
+private _driverClass = _driverCls;
+if !(isClass (configFile >> "CfgVehicles" >> _driverClass)) then
+{
+    _driverClass = "";
+    private _civPool = [] call ARC_fnc_civsubCivBuildClassPool;
+    if !(_civPool isEqualType []) then { _civPool = []; };
+    {
+        if (_driverClass isEqualTo "" && { _x isEqualType "" } && { isClass (configFile >> "CfgVehicles" >> _x) }) then
+        {
+            _driverClass = _x;
+        };
+    } forEach _civPool;
+    if (_driverClass isEqualTo "" && { isClass (configFile >> "CfgVehicles" >> "C_man_1") }) then { _driverClass = "C_man_1"; };
+};
+if (_driverClass isEqualTo "" || { !(isClass (configFile >> "CfgVehicles" >> _driverClass)) }) exitWith
+{
+    deleteVehicle _veh;
+    missionNamespace setVariable ["civsub_v1_traffic_lastMovingSpawnFail", "createFail", false];
+    [objNull, objNull]
+};
+
 private _grp = createGroup [civilian, true];
 _grp setGroupIdGlobal ["CIV Traffic"];
-private _drv = _grp createUnit [_driverCls, _pos, [], 0, "NONE"];
+private _driverPos = _pos getPos [4, (_dir + 180) % 360];
+_driverPos set [2, 0];
+private _drv = _grp createUnit [_driverClass, _driverPos, [], 0, "NONE"];
 if (isNull _drv) exitWith
 {
     deleteVehicle _veh;
@@ -161,7 +184,16 @@ if (isNull _drv) exitWith
     [objNull, objNull]
 };
 
+_drv assignAsDriver _veh;
+[_drv] allowGetIn true;
 _drv moveInDriver _veh;
+if (!((driver _veh) isEqualTo _drv)) exitWith
+{
+    deleteVehicle _drv;
+    deleteVehicle _veh;
+    missionNamespace setVariable ["civsub_v1_traffic_lastMovingSpawnFail", "createFail", false];
+    [objNull, objNull]
+};
 
 // Civilian-ish behavior
 _drv setBehaviour "CARELESS";
