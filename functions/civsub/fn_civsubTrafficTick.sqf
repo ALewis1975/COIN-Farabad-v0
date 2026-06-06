@@ -43,6 +43,12 @@ private _moving2 = [];
     private _v = _x;
     if (isNull _v) then { continue; };
     if (!alive _v) then { if (_deleteWrecks) then { deleteVehicle _v; }; continue; };
+    private _drv = driver _v;
+    if (isNull _drv || { !alive _drv }) then
+    {
+        deleteVehicle _v;
+        continue;
+    };
     _moving2 pushBack _v;
 } forEach _moving;
 
