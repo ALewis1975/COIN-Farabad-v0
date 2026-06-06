@@ -401,29 +401,29 @@ class ARC_StartdispDialog
 
     class controlsBackground
     {
-        class BG: RscText { idc = 77490; x = 0.24; y = 0.18; w = 0.52; h = 0.58; colorBackground[] = {0,0,0,0.82}; };
-        class TitleBar: RscText { idc = 77491; text = "STARTDISP"; x = 0.24; y = 0.18; w = 0.52; h = 0.04; colorBackground[] = {0.05,0.05,0.05,0.92}; };
+        class BG: RscText { idc = 77490; x = 0.193; y = 0.128; w = 0.614; h = 0.684; colorBackground[] = {0,0,0,0.82}; };
+        class TitleBar: RscText { idc = 77491; text = "STARTDISP"; x = 0.193; y = 0.128; w = 0.614; h = 0.047; colorBackground[] = {0.05,0.05,0.05,0.92}; };
     };
 
     class controls
     {
-        class Header: RscStructuredText { idc = 77492; x = 0.25; y = 0.23; w = 0.50; h = 0.07; };
-        class LabelLace: RscText { idc = 77402; text = "Starting LACE (Liquids / Ammo / Casualties / Equipment / Overall)"; x = 0.25; y = 0.305; w = 0.50; h = 0.03; };
-        class ComboLiquids: RscCombo { idc = 77421; x = 0.25; y = 0.335; w = 0.095; h = 0.04; };
-        class ComboAmmo: RscCombo { idc = 77422; x = 0.35; y = 0.335; w = 0.095; h = 0.04; };
-        class ComboCas: RscCombo { idc = 77423; x = 0.45; y = 0.335; w = 0.095; h = 0.04; };
-        class ComboEquip: RscCombo { idc = 77424; x = 0.55; y = 0.335; w = 0.095; h = 0.04; };
-        class ComboOverall: RscCombo { idc = 77425; x = 0.65; y = 0.335; w = 0.10; h = 0.04; };
-        class LabelDef: RscText { idc = 77403; text = "Known deficiencies:"; x = 0.25; y = 0.385; w = 0.25; h = 0.03; };
-        class EditDef: RscEdit { idc = 77411; style = 16; x = 0.25; y = 0.415; w = 0.50; h = 0.10; };
-        class LabelAdd: RscText { idc = 77404; text = "Additional supplies requested?"; x = 0.25; y = 0.525; w = 0.30; h = 0.03; };
-        class ComboAdd: RscCombo { idc = 77431; x = 0.56; y = 0.525; w = 0.19; h = 0.04; };
-        class LabelNotes: RscText { idc = 77405; text = "Additional supply notes:"; x = 0.25; y = 0.575; w = 0.25; h = 0.03; };
-        class EditNotes: RscEdit { idc = 77412; style = 16; x = 0.25; y = 0.605; w = 0.50; h = 0.07; };
-        class LabelConfirm: RscText { idc = 77406; text = "Confirm acceptance:"; x = 0.25; y = 0.685; w = 0.25; h = 0.03; };
-        class ComboConfirm: RscCombo { idc = 77441; x = 0.56; y = 0.685; w = 0.19; h = 0.04; };
-        class BtnSubmit: RscButton { idc = 77460; text = "Submit STARTDISP + Accept"; x = 0.25; y = 0.725; w = 0.24; h = 0.04; action = "[] call ARC_fnc_uiStartdispDialogSubmit;"; };
-        class BtnCancel: RscButton { idc = 77461; text = "Cancel"; x = 0.51; y = 0.725; w = 0.24; h = 0.04; action = "[] call ARC_fnc_uiStartdispDialogCancel;"; };
+        class Header: RscStructuredText { idc = 77492; x = 0.205; y = 0.187; w = 0.59; h = 0.083; };
+        class LabelLace: RscText { idc = 77402; text = "Starting LACE (Liquids / Ammo / Casualties / Equipment / Overall)"; x = 0.205; y = 0.275; w = 0.59; h = 0.035; };
+        class ComboLiquids: RscCombo { idc = 77421; x = 0.205; y = 0.311; w = 0.112; h = 0.047; };
+        class ComboAmmo: RscCombo { idc = 77422; x = 0.323; y = 0.311; w = 0.112; h = 0.047; };
+        class ComboCas: RscCombo { idc = 77423; x = 0.441; y = 0.311; w = 0.112; h = 0.047; };
+        class ComboEquip: RscCombo { idc = 77424; x = 0.559; y = 0.311; w = 0.112; h = 0.047; };
+        class ComboOverall: RscCombo { idc = 77425; x = 0.677; y = 0.311; w = 0.118; h = 0.047; };
+        class LabelDef: RscText { idc = 77403; text = "Known deficiencies:"; x = 0.205; y = 0.370; w = 0.295; h = 0.035; };
+        class EditDef: RscEdit { idc = 77411; style = 16; x = 0.205; y = 0.405; w = 0.59; h = 0.118; };
+        class LabelAdd: RscText { idc = 77404; text = "Additional supplies requested?"; x = 0.205; y = 0.535; w = 0.354; h = 0.035; };
+        class ComboAdd: RscCombo { idc = 77431; x = 0.571; y = 0.535; w = 0.224; h = 0.047; };
+        class LabelNotes: RscText { idc = 77405; text = "Additional supply notes:"; x = 0.205; y = 0.594; w = 0.295; h = 0.035; };
+        class EditNotes: RscEdit { idc = 77412; style = 16; x = 0.205; y = 0.629; w = 0.59; h = 0.083; };
+        class LabelConfirm: RscText { idc = 77406; text = "Confirm acceptance:"; x = 0.205; y = 0.724; w = 0.295; h = 0.035; };
+        class ComboConfirm: RscCombo { idc = 77441; x = 0.571; y = 0.724; w = 0.224; h = 0.047; };
+        class BtnSubmit: RscButton { idc = 77460; text = "Submit STARTDISP + Accept"; x = 0.205; y = 0.771; w = 0.283; h = 0.047; action = "[] call ARC_fnc_uiStartdispDialogSubmit;"; };
+        class BtnCancel: RscButton { idc = 77461; text = "Cancel"; x = 0.512; y = 0.771; w = 0.283; h = 0.047; action = "[] call ARC_fnc_uiStartdispDialogCancel;"; };
     };
 };
 
