@@ -42,6 +42,7 @@ class CfgRemoteExec
         class ARC_fnc_execObjectiveComplete         { allowedTargets = 2; };
         class ARC_fnc_tocReceiveSitrep              { allowedTargets = 2; };
         class ARC_fnc_tocRequestAcceptIncident      { allowedTargets = 2; };
+        class ARC_fnc_startdispSubmitAndAccept      { allowedTargets = 2; };
         class ARC_fnc_tocRequestCivsubReset         { allowedTargets = 2; };
         class ARC_fnc_tocRequestCivsubSave          { allowedTargets = 2; };
         class ARC_fnc_tocRequestCloseIncident       { allowedTargets = 2; };

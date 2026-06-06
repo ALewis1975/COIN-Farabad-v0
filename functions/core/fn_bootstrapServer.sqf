@@ -430,6 +430,9 @@ if (_safeModeEnabled) then
 // Load persistent COIN state
 [] call ARC_fnc_stateLoad;
 
+// SUPPLYLEDGER v1 mirrors the legacy baseFuel/baseAmmo/baseMed compatibility keys.
+[] call ARC_fnc_supplyInit;
+
 // TASKENG schema migration (runs once after stateLoad, before any thread writes)
 [] call ARC_fnc_taskengMigrateSchema;
 
@@ -475,6 +478,11 @@ missionNamespace setVariable ["ARC_activeIncidentSitrepFrom", ["activeIncidentSi
 missionNamespace setVariable ["ARC_activeIncidentSitrepSummary", ["activeIncidentSitrepSummary", ""] call ARC_fnc_stateGet, true];
 missionNamespace setVariable ["ARC_activeIncidentSitrepDetails", ["activeIncidentSitrepDetails", ""] call ARC_fnc_stateGet, true];
 missionNamespace setVariable ["ARC_activeIncidentSitrepAnnexCivsub", ["activeIncidentSitrepAnnexCivsub", ""] call ARC_fnc_stateGet, true];
+missionNamespace setVariable ["ARC_activeIncidentStartdispId", ["activeIncidentStartdispId", ""] call ARC_fnc_stateGet, true];
+missionNamespace setVariable ["ARC_activeIncidentStartdispSummary", ["activeIncidentStartdispSummary", []] call ARC_fnc_stateGet, true];
+missionNamespace setVariable ["ARC_activeIncidentSitrepSupplyAnnex", ["activeIncidentSitrepSupplyAnnex", []] call ARC_fnc_stateGet, true];
+missionNamespace setVariable ["ARC_activeIncidentSitrepReadinessDelta", ["activeIncidentSitrepReadinessDelta", []] call ARC_fnc_stateGet, true];
+missionNamespace setVariable ["ARC_activeIncidentMettTcAssessment", ["activeIncidentMettTcAssessment", []] call ARC_fnc_stateGet, true];
 
 
 // Recreate parent "case" tasks for any persisted threads (tasks don't persist across restarts).

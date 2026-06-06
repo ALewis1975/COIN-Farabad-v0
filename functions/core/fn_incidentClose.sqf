@@ -375,6 +375,22 @@ private _thrCtx = [
 ];
 ["INCIDENT_CLOSED", _thrCtx] call ARC_fnc_threatOnIncidentClosed;
 
+// Preserve bounded STARTDISP closed index and last supply/readiness summaries before clearing active incident.
+private _closedStartdispId = ["activeIncidentStartdispId", ""] call ARC_fnc_stateGet;
+if (_closedStartdispId isEqualType "" && { !(_closedStartdispId isEqualTo "") }) then
+{
+    private _closedIdx = ["startdisp_v1_closed_index", []] call ARC_fnc_stateGet;
+    if (!(_closedIdx isEqualType [])) then { _closedIdx = []; };
+    _closedIdx pushBackUnique _closedStartdispId;
+    private _closedMax = ["startdisp_v1_closed_max", 100] call ARC_fnc_stateGet;
+    if (!(_closedMax isEqualType 0) || { _closedMax < 1 }) then { _closedMax = 100; };
+    _closedMax = (_closedMax max 10) min 500;
+    if ((count _closedIdx) > _closedMax) then { _closedIdx = _closedIdx select [((count _closedIdx) - _closedMax), _closedMax]; };
+    ["startdisp_v1_closed_index", _closedIdx] call ARC_fnc_stateSet;
+};
+["lastSupplyAnnex", ["activeIncidentSitrepSupplyAnnex", []] call ARC_fnc_stateGet] call ARC_fnc_stateSet;
+["lastReadinessDelta", ["activeIncidentSitrepReadinessDelta", []] call ARC_fnc_stateGet] call ARC_fnc_stateSet;
+
 // Clear active incident
 ["activeTaskId", ""] call ARC_fnc_stateSet;
 ["activeIncidentType", ""] call ARC_fnc_stateSet;
@@ -423,6 +439,11 @@ if (_prevAcceptedGroup isEqualType "" && { !(_prevAcceptedGroup isEqualTo "") })
 ["activeIncidentSitrepFromRoleTag", ""] call ARC_fnc_stateSet;
 ["activeIncidentSitrepSummary", ""] call ARC_fnc_stateSet;
 ["activeIncidentSitrepDetails", ""] call ARC_fnc_stateSet;
+["activeIncidentStartdispId", ""] call ARC_fnc_stateSet;
+["activeIncidentStartdispSummary", []] call ARC_fnc_stateSet;
+["activeIncidentSitrepSupplyAnnex", []] call ARC_fnc_stateSet;
+["activeIncidentSitrepReadinessDelta", []] call ARC_fnc_stateSet;
+["activeIncidentMettTcAssessment", []] call ARC_fnc_stateSet;
 ["activeLeadId", ""] call ARC_fnc_stateSet;
 ["activeThreadId", ""] call ARC_fnc_stateSet;
 ["activeLeadTag", ""] call ARC_fnc_stateSet;
@@ -529,6 +550,11 @@ missionNamespace setVariable ["ARC_activeIncidentSitrepFrom", "", true];
 missionNamespace setVariable ["ARC_activeIncidentSitrepFromGroup", "", true];
 missionNamespace setVariable ["ARC_activeIncidentSitrepSummary", "", true];
 missionNamespace setVariable ["ARC_activeIncidentSitrepDetails", "", true];
+missionNamespace setVariable ["ARC_activeIncidentStartdispId", "", true];
+missionNamespace setVariable ["ARC_activeIncidentStartdispSummary", [], true];
+missionNamespace setVariable ["ARC_activeIncidentSitrepSupplyAnnex", [], true];
+missionNamespace setVariable ["ARC_activeIncidentSitrepReadinessDelta", [], true];
+missionNamespace setVariable ["ARC_activeIncidentMettTcAssessment", [], true];
 missionNamespace setVariable ["ARC_activeIncidentCloseReady", false, true];
 missionNamespace setVariable ["ARC_activeIncidentSuggestedResult", "", true];
 missionNamespace setVariable ["ARC_activeIncidentCloseReason", "", true];

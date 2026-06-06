@@ -1006,6 +1006,10 @@ if (!isNil "ARC_fnc_threatVirtualPoolSnapshotBuild") then {
 };
 if (!(_threatVirtualPoolPub isEqualType [])) then { _threatVirtualPoolPub = []; };
 
+private _supplyPub = [];
+if (!isNil "ARC_fnc_supplyBuildPublicSnapshot") then { _supplyPub = [] call ARC_fnc_supplyBuildPublicSnapshot; };
+if (!(_supplyPub isEqualType [])) then { _supplyPub = []; };
+
 private _pub = [
     ["insurgentPressure", _p],
     ["corruption", _c],
@@ -1026,6 +1030,7 @@ private _pub = [
     ["companyVirtualOps", ["companyVirtualOps", []] call ARC_fnc_stateGet],
     ["casreq", _casreqPub],
     ["airbase", _airbasePub],
+    ["supply", _supplyPub],
     ["threat", _threatPub],
     ["threatEconomy", _threatEconomyPub],
     ["threatVirtualPool", _threatVirtualPoolPub]
@@ -1115,6 +1120,13 @@ if (_semanticChanged || { _publishDue }) then {
 
 if (!_didPublish) exitWith { false };
 
+missionNamespace setVariable ["ARC_pub_supply_v1", _supplyPub, true];
+missionNamespace setVariable ["ARC_pub_supply_v1UpdatedAt", serverTime, true];
+missionNamespace setVariable ["ARC_activeIncidentStartdispId", ["activeIncidentStartdispId", ""] call ARC_fnc_stateGet, true];
+missionNamespace setVariable ["ARC_activeIncidentStartdispSummary", ["activeIncidentStartdispSummary", []] call ARC_fnc_stateGet, true];
+missionNamespace setVariable ["ARC_activeIncidentSitrepSupplyAnnex", ["activeIncidentSitrepSupplyAnnex", []] call ARC_fnc_stateGet, true];
+missionNamespace setVariable ["ARC_activeIncidentSitrepReadinessDelta", ["activeIncidentSitrepReadinessDelta", []] call ARC_fnc_stateGet, true];
+missionNamespace setVariable ["ARC_activeIncidentMettTcAssessment", ["activeIncidentMettTcAssessment", []] call ARC_fnc_stateGet, true];
 missionNamespace setVariable ["ARC_pub_threatUiSnapshot", _threatPub, true];
 missionNamespace setVariable ["ARC_pub_threatUiSnapshotUpdatedAt", serverTime, true];
 missionNamespace setVariable ["ARC_pub_threatEconomySnapshot", _threatEconomyPub, true];
@@ -1310,6 +1322,9 @@ if (_dbgEnabled) then
                 0
             }]
         ];
+
+        if (!isNil "ARC_fnc_supplyDebugSnapshot") then { _dbg append ([] call ARC_fnc_supplyDebugSnapshot); };
+        if (!isNil "ARC_fnc_startdispDebugSnapshot") then { _dbg append ([] call ARC_fnc_startdispDebugSnapshot); };
 
         // CIVSUB v1 (only when enabled)
         if (missionNamespace getVariable ["civsub_v1_enabled", false]) then

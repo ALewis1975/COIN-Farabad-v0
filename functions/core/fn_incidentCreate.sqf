@@ -406,6 +406,11 @@ private _taskId = format ["ARC_inc_%1", _counter];
 	["activeIncidentSitrepFromRoleTag", ""] call ARC_fnc_stateSet;
 ["activeIncidentSitrepSummary", ""] call ARC_fnc_stateSet;
 ["activeIncidentSitrepDetails", ""] call ARC_fnc_stateSet;
+["activeIncidentStartdispId", ""] call ARC_fnc_stateSet;
+["activeIncidentStartdispSummary", []] call ARC_fnc_stateSet;
+["activeIncidentSitrepSupplyAnnex", []] call ARC_fnc_stateSet;
+["activeIncidentSitrepReadinessDelta", []] call ARC_fnc_stateSet;
+["activeIncidentMettTcAssessment", []] call ARC_fnc_stateSet;
 
 // Mirror SITREP state into missionNamespace for client-side gating (public).
 missionNamespace setVariable ["ARC_activeIncidentSitrepSent", false, true];
@@ -413,6 +418,11 @@ missionNamespace setVariable ["ARC_activeIncidentSitrepFrom", "", true];
 missionNamespace setVariable ["ARC_activeIncidentSitrepFromGroup", "", true];
 missionNamespace setVariable ["ARC_activeIncidentSitrepSummary", "", true];
 missionNamespace setVariable ["ARC_activeIncidentSitrepDetails", "", true];
+missionNamespace setVariable ["ARC_activeIncidentStartdispId", "", true];
+missionNamespace setVariable ["ARC_activeIncidentStartdispSummary", [], true];
+missionNamespace setVariable ["ARC_activeIncidentSitrepSupplyAnnex", [], true];
+missionNamespace setVariable ["ARC_activeIncidentSitrepReadinessDelta", [], true];
+missionNamespace setVariable ["ARC_activeIncidentMettTcAssessment", [], true];
 
 // Clear any previous close-ready suggestion (TOC remains the closure authority)
 ["activeIncidentCloseReady", false] call ARC_fnc_stateSet;
