@@ -402,6 +402,7 @@ class ARC_StartdispDialog
     class controlsBackground
     {
         class BG: RscText { idc = 77490; x = 0.193; y = 0.128; w = 0.614; h = 0.695; colorBackground[] = {0,0,0,0.82}; };
+        class TitleBar: RscText { idc = 77491; text = "STARTDISP"; x = 0.193; y = 0.128; w = 0.614; h = 0.047; colorBackground[] = {0.05,0.05,0.05,0.92}; };
     };
 
     class controls
