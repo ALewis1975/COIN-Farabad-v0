@@ -16,6 +16,12 @@ if (_sid isEqualTo "" || { _taskId isEqualTo "" }) exitWith { false };
 private _records = ["startdisp_v1_records", []] call ARC_fnc_stateGet;
 if (!(_records isEqualType [])) then { _records = []; };
 _records pushBack _record;
+
+private _max = ["startdisp_v1_closed_max", 100] call ARC_fnc_stateGet;
+if (!(_max isEqualType 0) || { _max < 1 }) then { _max = 100; };
+_max = (_max max 10) min 500;
+if ((count _records) > _max) then { _records = _records select [((count _records) - _max), _max]; };
+
 ["startdisp_v1_records", _records] call ARC_fnc_stateSet;
 
 private _byTask = ["startdisp_v1_by_task", []] call ARC_fnc_stateGet;
