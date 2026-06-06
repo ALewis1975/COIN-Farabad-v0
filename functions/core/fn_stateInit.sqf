@@ -356,6 +356,40 @@
 
     // SitePop v1 site state persistence (loaded post-stateLoad via ARC_fnc_sitePopStateInit)
     // Each entry: siteId → site-state HashMap (visitCount, guardCasualties, adaptationLevel, ...)
-    ["sitepop_v1_site_states", createHashMap]
+    ["sitepop_v1_site_states", createHashMap],
+
+    // SUPPLYLEDGER v1 (abstract base logistics ledger; legacy baseFuel/baseAmmo/baseMed retained)
+    ["supply_v1_enabled", true],
+    ["supply_v1_version", 1],
+    ["supply_v1_seq", 0],
+    ["supply_v1_stock", [["FUEL", 0.68], ["AMMO", 0.61], ["MED", 0.57], ["EQUIPMENT", 0.70]]],
+    ["supply_v1_ledger", []],
+    ["supply_v1_ledger_max", 300],
+    ["supply_v1_last_ambient_tick", -1],
+    ["supply_v1_debug", false],
+    ["supply_v1_debug_last_event", []],
+    ["supply_v1_last_readiness", []],
+    ["supply_v1_last_mett_tc", []],
+
+    // STARTDISP v1
+    ["startdisp_v1_enabled", true],
+    ["startdisp_v1_required", true],
+    ["startdisp_v1_version", 1],
+    ["startdisp_v1_seq", 0],
+    ["startdisp_v1_records", []],
+    ["startdisp_v1_by_task", []],
+    ["startdisp_v1_closed_index", []],
+    ["startdisp_v1_closed_max", 100],
+    ["activeIncidentStartdispId", ""],
+    ["activeIncidentStartdispSummary", []],
+    ["lastStartdispId", ""],
+    ["lastStartdispAt", -1],
+
+    // SITREP Supply Annex v1 (embedded in existing SITREP lifecycle)
+    ["activeIncidentSitrepSupplyAnnex", []],
+    ["activeIncidentSitrepReadinessDelta", []],
+    ["activeIncidentMettTcAssessment", []],
+    ["lastSupplyAnnex", []],
+    ["lastReadinessDelta", []]
 
 ]

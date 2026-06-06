@@ -177,6 +177,20 @@ class CfgFunctions
             class sitrepGateEval {};
             class clientSendSitrep {};
             class tocReceiveSitrep {};
+            class sitrepSupplyValidate {};
+            class sitrepSupplyBuildAnnex {};
+            class sitrepSupplyCompareStart {};
+            class sitrepSupplyAssessMettTc {};
+            class sitrepSupplyFormatLines {};
+
+            // STARTDISP v1
+            class startdispCaptureGroup {};
+            class startdispBuildRecord {};
+            class startdispSubmitAndAccept {};
+            class startdispBindToIncident {};
+            class startdispGetForTask {};
+            class startdispBuildSummary {};
+            class startdispDebugSnapshot {};
 
             // TOC actions
             class tocInitPlayer {};
@@ -637,6 +651,13 @@ class CfgFunctions
             class uiSitrepDialogSubmit {};
             class uiSitrepDialogCancel {};
 
+            // STARTDISP dialog helpers
+            class uiStartdispDialogOpen {};
+            class uiStartdispDialogOnLoad {};
+            class uiStartdispDialogSubmit {};
+            class uiStartdispDialogCancel {};
+            class uiConsoleSupplyPaint {};
+
             // UI08: Workboard + S2 completeness + coverage helpers
             class uiConsoleIsAtStation {};
             class uiConsoleMainListSelChanged {};
@@ -656,6 +677,14 @@ class CfgFunctions
         class Logistics
         {
             file = "functions\logistics";
+            class supplyInit {};
+            class supplyGetStockSnapshot {};
+            class supplyLedgerAppend {};
+            class supplyApplyAmbientDrain {};
+            class supplyApplyLaunchCost {};
+            class supplyDebugSnapshot {};
+            class supplyBuildPublicSnapshot {};
+
             class convoyStartupConfig {};
             class convoyOpsLog {};            // uniform convoy lifecycle OPS logging (id+grid+actor)
             class execSpawnConvoy {};

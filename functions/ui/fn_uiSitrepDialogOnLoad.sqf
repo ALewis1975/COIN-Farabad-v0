@@ -69,9 +69,37 @@ private _fillCombo = {
     _ctrl lbSetCurSel _i;
 };
 
-[_display displayCtrl 77321, _aceDef # 0] call _fillCombo;
-[_display displayCtrl 77322, _aceDef # 1] call _fillCombo;
-[_display displayCtrl 77323, _aceDef # 2] call _fillCombo;
+[_display displayCtrl 77321, _aceDef select 0] call _fillCombo;
+[_display displayCtrl 77322, _aceDef select 1] call _fillCombo;
+[_display displayCtrl 77323, _aceDef select 2] call _fillCombo;
+
+private _fillExpCombo = {
+    params ["_ctrl", ["_idx", 0]];
+    if (isNull _ctrl) exitWith {};
+    lbClear _ctrl;
+    { _ctrl lbAdd _x; } forEach ["NONE", "LIGHT", "MODERATE", "HEAVY", "CRITICAL"];
+    if (!(_idx isEqualType 0) || { _idx < 0 } || { _idx > 4 }) then { _idx = 0; };
+    _ctrl lbSetCurSel _idx;
+};
+private _fillMedCombo = {
+    params ["_ctrl", ["_idx", 0]];
+    if (isNull _ctrl) exitWith {};
+    lbClear _ctrl;
+    { _ctrl lbAdd _x; } forEach ["NONE", "LIGHT", "MODERATE", "HEAVY"];
+    if (!(_idx isEqualType 0) || { _idx < 0 } || { _idx > 3 }) then { _idx = 0; };
+    _ctrl lbSetCurSel _idx;
+};
+private _fillYesNo = {
+    params ["_ctrl"];
+    if (isNull _ctrl) exitWith {};
+    lbClear _ctrl;
+    _ctrl lbAdd "NO";
+    _ctrl lbAdd "YES";
+    _ctrl lbSetCurSel 0;
+};
+{ [_display displayCtrl _x, 0] call _fillExpCombo; } forEach [77331, 77332, 77333];
+[_display displayCtrl 77334, 0] call _fillMedCombo;
+{ [_display displayCtrl _x] call _fillYesNo; } forEach [77343, 77344, 77345];
 
 // Clear previous result
 uiNamespace setVariable ["ARC_sitrepDialog_result", nil];

@@ -51,75 +51,8 @@ if (!isNil "ARC_fnc_tocBacklogPrune") then { [] call ARC_fnc_tocBacklogPrune; };
 
 
 // Sustainment drain
-// Base stocks should naturally deplete over time as BLUFOR operates.
-// This creates early mission pressure for logistics while still allowing
-// convoy success/failure (handled in ARC_fnc_incidentClose) to swing readiness.
-private _now = serverTime;
-private _last = ["sustainLastAt", -1] call ARC_fnc_stateGet;
-
-if (!(_last isEqualType 0) || { _last < 0 }) then
-{
-    ["sustainLastAt", _now] call ARC_fnc_stateSet;
-}
-else
-{
-    private _dt = (_now - _last) max 0;
-
-    // Only apply when enough time has elapsed (incidentLoop ticks ~every 60s).
-    if (_dt >= 30) then
-    {
-        private _hours = _dt / 3600;
-
-        private _fuel = ["baseFuel", 0.38] call ARC_fnc_stateGet;
-        private _ammo = ["baseAmmo", 0.32] call ARC_fnc_stateGet;
-        private _med  = ["baseMed",  0.40] call ARC_fnc_stateGet;
-
-        // Player-scaled drain (models higher ops tempo with larger elements).
-        private _nBlu = count (allPlayers select { alive _x && { side group _x in [west, independent] } });
-        if (_nBlu < 1) then { _nBlu = 1; };
-
-        private _perPlayer = missionNamespace getVariable ["ARC_sustainPlayerScale", 0.06];
-        if (!(_perPlayer isEqualType 0)) then { _perPlayer = 0.06; };
-        _perPlayer = (_perPlayer max 0) min 0.25;
-
-        private _scale = 1 + ((_nBlu - 1) * _perPlayer);
-        _scale = (_scale max 1) min 3;
-
-        // Active incident multiplier (operations consume more while a mission is in-flight).
-        private _hasActive = !((["activeTaskId", ""] call ARC_fnc_stateGet) isEqualTo "");
-        private _accepted = ["activeIncidentAccepted", false] call ARC_fnc_stateGet;
-        if (_hasActive && { _accepted isEqualType true && { _accepted } }) then
-        {
-            private _m = missionNamespace getVariable ["ARC_sustainActiveIncidentMult", 1.35];
-            if (!(_m isEqualType 0)) then { _m = 1.35; };
-            _m = (_m max 1) min 3;
-            _scale = _scale * _m;
-        };
-
-        // Rates are 0..1 stock per hour (tune via missionNamespace overrides).
-        private _rFuel = missionNamespace getVariable ["ARC_sustainFuelPerHour", 0.07];
-        private _rAmmo = missionNamespace getVariable ["ARC_sustainAmmoPerHour", 0.05];
-        private _rMed  = missionNamespace getVariable ["ARC_sustainMedPerHour",  0.04];
-
-        if (!(_rFuel isEqualType 0)) then { _rFuel = 0.07; };
-        if (!(_rAmmo isEqualType 0)) then { _rAmmo = 0.05; };
-        if (!(_rMed  isEqualType 0)) then { _rMed  = 0.04; };
-
-        _rFuel = (_rFuel max 0) min 0.30;
-        _rAmmo = (_rAmmo max 0) min 0.30;
-        _rMed  = (_rMed  max 0) min 0.30;
-
-        _fuel = (_fuel - (_rFuel * _hours * _scale)) max 0;
-        _ammo = (_ammo - (_rAmmo * _hours * _scale)) max 0;
-        _med  = (_med  - (_rMed  * _hours * _scale)) max 0;
-
-        ["baseFuel", _fuel] call ARC_fnc_stateSet;
-        ["baseAmmo", _ammo] call ARC_fnc_stateSet;
-        ["baseMed",  _med] call ARC_fnc_stateSet;
-
-        ["sustainLastAt", _now] call ARC_fnc_stateSet;
-    };
-};
+// Base stocks naturally deplete through SUPPLYLEDGER v1 so ambient drain is auditable.
+[] call ARC_fnc_supplyApplyAmbientDrain;
 
 
 // Intel layer periodic maintenance (metrics + order completion)

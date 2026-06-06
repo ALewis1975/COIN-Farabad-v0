@@ -6,6 +6,6 @@
 
 if (!hasInterface) exitWith {false};
 
-uiNamespace setVariable ["ARC_sitrepDialog_result", [false, "", "", "", "", "GREEN", "GREEN", "GREEN", "", ""]];
+uiNamespace setVariable ["ARC_sitrepDialog_result", [false, "", "", "", "", "GREEN", "GREEN", "GREEN", "", "", []]];
 closeDialog 2;
 true

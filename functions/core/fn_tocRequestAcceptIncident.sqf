@@ -31,9 +31,17 @@ params [
     ["_statusRequest", ""]
 ];
 
-// RemoteExec-only validation path: requires remoteExecutedOwner context.
-private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
-if (!([_caller, "ARC_fnc_tocRequestAcceptIncident", "Incident acceptance rejected: sender verification failed.", "TOC_ACCEPT_INCIDENT_SECURITY_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
+// RemoteExec-only validation path: requires remoteExecutedOwner context. STARTDISP uses a short-lived
+// server-only guard for the internal continuation call after disposition capture.
+private _callerUidForGuard = if (isNull _caller) then { "" } else { getPlayerUID _caller };
+private _acceptGuardUid = missionNamespace getVariable ["startdisp_v1_accept_guard_uid", ""];
+if (!(_acceptGuardUid isEqualType "")) then { _acceptGuardUid = ""; };
+private _startdispContinuation = (isNil "remoteExecutedOwner") && { !(_acceptGuardUid isEqualTo "") } && { _acceptGuardUid isEqualTo _callerUidForGuard };
+if (!_startdispContinuation) then
+{
+    private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+    if (!([_caller, "ARC_fnc_tocRequestAcceptIncident", "Incident acceptance rejected: sender verification failed.", "TOC_ACCEPT_INCIDENT_SECURITY_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
+};
 
 // Role-gated task acceptance (RHSUSAF Officer / Squad Leader classnames).
 if (!isNull _caller && { !([_caller] call ARC_fnc_rolesIsAuthorized) }) exitWith
@@ -108,6 +116,19 @@ if (!(_statusNow isEqualTo "AVAILABLE")) exitWith
 {
     ["Incident acceptance denied: your group must set status to AVAILABLE first."] remoteExec ["ARC_fnc_clientHint", owner _caller];
     ["INCIDENT_ACCEPT", "REJECTED", "Set group status to AVAILABLE, then retry."] remoteExec ["ARC_fnc_uiConsoleOpsActionStatus", owner _caller];
+    false
+};
+
+private _sdEnabled = ["startdisp_v1_enabled", true] call ARC_fnc_stateGet;
+if (!(_sdEnabled isEqualType true) && !(_sdEnabled isEqualType false)) then { _sdEnabled = true; };
+private _sdRequired = ["startdisp_v1_required", true] call ARC_fnc_stateGet;
+if (!(_sdRequired isEqualType true) && !(_sdRequired isEqualType false)) then { _sdRequired = true; };
+private _sdId = ["activeIncidentStartdispId", ""] call ARC_fnc_stateGet;
+if (!(_sdId isEqualType "")) then { _sdId = ""; };
+if (_sdEnabled && { _sdRequired } && { _sdId isEqualTo "" } && { !_startdispContinuation }) exitWith
+{
+    ["Incident acceptance requires STARTDISP capture first."] remoteExec ["ARC_fnc_clientHint", owner _caller];
+    ["INCIDENT_ACCEPT", "REJECTED", "Complete STARTDISP before accepting."] remoteExec ["ARC_fnc_uiConsoleOpsActionStatus", owner _caller];
     false
 };
 
@@ -231,53 +252,13 @@ missionNamespace setVariable ["ARC_activeIncidentAccepted", true, true];
 missionNamespace setVariable ["ARC_activeIncidentAcceptedAt", serverTime, true];
 missionNamespace setVariable ["ARC_activeIncidentAcceptedByGroup", _lastG, true];
 
-// Apply a small sustainment cost for launching a mission.
-// This works with the over-time sustainment drain to create steady logistics pressure.
+// Apply a small sustainment cost for launching a mission through SUPPLYLEDGER v1.
 private _type = ["activeIncidentType", ""] call ARC_fnc_stateGet;
 private _typeU = toUpper _type;
-
-private _fuel = ["baseFuel", 0.38] call ARC_fnc_stateGet;
-private _ammo = ["baseAmmo", 0.32] call ARC_fnc_stateGet;
-private _med  = ["baseMed", 0.40] call ARC_fnc_stateGet;
-
-private _nBlu = count (allPlayers select { alive _x && { side group _x in [west, independent] } });
-if (_nBlu < 1) then { _nBlu = 1; };
-private _scale = 1 + (((_nBlu - 1) max 0) * 0.05);
-_scale = _scale min 2.5;
-
-private _cFuel = 0.010;
-private _cAmmo = 0.008;
-private _cMed  = 0.004;
-
-switch (_typeU) do
-{
-    case "LOGISTICS":      { _cFuel = 0.012; _cAmmo = 0.004; _cMed = 0.003; };
-    case "ESCORT":         { _cFuel = 0.013; _cAmmo = 0.005; _cMed = 0.003; };
-    case "PATROL":         { _cFuel = 0.010; _cAmmo = 0.006; _cMed = 0.003; };
-    case "RECON":          { _cFuel = 0.009; _cAmmo = 0.004; _cMed = 0.002; };
-    case "CHECKPOINT":     { _cFuel = 0.008; _cAmmo = 0.006; _cMed = 0.003; };
-    case "CIVIL":          { _cFuel = 0.009; _cAmmo = 0.003; _cMed = 0.003; };
-    case "IED":            { _cFuel = 0.011; _cAmmo = 0.010; _cMed = 0.004; };
-    case "RAID":           { _cFuel = 0.012; _cAmmo = 0.012; _cMed = 0.005; };
-    case "DEFEND":         { _cFuel = 0.010; _cAmmo = 0.014; _cMed = 0.006; };
-    case "QRF":            { _cFuel = 0.013; _cAmmo = 0.012; _cMed = 0.006; };
-    case "CMDNODE_RAID":   { _cFuel = 0.012; _cAmmo = 0.012; _cMed = 0.005; };
-    case "CMDNODE_MEET":   { _cFuel = 0.010; _cAmmo = 0.005; _cMed = 0.004; };
-    case "CMDNODE_INTERCEPT": { _cFuel = 0.013; _cAmmo = 0.010; _cMed = 0.005; };
-    default {};
-};
-
-_cFuel = _cFuel * _scale;
-_cAmmo = _cAmmo * _scale;
-_cMed  = _cMed  * _scale;
-
-private _fuelNew = (_fuel - _cFuel) max 0;
-private _ammoNew = (_ammo - _cAmmo) max 0;
-private _medNew  = (_med  - _cMed) max 0;
-
-["baseFuel", _fuelNew] call ARC_fnc_stateSet;
-["baseAmmo", _ammoNew] call ARC_fnc_stateSet;
-["baseMed", _medNew] call ARC_fnc_stateSet;
+private _cost = [_caller] call ARC_fnc_supplyApplyLaunchCost;
+private _cFuel = _cost param [0, 0];
+private _cAmmo = _cost param [1, 0];
+private _cMed = _cost param [2, 0];
 
 // Promote task state
 [] call ARC_fnc_taskRehydrateActive;

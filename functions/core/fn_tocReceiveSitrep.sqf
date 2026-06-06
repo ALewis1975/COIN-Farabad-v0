@@ -46,7 +46,8 @@ params [
     ["_foNotes", ""],
     ["_foHoldIntent", ""],
     ["_foHoldMinutes", -1],
-    ["_foProceedIntent", ""]
+    ["_foProceedIntent", ""],
+    ["_supplyPayload", []]
 ];
 
 // RemoteExec-only validation path: requires remoteExecutedOwner context.
@@ -196,6 +197,32 @@ if !((_pos select 0) isEqualTo 0 && { (_pos select 1) isEqualTo 0 }) then
 {
     _grid = mapGridPosition _pos;
 };
+
+
+// SITREP Supply Annex v1: validate, compare to STARTDISP, store, and append to details.
+private _taskIdForSupply = ["activeTaskId", ""] call ARC_fnc_stateGet;
+if (!(_taskIdForSupply isEqualType "")) then { _taskIdForSupply = ""; };
+if (!(_supplyPayload isEqualType [])) then { _supplyPayload = []; };
+private _supplyAnnex = [_unit, _supplyPayload, _taskIdForSupply] call ARC_fnc_sitrepSupplyBuildAnnex;
+private _startdisp = [_taskIdForSupply] call ARC_fnc_startdispGetForTask;
+private _readinessDelta = [_startdisp, _supplyAnnex] call ARC_fnc_sitrepSupplyCompareStart;
+private _mettTc = [_supplyAnnex, _readinessDelta] call ARC_fnc_sitrepSupplyAssessMettTc;
+private _supplyLines = [_supplyAnnex, _readinessDelta, _mettTc] call ARC_fnc_sitrepSupplyFormatLines;
+private _supplyText = _supplyLines joinString "\n";
+if (!(_supplyText isEqualTo "")) then
+{
+    if (_details isEqualTo "") then { _details = _supplyText; } else { _details = _details + "\n\n" + _supplyText; };
+};
+["activeIncidentSitrepSupplyAnnex", _supplyAnnex] call ARC_fnc_stateSet;
+["activeIncidentSitrepReadinessDelta", _readinessDelta] call ARC_fnc_stateSet;
+["activeIncidentMettTcAssessment", _mettTc] call ARC_fnc_stateSet;
+["lastSupplyAnnex", _supplyAnnex] call ARC_fnc_stateSet;
+["lastReadinessDelta", _readinessDelta] call ARC_fnc_stateSet;
+["supply_v1_last_readiness", _readinessDelta] call ARC_fnc_stateSet;
+["supply_v1_last_mett_tc", _mettTc] call ARC_fnc_stateSet;
+missionNamespace setVariable ["ARC_activeIncidentSitrepSupplyAnnex", _supplyAnnex, true];
+missionNamespace setVariable ["ARC_activeIncidentSitrepReadinessDelta", _readinessDelta, true];
+missionNamespace setVariable ["ARC_activeIncidentMettTcAssessment", _mettTc, true];
 
 // Phase 6: CIVSUB SITREP annex (contract: include for every SITREP when CIVSUB is enabled)
 private _civAnnex = "";
@@ -431,7 +458,10 @@ private _meta = [
     ["fromName", _pName],
     ["fromGroup", _grpId],
     ["fromUID", _uid],
-    ["fromSide", _sideTxt]
+    ["fromSide", _sideTxt],
+    ["supplyAnnex", _supplyAnnex],
+    ["readinessDelta", _readinessDelta],
+    ["mettTc", _mettTc]
 ];
 
 if (!(_recU isEqualTo "")) then { _meta pushBack ["recommend", _recU]; };
