@@ -77,6 +77,12 @@ if (!isNull _caller) then { _owner = owner _caller; };
 if (_owner <= 0 && { !isNil "remoteExecutedOwner" }) then { _owner = remoteExecutedOwner; };
 
 private _rpc = "ARC_fnc_tocRequestCloseoutAndOrder";
+// Helper: send a toast back to the originating client (best-effort)
+private _toast = {
+    params ["_title", "_msg"];
+    if (_owner > 0) then { [_title, _msg] remoteExec ["ARC_fnc_clientToast", _owner]; };
+};
+
 private _deny = {
     params ["_reason", ["_details", []], ["_toastMsg", ""]];
 
@@ -89,12 +95,6 @@ private _deny = {
     if (!(_toastMsg isEqualTo "")) then {
         ["TOC Ops", _toastMsg] call _toast;
     };
-};
-
-// Helper: send a toast back to the originating client (best-effort)
-private _toast = {
-    params ["_title", "_msg"];
-    if (_owner > 0) then { [_title, _msg] remoteExec ["ARC_fnc_clientToast", _owner]; };
 };
 
 private _trimFn = compile "params ['_s']; trim _s";
@@ -331,7 +331,8 @@ if (!(_ordersExisting isEqualType [])) then { _ordersExisting = []; };
 private _hasIssued = false;
 {
     if (!(_x isEqualType []) || { (count _x) < 7 }) then { continue; };
-    _x params ["_oid", "_iat", "_st", "_ot", "_tg", "_data", "_meta"];
+    private _st = _x select 2;
+    private _tg = _x select 4;
     if (!(_tg isEqualTo _gid)) then { continue; };
     if (toUpper _st isEqualTo "ISSUED") exitWith { _hasIssued = true; };
 } forEach _ordersExisting;
@@ -345,7 +346,11 @@ if (_hasIssued) exitWith
 
     {
         if (!(_x isEqualType []) || { (count _x) < 7 }) then { continue; };
-        _x params ["_oid", "_iat", "_st", "_ot", "_tg", "_data", "_meta"];
+        private _oid = _x select 0;
+        private _iat = _x select 1;
+        private _st = _x select 2;
+        private _ot = _x select 3;
+        private _tg = _x select 4;
         if (!(_tg isEqualTo _gid)) then { continue; };
         if (!(toUpper _st isEqualTo "ISSUED")) then { continue; };
         if (!(_iat isEqualType 0)) then { _iat = -1; };
@@ -389,7 +394,12 @@ if (_hasIssued) exitWith
 
     private _whoDone = if (isNull _caller) then {"<unknown>"} else { name _caller };
     diag_log format ["[ARC][TOC][CLOSEOUT][BRANCH=STAGED_REUSED_ORDER] armed by=%1 result=%2 gid=%3 task=%4 orderId=%5 orderType=%6", _whoDone, _closeResult, _gid, _taskId, _reuseId, _reuseType];
-    ["OPS", format ["Closeout staged by %1: %2. Reusing ISSUED order %3 (%4) for %5 acceptance.", _whoDone, _closeResult, _reuseId, _reuseType, _gid], _posATL,
+
+    private _sposATL = ["activeIncidentPos", []] call ARC_fnc_stateGet;
+    if (!(_sposATL isEqualType []) || { (count _sposATL) < 2 }) then { _sposATL = [0,0,0]; };
+    _sposATL resize 3;
+
+    ["OPS", format ["Closeout staged by %1: %2. Reusing ISSUED order %3 (%4) for %5 acceptance.", _whoDone, _closeResult, _reuseId, _reuseType, _gid], _sposATL,
         [["event","CLOSEOUT_STAGED"],["path","STAGED_REUSED_ORDER"],["taskId",_taskId],["result",_closeResult],["orderType",_reuseType],["orderId",_reuseId],["targetGroup",_gid]]
     ] call ARC_fnc_intelLog;
 
@@ -586,7 +596,10 @@ if (!(_orders isEqualType [])) then { _orders = []; };
 private _bestAt = -1;
 {
     if (!(_x isEqualType []) || { (count _x) < 7 }) then { continue; };
-    _x params ["_oid", "_iat", "_st", "_ot", "_tg", "_data", "_meta"];
+    private _oid = _x select 0;
+    private _iat = _x select 1;
+    private _st = _x select 2;
+    private _tg = _x select 4;
     if (!(_tg isEqualTo _gid)) then { continue; };
     if (!(toUpper _st isEqualTo "ISSUED")) then { continue; };
     if (!(_iat isEqualType 0)) then { continue; };
