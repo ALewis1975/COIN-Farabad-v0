@@ -391,6 +391,24 @@ private _backlogArr = missionNamespace getVariable ["ARC_pub_tocBacklog", []];
 if (!(_backlogArr isEqualType [])) then { _backlogArr = []; };
 private _backlogCnt = count _backlogArr;
 
+private _baseServices = missionNamespace getVariable ["ARC_pub_baseServices", []];
+if (!(_baseServices isEqualType [])) then { _baseServices = []; };
+private _svcManRaw = [_baseServices, "manpowerReadiness", 1] call ARC_fnc_uiConsoleGetPair;
+private _svcS4Raw = [_baseServices, "s4Readiness", 1] call ARC_fnc_uiConsoleGetPair;
+private _svcMedRaw = [_baseServices, "medicalReadiness", 1] call ARC_fnc_uiConsoleGetPair;
+private _svcMayorRaw = [_baseServices, "mayorReadiness", 1] call ARC_fnc_uiConsoleGetPair;
+if (!(_svcManRaw isEqualType 0)) then { _svcManRaw = 1; };
+if (!(_svcS4Raw isEqualType 0)) then { _svcS4Raw = 1; };
+if (!(_svcMedRaw isEqualType 0)) then { _svcMedRaw = 1; };
+if (!(_svcMayorRaw isEqualType 0)) then { _svcMayorRaw = 1; };
+private _svcMan = round ((_svcManRaw max 0) * 100);
+private _svcS4 = round ((_svcS4Raw max 0) * 100);
+private _svcMed = round ((_svcMedRaw max 0) * 100);
+private _svcMayor = round ((_svcMayorRaw max 0) * 100);
+private _svcIssues = [_baseServices, "issues", []] call ARC_fnc_uiConsoleGetPair;
+if (!(_svcIssues isEqualType [])) then { _svcIssues = []; };
+private _svcIssueLabel = if ((count _svcIssues) > 0) then { _svcIssues joinString ", " } else { "Base services nominal" };
+
 private _secIntel    = format [
     "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Intel / Leads</t><br/>" +
     "<t color='#DDDDDD'>Lead pool:</t> %1<br/>" +
@@ -403,6 +421,16 @@ private _secIntel    = format [
     _lastIntel
 ];
 private _secUnits = "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Unit Availability</t><br/>" + _unitsBlock + "<br/><br/>";
+private _secBase = format [
+    "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Base Services</t><br/>" +
+    "<t color='#DDDDDD'>MAYOR:</t> %1%% | <t color='#DDDDDD'>S1:</t> %2%% | <t color='#DDDDDD'>S4:</t> %3%% | <t color='#DDDDDD'>MED:</t> %4%%<br/>" +
+    "<t color='#DDDDDD'>Service notes:</t> %5<br/><br/>",
+    _svcMayor,
+    _svcMan,
+    _svcS4,
+    _svcMed,
+    _svcIssueLabel
+];
 // Phase 6: runway color helper — OPEN=green, RESERVED/OCCUPIED=amber, BLOCKED/UNKNOWN=red.
 private _airRunwayColor = switch (toUpper _airRunwayState) do {
     case "OPEN": { _tshGreen };
@@ -461,6 +489,7 @@ switch (_roleCat) do
     case "TOC-CMD":
     {
         _sections pushBack _secAir;
+        _sections pushBack _secBase;
         _sections pushBack _secIntel;
         _sections pushBack _secIncident;
         _sections pushBack _secOrders;
@@ -469,6 +498,7 @@ switch (_roleCat) do
     case "TOC-S3":
     {
         _sections pushBack _secAir;
+        _sections pushBack _secBase;
         _sections pushBack _secIncident;
         _sections pushBack _secOrders;
         _sections pushBack _secUnits;
@@ -477,12 +507,14 @@ switch (_roleCat) do
     case "TOC-S2":
     {
         _sections pushBack _secIntel;
+        _sections pushBack _secBase;
         _sections pushBack _secIncident;
         _sections pushBack _secUnits;
     };
     case "FIELD":
     {
         _sections pushBack _secIncident;
+        _sections pushBack _secBase;
         _sections pushBack _secOrders;
         _sections pushBack _secUnits;
         _sections pushBack _secIntel;
@@ -490,6 +522,7 @@ switch (_roleCat) do
     default
     {
         _sections pushBack _secIncident;
+        _sections pushBack _secBase;
         _sections pushBack _secOrders;
     };
 };
@@ -537,6 +570,7 @@ if (!isNull _ctrlDetailsGrp && { !isNull _ctrlDetails }) then
             format ["<t size='0.9' color='#BDBDBD'>Blocker:</t> <t size='0.9' color='%1'>%2</t><br/>", _tshRed, _airTopBlocker]
         }) +
         format ["<t size='0.9' color='#BDBDBD'>Air data:</t> <t size='0.9' color='%1'>%2</t><br/>", _airFreshnessColor, _airFreshnessState] +
+        format ["<t size='0.9' color='#BDBDBD'>Base services:</t> <t size='0.9'>MAYOR %1%% | S1 %2%% | S4 %3%% | MED %4%%</t><br/>", _svcMayor, _svcMan, _svcS4, _svcMed] +
         format ["<t size='0.9' color='#BDBDBD'>Unit reports:</t> <t size='0.9'>%1</t><br/>", count _statusRows] +
         format ["<t size='0.9' color='#BDBDBD'>Intel leads:</t> <t size='0.9'>%1</t><br/>", count _leadPool] +
         format ["<br/><t size='1.0' font='PuristaMedium' color='%1'>Quick Reference</t><br/>", _tshCoyote] +

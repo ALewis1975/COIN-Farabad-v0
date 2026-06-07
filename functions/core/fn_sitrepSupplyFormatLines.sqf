@@ -27,4 +27,8 @@ _lines pushBack format ["RECOMMENDATIONS: REFIT=%1 | RESUPPLY=%2", if ([_annex, 
 _lines pushBack "READINESS DELTA";
 { if (_x isEqualType [] && { (count _x) >= 4 }) then { _lines pushBack format ["%1: %2 -> %3 (delta %4)", toUpper (_x select 0), _x select 1, _x select 2, _x select 3]; }; } forEach ([_delta, "lace_delta", []] call _get);
 _lines pushBack format ["METT-TC FOLLOW-ON BIAS: %1 | PRESSURE: %2", [_mett, "recommended_follow_on_bias", "PROCEED"] call _get, [_mett, "supply_pressure", "NORMAL"] call _get];
+private _svc = [_mett, "base_services", []] call _get;
+if (_svc isEqualType [] && { (count _svc) > 0 }) then {
+    _lines pushBack format ["BASE SERVICES: MANPOWER=%1 | S4=%2 | MED=%3 | MAYOR=%4", round ((([_svc, "manpowerReadiness", 1] call _get) max 0) * 100), round ((([_svc, "s4Readiness", 1] call _get) max 0) * 100), round ((([_svc, "medicalReadiness", 1] call _get) max 0) * 100), round ((([_svc, "mayorReadiness", 1] call _get) max 0) * 100)];
+};
 _lines

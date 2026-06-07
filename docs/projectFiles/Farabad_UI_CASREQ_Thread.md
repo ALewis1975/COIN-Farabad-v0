@@ -170,9 +170,13 @@ CASREQ has two channels:
 
 # 4) FARABAD CASREQ v1 — Data Contract + State Machine
 
-**Document status:** locked v1 baseline (implementation planning)  
+**Document status:** implementation baseline reconciled to shipped compact v1
 **Date:** 2026-01-02  
 **Scope:** CAS request object + server-emitted delta bundles + state transition tables (CASREQ-only).
+
+> **2026-06 Lane A reconciliation:** Sections 4.2-4.7 below are the original full planning contract.
+> The shipped mission implementation uses the compact CASREQ v1 record documented in §4.8 as the authoritative runtime/persistence contract.
+> Consumers must continue to use `payload.casreq_snapshot`; they must not assume fields from the original full JSON shape unless they are present in the compact snapshot.
 
 ## 4.1 System rules (hard constraints)
 
@@ -537,6 +541,51 @@ CLOSEOUT_RESULT:
 | OPEN/ASSIGNED/IN_PROGRESS/PENDING_CLOSE → EXPIRED | EXPIRE | `now >= expires_ts` | SYSTEM |
 
 Terminal states: `CLOSED`, `CANCELLED`, `EXPIRED`
+
+---
+
+## 4.8 Shipped compact CASREQ v1 baseline (authoritative)
+
+The current mission implementation stores CASREQ records as SQF pairs arrays inside `ARC_state`:
+
+```text
+casreq_v1_enabled = true
+casreq_v1_version = 1
+casreq_v1_records = HashMap      # casreq_id -> compact CASREQ pairs array
+casreq_v1_open_index = Array     # active request IDs
+casreq_v1_closed_index = Array   # bounded closed request IDs
+casreq_v1_seq = Number           # ID sequence
+```
+
+### Compact record keys
+
+Every snapshot emitted by `ARC_fnc_casreqSnapshotGet` is expected to include:
+
+```text
+casreq_id
+district_id
+state
+requester
+area                    # pairs: target_pos, target_marker
+messages                # bounded event/message pairs
+created_at
+updated_at
+incident_id
+nine_line
+remarks
+result
+closed_at
+```
+
+### Compact lifecycle
+
+- `ARC_fnc_casreqInitServer` initializes/migrates missing or malformed compact stores without clearing valid persisted records.
+- `ARC_fnc_casreqOpen` creates `OPEN` records with the compact schema and appends IDs to `casreq_v1_open_index`.
+- `ARC_fnc_casreqDecide`, `ARC_fnc_casreqExecute`, and `ARC_fnc_casreqClose` mutate only server-owned records and emit delta bundles.
+- `ARC_fnc_casreqBroadcastDelta` always includes `payload.casreq_snapshot`.
+- `ARC_fnc_resetAll` clears `casreq_v1_records`, indexes, sequence, public bundle, and revision for clean JIP snapshots after a campaign reset.
+
+Any future expansion toward the original full JSON planning shape must either migrate `casreq_v1_version` or introduce a new `casreq_v2_*` storage contract.
 
 ---
 
@@ -939,4 +988,3 @@ Allowed `phase.to` (v1):
 - `Farabad_BLUFOR_ORBAT_82ABN_USAF_2011.md`
 - `Farabad_OPFOR_CIV_ORBAT_2011.md`
 - `Farabad_CIVSUBv1_Development_Baseline (1).md`
-

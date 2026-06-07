@@ -59,7 +59,7 @@ if ((count _list) >= _capGlobal) exitWith
 private _zones = missionNamespace getVariable ["airbase_v1_gnd_zones", []];
 if (!(_zones isEqualType [])) then { _zones = []; };
 
-private _players = allPlayers;
+private _players = call ARC_fnc_playerSnapshot;
 private _playerPresenceRadius = missionNamespace getVariable ["airbase_v1_gnd_playerPresenceRadius_m", 1800];
 if (!(_playerPresenceRadius isEqualType 0)) then { _playerPresenceRadius = 1800; };
 
@@ -92,7 +92,7 @@ if (!(_playerPresenceRadius isEqualType 0)) then { _playerPresenceRadius = 1800;
     // Player presence check — only spawn when players are in range
     private _playersNear = false;
     {
-        if ((getPos _x) distance2D _zonePos <= _playerPresenceRadius) exitWith { _playersNear = true; };
+        if (((_x select 1) distance2D _zonePos) <= _playerPresenceRadius) exitWith { _playersNear = true; };
     } forEach _players;
 
     if (!_playersNear) then

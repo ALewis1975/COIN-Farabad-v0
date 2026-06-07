@@ -37,7 +37,7 @@ private _registryKeys = [_registry] call _hk;
 } forEach _registryKeys;
 
 // ── 2. Players + bubble radius ───────────────────────────────────────────────
-private _players  = [] call ARC_fnc_civsubBubbleGetPlayers;
+private _players  = (call ARC_fnc_playerSnapshot) select { alive (_x select 0) };
 if ((count _players) == 0) exitWith { false };
 
 private _bubbleR_ground = missionNamespace getVariable ["civsub_v1_locnpc_bubbleRadius_m_ground", 2000];
@@ -84,9 +84,10 @@ private _totalLive = 0;
     // they are airborne (larger radius) or on the ground.
     private _inBubble = false;
     {
-        private _p = _x;
+        private _p = _x select 0;
+        private _pPos = _x select 1;
         private _pr = if ((vehicle _p) isKindOf "Air") then { _bubbleR_air } else { _bubbleR_ground };
-        if (!isNull _p && { (getPosATL _p) distance2D [_sitePos select 0, _sitePos select 1, 0] <= _pr }) exitWith { _inBubble = true; };
+        if (!isNull _p && { (_pPos distance2D [_sitePos select 0, _sitePos select 1, 0]) <= _pr }) exitWith { _inBubble = true; };
     } forEach _players;
     if (!_inBubble) then { continue; };
 

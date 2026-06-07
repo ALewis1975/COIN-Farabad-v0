@@ -79,6 +79,27 @@ if (!(_curState in ["OPEN"])) exitWith
     false
 };
 
+private _pairGet = {
+    params ["_pairs", "_key", "_def"];
+    private _out = _def;
+    { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _out = _x select 1; }; } forEach _pairs;
+    _out
+};
+
+private _airbaseAvailability = [];
+if (!isNil "ARC_fnc_casreqAirbaseAvailability") then { _airbaseAvailability = [] call ARC_fnc_casreqAirbaseAvailability; };
+if (!(_airbaseAvailability isEqualType [])) then { _airbaseAvailability = []; };
+
+if (_decU isEqualTo "APPROVED" && { !([_airbaseAvailability, "available", true] call _pairGet) }) exitWith
+{
+    private _reasonAir = [_airbaseAvailability, "reason", "AIRBASE_UNAVAILABLE"] call _pairGet;
+    diag_log format ["[ARC][CASREQ] casreqDecide: %1 approval blocked by AIRBASESUB availability (%2).", _id, _reasonAir];
+    if (!isNull _unit) then {
+        [format ["CASREQ approval blocked: AIRBASESUB reports %1.", _reasonAir]] remoteExec ["ARC_fnc_clientHint", owner _unit];
+    };
+    false
+};
+
 (_record select _stateIdx) set [1, _decU];
 
 // Update updated_at
@@ -95,9 +116,13 @@ if (_msgIdx >= 0) then
     private _msgs = (_record select _msgIdx) select 1;
     if (!(_msgs isEqualType [])) then { _msgs = []; };
     private _actor = [_unit] call ARC_fnc_rolesFormatUnit;
-    _msgs pushBack [["event", _decU], ["at", _now], ["by", _actor], ["reason", _reason]];
+    _msgs pushBack [["event", _decU], ["at", _now], ["by", _actor], ["reason", _reason], ["airbase_availability", _airbaseAvailability]];
     (_record select _msgIdx) set [1, _msgs];
 };
+
+private _airIdx = -1;
+{ if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo "airbase_availability" }) exitWith { _airIdx = _forEachIndex; }; } forEach _record;
+if (_airIdx >= 0) then { (_record select _airIdx) set [1, _airbaseAvailability]; } else { _record pushBack ["airbase_availability", _airbaseAvailability]; };
 
 _records set [_id, _record];
 ["casreq_v1_records", _records] call ARC_fnc_stateSet;

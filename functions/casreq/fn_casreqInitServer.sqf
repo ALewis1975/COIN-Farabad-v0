@@ -6,13 +6,15 @@
 
 if (!isServer) exitWith {false};
 
-private _enabled = missionNamespace getVariable ["casreq_v1_enabled", true];
+private _enabled = ["casreq_v1_enabled", missionNamespace getVariable ["casreq_v1_enabled", true]] call ARC_fnc_stateGet;
 if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabled = true; };
+["casreq_v1_enabled", _enabled] call ARC_fnc_stateSet;
 missionNamespace setVariable ["casreq_v1_enabled", _enabled, true];
 if (!_enabled) exitWith { false };
 
-private _schemaVersion = missionNamespace getVariable ["casreq_v1_schemaVersion", 1];
+private _schemaVersion = ["casreq_v1_version", missionNamespace getVariable ["casreq_v1_schemaVersion", 1]] call ARC_fnc_stateGet;
 if (!(_schemaVersion isEqualType 0) || { _schemaVersion < 1 }) then { _schemaVersion = 1; };
+["casreq_v1_version", _schemaVersion] call ARC_fnc_stateSet;
 missionNamespace setVariable ["casreq_v1_schemaVersion", _schemaVersion, true];
 
 private _idPattern = "^CAS:D[0-9]{2}:[0-9]{6}$";
@@ -33,6 +35,10 @@ if !(_closedIndex isEqualType []) then { _closedIndex = []; };
 private _seq = ["casreq_v1_seq", 0] call ARC_fnc_stateGet;
 if (!(_seq isEqualType 0) || { _seq < 0 }) then { _seq = 0; };
 ["casreq_v1_seq", _seq] call ARC_fnc_stateSet;
+
+private _attackVehVars = missionNamespace getVariable ["casreq_v1_airbase_attack_vehvars", ["plane4", "plane5"]];
+if (!(_attackVehVars isEqualType [])) then { _attackVehVars = ["plane4", "plane5"]; };
+missionNamespace setVariable ["casreq_v1_airbase_attack_vehvars", _attackVehVars, true];
 
 missionNamespace setVariable ["ARC_pub_casreqBundle", [
     ["meta", [["rev", 0], ["updatedAt", -1], ["actor", "SERVER_INIT"]]],

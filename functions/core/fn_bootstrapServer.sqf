@@ -433,6 +433,9 @@ if (_safeModeEnabled) then
 // SUPPLYLEDGER v1 mirrors the legacy baseFuel/baseAmmo/baseMed compatibility keys.
 [] call ARC_fnc_supplyInit;
 
+// Base services v1: MAYOR/S1/S4/MED readiness actors for sustainment and command decisions.
+[] call ARC_fnc_baseServicesInit;
+
 // TASKENG schema migration (runs once after stateLoad, before any thread writes)
 [] call ARC_fnc_taskengMigrateSchema;
 

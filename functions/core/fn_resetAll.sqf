@@ -139,6 +139,20 @@ missionNamespace setVariable ["ARC_persistentCheckpointSites", []];
 missionNamespace setVariable ["ARC_persistentRouteSupportSites", []];
 
 
+// Reset the authoritative persisted blob back to the current versioned defaults first.
+// Follow-on writes below preserve existing reset-specific rerolls/reseeds while ensuring
+// newly added persisted keys cannot survive a hard reset by omission.
+private _resetDefaults = [] call ARC_fnc_stateInit;
+if (_resetDefaults isEqualType []) then
+{
+    missionNamespace setVariable ["ARC_state", +_resetDefaults];
+    private _genReset = missionNamespace getVariable ["ARC_stateWriteGen", 0];
+    if (!(_genReset isEqualType 0)) then { _genReset = 0; };
+    missionNamespace setVariable ["ARC_stateWriteGen", (_genReset + 1)];
+};
+
+["autoIncidentSuspendUntil", serverTime + _holdSec] call ARC_fnc_stateSet;
+
 // Clear state
 ["taskCounter", 0] call ARC_fnc_stateSet;
 ["leadCounter", 0] call ARC_fnc_stateSet;
@@ -192,6 +206,11 @@ if (_rerollEnv) then
 ["supply_v1_debug_last_event", []] call ARC_fnc_stateSet;
 ["supply_v1_last_readiness", []] call ARC_fnc_stateSet;
 ["supply_v1_last_mett_tc", []] call ARC_fnc_stateSet;
+["baseServices_v1_enabled", true] call ARC_fnc_stateSet;
+["baseServices_v1_version", 1] call ARC_fnc_stateSet;
+["baseServices_v1_services", []] call ARC_fnc_stateSet;
+["baseServices_v1_snapshot", []] call ARC_fnc_stateSet;
+missionNamespace setVariable ["ARC_pub_baseServices", [], true];
 
 ["activeTaskId", ""] call ARC_fnc_stateSet;
 ["activeIncidentType", ""] call ARC_fnc_stateSet;
@@ -354,6 +373,40 @@ missionNamespace setVariable ["ARC_pub_intelUpdatedAt", serverTime, true];
 ["companyVirtualOpsCounter", 0] call ARC_fnc_stateSet;
 ["companyVirtualOpsLastTickAt", -1] call ARC_fnc_stateSet;
 ["companyVirtualOpsLastRollupAt", -1] call ARC_fnc_stateSet;
+
+// AIRBASE v1 persistence/control-plane reset. Queue/records are persistent during
+// normal init/restart, but a campaign hard reset intentionally clears them.
+["airbase_v1_records", []] call ARC_fnc_stateSet;
+["airbase_v1_queue", []] call ARC_fnc_stateSet;
+["airbase_v1_seq", 0] call ARC_fnc_stateSet;
+["airbase_v1_holdDepartures", false] call ARC_fnc_stateSet;
+["airbase_v1_manualPriority", []] call ARC_fnc_stateSet;
+["airbase_v1_towerStaffing", [
+    ["tower", ["claimed", false, "uid", "", "name", "", "roleTag", "", "owner", -1, "updatedAt", -1]],
+    ["ground", ["claimed", false, "uid", "", "name", "", "roleTag", "", "owner", -1, "updatedAt", -1]],
+    ["arrival", ["claimed", false, "uid", "", "name", "", "roleTag", "", "owner", -1, "updatedAt", -1]]
+]] call ARC_fnc_stateSet;
+["airbase_v1_clearanceRequests", []] call ARC_fnc_stateSet;
+["airbase_v1_clearanceSeq", 0] call ARC_fnc_stateSet;
+["airbase_v1_clearanceHistory", []] call ARC_fnc_stateSet;
+["airbase_v1_events", []] call ARC_fnc_stateSet;
+missionNamespace setVariable ["airbase_v1_runwayState", "OPEN", true];
+missionNamespace setVariable ["airbase_v1_runwayOwner", "", true];
+missionNamespace setVariable ["airbase_v1_runwayUntil", -1, true];
+missionNamespace setVariable ["airbase_v1_execActive", false, true];
+missionNamespace setVariable ["airbase_v1_execFid", "", true];
+missionNamespace setVariable ["airbase_v1_notifyState", createHashMap, false];
+
+// CASREQ v1 reset. Active records are bounded/persistent for restart + JIP, and
+// hard reset clears both storage and public snapshot bundle.
+["casreq_v1_records", createHashMap] call ARC_fnc_stateSet;
+["casreq_v1_open_index", []] call ARC_fnc_stateSet;
+["casreq_v1_closed_index", []] call ARC_fnc_stateSet;
+["casreq_v1_seq", 0] call ARC_fnc_stateSet;
+private _casreqRev = missionNamespace getVariable ["ARC_casreq_rev", 0];
+if (!(_casreqRev isEqualType 0)) then { _casreqRev = 0; };
+missionNamespace setVariable ["ARC_casreq_rev", _casreqRev + 1, true];
+missionNamespace setVariable ["ARC_pub_casreqBundle", [], true];
 
 // S1 registry persistence + public mirrors
 ["s1Registry", []] call ARC_fnc_stateSet;

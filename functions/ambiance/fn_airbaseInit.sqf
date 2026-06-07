@@ -491,12 +491,31 @@ missionNamespace setVariable ["airbase_v1_runwayState", "OPEN", true];
 missionNamespace setVariable ["airbase_v1_runwayOwner", "", true];
 missionNamespace setVariable ["airbase_v1_runwayUntil", -1, true];
 
-// State store init (records/queue/seq)
-["airbase_v1_records", []] call ARC_fnc_stateSet;
-["airbase_v1_queue", []] call ARC_fnc_stateSet;
-["airbase_v1_seq", 0] call ARC_fnc_stateSet;
-["airbase_v1_holdDepartures", false] call ARC_fnc_stateSet;
-["airbase_v1_manualPriority", []] call ARC_fnc_stateSet;
+// State store init (records/queue/seq). AIRBASE queue/records are persisted; init
+// normalizes malformed/missing keys but must not wipe restart/JIP state.
+private _airbaseVersion = ["airbase_v1_version", 1] call ARC_fnc_stateGet;
+if (!(_airbaseVersion isEqualType 0) || { _airbaseVersion < 1 }) then { _airbaseVersion = 1; };
+["airbase_v1_version", _airbaseVersion] call ARC_fnc_stateSet;
+
+private _airbaseRecords = ["airbase_v1_records", []] call ARC_fnc_stateGet;
+if (!(_airbaseRecords isEqualType [])) then { _airbaseRecords = []; };
+["airbase_v1_records", _airbaseRecords] call ARC_fnc_stateSet;
+
+private _airbaseQueue = ["airbase_v1_queue", []] call ARC_fnc_stateGet;
+if (!(_airbaseQueue isEqualType [])) then { _airbaseQueue = []; };
+["airbase_v1_queue", _airbaseQueue] call ARC_fnc_stateSet;
+
+private _airbaseSeq = ["airbase_v1_seq", 0] call ARC_fnc_stateGet;
+if (!(_airbaseSeq isEqualType 0)) then { _airbaseSeq = 0; };
+["airbase_v1_seq", _airbaseSeq] call ARC_fnc_stateSet;
+
+private _airbaseHold = ["airbase_v1_holdDepartures", false] call ARC_fnc_stateGet;
+if (!(_airbaseHold isEqualType true) && !(_airbaseHold isEqualType false)) then { _airbaseHold = false; };
+["airbase_v1_holdDepartures", _airbaseHold] call ARC_fnc_stateSet;
+
+private _airbaseManualPriority = ["airbase_v1_manualPriority", []] call ARC_fnc_stateGet;
+if (!(_airbaseManualPriority isEqualType [])) then { _airbaseManualPriority = []; };
+["airbase_v1_manualPriority", _airbaseManualPriority] call ARC_fnc_stateSet;
 
 // ---------------------------------------------------------------------------
 // Departure seed: queue initial departures visible on first console load.

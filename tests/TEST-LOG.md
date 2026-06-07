@@ -11,7 +11,52 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
-## 2026-06-01 — C3 follow-up: TNP_PARTNERED consumer + reliable prompts
+## 2026-06-07 — Shared player-snapshot helper + config-class cache (Mode C/D)
+
+**Branch/Commit:** copilot/read-only-architect-review @ commit: unrecoverable (SHA assigned by the push that lands this entry; recorded per the contributor rule rather than a `<pending>` placeholder)
+
+**Scenario:** Architect-review follow-up performance refactor. Implemented the two cross-cutting optimizations the Lanes A/B/C review flagged as the highest-ROI, behavior-preserving wins:
+- **Shared player-snapshot helper (`ARC_fnc_playerSnapshot`):** a per-frame-cached `[unit, posATL]` snapshot of `allPlayers` (keyed by `diag_frameNo`). Eliminates the O(districts×players) re-scan in `ARC_fnc_civsubIsDistrictActive` (it recomputed `allPlayers` + `getPosATL` for every district each scheduler tick) and removes repeated per-iteration `getPos` engine reads in `fn_airbaseGroundTrafficTick`, `fn_cleanupTick`, and `fn_civsubLocNpcTick`. Alive-filtering and the locked district-active rule (`dist <= radius_m + 200`) are preserved at each site.
+- **Config-class cache (`ARC_fnc_cfgClassExists`):** a memoized `isClass (configFile >> root >> class)` lookup. Replaces the per-tick re-validation of the OPFOR unit-class list in `fn_threatVirtualPoolTick` (and the mirror in `fn_threatVirtualPoolInit`). Config classes are static for the session, so caching is deterministic and side-effect-free.
+
+The virtual-pool nearest-player loop was intentionally left unchanged because its `_alivePlayers` list is also passed (as objects) to the test-protected `ARC_fnc_threatSpawnPosClear` predicate; refactoring it would have widened scope beyond the surgical intent. Touching `fn_civsubIsDistrictActive` brought it under the changed-file SQF lint, so its two pre-existing parser-hostile method-style `getOrDefault` reads were converted to the sanctioned `_hg` compiled-helper form.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict <8 changed .sqf>` | PASS | No known parser-compat patterns. |
+| 2 | SQF lint (changed files) | `sqflint -e w <each changed .sqf>` | PASS | 8/8 clean (incl. the two new helpers). |
+| 3 | New contract suite | `bash tests/static/perf_shared_helpers_contract_checks.sh` | PASS | 19/19 — registration, helper internals, call sites, behaviour anchors. |
+| 4 | Threat standoff/observability regression | `bash tests/static/threat_virtual_opfor_spawn_standoff_checks.sh && bash tests/static/threat_virtual_opfor_observability_contract_checks.sh` | PASS | Unaffected by the class-validation change. |
+| 5 | Full static-suite regression | `for t in tests/static/*.sh; do bash "$t"; done` | PASS | All 21 suites pass (20 prior + new). |
+| 6 | Workflow YAML parses | `python3 -c "import yaml; yaml.safe_load(open('.github/workflows/arma-preflight.yml'))"` | PASS | New preflight step wired. |
+| 7 | State migration validation | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios. |
+| 8 | Whitespace/conflict scan | `git --no-pager diff --check` | PASS | Clean. |
+| 9 | Runtime smoke (local MP / dedicated / JIP) | Open mission, exercise CIVSUB scheduler, AIRBASE ground traffic, cleanup, virtual-OpFor spawns | BLOCKED | Arma runtime unavailable in this sandbox; optimization is behaviour-preserving and grep-contract protected. |
+
+
+
+**Branch/Commit:** copilot/read-only-architect-review @ 3270ed0
+
+**Scenario:** Architect-review follow-up. **P1 (CI wiring, Mode G):** the architect review found that `.github/workflows/arma-preflight.yml` ran only 4 static suites, leaving recently-shipped Lane B/C contract suites unexecuted in CI. Wired four previously-unwired suites into the preflight workflow so they gate every PR/push: `lane_c_contract_checks.sh` (CASREQ↔AIRBASESUB / CIVSUB rumors→TOC backlog / base-services integration), `intel_shadow_lead_bridge_contract_checks.sh` (C2), `ops_tnp_partnered_contract_checks.sh` (C3), and `dossier_runtime_contract_checks.sh` (B3). **P2 (floor/scope, Mode E):** the RPC owner-capture conformance gate's coverage floor `ARC_RPC_MIN_HANDLERS` was still `38` while the repo now has `39` conformant handlers, so a silent drop from 39→38 (e.g. a handler renamed/removed out of scan scope) would no longer be caught. Raised the default floor to `39` to restore the masking guard. No production SQF/logic changed.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Workflow YAML parses | `python3 -c "import yaml; yaml.safe_load(open('.github/workflows/arma-preflight.yml'))"` | PASS | YAML OK after adding 4 steps. |
+| 2 | RPC owner-capture conformance (floor 39) | `bash tests/static/rpc_owner_capture_conformance_checks.sh` | PASS | `all 39 handlers pass an explicit _callerOwner (>= floor 39)`. |
+| 3 | Newly-wired Lane C umbrella | `bash tests/static/lane_c_contract_checks.sh` | PASS | Lane C contract checks complete. |
+| 4 | Newly-wired C2 SHADOW ISR | `bash tests/static/intel_shadow_lead_bridge_contract_checks.sh` | PASS | Untouched suite; now in CI. |
+| 5 | Newly-wired C3 TNP partnered | `bash tests/static/ops_tnp_partnered_contract_checks.sh` | PASS | Untouched suite; now in CI. |
+| 6 | Newly-wired B3 dossier | `bash tests/static/dossier_runtime_contract_checks.sh` | PASS | Untouched suite; now in CI. |
+| 7 | Full static-suite regression | `for t in tests/static/*.sh; do bash "$t"; done` | PASS | All 20 suites pass. |
+| 8 | Whitespace/conflict scan | `git diff --check` | PASS | Clean. |
+
+**Result:** PASS (static/CI-config).
+
+**Risk Notes:** CI now fails if any wired Lane B/C contract assertion regresses; the RPC floor of 39 must be raised (with justification) whenever a new sender-validated handler is added.
+
+**Rollback:** Revert commit 3270ed0 (restores the 4-suite CI list and floor 38).
+
+
 
 **Branch/Commit:** copilot/read-only-architecture-audit @ a243337
 

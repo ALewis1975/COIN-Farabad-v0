@@ -23,6 +23,10 @@ class CfgFunctions
             class stateGet {};
             class stateSet {};
             class stateSetGet {};  // legacy compatibility wrapper
+
+            // Shared performance helpers (per-frame player snapshot + memoized config-class lookup)
+            class playerSnapshot {};
+            class cfgClassExists {};
             class dynamicTodRefresh {};
             class dynamicTodGetPolicy {};
 
@@ -72,6 +76,8 @@ class CfgFunctions
             class rolesCanRecruitAI {};
             class rpcValidateSender {};
             class airbaseTowerAuthorize {};
+            class baseServicesInit {};
+            class baseServicesSnapshot {};
 
             // Deferred cleanup (despawn when players leave area)
             class cleanupRegister {};
@@ -320,6 +326,7 @@ class CfgFunctions
             class casreqClose {};
             class casreqClientSubmit {};
             class casreqJtacPrefill {};
+            class casreqAirbaseAvailability {};
         };
 
         class Dossier

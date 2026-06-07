@@ -56,7 +56,11 @@ private _lines = [];
             private _evidence = [_rec, "evidence", []] call _pget;
             if !(_evidence isEqualType []) then { _evidence = []; };
             private _evItems = 0;
-            { _evItems = _evItems + ([_x, "item_count", 0] call _pget); } forEach _evidence;
+            {
+                private _cnt = [_x, "item_count", 0] call _pget;
+                if !(_cnt isEqualType 0) then { _cnt = 0; };
+                _evItems = _evItems + _cnt;
+            } forEach _evidence;
 
             private _leadTxt = "no lead";
             if (!(_leadId isEqualTo "")) then { _leadTxt = format ["lead %1", _leadId]; };

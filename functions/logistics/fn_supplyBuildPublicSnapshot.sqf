@@ -5,6 +5,7 @@ private _last = if ((count _ledger) > 0) then { _ledger select ((count _ledger) 
 [
     ["stock", [] call ARC_fnc_supplyGetStockSnapshot],
     ["lastLedgerEvent", _last],
+    ["baseServices", if (!isNil "ARC_fnc_baseServicesSnapshot") then { [] call ARC_fnc_baseServicesSnapshot } else { ["baseServices_v1_snapshot", []] call ARC_fnc_stateGet }],
     ["activeStartdispId", ["activeIncidentStartdispId", ""] call ARC_fnc_stateGet],
     ["activeStartdispSummary", ["activeIncidentStartdispSummary", []] call ARC_fnc_stateGet],
     ["activeSupplyAnnex", ["activeIncidentSitrepSupplyAnnex", []] call ARC_fnc_stateGet],

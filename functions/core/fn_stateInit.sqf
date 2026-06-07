@@ -10,6 +10,7 @@
 
     // System control
     ["systemPauseUntil", -1],
+    ["autoIncidentSuspendUntil", -1],
 
     // Sustainment
     // Last time (serverTime) base stocks were decayed.
@@ -340,7 +341,24 @@
     ["companyVirtualOpsLastTickAt", -1],
     ["companyVirtualOpsLastRollupAt", -1],
 
-    // Airbase clearance request workflow (server authoritative queue + audit trail)
+    // Base services v1 (MAYOR/S1/S4/MED as campaign actors)
+    ["baseServices_v1_enabled", true],
+    ["baseServices_v1_version", 1],
+    ["baseServices_v1_services", []],
+    ["baseServices_v1_snapshot", []],
+
+    // AIRBASE v1 persistence (server authoritative queue/records/control + audit trail)
+    ["airbase_v1_version", 1],
+    ["airbase_v1_records", []],
+    ["airbase_v1_queue", []],
+    ["airbase_v1_seq", 0],
+    ["airbase_v1_holdDepartures", false],
+    ["airbase_v1_manualPriority", []],
+    ["airbase_v1_towerStaffing", [
+        ["tower", ["claimed", false, "uid", "", "name", "", "roleTag", "", "owner", -1, "updatedAt", -1]],
+        ["ground", ["claimed", false, "uid", "", "name", "", "roleTag", "", "owner", -1, "updatedAt", -1]],
+        ["arrival", ["claimed", false, "uid", "", "name", "", "roleTag", "", "owner", -1, "updatedAt", -1]]
+    ]],
     ["airbase_v1_clearanceRequests", []],
     ["airbase_v1_clearanceSeq", 0],
     ["airbase_v1_clearanceHistory", []],
@@ -349,6 +367,8 @@
     ["airbase_v1_events", []],
 
     // CASREQ v1 (server-owned request store)
+    ["casreq_v1_enabled", true],
+    ["casreq_v1_version", 1],
     ["casreq_v1_records", createHashMap],
     ["casreq_v1_open_index", []],
     ["casreq_v1_closed_index", []],

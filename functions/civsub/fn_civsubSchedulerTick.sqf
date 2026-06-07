@@ -5,7 +5,7 @@
     Implements:
       - ambient lead generation (<=1 per district per hour)
       - reactive contact cue (<=1 per district per 30 minutes)
-      - optional rumor (stubbed)
+      - optional rumor/informant lead generation (bounded by rumor cooldown)
 
     Exact formulas and cooldown logic are taken from the CIVSUB v1 Development Baseline (Section 8.3, 8.4, 9, 12).
 
@@ -25,6 +25,8 @@ private _requiredFnNames = [
     "ARC_fnc_civsubIntelConfidence",
     "ARC_fnc_civsubSchedulerEmitAmbientLead",
     "ARC_fnc_civsubSchedulerEmitReactiveContact",
+    "ARC_fnc_civsubSchedulerEmitRumor",
+    "ARC_fnc_tocBacklogEnqueue",
     "ARC_fnc_civsubBundleToPairs"
 ];
 private _missingFns = _requiredFnNames select {
@@ -58,7 +60,7 @@ private _hmFrom  = compile "private _pairs = _this; private _r = createHashMap; 
 private _keysFn  = compile "params ['_h']; keys _h";
 
 // Test/diagnostics (server only)
-// - civsub_v1_scheduler_force_emit: "" | "LEAD" | "ATTACK" | "BOTH"
+// - civsub_v1_scheduler_force_emit: "" | "LEAD" | "ATTACK" | "RUMOR" | "BOTH"
 // - civsub_v1_scheduler_force_district: "" (all) or "Dxx"
 // - civsub_v1_scheduler_diag_enabled: bool (store last computed values per district)
 
@@ -145,6 +147,7 @@ missionNamespace setVariable ["civsub_v1_scheduler_lastTick_ts", serverTime, tru
     // Cooldowns
     private _nextLead = [_d, "cooldown_nextLead_ts", 0] call _hg;
     private _nextAttack = [_d, "cooldown_nextAttack_ts", 0] call _hg;
+    private _nextRumor = [_d, "cooldown_nextRumor_ts", 0] call _hg;
 
     // Diagnostics snapshot (per district)
     if (_diagEnabled) then {
@@ -160,7 +163,8 @@ missionNamespace setVariable ["civsub_v1_scheduler_lastTick_ts", serverTime, tru
             ["pAttackTickEff", _pAttackTickEff],
             ["intel_conf", _intelConf],
             ["nextLead_ts", _nextLead],
-            ["nextAttack_ts", _nextAttack]
+            ["nextAttack_ts", _nextAttack],
+            ["nextRumor_ts", _nextRumor]
         ] call _hmFrom;
         _diagMap set [_did, _row];
     };
@@ -169,6 +173,7 @@ missionNamespace setVariable ["civsub_v1_scheduler_lastTick_ts", serverTime, tru
     private _forceThisDistrict = (_forceDid isEqualTo "") || {_forceDid isEqualTo _did};
     private _forceLead = _forceThisDistrict && ((_forceMode isEqualTo "LEAD") || {_forceMode isEqualTo "BOTH"});
     private _forceAttack = _forceThisDistrict && ((_forceMode isEqualTo "ATTACK") || {_forceMode isEqualTo "BOTH"});
+    private _forceRumor = _forceThisDistrict && ((_forceMode isEqualTo "RUMOR") || {_forceMode isEqualTo "BOTH"});
 
     // Emit ambient lead (<= 1/hr)
     if (serverTime >= _nextLead) then {
@@ -181,6 +186,7 @@ missionNamespace setVariable ["civsub_v1_scheduler_lastTick_ts", serverTime, tru
                 if (_bridgedLeadId isEqualType "" && { !(_bridgedLeadId isEqualTo "") }) then
                 {
                     missionNamespace setVariable ["civsub_v1_lastScheduler_leadId", _bridgedLeadId, true];
+                    [_bridgedLeadId, 2, "", "CIVSUB", format ["Ambient CIVSUB lead from %1", _did]] call ARC_fnc_tocBacklogEnqueue;
                 };
             };
 
@@ -196,6 +202,42 @@ missionNamespace setVariable ["civsub_v1_scheduler_lastTick_ts", serverTime, tru
                 private _row2 = [_diagMap, _did] call _mapGet;
                 if (_row2 isEqualType createHashMap) then {
                     _row2 set ["nextLead_ts", [_d, "cooldown_nextLead_ts", _nextLead] call _hg];
+                };
+            };
+        };
+    };
+
+    // Emit bounded rumor / informant lead into the TOC backlog.
+    if (missionNamespace getVariable ["civsub_v1_rumor_enabled", false]) then
+    {
+        if (serverTime >= _nextRumor) then
+        {
+            private _pRumorTick = (_pLeadTick * 0.45) min 0.50;
+            if (_forceRumor || {(random 1) < _pRumorTick}) then
+            {
+                private _bRumor = [_did, _d, (_intelConf * 0.75)] call ARC_fnc_civsubSchedulerEmitRumor;
+                private _rumorLeadId = "";
+                if (!isNil "ARC_fnc_civsubLeadEmitBridge") then
+                {
+                    _rumorLeadId = [_bRumor] call ARC_fnc_civsubLeadEmitBridge;
+                    if (_rumorLeadId isEqualType "" && { !(_rumorLeadId isEqualTo "") }) then
+                    {
+                        missionNamespace setVariable ["civsub_v1_lastRumor_leadId", _rumorLeadId, true];
+                        [_rumorLeadId, 2, "", "CIVSUB", format ["Rumor / informant lead from %1", _did]] call ARC_fnc_tocBacklogEnqueue;
+                    };
+                };
+                missionNamespace setVariable ["civsub_v1_lastScheduler_bundle", _bRumor, true];
+                missionNamespace setVariable ["civsub_v1_lastScheduler_bundle_pairs", [_bRumor] call ARC_fnc_civsubBundleToPairs, true];
+
+                private _lbRumor = missionNamespace getVariable ["civsub_v1_lastBundleByDistrict", createHashMap];
+                if !(_lbRumor isEqualType createHashMap) then { _lbRumor = createHashMap; };
+                _lbRumor set [_did, _bRumor];
+                missionNamespace setVariable ["civsub_v1_lastBundleByDistrict", _lbRumor, true];
+                if (_diagEnabled) then {
+                    private _rowRumor = [_diagMap, _did] call _mapGet;
+                    if (_rowRumor isEqualType createHashMap) then {
+                        _rowRumor set ["nextRumor_ts", [_d, "cooldown_nextRumor_ts", _nextRumor] call _hg];
+                    };
                 };
             };
         };

@@ -24,6 +24,11 @@ check "\[\"updatedAt\", serverTime\]" "functions/casreq/fn_casreqBroadcastDelta.
 check "\[\"actor\", _actor\]" "functions/casreq/fn_casreqBroadcastDelta.sqf" "CASREQ bundle metadata includes actor"
 check "\[\"casreq\", _casreqPub\]" "functions/core/fn_publicBroadcastState.sqf" "Public state includes casreq block"
 check "\[\"casreq_snapshot\", _casreqSnapshot\]" "functions/core/fn_publicBroadcastState.sqf" "Public casreq block includes full snapshot key"
+check "\"incident_id\"" "functions/casreq/fn_casreqSnapshotGet.sqf" "Compact snapshot requires incident_id"
+check "\"nine_line\"" "functions/casreq/fn_casreqSnapshotGet.sqf" "Compact snapshot requires nine_line"
+check "\"closed_at\"" "functions/casreq/fn_casreqSnapshotGet.sqf" "Compact snapshot requires closed_at"
+check "Shipped compact CASREQ v1 baseline" "docs/projectFiles/Farabad_UI_CASREQ_Thread.md" "CASREQ docs re-baseline shipped compact v1"
+check "casreq_v1_records = HashMap" "docs/projectFiles/Farabad_UI_CASREQ_Thread.md" "CASREQ docs document persisted compact store"
 
 # C1 — RAVEN JTAC → CASREQ 9-line prefill reuses the existing casreqOpen path
 check "remoteExec \[\"ARC_fnc_casreqOpen\", 2\]" "functions/casreq/fn_casreqJtacPrefill.sqf" "JTAC prefill submits via existing ARC_fnc_casreqOpen RPC path"

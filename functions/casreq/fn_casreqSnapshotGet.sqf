@@ -10,10 +10,12 @@ params [
     ["_casreqId", "", [""]]
 ];
 
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+
 private _records = ["casreq_v1_records", createHashMap] call ARC_fnc_stateGet;
 if !(_records isEqualType createHashMap) exitWith { [] };
 
-private _snapshot = _records getOrDefault [_casreqId, []];
+private _snapshot = [_records, _casreqId, []] call _hg;
 if !(_snapshot isEqualType []) then { _snapshot = []; };
 
 private _requiredKeys = [
@@ -24,7 +26,13 @@ private _requiredKeys = [
     "area",
     "messages",
     "created_at",
-    "updated_at"
+    "updated_at",
+    "incident_id",
+    "nine_line",
+    "remarks",
+    "airbase_availability",
+    "result",
+    "closed_at"
 ];
 
 {
@@ -35,6 +43,9 @@ private _requiredKeys = [
         private _def = switch (_k) do {
             case "messages": { [] };
             case "area": { [["target_pos", [0,0,0]], ["target_marker", ""]] };
+            case "nine_line": { [] };
+            case "airbase_availability": { [] };
+            case "closed_at": { -1 };
             case "created_at": { serverTime };
             case "updated_at": { serverTime };
             default { "" };

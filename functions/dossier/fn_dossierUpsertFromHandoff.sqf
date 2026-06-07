@@ -111,7 +111,9 @@ _conf = (_conf max 0) min 1;
 private _pos = [0,0,0];
 if (!isNull _civ) then { _pos = getPosATL _civ; };
 if (!(_pos isEqualType []) || {(count _pos) < 2}) then { _pos = [0,0,0]; };
-_pos resize 3;
+private _z = 0;
+if ((count _pos) >= 3 && { (_pos select 2) isEqualType 0 }) then { _z = _pos select 2; };
+_pos = [_pos select 0, _pos select 1, _z];
 private _grid = mapGridPosition _pos;
 
 // ---- Confidence-weighted lead -------------------------------------------
@@ -204,6 +206,13 @@ if (_maxRec < 1) then { _maxRec = 1; };
 while {(count _records) > _maxRec} do { _records deleteAt 0; };
 
 ["dossier_v0_records", _records] call ARC_fnc_stateSet;
+
+// Bind the stable dossier id to the detainee so delayed EPW transfer / MP locality
+// changes can still prove which handoff created the persisted dossier.
+if (!isNull _civ) then {
+    _civ setVariable ["ARC_dossier_id", _dossierId, true];
+    _civ setVariable ["ARC_dossier_handoff_task_id", _taskId, true];
+};
 
 // ---- OPS lifecycle log + read-model publish -----------------------------
 if (!isNil "ARC_fnc_intelLog") then {

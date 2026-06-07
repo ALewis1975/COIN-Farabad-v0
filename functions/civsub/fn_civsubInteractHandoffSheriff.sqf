@@ -154,7 +154,11 @@ if ((count ([_bundle] call _keysFn)) isEqualTo 0) exitWith {
 // Unified SHERIFF/SSE dossier: join identity + SSE evidence, emit confidence-weighted lead,
 // publish read model and SITREP annex. Non-fatal — handoff proceeds even if this fails.
 if (!isNil "ARC_fnc_dossierUpsertFromHandoff") then {
-    [_civ, _civUid, _did, _actorUid, _wl, _rec] call ARC_fnc_dossierUpsertFromHandoff;
+    private _dossierId = [_civ, _civUid, _did, _actorUid, _wl, _rec] call ARC_fnc_dossierUpsertFromHandoff;
+    if (_dossierId isEqualType "" && { !(_dossierId isEqualTo "") }) then {
+        _rec set ["dossier_id", _dossierId];
+        [_civUid, _rec] call ARC_fnc_civsubIdentitySet;
+    };
 };
 
 // Pin + hold at sheriff area (pre-transfer). This prevents despawn and keeps the scene stable.

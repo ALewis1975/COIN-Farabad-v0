@@ -92,14 +92,15 @@ Players experience a living joint operational environment where their actions ha
 ### Entry Points
 - **`initServer.sqf`:** Server bootstrap and configuration overrides
 - **`initPlayerLocal.sqf`:** Client bootstrap with server-ready gate
-- **`config/CfgFunctions.hpp`:** ARC function registry (494+ functions)
+- **`config/CfgFunctions.hpp`:** ARC function registry (588 registered functions)
 
 ### Subsystems
 ```
 functions/
 ├── core/          # State management, logging, roles, lifecycle
-├── ui/            # Farabad Console (7 tabs + painters)
+├── ui/            # Farabad Console (8 tabs + painters)
 ├── command/       # Task/Lead/SITREP workflow
+├── casreq/        # Close air support request workflow
 ├── civsub/        # Population, influence, identity, traffic
 ├── threat/        # Threat recordkeeping and IED system
 ├── ied/           # IED-specific handlers and interactions
@@ -107,6 +108,8 @@ functions/
 ├── ops/           # Operational tempo and patrol logic
 ├── logistics/     # Convoy and sustainment systems
 ├── medical/       # Casualty tracking and medical influence feedback
+├── prison/        # Karkanak prison site evaluation and lifecycle
+├── dossier/       # SHERIFF/SSE detainee dossier (identity + IED evidence)
 ├── sitepop/       # Dynamic site NPC presence (proximity/task-triggered)
 ├── ambiance/      # Airbase operations and world simulation
 └── world/         # Location registry and world utilities
@@ -260,7 +263,7 @@ This staged return-to-service keeps command/control online while reducing noness
 ```
 COIN-Farabad-v0/
 ├── config/              # CfgFunctions, dialogs, HUD overlays
-├── functions/           # 494+ SQF functions (73k LOC, 14 subsystems)
+├── functions/           # 588 SQF functions (89k LOC, 16 subsystems)
 ├── scripts/             # Utility scripts (world time, dev tools)
 ├── data/                # Compositions, paths, documentation
 ├── docs/                # Comprehensive project documentation
@@ -422,7 +425,7 @@ Excessive force → Grievances → Less cooperation → Worse intel → Broader 
 ### Language & Runtime
 - **Scripting:** SQF (Real Virtuality 4 / Poseidon engine)
 - **Target:** Arma 3 dedicated server multiplayer environment
-- **Codebase:** ~530 SQF/HPP files, ~73,000 lines of code (14 subsystems, 494+ registered functions)
+- **Codebase:** ~627 SQF/HPP files, ~98,000 lines of code (16 subsystems, 588 registered functions)
 
 ### State Management
 - **Authority:** Dedicated server is single writer for all persistent state
@@ -555,7 +558,7 @@ Until dedicated server environment is available:
 - ✅ Strong state isolation (pub vs. private variables)
 - ✅ Robust defensive programming (type checks, nil guards)
 - ✅ Well-structured UI integration
-- ✅ Clear module boundaries across 14 subsystems
+- ✅ Clear module boundaries across 16 subsystems
 - ✅ All sqflint CI-blocking patterns resolved (Phase 1 complete)
 - ✅ 62 automated unit test assertions in test harness
 

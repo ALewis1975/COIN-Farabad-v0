@@ -36,8 +36,10 @@ REQ="functions/ops/fn_opsTnpPartneredRequest.sqf"
 check "remoteExec \[\"ARC_fnc_intelQueueSubmit\", 2\]" "$REQ" "TNP partnered request submits via existing ARC_fnc_intelQueueSubmit RPC path"
 check "\"LEAD_REQUEST\"" "$REQ" "TNP partnered request submits a LEAD_REQUEST kind"
 check "\[\"leadType\", _leadType\]" "$REQ" "TNP partnered request payload includes leadType"
+check "\[\"confidence\", _conf\]" "$REQ" "TNP partnered request payload includes confidence"
 check "\[\"tag\", \"TNP_PARTNERED\"\]" "$REQ" "TNP partnered request tags the lead request TNP_PARTNERED"
 check "\[\"source\", \"TNP_PARTNERED\"\]" "$REQ" "TNP partnered request stamps source meta TNP_PARTNERED"
+check "\[\"confidence\", _conf\]" "$REQ" "TNP partnered request stamps confidence meta"
 check "ARC_opsTnpPartneredRequestEnabled" "$REQ" "TNP partnered request honours the feature flag"
 check "ARC_fnc_rolesHasGroupIdToken" "$REQ" "TNP partnered request gates on the TNP callsign token"
 
@@ -58,6 +60,13 @@ LS="functions/ops/fn_opsSpawnLocalSupport.sqf"
 check "activeLeadTag" "$LS" "Local-support spawn reads the active incident lead tag"
 check "TNP_PARTNERED" "$LS" "Local-support spawn recognises the TNP_PARTNERED lead tag"
 check "_isTnpPartnered" "$LS" "Local-support spawn forces eligibility for TNP_PARTNERED leads"
+
+# CIVSUB effects: partnered leads must change district deltas and leave an OPS-log audit trail.
+CIV="functions/civsub/fn_civsubApplyIncidentOutcomeDelta.sqf"
+check "activeLeadTag" "$CIV" "CIVSUB outcome reads active lead tag"
+check "TNP_PARTNERED" "$CIV" "CIVSUB outcome recognises TNP_PARTNERED tag"
+check "activeIncidentTnpPartneredCivsubEffect" "$CIV" "CIVSUB outcome stores partnered effect read model"
+check "TNP_PARTNERED_CIVSUB_EFFECT" "$CIV" "CIVSUB outcome logs partnered district effect"
 
 # Prompts: selections use two-button guiMessage choices (reliably captured), and
 # the dead free-text/parseNumber override pattern is gone.

@@ -34,5 +34,6 @@ private _gid = if (isNull _unit || { isNull (group _unit) }) then { "" } else { 
     ["ending_lace", [_clean, "ending_lace", []] call _get],
     ["remaining_limitations", [_clean, "remaining_limitations", ""] call _get],
     ["refit_recommended", [_clean, "refit_recommended", false] call _get],
-    ["resupply_recommended", [_clean, "resupply_recommended", false] call _get]
+    ["resupply_recommended", [_clean, "resupply_recommended", false] call _get],
+    ["base_services", if (!isNil "ARC_fnc_baseServicesSnapshot") then { [] call ARC_fnc_baseServicesSnapshot } else { ["baseServices_v1_snapshot", []] call ARC_fnc_stateGet }]
 ]

@@ -33,7 +33,7 @@ cd "$ROOT_DIR"
 
 # Minimum number of conformant handlers expected. Raise this when handlers are
 # added; never lower it without justification — a drop means lost coverage.
-MIN_HANDLERS="${ARC_RPC_MIN_HANDLERS:-38}"
+MIN_HANDLERS="${ARC_RPC_MIN_HANDLERS:-39}"
 
 python3 - "$MIN_HANDLERS" <<'PY'
 import glob

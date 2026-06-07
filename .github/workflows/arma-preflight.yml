@@ -235,6 +235,30 @@ jobs:
         run: |
           tests/static/casreq_snapshot_contract_checks.sh
 
+      - name: Persistence reset coverage static validation
+        run: |
+          tests/static/persistence_reset_coverage_contract_checks.sh
+
       - name: RPC owner-capture conformance static validation
         run: |
           tests/static/rpc_owner_capture_conformance_checks.sh
+
+      - name: Lane C integration contract static validation
+        run: |
+          bash tests/static/lane_c_contract_checks.sh
+
+      - name: SHADOW ISR lead-bridge contract static validation
+        run: |
+          tests/static/intel_shadow_lead_bridge_contract_checks.sh
+
+      - name: TNP partnered-ops contract static validation
+        run: |
+          tests/static/ops_tnp_partnered_contract_checks.sh
+
+      - name: SHERIFF/SSE dossier contract static validation
+        run: |
+          tests/static/dossier_runtime_contract_checks.sh
+
+      - name: Shared perf helpers (player snapshot + config-class cache) static validation
+        run: |
+          tests/static/perf_shared_helpers_contract_checks.sh
