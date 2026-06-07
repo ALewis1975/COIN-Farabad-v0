@@ -74,6 +74,7 @@ private _cat = switch (_kind) do
     case "CACHE_SEARCH": { "DOCS" };
     case "CASEVAC_CASUALTY": { "MEDEVAC" };
     case "CIV_MEET": { "HUMINT" };
+    case "CHECKPOINT_ACCESS": { "OPS" };
     case "LOG_DROP": { "LOGISTICS" };
     case "ESCORT_END": { "OPS" };
     default { "INTEL" };
@@ -87,6 +88,7 @@ private _defaultSummary = switch (_kind) do
     case "CACHE_SEARCH": { "Cache secured" };
     case "CASEVAC_CASUALTY": { "Casualty reached and stabilized" };
     case "CIV_MEET": { "Meeting conducted" };
+    case "CHECKPOINT_ACCESS": { "Checkpoint access control completed" };
     case "LOG_DROP": { "Supplies delivered" };
     case "ESCORT_END": { "Arrival confirmed" };
     default { "Objective complete" };

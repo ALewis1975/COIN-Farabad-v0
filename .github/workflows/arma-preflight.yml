@@ -266,3 +266,7 @@ jobs:
       - name: Lead origin / single-track routing contract static validation
         run: |
           bash tests/static/lead_origin_contract_checks.sh
+
+      - name: Mission manifestation contract static validation
+        run: |
+          bash tests/static/mission_manifestation_contract_checks.sh

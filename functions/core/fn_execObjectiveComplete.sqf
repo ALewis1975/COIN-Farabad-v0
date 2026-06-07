@@ -215,6 +215,7 @@ if (_summary isEqualTo "") then
         case "CACHE_SEARCH": { "Cache located and secured." };
         case "CASEVAC_CASUALTY": { "Casualty reached and stabilized; preparing evacuation." };
         case "CIV_MEET": { "Conducted local engagement; collected HUMINT." };
+        case "CHECKPOINT_ACCESS": { "Processed civil access control at the checkpoint." };
         case "LOG_DROP": { "Delivered supplies to the designated point." };
         case "ESCORT_END": { "Escort reached destination; arrival confirmed." };
         default { "Objective complete." };
@@ -229,6 +230,7 @@ private _cat = switch (_kindU) do
     case "CACHE_SEARCH": { "DOCS" };
     case "CASEVAC_CASUALTY": { "MEDEVAC" };
     case "CIV_MEET": { "HUMINT" };
+    case "CHECKPOINT_ACCESS": { "OPS" };
     case "LOG_DROP": { "LOGISTICS" };
     case "ESCORT_END": { "OPS" };
     default { "INTEL" };

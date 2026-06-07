@@ -28,7 +28,7 @@ if (_actionText isEqualTo "" || _kind isEqualTo "") exitWith {false};
 private _vanillaActionsEnabled = missionNamespace getVariable ["ARC_vanillaAddActionsEnabled", false];
 if (!(_vanillaActionsEnabled isEqualType true)) then { _vanillaActionsEnabled = false; };
 
-private _objectiveActionsEnabled = missionNamespace getVariable ["ARC_objectiveAddActionsEnabled", _vanillaActionsEnabled];
+private _objectiveActionsEnabled = missionNamespace getVariable ["ARC_objectiveAddActionsEnabled", true];
 if (!(_objectiveActionsEnabled isEqualType true)) then { _objectiveActionsEnabled = _vanillaActionsEnabled; };
 if (!_objectiveActionsEnabled) exitWith {false};
 

@@ -54,6 +54,20 @@ if (_pos isEqualTo [] && { _posATL isEqualType [] && { (count _posATL) >= 2 } })
 if (_pos isEqualTo []) exitWith {false};
 
 private _typeU = toUpper _type;
+private _missionMeta = ["activeIncidentMissionMeta", []] call ARC_fnc_stateGet;
+if (!(_missionMeta isEqualType [])) then { _missionMeta = []; };
+private _fnMetaGet = {
+    params ["_pairs", "_key", "_default"];
+    private _out = _default;
+    {
+        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith
+        {
+            _out = _x select 1;
+        };
+    } forEach _pairs;
+    _out
+};
+private _missionSubtype = toUpper ([_missionMeta, "subtype", ""] call _fnMetaGet);
 
 // RECON tasks: some are area recon, some are route recon.
 // We treat any RECON display name containing "route" as a route recon task.
@@ -288,6 +302,16 @@ if (_kind isEqualTo "VBIED_VEHICLE") then
     _obj engineOn false;
     _obj lock 0; // unlocked so it can be moved/towed
 };
+
+// Civic checkpoint access-control vehicles should stay in the lane as a
+// physical inspection target instead of driving away under simulation.
+if (_kind isEqualTo "CHECKPOINT_ACCESS") then
+{
+    _obj setDir (random 360);
+    _obj setFuel 0;
+    _obj engineOn false;
+    _obj lock 0;
+};
             };
         };
     };
@@ -463,6 +487,17 @@ if (_needsBuild) then
             _radius = 90;
             _holdReq = 10 * 60;
             _deadlineSec = 15 * 60;
+
+            _objKind = "CHECKPOINT_ACCESS";
+            private _pool = missionNamespace getVariable ["ARC_checkpointAccessVehicleClassPool", ["C_Offroad_01_F", "C_SUV_01_F", "C_Hatchback_01_F"]];
+            if (!(_pool isEqualType [])) then { _pool = ["C_Offroad_01_F", "C_SUV_01_F", "C_Hatchback_01_F"]; };
+            private _valid = _pool select { _x isEqualType "" && { isClass (configFile >> "CfgVehicles" >> _x) } };
+            if ((count _valid) <= 0) then { _valid = ["C_Offroad_01_F"] select { isClass (configFile >> "CfgVehicles" >> _x) }; };
+            if ((count _valid) <= 0) then { _valid = ["C_Offroad_01_F"]; };
+            _objClass = selectRandom _valid;
+            _objRadius = 45;
+            _objAction = "Process civil access checkpoint";
+            _failOnKilled = false;
         };
 
         case "PATROL":
@@ -756,6 +791,11 @@ case "IED":
             _objClass = "C_man_1";
             _objRadius = 250;
             _objAction = "Conduct meeting";
+            if (_missionSubtype isEqualTo "FOOD_WATER_DISTRIBUTION") then
+            {
+                _objRadius = 60;
+                _objAction = "Distribute food and water";
+            };
             _failOnKilled = true;
         };
 
@@ -1448,6 +1488,59 @@ if (!(_objKind isEqualTo "")) then
             ["activeObjectiveArmed", !(_failOnKilled)] call ARC_fnc_stateSet;
 
             missionNamespace setVariable ["ARC_activeObjective", _obj, true];
+
+            if (_objKind isEqualTo "CIV_MEET" && { _missionSubtype isEqualTo "FOOD_WATER_DISTRIBUTION" }) then
+            {
+                private _civicNids = ["activeCivicObjectiveNetIds", []] call ARC_fnc_stateGet;
+                if (!(_civicNids isEqualType [])) then { _civicNids = []; };
+
+                private _haveCivics = false;
+                {
+                    private _cu = objectFromNetId _x;
+                    if (!isNull _cu && { alive _cu }) exitWith { _haveCivics = true; };
+                } forEach _civicNids;
+
+                if (!_haveCivics) then
+                {
+                    private _crowdCount = missionNamespace getVariable ["ARC_civicFoodWaterCrowdCount", 4];
+                    if (!(_crowdCount isEqualType 0)) then { _crowdCount = 4; };
+                    _crowdCount = (_crowdCount max 0) min 8;
+
+                    private _civPool = missionNamespace getVariable ["ARC_liaisonClassPool", []];
+                    if (!(_civPool isEqualType [])) then { _civPool = []; };
+                    private _validCivs = _civPool select { _x isEqualType "" && { isClass (configFile >> "CfgVehicles" >> _x) } };
+                    if ((count _validCivs) <= 0) then { _validCivs = ["C_man_1"] select { isClass (configFile >> "CfgVehicles" >> _x) }; };
+                    if ((count _validCivs) <= 0) then { _validCivs = ["C_man_1"]; };
+
+                    private _grpCiv = createGroup [civilian, true];
+                    _grpCiv setGroupIdGlobal [format ["Civic Aid Crowd %1", _taskId]];
+                    private _newNids = [];
+
+                    for "_ci" from 1 to _crowdCount do
+                    {
+                        private _cp = _oPos getPos [4 + random 16, random 360];
+                        _cp resize 3;
+                        private _cu = _grpCiv createUnit [selectRandom _validCivs, _cp, [], 2, "NONE"];
+                        _cu setVariable ["ARC_objectiveKind", "CIV_AID_RECIPIENT", true];
+                        _cu setBehaviour "CARELESS";
+                        _cu setCombatMode "BLUE";
+                        _cu setCaptive true;
+                        [_cu, "", "INCIDENT_CIV_FOOD_WATER"] call ARC_fnc_civsubCivConnect;
+                        private _cn = netId _cu;
+                        if (!(_cn isEqualTo "")) then { _newNids pushBack _cn; };
+                    };
+
+                    if ((count _newNids) > 0) then
+                    {
+                        [_grpCiv, "camp", _oPos, 35, ""] call ARC_fnc_sitePopApplyAmbiance;
+                        ["activeCivicObjectiveNetIds", _newNids] call ARC_fnc_stateSet;
+                    }
+                    else
+                    {
+                        deleteGroup _grpCiv;
+                    };
+                };
+            };
         };
     };
     };

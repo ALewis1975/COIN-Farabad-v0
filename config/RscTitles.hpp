@@ -18,7 +18,7 @@ class RscTitles
             class ARC_TaskTimerHUD_Text: RscStructuredText
             {
                 idc = 86001;
-                x = safeZoneX + safeZoneW - 0.34;
+                x = safeZoneX + 0.01;
                 y = safeZoneY + 0.02;
                 w = 0.33;
                 h = 0.18;

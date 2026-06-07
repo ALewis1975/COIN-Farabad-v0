@@ -54,9 +54,9 @@ _interval = (_interval max 150) min 2000;
 
 private _maxWps = _maxWpsUser;
 
-private _finalWpRad = missionNamespace getVariable ["ARC_convoyFinalWpRadiusM", 45];
-if (!(_finalWpRad isEqualType 0)) then { _finalWpRad = 45; };
-_finalWpRad = (_finalWpRad max 25) min 150;
+private _finalWpRad = missionNamespace getVariable ["ARC_convoyFinalWpRadiusM", 90];
+if (!(_finalWpRad isEqualType 0)) then { _finalWpRad = 90; };
+_finalWpRad = (_finalWpRad max 60) min 180;
 
 private _wps = [];
 
@@ -155,7 +155,7 @@ if (_routePtsIn isEqualType [] && { (count _routePtsIn) >= 2 }) then
 };
 
 // Always add the final waypoint (dedupe if already close).
-if ((count _wps) isEqualTo 0 || { ((_wps select ((count _wps) - 1)) distance2D _destWp) > 60 }) then
+if ((count _wps) isEqualTo 0 || { ((_wps select ((count _wps) - 1)) distance2D _destWp) > (_finalWpRad * 0.75) }) then
 {
     _wps pushBack _destWp;
 };

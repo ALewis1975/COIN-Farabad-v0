@@ -2804,9 +2804,9 @@ if (_arrivedAt isEqualType 0 && { _arrivedAt > 0 }) then
     if (!(_fileSpacing isEqualType 0)) then { _fileSpacing = 10; };
     _fileSpacing = (_fileSpacing max 8) min 15;
 
-    private _fileSlotRad = missionNamespace getVariable ["ARC_convoyArrivalFileSlotRadiusM", 9];
-    if (!(_fileSlotRad isEqualType 0)) then { _fileSlotRad = 9; };
-    _fileSlotRad = (_fileSlotRad max 5) min 18;
+    private _fileSlotRad = missionNamespace getVariable ["ARC_convoyArrivalFileSlotRadiusM", 14];
+    if (!(_fileSlotRad isEqualType 0)) then { _fileSlotRad = 14; };
+    _fileSlotRad = (_fileSlotRad max 8) min 24;
 
     private _fileSnapR = missionNamespace getVariable ["ARC_convoyArrivalRoadSnapM", 45];
     if (!(_fileSnapR isEqualType 0)) then { _fileSnapR = 45; };

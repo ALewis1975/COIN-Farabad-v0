@@ -145,6 +145,7 @@
     ["activeObjectiveClass", ""],
     ["activeObjectivePos", []],
     ["activeObjectiveNetId", ""],
+    ["activeCivicObjectiveNetIds", []],
 
     // Convoy execution state (LOGISTICS / ESCORT)
     ["activeConvoyNetIds", []],
