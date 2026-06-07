@@ -827,6 +827,21 @@ missionNamespace setVariable ["ARC_cacheContainerClassPool", [
 
 
 // ============================================================================
+// CASEVAC CASUALTY POOL
+// ============================================================================
+// BLUFOR casualty classes used to stand up a downed wounded unit at CASEVAC
+// incidents (QRF incidents carrying the "CASEVAC" lead tag). Classes are
+// validated with isClass at spawn time; fn_execInitActive falls back to proven
+// 3CB Takistani Army BLUFOR classes and finally vanilla "B_Soldier_F".
+missionNamespace setVariable ["ARC_casevacCasualtyClassPool", [
+    "UK3CB_TKA_B_AR",
+    "UK3CB_TKA_B_TL",
+    "UK3CB_TKA_B_OFF",
+    "B_Soldier_F"
+], true];
+
+
+// ============================================================================
 // CONVOY FEATURES (do not modify spawn logic here)
 // ============================================================================
 
