@@ -389,7 +389,12 @@ if (_hasIssued) exitWith
 
     private _whoDone = if (isNull _caller) then {"<unknown>"} else { name _caller };
     diag_log format ["[ARC][TOC][CLOSEOUT][BRANCH=STAGED_REUSED_ORDER] armed by=%1 result=%2 gid=%3 task=%4 orderId=%5 orderType=%6", _whoDone, _closeResult, _gid, _taskId, _reuseId, _reuseType];
-    ["OPS", format ["Closeout staged by %1: %2. Reusing ISSUED order %3 (%4) for %5 acceptance.", _whoDone, _closeResult, _reuseId, _reuseType, _gid], _posATL,
+
+    private _sposATL = ["activeIncidentPos", []] call ARC_fnc_stateGet;
+    if (!(_sposATL isEqualType []) || { (count _sposATL) < 2 }) then { _sposATL = [0,0,0]; };
+    _sposATL resize 3;
+
+    ["OPS", format ["Closeout staged by %1: %2. Reusing ISSUED order %3 (%4) for %5 acceptance.", _whoDone, _closeResult, _reuseId, _reuseType, _gid], _sposATL,
         [["event","CLOSEOUT_STAGED"],["path","STAGED_REUSED_ORDER"],["taskId",_taskId],["result",_closeResult],["orderType",_reuseType],["orderId",_reuseId],["targetGroup",_gid]]
     ] call ARC_fnc_intelLog;
 
