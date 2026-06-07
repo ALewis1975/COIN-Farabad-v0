@@ -417,9 +417,9 @@ private _leadS2Cnt = 0;
     if (_x isEqualType []) then
     {
         private _mm = if ((count _x) >= 12 && { (_x select 11) isEqualType [] }) then { _x select 11 } else { [] };
-        private _o = toUpper ([_mm, "origin", "FIELD"] call ARC_fnc_uiConsoleGetPair);
-        if (!(_o isEqualType "")) then { _o = "FIELD"; };
-        if (_o isEqualTo "S2") then { _leadS2Cnt = _leadS2Cnt + 1; } else { _leadFieldCnt = _leadFieldCnt + 1; };
+        private _oRaw = [_mm, "origin", "FIELD"] call ARC_fnc_uiConsoleGetPair;
+        private _o = if (_oRaw isEqualType "") then { toUpper _oRaw } else { "FIELD" };
+        if (_o isEqualTo "S2") then { _leadS2Cnt = _leadS2Cnt + 1 } else { _leadFieldCnt = _leadFieldCnt + 1 };
     };
 } forEach _leadPool;
 
