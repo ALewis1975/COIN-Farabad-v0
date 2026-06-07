@@ -2658,7 +2658,10 @@ for "_i" from 0 to (_rmCount - 1) do
 private _ok = true;
 private _kindNow = ["activeExecKind", ""] call ARC_fnc_stateGet;
 private _objKindNow = ["activeObjectiveKind", ""] call ARC_fnc_stateGet;
-if (_kindNow isEqualTo "INTERACT" && { !(_objKindNow isEqualTo "") }) then
+// INTERACT tasks spawn an interactable objective; CASEVAC QRF incidents spawn a
+// downed casualty under the ARRIVE_HOLD exec kind. Both must be rebuilt if their
+// objective object goes missing (restart cleanup, manual deletion, persistence edge cases).
+if ((_kindNow isEqualTo "INTERACT" || { _objKindNow isEqualTo "CASEVAC_CASUALTY" }) && { !(_objKindNow isEqualTo "") }) then
 {
     private _nid = ["activeObjectiveNetId", ""] call ARC_fnc_stateGet;
     if (!(_nid isEqualTo "")) then
