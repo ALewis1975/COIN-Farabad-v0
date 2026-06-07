@@ -166,7 +166,7 @@ if (_rebuild) then
             if (!(_purpose isEqualType "")) then { _purpose = ""; };
             _purpose = ([_purpose] call _trimFn);
 
-            private _label = format ["[%1] %2", _status, _otype];
+            private _label = format ["[%1] %2", _status, ([_otype] call ARC_fnc_intelOrderTypeLabel)];
             if (_purpose != "") then { _label = _label + format [" - %1", _purpose]; };
             // Append the target group name when it differs from the viewing player's group
             // so S3/TOC staff can see which unit the order is for.
@@ -527,7 +527,7 @@ else
                 if (!(_note isEqualType "")) then { _note = ""; };
                 _note = ([_note] call _trimFn);
 
-                _details = format ["<t size='1.2' font='PuristaMedium'>%1</t><br/>", _otype];
+                _details = format ["<t size='1.2' font='PuristaMedium'>%1</t><br/>", ([_otype] call ARC_fnc_intelOrderTypeLabel)];
                 _details = _details + format ["<t color='#A0A0A0'>Status:</t> %1<br/>", _status];
                 if (_orderTgtGrp != "") then { _details = _details + format ["<t color='#A0A0A0'>Tasked unit:</t> %1<br/>", _orderTgtGrp]; };
                 if (_purpose != "") then { _details = _details + format ["<t color='#A0A0A0'>Purpose:</t> %1<br/>", _purpose]; };

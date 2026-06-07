@@ -252,7 +252,7 @@ else
                     if (_stU isEqualTo "ACCEPTED") then { _stColor = "#9FE870"; };
                     if (_stU isEqualTo "COMPLETED") then { _stColor = "#AAAAAA"; };
                     if (_stU isEqualTo "FAILED") then { _stColor = "#FF7A7A"; };
-                    _ordLine = format ["%1 (<t color='%2'>%3</t>)", _ot, _stColor, _stU];
+                    _ordLine = format ["%1 (<t color='%2'>%3</t>)", ([_ot] call ARC_fnc_intelOrderTypeLabel), _stColor, _stU];
                 };
             };
         };
@@ -430,7 +430,7 @@ if (!isNull _ctrlDetailsGrp && { !isNull _ctrlDetails }) then
         if (_stO isEqualTo "ACCEPTED")  then { _stColor = "#9FE870"; };
         if (_stO isEqualTo "COMPLETED") then { _stColor = "#AAAAAA"; };
         if (_stO isEqualTo "FAILED")    then { _stColor = "#FF7A7A"; };
-        _grpOrderLines pushBack format ["<t size='0.85' color='#BDBDBD'>%1:</t> <t size='0.85'>%2</t> <t size='0.85' color='%3'>(%4)</t>", _tgO, _tyO, _stColor, _stO];
+        _grpOrderLines pushBack format ["<t size='0.85' color='#BDBDBD'>%1:</t> <t size='0.85'>%2</t> <t size='0.85' color='%3'>(%4)</t>", _tgO, ([_tyO] call ARC_fnc_intelOrderTypeLabel), _stColor, _stO];
         if ((count _grpOrderLines) >= 8) exitWith {};
     } forEach _ordersR;
     private _ordersSection = if ((count _grpOrderLines) > 0) then

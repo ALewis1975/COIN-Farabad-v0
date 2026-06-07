@@ -518,6 +518,7 @@ class CfgFunctions
             class intelResolveRtbDestination {};
 
             class intelOrderIssue {};
+            class intelOrderTypeLabel {};
             class intelOrderAccept {};
             class intelOrderBroadcast {};
             class intelOrderTick {};
