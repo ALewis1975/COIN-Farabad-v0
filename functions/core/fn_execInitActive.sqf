@@ -246,10 +246,12 @@ if (_p isEqualTo []) then { _p = +_center; _p resize 3; };
                 _obj setCombatMode "BLUE";
                 _obj setUnitPos "DOWN";
                 // Wounded state: vanilla unconscious; ACE medical (when present) reads the
-                // unit as a casualty to treat/drag. Apply damage before any damage lock.
+                // unit as a casualty to treat/drag.
                 _obj setDamage 0.65;
                 _obj setUnconscious true;
-                // Keep the casualty safe until players are on-site (prevents random pre-arrival death).
+                // Stay damageable so players (and ACE medical, when present) can treat/heal
+                // the casualty. _failOnKilled is false here, so a casualty death does not
+                // auto-fail the incident — TOC controls closure.
                 _obj allowDamage (!_failOnKilled);
             }
             else
