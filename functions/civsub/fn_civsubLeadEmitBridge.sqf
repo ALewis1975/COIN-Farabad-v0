@@ -101,8 +101,8 @@ private _pos = [];
 private _seedPos = _seed getOrDefault ["home_pos", []];
 if (_seedPos isEqualType [] && { (count _seedPos) >= 2 }) then
 {
-    _pos = +_seedPos;
-    _pos resize 3;
+    private _sz = if ((count _seedPos) >= 3 && { (_seedPos select 2) isEqualType 0 }) then { _seedPos select 2 } else { 0 };
+    _pos = [_seedPos select 0, _seedPos select 1, _sz];
 };
 
 if (_pos isEqualTo []) then
@@ -111,8 +111,18 @@ if (_pos isEqualTo []) then
     if !(_cent isEqualType []) then { _cent = _bundle getOrDefault ["centroid", []]; };
     if (_cent isEqualType [] && { (count _cent) >= 2 }) then
     {
-        _pos = +_cent;
-        _pos resize 3;
+        private _cz = if ((count _cent) >= 3 && { (_cent select 2) isEqualType 0 }) then { _cent select 2 } else { 0 };
+        _pos = [_cent select 0, _cent select 1, _cz];
+    };
+};
+
+if (_pos isEqualTo []) then
+{
+    private _bundlePos = _bundle getOrDefault ["pos", []];
+    if (_bundlePos isEqualType [] && { (count _bundlePos) >= 2 }) then
+    {
+        private _bz = if ((count _bundlePos) >= 3 && { (_bundlePos select 2) isEqualType 0 }) then { _bundlePos select 2 } else { 0 };
+        _pos = [_bundlePos select 0, _bundlePos select 1, _bz];
     };
 };
 

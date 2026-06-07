@@ -36,6 +36,10 @@ private _seq = ["casreq_v1_seq", 0] call ARC_fnc_stateGet;
 if (!(_seq isEqualType 0) || { _seq < 0 }) then { _seq = 0; };
 ["casreq_v1_seq", _seq] call ARC_fnc_stateSet;
 
+private _attackVehVars = missionNamespace getVariable ["casreq_v1_airbase_attack_vehvars", ["plane4", "plane5"]];
+if (!(_attackVehVars isEqualType [])) then { _attackVehVars = ["plane4", "plane5"]; };
+missionNamespace setVariable ["casreq_v1_airbase_attack_vehvars", _attackVehVars, true];
+
 missionNamespace setVariable ["ARC_pub_casreqBundle", [
     ["meta", [["rev", 0], ["updatedAt", -1], ["actor", "SERVER_INIT"]]],
     ["payload", [["casreq_id", ""], ["casreq_snapshot", []]]]

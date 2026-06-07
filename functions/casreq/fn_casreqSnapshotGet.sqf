@@ -28,6 +28,7 @@ private _requiredKeys = [
     "incident_id",
     "nine_line",
     "remarks",
+    "airbase_availability",
     "result",
     "closed_at"
 ];
@@ -41,6 +42,7 @@ private _requiredKeys = [
             case "messages": { [] };
             case "area": { [["target_pos", [0,0,0]], ["target_marker", ""]] };
             case "nine_line": { [] };
+            case "airbase_availability": { [] };
             case "closed_at": { -1 };
             case "created_at": { serverTime };
             case "updated_at": { serverTime };

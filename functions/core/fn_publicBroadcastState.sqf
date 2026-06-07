@@ -523,6 +523,10 @@ private _casreqSnapshot = [];
 } forEach _casreqPayload;
 if !(_casreqSnapshot isEqualType []) then { _casreqSnapshot = []; };
 
+private _casreqAirbaseAvailability = [];
+if (!isNil "ARC_fnc_casreqAirbaseAvailability") then { _casreqAirbaseAvailability = [] call ARC_fnc_casreqAirbaseAvailability; };
+if (!(_casreqAirbaseAvailability isEqualType [])) then { _casreqAirbaseAvailability = []; };
+
 private _casreqPub = [
     ["schemaVersion", missionNamespace getVariable ["casreq_v1_schemaVersion", 1]],
     ["rev", missionNamespace getVariable ["ARC_casreq_rev", 0]],
@@ -530,6 +534,7 @@ private _casreqPub = [
     ["actor", "PUBLIC_BROADCAST"],
     ["casreq_id", _casreqId],
     ["casreq_snapshot", _casreqSnapshot],
+    ["airbase_availability", _casreqAirbaseAvailability],
     ["bundleMeta", _casreqMeta]
 ];
 
@@ -1010,6 +1015,12 @@ private _supplyPub = [];
 if (!isNil "ARC_fnc_supplyBuildPublicSnapshot") then { _supplyPub = [] call ARC_fnc_supplyBuildPublicSnapshot; };
 if (!(_supplyPub isEqualType [])) then { _supplyPub = []; };
 
+private _baseServicesPub = [];
+if (!isNil "ARC_fnc_baseServicesSnapshot") then { _baseServicesPub = [] call ARC_fnc_baseServicesSnapshot; };
+if (!(_baseServicesPub isEqualType [])) then { _baseServicesPub = []; };
+["baseServices_v1_snapshot", _baseServicesPub] call ARC_fnc_stateSet;
+missionNamespace setVariable ["ARC_pub_baseServices", _baseServicesPub, true];
+
 private _pub = [
     ["insurgentPressure", _p],
     ["corruption", _c],
@@ -1031,6 +1042,7 @@ private _pub = [
     ["casreq", _casreqPub],
     ["airbase", _airbasePub],
     ["supply", _supplyPub],
+    ["baseServices", _baseServicesPub],
     ["threat", _threatPub],
     ["threatEconomy", _threatEconomyPub],
     ["threatVirtualPool", _threatVirtualPoolPub]

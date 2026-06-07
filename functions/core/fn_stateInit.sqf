@@ -341,6 +341,12 @@
     ["companyVirtualOpsLastTickAt", -1],
     ["companyVirtualOpsLastRollupAt", -1],
 
+    // Base services v1 (MAYOR/S1/S4/MED as campaign actors)
+    ["baseServices_v1_enabled", true],
+    ["baseServices_v1_version", 1],
+    ["baseServices_v1_services", []],
+    ["baseServices_v1_snapshot", []],
+
     // AIRBASE v1 persistence (server authoritative queue/records/control + audit trail)
     ["airbase_v1_version", 1],
     ["airbase_v1_records", []],

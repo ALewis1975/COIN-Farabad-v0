@@ -44,6 +44,19 @@ if (_hasActive && { _accepted isEqualType true && { _accepted } }) then
     _scale = _scale * _m;
 };
 
+private _pairGet = {
+    params ["_pairs", "_key", "_def"];
+    private _out = _def;
+    { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _out = _x select 1; }; } forEach _pairs;
+    _out
+};
+private _baseServices = if (!isNil "ARC_fnc_baseServicesSnapshot") then { [] call ARC_fnc_baseServicesSnapshot } else { ["baseServices_v1_snapshot", []] call ARC_fnc_stateGet };
+if (!(_baseServices isEqualType [])) then { _baseServices = []; };
+private _serviceDrainMult = [_baseServices, "sustainmentDrainMult", 1] call _pairGet;
+if (!(_serviceDrainMult isEqualType 0)) then { _serviceDrainMult = 1; };
+_serviceDrainMult = (_serviceDrainMult max 1) min 1.75;
+_scale = _scale * _serviceDrainMult;
+
 private _rFuel = missionNamespace getVariable ["ARC_sustainFuelPerHour", 0.07];
 private _rAmmo = missionNamespace getVariable ["ARC_sustainAmmoPerHour", 0.05];
 private _rMed = missionNamespace getVariable ["ARC_sustainMedPerHour", 0.04];
@@ -69,5 +82,5 @@ _med = (_med - _dMed) max 0;
 
 private _after = [] call ARC_fnc_supplyGetStockSnapshot;
 ["supply_v1_stock", _after] call ARC_fnc_stateSet;
-["SUPPLY_AMBIENT_DRAIN", [["FUEL", -_dFuel], ["AMMO", -_dAmmo], ["MED", -_dMed]], _before, _after, "SERVER", ["activeTaskId", ""] call ARC_fnc_stateGet, [["dt", _dt], ["scale", _scale]]] call ARC_fnc_supplyLedgerAppend;
+["SUPPLY_AMBIENT_DRAIN", [["FUEL", -_dFuel], ["AMMO", -_dAmmo], ["MED", -_dMed]], _before, _after, "SERVER", ["activeTaskId", ""] call ARC_fnc_stateGet, [["dt", _dt], ["scale", _scale], ["baseServices", _baseServices]]] call ARC_fnc_supplyLedgerAppend;
 true

@@ -72,6 +72,8 @@ class CfgFunctions
             class rolesCanRecruitAI {};
             class rpcValidateSender {};
             class airbaseTowerAuthorize {};
+            class baseServicesInit {};
+            class baseServicesSnapshot {};
 
             // Deferred cleanup (despawn when players leave area)
             class cleanupRegister {};
@@ -320,6 +322,7 @@ class CfgFunctions
             class casreqClose {};
             class casreqClientSubmit {};
             class casreqJtacPrefill {};
+            class casreqAirbaseAvailability {};
         };
 
         class Dossier

@@ -206,6 +206,11 @@ if (_rerollEnv) then
 ["supply_v1_debug_last_event", []] call ARC_fnc_stateSet;
 ["supply_v1_last_readiness", []] call ARC_fnc_stateSet;
 ["supply_v1_last_mett_tc", []] call ARC_fnc_stateSet;
+["baseServices_v1_enabled", true] call ARC_fnc_stateSet;
+["baseServices_v1_version", 1] call ARC_fnc_stateSet;
+["baseServices_v1_services", []] call ARC_fnc_stateSet;
+["baseServices_v1_snapshot", []] call ARC_fnc_stateSet;
+missionNamespace setVariable ["ARC_pub_baseServices", [], true];
 
 ["activeTaskId", ""] call ARC_fnc_stateSet;
 ["activeIncidentType", ""] call ARC_fnc_stateSet;
