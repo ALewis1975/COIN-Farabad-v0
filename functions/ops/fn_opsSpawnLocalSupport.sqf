@@ -1,10 +1,11 @@
 /*
     ARC_fnc_opsSpawnLocalSupport
 
-    Server: Spawn host-nation / local friendly forces already on scene at an objective.
+    Server: Spawn host-nation / local friendly forces and civilian scene actors at an objective.
 
     Intended for tasks involving civilian infrastructure controlled by friendly/local forces.
-    Spawns a small garrison element (in nearby buildings) and a small patrol element.
+    Spawns a small garrison element (in nearby buildings), a small patrol element, and
+    task-relevant CIVSUB civilians for civil distribution and checkpoint access-control scenes.
 
     Params:
         0: STRING - taskId
@@ -66,15 +67,19 @@ _eligible = _eligible apply { toUpper _x };
 // TNP partnered-ops leads (Lane C / C3) are tagged TNP_PARTNERED and carried onto the active
 // incident as activeLeadTag. Such incidents must always stand up a host-nation partnered
 // element (police/army garrison + patrol) regardless of the incident type, so the PATROL
-// variant gets a partnered presence too — not just the already-eligible CHECKPOINT variant.
+// variant gets a partnered presence too, not just the already-eligible CHECKPOINT variant.
 private _activeLeadTag = ["activeLeadTag", ""] call ARC_fnc_stateGet;
 if (!(_activeLeadTag isEqualType "")) then { _activeLeadTag = ""; };
 private _isTnpPartnered = (toUpper _activeLeadTag) isEqualTo "TNP_PARTNERED";
 if !((_type in _eligible) || { _type isEqualTo "IED" } || _isTnpPartnered) exitWith {[]};
 
-// Keep the Airbase/JBF clean by default.
+// Keep the Airbase/JBF clean by default, but allow explicit civic checkpoint scenes.
 private _zone = [_pos] call ARC_fnc_worldGetZoneForPos;
-if ((toUpper _zone) isEqualTo "AIRBASE") exitWith {[]};
+private _zoneU = toUpper _zone;
+private _airbaseAllowTypes = missionNamespace getVariable ["ARC_localSupportAirbaseAllowTypes", ["CHECKPOINT"]];
+if (!(_airbaseAllowTypes isEqualType [])) then { _airbaseAllowTypes = ["CHECKPOINT"]; };
+_airbaseAllowTypes = _airbaseAllowTypes apply { toUpper _x };
+if (_zoneU isEqualTo "AIRBASE" && { !(_type in _airbaseAllowTypes) }) exitWith {[]};
 
 private _excludeMarkers = missionNamespace getVariable ["ARC_localSupportExcludeMarkers", ["mkr_airbaseCenter","ARC_m_base_toc","ARC_convoy_start"]];
 if (!(_excludeMarkers isEqualType [])) then { _excludeMarkers = ["mkr_airbaseCenter","ARC_m_base_toc","ARC_convoy_start"]; };
@@ -143,6 +148,157 @@ private _presenceR = missionNamespace getVariable [format ["ARC_localSupportRadi
 if (!(_presenceR isEqualType 0)) then { _presenceR = (_radius max 80) min 250; };
 _presenceR = (_presenceR max 50) min 500;
 
+private _out = [];
+
+// -----------------------------------------------------------------------------
+// Task-scene civilians
+// -----------------------------------------------------------------------------
+private _sceneCivsEnabled = missionNamespace getVariable ["ARC_localSupportSceneCivsEnabled", true];
+if (!(_sceneCivsEnabled isEqualType true) && !(_sceneCivsEnabled isEqualType false)) then { _sceneCivsEnabled = true; };
+
+private _sceneCivTypes = missionNamespace getVariable ["ARC_localSupportSceneCivTypes", ["CIVIL","CHECKPOINT"]];
+if (!(_sceneCivTypes isEqualType [])) then { _sceneCivTypes = ["CIVIL","CHECKPOINT"]; };
+_sceneCivTypes = _sceneCivTypes apply { toUpper _x };
+
+if (_sceneCivsEnabled && { _type in _sceneCivTypes }) then
+{
+    private _sceneCivN = missionNamespace getVariable [format ["ARC_localSupportSceneCivCount_%1", _type], -1];
+    if (!(_sceneCivN isEqualType 0) || { _sceneCivN < 0 }) then
+    {
+        _sceneCivN = switch (_type) do
+        {
+            case "CHECKPOINT": { 6 };
+            case "CIVIL":      { 8 };
+            default             { 0 };
+        };
+    };
+    _sceneCivN = (_sceneCivN max 0) min 24;
+
+    private _sceneR = missionNamespace getVariable ["ARC_localSupportSceneCivRadiusM", (_presenceR min 90)];
+    if (!(_sceneR isEqualType 0)) then { _sceneR = (_presenceR min 90); };
+    _sceneR = (_sceneR max 20) min 180;
+
+    private _existingScene = allUnits select {
+        alive _x
+        && { !isPlayer _x }
+        && { side _x isEqualTo civilian }
+        && { (_x getVariable ["ARC_isLocalSupportSceneCiv", false]) }
+        && { (_x distance2D _pos) <= _presenceR }
+    };
+
+    if ((count _existingScene) >= ((_sceneCivN min 2) max 1)) then
+    {
+        {
+            _x setVariable ["ARC_localSupportTaskId", _taskId, true];
+            _out pushBackUnique (netId _x);
+        } forEach _existingScene;
+        _sceneCivN = 0;
+    };
+
+    if (_sceneCivN > 0) then
+    {
+        private _civPoolDefault = missionNamespace getVariable ["civsub_v1_civ_classPool", ["C_man_1"]];
+        if (!(_civPoolDefault isEqualType [])) then { _civPoolDefault = ["C_man_1"]; };
+
+        private _civClasses = missionNamespace getVariable ["ARC_localSupportSceneCivClassPool", _civPoolDefault];
+        if (!(_civClasses isEqualType [])) then { _civClasses = _civPoolDefault; };
+        _civClasses = _civClasses select {
+            isClass (configFile >> "CfgVehicles" >> _x)
+            && { (getNumber (configFile >> "CfgVehicles" >> _x >> "side")) isEqualTo 3 }
+            && { _x isKindOf "Man" }
+        };
+        if ((count _civClasses) isEqualTo 0) then
+        {
+            _civClasses = ["C_man_1"] select { isClass (configFile >> "CfgVehicles" >> _x) };
+        };
+
+        if ((count _civClasses) > 0) then
+        {
+            private _grpC = createGroup [civilian, true];
+            _grpC setVariable ["ARC_isLocalSupportSceneCivGroup", true, true];
+            _grpC setVariable ["ARC_localSupportTaskId", _taskId, true];
+            _grpC setVariable ["ARC_localSupportType", _type, true];
+            _grpC setBehaviour "SAFE";
+            _grpC setCombatMode "BLUE";
+            _grpC allowFleeing 0.15;
+            _grpC setGroupIdGlobal [format ["LS CIV %1", _type]];
+
+            for "_i" from 1 to _sceneCivN do
+            {
+                private _spawnP = _pos getPos [8 + random (_sceneR max 12), random 360];
+                _spawnP resize 3;
+                if (surfaceIsWater _spawnP) then
+                {
+                    _spawnP = _pos getPos [5 + random 25, random 360];
+                    _spawnP resize 3;
+                };
+
+                private _clsC = selectRandom _civClasses;
+                private _uC = _grpC createUnit [_clsC, _spawnP, [], 0, "NONE"];
+                if (isNull _uC) then { continue; };
+                _uC setPosATL _spawnP;
+
+                _uC setVariable ["ARC_isLocalSupportSceneCiv", true, true];
+                _uC setVariable ["ARC_isLocalSupport", true, true];
+                _uC setVariable ["ARC_localSupportTaskId", _taskId, true];
+                _uC setVariable ["ARC_localSupportMarker", _marker, true];
+                _uC setVariable ["ARC_localSupportType", _type, true];
+                _uC setVariable ["ARC_localSupportSceneType", _type, true];
+                _uC setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];
+                _uC setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hg, true];
+
+                if (_type isEqualTo "CIVIL") then
+                {
+                    _uC setVariable ["civsub_need_satiation", 10 + floor (random 31), true];
+                    _uC setVariable ["civsub_need_hydration", 10 + floor (random 31), true];
+                    _uC setVariable ["ARC_civilDistributionSubject", true, true];
+                };
+
+                if (_type isEqualTo "CHECKPOINT") then
+                {
+                    _uC setVariable ["ARC_checkpointCivilAccessSubject", true, true];
+                    _uC setVariable ["civsub_need_satiation", 35 + floor (random 31), true];
+                    _uC setVariable ["civsub_need_hydration", 35 + floor (random 31), true];
+                };
+
+                if (_persistInAO) then
+                {
+                    _uC setVariable ["ARC_persistInAO", true, true];
+                };
+
+                if (_dynSim) then
+                {
+                    _uC enableDynamicSimulation true;
+                };
+
+                _uC setBehaviour "SAFE";
+                _uC setCombatMode "BLUE";
+                _uC setUnitPos "UP";
+                doStop _uC;
+
+                if (!isNil "ARC_fnc_civsubCivConnect") then
+                {
+                    [_uC, "", format ["LOCAL_SUPPORT_%1", _type]] call ARC_fnc_civsubCivConnect;
+                };
+
+                if (!isNil "ARC_fnc_civsubCivAddContactActions") then
+                {
+                    [_uC] remoteExecCall ["ARC_fnc_civsubCivAddContactActions", 0, _uC];
+                };
+
+                _out pushBackUnique (netId _uC);
+            };
+
+            if ((count units _grpC) isEqualTo 0) then { deleteGroup _grpC; };
+
+            if ((count _out) > 0) then
+            {
+                ["OPS", format ["Local support scene spawned %1 civilian(s) for %2 task at %3.", count _out, _type, mapGridPosition _pos], _pos, [["taskId", _taskId], ["event", "LOCAL_SUPPORT_SCENE_CIVS_SPAWNED"], ["type", _type]]] call ARC_fnc_intelLog;
+            };
+        };
+    };
+};
+
 // Reuse existing local-support units near this AO (prevents stacking if tasks repeat at same site)
 private _reuseExisting = missionNamespace getVariable ["ARC_localSupportReuseExisting", true];
 if (!(_reuseExisting isEqualType true) && !(_reuseExisting isEqualType false)) then { _reuseExisting = true; };
@@ -153,6 +309,7 @@ if (_reuseExisting) then
         alive _x
         && { !isPlayer _x }
         && { (_x getVariable ["ARC_isLocalSupport", false]) }
+        && { !(_x getVariable ["ARC_isLocalSupportSceneCiv", false]) }
         && { (_x distance2D _pos) <= _presenceR }
     };
 
@@ -170,7 +327,7 @@ if (_reuseExisting) then
             ["cleanupQueue", _q] call ARC_fnc_stateSet;
         };
 
-        _nids
+        _out + _nids
     };
 };
 
@@ -299,8 +456,6 @@ _garrisonR = (_garrisonR max 40) min 260;
 private _patrolR = missionNamespace getVariable ["ARC_localSupportPatrolRadiusM", (_presenceR min 160)];
 if (!(_patrolR isEqualType 0)) then { _patrolR = (_presenceR min 160); };
 _patrolR = (_patrolR max 50) min 450;
-
-private _out = [];
 
 // Helper: pick a class
 private _fn_pickClass = {
