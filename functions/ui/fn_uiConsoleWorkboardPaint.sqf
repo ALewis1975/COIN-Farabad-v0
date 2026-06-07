@@ -215,18 +215,27 @@ switch (_kind) do
             private _grid = if (_pos isEqualType [] && { (count _pos) >= 2 }) then { mapGridPosition _pos } else { "UNKNOWN" };
 
             _txt = _txt + format [
-                "<t size='1.05' font='PuristaMedium'>%1</t><br/><t size='0.9' color='#DDDDDD'>Lead Type: %2 | Grid: %3</t><br/><br/>",
-                _lname, _ltype, _grid
+                "<t size='1.05' font='PuristaMedium'>%1</t><br/><t size='0.9' color='#DDDDDD'>Lead Type: %2 | Grid: %3 | ID: %4</t><br/><br/>",
+                _lname, _ltype, _grid, _lid
             ];
 
             private _age = if (_createdAt isEqualType 0) then { round (serverTime - _createdAt) } else { -1 };
             private _ageTxt = if (_age < 0) then {"(unknown)"} else { format ["%1s", _age] };
 
+            private _ttlMin = -1;
+            if (_expiresAt isEqualType 0 && { _expiresAt > 0 }) then { _ttlMin = floor ((_expiresAt - serverTime) / 60); };
+            private _expiryTxt = if (_ttlMin < 0) then { "(no expiry)" } else { format ["%1m", _ttlMin max 0] };
+
+            private _srcTxt = if (_sourceTaskId isEqualType "" && { _sourceTaskId != "" }) then {
+                format ["Task %1 (%2)", _sourceTaskId, _sourceIncidentType]
+            } else { "(none)" };
+
             _txt = _txt + format [
-                "<t size='0.95'>Details</t><br/>- Strength: %1<br/>- Age: %2<br/>- Tag: %3<br/>- Thread: %4<br/><br/>",
-                _strength, _ageTxt,
+                "<t size='0.95'>Details</t><br/>- Strength: %1<br/>- Age: %2<br/>- Expiry: %3<br/>- Tag: %4<br/>- Thread: %5<br/>- Source: %6<br/><br/>",
+                _strength, _ageTxt, _expiryTxt,
                 if (_tag isEqualType "" && { _tag != "" }) then {_tag} else {"(none)"},
-                if (_threadId isEqualType "" && { _threadId != "" }) then {_threadId} else {"(none)"}
+                if (_threadId isEqualType "" && { _threadId != "" }) then {_threadId} else {"(none)"},
+                _srcTxt
             ];
 
             _txt = _txt + "<t size='0.9' color='#DDDDDD'>Leads feed TOC tasking. S2 creates leads; TOC converts them into orders/incidents.</t>";
