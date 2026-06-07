@@ -42,7 +42,7 @@ This document locks **Design Decision 6 from Mission Design Guide §16**:
 
 The approved launcher preset is located at:
 ```
-docs/projectFiles/Ambient_Dev_Mods_2026-04-01.html
+data/docs/Ambient_Dev_Mods_2026-01-01.html
 ```
 Import by dragging the file onto the Arma 3 Launcher window, or via MODS → PRESET → IMPORT.
 
