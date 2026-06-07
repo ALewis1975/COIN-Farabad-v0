@@ -135,10 +135,10 @@ class ARC_SitrepDialog
         class BG: RscText
         {
             idc = 77390;
-            x = 0.18;
-            y = 0.04;
-            w = 0.64;
-            h = 0.91;
+            x = 0.13;
+            y = 0.02;
+            w = 0.74;
+            h = 0.95;
             colorBackground[] = {0,0,0,0.80};
         };
 
@@ -146,10 +146,10 @@ class ARC_SitrepDialog
         {
             idc = 77391;
             text = "SITREP";
-            x = 0.18;
-            y = 0.04;
-            w = 0.64;
-            h = 0.04;
+            x = 0.13;
+            y = 0.02;
+            w = 0.74;
+            h = 0.035;
             colorBackground[] = {0.05,0.05,0.05,0.92};
         };
     };
@@ -159,153 +159,153 @@ class ARC_SitrepDialog
         class Header: RscStructuredText
         {
             idc = 77392;
-            x = 0.19;
-            y = 0.085;
-            w = 0.62;
-            h = 0.11;
+            x = 0.14;
+            y = 0.060;
+            w = 0.72;
+            h = 0.085;
         };
 
         class LabelSummary: RscText
         {
             idc = 77301;
             text = "Summary (one line):";
-            x = 0.19;
-            y = 0.205;
-            w = 0.25;
-            h = 0.03;
+            x = 0.14;
+            y = 0.150;
+            w = 0.30;
+            h = 0.028;
         };
         class EditSummary: RscEdit
         {
             idc = 77310;
-            x = 0.19;
-            y = 0.230;
-            w = 0.62;
-            h = 0.04;
+            x = 0.14;
+            y = 0.180;
+            w = 0.72;
+            h = 0.038;
         };
 
         class LabelEnemy: RscText
         {
             idc = 77302;
             text = "Enemy Situation:";
-            x = 0.19;
-            y = 0.270;
-            w = 0.25;
-            h = 0.03;
+            x = 0.14;
+            y = 0.222;
+            w = 0.30;
+            h = 0.028;
         };
         class EditEnemy: RscEdit
         {
             idc = 77311;
-            x = 0.19;
-            y = 0.295;
-            w = 0.62;
-            h = 0.04;
+            x = 0.14;
+            y = 0.252;
+            w = 0.72;
+            h = 0.038;
         };
 
         class LabelFriendly: RscText
         {
             idc = 77303;
             text = "Friendly Forces / Actions:";
-            x = 0.19;
-            y = 0.335;
-            w = 0.25;
-            h = 0.03;
+            x = 0.14;
+            y = 0.294;
+            w = 0.30;
+            h = 0.028;
         };
         class EditFriendly: RscEdit
         {
             idc = 77312;
-            x = 0.19;
-            y = 0.360;
-            w = 0.62;
-            h = 0.04;
+            x = 0.14;
+            y = 0.324;
+            w = 0.72;
+            h = 0.038;
         };
 
         class LabelTask: RscText
         {
             idc = 77304;
             text = "Task Status:";
-            x = 0.19;
-            y = 0.400;
-            w = 0.25;
-            h = 0.03;
+            x = 0.14;
+            y = 0.366;
+            w = 0.30;
+            h = 0.028;
         };
         class EditTask: RscEdit
         {
             idc = 77313;
-            x = 0.19;
-            y = 0.425;
-            w = 0.62;
-            h = 0.04;
+            x = 0.14;
+            y = 0.396;
+            w = 0.72;
+            h = 0.038;
         };
 
         class LabelACE: RscText
         {
             idc = 77305;
             text = "ACE Status (Ammo / Casualties / Equipment):";
-            x = 0.19;
-            y = 0.465;
-            w = 0.45;
-            h = 0.03;
+            x = 0.14;
+            y = 0.438;
+            w = 0.72;
+            h = 0.028;
         };
         class ComboAmmo: RscCombo
         {
             idc = 77321;
-            x = 0.19;
-            y = 0.490;
-            w = 0.20;
-            h = 0.04;
+            x = 0.14;
+            y = 0.468;
+            w = 0.22;
+            h = 0.038;
         };
         class ComboCasualties: RscCombo
         {
             idc = 77322;
-            x = 0.40;
-            y = 0.645;
-            w = 0.20;
-            h = 0.04;
+            x = 0.39;
+            y = 0.468;
+            w = 0.22;
+            h = 0.038;
         };
         class ComboEquipment: RscCombo
         {
             idc = 77323;
-            x = 0.61;
-            y = 0.645;
-            w = 0.20;
-            h = 0.04;
+            x = 0.64;
+            y = 0.468;
+            w = 0.22;
+            h = 0.038;
         };
 
         class LabelRequests: RscText
         {
             idc = 77306;
             text = "Requests:";
-            x = 0.19;
-            y = 0.535;
-            w = 0.25;
-            h = 0.03;
+            x = 0.14;
+            y = 0.512;
+            w = 0.30;
+            h = 0.028;
         };
         class EditRequests: RscEdit
         {
             idc = 77314;
-            x = 0.19;
-            y = 0.560;
-            w = 0.62;
-            h = 0.04;
+            x = 0.14;
+            y = 0.542;
+            w = 0.72;
+            h = 0.038;
         };
 
         class LabelNotes: RscText
         {
             idc = 77307;
             text = "Notes (optional):";
-            x = 0.19;
-            y = 0.605;
-            w = 0.25;
-            h = 0.03;
+            x = 0.14;
+            y = 0.584;
+            w = 0.30;
+            h = 0.028;
         };
         class EditNotes: RscEdit
         {
             idc = 77315;
             style = 16; // ST_MULTI
-            x = 0.19;
-            y = 0.630;
-            w = 0.62;
-            h = 0.05;
+            x = 0.14;
+            y = 0.614;
+            w = 0.72;
+            h = 0.050;
         };
 
 
@@ -314,63 +314,63 @@ class ARC_SitrepDialog
         {
             idc = 77330;
             text = "Supply Annex: Ammo expended (SA / Grenades / Smoke)";
-            x = 0.19;
-            y = 0.685;
-            w = 0.62;
-            h = 0.025;
+            x = 0.14;
+            y = 0.670;
+            w = 0.72;
+            h = 0.026;
         };
         class ComboSupplySmallArms: RscCombo
         {
             idc = 77331;
-            x = 0.19;
-            y = 0.710;
-            w = 0.20;
-            h = 0.035;
+            x = 0.14;
+            y = 0.698;
+            w = 0.22;
+            h = 0.036;
         };
         class ComboSupplyGrenades: RscCombo
         {
             idc = 77332;
-            x = 0.40;
-            y = 0.710;
-            w = 0.20;
-            h = 0.035;
+            x = 0.39;
+            y = 0.698;
+            w = 0.22;
+            h = 0.036;
         };
         class ComboSupplySmoke: RscCombo
         {
             idc = 77333;
-            x = 0.61;
-            y = 0.710;
-            w = 0.20;
-            h = 0.035;
+            x = 0.64;
+            y = 0.698;
+            w = 0.22;
+            h = 0.036;
         };
         class LabelSupply2: RscText
         {
             idc = 77341;
             text = "Medical used / CASEVAC / Refit / Resupply";
-            x = 0.19;
-            y = 0.750;
-            w = 0.62;
-            h = 0.025;
+            x = 0.14;
+            y = 0.738;
+            w = 0.72;
+            h = 0.026;
         };
-        class ComboMedicalUsed: RscCombo { idc = 77334; x = 0.19; y = 0.775; w = 0.15; h = 0.035; };
-        class ComboCasevac: RscCombo { idc = 77343; x = 0.35; y = 0.775; w = 0.15; h = 0.035; };
-        class ComboRefit: RscCombo { idc = 77344; x = 0.51; y = 0.775; w = 0.14; h = 0.035; };
-        class ComboResupply: RscCombo { idc = 77345; x = 0.66; y = 0.775; w = 0.15; h = 0.035; };
-        class EditEquipLost: RscEdit { idc = 77335; x = 0.19; y = 0.815; w = 0.19; h = 0.035; };
-        class EditEquipDamaged: RscEdit { idc = 77336; x = 0.39; y = 0.815; w = 0.20; h = 0.035; };
-        class EditVehicleDamage: RscEdit { idc = 77337; x = 0.60; y = 0.815; w = 0.21; h = 0.035; };
-        class EditKia: RscEdit { idc = 77338; text = "0"; x = 0.19; y = 0.855; w = 0.08; h = 0.035; };
-        class EditWia: RscEdit { idc = 77339; text = "0"; x = 0.28; y = 0.855; w = 0.08; h = 0.035; };
-        class EditLimitations: RscEdit { idc = 77340; x = 0.37; y = 0.855; w = 0.44; h = 0.035; };
+        class ComboMedicalUsed: RscCombo { idc = 77334; x = 0.14; y = 0.766; w = 0.16; h = 0.036; };
+        class ComboCasevac: RscCombo { idc = 77343; x = 0.32; y = 0.766; w = 0.16; h = 0.036; };
+        class ComboRefit: RscCombo { idc = 77344; x = 0.50; y = 0.766; w = 0.16; h = 0.036; };
+        class ComboResupply: RscCombo { idc = 77345; x = 0.68; y = 0.766; w = 0.18; h = 0.036; };
+        class EditEquipLost: RscEdit { idc = 77335; x = 0.14; y = 0.806; w = 0.22; h = 0.036; };
+        class EditEquipDamaged: RscEdit { idc = 77336; x = 0.39; y = 0.806; w = 0.22; h = 0.036; };
+        class EditVehicleDamage: RscEdit { idc = 77337; x = 0.64; y = 0.806; w = 0.22; h = 0.036; };
+        class EditKia: RscEdit { idc = 77338; text = "0"; x = 0.14; y = 0.846; w = 0.09; h = 0.036; };
+        class EditWia: RscEdit { idc = 77339; text = "0"; x = 0.24; y = 0.846; w = 0.09; h = 0.036; };
+        class EditLimitations: RscEdit { idc = 77340; x = 0.34; y = 0.846; w = 0.52; h = 0.036; };
 
         class BtnSubmit: RscButton
         {
             idc = 77360;
             text = "Submit";
-            x = 0.19;
+            x = 0.14;
             y = 0.900;
             w = 0.30;
-            h = 0.04;
+            h = 0.040;
             action = "[] call ARC_fnc_uiSitrepDialogSubmit;";
         };
 
@@ -378,10 +378,10 @@ class ARC_SitrepDialog
         {
             idc = 77361;
             text = "Cancel";
-            x = 0.51;
-            y = 0.885;
+            x = 0.56;
+            y = 0.900;
             w = 0.30;
-            h = 0.04;
+            h = 0.040;
             action = "[] call ARC_fnc_uiSitrepDialogCancel;";
         };
     };
