@@ -298,6 +298,13 @@ missionNamespace setVariable ["ARC_convoyDisablePassengerFSM", true];
 missionNamespace setVariable ["ARC_convoyGunnerSectorScanEnabled", true];
 missionNamespace setVariable ["ARC_convoyGunnerSectorScanEverySec", 6];
 
+// Destination handling: the final waypoint and the success vicinity should be generous enough
+// for a road-snapped endpoint, otherwise the convoy can overshoot and circle near arrival.
+missionNamespace setVariable ["ARC_convoyFinalWpRadiusM", 120];
+missionNamespace setVariable ["ARC_convoyArrivalVicinityM", 160];
+missionNamespace setVariable ["ARC_convoyArrivalFileSlotRadiusM", 18];
+missionNamespace setVariable ["ARC_convoyArrivalFileSpeedKph", 8];
+
 // Route recon parameters
 missionNamespace setVariable ["ARC_routeReconStartOffsetM", 450];
 missionNamespace setVariable ["ARC_routeReconEndOffsetM", 650];
