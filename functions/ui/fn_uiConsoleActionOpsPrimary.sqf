@@ -56,15 +56,8 @@ switch (_focus) do
             private _leadPos  = if ((count _leadRec) >= 4) then { _leadRec select 3 } else { [] };
             if (!(_leadPos isEqualType []) || { (count _leadPos) < 2 }) then { _leadPos = getPosATL player; };
             private _missionMeta = if ((count _leadRec) >= 12 && { (_leadRec select 11) isEqualType [] }) then { _leadRec select 11 } else { [] };
-            private _getPair = {
-                params ["_pairs", "_k", "_d"];
-                if (!(_pairs isEqualType [])) exitWith { _d };
-                private _out = _d;
-                { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _out = _x select 1; }; } forEach _pairs;
-                _out
-            };
-            private _source = [_missionMeta, "source", ""] call _getPair;
-            private _confidence = [_missionMeta, "confidence", ""] call _getPair;
+            private _source = [_missionMeta, "source", ""] call ARC_fnc_uiConsoleGetPair;
+            private _confidence = [_missionMeta, "confidence", ""] call ARC_fnc_uiConsoleGetPair;
             if (!(_source isEqualType "")) then { _source = ""; };
             if (!(_confidence isEqualType "")) then { _confidence = ""; };
 

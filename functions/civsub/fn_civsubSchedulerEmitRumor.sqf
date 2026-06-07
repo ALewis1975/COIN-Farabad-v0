@@ -19,11 +19,12 @@ params [
 if (_districtId isEqualTo "") exitWith {createHashMap};
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 if !(_intelConf isEqualType 0) then { _intelConf = 0.25; };
 _intelConf = (_intelConf max 0.10) min 0.60;
 
 private _seed = createHashMap;
-_seed set ["district_centroid", _d getOrDefault ["centroid", [0,0]]];
+_seed set ["district_centroid", [_d, "centroid", [0,0]] call _hg];
 _seed set ["district_id", _districtId];
 _seed set ["rumor_kind", selectRandom ["CACHE", "MOVEMENT", "FACILITATOR", "IED_WARNING"]];
 
@@ -38,7 +39,7 @@ private _influenceDelta = [[["dW", 0], ["dR", 0], ["dG", 0]]] call _hmCreate;
 
 private _bundle = [
     _districtId,
-    _d getOrDefault ["centroid", [0,0]],
+    [_d, "centroid", [0,0]] call _hg,
     "SCHEDULER",
     "RUMOR_AMBIENT",
     createHashMap,
@@ -58,7 +59,7 @@ private _cooldown = missionNamespace getVariable ["civsub_v1_rumor_cooldown_s", 
 if (!(_cooldown isEqualType 0) || { _cooldown < 1800 }) then { _cooldown = 7200; };
 _d set ["cooldown_nextRumor_ts", serverTime + _cooldown];
 
-missionNamespace setVariable ["civsub_v1_lastRumor_bundle_id", _bundle getOrDefault ["bundle_id", ""], true];
+missionNamespace setVariable ["civsub_v1_lastRumor_bundle_id", [_bundle, "bundle_id", ""] call _hg, true];
 missionNamespace setVariable ["civsub_v1_lastRumor_ts", serverTime, true];
 
 _bundle
