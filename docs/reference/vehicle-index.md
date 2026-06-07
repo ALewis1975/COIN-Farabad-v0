@@ -174,10 +174,10 @@ Published under `docs/reference/`.
 
 | id | className | varName | side | layer | pos |
 |---|---|---|---|---|---|
-| 2889 | TFAR_NATO_Radio_Crate |  | Empty | 09.1.1.6 Interactive | [6234.2002,8.7396,1594.895] |
 | 2746 | B_Slingload_01_Ammo_F |  | Empty | 06.2.2.2 Interactive | [6627.5498,11.3964,3202.083] |
 | 2747 | B_Slingload_01_Cargo_F |  | Empty | 06.2.2.2 Interactive | [6595.5903,11.6299,3200.8215] |
 | 3900 | B_Slingload_01_Cargo_F |  | Empty | 10.2.3) Engineers | [6204.75,9.852,1603.5] |
+| 4948 | B_Slingload_01_Cargo_F | recruitment_01 | Empty | 09.1.1.6 BN TOC | [6254.3418,9.852,1575.448] |
 | 2748 | B_Slingload_01_Fuel_F |  | Empty | 06.2.2.2 Interactive | [6618.9814,11.5261,3220.3418] |
 | 2749 | B_Slingload_01_Medevac_F |  | Empty | 06.2.2.2 Interactive | [6597.3169,11.5384,3146.614] |
 | 2750 | B_Slingload_01_Repair_F |  | Empty | 06.2.2.2 Interactive | [6599.2061,11.5459,3159.2024] |
