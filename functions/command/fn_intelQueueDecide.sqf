@@ -177,6 +177,8 @@ if (_approve) then
             private _tag      = [_payload, "tag", "S2_REQUEST"] call _getP;
 
             private _pri      = [_payload, "priority", 3] call _getP;
+            private _source   = [_meta, "source", "S2_REQUEST"] call _getP;
+            private _conf     = [_payload, "confidence", ([_meta, "confidence", ""] call _getP)] call _getP;
 
             if (!(_leadType isEqualType "")) then { _leadType = "RECON"; };
             _leadType = toUpper (([_leadType] call _trimFn));
@@ -200,10 +202,24 @@ if (_approve) then
             _pri = round _pri;
             _pri = (_pri max 1) min 5;
 
+            if (!(_source isEqualType "")) then { _source = "S2_REQUEST"; };
+            _source = toUpper (([_source] call _trimFn));
+            if (_source isEqualTo "") then { _source = "S2_REQUEST"; };
+
+            if (!(_conf isEqualType "")) then { _conf = ""; };
+            _conf = toUpper (([_conf] call _trimFn));
+            if !(_conf in ["LOW","MED","HIGH"]) then { _conf = ""; };
+
+            private _missionMeta = [
+                ["source", _source],
+                ["priority", _pri],
+                ["tag", _tag]
+            ];
+            if (!(_conf isEqualTo "")) then { _missionMeta pushBack ["confidence", _conf]; };
 
             // Create a lead that the incident generator will prefer (tagged), and
             // carry the queueId for traceability.
-            private _lid = [_leadType, _disp, _posATL, _strength, _ttl, _id, "QUEUE", "", _tag] call ARC_fnc_leadCreate;
+            private _lid = [_leadType, _disp, _posATL, _strength, _ttl, _id, "QUEUE", "", _tag, _missionMeta] call ARC_fnc_leadCreate;
             if (!(_lid isEqualType "")) then { _lid = ""; };
 
             // Attach the created leadId to the queue item's meta so client UIs can track it after approval.
@@ -231,6 +247,9 @@ if (_approve) then
                     ["kind", _kindU],
                     ["leadId", _lid],
                     ["leadType", _leadType],
+                    ["source", _source],
+                    ["confidence", _conf],
+                    ["priority", _pri],
                     ["from", _from],
                     ["fromGroup", _fromGroup]
                 ]

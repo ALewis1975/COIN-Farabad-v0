@@ -254,6 +254,41 @@ switch (_incidentType) do
     default {};
 };
 
+private _activeLeadTag = ["activeLeadTag", ""] call ARC_fnc_stateGet;
+if (!(_activeLeadTag isEqualType "")) then { _activeLeadTag = ""; };
+private _isTnpPartnered = (toUpper _activeLeadTag) isEqualTo "TNP_PARTNERED";
+private _tnpEffect = [];
+if (_isTnpPartnered) then
+{
+    private _bW = _dW;
+    private _bR = _dR;
+    private _bG = _dG;
+    if (_result isEqualTo "SUCCEEDED") then
+    {
+        _dW = _dW + 1.0;
+        _dR = _dR - 0.5;
+        _dG = _dG + 1.5;
+    }
+    else
+    {
+        _dW = _dW + 0.5;
+        _dR = _dR - 0.5;
+        _dG = _dG + 0.5;
+    };
+    _tnpEffect = [
+        ["source", "TNP_PARTNERED"],
+        ["result", _result],
+        ["base_dW", _bW],
+        ["base_dR", _bR],
+        ["base_dG", _bG],
+        ["final_dW", _dW],
+        ["final_dR", _dR],
+        ["final_dG", _dG]
+    ];
+    ["activeIncidentTnpPartneredCivsubEffect", _tnpEffect] call ARC_fnc_stateSet;
+    missionNamespace setVariable ["ARC_activeIncidentTnpPartneredCivsubEffect", _tnpEffect, true];
+};
+
 // LATER rows (and unrecognized types) produce zero deltas — log and exit without applying
 if (_dW == 0 && { _dR == 0 } && { _dG == 0 }) exitWith
 {
@@ -283,5 +318,22 @@ if (!(_bundle isEqualType createHashMap) || { count _bundle == 0 }) exitWith
 
 diag_log format ["[CIVSUB][INCIDENT] ApplyOutcomeDelta applied did=%1 type=%2 result=%3 dW=%4 dR=%5 dG=%6 zone=%7",
     _districtId, _incidentType, _result, _dW, _dR, _dG, _zone];
+
+if (_isTnpPartnered && { !isNil "ARC_fnc_intelLog" }) then
+{
+    ["OPS",
+        format ["TNP partnered CIVSUB effect applied in %1: dW=%2 dR=%3 dG=%4.", _districtId, _dW, _dR, _dG],
+        [0,0,0],
+        [
+            ["event", "TNP_PARTNERED_CIVSUB_EFFECT"],
+            ["district", _districtId],
+            ["incidentType", _incidentType],
+            ["result", _result],
+            ["dW", _dW],
+            ["dR", _dR],
+            ["dG", _dG]
+        ]
+    ] call ARC_fnc_intelLog;
+};
 
 true

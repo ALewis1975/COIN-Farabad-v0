@@ -208,13 +208,22 @@ switch (_kindU) do
         private _leadId2  = [_payload, "leadId",      ""] call _getPair;
         private _leadType = [_payload, "leadType",    "LEAD"] call _getPair;
         private _dispName = [_payload, "displayName", _sum] call _getPair;
+        private _source = [_payload, "source", ""] call _getPair;
+        private _conf = [_payload, "confidence", ""] call _getPair;
 
         if (!(_leadId2  isEqualType "")) then { _leadId2  = ""; };
         if (!(_leadType isEqualType "")) then { _leadType = "LEAD"; };
         if (!(_dispName isEqualType "")) then { _dispName = _sum; };
+        if (!(_source isEqualType "")) then { _source = ""; };
+        if (!(_conf isEqualType "")) then { _conf = ""; };
 
         _payloadTxt = format ["Lead Issue Request: <t color='#FFD700'>%1</t><br/>Lead: %2<br/>Grid: %3 | Zone: %4<br/>Lead ID: %5",
             toUpper (([_leadType] call _trimFn)), ([_dispName] call _trimFn), _grid, _zone, ([_leadId2] call _trimFn)];
+        if (!(_source isEqualTo "") || { !(_conf isEqualTo "") }) then {
+            private _srcTxt = if (_source isEqualTo "") then { "N/A" } else { _source };
+            private _confTxt = if (_conf isEqualTo "") then { "N/A" } else { _conf };
+            _payloadTxt = _payloadTxt + format ["<br/>ISR Source: %1 | Confidence: %2", _srcTxt, _confTxt];
+        };
 
         // UX-05: surface the full lead-loop downstream of approval so TOC
         // staff and S2/S3 supervisors see the chain at a glance and field
@@ -256,13 +265,22 @@ switch (_kindU) do
         private _dispName = [_payload, "displayName", _sum] call _getPair;
         private _pri = [_payload, "priority", 3] call _getPair;
         private _tag = [_payload, "tag", "S2_REQUEST"] call _getPair;
+        private _source = [_meta, "source", [_payload, "source", ""] call _getPair] call _getPair;
+        private _conf = [_payload, "confidence", ([_meta, "confidence", ""] call _getPair)] call _getPair;
 
         if (!(_leadType isEqualType "")) then { _leadType = "RECON"; };
         if (!(_dispName isEqualType "")) then { _dispName = _sum; };
         if (!(_pri isEqualType 0)) then { _pri = 3; };
         if (!(_tag isEqualType "")) then { _tag = "S2_REQUEST"; };
+        if (!(_source isEqualType "")) then { _source = ""; };
+        if (!(_conf isEqualType "")) then { _conf = ""; };
 
         _payloadTxt = format ["Lead Request: <t color='#FFD700'>%1</t> (P%2)<br/>Grid: %3 | Zone: %4<br/>Tag: %5<br/>Title: %6", toUpper (([_leadType] call _trimFn)), (_pri max 1) min 5, _grid, _zone, ([_tag] call _trimFn), ([_dispName] call _trimFn)];
+        if (!(_source isEqualTo "") || { !(_conf isEqualTo "") }) then {
+            private _srcTxt = if (_source isEqualTo "") then { "N/A" } else { _source };
+            private _confTxt = if (_conf isEqualTo "") then { "N/A" } else { _conf };
+            _payloadTxt = _payloadTxt + format ["<br/>ISR Source: %1 | Confidence: %2", _srcTxt, _confTxt];
+        };
         if (_stU isEqualTo "APPROVED") then
         {
             _statusTxt = "Lead Status: APPROVED (follow-on handling shown in TOC lead/order views).";

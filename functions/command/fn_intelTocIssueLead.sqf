@@ -59,4 +59,25 @@ if (isNil "ARC_fnc_tocBacklogEnqueue") exitWith {false};
 private _by = "SYSTEM";
 if (!isNil "ARC_fnc_rolesFormatUnit") then { _by = [_issuer] call ARC_fnc_rolesFormatUnit; };
 
-[_leadId, 3, "", _by, _note] call ARC_fnc_tocBacklogEnqueue
+private _priority = 3;
+private _pool = ["leadPool", []] call ARC_fnc_stateGet;
+if (!(_pool isEqualType [])) then { _pool = []; };
+{
+    if (_x isEqualType [] && { (count _x) >= 12 } && { (_x select 0) isEqualTo _leadId }) exitWith
+    {
+        private _meta = _x select 11;
+        if (_meta isEqualType []) then
+        {
+            {
+                if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo "priority" }) exitWith
+                {
+                    private _p = _x select 1;
+                    if (_p isEqualType 0) then { _priority = round _p; };
+                };
+            } forEach _meta;
+        };
+    };
+} forEach _pool;
+_priority = (_priority max 1) min 5;
+
+[_leadId, _priority, "", _by, _note] call ARC_fnc_tocBacklogEnqueue

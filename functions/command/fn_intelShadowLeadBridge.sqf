@@ -157,6 +157,12 @@ private _strength = switch (_conf) do
     case "HIGH": { 0.75 };
     default      { 0.55 };
 };
+private _pri = switch (_conf) do
+{
+    case "HIGH": { 1 };
+    case "LOW":  { 4 };
+    default      { 3 };
+};
 
 // Remarks (optional).
 private _remarksPrompt = ["Remarks (optional):", ""] call BIS_fnc_guiMessage;
@@ -174,6 +180,7 @@ private _payload = [
     ["displayName", _sum],
     ["strength", _strength],
     ["ttl", _ttl],
+    ["priority", _pri],
     ["confidence", _conf],
     ["tag", "SHADOW_ISR"]
 ];
@@ -186,7 +193,7 @@ private _payload = [
     _sum,
     _det,
     _pos,
-    [["source", "SHADOW_ISR"]]
+    [["source", "SHADOW_ISR"], ["confidence", _conf]]
 ] remoteExec ["ARC_fnc_intelQueueSubmit", 2];
 
 ["ISR", "SHADOW ISR lead submitted to TOC queue. Awaiting approval."] call ARC_fnc_clientToast;

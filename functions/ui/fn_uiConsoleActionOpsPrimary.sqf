@@ -55,15 +55,34 @@ switch (_focus) do
             if (!(_leadName isEqualType "")) then { _leadName = "Lead"; };
             private _leadPos  = if ((count _leadRec) >= 4) then { _leadRec select 3 } else { [] };
             if (!(_leadPos isEqualType []) || { (count _leadPos) < 2 }) then { _leadPos = getPosATL player; };
+            private _missionMeta = if ((count _leadRec) >= 12 && { (_leadRec select 11) isEqualType [] }) then { _leadRec select 11 } else { [] };
+            private _getPair = {
+                params ["_pairs", "_k", "_d"];
+                if (!(_pairs isEqualType [])) exitWith { _d };
+                private _out = _d;
+                { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _out = _x select 1; }; } forEach _pairs;
+                _out
+            };
+            private _source = [_missionMeta, "source", ""] call _getPair;
+            private _confidence = [_missionMeta, "confidence", ""] call _getPair;
+            if (!(_source isEqualType "")) then { _source = ""; };
+            if (!(_confidence isEqualType "")) then { _confidence = ""; };
 
             private _summary = format ["LEAD ISSUE: %1 - %2", _leadType, _leadName];
             private _details = format ["S3 requests TOC approval to issue a PROCEED order for lead %1 (%2) at grid %3.", _leadId, _leadType, mapGridPosition _leadPos];
+            if (!(_source isEqualTo "") || { !(_confidence isEqualTo "") }) then {
+                private _srcTxt = if (_source isEqualTo "") then { "N/A" } else { _source };
+                private _confTxt = if (_confidence isEqualTo "") then { "N/A" } else { _confidence };
+                _details = _details + format [" ISR source=%1 confidence=%2.", _srcTxt, _confTxt];
+            };
 
             private _payload = [
                 ["leadId",      _leadId],
                 ["leadType",    _leadType],
                 ["displayName", _leadName]
             ];
+            if (!(_source isEqualTo "")) then { _payload pushBack ["source", _source]; };
+            if (!(_confidence isEqualTo "")) then { _payload pushBack ["confidence", _confidence]; };
 
             [player, "LEAD_ISSUE_REQUEST", _payload, _summary, _details, _leadPos] remoteExec ["ARC_fnc_intelQueueSubmit", 2];
             ["Operations", format ["Lead %1 submitted to TOC queue for approval.", _leadId]] call ARC_fnc_clientToast;

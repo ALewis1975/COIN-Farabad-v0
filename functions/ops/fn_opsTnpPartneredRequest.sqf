@@ -103,6 +103,7 @@ private _isPriority = [
     "ROUTINE (3)"
 ] call BIS_fnc_guiMessage;
 private _pri = if (_isPriority) then { 1 } else { 3 };
+private _conf = if (_isPriority) then { "HIGH" } else { "MED" };
 
 private _strength = if (_isPriority) then { 0.80 } else { 0.55 };
 
@@ -123,6 +124,7 @@ private _payload = [
     ["strength", _strength],
     ["ttl", _ttl],
     ["priority", _pri],
+    ["confidence", _conf],
     ["tag", "TNP_PARTNERED"]
 ];
 
@@ -134,7 +136,7 @@ private _payload = [
     _sum,
     _det,
     _pos,
-    [["source", "TNP_PARTNERED"]]
+    [["source", "TNP_PARTNERED"], ["confidence", _conf]]
 ] remoteExec ["ARC_fnc_intelQueueSubmit", 2];
 
 ["TNP", "TNP partnered ops request submitted to TOC queue. Awaiting approval."] call ARC_fnc_clientToast;

@@ -69,6 +69,8 @@ private _districtId = missionNamespace getVariable ["ARC_activeIncidentCivsubDis
 if (!(_districtId isEqualType "") || { _districtId isEqualTo "" }) then { _districtId = "D00"; };
 
 private _grid = mapGridPosition _pos;
+private _isLaserMark = _markMethod isEqualTo "LASER";
+private _isrConfidence = if (_isLaserMark) then { "HIGH" } else { "MED" };
 
 // Default target description: prefer the marked object's display name.
 private _desc = "JTAC-marked target";
@@ -138,6 +140,8 @@ private _trimFn = compile "params ['_s']; trim _s";
 private _remarksPrompt = ["Remarks (optional):", ""] call BIS_fnc_guiMessage;
 private _remarks = if (_remarksPrompt isEqualType "") then { _remarksPrompt } else { "" };
 _remarks = [_remarks] call _trimFn;
+private _isrMeta = format ["ISR source: RAVEN_JTAC; confidence: %1; marking: %2", _isrConfidence, _markMethod];
+if (_remarks isEqualTo "") then { _remarks = _isrMeta; } else { _remarks = _remarks + "; " + _isrMeta; };
 
 private _r9Idx = -1;
 { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo "line9_remarks" }) exitWith { _r9Idx = _forEachIndex; }; } forEach _nineLine;
