@@ -26,22 +26,22 @@ private _o = [];
 {
     if (_x isEqualType [] && { (count _x) >= 7 }) then
     {
-        private _st = toUpper (_x # 2);
-        private _tg = _x # 4;
+        private _st = toUpper (_x select 2);
+        private _tg = _x select 4;
         if (_st isEqualTo "ISSUED" && { _tg isEqualTo _gid }) exitWith { _o = _x; };
     };
 } forEach _orders;
 
 if (_o isEqualTo []) exitWith { ["No TOC order found.", "WARN", "TOAST"] call ARC_fnc_clientHint; false };
 
-_o params ["_orderId", "_issuedAt", "_status", "_orderType", "_targetGroup", "_data", "_meta"];
+_o params ["_orderId", "", "", "_orderType", "", "_data", "_meta"];
 _orderType = toUpper _orderType;
 
 private _getPair = {
     params ["_pairs", "_k", "_d"];
     if (!(_pairs isEqualType [])) exitWith { _d };
     {
-        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _x # 1 };
+        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _x select 1 };
     } forEach _pairs;
     _d
 };
@@ -51,7 +51,7 @@ private _note = [_meta, "note", ""] call _getPair;
 
 private _lines = [];
 _lines pushBack format ["Order ID: %1", _orderId];
-_lines pushBack format ["Type: %1", _orderType];
+_lines pushBack format ["Type: %1", ([_orderType] call ARC_fnc_intelOrderTypeLabel)];
 _lines pushBack format ["Issued By: %1", _issuer];
 
 switch (_orderType) do
@@ -74,13 +74,13 @@ switch (_orderType) do
         private _leadPos = [_data, "leadPos", []] call _getPair;
         private _grid = if (_leadPos isEqualType [] && { (count _leadPos) >= 2 }) then { mapGridPosition _leadPos } else { "" };
         _lines pushBack format ["Lead: %1", _leadName];
-        if (_grid isNotEqualTo "") then { _lines pushBack format ["Lead Location: %1", _grid]; };
+        if (_grid != "") then { _lines pushBack format ["Lead Location: %1", _grid]; };
     };
 
     default { };
 };
 
-if (_note isNotEqualTo "") then
+if (_note != "") then
 {
     _lines pushBack "";
     _lines pushBack "TOC Note:";

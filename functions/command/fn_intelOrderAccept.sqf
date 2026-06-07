@@ -330,7 +330,7 @@ switch (_type) do
         private _taskId = format ["%1_task", _orderId];
         private _note = [_meta, "note", ""] call _getPair;
 
-        private _title = format ["LEAD: %1", _leadName];
+        private _title = format ["%1: %2", [_type] call ARC_fnc_intelOrderTypeLabel, _leadName];
 
         // UX-03: role-specific guidance per lead incident type so field elements
         // know what action to take on arrival, rather than the previous generic
@@ -381,7 +381,7 @@ switch (_type) do
         {
             if (isPlayer _x) then
             {
-                private _m = format ["ORDER ACCEPTED: %1.", _type];
+                private _m = format ["ORDER ACCEPTED: %1.", [_type] call ARC_fnc_intelOrderTypeLabel];
                 ["Order Accepted", _m, 6] remoteExec ["ARC_fnc_clientToast", _x];
             };
         } forEach (units (group _acceptor));
@@ -395,7 +395,7 @@ _orders set [_idx, _ord];
 [] call ARC_fnc_intelOrderBroadcast;
 [] call ARC_fnc_publicBroadcastState;
 
-["OPS", format ["ORDER ACCEPTED: %1 accepted %2 (%3)", [_acceptor] call ARC_fnc_rolesFormatUnit, _orderId, _type], [0,0,0],
+["OPS", format ["ORDER ACCEPTED: %1 accepted %2 (%3)", [_acceptor] call ARC_fnc_rolesFormatUnit, _orderId, [_type] call ARC_fnc_intelOrderTypeLabel], [0,0,0],
     [
         ["event", "TOC_ORDER_ACCEPTED"],
         ["orderId", _orderId],

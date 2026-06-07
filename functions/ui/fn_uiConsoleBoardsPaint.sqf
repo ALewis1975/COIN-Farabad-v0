@@ -31,14 +31,7 @@ if (isNull _ctrlMain) exitWith {false};
 // -------------------------------------------------------------------------
 // Helpers
 // -------------------------------------------------------------------------
-private _getPair = {
-    params ["_pairs", "_k", "_d"];
-    if (!(_pairs isEqualType [])) exitWith { _d };
-    private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
-    if (_idx < 0) exitWith { _d };
-    (_pairs # _idx) # 1
-};
+private _trimFn = compile "params ['_s', ['_d', '']]; if (!(_s isEqualType '')) exitWith { _d }; trim _s";
 
 private _fmtHdr = {
     params ["_t"];
@@ -96,9 +89,9 @@ private _qOther = 0;
 private _queueLines = [];
 {
     if (!(_x isEqualType []) || { (count _x) < 8 }) then { continue; };
-    _x params ["_qid", "_createdAt", "_qSt", "_qKind", "_qFrom", "_qFromGrp", "_qPos", "_qSummary"]; 
+    _x params ["", "_createdAt", "", "_qKind", "", "_qFromGrp", "", "_qSummary"]; 
 
-    private _k = toUpper (trim _qKind);
+    private _k = toUpper ([_qKind] call _trimFn);
     switch (_k) do
     {
         case "INCIDENT": { _qInc = _qInc + 1; };
@@ -110,8 +103,8 @@ private _queueLines = [];
     // Keep the snapshot short (top 10)
     if ((count _queueLines) < 10) then
     {
-        private _g = if (_qFromGrp isEqualType "" && { _qFromGrp isNotEqualTo "" }) then { _qFromGrp } else { "" };
-        private _s = if (_qSummary isEqualType "" && { _qSummary isNotEqualTo "" }) then { _qSummary } else {
+        private _g = if (_qFromGrp isEqualType "" && { _qFromGrp != "" }) then { _qFromGrp } else { "" };
+        private _s = if (_qSummary isEqualType "" && { _qSummary != "" }) then { _qSummary } else {
             // No summary — fall back to kind + age + submitter for differentiation
             private _ageS = if (_createdAt isEqualType 0 && { _createdAt > 0 }) then { round (serverTime - _createdAt) } else { -1 };
             private _ageFmt = if (_ageS < 0) then { "" } else { if (_ageS < 60) then { format [" (%1s ago)", _ageS] } else { format [" (%1m ago)", floor (_ageS / 60)] } };
@@ -130,7 +123,7 @@ if (!(_orders isEqualType [])) then { _orders = []; };
 private _issued = [];
 {
     if (!(_x isEqualType []) || { (count _x) < 7 }) then { continue; };
-    _x params ["_oid", "_iat", "_st", "_ty", "_tg", "_data", "_meta"]; 
+    _x params ["", "", "_st", "_ty", "_tg", "", "_meta"]; 
     if ((toUpper _st) isEqualTo "ISSUED") then
     {
         _issued pushBack _x;
@@ -140,11 +133,11 @@ private _issued = [];
 private _ordLines = [];
 {
     if (!(_x isEqualType []) || { (count _x) < 7 }) then { continue; };
-    _x params ["_oid", "_iat", "_st", "_ty", "_tg", "_data", "_meta"]; 
+    _x params ["", "", "_st", "_ty", "_tg", "", "_meta"]; 
     private _note = [_meta, "note", ""] call ARC_fnc_uiConsoleGetPair;
     if (!(_note isEqualType "")) then { _note = ""; };
     private _suffix = if (_note isEqualTo "") then { "" } else { format [" - <t color='#FFFFFF'>%1</t>", _note] };
-    _ordLines pushBack format ["- <t color='#B89B6B'>%1</t> to <t color='#DDDDDD'>%2</t>%3", toUpper _ty, _tg, _suffix];
+    _ordLines pushBack format ["- <t color='#B89B6B'>%1</t> to <t color='#DDDDDD'>%2</t>%3", ([_ty] call ARC_fnc_intelOrderTypeLabel), _tg, _suffix];
     if ((count _ordLines) >= 10) exitWith {};
 } forEach _issued;
 
@@ -157,18 +150,18 @@ if (!(_ops isEqualType [])) then { _ops = []; };
 private _sit = [];
 for "_i" from ((count _ops) - 1) to 0 step -1 do
 {
-    private _e = _ops # _i;
+    private _e = _ops select _i;
     if (!(_e isEqualType []) || { (count _e) < 6 }) then { continue; };
-    _e params ["_id", "_ts", "_cat", "_summary", "_pos", "_meta"]; 
+    _e params ["", "", "", "_summary", "_pos", "_meta"]; 
     private _evt = [_meta, "event", ""] call ARC_fnc_uiConsoleGetPair;
     if (!(_evt isEqualType "")) then { _evt = ""; };
     if (toUpper _evt isEqualTo "SITREP") exitWith { _sit = _e; };
 };
 
 private _sitTxt = "<t color='#FFFFFF'>(none)</t>";
-if (_sit isNotEqualTo []) then
+if (!(_sit isEqualTo [])) then
 {
-    _sit params ["_id", "_ts", "_cat", "_summary", "_pos", "_meta"]; 
+    _sit params ["", "", "", "_summary", "_pos", "_meta"]; 
     private _from = [_meta, "from", ""] call ARC_fnc_uiConsoleGetPair;
     if (!(_from isEqualType "")) then { _from = ""; };
     private _rec = [_meta, "recommend", ""] call ARC_fnc_uiConsoleGetPair;
@@ -180,7 +173,7 @@ if (_sit isNotEqualTo []) then
         if (_from isEqualTo "") then {"(n/a)"} else {_from},
         if (_rec isEqualTo "") then {"(n/a)"} else {toUpper _rec},
         if (_grid2 isEqualTo "") then {"(n/a)"} else {_grid2},
-        if (_summary isEqualType "" && { _summary isNotEqualTo "" }) then {_summary} else {"(no summary)"}
+        if (_summary isEqualType "" && { _summary != "" }) then {_summary} else {"(no summary)"}
     ];
 };
 
@@ -207,10 +200,10 @@ else
     private _support = [];
     {
         if (!(_x isEqualType []) || { (count _x) < 2 }) then { continue; };
-        private _g = _x # 0;
-        private _s = toUpper (trim (_x # 1));
+        private _g = _x select 0;
+        private _s = toUpper ([_x select 1] call _trimFn);
         if (_s isEqualTo "OFFLINE") then { _s = "UNAVAILABLE"; };
-        if (_accBy isNotEqualTo "" && { _g isNotEqualTo _accBy } && { _s in ["IN TRANSIT", "ON SCENE"] }) then { _support pushBack _g; };
+        if (_accBy != "" && { _g != _accBy } && { _s in ["IN TRANSIT", "ON SCENE"] }) then { _support pushBack _g; };
     } forEach _statusRows;
 
     private _supportColor = "#AAAAAA";
@@ -267,9 +260,9 @@ _ctrlMain ctrlSetStructuredText parseText _txt;
 // Auto-fit + clamp to viewport so the controls group can scroll when needed.
 [_ctrlMain] call BIS_fnc_ctrlFitToTextHeight;
 private _mainGrp = _display displayCtrl 78015;
-private _minH = if (!isNull _mainGrp) then { (ctrlPosition _mainGrp) # 3 } else { 0.74 };
+private _minH = if (!isNull _mainGrp) then { (ctrlPosition _mainGrp) select 3 } else { 0.74 };
 private _p = ctrlPosition _ctrlMain;
-_p set [3, (_p # 3) max _minH];
+_p set [3, (_p select 3) max _minH];
 _ctrlMain ctrlSetPosition _p;
 _ctrlMain ctrlCommit 0;
 
