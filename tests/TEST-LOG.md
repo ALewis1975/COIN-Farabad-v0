@@ -11,6 +11,26 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+
+## 2026-06-07 — Mission manifestation fixes: civic objectives, HUD placement, convoy arrival
+
+**Branch/Commit:** worktree @ 82b81a87a087a9c1e7c5734670e8e517376fac15
+
+**Scenario:** Addressed playtest gaps where accepted incidents manifested without visible/interactable content, the Active Task HUD occupied the upper-right, and convoys over-controlled near their destination. Objective addActions now default on, food/water distribution spawns aid recipients with a matching action, civic access-control checkpoints spawn a physical vehicle inspection target, the HUD is anchored upper-left, and convoy destination convergence uses relaxed final waypoint / parking tolerances.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict <8 changed .sqf>` | PASS | No known parser-compat patterns. |
+| 2 | SQF lint (changed files) | `sqflint -e w <each changed .sqf>` | PASS | 8/8 changed SQF files lint clean. |
+| 3 | New manifestation contract suite | `bash tests/static/mission_manifestation_contract_checks.sh` | PASS | HUD anchor, objective addActions, civic/checkpoint objective content, cleanup, and convoy tolerances locked. |
+| 4 | Civic catalog regression | `bash tests/static/civic_mission_catalog_contract_checks.sh` | PASS | Mission metadata catalog flow remains intact. |
+| 5 | CIVSUB traffic regression | `bash tests/static/civsub_traffic_contract_checks.sh` | PASS | Existing CIVSUB traffic contract unaffected. |
+| 6 | State migration validation | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios. |
+| 7 | Workflow YAML parses | `python3 -c "import yaml; yaml.safe_load(open('.github/workflows/arma-preflight.yml'))"` | PASS | New preflight step is valid YAML. |
+| 8 | Whitespace/conflict scan | `git diff --check` | PASS | Clean. |
+| 9 | Runtime smoke (local MP / dedicated / JIP) | Accept Food/Water, Checkpoint Access Control, and convoy incidents in Arma | BLOCKED | Arma runtime unavailable in this sandbox; changes are static-contract protected. |
+
+---
 ## 2026-06-07 — Single-track lead model (origin discriminator + Path B retirement)
 
 **Branch/Commit:** copilot/read-only-architect-review @ commit: unrecoverable (SHA assigned by the push that lands this entry; recorded per the contributor rule rather than a `<pending>` placeholder)
