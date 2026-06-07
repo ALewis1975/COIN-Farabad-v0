@@ -145,7 +145,7 @@ diag_log "[ARC][VPOOL][INFO] ARC_fnc_threatVirtualPoolTick: loop started.";
 
         // Filter out classnames absent from CfgVehicles to prevent null-object crashes on createUnit
         private _validTickClasses = [];
-        { if (isClass (configFile >> "CfgVehicles" >> _x)) then { _validTickClasses pushBack _x; }; } forEach _unitClasses;
+        { if ([_x] call ARC_fnc_cfgClassExists) then { _validTickClasses pushBack _x; }; } forEach _unitClasses;
         if ((count _validTickClasses) < (count _unitClasses)) then {
             diag_log format ["[ARC][VPOOL][WARN] ARC_fnc_threatVirtualPoolTick: %1 class(es) missing from CfgVehicles — filtered. Valid: %2",
                 (count _unitClasses) - (count _validTickClasses), _validTickClasses];

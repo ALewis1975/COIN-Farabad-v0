@@ -11,7 +11,29 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
-## 2026-06-07 — Follow-up: wire Lane B/C contract suites into CI + raise RPC owner-capture floor (Mode G/E)
+## 2026-06-07 — Shared player-snapshot helper + config-class cache (Mode C/D)
+
+**Branch/Commit:** copilot/read-only-architect-review @ commit: unrecoverable (SHA assigned by the push that lands this entry; recorded per the contributor rule rather than a `<pending>` placeholder)
+
+**Scenario:** Architect-review follow-up performance refactor. Implemented the two cross-cutting optimizations the Lanes A/B/C review flagged as the highest-ROI, behavior-preserving wins:
+- **Shared player-snapshot helper (`ARC_fnc_playerSnapshot`):** a per-frame-cached `[unit, posATL]` snapshot of `allPlayers` (keyed by `diag_frameNo`). Eliminates the O(districts×players) re-scan in `ARC_fnc_civsubIsDistrictActive` (it recomputed `allPlayers` + `getPosATL` for every district each scheduler tick) and removes repeated per-iteration `getPos` engine reads in `fn_airbaseGroundTrafficTick`, `fn_cleanupTick`, and `fn_civsubLocNpcTick`. Alive-filtering and the locked district-active rule (`dist <= radius_m + 200`) are preserved at each site.
+- **Config-class cache (`ARC_fnc_cfgClassExists`):** a memoized `isClass (configFile >> root >> class)` lookup. Replaces the per-tick re-validation of the OPFOR unit-class list in `fn_threatVirtualPoolTick` (and the mirror in `fn_threatVirtualPoolInit`). Config classes are static for the session, so caching is deterministic and side-effect-free.
+
+The virtual-pool nearest-player loop was intentionally left unchanged because its `_alivePlayers` list is also passed (as objects) to the test-protected `ARC_fnc_threatSpawnPosClear` predicate; refactoring it would have widened scope beyond the surgical intent. Touching `fn_civsubIsDistrictActive` brought it under the changed-file SQF lint, so its two pre-existing parser-hostile method-style `getOrDefault` reads were converted to the sanctioned `_hg` compiled-helper form.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict <8 changed .sqf>` | PASS | No known parser-compat patterns. |
+| 2 | SQF lint (changed files) | `sqflint -e w <each changed .sqf>` | PASS | 8/8 clean (incl. the two new helpers). |
+| 3 | New contract suite | `bash tests/static/perf_shared_helpers_contract_checks.sh` | PASS | 19/19 — registration, helper internals, call sites, behaviour anchors. |
+| 4 | Threat standoff/observability regression | `bash tests/static/threat_virtual_opfor_spawn_standoff_checks.sh && bash tests/static/threat_virtual_opfor_observability_contract_checks.sh` | PASS | Unaffected by the class-validation change. |
+| 5 | Full static-suite regression | `for t in tests/static/*.sh; do bash "$t"; done` | PASS | All 21 suites pass (20 prior + new). |
+| 6 | Workflow YAML parses | `python3 -c "import yaml; yaml.safe_load(open('.github/workflows/arma-preflight.yml'))"` | PASS | New preflight step wired. |
+| 7 | State migration validation | `python3 scripts/dev/validate_state_migrations.py` | PASS | 3 scenarios. |
+| 8 | Whitespace/conflict scan | `git --no-pager diff --check` | PASS | Clean. |
+| 9 | Runtime smoke (local MP / dedicated / JIP) | Open mission, exercise CIVSUB scheduler, AIRBASE ground traffic, cleanup, virtual-OpFor spawns | BLOCKED | Arma runtime unavailable in this sandbox; optimization is behaviour-preserving and grep-contract protected. |
+
+
 
 **Branch/Commit:** copilot/read-only-architect-review @ 3270ed0
 

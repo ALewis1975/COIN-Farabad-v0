@@ -183,7 +183,7 @@ if (!(_unitClasses isEqualType []) || {(count _unitClasses) == 0}) then {
 
 // Filter out classnames absent from CfgVehicles to prevent null-object crashes on createUnit
 private _validInitClasses = [];
-{ if (isClass (configFile >> "CfgVehicles" >> _x)) then { _validInitClasses pushBack _x; }; } forEach _unitClasses;
+{ if ([_x] call ARC_fnc_cfgClassExists) then { _validInitClasses pushBack _x; }; } forEach _unitClasses;
 if ((count _validInitClasses) < (count _unitClasses)) then {
     diag_log format ["[ARC][VPOOL][WARN] ARC_fnc_threatVirtualPoolInit: %1 class(es) missing from CfgVehicles — filtered. Valid: %2",
         (count _unitClasses) - (count _validInitClasses), _validInitClasses];

@@ -258,3 +258,7 @@ jobs:
       - name: SHERIFF/SSE dossier contract static validation
         run: |
           tests/static/dossier_runtime_contract_checks.sh
+
+      - name: Shared perf helpers (player snapshot + config-class cache) static validation
+        run: |
+          tests/static/perf_shared_helpers_contract_checks.sh

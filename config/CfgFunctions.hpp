@@ -23,6 +23,10 @@ class CfgFunctions
             class stateGet {};
             class stateSet {};
             class stateSetGet {};  // legacy compatibility wrapper
+
+            // Shared performance helpers (per-frame player snapshot + memoized config-class lookup)
+            class playerSnapshot {};
+            class cfgClassExists {};
             class dynamicTodRefresh {};
             class dynamicTodGetPolicy {};
 

@@ -22,7 +22,7 @@ private _queue = ["cleanupQueue", []] call ARC_fnc_stateGet;
 if (!(_queue isEqualType []) || { (count _queue) isEqualTo 0 }) exitWith {true};
 
 private _now = serverTime;
-private _players = allPlayers select { alive _x };
+private _players = (call ARC_fnc_playerSnapshot) select { alive (_x select 0) };
 
 private _debug = missionNamespace getVariable ["ARC_debugCleanup", false];
 
@@ -90,7 +90,7 @@ if (!_force) then
 {
     // Key rule: keep the entity if any alive player is near the entity itself.
     // This prevents "early despawn" when an anchor is far from the convoy/prop.
-    { if ((_x distance2D _objPos) <= _radius) exitWith { _nearPlayers = true; }; } forEach _players;
+    { if (((_x select 1) distance2D _objPos) <= _radius) exitWith { _nearPlayers = true; }; } forEach _players;
 };
 
 if (_nearPlayers) then
