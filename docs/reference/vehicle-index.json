@@ -2,21 +2,6 @@
   "objects": [
     {
       "category": "Equipment",
-      "className": "TFAR_NATO_Radio_Crate",
-      "id": "2889",
-      "layer": "09.1.1.6 Interactive",
-      "layerPath": "JOINT BASE FARABAD \u2014 Tenant Unit OOB (2011) > 09) MAJOR ARMY TENANTS > 09.1) TF RED FALCON (Ground TF core) \u2014 2-325 AIR 'White Falcons' [REDFALCON] > 09.1.1) TF HQ / TOC (REDFALCON 6 / 5 / TOC) > 09.1.1.6 BN TOC > 09.1.1.6 Interactive",
-      "pos": [
-        6234.2002,
-        8.7396,
-        1594.895
-      ],
-      "side": "Empty",
-      "source": "mission.sqm",
-      "varName": ""
-    },
-    {
-      "category": "Equipment",
       "className": "B_Slingload_01_Ammo_F",
       "id": "2746",
       "layer": "06.2.2.2 Interactive",
@@ -59,6 +44,21 @@
       "side": "Empty",
       "source": "mission.sqm",
       "varName": ""
+    },
+    {
+      "category": "Equipment",
+      "className": "B_Slingload_01_Cargo_F",
+      "id": "4948",
+      "layer": "09.1.1.6 BN TOC",
+      "layerPath": "JOINT BASE FARABAD \u2014 Tenant Unit OOB (2011) > 09) MAJOR ARMY TENANTS > 09.1) TF RED FALCON (Ground TF core) \u2014 2-325 AIR 'White Falcons' [REDFALCON] > 09.1.1) TF HQ / TOC (REDFALCON 6 / 5 / TOC) > 09.1.1.6 BN TOC",
+      "pos": [
+        6254.3418,
+        9.852,
+        1575.448
+      ],
+      "side": "Empty",
+      "source": "mission.sqm",
+      "varName": "recruitment_01"
     },
     {
       "category": "Equipment",
@@ -262,9 +262,9 @@
       "layer": "08.1) Airlift (C-130) \u2014 746 EAS [REACH 3xx]",
       "layerPath": "JOINT BASE FARABAD \u2014 Tenant Unit OOB (2011) > 08) USAF FLYING TENANTS / TRANSIENT AIRCRAFT (RAMP) > 08.1) Airlift (C-130) \u2014 746 EAS [REACH 3xx]",
       "pos": [
-        6608.7378,
+        6606.9297,
         8.5045,
-        1659.0719
+        1656.2521
       ],
       "side": "Empty",
       "source": "mission.sqm",
@@ -293,7 +293,7 @@
       "layerPath": "JOINT BASE FARABAD \u2014 Tenant Unit OOB (2011) > 08) USAF FLYING TENANTS / TRANSIENT AIRCRAFT (RAMP) > 08.2) Airlift (C-17) \u2014 816 EAS [REACH 1xx]",
       "pos": [
         6368.3398,
-        11.848,
+        11.8479,
         1640.337
       ],
       "side": "Empty",
@@ -307,9 +307,9 @@
       "layer": "",
       "layerPath": "",
       "pos": [
-        6642.3696,
-        10.2193,
-        1588.0333
+        6644.4839,
+        10.2922,
+        1605.7592
       ],
       "side": "West",
       "source": "mission.sqm",
@@ -352,9 +352,9 @@
       "layer": "08.3) Tanker (KC-135) \u2014 340 EARS [TEXACO 4x]",
       "layerPath": "JOINT BASE FARABAD \u2014 Tenant Unit OOB (2011) > 08) USAF FLYING TENANTS / TRANSIENT AIRCRAFT (RAMP) > 08.3) Tanker (KC-135) \u2014 340 EARS [TEXACO 4x]",
       "pos": [
-        6545.6685,
+        6547.9556,
         10.0217,
-        1658.2799
+        1658.1484
       ],
       "side": "Empty",
       "source": "mission.sqm",
@@ -449,51 +449,6 @@
       "side": "Empty",
       "source": "mission.sqm",
       "varName": ""
-    },
-    {
-      "category": "Ground Vehicle",
-      "className": "Fox_Firetruck",
-      "id": "3854",
-      "layer": "02.5) Crash / Fire / Rescue (CFR)",
-      "layerPath": "JOINT BASE FARABAD \u2014 Tenant Unit OOB (2011) > 02) AIRFIELD / TOWER / AIRSPACE MANAGEMENT (USAF) > 02.5) Crash / Fire / Rescue (CFR)",
-      "pos": [
-        5805.0,
-        10.5188,
-        2298.9998
-      ],
-      "side": "Empty",
-      "source": "mission.sqm",
-      "varName": "fire_pumper_01"
-    },
-    {
-      "category": "Ground Vehicle",
-      "className": "Fox_HeavyRescue",
-      "id": "3851",
-      "layer": "02.5) Crash / Fire / Rescue (CFR)",
-      "layerPath": "JOINT BASE FARABAD \u2014 Tenant Unit OOB (2011) > 02) AIRFIELD / TOWER / AIRSPACE MANAGEMENT (USAF) > 02.5) Crash / Fire / Rescue (CFR)",
-      "pos": [
-        5783.8252,
-        8.6864,
-        2298.1326
-      ],
-      "side": "Empty",
-      "source": "mission.sqm",
-      "varName": "fire_heavy_rescue_01"
-    },
-    {
-      "category": "Ground Vehicle",
-      "className": "Fox_HeavyRescue2",
-      "id": "3852",
-      "layer": "02.5) Crash / Fire / Rescue (CFR)",
-      "layerPath": "JOINT BASE FARABAD \u2014 Tenant Unit OOB (2011) > 02) AIRFIELD / TOWER / AIRSPACE MANAGEMENT (USAF) > 02.5) Crash / Fire / Rescue (CFR)",
-      "pos": [
-        5790.8252,
-        8.6864,
-        2298.1326
-      ],
-      "side": "Empty",
-      "source": "mission.sqm",
-      "varName": "fire_heavy_rescue_02"
     },
     {
       "category": "Ground Vehicle",
@@ -637,9 +592,9 @@
       "layer": "",
       "layerPath": "",
       "pos": [
-        6913.7349,
-        9.9339,
-        1608.323
+        6788.3066,
+        9.9334,
+        1501.923
       ],
       "side": "West",
       "source": "mission.sqm",
@@ -752,21 +707,6 @@
     },
     {
       "category": "Ground Vehicle",
-      "className": "d3s_e89_12_M",
-      "id": "1602",
-      "layer": "FARABAD TOWER",
-      "layerPath": "JOINT BASE FARABAD \u2014 Tenant Unit OOB (2011) > 02) AIRFIELD / TOWER / AIRSPACE MANAGEMENT (USAF) > 02.1) ATC / Approach (Airspace Authority) > FARABAD TOWER",
-      "pos": [
-        6453.7017,
-        9.8015,
-        1669.9178
-      ],
-      "side": "Empty",
-      "source": "mission.sqm",
-      "varName": ""
-    },
-    {
-      "category": "Ground Vehicle",
       "className": "d3s_eldorado_76",
       "id": "1596",
       "layer": "FARABAD APPROACH",
@@ -809,21 +749,6 @@
       "side": "Civilian",
       "source": "mission.sqm",
       "varName": "ambulance_03"
-    },
-    {
-      "category": "Ground Vehicle",
-      "className": "d3s_teslaS_16_90",
-      "id": "1601",
-      "layer": "FARABAD TOWER",
-      "layerPath": "JOINT BASE FARABAD \u2014 Tenant Unit OOB (2011) > 02) AIRFIELD / TOWER / AIRSPACE MANAGEMENT (USAF) > 02.1) ATC / Approach (Airspace Authority) > FARABAD TOWER",
-      "pos": [
-        6454.75,
-        9.8641,
-        1676.375
-      ],
-      "side": "Empty",
-      "source": "mission.sqm",
-      "varName": ""
     },
     {
       "category": "Ground Vehicle",
@@ -997,9 +922,9 @@
       "layer": "09.1.1.6 Vehicles",
       "layerPath": "JOINT BASE FARABAD \u2014 Tenant Unit OOB (2011) > 09) MAJOR ARMY TENANTS > 09.1) TF RED FALCON (Ground TF core) \u2014 2-325 AIR 'White Falcons' [REDFALCON] > 09.1.1) TF HQ / TOC (REDFALCON 6 / 5 / TOC) > 09.1.1.6 BN TOC > 09.1.1.6 Vehicles",
       "pos": [
-        6236.7139,
-        10.1358,
-        1548.4988
+        6245.2231,
+        10.1345,
+        1568.999
       ],
       "side": "Empty",
       "source": "mission.sqm",
@@ -1060,21 +985,6 @@
         6217.0601,
         10.1374,
         1547.9182
-      ],
-      "side": "Empty",
-      "source": "mission.sqm",
-      "varName": ""
-    },
-    {
-      "category": "Ground Vehicle",
-      "className": "renelerchberg_v4",
-      "id": "590",
-      "layer": "02.5) Crash / Fire / Rescue (CFR)",
-      "layerPath": "JOINT BASE FARABAD \u2014 Tenant Unit OOB (2011) > 02) AIRFIELD / TOWER / AIRSPACE MANAGEMENT (USAF) > 02.5) Crash / Fire / Rescue (CFR)",
-      "pos": [
-        5782.7451,
-        12.3562,
-        2304.4585
       ],
       "side": "Empty",
       "source": "mission.sqm",
@@ -1996,6 +1906,36 @@
       "varName": ""
     },
     {
+      "category": "Other",
+      "className": "CUP_A2_Road_OA_asf1_25",
+      "id": "4959",
+      "layer": "09.1.1.6 BN TOC",
+      "layerPath": "JOINT BASE FARABAD \u2014 Tenant Unit OOB (2011) > 09) MAJOR ARMY TENANTS > 09.1) TF RED FALCON (Ground TF core) \u2014 2-325 AIR 'White Falcons' [REDFALCON] > 09.1.1) TF HQ / TOC (REDFALCON 6 / 5 / TOC) > 09.1.1.6 BN TOC",
+      "pos": [
+        6262.3525,
+        8.49,
+        1634.1046
+      ],
+      "side": "Empty",
+      "source": "mission.sqm",
+      "varName": ""
+    },
+    {
+      "category": "Other",
+      "className": "CUP_A2_Road_OA_asf1_25",
+      "id": "4960",
+      "layer": "09.1.1.6 BN TOC",
+      "layerPath": "JOINT BASE FARABAD \u2014 Tenant Unit OOB (2011) > 09) MAJOR ARMY TENANTS > 09.1) TF RED FALCON (Ground TF core) \u2014 2-325 AIR 'White Falcons' [REDFALCON] > 09.1.1) TF HQ / TOC (REDFALCON 6 / 5 / TOC) > 09.1.1.6 BN TOC",
+      "pos": [
+        6262.7173,
+        8.49,
+        1655.8663
+      ],
+      "side": "Empty",
+      "source": "mission.sqm",
+      "varName": ""
+    },
+    {
       "category": "Prop",
       "className": "Banner_01_F",
       "id": "1771",
@@ -2507,21 +2447,6 @@
     },
     {
       "category": "Prop",
-      "className": "Fox_ArrowXTLadder",
-      "id": "3853",
-      "layer": "02.5) Crash / Fire / Rescue (CFR)",
-      "layerPath": "JOINT BASE FARABAD \u2014 Tenant Unit OOB (2011) > 02) AIRFIELD / TOWER / AIRSPACE MANAGEMENT (USAF) > 02.5) Crash / Fire / Rescue (CFR)",
-      "pos": [
-        5797.9214,
-        8.7084,
-        2297.4895
-      ],
-      "side": "Empty",
-      "source": "mission.sqm",
-      "varName": "fire_ladder_01"
-    },
-    {
-      "category": "Prop",
       "className": "Fridge_01_closed_F",
       "id": "1750",
       "layer": "09.1.1.6 Simple",
@@ -2560,21 +2485,6 @@
         6222.8447,
         9.1337,
         1567.1163
-      ],
-      "side": "Empty",
-      "source": "mission.sqm",
-      "varName": ""
-    },
-    {
-      "category": "Prop",
-      "className": "Fridge_01_closed_F",
-      "id": "4704",
-      "layer": "FARABAD TOWER",
-      "layerPath": "JOINT BASE FARABAD \u2014 Tenant Unit OOB (2011) > 02) AIRFIELD / TOWER / AIRSPACE MANAGEMENT (USAF) > 02.1) ATC / Approach (Airspace Authority) > FARABAD TOWER",
-      "pos": [
-        6459.5088,
-        21.9275,
-        1691.816
       ],
       "side": "Empty",
       "source": "mission.sqm",
@@ -2773,7 +2683,7 @@
       ],
       "side": "Empty",
       "source": "mission.sqm",
-      "varName": "gate_03"
+      "varName": "ARC_barrier_north"
     },
     {
       "category": "Prop",
@@ -2788,7 +2698,7 @@
       ],
       "side": "Empty",
       "source": "mission.sqm",
-      "varName": "gate_01"
+      "varName": "ARC_barrier_main"
     },
     {
       "category": "Prop",
@@ -2804,6 +2714,21 @@
       "side": "Empty",
       "source": "mission.sqm",
       "varName": "gate_02"
+    },
+    {
+      "category": "Prop",
+      "className": "Land_BarGate_F",
+      "id": "4837",
+      "layer": "South Gate",
+      "layerPath": "JOINT BASE FARABAD \u2014 Tenant Unit OOB (2011) > 04) INSIDE / OUTSIDE SECURITY (JOINT) > 04.1) USAF Security Forces (internal + flightline) [SENTRY] > 04.1.1) ECPs / Gates > South Gate",
+      "pos": [
+        6236.8408,
+        11.6236,
+        1354.1001
+      ],
+      "side": "Empty",
+      "source": "mission.sqm",
+      "varName": "ARC_barrier_south"
     },
     {
       "category": "Prop",
@@ -11987,6 +11912,51 @@
     },
     {
       "category": "Prop",
+      "className": "Land_HelipadEmpty_F",
+      "id": "4838",
+      "layer": "Main Gate",
+      "layerPath": "JOINT BASE FARABAD \u2014 Tenant Unit OOB (2011) > 04) INSIDE / OUTSIDE SECURITY (JOINT) > 04.1) USAF Security Forces (internal + flightline) [SENTRY] > 04.1.1) ECPs / Gates > Main Gate",
+      "pos": [
+        5218.0,
+        13.03,
+        2679.0
+      ],
+      "side": "Empty",
+      "source": "mission.sqm",
+      "varName": "ARC_guardpost_main"
+    },
+    {
+      "category": "Prop",
+      "className": "Land_HelipadEmpty_F",
+      "id": "4839",
+      "layer": "North Gate",
+      "layerPath": "JOINT BASE FARABAD \u2014 Tenant Unit OOB (2011) > 04) INSIDE / OUTSIDE SECURITY (JOINT) > 04.1) USAF Security Forces (internal + flightline) [SENTRY] > 04.1.1) ECPs / Gates > North Gate",
+      "pos": [
+        6735.0,
+        13.5,
+        3240.0
+      ],
+      "side": "Empty",
+      "source": "mission.sqm",
+      "varName": "ARC_guardpost_north"
+    },
+    {
+      "category": "Prop",
+      "className": "Land_HelipadEmpty_F",
+      "id": "4840",
+      "layer": "South Gate",
+      "layerPath": "JOINT BASE FARABAD \u2014 Tenant Unit OOB (2011) > 04) INSIDE / OUTSIDE SECURITY (JOINT) > 04.1) USAF Security Forces (internal + flightline) [SENTRY] > 04.1.1) ECPs / Gates > South Gate",
+      "pos": [
+        6221.1445,
+        7.1932,
+        1333.7781
+      ],
+      "side": "Empty",
+      "source": "mission.sqm",
+      "varName": "ARC_guardpost_south"
+    },
+    {
+      "category": "Prop",
       "className": "Land_HelipadSquare_F",
       "id": "3199",
       "layer": "09.2.3) Attack (Apache role) [WOLFPACK]  (map your AH-47 mod here)",
@@ -12100,6 +12070,21 @@
         5710.5,
         8.49,
         2268.0
+      ],
+      "side": "Empty",
+      "source": "mission.sqm",
+      "varName": ""
+    },
+    {
+      "category": "Prop",
+      "className": "Land_HelipadSquare_F",
+      "id": "4836",
+      "layer": "Karkanak Prison",
+      "layerPath": "Location_Markers > Karkanak Prison",
+      "pos": [
+        2230.5398,
+        4.1781,
+        1441.1276
       ],
       "side": "Empty",
       "source": "mission.sqm",
@@ -13060,6 +13045,36 @@
         6241.5,
         12.4027,
         1571.5
+      ],
+      "side": "Empty",
+      "source": "mission.sqm",
+      "varName": ""
+    },
+    {
+      "category": "Prop",
+      "className": "Land_LampSolar_F",
+      "id": "4962",
+      "layer": "09.1.1.6 BN TOC",
+      "layerPath": "JOINT BASE FARABAD \u2014 Tenant Unit OOB (2011) > 09) MAJOR ARMY TENANTS > 09.1) TF RED FALCON (Ground TF core) \u2014 2-325 AIR 'White Falcons' [REDFALCON] > 09.1.1) TF HQ / TOC (REDFALCON 6 / 5 / TOC) > 09.1.1.6 BN TOC",
+      "pos": [
+        6253.2793,
+        12.4027,
+        1630.1552
+      ],
+      "side": "Empty",
+      "source": "mission.sqm",
+      "varName": ""
+    },
+    {
+      "category": "Prop",
+      "className": "Land_LampSolar_F",
+      "id": "4963",
+      "layer": "09.1.1.6 BN TOC",
+      "layerPath": "JOINT BASE FARABAD \u2014 Tenant Unit OOB (2011) > 09) MAJOR ARMY TENANTS > 09.1) TF RED FALCON (Ground TF core) \u2014 2-325 AIR 'White Falcons' [REDFALCON] > 09.1.1) TF HQ / TOC (REDFALCON 6 / 5 / TOC) > 09.1.1.6 BN TOC",
+      "pos": [
+        6252.9102,
+        12.4042,
+        1662.3336
       ],
       "side": "Empty",
       "source": "mission.sqm",
@@ -15367,9 +15382,9 @@
       "layer": "09.1.1.6 Interactive",
       "layerPath": "JOINT BASE FARABAD \u2014 Tenant Unit OOB (2011) > 09) MAJOR ARMY TENANTS > 09.1) TF RED FALCON (Ground TF core) \u2014 2-325 AIR 'White Falcons' [REDFALCON] > 09.1.1) TF HQ / TOC (REDFALCON 6 / 5 / TOC) > 09.1.1.6 BN TOC > 09.1.1.6 Interactive",
       "pos": [
-        6232.251,
+        6232.291,
         9.1644,
-        1586.4512
+        1586.7971
       ],
       "side": "Empty",
       "source": "mission.sqm",
@@ -16252,9 +16267,9 @@
       "layer": "FARABAD TOWER",
       "layerPath": "JOINT BASE FARABAD \u2014 Tenant Unit OOB (2011) > 02) AIRFIELD / TOWER / AIRSPACE MANAGEMENT (USAF) > 02.1) ATC / Approach (Airspace Authority) > FARABAD TOWER",
       "pos": [
-        6461.6943,
+        6461.7026,
         22.0837,
-        1696.3309
+        1696.493
       ],
       "side": "Empty",
       "source": "mission.sqm",
@@ -16267,9 +16282,9 @@
       "layer": "FARABAD TOWER",
       "layerPath": "JOINT BASE FARABAD \u2014 Tenant Unit OOB (2011) > 02) AIRFIELD / TOWER / AIRSPACE MANAGEMENT (USAF) > 02.1) ATC / Approach (Airspace Authority) > FARABAD TOWER",
       "pos": [
-        6460.2129,
+        6460.4961,
         22.0837,
-        1695.9729
+        1696.109
       ],
       "side": "Empty",
       "source": "mission.sqm",
@@ -17485,6 +17500,36 @@
         6261.5,
         8.49,
         1566.375
+      ],
+      "side": "Empty",
+      "source": "mission.sqm",
+      "varName": ""
+    },
+    {
+      "category": "Prop",
+      "className": "Land_PedestrianCrossing_01_6m_6str_F",
+      "id": "4954",
+      "layer": "09.1.1.6 BN TOC",
+      "layerPath": "JOINT BASE FARABAD \u2014 Tenant Unit OOB (2011) > 09) MAJOR ARMY TENANTS > 09.1) TF RED FALCON (Ground TF core) \u2014 2-325 AIR 'White Falcons' [REDFALCON] > 09.1.1) TF HQ / TOC (REDFALCON 6 / 5 / TOC) > 09.1.1.6 BN TOC",
+      "pos": [
+        6262.3555,
+        8.49,
+        1624.7212
+      ],
+      "side": "Empty",
+      "source": "mission.sqm",
+      "varName": ""
+    },
+    {
+      "category": "Prop",
+      "className": "Land_PedestrianCrossing_01_6m_6str_F",
+      "id": "4957",
+      "layer": "09.1.1.6 BN TOC",
+      "layerPath": "JOINT BASE FARABAD \u2014 Tenant Unit OOB (2011) > 09) MAJOR ARMY TENANTS > 09.1) TF RED FALCON (Ground TF core) \u2014 2-325 AIR 'White Falcons' [REDFALCON] > 09.1.1) TF HQ / TOC (REDFALCON 6 / 5 / TOC) > 09.1.1.6 BN TOC",
+      "pos": [
+        6262.7642,
+        8.4915,
+        1665.6168
       ],
       "side": "Empty",
       "source": "mission.sqm",
@@ -20062,9 +20107,9 @@
       "layer": "FARABAD TOWER",
       "layerPath": "JOINT BASE FARABAD \u2014 Tenant Unit OOB (2011) > 02) AIRFIELD / TOWER / AIRSPACE MANAGEMENT (USAF) > 02.1) ATC / Approach (Airspace Authority) > FARABAD TOWER",
       "pos": [
-        6458.9492,
-        22.1411,
-        1692.262
+        6459.2231,
+        22.1415,
+        1691.9886
       ],
       "side": "Empty",
       "source": "mission.sqm",
@@ -20602,9 +20647,9 @@
       "layer": "South Gate",
       "layerPath": "JOINT BASE FARABAD \u2014 Tenant Unit OOB (2011) > 04) INSIDE / OUTSIDE SECURITY (JOINT) > 04.1) USAF Security Forces (internal + flightline) [SENTRY] > 04.1.1) ECPs / Gates > South Gate",
       "pos": [
-        6213.8848,
-        7.7499,
-        1335.422
+        6212.2646,
+        7.7014,
+        1333.3273
       ],
       "side": "Empty",
       "source": "mission.sqm",
@@ -20827,9 +20872,9 @@
       "layer": "South Gate",
       "layerPath": "JOINT BASE FARABAD \u2014 Tenant Unit OOB (2011) > 04) INSIDE / OUTSIDE SECURITY (JOINT) > 04.1) USAF Security Forces (internal + flightline) [SENTRY] > 04.1.1) ECPs / Gates > South Gate",
       "pos": [
-        6214.4922,
-        7.552,
-        1335.7411
+        6212.8721,
+        7.5092,
+        1333.6464
       ],
       "side": "Empty",
       "source": "mission.sqm",
@@ -21745,6 +21790,36 @@
         6261.519,
         8.49,
         1576.5315
+      ],
+      "side": "Empty",
+      "source": "mission.sqm",
+      "varName": ""
+    },
+    {
+      "category": "Prop",
+      "className": "marking_road_line_10m",
+      "id": "4955",
+      "layer": "09.1.1.6 BN TOC",
+      "layerPath": "JOINT BASE FARABAD \u2014 Tenant Unit OOB (2011) > 09) MAJOR ARMY TENANTS > 09.1) TF RED FALCON (Ground TF core) \u2014 2-325 AIR 'White Falcons' [REDFALCON] > 09.1.1) TF HQ / TOC (REDFALCON 6 / 5 / TOC) > 09.1.1.6 BN TOC",
+      "pos": [
+        6261.71,
+        8.49,
+        1590.392
+      ],
+      "side": "Empty",
+      "source": "mission.sqm",
+      "varName": ""
+    },
+    {
+      "category": "Prop",
+      "className": "marking_road_line_10m",
+      "id": "4956",
+      "layer": "09.1.1.6 BN TOC",
+      "layerPath": "JOINT BASE FARABAD \u2014 Tenant Unit OOB (2011) > 09) MAJOR ARMY TENANTS > 09.1) TF RED FALCON (Ground TF core) \u2014 2-325 AIR 'White Falcons' [REDFALCON] > 09.1.1) TF HQ / TOC (REDFALCON 6 / 5 / TOC) > 09.1.1.6 BN TOC",
+      "pos": [
+        6262.0366,
+        8.49,
+        1604.4156
       ],
       "side": "Empty",
       "source": "mission.sqm",
@@ -23375,11 +23450,12 @@
     "by_category": {
       "Equipment": 12,
       "Fixed-Wing": 12,
-      "Ground Vehicle": 103,
+      "Ground Vehicle": 97,
       "Infantry (standalone)": 6,
-      "Prop": 1411,
+      "Other": 2,
+      "Prop": 1420,
       "Rotary-Wing": 14
     },
-    "total": 1558
+    "total": 1563
   }
 }
