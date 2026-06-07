@@ -77,6 +77,12 @@ if (!isNull _caller) then { _owner = owner _caller; };
 if (_owner <= 0 && { !isNil "remoteExecutedOwner" }) then { _owner = remoteExecutedOwner; };
 
 private _rpc = "ARC_fnc_tocRequestCloseoutAndOrder";
+// Helper: send a toast back to the originating client (best-effort)
+private _toast = {
+    params ["_title", "_msg"];
+    if (_owner > 0) then { [_title, _msg] remoteExec ["ARC_fnc_clientToast", _owner]; };
+};
+
 private _deny = {
     params ["_reason", ["_details", []], ["_toastMsg", ""]];
 
@@ -89,12 +95,6 @@ private _deny = {
     if (!(_toastMsg isEqualTo "")) then {
         ["TOC Ops", _toastMsg] call _toast;
     };
-};
-
-// Helper: send a toast back to the originating client (best-effort)
-private _toast = {
-    params ["_title", "_msg"];
-    if (_owner > 0) then { [_title, _msg] remoteExec ["ARC_fnc_clientToast", _owner]; };
 };
 
 private _trimFn = compile "params ['_s']; trim _s";
@@ -331,7 +331,8 @@ if (!(_ordersExisting isEqualType [])) then { _ordersExisting = []; };
 private _hasIssued = false;
 {
     if (!(_x isEqualType []) || { (count _x) < 7 }) then { continue; };
-    _x params ["_oid", "_iat", "_st", "_ot", "_tg", "_data", "_meta"];
+    private _st = _x select 2;
+    private _tg = _x select 4;
     if (!(_tg isEqualTo _gid)) then { continue; };
     if (toUpper _st isEqualTo "ISSUED") exitWith { _hasIssued = true; };
 } forEach _ordersExisting;
@@ -345,7 +346,11 @@ if (_hasIssued) exitWith
 
     {
         if (!(_x isEqualType []) || { (count _x) < 7 }) then { continue; };
-        _x params ["_oid", "_iat", "_st", "_ot", "_tg", "_data", "_meta"];
+        private _oid = _x select 0;
+        private _iat = _x select 1;
+        private _st = _x select 2;
+        private _ot = _x select 3;
+        private _tg = _x select 4;
         if (!(_tg isEqualTo _gid)) then { continue; };
         if (!(toUpper _st isEqualTo "ISSUED")) then { continue; };
         if (!(_iat isEqualType 0)) then { _iat = -1; };
@@ -591,7 +596,10 @@ if (!(_orders isEqualType [])) then { _orders = []; };
 private _bestAt = -1;
 {
     if (!(_x isEqualType []) || { (count _x) < 7 }) then { continue; };
-    _x params ["_oid", "_iat", "_st", "_ot", "_tg", "_data", "_meta"];
+    private _oid = _x select 0;
+    private _iat = _x select 1;
+    private _st = _x select 2;
+    private _tg = _x select 4;
     if (!(_tg isEqualTo _gid)) then { continue; };
     if (!(toUpper _st isEqualTo "ISSUED")) then { continue; };
     if (!(_iat isEqualType 0)) then { continue; };
