@@ -222,9 +222,9 @@ if (_rebuild) then
             // S2/Intelligence/ISR leads created via the TOC. Read from the lead
             // record's missionMeta (index 11); default FIELD.
             private _mm = if ((count _lead) >= 12 && { (_lead select 11) isEqualType [] }) then { _lead select 11 } else { [] };
-            private _origin = toUpper ([_mm, "origin", "FIELD"] call ARC_fnc_uiConsoleGetPair);
-            if (!(_origin isEqualType "")) then { _origin = "FIELD"; };
-            if !(_origin in ["FIELD", "S2"]) then { _origin = "FIELD"; };
+            private _originRaw = [_mm, "origin", "FIELD"] call ARC_fnc_uiConsoleGetPair;
+            private _origin = if (_originRaw isEqualType "") then { toUpper _originRaw } else { "FIELD" };
+            if !(_origin in ["FIELD", "S2"]) then { _origin = "FIELD" };
 
             private _label = format ["[%1][%2] %3 | STR %4%5 | %6", _origin, _typ, _name, _strPct, "%", _ttlTxt];
             private _idx = _cLead lbAdd _label;
