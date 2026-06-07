@@ -31,9 +31,12 @@ params [
 
 if (isNull _grp) exitWith {};
 
-// _destRad is received for API consistency with convoy callers; the final
-// waypoint radius is driven by ARC_convoyFinalWpRadiusM (tunable).
-_destRad;
+// Final waypoint tolerance is deliberately wider than the old fixed 45m default.
+// Arma convoy AI tends to over-correct or circle when forced to hit an exact end point,
+// especially when the incident marker and nearest road snap are offset.
+private _destRadN = _destRad;
+if (!(_destRadN isEqualType 0)) then { _destRadN = 40; };
+_destRadN = (_destRadN max 40) min 260;
 
 // Clear any existing waypoints.
 while { (count waypoints _grp) > 0 } do { deleteWaypoint ((waypoints _grp) select 0); };
@@ -54,9 +57,10 @@ _interval = (_interval max 150) min 2000;
 
 private _maxWps = _maxWpsUser;
 
-private _finalWpRad = missionNamespace getVariable ["ARC_convoyFinalWpRadiusM", 45];
-if (!(_finalWpRad isEqualType 0)) then { _finalWpRad = 45; };
-_finalWpRad = (_finalWpRad max 25) min 150;
+private _finalWpRadDefault = ((_destRadN max 95) min 160);
+private _finalWpRad = missionNamespace getVariable ["ARC_convoyFinalWpRadiusM", _finalWpRadDefault];
+if (!(_finalWpRad isEqualType 0) || { _finalWpRad <= 0 }) then { _finalWpRad = _finalWpRadDefault; };
+_finalWpRad = (_finalWpRad max 60) min 220;
 
 private _wps = [];
 
@@ -169,7 +173,7 @@ if ((count _wps) isEqualTo 0 || { ((_wps select ((count _wps) - 1)) distance2D _
     _wp setWaypointFormation "COLUMN";
     _wp setWaypointCompletionRadius 45;
 
-    // Final wp uses a small radius so the lead stays on-road longer.
+    // Final waypoint uses a relaxed radius so the lead does not circle the snapped road point.
     if (_forEachIndex isEqualTo ((count _wps) - 1)) then
     {
         _wp setWaypointCompletionRadius _finalWpRad;
