@@ -11,7 +11,30 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
-## 2026-06-07 — Shared player-snapshot helper + config-class cache (Mode C/D)
+## 2026-06-07 — Single-track lead model (origin discriminator + Path B retirement)
+
+**Branch/Commit:** copilot/read-only-architect-review @ commit: unrecoverable (SHA assigned by the push that lands this entry; recorded per the contributor rule rather than a `<pending>` placeholder)
+
+**Scenario:** Lead-system integration remediation. Established a clean single-track lead model that distinguishes field-generated leads from S2/Intelligence/ISR leads and routes both to incidents only through the governed TOC backlog:
+- **Stage 1 (terminology):** UI paint strings now name the approval surface the "S2 Approval Queue" and reserve "TOC Queue (backlog)" for the incident-feeding backlog (`fn_uiConsoleTocQueuePaint`, `fn_uiConsoleOpsPaint`, `fn_uiConsoleDashboardPaint`). No logic touched.
+- **Stage 2 (origin):** `ARC_fnc_leadCreate` takes an `_origin` param (default `FIELD`) and injects an `["origin", ...]` pair into `missionMeta`, preserving the positional 12-field record shape. S2/ISR/TOC create sites in `fn_intelQueueDecide` stamp `S2`. Origin surfaced as a `[FIELD]`/`[S2]` badge in the Ops, Dashboard (FIELD/S2 counts), and Workboard lead panels.
+- **Stage 3 (retire Path B):** `fn_intelOrderIssue` coerces `PROCEED`/`LEAD` order requests to `STANDBY`; the `LEAD` case is a no-op that consumes no lead. The FOLLOWON PROCEED disposition in `fn_intelQueueDecide` now peeks the strongest pool lead, enqueues it via `ARC_fnc_tocBacklogEnqueue`, and issues a STANDBY order. Dead lead-assignment rendering removed from the Ops paint.
+- **Stage 4 (opt-in auto-routing):** `ARC_leadAutoEnqueueField` (default `false`) + `ARC_leadAutoEnqueueMinStrength` (default `0.7`) auto-enqueue high-confidence FIELD leads into the backlog at creation; opt-in to preserve the review-cycle default.
+- **Stage 5 (attrition visibility):** pool-cap eviction now records a `DROPPED` `leadHistory` end-state plus the existing OPS notice.
+
+While touching `fn_intelOrderIssue.sqf` for Stage 3, its pre-existing parser-hostile patterns (bare `trim`, `#` indexing) were converted to the sanctioned compiled-helper / `select` forms so the changed-file compat scan stays green.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict <8 changed .sqf>` | PASS | No known parser-compat patterns across all 8 changed files. |
+| 2 | New contract suite | `bash tests/static/lead_origin_contract_checks.sh` | PASS | 12/12 — origin on every lead, no live LEAD-order assignment path, backlog routing, UI badges. |
+| 3 | Full static-suite regression | `for t in tests/static/*.sh; do bash "$t"; done` | PASS | All suites pass (prior + new lead-origin suite). |
+| 4 | Workflow YAML parses | `python3 -c "import yaml; yaml.safe_load(open('.github/workflows/arma-preflight.yml'))"` | PASS | New preflight step wired for the lead-origin suite. |
+| 5 | SQF lint (changed files) | `sqflint -e w <each changed .sqf>` | BLOCKED | sqflint not installed in this sandbox; compat scan (CI's gating pre-step) passed for all changed files. |
+| 6 | Runtime smoke (local MP / dedicated / JIP) | Generate field + S2 leads, verify badges, PROCEED→backlog, auto-enqueue flag, pool-cap DROPPED history | BLOCKED | Arma runtime unavailable in this sandbox; changes are grep-contract protected and behaviour-scoped. |
+
+---
+
 
 **Branch/Commit:** copilot/read-only-architect-review @ commit: unrecoverable (SHA assigned by the push that lands this entry; recorded per the contributor rule rather than a `<pending>` placeholder)
 

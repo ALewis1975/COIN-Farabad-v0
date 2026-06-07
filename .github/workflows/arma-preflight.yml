@@ -262,3 +262,7 @@ jobs:
       - name: Shared perf helpers (player snapshot + config-class cache) static validation
         run: |
           tests/static/perf_shared_helpers_contract_checks.sh
+
+      - name: Lead origin / single-track routing contract static validation
+        run: |
+          bash tests/static/lead_origin_contract_checks.sh

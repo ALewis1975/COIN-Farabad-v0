@@ -639,6 +639,14 @@ missionNamespace setVariable ["ARC_suspiciousLeadCircleRadiusM_person", 250, tru
 missionNamespace setVariable ["ARC_suspiciousLeadCircleRadiusM_vehicle", 350, true];
 missionNamespace setVariable ["ARC_suspiciousLeadCircleTtlSec", 75*60, true];
 
+// Lead routing (single-track model): origin discrimination is automatic, but the
+// optional auto-enqueue policy routes high-confidence FIELD-origin leads straight
+// into the TOC Queue (backlog) at creation. Disabled by default to preserve the
+// deliberate S2/TOC review cycle; ARC_leadAutoEnqueueMinStrength gates which leads
+// qualify when the policy is enabled.
+missionNamespace setVariable ["ARC_leadAutoEnqueueField", false, true];
+missionNamespace setVariable ["ARC_leadAutoEnqueueMinStrength", 0.7, true];
+
 // VBIED vehicle class pool (also used elsewhere; keep authoritative here)
 missionNamespace setVariable ["ARC_vbiedVehicleClassPool", [
     "UK3CB_TKC_C_Datsun_Civ_Closed",

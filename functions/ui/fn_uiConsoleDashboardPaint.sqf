@@ -409,16 +409,32 @@ private _svcIssues = [_baseServices, "issues", []] call ARC_fnc_uiConsoleGetPair
 if (!(_svcIssues isEqualType [])) then { _svcIssues = []; };
 private _svcIssueLabel = if ((count _svcIssues) > 0) then { _svcIssues joinString ", " } else { "Base services nominal" };
 
+// Lead origin breakdown (Stage 2): show how many pool leads are field-generated
+// vs S2/Intelligence/ISR so the TOC can triage at a glance.
+private _leadFieldCnt = 0;
+private _leadS2Cnt = 0;
+{
+    if (_x isEqualType []) then
+    {
+        private _mm = if ((count _x) >= 12 && { (_x select 11) isEqualType [] }) then { _x select 11 } else { [] };
+        private _oRaw = [_mm, "origin", "FIELD"] call ARC_fnc_uiConsoleGetPair;
+        private _o = if (_oRaw isEqualType "") then { toUpper _oRaw } else { "FIELD" };
+        if (_o isEqualTo "S2") then { _leadS2Cnt = _leadS2Cnt + 1 } else { _leadFieldCnt = _leadFieldCnt + 1 };
+    };
+} forEach _leadPool;
+
 private _secIntel    = format [
     "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Intel / Leads</t><br/>" +
-    "<t color='#DDDDDD'>Lead pool:</t> %1<br/>" +
+    "<t color='#DDDDDD'>Lead pool:</t> %1 <t color='#AAAAAA'>(field %5 / S2 %6)</t><br/>" +
     "<t color='#DDDDDD'>TOC Queue (follow-up):</t> %2<br/>" +
-    "<t color='#DDDDDD'>Queue oldest:</t> %3<br/>" +
+    "<t color='#DDDDDD'>Approval queue oldest:</t> %3<br/>" +
     "<t color='#DDDDDD'>Latest intel:</t> %4<br/><br/>",
     count _leadPool,
     _backlogCnt,
     _qOldestDesc,
-    _lastIntel
+    _lastIntel,
+    _leadFieldCnt,
+    _leadS2Cnt
 ];
 private _secUnits = "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Unit Availability</t><br/>" + _unitsBlock + "<br/><br/>";
 private _secBase = format [
