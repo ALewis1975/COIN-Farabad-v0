@@ -71,7 +71,7 @@ _GROUND_VEHICLE_PATTERNS = (
 # Equipment / supplies / crates (not personnel-carrying vehicles)
 _EQUIPMENT_PATTERNS = (
     "B_Slingload", "rhsusf_props_",
-    "ACRE_Radio", "US_Warfare",
+    "TFAR_", "US_Warfare",
     "RuggedTerminal",
 )
 

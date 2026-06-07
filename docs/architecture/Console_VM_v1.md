@@ -150,11 +150,11 @@ Recommended envelope fields:
 ### 2.10 Communications/SOI section (`sections.comms`)
 | VM field | Source key(s) | Type | Default/fallback |
 |---|---|---|---|
-| `acre_required` | `CfgPatches >> acre_main` presence check | `BOOL` | `false` |
+| `tfar_required` | `CfgPatches >> task_force_radio` presence check | `BOOL` | `false` |
 | `command_nets` | `ARC_commsCommandNets` | `ARRAY` | built-in SOI quick plan |
 | `prc152_plan` | `ARC_commsPrc152Plan` | `ARRAY` | built-in SOI quick plan |
-| `prc343_buckets` | `ARC_commsPrc343Buckets` | `ARRAY` | built-in SOI quick plan |
-| `radio_crates` | literal | `ARRAY` | `["ACRE_RadioSupplyCrate"]` |
+| `short_range_buckets` | `ARC_commsShortRangeBuckets` (falls back to `ARC_commsPrc343Buckets`) | `ARRAY` | built-in SOI quick plan |
+| `radio_crates` | literal | `ARRAY` | `["TFAR_NATO_Radio_Crate"]` |
 | `role_hint` | literal | `STRING` | soft-enforcement guidance |
 
 ### 2.11 cTab interoperability section (`sections.ctab`)

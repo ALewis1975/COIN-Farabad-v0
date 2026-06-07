@@ -5,7 +5,7 @@
 
     UI09 tab model:
       DASH      - Dashboard
-      COMMS     - ACRE/SOI + ACE/KAT CASEVAC integration
+      COMMS     - TFAR/SOI + ACE/KAT CASEVAC integration
       INTEL     - Intelligence (S2)
       OPS       - Operations (S3)
       AIR       - Airbase snapshot + tower controls

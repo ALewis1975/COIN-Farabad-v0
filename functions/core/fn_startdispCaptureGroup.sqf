@@ -72,7 +72,7 @@ private _explosives = [];
             }
             else
             {
-                if ((_uCls find "RADIO" >= 0) || { (_uCls find "ACRE" >= 0) || { (_uCls find "TFAR" >= 0) } }) then
+                if ((_uCls find "RADIO" >= 0) || { (_uCls find "TFAR" >= 0) }) then
                 {
                     _radios = [_radios, _cls, 40] call _incClass;
                 }
