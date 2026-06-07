@@ -54,14 +54,18 @@ _origin = toUpper _origin;
 if !(_origin in ["FIELD", "S2"]) then { _origin = "FIELD"; };
 
 private _hasOrigin = false;
+for "_i" from 0 to ((count _missionMeta) - 1) do
 {
-    if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo "origin" }) exitWith
+    private _p = _missionMeta select _i;
+    if (_p isEqualType [] && { (count _p) >= 2 } && { (_p select 0) isEqualTo "origin" }) exitWith
     {
         _hasOrigin = true;
-        if ((_x select 1) isEqualType "") then { _origin = toUpper (_x select 1); };
+        private _v = _p select 1;
+        if (_v isEqualType "") then { _origin = toUpper _v; };
         if !(_origin in ["FIELD", "S2"]) then { _origin = "FIELD"; };
+        _missionMeta set [_i, ["origin", _origin]];
     };
-} forEach _missionMeta;
+};
 if (!_hasOrigin) then { _missionMeta pushBack ["origin", _origin]; };
 
 _strength = (_strength max 0) min 1;
