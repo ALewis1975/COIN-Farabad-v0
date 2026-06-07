@@ -210,6 +210,7 @@ if (_summary isEqualTo "") then
         case "IED_DEVICE": { "IED device located and cleared." };
         case "VBIED_VEHICLE": { "Suspicious vehicle inspected and cleared." };
         case "CACHE_SEARCH": { "Cache located and secured." };
+        case "CASEVAC_CASUALTY": { "Casualty reached and stabilized; preparing evacuation." };
         case "CIV_MEET": { "Conducted local engagement; collected HUMINT." };
         case "LOG_DROP": { "Delivered supplies to the designated point." };
         case "ESCORT_END": { "Escort reached destination; arrival confirmed." };
@@ -223,6 +224,7 @@ private _cat = switch (_kindU) do
     case "IED_DEVICE": { "TECHINT" };
     case "VBIED_VEHICLE": { "TECHINT" };
     case "CACHE_SEARCH": { "DOCS" };
+    case "CASEVAC_CASUALTY": { "MEDEVAC" };
     case "CIV_MEET": { "HUMINT" };
     case "LOG_DROP": { "LOGISTICS" };
     case "ESCORT_END": { "OPS" };

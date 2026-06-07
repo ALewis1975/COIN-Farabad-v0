@@ -71,6 +71,7 @@ private _cat = switch (_kind) do
     case "IED_DEVICE": { "TECHINT" };
     case "VBIED_VEHICLE": { "TECHINT" };
     case "CACHE_SEARCH": { "DOCS" };
+    case "CASEVAC_CASUALTY": { "MEDEVAC" };
     case "CIV_MEET": { "HUMINT" };
     case "LOG_DROP": { "LOGISTICS" };
     case "ESCORT_END": { "OPS" };
@@ -83,6 +84,7 @@ private _defaultSummary = switch (_kind) do
     case "IED_DEVICE": { "Device cleared" };
     case "VBIED_VEHICLE": { "Suspicious vehicle cleared" };
     case "CACHE_SEARCH": { "Cache secured" };
+    case "CASEVAC_CASUALTY": { "Casualty reached and stabilized" };
     case "CIV_MEET": { "Meeting conducted" };
     case "LOG_DROP": { "Supplies delivered" };
     case "ESCORT_END": { "Arrival confirmed" };
