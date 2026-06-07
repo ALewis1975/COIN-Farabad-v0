@@ -12,6 +12,7 @@ This inventory documents every top-level key declared by `functions/core/fn_stat
 ## Subsystem reset notes
 - **AIRBASE v1:** `airbase_v1_queue`, `airbase_v1_records`, and related control keys persist across normal init/restart. Hard reset clears queue, records, clearance requests/history/events, runway locks, active execution, notification state, and publishes a clean AIR tab snapshot.
 - **CASREQ v1:** Compact records persist for active/JIP workflows. Hard reset clears records, open/closed indexes, sequence, and the public CASREQ bundle/revision.
+- **Base services v1:** `baseServices_v1_enabled`, `baseServices_v1_version`, `baseServices_v1_services`, and `baseServices_v1_snapshot` persist the MAYOR/S1/S4/MED readiness actor model. Hard reset reseeds the service actor snapshot from defaults.
 - **Unknown legacy keys:** `resetAll` now resets the authoritative blob from defaults, so keys not declared below are removed from future saves unless code re-adds them intentionally via `ARC_fnc_stateSet`.
 
 ## Key inventory
@@ -246,6 +247,10 @@ This inventory documents every top-level key declared by `functions/core/fn_stat
 | `companyVirtualOpsCounter` | Company command | `fn_stateInit.sqf:340` | `fn_stateLoad.sqf` default merge | `fn_stateSave.sqf` whole-blob save | Default reset via `resetAll`; subsystem-specific overrides where applicable. |
 | `companyVirtualOpsLastTickAt` | Company command | `fn_stateInit.sqf:341` | `fn_stateLoad.sqf` default merge | `fn_stateSave.sqf` whole-blob save | Default reset via `resetAll`; subsystem-specific overrides where applicable. |
 | `companyVirtualOpsLastRollupAt` | Company command | `fn_stateInit.sqf:342` | `fn_stateLoad.sqf` default merge | `fn_stateSave.sqf` whole-blob save | Default reset via `resetAll`; subsystem-specific overrides where applicable. |
+| `baseServices_v1_enabled` | Base services v1 | `fn_stateInit.sqf:345` | `fn_stateLoad.sqf` default merge | `fn_stateSave.sqf` whole-blob save | Explicit base-services hard-reset block in `fn_resetAll.sqf`. |
+| `baseServices_v1_version` | Base services v1 | `fn_stateInit.sqf:346` | `fn_stateLoad.sqf` default merge | `fn_stateSave.sqf` whole-blob save | Explicit base-services hard-reset block in `fn_resetAll.sqf`. |
+| `baseServices_v1_services` | Base services v1 | `fn_stateInit.sqf:347` | `fn_stateLoad.sqf` default merge | `fn_stateSave.sqf` whole-blob save | Explicit base-services hard-reset block in `fn_resetAll.sqf`. |
+| `baseServices_v1_snapshot` | Base services v1 | `fn_stateInit.sqf:348` | `fn_stateLoad.sqf` default merge | `fn_stateSave.sqf` whole-blob save | Explicit base-services hard-reset block in `fn_resetAll.sqf`. |
 | `airbase_v1_version` | AIRBASE v1 | `fn_stateInit.sqf:345` | `fn_stateLoad.sqf` default merge | `fn_stateSave.sqf` whole-blob save | Explicit AIRBASE hard-reset block in `fn_resetAll.sqf`. |
 | `airbase_v1_records` | AIRBASE v1 | `fn_stateInit.sqf:346` | `fn_stateLoad.sqf` default merge | `fn_stateSave.sqf` whole-blob save | Explicit AIRBASE hard-reset block in `fn_resetAll.sqf`. |
 | `airbase_v1_queue` | AIRBASE v1 | `fn_stateInit.sqf:347` | `fn_stateLoad.sqf` default merge | `fn_stateSave.sqf` whole-blob save | Explicit AIRBASE hard-reset block in `fn_resetAll.sqf`. |
