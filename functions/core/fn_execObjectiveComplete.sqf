@@ -35,6 +35,8 @@ if (isNull _target) exitWith {false};
 if (isNull _caller) exitWith {false};
 if (!isPlayer _caller) exitWith {false};
 
+private _trimFn = compile "params ['_s']; trim _s";
+
 // Dedicated MP hardening: validate sender identity.
 if (!isNil "remoteExecutedOwner") then
 {
@@ -50,7 +52,7 @@ if (!isNil "remoteExecutedOwner") then
     };
 };
 
-private _stageU = toUpper (trim _stage);
+private _stageU = toUpper ([_stage] call _trimFn);
 // IED/VBIED suspicious-object objectives support a "scan" discovery stage.
 if !(_stageU in ["DISCOVER", "DISCOVER_SCAN", "COMPLETE"]) then { _stageU = "COMPLETE"; };
 
@@ -61,17 +63,17 @@ if (_taskId isEqualTo "") exitWith {false};
 private _activeKind = ["activeObjectiveKind", ""] call ARC_fnc_stateGet;
 private _activeNet = ["activeObjectiveNetId", ""] call ARC_fnc_stateGet;
 
-if (_activeKind isNotEqualTo _kind) exitWith {false};
-if (_activeNet isNotEqualTo "" && { (netId _target) isNotEqualTo _activeNet }) exitWith {false};
+if !(_activeKind isEqualTo _kind) exitWith {false};
+if !(_activeNet isEqualTo "" || { (netId _target) isEqualTo _activeNet }) exitWith {false};
 
-private _kindU = toUpper (trim _kind);
+private _kindU = toUpper ([_kind] call _trimFn);
 
 // Tiny kv helper for threat records
 private _kvGet = {
     params ["_pairs", "_key", ["_default",""]];
     private _out = _default;
     {
-        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _key }) exitWith { _out = _x # 1; };
+        if (_x isEqualType [] && { (count _x) >= 2 } && { ((_x select 0) isEqualTo _key) }) exitWith { _out = _x select 1; };
     } forEach _pairs;
     _out
 };
@@ -86,9 +88,9 @@ private _getThreatState = {
     { if (_x isEqualType [] && { ([_x, "threat_id", ""] call _kvGet) isEqualTo _tid }) exitWith { _idx = _forEachIndex; }; } forEach _records;
     if (_idx < 0) exitWith {""};
 
-    private _st = [_records # _idx, "state", ""] call _kvGet;
+    private _st = [_records select _idx, "state", ""] call _kvGet;
     if (!(_st isEqualType "")) then { _st = ""; };
-    toUpper (trim _st)
+    toUpper ([_st] call _trimFn)
 };
 
 // CACHE_SEARCH is a multi-container objective: allow interactions with any cache container.
@@ -149,7 +151,8 @@ if (_stageU in ["DISCOVER","DISCOVER_SCAN"]) exitWith
         ["caller", name _caller]
     ];
 
-    if ((trim _details) isNotEqualTo "") then { _meta pushBack ["details", trim _details]; };
+    private _detailsTrimmed = [_details] call _trimFn;
+    if !(_detailsTrimmed isEqualTo "") then { _meta pushBack ["details", _detailsTrimmed]; };
 
     ["TECHINT", _summary, _pos, _meta] call ARC_fnc_intelLog;
 
@@ -175,7 +178,7 @@ if (_kindU in ["IED_DEVICE", "VBIED_VEHICLE"]) then
     ];
 
     private _tid = [_taskId, "IED", "IED_SUSPICIOUS_OBJECT", _tCtx] call ARC_fnc_threatCreateFromTask;
-    if (_tid isNotEqualTo "") then
+    if !(_tid isEqualTo "") then
     {
         private _cur = [_tid] call _getThreatState;
         if (_cur in ["", "CREATED", "ACTIVE"]) then
@@ -193,7 +196,7 @@ if (_kindU in ["IED_DEVICE", "VBIED_VEHICLE"]) then
 
 // Basic idempotence for single-object objectives (prevents double-click / two-player spam).
 // CACHE_SEARCH is special and must not be blocked here.
-if (_kindU isNotEqualTo "CACHE_SEARCH") then
+if !(_kindU isEqualTo "CACHE_SEARCH") then
 {
     private _done = _target getVariable ["ARC_objectiveCompleted", false];
     if (!(_done isEqualType true) && !(_done isEqualType false)) then { _done = false; };
@@ -210,6 +213,7 @@ if (_summary isEqualTo "") then
         case "IED_DEVICE": { "IED device located and cleared." };
         case "VBIED_VEHICLE": { "Suspicious vehicle inspected and cleared." };
         case "CACHE_SEARCH": { "Cache located and secured." };
+        case "CASEVAC_CASUALTY": { "Casualty reached and stabilized; preparing evacuation." };
         case "CIV_MEET": { "Conducted local engagement; collected HUMINT." };
         case "LOG_DROP": { "Delivered supplies to the designated point." };
         case "ESCORT_END": { "Escort reached destination; arrival confirmed." };
@@ -223,6 +227,7 @@ private _cat = switch (_kindU) do
     case "IED_DEVICE": { "TECHINT" };
     case "VBIED_VEHICLE": { "TECHINT" };
     case "CACHE_SEARCH": { "DOCS" };
+    case "CASEVAC_CASUALTY": { "MEDEVAC" };
     case "CIV_MEET": { "HUMINT" };
     case "LOG_DROP": { "LOGISTICS" };
     case "ESCORT_END": { "OPS" };
@@ -238,9 +243,10 @@ private _meta = [
     ["caller", name _caller]
 ];
 
-if ((trim _details) isNotEqualTo "") then
+private _detailsTrimmed = [_details] call _trimFn;
+if !(_detailsTrimmed isEqualTo "") then
 {
-    _meta pushBack ["details", trim _details];
+    _meta pushBack ["details", _detailsTrimmed];
 };
 
 [_cat, _summary, _pos, _meta] call ARC_fnc_intelLog;
@@ -266,7 +272,7 @@ if (_kindU in ["IED_DEVICE", "VBIED_VEHICLE"]) then
 
     // Ensure a threat record exists (idempotent) and update states without downgrades.
     private _tid = [_taskId, "IED", "IED_SUSPICIOUS_OBJECT", _tCtx] call ARC_fnc_threatCreateFromTask;
-    if (_tid isNotEqualTo "") then
+    if !(_tid isEqualTo "") then
     {
         private _cur = [_tid] call _getThreatState;
 
@@ -327,7 +333,7 @@ if (_leadOut) then
     private _tag = ["activeLeadTag", ""] call ARC_fnc_stateGet;
     if (!(_tag isEqualType "")) then { _tag = ""; };
 
-    private _tagU = toUpper (trim _tag);
+    private _tagU = toUpper ([_tag] call _trimFn);
 
     // 1) HUMINT interview -> follow-on recon lead
     if (_kindU isEqualTo "CIV_MEET") then
@@ -338,7 +344,7 @@ if (_leadOut) then
         if (_existing isEqualTo "") then
         {
             private _lid = ["RECON", "Lead: HUMINT follow-up", _pos, 0.45, 55*60, _taskId, _incType, "", "SUS_ACTIVITY"] call ARC_fnc_leadCreate;
-            if (_lid isNotEqualTo "") then
+            if !(_lid isEqualTo "") then
             {
                 _target setVariable ["ARC_objectiveLeadId", _lid, true];
             };
@@ -354,7 +360,7 @@ if (_leadOut) then
         if (_existing isEqualTo "") then
         {
             private _lid = ["RECON", "Lead: Vehicle of interest follow-up", _pos, 0.45, 50*60, _taskId, _incType, "", "SUS_VEHICLE"] call ARC_fnc_leadCreate;
-            if (_lid isNotEqualTo "") then
+            if !(_lid isEqualTo "") then
             {
                 _target setVariable ["ARC_objectiveLeadId", _lid, true];
             };

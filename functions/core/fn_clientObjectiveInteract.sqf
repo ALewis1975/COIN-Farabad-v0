@@ -30,7 +30,8 @@ if (isNull _target) exitWith {false};
 if (isNull _caller) exitWith {false};
 if (_kind isEqualTo "") exitWith {false};
 
-private _stageU = toUpper (trim _stage);
+private _trimFn = compile "params ['_s']; trim _s";
+private _stageU = toUpper ([_stage] call _trimFn);
 
 // Helper: remove any stored objective actions for this target (supports int or array)
 private _removeObjectiveActions = {
@@ -71,6 +72,7 @@ private _cat = switch (_kind) do
     case "IED_DEVICE": { "TECHINT" };
     case "VBIED_VEHICLE": { "TECHINT" };
     case "CACHE_SEARCH": { "DOCS" };
+    case "CASEVAC_CASUALTY": { "MEDEVAC" };
     case "CIV_MEET": { "HUMINT" };
     case "LOG_DROP": { "LOGISTICS" };
     case "ESCORT_END": { "OPS" };
@@ -83,6 +85,7 @@ private _defaultSummary = switch (_kind) do
     case "IED_DEVICE": { "Device cleared" };
     case "VBIED_VEHICLE": { "Suspicious vehicle cleared" };
     case "CACHE_SEARCH": { "Cache secured" };
+    case "CASEVAC_CASUALTY": { "Casualty reached and stabilized" };
     case "CIV_MEET": { "Meeting conducted" };
     case "LOG_DROP": { "Supplies delivered" };
     case "ESCORT_END": { "Arrival confirmed" };

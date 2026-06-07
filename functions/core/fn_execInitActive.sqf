@@ -226,6 +226,36 @@ if (_p isEqualTo []) then { _p = +_center; _p resize 3; };
         }
         else
         {
+            if (_kind isEqualTo "CASEVAC_CASUALTY") then
+            {
+                // Downed BLUFOR casualty for a CASEVAC incident: a real wounded unit
+                // at the reported position that players can reach, treat and evacuate.
+                private _grp = createGroup [west, true];
+                _grp setGroupIdGlobal [format ["CASEVAC Casualty %1", _taskId]];
+
+                _obj = _grp createUnit [_class, _p, [], 0, "NONE"];
+                _obj setVariable ["ARC_objectiveKind", _kind, true];
+                _obj setDir (random 360);
+                // Non-combatant, immobile, lying down.
+                _obj setCaptive true;
+                _obj disableAI "MOVE";
+                _obj disableAI "AUTOTARGET";
+                _obj disableAI "TARGET";
+                _obj disableAI "FSM";
+                _obj setBehaviour "CARELESS";
+                _obj setCombatMode "BLUE";
+                _obj setUnitPos "DOWN";
+                // Wounded state: vanilla unconscious; ACE medical (when present) reads the
+                // unit as a casualty to treat/drag.
+                _obj setDamage 0.65;
+                _obj setUnconscious true;
+                // Stay damageable so players (and ACE medical, when present) can treat/heal
+                // the casualty. _failOnKilled is false here, so a casualty death does not
+                // auto-fail the incident — TOC controls closure.
+                _obj allowDamage (!_failOnKilled);
+            }
+            else
+            {
             // Physical object
             _obj = createVehicle [_class, _p, [], 0, "CAN_COLLIDE"];
             // Place at the chosen ATL position; do NOT snap upward (avoids rooftop placement).
@@ -258,6 +288,7 @@ if (_kind isEqualTo "VBIED_VEHICLE") then
     _obj engineOn false;
     _obj lock 0; // unlocked so it can be moved/towed
 };
+            };
         };
     };
 
@@ -478,6 +509,32 @@ if (_needsBuild) then
             _arrivalReq = 5 * 60;
             _holdReq = 3 * 60;
             _deadlineSec = 15 * 60;
+
+            // CASEVAC incidents originate from a BLUFOR casualty (medicalCasevacRequest)
+            // and carry the "CASEVAC" lead tag. Without a spawned casualty the player
+            // arrives to an empty location. Stand up a downed friendly casualty at the
+            // reported position so there is an actual wounded unit to reach and evacuate.
+            if (_leadTagU isEqualTo "CASEVAC") then
+            {
+                private _pool = missionNamespace getVariable ["ARC_casevacCasualtyClassPool", []];
+                if (!(_pool isEqualType [])) then { _pool = []; };
+
+                private _valid = _pool select { _x isEqualType "" && { isClass (configFile >> "CfgVehicles" >> _x) } };
+                if ((count _valid) <= 0) then
+                {
+                    // Prefer proven 3CB Takistani Army BLUFOR classes; fall back to vanilla.
+                    _valid = (["UK3CB_TKA_B_AR", "UK3CB_TKA_B_TL", "UK3CB_TKA_B_OFF", "B_Soldier_F"]) select { isClass (configFile >> "CfgVehicles" >> _x) };
+                };
+                if ((count _valid) <= 0) then { _valid = ["B_Soldier_F"]; };
+
+                _objKind = "CASEVAC_CASUALTY";
+                _objClass = selectRandom _valid;
+                // Keep the casualty at/near the reported position (not forced indoors).
+                _objRadius = 30;
+                _objAction = "Stabilize / evacuate casualty";
+                // TOC controls closure; do not auto-fail the incident if the casualty dies.
+                _failOnKilled = false;
+            };
         };
 
 	case "CMDNODE_INTERCEPT":
@@ -2601,7 +2658,10 @@ for "_i" from 0 to (_rmCount - 1) do
 private _ok = true;
 private _kindNow = ["activeExecKind", ""] call ARC_fnc_stateGet;
 private _objKindNow = ["activeObjectiveKind", ""] call ARC_fnc_stateGet;
-if (_kindNow isEqualTo "INTERACT" && { !(_objKindNow isEqualTo "") }) then
+// INTERACT tasks spawn an interactable objective; CASEVAC QRF incidents spawn a
+// downed casualty under the ARRIVE_HOLD exec kind. Both must be rebuilt if their
+// objective object goes missing (restart cleanup, manual deletion, persistence edge cases).
+if ((_kindNow isEqualTo "INTERACT" || { _objKindNow isEqualTo "CASEVAC_CASUALTY" }) && { !(_objKindNow isEqualTo "") }) then
 {
     private _nid = ["activeObjectiveNetId", ""] call ARC_fnc_stateGet;
     if (!(_nid isEqualTo "")) then
