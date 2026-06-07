@@ -245,7 +245,7 @@ jobs:
 
       - name: Lane C integration contract static validation
         run: |
-          tests/static/lane_c_contract_checks.sh
+          bash tests/static/lane_c_contract_checks.sh
 
       - name: SHADOW ISR lead-bridge contract static validation
         run: |
