@@ -14,6 +14,11 @@
         9: ARRAY  - (optional) civic mission metadata (pairs array; passed
                     through to the resulting incident so catalog-seeded missions
                     keep their structured metadata across the queue/lead path)
+       10: STRING - (optional) origin: "FIELD" (default) for field-generated
+                    leads (IED/CIVSUB/threat/HUMINT/etc.) or "S2" for leads
+                    created by S2/Intelligence/ISR assets via the TOC. Stored as
+                    an "origin" pair inside missionMeta so the positional 12-field
+                    lead-record shape is preserved.
 
     Returns:
         STRING - leadId ("" if failed)
@@ -31,13 +36,33 @@ params [
     ["_sourceIncidentType", ""],
     ["_threadId", ""],
     ["_tag", ""],
-    ["_missionMeta", []]
+    ["_missionMeta", []],
+    ["_origin", "FIELD"]
 ];
 
 if (_leadType isEqualTo "" || _displayName isEqualTo "") exitWith {""};
 if !(_pos isEqualType []) exitWith {""};
 if ((count _pos) < 2) exitWith {""};
 if (!(_missionMeta isEqualType [])) then { _missionMeta = []; };
+
+// First-class lead origin (field-generated vs S2/Intelligence/ISR). Default FIELD.
+// A caller may instead embed an ["origin", ...] pair directly in _missionMeta; if
+// present that value wins. Otherwise the _origin param value is injected so every
+// lead record carries an origin discriminator.
+if (!(_origin isEqualType "")) then { _origin = "FIELD"; };
+_origin = toUpper _origin;
+if !(_origin in ["FIELD", "S2"]) then { _origin = "FIELD"; };
+
+private _hasOrigin = false;
+{
+    if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo "origin" }) exitWith
+    {
+        _hasOrigin = true;
+        if ((_x select 1) isEqualType "") then { _origin = toUpper (_x select 1); };
+        if !(_origin in ["FIELD", "S2"]) then { _origin = "FIELD"; };
+    };
+} forEach _missionMeta;
+if (!_hasOrigin) then { _missionMeta pushBack ["origin", _origin]; };
 
 _strength = (_strength max 0) min 1;
 
@@ -74,6 +99,14 @@ while { (count _leads) > _cap } do
         private _mk = format ["ARC_leadCircle_%1", _did];
         if (_mk in allMapMarkers) then { deleteMarker _mk; };
         missionNamespace setVariable [format ["ARC_leadCircleExpiresAt_%1", _did], nil];
+
+        // Stage 5: record the eviction as a DROPPED end-state in leadHistory so the
+        // S2 can audit actionable intel that aged out under capacity pressure, not
+        // just an RPT/OPS line that scrolls away.
+        private _lhDrop = ["leadHistory", []] call ARC_fnc_stateGet;
+        if (!(_lhDrop isEqualType [])) then { _lhDrop = []; };
+        _lhDrop pushBack [_did, "DROPPED", serverTime];
+        ["leadHistory", _lhDrop] call ARC_fnc_stateSet;
 
         if (!isNil "ARC_fnc_intelLog") then
         {
@@ -176,9 +209,29 @@ if (!isNil "ARC_fnc_intelLog") then
             ["tag",_tag],
             ["sourceTaskId",_sourceTaskId],
             ["sourceIncidentType",toUpper _sourceIncidentType],
-            ["threadId",_threadId]
+            ["threadId",_threadId],
+            ["origin",_origin]
         ]
     ] call ARC_fnc_intelLog;
+};
+
+// Stage 4 (opt-in): auto-route high-confidence FIELD leads straight into the TOC
+// Queue (backlog) at creation so "generate next incident" naturally picks them up,
+// closing the "added to the lead panel but never routed" gap. Disabled by default
+// to preserve the deliberate S2/TOC review cycle. S2/ISR-origin leads are never
+// auto-routed — they always go through explicit TOC approval.
+private _autoEnq = missionNamespace getVariable ["ARC_leadAutoEnqueueField", false];
+if (!(_autoEnq isEqualType true) && !(_autoEnq isEqualType false)) then { _autoEnq = false; };
+if (_autoEnq && { _origin isEqualTo "FIELD" } && { !isNil "ARC_fnc_tocBacklogEnqueue" }) then
+{
+    private _minStr = missionNamespace getVariable ["ARC_leadAutoEnqueueMinStrength", 0.7];
+    if (!(_minStr isEqualType 0)) then { _minStr = 0.7; };
+    _minStr = (_minStr max 0) min 1;
+
+    if (_strength >= _minStr) then
+    {
+        [_id, 3, "", "AUTO", "Auto-routed high-confidence field lead."] call ARC_fnc_tocBacklogEnqueue;
+    };
 };
 
 _id

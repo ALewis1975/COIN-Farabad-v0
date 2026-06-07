@@ -128,7 +128,7 @@ if (_forceRebuild) then
 
 if ((count _items) isEqualTo 0) exitWith
 {
-    _detailsCtrl ctrlSetStructuredText parseText "<t size='1.1'>No queue items.</t><br/><t size='0.9'>Requests appear here after player follow-ons or S2 lead requests.</t>";
+    _detailsCtrl ctrlSetStructuredText parseText "<t size='1.1'>S2 Approval Queue is empty.</t><br/><t size='0.9'>Requests appear here after player follow-ons or S2 lead requests. Approved leads move on to the TOC Queue (backlog) for incident creation.</t>";
     ["", false]
 };
 

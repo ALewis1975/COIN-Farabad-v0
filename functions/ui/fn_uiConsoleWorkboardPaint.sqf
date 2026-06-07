@@ -74,7 +74,13 @@ if (_rebuild) then
         private _grid = "";
         if (_pos isEqualType [] && { (count _pos) >= 2 }) then { _grid = mapGridPosition _pos; };
 
-        private _lbl = format ["LEAD: %1 (%2)%3", _displayName, _leadType, if (_grid isEqualTo "") then {""} else {format [" @%1", _grid]}];
+        // Lead origin badge (Stage 2): FIELD vs S2/ISR, read from missionMeta (index 11).
+        private _mm = if ((count _x) >= 12 && { (_x select 11) isEqualType [] }) then { _x select 11 } else { [] };
+        private _origin = toUpper ([_mm, "origin", "FIELD"] call ARC_fnc_uiConsoleGetPair);
+        if (!(_origin isEqualType "")) then { _origin = "FIELD"; };
+        if !(_origin in ["FIELD", "S2"]) then { _origin = "FIELD"; };
+
+        private _lbl = format ["LEAD [%1]: %2 (%3)%4", _origin, _displayName, _leadType, if (_grid isEqualTo "") then {""} else {format [" @%1", _grid]}];
         private _j = _ctrlList lbAdd _lbl;
         _ctrlList lbSetData [_j, format ["LEAD|%1", _id]];
     } forEach _pool;

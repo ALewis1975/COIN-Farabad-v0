@@ -219,7 +219,7 @@ if (_approve) then
 
             // Create a lead that the incident generator will prefer (tagged), and
             // carry the queueId for traceability.
-            private _lid = [_leadType, _disp, _posATL, _strength, _ttl, _id, "QUEUE", "", _tag, _missionMeta] call ARC_fnc_leadCreate;
+            private _lid = [_leadType, _disp, _posATL, _strength, _ttl, _id, "QUEUE", "", _tag, _missionMeta, "S2"] call ARC_fnc_leadCreate;
             if (!(_lid isEqualType "")) then { _lid = ""; };
 
             // Attach the created leadId to the queue item's meta so client UIs can track it after approval.
@@ -443,9 +443,32 @@ if (_approve) then
 
                 case "PROCEED":
                 {
-                    // PROCEED becomes a LEAD assignment when possible; otherwise STANDBY.
+                    // Doctrine: leads are never assigned as field tasks. A PROCEED
+                    // disposition routes the strongest available pool lead into the
+                    // TOC Queue (backlog) for TOC-driven incident creation, and the
+                    // field unit is given a STANDBY order (no lead is consumed/assigned).
                     if (!(([_proceedIntent] call _trimFn) isEqualTo "")) then { _seed pushBack ["proceedIntent", ([_proceedIntent] call _trimFn)]; };
-                    _issueOk = ["LEAD", _fromGroup, _seed, _approver, _note2, _id] call ARC_fnc_intelOrderIssue;
+
+                    private _poolP = ["leadPool", []] call ARC_fnc_stateGet;
+                    if (!(_poolP isEqualType [])) then { _poolP = []; };
+
+                    private _bestLid = "";
+                    private _bestStr = -1;
+                    {
+                        if (_x isEqualType [] && { (count _x) >= 5 } && { (_x select 0) isEqualType "" }) then
+                        {
+                            private _s = _x select 4;
+                            if (!(_s isEqualType 0)) then { _s = 0.5; };
+                            if (_s > _bestStr) then { _bestStr = _s; _bestLid = _x select 0; };
+                        };
+                    } forEach _poolP;
+
+                    if (!(_bestLid isEqualTo "") && { !isNil "ARC_fnc_tocBacklogEnqueue" }) then
+                    {
+                        [_bestLid, 3, _id, _by, ([_note2] call _trimFn)] call ARC_fnc_tocBacklogEnqueue;
+                    };
+
+                    _issueOk = ["STANDBY", _fromGroup, _seed, _approver, _note2, _id] call ARC_fnc_intelOrderIssue;
                 };
 
                 default
@@ -546,7 +569,7 @@ if (_approve) then
             // Create a high-priority seed lead for the incident generator. The
             // civic mission metadata travels with the lead so catalog-seeded
             // missions keep their structured metadata once the incident is built.
-            private _lid = [_incType, _disp, _incPos, 0.80, 3600, _id, "", "", "TOC_INCIDENT", _civicMeta] call ARC_fnc_leadCreate;
+            private _lid = [_incType, _disp, _incPos, 0.80, 3600, _id, "", "", "TOC_INCIDENT", _civicMeta, "S2"] call ARC_fnc_leadCreate;
             if (!(_lid isEqualType "")) then { _lid = ""; };
 
             // Attach the leadId to the queue item meta for UI traceability.

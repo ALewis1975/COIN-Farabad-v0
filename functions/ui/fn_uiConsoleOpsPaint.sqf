@@ -180,52 +180,15 @@ if (_rebuild) then
     // -------------------------------
     // Leads
     //
-    // Each label encodes lead-pool entries plus, when applicable, the assignment
-    // status drawn from the orders snapshot (UX-01) and the time-to-expiry +
-    // strength badge (UX-02). Assignment lookup uses the lead identifier stored
-    // in LEAD-order data pairs (key "leadId").
+    // Each label encodes lead-pool entries plus the lead origin badge (FIELD vs
+    // S2/ISR), the time-to-expiry and a strength badge. Leads are never assigned
+    // as field tasks, so no order-assignment status is rendered here — approved
+    // leads move into the TOC Queue (backlog) for TOC-driven incident creation.
     // -------------------------------
     lbClear _cLead;
     private _leads = if (_opsUseVm && { (count _vm_leads) > 0 }) then { _vm_leads } else { missionNamespace getVariable ["ARC_leadPoolPublic", []] };
     if (!(_leads isEqualType [])) then { _leads = []; };
     if ((count _leads) > _rxMaxItems) then { _leads = _leads select [0, _rxMaxItems]; };
-
-    // Build a fast leadId → [status, targetGroup] lookup from the orders snapshot.
-    // Pool leads are unassigned by definition, but consumed leads still keep
-    // their broadcast tail until the pool pruner removes them; the lookup
-    // lets us distinguish the two states even if the broadcast is briefly
-    // stale.  Only ISSUED / ACCEPTED LEAD orders are considered.
-    private _leadAssignLookup = [];
-    private _ordersSnap = missionNamespace getVariable ["ARC_pub_orders", []];
-    if (!(_ordersSnap isEqualType [])) then { _ordersSnap = []; };
-    if ((count _ordersSnap) > _rxMaxItems) then { _ordersSnap = _ordersSnap select [0, _rxMaxItems]; };
-    {
-        if (_x isEqualType [] && { (count _x) >= 6 }) then
-        {
-            private _oSt = toUpper (([_x select 2] call _trimFn));
-            private _oTy = toUpper (([_x select 3] call _trimFn));
-            private _oTg = _x select 4;
-            if (!(_oTg isEqualType "")) then { _oTg = ""; };
-            if (_oTy isEqualTo "LEAD" && { _oSt in ["ISSUED","ACCEPTED"] }) then
-            {
-                private _oData = _x select 5;
-                if (_oData isEqualType []) then
-                {
-                    private _embeddedId = "";
-                    {
-                        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo "leadId" }) exitWith
-                        {
-                            if ((_x select 1) isEqualType "") then { _embeddedId = _x select 1; };
-                        };
-                    } forEach _oData;
-                    if (_embeddedId != "") then
-                    {
-                        _leadAssignLookup pushBack [_embeddedId, _oSt, _oTg];
-                    };
-                };
-            };
-        };
-    } forEach _ordersSnap;
 
     if ((count _leads) isEqualTo 0) then
     {
@@ -255,25 +218,15 @@ if (_rebuild) then
 
             private _strPct = round (_strength * 100);
 
-            // UX-01: assignment indicator.  An "ASSIGNED" or "ISSUED" prefix
-            // makes the lead's order state visible without a context switch.
-            private _assignTag = "";
-            {
-                if (_x isEqualType [] && { (count _x) >= 3 } && { (_x select 0) isEqualTo _id }) exitWith
-                {
-                    private _aSt = _x select 1;
-                    private _aGrp = _x select 2;
-                    private _grpStr = if ((_aGrp isEqualType "") && { _aGrp != "" }) then { format [" → %1", _aGrp] } else { "" };
-                    _assignTag = switch (_aSt) do
-                    {
-                        case "ISSUED": { format ["[ISSUED%1] ", _grpStr] };
-                        case "ACCEPTED": { format ["[ACCEPTED%1] ", _grpStr] };
-                        default { "" };
-                    };
-                };
-            } forEach _leadAssignLookup;
+            // Lead origin badge (Stage 2): distinguish field-generated leads from
+            // S2/Intelligence/ISR leads created via the TOC. Read from the lead
+            // record's missionMeta (index 11); default FIELD.
+            private _mm = if ((count _lead) >= 12 && { (_lead select 11) isEqualType [] }) then { _lead select 11 } else { [] };
+            private _origin = toUpper ([_mm, "origin", "FIELD"] call ARC_fnc_uiConsoleGetPair);
+            if (!(_origin isEqualType "")) then { _origin = "FIELD"; };
+            if !(_origin in ["FIELD", "S2"]) then { _origin = "FIELD"; };
 
-            private _label = format ["%1[%2] %3 | STR %4%5 | %6", _assignTag, _typ, _name, _strPct, "%", _ttlTxt];
+            private _label = format ["[%1][%2] %3 | STR %4%5 | %6", _origin, _typ, _name, _strPct, "%", _ttlTxt];
             private _idx = _cLead lbAdd _label;
             _cLead lbSetData [_idx, format ["LEAD|%1", _id]];
         } forEach _leads;
@@ -629,12 +582,12 @@ else
                     };
                 };
 
-                _details = _details + "<br/>Leads are intelligence-derived opportunities.<br/>";
+                _details = _details + "<br/>Leads are intelligence-derived opportunities (origin shown as [FIELD] or [S2] in the list).<br/>";
                 if (_isAuth) then
                 {
-                    _primaryLabel = "SUBMIT TO TOC QUEUE";
+                    _primaryLabel = "SUBMIT FOR APPROVAL";
                     _primaryEnabled = true;
-                    _details = _details + "SUBMIT TO TOC QUEUE: send this lead to the TOC for review and approval. Approved leads are added to the TOC Queue for incident creation — leads are never assigned directly as field tasks.";
+                    _details = _details + "SUBMIT FOR APPROVAL: send this lead to the S2 Approval Queue for TOC review. Once approved it enters the TOC Queue (backlog) for incident creation — leads are never assigned directly as field tasks.";
                 }
                 else
                 {

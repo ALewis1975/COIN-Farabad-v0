@@ -37,14 +37,19 @@ params [
     ["_sourceQid", ""]
 ];
 
-if (!(_orderType isEqualType "")) then { _orderType = ""; };
-_orderType = toUpper (trim _orderType);
+private _trimFn = compile "params ['_s']; trim _s";
 
-if (_orderType in ["PROCEED"]) then { _orderType = "LEAD"; };
+if (!(_orderType isEqualType "")) then { _orderType = ""; };
+_orderType = toUpper ([_orderType] call _trimFn);
+
+// DEPRECATED PATH B: leads are never assigned as field tasks. Any legacy PROCEED/LEAD
+// order request is coerced to STANDBY; the lead stays in the pool and must be routed
+// via the TOC Queue (backlog) instead (see ARC_fnc_tocBacklogEnqueue / fn_intelQueueDecide).
+if (_orderType in ["PROCEED", "LEAD"]) then { _orderType = "STANDBY"; };
 if (_orderType isEqualTo "") exitWith {false};
 
 if (!(_targetGroupId isEqualType "")) then { _targetGroupId = ""; };
-_targetGroupId = trim _targetGroupId;
+_targetGroupId = [_targetGroupId] call _trimFn;
 if (_targetGroupId isEqualTo "") exitWith {false};
 
 if (!(_dataSeed isEqualType [])) then { _dataSeed = []; };
@@ -66,8 +71,8 @@ private _setPair = {
     private _found = false;
     for "_i" from 0 to ((count _pairs) - 1) do
     {
-        private _p = _pairs # _i;
-        if (_p isEqualType [] && { (count _p) >= 2 } && { (_p # 0) isEqualTo _k }) exitWith
+        private _p = _pairs select _i;
+        if (_p isEqualType [] && { (count _p) >= 2 } && { (_p select 0) isEqualTo _k }) exitWith
         {
             _pairs set [_i, [_k, _v]];
             _found = true;
@@ -83,9 +88,9 @@ private _getPair = {
     if (!(_pairs isEqualType [])) exitWith { _d };
     private _out = _d;
     {
-        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith
+        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith
         {
-            _out = _x # 1;
+            _out = _x select 1;
         };
     } forEach _pairs;
     _out
@@ -99,8 +104,8 @@ private _hasIssued = false;
 {
     if (_x isEqualType [] && { (count _x) >= 7 }) then
     {
-        private _st = toUpper (_x # 2);
-        private _tg = _x # 4;
+        private _st = toUpper (_x select 2);
+        private _tg = _x select 4;
         if (_st isEqualTo "ISSUED" && { _tg isEqualTo _targetGroupId }) exitWith { _hasIssued = true; };
     };
 } forEach _orders;
@@ -128,7 +133,7 @@ switch (_orderType) do
     {
         private _purpose = [_dataSeed, "purpose", "REFIT"] call _getPair;
         if (!(_purpose isEqualType "")) then { _purpose = "REFIT"; };
-        _purpose = toUpper (trim _purpose);
+        _purpose = toUpper ([_purpose] call _trimFn);
 
         private _dest = [_purpose] call ARC_fnc_intelResolveRtbDestination;
         _dest params ["_destPos", "_destLabel", "_destRad"];
@@ -139,43 +144,14 @@ switch (_orderType) do
         _data = [_data, "destRadius", _destRad] call _setPair;
     };
 
+    // DEPRECATED PATH B: the "LEAD" order type previously consumed a lead from the
+    // pool and assigned it to a field group as an acceptable task. Leads must never
+    // be assigned as field tasks, so order requests are coerced to STANDBY above and
+    // this case is no longer reachable. It is retained as an explicit no-op so any
+    // future caller that bypasses the coercion still cannot turn a lead into a task.
     case "LEAD":
     {
-        // Assign a lead from the pool (consumes it from leadPool).
-        // If the caller provided a specific leadId in the seed, try to consume that lead first.
-        private _seedLeadId = [_data, "leadId", ""] call _getPair;
-        if (!(_seedLeadId isEqualType "")) then { _seedLeadId = ""; };
-        _seedLeadId = trim _seedLeadId;
-
-        private _lead = [];
-        if (_seedLeadId != "") then
-        {
-            _lead = [_seedLeadId] call ARC_fnc_leadConsumeById;
-        };
-        if (_lead isEqualTo []) then
-        {
-            _lead = [] call ARC_fnc_leadConsumeNext;
-        };
-        if (!(_lead isEqualType []) || { (count _lead) == 0 }) then
-        {
-            _orderType = "STANDBY";
-        }
-        else
-        {
-            private _leadId = _lead # 0;
-            private _leadType = _lead # 1;
-            private _leadName = _lead # 2;
-            private _leadPos  = _lead # 3;
-
-            private _zone = [_leadPos] call ARC_fnc_worldGetZoneForPos;
-
-            _data = [_data, "lead", _lead] call _setPair;
-            _data = [_data, "leadId", _leadId] call _setPair;
-            _data = [_data, "leadType", _leadType] call _setPair;
-            _data = [_data, "leadName", _leadName] call _setPair;
-            _data = [_data, "leadPos", _leadPos] call _setPair;
-            _data = [_data, "zone", _zone] call _setPair;
-        };
+        _orderType = "STANDBY";
     };
 
     default { };
@@ -191,8 +167,8 @@ private _orderId = format ["ARC_ord_%1", _ctr];
 private _meta = [];
 _meta = [_meta, "issuedBy", _issuerStr] call _setPair;
 _meta = [_meta, "issuedByUID", _issuerUID] call _setPair;
-_meta = [_meta, "note", trim _note] call _setPair;
-_meta = [_meta, "sourceQid", trim _sourceQid] call _setPair;
+_meta = [_meta, "note", [_note] call _trimFn] call _setPair;
+_meta = [_meta, "sourceQid", [_sourceQid] call _trimFn] call _setPair;
 
 private _rec = [_orderId, serverTime, "ISSUED", _orderType, _targetGroupId, _data, _meta];
 
@@ -215,7 +191,7 @@ while { (count _orders) > _cap } do { _orders deleteAt 0; };
         ["orderId", _orderId],
         ["orderType", _orderType],
         ["targetGroup", _targetGroupId],
-        ["sourceQid", trim _sourceQid]
+        ["sourceQid", [_sourceQid] call _trimFn]
     ]
 ] call ARC_fnc_intelLog;
 
