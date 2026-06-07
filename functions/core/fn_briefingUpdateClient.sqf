@@ -740,7 +740,7 @@ _opordText = _opordText + format ["Convoy spawn interval (server target): %1 sec
 
 private _soiText = "";
 _soiText = _soiText + "<t size='1.2'>Signal Operating Instructions</t><br/>";
-_soiText = _soiText + "<t color='#A0A0A0'>ACRE2 preset plan. Use this as a quick reference; see docs/Signal Operating Instructions.md for full PRC-343 block mapping.</t><br/><br/>";
+_soiText = _soiText + "<t color='#A0A0A0'>TFAR preset plan. Use this as a quick reference; see docs/Signal Operating Instructions.md for full short-range channel mapping.</t><br/><br/>";
 
 _soiText = _soiText + "<t size='1.05'>PRC-117F channels</t><br/>";
 _soiText = _soiText + "001 BCT CMD FALCON<br/>";
@@ -770,7 +770,7 @@ _soiText = _soiText + "084 FARABAD TOWER<br/>";
 _soiText = _soiText + "085 FARABAD GROUND<br/>";
 _soiText = _soiText + "086 FARABAD APPROACH<br/><br/>";
 
-_soiText = _soiText + "<t size='1.05'>PRC-152 channels</t><br/>";
+_soiText = _soiText + "<t size='1.05'>AN/PRC-152 channels</t><br/>";
 _soiText = _soiText + "Charlie: 010 1PLT | 011 2PLT | 012 3PLT<br/>";
 _soiText = _soiText + "Bravo: 020 1PLT | 021 2PLT | 022 3PLT<br/>";
 _soiText = _soiText + "Alpha: 030 1PLT | 031 2PLT | 032 3PLT<br/>";
@@ -780,14 +780,14 @@ _soiText = _soiText + "SHERIFF: 060 TAC<br/>";
 _soiText = _soiText + "GRIFFIN: 070 CONVOY TAC<br/>";
 _soiText = _soiText + "SENTRY: 080 TAC<br/><br/>";
 
-_soiText = _soiText + "<t size='1.05'>PRC-343 channel buckets (1-16)</t><br/>";
+_soiText = _soiText + "<t size='1.05'>TFAR short-range channel buckets (1-16)</t><br/>";
 _soiText = _soiText + "1 C 1PLT | 2 C 2PLT | 3 C 3PLT<br/>";
 _soiText = _soiText + "4 B 1PLT | 5 B 2PLT | 6 B 3PLT<br/>";
 _soiText = _soiText + "7 A 1PLT | 8 A 2PLT | 9 A 3PLT<br/>";
 _soiText = _soiText + "10 WPN sections | 11 THUNDER A | 12 THUNDER B | 13 THUNDER C<br/>";
 _soiText = _soiText + "14 SHERIFF MP | 15 GRIFFIN convoys | 16 SENTRY SECFO<br/><br/>";
 
-_soiText = _soiText + "<t color='#A0A0A0'>PRC-343 default blocks: BLK1 squad net, BLK2/3 Team A/B, BLK4+ additional squads/weapons. Full block callsign mapping is in the SOI doc.</t><br/>";
+_soiText = _soiText + "<t color='#A0A0A0'>TFAR short-range blocks: BLK1 squad net, BLK2/3 Team A/B, BLK4+ additional squads/weapons. Full block callsign mapping is in the SOI doc.</t><br/>";
 
 
 private _modCompatText = "";
@@ -800,7 +800,7 @@ _modCompatText = _modCompatText + "Sessions must launch with the approved Faraba
 _modCompatText = _modCompatText + "<t size='1.05'>Required core/framework mods</t><br/>";
 _modCompatText = _modCompatText + "- CBA_A3: scripting framework prerequisite.<br/>";
 _modCompatText = _modCompatText + "- ACE3: medical system, interactions, captive state.<br/>";
-_modCompatText = _modCompatText + "- ACRE2: radio communications.<br/>";
+_modCompatText = _modCompatText + "- Task Force Arrowhead Radio (TFAR): radio communications.<br/>";
 _modCompatText = _modCompatText + "- KAT - Advanced Medical: ACE3 medical extension.<br/><br/>";
 
 _modCompatText = _modCompatText + "<t size='1.05'>Required content/behavior/admin mods</t><br/>";
@@ -814,7 +814,7 @@ _modCompatText = _modCompatText + "<t size='1.05'>Known interoperability caveats
 _modCompatText = _modCompatText + "- No automated CI enforcement verifies the mod preset. Server operators must run a pre-session mod-stack compliance check.<br/>";
 _modCompatText = _modCompatText + "- Mismatched or missing framework/content mods are unsupported and may remove assets, interactions, radios, medical behavior, or terrain dependencies.<br/>";
 _modCompatText = _modCompatText + "- KAT depends on ACE3 medical behavior; treat ACE/KAT version drift as a medical-system compatibility risk.<br/>";
-_modCompatText = _modCompatText + "- ACRE2 radio plans depend on the approved preset and SOI. If radios/channels differ, confirm the preset before troubleshooting mission logic.<br/>";
+_modCompatText = _modCompatText + "- TFAR radio plans depend on the approved preset and SOI. If radios/channels differ, confirm the preset before troubleshooting mission logic.<br/>";
 _modCompatText = _modCompatText + "- The governance changelog records the full authorized stack/preset; the table above is the standard in-game quick reference.<br/><br/>";
 
 _modCompatText = _modCompatText + "<t color='#FFD700'>Action for players:</t> If you notice missing actions, broken radios, absent medical options, or missing assets, report your loaded preset to the TOC/Zeus before assuming a mission-script fault.<br/>";

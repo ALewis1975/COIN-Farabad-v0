@@ -800,7 +800,7 @@ missionNamespace setVariable ["ARC_cacheContainerClassPool", [
     "ACE_medicalSupplyCrate",
     "ACE_Box_Misc",
     "ACE_fastropingSupplyCrate",
-    "ACRE_RadioSupplyCrate",
+    "TFAR_NATO_Radio_Crate",
     "Box_cTab_items",
     "VirtualReammoBox_small_F",
     "UK3CB_Cocaine_Bricks",

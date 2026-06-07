@@ -48,14 +48,14 @@ private _useVm = (!isNil "ARC_fnc_consoleVmAdapterV1");
 
 private _commandNets = if (_useVm) then { ["comms", "command_nets", []] call ARC_fnc_consoleVmAdapterV1 } else { [] };
 private _prc152 = if (_useVm) then { ["comms", "prc152_plan", []] call ARC_fnc_consoleVmAdapterV1 } else { [] };
-private _prc343 = if (_useVm) then { ["comms", "prc343_buckets", []] call ARC_fnc_consoleVmAdapterV1 } else { [] };
+private _shortRange = if (_useVm) then { ["comms", "short_range_buckets", []] call ARC_fnc_consoleVmAdapterV1 } else { [] };
 private _roleHint = if (_useVm) then { ["comms", "role_hint", ""] call ARC_fnc_consoleVmAdapterV1 } else { "" };
-private _acreRequired = if (_useVm) then { ["comms", "acre_required", false] call ARC_fnc_consoleVmAdapterV1 } else { false };
+private _tfarRequired = if (_useVm) then { ["comms", "tfar_required", false] call ARC_fnc_consoleVmAdapterV1 } else { false };
 if (!(_commandNets isEqualType [])) then { _commandNets = []; };
 if (!(_prc152 isEqualType [])) then { _prc152 = []; };
-if (!(_prc343 isEqualType [])) then { _prc343 = []; };
+if (!(_shortRange isEqualType [])) then { _shortRange = []; };
 if (!(_roleHint isEqualType "")) then { _roleHint = ""; };
-if (!(_acreRequired isEqualType true) && !(_acreRequired isEqualType false)) then { _acreRequired = false; };
+if (!(_tfarRequired isEqualType true) && !(_tfarRequired isEqualType false)) then { _tfarRequired = false; };
 
 private _medicalSnapshot = if (_useVm) then { ["medical", "snapshot", []] call ARC_fnc_consoleVmAdapterV1 } else { [] };
 private _activeCasevac = if (_useVm) then { ["medical", "active_casevac", []] call ARC_fnc_consoleVmAdapterV1 } else { [] };
@@ -101,10 +101,10 @@ private _casevacLines = [];
 
 private _main = "";
 _main = _main + "<t size='1.15' color='#B89B6B' font='PuristaMedium'>COMMS / MEDICAL C2</t><br/>";
-_main = _main + "<t color='#AAAAAA'>Read-only integration panel. ACRE, ACE/KAT, and cTab support command workflow; server state remains authoritative.</t><br/><br/>";
+_main = _main + "<t color='#AAAAAA'>Read-only integration panel. TFAR, ACE/KAT, and cTab support command workflow; server state remains authoritative.</t><br/><br/>";
 
-_main = _main + "<t color='#B89B6B'>ACRE / SOI</t><br/>";
-_main = _main + format ["ACRE status: <t color='%1'>%2</t><br/>", if (_acreRequired) then {"#9FE870"} else {"#FFD166"}, if (_acreRequired) then {"loaded"} else {"not detected / static plan"}];
+_main = _main + "<t color='#B89B6B'>TFAR / SOI</t><br/>";
+_main = _main + format ["TFAR status: <t color='%1'>%2</t><br/>", if (_tfarRequired) then {"#9FE870"} else {"#FFD166"}, if (_tfarRequired) then {"loaded"} else {"not detected / static plan"}];
 _main = _main + ((_netLines joinString "<br/>") + "<br/><br/>");
 
 _main = _main + "<t color='#B89B6B'>ACE/KAT Medical</t><br/>";
@@ -135,10 +135,10 @@ if (!isNull _ctrlDetails) then
     _detail = _detail + format ["Active task marker: <t color='#DDDDDD'>%1</t><br/>", if (([_taskMarker] call _trimFn) isEqualTo "") then {"none"} else {_taskMarker}];
     _detail = _detail + format ["Latest CASEVAC marker: <t color='#DDDDDD'>%1</t><br/><br/>", if (([_ctabMarker] call _trimFn) isEqualTo "") then {"none"} else {_ctabMarker}];
 
-    _detail = _detail + "<t size='1.05' color='#B89B6B'>PRC-152 quick plan</t><br/>";
+    _detail = _detail + "<t size='1.05' color='#B89B6B'>AN/PRC-152 quick plan</t><br/>";
     _detail = _detail + ((_prc152 select [0, (count _prc152) min 8]) joinString "<br/>") + "<br/><br/>";
-    _detail = _detail + "<t size='1.05' color='#B89B6B'>PRC-343 buckets</t><br/>";
-    _detail = _detail + ((_prc343 select [0, (count _prc343) min 6]) joinString "<br/>") + "<br/><br/>";
+    _detail = _detail + "<t size='1.05' color='#B89B6B'>TFAR short-range buckets</t><br/>";
+    _detail = _detail + ((_shortRange select [0, (count _shortRange) min 6]) joinString "<br/>") + "<br/><br/>";
     _detail = _detail + format ["<t color='#AAAAAA'>%1</t>", _roleHint];
 
     if ((count _recentMedEvents) > 0) then

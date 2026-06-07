@@ -26021,7 +26021,7 @@ class Mission
 																	};
 																	class Item3
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item4
@@ -26207,7 +26207,7 @@ class Mission
 																	};
 																	class Item3
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item4
@@ -26392,7 +26392,7 @@ class Mission
 																	};
 																	class Item3
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item4
@@ -26577,7 +26577,7 @@ class Mission
 																	};
 																	class Item3
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item4
@@ -26747,7 +26747,7 @@ class Mission
 																	};
 																	class Item3
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item4
@@ -26939,7 +26939,7 @@ class Mission
 																	};
 																	class Item3
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item4
@@ -27123,7 +27123,7 @@ class Mission
 																	};
 																	class Item3
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item4
@@ -27310,7 +27310,7 @@ class Mission
 																	};
 																	class Item3
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item4
@@ -27496,7 +27496,7 @@ class Mission
 																	};
 																	class Item3
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item4
@@ -27667,7 +27667,7 @@ class Mission
 																	};
 																	class Item3
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item4
@@ -27968,7 +27968,7 @@ class Mission
 																	};
 																	class Item3
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item4
@@ -28155,7 +28155,7 @@ class Mission
 																	};
 																	class Item3
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item4
@@ -28341,7 +28341,7 @@ class Mission
 																	};
 																	class Item3
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item4
@@ -28527,7 +28527,7 @@ class Mission
 																	};
 																	class Item3
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item4
@@ -28698,7 +28698,7 @@ class Mission
 																	};
 																	class Item3
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item4
@@ -28889,7 +28889,7 @@ class Mission
 																	};
 																	class Item3
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item4
@@ -29059,7 +29059,7 @@ class Mission
 																	};
 																	class Item3
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item4
@@ -29343,7 +29343,7 @@ class Mission
 																	};
 																	class Item3
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item4
@@ -29529,7 +29529,7 @@ class Mission
 																	};
 																	class Item3
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item4
@@ -29715,7 +29715,7 @@ class Mission
 																	};
 																	class Item3
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item4
@@ -29887,7 +29887,7 @@ class Mission
 																	};
 																	class Item3
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item4
@@ -34059,7 +34059,7 @@ class Mission
 															};
 															class Item3
 															{
-																name="ACRE_PRC152";
+																name="TFAR_anprc152";
 																count=1;
 															};
 															class Item4
@@ -34275,7 +34275,7 @@ class Mission
 															};
 															class Item3
 															{
-																name="ACRE_PRC152";
+																name="TFAR_anprc152";
 																count=1;
 															};
 															class Item4
@@ -34454,7 +34454,7 @@ class Mission
 															};
 															class Item3
 															{
-																name="ACRE_PRC152";
+																name="TFAR_anprc152";
 																count=1;
 															};
 															class Item4
@@ -34675,7 +34675,7 @@ class Mission
 															};
 															class Item3
 															{
-																name="ACRE_PRC152";
+																name="TFAR_anprc152";
 																count=1;
 															};
 															class Item4
@@ -41182,7 +41182,7 @@ class Mission
 																	};
 																	class Item5
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item6
@@ -41498,7 +41498,7 @@ class Mission
 																	};
 																	class Item5
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item6
@@ -43731,7 +43731,7 @@ class Mission
 															};
 															class Item3
 															{
-																name="ACRE_PRC152";
+																name="TFAR_anprc152";
 																count=1;
 															};
 															class Item4
@@ -44135,7 +44135,7 @@ class Mission
 															};
 															class Item3
 															{
-																name="ACRE_PRC152";
+																name="TFAR_anprc152";
 																count=1;
 															};
 															class Item4
@@ -44467,7 +44467,7 @@ class Mission
 															};
 															class Item3
 															{
-																name="ACRE_PRC152";
+																name="TFAR_anprc152";
 																count=1;
 															};
 															class Item4
@@ -44820,7 +44820,7 @@ class Mission
 															};
 															class Item3
 															{
-																name="ACRE_PRC152";
+																name="TFAR_anprc152";
 																count=1;
 															};
 															class Item4
@@ -46769,7 +46769,7 @@ class Mission
 																			};
 																			class Item17
 																			{
-																				name="ACRE_PRC152";
+																				name="TFAR_anprc152";
 																				count=1;
 																			};
 																		};
@@ -49368,7 +49368,7 @@ class Mission
 																			};
 																			class Item4
 																			{
-																				name="ACRE_PRC152";
+																				name="TFAR_anprc152";
 																				count=1;
 																			};
 																			class Item5
@@ -72722,7 +72722,7 @@ class Mission
 																		class data
 																		{
 																			singleType="STRING";
-																			value="[[[[""rhs_weap_M136_hedp"",""ItemcTabHCam""],[1,1]],[[""SmokeShellYellow"",""SmokeShellGreen"",""SmokeShellOrange"",""SmokeShellBlue"",""rhs_mag_an_m14_th3"",""ACE_M14"",""DemoCharge_Remote_Mag"",""SatchelCharge_Remote_Mag"",""rhsusf_m112_mag"",""rhsusf_m112x4_mag"",""Laserbatteries""],[1,2,2,2,1,1,2,1,2,2,1]],[[""Rangefinder"",""ACE_MX2A"",""ChemicalDetector_01_black_F"",""ACE_Sandbag_empty"",""ACE_EntrenchingTool"",""EODS_Multimeter"",""EODS_MultiTool"",""EODS_TapeRoll"",""EODS_Medford_Knife"",""ACE_IR_Strobe_Item"",""ACE_CableTie"",""ACE_Clacker"",""ACE_M26_Clacker"",""ACE_DefusalKit"",""ACE_WaterBottle"",""ACE_Can_RedGull"",""ACE_MRE_BeefStew"",""ACE_MRE_ChickenTikkaMasala"",""ACE_MRE_ChickenHerbDumplings"",""ACE_Humanitarian_Ration"",""ACE_Sunflower_Seeds"",""ACE_Fortify"",""ACE_EarPlugs"",""ACE_Kestrel4500"",""ACE_fieldDressing"",""ACE_packingBandage"",""ACE_elasticBandage"",""ACE_splint"",""ACE_morphine"",""ACE_adenosine"",""ACE_epinephrine"",""ACE_plasmaIV_250"",""ACE_salineIV_250"",""ACE_quikclot"",""ACE_personalAidKit"",""ACE_surgicalKit"",""ACE_suture"",""ACE_bodyBag"",""ACE_painkillers_Item"",""HydrationBladder"",""ACE_ATNAA_AntidoteInjector"",""ace_intelitems_notepad_Item"",""ACRE_PRC117F"",""plp_bo_w_CigarFine"",""plp_bo_w_CigarCutter"",""MineDetector"",""FirstAidKit"",""Medikit"",""ToolKit"",""B_UavTerminal"",""ChemicalDetector_01_watch_F"",""CBRN_gasmaskFilter"",""CBRN_DuctTape"",""PHEN_ATNAA_Injector"",""ItemcTab"",""cigs_cigars_cigar0_nv"",""rhsusf_patrolcap_ocp"",""G_CBRN_B"",""rhsusf_ach_helmet_headset_ocp_alt""],[1,1,1,4,1,1,1,1,1,1,25,1,1,1,25,4,1,1,1,10,6,1,1,1,20,10,10,8,10,1,1,2,2,10,1,1,6,5,10,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]],[[""B_Kitbag_tan""],[1]]],false]";
+																			value="[[[[""rhs_weap_M136_hedp"",""ItemcTabHCam""],[1,1]],[[""SmokeShellYellow"",""SmokeShellGreen"",""SmokeShellOrange"",""SmokeShellBlue"",""rhs_mag_an_m14_th3"",""ACE_M14"",""DemoCharge_Remote_Mag"",""SatchelCharge_Remote_Mag"",""rhsusf_m112_mag"",""rhsusf_m112x4_mag"",""Laserbatteries""],[1,2,2,2,1,1,2,1,2,2,1]],[[""Rangefinder"",""ACE_MX2A"",""ChemicalDetector_01_black_F"",""ACE_Sandbag_empty"",""ACE_EntrenchingTool"",""EODS_Multimeter"",""EODS_MultiTool"",""EODS_TapeRoll"",""EODS_Medford_Knife"",""ACE_IR_Strobe_Item"",""ACE_CableTie"",""ACE_Clacker"",""ACE_M26_Clacker"",""ACE_DefusalKit"",""ACE_WaterBottle"",""ACE_Can_RedGull"",""ACE_MRE_BeefStew"",""ACE_MRE_ChickenTikkaMasala"",""ACE_MRE_ChickenHerbDumplings"",""ACE_Humanitarian_Ration"",""ACE_Sunflower_Seeds"",""ACE_Fortify"",""ACE_EarPlugs"",""ACE_Kestrel4500"",""ACE_fieldDressing"",""ACE_packingBandage"",""ACE_elasticBandage"",""ACE_splint"",""ACE_morphine"",""ACE_adenosine"",""ACE_epinephrine"",""ACE_plasmaIV_250"",""ACE_salineIV_250"",""ACE_quikclot"",""ACE_personalAidKit"",""ACE_surgicalKit"",""ACE_suture"",""ACE_bodyBag"",""ACE_painkillers_Item"",""HydrationBladder"",""ACE_ATNAA_AntidoteInjector"",""ace_intelitems_notepad_Item"",""TFAR_rt1523g"",""plp_bo_w_CigarFine"",""plp_bo_w_CigarCutter"",""MineDetector"",""FirstAidKit"",""Medikit"",""ToolKit"",""B_UavTerminal"",""ChemicalDetector_01_watch_F"",""CBRN_gasmaskFilter"",""CBRN_DuctTape"",""PHEN_ATNAA_Injector"",""ItemcTab"",""cigs_cigars_cigar0_nv"",""rhsusf_patrolcap_ocp"",""G_CBRN_B"",""rhsusf_ach_helmet_headset_ocp_alt""],[1,1,1,4,1,1,1,1,1,1,25,1,1,1,25,4,1,1,1,10,6,1,1,1,20,10,10,8,10,1,1,2,2,10,1,1,6,5,10,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]],[[""B_Kitbag_tan""],[1]]],false]";
 																		};
 																	};
 																};
@@ -81945,7 +81945,7 @@ class Mission
 																			};
 																			class Item16
 																			{
-																				name="ACRE_PRC152";
+																				name="TFAR_anprc152";
 																				count=1;
 																			};
 																			class Item17
@@ -95872,7 +95872,7 @@ class Mission
 																	};
 																	class Item4
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item5
@@ -96135,7 +96135,7 @@ class Mission
 																	};
 																	class Item4
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item5
@@ -96476,7 +96476,7 @@ class Mission
 																	};
 																	class Item4
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item5
@@ -96700,7 +96700,7 @@ class Mission
 																	};
 																	class Item4
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item5
@@ -97145,7 +97145,7 @@ class Mission
 																	};
 																	class Item4
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item5
@@ -97368,7 +97368,7 @@ class Mission
 																	};
 																	class Item4
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item5
@@ -97631,7 +97631,7 @@ class Mission
 																	};
 																	class Item4
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item5
@@ -97893,7 +97893,7 @@ class Mission
 																	};
 																	class Item4
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item5
@@ -98366,7 +98366,7 @@ class Mission
 																	};
 																	class Item4
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item5
@@ -98589,7 +98589,7 @@ class Mission
 																	};
 																	class Item4
 																	{
-																		name="ACRE_PRC152";
+																		name="TFAR_anprc152";
 																		count=1;
 																	};
 																	class Item5

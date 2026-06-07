@@ -2,7 +2,7 @@
 
 **Owner:** Mission Commander / Server Operator
 **Status:** LOCKED — see Decision 6 (§16)
-**Last Updated:** 2026-04-01 (preset updated)
+**Last Updated:** 2026-06-07 (radio stack updated)
 
 ---
 
@@ -24,7 +24,7 @@ This document locks **Design Decision 6 from Mission Design Guide §16**:
 |-----|------------------|------|
 | CBA_A3 | 450814997 | Scripting framework prerequisite |
 | ACE3 | 463939057 | Medical system, interactions, captive state |
-| ACRE2 | 751965892 | Radio communications |
+| Task Force Arrowhead Radio (TFAR) | 894678801 | Radio communications |
 | RHSUSAF | 843577117 | US Army assets (vehicles, uniforms, equipment) |
 | RHSAFRF | 843425103 | OPFOR assets (ANA/insurgent proxies) |
 | RHSGREF | 843593391 | Additional faction assets |
@@ -74,3 +74,4 @@ mod stack compliance before server launch.
 |------|--------|-------------|-------|
 | 2026-04-01 | Initial governance document created | Mission Commander | Locked per Design Guide §16 Decision 6 |
 | 2026-04-01 | Modset updated to 65-mod authorised stack; preset regenerated as Ambient_Dev_Mods_2026-04-01.html; removed 6x6 ATV and Wildfire; added Animated Smoke Effects, RKSL RQ7/UAV Shelter, RKSL Common Library, K9 Companion, Pinned Down Surrender, and others per Mission Commander directive | Mission Commander | Full list in docs/projectFiles/Ambient_Dev_Mods_2026-04-01.html |
+| 2026-06-07 | Radio stack updated from ACRE2 to Task Force Arrowhead Radio (TFAR); mission integrations, SOI labels, and preset reference updated accordingly | Mission Commander | Per directive that ACRE is no longer the radio/communication mod |

@@ -393,7 +393,7 @@ private _medicalSection = [
 ];
 
 // ---------------------------------------------------------------------------
-// Section: comms — ACRE/SOI read-only command-and-signal reference
+// Section: comms — TFAR/SOI read-only command-and-signal reference
 // ---------------------------------------------------------------------------
 private _commandNets = missionNamespace getVariable ["ARC_commsCommandNets", [
     ["001", "BCT CMD", "FALCON"],
@@ -423,22 +423,22 @@ private _prc152 = missionNamespace getVariable ["ARC_commsPrc152Plan", [
 ]];
 if (!(_prc152 isEqualType [])) then { _prc152 = []; };
 
-private _prc343 = missionNamespace getVariable ["ARC_commsPrc343Buckets", [
+private _shortRange = missionNamespace getVariable ["ARC_commsShortRangeBuckets", missionNamespace getVariable ["ARC_commsPrc343Buckets", [
     "1 C 1PLT | 2 C 2PLT | 3 C 3PLT",
     "4 B 1PLT | 5 B 2PLT | 6 B 3PLT",
     "7 A 1PLT | 8 A 2PLT | 9 A 3PLT",
     "10 WPN | 11 THUNDER A | 12 THUNDER B | 13 THUNDER C",
     "14 SHERIFF MP | 15 GRIFFIN convoys | 16 SENTRY SECFO"
-]];
-if (!(_prc343 isEqualType [])) then { _prc343 = []; };
+]]];
+if (!(_shortRange isEqualType [])) then { _shortRange = []; };
 
 private _commsData = [
-    ["acre_required", isClass (configFile >> "CfgPatches" >> "acre_main")],
+    ["tfar_required", isClass (configFile >> "CfgPatches" >> "task_force_radio")],
     ["command_nets", _commandNets],
     ["prc152_plan", _prc152],
-    ["prc343_buckets", _prc343],
-    ["radio_crates", ["ACRE_RadioSupplyCrate"]],
-    ["role_hint", "Soft guidance only: use ACRE nets to support TOC workflow; mission state remains server-owned."]
+    ["short_range_buckets", _shortRange],
+    ["radio_crates", ["TFAR_NATO_Radio_Crate"]],
+    ["role_hint", "Soft guidance only: use TFAR nets to support TOC workflow; mission state remains server-owned."]
 ];
 
 private _commsSection = [
