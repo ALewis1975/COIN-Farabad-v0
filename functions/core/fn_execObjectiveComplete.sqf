@@ -213,6 +213,7 @@ if (_summary isEqualTo "") then
         case "CIV_MEET": { "Conducted local engagement; collected HUMINT." };
         case "LOG_DROP": { "Delivered supplies to the designated point." };
         case "ESCORT_END": { "Escort reached destination; arrival confirmed." };
+        case "CASEVAC_CASUALTY": { "Casualty stabilized and evacuated." };
         default { "Objective complete." };
     };
 };
@@ -226,6 +227,7 @@ private _cat = switch (_kindU) do
     case "CIV_MEET": { "HUMINT" };
     case "LOG_DROP": { "LOGISTICS" };
     case "ESCORT_END": { "OPS" };
+    case "CASEVAC_CASUALTY": { "MEDEVAC" };
     default { "INTEL" };
 };
 

@@ -74,6 +74,7 @@ private _cat = switch (_kind) do
     case "CIV_MEET": { "HUMINT" };
     case "LOG_DROP": { "LOGISTICS" };
     case "ESCORT_END": { "OPS" };
+    case "CASEVAC_CASUALTY": { "MEDEVAC" };
     default { "INTEL" };
 };
 
@@ -86,6 +87,7 @@ private _defaultSummary = switch (_kind) do
     case "CIV_MEET": { "Meeting conducted" };
     case "LOG_DROP": { "Supplies delivered" };
     case "ESCORT_END": { "Arrival confirmed" };
+    case "CASEVAC_CASUALTY": { "Casualty stabilized / evacuated" };
     default { "Objective complete" };
 };
 
