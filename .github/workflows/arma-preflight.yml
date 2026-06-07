@@ -235,6 +235,10 @@ jobs:
         run: |
           tests/static/casreq_snapshot_contract_checks.sh
 
+      - name: Persistence reset coverage static validation
+        run: |
+          tests/static/persistence_reset_coverage_contract_checks.sh
+
       - name: RPC owner-capture conformance static validation
         run: |
           tests/static/rpc_owner_capture_conformance_checks.sh

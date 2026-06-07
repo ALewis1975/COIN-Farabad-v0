@@ -17,14 +17,22 @@ Operational runbook for resetting AIRSUB control state and rolling back safely i
 
 ## State Keys Cleared by Reset
 
+### Persistence baseline
+- Normal `ARC_fnc_airbaseInit` **does not clear** `airbase_v1_queue`, `airbase_v1_records`, `airbase_v1_seq`, or AIRBASE control-state keys. Valid persisted state survives restart/load and is used to reconstruct AIR tab snapshots.
+- Malformed or missing AIRBASE keys are normalized to `fn_stateInit.sqf` defaults.
+- Campaign hard reset (`ARC_fnc_resetAll`) intentionally clears AIRBASE persisted records/queue/control state and runtime/public mirrors.
+
 ### Always cleared
 - `airbase_v1_runwayState` -> `OPEN`
 - `airbase_v1_runwayOwner` -> `""`
 - `airbase_v1_runwayUntil` -> `-1`
 - `airbase_v1_clearanceRequests` -> `[]`
 - `airbase_v1_queue` -> `[]`
+- `airbase_v1_records` -> `[]`
+- `airbase_v1_seq` -> `0`
 - `airbase_v1_manualPriority` -> `[]`
 - `airbase_v1_holdDepartures` -> `false`
+- `airbase_v1_towerStaffing` -> unclaimed tower/ground/arrival lanes
 - `airbase_v1_notifyState` -> empty map
 
 ### Cleared only when `preserveHistory=false`

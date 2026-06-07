@@ -24,7 +24,12 @@ private _requiredKeys = [
     "area",
     "messages",
     "created_at",
-    "updated_at"
+    "updated_at",
+    "incident_id",
+    "nine_line",
+    "remarks",
+    "result",
+    "closed_at"
 ];
 
 {
@@ -35,6 +40,8 @@ private _requiredKeys = [
         private _def = switch (_k) do {
             case "messages": { [] };
             case "area": { [["target_pos", [0,0,0]], ["target_marker", ""]] };
+            case "nine_line": { [] };
+            case "closed_at": { -1 };
             case "created_at": { serverTime };
             case "updated_at": { serverTime };
             default { "" };
