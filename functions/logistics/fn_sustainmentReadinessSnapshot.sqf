@@ -148,7 +148,7 @@ if (!(_overallState isEqualType "")) then { _overallState = ""; };
 _overallState = toUpper _overallState;
 if (_overallState isEqualTo "") then
 {
-    _overallState = [[_liquidsState, _ammoState, _casualtyState, _equipmentState]] call _worseState;
+    _overallState = [_liquidsState, _ammoState, _casualtyState, _equipmentState] call _worseState;
 };
 
 private _resupplyRecommended = [_supplyAnnex, "resupply_recommended", [_readinessDelta, "resupply_recommended", false] call _get] call _get;
