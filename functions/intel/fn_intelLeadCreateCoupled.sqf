@@ -81,12 +81,17 @@ if (!(_precision isEqualType "")) then { _precision = "UNKNOWN"; };
 private _timeliness = [_coupling, "timeliness", "UNKNOWN"] call _pget;
 if (!(_timeliness isEqualType "")) then { _timeliness = "UNKNOWN"; };
 
+// Use the canonical (uppercased/trimmed) district id from the coupling payload so the
+// top-level missionMeta.district_id never conflicts with intel_quality_coupling[].district_id.
+private _districtCanonical = [_coupling, "district_id", _districtId] call _pget;
+if (!(_districtCanonical isEqualType "") || { _districtCanonical isEqualTo "" }) then { _districtCanonical = _districtId; };
+
 _missionMeta = [_missionMeta, "intel_quality", _quality] call _setPair;
 _missionMeta = [_missionMeta, "intel_confidence_band", _confidenceBand] call _setPair;
 _missionMeta = [_missionMeta, "intel_precision", _precision] call _setPair;
 _missionMeta = [_missionMeta, "intel_timeliness", _timeliness] call _setPair;
 _missionMeta = [_missionMeta, "intel_quality_coupling", _coupling] call _setPair;
-_missionMeta = [_missionMeta, "district_id", _districtId] call _setPair;
+_missionMeta = [_missionMeta, "district_id", _districtCanonical] call _setPair;
 
 [
     _leadType,
