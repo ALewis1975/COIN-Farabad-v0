@@ -274,3 +274,7 @@ jobs:
       - name: Threat district posture selection static validation
         run: |
           bash tests/static/threat_district_posture_selection_checks.sh
+
+      - name: Intel quality coupling static validation
+        run: |
+          bash tests/static/intel_quality_coupling_contract_checks.sh
