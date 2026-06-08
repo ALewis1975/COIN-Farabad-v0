@@ -20,7 +20,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | # | Check | Command / Step | Result | Notes |
 |---|-------|----------------|--------|-------|
 | 1 | Reliability sweep document | Add `docs/qa/CIVSUB_Threat_IED_Reliability_Sweep_2026-06-08.md` | PASS | Checklist/evidence contract only. No runtime behavior changed. |
-| 2 | Static review | Review CIVSUB delta, Threat record, Threat economy, IED evidence/disposition, and protected-zone paths | PENDING | Requires reviewer execution. |
+| 2 | Static review | Review CIVSUB delta, Threat record, Threat economy, IED evidence/disposition, and protected-zone paths | BLOCKED | Requires reviewer execution. |
 | 3 | Hosted MP runtime | Run CIVSUB district activation, contact/delta path, threat scheduler, IED evidence/disposition flow | BLOCKED | Arma runtime unavailable in this environment. |
 | 4 | Dedicated/JIP runtime | Run dedicated fresh start, JIP during active CIVSUB/threat/evidence state, reconnect/restart checks | BLOCKED | Dedicated/JIP operator run required. |
 | 5 | Adaptive behavior gate | Confirm adaptive COIN behavior remains blocked until reliability failures are closed or scoped | PASS | This sweep defines the gate and does not implement adaptive behavior. |
