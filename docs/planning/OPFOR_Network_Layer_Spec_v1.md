@@ -113,7 +113,7 @@ Forbidden public exposure:
 - Do not create a second Threat governor.
 - Do not expose raw hidden network state to players.
 - Do not add physical activity paths from OPFOR Network directly.
-- Do not bypass CIVSUB, Intel, or Threat contracts.
+- Do not bypass CIVSUB, Intel, Threat, or TASKENG contracts.
 
 ---
 
