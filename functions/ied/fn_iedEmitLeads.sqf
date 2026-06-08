@@ -44,7 +44,6 @@ _pos = +_pos; _pos resize 3;
 
 private _transU = toUpper _transition;
 private _emittedLeads = [];
-private _now = serverTime;
 
 private _makeLead = {
     params ["_leadType", "_displayName", "_leadPos", "_baseStrength", "_expiresIn", "_sourceTaskId", "_sourceIncidentType", "_tag", "_sourceKind"];

@@ -274,7 +274,7 @@ if (!(isNil "ARC_fnc_consoleThemeGet")) then {
   [_isThemeHashMap, "UT-THEME-000", "console theme returns HashMap", ["type", typeName _theme]] call ARC_TEST_fnc_assert;
 
   if (_isThemeHashMap) then {
-    private _themeKeys = keys _theme;
+    private _themeKeys = [_theme] call (compile "params ['_m']; keys _m");
 
     {
       private _hasKey = _x in _themeKeys;
