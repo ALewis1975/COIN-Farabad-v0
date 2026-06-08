@@ -96,16 +96,22 @@ private _allMarkersZ = allMapMarkers;
     _zonesOut pushBack _rec;
 } forEach _zones;
 
+private _hget = compile "params ['_h','_k']; (_h) get _k";
+private _keysFn = compile "params ['_m']; keys _m";
+
 private _aliasesOut = [];
+private _aliasKeys = ([_aliases] call _keysFn);
+_aliasKeys sort true;
 {
-    _aliasesOut pushBack [_x, _aliases get _x];
-} forEach (keys _aliases);
+    _aliasesOut pushBack [_x, [_aliases, _x] call _hget];
+} forEach _aliasKeys;
 
 private _objectiveIndexOut = [];
+private _objectiveKeys = ([_objectiveIndex] call _keysFn);
+_objectiveKeys sort true;
 {
-    _objectiveIndexOut pushBack [_x, _objectiveIndex get _x];
-} forEach (keys _objectiveIndex);
-
+    _objectiveIndexOut pushBack [_x, [_objectiveIndex, _x] call _hget];
+} forEach _objectiveKeys;
 private _counts = createHashMap;
 _counts set ["locations", count _locationsOut];
 _counts set ["terrainSiteTypes", count _sitesOut];
