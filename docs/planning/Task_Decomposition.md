@@ -186,7 +186,7 @@ This decomposition supersedes older phase/task narratives that are now stale rel
 
 1. Add hard **truth-before-claim** checks to every diagnostic task.
 2. Keep responses tightly scoped to user request type:
-   - analysis request -> analysis
+   - analysis request -> analysis output only
    - plan request -> plan
    - implementation request -> implementation artifacts
 3. Use the ecosystem architecture contract to classify layer ownership before expanding cross-system behavior.
