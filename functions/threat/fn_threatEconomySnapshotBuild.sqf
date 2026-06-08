@@ -16,6 +16,12 @@ if (isNil "ARC_fnc_threatEconomyReasonMeta") then
 
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _pg = compile "params ['_pairs','_k','_d']; private _out = _d; { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _out = _x select 1; }; } forEach _pairs; _out";
+private _clampScore = {
+    params [["_v", 0, [0]]];
+    if (_v < 0) then { _v = 0; };
+    if (_v > 100) then { _v = 100; };
+    _v
+};
 
 private _enabled = ["threat_v0_enabled", true] call ARC_fnc_stateGet;
 if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabled = true; };
@@ -23,6 +29,9 @@ if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabl
 private _now = serverTime;
 private _schedulerIntervalS = missionNamespace getVariable ["ARC_threatSchedulerIntervalS", 120];
 if (!(_schedulerIntervalS isEqualType 0) || { _schedulerIntervalS < 30 }) then { _schedulerIntervalS = 120; };
+
+private _postureSelectionEnabled = missionNamespace getVariable ["ARC_threatDistrictPostureSelectionEnabled", true];
+if (!(_postureSelectionEnabled isEqualType true) && !(_postureSelectionEnabled isEqualType false)) then { _postureSelectionEnabled = true; };
 
 private _schedulerLastTs = ["threat_v0_scheduler_last_ts", -1] call ARC_fnc_stateGet;
 if (!(_schedulerLastTs isEqualType 0)) then { _schedulerLastTs = -1; };
@@ -42,6 +51,9 @@ if (!(_riskMap isEqualType createHashMap)) then { _riskMap = createHashMap; };
 
 private _budgetMap = ["threat_v0_attack_budget", createHashMap] call ARC_fnc_stateGet;
 if (!(_budgetMap isEqualType createHashMap)) then { _budgetMap = createHashMap; };
+
+private _civDistricts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
+if (!(_civDistricts isEqualType createHashMap)) then { _civDistricts = createHashMap; };
 
 private _lastDecision = ["threat_v0_economy_last_decision", []] call ARC_fnc_stateGet;
 if (!(_lastDecision isEqualType [])) then { _lastDecision = []; };
@@ -83,6 +95,7 @@ private _districtIds = [
 private _rows = [];
 private _riskRank = [];
 private _spentRank = [];
+private _postureRank = [];
 private _hotRiskCount = 0;
 private _criticalRiskCount = 0;
 private _budgetExhaustedCount = 0;
@@ -94,18 +107,18 @@ private _totalSpentToday = 0;
     private _districtId = _x;
     private _secLevel = missionNamespace getVariable [format ["ARC_district_%1_secLevel", _districtId], "NORMAL"];
     if (!(_secLevel isEqualType "")) then { _secLevel = "NORMAL"; };
-    private _postureTier = 0;
-    if (_secLevel isEqualTo "ELEVATED") then { _postureTier = 1; };
-    if (_secLevel isEqualTo "HIGH_RISK") then { _postureTier = 2; };
-    if (_secLevel isEqualTo "CRITICAL") then { _postureTier = 3; };
+    private _secTier = 0;
+    if (_secLevel isEqualTo "ELEVATED") then { _secTier = 1; };
+    if (_secLevel isEqualTo "HIGH_RISK") then { _secTier = 2; };
+    if (_secLevel isEqualTo "CRITICAL") then { _secTier = 3; };
 
     private _r = [_riskMap, _districtId, createHashMap] call _hg;
     if (!(_r isEqualType createHashMap)) then { _r = createHashMap; };
     private _b = [_budgetMap, _districtId, createHashMap] call _hg;
     if (!(_b isEqualType createHashMap)) then { _b = createHashMap; };
 
-    private _riskLevel = [_r, "risk_level", 0] call _hg;
-    if (!(_riskLevel isEqualType 0)) then { _riskLevel = 0; };
+    private _riskLevel = [_r, "risk_level", 30] call _hg;
+    if (!(_riskLevel isEqualType 0)) then { _riskLevel = 30; };
     private _attackCount30d = [_r, "attack_count_30d", 0] call _hg;
     if (!(_attackCount30d isEqualType 0)) then { _attackCount30d = 0; };
     private _lastAttackTs = [_r, "last_attack_ts", -1] call _hg;
@@ -127,10 +140,74 @@ private _totalSpentToday = 0;
     private _disruptionPenaltyRemainingS = 0;
     if (_disruptionPenaltyUntil > _now) then { _disruptionPenaltyRemainingS = _disruptionPenaltyUntil - _now; };
 
+    private _whiteScore = 45;
+    private _redScore = 55;
+    private _greenScore = 35;
+    private _civD = [_civDistricts, _districtId, createHashMap] call _hg;
+    if (_civD isEqualType createHashMap) then
+    {
+        _whiteScore = [_civD, "W_EFF_U", [_civD, "W", 45] call _hg] call _hg;
+        _redScore = [_civD, "R_EFF_U", [_civD, "R", 55] call _hg] call _hg;
+        _greenScore = [_civD, "G_EFF_U", [_civD, "G", 35] call _hg] call _hg;
+        if (!(_whiteScore isEqualType 0)) then { _whiteScore = 45; };
+        if (!(_redScore isEqualType 0)) then { _redScore = 55; };
+        if (!(_greenScore isEqualType 0)) then { _greenScore = 35; };
+    };
+
+    private _sCoop = [(0.55 * _whiteScore) + (0.35 * _greenScore) - (0.70 * _redScore)] call _clampScore;
+    private _sThreat = [(1.00 * _redScore) - (0.35 * _whiteScore) - (0.25 * _greenScore)] call _clampScore;
+    private _postureScoreRaw = (0.40 * _riskLevel) + (0.40 * _sThreat) + (0.10 * _redScore) - (0.15 * _greenScore) - (0.10 * _whiteScore) + (_secTier * 5) + ((_attackCount30d min 5) * 2);
+    private _postureScore = [_postureScoreRaw] call _clampScore;
+
+    private _postureTier = 0;
+    private _postureBand = "NORMAL";
+    if (_postureScore >= 35) then { _postureTier = 1; _postureBand = "ELEVATED"; };
+    if (_postureScore >= 55) then { _postureTier = 2; _postureBand = "HIGH_RISK"; };
+    if (_postureScore >= 75) then { _postureTier = 3; _postureBand = "CRITICAL"; };
+
+    private _selectedTier = _secTier;
+    private _tierSource = "SEC_LEVEL";
+    if (_postureSelectionEnabled && { _postureTier > _selectedTier }) then
+    {
+        _selectedTier = _postureTier;
+        _tierSource = "DISTRICT_POSTURE";
+    };
+    if (!_postureSelectionEnabled) then { _tierSource = "SEC_LEVEL_DISABLED"; };
+
+    private _selectionInputs = [
+        ["selection_enabled", _postureSelectionEnabled],
+        ["selection_policy", "DISTRICT_POSTURE_V1"],
+        ["tier_source", _tierSource],
+        ["district_sec_level", _secLevel],
+        ["sec_level_tier", _secTier],
+        ["posture_tier", _postureTier],
+        ["selected_tier", _selectedTier],
+        ["posture_band", _postureBand],
+        ["posture_score", _postureScore],
+        ["s_coop", _sCoop],
+        ["s_threat", _sThreat],
+        ["white", _whiteScore],
+        ["red", _redScore],
+        ["green", _greenScore],
+        ["risk_level", _riskLevel],
+        ["attack_count_30d", _attackCount30d]
+    ];
+
     _rows pushBack [
         ["district_id", _districtId],
         ["district_sec_level", _secLevel],
+        ["sec_level_tier", _secTier],
         ["posture_tier", _postureTier],
+        ["selected_tier", _selectedTier],
+        ["tier_source", _tierSource],
+        ["posture_band", _postureBand],
+        ["posture_score", _postureScore],
+        ["s_coop", _sCoop],
+        ["s_threat", _sThreat],
+        ["white_score", _whiteScore],
+        ["red_score", _redScore],
+        ["green_score", _greenScore],
+        ["selection_inputs", _selectionInputs],
         ["risk_level", _riskLevel],
         ["attack_count_30d", _attackCount30d],
         ["last_attack_ts", _lastAttackTs],
@@ -146,6 +223,7 @@ private _totalSpentToday = 0;
 
     _riskRank pushBack [_riskLevel, _districtId];
     _spentRank pushBack [_spentToday, _districtId, _budgetPoints];
+    _postureRank pushBack [_postureScore, _districtId, _postureBand, _tierSource, _selectedTier];
 
     if (_riskLevel >= 70) then { _hotRiskCount = _hotRiskCount + 1; };
     if (_riskLevel >= 85) then { _criticalRiskCount = _criticalRiskCount + 1; };
@@ -157,8 +235,10 @@ private _totalSpentToday = 0;
 
 _riskRank sort false;
 _spentRank sort false;
+_postureRank sort false;
 if ((count _riskRank) > 5) then { _riskRank resize 5; };
 if ((count _spentRank) > 5) then { _spentRank resize 5; };
+if ((count _postureRank) > 5) then { _postureRank resize 5; };
 
 private _denyRows = [];
 {
@@ -176,6 +256,7 @@ private _denyRows = [];
     ["summary", [
         ["enabled", _enabled],
         ["district_count", count _districtIds],
+        ["district_posture_selection_enabled", _postureSelectionEnabled],
         ["hot_risk_count", _hotRiskCount],
         ["critical_risk_count", _criticalRiskCount],
         ["cooldown_active_count", _cooldownActiveCount],
@@ -196,6 +277,8 @@ private _denyRows = [];
     ["thresholds", [
         ["risk_hot_gte", 70],
         ["risk_critical_gte", 85],
+        ["posture_score_bands", [["NORMAL", 0], ["ELEVATED", 35], ["HIGH_RISK", 55], ["CRITICAL", 75]]],
+        ["posture_score_formula", "0.40*risk + 0.40*S_THREAT + 0.10*R - 0.15*G - 0.10*W + 5*secTier + 2*min(attackCount30d,5)"],
         ["budget_exhausted_when_spent_plus_cost_gt_budget", true],
         ["posture_tiers", [["NORMAL", 0], ["ELEVATED", 1], ["HIGH_RISK", 2], ["CRITICAL", 3]]],
         ["threat_costs", [["IED", 1], ["RAID", 2], ["AMBUSH", 2], ["ATTACK", 2], ["VBIED", 2], ["SUICIDE", 3]]]
@@ -209,5 +292,6 @@ private _denyRows = [];
     ["lastWarningDecision", _lastWarningDecision],
     ["topRiskDistricts", _riskRank],
     ["topSpentDistricts", _spentRank],
+    ["topPostureDistricts", _postureRank],
     ["districtRows", _rows]
 ]

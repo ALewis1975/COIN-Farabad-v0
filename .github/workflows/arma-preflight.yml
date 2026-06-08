@@ -270,3 +270,7 @@ jobs:
       - name: Threat economy reason taxonomy static validation
         run: |
           bash tests/static/threat_economy_reason_taxonomy_checks.sh
+
+      - name: Threat district posture selection static validation
+        run: |
+          bash tests/static/threat_district_posture_selection_checks.sh
