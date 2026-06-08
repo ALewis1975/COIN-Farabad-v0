@@ -17,6 +17,8 @@
         cache can never return stale data within one server tick.
       - Server-authoritative; returns [] off the server (all callers are
         server-side ticks).
+      - Publishes the Runtime Boundary snapshot on a coarse throttle. This keeps
+        the runtime policy current without adding another scheduler loop.
 */
 
 if (!isServer) exitWith { [] };
@@ -30,5 +32,21 @@ if (_cachedFrame isEqualTo _frame) exitWith {
 private _snap = allPlayers apply { [_x, getPosATL _x] };
 missionNamespace setVariable ["ARC_playerSnapshotFrame", _frame];
 missionNamespace setVariable ["ARC_playerSnapshotData", _snap];
+
+private _interval = missionNamespace getVariable ["ARC_runtimePolicyPublishIntervalS", 30];
+if (!(_interval isEqualType 0)) then { _interval = 30; };
+_interval = (_interval max 5) min 300;
+
+private _lastRuntimePolicyPublish = missionNamespace getVariable ["ARC_runtimePolicyLastPublishAt", -1];
+if (!(_lastRuntimePolicyPublish isEqualType 0)) then { _lastRuntimePolicyPublish = -1; };
+
+if ((_lastRuntimePolicyPublish < 0) || { (serverTime - _lastRuntimePolicyPublish) >= _interval }) then
+{
+    if (isNil "ARC_fnc_runtimePolicyPublish") then
+    {
+        ARC_fnc_runtimePolicyPublish = compile preprocessFileLineNumbers "functions\\core\\fn_runtimePolicyPublish.sqf";
+    };
+    [] call ARC_fnc_runtimePolicyPublish;
+};
 
 _snap
