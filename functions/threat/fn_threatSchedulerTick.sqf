@@ -17,6 +17,11 @@ if (isNil "ARC_fnc_threatEconomyReasonMeta") then
     ARC_fnc_threatEconomyReasonMeta = compile preprocessFileLineNumbers "functions\\threat\\fn_threatEconomyReasonMeta.sqf";
 };
 
+if (isNil "ARC_fnc_intelQualityCoupleDistrict") then
+{
+    ARC_fnc_intelQualityCoupleDistrict = compile preprocessFileLineNumbers "functions\\intel\\fn_intelQualityCoupleDistrict.sqf";
+};
+
 private _reasonMetaFn = {
     params [["_code", "UNKNOWN_REASON", [""]]];
     [_code] call ARC_fnc_threatEconomyReasonMeta
@@ -29,8 +34,6 @@ private _lastTs = ["threat_v0_scheduler_last_ts", -1] call ARC_fnc_stateGet;
 if (!(_lastTs isEqualType 0)) then { _lastTs = -1; };
 
 // ── Daily budget reset (TEA-F5 fix) ────────────────────────────────────────
-// A "day" is measured as a floor(serverTime / 86400) epoch. On rollover the
-// per-district spent_today counters are reset to 0 so each day gets a fresh budget.
 private _lastResetDay = ["threat_v0_budget_last_reset_day", -1] call ARC_fnc_stateGet;
 if (!(_lastResetDay isEqualType 0)) then { _lastResetDay = -1; };
 private _todayDay = floor (serverTime / 86400);
@@ -39,7 +42,6 @@ if (_todayDay != _lastResetDay) then
     private _budgetMap = ["threat_v0_attack_budget", createHashMap] call ARC_fnc_stateGet;
     if (!(_budgetMap isEqualType createHashMap)) then { _budgetMap = createHashMap; };
     private _hgReset = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
-    // Iterate over the canonical 20-district list; avoids sqflint `keys` parser issue.
     private _distReset = [
         "D01","D02","D03","D04","D05","D06","D07","D08","D09","D10",
         "D11","D12","D13","D14","D15","D16","D17","D18","D19","D20"
@@ -68,6 +70,7 @@ if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabl
 if (!_enabled) exitWith {false};
 
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _pget = compile "params ['_pairs','_k','_d']; private _out = _d; { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _out = _x select 1; }; } forEach _pairs; _out";
 private _clampScore = {
     params [["_v", 0, [0]]];
     if (_v < 0) then { _v = 0; };
@@ -89,23 +92,18 @@ if (!(_civDistricts isEqualType createHashMap)) then { _civDistricts = createHas
 private _postureSelectionEnabled = missionNamespace getVariable ["ARC_threatDistrictPostureSelectionEnabled", true];
 if (!(_postureSelectionEnabled isEqualType true) && !(_postureSelectionEnabled isEqualType false)) then { _postureSelectionEnabled = true; };
 
-// GREEN score only nudges intel quality; posture and risk drive threat selection.
-// >=70 means strong civil cooperation, <25 means weak civil cooperation;
-// the +/-0.10 adjustment is bounded so posture remains the dominant signal.
 private _greenStrongMin = 70;
 private _greenWeakMax = 25;
 private _intelGreenAdjust = 0.10;
 private _intelMaxFromGreen = 0.90;
 private _intelMinFromGreen = 0.25;
 
-// Build open threat district index (quick look-up to skip already-open districts)
 private _records = ["threat_v0_records", []] call ARC_fnc_stateGet;
 if (!(_records isEqualType [])) then { _records = []; };
 
 private _openDistricts = [];
 {
     private _rec = _x;
-    // Extract state value from pairs array
     private _stateVal = "";
     {
         if ((_x isEqualType []) && { (count _x) >= 2 } && { ((_x select 0) isEqualTo "state") }) exitWith { _stateVal = _x select 1; };
@@ -122,16 +120,12 @@ private _openDistricts = [];
     };
 } forEach _records;
 
-// Determine current escalation tier from district posture.
 private _scheduledAny = false;
 
 {
     private _districtId = _x;
-
-    // Skip if already has an open threat
     if (_districtId in _openDistricts) then { continue; };
 
-    // Read authored/derived security posture.
     private _secLevel = missionNamespace getVariable [format ["ARC_district_%1_secLevel", _districtId], "NORMAL"];
     if (!(_secLevel isEqualType "")) then { _secLevel = "NORMAL"; };
     private _secTier = 0;
@@ -217,6 +211,26 @@ private _scheduledAny = false;
     if (_greenScore >= _greenStrongMin) then { _intelQuality = (_intelQuality + _intelGreenAdjust) min _intelMaxFromGreen; };
     if (_greenScore < _greenWeakMax) then { _intelQuality = (_intelQuality - _intelGreenAdjust) max _intelMinFromGreen; };
 
+    private _baseIntelQuality = _intelQuality;
+    private _qualityContext = [
+        ["white", _whiteScore],
+        ["red", _redScore],
+        ["green", _greenScore],
+        ["risk_level", _riskLevel],
+        ["attack_count_30d", _attackCount30d],
+        ["s_coop", _sCoop],
+        ["s_threat", _sThreat],
+        ["posture_score", _postureScore],
+        ["threat_type", _threatType],
+        ["threat_subtype", _threatSubtype],
+        ["transition", "SCHEDULED"]
+    ];
+    private _intelQualityMeta = [_districtId, _baseIntelQuality, "THREAT_SCHEDULER", _qualityContext] call ARC_fnc_intelQualityCoupleDistrict;
+    if (!(_intelQualityMeta isEqualType [])) then { _intelQualityMeta = []; };
+    private _coupledIntelQuality = [_intelQualityMeta, "quality", _baseIntelQuality] call _pget;
+    if (!(_coupledIntelQuality isEqualType 0)) then { _coupledIntelQuality = _baseIntelQuality; };
+    _intelQuality = (_coupledIntelQuality max 0) min 1;
+
     private _selectionInputs = [
         ["selection_enabled", _postureSelectionEnabled],
         ["selection_policy", "DISTRICT_POSTURE_V1"],
@@ -233,7 +247,10 @@ private _scheduledAny = false;
         ["red", _redScore],
         ["green", _greenScore],
         ["risk_level", _riskLevel],
-        ["attack_count_30d", _attackCount30d]
+        ["attack_count_30d", _attackCount30d],
+        ["base_intel_quality", _baseIntelQuality],
+        ["coupled_intel_quality", _intelQuality],
+        ["intel_quality_meta", _intelQualityMeta]
     ];
 
     private _govResult = [_districtId, _threatType, _selectedTier] call ARC_fnc_threatGovernorCheck;
@@ -266,12 +283,14 @@ private _scheduledAny = false;
             ["selected_tier", _selectedTier],
             ["tier_source", _tierSource],
             ["selection_inputs", _selectionInputs],
+            ["base_intel_quality", _baseIntelQuality],
+            ["intel_quality", _intelQuality],
+            ["intel_quality_meta", _intelQualityMeta],
             ["threat_type", _threatType],
             ["threat_subtype", _threatSubtype],
             ["threat_intent", _threatIntent],
             ["tier", _selectedTier],
             ["budget_cost", _spendCost],
-            ["intel_quality", _intelQuality],
             ["ts", _now],
             ["source", "ARC_fnc_threatSchedulerTick"]
         ];
@@ -280,14 +299,15 @@ private _scheduledAny = false;
         diag_log format ["[ARC][THREAT] ARC_fnc_threatSchedulerTick: governor allowed district=%1 posture=%2 postureScore=%3 tierSource=%4 type=%5 subtype=%6 tier=%7 cost=%8 intel=%9 reason=%10", _districtId, _secLevel, _postureScore, _tierSource, _threatType, _threatSubtype, _selectedTier, _spendCost, _intelQuality, "ALLOW_GOVERNOR"];
 
         private _scheduled = [
-            _districtId,     // district
-            _selectedTier,   // tier
-            _threatType,     // type
-            _threatSubtype,  // subtype
-            _intelQuality,   // intelQuality
-            _spendCost,      // budgetCost
-            _secLevel,       // posture
-            _threatIntent    // intent
+            _districtId,
+            _selectedTier,
+            _threatType,
+            _threatSubtype,
+            _intelQuality,
+            _spendCost,
+            _secLevel,
+            _threatIntent,
+            _intelQualityMeta
         ] call ARC_fnc_threatScheduleEvent;
 
         if (_scheduled) then
@@ -309,7 +329,7 @@ private _scheduledAny = false;
             ["threat_v0_economy_last_decision", _scheduledDecision] call ARC_fnc_stateSet;
             ["threat_v0_economy_last_allowed_decision", _scheduledDecision] call ARC_fnc_stateSet;
 
-            diag_log format ["[ARC][THREAT] ARC_fnc_threatSchedulerTick: budget spend did=%1 posture=%2 postureScore=%3 tierSource=%4 tier=%5 spent=%6 cost=%7 reason=%8", _districtId, _secLevel, _postureScore, _tierSource, _selectedTier, _spentNow + _spendCost, _spendCost, "ALLOW_SCHEDULED"];
+            diag_log format ["[ARC][THREAT] ARC_fnc_threatSchedulerTick: budget spend did=%1 posture=%2 postureScore=%3 tierSource=%4 tier=%5 spent=%6 cost=%7 intel=%8 reason=%9", _districtId, _secLevel, _postureScore, _tierSource, _selectedTier, _spentNow + _spendCost, _spendCost, _intelQuality, "ALLOW_SCHEDULED"];
 
             _scheduledAny = true;
         }
@@ -346,12 +366,14 @@ private _scheduledAny = false;
             ["selected_tier", _selectedTier],
             ["tier_source", _tierSource],
             ["selection_inputs", _selectionInputs],
+            ["base_intel_quality", _baseIntelQuality],
+            ["intel_quality", _intelQuality],
+            ["intel_quality_meta", _intelQualityMeta],
             ["threat_type", _threatType],
             ["threat_subtype", _threatSubtype],
             ["threat_intent", _threatIntent],
             ["tier", _selectedTier],
             ["budget_cost", _spendCost],
-            ["intel_quality", _intelQuality],
             ["ts", _now],
             ["source", "ARC_fnc_threatSchedulerTick"]
         ];
@@ -368,7 +390,7 @@ private _scheduledAny = false;
             ["threat_v0_economy_deny_counts", _denyCounts] call ARC_fnc_stateSet;
         };
 
-        diag_log format ["[ARC][THREAT] ARC_fnc_threatSchedulerTick: governor denied district=%1 posture=%2 postureScore=%3 tierSource=%4 type=%5 subtype=%6 tier=%7 reason=%8", _districtId, _secLevel, _postureScore, _tierSource, _threatType, _threatSubtype, _selectedTier, _denyReason];
+        diag_log format ["[ARC][THREAT] ARC_fnc_threatSchedulerTick: governor denied district=%1 posture=%2 postureScore=%3 tierSource=%4 type=%5 subtype=%6 tier=%7 intel=%8 reason=%9", _districtId, _secLevel, _postureScore, _tierSource, _threatType, _threatSubtype, _selectedTier, _intelQuality, _denyReason];
     };
 } forEach _districtIds;
 
