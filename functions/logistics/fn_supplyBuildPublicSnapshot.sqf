@@ -2,6 +2,14 @@
 private _ledger = ["supply_v1_ledger", []] call ARC_fnc_stateGet;
 if (!(_ledger isEqualType [])) then { _ledger = []; };
 private _last = if ((count _ledger) > 0) then { _ledger select ((count _ledger) - 1) } else { [] };
+
+if (isNil "ARC_fnc_sustainmentReadinessSnapshot") then
+{
+    ARC_fnc_sustainmentReadinessSnapshot = compile preprocessFileLineNumbers "functions\\logistics\\fn_sustainmentReadinessSnapshot.sqf";
+};
+private _sustainmentReadiness = [] call ARC_fnc_sustainmentReadinessSnapshot;
+if (!(_sustainmentReadiness isEqualType [])) then { _sustainmentReadiness = []; };
+
 [
     ["stock", [] call ARC_fnc_supplyGetStockSnapshot],
     ["lastLedgerEvent", _last],
@@ -10,5 +18,6 @@ private _last = if ((count _ledger) > 0) then { _ledger select ((count _ledger) 
     ["activeStartdispSummary", ["activeIncidentStartdispSummary", []] call ARC_fnc_stateGet],
     ["activeSupplyAnnex", ["activeIncidentSitrepSupplyAnnex", []] call ARC_fnc_stateGet],
     ["activeReadinessDelta", ["activeIncidentSitrepReadinessDelta", []] call ARC_fnc_stateGet],
-    ["activeMettTcAssessment", ["activeIncidentMettTcAssessment", []] call ARC_fnc_stateGet]
+    ["activeMettTcAssessment", ["activeIncidentMettTcAssessment", []] call ARC_fnc_stateGet],
+    ["sustainmentReadiness", _sustainmentReadiness]
 ]
