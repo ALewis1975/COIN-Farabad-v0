@@ -469,6 +469,29 @@ private _ctabSection = [
 ];
 
 // ---------------------------------------------------------------------------
+// Section: runtimeBoundary — diagnostics-only Runtime Boundary read model
+// ---------------------------------------------------------------------------
+private _runtimePolicy = missionNamespace getVariable ["ARC_pub_runtimePolicy", []];
+if (!(_runtimePolicy isEqualType [])) then { _runtimePolicy = []; };
+
+private _runtimePolicyAt = missionNamespace getVariable ["ARC_pub_runtimePolicyUpdatedAt", -1];
+if (!(_runtimePolicyAt isEqualType 0)) then { _runtimePolicyAt = -1; };
+
+private _runtimePolicyMeta = missionNamespace getVariable ["ARC_pub_runtimePolicyMeta", []];
+if (!(_runtimePolicyMeta isEqualType [])) then { _runtimePolicyMeta = []; };
+
+private _runtimeBoundaryData = [
+    ["snapshot", _runtimePolicy],
+    ["meta", _runtimePolicyMeta],
+    ["note", "Diagnostics-only Runtime Boundary read model. UI is a consumer only; no gameplay authority."]
+];
+
+private _runtimeBoundarySection = [
+    ["data",      _runtimeBoundaryData],
+    ["freshness", [["updatedAt", if (_runtimePolicyAt > 0) then { _runtimePolicyAt } else { _now }], ["staleAfterS", 60]]]
+];
+
+// ---------------------------------------------------------------------------
 // Assemble final payload
 // ---------------------------------------------------------------------------
 [
@@ -490,6 +513,7 @@ private _ctabSection = [
         ["intelFeed",    _intelFeedSection],
         ["medical",      _medicalSection],
         ["comms",        _commsSection],
-        ["ctab",         _ctabSection]
+        ["ctab",         _ctabSection],
+        ["runtimeBoundary", _runtimeBoundarySection]
     ]]
 ]
