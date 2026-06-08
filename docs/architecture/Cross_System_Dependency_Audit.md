@@ -66,7 +66,7 @@ This audit creates a bounded review board for:
 | DEP-007 | Government / GREEN | GREEN legitimacy exists in CIVSUB, but government agency behavior is not yet a narrow runtime contract. | `LEGACY_ACCEPTED` | CIVSUB / future Gov bridge | Write Government Layer planning spec before persistent government state or scheduler. |
 | DEP-008 | OPFOR capacity | Threat currently carries pressure that may later belong to OPFOR network capacity. | `LEGACY_ACCEPTED` | Threat / future OPFOR bridge | Write OPFOR Network planning spec before persistent hidden network state. |
 | DEP-009 | SitePop / Prison | Site presence uses world anchors and may later interact with government/prison handoff semantics. | `NEEDS_ADAPTER` | SitePop / Prison / World | Keep server-mediated handoff behavior and document world-anchor consumers. |
-| DEP-010 | Public snapshots | Public snapshots can grow into unbounded mirrors if used as integration shortcuts. | `OK_CONTRACTED` with risk | Core | Keep snapshots bounded and presentation-oriented. Reject mirror-style expansion. |
+| DEP-010 | Public snapshots | Public snapshots can grow into unbounded mirrors if used as integration shortcuts. | `OK_CONTRACTED` | Core | Keep snapshots bounded and presentation-oriented. Reject mirror-style expansion. |
 
 ---
 
