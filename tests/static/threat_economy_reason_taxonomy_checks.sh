@@ -33,8 +33,7 @@ check 'threat_v0_economy_reason_taxonomy' "functions/threat/fn_threatEconomyInit
 check 'threat_v0_economy_deny_reason_enum' "functions/threat/fn_threatEconomyInit.sqf" "Economy init preserves deny reason enum"
 check 'reasonTaxonomy' "functions/threat/fn_threatEconomySnapshotBuild.sqf" "Economy snapshot exposes reason taxonomy"
 check 'denyReasonTaxonomy' "functions/threat/fn_threatEconomySnapshotBuild.sqf" "Economy snapshot preserves deny taxonomy"
-check 'denyReasonCounts' "functions/threat/fn_threatEconomySnapshotBuild.sqf" "Economy snapshot preserves denial counts"
-check '\["meta", _meta\]' "functions/threat/fn_threatEconomySnapshotBuild.sqf" "Deny counts include reason metadata"
+check '_denyRows pushBack \[_reason, _count, _meta\]' "functions/threat/fn_threatEconomySnapshotBuild.sqf" "Deny counts include reason metadata"
 
 if [[ "$pass" != true ]]; then
   exit 1
