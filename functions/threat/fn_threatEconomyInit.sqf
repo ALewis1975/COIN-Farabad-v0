@@ -17,6 +17,12 @@
 if (!isServer) exitWith {false};
 
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _pg = compile "params ['_pairs','_k','_d']; private _out = _d; { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _out = _x select 1; }; } forEach _pairs; _out";
+
+if (isNil "ARC_fnc_threatEconomyReasonMeta") then
+{
+    ARC_fnc_threatEconomyReasonMeta = compile preprocessFileLineNumbers "functions\\threat\\fn_threatEconomyReasonMeta.sqf";
+};
 
 // District list (D01-D20, canonical per fn_worldIsValidDistrictId)
 private _districtIds = [
@@ -71,15 +77,22 @@ if (!(_stExisting isEqualType 0)) then { _stExisting = -1; };
 ["threat_v0_scheduler_last_ts", _stExisting] call ARC_fnc_stateSet;
 
 // ── Economy observability state (Epic 7) ────────────────────────────────────
-["threat_v0_economy_deny_reason_enum", [
-    "THREAT_DISABLED",
-    "GLOBAL_COOLDOWN",
-    "DISTRICT_COOLDOWN",
-    "BUDGET_EXHAUSTED",
-    "ESCALATION_TIER",
-    "BAD_DISTRICT",
-    "NOT_SERVER"
-]] call ARC_fnc_stateSet;
+private _reasonTaxonomy = ["__ALL__"] call ARC_fnc_threatEconomyReasonMeta;
+["threat_v0_economy_reason_taxonomy", _reasonTaxonomy] call ARC_fnc_stateSet;
+
+private _denyReasons = [];
+{
+    private _row = _x;
+    private _code = [_row, "code", ""] call _pg;
+    private _decision = [_row, "decision", ""] call _pg;
+    private _blocksEvent = [_row, "blocks_event", false] call _pg;
+    if ((_decision isEqualTo "DENY") && { _blocksEvent isEqualTo true } && { !(_code isEqualTo "") }) then
+    {
+        _denyReasons pushBackUnique _code;
+    };
+} forEach _reasonTaxonomy;
+
+["threat_v0_economy_deny_reason_enum", _denyReasons] call ARC_fnc_stateSet;
 
 private _denyCounts = ["threat_v0_economy_deny_counts", createHashMap] call ARC_fnc_stateGet;
 if (!(_denyCounts isEqualType createHashMap)) then { _denyCounts = createHashMap; };
@@ -87,7 +100,7 @@ if (!(_denyCounts isEqualType createHashMap)) then { _denyCounts = createHashMap
     private _reason = _x;
     private _seen = [_denyCounts, _reason, -1] call _hg;
     if (!(_seen isEqualType 0) || { _seen < 0 }) then { _denyCounts set [_reason, 0]; };
-} forEach ["THREAT_DISABLED", "GLOBAL_COOLDOWN", "DISTRICT_COOLDOWN", "BUDGET_EXHAUSTED", "ESCALATION_TIER", "BAD_DISTRICT", "NOT_SERVER"];
+} forEach _denyReasons;
 ["threat_v0_economy_deny_counts", _denyCounts] call ARC_fnc_stateSet;
 
 private _lastDecision = ["threat_v0_economy_last_decision", []] call ARC_fnc_stateGet;
@@ -102,6 +115,6 @@ private _lastDeniedDecision = ["threat_v0_economy_last_denied_decision", []] cal
 if (!(_lastDeniedDecision isEqualType [])) then { _lastDeniedDecision = []; };
 ["threat_v0_economy_last_denied_decision", _lastDeniedDecision] call ARC_fnc_stateSet;
 
-diag_log format ["[ARC][INFO] ARC_fnc_threatEconomyInit: economy keys seeded for %1 districts.", count _districtIds];
+diag_log format ["[ARC][INFO] ARC_fnc_threatEconomyInit: economy keys seeded for %1 districts. reasonTaxonomy=%2 denyReasons=%3", count _districtIds, count _reasonTaxonomy, count _denyReasons];
 
 true
