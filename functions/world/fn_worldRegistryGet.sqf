@@ -37,6 +37,7 @@ private _objectiveRanked = missionNamespace getVariable ["ARC_worldObjectiveRank
 if (!(_objectiveRanked isEqualType [])) then { _objectiveRanked = []; };
 
 private _locationsOut = [];
+private _allMarkers = allMapMarkers;
 {
     _x params [ ["_id", "", [""]], ["_displayName", "", [""]], ["_pos", [], [[]]] ];
     private _p = [_pos] call _asPos3;
@@ -48,7 +49,7 @@ private _locationsOut = [];
     _rec set ["displayName", _displayName];
     _rec set ["pos", _p];
     _rec set ["marker", _marker];
-    _rec set ["markerExists", _marker in allMapMarkers];
+    _rec set ["markerExists", _marker in _allMarkers];
     _locationsOut pushBack _rec;
 } forEach _named;
 
