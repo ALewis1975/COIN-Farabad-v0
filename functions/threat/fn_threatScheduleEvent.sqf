@@ -331,7 +331,11 @@ switch (_familyU) do
         {
             format ["District Attack Network — %1", _districtId]
         };
-        private _leadId = [_leadType, _disp, _iedPos, _intelQuality, _nonIedLeadTtlS, "", _typeU, "", _tag] call ARC_fnc_leadCreate;
+        if (isNil "ARC_fnc_intelLeadCreateCoupled") then
+        {
+            ARC_fnc_intelLeadCreateCoupled = compile preprocessFileLineNumbers "functions\\intel\\fn_intelLeadCreateCoupled.sqf";
+        };
+        private _leadId = [_leadType, _disp, _iedPos, _intelQuality, _nonIedLeadTtlS, "", _typeU, "", _tag, [], "FIELD", _districtId, "THREAT_SCHEDULER", [["threat_id", _threatId], ["intent", _intentU], ["family", _familyU]]] call ARC_fnc_intelLeadCreateCoupled;
         if (!(_leadId isEqualTo "")) then
         {
             diag_log format ["[ARC][INFO] ARC_fnc_threatScheduleEvent: NON_IED lead=%1 threat=%2 intent=%3", _leadId, _threatId, _intentU];

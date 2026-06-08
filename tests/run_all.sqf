@@ -274,7 +274,7 @@ if (!(isNil "ARC_fnc_consoleThemeGet")) then {
   [_isThemeHashMap, "UT-THEME-000", "console theme returns HashMap", ["type", typeName _theme]] call ARC_TEST_fnc_assert;
 
   if (_isThemeHashMap) then {
-    private _themeKeys = keys _theme;
+    private _themeKeys = [_theme] call (compile "params ['_m']; keys _m");
 
     {
       private _hasKey = _x in _themeKeys;
@@ -1028,6 +1028,90 @@ if (!(isNil "ARC_fnc_civsubDistrictsClamp")) then {
   ["risk ceiling clamp               (rate=5,w=10,risk=99 →100)", "UT-DECAY-006", 5, 10, 99, 100]
 ];
 
+
+// ---------- Intel quality coupling tests ----------
+// Validates the bounded coupling formula in functions/intel/fn_intelQualityCouple.sqf:
+//   _deltaRaw -> _delta (clamped to [-0.30, 0.25]) -> _quality, plus the
+//   confidence_band / precision / timeliness classification thresholds.
+// Inputs are driven through CIVSUB posture (civsub_v1_districts) and threat risk
+// state (threat_v0_district_risk) exactly as the runtime emitters supply them.
+// IMPORTANT: If the formula or thresholds in fn_intelQualityCouple.sqf change,
+//            update the expected values below to match.
+if (isServer) then {
+  if (isNil "ARC_fnc_intelQualityCouple") then {
+    ARC_fnc_intelQualityCouple = compile preprocessFileLineNumbers "functions\\intel\\fn_intelQualityCouple.sqf";
+  };
+
+  if (!(isNil "ARC_fnc_intelQualityCouple") && !(isNil "ARC_fnc_stateSet") && !(isNil "ARC_fnc_stateGet")) then {
+    private _iqcStateSaved = [["threat_v0_district_risk"]] call ARC_TEST_fnc_stateSnapshot;
+    private _iqcVarsSaved  = [["civsub_v1_districts"]] call ARC_TEST_fnc_varSnapshot;
+
+    // pget helper for reading pair arrays returned by the coupling function.
+    private _iqcPget = {
+      params ["_pairs", "_key", "_default"];
+      private _out = _default;
+      {
+        if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _out = _x select 1; };
+      } forEach _pairs;
+      _out
+    };
+
+    // Seed deterministic CIVSUB posture + threat risk for each scenario district.
+    private _civ = createHashMap;
+    private _risk = createHashMap;
+
+    // Scenario A (D01): high-trust, calm district -> strong positive coupling.
+    private _cA = createHashMap; _cA set ["W_EFF_U", 80]; _cA set ["R_EFF_U", 20]; _cA set ["G_EFF_U", 70];
+    _civ set ["D01", _cA];
+    private _rA = createHashMap; _rA set ["risk_level", 10]; _rA set ["attack_count_30d", 0]; _rA set ["cooldown_until", -1];
+    _risk set ["D01", _rA];
+
+    // Scenario B (D02): intimidated, volatile district under cooldown -> negative coupling.
+    private _cB = createHashMap; _cB set ["W_EFF_U", 20]; _cB set ["R_EFF_U", 85]; _cB set ["G_EFF_U", 15];
+    _civ set ["D02", _cB];
+    private _rB = createHashMap; _rB set ["risk_level", 80]; _rB set ["attack_count_30d", 4]; _rB set ["cooldown_until", serverTime + 3600];
+    _risk set ["D02", _rB];
+
+    // Scenario C (D03): worst-case inputs -> coupling clamps at the -0.30 floor.
+    private _cC = createHashMap; _cC set ["W_EFF_U", 0]; _cC set ["R_EFF_U", 100]; _cC set ["G_EFF_U", 0];
+    _civ set ["D03", _cC];
+    private _rC = createHashMap; _rC set ["risk_level", 100]; _rC set ["attack_count_30d", 5]; _rC set ["cooldown_until", serverTime + 3600];
+    _risk set ["D03", _rC];
+
+    missionNamespace setVariable ["civsub_v1_districts", _civ];
+    ["threat_v0_district_risk", _risk] call ARC_fnc_stateSet;
+
+    // UT-IQC-001..004: high-trust district couples strength upward to the +0.25 ceiling.
+    private _outA = ["D01", 0.50, "HUMINT", "", []] call ARC_fnc_intelQualityCouple;
+    private _qA = [_outA, "quality", -1] call _iqcPget;
+    [(abs (_qA - 0.75) < 0.0001), "UT-IQC-001", "high-trust coupling reaches +0.25 quality ceiling", ["got", _qA]] call ARC_TEST_fnc_assert;
+    [(([_outA, "confidence_band", ""] call _iqcPget) isEqualTo "HIGH"), "UT-IQC-002", "high-trust quality maps to HIGH confidence band"] call ARC_TEST_fnc_assert;
+    [(([_outA, "precision", ""] call _iqcPget) isEqualTo "AREA"), "UT-IQC-003", "high trust + high quality maps to AREA precision"] call ARC_TEST_fnc_assert;
+    [(([_outA, "timeliness", ""] call _iqcPget) isEqualTo "NORMAL"), "UT-IQC-004", "calm district maps to NORMAL timeliness"] call ARC_TEST_fnc_assert;
+
+    // UT-IQC-005..008: intimidated/volatile district couples strength downward.
+    private _outB = ["D02", 0.50, "POST_BLAST", "", []] call ARC_fnc_intelQualityCouple;
+    private _qB = [_outB, "quality", -1] call _iqcPget;
+    [(_qB < 0.50 && _qB > 0), "UT-IQC-005", "intimidated district lowers coupled quality below base", ["got", _qB]] call ARC_TEST_fnc_assert;
+    [(([_outB, "confidence_band", ""] call _iqcPget) isEqualTo "LOW"), "UT-IQC-006", "lowered quality maps to LOW confidence band", ["q", _qB]] call ARC_TEST_fnc_assert;
+    [(([_outB, "precision", ""] call _iqcPget) isEqualTo "VAGUE"), "UT-IQC-007", "high intimidation maps to VAGUE precision"] call ARC_TEST_fnc_assert;
+    [(([_outB, "timeliness", ""] call _iqcPget) isEqualTo "VOLATILE"), "UT-IQC-008", "attack_count_30d>=3 maps to VOLATILE timeliness"] call ARC_TEST_fnc_assert;
+
+    // UT-IQC-009..011: worst-case inputs clamp the coupling delta at the -0.30 floor.
+    private _outC = ["D03", 0.50, "HUMINT", "", []] call ARC_fnc_intelQualityCouple;
+    private _qC = [_outC, "quality", -1] call _iqcPget;
+    [(abs (_qC - 0.20) < 0.0001), "UT-IQC-009", "worst-case coupling clamps delta at -0.30 floor", ["got", _qC]] call ARC_TEST_fnc_assert;
+    [(([_outC, "confidence_band", ""] call _iqcPget) isEqualTo "VERY_LOW"), "UT-IQC-010", "floor quality maps to VERY_LOW confidence band"] call ARC_TEST_fnc_assert;
+    [(([_outC, "quality_delta", 0] call _iqcPget) >= -0.3001 && { ([_outC, "quality_delta", 0] call _iqcPget) <= 0.2501 }), "UT-IQC-011", "coupling delta stays within [-0.30, 0.25] bounds"] call ARC_TEST_fnc_assert;
+
+    [_iqcStateSaved] call ARC_TEST_fnc_stateRestore;
+    [_iqcVarsSaved]  call ARC_TEST_fnc_varRestore;
+  } else {
+    ["INFO", "UT-IQC-SKIP", "intelQualityCouple tests skipped; prerequisites missing", []] call ARC_TEST_fnc_log;
+  };
+} else {
+  ["INFO", "UT-IQC-SKIP", "intelQualityCouple tests skipped; server-only", []] call ARC_TEST_fnc_log;
+};
 
 
 ["INFO", "RUN", format ["Completed in %1s", (diag_tickTime - _t0)], []] call ARC_TEST_fnc_log;

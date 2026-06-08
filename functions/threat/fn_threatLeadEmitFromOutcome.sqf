@@ -54,11 +54,35 @@ private _emittedLeads = switch (_family) do
             private _area       = [_rec, "area", []] call _kvGet;
             private _districtId = [_links, "district_id", "D00"] call _kvGet;
             private _taskId     = [_links, "task_id", ""] call _kvGet;
+            private _threatId   = [_rec, "threat_id", ""] call _kvGet;
             private _pos        = [_area, "pos", [0,0,0]] call _kvGet;
             if (!(_pos isEqualType []) || { (count _pos) < 2 }) then { _pos = [0,0,0]; };
             _pos resize 3;
 
             private _transU = toUpper _transition;
+            private _makeLead = {
+                params ["_leadType", "_displayName", "_leadPos", "_baseStrength", "_expiresIn", "_sourceTaskId", "_sourceIncidentType", "_tag", "_sourceKind"];
+                if (isNil "ARC_fnc_intelLeadCreateCoupled") then
+                {
+                    ARC_fnc_intelLeadCreateCoupled = compile preprocessFileLineNumbers "functions\\intel\\fn_intelLeadCreateCoupled.sqf";
+                };
+                [
+                    _leadType,
+                    _displayName,
+                    _leadPos,
+                    _baseStrength,
+                    _expiresIn,
+                    _sourceTaskId,
+                    _sourceIncidentType,
+                    "",
+                    _tag,
+                    [],
+                    "FIELD",
+                    _districtId,
+                    _sourceKind,
+                    [["threat_id", _threatId], ["transition", _transU], ["family", "SUICIDE"]]
+                ] call ARC_fnc_intelLeadCreateCoupled
+            };
 
             if (_transU isEqualTo "DETONATED") then
             {
@@ -71,9 +95,9 @@ private _emittedLeads = switch (_family) do
                     7200,
                     _taskId,
                     "IED",
-                    "",
-                    "retaliation_risk"
-                ] call ARC_fnc_leadCreate;
+                    "retaliation_risk",
+                    "SUICIDE_DETONATED"
+                ] call _makeLead;
 
                 if (!(_rrId isEqualTo "")) then
                 {
@@ -90,9 +114,9 @@ private _emittedLeads = switch (_family) do
                     7200,
                     _taskId,
                     "IED",
-                    "",
-                    "recruitment_pressure"
-                ] call ARC_fnc_leadCreate;
+                    "recruitment_pressure",
+                    "SUICIDE_DETONATED"
+                ] call _makeLead;
 
                 if (!(_rpId isEqualTo "")) then
                 {
@@ -112,9 +136,9 @@ private _emittedLeads = switch (_family) do
                     1800,
                     _taskId,
                     "IED",
-                    "",
-                    "sb_threat_advisory"
-                ] call ARC_fnc_leadCreate;
+                    "sb_threat_advisory",
+                    "SUICIDE_STAGED"
+                ] call _makeLead;
 
                 if (!(_staId isEqualTo "")) then
                 {
