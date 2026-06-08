@@ -9,7 +9,7 @@
 
 ## Purpose
 
-S3 follow-on decisions should consume explicit inputs instead of relying on scattered UI state or implicit task text. This matrix defines the planning contract for RTB, Hold, Proceed, and support-oriented recommendations.
+S3 follow-on decisions should consume explicit inputs instead of relying on scattered UI state or implicit task text. This matrix defines the planning contract for RTB, Hold, Continue (next-task), and support-oriented recommendations.
 
 ## Authority
 
