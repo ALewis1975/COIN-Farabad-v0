@@ -38,7 +38,7 @@ S3 follow-on decisions should consume explicit inputs instead of relying on scat
 
 | Condition | Preferred recommendation | Reasoning |
 |---|---|---|
-| Objective complete, status good, confidence sufficient, support adequate | Proceed | Next task or lead may be appropriate. |
+| Objective complete, status good, confidence sufficient, support adequate | Continue (next task) | Next task or lead may be appropriate. |
 | Objective complete, status degraded, support constrained | RTB or resupply | Refitting protects mission tempo and continuity. |
 | Objective complete, local posture unstable, threat unresolved | Hold | Presence, security, or observation may be required. |
 | Intel confidence low or source uncertain | Hold / investigate | Avoid overcommitting on weak information. |
