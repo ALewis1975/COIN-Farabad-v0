@@ -9,7 +9,13 @@
 
 if (!isServer) exitWith {[]};
 
+if (isNil "ARC_fnc_threatEconomyReasonMeta") then
+{
+    ARC_fnc_threatEconomyReasonMeta = compile preprocessFileLineNumbers "functions\\threat\\fn_threatEconomyReasonMeta.sqf";
+};
+
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _pg = compile "params ['_pairs','_k','_d']; private _out = _d; { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _out = _x select 1; }; } forEach _pairs; _out";
 
 private _enabled = ["threat_v0_enabled", true] call ARC_fnc_stateGet;
 if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabled = true; };
@@ -43,19 +49,31 @@ private _lastAllowedDecision = ["threat_v0_economy_last_allowed_decision", []] c
 if (!(_lastAllowedDecision isEqualType [])) then { _lastAllowedDecision = []; };
 private _lastDeniedDecision = ["threat_v0_economy_last_denied_decision", []] call ARC_fnc_stateGet;
 if (!(_lastDeniedDecision isEqualType [])) then { _lastDeniedDecision = []; };
+private _lastWarningDecision = ["threat_v0_economy_last_warning_decision", []] call ARC_fnc_stateGet;
+if (!(_lastWarningDecision isEqualType [])) then { _lastWarningDecision = []; };
 
 private _denyCounts = ["threat_v0_economy_deny_counts", createHashMap] call ARC_fnc_stateGet;
 if (!(_denyCounts isEqualType createHashMap)) then { _denyCounts = createHashMap; };
 
-private _denyTaxonomy = [
-    "THREAT_DISABLED",
-    "GLOBAL_COOLDOWN",
-    "DISTRICT_COOLDOWN",
-    "BUDGET_EXHAUSTED",
-    "ESCALATION_TIER",
-    "BAD_DISTRICT",
-    "NOT_SERVER"
-];
+private _reasonTaxonomy = ["threat_v0_economy_reason_taxonomy", []] call ARC_fnc_stateGet;
+if (!(_reasonTaxonomy isEqualType [])) then { _reasonTaxonomy = []; };
+if (_reasonTaxonomy isEqualTo []) then { _reasonTaxonomy = ["__ALL__"] call ARC_fnc_threatEconomyReasonMeta; };
+
+private _denyTaxonomy = ["threat_v0_economy_deny_reason_enum", []] call ARC_fnc_stateGet;
+if (!(_denyTaxonomy isEqualType [])) then { _denyTaxonomy = []; };
+if (_denyTaxonomy isEqualTo []) then
+{
+    {
+        private _row = _x;
+        private _code = [_row, "code", ""] call _pg;
+        private _decision = [_row, "decision", ""] call _pg;
+        private _blocksEvent = [_row, "blocks_event", false] call _pg;
+        if ((_decision isEqualTo "DENY") && { _blocksEvent isEqualTo true } && { !(_code isEqualTo "") }) then
+        {
+            _denyTaxonomy pushBackUnique _code;
+        };
+    } forEach _reasonTaxonomy;
+};
 
 private _districtIds = [
     "D01","D02","D03","D04","D05","D06","D07","D08","D09","D10",
@@ -147,7 +165,8 @@ private _denyRows = [];
     private _reason = _x;
     private _count = [_denyCounts, _reason, 0] call _hg;
     if (!(_count isEqualType 0)) then { _count = 0; };
-    _denyRows pushBack [_reason, _count];
+    private _meta = [_reason] call ARC_fnc_threatEconomyReasonMeta;
+    _denyRows pushBack [["reason", _reason], ["count", _count], ["meta", _meta]];
 } forEach _denyTaxonomy;
 
 [
@@ -181,11 +200,13 @@ private _denyRows = [];
         ["posture_tiers", [["NORMAL", 0], ["ELEVATED", 1], ["HIGH_RISK", 2], ["CRITICAL", 3]]],
         ["threat_costs", [["IED", 1], ["RAID", 2], ["AMBUSH", 2], ["ATTACK", 2], ["VBIED", 2], ["SUICIDE", 3]]]
     ]],
+    ["reasonTaxonomy", _reasonTaxonomy],
     ["denyReasonTaxonomy", _denyTaxonomy],
     ["denyReasonCounts", _denyRows],
     ["lastDecision", _lastDecision],
     ["lastAllowedDecision", _lastAllowedDecision],
     ["lastDeniedDecision", _lastDeniedDecision],
+    ["lastWarningDecision", _lastWarningDecision],
     ["topRiskDistricts", _riskRank],
     ["topSpentDistricts", _spentRank],
     ["districtRows", _rows]
