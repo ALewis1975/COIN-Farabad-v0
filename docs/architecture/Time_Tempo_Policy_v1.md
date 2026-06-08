@@ -56,21 +56,21 @@ Recommended fields:
 
 | Field | Type | Meaning |
 |---|---|---|
-| `schema` | string | `ARC_timePolicy_v1` |
-| `version` | array | `[1,0,0]` |
-| `builtAtServerTime` | number | Server build time |
-| `dayTime` | number | Current mission dayTime |
-| `phase` | string | `DAY`, `NIGHT`, `PEAK`, or `UNKNOWN` |
-| `profile` | string | `STANDARD`, `LOW_VIS`, `HIGH_VIS`, or `UNKNOWN` |
-| `activityWindows` | map | Named windows and open/closed state |
-| `canSpawnCivil` | bool | Compatibility field for civilian physical activity |
-| `canSpawnTraffic` | bool | Policy hint for traffic physical activity |
-| `canSpawnAirbase` | bool | Policy hint for airbase ambience |
-| `canSpawnThreat` | bool | Policy hint for threat physical manifestation |
-| `canSpawnOps` | bool | Policy hint for operations ambience |
-| `tempoHint` | string | `NORMAL`, `LOW`, `HIGH`, or `UNKNOWN` |
-| `derivedFrom` | string | Config source / compatibility note |
-| `staleAfterS` | number | UI freshness hint |
+| `schema` | STRING | `ARC_timePolicy_v1` |
+| `version` | ARRAY | `[1,0,0]` |
+| `builtAtServerTime` | NUMBER | Server build time |
+| `dayTime` | NUMBER | Current mission dayTime |
+| `phase` | STRING | `DAY`, `NIGHT`, `PEAK`, or `UNKNOWN` |
+| `profile` | STRING | `STANDARD`, `LOW_VIS`, `HIGH_VIS`, or `UNKNOWN` |
+| `activityWindows` | HASHMAP | Named windows and open/closed state |
+| `canSpawnCivil` | BOOL | Compatibility field for civilian physical activity |
+| `canSpawnTraffic` | BOOL | Policy hint for traffic physical activity |
+| `canSpawnAirbase` | BOOL | Policy hint for airbase ambience |
+| `canSpawnThreat` | BOOL | Policy hint for threat physical manifestation |
+| `canSpawnOps` | BOOL | Policy hint for operations ambience |
+| `tempoHint` | STRING | `NORMAL`, `LOW`, `HIGH`, or `UNKNOWN` |
+| `derivedFrom` | STRING | Config source / compatibility note |
+| `staleAfterS` | NUMBER | UI freshness hint |
 
 This read model should remain compact and policy-oriented. It should not become a scheduler registry.
 
