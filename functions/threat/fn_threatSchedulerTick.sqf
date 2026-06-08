@@ -68,6 +68,12 @@ if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabl
 if (!_enabled) exitWith {false};
 
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _clampScore = {
+    params [["_v", 0, [0]]];
+    if (_v < 0) then { _v = 0; };
+    if (_v > 100) then { _v = 100; };
+    _v
+};
 
 private _districtIds = [
     "D01","D02","D03","D04","D05","D06","D07","D08","D09","D10",
@@ -80,7 +86,10 @@ if (!(_riskMap isEqualType createHashMap)) then { _riskMap = createHashMap; };
 private _civDistricts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
 if (!(_civDistricts isEqualType createHashMap)) then { _civDistricts = createHashMap; };
 
-// GREEN score only nudges intel quality; posture still owns threat selection.
+private _postureSelectionEnabled = missionNamespace getVariable ["ARC_threatDistrictPostureSelectionEnabled", true];
+if (!(_postureSelectionEnabled isEqualType true) && !(_postureSelectionEnabled isEqualType false)) then { _postureSelectionEnabled = true; };
+
+// GREEN score only nudges intel quality; posture and risk drive threat selection.
 // >=70 means strong civil cooperation, <25 means weak civil cooperation;
 // the +/-0.10 adjustment is bounded so posture remains the dominant signal.
 private _greenStrongMin = 70;
@@ -113,7 +122,7 @@ private _openDistricts = [];
     };
 } forEach _records;
 
-// Determine current escalation tier from AO posture
+// Determine current escalation tier from district posture.
 private _scheduledAny = false;
 
 {
@@ -122,13 +131,13 @@ private _scheduledAny = false;
     // Skip if already has an open threat
     if (_districtId in _openDistricts) then { continue; };
 
-    // Read posture for tier and derive a network-driven threat profile.
+    // Read authored/derived security posture.
     private _secLevel = missionNamespace getVariable [format ["ARC_district_%1_secLevel", _districtId], "NORMAL"];
     if (!(_secLevel isEqualType "")) then { _secLevel = "NORMAL"; };
-    private _tier = 0;
-    if (_secLevel isEqualTo "ELEVATED") then { _tier = 1; };
-    if (_secLevel isEqualTo "HIGH_RISK") then { _tier = 2; };
-    if (_secLevel isEqualTo "CRITICAL") then { _tier = 3; };
+    private _secTier = 0;
+    if (_secLevel isEqualTo "ELEVATED") then { _secTier = 1; };
+    if (_secLevel isEqualTo "HIGH_RISK") then { _secTier = 2; };
+    if (_secLevel isEqualTo "CRITICAL") then { _secTier = 3; };
 
     private _rEntry = [_riskMap, _districtId, createHashMap] call _hg;
     if (!(_rEntry isEqualType createHashMap)) then { _rEntry = createHashMap; };
@@ -137,13 +146,40 @@ private _scheduledAny = false;
     private _attackCount30d = [_rEntry, "attack_count_30d", 0] call _hg;
     if (!(_attackCount30d isEqualType 0)) then { _attackCount30d = 0; };
 
+    private _whiteScore = 45;
+    private _redScore = 55;
     private _greenScore = 35;
     private _civD = [_civDistricts, _districtId, createHashMap] call _hg;
     if (_civD isEqualType createHashMap) then
     {
-        _greenScore = [_civD, "G", 35] call _hg;
+        _whiteScore = [_civD, "W_EFF_U", [_civD, "W", 45] call _hg] call _hg;
+        _redScore = [_civD, "R_EFF_U", [_civD, "R", 55] call _hg] call _hg;
+        _greenScore = [_civD, "G_EFF_U", [_civD, "G", 35] call _hg] call _hg;
+        if (!(_whiteScore isEqualType 0)) then { _whiteScore = 45; };
+        if (!(_redScore isEqualType 0)) then { _redScore = 55; };
         if (!(_greenScore isEqualType 0)) then { _greenScore = 35; };
     };
+
+    private _sCoop = [(0.55 * _whiteScore) + (0.35 * _greenScore) - (0.70 * _redScore)] call _clampScore;
+    private _sThreat = [(1.00 * _redScore) - (0.35 * _whiteScore) - (0.25 * _greenScore)] call _clampScore;
+
+    private _postureScoreRaw = (0.40 * _riskLevel) + (0.40 * _sThreat) + (0.10 * _redScore) - (0.15 * _greenScore) - (0.10 * _whiteScore) + (_secTier * 5) + ((_attackCount30d min 5) * 2);
+    private _postureScore = [_postureScoreRaw] call _clampScore;
+
+    private _postureTier = 0;
+    private _postureBand = "NORMAL";
+    if (_postureScore >= 35) then { _postureTier = 1; _postureBand = "ELEVATED"; };
+    if (_postureScore >= 55) then { _postureTier = 2; _postureBand = "HIGH_RISK"; };
+    if (_postureScore >= 75) then { _postureTier = 3; _postureBand = "CRITICAL"; };
+
+    private _selectedTier = _secTier;
+    private _tierSource = "SEC_LEVEL";
+    if (_postureSelectionEnabled && { _postureTier > _selectedTier }) then
+    {
+        _selectedTier = _postureTier;
+        _tierSource = "DISTRICT_POSTURE";
+    };
+    if (!_postureSelectionEnabled) then { _tierSource = "SEC_LEVEL_DISABLED"; };
 
     private _threatType = "IED";
     private _threatSubtype = "IED_EMPLACED_SINGLE";
@@ -151,7 +187,7 @@ private _scheduledAny = false;
     private _intelQuality = 0.70;
     private _threatIntent = "IED_PRESSURE";
 
-    if (_tier isEqualTo 1) then
+    if (_selectedTier isEqualTo 1) then
     {
         _threatType = "RAID";
         _threatSubtype = "AMBUSH_ROADSIDE";
@@ -160,7 +196,7 @@ private _scheduledAny = false;
         _threatIntent = "AMBUSH";
     };
 
-    if (_tier isEqualTo 2) then
+    if (_selectedTier isEqualTo 2) then
     {
         _threatType = "VBIED";
         _threatSubtype = "VBIED";
@@ -169,7 +205,7 @@ private _scheduledAny = false;
         _threatIntent = "VBIED_ATTACK";
     };
 
-    if (_tier >= 3) then
+    if (_selectedTier >= 3) then
     {
         _threatType = "SUICIDE";
         _threatSubtype = "SB_CHECKPOINT_APPROACH";
@@ -181,7 +217,26 @@ private _scheduledAny = false;
     if (_greenScore >= _greenStrongMin) then { _intelQuality = (_intelQuality + _intelGreenAdjust) min _intelMaxFromGreen; };
     if (_greenScore < _greenWeakMax) then { _intelQuality = (_intelQuality - _intelGreenAdjust) max _intelMinFromGreen; };
 
-    private _govResult = [_districtId, _threatType, _tier] call ARC_fnc_threatGovernorCheck;
+    private _selectionInputs = [
+        ["selection_enabled", _postureSelectionEnabled],
+        ["selection_policy", "DISTRICT_POSTURE_V1"],
+        ["tier_source", _tierSource],
+        ["district_sec_level", _secLevel],
+        ["sec_level_tier", _secTier],
+        ["posture_tier", _postureTier],
+        ["selected_tier", _selectedTier],
+        ["posture_band", _postureBand],
+        ["posture_score", _postureScore],
+        ["s_coop", _sCoop],
+        ["s_threat", _sThreat],
+        ["white", _whiteScore],
+        ["red", _redScore],
+        ["green", _greenScore],
+        ["risk_level", _riskLevel],
+        ["attack_count_30d", _attackCount30d]
+    ];
+
+    private _govResult = [_districtId, _threatType, _selectedTier] call ARC_fnc_threatGovernorCheck;
     private _allowed   = _govResult select 0;
     private _denyReason = _govResult select 1;
     if (!(_denyReason isEqualType "")) then { _denyReason = ""; };
@@ -200,10 +255,21 @@ private _scheduledAny = false;
             ["risk_level", _riskLevel],
             ["attack_count_30d", _attackCount30d],
             ["green_score", _greenScore],
+            ["white_score", _whiteScore],
+            ["red_score", _redScore],
+            ["s_coop", _sCoop],
+            ["s_threat", _sThreat],
+            ["posture_score", _postureScore],
+            ["posture_band", _postureBand],
+            ["posture_tier", _postureTier],
+            ["sec_level_tier", _secTier],
+            ["selected_tier", _selectedTier],
+            ["tier_source", _tierSource],
+            ["selection_inputs", _selectionInputs],
             ["threat_type", _threatType],
             ["threat_subtype", _threatSubtype],
             ["threat_intent", _threatIntent],
-            ["tier", _tier],
+            ["tier", _selectedTier],
             ["budget_cost", _spendCost],
             ["intel_quality", _intelQuality],
             ["ts", _now],
@@ -211,11 +277,11 @@ private _scheduledAny = false;
         ];
         ["threat_v0_economy_last_decision", _allowDecision] call ARC_fnc_stateSet;
         ["threat_v0_economy_last_allowed_decision", _allowDecision] call ARC_fnc_stateSet;
-        diag_log format ["[ARC][THREAT] ARC_fnc_threatSchedulerTick: governor allowed district=%1 posture=%2 type=%3 subtype=%4 tier=%5 cost=%6 intel=%7 reason=%8", _districtId, _secLevel, _threatType, _threatSubtype, _tier, _spendCost, _intelQuality, "ALLOW_GOVERNOR"];
+        diag_log format ["[ARC][THREAT] ARC_fnc_threatSchedulerTick: governor allowed district=%1 posture=%2 postureScore=%3 tierSource=%4 type=%5 subtype=%6 tier=%7 cost=%8 intel=%9 reason=%10", _districtId, _secLevel, _postureScore, _tierSource, _threatType, _threatSubtype, _selectedTier, _spendCost, _intelQuality, "ALLOW_GOVERNOR"];
 
         private _scheduled = [
             _districtId,     // district
-            _tier,           // tier
+            _selectedTier,   // tier
             _threatType,     // type
             _threatSubtype,  // subtype
             _intelQuality,   // intelQuality
@@ -243,7 +309,7 @@ private _scheduledAny = false;
             ["threat_v0_economy_last_decision", _scheduledDecision] call ARC_fnc_stateSet;
             ["threat_v0_economy_last_allowed_decision", _scheduledDecision] call ARC_fnc_stateSet;
 
-            diag_log format ["[ARC][THREAT] ARC_fnc_threatSchedulerTick: budget spend did=%1 posture=%2 tier=%3 spent=%4 cost=%5 reason=%6", _districtId, _secLevel, _tier, _spentNow + _spendCost, _spendCost, "ALLOW_SCHEDULED"];
+            diag_log format ["[ARC][THREAT] ARC_fnc_threatSchedulerTick: budget spend did=%1 posture=%2 postureScore=%3 tierSource=%4 tier=%5 spent=%6 cost=%7 reason=%8", _districtId, _secLevel, _postureScore, _tierSource, _selectedTier, _spentNow + _spendCost, _spendCost, "ALLOW_SCHEDULED"];
 
             _scheduledAny = true;
         }
@@ -256,7 +322,7 @@ private _scheduledAny = false;
             _failedDecision set [2, ["reason_meta", _failedMeta]];
             ["threat_v0_economy_last_decision", _failedDecision] call ARC_fnc_stateSet;
             ["threat_v0_economy_last_warning_decision", _failedDecision] call ARC_fnc_stateSet;
-            diag_log format ["[ARC][WARN] ARC_fnc_threatSchedulerTick: governor allowed but schedule failed district=%1 posture=%2 type=%3 subtype=%4 tier=%5 reason=%6", _districtId, _secLevel, _threatType, _threatSubtype, _tier, "SCHEDULE_FAILED"];
+            diag_log format ["[ARC][WARN] ARC_fnc_threatSchedulerTick: governor allowed but schedule failed district=%1 posture=%2 type=%3 subtype=%4 tier=%5 reason=%6", _districtId, _secLevel, _threatType, _threatSubtype, _selectedTier, "SCHEDULE_FAILED"];
         };
     } else {
         private _denyDecision = [
@@ -269,10 +335,21 @@ private _scheduledAny = false;
             ["risk_level", _riskLevel],
             ["attack_count_30d", _attackCount30d],
             ["green_score", _greenScore],
+            ["white_score", _whiteScore],
+            ["red_score", _redScore],
+            ["s_coop", _sCoop],
+            ["s_threat", _sThreat],
+            ["posture_score", _postureScore],
+            ["posture_band", _postureBand],
+            ["posture_tier", _postureTier],
+            ["sec_level_tier", _secTier],
+            ["selected_tier", _selectedTier],
+            ["tier_source", _tierSource],
+            ["selection_inputs", _selectionInputs],
             ["threat_type", _threatType],
             ["threat_subtype", _threatSubtype],
             ["threat_intent", _threatIntent],
-            ["tier", _tier],
+            ["tier", _selectedTier],
             ["budget_cost", _spendCost],
             ["intel_quality", _intelQuality],
             ["ts", _now],
@@ -291,7 +368,7 @@ private _scheduledAny = false;
             ["threat_v0_economy_deny_counts", _denyCounts] call ARC_fnc_stateSet;
         };
 
-        diag_log format ["[ARC][THREAT] ARC_fnc_threatSchedulerTick: governor denied district=%1 posture=%2 type=%3 subtype=%4 tier=%5 reason=%6", _districtId, _secLevel, _threatType, _threatSubtype, _tier, _denyReason];
+        diag_log format ["[ARC][THREAT] ARC_fnc_threatSchedulerTick: governor denied district=%1 posture=%2 postureScore=%3 tierSource=%4 type=%5 subtype=%6 tier=%7 reason=%8", _districtId, _secLevel, _postureScore, _tierSource, _threatType, _threatSubtype, _selectedTier, _denyReason];
     };
 } forEach _districtIds;
 
