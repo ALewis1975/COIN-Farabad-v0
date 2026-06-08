@@ -48,10 +48,10 @@ Use this overlay before implementation work when a PR touches any of the followi
 
 | Ownership dimension | Canonical document | What it controls |
 |---|---|---|
-| Key-level writer | `State_Ownership_Ledger.md` | Exact function(s) allowed to write replicated mission state. |
-| Config classification | `Configuration_Ownership_Ledger.md` | Whether a variable is posture toggle, tuning constant, class pool, or runtime-derived state. |
+| Key-level writer | `docs/architecture/State_Ownership_Ledger.md` | Exact function(s) allowed to write replicated mission state. |
+| Config classification | `docs/architecture/Configuration_Ownership_Ledger.md` | Whether a variable is posture toggle, tuning constant, class pool, or runtime-derived state. |
 | Ecosystem layer owner | This overlay | Which layer owns the state/config family and which higher layers may consume it. |
-| Layer contract | `Layer_Contract_Ledger.md` | Layer authority, inputs, outputs, events, tests, failure mode, and next task. |
+| Layer contract | `docs/architecture/Layer_Contract_Ledger.md` | Layer authority, inputs, outputs, events, tests, failure mode, and next task. |
 
 Hard rule: this overlay never authorizes a new writer. A state family still needs a documented server-side writer in `State_Ownership_Ledger.md` or a locked subsystem baseline.
 
