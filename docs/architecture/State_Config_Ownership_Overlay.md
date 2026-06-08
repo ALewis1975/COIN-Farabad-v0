@@ -85,7 +85,7 @@ Hard rule: this overlay never authorizes a new writer. A state family still need
 
 ## 4) Configuration ownership overlay
 
-| Config family | Config class | Primary ecosystem layer owner | Current or preferred home | Overlay rule |
+| Config family | Config class | Ecosystem layer owner(s) | Current or preferred home | Overlay rule |
 |---|---|---|---|---|
 | Core dev/debug/safe-mode flags | Posture toggle | L3 State / Event / Persistence and L0 Runtime Boundary | `initServer.sqf` with startup audit | Safe mode and debug posture may influence many layers, but Core owns the toggle and audit output. |
 | Console VM feature flags | Posture toggle | L12 Interface | `initServer.sqf` with startup audit | UI migration flags change rendering path only. They must not alter authoritative gameplay behavior. |
