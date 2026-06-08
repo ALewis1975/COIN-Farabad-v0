@@ -46,6 +46,30 @@ private _transU = toUpper _transition;
 private _emittedLeads = [];
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 
+private _makeLead = {
+    params ["_leadType", "_displayName", "_leadPos", "_baseStrength", "_expiresIn", "_sourceTaskId", "_sourceIncidentType", "_tag", "_sourceKind"];
+    if (isNil "ARC_fnc_intelLeadCreateCoupled") then
+    {
+        ARC_fnc_intelLeadCreateCoupled = compile preprocessFileLineNumbers "functions\\intel\\fn_intelLeadCreateCoupled.sqf";
+    };
+    [
+        _leadType,
+        _displayName,
+        _leadPos,
+        _baseStrength,
+        _expiresIn,
+        _sourceTaskId,
+        _sourceIncidentType,
+        "",
+        _tag,
+        [],
+        "FIELD",
+        _districtId,
+        _sourceKind,
+        [["threat_id", _threatId], ["transition", _transU], ["family", "VBIED"]]
+    ] call ARC_fnc_intelLeadCreateCoupled
+};
+
 switch (_transU) do
 {
     case "STAGED":
@@ -59,9 +83,9 @@ switch (_transU) do
             1800,
             _taskId,
             "IED",
-            "",
-            "vbied_watch"
-        ] call ARC_fnc_leadCreate;
+            "vbied_watch",
+            "VBIED_STAGED"
+        ] call _makeLead;
 
         if (!(_wId isEqualTo "")) then
         {
@@ -78,9 +102,9 @@ switch (_transU) do
             1800,
             _taskId,
             "IED",
-            "",
-            "checkpoint_advisory"
-        ] call ARC_fnc_leadCreate;
+            "checkpoint_advisory",
+            "VBIED_STAGED"
+        ] call _makeLead;
 
         if (!(_cpId isEqualTo "")) then
         {
@@ -104,9 +128,9 @@ switch (_transU) do
             5400,
             _taskId,
             "IED",
-            "",
-            "vehicle_origin_lead"
-        ] call ARC_fnc_leadCreate;
+            "vehicle_origin_lead",
+            "VBIED_DISCOVERED"
+        ] call _makeLead;
 
         if (!(_origId isEqualTo "")) then
         {
@@ -123,9 +147,9 @@ switch (_transU) do
             5400,
             _taskId,
             "IED",
-            "",
-            "urban_support_lead"
-        ] call ARC_fnc_leadCreate;
+            "urban_support_lead",
+            "VBIED_DISCOVERED"
+        ] call _makeLead;
 
         if (!(_usId isEqualTo "")) then
         {
@@ -146,9 +170,9 @@ switch (_transU) do
             7200,
             _taskId,
             "IED",
-            "",
-            "facilitator_node_lead"
-        ] call ARC_fnc_leadCreate;
+            "facilitator_node_lead",
+            "INTERDICTED"
+        ] call _makeLead;
 
         if (!(_fnId isEqualTo "")) then
         {
@@ -165,9 +189,9 @@ switch (_transU) do
             7200,
             _taskId,
             "IED",
-            "",
-            "vbied_cell_attribution"
-        ] call ARC_fnc_leadCreate;
+            "vbied_cell_attribution",
+            "INTERDICTED"
+        ] call _makeLead;
 
         if (!(_attrId isEqualTo "")) then
         {
@@ -187,9 +211,9 @@ switch (_transU) do
             7200,
             _taskId,
             "IED",
-            "",
-            "network_escalation_lead"
-        ] call ARC_fnc_leadCreate;
+            "network_escalation_lead",
+            "VBIED_DETONATED"
+        ] call _makeLead;
 
         if (!(_neId isEqualTo "")) then
         {
@@ -206,9 +230,9 @@ switch (_transU) do
             7200,
             _taskId,
             "IED",
-            "",
-            "copycat_risk_lead"
-        ] call ARC_fnc_leadCreate;
+            "copycat_risk_lead",
+            "VBIED_DETONATED"
+        ] call _makeLead;
 
         if (!(_ccId isEqualTo "")) then
         {
