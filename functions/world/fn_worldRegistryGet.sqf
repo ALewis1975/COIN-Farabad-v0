@@ -10,6 +10,8 @@
     Returns: HASHMAP
 */
 
+if (!isServer) exitWith { createHashMap };
+
 private _asPos3 = {
     params [ ["_pos", [], [[]]] ];
     private _p = +_pos;
