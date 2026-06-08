@@ -12,6 +12,13 @@
 
 if (!isServer) exitWith {false};
 
+// Read-only World Registry adapter. Compiled here for server consumers without
+// changing existing scans, objective scoring, or caller behavior.
+if (isNil "ARC_fnc_worldRegistryGet") then
+{
+    ARC_fnc_worldRegistryGet = compile preprocessFileLineNumbers "functions\\world\\fn_worldRegistryGet.sqf";
+};
+
 // Marker alias map (legacy -> canonical)
 private _aliases = call compile preprocessFileLineNumbers "data\farabad_marker_aliases.sqf";
 if (_aliases isEqualType createHashMap) then
