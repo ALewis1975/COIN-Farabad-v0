@@ -54,7 +54,7 @@ This contract defines the fields and ownership rules for future lead confidence 
 2. UI displays confidence; it does not derive it.
 3. Hidden state must be filtered before public exposure.
 4. Low confidence should create ambiguity, not false certainty.
-5. Confidence metadata should travel with leads when they become tasks.
+5. Confidence metadata should travel with leads when they are routed into the TOC Queue and/or used to seed incidents.
 
 ## Validation before implementation
 
