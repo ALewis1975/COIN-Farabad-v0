@@ -29,6 +29,7 @@ class CfgFunctions
             class cfgClassExists {};
             class dynamicTodRefresh {};
             class dynamicTodGetPolicy {};
+            class timePolicyGet {};
             class runtimePolicyBuild {};
             class runtimePolicyPublish {};
 
@@ -233,6 +234,7 @@ class CfgFunctions
             file = "functions\world";
 
             class worldInit {};
+            class worldRegistryGet {};
             class worldResolveMarker {};
 
             class worldGetZoneForPos {};
@@ -503,7 +505,6 @@ class CfgFunctions
 
 
 
-
         };
 
         class Command
@@ -738,6 +739,7 @@ class CfgFunctions
             // Threat Economy v0 (S1-S5)
             class threatEconomyInit {};
             class threatEconomySnapshotBuild {};
+            class threatEconomyReasonMeta {};
             class threatGovernorCheck {};
             class threatSchedulerTick {};
             class threatScheduleEvent {};
