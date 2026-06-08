@@ -112,7 +112,7 @@ The enforceable per-layer ledger lives in `docs/architecture/Layer_Contract_Ledg
 
 | Field | Required content |
 |---|---|
-| Layer ID | Stable ID such as `L0_RUNTIME`, `L1_WORLD`, or `L7_THREAT` |
+| Layer ID | Stable ID such as `L0`, `L1`, etc. (optionally with a mnemonic suffix like `L0_RUNTIME` or `L1_WORLD`) |
 | Owner subsystem | Primary subsystem or document owner |
 | Authority | Server-only, client-only, or mixed with exact boundaries |
 | Inputs | Snapshots, delta bundles, config values, or engine facts the layer consumes |
