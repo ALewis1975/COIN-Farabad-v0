@@ -9,13 +9,20 @@
       2: NUMBER escalationTier (0=normal, 1=elevated, 2=high, 3=critical)
 
     Returns:
-      ARRAY [allowed(BOOL), denyReason(STRING)]
-      denyReason: "" on allow; one of:
-        "THREAT_DISABLED", "GLOBAL_COOLDOWN", "DISTRICT_COOLDOWN",
-        "BUDGET_EXHAUSTED", "ESCALATION_TIER"
+      ARRAY [allowed(BOOL), reasonCode(STRING), reasonMeta(ARRAY)]
+      reasonCode: "" on allow; stable denial code on deny.
 */
 
-if (!isServer) exitWith {[false, "NOT_SERVER"]};
+private _reasonMeta = {
+    params [["_code", "UNKNOWN_REASON", [""]]];
+    if (isNil "ARC_fnc_threatEconomyReasonMeta") then
+    {
+        ARC_fnc_threatEconomyReasonMeta = compile preprocessFileLineNumbers "functions\\threat\\fn_threatEconomyReasonMeta.sqf";
+    };
+    [_code] call ARC_fnc_threatEconomyReasonMeta
+};
+
+if (!isServer) exitWith {[false, "NOT_SERVER", ["NOT_SERVER"] call _reasonMeta]};
 
 params [
     ["_districtId", "", [""]],
@@ -23,12 +30,12 @@ params [
     ["_tier", 0, [0]]
 ];
 
-if (_districtId isEqualTo "") exitWith {[false, "BAD_DISTRICT"]};
+if (_districtId isEqualTo "") exitWith {[false, "BAD_DISTRICT", ["BAD_DISTRICT"] call _reasonMeta]};
 
 // ── 1. Global enable flag ──────────────────────────────────────────────────
 private _enabled = ["threat_v0_enabled", true] call ARC_fnc_stateGet;
 if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabled = true; };
-if (!_enabled) exitWith {[false, "THREAT_DISABLED"]};
+if (!_enabled) exitWith {[false, "THREAT_DISABLED", ["THREAT_DISABLED"] call _reasonMeta]};
 
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _now = serverTime;
@@ -44,7 +51,7 @@ if (!(_gc isEqualType 0)) then { _gc = -1; };
 if (_gc > 0 && { _now < _gc }) exitWith
 {
     diag_log format ["[ARC][WARN] ARC_fnc_threatGovernorCheck: GLOBAL_COOLDOWN district=%1 type=%2 remaining=%3s", _districtId, _threatType, _gc - _now];
-    [false, "GLOBAL_COOLDOWN"]
+    [false, "GLOBAL_COOLDOWN", ["GLOBAL_COOLDOWN"] call _reasonMeta]
 };
 
 // ── 3. District risk + cooldown ────────────────────────────────────────────
@@ -55,7 +62,7 @@ private _coolUntil = [_rEntry, "cooldown_until", -1] call _hg;
 if (_coolUntil > 0 && { _now < _coolUntil }) exitWith
 {
     diag_log format ["[ARC][WARN] ARC_fnc_threatGovernorCheck: DISTRICT_COOLDOWN district=%1 type=%2 remaining=%3s", _districtId, _threatType, _coolUntil - _now];
-    [false, "DISTRICT_COOLDOWN"]
+    [false, "DISTRICT_COOLDOWN", ["DISTRICT_COOLDOWN"] call _reasonMeta]
 };
 
 // ── 4. Attack budget ───────────────────────────────────────────────────────
@@ -86,7 +93,7 @@ if (_penaltyUntil > 0 && { _now < _penaltyUntil }) then
 if ((_spent + _spendCost) > _bPoints) exitWith
 {
     diag_log format ["[ARC][WARN] ARC_fnc_threatGovernorCheck: BUDGET_EXHAUSTED district=%1 type=%2 spent=%3 budget=%4 cost=%5", _districtId, _threatType, _spent, _bPoints, _spendCost];
-    [false, "BUDGET_EXHAUSTED"]
+    [false, "BUDGET_EXHAUSTED", ["BUDGET_EXHAUSTED"] call _reasonMeta]
 };
 
 // ── 5. Escalation tier requirement ────────────────────────────────────────
@@ -96,7 +103,7 @@ if (_typeU isEqualTo "SUICIDE") then { _tierMin = 3; };
 if (_tier < _tierMin) exitWith
 {
     diag_log format ["[ARC][WARN] ARC_fnc_threatGovernorCheck: ESCALATION_TIER district=%1 type=%2 tier=%3 tierMin=%4", _districtId, _threatType, _tier, _tierMin];
-    [false, "ESCALATION_TIER"]
+    [false, "ESCALATION_TIER", ["ESCALATION_TIER"] call _reasonMeta]
 };
 
 // ── 6. CIVSUB GREEN score gate (budget modifier) ───────────────────────────
@@ -145,4 +152,4 @@ if (missionNamespace getVariable ["civsub_v1_enabled", false]) then
     };
 };
 
-[true, ""]
+[true, "", ["ALLOW_GOVERNOR"] call _reasonMeta]

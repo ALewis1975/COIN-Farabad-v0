@@ -12,6 +12,16 @@
 
 if (!isServer) exitWith {false};
 
+if (isNil "ARC_fnc_threatEconomyReasonMeta") then
+{
+    ARC_fnc_threatEconomyReasonMeta = compile preprocessFileLineNumbers "functions\\threat\\fn_threatEconomyReasonMeta.sqf";
+};
+
+private _reasonMetaFn = {
+    params [["_code", "UNKNOWN_REASON", [""]]];
+    [_code] call ARC_fnc_threatEconomyReasonMeta
+};
+
 private _intervalS = missionNamespace getVariable ["ARC_threatSchedulerIntervalS", 120];
 if (!(_intervalS isEqualType 0) || { _intervalS < 30 }) then { _intervalS = 120; };
 
@@ -175,11 +185,15 @@ private _scheduledAny = false;
     private _allowed   = _govResult select 0;
     private _denyReason = _govResult select 1;
     if (!(_denyReason isEqualType "")) then { _denyReason = ""; };
+    private _reasonMeta = if ((count _govResult) > 2) then { _govResult select 2 } else { [if (_allowed) then {"ALLOW_GOVERNOR"} else {_denyReason}] call _reasonMetaFn };
+    if (!(_reasonMeta isEqualType [])) then { _reasonMeta = [if (_allowed) then {"ALLOW_GOVERNOR"} else {_denyReason}] call _reasonMetaFn; };
 
     if (_allowed) then
     {
         private _allowDecision = [
             ["decision", "ALLOWED"],
+            ["reason_code", "ALLOW_GOVERNOR"],
+            ["reason_meta", _reasonMeta],
             ["deny_reason", ""],
             ["district_id", _districtId],
             ["district_sec_level", _secLevel],
@@ -197,7 +211,7 @@ private _scheduledAny = false;
         ];
         ["threat_v0_economy_last_decision", _allowDecision] call ARC_fnc_stateSet;
         ["threat_v0_economy_last_allowed_decision", _allowDecision] call ARC_fnc_stateSet;
-        diag_log format ["[ARC][THREAT] ARC_fnc_threatSchedulerTick: governor allowed district=%1 posture=%2 type=%3 subtype=%4 tier=%5 cost=%6 intel=%7", _districtId, _secLevel, _threatType, _threatSubtype, _tier, _spendCost, _intelQuality];
+        diag_log format ["[ARC][THREAT] ARC_fnc_threatSchedulerTick: governor allowed district=%1 posture=%2 type=%3 subtype=%4 tier=%5 cost=%6 intel=%7 reason=%8", _districtId, _secLevel, _threatType, _threatSubtype, _tier, _spendCost, _intelQuality, "ALLOW_GOVERNOR"];
 
         private _scheduled = [
             _districtId,     // district
@@ -221,17 +235,34 @@ private _scheduledAny = false;
             _bEntry2 set ["spent_today", _spentNow + _spendCost];
             _budgetMap2 set [_districtId, _bEntry2];
             ["threat_v0_attack_budget", _budgetMap2] call ARC_fnc_stateSet;
-            diag_log format ["[ARC][THREAT] ARC_fnc_threatSchedulerTick: budget spend did=%1 posture=%2 tier=%3 spent=%4 cost=%5", _districtId, _secLevel, _tier, _spentNow + _spendCost, _spendCost];
+
+            private _scheduledMeta = ["ALLOW_SCHEDULED"] call _reasonMetaFn;
+            private _scheduledDecision = +_allowDecision;
+            _scheduledDecision set [1, ["reason_code", "ALLOW_SCHEDULED"]];
+            _scheduledDecision set [2, ["reason_meta", _scheduledMeta]];
+            ["threat_v0_economy_last_decision", _scheduledDecision] call ARC_fnc_stateSet;
+            ["threat_v0_economy_last_allowed_decision", _scheduledDecision] call ARC_fnc_stateSet;
+
+            diag_log format ["[ARC][THREAT] ARC_fnc_threatSchedulerTick: budget spend did=%1 posture=%2 tier=%3 spent=%4 cost=%5 reason=%6", _districtId, _secLevel, _tier, _spentNow + _spendCost, _spendCost, "ALLOW_SCHEDULED"];
 
             _scheduledAny = true;
         }
         else
         {
-            diag_log format ["[ARC][WARN] ARC_fnc_threatSchedulerTick: governor allowed but schedule failed district=%1 posture=%2 type=%3 subtype=%4 tier=%5", _districtId, _secLevel, _threatType, _threatSubtype, _tier];
+            private _failedMeta = ["SCHEDULE_FAILED"] call _reasonMetaFn;
+            private _failedDecision = +_allowDecision;
+            _failedDecision set [0, ["decision", "WARN"]];
+            _failedDecision set [1, ["reason_code", "SCHEDULE_FAILED"]];
+            _failedDecision set [2, ["reason_meta", _failedMeta]];
+            ["threat_v0_economy_last_decision", _failedDecision] call ARC_fnc_stateSet;
+            ["threat_v0_economy_last_warning_decision", _failedDecision] call ARC_fnc_stateSet;
+            diag_log format ["[ARC][WARN] ARC_fnc_threatSchedulerTick: governor allowed but schedule failed district=%1 posture=%2 type=%3 subtype=%4 tier=%5 reason=%6", _districtId, _secLevel, _threatType, _threatSubtype, _tier, "SCHEDULE_FAILED"];
         };
     } else {
         private _denyDecision = [
             ["decision", "DENIED"],
+            ["reason_code", _denyReason],
+            ["reason_meta", _reasonMeta],
             ["deny_reason", _denyReason],
             ["district_id", _districtId],
             ["district_sec_level", _secLevel],
