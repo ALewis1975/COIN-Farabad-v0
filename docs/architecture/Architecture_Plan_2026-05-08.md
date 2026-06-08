@@ -1,10 +1,11 @@
-# Farabad COIN v0 — Architecture Plan
+# Farabad COIN v0 - Architecture Plan
 
-**Version:** 1.2
-**Date:** 2026-05-08
+**Version:** 1.3
+**Date:** 2026-06-08
 **Status:** Active architecture plan (current-clone analysis; not yet main-confirmed)
-**Mode:** F — Documentation-Only Changes
+**Mode:** F - Documentation-Only Changes
 **Scope:** Forward-looking architecture plan and roadmap. Does not redesign existing systems; consolidates and supersedes the planning portions of `Architecture_and_Readiness_Plan.md` while keeping that file as historical assessment context.
+**Ecosystem contract:** `docs/architecture/Farabad_Ecosystem_Architecture_v1.md`
 
 ---
 
@@ -33,14 +34,16 @@ Core anchors:
 - RemoteExec allowlist: `config/CfgRemoteExec.hpp`
 - Prior readiness plan: `docs/architecture/Architecture_and_Readiness_Plan.md`
 - Canonical execution board: `docs/qa/Pre_Dedicated_Mission_Completion_Audit_2026-04-06.md`
+- Ecosystem layer contract: `docs/architecture/Farabad_Ecosystem_Architecture_v1.md`
 
 ### 1.2 Strengths (carry forward)
 
 - Server-as-single-writer model is consistently documented and reflected in core state functions.
 - Client initialization is gated on server readiness and public snapshot availability.
-- `CfgRemoteExec` is whitelist-only and grouped by client→server, server→client, and JIP-critical endpoints.
+- `CfgRemoteExec` is whitelist-only and grouped by client->server, server->client, and JIP-critical endpoints.
 - Subsystems are well partitioned: core, world, CIVSUB, TASKENG/SITREP, command, UI, airbase, threat, IED, logistics, medical, sitepop, prison.
 - Existing docs already identify the main development risk correctly: not missing architecture, but runtime evidence gaps and governance drift.
+- `Farabad_Ecosystem_Architecture_v1.md` now provides the layer-composition model that maps those subsystems into foundation, society/actors, operational synthesis, and player-experience strata.
 
 ### 1.3 Main risks
 
@@ -48,9 +51,10 @@ Core anchors:
 |---|---|---|
 | R1 | **Source-of-truth drift** | Several older QA docs contain findings later marked superseded; current-clone findings must be verified against `origin/main` before being treated as truth. |
 | R2 | **Runtime validation gap** | Many systems are classified `runtime-only unverified`; dedicated/JIP, reconnect, respawn, persistence durability, and mod-stack validation remain release-critical unknowns. |
-| R3 | **RemoteExec / security surface** | The allowlist is much improved, but the number of client→server endpoints remains large; the hardening plan needs to become an endpoint-by-endpoint audit ledger, not just a policy doc. |
+| R3 | **RemoteExec / security surface** | The allowlist is much improved, but the number of client->server endpoints remains large; the hardening plan needs to become an endpoint-by-endpoint audit ledger, not just a policy doc. |
 | R4 | **Console / UI complexity** | The Farabad Console has grown into a shared platform, but many tabs still rely on direct `missionNamespace` reads and tab-specific layout/painter logic; the Console VM pattern is only partially adopted. |
 | R5 | **Configuration concentration** | `initServer.sqf` holds many subsystem flags, tuning values, class pools, and operator toggles; continued growth without ownership clarification raises regression risk. |
+| R6 | **Implicit layer coupling** | Terrain, time, population, threat, intel, tasking, sustainment, and UI can drift when systems consume each other through undocumented direct reads instead of snapshots, delta bundles, or validated service paths. |
 
 ---
 
@@ -92,14 +96,14 @@ Rule: subsystems exchange **bounded event envelopes**, not direct reads into eac
 
 ### 2.3 RPC / security layer
 
-Treat RemoteExec as a security boundary. For every client→server endpoint, record status for:
+Treat RemoteExec as a security boundary. For every client->server endpoint, record status for:
 
-- **S0** — server guard (`if (!isServer) exitWith {};`)
-- **S1** — sender / object binding (`ARC_fnc_rpcValidateSender` or equivalent)
-- **S2** — parameter type / shape validation
-- **S3** — role authorization
-- **S4** — world / state invariant checks
-- **S5** — idempotency / rate-limit + structured security logging
+- **S0** - server guard (`if (!isServer) exitWith {};`)
+- **S1** - sender / object binding (`ARC_fnc_rpcValidateSender` or equivalent)
+- **S2** - parameter type / shape validation
+- **S3** - role authorization
+- **S4** - world / state invariant checks
+- **S5** - idempotency / rate-limit + structured security logging
 
 `docs/security/RemoteExec_Hardening_Plan.md` policy + `docs/security/RemoteExec_Endpoint_Audit_Matrix.md` ledger together form the live security surface tracker.
 
@@ -135,6 +139,21 @@ Canonical references:
 
 Cross-boundary interaction is event-driven (delta bundles) and read-only against published snapshots.
 
+### 2.6 Ecosystem layer framing
+
+`docs/architecture/Farabad_Ecosystem_Architecture_v1.md` adds a layer-composition contract above subsystem ownership. It does not replace the subsystem boundaries above. It tells developers how those subsystems interact as an ecosystem.
+
+Use the ecosystem strata for cross-system design decisions:
+
+| Stratum | Layers |
+|---|---|
+| Foundation | Runtime Boundary, Terrain / World Registry, Time / Tempo Policy, State / Event / Persistence, Observability |
+| Society and actors | Civilian, Government, OPFOR Network, BLUFOR Footprint |
+| Operational synthesis | Threat, Intel / S2, Operations / S3, Sustainment / S4, Airbase / CASREQ, Medical, SitePop / Prison |
+| Player experience | Farabad Console, Console VM, Helpers, Toasts, addActions, role/station UI |
+
+Hard rule: foundation layers should not depend on higher gameplay layers for canonical policy. For example, Time / Tempo Policy should own canonical time-of-day phase logic; CIVSUB, Threat, Airbase, and Ops should consume that policy rather than define it.
+
 ---
 
 ## 3) Configuration ownership policy (R5 mitigation)
@@ -150,6 +169,8 @@ To prevent `initServer.sqf` from becoming a single point of regression risk, cla
 
 Rule: when adding a new operator toggle, also add a startup-audit entry (see `ARC_fnc_operatorToggleAuditStartup`) so RPT operators can confirm it took effect. No silent toggles.
 
+Future ownership reviews should also record the ecosystem layer that owns the config value.
+
 ---
 
 ## 4) Acceptance criteria for "architecturally healthy"
@@ -157,11 +178,13 @@ Rule: when adding a new operator toggle, also add a startup-audit entry (see `AR
 The mission should be considered architecturally healthy when **all** of the following are simultaneously true:
 
 1. Every replicated `missionNamespace` key has a documented single writer.
-2. Every client→server RPC has S0–S5 ledger status; no privileged RPC lacks S1 + role check.
+2. Every client->server RPC has S0-S5 ledger status; no privileged RPC lacks S1 + role check.
 3. Every persisted store has schema version + reset + migration test coverage (`scripts/dev/validate_state_migrations.py`).
 4. Every console tab reads from either Console VM or a documented `ARC_pub_*` snapshot, with explicit empty-state handling.
 5. Every subsystem can complete its lifecycle loop without unhandled fallback in a representative scenario, with structured logs at critical transitions.
 6. Dedicated/JIP, reconnect, and respawn behaviors are evidenced in `tests/TEST-LOG.md` against current head, not stale runs.
+7. Every materially changed subsystem behavior has a documented ecosystem layer owner.
+8. Cross-layer interactions use public snapshots, delta bundles, or validated service requests instead of undocumented internal reads.
 
 ---
 
@@ -172,6 +195,7 @@ The mission should be considered architecturally healthy when **all** of the fol
 - Do **not** rewrite core state functions or `publicBroadcastState`.
 - Do **not** introduce a new dialog class or replace the Farabad Console shell.
 - Do **not** add new RemoteExec endpoints during the hardening phase.
+- Do **not** move SQF files solely to match ecosystem layer names.
 
 If a workstream appears to require any of the above, stop and update this plan via a versioned bump before implementation.
 
@@ -179,9 +203,9 @@ If a workstream appears to require any of the above, stop and update this plan v
 
 ## 6) Development roadmap
 
-### Phase 0 — Truth alignment and documentation hygiene
+### Phase 0 - Truth alignment, documentation hygiene, and ecosystem contract
 
-**Goal:** eliminate stale planning as an active risk.
+**Goal:** eliminate stale planning as an active risk and keep ecosystem work tied to the existing architecture plan instead of becoming a parallel roadmap.
 
 Actions:
 
@@ -189,21 +213,24 @@ Actions:
 - Treat `docs/qa/Pre_Dedicated_Mission_Completion_Audit_2026-04-06.md` as **the** completion ledger; supersede competing "what's left?" narratives.
 - Move superseded QA findings out of active planning unless freshly reproduced on current head.
 - Cross-link active plans from `README.md`, `Architecture_and_Readiness_Plan.md`, and the completion audit.
+- Use `docs/architecture/Farabad_Ecosystem_Architecture_v1.md` as the layer-composition contract for future cross-system design.
+- Record ecosystem layer ownership when state, config, event, or UI contracts change.
 
 Acceptance:
 
 - One canonical "what remains before dedicated/JIP" board.
 - Older findings clearly marked superseded or current.
 - No planning doc drives work without current-source evidence.
+- Ecosystem work maps back to this plan, `Task_Decomposition.md`, and the pre-dedicated completion audit.
 
-### Phase 1 — Security and authority hardening
+### Phase 1 - Security and authority hardening
 
 **Goal:** close the highest-risk architecture surface before more feature work.
 
 Actions:
 
 - Convert `docs/security/RemoteExec_Hardening_Plan.md` policy into the live audit ledger maintained at `docs/security/RemoteExec_Endpoint_Audit_Matrix.md`.
-- Verify all client→server RPCs against S0–S5 checks; record status per endpoint.
+- Verify all client->server RPCs against S0-S5 checks; record status per endpoint.
 - Minimize command-class allowlist usage where named wrappers are feasible.
 - Confirm all JIP-enabled RPCs are persistent, object-bound, and idempotent.
 
@@ -213,7 +240,7 @@ Acceptance:
 - JIP allowlist remains narrow.
 - Security logging is consistent (`[ARC][SEC]` prefix; structured fields).
 
-### Phase 2 — State, persistence, and snapshot stabilization
+### Phase 2 - State, persistence, and snapshot stabilization
 
 **Goal:** make state behavior boring before runtime validation.
 
@@ -222,6 +249,7 @@ Actions:
 - Re-audit state schema migrations and reset / rebuild flows.
 - Verify bounded stores for logs, queues, histories, metrics, and public snapshots (caps + TTL where appropriate).
 - Clarify ownership for every replicated `missionNamespace` key (single-writer table).
+- Add ecosystem layer ownership where it improves State Ownership and Configuration Ownership ledgers.
 - Keep public snapshots presentation-oriented; reject changes that expand them into unbounded mirrors of internal state.
 
 Acceptance:
@@ -229,8 +257,9 @@ Acceptance:
 - Re-running migrations is a no-op when appropriate.
 - Reset / rebuild paths leave no orphaned active tasks, orders, records, or spawned entities.
 - JIP clients reconstruct UI from snapshots without hidden assumptions.
+- New or changed layer interactions declare whether they use snapshot, delta bundle, or validated request path.
 
-### Phase 3 — Console platform migration
+### Phase 3 - Console platform migration
 
 **Goal:** reduce UI regression risk.
 
@@ -241,14 +270,15 @@ Actions:
 - Keep AIR/TOWER as first full proving ground.
 - Move direct tab reads toward normalized VM adapters.
 - Separate operator, commander, pilot, and debug views.
+- Map interface-layer work to `Farabad_Ecosystem_Architecture_v1.md` so UI remains a consumer, not an authority layer.
 
 Acceptance:
 
 - Each tab has explicit data source, freshness signal, empty state, and action permissions.
 - No tab-specific layout hack breaks another tab.
-- Console actions remain client request → server validation → snapshot refresh.
+- Console actions remain client request -> server validation -> snapshot refresh.
 
-### Phase 4 — Subsystem reliability sweeps
+### Phase 4 - Subsystem reliability sweeps
 
 **Goal:** prove lifecycle loops in representative scenarios.
 
@@ -269,7 +299,7 @@ Acceptance:
 - Known mod-stack dependencies are documented in `README.md`.
 - Runtime failures become bounded single-mode tasks per `AGENTS.md`.
 
-### Phase 5 — Dedicated / JIP release-candidate gate
+### Phase 5 - Dedicated / JIP release-candidate gate
 
 **Goal:** spend dedicated-server time only after static / code / content blockers are closed.
 
@@ -299,6 +329,7 @@ Acceptance:
 4. Freeze broad feature work until the runtime-only-unverified board is reduced.
 5. Continue AIR/TOWER and Console VM migration, but keep it isolated from backend rewrites.
 6. Prepare a dedicated/JIP validation matrix from current-head evidence only.
+7. Use `docs/architecture/Farabad_Ecosystem_Architecture_v1.md` to classify layer ownership before expanding cross-system behavior.
 
 ---
 
@@ -306,9 +337,10 @@ Acceptance:
 
 | Document | Role relative to this plan |
 |---|---|
+| `docs/architecture/Farabad_Ecosystem_Architecture_v1.md` | Layer-composition contract. It explains how foundation, society/actors, operational synthesis, and player-experience layers interact under the existing server-authoritative architecture. |
 | `docs/architecture/Architecture_and_Readiness_Plan.md` | Historical assessment baseline (B-) and governance framing. Still relevant for §1 context; this plan is the active forward roadmap. |
-| `docs/qa/Pre_Dedicated_Mission_Completion_Audit_2026-04-06.md` | Canonical subsystem completion ledger. Phases 4–5 close items off this board. |
-| `docs/planning/Task_Decomposition.md` | Workstream / track decomposition. Phases here map to its tracks 1–7. |
+| `docs/qa/Pre_Dedicated_Mission_Completion_Audit_2026-04-06.md` | Canonical subsystem completion ledger. Phases 4-5 close items off this board. |
+| `docs/planning/Task_Decomposition.md` | Workstream / track decomposition. Phases here map to its tracks 1-8. |
 | `docs/planning/Subsystem_Reliability_and_Adaptive_COIN_Plan.md` | Phase 4 reliability-sweep execution contract plus the follow-on adaptive enemy/population behavior track. |
 | `docs/security/RemoteExec_Hardening_Plan.md` | Policy definition for the RPC surface. |
 | `docs/security/RemoteExec_Endpoint_Audit_Matrix.md` | Phase 1 live audit ledger derived from the hardening plan. |
@@ -328,42 +360,4 @@ This plan is updated when any of the following changes:
 - The phase order, scope, or acceptance criteria of any phase.
 - The set of subsystem boundaries or ownership rules.
 - The hard non-goals in §5.
-
-Process:
-
-1. Open a Mode F PR.
-2. Bump the version + date at the top.
-3. Note the change in a short change-log section appended to this document.
-4. Update cross-references in `README.md` and `Architecture_and_Readiness_Plan.md` if the plan is renamed or replaced.
-
----
-
-## Change log
-
-### v1.3 — 2026-05-08
-- Wave 3-T2 deliverable landed (next-wave Mode F batch continuation):
-  - `docs/security/RemoteExec_Endpoint_Audit_Matrix.md` v1.3 — completed audit batch 3 for CASREQ/Airbase + Logistics/Medical/CASEVAC endpoint set.
-  - §3.5 S4/S5 statuses for all Airbase/TOWER client→server endpoints are now explicit.
-  - New §3.6 endpoint group added for CASREQ + Logistics/Medical/CASEVAC with four new findings (F-AIR-1, F-CAS-1, F-LOG-1, F-MED-1).
-- No phase / scope / non-goal changes.
-
-### v1.4 — 2026-05-14
-- Added `docs/planning/Subsystem_Reliability_and_Adaptive_COIN_Plan.md` as the Phase 4 execution contract for subsystem reliability sweeps and the follow-on adaptive COIN behavior track.
-- No phase / scope / non-goal changes.
-
-### v1.2 — 2026-05-08
-- Wave 3-T1 / Wave 4-T1 / Wave 7-T1 deliverables landed (next-wave Mode F batch):
-  - `docs/security/RemoteExec_Endpoint_Audit_Matrix.md` v1.2 — §3.3 Objective / IED / VBIED endpoints audited (S0–S5). Three new findings (F-IED-1..3).
-  - `docs/architecture/State_Ownership_Ledger.md` v1.1 — extended with §3.10 (S1 registry) and §3a (subsystem-runtime replicated state for `airbase_v1_*`, `civsub_v1_*`, `casreq_v1_*`). Three new findings (S-OWN-4..6).
-  - `docs/architecture/Configuration_Ownership_Ledger.md` v1.0 — new doc; classifies all 242 operator-visible variables in `initServer.sqf` per §3. Four open findings (C-OWN-1..4) seeding Wave 7-T2 / W7-T3.
-- Cross-references in §8 updated to point at the Configuration Ownership Ledger.
-- No phase / scope / non-goal changes.
-
-### v1.1 — 2026-05-08
-- Added cross-references to two new Wave 2 / Wave 5 deliverables produced as part of "implement the plan" execution:
-  - `docs/architecture/State_Ownership_Ledger.md` (Phase 2 single-writer ledger).
-  - `docs/qa/Dedicated_JIP_Validation_Matrix.md` (Phase 5 release-candidate smoke checklist).
-- No phase / scope / non-goal changes.
-
-### v1.0 — 2026-05-08
-- Initial issuance. Captures current-clone architecture posture, target architecture, ownership boundaries, configuration ownership policy, acceptance criteria, non-goals, and 6-phase roadmap (Phase 0 → Phase 5).
+- The ecosystem layer contract changes in a way that affects subsystem ownership, state ownership, or execution order.
