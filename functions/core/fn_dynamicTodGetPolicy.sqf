@@ -14,13 +14,14 @@ if (isNil "ARC_fnc_timePolicyGet") then {
 private _policy = [] call ARC_fnc_timePolicyGet;
 if (!(_policy isEqualType createHashMap)) then { _policy = createHashMap; };
 
-private _phase = _policy getOrDefault ["phase", "DAY"];
-private _profile = _policy getOrDefault ["profile", "STANDARD"];
-private _tod = _policy getOrDefault ["tod", dayTime];
-private _canSpawnCivil = _policy getOrDefault ["canSpawnCivil", true];
-private _canSpawnAirbase = _policy getOrDefault ["canSpawnAirbase", true];
-private _canSpawnThreat = _policy getOrDefault ["canSpawnThreat", true];
-private _canSpawnOps = _policy getOrDefault ["canSpawnOps", true];
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _phase = [_policy, "phase", "DAY"] call _hg;
+private _profile = [_policy, "profile", "STANDARD"] call _hg;
+private _tod = [_policy, "tod", dayTime] call _hg;
+private _canSpawnCivil = [_policy, "canSpawnCivil", true] call _hg;
+private _canSpawnAirbase = [_policy, "canSpawnAirbase", true] call _hg;
+private _canSpawnThreat = [_policy, "canSpawnThreat", true] call _hg;
+private _canSpawnOps = [_policy, "canSpawnOps", true] call _hg;
 
 if (!(_phase isEqualType "")) then { _phase = "DAY"; };
 if (!(_profile isEqualType "")) then { _profile = "STANDARD"; };
