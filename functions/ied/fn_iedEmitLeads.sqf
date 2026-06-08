@@ -46,6 +46,30 @@ private _transU = toUpper _transition;
 private _emittedLeads = [];
 private _now = serverTime;
 
+private _makeLead = {
+    params ["_leadType", "_displayName", "_leadPos", "_baseStrength", "_expiresIn", "_sourceTaskId", "_sourceIncidentType", "_tag", "_sourceKind"];
+    if (isNil "ARC_fnc_intelLeadCreateCoupled") then
+    {
+        ARC_fnc_intelLeadCreateCoupled = compile preprocessFileLineNumbers "functions\\intel\\fn_intelLeadCreateCoupled.sqf";
+    };
+    [
+        _leadType,
+        _displayName,
+        _leadPos,
+        _baseStrength,
+        _expiresIn,
+        _sourceTaskId,
+        _sourceIncidentType,
+        "",
+        _tag,
+        [],
+        "FIELD",
+        _districtId,
+        _sourceKind,
+        [["threat_id", _threatId], ["transition", _transU], ["family", "IED"]]
+    ] call ARC_fnc_intelLeadCreateCoupled
+};
+
 switch (_transU) do
 {
     case "DISCOVERED":
@@ -59,9 +83,9 @@ switch (_transU) do
             1800,
             _taskId,
             "IED",
-            "",
-            "ied_warning"
-        ] call ARC_fnc_leadCreate;
+            "ied_warning",
+            "IED_DISCOVERED"
+        ] call _makeLead;
 
         if (!(_warnId isEqualTo "")) then
         {
@@ -78,9 +102,9 @@ switch (_transU) do
             3600,
             _taskId,
             "IED",
-            "",
-            "component_trace"
-        ] call ARC_fnc_leadCreate;
+            "component_trace",
+            "IED_DISCOVERED"
+        ] call _makeLead;
 
         if (!(_traceId isEqualTo "")) then
         {
@@ -100,9 +124,9 @@ switch (_transU) do
             2700,
             _taskId,
             "IED",
-            "",
-            "post_blast_followup"
-        ] call ARC_fnc_leadCreate;
+            "post_blast_followup",
+            "IED_DETONATED"
+        ] call _makeLead;
 
         if (!(_pbId isEqualTo "")) then
         {
@@ -122,9 +146,9 @@ switch (_transU) do
                 5400,
                 _taskId,
                 "IED",
-                "",
-                "facilitator_node_lead"
-            ] call ARC_fnc_leadCreate;
+                "facilitator_node_lead",
+                "EVIDENCE"
+            ] call _makeLead;
 
             if (!(_facId isEqualTo "")) then
             {
@@ -146,9 +170,9 @@ switch (_transU) do
             5400,
             _taskId,
             "IED",
-            "",
-            "component_trace"
-        ] call ARC_fnc_leadCreate;
+            "component_trace",
+            "INTERDICTED"
+        ] call _makeLead;
 
         if (!(_traceId isEqualTo "")) then
         {
@@ -165,9 +189,9 @@ switch (_transU) do
             7200,
             _taskId,
             "IED",
-            "",
-            "repeat_location_lead"
-        ] call ARC_fnc_leadCreate;
+            "repeat_location_lead",
+            "INTERDICTED"
+        ] call _makeLead;
 
         if (!(_repId isEqualTo "")) then
         {
