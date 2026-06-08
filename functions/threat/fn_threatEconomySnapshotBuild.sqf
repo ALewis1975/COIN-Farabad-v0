@@ -163,8 +163,7 @@ private _denyRows = [];
     private _reason = _x;
     private _count = [_denyCounts, _reason, 0] call _hg;
     if (!(_count isEqualType 0)) then { _count = 0; };
-    private _meta = [_reason] call ARC_fnc_threatEconomyReasonMeta;
-    _denyRows pushBack [["reason", _reason], ["count", _count], ["meta", _meta]];
+    _denyRows pushBack [_reason, _count, _meta];
 } forEach _denyTaxonomy;
 
 [
