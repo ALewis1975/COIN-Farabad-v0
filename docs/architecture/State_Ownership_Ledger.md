@@ -118,6 +118,10 @@ All writers in this ledger are required to be **server-side only**. Any client-s
 | `ARC_pub_s1_registry` | ✅ | `functions/core/fn_s1RegistrySnapshot.sqf:190` | — | Replicated S1 unit-roster snapshot. |
 | `ARC_pub_s1_registryUpdatedAt` | ⚠️ | `functions/core/fn_s1RegistrySnapshot.sqf:191` | `functions/core/fn_s1RegistryInit.sqf:50`, `functions/core/fn_resetAll.sqf:342` | Freshness signal. Three writers, all server-owned and part of one registry lifecycle: init seeds `-1`, snapshot updates with `serverTime`, reset path resets to current `serverTime`. Acceptable for Phase 2 closure (multi-writer pattern matches S-OWN-1..3). Single-writer extraction tracked as S-OWN-4 (P2, non-blocking). |
 
+### 3.11 Runtime Boundary public state
+
+Runtime Boundary ownership rows for `ARC_pub_runtimePolicy`, `ARC_pub_runtimePolicyUpdatedAt`, and `ARC_pub_runtimePolicyMeta` are tracked in `docs/architecture/Runtime_Boundary_State_Ownership_Addendum.md` until they are folded into this ledger.
+
 ---
 
 ## 3a) Subsystem-runtime replicated state (non-`ARC_pub_*`)
