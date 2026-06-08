@@ -58,21 +58,21 @@ Recommended fields:
 
 | Field | Type | Meaning |
 |---|---|---|
-| `schema` | string | `ARC_runtimePolicy_v1` |
-| `version` | array | `[1,0,0]` |
-| `builtAtServerTime` | number | Server time at build |
-| `serverMode` | string | `HOSTED`, `DEDICATED`, or `UNKNOWN` |
-| `safeMode` | bool | Whether safe mode posture is active |
-| `degradedMode` | string | `NONE`, `LIGHT`, `HEAVY`, or `LOCKDOWN` |
-| `playerCount` | number | Current active player count |
-| `activeDistricts` | array | District IDs active under player bubble policy |
-| `aiPressureBand` | string | `LOW`, `MED`, `HIGH`, or `UNKNOWN` |
-| `vehiclePressureBand` | string | `LOW`, `MED`, `HIGH`, or `UNKNOWN` |
-| `schedulerBudgetBand` | string | `NORMAL`, `REDUCED`, `MINIMAL`, or `LOCKED` |
-| `spawnPolicy` | hash/map | Per-family allow/reduce/deny guidance |
-| `cleanupPolicy` | hash/map | Cleanup radius, delay, and conservative fallback hints |
-| `jipPosture` | string | `NORMAL`, `RECOVERY`, or `UNKNOWN` |
-| `notes` | array | Bounded diagnostic notes |
+| `schema` | STRING | `ARC_runtimePolicy_v1` |
+| `version` | ARRAY | `[1,0,0]` |
+| `builtAtServerTime` | NUMBER | Server time at build |
+| `serverMode` | STRING | `HOSTED`, `DEDICATED`, or `UNKNOWN` |
+| `safeMode` | BOOL | Whether safe mode posture is active |
+| `degradedMode` | STRING | `NONE`, `LIGHT`, `HEAVY`, or `LOCKDOWN` |
+| `playerCount` | NUMBER | Current active player count |
+| `activeDistricts` | ARRAY | District IDs active under player bubble policy |
+| `aiPressureBand` | STRING | `LOW`, `MED`, `HIGH`, or `UNKNOWN` |
+| `vehiclePressureBand` | STRING | `LOW`, `MED`, `HIGH`, or `UNKNOWN` |
+| `schedulerBudgetBand` | STRING | `NORMAL`, `REDUCED`, `MINIMAL`, or `LOCKED` |
+| `spawnPolicy` | HASHMAP | Per-family allow/reduce/deny guidance |
+| `cleanupPolicy` | HASHMAP | Cleanup radius, delay, and conservative fallback hints |
+| `jipPosture` | STRING | `NORMAL`, `RECOVERY`, or `UNKNOWN` |
+| `notes` | ARRAY | Bounded diagnostic notes |
 
 This read model should remain compact. It should not become a live dump of every unit, group, vehicle, or scheduler.
 
