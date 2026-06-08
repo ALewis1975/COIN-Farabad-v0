@@ -10,7 +10,7 @@
 
 The CIVSUB / Threat / IED reliability sweep uses `BLOCKED_RUNTIME` to distinguish unavailable Arma runtime evidence from other blocked or pending review states.
 
-This normalization record defines the intended canonical wording for the dated `tests/TEST-LOG.md` entry and the already-normalized addendum file.
+This normalization record proposes canonical wording for the dated `tests/TEST-LOG.md` entry. Note: `tests/TEST-LOG.md` currently defines the allowed Result labels as `PASS`, `FAIL`, or `BLOCKED`; update that policy header before applying new labels like `PENDING` or `BLOCKED_RUNTIME` in the canonical log.
 
 ---
 
