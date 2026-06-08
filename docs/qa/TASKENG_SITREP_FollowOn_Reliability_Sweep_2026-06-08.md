@@ -9,7 +9,7 @@
 
 ## 1) Purpose
 
-This reliability sweep proves the command cycle that defines the mission spine under the new read-model and ecosystem-layer work.
+This reliability sweep defines the evidence required to prove the command cycle that defines the mission spine under the new read-model and ecosystem-layer work.
 
 The active reliability plan defines A4 as the TASKENG / SITREP / follow-on-orders proof point. Its acceptance focus is that task acceptance, execution, SITREP, closeout, and follow-on orders complete without orphaned state; unit status, queue, orders, lead pool, and public snapshots stay consistent; TOC role gates remain enforced; and rebuild/reset paths leave no ghost tasks or stale addActions.
 
