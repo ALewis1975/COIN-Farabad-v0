@@ -1,8 +1,9 @@
-# Farabad COIN v0 — Task Decomposition (Revised)
+# Farabad COIN v0 - Task Decomposition (Revised)
 
-**Version:** 2.0  
-**Date:** 2026-04-04  
-**Source:** Revised Architecture Assessment (`docs/architecture/Architecture_and_Readiness_Plan.md`)
+**Version:** 2.1  
+**Date:** 2026-06-08  
+**Source:** Revised Architecture Assessment (`docs/architecture/Architecture_and_Readiness_Plan.md`)  
+**Ecosystem architecture source:** `docs/architecture/Farabad_Ecosystem_Architecture_v1.md`
 
 **Canonical completion ledger:** `/home/runner/work/COIN-Farabad-v0/COIN-Farabad-v0/docs/qa/Pre_Dedicated_Mission_Completion_Audit_2026-04-06.md`
 
@@ -10,7 +11,7 @@
 
 ## 1) Objective
 
-Execute the revised program of work with stronger governance discipline, explicit security/risk tracks, and clear runtime-validation closure criteria.
+Execute the revised program of work with stronger governance discipline, explicit security/risk tracks, clear runtime-validation closure criteria, and an ecosystem layer contract that keeps terrain, time, population, threat, tasking, sustainment, and UI behavior aligned.
 
 This decomposition supersedes older phase/task narratives that are now stale relative to current grading and workflow expectations.
 
@@ -18,12 +19,12 @@ This decomposition supersedes older phase/task narratives that are now stale rel
 
 ## 2) Workstream decomposition (project-wide)
 
-## Track 1 — Governance & Source-of-Truth Enforcement
+## Track 1 - Governance & Source-of-Truth Enforcement
 
 ### Scope
 - Enforce `main`-truth checks for all architecture/diagnostic conclusions.
 - Add mandatory branch-drift step in analysis workflow.
-- Enforce response-shape discipline (analysis request → analysis output only).
+- Enforce response-shape discipline (analysis request -> analysis output only).
 
 ### Deliverables
 - Standardized truth-check procedure integrated into planning/analysis workflows.
@@ -35,23 +36,26 @@ This decomposition supersedes older phase/task narratives that are now stale rel
 
 ---
 
-## Track 2 — Architecture Integrity
+## Track 2 - Architecture Integrity
 
 ### Scope
 - Re-verify single-writer boundaries for shared `missionNamespace` state.
 - Audit client-only namespace usage (`uiNamespace`) to prevent authority leakage.
 - Confirm subsystem ownership contracts remain aligned with locked baselines.
+- Confirm ecosystem layer ownership stays aligned with `docs/architecture/Farabad_Ecosystem_Architecture_v1.md`.
 
 ### Deliverables
 - Updated architecture integrity audit notes with ownership confirmations/exceptions.
+- Layer ownership notes for affected subsystem state, snapshots, and config values.
 
 ### Acceptance
 - No unmediated client writes to authoritative shared mission state.
 - Ownership boundaries documented and conflict-free.
+- New or changed subsystem behavior has an assigned ecosystem layer owner.
 
 ---
 
-## Track 3 — RemoteExec / Security
+## Track 3 - RemoteExec / Security
 
 ### Scope
 - Validate each endpoint against hardening requirements:
@@ -67,12 +71,12 @@ This decomposition supersedes older phase/task narratives that are now stale rel
 - Endpoint validation matrix with pass/fail status and remediation list.
 
 ### Acceptance
-- No unvalidated privileged client→server path remains in active surface.
+- No unvalidated privileged client->server path remains in active surface.
 - JIP usage restricted to persistent late-join requirements only.
 
 ---
 
-## Track 4 — State / Persistence / TASKENG
+## Track 4 - State / Persistence / TASKENG
 
 ### Scope
 - Re-validate migration idempotency and backward compatibility.
@@ -88,7 +92,7 @@ This decomposition supersedes older phase/task narratives that are now stale rel
 
 ---
 
-## Track 5 — Runtime Subsystem Reliability
+## Track 5 - Runtime Subsystem Reliability
 
 ### Scope
 - **Airbase:** queue lifecycle, crew seat assignment pathing, despawn marker logic, parked-restore continuity.
@@ -104,7 +108,7 @@ This decomposition supersedes older phase/task narratives that are now stale rel
 
 ---
 
-## Track 6 — Validation & Evidence
+## Track 6 - Validation & Evidence
 
 ### Scope
 - Keep compat-scan + sqflint mandatory for changed SQF.
@@ -121,34 +125,58 @@ This decomposition supersedes older phase/task narratives that are now stale rel
 
 ---
 
-## Track 7 — Execution Governance
+## Track 7 - Execution Governance
 
 ### Scope
 - Enforce the revised execution order and completion criteria.
 - Prevent scope drift between tracks.
 
 ### Deliverables
-- Ordered execution board tied to the four phases below.
+- Ordered execution board tied to the phases below.
 
 ### Acceptance
 - Work proceeds in phase order unless an explicit risk-based exception is approved.
 
 ---
 
+## Track 8 - Ecosystem Architecture Contract
+
+### Scope
+- Maintain `docs/architecture/Farabad_Ecosystem_Architecture_v1.md` as the layer-composition contract.
+- Map subsystem work to layer ownership before implementation expands behavior.
+- Prevent terrain, time, population, threat, intel, tasking, sustainment, and UI from drifting into implicit dependencies.
+- Keep foundation layers from depending on higher gameplay layers for canonical policy.
+
+### Deliverables
+- Ecosystem architecture contract.
+- Layer Contract Ledger fields for each layer.
+- Cross-system dependency audit items converted into bounded follow-up tasks.
+
+### Acceptance
+- Every new or materially changed subsystem behavior identifies its ecosystem layer.
+- Every cross-layer interaction uses a public snapshot, delta bundle, or validated service request.
+- Any direct internal cross-subsystem read has an audit note and a migration decision.
+
+---
+
 ## 3) Execution order (mandatory)
 
-## Phase 1 — Governance/Security Gates
+## Phase 0 - Ecosystem Contract and Truth Alignment
+- Track 1 (Governance & Source-of-Truth)
+- Track 8 (Ecosystem Architecture Contract)
+
+## Phase 1 - Governance/Security Gates
 - Track 1 (Governance & Source-of-Truth)
 - Track 3 (RemoteExec/Security) initial pass
 
-## Phase 2 — Persistence/Runtime Integrity Audits
+## Phase 2 - Persistence/Runtime Integrity Audits
 - Track 2 (Architecture Integrity)
 - Track 4 (State/Persistence/TASKENG)
 
-## Phase 3 — Subsystem Regression Reliability Passes
+## Phase 3 - Subsystem Regression Reliability Passes
 - Track 5 (Airbase, SitePop/Prison, CIVSUB/Threat)
 
-## Phase 4 — Dedicated/JIP Closure + Release Readiness
+## Phase 4 - Dedicated/JIP Closure + Release Readiness
 - Track 6 (Validation & Evidence) deferred closure
 - Track 7 (Execution Governance) final readiness confirmation
 
@@ -158,9 +186,10 @@ This decomposition supersedes older phase/task narratives that are now stale rel
 
 1. Add hard **truth-before-claim** checks to every diagnostic task.
 2. Keep responses tightly scoped to user request type:
-   - analysis request → analysis
-   - plan request → plan
-   - implementation request → implementation artifacts
+   - analysis request -> analysis output only
+   - plan request -> plan
+   - implementation request -> implementation artifacts
+3. Use the ecosystem architecture contract to classify layer ownership before expanding cross-system behavior.
 
 ---
 
@@ -169,6 +198,7 @@ This decomposition supersedes older phase/task narratives that are now stale rel
 - [ ] Verified relevant findings against `origin/main` before asserting.
 - [ ] Marked each conclusion as branch-local or main-confirmed.
 - [ ] Applied authority/ownership checks for affected subsystem.
+- [ ] Applied ecosystem layer ownership checks for affected subsystem.
 - [ ] Applied RemoteExec/security checks for affected RPC surfaces.
 - [ ] Ran required static validations for changed SQF/config.
 - [ ] Logged validation results in `tests/TEST-LOG.md`.
@@ -184,13 +214,13 @@ The AIR / TOWER subsystem has its own narrow PR-by-PR execution plan:
 - **Implementation matrix:** `docs/architecture/AIR_TOWER_Arma_Native_Implementation_Matrix.md`
 - **PR breakdown:** `docs/architecture/AIR_TOWER_PR_BY_PR_BREAKDOWN.md`
 
-Execution order: PR 1 (docs) → PR 2 (shell scaffold) → PR 3 (ops board) → PR 4 (clearances safety) → PR 5 (input flow) → PR 6 (snapshot freshness) → PR 7 (DASH air summary) → PR 8 (map pane) → PR 9 (RemoteExec hardening) → PR 10 (world overlay) → PR 11 (debug cleanup).
+Execution order: PR 1 (docs) -> PR 2 (shell scaffold) -> PR 3 (ops board) -> PR 4 (clearances safety) -> PR 5 (input flow) -> PR 6 (snapshot freshness) -> PR 7 (DASH air summary) -> PR 8 (map pane) -> PR 9 (RemoteExec hardening) -> PR 10 (world overlay) -> PR 11 (debug cleanup).
 
 ---
 
 ## 7) Notes on scope control
 
 - This document defines **what** to execute, not implementation-level code steps.
-- Use subsystem baselines and security/QA guides as authoritative references during execution.
+- Use subsystem baselines, ecosystem layer contracts, and security/QA guides as authoritative references during execution.
 - Use the pre-dedicated completion audit as the canonical “complete vs missing” board before scheduling dedicated/JIP validation.
 - If new requirements materially expand scope, update this decomposition before executing expanded work.
