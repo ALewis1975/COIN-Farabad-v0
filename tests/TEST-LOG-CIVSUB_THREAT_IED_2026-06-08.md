@@ -4,7 +4,7 @@
 **Branch/Commit:** `ops/civsub-threat-ied-reliability-sweep` @ `b53a507f97271bf3a1eb31d097982bc081762725`  
 **Mode:** J — Operations / Config / Data Maintenance  
 **Canonical destination:** `tests/TEST-LOG.md`  
-**Status:** Addendum pending operator/runtime execution.  
+**Status:** Folded into `tests/TEST-LOG.md` (canonical entry dated 2026-06-08). Retained for historical reference only.
 
 ---
 
