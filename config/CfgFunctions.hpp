@@ -31,7 +31,7 @@ class CfgFunctions
             class dynamicTodGetPolicy {};
             class timePolicyGet {};
             class runtimePolicyBuild {};
-            class runtimePolicyPublish {};
+            class runtimePolicyPublish { postInit = 1; };
 
             // S1 registry (server-owned personnel/unit registry)
             class s1RegistryInit {};
