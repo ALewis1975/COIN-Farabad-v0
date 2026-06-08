@@ -20,6 +20,7 @@
       5: NUMBER budgetCost (default 1)
       6: STRING district posture (default "NORMAL")
       7: STRING threat intent (default "IED_PRESSURE")
+      8: ARRAY intel quality metadata (optional, pairs array)
           Known intents: IED_PRESSURE, AMBUSH, VBIED_ATTACK, SUICIDE_ATTACK.
 
     Returns:
@@ -36,7 +37,8 @@ params [
     ["_intelQuality", -1, [0]],
     ["_budgetCost", 1, [0]],
     ["_districtPosture", "NORMAL", [""]],
-    ["_threatIntent", "IED_PRESSURE", [""]]
+    ["_threatIntent", "IED_PRESSURE", [""]],
+    ["_intelQualityMeta", [], [[]]]
 ];
 
 if (_districtId isEqualTo "") exitWith {false};
@@ -67,13 +69,9 @@ if (!(_intelQuality isEqualType 0) || { _intelQuality < 0 }) then
 };
 _intelQuality = (_intelQuality max 0) min 1;
 if (!(_budgetCost isEqualType 0) || { _budgetCost < 1 }) then { _budgetCost = 1; };
-// Below this quality, leads remain recorded but omit extra telegraphing cues.
 private _cueIntelMin = 0.35;
 private _nonIedLeadTtlS = 2700;
 
-// ---------------------------------------------------------------------------
-// Helper: pairs-array set (mirrors fn_threatCreateFromTask convention)
-// ---------------------------------------------------------------------------
 private _kvSet = {
     params ["_pairs", "_key", "_value"];
     if (!(_pairs isEqualType [])) then { _pairs = []; };
@@ -83,9 +81,14 @@ private _kvSet = {
     _pairs
 };
 
-// ---------------------------------------------------------------------------
-// Campaign ID + sequence
-// ---------------------------------------------------------------------------
+private _kvGet = {
+    params ["_pairs", "_key", "_default"];
+    if (!(_pairs isEqualType [])) exitWith { _default };
+    private _out = _default;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { ((_x select 0) isEqualTo _key) }) exitWith { _out = _x select 1; }; } forEach _pairs;
+    _out
+};
+
 private _campaignId = ["threat_v0_campaign_id", ""] call ARC_fnc_stateGet;
 if (!(_campaignId isEqualType "") || { _campaignId isEqualTo "" }) then
 {
@@ -105,12 +108,6 @@ private _seq6 = (_zeros select [0, _need]) + _s;
 
 private _threatId = format ["THR:%1:%2", _districtId, _seq6];
 
-// ---------------------------------------------------------------------------
-// MSR/Convoy-aware target selection (T10 integration)
-// ---------------------------------------------------------------------------
-// If a convoy is active and has route points, target the convoy on its MSR route.
-// Otherwise, fall back to a generic FOOT_PATROL target within the district.
-// ---------------------------------------------------------------------------
 private _convoyNetIds = missionNamespace getVariable ["ARC_activeConvoyNetIds", []];
 if (!(_convoyNetIds isEqualType [])) then { _convoyNetIds = []; };
 private _convoyActive = (count _convoyNetIds) > 0;
@@ -127,7 +124,6 @@ if (_convoyActive) then
 
     if ((count _routePts) > 1) then
     {
-        // Pick a point between 30 % and 70 % along the route (threat placed mid-route).
         private _startIdx = floor (0.30 * (count _routePts));
         private _endIdx   = floor (0.70 * (count _routePts));
         if (_endIdx <= _startIdx) then { _endIdx = _startIdx + 1; };
@@ -139,23 +135,18 @@ if (_convoyActive) then
 
     if (_basePos isEqualTo [] || { (count _basePos) < 2 }) then
     {
-        // Route not available - use lead vehicle position.
         private _leadNid = _convoyNetIds select 0;
         private _leadVeh = objectFromNetId _leadNid;
         if (!isNull _leadVeh) then { _basePos = getPosATL _leadVeh; };
     };
 };
 
-// Fallback: use active incident position or origin marker.
 if (_basePos isEqualTo [] || { (count _basePos) < 2 }) then
 {
     _basePos = missionNamespace getVariable ["ARC_activeIncidentPos", []];
     if (!(_basePos isEqualType []) || { (count _basePos) < 2 }) then { _basePos = []; };
 };
 
-// Last-resort: use the CIVSUB district centroid. Do not fall back to legacy
-// old district objective markers; those can drift away from the authoritative
-// CIVSUB district model.
 if (_basePos isEqualTo [] || { (count _basePos) < 2 }) then
 {
     private _d = createHashMap;
@@ -176,10 +167,6 @@ if (_basePos isEqualTo [] || { (count _basePos) < 2 }) then
     };
 };
 
-// Canonical per-district fallback: the CIVSUB district centroid. Districts are
-// registered as "D01".."D20" in civsub_v1_districts with a [x,y] centroid, so
-// this resolves a valid base position whenever CIVSUB is active even when no
-// convoy or active incident is supplying one.
 if (_basePos isEqualTo [] || { (count _basePos) < 2 }) then
 {
     private _civDistricts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
@@ -203,18 +190,26 @@ if (_basePos isEqualTo [] || { (count _basePos) < 2 }) exitWith
 
 _basePos = +_basePos; _basePos resize 3; _basePos set [2, 0];
 
-// ---------------------------------------------------------------------------
-// Pick a roadside IED site near the base position
-// ---------------------------------------------------------------------------
 private _iedPos = [_basePos] call ARC_fnc_iedPickSite;
 if (_iedPos isEqualTo [] || { (count _iedPos) < 2 }) then { _iedPos = _basePos; };
 
-// ---------------------------------------------------------------------------
-// Build ThreatRecord (pairs-array format)
-// ---------------------------------------------------------------------------
 private _now = serverTime;
-
 private _familyU = [_typeU, _subtypeU] call ARC_fnc_threatInferFamily;
+
+if (!(_intelQualityMeta isEqualType [])) then { _intelQualityMeta = []; };
+if (_intelQualityMeta isEqualTo []) then
+{
+    if (isNil "ARC_fnc_intelQualityCoupleDistrict") then
+    {
+        ARC_fnc_intelQualityCoupleDistrict = compile preprocessFileLineNumbers "functions\\intel\\fn_intelQualityCoupleDistrict.sqf";
+    };
+    _intelQualityMeta = [_districtId, _intelQuality, "THREAT_RECORD", [["threat_type", _typeU], ["threat_subtype", _subtypeU], ["transition", "SCHEDULED"]]] call ARC_fnc_intelQualityCoupleDistrict;
+};
+private _metaQuality = [_intelQualityMeta, "quality", _intelQuality] call _kvGet;
+if (_metaQuality isEqualType 0) then { _intelQuality = (_metaQuality max 0) min 1; };
+private _qualityBand = [_intelQualityMeta, "quality_band", "UNKNOWN"] call _kvGet;
+private _qualityPrecision = [_intelQualityMeta, "precision", "UNKNOWN"] call _kvGet;
+private _qualityTimeliness = [_intelQualityMeta, "timeliness", "UNKNOWN"] call _kvGet;
 
 private _area = [];
 _area = [_area, "pos", _iedPos] call _kvSet;
@@ -239,6 +234,7 @@ _classification = [_classification, "district_posture", _postureU] call _kvSet;
 _classification = [_classification, "threat_intent", _intentU] call _kvSet;
 _classification = [_classification, "budget_cost", _budgetCost] call _kvSet;
 _classification = [_classification, "intel_quality", _intelQuality] call _kvSet;
+_classification = [_classification, "intel_quality_meta", _intelQualityMeta] call _kvSet;
 _classification = [_classification, "priority", ((_tier min 4) + 1)] call _kvSet;
 
 private _world = [];
@@ -258,9 +254,12 @@ _stateTsNew = [_stateTsNew, "cleaned", -1] call _kvSet;
 _stateTsNew = [_stateTsNew, "expired", -1] call _kvSet;
 
 private _tele = [];
-// Keep legacy intel_level while adding explicit intel_quality for economy views.
 _tele = [_tele, "intel_level", _intelQuality] call _kvSet;
 _tele = [_tele, "intel_quality", _intelQuality] call _kvSet;
+_tele = [_tele, "intel_quality_meta", _intelQualityMeta] call _kvSet;
+_tele = [_tele, "quality_band", _qualityBand] call _kvSet;
+_tele = [_tele, "precision", _qualityPrecision] call _kvSet;
+_tele = [_tele, "timeliness", _qualityTimeliness] call _kvSet;
 _tele = [_tele, "cues_enabled", _intelQuality >= _cueIntelMin] call _kvSet;
 
 private _outcome = [];
@@ -292,9 +291,6 @@ _rec = [_rec, "telegraphing", _tele] call _kvSet;
 _rec = [_rec, "outcome", _outcome] call _kvSet;
 _rec = [_rec, "audit", _audit] call _kvSet;
 
-// ---------------------------------------------------------------------------
-// Persist record and update open index
-// ---------------------------------------------------------------------------
 private _records = ["threat_v0_records", []] call ARC_fnc_stateGet;
 if (!(_records isEqualType [])) then { _records = []; };
 _records pushBack _rec;
@@ -306,13 +302,10 @@ _open pushBackUnique _threatId;
 ["threat_v0_open_index", _open] call ARC_fnc_stateSet;
 
 diag_log format [
-    "[ARC][THREAT] ARC_fnc_threatScheduleEvent: scheduled threat_id=%1 district=%2 posture=%3 family=%4 type=%5 subtype=%6 tier=%7 target=%8 intel=%9 pos=%10",
-    _threatId, _districtId, _postureU, _familyU, _typeU, _subtypeU, _tier, _targetProfile, _intelQuality, _iedPos
+    "[ARC][THREAT] ARC_fnc_threatScheduleEvent: scheduled threat_id=%1 district=%2 posture=%3 family=%4 type=%5 subtype=%6 tier=%7 target=%8 intel=%9 band=%10 pos=%11",
+    _threatId, _districtId, _postureU, _familyU, _typeU, _subtypeU, _tier, _targetProfile, _intelQuality, _qualityBand, _iedPos
 ];
 
-// ---------------------------------------------------------------------------
-// Emit the first intel cue about the threat.
-// ---------------------------------------------------------------------------
 switch (_familyU) do
 {
     case "IED": { [_rec, "DISCOVERED"] call ARC_fnc_iedEmitLeads; };
@@ -331,10 +324,20 @@ switch (_familyU) do
         {
             format ["District Attack Network — %1", _districtId]
         };
-        private _leadId = [_leadType, _disp, _iedPos, _intelQuality, _nonIedLeadTtlS, "", _typeU, "", _tag] call ARC_fnc_leadCreate;
+        private _leadMeta = [
+            ["source_threat_id", _threatId],
+            ["district_id", _districtId],
+            ["intel_quality", _intelQuality],
+            ["intel_quality_meta", _intelQualityMeta],
+            ["quality_coupling", "DISTRICT_TRUST_INTIMIDATION_STABILITY_V1"],
+            ["quality_band", _qualityBand],
+            ["precision", _qualityPrecision],
+            ["timeliness", _qualityTimeliness]
+        ];
+        private _leadId = [_leadType, _disp, _iedPos, _intelQuality, _nonIedLeadTtlS, "", _typeU, "", _tag, _leadMeta] call ARC_fnc_leadCreate;
         if (!(_leadId isEqualTo "")) then
         {
-            diag_log format ["[ARC][INFO] ARC_fnc_threatScheduleEvent: NON_IED lead=%1 threat=%2 intent=%3", _leadId, _threatId, _intentU];
+            diag_log format ["[ARC][INFO] ARC_fnc_threatScheduleEvent: NON_IED lead=%1 threat=%2 intent=%3 intel=%4 band=%5", _leadId, _threatId, _intentU, _intelQuality, _qualityBand];
         };
     };
 };
