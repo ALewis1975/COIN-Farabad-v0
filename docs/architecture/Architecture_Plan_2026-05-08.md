@@ -361,3 +361,15 @@ This plan is updated when any of the following changes:
 - The set of subsystem boundaries or ownership rules.
 - The hard non-goals in §5.
 - The ecosystem layer contract changes in a way that affects subsystem ownership, state ownership, or execution order.
+
+When updating this plan:
+
+1. Bump the version and date together.
+2. Update §8 cross-references if document relationships or active companion plans changed.
+3. Add a brief entry to §10 summarizing why the version changed.
+
+---
+
+## 10) Change log
+
+- **v1.3 (2026-06-08):** Cross-linked `docs/architecture/Farabad_Ecosystem_Architecture_v1.md` as the active layer-composition contract throughout the plan and document-relationship table.
