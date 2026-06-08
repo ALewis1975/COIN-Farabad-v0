@@ -117,8 +117,8 @@ private _totalSpentToday = 0;
     private _b = [_budgetMap, _districtId, createHashMap] call _hg;
     if (!(_b isEqualType createHashMap)) then { _b = createHashMap; };
 
-    private _riskLevel = [_r, "risk_level", 0] call _hg;
-    if (!(_riskLevel isEqualType 0)) then { _riskLevel = 0; };
+    private _riskLevel = [_r, "risk_level", 30] call _hg;
+    if (!(_riskLevel isEqualType 0)) then { _riskLevel = 30; };
     private _attackCount30d = [_r, "attack_count_30d", 0] call _hg;
     if (!(_attackCount30d isEqualType 0)) then { _attackCount30d = 0; };
     private _lastAttackTs = [_r, "last_attack_ts", -1] call _hg;
