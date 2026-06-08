@@ -122,9 +122,9 @@ Any check demonstrates:
 - JIP client reconstructs false state or cannot recover public state.
 - Cleanup leaves persistent orphaned world entities or stale records.
 
-### BLOCKED
+### BLOCKED_RUNTIME
 
-Use `BLOCKED` when Arma runtime, full mod stack, dedicated rig, JIP observer, or required scenario setup is unavailable.
+Use `BLOCKED_RUNTIME` when Arma runtime, full mod stack, dedicated rig, JIP observer, or required scenario setup is unavailable.
 
 ---
 
