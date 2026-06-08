@@ -38,6 +38,19 @@ check 'posture_score_bands' "functions/threat/fn_threatEconomySnapshotBuild.sqf"
 check 'selection_inputs' "functions/threat/fn_threatEconomySnapshotBuild.sqf" "Economy snapshot exposes explainable district inputs"
 check 'district_posture_selection_enabled' "functions/threat/fn_threatEconomySnapshotBuild.sqf" "Economy snapshot summary exposes selection state"
 
+check 'ARC_fnc_intelQualityCouple' "functions/intel/fn_intelQualityCouple.sqf" "Intel quality coupling helper exists"
+check 'trust' "functions/intel/fn_intelQualityCouple.sqf" "Coupling helper computes trust"
+check 'intimidation' "functions/intel/fn_intelQualityCouple.sqf" "Coupling helper computes intimidation"
+check 'stability' "functions/intel/fn_intelQualityCouple.sqf" "Coupling helper computes stability"
+check 'confidence_band' "functions/intel/fn_intelQualityCouple.sqf" "Coupling helper emits confidence band"
+check 'precision' "functions/intel/fn_intelQualityCouple.sqf" "Coupling helper emits precision band"
+check 'intel_quality_coupling' "functions/intel/fn_intelLeadCreateCoupled.sqf" "Coupled lead creator writes coupling metadata"
+check 'intel_confidence_band' "functions/intel/fn_intelLeadCreateCoupled.sqf" "Coupled lead creator writes confidence metadata"
+check 'ARC_fnc_intelLeadCreateCoupled' "functions/ied/fn_iedEmitLeads.sqf" "IED leads use coupled lead creation"
+check 'ARC_fnc_intelLeadCreateCoupled' "functions/ied/fn_vbiedEmitLeads.sqf" "VBIED leads use coupled lead creation"
+check 'ARC_fnc_intelLeadCreateCoupled' "functions/threat/fn_threatLeadEmitFromOutcome.sqf" "Suicide leads use coupled lead creation"
+check 'ARC_fnc_intelLeadCreateCoupled' "functions/threat/fn_threatScheduleEvent.sqf" "Scheduled non-IED leads use coupled lead creation"
+
 if [[ "$pass" != true ]]; then
   exit 1
 fi
