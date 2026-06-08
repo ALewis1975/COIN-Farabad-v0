@@ -71,6 +71,7 @@ private _sitesOut = [];
 } forEach _sites;
 
 private _zonesOut = [];
+private _allMarkersZ = allMapMarkers;
 {
     _x params [
         ["_id", "", [""]],
@@ -90,7 +91,7 @@ private _zonesOut = [];
     _rec set ["halfExtents", +_halfExtents];
     _rec set ["dir", _dir];
     _rec set ["marker", _marker];
-    _rec set ["markerExists", _marker in allMapMarkers];
+    _rec set ["markerExists", _marker in _allMarkersZ];
     _zonesOut pushBack _rec;
 } forEach _zones;
 
