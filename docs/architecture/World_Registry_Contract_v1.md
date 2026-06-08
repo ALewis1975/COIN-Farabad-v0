@@ -73,17 +73,17 @@ Recommended fields:
 
 | Field | Type | Meaning |
 |---|---|---|
-| `schema` | string | `ARC_worldRegistry_v1` |
-| `version` | array | `[1,0,0]` |
-| `builtAtServerTime` | number | Server build time |
-| `locations` | array/map | Bounded named-location records |
-| `districts` | array/map | District spatial metadata, not CIVSUB population state |
-| `zones` | array/map | World zones and protected-zone metadata |
-| `terrainSites` | array/map | Key infrastructure and site metadata |
-| `routes` | array/map | Route IDs and endpoint/link metadata where authored |
-| `objectiveIndex` | map | Objective score/tier by location ID |
-| `rankedObjectives` | array | Ranked objective location IDs |
-| `anchorIssues` | array | Bounded missing/invalid anchor diagnostics |
+| `schema` | STRING | `ARC_worldRegistry_v1` |
+| `version` | ARRAY | `[1,0,0]` |
+| `builtAtServerTime` | NUMBER | Server build time |
+| `locations` | ARRAY/HASHMAP | Bounded named-location records |
+| `districts` | ARRAY/HASHMAP | District spatial metadata, not CIVSUB population state |
+| `zones` | ARRAY/HASHMAP | World zones and protected-zone metadata |
+| `terrainSites` | ARRAY/HASHMAP | Key infrastructure and site metadata |
+| `routes` | ARRAY/HASHMAP | Route IDs and endpoint/link metadata where authored |
+| `objectiveIndex` | HASHMAP | Objective score/tier by location ID |
+| `rankedObjectives` | ARRAY | Ranked objective location IDs |
+| `anchorIssues` | ARRAY | Bounded missing/invalid anchor diagnostics |
 
 This read model should expose spatial facts, not internal engine objects or unbounded scans.
 
