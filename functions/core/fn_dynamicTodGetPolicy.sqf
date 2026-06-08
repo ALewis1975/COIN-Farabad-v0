@@ -1,25 +1,27 @@
 /*
     ARC_fnc_dynamicTodGetPolicy
 
-    Returns current shared dynamic TOD policy.
-    Server refreshes lazily if needed; clients read replicated values.
+    Legacy compatibility adapter for the canonical Time / Tempo Policy getter.
+    Existing callers keep receiving the original dynamic TOD payload shape.
 
     Returns: HASHMAP
 */
 
-private _has = !(isNil { missionNamespace getVariable "ARC_dynamic_tod_phase" });
-if (isServer && { !_has }) then
-{
-    [] call ARC_fnc_dynamicTodRefresh;
+if (isNil "ARC_fnc_timePolicyGet") then {
+    ARC_fnc_timePolicyGet = compile preprocessFileLineNumbers "functions\\core\\fn_timePolicyGet.sqf";
 };
 
-private _phase = missionNamespace getVariable ["ARC_dynamic_tod_phase", "DAY"];
-private _profile = missionNamespace getVariable ["ARC_dynamic_tod_profile", "STANDARD"];
-private _tod = missionNamespace getVariable ["ARC_dynamic_tod_tod", dayTime];
-private _canSpawnCivil = missionNamespace getVariable ["ARC_dynamic_tod_canSpawnCivil", true];
-private _canSpawnAirbase = missionNamespace getVariable ["ARC_dynamic_tod_canSpawnAirbase", true];
-private _canSpawnThreat = missionNamespace getVariable ["ARC_dynamic_tod_canSpawnThreat", true];
-private _canSpawnOps = missionNamespace getVariable ["ARC_dynamic_tod_canSpawnOps", true];
+private _policy = [] call ARC_fnc_timePolicyGet;
+if (!(_policy isEqualType createHashMap)) then { _policy = createHashMap; };
+
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _phase = [_policy, "phase", "DAY"] call _hg;
+private _profile = [_policy, "profile", "STANDARD"] call _hg;
+private _tod = [_policy, "tod", dayTime] call _hg;
+private _canSpawnCivil = [_policy, "canSpawnCivil", true] call _hg;
+private _canSpawnAirbase = [_policy, "canSpawnAirbase", true] call _hg;
+private _canSpawnThreat = [_policy, "canSpawnThreat", true] call _hg;
+private _canSpawnOps = [_policy, "canSpawnOps", true] call _hg;
 
 if (!(_phase isEqualType "")) then { _phase = "DAY"; };
 if (!(_profile isEqualType "")) then { _profile = "STANDARD"; };
