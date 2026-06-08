@@ -11,6 +11,24 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-06-08 — CIVSUB / Threat / IED reliability sweep (evidence contract)
+
+**Branch/Commit:** `ops/civsub-threat-ied-reliability-sweep` @ commit `b53a507f97271bf3a1eb31d097982bc081762725`
+
+**Scenario:** Mode J reliability sweep contract for CIVSUB / Threat / IED coupling. Defines the static, hosted-MP, and dedicated/JIP checklist plus the evidence requirements that gate readiness claims (CIVSUB district/posture deltas, physical sampling and contact/identity behavior, threat record stability and public visibility, threat economy allow/deny reasoning, IED evidence/disposition lifecycle, VBIED and suicide-bomber scaffold visibility, protected-zone gates, cleanup, and JIP observer recovery). No runtime behavior is changed; no adaptive behavior is implemented. See `docs/qa/CIVSUB_Threat_IED_Reliability_Sweep_2026-06-08.md`.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Reliability sweep document | Add `docs/qa/CIVSUB_Threat_IED_Reliability_Sweep_2026-06-08.md` | PASS | Checklist/evidence contract only. No runtime behavior changed. |
+| 2 | Static review | Review CIVSUB delta, Threat record, Threat economy, IED evidence/disposition, and protected-zone paths | BLOCKED | Requires reviewer execution. |
+| 3 | Hosted MP runtime | Run CIVSUB district activation, contact/delta path, threat scheduler, IED evidence/disposition flow | BLOCKED | Arma runtime unavailable in this environment. |
+| 4 | Dedicated/JIP runtime | Run dedicated fresh start, JIP during active CIVSUB/threat/evidence state, reconnect/restart checks | BLOCKED | Dedicated/JIP operator run required. |
+| 5 | Adaptive behavior gate | Confirm adaptive COIN behavior remains blocked until reliability failures are closed or scoped | PASS | This sweep defines the gate and does not implement adaptive behavior. |
+
+**Result:** BLOCKED — sweep defines the evidence contract; hosted MP, dedicated, JIP, reconnect, and persistence validation must be executed in Arma and recorded here. Folded in from `tests/TEST-LOG-CIVSUB_THREAT_IED_2026-06-08.md`.
+
+---
+
 ## 2026-06-07 — Single-track lead model (origin discriminator + Path B retirement)
 
 **Branch/Commit:** copilot/read-only-architect-review @ commit: unrecoverable (SHA assigned by the push that lands this entry; recorded per the contributor rule rather than a `<pending>` placeholder)

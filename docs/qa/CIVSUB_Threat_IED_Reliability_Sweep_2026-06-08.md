@@ -26,7 +26,8 @@ This sweep does not add new behavior. It defines what must be observed, what evi
 | `docs/projectFiles/Farabad_CIVSUBv1_Development_Baseline (1).md` | Locked CIVSUB v1 intent. |
 | `docs/projectFiles/Farabad_THREAT_v0_IED_P1_Baseline_regen.md` | Locked Threat v0 + IED Phase 1 implementation baseline. |
 | `docs/architecture/Layer_Contract_Ledger.md` | Layer ownership for L4 Civilian / Population and L8 Threat Synthesis. |
-| `docs/architecture/State_Config_Ownership_Overlay.md` | State/config family ownership overlay. |
+| `docs/architecture/State_Ownership_Ledger.md` | State family ownership ledger. |
+| `docs/architecture/Configuration_Ownership_Ledger.md` | Config family ownership ledger. |
 | `tests/TEST-LOG.md` | Canonical validation log. |
 
 ---
