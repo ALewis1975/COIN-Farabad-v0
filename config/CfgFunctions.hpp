@@ -29,6 +29,8 @@ class CfgFunctions
             class cfgClassExists {};
             class dynamicTodRefresh {};
             class dynamicTodGetPolicy {};
+            class runtimePolicyBuild {};
+            class runtimePolicyPublish {};
 
             // S1 registry (server-owned personnel/unit registry)
             class s1RegistryInit {};
