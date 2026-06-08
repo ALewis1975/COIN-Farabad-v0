@@ -17,12 +17,12 @@ private _headlessClients = entities "HeadlessClient_F";
 private _players = _playersRaw - _headlessClients;
 private _alivePlayers = _players select { alive _x };
 
+private _allUnits = allUnits;
 private _aiUnits = 0;
 {
     if (!isPlayer _x) then { _aiUnits = _aiUnits + 1; };
-} forEach allUnits;
-
-private _allUnitsCount = count allUnits;
+} forEach _allUnits;
+private _allUnitsCount = count _allUnits;
 private _groupsCount = count allGroups;
 private _vehiclesCount = count vehicles;
 private _serverFps = diag_fps;
