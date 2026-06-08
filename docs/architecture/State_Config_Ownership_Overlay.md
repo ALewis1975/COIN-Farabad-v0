@@ -59,7 +59,7 @@ Hard rule: this overlay never authorizes a new writer. A state family still need
 
 ## 3) State ownership overlay
 
-| State family | Primary ecosystem layer owner | Primary subsystem owner | Canonical state ledger | Allowed consumers | Overlay rule |
+| State family | Ecosystem layer owner(s) | Primary subsystem owner | Canonical state ledger | Allowed consumers | Overlay rule |
 |---|---|---|---|---|---|
 | `ARC_state` persistent source of truth | L3 State / Event / Persistence | Core | State Ownership Ledger + persistence docs | Server systems only | No client reads or writes. Public consumers use bounded snapshots. |
 | `ARC_pub_state*` public campaign state | L3 State / Event / Persistence | Core | State Ownership Ledger | Console VM, dashboard, diagnostics | Presentation snapshot only. Do not expand into unbounded internal mirror. |
