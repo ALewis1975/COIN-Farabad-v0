@@ -1,10 +1,11 @@
 # Farabad COIN v0 - Ecosystem Architecture v1
 
-**Version:** 1.0  
+**Version:** 1.1  
 **Date:** 2026-06-08  
 **Status:** Active planning contract  
 **Mode:** F - Documentation-Only Changes  
-**Scope:** Architecture contract, layer ownership model, dependency direction, feedback-loop catalog, and refactor sequencing. No runtime behavior changes.
+**Scope:** Architecture contract, layer ownership model, dependency direction, feedback-loop catalog, and refactor sequencing. No runtime behavior changes.  
+**Layer ledger:** `docs/architecture/Layer_Contract_Ledger.md`
 
 ---
 
@@ -35,6 +36,7 @@ This document does not replace these active authorities:
 - `docs/architecture/Architecture_Plan_2026-05-08.md`
 - `docs/planning/Task_Decomposition.md`
 - `docs/qa/Pre_Dedicated_Mission_Completion_Audit_2026-04-06.md`
+- `docs/architecture/Layer_Contract_Ledger.md`
 - `docs/architecture/State_Ownership_Ledger.md`
 - `docs/architecture/Configuration_Ownership_Ledger.md`
 - `docs/architecture/Console_VM_v1.md`
@@ -106,9 +108,11 @@ Allowed exceptions must be documented in the Layer Contract Ledger and State Own
 
 Every layer entry should define the following fields before implementation work expands that layer.
 
+The enforceable per-layer ledger lives in `docs/architecture/Layer_Contract_Ledger.md`. The schema below is the minimum row shape; the ledger holds the current status, owner, enforcement point, detailed contract, tests, and failure mode for each layer.
+
 | Field | Required content |
 |---|---|
-| Layer ID | Stable ID such as `L0_RUNTIME`, `L1_WORLD`, or `L7_THREAT` |
+| Layer ID | Stable ID such as `L0`, `L1`, etc. (optionally with a mnemonic suffix like `L0_RUNTIME` or `L1_WORLD`) |
 | Owner subsystem | Primary subsystem or document owner |
 | Authority | Server-only, client-only, or mixed with exact boundaries |
 | Inputs | Snapshots, delta bundles, config values, or engine facts the layer consumes |
@@ -127,7 +131,9 @@ A layer without these fields remains planning-only.
 
 ---
 
-## 6) Initial layer ledger
+## 6) Initial layer ledger summary
+
+The table below is only the architecture overview. The detailed enforceable ledger is `docs/architecture/Layer_Contract_Ledger.md`.
 
 | Layer | Owner | Primary role | Current implementation posture | Next architecture task |
 |---|---|---|---|---|
@@ -209,18 +215,19 @@ Use this sequence for ecosystem-related work.
 | Step | Mode | Work |
 |---|---|---|
 | 1 | F | Add this ecosystem architecture contract and cross-link it from active planning docs |
-| 2 | F | Extend State Ownership and Configuration Ownership ledgers with layer ownership |
-| 3 | F | Audit direct cross-subsystem reads and upward dependency violations |
-| 4 | F | Define Runtime Boundary, World Registry, and Time Policy contracts |
-| 5 | C | Add compatibility wrappers for time/world/runtime read models without behavior change |
-| 6 | J | Run CIVSUB / Threat / IED reliability sweep before adaptive behavior changes |
-| 7 | B | Add threat economy reason taxonomy and district-posture-driven event selection |
-| 8 | B | Add intel quality coupling and lead fidelity surfacing |
-| 9 | J | Run TASKENG / SITREP / follow-on reliability sweep |
-| 10 | B | Add sustainment readiness snapshot and follow-on policy hints |
-| 11 | C/B | Continue Console VM migration tab by tab with parity evidence |
-| 12 | I | Update RemoteExec matrix for changed request/action paths |
-| 13 | J | Run dedicated/JIP ecosystem validation |
+| 2 | F | Add and maintain `docs/architecture/Layer_Contract_Ledger.md` as the detailed per-layer contract ledger |
+| 3 | F | Extend State Ownership and Configuration Ownership ledgers with layer ownership where useful |
+| 4 | F | Audit direct cross-subsystem reads and upward dependency violations |
+| 5 | F | Define Runtime Boundary, World Registry, and Time Policy contracts |
+| 6 | C | Add compatibility wrappers for time/world/runtime read models without behavior change |
+| 7 | J | Run CIVSUB / Threat / IED reliability sweep before adaptive behavior changes |
+| 8 | B | Add threat economy reason taxonomy and district-posture-driven event selection |
+| 9 | B | Add intel quality coupling and lead fidelity surfacing |
+| 10 | J | Run TASKENG / SITREP / follow-on reliability sweep |
+| 11 | B | Add sustainment readiness snapshot and follow-on policy hints |
+| 12 | C/B | Continue Console VM migration tab by tab with parity evidence |
+| 13 | I | Update RemoteExec matrix for changed request/action paths |
+| 14 | J | Run dedicated/JIP ecosystem validation |
 
 Each PR must use exactly one primary mode under `AGENTS.md`. Split mixed-mode work into separate PRs.
 
@@ -247,6 +254,7 @@ Farabad should count the ecosystem architecture as healthy when all of these are
 
 | Document | Relationship |
 |---|---|
+| `docs/architecture/Layer_Contract_Ledger.md` | Enforceable per-layer ledger. It expands this document's layer schema into owner, authority, state, events, tests, failure mode, and enforcement rows. |
 | `docs/architecture/Architecture_Plan_2026-05-08.md` | Remains the active forward architecture roadmap. This ecosystem contract adds a layer-composition model under that roadmap. |
 | `docs/planning/Task_Decomposition.md` | Remains the execution-track decomposition. Ecosystem tasks should be tracked there before implementation. |
 | `docs/qa/Pre_Dedicated_Mission_Completion_Audit_2026-04-06.md` | Remains the canonical feature-completion ledger before dedicated/JIP validation. Ecosystem work must not create a competing completion board. |
@@ -268,3 +276,4 @@ Update this document when any of the following changes:
 - A foundation service moves from implicit to explicit ownership.
 - A feedback loop becomes implemented behavior.
 - A future architecture plan changes subsystem boundaries, phase order, or hard non-goals.
+- `docs/architecture/Layer_Contract_Ledger.md` changes in a way that alters the layer schema or implementation sequence.
