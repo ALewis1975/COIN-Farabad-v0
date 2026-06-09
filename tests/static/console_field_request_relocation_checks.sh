@@ -57,6 +57,8 @@ check "_isShadowTok += .*\"SHADOW\".*rolesHasGroupIdToken" "$PAINT" "SHADOW row 
 check "_isTnpTok += .*\"TNP\".*rolesHasGroupIdToken" "$PAINT" "TNP row derives gating from the TNP callsign token"
 check "_canFieldShadow = _flagShadow" "$PAINT" "SHADOW row combines its flag with the SHADOW/S2/Command gate"
 check "_canFieldTnp += _flagTnp" "$PAINT" "TNP row combines its flag with the TNP/S3/Command gate"
+check "_panels pushBack \\(\\[\"FIELD REQUESTS\"\\] call _mkPanel\\)" "$PAINT" "S2 category projection creates a dedicated FIELD REQUESTS panel"
+check "\\[\"FIELD REQUESTS\", +\\(_panels select 3\\) select 2\\]" "$PAINT" "S2 master-list projection maps the FIELD REQUESTS section to its own panel"
 
 # (c) Primary click handler routes each row: close the console, then spawn the
 #     unchanged client function (so the in-world marking context is valid).
