@@ -132,7 +132,7 @@ private _canIntel = _canTocFull || _isAuth || _isOmni;
 // Field-request actions (JTAC CAS prefill / SHADOW ISR bridge / TNP partnered ops)
 // were relocated from the player action menu into the S2/INTEL console tools, so
 // their callsign operators must be able to reach the INTEL tab even when they are
-// not TOC staff or authorized leadership. Mirrors the per-row gates used in
+// not TOC staff or authorized leadership. Feature-flag gating is enforced per-row in
 // ARC_fnc_uiConsoleIntelPaint.
 private _isShadowTok = [player, "SHADOW"] call ARC_fnc_rolesHasGroupIdToken;
 private _isTnpTok    = [player, "TNP"] call ARC_fnc_rolesHasGroupIdToken;
