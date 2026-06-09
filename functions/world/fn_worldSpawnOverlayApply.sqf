@@ -159,10 +159,15 @@ if (_slots isEqualType createHashMap && { (count _slots) > 0 }) then {
             if (_x isEqualType [] && { (count _x) >= 3 }) then {
                 private _lid = _x select 0;
                 private _lp  = _x select 2;
-if (_lp isEqualType [] && { (count _lp) >= 2 } && { _slots hasKey _lid }) then {
-                    private _d = _p3 distance2D _lp;
-                    if (_d < _bestD) then { _bestD = _d; _bestId = _lid; };
-                };
+private _slotEntry = [_slots, _lid, objNull] call _hg;
+if (
+    _lp isEqualType [] &&
+    { (count _lp) >= 2 } &&
+    { !(_slotEntry isEqualTo objNull) }
+) then {
+    private _d = _p3 distance2D _lp;
+    if (_d < _bestD) then { _bestD = _d; _bestId = _lid; };
+};
             };
         } forEach _named;
         if (!(_bestId isEqualTo "")) then {

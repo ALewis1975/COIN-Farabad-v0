@@ -115,12 +115,17 @@ if ((count _def) == 0 && { !(_typeU isEqualTo "") }) then {
     private _lookupKey = _typeU;
     if (_typeU isEqualTo "CHECKPOINT") then {
         private _zoneU = toUpper _zone;
-        private _variant = switch (_zoneU) do {
-            case "AIRBASE":
-            case "GREENZONE":
-            case "MILITARYBASE": { "CHECKPOINT_GATE" };
-            case "FARABADCITY":  { "CHECKPOINT_URBAN" };
-            default              { "CHECKPOINT_RURAL" };
+        private _variant = "CHECKPOINT_RURAL";
+        if (
+            _zoneU isEqualTo "AIRBASE" ||
+            { _zoneU isEqualTo "GREENZONE" } ||
+            { _zoneU isEqualTo "MILITARYBASE" }
+        ) then {
+            _variant = "CHECKPOINT_GATE";
+        } else {
+            if (_zoneU isEqualTo "FARABADCITY") then {
+                _variant = "CHECKPOINT_URBAN";
+            };
         };
         private _vDef = [_incidentOverlays, _variant, []] call _hg;
         if (_vDef isEqualType [] && { (count _vDef) > 0 }) then { _lookupKey = _variant; };

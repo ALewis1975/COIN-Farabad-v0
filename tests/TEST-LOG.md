@@ -11,6 +11,24 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-06-09 — Preflight CI fix for world spawn SQF lint parse failures
+
+**Branch/Commit:** `copilot/issue-633-more-work` @ commit `2652101d9330d0facad5eaa2f599672589d1dc51`
+
+**Scenario:** Mode A bug fix — resolve `arma-preflight` changed-file `sqflint -e w` failures triggered by parser-unfriendly constructs in world spawn pattern files (`hasKey` method usage and multi-label `switch case` form).
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Reproduce failing CI gate locally | `python3 scripts/dev/sqflint_compat_scan.py --strict <7 changed .sqf> && sqflint -e w <7 changed .sqf>` | FAIL | Reproduced parse errors at `fn_worldSpawnOverlayApply.sqf` line 162 (`_slots hasKey _lid`) and `fn_worldSpawnPatternResolve.sqf` lines 119-121 (multi-label switch parse). |
+| 2 | Changed-file compat scan (post-fix) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/world/fn_worldSpawnOverlayApply.sqf functions/world/fn_worldSpawnPatternResolve.sqf` | PASS | No banned parser-compat patterns. |
+| 3 | Changed-file sqflint (post-fix) | `sqflint -e w functions/world/fn_worldSpawnOverlayApply.sqf && sqflint -e w functions/world/fn_worldSpawnPatternResolve.sqf` | PASS | Both changed files lint clean. |
+| 4 | CI-equivalent changed-file SQF gate (post-fix) | `python3 scripts/dev/sqflint_compat_scan.py --strict <7 changed .sqf> && sqflint -e w <7 changed .sqf>` | PASS | Full set from failing job now passes locally. |
+| 5 | Dedicated runtime/JIP verification | World spawn overlay + checkpoint variant behavior in dedicated + JIP session | BLOCKED | Arma runtime unavailable in sandbox; operator run required on dedicated rig. |
+
+**Result:** PASS (static) / BLOCKED (runtime). Local reproduction confirms the CI root cause and the changed-file preflight gate now passes with the surgical SQF rewrites.
+
+---
+
 ## 2026-06-09 — SitePop purpose expansion (issue #633 step 4)
 
 **Branch/Commit:** `copilot/fix-issue-633` @ commit `fed10e581b1dc47a11e354bd5f8750701ba61987`
