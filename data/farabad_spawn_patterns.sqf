@@ -536,6 +536,59 @@
             ["cleanupOwner", "INCIDENT"],
             ["despawnPolicy", "INCIDENT_DESPAWN"]
         ]],
+        // Zone-sensitive checkpoint variants (issue #633 step 6). The resolver
+        // selects one of these for a CHECKPOINT incident based on the zone of
+        // the incident position; plain CHECKPOINT above is the default fallback.
+        ["CHECKPOINT_GATE", [
+            // Controlled gate lane: hard security, mixed foot + vehicle queue,
+            // optional vehicle of interest. Airbase / Green Zone / Military.
+            ["overlay", [
+                ["gate_guard", "west", [3, 6], "guard",   "gate_lane"],
+                ["pedestrian", "civ",  [2, 5], "queue",   "gate_lane"],
+                ["voi_vehicle","civ",  [0, 1], "inspect", "gate_lane"]
+            ]],
+            ["objects", [
+                ["civ_car", [2, 5], "traffic_through"],
+                ["barrier", [2, 4], "gate_lane"]
+            ]],
+            ["placement", "gate_lane"],
+            ["cleanupOwner", "INCIDENT"],
+            ["despawnPolicy", "INCIDENT_DESPAWN"]
+        ]],
+        ["CHECKPOINT_URBAN", [
+            // City checkpoint: pedestrians, taxis/cars, nearby vendors, higher
+            // crowd density. Used inside the urban (FarabadCity) zone.
+            ["overlay", [
+                ["gate_guard", "west", [2, 4], "guard",          "gate_lane"],
+                ["pedestrian", "civ",  [4, 8], "queue",          "gate_lane"],
+                ["vendor",     "civ",  [1, 3], "camp",           "courtyard"],
+                ["voi_vehicle","civ",  [0, 1], "inspect",        "gate_lane"]
+            ]],
+            ["objects", [
+                ["civ_car",      [3, 6], "traffic_through"],
+                ["market_stall", [1, 3], "courtyard"],
+                ["barrier",      [1, 3], "gate_lane"]
+            ]],
+            ["placement", "gate_lane"],
+            ["cleanupOwner", "INCIDENT"],
+            ["despawnPolicy", "INCIDENT_DESPAWN"]
+        ]],
+        ["CHECKPOINT_RURAL", [
+            // Rural / MSR checkpoint: fewer pedestrians, more trucks/pickups,
+            // roadside flow, no open-desert crowd. Default outside named zones.
+            ["overlay", [
+                ["gate_guard",   "west", [2, 4], "guard",  "roadside"],
+                ["roadside_civ", "civ",  [0, 2], "loiter", "roadside"]
+            ]],
+            ["objects", [
+                ["civ_truck", [1, 3], "traffic_through"],
+                ["pickup",    [1, 2], "parked"],
+                ["barrier",   [1, 3], "roadside"]
+            ]],
+            ["placement", "roadside"],
+            ["cleanupOwner", "INCIDENT"],
+            ["despawnPolicy", "INCIDENT_DESPAWN"]
+        ]],
         ["ESCORT", [
             ["overlay", [
                 ["escortee", "civ", [1, 2], "route_drive", "route_segment"]

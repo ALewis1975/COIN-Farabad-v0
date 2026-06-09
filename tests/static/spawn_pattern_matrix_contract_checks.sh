@@ -14,6 +14,7 @@ WORLD="$ROOT/data/farabad_world_locations.sqf"
 CIVIC="$ROOT/data/coin_civic_mission_catalog.sqf"
 CFG="$ROOT/config/CfgFunctions.hpp"
 INIT="$ROOT/initServer.sqf"
+RESOLVE="$ROOT/functions/world/fn_worldSpawnPatternResolve.sqf"
 
 fail() { echo "[FAIL] $*" >&2; exit 1; }
 pass() { echo "[PASS] $*"; }
@@ -52,6 +53,35 @@ if grep -E 'createHashMapFromArray' "$AUDIT" | grep -vq 'compile'; then
     fail "sqflint-compat: bare createHashMapFromArray in audit"
 fi
 pass "spawn-pattern SQF avoids known sqflint-compat pitfalls"
+
+# --- Zone-sensitive checkpoint variants (issue #633 step 6) ---------------
+# The matrix must define three distinct checkpoint variants and the resolver
+# must accept a zone arg and map zones to those variants.
+for v in CHECKPOINT_GATE CHECKPOINT_URBAN CHECKPOINT_RURAL; do
+    grep -q "\"$v\"" "$PAT" || fail "checkpoint variant $v missing from spawn-pattern matrix"
+done
+pass "matrix defines CHECKPOINT_GATE / CHECKPOINT_URBAN / CHECKPOINT_RURAL"
+
+# Distinct placement: gate/urban use a gate lane, rural uses roadside flow.
+grep -q '"CHECKPOINT_RURAL"' "$PAT" && grep -A14 '"CHECKPOINT_RURAL"' "$PAT" | grep -q '"placement", "roadside"' \
+    || fail "CHECKPOINT_RURAL must use roadside placement (distinct ambient flow)"
+pass "checkpoint variants have distinct placement/flow"
+
+[[ -f "$RESOLVE" ]] || fail "resolver function is missing"
+# Resolver must accept the 4th zone param and map zones to variants.
+grep -q '_zone' "$RESOLVE" || fail "resolver does not accept a zone parameter"
+for z in 'CHECKPOINT_GATE' 'CHECKPOINT_URBAN' 'CHECKPOINT_RURAL'; do
+    grep -q "$z" "$RESOLVE" || fail "resolver missing zone->variant mapping for $z"
+done
+pass "resolver maps incident zone to checkpoint variant (default plain CHECKPOINT)"
+
+# sqflint-compat for the resolver too.
+for badpat in 'findIf' 'isNotEqualTo' 'toUpperANSI' 'toLowerANSI'; do
+    if grep -qE "\b$badpat\b" "$RESOLVE"; then
+        fail "sqflint-compat: $badpat used in resolver"
+    fi
+done
+pass "resolver avoids known sqflint-compat pitfalls"
 
 python3 - "$PAT" "$MARKERS" "$WORLD" "$CIVIC" <<'PY'
 import re, sys
