@@ -264,6 +264,11 @@ class CfgFunctions
 
             // Spawn-pattern matrix diagnostics/audit (issue #633, read-only)
             class worldSpawnPatternAudit {};
+
+            // Spawn-pattern matrix overlay consumers (issue #633 step 4, server-only)
+            class worldSpawnPatternResolve {};
+            class worldSpawnRoleResolve {};
+            class worldSpawnOverlayApply {};
         };
 
 

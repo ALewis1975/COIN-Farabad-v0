@@ -290,3 +290,7 @@ jobs:
       - name: Spawn-pattern matrix contract static validation
         run: |
           bash tests/static/spawn_pattern_matrix_contract_checks.sh
+
+      - name: Spawn-pattern overlay contract static validation
+        run: |
+          bash tests/static/spawn_pattern_overlay_contract_checks.sh

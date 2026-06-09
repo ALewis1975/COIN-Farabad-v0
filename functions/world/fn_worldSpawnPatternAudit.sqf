@@ -446,12 +446,60 @@ private _civicRowCount = 0;
     ];
 } forEach _civicCatalog;
 
+// --- 5. Class-pool resolvability diagnostics (issue #633 step 9) ----------
+// For every distinct [side, roleTag] referenced by the matrix overlays and
+// baseline patterns, resolve the concrete class pool and warn when it is empty
+// against the live mod preset. This is the pre-flight check operators run
+// before enabling ARC_incidentOverlaySpawnsEnabled. Read-only: the resolver
+// only reads config and memoises a cache.
+private _emptyPoolCount = 0;
+if (!isNil "ARC_fnc_worldSpawnRoleResolve") then {
+    private _seenRoles = [];
+    private _checkRoleSpecs = {
+        params ["_specs"];
+        if (!(_specs isEqualType [])) exitWith {};
+        {
+            if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualType "" } && { (_x select 1) isEqualType "" }) then {
+                private _roleTag = _x select 0;
+                private _sideStr = _x select 1;
+                private _key = format ["%1|%2", toLower _sideStr, toLower _roleTag];
+                if (!(_key in _seenRoles)) then {
+                    _seenRoles pushBack _key;
+                    private _pool = [_sideStr, _roleTag] call ARC_fnc_worldSpawnRoleResolve;
+                    if ((count _pool) == 0) then {
+                        _emptyPoolCount = _emptyPoolCount + 1;
+                        [format ["[CLASSPOOL] role '%1' side '%2' resolves to EMPTY class pool", _roleTag, _sideStr]] call _addWarn;
+                    };
+                };
+            };
+        } forEach _specs;
+    };
+    // Baseline purpose patterns.
+    {
+        private _pm = [[_purposePatterns, _x, []] call _hg] call _pairsToMap;
+        [[_pm, "baselinePop", []] call _hg] call _checkRoleSpecs;
+    } forEach ([_purposePatterns] call (compile "params ['_m']; keys _m"));
+    // Incident / lead / civic overlays.
+    {
+        private _om = [[_incidentOverlays, _x, []] call _hg] call _pairsToMap;
+        [[_om, "overlay", []] call _hg] call _checkRoleSpecs;
+    } forEach ([_incidentOverlays] call (compile "params ['_m']; keys _m"));
+    {
+        private _om = [[_leadOverlays, _x, []] call _hg] call _pairsToMap;
+        [[_om, "overlay", []] call _hg] call _checkRoleSpecs;
+    } forEach ([_leadOverlays] call (compile "params ['_m']; keys _m"));
+    {
+        private _om = [[_civicMissionOverlays, _x, []] call _hg] call _pairsToMap;
+        [[_om, "overlay", []] call _hg] call _checkRoleSpecs;
+    } forEach ([_civicMissionOverlays] call (compile "params ['_m']; keys _m"));
+};
+
 // --- Emit -----------------------------------------------------------------
 private _summary = [count _rows, _locationCount, _siteTypeCount, _incidentRowCount, _civicRowCount, count _warnings];
 
 diag_log format [
-    "[ARC][SPAWNPAT][AUDIT] rows=%1 locations=%2 siteTypes=%3 incidents=%4 civic=%5 warnings=%6",
-    _summary select 0, _summary select 1, _summary select 2, _summary select 3, _summary select 4, _summary select 5
+    "[ARC][SPAWNPAT][AUDIT] rows=%1 locations=%2 siteTypes=%3 incidents=%4 civic=%5 warnings=%6 emptyPools=%7",
+    _summary select 0, _summary select 1, _summary select 2, _summary select 3, _summary select 4, _summary select 5, _emptyPoolCount
 ];
 
 if (_verbose) then {

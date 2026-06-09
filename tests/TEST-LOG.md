@@ -11,22 +11,25 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
-## 2026-06-09 — CIVSUB moving traffic: right-side lateral lane offset
+## 2026-06-09 — Transient Incident/Lead/civic overlay spawning (issue #633 step 4/7/8)
 
-**Branch/Commit:** current working branch @ commit `998e36aaed030e2b5e0f2cfaec43d8980d8de211`
+**Branch/Commit:** `copilot/fix-issue-with-data-processing` @ commit `f29e7a3b1dec529af5b1d269fd05ba186148af43`
 
-**Scenario:** Mode A bug fix. Moving ambient civilian vehicles spawned on the road-segment centreline (median), causing them to materialise inside the central highway barrier props. `ARC_fnc_civsubTrafficPickRoadDrivePos` now laterally offsets the spawn point and the first move target to the RIGHT of the established travel direction (bearing `_dir + 90`), stepping the offset down toward the centreline until the candidate is still `isOnRoad` so narrow single-carriageway roads keep a small/zero offset. Offset distance is tunable via `civsub_v1_traffic_moving_laneOffset_m` (default 3 m, clamped 0-8). Subsequent slope/separation/clearance/exclusion checks and the returned spawn+next positions now use the offset position; the existing post-create bounding-box collision check still rejects any residual overlap.
+**Scenario:** Mode B feature delivery — wire the default-off `ARC_incidentOverlaySpawnsEnabled` toggle into runtime spawning that consumes `data/farabad_spawn_patterns.sqf`. New resolver/role-resolver/executor functions produce bounded, cleanup-owned, server-authoritative overlay AI/objects at incident init and despawn them at incident close. Behavior is gameplay-neutral when the toggle is off (default).
 
 | # | Check | Command / Step | Result | Notes |
 |---|-------|----------------|--------|-------|
-| 1 | sqflint compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubTrafficPickRoadDrivePos.sqf initServer.sqf` | PASS | No known parser-compat patterns found. |
-| 2 | Bracket/paren balance | Static brace/paren/bracket balance check on changed picker | PASS | Balanced. |
-| 3 | Hosted MP runtime | Spawn moving traffic on a divided highway; confirm vehicles spawn in the right-hand carriageway and clear of median barriers | BLOCKED | Arma runtime unavailable in this environment. |
-| 4 | Dedicated/JIP runtime | Confirm spawn placement + JIP observer view of moving traffic on highways | BLOCKED | Dedicated/JIP operator run required. |
+| 1 | sqflint-compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict` on all 7 changed SQF files | PASS | Clean. Also fixed pre-existing `isNotEqualTo`/`#`-index violations in `fn_execCleanupActive.sqf` exposed by whole-file scan. |
+| 2 | Overlay contract suite | `bash tests/static/spawn_pattern_overlay_contract_checks.sh` | PASS | Asserts CfgFunctions registration, isServer + toggle gate, single-writer `activeOverlaySpawnNetIds` written at init / cleared at cleanup, caps seeded, compat-clean. |
+| 3 | Matrix contract suite (regression) | `bash tests/static/spawn_pattern_matrix_contract_checks.sh` | PASS | Unchanged, still green. |
+| 4 | sqflint `-e w` | `sqflint -e w <changed .sqf>` | BLOCKED | sqflint not installed in sandbox; runs in `arma-preflight.yml` CI. |
+| 5 | Overlay visibility on dedicated | Flip `ARC_incidentOverlaySpawnsEnabled` true, trigger incident/lead/civic, observe overlay AI/objects spawn at correct placement, no missing-class RPT | BLOCKED | No Arma runtime in sandbox; operator run required on dedicated rig. |
+| 6 | Despawn-on-close + JIP | Close incident, confirm overlay entities removed; JIP mid-incident sees overlay; reconnect/restart idempotency | BLOCKED | Dedicated/JIP operator run required. |
 
-**Result:** BLOCKED — static checks PASS; hosted MP and dedicated/JIP placement validation must be executed in Arma and recorded here.
+**Result:** PASS (static) / BLOCKED (runtime). Static compat + contract gates green; dedicated/JIP overlay visibility and despawn checks must be executed in Arma with the toggle enabled and recorded here.
 
 ---
+
 
 **Branch/Commit:** `ops/civsub-threat-ied-reliability-sweep` @ commit `b53a507f97271bf3a1eb31d097982bc081762725`
 
