@@ -45,7 +45,8 @@ private _stateFromStock = {
 };
 
 private _worseState = {
-    params ["_states"];
+    private _states = _this;
+    if (!(_states isEqualType [])) then { _states = []; };
     private _worst = "GREEN";
     private _worstScore = 0;
     {
