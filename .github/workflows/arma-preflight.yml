@@ -282,3 +282,7 @@ jobs:
       - name: Intel quality coupling static validation
         run: |
           bash tests/static/intel_quality_coupling_contract_checks.sh
+
+      - name: Console VM dashboard migration static validation
+        run: |
+          bash tests/static/console_vm_dashboard_migration_checks.sh
