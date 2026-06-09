@@ -63,7 +63,32 @@ grep -q 'ARC_incidentOverlaySpawnsEnabled' "$INITACT" \
     || fail "execInitActive overlay block not gated by ARC_incidentOverlaySpawnsEnabled"
 pass "execInitActive overlay block is toggle-gated"
 
-# --- sqflint-compat: changed SQF must avoid known parser-compat pitfalls ---
+# --- Placement strategies: rooftop/tower + district_centroid (issue #633 c) -
+# The new strategies must be present in the apply dispatch and must reuse the
+# existing server-local registries rather than introducing new scans.
+for label in 'rooftop' 'tower' 'district_centroid'; do
+    grep -q "\"$label\"" "$APPLY" || fail "placement strategy '$label' missing from overlay apply"
+done
+pass "overlay apply implements rooftop/tower + district_centroid placement"
+
+for reg in 'ARC_worldBuildingSlots' 'civsub_v1_districts'; do
+    grep -q "$reg" "$APPLY" || fail "overlay apply does not reuse registry $reg for slot/centroid placement"
+done
+pass "overlay apply reuses building-slot + district registries (no new scans)"
+
+# No new expensive scans introduced for placement: BIS_fnc_buildingPositions
+# must NOT appear, and nearestObjects is only allowed for the pre-existing
+# one-time parked-vehicle collision guard (at most one occurrence).
+if grep -q 'BIS_fnc_buildingPositions' "$APPLY"; then
+    fail "overlay apply must not call BIS_fnc_buildingPositions (reuse ARC_worldBuildingSlots)"
+fi
+no_calls=$(grep -cE 'nearestObjects[[:space:]]*\[' "$APPLY" || true)
+if [[ "$no_calls" -gt 1 ]]; then
+    fail "overlay apply has $no_calls nearestObjects calls; only the parked-vehicle collision guard is allowed"
+fi
+pass "overlay apply introduces no new building/nearestObjects scans"
+
+
 for f in "$RESOLVE" "$ROLE" "$APPLY"; do
     for badpat in 'findIf' 'isNotEqualTo' 'toUpperANSI' 'toLowerANSI'; do
         if grep -qE "\b$badpat\b" "$f"; then

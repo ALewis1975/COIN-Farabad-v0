@@ -136,18 +136,128 @@ private _objMap = [[
     ["ied_object",      ["Land_Suitcase_F","Land_Sacks_goods_F","Land_GarbageBags_F"]]
 ]] call _hmCreate;
 
-// --- Placement: bounded radial offset by strategy -------------------------
+private _keysFn = compile "params ['_m']; keys _m";
+
+// --- Slot-bound + centroid placement pools (issue #633 item c) ------------
+// Reuse the server-local registries built at world init (no new scans):
+//   ARC_worldBuildingSlots  (locationId -> [bldPositions, roadsidePositions])
+//   civsub_v1_districts     (districtId -> HashMap with a "centroid" key)
+// _bldPool     : interior building positions near the anchor (true indoor).
+// _rooftopPool : the elevated subset of _bldPool (z preserved) for rooftop/tower.
+// _centroidPos : nearest district centroid for district_centroid placement.
+private _bldPool     = [];
+private _rooftopPool = [];
+private _centroidPos = [];
+
+private _slots = missionNamespace getVariable ["ARC_worldBuildingSlots", createHashMap];
+if (_slots isEqualType createHashMap && { (count _slots) > 0 }) then {
+    private _named = missionNamespace getVariable ["ARC_worldNamedLocations", []];
+    if (_named isEqualType []) then {
+        // Nearest scanned location to the anchor (bounded: one pass over locations).
+        private _bestId = ""; private _bestD = 1e9;
+        {
+            if (_x isEqualType [] && { (count _x) >= 3 }) then {
+                private _lid = _x select 0;
+                private _lp  = _x select 2;
+                if (_lp isEqualType [] && { (count _lp) >= 2 } && { _lid in _slots }) then {
+                    private _d = _p3 distance2D _lp;
+                    if (_d < _bestD) then { _bestD = _d; _bestId = _lid; };
+                };
+            };
+        } forEach _named;
+        if (!(_bestId isEqualTo "")) then {
+            private _entry = [_slots, _bestId, []] call _hg;
+            private _bld = [];
+            if (_entry isEqualType [] && { (count _entry) >= 1 }) then { _bld = _entry select 0; };
+            if (_bld isEqualType []) then {
+                private _maxReach = (_r * 1.5) max 60;
+                {
+                    if (_x isEqualType [] && { (count _x) >= 3 } && { (_p3 distance2D _x) <= _maxReach }) then {
+                        _bldPool pushBack (+_x);
+                    };
+                } forEach _bld;
+            };
+        };
+    };
+};
+if ((count _bldPool) > 0) then {
+    // Elevated subset: positions within 3 m of the highest interior z.
+    private _maxZ = 0; private _haveZ = false;
+    {
+        private _z = _x select 2;
+        if (_z isEqualType 0) then {
+            if (!_haveZ || { _z > _maxZ }) then { _maxZ = _z; _haveZ = true; };
+        };
+    } forEach _bldPool;
+    if (_haveZ && { _maxZ > 3 }) then {
+        _rooftopPool = _bldPool select {
+            ((_x select 2) isEqualType 0) && { (_x select 2) >= (_maxZ - 3) }
+        };
+    };
+};
+
+private _districts = missionNamespace getVariable ["civsub_v1_districts", createHashMap];
+if (_districts isEqualType createHashMap && { (count _districts) > 0 }) then {
+    private _bestCD = 1e9;
+    {
+        private _ds = [_districts, _x, createHashMap] call _hg;
+        if (_ds isEqualType createHashMap) then {
+            private _c = [_ds, "centroid", []] call _hg;
+            if (_c isEqualType [] && { (count _c) >= 2 } && { (_c select 0) isEqualType 0 } && { (_c select 1) isEqualType 0 }) then {
+                private _d = _p3 distance2D _c;
+                if (_d < _bestCD) then { _bestCD = _d; _centroidPos = +_c; };
+            };
+        };
+    } forEach ([_districts] call _keysFn);
+};
+
+// One-time warning when neither registry is available (scan not yet run / off).
+if ((count _slots) == 0 && { (count _districts) == 0 }) then {
+    if (isNil { missionNamespace getVariable "ARC_overlayPlacementRegWarned" }) then {
+        missionNamespace setVariable ["ARC_overlayPlacementRegWarned", true];
+        diag_log "[ARC][SPAWNPAT][WARN] ARC_fnc_worldSpawnOverlayApply: building-slot + district registries unavailable — rooftop/indoor/district_centroid fall back to bounded radial offsets.";
+    };
+};
+
+// --- Placement: registry-backed where available, else bounded radial ------
 private _placePos = {
     params ["_place"];
-    private _band = switch (toLower _place) do {
-        case "gate_lane":      { [6, 0.35] };
-        case "roadside":       { [8, 0.45] };
-        case "courtyard":      { [4, 0.40] };
-        case "indoor":         { [3, 0.30] };
-        case "perimeter":      { [(_r * 0.6) max 12, 0.30] };
-        case "route_segment":  { [10, 0.55] };
-        case "open":           { [5, 0.50] };
-        default                { [5, 0.45] };
+    private _pl = toLower _place;
+
+    // Slot-bound interior / elevated placement (z preserved) from registry.
+    if ((_pl in ["indoor", "rooftop", "tower"]) && { (count _bldPool) > 0 }) exitWith {
+        private _src = _bldPool;
+        if ((_pl isEqualTo "rooftop" || { _pl isEqualTo "tower" }) && { (count _rooftopPool) > 0 }) then {
+            _src = _rooftopPool;
+        };
+        private _pp = +(selectRandom _src);
+        _pp resize 3;
+        _pp
+    };
+
+    // District-centroid placement with a small jitter ring.
+    if (_pl isEqualTo "district_centroid" && { (count _centroidPos) >= 2 }) exitWith {
+        private _ang  = random 360;
+        private _dist = random 25;
+        private _pp   = [(_centroidPos select 0) + (sin _ang) * _dist, (_centroidPos select 1) + (cos _ang) * _dist, 0];
+        if (surfaceIsWater _pp) then { _pp = [_centroidPos select 0, _centroidPos select 1, 0]; };
+        _pp
+    };
+
+    // Fallback: bounded radial offset by strategy. rooftop/tower degrade to a
+    // perimeter-style band; district_centroid degrades to open.
+    private _band = switch (_pl) do {
+        case "gate_lane":         { [6, 0.35] };
+        case "roadside":          { [8, 0.45] };
+        case "courtyard":         { [4, 0.40] };
+        case "indoor":            { [3, 0.30] };
+        case "rooftop":           { [(_r * 0.6) max 12, 0.30] };
+        case "tower":             { [(_r * 0.6) max 12, 0.30] };
+        case "district_centroid": { [5, 0.50] };
+        case "perimeter":         { [(_r * 0.6) max 12, 0.30] };
+        case "route_segment":     { [10, 0.55] };
+        case "open":              { [5, 0.50] };
+        default                   { [5, 0.45] };
     };
     private _minD = _band select 0;
     private _span = (_r * (_band select 1)) max 8;

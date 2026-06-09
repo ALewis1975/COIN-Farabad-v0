@@ -452,7 +452,8 @@
         ]],
         ["DEFEND", [
             ["overlay", [
-                ["hostile", "east", [3, 6], "search", "perimeter"]
+                ["hostile",  "east", [3, 6], "search", "perimeter"],
+                ["overwatch","east", [0, 2], "guard",  "rooftop"]
             ]],
             ["objects", []],
             ["placement", "perimeter"],
@@ -471,7 +472,8 @@
         ["RAID", [
             ["overlay", [
                 ["hostile", "east", [3, 6], "garrison", "indoor"],
-                ["hvt",     "east", [0, 1], "garrison", "indoor"]
+                ["hvt",     "east", [0, 1], "garrison", "indoor"],
+                ["lookout", "east", [0, 1], "guard",    "rooftop"]
             ]],
             ["objects", [
                 ["cache", [1, 2], "indoor"]
@@ -493,7 +495,8 @@
         ]],
         ["CIVIL", [
             ["overlay", [
-                ["crowd", "civ", [4, 10], "loiter", "courtyard"]
+                ["crowd",      "civ", [4, 10], "loiter", "courtyard"],
+                ["pedestrian", "civ", [0, 4],  "loiter", "district_centroid"]
             ]],
             ["objects", [
                 ["aid_table", [1, 3], "courtyard"]
@@ -688,6 +691,7 @@
                 ["elder",      "civ",  [1, 1], "loiter", "courtyard"],
                 ["crowd",      "civ",  [4, 8], "loiter", "courtyard"],
                 ["vendor",     "civ",  [1, 3], "camp",   "perimeter"],
+                ["pedestrian", "civ",  [0, 4], "wander", "district_centroid"],
                 ["local_sec",  "west", [0, 2], "guard",  "perimeter"]
             ]],
             ["objects", []],
