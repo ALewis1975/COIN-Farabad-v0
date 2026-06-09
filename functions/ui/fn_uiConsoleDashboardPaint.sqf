@@ -81,36 +81,112 @@ if (_isCmd) then { _roleCat = "TOC-CMD"; } else {
 private _pos = getPosATL player;
 private _grid = mapGridPosition _pos;
 
-// ── Console VM v1 shadow-mode (Item 8: Dashboard tab migration) ─────────────
-// Console VM v2: state vars are sourced from the VM payload via
-// ARC_fnc_consoleVmAdapterV1 (Refactor Plan §PR4: feature flags removed,
-// VM is the only path). Direct missionNamespace reads kept as fallback
-// only when VM adapter is unavailable.
+// ── Console VM v1 primary path (Dashboard migration slice) ──────────────────
+// Dashboard now sources incident, follow-on, ops, queue, unit status, backlog,
+// airbase, and base-services data from Console VM when available.
+// Direct missionNamespace reads remain fallback-only when the VM adapter is unavailable.
 private _useVm = (!isNil "ARC_fnc_consoleVmAdapterV1");
 
-// Active incident summary
-private _taskId = missionNamespace getVariable ["ARC_activeTaskId", ""]; if (!(_taskId isEqualType "")) then { _taskId = ""; };
-private _hasIncident = (_taskId != "");
-private _incDisp = missionNamespace getVariable ["ARC_activeIncidentDisplayName", "(none)"]; if (!(_incDisp isEqualType "")) then { _incDisp = "(none)"; };
-private _incType = missionNamespace getVariable ["ARC_activeIncidentType", ""]; if (!(_incType isEqualType "")) then { _incType = ""; };
-private _incPos  = missionNamespace getVariable ["ARC_activeIncidentPos", []]; if (!(_incPos isEqualType [])) then { _incPos = []; };
-private _incGrid = if (_incPos isEqualType [] && { (count _incPos) >= 2 }) then { mapGridPosition _incPos } else { "" };
-private _acc = missionNamespace getVariable ["ARC_activeIncidentAccepted", false]; if (!(_acc isEqualType true) && !(_acc isEqualType false)) then { _acc = false; };
-private _accBy = missionNamespace getVariable ["ARC_activeIncidentAcceptedByGroup", ""]; if (!(_accBy isEqualType "")) then { _accBy = ""; };
-private _closeReady = missionNamespace getVariable ["ARC_activeIncidentCloseReady", false]; if (!(_closeReady isEqualType true) && !(_closeReady isEqualType false)) then { _closeReady = false; };
-private _sitrepSent = missionNamespace getVariable ["ARC_activeIncidentSitrepSent", false]; if (!(_sitrepSent isEqualType true) && !(_sitrepSent isEqualType false)) then { _sitrepSent = false; };
+private _taskId = "";
+private _hasIncident = false;
+private _incDisp = "(none)";
+private _incType = "";
+private _incPos = [];
+private _incGrid = "";
+private _acc = false;
+private _accBy = "";
+private _closeReady = false;
+private _sitrepSent = false;
+private _foSummary = "";
+private _foLeadName = "";
+private _foLeadGrid = "";
+private _orders = [];
+private _leadPool = [];
+private _intelLog = [];
+private _qPendingArr = [];
+private _statusRows = [];
+private _airSnap = [];
+private _backlogArr = [];
+private _baseServices = [];
 
-// Follow-on (from field SITREP flow) and/or system-queued follow-on lead
-private _foSummary = missionNamespace getVariable ["ARC_activeIncidentFollowOnSummary", ""];
+if (_useVm) then
+{
+    _taskId      = ["incident",     "task_id",            ""]      call ARC_fnc_consoleVmAdapterV1;
+    _incDisp     = ["incident",     "display_name",       "(none)"] call ARC_fnc_consoleVmAdapterV1;
+    _incType     = ["incident",     "incident_type",      ""]      call ARC_fnc_consoleVmAdapterV1;
+    _incPos      = ["incident",     "position",           []]      call ARC_fnc_consoleVmAdapterV1;
+    _acc         = ["incident",     "accepted",           false]   call ARC_fnc_consoleVmAdapterV1;
+    _accBy       = ["incident",     "accepted_by_group",  ""]      call ARC_fnc_consoleVmAdapterV1;
+    _closeReady  = ["incident",     "close_ready",        false]   call ARC_fnc_consoleVmAdapterV1;
+    _sitrepSent  = ["incident",     "sitrep_sent",        false]   call ARC_fnc_consoleVmAdapterV1;
+    _foSummary   = ["followOn",     "summary",            ""]      call ARC_fnc_consoleVmAdapterV1;
+    _foLeadName  = ["followOn",     "lead_name",          ""]      call ARC_fnc_consoleVmAdapterV1;
+    _foLeadGrid  = ["followOn",     "lead_grid",          ""]      call ARC_fnc_consoleVmAdapterV1;
+    _orders      = ["ops",          "orders",             []]      call ARC_fnc_consoleVmAdapterV1;
+    _leadPool    = ["ops",          "lead_pool",          []]      call ARC_fnc_consoleVmAdapterV1;
+    _intelLog    = ["ops",          "intel_log",          []]      call ARC_fnc_consoleVmAdapterV1;
+    _qPendingArr = ["ops",          "queue_pending",      []]      call ARC_fnc_consoleVmAdapterV1;
+    _statusRows  = ["ops",          "unit_statuses",      []]      call ARC_fnc_consoleVmAdapterV1;
+    _backlogArr  = ["ops",          "toc_backlog",        []]      call ARC_fnc_consoleVmAdapterV1;
+    _airSnap     = ["airbase",      "snapshot",           []]      call ARC_fnc_consoleVmAdapterV1;
+    _baseServices = ["stateSummary", "base_services",      []]      call ARC_fnc_consoleVmAdapterV1;
+}
+else
+{
+    _taskId = missionNamespace getVariable ["ARC_activeTaskId", ""];
+    _incDisp = missionNamespace getVariable ["ARC_activeIncidentDisplayName", "(none)"];
+    _incType = missionNamespace getVariable ["ARC_activeIncidentType", ""];
+    _incPos  = missionNamespace getVariable ["ARC_activeIncidentPos", []];
+    _acc = missionNamespace getVariable ["ARC_activeIncidentAccepted", false];
+    _accBy = missionNamespace getVariable ["ARC_activeIncidentAcceptedByGroup", ""];
+    _closeReady = missionNamespace getVariable ["ARC_activeIncidentCloseReady", false];
+    _sitrepSent = missionNamespace getVariable ["ARC_activeIncidentSitrepSent", false];
+    _foSummary = missionNamespace getVariable ["ARC_activeIncidentFollowOnSummary", ""];
+    _foLeadName = missionNamespace getVariable ["ARC_activeIncidentFollowOnLeadName", ""];
+    _foLeadGrid = missionNamespace getVariable ["ARC_activeIncidentFollowOnLeadGrid", ""];
+    _orders = missionNamespace getVariable ["ARC_pub_orders", []];
+    _leadPool = missionNamespace getVariable ["ARC_leadPoolPublic", []];
+    _intelLog = missionNamespace getVariable ["ARC_pub_intelLog", []];
+    _qPendingArr = missionNamespace getVariable ["ARC_pub_queuePending", []];
+    _statusRows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
+    _airSnap = missionNamespace getVariable ["ARC_pub_airbaseUiSnapshot", []];
+    _backlogArr = missionNamespace getVariable ["ARC_pub_tocBacklog", []];
+    _baseServices = missionNamespace getVariable ["ARC_pub_baseServices", []];
+};
+
+if (!(_taskId isEqualType "")) then { _taskId = ""; };
+if (!(_incDisp isEqualType "")) then { _incDisp = "(none)"; };
+if (!(_incType isEqualType "")) then { _incType = ""; };
+if (!(_incPos isEqualType [])) then { _incPos = []; };
+if (!(_acc isEqualType true) && !(_acc isEqualType false)) then { _acc = false; };
+if (!(_accBy isEqualType "")) then { _accBy = ""; };
+if (!(_closeReady isEqualType true) && !(_closeReady isEqualType false)) then { _closeReady = false; };
+if (!(_sitrepSent isEqualType true) && !(_sitrepSent isEqualType false)) then { _sitrepSent = false; };
 if (!(_foSummary isEqualType "")) then { _foSummary = ""; };
-_foSummary = [_foSummary] call _trimFn;
-private _foLeadName = missionNamespace getVariable ["ARC_activeIncidentFollowOnLeadName", ""];
 if (!(_foLeadName isEqualType "")) then { _foLeadName = ""; };
-_foLeadName = [_foLeadName] call _trimFn;
-private _foLeadGrid = missionNamespace getVariable ["ARC_activeIncidentFollowOnLeadGrid", ""];
 if (!(_foLeadGrid isEqualType "")) then { _foLeadGrid = ""; };
-_foLeadGrid = [_foLeadGrid] call _trimFn;
+if (!(_orders isEqualType [])) then { _orders = []; };
+if (!(_leadPool isEqualType [])) then { _leadPool = []; };
+if (!(_intelLog isEqualType [])) then { _intelLog = []; };
+if (!(_qPendingArr isEqualType [])) then { _qPendingArr = []; };
+if (!(_statusRows isEqualType [])) then { _statusRows = []; };
+if (!(_airSnap isEqualType [])) then { _airSnap = []; };
+if (!(_backlogArr isEqualType [])) then { _backlogArr = []; };
+if (!(_baseServices isEqualType [])) then { _baseServices = []; };
 
+_foSummary = [_foSummary] call _trimFn;
+_foLeadName = [_foLeadName] call _trimFn;
+_foLeadGrid = [_foLeadGrid] call _trimFn;
+_hasIncident = (_taskId != "");
+_incGrid = if (_incPos isEqualType [] && { (count _incPos) >= 2 }) then { mapGridPosition _incPos } else { "" };
+
+if ((count _orders) > _rxMaxItems) then { _orders = _orders select [0, _rxMaxItems]; };
+if ((count _leadPool) > _rxMaxItems) then { _leadPool = _leadPool select [0, _rxMaxItems]; };
+if ((count _intelLog) > _rxMaxItems) then { _intelLog = _intelLog select [((count _intelLog) - _rxMaxItems) max 0, _rxMaxItems]; };
+if ((count _qPendingArr) > _rxMaxItems) then { _qPendingArr = _qPendingArr select [0, _rxMaxItems]; };
+if ((count _statusRows) > _rxMaxItems) then { _statusRows = _statusRows select [0, _rxMaxItems]; };
+
+// Active incident summary
 private _incLine = if (!_hasIncident) then
 {
     "<t color='#FFFFFF'>No active incident.</t>"
@@ -139,9 +215,6 @@ else
 };
 
 // Group orders summary
-private _orders = missionNamespace getVariable ["ARC_pub_orders", []];
-if (!(_orders isEqualType [])) then { _orders = []; };
-if ((count _orders) > _rxMaxItems) then { _orders = _orders select [0, _rxMaxItems]; };
 private _issued = [];
 private _accepted = [];
 {
@@ -166,13 +239,6 @@ else
 };
 
 // Lead pool / intel feed summary
-private _leadPool = missionNamespace getVariable ["ARC_leadPoolPublic", []];
-if (!(_leadPool isEqualType [])) then { _leadPool = []; };
-if ((count _leadPool) > _rxMaxItems) then { _leadPool = _leadPool select [0, _rxMaxItems]; };
-private _intelLog = missionNamespace getVariable ["ARC_pub_intelLog", []];
-if (!(_intelLog isEqualType [])) then { _intelLog = []; };
-if ((count _intelLog) > _rxMaxItems) then { _intelLog = _intelLog select [((count _intelLog) - _rxMaxItems) max 0, _rxMaxItems]; };
-
 private _lastIntel = "<t color='#BBBBBB'>No intel logged yet.</t>";
 if ((count _intelLog) > 0) then
 {
@@ -189,59 +255,8 @@ if ((count _intelLog) > 0) then
 };
 
 // Queue summary
-private _qPendingArr = missionNamespace getVariable ["ARC_pub_queuePending", []];
-if (!(_qPendingArr isEqualType [])) then { _qPendingArr = []; };
-if ((count _qPendingArr) > _rxMaxItems) then { _qPendingArr = _qPendingArr select [0, _rxMaxItems]; };
 private _qPendingCnt = count _qPendingArr;
-private _statusRows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
-if (!(_statusRows isEqualType [])) then { _statusRows = []; };
-if ((count _statusRows) > _rxMaxItems) then { _statusRows = _statusRows select [0, _rxMaxItems]; };
 
-// ── VM path (primary data source) ───────────────────────────────────────────
-// Read incident, follow-on, ops, and queue fields from the VM payload.
-// ARC_pub_unitStatuses has no VM equivalent yet and remains on the legacy path.
-if (_useVm) then
-{
-    _taskId      = ["incident",  "task_id",           ""]      call ARC_fnc_consoleVmAdapterV1;
-    _hasIncident = (_taskId != "");
-    _incDisp     = ["incident",  "display_name",       "(none)"] call ARC_fnc_consoleVmAdapterV1;
-    _incType     = ["incident",  "incident_type",       ""]      call ARC_fnc_consoleVmAdapterV1;
-    _incPos      = ["incident",  "position",            []]      call ARC_fnc_consoleVmAdapterV1;
-    _acc         = ["incident",  "accepted",            false]   call ARC_fnc_consoleVmAdapterV1;
-    _accBy       = ["incident",  "accepted_by_group",   ""]      call ARC_fnc_consoleVmAdapterV1;
-    _closeReady  = ["incident",  "close_ready",         false]   call ARC_fnc_consoleVmAdapterV1;
-    _sitrepSent  = ["incident",  "sitrep_sent",         false]   call ARC_fnc_consoleVmAdapterV1;
-    _foSummary   = ["followOn",  "summary",             ""]      call ARC_fnc_consoleVmAdapterV1;
-    _foLeadName  = ["followOn",  "lead_name",           ""]      call ARC_fnc_consoleVmAdapterV1;
-    _foLeadGrid  = ["followOn",  "lead_grid",           ""]      call ARC_fnc_consoleVmAdapterV1;
-    _orders      = ["ops",       "orders",              []]      call ARC_fnc_consoleVmAdapterV1;
-    _leadPool    = ["ops",       "lead_pool",           []]      call ARC_fnc_consoleVmAdapterV1;
-    _intelLog    = ["ops",       "intel_log",           []]      call ARC_fnc_consoleVmAdapterV1;
-    _qPendingArr = ["ops",       "queue_pending",       []]      call ARC_fnc_consoleVmAdapterV1;
-
-    if (!(_taskId     isEqualType ""))                                          then { _taskId     = ""; };
-    if (!(_incDisp    isEqualType ""))                                          then { _incDisp    = "(none)"; };
-    if (!(_incType    isEqualType ""))                                          then { _incType    = ""; };
-    if (!(_incPos     isEqualType []))                                          then { _incPos     = []; };
-    if (!(_acc        isEqualType true) && { !(_acc     isEqualType false) })   then { _acc        = false; };
-    if (!(_accBy      isEqualType ""))                                          then { _accBy      = ""; };
-    if (!(_closeReady isEqualType true) && { !(_closeReady isEqualType false) }) then { _closeReady = false; };
-    if (!(_sitrepSent isEqualType true) && { !(_sitrepSent isEqualType false) }) then { _sitrepSent = false; };
-    if (!(_foSummary  isEqualType ""))                                          then { _foSummary  = ""; };
-    if (!(_foLeadName isEqualType ""))                                          then { _foLeadName = ""; };
-    if (!(_foLeadGrid isEqualType ""))                                          then { _foLeadGrid = ""; };
-    if (!(_orders     isEqualType []))                                          then { _orders     = []; };
-    if (!(_leadPool   isEqualType []))                                          then { _leadPool   = []; };
-    if (!(_intelLog   isEqualType []))                                          then { _intelLog   = []; };
-    if (!(_qPendingArr isEqualType []))                                         then { _qPendingArr = []; };
-
-    // Recompute derived values from VM data
-    _incGrid     = if (_incPos isEqualType [] && { (count _incPos) >= 2 }) then { mapGridPosition _incPos } else { "" };
-    _qPendingCnt = count _qPendingArr;
-};
-
-private _airSnap = missionNamespace getVariable ["ARC_pub_airbaseUiSnapshot", []];
-if (!(_airSnap isEqualType [])) then { _airSnap = []; };
 private _airRunway = [_airSnap, "runway", []] call ARC_fnc_uiConsoleGetPair;
 if (!(_airRunway isEqualType [])) then { _airRunway = []; };
 private _airArrivals = [_airSnap, "arrivals", []] call ARC_fnc_uiConsoleGetPair;
@@ -261,9 +276,6 @@ if (!(_airHoldState isEqualType true) && !(_airHoldState isEqualType false)) the
 private _airNextArrival = if ((count _airArrivals) > 0) then { _airArrivals select 0 } else { [] };
 private _airNextDeparture = if ((count _airDepartures) > 0) then { _airDepartures select 0 } else { [] };
 
-// Phase 6: helper — format a flight tuple as "callsign (phase/state)" or just callsign.
-// Falls back to flightId (index 0) when callsign is empty.
-// tuple: [flightId(0), callsign(1), category(2), phase/state(3), ...]
 private _fmtFlight = {
     params [["_tuple", [], [[]]], ["_fallback", "?", [""]]];
     if (!(_tuple isEqualType []) || { (count _tuple) < 4 }) exitWith { _fallback };
@@ -280,7 +292,6 @@ private _airInboundLabel  = [_airNextArrival, "No inbound"] call _fmtFlight;
 private _airOutboundLabel = [_airNextDeparture, "No outbound"] call _fmtFlight;
 
 private _airAlertLabel = if ((count _airAlerts) > 0) then { (_airAlerts select 0) param [0, "NONE"] } else { "NONE" };
-// Phase 5: read freshness state from snapshot for dashboard display.
 private _airFreshnessState = [_airSnap, "freshnessState", "UNKNOWN"] call ARC_fnc_uiConsoleGetPair;
 if (!(_airFreshnessState isEqualType "")) then { _airFreshnessState = "UNKNOWN"; };
 private _airAlertColor = _tshGreen;
@@ -294,8 +305,6 @@ if ((count _airAlerts) > 0) then {
     };
 };
 
-// Phase 6: compute top blocker for commander situational awareness.
-// Priority: HOLD → BLOCKED/OCCUPIED runway → CRITICAL alert → pending decision.
 private _airDecisionQueue = [_airSnap, "decisionQueue", []] call ARC_fnc_uiConsoleGetPair;
 if (!(_airDecisionQueue isEqualType [])) then { _airDecisionQueue = []; };
 private _airTopBlocker = "";
@@ -372,7 +381,6 @@ if (_foLine != "") then { _foLine = _foLine + "<br/>"; };
 private _secIncident = "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Current Incident</t><br/>" + _incLine + "<br/>" + _foLine + "<br/>";
 private _secOrders   = "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Orders</t><br/>" + _ordLine + "<br/><br/>";
 
-// Build oldest-queue-item descriptor (replaces duplicate pending count from right panel)
 private _qOldestDesc = "(none)";
 if (_qPendingCnt > 0) then
 {
@@ -387,12 +395,8 @@ if (_qPendingCnt > 0) then
     };
 };
 
-private _backlogArr = missionNamespace getVariable ["ARC_pub_tocBacklog", []];
-if (!(_backlogArr isEqualType [])) then { _backlogArr = []; };
 private _backlogCnt = count _backlogArr;
 
-private _baseServices = missionNamespace getVariable ["ARC_pub_baseServices", []];
-if (!(_baseServices isEqualType [])) then { _baseServices = []; };
 private _svcManRaw = [_baseServices, "manpowerReadiness", 1] call ARC_fnc_uiConsoleGetPair;
 private _svcS4Raw = [_baseServices, "s4Readiness", 1] call ARC_fnc_uiConsoleGetPair;
 private _svcMedRaw = [_baseServices, "medicalReadiness", 1] call ARC_fnc_uiConsoleGetPair;
@@ -409,8 +413,6 @@ private _svcIssues = [_baseServices, "issues", []] call ARC_fnc_uiConsoleGetPair
 if (!(_svcIssues isEqualType [])) then { _svcIssues = []; };
 private _svcIssueLabel = if ((count _svcIssues) > 0) then { _svcIssues joinString ", " } else { "Base services nominal" };
 
-// Lead origin breakdown (Stage 2): show how many pool leads are field-generated
-// vs S2/Intelligence/ISR so the TOC can triage at a glance.
 private _leadFieldCnt = 0;
 private _leadS2Cnt = 0;
 {
@@ -447,7 +449,7 @@ private _secBase = format [
     _svcMed,
     _svcIssueLabel
 ];
-// Phase 6: runway color helper — OPEN=green, RESERVED/OCCUPIED=amber, BLOCKED/UNKNOWN=red.
+
 private _airRunwayColor = switch (toUpper _airRunwayState) do {
     case "OPEN": { _tshGreen };
     case "RESERVED": { _tshAmber };
@@ -457,7 +459,6 @@ private _airRunwayColor = switch (toUpper _airRunwayState) do {
 private _secAir = "";
 private _airFreshnessColor = if ((toUpper _airFreshnessState) isEqualTo "FRESH") then { _tshGreen } else { if ((toUpper _airFreshnessState) isEqualTo "STALE") then { _tshAmber } else { _tshRed } };
 private _airFreshnessLine = format ["<t color='#DDDDDD'>Data:</t> <t color='%1'>%2</t><br/>", _airFreshnessColor, _airFreshnessState];
-// Phase 6: blocker line — only shown when a blocker exists.
 private _airBlockerLine = if (_airTopBlocker isEqualTo "") then { "" } else {
     format ["<t color='#DDDDDD'>Top blocker:</t> <t color='%1'>%2</t><br/>", _tshRed, _airTopBlocker]
 };
@@ -477,23 +478,20 @@ _secAir = format [
     _airAlertLabel
 ] + _airBlockerLine + _airFreshnessLine + "<br/>";
 
-// Next Actions: workflow coaching / blocker visibility
 private _secNext = "";
-	private _nextArr = [];
-	// Defensive: allow this painter to run even if CfgFunctions is stale.
-	// If the helper function isn't registered, lazy-load it from file.
-	if (isNil "ARC_fnc_uiIncidentGetNextActions") then
-	{
-		private _p = "functions\\ui\\fn_uiIncidentGetNextActions.sqf";
-		if ([_p] call _fileExistsFn) then
-		{
-			ARC_fnc_uiIncidentGetNextActions = compileFinal (preprocessFileLineNumbers _p);
-		};
-	};
-	if (!(isNil "ARC_fnc_uiIncidentGetNextActions")) then
-	{
-		_nextArr = [_roleCat] call ARC_fnc_uiIncidentGetNextActions;
-	};
+private _nextArr = [];
+if (isNil "ARC_fnc_uiIncidentGetNextActions") then
+{
+    private _p = "functions\\ui\\fn_uiIncidentGetNextActions.sqf";
+    if ([_p] call _fileExistsFn) then
+    {
+        ARC_fnc_uiIncidentGetNextActions = compileFinal (preprocessFileLineNumbers _p);
+    };
+};
+if (!(isNil "ARC_fnc_uiIncidentGetNextActions")) then
+{
+    _nextArr = [_roleCat] call ARC_fnc_uiIncidentGetNextActions;
+};
 if (_nextArr isEqualType [] && { (count _nextArr) > 0 }) then
 {
     _secNext = "<t size='1.0' font='PuristaMedium' color='#B89B6B'>Next Actions</t><br/>" + (_nextArr joinString "<br/>") + "<br/><br/>";
