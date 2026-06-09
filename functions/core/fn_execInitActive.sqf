@@ -1486,6 +1486,60 @@ if (!(_objKind isEqualTo "")) then
         };
     };
 
+    // -------------------------------------------------------------------------
+    // Transient Incident/Lead/civic overlay spawning (issue #633 step 4).
+    // Data-driven, server-authoritative, bounded, cleanup-owned. Gated by
+    // ARC_incidentOverlaySpawnsEnabled (default OFF) so the merged change is
+    // gameplay-neutral until an operator opts in. Idempotent: skips when an
+    // overlay is already spawned (persistence rehydration / restart cleanup).
+    // -------------------------------------------------------------------------
+    private _overlayEnabled = missionNamespace getVariable ["ARC_incidentOverlaySpawnsEnabled", false];
+    if (_overlayEnabled isEqualType true && { _overlayEnabled }
+        && { !isNil "ARC_fnc_worldSpawnPatternResolve" }
+        && { !isNil "ARC_fnc_worldSpawnOverlayApply" }) then
+    {
+        private _ovNids = ["activeOverlaySpawnNetIds", []] call ARC_fnc_stateGet;
+        if (!(_ovNids isEqualType [])) then { _ovNids = []; };
+
+        private _haveOverlay = false;
+        {
+            private _e = objectFromNetId _x;
+            if (!isNull _e) exitWith { _haveOverlay = true; };
+        } forEach _ovNids;
+
+        if (!_haveOverlay) then
+        {
+            // Civic subtype (if any) is carried in the incident mission meta.
+            private _civicSubtype = "";
+            private _ovMeta = ["activeIncidentMissionMeta", []] call ARC_fnc_stateGet;
+            if (_ovMeta isEqualType []) then
+            {
+                {
+                    if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo "subtype" }) exitWith
+                    {
+                        if ((_x select 1) isEqualType "") then { _civicSubtype = _x select 1; };
+                    };
+                } forEach _ovMeta;
+            };
+
+            private _ovDef = [_typeU, _leadTagU, _civicSubtype] call ARC_fnc_worldSpawnPatternResolve;
+            if (_ovDef isEqualType [] && { (count _ovDef) > 0 }) then
+            {
+                private _spawnedOv = [_ovDef, _pos, _radius, _taskId] call ARC_fnc_worldSpawnOverlayApply;
+                if (_spawnedOv isEqualType [] && { (count _spawnedOv) > 0 }) then
+                {
+                    ["activeOverlaySpawnNetIds", _spawnedOv] call ARC_fnc_stateSet;
+                    ["activeOverlaySpawned", true] call ARC_fnc_stateSet;
+                }
+                else
+                {
+                    ["activeOverlaySpawnNetIds", []] call ARC_fnc_stateSet;
+                    ["activeOverlaySpawned", false] call ARC_fnc_stateSet;
+                };
+            };
+        };
+    };
+
     // Spawn convoy package (LOGISTICS / ESCORT)
     if (_kind isEqualTo "CONVOY") then
     {

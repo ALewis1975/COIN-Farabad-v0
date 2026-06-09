@@ -167,6 +167,25 @@ if (isNil { missionNamespace getVariable "ARC_incidentOverlaySpawnsEnabled" }) t
 if (isNil { missionNamespace getVariable "ARC_sitePurposeExpansionEnabled" }) then {
     missionNamespace setVariable ["ARC_sitePurposeExpansionEnabled", false, true];
 };
+// Transient overlay spawning caps (issue #633 step 4/8 — bounded performance).
+//   ARC_overlayMaxAiPerIncident        total overlay AI allowed per incident.
+//   ARC_overlayMaxHostilesPerIncident  hostile (east) overlay AI cap; keeps
+//                                       overlay OPFOR within the physical OPFOR
+//                                       budget rather than stacking on the
+//                                       virtual pool (ARC_fnc_threatVirtualPoolTick).
+//   ARC_overlayMaxObjectsPerIncident   total overlay props/vehicles per incident.
+// These are consumed only when ARC_incidentOverlaySpawnsEnabled is on.
+// NOTE: ARC_sitePurposeExpansionEnabled remains inert this phase; its SitePop
+// baseline consumer is a separate follow-up PR.
+if (isNil { missionNamespace getVariable "ARC_overlayMaxAiPerIncident" }) then {
+    missionNamespace setVariable ["ARC_overlayMaxAiPerIncident", 14, true];
+};
+if (isNil { missionNamespace getVariable "ARC_overlayMaxHostilesPerIncident" }) then {
+    missionNamespace setVariable ["ARC_overlayMaxHostilesPerIncident", 6, true];
+};
+if (isNil { missionNamespace getVariable "ARC_overlayMaxObjectsPerIncident" }) then {
+    missionNamespace setVariable ["ARC_overlayMaxObjectsPerIncident", 12, true];
+};
 // Opt-in diagnostics: when the master gate is on, log a one-shot audit of the
 // spawn-pattern matrix so coverage/warnings are visible in the RPT.
 if (missionNamespace getVariable ["ARC_spawnPatternsEnabled", false]) then {
