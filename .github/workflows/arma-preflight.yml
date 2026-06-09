@@ -286,3 +286,7 @@ jobs:
       - name: Console VM dashboard migration static validation
         run: |
           bash tests/static/console_vm_dashboard_migration_checks.sh
+
+      - name: Spawn-pattern matrix contract static validation
+        run: |
+          bash tests/static/spawn_pattern_matrix_contract_checks.sh

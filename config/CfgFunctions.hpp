@@ -261,6 +261,9 @@ class CfgFunctions
 
             // Threat-state base reaction — barriers + posture broadcast (Roadmap #14)
             class worldThreatStateReact {};
+
+            // Spawn-pattern matrix diagnostics/audit (issue #633, read-only)
+            class worldSpawnPatternAudit {};
         };
 
 
