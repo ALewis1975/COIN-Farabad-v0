@@ -76,7 +76,7 @@ Important caveat: `docs/security/RemoteExec_Endpoint_Audit_Matrix.md` section 3.
 
 | ID | Follow-up | Mode | Notes |
 |---|---|---|---|
-| RPC-FU-01 | Dedicated audit of `RemoteExec_Endpoint_Audit_Matrix.md` §3.4 Intel / order / TOC endpoints. | I | Do not combine with feature work. |
+| RPC-FU-01 | Dedicated audit of `RemoteExec_Endpoint_Audit_Matrix.md` section 3.4 Intel / order / TOC endpoints. | I | Do not combine with feature work. |
 | RPC-FU-02 | When S3 follow-on policy begins consuming sustainment/intel read models, re-check any UI action path that issues follow-on orders. | I | Only needed if action/request routes change. |
 | RPC-FU-03 | When Console VM tab migration changes a button/action route, update the endpoint row and security notes in the same PR. | I | Read-only tab paint migration alone does not require endpoint-row changes. |
 | RPC-FU-04 | If Runtime Boundary later drives degraded-mode behavior through operator actions, add or update endpoint rows before merge. | I | Current Runtime Boundary path is diagnostics/read-model only. |
