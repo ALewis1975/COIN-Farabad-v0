@@ -69,7 +69,10 @@ check "spawn ARC_fnc_intelShadowLeadBridge" "$CLICK" "Primary handler spawns the
 check "spawn ARC_fnc_opsTnpPartneredRequest" "$CLICK" "Primary handler spawns the unchanged TNP partnered request"
 
 # (d) INTEL tab reachable by the relocated operators (SHADOW/TNP/queue approver).
-check "_canIntel = _canIntel" "$ONLOAD" "INTEL tab visibility extended for relocated field-request operators"
+check "\\[player, \"SHADOW\"\\] call ARC_fnc_rolesHasGroupIdToken" "$ONLOAD" "INTEL tab visibility checks SHADOW callsign token"
+check "\\[player, \"TNP\"\\] call ARC_fnc_rolesHasGroupIdToken" "$ONLOAD" "INTEL tab visibility checks TNP callsign token"
+check "call ARC_fnc_rolesCanApproveQueue" "$ONLOAD" "INTEL tab visibility checks queue-approver role"
+check "_canIntel = _canIntel \\\|\\\| _isShadowTok \\\|\\\| _isTnpTok \\\|\\\| _canApprove" "$ONLOAD" "INTEL tab visibility extended for relocated field-request operators"
 
 # (e) No new server RPC / validation handler introduced by the relocation.
 check_absent "ARC_fnc_rpcValidateSender" "$CLICK" "Console routing adds no new server validation handler"
