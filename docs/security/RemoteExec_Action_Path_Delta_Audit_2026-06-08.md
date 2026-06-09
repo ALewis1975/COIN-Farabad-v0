@@ -58,7 +58,7 @@ None introduced by the audited recent changes.
 
 No existing RemoteExec endpoint implementation changed as part of this delta audit scope.
 
-Important caveat: `docs/security/RemoteExec_Endpoint_Audit_Matrix.md` §3.4 still lists Intel / order / TOC endpoints as unaudited (`?`). This addendum does not close those rows. The reliability sweep for TASKENG / SITREP / follow-on should produce runtime evidence first; endpoint hardening of §3.4 should remain a separate Mode I pass.
+Important caveat: `docs/security/RemoteExec_Endpoint_Audit_Matrix.md` section 3.4 still lists Intel / order / TOC endpoints as unaudited (`?`). This addendum does not close those rows. The reliability sweep for TASKENG / SITREP / follow-on should produce runtime evidence first; endpoint hardening of section 3.4 should remain a separate Mode I pass.
 
 ---
 
