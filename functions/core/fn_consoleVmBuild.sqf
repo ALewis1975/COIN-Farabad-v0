@@ -133,6 +133,12 @@ if (!(_intelLog isEqualType [])) then { _intelLog = []; };
 private _leadPool = missionNamespace getVariable ["ARC_leadPoolPublic", []];
 if (!(_leadPool isEqualType [])) then { _leadPool = []; };
 
+private _unitStatuses = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
+if (!(_unitStatuses isEqualType [])) then { _unitStatuses = []; };
+
+private _tocBacklog = missionNamespace getVariable ["ARC_pub_tocBacklog", []];
+if (!(_tocBacklog isEqualType [])) then { _tocBacklog = []; };
+
 private _opsUpdatedAt = missionNamespace getVariable ["ARC_pub_ordersUpdatedAt", _now];
 if (!(_opsUpdatedAt isEqualType 0)) then { _opsUpdatedAt = _now; };
 
@@ -141,7 +147,9 @@ private _opsData = [
     ["queue_pending", _queuePending],
     ["orders",       _orders],
     ["intel_log",    _intelLog],
-    ["lead_pool",    _leadPool]
+    ["lead_pool",    _leadPool],
+    ["unit_statuses", _unitStatuses],
+    ["toc_backlog",  _tocBacklog]
 ];
 
 private _opsSection = [
@@ -168,6 +176,9 @@ if (!(_infiltr  isEqualType 0)) then { _infiltr  = 0.35; };
 if (!(_civCas   isEqualType 0)) then { _civCas   = 0; };
 if (!(_bCas     isEqualType 0)) then { _bCas     = 0; };
 
+private _baseServices = missionNamespace getVariable ["ARC_pub_baseServices", []];
+if (!(_baseServices isEqualType [])) then { _baseServices = []; };
+
 private _statData = [
     ["base_fuel",          _baseFuel],
     ["base_ammo",          _baseAmmo],
@@ -175,7 +186,8 @@ private _statData = [
     ["insurgent_pressure", _insPres],
     ["infiltration",       _infiltr],
     ["civ_casualties",     _civCas],
-    ["base_casualties",    _bCas]
+    ["base_casualties",    _bCas],
+    ["base_services",      _baseServices]
 ];
 
 private _statSection = [
