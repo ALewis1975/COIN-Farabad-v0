@@ -148,6 +148,36 @@ missionNamespace setVariable ["ARC_isrShadowLeadBridgeEnabled", true, true];
 // TNP partnered ops → lead request field action: enabled by default.
 missionNamespace setVariable ["ARC_opsTnpPartneredRequestEnabled", true, true];
 
+// -------------------------------------------------------------------------
+// Spawn-pattern matrix (issue #633) — staged rollout toggles.
+//   ARC_spawnPatternsEnabled         master gate for the data-driven spawn
+//                                     pattern matrix + audit diagnostics.
+//   ARC_incidentOverlaySpawnsEnabled  transient Incident/Lead overlay spawning
+//                                     (later phase; off until validated).
+//   ARC_sitePurposeExpansionEnabled   expanded SitePop site-purpose baselines
+//                                     (later phase; off until validated).
+// All default OFF so the mission keeps its current type-driven incident
+// execution and existing SitePop behaviour until each phase is validated.
+if (isNil { missionNamespace getVariable "ARC_spawnPatternsEnabled" }) then {
+    missionNamespace setVariable ["ARC_spawnPatternsEnabled", false, true];
+};
+if (isNil { missionNamespace getVariable "ARC_incidentOverlaySpawnsEnabled" }) then {
+    missionNamespace setVariable ["ARC_incidentOverlaySpawnsEnabled", false, true];
+};
+if (isNil { missionNamespace getVariable "ARC_sitePurposeExpansionEnabled" }) then {
+    missionNamespace setVariable ["ARC_sitePurposeExpansionEnabled", false, true];
+};
+// Opt-in diagnostics: when the master gate is on, log a one-shot audit of the
+// spawn-pattern matrix so coverage/warnings are visible in the RPT.
+if (missionNamespace getVariable ["ARC_spawnPatternsEnabled", false]) then {
+    [] spawn {
+        private _t0 = diag_tickTime;
+        waitUntil { !isNil "ARC_fnc_worldSpawnPatternAudit" || { (diag_tickTime - _t0) > 30 } };
+        if (isNil "ARC_fnc_worldSpawnPatternAudit") exitWith { diag_log "[ARC][SPAWNPAT][WARN] initServer: ARC_fnc_worldSpawnPatternAudit not available after 30s; skipping audit."; };
+        [true] call ARC_fnc_worldSpawnPatternAudit;
+    };
+};
+
 // Simple AI recruitment from the named Eden object "recruitment_01".
 // Clients render one "Recruit AI" action; the server validates sender identity,
 // registered recruitment object, public infantry class, side/faction match, and
