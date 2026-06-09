@@ -86,6 +86,7 @@ if not m:
 i = m.end() - 1
 depth = 0
 loc_section = None
+for j in range(i, len(pat)):
     if pat[j] == '[':
         depth += 1
     elif pat[j] == ']':
