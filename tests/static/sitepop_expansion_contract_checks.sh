@@ -41,7 +41,7 @@ pass "expansion is gated behind the toggle; base + expansion sets are separated"
 
 # sqflint-compat: avoid known parser-compat pitfalls in the changed data file.
 for badpat in 'findIf' 'isNotEqualTo' 'toUpperANSI' 'toLowerANSI'; do
-    if grep -qE "\b$badpat\b" "$TPL"; then
+    if grep -qE "(^|[^[:alnum:]_])${badpat}([^[:alnum:]_]|$)" "$TPL"; then
         fail "sqflint-compat: $badpat used in site templates SQF"
     fi
 done
