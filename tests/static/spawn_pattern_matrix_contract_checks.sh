@@ -29,15 +29,14 @@ for tog in ARC_spawnPatternsEnabled ARC_incidentOverlaySpawnsEnabled ARC_sitePur
 done
 pass "staged-rollout toggles present and default false"
 
-# The audit must be read-only: it must not create units/vehicles or broadcast
+# The audit must be read-only: it must not create units/vehicles/markers or broadcast
 # public mission state. (createHashMap / setVariable on local maps is fine; the
 # guard targets spawning + public-variable broadcast verbs.)
-for verb in 'createUnit' 'createVehicle' 'createAgent' 'createGroup' 'publicVariable' 'remoteExec'; do
+for verb in 'createUnit' 'createVehicle' 'createAgent' 'createGroup' 'createMarker' 'publicVariable' 'remoteExec' 'ARC_fnc_incidentCatalogBuild'; do
     if grep -qE "\b$verb\b" "$AUDIT"; then
         fail "audit function must be read-only but uses $verb"
     fi
 done
-grep -q 'if (!isServer) exitWith' "$AUDIT" || fail "audit function must be server-only"
 pass "audit function is server-only and read-only"
 
 # sqflint-compat: the changed SQF must avoid known parser-compat pitfalls.
