@@ -1522,7 +1522,7 @@ if (!(_objKind isEqualTo "")) then
                 } forEach _ovMeta;
             };
 
-            private _ovDef = [_typeU, _leadTagU, _civicSubtype] call ARC_fnc_worldSpawnPatternResolve;
+            private _ovDef = [_typeU, _leadTagU, _civicSubtype, _zone] call ARC_fnc_worldSpawnPatternResolve;
             if (_ovDef isEqualType [] && { (count _ovDef) > 0 }) then
             {
                 private _spawnedOv = [_ovDef, _pos, _radius, _taskId] call ARC_fnc_worldSpawnOverlayApply;

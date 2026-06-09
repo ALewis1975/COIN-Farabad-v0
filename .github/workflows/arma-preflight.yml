@@ -298,3 +298,7 @@ jobs:
       - name: SitePop purpose-expansion contract static validation
         run: |
           bash tests/static/sitepop_expansion_contract_checks.sh
+
+      - name: Building-purpose classification contract static validation
+        run: |
+          bash tests/static/building_purpose_classification_contract_checks.sh

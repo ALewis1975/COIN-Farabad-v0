@@ -26,6 +26,8 @@
         0: STRING — incidentType (e.g. "RAID", "CHECKPOINT"); upper-cased internally.
         1: STRING — leadTag (e.g. "SUS_VEHICLE"); "" when not a lead-seeded task.
         2: STRING — civicSubtype (e.g. "MEDICAL_OUTREACH"); "" when not civic.
+        3: STRING — zone id (e.g. "Airbase", "FarabadCity"); "" when none. Used to
+                    select a zone-sensitive CHECKPOINT variant (issue #633 step 6).
 
     Returns: ARRAY of [key,value] pairs (empty array if no overlay resolves):
         ["overlay",       ARRAY of roleSpec]   task-added AI roles
@@ -41,7 +43,8 @@ if (!isServer) exitWith {[]};
 params [
     ["_incidentType", "", [""]],
     ["_leadTag",      "", [""]],
-    ["_civicSubtype", "", [""]]
+    ["_civicSubtype", "", [""]],
+    ["_zone",         "", [""]]
 ];
 
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
@@ -106,7 +109,28 @@ if ((count _def) == 0 && { !(_leadU isEqualTo "") }) then {
 };
 
 if ((count _def) == 0 && { !(_typeU isEqualTo "") }) then {
-    private _i = [_incidentOverlays, _typeU, []] call _hg;
+    // Zone-sensitive CHECKPOINT variant selection (issue #633 step 6). Map the
+    // incident zone to a CHECKPOINT_* key; fall back to plain CHECKPOINT when
+    // the variant is absent. All other incident types resolve directly.
+    private _lookupKey = _typeU;
+    if (_typeU isEqualTo "CHECKPOINT") then {
+        private _zoneU = toUpper _zone;
+        private _variant = "CHECKPOINT_RURAL";
+        if (
+            _zoneU isEqualTo "AIRBASE" ||
+            { _zoneU isEqualTo "GREENZONE" } ||
+            { _zoneU isEqualTo "MILITARYBASE" }
+        ) then {
+            _variant = "CHECKPOINT_GATE";
+        } else {
+            if (_zoneU isEqualTo "FARABADCITY") then {
+                _variant = "CHECKPOINT_URBAN";
+            };
+        };
+        private _vDef = [_incidentOverlays, _variant, []] call _hg;
+        if (_vDef isEqualType [] && { (count _vDef) > 0 }) then { _lookupKey = _variant; };
+    };
+    private _i = [_incidentOverlays, _lookupKey, []] call _hg;
     if (_i isEqualType [] && { (count _i) > 0 }) then { _def = _i; _source = "INCIDENT"; };
 };
 
