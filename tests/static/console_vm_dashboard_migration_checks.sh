@@ -18,9 +18,9 @@ check() {
   fi
 }
 
-check 'unit_statuses' "functions/core/fn_consoleVmBuild.sqf" "Console VM exposes unit statuses"
-check 'toc_backlog' "functions/core/fn_consoleVmBuild.sqf" "Console VM exposes TOC backlog"
-check 'base_services' "functions/core/fn_consoleVmBuild.sqf" "Console VM exposes base services in stateSummary"
+check '\["unit_statuses",[[:space:]]*_unitStatuses\]' "functions/core/fn_consoleVmBuild.sqf" "Console VM exposes unit statuses"
+check '\["toc_backlog",[[:space:]]*_tocBacklog\]' "functions/core/fn_consoleVmBuild.sqf" "Console VM exposes TOC backlog"
+check '\["base_services",[[:space:]]*_baseServices\]' "functions/core/fn_consoleVmBuild.sqf" "Console VM exposes base services in stateSummary"
 
 check 'ARC_fnc_consoleVmAdapterV1' "functions/ui/fn_uiConsoleDashboardPaint.sqf" "Dashboard uses Console VM adapter"
 check '\["ops",[[:space:]]*"unit_statuses"' "functions/ui/fn_uiConsoleDashboardPaint.sqf" "Dashboard reads unit statuses from VM"
