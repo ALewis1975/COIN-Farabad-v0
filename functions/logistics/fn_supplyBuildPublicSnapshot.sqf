@@ -7,8 +7,12 @@ if (isNil "ARC_fnc_sustainmentReadinessSnapshot") then
 {
     ARC_fnc_sustainmentReadinessSnapshot = compile preprocessFileLineNumbers "functions\\logistics\\fn_sustainmentReadinessSnapshot.sqf";
 };
-private _sustainmentReadiness = [] call ARC_fnc_sustainmentReadinessSnapshot;
-if (!(_sustainmentReadiness isEqualType [])) then { _sustainmentReadiness = []; };
+private _sustainmentReadiness = [];
+if (!isNil "ARC_fnc_sustainmentReadinessSnapshot") then
+{
+    private _res = [] call ARC_fnc_sustainmentReadinessSnapshot;
+    if (_res isEqualType []) then { _sustainmentReadiness = _res; };
+};
 
 [
     ["stock", [] call ARC_fnc_supplyGetStockSnapshot],
