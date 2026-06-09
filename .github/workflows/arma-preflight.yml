@@ -235,6 +235,10 @@ jobs:
         run: |
           tests/static/casreq_snapshot_contract_checks.sh
 
+      - name: Sustainment readiness snapshot contract static validation
+        run: |
+          tests/static/sustainment_readiness_snapshot_checks.sh
+
       - name: Persistence reset coverage static validation
         run: |
           tests/static/persistence_reset_coverage_contract_checks.sh
