@@ -260,8 +260,10 @@ private _markerPurpose = {
 };
 
 private _catalog = [];
-if (!isNil "ARC_fnc_incidentCatalogBuild") then {
-    _catalog = call ARC_fnc_incidentCatalogBuild;
+private _basePath = "data\incident_markers.sqf";
+if ([_basePath] call _fileExistsFn) then {
+    private _base = call compile preprocessFileLineNumbers _basePath;
+    if (_base isEqualType []) then { _catalog = _base; };
 };
 if (!(_catalog isEqualType [])) then { _catalog = []; };
 
