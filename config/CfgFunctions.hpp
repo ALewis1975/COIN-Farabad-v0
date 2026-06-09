@@ -696,6 +696,7 @@ class CfgFunctions
             class supplyApplyLaunchCost {};
             class supplyDebugSnapshot {};
             class supplyBuildPublicSnapshot {};
+            class sustainmentReadinessSnapshot {};
 
             class convoyStartupConfig {};
             class convoyOpsLog {};            // uniform convoy lifecycle OPS logging (id+grid+actor)
