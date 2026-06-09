@@ -259,6 +259,10 @@ jobs:
         run: |
           tests/static/ops_tnp_partnered_contract_checks.sh
 
+      - name: Console field-request relocation contract static validation
+        run: |
+          tests/static/console_field_request_relocation_checks.sh
+
       - name: SHERIFF/SSE dossier contract static validation
         run: |
           tests/static/dossier_runtime_contract_checks.sh

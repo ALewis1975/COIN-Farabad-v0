@@ -90,7 +90,7 @@ private _selDataHint = "";
 if (_selIdxHint >= 0) then { _selDataHint = _list lbData _selIdxHint; };
 if (!(_selDataHint isEqualType "")) then { _selDataHint = ""; };
 
-private _isStaticDetailSel = _selDataHint in ["", "HDR", "SEP", "INTEL_LOG", "LEAD_REQ", "REFRESH_INTEL", "S2_SHOW_LEADS", "S2_SHOW_THREADS", "S2_SHOW_INTEL", "CIV_CENSUS_OPEN", "CIV_CENSUS_BACK"];
+private _isStaticDetailSel = _selDataHint in ["", "HDR", "SEP", "INTEL_LOG", "LEAD_REQ", "REFRESH_INTEL", "S2_SHOW_LEADS", "S2_SHOW_THREADS", "S2_SHOW_INTEL", "CIV_CENSUS_OPEN", "CIV_CENSUS_BACK", "FIELD_JTAC_CAS", "FIELD_SHADOW_ISR", "FIELD_TNP_PARTNERED"];
 if ((_selDataHint find "CIV_CONTACT_") isEqualTo 0) then { _isStaticDetailSel = true; };
 
 if (!_rebuild && { _isStaticDetailSel }) then
@@ -424,6 +424,24 @@ private _canLog     = _isAuth || _isS2 || _isCmd || _isOmni;
 private _canLeadReq = _isS2 || _isCmd || _isOmni;
 private _canAdmin   = _isS2 || _isCmd || _isOmni;
 
+// Field-request actions relocated from the player action menu into the console.
+// Each row mirrors the exact feature-flag + role gate the old addAction used so
+// visibility/authorization is identical.
+private _isShadowTok = [player, "SHADOW"] call ARC_fnc_rolesHasGroupIdToken;
+private _isTnpTok    = [player, "TNP"] call ARC_fnc_rolesHasGroupIdToken;
+private _canApprove  = [player] call ARC_fnc_rolesCanApproveQueue;
+
+private _flagJtac   = missionNamespace getVariable ["ARC_casreqJtacPrefillEnabled", true];
+private _flagShadow = missionNamespace getVariable ["ARC_isrShadowLeadBridgeEnabled", true];
+private _flagTnp    = missionNamespace getVariable ["ARC_opsTnpPartneredRequestEnabled", true];
+if (!(_flagJtac isEqualType true)) then { _flagJtac = true; };
+if (!(_flagShadow isEqualType true)) then { _flagShadow = true; };
+if (!(_flagTnp isEqualType true)) then { _flagTnp = true; };
+
+private _canFieldJtac   = _flagJtac && { _isAuth || _canApprove };
+private _canFieldShadow = _flagShadow && { _isShadowTok || _isS2 || _isCmd };
+private _canFieldTnp    = _flagTnp && { _isTnpTok || ([player] call ARC_fnc_rolesIsTocS3) || _isCmd };
+
 // Preserve selection by data string
 private _selDataPrev = uiNamespace getVariable ["ARC_console_intelSelData", ""];
 if (!(_selDataPrev isEqualType "")) then { _selDataPrev = ""; };
@@ -689,6 +707,27 @@ if (_rebuild) then
         else
         {
             ["(S2/TOC only)", "HDR"] call _addTool;
+        };
+
+        // Field requests (relocated from the player action menu). Each row is
+        // individually flag + role gated; the section header only appears when at
+        // least one row qualifies. Selecting a row closes the console and spawns
+        // the existing client function so the in-world marking context is valid.
+        if (_canFieldJtac || _canFieldShadow || _canFieldTnp) then
+        {
+            ["FIELD REQUESTS"] call _addHdr;
+            if (_canFieldJtac) then
+            {
+                ["JTAC: Prefill CAS Request (Lase/Mark)", "FIELD_JTAC_CAS"] call _addTool;
+            };
+            if (_canFieldShadow) then
+            {
+                ["SHADOW ISR: Bridge Observation to Lead (Lase/Cursor)", "FIELD_SHADOW_ISR"] call _addTool;
+            };
+            if (_canFieldTnp) then
+            {
+                ["TNP: Request Partnered Ops (Cursor/Self)", "FIELD_TNP_PARTNERED"] call _addTool;
+            };
         };
 
         // Intel feed
@@ -1182,6 +1221,30 @@ else
             _txt = "<t size='1.1' font='PuristaMedium'>Show Latest Intel (Local)</t><br/><br/>" +
                    "Shows the latest intel log entry (debug helper).";
             if (!isNull _b1) then { _b1 ctrlEnable _canAdmin; _b1 ctrlSetText "EXECUTE"; };
+        };
+
+        case "FIELD_JTAC_CAS":
+        {
+            _txt = "<t size='1.1' font='PuristaMedium'>JTAC: Prefill CAS Request</t><br/><br/>" +
+                   "Derives a CAS 9-line from your laser/cursor target and opens the CASREQ workflow.<br/><br/>" +
+                   "<t color='#FFD700'>OPEN closes the console so you can lase/aim at the target, then continues.</t>";
+            if (!isNull _b1) then { _b1 ctrlEnable _canFieldJtac; _b1 ctrlSetText "OPEN"; };
+        };
+
+        case "FIELD_SHADOW_ISR":
+        {
+            _txt = "<t size='1.1' font='PuristaMedium'>SHADOW ISR: Bridge Observation to Lead</t><br/><br/>" +
+                   "Bridges a UAS/laser/cursor observation into a TOC lead request (PENDING approval).<br/><br/>" +
+                   "<t color='#FFD700'>OPEN closes the console so you can lase/cursor the contact, then continues.</t>";
+            if (!isNull _b1) then { _b1 ctrlEnable _canFieldShadow; _b1 ctrlSetText "OPEN"; };
+        };
+
+        case "FIELD_TNP_PARTNERED":
+        {
+            _txt = "<t size='1.1' font='PuristaMedium'>TNP: Request Partnered Ops</t><br/><br/>" +
+                   "Requests a partnered patrol or checkpoint at your cursor/own position (TOC lead, PENDING approval).<br/><br/>" +
+                   "<t color='#FFD700'>OPEN closes the console so you can aim at the location, then continues.</t>";
+            if (!isNull _b1) then { _b1 ctrlEnable _canFieldTnp; _b1 ctrlSetText "OPEN"; };
         };
 
         case "FEED":

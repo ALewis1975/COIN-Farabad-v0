@@ -49,9 +49,12 @@ check_absent "call ARC_fnc_leadCreate" "$REQ" "TNP partnered request does not cr
 check_absent "call ARC_fnc_tocBacklogEnqueue" "$REQ" "TNP partnered request does not enqueue the TOC backlog directly"
 check_absent "ARC_fnc_rpcValidateSender" "$REQ" "TNP partnered request adds no new server validation handler"
 
-# Wiring: flag seeded server-side and action registered.
+# Wiring: flag seeded server-side and action surfaced in the Farabad Console.
+# (Relocated from the player action menu into the S2/INTEL console tools.)
 check "ARC_opsTnpPartneredRequestEnabled" "initServer.sqf" "ARC_opsTnpPartneredRequestEnabled seeded in initServer"
-check "ARC_fnc_opsTnpPartneredRequest" "functions/core/fn_tocInitPlayer.sqf" "TNP partnered request wired as a player addAction"
+check_absent "ARC_fnc_opsTnpPartneredRequest" "functions/core/fn_tocInitPlayer.sqf" "TNP partnered request no longer wired as a player addAction"
+check "ARC_fnc_opsTnpPartneredRequest" "functions/ui/fn_uiConsoleClickPrimary.sqf" "TNP partnered request routed from the Farabad Console primary handler"
+check "FIELD_TNP_PARTNERED" "functions/ui/fn_uiConsoleIntelPaint.sqf" "TNP partnered request surfaced as a console FIELD REQUESTS row"
 check "class opsTnpPartneredRequest" "config/CfgFunctions.hpp" "opsTnpPartneredRequest registered in CfgFunctions"
 
 # Consumer: the TNP_PARTNERED lead tag is carried onto the active incident and
