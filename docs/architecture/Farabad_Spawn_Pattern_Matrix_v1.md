@@ -1,9 +1,10 @@
-# Farabad Spawn-Pattern Matrix (Issue #633, Step 1)
+# Farabad Spawn-Pattern Matrix (Issue #633, Steps 1–2)
 
 This document describes the data-driven Incident / Lead / site **spawn-pattern
-matrix** and its **audit** diagnostics. It corresponds to step 1 of the issue
+matrix** and its **audit** diagnostics. It corresponds to steps 1–2 of the issue
 #633 suggested implementation sequence: *"Add the spawn-pattern schema and audit
-function without changing gameplay behavior."*
+function without changing gameplay behavior"* and *"map all existing Incident and
+civic catalog rows to pattern IDs."*
 
 ## What this delivers
 
@@ -42,6 +43,11 @@ wired up yet; the matrix is data and the audit is diagnostics only.
   baseline for each incident type in `data/incident_markers.sqf`.
 - `leadOverlays` — `[leadTag, overlayDef]` lead-driven overlay (driven by lead
   fields, not display-name string checks).
+- `civicMissionOverlays` — `[subtype, overlayDef]` purpose-specific overlay keyed
+  by the `subtype` field of every record in
+  `data/coin_civic_mission_catalog.sqf` (aid tables/crowds, doctors/ambulance,
+  government staff, work crews, gate flow, etc.) so structured civic missions get
+  context the bare `incidentType` overlay cannot express.
 
 ### Purpose tags
 
@@ -63,16 +69,19 @@ free of class-pool drift and missing-class RPT spam.
 
 `ARC_fnc_worldSpawnPatternAudit` (server-only, read-only):
 
-- Resolves every named location, terrain site type, and Incident catalog row
-  against the matrix.
+- Resolves every named location, terrain site type, Incident catalog row, and
+  structured civic-mission row against the matrix.
 - Reports, per row: resolved reference, purpose tag, selected pattern, combined
   AI count range, object count range, placement strategy, cleanup owner, and
   per-row warnings.
 - Collects warnings for: missing purpose mapping, missing pattern, missing
-  marker, missing incident overlay, or no baseline population.
+  marker, missing incident overlay, missing civic-subtype overlay, or no
+  baseline population.
 
-Returns `[["rows", …], ["warnings", …], ["summary", …]]`. Pass `true` for a
-verbose `diag_log` dump of every row and warning.
+Returns `[["rows", …], ["warnings", …], ["summary", …]]` where `summary` is
+`[totalRows, locationCount, siteTypeCount, incidentRowCount, civicRowCount,
+warningCount]`. Pass `true` for a verbose `diag_log` dump of every row and
+warning. Civic rows carry the civic `subtype` in the row's `incidentType` field.
 
 ## Rollout toggles
 
@@ -100,12 +109,12 @@ spawning regardless of toggle state.
 - Audit is server-only and read-only (no `createUnit` / `createVehicle` /
   `publicVariable` / `remoteExec` / …).
 - Every named location and terrain site type maps to a purpose that has a
-  pattern; every incident type and required lead tag has an overlay.
+  pattern; every incident type and required lead tag has an overlay; every
+  structured civic-mission subtype has an overlay.
 - The changed SQF avoids known sqflint-compat pitfalls.
 
-## Next phases (not in this step)
+## Next phases (not in these steps)
 
-2. Map catalog rows to pattern IDs at execution time.
 3. Expand SitePop templates for high-value named locations.
 4. Transient Incident/Lead overlay spawning behind `ARC_incidentOverlaySpawnsEnabled`.
 5. Checkpoint traffic / civilian flow behaviour.

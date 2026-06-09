@@ -27,6 +27,11 @@
         "leadOverlays"     ARRAY of [leadTag, overlayDef]
                            Lead-tag-driven overlay (drives spawns from lead
                            fields rather than display-name string checks).
+        "civicMissionOverlays" ARRAY of [subtype, overlayDef]
+                           Structured-civic-mission overlay keyed by the
+                           `subtype` field in data/coin_civic_mission_catalog.sqf
+                           (purpose-specific aid/governance/repair context that
+                           the bare incidentType overlay cannot express).
 
     purposeTag values (issue #633 step 5 building-purpose classification):
         RESIDENTIAL MARKET RELIGIOUS MEDICAL GOVERNMENT HOTEL SECURITY INDUSTRIAL
@@ -624,6 +629,136 @@
             ["placement", "open"],
             ["cleanupOwner", "LEAD"],
             ["despawnPolicy", "LEAD_DESPAWN"]
+        ]]
+    ]],
+
+    // =====================================================================
+    // Structured civic-mission subtype -> task overlay (issue #633 step 3).
+    // Keyed by the `subtype` field of data/coin_civic_mission_catalog.sqf so
+    // each civic mission gets purpose-specific context (aid tables, doctors,
+    // work crews, gate flow) that the bare incidentType overlay cannot express.
+    // Layered on top of the location baseline, same as incidentOverlays.
+    // =====================================================================
+    ["civicMissionOverlays", [
+        ["FOOD_WATER_DISTRIBUTION", [
+            ["overlay", [
+                ["aid_worker",  "west", [2, 4],  "queue",  "courtyard"],
+                ["elder",       "civ",  [1, 1],  "loiter", "courtyard"],
+                ["crowd",       "civ",  [6, 12], "queue",  "courtyard"],
+                ["local_sec",   "west", [0, 3],  "guard",  "perimeter"]
+            ]],
+            ["objects", [
+                ["aid_table",      [2, 4], "courtyard"],
+                ["water_container",[2, 4], "courtyard"],
+                ["cargo_truck",    [1, 1], "parked"]
+            ]],
+            ["placement", "courtyard"],
+            ["cleanupOwner", "INCIDENT"],
+            ["despawnPolicy", "INCIDENT_DESPAWN"]
+        ]],
+        ["MEDICAL_OUTREACH", [
+            ["overlay", [
+                ["doctor",   "west", [1, 2], "medical", "courtyard"],
+                ["nurse",    "west", [1, 3], "medical", "courtyard"],
+                ["patient",  "civ",  [4, 8], "queue",   "courtyard"],
+                ["crowd",    "civ",  [2, 5], "loiter",  "courtyard"]
+            ]],
+            ["objects", [
+                ["aid_crate", [1, 3], "courtyard"],
+                ["ambulance", [1, 1], "parked"]
+            ]],
+            ["placement", "courtyard"],
+            ["cleanupOwner", "INCIDENT"],
+            ["despawnPolicy", "INCIDENT_DESPAWN"]
+        ]],
+        ["GOVERNMENT_LIAISON", [
+            ["overlay", [
+                ["gov_staff",  "west", [1, 3], "loiter", "indoor"],
+                ["gate_guard", "west", [2, 4], "guard",  "gate_lane"]
+            ]],
+            ["objects", [
+                ["official_car", [1, 2], "parked"]
+            ]],
+            ["placement", "courtyard"],
+            ["cleanupOwner", "INCIDENT"],
+            ["despawnPolicy", "INCIDENT_DESPAWN"]
+        ]],
+        ["COMMUNITY_ENGAGEMENT", [
+            ["overlay", [
+                ["elder",      "civ",  [1, 1], "loiter", "courtyard"],
+                ["crowd",      "civ",  [4, 8], "loiter", "courtyard"],
+                ["vendor",     "civ",  [1, 3], "camp",   "perimeter"],
+                ["local_sec",  "west", [0, 2], "guard",  "perimeter"]
+            ]],
+            ["objects", []],
+            ["placement", "courtyard"],
+            ["cleanupOwner", "INCIDENT"],
+            ["despawnPolicy", "INCIDENT_DESPAWN"]
+        ]],
+        ["WATER_POWER_REPAIR", [
+            ["overlay", [
+                ["worker", "civ", [2, 4], "construction", "courtyard"]
+            ]],
+            ["objects", [
+                ["utility_truck", [1, 2], "parked"],
+                ["generator",     [1, 2], "courtyard"],
+                ["repair_crate",  [1, 3], "courtyard"]
+            ]],
+            ["placement", "courtyard"],
+            ["cleanupOwner", "INCIDENT"],
+            ["despawnPolicy", "INCIDENT_DESPAWN"]
+        ]],
+        ["FUEL_SITE_REPAIR", [
+            ["overlay", [
+                ["mechanic", "civ", [2, 4], "construction", "courtyard"],
+                ["work_crew","civ", [1, 3], "construction", "courtyard"]
+            ]],
+            ["objects", [
+                ["fuel_truck", [1, 2], "parked"],
+                ["civ_car",    [1, 3], "parked"]
+            ]],
+            ["placement", "courtyard"],
+            ["cleanupOwner", "INCIDENT"],
+            ["despawnPolicy", "INCIDENT_DESPAWN"]
+        ]],
+        ["GATE_CHECKPOINT_CONTROL", [
+            ["overlay", [
+                ["gate_guard", "west", [3, 6], "guard",   "gate_lane"],
+                ["pedestrian", "civ",  [2, 5], "queue",   "gate_lane"],
+                ["voi_vehicle","civ",  [0, 1], "inspect", "gate_lane"]
+            ]],
+            ["objects", [
+                ["civ_car", [2, 5], "traffic_through"],
+                ["barrier", [2, 4], "gate_lane"]
+            ]],
+            ["placement", "gate_lane"],
+            ["cleanupOwner", "INCIDENT"],
+            ["despawnPolicy", "INCIDENT_DESPAWN"]
+        ]],
+        ["MSR_RECON", [
+            ["overlay", [
+                ["roadside_civ", "civ",  [1, 3], "loiter", "roadside"],
+                ["observer",     "east", [0, 1], "loiter", "perimeter"]
+            ]],
+            ["objects", [
+                ["civ_truck", [1, 3], "traffic_through"],
+                ["pickup",    [1, 2], "parked"]
+            ]],
+            ["placement", "route_segment"],
+            ["cleanupOwner", "INCIDENT"],
+            ["despawnPolicy", "INCIDENT_DESPAWN"]
+        ]],
+        ["LOCAL_LEADER_ENGAGEMENT", [
+            ["overlay", [
+                ["elder",     "civ",  [1, 1], "loiter", "courtyard"],
+                ["local_sec", "civ",  [1, 3], "guard",  "courtyard"],
+                ["crowd",     "civ",  [2, 6], "loiter", "courtyard"],
+                ["observer",  "east", [0, 1], "loiter", "perimeter"]
+            ]],
+            ["objects", []],
+            ["placement", "courtyard"],
+            ["cleanupOwner", "INCIDENT"],
+            ["despawnPolicy", "INCIDENT_DESPAWN"]
         ]]
     ]]
 ]

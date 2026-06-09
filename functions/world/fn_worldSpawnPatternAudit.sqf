@@ -4,8 +4,9 @@
     Developer/debug diagnostics for the Incident / Lead / site spawn-pattern
     matrix (issue #633, step 1 / section 9).
 
-    Read-only. Resolves every Incident catalog row, named location, and terrain
-    site type against data/farabad_spawn_patterns.sqf and reports, for each:
+    Read-only. Resolves every Incident catalog row, named location, terrain
+    site type, and structured civic-mission row against
+    data/farabad_spawn_patterns.sqf and reports, for each:
         - resolved marker / position reference
         - resolved purpose tag (place classification)
         - selected spawn pattern (baseline + incident/lead overlay)
@@ -27,13 +28,14 @@
         ["rows",     ARRAY]   one report row per resolved entry
         ["warnings", ARRAY]   collected warning strings
         ["summary",  ARRAY]   [totalRows, locationCount, siteTypeCount,
-                               incidentRowCount, warningCount]
+                               incidentRowCount, civicRowCount, warningCount]
 
     Each report row is itself a pairs array:
-        ["kind", STRING]            LOCATION | TERRAIN_SITE | INCIDENT
-        ["ref", STRING]             location id / site type / marker
+        ["kind", STRING]            LOCATION | TERRAIN_SITE | INCIDENT | CIVIC
+        ["ref", STRING]             location id / site type / marker / civic id
         ["purpose", STRING]         resolved purpose tag
-        ["incidentType", STRING]    "" for non-incident rows
+        ["incidentType", STRING]    "" for non-incident rows; civic rows use the
+                                    civic subtype here
         ["placement", STRING]
         ["aiRange", ARRAY]          [min, max] combined baseline + overlay
         ["objRange", ARRAY]         [min, max] combined baseline + overlay
@@ -77,6 +79,7 @@ private _locationPurposes = [[_root, "locationPurposes", []] call _hg] call _pai
 private _siteTypePurposes = [[_root, "siteTypePurposes", []] call _hg] call _pairsToMap;
 private _incidentOverlays = [[_root, "incidentOverlays", []] call _hg] call _pairsToMap;
 private _leadOverlays = [[_root, "leadOverlays", []] call _hg] call _pairsToMap;
+private _civicMissionOverlays = [[_root, "civicMissionOverlays", []] call _hg] call _pairsToMap;
 
 // --- Helpers --------------------------------------------------------------
 // Sum [min,max] role/object count ranges from a specs array (index 2 holds the
@@ -349,12 +352,106 @@ private _incidentRowCount = 0;
     ];
 } forEach _catalog;
 
+// --- 4. Structured civic-mission catalog coverage ------------------------
+// Resolve civic "locations" entries using the same heuristics as incident markers.
+private _locIdPurpose = {
+    params ["_locRef"];
+    [_locRef] call _markerPurpose
+};
+
+private _civicCatalog = [];
+private _civicPath = "data\coin_civic_mission_catalog.sqf";
+if ([_civicPath] call _fileExistsFn) then {
+    private _cc = call compile preprocessFileLineNumbers _civicPath;
+    if (_cc isEqualType []) then { _civicCatalog = _cc; };
+};
+if (!(_civicCatalog isEqualType [])) then { _civicCatalog = []; };
+
+private _civicRowCount = 0;
+{
+    if (!(_x isEqualType [])) then { continue; };
+    private _recMap = [_x] call _pairsToMap;
+    private _id = [_recMap, "id", ""] call _hg;
+    private _subtype = toUpper ([_recMap, "subtype", ""] call _hg);
+    private _itype = toUpper ([_recMap, "incidentType", ""] call _hg);
+    if (_id isEqualTo "" && { _subtype isEqualTo "" }) then { continue; };
+    _civicRowCount = _civicRowCount + 1;
+
+    private _rowWarn = [];
+
+    // What place: purpose from the first resolvable location, else first site type.
+    private _purpose = "";
+    private _locs = [_recMap, "locations", []] call _hg;
+    if (_locs isEqualType []) then {
+        {
+            private _p = [_x] call _locIdPurpose;
+            if (!(_p isEqualTo "")) exitWith { _purpose = _p; };
+        } forEach _locs;
+    };
+    if (_purpose isEqualTo "") then {
+        private _sts = [_recMap, "siteTypes", []] call _hg;
+        if (_sts isEqualType []) then {
+            {
+                private _p = [_siteTypePurposes, _x, ""] call _hg;
+                if (!(_p isEqualTo "")) exitWith { _purpose = _p; };
+            } forEach _sts;
+        };
+    };
+    if (_purpose isEqualTo "") then {
+        _purpose = "UNMAPPED";
+        _rowWarn pushBack "no purpose mapping";
+        [format ["[CIVIC] %1: no resolvable location/site purpose", _id]] call _addWarn;
+    };
+
+    private _aiMin = 0; private _aiMax = 0; private _obMin = 0; private _obMax = 0;
+    private _pl = ""; private _co = "INCIDENT";
+
+    // Baseline from purpose pattern.
+    if (!(_purpose isEqualTo "UNMAPPED")) then {
+        private _pat = [_purposePatterns, _purpose, []] call _hg;
+        if (_pat isEqualType [] && { (count _pat) > 0 }) then {
+            ([_pat] call _patternRanges) params ["_ai", "_ob", "_plv"];
+            _aiMin = _aiMin + (_ai select 0); _aiMax = _aiMax + (_ai select 1);
+            _obMin = _obMin + (_ob select 0); _obMax = _obMax + (_ob select 1);
+            _pl = _plv;
+        };
+    };
+
+    // Civic-subtype overlay (preferred). Fall back to the incident-type overlay
+    // so legacy civic rows without a subtype mapping still resolve a task layer.
+    private _ov = [_civicMissionOverlays, _subtype, []] call _hg;
+    if (!(_ov isEqualType []) || { (count _ov) == 0 }) then {
+        _rowWarn pushBack "no civic overlay";
+        [format ["[CIVIC] %1: subtype %2 has no overlay", _id, _subtype]] call _addWarn;
+        _ov = [_incidentOverlays, _itype, []] call _hg;
+    };
+    if (_ov isEqualType [] && { (count _ov) > 0 }) then {
+        ([_ov] call _overlayRanges) params ["_ai", "_ob", "_plv", "_cov"];
+        _aiMin = _aiMin + (_ai select 0); _aiMax = _aiMax + (_ai select 1);
+        _obMin = _obMin + (_ob select 0); _obMax = _obMax + (_ob select 1);
+        if (!(_plv isEqualTo "")) then { _pl = _plv; };
+        if (!(_cov isEqualTo "")) then { _co = _cov; };
+    };
+
+    _rows pushBack [
+        ["kind", "CIVIC"],
+        ["ref", _id],
+        ["purpose", _purpose],
+        ["incidentType", _subtype],
+        ["placement", _pl],
+        ["aiRange", [_aiMin, _aiMax]],
+        ["objRange", [_obMin, _obMax]],
+        ["cleanupOwner", _co],
+        ["warnings", _rowWarn]
+    ];
+} forEach _civicCatalog;
+
 // --- Emit -----------------------------------------------------------------
-private _summary = [count _rows, _locationCount, _siteTypeCount, _incidentRowCount, count _warnings];
+private _summary = [count _rows, _locationCount, _siteTypeCount, _incidentRowCount, _civicRowCount, count _warnings];
 
 diag_log format [
-    "[ARC][SPAWNPAT][AUDIT] rows=%1 locations=%2 siteTypes=%3 incidents=%4 warnings=%5",
-    _summary select 0, _summary select 1, _summary select 2, _summary select 3, _summary select 4
+    "[ARC][SPAWNPAT][AUDIT] rows=%1 locations=%2 siteTypes=%3 incidents=%4 civic=%5 warnings=%6",
+    _summary select 0, _summary select 1, _summary select 2, _summary select 3, _summary select 4, _summary select 5
 ];
 
 if (_verbose) then {

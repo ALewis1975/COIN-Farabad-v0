@@ -2,14 +2,16 @@
 set -euo pipefail
 
 # Static contract checks for the Incident / Lead / site spawn-pattern matrix
-# foundation (issue #633, step 1). Verifies coverage and that the audit is
-# read-only and gameplay-neutral by default.
+# foundation (issue #633, steps 1-2). Verifies coverage (incidents, leads, and
+# structured civic-mission subtypes) and that the audit is read-only and
+# gameplay-neutral by default.
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PAT="$ROOT/data/farabad_spawn_patterns.sqf"
 AUDIT="$ROOT/functions/world/fn_worldSpawnPatternAudit.sqf"
 MARKERS="$ROOT/data/incident_markers.sqf"
 WORLD="$ROOT/data/farabad_world_locations.sqf"
+CIVIC="$ROOT/data/coin_civic_mission_catalog.sqf"
 CFG="$ROOT/config/CfgFunctions.hpp"
 INIT="$ROOT/initServer.sqf"
 
@@ -51,12 +53,13 @@ if grep -E 'createHashMapFromArray' "$AUDIT" | grep -vq 'compile'; then
 fi
 pass "spawn-pattern SQF avoids known sqflint-compat pitfalls"
 
-python3 - "$PAT" "$MARKERS" "$WORLD" <<'PY'
+python3 - "$PAT" "$MARKERS" "$WORLD" "$CIVIC" <<'PY'
 import re, sys
-pat_path, markers_path, world_path = sys.argv[1], sys.argv[2], sys.argv[3]
+pat_path, markers_path, world_path, civic_path = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
 pat = open(pat_path, encoding='utf-8').read()
 markers = open(markers_path, encoding='utf-8').read()
 world = open(world_path, encoding='utf-8').read()
+civic = open(civic_path, encoding='utf-8').read()
 
 def section(text, key):
     # Extract the array value for ["key", [ ... ]] by bracket matching.
@@ -80,6 +83,7 @@ location_purposes = section(pat, "locationPurposes")
 site_type_purposes = section(pat, "siteTypePurposes")
 incident_overlays = section(pat, "incidentOverlays")
 lead_overlays = section(pat, "leadOverlays")
+civic_overlays = section(pat, "civicMissionOverlays")
 
 # Purpose tags that have a pattern: first string of each top-level entry.
 pattern_tags = set(re.findall(r'\["([A-Z_]+)",\s*\[\s*\["purpose"', purpose_patterns))
@@ -148,8 +152,18 @@ missing_lead = required_lead - lead_tags
 if missing_lead:
     raise SystemExit("lead overlays missing: %s" % sorted(missing_lead))
 
+# Every civic-mission subtype in the structured catalog must have an overlay.
+civic_overlay_tags = set(re.findall(r'\["([A-Z_]+)",\s*\[\s*\["overlay"', civic_overlays))
+civic_subtypes = set(re.findall(r'\["subtype",\s*"([A-Z_]+)"\]', civic))
+if not civic_subtypes:
+    raise SystemExit("no civic mission subtypes parsed from catalog")
+missing_civic = civic_subtypes - civic_overlay_tags
+if missing_civic:
+    raise SystemExit("civic mission subtypes without overlay: %s" % sorted(missing_civic))
+
 print("[PASS] every named location + terrain site type is mapped to a purpose with a pattern")
 print("[PASS] every incident type and required lead tag has an overlay")
+print("[PASS] every civic mission subtype has an overlay")
 PY
 
 pass "spawn-pattern matrix coverage is complete"
