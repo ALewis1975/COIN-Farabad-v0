@@ -226,7 +226,7 @@ private _siteTypeCount = 0;
         ["cleanupOwner", _co],
         ["warnings", _rowWarn]
     ];
-} forEach (keys _siteTypePurposes);
+} forEach ([_siteTypePurposes] call (compile "params ['_m']; keys _m"));
 
 // --- 3. Incident catalog coverage ----------------------------------------
 private _markerPurpose = {
