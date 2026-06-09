@@ -31,6 +31,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-06-09 — Transient Incident/Lead/civic overlay spawning (issue #633 step 4/7/8)
 
 **Branch/Commit:** `copilot/fix-issue-with-data-processing` @ commit `f29e7a3b1dec529af5b1d269fd05ba186148af43`
 
