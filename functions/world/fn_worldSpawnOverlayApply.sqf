@@ -102,7 +102,7 @@ if (_spActive isEqualType createHashMap && { (count _spActive) > 0 }) then {
                     };
                 };
             } forEach _named;
-        } forEach (keys _spActive);
+        } forEach ([_spActive] call (compile "params ['_m']; keys _m"));
     };
 };
 private _ambientRoles = ["resident","pedestrian","vendor","shopper","worshipper","guest","crowd","roadside_civ"];
