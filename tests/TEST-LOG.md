@@ -11,7 +11,26 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
-## 2026-06-09 — Transient Incident/Lead/civic overlay spawning (issue #633 step 4/7/8)
+## 2026-06-09 — SitePop purpose expansion (issue #633 step 4)
+
+**Branch/Commit:** `copilot/fix-issue-633` @ commit `fed10e581b1dc47a11e354bd5f8750701ba61987`
+
+**Scenario:** Mode B feature delivery — consume the default-off `ARC_sitePurposeExpansionEnabled` toggle in `data/farabad_site_templates.sqf` to append purpose-specific SitePop baselines for 10 high-value named AO locations (Grand Mosque, Belle Foille Hotel, Hospital, Industrial, Junkyard, Solar Farm, Port Farabad, Jazira Oil Refinery, Jazira Oil Field, Military compound) on top of the three original sites. Each site translates the matrix `purposePatterns` into concrete SitePop role groups using existing class pools plus new bounded civilian/utility/fuel/cargo/military vehicle pools (invalid classes silently filtered). The three original sites (Prison/Palace/Embassy) are unchanged, and the file returns exactly the pre-expansion three-site set when the toggle is off (default). Concurrent AI is bounded by `ARC_sitePopActiveSitesCap` (6, enforced in `ARC_fnc_sitePopSpawnSite`).
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | sqflint-compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict data/farabad_site_templates.sqf initServer.sqf` | PASS | Clean, no parser-compat patterns. |
+| 2 | sqflint `-e w` | `sqflint -e w data/farabad_site_templates.sqf initServer.sqf` | PASS | Installed sqflint 0.3.2 in sandbox; no warnings/errors. |
+| 3 | Expansion contract suite | `bash tests/static/sitepop_expansion_contract_checks.sh` | PASS | Asserts toggle default-off, base/expansion sets separated, 10 expansion sites map to real named locations with a baseline (non-`NO_BASELINE_POP`) purpose, `ARC_loc_<id>` marker convention, no duplicate ids; wired into `arma-preflight.yml`. |
+| 4 | Matrix + overlay suites (regression) | `bash tests/static/spawn_pattern_matrix_contract_checks.sh` / `..._overlay_...sh` | PASS | Unchanged, still green. |
+| 5 | Bootstrap ordering | Confirm `ARC_sitePurposeExpansionEnabled` default is set (initServer.sqf:167) before `ARC_fnc_bootstrapServer` (1155) → `ARC_fnc_worldInit` → `ARC_fnc_sitePopInit` reads the templates | PASS | Toggle is resolved before SitePop loads templates. |
+| 6 | Expansion visibility on dedicated | Flip `ARC_sitePurposeExpansionEnabled` true, approach each expansion site, confirm purpose-appropriate ambient AI/vehicles spawn, civilians disarmed, no missing-class RPT spam, despawn on grace | BLOCKED | No Arma runtime in sandbox; operator run required on dedicated rig. |
+| 7 | Active-sites cap + JIP | Confirm concurrent active sites respect `ARC_sitePopActiveSitesCap`; JIP client sees active-site population; reconnect/restart idempotency | BLOCKED | Dedicated/JIP operator run required. |
+
+**Result:** PASS (static) / BLOCKED (runtime). Static compat + contract gates green; dedicated/JIP site-population visibility, class-pool validity against the live mod preset, and despawn checks must be executed in Arma with the toggle enabled and recorded here.
+
+---
+
 
 **Branch/Commit:** `copilot/fix-issue-with-data-processing` @ commit `f29e7a3b1dec529af5b1d269fd05ba186148af43`
 
