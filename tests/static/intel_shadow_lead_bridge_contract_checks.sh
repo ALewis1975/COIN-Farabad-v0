@@ -50,9 +50,12 @@ check_absent "call ARC_fnc_leadCreate" "$BRIDGE" "SHADOW ISR bridge does not cre
 check_absent "call ARC_fnc_tocBacklogEnqueue" "$BRIDGE" "SHADOW ISR bridge does not enqueue the TOC backlog directly"
 check_absent "ARC_fnc_rpcValidateSender" "$BRIDGE" "SHADOW ISR bridge adds no new server validation handler"
 
-# Wiring: flag seeded server-side and action registered.
+# Wiring: flag seeded server-side and action surfaced in the Farabad Console.
+# (Relocated from the player action menu into the S2/INTEL console tools.)
 check "ARC_isrShadowLeadBridgeEnabled" "initServer.sqf" "ARC_isrShadowLeadBridgeEnabled seeded in initServer"
-check "ARC_fnc_intelShadowLeadBridge" "functions/core/fn_tocInitPlayer.sqf" "SHADOW ISR bridge wired as a player addAction"
+check_absent "ARC_fnc_intelShadowLeadBridge" "functions/core/fn_tocInitPlayer.sqf" "SHADOW ISR bridge no longer wired as a player addAction"
+check "ARC_fnc_intelShadowLeadBridge" "functions/ui/fn_uiConsoleClickPrimary.sqf" "SHADOW ISR bridge routed from the Farabad Console primary handler"
+check "FIELD_SHADOW_ISR" "functions/ui/fn_uiConsoleIntelPaint.sqf" "SHADOW ISR bridge surfaced as a console FIELD REQUESTS row"
 check "class intelShadowLeadBridge" "config/CfgFunctions.hpp" "intelShadowLeadBridge registered in CfgFunctions"
 
 # B3 — TOC lead workflow must preserve and display source/confidence metadata.

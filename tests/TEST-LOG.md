@@ -11,6 +11,26 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-06-09 — Relocate JTAC/SHADOW/TNP field requests into the Farabad Console
+
+**Branch/Commit:** `copilot/remove-jtac-shadow-tnp-request-action` (base commit `db563c4`)
+
+**Scenario:** Mode B feature delivery — remove the JTAC CAS prefill, SHADOW ISR lead-bridge and TNP partnered-ops player `addAction`s from `functions/core/fn_tocInitPlayer.sqf` and surface them instead as gated "FIELD REQUESTS" rows on the Farabad Console S2/INTEL tab. Selecting a row from the console primary handler closes the dialog first, then spawns the unchanged client function so the in-world marking context (laser/cursor target) is valid. Underlying functions, feature flags and server RPC paths are unchanged; INTEL tab visibility is extended so SHADOW/TNP/queue-approver operators can reach the relocated actions.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_tocInitPlayer.sqf functions/ui/fn_uiConsoleClickPrimary.sqf functions/ui/fn_uiConsoleIntelPaint.sqf functions/ui/fn_uiConsoleOnLoad.sqf` | PASS | No banned parser-compat patterns; `fn_uiConsoleActionS2Primary.sqf` left untouched to avoid its pre-existing compat debt. |
+| 2 | Relocation contract test | `tests/static/console_field_request_relocation_checks.sh` | PASS | Asserts addActions removed, console rows + flag/role gates present, primary handler closes+spawns, INTEL visibility extended, no new RPC. |
+| 3 | Updated SHADOW contract test | `tests/static/intel_shadow_lead_bridge_contract_checks.sh` | PASS | Now asserts console wiring instead of the player addAction. |
+| 4 | Updated TNP contract test | `tests/static/ops_tnp_partnered_contract_checks.sh` | PASS | Now asserts console wiring instead of the player addAction. |
+| 5 | Regression: CASREQ + Lane C contracts | `tests/static/casreq_snapshot_contract_checks.sh`, `tests/static/lane_c_contract_checks.sh` | PASS | Unaffected by the relocation. |
+| 6 | `sqflint -e w` on changed files | n/a | BLOCKED | `sqflint` binary unavailable in sandbox; compat scan run as the available proxy. |
+| 7 | Dedicated server / JIP exercise of relocated console actions | Open console → INTEL → FIELD REQUESTS → JTAC/SHADOW/TNP; verify dialog closes, marking context resolves, request submits/replicates | BLOCKED | Arma 3 runtime unavailable in sandbox; operator run required on the dedicated rig. |
+
+**Result:** PASS (static) / BLOCKED (runtime + sqflint binary). Static contracts confirm the trigger surface moved cleanly with identical flag/role gates; dedicated/JIP behavior must be operator-verified.
+
+---
+
 ## 2026-06-09 — Preflight CI fix for world spawn SQF lint parse failures
 
 **Branch/Commit:** `copilot/issue-633-more-work` @ commit `2652101d9330d0facad5eaa2f599672589d1dc51`

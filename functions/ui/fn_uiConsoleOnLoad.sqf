@@ -129,6 +129,16 @@ private _canTocTab  = _canTocFull || { _atStation && _isAuth };
 // Intel feed is useful for TOC roles, and for authorized field leadership.
 private _canIntel = _canTocFull || _isAuth || _isOmni;
 
+// Field-request actions (JTAC CAS prefill / SHADOW ISR bridge / TNP partnered ops)
+// were relocated from the player action menu into the S2/INTEL console tools, so
+// their callsign operators must be able to reach the INTEL tab even when they are
+// not TOC staff or authorized leadership. Mirrors the per-row gates used in
+// ARC_fnc_uiConsoleIntelPaint.
+private _isShadowTok = [player, "SHADOW"] call ARC_fnc_rolesHasGroupIdToken;
+private _isTnpTok    = [player, "TNP"] call ARC_fnc_rolesHasGroupIdToken;
+private _canApprove  = [player] call ARC_fnc_rolesCanApproveQueue;
+_canIntel = _canIntel || _isShadowTok || _isTnpTok || _canApprove;
+
 // Headquarters (Admin) tab access (S3, TOC Command, BN Command group, OMNI)
 private _hqTokens = missionNamespace getVariable ["ARC_consoleHQTokens", ["BNCMD", "BN COMMAND", "BNHQ", "BN HQ", "BN CO", "BNCO", "BN CDR", "BNCDR", "BN CMDR", "BATTALION CO", "BATTALION CDR", "REDFALCON 6", "REDFALCON6", "RED FALCON 6", "FALCON 6", "FALCON6"]];
 if (!(_hqTokens isEqualType [])) then { _hqTokens = ["BNCMD", "BN COMMAND", "BNHQ", "BN HQ", "BN CO", "BNCO", "BN CDR", "BNCDR", "BN CMDR", "BATTALION CO", "BATTALION CDR", "REDFALCON 6", "REDFALCON6", "RED FALCON 6", "FALCON 6", "FALCON6"]; };

@@ -19,7 +19,53 @@ switch (_tab) do
 {
     case "HANDOFF": { [] spawn ARC_fnc_uiConsoleActionIntelDebrief; };
 
-    case "INTEL":   { [] spawn ARC_fnc_uiConsoleActionS2Primary; };
+    case "INTEL":   {
+        // Field-request rows (relocated from the player action menu) are intercepted
+        // here so they can close the console first — the underlying JTAC/SHADOW/TNP
+        // functions read an in-world marking context (laser/cursor target) that is
+        // only valid once the fullscreen console is closed. All other INTEL rows fall
+        // through to the standard S2 primary dispatch.
+        private _handled = false;
+        private _disp = uiNamespace getVariable ["ARC_console_display", displayNull];
+        if (isNull _disp) then { _disp = findDisplay 78000; };
+        if (!isNull _disp) then
+        {
+            private _list = _disp displayCtrl 78011;
+            if (!isNull _list) then
+            {
+                private _sel = lbCurSel _list;
+                private _data = if (_sel >= 0) then { _list lbData _sel } else { "" };
+                if (!(_data isEqualType "")) then { _data = ""; };
+
+                switch (_data) do
+                {
+                    case "FIELD_JTAC_CAS":
+                    {
+                        _handled = true;
+                        closeDialog 0;
+                        ["CASREQ", "Console closed - lase/aim at target to continue."] call ARC_fnc_clientToast;
+                        [] spawn ARC_fnc_casreqJtacPrefill;
+                    };
+                    case "FIELD_SHADOW_ISR":
+                    {
+                        _handled = true;
+                        closeDialog 0;
+                        ["ISR", "Console closed - lase/cursor the contact to continue."] call ARC_fnc_clientToast;
+                        [] spawn ARC_fnc_intelShadowLeadBridge;
+                    };
+                    case "FIELD_TNP_PARTNERED":
+                    {
+                        _handled = true;
+                        closeDialog 0;
+                        ["TNP", "Console closed - aim at the location to continue."] call ARC_fnc_clientToast;
+                        [] spawn ARC_fnc_opsTnpPartneredRequest;
+                    };
+                };
+            };
+        };
+
+        if (!_handled) then { [] spawn ARC_fnc_uiConsoleActionS2Primary; };
+    };
 
     case "OPS":
     {
