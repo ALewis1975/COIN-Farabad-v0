@@ -159,7 +159,7 @@ if (_slots isEqualType createHashMap && { (count _slots) > 0 }) then {
             if (_x isEqualType [] && { (count _x) >= 3 }) then {
                 private _lid = _x select 0;
                 private _lp  = _x select 2;
-                if (_lp isEqualType [] && { (count _lp) >= 2 } && { _lid in _slots }) then {
+if (_lp isEqualType [] && { (count _lp) >= 2 } && { _slots hasKey _lid }) then {
                     private _d = _p3 distance2D _lp;
                     if (_d < _bestD) then { _bestD = _d; _bestId = _lid; };
                 };
