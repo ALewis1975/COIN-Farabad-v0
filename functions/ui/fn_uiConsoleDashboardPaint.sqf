@@ -85,7 +85,8 @@ private _grid = mapGridPosition _pos;
 // Dashboard now sources incident, follow-on, ops, queue, unit status, backlog,
 // airbase, and base-services data from Console VM when available.
 // Direct missionNamespace reads remain fallback-only when the VM adapter is unavailable.
-private _useVm = (!isNil "ARC_fnc_consoleVmAdapterV1");
+private _vmPayload = missionNamespace getVariable ["ARC_consoleVM_payload", []];
+private _useVm = (!isNil "ARC_fnc_consoleVmAdapterV1") && { _vmPayload isEqualType [] } && { !(_vmPayload isEqualTo []) };
 
 private _taskId = "";
 private _hasIncident = false;
