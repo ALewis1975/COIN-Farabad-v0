@@ -543,6 +543,13 @@ missionNamespace setVariable ["civsub_v1_traffic_cap_moving_global", 6, true];
 missionNamespace setVariable ["civsub_v1_traffic_prob_moving", 0.40, true];
 missionNamespace setVariable ["civsub_v1_traffic_moving_spawnMaxDistrictAttempts", 3, true];
 missionNamespace setVariable ["civsub_v1_traffic_moving_maxSpeed", 35, true];
+// Lateral lane offset (m) for moving spawns: shifts the spawn + first move
+// target to the RIGHT of the travel direction so vehicles spawn inside the
+// correct carriageway/lane instead of on the road centreline (median), where
+// divided-highway barrier props sit. Clamped to 0-8 m; the picker steps the
+// offset down toward the centreline until the candidate is still on the paved
+// road, so narrow single-carriageway roads keep a small/zero offset.
+missionNamespace setVariable ["civsub_v1_traffic_moving_laneOffset_m", 3, true];
 // Moving waypoint distances: min clamps to 1000-3000m; search clamps to min+100..4000m.
 // The 100m gap prevents near-duplicate road picks; 4000m upper bound preserves district locality.
 // Search radius must exceed minimum distance so the road-distance filter can produce candidates.
