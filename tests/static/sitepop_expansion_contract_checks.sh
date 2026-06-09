@@ -81,10 +81,11 @@ named_ids = set(re.findall(r'\["([A-Za-z0-9_]+)",\s*"', world_named_block))
 
 # --- Spawn matrix: id -> purpose mapping. ---
 m = re.search(r'\["locationPurposes",\s*\[', pat)
+if not m:
+    raise SystemExit("could not locate locationPurposes block in spawn-pattern matrix")
 i = m.end() - 1
 depth = 0
 loc_section = None
-for j in range(i, len(pat)):
     if pat[j] == '[':
         depth += 1
     elif pat[j] == ']':
