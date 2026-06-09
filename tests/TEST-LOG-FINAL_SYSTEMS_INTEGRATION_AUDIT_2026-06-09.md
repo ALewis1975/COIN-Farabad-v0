@@ -35,7 +35,7 @@ This addendum records static validation and audit evidence only. It does not pro
 | 11 | `python3 scripts/dev/validate_state_migrations.py` | PASS | State migration validation passed. |
 | 12 | `bash scripts/dev/check_remoteexec_contract.sh` | PASS | Existing Air/Tower RemoteExec contract checks passed. |
 | 13 | `bash scripts/dev/check_console_conflicts.sh` | PASS | No console IDC collisions; painter contract passed. |
-| 14 | `git diff --check` | PASS | No whitespace errors before evidence-file creation. |
+| 14 | `git diff --check` | PASS | No whitespace errors before evidence-file creation.
 
 ---
 
