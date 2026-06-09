@@ -171,7 +171,9 @@ if (isNil { missionNamespace getVariable "ARC_sitePurposeExpansionEnabled" }) th
 // spawn-pattern matrix so coverage/warnings are visible in the RPT.
 if (missionNamespace getVariable ["ARC_spawnPatternsEnabled", false]) then {
     [] spawn {
-        waitUntil { !isNil "ARC_fnc_worldSpawnPatternAudit" };
+        private _t0 = diag_tickTime;
+        waitUntil { !isNil "ARC_fnc_worldSpawnPatternAudit" || { (diag_tickTime - _t0) > 30 } };
+        if (isNil "ARC_fnc_worldSpawnPatternAudit") exitWith { diag_log "[ARC][SPAWNPAT][WARN] initServer: ARC_fnc_worldSpawnPatternAudit not available after 30s; skipping audit."; };
         [true] call ARC_fnc_worldSpawnPatternAudit;
     };
 };
