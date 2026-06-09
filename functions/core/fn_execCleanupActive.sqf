@@ -243,7 +243,7 @@ if (_lsNids isEqualType [] && { (count _lsNids) > 0 }) then
 // --- Transient Incident/Lead/civic overlay spawns (issue #633 step 4) --------
 // Mirrors the localSupport/cache cleanup blocks: read the NetId list stored by
 // ARC_fnc_worldSpawnOverlayApply, delete (immediate) or register for deferred
-// cleanup, then clear the state key. Honours INCIDENT despawn ownership.
+// cleanup, then clear the state key.
 private _ovNids = ["activeOverlaySpawnNetIds", []] call ARC_fnc_stateGet;
 if (_ovNids isEqualType [] && { (count _ovNids) > 0 }) then
 {
