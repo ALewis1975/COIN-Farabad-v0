@@ -185,7 +185,7 @@ private _ensureS2Split = {
 // S2 category panels (TOOLS mode):
 // Break the long mixed list into stacked sub-panels (similar to OPS frames).
 // We keep MainList (78011) as a hidden master list for data + selection logic,
-// and render 4 visible panel listboxes as UI-only projections.
+// and render 5 visible panel listboxes as UI-only projections.
 // ---------------------------------------------------------------------------
 
 private _ensureS2CatPanels = {
@@ -194,7 +194,7 @@ private _ensureS2CatPanels = {
     private _k = "ARC_s2_catPanels";
     private _panels = uiNamespace getVariable [_k, []];
 
-    private _ok = (_panels isEqualType [] && { (count _panels) == 4 });
+    private _ok = (_panels isEqualType [] && { (count _panels) == 5 });
     if (_ok) then {
         {
             if !(_x isEqualType [] && { (count _x) == 3 }) exitWith { _ok = false; };
@@ -252,6 +252,7 @@ private _ensureS2CatPanels = {
         _panels pushBack (["INTEL / LEADS"] call _mkPanel);
         _panels pushBack (["CIVSUB / MDT"] call _mkPanel);
         _panels pushBack (["ADMIN / TOOLS"] call _mkPanel);
+        _panels pushBack (["FIELD REQUESTS"] call _mkPanel);
         _panels pushBack (["INTEL FEED"] call _mkPanel);
 
         uiNamespace setVariable [_k, _panels];
@@ -277,20 +278,21 @@ private _layoutS2CatPanels = {
     };
 
     private _gap = 0.006;
-    private _avail = _h - (_gap * 3);
+    private _avail = _h - (_gap * 4);
     if (_avail < 0.20) then { _avail = _h; _gap = 0; };
 
     // Combined Intel/Lead panel keeps the top footprint compact so CIVSUB starts higher.
     // CIVSUB receives a larger ratio for better in-pane browsing.
-    private _weights = [0.14, 0.36, 0.20, 0.30];
+    // FIELD REQUESTS holds at most 3 gated rows, so it gets a slim slice.
+    private _weights = [0.13, 0.33, 0.17, 0.11, 0.26];
 
     private _yCur = _y;
-    for "_pi" from 0 to 3 do {
+    for "_pi" from 0 to 4 do {
         private _p = _panels select _pi;
         _p params ["_bg","_lbl","_lb"];
 
         private _ph = _avail * (_weights select _pi);
-        if (_pi == 3) then { _ph = (_y + _h) - _yCur; };
+        if (_pi == 4) then { _ph = (_y + _h) - _yCur; };
 
         _bg  ctrlSetPosition [_x, _yCur, _w, _ph];
         _lbl ctrlSetPosition [_x, _yCur, _w, _hHdr];
@@ -313,7 +315,8 @@ private _renderS2CatPanelsFromMaster = {
         ["INTEL / LEADS",      (_panels select 0) select 2],
         ["CIVSUB / MDT",       (_panels select 1) select 2],
         ["ADMIN / TOOLS",      (_panels select 2) select 2],
-        ["INTEL FEED",         (_panels select 3) select 2]
+        ["FIELD REQUESTS",     (_panels select 3) select 2],
+        ["INTEL FEED",         (_panels select 4) select 2]
     ]] call _hmCreate;
 
     private _section = "";

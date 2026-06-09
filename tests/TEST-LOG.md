@@ -11,6 +11,25 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-06-09 — QA follow-up: dedicated FIELD REQUESTS panel in the S2 category projection
+
+**Branch/Commit:** `copilot/conduct-full-systems-design-check` (base commit `dd471e2`)
+
+**Scenario:** Mode A bug fix — QA design-check follow-up. The relocated "FIELD REQUESTS" section header was unmapped in the S2 TOOLS-mode category-panel projection (`fn_uiConsoleIntelPaint.sqf`), so its JTAC/SHADOW/TNP rows inherited the previously mapped panel (ADMIN / TOOLS) instead of a dedicated section. Fix adds a fifth "FIELD REQUESTS" panel (cache validation, layout weights, master-list mapping) so the rows render under their own labelled panel; row gating, action tokens, click routing and RPC paths are unchanged.
+
+| # | Check | Command / Step | Result | Notes |
+|---|-------|----------------|--------|-------|
+| 1 | Changed-file compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ui/fn_uiConsoleIntelPaint.sqf` | PASS | No banned parser-compat patterns. |
+| 2 | Changed-file sqflint | `sqflint -e w functions/ui/fn_uiConsoleIntelPaint.sqf` | PASS | Lints clean after the panel addition. |
+| 3 | Relocation contract test (extended) | `tests/static/console_field_request_relocation_checks.sh` | PASS | Now also asserts the dedicated FIELD REQUESTS panel creation and master-list mapping. |
+| 4 | Regression: SHADOW + TNP contracts | `tests/static/intel_shadow_lead_bridge_contract_checks.sh`, `tests/static/ops_tnp_partnered_contract_checks.sh` | PASS | Console wiring unchanged. |
+| 5 | Console painter/IDC conflict check | `bash scripts/dev/check_console_conflicts.sh` | PASS | No IDC collisions; painter contract intact. |
+| 6 | Dedicated server / JIP visual check of the FIELD REQUESTS panel | Open console → INTEL (TOOLS mode); verify FIELD REQUESTS rows render in their own panel and stale 4-panel uiNamespace cache rebuilds | BLOCKED | Arma 3 runtime unavailable in sandbox; operator run required on the dedicated rig. |
+
+**Result:** PASS (static) / BLOCKED (runtime). UI-only projection fix; no authority, flag, role-gate or RemoteExec surface changes.
+
+---
+
 ## 2026-06-09 — Relocate JTAC/SHADOW/TNP field requests into the Farabad Console
 
 **Branch/Commit:** `copilot/remove-jtac-shadow-tnp-request-action` (base commit `db563c4`)
