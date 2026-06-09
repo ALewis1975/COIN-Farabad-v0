@@ -294,3 +294,7 @@ jobs:
       - name: Spawn-pattern overlay contract static validation
         run: |
           bash tests/static/spawn_pattern_overlay_contract_checks.sh
+
+      - name: SitePop purpose-expansion contract static validation
+        run: |
+          bash tests/static/sitepop_expansion_contract_checks.sh

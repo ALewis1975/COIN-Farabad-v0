@@ -175,8 +175,10 @@ if (isNil { missionNamespace getVariable "ARC_sitePurposeExpansionEnabled" }) th
 //                                       virtual pool (ARC_fnc_threatVirtualPoolTick).
 //   ARC_overlayMaxObjectsPerIncident   total overlay props/vehicles per incident.
 // These are consumed only when ARC_incidentOverlaySpawnsEnabled is on.
-// NOTE: ARC_sitePurposeExpansionEnabled remains inert this phase; its SitePop
-// baseline consumer is a separate follow-up PR.
+// NOTE: ARC_sitePurposeExpansionEnabled is consumed by data/farabad_site_templates.sqf
+// (loaded by ARC_fnc_sitePopInit). When on, it appends purpose-specific SitePop
+// baselines for the high-value named AO locations on top of the three original
+// sites; when off (default) the mission keeps the original three-site behaviour.
 if (isNil { missionNamespace getVariable "ARC_overlayMaxAiPerIncident" }) then {
     missionNamespace setVariable ["ARC_overlayMaxAiPerIncident", 14, true];
 };

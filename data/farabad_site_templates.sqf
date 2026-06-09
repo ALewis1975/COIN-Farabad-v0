@@ -191,10 +191,64 @@ private _staffPool = [
 ];
 
 // ---------------------------------------------------------------------------
-// Templates
+// Vehicle pools for the purpose-expansion sites (issue #633 step 4).
+// Each pool mixes 3CB civilian classes with vanilla fallbacks; classes absent
+// from CfgVehicles are silently filtered at spawn time, so a thin mod preset
+// degrades gracefully to the vanilla entries rather than producing missing-class
+// RPT spam. All are spawned with behaviour "parked" (locked, dynamic-sim).
 // ---------------------------------------------------------------------------
 
-[
+// General civilian cars parked in markets, hotels, and urban sites.
+private _civCarPool = [
+    "UK3CB_TKC_C_S1203",
+    "C_Offroad_01_F",
+    "C_Hatchback_01_F",
+    "C_SUV_01_F"
+];
+
+// Light utility/box trucks for industrial, power, and mine sites.
+private _utilityTruckPool = [
+    "C_Van_01_box_F",
+    "C_Truck_02_transport_F",
+    "C_Truck_02_covered_F",
+    "UK3CB_TKC_C_S1203"
+];
+
+// Fuel transport for oil/gas sites.
+private _fuelTruckPool = [
+    "C_Van_01_fuel_F",
+    "C_Truck_02_fuel_F"
+];
+
+// Cargo transport for the port.
+private _cargoTruckPool = [
+    "C_Truck_02_covered_F",
+    "C_Truck_02_transport_F",
+    "C_Van_01_box_F"
+];
+
+// Military soft-skin transport for the military compound baseline.
+private _milVehiclePool = [
+    "B_Truck_01_transport_F",
+    "B_Truck_01_covered_F",
+    "C_Offroad_01_F"
+];
+
+// ---------------------------------------------------------------------------
+// Templates
+// ---------------------------------------------------------------------------
+//
+// _baseTemplates: the three original SitePop sites. ALWAYS returned, unchanged.
+// _expansionTemplates (further below): purpose-specific baselines for the rest of
+// the high-value named AO locations (issue #633 step 4). These are appended ONLY
+// when ARC_sitePurposeExpansionEnabled is true (default false in initServer.sqf),
+// so SitePop behaviour is identical to the pre-expansion mission until an operator
+// opts in. The active-sites cap (ARC_sitePopActiveSitesCap, default 6, enforced in
+// ARC_fnc_sitePopSpawnSite) bounds concurrent AI regardless of how many sites are
+// registered here.
+// ---------------------------------------------------------------------------
+
+private _baseTemplates = [
     // -------------------------------------------------------------------------
     // KARKANAK PRISON  (zone-aware, anchor-local spawning)
     //   All guard roles use TNP (BLUFOR). Civilian roles: medical staff, vendors,
@@ -315,4 +369,189 @@ private _staffPool = [
             ["contractor", "civ",  _workerPool, [2,  4], "wander",   80]
         ]
     ]
-]
+];
+
+// ---------------------------------------------------------------------------
+// Purpose-expansion templates (issue #633 step 4).
+//
+// One bounded SitePop baseline per high-value named AO location, translating the
+// purpose patterns declared in data/farabad_spawn_patterns.sqf ("purposePatterns"
+// + "locationPurposes") into concrete SitePop role groups. Counts are kept on the
+// conservative end of the matrix ranges because uncontrolled AI count is the
+// primary risk called out in the issue; richer fidelity should be tuned upward
+// only after MP validation.
+//
+// SitePop supports four behaviours (garrison | camp | wander | parked); the
+// richer matrix behaviours are mapped down here (construction/medical/inspect ->
+// camp, guard -> garrison, loiter/queue -> wander, traffic_through -> parked
+// vehicles). Each site uses site-wide (6-field) groups: no Eden anchor markers
+// are required, so these spawn correctly without additional mission.sqm edits.
+//
+// siteId / markerName values match ARC_worldNamedLocations + the canonical
+// ARC_loc_* markers in data/farabad_world_locations.sqf. Civilian-side units are
+// auto-disarmed by ARC_fnc_sitePopBuildGroup.
+// ---------------------------------------------------------------------------
+private _expansionTemplates = [
+    // GRAND MOSQUE — RELIGIOUS: elder, worshippers, vendors, TNP outer security.
+    [
+        "GrandMosque",
+        "ARC_loc_GrandMosque",
+        450,
+        700,
+        120,
+        [
+            ["elder",      "civ",  _civPool,    [1, 1], "camp",     30],
+            ["worshipper", "civ",  _civPool,    [5, 8], "wander",   60],
+            ["vendor",     "civ",  _civPool,    [1, 3], "camp",     50],
+            ["tnp_outer",  "west", _tnpPool,    [2, 4], "garrison", 70],
+            ["civ_car",    "civ",  _civCarPool, [1, 3], "parked",   70]
+        ]
+    ],
+
+    // BELLE FOILLE HOTEL — HOTEL: staff, guests, security, parked cars.
+    [
+        "BelleFoilleHotel",
+        "ARC_loc_BelleFoilleHotel",
+        450,
+        700,
+        120,
+        [
+            ["hotel_staff", "civ",  _civPool,    [2, 4], "camp",     40],
+            ["guest",       "civ",  _civPool,    [3, 6], "wander",   55],
+            ["security",    "west", _tnpPool,    [2, 4], "garrison", 50],
+            ["civ_car",     "civ",  _civCarPool, [2, 5], "parked",   70]
+        ]
+    ],
+
+    // HOSPITAL — MEDICAL: civilian doctors/nurses, patients, TNP outer, ambulance.
+    [
+        "hospital",
+        "ARC_loc_hospital",
+        450,
+        700,
+        120,
+        [
+            ["civ_doctor", "civ",  _civMedPool,    [2, 4], "camp",     40],
+            ["patient",    "civ",  _civPool,       [3, 6], "wander",   55],
+            ["tnp_outer",  "west", _tnpPool,       [2, 4], "garrison", 60],
+            ["ambulance",  "civ",  _ambVehiclePool,[1, 2], "parked",   60]
+        ]
+    ],
+
+    // INDUSTRIAL COMPLEX — INDUSTRIAL: workers, contractors, limited security.
+    [
+        "industrial022",
+        "ARC_loc_industrial022",
+        450,
+        700,
+        120,
+        [
+            ["worker",     "civ",  _workerPool,      [4, 6], "camp",     70],
+            ["contractor", "civ",  _workerPool,      [1, 3], "wander",   90],
+            ["security",   "west", _tnpPool,         [2, 3], "garrison", 80],
+            ["utility_truck","civ",_utilityTruckPool,[1, 3], "parked",   90]
+        ]
+    ],
+
+    // JUNKYARD — INDUSTRIAL: mechanics/scavengers, light security, derelict trucks.
+    [
+        "Junkyard",
+        "ARC_loc_Junkyard",
+        450,
+        700,
+        120,
+        [
+            ["mechanic",   "civ",  _workerPool,      [2, 4], "camp",     60],
+            ["scavenger",  "civ",  _civPool,         [2, 4], "wander",   80],
+            ["security",   "west", _tnpPool,         [1, 2], "garrison", 70],
+            ["junk_truck", "civ",  _utilityTruckPool,[1, 3], "parked",   80]
+        ]
+    ],
+
+    // SOLAR FARM — POWER: technicians, light security, utility trucks.
+    [
+        "SolarFarm",
+        "ARC_loc_SolarFarm",
+        450,
+        700,
+        120,
+        [
+            ["technician",   "civ",  _workerPool,      [2, 4], "camp",     80],
+            ["security",     "west", _tnpPool,         [1, 3], "garrison", 90],
+            ["utility_truck","civ",  _utilityTruckPool,[1, 2], "parked",   90]
+        ]
+    ],
+
+    // PORT FARABAD — PORT: stevedores, port security, customs, cargo trucks.
+    [
+        "PortFarabad",
+        "ARC_loc_PortFarabad",
+        500,
+        750,
+        120,
+        [
+            ["stevedore",    "civ",  _workerPool,     [4, 6], "camp",     90],
+            ["port_security","west", _tnpPool,        [2, 4], "garrison", 80],
+            ["customs",      "west", _tnpPool,        [1, 3], "camp",     70],
+            ["cargo_truck",  "civ",  _cargoTruckPool, [1, 3], "parked",   90]
+        ]
+    ],
+
+    // JAZIRA OIL REFINERY — OIL_GAS: workers, perimeter security, fuel trucks.
+    [
+        "JaziraOilRefinery",
+        "ARC_loc_JaziraOilRefinery",
+        500,
+        750,
+        120,
+        [
+            ["worker",     "civ",  _workerPool,   [3, 6], "camp",     90],
+            ["security",   "west", _tnpPool,      [2, 4], "garrison", 90],
+            ["fuel_truck", "civ",  _fuelTruckPool,[1, 3], "parked",   90]
+        ]
+    ],
+
+    // JAZIRA OIL FIELD — OIL_GAS: workers, perimeter security, fuel trucks.
+    [
+        "JaziraOilField",
+        "ARC_loc_JaziraOilField",
+        500,
+        750,
+        120,
+        [
+            ["worker",     "civ",  _workerPool,   [3, 5], "camp",     90],
+            ["security",   "west", _tnpPool,      [2, 3], "garrison", 90],
+            ["fuel_truck", "civ",  _fuelTruckPool,[1, 2], "parked",   90]
+        ]
+    ],
+
+    // MILITARY COMPOUND — MILITARY: TNA staff, patrols, parked military vehicles.
+    [
+        "military",
+        "ARC_loc_military",
+        500,
+        750,
+        120,
+        [
+            ["tna_staff",  "west", _tnaPool,        [4, 6], "garrison", 90],
+            ["patrol",     "west", _tnaPool,        [2, 4], "wander",   100],
+            ["mil_vehicle","west", _milVehiclePool, [1, 3], "parked",   90]
+        ]
+    ]
+];
+
+// ---------------------------------------------------------------------------
+// Assemble the returned template set.
+//   - Base sites are always present.
+//   - Expansion sites are appended only when the operator has opted in via the
+//     ARC_sitePurposeExpansionEnabled toggle (default false). When off, this file
+//     returns exactly the pre-expansion three-site set.
+// ---------------------------------------------------------------------------
+private _result = +_baseTemplates;
+if (missionNamespace getVariable ["ARC_sitePurposeExpansionEnabled", false]) then
+{
+    _result append _expansionTemplates;
+    diag_log format ["[ARC][SITEPOP][INFO] farabad_site_templates: purpose expansion ON — +%1 site template(s).", count _expansionTemplates];
+};
+
+_result
