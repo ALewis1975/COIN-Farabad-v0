@@ -2,7 +2,7 @@
 
 **Mode:** I — Security Hardening  
 **Status:** Security delta-audit addendum to `docs/security/RemoteExec_Endpoint_Audit_Matrix.md`  
-**Scope:** Recent ecosystem/read-model/adaptive-COIN changes that could have changed UI action paths, request routes, or RemoteExec surface.  
+**Scope:** Recent ecosystem/read-model/adaptive-pressure changes that could have changed UI action paths, request routes, or RemoteExec surface.  
 **Runtime behavior changes:** None.  
 **Endpoint rows changed:** None. This audit records that the recent changes did not add new client-to-server or server-to-client RemoteExec endpoints.
 
@@ -10,7 +10,7 @@
 
 ## 1) Purpose
 
-This addendum closes the RemoteExec security-surface question for the recent ecosystem-layer and adaptive-read-model work.
+This addendum closes the RemoteExec security-surface question for the recent ecosystem-layer, read-model, and adaptive-pressure work.
 
 The existing `RemoteExec_Endpoint_Audit_Matrix.md` remains the canonical endpoint ledger. This addendum does not mark unaudited endpoints as verified. It records whether the recent PR sequence introduced any new RemoteExec endpoints, changed client action routes, or changed the security posture of existing RPC surfaces.
 
@@ -23,7 +23,7 @@ The existing `RemoteExec_Endpoint_Audit_Matrix.md` remains the canonical endpoin
 | `docs/security/RemoteExec_Endpoint_Audit_Matrix.md` | Canonical endpoint ledger and S0-S5 check vocabulary. |
 | `config/CfgRemoteExec.hpp` | Allowlist source for RemoteExec functions and commands. |
 | `config/CfgFunctions.hpp` | Function discovery/registration source. |
-| Recent Mode C/B/J changes | Time Policy, World Registry, Runtime Boundary, Console VM, Threat Economy, district posture selection, Intel quality coupling, sustainment snapshot, and reliability sweeps. |
+| Recent Mode C/B/J changes | Time Policy (#606), World Registry (#607), Runtime Boundary snapshot (#608), Console VM runtime boundary section (#618) and dashboard tab migration (#627), Threat Economy reason taxonomy (#613), district posture selection (#620), Intel quality coupling (#621), sustainment readiness snapshot (#625), TASKENG/SITREP follow-on reliability sweep (#624), and CIVSUB/Threat/IED reliability sweep (#609). |
 
 ---
 
@@ -31,16 +31,16 @@ The existing `RemoteExec_Endpoint_Audit_Matrix.md` remains the canonical endpoin
 
 | Area / PR theme | Changed path type | New client→server RPC? | New server→client RPC? | Existing endpoint affected? | Matrix action |
 |---|---|:---:|:---:|---|---|
-| Time / Tempo Policy wrapper | Server/client read helper over existing `ARC_dynamic_tod_*` state | No | No | None | No endpoint row change. |
-| World Registry adapter | Server-owned read adapter over world registry state | No | No | None | No endpoint row change. |
-| Runtime Boundary snapshot | Server-owned public snapshot publisher | No | No | None | No endpoint row change. Public replicated state only. |
-| Runtime Boundary Console VM section | Console VM read-model section | No | No | None | No endpoint row change. UI remains read-only consumer. |
-| Threat Economy reason taxonomy | Server-side reason metadata and public snapshot enrichment | No | No | None | No endpoint row change. No action/request route added. |
-| District-posture-driven threat selection | Server-side scheduler selection logic and observability | No | No | None | No endpoint row change. No client action route added. |
-| Intel quality coupling | Server-side lead-quality read model and lead metadata | No | No | None | No endpoint row change. Lead creation remains server-side. |
-| Sustainment readiness snapshot | Server-owned read model embedded in existing supply public snapshot | No | No | None | No endpoint row change. S3 consumes later; no action path yet. |
-| TASKENG / SITREP / follow-on reliability sweep | QA checklist/evidence contract | No | No | Existing TASKENG/SITREP endpoints remain in §3.4 with `?` status | No row upgrade. Runtime proof still pending. |
-| CIVSUB / Threat / IED reliability sweep | QA checklist/evidence contract | No | No | Existing CIVSUB/Threat/IED endpoints unchanged | No row upgrade. Runtime proof still pending. |
+| Time / Tempo Policy wrapper (#606) | Server/client read helper over existing `ARC_dynamic_tod_*` state | No | No | None | No endpoint row change. |
+| World Registry adapter (#607) | Server-owned read adapter over world registry state | No | No | None | No endpoint row change. |
+| Runtime Boundary snapshot (#608) | Server-owned public snapshot publisher | No | No | None | No endpoint row change. Public replicated state only. |
+| Runtime Boundary Console VM section (#618, #627) | Console VM read-model section | No | No | None | No endpoint row change. UI remains read-only consumer. |
+| Threat Economy reason taxonomy (#613) | Server-side reason metadata and public snapshot enrichment | No | No | None | No endpoint row change. No action/request route added. |
+| District-posture-driven threat selection (#620) | Server-side scheduler selection logic and observability | No | No | None | No endpoint row change. No client action route added. |
+| Intel quality coupling (#621) | Server-side lead-quality read model and lead metadata | No | No | None | No endpoint row change. Lead creation remains server-side. |
+| Sustainment readiness snapshot (#625) | Server-owned read model embedded in existing supply public snapshot | No | No | None | No endpoint row change. S3 consumes later; no action path yet. |
+| TASKENG / SITREP / follow-on reliability sweep (#624) | QA checklist/evidence contract | No | No | Existing TASKENG/SITREP endpoints remain in section 3.4 with `?` status | No row upgrade. Runtime proof still pending. |
+| CIVSUB / Threat / IED reliability sweep (#609) | QA checklist/evidence contract | No | No | Existing CIVSUB/Threat/IED endpoints unchanged | No row upgrade. Runtime proof still pending. |
 
 ---
 
