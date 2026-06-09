@@ -242,7 +242,7 @@ private _markerPurpose = {
         private _hit = "";
         {
             if ((toUpper _x) isEqualTo (toUpper _suffix)) exitWith { _hit = _x; };
-        } forEach (keys _locationPurposes);
+        } forEach ([_locationPurposes] call (compile "params ['_m']; keys _m"));
         if (!(_hit isEqualTo "")) exitWith { [_locationPurposes, _hit, ""] call _hg };
     };
     // Gate markers -> checkpoint.
