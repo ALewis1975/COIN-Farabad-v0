@@ -353,19 +353,10 @@ private _incidentRowCount = 0;
 } forEach _catalog;
 
 // --- 4. Structured civic-mission catalog coverage ------------------------
-// Resolve each civic mission's purpose (from its first location / site type)
-// and its subtype overlay, mirroring the incident-row resolution above.
+// Resolve civic "locations" entries using the same heuristics as incident markers.
 private _locIdPurpose = {
-    // ARC_loc_<LocationId> or bare <LocationId> -> purpose (case-insensitive).
     params ["_locRef"];
-    private _suffix = _locRef;
-    if ((toUpper _locRef find "ARC_LOC_") == 0) then { _suffix = _locRef select [8]; };
-    private _hit = "";
-    {
-        if ((toUpper _x) isEqualTo (toUpper _suffix)) exitWith { _hit = _x; };
-    } forEach ([_locationPurposes] call (compile "params ['_m']; keys _m"));
-    if (_hit isEqualTo "") exitWith { "" };
-    [_locationPurposes, _hit, ""] call _hg
+    [_locRef] call _markerPurpose
 };
 
 private _civicCatalog = [];
