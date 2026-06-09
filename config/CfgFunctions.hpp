@@ -269,6 +269,9 @@ class CfgFunctions
             class worldSpawnPatternResolve {};
             class worldSpawnRoleResolve {};
             class worldSpawnOverlayApply {};
+
+            // Building-purpose classification layer (issue #633 step 5, server-only)
+            class worldBuildingPurposeClassify {};
         };
 
 

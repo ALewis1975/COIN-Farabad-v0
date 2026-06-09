@@ -439,6 +439,29 @@
     ]],
 
     // =====================================================================
+    // Building-purpose classification hints (issue #633 step 5).
+    // Substring signals on a location id / display name that override the
+    // location/terrain purpose. Primarily used to tag unfinished or
+    // construction-looking areas as CONSTRUCTION so the CONSTRUCTION purpose
+    // pattern (workers, utility trucks, barriers, etc.) applies. Consumed by
+    // ARC_fnc_worldBuildingPurposeClassify (case-insensitive substring match).
+    // =====================================================================
+    ["buildingClassPurposeHints", [
+        ["construction", "CONSTRUCTION"],
+        ["unfinished",   "CONSTRUCTION"],
+        ["worksite",     "CONSTRUCTION"],
+        ["junkyard",     "INDUSTRIAL"],
+        ["refinery",     "OIL_GAS"],
+        ["oilfield",     "OIL_GAS"],
+        ["mine",         "MINE"],
+        ["prison",       "PRISON"],
+        ["mosque",       "RELIGIOUS"],
+        ["hospital",     "MEDICAL"],
+        ["hotel",        "HOTEL"],
+        ["port",         "PORT"]
+    ]],
+
+    // =====================================================================
     // Incident-type -> task overlay. Layered on top of the location baseline.
     // Covers every incidentType in data/incident_markers.sqf.
     // =====================================================================

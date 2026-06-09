@@ -92,6 +92,13 @@ if (_zones isEqualType []) then
 [] call ARC_fnc_worldScanPatrolWaypoints;
 [] call ARC_fnc_worldIndexObjectives;
 
+// Building-purpose classification layer (issue #633 step 5). Runs after the
+// building-slot scan; inert unless ARC_spawnPatternsEnabled (default OFF).
+if (!isNil "ARC_fnc_worldBuildingPurposeClassify") then
+{
+    [] call ARC_fnc_worldBuildingPurposeClassify;
+};
+
 // Living base: ambient personnel + gate barrier logic
 if (!isNil "ARC_fnc_worldAmbientPersonnelInit") then
 {

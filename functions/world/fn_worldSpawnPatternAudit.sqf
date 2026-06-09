@@ -494,6 +494,29 @@ if (!isNil "ARC_fnc_worldSpawnRoleResolve") then {
     } forEach ([_civicMissionOverlays] call (compile "params ['_m']; keys _m"));
 };
 
+// --- Building-purpose classification coverage (issue #633 step 5) ---------
+// Read the server-local registry produced by ARC_fnc_worldBuildingPurposeClassify
+// (present only when ARC_spawnPatternsEnabled and after the building-slot scan).
+// Tally per-purpose location counts and warn on any location left unclassified.
+private _buildingPurposeCounts = [];
+private _bpReg = missionNamespace getVariable ["ARC_worldBuildingPurpose", createHashMap];
+if (_bpReg isEqualType createHashMap && { (count _bpReg) > 0 }) then {
+    private _tally = createHashMap;
+    {
+        private _tag = [_bpReg, _x, "NONE"] call _hg;
+        if (!(_tag isEqualType "")) then { _tag = "NONE"; };
+        private _cur = [_tally, _tag, 0] call _hg;
+        if (!(_cur isEqualType 0)) then { _cur = 0; };
+        _tally set [_tag, _cur + 1];
+        if (_tag isEqualTo "NONE") then {
+            [format ["[BUILDINGPURPOSE] location '%1' is unclassified (NONE) — no purpose mapping/hint/site match", _x]] call _addWarn;
+        };
+    } forEach ([_bpReg] call (compile "params ['_m']; keys _m"));
+    {
+        _buildingPurposeCounts pushBack [_x, [_tally, _x, 0] call _hg];
+    } forEach ([_tally] call (compile "params ['_m']; keys _m"));
+};
+
 // --- Emit -----------------------------------------------------------------
 private _summary = [count _rows, _locationCount, _siteTypeCount, _incidentRowCount, _civicRowCount, count _warnings];
 
@@ -501,6 +524,8 @@ diag_log format [
     "[ARC][SPAWNPAT][AUDIT] rows=%1 locations=%2 siteTypes=%3 incidents=%4 civic=%5 warnings=%6 emptyPools=%7",
     _summary select 0, _summary select 1, _summary select 2, _summary select 3, _summary select 4, _summary select 5, _emptyPoolCount
 ];
+
+diag_log format ["[ARC][SPAWNPAT][AUDIT] buildingPurposeCounts=%1", _buildingPurposeCounts];
 
 if (_verbose) then {
     {
@@ -526,5 +551,6 @@ if (_verbose) then {
 [
     ["rows", _rows],
     ["warnings", _warnings],
-    ["summary", _summary]
+    ["summary", _summary],
+    ["buildingPurposeCounts", _buildingPurposeCounts]
 ]
