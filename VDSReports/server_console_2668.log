@@ -1,0 +1,58 @@
+﻿17:39:00 BattlEye Server: Initialized (v1.220, Arma 3 2.20.152984)
+17:39:00 Game Port: 2308, Steam Query Port: 2309
+17:39:00 Host identity created.
+17:39:01 BattlEye Server: Config entry: RConPassword 285c1517e6b74ae4b46ca5afa9b91df5
+17:39:01 BattlEye Server: Config entry: RConPort 2313
+17:39:01 BattlEye Server: Config entry: RConIP 0.0.0.0
+17:39:04 MAJ.Lewis.A uses modified data file
+17:39:04 BattlEye Server: Player #0 MAJ.Lewis.A (96.245.171.158:2304) connected
+17:39:04 Player MAJ.Lewis.A connecting.
+17:39:05 BattlEye Server: Connected to BE Master
+17:39:06 BattlEye Server: Player #0 MAJ.Lewis.A - BE GUID: 9cc9d4fc1441fa371f2cd0b1ddbdd783
+17:39:07 Player MAJ.Lewis.A connected (id=76561198027320796).
+17:39:08 BattlEye Server: Verified GUID (9cc9d4fc1441fa371f2cd0b1ddbdd783) of player #0 MAJ.Lewis.A
+17:39:08 BattlEye Server: RCon admin #0 (127.0.0.1:51954) logged in
+17:39:22 Admin logged in, player: MAJ.Lewis.A, playerUID: 76561198027320796, IP: 192.168.1.160:2304.
+17:39:28 Mission COIN_Farabad_v0.Farabad read from bank.
+17:39:37 Roles assigned.
+17:39:37 Reading mission ...
+17:39:51 Mission read.
+17:40:56 BattlEye Server: Player #1 headlessclient (127.0.0.1:2808) connected
+17:40:56 Player headlessclient connecting.
+17:40:57 Player headlessclient connected (id=HC11732).
+17:40:57 BattlEye Server: Verified GUID () of player #1 headlessclient
+17:40:57 BattlEye Server: Player #1 headlessclient - Owner BE GUID: 8539e01499f87083b3a25eb30041261c
+17:40:57 BattlEye Server: (Unknown) headlessclient: No entry 'bin\config.bin/CfgWeapons/ItemInfo.scope'
+17:41:24 Game started.
+18:03:16 Game finished.
+class Session
+{
+	mission="COIN_Farabad_v0";
+	island="Farabad";
+	gameType="COOP";
+	duration=1312.3821;
+	class Player1
+	{
+		name="headlessclient";
+		killsInfantry=0;
+		killsSoft=0;
+		killsArmor=0;
+		killsAir=0;
+		killsPlayers=0;
+		customScore=0;
+		killsTotal=0;
+		killed=0;
+	};
+	class Player2
+	{
+		name="MAJ.Lewis.A";
+		killsInfantry=0;
+		killsSoft=0;
+		killsArmor=0;
+		killsAir=0;
+		killsPlayers=0;
+		customScore=0;
+		killsTotal=0;
+		killed=0;
+	};
+};
