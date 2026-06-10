@@ -14,9 +14,6 @@ if (!hasInterface) exitWith {false};
 if (uiNamespace getVariable ["ARC_uiTaskTimers_running", false]) exitWith {true};
 uiNamespace setVariable ["ARC_uiTaskTimers_running", true];
 
-// Only show by default for authorized roles (SL / Officers).
-private _enabled = missionNamespace getVariable ["ARC_uiTaskTimers_enabled", true];
-
 // Create HUD layer
 private _layer = "ARC_TaskTimerHUD" call BIS_fnc_rscLayer;
 _layer cutRsc ["ARC_TaskTimerHUD", "PLAIN", 0, false];
