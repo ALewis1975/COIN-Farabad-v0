@@ -56,3 +56,55 @@ class Session
 		killed=0;
 	};
 };
+18:03:17 Waiting for next game.
+18:03:22 Player MAJ.Lewis.A disconnected.
+18:03:22 BattlEye Server: Player #0 MAJ.Lewis.A disconnected
+18:03:22 Admin logged out, player: MAJ.Lewis.A, playerUID: 76561198027320796, IP: 192.168.1.160:2304.
+18:34:23 MAJ.Lewis.A uses modified data file
+18:34:24 BattlEye Server: Player #2 MAJ.Lewis.A (96.245.171.158:2304) connected
+18:34:24 Player MAJ.Lewis.A connecting.
+18:34:25 BattlEye Server: Player #2 MAJ.Lewis.A - BE GUID: 9cc9d4fc1441fa371f2cd0b1ddbdd783
+18:34:27 Player MAJ.Lewis.A connected (id=76561198027320796).
+18:34:27 BattlEye Server: Verified GUID (9cc9d4fc1441fa371f2cd0b1ddbdd783) of player #2 MAJ.Lewis.A
+18:34:48 Admin logged in, player: MAJ.Lewis.A, playerUID: 76561198027320796, IP: 192.168.1.160:2304.
+18:34:53 Mission COIN_Farabad_v0.Farabad read from bank.
+18:34:57 Roles assigned.
+18:34:57 Reading mission ...
+18:35:07 Mission read.
+18:35:37 Game started.
+18:59:40 Player MAJ.Lewis.A is losing connection
+18:59:47 Player MAJ.Lewis.A disconnected.
+18:59:47 BattlEye Server: Player #2 MAJ.Lewis.A disconnected
+18:59:47 Admin logged out, player: MAJ.Lewis.A, playerUID: 76561198027320796, IP: 192.168.1.160:2304.
+18:59:47 Game finished.
+class Session
+{
+	mission="COIN_Farabad_v0";
+	island="Farabad";
+	gameType="COOP";
+	duration=1449.54;
+	class Player1
+	{
+		name="headlessclient";
+		killsInfantry=0;
+		killsSoft=0;
+		killsArmor=0;
+		killsAir=0;
+		killsPlayers=0;
+		customScore=0;
+		killsTotal=0;
+		killed=0;
+	};
+	class Player2
+	{
+		name="MAJ.Lewis.A";
+		killsInfantry=0;
+		killsSoft=0;
+		killsArmor=0;
+		killsAir=0;
+		killsPlayers=0;
+		customScore=0;
+		killsTotal=0;
+		killed=1;
+	};
+};
