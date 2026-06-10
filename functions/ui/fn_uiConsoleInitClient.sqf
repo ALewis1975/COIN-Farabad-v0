@@ -20,9 +20,9 @@ if (!hasInterface) exitWith {false};
 // For readable DIK codes (used in CBA keybind defaults)
 #include "\a3\ui_f\hpp\defineDIKCodes.inc"
 
-// Avoid double init on JIP or respawn frameworks.
-if (missionNamespace getVariable ["ARC_console_keybindInit", false]) exitWith {true};
-missionNamespace setVariable ["ARC_console_keybindInit", true];
+// Avoid double init on JIP or respawn frameworks (client-local flag; uiNamespace per namespace-ownership rules).
+if (uiNamespace getVariable ["ARC_console_keybindInit", false]) exitWith {true};
+uiNamespace setVariable ["ARC_console_keybindInit", true];
 
 // Defaults (can be overridden from initServer/initPlayerLocal before this runs)
 if (isNil { missionNamespace getVariable "ARC_consoleRequiredItems" }) then

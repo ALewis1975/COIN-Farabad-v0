@@ -16,16 +16,13 @@
 
 if (!hasInterface) exitWith {false};
 
-// Guard: only register once per client session
-if (missionNamespace getVariable ["ARC_medAceIncapHandlerRegistered", false]) exitWith
+// Guard: only register once per client session (client-local flag; uiNamespace per namespace-ownership rules)
+if (uiNamespace getVariable ["ARC_medAceIncapHandlerRegistered", false]) exitWith
 {
     diag_log "[ARC][MEDICAL][ACE] medicalAceIncapHandler: already registered, skipping.";
     true
 };
-missionNamespace setVariable ["ARC_medAceIncapHandlerRegistered", true];
-
-// Per-player cooldown to avoid spamming the server with rapid incap events
-private _cooldownKey = "ARC_medAceIncapClientLastTs";
+uiNamespace setVariable ["ARC_medAceIncapHandlerRegistered", true];
 
 // ACE3 unconscious event — fired on the machine where the unit is local
 ["ace_unconscious", {

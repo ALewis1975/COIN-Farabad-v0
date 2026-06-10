@@ -246,8 +246,8 @@ if (!_updateOnly) then
 // Hide SITREP options immediately for the sender (server will broadcast the authoritative flag).
 // Do not set ARC_activeIncidentSitrepSent client-side.
 // The server will broadcast authoritative SITREP state; keeping the option visible avoids false-lockouts.
-missionNamespace setVariable ["ARC_activeIncidentSitrepSentPending", true];
-missionNamespace setVariable ["ARC_activeIncidentSitrepSentPendingAt", diag_tickTime];
+uiNamespace setVariable ["ARC_activeIncidentSitrepSentPending", true];
+uiNamespace setVariable ["ARC_activeIncidentSitrepSentPendingAt", diag_tickTime];
 
 ["SITREP", "SUBMITTING", "", 10] call ARC_fnc_uiConsoleOpsActionStatus;
 true
