@@ -11,6 +11,24 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-06-10 — Convoy never staged after rejoin/accept (partial-convoy rehydrate race)
+
+**Branch/Commit:** `copilot/logistics-convoy-spawn-issue` (base commit `9d0f2d8`)
+
+**Scenario:** Mode A bug fix — playtest report: player left (BN CO), rejoined as BN XO, accepted the pending LOGISTICS convoy task, drove to the spawn point, and no convoy had staged. RPT evidence (`VDSReports/ArmA3Server_x64_2026-06-09_17-37-04.rpt`, task `ARC_inc_10`): the async spawn thread tags each vehicle at creation, and `fn_execTickConvoy`'s world-rehydration block adopted the partial convoy mid-spawn (`Rehydrated convoy vehicles from world (n=1)` then `(n=2)`), promoted a lead, and began driving 1–2 vehicles off the pad — starving the spawn thread, so `CONVOY_SPAWNED`/`CONVOY_STAGED` never fired. Fix: (1) `fn_execTickConvoy` now skips rehydration while a spawn is in progress (`activeConvoySpawning` + `activeConvoySpawningSince`, with stale/future-timestamp recovery via `ARC_convoySpawnInProgressStaleSec`, default 900s); (2) `fn_execInitActive` convoy rebuild now also resets `activeConvoySpawnFailCount`/`activeConvoyNextSpawnAttemptAt`, which persist across restarts and are serverTime-based — a stale future "next attempt" timestamp from a prior session would otherwise silently block spawning after a restart.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | sqflint compat scan (changed SQF) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/logistics/fn_execTickConvoy.sqf functions/core/fn_execInitActive.sqf` | PASS | No banned parser-compat patterns. |
+| 2 | SQF lint (warnings as errors) | `sqflint -e w functions/logistics/fn_execTickConvoy.sqf && sqflint -e w functions/core/fn_execInitActive.sqf` | PASS | Both changed files lint clean. |
+| 3 | Related static contract suites | `bash tests/static/spawn_pattern_overlay_contract_checks.sh && bash tests/static/threat_ied_lifecycle_contract_checks.sh` | PASS | Suites referencing exec init/tick paths unaffected. |
+| 4 | Runtime convoy staging after leave/rejoin + acceptance | Dedicated MP: rejoin as different role, accept LOGISTICS convoy, verify full convoy stages and `CONVOY_SPAWNED`/`CONVOY_STAGED` fire | BLOCKED | Arma 3 runtime unavailable in this sandbox; operator pass required on dedicated rig. |
+| 5 | Restart persistence: convoy spawn backoff keys reset on accept rebuild | Dedicated MP: restart server with persisted pending convoy incident, accept, verify spawn attempt is not blocked | BLOCKED | Requires dedicated server run. |
+
+**Notes:** The rehydrate gate only defers adoption while a live spawn thread is active; genuine state-loss recovery (e.g., the post-close rehydrate of completed convoys) still works once `activeConvoySpawning` is false or stale.
+
+---
+
 ## 2026-06-09 — QA follow-up: dedicated FIELD REQUESTS panel in the S2 category projection
 
 **Branch/Commit:** `copilot/conduct-full-systems-design-check` (base commit `dd471e2`)

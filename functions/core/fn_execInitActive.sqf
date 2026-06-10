@@ -2602,6 +2602,11 @@ for "_i" from 0 to (_rmCount - 1) do
         ["activeConvoyNetIds", []] call ARC_fnc_stateSet;
         ["activeConvoySpawning", false] call ARC_fnc_stateSet;
         ["activeConvoySpawningSince", -1] call ARC_fnc_stateSet;
+        // Reset retry/backoff bookkeeping too. These keys persist across server restarts and
+        // are serverTime-based; a stale future "next attempt" timestamp from a previous session
+        // would silently block the convoy from ever spawning after a restart.
+        ["activeConvoySpawnFailCount", 0] call ARC_fnc_stateSet;
+        ["activeConvoyNextSpawnAttemptAt", -1] call ARC_fnc_stateSet;
 
         // Preserve the planned speed (execSpawnConvoy may still adjust this when it spawns).
         ["activeConvoySpeedKph", _speedKph] call ARC_fnc_stateSet;
