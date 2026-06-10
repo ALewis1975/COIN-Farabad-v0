@@ -17,12 +17,15 @@
 if (!hasInterface) exitWith {false};
 
 // Guard: only register once per client session (client-local flag; uiNamespace per namespace-ownership rules)
-if (uiNamespace getVariable ["ARC_medAceIncapHandlerRegistered", false]) exitWith
+// uiNamespace persists across mission restarts on the same client, but CBA event handlers are
+// mission-scoped — guard on a per-mission token so the handler re-registers each mission session.
+private _sessionTok = format ["%1|%2", missionName, missionStart];
+if ((uiNamespace getVariable ["ARC_medAceIncapHandlerRegistered", ""]) isEqualTo _sessionTok) exitWith
 {
     diag_log "[ARC][MEDICAL][ACE] medicalAceIncapHandler: already registered, skipping.";
     true
 };
-uiNamespace setVariable ["ARC_medAceIncapHandlerRegistered", true];
+uiNamespace setVariable ["ARC_medAceIncapHandlerRegistered", _sessionTok];
 
 // ACE3 unconscious event — fired on the machine where the unit is local
 ["ace_unconscious", {

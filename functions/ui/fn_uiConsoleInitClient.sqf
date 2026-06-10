@@ -21,8 +21,11 @@ if (!hasInterface) exitWith {false};
 #include "\a3\ui_f\hpp\defineDIKCodes.inc"
 
 // Avoid double init on JIP or respawn frameworks (client-local flag; uiNamespace per namespace-ownership rules).
-if (uiNamespace getVariable ["ARC_console_keybindInit", false]) exitWith {true};
-uiNamespace setVariable ["ARC_console_keybindInit", true];
+// uiNamespace persists across mission restarts on the same client, but CBA keybind handlers are
+// mission-scoped — guard on a per-mission token so the keybind re-registers each mission session.
+private _sessionTok = format ["%1|%2", missionName, missionStart];
+if ((uiNamespace getVariable ["ARC_console_keybindInit", ""]) isEqualTo _sessionTok) exitWith {true};
+uiNamespace setVariable ["ARC_console_keybindInit", _sessionTok];
 
 // Defaults (can be overridden from initServer/initPlayerLocal before this runs)
 if (isNil { missionNamespace getVariable "ARC_consoleRequiredItems" }) then

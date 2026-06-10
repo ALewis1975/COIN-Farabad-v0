@@ -11,8 +11,11 @@
 if (!hasInterface) exitWith {false};
 
 // Only start once per client (client-local flag; uiNamespace per namespace-ownership rules).
-if (uiNamespace getVariable ["ARC_uiTaskTimers_running", false]) exitWith {true};
-uiNamespace setVariable ["ARC_uiTaskTimers_running", true];
+// uiNamespace persists across mission restarts on the same client, but the HUD layer and its
+// spawned loop are mission-scoped — guard on a per-mission token so the HUD re-inits each mission.
+private _sessionTok = format ["%1|%2", missionName, missionStart];
+if ((uiNamespace getVariable ["ARC_uiTaskTimers_running", ""]) isEqualTo _sessionTok) exitWith {true};
+uiNamespace setVariable ["ARC_uiTaskTimers_running", _sessionTok];
 
 // Create HUD layer
 private _layer = "ARC_TaskTimerHUD" call BIS_fnc_rscLayer;
