@@ -36,7 +36,7 @@ class CfgRemoteExec
         class ARC_fnc_intelQueueDecide              { allowedTargets = 2; };
         class ARC_fnc_intelQueueSubmit              { allowedTargets = 2; };
         class ARC_fnc_intelTocIssueOrder            { allowedTargets = 2; };
-        class ARC_fnc_intelTocIssueLead             { allowedTargets = 2; };
+        // ARC_fnc_intelTocIssueLead: invoked via local call only (fn_intelQueueDecide); removed from allowlist (issue #642)
 
         // Core / TOC RPCs
         class ARC_fnc_execObjectiveComplete         { allowedTargets = 2; };
@@ -82,9 +82,7 @@ class CfgRemoteExec
 
         // CASREQ RPCs
         class ARC_fnc_casreqOpen                    { allowedTargets = 2; };
-        class ARC_fnc_casreqDecide                  { allowedTargets = 2; };
-        class ARC_fnc_casreqExecute                 { allowedTargets = 2; };
-        class ARC_fnc_casreqClose                   { allowedTargets = 2; };
+        // ARC_fnc_casreqDecide / casreqExecute / casreqClose: no live remoteExec callsites (server-local call only); removed from allowlist (issue #642)
 
         // CASEVAC RPC (Item 5 — client → server request)
         class ARC_fnc_medicalCasevacRequest         { allowedTargets = 2; };
