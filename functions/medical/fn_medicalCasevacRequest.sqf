@@ -58,23 +58,40 @@ if (_lastTs > 0 && { (serverTime - _lastTs) < _cooldownS }) exitWith
     ""
 };
 
+// Position validator: array with numeric X/Y components that is not at/near the
+// map origin. Deleted units and corpses parked at [0,0,0] by cleanup return an
+// origin position that previously produced useless grid=000000 zone="" leads.
+private _isUsablePos =
+{
+    params [["_p", [], [[]]]];
+    if ((count _p) < 2) exitWith { false };
+    private _px = _p select 0;
+    private _py = _p select 1;
+    if (!(_px isEqualType 0) || { !(_py isEqualType 0) }) exitWith { false };
+    // Reject positions within 100 m of the map origin (no playable area there).
+    if ((_px * _px + _py * _py) < 10000) exitWith { false };
+    true
+};
+
 // Determine position from unit or active incident pos as fallback
 private _pos = [];
 if (!isNull _unit) then
 {
     _pos = getPosATL _unit;
 };
-if (_pos isEqualTo [] || { (count _pos) < 2 }) then
+if (!([_pos] call _isUsablePos)) then
 {
     private _activePos = ["activeIncidentPos", []] call ARC_fnc_stateGet;
-    if (_activePos isEqualType [] && { (count _activePos) >= 2 }) then { _pos = _activePos; };
+    if (_activePos isEqualType [] && { [_activePos] call _isUsablePos }) then { _pos = +_activePos; };
 };
-if (_pos isEqualTo [] || { (count _pos) < 2 }) exitWith
+if (!([_pos] call _isUsablePos)) exitWith
 {
-    diag_log "[ARC][MEDICAL][WARN] ARC_fnc_medicalCasevacRequest: could not determine position — CASEVAC lead not created.";
+    diag_log format ["[ARC][MEDICAL][WARN] ARC_fnc_medicalCasevacRequest: could not determine a usable position (unit=%1 pos=%2) — CASEVAC lead not created.",
+        if (isNull _unit) then { "objNull" } else { name _unit }, _pos];
     ""
 };
 _pos resize 3;
+if (isNil { _pos select 2 } || { !((_pos select 2) isEqualType 0) }) then { _pos set [2, 0]; };
 
 // Who was the casualty?
 private _whoName = if (!isNull _unit) then { name _unit } else { "UNKNOWN" };
