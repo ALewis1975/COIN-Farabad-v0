@@ -10,12 +10,9 @@
 
 if (!hasInterface) exitWith {false};
 
-// Only start once per client.
-if (missionNamespace getVariable ["ARC_uiTaskTimers_running", false]) exitWith {true};
-missionNamespace setVariable ["ARC_uiTaskTimers_running", true];
-
-// Only show by default for authorized roles (SL / Officers).
-private _enabled = missionNamespace getVariable ["ARC_uiTaskTimers_enabled", true];
+// Only start once per client (client-local flag; uiNamespace per namespace-ownership rules).
+if (uiNamespace getVariable ["ARC_uiTaskTimers_running", false]) exitWith {true};
+uiNamespace setVariable ["ARC_uiTaskTimers_running", true];
 
 // Create HUD layer
 private _layer = "ARC_TaskTimerHUD" call BIS_fnc_rscLayer;
@@ -33,6 +30,12 @@ uiNamespace setVariable ["ARC_TaskTimerHUD_layer", _layer];
         private _s2 = if (_s < 10) then { format ["0%1", _s] } else { str _s };
         format ["%1:%2", _m, _s2]
     };
+
+    // Cache the trim helper in uiNamespace so it is compiled once and reused across ticks.
+    if (isNil { uiNamespace getVariable "ARC_uiTaskTimers_trimFn" }) then {
+        uiNamespace setVariable ["ARC_uiTaskTimers_trimFn", compile "params ['_s']; trim _s"];
+    };
+    private _trimFn = uiNamespace getVariable ["ARC_uiTaskTimers_trimFn", {}];
 
     while { hasInterface } do
     {
@@ -54,14 +57,14 @@ uiNamespace setVariable ["ARC_TaskTimerHUD_layer", _layer];
 
         private _taskId = missionNamespace getVariable ["ARC_activeTaskId", ""];
         private _accepted = missionNamespace getVariable ["ARC_activeIncidentAccepted", false];
-        private _useIncident = (_taskId isNotEqualTo "") && { _accepted };
+        private _useIncident = (!(_taskId isEqualTo "")) && { _accepted };
 
         // Non-incident tasks: show the ATH for any focused task set via ARC_fnc_clientSetCurrentTask.
         if (!_useIncident) then
         {
             private _focusId = missionNamespace getVariable ["ARC_uiFocusTaskId", ""];
             if (!(_focusId isEqualType "")) then { _focusId = ""; };
-            _focusId = trim _focusId;
+            _focusId = [_focusId] call _trimFn;
             if (_focusId isEqualTo "") then
             {
                 _ctrl ctrlShow false;
@@ -84,14 +87,14 @@ uiNamespace setVariable ["ARC_TaskTimerHUD_layer", _layer];
 
             private _txt = format ["<t size='%1' font='PuristaMedium' color='#FFD700'>ASSIGNED TASK</t>", _sHeader];
 
-            if (_fTitle isNotEqualTo "") then
+            if (!(_fTitle isEqualTo "")) then
             {
                 _txt = _txt + "<br/>" + format ["<t size='%1' font='PuristaMedium'>%2</t>", _uiScale, _fTitle];
             };
 
             _txt = _txt + "<br/>" + format ["<t size='%1' font='PuristaLight'>%2</t>", _uiScale, _fKind];
 
-            if (_grid isNotEqualTo "") then
+            if (!(_grid isEqualTo "")) then
             {
                 private _line = if (_dist >= 0) then { format ["GRID %1 | %2m", _grid, _dist] } else { format ["GRID %1", _grid] };
                 _txt = _txt + "<br/>" + format ["<t size='%1' font='PuristaLight'>%2</t>", _sGrid, _line];
