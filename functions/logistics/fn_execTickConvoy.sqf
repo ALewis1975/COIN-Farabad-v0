@@ -283,9 +283,24 @@ if (!(_nids isEqualType [])) then { _nids = []; };
 private _spawnInProgress = false;
 if ((count _nids) isEqualTo 0) then
 {
+    // A valid spawn lock implies spawning even if state was rebuilt and reset activeConvoySpawning.
+    private _sipStaleSecLocal = missionNamespace getVariable ["ARC_convoySpawnInProgressStaleSec", 900];
+    if (!(_sipStaleSecLocal isEqualType 0)) then { _sipStaleSecLocal = 900; };
+    _sipStaleSecLocal = (_sipStaleSecLocal max 120) min 3600;
+
+    private _lock = missionNamespace getVariable ["ARC_convoySpawnLock", []];
+    if (_lock isEqualType [] && { (count _lock) >= 3 }) then
+    {
+        private _lockTask = _lock select 0;
+        private _lockAt = _lock select 2;
+        if ((_lockTask isEqualType "") && { _lockTask isEqualTo _taskId } && { (_lockAt isEqualType 0) } && { (_now - _lockAt) < _sipStaleSecLocal }) then
+        {
+            _spawnInProgress = true;
+        };
+    };
+
     private _sipFlag = ["activeConvoySpawning", false] call ARC_fnc_stateGet;
     if (!(_sipFlag isEqualType true) && !(_sipFlag isEqualType false)) then { _sipFlag = false; };
-
     if (_sipFlag) then
     {
         private _sipSince = ["activeConvoySpawningSince", -1] call ARC_fnc_stateGet;
