@@ -276,9 +276,62 @@ private _setLinkupTaskState = {
 private _nids = ["activeConvoyNetIds", []] call ARC_fnc_stateGet;
 if (!(_nids isEqualType [])) then { _nids = []; };
 
+// Spawn-in-progress detection: the async spawn thread tags each vehicle the moment it is
+// created, so the rehydration block below must NOT run while a spawn is still in flight.
+// Otherwise the tick adopts a partial (1-2 vehicle) convoy, starts driving it off the pad,
+// and starves the spawn thread (observed in RPT 2026-06-09: ARC_inc_10 never staged).
+private _spawnInProgress = false;
+if ((count _nids) isEqualTo 0) then
+{
+    // A valid spawn lock implies spawning even if state was rebuilt and reset activeConvoySpawning.
+    private _sipStaleSecLocal = missionNamespace getVariable ["ARC_convoySpawnInProgressStaleSec", 900];
+    if (!(_sipStaleSecLocal isEqualType 0)) then { _sipStaleSecLocal = 900; };
+    _sipStaleSecLocal = (_sipStaleSecLocal max 120) min 3600;
+
+    private _lock = missionNamespace getVariable ["ARC_convoySpawnLock", []];
+    if (_lock isEqualType [] && { (count _lock) >= 3 }) then
+    {
+        private _lockTask = _lock select 0;
+        private _lockAt = _lock select 2;
+        if ((_lockTask isEqualType "") && { _lockTask isEqualTo _taskId } && { (_lockAt isEqualType 0) } && { (_now - _lockAt) < _sipStaleSecLocal }) then
+        {
+            _spawnInProgress = true;
+        };
+    };
+
+    private _sipFlag = ["activeConvoySpawning", false] call ARC_fnc_stateGet;
+    if (!(_sipFlag isEqualType true) && !(_sipFlag isEqualType false)) then { _sipFlag = false; };
+    if (_sipFlag) then
+    {
+        private _sipSince = ["activeConvoySpawningSince", -1] call ARC_fnc_stateGet;
+        if (!(_sipSince isEqualType 0)) then { _sipSince = -1; };
+
+        // Worst-case window for a legitimate spawn thread (per-vehicle pad-clear waits can be long).
+        private _sipStaleSec = missionNamespace getVariable ["ARC_convoySpawnInProgressStaleSec", 900];
+        if (!(_sipStaleSec isEqualType 0)) then { _sipStaleSec = 900; };
+        _sipStaleSec = (_sipStaleSec max 120) min 3600;
+
+        // A "since" timestamp in the future means it was persisted from a previous server
+        // session (serverTime restarts at 0); treat the flag as stale in that case too.
+        private _sipStale = (_sipSince < 0) || { _sipSince > _now } || { (_now - _sipSince) >= _sipStaleSec };
+
+        if (_sipStale) then
+        {
+            diag_log format ["[ARC][CONVOY] Clearing stale activeConvoySpawning flag (task=%1, since=%2, now=%3).", _taskId, _sipSince, _now];
+            ["activeConvoySpawning", false] call ARC_fnc_stateSet;
+            ["activeConvoySpawningSince", -1] call ARC_fnc_stateSet;
+        }
+        else
+        {
+            _spawnInProgress = true;
+        };
+    };
+};
+
 // Rehydrate convoy state if netIds were lost (prevents duplicate spawns).
 // Vehicles are tagged by execSpawnConvoy (ARC_convoyTaskId / ARC_convoyIndex).
-if ((count _nids) isEqualTo 0) then
+// Skipped while a spawn thread is in progress so we never adopt a partial convoy.
+if ((count _nids) isEqualTo 0 && { !_spawnInProgress }) then
 {
     private _existing = vehicles select {
         alive _x
