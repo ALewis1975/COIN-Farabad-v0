@@ -16,6 +16,8 @@
 if (!isServer) exitWith {false};
 if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {false};
 if !(missionNamespace getVariable ["civsub_v1_traffic_enabled", false]) exitWith {false};
+// Idle gate: skip ambient traffic spawn/maintenance while no interfaced players are connected.
+if ([] call ARC_fnc_idleGateActive) exitWith {false};
 
 private _debug = missionNamespace getVariable ["civsub_v1_traffic_debug", false];
 if (!(_debug isEqualType true)) then { _debug = false; };

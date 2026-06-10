@@ -312,6 +312,20 @@ missionNamespace setVariable ["ARC_opforPatrolUnitClasses", [
 
 
 // ============================================================================
+// IDLE GATE (empty-server simulation pause)
+// ============================================================================
+
+// When no interfaced human players are connected (headless clients excluded),
+// ARC_fnc_idleGateActive pauses idle-gated background ticks: ambient lead/rumor
+// generation, medical + sustainment ambient decay, and ambient spawn ticks
+// (civ sampler, civ traffic, location NPCs, airbase ground traffic, sitepop).
+missionNamespace setVariable ["ARC_idleGateEnabled", true, true];
+// Grace period (s) of empty server before the gate engages. Kept above the
+// sitepop despawn grace windows so proximity cleanup finishes before pausing.
+missionNamespace setVariable ["ARC_idleGateGraceS", 300, true];
+
+
+// ============================================================================
 // CIVSUB v1 (district influence + identity + physical civ sampling)
 // ============================================================================
 

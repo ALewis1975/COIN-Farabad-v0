@@ -4,9 +4,9 @@
     Server: apply LAMBS Danger or vanilla waypoint behavior to a spawned group.
 
     Behavior modes:
-        "garrison" — LAMBS lambs_danger_fnc_garrison (units occupy and hold nearby
+        "garrison" — LAMBS lambs_wp_fnc_taskGarrison (units occupy and hold nearby
                      buildings). Falls back to SAFE/WHITE hold-in-place if LAMBS absent.
-        "camp"     — LAMBS lambs_danger_fnc_camp (units loiter near a camp anchor).
+        "camp"     — LAMBS lambs_wp_fnc_taskCamp (units loiter near a camp anchor).
                      Falls back to loiter waypoints if LAMBS absent.
         "wander"   — Place loiter waypoints using pre-scanned ARC_worldPatrolRings
                      (tight ring for radius < 150 m, medium for 150-279 m, wide for ≥ 280 m).
@@ -52,16 +52,17 @@ switch (_behL) do
     case "garrison":
     // -------------------------------------------------------------------------
     {
-        if (isNil "lambs_danger_fnc_garrison") then
+        if (isNil "lambs_wp_fnc_taskGarrison") then
         {
-            diag_log "[ARC][SITEPOP][WARN] ARC_fnc_sitePopApplyAmbiance: lambs_danger_fnc_garrison not found — garrison group set to SAFE/WHITE hold.";
+            diag_log "[ARC][SITEPOP][WARN] ARC_fnc_sitePopApplyAmbiance: lambs_wp_fnc_taskGarrison not found — garrison group set to SAFE/WHITE hold.";
             _grp setBehaviour "SAFE";
             _grp setCombatMode "WHITE";
             { _x disableAI "PATH"; doStop _x; } forEach (units _grp);
         }
         else
         {
-            [_grp, _p3, _radius] spawn lambs_danger_fnc_garrison;
+            // Exit condition: firedNear (3) so they can react, but they won't wander otherwise.
+            [_grp, _p3, _radius, [], false, true, 3, false] spawn lambs_wp_fnc_taskGarrison;
         };
     };
 
@@ -69,9 +70,9 @@ switch (_behL) do
     case "camp":
     // -------------------------------------------------------------------------
     {
-        if (isNil "lambs_danger_fnc_camp") then
+        if (isNil "lambs_wp_fnc_taskCamp") then
         {
-            diag_log "[ARC][SITEPOP][WARN] ARC_fnc_sitePopApplyAmbiance: lambs_danger_fnc_camp not found — camp group using loiter waypoints.";
+            diag_log "[ARC][SITEPOP][WARN] ARC_fnc_sitePopApplyAmbiance: lambs_wp_fnc_taskCamp not found — camp group using loiter waypoints.";
             _grp setBehaviour "SAFE";
             _grp setCombatMode "WHITE";
 
@@ -92,7 +93,7 @@ switch (_behL) do
         }
         else
         {
-            [_grp, _p3, _radius] spawn lambs_danger_fnc_camp;
+            [_grp, _p3, _radius] spawn lambs_wp_fnc_taskCamp;
         };
     };
 

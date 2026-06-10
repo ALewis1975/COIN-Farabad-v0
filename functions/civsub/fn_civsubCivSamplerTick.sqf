@@ -22,6 +22,9 @@ if !(missionNamespace getVariable ["civsub_v1_civs_enabled", false]) exitWith {
     diag_log "[CIVSUB][CIVS][SAMPLER] GUARD FAIL civsub_v1_civs_enabled=false";
     false
 };
+// Idle gate: skip ambient civilian sampling/spawning while no interfaced
+// players are connected (grace window lets caps enforcement despawn first).
+if ([] call ARC_fnc_idleGateActive) exitWith { false };
 
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _hk = compile "params ['_h']; keys _h";
