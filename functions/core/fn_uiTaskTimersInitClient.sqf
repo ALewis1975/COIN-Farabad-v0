@@ -34,6 +34,12 @@ uiNamespace setVariable ["ARC_TaskTimerHUD_layer", _layer];
         format ["%1:%2", _m, _s2]
     };
 
+    // Cache the trim helper in uiNamespace so it is compiled once and reused across ticks.
+    if (isNil { uiNamespace getVariable "ARC_uiTaskTimers_trimFn" }) then {
+        uiNamespace setVariable ["ARC_uiTaskTimers_trimFn", compile "params ['_s']; trim _s"];
+    };
+    private _trimFn = uiNamespace getVariable ["ARC_uiTaskTimers_trimFn", {}];
+
     while { hasInterface } do
     {
         uiSleep 1;
@@ -61,7 +67,6 @@ uiNamespace setVariable ["ARC_TaskTimerHUD_layer", _layer];
         {
             private _focusId = missionNamespace getVariable ["ARC_uiFocusTaskId", ""];
             if (!(_focusId isEqualType "")) then { _focusId = ""; };
-            private _trimFn = compile "params ['_s']; trim _s";
             _focusId = [_focusId] call _trimFn;
             if (_focusId isEqualTo "") then
             {
