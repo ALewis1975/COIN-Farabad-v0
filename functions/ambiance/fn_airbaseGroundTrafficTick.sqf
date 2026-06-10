@@ -17,6 +17,8 @@
 
 if (!isServer) exitWith { false };
 if !(["airbaseGroundTrafficTick"] call ARC_fnc_airbaseRuntimeEnabled) exitWith { false };
+// Idle gate: skip airbase ambient ground-traffic spawning while no interfaced players are connected.
+if ([] call ARC_fnc_idleGateActive) exitWith { false };
 
 private _dbg = missionNamespace getVariable ["airbase_v1_gnd_debug", false];
 if (!(_dbg isEqualType true)) then { _dbg = false; };

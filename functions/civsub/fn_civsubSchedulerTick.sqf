@@ -15,6 +15,9 @@
 if (!isServer) exitWith {false};
 if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {false};
 if !(missionNamespace getVariable ["civsub_v1_scheduler_enabled", false]) exitWith {false};
+// Idle gate: pause ambient lead / reactive contact / rumor generation while no
+// interfaced players are connected (self-scaling loop, so resume is seamless).
+if ([] call ARC_fnc_idleGateActive) exitWith {false};
 
 private _requiredFnNames = [
     "ARC_fnc_civsubIsDistrictActive",

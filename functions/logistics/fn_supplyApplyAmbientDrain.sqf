@@ -5,6 +5,15 @@
 
 if (!isServer) exitWith { false };
 
+// Idle gate: pause ambient sustainment decay (FUEL/AMMO/MED — includes medical
+// decay) while no interfaced players are connected. Advance the drain clock so
+// the empty-server interval never accrues retroactive drain on resume.
+if ([] call ARC_fnc_idleGateActive) exitWith {
+    ["sustainLastAt", serverTime] call ARC_fnc_stateSet;
+    ["supply_v1_last_ambient_tick", serverTime] call ARC_fnc_stateSet;
+    false
+};
+
 private _now = serverTime;
 private _last = ["sustainLastAt", -1] call ARC_fnc_stateGet;
 if (!(_last isEqualType 0) || { _last < 0 }) exitWith

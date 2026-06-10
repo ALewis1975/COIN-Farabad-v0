@@ -15,6 +15,11 @@
 
 if (!isServer) exitWith {false};
 
+// Idle gate: freeze the medical recovery clock while no interfaced players are
+// connected (mirrors the paused ambient drain so baseMed neither decays nor
+// recovers on an empty server).
+if ([] call ARC_fnc_idleGateActive) exitWith {false};
+
 private _med = ["baseMed", 0.57] call ARC_fnc_stateGet;
 if (!(_med isEqualType 0)) then { _med = 0.57; };
 _med = (_med max 0) min 1;

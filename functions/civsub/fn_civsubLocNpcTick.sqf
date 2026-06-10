@@ -12,6 +12,8 @@
 if (!isServer) exitWith { false };
 if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith { false };
 if !(missionNamespace getVariable ["civsub_v1_locnpc_enabled", false]) exitWith { false };
+// Idle gate: skip location-NPC spawn/cull work while no interfaced players are connected.
+if ([] call ARC_fnc_idleGateActive) exitWith { false };
 
 private _debug = missionNamespace getVariable ["civsub_v1_locnpc_debug", false];
 if (!(_debug isEqualType true)) then { _debug = false; };

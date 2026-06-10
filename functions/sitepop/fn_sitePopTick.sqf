@@ -37,6 +37,11 @@ while {true} do
 
     if (!isServer) exitWith {};
 
+    // Idle gate: skip sitepop proximity/spawn work while no interfaced players
+    // are connected (gate grace exceeds site despawn grace, so active sites
+    // wind down before the pause engages).
+    if ([] call ARC_fnc_idleGateActive) then { continue; };
+
     private _siteIds  = missionNamespace getVariable ["ARC_sitePopSiteIds",  []];
     private _registry = missionNamespace getVariable ["ARC_sitePopRegistry", createHashMap];
     private _active   = missionNamespace getVariable ["ARC_sitePopActive",   createHashMap];
