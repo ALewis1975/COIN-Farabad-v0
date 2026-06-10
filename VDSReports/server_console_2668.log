@@ -108,3 +108,89 @@ class Session
 		killed=1;
 	};
 };
+18:59:47 Waiting for next game.
+ 6:00:57 BattlEye Server: Failed to receive from BE Master (0)
+ 6:00:57 BattlEye Server: Disconnected from BE Master
+ 7:11:26 MAJ.Lewis.A uses modified data file
+ 7:11:27 BattlEye Server: Player #2 MAJ.Lewis.A (96.245.171.158:2304) connected
+ 7:11:27 Player MAJ.Lewis.A connecting.
+ 7:11:27 BattlEye Server: Connected to BE Master
+ 7:11:28 BattlEye Server: Player #2 MAJ.Lewis.A - BE GUID: 9cc9d4fc1441fa371f2cd0b1ddbdd783
+ 7:11:29 Player MAJ.Lewis.A connected (id=76561198027320796).
+ 7:11:29 BattlEye Server: Verified GUID (9cc9d4fc1441fa371f2cd0b1ddbdd783) of player #2 MAJ.Lewis.A
+ 7:11:54 Admin logged in, player: MAJ.Lewis.A, playerUID: 76561198027320796, IP: 192.168.1.160:2304.
+ 7:12:09 Mission COIN_Farabad_v0.Farabad read from bank.
+ 7:12:15 Roles assigned.
+ 7:12:15 Reading mission ...
+ 7:12:26 Mission read.
+ 7:13:16 Game started.
+ 8:19:45 Game finished.
+class Session
+{
+	mission="COIN_Farabad_v0";
+	island="Farabad";
+	gameType="COOP";
+	duration=3988.7051;
+	class Player1
+	{
+		name="headlessclient";
+		killsInfantry=0;
+		killsSoft=0;
+		killsArmor=0;
+		killsAir=0;
+		killsPlayers=0;
+		customScore=0;
+		killsTotal=0;
+		killed=0;
+	};
+	class Player2
+	{
+		name="MAJ.Lewis.A";
+		killsInfantry=0;
+		killsSoft=0;
+		killsArmor=0;
+		killsAir=0;
+		killsPlayers=0;
+		customScore=0;
+		killsTotal=0;
+		killed=0;
+	};
+};
+ 8:19:45 Waiting for next game.
+ 8:19:55 Mission COIN_Farabad_v0.Farabad read from bank.
+ 8:20:03 Roles assigned.
+ 8:20:03 Reading mission ...
+ 8:20:14 Mission read.
+ 8:20:52 Game started.
+ 8:29:29 Game finished.
+class Session
+{
+	mission="COIN_Farabad_v0";
+	island="Farabad";
+	gameType="COOP";
+	duration=517.32703;
+	class Player1
+	{
+		name="headlessclient";
+		killsInfantry=0;
+		killsSoft=0;
+		killsArmor=0;
+		killsAir=0;
+		killsPlayers=0;
+		customScore=0;
+		killsTotal=0;
+		killed=0;
+	};
+	class Player2
+	{
+		name="MAJ.Lewis.A";
+		killsInfantry=0;
+		killsSoft=0;
+		killsArmor=0;
+		killsAir=0;
+		killsPlayers=0;
+		customScore=0;
+		killsTotal=0;
+		killed=0;
+	};
+};

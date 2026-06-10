@@ -44017,3 +44017,1416 @@ PhysMem: 190 GiB, VirtMem : 131072 GiB, AvailPhys : 160 GiB, AvailVirt : 131068 
 18:59:36 Client: Object 2:11170 (type Type_112) not found.
 18:59:38 Client: Object 2:11243 (type Type_116) not found.
 18:59:45 Client: Object 2:11167 (type Type_468) not found.
+ 7:12:10 EPE manager release (44|259|0)
+ 7:12:10 Number of joints in scene after release: 14
+ 7:12:10 Number of actors in scene after release: 58
+ 7:12:10 EPE manager release (0|58|0)
+ 7:12:10 Number of joints in scene after release: 14
+ 7:12:10 Number of actors in scene after release: 15
+ 7:12:15 EPE manager release (14|15|0)
+ 7:12:15 Number of actors in scene after release: 15
+ 7:12:15 EPE manager release (0|15|0)
+ 7:12:16 Starting mission:
+ 7:12:16  Mission file: COIN_Farabad_v0 (__CUR_MP)
+ 7:12:16  Mission world: Farabad
+ 7:12:16  Mission directory: mpmissions\__CUR_MP.Farabad\
+ 7:12:16 Link to 99c0448d (Obj-8,206:1165) not released
+ 7:12:16 Link to 99a0848f (Obj-16,205:1167) not released
+ 7:12:16 Link to 99805491 (Obj-10,204:1169) not released
+ 7:12:16 Link to 986023f4 (Obj-4,195:1012) not released
+ 7:12:16 Link to 98202452 (Obj-4,193:1106) not released
+ 7:12:16 Link to 97e01c85 (Obj-3,191:1157) not released
+ 7:12:16 Link to 97001d84 (Obj-3,184:1412) not released
+ 7:12:16 Link to 96602fc1 (Obj-5,179:1985) not released
+ 7:12:16 Link to 96001e4f (Obj-3,176:1615) not released
+ 7:12:16 Link to 958685f2 (Obj-208,172:1522) not released
+ 7:12:16 Link to 956685f1 (Obj-208,171:1521) not released
+ 7:12:16 Link to 930029cd (Obj-5,152:461) not released
+ 7:12:16 Link to 92e0620e (Obj-12,151:526) not released
+ 7:12:16 Link to 92e02189 (Obj-4,151:393) not released
+ 7:12:16 Link to 92c021d9 (Obj-4,150:473) not released
+ 7:12:16 Link to 92c021d8 (Obj-4,150:472) not released
+ 7:12:16 Link to 92637b5b (Obj-111,147:859) not released
+ 7:12:16 Link to 92633e36 (Obj-103,147:1590) not released
+ 7:12:16 Link to 92633e31 (Obj-103,147:1585) not released
+ 7:12:16 Link to 92434e8d (Obj-105,146:1677) not released
+ 7:12:16 Link to 92434e8c (Obj-105,146:1676) not released
+ 7:12:16 Link to 9223600d (Obj-108,145:13) not released
+ 7:12:16 Link to 922367e9 (Obj-108,145:2025) not released
+ 7:12:16 Link to 91e33761 (Obj-102,143:1889) not released
+ 7:12:16 Link to 91c348d6 (Obj-105,142:214) not released
+ 7:12:16 Link to 91c34774 (Obj-104,142:1908) not released
+ 7:12:16 Link to 91c34762 (Obj-104,142:1890) not released
+ 7:12:16 Link to 91a348d8 (Obj-105,141:216) not released
+ 7:12:16 Link to 91a338bc (Obj-103,141:188) not released
+ 7:12:16 Link to 91a318ad (Obj-99,141:173) not released
+ 7:12:16 Link to 91635188 (Obj-106,139:392) not released
+ 7:12:16 Link to 9123b3d8 (Obj-118,137:984) not released
+ 7:12:16 Link to 9123b300 (Obj-118,137:768) not released
+ 7:12:16 Link to 9103ba00 (Obj-119,136:512) not released
+ 7:12:16 Link to 9103b1ff (Obj-118,136:511) not released
+ 7:12:16 Link to 9103b1f5 (Obj-118,136:501) not released
+ 7:12:16 Link to 9103b184 (Obj-118,136:388) not released
+ 7:12:16 Link to 90e3b2de (Obj-118,135:734) not released
+ 7:12:16 Link to 90e3b286 (Obj-118,135:646) not released
+ 7:12:16 Link to 90e3b201 (Obj-118,135:513) not released
+ 7:12:16 Link to 90e34d3f (Obj-105,135:1343) not released
+ 7:12:16 Link to 90a39b32 (Obj-115,133:818) not released
+ 7:12:16 Link to 90a39b30 (Obj-115,133:816) not released
+ 7:12:16 Link to 90a39331 (Obj-114,133:817) not released
+ 7:12:16 Link to 90a39321 (Obj-114,133:801) not released
+ 7:12:16 Link to 90a34da1 (Obj-105,133:1441) not released
+ 7:12:16 Link to 90a33d7a (Obj-103,133:1402) not released
+ 7:12:16 Link to 9083b41d (Obj-118,132:1053) not released
+ 7:12:16 Link to 9083b41c (Obj-118,132:1052) not released
+ 7:12:16 Link to 90839b70 (Obj-115,132:880) not released
+ 7:12:16 Link to 90839b6c (Obj-115,132:876) not released
+ 7:12:16 Link to 9083936d (Obj-114,132:877) not released
+ 7:12:16 Link to 90839366 (Obj-114,132:870) not released
+ 7:12:16 Link to 90839365 (Obj-114,132:869) not released
+ 7:12:16 Link to 9083923b (Obj-114,132:571) not released
+ 7:12:16 Link to 90834e7f (Obj-105,132:1663) not released
+ 7:12:16 Link to 9083462a (Obj-104,132:1578) not released
+ 7:12:16 Link to 90804e80 (Obj-9,132:1664) not released
+ 7:12:16 Link to 9063b41b (Obj-118,131:1051) not released
+ 7:12:16 Link to 90633a83 (Obj-103,131:643) not released
+ 7:12:16 Link to 90604efc (Obj-9,131:1788) not released
+ 7:12:16 Link to 90604efb (Obj-9,131:1787) not released
+ 7:12:16 Link to 9060369a (Obj-6,131:1690) not released
+ 7:12:16 Link to 90602631 (Obj-4,131:1585) not released
+ 7:12:16 Link to 90439d3a (Obj-115,130:1338) not released
+ 7:12:16 Link to 904046f8 (Obj-8,130:1784) not released
+ 7:12:16 Link to 904046bb (Obj-8,130:1723) not released
+ 7:12:16 Link to 90403ed5 (Obj-7,130:1749) not released
+ 7:12:16 Link to 904036b0 (Obj-6,130:1712) not released
+ 7:12:16 Link to 90403692 (Obj-6,130:1682) not released
+ 7:12:16 Link to 90402e9b (Obj-5,130:1691) not released
+ 7:12:16 Link to 90402e99 (Obj-5,130:1689) not released
+ 7:12:16 Link to 90402e87 (Obj-5,130:1671) not released
+ 7:12:16 Link to 90230c36 (Obj-97,129:1078) not released
+ 7:12:16 Link to 90230435 (Obj-96,129:1077) not released
+ 7:12:16 Link to 90204707 (Obj-8,129:1799) not released
+ 7:12:16 Link to 902046ca (Obj-8,129:1738) not released
+ 7:12:16 Link to 90203ef7 (Obj-7,129:1783) not released
+ 7:12:16 Link to 90203ec9 (Obj-7,129:1737) not released
+ 7:12:16 Link to 90203ebc (Obj-7,129:1724) not released
+ 7:12:16 Link to 902036b9 (Obj-6,129:1721) not released
+ 7:12:16 Link to 902036b2 (Obj-6,129:1714) not released
+ 7:12:16 Link to 902036b1 (Obj-6,129:1713) not released
+ 7:12:16 Link to 902036af (Obj-6,129:1711) not released
+ 7:12:16 Link to 902036ad (Obj-6,129:1709) not released
+ 7:12:16 Link to 90202eba (Obj-5,129:1722) not released
+ 7:12:16 Link to 900380c6 (Obj-112,128:198) not released
+ 7:12:16 Link to 900380c2 (Obj-112,128:194) not released
+ 7:12:16 Link to 90035f7a (Obj-107,128:1914) not released
+ 7:12:16 Link to 90035f79 (Obj-107,128:1913) not released
+ 7:12:16 Link to 90035f78 (Obj-107,128:1912) not released
+ 7:12:16 Link to 90034c68 (Obj-105,128:1128) not released
+ 7:12:16 Link to 90003f0d (Obj-7,128:1805) not released
+ 7:12:16 Link to 90003f0b (Obj-7,128:1803) not released
+ 7:12:16 Link to 90003f0a (Obj-7,128:1802) not released
+ 7:12:16 Link to 90003f09 (Obj-7,128:1801) not released
+ 7:12:16 Link to 90003f05 (Obj-7,128:1797) not released
+ 7:12:16 Link to 90003f04 (Obj-7,128:1796) not released
+ 7:12:16 Link to 900036ff (Obj-6,128:1791) not released
+ 7:12:16 Link to 900036fe (Obj-6,128:1790) not released
+ 7:12:16 Link to 900036fd (Obj-6,128:1789) not released
+ 7:12:16 Link to 8fe03f10 (Obj-7,127:1808) not released
+ 7:12:16 Link to 8fe03f0c (Obj-7,127:1804) not released
+ 7:12:16 Link to 8fc348b9 (Obj-105,126:185) not released
+ 7:12:16 Link to 8fc348b8 (Obj-105,126:184) not released
+ 7:12:16 Link to 8fc348aa (Obj-105,126:170) not released
+ 7:12:16 Link to 8fc344d0 (Obj-104,126:1232) not released
+ 7:12:16 Link to 8fc330a1 (Obj-102,126:161) not released
+ 7:12:16 Link to 8fc33095 (Obj-102,126:149) not released
+ 7:12:16 Link to 8fc31c04 (Obj-99,126:1028) not released
+ 7:12:16 Link to 8fc2ec69 (Obj-93,126:1129) not released
+ 7:12:16 Link to 8fc2ed3a (Obj-93,126:1338) not released
+ 7:12:16 Link to 8fa340a9 (Obj-104,125:169) not released
+ 7:12:16 Link to 8f8353e9 (Obj-106,124:1001) not released
+ 7:12:16 Link to 8f8353e8 (Obj-106,124:1000) not released
+ 7:12:16 Link to 8f834941 (Obj-105,124:321) not released
+ 7:12:16 Link to 8f834108 (Obj-104,124:264) not released
+ 7:12:16 Link to 8f438ecd (Obj-113,122:1741) not released
+ 7:12:16 Link to 8f43770e (Obj-110,122:1806) not released
+ 7:12:16 Link to 8f437698 (Obj-110,122:1688) not released
+ 7:12:16 Link to 8f2399bd (Obj-115,121:445) not released
+ 7:12:16 Link to 8f239ef1 (Obj-115,121:1777) not released
+ 7:12:16 Link to 8f239ee6 (Obj-115,121:1766) not released
+ 7:12:16 Link to 8f2391dd (Obj-114,121:477) not released
+ 7:12:16 Link to 8f238353 (Obj-112,121:851) not released
+ 7:12:16 Link to 8f238715 (Obj-112,121:1813) not released
+ 7:12:16 Link to 8f237b24 (Obj-111,121:804) not released
+ 7:12:16 Link to 8f236e7f (Obj-109,121:1663) not released
+ 7:12:16 Link to 8f236e6a (Obj-109,121:1642) not released
+ 7:12:16 Link to 8f236680 (Obj-108,121:1664) not released
+ 7:12:16 Link to 8f037b22 (Obj-111,120:802) not released
+ 7:12:16 Link to 8f037b1f (Obj-111,120:799) not released
+ 7:12:16 Link to 8f037b10 (Obj-111,120:784) not released
+ 7:12:16 Link to 8f037323 (Obj-110,120:803) not released
+ 7:12:16 Link to 8f037309 (Obj-110,120:777) not released
+ 7:12:16 Link to 8f037307 (Obj-110,120:775) not released
+ 7:12:16 Link to 8f037261 (Obj-110,120:609) not released
+ 7:12:16 Link to 8f036a6f (Obj-109,120:623) not released
+ 7:12:16 Link to 8f036a6e (Obj-109,120:622) not released
+ 7:12:16 Link to 8f036a54 (Obj-109,120:596) not released
+ 7:12:16 Link to 8f036a53 (Obj-109,120:595) not released
+ 7:12:16 Link to 8f035a48 (Obj-107,120:584) not released
+ 7:12:16 Link to 8ee372e8 (Obj-110,119:744) not released
+ 7:12:16 Link to 8ee36aeb (Obj-109,119:747) not released
+ 7:12:16 Link to 8ee36ab7 (Obj-109,119:695) not released
+ 7:12:16 Link to 8ee36ab6 (Obj-109,119:694) not released
+ 7:12:16 Link to 8ee2f56e (Obj-94,119:1390) not released
+ 7:12:16 Link to 8ea310ee (Obj-98,117:238) not released
+ 7:12:16 Link to 8e0380e7 (Obj-112,112:231) not released
+ 7:12:16 Link to 8de38152 (Obj-112,111:338) not released
+ 7:12:16 Link to 8dc339d6 (Obj-103,110:470) not released
+ 7:12:16 Link to 8da34262 (Obj-104,109:610) not released
+ 7:12:16 Link to 8da34250 (Obj-104,109:592) not released
+ 7:12:16 Link to 8da34226 (Obj-104,109:550) not released
+ 7:12:16 Link to 8da339d8 (Obj-103,109:472) not released
+ 7:12:16 Link to 8da339cb (Obj-103,109:459) not released
+ 7:12:16 Link to 8d835ba0 (Obj-107,108:928) not released
+ 7:12:16 Link to 8d83428c (Obj-104,108:652) not released
+ 7:12:16 Link to 8d834255 (Obj-104,108:597) not released
+ 7:12:16 Link to 8d636d90 (Obj-109,107:1424) not released
+ 7:12:16 Link to 8d636d5c (Obj-109,107:1372) not released
+ 7:12:16 Link to 8d636d5a (Obj-109,107:1370) not released
+ 7:12:16 Link to 8d6352ec (Obj-106,107:748) not released
+ 7:12:16 Link to 8d6352cc (Obj-106,107:716) not released
+ 7:12:16 Link to 8d435335 (Obj-106,106:821) not released
+ 7:12:16 Link to 8d235058 (Obj-106,105:88) not released
+ 7:12:16 Link to 8d2357c6 (Obj-106,105:1990) not released
+ 7:12:16 Link to 8d235593 (Obj-106,105:1427) not released
+ 7:12:16 Link to 8ce39958 (Obj-115,103:344) not released
+ 7:12:16 Link to 8ce358cd (Obj-107,103:205) not released
+ 7:12:16 Link to 8ba30049 (Obj-96,93:73) not released
+ 7:12:16 Link to 8ba2f829 (Obj-95,93:41) not released
+ 7:12:16 Link to 8aa308e3 (Obj-97,85:227) not released
+ 7:12:16 Link to 8982c540 (Obj-88,76:1344) not released
+ 7:12:16 Link to 8905f94d (Obj-191,72:333) not released
+ 7:12:16 Link to 8905f111 (Obj-190,72:273) not released
+ 7:12:16 Link to 88e61428 (Obj-194,71:1064) not released
+ 7:12:16 Link to 88e61427 (Obj-194,71:1063) not released
+ 7:12:16 Link to 88e60c21 (Obj-193,71:1057) not released
+ 7:12:16 Link to 88a33382 (Obj-102,69:898) not released
+ 7:12:16 Link to 83e618ca (Obj-195,31:202) not released
+ 7:12:16 Link to 8326bad9 (Obj-215,25:729) not released
+ 7:12:16 Link to 8301ea4d (Obj-61,24:589) not released
+ 7:12:16 Link to 82e1da2b (Obj-59,23:555) not released
+ 7:12:16 Link to 8261da0f (Obj-59,19:527) not released
+ 7:12:16 Link to 8261d2f8 (Obj-58,19:760) not released
+ 7:12:16 Link to 8241da11 (Obj-59,18:529) not released
+ 7:12:16 Link to 8241d224 (Obj-58,18:548) not released
+ 7:12:16 Link to 8241d223 (Obj-58,18:547) not released
+ 7:12:16 Link to 8241ca07 (Obj-57,18:519) not released
+ 7:12:16 Link to 8221d265 (Obj-58,17:613) not released
+ 7:12:16 Link to 8221d210 (Obj-58,17:528) not released
+ 7:12:16 Link to 8221ca38 (Obj-57,17:568) not released
+ 7:12:16 Link to 820188e2 (Obj-49,16:226) not released
+ 7:12:16 Link to 820170b8 (Obj-46,16:184) not released
+ 7:12:16 Link to 81a19b98 (Obj-51,13:920) not released
+ 7:12:16 Link to 8181cbb7 (Obj-57,12:951) not released
+ 7:12:16 Link to 8161d3cf (Obj-58,11:975) not released
+ 7:12:16 Link to 80e55fbc (Obj-171,7:1980) not released
+ 7:12:18 No more slot to add connection at 046054 (4692.5,5475.5)
+ 7:12:18 No more slot to add connection at 051057 (5156.7,5769.8)
+ 7:12:18 Bad simulation shipx, type Land_BuoyBig_F (class=vehicle), a3\structures_f\naval\buoys\buoybig_f.p3d
+ 7:12:18 Bad simulation shipx, type Land_BuoyBig_F (class=vehicle), a3\structures_f\naval\buoys\buoybig_f.p3d
+ 7:12:18 Bad simulation shipx, type Land_BuoyBig_F (class=vehicle), a3\structures_f\naval\buoys\buoybig_f.p3d
+ 7:12:22 "No params given for ALIVE_fnc_BUS - exiting..."
+ 7:12:22 [CBA] (xeh) INFO: [2.22456e+06,48800.3,0] PreInit started. v3.18.6.260327
+ 7:12:22 [CBA] (settings) INFO: Reading settings from settings file.
+ 7:12:22 [CBA] (settings) INFO: Finished reading settings from settings file.
+ 7:12:22 [CBA] (xeh) WARNING: One or more children of class CAManBase do not support Extended Event Handlers. Fall back to loop.
+ 7:12:22 [CBA] (disposable) WARNING: Mass of launcher uk3cb_m72a1_law (79.3) is different from mass of used launcher uk3cb_m72a1_law_spent (57.3).
+ 7:12:23 [ACE] (common) INFO: Parsed Settings Configs [0.0 ms]
+ 7:12:23 Attempt to override final function - ace_medical_engine_fnc_updatedamageeffects
+ 7:12:23 Attempt to override final function - ace_medical_status_fnc_addmedicationadjustment
+ 7:12:23 Attempt to override final function - ace_medical_status_fnc_getbloodpressure
+ 7:12:23 Attempt to override final function - ace_medical_status_fnc_hasstablevitals
+ 7:12:23 Attempt to override final function - ace_medical_vitals_fnc_handleunitvitals
+ 7:12:23 Attempt to override final function - ace_medical_vitals_fnc_updateheartrate
+ 7:12:23 Attempt to override final function - ace_dogtags_fnc_cancheckdogtag
+ 7:12:23 Attempt to override final function - ace_dogtags_fnc_getdogtagdata
+ 7:12:23 Attempt to override final function - ace_dragging_fnc_carryobject
+ 7:12:23 Attempt to override final function - ace_dragging_fnc_handleunconscious
+ 7:12:23 Attempt to override final function - ace_medical_fnc_setunconscious
+ 7:12:23 Attempt to override final function - ace_medical_statemachine_fnc_conditionexecutiondeath
+ 7:12:23 Attempt to override final function - ace_medical_statemachine_fnc_conditionsecondchance
+ 7:12:23 Attempt to override final function - ace_medical_treatment_fnc_cprsuccess
+ 7:12:23 Attempt to override final function - ace_medical_treatment_fnc_cprlocal
+ 7:12:23 Attempt to override final function - ace_medical_treatment_fnc_medicationlocal
+ 7:12:23 Attempt to override final function - ace_medical_treatment_fnc_tourniquetremove
+ 7:12:23 Attempt to override final function - ace_medical_treatment_fnc_treatment
+ 7:12:23 Attempt to override final function - ace_medical_treatment_fnc_treatmentsuccess
+ 7:12:23 Attempt to override final function - ace_medical_treatment_fnc_useitem
+ 7:12:23 MIRA_Vehicle_Medical[DEBUG]: [MIRA_Vehicle_Medical] PreInit Begin at MIRA_Vehicle_Medical\XEH_preInit.sqf:2
+ 7:12:23 MIRA_Vehicle_Medical[DEBUG]: [MIRA_Vehicle_Medical] PREP Begin at MIRA_Vehicle_Medical\XEH_preInit.sqf:4
+ 7:12:23 "PREP fnc_openMedicalMenu"
+ 7:12:23 "PREP fnc_isMedic"
+ 7:12:23 "PREP fnc_getVersion"
+ 7:12:23 "PREP fnc_getBloodPressure"
+ 7:12:23 "PREP fnc_getHeartRate"
+ 7:12:23 "PREP fnc_hasLowHR"
+ 7:12:23 "PREP fnc_displayHR"
+ 7:12:23 "PREP fnc_hasLowBP"
+ 7:12:23 "PREP fnc_displayBP"
+ 7:12:23 "PREP fnc_getTotalIV"
+ 7:12:23 "PREP fnc_buildIncapacitatedPassengerActions"
+ 7:12:23 "PREP fnc_unloadPatient"
+ 7:12:23 "PREP fnc_unloadAllWithCondition"
+ 7:12:23 "PREP fnc_unloadPatientForceHandler"
+ 7:12:23 "PREP fnc_countIncapacitated"
+ 7:12:23 "PREP fnc_countUnstable"
+ 7:12:23 "PREP fnc_countStable"
+ 7:12:23 "PREP fnc_buildStablePassengerActions"
+ 7:12:23 "PREP fnc_buildStableActions"
+ 7:12:23 "PREP fnc_isStable"
+ 7:12:23 "PREP fnc_getOpenWounds"
+ 7:12:23 "PREP fnc_needsBandage"
+ 7:12:23 "PREP fnc_getNumberOfWoundsToBandage"
+ 7:12:23 "PREP fnc_getStitchableWounds"
+ 7:12:23 "PREP fnc_getFractures"
+ 7:12:23 "PREP fnc_hasFractures"
+ 7:12:23 "PREP fnc_getNumberOfFractures"
+ 7:12:23 "PREP fnc_getStitchedWounds"
+ 7:12:23 "PREP fnc_hasTourniquets"
+ 7:12:23 "PREP fnc_getNumberOfTourniquets"
+ 7:12:23 "PREP fnc_buildUnstablePassengerActions"
+ 7:12:23 "PREP fnc_buildUnstableActions"
+ 7:12:23 "PREP fnc_isUnstable"
+ 7:12:23 "PREP fnc_isBleeding"
+ 7:12:23 "PREP fnc_isCardiacArrest"
+ 7:12:23 "PREP fnc_isUnconscious"
+ 7:12:23 "PREP fnc_hasLegFractures"
+ 7:12:23 "PREP fnc_getNumberOfLegFractures"
+ 7:12:23 "PREP fnc_kat_isUnstable"
+ 7:12:23 "PREP fnc_kat_getAirwayObstruction"
+ 7:12:23 "PREP fnc_kat_getAirwayOcclusion"
+ 7:12:23 "PREP fnc_kat_getAirwayStatus"
+ 7:12:23 "PREP fnc_kat_getHemoPneumothorax"
+ 7:12:23 "PREP fnc_kat_getPneumothorax"
+ 7:12:23 "PREP fnc_kat_getTensionPneumothorax"
+ 7:12:23 "PREP fnc_cachedLocalisationCall"
+ 7:12:23 "PREP fnc_cachedResult"
+ 7:12:23 MIRA_Vehicle_Medical[DEBUG]: [MIRA_Vehicle_Medical] PREP Complete at MIRA_Vehicle_Medical\XEH_preInit.sqf:6
+ 7:12:23 MIRA_Vehicle_Medical[DEBUG]: MIRA_Vehicle_Medical at version [2,6,0,0] at MIRA_Vehicle_Medical\XEH_preInit.sqf:9
+ 7:12:23 MIRA_Vehicle_Medical[DEBUG]: ACE Version is >= 3.13 at MIRA_Vehicle_Medical\XEH_preInit.sqf:15
+ 7:12:23 MIRA_Vehicle_Medical[DEBUG]: ACE Version is >= 3.16 at MIRA_Vehicle_Medical\XEH_preInit.sqf:23
+ 7:12:23 MIRA_Vehicle_Medical[DEBUG]: Searching for Integrations at MIRA_Vehicle_Medical\XEH_preInit.sqf:31
+ 7:12:23 MIRA_Vehicle_Medical[DEBUG]: Found KAT: true at MIRA_Vehicle_Medical\XEH_preInit.sqf:35
+ 7:12:23 MIRA_Vehicle_Medical[DEBUG]: Integration Search Complete at MIRA_Vehicle_Medical\XEH_preInit.sqf:37
+ 7:12:23 MIRA_Vehicle_Medical[DEBUG]: [MIRA_Vehicle_Medical] CBA Options Begin at MIRA_Vehicle_Medical\XEH_preInit.sqf:39
+ 7:12:23 MIRA_Vehicle_Medical[DEBUG]: [MIRA_Vehicle_Medical] CBA Options Complete at MIRA_Vehicle_Medical\XEH_preInit.sqf:109
+ 7:12:23 MIRA_Vehicle_Medical[DEBUG]: [MIRA_Vehicle_Medical] PreInit Complete at MIRA_Vehicle_Medical\XEH_preInit.sqf:111
+ 7:12:23 Attempt to override final function - ace_medical_gui_fnc_menupfh
+ 7:12:23 Attempt to override final function - ace_medical_gui_fnc_onmenuclose
+ 7:12:23 Attempt to override final function - ace_medical_gui_fnc_onmenuopen
+ 7:12:23 Attempt to override final function - ace_medical_gui_fnc_updatebodyimage
+ 7:12:23 Attempt to override final function - ace_medical_gui_fnc_updatecategories
+ 7:12:23 Attempt to override final function - ace_medical_gui_fnc_updateinjurylist
+ 7:12:23 [CBA] (xeh) INFO: [2.22456e+06,48801.4,0] PreInit finished.
+ 7:12:26 Attempt to override final function - tfar_fnc_missingmodmessage
+ 7:12:37 unable to create weapon for missile 'FIR_F16C_Fueltank_P_1rnd_M', check config entry'pylonWeapon'
+ 7:12:37 unable to create weapon for missile 'FIR_F16C_center_Fueltank_P_1rnd_M', check config entry'pylonWeapon'
+ 7:12:37 unable to create weapon for missile 'FIR_Empty_P_1rnd_M', check config entry'pylonWeapon'
+ 7:12:37 unable to create weapon for missile 'FIR_F16C_Fueltank_P_1rnd_M', check config entry'pylonWeapon'
+ 7:12:37 unable to create weapon for missile 'FIR_F16C_Fueltank_P_1rnd_M', check config entry'pylonWeapon'
+ 7:12:37 unable to create weapon for missile 'FIR_F16C_center_Fueltank_P_1rnd_M', check config entry'pylonWeapon'
+ 7:12:37 unable to create weapon for missile 'FIR_Empty_P_1rnd_M', check config entry'pylonWeapon'
+ 7:12:37 unable to create weapon for missile 'FIR_F16C_Fueltank_P_1rnd_M', check config entry'pylonWeapon'
+ 7:12:42 Setting invalid pitch 0.0000 for B Bravo 4-4:2 REMOTE
+ 7:12:42 SetFace error: texture  not found
+ 7:12:42 SetFace error: textureHL  not found
+ 7:12:42 SetFace error: texture  not found
+ 7:12:42 SetFace error: textureHL  not found
+ 7:12:42 SetFace error: texture  not found
+ 7:12:42 SetFace error: textureHL  not found
+ 7:12:42 Setting invalid pitch 0.0000 for B Charlie 4-6:2 REMOTE
+ 7:12:42 SetFace error: texture  not found
+ 7:12:42 SetFace error: textureHL  not found
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-1:1 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:1 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:2 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for hc1
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:4 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:5 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:6 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:7 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:8 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:9 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:10 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:11 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:12 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:13 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:14 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:15 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:16 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:17 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:18 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:19 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:20 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:21 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:22 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:23 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:24 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:25 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:26 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:27 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:28 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:29 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:30 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:31 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:32 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:33 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:34 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:35 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:36 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:37 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:38 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:39 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:40 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:41 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:42 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:43 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:44 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:45 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:46 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:47 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:48 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:49 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:50 REMOTE
+ 7:12:42 Setting invalid pitch 0.0000 for L Alpha 1-3:51 REMOTE
+ 7:12:43 "LIGHTS WORKING"
+ 7:12:43 "LIGHTS WORKING"
+ 7:12:43 "LIGHTS WORKING"
+ 7:12:43 "LIGHTS WORKING"
+ 7:12:43 "LIGHTS WORKING"
+ 7:12:45 Client: Object 2:13921 (type Type_128) not found.
+ 7:12:45 Client: Object 2:13921 (type Type_100) not found.
+ 7:12:45 Client: Object 2:13921 (type Type_168) not found.
+ 7:12:45 Client: Object 2:13921 (type Type_468) not found.
+ 7:12:45 Client: Object 2:13929 (type Type_128) not found.
+ 7:12:45 Client: Object 2:13929 (type Type_100) not found.
+ 7:12:45 Client: Object 2:13929 (type Type_168) not found.
+ 7:12:45 Client: Object 2:13929 (type Type_468) not found.
+ 7:12:45 Client: Object 2:13937 (type Type_128) not found.
+ 7:12:45 Client: Object 2:13937 (type Type_100) not found.
+ 7:12:45 Client: Object 2:13937 (type Type_168) not found.
+ 7:12:45 Client: Object 2:13937 (type Type_468) not found.
+ 7:12:45 Client: Object 2:13945 (type Type_128) not found.
+ 7:12:45 Client: Object 2:13945 (type Type_100) not found.
+ 7:12:45 Client: Object 2:13945 (type Type_168) not found.
+ 7:12:45 Client: Object 2:13945 (type Type_468) not found.
+ 7:12:45 Client: Object 2:13953 (type Type_128) not found.
+ 7:12:45 Client: Object 2:13953 (type Type_100) not found.
+ 7:12:45 Client: Object 2:13953 (type Type_168) not found.
+ 7:12:45 Client: Object 2:13953 (type Type_468) not found.
+ 7:12:45 Client: Object 2:13961 (type Type_128) not found.
+ 7:12:45 Client: Object 2:13961 (type Type_100) not found.
+ 7:12:45 Client: Object 2:13961 (type Type_168) not found.
+ 7:12:45 Client: Object 2:13961 (type Type_468) not found.
+ 7:12:48 "Advanced Towing Loading..."
+ 7:12:48 "Advanced Towing Loaded"
+ 7:12:50 [CBA] (xeh) INFO: [2.22571e+06,48828.3,0] PostInit started. MISSIONINIT: missionName=COIN_Farabad_v0, missionVersion=54, worldName=Farabad, isMultiplayer=true, isServer=false, isDedicated=false, CBA_isHeadlessClient=true, hasInterface=false, didJIP=false
+ 7:12:51 [CBA] (versioning) INFO: [2.22571e+06,48828.6,0] VERSIONING:aceax=0.10.0.0, alive_main=2.2.0.2601221, cba=3.18.6.260327, zen=1.15.1.36, ace=3.21.0.110, tfar=1.-1.0.341, ctab=2.2.2.5, kat=3.1.3, abc=2.1.1.0
+ 7:12:51 [CBA Keybinding] WARNING: Purple weapons=>switch benelli shotgun stock position called cba_fnc_registerKeybind is no longer a valid function and has been replaced with cba_fnc_addKeybind. Contact the developer of mod Purple weapons to change the code to use the new function.
+ 7:12:51 "Converted _defaultKeybind => [35,true,false,false]"
+ 7:12:51 [CBA Keybinding] WARNING: Purple weapons=>reload a single round in shotgun called cba_fnc_registerKeybind is no longer a valid function and has been replaced with cba_fnc_addKeybind. Contact the developer of mod Purple weapons to change the code to use the new function.
+ 7:12:51 "Converted _defaultKeybind => [33,true,false,false]"
+ 7:12:51 Warn: Shape '???' contains water texture however it does not carry a property "class=pond". Consider creating one to speed up the detection!
+ 7:12:52 [ACE] (common) INFO: ACE is version 3.21.0.110 - CBA is version 3.18.6.260327 (min required 3.18.5)
+ 7:12:52 [ACE] (common) WARNING: Waiting for server version/addon vars
+ 7:12:52 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usgroundcrew_1.p3d"
+ 7:12:52 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usgroundcrew_1.p3d"
+ 7:12:52 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usgroundcrew_1.p3d"
+ 7:12:52 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usgroundcrew_1.p3d"
+ 7:12:52 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usgroundcrew_1.p3d"
+ 7:12:52 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usgroundcrew_1.p3d"
+ 7:12:52 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usgroundcrew_1.p3d"
+ 7:12:52 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usgroundcrew_1.p3d"
+ 7:12:52 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usgroundcrew_1.p3d"
+ 7:12:52 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usgroundcrew_1.p3d"
+ 7:12:52 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usgroundcrew_1.p3d"
+ 7:12:52 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usgroundcrew_1.p3d"
+ 7:12:52 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_1.p3d"
+ 7:12:52 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_1.p3d"
+ 7:12:52 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_1.p3d"
+ 7:12:52 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_1.p3d"
+ 7:12:52 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_7.p3d"
+ 7:12:52 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_7.p3d"
+ 7:12:52 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_1.p3d"
+ 7:12:52 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_1.p3d"
+ 7:12:52 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_7.p3d"
+ 7:12:52 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_7.p3d"
+ 7:12:52 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_1.p3d"
+ 7:12:52 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_1.p3d"
+ 7:12:52 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_1.p3d"
+ 7:12:52 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_1.p3d"
+ 7:12:52 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_1.p3d"
+ 7:12:52 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_1.p3d"
+ 7:12:52 SelectionID "31" is wrong for shape "moecoveralls\gsuit\nomexgsuitlegsfingerless.p3d"
+ 7:12:52 SelectionID "32" is wrong for shape "moecoveralls\gsuit\nomexgsuitlegsfingerless.p3d"
+ 7:12:52 SelectionID "31" is wrong for shape "moecoveralls\longsleeves\nomexlongsleeves.p3d"
+ 7:12:52 SelectionID "32" is wrong for shape "moecoveralls\longsleeves\nomexlongsleeves.p3d"
+ 7:12:52 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 7:12:52 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 7:12:52 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 7:12:52 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 7:12:52 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 7:12:52 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 7:12:52 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 7:12:52 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 7:12:52 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 7:12:52 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 7:12:52 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 7:12:52 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 7:12:52 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 7:12:52 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 7:12:52 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 7:12:52 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 7:12:52 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 7:12:52 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 7:12:52 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 7:12:52 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 7:12:52 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_7.p3d"
+ 7:12:52 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_7.p3d"
+ 7:12:52 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_7.p3d"
+ 7:12:52 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_7.p3d"
+ 7:12:52 [ACE] (markinglaser) INFO: Class USAF_C17 does not have a pilot camera nor a turret that could be equipped with an IR marking laser.
+ 7:12:52 [ACE] (markinglaser) INFO: Class USAF_C130J does not have a pilot camera nor a turret that could be equipped with an IR marking laser.
+ 7:12:52 [ACE] (markinglaser) INFO: Class USAF_C17 does not have a pilot camera nor a turret that could be equipped with an IR marking laser.
+ 7:12:52 [ACE] (markinglaser) INFO: Class RHS_UH60M_d does not have a pilot camera nor a turret that could be equipped with an IR marking laser.
+ 7:12:52 [ACE] (markinglaser) INFO: Class RHS_UH60M_d does not have a pilot camera nor a turret that could be equipped with an IR marking laser.
+ 7:12:52 [ACE] (markinglaser) INFO: Class RHS_UH60M_d does not have a pilot camera nor a turret that could be equipped with an IR marking laser.
+ 7:12:52 [ACE] (markinglaser) INFO: Class RHS_UH60M_d does not have a pilot camera nor a turret that could be equipped with an IR marking laser.
+ 7:12:52 [ACE] (markinglaser) INFO: Class RHS_CH_47F_10 does not have a pilot camera nor a turret that could be equipped with an IR marking laser.
+ 7:12:52 [ACE] (markinglaser) INFO: Class RHS_CH_47F_10 does not have a pilot camera nor a turret that could be equipped with an IR marking laser.
+ 7:12:52 [CBA] (xeh) INFO: [2.22571e+06,48830,0] PostInit finished.
+ 7:12:52 [ACE] (common) INFO: Settings initialized.
+ 7:12:52 [ACE] (common) INFO: 1027 delayed functions running.
+ 7:12:52 "IL starting"
+ 7:12:52 "IL config loading"
+ 7:12:52 "IL config done"
+ 7:12:52 "IL func loaded"
+ 7:12:52 "IL ready"
+ 7:12:52 ALiVE 0 : 48830.5 - ALiVE_sys_acemenu: ACE interact_menu not active or no interface found, exiting
+ 7:13:04 [CBA] (versioning) INFO: [2.22622e+06,48842,0] VERSIONING_SERVER:aceax=0.10.0.0, alive_main=2.2.0.2.60122e+06, cba=3.18.6.260327, zen=1.15.1.36, ace=3.21.0.110, tfar=1.-1.0.341, ctab=2.2.2.5, kat=3.1.3, abc=2.1.1.0
+ 7:13:04 Attempt to override final function - bis_fnc_preload_server
+ 7:13:06 d3s_raptor_17_3_BIG: caution - unknown animation source caution
+ 7:13:16  Mission id: fe27e5236c0be5c2cd982ae625c48a4b552d5254
+ 7:13:17 Setting invalid pitch 0.0000 for B 2 BSTB | SHERIFF HOLDING 01:7 REMOTE
+ 7:13:17 Setting invalid pitch 0.0000 for B 2 BSTB | SHERIFF K-9 01:1 REMOTE
+ 7:13:17 Setting invalid pitch 0.0000 for B Charlie 1-4:1 REMOTE
+ 7:13:17 Client: Object 2:14584 (type Type_100) not found.
+ 7:13:17 Setting invalid pitch 0.0000 for B Delta 3-3:1 REMOTE
+ 7:13:18 Setting invalid pitch 0.0000 for B Delta 4-2:1 REMOTE
+ 7:13:18 Setting invalid pitch 0.0000 for B Delta 4-3:1 REMOTE
+ 7:13:18 Setting invalid pitch 0.0000 for B Delta 4-4:1 REMOTE
+ 7:13:18 Setting invalid pitch 0.0000 for B Delta 3-6:1 REMOTE
+ 7:13:20 Setting invalid pitch 0.0000 for L Charlie 3-4:1 REMOTE
+ 7:13:20 Setting invalid pitch 0.0000 for L Charlie 3-4:2 REMOTE
+ 7:13:20 Setting invalid pitch 0.0000 for L Charlie 3-4:3 REMOTE
+ 7:13:20 Setting invalid pitch 0.0000 for L Charlie 3-4:4 REMOTE
+ 7:13:21 Setting invalid pitch 0.0000 for L Charlie 3-4:5 REMOTE
+ 7:13:21 Setting invalid pitch 0.0000 for L Charlie 3-4:6 REMOTE
+ 7:13:21 Setting invalid pitch 0.0000 for L Charlie 3-4:7 REMOTE
+ 7:13:21 Setting invalid pitch 0.0000 for L Charlie 3-4:8 REMOTE
+ 7:13:21 Setting invalid pitch 0.0000 for L Charlie 3-4:9 REMOTE
+ 7:13:21 Setting invalid pitch 0.0000 for L Charlie 3-4:10 REMOTE
+ 7:13:21 Setting invalid pitch 0.0000 for L Charlie 3-4:11 REMOTE
+ 7:13:21 Setting invalid pitch 0.0000 for L Charlie 3-4:12 REMOTE
+ 7:13:21 Setting invalid pitch 0.0000 for L Charlie 3-4:13 REMOTE
+ 7:13:21 Setting invalid pitch 0.0000 for L Charlie 3-4:14 REMOTE
+ 7:13:21 Setting invalid pitch 0.0000 for L Charlie 3-4:15 REMOTE
+ 7:13:21 Setting invalid pitch 0.0000 for L Charlie 3-4:16 REMOTE
+ 7:13:21 Setting invalid pitch 0.0000 for L Charlie 3-4:17 REMOTE
+ 7:13:21 Setting invalid pitch 0.0000 for L Charlie 3-4:18 REMOTE
+ 7:13:21 Setting invalid pitch 0.0000 for L Charlie 3-4:19 REMOTE
+ 7:13:21 Setting invalid pitch 0.0000 for L Charlie 3-4:20 REMOTE
+ 7:13:21 Setting invalid pitch 0.0000 for L Charlie 3-4:21 REMOTE
+ 7:13:21 Setting invalid pitch 0.0000 for L Charlie 3-4:22 REMOTE
+ 7:13:21 Setting invalid pitch 0.0000 for L Charlie 3-4:23 REMOTE
+ 7:13:26 Setting invalid pitch 0.0000 for L Charlie 3-4:24 REMOTE
+ 7:13:26 Setting invalid pitch 0.0000 for L Charlie 3-4:25 REMOTE
+ 7:13:26 Setting invalid pitch 0.0000 for L Charlie 3-4:26 REMOTE
+ 7:13:26 Setting invalid pitch 0.0000 for L Charlie 3-4:27 REMOTE
+ 7:13:31 Setting invalid pitch 0.0000 for L Charlie 3-4:28 REMOTE
+ 7:13:31 Setting invalid pitch 0.0000 for L Charlie 3-4:29 REMOTE
+ 7:13:31 Setting invalid pitch 0.0000 for L Charlie 3-4:30 REMOTE
+ 7:13:31 Setting invalid pitch 0.0000 for L Charlie 3-4:31 REMOTE
+ 7:13:33 Setting invalid pitch 0.0000 for L Charlie 3-4:32 REMOTE
+ 7:13:33 Setting invalid pitch 0.0000 for L Charlie 3-4:33 REMOTE
+ 7:13:33 Setting invalid pitch 0.0000 for L Charlie 3-4:34 REMOTE
+ 7:13:33 Setting invalid pitch 0.0000 for L Charlie 3-4:35 REMOTE
+ 7:13:33 Setting invalid pitch 0.0000 for L Charlie 3-4:36 REMOTE
+ 7:13:33 Setting invalid pitch 0.0000 for L Charlie 3-4:37 REMOTE
+ 7:13:35 Setting invalid pitch 0.0000 for L Charlie 3-4:38 REMOTE
+ 7:13:35 Setting invalid pitch 0.0000 for L Charlie 3-4:39 REMOTE
+ 7:13:35 Setting invalid pitch 0.0000 for L Charlie 3-4:40 REMOTE
+ 7:13:35 Setting invalid pitch 0.0000 for L Charlie 3-4:41 REMOTE
+ 7:13:38 Setting invalid pitch 0.0000 for L Charlie 3-4:42 REMOTE
+ 7:13:38 Setting invalid pitch 0.0000 for L Charlie 3-4:43 REMOTE
+ 7:13:38 Setting invalid pitch 0.0000 for L Charlie 3-4:44 REMOTE
+ 7:13:38 Setting invalid pitch 0.0000 for L Charlie 3-4:45 REMOTE
+ 7:13:38 Setting invalid pitch 0.0000 for L Charlie 3-4:46 REMOTE
+ 7:13:41 Setting invalid pitch 0.0000 for L Charlie 3-4:47 REMOTE
+ 7:13:41 Setting invalid pitch 0.0000 for L Charlie 3-4:48 REMOTE
+ 7:13:41 Setting invalid pitch 0.0000 for L Charlie 3-4:49 REMOTE
+ 7:13:41 Setting invalid pitch 0.0000 for L Charlie 3-4:50 REMOTE
+ 7:13:41 Setting invalid pitch 0.0000 for L Charlie 3-4:51 REMOTE
+ 7:13:44 Setting invalid pitch 0.0000 for L Charlie 3-4:52 REMOTE
+ 7:13:44 Setting invalid pitch 0.0000 for L Charlie 3-4:53 REMOTE
+ 7:13:44 Setting invalid pitch 0.0000 for L Charlie 3-4:54 REMOTE
+ 7:13:44 Setting invalid pitch 0.0000 for L Charlie 3-4:55 REMOTE
+ 7:13:44 Setting invalid pitch 0.0000 for L Charlie 3-4:56 REMOTE
+ 7:13:44 Setting invalid pitch 0.0000 for L Charlie 3-4:57 REMOTE
+ 7:13:44 Setting invalid pitch 0.0000 for L Charlie 3-4:58 REMOTE
+ 7:13:44 Setting invalid pitch 0.0000 for L Charlie 3-4:59 REMOTE
+ 7:13:44 Setting invalid pitch 0.0000 for L Charlie 3-4:60 REMOTE
+ 7:15:24 B_Truck_01_Repair_F: mirror_l_hide - unknown animation source mirror_l_hide
+ 7:18:53 [ACE] (medical_status) WARNING: setDead executed on unit with damage blocked - [BIS_SUPP_HQ_WEST,"#scripted"]
+ 7:19:05 [ACE] (medical_status) WARNING: setDead executed on unit with damage blocked - [BIS_SUPP_HQ_GUER,"#scripted"]
+ 7:19:32 [ACE] (medical_status) WARNING: setDead executed on unit with damage blocked - [BIS_SUPP_HQ_EAST,"#scripted"]
+ 7:28:37 Client: Object 2:16022 (type Type_135) not found.
+ 7:28:37 Client: Object 2:16021 (type Type_100) not found.
+ 7:28:37 Client: Object 2:16021 (type Type_468) not found.
+ 7:28:37 Client: Object 2:16023 (type Type_122) not found.
+ 7:32:15 Client: Object 2:16246 (type Type_135) not found.
+ 7:32:16 Client: Object 2:16220 (type Type_112) not found.
+ 7:32:16 Client: Object 2:16243 (type Type_112) not found.
+ 7:32:16 Client: Object 2:16249 (type Type_112) not found.
+ 7:32:46 Client: Object 2:16258 (type Type_135) not found.
+ 7:32:46 Client: Object 2:16255 (type Type_112) not found.
+ 7:32:46 Client: Object 2:16277 (type Type_112) not found.
+ 7:32:46 Client: Object 2:16284 (type Type_112) not found.
+ 7:32:51 Client: Object 2:16283 (type Type_468) not found.
+ 7:33:10 Client: Object 2:16312 (type Type_100) not found.
+ 7:33:10 Client: Object 2:16314 (type Type_122) not found.
+ 7:33:10 Client: Object 2:16312 (type Type_468) not found.
+ 7:33:10 Client: Object 2:16313 (type Type_135) not found.
+ 7:34:16 Client: Object 2:16394 (type Type_112) not found.
+ 7:34:16 Client: Object 2:16412 (type Type_112) not found.
+ 7:34:16 Client: Object 2:16418 (type Type_112) not found.
+ 7:34:16 Client: Object 2:16423 (type Type_112) not found.
+ 7:35:01 Client: Object 2:16465 (type Type_122) not found.
+ 7:35:01 Client: Object 2:16463 (type Type_468) not found.
+ 7:35:01 Client: Object 2:16471 (type Type_122) not found.
+ 7:35:01 Client: Object 2:16469 (type Type_468) not found.
+ 7:35:32 Client: Object 2:16512 (type Type_116) not found.
+ 7:35:42 Client: Object 2:16524 (type Type_122) not found.
+ 7:35:42 Client: Object 2:16522 (type Type_468) not found.
+ 7:35:42 Client: Object 2:16535 (type Type_122) not found.
+ 7:35:42 Client: Object 2:16533 (type Type_468) not found.
+ 7:36:07 Client: Object 2:12283 (type Type_143) not found.
+ 7:36:07 Client: Object 2:12286 (type Type_268) not found.
+ 7:36:07 Client: Object 2:14122 (type Type_122) not found.
+ 7:36:07 Client: Object 2:12302 (type Type_135) not found.
+ 7:36:07 Client: Object 2:12283 (type Type_142) not found.
+ 7:36:07 Client: Object 2:12300 (type Type_468) not found.
+ 7:36:07 Client: Object 2:12302 (type Type_469) not found.
+ 7:36:07 Client: Object 2:12307 (type Type_135) not found.
+ 7:36:07 Client: Object 2:12286 (type Type_139) not found.
+ 7:36:56 Client: Object 2:16614 (type Type_116) not found.
+ 7:37:13 Client: Object 2:16629 (type Type_468) not found.
+ 7:37:13 Client: Object 2:16631 (type Type_122) not found.
+ 7:37:47 d3s_SRlonghorn_4520: turn_left - unknown animation source turn_left
+ 7:37:47 d3s_SRlonghorn_4520: turn_right - unknown animation source turn_right
+ 7:37:47 d3s_SRlonghorn_4520: pbeacon - unknown animation source pbeacon
+ 7:37:47 Render target memory points PIP3_pos & PIP3_dir not found.
+ 7:37:47 Render target memory points PIP4_pos & PIP4_dir not found.
+ 7:39:04 Client: Object 2:16732 (type Type_122) not found.
+ 7:39:04 Client: Object 2:16730 (type Type_468) not found.
+ 7:40:21 Client: Object 2:16804 (type Type_468) not found.
+ 7:40:48 Client: Object 2:16840 (type Type_135) not found.
+ 7:40:48 Client: Object 2:16817 (type Type_112) not found.
+ 7:40:48 Client: Object 2:16823 (type Type_112) not found.
+ 7:40:48 Client: Object 2:16836 (type Type_112) not found.
+ 7:41:19 Client: Object 2:16847 (type Type_112) not found.
+ 7:41:19 Client: Object 2:16852 (type Type_112) not found.
+ 7:41:19 Client: Object 2:16863 (type Type_112) not found.
+ 7:41:24 Client: Object 7:81 (type Type_116) not found.
+ 7:41:29 Sound: Error: File: usaf_kc135\sound\767flaps.ogg not found !!!
+ 7:42:20 Client: Object 2:16926 (type Type_112) not found.
+ 7:42:47 Client: Object 2:16948 (type Type_468) not found.
+ 7:42:47 Client: Object 2:16950 (type Type_122) not found.
+ 7:43:44 Client: Object 2:16989 (type Type_116) not found.
+ 7:43:49 Client: Object 2:16975 (type Type_135) not found.
+ 7:43:49 Client: Object 2:16971 (type Type_112) not found.
+ 7:43:49 Client: Object 2:16977 (type Type_112) not found.
+ 7:43:49 Client: Object 2:16984 (type Type_112) not found.
+ 7:44:07 Client: Object 2:17002 (type Type_468) not found.
+ 7:44:07 Client: Object 2:17004 (type Type_122) not found.
+ 7:44:07 Client: Object 2:17007 (type Type_468) not found.
+ 7:44:07 Client: Object 2:17009 (type Type_122) not found.
+ 7:44:07 Client: Object 2:17003 (type Type_135) not found.
+ 7:44:47 Client: Object 2:17061 (type Type_116) not found.
+ 7:45:18 Client: Object 2:17099 (type Type_122) not found.
+ 7:45:18 Client: Object 2:17097 (type Type_468) not found.
+ 7:46:25 Client: Object 2:17198 (type Type_116) not found.
+ 7:46:49 Client: Object 2:17270 (type Type_468) not found.
+ 7:46:49 Client: Object 2:17272 (type Type_122) not found.
+ 7:47:14 Client: Object 2:17303 (type Type_116) not found.
+ 7:47:22 Client: Object 2:17282 (type Type_121) not found.
+ 7:47:22 Client: Object 2:17279 (type Type_116) not found.
+ 7:47:22 Client: Object 2:17262 (type Type_112) not found.
+ 7:47:22 Client: Object 2:17278 (type Type_112) not found.
+ 7:47:22 Client: Object 2:17309 (type Type_135) not found.
+ 7:47:22 Client: Object 2:17305 (type Type_112) not found.
+ 7:47:36 Client: Object 2:17348 (type Type_116) not found.
+ 7:47:52 Client: Object 2:17331 (type Type_122) not found.
+ 7:47:52 Client: Object 2:17327 (type Type_112) not found.
+ 7:47:59 Client: Object 2:17304 (type Type_116) not found.
+ 7:48:09 Client: Object 2:17367 (type Type_116) not found.
+ 7:48:30 Client: Object 2:17379 (type Type_122) not found.
+ 7:48:30 Client: Object 2:17377 (type Type_468) not found.
+ 7:49:08 Client: Object 2:17454 (type Type_116) not found.
+ 7:50:29 Client: Object 2:17573 (type Type_116) not found.
+ 7:50:46 Client: Object 7:174 (type Type_468) not found.
+ 7:50:46 Client: Object 7:171 (type Type_468) not found.
+ 7:51:24 Client: Object 7:201 (type Type_468) not found.
+ 7:52:15 Client: Object 7:261 (type Type_468) not found.
+ 7:52:15 Client: Object 7:279 (type Type_468) not found.
+ 7:52:15 Client: Object 7:277 (type Type_468) not found.
+ 7:52:15 Client: Object 7:273 (type Type_468) not found.
+ 7:52:15 Client: Object 7:263 (type Type_468) not found.
+ 7:52:15 Client: Object 7:258 (type Type_468) not found.
+ 7:52:15 Client: Object 7:254 (type Type_468) not found.
+ 7:52:15 Client: Object 7:334 (type Type_468) not found.
+ 7:52:15 Client: Object 7:323 (type Type_468) not found.
+ 7:52:15 Client: Object 7:389 (type Type_468) not found.
+ 7:52:15 Client: Object 7:392 (type Type_468) not found.
+ 7:52:15 Client: Object 7:374 (type Type_468) not found.
+ 7:52:15 Client: Object 7:373 (type Type_468) not found.
+ 7:52:15 Client: Object 7:375 (type Type_468) not found.
+ 7:52:15 Client: Object 7:357 (type Type_468) not found.
+ 7:52:15 Client: Object 7:447 (type Type_468) not found.
+ 7:52:15 Client: Object 7:439 (type Type_468) not found.
+ 7:52:15 Client: Object 7:425 (type Type_468) not found.
+ 7:52:15 Client: Object 7:411 (type Type_468) not found.
+ 7:52:15 Client: Object 7:414 (type Type_468) not found.
+ 7:52:30 Client: Object 2:17720 (type Type_116) not found.
+ 7:52:49 Client: Object 2:17719 (type Type_116) not found.
+ 7:55:58 Client: Object 2:17703 (type Type_112) not found.
+ 7:56:34 Client: Object 2:17741 (type Type_116) not found.
+ 7:59:03 [ACE] (markinglaser) INFO: Class USAF_C130J does not have a pilot camera nor a turret that could be equipped with an IR marking laser.
+ 7:59:04 Setting invalid pitch 0.0000 for L Charlie 3-4:4 REMOTE
+ 7:59:04 Setting invalid pitch 0.0000 for L Charlie 3-4:6 REMOTE
+ 8:01:26 Client: Object 2:17574 (type Type_140) not found.
+ 8:04:41 Client: Object 2:18138 (type Type_100) not found.
+ 8:04:47 Client: Object 7:858 (type Type_468) not found.
+ 8:04:47 Client: Object 7:850 (type Type_468) not found.
+ 8:04:47 Client: Object 7:861 (type Type_468) not found.
+ 8:04:47 Client: Object 7:848 (type Type_468) not found.
+ 8:04:47 Client: Object 7:844 (type Type_468) not found.
+ 8:04:47 Client: Object 7:857 (type Type_468) not found.
+ 8:04:47 Client: Object 7:853 (type Type_468) not found.
+ 8:04:47 Client: Object 7:877 (type Type_468) not found.
+ 8:04:47 Client: Object 7:881 (type Type_468) not found.
+ 8:04:47 Client: Object 7:917 (type Type_468) not found.
+ 8:04:47 Client: Object 7:947 (type Type_468) not found.
+ 8:04:47 Client: Object 7:946 (type Type_468) not found.
+ 8:04:47 Client: Object 7:941 (type Type_468) not found.
+ 8:04:47 Client: Object 7:939 (type Type_468) not found.
+ 8:04:47 Client: Object 7:938 (type Type_468) not found.
+ 8:04:47 Client: Object 7:936 (type Type_468) not found.
+ 8:04:47 Client: Object 7:935 (type Type_468) not found.
+ 8:04:47 Client: Object 7:933 (type Type_468) not found.
+ 8:04:47 Client: Object 7:927 (type Type_468) not found.
+ 8:04:47 Client: Object 7:869 (type Type_468) not found.
+ 8:04:47 Client: Object 7:911 (type Type_468) not found.
+ 8:04:47 Client: Object 7:908 (type Type_468) not found.
+ 8:04:47 Client: Object 7:905 (type Type_468) not found.
+ 8:04:47 Client: Object 7:904 (type Type_468) not found.
+ 8:04:47 Client: Object 7:839 (type Type_468) not found.
+ 8:04:47 Client: Object 7:884 (type Type_468) not found.
+ 8:04:47 Client: Object 7:893 (type Type_468) not found.
+ 8:04:47 Client: Object 7:894 (type Type_468) not found.
+ 8:04:47 Client: Object 7:888 (type Type_468) not found.
+ 8:04:47 Client: Object 7:951 (type Type_468) not found.
+ 8:04:47 Client: Object 7:984 (type Type_468) not found.
+ 8:04:47 Client: Object 7:961 (type Type_468) not found.
+ 8:04:47 Client: Object 7:965 (type Type_468) not found.
+ 8:04:47 Client: Object 7:981 (type Type_468) not found.
+ 8:04:47 Client: Object 7:978 (type Type_468) not found.
+ 8:04:47 Client: Object 7:963 (type Type_468) not found.
+ 8:04:47 Client: Object 7:960 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1035 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1033 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1031 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1030 (type Type_468) not found.
+ 8:04:47 Client: Object 7:997 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1027 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1025 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1020 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1014 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1013 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1009 (type Type_468) not found.
+ 8:04:47 Client: Object 7:993 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1038 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1001 (type Type_468) not found.
+ 8:04:47 Client: Object 7:986 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1039 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1067 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1061 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1108 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1106 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1096 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1052 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1053 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1057 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1060 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1098 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1080 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1089 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1162 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1157 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1156 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1154 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1149 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1148 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1146 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1172 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1143 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1132 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1171 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1202 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1223 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1213 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1211 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1187 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1203 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1192 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1185 (type Type_468) not found.
+ 8:04:47 Client: Object 7:1194 (type Type_468) not found.
+ 8:05:03 Client: Object 7:1344 (type Type_468) not found.
+ 8:05:03 Client: Object 7:1340 (type Type_468) not found.
+ 8:05:03 Client: Object 7:1343 (type Type_468) not found.
+ 8:05:18 Client: Object 7:1401 (type Type_468) not found.
+ 8:05:18 Client: Object 7:1391 (type Type_468) not found.
+ 8:05:18 Client: Object 7:1387 (type Type_468) not found.
+ 8:05:18 Client: Object 7:1399 (type Type_468) not found.
+ 8:05:18 Client: Object 7:1395 (type Type_468) not found.
+ 8:05:18 Client: Object 7:1437 (type Type_468) not found.
+ 8:05:18 Client: Object 7:1453 (type Type_468) not found.
+ 8:05:18 Client: Object 7:1438 (type Type_468) not found.
+ 8:05:18 Client: Object 7:1446 (type Type_468) not found.
+ 8:05:18 Client: Object 7:1513 (type Type_468) not found.
+ 8:05:18 Client: Object 7:1504 (type Type_468) not found.
+ 8:05:18 Client: Object 7:1500 (type Type_468) not found.
+ 8:05:18 Client: Object 7:1549 (type Type_468) not found.
+ 8:05:18 Client: Object 7:1561 (type Type_468) not found.
+ 8:05:18 Client: Object 7:1621 (type Type_468) not found.
+ 8:05:18 Client: Object 7:1624 (type Type_468) not found.
+ 8:05:18 Client: Object 7:1618 (type Type_468) not found.
+ 8:05:18 Client: Object 7:1622 (type Type_468) not found.
+ 8:05:18 Client: Object 7:1608 (type Type_468) not found.
+ 8:05:18 Client: Object 7:1610 (type Type_468) not found.
+ 8:05:19 Client: Object 7:1655 (type Type_468) not found.
+ 8:05:19 Client: Object 7:1669 (type Type_468) not found.
+ 8:05:19 Client: Object 7:1667 (type Type_468) not found.
+ 8:05:19 Client: Object 7:1668 (type Type_468) not found.
+ 8:05:19 Client: Object 7:1666 (type Type_468) not found.
+ 8:05:19 Client: Object 7:1733 (type Type_468) not found.
+ 8:05:19 Client: Object 7:1732 (type Type_468) not found.
+ 8:05:19 Client: Object 7:1730 (type Type_468) not found.
+ 8:05:19 Client: Object 7:1729 (type Type_468) not found.
+ 8:05:19 Client: Object 7:1724 (type Type_468) not found.
+ 8:05:19 Client: Object 7:1716 (type Type_468) not found.
+ 8:05:19 Client: Object 7:1722 (type Type_468) not found.
+ 8:05:23 Client: Object 2:18296 (type Type_100) not found.
+ 8:08:53 Client: Object 2:18484 (type Type_135) not found.
+ 8:09:00 Client: Object 2:18478 (type Type_135) not found.
+ 8:09:33 Client: Object 2:18489 (type Type_100) not found.
+ 8:09:33 Client: Object 2:18489 (type Type_468) not found.
+ 8:09:33 Client: Object 2:18491 (type Type_122) not found.
+ 8:13:01 Client: Object 2:18555 (type Type_112) not found.
+ 8:13:34 Client: Object 2:18565 (type Type_122) not found.
+ 8:13:34 Client: Object 2:18563 (type Type_468) not found.
+ 8:16:54 Client: Object 2:18590 (type Type_100) not found.
+ 8:16:54 Client: Object 2:18592 (type Type_122) not found.
+ 8:16:54 Client: Object 2:18590 (type Type_468) not found.
+ 8:17:35 Client: Object 2:18605 (type Type_468) not found.
+ 8:18:57 Client: Object 2:18630 (type Type_116) not found.
+ 8:19:31 Client: Object 2:18635 (type Type_135) not found.
+ 8:19:31 Client: Object 2:18632 (type Type_112) not found.
+ 8:19:56 EPE manager release (42|243|0)
+ 8:19:56 Number of joints in scene after release: 14
+ 8:19:56 Number of actors in scene after release: 57
+ 8:19:56 EPE manager release (0|57|0)
+ 8:19:56 Number of joints in scene after release: 14
+ 8:19:56 Number of actors in scene after release: 15
+ 8:20:03 EPE manager release (14|15|0)
+ 8:20:03 Number of actors in scene after release: 15
+ 8:20:03 EPE manager release (0|15|0)
+ 8:20:04 Starting mission:
+ 8:20:04  Mission file: COIN_Farabad_v0 (__CUR_MP)
+ 8:20:04  Mission world: Farabad
+ 8:20:04  Mission directory: mpmissions\__CUR_MP.Farabad\
+ 8:20:04 Link to 99c0448d (Obj-8,206:1165) not released
+ 8:20:04 Link to 99a0848f (Obj-16,205:1167) not released
+ 8:20:04 Link to 99805491 (Obj-10,204:1169) not released
+ 8:20:04 Link to 986023f4 (Obj-4,195:1012) not released
+ 8:20:04 Link to 98202452 (Obj-4,193:1106) not released
+ 8:20:04 Link to 97e01c85 (Obj-3,191:1157) not released
+ 8:20:04 Link to 97001d84 (Obj-3,184:1412) not released
+ 8:20:04 Link to 96602fc1 (Obj-5,179:1985) not released
+ 8:20:04 Link to 96001e4f (Obj-3,176:1615) not released
+ 8:20:04 Link to 958685f2 (Obj-208,172:1522) not released
+ 8:20:04 Link to 956685f1 (Obj-208,171:1521) not released
+ 8:20:04 Link to 930029cd (Obj-5,152:461) not released
+ 8:20:04 Link to 92e0620e (Obj-12,151:526) not released
+ 8:20:04 Link to 92e02189 (Obj-4,151:393) not released
+ 8:20:04 Link to 92c021d9 (Obj-4,150:473) not released
+ 8:20:04 Link to 92c021d8 (Obj-4,150:472) not released
+ 8:20:04 Link to 92637b5b (Obj-111,147:859) not released
+ 8:20:04 Link to 92633e36 (Obj-103,147:1590) not released
+ 8:20:04 Link to 92633e31 (Obj-103,147:1585) not released
+ 8:20:04 Link to 92434e8d (Obj-105,146:1677) not released
+ 8:20:04 Link to 92434e8c (Obj-105,146:1676) not released
+ 8:20:04 Link to 9223600d (Obj-108,145:13) not released
+ 8:20:04 Link to 922367e9 (Obj-108,145:2025) not released
+ 8:20:04 Link to 91e33761 (Obj-102,143:1889) not released
+ 8:20:04 Link to 91c348d6 (Obj-105,142:214) not released
+ 8:20:04 Link to 91c34774 (Obj-104,142:1908) not released
+ 8:20:04 Link to 91c34762 (Obj-104,142:1890) not released
+ 8:20:04 Link to 91a348d8 (Obj-105,141:216) not released
+ 8:20:04 Link to 91a338bc (Obj-103,141:188) not released
+ 8:20:04 Link to 91a318ad (Obj-99,141:173) not released
+ 8:20:04 Link to 91635188 (Obj-106,139:392) not released
+ 8:20:04 Link to 9123b3d8 (Obj-118,137:984) not released
+ 8:20:04 Link to 9123b300 (Obj-118,137:768) not released
+ 8:20:04 Link to 9103ba00 (Obj-119,136:512) not released
+ 8:20:04 Link to 9103b1ff (Obj-118,136:511) not released
+ 8:20:04 Link to 9103b1f5 (Obj-118,136:501) not released
+ 8:20:04 Link to 9103b184 (Obj-118,136:388) not released
+ 8:20:04 Link to 90e3b2de (Obj-118,135:734) not released
+ 8:20:04 Link to 90e3b286 (Obj-118,135:646) not released
+ 8:20:04 Link to 90e3b201 (Obj-118,135:513) not released
+ 8:20:04 Link to 90e34d3f (Obj-105,135:1343) not released
+ 8:20:04 Link to 90a39b32 (Obj-115,133:818) not released
+ 8:20:04 Link to 90a39b30 (Obj-115,133:816) not released
+ 8:20:04 Link to 90a39331 (Obj-114,133:817) not released
+ 8:20:04 Link to 90a39321 (Obj-114,133:801) not released
+ 8:20:04 Link to 90a34da1 (Obj-105,133:1441) not released
+ 8:20:04 Link to 90a33d7a (Obj-103,133:1402) not released
+ 8:20:04 Link to 9083b41d (Obj-118,132:1053) not released
+ 8:20:04 Link to 9083b41c (Obj-118,132:1052) not released
+ 8:20:04 Link to 90839b70 (Obj-115,132:880) not released
+ 8:20:04 Link to 90839b6c (Obj-115,132:876) not released
+ 8:20:04 Link to 9083936d (Obj-114,132:877) not released
+ 8:20:04 Link to 90839366 (Obj-114,132:870) not released
+ 8:20:04 Link to 90839365 (Obj-114,132:869) not released
+ 8:20:04 Link to 9083923b (Obj-114,132:571) not released
+ 8:20:04 Link to 90834e7f (Obj-105,132:1663) not released
+ 8:20:04 Link to 9083462a (Obj-104,132:1578) not released
+ 8:20:04 Link to 90804e80 (Obj-9,132:1664) not released
+ 8:20:04 Link to 9063b41b (Obj-118,131:1051) not released
+ 8:20:04 Link to 90633a83 (Obj-103,131:643) not released
+ 8:20:04 Link to 90604efc (Obj-9,131:1788) not released
+ 8:20:04 Link to 90604efb (Obj-9,131:1787) not released
+ 8:20:04 Link to 9060369a (Obj-6,131:1690) not released
+ 8:20:04 Link to 90602631 (Obj-4,131:1585) not released
+ 8:20:04 Link to 90439d3a (Obj-115,130:1338) not released
+ 8:20:04 Link to 904046f8 (Obj-8,130:1784) not released
+ 8:20:04 Link to 904046bb (Obj-8,130:1723) not released
+ 8:20:04 Link to 90403ed5 (Obj-7,130:1749) not released
+ 8:20:04 Link to 904036b0 (Obj-6,130:1712) not released
+ 8:20:04 Link to 90403692 (Obj-6,130:1682) not released
+ 8:20:04 Link to 90402e9b (Obj-5,130:1691) not released
+ 8:20:04 Link to 90402e99 (Obj-5,130:1689) not released
+ 8:20:04 Link to 90402e87 (Obj-5,130:1671) not released
+ 8:20:04 Link to 90230c36 (Obj-97,129:1078) not released
+ 8:20:04 Link to 90230435 (Obj-96,129:1077) not released
+ 8:20:04 Link to 90204707 (Obj-8,129:1799) not released
+ 8:20:04 Link to 902046ca (Obj-8,129:1738) not released
+ 8:20:04 Link to 90203ef7 (Obj-7,129:1783) not released
+ 8:20:04 Link to 90203ec9 (Obj-7,129:1737) not released
+ 8:20:04 Link to 90203ebc (Obj-7,129:1724) not released
+ 8:20:04 Link to 902036b9 (Obj-6,129:1721) not released
+ 8:20:04 Link to 902036b2 (Obj-6,129:1714) not released
+ 8:20:04 Link to 902036b1 (Obj-6,129:1713) not released
+ 8:20:04 Link to 902036af (Obj-6,129:1711) not released
+ 8:20:04 Link to 902036ad (Obj-6,129:1709) not released
+ 8:20:04 Link to 90202eba (Obj-5,129:1722) not released
+ 8:20:04 Link to 900380c6 (Obj-112,128:198) not released
+ 8:20:04 Link to 900380c2 (Obj-112,128:194) not released
+ 8:20:04 Link to 90035f7a (Obj-107,128:1914) not released
+ 8:20:04 Link to 90035f79 (Obj-107,128:1913) not released
+ 8:20:04 Link to 90035f78 (Obj-107,128:1912) not released
+ 8:20:04 Link to 90034c68 (Obj-105,128:1128) not released
+ 8:20:04 Link to 90003f0d (Obj-7,128:1805) not released
+ 8:20:04 Link to 90003f0b (Obj-7,128:1803) not released
+ 8:20:04 Link to 90003f0a (Obj-7,128:1802) not released
+ 8:20:04 Link to 90003f09 (Obj-7,128:1801) not released
+ 8:20:04 Link to 90003f05 (Obj-7,128:1797) not released
+ 8:20:04 Link to 90003f04 (Obj-7,128:1796) not released
+ 8:20:04 Link to 900036ff (Obj-6,128:1791) not released
+ 8:20:04 Link to 900036fe (Obj-6,128:1790) not released
+ 8:20:04 Link to 900036fd (Obj-6,128:1789) not released
+ 8:20:04 Link to 8fe03f10 (Obj-7,127:1808) not released
+ 8:20:04 Link to 8fe03f0c (Obj-7,127:1804) not released
+ 8:20:04 Link to 8fc348b9 (Obj-105,126:185) not released
+ 8:20:04 Link to 8fc348b8 (Obj-105,126:184) not released
+ 8:20:04 Link to 8fc348aa (Obj-105,126:170) not released
+ 8:20:04 Link to 8fc344d0 (Obj-104,126:1232) not released
+ 8:20:04 Link to 8fc330a1 (Obj-102,126:161) not released
+ 8:20:04 Link to 8fc33095 (Obj-102,126:149) not released
+ 8:20:04 Link to 8fc31c04 (Obj-99,126:1028) not released
+ 8:20:04 Link to 8fc2ec69 (Obj-93,126:1129) not released
+ 8:20:04 Link to 8fc2ed3a (Obj-93,126:1338) not released
+ 8:20:04 Link to 8fa340a9 (Obj-104,125:169) not released
+ 8:20:04 Link to 8f8353e9 (Obj-106,124:1001) not released
+ 8:20:04 Link to 8f8353e8 (Obj-106,124:1000) not released
+ 8:20:04 Link to 8f834941 (Obj-105,124:321) not released
+ 8:20:04 Link to 8f834108 (Obj-104,124:264) not released
+ 8:20:04 Link to 8f438ecd (Obj-113,122:1741) not released
+ 8:20:04 Link to 8f43770e (Obj-110,122:1806) not released
+ 8:20:04 Link to 8f437698 (Obj-110,122:1688) not released
+ 8:20:04 Link to 8f2399bd (Obj-115,121:445) not released
+ 8:20:04 Link to 8f239ef1 (Obj-115,121:1777) not released
+ 8:20:04 Link to 8f239ee6 (Obj-115,121:1766) not released
+ 8:20:04 Link to 8f2391dd (Obj-114,121:477) not released
+ 8:20:04 Link to 8f238353 (Obj-112,121:851) not released
+ 8:20:04 Link to 8f238715 (Obj-112,121:1813) not released
+ 8:20:04 Link to 8f237b24 (Obj-111,121:804) not released
+ 8:20:04 Link to 8f236e7f (Obj-109,121:1663) not released
+ 8:20:04 Link to 8f236e6a (Obj-109,121:1642) not released
+ 8:20:04 Link to 8f236680 (Obj-108,121:1664) not released
+ 8:20:04 Link to 8f037b22 (Obj-111,120:802) not released
+ 8:20:04 Link to 8f037b1f (Obj-111,120:799) not released
+ 8:20:04 Link to 8f037b10 (Obj-111,120:784) not released
+ 8:20:04 Link to 8f037323 (Obj-110,120:803) not released
+ 8:20:04 Link to 8f037309 (Obj-110,120:777) not released
+ 8:20:04 Link to 8f037307 (Obj-110,120:775) not released
+ 8:20:04 Link to 8f037261 (Obj-110,120:609) not released
+ 8:20:04 Link to 8f036a6f (Obj-109,120:623) not released
+ 8:20:04 Link to 8f036a6e (Obj-109,120:622) not released
+ 8:20:04 Link to 8f036a54 (Obj-109,120:596) not released
+ 8:20:04 Link to 8f036a53 (Obj-109,120:595) not released
+ 8:20:04 Link to 8f035a48 (Obj-107,120:584) not released
+ 8:20:04 Link to 8ee372e8 (Obj-110,119:744) not released
+ 8:20:04 Link to 8ee36aeb (Obj-109,119:747) not released
+ 8:20:04 Link to 8ee36ab7 (Obj-109,119:695) not released
+ 8:20:04 Link to 8ee36ab6 (Obj-109,119:694) not released
+ 8:20:04 Link to 8ee2f56e (Obj-94,119:1390) not released
+ 8:20:04 Link to 8ea310ee (Obj-98,117:238) not released
+ 8:20:04 Link to 8e0380e7 (Obj-112,112:231) not released
+ 8:20:04 Link to 8de38152 (Obj-112,111:338) not released
+ 8:20:04 Link to 8dc339d6 (Obj-103,110:470) not released
+ 8:20:04 Link to 8da34262 (Obj-104,109:610) not released
+ 8:20:04 Link to 8da34250 (Obj-104,109:592) not released
+ 8:20:04 Link to 8da34226 (Obj-104,109:550) not released
+ 8:20:04 Link to 8da339d8 (Obj-103,109:472) not released
+ 8:20:04 Link to 8da339cb (Obj-103,109:459) not released
+ 8:20:04 Link to 8d835ba0 (Obj-107,108:928) not released
+ 8:20:04 Link to 8d83428c (Obj-104,108:652) not released
+ 8:20:04 Link to 8d834255 (Obj-104,108:597) not released
+ 8:20:04 Link to 8d636d90 (Obj-109,107:1424) not released
+ 8:20:04 Link to 8d636d5c (Obj-109,107:1372) not released
+ 8:20:04 Link to 8d636d5a (Obj-109,107:1370) not released
+ 8:20:04 Link to 8d6352ec (Obj-106,107:748) not released
+ 8:20:04 Link to 8d6352cc (Obj-106,107:716) not released
+ 8:20:04 Link to 8d435335 (Obj-106,106:821) not released
+ 8:20:04 Link to 8d235058 (Obj-106,105:88) not released
+ 8:20:04 Link to 8d2357c6 (Obj-106,105:1990) not released
+ 8:20:04 Link to 8d235593 (Obj-106,105:1427) not released
+ 8:20:04 Link to 8ce39958 (Obj-115,103:344) not released
+ 8:20:04 Link to 8ce358cd (Obj-107,103:205) not released
+ 8:20:04 Link to 8ba30049 (Obj-96,93:73) not released
+ 8:20:04 Link to 8ba2f829 (Obj-95,93:41) not released
+ 8:20:04 Link to 8aa308e3 (Obj-97,85:227) not released
+ 8:20:04 Link to 8982c540 (Obj-88,76:1344) not released
+ 8:20:04 Link to 8905f94d (Obj-191,72:333) not released
+ 8:20:04 Link to 8905f111 (Obj-190,72:273) not released
+ 8:20:04 Link to 88e61428 (Obj-194,71:1064) not released
+ 8:20:04 Link to 88e61427 (Obj-194,71:1063) not released
+ 8:20:04 Link to 88e60c21 (Obj-193,71:1057) not released
+ 8:20:04 Link to 88a33382 (Obj-102,69:898) not released
+ 8:20:04 Link to 83e618ca (Obj-195,31:202) not released
+ 8:20:04 Link to 8326bad9 (Obj-215,25:729) not released
+ 8:20:04 Link to 8301ea4d (Obj-61,24:589) not released
+ 8:20:04 Link to 82e1da2b (Obj-59,23:555) not released
+ 8:20:04 Link to 8261da0f (Obj-59,19:527) not released
+ 8:20:04 Link to 8261d2f8 (Obj-58,19:760) not released
+ 8:20:04 Link to 8241da11 (Obj-59,18:529) not released
+ 8:20:04 Link to 8241d224 (Obj-58,18:548) not released
+ 8:20:04 Link to 8241d223 (Obj-58,18:547) not released
+ 8:20:04 Link to 8241ca07 (Obj-57,18:519) not released
+ 8:20:04 Link to 8221d265 (Obj-58,17:613) not released
+ 8:20:04 Link to 8221d210 (Obj-58,17:528) not released
+ 8:20:04 Link to 8221ca38 (Obj-57,17:568) not released
+ 8:20:04 Link to 820188e2 (Obj-49,16:226) not released
+ 8:20:04 Link to 820170b8 (Obj-46,16:184) not released
+ 8:20:04 Link to 81a19b98 (Obj-51,13:920) not released
+ 8:20:04 Link to 8181cbb7 (Obj-57,12:951) not released
+ 8:20:04 Link to 8161d3cf (Obj-58,11:975) not released
+ 8:20:04 Link to 80e55fbc (Obj-171,7:1980) not released
+ 8:20:06 No more slot to add connection at 046054 (4692.5,5475.5)
+ 8:20:06 No more slot to add connection at 051057 (5156.7,5769.8)
+ 8:20:06 Bad simulation shipx, type Land_BuoyBig_F (class=vehicle), a3\structures_f\naval\buoys\buoybig_f.p3d
+ 8:20:06 Bad simulation shipx, type Land_BuoyBig_F (class=vehicle), a3\structures_f\naval\buoys\buoybig_f.p3d
+ 8:20:06 Bad simulation shipx, type Land_BuoyBig_F (class=vehicle), a3\structures_f\naval\buoys\buoybig_f.p3d
+ 8:20:10 "No params given for ALIVE_fnc_BUS - exiting..."
+ 8:20:10 [CBA] (xeh) INFO: [2.41332e+06,52868.4,0] PreInit started. v3.18.6.260327
+ 8:20:10 [CBA] (settings) INFO: Reading settings from settings file.
+ 8:20:10 [CBA] (settings) INFO: Finished reading settings from settings file.
+ 8:20:11 [CBA] (xeh) WARNING: One or more children of class CAManBase do not support Extended Event Handlers. Fall back to loop.
+ 8:20:11 [CBA] (disposable) WARNING: Mass of launcher uk3cb_m72a1_law (79.3) is different from mass of used launcher uk3cb_m72a1_law_spent (57.3).
+ 8:20:11 [ACE] (common) INFO: Parsed Settings Configs [0.0 ms]
+ 8:20:11 Attempt to override final function - ace_medical_engine_fnc_updatedamageeffects
+ 8:20:11 Attempt to override final function - ace_medical_status_fnc_addmedicationadjustment
+ 8:20:11 Attempt to override final function - ace_medical_status_fnc_getbloodpressure
+ 8:20:11 Attempt to override final function - ace_medical_status_fnc_hasstablevitals
+ 8:20:11 Attempt to override final function - ace_medical_vitals_fnc_handleunitvitals
+ 8:20:11 Attempt to override final function - ace_medical_vitals_fnc_updateheartrate
+ 8:20:11 Attempt to override final function - ace_dogtags_fnc_cancheckdogtag
+ 8:20:11 Attempt to override final function - ace_dogtags_fnc_getdogtagdata
+ 8:20:11 Attempt to override final function - ace_dragging_fnc_carryobject
+ 8:20:11 Attempt to override final function - ace_dragging_fnc_handleunconscious
+ 8:20:11 Attempt to override final function - ace_medical_fnc_setunconscious
+ 8:20:11 Attempt to override final function - ace_medical_statemachine_fnc_conditionexecutiondeath
+ 8:20:11 Attempt to override final function - ace_medical_statemachine_fnc_conditionsecondchance
+ 8:20:11 Attempt to override final function - ace_medical_treatment_fnc_cprsuccess
+ 8:20:11 Attempt to override final function - ace_medical_treatment_fnc_cprlocal
+ 8:20:11 Attempt to override final function - ace_medical_treatment_fnc_medicationlocal
+ 8:20:11 Attempt to override final function - ace_medical_treatment_fnc_tourniquetremove
+ 8:20:11 Attempt to override final function - ace_medical_treatment_fnc_treatment
+ 8:20:11 Attempt to override final function - ace_medical_treatment_fnc_treatmentsuccess
+ 8:20:11 Attempt to override final function - ace_medical_treatment_fnc_useitem
+ 8:20:11 MIRA_Vehicle_Medical[DEBUG]: [MIRA_Vehicle_Medical] PreInit Begin at MIRA_Vehicle_Medical\XEH_preInit.sqf:2
+ 8:20:11 MIRA_Vehicle_Medical[DEBUG]: [MIRA_Vehicle_Medical] PREP Begin at MIRA_Vehicle_Medical\XEH_preInit.sqf:4
+ 8:20:11 "PREP fnc_openMedicalMenu"
+ 8:20:11 "PREP fnc_isMedic"
+ 8:20:11 "PREP fnc_getVersion"
+ 8:20:11 "PREP fnc_getBloodPressure"
+ 8:20:11 "PREP fnc_getHeartRate"
+ 8:20:11 "PREP fnc_hasLowHR"
+ 8:20:11 "PREP fnc_displayHR"
+ 8:20:11 "PREP fnc_hasLowBP"
+ 8:20:11 "PREP fnc_displayBP"
+ 8:20:11 "PREP fnc_getTotalIV"
+ 8:20:11 "PREP fnc_buildIncapacitatedPassengerActions"
+ 8:20:11 "PREP fnc_unloadPatient"
+ 8:20:11 "PREP fnc_unloadAllWithCondition"
+ 8:20:11 "PREP fnc_unloadPatientForceHandler"
+ 8:20:11 "PREP fnc_countIncapacitated"
+ 8:20:11 "PREP fnc_countUnstable"
+ 8:20:11 "PREP fnc_countStable"
+ 8:20:11 "PREP fnc_buildStablePassengerActions"
+ 8:20:11 "PREP fnc_buildStableActions"
+ 8:20:11 "PREP fnc_isStable"
+ 8:20:11 "PREP fnc_getOpenWounds"
+ 8:20:11 "PREP fnc_needsBandage"
+ 8:20:11 "PREP fnc_getNumberOfWoundsToBandage"
+ 8:20:11 "PREP fnc_getStitchableWounds"
+ 8:20:11 "PREP fnc_getFractures"
+ 8:20:11 "PREP fnc_hasFractures"
+ 8:20:11 "PREP fnc_getNumberOfFractures"
+ 8:20:11 "PREP fnc_getStitchedWounds"
+ 8:20:11 "PREP fnc_hasTourniquets"
+ 8:20:11 "PREP fnc_getNumberOfTourniquets"
+ 8:20:11 "PREP fnc_buildUnstablePassengerActions"
+ 8:20:11 "PREP fnc_buildUnstableActions"
+ 8:20:11 "PREP fnc_isUnstable"
+ 8:20:11 "PREP fnc_isBleeding"
+ 8:20:11 "PREP fnc_isCardiacArrest"
+ 8:20:11 "PREP fnc_isUnconscious"
+ 8:20:11 "PREP fnc_hasLegFractures"
+ 8:20:11 "PREP fnc_getNumberOfLegFractures"
+ 8:20:11 "PREP fnc_kat_isUnstable"
+ 8:20:11 "PREP fnc_kat_getAirwayObstruction"
+ 8:20:11 "PREP fnc_kat_getAirwayOcclusion"
+ 8:20:11 "PREP fnc_kat_getAirwayStatus"
+ 8:20:11 "PREP fnc_kat_getHemoPneumothorax"
+ 8:20:11 "PREP fnc_kat_getPneumothorax"
+ 8:20:11 "PREP fnc_kat_getTensionPneumothorax"
+ 8:20:11 "PREP fnc_cachedLocalisationCall"
+ 8:20:11 "PREP fnc_cachedResult"
+ 8:20:11 MIRA_Vehicle_Medical[DEBUG]: [MIRA_Vehicle_Medical] PREP Complete at MIRA_Vehicle_Medical\XEH_preInit.sqf:6
+ 8:20:11 MIRA_Vehicle_Medical[DEBUG]: MIRA_Vehicle_Medical at version [2,6,0,0] at MIRA_Vehicle_Medical\XEH_preInit.sqf:9
+ 8:20:11 MIRA_Vehicle_Medical[DEBUG]: ACE Version is >= 3.13 at MIRA_Vehicle_Medical\XEH_preInit.sqf:15
+ 8:20:11 MIRA_Vehicle_Medical[DEBUG]: ACE Version is >= 3.16 at MIRA_Vehicle_Medical\XEH_preInit.sqf:23
+ 8:20:11 MIRA_Vehicle_Medical[DEBUG]: Searching for Integrations at MIRA_Vehicle_Medical\XEH_preInit.sqf:31
+ 8:20:11 MIRA_Vehicle_Medical[DEBUG]: Found KAT: true at MIRA_Vehicle_Medical\XEH_preInit.sqf:35
+ 8:20:11 MIRA_Vehicle_Medical[DEBUG]: Integration Search Complete at MIRA_Vehicle_Medical\XEH_preInit.sqf:37
+ 8:20:11 MIRA_Vehicle_Medical[DEBUG]: [MIRA_Vehicle_Medical] CBA Options Begin at MIRA_Vehicle_Medical\XEH_preInit.sqf:39
+ 8:20:11 MIRA_Vehicle_Medical[DEBUG]: [MIRA_Vehicle_Medical] CBA Options Complete at MIRA_Vehicle_Medical\XEH_preInit.sqf:109
+ 8:20:11 MIRA_Vehicle_Medical[DEBUG]: [MIRA_Vehicle_Medical] PreInit Complete at MIRA_Vehicle_Medical\XEH_preInit.sqf:111
+ 8:20:11 Attempt to override final function - ace_medical_gui_fnc_menupfh
+ 8:20:11 Attempt to override final function - ace_medical_gui_fnc_onmenuclose
+ 8:20:11 Attempt to override final function - ace_medical_gui_fnc_onmenuopen
+ 8:20:11 Attempt to override final function - ace_medical_gui_fnc_updatebodyimage
+ 8:20:11 Attempt to override final function - ace_medical_gui_fnc_updatecategories
+ 8:20:11 Attempt to override final function - ace_medical_gui_fnc_updateinjurylist
+ 8:20:11 [CBA] (xeh) INFO: [2.41332e+06,52869.5,0] PreInit finished.
+ 8:20:14 Attempt to override final function - tfar_fnc_missingmodmessage
+ 8:20:16 unable to create weapon for missile 'FIR_F16C_Fueltank_P_1rnd_M', check config entry'pylonWeapon'
+ 8:20:16 unable to create weapon for missile 'FIR_F16C_center_Fueltank_P_1rnd_M', check config entry'pylonWeapon'
+ 8:20:16 unable to create weapon for missile 'FIR_Empty_P_1rnd_M', check config entry'pylonWeapon'
+ 8:20:16 unable to create weapon for missile 'FIR_F16C_Fueltank_P_1rnd_M', check config entry'pylonWeapon'
+ 8:20:16 unable to create weapon for missile 'FIR_F16C_Fueltank_P_1rnd_M', check config entry'pylonWeapon'
+ 8:20:16 unable to create weapon for missile 'FIR_F16C_center_Fueltank_P_1rnd_M', check config entry'pylonWeapon'
+ 8:20:16 unable to create weapon for missile 'FIR_Empty_P_1rnd_M', check config entry'pylonWeapon'
+ 8:20:16 unable to create weapon for missile 'FIR_F16C_Fueltank_P_1rnd_M', check config entry'pylonWeapon'
+ 8:20:18 Setting invalid pitch 0.0000 for B Bravo 4-4:2 REMOTE
+ 8:20:18 SetFace error: texture  not found
+ 8:20:18 SetFace error: textureHL  not found
+ 8:20:18 SetFace error: texture  not found
+ 8:20:18 SetFace error: textureHL  not found
+ 8:20:18 SetFace error: texture  not found
+ 8:20:18 SetFace error: textureHL  not found
+ 8:20:18 Setting invalid pitch 0.0000 for B Charlie 4-6:2 REMOTE
+ 8:20:18 SetFace error: texture  not found
+ 8:20:18 SetFace error: textureHL  not found
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-1:1 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:1 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:2 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for hc1
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:4 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:5 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:6 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:7 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:8 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:9 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:10 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:11 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:12 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:13 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:14 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:15 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:16 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:17 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:18 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:19 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:20 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:21 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:22 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:23 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:24 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:25 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:26 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:27 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:28 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:29 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:30 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:31 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:32 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:33 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:34 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:35 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:36 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:37 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:38 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:39 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:40 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:41 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:42 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:43 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:44 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:45 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:46 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:47 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:48 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:49 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:50 REMOTE
+ 8:20:18 Setting invalid pitch 0.0000 for L Alpha 1-3:51 REMOTE
+ 8:20:19 "LIGHTS WORKING"
+ 8:20:19 "LIGHTS WORKING"
+ 8:20:19 "LIGHTS WORKING"
+ 8:20:19 "LIGHTS WORKING"
+ 8:20:19 "LIGHTS WORKING"
+ 8:20:20 Client: Object 2:21317 (type Type_128) not found.
+ 8:20:20 Client: Object 2:21317 (type Type_100) not found.
+ 8:20:20 Client: Object 2:21317 (type Type_168) not found.
+ 8:20:20 Client: Object 2:21317 (type Type_468) not found.
+ 8:20:20 Client: Object 2:21325 (type Type_128) not found.
+ 8:20:20 Client: Object 2:21325 (type Type_100) not found.
+ 8:20:20 Client: Object 2:21325 (type Type_168) not found.
+ 8:20:20 Client: Object 2:21325 (type Type_468) not found.
+ 8:20:20 Client: Object 2:21333 (type Type_128) not found.
+ 8:20:20 Client: Object 2:21333 (type Type_100) not found.
+ 8:20:20 Client: Object 2:21333 (type Type_168) not found.
+ 8:20:20 Client: Object 2:21333 (type Type_468) not found.
+ 8:20:20 Client: Object 2:21341 (type Type_128) not found.
+ 8:20:20 Client: Object 2:21341 (type Type_100) not found.
+ 8:20:20 Client: Object 2:21341 (type Type_168) not found.
+ 8:20:20 Client: Object 2:21341 (type Type_468) not found.
+ 8:20:20 Client: Object 2:21349 (type Type_128) not found.
+ 8:20:20 Client: Object 2:21349 (type Type_100) not found.
+ 8:20:20 Client: Object 2:21349 (type Type_168) not found.
+ 8:20:20 Client: Object 2:21349 (type Type_468) not found.
+ 8:20:20 Client: Object 2:21357 (type Type_128) not found.
+ 8:20:20 Client: Object 2:21357 (type Type_100) not found.
+ 8:20:20 Client: Object 2:21357 (type Type_168) not found.
+ 8:20:20 Client: Object 2:21357 (type Type_468) not found.
+ 8:20:21 "Advanced Towing Loading..."
+ 8:20:21 "Advanced Towing Loaded"
+ 8:20:32 Attempt to override final function - bis_fnc_preload_server
+ 8:20:32 [CBA] (xeh) INFO: [2.4142e+06,52890.5,0] PostInit started. MISSIONINIT: missionName=COIN_Farabad_v0, missionVersion=54, worldName=Farabad, isMultiplayer=true, isServer=false, isDedicated=false, CBA_isHeadlessClient=true, hasInterface=false, didJIP=false
+ 8:20:33 [CBA] (versioning) INFO: [2.4142e+06,52890.8,0] VERSIONING:aceax=0.10.0.0, alive_main=2.2.0.2601221, cba=3.18.6.260327, zen=1.15.1.36, ace=3.21.0.110, tfar=1.-1.0.341, ctab=2.2.2.5, kat=3.1.3, abc=2.1.1.0
+ 8:20:33 [CBA Keybinding] WARNING: Purple weapons=>switch benelli shotgun stock position called cba_fnc_registerKeybind is no longer a valid function and has been replaced with cba_fnc_addKeybind. Contact the developer of mod Purple weapons to change the code to use the new function.
+ 8:20:33 "Converted _defaultKeybind => [35,true,false,false]"
+ 8:20:33 [CBA Keybinding] WARNING: Purple weapons=>reload a single round in shotgun called cba_fnc_registerKeybind is no longer a valid function and has been replaced with cba_fnc_addKeybind. Contact the developer of mod Purple weapons to change the code to use the new function.
+ 8:20:33 "Converted _defaultKeybind => [33,true,false,false]"
+ 8:20:33 Warn: Shape '???' contains water texture however it does not carry a property "class=pond". Consider creating one to speed up the detection!
+ 8:20:34 [ACE] (common) INFO: ACE is version 3.21.0.110 - CBA is version 3.18.6.260327 (min required 3.18.5)
+ 8:20:34 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usgroundcrew_1.p3d"
+ 8:20:34 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usgroundcrew_1.p3d"
+ 8:20:34 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usgroundcrew_1.p3d"
+ 8:20:34 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usgroundcrew_1.p3d"
+ 8:20:34 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usgroundcrew_1.p3d"
+ 8:20:34 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usgroundcrew_1.p3d"
+ 8:20:34 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usgroundcrew_1.p3d"
+ 8:20:34 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usgroundcrew_1.p3d"
+ 8:20:34 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usgroundcrew_1.p3d"
+ 8:20:34 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usgroundcrew_1.p3d"
+ 8:20:34 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usgroundcrew_1.p3d"
+ 8:20:34 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usgroundcrew_1.p3d"
+ 8:20:34 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_1.p3d"
+ 8:20:34 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_1.p3d"
+ 8:20:34 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_1.p3d"
+ 8:20:34 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_1.p3d"
+ 8:20:34 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_7.p3d"
+ 8:20:34 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_7.p3d"
+ 8:20:34 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_1.p3d"
+ 8:20:34 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_1.p3d"
+ 8:20:34 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_7.p3d"
+ 8:20:34 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_7.p3d"
+ 8:20:34 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_1.p3d"
+ 8:20:34 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_1.p3d"
+ 8:20:34 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_1.p3d"
+ 8:20:34 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_1.p3d"
+ 8:20:34 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_1.p3d"
+ 8:20:34 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_1.p3d"
+ 8:20:34 SelectionID "31" is wrong for shape "moecoveralls\gsuit\nomexgsuitlegsfingerless.p3d"
+ 8:20:34 SelectionID "32" is wrong for shape "moecoveralls\gsuit\nomexgsuitlegsfingerless.p3d"
+ 8:20:34 SelectionID "31" is wrong for shape "moecoveralls\longsleeves\nomexlongsleeves.p3d"
+ 8:20:34 SelectionID "32" is wrong for shape "moecoveralls\longsleeves\nomexlongsleeves.p3d"
+ 8:20:34 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 8:20:34 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 8:20:34 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 8:20:34 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 8:20:34 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 8:20:34 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 8:20:34 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 8:20:34 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 8:20:34 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 8:20:34 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 8:20:34 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 8:20:34 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 8:20:34 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 8:20:34 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 8:20:34 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 8:20:34 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 8:20:34 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 8:20:34 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 8:20:34 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 8:20:34 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usarmycrew.p3d"
+ 8:20:34 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_7.p3d"
+ 8:20:34 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_7.p3d"
+ 8:20:34 SelectionID "31" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_7.p3d"
+ 8:20:34 SelectionID "32" is wrong for shape "fir_pilotcrewpack_us\fir_usnomex_7.p3d"
+ 8:20:34 [ACE] (markinglaser) INFO: Class USAF_C17 does not have a pilot camera nor a turret that could be equipped with an IR marking laser.
+ 8:20:34 [ACE] (markinglaser) INFO: Class USAF_C130J does not have a pilot camera nor a turret that could be equipped with an IR marking laser.
+ 8:20:34 [ACE] (markinglaser) INFO: Class USAF_C17 does not have a pilot camera nor a turret that could be equipped with an IR marking laser.
+ 8:20:34 [ACE] (markinglaser) INFO: Class RHS_UH60M_d does not have a pilot camera nor a turret that could be equipped with an IR marking laser.
+ 8:20:34 [ACE] (markinglaser) INFO: Class RHS_UH60M_d does not have a pilot camera nor a turret that could be equipped with an IR marking laser.
+ 8:20:34 [ACE] (markinglaser) INFO: Class RHS_UH60M_d does not have a pilot camera nor a turret that could be equipped with an IR marking laser.
+ 8:20:34 [ACE] (markinglaser) INFO: Class RHS_UH60M_d does not have a pilot camera nor a turret that could be equipped with an IR marking laser.
+ 8:20:34 [ACE] (markinglaser) INFO: Class RHS_CH_47F_10 does not have a pilot camera nor a turret that could be equipped with an IR marking laser.
+ 8:20:34 [ACE] (markinglaser) INFO: Class RHS_CH_47F_10 does not have a pilot camera nor a turret that could be equipped with an IR marking laser.
+ 8:20:34 [CBA] (xeh) INFO: [2.4142e+06,52891.9,0] PostInit finished.
+ 8:20:34 [ACE] (common) INFO: Settings initialized.
+ 8:20:34 [ACE] (common) INFO: 1053 delayed functions running.
+ 8:20:34 [CBA] (versioning) INFO: [2.4142e+06,52892.3,0] VERSIONING_SERVER:aceax=0.10.0.0, alive_main=2.2.0.2.60122e+06, cba=3.18.6.260327, zen=1.15.1.36, ace=3.21.0.110, tfar=1.-1.0.341, ctab=2.2.2.5, kat=3.1.3, abc=2.1.1.0
+ 8:20:34 ALiVE 0 : 52892.3 - ALiVE_sys_acemenu: ACE interact_menu not active or no interface found, exiting
+ 8:20:34 "IL starting"
+ 8:20:34 "IL config loading"
+ 8:20:34 "IL config done"
+ 8:20:34 "IL func loaded"
+ 8:20:34 "IL ready"
+ 8:20:52  Mission id: 02fba6eca8f903faf9b62f1a7841909c3fc2a73a
+ 8:20:53 Setting invalid pitch 0.0000 for B 2 BSTB | SHERIFF HOLDING 01:7 REMOTE
+ 8:20:53 Setting invalid pitch 0.0000 for B 2 BSTB | SHERIFF K-9 01:1 REMOTE
+ 8:20:53 Setting invalid pitch 0.0000 for B Delta 3-4:1 REMOTE
+ 8:20:53 Setting invalid pitch 0.0000 for B Delta 3-3:1 REMOTE
+ 8:20:54 Setting invalid pitch 0.0000 for B Delta 4-1:1 REMOTE
+ 8:20:54 Setting invalid pitch 0.0000 for B Delta 4-2:1 REMOTE
+ 8:20:54 Setting invalid pitch 0.0000 for B Delta 4-3:1 REMOTE
+ 8:20:54 Setting invalid pitch 0.0000 for B Delta 4-4:1 REMOTE
+ 8:20:56 Setting invalid pitch 0.0000 for L Charlie 3-4:1 REMOTE
+ 8:20:56 Setting invalid pitch 0.0000 for L Charlie 3-4:2 REMOTE
+ 8:20:56 Setting invalid pitch 0.0000 for L Charlie 3-4:3 REMOTE
+ 8:20:56 Setting invalid pitch 0.0000 for L Charlie 3-4:4 REMOTE
+ 8:20:56 Setting invalid pitch 0.0000 for L Charlie 3-4:5 REMOTE
+ 8:20:56 Setting invalid pitch 0.0000 for L Charlie 3-4:6 REMOTE
+ 8:20:56 Setting invalid pitch 0.0000 for L Charlie 3-4:7 REMOTE
+ 8:20:56 Setting invalid pitch 0.0000 for L Charlie 3-4:8 REMOTE
+ 8:20:56 Setting invalid pitch 0.0000 for L Charlie 3-4:9 REMOTE
+ 8:20:56 Setting invalid pitch 0.0000 for L Charlie 3-4:10 REMOTE
+ 8:20:56 Setting invalid pitch 0.0000 for L Charlie 3-4:11 REMOTE
+ 8:20:56 Setting invalid pitch 0.0000 for L Charlie 3-4:12 REMOTE
+ 8:20:56 Setting invalid pitch 0.0000 for L Charlie 3-4:13 REMOTE
+ 8:20:57 Setting invalid pitch 0.0000 for L Charlie 3-4:14 REMOTE
+ 8:20:57 Setting invalid pitch 0.0000 for L Charlie 3-4:15 REMOTE
+ 8:20:57 Setting invalid pitch 0.0000 for L Charlie 3-4:16 REMOTE
+ 8:20:57 Setting invalid pitch 0.0000 for L Charlie 3-4:17 REMOTE
+ 8:20:57 Setting invalid pitch 0.0000 for L Charlie 3-4:18 REMOTE
+ 8:20:57 Setting invalid pitch 0.0000 for L Charlie 3-4:19 REMOTE
+ 8:20:57 Setting invalid pitch 0.0000 for L Charlie 3-4:20 REMOTE
+ 8:20:57 Setting invalid pitch 0.0000 for L Charlie 3-4:21 REMOTE
+ 8:20:57 Setting invalid pitch 0.0000 for L Charlie 3-4:22 REMOTE
+ 8:20:57 Setting invalid pitch 0.0000 for L Charlie 3-4:23 REMOTE
+ 8:21:02 Setting invalid pitch 0.0000 for L Charlie 3-4:24 REMOTE
+ 8:21:02 Setting invalid pitch 0.0000 for L Charlie 3-4:25 REMOTE
+ 8:21:02 Setting invalid pitch 0.0000 for L Charlie 3-4:26 REMOTE
+ 8:21:02 Setting invalid pitch 0.0000 for L Charlie 3-4:27 REMOTE
+ 8:21:07 Setting invalid pitch 0.0000 for L Charlie 3-4:28 REMOTE
+ 8:21:07 Setting invalid pitch 0.0000 for L Charlie 3-4:29 REMOTE
+ 8:21:07 Setting invalid pitch 0.0000 for L Charlie 3-4:30 REMOTE
+ 8:21:07 Setting invalid pitch 0.0000 for L Charlie 3-4:31 REMOTE
+ 8:21:09 Setting invalid pitch 0.0000 for L Charlie 3-4:32 REMOTE
+ 8:21:09 Setting invalid pitch 0.0000 for L Charlie 3-4:33 REMOTE
+ 8:21:09 Setting invalid pitch 0.0000 for L Charlie 3-4:34 REMOTE
+ 8:21:09 Setting invalid pitch 0.0000 for L Charlie 3-4:35 REMOTE
+ 8:21:09 Setting invalid pitch 0.0000 for L Charlie 3-4:36 REMOTE
+ 8:21:09 Setting invalid pitch 0.0000 for L Charlie 3-4:37 REMOTE
+ 8:21:12 Setting invalid pitch 0.0000 for L Charlie 3-4:38 REMOTE
+ 8:21:12 Setting invalid pitch 0.0000 for L Charlie 3-4:39 REMOTE
+ 8:21:12 Setting invalid pitch 0.0000 for L Charlie 3-4:40 REMOTE
+ 8:21:12 Setting invalid pitch 0.0000 for L Charlie 3-4:41 REMOTE
+ 8:21:14 Setting invalid pitch 0.0000 for L Charlie 3-4:42 REMOTE
+ 8:21:14 Setting invalid pitch 0.0000 for L Charlie 3-4:43 REMOTE
+ 8:21:15 Setting invalid pitch 0.0000 for L Charlie 3-4:44 REMOTE
+ 8:21:15 Setting invalid pitch 0.0000 for L Charlie 3-4:45 REMOTE
+ 8:21:15 Setting invalid pitch 0.0000 for L Charlie 3-4:46 REMOTE
+ 8:21:18 Setting invalid pitch 0.0000 for L Charlie 3-4:47 REMOTE
+ 8:21:18 Setting invalid pitch 0.0000 for L Charlie 3-4:48 REMOTE
+ 8:21:18 Setting invalid pitch 0.0000 for L Charlie 3-4:49 REMOTE
+ 8:21:18 Setting invalid pitch 0.0000 for L Charlie 3-4:50 REMOTE
+ 8:21:18 Setting invalid pitch 0.0000 for L Charlie 3-4:51 REMOTE
+ 8:21:21 Setting invalid pitch 0.0000 for L Charlie 3-4:52 REMOTE
+ 8:21:21 Setting invalid pitch 0.0000 for L Charlie 3-4:53 REMOTE
+ 8:21:21 Setting invalid pitch 0.0000 for L Charlie 3-4:54 REMOTE
+ 8:21:21 Setting invalid pitch 0.0000 for L Charlie 3-4:55 REMOTE
+ 8:21:21 Setting invalid pitch 0.0000 for L Charlie 3-4:56 REMOTE
+ 8:21:21 Setting invalid pitch 0.0000 for L Charlie 3-4:57 REMOTE
+ 8:21:21 Setting invalid pitch 0.0000 for L Charlie 3-4:58 REMOTE
+ 8:21:21 Setting invalid pitch 0.0000 for L Charlie 3-4:59 REMOTE
+ 8:21:21 Setting invalid pitch 0.0000 for L Charlie 3-4:60 REMOTE
+ 8:25:22 rhsusf_m1151_mk19crows_usarmy_d: bumper2_rhino_translate - unknown animation source bumper2_hide
+ 8:26:17 Client: Object 2:22901 (type Type_468) not found.
+ 8:26:17 Client: Object 2:22903 (type Type_122) not found.
+ 8:26:17 Client: Object 2:22914 (type Type_122) not found.
+ 8:26:17 Client: Object 2:22912 (type Type_468) not found.
+ 8:27:01 Client: Object 2:22842 (type Type_116) not found.
+ 8:27:01 Client: Object 2:22961 (type Type_116) not found.
+ 8:27:09 Client: Object 2:22971 (type Type_116) not found.
+ 8:27:33 Client: Object 2:22986 (type Type_135) not found.
+ 8:27:40 Client: Object 2:23254 (type Type_116) not found.
+ 8:29:04 Client: Object 2:23613 (type Type_470) not found.
+ 8:29:04 Client: Object 2:23627 (type Type_135) not found.
+ 8:29:26 Client: Object 2:23854 (type Type_116) not found.
+ 8:29:28 Client: Object 2:23865 (type Type_116) not found.
