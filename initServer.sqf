@@ -158,9 +158,9 @@ missionNamespace setVariable ["ARC_iedComplexAttackEnabled", true, true];
 //                                     pattern matrix + audit diagnostics.
 //   ARC_incidentOverlaySpawnsEnabled  transient Incident/Lead overlay spawning.
 //   ARC_sitePurposeExpansionEnabled   expanded SitePop site-purpose baselines.
-// All default ON after live-run validation (2026-06-11). Set any toggle to
-// false to fall back to the previous type-driven incident execution and
-// original three-site SitePop behaviour.
+// All default ON after live-run validation (2026-06-11). For rollback, set any
+// toggle to false BEFORE initServer.sqf runs (seeds are isNil-guarded).
+// Off state restores the previous type-driven incidents and three-site SitePop.
 if (isNil { missionNamespace getVariable "ARC_spawnPatternsEnabled" }) then {
     missionNamespace setVariable ["ARC_spawnPatternsEnabled", true, true];
 };
