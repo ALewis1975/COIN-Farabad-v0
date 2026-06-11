@@ -190,8 +190,8 @@ if (_needsNew) then
             if (!(_cxStaged isEqualType true) && !(_cxStaged isEqualType false)) then { _cxStaged = false; };
             if (_cxEnabled && { !_cxStaged }) then
             {
-                missionNamespace setVariable [format ["ARC_complexAtkStaged_%1", _threatIdCx], true];
-                [_recCx] call ARC_fnc_iedComplexAttackStage;
+                private _okStage = [_recCx] call ARC_fnc_iedComplexAttackStage;
+                if (_okStage) then { missionNamespace setVariable [format ["ARC_complexAtkStaged_%1", _threatIdCx], true]; };
             };
         };
     };
