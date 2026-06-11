@@ -1353,29 +1353,100 @@ if (_dbgEnabled) then
 };
 
 // ---------------------------------------------------------------------------
-// Console VM meta (rev) publish: monotonic rev to stabilize UI refresh ordering
-// ---------------------------------------------------------------------------
-private _rev = missionNamespace getVariable ["ARC_consoleVM_rev", 0];
-if (!(_rev isEqualType 0)) then { _rev = 0; };
-_rev = _rev + 1;
-missionNamespace setVariable ["ARC_consoleVM_rev", _rev];
-missionNamespace setVariable ["ARC_pub_stateSchema", ["ARC_pub_state_v2", 2], true];
-missionNamespace setVariable ["ARC_consoleVM_meta", [
-    ["schema", "Console_VM_v1"],
-    ["schemaVersion", 1],
-    ["publicStateSchema", "ARC_pub_state_v2"],
-    ["publicStateSchemaVersion", 2],
-    ["rev", _rev],
-    ["publishedAt", serverTime],
-    ["source", "publicBroadcastState"]
-], true];
-
-// ---------------------------------------------------------------------------
-// Console VM v1 full payload — build and publish (used by future tab migrations)
+// Console VM v1 publish — change-detected (perf):
+// The full VM payload + meta were previously re-replicated to every client on
+// every broadcast cycle (~5s) even when nothing changed. We now compare a
+// data-only signature (section name + data pairs; rev/builtAt/freshness
+// timestamps excluded) against the last published signature and skip the
+// global setVariable when identical. A bounded max-age refresh
+// (ARC_consoleVmMaxPublishAgeS, default 60s) keeps embedded freshness
+// timestamps from drifting indefinitely for stale-detection consumers.
 // ---------------------------------------------------------------------------
 private _vmPayload = [] call ARC_fnc_consoleVmBuild;
-if (_vmPayload isEqualType [] && { !(_vmPayload isEqualTo []) }) then {
-    missionNamespace setVariable ["ARC_consoleVM_payload", _vmPayload, true];
+if (_vmPayload isEqualType [] && { !(_vmPayload isEqualTo []) }) then
+{
+    // Extract data-only signature from the payload's sections.
+    private _vmSig = [];
+    private _vmSections = [];
+    {
+        if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo "sections" }) exitWith
+        {
+            _vmSections = _x select 1;
+        };
+    } forEach _vmPayload;
+    if (!(_vmSections isEqualType [])) then { _vmSections = []; };
+
+    {
+        private _sectionPair = _x;
+        if ((_sectionPair isEqualType []) && { (count _sectionPair) >= 2 }) then
+        {
+            private _sectionName = _sectionPair select 0;
+            private _sectionBody = _sectionPair select 1;
+            private _sectionData = [];
+            if (_sectionBody isEqualType []) then
+            {
+                {
+                    if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo "data" }) exitWith
+                    {
+                        _sectionData = _x select 1;
+                    };
+                } forEach _sectionBody;
+            };
+            _vmSig pushBack [_sectionName, _sectionData];
+        };
+    } forEach _vmSections;
+
+    private _vmLastSig = missionNamespace getVariable ["ARC_consoleVM_lastDataSig", []];
+    if (!(_vmLastSig isEqualType [])) then { _vmLastSig = []; };
+
+    private _vmLastPubAt = missionNamespace getVariable ["ARC_consoleVM_lastPublishAt", -1];
+    if (!(_vmLastPubAt isEqualType 0)) then { _vmLastPubAt = -1; };
+
+    private _vmMaxAgeS = missionNamespace getVariable ["ARC_consoleVmMaxPublishAgeS", 60];
+    if (!(_vmMaxAgeS isEqualType 0)) then { _vmMaxAgeS = 60; };
+    _vmMaxAgeS = (_vmMaxAgeS max 5) min 600;
+
+    private _vmChanged = !(_vmSig isEqualTo _vmLastSig);
+    private _vmAged = (_vmLastPubAt < 0) || { (serverTime - _vmLastPubAt) >= _vmMaxAgeS };
+
+    if (_vmChanged || _vmAged) then
+    {
+        // Bump the monotonic rev only when an actual publish occurs.
+        private _rev = missionNamespace getVariable ["ARC_consoleVM_rev", 0];
+        if (!(_rev isEqualType 0)) then { _rev = 0; };
+        _rev = _rev + 1;
+        missionNamespace setVariable ["ARC_consoleVM_rev", _rev];
+
+        // Patch the published rev into the already-built payload.
+        {
+            if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo "rev" }) exitWith
+            {
+                _x set [1, _rev];
+            };
+        } forEach _vmPayload;
+
+        missionNamespace setVariable ["ARC_consoleVM_meta", [
+            ["schema", "Console_VM_v1"],
+            ["schemaVersion", 1],
+            ["publicStateSchema", "ARC_pub_state_v2"],
+            ["publicStateSchemaVersion", 2],
+            ["rev", _rev],
+            ["publishedAt", serverTime],
+            ["source", "publicBroadcastState"]
+        ], true];
+        missionNamespace setVariable ["ARC_consoleVM_payload", _vmPayload, true];
+
+        // Server-local change-detection bookkeeping (not replicated).
+        missionNamespace setVariable ["ARC_consoleVM_lastDataSig", _vmSig];
+        missionNamespace setVariable ["ARC_consoleVM_lastPublishAt", serverTime];
+    };
+};
+
+// Schema identifier is constant — replicate only when missing or outdated.
+private _pubSchema = ["ARC_pub_state_v2", 2];
+if (!((missionNamespace getVariable ["ARC_pub_stateSchema", []]) isEqualTo _pubSchema)) then
+{
+    missionNamespace setVariable ["ARC_pub_stateSchema", _pubSchema, true];
 };
 
 // ---------------------------------------------------------------------------

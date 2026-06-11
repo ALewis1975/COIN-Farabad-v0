@@ -4,8 +4,13 @@
     Server-side: create or update per-district map markers reflecting the
     dominant influence axis (RED / WHITE / GREEN) for each CIVSUB district.
 
-    Markers are named ARC_district_<districtId>_influence and are replicated to
-    all clients on each broadcast cycle. Only runs when CIVSUB is enabled.
+    Markers are named ARC_district_<districtId>_influence. Only runs when
+    CIVSUB is enabled.
+
+    Perf: every global setMarker* command is a network message to every client.
+    A server-local signature cache (ARC_districtMarkersApplied) suppresses
+    re-sends when a district's marker visuals have not changed since the last
+    broadcast, so steady-state broadcasts cost zero marker traffic.
 
     Marker colour mapping:
       RED dominant (R >= W && R >= G && R > 45): ColorRed
@@ -15,7 +20,7 @@
     Called from ARC_fnc_publicBroadcastState after the state publish.
 
     Returns:
-      NUMBER — count of markers updated
+      NUMBER — count of markers actually created/updated this call
 */
 
 if (!isServer) exitWith {0};
@@ -28,6 +33,10 @@ if (_districts isEqualTo createHashMap) exitWith {0};
 
 private _updated = 0;
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k,_d]";
+
+// Server-local cache of last-applied marker signatures (districtId -> signature).
+private _applied = missionNamespace getVariable ["ARC_districtMarkersApplied", createHashMap];
+if (!(_applied isEqualType createHashMap)) then { _applied = createHashMap; };
 
 private _getScore = {
     params ["_d", "_key", "_default"];
@@ -58,7 +67,23 @@ private _getScore = {
 
     private _mkName = format ["ARC_district_%1_influence", _districtId];
 
-    if !(_mkName in allMapMarkers) then
+    private _radius = [_d, "radius_m", 400] call _hg;
+    if (!(_radius isEqualType 0)) then { _radius = 400; };
+    _radius = (_radius max 100) min 3000;
+
+    private _labelR = round _scoreR;
+    private _labelG = round _scoreG;
+    private _labelW = round _scoreW;
+    private _displayName = [_d, "display_name", _districtId] call _hg;
+    private _text = format ["%1 - %2 | R:%3 G:%4 W:%5", _districtId, _displayName, _labelR, _labelG, _labelW];
+
+    // Skip all global setMarker* traffic when nothing visible changed.
+    private _sig = [_pos2, _color, _radius, _text];
+    private _lastSig = [_applied, _districtId, []] call _hg;
+    private _exists = _mkName in allMapMarkers;
+    if (_exists && { _sig isEqualTo _lastSig }) then { continue; };
+
+    if (!_exists) then
     {
         createMarker [_mkName, _pos2];
     }
@@ -71,20 +96,14 @@ private _getScore = {
     _mkName setMarkerBrush "SolidBorder";
     _mkName setMarkerColor _color;
     _mkName setMarkerAlpha 0.18;
-
-    private _radius = [_d, "radius_m", 400] call _hg;
-    if (!(_radius isEqualType 0)) then { _radius = 400; };
-    _radius = (_radius max 100) min 3000;
     _mkName setMarkerSize [_radius, _radius];
+    _mkName setMarkerText _text;
 
-    private _labelR = round _scoreR;
-    private _labelG = round _scoreG;
-    private _labelW = round _scoreW;
-    private _displayName = [_d, "display_name", _districtId] call _hg;
-    _mkName setMarkerText format ["%1 - %2 | R:%3 G:%4 W:%5", _districtId, _displayName, _labelR, _labelG, _labelW];
-
+    _applied set [_districtId, _sig];
     _updated = _updated + 1;
 } forEach _districts;
+
+missionNamespace setVariable ["ARC_districtMarkersApplied", _applied];
 
 if (_updated > 0) then
 {
