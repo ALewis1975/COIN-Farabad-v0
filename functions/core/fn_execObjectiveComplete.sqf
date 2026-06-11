@@ -181,7 +181,15 @@ if (_kindU in ["IED_DEVICE", "VBIED_VEHICLE"]) then
     if !(_tid isEqualTo "") then
     {
         private _cur = [_tid] call _getThreatState;
-        if (_cur in ["", "CREATED", "ACTIVE"]) then
+        // State table only allows CREATED -> ACTIVE/STAGED/CLOSED/EXPIRED, so a
+        // never-activated record must be stepped through ACTIVE first or the
+        // DISCOVERED transition is denied (DENY_TRANSITION_INVALID).
+        if (_cur in ["", "CREATED"]) then
+        {
+            [_tid, "ACTIVE", "OBJECTIVE_DISCOVERED_BACKFILL_ACTIVE"] call ARC_fnc_threatUpdateState;
+            _cur = [_tid] call _getThreatState;
+        };
+        if (_cur in ["ACTIVE", "STAGED"]) then
         {
             [_tid, "DISCOVERED", "OBJECTIVE_DISCOVERED"] call ARC_fnc_threatUpdateState;
         };
@@ -276,12 +284,22 @@ if (_kindU in ["IED_DEVICE", "VBIED_VEHICLE"]) then
     {
         private _cur = [_tid] call _getThreatState;
 
-        if (_cur in ["", "CREATED", "ACTIVE"]) then
+        // State table only allows CREATED -> ACTIVE/STAGED/CLOSED/EXPIRED, so a
+        // never-activated record must be stepped through ACTIVE first or the
+        // DISCOVERED/NEUTRALIZED backfills are denied (DENY_TRANSITION_INVALID).
+        if (_cur in ["", "CREATED"]) then
         {
-            [_tid, "DISCOVERED", "OBJECTIVE_COMPLETE_BACKFILL_DISCOVERED"] call ARC_fnc_threatUpdateState;
+            [_tid, "ACTIVE", "OBJECTIVE_COMPLETE_BACKFILL_ACTIVE"] call ARC_fnc_threatUpdateState;
+            _cur = [_tid] call _getThreatState;
         };
 
-        if (_cur in ["", "CREATED", "ACTIVE", "DISCOVERED"]) then
+        if (_cur in ["ACTIVE", "STAGED"]) then
+        {
+            [_tid, "DISCOVERED", "OBJECTIVE_COMPLETE_BACKFILL_DISCOVERED"] call ARC_fnc_threatUpdateState;
+            _cur = [_tid] call _getThreatState;
+        };
+
+        if (_cur isEqualTo "DISCOVERED") then
         {
             [_tid, "NEUTRALIZED", "OBJECTIVE_COMPLETE"] call ARC_fnc_threatUpdateState;
         };
