@@ -48,7 +48,17 @@ if !([_did] call ARC_fnc_worldIsValidDistrictId) then
 
 if !([_did] call ARC_fnc_worldIsValidDistrictId) exitWith
 {
-    diag_log format ["[CIVSUB][WARN] ARC_fnc_civsubCivConnect: skipped source=%1 unit=%2 pos=%3 reason=no district", _source, _unit, getPosATL _unit];
+    // Warn once per unit: connect attempts arrive from multiple sources
+    // (CIVLOC, ENTITY_CREATED, PERIODIC_SCAN) and the periodic scan retries
+    // the same unconnectable unit every pass — without this guard a single
+    // out-of-district unit can generate hundreds of WARN lines per session.
+    private _warned = _unit getVariable ["civsub_v1_noDistrictWarned", false];
+    if (!(_warned isEqualType true) && !(_warned isEqualType false)) then { _warned = false; };
+    if (!_warned) then
+    {
+        _unit setVariable ["civsub_v1_noDistrictWarned", true];
+        diag_log format ["[CIVSUB][WARN] ARC_fnc_civsubCivConnect: skipped source=%1 unit=%2 pos=%3 reason=no district (warn-once; later skips for this unit are silent)", _source, _unit, getPosATL _unit];
+    };
     false
 };
 
