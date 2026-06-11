@@ -267,6 +267,10 @@ jobs:
         run: |
           bash tests/static/dedicated_observability_contract_checks.sh
 
+      - name: Complex/chain IED contract static validation
+        run: |
+          bash tests/static/ied_complex_chain_contract_checks.sh
+
       - name: Idle-gate contract static validation
         run: |
           tests/static/idle_gate_contract_checks.sh

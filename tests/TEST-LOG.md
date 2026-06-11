@@ -11,6 +11,25 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-06-11 — Complex/chain IED modules un-deferred (tier-gated reachability)
+
+**Branch/Commit:** `copilot/dedicated-server-testing-updates` (code commit `4e612bb`; contract suite + docs in the follow-up commit on the same branch)
+
+**Scenario:** Mode B feature delivery — un-defer `ARC_fnc_iedChainEmplace` and `ARC_fnc_iedComplexAttackStage` (Bucket 2, `docs/planning/threat/Threat_IED_Lifecycle_Implementation_v1.md` "Complex/chain IED status"). (1) `ARC_fnc_threatOnAOActivated` now writes a tier-derived `execution` profile onto the IED threat record (district secLevel → tier; `chain_count` 1 at tier ≥ 2 / 2 at tier ≥ 3; `hasSecondaryAttack`+`complexity` 3 at tier ≥ 3). (2) `ARC_fnc_iedSpawnTick` consumes the profile once per new device: chain emplacement behind `ARC_iedChainEnabled`, complex ambush staging behind `ARC_iedComplexAttackEnabled` (module keeps its `complexity >= 3` self-gate). (3) New server-only idempotent `ARC_fnc_iedChainDetonate` is the single chain-detonation path, called explicitly from `ARC_fnc_iedServerDetonate` (which `deleteVehicle`s the primary, so the Killed EH alone was unreliable) and from the primary's Killed EH. (4) `ARC_fnc_iedServerDetonate` activates the staged ambush group (COMBAT/RED + SAD at blast pos). (5) `ARC_fnc_execCleanupActive` cleans chain devices and the ambush group at incident close (defer + immediate modes). While enabling the modules, two latent `select`-precedence bugs (`_pos select 0 + _dist * sin _dir`) were fixed, the ambush unit pool now resolves from `ARC_opforPatrolUnitClasses` with `ARC_fnc_cfgClassExists` validation, and staging respects `ARC_fnc_threatIsProtectedSpawnPos`.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | sqflint compat scan (changed SQF) | `python3 scripts/dev/sqflint_compat_scan.py --strict <8 changed .sqf files>` | PASS | No banned parser-compat patterns. |
+| 2 | SQF lint (warnings as errors) | `sqflint -e w <each changed .sqf>` | PASS | All 8 changed files lint clean. |
+| 3 | New contract suite | `bash tests/static/ied_complex_chain_contract_checks.sh` | PASS | 34/34 checks; suite wired into `.github/workflows/arma-preflight.yml`. |
+| 4 | Full static contract regression | `for t in tests/static/*.sh; do bash "$t"; done` | PASS | All suites pass; `threat_ied_lifecycle_contract_checks.sh` deferred-status assertions converted to reachability assertions. |
+| 5 | Dedicated runtime: chain devices emplace + sequence-detonate after primary (tier ≥ 2 district) | Dedicated MP: drive an IED incident in a HIGH_RISK district, detonate primary, verify staggered secondary detonations + RPT `ARC_fnc_iedChainDetonate` lines | BLOCKED | Arma 3 runtime unavailable in sandbox; operator pass required on dedicated rig. |
+| 6 | Dedicated runtime: complex ambush stages at tier ≥ 3 and activates on detonation; cleanup at close | Dedicated MP: CRITICAL district IED, verify COBRA ambush staging (outside protected zones), activation on blast, deferred cleanup after close | BLOCKED | Requires dedicated server run. |
+
+**Notes:** Both features ship enabled (`ARC_iedChainEnabled` / `ARC_iedComplexAttackEnabled` in `initServer.sqf`) but are tier-gated, so NORMAL/ELEVATED districts see no behavior change. Rollback: set either flag false (no schema/save-format changes). Epic 1 doc updated to reflect that `threatCreateFromLead`/`threatEmitEvent` are implemented (stale "Missing" framing removed).
+
+---
+
 ## 2026-06-11 — Track 3 dedicated-observability features delivered (deny toast watcher + Server Health pane)
 
 **Branch/Commit:** `copilot/dedicated-server-testing-updates` (commit `b06f4d7`)
