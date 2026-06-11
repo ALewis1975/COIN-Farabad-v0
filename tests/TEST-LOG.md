@@ -11,6 +11,25 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-06-11 21:00 UTC — ADMIN_RUN_TESTS: console-driven ARC test-suite runner
+
+**Branch/Commit:** `copilot/check-tests-farabad-console` @ `0dfaf4c`
+
+**Scenario:** Mode B feature — wire an `ADMIN_RUN_TESTS` row into the Farabad Console HQ tab (DIAGNOSTICS) that execVMs `tests\run_all.sqf` on the server and routes a PASS/FAIL summary back to the requesting client, mirroring the QA Audit RPC/report pattern. New server RPC `ARC_fnc_uiConsoleTestRunServer` (sender-validated via `ARC_fnc_rpcValidateSender` with explicit `_reoOwner` 6th arg, approver/OMNI role-gated, 60s debounce, 600s timeout) and client receiver `ARC_fnc_uiConsoleTestRunClientReceive` (stores `ARC_console_lastTestReport` in uiNamespace, toast + refresh). Both registered in `config/CfgFunctions.hpp` and allowlisted in `config/CfgRemoteExec.hpp`; `docs/security/RemoteExec_Hardening_Plan.md` tables updated.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | Parser-compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_uiConsoleTestRunServer.sqf functions/ui/fn_uiConsoleTestRunClientReceive.sqf functions/ui/fn_uiConsoleHQPaint.sqf functions/ui/fn_uiConsoleActionHQPrimary.sqf` | PASS | No flagged parser-compat patterns. |
+| 2 | SQF lint | `sqflint -e w` on each of the 4 changed/new `.sqf` files | PASS | Clean on all files. |
+| 3 | RPC owner-capture conformance | `bash tests/static/rpc_owner_capture_conformance_checks.sh` | PASS | 40 conformant handlers (≥ floor 39); new handler passes `_reoOwner` explicitly. |
+| 4 | RemoteExec contract | `bash scripts/dev/check_remoteexec_contract.sh` | PASS | Allowlist intact. |
+| 5 | Console conflicts / VM section contract | `bash scripts/dev/check_console_conflicts.sh`, `bash tests/static/console_vm_section_contract_checks.sh` | PASS | HQ paint counts unchanged in policy. |
+| 6 | Runtime / dedicated / JIP validation | In-game HQ tab -> Run SQF Test Suite (Server); verify summary report routes to requesting client and `[ARC][TEST]` lines in RPT | BLOCKED | Sandbox cannot run the Arma 3 runtime; operator pass required on the dedicated rig. |
+
+**Notes:** The suite mutates/restores mission state — the detail pane warns to run it outside live play. Debounce rejects re-runs within 60s and notifies the requester. Rollback: revert this commit (new files + additive registry/UI rows only).
+
+---
+
 ## 2026-06-11 20:25 UTC — Preflight CI fix for `fn_execCleanupActive.sqf`
 
 **Branch/Commit:** `copilot/dedicated-server-testing-updates` @ `2ff69a1`
