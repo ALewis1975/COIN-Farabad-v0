@@ -11,6 +11,58 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-06-11 21:10 UTC — Preflight CI fix for `fn_uiConsoleTestRunServer.sqf`
+
+**Branch/Commit:** `copilot/check-tests-farabad-console` @ `2453390`
+
+**Scenario:** Mode A bug fix — GitHub Actions job `Arma SQF + Mission Config Preflight / preflight (pull_request)` failed on job `80905703047` during changed-file SQF lint. CI logs showed the compat scan passing, then `sqflint -e w` aborting on `functions/core/fn_uiConsoleTestRunServer.sqf` with four `_pass` scope warnings (`not private`). Local reproduction confirmed `_pass` was read and normalized inside the spawned server-runner block without ever being declared there. Fix: initialize `private _pass = missionNamespace getVariable ["ARC_TEST_pass", 0];` alongside the existing `_fail` read so the spawned scope owns both counters before logging/report formatting.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | CI root-cause capture | GitHub Actions logs for job `80905703047` | PASS | Failure isolated to changed-file SQF lint; compat scan passed and `sqflint` stopped on `_pass` scope warnings in `fn_uiConsoleTestRunServer.sqf`. |
+| 2 | Local repro + fix validation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_uiConsoleTestRunServer.sqf functions/ui/fn_uiConsoleActionHQPrimary.sqf functions/ui/fn_uiConsoleHQPaint.sqf functions/ui/fn_uiConsoleTestRunClientReceive.sqf` + `~/.local/bin/sqflint -e w` on each of those 4 files | PASS | Changed-file lint path now passes cleanly after declaring `_pass` locally in the spawned block. |
+| 3 | Whitespace | `git diff --check` | PASS | No whitespace or patch-format issues after the fix. |
+| 4 | Runtime / dedicated / JIP validation | In-game HQ tab -> Run SQF Test Suite (Server); verify PASS/FAIL summary still returns to the requester and server RPT logs remain intact | BLOCKED | Arma 3 runtime unavailable in sandbox; operator validation required on hosted/dedicated MP. |
+
+**Notes:** This is a surgical lint-only fix in one server function; runtime behavior is unchanged except that the local `_pass` variable is now explicitly owned by the spawned scope before it is type-normalized, logged, and rendered.
+
+---
+
+## 2026-06-11 21:10 UTC — ADMIN_RUN_TESTS overlap guard follow-up
+
+**Branch/Commit:** `copilot/check-tests-farabad-console` @ `6e1d58c`
+
+**Scenario:** Mode A bug fix — address PR review feedback that the 60s debounce alone can allow overlapping server test runs when a prior `tests\run_all.sqf` run is still executing.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | Parser-compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_uiConsoleTestRunServer.sqf` | PASS | No parser-compat violations in edited file. |
+| 2 | SQF lint | `~/.local/bin/sqflint -e w functions/core/fn_uiConsoleTestRunServer.sqf` | FAIL | Existing warning: `_pass` scope warnings (pre-existing in function; unchanged by this overlap-guard patch). |
+| 3 | Runtime overlap behavior | Start one long test run, attempt second launch while first is active | BLOCKED | Arma 3 runtime unavailable in sandbox; operator validation required on dedicated/hosted MP. |
+
+**Notes:** Change is scoped to overlap prevention only by adding a server-local in-progress flag (`ARC_testRun_inProgress`) around the existing 60s debounce path.
+
+---
+
+## 2026-06-11 21:00 UTC — ADMIN_RUN_TESTS: console-driven ARC test-suite runner
+
+**Branch/Commit:** `copilot/check-tests-farabad-console` @ `0dfaf4c`
+
+**Scenario:** Mode B feature — wire an `ADMIN_RUN_TESTS` row into the Farabad Console HQ tab (DIAGNOSTICS) that execVMs `tests\run_all.sqf` on the server and routes a PASS/FAIL summary back to the requesting client, mirroring the QA Audit RPC/report pattern. New server RPC `ARC_fnc_uiConsoleTestRunServer` (sender-validated via `ARC_fnc_rpcValidateSender` with explicit `_reoOwner` 6th arg, approver/OMNI role-gated, 60s debounce, 600s timeout) and client receiver `ARC_fnc_uiConsoleTestRunClientReceive` (stores `ARC_console_lastTestReport` in uiNamespace, toast + refresh). Both registered in `config/CfgFunctions.hpp` and allowlisted in `config/CfgRemoteExec.hpp`; `docs/security/RemoteExec_Hardening_Plan.md` tables updated.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | Parser-compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_uiConsoleTestRunServer.sqf functions/ui/fn_uiConsoleTestRunClientReceive.sqf functions/ui/fn_uiConsoleHQPaint.sqf functions/ui/fn_uiConsoleActionHQPrimary.sqf` | PASS | No flagged parser-compat patterns. |
+| 2 | SQF lint | `sqflint -e w` on each of the 4 changed/new `.sqf` files | PASS | Clean on all files. |
+| 3 | RPC owner-capture conformance | `bash tests/static/rpc_owner_capture_conformance_checks.sh` | PASS | 40 conformant handlers (≥ floor 39); new handler passes `_reoOwner` explicitly. |
+| 4 | RemoteExec contract | `bash scripts/dev/check_remoteexec_contract.sh` | PASS | Allowlist intact. |
+| 5 | Console conflicts / VM section contract | `bash scripts/dev/check_console_conflicts.sh`, `bash tests/static/console_vm_section_contract_checks.sh` | PASS | HQ paint counts unchanged in policy. |
+| 6 | Runtime / dedicated / JIP validation | In-game HQ tab -> Run SQF Test Suite (Server); verify summary report routes to requesting client and `[ARC][TEST]` lines in RPT | BLOCKED | Sandbox cannot run the Arma 3 runtime; operator pass required on the dedicated rig. |
+
+**Notes:** The suite mutates/restores mission state — the detail pane warns to run it outside live play. Debounce rejects re-runs within 60s and notifies the requester. Rollback: revert this commit (new files + additive registry/UI rows only).
+
+---
+
 ## 2026-06-11 20:25 UTC — Preflight CI fix for `fn_execCleanupActive.sqf`
 
 **Branch/Commit:** `copilot/dedicated-server-testing-updates` @ `2ff69a1`

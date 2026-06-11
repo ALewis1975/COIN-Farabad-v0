@@ -164,7 +164,7 @@ private _renderHQSubPanelsFromMaster = {
         "ADMIN_FORCE_CLOSE_SUCC", "ADMIN_FORCE_CLOSE_FAIL", "ADMIN_REBUILD_ACTIVE", "ADMIN_BROADCAST"
     ];
     private _incRows = ["ADMIN_INCIDENTS"];
-    private _diagRows = ["ADMIN_COVERAGE", "ADMIN_QA", "ADMIN_COMPILE", "ADMIN_DUMP_LEADS", "ADMIN_DUMP_INTEL", "ADMIN_DIAG_STATUS", "ADMIN_DIAG_SERVER", "ADMIN_DIAG_TOGGLE_DEBUG"];
+    private _diagRows = ["ADMIN_COVERAGE", "ADMIN_QA", "ADMIN_COMPILE", "ADMIN_RUN_TESTS", "ADMIN_DUMP_LEADS", "ADMIN_DUMP_INTEL", "ADMIN_DIAG_STATUS", "ADMIN_DIAG_SERVER", "ADMIN_DIAG_TOGGLE_DEBUG"];
 
     for "_i" from 0 to ((lbSize _master) - 1) do {
         private _d = _master lbData _i;
@@ -247,7 +247,7 @@ if (!isNull _ctrlList) then
         }
         else
         {
-            if (_d in ["ADMIN_SAVE","ADMIN_CIVSUB_SAVE","ADMIN_SCORE","ADMIN_RESET","ADMIN_AIRBASE_RESET_CTRL","ADMIN_CIVSUB_RESET","ADMIN_FORCE_CLOSE_SUCC","ADMIN_FORCE_CLOSE_FAIL","ADMIN_REBUILD_ACTIVE","ADMIN_BROADCAST","ADMIN_INCIDENTS","ADMIN_COVERAGE","ADMIN_QA","ADMIN_COMPILE","ADMIN_DUMP_LEADS","ADMIN_DUMP_INTEL","ADMIN_DIAG_STATUS","ADMIN_DIAG_SERVER","ADMIN_DIAG_TOGGLE_DEBUG"]) exitWith { _hasHqRow = true; };
+            if (_d in ["ADMIN_SAVE","ADMIN_CIVSUB_SAVE","ADMIN_SCORE","ADMIN_RESET","ADMIN_AIRBASE_RESET_CTRL","ADMIN_CIVSUB_RESET","ADMIN_FORCE_CLOSE_SUCC","ADMIN_FORCE_CLOSE_FAIL","ADMIN_REBUILD_ACTIVE","ADMIN_BROADCAST","ADMIN_INCIDENTS","ADMIN_COVERAGE","ADMIN_QA","ADMIN_COMPILE","ADMIN_RUN_TESTS","ADMIN_DUMP_LEADS","ADMIN_DUMP_INTEL","ADMIN_DIAG_STATUS","ADMIN_DIAG_SERVER","ADMIN_DIAG_TOGGLE_DEBUG"]) exitWith { _hasHqRow = true; };
         };
     };
 
@@ -425,6 +425,7 @@ if (_needRebuild && {!isNull _ctrlList}) then
         ["Rebuild UI Coverage Map", "ADMIN_COVERAGE"] call _addRow;
         ["Run Console QA Audit (Server)", "ADMIN_QA"] call _addRow;
         ["Run Compile Audit (Server)", "ADMIN_COMPILE"] call _addRow;
+        ["Run SQF Test Suite (Server)", "ADMIN_RUN_TESTS"] call _addRow;
         ["Dump Lead Pool (Local)", "ADMIN_DUMP_LEADS"] call _addRow;
         ["Dump Intel Log (Local)", "ADMIN_DUMP_INTEL"] call _addRow;
         ["Diagnostics Snapshot (Server)", "ADMIN_DIAG_STATUS"] call _addRow;
@@ -599,6 +600,17 @@ switch (toUpper _data) do
         _txt = _txt + "Attempts to compile all ARC functions listed in CfgFunctions. This surfaces SQF syntax errors early (check server RPT for file/line details).";
 
         private _rep = uiNamespace getVariable ["ARC_console_lastCompileReport", ""];
+        if (_rep isEqualType "" && { !(_rep isEqualTo "") }) then
+        {
+            _txt = _txt + "<br/><br/><t font='PuristaMedium'>Last report:</t><br/>" + _rep;
+        };
+    };
+    case "ADMIN_RUN_TESTS":
+    {
+        _txt = _txt + "Runs the ARC SQF test suite (tests\run_all.sqf) on the server and returns a PASS/FAIL summary. Per-test detail lands in the server RPT ([ARC][TEST] lines)." +
+               "<br/><br/><t size='0.9' color='#AAAAAA'>The suite mutates and restores mission state — run it outside live play. Debounced to one run per 60s.</t>";
+
+        private _rep = uiNamespace getVariable ["ARC_console_lastTestReport", ""];
         if (_rep isEqualType "" && { !(_rep isEqualTo "") }) then
         {
             _txt = _txt + "<br/><br/><t font='PuristaMedium'>Last report:</t><br/>" + _rep;

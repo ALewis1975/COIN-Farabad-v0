@@ -53,6 +53,7 @@ These are the highest-risk endpoints because any connected client can attempt to
 | `ARC_fnc_tocRequestResetAll` | HQ UI | Full admin reset. |
 | `ARC_fnc_tocRequestSave` | HQ UI | Save operation trigger. |
 | `ARC_fnc_uiConsoleQAAuditServer` | HQ UI QA tool | Server-side QA audit runner. |
+| `ARC_fnc_uiConsoleTestRunServer` | HQ UI QA tool | Server-side ARC test-suite runner (tests/run_all.sqf). |
 | `ARC_fnc_uiCoverageAuditServer` | HQ UI QA tool | Coverage/audit scan runner. |
 | `ARC_fnc_iedServerRequestDisposition` | EOD disposition workflow | Server-side approval request for IED/VBIED disposition. |
 | `ARC_fnc_vbiedServerDetonate` | VBIED disposition action | Server detonation of VBIED. |
@@ -232,6 +233,7 @@ For each client→server endpoint in **1.1**, enforce (or keep enforcing) the fo
 | `ARC_fnc_tocRequestResetAll` | S0, S1, S2, S3, S5 |
 | `ARC_fnc_tocRequestSave` | S0, S1, S2, S3, S5 |
 | `ARC_fnc_uiConsoleQAAuditServer` | S0, S1, S2, S3, S5 |
+| `ARC_fnc_uiConsoleTestRunServer` | S0, S1, S2, S3, S5 |
 | `ARC_fnc_uiCoverageAuditServer` | S0, S1, S2, S3, S5 |
 | `ARC_fnc_iedServerRequestDisposition` | S0, S1, S2, S3, S4, S5 |
 | `ARC_fnc_vbiedServerDetonate` | S0, S1, S2, S3, S4, S5 |

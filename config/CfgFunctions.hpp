@@ -177,6 +177,7 @@ class CfgFunctions
             // UI coverage audit (server)
             class uiCoverageAuditServer {};
             class uiConsoleQAAuditServer {};
+            class uiConsoleTestRunServer {};
 
             // Dev: compile audit (server) to surface SQF syntax errors early
             class devCompileAuditServer {};
@@ -603,6 +604,7 @@ class CfgFunctions
             class uiConsoleRefresh {};
             class uiConsoleQAAuditClientReceive {};
             class uiConsoleCompileAuditClientReceive {};
+            class uiConsoleTestRunClientReceive {};
             class uiNsWarnTypeMismatchOnce {};
             class uiNsGetString {};
             class uiNsGetArray {};
