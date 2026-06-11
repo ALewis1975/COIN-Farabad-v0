@@ -11,6 +11,25 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-06-11 — Track 3 dedicated-observability features delivered (deny toast watcher + Server Health pane)
+
+**Branch/Commit:** `copilot/dedicated-server-testing-updates` (commit `b06f4d7`)
+
+**Scenario:** Mode B feature delivery — un-defer the two Track 3 observability features from `docs/architecture/Dedicated_Server_Activation_Plan_2026-05-27.md` now that dedicated server testing is underway. (1) `ARC_fnc_securityDenyRecord` (server-only) records the last 10 `SECURITY_DENIED` events into the replicated bounded buffer `ARC_pub_securityDenials`, wired into all three deny paths of `ARC_fnc_rpcValidateSender` (`MISSING_REMOTE_CONTEXT` strict, `NULL_OBJECT`, `OWNER_MISMATCH`). (2) `ARC_fnc_uiNextIncidentDenyWatchClient` (client-only, started from `initPlayerLocal.sqf` with a per-mission session-token guard) passively surfaces `ARC_pub_nextIncidentLastDenied` as a toast to TOC queue approvers/OMNI, skipping the original requester via the new 4th `_ownerId` element published by `ARC_fnc_tocRequestNextIncident`. (3) HQ/ADMIN console DIAGNOSTICS gains a read-only "Server Health (Live)" pane (`ADMIN_DIAG_SERVER`) showing `ARC_serverReady`, snapshot broadcast ages, and the recent security denials. While touching `fn_uiConsoleHQPaint.sqf`, its pre-existing sqflint parser-compat violations (`#` indexing, `isNotEqualTo`, direct `trim`) were converted to approved equivalents so the file passes the strict preflight scan.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | sqflint compat scan (changed SQF) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_securityDenyRecord.sqf functions/ui/fn_uiNextIncidentDenyWatchClient.sqf functions/core/fn_rpcValidateSender.sqf functions/core/fn_tocRequestNextIncident.sqf functions/ui/fn_uiConsoleHQPaint.sqf initPlayerLocal.sqf` | PASS | No banned parser-compat patterns. |
+| 2 | SQF lint (warnings as errors) | `sqflint -e w <each changed .sqf>` | PASS | All 6 changed files lint clean (HQ paint previously failed baseline sqflint; now clean). |
+| 3 | New contract suite | `bash tests/static/dedicated_observability_contract_checks.sh` | PASS | 26/26 checks; suite wired into `.github/workflows/arma-preflight.yml`. |
+| 4 | Full static contract regression | `for t in tests/static/*.sh; do bash "$t"; done` | PASS | All suites pass, including RPC owner-capture conformance (39/39 handlers). |
+| 5 | Dedicated runtime: deny toast reaches TOC operators on a forged/contextless RPC | Dedicated MP: trigger a denied TOC RPC, verify TOC-gated toast on a second operator client and entry in Server Health pane | BLOCKED | Arma 3 runtime unavailable in sandbox; operator pass required on dedicated rig. |
+| 6 | Dedicated runtime / JIP: Server Health pane ages + denial list replicate | Dedicated MP + JIP client: open Console → HQ/ADMIN → DIAGNOSTICS → Server Health (Live); verify readiness, snapshot ages, denial rows | BLOCKED | Requires dedicated server run. |
+
+**Notes:** Track 5's `.pbo` CI build/release-artifact item remains open — it is a Build/CI (Mode G) change and must ship as its own PR per AGENTS.md single-mode rule; the activation plan now tracks it as "next up" instead of "deferred".
+
+---
+
 ## 2026-06-10 — Convoy never staged after rejoin/accept (partial-convoy rehydrate race)
 
 **Branch/Commit:** `copilot/logistics-convoy-spawn-issue` (base commit `9d0f2d8`)
