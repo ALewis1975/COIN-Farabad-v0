@@ -105,7 +105,8 @@ spawning regardless of toggle state.
 `.github/workflows/arma-preflight.yml`) verifies:
 
 - Data + audit files exist; audit registered in `CfgFunctions`.
-- Rollout toggles present and default `false`.
+- Rollout toggles present and default `true` (enabled after the 2026-06-11
+  live-run validation; set `false` for rollback).
 - Audit is server-only and read-only (no `createUnit` / `createVehicle` /
   `publicVariable` / `remoteExec` / …).
 - Every named location and terrain site type maps to a purpose that has a

@@ -156,20 +156,19 @@ missionNamespace setVariable ["ARC_iedComplexAttackEnabled", true, true];
 // Spawn-pattern matrix (issue #633) — staged rollout toggles.
 //   ARC_spawnPatternsEnabled         master gate for the data-driven spawn
 //                                     pattern matrix + audit diagnostics.
-//   ARC_incidentOverlaySpawnsEnabled  transient Incident/Lead overlay spawning
-//                                     (later phase; off until validated).
-//   ARC_sitePurposeExpansionEnabled   expanded SitePop site-purpose baselines
-//                                     (later phase; off until validated).
-// All default OFF so the mission keeps its current type-driven incident
-// execution and existing SitePop behaviour until each phase is validated.
+//   ARC_incidentOverlaySpawnsEnabled  transient Incident/Lead overlay spawning.
+//   ARC_sitePurposeExpansionEnabled   expanded SitePop site-purpose baselines.
+// All default ON after live-run validation (2026-06-11). Set any toggle to
+// false to fall back to the previous type-driven incident execution and
+// original three-site SitePop behaviour.
 if (isNil { missionNamespace getVariable "ARC_spawnPatternsEnabled" }) then {
-    missionNamespace setVariable ["ARC_spawnPatternsEnabled", false, true];
+    missionNamespace setVariable ["ARC_spawnPatternsEnabled", true, true];
 };
 if (isNil { missionNamespace getVariable "ARC_incidentOverlaySpawnsEnabled" }) then {
-    missionNamespace setVariable ["ARC_incidentOverlaySpawnsEnabled", false, true];
+    missionNamespace setVariable ["ARC_incidentOverlaySpawnsEnabled", true, true];
 };
 if (isNil { missionNamespace getVariable "ARC_sitePurposeExpansionEnabled" }) then {
-    missionNamespace setVariable ["ARC_sitePurposeExpansionEnabled", false, true];
+    missionNamespace setVariable ["ARC_sitePurposeExpansionEnabled", true, true];
 };
 // Transient overlay spawning caps (issue #633 step 4/8 — bounded performance).
 //   ARC_overlayMaxAiPerIncident        total overlay AI allowed per incident.
@@ -180,9 +179,9 @@ if (isNil { missionNamespace getVariable "ARC_sitePurposeExpansionEnabled" }) th
 //   ARC_overlayMaxObjectsPerIncident   total overlay props/vehicles per incident.
 // These are consumed only when ARC_incidentOverlaySpawnsEnabled is on.
 // NOTE: ARC_sitePurposeExpansionEnabled is consumed by data/farabad_site_templates.sqf
-// (loaded by ARC_fnc_sitePopInit). When on, it appends purpose-specific SitePop
-// baselines for the high-value named AO locations on top of the three original
-// sites; when off (default) the mission keeps the original three-site behaviour.
+// (loaded by ARC_fnc_sitePopInit). When on (default), it appends purpose-specific
+// SitePop baselines for the high-value named AO locations on top of the three
+// original sites; when off the mission keeps the original three-site behaviour.
 if (isNil { missionNamespace getVariable "ARC_overlayMaxAiPerIncident" }) then {
     missionNamespace setVariable ["ARC_overlayMaxAiPerIncident", 14, true];
 };
