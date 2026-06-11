@@ -11,6 +11,22 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-06-11 21:10 UTC — ADMIN_RUN_TESTS overlap guard follow-up
+
+**Branch/Commit:** `copilot/check-tests-farabad-console` @ `6e1d58c`
+
+**Scenario:** Mode A bug fix — address PR review feedback that the 60s debounce alone can allow overlapping server test runs when a prior `tests\run_all.sqf` run is still executing.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | Parser-compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_uiConsoleTestRunServer.sqf` | PASS | No parser-compat violations in edited file. |
+| 2 | SQF lint | `~/.local/bin/sqflint -e w functions/core/fn_uiConsoleTestRunServer.sqf` | FAIL | Existing warning: `_pass` scope warnings (pre-existing in function; unchanged by this overlap-guard patch). |
+| 3 | Runtime overlap behavior | Start one long test run, attempt second launch while first is active | BLOCKED | Arma 3 runtime unavailable in sandbox; operator validation required on dedicated/hosted MP. |
+
+**Notes:** Change is scoped to overlap prevention only by adding a server-local in-progress flag (`ARC_testRun_inProgress`) around the existing 60s debounce path.
+
+---
+
 ## 2026-06-11 21:00 UTC — ADMIN_RUN_TESTS: console-driven ARC test-suite runner
 
 **Branch/Commit:** `copilot/check-tests-farabad-console` @ `0dfaf4c`

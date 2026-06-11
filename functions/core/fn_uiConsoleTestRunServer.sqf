@@ -45,6 +45,18 @@ if (!isNil "remoteExecutedOwner" && { _owner > 0 }) then
     };
 };
 
+private _runInProgress = missionNamespace getVariable ["ARC_testRun_inProgress", false];
+if (!(_runInProgress isEqualType true)) then { _runInProgress = false; };
+if (_runInProgress) exitWith {
+    diag_log "[ARC][TEST] Run rejected (in progress).";
+    if (_owner > 0) then
+    {
+        ["<t size='1.05' font='PuristaMedium'>ARC Test Suite</t><br/><br/><t color='#F87171'>Run rejected: another test run is already in progress.</t>"]
+            remoteExec ["ARC_fnc_uiConsoleTestRunClientReceive", _owner];
+    };
+    false
+};
+
 // Debounce: the test suite is heavy and mutates/restores state — reject
 // re-invocations within 60 seconds of the last run start.
 private _lastRun = missionNamespace getVariable ["ARC_testRun_lastStartTime", -999];
@@ -58,6 +70,7 @@ if (serverTime - _lastRun < 60) exitWith {
     false
 };
 missionNamespace setVariable ["ARC_testRun_lastStartTime", serverTime, false];
+missionNamespace setVariable ["ARC_testRun_inProgress", true, false];
 
 diag_log format ["[ARC][TEST] ARC_fnc_uiConsoleTestRunServer: run requested by owner=%1", _owner];
 
@@ -111,6 +124,8 @@ diag_log format ["[ARC][TEST] ARC_fnc_uiConsoleTestRunServer: run requested by o
     {
         [_report] remoteExec ["ARC_fnc_uiConsoleTestRunClientReceive", _owner];
     };
+
+    missionNamespace setVariable ["ARC_testRun_inProgress", false, false];
 };
 
 true
