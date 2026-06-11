@@ -148,6 +148,14 @@ missionNamespace setVariable ["ARC_isrShadowLeadBridgeEnabled", true, true];
 // TNP partnered ops → lead request field action: enabled by default.
 missionNamespace setVariable ["ARC_opsTnpPartneredRequestEnabled", true, true];
 
+// Complex/chain IED modules (un-deferred): tier-gated reachability.
+//   ARC_iedChainEnabled          secondary chain devices linked to the primary
+//                                IED (execution.chain_count > 0; tier >= 2).
+//   ARC_iedComplexAttackEnabled  staged secondary ambush group activated on
+//                                detonation (execution.complexity >= 3; tier >= 3).
+missionNamespace setVariable ["ARC_iedChainEnabled", true, true];
+missionNamespace setVariable ["ARC_iedComplexAttackEnabled", true, true];
+
 // -------------------------------------------------------------------------
 // Spawn-pattern matrix (issue #633) — staged rollout toggles.
 //   ARC_spawnPatternsEnabled         master gate for the data-driven spawn

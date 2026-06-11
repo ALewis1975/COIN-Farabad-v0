@@ -97,6 +97,54 @@ if (!(_nid isEqualTo "")) then
 missionNamespace setVariable ["ARC_activeObjective", objNull, true];
 missionNamespace setVariable ["ARC_activeObjectivePos", [], true];
 
+// --- Complex/chain IED secondary entities ------------------------------------
+// Chain devices (any not already detonated)
+private _chainNids = missionNamespace getVariable ["ARC_activeIedChainNetIds", []];
+if (!(_chainNids isEqualType [])) then { _chainNids = []; };
+if ((count _chainNids) > 0) then
+{
+    {
+        private _chainObj = objectFromNetId _x;
+        if (!isNull _chainObj) then
+        {
+            if (_defer) then
+            {
+                [_chainObj, _anchor, _radius, _minDelay, "iedChain"] call ARC_fnc_cleanupRegister;
+            }
+            else
+            {
+                deleteVehicle _chainObj;
+            };
+        };
+    } forEach _chainNids;
+    missionNamespace setVariable ["ARC_activeIedChainNetIds", [], true];
+};
+
+// Complex attack ambush group (staged or activated)
+private _cxThreatId = ["activeIedThreatId", ""] call ARC_fnc_stateGet;
+if (!(_cxThreatId isEqualType "")) then { _cxThreatId = ""; };
+if (!(_cxThreatId isEqualTo "")) then
+{
+    private _cxGrp = missionNamespace getVariable [format ["ARC_complexAtkGroup_%1", _cxThreatId], grpNull];
+    if (!(_cxGrp isEqualType grpNull)) then { _cxGrp = grpNull; };
+    if (!isNull _cxGrp) then
+    {
+        private _cxUnits = (units _cxGrp) select { !isPlayer _x };
+        if (_defer && { (count _cxUnits) > 0 }) then
+        {
+            [_cxUnits, _anchor, _radius, _minDelay, "iedComplexAtk"] call ARC_fnc_cleanupRegister;
+        }
+        else
+        {
+            { deleteVehicle _x; } forEach _cxUnits;
+            deleteGroup _cxGrp;
+        };
+    };
+    missionNamespace setVariable [format ["ARC_complexAtkGroup_%1", _cxThreatId], nil];
+    missionNamespace setVariable [format ["ARC_complexAtkLabel_%1", _cxThreatId], nil];
+    missionNamespace setVariable [format ["ARC_complexAtkStaged_%1", _cxThreatId], nil];
+};
+
 // --- IED Phase 1 trigger cleanup (server only) ------------------------------
 private _trg = missionNamespace getVariable ["ARC_activeIedTrigger", objNull];
 if (!isNull _trg) then { deleteVehicle _trg; };

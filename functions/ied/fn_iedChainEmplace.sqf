@@ -1,10 +1,11 @@
 /*
     ARC_fnc_iedChainEmplace
 
-    Deferred module: spawn secondary chain IED devices linked to a primary device.
-    Intentionally not called by the active incident runtime unless a future PR
-    explicitly enables chain IEDs with runtime validation.
-    Detonated in sequence after primary detonation.
+    Spawn secondary chain IED devices linked to a primary device.
+    Reachable from ARC_fnc_iedSpawnTick when ARC_iedChainEnabled is true and the
+    active threat record carries execution.chain_count > 0 (tier-gated profile
+    assigned in ARC_fnc_threatOnAOActivated).
+    Detonated in sequence after primary detonation via ARC_fnc_iedChainDetonate.
 
     Params:
       0: STRING primaryDeviceId (device netId)
@@ -55,7 +56,7 @@ for "_i" from 1 to _chainCount do
     {
         private _dir = random 360;
         private _dist = 20 + (random 60);
-        _candidatePos = [_primaryPos select 0 + _dist * sin _dir, _primaryPos select 1 + _dist * cos _dir, 0];
+        _candidatePos = [(_primaryPos select 0) + _dist * sin _dir, (_primaryPos select 1) + _dist * cos _dir, 0];
     };
     _candidatePos resize 3;
 
@@ -74,42 +75,19 @@ for "_i" from 1 to _chainCount do
     diag_log format ["[ARC][INFO] ARC_fnc_iedChainEmplace: chain[%1] netId=%2 pos=%3 label=%4", _i, netId _chainObj, mapGridPosition _candidatePos, _label];
 };
 
-// Store chain device netIds on primary object
+// Store chain device netIds on primary object and mission state (cleanup/detonation fallback)
 _primaryObj setVariable ["ARC_chainDeviceNetIds", _chainNetIds, true];
+missionNamespace setVariable ["ARC_activeIedChainNetIds", _chainNetIds, true];
 
-// Register detonation sequence on primary destruction
+// Register detonation sequence on primary destruction (blast-kill path).
+// The explicit detonation path (ARC_fnc_iedServerDetonate) calls
+// ARC_fnc_iedChainDetonate directly; the function is idempotent per primary.
 if ((count _chainNetIds) > 0) then
 {
     _primaryObj addEventHandler ["Killed", {
         params ["_vehicle"];
         private _chains = _vehicle getVariable ["ARC_chainDeviceNetIds", []];
-        private _delay = 2;
-        {
-            private _nid = _x;
-            private _d = _delay;
-            [_nid, _d] spawn {
-                params ["_chainNid", "_delayS"];
-                sleep _delayS;
-                private _chainObj = objectFromNetId _chainNid;
-                if (isNull _chainObj) then
-                {
-                    diag_log format ["[ARC][WARN] ARC_fnc_iedChainEmplace: chain device not found at detonation netId=%1", _chainNid];
-                }
-                else
-                {
-                    if (alive _chainObj) then
-                    {
-                        private _p = getPosATL _chainObj;
-                        _p resize 3; _p set [2, 0];
-                        private _boomClass = "Bo_Mk82";
-                        createVehicle [_boomClass, _p, [], 0, "CAN_COLLIDE"];
-                        deleteVehicle _chainObj;
-                        diag_log format ["[ARC][INFO] Chain device detonated netId=%1", _chainNid];
-                    };
-                };
-            };
-            _delay = _delay + 2 + (floor (random 4));
-        } forEach _chains;
+        [netId _vehicle, _chains] call ARC_fnc_iedChainDetonate;
     }];
 };
 

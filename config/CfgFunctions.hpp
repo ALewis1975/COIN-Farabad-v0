@@ -311,6 +311,7 @@ class CfgFunctions
             class iedBuildCaseFile {};
             class vbiedEmitLeads {};
             class iedChainEmplace {};
+            class iedChainDetonate {};
             class vbiedDrivenSpawnTick {};
             class suicideBomberSpawnTick {};
             class suicideBomberOnDetonate {};
