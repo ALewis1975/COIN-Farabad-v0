@@ -100,14 +100,10 @@ missionNamespace setVariable ["ARC_patrolSpawnContactsEnabled", true, true];
 
 
 // ============================================================================
-// CONSOLE VM — feature flags (Phase 4.1 migration)
+// CONSOLE VM — migration feature flags removed (Refactor Plan §12.2 / PR 4)
+// DASH/OPS/CMD/COMMS read ARC_consoleVM_payload via ARC_fnc_consoleVmAdapterV1
+// unconditionally, with direct missionNamespace reads as fallback only.
 // ============================================================================
-// When true, the tab reads from ARC_consoleVM_payload via
-// ARC_fnc_consoleVmAdapterV1 instead of direct missionNamespace reads.
-// Both flags default to false in the paint functions; set true once VM
-// publishing is confirmed stable on this server.
-missionNamespace setVariable ["ARC_console_ops_v2",       true, true];
-missionNamespace setVariable ["ARC_console_dashboard_v2", true, true];
 private _arcConsoleHQTokensDefault = [
     "BNCMD", "BN COMMAND", "BNHQ", "BN HQ", "BN CO", "BNCO",
     "BN CDR", "BNCDR", "BN CMDR", "BATTALION CO", "BATTALION CDR",

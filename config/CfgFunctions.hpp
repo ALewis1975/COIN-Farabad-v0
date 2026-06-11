@@ -101,6 +101,7 @@ class CfgFunctions
             class govStatsScheduler {};
             class consoleVmBuild {};
             class consoleVmAdapterV1 {};
+            class consoleVmFreshness {};
             class statePublishPublic {};
             class intelLog {};
             class intelCreateMarker {};

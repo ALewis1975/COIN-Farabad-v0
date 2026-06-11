@@ -513,8 +513,15 @@ switch (toUpper _data) do
                "Generate a composite COIN assessment report (0–100). Covers task success rate, civilian protection, lead actioned rate, sustainment health, and SITREP discipline.<br/><br/>";
 
         // Show the latest score if available.
-        private _score = missionNamespace getVariable ["ARC_pub_missionScore", []];
-        private _scoreAt = missionNamespace getVariable ["ARC_pub_missionScoreAt", -1];
+        // Console VM primary (stateSummary section); direct reads are fallback only.
+        private _scoreDirect = missionNamespace getVariable ["ARC_pub_missionScore", []];
+        if (!(_scoreDirect isEqualType [])) then { _scoreDirect = []; };
+        private _scoreAtDirect = missionNamespace getVariable ["ARC_pub_missionScoreAt", -1];
+        if (!(_scoreAtDirect isEqualType 0)) then { _scoreAtDirect = -1; };
+        private _score = ["stateSummary", "mission_score", _scoreDirect] call ARC_fnc_consoleVmAdapterV1;
+        if (!(_score isEqualType []) || { (count _score) isEqualTo 0 }) then { _score = _scoreDirect; };
+        private _scoreAt = ["stateSummary", "mission_score_at", _scoreAtDirect] call ARC_fnc_consoleVmAdapterV1;
+        if (!(_scoreAt isEqualType 0) || { _scoreAt <= 0 }) then { _scoreAt = _scoreAtDirect; };
         if (_score isEqualType [] && { (count _score) > 0 } && { _scoreAt isEqualType 0 } && { _scoreAt > 0 }) then
         {
             private _composite = -1;

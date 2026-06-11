@@ -263,6 +263,14 @@ jobs:
         run: |
           tests/static/console_field_request_relocation_checks.sh
 
+      - name: Console VM section contract static validation
+        run: |
+          bash tests/static/console_vm_section_contract_checks.sh
+
+      - name: Console IDC collision + painter contract static validation
+        run: |
+          bash scripts/dev/check_console_conflicts.sh
+
       - name: Dedicated observability (Track 3) contract static validation
         run: |
           bash tests/static/dedicated_observability_contract_checks.sh
