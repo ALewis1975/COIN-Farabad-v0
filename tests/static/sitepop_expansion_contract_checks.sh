@@ -4,8 +4,9 @@ set -euo pipefail
 # Static contract checks for the SitePop purpose-expansion (issue #633, step 4).
 #
 # Verifies that:
-#   1. The expansion is gated behind ARC_sitePurposeExpansionEnabled (default off),
-#      so default behaviour is identical to the pre-expansion three-site mission.
+#   1. The expansion is gated behind ARC_sitePurposeExpansionEnabled (default on
+#      post live-run validation; isNil-guarded so it remains overridable), with
+#      the off state restoring the pre-expansion three-site mission.
 #   2. The three original sites remain registered unconditionally.
 #   3. Every expansion siteId / marker corresponds to a real named location +
 #      ARC_loc_* marker in the world export, and aligns with the purpose mapping in
@@ -25,10 +26,13 @@ pass() { echo "[PASS] $*"; }
 [[ -f "$PAT" ]] || fail "spawn-pattern matrix data file is missing"
 pass "required data files exist"
 
-# Toggle default must be OFF (gameplay-neutral by default).
-grep -q '"ARC_sitePurposeExpansionEnabled", false' "$INIT" \
-    || fail "ARC_sitePurposeExpansionEnabled missing or not defaulted false in initServer.sqf"
-pass "expansion toggle present and defaults false"
+# Toggle must be seeded ON by default (post live-run validation) and remain
+# overridable via the isNil guard for rollback.
+grep -q '"ARC_sitePurposeExpansionEnabled", true' "$INIT" \
+    || fail "ARC_sitePurposeExpansionEnabled missing or not defaulted true in initServer.sqf"
+grep -q 'isNil { missionNamespace getVariable "ARC_sitePurposeExpansionEnabled" }' "$INIT" \
+    || fail "ARC_sitePurposeExpansionEnabled seed is not isNil-guarded (not overridable)"
+pass "expansion toggle present, defaults true, and remains overridable"
 
 # The templates file must actually consume the toggle to gate the expansion set.
 grep -q 'ARC_sitePurposeExpansionEnabled' "$TPL" \

@@ -85,19 +85,20 @@ warning. Civic rows carry the civic `subtype` in the row's `incidentType` field.
 
 ## Rollout toggles
 
-All default **off** so the mission keeps its current type-driven incident
-execution and existing SitePop behaviour until each later phase is validated
-(set in `initServer.sqf`):
+All default **on** after the 2026-06-11 live-run validation (seeded in
+`initServer.sqf`, `isNil`-guarded). For rollback, set any toggle to `false`
+**before** `initServer.sqf` runs (e.g. an earlier init or operator override):
 
 ```sqf
-ARC_spawnPatternsEnabled         = false; // master gate + one-shot audit log
-ARC_incidentOverlaySpawnsEnabled = false; // transient overlay spawning (later)
-ARC_sitePurposeExpansionEnabled  = false; // expanded SitePop baselines (later)
+ARC_spawnPatternsEnabled         = true; // master gate + one-shot audit log
+ARC_incidentOverlaySpawnsEnabled = true; // transient overlay spawning
+ARC_sitePurposeExpansionEnabled  = true; // expanded SitePop baselines
 ```
 
 When `ARC_spawnPatternsEnabled` is `true`, `initServer.sqf` runs a one-shot
-verbose audit so coverage/warnings appear in the RPT. The audit performs no
-spawning regardless of toggle state.
+summary (non-verbose) audit so coverage/warnings appear in the RPT; run
+`[true] call ARC_fnc_worldSpawnPatternAudit` manually for per-row detail.
+The audit performs no spawning regardless of toggle state.
 
 ## Validation
 
@@ -105,7 +106,8 @@ spawning regardless of toggle state.
 `.github/workflows/arma-preflight.yml`) verifies:
 
 - Data + audit files exist; audit registered in `CfgFunctions`.
-- Rollout toggles present and default `false`.
+- Rollout toggles present and default `true` (enabled after the 2026-06-11
+  live-run validation; set `false` for rollback).
 - Audit is server-only and read-only (no `createUnit` / `createVehicle` /
   `publicVariable` / `remoteExec` / …).
 - Every named location and terrain site type maps to a purpose that has a

@@ -26,11 +26,13 @@ pass "spawn-pattern data + audit files exist"
 grep -q 'class worldSpawnPatternAudit' "$CFG" || fail "worldSpawnPatternAudit not registered in CfgFunctions"
 pass "audit function is registered in CfgFunctions"
 
-# Staged-rollout toggles must exist and default OFF (gameplay-neutral).
+# Staged-rollout toggles must exist, default ON (post live-run validation), and
+# stay isNil-guarded so they remain overridable for rollback.
 for tog in ARC_spawnPatternsEnabled ARC_incidentOverlaySpawnsEnabled ARC_sitePurposeExpansionEnabled; do
-    grep -q "\"$tog\", false" "$INIT" || fail "toggle $tog missing or not defaulted false in initServer.sqf"
+    grep -q "\"$tog\", true" "$INIT" || fail "toggle $tog missing or not defaulted true in initServer.sqf"
+    grep -q "isNil { missionNamespace getVariable \"$tog\" }" "$INIT" || fail "toggle $tog seed is not isNil-guarded (not overridable)"
 done
-pass "staged-rollout toggles present and default false"
+pass "staged-rollout toggles present, default true, and overridable"
 
 # The audit must be read-only: it must not create units/vehicles/markers or broadcast
 # public mission state. (createHashMap / setVariable on local maps is fine; the

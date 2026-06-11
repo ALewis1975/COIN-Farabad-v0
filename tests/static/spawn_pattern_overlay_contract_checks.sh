@@ -36,10 +36,13 @@ grep -q 'isServer' "$APPLY" || fail "overlay spawner missing isServer guard"
 grep -q 'ARC_incidentOverlaySpawnsEnabled' "$APPLY" || fail "overlay spawner not gated by ARC_incidentOverlaySpawnsEnabled"
 pass "overlay spawner is server-only and toggle-gated"
 
-# Toggle must default OFF in initServer.sqf.
-grep -q '"ARC_incidentOverlaySpawnsEnabled", false' "$INIT" \
-    || fail "ARC_incidentOverlaySpawnsEnabled not defaulted false in initServer.sqf"
-pass "overlay toggle defaults false (gameplay-neutral)"
+# Toggle must be seeded ON by default in initServer.sqf (post live-run validation),
+# while remaining overridable (isNil-guarded) for rollback.
+grep -q '"ARC_incidentOverlaySpawnsEnabled", true' "$INIT" \
+    || fail "ARC_incidentOverlaySpawnsEnabled not defaulted true in initServer.sqf"
+grep -q 'isNil { missionNamespace getVariable "ARC_incidentOverlaySpawnsEnabled" }' "$INIT" \
+    || fail "ARC_incidentOverlaySpawnsEnabled seed is not isNil-guarded (not overridable)"
+pass "overlay toggle defaults true and remains overridable"
 
 # Performance caps must be seeded.
 for cap in ARC_overlayMaxAiPerIncident ARC_overlayMaxHostilesPerIncident ARC_overlayMaxObjectsPerIncident; do

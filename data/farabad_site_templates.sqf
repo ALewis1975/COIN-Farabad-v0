@@ -241,9 +241,9 @@ private _milVehiclePool = [
 // _baseTemplates: the three original SitePop sites. ALWAYS returned, unchanged.
 // _expansionTemplates (further below): purpose-specific baselines for the rest of
 // the high-value named AO locations (issue #633 step 4). These are appended ONLY
-// when ARC_sitePurposeExpansionEnabled is true (default false in initServer.sqf),
-// so SitePop behaviour is identical to the pre-expansion mission until an operator
-// opts in. The active-sites cap (ARC_sitePopActiveSitesCap, default 6, enforced in
+// when ARC_sitePurposeExpansionEnabled is true (default true in initServer.sqf
+// since the 2026-06-11 live-run validation; set false to restore the
+// pre-expansion three-site mission). The active-sites cap (ARC_sitePopActiveSitesCap, default 6, enforced in
 // ARC_fnc_sitePopSpawnSite) bounds concurrent AI regardless of how many sites are
 // registered here.
 // ---------------------------------------------------------------------------
@@ -543,8 +543,8 @@ private _expansionTemplates = [
 // ---------------------------------------------------------------------------
 // Assemble the returned template set.
 //   - Base sites are always present.
-//   - Expansion sites are appended only when the operator has opted in via the
-//     ARC_sitePurposeExpansionEnabled toggle (default false). When off, this file
+//   - Expansion sites are appended only while the
+//     ARC_sitePurposeExpansionEnabled toggle is true (the default). When off, this file
 //     returns exactly the pre-expansion three-site set.
 // ---------------------------------------------------------------------------
 private _result = +_baseTemplates;
