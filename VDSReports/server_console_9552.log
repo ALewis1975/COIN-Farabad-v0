@@ -1,0 +1,58 @@
+﻿19:35:01 BattlEye Server: Initialized (v1.220, Arma 3 2.20.152984)
+19:35:01 Game Port: 2308, Steam Query Port: 2309
+19:35:01 Host identity created.
+19:35:01 BattlEye Server: Config entry: RConPassword 285c1517e6b74ae4b46ca5afa9b91df5
+19:35:01 BattlEye Server: Config entry: RConPort 2313
+19:35:01 BattlEye Server: Config entry: RConIP 0.0.0.0
+19:35:06 BattlEye Server: RCon admin #0 (127.0.0.1:59263) logged in
+19:37:01 BattlEye Server: Player #0 headlessclient (127.0.0.1:2808) connected
+19:37:01 Player headlessclient connecting.
+19:37:01 Player headlessclient connected (id=HC1220).
+19:37:02 BattlEye Server: Verified GUID () of player #0 headlessclient
+19:37:02 BattlEye Server: Player #0 headlessclient - Owner BE GUID: 8539e01499f87083b3a25eb30041261c
+ 7:26:04 MAJ.Lewis.A uses modified data file
+ 7:26:04 BattlEye Server: Player #1 MAJ.Lewis.A (96.245.171.158:2304) connected
+ 7:26:04 Player MAJ.Lewis.A connecting.
+ 7:26:05 BattlEye Server: Connected to BE Master
+ 7:26:06 BattlEye Server: Player #1 MAJ.Lewis.A - BE GUID: 9cc9d4fc1441fa371f2cd0b1ddbdd783
+ 7:26:07 Player MAJ.Lewis.A connected (id=76561198027320796).
+ 7:26:07 BattlEye Server: Verified GUID (9cc9d4fc1441fa371f2cd0b1ddbdd783) of player #1 MAJ.Lewis.A
+ 7:27:39 Admin logged in, player: MAJ.Lewis.A, playerUID: 76561198027320796, IP: 192.168.1.160:2304.
+ 7:27:54 Mission COIN_Farabad_v0.Farabad read from bank.
+ 7:28:10 Roles assigned.
+ 7:28:10 Reading mission ...
+ 7:28:23 Mission read.
+ 7:28:37 Game started.
+ 7:45:54 Server load: FPS 0, memory used: 5052 MB, out: 0 Kbps, in: 0 Kbps, NG:0, G:2107, BE-NG:0, BE-G:0, RQ:0, Players: 1 (L:0, R:0, B:0, G:1, D:0), JIP (T:51 Q:27464)
+ 9:19:19 Game finished.
+class Session
+{
+	mission="COIN_Farabad_v0";
+	island="Farabad";
+	gameType="COOP";
+	duration=6642.1504;
+	class Player1
+	{
+		name="MAJ.Lewis.A";
+		killsInfantry=4;
+		killsSoft=0;
+		killsArmor=0;
+		killsAir=0;
+		killsPlayers=0;
+		customScore=0;
+		killsTotal=4;
+		killed=0;
+	};
+	class Player2
+	{
+		name="headlessclient";
+		killsInfantry=0;
+		killsSoft=0;
+		killsArmor=0;
+		killsAir=0;
+		killsPlayers=0;
+		customScore=0;
+		killsTotal=0;
+		killed=0;
+	};
+};
