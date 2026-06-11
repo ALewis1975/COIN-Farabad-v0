@@ -11,6 +11,100 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-06-11 20:25 UTC — Preflight CI fix for `fn_execCleanupActive.sqf`
+
+**Branch/Commit:** `copilot/dedicated-server-testing-updates` @ `2ff69a1`
+
+**Scenario:** Mode A bug fix — GitHub Actions job `Arma SQF + Mission Config Preflight / preflight (pull_request)` failed on job `80893021282` during changed-file SQF lint. CI logs showed `sqflint` aborting with `[105,0]:error:Parenthesis "{" not closed`. Local reproduction against the PR diff isolated the failure to `functions/core/fn_execCleanupActive.sqf`: the new chain-cleanup loop left `if (!isNull _chainObj) then { ... }` unclosed before `forEach _chainNids`. Fix: add the missing closing `};` so the chain-device cleanup block parses and the loop/body structure matches the intended defer/immediate cleanup logic.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | CI root-cause capture | GitHub Actions logs for job `80893021282` | PASS | Failure isolated to changed-file SQF lint; compat scan passed first, then `sqflint` failed at line 105. |
+| 2 | Local repro of failing lint step | `python3 scripts/dev/sqflint_compat_scan.py --strict $(git diff --name-only --diff-filter=ACMR origin/main...HEAD -- '*.sqf')` + `sqflint -e w` on each changed `.sqf` | PASS | Reproduced the original failure before the fix, then passed after adding the missing brace. |
+| 3 | Remaining preflight static checks | `python3 scripts/dev/validate_state_migrations.py`, `bash scripts/dev/check_test_log_commits.sh`, `python3 scripts/dev/validate_marker_index.py`, and the existing `tests/static/*.sh` suites wired in `.github/workflows/arma-preflight.yml` | PASS | Full local preflight static tail passed after the syntax fix. |
+| 4 | Runtime / dedicated / JIP validation | Arma 3 runtime exercise of cleanup-at-close paths | BLOCKED | Sandbox cannot run Arma 3; this change is syntax-only and does not alter intended cleanup behavior. |
+
+**Notes:** Risk is limited to parser restoration in one server-only cleanup function; runtime logic is unchanged aside from making the intended chain cleanup block syntactically valid. Rollback: revert the one-line brace fix in `functions/core/fn_execCleanupActive.sqf`.
+
+---
+
+## 2026-06-11 — Console refactor remaining track (plan trueup, VM stub fixes, PR 5 tab migration, QA gates)
+
+**Branch/Commit:** `copilot/dedicated-server-testing-updates` @ `adcebec` (plan trueup) + `12cac14` (implementation)
+
+**Scenario:** Execute the remaining Farabad Console refactor track. **Phase 0 (Mode F):** trued up `docs/architecture/Farabad_Console_Refactor_Plan.md` — status header no longer "implementation pending"; added §12 Implementation Status with the 10-tab inventory (COMMS added post-plan; BOARDS TOC-gated), an honest per-PR delivery ledger (AIR's VM migration was never completed; the 4 PR-2 VM sections shipped as stubs), and the formal **AIR/S1 descope decision** (both keep rev-checked direct reads as documented exceptions). **Phase 5a (Mode A — bugs):** fixed `fn_consoleVmBuild.sqf` stub sections: `personnel` now reads the real publisher key `ARC_pub_s1_registry` (was `ARC_pub_s1Registry`, which nothing writes) with `ARC_pub_s1_registryUpdatedAt` freshness; `handoff` no longer reads `ARC_pub_handoffState` (no publisher exists) and is sourced from published orders with `ARC_pub_ordersUpdatedAt` freshness; `intelFeed` freshness from `ARC_pub_intelUpdatedAt`; `stateSummary` freshness from `ARC_pub_stateUpdatedAt` plus new `mission_score`/`mission_score_at` keys. **Phase 5b (Mode C):** migrated INTEL (4 intel-log read sites), HQ (mission score), BOARDS (incident/queue/orders/unit-statuses/lead-pool) and HANDOFF (orders) to Console-VM-primary reads with direct reads as adapter-default fallback; added shared `ARC_fnc_consoleVmFreshness` helper and DATA STALE badges on BOARDS/HANDOFF; cleared all pre-existing sqflint-compat violations (`#` indexing, `trim`, `isNotEqualTo`, unused params) in the two repainted files. BOARDS keeps a documented direct read of the full ops log (last SITREP may be older than the VM 5-entry log_tail). **Phase 5c (Mode G/E):** removed dead `ARC_console_ops_v2`/`ARC_console_dashboard_v2` seeding from `initServer.sqf` and the stale `command_v2` comment; wired `tests/static/console_vm_section_contract_checks.sh` (new, 26 checks) and `scripts/dev/check_console_conflicts.sh` into `arma-preflight.yml`; authored `docs/qa/Console_Tab_Regression_Checklist.md` (10 tabs × role variants × empty/selected states + JIP section).
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | SQF compat scan (changed files) | `python3 scripts/dev/sqflint_compat_scan.py --strict <8 changed .sqf files>` | PASS | Includes BOARDS/HANDOFF which previously failed strict scan (22/29 findings cleared). |
+| 2 | sqflint (changed files) | `~/.local/bin/sqflint -e w <8 changed .sqf files>` | PASS | Installed via `python3 -m pip install --user sqflint`; unused destructured params replaced with `""` placeholders. |
+| 3 | New VM section contract suite | `bash tests/static/console_vm_section_contract_checks.sh` | PASS | 26/26 — publisher keys, real freshness, painter migrations, descope, dead-flag removal. |
+| 4 | Console IDC + painter contract | `bash scripts/dev/check_console_conflicts.sh` | PASS | BOARDS now shared=5 VM=12; HANDOFF shared=10 VM=1. |
+| 5 | Regression: dashboard VM suite | `bash tests/static/console_vm_dashboard_migration_checks.sh` | PASS | consoleVmBuild keys unchanged for DASH consumers. |
+| 6 | Regression: field-request / SHADOW / TNP suites | `bash tests/static/console_field_request_relocation_checks.sh` + shadow + tnp | PASS | INTEL tab wiring unchanged. |
+| 7 | Whitespace | `git diff --check` | PASS | |
+| 8 | Visual parity (all 10 tabs), staleness badges with genuinely stale data, JIP/fallback behavior | Per `docs/qa/Console_Tab_Regression_Checklist.md` | BLOCKED | Arma 3 runtime unavailable in sandbox; operator run required on the dedicated rig. |
+
+**Risk notes:** painter migrations are behavior-parity by construction (adapter default arg = previous direct read; type guards retained). The `handoff` VM section payload changed shape (`state` → `orders`) — safe because the old key had no consumers and no publisher. Rollback: revert commits `adcebec`/`12cac14`; no schema/save-format changes.
+
+---
+
+**Branch/Commit:** `copilot/dedicated-server-testing-updates` (code commit `f7bbb65`)
+
+**Scenario:** Mode B/D — lock spawn pacing, detonation behavior and lead-emission tuning of the VBIED / suicide-bomber subsystem against `docs/projectFiles/Farabad_IED_VBIED_Suicide_Subsystem_Planning.md`, then promote the status from "Scaffold — pending lock" to **Locked (v1)**. Code lock: (1) `initServer.sqf` now seeds authoritative replicated defaults for the previously implicit knobs (`ARC_vbiedDrivenEnabled`, `ARC_suicideBomberEnabled`, `ARC_vbiedDrivenIntelLevel`, `ARC_vbiedDetonationCooldownS`), adds them to the operator startup audit catalog (VBIED group), and disables both escalation spawn paths under safe mode. (2) `fn_vbiedDrivenSpawnTick` draws the driven VBIED vehicle from the authoritative civilian `ARC_vbiedVehicleClassPool` (class-existence validated, civilian fallback) instead of the hardcoded `O_MRAP_02_F` military placeholder — spec fairness rule: VBIEDs are telegraphed civilian vehicles. (3) `fn_vbiedServerDetonate` resolves the detonation position from the live VBIED vehicle (deviceId-as-netId, `activeVbiedVehicleNetId`, `ARC_vbiedDrivenNetId`) before falling back to the stored objective pos/device record, so driven VBIEDs detonate at the vehicle rather than up to the trigger radius away. New CI-wired contract suite `tests/static/vbied_suicide_lock_contract_checks.sh` locks the full contract: tier gates (VBIED≥2, SUICIDE≥3, governor parity), cooldown/one-shot/fairness pacing, idempotent + EOD-approval-gated detonation, RemoteExec allowlist, per-transition lead packages (STAGED/DISCOVERED/INTERDICTED/DETONATED + SUICIDE branch), district detonation penalty, and exec-tick/CfgFunctions wiring. Docs promoted: planning spec header, THREAT v0 baseline regen (§0.0 table + §1.2), Design Guide VBIED/Suicide status note.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | sqflint compat scan (changed SQF) | `python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf functions/ied/fn_vbiedDrivenSpawnTick.sqf functions/ied/fn_vbiedServerDetonate.sqf` | PASS | No banned parser-compat patterns. |
+| 2 | SQF lint (warnings as errors) | `sqflint -e w` on each changed `.sqf` | PASS | All three changed files lint clean. |
+| 3 | New contract suite | `bash tests/static/vbied_suicide_lock_contract_checks.sh` | PASS | 66/66 checks; suite wired into `.github/workflows/arma-preflight.yml`. |
+| 4 | Full static contract regression | `for t in tests/static/*.sh; do bash "$t"; done` | PASS | All suites pass (incl. complex/chain IED, threat lifecycle, posture selection, spawn-pattern matrix, intel-quality coupling). |
+| 5 | Workflow YAML sanity | `python3 -c "import yaml; yaml.safe_load(open('.github/workflows/arma-preflight.yml'))"` | PASS | New step parses. |
+| 6 | Runtime evidence: dedicated-rig boot/compile/config audit | Reviewed `VDSReports/ArmA3Server_x64_2026-06-09_17-37-04.rpt` (Armahosts dedicated) and `serverRpts/Arma3_x64_2026-06-08_23-00-03.rpt` | PASS | All eight VBIED/SB functions log `[ARC][COMPILE][OK]`; `[ARC][CONFIG][AUDIT][VBIED]` reports effective values (phase3=true, defuseWindow=300, cooldown=1800, proxRadius=12) with no undefined-variable or script errors in the subsystem. |
+| 7 | Dedicated runtime: parked VBIED arm → defuse-window → detonate/render-safe; driven VBIED telegraph → checkpoint rush; SB approach → detonation leads | Dedicated MP on the rig: HIGH_RISK district VBIED incident + CRITICAL district SB incident; verify RPT spawn/detonation/lead lines and district cooldown penalty | BLOCKED | Arma 3 runtime unavailable in sandbox; operator live-fire pass required on the dedicated rig (lock is static-contract + boot-evidence backed). |
+
+**Notes:** Rollback: set `ARC_vbiedPhase3_enabled` / `ARC_vbiedDrivenEnabled` / `ARC_suicideBomberEnabled` false (no schema changes); doc status can be reverted independently. Behavior change surface: driven VBIED vehicle classes (civilian pool) and detonation position fidelity; all pacing values keep their previously effective defaults — they are now just authoritative and audited.
+
+---
+
+## 2026-06-11 — Complex/chain IED modules un-deferred (tier-gated reachability)
+
+**Branch/Commit:** `copilot/dedicated-server-testing-updates` (code commit `4e612bb`; contract suite + docs in the follow-up commit on the same branch)
+
+**Scenario:** Mode B feature delivery — un-defer `ARC_fnc_iedChainEmplace` and `ARC_fnc_iedComplexAttackStage` (Bucket 2, `docs/planning/threat/Threat_IED_Lifecycle_Implementation_v1.md` "Complex/chain IED status"). (1) `ARC_fnc_threatOnAOActivated` now writes a tier-derived `execution` profile onto the IED threat record (district secLevel → tier; `chain_count` 1 at tier ≥ 2 / 2 at tier ≥ 3; `hasSecondaryAttack`+`complexity` 3 at tier ≥ 3). (2) `ARC_fnc_iedSpawnTick` consumes the profile once per new device: chain emplacement behind `ARC_iedChainEnabled`, complex ambush staging behind `ARC_iedComplexAttackEnabled` (module keeps its `complexity >= 3` self-gate). (3) New server-only idempotent `ARC_fnc_iedChainDetonate` is the single chain-detonation path, called explicitly from `ARC_fnc_iedServerDetonate` (which `deleteVehicle`s the primary, so the Killed EH alone was unreliable) and from the primary's Killed EH. (4) `ARC_fnc_iedServerDetonate` activates the staged ambush group (COMBAT/RED + SAD at blast pos). (5) `ARC_fnc_execCleanupActive` cleans chain devices and the ambush group at incident close (defer + immediate modes). While enabling the modules, two latent `select`-precedence bugs (`_pos select 0 + _dist * sin _dir`) were fixed, the ambush unit pool now resolves from `ARC_opforPatrolUnitClasses` with `ARC_fnc_cfgClassExists` validation, and staging respects `ARC_fnc_threatIsProtectedSpawnPos`.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | sqflint compat scan (changed SQF) | `python3 scripts/dev/sqflint_compat_scan.py --strict <8 changed .sqf files>` | PASS | No banned parser-compat patterns. |
+| 2 | SQF lint (warnings as errors) | `sqflint -e w <each changed .sqf>` | PASS | All 8 changed files lint clean. |
+| 3 | New contract suite | `bash tests/static/ied_complex_chain_contract_checks.sh` | PASS | 34/34 checks; suite wired into `.github/workflows/arma-preflight.yml`. |
+| 4 | Full static contract regression | `for t in tests/static/*.sh; do bash "$t"; done` | PASS | All suites pass; `threat_ied_lifecycle_contract_checks.sh` deferred-status assertions converted to reachability assertions. |
+| 5 | Dedicated runtime: chain devices emplace + sequence-detonate after primary (tier ≥ 2 district) | Dedicated MP: drive an IED incident in a HIGH_RISK district, detonate primary, verify staggered secondary detonations + RPT `ARC_fnc_iedChainDetonate` lines | BLOCKED | Arma 3 runtime unavailable in sandbox; operator pass required on dedicated rig. |
+| 6 | Dedicated runtime: complex ambush stages at tier ≥ 3 and activates on detonation; cleanup at close | Dedicated MP: CRITICAL district IED, verify COBRA ambush staging (outside protected zones), activation on blast, deferred cleanup after close | BLOCKED | Requires dedicated server run. |
+
+**Notes:** Both features ship enabled (`ARC_iedChainEnabled` / `ARC_iedComplexAttackEnabled` in `initServer.sqf`) but are tier-gated, so NORMAL/ELEVATED districts see no behavior change. Rollback: set either flag false (no schema/save-format changes). Epic 1 doc updated to reflect that `threatCreateFromLead`/`threatEmitEvent` are implemented (stale "Missing" framing removed).
+
+---
+
+## 2026-06-11 — Track 3 dedicated-observability features delivered (deny toast watcher + Server Health pane)
+
+**Branch/Commit:** `copilot/dedicated-server-testing-updates` (commit `b06f4d7`)
+
+**Scenario:** Mode B feature delivery — un-defer the two Track 3 observability features from `docs/architecture/Dedicated_Server_Activation_Plan_2026-05-27.md` now that dedicated server testing is underway. (1) `ARC_fnc_securityDenyRecord` (server-only) records the last 10 `SECURITY_DENIED` events into the replicated bounded buffer `ARC_pub_securityDenials`, wired into all three deny paths of `ARC_fnc_rpcValidateSender` (`MISSING_REMOTE_CONTEXT` strict, `NULL_OBJECT`, `OWNER_MISMATCH`). (2) `ARC_fnc_uiNextIncidentDenyWatchClient` (client-only, started from `initPlayerLocal.sqf` with a per-mission session-token guard) passively surfaces `ARC_pub_nextIncidentLastDenied` as a toast to TOC queue approvers/OMNI, skipping the original requester via the new 4th `_ownerId` element published by `ARC_fnc_tocRequestNextIncident`. (3) HQ/ADMIN console DIAGNOSTICS gains a read-only "Server Health (Live)" pane (`ADMIN_DIAG_SERVER`) showing `ARC_serverReady`, snapshot broadcast ages, and the recent security denials. While touching `fn_uiConsoleHQPaint.sqf`, its pre-existing sqflint parser-compat violations (`#` indexing, `isNotEqualTo`, direct `trim`) were converted to approved equivalents so the file passes the strict preflight scan.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | sqflint compat scan (changed SQF) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_securityDenyRecord.sqf functions/ui/fn_uiNextIncidentDenyWatchClient.sqf functions/core/fn_rpcValidateSender.sqf functions/core/fn_tocRequestNextIncident.sqf functions/ui/fn_uiConsoleHQPaint.sqf initPlayerLocal.sqf` | PASS | No banned parser-compat patterns. |
+| 2 | SQF lint (warnings as errors) | `sqflint -e w <each changed .sqf>` | PASS | All 6 changed files lint clean (HQ paint previously failed baseline sqflint; now clean). |
+| 3 | New contract suite | `bash tests/static/dedicated_observability_contract_checks.sh` | PASS | 26/26 checks; suite wired into `.github/workflows/arma-preflight.yml`. |
+| 4 | Full static contract regression | `for t in tests/static/*.sh; do bash "$t"; done` | PASS | All suites pass, including RPC owner-capture conformance (39/39 handlers). |
+| 5 | Dedicated runtime: deny toast reaches TOC operators on a forged/contextless RPC | Dedicated MP: trigger a denied TOC RPC, verify TOC-gated toast on a second operator client and entry in Server Health pane | BLOCKED | Arma 3 runtime unavailable in sandbox; operator pass required on dedicated rig. |
+| 6 | Dedicated runtime / JIP: Server Health pane ages + denial list replicate | Dedicated MP + JIP client: open Console → HQ/ADMIN → DIAGNOSTICS → Server Health (Live); verify readiness, snapshot ages, denial rows | BLOCKED | Requires dedicated server run. |
+
+**Notes:** Track 5's `.pbo` CI build/release-artifact item remains open — it is a Build/CI (Mode G) change and must ship as its own PR per AGENTS.md single-mode rule; the activation plan now tracks it as "next up" instead of "deferred".
+
+---
+
 ## 2026-06-10 — Convoy never staged after rejoin/accept (partial-convoy rehydrate race)
 
 **Branch/Commit:** `copilot/logistics-convoy-spawn-issue` (base commit `9d0f2d8`)

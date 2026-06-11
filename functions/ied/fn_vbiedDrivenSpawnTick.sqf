@@ -134,9 +134,14 @@ private _spawnDelay = 60 + (floor (random 60));
         diag_log format ["[ARC][INFO] ARC_fnc_vbiedDrivenSpawnTick: force-emit warning lead=%1", _warnLead];
     };
 
-    // Spawn VBIED vehicle
-    private _vehClass = "O_MRAP_02_F";
-    if !(isClass (configFile >> "CfgVehicles" >> _vehClass)) then { _vehClass = "O_Truck_02_transport_F"; };
+    // Spawn VBIED vehicle — civilian-profile vehicle from the authoritative pool
+    // (spec: VBIEDs are telegraphed civilian vehicles, not military placeholders).
+    private _pool = missionNamespace getVariable ["ARC_vbiedVehicleClassPool", []];
+    if (!(_pool isEqualType [])) then { _pool = []; };
+    _pool = _pool select { _x isEqualType "" && { isClass (configFile >> "CfgVehicles" >> _x) } };
+    private _vehClass = "C_Offroad_01_F";
+    if ((count _pool) > 0) then { _vehClass = selectRandom _pool; };
+    if !(isClass (configFile >> "CfgVehicles" >> _vehClass)) then { _vehClass = "C_Van_01_transport_F"; };
 
     private _veh = createVehicle [_vehClass, _sp, [], 0, "CAN_COLLIDE"];
     if (isNull _veh) exitWith { diag_log "[ARC][WARN] ARC_fnc_vbiedDrivenSpawnTick: vehicle spawn failed"; };

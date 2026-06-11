@@ -1,14 +1,26 @@
 # Farabad COIN — IED / VBIED / Suicide Bomber Sub-System (Planning Spec)
 
 **Status:** Planning-only (no mission files generated)  
-**Implementation status (2026-06-01):** **Scaffold — pending lock.** Parts of this
-spec have shipped as scaffolding — the threat scheduler selects VBIED/Suicide
-profiles at higher escalation tiers, and spawn/lead/detonation functions exist
-(`fn_vbiedSpawnTick`, `fn_vbiedDrivenSpawnTick`, `fn_vbiedServerDetonate`,
+**Implementation status (2026-06-11):** **Locked (v1).** The shipped execution
+layer (`fn_vbiedSpawnTick`, `fn_vbiedDrivenSpawnTick`, `fn_vbiedServerDetonate`,
 `fn_vbiedServerOnDestroyed`, `fn_vbiedEmitLeads`, `fn_vbiedPickSite`,
-`fn_suicideBomberSpawnTick`, `fn_suicideBomberOnDetonate`). Behaviour and tuning
-are **not yet locked**; treat as in-development. See the re-baseline note (§0.0)
-in `Farabad_THREAT_v0_IED_P1_Baseline_regen.md`.  
+`fn_suicideBomberSpawnTick`, `fn_suicideBomberOnDetonate`) has been audited and
+locked against this spec for spawn pacing (escalation-tier gates VBIED≥2 /
+SUICIDE≥3, `ARC_vbiedCooldownSeconds` rearm cooldown, one-shot per-incident
+flags reset in `fn_execInitActive`, no-player fairness aborts → EXPIRED),
+detonation behavior (idempotent state-guarded detonation, rendered-safe
+override, TOC EOD-approval gate for client-driven detonation, live-vehicle
+detonation position, shared `ARC_fnc_iedHandleDetonation` pipeline), and
+lead-emission tuning (per-transition lead packages in `fn_vbiedEmitLeads` and
+the SUICIDE branch of `fn_threatLeadEmitFromOutcome`, plus the
+`ARC_vbiedDetonationCooldownS` district penalty on DETONATED). The contract is
+enforced by `tests/static/vbied_suicide_lock_contract_checks.sh` (wired into
+`arma-preflight` CI). Runtime evidence: dedicated-rig RPT
+`VDSReports/ArmA3Server_x64_2026-06-09_17-37-04.rpt` shows all eight functions
+compile clean (`[ARC][COMPILE][OK]`) and the VBIED config audit reporting
+effective values; live detonation-path validation on the dedicated rig remains
+an operator checklist item (see `tests/TEST-LOG.md`). See the re-baseline note
+(§0.0) in `Farabad_THREAT_v0_IED_P1_Baseline_regen.md`.  
 **Scope:** Design + integration plan for a future subsystem to layer into *Farabad COIN*  
 **Context:** 2011-era COIN, Takistan AO  
 

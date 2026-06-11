@@ -149,11 +149,11 @@ check 'spawn_token' "docs/planning/threat/Threat_IED_Lifecycle_Implementation_v1
 check 'Complex/chain IED status' "docs/planning/threat/Threat_IED_Lifecycle_Implementation_v1.md" \
   "Epic 2 implementation doc declares complex/chain IED status"
 
-check 'Deferred module' "functions/ied/fn_iedComplexAttackStage.sqf" \
-  "Complex attack module is explicitly marked deferred"
+check 'Reachable from ARC_fnc_iedSpawnTick' "functions/ied/fn_iedComplexAttackStage.sqf" \
+  "Complex attack module documents its runtime reachability path"
 
-check 'Deferred module' "functions/ied/fn_iedChainEmplace.sqf" \
-  "Chain IED module is explicitly marked deferred"
+check 'Reachable from ARC_fnc_iedSpawnTick' "functions/ied/fn_iedChainEmplace.sqf" \
+  "Chain IED module documents its runtime reachability path"
 
 if [[ "$pass" != true ]]; then
   exit 1

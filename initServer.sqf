@@ -100,14 +100,10 @@ missionNamespace setVariable ["ARC_patrolSpawnContactsEnabled", true, true];
 
 
 // ============================================================================
-// CONSOLE VM — feature flags (Phase 4.1 migration)
+// CONSOLE VM — migration feature flags removed (Refactor Plan §12.2 / PR 4)
+// DASH/OPS/CMD/COMMS read ARC_consoleVM_payload via ARC_fnc_consoleVmAdapterV1
+// unconditionally, with direct missionNamespace reads as fallback only.
 // ============================================================================
-// When true, the tab reads from ARC_consoleVM_payload via
-// ARC_fnc_consoleVmAdapterV1 instead of direct missionNamespace reads.
-// Both flags default to false in the paint functions; set true once VM
-// publishing is confirmed stable on this server.
-missionNamespace setVariable ["ARC_console_ops_v2",       true, true];
-missionNamespace setVariable ["ARC_console_dashboard_v2", true, true];
 private _arcConsoleHQTokensDefault = [
     "BNCMD", "BN COMMAND", "BNHQ", "BN HQ", "BN CO", "BNCO",
     "BN CDR", "BNCDR", "BN CMDR", "BATTALION CO", "BATTALION CDR",
@@ -147,6 +143,14 @@ missionNamespace setVariable ["ARC_isrShadowLeadBridgeEnabled", true, true];
 
 // TNP partnered ops → lead request field action: enabled by default.
 missionNamespace setVariable ["ARC_opsTnpPartneredRequestEnabled", true, true];
+
+// Complex/chain IED modules (un-deferred): tier-gated reachability.
+//   ARC_iedChainEnabled          secondary chain devices linked to the primary
+//                                IED (execution.chain_count > 0; tier >= 2).
+//   ARC_iedComplexAttackEnabled  staged secondary ambush group activated on
+//                                detonation (execution.complexity >= 3; tier >= 3).
+missionNamespace setVariable ["ARC_iedChainEnabled", true, true];
+missionNamespace setVariable ["ARC_iedComplexAttackEnabled", true, true];
 
 // -------------------------------------------------------------------------
 // Spawn-pattern matrix (issue #633) — staged rollout toggles.
@@ -671,6 +675,16 @@ missionNamespace setVariable ["ARC_vbiedProxRadiusM", 12, true];
 missionNamespace setVariable ["ARC_vbiedSiteAvoidAirbase", true, true];
 missionNamespace setVariable ["ARC_vbiedTelegraphIntelLog", true, true];
 
+// VBIED Driven + Suicide Bomber (locked v1 pacing knobs — authoritative defaults)
+// Spawn-path enable flags (escalation-tier gates still apply inside the ticks).
+missionNamespace setVariable ["ARC_vbiedDrivenEnabled", true, true];
+missionNamespace setVariable ["ARC_suicideBomberEnabled", true, true];
+// Telegraph floor for driven VBIED: 0 forces a minimum urgent warning lead
+// before the spawn-delay window elapses (fairness rule, non-negotiable).
+missionNamespace setVariable ["ARC_vbiedDrivenIntelLevel", 0, true];
+// District risk cooldown applied on VBIED DETONATED (lead-emission penalty path).
+missionNamespace setVariable ["ARC_vbiedDetonationCooldownS", 3600, true];
+
 // VBIED scaffolding (object-first)
 missionNamespace setVariable ["ARC_vbiedScaffoldEnabled", true, true];
 missionNamespace setVariable ["airbase_v1_ambiance_enabled", true, true];
@@ -690,6 +704,8 @@ if (_arcSafeModeEnabled) then {
     missionNamespace setVariable ["ARC_iedPhase1_siteSelectionEnabled", false, true];
     missionNamespace setVariable ["ARC_vbiedPhase3_enabled", false, true];
     missionNamespace setVariable ["ARC_vbiedScaffoldEnabled", false, true];
+    missionNamespace setVariable ["ARC_vbiedDrivenEnabled", false, true];
+    missionNamespace setVariable ["ARC_suicideBomberEnabled", false, true];
     missionNamespace setVariable ["airbase_v1_ambiance_enabled", false, true];
     missionNamespace setVariable ["airbase_v1_runtime_enabled", false, true];
     missionNamespace setVariable ["airbase_v1_gnd_traffic_enabled", false, true];
@@ -1017,7 +1033,11 @@ missionNamespace setVariable ["ARC_operatorToggleAuditCatalog", [
         ["ARC_vbiedDefuseActionEnabled", "bool"],
         ["ARC_vbiedDefuseWindowSeconds", "number"],
         ["ARC_vbiedCooldownSeconds", "number"],
-        ["ARC_vbiedProxRadiusM", "number"]
+        ["ARC_vbiedProxRadiusM", "number"],
+        ["ARC_vbiedDrivenEnabled", "bool"],
+        ["ARC_suicideBomberEnabled", "bool"],
+        ["ARC_vbiedDrivenIntelLevel", "number"],
+        ["ARC_vbiedDetonationCooldownS", "number"]
     ]],
     ["Airbase", [
         ["airbase_v1_tower_allowBnCmd", "bool"],

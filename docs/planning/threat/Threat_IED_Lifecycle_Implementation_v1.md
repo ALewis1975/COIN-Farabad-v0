@@ -17,7 +17,7 @@ Implementation completion for Epic 2 runtime gaps deferred from PR #506.
 | Active IED threat linkage | Implemented (current PR) |
 | EOD RTB/TOW disposition lifecycle request | Implemented (current PR) |
 | Driven VBIED / suicide objective production | Implemented (current PR) |
-| Complex/chain IED status | Deferred — modules are registered but intentionally unreachable without future runtime-validation PR |
+| Complex/chain IED status | Implemented (un-deferred 2026-06-11) — tier-gated reachability via `ARC_fnc_iedSpawnTick` (`ARC_iedChainEnabled` / `ARC_iedComplexAttackEnabled`; execution profile assigned in `ARC_fnc_threatOnAOActivated`, chain at tier ≥ 2, secondary ambush at tier ≥ 3). Runtime proof on the dedicated rig pending. |
 | Static contract checks | Implemented (this PR) |
 | Local MP runtime smoke | BLOCKED — Arma 3 runtime unavailable in sandbox |
 | Dedicated / JIP / restart validation | BLOCKED — requires dedicated server environment |
@@ -163,7 +163,7 @@ Checks cover:
 - Active IED threat linkage and detonation-to-`DETONATED` lifecycle updates
 - EOD RTB/TOW disposition RPC registration, sender validation, and lifecycle flags
 - Driven VBIED and suicide bomber objective-kind production gates
-- Explicit deferred status for complex/chain IED modules
+- Tier-gated reachability contract for complex/chain IED modules (`tests/static/ied_complex_chain_contract_checks.sh`)
 - Cleanup convergence markers
 - Stale close detection and evidence emission
 - CfgFunctions registration

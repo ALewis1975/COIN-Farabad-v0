@@ -84,8 +84,8 @@ for mods you expect to load.
 | Step | Owner | Status |
 |------|-------|--------|
 | FARABAD dual-write logger sink (already documented; runtime-enable helper added) | this PR (helper only) | ✅ helper `tools/dev_deploy/enable_dual_write.sqf` |
-| Surface `ARC_pub_nextIncidentLastDenied` to the operator UI as a client toast | follow-up | deferred |
-| Add a server-diagnostics panel (Console_VM_v1 extension) reading `ARC_serverReady`, snapshot ages, last 10 `SECURITY_DENIED` events | follow-up | deferred |
+| Surface `ARC_pub_nextIncidentLastDenied` to the operator UI as a client toast | delivered (2026-06-11) | ✅ `ARC_fnc_uiNextIncidentDenyWatchClient` (passive TOC-gated deny toast watcher) |
+| Add a server-diagnostics panel (Console_VM_v1 extension) reading `ARC_serverReady`, snapshot ages, last 10 `SECURITY_DENIED` events | delivered (2026-06-11) | ✅ HQ/ADMIN console "Server Health (Live)" pane + `ARC_fnc_securityDenyRecord` bounded `ARC_pub_securityDenials` buffer |
 | PowerShell RPT-tail script with the canonical `[ARC][SEC]\|MISSING_REMOTE_CONTEXT\|SECURITY_DENIED\|Error in expression` filter | this PR | ✅ `tools/dev_deploy/tail.ps1` |
 
 **Acceptance:** From the dev workstation: restart the dedicated process,
@@ -104,7 +104,7 @@ row in `tests/TEST-LOG.md`. Fail-rows open bounded Mode-A fixes.
 |------|-------|--------|
 | Extend `tools/sync_mission_to_arma_profile.ps1` verified-file SHA list to also cover `initServer.sqf`, `functions/core/fn_rpcValidateSender.sqf`, `functions/core/fn_tocRequestNextIncident.sqf`, `config/CfgRemoteExec.hpp` | this PR | ✅ |
 | Add `tools/dev_deploy/` scaffold (`clone.ps1`, `deploy.ps1`, `tail.ps1`, `enable_dual_write.sqf`) | this PR | ✅ |
-| Build the mission as a `.pbo` via MakePbo in CI on commit-to-main and publish as a release artifact | follow-up | deferred |
+| Build the mission as a `.pbo` via MakePbo in CI on commit-to-main and publish as a release artifact | next up — requires its own Build/CI (Mode G) PR | open |
 
 ## Development pattern on the Armahosts VPS
 

@@ -75,6 +75,66 @@ if (_tid isEqualTo "") exitWith {false};
 ["activeIedThreatId", _tid] call ARC_fnc_stateSet;
 missionNamespace setVariable ["ARC_activeIedThreatId", _tid, true];
 
+// Execution profile (complex/chain IED reachability): derive from the district
+// escalation tier and write once (idempotent) onto the threat record.
+//   tier >= 2 (HIGH_RISK)  -> chain_count 1
+//   tier >= 3 (CRITICAL)   -> chain_count 2, hasSecondaryAttack true, complexity 3
+private _kvSetTop = {
+    params ["_pairs", "_key", "_value"];
+    if (!(_pairs isEqualType [])) then { _pairs = []; };
+    private _i = -1;
+    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _i = _forEachIndex; }; } forEach _pairs;
+    if (_i < 0) then { _pairs pushBack [_key, _value]; } else { _pairs set [_i, [_key, _value]]; };
+    _pairs
+};
+
+private _recsProf = ["threat_v0_records", []] call ARC_fnc_stateGet;
+if (_recsProf isEqualType []) then
+{
+    private _iProf = -1;
+    { if (([_x, "threat_id", ""] call _kvGet) isEqualTo _tid) exitWith { _iProf = _forEachIndex; }; } forEach _recsProf;
+    if (_iProf >= 0) then
+    {
+        private _recProf = _recsProf select _iProf;
+        private _execProf = [_recProf, "execution", []] call _kvGet;
+        if (!(_execProf isEqualType [])) then { _execProf = []; };
+        if ((count _execProf) == 0) then
+        {
+            private _links = [_recProf, "links", []] call _kvGet;
+            private _districtId = [_links, "district_id", ""] call _kvGet;
+            if (!(_districtId isEqualType "")) then { _districtId = ""; };
+
+            private _secLevel = "NORMAL";
+            if (!(_districtId isEqualTo "")) then
+            {
+                _secLevel = missionNamespace getVariable [format ["ARC_district_%1_secLevel", _districtId], "NORMAL"];
+                if (!(_secLevel isEqualType "")) then { _secLevel = "NORMAL"; };
+            };
+            private _tier = 0;
+            if (_secLevel isEqualTo "ELEVATED") then { _tier = 1; };
+            if (_secLevel isEqualTo "HIGH_RISK") then { _tier = 2; };
+            if (_secLevel isEqualTo "CRITICAL") then { _tier = 3; };
+
+            private _chainCount = 0;
+            if (_tier >= 2) then { _chainCount = 1; };
+            if (_tier >= 3) then { _chainCount = 2; };
+            private _hasSecondary = (_tier >= 3);
+            private _complexity = if (_hasSecondary) then { 3 } else { _tier };
+
+            _execProf = [_execProf, "tier", _tier] call _kvSetTop;
+            _execProf = [_execProf, "complexity", _complexity] call _kvSetTop;
+            _execProf = [_execProf, "hasSecondaryAttack", _hasSecondary] call _kvSetTop;
+            _execProf = [_execProf, "chain_count", _chainCount] call _kvSetTop;
+
+            _recProf = [_recProf, "execution", _execProf] call _kvSetTop;
+            _recsProf set [_iProf, _recProf];
+            ["threat_v0_records", _recsProf] call ARC_fnc_stateSet;
+
+            diag_log format ["[ARC][THREAT] ARC_fnc_threatOnAOActivated: execution profile set threat_id=%1 district=%2 tier=%3 chain=%4 secondary=%5", _tid, _districtId, _tier, _chainCount, _hasSecondary];
+        };
+    };
+};
+
 // Attempt to link the currently active objective object as the "manifestation" (Phase 1).
 // Guard against duplicate spawn via idempotency token before writing world.spawned.
 private _linked = false;

@@ -6,9 +6,8 @@ Complete planned API surface and shared event/schema contract, centered on:
 - `ARC_fnc_threatEmitEvent`
 
 ## Status framing
-- **Implemented:** `threatCreateFromTask`, `threatUpdateState`, `threatOnAOActivated`, `threatOnIncidentClosed`, `threatDebugSnapshot`.
-- **Missing:** `threatCreateFromLead`, `threatEmitEvent` (baseline optional/deferred APIs).
-- **Partially implemented:** Event semantics exist in pockets but no explicit subsystem event contract.
+- **Implemented:** `threatCreateFromTask`, `threatUpdateState`, `threatOnAOActivated`, `threatOnIncidentClosed`, `threatDebugSnapshot`, `threatCreateFromLead` (E1-WP2), `threatEmitEvent` (E1-WP3 — bounded envelope buffer with replicated public tail).
+- **Partially implemented:** Event emissions are integrated at create/state/spawn-deny/cleanup transitions (E1-WP4); remaining transition coverage is tracked per subsystem.
 
 ## Deliverables
 1. API contract spec (inputs, outputs, idempotency, authority, logging).

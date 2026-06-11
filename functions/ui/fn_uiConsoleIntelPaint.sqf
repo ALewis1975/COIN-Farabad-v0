@@ -736,8 +736,11 @@ if (_rebuild) then
         // Intel feed
         ["INTEL FEED"] call _addHdr;
 
-        private _intelLog = missionNamespace getVariable ["ARC_pub_intelLog", []];
-        if (!(_intelLog isEqualType [])) then { _intelLog = []; };
+        private _intelLogDirect = missionNamespace getVariable ["ARC_pub_intelLog", []];
+        if (!(_intelLogDirect isEqualType [])) then { _intelLogDirect = []; };
+        // Console VM primary (intelFeed section); direct read above is fallback only.
+        private _intelLog = ["intelFeed", "log", _intelLogDirect] call ARC_fnc_consoleVmAdapterV1;
+        if (!(_intelLog isEqualType [])) then { _intelLog = _intelLogDirect; };
         if ((count _intelLog) > _rxMaxItems) then { _intelLog = _intelLog select [((count _intelLog) - _rxMaxItems) max 0, _rxMaxItems]; };
 
         // Show last 25
@@ -1253,8 +1256,11 @@ else
         case "FEED":
         {
             private _id = _arg;
-            private _intelLog = missionNamespace getVariable ["ARC_pub_intelLog", []];
-            if (!(_intelLog isEqualType [])) then { _intelLog = []; };
+            private _intelLogDirect = missionNamespace getVariable ["ARC_pub_intelLog", []];
+            if (!(_intelLogDirect isEqualType [])) then { _intelLogDirect = []; };
+            // Console VM primary (intelFeed section); direct read above is fallback only.
+            private _intelLog = ["intelFeed", "log", _intelLogDirect] call ARC_fnc_consoleVmAdapterV1;
+            if (!(_intelLog isEqualType [])) then { _intelLog = _intelLogDirect; };
             if ((count _intelLog) > _rxMaxItems) then { _intelLog = _intelLog select [((count _intelLog) - _rxMaxItems) max 0, _rxMaxItems]; };
 
             private _match = [];
@@ -1663,8 +1669,11 @@ else
                        if (_activeTaskId isEqualTo "") then {"None"} else { format ["%1 (ID: %2)", _activeIncDisp, _activeTaskId] }];
 
             // Last 10 SIGHTING/THREAT intel log entries
-            private _iLog = missionNamespace getVariable ["ARC_pub_intelLog", []];
-            if (!(_iLog isEqualType [])) then { _iLog = []; };
+            private _iLogDirect = missionNamespace getVariable ["ARC_pub_intelLog", []];
+            if (!(_iLogDirect isEqualType [])) then { _iLogDirect = []; };
+            // Console VM primary (intelFeed section); direct read above is fallback only.
+            private _iLog = ["intelFeed", "log", _iLogDirect] call ARC_fnc_consoleVmAdapterV1;
+            if (!(_iLog isEqualType [])) then { _iLog = _iLogDirect; };
             private _opforEntries = [];
             {
                 if (!(_x isEqualType []) || { (count _x) < 6 }) then { continue; };
@@ -1763,8 +1772,11 @@ else
             };
 
             // Intel feed: last 15 entries (all categories)
-            private _iLog2 = missionNamespace getVariable ["ARC_pub_intelLog", []];
-            if (!(_iLog2 isEqualType [])) then { _iLog2 = []; };
+            private _iLog2Direct = missionNamespace getVariable ["ARC_pub_intelLog", []];
+            if (!(_iLog2Direct isEqualType [])) then { _iLog2Direct = []; };
+            // Console VM primary (intelFeed section); direct read above is fallback only.
+            private _iLog2 = ["intelFeed", "log", _iLog2Direct] call ARC_fnc_consoleVmAdapterV1;
+            if (!(_iLog2 isEqualType [])) then { _iLog2 = _iLog2Direct; };
             private _feedEntries = [];
             {
                 if (!(_x isEqualType []) || { (count _x) < 4 }) then { continue; };

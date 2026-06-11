@@ -1,7 +1,7 @@
 # Farabad Console — Architecture Refactor Plan
 
-**Date:** 2026-04-07  
-**Status:** Approved design; implementation pending  
+**Date:** 2026-04-07 (status trued up 2026-06-11)  
+**Status:** Approved design; substantially implemented — see §12 Implementation Status for the delivery ledger and remaining scope  
 **Mode:** F — Documentation-Only Changes (this document)  
 **Supersedes:** `AIR_TOWER_Vision_Architecture_Plan.md` (AIR-only scope)  
 **Depends on:** `Console_VM_v1.md`, `Console_Tab_Migration_Plan.md`, `Farabad_Tablet_2011_Style.md`
@@ -510,19 +510,71 @@ Every PR must include:
 
 ---
 
-## 11) Exit Criteria (Plan Complete)
+## 11) Exit Criteria (Plan Complete) — revised 2026-06-11
 
 The console refactor is complete when:
 
-1. All 9 tabs read from Console VM (no direct `missionNamespace` reads in painters)
+1. All VM-scoped tabs read from Console VM as the primary source with direct
+   reads retained as fallback only (see §12.3 for the AIR/S1 descope)
 2. All tabs use shared helpers for rows, detail cards, empty states, and buttons
 3. Shell layout engine positions all regions from tab declarations (no per-tab special cases in refresh)
 4. AIR map renders in Region C without overlapping Region D
 5. All 5 AIR status chips are visible and labeled at 1080p
 6. No dead/ambiguous buttons on any tab
-7. Static IDC collision check passes
-8. Visual regression checklist signed off for all 9 tabs
-9. Test log is current with entries for all 6 PRs
+7. Static IDC collision check passes **and is wired into `arma-preflight.yml`**
+8. Visual regression checklist signed off for all 10 tabs (see §12.1)
+9. Test log is current with entries for all PRs
+
+---
+
+## 12) Implementation Status (2026-06-11 trueup)
+
+This section corrects the original plan against the shipped codebase so future
+sessions do not re-derive the state from stale framing.
+
+### 12.1 Tab inventory correction
+
+The console now has **10 tabs**, not 9: a **COMMS** tab (TFAR/SOI +
+ACE/KAT CASEVAC integration) was added after this plan was written, and
+**BOARDS is TOC-gated** (only added to the tab bar for queue approvers — see
+`fn_uiConsoleOnLoad.sqf`). COMMS already consumes the Console VM
+(`medical`/`comms` sections).
+
+### 12.2 Per-PR delivery ledger
+
+| PR | Status | Notes |
+|----|--------|-------|
+| PR 1 — Shell layout contract | ✅ Delivered | Tab layout declarations in `fn_uiConsoleApplyLayout.sqf`; Region C (IDC 78140) in `CfgDialogs.hpp` |
+| PR 2 — Helpers + VM expansion | ⚠️ Partially delivered | All 7 shared helpers shipped. The `personnel`/`handoff`/`intelFeed` sections shipped as **stubs**: `personnel` read the wrong key (`ARC_pub_s1Registry` — real publisher is `ARC_pub_s1_registry`), `handoff` read `ARC_pub_handoffState` which **no publisher writes**, and all stub sections stamped freshness with build-time `_now`, making staleness detection meaningless. Fixed in the 2026-06-11 pass. |
+| PR 3 — AIR rebuild | ⚠️ Partially delivered | Chips/empty-states/callsign resolution delivered. **AIR was NOT migrated to the VM** — `fn_uiConsoleAirPaint.sqf` still reads `ARC_pub_airbaseUiSnapshot` directly (now a documented exception, §12.3). |
+| PR 4 — DASH/OPS/CMD migration | ✅ Delivered | VM-primary with direct fallback; painter-side feature flags removed (server-side seeding removed in the 2026-06-11 pass) |
+| PR 5 — Remaining tabs | ⚠️ In progress | INTEL/HQ/BOARDS/HANDOFF migrated to VM-primary with fallback in the 2026-06-11 pass. S1 descoped (§12.3). |
+| PR 6 — Validation gates | ⚠️ Partially delivered | `scripts/dev/check_console_conflicts.sh` shipped (IDC + painter-contract checks combined); wired into CI and regression checklist authored in the 2026-06-11 pass. |
+
+### 12.3 Descope decision — AIR and S1 stay on rev-checked direct reads
+
+**Decision (2026-06-11):** AIR and S1 are formally **descoped** from the
+"all tabs on Console VM" exit criterion.
+
+Rationale: both painters already have their own rev-checked direct-read paths
+with change detection and freshness presentation:
+
+- **AIR** reads `ARC_pub_airbaseUiSnapshot` + `ARC_pub_airbaseUiSnapshotUpdatedAt`
+  directly and renders its own `freshnessState` (FRESH/STALE/DEGRADED) from the
+  snapshot contract (`AIR_TOWER_UI_Snapshot_Contract_v1.md`).
+- **S1** reads `ARC_pub_s1_registry` + `ARC_pub_s1_registryUpdatedAt` directly
+  with a repaint rev-check keyed on the published timestamp.
+
+Forcing these through the VM would duplicate freshness machinery for no player
+benefit. The VM `airbase` and `personnel` sections remain available (correctly
+sourced) for cross-tab consumers such as DASH, which already reads
+`["airbase", "snapshot"]`.
+
+### 12.4 Known intentional exceptions
+
+- BOARDS scans the **full** `ARC_pub_opsLog` for the last SITREP; the VM `ops`
+  section only carries a 5-entry `log_tail`, so that one read stays direct (a
+  SITREP may be older than the tail).
 
 ---
 

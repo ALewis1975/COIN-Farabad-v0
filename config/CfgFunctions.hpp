@@ -79,6 +79,7 @@ class CfgFunctions
             class rolesCanUseMobileOps {};
             class rolesCanRecruitAI {};
             class rpcValidateSender {};
+            class securityDenyRecord {};
             class airbaseTowerAuthorize {};
             class baseServicesInit {};
             class baseServicesSnapshot {};
@@ -100,6 +101,7 @@ class CfgFunctions
             class govStatsScheduler {};
             class consoleVmBuild {};
             class consoleVmAdapterV1 {};
+            class consoleVmFreshness {};
             class statePublishPublic {};
             class intelLog {};
             class intelCreateMarker {};
@@ -310,6 +312,7 @@ class CfgFunctions
             class iedBuildCaseFile {};
             class vbiedEmitLeads {};
             class iedChainEmplace {};
+            class iedChainDetonate {};
             class vbiedDrivenSpawnTick {};
             class suicideBomberSpawnTick {};
             class suicideBomberOnDetonate {};
@@ -590,6 +593,7 @@ class CfgFunctions
             file = "functions\ui";
 
             class uiConsoleInitClient {};
+            class uiNextIncidentDenyWatchClient {};
             class uiConsoleCanOpen {};
             class uiConsoleOpen {};
             class uiConsoleApplyLayout {};

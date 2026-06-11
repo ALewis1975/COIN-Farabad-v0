@@ -83,7 +83,14 @@ if (!_isRemoteRpc) exitWith
         ]
     ] call ARC_fnc_intelLog;
 
-    if (_requireRemoteContext) exitWith {false};
+    if (_requireRemoteContext) exitWith
+    {
+        if (!isNil "ARC_fnc_securityDenyRecord") then
+        {
+            [_rpc, "MISSING_REMOTE_CONTEXT", -1] call ARC_fnc_securityDenyRecord;
+        };
+        false
+    };
     true
 };
 
@@ -99,6 +106,11 @@ if (isNull _caller) exitWith
             ["remoteOwner", _actualOwner]
         ]
     ] call ARC_fnc_intelLog;
+
+    if (!isNil "ARC_fnc_securityDenyRecord") then
+    {
+        [_rpc, "NULL_OBJECT", _actualOwner] call ARC_fnc_securityDenyRecord;
+    };
 
     if (_notify isEqualType "" && { !(_notify isEqualTo "") } && { _actualOwner > 0 }) then
     {
@@ -122,6 +134,11 @@ if (_expectedOwner != _actualOwner) exitWith
                 ["callerName", name _caller]
             ]
         ] call ARC_fnc_intelLog;
+
+        if (!isNil "ARC_fnc_securityDenyRecord") then
+        {
+            [_rpc, "OWNER_MISMATCH", _actualOwner] call ARC_fnc_securityDenyRecord;
+        };
 
         if (_notify isEqualType "" && { !(_notify isEqualTo "") } && { _actualOwner > 0 }) then
         {

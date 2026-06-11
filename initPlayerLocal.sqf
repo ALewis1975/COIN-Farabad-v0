@@ -70,6 +70,10 @@ else
 // Farabad Console (tablet UI) - keybind + client init
 [] call ARC_fnc_uiConsoleInitClient;
 
+// TOC incident-generation denial watcher (Track 3 observability):
+// surfaces ARC_pub_nextIncidentLastDenied to TOC-authorized operators as a toast.
+[] call ARC_fnc_uiNextIncidentDenyWatchClient;
+
 // CIVSUB contact (ALiVE-style) - client init
 [] call ARC_fnc_civsubContactInitClient;
 

@@ -87,8 +87,37 @@ missionNamespace setVariable ["ARC_activeIedTriggerDeviceId", ""];
 // Best-effort remove the IED prop (objective can also be destroyed by the blast)
 if (!isNull _obj) then
 {
+    // Chain devices: start the staggered secondary detonation sequence before the
+    // primary prop is removed (idempotent; the Killed EH path shares the guard).
+    private _chainNids = _obj getVariable ["ARC_chainDeviceNetIds", []];
+    if (!(_chainNids isEqualType [])) then { _chainNids = []; };
+    if ((count _chainNids) > 0) then
+    {
+        [_nid, _chainNids] call ARC_fnc_iedChainDetonate;
+    };
+
     // If the class doesn't accept damage well, deleting is still correct for Phase 1.
     deleteVehicle _obj;
+};
+
+// Complex attack: activate the staged ambush group (if any) against the blast site.
+private _cxThreatId = ["activeIedThreatId", ""] call ARC_fnc_stateGet;
+if (!(_cxThreatId isEqualType "")) then { _cxThreatId = ""; };
+if (!(_cxThreatId isEqualTo "")) then
+{
+    private _cxGrp = missionNamespace getVariable [format ["ARC_complexAtkGroup_%1", _cxThreatId], grpNull];
+    if (!(_cxGrp isEqualType grpNull)) then { _cxGrp = grpNull; };
+    if (!isNull _cxGrp && { (count (units _cxGrp)) > 0 }) then
+    {
+        _cxGrp setBehaviour "COMBAT";
+        _cxGrp setCombatMode "RED";
+        private _cxWp = _cxGrp addWaypoint [_pos, 0];
+        _cxWp setWaypointType "SAD";
+        _cxWp setWaypointBehaviour "COMBAT";
+        _cxWp setWaypointCombatMode "RED";
+        _cxGrp setCurrentWaypoint _cxWp;
+        diag_log format ["[ARC][INFO] ARC_fnc_iedServerDetonate: complex attack activated threat=%1 units=%2", _cxThreatId, count (units _cxGrp)];
+    };
 };
 
 // Drive the mission spine (close-ready + follow-on lead)

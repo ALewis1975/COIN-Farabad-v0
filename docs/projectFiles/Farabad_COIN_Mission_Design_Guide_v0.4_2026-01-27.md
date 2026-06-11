@@ -366,11 +366,16 @@ The `Farabad_IED_VBIED_Suicide_Subsystem_Planning.md` document defines:
 
 This module should be a **child** of the Threat System, not a standalone random spawner.
 
-> **VBIED / Suicide status (2026-06-01):** **Scaffold — pending lock.** Spawn
-> ticks and lead emitters exist (`fn_vbiedSpawnTick`, `fn_vbiedDrivenSpawnTick`,
+> **VBIED / Suicide status (2026-06-11):** **Locked (v1).** Spawn ticks, lead
+> emitters and detonation handlers (`fn_vbiedSpawnTick`, `fn_vbiedDrivenSpawnTick`,
 > `fn_vbiedServerDetonate`, `fn_vbiedEmitLeads`, `fn_suicideBomberSpawnTick`,
-> `fn_suicideBomberOnDetonate`) and the scheduler selects VBIED/Suicide profiles
-> at higher escalation tiers, but their behaviour and tuning are not yet locked.
+> `fn_suicideBomberOnDetonate`) are locked against the planning spec: spawn
+> pacing (tier gates VBIED≥2 / SUICIDE≥3, cooldowns, one-shot incident flags,
+> fairness aborts), detonation behavior (idempotence, EOD-approval gate,
+> live-vehicle position) and lead-emission tuning are enforced by
+> `tests/static/vbied_suicide_lock_contract_checks.sh` in CI, with dedicated-rig
+> compile/config-audit runtime evidence (see
+> `Farabad_IED_VBIED_Suicide_Subsystem_Planning.md` header and `tests/TEST-LOG.md`).
 
 ---
 

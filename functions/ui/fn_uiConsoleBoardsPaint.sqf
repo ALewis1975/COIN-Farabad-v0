@@ -31,14 +31,7 @@ if (isNull _ctrlMain) exitWith {false};
 // -------------------------------------------------------------------------
 // Helpers
 // -------------------------------------------------------------------------
-private _getPair = {
-    params ["_pairs", "_k", "_d"];
-    if (!(_pairs isEqualType [])) exitWith { _d };
-    private _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _idx = _forEachIndex; }; } forEach _pairs;
-    if (_idx < 0) exitWith { _d };
-    (_pairs # _idx) # 1
-};
+private _trimFn = compile "params ['_s']; if (!(_s isEqualType '')) exitWith { '' }; trim _s";
 
 private _fmtHdr = {
     params ["_t"];
@@ -51,41 +44,42 @@ private _fmtKV = {
 };
 
 // -------------------------------------------------------------------------
-// Active incident snapshot (client-public vars)
+// Active incident snapshot — Console VM primary (incident section); direct
+// missionNamespace reads are fallback only (adapter default args).
 // -------------------------------------------------------------------------
-private _taskId = missionNamespace getVariable ["ARC_activeTaskId", ""]; 
+private _taskId = ["incident", "task_id", missionNamespace getVariable ["ARC_activeTaskId", ""]] call ARC_fnc_consoleVmAdapterV1;
 if (!(_taskId isEqualType "")) then { _taskId = ""; };
 
-private _incName = missionNamespace getVariable ["ARC_activeIncidentDisplayName", ""]; 
+private _incName = ["incident", "display_name", missionNamespace getVariable ["ARC_activeIncidentDisplayName", ""]] call ARC_fnc_consoleVmAdapterV1;
 if (!(_incName isEqualType "")) then { _incName = ""; };
 
-private _incType = missionNamespace getVariable ["ARC_activeIncidentType", ""]; 
+private _incType = ["incident", "incident_type", missionNamespace getVariable ["ARC_activeIncidentType", ""]] call ARC_fnc_consoleVmAdapterV1;
 if (!(_incType isEqualType "")) then { _incType = ""; };
 
-private _incPos = missionNamespace getVariable ["ARC_activeIncidentPos", []];
+private _incPos = ["incident", "position", missionNamespace getVariable ["ARC_activeIncidentPos", []]] call ARC_fnc_consoleVmAdapterV1;
 if (!(_incPos isEqualType []) || { (count _incPos) < 2 }) then { _incPos = []; };
 private _grid = if ((count _incPos) >= 2) then { mapGridPosition _incPos } else { "" };
 private _zone = if ((count _incPos) >= 2) then { [_incPos] call ARC_fnc_worldGetZoneForPos } else { "" };
 if (!(_zone isEqualType "")) then { _zone = ""; };
 
-private _acc = missionNamespace getVariable ["ARC_activeIncidentAccepted", false];
+private _acc = ["incident", "accepted", missionNamespace getVariable ["ARC_activeIncidentAccepted", false]] call ARC_fnc_consoleVmAdapterV1;
 if (!(_acc isEqualType true) && !(_acc isEqualType false)) then { _acc = false; };
 
-private _accBy = missionNamespace getVariable ["ARC_activeIncidentAcceptedByGroup", ""]; 
+private _accBy = ["incident", "accepted_by_group", missionNamespace getVariable ["ARC_activeIncidentAcceptedByGroup", ""]] call ARC_fnc_consoleVmAdapterV1;
 if (!(_accBy isEqualType "")) then { _accBy = ""; };
 
-private _closeReady = missionNamespace getVariable ["ARC_activeIncidentCloseReady", false];
+private _closeReady = ["incident", "close_ready", missionNamespace getVariable ["ARC_activeIncidentCloseReady", false]] call ARC_fnc_consoleVmAdapterV1;
 if (!(_closeReady isEqualType true) && !(_closeReady isEqualType false)) then { _closeReady = false; };
 
-private _sitrepSent = missionNamespace getVariable ["ARC_activeIncidentSitrepSent", false];
+private _sitrepSent = ["incident", "sitrep_sent", missionNamespace getVariable ["ARC_activeIncidentSitrepSent", false]] call ARC_fnc_consoleVmAdapterV1;
 if (!(_sitrepSent isEqualType true) && !(_sitrepSent isEqualType false)) then { _sitrepSent = false; };
-private _statusRows = missionNamespace getVariable ["ARC_pub_unitStatuses", []];
+private _statusRows = ["ops", "unit_statuses", missionNamespace getVariable ["ARC_pub_unitStatuses", []]] call ARC_fnc_consoleVmAdapterV1;
 if (!(_statusRows isEqualType [])) then { _statusRows = []; };
 
 // -------------------------------------------------------------------------
-// Queue snapshot (published pending)
+// Queue snapshot — Console VM primary; published pending list is fallback only
 // -------------------------------------------------------------------------
-private _queue = missionNamespace getVariable ["ARC_pub_queuePending", []];
+private _queue = ["ops", "queue_pending", missionNamespace getVariable ["ARC_pub_queuePending", []]] call ARC_fnc_consoleVmAdapterV1;
 if (!(_queue isEqualType [])) then { _queue = []; };
 
 private _qInc = 0;
@@ -96,9 +90,9 @@ private _qOther = 0;
 private _queueLines = [];
 {
     if (!(_x isEqualType []) || { (count _x) < 8 }) then { continue; };
-    _x params ["_qid", "_createdAt", "_qSt", "_qKind", "_qFrom", "_qFromGrp", "_qPos", "_qSummary"]; 
+    _x params ["", "_createdAt", "", "_qKind", "", "_qFromGrp", "", "_qSummary"];
 
-    private _k = toUpper (trim _qKind);
+    private _k = toUpper ([_qKind] call _trimFn);
     switch (_k) do
     {
         case "INCIDENT": { _qInc = _qInc + 1; };
@@ -110,8 +104,8 @@ private _queueLines = [];
     // Keep the snapshot short (top 10)
     if ((count _queueLines) < 10) then
     {
-        private _g = if (_qFromGrp isEqualType "" && { _qFromGrp isNotEqualTo "" }) then { _qFromGrp } else { "" };
-        private _s = if (_qSummary isEqualType "" && { _qSummary isNotEqualTo "" }) then { _qSummary } else {
+        private _g = if (_qFromGrp isEqualType "" && { !(_qFromGrp isEqualTo "") }) then { _qFromGrp } else { "" };
+        private _s = if (_qSummary isEqualType "" && { !(_qSummary isEqualTo "") }) then { _qSummary } else {
             // No summary — fall back to kind + age + submitter for differentiation
             private _ageS = if (_createdAt isEqualType 0 && { _createdAt > 0 }) then { round (serverTime - _createdAt) } else { -1 };
             private _ageFmt = if (_ageS < 0) then { "" } else { if (_ageS < 60) then { format [" (%1s ago)", _ageS] } else { format [" (%1m ago)", floor (_ageS / 60)] } };
@@ -122,15 +116,15 @@ private _queueLines = [];
 } forEach _queue;
 
 // -------------------------------------------------------------------------
-// Orders snapshot (published)
+// Orders snapshot — Console VM primary; published list is fallback only
 // -------------------------------------------------------------------------
-private _orders = missionNamespace getVariable ["ARC_pub_orders", []];
+private _orders = ["ops", "orders", missionNamespace getVariable ["ARC_pub_orders", []]] call ARC_fnc_consoleVmAdapterV1;
 if (!(_orders isEqualType [])) then { _orders = []; };
 
 private _issued = [];
 {
     if (!(_x isEqualType []) || { (count _x) < 7 }) then { continue; };
-    _x params ["_oid", "_iat", "_st", "_ty", "_tg", "_data", "_meta"]; 
+    _x params ["", "", "_st", "", "", "", ""];
     if ((toUpper _st) isEqualTo "ISSUED") then
     {
         _issued pushBack _x;
@@ -140,7 +134,7 @@ private _issued = [];
 private _ordLines = [];
 {
     if (!(_x isEqualType []) || { (count _x) < 7 }) then { continue; };
-    _x params ["_oid", "_iat", "_st", "_ty", "_tg", "_data", "_meta"]; 
+    _x params ["", "", "", "_ty", "_tg", "", "_meta"];
     private _note = [_meta, "note", ""] call ARC_fnc_uiConsoleGetPair;
     if (!(_note isEqualType "")) then { _note = ""; };
     private _suffix = if (_note isEqualTo "") then { "" } else { format [" - <t color='#FFFFFF'>%1</t>", _note] };
@@ -150,6 +144,8 @@ private _ordLines = [];
 
 // -------------------------------------------------------------------------
 // Last SITREP (from published ops log slice)
+// Intentionally a direct read: the VM ops section only carries a 5-entry
+// log_tail and the last SITREP may be older than that (Refactor Plan §12.4).
 // -------------------------------------------------------------------------
 private _ops = missionNamespace getVariable ["ARC_pub_opsLog", []];
 if (!(_ops isEqualType [])) then { _ops = []; };
@@ -157,18 +153,18 @@ if (!(_ops isEqualType [])) then { _ops = []; };
 private _sit = [];
 for "_i" from ((count _ops) - 1) to 0 step -1 do
 {
-    private _e = _ops # _i;
+    private _e = _ops select _i;
     if (!(_e isEqualType []) || { (count _e) < 6 }) then { continue; };
-    _e params ["_id", "_ts", "_cat", "_summary", "_pos", "_meta"]; 
+    _e params ["", "", "", "_summary", "_pos", "_meta"];
     private _evt = [_meta, "event", ""] call ARC_fnc_uiConsoleGetPair;
     if (!(_evt isEqualType "")) then { _evt = ""; };
     if (toUpper _evt isEqualTo "SITREP") exitWith { _sit = _e; };
 };
 
 private _sitTxt = "<t color='#FFFFFF'>(none)</t>";
-if (_sit isNotEqualTo []) then
+if (!(_sit isEqualTo [])) then
 {
-    _sit params ["_id", "_ts", "_cat", "_summary", "_pos", "_meta"]; 
+    _sit params ["", "", "", "_summary", "_pos", "_meta"];
     private _from = [_meta, "from", ""] call ARC_fnc_uiConsoleGetPair;
     if (!(_from isEqualType "")) then { _from = ""; };
     private _rec = [_meta, "recommend", ""] call ARC_fnc_uiConsoleGetPair;
@@ -180,7 +176,7 @@ if (_sit isNotEqualTo []) then
         if (_from isEqualTo "") then {"(n/a)"} else {_from},
         if (_rec isEqualTo "") then {"(n/a)"} else {toUpper _rec},
         if (_grid2 isEqualTo "") then {"(n/a)"} else {_grid2},
-        if (_summary isEqualType "" && { _summary isNotEqualTo "" }) then {_summary} else {"(no summary)"}
+        if (_summary isEqualType "" && { !(_summary isEqualTo "") }) then {_summary} else {"(no summary)"}
     ];
 };
 
@@ -188,7 +184,16 @@ if (_sit isNotEqualTo []) then
 // Build text
 // -------------------------------------------------------------------------
 private _title = "<t size='1.15' font='PuristaMedium'>TOC BOARDS</t>";
-private _sub = "<t size='0.9' color='#DDDDDD'>Snapshot: Incident | Queue | Orders | SITREP</t><br/><br/>";
+private _sub = "<t size='0.9' color='#DDDDDD'>Snapshot: Incident | Queue | Orders | SITREP</t><br/>";
+
+// Staleness indicator from the Console VM ops-section freshness metadata.
+(["ops"] call ARC_fnc_consoleVmFreshness) params ["_opsVmUpdatedAt", "", "_opsVmStale"];
+if (_opsVmStale) then
+{
+    private _ageS = round (serverTime - _opsVmUpdatedAt);
+    _sub = _sub + format ["<t size='0.85' color='#FF7A7A'>DATA STALE — last update %1s ago</t><br/>", _ageS];
+};
+_sub = _sub + "<br/>";
 
 private _incBlock = "";
 if (_taskId isEqualTo "") then
@@ -207,10 +212,10 @@ else
     private _support = [];
     {
         if (!(_x isEqualType []) || { (count _x) < 2 }) then { continue; };
-        private _g = _x # 0;
-        private _s = toUpper (trim (_x # 1));
+        private _g = _x select 0;
+        private _s = toUpper ([_x select 1] call _trimFn);
         if (_s isEqualTo "OFFLINE") then { _s = "UNAVAILABLE"; };
-        if (_accBy isNotEqualTo "" && { _g isNotEqualTo _accBy } && { _s in ["IN TRANSIT", "ON SCENE"] }) then { _support pushBack _g; };
+        if (!(_accBy isEqualTo "") && { !(_g isEqualTo _accBy) } && { _s in ["IN TRANSIT", "ON SCENE"] }) then { _support pushBack _g; };
     } forEach _statusRows;
 
     private _supportColor = "#AAAAAA";
@@ -267,9 +272,9 @@ _ctrlMain ctrlSetStructuredText parseText _txt;
 // Auto-fit + clamp to viewport so the controls group can scroll when needed.
 [_ctrlMain] call BIS_fnc_ctrlFitToTextHeight;
 private _mainGrp = _display displayCtrl 78015;
-private _minH = if (!isNull _mainGrp) then { (ctrlPosition _mainGrp) # 3 } else { 0.74 };
+private _minH = if (!isNull _mainGrp) then { (ctrlPosition _mainGrp) select 3 } else { 0.74 };
 private _p = ctrlPosition _ctrlMain;
-_p set [3, (_p # 3) max _minH];
+_p set [3, (_p select 3) max _minH];
 _ctrlMain ctrlSetPosition _p;
 _ctrlMain ctrlCommit 0;
 
@@ -297,8 +302,8 @@ if (!isNull _ctrlDetailsGrp && { !isNull _ctrlDetails }) then
     private _unitSummary =
         format ["<t color='#9FE870'>Available: %1</t>  <t color='#FFD166'>On task: %2</t>  <t color='#AAAAAA'>Other: %3</t>", _cntAvail, _cntOnScene, _cntOther];
 
-    // Lead pool snapshot
-    private _leadPoolR = missionNamespace getVariable ["ARC_leadPoolPublic", []];
+    // Lead pool snapshot — Console VM primary; published pool is fallback only
+    private _leadPoolR = ["ops", "lead_pool", missionNamespace getVariable ["ARC_leadPoolPublic", []]] call ARC_fnc_consoleVmAdapterV1;
     if (!(_leadPoolR isEqualType [])) then { _leadPoolR = []; };
     private _leadCnt = count _leadPoolR;
     private _leadColor = if (_leadCnt >= 5) then {"#9FE870"} else { if (_leadCnt >= 1) then {"#FFD166"} else {"#AAAAAA"} };

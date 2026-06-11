@@ -67,8 +67,27 @@ if (!(_safe isEqualType true) && !(_safe isEqualType false)) then { _safe = fals
 if (_safe) exitWith {true};
 
 
-// Resolve objective pos (fallback to stored record)
-private _pos = ["activeObjectivePos", []] call ARC_fnc_stateGet;
+// Resolve detonation pos — prefer the live VBIED vehicle position (driven VBIEDs
+// move; the stored objective pos can be stale by up to the trigger radius).
+private _pos = [];
+private _vehNidCands = [_deviceId];
+private _parkedNid = ["activeVbiedVehicleNetId", ""] call ARC_fnc_stateGet;
+if (_parkedNid isEqualType "" && { !(_parkedNid isEqualTo "") }) then { _vehNidCands pushBack _parkedNid; };
+private _drivenNid = missionNamespace getVariable ["ARC_vbiedDrivenNetId", ""];
+if (_drivenNid isEqualType "" && { !(_drivenNid isEqualTo "") }) then { _vehNidCands pushBack _drivenNid; };
+{
+    if (_x isEqualType "" && { !(_x isEqualTo "") }) then
+    {
+        private _vehCand = objectFromNetId _x;
+        if (!isNull _vehCand && { (_pos isEqualTo []) }) then { _pos = getPosATL _vehCand; };
+    };
+} forEach _vehNidCands;
+
+// Fallback: stored objective pos, then device record
+if (!(_pos isEqualType []) || { (count _pos) < 2 }) then
+{
+    _pos = ["activeObjectivePos", []] call ARC_fnc_stateGet;
+};
 if (!(_pos isEqualType []) || { (count _pos) < 2 }) then
 {
     private _rec = ["activeVbiedDeviceRecord", []] call ARC_fnc_stateGet;

@@ -143,6 +143,58 @@ if (_needsNew) then
     if ((count _all) > _cap) then { _all = _all select [(count _all) - _cap, _cap]; };
 
     missionNamespace setVariable ["ARC_iedPhase1_deviceRecords", _all, true];
+
+    // Complex/chain IED reachability (once per new device): consume the
+    // tier-derived execution profile from the linked threat record.
+    private _threatIdCx = ["activeIedThreatId", ""] call ARC_fnc_stateGet;
+    if (!(_threatIdCx isEqualType "")) then { _threatIdCx = ""; };
+    if (!(_threatIdCx isEqualTo "")) then
+    {
+        private _kvGetCx = {
+            params ["_pairs", "_key", "_default"];
+            if (!(_pairs isEqualType [])) exitWith {_default};
+            private _i = -1;
+            { if ((_x isEqualType []) && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _i = _forEachIndex; }; } forEach _pairs;
+            if (_i < 0) exitWith {_default};
+            private _v = (_pairs select _i) select 1;
+            if (isNil "_v") exitWith {_default};
+            _v
+        };
+
+        private _recsCx = ["threat_v0_records", []] call ARC_fnc_stateGet;
+        if (!(_recsCx isEqualType [])) then { _recsCx = []; };
+        private _recCx = [];
+        { if (([_x, "threat_id", ""] call _kvGetCx) isEqualTo _threatIdCx) exitWith { _recCx = _x; }; } forEach _recsCx;
+
+        if ((count _recCx) > 0) then
+        {
+            private _execCx = [_recCx, "execution", []] call _kvGetCx;
+
+            // Chain devices (tier >= 2 profile -> chain_count > 0)
+            private _chainEnabled = missionNamespace getVariable ["ARC_iedChainEnabled", false];
+            if (!(_chainEnabled isEqualType true) && !(_chainEnabled isEqualType false)) then { _chainEnabled = false; };
+            private _chainCount = [_execCx, "chain_count", 0] call _kvGetCx;
+            if (!(_chainCount isEqualType 0)) then { _chainCount = 0; };
+            private _chainDone = _obj getVariable ["ARC_chainEmplaced", false];
+            if (!(_chainDone isEqualType true) && !(_chainDone isEqualType false)) then { _chainDone = false; };
+            if (_chainEnabled && { _chainCount > 0 } && { !_chainDone }) then
+            {
+                private _okChain = [_nid, _chainCount] call ARC_fnc_iedChainEmplace;
+                if (_okChain) then { _obj setVariable ["ARC_chainEmplaced", true, true]; };
+            };
+
+            // Complex attack ambush group (tier >= 3 profile -> hasSecondaryAttack)
+            private _cxEnabled = missionNamespace getVariable ["ARC_iedComplexAttackEnabled", false];
+            if (!(_cxEnabled isEqualType true) && !(_cxEnabled isEqualType false)) then { _cxEnabled = false; };
+            private _cxStaged = missionNamespace getVariable [format ["ARC_complexAtkStaged_%1", _threatIdCx], false];
+            if (!(_cxStaged isEqualType true) && !(_cxStaged isEqualType false)) then { _cxStaged = false; };
+            if (_cxEnabled && { !_cxStaged }) then
+            {
+                private _okStage = [_recCx] call ARC_fnc_iedComplexAttackStage;
+                if (_okStage) then { missionNamespace setVariable [format ["ARC_complexAtkStaged_%1", _threatIdCx], true]; };
+            };
+        };
+    };
 };
 
 // Ensure trigger exists and matches the current device id

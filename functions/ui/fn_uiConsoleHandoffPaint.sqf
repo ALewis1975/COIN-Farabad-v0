@@ -36,6 +36,8 @@ private _fmt = {
     format ["<t color='%1'>%2</t>: %3", _c, _label, _state]
 };
 
+private _trimFn = compile "params ['_s']; if (!(_s isEqualType '')) exitWith { '' }; trim _s";
+
 private _gidSelf = groupId (group player);
 private _roleTag = [player] call ARC_fnc_rolesGetTag;
 if (_roleTag isEqualTo "") then { _roleTag = "RFL"; };
@@ -50,39 +52,32 @@ if (_isToc) then
 {
     _focusGid = missionNamespace getVariable ["ARC_activeIncidentSitrepFromGroup", ""];
     if (!(_focusGid isEqualType "")) then { _focusGid = ""; };
-    _focusGid = trim _focusGid;
+    _focusGid = [_focusGid] call _trimFn;
 
     if (_focusGid isEqualTo "") then
     {
         _focusGid = missionNamespace getVariable ["ARC_activeIncidentAcceptedByGroup", ""];
         if (!(_focusGid isEqualType "")) then { _focusGid = ""; };
-        _focusGid = trim _focusGid;
+        _focusGid = [_focusGid] call _trimFn;
     };
 
     if (_focusGid isEqualTo "") then { _focusGid = _gidSelf; };
 };
 
-private _orders = missionNamespace getVariable ["ARC_pub_orders", []];
+// Console VM primary (handoff section, sourced from published orders);
+// direct ARC_pub_orders read is fallback only.
+private _orders = ["handoff", "orders", missionNamespace getVariable ["ARC_pub_orders", []]] call ARC_fnc_consoleVmAdapterV1;
 if (!(_orders isEqualType [])) then { _orders = []; };
-
-private _getPair = {
-    params ["_pairs", "_k", "_d"];
-    if (!(_pairs isEqualType [])) exitWith { _d };
-    {
-        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _x # 1 };
-    } forEach _pairs;
-    _d
-};
 
 private _findAcceptedRtb = {
     params ["_purposeU"];
     private _out = [];
     {
         if (!(_x isEqualType [] && { (count _x) >= 7 })) then { continue; };
-        _x params ["_orderId", "_issuedAt", "_status", "_orderType", "_targetGroup", "_data", "_meta"]; 
-        if ((toUpper _status) isNotEqualTo "ACCEPTED") then { continue; };
-        if ((toUpper _orderType) isNotEqualTo "RTB") then { continue; };
-        if (_targetGroup isNotEqualTo _focusGid) then { continue; };
+        _x params ["", "", "_status", "_orderType", "_targetGroup", "_data", ""];
+        if (!((toUpper _status) isEqualTo "ACCEPTED")) then { continue; };
+        if (!((toUpper _orderType) isEqualTo "RTB")) then { continue; };
+        if (!(_targetGroup isEqualTo _focusGid)) then { continue; };
         private _p = toUpper ([_data, "purpose", "REFIT"] call ARC_fnc_uiConsoleGetPair);
         if (_p isEqualTo _purposeU) exitWith { _out = _x; };
     } forEach _orders;
@@ -94,8 +89,8 @@ private _findIssuedAny = {
     {
         if (_x isEqualType [] && { (count _x) >= 5 }) then
         {
-            private _st = toUpper (_x # 2);
-            private _tg = _x # 4;
+            private _st = toUpper (_x select 2);
+            private _tg = _x select 4;
             if (_st isEqualTo "ISSUED" && { _tg isEqualTo _focusGid }) exitWith { _has = true; };
         };
     } forEach _orders;
@@ -106,7 +101,7 @@ private _isArrived = {
     params ["_ord", "_purposeU"];
     if (_ord isEqualTo []) exitWith {false};
 
-    _ord params ["_oid", "_iat", "_st", "_ot", "_tg", "_data", "_meta"]; 
+    _ord params ["", "", "", "", "", "_data", "_meta"];
 
     // Primary: server arrival state
     private _arrivedAt = [_meta, "arrivedAt", -1] call ARC_fnc_uiConsoleGetPair;
@@ -172,10 +167,18 @@ private _hdr = format [
     _roleTag
 ];
 
-if (_isToc && { _focusGid isNotEqualTo _gidSelf }) then
+if (_isToc && { !(_focusGid isEqualTo _gidSelf) }) then
 {
     private _selfLbl = if (_gidSelf isEqualTo "") then {"(no callsign)"} else {_gidSelf};
     _hdr = _hdr + format ["<br/><t size='0.85' color='#CCCCCC'>Focus: Active incident group (you are %1)</t>", _selfLbl];
+};
+
+// Staleness indicator from the Console VM handoff-section freshness metadata.
+(["handoff"] call ARC_fnc_consoleVmFreshness) params ["_hoVmUpdatedAt", "", "_hoVmStale"];
+if (_hoVmStale) then
+{
+    private _hoAgeS = round (serverTime - _hoVmUpdatedAt);
+    _hdr = _hdr + format ["<br/><t size='0.85' color='#FF7A7A'>DATA STALE — last update %1s ago</t>", _hoAgeS];
 };
 
 _hdr = _hdr + "<br/><br/>";
@@ -185,16 +188,16 @@ private _epwOrd   = ["EPW"] call _findAcceptedRtb;
 // Cache selected orders for the ACTION / ALT handlers (deterministic console buttons)
 private _intelId = "";
 private _intelTg = "";
-if (_intelOrd isNotEqualTo []) then {
-    _intelId = _intelOrd # 0;
-    _intelTg = _intelOrd # 4;
+if (!(_intelOrd isEqualTo [])) then {
+    _intelId = _intelOrd select 0;
+    _intelTg = _intelOrd select 4;
 };
 
 private _epwId = "";
 private _epwTg = "";
-if (_epwOrd isNotEqualTo []) then {
-    _epwId = _epwOrd # 0;
-    _epwTg = _epwOrd # 4;
+if (!(_epwOrd isEqualTo [])) then {
+    _epwId = _epwOrd select 0;
+    _epwTg = _epwOrd select 4;
 };
 
 uiNamespace setVariable ["ARC_console_handoff_intelOrderId", _intelId];
@@ -202,8 +205,8 @@ uiNamespace setVariable ["ARC_console_handoff_intelTargetGroup", _intelTg];
 uiNamespace setVariable ["ARC_console_handoff_epwOrderId", _epwId];
 uiNamespace setVariable ["ARC_console_handoff_epwTargetGroup", _epwTg];
 
-private _intelAccepted = (_intelOrd isNotEqualTo []);
-private _epwAccepted = (_epwOrd isNotEqualTo []);
+private _intelAccepted = !(_intelOrd isEqualTo []);
+private _epwAccepted = !(_epwOrd isEqualTo []);
 
 private _intelArr = [_intelOrd, "INTEL"] call _isArrived;
 private _epwArr   = [_epwOrd, "EPW"] call _isArrived;
@@ -214,7 +217,7 @@ private _epwLine   = ["RTB (EPW)",   if (_epwAccepted) then {"ACCEPTED"} else {"
 private _intelDest = "";
 if (_intelAccepted) then
 {
-    _intelOrd params ["_oid", "_iat", "_st", "_ot", "_tg", "_data", "_meta"]; 
+    _intelOrd params ["", "", "", "", "", "_data", ""];
     private _lbl = [_data, "destLabel", "Destination"] call ARC_fnc_uiConsoleGetPair;
     private _pos = [_data, "destPos", []] call ARC_fnc_uiConsoleGetPair;
     private _grid = if (_pos isEqualType [] && { (count _pos) >= 2 }) then { mapGridPosition _pos } else { "" };
@@ -224,7 +227,7 @@ if (_intelAccepted) then
 private _epwDest = "";
 if (_epwAccepted) then
 {
-    _epwOrd params ["_oid", "_iat", "_st", "_ot", "_tg", "_data", "_meta"]; 
+    _epwOrd params ["", "", "", "", "", "_data", ""];
     private _lbl = [_data, "destLabel", "Destination"] call ARC_fnc_uiConsoleGetPair;
     private _pos = [_data, "destPos", []] call ARC_fnc_uiConsoleGetPair;
     private _grid = if (_pos isEqualType [] && { (count _pos) >= 2 }) then { mapGridPosition _pos } else { "" };
@@ -249,9 +252,9 @@ _ctrlMain ctrlSetStructuredText parseText _txt;
 // Auto-fit + clamp to viewport so the controls group can scroll when needed.
 [_ctrlMain] call BIS_fnc_ctrlFitToTextHeight;
 private _mainGrp = _display displayCtrl 78015;
-private _minH = if (!isNull _mainGrp) then { (ctrlPosition _mainGrp) # 3 } else { 0.74 };
+private _minH = if (!isNull _mainGrp) then { (ctrlPosition _mainGrp) select 3 } else { 0.74 };
 private _p = ctrlPosition _ctrlMain;
-_p set [3, (_p # 3) max _minH];
+_p set [3, (_p select 3) max _minH];
 _ctrlMain ctrlSetPosition _p;
 _ctrlMain ctrlCommit 0;
 

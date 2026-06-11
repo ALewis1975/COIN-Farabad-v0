@@ -102,8 +102,7 @@ _sysFoLeadName = [_sysFoLeadName, ""] call _trimText;
 
 private _sysFoLeadPos = missionNamespace getVariable ["ARC_activeIncidentFollowOnLeadPos", []];
 
-// ── Console VM v1 opt-in (Command tab) ──────────────────────────────────────
-// When ARC_console_command_v2 is true, the incident, follow-on, and queue fields
+// ── Console VM v1 (Command tab) ─────────────────────────────────────────────
 // Console VM (primary data source — Refactor Plan §PR4, feature flag removed).
 // When VM adapter available, re-source incident/followOn from payload.
 // Direct missionNamespace reads remain as fallback only when unavailable.

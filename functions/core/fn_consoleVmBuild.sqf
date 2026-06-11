@@ -22,8 +22,10 @@
         ]]
       ]
 
-    Note: existing UI tabs still read ARC_pub_* directly. This payload is the
-    contract for future tab migration. Do NOT change existing tab paint behaviour.
+    Note: migrated tabs (DASH, OPS, CMD, COMMS, INTEL, HQ, BOARDS, HANDOFF) read
+    this payload via ARC_fnc_consoleVmAdapterV1 with direct ARC_pub_* reads as
+    fallback only. AIR and S1 are documented exceptions (rev-checked direct
+    reads — see docs/architecture/Farabad_Console_Refactor_Plan.md §12.3).
 
     Returns: ARRAY (the payload) or [] on failure
 */
@@ -158,7 +160,7 @@ private _opsSection = [
 ];
 
 // ---------------------------------------------------------------------------
-// Section: stateSummary — sustainment + pressure indicators
+// Section: stateSummary — sustainment + pressure indicators + mission score
 // ---------------------------------------------------------------------------
 private _baseFuel = ["baseFuel",           0.68] call ARC_fnc_stateGet;
 private _baseAmmo = ["baseAmmo",           0.61] call ARC_fnc_stateGet;
@@ -179,6 +181,12 @@ if (!(_bCas     isEqualType 0)) then { _bCas     = 0; };
 private _baseServices = missionNamespace getVariable ["ARC_pub_baseServices", []];
 if (!(_baseServices isEqualType [])) then { _baseServices = []; };
 
+private _missionScore = missionNamespace getVariable ["ARC_pub_missionScore", []];
+if (!(_missionScore isEqualType [])) then { _missionScore = []; };
+
+private _missionScoreAt = missionNamespace getVariable ["ARC_pub_missionScoreAt", -1];
+if (!(_missionScoreAt isEqualType 0)) then { _missionScoreAt = -1; };
+
 private _statData = [
     ["base_fuel",          _baseFuel],
     ["base_ammo",          _baseAmmo],
@@ -187,12 +195,17 @@ private _statData = [
     ["infiltration",       _infiltr],
     ["civ_casualties",     _civCas],
     ["base_casualties",    _bCas],
-    ["base_services",      _baseServices]
+    ["base_services",      _baseServices],
+    ["mission_score",      _missionScore],
+    ["mission_score_at",   _missionScoreAt]
 ];
+
+private _stateUpdatedAt = missionNamespace getVariable ["ARC_pub_stateUpdatedAt", -1];
+if (!(_stateUpdatedAt isEqualType 0)) then { _stateUpdatedAt = -1; };
 
 private _statSection = [
     ["data",      _statData],
-    ["freshness", [["updatedAt", _now], ["staleAfterS", 60]]]
+    ["freshness", [["updatedAt", if (_stateUpdatedAt > 0) then { _stateUpdatedAt } else { _now }], ["staleAfterS", 60]]]
 ];
 
 // ---------------------------------------------------------------------------
@@ -258,10 +271,13 @@ private _airbaseSection = [
 ];
 
 // ---------------------------------------------------------------------------
-// Section: personnel — S1 registry snapshot (stub; full data in future PR)
+// Section: personnel — S1 registry snapshot (published by ARC_fnc_s1RegistrySnapshot)
 // ---------------------------------------------------------------------------
-private _s1Snapshot = missionNamespace getVariable ["ARC_pub_s1Registry", []];
+private _s1Snapshot = missionNamespace getVariable ["ARC_pub_s1_registry", []];
 if (!(_s1Snapshot isEqualType [])) then { _s1Snapshot = []; };
+
+private _s1SnapshotAt = missionNamespace getVariable ["ARC_pub_s1_registryUpdatedAt", -1];
+if (!(_s1SnapshotAt isEqualType 0)) then { _s1SnapshotAt = -1; };
 
 private _personnelData = [
     ["registry", _s1Snapshot]
@@ -269,29 +285,31 @@ private _personnelData = [
 
 private _personnelSection = [
     ["data",      _personnelData],
-    ["freshness", [["updatedAt", _now], ["staleAfterS", 60]]]
+    ["freshness", [["updatedAt", if (_s1SnapshotAt > 0) then { _s1SnapshotAt } else { _now }], ["staleAfterS", 60]]]
 ];
 
 // ---------------------------------------------------------------------------
-// Section: handoff — handoff state (stub; full data in future PR)
+// Section: handoff — RTB/handoff orders view (sourced from ARC_pub_orders;
+// the HANDOFF tab derives its state from accepted RTB orders, there is no
+// separate handoff-state publisher)
 // ---------------------------------------------------------------------------
-private _handoffState = missionNamespace getVariable ["ARC_pub_handoffState", []];
-if (!(_handoffState isEqualType [])) then { _handoffState = []; };
-
 private _handoffData = [
-    ["state", _handoffState]
+    ["orders", _orders]
 ];
 
 private _handoffSection = [
     ["data",      _handoffData],
-    ["freshness", [["updatedAt", _now], ["staleAfterS", 120]]]
+    ["freshness", [["updatedAt", _opsUpdatedAt], ["staleAfterS", 120]]]
 ];
 
 // ---------------------------------------------------------------------------
-// Section: intelFeed — intelligence log with freshness (stub; full data in future PR)
+// Section: intelFeed — intelligence log with publisher freshness
 // ---------------------------------------------------------------------------
 private _intelLogFeed = missionNamespace getVariable ["ARC_pub_intelLog", []];
 if (!(_intelLogFeed isEqualType [])) then { _intelLogFeed = []; };
+
+private _intelFeedAt = missionNamespace getVariable ["ARC_pub_intelUpdatedAt", -1];
+if (!(_intelFeedAt isEqualType 0)) then { _intelFeedAt = -1; };
 
 private _intelFeedData = [
     ["log", _intelLogFeed]
@@ -299,7 +317,7 @@ private _intelFeedData = [
 
 private _intelFeedSection = [
     ["data",      _intelFeedData],
-    ["freshness", [["updatedAt", _now], ["staleAfterS", 60]]]
+    ["freshness", [["updatedAt", if (_intelFeedAt > 0) then { _intelFeedAt } else { _now }], ["staleAfterS", 60]]]
 ];
 
 // ---------------------------------------------------------------------------

@@ -2,8 +2,11 @@
     ARC_fnc_iedComplexAttackStage
 
     IED subsystem: stage a secondary ambush group linked to an IED complex attack.
-    Deferred module: intentionally not called by the active incident runtime unless a
-    future PR explicitly enables complex attacks with runtime validation.
+    Reachable from ARC_fnc_iedSpawnTick when ARC_iedComplexAttackEnabled is true and
+    the active threat record carries execution.hasSecondaryAttack with
+    execution.complexity >= 3 (tier-gated profile assigned in
+    ARC_fnc_threatOnAOActivated). The staged group is activated on detonation by
+    ARC_fnc_iedServerDetonate and cleaned up via ARC_fnc_execCleanupActive.
 
     Params:
       0: ARRAY threatRecord (pairs array)
@@ -69,20 +72,37 @@ else
 {
     private _dir = random 360;
     private _dist = 150 + (random 250);
-    _stagePos = [_pos select 0 + _dist * sin _dir, _pos select 1 + _dist * cos _dir, 0];
+    _stagePos = [(_pos select 0) + _dist * sin _dir, (_pos select 1) + _dist * cos _dir, 0];
 };
 _stagePos resize 3;
+
+// Protected-zone guard: never stage a hostile ambush inside a protected zone
+// (airbase / green zone / military base bubbles).
+if ([_stagePos, [], []] call ARC_fnc_threatIsProtectedSpawnPos) exitWith
+{
+    diag_log format ["[ARC][WARN] ARC_fnc_iedComplexAttackStage: stage pos protected, skipping threat=%1 pos=%2", _threatId, mapGridPosition _stagePos];
+    false
+};
 
 // Spawn secondary ambush group (OPFOR/east)
 private _grp = createGroup [east, true];
 _grp setGroupIdGlobal [format ["COBRA Ambush %1", _threatId]];
 private _unitCount = 3 + (floor (random 2)); // 3 or 4
 
-private _unitClasses = [
-    "O_Soldier_F",
-    "O_Soldier_AR_F",
-    "O_Soldier_GL_F"
-];
+// Resolve the OPFOR pool from the mission-configured patrol classes (validated
+// against CfgVehicles); fall back to vanilla guerrilla classes.
+private _unitClasses = missionNamespace getVariable ["ARC_opforPatrolUnitClasses", []];
+if (!(_unitClasses isEqualType []) || { (count _unitClasses) == 0 }) then
+{
+    _unitClasses = ["O_G_Soldier_F", "O_G_Soldier_AR_F", "O_G_Soldier_GL_F"];
+};
+private _validClasses = [];
+{ if ([_x] call ARC_fnc_cfgClassExists) then { _validClasses pushBack _x; }; } forEach _unitClasses;
+if ((count _validClasses) == 0) then
+{
+    _validClasses = ["O_Soldier_F", "O_Soldier_AR_F", "O_Soldier_GL_F"];
+};
+_unitClasses = _validClasses;
 
 for "_unitIdx" from 0 to (_unitCount - 1) do
 {
