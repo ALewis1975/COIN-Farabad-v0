@@ -77,8 +77,7 @@ for "_i" from 1 to _chainCount do
 
 // Store chain device netIds on primary object and mission state (cleanup/detonation fallback)
 _primaryObj setVariable ["ARC_chainDeviceNetIds", _chainNetIds, true];
-missionNamespace setVariable ["ARC_activeIedChainNetIds", _chainNetIds, true];
-
+missionNamespace setVariable ["ARC_activeIedChainNetIds", _chainNetIds, false];
 // Register detonation sequence on primary destruction (blast-kill path).
 // The explicit detonation path (ARC_fnc_iedServerDetonate) calls
 // ARC_fnc_iedChainDetonate directly; the function is idempotent per primary.
