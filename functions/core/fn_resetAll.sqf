@@ -545,6 +545,8 @@ if (!isNil "ARC_fnc_tocBacklogBroadcast") then { [] call ARC_fnc_tocBacklogBroad
 // EOD disposal approvals are authorization-relevant on clients/servers via
 // ARC_pub_eodDispoApprovals; republish from the freshly reset state so no
 // stale approval survives a hard reset.
+missionNamespace setVariable ["ARC_pub_eodDispoApprovals", [], true];
+missionNamespace setVariable ["ARC_pub_eodDispoApprovalsUpdatedAt", -1, true];
 if (!isNil "ARC_fnc_iedDispoBroadcast") then { [] call ARC_fnc_iedDispoBroadcast; };
 
 // Best-effort client cleanup
