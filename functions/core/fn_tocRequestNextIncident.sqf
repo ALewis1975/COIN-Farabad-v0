@@ -52,7 +52,9 @@ private _trimFn = compile "params ['_s']; trim _s";
     {
         missionNamespace setVariable [
             "ARC_pub_nextIncidentLastDenied",
-            [_stamp, toUpper (([_resultCode] call _trimFn)), _detail],
+            // 4th element (_ownerId) lets the passive client deny-watcher skip
+            // the original requester (who already received a direct toast).
+            [_stamp, toUpper (([_resultCode] call _trimFn)), _detail, _ownerId],
             true
         ];
     };

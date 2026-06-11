@@ -22,12 +22,15 @@ if (isNull _display) exitWith {false};
 
 private _ctrlList = _display displayCtrl 78011;
 
+// sqflint compat: wrap `trim` via a compiled helper (see docs/qa/SQFLINT_COMPAT_GUIDE.md).
+private _trimFn = compile "params ['_s']; trim _s";
+
 // Force rebuild if the main list currently belongs to another tab.
 // This prevents INTEL list items persisting when switching to HQ (and vice versa).
 private _owner = uiNamespace getVariable ["ARC_console_mainListOwner", ""];
 if (!(_owner isEqualType "")) then { _owner = ""; };
-_owner = toUpper (trim _owner);
-private _ownerChanged = (_owner isNotEqualTo "HQ");
+_owner = toUpper ([_owner] call _trimFn);
+private _ownerChanged = !(_owner isEqualTo "HQ");
 if (_ownerChanged) then { _rebuild = true; };
 uiNamespace setVariable ["ARC_console_mainListOwner", "HQ"];
 private _ctrlDetails = _display displayCtrl 78012;
@@ -47,7 +50,7 @@ private _ensureHQSubPanels = {
         {
             if !(_x isEqualType [] && { (count _x) == 3 }) exitWith { _ok = false; };
             if (_ok) then {
-                if (isNull (_x # 0) || { isNull (_x # 1) } || { isNull (_x # 2) }) exitWith { _ok = false; };
+                if (isNull (_x select 0) || { isNull (_x select 1) } || { isNull (_x select 2) }) exitWith { _ok = false; };
             };
         } forEach _panels;
     };
@@ -112,10 +115,10 @@ private _layoutHQSubPanels = {
     if (isNull _ctrlList) exitWith {};
 
     private _pL = ctrlPosition _ctrlList;
-    private _xPos = _pL # 0;
-    private _y = _pL # 1;
-    private _w = _pL # 2;
-    private _h = _pL # 3;
+    private _xPos = _pL select 0;
+    private _y = _pL select 1;
+    private _w = _pL select 2;
+    private _h = _pL select 3;
 
     private _gap = 0.004;
     private _hHdr = 0.03;
@@ -141,13 +144,13 @@ private _layoutHQSubPanels = {
 };
 
 private _renderHQSubPanelsFromMaster = {
-    params ["_display", "_master", "_panels"];
+    params ["_master", "_panels"];
     if (isNull _master) exitWith {};
 
     _panels params ["_pAdmin", "_pInc", "_pDiag"];
-    private _lbAdmin = _pAdmin # 2;
-    private _lbInc   = _pInc # 2;
-    private _lbDiag  = _pDiag # 2;
+    private _lbAdmin = _pAdmin select 2;
+    private _lbInc   = _pInc select 2;
+    private _lbDiag  = _pDiag select 2;
 
     { lbClear _x; } forEach [_lbAdmin, _lbInc, _lbDiag];
 
@@ -161,7 +164,7 @@ private _renderHQSubPanelsFromMaster = {
         "ADMIN_FORCE_CLOSE_SUCC", "ADMIN_FORCE_CLOSE_FAIL", "ADMIN_REBUILD_ACTIVE", "ADMIN_BROADCAST"
     ];
     private _incRows = ["ADMIN_INCIDENTS"];
-    private _diagRows = ["ADMIN_COVERAGE", "ADMIN_QA", "ADMIN_COMPILE", "ADMIN_DUMP_LEADS", "ADMIN_DUMP_INTEL", "ADMIN_DIAG_STATUS", "ADMIN_DIAG_TOGGLE_DEBUG"];
+    private _diagRows = ["ADMIN_COVERAGE", "ADMIN_QA", "ADMIN_COMPILE", "ADMIN_DUMP_LEADS", "ADMIN_DUMP_INTEL", "ADMIN_DIAG_STATUS", "ADMIN_DIAG_SERVER", "ADMIN_DIAG_TOGGLE_DEBUG"];
 
     for "_i" from 0 to ((lbSize _master) - 1) do {
         private _d = _master lbData _i;
@@ -195,9 +198,9 @@ private _renderHQSubPanelsFromMaster = {
 
     uiNamespace setVariable ["ARC_hq_subPanels_suppressSel", true];
     {
-        private _lb = _x # 2;
+        private _lb = _x select 2;
         _lb lbSetCurSel -1;
-        if (_selData isNotEqualTo "") then {
+        if (!(_selData isEqualTo "")) then {
             for "_k" from 0 to ((lbSize _lb) - 1) do {
                 if ((_lb lbData _k) isEqualTo _selData) exitWith { _lb lbSetCurSel _k; };
             };
@@ -209,7 +212,7 @@ private _renderHQSubPanelsFromMaster = {
 // HQ mode: TOOLS (default) or INCIDENTS (incident picker)
 private _mode = uiNamespace getVariable ["ARC_console_hqMode", "TOOLS"];
 if (!(_mode isEqualType "")) then { _mode = "TOOLS"; };
-_mode = toUpper (trim _mode);
+_mode = toUpper ([_mode] call _trimFn);
 if !(_mode in ["TOOLS", "INCIDENTS"]) then { _mode = "TOOLS"; };
 
 // Prevent the 1.2s console refresh loop from clearing/rebuilding the HQ list every tick.
@@ -244,7 +247,7 @@ if (!isNull _ctrlList) then
         }
         else
         {
-            if (_d in ["ADMIN_SAVE","ADMIN_CIVSUB_SAVE","ADMIN_SCORE","ADMIN_RESET","ADMIN_AIRBASE_RESET_CTRL","ADMIN_CIVSUB_RESET","ADMIN_FORCE_CLOSE_SUCC","ADMIN_FORCE_CLOSE_FAIL","ADMIN_REBUILD_ACTIVE","ADMIN_BROADCAST","ADMIN_INCIDENTS","ADMIN_COVERAGE","ADMIN_QA","ADMIN_COMPILE","ADMIN_DUMP_LEADS","ADMIN_DUMP_INTEL","ADMIN_DIAG_STATUS","ADMIN_DIAG_TOGGLE_DEBUG"]) exitWith { _hasHqRow = true; };
+            if (_d in ["ADMIN_SAVE","ADMIN_CIVSUB_SAVE","ADMIN_SCORE","ADMIN_RESET","ADMIN_AIRBASE_RESET_CTRL","ADMIN_CIVSUB_RESET","ADMIN_FORCE_CLOSE_SUCC","ADMIN_FORCE_CLOSE_FAIL","ADMIN_REBUILD_ACTIVE","ADMIN_BROADCAST","ADMIN_INCIDENTS","ADMIN_COVERAGE","ADMIN_QA","ADMIN_COMPILE","ADMIN_DUMP_LEADS","ADMIN_DUMP_INTEL","ADMIN_DIAG_STATUS","ADMIN_DIAG_SERVER","ADMIN_DIAG_TOGGLE_DEBUG"]) exitWith { _hasHqRow = true; };
         };
     };
 
@@ -256,7 +259,7 @@ if (!isNull _ctrlList) then
     }
     else
     {
-        if (_lastMode isNotEqualTo _mode) then
+        if (!(_lastMode isEqualTo _mode)) then
         {
             _needRebuild = true;
         }
@@ -308,9 +311,9 @@ if (!_canHQ) exitWith
         // Auto-fit + clamp to viewport so the controls group can scroll when needed.
         [_ctrlDetails] call BIS_fnc_ctrlFitToTextHeight;
         private _grp = _display displayCtrl 78016;
-        private _minH = if (!isNull _grp) then { (ctrlPosition _grp) # 3 } else { 0.74 };
+        private _minH = if (!isNull _grp) then { (ctrlPosition _grp) select 3 } else { 0.74 };
         private _p = ctrlPosition _ctrlDetails;
-        _p set [3, (_p # 3) max _minH];
+        _p set [3, (_p select 3) max _minH];
         _ctrlDetails ctrlSetPosition _p;
         _ctrlDetails ctrlCommit 0;
     };
@@ -378,7 +381,7 @@ if (_needRebuild && {!isNull _ctrlList}) then
         {
             private _tU = _x;
             private _rows = _catalog select {
-                _x isEqualType [] && { (count _x) >= 3 } && { toUpper (_x # 2) isEqualTo _tU }
+                _x isEqualType [] && { (count _x) >= 3 } && { toUpper (_x select 2) isEqualTo _tU }
             };
 
             if ((count _rows) > 0) then
@@ -425,6 +428,7 @@ if (_needRebuild && {!isNull _ctrlList}) then
         ["Dump Lead Pool (Local)", "ADMIN_DUMP_LEADS"] call _addRow;
         ["Dump Intel Log (Local)", "ADMIN_DUMP_INTEL"] call _addRow;
         ["Diagnostics Snapshot (Server)", "ADMIN_DIAG_STATUS"] call _addRow;
+        ["Server Health (Live)", "ADMIN_DIAG_SERVER"] call _addRow;
         ["Toggle Debug Mode (Server)", "ADMIN_DIAG_TOGGLE_DEBUG"] call _addRow;
     };
 
@@ -448,13 +452,13 @@ if (!isNull _ctrlList) then
 
         private _hqPanels = [_display] call _ensureHQSubPanels;
         [_ctrlList, _hqPanels] call _layoutHQSubPanels;
-        [_display, _ctrlList, _hqPanels] call _renderHQSubPanelsFromMaster;
+        [_ctrlList, _hqPanels] call _renderHQSubPanelsFromMaster;
 
         {
-            (_x # 0) ctrlShow true;
-            (_x # 1) ctrlShow true;
-            (_x # 2) ctrlShow true;
-            (_x # 2) ctrlEnable true;
+            (_x select 0) ctrlShow true;
+            (_x select 1) ctrlShow true;
+            (_x select 2) ctrlShow true;
+            (_x select 2) ctrlEnable true;
         } forEach _hqPanels;
     }
     else
@@ -577,7 +581,7 @@ switch (toUpper _data) do
         _txt = _txt + "Runs a server-side QA audit of Farabad Console integration (functions + state coherence).";
 
         private _rep = uiNamespace getVariable ["ARC_console_lastQAReport", ""];
-        if (_rep isEqualType "" && { _rep isNotEqualTo "" }) then
+        if (_rep isEqualType "" && { !(_rep isEqualTo "") }) then
         {
             _txt = _txt + "<br/><br/><t font='PuristaMedium'>Last report:</t><br/>" + _rep;
         };
@@ -588,7 +592,7 @@ switch (toUpper _data) do
         _txt = _txt + "Attempts to compile all ARC functions listed in CfgFunctions. This surfaces SQF syntax errors early (check server RPT for file/line details).";
 
         private _rep = uiNamespace getVariable ["ARC_console_lastCompileReport", ""];
-        if (_rep isEqualType "" && { _rep isNotEqualTo "" }) then
+        if (_rep isEqualType "" && { !(_rep isEqualTo "") }) then
         {
             _txt = _txt + "<br/><br/><t font='PuristaMedium'>Last report:</t><br/>" + _rep;
         };
@@ -607,11 +611,77 @@ switch (toUpper _data) do
                "<br/><br/><t size='0.9' color='#AAAAAA'>Results appear in this detail pane after the server responds.</t>";
 
         private _rep = uiNamespace getVariable ["ARC_console_lastDiagReport", ""];
-        if (_rep isEqualType "" && { _rep isNotEqualTo "" }) then
+        if (_rep isEqualType "" && { !(_rep isEqualTo "") }) then
         {
             _txt = _txt + "<br/><br/><t font='PuristaMedium'>Last report:</t><br/>" + _rep;
         };
     };
+    case "ADMIN_DIAG_SERVER":
+    {
+        // Track 3 (Dedicated Server Activation Plan): live server-health pane.
+        // Read-only — renders replicated diagnostics; no EXECUTE action.
+        _txt = _txt + "<t size='1.0' font='PuristaMedium'>Server Health (Live)</t><br/><br/>";
+
+        private _ready = missionNamespace getVariable ["ARC_serverReady", false];
+        private _readyLabel = if (_ready isEqualType true && { _ready }) then
+        {
+            "<t color='#6EE7B7'>READY</t>"
+        }
+        else
+        {
+            "<t color='#F87171'>NOT READY</t>"
+        };
+        _txt = _txt + format ["Server bootstrap (ARC_serverReady): %1<br/><br/>", _readyLabel];
+
+        _txt = _txt + "<t font='PuristaMedium'>Snapshot broadcast ages</t><br/>";
+        {
+            _x params ["_label", "_var"];
+            private _t = missionNamespace getVariable [_var, -1];
+            if (!(_t isEqualType 0)) then { _t = -1; };
+            private _age = [_t] call ARC_fnc_uiConsoleFormatAgo;
+            private _ageColor = if (_t < 0) then { "#F87171" } else { "#BDBDBD" };
+            _txt = _txt + format ["%1: <t color='%2'>%3</t><br/>", _label, _ageColor, _age];
+        } forEach [
+            ["Mission state",   "ARC_pub_stateUpdatedAt"],
+            ["Intel log",       "ARC_pub_intelUpdatedAt"],
+            ["TOC queue",       "ARC_pub_queueUpdatedAt"],
+            ["TOC orders",      "ARC_pub_ordersUpdatedAt"],
+            ["TOC backlog",     "ARC_pub_tocBacklogUpdatedAt"],
+            ["Airbase UI",      "ARC_pub_airbaseUiSnapshotUpdatedAt"],
+            ["Threat UI",       "ARC_pub_threatUiSnapshotUpdatedAt"],
+            ["Supply",          "ARC_pub_supply_v1UpdatedAt"],
+            ["Company command", "ARC_pub_companyCommandUpdatedAt"]
+        ];
+
+        _txt = _txt + "<br/><t font='PuristaMedium'>Recent security denials (last 10)</t><br/>";
+        private _denials = missionNamespace getVariable ["ARC_pub_securityDenials", []];
+        if (!(_denials isEqualType [])) then { _denials = []; };
+        if ((count _denials) == 0) then
+        {
+            _txt = _txt + "<t color='#6EE7B7'>None recorded this session.</t><br/>";
+        }
+        else
+        {
+            // Newest first.
+            for "_i" from ((count _denials) - 1) to 0 step -1 do
+            {
+                private _e = _denials select _i;
+                if (_e isEqualType [] && { (count _e) >= 4 }) then
+                {
+                    _e params ["_at", "_rpc", "_reason", "_remoteOwner"];
+                    private _ago = [_at] call ARC_fnc_uiConsoleFormatAgo;
+                    _txt = _txt + format [
+                        "<t color='#FF7A7A'>%1</t> — %2 <t size='0.85' color='#AAAAAA'>(owner=%3, %4)</t><br/>",
+                        _reason, _rpc, _remoteOwner, _ago
+                    ];
+                };
+            };
+        };
+
+        _txt = _txt + "<br/><t size='0.9' color='#AAAAAA'>Read-only live view. Refreshes with the console paint loop.</t>";
+        _enableExec = false;
+    };
+
     case "ADMIN_DIAG_TOGGLE_DEBUG":
     {
         private _debugOn = missionNamespace getVariable ["ARC_debugLogEnabled", false];
@@ -665,9 +735,9 @@ switch (toUpper _data) do
                 }
                 else
                 {
-                    private _mkr = _parts # 0;
-                    private _typ = _parts # 1;
-                    private _disp = _parts # 2;
+                    private _mkr = _parts select 0;
+                    private _typ = _parts select 1;
+                    private _disp = _parts select 2;
 
                     private _m = [_mkr] call ARC_fnc_worldResolveMarker;
                     private _pos = getMarkerPos _m;
@@ -676,7 +746,7 @@ switch (toUpper _data) do
 
                     private _taskId = missionNamespace getVariable ["ARC_activeTaskId", ""]; 
                     if (!(_taskId isEqualType "")) then { _taskId = ""; };
-                    private _blocked = (_taskId isNotEqualTo "");
+                    private _blocked = !(_taskId isEqualTo "");
 
                     _txt = _txt + format [
                         "<t font='PuristaMedium'>%1</t><br/>Type: %2<br/>Marker: %3<br/>Grid: %4<br/>Zone: %5",
@@ -715,9 +785,9 @@ if (!isNull _ctrlDetails) then
     // Auto-fit + clamp to viewport so the controls group can scroll when needed.
     [_ctrlDetails] call BIS_fnc_ctrlFitToTextHeight;
     private _grp = _display displayCtrl 78016;
-    private _minH = if (!isNull _grp) then { (ctrlPosition _grp) # 3 } else { 0.74 };
+    private _minH = if (!isNull _grp) then { (ctrlPosition _grp) select 3 } else { 0.74 };
     private _p = ctrlPosition _ctrlDetails;
-    _p set [3, (_p # 3) max _minH];
+    _p set [3, (_p select 3) max _minH];
     _ctrlDetails ctrlSetPosition _p;
     _ctrlDetails ctrlCommit 0;
 };

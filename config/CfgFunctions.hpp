@@ -79,6 +79,7 @@ class CfgFunctions
             class rolesCanUseMobileOps {};
             class rolesCanRecruitAI {};
             class rpcValidateSender {};
+            class securityDenyRecord {};
             class airbaseTowerAuthorize {};
             class baseServicesInit {};
             class baseServicesSnapshot {};
@@ -590,6 +591,7 @@ class CfgFunctions
             file = "functions\ui";
 
             class uiConsoleInitClient {};
+            class uiNextIncidentDenyWatchClient {};
             class uiConsoleCanOpen {};
             class uiConsoleOpen {};
             class uiConsoleApplyLayout {};
