@@ -11,6 +11,23 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-06-11 20:25 UTC — Preflight CI fix for `fn_execCleanupActive.sqf`
+
+**Branch/Commit:** `copilot/dedicated-server-testing-updates` @ `2ff69a1`
+
+**Scenario:** Mode A bug fix — GitHub Actions job `Arma SQF + Mission Config Preflight / preflight (pull_request)` failed on job `80893021282` during changed-file SQF lint. CI logs showed `sqflint` aborting with `[105,0]:error:Parenthesis "{" not closed`. Local reproduction against the PR diff isolated the failure to `functions/core/fn_execCleanupActive.sqf`: the new chain-cleanup loop left `if (!isNull _chainObj) then { ... }` unclosed before `forEach _chainNids`. Fix: add the missing closing `};` so the chain-device cleanup block parses and the loop/body structure matches the intended defer/immediate cleanup logic.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | CI root-cause capture | GitHub Actions logs for job `80893021282` | PASS | Failure isolated to changed-file SQF lint; compat scan passed first, then `sqflint` failed at line 105. |
+| 2 | Local repro of failing lint step | `python3 scripts/dev/sqflint_compat_scan.py --strict $(git diff --name-only --diff-filter=ACMR origin/main...HEAD -- '*.sqf')` + `sqflint -e w` on each changed `.sqf` | PASS | Reproduced the original failure before the fix, then passed after adding the missing brace. |
+| 3 | Remaining preflight static checks | `python3 scripts/dev/validate_state_migrations.py`, `bash scripts/dev/check_test_log_commits.sh`, `python3 scripts/dev/validate_marker_index.py`, and the existing `tests/static/*.sh` suites wired in `.github/workflows/arma-preflight.yml` | PASS | Full local preflight static tail passed after the syntax fix. |
+| 4 | Runtime / dedicated / JIP validation | Arma 3 runtime exercise of cleanup-at-close paths | BLOCKED | Sandbox cannot run Arma 3; this change is syntax-only and does not alter intended cleanup behavior. |
+
+**Notes:** Risk is limited to parser restoration in one server-only cleanup function; runtime logic is unchanged aside from making the intended chain cleanup block syntactically valid. Rollback: revert the one-line brace fix in `functions/core/fn_execCleanupActive.sqf`.
+
+---
+
 ## 2026-06-11 — Console refactor remaining track (plan trueup, VM stub fixes, PR 5 tab migration, QA gates)
 
 **Branch/Commit:** `copilot/dedicated-server-testing-updates` @ `adcebec` (plan trueup) + `12cac14` (implementation)

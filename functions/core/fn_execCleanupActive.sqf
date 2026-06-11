@@ -115,6 +115,7 @@ if ((count _chainNids) > 0) then
             {
                 deleteVehicle _chainObj;
             };
+        };
     } forEach _chainNids;
     missionNamespace setVariable ["ARC_activeIedChainNetIds", [], false];
 };
