@@ -38,8 +38,7 @@ if ((count _chainNetIds) == 0) exitWith {false};
 _doneList pushBack _primaryNid;
 // Keep the guard list bounded.
 if ((count _doneList) > 20) then { _doneList = _doneList select [(count _doneList) - 20, 20]; };
-missionNamespace setVariable ["ARC_iedChainDetonatedPrimaries", _doneList, true];
-
+missionNamespace setVariable ["ARC_iedChainDetonatedPrimaries", _doneList, false];
 private _boomClass = "Bo_Mk82";
 if !(isClass (configFile >> "CfgVehicles" >> _boomClass)) then { _boomClass = "Bo_GBU12_LGB"; };
 
