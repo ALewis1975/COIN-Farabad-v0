@@ -115,9 +115,8 @@ if ((count _chainNids) > 0) then
             {
                 deleteVehicle _chainObj;
             };
-        };
     } forEach _chainNids;
-    missionNamespace setVariable ["ARC_activeIedChainNetIds", [], true];
+    missionNamespace setVariable ["ARC_activeIedChainNetIds", [], false];
 };
 
 // Complex attack ambush group (staged or activated)
