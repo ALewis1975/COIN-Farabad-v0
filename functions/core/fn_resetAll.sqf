@@ -512,7 +512,7 @@ missionNamespace setVariable ["ARC_casevacLeadLastTs", -1];
 
 // CIVSUB / SITREP annex incident mirrors
 missionNamespace setVariable ["ARC_activeIncidentCivsubDistrictId", "", true];
-missionNamespace setVariable ["ARC_activeIncidentCivsubStart", [], true];
+missionNamespace setVariable ["ARC_activeIncidentCivsubStart", createHashMap, true];
 missionNamespace setVariable ["ARC_activeIncidentSitrepAnnexCivsub", "", true];
 missionNamespace setVariable ["ARC_activeIncidentSitrepAnnexDossier", "", true];
 missionNamespace setVariable ["ARC_activeIncidentTnpPartneredCivsubEffect", [], true];
