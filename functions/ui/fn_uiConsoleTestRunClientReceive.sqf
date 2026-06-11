@@ -18,7 +18,7 @@ if (!(_report isEqualType "")) then { _report = ""; };
 
 uiNamespace setVariable ["ARC_console_lastTestReport", _report];
 
-["HQ", "ARC test suite complete. Open Headquarters tab -> Run SQF Test Suite to view the summary."] call ARC_fnc_clientToast;
+["HQ", "ARC test suite report received. Open Headquarters tab -> Run SQF Test Suite to view the summary."] call ARC_fnc_clientToast;
 
 // If console is open, refresh the current tab (best-effort)
 [] call ARC_fnc_uiConsoleRefresh;
