@@ -13,7 +13,7 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ## 2026-06-11 21:45 UTC — Spawn-pattern rollout toggles enabled by default (issue #633)
 
-**Branch/Commit:** `copilot/extend-sitepop-system` @ commit `f50d236` (parent; this entry lands with the toggle-enable commit)
+**Branch/Commit:** `copilot/extend-sitepop-system` @ commit `ea9ffa9` (toggle-enable commit containing this entry)
 
 **Scenario:** Mode J configuration change — after operator live runs on the dedicated rig, flip the three issue-#633 staged-rollout toggles (`ARC_spawnPatternsEnabled`, `ARC_incidentOverlaySpawnsEnabled`, `ARC_sitePurposeExpansionEnabled`) to default **true** in `initServer.sqf`. Seeds remain `isNil`-guarded so any toggle can be forced `false` (e.g. via an earlier init or operator override) to roll back to type-driven incident execution and the original three-site SitePop behaviour. Contract suites updated to assert default-true + overridability; stale default-off comments in `data/farabad_site_templates.sqf` and `docs/architecture/Farabad_Spawn_Pattern_Matrix_v1.md` refreshed.
 
@@ -27,6 +27,8 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 | 6 | Default-on dedicated regression | Restart dedicated with no overrides; confirm expansion sites populate, overlays spawn/despawn on incident lifecycle, AI counts within caps, no missing-class RPT spam, JIP visibility | BLOCKED | Operator follow-up run on the dedicated rig now that defaults are on. |
 
 **Result:** PASS (static) / BLOCKED (runtime regression). Toggles now ship enabled; rollback is setting any toggle to `false` before/at server init.
+
+**Addendum (2026-06-11 22:00 UTC, review follow-up):** startup audit now runs non-verbose (`[false] call ARC_fnc_worldSpawnPatternAudit`; summary-only RPT output, per-row detail via manual `[true]` run) and `docs/architecture/Farabad_Spawn_Pattern_Matrix_v1.md` rollout-toggle section updated to the default-on contract. Re-ran checks 1, 3, 4, 5 — all PASS.
 
 ---
 

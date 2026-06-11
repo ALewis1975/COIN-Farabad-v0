@@ -191,14 +191,16 @@ if (isNil { missionNamespace getVariable "ARC_overlayMaxHostilesPerIncident" }) 
 if (isNil { missionNamespace getVariable "ARC_overlayMaxObjectsPerIncident" }) then {
     missionNamespace setVariable ["ARC_overlayMaxObjectsPerIncident", 12, true];
 };
-// Opt-in diagnostics: when the master gate is on, log a one-shot audit of the
-// spawn-pattern matrix so coverage/warnings are visible in the RPT.
+// Opt-in diagnostics: when the master gate is on, log a one-shot summary audit
+// of the spawn-pattern matrix so coverage/warnings are visible in the RPT.
+// Non-verbose by default (toggles now ship on, so this runs every start);
+// operators can run [true] call ARC_fnc_worldSpawnPatternAudit for per-row detail.
 if (missionNamespace getVariable ["ARC_spawnPatternsEnabled", false]) then {
     [] spawn {
         private _t0 = diag_tickTime;
         waitUntil { !isNil "ARC_fnc_worldSpawnPatternAudit" || { (diag_tickTime - _t0) > 30 } };
         if (isNil "ARC_fnc_worldSpawnPatternAudit") exitWith { diag_log "[ARC][SPAWNPAT][WARN] initServer: ARC_fnc_worldSpawnPatternAudit not available after 30s; skipping audit."; };
-        [true] call ARC_fnc_worldSpawnPatternAudit;
+        [false] call ARC_fnc_worldSpawnPatternAudit;
     };
 };
 
