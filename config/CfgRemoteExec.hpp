@@ -98,6 +98,7 @@ class CfgRemoteExec
         class ARC_fnc_devDiagnosticsSnapshot        { allowedTargets = 2; };
         class ARC_fnc_devToggleDebugMode            { allowedTargets = 2; };
         class ARC_fnc_uiConsoleQAAuditServer        { allowedTargets = 2; };
+        class ARC_fnc_uiConsoleTestRunServer        { allowedTargets = 2; };
         class ARC_fnc_uiCoverageAuditServer         { allowedTargets = 2; };
 
         // ── Server → Client ─────────────────────────────────────────────
@@ -119,6 +120,7 @@ class CfgRemoteExec
         class ARC_fnc_uiConsoleCompileAuditClientReceive   { allowedTargets = 0; };
         class ARC_fnc_uiConsoleOpsActionStatus             { allowedTargets = 0; };
         class ARC_fnc_uiConsoleQAAuditClientReceive        { allowedTargets = 0; };
+        class ARC_fnc_uiConsoleTestRunClientReceive        { allowedTargets = 0; };
 
         // Persistent / JIP-critical (late joiners need these actions)
         class ARC_fnc_civsubCivAddContactActions    { allowedTargets = 0; jip = 1; };

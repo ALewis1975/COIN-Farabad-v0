@@ -199,6 +199,12 @@ switch (_data) do
         ["HQ", "Compile audit requested."] call ARC_fnc_clientToast;
     };
 
+    case "ADMIN_RUN_TESTS":
+    {
+        [player] remoteExec ["ARC_fnc_uiConsoleTestRunServer", 2];
+        ["HQ", "ARC test suite run requested (server)."] call ARC_fnc_clientToast;
+    };
+
     case "ADMIN_DUMP_LEADS":
     {
         [] call ARC_fnc_tocShowLeadPoolLocal;
