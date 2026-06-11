@@ -11,6 +11,23 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-06-11 21:25 UTC — resetAll coverage audit + stale broadcast-mirror cleanup
+
+**Branch/Commit:** `copilot/check-reset-all-functionality` @ `7b98876` (pre-fix base; fix committed on this branch)
+
+**Scenario:** Mode A bug fix — audited `ARC_fnc_resetAll` against all persisted state keys and public broadcast variables. Persisted state is fully covered (the `ARC_state` blob is replaced wholesale with `stateInit` defaults, so leads — `leadPool`/`leadHistory`/`leadCounter` — and prior Ops records — `intelLog` OPS entries, `incidentHistory`, `startdisp_v1_*`, `companyVirtualOps` — cannot survive by omission). However, several public broadcast mirrors survived a hard reset: close-pending workflow vars (`ARC_activeIncidentClosePending*`), follow-on request/lead mirrors (`ARC_activeIncidentFollowOn*`), closeout-generated lead breadcrumbs (`ARC_lastCloseoutGeneratedLead*`), CASEVAC lead breadcrumbs (`ARC_casevacLeadLastId/Ts`), CIVSUB/annex mirrors (`ARC_activeIncidentCivsub*`, `ARC_activeIncidentSitrepAnnex*`, `ARC_activeIncidentTnpPartneredCivsubEffect`), presentation snapshots (`ARC_pub_unitStatuses`, `ARC_pub_missionScore/At`), and — security-relevant — `ARC_pub_eodDispoApprovals`, which gates EOD disposal authorization and was not republished after the backing state was wiped. Fix: clear all of the above in the broadcast-vars section of `fn_resetAll.sqf` and call `ARC_fnc_iedDispoBroadcast` after reset.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | Parser-compat scan | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_resetAll.sqf` | PASS | No parser-compat violations. |
+| 2 | SQF lint | `sqflint -e w functions/core/fn_resetAll.sqf` | PASS | Clean. |
+| 3 | Reset coverage contract suite | `bash tests/static/persistence_reset_coverage_contract_checks.sh` | PASS | All 8 checks pass (stateInit-default replacement, AIRBASE/CASREQ clears, coverage doc completeness). |
+| 4 | Runtime / dedicated / JIP validation | Trigger TOC `RESET ALL`; verify console Dashboard/Command/HQ tabs show no stale follow-on lead, unit-status rows, mission score, or close-pending banner; verify EOD disposal is denied without a fresh approval | BLOCKED | Arma 3 runtime unavailable in sandbox; operator validation required on the dedicated rig. |
+
+**Notes:** Surgical addition of broadcast-variable clears inside the existing "Clear broadcast vars" section plus one guarded `iedDispoBroadcast` republish; no change to reset ordering, persisted-state handling, or any other subsystem.
+
+---
+
 ## 2026-06-11 21:10 UTC — Preflight CI fix for `fn_uiConsoleTestRunServer.sqf`
 
 **Branch/Commit:** `copilot/check-tests-farabad-console` @ `2453390`

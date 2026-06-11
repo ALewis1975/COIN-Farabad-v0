@@ -480,6 +480,48 @@ missionNamespace setVariable ["ARC_activeIncidentCloseMarkedAt", -1, true];
 missionNamespace setVariable ["ARC_activeLeadId", "", true];
 missionNamespace setVariable ["ARC_activeThreadId", "", true];
 
+// Close-pending workflow mirrors (otherwise a stale "close pending" survives reset)
+missionNamespace setVariable ["ARC_activeIncidentClosePending", false, true];
+missionNamespace setVariable ["ARC_activeIncidentClosePendingAt", -1, true];
+missionNamespace setVariable ["ARC_activeIncidentClosePendingResult", "", true];
+missionNamespace setVariable ["ARC_activeIncidentClosePendingOrderId", "", true];
+missionNamespace setVariable ["ARC_activeIncidentClosePendingGroup", "", true];
+
+// Follow-on request / follow-on lead mirrors (consoles read these directly)
+missionNamespace setVariable ["ARC_activeIncidentFollowOnRequest", [], true];
+missionNamespace setVariable ["ARC_activeIncidentFollowOnAt", -1, true];
+missionNamespace setVariable ["ARC_activeIncidentFollowOnDetails", "", true];
+missionNamespace setVariable ["ARC_activeIncidentFollowOnFromGroup", "", true];
+missionNamespace setVariable ["ARC_activeIncidentFollowOnSummary", "", true];
+missionNamespace setVariable ["ARC_activeIncidentFollowOnQueueId", "", true];
+missionNamespace setVariable ["ARC_activeIncidentFollowOnLeadId", "", true];
+missionNamespace setVariable ["ARC_activeIncidentFollowOnLeadName", "", true];
+missionNamespace setVariable ["ARC_activeIncidentFollowOnLeadType", "", true];
+missionNamespace setVariable ["ARC_activeIncidentFollowOnLeadZone", "", true];
+missionNamespace setVariable ["ARC_activeIncidentFollowOnLeadGrid", "", true];
+missionNamespace setVariable ["ARC_activeIncidentFollowOnLeadPos", [], true];
+
+// Closeout-generated lead breadcrumbs (Command/Closeout UI)
+missionNamespace setVariable ["ARC_lastCloseoutGeneratedLeadId", "", true];
+missionNamespace setVariable ["ARC_lastCloseoutGeneratedLeadName", "", true];
+missionNamespace setVariable ["ARC_lastCloseoutGeneratedLeadType", "", true];
+
+// CASEVAC lead breadcrumbs (Console VM "last casevac lead" + server dedupe window)
+missionNamespace setVariable ["ARC_casevacLeadLastId", "", true];
+missionNamespace setVariable ["ARC_casevacLeadLastTs", -1];
+
+// CIVSUB / SITREP annex incident mirrors
+missionNamespace setVariable ["ARC_activeIncidentCivsubDistrictId", "", true];
+missionNamespace setVariable ["ARC_activeIncidentCivsubStart", [], true];
+missionNamespace setVariable ["ARC_activeIncidentSitrepAnnexCivsub", "", true];
+missionNamespace setVariable ["ARC_activeIncidentSitrepAnnexDossier", "", true];
+missionNamespace setVariable ["ARC_activeIncidentTnpPartneredCivsubEffect", [], true];
+
+// Prior-ops presentation snapshots (otherwise stale rows/scores survive reset)
+missionNamespace setVariable ["ARC_pub_unitStatuses", [], true];
+missionNamespace setVariable ["ARC_pub_missionScore", [], true];
+missionNamespace setVariable ["ARC_pub_missionScoreAt", -1, true];
+
 // Convoy public anchors (used for client-side SITREP proximity checks)
 missionNamespace setVariable ["ARC_activeConvoyNetIds", [], true];
 
@@ -499,6 +541,11 @@ if (!isNil "ARC_fnc_intelOrderBroadcast") then { [] call ARC_fnc_intelOrderBroad
 [] call ARC_fnc_leadBroadcast;
 [] call ARC_fnc_threadBroadcast;
 if (!isNil "ARC_fnc_tocBacklogBroadcast") then { [] call ARC_fnc_tocBacklogBroadcast; };
+
+// EOD disposal approvals are authorization-relevant on clients/servers via
+// ARC_pub_eodDispoApprovals; republish from the freshly reset state so no
+// stale approval survives a hard reset.
+if (!isNil "ARC_fnc_iedDispoBroadcast") then { [] call ARC_fnc_iedDispoBroadcast; };
 
 // Best-effort client cleanup
 [_ids] remoteExec ["ARC_fnc_clientPurgeArcTasks", 0];
