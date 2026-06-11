@@ -11,6 +11,26 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-06-11 — VBIED / suicide-bomber subsystem lock (scaffold → LOCKED v1)
+
+**Branch/Commit:** `copilot/dedicated-server-testing-updates` (code commit `f7bbb65`)
+
+**Scenario:** Mode B/D — lock spawn pacing, detonation behavior and lead-emission tuning of the VBIED / suicide-bomber subsystem against `docs/projectFiles/Farabad_IED_VBIED_Suicide_Subsystem_Planning.md`, then promote the status from "Scaffold — pending lock" to **Locked (v1)**. Code lock: (1) `initServer.sqf` now seeds authoritative replicated defaults for the previously implicit knobs (`ARC_vbiedDrivenEnabled`, `ARC_suicideBomberEnabled`, `ARC_vbiedDrivenIntelLevel`, `ARC_vbiedDetonationCooldownS`), adds them to the operator startup audit catalog (VBIED group), and disables both escalation spawn paths under safe mode. (2) `fn_vbiedDrivenSpawnTick` draws the driven VBIED vehicle from the authoritative civilian `ARC_vbiedVehicleClassPool` (class-existence validated, civilian fallback) instead of the hardcoded `O_MRAP_02_F` military placeholder — spec fairness rule: VBIEDs are telegraphed civilian vehicles. (3) `fn_vbiedServerDetonate` resolves the detonation position from the live VBIED vehicle (deviceId-as-netId, `activeVbiedVehicleNetId`, `ARC_vbiedDrivenNetId`) before falling back to the stored objective pos/device record, so driven VBIEDs detonate at the vehicle rather than up to the trigger radius away. New CI-wired contract suite `tests/static/vbied_suicide_lock_contract_checks.sh` locks the full contract: tier gates (VBIED≥2, SUICIDE≥3, governor parity), cooldown/one-shot/fairness pacing, idempotent + EOD-approval-gated detonation, RemoteExec allowlist, per-transition lead packages (STAGED/DISCOVERED/INTERDICTED/DETONATED + SUICIDE branch), district detonation penalty, and exec-tick/CfgFunctions wiring. Docs promoted: planning spec header, THREAT v0 baseline regen (§0.0 table + §1.2), Design Guide VBIED/Suicide status note.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | sqflint compat scan (changed SQF) | `python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf functions/ied/fn_vbiedDrivenSpawnTick.sqf functions/ied/fn_vbiedServerDetonate.sqf` | PASS | No banned parser-compat patterns. |
+| 2 | SQF lint (warnings as errors) | `sqflint -e w` on each changed `.sqf` | PASS | All three changed files lint clean. |
+| 3 | New contract suite | `bash tests/static/vbied_suicide_lock_contract_checks.sh` | PASS | 66/66 checks; suite wired into `.github/workflows/arma-preflight.yml`. |
+| 4 | Full static contract regression | `for t in tests/static/*.sh; do bash "$t"; done` | PASS | All suites pass (incl. complex/chain IED, threat lifecycle, posture selection, spawn-pattern matrix, intel-quality coupling). |
+| 5 | Workflow YAML sanity | `python3 -c "import yaml; yaml.safe_load(open('.github/workflows/arma-preflight.yml'))"` | PASS | New step parses. |
+| 6 | Runtime evidence: dedicated-rig boot/compile/config audit | Reviewed `VDSReports/ArmA3Server_x64_2026-06-09_17-37-04.rpt` (Armahosts dedicated) and `serverRpts/Arma3_x64_2026-06-08_23-00-03.rpt` | PASS | All eight VBIED/SB functions log `[ARC][COMPILE][OK]`; `[ARC][CONFIG][AUDIT][VBIED]` reports effective values (phase3=true, defuseWindow=300, cooldown=1800, proxRadius=12) with no undefined-variable or script errors in the subsystem. |
+| 7 | Dedicated runtime: parked VBIED arm → defuse-window → detonate/render-safe; driven VBIED telegraph → checkpoint rush; SB approach → detonation leads | Dedicated MP on the rig: HIGH_RISK district VBIED incident + CRITICAL district SB incident; verify RPT spawn/detonation/lead lines and district cooldown penalty | BLOCKED | Arma 3 runtime unavailable in sandbox; operator live-fire pass required on the dedicated rig (lock is static-contract + boot-evidence backed). |
+
+**Notes:** Rollback: set `ARC_vbiedPhase3_enabled` / `ARC_vbiedDrivenEnabled` / `ARC_suicideBomberEnabled` false (no schema changes); doc status can be reverted independently. Behavior change surface: driven VBIED vehicle classes (civilian pool) and detonation position fidelity; all pacing values keep their previously effective defaults — they are now just authoritative and audited.
+
+---
+
 ## 2026-06-11 — Complex/chain IED modules un-deferred (tier-gated reachability)
 
 **Branch/Commit:** `copilot/dedicated-server-testing-updates` (code commit `4e612bb`; contract suite + docs in the follow-up commit on the same branch)
