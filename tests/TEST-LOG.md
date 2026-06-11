@@ -11,6 +11,23 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-06-11 21:10 UTC — Preflight CI fix for `fn_uiConsoleTestRunServer.sqf`
+
+**Branch/Commit:** `copilot/check-tests-farabad-console` @ `2453390`
+
+**Scenario:** Mode A bug fix — GitHub Actions job `Arma SQF + Mission Config Preflight / preflight (pull_request)` failed on job `80905703047` during changed-file SQF lint. CI logs showed the compat scan passing, then `sqflint -e w` aborting on `functions/core/fn_uiConsoleTestRunServer.sqf` with four `_pass` scope warnings (`not private`). Local reproduction confirmed `_pass` was read and normalized inside the spawned server-runner block without ever being declared there. Fix: initialize `private _pass = missionNamespace getVariable ["ARC_TEST_pass", 0];` alongside the existing `_fail` read so the spawned scope owns both counters before logging/report formatting.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | CI root-cause capture | GitHub Actions logs for job `80905703047` | PASS | Failure isolated to changed-file SQF lint; compat scan passed and `sqflint` stopped on `_pass` scope warnings in `fn_uiConsoleTestRunServer.sqf`. |
+| 2 | Local repro + fix validation | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_uiConsoleTestRunServer.sqf functions/ui/fn_uiConsoleActionHQPrimary.sqf functions/ui/fn_uiConsoleHQPaint.sqf functions/ui/fn_uiConsoleTestRunClientReceive.sqf` + `~/.local/bin/sqflint -e w` on each of those 4 files | PASS | Changed-file lint path now passes cleanly after declaring `_pass` locally in the spawned block. |
+| 3 | Whitespace | `git diff --check` | PASS | No whitespace or patch-format issues after the fix. |
+| 4 | Runtime / dedicated / JIP validation | In-game HQ tab -> Run SQF Test Suite (Server); verify PASS/FAIL summary still returns to the requester and server RPT logs remain intact | BLOCKED | Arma 3 runtime unavailable in sandbox; operator validation required on hosted/dedicated MP. |
+
+**Notes:** This is a surgical lint-only fix in one server function; runtime behavior is unchanged except that the local `_pass` variable is now explicitly owned by the spawned scope before it is type-normalized, logged, and rendered.
+
+---
+
 ## 2026-06-11 21:10 UTC — ADMIN_RUN_TESTS overlap guard follow-up
 
 **Branch/Commit:** `copilot/check-tests-farabad-console` @ `6e1d58c`
