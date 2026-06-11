@@ -90,6 +90,7 @@ diag_log format ["[ARC][TEST] ARC_fnc_uiConsoleTestRunServer: run requested by o
     private _timedOut = !(scriptDone _handle);
     if (_timedOut) then { terminate _handle; };
     private _elapsed = diag_tickTime - _t0;
+    private _pass = missionNamespace getVariable ["ARC_TEST_pass", 0];
     private _fail = missionNamespace getVariable ["ARC_TEST_fail", 0];
     if (!(_pass isEqualType 0)) then { _pass = 0; };
     if (!(_fail isEqualType 0)) then { _fail = 0; };
