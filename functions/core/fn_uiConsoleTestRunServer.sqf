@@ -80,6 +80,23 @@ diag_log format ["[ARC][TEST] ARC_fnc_uiConsoleTestRunServer: run requested by o
     params ["_owner"];
 
     private _t0 = diag_tickTime;
+
+    private _testHarnessVars = [
+        "ARC_TEST_mode",
+        "ARC_TEST_tocDryRun",
+        "ARC_TEST_tocCanApproveQueueOverride",
+        "ARC_TEST_tocSaveCalls",
+        "ARC_TEST_tocResetCalls",
+        "ARC_TEST_tocRebuildCalls"
+    ];
+    private _testHarnessSaved = [];
+    {
+        _testHarnessSaved pushBack [_x, missionNamespace getVariable [_x, nil]];
+    } forEach _testHarnessVars;
+
+    missionNamespace setVariable ["ARC_TEST_mode", true, false];
+    missionNamespace setVariable ["ARC_TEST_tocDryRun", true, false];
+
     private _handle = [] execVM "tests\run_all.sqf";
 
     // run_all.sqf resets ARC_TEST_pass / ARC_TEST_fail itself at startup and
@@ -89,6 +106,19 @@ diag_log format ["[ARC][TEST] ARC_fnc_uiConsoleTestRunServer: run requested by o
 
     private _timedOut = !(scriptDone _handle);
     if (_timedOut) then { terminate _handle; };
+
+    {
+        _x params ["_k"];
+        if ((count _x) < 2 || { isNil { _x select 1 } }) then
+        {
+            missionNamespace setVariable [_k, nil, false];
+        }
+        else
+        {
+            missionNamespace setVariable [_k, _x select 1, false];
+        };
+    } forEach _testHarnessSaved;
+
     private _elapsed = diag_tickTime - _t0;
     private _pass = missionNamespace getVariable ["ARC_TEST_pass", 0];
     private _fail = missionNamespace getVariable ["ARC_TEST_fail", 0];

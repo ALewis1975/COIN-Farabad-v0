@@ -7,8 +7,8 @@ class Header
 {
     gameType = COOP;
     minPlayers = 1;
-    // RPT shows 79 roles in mission.sqm (slots). Keep this aligned to avoid lobby confusion and warnings.
-    maxPlayers = 79;
+    // RPT 2026-06-11 shows 83 roles in mission.sqm (slots). Keep this aligned to avoid lobby confusion and warnings.
+    maxPlayers = 83;
 };
 
 // Shared save file name for missionProfileNamespace persistence (server profile).
