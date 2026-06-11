@@ -38,6 +38,9 @@ if (!isNil "remoteExecutedOwner" && { _owner > 0 }) then
     private _can = _isOmni || { [_requestor] call ARC_fnc_rolesCanApproveQueue };
     if (!_can) exitWith {
         diag_log format ["[ARC][SEC] ARC_fnc_uiConsoleTestRunServer: unauthorized caller owner=%1", _owner];
+        if (_owner > 0) then {
+            ["<t size='1.05' font='PuristaMedium'>ARC Test Suite</t><br/><br/><t color='#F87171'>Denied: approver/OMNI only.</t>"] remoteExec ["ARC_fnc_uiConsoleTestRunClientReceive", _owner];
+        };
         false
     };
 };
