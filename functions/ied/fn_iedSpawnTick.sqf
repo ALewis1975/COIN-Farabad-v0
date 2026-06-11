@@ -179,8 +179,8 @@ if (_needsNew) then
             if (!(_chainDone isEqualType true) && !(_chainDone isEqualType false)) then { _chainDone = false; };
             if (_chainEnabled && { _chainCount > 0 } && { !_chainDone }) then
             {
-                _obj setVariable ["ARC_chainEmplaced", true, true];
-                [_nid, _chainCount] call ARC_fnc_iedChainEmplace;
+                private _okChain = [_nid, _chainCount] call ARC_fnc_iedChainEmplace;
+                if (_okChain) then { _obj setVariable ["ARC_chainEmplaced", true, true]; };
             };
 
             // Complex attack ambush group (tier >= 3 profile -> hasSecondaryAttack)
