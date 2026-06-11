@@ -11,7 +11,26 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
-## 2026-06-11 — VBIED / suicide-bomber subsystem lock (scaffold → LOCKED v1)
+## 2026-06-11 — Console refactor remaining track (plan trueup, VM stub fixes, PR 5 tab migration, QA gates)
+
+**Branch/Commit:** `copilot/dedicated-server-testing-updates` @ `adcebec` (plan trueup) + `12cac14` (implementation)
+
+**Scenario:** Execute the remaining Farabad Console refactor track. **Phase 0 (Mode F):** trued up `docs/architecture/Farabad_Console_Refactor_Plan.md` — status header no longer "implementation pending"; added §12 Implementation Status with the 10-tab inventory (COMMS added post-plan; BOARDS TOC-gated), an honest per-PR delivery ledger (AIR's VM migration was never completed; the 4 PR-2 VM sections shipped as stubs), and the formal **AIR/S1 descope decision** (both keep rev-checked direct reads as documented exceptions). **Phase 5a (Mode A — bugs):** fixed `fn_consoleVmBuild.sqf` stub sections: `personnel` now reads the real publisher key `ARC_pub_s1_registry` (was `ARC_pub_s1Registry`, which nothing writes) with `ARC_pub_s1_registryUpdatedAt` freshness; `handoff` no longer reads `ARC_pub_handoffState` (no publisher exists) and is sourced from published orders with `ARC_pub_ordersUpdatedAt` freshness; `intelFeed` freshness from `ARC_pub_intelUpdatedAt`; `stateSummary` freshness from `ARC_pub_stateUpdatedAt` plus new `mission_score`/`mission_score_at` keys. **Phase 5b (Mode C):** migrated INTEL (4 intel-log read sites), HQ (mission score), BOARDS (incident/queue/orders/unit-statuses/lead-pool) and HANDOFF (orders) to Console-VM-primary reads with direct reads as adapter-default fallback; added shared `ARC_fnc_consoleVmFreshness` helper and DATA STALE badges on BOARDS/HANDOFF; cleared all pre-existing sqflint-compat violations (`#` indexing, `trim`, `isNotEqualTo`, unused params) in the two repainted files. BOARDS keeps a documented direct read of the full ops log (last SITREP may be older than the VM 5-entry log_tail). **Phase 5c (Mode G/E):** removed dead `ARC_console_ops_v2`/`ARC_console_dashboard_v2` seeding from `initServer.sqf` and the stale `command_v2` comment; wired `tests/static/console_vm_section_contract_checks.sh` (new, 26 checks) and `scripts/dev/check_console_conflicts.sh` into `arma-preflight.yml`; authored `docs/qa/Console_Tab_Regression_Checklist.md` (10 tabs × role variants × empty/selected states + JIP section).
+
+| # | Check | Command | Result | Notes |
+|---|-------|---------|--------|-------|
+| 1 | SQF compat scan (changed files) | `python3 scripts/dev/sqflint_compat_scan.py --strict <8 changed .sqf files>` | PASS | Includes BOARDS/HANDOFF which previously failed strict scan (22/29 findings cleared). |
+| 2 | sqflint (changed files) | `~/.local/bin/sqflint -e w <8 changed .sqf files>` | PASS | Installed via `python3 -m pip install --user sqflint`; unused destructured params replaced with `""` placeholders. |
+| 3 | New VM section contract suite | `bash tests/static/console_vm_section_contract_checks.sh` | PASS | 26/26 — publisher keys, real freshness, painter migrations, descope, dead-flag removal. |
+| 4 | Console IDC + painter contract | `bash scripts/dev/check_console_conflicts.sh` | PASS | BOARDS now shared=5 VM=12; HANDOFF shared=10 VM=1. |
+| 5 | Regression: dashboard VM suite | `bash tests/static/console_vm_dashboard_migration_checks.sh` | PASS | consoleVmBuild keys unchanged for DASH consumers. |
+| 6 | Regression: field-request / SHADOW / TNP suites | `bash tests/static/console_field_request_relocation_checks.sh` + shadow + tnp | PASS | INTEL tab wiring unchanged. |
+| 7 | Whitespace | `git diff --check` | PASS | |
+| 8 | Visual parity (all 10 tabs), staleness badges with genuinely stale data, JIP/fallback behavior | Per `docs/qa/Console_Tab_Regression_Checklist.md` | BLOCKED | Arma 3 runtime unavailable in sandbox; operator run required on the dedicated rig. |
+
+**Risk notes:** painter migrations are behavior-parity by construction (adapter default arg = previous direct read; type guards retained). The `handoff` VM section payload changed shape (`state` → `orders`) — safe because the old key had no consumers and no publisher. Rollback: revert commits `adcebec`/`12cac14`; no schema/save-format changes.
+
+---
 
 **Branch/Commit:** `copilot/dedicated-server-testing-updates` (code commit `f7bbb65`)
 
