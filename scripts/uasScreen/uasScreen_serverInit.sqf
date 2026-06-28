@@ -117,13 +117,9 @@ ARC_fnc_uasScreenRequestClear = {
         ["_caller", objNull, [objNull]]
     ];
 
+    if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\\core\\fn_rpcValidateSender.sqf"; };
     private _remoteOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
-    private _senderOk = true;
-    if (!isNil "ARC_fnc_rpcValidateSender") then
-    {
-        _senderOk = [_caller, "ARC_fnc_uasScreenRequestClear", "UAS screen clear denied.", "UAS_SCREEN_SENDER_REJECTED", false, _remoteOwner] call ARC_fnc_rpcValidateSender;
-    };
-    if (!_senderOk) exitWith {false};
+    if (!([_caller, "ARC_fnc_uasScreenRequestClear", "UAS screen clear denied.", "UAS_SCREEN_SENDER_REJECTED", true, _remoteOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
     private _screen = objectFromNetId _screenNid;
     if (isNull _screen || {!([_screen] call ARC_fnc_uasScreenIsManaged)}) exitWith {false};
