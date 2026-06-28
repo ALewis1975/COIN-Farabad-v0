@@ -23,9 +23,12 @@ if (isNil { missionNamespace getVariable "ARC_uasScreenFeedSnapshotUpdatedAt" })
 
 ARC_fnc_uasScreenPublishSnapshot = {
     private _snapshot = missionNamespace getVariable ["ARC_uasScreenFeedSnapshot", []];
-    if (!(_snapshot isEqualType [])) then { _snapshot = []; };
+    if (!(_snapshot isEqualType [])) then
+    {
+        _snapshot = [];
+        missionNamespace setVariable ["ARC_uasScreenFeedSnapshot", _snapshot, true];
+    };
 
-    missionNamespace setVariable ["ARC_uasScreenFeedSnapshot", _snapshot, true];
     missionNamespace setVariable ["ARC_uasScreenFeedSnapshotUpdatedAt", serverTime, true];
     _snapshot
 };
