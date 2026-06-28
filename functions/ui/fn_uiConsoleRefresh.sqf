@@ -446,7 +446,7 @@ case "DASH":
             private _regionCY = _boardY + _boardH;
             private _regionCW = _paneW;
             private _regionCH = 0;
-            if (_layoutModeActive isEqualTo "DOCK_RIGHT") then {
+            if (_layoutModeActive in ["DOCK_RIGHT", "TABLET_FRAME"]) then {
                 _regionCX = uiNamespace getVariable ["ARC_console_regionCX", _paneX];
                 _regionCY = uiNamespace getVariable ["ARC_console_regionCY", _boardY + _boardH];
                 _regionCW = uiNamespace getVariable ["ARC_console_regionCW", _paneW];
