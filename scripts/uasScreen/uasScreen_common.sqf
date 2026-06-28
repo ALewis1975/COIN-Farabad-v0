@@ -58,6 +58,7 @@ ARC_fnc_uasScreenResolveManagedScreens = {
     private _names = missionNamespace getVariable ["ARC_uasScreenObjectVarNames", []];
     if (!(_names isEqualType [])) then { _names = []; };
 
+    private _all = allMissionObjects "All";
     private _objects = [];
     {
         if (!(_x isEqualType "")) then { continue; };
@@ -70,7 +71,7 @@ ARC_fnc_uasScreenResolveManagedScreens = {
             private _needle = toLower _name;
             {
                 if ((toLower (vehicleVarName _x)) isEqualTo _needle) exitWith { _obj = _x; };
-            } forEach (allMissionObjects "All");
+            } forEach _all;
 
             if (!isNull _obj) then
             {
