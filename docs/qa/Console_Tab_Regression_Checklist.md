@@ -20,6 +20,11 @@ Role variants:
 - **Operator** — squad leader / non-approver with console access
 - **OMNI** — testing token (sees all)
 
+Layout variants:
+- **FULL** — default fallback layout
+- **DOCK_RIGHT** — compact right-docked layout
+- **TABLET_FRAME** — opt-in rugged tablet frame layout (`ARC_console_layoutMode = "TABLET_FRAME"`)
+
 ## Shell (all tabs)
 
 | # | Check | Expected |
@@ -29,6 +34,10 @@ Role variants:
 | S3 | Action row (78021–78024) | No dead/cryptic disabled buttons; READ-ONLY label where unauthorized |
 | S4 | Status strip (78060–78063) | All 4 indicators visible at 1080p |
 | S5 | Tab switch round-trip (visit all 10, return to first) | No layout drift, no control bleed-through from prior tab |
+| S6 | TABLET_FRAME opt-in | `pics\Farabad_Tablet.paa` frame visible only when layout mode is `TABLET_FRAME` |
+| S7 | TABLET_FRAME viewport | Tabs, panes, status strip, Region C, and action row sit inside the tablet screen rectangle |
+| S8 | TABLET_FRAME rollback | Switching back to `FULL` hides the frame and restores full-screen positions |
+| S9 | TABLET_FRAME tuning vars | `ARC_console_tabletFrameAspect`, `ARC_console_tabletFrameScale`, and `ARC_console_tabletScreenRect` adjust frame/screen placement without script errors |
 
 ## DASH
 
@@ -81,6 +90,7 @@ Role variants:
 | A4 | Recent events | Callsigns resolved, not raw FLT-xxxx |
 | A5 | Hotkeys (H, R, E, D, M, Enter, Esc) | Work identically |
 | A6 | Freshness line | FRESH/STALE/DEGRADED renders from snapshot contract |
+| A7 | TABLET_FRAME AIR map | Map remains inside the tablet screen and does not cover AIR details or action buttons |
 
 ## HANDOFF
 
@@ -123,3 +133,4 @@ Role variants:
 | J2 | JIP client after broadcast | VM-sourced tabs match a connected client |
 | J3 | Staleness badges with genuinely stale data | Badge appears/disappears across broadcast resume |
 | J4 | Reconnect/respawn | Console re-init (keybinds/EHs) re-registers per-mission token |
+| J5 | JIP in TABLET_FRAME | Frame and inner screen layout apply locally without new server state or RemoteExec traffic |
