@@ -10,7 +10,12 @@
     - Region C (Visual Panel, IDC 78140) is shown/hidden and sized from declaration.
 
     Mission var:
-      ARC_console_layoutMode = "FULL" | "DOCK_RIGHT"
+      ARC_console_layoutMode = "FULL" | "DOCK_RIGHT" | "TABLET_FRAME"
+
+    Tablet-frame tuning vars (client/read-only presentation only):
+      ARC_console_tabletFrameAspect = NUMBER (default 2.0)
+      ARC_console_tabletFrameScale = NUMBER 0.55..1.0 (default 0.98)
+      ARC_console_tabletScreenRect = ARRAY [relX, relY, relW, relH]
 
     Params:
       0: DISPLAY
@@ -80,9 +85,28 @@ if !(_trimFn isEqualType {}) then {
     uiNamespace setVariable ["ARC_console_trimFn", _trimFn];
 };
 private _mode = toUpper ([_modeRaw] call _trimFn);
-if !(_mode in ["FULL", "DOCK_RIGHT"]) then { _mode = "FULL"; };
+if !(_mode in ["FULL", "DOCK_RIGHT", "TABLET_FRAME"]) then { _mode = "FULL"; };
 
 uiNamespace setVariable ["ARC_console_layoutModeActive", _mode];
+
+private _tabletFrameIdc = 78141;
+private _tabletFrameCtrl = _display displayCtrl _tabletFrameIdc;
+if (_mode isEqualTo "TABLET_FRAME") then {
+    if (isNull _tabletFrameCtrl) then {
+        _tabletFrameCtrl = _display ctrlCreate ["RscPicture", _tabletFrameIdc];
+    };
+    if (!isNull _tabletFrameCtrl) then {
+        _tabletFrameCtrl ctrlSetText "pics\Farabad_Tablet.paa";
+        _tabletFrameCtrl ctrlShow true;
+    } else {
+        if !(uiNamespace getVariable ["ARC_console_tabletFrameWarned", false]) then {
+            diag_log "[ARC][UI][WARN] uiConsoleApplyLayout: TABLET_FRAME requested but RscPicture control could not be created.";
+            uiNamespace setVariable ["ARC_console_tabletFrameWarned", true];
+        };
+    };
+} else {
+    if (!isNull _tabletFrameCtrl) then { _tabletFrameCtrl ctrlShow false; };
+};
 
 private _trackedIdcs = [
     // shell + status
@@ -92,6 +116,8 @@ private _trackedIdcs = [
     78001,78015,78011,78016,
     // Region C: Visual Panel
     78140,
+    // Optional tablet frame control (runtime-created when TABLET_FRAME is active)
+    78141,
     // AIR / TOWER dedicated
     78130,78136,78137,
     // S2 workflow controls
@@ -143,13 +169,65 @@ if (_mode isEqualTo "FULL") exitWith {
             };
         };
     } forEach _trackedIdcs;
+    { private _ctrl = _display displayCtrl _x; if (!isNull _ctrl) then { _ctrl ctrlShow true; }; } forEach [78094,78095,78096,78097];
     _mode
 };
 
-private _frameCtrl = _display displayCtrl 78099;
-private _frame = if (!isNull _frameCtrl) then { ctrlPosition _frameCtrl } else {
-    [safeZoneX + (safeZoneW * 0.66), safeZoneY + (safeZoneH * 0.01), safeZoneW * 0.34, safeZoneH * 0.98]
+private _frame = [];
+if (_mode isEqualTo "TABLET_FRAME") then {
+    private _tabletAspect = missionNamespace getVariable ["ARC_console_tabletFrameAspect", 2.0];
+    if (!(_tabletAspect isEqualType 0) || { _tabletAspect <= 0 }) then { _tabletAspect = 2.0; };
+
+    private _tabletScale = missionNamespace getVariable ["ARC_console_tabletFrameScale", 0.98];
+    if (!(_tabletScale isEqualType 0)) then { _tabletScale = 0.98; };
+    _tabletScale = (_tabletScale max 0.55) min 1.0;
+
+    private _tabletW = safeZoneW * _tabletScale;
+    private _tabletH = _tabletW / _tabletAspect;
+    if (_tabletH > (safeZoneH * _tabletScale)) then {
+        _tabletH = safeZoneH * _tabletScale;
+        _tabletW = _tabletH * _tabletAspect;
+    };
+
+    private _tabletX = safeZoneX + ((safeZoneW - _tabletW) / 2);
+    private _tabletY = safeZoneY + ((safeZoneH - _tabletH) / 2);
+
+    if (!isNull _tabletFrameCtrl) then {
+        _tabletFrameCtrl ctrlSetPosition [_tabletX, _tabletY, _tabletW, _tabletH];
+        _tabletFrameCtrl ctrlCommit 0;
+    };
+
+    private _screenRectDefault = [0.144, 0.166, 0.713, 0.670];
+    private _screenRect = missionNamespace getVariable ["ARC_console_tabletScreenRect", _screenRectDefault];
+    if (!(_screenRect isEqualType []) || { (count _screenRect) < 4 }) then { _screenRect = _screenRectDefault; };
+
+    private _rx = _screenRect param [0, 0.144, [0]];
+    private _ry = _screenRect param [1, 0.166, [0]];
+    private _rw = _screenRect param [2, 0.713, [0]];
+    private _rh = _screenRect param [3, 0.670, [0]];
+    if (_rw <= 0 || { _rh <= 0 }) then {
+        _rx = 0.144;
+        _ry = 0.166;
+        _rw = 0.713;
+        _rh = 0.670;
+    };
+
+    private _screenX = _tabletX + (_tabletW * _rx);
+    private _screenY = _tabletY + (_tabletH * _ry);
+    private _screenW = _tabletW * _rw;
+    private _screenH = _tabletH * _rh;
+
+    uiNamespace setVariable ["ARC_console_tabletFramePos", [_tabletX, _tabletY, _tabletW, _tabletH]];
+    uiNamespace setVariable ["ARC_console_tabletScreenPos", [_screenX, _screenY, _screenW, _screenH]];
+
+    _frame = [_screenX, _screenY, _screenW, _screenH];
+} else {
+    private _frameCtrl = _display displayCtrl 78099;
+    _frame = if (!isNull _frameCtrl) then { ctrlPosition _frameCtrl } else {
+        [safeZoneX + (safeZoneW * 0.66), safeZoneY + (safeZoneH * 0.01), safeZoneW * 0.34, safeZoneH * 0.98]
+    };
 };
+
 _frame params ["_fx", "_fy", "_fw", "_fh"];
 
 private _titleH = _fh * 0.045;
@@ -218,6 +296,11 @@ private _gripH = _fh * 0.018;
 [78095, _fx + _fw - _gripW, _fy, _gripW, _gripH] call _setPos;
 [78096, _fx, _fy + _fh - _gripH, _gripW, _gripH] call _setPos;
 [78097, _fx + _fw - _gripW, _fy + _fh - _gripH, _gripW, _gripH] call _setPos;
+if (_mode isEqualTo "TABLET_FRAME") then {
+    { private _ctrl = _display displayCtrl _x; if (!isNull _ctrl) then { _ctrl ctrlShow false; }; } forEach [78094,78095,78096,78097];
+} else {
+    { private _ctrl = _display displayCtrl _x; if (!isNull _ctrl) then { _ctrl ctrlShow true; }; } forEach [78094,78095,78096,78097];
+};
 
 // Status row
 [78060, _fx + (_fw * 0.01), _fy + _titleH + (_statusH * 0.12), _fw * 0.36, _statusH * 0.74] call _setPos;
