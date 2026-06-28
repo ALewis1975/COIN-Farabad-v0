@@ -56,6 +56,10 @@ class CfgRemoteExec
         class ARC_fnc_tocRequestResetAll            { allowedTargets = 2; };
         class ARC_fnc_tocRequestSave                { allowedTargets = 2; };
 
+        // UAS screen feed RPCs (client request; server owns published snapshot)
+        class ARC_fnc_uasScreenRequestFeed          { allowedTargets = 2; };
+        class ARC_fnc_uasScreenRequestClear         { allowedTargets = 2; };
+
         // AIRBASE client → server RPCs (ATC interactions)
         // All 9 server-side handlers have isServer guard + ARC_fnc_rpcValidateSender;
         // these entries are additive — mode=1 blocked all of them without them.
