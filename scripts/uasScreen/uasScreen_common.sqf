@@ -8,6 +8,8 @@
 */
 
 ARC_fnc_uasScreenEnsureDefaults = {
+    if (!isServer) exitWith {true};
+
     private _setDefault = {
         params ["_key", "_value", ["_public", false]];
         if (isNil { missionNamespace getVariable _key }) then
