@@ -208,7 +208,7 @@ ARC_fnc_uasScreenAddActions = {
     [] call ARC_fnc_uasScreenEnsureDefaults;
 
     private _screens = [] call ARC_fnc_uasScreenResolveManagedScreens;
-    private _condition = "(missionNamespace getVariable ['ARC_uasScreenEnabled', true]) && { !(missionNamespace getVariable ['ARC_uasScreenRequireAuthorizedRole', false]) || { [player] call ARC_fnc_rolesIsAuthorized } }";
+    private _condition = "(missionNamespace getVariable ['ARC_uasScreenEnabled', true]) && { !(missionNamespace getVariable ['ARC_uasScreenRequireAuthorizedRole', false]) || { !(isNil 'ARC_fnc_rolesIsAuthorized') && { [player] call ARC_fnc_rolesIsAuthorized } } }";
 
     {
         private _obj = _x;
