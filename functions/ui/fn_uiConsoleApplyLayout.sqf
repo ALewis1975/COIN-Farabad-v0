@@ -169,6 +169,7 @@ if (_mode isEqualTo "FULL") exitWith {
             };
         };
     } forEach _trackedIdcs;
+    { private _ctrl = _display displayCtrl _x; if (!isNull _ctrl) then { _ctrl ctrlShow true; }; } forEach [78094,78095,78096,78097];
     _mode
 };
 
