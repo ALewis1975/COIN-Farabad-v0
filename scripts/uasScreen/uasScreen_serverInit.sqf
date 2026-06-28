@@ -39,13 +39,9 @@ ARC_fnc_uasScreenRequestFeed = {
         ["_caller", objNull, [objNull]]
     ];
 
+    if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\\core\\fn_rpcValidateSender.sqf"; };
     private _remoteOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
-    private _senderOk = true;
-    if (!isNil "ARC_fnc_rpcValidateSender") then
-    {
-        _senderOk = [_caller, "ARC_fnc_uasScreenRequestFeed", "UAS screen request denied.", "UAS_SCREEN_SENDER_REJECTED", false, _remoteOwner] call ARC_fnc_rpcValidateSender;
-    };
-    if (!_senderOk) exitWith {false};
+    if (!([_caller, "ARC_fnc_uasScreenRequestFeed", "UAS screen request denied.", "UAS_SCREEN_SENDER_REJECTED", true, _remoteOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
     if (!(missionNamespace getVariable ["ARC_uasScreenEnabled", true])) exitWith {false};
 
