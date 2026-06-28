@@ -22,9 +22,7 @@ ARC_fnc_uasScreenClearFeedClient = {
     {
         if (!(_x isEqualType [])) then { continue; };
         private _sNid = _x param [0, ""];
-        private _uNid = _x param [1, ""];
         private _cam = _x param [2, objNull];
-        private _rt = _x param [3, ""];
 
         if (_sNid isEqualTo _screenNid) then
         {
