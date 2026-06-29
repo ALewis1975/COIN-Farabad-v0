@@ -33,6 +33,14 @@ private _cycleModes = {
     _modes select ((_idx + 1) mod (count _modes))
 };
 
+private _markAirViewSwitch = {
+    params ["_nextMode"];
+    uiNamespace setVariable ["ARC_console_airSubmode", _nextMode];
+    uiNamespace setVariable ["ARC_console_airPostRefreshSubmode", _nextMode];
+    uiNamespace setVariable ["ARC_console_mainListOwner", ""];
+};
+uiNamespace setVariable ["ARC_console_airPostRefreshSubmode", ""];
+
 private _airMode = ["ARC_console_airMode", "TOWER"] call ARC_fnc_uiNsGetString;
 _airMode = toUpper _airMode;
 _airMode = (_airMode splitString " ") joinString "";
@@ -41,6 +49,7 @@ if (_airMode isEqualTo "PILOT") exitWith {
     if (_canAirControl) then {
         uiNamespace setVariable ["ARC_console_airMode", "TOWER"];
         uiNamespace setVariable ["ARC_console_airSubmode", "AIRFIELD_OPS"];
+        uiNamespace setVariable ["ARC_console_mainListOwner", ""];
         ["AIR", "Switched AIR mode to TOWER."] call ARC_fnc_clientToast;
     } else {
         ["AIR", "Pilot submode refreshed."] call ARC_fnc_clientToast;
@@ -153,7 +162,7 @@ switch (_airSubmode) do
             {
                 // Phase 3 safety: non-action rows cycle submode (no queue/airfield action).
                 private _nextMode = [_airSubmode, _canAirControl, _debugAir] call _cycleModes;
-                uiNamespace setVariable ["ARC_console_airSubmode", _nextMode];
+                [_nextMode] call _markAirViewSwitch;
                 ["AIR", format ["Switched AIR view to %1.", _nextMode]] call ARC_fnc_clientToast;
             };
         };
@@ -162,7 +171,7 @@ switch (_airSubmode) do
     case "DEBUG":
     {
         private _nextMode = [_airSubmode, _canAirControl, _debugAir] call _cycleModes;
-        uiNamespace setVariable ["ARC_console_airSubmode", _nextMode];
+        [_nextMode] call _markAirViewSwitch;
         ["AIR", format ["Switched AIR view to %1.", _nextMode]] call ARC_fnc_clientToast;
     };
 
@@ -170,7 +179,7 @@ switch (_airSubmode) do
     {
         // Secondary in RAMP view cycles to the next available view.
         private _nextMode = [_airSubmode, _canAirControl, _debugAir] call _cycleModes;
-        uiNamespace setVariable ["ARC_console_airSubmode", _nextMode];
+        [_nextMode] call _markAirViewSwitch;
         ["AIR", format ["Switched AIR view to %1.", _nextMode]] call ARC_fnc_clientToast;
     };
 
@@ -180,11 +189,19 @@ switch (_airSubmode) do
         if (_nextMode isEqualTo _airSubmode) then {
             ["AIR", "AIRFIELD OPS refreshed."] call ARC_fnc_clientToast;
         } else {
-            uiNamespace setVariable ["ARC_console_airSubmode", _nextMode];
+            [_nextMode] call _markAirViewSwitch;
             ["AIR", format ["Switched AIR view to %1.", _nextMode]] call ARC_fnc_clientToast;
         };
     };
 };
 
 [_disp] call ARC_fnc_uiConsoleRefresh;
+private _postRefreshSubmode = uiNamespace getVariable ["ARC_console_airPostRefreshSubmode", ""];
+if (!(_postRefreshSubmode isEqualType "")) then { _postRefreshSubmode = ""; };
+uiNamespace setVariable ["ARC_console_airPostRefreshSubmode", ""];
+if (!(_postRefreshSubmode isEqualTo "")) then {
+    uiNamespace setVariable ["ARC_console_airSubmode", _postRefreshSubmode];
+    uiNamespace setVariable ["ARC_console_mainListOwner", ""];
+    [_disp, true] call ARC_fnc_uiConsoleAirPaint;
+};
 true
