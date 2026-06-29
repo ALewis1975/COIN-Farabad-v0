@@ -144,8 +144,30 @@ ARC_fnc_helmScreenGetHelmCamUnits = {
     private _item = missionNamespace getVariable ["ARC_helmScreenHelmCamItem", "ItemcTabHCam"];
     if (!(_item isEqualType "")) then { _item = "ItemcTabHCam"; };
 
-    // sqflint does not recognise hasItem as a binary command; wrap in compile helper.
-    private _hasItemFn = compile "params ['_u','_i']; _u hasItem _i";
+    private _unitHasConfiguredItem = {
+        params [["_u", objNull, [objNull]], ["_i", "", [""]]];
+        if (_i isEqualTo "") exitWith {true};
+        if (isNull _u) exitWith {false};
+
+        private _inventory = [];
+        _inventory append (items _u);
+        _inventory append (assignedItems _u);
+        _inventory append (weapons _u);
+        _inventory append (magazines _u);
+
+        {
+            if (_x != "") then { _inventory pushBack _x; };
+        } forEach [
+            headgear _u,
+            goggles _u,
+            hmd _u,
+            uniform _u,
+            vest _u,
+            backpack _u
+        ];
+
+        _i in _inventory
+    };
 
     private _units = [];
     {
@@ -155,8 +177,7 @@ ARC_fnc_helmScreenGetHelmCamUnits = {
         private _sideStr = toUpper str (side (group _u));
         if ((count _allowedU) > 0 && {!(_sideStr in _allowedU)}) then { continue; };
 
-        private _hasItem = [_u, _item] call _hasItemFn;
-        if (_hasItem || {_item isEqualTo ""}) then
+        if ([_u, _item] call _unitHasConfiguredItem) then
         {
             _units pushBackUnique _u;
         };
