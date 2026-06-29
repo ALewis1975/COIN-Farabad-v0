@@ -92,15 +92,11 @@ uiNamespace setVariable ["ARC_console_layoutModeActive", _mode];
 private _tabletFrameIdc = 78141;
 private _tabletFrameCtrl = _display displayCtrl _tabletFrameIdc;
 if (_mode isEqualTo "TABLET_FRAME") then {
-    if (isNull _tabletFrameCtrl) then {
-        _tabletFrameCtrl = _display ctrlCreate ["RscPicture", _tabletFrameIdc];
-    };
     if (!isNull _tabletFrameCtrl) then {
-        _tabletFrameCtrl ctrlSetText "pics\Farabad_Tablet.paa";
         _tabletFrameCtrl ctrlShow true;
     } else {
         if !(uiNamespace getVariable ["ARC_console_tabletFrameWarned", false]) then {
-            diag_log "[ARC][UI][WARN] uiConsoleApplyLayout: TABLET_FRAME requested but RscPicture control could not be created.";
+            diag_log format ["[ARC][UI][WARN] uiConsoleApplyLayout: TABLET_FRAME requested but IDC %1 not found in display.", _tabletFrameIdc];
             uiNamespace setVariable ["ARC_console_tabletFrameWarned", true];
         };
     };
