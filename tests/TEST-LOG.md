@@ -11,6 +11,21 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-06-29 03:54 UTC — Preflight sqflint scope warning fix for AIRBASE UI snapshot (Mode A)
+
+**Branch/Commit:** `copilot/queue-aircraft-for-departure` @ `5f877902d65998ead63c99cecd80c405dfabda2b` (base before this fix; working tree includes this TEST-LOG update)
+
+**Scenario:** Fix the failing GitHub Actions job `Arma SQF + Mission Config Preflight / preflight (pull_request)` by addressing `sqflint -e w` warnings in `functions/core/fn_publicBroadcastState.sqf` for nested AIRBASE UI snapshot blocks that call `_resolveAircraftDisplay`.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | CI root-cause analysis | Review workflow run `28347455433` job `83973603809` logs. | PASS | Failure isolated to `SQF static analysis (changed *.sqf files only)` with warnings: `Local variable "_resolveAircraftDisplay" is not from this scope (not private)`. |
+| 2 | Post-change targeted preflight | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_publicBroadcastState.sqf && ~/.local/bin/sqflint -e w functions/core/fn_publicBroadcastState.sqf && bash tests/static/airbase_ramp_queue_contract_checks.sh && bash tests/static/airbase_queue_lifecycle_contract_checks.sh` | PASS | Compat scan passed; sqflint warning cleared; both AIRBASE ramp/queue lifecycle static suites passed after the scoped fix. |
+| 3 | Runtime smoke (hosted/local MP) | Exercise AIR/TOWER pending-clearance decision rows and runway-owner fallback labels after a parked asset leaves the queue preview. | BLOCKED | Arma 3 runtime unavailable in sandbox. |
+| 4 | Dedicated/JIP validation | Dedicated server + late-join client: verify AIRBASE UI snapshot labels remain correct and replicated for pending decisions and runway-owner fallback. | BLOCKED | Dedicated server/JIP runtime unavailable in sandbox session. |
+
+---
+
 ## 2026-06-29 03:47 UTC — QA actions 1-3: CI coverage, compat debt doc, lazy-load guard cleanup (Mode G/F/C)
 
 **Branch/Commit:** `copilot/queue-aircraft-for-departure` @ `98f11446c2c35246a1eb02fa8c29b86fb3768391` (pre-commit; this TEST-LOG entry is part of the same commit)

@@ -679,7 +679,16 @@ if (!(_airUiDecisionCap isEqualType 0) || { _airUiDecisionCap < 5 }) then { _air
 
     if (_decisionNeeded && { (count _uiDecisionQueue) < _airUiDecisionCap }) then {
         private _decisionType = [_meta, "aircraftType", ""] call _metaValue;
-        _decisionType = [_decisionType] call _resolveAircraftDisplay;
+        private _decisionTypeClass = [_decisionType, ""] call _normalizeAirText;
+        if !(_decisionTypeClass isEqualTo "") then {
+            private _decisionTypeDisplay = "";
+            if (isClass (configFile >> "CfgVehicles" >> _decisionTypeClass)) then {
+                _decisionTypeDisplay = getText (configFile >> "CfgVehicles" >> _decisionTypeClass >> "displayName");
+            };
+            _decisionType = [_decisionTypeDisplay, _decisionTypeClass] call _normalizeAirText;
+        } else {
+            _decisionType = "";
+        };
         _uiDecisionQueue pushBack [
             format [
                 "Decision required: %1 %2",
@@ -921,7 +930,16 @@ if !(_runwayOwnerFlightId isEqualTo "") then {
         private _ownerMeta = if (_ownerAirRec isEqualType [] && { (count _ownerAirRec) >= 8 }) then { _ownerAirRec param [7, []] } else { [] };
         if !(_ownerMeta isEqualType []) then { _ownerMeta = []; };
         private _ownerAircraftType = [_ownerMeta, "vehType", ""] call _metaValue;
-        _ownerAircraftType = [_ownerAircraftType] call _resolveAircraftDisplay;
+        private _ownerAircraftTypeClass = [_ownerAircraftType, ""] call _normalizeAirText;
+        if !(_ownerAircraftTypeClass isEqualTo "") then {
+            private _ownerAircraftTypeDisplay = "";
+            if (isClass (configFile >> "CfgVehicles" >> _ownerAircraftTypeClass)) then {
+                _ownerAircraftTypeDisplay = getText (configFile >> "CfgVehicles" >> _ownerAircraftTypeClass >> "displayName");
+            };
+            _ownerAircraftType = [_ownerAircraftTypeDisplay, _ownerAircraftTypeClass] call _normalizeAirText;
+        } else {
+            _ownerAircraftType = "";
+        };
         private _ownerAssetId = if (_ownerAirRec isEqualType [] && { (count _ownerAirRec) >= 5 }) then { _ownerAirRec param [4, ""] } else { "" };
         _runwayOwnerCallsign = [_ownerAssetId, _ownerAircraftType] call _deriveAssetCallsign;
         _runwayOwnerDisplay = if (_runwayOwnerCallsign isEqualTo "") then {
