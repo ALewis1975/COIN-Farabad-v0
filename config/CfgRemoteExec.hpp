@@ -59,6 +59,8 @@ class CfgRemoteExec
         // UAS screen feed RPCs (client request; server owns published snapshot)
         class ARC_fnc_uasScreenRequestFeed          { allowedTargets = 2; };
         class ARC_fnc_uasScreenRequestClear         { allowedTargets = 2; };
+        class ARC_fnc_helmScreenRequestFeed         { allowedTargets = 2; };
+        class ARC_fnc_helmScreenRequestClear        { allowedTargets = 2; };
 
         // AIRBASE client → server RPCs (ATC interactions)
         // All 9 server-side handlers have isServer guard + ARC_fnc_rpcValidateSender;
