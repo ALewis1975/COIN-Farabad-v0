@@ -79,6 +79,32 @@ ARC_fnc_uasScreenRequestFeed = {
         };
     };
 
+    private _screenName = vehicleVarName _screen;
+    if (_screenName isEqualTo "") then { _screenName = _screenNid; };
+
+    private _helmSnapshot = missionNamespace getVariable ["ARC_helmScreenFeedSnapshot", []];
+    if (_helmSnapshot isEqualType []) then
+    {
+        private _helmCount = count _helmSnapshot;
+        if (_helmCount > 0) then
+        {
+            _helmSnapshot = _helmSnapshot select { !((_x param [0, ""]) isEqualTo _screenNid) };
+            if ((count _helmSnapshot) < _helmCount) then
+            {
+                missionNamespace setVariable ["ARC_helmScreenFeedSnapshot", _helmSnapshot, true];
+                if (!isNil "ARC_fnc_helmScreenPublishSnapshot") then
+                {
+                    [] call ARC_fnc_helmScreenPublishSnapshot;
+                }
+                else
+                {
+                    missionNamespace setVariable ["ARC_helmScreenFeedSnapshotUpdatedAt", serverTime, true];
+                };
+                diag_log format ["[ARC][SCREENFEED][OPS] OWNER_SET screen=%1 owner=UAS cleared=HELM_MAP caller=%2", _screenName, name _caller];
+            };
+        };
+    };
+
     private _label = [_uav] call ARC_fnc_uasScreenLabel;
     private _snapshot = missionNamespace getVariable ["ARC_uasScreenFeedSnapshot", []];
     if (!(_snapshot isEqualType [])) then { _snapshot = []; };
@@ -89,9 +115,6 @@ ARC_fnc_uasScreenRequestFeed = {
 
     missionNamespace setVariable ["ARC_uasScreenFeedSnapshot", _snapshot, true];
     [] call ARC_fnc_uasScreenPublishSnapshot;
-
-    private _screenName = vehicleVarName _screen;
-    if (_screenName isEqualTo "") then { _screenName = _screenNid; };
 
     if (!isNil "ARC_fnc_intelLog") then
     {
