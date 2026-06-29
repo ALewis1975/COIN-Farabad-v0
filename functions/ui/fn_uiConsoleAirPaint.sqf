@@ -192,8 +192,8 @@ private _trafficStatusLabel = {
 
 private _priorityLabel = {
     params ["_priority"];
-    if (_priority >= _PRIO_EMERGENCY) exitWith { "Emergency" };
-    if (_priority >= _PRIO_ELEVATED) exitWith { "Priority" };
+    if (_priority >= 100) exitWith { "Emergency" };
+    if (_priority >= 1) exitWith { "Priority" };
     "Routine"
 };
 

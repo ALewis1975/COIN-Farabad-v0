@@ -11,6 +11,21 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-06-29 02:18 UTC — AIR / TOWER callsign visibility + plain-English UX refresh (Mode A)
+
+**Branch/Commit:** `copilot/ensure-call-sign-display` @ `b561a79ba04bfe30ce6d835896a17381be13f0e9` (working tree includes this TEST-LOG update and the final `fn_uiConsoleAirPaint.sqf` lint fix)
+
+**Scenario:** Keep active departures and arrivals human-readable on the AIR / TOWER console by preserving aircraft callsign context even after the aircraft leaves the queue preview, and rewrite major AIR/TOWER labels into plain English / controller terminology so the board is more intuitive.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | Baseline AIR/TOWER lint + static contracts | `python3 -m pip install --user sqflint ripgrep && python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_publicBroadcastState.sqf functions/ui/fn_uiConsoleAirPaint.sqf functions/ui/fn_uiConsoleAirMapPaint.sqf functions/ui/fn_uiConsoleActionAirPrimary.sqf functions/ui/fn_uiConsoleActionAirSecondary.sqf functions/ambiance/fn_airbaseInit.sqf && ~/.local/bin/sqflint -e w functions/core/fn_publicBroadcastState.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleAirPaint.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleAirMapPaint.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleActionAirPrimary.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleActionAirSecondary.sqf && ~/.local/bin/sqflint -e w functions/ambiance/fn_airbaseInit.sqf && bash tests/static/airbase_queue_lifecycle_contract_checks.sh && bash tests/static/airbase_planning_mode_checks.sh && bash scripts/dev/check_console_conflicts.sh` | PASS | Baseline AIR/TOWER snapshot, painter, and console shell checks were clean before edits. |
+| 2 | Post-change AIR/TOWER lint + static contracts | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/core/fn_publicBroadcastState.sqf functions/ui/fn_uiConsoleAirPaint.sqf && ~/.local/bin/sqflint -e w functions/core/fn_publicBroadcastState.sqf && ~/.local/bin/sqflint -e w functions/ui/fn_uiConsoleAirPaint.sqf && bash tests/static/airbase_queue_lifecycle_contract_checks.sh && bash tests/static/airbase_planning_mode_checks.sh && bash scripts/dev/check_console_conflicts.sh` | PASS | Updated runway-owner fallback and AIR / TOWER wording passed compat, sqflint, AIRBASE lifecycle checks, planning-mode checks, and console IDC/painter validation. |
+| 3 | Runtime smoke (hosted/local MP) | Open the AIR / TOWER console during one active departure and one active arrival; verify the board and runway detail pane show the aircraft callsign and readable controller text throughout the movement. | BLOCKED | Arma 3 runtime unavailable in sandbox. |
+| 4 | Dedicated/JIP validation | Dedicated server + late join client: repeat active departure/arrival checks and confirm callsign/board text stay replicated correctly for JIP clients. | BLOCKED | Dedicated server/JIP runtime unavailable in sandbox session. |
+
+---
+
 ## 2026-06-29 02:18 UTC — Pre-taxi startup failure no longer aborts departures (Mode A)
 
 **Branch/Commit:** `copilot/taxi-aircraft-engines-on` @ `363f35b4c1fe85e49d7c2121a5007a9646e58c17` (working tree includes this TEST-LOG update)
