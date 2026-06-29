@@ -396,7 +396,45 @@ private _composeAircraftLabel = {
     format ["%1 / %2", _callsignLabel, _fidLabel]
 };
 
+private _deriveAssetCallsign = {
+    params [
+        ["_assetId", "", [""]],
+        ["_aircraftType", "", [""]]
+    ];
+
+    private _assetLabel = [_assetId, ""] call _normalizeAirText;
+    if (_assetLabel isEqualTo "") exitWith { "" };
+    if ((_assetLabel find "-") < 0) exitWith { "" };
+
+    private _parts = _assetLabel splitString "-";
+    if ((count _parts) < 2) exitWith { "" };
+
+    private _callsign = "";
+    if ((count _parts) >= 3) then {
+        _callsign = _parts select ((count _parts) - 1);
+        if ((count _callsign) <= 2) then {
+            _callsign = format ["%1 %2", _parts select 1, _callsign];
+        };
+    } else {
+        _callsign = _parts select 1;
+    };
+
+    if ([_callsign] call _isOpaqueAirId) exitWith { "" };
+    [_callsign, [_aircraftType, _assetLabel] call _normalizeAirText] call _normalizeAirText
+};
+
 private _findFlightPreview = {
+    params ["_rows", "_fid"];
+    private _out = [];
+    {
+        if (_x isEqualType [] && { (_x param [0, ""]) isEqualTo _fid }) exitWith {
+            _out = _x;
+        };
+    } forEach _rows;
+    _out
+};
+
+private _findAirRecord = {
     params ["_rows", "_fid"];
     private _out = [];
     {
@@ -699,6 +737,9 @@ private _depSlot = 0;
             _ageS = round ((serverTime - _requestedAt) max 0);
         };
     };
+    if ([_callsign] call _isOpaqueAirId) then {
+        _callsign = [_asset, _aircraftType] call _deriveAssetCallsign;
+    };
     _callsign = [_callsign, _fid] call _normalizeAirText;
 
     if (_kind isEqualTo "ARR") then {
@@ -876,8 +917,18 @@ if !(_runwayOwnerFlightId isEqualTo "") then {
         _runwayOwnerCallsign = _ownerRec param [1, ""];
         _runwayOwnerDisplay = [_runwayOwnerFlightId, _runwayOwnerCallsign, _ownerRec param [2, ""]] call _composeAircraftLabel;
     } else {
-        _runwayOwnerCallsign = "";
-        _runwayOwnerDisplay = _runwayOwnerFlightId;
+        private _ownerAirRec = [_airRecs, _runwayOwnerFlightId] call _findAirRecord;
+        private _ownerMeta = if (_ownerAirRec isEqualType [] && { (count _ownerAirRec) >= 8 }) then { _ownerAirRec param [7, []] } else { [] };
+        if !(_ownerMeta isEqualType []) then { _ownerMeta = []; };
+        private _ownerAircraftType = [_ownerMeta, "vehType", ""] call _metaValue;
+        _ownerAircraftType = [_ownerAircraftType] call _resolveAircraftDisplay;
+        private _ownerAssetId = if (_ownerAirRec isEqualType [] && { (count _ownerAirRec) >= 5 }) then { _ownerAirRec param [4, ""] } else { "" };
+        _runwayOwnerCallsign = [_ownerAssetId, _ownerAircraftType] call _deriveAssetCallsign;
+        _runwayOwnerDisplay = if (_runwayOwnerCallsign isEqualTo "") then {
+            [_runwayOwnerFlightId, _runwayOwnerFlightId, _ownerAircraftType] call _composeAircraftLabel
+        } else {
+            [_runwayOwnerFlightId, _runwayOwnerCallsign, _ownerAircraftType] call _composeAircraftLabel
+        };
     };
     if ([_runwayOwnerCallsign] call _isOpaqueAirId) then { _runwayOwnerCallsign = ""; };
 };
