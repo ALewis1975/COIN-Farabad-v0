@@ -161,6 +161,18 @@ ARC_fnc_uasScreenGetActiveUavs = {
     _uavs
 };
 
+ARC_fnc_uasScreenShortLabel = {
+    params [["_uav", objNull, [objNull]]];
+    if (isNull _uav) exitWith {"UNKNOWN"};
+
+    private _name = vehicleVarName _uav;
+    if (_name != "") exitWith { _name };
+
+    private _display = getText (configFile >> "CfgVehicles" >> typeOf _uav >> "displayName");
+    if (_display isEqualTo "") then { _display = typeOf _uav; };
+    _display
+};
+
 ARC_fnc_uasScreenLabel = {
     params [["_uav", objNull, [objNull]]];
     if (isNull _uav) exitWith {"UNKNOWN UAV"};

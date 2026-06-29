@@ -9,9 +9,11 @@
 if (isServer) then
 {
     [] execVM "scripts\uasScreen\uasScreen_serverInit.sqf";
+    [] execVM "scripts\helmScreen\helmScreen_serverInit.sqf";
 };
 
 if (hasInterface) then
 {
     [] execVM "scripts\uasScreen\uasScreen_clientInit.sqf";
+    [] execVM "scripts\helmScreen\helmScreen_clientInit.sqf";
 };

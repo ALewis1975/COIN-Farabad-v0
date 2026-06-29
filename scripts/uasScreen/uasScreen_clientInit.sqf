@@ -174,6 +174,42 @@ ARC_fnc_uasScreenApplySnapshotClient = {
     true
 };
 
+ARC_fnc_uasScreenRefreshActionTitles = {
+    params [["_screen", objNull, [objNull]]];
+    if (isNull _screen) exitWith {};
+
+    private _nextId = _screen getVariable ["ARC_uasScreen_nextActionId", -1];
+    private _prevId = _screen getVariable ["ARC_uasScreen_prevActionId", -1];
+    if (!(_nextId isEqualType 0)) then { _nextId = -1; };
+    if (!(_prevId isEqualType 0)) then { _prevId = -1; };
+    if (_nextId < 0 && { _prevId < 0 }) exitWith {};
+
+    private _uavs = [] call ARC_fnc_uasScreenGetActiveUavs;
+    private _count = count _uavs;
+    if (_count isEqualTo 0) exitWith
+    {
+        if (_nextId >= 0) then { _screen setUserActionText [_nextId, "[UAS] Next Active UAV Feed"]; };
+        if (_prevId >= 0) then { _screen setUserActionText [_prevId, "[UAS] Previous Active UAV Feed"]; };
+    };
+
+    private _curIdx = _screen getVariable ["ARC_uasScreenSelectedIndex", -1];
+    if (!(_curIdx isEqualType 0)) then { _curIdx = -1; };
+
+    private _nextIdx = (_curIdx + 1);
+    if (_nextIdx < 0) then { _nextIdx = _count - 1; };
+    if (_nextIdx >= _count) then { _nextIdx = 0; };
+
+    private _prevIdx = (_curIdx - 1);
+    if (_prevIdx < 0) then { _prevIdx = _count - 1; };
+    if (_prevIdx >= _count) then { _prevIdx = 0; };
+
+    private _nextLabel = [_uavs select _nextIdx] call ARC_fnc_uasScreenShortLabel;
+    private _prevLabel = [_uavs select _prevIdx] call ARC_fnc_uasScreenShortLabel;
+
+    if (_nextId >= 0) then { _screen setUserActionText [_nextId, format ["[UAS] Next: %1", _nextLabel]]; };
+    if (_prevId >= 0) then { _screen setUserActionText [_prevId, format ["[UAS] Prev: %1", _prevLabel]]; };
+};
+
 ARC_fnc_uasScreenSelectFeed = {
     params [
         ["_screen", objNull, [objNull]],
@@ -200,6 +236,7 @@ ARC_fnc_uasScreenSelectFeed = {
     private _label = [_uav] call ARC_fnc_uasScreenLabel;
     [netId _screen, netId _uav, _caller] remoteExecCall ["ARC_fnc_uasScreenRequestFeed", 2];
     [format ["Requesting UAS feed: %1", _label], "INFO", "TOAST", "uas-screen-select", 1] call ARC_fnc_clientHint;
+    [_screen] call ARC_fnc_uasScreenRefreshActionTitles;
     true
 };
 
@@ -230,11 +267,13 @@ ARC_fnc_uasScreenAddActions = {
 
         { if (_x in (actionIDs _obj)) then { _obj removeAction _x; }; } forEach _stored;
 
-        private _before = actionIDs _obj;
-        _obj addAction ["[UAS] Next Active UAV Feed", { params ["_target", "_caller"]; [_target, _caller, 1] call ARC_fnc_uasScreenSelectFeed; }, [], 0.84, true, true, "", _condition, 6];
-        _obj addAction ["[UAS] Previous Active UAV Feed", { params ["_target", "_caller"]; [_target, _caller, -1] call ARC_fnc_uasScreenSelectFeed; }, [], 0.83, true, true, "", _condition, 6];
-        _obj addAction ["[UAS] Clear Screen Feed", { params ["_target", "_caller"]; [netId _target, _caller] remoteExecCall ["ARC_fnc_uasScreenRequestClear", 2]; }, [], 0.82, true, true, "", _condition, 6];
-        _obj setVariable ["ARC_uasScreen_actionIds", (actionIDs _obj) - _before, false];
+        private _nextId = _obj addAction ["[UAS] Next Active UAV Feed", { params ["_target", "_caller"]; [_target, _caller, 1] call ARC_fnc_uasScreenSelectFeed; }, [], 0.84, true, true, "", _condition, 6];
+        private _prevId = _obj addAction ["[UAS] Previous Active UAV Feed", { params ["_target", "_caller"]; [_target, _caller, -1] call ARC_fnc_uasScreenSelectFeed; }, [], 0.83, true, true, "", _condition, 6];
+        private _clearId = _obj addAction ["[UAS] Clear Screen Feed", { params ["_target", "_caller"]; [netId _target, _caller] remoteExecCall ["ARC_fnc_uasScreenRequestClear", 2]; }, [], 0.82, true, true, "", _condition, 6];
+        _obj setVariable ["ARC_uasScreen_nextActionId", _nextId, false];
+        _obj setVariable ["ARC_uasScreen_prevActionId", _prevId, false];
+        _obj setVariable ["ARC_uasScreen_actionIds", [_nextId, _prevId, _clearId], false];
+        [_obj] call ARC_fnc_uasScreenRefreshActionTitles;
     } forEach _screens;
 
     true
