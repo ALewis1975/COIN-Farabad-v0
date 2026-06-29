@@ -529,11 +529,13 @@ if ((count _taxiFrames) == 0) exitWith {
 };
 
 if (_isEC130) then { _veh setFuel 1; };
-if !([_veh, _pilot, _debug] call _fnEnsureTaxiEngineOn) exitWith {
-    [_crewLive, _veh] call _fnAbortToIdle;
-    _asset set ["state", "PARKED"];
-    _asset set ["activeFlight", ""];
-    false
+private _startupOk = [_veh, _pilot, _debug] call _fnEnsureTaxiEngineOn;
+if (!_startupOk) then {
+    if (_debug) then { diag_log format ["[AIRBASESUB] %1 continuing departure despite pre-taxi startup failure (%2)", _fid, _vehType]; };
+    _veh engineOn true;
+    if (!isNull _pilot && {alive _pilot}) then {
+        _pilot action ["EngineOn", _veh];
+    };
 };
 if (_veh isKindOf "Air") then { _veh setCollisionLight true; _veh setPilotLight true; };
 

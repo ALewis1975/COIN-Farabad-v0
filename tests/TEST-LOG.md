@@ -11,6 +11,22 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-06-29 02:18 UTC — Pre-taxi startup failure no longer aborts departures (Mode A)
+
+**Branch/Commit:** `copilot/taxi-aircraft-engines-on` @ `363f35b4c1fe85e49d7c2121a5007a9646e58c17` (working tree includes this TEST-LOG update)
+
+**Scenario:** If engine startup fails before taxi in `ARC_fnc_airbasePlaneDepart`, do not abort the departure back to idle/PARKED. Continue taxi/takeoff attempt instead.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | Baseline repo static validation | `python3 -m pip install --quiet sqflint ripgrep && python3 scripts/dev/validate_state_migrations.py && bash scripts/dev/check_test_log_commits.sh && python3 scripts/dev/validate_marker_index.py && for t in tests/static/*.sh; do bash "$t"; done` | PASS | Full static suite passed before edits. |
+| 2 | Baseline changed-file lint | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf && sqflint -e w functions/ambiance/fn_airbasePlaneDepart.sqf` | PASS | Changed file was clean before edits. |
+| 3 | Post-change lint + AIRBASE static contracts | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf && sqflint -e w functions/ambiance/fn_airbasePlaneDepart.sqf && bash tests/static/airbase_planning_mode_checks.sh && bash tests/static/airbase_queue_lifecycle_contract_checks.sh` | PASS | Updated departure logic and related AIRBASE contracts passed. |
+| 4 | Runtime smoke (hosted/local MP) | Trigger a departure where pre-taxi startup fails; verify departure still proceeds and queue does not stall. | BLOCKED | Arma 3 runtime unavailable in sandbox. |
+| 5 | Dedicated/JIP validation | Dedicated server + late-join client: repeat pre-taxi startup-failure departure and verify replicated state/queue behavior. | BLOCKED | Dedicated server/JIP runtime unavailable in sandbox session. |
+
+---
+
 ## 2026-06-29 02:15 UTC — Airbase taxi requires engine-on for all takeoff departures (Mode A)
 
 **Branch/Commit:** `copilot/taxi-aircraft-engines-on` @ `173fccbcaf5fa0bf9509692fcb905a5bc771bbc8` (base before this fix; working tree includes this TEST-LOG update)
