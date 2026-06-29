@@ -35,9 +35,22 @@ ARC_fnc_uasScreenClearFeedClient = {
             private _screen = objectFromNetId _sNid;
             if (!isNull _screen) then
             {
-                private _selection = missionNamespace getVariable ["ARC_uasScreenTextureSelection", 0];
-                if (!(_selection isEqualType 0)) then { _selection = 0; };
-                _screen setObjectTexture [_selection, missionNamespace getVariable ["ARC_uasScreenIdleTexture", "#(argb,8,8,3)color(0,0,0,1)"]];
+                private _helmActive = false;
+                private _helmRecords = uiNamespace getVariable ["ARC_helmScreenLocalFeeds", []];
+                if (!(_helmRecords isEqualType [])) then { _helmRecords = []; };
+                {
+                    if (_x isEqualType [] && { (_x param [0, ""]) isEqualTo _sNid }) exitWith
+                    {
+                        _helmActive = true;
+                    };
+                } forEach _helmRecords;
+
+                if (!_helmActive) then
+                {
+                    private _selection = missionNamespace getVariable ["ARC_uasScreenTextureSelection", 0];
+                    if (!(_selection isEqualType 0)) then { _selection = 0; };
+                    _screen setObjectTexture [_selection, missionNamespace getVariable ["ARC_uasScreenIdleTexture", "#(argb,8,8,3)color(0,0,0,1)"]];
+                };
             };
         }
         else
@@ -65,13 +78,24 @@ ARC_fnc_uasScreenApplyFeedClient = {
     if (!(_records isEqualType [])) then { _records = []; };
 
     private _same = false;
+    private _sameRt = "";
     {
         if (_x isEqualType [] && { (_x param [0, ""]) isEqualTo _screenNid } && { (_x param [1, ""]) isEqualTo _uavNid }) exitWith
         {
             _same = true;
+            _sameRt = _x param [3, ""];
         };
     } forEach _records;
-    if (_same) exitWith {true};
+    if (_same) exitWith
+    {
+        if (_sameRt != "") then
+        {
+            private _selection = missionNamespace getVariable ["ARC_uasScreenTextureSelection", 0];
+            if (!(_selection isEqualType 0)) then { _selection = 0; };
+            _screen setObjectTexture [_selection, format ["#(argb,512,512,1)r2t(%1,1)", _sameRt]];
+        };
+        true
+    };
 
     [_screenNid] call ARC_fnc_uasScreenClearFeedClient;
 
