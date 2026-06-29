@@ -231,6 +231,10 @@ jobs:
         run: |
           tests/static/airbase_planning_mode_checks.sh
 
+      - name: AIRBASE ramp-queue contract static validation
+        run: |
+          bash tests/static/airbase_ramp_queue_contract_checks.sh
+
       - name: CASREQ snapshot contract static validation
         run: |
           tests/static/casreq_snapshot_contract_checks.sh

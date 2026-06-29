@@ -650,7 +650,20 @@ if (!_holdDepartures && { _rollDep } && { (count _candidates) > 0 }) then {
         if ((count _prefer) > 0) then { _candidates = _prefer; };
     };
 
-    private _asset = selectRandom _candidates;
+    // METT-TC priority: walk priority order, select first candidate whose asset ID
+    // starts with a configured prefix. Falls back to selectRandom when no match.
+    private _priorityOrder = missionNamespace getVariable ["airbase_v1_assetDeparturePriorityOrder", ["FW-RQ4","FW-EC130","FW-KC135","FW-A10","FW-F16","RW-AH64","RW-UH60","RW-CH47","FW-C17","FW-C130"]];
+    if (!(_priorityOrder isEqualType [])) then { _priorityOrder = []; };
+    private _priorityIdx = -1;
+    {
+        if (!(_x isEqualType "")) then { continue; };
+        private _prefix = _x;
+        {
+            if ((([_x, "id", ""] call _fnHmGet) find _prefix) == 0) exitWith { _priorityIdx = _forEachIndex; };
+        } forEach _candidates;
+        if (_priorityIdx >= 0) exitWith {};
+    } forEach _priorityOrder;
+    private _asset = if (_priorityIdx >= 0) then { _candidates select _priorityIdx } else { selectRandom _candidates };
     private _fid = call _fn_nextId;
     private _cat = [_asset, "category", "FW"] call _fnHmGet;
     private _aid = [_asset, "id", ""] call _fnHmGet;

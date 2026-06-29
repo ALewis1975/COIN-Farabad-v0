@@ -940,6 +940,37 @@ private _casTiming = [
     ["state", if (_casreqSnapshot isEqualType []) then { [_casreqSnapshot, "state", ""] call _metaValue } else { "" }]
 ];
 
+// Build parked-ramp view for player ATC: assets with state PARKED that are not
+// already in the departure queue. Each entry: [assetId, category, vehType, requiresTow].
+private _fnHmGetBcast = compile "params ['_m', '_k', '_d']; private _v = _m get _k; if (isNil '_v') then { _d } else { _v }";
+private _rtBcast = missionNamespace getVariable ["airbase_v1_rt", createHashMap];
+private _rtBcastAssets = [_rtBcast, "assets", []] call _fnHmGetBcast;
+if (!(_rtBcastAssets isEqualType [])) then { _rtBcastAssets = []; };
+
+private _queuedAssetIds = [];
+{
+    if (!(_x isEqualType [])) then { continue; };
+    if ((toUpper (_x param [1, ""])) isEqualTo "DEP") then {
+        private _qAid = _x param [2, ""];
+        if (!(_qAid isEqualTo "")) then { _queuedAssetIds pushBack _qAid; };
+    };
+} forEach _airQueue;
+
+private _uiParkedAssets = [];
+{
+    if (!(_x isEqualType createHashMap)) then { continue; };
+    private _pState = [_x, "state", "DISABLED"] call _fnHmGetBcast;
+    if (!(_pState isEqualTo "PARKED")) then { continue; };
+    private _pAid = [_x, "id", ""] call _fnHmGetBcast;
+    if (_pAid isEqualTo "") then { continue; };
+    if (_pAid in _queuedAssetIds) then { continue; };
+    private _pCat = [_x, "category", "FW"] call _fnHmGetBcast;
+    private _pVehType = [_x, "startVehType", ""] call _fnHmGetBcast;
+    private _pTow = [_x, "requiresTow", false] call _fnHmGetBcast;
+    if ((!(_pTow isEqualType true)) && (!(_pTow isEqualType false))) then { _pTow = false; };
+    _uiParkedAssets pushBack [_pAid, _pCat, _pVehType, _pTow];
+} forEach _rtBcastAssets;
+
 // Phase 5: compute real snapshot freshness from last airbase tick timestamp.
 // Thresholds are configurable; defaults: FRESH < 15s, STALE < 60s, DEGRADED >= 60s or missing.
 private _freshnessThresholdS = missionNamespace getVariable ["airbase_v1_freshness_threshold_s", 15];
@@ -1038,7 +1069,8 @@ private _airbaseUiSnapshot = [
         ["arrSlotSpacingS", _airUiArrSlotSpacing_s],
         ["depSlotSpacingS", _airUiDepSlotSpacing_s],
         ["publishIntervalS", (missionNamespace getVariable ["airbase_v1_uiPublishInterval_s", 5])]
-    ]]
+    ]],
+    ["parkedAssets", _uiParkedAssets]
 ];
 if ((count _uiDebug) > 0) then {
     _airbaseUiSnapshot pushBack ["debug", _uiDebug];
@@ -1163,7 +1195,8 @@ private _airUiKey = str [
     _uiArrivalsKey,
     _uiDeparturesKey,
     _uiPendingClearancesKey,
-    _uiStaffing
+    _uiStaffing,
+    count _uiParkedAssets
 ];
 private _lastAirUiKey = missionNamespace getVariable ["ARC_pub_airbaseUiSnapshotKey", ""];
 if (!(_lastAirUiKey isEqualType "")) then { _lastAirUiKey = ""; };

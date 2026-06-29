@@ -870,6 +870,10 @@ class Ops
             class airbaseRequestSetLaneStaffing {};
             class airbaseClientRequestSetLaneStaffing {};
 
+            // Ramp manual-queue RPCs (server authority + client wrapper)
+            class airbaseRequestQueueParkedAsset {};
+            class airbaseClientQueueParkedAsset {};
+
             // Clearance request RPCs (server authority + client wrappers)
             class airbaseClearanceSortRequests {};
             class airbaseBuildRouteDecision {};
