@@ -679,7 +679,16 @@ if (!(_airUiDecisionCap isEqualType 0) || { _airUiDecisionCap < 5 }) then { _air
 
     if (_decisionNeeded && { (count _uiDecisionQueue) < _airUiDecisionCap }) then {
         private _decisionType = [_meta, "aircraftType", ""] call _metaValue;
-        _decisionType = [_decisionType] call _resolveAircraftDisplay;
+        private _decisionTypeClass = [_decisionType, ""] call _normalizeAirText;
+        if !(_decisionTypeClass isEqualTo "") then {
+            private _decisionTypeDisplay = "";
+            if (isClass (configFile >> "CfgVehicles" >> _decisionTypeClass)) then {
+                _decisionTypeDisplay = getText (configFile >> "CfgVehicles" >> _decisionTypeClass >> "displayName");
+            };
+            _decisionType = [_decisionTypeDisplay, _decisionTypeClass] call _normalizeAirText;
+        } else {
+            _decisionType = "";
+        };
         _uiDecisionQueue pushBack [
             format [
                 "Decision required: %1 %2",
@@ -921,7 +930,16 @@ if !(_runwayOwnerFlightId isEqualTo "") then {
         private _ownerMeta = if (_ownerAirRec isEqualType [] && { (count _ownerAirRec) >= 8 }) then { _ownerAirRec param [7, []] } else { [] };
         if !(_ownerMeta isEqualType []) then { _ownerMeta = []; };
         private _ownerAircraftType = [_ownerMeta, "vehType", ""] call _metaValue;
-        _ownerAircraftType = [_ownerAircraftType] call _resolveAircraftDisplay;
+        private _ownerAircraftTypeClass = [_ownerAircraftType, ""] call _normalizeAirText;
+        if !(_ownerAircraftTypeClass isEqualTo "") then {
+            private _ownerAircraftTypeDisplay = "";
+            if (isClass (configFile >> "CfgVehicles" >> _ownerAircraftTypeClass)) then {
+                _ownerAircraftTypeDisplay = getText (configFile >> "CfgVehicles" >> _ownerAircraftTypeClass >> "displayName");
+            };
+            _ownerAircraftType = [_ownerAircraftTypeDisplay, _ownerAircraftTypeClass] call _normalizeAirText;
+        } else {
+            _ownerAircraftType = "";
+        };
         private _ownerAssetId = if (_ownerAirRec isEqualType [] && { (count _ownerAirRec) >= 5 }) then { _ownerAirRec param [4, ""] } else { "" };
         _runwayOwnerCallsign = [_ownerAssetId, _ownerAircraftType] call _deriveAssetCallsign;
         _runwayOwnerDisplay = if (_runwayOwnerCallsign isEqualTo "") then {
@@ -939,6 +957,37 @@ private _casTiming = [
     ["district", if (_casreqSnapshot isEqualType []) then { [_casreqSnapshot, "district_id", ""] call _metaValue } else { "" }],
     ["state", if (_casreqSnapshot isEqualType []) then { [_casreqSnapshot, "state", ""] call _metaValue } else { "" }]
 ];
+
+// Build parked-ramp view for player ATC: assets with state PARKED that are not
+// already in the departure queue. Each entry: [assetId, category, vehType, requiresTow].
+private _fnHmGetBcast = compile "params ['_m', '_k', '_d']; private _v = _m get _k; if (isNil '_v') then { _d } else { _v }";
+private _rtBcast = missionNamespace getVariable ["airbase_v1_rt", createHashMap];
+private _rtBcastAssets = [_rtBcast, "assets", []] call _fnHmGetBcast;
+if (!(_rtBcastAssets isEqualType [])) then { _rtBcastAssets = []; };
+
+private _queuedAssetIds = [];
+{
+    if (!(_x isEqualType [])) then { continue; };
+    if ((toUpper (_x param [1, ""])) isEqualTo "DEP") then {
+        private _qAid = _x param [2, ""];
+        if (!(_qAid isEqualTo "")) then { _queuedAssetIds pushBack _qAid; };
+    };
+} forEach _airQueue;
+
+private _uiParkedAssets = [];
+{
+    if (!(_x isEqualType createHashMap)) then { continue; };
+    private _pState = [_x, "state", "DISABLED"] call _fnHmGetBcast;
+    if (!(_pState isEqualTo "PARKED")) then { continue; };
+    private _pAid = [_x, "id", ""] call _fnHmGetBcast;
+    if (_pAid isEqualTo "") then { continue; };
+    if (_pAid in _queuedAssetIds) then { continue; };
+    private _pCat = [_x, "category", "FW"] call _fnHmGetBcast;
+    private _pVehType = [_x, "startVehType", ""] call _fnHmGetBcast;
+    private _pTow = [_x, "requiresTow", false] call _fnHmGetBcast;
+    if ((!(_pTow isEqualType true)) && (!(_pTow isEqualType false))) then { _pTow = false; };
+    _uiParkedAssets pushBack [_pAid, _pCat, _pVehType, _pTow];
+} forEach _rtBcastAssets;
 
 // Phase 5: compute real snapshot freshness from last airbase tick timestamp.
 // Thresholds are configurable; defaults: FRESH < 15s, STALE < 60s, DEGRADED >= 60s or missing.
@@ -1038,7 +1087,8 @@ private _airbaseUiSnapshot = [
         ["arrSlotSpacingS", _airUiArrSlotSpacing_s],
         ["depSlotSpacingS", _airUiDepSlotSpacing_s],
         ["publishIntervalS", (missionNamespace getVariable ["airbase_v1_uiPublishInterval_s", 5])]
-    ]]
+    ]],
+    ["parkedAssets", _uiParkedAssets]
 ];
 if ((count _uiDebug) > 0) then {
     _airbaseUiSnapshot pushBack ["debug", _uiDebug];
@@ -1163,7 +1213,8 @@ private _airUiKey = str [
     _uiArrivalsKey,
     _uiDeparturesKey,
     _uiPendingClearancesKey,
-    _uiStaffing
+    _uiStaffing,
+    count _uiParkedAssets
 ];
 private _lastAirUiKey = missionNamespace getVariable ["ARC_pub_airbaseUiSnapshotKey", ""];
 if (!(_lastAirUiKey isEqualType "")) then { _lastAirUiKey = ""; };

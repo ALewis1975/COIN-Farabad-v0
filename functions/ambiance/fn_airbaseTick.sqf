@@ -324,6 +324,15 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
             _meta = [_meta, "lifecycle_auto_land", true] call _metaSet;
             _clearanceStateDirty = true;
             ["LIFECYCLE_LAND_GATE", _rec param [0, ""], "SYSTEM", _rec param [2, ""], [_distM, _landGateM]] call _fnEventPush;
+            // Notify tower controllers that the auto-land gate has fired so they
+            // can issue landing clearance without checking the console.
+            private _lgRid = _rec param [0, ""];
+            private _lgPilot = [_meta, "pilotCallsign", _rec param [3, ""]] call _metaGet;
+            {
+                private _lgTowUid = _x param [1, ""];
+                private _lgTowOwner = [_uidOwnerCache, _lgTowUid, -1] call _hgOwner;
+                [_lgTowOwner, "TOAST", "Airbase Tower", format ["LAND GATE: %1 on final (%2m) — issue landing clearance", _lgPilot, round _distM], format ["AIR_LAND_GATE:%1", _lgRid]] call _fnNotifyMaybe;
+            } forEach _towerControllers;
         };
 
         if (_rtypeNow isEqualTo "REQ_INBOUND" && { _status in ["QUEUED", "PENDING", "AWAITING_TOWER_DECISION"] } && { _distM >= 0 } && { _distM <= _warnGateUrg } && { _ageS >= _staleEscalateS }) then {
@@ -335,6 +344,18 @@ for "_iClr" from 0 to ((count _clearanceRequests) - 1) do {
             _meta = [_meta, "staleInboundEscalateAfterS", _staleEscalateS] call _metaSet;
             _clearanceStateDirty = true;
             ["ESCALATE", _rec param [0, ""], "SYSTEM", _rec param [2, ""], ["STALE_INBOUND_NEAR_RUNWAY", _distM, _ageS]] call _fnEventPush;
+            // Alert tower controllers: aircraft is near the runway without clearance.
+            private _siRid = _rec param [0, ""];
+            private _siPilot = [_meta, "pilotCallsign", _rec param [3, ""]] call _metaGet;
+            {
+                private _siTowUid = _x param [1, ""];
+                private _siTowOwner = [_uidOwnerCache, _siTowUid, -1] call _hgOwner;
+                [_siTowOwner, "TOAST", "Airbase Tower", format ["URGENT: %1 uncleared at %2m — decision required now", _siPilot, round _distM], format ["AIR_STALE_INB:%1", _siRid]] call _fnNotifyMaybe;
+            } forEach _towerControllers;
+            // Also alert the pilot that their request has been escalated.
+            private _siPilotUid = _rec param [2, ""];
+            private _siPilotOwner = [_uidOwnerCache, _siPilotUid, -1] call _hgOwner;
+            [_siPilotOwner, "TOAST", "Airbase Tower", format ["Your inbound %1 is URGENT — awaiting tower clearance", _siRid], format ["AIR_STALE_PILOT:%1", _siRid]] call _fnNotifyMaybe;
         };
     };
 
@@ -650,7 +671,20 @@ if (!_holdDepartures && { _rollDep } && { (count _candidates) > 0 }) then {
         if ((count _prefer) > 0) then { _candidates = _prefer; };
     };
 
-    private _asset = selectRandom _candidates;
+    // METT-TC priority: walk priority order, select first candidate whose asset ID
+    // starts with a configured prefix. Falls back to selectRandom when no match.
+    private _priorityOrder = missionNamespace getVariable ["airbase_v1_assetDeparturePriorityOrder", ["FW-RQ4","FW-EC130","FW-KC135","FW-A10","FW-F16","RW-AH64","RW-UH60","RW-CH47","FW-C17","FW-C130"]];
+    if (!(_priorityOrder isEqualType [])) then { _priorityOrder = []; };
+    private _priorityIdx = -1;
+    {
+        if (!(_x isEqualType "")) then { continue; };
+        private _prefix = _x;
+        {
+            if ((([_x, "id", ""] call _fnHmGet) find _prefix) == 0) exitWith { _priorityIdx = _forEachIndex; };
+        } forEach _candidates;
+        if (_priorityIdx >= 0) exitWith {};
+    } forEach _priorityOrder;
+    private _asset = if (_priorityIdx >= 0) then { _candidates select _priorityIdx } else { selectRandom _candidates };
     private _fid = call _fn_nextId;
     private _cat = [_asset, "category", "FW"] call _fnHmGet;
     private _aid = [_asset, "id", ""] call _fnHmGet;

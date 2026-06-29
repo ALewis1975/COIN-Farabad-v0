@@ -142,6 +142,16 @@ if (_approve) then {
         false
     };
 
+    // Reserve runway for player-approved departures so no second approval can be
+    // issued while this aircraft is taxiing to the runway. Uses the clearance
+    // request ID as the runway owner token; release is handled by
+    // fn_airbaseRunwayLockSweep or when the aircraft physically occupies the runway.
+    if (_flowKind isEqualTo "DEP") then {
+        private _playerReserveS = missionNamespace getVariable ["airbase_v1_player_dep_reserve_s", 300];
+        if (!(_playerReserveS isEqualType 0) || { _playerReserveS < 30 }) then { _playerReserveS = 300; };
+        [_requestId, "DEP", format ["PLAYER:%1", _name], _playerReserveS, "PLAYER_APPROVAL"] call ARC_fnc_airbaseRunwayLockReserve;
+    };
+
     { _meta pushBack _x; } forEach _routeMeta;
     _meta pushBack ["routeValidatedAtDecision", _now];
     _rec set [10, _meta];
@@ -174,8 +184,12 @@ _requests = [_requests] call ARC_fnc_airbaseClearanceSortRequests;
 
 
 private _decisionWord = if (_approve) then {"approved"} else {"denied"};
+private _reqTypeOuter = toUpper (_rec param [1, ""]);
 if (_requesterOwner > 0) then {
     ["Airbase Clearance", format ["Request %1 %2 by tower (%3) [HUMAN DECIDED]", _requestId, _decisionWord, _name], 6] remoteExec ["ARC_fnc_clientToast", _requesterOwner];
+    if (_approve && { !(_reqTypeOuter in ["REQ_INBOUND", "REQ_LAND", "REQ_EMERGENCY"]) }) then {
+        ["Runway reserved. Taxi to runway and depart when ready."] remoteExec ["ARC_fnc_clientHint", _requesterOwner];
+    };
 };
 private _controllerOwner = owner _caller;
 if (_controllerOwner > 0) then {

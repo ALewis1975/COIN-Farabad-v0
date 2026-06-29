@@ -74,6 +74,7 @@ class CfgRemoteExec
         class ARC_fnc_airbaseRequestSetLaneStaffing     { allowedTargets = 2; };
         class ARC_fnc_airbaseRequestHoldDepartures      { allowedTargets = 2; };
         class ARC_fnc_airbaseRequestReleaseDepartures   { allowedTargets = 2; };
+        class ARC_fnc_airbaseRequestQueueParkedAsset    { allowedTargets = 2; };
 
         // Logistics relay + AIRBASE admin RPCs
         // (ARC_fnc_execSpawnConvoy intentionally NOT allowlisted — server-internal only; F-LOG-1.)

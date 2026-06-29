@@ -82,6 +82,18 @@ private _cleanAirText = {
     _out
 };
 
+private _resolveAircraftDisplay = {
+    params ["_raw"];
+    private _cls = [_raw, ""] call _cleanAirText;
+    if (_cls isEqualTo "") exitWith { "" };
+    private _display = "";
+    if (isClass (configFile >> "CfgVehicles" >> _cls)) then {
+        _display = getText (configFile >> "CfgVehicles" >> _cls >> "displayName");
+    };
+    _display = [_display, _cls] call _cleanAirText;
+    _display
+};
+
 private _isOpaqueAirId = {
     params ["_value"];
     private _txt = toUpper ([_value, ""] call _cleanAirText);
@@ -132,6 +144,7 @@ private _modeTitle = {
     switch (toUpper _mode) do
     {
         case "CLEARANCES": { "Clearance Desk" };
+        case "RAMP": { "Ramp Control" };
         case "DEBUG": { "Diagnostics" };
         default { "Airfield Status Board" };
     }
@@ -142,6 +155,7 @@ private _modeSummary = {
     switch (toUpper _mode) do
     {
         case "CLEARANCES": { "Approve, deny, and route aircraft requests." };
+        case "RAMP": { "View parked aircraft and queue them for departure." };
         case "DEBUG": { "Snapshot health, routing faults, and timing telemetry." };
         default { "Inbound traffic, runway status, and outbound traffic." };
     }
@@ -152,6 +166,7 @@ private _modeGuidance = {
     switch (toUpper _mode) do
     {
         case "CLEARANCES": { "Approve or deny pilot requests, manage the departure lineup, and staff tower positions." };
+        case "RAMP": { "Select a parked aircraft and press QUEUE DEPARTURE to add it to the departure lineup." };
         case "DEBUG": { "Review snapshot health, route failures, and controller timing telemetry." };
         default { "Track inbound aircraft, runway use, and outbound departures at a glance." };
     }
@@ -229,6 +244,7 @@ private _modeButtonLabel = {
     switch (toUpper _mode) do
     {
         case "CLEARANCES": { "CLEARANCE DESK" };
+        case "RAMP": { "RAMP" };
         case "DEBUG": { "DIAGNOSTICS" };
         default { "STATUS BOARD" };
     }
@@ -246,6 +262,7 @@ private _cycleModes = {
     params ["_current", "_canControl", "_debugEnabled"];
     private _modes = ["AIRFIELD_OPS"];
     if (_canControl) then { _modes pushBack "CLEARANCES"; };
+    if (_canControl) then { _modes pushBack "RAMP"; };
     if (_debugEnabled) then { _modes pushBack "DEBUG"; };
     private _idx = _modes find _current;
     if (_idx < 0) exitWith { _modes select 0 };
@@ -353,8 +370,9 @@ uiNamespace setVariable ["ARC_console_airMode", _airMode];
 
 private _airSubmode = ["ARC_console_airSubmode", "AIRFIELD_OPS"] call ARC_fnc_uiNsGetString;
 _airSubmode = toUpper ([_airSubmode] call _trimFn);
-if !(_airSubmode in ["AIRFIELD_OPS", "CLEARANCES", "DEBUG"]) then { _airSubmode = "AIRFIELD_OPS"; };
+if !(_airSubmode in ["AIRFIELD_OPS", "CLEARANCES", "RAMP", "DEBUG"]) then { _airSubmode = "AIRFIELD_OPS"; };
 if (!_canAirControl && { _airSubmode isEqualTo "CLEARANCES" }) then { _airSubmode = "AIRFIELD_OPS"; };
+if (!_canAirControl && { _airSubmode isEqualTo "RAMP" }) then { _airSubmode = "AIRFIELD_OPS"; };
 if (!_debugAir && { _airSubmode isEqualTo "DEBUG" }) then { _airSubmode = "AIRFIELD_OPS"; };
 uiNamespace setVariable ["ARC_console_airSubmode", _airSubmode];
 
@@ -558,6 +576,12 @@ if (_rebuild) then {
                 ];
                 _ctrlList lbSetData [_summaryRow, "CSTATUS|SUMMARY"];
 
+                // Runway status row — ATC can see runway state without leaving CLEARANCES.
+                private _rwyOwnerTagC = if (_runwayOwnerDisplay isEqualTo "") then {"Vacant"} else {_runwayOwnerDisplay};
+                private _rwyHoldLabelC = if (_holdDepartures) then {"Hold ACTIVE"} else {"Open"};
+                private _rwyStatusRow = _ctrlList lbAdd format ["Runway: %1  |  Aircraft: %2  |  Departures: %3", _runwayState, _rwyOwnerTagC, _rwyHoldLabelC];
+                _ctrlList lbSetData [_rwyStatusRow, format ["RWY|%1|%2|%3", _runwayState, _runwayOwnerFlightId, _activeMovement]];
+
                 private _hdrReq = _ctrlList lbAdd "-- PENDING CLEARANCES --";
                 _ctrlList lbSetData [_hdrReq, "HDR|REQ"];
                 if ((count _pendingClearances) == 0) then {
@@ -577,6 +601,17 @@ if (_rebuild) then {
                         if (!(_autoEta isEqualType 0)) then { _autoEta = -1; };
                         private _lbl = format ["%1  |  %2  |  Request %3", _trackLabel, [_rtype] call _requestTypeLabel, _rid];
                         if (_autoEta >= 0) then { _lbl = _lbl + format ["  |  AUTO %1", [_autoEta] call _fmtSeconds]; };
+                        if (toUpper _rtype in ["REQ_INBOUND", "REQ_LAND"]) then {
+                            private _distM = [_meta, "arrivalDistanceM", -1] call _metaGet;
+                            private _warnLvl = [_meta, "arrivalWarnLevel", ""] call _metaGet;
+                            if ((_distM isEqualType 0) && { _distM >= 0 }) then {
+                                if (!(_warnLvl isEqualTo "") && { !(_warnLvl isEqualTo "NONE") }) then {
+                                    _lbl = _lbl + format ["  |  %1 %2m", _warnLvl, round _distM];
+                                } else {
+                                    _lbl = _lbl + format ["  |  %1m", round _distM];
+                                };
+                            };
+                        };
                         if (_prio >= 100) then { _lbl = _lbl + "  |  !EMERGENCY!"; };
                         private _row = _ctrlList lbAdd _lbl;
                         _ctrlList lbSetData [_row, format ["REQ|%1|%2|%3|%4", _rid, _rtype, _callsign, _prio]];
@@ -624,6 +659,36 @@ if (_rebuild) then {
                         private _row = _ctrlList lbAdd format ["Request %1 %2 by %3 (%4)", _rid, toLower _status, _by, [_ts] call _fmtAgo];
                         _ctrlList lbSetData [_row, format ["DEC|%1|%2|%3|%4", _rid, _status, _ts, _by]];
                     } forEach _clearanceHistory;
+                };
+            };
+
+            case "RAMP":
+            {
+                private _guideRow = _ctrlList lbAdd (["RAMP"] call _modeGuidance);
+                _ctrlList lbSetData [_guideRow, "RAMP_HDR|RAMP"];
+
+                private _parkedAssets = [_snapshot, "parkedAssets", []] call _getPair;
+                if (!(_parkedAssets isEqualType [])) then { _parkedAssets = []; };
+
+                private _hdrRamp = _ctrlList lbAdd format ["-- RAMP: PARKED AIRCRAFT (%1) --", count _parkedAssets];
+                _ctrlList lbSetData [_hdrRamp, "HDR|RAMP"];
+
+                if ((count _parkedAssets) == 0) then {
+                    [_ctrlList, "No parked aircraft available for departure"] call ARC_fnc_uiConsoleFormatEmptyState;
+                } else {
+                    {
+                        if (!(_x isEqualType [])) then { continue; };
+                        private _pAid = _x param [0, ""];
+                        private _pCat = _x param [1, "FW"];
+                        private _pVehType = _x param [2, ""];
+                        private _pTow = _x param [3, false];
+                        if ((!(_pTow isEqualType true)) && (!(_pTow isEqualType false))) then { _pTow = false; };
+                        private _towTag = if (_pTow) then { " [TOW]" } else { "" };
+                        private _displayName = [_pVehType] call _resolveAircraftDisplay;
+                        private _label = if (_displayName isEqualTo "") then { _pAid } else { format ["%1 (%2)", _pAid, _displayName] };
+                        private _row = _ctrlList lbAdd format ["%1  |  %2  |  PARKED%3", _label, _pCat, _towTag];
+                        _ctrlList lbSetData [_row, format ["ASSET|%1|%2|%3|%4", _pAid, _pCat, _pVehType, if (_pTow) then {"1"} else {"0"}]];
+                    } forEach _parkedAssets;
                 };
             };
 
@@ -845,6 +910,24 @@ if (_airMode isEqualTo "PILOT") then {
             _secondaryLabel = _nextViewLabel;
             _secondaryTooltip = _nextViewTooltip;
         };
+        case "RAMP":
+        {
+            switch (_rowType) do
+            {
+                case "ASSET": {
+                    _primaryLabel = "QUEUE DEPARTURE";
+                    _primaryEnabled = _canAirQueueManage;
+                    _primaryTooltip = "Add selected parked aircraft to the departure queue.";
+                };
+                default {
+                    _primaryLabel = "READ-ONLY";
+                    _primaryEnabled = false;
+                    _primaryTooltip = "Select a parked aircraft to queue.";
+                };
+            };
+            _secondaryLabel = _nextViewLabel;
+            _secondaryTooltip = _nextViewTooltip;
+        };
         default
         {
             // Phase 3 safety: HDR rows are always inert.
@@ -1051,6 +1134,18 @@ switch (_rowType) do
             if (_prio >= _PRIO_EMERGENCY) then {
                 _detailLines pushBack "<t color='#E74C3C'>EMERGENCY — requires immediate decision.</t>";
             };
+            if ((toUpper (_rec param [1, "-"])) in ["REQ_INBOUND", "REQ_LAND"]) then {
+                private _distM = [_meta, "arrivalDistanceM", -1] call _metaGet;
+                private _warnLvl = [_meta, "arrivalWarnLevel", "NONE"] call _metaGet;
+                if ((_distM isEqualType 0) && { _distM >= 0 }) then {
+                    private _warnColor = switch (toUpper _warnLvl) do {
+                        case "URGENT": { "#E74C3C" };
+                        case "CAUTION": { "#F5A623" };
+                        default { "#FFFFFF" }
+                    };
+                    _detailLines pushBack format ["Distance: <t color='%1'>%2m (%3)</t>", _warnColor, round _distM, _warnLvl];
+                };
+            };
             if (_canAirQueueManage) then {
                 _detailLines pushBack "Action: APPROVE or DENY this request.";
             } else {
@@ -1111,6 +1206,44 @@ switch (_rowType) do
             format ["Status: <t color='#FFFFFF'>%1</t>", _parts param [2, ""]],
             format ["When: <t color='#FFFFFF'>%1</t>", [parseNumber (_parts param [3, "-1"])] call _fmtAgo]
         ];
+    };
+    case "ASSET":
+    {
+        private _pAid = _parts param [1, ""];
+        private _pCat = _parts param [2, "FW"];
+        private _pVehType = _parts param [3, ""];
+        private _towFlag = _parts param [4, "0"];
+        private _requiresTow = (_towFlag isEqualTo "1");
+        private _displayName = [_pVehType] call _resolveAircraftDisplay;
+        private _label = if (_displayName isEqualTo "") then { _pAid } else { format ["%1 (%2)", _pAid, _displayName] };
+        _selectionHeading = format ["Parked: %1", _label];
+        _detailLines = [
+            format ["Asset ID: <t color='#FFFFFF'>%1</t>", _pAid],
+            format ["Category: <t color='#FFFFFF'>%1</t>", _pCat],
+            format ["Aircraft type: <t color='#FFFFFF'>%1</t>", if (_displayName isEqualTo "") then { "-" } else { _displayName }],
+            format ["Tow required: <t color='#FFFFFF'>%1</t>", if (_requiresTow) then { "Yes" } else { "No" }],
+            "Status: <t color='#4CAF50'>PARKED — available for departure</t>"
+        ];
+        if (_canAirQueueManage) then {
+            _detailLines pushBack "Action: Press QUEUE DEPARTURE to add this aircraft to the departure lineup.";
+        } else {
+            _detailLines pushBack "Read-only: no ramp queue authority on this account.";
+        };
+    };
+    case "RAMP_HDR":
+    {
+        _selectionHeading = "Ramp Control";
+        private _parkedCount = count ([_snapshot, "parkedAssets", []] call _getPair);
+        _detailLines = [
+            format ["<t color='#FFFFFF'>%1</t>", ["RAMP"] call _modeGuidance],
+            format ["Parked and available: <t color='#FFFFFF'>%1</t>", _parkedCount],
+            format ["Snapshot: <t color='#FFFFFF'>%1</t>", _freshnessText]
+        ];
+        if (_canAirQueueManage) then {
+            _detailLines pushBack "Select an aircraft below to queue it for departure.";
+        } else {
+            _detailLines pushBack "Read-only: no ramp queue authority on this account.";
+        };
     };
     case "DBG":
     {

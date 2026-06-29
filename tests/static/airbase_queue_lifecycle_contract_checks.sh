@@ -228,6 +228,101 @@ check 'param\s*\[_IDX_POS_Y' \
     "functions/ui/fn_uiConsoleAirMapPaint.sqf" \
     "AirMapPaint: uses param [_IDX_POS_Y, ...] with default for safe posY access"
 
+# ── 6. Item 1 — Player departure approval: runway lock + taxi hint ────────────
+
+echo ""
+echo "=== 6. Player departure approval: runway lock and taxi hint ==="
+
+check 'airbase_v1_player_dep_reserve_s' \
+    "functions/ambiance/fn_airbaseRequestClearanceDecision.sqf" \
+    "ClearanceDecision: reads player departure reserve window variable"
+
+check 'ARC_fnc_airbaseRunwayLockReserve' \
+    "functions/ambiance/fn_airbaseRequestClearanceDecision.sqf" \
+    "ClearanceDecision: calls airbaseRunwayLockReserve on approval"
+
+check 'PLAYER_APPROVAL' \
+    "functions/ambiance/fn_airbaseRequestClearanceDecision.sqf" \
+    "ClearanceDecision: runway reserve reason tagged PLAYER_APPROVAL"
+
+check 'Runway reserved.*Taxi' \
+    "functions/ambiance/fn_airbaseRequestClearanceDecision.sqf" \
+    "ClearanceDecision: sends taxi hint to pilot after DEP approval"
+
+check 'Runway reserved.*ARC_fnc_clientHint' \
+    "functions/ambiance/fn_airbaseRequestClearanceDecision.sqf" \
+    "ClearanceDecision: taxi hint sent via clientHint remoteExec"
+
+check_order \
+    'ARC_fnc_airbaseRunwayLockReserve' \
+    'Runway reserved' \
+    "functions/ambiance/fn_airbaseRequestClearanceDecision.sqf" \
+    "ClearanceDecision: runway lock fires before taxi hint to pilot"
+
+# ── 7. Item 2 — Land gate and stale inbound ATC notifications ────────────────
+
+echo ""
+echo "=== 7. Land gate and stale inbound ATC notifications ==="
+
+check 'LAND GATE.*_fnNotifyMaybe' \
+    "functions/ambiance/fn_airbaseTick.sqf" \
+    "airbaseTick: land gate fires fnNotifyMaybe to tower controllers"
+
+check 'AIR_LAND_GATE' \
+    "functions/ambiance/fn_airbaseTick.sqf" \
+    "airbaseTick: land gate notification uses AIR_LAND_GATE dedupeKey"
+
+check 'LIFECYCLE_LAND_GATE.*_fnEventPush' \
+    "functions/ambiance/fn_airbaseTick.sqf" \
+    "airbaseTick: land gate event still pushed to event log"
+
+check 'AIR_STALE_INB' \
+    "functions/ambiance/fn_airbaseTick.sqf" \
+    "airbaseTick: stale inbound notification uses AIR_STALE_INB dedupeKey"
+
+check 'AIR_STALE_PILOT' \
+    "functions/ambiance/fn_airbaseTick.sqf" \
+    "airbaseTick: stale inbound pilot notification uses AIR_STALE_PILOT dedupeKey"
+
+check 'STALE_INBOUND_NEAR_RUNWAY.*_fnEventPush' \
+    "functions/ambiance/fn_airbaseTick.sqf" \
+    "airbaseTick: stale inbound event still pushed to event log"
+
+check_order \
+    'AIR_LAND_GATE' \
+    'AIR_STALE_INB' \
+    "functions/ambiance/fn_airbaseTick.sqf" \
+    "airbaseTick: land gate notification precedes stale inbound notification in file"
+
+# ── 8. Item 3 — CLEARANCES submode: runway row + arrival distance column ─────
+
+echo ""
+echo "=== 8. CLEARANCES submode: runway status row and arrival distance ==="
+
+check 'Runway:.*Aircraft:.*Departures:' \
+    "functions/ui/fn_uiConsoleAirPaint.sqf" \
+    "AirPaint: runway status row present in CLEARANCES submode"
+
+check 'RWY.*runwayState.*runwayOwnerFlightId' \
+    "functions/ui/fn_uiConsoleAirPaint.sqf" \
+    "AirPaint: runway status row lbData includes state and owner"
+
+check 'arrivalDistanceM' \
+    "functions/ui/fn_uiConsoleAirPaint.sqf" \
+    "AirPaint: CLEARANCES list reads arrivalDistanceM from meta"
+
+check 'arrivalWarnLevel' \
+    "functions/ui/fn_uiConsoleAirPaint.sqf" \
+    "AirPaint: CLEARANCES list reads arrivalWarnLevel from meta"
+
+check 'REQ_INBOUND.*REQ_LAND' \
+    "functions/ui/fn_uiConsoleAirPaint.sqf" \
+    "AirPaint: arrival distance only shown for REQ_INBOUND/REQ_LAND types"
+
+check 'arrivalDistanceM.*_metaGet' \
+    "functions/ui/fn_uiConsoleAirPaint.sqf" \
+    "AirPaint: arrival distance detail in REQ detail panel"
+
 # ── Summary ───────────────────────────────────────────────────────────────────
 
 echo ""

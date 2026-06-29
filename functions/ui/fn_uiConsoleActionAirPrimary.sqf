@@ -228,6 +228,36 @@ switch (_airSubmode) do
         ["AIR", "DEBUG view is read-only."] call ARC_fnc_clientToast;
     };
 
+    case "RAMP":
+    {
+        switch (_rowType) do
+        {
+            case "ASSET":
+            {
+                private _aid = _parts param [1, ""];
+                if (_aid isEqualTo "" || { _aid isEqualTo "NONE" }) exitWith {
+                    ["AIR", "Select a parked aircraft first."] call ARC_fnc_clientToast;
+                    false
+                };
+
+                private _canAirQueueManage = ["ARC_console_airCanQueueManage", false] call ARC_fnc_uiNsGetBool;
+                if (!_canAirQueueManage) exitWith
+                {
+                    ["AIR", "READ-ONLY: no ramp queue authority for this callsign."] call ARC_fnc_clientToast;
+                    true
+                };
+
+                [_aid] call ARC_fnc_airbaseClientQueueParkedAsset;
+                ["AIR", format ["Ramp queue request sent: %1", _aid]] call ARC_fnc_clientToast;
+            };
+
+            default
+            {
+                ["AIR", "Select a parked aircraft to queue for departure."] call ARC_fnc_clientToast;
+            };
+        };
+    };
+
     default
     {
         // Phase 3 safety: non-action rows (HDR, EVT, DEC, MODE, etc.) must not

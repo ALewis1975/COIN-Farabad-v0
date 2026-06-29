@@ -231,6 +231,10 @@ jobs:
         run: |
           tests/static/airbase_planning_mode_checks.sh
 
+      - name: AIRBASE ramp-queue contract static validation
+        run: |
+          bash tests/static/airbase_ramp_queue_contract_checks.sh
+
       - name: CASREQ snapshot contract static validation
         run: |
           tests/static/casreq_snapshot_contract_checks.sh
@@ -330,3 +334,51 @@ jobs:
       - name: Building-purpose classification contract static validation
         run: |
           bash tests/static/building_purpose_classification_contract_checks.sh
+
+      - name: AIRBASE queue lifecycle contract static validation
+        run: |
+          bash tests/static/airbase_queue_lifecycle_contract_checks.sh
+
+      - name: Civic mission catalog contract static validation
+        run: |
+          bash tests/static/civic_mission_catalog_contract_checks.sh
+
+      - name: CIVSUB traffic contract static validation
+        run: |
+          bash tests/static/civsub_traffic_contract_checks.sh
+
+      - name: Recruitment container contract static validation
+        run: |
+          bash tests/static/recruitment_container_contract_checks.sh
+
+      - name: Threat economy operator tooling contract static validation
+        run: |
+          bash tests/static/threat_economy_operator_tooling_contract_checks.sh
+
+      - name: Threat family normalization contract static validation
+        run: |
+          bash tests/static/threat_family_normalization_contract_checks.sh
+
+      - name: Threat IED lifecycle contract static validation
+        run: |
+          bash tests/static/threat_ied_lifecycle_contract_checks.sh
+
+      - name: Threat persistence migration contract static validation
+        run: |
+          bash tests/static/threat_persistence_migration_contract_checks.sh
+
+      - name: Threat UI snapshot contract static validation
+        run: |
+          bash tests/static/threat_ui_snapshot_contract_checks.sh
+
+      - name: Threat validation framework contract static validation
+        run: |
+          bash tests/static/threat_validation_framework_contract_checks.sh
+
+      - name: Threat virtual OPFOR observability contract static validation
+        run: |
+          bash tests/static/threat_virtual_opfor_observability_contract_checks.sh
+
+      - name: Threat virtual OPFOR spawn standoff contract static validation
+        run: |
+          bash tests/static/threat_virtual_opfor_spawn_standoff_checks.sh

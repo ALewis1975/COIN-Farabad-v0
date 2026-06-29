@@ -26,6 +26,7 @@ private _cycleModes = {
     params ["_current", "_canControl", "_debugEnabled"];
     private _modes = ["AIRFIELD_OPS"];
     if (_canControl) then { _modes pushBack "CLEARANCES"; };
+    if (_canControl) then { _modes pushBack "RAMP"; };
     if (_debugEnabled) then { _modes pushBack "DEBUG"; };
     private _idx = _modes find _current;
     if (_idx < 0) exitWith { _modes select 0 };
@@ -52,7 +53,7 @@ private _canAirControl = ["ARC_console_airCanControl", false] call ARC_fnc_uiNsG
 private _airSubmode = ["ARC_console_airSubmode", "AIRFIELD_OPS"] call ARC_fnc_uiNsGetString;
 _airSubmode = toUpper _airSubmode;
 _airSubmode = (_airSubmode splitString " ") joinString "";
-if !(_airSubmode in ["AIRFIELD_OPS", "CLEARANCES", "DEBUG"]) then { _airSubmode = "AIRFIELD_OPS"; };
+if !(_airSubmode in ["AIRFIELD_OPS", "CLEARANCES", "RAMP", "DEBUG"]) then { _airSubmode = "AIRFIELD_OPS"; };
 
 switch (_airSubmode) do
 {
@@ -160,6 +161,14 @@ switch (_airSubmode) do
 
     case "DEBUG":
     {
+        private _nextMode = [_airSubmode, _canAirControl, _debugAir] call _cycleModes;
+        uiNamespace setVariable ["ARC_console_airSubmode", _nextMode];
+        ["AIR", format ["Switched AIR view to %1.", _nextMode]] call ARC_fnc_clientToast;
+    };
+
+    case "RAMP":
+    {
+        // Secondary in RAMP view cycles to the next available view.
         private _nextMode = [_airSubmode, _canAirControl, _debugAir] call _cycleModes;
         uiNamespace setVariable ["ARC_console_airSubmode", _nextMode];
         ["AIR", format ["Switched AIR view to %1.", _nextMode]] call ARC_fnc_clientToast;
