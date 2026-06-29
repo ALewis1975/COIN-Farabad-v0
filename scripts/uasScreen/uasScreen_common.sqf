@@ -124,9 +124,12 @@ ARC_fnc_uasScreenGetActiveUavs = {
         private _veh = _x;
         if (isNull _veh || {!alive _veh}) then { continue; };
 
-        private _cfg = configFile >> "CfgVehicles" >> typeOf _veh;
+        private _vehType = typeOf _veh;
+        private _cfg = configFile >> "CfgVehicles" >> _vehType;
         private _isUav = (getNumber (_cfg >> "isUav")) > 0;
-        if (!_isUav) then { continue; };
+        private _typeU = toUpper _vehType;
+        private _isNamedUasAsset = ((_typeU find "UAV") >= 0) || { ((_typeU find "UGV") >= 0) };
+        if (!(_isUav || {_isNamedUasAsset})) then { continue; };
 
         private _crew = crew _veh;
         private _sideStr = "";
