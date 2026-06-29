@@ -11,6 +11,21 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-06-29 02:15 UTC — Airbase taxi requires engine-on for all takeoff departures (Mode A)
+
+**Branch/Commit:** `copilot/taxi-aircraft-engines-on` @ `173fccbcaf5fa0bf9509692fcb905a5bc771bbc8` (base before this fix; working tree includes this TEST-LOG update)
+
+**Scenario:** Ensure takeoff taxi is engine-on for both fixed-wing and rotary-wing AIRBASESUB departures by enforcing engine start before taxi playback and aborting cleanly back to idle if startup fails.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | Baseline lint + static AIRBASE gate | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf && sqflint -e w functions/ambiance/fn_airbasePlaneDepart.sqf && tests/static/airbase_planning_mode_checks.sh` | PASS / BLOCKED | Compat + AIRBASE static suite passed; `sqflint` initially unavailable in sandbox. |
+| 2 | Post-change lint + static AIRBASE gate | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf && sqflint -e w functions/ambiance/fn_airbasePlaneDepart.sqf && tests/static/airbase_planning_mode_checks.sh` | PASS | After installing `sqflint`, changed file linted clean and AIRBASE static suite passed. |
+| 3 | Runtime smoke (hosted/local MP) | Queue and clear one fixed-wing and one rotary departure; verify engines are on before taxi playback and taxi abort path returns crew/asset to PARKED on failed startup. | BLOCKED | Arma 3 runtime unavailable in sandbox. |
+| 4 | Dedicated/JIP validation | Dedicated server with one late-joining client: repeat fixed-wing and rotary departures and confirm authoritative taxi/startup behavior remains consistent for JIP clients. | BLOCKED | Dedicated server/JIP runtime unavailable in sandbox session. |
+
+---
+
 ## 2026-06-29 01:47 UTC — RQ-4A plane6 uncrewed parking + taxi-spawn crew handoff (Mode A)
 
 **Branch/Commit:** `copilot/update-rq-4a-crew-management` @ `dec64d7` (base before this fix; working tree includes this TEST-LOG update)
