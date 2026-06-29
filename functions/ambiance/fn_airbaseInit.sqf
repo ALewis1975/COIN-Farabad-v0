@@ -380,6 +380,21 @@ private _assets = [];
         };
     } forEach _crewVars;
 
+    // plane6 (RQ-4A) staging policy:
+    // Keep the hangar aircraft uncrewed while parked. Crew is recreated only when
+    // Tower clears taxi/depart (see fn_airbasePlaneDepart.sqf).
+    if (_vehVar isEqualTo "plane6") then {
+        {
+            if (!isNull _x) then { deleteVehicle _x; };
+        } forEach _crewResolved;
+        {
+            if (_x isEqualType "" && { !(_x isEqualTo "") }) then {
+                missionNamespace setVariable [_x, objNull, true];
+            };
+        } forEach _crewVars;
+        _crewResolved = [];
+    };
+
     private _towVeh = objNull;
     private _towCrew = objNull;
     private _towStartPos = [0,0,0];

@@ -11,6 +11,21 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-06-29 01:47 UTC — RQ-4A plane6 uncrewed parking + taxi-spawn crew handoff (Mode A)
+
+**Branch/Commit:** `copilot/update-rq-4a-crew-management` @ `dec64d7` (base before this fix; working tree includes this TEST-LOG update)
+
+**Scenario:** Keep `plane6` (RQ-4A) uncrewed while parked in hangar, then on Tower-cleared departure delete and respawn it at marker `ARC_m_base_uas_spawn` with crew, set group callsign to `99 ERS | HORIZON-1 (RQ-4)`, and continue normal taxi/takeoff flow.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | Baseline changed-file compat + static contracts | `python3 scripts/dev/sqflint_compat_scan.py --strict initServer.sqf functions/ambiance/fn_airbaseInit.sqf functions/ambiance/fn_airbasePlaneDepart.sqf && sqflint -e w initServer.sqf functions/ambiance/fn_airbaseInit.sqf functions/ambiance/fn_airbasePlaneDepart.sqf && bash tests/static/airbase_queue_lifecycle_contract_checks.sh` | PASS / BLOCKED | Compat and queue contract passed; `sqflint` unavailable in sandbox (`command not found`). |
+| 2 | Post-change changed-file compat + static contracts | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbaseInit.sqf functions/ambiance/fn_airbasePlaneDepart.sqf && sqflint -e w functions/ambiance/fn_airbaseInit.sqf functions/ambiance/fn_airbasePlaneDepart.sqf && bash tests/static/airbase_queue_lifecycle_contract_checks.sh && bash tests/static/airbase_planning_mode_checks.sh` | PASS / BLOCKED | Compat and both AIRBASE static suites passed; `sqflint` remains unavailable in sandbox (`command not found`). |
+| 3 | Runtime smoke | Hosted/local MP: queue/clear RQ-4A departure, verify parked hangar frame is uncrewed, clearance deletes old frame, respawns at `ARC_m_base_uas_spawn` with `99 ERS \| HORIZON-1 (RQ-4)`, then taxis/takes off. | BLOCKED | Arma 3 runtime unavailable in sandbox. |
+| 4 | Dedicated/JIP validation | Dedicated server with one late-joining client: repeat RQ-4A clearance cycle and confirm authoritative respawn + crew visibility/state consistency for JIP clients. | BLOCKED | Dedicated server/JIP rig unavailable in sandbox session. |
+
+---
+
 ## 2026-06-11 21:45 UTC — Spawn-pattern rollout toggles enabled by default (issue #633)
 
 **Branch/Commit:** `copilot/extend-sitepop-system` @ commit `ea9ffa9` (toggle-enable commit containing this entry)

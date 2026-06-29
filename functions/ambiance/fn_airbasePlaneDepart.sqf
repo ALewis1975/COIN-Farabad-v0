@@ -36,6 +36,9 @@ if (isNull _veh) exitWith {
 };
 
 private _vehType = typeOf _veh;
+private _vehVar  = [_asset, "vehVar", ""] call _hg;
+private _crewVars = [_asset, "crewVars", []] call _hg;
+if (!(_crewVars isEqualType [])) then { _crewVars = []; };
 private _isHeli  = (_veh isKindOf "Helicopter");
 // UAS / RPAS detection: fixed-wing UAVs (e.g. RQ-4A Global Hawk) need ISR loiter
 // treatment rather than a standard fly-to-despawn departure.
@@ -218,7 +221,121 @@ private _fnRecoverCrewSeats = {
     _fixed
 };
 
+private _fnPreparePlane6TaxiSpawn = {
+    params [
+        ["_assetLocal", createHashMap, [createHashMap]],
+        ["_vehLocal", objNull, [objNull]],
+        ["_vehTypeLocal", "", [""]],
+        ["_vehVarLocal", "", [""]],
+        ["_crewVarsLocal", [], [[]]]
+    ];
+
+    if (isNull _vehLocal) exitWith { [false, objNull, []] };
+    if (_vehTypeLocal isEqualTo "") exitWith { [false, objNull, []] };
+
+    private _spawnMarker = "ARC_m_base_uas_spawn";
+    private _spawnPos = getMarkerPos _spawnMarker;
+    private _spawnDir = markerDir _spawnMarker;
+    if (!(_spawnPos isEqualType []) || { (count _spawnPos) < 2 } || { _spawnPos isEqualTo [0,0,0] }) then {
+        _spawnPos = [_assetLocal, "startPos", getPosATL _vehLocal] call _hg;
+        _spawnDir = [_assetLocal, "startDir", getDir _vehLocal] call _hg;
+        diag_log format ["[ARC][WARN] ARC_fnc_airbasePlaneDepart: marker %1 missing/invalid; fallback spawn used for plane6", _spawnMarker];
+    };
+    if (!(_spawnDir isEqualType 0)) then { _spawnDir = getDir _vehLocal; };
+
+    private _trackedCrew = [_assetLocal, "crew", []] call _hg;
+    if (!(_trackedCrew isEqualType [])) then { _trackedCrew = []; };
+    private _vehCrew = crew _vehLocal;
+    private _oldCrew = [];
+    {
+        if (isNull _x) then { continue; };
+        if ((_oldCrew find _x) < 0) then { _oldCrew pushBack _x; };
+    } forEach (_trackedCrew + _vehCrew);
+
+    { deleteVehicle _x; } forEach _oldCrew;
+    deleteVehicle _vehLocal;
+
+    private _newVeh = createVehicle [_vehTypeLocal, _spawnPos, [], 0, "NONE"];
+    _newVeh setPosATL _spawnPos;
+    _newVeh setDir _spawnDir;
+    _newVeh setVelocity [0,0,0];
+    _newVeh setVelocityModelSpace [0,0,0];
+    _newVeh enableSimulationGlobal true;
+    _newVeh allowDamage true;
+
+    if (_vehVarLocal != "") then {
+        missionNamespace setVariable [_vehVarLocal, _newVeh, true];
+    };
+
+    private _templates = [_assetLocal, "crewTemplates", []] call _hg;
+    if (!(_templates isEqualType [])) then { _templates = []; };
+    private _crewSide = [_assetLocal, "crewSide", west] call _hg;
+    private _newCrew = [];
+
+    if ((count _templates) > 0) then {
+        private _grpCrew = createGroup [_crewSide, true];
+        _grpCrew setGroupIdGlobal ["99 ERS | HORIZON-1 (RQ-4)"];
+        {
+            private _row = _x;
+            if (!(_row isEqualType []) || { (count _row) < 2 }) then { continue; };
+            private _vName = _row param [0, ""];
+            private _class = _row param [1, ""];
+            private _loadout = _row param [2, []];
+            if (_class isEqualTo "") then { continue; };
+
+            private _u = _grpCrew createUnit [_class, _spawnPos, [], 0, "NONE"];
+            _u setPosATL _spawnPos;
+            _u setDir _spawnDir;
+            if (_loadout isEqualType [] && { (count _loadout) > 0 }) then {
+                _u setUnitLoadout _loadout;
+            };
+
+            if (_vName isEqualTo "" && { _forEachIndex < (count _crewVarsLocal) }) then {
+                _vName = _crewVarsLocal select _forEachIndex;
+            };
+            if (!(_vName isEqualTo "")) then {
+                missionNamespace setVariable [_vName, _u, true];
+            };
+
+            if (_forEachIndex isEqualTo 0) then { _u moveInDriver _newVeh; } else { _u moveInAny _newVeh; };
+            _newCrew pushBack _u;
+        } forEach _templates;
+    };
+
+    if ((count _newCrew) == 0) then {
+        createVehicleCrew _newVeh;
+        _newCrew = crew _newVeh;
+        if ((count _newCrew) > 0) then {
+            private _grpCrewFallback = group (_newCrew select 0);
+            _grpCrewFallback setGroupIdGlobal ["99 ERS | HORIZON-1 (RQ-4)"];
+            {
+                if (_forEachIndex < (count _crewVarsLocal)) then {
+                    private _cv = _crewVarsLocal select _forEachIndex;
+                    if (!(_cv isEqualTo "")) then { missionNamespace setVariable [_cv, _x, true]; };
+                };
+            } forEach _newCrew;
+        };
+    };
+
+    _assetLocal set ["veh", _newVeh];
+    _assetLocal set ["crew", _newCrew];
+
+    [!isNull _newVeh && { (count _newCrew) > 0 }, _newVeh, _newCrew]
+};
+
 // --- resolve crew ---
+if (_vehVar isEqualTo "plane6") then {
+    private _prep = [_asset, _veh, _vehType, _vehVar, _crewVars] call _fnPreparePlane6TaxiSpawn;
+    if !(_prep param [0, false]) exitWith {
+        diag_log format ["[ARC][WARN] ARC_fnc_airbasePlaneDepart: plane6 taxi spawn prep failed for %1", _fid];
+        _asset set ["state", "PARKED"];
+        _asset set ["activeFlight", ""];
+        false
+    };
+    _veh = _prep param [1, objNull];
+    _vehType = typeOf _veh;
+};
+
 private _crew = [_asset, "crew", []] call _hg;
 if (!(_crew isEqualType [])) then { _crew = []; };
 private _crewLive = _crew select { !isNull _x && alive _x };
