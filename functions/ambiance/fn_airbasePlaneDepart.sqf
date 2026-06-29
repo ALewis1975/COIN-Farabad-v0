@@ -88,6 +88,29 @@ private _fnUnitPlayBlocking = {
     !(isNull _vehL) && {alive _vehL}
 };
 
+private _fnEnsureTaxiEngineOn = {
+    params ["_vehL", "_pilotL", "_debugL"];
+    if (isNull _vehL || {!alive _vehL}) exitWith { false };
+
+    _vehL engineOn true;
+    if (!isNull _pilotL && {alive _pilotL}) then {
+        _pilotL action ["EngineOn", _vehL];
+    };
+
+    private _tEngine = time + 8;
+    waitUntil {
+        sleep 0.25;
+        isNull _vehL || {!alive _vehL} || {isEngineOn _vehL} || {time > _tEngine}
+    };
+
+    if (isNull _vehL || {!alive _vehL}) exitWith { false };
+    private _engineOk = isEngineOn _vehL;
+    if (!_engineOk && {_debugL}) then {
+        diag_log format ["[AIRBASESUB] %1 engine failed to start before taxi (%2)", _fid, typeOf _vehL];
+    };
+    _engineOk
+};
+
 private _fnSeatScan = {
     params ["_vehL"];
     private _hasCommander = false;
@@ -506,7 +529,14 @@ if ((count _taxiFrames) == 0) exitWith {
 };
 
 if (_isEC130) then { _veh setFuel 1; };
-_veh engineOn true;
+private _startupOk = [_veh, _pilot, _debug] call _fnEnsureTaxiEngineOn;
+if (!_startupOk) then {
+    if (_debug) then { diag_log format ["[AIRBASESUB] %1 continuing departure despite pre-taxi startup failure (%2)", _fid, _vehType]; };
+    _veh engineOn true;
+    if (!isNull _pilot && {alive _pilot}) then {
+        _pilot action ["EngineOn", _veh];
+    };
+};
 if (_veh isKindOf "Air") then { _veh setCollisionLight true; _veh setPilotLight true; };
 
 // Disable AI for ALL crew during unitPlay so no crew member (including co-pilot/commander)

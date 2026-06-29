@@ -11,19 +11,34 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
-## 2026-06-29 02:06 UTC — UAS screen options include BLUFOR UGV/UAV mission assets (Mode A)
+## 2026-06-29 02:18 UTC — Pre-taxi startup failure no longer aborts departures (Mode A)
 
-**Branch/Commit:** `copilot/scan-mission-sqm-for-uav-ugv-assets` @ `173fccb` (base before this fix; working tree includes this TEST-LOG update)
+**Branch/Commit:** `copilot/taxi-aircraft-engines-on` @ `363f35b4c1fe85e49d7c2121a5007a9646e58c17` (working tree includes this TEST-LOG update)
 
-**Scenario:** Fix UAS screen option discovery so selectable feeds include active BLUFOR UGV/UAV-class assets found in `mission.sqm`, not only config-flagged `isUav` vehicles.
+**Scenario:** If engine startup fails before taxi in `ARC_fnc_airbasePlaneDepart`, do not abort the departure back to idle/PARKED. Continue taxi/takeoff attempt instead.
 
 | # | Check | Command / Step | Result | Notes |
 |---|---|---|---|---|
-| 1 | Mission asset scan (`mission.sqm`) | `python3` scan for `type="...UAV..."` / `type="...UGV..."` + side context | PASS | BLUFOR mission entries found: `B_UAV_01_DroneDropMineDispenser`, `B_UGV_02_Demining_F`, `B_UGV_02_Science_F` (plus `B_UAV_AI` unit entries and one UAV terminal object). |
-| 2 | Parser-compat scan (changed file) | `python3 scripts/dev/sqflint_compat_scan.py --strict scripts/uasScreen/uasScreen_common.sqf` | PASS | No banned parser-compat patterns. |
-| 3 | SQF lint (changed file) | `sqflint -e w scripts/uasScreen/uasScreen_common.sqf` | PASS | Clean. |
-| 4 | Static regression suite | `bash tests/static/lane_c_contract_checks.sh` | PASS | Existing static contract suite passes after UAS/UGV selector expansion. |
-| 5 | Runtime/UAS screen behavior | In hosted/dedicated MP, cycle `[UAS] Next/Previous Active UAV Feed` and confirm UGV feeds are now selectable and render on managed screens | BLOCKED | Arma 3 runtime unavailable in sandbox; operator validation required. |
+| 1 | Baseline repo static validation | `python3 -m pip install --quiet sqflint ripgrep && python3 scripts/dev/validate_state_migrations.py && bash scripts/dev/check_test_log_commits.sh && python3 scripts/dev/validate_marker_index.py && for t in tests/static/*.sh; do bash "$t"; done` | PASS | Full static suite passed before edits. |
+| 2 | Baseline changed-file lint | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf && sqflint -e w functions/ambiance/fn_airbasePlaneDepart.sqf` | PASS | Changed file was clean before edits. |
+| 3 | Post-change lint + AIRBASE static contracts | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf && sqflint -e w functions/ambiance/fn_airbasePlaneDepart.sqf && bash tests/static/airbase_planning_mode_checks.sh && bash tests/static/airbase_queue_lifecycle_contract_checks.sh` | PASS | Updated departure logic and related AIRBASE contracts passed. |
+| 4 | Runtime smoke (hosted/local MP) | Trigger a departure where pre-taxi startup fails; verify departure still proceeds and queue does not stall. | BLOCKED | Arma 3 runtime unavailable in sandbox. |
+| 5 | Dedicated/JIP validation | Dedicated server + late-join client: repeat pre-taxi startup-failure departure and verify replicated state/queue behavior. | BLOCKED | Dedicated server/JIP runtime unavailable in sandbox session. |
+
+---
+
+## 2026-06-29 02:15 UTC — Airbase taxi requires engine-on for all takeoff departures (Mode A)
+
+**Branch/Commit:** `copilot/taxi-aircraft-engines-on` @ `173fccbcaf5fa0bf9509692fcb905a5bc771bbc8` (base before this fix; working tree includes this TEST-LOG update)
+
+**Scenario:** Ensure takeoff taxi is engine-on for both fixed-wing and rotary-wing AIRBASESUB departures by enforcing engine start before taxi playback and aborting cleanly back to idle if startup fails.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | Baseline lint + static AIRBASE gate | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf && sqflint -e w functions/ambiance/fn_airbasePlaneDepart.sqf && tests/static/airbase_planning_mode_checks.sh` | PASS / BLOCKED | Compat + AIRBASE static suite passed; `sqflint` initially unavailable in sandbox. |
+| 2 | Post-change lint + static AIRBASE gate | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbasePlaneDepart.sqf && sqflint -e w functions/ambiance/fn_airbasePlaneDepart.sqf && tests/static/airbase_planning_mode_checks.sh` | PASS | After installing `sqflint`, changed file linted clean and AIRBASE static suite passed. |
+| 3 | Runtime smoke (hosted/local MP) | Queue and clear one fixed-wing and one rotary departure; verify engines are on before taxi playback and taxi abort path returns crew/asset to PARKED on failed startup. | BLOCKED | Arma 3 runtime unavailable in sandbox. |
+| 4 | Dedicated/JIP validation | Dedicated server with one late-joining client: repeat fixed-wing and rotary departures and confirm authoritative taxi/startup behavior remains consistent for JIP clients. | BLOCKED | Dedicated server/JIP runtime unavailable in sandbox session. |
 
 ---
 
