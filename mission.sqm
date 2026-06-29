@@ -5,14 +5,14 @@ class EditorData
 	angleGridStep=0.2617994;
 	scaleGridStep=1;
 	autoGroupingDist=10;
-	toggles=1537;
+	toggles=545;
 	mods[]=
 	{
 		"3denEnhanced"
 	};
 	class ItemIDProvider
 	{
-		nextID=4994;
+		nextID=5014;
 	};
 	class MarkerIDProvider
 	{
@@ -20,14 +20,14 @@ class EditorData
 	};
 	class LayerIndexProvider
 	{
-		nextID=133261;
+		nextID=133861;
 	};
 	class Camera
 	{
-		pos[]={6237.9629,11.773125,1595.2213};
-		dir[]={-0.16418509,-0.52081162,0.83773416};
-		up[]={-0.10016675,0.85367167,0.51108843};
-		aside[]={0.98133075,0,0.19232816};
+		pos[]={6404.8862,52.966667,1746.7581};
+		dir[]={0.04447211,-0.47932747,-0.87650865};
+		up[]={0.02428877,0.87763613,-0.47871166};
+		aside[]={-0.99871528,0,-0.050672606};
 	};
 };
 binarizationWanted=0;
@@ -237,13 +237,14 @@ addons[]=
 	"A3_Characters_F_Common",
 	"A3_Characters_F_Jets",
 	"ace_vehiclelock",
-	"USAF_RQ4A"
+	"USAF_RQ4A",
+	"CUP_Buildings_Config"
 };
 class AddonsMetaData
 {
 	class List
 	{
-		items=145;
+		items=146;
 		class Item0
 		{
 			className="A3_Modules_F";
@@ -1175,6 +1176,11 @@ class AddonsMetaData
 			name="USAF_RQ4A";
 			author="USAF Mod Team";
 		};
+		class Item145
+		{
+			className="CUP_Buildings_Config";
+			name="CUP_Buildings_Config";
+		};
 	};
 };
 dlcs[]=
@@ -1246,19 +1252,6 @@ class CustomAttributes
 		name="Multiplayer";
 		class Attribute0
 		{
-			property="ENH_saveLoadout";
-			expression="if (!isMultiplayer || !_value || is3DEN || !hasInterface) exitWith {};        0 spawn        {            waitUntil {sleep 1; !isNull player};            player setVariable ['ENH_savedLoadout', getUnitloadout player];            player addMPEventHandler ['MPRespawn',            {                params ['_unit'];                private _loadout = _unit getVariable ['ENH_savedLoadout', []];                if (_loadout isNotEqualTo []) then {_unit setUnitLoadout _loadout};            }];        };";
-			class Value
-			{
-				class data
-				{
-					singleType="BOOL";
-					value=1;
-				};
-			};
-		};
-		class Attribute1
-		{
 			property="RespawnTemplates";
 			expression="true";
 			class Value
@@ -1278,6 +1271,19 @@ class CustomAttributes
 							};
 						};
 					};
+				};
+			};
+		};
+		class Attribute1
+		{
+			property="ENH_saveLoadout";
+			expression="if (!isMultiplayer || !_value || is3DEN || !hasInterface) exitWith {};        0 spawn        {            waitUntil {sleep 1; !isNull player};            player setVariable ['ENH_savedLoadout', getUnitloadout player];            player addMPEventHandler ['MPRespawn',            {                params ['_unit'];                private _loadout = _unit getVariable ['ENH_savedLoadout', []];                if (_loadout isNotEqualTo []) then {_unit setUnitLoadout _loadout};            }];        };";
+			class Value
+			{
+				class data
+				{
+					singleType="BOOL";
+					value=1;
 				};
 			};
 		};
@@ -2033,7 +2039,7 @@ class Mission
 	};
 	class Entities
 	{
-		items=20;
+		items=22;
 		class Item0
 		{
 			dataType="Layer";
@@ -2041,7 +2047,7 @@ class Mission
 			state=2;
 			class Entities
 			{
-				items=2;
+				items=3;
 				class Item0
 				{
 					dataType="Layer";
@@ -3871,9 +3877,52 @@ class Mission
 					id=2042;
 					atlOffset=35;
 				};
+				class Item2
+				{
+					dataType="Logic";
+					class PositionInfo
+					{
+						position[]={6521.5,8.4899998,1584.3105};
+					};
+					areaSize[]={18.329151,0,15.00138};
+					areaIsRectangle=1;
+					flags=1;
+					id=4999;
+					type="ModuleHideTerrainObjects_F";
+					class CustomAttributes
+					{
+						class Attribute0
+						{
+							property="#filter";
+							expression="_this setVariable [""#filter"",_value]";
+							class Value
+							{
+								class data
+								{
+									singleType="SCALAR";
+									value=15;
+								};
+							};
+						};
+						class Attribute1
+						{
+							property="#hideLocally";
+							expression="_this setVariable [""#hideLocally"",_value]";
+							class Value
+							{
+								class data
+								{
+									singleType="BOOL";
+									value=0;
+								};
+							};
+						};
+						nAttributes=2;
+					};
+				};
 			};
 			id=44;
-			atlOffset=1.9758501;
+			atlOffset=0.98717499;
 		};
 		class Item1
 		{
@@ -20596,7 +20645,7 @@ class Mission
 									dataType="Object";
 									class PositionInfo
 									{
-										position[]={6534.0825,10.313853,1604.4447};
+										position[]={6535.0859,10.312335,1591.292};
 									};
 									side="Empty";
 									flags=4;
@@ -20609,6 +20658,19 @@ class Mission
 									{
 										class Attribute0
 										{
+											property="IDFontStyle";
+											expression="_this setVariable [""AL_ID_Color"", _value]; [_this,0.80] call AL_towing_fnc_ID_Number;";
+											class Value
+											{
+												class data
+												{
+													singleType="STRING";
+													value="#FFFFFF";
+												};
+											};
+										};
+										class Attribute1
+										{
 											property="ObjectCollision";
 											expression="[_this, 	(			[false,true] select (if 		(_value in [true,false]) 	then 	{parseNumber _value} else {_value # 0}		 ) ) 	] remoteExecCall ['setPhysicsCollisionFlag', 0, _this];";
 											class Value
@@ -20620,7 +20682,7 @@ class Mission
 												};
 											};
 										};
-										class Attribute1
+										class Attribute2
 										{
 											property="attachMarker";
 											expression="if (_value isNotEqualTo '') then {[_this, _value] spawn expEden_fnc_markerAttachToObject}";
@@ -20633,7 +20695,7 @@ class Mission
 												};
 											};
 										};
-										class Attribute2
+										class Attribute3
 										{
 											property="IDNumber";
 											expression="_this setVariable [""AL_ID_Number"", _value]; [_this,0.80] call AL_towing_fnc_ID_Number;";
@@ -20642,11 +20704,11 @@ class Mission
 												class data
 												{
 													singleType="STRING";
-													value="85";
+													value="01";
 												};
 											};
 										};
-										nAttributes=3;
+										nAttributes=4;
 									};
 								};
 								class Item4
@@ -20668,6 +20730,19 @@ class Mission
 									{
 										class Attribute0
 										{
+											property="IDFontStyle";
+											expression="_this setVariable [""AL_ID_Color"", _value]; [_this,0.80] call AL_towing_fnc_ID_Number;";
+											class Value
+											{
+												class data
+												{
+													singleType="STRING";
+													value="#FFFFFF";
+												};
+											};
+										};
+										class Attribute1
+										{
 											property="ObjectCollision";
 											expression="[_this, 	(			[false,true] select (if 		(_value in [true,false]) 	then 	{parseNumber _value} else {_value # 0}		 ) ) 	] remoteExecCall ['setPhysicsCollisionFlag', 0, _this];";
 											class Value
@@ -20679,7 +20754,7 @@ class Mission
 												};
 											};
 										};
-										class Attribute1
+										class Attribute2
 										{
 											property="attachMarker";
 											expression="if (_value isNotEqualTo '') then {[_this, _value] spawn expEden_fnc_markerAttachToObject}";
@@ -20692,7 +20767,7 @@ class Mission
 												};
 											};
 										};
-										class Attribute2
+										class Attribute3
 										{
 											property="IDNumber";
 											expression="_this setVariable [""AL_ID_Number"", _value]; [_this,0.80] call AL_towing_fnc_ID_Number;";
@@ -20701,11 +20776,11 @@ class Mission
 												class data
 												{
 													singleType="STRING";
-													value="74";
+													value="02";
 												};
 											};
 										};
-										nAttributes=3;
+										nAttributes=4;
 									};
 								};
 								class Item5
@@ -20713,7 +20788,7 @@ class Mission
 									dataType="Object";
 									class PositionInfo
 									{
-										position[]={6234.5083,10.318264,1674.0507};
+										position[]={6234.5078,10.318353,1674.0505};
 									};
 									side="Empty";
 									flags=4;
@@ -20723,10 +20798,23 @@ class Mission
 									};
 									id=573;
 									type="Peral_B600";
-									atlOffset=0.00018119812;
+									atlOffset=0.00026988983;
 									class CustomAttributes
 									{
 										class Attribute0
+										{
+											property="IDFontStyle";
+											expression="_this setVariable [""AL_ID_Color"", _value]; [_this,0.80] call AL_towing_fnc_ID_Number;";
+											class Value
+											{
+												class data
+												{
+													singleType="STRING";
+													value="#FFFFFF";
+												};
+											};
+										};
+										class Attribute1
 										{
 											property="ObjectCollision";
 											expression="[_this, 	(			[false,true] select (if 		(_value in [true,false]) 	then 	{parseNumber _value} else {_value # 0}		 ) ) 	] remoteExecCall ['setPhysicsCollisionFlag', 0, _this];";
@@ -20739,7 +20827,7 @@ class Mission
 												};
 											};
 										};
-										class Attribute1
+										class Attribute2
 										{
 											property="attachMarker";
 											expression="if (_value isNotEqualTo '') then {[_this, _value] spawn expEden_fnc_markerAttachToObject}";
@@ -20752,7 +20840,7 @@ class Mission
 												};
 											};
 										};
-										class Attribute2
+										class Attribute3
 										{
 											property="IDNumber";
 											expression="_this setVariable [""AL_ID_Number"", _value]; [_this,0.80] call AL_towing_fnc_ID_Number;";
@@ -20761,11 +20849,11 @@ class Mission
 												class data
 												{
 													singleType="STRING";
-													value="70";
+													value="05";
 												};
 											};
 										};
-										nAttributes=3;
+										nAttributes=4;
 									};
 								};
 								class Item6
@@ -20773,7 +20861,7 @@ class Mission
 									dataType="Object";
 									class PositionInfo
 									{
-										position[]={6125.002,10.318083,1672.8264};
+										position[]={6125.002,10.318353,1672.8265};
 									};
 									side="Empty";
 									flags=4;
@@ -20783,9 +20871,23 @@ class Mission
 									};
 									id=574;
 									type="Peral_B600";
+									atlOffset=0.00026988983;
 									class CustomAttributes
 									{
 										class Attribute0
+										{
+											property="IDFontStyle";
+											expression="_this setVariable [""AL_ID_Color"", _value]; [_this,0.80] call AL_towing_fnc_ID_Number;";
+											class Value
+											{
+												class data
+												{
+													singleType="STRING";
+													value="#FFFFFF";
+												};
+											};
+										};
+										class Attribute1
 										{
 											property="ObjectCollision";
 											expression="[_this, 	(			[false,true] select (if 		(_value in [true,false]) 	then 	{parseNumber _value} else {_value # 0}		 ) ) 	] remoteExecCall ['setPhysicsCollisionFlag', 0, _this];";
@@ -20798,7 +20900,7 @@ class Mission
 												};
 											};
 										};
-										class Attribute1
+										class Attribute2
 										{
 											property="attachMarker";
 											expression="if (_value isNotEqualTo '') then {[_this, _value] spawn expEden_fnc_markerAttachToObject}";
@@ -20811,7 +20913,7 @@ class Mission
 												};
 											};
 										};
-										class Attribute2
+										class Attribute3
 										{
 											property="IDNumber";
 											expression="_this setVariable [""AL_ID_Number"", _value]; [_this,0.80] call AL_towing_fnc_ID_Number;";
@@ -20820,11 +20922,11 @@ class Mission
 												class data
 												{
 													singleType="STRING";
-													value="36";
+													value="06";
 												};
 											};
 										};
-										nAttributes=3;
+										nAttributes=4;
 									};
 								};
 								class Item7
@@ -20969,8 +21071,8 @@ class Mission
 									dataType="Object";
 									class PositionInfo
 									{
-										position[]={6722.5015,10.312353,3106.6619};
-										angles[]={0,2.9120185,0};
+										position[]={6722.501,10.312353,3106.6616};
+										angles[]={0,2.9120119,0};
 									};
 									side="Empty";
 									flags=4;
@@ -20983,6 +21085,45 @@ class Mission
 									{
 										class Attribute0
 										{
+											property="IDFontStyle";
+											expression="_this setVariable [""AL_ID_Color"", _value]; [_this,0.80] call AL_towing_fnc_ID_Number;";
+											class Value
+											{
+												class data
+												{
+													singleType="STRING";
+													value="#FFFFFF";
+												};
+											};
+										};
+										class Attribute1
+										{
+											property="ObjectCollision";
+											expression="[_this, 	(			[false,true] select (if 		(_value in [true,false]) 	then 	{parseNumber _value} else {_value # 0}		 ) ) 	] remoteExecCall ['setPhysicsCollisionFlag', 0, _this];";
+											class Value
+											{
+												class data
+												{
+													singleType="BOOL";
+													value=1;
+												};
+											};
+										};
+										class Attribute2
+										{
+											property="attachMarker";
+											expression="if (_value isNotEqualTo '') then {[_this, _value] spawn expEden_fnc_markerAttachToObject}";
+											class Value
+											{
+												class data
+												{
+													singleType="STRING";
+													value="";
+												};
+											};
+										};
+										class Attribute3
+										{
 											property="IDNumber";
 											expression="_this setVariable [""AL_ID_Number"", _value]; [_this,0.80] call AL_towing_fnc_ID_Number;";
 											class Value
@@ -20990,11 +21131,11 @@ class Mission
 												class data
 												{
 													singleType="STRING";
-													value="19";
+													value="03";
 												};
 											};
 										};
-										nAttributes=1;
+										nAttributes=4;
 									};
 								};
 								class Item9
@@ -21125,8 +21266,7 @@ class Mission
 									dataType="Object";
 									class PositionInfo
 									{
-										position[]={6208.6914,10.318083,1667.0677};
-										angles[]={0,1.4901161e-07,0};
+										position[]={6208.6909,10.318353,1667.0675};
 									};
 									side="Empty";
 									flags=4;
@@ -21135,9 +21275,23 @@ class Mission
 									};
 									id=3923;
 									type="Peral_B600";
+									atlOffset=0.00026988983;
 									class CustomAttributes
 									{
 										class Attribute0
+										{
+											property="IDFontStyle";
+											expression="_this setVariable [""AL_ID_Color"", _value]; [_this,0.80] call AL_towing_fnc_ID_Number;";
+											class Value
+											{
+												class data
+												{
+													singleType="STRING";
+													value="#FFFFFF";
+												};
+											};
+										};
+										class Attribute1
 										{
 											property="ObjectCollision";
 											expression="[_this, 	(			[false,true] select (if 		(_value in [true,false]) 	then 	{parseNumber _value} else {_value # 0}		 ) ) 	] remoteExecCall ['setPhysicsCollisionFlag', 0, _this];";
@@ -21150,7 +21304,7 @@ class Mission
 												};
 											};
 										};
-										class Attribute1
+										class Attribute2
 										{
 											property="attachMarker";
 											expression="if (_value isNotEqualTo '') then {[_this, _value] spawn expEden_fnc_markerAttachToObject}";
@@ -21163,7 +21317,7 @@ class Mission
 												};
 											};
 										};
-										class Attribute2
+										class Attribute3
 										{
 											property="IDNumber";
 											expression="_this setVariable [""AL_ID_Number"", _value]; [_this,0.80] call AL_towing_fnc_ID_Number;";
@@ -21172,16 +21326,16 @@ class Mission
 												class data
 												{
 													singleType="STRING";
-													value="74";
+													value="04";
 												};
 											};
 										};
-										nAttributes=3;
+										nAttributes=4;
 									};
 								};
 							};
 							id=469;
-							atlOffset=0.0018138885;
+							atlOffset=0.0019521713;
 						};
 						class Item2
 						{
@@ -21206,7 +21360,7 @@ class Mission
 						};
 					};
 					id=464;
-					atlOffset=36.39159;
+					atlOffset=36.391598;
 				};
 				class Item3
 				{
@@ -30140,8 +30294,8 @@ class Mission
 											{
 												class Attribute0
 												{
-													property="ENH_doStop";
-													expression="if (!is3DEN && _value) then {doStop _this}";
+													property="ENH_enableHeadlights";
+													expression="[_this, _value] remoteExec ['setPilotLight', _this]";
 													class Value
 													{
 														class data
@@ -30192,8 +30346,8 @@ class Mission
 												};
 												class Attribute4
 												{
-													property="ENH_enableHeadlights";
-													expression="[_this, _value] remoteExec ['setPilotLight', _this]";
+													property="ENH_doStop";
+													expression="if (!is3DEN && _value) then {doStop _this}";
 													class Value
 													{
 														class data
@@ -35212,7 +35366,7 @@ class Mission
 									dataType="Object";
 									class PositionInfo
 									{
-										position[]={6539.9985,8.9374743,1608.2605};
+										position[]={6543.6343,8.9374743,1603.6863};
 									};
 									side="Empty";
 									flags=4;
@@ -35227,7 +35381,7 @@ class Mission
 								};
 							};
 							id=493;
-							atlOffset=-0.26501751;
+							atlOffset=-0.22904778;
 						};
 						class Item1
 						{
@@ -35260,7 +35414,7 @@ class Mission
 									name="Storage";
 									class Entities
 									{
-										items=49;
+										items=51;
 										class Item0
 										{
 											dataType="Object";
@@ -35677,7 +35831,8 @@ class Mission
 											dataType="Object";
 											class PositionInfo
 											{
-												position[]={6524.0356,10.597123,1604.8008};
+												position[]={6534.8472,10.666321,1562.6809};
+												angles[]={0.011431906,3.1415927,0};
 											};
 											side="Empty";
 											flags=4;
@@ -35686,9 +35841,49 @@ class Mission
 											};
 											id=171;
 											type="Peral_527_58M";
+											atlOffset=-0.00022888184;
 											class CustomAttributes
 											{
 												class Attribute0
+												{
+													property="IDFontStyle";
+													expression="_this setVariable [""AL_ID_Color"", _value]; [_this,0.80] call AL_towing_fnc_ID_Number";
+													class Value
+													{
+														class data
+														{
+															singleType="STRING";
+															value="#FFFFFF";
+														};
+													};
+												};
+												class Attribute1
+												{
+													property="ObjectCollision";
+													expression="[_this, 	(			[false,true] select (if 		(_value in [true,false]) 	then 	{parseNumber _value} else {_value # 0}		 ) ) 	] remoteExecCall ['setPhysicsCollisionFlag', 0, _this];";
+													class Value
+													{
+														class data
+														{
+															singleType="BOOL";
+															value=1;
+														};
+													};
+												};
+												class Attribute2
+												{
+													property="attachMarker";
+													expression="if (_value isNotEqualTo '') then {[_this, _value] spawn expEden_fnc_markerAttachToObject}";
+													class Value
+													{
+														class data
+														{
+															singleType="STRING";
+															value="";
+														};
+													};
+												};
+												class Attribute3
 												{
 													property="IDNumber";
 													expression="_this setVariable [""AL_ID_Number"", _value]; [_this,0.80] call AL_towing_fnc_ID_Number";
@@ -35697,11 +35892,11 @@ class Mission
 														class data
 														{
 															singleType="STRING";
-															value="54";
+															value="12";
 														};
 													};
 												};
-												nAttributes=1;
+												nAttributes=4;
 											};
 										};
 										class Item27
@@ -35709,7 +35904,8 @@ class Mission
 											dataType="Object";
 											class PositionInfo
 											{
-												position[]={6520.3604,10.497772,1603.7681};
+												position[]={6515.2329,10.534096,1563.8132};
+												angles[]={0.011431906,3.1415927,6.2793808};
 											};
 											side="Empty";
 											flags=4;
@@ -35718,9 +35914,49 @@ class Mission
 											};
 											id=172;
 											type="Peral_H2_Forklift";
+											atlOffset=-0.00023841858;
 											class CustomAttributes
 											{
 												class Attribute0
+												{
+													property="IDFontStyle";
+													expression="_this setVariable [""AL_ID_Color"", _value]; [_this,0.80] call AL_towing_fnc_ID_Number;";
+													class Value
+													{
+														class data
+														{
+															singleType="STRING";
+															value="#FFFFFF";
+														};
+													};
+												};
+												class Attribute1
+												{
+													property="ObjectCollision";
+													expression="[_this, 	(			[false,true] select (if 		(_value in [true,false]) 	then 	{parseNumber _value} else {_value # 0}		 ) ) 	] remoteExecCall ['setPhysicsCollisionFlag', 0, _this];";
+													class Value
+													{
+														class data
+														{
+															singleType="BOOL";
+															value=1;
+														};
+													};
+												};
+												class Attribute2
+												{
+													property="attachMarker";
+													expression="if (_value isNotEqualTo '') then {[_this, _value] spawn expEden_fnc_markerAttachToObject}";
+													class Value
+													{
+														class data
+														{
+															singleType="STRING";
+															value="";
+														};
+													};
+												};
+												class Attribute3
 												{
 													property="IDNumber";
 													expression="_this setVariable [""AL_ID_Number"", _value]; [_this,0.80] call AL_towing_fnc_ID_Number;";
@@ -35729,11 +35965,11 @@ class Mission
 														class data
 														{
 															singleType="STRING";
-															value="76";
+															value="8";
 														};
 													};
 												};
-												nAttributes=1;
+												nAttributes=4;
 											};
 										};
 										class Item28
@@ -35741,7 +35977,8 @@ class Mission
 											dataType="Object";
 											class PositionInfo
 											{
-												position[]={6513.6416,10.062909,1603.8966};
+												position[]={6509.9951,10.108896,1563.6362};
+												angles[]={0.007627089,3.1415927,0.0038048176};
 											};
 											side="Empty";
 											flags=4;
@@ -35750,9 +35987,49 @@ class Mission
 											};
 											id=173;
 											type="Peral_MJ_1E";
+											atlOffset=0.00098228455;
 											class CustomAttributes
 											{
 												class Attribute0
+												{
+													property="IDFontStyle";
+													expression="_this setVariable [""AL_ID_Color"", _value]; [_this,0.80] call AL_towing_fnc_ID_Number";
+													class Value
+													{
+														class data
+														{
+															singleType="STRING";
+															value="#FFFFFF";
+														};
+													};
+												};
+												class Attribute1
+												{
+													property="ObjectCollision";
+													expression="[_this, 	(			[false,true] select (if 		(_value in [true,false]) 	then 	{parseNumber _value} else {_value # 0}		 ) ) 	] remoteExecCall ['setPhysicsCollisionFlag', 0, _this];";
+													class Value
+													{
+														class data
+														{
+															singleType="BOOL";
+															value=1;
+														};
+													};
+												};
+												class Attribute2
+												{
+													property="attachMarker";
+													expression="if (_value isNotEqualTo '') then {[_this, _value] spawn expEden_fnc_markerAttachToObject}";
+													class Value
+													{
+														class data
+														{
+															singleType="STRING";
+															value="";
+														};
+													};
+												};
+												class Attribute3
 												{
 													property="IDNumber";
 													expression="_this setVariable [""AL_ID_Number"", _value]; [_this,0.45] call AL_towing_fnc_ID_Number";
@@ -35761,11 +36038,11 @@ class Mission
 														class data
 														{
 															singleType="STRING";
-															value="30";
+															value="7";
 														};
 													};
 												};
-												nAttributes=1;
+												nAttributes=4;
 											};
 										};
 										class Item29
@@ -35773,7 +36050,8 @@ class Mission
 											dataType="Object";
 											class PositionInfo
 											{
-												position[]={6509.7271,10.147408,1603.6559};
+												position[]={6525.3701,10.193583,1563.4714};
+												angles[]={0.0076096351,3.1415927,0};
 											};
 											side="Empty";
 											flags=4;
@@ -35782,9 +36060,49 @@ class Mission
 											};
 											id=174;
 											type="Peral_USN6";
+											atlOffset=-9.9182129e-05;
 											class CustomAttributes
 											{
 												class Attribute0
+												{
+													property="IDFontStyle";
+													expression="_this setVariable [""AL_ID_Color"", _value]; [_this,0.80] call AL_towing_fnc_ID_Number";
+													class Value
+													{
+														class data
+														{
+															singleType="STRING";
+															value="#FFFFFF";
+														};
+													};
+												};
+												class Attribute1
+												{
+													property="ObjectCollision";
+													expression="[_this, 	(			[false,true] select (if 		(_value in [true,false]) 	then 	{parseNumber _value} else {_value # 0}		 ) ) 	] remoteExecCall ['setPhysicsCollisionFlag', 0, _this];";
+													class Value
+													{
+														class data
+														{
+															singleType="BOOL";
+															value=1;
+														};
+													};
+												};
+												class Attribute2
+												{
+													property="attachMarker";
+													expression="if (_value isNotEqualTo '') then {[_this, _value] spawn expEden_fnc_markerAttachToObject}";
+													class Value
+													{
+														class data
+														{
+															singleType="STRING";
+															value="";
+														};
+													};
+												};
+												class Attribute3
 												{
 													property="IDNumber";
 													expression="_this setVariable [""AL_ID_Number"", _value]; [_this,0.80] call AL_towing_fnc_ID_Number";
@@ -35793,11 +36111,11 @@ class Mission
 														class data
 														{
 															singleType="STRING";
-															value="05";
+															value="10";
 														};
 													};
 												};
-												nAttributes=1;
+												nAttributes=4;
 											};
 										};
 										class Item30
@@ -36103,13 +36421,159 @@ class Mission
 											type="Land_MobileScafolding_01_F";
 											atlOffset=0.0074768066;
 										};
+										class Item49
+										{
+											dataType="Object";
+											class PositionInfo
+											{
+												position[]={6519.8608,10.538363,1563.6653};
+												angles[]={0.011431906,3.1415927,6.2793808};
+											};
+											side="Empty";
+											flags=4;
+											class Attributes
+											{
+											};
+											id=5012;
+											type="Peral_H2_Forklift";
+											atlOffset=-2.8610229e-05;
+											class CustomAttributes
+											{
+												class Attribute0
+												{
+													property="IDFontStyle";
+													expression="_this setVariable [""AL_ID_Color"", _value]; [_this,0.80] call AL_towing_fnc_ID_Number;";
+													class Value
+													{
+														class data
+														{
+															singleType="STRING";
+															value="#FFFFFF";
+														};
+													};
+												};
+												class Attribute1
+												{
+													property="ObjectCollision";
+													expression="[_this, 	(			[false,true] select (if 		(_value in [true,false]) 	then 	{parseNumber _value} else {_value # 0}		 ) ) 	] remoteExecCall ['setPhysicsCollisionFlag', 0, _this];";
+													class Value
+													{
+														class data
+														{
+															singleType="BOOL";
+															value=1;
+														};
+													};
+												};
+												class Attribute2
+												{
+													property="attachMarker";
+													expression="if (_value isNotEqualTo '') then {[_this, _value] spawn expEden_fnc_markerAttachToObject}";
+													class Value
+													{
+														class data
+														{
+															singleType="STRING";
+															value="";
+														};
+													};
+												};
+												class Attribute3
+												{
+													property="IDNumber";
+													expression="_this setVariable [""AL_ID_Number"", _value]; [_this,0.80] call AL_towing_fnc_ID_Number;";
+													class Value
+													{
+														class data
+														{
+															singleType="STRING";
+															value="9";
+														};
+													};
+												};
+												nAttributes=4;
+											};
+										};
+										class Item50
+										{
+											dataType="Object";
+											class PositionInfo
+											{
+												position[]={6529.6167,10.206641,1563.08};
+												angles[]={0.0076096351,3.1415927,0};
+											};
+											side="Empty";
+											flags=4;
+											class Attributes
+											{
+											};
+											id=5013;
+											type="Peral_USN6";
+											atlOffset=-2.3841858e-05;
+											class CustomAttributes
+											{
+												class Attribute0
+												{
+													property="IDFontStyle";
+													expression="_this setVariable [""AL_ID_Color"", _value]; [_this,0.80] call AL_towing_fnc_ID_Number";
+													class Value
+													{
+														class data
+														{
+															singleType="STRING";
+															value="#FFFFFF";
+														};
+													};
+												};
+												class Attribute1
+												{
+													property="ObjectCollision";
+													expression="[_this, 	(			[false,true] select (if 		(_value in [true,false]) 	then 	{parseNumber _value} else {_value # 0}		 ) ) 	] remoteExecCall ['setPhysicsCollisionFlag', 0, _this];";
+													class Value
+													{
+														class data
+														{
+															singleType="BOOL";
+															value=1;
+														};
+													};
+												};
+												class Attribute2
+												{
+													property="attachMarker";
+													expression="if (_value isNotEqualTo '') then {[_this, _value] spawn expEden_fnc_markerAttachToObject}";
+													class Value
+													{
+														class data
+														{
+															singleType="STRING";
+															value="";
+														};
+													};
+												};
+												class Attribute3
+												{
+													property="IDNumber";
+													expression="_this setVariable [""AL_ID_Number"", _value]; [_this,0.80] call AL_towing_fnc_ID_Number";
+													class Value
+													{
+														class data
+														{
+															singleType="STRING";
+															value="11";
+														};
+													};
+												};
+												nAttributes=4;
+											};
+										};
 									};
 									id=144;
-									atlOffset=0.00066661835;
+									atlOffset=0.041055679;
 								};
 							};
 							id=499;
-							atlOffset=0.00066661835;
+							atlOffset=0.041055679;
 						};
 						class Item1
 						{
@@ -41059,7 +41523,7 @@ class Mission
 						};
 					};
 					id=498;
-					atlOffset=-2.9570942;
+					atlOffset=-4.6420865;
 				};
 				class Item7
 				{
@@ -108894,7 +109358,7 @@ class Mission
 				};
 			};
 			id=448;
-			atlOffset=0.54018497;
+			atlOffset=0.71790314;
 		};
 		class Item3
 		{
@@ -119861,6 +120325,37 @@ class Mission
 				};
 				nAttributes=3;
 			};
+		};
+		class Item20
+		{
+			dataType="Object";
+			class PositionInfo
+			{
+				position[]={6522.4824,9.7215261,1582.8368};
+			};
+			side="Empty";
+			flags=4;
+			class Attributes
+			{
+			};
+			id=5010;
+			type="Land_Garaz_long_open";
+		};
+		class Item21
+		{
+			dataType="Object";
+			class PositionInfo
+			{
+				position[]={6522.7944,9.727417,1571.1593};
+				angles[]={0.003797939,3.141593,6.2793875};
+			};
+			side="Empty";
+			flags=4;
+			class Attributes
+			{
+			};
+			id=5011;
+			type="Land_Garaz_long_open";
 		};
 	};
 	class Connections
