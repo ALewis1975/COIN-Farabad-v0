@@ -16,6 +16,7 @@ import RscCombo;
 import RscStructuredText;
 import RscControlsGroup;
 import RscMapControl;
+import RscPicture;
 
 class ARC_IntelReportDialog
 {
@@ -675,6 +676,21 @@ class ARC_FarabadConsoleDialog
 
     class controlsBackground
     {
+        // Tablet frame background image (TABLET_FRAME layout mode, IDC 78141).
+        // Defined here so it renders behind all console controls (controlsBackground
+        // layer).  Hidden by default; shown and positioned by fn_uiConsoleApplyLayout.sqf
+        // when ARC_console_layoutMode is "TABLET_FRAME".
+        class TabletFrame: RscPicture
+        {
+            idc = 78141;
+            text = "pics\Farabad_Tablet.paa";
+            x = safeZoneX;
+            y = safeZoneY;
+            w = safeZoneW;
+            h = safeZoneH;
+            show = 0;
+        };
+
         class Shell: RscText
         {
             idc = 78090;

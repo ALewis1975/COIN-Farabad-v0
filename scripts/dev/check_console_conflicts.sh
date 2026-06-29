@@ -73,13 +73,14 @@ echo "  78060-78063: Status strip"
 echo "  78090-78099: Shell frame"
 echo "  78130-78137: AIR/TOWER"
 echo "  78140:       Region C (Visual Panel)"
-echo "  78141-78149: Reserved (future AIR/Region)"
+echo "  78141:       Tablet frame background (TabletFrame, static controlsBackground)"
+echo "  78142-78149: Reserved (future AIR/Region)"
 echo "  78200-78299: Modal action dialogs (EOD, closeout)"
 echo "  78300-78499: Recruit dialog"
 echo ""
 
 # Check for any IDC outside known ranges
-UNKNOWN=$(echo "$IDCS" | grep -vE '^(78001|7801[0-6]|7802[1-4]|7803[0-8]|7805[0-5]|7806[0-3]|7809[0-9]|7810[1-9]|7811[0-8]|7812[0-1]|7813[0-7]|78140|7819[0-2]|782[0-9][0-9]|783[0-9][0-9]|784[0-9][0-9])$' || true)
+UNKNOWN=$(echo "$IDCS" | grep -vE '^(78001|7801[0-6]|7802[1-4]|7803[0-8]|7805[0-5]|7806[0-3]|7809[0-9]|7810[1-9]|7811[0-8]|7812[0-1]|7813[0-7]|78140|7814[1-9]|7819[0-2]|782[0-9][0-9]|783[0-9][0-9]|784[0-9][0-9])$' || true)
 if [ -n "$UNKNOWN" ]; then
     echo "[WARN] IDCs outside documented ranges:"
     echo "$UNKNOWN" | while read idc; do
