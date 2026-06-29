@@ -564,6 +564,12 @@ if (_rebuild) then {
                 ];
                 _ctrlList lbSetData [_summaryRow, "CSTATUS|SUMMARY"];
 
+                // Runway status row — ATC can see runway state without leaving CLEARANCES.
+                private _rwyOwnerTagC = if (_runwayOwnerDisplay isEqualTo "") then {"Vacant"} else {_runwayOwnerDisplay};
+                private _rwyHoldLabelC = if (_holdDepartures) then {"Hold ACTIVE"} else {"Open"};
+                private _rwyStatusRow = _ctrlList lbAdd format ["Runway: %1  |  Aircraft: %2  |  Departures: %3", _runwayState, _rwyOwnerTagC, _rwyHoldLabelC];
+                _ctrlList lbSetData [_rwyStatusRow, format ["RWY|%1|%2|%3", _runwayState, _runwayOwnerFlightId, _activeMovement]];
+
                 private _hdrReq = _ctrlList lbAdd "-- PENDING CLEARANCES --";
                 _ctrlList lbSetData [_hdrReq, "HDR|REQ"];
                 if ((count _pendingClearances) == 0) then {
@@ -583,6 +589,17 @@ if (_rebuild) then {
                         if (!(_autoEta isEqualType 0)) then { _autoEta = -1; };
                         private _lbl = format ["%1  |  %2  |  Request %3", _trackLabel, [_rtype] call _requestTypeLabel, _rid];
                         if (_autoEta >= 0) then { _lbl = _lbl + format ["  |  AUTO %1", [_autoEta] call _fmtSeconds]; };
+                        if (toUpper _rtype in ["REQ_INBOUND", "REQ_LAND"]) then {
+                            private _distM = [_meta, "arrivalDistanceM", -1] call _metaGet;
+                            private _warnLvl = [_meta, "arrivalWarnLevel", ""] call _metaGet;
+                            if ((_distM isEqualType 0) && { _distM >= 0 }) then {
+                                if (!(_warnLvl isEqualTo "") && { !(_warnLvl isEqualTo "NONE") }) then {
+                                    _lbl = _lbl + format ["  |  %1 %2m", _warnLvl, round _distM];
+                                } else {
+                                    _lbl = _lbl + format ["  |  %1m", round _distM];
+                                };
+                            };
+                        };
                         if (_prio >= 100) then { _lbl = _lbl + "  |  !EMERGENCY!"; };
                         private _row = _ctrlList lbAdd _lbl;
                         _ctrlList lbSetData [_row, format ["REQ|%1|%2|%3|%4", _rid, _rtype, _callsign, _prio]];
@@ -1104,6 +1121,18 @@ switch (_rowType) do
             ];
             if (_prio >= _PRIO_EMERGENCY) then {
                 _detailLines pushBack "<t color='#E74C3C'>EMERGENCY — requires immediate decision.</t>";
+            };
+            if ((toUpper (_rec param [1, "-"])) in ["REQ_INBOUND", "REQ_LAND"]) then {
+                private _distM = [_meta, "arrivalDistanceM", -1] call _metaGet;
+                private _warnLvl = [_meta, "arrivalWarnLevel", "NONE"] call _metaGet;
+                if ((_distM isEqualType 0) && { _distM >= 0 }) then {
+                    private _warnColor = switch (toUpper _warnLvl) do {
+                        case "URGENT": { "#E74C3C" };
+                        case "CAUTION": { "#F5A623" };
+                        default { "#FFFFFF" }
+                    };
+                    _detailLines pushBack format ["Distance: <t color='%1'>%2m (%3)</t>", _warnColor, round _distM, _warnLvl];
+                };
             };
             if (_canAirQueueManage) then {
                 _detailLines pushBack "Action: APPROVE or DENY this request.";
