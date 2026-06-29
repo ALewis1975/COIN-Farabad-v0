@@ -11,6 +11,22 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-06-29 02:06 UTC — UAS screen options include BLUFOR UGV/UAV mission assets (Mode A)
+
+**Branch/Commit:** `copilot/scan-mission-sqm-for-uav-ugv-assets` @ `173fccb` (base before this fix; working tree includes this TEST-LOG update)
+
+**Scenario:** Fix UAS screen option discovery so selectable feeds include active BLUFOR UGV/UAV-class assets found in `mission.sqm`, not only config-flagged `isUav` vehicles.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | Mission asset scan (`mission.sqm`) | `python3` scan for `type="...UAV..."` / `type="...UGV..."` + side context | PASS | BLUFOR mission entries found: `B_UAV_01_DroneDropMineDispenser`, `B_UGV_02_Demining_F`, `B_UGV_02_Science_F` (plus `B_UAV_AI` unit entries and one UAV terminal object). |
+| 2 | Parser-compat scan (changed file) | `python3 scripts/dev/sqflint_compat_scan.py --strict scripts/uasScreen/uasScreen_common.sqf` | PASS | No banned parser-compat patterns. |
+| 3 | SQF lint (changed file) | `sqflint -e w scripts/uasScreen/uasScreen_common.sqf` | PASS | Clean. |
+| 4 | Static regression suite | `bash tests/static/lane_c_contract_checks.sh` | PASS | Existing static contract suite passes after UAS/UGV selector expansion. |
+| 5 | Runtime/UAS screen behavior | In hosted/dedicated MP, cycle `[UAS] Next/Previous Active UAV Feed` and confirm UGV feeds are now selectable and render on managed screens | BLOCKED | Arma 3 runtime unavailable in sandbox; operator validation required. |
+
+---
+
 ## 2026-06-29 01:47 UTC — RQ-4A plane6 uncrewed parking + taxi-spawn crew handoff (Mode A)
 
 **Branch/Commit:** `copilot/update-rq-4a-crew-management` @ `dec64d7` (base before this fix; working tree includes this TEST-LOG update)
