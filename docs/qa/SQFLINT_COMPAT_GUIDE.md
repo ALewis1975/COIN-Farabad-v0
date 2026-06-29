@@ -129,3 +129,46 @@ The scanner is intentionally lightweight and pattern-based. It catches known par
 | `#` indexing | `hash-index-operator` | ✅ Covered |
 | `createHashMapFromArray` | `bare-createHashMapFromArray` | ✅ Covered |
 | `keys _map` | — | ❌ Caught by sqflint only |
+
+---
+
+## Known compat debt inventory
+
+The compat scanner currently reports **~930 matches** across the codebase. These are all pre-existing and do not block runtime, but they cause the compat scanner to exit non-zero (--strict) on any PR that touches the flagged files. The debt is catalogued here so it can be paid down incrementally.
+
+**Policy:** when a file below is next modified for any reason, the contributor must also clean its compat violations in the same PR (Mode A/B/C as applicable) before the compat scanner will pass for that PR.
+
+### Files with outstanding violations (as of 2026-06-29)
+
+| File | Pattern types | Count |
+|---|---|---|
+| `functions/core/fn_companyCommandTick.sqf` | `isNotEqualTo`, `#` | 5 |
+| `functions/core/fn_worldIsValidDistrictId.sqf` | `trim`, `isNotEqualTo` | 3 |
+| `functions/core/fn_clientSetCurrentTask.sqf` | `#`, `isNotEqualTo` | 3 |
+| `functions/core/fn_clientHint.sqf` | `trim` | 3 |
+| `functions/core/fn_rolesFormatUnit.sqf` | `isNotEqualTo` | 3 |
+| `functions/core/fn_companyCommandIssueTask.sqf` | `#` | 4 |
+| `functions/core/fn_incidentLoop.sqf` | `hashmap-getOrDefault-method` | 1 |
+| `functions/threat/fn_threatDebugSnapshot.sqf` | `#`, `hashmap-getOrDefault-method` | 4 |
+| `functions/threat/fn_threatGetCleanupLabelForTask.sqf` | `#`, `isNotEqualTo` | 5 |
+| *(+ ~600 other files with scattered hits)* | mixed | ~900 |
+
+For files not individually listed, run `python3 scripts/dev/sqflint_compat_scan.py --strict <file>` before editing to see what needs fixing in that file.
+
+### Remediation patterns (quick reference)
+
+```sqf
+// isNotEqualTo → negate isEqualTo
+if (!(_a isEqualTo _b)) then { ... };
+
+// # indexing → select
+private _val = _arr select _i;
+
+// trim → compiled helper (declare once after exitWith guards)
+private _trimFn = compile "params ['_s']; trim _s";
+private _cleaned = [_raw] call _trimFn;
+
+// getOrDefault method → compiled helper
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _val = [_map, _key, _default] call _hg;
+```

@@ -11,6 +11,21 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-06-29 03:47 UTC — QA actions 1-3: CI coverage, compat debt doc, lazy-load guard cleanup (Mode G/F/C)
+
+**Branch/Commit:** `copilot/queue-aircraft-for-departure` @ `98f11446c2c35246a1eb02fa8c29b86fb3768391` (pre-commit; this TEST-LOG entry is part of the same commit)
+
+**Scenario:** Address three QA findings: (1) wire 12 missing static suites into CI, (2) add compat debt tracking section to SQFLINT_COMPAT_GUIDE.md, (3) remove `isNil "ARC_fnc_airbaseTowerAuthorize"` lazy-load guards from 3 AIRBASE server RPCs.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | Compat scan on changed SQF files | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbaseRequestHoldDepartures.sqf functions/ambiance/fn_airbaseRequestCancelQueuedFlight.sqf functions/ambiance/fn_airbaseMarkClearanceEmergency.sqf` | PASS | 0 violations on 3 changed files. |
+| 2 | AIRBASE static contract suites | `bash tests/static/airbase_planning_mode_checks.sh && bash tests/static/airbase_ramp_queue_contract_checks.sh && bash tests/static/airbase_queue_lifecycle_contract_checks.sh` | PASS | All AIRBASE contracts satisfied after guard removal. |
+| 3 | Full static suite (38 suites, no FAILs) | `for f in tests/static/*.sh; do bash "$f"; done \| grep -E "FAIL\|ERROR"` | PASS | No FAIL/ERROR lines in any suite. |
+| 4 | Runtime smoke | Verify `ARC_fnc_airbaseTowerAuthorize` is available before any of the 3 RPCs fire. | BLOCKED | Arma 3 runtime unavailable in sandbox. Function is registered under `class Core` in `CfgFunctions.hpp` so CfgFunctions bootstrap guarantees availability on init. |
+
+---
+
 ## 2026-06-29 02:18 UTC — AIR / TOWER callsign visibility + plain-English UX refresh (Mode A)
 
 **Branch/Commit:** `copilot/ensure-call-sign-display` @ `b561a79ba04bfe30ce6d835896a17381be13f0e9` (working tree includes this TEST-LOG update and the final `fn_uiConsoleAirPaint.sqf` lint fix)

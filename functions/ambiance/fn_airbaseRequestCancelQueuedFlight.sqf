@@ -7,7 +7,6 @@ if (!isServer) exitWith {false};
 if !(["airbaseRequestCancelQueuedFlight"] call ARC_fnc_airbaseRuntimeEnabled) exitWith {false};
 
 if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compile preprocessFileLineNumbers "functions\\core\\fn_rpcValidateSender.sqf"; };
-if (isNil "ARC_fnc_airbaseTowerAuthorize") then { ARC_fnc_airbaseTowerAuthorize = compile preprocessFileLineNumbers "functions\\core\\fn_airbaseTowerAuthorize.sqf"; };
 if (isNil "ARC_fnc_airbaseRestoreParkedAsset") then { ARC_fnc_airbaseRestoreParkedAsset = compile preprocessFileLineNumbers "functions\\ambiance\\fn_airbaseRestoreParkedAsset.sqf"; };
 
 params [
