@@ -11,6 +11,22 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-06-29 04:04 UTC — Preflight sqflint warning fix for AIR/TOWER painter helper (Mode A)
+
+**Branch/Commit:** `copilot/queue-aircraft-for-departure` @ `3316aa13d0dda67a61f04220ece91bff969000dc` (base before this fix; working tree includes this TEST-LOG update)
+
+**Scenario:** Fix the failing GitHub Actions job `Arma SQF + Mission Config Preflight / preflight (pull_request)` run `28347590538` job `83974072073` by addressing fatal `sqflint -e w` warnings in `functions/ui/fn_uiConsoleAirPaint.sqf`, where `_resolveAircraftDisplay` was called in the RAMP list/detail paths without a local private helper declaration.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | CI root-cause analysis | Review workflow run `28347590538` job `83974072073` logs and step metadata. | PASS | Failure isolated to `SQF static analysis (changed *.sqf files only)`; warnings were `[675,64]` and `[1205,48]` in `functions/ui/fn_uiConsoleAirPaint.sqf`: `Local variable "_resolveAircraftDisplay" is not from this scope (not private)`. |
+| 2 | Post-change preflight lint reproduction | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/ambiance/fn_airbaseClientQueueParkedAsset.sqf functions/ambiance/fn_airbaseMarkClearanceEmergency.sqf functions/ambiance/fn_airbaseRequestCancelQueuedFlight.sqf functions/ambiance/fn_airbaseRequestClearanceDecision.sqf functions/ambiance/fn_airbaseRequestHoldDepartures.sqf functions/ambiance/fn_airbaseRequestQueueParkedAsset.sqf functions/ambiance/fn_airbaseTick.sqf functions/core/fn_publicBroadcastState.sqf functions/ui/fn_uiConsoleActionAirPrimary.sqf functions/ui/fn_uiConsoleActionAirSecondary.sqf functions/ui/fn_uiConsoleAirPaint.sqf && for f in functions/ambiance/fn_airbaseClientQueueParkedAsset.sqf functions/ambiance/fn_airbaseMarkClearanceEmergency.sqf functions/ambiance/fn_airbaseRequestCancelQueuedFlight.sqf functions/ambiance/fn_airbaseRequestClearanceDecision.sqf functions/ambiance/fn_airbaseRequestHoldDepartures.sqf functions/ambiance/fn_airbaseRequestQueueParkedAsset.sqf functions/ambiance/fn_airbaseTick.sqf functions/core/fn_publicBroadcastState.sqf functions/ui/fn_uiConsoleActionAirPrimary.sqf functions/ui/fn_uiConsoleActionAirSecondary.sqf functions/ui/fn_uiConsoleAirPaint.sqf; do sqflint -e w \"$f\"; done` | PASS | Compat scan passed on the full PR SQF file set; `sqflint` produced no warnings/errors after adding the missing local helper. |
+| 3 | AIRBASE + console static regression checks | `bash tests/static/airbase_ramp_queue_contract_checks.sh && bash tests/static/airbase_queue_lifecycle_contract_checks.sh && bash tests/static/airbase_planning_mode_checks.sh && bash scripts/dev/check_console_conflicts.sh` | PASS | RAMP-mode UI contract checks, AIRBASE queue lifecycle checks, planning-mode checks, and console painter/IDC validation all remained green. |
+| 4 | Runtime smoke (hosted/local MP) | Open AIR / TOWER in RAMP mode and inspect parked-aircraft rows/detail panel after the helper fix. | BLOCKED | Arma 3 runtime unavailable in sandbox. |
+| 5 | Dedicated/JIP validation | Dedicated server + late-join client: verify RAMP parked-aircraft labels/detail panel remain correct for connected and JIP clients. | BLOCKED | Dedicated server/JIP runtime unavailable in sandbox session. |
+
+---
+
 ## 2026-06-29 03:54 UTC — Preflight sqflint scope warning fix for AIRBASE UI snapshot (Mode A)
 
 **Branch/Commit:** `copilot/queue-aircraft-for-departure` @ `5f877902d65998ead63c99cecd80c405dfabda2b` (base before this fix; working tree includes this TEST-LOG update)

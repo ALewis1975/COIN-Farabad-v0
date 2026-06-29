@@ -82,6 +82,18 @@ private _cleanAirText = {
     _out
 };
 
+private _resolveAircraftDisplay = {
+    params ["_raw"];
+    private _cls = [_raw, ""] call _cleanAirText;
+    if (_cls isEqualTo "") exitWith { "" };
+    private _display = "";
+    if (isClass (configFile >> "CfgVehicles" >> _cls)) then {
+        _display = getText (configFile >> "CfgVehicles" >> _cls >> "displayName");
+    };
+    _display = [_display, _cls] call _cleanAirText;
+    _display
+};
+
 private _isOpaqueAirId = {
     params ["_value"];
     private _txt = toUpper ([_value, ""] call _cleanAirText);
