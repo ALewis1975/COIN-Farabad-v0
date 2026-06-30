@@ -58,7 +58,7 @@ private _civUid = _civ getVariable ["civ_uid", ""];
 if !(_civUid isEqualTo "") then {
     private _rec = [_civUid] call ARC_fnc_civsubIdentityGet;
     if (_rec isEqualType createHashMap) then {
-        _isDetained = _rec getOrDefault ["status_detained", false];
+        _isDetained = [_rec, "status_detained", false] call getOrDefault;
     };
 };
 if (_isDetained) exitWith {

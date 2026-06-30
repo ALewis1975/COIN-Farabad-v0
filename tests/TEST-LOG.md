@@ -11,6 +11,23 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-06-30 02:40 UTC — Preflight compat-scan failure fix for CIVSUB identity lookups (Mode A)
+
+**Branch/Commit:** `codex/civsub-interaction-protect-grandmosque-aid` @ `00aa5480c2db0e684910a2ebcbea7ace3e43063c` (base before this fix; working tree includes this TEST-LOG update)
+
+**Scenario:** Fix the failing GitHub Actions job `Arma SQF + Mission Config Preflight / preflight (pull_request)` run `28416361808` job `84200010509`, where strict compat scanning rejected method-style HashMap `getOrDefault` calls in CIVSUB functions.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | CI root-cause analysis | Review workflow run `28416361808` job `84200010509` logs. | PASS | Failure isolated to `SQF static analysis (changed *.sqf files only)` at `python3 scripts/dev/sqflint_compat_scan.py --strict ...`; flagged 3 method-style `getOrDefault` uses in `functions/civsub/fn_civsubCivIsProtected.sqf` and `functions/civsub/fn_civsubInteractEndSession.sqf`. |
+| 2 | Baseline compat reproduction (pre-change) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubCivIsProtected.sqf functions/civsub/fn_civsubInteractEndSession.sqf functions/world/fn_worldSpawnPatternResolve.sqf` | FAIL | Reproduced the exact strict-compat findings before edits. |
+| 3 | Post-change targeted preflight lint | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubCivIsProtected.sqf functions/civsub/fn_civsubInteractEndSession.sqf functions/world/fn_worldSpawnPatternResolve.sqf && ~/.local/bin/sqflint -e w functions/civsub/fn_civsubCivIsProtected.sqf && ~/.local/bin/sqflint -e w functions/civsub/fn_civsubInteractEndSession.sqf && ~/.local/bin/sqflint -e w functions/world/fn_worldSpawnPatternResolve.sqf` | PASS | Compat scanner clean; sqflint warning-free on all affected files. |
+| 4 | CIVSUB static regression check | `bash tests/static/civsub_traffic_contract_checks.sh` | PASS | CIVSUB traffic contract remains green after compat-form rewrite. |
+| 5 | Runtime smoke (hosted/local MP) | Exercise interaction stop/end flows for detained and non-detained civs. | BLOCKED | Arma 3 runtime unavailable in sandbox. |
+| 6 | Dedicated/JIP validation | Dedicated server + late-join client: verify stop/end-session protection behavior replicates correctly and remains server-authoritative. | BLOCKED | Dedicated/JIP runtime unavailable in sandbox session. |
+
+---
+
 ## 2026-06-29 04:04 UTC — Preflight sqflint warning fix for AIR/TOWER painter helper (Mode A)
 
 **Branch/Commit:** `copilot/queue-aircraft-for-departure` @ `3316aa13d0dda67a61f04220ece91bff969000dc` (base before this fix; working tree includes this TEST-LOG update)
