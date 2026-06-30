@@ -19,6 +19,8 @@
 params [["_u", objNull, [objNull]]];
 if (isNull _u) exitWith {false};
 
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+
 // Explicit pin (CIVSUB-owned)
 if (_u getVariable ["civsub_v1_pinned", false]) exitWith {true};
 
@@ -49,8 +51,8 @@ private _civUid = _u getVariable ["civ_uid", ""];
 if !(_civUid isEqualTo "") then {
     private _rec = [_civUid] call ARC_fnc_civsubIdentityGet;
     if (_rec isEqualType createHashMap) then {
-        if ([_rec, "status_detained", false] call getOrDefault) exitWith {true};
-        if ([_rec, "status_handedOff", false] call getOrDefault) exitWith {true};
+        if ([_rec, "status_detained", false] call _hg) exitWith {true};
+        if ([_rec, "status_handedOff", false] call _hg) exitWith {true};
     };
 };
 
