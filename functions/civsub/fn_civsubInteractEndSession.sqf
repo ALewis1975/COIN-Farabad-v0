@@ -53,17 +53,19 @@ if !(_ownerUid isEqualTo "" || {_ownerUid isEqualTo _actorUid}) exitWith {false}
 private _releasePending = _civ getVariable ["ARC_civsub_releasePending", false];
 
 // If the civilian is detained, keep them pinned in place.
+private _isDetained = false;
 private _civUid = _civ getVariable ["civ_uid", ""];
 if !(_civUid isEqualTo "") then {
     private _rec = [_civUid] call ARC_fnc_civsubIdentityGet;
     if (_rec isEqualType createHashMap) then {
-        if (_rec getOrDefault ["status_detained", false]) exitWith {
-            if (!_silent) then {
-                ["CIVSUB: Interaction ended. Civilian remains detained.", "CHAT"] remoteExecCall ["ARC_fnc_civsubClientMessage", _actor];
-            };
-            true
-        };
+        _isDetained = _rec getOrDefault ["status_detained", false];
     };
+};
+if (_isDetained) exitWith {
+    if (!_silent) then {
+        ["CIVSUB: Interaction ended. Civilian remains detained.", "CHAT"] remoteExecCall ["ARC_fnc_civsubClientMessage", _actor];
+    };
+    true
 };
 
 // If the player released the civilian inside the dialog, clear custody pins now.
