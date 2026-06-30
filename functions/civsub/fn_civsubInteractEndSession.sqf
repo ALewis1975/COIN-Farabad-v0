@@ -57,7 +57,7 @@ private _civUid = _civ getVariable ["civ_uid", ""];
 if !(_civUid isEqualTo "") then {
     private _rec = [_civUid] call ARC_fnc_civsubIdentityGet;
     if (_rec isEqualType createHashMap) then {
-        if ([_rec, "status_detained", false] call getOrDefault) exitWith {
+        if (_rec getOrDefault ["status_detained", false]) exitWith {
             if (!_silent) then {
                 ["CIVSUB: Interaction ended. Civilian remains detained.", "CHAT"] remoteExecCall ["ARC_fnc_civsubClientMessage", _actor];
             };
