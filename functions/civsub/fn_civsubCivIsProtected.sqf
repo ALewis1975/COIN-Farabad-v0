@@ -24,6 +24,7 @@ if (_u getVariable ["civsub_v1_pinned", false]) exitWith {true};
 
 // Active interaction session marker. The Interact action sets this via OrderStop before opening the dialog.
 private _stopped = _u getVariable ["civsub_v1_stopped", false];
+private _interactionProtected = false;
 if (_stopped isEqualType true && {_stopped}) then {
     private _ownerUid = _u getVariable ["civsub_v1_stopOwnerUid", ""];
     private _stopTs = _u getVariable ["civsub_v1_stopTs", 0];
@@ -33,8 +34,9 @@ if (_stopped isEqualType true && {_stopped}) then {
     if (!(_ttl isEqualType 0)) then { _ttl = 900; };
     _ttl = (_ttl max 60) min 3600;
 
-    if (!(_ownerUid isEqualTo "") && {_stopTs > 0} && {(serverTime - _stopTs) <= _ttl}) exitWith {true};
+    _interactionProtected = !(_ownerUid isEqualTo "") && {_stopTs > 0} && {(serverTime - _stopTs) <= _ttl};
 };
+if (_interactionProtected) exitWith {true};
 
 // Engine captive
 if (captive _u) exitWith {true};
