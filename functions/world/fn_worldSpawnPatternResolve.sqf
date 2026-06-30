@@ -143,6 +143,36 @@ private _objects = [_m, "objects", []] call _hg;
 if (!(_overlay isEqualType [])) then { _overlay = []; };
 if (!(_objects isEqualType [])) then { _objects = []; };
 
+// FOOD_WATER_DISTRIBUTION can resolve onto dense pedestrian courtyards (e.g. Grand Mosque).
+// Strip vehicle tags here and represent supply delivery with static crates instead.
+if (_civicU isEqualTo "FOOD_WATER_DISTRIBUTION") then {
+    private _vehicleObjectTags = [
+        "civ_car",
+        "civ_truck",
+        "pickup",
+        "official_car",
+        "cargo_truck",
+        "fuel_truck",
+        "utility_truck",
+        "ambulance",
+        "voi_vehicle",
+        "vbied_vehicle"
+    ];
+    private _filteredObjects = [];
+    {
+        private _keep = true;
+        if (_x isEqualType [] && { (count _x) >= 1 }) then {
+            private _tag = _x param [0, ""];
+            if (!(_tag isEqualType "")) then { _tag = str _tag; };
+            _tag = toLower _tag;
+            if (_tag in _vehicleObjectTags) then { _keep = false; };
+        };
+        if (_keep) then { _filteredObjects pushBack _x; };
+    } forEach _objects;
+    _filteredObjects pushBack ["supply_crate", [1, 2], "courtyard"];
+    _objects = _filteredObjects;
+};
+
 [
     ["overlay", _overlay],
     ["objects", _objects],
