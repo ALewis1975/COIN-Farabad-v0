@@ -32,11 +32,22 @@ _unit setVariable ["civsub_v1_isCiv", true, true];
 
 // Phase 7: add vanilla contact actions client-side.
 if (missionNamespace getVariable ["civsub_v1_interactions_enabled", true]) then {
-    // Use the unit as the JIP key so joining clients also get the actions.
-    // ALiVE-style contact actions (two addActions: Stop + Interact)
-    [_unit] remoteExecCall ["ARC_fnc_civsubCivAddContactActions", 0, _unit];
+    private _queued = _unit getVariable ["civsub_v1_contactActionsQueued", false];
+    if (!(_queued isEqualType true) && !(_queued isEqualType false)) then { _queued = false; };
 
-    diag_log format ["[CIVSUB][IDENTITY] Queued client actions for unit netId=%1 district=%2", netId _unit, _districtId];
+    if (!_queued) then {
+        _unit setVariable ["civsub_v1_contactActionsQueued", true, true];
+
+        // Use the unit as the JIP key so joining clients also get the actions.
+        // ALiVE-style contact actions (two addActions: Stop + Interact)
+        [_unit] remoteExecCall ["ARC_fnc_civsubCivAddContactActions", 0, _unit];
+
+        diag_log format ["[CIVSUB][IDENTITY] Queued client actions for unit netId=%1 district=%2", netId _unit, _districtId];
+    } else {
+        if (missionNamespace getVariable ["civsub_v1_debug", false]) then {
+            diag_log format ["[CIVSUB][IDENTITY] Contact actions already queued for unit netId=%1 district=%2", netId _unit, _districtId];
+        };
+    };
 };
 
 true
