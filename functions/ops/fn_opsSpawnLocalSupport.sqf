@@ -113,7 +113,7 @@ else
             "ARC_loc_EmbassyCompound",
             "ARC_loc_AwenaResevoir",
             "ARC_loc_JaziraOilRefinery",
-            "ARC_loc_OilProcessing",
+            "marker_14",
             "ARC_loc_JaziraOilField"
         ];
     };
