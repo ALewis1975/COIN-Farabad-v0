@@ -1,0 +1,45 @@
+name: Regenerate marker index for PR B once
+
+on:
+  push:
+    branches:
+      - data/imagery-marker-alias-cleanup-2026-07-01
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate-marker-index:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Regenerate marker index
+        run: python3 tools/generate_marker_index.py
+
+      - name: Show generated marker-index diff
+        run: |
+          git status --short
+          git diff -- docs/reference/marker-index.md docs/reference/marker-index.json || true
+
+      - name: Commit generated docs and remove temporary workflow
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git rm .github/workflows/regenerate-marker-index-pr-b-once.yml
+          git add docs/reference/marker-index.md docs/reference/marker-index.json
+
+          if git diff --cached --quiet; then
+            echo "No generated marker-index changes; removing temporary workflow only."
+            git commit -m "ci: remove temporary PR B marker index workflow"
+          else
+            git commit -m "docs: regenerate marker index after marker alias cleanup"
+          fi
+
+          git push origin HEAD:${{ github.ref_name }}
