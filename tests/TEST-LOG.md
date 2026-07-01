@@ -11,6 +11,22 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-07-01 15:16 UTC — Preflight compat-scan fix for CIVSUB district clamp (Mode A)
+
+**Branch/Commit:** `fix/runtime-hardening-rpt-20260630` @ `0afb3dd75071c5b1e7129aa2b6bd9a5f8cae917a` (base before this fix; working tree includes this TEST-LOG update)
+
+**Scenario:** Fix failing GitHub Actions job `Arma SQF + Mission Config Preflight / preflight (pull_request)` run `28527829754` job `84569011286`, where strict compat scanning rejected a method-style HashMap lookup in `functions/civsub/fn_civsubDistrictsClamp.sqf`.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | CI root-cause analysis | Review workflow run `28527829754` job `84569011286` logs. | PASS | Failure isolated to `SQF static analysis (changed *.sqf files only)`; compat scan flagged `L14` method-style `getOrDefault` in `functions/civsub/fn_civsubDistrictsClamp.sqf`. |
+| 2 | Baseline compat reproduction (pre-change) | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubDistrictsClamp.sqf` | FAIL | Reproduced exact strict-compat failure before edit. |
+| 3 | Post-change targeted preflight + static contract | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubDistrictsClamp.sqf && ~/.local/bin/sqflint -e w functions/civsub/fn_civsubDistrictsClamp.sqf && bash tests/static/civsub_traffic_contract_checks.sh` | PASS | Compat scan clean, sqflint warning-free, and CIVSUB traffic static contract remained green. |
+| 4 | Runtime smoke (hosted/local MP) | Exercise district clamp behavior through CIVSUB traffic/state update paths. | BLOCKED | Arma 3 runtime unavailable in sandbox. |
+| 5 | Dedicated/JIP validation | Dedicated server + late-join client: verify clamped district values replicate and remain server-authoritative. | BLOCKED | Dedicated/JIP runtime unavailable in sandbox session. |
+
+---
+
 ## 2026-06-30 02:40 UTC — Preflight compat-scan failure fix for CIVSUB identity lookups (Mode A)
 
 **Branch/Commit:** `codex/civsub-interaction-protect-grandmosque-aid` @ `00aa5480c2db0e684910a2ebcbea7ace3e43063c` (base before this fix; working tree includes this TEST-LOG update)
