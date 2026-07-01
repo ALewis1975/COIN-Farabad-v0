@@ -1,0 +1,57 @@
+name: Repair PR B local support and marker index once
+
+on:
+  push:
+    branches:
+      - data/imagery-marker-alias-cleanup-2026-07-01
+
+permissions:
+  contents: write
+
+jobs:
+  repair-and-regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR B branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Restore full local support file and apply intended marker rename
+        run: |
+          set -euo pipefail
+          git fetch origin docs/imagery-marker-audit-2026-07-01
+          git checkout origin/docs/imagery-marker-audit-2026-07-01 -- functions/ops/fn_opsSpawnLocalSupport.sqf
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('functions/ops/fn_opsSpawnLocalSupport.sqf')
+          s = p.read_text(encoding='utf-8')
+          old = '            "marker_14",\n            "ARC_loc_JaziraOilField"'
+          new = '            "ARC_loc_OilProcessing",\n            "ARC_loc_JaziraOilField"'
+          if old not in s:
+              raise SystemExit('expected marker_14 allow-list entry not found')
+          p.write_text(s.replace(old, new, 1), encoding='utf-8')
+          PY
+
+      - name: Regenerate marker index
+        run: python3 tools/generate_marker_index.py
+
+      - name: Commit repair and remove temporary workflow
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git rm .github/workflows/repair-pr-b-local-support-once.yml
+          git add functions/ops/fn_opsSpawnLocalSupport.sqf docs/reference/marker-index.md docs/reference/marker-index.json
+
+          if git diff --cached --quiet; then
+            echo "No repair changes; removing temporary workflow only."
+            git commit -m "ci: remove temporary PR B repair workflow"
+          else
+            git commit -m "ops: repair local support marker cleanup and regenerate index"
+          fi
+
+          git push origin HEAD:${{ github.ref_name }}
