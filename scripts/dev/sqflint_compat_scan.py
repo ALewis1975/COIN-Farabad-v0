@@ -41,8 +41,8 @@ RULES: list[PatternRule] = [
     PatternRule(
         name="hashmap-getOrDefault-method",
         regex=re.compile(r"\b[_A-Za-z]\w*\s+getOrDefault\s*\["),
-        approved_equivalent="Prefer call form: `[map, key, default] call getOrDefault`.",
-        notes="Method-style HashMap calls can misparse under older sqflint builds.",
+        approved_equivalent="Use a local safe getter based on `get` + `isNil`; do not use `[map, key, default] call getOrDefault` unless a real helper exists in the mission.",
+        notes="Method-style HashMap default calls can misparse under older sqflint builds; call-form getOrDefault is not a valid built-in replacement.",
     ),
     PatternRule(
         name="isNotEqualTo",
