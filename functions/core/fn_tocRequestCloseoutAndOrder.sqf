@@ -118,12 +118,12 @@ if !(_req in ["RTB","HOLD","PROCEED"]) then { _req = "HOLD"; };
 _purpose = toUpper (([_purpose] call _trimFn));
 if !(_purpose in ["REFIT","INTEL","EPW",""]) then { _purpose = "REFIT"; };
 
-// Defensive reset: clear stale staged-close flags left over from a previous flow
-// before evaluating whether this request will run immediate-close or staged-close.
-private _pending = ["activeIncidentClosePending", false] call ARC_fnc_stateGet;
-if (!(_pending isEqualType true)) then { _pending = false; };
-if (_pending) then
-{
+// -------------------------------------------------------------------------
+// Shared closeout helpers
+// -------------------------------------------------------------------------
+private _clearPending = {
+    params [["_reason", "INVALID", [""]]];
+
     ["activeIncidentClosePending", false] call ARC_fnc_stateSet;
     ["activeIncidentClosePendingAt", -1] call ARC_fnc_stateSet;
     ["activeIncidentClosePendingResult", ""] call ARC_fnc_stateSet;
@@ -136,19 +136,134 @@ if (_pending) then
     missionNamespace setVariable ["ARC_activeIncidentClosePendingOrderId", "", true];
     missionNamespace setVariable ["ARC_activeIncidentClosePendingGroup", "", true];
 
-    diag_log "[ARC][TOC] Closeout path preflight: cleared stale activeIncidentClosePending* state.";
+    diag_log format ["[ARC][TOC][WARN] CloseoutAndOrder preflight: cleared invalid activeIncidentClosePending* state. reason=%1", _reason];
 };
 
-// Require SITREP for the active incident
-private _sitrepSent = ["activeIncidentSitrepSent", false] call ARC_fnc_stateGet;
-if (!(_sitrepSent isEqualType true)) then { _sitrepSent = false; };
-if (!_sitrepSent) exitWith
-{
-    ["MISSING_SITREP", [], "Closeout denied: SITREP not received yet for the active incident."] call _deny;
-    false
+private _findIssuedOrder = {
+    params [
+        ["_gidReq", "", [""]],
+        ["_oidReq", "", [""]]
+    ];
+
+    private _orders = ["tocOrders", []] call ARC_fnc_stateGet;
+    if (!(_orders isEqualType [])) then { _orders = []; };
+
+    private _bestId = "";
+    private _bestType = "";
+    private _bestAt = -1;
+
+    {
+        if (!(_x isEqualType []) || { (count _x) < 7 }) then { continue; };
+        private _oid = _x select 0;
+        private _iat = _x select 1;
+        private _st = _x select 2;
+        private _ot = _x select 3;
+        private _tg = _x select 4;
+
+        if (!(_oid isEqualType "")) then { _oid = ""; };
+        if (!(_ot isEqualType "")) then { _ot = ""; };
+        if (!(_tg isEqualType "")) then { _tg = ""; };
+        if (!(_st isEqualType "")) then { _st = ""; };
+        if (!(_iat isEqualType 0)) then { _iat = -1; };
+
+        _oid = ([_oid] call _trimFn);
+        _tg = ([_tg] call _trimFn);
+
+        if (!(_gidReq isEqualTo "") && { !(_tg isEqualTo _gidReq) }) then { continue; };
+        if (!(_oidReq isEqualTo "") && { !(_oid isEqualTo _oidReq) }) then { continue; };
+        if (!(toUpper _st isEqualTo "ISSUED")) then { continue; };
+
+        if (_iat > _bestAt) then
+        {
+            _bestAt = _iat;
+            _bestId = _oid;
+            _bestType = _ot;
+        };
+    } forEach _orders;
+
+    [_bestId, _bestType, _bestAt]
 };
 
-// Active context (rehydrate if needed)
+private _stagePending = {
+    params [
+        ["_resultStage", "", [""]],
+        ["_orderIdStage", "", [""]],
+        ["_groupStage", "", [""]]
+    ];
+
+    if (_orderIdStage isEqualTo "" || { _groupStage isEqualTo "" }) exitWith { false };
+
+    private _stageAt = serverTime;
+
+    ["activeIncidentClosePending", true] call ARC_fnc_stateSet;
+    ["activeIncidentClosePendingAt", _stageAt] call ARC_fnc_stateSet;
+    ["activeIncidentClosePendingResult", _resultStage] call ARC_fnc_stateSet;
+    ["activeIncidentClosePendingOrderId", _orderIdStage] call ARC_fnc_stateSet;
+    ["activeIncidentClosePendingGroup", _groupStage] call ARC_fnc_stateSet;
+
+    ["activeIncidentCloseReady", true] call ARC_fnc_stateSet;
+
+    missionNamespace setVariable ["ARC_activeIncidentClosePending", true, true];
+    missionNamespace setVariable ["ARC_activeIncidentClosePendingAt", _stageAt, true];
+    missionNamespace setVariable ["ARC_activeIncidentClosePendingResult", _resultStage, true];
+    missionNamespace setVariable ["ARC_activeIncidentClosePendingOrderId", _orderIdStage, true];
+    missionNamespace setVariable ["ARC_activeIncidentClosePendingGroup", _groupStage, true];
+    missionNamespace setVariable ["ARC_activeIncidentCloseReady", true, true];
+
+    // Publish orders snapshot so clients can see/accept the pending ISSUED order.
+    [] call ARC_fnc_intelOrderBroadcast;
+
+    true
+};
+
+private _approveEodIfNeeded = {
+    params [
+        ["_incidentType", "", [""]],
+        ["_taskIdRef", "", [""]],
+        ["_gidRef", "", [""]],
+        ["_posRef", [0,0,0], [[]]]
+    ];
+
+    if !(toUpper (([_incidentType] call _trimFn)) isEqualTo "IED") exitWith { false };
+
+    private _eodReqU = toUpper (([["activeIncidentEodDispoRequestedType", ""] call ARC_fnc_stateGet] call _trimFn));
+    private _objKindU = toUpper (([["activeIncidentEodDispoObjectiveKind", ""] call ARC_fnc_stateGet] call _trimFn));
+
+    if (!(_eodReqU in ["DET_IN_PLACE","RTB_IED","TOW_VBIED"]) || { !(_objKindU in ["IED_DEVICE","VBIED_VEHICLE"]) }) exitWith { false };
+
+    private _ttl = missionNamespace getVariable ["ARC_eodDispoApprovalTTLsec", 900];
+    if (!(_ttl isEqualType 0)) then { _ttl = 900; };
+    _ttl = (_ttl max 60) min (60*60);
+
+    private _appr = ["eodDispoApprovals", []] call ARC_fnc_stateGet;
+    if (!(_appr isEqualType [])) then { _appr = []; };
+
+    private _exp = serverTime + _ttl;
+    private _notesE = ([["activeIncidentEodDispoNotes", ""] call ARC_fnc_stateGet] call _trimFn);
+
+    // Remove any existing approval for this task+group+type before adding a new one (prevents duplicates)
+    _appr = _appr select {
+        !(_x isEqualType [] && { (count _x) >= 6 } && { (_x select 0) isEqualTo _taskIdRef } && { (_x select 1) isEqualTo _gidRef } && { (toUpper (([_x select 2] call _trimFn))) isEqualTo _eodReqU })
+    };
+    _appr pushBack [_taskIdRef, _gidRef, _eodReqU, serverTime, if (isNull _caller) then {"TOC"} else { name _caller }, _exp, _notesE];
+
+    // Cap to avoid unbounded growth
+    private _cap = 50;
+    if ((count _appr) > _cap) then { _appr = _appr select [((count _appr) - _cap) max 0, _cap]; };
+    ["eodDispoApprovals", _appr] call ARC_fnc_stateSet;
+
+    // Broadcast for clients
+    [] call ARC_fnc_iedDispoBroadcast;
+
+    ["OPS", format ["TOC approved EOD disposition as part of closeout: %1 (%2).", _eodReqU, _gidRef], _posRef,
+        [["event","TOC_EOD_APPROVED"],["taskId",_taskIdRef],["targetGroup",_gidRef],["requestType",_eodReqU],["objectiveKind",_objKindU]]
+    ] call ARC_fnc_intelLog;
+
+    true
+};
+
+// Active context (rehydrate before pending validation so stale-state checks can
+// distinguish an actually live pending closeout from orphaned persistence).
 private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
 if (!(_taskId isEqualType "")) then { _taskId = ""; };
 _taskId = ([_taskId] call _trimFn);
@@ -161,8 +276,56 @@ if (_taskId isEqualTo "") then
     _taskId = ([_taskId] call _trimFn);
 };
 
-// Group context (Farabad rule): follow-on orders go to the unit that SENT the SITREP.
-// Fallbacks exist for edge cases where SITREP data is missing.
+// Pending closeout preflight: do not blindly clear valid pending orders. A valid
+// pending record means the unit still needs to accept the issued follow-on.
+private _pending = ["activeIncidentClosePending", false] call ARC_fnc_stateGet;
+if (!(_pending isEqualType true)) then { _pending = false; };
+
+private _denyAlreadyPending = false;
+if (_pending) then
+{
+    private _pendingOrderId = ["activeIncidentClosePendingOrderId", ""] call ARC_fnc_stateGet;
+    if (!(_pendingOrderId isEqualType "")) then { _pendingOrderId = ""; };
+    _pendingOrderId = ([_pendingOrderId] call _trimFn);
+
+    private _pendingGroup = ["activeIncidentClosePendingGroup", ""] call ARC_fnc_stateGet;
+    if (!(_pendingGroup isEqualType "")) then { _pendingGroup = ""; };
+    _pendingGroup = ([_pendingGroup] call _trimFn);
+
+    private _foundPending = ["", "", -1];
+    if (!(_taskId isEqualTo "") && { !(_pendingOrderId isEqualTo "") } && { !(_pendingGroup isEqualTo "") }) then
+    {
+        _foundPending = [_pendingGroup, _pendingOrderId] call _findIssuedOrder;
+    };
+
+    private _foundPendingId = _foundPending select 0;
+    private _foundPendingType = _foundPending select 1;
+
+    if (!(_foundPendingId isEqualTo "")) then
+    {
+        diag_log format ["[ARC][TOC] CloseoutAndOrder denied: already pending. task=%1 gid=%2 orderId=%3 orderType=%4 caller=%5", _taskId, _pendingGroup, _foundPendingId, _foundPendingType, if (isNull _caller) then {"<unknown>"} else { name _caller }];
+        ["TOC Ops", format ["Closeout already pending: awaiting %1 acceptance of order %2.", _pendingGroup, _foundPendingId]] call _toast;
+        _denyAlreadyPending = true;
+    }
+    else
+    {
+        [format ["task=%1 pendingGroup=%2 pendingOrderId=%3 orderStillIssued=false", _taskId, _pendingGroup, _pendingOrderId]] call _clearPending;
+    };
+};
+if (_denyAlreadyPending) exitWith { false };
+
+// Require SITREP for the active incident
+private _sitrepSent = ["activeIncidentSitrepSent", false] call ARC_fnc_stateGet;
+if (!(_sitrepSent isEqualType true)) then { _sitrepSent = false; };
+if (!_sitrepSent) exitWith
+{
+    ["MISSING_SITREP", [], "Closeout denied: SITREP not received yet for the active incident."] call _deny;
+    false
+};
+
+// Group context. Prefer the SITREP group normally, but if it disagrees with the
+// accepted task owner, route follow-ons to the accepted owner so the executing
+// unit can accept the resulting order from its console.
 private _gidSitrep = ["activeIncidentSitrepFromGroup", ""] call ARC_fnc_stateGet;
 if (!(_gidSitrep isEqualType "")) then { _gidSitrep = ""; };
 _gidSitrep = ([_gidSitrep] call _trimFn);
@@ -176,10 +339,15 @@ if (!(_gidLast isEqualType "")) then { _gidLast = ""; };
 _gidLast = ([_gidLast] call _trimFn);
 
 private _gid = _gidSitrep;
+if (!(_gidSitrep isEqualTo "") && { !(_gidAccepted isEqualTo "") } && { !(_gidSitrep isEqualTo _gidAccepted) }) then
+{
+    diag_log format ["[ARC][TOC][WARN] CloseoutAndOrder group mismatch: sitrep=%1 accepted=%2 last=%3 -> using accepted group", _gidSitrep, _gidAccepted, _gidLast];
+    _gid = _gidAccepted;
+};
 if (_gid isEqualTo "") then { _gid = _gidAccepted; };
 if (_gid isEqualTo "") then { _gid = _gidLast; };
 
-// Diagnostic: catch group mismatch (order issued to wrong unit)
+// Diagnostic: catch group mismatch / target resolution.
 diag_log format ["[ARC][TOC] Closeout target group resolve: sitrep=%1 accepted=%2 last=%3 -> chosen=%4", _gidSitrep, _gidAccepted, _gidLast, _gid];
 
 if (_gid isEqualTo "" || { _taskId isEqualTo "" }) exitWith
@@ -235,43 +403,7 @@ if (_noAutoOrders) exitWith
         if (_civKia > 0) then { _closeResult = "FAILED"; };
     };
 
-    // Preserve the convenience behavior: IED/VBIED closeout can approve EOD disposition.
-    if (toUpper (([_itype] call _trimFn)) isEqualTo "IED") then
-    {
-        private _eodReqU = toUpper (([["activeIncidentEodDispoRequestedType", ""] call ARC_fnc_stateGet] call _trimFn));
-        private _objKindU = toUpper (([["activeIncidentEodDispoObjectiveKind", ""] call ARC_fnc_stateGet] call _trimFn));
-
-        if (_eodReqU in ["DET_IN_PLACE","RTB_IED","TOW_VBIED"] && { _objKindU in ["IED_DEVICE","VBIED_VEHICLE"] }) then
-        {
-            private _ttl = missionNamespace getVariable ["ARC_eodDispoApprovalTTLsec", 900];
-            if (!(_ttl isEqualType 0)) then { _ttl = 900; };
-            _ttl = (_ttl max 60) min (60*60);
-
-            private _appr = ["eodDispoApprovals", []] call ARC_fnc_stateGet;
-            if (!(_appr isEqualType [])) then { _appr = []; };
-
-            private _exp = serverTime + _ttl;
-            private _notesE = ([["activeIncidentEodDispoNotes", ""] call ARC_fnc_stateGet] call _trimFn);
-
-            // Remove any existing approval for this task+group+type before adding a new one (prevents duplicates)
-            _appr = _appr select {
-                !(_x isEqualType [] && { (count _x) >= 6 } && { (_x select 0) isEqualTo _taskId } && { (_x select 1) isEqualTo _gid } && { (toUpper (([_x select 2] call _trimFn))) isEqualTo _eodReqU })
-            };
-            _appr pushBack [_taskId, _gid, _eodReqU, serverTime, if (isNull _caller) then {"TOC"} else { name _caller }, _exp, _notesE];
-
-            // Cap to avoid unbounded growth
-            private _cap = 50;
-            if ((count _appr) > _cap) then { _appr = _appr select [((count _appr) - _cap) max 0, _cap]; };
-            ["eodDispoApprovals", _appr] call ARC_fnc_stateSet;
-
-            // Broadcast for clients
-            [] call ARC_fnc_iedDispoBroadcast;
-
-            ["OPS", format ["TOC approved EOD disposition as part of closeout: %1 (%2).", _eodReqU, _gid], _iposATL,
-                [["event","TOC_EOD_APPROVED"],["taskId",_taskId],["targetGroup",_gid],["requestType",_eodReqU],["objectiveKind",_objKindU]]
-            ] call ARC_fnc_intelLog;
-        };
-    };
+    [_itype, _taskId, _gid, _iposATL] call _approveEodIfNeeded;
 
     // IMMEDIATE branch: close now and publish queue package (no order acceptance gate).
     private _resFinal = _closeResult;
@@ -324,86 +456,36 @@ if (_noAutoOrders) exitWith
     true
 };
 
-// Guard: prevent stacking multiple ISSUED orders for the same group
-private _ordersExisting = ["tocOrders", []] call ARC_fnc_stateGet;
-if (!(_ordersExisting isEqualType [])) then { _ordersExisting = []; };
+// Guard: prevent stacking multiple ISSUED orders for the same group. If one is
+// already issued, reuse it and arm the pending closeout once.
+private _issued = [_gid, ""] call _findIssuedOrder;
+private _issuedId = _issued select 0;
+private _issuedType = _issued select 1;
 
-private _hasIssued = false;
+if (!(_issuedId isEqualTo "")) exitWith
 {
-    if (!(_x isEqualType []) || { (count _x) < 7 }) then { continue; };
-    private _st = _x select 2;
-    private _tg = _x select 4;
-    if (!(_tg isEqualTo _gid)) then { continue; };
-    if (toUpper _st isEqualTo "ISSUED") exitWith { _hasIssued = true; };
-} forEach _ordersExisting;
-
-if (_hasIssued) exitWith
-{
-    // Reuse the existing ISSUED order instead of hard-failing.
-    private _reuseId = "";
-    private _reuseType = "";
-    private _bestAt = -1;
-
+    private _stageOk = [_closeResult, _issuedId, _gid] call _stagePending;
+    if (!_stageOk) exitWith
     {
-        if (!(_x isEqualType []) || { (count _x) < 7 }) then { continue; };
-        private _oid = _x select 0;
-        private _iat = _x select 1;
-        private _st = _x select 2;
-        private _ot = _x select 3;
-        private _tg = _x select 4;
-        if (!(_tg isEqualTo _gid)) then { continue; };
-        if (!(toUpper _st isEqualTo "ISSUED")) then { continue; };
-        if (!(_iat isEqualType 0)) then { _iat = -1; };
-        if (_iat > _bestAt) then
-        {
-            _bestAt = _iat;
-            _reuseId = _oid;
-            _reuseType = _ot;
-        };
-    } forEach _ordersExisting;
-
-    if (!(_reuseId isEqualType "")) then { _reuseId = ""; };
-    _reuseId = ([_reuseId] call _trimFn);
-
-    if (_reuseId isEqualTo "") exitWith
-    {
-        ["TOC Ops", "Closeout denied: ISSUED order exists but could not resolve orderId."] call _toast;
+        ["TOC Ops", "Closeout denied: ISSUED order exists but pending state could not be staged."] call _toast;
         false
     };
 
-    // STAGED branch (reused ISSUED order): wait for acceptance trigger in fn_intelOrderAccept.
-    ["activeIncidentClosePending", true] call ARC_fnc_stateSet;
-    ["activeIncidentClosePendingAt", serverTime] call ARC_fnc_stateSet;
-    ["activeIncidentClosePendingResult", _closeResult] call ARC_fnc_stateSet;
-    ["activeIncidentClosePendingOrderId", _reuseId] call ARC_fnc_stateSet;
-    ["activeIncidentClosePendingGroup", _gid] call ARC_fnc_stateSet;
-
-    missionNamespace setVariable ["ARC_activeIncidentClosePending", true, true];
-    missionNamespace setVariable ["ARC_activeIncidentClosePendingAt", serverTime, true];
-    missionNamespace setVariable ["ARC_activeIncidentClosePendingResult", _closeResult, true];
-    missionNamespace setVariable ["ARC_activeIncidentClosePendingOrderId", _reuseId, true];
-    missionNamespace setVariable ["ARC_activeIncidentClosePendingGroup", _gid, true];
-    // Publish orders snapshot so clients can see/accept the reused ISSUED order
-    [] call ARC_fnc_intelOrderBroadcast;
-
-
-    ["activeIncidentCloseReady", true] call ARC_fnc_stateSet;
-    missionNamespace setVariable ["ARC_activeIncidentCloseReady", true, true];
-
+    // Freeze execution while waiting
     ["DEFER"] call ARC_fnc_execCleanupActive;
 
     private _whoDone = if (isNull _caller) then {"<unknown>"} else { name _caller };
-    diag_log format ["[ARC][TOC][CLOSEOUT][BRANCH=STAGED_REUSED_ORDER] armed by=%1 result=%2 gid=%3 task=%4 orderId=%5 orderType=%6", _whoDone, _closeResult, _gid, _taskId, _reuseId, _reuseType];
+    diag_log format ["[ARC][TOC][CLOSEOUT][BRANCH=STAGED_REUSED_ORDER] armed by=%1 result=%2 gid=%3 task=%4 orderId=%5 orderType=%6", _whoDone, _closeResult, _gid, _taskId, _issuedId, _issuedType];
 
     private _sposATL = ["activeIncidentPos", []] call ARC_fnc_stateGet;
     if (!(_sposATL isEqualType []) || { (count _sposATL) < 2 }) then { _sposATL = [0,0,0]; };
     _sposATL resize 3;
 
-    ["OPS", format ["Closeout staged by %1: %2. Reusing ISSUED order %3 (%4) for %5 acceptance.", _whoDone, _closeResult, _reuseId, _reuseType, _gid], _sposATL,
-        [["event","CLOSEOUT_STAGED"],["path","STAGED_REUSED_ORDER"],["taskId",_taskId],["result",_closeResult],["orderType",_reuseType],["orderId",_reuseId],["targetGroup",_gid]]
+    ["OPS", format ["Closeout staged by %1: %2. Reusing ISSUED order %3 (%4) for %5 acceptance.", _whoDone, _closeResult, _issuedId, _issuedType, _gid], _sposATL,
+        [["event","CLOSEOUT_STAGED"],["path","STAGED_REUSED_ORDER"],["taskId",_taskId],["result",_closeResult],["orderType",_issuedType],["orderId",_issuedId],["targetGroup",_gid]]
     ] call ARC_fnc_intelLog;
 
-    ["TOC Ops", format ["Closeout staged: %1. Reusing existing ISSUED order (%2). Awaiting unit acceptance.", _closeResult, _reuseType]] call _toast;
+    ["TOC Ops", format ["Closeout staged: %1. Reusing existing ISSUED order (%2). Awaiting unit acceptance.", _closeResult, _issuedType]] call _toast;
 
     [] call ARC_fnc_stateSave;
 
@@ -509,44 +591,7 @@ if (!(_genLeadId isEqualTo "")) then
 private _orderType = _req;
 if (_req isEqualTo "PROCEED") then { _orderType = "LEAD"; };
 
-// IED/VBIED closeout: if the SITREP included an EOD disposition request, treat this closeout
-// action as TOC approval and broadcast it immediately (no separate UI hunt).
-private _incTypeU = toUpper (([['activeIncidentType',''] call ARC_fnc_stateGet] call _trimFn));
-if (_incTypeU isEqualTo "IED") then
-{
-    private _eodReqU = toUpper (([['activeIncidentEodDispoRequestedType',''] call ARC_fnc_stateGet] call _trimFn));
-    private _objKindU = toUpper (([['activeIncidentEodDispoObjectiveKind',''] call ARC_fnc_stateGet] call _trimFn));
-    if (_eodReqU in ["DET_IN_PLACE","RTB_IED","TOW_VBIED"] && { _objKindU in ["IED_DEVICE","VBIED_VEHICLE"] }) then
-    {
-        private _ttl = missionNamespace getVariable ["ARC_eodDispoApprovalTTLsec", 900];
-        if (!(_ttl isEqualType 0)) then { _ttl = 900; };
-        _ttl = (_ttl max 60) min (60*60);
-
-        private _appr = ["eodDispoApprovals", []] call ARC_fnc_stateGet;
-        if (!(_appr isEqualType [])) then { _appr = []; };
-
-        private _exp = serverTime + _ttl;
-        private _notesE = ([['activeIncidentEodDispoNotes',''] call ARC_fnc_stateGet] call _trimFn);
-
-        // Remove any existing approval for this task+group+type before adding a new one (prevents duplicates)
-        _appr = _appr select {
-            !(_x isEqualType [] && { (count _x) >= 6 } && { (_x select 0) isEqualTo _taskId } && { (_x select 1) isEqualTo _gid } && { (toUpper (([_x select 2] call _trimFn))) isEqualTo _eodReqU })
-        };
-        _appr pushBack [_taskId, _gid, _eodReqU, serverTime, if (isNull _caller) then {"TOC"} else { name _caller }, _exp, _notesE];
-
-        // Cap to avoid unbounded growth
-        private _cap = 50;
-        if ((count _appr) > _cap) then { _appr = _appr select [((count _appr) - _cap) max 0, _cap]; };
-        ["eodDispoApprovals", _appr] call ARC_fnc_stateSet;
-
-        // Broadcast for clients
-        [] call ARC_fnc_iedDispoBroadcast;
-
-        ["OPS", format ["TOC approved EOD disposition as part of closeout: %1 (%2).", _eodReqU, _gid], _pos,
-            [["event","TOC_EOD_APPROVED"],["taskId",_taskId],["targetGroup",_gid],["requestType",_eodReqU],["objectiveKind",_objKindU]]
-        ] call ARC_fnc_intelLog;
-    };
-};
+[_type, _taskId, _gid, _pos] call _approveEodIfNeeded;
 
 private _seed = [];
 if (!(([_rationale] call _trimFn) isEqualTo "")) then { _seed pushBack ["rationale", ([_rationale] call _trimFn)]; };
@@ -589,42 +634,23 @@ if (!_issueOk) exitWith
 };
 
 // Resolve newly issued orderId (latest ISSUED to this group)
-private _orderId = "";
-private _orders = ["tocOrders", []] call ARC_fnc_stateGet;
-if (!(_orders isEqualType [])) then { _orders = []; };
+private _newIssued = [_gid, ""] call _findIssuedOrder;
+private _orderId = _newIssued select 0;
 
-private _bestAt = -1;
+if (_orderId isEqualTo "") exitWith
 {
-    if (!(_x isEqualType []) || { (count _x) < 7 }) then { continue; };
-    private _oid = _x select 0;
-    private _iat = _x select 1;
-    private _st = _x select 2;
-    private _tg = _x select 4;
-    if (!(_tg isEqualTo _gid)) then { continue; };
-    if (!(toUpper _st isEqualTo "ISSUED")) then { continue; };
-    if (!(_iat isEqualType 0)) then { continue; };
-    if (_iat > _bestAt) then { _bestAt = _iat; _orderId = _oid; };
-} forEach _orders;
+    diag_log format ["[ARC][TOC] CloseoutAndOrder FAILED: issued order but could not resolve ISSUED orderId (type=%1 gid=%2).", _orderType, _gid];
+    ["TOC Ops", "Closeout failed: issued follow-on order but could not resolve order ID."] call _toast;
+    false
+};
 
-if (!(_orderId isEqualType "")) then { _orderId = ""; };
-_orderId = ([_orderId] call _trimFn);
-
-// STAGED branch (new order): order issued now, incident closes later via acceptance trigger in fn_intelOrderAccept.
-["activeIncidentClosePending", true] call ARC_fnc_stateSet;
-["activeIncidentClosePendingAt", serverTime] call ARC_fnc_stateSet;
-["activeIncidentClosePendingResult", _closeResult] call ARC_fnc_stateSet;
-["activeIncidentClosePendingOrderId", _orderId] call ARC_fnc_stateSet;
-["activeIncidentClosePendingGroup", _gid] call ARC_fnc_stateSet;
-
-// Ensure execution is halted while waiting for acceptance
-["activeIncidentCloseReady", true] call ARC_fnc_stateSet;
-
-missionNamespace setVariable ["ARC_activeIncidentClosePending", true, true];
-missionNamespace setVariable ["ARC_activeIncidentClosePendingAt", serverTime, true];
-missionNamespace setVariable ["ARC_activeIncidentClosePendingResult", _closeResult, true];
-missionNamespace setVariable ["ARC_activeIncidentClosePendingOrderId", _orderId, true];
-missionNamespace setVariable ["ARC_activeIncidentClosePendingGroup", _gid, true];
-missionNamespace setVariable ["ARC_activeIncidentCloseReady", true, true];
+private _stageOk = [_closeResult, _orderId, _gid] call _stagePending;
+if (!_stageOk) exitWith
+{
+    diag_log format ["[ARC][TOC] CloseoutAndOrder FAILED: could not stage pending closeout (orderId=%1 gid=%2).", _orderId, _gid];
+    ["TOC Ops", "Closeout failed: could not stage pending closeout."] call _toast;
+    false
+};
 
 // End active execution package objects (deferred cleanup)
 ["DEFER"] call ARC_fnc_execCleanupActive;
