@@ -158,7 +158,7 @@ private _bestAt = -1;
 
 {
     if (!(_x isEqualType []) || { (count _x) < 7 }) then { continue; };
-    _x params ["_oid", "_iat", "_st", "_ot", "_tg", "_data", "_meta"];
+    _x params ["_oid", "_iat", "_st", "_ot", "_tg"];
     if (!(_tg isEqualTo _gid)) then { continue; };
     if (!(toUpper _st isEqualTo "ISSUED")) then { continue; };
     if (!(_iat isEqualType 0)) then { _iat = -1; };
@@ -192,7 +192,7 @@ if (_issuedId isEqualTo "") then
     _bestAt = -1;
     {
         if (!(_x isEqualType []) || { (count _x) < 7 }) then { continue; };
-        _x params ["_oid", "_iat", "_st", "_ot", "_tg", "_data", "_meta"];
+        _x params ["_oid", "_iat", "_st", "_ot", "_tg"];
         if (!(_tg isEqualTo _gid)) then { continue; };
         if (!(toUpper _st isEqualTo "ISSUED")) then { continue; };
         if (!(_iat isEqualType 0)) then { _iat = -1; };
