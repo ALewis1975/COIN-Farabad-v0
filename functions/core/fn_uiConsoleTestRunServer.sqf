@@ -24,6 +24,22 @@ private _owner = 0;
 if (!isNull _requester) then { _owner = owner _requester; };
 if (_owner <= 0 && { !isNil "remoteExecutedOwner" }) then { _owner = remoteExecutedOwner; };
 
+private _testRunEnabled = missionNamespace getVariable ["ARC_testRunEnabled", false];
+if (!(_testRunEnabled isEqualType true) && !(_testRunEnabled isEqualType false)) then { _testRunEnabled = false; };
+private _devMode = missionNamespace getVariable ["ARC_profile_devMode", false];
+if (!(_devMode isEqualType true) && !(_devMode isEqualType false)) then { _devMode = false; };
+
+if (!_testRunEnabled && { !_devMode }) exitWith
+{
+    diag_log format ["[ARC][TEST] Run denied: ARC_testRunEnabled=false ARC_profile_devMode=%1 owner=%2", _devMode, _owner];
+    if (_owner > 0) then
+    {
+        ["<t size='1.05' font='PuristaMedium'>ARC Test Suite</t><br/><br/><t color='#F87171'>Denied: test runner disabled for this live profile.</t><br/><t size='0.9' color='#BDBDBD'>Set ARC_testRunEnabled=true or ARC_profile_devMode=true before running tests.</t>"]
+            remoteExec ["ARC_fnc_uiConsoleTestRunClientReceive", _owner];
+    };
+    false
+};
+
 // S1 + S3: sender validation and HQ role gate (test runner is approver-only).
 if (!isNil "remoteExecutedOwner" && { _owner > 0 }) then
 {
