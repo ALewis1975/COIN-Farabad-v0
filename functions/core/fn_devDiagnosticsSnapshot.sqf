@@ -54,6 +54,8 @@ private _fncSnapshotAge = {
     if (_updatedAt < 0) exitWith { -1 };
     serverTime - _updatedAt
 };
+private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _keysFn = compile "params ['_m']; keys _m";
 
 _lines pushBack "<t size='1.2' font='PuristaMedium'>Debug / Diagnostics Snapshot</t>";
 _lines pushBack format ["<t size='0.9' color='#BDBDBD'>Server time:</t> <t size='0.9'>%1</t>", serverTime];
@@ -201,6 +203,193 @@ private _iedRecords = missionNamespace getVariable ["ARC_iedPhase1_deviceRecords
 private _vbiedRecords = missionNamespace getVariable ["ARC_vbiedPhase3_deviceRecords", []];
 _lines pushBack format ["<t size='0.9'>IED Device Records: %1</t>", [_iedRecords] call _fncCountContainer];
 _lines pushBack format ["<t size='0.9'>VBIED Device Records: %1</t>", [_vbiedRecords] call _fncCountContainer];
+
+// --- Active CIVIL site density diagnostics --------------------------------
+// Explicit, on-demand snapshot only. No tick loop, no spawns, no persistence of handles.
+private _taskIdCivil = ["activeTaskId", ""] call ARC_fnc_stateGet;
+if (!(_taskIdCivil isEqualType "")) then { _taskIdCivil = ""; };
+private _typeCivil = ["activeIncidentType", ""] call ARC_fnc_stateGet;
+if (!(_typeCivil isEqualType "")) then { _typeCivil = ""; };
+private _typeCivilU = toUpper _typeCivil;
+
+if (_typeCivilU isEqualTo "CIVIL") then
+{
+    private _displayCivil = ["activeIncidentDisplayName", ""] call ARC_fnc_stateGet;
+    if (!(_displayCivil isEqualType "")) then { _displayCivil = ""; };
+
+    private _posCivil = ["activeIncidentPos", []] call ARC_fnc_stateGet;
+    if (!(_posCivil isEqualType []) || { (count _posCivil) < 2 }) then { _posCivil = []; };
+    if ((count _posCivil) < 2) then
+    {
+        private _mkrCivil = ["activeIncidentMarker", ""] call ARC_fnc_stateGet;
+        if (_mkrCivil isEqualType "" && { !(_mkrCivil isEqualTo "") }) then
+        {
+            private _mResolved = [_mkrCivil] call ARC_fnc_worldResolveMarker;
+            if (_mResolved in allMapMarkers) then { _posCivil = getMarkerPos _mResolved; };
+        };
+    };
+    if ((count _posCivil) < 2) then { _posCivil = [0,0,0]; };
+    _posCivil = +_posCivil;
+    _posCivil resize 3;
+
+    private _gridCivil = mapGridPosition _posCivil;
+    private _didCivil = ["activeIncidentCivsubDistrictId", ""] call ARC_fnc_stateGet;
+    if (!(_didCivil isEqualType "")) then { _didCivil = ""; };
+    if (_didCivil isEqualTo "" && { !isNil "ARC_fnc_threadResolveDistrictId" }) then
+    {
+        _didCivil = [_posCivil] call ARC_fnc_threadResolveDistrictId;
+        if (!(_didCivil isEqualType "")) then { _didCivil = ""; };
+    };
+
+    private _nearestSiteId = "";
+    private _nearestSiteDist = 1e12;
+    private _sitePopActive = false;
+    private _sitePopUnits250 = 0;
+    private _sitePopActiveMap = missionNamespace getVariable ["ARC_sitePopActive", createHashMap];
+
+    if (_sitePopRegistry isEqualType createHashMap) then
+    {
+        {
+            private _sid = _x;
+            private _row = [_sitePopRegistry, _sid, []] call _hg;
+            if (_row isEqualType [] && { (count _row) >= 7 }) then
+            {
+                private _sp = _row select 6;
+                if (_sp isEqualType [] && { (count _sp) >= 2 }) then
+                {
+                    private _d = _posCivil distance2D _sp;
+                    if (_d < _nearestSiteDist) then
+                    {
+                        _nearestSiteDist = _d;
+                        _nearestSiteId = _sid;
+                    };
+                };
+            };
+        } forEach ([_sitePopRegistry] call _keysFn);
+    };
+
+    if (_sitePopActiveMap isEqualType createHashMap) then
+    {
+        private _nearestActiveRow = [_sitePopActiveMap, _nearestSiteId, []] call _hg;
+        _sitePopActive = (_nearestActiveRow isEqualType [] && { (count _nearestActiveRow) > 0 });
+
+        {
+            private _sid = _x;
+            private _row = [_sitePopActiveMap, _sid, []] call _hg;
+            if (!(_row isEqualType []) || { (count _row) < 1 }) then { continue; };
+            private _groups = _row select 0;
+            if (!(_groups isEqualType [])) then { continue; };
+            {
+                if (isNull _x) then { continue; };
+                {
+                    if (!isNull _x && { alive _x } && { (_x distance2D _posCivil) <= 250 }) then
+                    {
+                        _sitePopUnits250 = _sitePopUnits250 + 1;
+                    };
+                } forEach (units _x);
+            } forEach _groups;
+        } forEach ([_sitePopActiveMap] call _keysFn);
+    };
+
+    private _overlayNetIds = ["activeOverlaySpawnNetIds", []] call ARC_fnc_stateGet;
+    if (!(_overlayNetIds isEqualType [])) then { _overlayNetIds = []; };
+    private _overlayUnitsAlive = 0;
+    private _overlayObjectsAlive = 0;
+    {
+        if (!(_x isEqualType "")) then { continue; };
+        private _e = objectFromNetId _x;
+        if (isNull _e || { !alive _e }) then { continue; };
+        if (_e isKindOf "Man") then
+        {
+            _overlayUnitsAlive = _overlayUnitsAlive + 1;
+        }
+        else
+        {
+            _overlayObjectsAlive = _overlayObjectsAlive + 1;
+        };
+    } forEach _overlayNetIds;
+
+    private _civsub250 = 0;
+    private _civsub500 = 0;
+    if (_civRegistry isEqualType createHashMap) then
+    {
+        {
+            private _row = [_civRegistry, _x, createHashMap] call _hg;
+            if (!(_row isEqualType createHashMap)) then { continue; };
+            private _u = [_row, "unit", objNull] call _hg;
+            if (isNull _u || { !alive _u }) then { continue; };
+            private _d = _u distance2D _posCivil;
+            if (_d <= 250) then { _civsub250 = _civsub250 + 1; };
+            if (_d <= 500) then { _civsub500 = _civsub500 + 1; };
+        } forEach ([_civRegistry] call _keysFn);
+    }
+    else
+    {
+        {
+            if (!isNull _x && { alive _x } && { _x getVariable ["civsub_v1_isCiv", false] }) then
+            {
+                private _d = _x distance2D _posCivil;
+                if (_d <= 250) then { _civsub250 = _civsub250 + 1; };
+                if (_d <= 500) then { _civsub500 = _civsub500 + 1; };
+            };
+        } forEach allUnits;
+    };
+
+    private _traffic300 = 0;
+    private _traffic700 = 0;
+    private _trafficAll = [];
+    if (_trafficMoving isEqualType []) then { _trafficAll append _trafficMoving; };
+    if (_trafficParked isEqualType []) then { _trafficAll append _trafficParked; };
+    {
+        if (isNull _x || { !alive _x }) then { continue; };
+        private _d = _x distance2D _posCivil;
+        if (_d <= 300) then { _traffic300 = _traffic300 + 1; };
+        if (_d <= 700) then { _traffic700 = _traffic700 + 1; };
+    } forEach _trafficAll;
+
+    private _todPhase = "UNKNOWN";
+    if (!isNil "ARC_fnc_dynamicTodGetPolicy") then
+    {
+        private _todPolicy = [] call ARC_fnc_dynamicTodGetPolicy;
+        if (_todPolicy isEqualType createHashMap) then
+        {
+            _todPhase = [_todPolicy, "phase", "UNKNOWN"] call _hg;
+            if (!(_todPhase isEqualType "")) then { _todPhase = "UNKNOWN"; };
+        };
+    };
+
+    private _activeCivilSite = [
+        ["taskId", _taskIdCivil],
+        ["incidentType", _typeCivil],
+        ["displayName", _displayCivil],
+        ["pos", _posCivil],
+        ["grid", _gridCivil],
+        ["districtId", _didCivil],
+        ["siteId", _nearestSiteId],
+        ["sitePopActive", _sitePopActive],
+        ["overlayNetIds", _overlayNetIds],
+        ["overlayUnitsAlive", _overlayUnitsAlive],
+        ["overlayObjectsAlive", _overlayObjectsAlive],
+        ["sitePopUnitsNear250m", _sitePopUnits250],
+        ["civsubCivsNear250m", _civsub250],
+        ["civsubCivsNear500m", _civsub500],
+        ["trafficNear300m", _traffic300],
+        ["trafficNear700m", _traffic700],
+        ["todPhase", _todPhase]
+    ];
+    missionNamespace setVariable ["ARC_lastActiveCivilSiteDiag", _activeCivilSite, false];
+
+    _lines pushBack "";
+    _lines pushBack "<t size='1.05' font='PuristaMedium'>ACTIVE CIVIL SITE</t>";
+    _lines pushBack format ["<t size='0.9'>Task: %1 | %2 | %3</t>", _taskIdCivil, _displayCivil, _gridCivil];
+    _lines pushBack format ["<t size='0.9'>District: %1 | SitePop site: %2 active=%3 | TOD=%4</t>", _didCivil, _nearestSiteId, _sitePopActive, _todPhase];
+    _lines pushBack format ["<t size='0.9'>Overlay: units=%1 objects=%2 netIds=%3</t>", _overlayUnitsAlive, _overlayObjectsAlive, count _overlayNetIds];
+    _lines pushBack format ["<t size='0.9'>Near 250m: SitePop=%1 CIVSUB=%2 | CIVSUB 500m=%3</t>", _sitePopUnits250, _civsub250, _civsub500];
+    _lines pushBack format ["<t size='0.9'>Traffic: 300m=%1 700m=%2</t>", _traffic300, _traffic700];
+
+    diag_log format ["[ARC][DIAG][CIVIL_SITE] task=%1 grid=%2 district=%3 site=%4 active=%5 overlayU=%6 overlayO=%7 sitePop250=%8 civsub250=%9 civsub500=%10 traffic300=%11 traffic700=%12 tod=%13",
+        _taskIdCivil, _gridCivil, _didCivil, _nearestSiteId, _sitePopActive, _overlayUnitsAlive, _overlayObjectsAlive, _sitePopUnits250, _civsub250, _civsub500, _traffic300, _traffic700, _todPhase];
+};
 
 _lines pushBack "";
 _lines pushBack "<t size='1.05' font='PuristaMedium'>SNAPSHOT FRESHNESS</t>";
