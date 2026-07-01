@@ -33,15 +33,15 @@ Published under `docs/reference/`.
 | ARC_convoy_start_3 | Empty |  | [10581.282,25.944239,917.58618] |  |  | 1 |  |  | unresolved |  |
 | ARC_convoy_start_4 | Empty |  | [187.0,4.4299998,1409.5] |  |  | 1 |  |  | unresolved |  |
 | ARC_loc_BelleFoilleHotel |  | RECTANGLE | [5349.7939,179.886,11000.318] |  |  | 1 | marker_3 |  | unresolved |  |
-| ARC_loc_FortKelati | loc_mission |  | [6292.2148,8.4899998,1605.1696] |  EPW Holding |  | 0.5 | marker_22 |  | unresolved |  |
-| ARC_loc_JaziraOilField | loc_defend |  | [6220.3008,7.2160001,1335.816] |  South Gate |  | 0.5 | marker_15 |  | unresolved |  |
-| ARC_loc_JaziraOilRefinery | loc_defend |  | [6737.1758,9.7045679,3238.6482] |  North Gate |  | 0.5 | marker_12 |  | unresolved |  |
-| ARC_loc_Junkyard | loc_defend |  | [5209.2402,8.6000004,2679.394] |  Main Gate |  | 0.5 | marker_13 |  | unresolved |  |
 | ARC_loc_KarkanakPrison |  | RECTANGLE | [10949.0,98.934288,5500.75] |  |  | 1 | marker_6 |  | unresolved |  |
+| ARC_loc_Mine16 | Empty |  | [5974.5332,79.068001,7771.583] |  Mine |  | 1 | marker_16 |  | unresolved |  |
+| ARC_loc_Mine18 | Empty |  | [3660.427,47.099731,8608.7529] |  Mine |  | 1 | marker_18 |  | unresolved |  |
+| ARC_loc_Mine19 | Empty |  | [3021.792,56.458,8775.3633] |  Mine |  | 1 | marker_19 |  | unresolved |  |
+| ARC_loc_Mine20 | Empty |  | [5468.5742,122.488,10089.154] |  Mine |  | 1 | marker_20 |  | unresolved |  |
+| ARC_loc_Mine21 | Empty |  | [3131.905,114.38284,9926.2334] |  Mine |  | 1 | marker_21 |  | unresolved |  |
+| ARC_loc_OilProcessing | Empty |  | [2468.0039,27.848,7012.0952] |  Oil Processing |  | 1 | marker_14 |  | unresolved |  |
 | ARC_loc_hospital |  | RECTANGLE | [5350.0811,0.0,-0.8369751] |  |  | 1 | marker_4 |  | unresolved |  |
 | ARC_loc_industrial022 |  | RECTANGLE | [-249.2251,47.273209,5499.5889] |  |  | 1 | marker_5 |  | unresolved |  |
-| ARC_loc_military | loc_mission |  | [6236.9531,8.4899998,1589.866] |  TOC |  | 0.5 | ARC_m_logistics_01, marker_17 |  | unresolved |  |
-| ARC_loc_military | Empty |  | [7703.9258,73.036575,7521.1558] |  Logistics 01 |  | 1 | ARC_m_logistics_01, marker_17 |  | unresolved |  |
 | ARC_m_Fort Kelati | Empty |  | [7962.8252,70.329002,3557.7019] |  Fort Kelati |  | 1 |  |  | unresolved |  |
 | ARC_m_base_avn_hq | Empty |  | [6690.438,8.5310001,1553.615] | Joint Aviation HQ |  | 1 |  |  | unresolved |  |
 | ARC_m_base_c130_parking | Empty |  | [6609.4419,8.4899998,1660.5601] | C-130J Parking |  | 1 |  |  | unresolved |  |
@@ -57,6 +57,7 @@ Published under `docs/reference/`.
 | ARC_m_charlie_2_325AIR | Empty |  | [5894.0,6.4699998,1330.0] |  C-2-325 AIR HQ |  | 1 |  |  | unresolved |  |
 | ARC_m_civil_01 | Empty |  | [8120.0439,5.2690001,1269.457] |  Civil 01 |  | 1 |  |  | unresolved |  |
 | ARC_m_ied_01 | Empty |  | [5118.0,220.42763,8908.0] |  IED 01 |  | 1 |  |  | unresolved |  |
+| ARC_m_logistics_01 | Empty |  | [7703.9258,73.036575,7521.1558] |  Logistics 01 |  | 1 |  |  | unresolved |  |
 | ARC_m_patrol_01 | Empty |  | [8970.6133,22.384657,3704.8755] |  Patrol 01 |  | 1 |  |  | unresolved |  |
 | ARC_m_patrol_02 | Empty |  | [514.91968,34.850628,3942.9153] |  Patrol 02 |  | 1 |  |  | unresolved |  |
 | ARC_m_patrol_03 | Empty |  | [8914.458,74.589996,6032.0649] |  Patrol 03 |  | 1 |  |  | unresolved |  |
@@ -132,12 +133,11 @@ Published under `docs/reference/`.
 | hq_a_2_325_motor_maintenance | Empty |  | [5152.498,4.2150979,4745.7041] |  |  | 1 |  |  | unresolved |  |
 | hq_a_2_325_offices | Empty |  | [5035.9507,5.681015,4734.0571] |  |  | 1 |  |  | unresolved |  |
 | hq_a_2_325_supply | Empty |  | [5089.7749,5.7470002,4681.6641] |  |  | 1 |  |  | unresolved |  |
-| marker_14 | Empty |  | [2468.0039,27.848,7012.0952] |  Oil Processing |  | 1 |  |  | unresolved |  |
-| marker_16 | Empty |  | [5974.5332,79.068001,7771.583] |  Mine |  | 1 |  |  | unresolved |  |
-| marker_18 | Empty |  | [3660.427,47.099731,8608.7529] |  Mine |  | 1 |  |  | unresolved |  |
-| marker_19 | Empty |  | [3021.792,56.458,8775.3633] |  Mine |  | 1 |  |  | unresolved |  |
-| marker_20 | Empty |  | [5468.5742,122.488,10089.154] |  Mine |  | 1 |  |  | unresolved |  |
-| marker_21 | Empty |  | [3131.905,114.38284,9926.2334] |  Mine |  | 1 |  |  | unresolved |  |
+| marker_12 | loc_defend |  | [6737.1758,9.7045679,3238.6482] |  North Gate |  | 0.5 |  |  | unresolved |  |
+| marker_13 | loc_defend |  | [5209.2402,8.6000004,2679.394] |  Main Gate |  | 0.5 |  |  | unresolved |  |
+| marker_15 | loc_defend |  | [6220.3008,7.2160001,1335.816] |  South Gate |  | 0.5 |  |  | unresolved |  |
+| marker_17 | loc_mission |  | [6236.9531,8.4899998,1589.866] |  TOC |  | 0.5 |  |  | unresolved |  |
+| marker_22 | loc_mission |  | [6292.2148,8.4899998,1605.1696] |  EPW Holding |  | 0.5 |  |  | unresolved |  |
 | marker_23 | loc_mission |  | [6297.0264,8.7650003,1642.1555] |  EPW Processing |  | 0.5 |  |  | unresolved |  |
 | marker_24 | loc_mission |  | [6457.5601,8.4899998,1696.594] |  Farabad Tower |  | 0.5 |  |  | unresolved |  |
 | marker_25 | loc_mission |  | [6179.1602,8.54,1655.892] |  Fixed Wing Hangars |  | 0.5 |  |  | unresolved |  |
