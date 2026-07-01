@@ -21,7 +21,16 @@ if ([] call ARC_fnc_idleGateActive) exitWith {false};
 
 private _debug = missionNamespace getVariable ["civsub_v1_traffic_debug", false];
 if (!(_debug isEqualType true)) then { _debug = false; };
-private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+
+// Runtime-safe HashMap getter. Avoid getOrDefault call-form shims; that form has
+// no mission function backing and caused undefined-variable cascades in CIVTRAF.
+private _hmGet = {
+    params ["_h", "_k", "_d"];
+    if (!(_h isEqualType createHashMap)) exitWith { _d };
+    private _v = _h get _k;
+    if (isNil "_v") exitWith { _d };
+    _v
+};
 
 private _parked = missionNamespace getVariable ["civsub_v1_traffic_list_parked", []];
 private _moving = missionNamespace getVariable ["civsub_v1_traffic_list_moving", []];
@@ -72,11 +81,11 @@ private _pool = missionNamespace getVariable ["civsub_v1_traffic_vehiclePool_val
 if !(_pool isEqualType []) then { _pool = []; };
 
 private _todPolicy = [] call ARC_fnc_dynamicTodRefresh;
-private _canSpawnCivil = [_todPolicy, "canSpawnCivil", true] call _hg;
+private _canSpawnCivil = [_todPolicy, "canSpawnCivil", true] call _hmGet;
 if (!(_canSpawnCivil isEqualType true) && !(_canSpawnCivil isEqualType false)) then { _canSpawnCivil = true; };
-private _phasePolicy = [_todPolicy, "phase", "DAY"] call _hg;
+private _phasePolicy = [_todPolicy, "phase", "DAY"] call _hmGet;
 if (!(_phasePolicy isEqualType "")) then { _phasePolicy = "DAY"; };
-private _todPolicyVal = [_todPolicy, "tod", dayTime] call _hg;
+private _todPolicyVal = [_todPolicy, "tod", dayTime] call _hmGet;
 if (!(_todPolicyVal isEqualType 0)) then { _todPolicyVal = dayTime; };
 
 if (!_canSpawnCivil) exitWith
@@ -159,7 +168,7 @@ private _playerDistrictPositions = createHashMap; // districtId -> [playerPositi
             _playerDistrictCounts set [_idx, _row];
         };
 
-        private _existingPositions = [_playerDistrictPositions, _did, []] call _hg;
+        private _existingPositions = [_playerDistrictPositions, _did, []] call _hmGet;
         _existingPositions pushBack _ppos;
         _playerDistrictPositions set [_did, _existingPositions];
     } forEach ([_ppos] call ARC_fnc_civsubDistrictsWithinBuffer);
@@ -207,7 +216,7 @@ if ((count _act) == 0) then
         if ([_d] call ARC_fnc_civsubIsDistrictActive) then
         {
             // sort key: distance to nearest player (from district centroid)
-            private _c = [_d, "centroid", [0,0]] call _hg;
+            private _c = [_d, "centroid", [0,0]] call _hmGet;
             if !(_c isEqualType []) then { _c = [0,0]; };
             if ((count _c) < 2) then { _c = [0,0]; };
             private _min = 1e12;
@@ -235,7 +244,7 @@ private _opCenters = createHashMap;
 {
     private _did = _x select 1;
     private _d = _x select 2;
-    private _playerPosForDid = [_playerDistrictPositions, _did, []] call _hg;
+    private _playerPosForDid = [_playerDistrictPositions, _did, []] call _hmGet;
     private _op = [_did, _d, _playerPosForDid] call ARC_fnc_civsubTrafficResolveSpawnCenter;
     _opCenters set [_did, _op];
 } forEach _act;
@@ -289,11 +298,19 @@ missionNamespace setVariable ["civsub_v1_activity_mul_moving_active", _mMoving, 
     if (_budgetG <= 0) exitWith {};
     private _did = _x select 1;
     private _d = _x select 2;
+    if !(_d isEqualType createHashMap) then { continue; };
 
-    // Compute S_THREAT (consistent with CIVSUB baseline)
-    private _W = [_d, "W_EFF_U", 45] call _hg;
-    private _R = [_d, "R_EFF_U", 55] call _hg;
-    private _G = [_d, "G_EFF_U", 35] call _hg;
+    // Compute S_THREAT (consistent with CIVSUB baseline). Defaults are assigned
+    // before reads so a bad district row cannot leave later expressions undefined.
+    private _W = 45;
+    private _R = 55;
+    private _G = 35;
+    private _pop = 100;
+    private _desired = 0;
+
+    _W = [_d, "W_EFF_U", 45] call _hmGet;
+    _R = [_d, "R_EFF_U", 55] call _hmGet;
+    _G = [_d, "G_EFF_U", 35] call _hmGet;
     if !(_W isEqualType 0) then { _W = 45; };
     if !(_R isEqualType 0) then { _R = 55; };
     if !(_G isEqualType 0) then { _G = 35; };
@@ -306,12 +323,12 @@ missionNamespace setVariable ["civsub_v1_activity_mul_moving_active", _mMoving, 
     _mThreat = (_mThreat max 0.25) min 1.0;
 
     // Pop multiplier: bigger towns get more traffic (normalized via pop_total)
-    private _pop = [_d, "pop_total", 100] call _hg;
+    _pop = [_d, "pop_total", 100] call _hmGet;
     if !(_pop isEqualType 0) then { _pop = 100; };
     private _mPop = 0.6 + (0.00025 * _pop); // 100 -> 0.625, 2000 -> 1.1
     _mPop = (_mPop max 0.5) min 1.2;
 
-    private _desired = floor ((_capD * _mPop * _mThreat * _mTraffic) max 0);
+    _desired = floor ((_capD * _mPop * _mThreat * _mTraffic) max 0);
     _desired = _desired min _capD;
 
     // Current parked count for this district
@@ -321,7 +338,7 @@ missionNamespace setVariable ["civsub_v1_activity_mul_moving_active", _mMoving, 
 
     while { _cur < _desired && { (count _parked) < _capG } && { _budget > 0 } && { _budgetG > 0 } } do
     {
-        private _op = [_opCenters, _did, []] call _hg;
+        private _op = [_opCenters, _did, []] call _hmGet;
         if !(_op isEqualType []) then { _op = []; };
         private _veh = [_did, _d, _pool, _op] call ARC_fnc_civsubTrafficSpawnParked;
         if (isNull _veh) exitWith { _budget = 0; };
@@ -379,7 +396,7 @@ if (_allowMoving) then
 
             private _did = _row select 1;
             private _d = _row select 2;
-            private _op = [_opCenters, _did, []] call _hg;
+            private _op = [_opCenters, _did, []] call _hmGet;
             if !(_op isEqualType []) then { _op = []; };
 
             missionNamespace setVariable ["civsub_v1_traffic_lastMovingSpawnFail", "", false];
