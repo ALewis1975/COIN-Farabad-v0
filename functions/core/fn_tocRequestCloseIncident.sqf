@@ -116,8 +116,9 @@ if (_taskId isEqualTo "") then
 };
 
 // Determine the assigned group.
-// Farabad rule: issue/hand follow-on to the unit that SENT the SITREP.
-// Fallbacks: accepted-by group (if no SITREP), lastTaskingGroup (last resort).
+// Normal path uses the SITREP group. If SITREP and acceptance groups disagree,
+// prefer the accepted task owner to avoid staging follow-ons to an alias/stale
+// callsign that the executing unit cannot accept from the console.
 private _gidSitrep = ["activeIncidentSitrepFromGroup", ""] call ARC_fnc_stateGet;
 if (!(_gidSitrep isEqualType "")) then { _gidSitrep = ""; };
 _gidSitrep = ([_gidSitrep] call _trimFn);
@@ -131,6 +132,11 @@ if (!(_gidLastTask isEqualType "")) then { _gidLastTask = ""; };
 _gidLastTask = ([_gidLastTask] call _trimFn);
 
 private _gid = _gidSitrep;
+if (!(_gidSitrep isEqualTo "") && { !(_gidAccepted isEqualTo "") } && { !(_gidSitrep isEqualTo _gidAccepted) }) then
+{
+    diag_log format ["[ARC][TOC][WARN] CloseIncident group mismatch: sitrep=%1 accepted=%2 lastTask=%3 -> using accepted group", _gidSitrep, _gidAccepted, _gidLastTask];
+    _gid = _gidAccepted;
+};
 if (_gid isEqualTo "") then { _gid = _gidAccepted; };
 if (_gid isEqualTo "") then { _gid = _gidLastTask; };
 
@@ -152,7 +158,7 @@ private _bestAt = -1;
 
 {
     if (!(_x isEqualType []) || { (count _x) < 7 }) then { continue; };
-    _x params ["_oid", "_iat", "_st", "_ot", "_tg", "_data", "_meta"];
+    _x params ["_oid", "_iat", "_st", "_ot", "_tg"];
     if (!(_tg isEqualTo _gid)) then { continue; };
     if (!(toUpper _st isEqualTo "ISSUED")) then { continue; };
     if (!(_iat isEqualType 0)) then { _iat = -1; };
@@ -186,7 +192,7 @@ if (_issuedId isEqualTo "") then
     _bestAt = -1;
     {
         if (!(_x isEqualType []) || { (count _x) < 7 }) then { continue; };
-        _x params ["_oid", "_iat", "_st", "_ot", "_tg", "_data", "_meta"];
+        _x params ["_oid", "_iat", "_st", "_ot", "_tg"];
         if (!(_tg isEqualTo _gid)) then { continue; };
         if (!(toUpper _st isEqualTo "ISSUED")) then { continue; };
         if (!(_iat isEqualType 0)) then { _iat = -1; };
