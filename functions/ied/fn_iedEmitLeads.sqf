@@ -45,6 +45,19 @@ _pos = +_pos; _pos resize 3;
 private _transU = toUpper _transition;
 private _emittedLeads = [];
 
+// Scheduler-created IED records are taskless CREATED records. Do not turn those
+// latent records into FIELD-origin IED Warning / Component Trace leads; that
+// polluted the lead pool at mission start and made generated threats look like
+// player-discovered intelligence. Incident/task-linked discoveries still emit.
+private _tasklessDiscovered = (_transU isEqualTo "DISCOVERED") && { _taskId isEqualTo "" };
+private _allowTasklessDiscovered = missionNamespace getVariable ["ARC_iedEmitTasklessDiscoveredLeads", false];
+if (!(_allowTasklessDiscovered isEqualType true) && !(_allowTasklessDiscovered isEqualType false)) then { _allowTasklessDiscovered = false; };
+if (_tasklessDiscovered && { !_allowTasklessDiscovered }) exitWith
+{
+    diag_log format ["[ARC][INFO] ARC_fnc_iedEmitLeads: suppressed taskless DISCOVERED lead emission threat=%1 district=%2", _threatId, _districtId];
+    []
+};
+
 private _makeLead = {
     params ["_leadType", "_displayName", "_leadPos", "_baseStrength", "_expiresIn", "_sourceTaskId", "_sourceIncidentType", "_tag", "_sourceKind"];
     if (isNil "ARC_fnc_intelLeadCreateCoupled") then

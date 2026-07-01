@@ -65,12 +65,15 @@ private _pairsToMap = {
     _m
 };
 
-private _m       = [_def] call _pairsToMap;
-private _roles   = [_m, "overlay", []] call _hg;
-private _objects = [_m, "objects", []] call _hg;
-private _source  = [_m, "source", ""] call _hg;
+private _m           = [_def] call _pairsToMap;
+private _roles       = [_m, "overlay", []] call _hg;
+private _objects     = [_m, "objects", []] call _hg;
+private _source      = [_m, "source", ""] call _hg;
+private _composition = [_m, "composition", ""] call _hg;
 if (!(_roles isEqualType [])) then { _roles = []; };
 if (!(_objects isEqualType [])) then { _objects = []; };
+if (!(_composition isEqualType "")) then { _composition = ""; };
+private _isFoodWater = (toUpper _composition) isEqualTo "FOOD_WATER_DISTRIBUTION";
 
 private _p3 = +_anchor;
 if ((count _p3) < 3) then { _p3 pushBack 0; };
@@ -159,15 +162,15 @@ if (_slots isEqualType createHashMap && { (count _slots) > 0 }) then {
             if (_x isEqualType [] && { (count _x) >= 3 }) then {
                 private _lid = _x select 0;
                 private _lp  = _x select 2;
-private _slotEntry = [_slots, _lid, objNull] call _hg;
-if (
-    _lp isEqualType [] &&
-    { (count _lp) >= 2 } &&
-    { !(_slotEntry isEqualTo objNull) }
-) then {
-    private _d = _p3 distance2D _lp;
-    if (_d < _bestD) then { _bestD = _d; _bestId = _lid; };
-};
+                private _slotEntry = [_slots, _lid, objNull] call _hg;
+                if (
+                    _lp isEqualType [] &&
+                    { (count _lp) >= 2 } &&
+                    { !(_slotEntry isEqualTo objNull) }
+                ) then {
+                    private _d = _p3 distance2D _lp;
+                    if (_d < _bestD) then { _bestD = _d; _bestId = _lid; };
+                };
             };
         } forEach _named;
         if (!(_bestId isEqualTo "")) then {
@@ -224,10 +227,68 @@ if ((count _slots) == 0 && { (count _districts) == 0 }) then {
     };
 };
 
+// Deterministic Food/Water Distribution slots. Offsets are bounded around the
+// incident anchor and intentionally avoid vehicle-in-courtyard placement.
+private _fwSlotCounts = createHashMap;
+private _fwSlots = [[
+    ["fw_aid",      [[0, -4, 0], [2, -4, 0], [-2, -4, 0]]],
+    ["fw_water",    [[7, -4, 0], [9, -4, 0], [7, -6, 0]]],
+    ["fw_supply",   [[-6, -5, 0], [-8, -5, 0], [-7, -7, 0]]],
+    ["fw_queue",    [[0, 6, 0], [0, 9, 0], [0, 12, 0], [0, 15, 0], [1.5, 18, 0], [-1.5, 21, 0], [1.5, 24, 0], [-1.5, 27, 0]]],
+    ["fw_liaison",  [[-7, 3, 0], [-9, 4, 0]]],
+    ["fw_security", [[14, 0, 0], [-14, 0, 0], [0, 18, 0], [12, 12, 0]]]
+]] call _hmCreate;
+private _fwDirs = [[
+    ["fw_aid", 0],
+    ["fw_water", 270],
+    ["fw_supply", 45],
+    ["fw_queue", 180],
+    ["fw_liaison", 120],
+    ["fw_security", 180]
+]] call _hmCreate;
+
+private _fwSlotPos = {
+    params ["_place"];
+    private _pl = toLower _place;
+    private _slotList = [_fwSlots, _pl, []] call _hg;
+    if (!(_slotList isEqualType []) || { (count _slotList) == 0 }) exitWith {[]};
+
+    private _idx = [_fwSlotCounts, _pl, 0] call _hg;
+    if (!(_idx isEqualType 0) || { _idx < 0 }) then { _idx = 0; };
+    _fwSlotCounts set [_pl, _idx + 1];
+
+    private _off = _slotList select (_idx mod (count _slotList));
+    private _pp = [(_p3 select 0) + (_off select 0), (_p3 select 1) + (_off select 1), 0];
+    if (surfaceIsWater _pp) then {
+        _pp = +_p3;
+        _pp resize 3;
+    };
+    _pp
+};
+
+private _placeDir = {
+    params ["_place"];
+    private _pl = toLower _place;
+    private _d = [_fwDirs, _pl, 0] call _hg;
+    if (!(_d isEqualType 0)) then { _d = 0; };
+    _d
+};
+
+private _isFixedFoodWaterPlacement = {
+    params ["_place"];
+    private _pl = toLower _place;
+    _isFoodWater && { (_pl find "fw_") isEqualTo 0 }
+};
+
 // --- Placement: registry-backed where available, else bounded radial ------
 private _placePos = {
     params ["_place"];
     private _pl = toLower _place;
+
+    if (_isFoodWater) then {
+        private _fw = [_pl] call _fwSlotPos;
+        if (_fw isEqualType [] && { (count _fw) >= 2 }) exitWith { _fw };
+    };
 
     // Slot-bound interior / elevated placement (z preserved) from registry.
     if ((_pl in ["indoor", "rooftop", "tower"]) && { (count _bldPool) > 0 }) exitWith {
@@ -262,7 +323,7 @@ private _placePos = {
         case "perimeter":         { [(_r * 0.6) max 12, 0.30] };
         case "route_segment":     { [10, 0.55] };
         case "open":              { [5, 0.50] };
-        default                   { [5, 0.45] };
+        default                    { [5, 0.45] };
     };
     private _minD = _band select 0;
     private _span = (_r * (_band select 1)) max 8;
@@ -286,6 +347,9 @@ private _netIds = [];
 private _aiSpawned = 0;
 private _hostileSpawned = 0;
 private _objSpawned = 0;
+private _fwAiSpawned = 0;
+private _fwObjSpawned = 0;
+private _fwQueueSpawned = 0;
 
 private _resolveSide = {
     params ["_sideStr"];
@@ -294,7 +358,7 @@ private _resolveSide = {
         case "east":  { east };
         case "indep": { independent };
         case "civ":   { civilian };
-        default       { civilian };
+        default        { civilian };
     };
 };
 
@@ -309,8 +373,13 @@ private _resolveSide = {
         ["_placement", "open", [""]]
     ];
 
+    private _roleL = toLower _roleTag;
+    private _fixedFoodWaterPlacement = [_placement] call _isFixedFoodWaterPlacement;
+
     // De-dup: skip SitePop-provided ambient roles when a site is active nearby.
-    if (_sitePopActiveNear && { (toLower _roleTag) in _ambientRoles }) then { continue; };
+    // Food/Water uses fw_* role tags for the distribution queue so SitePop worshipper/crowd
+    // de-duplication cannot erase the task-specific aid line.
+    if (!_fixedFoodWaterPlacement && { _sitePopActiveNear && { _roleL in _ambientRoles } }) then { continue; };
 
     if (_aiSpawned >= _maxAi) then { continue; };
 
@@ -354,9 +423,11 @@ private _resolveSide = {
         private _u = _grp createUnit [_cls, _sp, [], 0, "NONE"];
         if (isNull _u) then { continue; };
         _u setPosATL _sp;
+        _u setDir ([_placement] call _placeDir);
         _u setVariable ["ARC_overlaySpawn", true, true];
         _u setVariable ["ARC_overlayTaskId", _taskId, true];
         _u setVariable ["ARC_overlayRole", _roleTag, true];
+        _u setVariable ["ARC_overlayPlacement", _placement, true];
         _u setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, false];
         _u setVariable ["ARC_dynamic_tod_profile_spawn", _todProfile, false];
         if ((toLower _sideStr) isEqualTo "civ") then {
@@ -366,12 +437,21 @@ private _resolveSide = {
         _u enableDynamicSimulation true;
         _netIds pushBack (netId _u);
         _aiSpawned = _aiSpawned + 1;
+        if (_isFoodWater) then {
+            _fwAiSpawned = _fwAiSpawned + 1;
+            if (_roleL isEqualTo "fw_queue_civ") then { _fwQueueSpawned = _fwQueueSpawned + 1; };
+        };
         if (_isHostile) then { _hostileSpawned = _hostileSpawned + 1; };
     };
 
-    // Ambient behaviour for non-hostile groups (reuse SitePop ambiance helper).
-    if (!_isHostile && { !isNil "ARC_fnc_sitePopApplyAmbiance" }) then {
-        [_grp, _behavior, _p3, _r, ""] call ARC_fnc_sitePopApplyAmbiance;
+    // Deterministic Food/Water scene actors hold their queue/table/perimeter slots.
+    if (_fixedFoodWaterPlacement) then {
+        { doStop _x; _x disableAI "PATH"; } forEach (units _grp);
+    } else {
+        // Ambient behaviour for non-hostile groups (reuse SitePop ambiance helper).
+        if (!_isHostile && { !isNil "ARC_fnc_sitePopApplyAmbiance" }) then {
+            [_grp, _behavior, _p3, _r, ""] call ARC_fnc_sitePopApplyAmbiance;
+        };
     };
 } forEach _roles;
 
@@ -419,16 +499,25 @@ private _resolveSide = {
         private _o = createVehicle [_cls, _sp, [], 0, "CAN_COLLIDE"];
         if (isNull _o) then { continue; };
         _o setPosATL _sp;
+        _o setDir ([_placement] call _placeDir);
         if (_isVehicleTag) then { _o lock true; };
         _o setVariable ["ARC_overlaySpawn", true, true];
         _o setVariable ["ARC_overlayTaskId", _taskId, true];
+        _o setVariable ["ARC_overlayObjTag", _objTag, true];
+        _o setVariable ["ARC_overlayPlacement", _placement, true];
         _o enableDynamicSimulation true;
         _netIds pushBack (netId _o);
         _objSpawned = _objSpawned + 1;
+        if (_isFoodWater) then { _fwObjSpawned = _fwObjSpawned + 1; };
     };
 } forEach _objects;
 
-diag_log format ["[ARC][SPAWNPAT][INFO] ARC_fnc_worldSpawnOverlayApply: task=%1 source=%2 ai=%3 (hostiles=%4) objects=%5 dedup=%6.",
-    _taskId, _source, _aiSpawned, _hostileSpawned, _objSpawned, _sitePopActiveNear];
+if (_isFoodWater) then {
+    diag_log format ["[ARC][SPAWNPAT][INFO] FoodWater composition task=%1 ai=%2 objects=%3 queue=%4 sitePopDedup=%5",
+        _taskId, _fwAiSpawned, _fwObjSpawned, _fwQueueSpawned, _sitePopActiveNear];
+};
+
+diag_log format ["[ARC][SPAWNPAT][INFO] ARC_fnc_worldSpawnOverlayApply: task=%1 source=%2 composition=%3 ai=%4 (hostiles=%5) objects=%6 dedup=%7.",
+    _taskId, _source, _composition, _aiSpawned, _hostileSpawned, _objSpawned, _sitePopActiveNear];
 
 _netIds
