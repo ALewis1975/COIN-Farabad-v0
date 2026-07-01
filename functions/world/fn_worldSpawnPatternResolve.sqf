@@ -36,6 +36,7 @@
         ["cleanupOwner",  STRING]              INCIDENT | LEAD | NONE
         ["despawnPolicy", STRING]
         ["source",        STRING]              INCIDENT | LEAD | CIVIC (which table won)
+        ["composition",   STRING]              optional deterministic composition key
 */
 
 if (!isServer) exitWith {[]};
@@ -140,37 +141,29 @@ if ((count _def) == 0) exitWith {[]};
 private _m = [_def] call _pairsToMap;
 private _overlay = [_m, "overlay", []] call _hg;
 private _objects = [_m, "objects", []] call _hg;
+private _composition = [_m, "composition", ""] call _hg;
 if (!(_overlay isEqualType [])) then { _overlay = []; };
 if (!(_objects isEqualType [])) then { _objects = []; };
+if (!(_composition isEqualType "")) then { _composition = ""; };
 
 // FOOD_WATER_DISTRIBUTION can resolve onto dense pedestrian courtyards (e.g. Grand Mosque).
-// Strip vehicle tags here and represent supply delivery with static crates instead.
+// Replace the old haphazard radial spread with a deterministic aid-site composition
+// consumed by ARC_fnc_worldSpawnOverlayApply via fw_* placement tags.
 if (_civicU isEqualTo "FOOD_WATER_DISTRIBUTION") then {
-    private _vehicleObjectTags = [
-        "civ_car",
-        "civ_truck",
-        "pickup",
-        "official_car",
-        "cargo_truck",
-        "fuel_truck",
-        "utility_truck",
-        "ambulance",
-        "voi_vehicle",
-        "vbied_vehicle"
+    _composition = "FOOD_WATER_DISTRIBUTION";
+    _overlay = [
+        ["aid_worker",   "civ",  [2, 2], "hold",  "fw_aid"],
+        ["fw_queue_civ", "civ",  [6, 6], "hold",  "fw_queue"],
+        ["fw_liaison",   "civ",  [1, 1], "hold",  "fw_liaison"],
+        ["local_sec",    "west", [2, 2], "guard", "fw_security"]
     ];
-    private _filteredObjects = [];
-    {
-        private _keep = true;
-        if (_x isEqualType [] && { (count _x) >= 1 }) then {
-            private _tag = _x param [0, ""];
-            if (!(_tag isEqualType "")) then { _tag = str _tag; };
-            _tag = toLower _tag;
-            if (_tag in _vehicleObjectTags) then { _keep = false; };
-        };
-        if (_keep) then { _filteredObjects pushBack _x; };
-    } forEach _objects;
-    _filteredObjects pushBack ["supply_crate", [1, 2], "courtyard"];
-    _objects = _filteredObjects;
+    _objects = [
+        ["aid_table",       [1, 1], "fw_aid"],
+        ["water_container", [2, 2], "fw_water"],
+        ["supply_crate",    [2, 2], "fw_supply"],
+        ["cargo_clutter",   [1, 1], "fw_supply"],
+        ["barrier",         [1, 2], "fw_security"]
+    ];
 };
 
 [
@@ -179,5 +172,6 @@ if (_civicU isEqualTo "FOOD_WATER_DISTRIBUTION") then {
     ["placement", [_m, "placement", ""] call _hg],
     ["cleanupOwner", [_m, "cleanupOwner", "INCIDENT"] call _hg],
     ["despawnPolicy", [_m, "despawnPolicy", "INCIDENT_DESPAWN"] call _hg],
-    ["source", _source]
+    ["source", _source],
+    ["composition", _composition]
 ]
