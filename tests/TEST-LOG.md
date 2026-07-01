@@ -11,6 +11,23 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-07-01 20:42 UTC — Preflight sqflint parser fix for CIVTRAF HashMap getters (Mode A)
+
+**Branch/Commit:** `hotfix/civtraf-safe-hashmap-getters` @ `b3fd3dec065326c197b7d543b6a9a69187688d33` (base before this fix; working tree includes this TEST-LOG update)
+
+**Scenario:** Fix the failing GitHub Actions job `Arma SQF + Mission Config Preflight / preflight (pull_request)` run `28544253629` job `84625463187`, where `sqflint -e w` rejected direct HashMap `get` usage introduced while hardening CIVTRAF lookups.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | CI root-cause analysis | Review workflow run `28544253629` job `84625463187` logs and step metadata. | PASS | Failure isolated to `SQF static analysis (changed *.sqf files only)`; compat scan passed, then `sqflint` failed at `functions/civsub/fn_civsubDistrictsClamp.sqf` line 14 on method-style `get`. |
+| 2 | Post-fix targeted preflight lint | `python3 scripts/dev/sqflint_compat_scan.py --strict functions/civsub/fn_civsubDistrictsClamp.sqf functions/civsub/fn_civsubTrafficTick.sqf && ~/.local/bin/sqflint -e w functions/civsub/fn_civsubDistrictsClamp.sqf && ~/.local/bin/sqflint -e w functions/civsub/fn_civsubTrafficTick.sqf` | PASS | Both changed SQF files passed the same compat + sqflint path used by CI after replacing direct `get` with the compiled `_hget` wrapper. |
+| 3 | Scanner regression probe | `cat >/tmp/civtraf-ci/direct_get_probe.sqf <<'EOF' ... EOF && python3 scripts/dev/sqflint_compat_scan.py --strict /tmp/civtraf-ci/direct_get_probe.sqf` | PASS | Expected non-zero result: the updated scanner now flags raw HashMap `get` usage before sqflint sees it. |
+| 4 | CIVSUB static regression check | `bash tests/static/civsub_traffic_contract_checks.sh` | PASS | CIVSUB traffic contract remained green after the parser-safe getter change. |
+| 5 | Runtime smoke (hosted/local MP) | Exercise CIVTRAF district clamp / spawn-budget flow in Arma 3. | BLOCKED | Arma 3 runtime unavailable in sandbox. |
+| 6 | Dedicated/JIP validation | Dedicated server + late-join client: verify CIVTRAF state remains server-authoritative and replicated. | BLOCKED | Dedicated/JIP runtime unavailable in sandbox session. |
+
+---
+
 ## 2026-07-01 15:16 UTC — Preflight compat-scan fix for CIVSUB district clamp (Mode A)
 
 **Branch/Commit:** `fix/runtime-hardening-rpt-20260630` @ `0afb3dd75071c5b1e7129aa2b6bd9a5f8cae917a` (base before this fix; working tree includes this TEST-LOG update)

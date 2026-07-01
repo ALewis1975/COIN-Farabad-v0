@@ -122,6 +122,7 @@ The scanner is intentionally lightweight and pattern-based. It catches known par
 | `findIf` | `findIf` | ✅ Covered |
 | `trim` | `trim-operator` | ✅ Covered |
 | `fileExists` | `fileExists-operator` | ✅ Covered |
+| `get` (method) | `hashmap-get-method` | ✅ Covered |
 | `getOrDefault` (method) | `hashmap-getOrDefault-method` | ✅ Covered |
 | `isNotEqualTo` | `isNotEqualTo` | ✅ Covered |
 | `toUpperANSI` | `toUpperANSI` | ✅ Covered |
