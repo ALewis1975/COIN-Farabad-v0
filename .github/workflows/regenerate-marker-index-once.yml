@@ -1,0 +1,47 @@
+name: Regenerate marker index once
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  regenerate-marker-index:
+    if: github.head_ref == 'docs/imagery-marker-audit-2026-07-01'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Regenerate marker index
+        run: python3 tools/generate_marker_index.py
+
+      - name: Show generated marker-index diff
+        run: |
+          git status --short
+          git diff -- docs/reference/marker-index.md docs/reference/marker-index.json || true
+
+      - name: Commit generated docs and remove temporary workflow
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git rm .github/workflows/regenerate-marker-index-once.yml
+          git add docs/reference/marker-index.md docs/reference/marker-index.json
+
+          if git diff --cached --quiet; then
+            echo "No generated marker-index changes; removing temporary workflow only."
+            git commit -m "ci: remove temporary marker index workflow"
+          else
+            git commit -m "docs: regenerate marker index after imagery layout update"
+          fi
+
+          git push origin HEAD:${{ github.head_ref }}
