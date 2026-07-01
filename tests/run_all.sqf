@@ -338,14 +338,16 @@ if (isServer) then {
 
   // CIVSUB clamp guard smoke: non-hashmap input must return false without RPT error.
   if (!(isNil "ARC_fnc_civsubDistrictsClamp")) then {
+    private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+    private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
     private _clampBad = ["not_hashmap"] call ARC_fnc_civsubDistrictsClamp;
     [(_clampBad isEqualType false) && {!_clampBad}, "UT-CLAMP-001", "civsubDistrictsClamp returns false for non-hashmap input", ["got", _clampBad]] call ARC_TEST_fnc_assert;
 
-    private _d = createHashMapFromArray [["W_EFF_U", 150], ["R_EFF_U", -20], ["G_EFF_U", 35], ["food_idx", 110], ["water_idx", -1], ["fear_idx", 50]];
+    private _d = [["W_EFF_U", 150], ["R_EFF_U", -20], ["G_EFF_U", 35], ["food_idx", 110], ["water_idx", -1], ["fear_idx", 50]] call _hmCreate;
     private _clampOk = [_d] call ARC_fnc_civsubDistrictsClamp;
     [_clampOk, "UT-CLAMP-002", "civsubDistrictsClamp accepts hashmap input", []] call ARC_TEST_fnc_assert;
-    [((_d getOrDefault ["W_EFF_U", -1]) isEqualTo 100), "UT-CLAMP-003", "clamp caps W_EFF_U at 100", ["W", _d getOrDefault ["W_EFF_U", -1]]] call ARC_TEST_fnc_assert;
-    [((_d getOrDefault ["R_EFF_U", -1]) isEqualTo 0), "UT-CLAMP-004", "clamp floors R_EFF_U at 0", ["R", _d getOrDefault ["R_EFF_U", -1]]] call ARC_TEST_fnc_assert;
+    [(([_d, "W_EFF_U", -1] call _hg) isEqualTo 100), "UT-CLAMP-003", "clamp caps W_EFF_U at 100", ["W", [_d, "W_EFF_U", -1] call _hg]] call ARC_TEST_fnc_assert;
+    [(([_d, "R_EFF_U", -1] call _hg) isEqualTo 0), "UT-CLAMP-004", "clamp floors R_EFF_U at 0", ["R", [_d, "R_EFF_U", -1] call _hg]] call ARC_TEST_fnc_assert;
   } else {
     ["UT-CLAMP-SKIP", "civsubDistrictsClamp tests skipped; function missing", []] call ARC_TEST_fnc_skip;
   };
