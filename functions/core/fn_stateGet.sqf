@@ -44,12 +44,18 @@ if (_key isEqualTo "") exitWith { call _returnDefault };
 private _state = missionNamespace getVariable ["ARC_state", []];
 if !(_state isEqualType []) exitWith { call _returnDefault };
 
-private _val = call _returnDefault;
+private _found = false;
+private _foundValue = objNull;
 {
     if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith
     {
-        _val = _x select 1;
+        if !(isNil { _x select 1 }) then
+        {
+            _foundValue = _x select 1;
+            _found = true;
+        };
     };
 } forEach _state;
 
-_val
+if (_found) exitWith { _foundValue };
+call _returnDefault
