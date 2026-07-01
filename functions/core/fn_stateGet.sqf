@@ -9,7 +9,8 @@
 */
 
 private _key = "";
-private _default = nil;
+private _hasDefault = false;
+private _default = objNull;
 
 // Normalize input
 switch (true) do
@@ -17,26 +18,33 @@ switch (true) do
     case (_this isEqualType []):
     {
         _key = _this param [0, "", [""]];
-        _default = _this param [1, nil];
+        if ((count _this) > 1 && { !(isNil { _this select 1 }) }) then
+        {
+            _default = _this select 1;
+            _hasDefault = true;
+        };
     };
     case (_this isEqualType ""):
     {
         _key = _this;
-        _default = nil;
     };
     default
     {
         _key = "";
-        _default = nil;
     };
 };
 
-if (_key isEqualTo "") exitWith { _default };
+private _returnDefault = {
+    if (_hasDefault) exitWith { _default };
+    nil
+};
+
+if (_key isEqualTo "") exitWith { call _returnDefault };
 
 private _state = missionNamespace getVariable ["ARC_state", []];
-if !(_state isEqualType []) exitWith { _default };
+if !(_state isEqualType []) exitWith { call _returnDefault };
 
-private _val = _default;
+private _val = call _returnDefault;
 {
     if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith
     {
