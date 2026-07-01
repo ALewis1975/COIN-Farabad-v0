@@ -22,12 +22,14 @@ if ([] call ARC_fnc_idleGateActive) exitWith {false};
 private _debug = missionNamespace getVariable ["civsub_v1_traffic_debug", false];
 if (!(_debug isEqualType true)) then { _debug = false; };
 
+private _hget = compile "params ['_h','_k']; (_h) get _k";
+
 // Runtime-safe HashMap getter. Avoid getOrDefault call-form shims; that form has
 // no mission function backing and caused undefined-variable cascades in CIVTRAF.
 private _hmGet = {
     params ["_h", "_k", "_d"];
     if (!(_h isEqualType createHashMap)) exitWith { _d };
-    private _v = _h get _k;
+    private _v = [_h, _k] call _hget;
     if (isNil "_v") exitWith { _d };
     _v
 };

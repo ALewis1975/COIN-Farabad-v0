@@ -10,8 +10,10 @@
 private _d = if (_this isEqualType [] && { (count _this) > 0 }) then { _this select 0 } else { objNull };
 if !(_d isEqualType createHashMap) exitWith {false};
 
+private _hget = compile "params ['_h','_k']; (_h) get _k";
+
 {
-    private _v = _d get _x;
+    private _v = [_d, _x] call _hget;
     if (isNil "_v") then { _v = 0; };
     if (!(_v isEqualType 0)) then { _v = 0; };
     _d set [_x, (0 max (_v min 100))];

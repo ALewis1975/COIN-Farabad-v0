@@ -39,10 +39,16 @@ RULES: list[PatternRule] = [
         notes="Direct `fileExists` usage can trip parser compatibility in some sqflint versions.",
     ),
     PatternRule(
+        name="hashmap-get-method",
+        regex=re.compile(r"\b[_A-Za-z]\w*\s+get\s+"),
+        approved_equivalent="Wrap via compiled helper, e.g. `_hget = compile \"params ['_h','_k']; (_h) get _k\";` then `[_map, _key] call _hget`.",
+        notes="Method-style HashMap `get` calls can misparse under older sqflint builds.",
+    ),
+    PatternRule(
         name="hashmap-getOrDefault-method",
         regex=re.compile(r"\b[_A-Za-z]\w*\s+getOrDefault\s*\["),
-        approved_equivalent="Use a local safe getter based on `get` + `isNil`; do not use `[map, key, default] call getOrDefault` unless a real helper exists in the mission.",
-        notes="Method-style HashMap default calls can misparse under older sqflint builds; call-form getOrDefault is not a valid built-in replacement.",
+        approved_equivalent="Wrap via compiled helper, e.g. `_hg = compile \"params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]\";` then `[_map, _key, _default] call _hg`.",
+        notes="Method-style HashMap default calls can misparse under older sqflint builds.",
     ),
     PatternRule(
         name="isNotEqualTo",
