@@ -1,0 +1,94 @@
+﻿19:08:46 BattlEye Server: Initialized (v1.220, Arma 3 2.20.152984)
+19:08:46 Game Port: 2308, Steam Query Port: 2309
+19:08:46 Host identity created.
+19:08:46 BattlEye Server: Config entry: RConPassword 285c1517e6b74ae4b46ca5afa9b91df5
+19:08:46 BattlEye Server: Config entry: RConPort 2313
+19:08:46 BattlEye Server: Config entry: RConIP 0.0.0.0
+19:08:46 BattlEye Server: RCon admin #0 (127.0.0.1:62962) logged in
+19:08:57 MAJ.Lewis.A uses modified data file
+19:08:57 BattlEye Server: Player #0 MAJ.Lewis.A (96.245.171.158:2304) connected
+19:08:57 Player MAJ.Lewis.A connecting.
+19:08:58 BattlEye Server: Connected to BE Master
+19:08:59 BattlEye Server: Player #0 MAJ.Lewis.A - BE GUID: 9cc9d4fc1441fa371f2cd0b1ddbdd783
+19:09:00 Player MAJ.Lewis.A connected (id=76561198027320796).
+19:09:01 BattlEye Server: Verified GUID (9cc9d4fc1441fa371f2cd0b1ddbdd783) of player #0 MAJ.Lewis.A
+19:09:52 Admin logged in, player: MAJ.Lewis.A, playerUID: 76561198027320796, IP: 192.168.1.160:2304.
+19:10:00 Mission COIN_Farabad_v0.Farabad read from bank.
+19:10:04 Roles assigned.
+19:10:04 Reading mission ...
+19:10:17 Mission read.
+19:10:36 BattlEye Server: Player #1 headlessclient (127.0.0.1:2808) connected
+19:10:36 Player headlessclient connecting.
+19:10:36 Player headlessclient connected (id=HC3884).
+19:10:36 BattlEye Server: Verified GUID () of player #1 headlessclient
+19:10:36 BattlEye Server: Player #1 headlessclient - Owner BE GUID: 8539e01499f87083b3a25eb30041261c
+19:10:36 BattlEye Server: (Unknown) headlessclient: No entry 'bin\config.bin/CfgWeapons/ItemInfo.scope'
+19:10:46 Game started.
+19:44:47 Game restarted
+class Session
+{
+	mission="COIN_Farabad_v0";
+	island="Farabad";
+	gameType="COOP";
+	duration=2041.4291;
+	class Player1
+	{
+		name="MAJ.Lewis.A";
+		killsInfantry=3;
+		killsSoft=0;
+		killsArmor=0;
+		killsAir=0;
+		killsPlayers=0;
+		customScore=0;
+		killsTotal=3;
+		killed=0;
+	};
+	class Player2
+	{
+		name="headlessclient";
+		killsInfantry=0;
+		killsSoft=0;
+		killsArmor=0;
+		killsAir=0;
+		killsPlayers=0;
+		customScore=0;
+		killsTotal=0;
+		killed=0;
+	};
+};
+19:44:51 Roles assigned.
+19:44:51 Reading mission ...
+19:45:02 Mission read.
+19:45:38 Game started.
+19:46:18 Game restarted
+class Session
+{
+	mission="COIN_Farabad_v0";
+	island="Farabad";
+	gameType="COOP";
+	duration=39.869003;
+	class Player1
+	{
+		name="headlessclient";
+		killsInfantry=0;
+		killsSoft=0;
+		killsArmor=0;
+		killsAir=0;
+		killsPlayers=0;
+		customScore=0;
+		killsTotal=0;
+		killed=0;
+	};
+	class Player2
+	{
+		name="MAJ.Lewis.A";
+		killsInfantry=0;
+		killsSoft=0;
+		killsArmor=0;
+		killsAir=0;
+		killsPlayers=0;
+		customScore=0;
+		killsTotal=0;
+		killed=0;
+	};
+};
