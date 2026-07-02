@@ -1,0 +1,199 @@
+name: Apply PR D mosque hotel TNP anchors once
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  apply-pr-d:
+    if: github.head_ref == 'data/mosque-hotel-tnp-anchors-pr-d'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Apply PR D data and template patch
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path, old, new):
+              p = Path(path)
+              s = p.read_text(encoding='utf-8')
+              if old not in s:
+                  raise SystemExit(f'expected block not found in {path}: {old[:80]!r}')
+              p.write_text(s.replace(old, new, 1), encoding='utf-8')
+
+          # Runtime anchor markers are created by ARC_fnc_worldRegisterLocations as ARC_loc_<id>.
+          replace_once(
+              'data/farabad_world_locations.sqf',
+              '    ["GrandMosque", "Grand Mosque", [4966.5, 5554.61, -6.3]],\n',
+              '    ["GrandMosque", "Grand Mosque", [4966.5, 5554.61, -6.3]],\n'
+              '    ["GrandMosqueCourtyard", "Grand Mosque Courtyard", [4966.5, 5554.61, -6.3]],\n'
+              '    ["GrandMosqueVendorStrip", "Grand Mosque Vendor Strip", [4928.0, 5569.0, -6.3]],\n'
+              '    ["GrandMosqueOuterCordon", "Grand Mosque Outer Cordon", [4948.0, 5525.0, -6.3]],\n'
+              '    ["GrandMosqueParking", "Grand Mosque Parking", [4994.0, 5530.0, -6.3]],\n'
+          )
+          replace_once(
+              'data/farabad_world_locations.sqf',
+              '    ["BelleFoilleHotel", "Belle Foille Hotel", [4644.05, 5642.64, -4.15]],\n',
+              '    ["BelleFoilleHotel", "Belle Foille Hotel", [4644.05, 5642.64, -4.15]],\n'
+              '    ["BelleFoilleHotelEntrance", "Belle Foille Hotel Entrance", [4644.05, 5642.64, -4.15]],\n'
+              '    ["BelleFoilleHotelSecurityPost", "Belle Foille Hotel Security Post", [4668.0, 5625.0, -4.15]],\n'
+              '    ["BelleFoilleHotelParking", "Belle Foille Hotel Parking", [4615.0, 5622.0, -4.15]],\n'
+              '    ["TNPFarabadHQ", "TNP Farabad HQ", [4717.3931, 5623.1968, 9.972]],\n'
+              '    ["TNPFarabadHQFrontage", "TNP Farabad HQ Frontage", [4717.3931, 5623.1968, 9.972]],\n'
+              '    ["TNPFarabadHQCordon", "TNP Farabad HQ Cordon", [4742.0, 5626.0, 9.97]],\n'
+          )
+
+          # Purpose matrix audit requires every named location ID to be mapped.
+          replace_once(
+              'data/farabad_spawn_patterns.sqf',
+              '        ["GrandMosque",        "RELIGIOUS"],\n',
+              '        ["GrandMosque",        "RELIGIOUS"],\n'
+              '        ["GrandMosqueCourtyard", "NO_BASELINE_POP"],\n'
+              '        ["GrandMosqueVendorStrip", "NO_BASELINE_POP"],\n'
+              '        ["GrandMosqueOuterCordon", "NO_BASELINE_POP"],\n'
+              '        ["GrandMosqueParking", "NO_BASELINE_POP"],\n'
+          )
+          replace_once(
+              'data/farabad_spawn_patterns.sqf',
+              '        ["BelleFoilleHotel",   "HOTEL"],\n',
+              '        ["BelleFoilleHotel",   "HOTEL"],\n'
+              '        ["BelleFoilleHotelEntrance", "NO_BASELINE_POP"],\n'
+              '        ["BelleFoilleHotelSecurityPost", "NO_BASELINE_POP"],\n'
+              '        ["BelleFoilleHotelParking", "NO_BASELINE_POP"],\n'
+              '        ["TNPFarabadHQ", "NO_BASELINE_POP"],\n'
+              '        ["TNPFarabadHQFrontage", "NO_BASELINE_POP"],\n'
+              '        ["TNPFarabadHQCordon", "NO_BASELINE_POP"],\n'
+          )
+
+          replace_once(
+              'data/farabad_site_templates.sqf',
+              '// SitePop supports four behaviours (garrison | camp | wander | parked); the\n'
+              '// richer matrix behaviours are mapped down here (construction/medical/inspect ->\n'
+              '// camp, guard -> garrison, loiter/queue -> wander, traffic_through -> parked\n'
+              '// vehicles). Each site uses site-wide (6-field) groups: no Eden anchor markers\n'
+              '// are required, so these spawn correctly without additional mission.sqm edits.\n',
+              '// SitePop supports four behaviours (garrison | camp | wander | parked); the\n'
+              '// richer matrix behaviours are mapped down here (construction/medical/inspect ->\n'
+              '// camp, guard -> garrison, loiter/queue -> wander, traffic_through -> parked\n'
+              '// vehicles). Most sites use site-wide (6-field) groups. Grand Mosque and\n'
+              '// Belle Foille Hotel use optional 7-field runtime anchors to localize roles\n'
+              '// without changing population counts or requiring mission.sqm edits.\n'
+          )
+
+          replace_once(
+              'data/farabad_site_templates.sqf',
+              '            ["elder",      "civ",  _civPool,    [1, 1], "camp",     30],\n'
+              '            ["worshipper", "civ",  _civPool,    [5, 8], "wander",   60],\n'
+              '            ["vendor",     "civ",  _civPool,    [1, 3], "camp",     50],\n'
+              '            ["tnp_outer",  "west", _tnpPool,    [2, 4], "garrison", 70],\n'
+              '            ["civ_car",    "civ",  _civCarPool, [1, 3], "parked",   70]\n',
+              '            ["elder",      "civ",  _civPool,    [1, 1], "camp",     30, "ARC_loc_GrandMosqueCourtyard"],\n'
+              '            ["worshipper", "civ",  _civPool,    [5, 8], "wander",   60, "ARC_loc_GrandMosqueCourtyard"],\n'
+              '            ["vendor",     "civ",  _civPool,    [1, 3], "camp",     50, "ARC_loc_GrandMosqueVendorStrip"],\n'
+              '            ["tnp_outer",  "west", _tnpPool,    [2, 4], "garrison", 70, "ARC_loc_GrandMosqueOuterCordon"],\n'
+              '            ["civ_car",    "civ",  _civCarPool, [1, 3], "parked",   70, "ARC_loc_GrandMosqueParking"]\n'
+          )
+          replace_once(
+              'data/farabad_site_templates.sqf',
+              '            ["hotel_staff", "civ",  _civPool,    [2, 4], "camp",     40],\n'
+              '            ["guest",       "civ",  _civPool,    [3, 6], "wander",   55],\n'
+              '            ["security",    "west", _tnpPool,    [2, 4], "garrison", 50],\n'
+              '            ["civ_car",     "civ",  _civCarPool, [2, 5], "parked",   70]\n',
+              '            ["hotel_staff", "civ",  _civPool,    [2, 4], "camp",     40, "ARC_loc_BelleFoilleHotelEntrance"],\n'
+              '            ["guest",       "civ",  _civPool,    [3, 6], "wander",   55, "ARC_loc_BelleFoilleHotelEntrance"],\n'
+              '            ["security",    "west", _tnpPool,    [2, 4], "garrison", 50, "ARC_loc_BelleFoilleHotelSecurityPost"],\n'
+              '            ["civ_car",     "civ",  _civCarPool, [2, 5], "parked",   70, "ARC_loc_BelleFoilleHotelParking"]\n'
+          )
+          PY
+
+      - name: Add PR D QA note
+        run: |
+          cat > docs/qa/Mosque_Hotel_TNP_Anchors_PR_D_2026-07-02.md <<'EOF'
+          # PR D Mosque Hotel TNP HQ Anchors
+
+          Status: data and SitePop anchor implementation.
+
+          ## Scope
+
+          This PR adds runtime anchor markers for the Grand Mosque, Belle Foille Hotel, and TNP Farabad HQ micro-zone. It does not edit mission.sqm and does not change population counts.
+
+          ## Added runtime anchors
+
+          Grand Mosque:
+          - ARC_loc_GrandMosqueCourtyard
+          - ARC_loc_GrandMosqueVendorStrip
+          - ARC_loc_GrandMosqueOuterCordon
+          - ARC_loc_GrandMosqueParking
+
+          Belle Foille Hotel:
+          - ARC_loc_BelleFoilleHotelEntrance
+          - ARC_loc_BelleFoilleHotelSecurityPost
+          - ARC_loc_BelleFoilleHotelParking
+
+          TNP HQ:
+          - ARC_loc_TNPFarabadHQ
+          - ARC_loc_TNPFarabadHQFrontage
+          - ARC_loc_TNPFarabadHQCordon
+
+          These are created by ARC_fnc_worldRegisterLocations from data/farabad_world_locations.sqf.
+
+          ## SitePop changes
+
+          Grand Mosque and Belle Foille Hotel SitePop groups now use the optional seventh spawnAnchor field. Counts are unchanged.
+
+          Grand Mosque:
+          - elder and worshipper anchor to the courtyard
+          - vendor anchors to the vendor strip
+          - TNP outer security anchors to the outer cordon
+          - parked civilian cars anchor to parking
+
+          Belle Foille Hotel:
+          - staff and guests anchor to the entrance
+          - security anchors to the security post
+          - parked civilian cars anchor to parking
+
+          TNP HQ anchors are provided for future task placement and cordon logic; this PR does not add a new SitePop template or task catalog entry for TNP HQ.
+
+          ## Regression risk
+
+          Low to moderate. The risk is anchor coordinate quality, not system behavior. If an anchor marker is missing at runtime, ARC_fnc_sitePopBuildGroup falls back to site center and logs a warning.
+
+          ## Dedicated MP smoke test
+
+          1. Start dedicated server and confirm no RPT compile errors from data/farabad_world_locations.sqf, data/farabad_spawn_patterns.sqf, or data/farabad_site_templates.sqf.
+          2. Confirm the new ARC_loc_* anchors exist after world init.
+          3. Move a player into the Grand Mosque activation radius and confirm SitePop spawns the same count ranges as before.
+          4. Confirm mosque vendors, worshippers, TNP outer security, and parked cars cluster near their role anchors.
+          5. Move a player into the Belle Foille Hotel activation radius and confirm hotel staff, guests, security, and cars cluster near their anchors.
+          6. JIP a second client and confirm no duplicate SitePop activation or public-state errors.
+          EOF
+
+      - name: Static sanity checks
+        run: |
+          python3 -m py_compile tools/generate_marker_index.py
+          python3 scripts/dev/sqflint_compat_scan.py --strict data/farabad_world_locations.sqf data/farabad_spawn_patterns.sqf data/farabad_site_templates.sqf
+
+      - name: Commit PR D changes and remove temporary workflow
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git rm .github/workflows/apply-pr-d-mosque-hotel-tnp-anchors-once.yml
+          git add data/farabad_world_locations.sqf data/farabad_spawn_patterns.sqf data/farabad_site_templates.sqf docs/qa/Mosque_Hotel_TNP_Anchors_PR_D_2026-07-02.md
+
+          git commit -m "data: add mosque hotel TNP anchor markers"
+          git push origin HEAD:${{ github.head_ref }}
