@@ -561,7 +561,29 @@
       "usageNotes": ""
     },
     {
-      "aliases": [],
+      "aliases": [
+        "marker_31"
+      ],
+      "alpha": 0.5,
+      "color": "",
+      "consumers": [],
+      "name": "ARC_m_base_avn_hq",
+      "pos": [
+        6690.438,
+        8.5310001,
+        1555.176
+      ],
+      "shape": "",
+      "source": "mission.sqm:Map / Mission",
+      "status": "unresolved",
+      "text": " Joint Aviation HQ (332 AEW / 82 CAB)",
+      "type": "loc_mission",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [
+        "marker_31"
+      ],
       "alpha": 1.0,
       "color": "",
       "consumers": [],
@@ -633,7 +655,29 @@
       "usageNotes": ""
     },
     {
-      "aliases": [],
+      "aliases": [
+        "marker_27"
+      ],
+      "alpha": 0.5,
+      "color": "",
+      "consumers": [],
+      "name": "ARC_m_base_hq_1",
+      "pos": [
+        6409.1514,
+        8.5310307,
+        1584.8823
+      ],
+      "shape": "",
+      "source": "mission.sqm:Map / Mission",
+      "status": "unresolved",
+      "text": " Joint Base HQ",
+      "type": "loc_mission",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [
+        "marker_27"
+      ],
       "alpha": 1.0,
       "color": "",
       "consumers": [],
@@ -669,7 +713,29 @@
       "usageNotes": ""
     },
     {
-      "aliases": [],
+      "aliases": [
+        "marker_28"
+      ],
+      "alpha": 0.5,
+      "color": "",
+      "consumers": [],
+      "name": "ARC_m_base_mayor_1",
+      "pos": [
+        6293.3188,
+        8.7930002,
+        1556.349
+      ],
+      "shape": "",
+      "source": "mission.sqm:Map / Mission",
+      "status": "unresolved",
+      "text": " Base Mayor",
+      "type": "loc_mission",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [
+        "marker_28"
+      ],
       "alpha": 1.0,
       "color": "",
       "consumers": [],
@@ -741,7 +807,29 @@
       "usageNotes": ""
     },
     {
-      "aliases": [],
+      "aliases": [
+        "marker_32"
+      ],
+      "alpha": 0.5,
+      "color": "",
+      "consumers": [],
+      "name": "ARC_m_base_usaf_pilot_hangar",
+      "pos": [
+        6559.1079,
+        8.4899998,
+        1587.7531
+      ],
+      "shape": "",
+      "source": "mission.sqm:Map / Mission",
+      "status": "unresolved",
+      "text": " USAF Pilot Hangar",
+      "type": "loc_mission",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [
+        "marker_32"
+      ],
       "alpha": 1.0,
       "color": "",
       "consumers": [],
@@ -1569,7 +1657,29 @@
       "usageNotes": ""
     },
     {
-      "aliases": [],
+      "aliases": [
+        "marker_24"
+      ],
+      "alpha": 0.5,
+      "color": "",
+      "consumers": [],
+      "name": "arc_m_base_atc_tower",
+      "pos": [
+        6457.5601,
+        8.4899998,
+        1696.594
+      ],
+      "shape": "",
+      "source": "mission.sqm:Map / Mission",
+      "status": "unresolved",
+      "text": " Farabad Tower",
+      "type": "loc_mission",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [
+        "marker_24"
+      ],
       "alpha": 1.0,
       "color": "",
       "consumers": [],
@@ -1713,7 +1823,29 @@
       "usageNotes": ""
     },
     {
-      "aliases": [],
+      "aliases": [
+        "marker_29"
+      ],
+      "alpha": 0.5,
+      "color": "",
+      "consumers": [],
+      "name": "arc_m_base_police_hq",
+      "pos": [
+        5281.1631,
+        8.5,
+        2628.0498
+      ],
+      "shape": "",
+      "source": "mission.sqm:Map / Mission",
+      "status": "unresolved",
+      "text": " USAF Security HQ",
+      "type": "loc_mission",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [
+        "marker_29"
+      ],
       "alpha": 1.0,
       "color": "",
       "consumers": [],
@@ -2296,24 +2428,6 @@
       "alpha": 0.5,
       "color": "",
       "consumers": [],
-      "name": "marker_24",
-      "pos": [
-        6457.5601,
-        8.4899998,
-        1696.594
-      ],
-      "shape": "",
-      "source": "mission.sqm:Map / Mission",
-      "status": "unresolved",
-      "text": " Farabad Tower",
-      "type": "loc_mission",
-      "usageNotes": ""
-    },
-    {
-      "aliases": [],
-      "alpha": 0.5,
-      "color": "",
-      "consumers": [],
       "name": "marker_25",
       "pos": [
         6179.1602,
@@ -2350,60 +2464,6 @@
       "alpha": 0.5,
       "color": "",
       "consumers": [],
-      "name": "marker_27",
-      "pos": [
-        6409.1514,
-        8.5310307,
-        1584.8823
-      ],
-      "shape": "",
-      "source": "mission.sqm:Map / Mission",
-      "status": "unresolved",
-      "text": " Joint Base HQ",
-      "type": "loc_mission",
-      "usageNotes": ""
-    },
-    {
-      "aliases": [],
-      "alpha": 0.5,
-      "color": "",
-      "consumers": [],
-      "name": "marker_28",
-      "pos": [
-        6293.3188,
-        8.7930002,
-        1556.349
-      ],
-      "shape": "",
-      "source": "mission.sqm:Map / Mission",
-      "status": "unresolved",
-      "text": " Base Mayor",
-      "type": "loc_mission",
-      "usageNotes": ""
-    },
-    {
-      "aliases": [],
-      "alpha": 0.5,
-      "color": "",
-      "consumers": [],
-      "name": "marker_29",
-      "pos": [
-        5281.1631,
-        8.5,
-        2628.0498
-      ],
-      "shape": "",
-      "source": "mission.sqm:Map / Mission",
-      "status": "unresolved",
-      "text": " USAF Security HQ",
-      "type": "loc_mission",
-      "usageNotes": ""
-    },
-    {
-      "aliases": [],
-      "alpha": 0.5,
-      "color": "",
-      "consumers": [],
       "name": "marker_30",
       "pos": [
         6213.8481,
@@ -2414,42 +2474,6 @@
       "source": "mission.sqm:Map / Mission",
       "status": "unresolved",
       "text": " Kennel",
-      "type": "loc_mission",
-      "usageNotes": ""
-    },
-    {
-      "aliases": [],
-      "alpha": 0.5,
-      "color": "",
-      "consumers": [],
-      "name": "marker_31",
-      "pos": [
-        6690.438,
-        8.5310001,
-        1555.176
-      ],
-      "shape": "",
-      "source": "mission.sqm:Map / Mission",
-      "status": "unresolved",
-      "text": " Joint Aviation HQ (332 AEW / 82 CAB)",
-      "type": "loc_mission",
-      "usageNotes": ""
-    },
-    {
-      "aliases": [],
-      "alpha": 0.5,
-      "color": "",
-      "consumers": [],
-      "name": "marker_32",
-      "pos": [
-        6559.1079,
-        8.4899998,
-        1587.7531
-      ],
-      "shape": "",
-      "source": "mission.sqm:Map / Mission",
-      "status": "unresolved",
-      "text": " USAF Pilot Hangar",
       "type": "loc_mission",
       "usageNotes": ""
     },

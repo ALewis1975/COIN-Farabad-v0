@@ -43,17 +43,21 @@ Published under `docs/reference/`.
 | ARC_loc_hospital |  | RECTANGLE | [5350.0811,0.0,-0.8369751] |  |  | 1 | marker_4 |  | unresolved |  |
 | ARC_loc_industrial022 |  | RECTANGLE | [-249.2251,47.273209,5499.5889] |  |  | 1 | marker_5 |  | unresolved |  |
 | ARC_m_Fort Kelati | Empty |  | [7962.8252,70.329002,3557.7019] |  Fort Kelati |  | 1 |  |  | unresolved |  |
-| ARC_m_base_avn_hq | Empty |  | [6690.438,8.5310001,1553.615] | Joint Aviation HQ |  | 1 |  |  | unresolved |  |
+| ARC_m_base_avn_hq | loc_mission |  | [6690.438,8.5310001,1555.176] |  Joint Aviation HQ (332 AEW / 82 CAB) |  | 0.5 | marker_31 |  | unresolved |  |
+| ARC_m_base_avn_hq | Empty |  | [6690.438,8.5310001,1553.615] | Joint Aviation HQ |  | 1 | marker_31 |  | unresolved |  |
 | ARC_m_base_c130_parking | Empty |  | [6609.4419,8.4899998,1660.5601] | C-130J Parking |  | 1 |  |  | unresolved |  |
 | ARC_m_base_c17_parking | Empty |  | [6368.3877,8.4899998,1636.5112] | C-17 Parking |  | 1 |  |  | unresolved |  |
 | ARC_m_base_cargo_hangar | Empty |  | [6365.9141,8.4899998,1577.423] | Cargo Hangar |  | 1 |  |  | unresolved |  |
-| ARC_m_base_hq_1 | Empty |  | [6409.7266,8.5310154,1584.5387] | Joint Base HQ |  | 1 |  |  | unresolved |  |
+| ARC_m_base_hq_1 | loc_mission |  | [6409.1514,8.5310307,1584.8823] |  Joint Base HQ |  | 0.5 | marker_27 |  | unresolved |  |
+| ARC_m_base_hq_1 | Empty |  | [6409.7266,8.5310154,1584.5387] | Joint Base HQ |  | 1 | marker_27 |  | unresolved |  |
 | ARC_m_base_k135_parking | Empty |  | [6546.0205,8.4899998,1653.8867] | K-136 Parking |  | 1 |  |  | unresolved |  |
-| ARC_m_base_mayor_1 | Empty |  | [6293.228,8.7430792,1558.8572] |  332 EMSG (Base Mayor) |  | 1 |  |  | unresolved |  |
+| ARC_m_base_mayor_1 | loc_mission |  | [6293.3188,8.7930002,1556.349] |  Base Mayor |  | 0.5 | marker_28 |  | unresolved |  |
+| ARC_m_base_mayor_1 | Empty |  | [6293.228,8.7430792,1558.8572] |  332 EMSG (Base Mayor) |  | 1 | marker_28 |  | unresolved |  |
 | ARC_m_base_toc | Empty |  | [6237.0,8.4899998,1589.826] |  TOC |  | 1 |  |  | unresolved |  |
 | ARC_m_base_uas_hangar | Empty |  | [6642.3359,8.4949999,1576.281] | UAS/UAV Hangar |  | 1 |  |  | unresolved |  |
 | ARC_m_base_uas_spawn | Empty |  | [6662.3931,8.4899998,1642.7408] |  |  | 1 |  |  | unresolved |  |
-| ARC_m_base_usaf_pilot_hangar | Empty |  | [6559.1079,8.4899998,1586.193] | USAF Pilot Hangar |  | 1 |  |  | unresolved |  |
+| ARC_m_base_usaf_pilot_hangar | loc_mission |  | [6559.1079,8.4899998,1587.7531] |  USAF Pilot Hangar |  | 0.5 | marker_32 |  | unresolved |  |
+| ARC_m_base_usaf_pilot_hangar | Empty |  | [6559.1079,8.4899998,1586.193] | USAF Pilot Hangar |  | 1 | marker_32 |  | unresolved |  |
 | ARC_m_charlie_2_325AIR | Empty |  | [5894.0,6.4699998,1330.0] |  C-2-325 AIR HQ |  | 1 |  |  | unresolved |  |
 | ARC_m_civil_01 | Empty |  | [8120.0439,5.2690001,1269.457] |  Civil 01 |  | 1 |  |  | unresolved |  |
 | ARC_m_ied_01 | Empty |  | [5118.0,220.42763,8908.0] |  IED 01 |  | 1 |  |  | unresolved |  |
@@ -99,7 +103,8 @@ Published under `docs/reference/`.
 | arc_m_base_1_73_CAV_hq | Empty |  | [6142.0122,14.616,2309.8621] |  1-73 CAV HQ |  | 1 |  |  | unresolved |  |
 | arc_m_base_atc_approach | Empty |  | [7098.875,9.7499847,2458.875] |  FARABAD APPROACH |  | 1 |  |  | unresolved |  |
 | arc_m_base_atc_ground | Empty |  | [6517.75,8.8616562,2131.125] |  FARABAD GROUND |  | 1 |  |  | unresolved |  |
-| arc_m_base_atc_tower | Empty |  | [6457.541,8.4899998,1696.535] |  FARABAD TOWER |  | 1 |  |  | unresolved |  |
+| arc_m_base_atc_tower | loc_mission |  | [6457.5601,8.4899998,1696.594] |  Farabad Tower |  | 0.5 | marker_24 |  | unresolved |  |
+| arc_m_base_atc_tower | Empty |  | [6457.541,8.4899998,1696.535] |  FARABAD TOWER |  | 1 | marker_24 |  | unresolved |  |
 | arc_m_base_barracks_01 | Empty |  | [6539.8291,14.123,1430.038] |  |  | 1 |  |  | unresolved |  |
 | arc_m_base_civilian_terminal_01 | Empty |  | [5947.292,8.6120005,2324.7839] |  |  | 1 |  |  | unresolved |  |
 | arc_m_base_convoy_staging | Empty |  | [6631.3921,9.9551077,3166.7087] |  Convoy Staging Yard / MCP |  | 1 |  |  | unresolved |  |
@@ -107,7 +112,8 @@ Published under `docs/reference/`.
 | arc_m_base_fuel_depot | Empty |  | [7157.1929,5.7449999,1477.269] |  |  | 1 |  |  | unresolved |  |
 | arc_m_base_maintenance | Empty |  | [5625.5884,8.4995365,2366.7266] |  |  | 1 |  |  | unresolved |  |
 | arc_m_base_morgue | Empty |  | [5687.7881,8.4799995,2326.812] |  Morgue |  | 1 |  |  | unresolved |  |
-| arc_m_base_police_hq | Empty |  | [5281.042,8.5,2628.1025] |  USAF Security Forces HQ |  | 1 |  |  | unresolved |  |
+| arc_m_base_police_hq | loc_mission |  | [5281.1631,8.5,2628.0498] |  USAF Security HQ |  | 0.5 | marker_29 |  | unresolved |  |
+| arc_m_base_police_hq | Empty |  | [5281.042,8.5,2628.1025] |  USAF Security Forces HQ |  | 1 | marker_29 |  | unresolved |  |
 | arc_m_base_supply_depot | Empty |  | [5335.5571,8.4899998,2616.739] |  |  | 1 |  |  | unresolved |  |
 | arc_m_base_theater_hospital | Empty |  | [5714.25,8.5900154,2344.25] | Theater Hospital |  | 1 |  |  | unresolved |  |
 | arc_rotary_pad_1 | mil_dot |  | [6849.123,8.4914999,1471.7258] |  Pad 1 (AH-64 [AI]) | ColorWEST | 0.5 |  |  | unresolved |  |
@@ -139,15 +145,9 @@ Published under `docs/reference/`.
 | marker_17 | loc_mission |  | [6236.9531,8.4899998,1589.866] |  TOC |  | 0.5 |  |  | unresolved |  |
 | marker_22 | loc_mission |  | [6292.2148,8.4899998,1605.1696] |  EPW Holding |  | 0.5 |  |  | unresolved |  |
 | marker_23 | loc_mission |  | [6297.0264,8.7650003,1642.1555] |  EPW Processing |  | 0.5 |  |  | unresolved |  |
-| marker_24 | loc_mission |  | [6457.5601,8.4899998,1696.594] |  Farabad Tower |  | 0.5 |  |  | unresolved |  |
 | marker_25 | loc_mission |  | [6179.1602,8.54,1655.892] |  Fixed Wing Hangars |  | 0.5 |  |  | unresolved |  |
 | marker_26 | loc_mission |  | [6809.7041,8.8170004,1581.457] |  Rotary Hangars |  | 0.5 |  |  | unresolved |  |
-| marker_27 | loc_mission |  | [6409.1514,8.5310307,1584.8823] |  Joint Base HQ |  | 0.5 |  |  | unresolved |  |
-| marker_28 | loc_mission |  | [6293.3188,8.7930002,1556.349] |  Base Mayor |  | 0.5 |  |  | unresolved |  |
-| marker_29 | loc_mission |  | [5281.1631,8.5,2628.0498] |  USAF Security HQ |  | 0.5 |  |  | unresolved |  |
 | marker_30 | loc_mission |  | [6213.8481,8.4899998,1604.0792] |  Kennel |  | 0.5 |  |  | unresolved |  |
-| marker_31 | loc_mission |  | [6690.438,8.5310001,1555.176] |  Joint Aviation HQ (332 AEW / 82 CAB) |  | 0.5 |  |  | unresolved |  |
-| marker_32 | loc_mission |  | [6559.1079,8.4899998,1587.7531] |  USAF Pilot Hangar |  | 0.5 |  |  | unresolved |  |
 | marker_35 | loc_Bunker |  | [4714.2681,4.1399999,4629.8618] |  TNA Checkpoint |  | 1 |  |  | unresolved |  |
 | mkr_SHERIFF_HOLDING | Empty |  | [6299.4312,8.7650003,1636.3142] | Sheriff Holding |  | 1 |  |  | unresolved |  |
 | mkr_airbaseCenter | Empty |  | [6117.9551,8.4899998,2280.71] |  1,500 Meters Radius |  | 1 | marker_0 |  | unresolved |  |

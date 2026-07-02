@@ -28,6 +28,12 @@ private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
         ["marker_19", "ARC_loc_Mine19"],
         ["marker_20", "ARC_loc_Mine20"],
         ["marker_21", "ARC_loc_Mine21"],
+        ["marker_24", "arc_m_base_atc_tower"],
+        ["marker_27", "ARC_m_base_hq_1"],
+        ["marker_28", "ARC_m_base_mayor_1"],
+        ["marker_29", "arc_m_base_police_hq"],
+        ["marker_31", "ARC_m_base_avn_hq"],
+        ["marker_32", "ARC_m_base_usaf_pilot_hangar"],
         ["EPW_Holding", "epw_holding"],
         ["epw_holding_1", "epw_holding"]
     ]
