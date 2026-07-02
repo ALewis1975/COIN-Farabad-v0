@@ -105,10 +105,34 @@ def scan_file(path: Path) -> list[tuple[int, PatternRule, str]]:
         print(f"[sqflint-compat-scan] WARN: unable to read {path}: {exc}")
         return findings
 
+    in_block_comment = False
     for idx, line in enumerate(lines, start=1):
         stripped = line.strip()
+
+        # Continuation of a block comment: skip until closing */
+        if in_block_comment:
+            if "*/" in line:
+                in_block_comment = False
+            continue
+
+        # Single-line // comment: skip entirely
         if stripped.startswith("//"):
             continue
+
+        # If this line opens a block comment, strip the comment portion before scanning
+        if "/*" in line:
+            before_comment = line[: line.index("/*")]
+            after_open = line[line.index("/*") + 2:]
+            if "*/" in after_open:
+                # Inline block comment /* ... */ on same line: keep code around it
+                line = before_comment + after_open[after_open.index("*/") + 2:]
+            else:
+                # Block comment extends beyond this line
+                in_block_comment = True
+                line = before_comment  # only scan code before the /*
+            if not line.strip():
+                continue
+
         for rule in RULES:
             if _is_compat_wrapper_line(line, rule.name):
                 continue
