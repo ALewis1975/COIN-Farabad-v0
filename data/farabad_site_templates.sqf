@@ -293,7 +293,7 @@ private _baseTemplates = [
     //     prisoner_holding         (2-4)        Holding-yard wander population
     //   Support (CIV):
     //     vendor      (3-6)   Gate compound clusters
-    //     contractor  (2-4)   Outer maintenance / perimeter support (no anchor)
+    //     contractor  (2-4)   Entry/admin service support
     // -------------------------------------------------------------------------
     [
         "KarkanakPrison",
