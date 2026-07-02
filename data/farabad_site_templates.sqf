@@ -270,6 +270,8 @@ private _baseTemplates = [
     //     prison_hospital             — medical wing
     //     prison_holding_area         — holding yard / high-risk block
     //   When a marker is absent, the group falls back to site-centre with a WARN log.
+    //   Validation note: `prison_intake_03` is present in the generated marker index
+    //   but is offsite and is deliberately not used by this template.
     //
     //   Guard composition (BLUFOR, doctrinal):
     //     hq_admin       (4)   Prison HQ / Admin Cell
@@ -291,7 +293,7 @@ private _baseTemplates = [
     //     prisoner_holding         (2-4)        Holding-yard wander population
     //   Support (CIV):
     //     vendor      (3-6)   Gate compound clusters
-    //     contractor  (2-4)   Outer maintenance / perimeter support (no anchor)
+    //     contractor  (2-4)   Entry/admin service support
     // -------------------------------------------------------------------------
     [
         "KarkanakPrison",
@@ -313,9 +315,9 @@ private _baseTemplates = [
             ["internal_b",          "west", _tnpPool,        [6, 6], "garrison", 45, "prison_dorm_03"],
             // --- Intake ---
             ["intake",              "west", _tnpPool,        [4, 4], "camp",     35, "prison_intake_01"],
-            // --- Escort / Reaction (both anchor to admin area) ---
-            ["escort",              "west", _tnpPool,        [4, 4], "wander",   50, "prison_admin_offices"],
-            ["reaction",            "west", _tnpPool,        [4, 4], "camp",     40, "prison_admin_offices"],
+            // --- Escort / Reaction (separated to prevent admin-block stacking) ---
+            ["escort",              "west", _tnpPool,        [4, 4], "wander",   50, "prison_entry_office"],
+            ["reaction",            "west", _tnpPool,        [4, 4], "camp",     40, "prison_central_guard_tower"],
             // --- Hospital (all three groups anchored to hospital marker) ---
             ["prison_medic",        "west", _tnpMedPool,     [3, 4], "camp",     30, "prison_hospital"],
             ["prison_civ_doc",      "civ",  _civMedPool,     [2, 3], "camp",     30, "prison_hospital"],
@@ -328,9 +330,8 @@ private _baseTemplates = [
             ["prisoner_holding",    "civ",  _civPool,        [2, 4], "wander",   30, "prison_holding_area"],
             // --- Support (CIV) ---
             ["vendor",              "civ",  _civPool,        [3, 6], "camp",     50, "prison_entry_office"],
-            // Contractor has no anchor: omitting the 7th field is equivalent to ""
-            // and demonstrates backward-compatible 6-field usage.
-            ["contractor",          "civ",  _workerPool,     [2, 4], "wander",  100]
+            // Contractor support is localized near the entry/admin service area.
+            ["contractor",          "civ",  _workerPool,     [2, 4], "wander",  100, "prison_entry_office"]
         ]
     ],
 
