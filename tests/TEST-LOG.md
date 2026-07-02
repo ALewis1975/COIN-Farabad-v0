@@ -11,6 +11,23 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-07-02 01:47 UTC — Preflight compat-scan fix for marker alias HashMap literal (Mode A)
+
+**Branch/Commit:** `copilot/fix-github-actions-preflight-job-again` @ `2f3f65db556bc30ca240b51f485708cacce0d6ac` (base before this fix; working tree includes this TEST-LOG update)
+
+**Scenario:** Fix failing GitHub Actions job `Arma SQF + Mission Config Preflight / preflight (pull_request)` run `28555373292` job `84664115805`, where strict compat scanning rejected a bare `createHashMapFromArray` in `data/farabad_marker_aliases.sqf`.
+
+| # | Check | Command / Step | Result | Notes |
+|---|---|---|---|---|
+| 1 | CI root-cause analysis | Review workflow run `28555373292` job `84664115805` logs and step metadata. | PASS | Failure isolated to `SQF static analysis (changed *.sqf files only)`; compat scan flagged `L6` `[bare-createHashMapFromArray]` in `data/farabad_marker_aliases.sqf`. |
+| 2 | Baseline compat reproduction (pre-change) | `python3 scripts/dev/sqflint_compat_scan.py --strict data/farabad_marker_aliases.sqf data/farabad_world_locations.sqf data/incident_markers.sqf` | FAIL | Reproduced the same strict-compat finding before edit. |
+| 3 | Post-change targeted preflight lint | `python3 -m pip install --user sqflint && python3 scripts/dev/sqflint_compat_scan.py --strict data/farabad_marker_aliases.sqf data/farabad_world_locations.sqf data/incident_markers.sqf && ~/.local/bin/sqflint -e w data/farabad_marker_aliases.sqf && ~/.local/bin/sqflint -e w data/farabad_world_locations.sqf && ~/.local/bin/sqflint -e w data/incident_markers.sqf` | PASS | Compat scan and sqflint both passed after wrapping `createHashMapFromArray` in the approved compiled helper call form. |
+| 4 | Marker index static regression check | `python3 scripts/dev/validate_marker_index.py` | PASS | Marker index validation passed in off/auto/auto-no-rg modes after alias-map compatibility rewrite. |
+| 5 | Runtime smoke (hosted/local MP) | Run mission startup through `ARC_fnc_worldInit` to confirm alias-map load behavior remains unchanged. | BLOCKED | Arma 3 runtime unavailable in sandbox. |
+| 6 | Dedicated/JIP validation | Dedicated server + late-join client: verify alias-driven marker references remain replicated and stable for JIP. | BLOCKED | Dedicated/JIP runtime unavailable in sandbox session. |
+
+---
+
 ## 2026-07-01 20:42 UTC — Preflight sqflint parser fix for CIVTRAF HashMap getters (Mode A)
 
 **Branch/Commit:** `hotfix/civtraf-safe-hashmap-getters` @ `b3fd3dec065326c197b7d543b6a9a69187688d33` (base before this fix; working tree includes this TEST-LOG update)
