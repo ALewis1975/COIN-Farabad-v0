@@ -27,11 +27,14 @@
     ["ARC_loc_GrandMosque", "Patrol: Mosque Security Walkthrough", "PATROL"],
     ["ARC_loc_GrandMosque", "Defend: Protect Grand Mosque Gathering", "DEFEND"],
     ["ARC_loc_GrandMosque", "IED: Suspicious Package at Mosque", "IED"],
+    ["ARC_loc_GrandMosqueOuterCordon", "Checkpoint: TNP Cordon at Grand Mosque", "CHECKPOINT"],
+    ["ARC_loc_GrandMosqueVendorStrip", "Civil: Vendor Dispute at Mosque Market Edge", "CIVIL"],
 
     ["ARC_loc_BelleFoilleHotel", "Civil: VIP Meeting Security at Belle Fuelle Hotel", "CIVIL"],
     ["ARC_loc_BelleFoilleHotel", "Defend: Hotel Security Incident", "DEFEND"],
     ["ARC_loc_BelleFoilleHotel", "Raid: Detain HVT at Belle Fuelle Hotel", "RAID"],
     ["ARC_loc_BelleFoilleHotel", "QRF: Hotel Distress Call", "QRF"],
+    ["ARC_loc_BelleFoilleHotelSecurityPost", "Civil: Hotel Security Interview", "CIVIL"],
 
     ["ARC_loc_hospital", "Civil: Medical Outreach at Hospital", "CIVIL"],
     ["ARC_loc_hospital", "Logistics: Deliver Medical Supplies", "LOGISTICS"],
@@ -47,6 +50,7 @@
     ["ARC_loc_KarkanakPrison", "QRF: Reinforce Karkanak Prison", "QRF"],
     ["ARC_loc_KarkanakPrison", "Raid: Cell Extraction at Prison", "RAID"],
     ["ARC_loc_KarkanakPrison", "Patrol: Prison Outer Ring", "PATROL"],
+    ["prison_entry_office", "Escort: EPW Handoff at Karkanak Prison", "ESCORT"],
 
     ["ARC_loc_SolarFarm", "Defend: Protect Solar Farm Infrastructure", "DEFEND"],
     ["ARC_loc_SolarFarm", "Patrol: Solar Farm Security Patrol", "PATROL"],
