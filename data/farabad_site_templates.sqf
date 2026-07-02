@@ -384,8 +384,9 @@ private _baseTemplates = [
 // SitePop supports four behaviours (garrison | camp | wander | parked); the
 // richer matrix behaviours are mapped down here (construction/medical/inspect ->
 // camp, guard -> garrison, loiter/queue -> wander, traffic_through -> parked
-// vehicles). Each site uses site-wide (6-field) groups: no Eden anchor markers
-// are required, so these spawn correctly without additional mission.sqm edits.
+// vehicles). Most sites use site-wide (6-field) groups. Grand Mosque and
+// Belle Foille Hotel use optional 7-field runtime anchors to localize roles
+// without changing population counts or requiring mission.sqm edits.
 //
 // siteId / markerName values match ARC_worldNamedLocations + the canonical
 // ARC_loc_* markers in data/farabad_world_locations.sqf. Civilian-side units are
@@ -400,11 +401,11 @@ private _expansionTemplates = [
         700,
         120,
         [
-            ["elder",      "civ",  _civPool,    [1, 1], "camp",     30],
-            ["worshipper", "civ",  _civPool,    [5, 8], "wander",   60],
-            ["vendor",     "civ",  _civPool,    [1, 3], "camp",     50],
-            ["tnp_outer",  "west", _tnpPool,    [2, 4], "garrison", 70],
-            ["civ_car",    "civ",  _civCarPool, [1, 3], "parked",   70]
+            ["elder",      "civ",  _civPool,    [1, 1], "camp",     30, "ARC_loc_GrandMosqueCourtyard"],
+            ["worshipper", "civ",  _civPool,    [5, 8], "wander",   60, "ARC_loc_GrandMosqueCourtyard"],
+            ["vendor",     "civ",  _civPool,    [1, 3], "camp",     50, "ARC_loc_GrandMosqueVendorStrip"],
+            ["tnp_outer",  "west", _tnpPool,    [2, 4], "garrison", 70, "ARC_loc_GrandMosqueOuterCordon"],
+            ["civ_car",    "civ",  _civCarPool, [1, 3], "parked",   70, "ARC_loc_GrandMosqueParking"]
         ]
     ],
 
@@ -416,10 +417,10 @@ private _expansionTemplates = [
         700,
         120,
         [
-            ["hotel_staff", "civ",  _civPool,    [2, 4], "camp",     40],
-            ["guest",       "civ",  _civPool,    [3, 6], "wander",   55],
-            ["security",    "west", _tnpPool,    [2, 4], "garrison", 50],
-            ["civ_car",     "civ",  _civCarPool, [2, 5], "parked",   70]
+            ["hotel_staff", "civ",  _civPool,    [2, 4], "camp",     40, "ARC_loc_BelleFoilleHotelEntrance"],
+            ["guest",       "civ",  _civPool,    [3, 6], "wander",   55, "ARC_loc_BelleFoilleHotelEntrance"],
+            ["security",    "west", _tnpPool,    [2, 4], "garrison", 50, "ARC_loc_BelleFoilleHotelSecurityPost"],
+            ["civ_car",     "civ",  _civCarPool, [2, 5], "parked",   70, "ARC_loc_BelleFoilleHotelParking"]
         ]
     ],
 
