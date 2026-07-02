@@ -3,7 +3,8 @@
     Use this to translate legacy/temporary marker names to canonical references.
 */
 
-createHashMapFromArray [
+private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
+[
     ["marker_2", "ARC_loc_GrandMosque"],
     ["marker_3", "ARC_loc_BelleFoilleHotel"],
     ["marker_4", "ARC_loc_hospital"],
@@ -24,4 +25,4 @@ createHashMapFromArray [
     ["ARC_m_logistics_01", "ARC_loc_military"],
     ["EPW_Holding", "epw_holding"],
     ["epw_holding_1", "epw_holding"]
-];
+] call _hmCreate;
