@@ -364,86 +364,6 @@
     },
     {
       "aliases": [
-        "marker_22"
-      ],
-      "alpha": 0.5,
-      "color": "",
-      "consumers": [],
-      "name": "ARC_loc_FortKelati",
-      "pos": [
-        6292.2148,
-        8.4899998,
-        1605.1696
-      ],
-      "shape": "",
-      "source": "mission.sqm:Map / Mission",
-      "status": "unresolved",
-      "text": " EPW Holding",
-      "type": "loc_mission",
-      "usageNotes": ""
-    },
-    {
-      "aliases": [
-        "marker_15"
-      ],
-      "alpha": 0.5,
-      "color": "",
-      "consumers": [],
-      "name": "ARC_loc_JaziraOilField",
-      "pos": [
-        6220.3008,
-        7.2160001,
-        1335.816
-      ],
-      "shape": "",
-      "source": "mission.sqm:Map / Mission",
-      "status": "unresolved",
-      "text": " South Gate",
-      "type": "loc_defend",
-      "usageNotes": ""
-    },
-    {
-      "aliases": [
-        "marker_12"
-      ],
-      "alpha": 0.5,
-      "color": "",
-      "consumers": [],
-      "name": "ARC_loc_JaziraOilRefinery",
-      "pos": [
-        6737.1758,
-        9.7045679,
-        3238.6482
-      ],
-      "shape": "",
-      "source": "mission.sqm:Map / Mission",
-      "status": "unresolved",
-      "text": " North Gate",
-      "type": "loc_defend",
-      "usageNotes": ""
-    },
-    {
-      "aliases": [
-        "marker_13"
-      ],
-      "alpha": 0.5,
-      "color": "",
-      "consumers": [],
-      "name": "ARC_loc_Junkyard",
-      "pos": [
-        5209.2402,
-        8.6000004,
-        2679.394
-      ],
-      "shape": "",
-      "source": "mission.sqm:Map / Mission",
-      "status": "unresolved",
-      "text": " Main Gate",
-      "type": "loc_defend",
-      "usageNotes": ""
-    },
-    {
-      "aliases": [
         "marker_6"
       ],
       "alpha": 1.0,
@@ -460,6 +380,126 @@
       "status": "unresolved",
       "text": "",
       "type": "",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [
+        "marker_16"
+      ],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "ARC_loc_Mine16",
+      "pos": [
+        5974.5332,
+        79.068001,
+        7771.583
+      ],
+      "shape": "",
+      "source": "mission.sqm:Map Locations",
+      "status": "unresolved",
+      "text": " Mine",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [
+        "marker_18"
+      ],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "ARC_loc_Mine18",
+      "pos": [
+        3660.427,
+        47.099731,
+        8608.7529
+      ],
+      "shape": "",
+      "source": "mission.sqm:Map Locations",
+      "status": "unresolved",
+      "text": " Mine",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [
+        "marker_19"
+      ],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "ARC_loc_Mine19",
+      "pos": [
+        3021.792,
+        56.458,
+        8775.3633
+      ],
+      "shape": "",
+      "source": "mission.sqm:Map Locations",
+      "status": "unresolved",
+      "text": " Mine",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [
+        "marker_20"
+      ],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "ARC_loc_Mine20",
+      "pos": [
+        5468.5742,
+        122.488,
+        10089.154
+      ],
+      "shape": "",
+      "source": "mission.sqm:Map Locations",
+      "status": "unresolved",
+      "text": " Mine",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [
+        "marker_21"
+      ],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "ARC_loc_Mine21",
+      "pos": [
+        3131.905,
+        114.38284,
+        9926.2334
+      ],
+      "shape": "",
+      "source": "mission.sqm:Map Locations",
+      "status": "unresolved",
+      "text": " Mine",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [
+        "marker_14"
+      ],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "ARC_loc_OilProcessing",
+      "pos": [
+        2468.0039,
+        27.848,
+        7012.0952
+      ],
+      "shape": "",
+      "source": "mission.sqm:Map Locations",
+      "status": "unresolved",
+      "text": " Oil Processing",
+      "type": "Empty",
       "usageNotes": ""
     },
     {
@@ -500,48 +540,6 @@
       "status": "unresolved",
       "text": "",
       "type": "",
-      "usageNotes": ""
-    },
-    {
-      "aliases": [
-        "ARC_m_logistics_01",
-        "marker_17"
-      ],
-      "alpha": 0.5,
-      "color": "",
-      "consumers": [],
-      "name": "ARC_loc_military",
-      "pos": [
-        6236.9531,
-        8.4899998,
-        1589.866
-      ],
-      "shape": "",
-      "source": "mission.sqm:Map / Mission",
-      "status": "unresolved",
-      "text": " TOC",
-      "type": "loc_mission",
-      "usageNotes": ""
-    },
-    {
-      "aliases": [
-        "ARC_m_logistics_01",
-        "marker_17"
-      ],
-      "alpha": 1.0,
-      "color": "",
-      "consumers": [],
-      "name": "ARC_loc_military",
-      "pos": [
-        7703.9258,
-        73.036575,
-        7521.1558
-      ],
-      "shape": "",
-      "source": "mission.sqm:Task Markers (Defunct?)",
-      "status": "unresolved",
-      "text": " Logistics 01",
-      "type": "Empty",
       "usageNotes": ""
     },
     {
@@ -811,6 +809,24 @@
       "source": "mission.sqm:Task Markers (Defunct?)",
       "status": "unresolved",
       "text": " IED 01",
+      "type": "Empty",
+      "usageNotes": ""
+    },
+    {
+      "aliases": [],
+      "alpha": 1.0,
+      "color": "",
+      "consumers": [],
+      "name": "ARC_m_logistics_01",
+      "pos": [
+        7703.9258,
+        73.036575,
+        7521.1558
+      ],
+      "shape": "",
+      "source": "mission.sqm:Task Markers (Defunct?)",
+      "status": "unresolved",
+      "text": " Logistics 01",
       "type": "Empty",
       "usageNotes": ""
     },
@@ -2169,110 +2185,92 @@
     },
     {
       "aliases": [],
-      "alpha": 1.0,
+      "alpha": 0.5,
       "color": "",
       "consumers": [],
-      "name": "marker_14",
+      "name": "marker_12",
       "pos": [
-        2468.0039,
-        27.848,
-        7012.0952
+        6737.1758,
+        9.7045679,
+        3238.6482
       ],
       "shape": "",
-      "source": "mission.sqm:Map Locations",
+      "source": "mission.sqm:Map / Mission",
       "status": "unresolved",
-      "text": " Oil Processing",
-      "type": "Empty",
+      "text": " North Gate",
+      "type": "loc_defend",
       "usageNotes": ""
     },
     {
       "aliases": [],
-      "alpha": 1.0,
+      "alpha": 0.5,
       "color": "",
       "consumers": [],
-      "name": "marker_16",
+      "name": "marker_13",
       "pos": [
-        5974.5332,
-        79.068001,
-        7771.583
+        5209.2402,
+        8.6000004,
+        2679.394
       ],
       "shape": "",
-      "source": "mission.sqm:Map Locations",
+      "source": "mission.sqm:Map / Mission",
       "status": "unresolved",
-      "text": " Mine",
-      "type": "Empty",
+      "text": " Main Gate",
+      "type": "loc_defend",
       "usageNotes": ""
     },
     {
       "aliases": [],
-      "alpha": 1.0,
+      "alpha": 0.5,
       "color": "",
       "consumers": [],
-      "name": "marker_18",
+      "name": "marker_15",
       "pos": [
-        3660.427,
-        47.099731,
-        8608.7529
+        6220.3008,
+        7.2160001,
+        1335.816
       ],
       "shape": "",
-      "source": "mission.sqm:Map Locations",
+      "source": "mission.sqm:Map / Mission",
       "status": "unresolved",
-      "text": " Mine",
-      "type": "Empty",
+      "text": " South Gate",
+      "type": "loc_defend",
       "usageNotes": ""
     },
     {
       "aliases": [],
-      "alpha": 1.0,
+      "alpha": 0.5,
       "color": "",
       "consumers": [],
-      "name": "marker_19",
+      "name": "marker_17",
       "pos": [
-        3021.792,
-        56.458,
-        8775.3633
+        6236.9531,
+        8.4899998,
+        1589.866
       ],
       "shape": "",
-      "source": "mission.sqm:Map Locations",
+      "source": "mission.sqm:Map / Mission",
       "status": "unresolved",
-      "text": " Mine",
-      "type": "Empty",
+      "text": " TOC",
+      "type": "loc_mission",
       "usageNotes": ""
     },
     {
       "aliases": [],
-      "alpha": 1.0,
+      "alpha": 0.5,
       "color": "",
       "consumers": [],
-      "name": "marker_20",
+      "name": "marker_22",
       "pos": [
-        5468.5742,
-        122.488,
-        10089.154
+        6292.2148,
+        8.4899998,
+        1605.1696
       ],
       "shape": "",
-      "source": "mission.sqm:Map Locations",
+      "source": "mission.sqm:Map / Mission",
       "status": "unresolved",
-      "text": " Mine",
-      "type": "Empty",
-      "usageNotes": ""
-    },
-    {
-      "aliases": [],
-      "alpha": 1.0,
-      "color": "",
-      "consumers": [],
-      "name": "marker_21",
-      "pos": [
-        3131.905,
-        114.38284,
-        9926.2334
-      ],
-      "shape": "",
-      "source": "mission.sqm:Map Locations",
-      "status": "unresolved",
-      "text": " Mine",
-      "type": "Empty",
+      "text": " EPW Holding",
+      "type": "loc_mission",
       "usageNotes": ""
     },
     {
