@@ -1,0 +1,138 @@
+name: Apply PR E prison anchor correction once
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  apply-pr-e:
+    if: github.head_ref == 'data/prison-anchor-correction-pr-e'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Apply PR E prison template corrections
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path('data/farabad_site_templates.sqf')
+          s = p.read_text(encoding='utf-8')
+
+          replacements = [
+              (
+                  '    //   When a marker is absent, the group falls back to site-centre with a WARN log.\n',
+                  '    //   When a marker is absent, the group falls back to site-centre with a WARN log.\n'
+                  '    //   Validation note: `prison_intake_03` is present in the generated marker index\n'
+                  '    //   but is offsite and is deliberately not used by this template.\n'
+              ),
+              (
+                  '            // --- Escort / Reaction (both anchor to admin area) ---\n'
+                  '            ["escort",              "west", _tnpPool,        [4, 4], "wander",   50, "prison_admin_offices"],\n'
+                  '            ["reaction",            "west", _tnpPool,        [4, 4], "camp",     40, "prison_admin_offices"],\n',
+                  '            // --- Escort / Reaction (separated to prevent admin-block stacking) ---\n'
+                  '            ["escort",              "west", _tnpPool,        [4, 4], "wander",   50, "prison_entry_office"],\n'
+                  '            ["reaction",            "west", _tnpPool,        [4, 4], "camp",     40, "prison_central_guard_tower"],\n'
+              ),
+              (
+                  '            // Contractor has no anchor: omitting the 7th field is equivalent to ""\n'
+                  '            // and demonstrates backward-compatible 6-field usage.\n'
+                  '            ["contractor",          "civ",  _workerPool,     [2, 4], "wander",  100]\n',
+                  '            // Contractor support is localized near the entry/admin service area.\n'
+                  '            ["contractor",          "civ",  _workerPool,     [2, 4], "wander",  100, "prison_entry_office"]\n'
+              ),
+          ]
+
+          for old, new in replacements:
+              if old not in s:
+                  raise SystemExit(f'expected block not found: {old[:120]!r}')
+              s = s.replace(old, new, 1)
+
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Add PR E QA note
+        run: |
+          cat > docs/qa/Prison_Anchor_Correction_PR_E_2026-07-02.md <<'EOF'
+          # PR E Prison Anchor Correction
+
+          Status: data-only prison anchor correction. No SitePop engine rewrite and no mission.sqm edit.
+
+          ## Scope
+
+          This PR validates the Karkanak Prison SitePop anchors already present in the mission and corrects template-level anchor assignments that could stack support roles in the admin block or allow support civilians to bleed across the prison footprint.
+
+          ## Corrections
+
+          - `escort` now anchors to `prison_entry_office` instead of `prison_admin_offices`.
+          - `reaction` now anchors to `prison_central_guard_tower` instead of `prison_admin_offices`.
+          - `contractor` now anchors to `prison_entry_office` instead of using site-wide placement.
+          - Population count ranges are unchanged.
+          - Existing guard, hospital, dormitory, intake, and holding anchors are retained.
+
+          ## Validation notes
+
+          The generated marker index confirms the prison anchor set exists:
+          - `prison_admin_offices`
+          - `prison_central_guard_tower`
+          - `prison_dorm_01` through `prison_dorm_04`
+          - `prison_entry_office`
+          - `prison_guard_tower_1`
+          - `prison_guard_tower_2`
+          - `prison_holding_area`
+          - `prison_hospital`
+          - `prison_intake_01`
+
+          `prison_intake_02` exists but is not used by the current template.
+          `prison_intake_03` exists in the generated marker index but is offsite at the airbase and is deliberately not used.
+
+          ## Boundaries
+
+          No `mission.sqm` edits.
+          No population count increase.
+          No new task catalog entries.
+          No SitePop engine changes.
+          No CIVSUB, Threat, AIRBASE, persistence, or UI changes.
+
+          ## Dedicated MP smoke test
+
+          1. Start a dedicated server and confirm no RPT compile errors from `data/farabad_site_templates.sqf`.
+          2. Move a player into Karkanak Prison activation radius.
+          3. Confirm SitePop activates once and the same role count ranges spawn.
+          4. Confirm `escort` units are near the entry office / vehicle-search area.
+          5. Confirm `reaction` units are near the central guard tower / internal reserve area.
+          6. Confirm `contractor` civilians no longer wander site-wide at activation.
+          7. Leave the despawn radius and confirm cleanup/despawn behavior remains unchanged.
+          8. JIP a second client during active prison SitePop and confirm no duplicate activation.
+
+          ## Regression risk
+
+          Low to moderate. This is a template-only anchor assignment change. If an anchor marker is missing at runtime, `ARC_fnc_sitePopBuildGroup` falls back to the site center and logs a warning.
+          EOF
+
+      - name: Static sanity checks
+        run: |
+          python3 scripts/dev/sqflint_compat_scan.py --strict data/farabad_site_templates.sqf
+
+      - name: Commit PR E changes and remove temporary workflow
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git rm .github/workflows/apply-pr-e-prison-anchor-correction-once.yml
+          git add data/farabad_site_templates.sqf docs/qa/Prison_Anchor_Correction_PR_E_2026-07-02.md
+
+          git commit -m "data: correct prison SitePop anchors"
+          git push origin HEAD:${{ github.head_ref }}
