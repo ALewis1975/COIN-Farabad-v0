@@ -1,0 +1,21 @@
+name: Deployment Provenance Contract
+on:
+  pull_request:
+    paths:
+      - "tools/dev_deploy/**"
+      - "tools/sync_mission_to_arma_profile.ps1"
+      - "tests/static/build_provenance_contract_checks.sh"
+      - ".github/workflows/deployment-provenance-contract.yml"
+  push:
+    paths:
+      - "tools/dev_deploy/**"
+      - "tools/sync_mission_to_arma_profile.ps1"
+      - "tests/static/build_provenance_contract_checks.sh"
+      - ".github/workflows/deployment-provenance-contract.yml"
+permissions: { contents: read }
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash tests/static/build_provenance_contract_checks.sh
