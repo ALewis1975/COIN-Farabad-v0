@@ -1,82 +1,83 @@
 param(
-    [Parameter(Mandatory = $true)]
-    [string]$RepoMissionPath,
-
-    [Parameter(Mandatory = $true)]
-    [string]$ArmaMissionPath
+    [Parameter(Mandatory = $true)][string]$RepoMissionPath,
+    [Parameter(Mandatory = $true)][string]$ArmaMissionPath,
+    [switch]$VerifyOnly,
+    [string]$ExpectedBuildStamp = "",
+    [string]$ExpectedStampedInitServerHash = "",
+    [string[]]$AllowedDestinationOnlyFiles = @("ARC_DeploymentManifest.json")
 )
 
-if (!(Test-Path -Path $RepoMissionPath)) {
-    throw "Repo mission path not found: $RepoMissionPath"
+$ErrorActionPreference = "Stop"
+$excludedPathPattern = '^(\.git|\.github|docs|tests|\.vscode)(\\|$)'
+
+function Resolve-Root([string]$Path) {
+    if (!(Test-Path -LiteralPath $Path)) { throw "Path not found: $Path" }
+    (Resolve-Path -LiteralPath $Path).Path.TrimEnd('\', '/')
 }
 
-New-Item -ItemType Directory -Force -Path $ArmaMissionPath | Out-Null
-
-robocopy $RepoMissionPath $ArmaMissionPath /MIR /R:2 /W:1 /NFL /NDL /NP /XD .git .github docs tests .vscode
-if ($LASTEXITCODE -gt 7) {
-    throw "robocopy failed with exit code $LASTEXITCODE"
-}
-
-$verifiedFiles = @(
-    "description.ext",
-    "mission.sqm",
-    "initServer.sqf",
-    "config/CfgFunctions.hpp",
-    "config/CfgRemoteExec.hpp",
-
-    "functions/core/fn_intelBroadcast.sqf",
-    "functions/core/fn_rpcValidateSender.sqf",
-    "functions/core/fn_tocRequestNextIncident.sqf",
-    "functions/ui/fn_uiConsoleActionRequestNextIncident.sqf",
-    "functions/core/fn_taskCreateIncident.sqf",
-    "functions/core/fn_taskRehydrateActive.sqf",
-
-    "functions/ambiance/fn_airbaseInit.sqf",
-    "functions/ambiance/fn_airbaseTick.sqf",
-    "functions/ambiance/fn_airbasePlaneDepart.sqf",
-    "functions/ambiance/fn_airbaseSpawnArrival.sqf",
-
-    "data\incident_markers.sqf",
-    "data\ARC_ConfigData.sqf"
-)
-
-$pathDir = Join-Path $RepoMissionPath "data\paths"
-if (Test-Path -Path $pathDir) {
-    $pathFiles = Get-ChildItem -Path $pathDir -Filter "*.sqf" -File
-    foreach ($f in $pathFiles) {
-        $verifiedFiles += $f.FullName.Substring($RepoMissionPath.Length + 1)
+function Get-MissionFileMap([string]$Root) {
+    $map = @{}
+    Get-ChildItem -LiteralPath $Root -Recurse -File | ForEach-Object {
+        $rel = $_.FullName.Substring($Root.Length).TrimStart('\', '/').Replace('/', '\')
+        if ($rel -notmatch $excludedPathPattern) { $map[$rel] = $_.FullName }
     }
+    $map
 }
 
-$verifiedFiles = $verifiedFiles | Sort-Object -Unique
-
-$mismatches = @()
-foreach ($rel in $verifiedFiles) {
-    $repoFile = Join-Path $RepoMissionPath $rel
-    $armaFile = Join-Path $ArmaMissionPath $rel
-
-    if (!(Test-Path -Path $repoFile)) {
-        Write-Host "SKIP (missing in repo): $rel"
-        continue
+$repoRoot = Resolve-Root $RepoMissionPath
+if (-not $VerifyOnly) {
+    New-Item -ItemType Directory -Force -Path $ArmaMissionPath | Out-Null
+    foreach ($rel in $AllowedDestinationOnlyFiles) {
+        $generated = Join-Path $ArmaMissionPath $rel
+        if (Test-Path -LiteralPath $generated) { Remove-Item -LiteralPath $generated -Force }
     }
-    if (!(Test-Path -Path $armaFile)) {
-        $mismatches += "$rel (missing in arma profile after sync)"
+    robocopy $repoRoot $ArmaMissionPath /MIR /R:2 /W:1 /NFL /NDL /NP /XD .git .github docs tests .vscode
+    if ($LASTEXITCODE -gt 7) { throw "robocopy failed with exit code $LASTEXITCODE" }
+}
+
+$armaRoot = Resolve-Root $ArmaMissionPath
+$repoFiles = Get-MissionFileMap $repoRoot
+$armaFiles = Get-MissionFileMap $armaRoot
+$allowedExtras = @{}
+$AllowedDestinationOnlyFiles | ForEach-Object { $allowedExtras[$_.Replace('/', '\')] = $true }
+$mismatches = New-Object System.Collections.Generic.List[string]
+
+foreach ($rel in ($repoFiles.Keys | Sort-Object)) {
+    if (!$armaFiles.ContainsKey($rel)) {
+        $mismatches.Add("$rel (missing in Arma mission copy)")
         continue
     }
 
-    $repoHash = (Get-FileHash -Algorithm SHA256 -Path $repoFile).Hash
-    $armaHash = (Get-FileHash -Algorithm SHA256 -Path $armaFile).Hash
+    $repoFile = $repoFiles[$rel]
+    $armaFile = $armaFiles[$rel]
+    if (($rel -ieq "initServer.sqf") -and $ExpectedBuildStamp) {
+        $expectedLine = 'missionNamespace setVariable ["ARC_buildStamp", "' + $ExpectedBuildStamp + '", true];'
+        if ((Get-Content -Raw -LiteralPath $armaFile).IndexOf($expectedLine, [System.StringComparison]::Ordinal) -lt 0) {
+            $mismatches.Add("initServer.sqf (expected deployment build stamp missing)")
+        }
+        if ($ExpectedStampedInitServerHash) {
+            $actualHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $armaFile).Hash
+            if ($actualHash -ine $ExpectedStampedInitServerHash) {
+                $mismatches.Add("initServer.sqf (stamped sha256 mismatch)")
+            }
+        }
+        continue
+    }
 
-    Write-Host "repo $rel sha256: $repoHash"
-    Write-Host "arma $rel sha256: $armaHash"
+    $repoHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $repoFile).Hash
+    $armaHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $armaFile).Hash
+    if ($repoHash -ine $armaHash) { $mismatches.Add("$rel (sha256 mismatch)") }
+}
 
-    if ($repoHash -ne $armaHash) {
-        $mismatches += $rel
+foreach ($rel in $armaFiles.Keys) {
+    if (!$repoFiles.ContainsKey($rel) -and !$allowedExtras.ContainsKey($rel)) {
+        $mismatches.Add("$rel (unexpected destination-only file)")
     }
 }
 
 if ($mismatches.Count -gt 0) {
-    throw "SYNC MISMATCH after copy for: $($mismatches -join ', ')"
+    throw "MISSION COPY VERIFY FAILED ($($mismatches.Count)): $(($mismatches | Select-Object -First 50) -join '; ')"
 }
 
-Write-Host "SYNC OK: mission profile copy matches repo for $($verifiedFiles.Count) security-critical files."
+$mode = if ($VerifyOnly) { "VERIFY" } else { "SYNC" }
+Write-Host "$mode OK: $($repoFiles.Count) repository mission files match $armaRoot."
