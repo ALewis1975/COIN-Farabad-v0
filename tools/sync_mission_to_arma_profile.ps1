@@ -25,13 +25,25 @@ function Get-MissionFileMap([string]$Root) {
 }
 
 $repoRoot = Resolve-Root $RepoMissionPath
+$destinationRoot = [IO.Path]::GetFullPath($ArmaMissionPath).TrimEnd('\', '/')
+if (($destinationRoot -ieq $repoRoot) -or
+    $destinationRoot.StartsWith($repoRoot + '\', [StringComparison]::OrdinalIgnoreCase) -or
+    $repoRoot.StartsWith($destinationRoot + '\', [StringComparison]::OrdinalIgnoreCase)) {
+    throw "Source and destination mission directories must not overlap."
+}
 if (-not $VerifyOnly) {
     New-Item -ItemType Directory -Force -Path $ArmaMissionPath | Out-Null
     foreach ($rel in $AllowedDestinationOnlyFiles) {
         $generated = Join-Path $ArmaMissionPath $rel
         if (Test-Path -LiteralPath $generated) { Remove-Item -LiteralPath $generated -Force }
     }
-    robocopy $repoRoot $ArmaMissionPath /MIR /R:2 /W:1 /NFL /NDL /NP /XD .git .github docs tests .vscode
+    # Absolute paths exclude only the repository/destination roots. A name-only
+    # /XD also excludes data/docs, which the root-only verifier correctly includes.
+    $excludedDirectories = @('.git', '.github', 'docs', 'tests', '.vscode') | ForEach-Object {
+        Join-Path $repoRoot $_
+        Join-Path $destinationRoot $_
+    }
+    robocopy $repoRoot $destinationRoot /MIR /R:2 /W:1 /NFL /NDL /NP /XD $excludedDirectories
     if ($LASTEXITCODE -gt 7) { throw "robocopy failed with exit code $LASTEXITCODE" }
 }
 
