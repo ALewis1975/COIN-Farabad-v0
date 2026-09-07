@@ -90,7 +90,7 @@ private _selDataHint = "";
 if (_selIdxHint >= 0) then { _selDataHint = _list lbData _selIdxHint; };
 if (!(_selDataHint isEqualType "")) then { _selDataHint = ""; };
 
-private _isStaticDetailSel = _selDataHint in ["", "HDR", "SEP", "INTEL_LOG", "LEAD_REQ", "REFRESH_INTEL", "S2_SHOW_LEADS", "S2_SHOW_THREADS", "S2_SHOW_INTEL", "CIV_CENSUS_OPEN", "CIV_CENSUS_BACK", "FIELD_JTAC_CAS", "FIELD_SHADOW_ISR", "FIELD_TNP_PARTNERED"];
+private _isStaticDetailSel = _selDataHint in ["", "HDR", "SEP", "INTEL_LOG", "LEAD_REQ", "REFRESH_INTEL", "S2_SHOW_LEADS", "S2_SHOW_THREADS", "S2_SHOW_INTEL", "CIV_CENSUS_OPEN", "CIV_CENSUS_BACK", "FIELD_JTAC_CAS", "FIELD_SHADOW_ISR", "FIELD_TNP_PARTNERED", "CAS_INBOX"];
 if ((_selDataHint find "CIV_CONTACT_") isEqualTo 0) then { _isStaticDetailSel = true; };
 
 if (!_rebuild && { _isStaticDetailSel }) then
@@ -432,7 +432,6 @@ private _canAdmin   = _isS2 || _isCmd || _isOmni;
 // visibility/authorization is identical.
 private _isShadowTok = [player, "SHADOW"] call ARC_fnc_rolesHasGroupIdToken;
 private _isTnpTok    = [player, "TNP"] call ARC_fnc_rolesHasGroupIdToken;
-private _canApprove  = [player] call ARC_fnc_rolesCanApproveQueue;
 
 private _flagJtac   = missionNamespace getVariable ["ARC_casreqJtacPrefillEnabled", true];
 private _flagShadow = missionNamespace getVariable ["ARC_isrShadowLeadBridgeEnabled", true];
@@ -441,7 +440,7 @@ if (!(_flagJtac isEqualType true)) then { _flagJtac = true; };
 if (!(_flagShadow isEqualType true)) then { _flagShadow = true; };
 if (!(_flagTnp isEqualType true)) then { _flagTnp = true; };
 
-private _canFieldJtac   = _flagJtac && { _isAuth || _canApprove };
+private _canFieldJtac   = _flagJtac && { [player, "CREATE"] call ARC_fnc_casreqCan };
 private _canFieldShadow = _flagShadow && { _isShadowTok || _isS2 || _isCmd };
 private _canFieldTnp    = _flagTnp && { _isTnpTok || ([player] call ARC_fnc_rolesIsTocS3) || _isCmd };
 
@@ -711,6 +710,8 @@ if (_rebuild) then
         {
             ["(S2/TOC only)", "HDR"] call _addTool;
         };
+
+        if (missionNamespace getVariable ["casreq_v1_enabled", true]) then { ["CAS Requests: Inbox / Decision / BDA", "CAS_INBOX"] call _addTool; };
 
         // Field requests (relocated from the player action menu). Each row is
         // individually flag + role gated; the section header only appears when at
@@ -1229,6 +1230,11 @@ else
             if (!isNull _b1) then { _b1 ctrlEnable _canAdmin; _b1 ctrlSetText "EXECUTE"; };
         };
 
+        case "CAS_INBOX":
+        {
+            _txt = "<t size='1.1' font='PuristaMedium'>CAS Requests</t><br/><br/>Open the shared CAS inbox to approve or deny, execute assigned requests, submit BDA, or abort. All changes require server validation.";
+            if (!isNull _b1) then { _b1 ctrlEnable true; _b1 ctrlSetText "OPEN"; };
+        };
         case "FIELD_JTAC_CAS":
         {
             _txt = "<t size='1.1' font='PuristaMedium'>JTAC: Prefill CAS Request</t><br/><br/>" +

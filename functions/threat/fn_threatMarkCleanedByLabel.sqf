@@ -39,6 +39,7 @@ if (_threatId isEqualTo "") exitWith {false};
 private _note = "CLEANUP_TICK";
 if (!(_nid isEqualTo "")) then { _note = format ["%1 nid=%2", _note, _nid]; };
 
-[_threatId, "CLEANED", _note] call ARC_fnc_threatUpdateState;
+// Each queue entry completes independently; companions may still be live.
+[_threatId, _note] call ARC_fnc_threatIedCleanupSync;
 
 true

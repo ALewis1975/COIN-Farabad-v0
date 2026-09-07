@@ -6,11 +6,10 @@
 */
 
 if (!isServer) exitWith {false};
-if (!isNil "remoteExecutedOwner") exitWith
-{
-    diag_log format ["[ARC][SEC] ARC_fnc_publicBroadcastState: rejected remote execution owner=%1", remoteExecutedOwner];
-    false
-};
+// Internal server callee; deliberately absent from the client RPC allowlist.
+// Validated RPCs call this in their existing context after their own guards.
+[] call ARC_fnc_casreqMaintain;
+[] call ARC_fnc_casreqInboxPublish;
 
 private _trimFn = compile "params ['_s']; trim _s";
 
@@ -960,7 +959,7 @@ private _casTiming = [
 
 // Build parked-ramp view for player ATC: assets with state PARKED that are not
 // already in the departure queue. Each entry: [assetId, category, vehType, requiresTow].
-private _fnHmGetBcast = compile "params ['_m', '_k', '_d']; private _v = _m get _k; if (isNil '_v') then { _d } else { _v }";
+private _fnHmGetBcast = compile "params ['_m', '_k', '_d']; private _v = (_m) get _k; if (isNil '_v') then { _d } else { _v }";
 private _rtBcast = missionNamespace getVariable ["airbase_v1_rt", createHashMap];
 private _rtBcastAssets = [_rtBcast, "assets", []] call _fnHmGetBcast;
 if (!(_rtBcastAssets isEqualType [])) then { _rtBcastAssets = []; };

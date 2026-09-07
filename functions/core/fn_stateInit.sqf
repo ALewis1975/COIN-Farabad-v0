@@ -7,6 +7,8 @@
 
 [
     ["version", 7],
+    // Independent clock sub-schema; existing campaign record schemas stay stable.
+    ["persistenceClock", []],
 
     // System control
     ["systemPauseUntil", -1],
@@ -102,6 +104,7 @@
     ["threat_v0_global_cooldown_until",   -1],
     ["threat_v0_scheduler_last_ts",       -1],
     ["threat_v0_budget_last_reset_day",   -1],
+    ["threat_v0_budget_next_reset_ts",    -1],
     ["threat_v0_node_store",              createHashMap],
 
     // IED v0 case files
@@ -303,6 +306,7 @@
     ["activeVbiedTriggerEnabled", false],
     ["activeVbiedTriggerRadiusM", 0],
     ["activeVbiedLastArmedAt", -1],
+    ["activeVbiedElapsedBeforeLoad", 0],
     ["activeVbiedDetonated", false],
     ["activeVbiedDetonatedAt", -1],
 
@@ -373,6 +377,7 @@
     ["casreq_v1_open_index", []],
     ["casreq_v1_closed_index", []],
     ["casreq_v1_seq", 0],
+    ["casreq_v1_archived_completed", 0],
 
     // SitePop v1 site state persistence (loaded post-stateLoad via ARC_fnc_sitePopStateInit)
     // Each entry: siteId → site-state HashMap (visitCount, guardCasualties, adaptationLevel, ...)

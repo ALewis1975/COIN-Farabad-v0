@@ -124,6 +124,21 @@ if (_hasIssued) exitWith
 
 
 
+// Admission is pure: no counter/state mutation when live capacity is full.
+private _cap = missionNamespace getVariable ["ARC_tocOrderCap", 30];
+if (!(_cap isEqualType 0)) then { _cap = 30; };
+_cap = (_cap max 10) min 100;
+private _pendingId = ["activeIncidentClosePendingOrderId", ""] call ARC_fnc_stateGet;
+private _admission = [_orders,_cap,_pendingId] call ARC_fnc_intelOrderReserveSlot;
+_admission params ["_admitted","_retained","_evicted"];
+if (!_admitted) exitWith
+{
+    diag_log format ["[ARC][ORDER] TOC_ORDER_CAPACITY_DENIED group=%1 count=%2 cap=%3 actor=%4 ts=%5",_targetGroupId,count _orders,_cap,_issuerStr,serverTime];
+    ["OPS","Order issuance refused: live order capacity is full.",[0,0,0],[["event","TOC_ORDER_CAPACITY_DENIED"],["targetGroup",_targetGroupId],["cap",_cap]]] call ARC_fnc_intelLog;
+    false
+};
+_orders = _retained;
+
 // Build data pairs based on order type
 private _data = +_dataSeed;
 
@@ -174,10 +189,10 @@ private _rec = [_orderId, serverTime, "ISSUED", _orderType, _targetGroupId, _dat
 
 _orders pushBack _rec;
 
-private _cap = missionNamespace getVariable ["ARC_tocOrderCap", 30];
-if (!(_cap isEqualType 0)) then { _cap = 30; };
-_cap = (_cap max 10) min 100;
-while { (count _orders) > _cap } do { _orders deleteAt 0; };
+// Retired history may still own completed BIS task artifacts.
+private _evictedTaskIds = [_evicted] call ARC_fnc_resetOrderTaskIds;
+{ [_x,true,true] call BIS_fnc_deleteTask; } forEach _evictedTaskIds;
+if (count _evictedTaskIds > 0) then { [_evictedTaskIds] remoteExec ["ARC_fnc_clientPurgeArcTasks",0]; };
 
 ["tocOrders", _orders] call ARC_fnc_stateSet;
 

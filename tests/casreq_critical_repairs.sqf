@@ -1,0 +1,65 @@
+// Engine-compatible command wrappers retain the repository lint baseline.
+private _casGet = compile "params ['_map','_key']; (_map) get _key";
+private _casMap = compile "params ['_pairs']; createHashMapFromArray _pairs";
+/* Run on a disposable server, or SQF-VM from mission root. No campaign state mutations.
+   This executes the shipped pure transition function, not a translated model. */
+private _transition = compile preprocessFileLineNumbers "functions\casreq\fn_casreqTransition.sqf";
+private _failures = 0;
+private _checks = 0;
+private _assert = {
+    params ["_ok", "_label"];
+    _checks = _checks + 1;
+    if (!_ok) then {_failures = _failures + 1; diag_log ("[CAS_TEST][FAIL] " + _label)} else {diag_log ("[CAS_TEST][PASS] " + _label)};
+};
+private _open = [["casreq_id", "CAS:D01:000001"], ["district_id", "D01"], ["state", "OPEN"], ["requester", "RAVEN"], ["area", [["target_pos", [100,200,0]], ["target_marker", ""]]], ["messages", [[["event", "OPENED"], ["requester_uid", "111"], ["at", 1]]]], ["created_at", 1], ["updated_at", 1], ["closed_at", -1], ["incident_id", "ARC_inc_1"], ["nine_line", []], ["remarks", ""], ["result", ""]];
+private _original = +_open;
+private _bad = [_open, "EXECUTING", "PILOT", 10] call _transition;
+[!(_bad select 0), "OPEN cannot execute"] call _assert;
+_bad = [_open, "COMPLETE", "PILOT", 10, [["notes", "BDA"]]] call _transition;
+[!(_bad select 0), "OPEN cannot complete even with notes"] call _assert;
+private _approved = [_open, "APPROVED", "TOC", 10, [["crew_uids", ["222"]], ["aircraft_var", "plane4"]]] call _transition;
+[(_approved select 0) && {_approved select 2}, "OPEN approves once"] call _assert;
+[_open isEqualTo _original, "transition does not mutate input record or nested messages"] call _assert;
+private _a = _approved select 1;
+private _repeat = [_a, "APPROVED", "TOC", 20, [["crew_uids", ["333"]]]] call _transition;
+[(_repeat select 0) && {!(_repeat select 2)} && {(_repeat select 1) isEqualTo _a}, "repeat approval cannot reassign crew or extend timer"] call _assert;
+_bad = [_a, "DENIED", "TOC", 20] call _transition;
+[!(_bad select 0), "conflicting decision fails"] call _assert;
+private _executing = [_a, "EXECUTING", "PILOT", 20] call _transition;
+[(_executing select 0) && {_executing select 2}, "APPROVED executes"] call _assert;
+private _e = _executing select 1;
+_repeat = [_e, "EXECUTING", "PILOT", 25] call _transition;
+[(_repeat select 0) && {!(_repeat select 2)} && {(_repeat select 1) isEqualTo _e}, "execution replay has no side effects"] call _assert;
+_bad = [_e, "COMPLETE", "PILOT", 30, [["notes", "   "]]] call _transition;
+[!(_bad select 0), "empty BDA cannot complete"] call _assert;
+private _closed = [_e, "COMPLETE", "PILOT", 30, [["notes", "Target disabled; no secondary effects observed."]]] call _transition;
+[(_closed select 0) && {_closed select 2}, "executing request closes with BDA"] call _assert;
+private _c = _closed select 1;
+private _ch = ([_c] call _casMap);
+[(([_ch, "state"] call _casGet)) isEqualTo "CLOSED" && {(([_ch, "result"] call _casGet)) isEqualTo "COMPLETE"} && {(([_ch, "closed_at"] call _casGet)) == 30}, "terminal snapshot records result and closure time"] call _assert;
+_repeat = [_c, "COMPLETE", "PILOT", 40, [["notes", "Different report"]]] call _transition;
+[(_repeat select 0) && {!(_repeat select 2)} && {(_repeat select 1) isEqualTo _c}, "closed replay cannot overwrite BDA"] call _assert;
+{_bad = [_c, _x, "TOC", 40] call _transition; [!(_bad select 0), "terminal record rejects " + _x] call _assert} forEach ["ABORT", "TIMEOUT", "APPROVED", "EXECUTING", "DENIED"];
+{private _abort = [_x, "ABORT", "REQUESTER", 40] call _transition; private _ah = [(_abort select 1)] call _casMap; [(_abort select 0) && {([_ah, "result"] call _casGet) isEqualTo "ABORT"}, "active request aborts"] call _assert} forEach [_open, _a, _e];
+private _denied = [_open, "DENIED", "TOC", 40] call _transition;
+private _dh = ([(_denied select 1)] call _casMap);
+[(([_dh, "state"] call _casGet)) isEqualTo "DENIED" && {(([_dh, "closed_at"] call _casGet)) == 40}, "DENIED is timestamped terminal history"] call _assert;
+private _timeout = [_e, "TIMEOUT", "SERVER", 8000] call _transition;
+private _th = [(_timeout select 1)] call _casMap;
+[(_timeout select 0) && {([_th, "result"] call _casGet) isEqualTo "TIMEOUT"}, "server can expire active request"] call _assert;
+private _large = +_open;
+private _mi = -1;
+{if ((_x select 0) isEqualTo "messages") exitWith {_mi = _forEachIndex}} forEach _large;
+private _messages = +((_large select _mi) select 1);
+for "_i" from 1 to 30 do {_messages pushBack [["event", "LEGACY"], ["at", _i]]};
+_large set [_mi, ["messages", _messages]];
+private _bounded = [_large, "APPROVED", "TOC", 40] call _transition;
+private _bh = ([(_bounded select 1)] call _casMap);
+[count (([_bh, "messages"] call _casGet)) == 16, "legacy message tail bounded to 16"] call _assert;
+private _opening = ([((([_bh, "messages"] call _casGet)) select 0)] call _casMap);
+[(([_opening, "requester_uid"] call _casGet)) isEqualTo "111", "retention preserves requester identity"] call _assert;
+_bad = [[], "APPROVED", "TOC", 1] call _transition;
+[!(_bad select 0), "unknown record never becomes a synthetic request"] call _assert;
+diag_log format ["[CAS_TEST] checks=%1 failures=%2", _checks, _failures];
+if (_failures > 0) then {throw format ["CAS transition failures: %1", _failures]};
+true

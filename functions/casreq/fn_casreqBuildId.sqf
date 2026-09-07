@@ -24,14 +24,14 @@ _district = format ["D%1", (_district select [1, 2])];
 
 private _seq = ["casreq_v1_seq", 0] call ARC_fnc_stateGet;
 if (!(_seq isEqualType 0) || { _seq < 0 }) then { _seq = 0; };
+if (_seq >= 999999) exitWith {
+    diag_log "[ARC][CASREQ] ID_SEQUENCE_EXHAUSTED: refusing to reuse compact IDs";
+    ""
+};
 _seq = _seq + 1;
 ["casreq_v1_seq", _seq] call ARC_fnc_stateSet;
 
 private _seqStr = str _seq;
-if ((count _seqStr) > 6) then {
-    diag_log format ["[ARC][WARN] ARC_fnc_casreqBuildId: seq exceeds 6 digits, truncating to last 6 (collision risk) seq=%1", _seq];
-    _seqStr = _seqStr select [(count _seqStr) - 6, 6];
-};
 while { (count _seqStr) < 6 } do { _seqStr = "0" + _seqStr; };
 
 format ["CAS:%1:%2", _district, _seqStr]

@@ -17,6 +17,8 @@ if (!isServer) exitWith {false};
 
 private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
 if (_taskId isEqualTo "") exitWith {false};
+// Completed/failed objectives awaiting SITREP must not be recreated on restart.
+if (["activeIncidentCloseReady", false] call ARC_fnc_stateGet) exitWith {true};
 
 private _execTaskId = ["activeExecTaskId", ""] call ARC_fnc_stateGet;
 private _execKind   = ["activeExecKind", ""] call ARC_fnc_stateGet;
@@ -1115,6 +1117,21 @@ case "IED":
     ["activeExecActivatedAt", -1] call ARC_fnc_stateSet;
 
     // Clear objective fields before we potentially spawn
+    missionNamespace setVariable ["threat_v0_drivenPending", [], false];
+    {
+        private _worker = missionNamespace getVariable [_x, scriptNull];
+        if (_worker isEqualType scriptNull && {!scriptDone _worker}) then { terminate _worker; };
+        missionNamespace setVariable [_x, scriptNull, false];
+    } forEach ["threat_v0_drivenWorker", "threat_v0_suicideWorker"];
+    {
+        _x call ARC_fnc_stateSet;
+    } forEach [["activeVbiedDeviceId", ""], ["activeVbiedVehicleNetId", ""], ["activeVbiedSafe", false], ["activeVbiedAlerted", false], ["activeVbiedAlertAt", -1], ["activeVbiedPauseAccum", 0], ["activeVbiedPauseSince", -1], ["activeVbiedWindowRemaining", 0], ["activeVbiedDetCause", ""], ["activeVbiedLastArmedAt", -1], ["activeVbiedDetonated", false], ["activeVbiedDetonatedAt", -1]];
+    missionNamespace setVariable ["ARC_activeVbiedSafe", false, true];
+    ["activeVbiedElapsedBeforeLoad", 0] call ARC_fnc_stateSet;
+    ["activeVbiedDeviceRecord", []] call ARC_fnc_stateSet;
+    ["activeVbiedTriggerNetId", ""] call ARC_fnc_stateSet;
+    ["activeVbiedTriggerEnabled", false] call ARC_fnc_stateSet;
+    ["activeVbiedTriggerRadiusM", 0] call ARC_fnc_stateSet;
     ["activeObjectiveKind", ""] call ARC_fnc_stateSet;
     ["activeObjectiveClass", ""] call ARC_fnc_stateSet;
     ["activeObjectivePos", []] call ARC_fnc_stateSet;
@@ -2728,9 +2745,38 @@ if ((_kindNow isEqualTo "INTERACT" || { _objKindNow isEqualTo "CASEVAC_CASUALTY"
         private _obj = objectFromNetId _nid;
         if (isNull _obj) then
         {
-            // Rebuild the full package.
+            // PHYSICAL_REBUILD_PRESERVE_BEGIN: rebuilding an object is not a new task.
+            private _preserve = _execTaskId isEqualTo _taskId && { ["activeIncidentAccepted", false] call ARC_fnc_stateGet };
+            private _savedProgress = [];
+            private _savedVbied = [];
+            if (_preserve) then
+            {
+                {
+                    _x params ["_key", "_default"];
+                    _savedProgress pushBack [_key, [_key, _default] call ARC_fnc_stateGet];
+                } forEach [["activeExecStartedAt", -1], ["activeExecDeadlineAt", -1], ["activeExecArrivalReq", 0], ["activeExecArrived", false], ["activeExecHoldReq", 0], ["activeExecHoldAccum", 0], ["activeExecLastProg", -1], ["activeExecLastProgressAt", -1], ["activeExecActivated", false], ["activeExecActivatedAt", -1]];
+                if (_objKindNow isEqualTo "VBIED_VEHICLE") then
+                {
+                    {
+                        _x params ["_key", "_default"];
+                        _savedVbied pushBack [_key, [_key, _default] call ARC_fnc_stateGet];
+                    } forEach [["activeVbiedDeviceId", ""], ["activeVbiedLastArmedAt", -1], ["activeVbiedSafe", false], ["activeVbiedDetonated", false], ["activeVbiedDetonatedAt", -1], ["activeVbiedDetCause", ""], ["activeVbiedAlerted", false], ["activeVbiedAlertAt", -1], ["activeVbiedPauseAccum", 0], ["activeVbiedPauseSince", -1], ["activeVbiedWindowRemaining", 0], ["activeVbiedElapsedBeforeLoad", 0]];
+                };
+            };
             ["activeExecTaskId", ""] call ARC_fnc_stateSet;
             _ok = [] call ARC_fnc_execInitActive;
+            if (_ok && {_preserve} && {(["activeTaskId", ""] call ARC_fnc_stateGet) isEqualTo _taskId}) then
+            {
+                { _x call ARC_fnc_stateSet; } forEach _savedProgress;
+                if ((["activeObjectiveKind", ""] call ARC_fnc_stateGet) isEqualTo _objKindNow) then
+                {
+                    { _x call ARC_fnc_stateSet; } forEach _savedVbied;
+                    missionNamespace setVariable ["ARC_activeVbiedSafe", ["activeVbiedSafe", false] call ARC_fnc_stateGet, true];
+                };
+                [] call ARC_fnc_taskUpdateActiveDescription;
+                diag_log format ["[ARC][PERSIST] OBJECT_REBUILT time=%1 actor=SERVER task=%2 grid=%3 preservedDeadline=%4", serverTime, _taskId, mapGridPosition _pos, ["activeExecDeadlineAt", -1] call ARC_fnc_stateGet];
+            };
+            // PHYSICAL_REBUILD_PRESERVE_END
         };
     };
 };

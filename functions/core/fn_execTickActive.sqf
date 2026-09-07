@@ -125,12 +125,6 @@ private _incTypeU = toUpper _incType;
 if (_incTypeU isEqualTo "IED") then
 {
     [] call ARC_fnc_iedSpawnTick;
-    // IED Phase 3: VBIED (parked) trigger + record (no-op unless objectiveKind is VBIED_VEHICLE).
-    [] call ARC_fnc_vbiedSpawnTick;
-    // VBIED Driven: checkpoint/gate rush (no-op unless objectiveKind is VBIED_DRIVEN_*).
-    [] call ARC_fnc_vbiedDrivenSpawnTick;
-    // Suicide Bomber: approach spawn (no-op unless objectiveKind is SB_*_APPROACH).
-    [] call ARC_fnc_suicideBomberSpawnTick;
 };
 
 // Objective context (if any)
@@ -461,6 +455,11 @@ if (_onSite && { !_activated }) then
 // ---------------------------------------------------------------------------
 if (_activated && { _incTypeU isEqualTo "IED" }) then
 {
+    // AO activation owns the stable threat identity before execution admits actors.
+    [] call ARC_fnc_vbiedSpawnTick;
+    [] call ARC_fnc_vbiedDrivenSpawnTick;
+    [] call ARC_fnc_suicideBomberSpawnTick;
+
     private _handled = ["activeIedDetonationHandled", false] call ARC_fnc_stateGet;
     if (!(_handled isEqualType true)) then { _handled = false; };
 

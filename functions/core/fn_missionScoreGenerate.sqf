@@ -72,14 +72,7 @@ if (!(_detained isEqualType 0)) then { _detained = 0; };
 _detained = _detained max 0;
 
 // ── CAS sorties ────────────────────────────────────────────────────────────
-private _casreqs = ["casreq_v1_records", []] call ARC_fnc_stateGet;
-if (!(_casreqs isEqualType [])) then { _casreqs = []; };
-private _casreqCompleted = count (_casreqs select
-{
-    _x isEqualType []
-    && { (count _x) >= 3 }
-    && { (toUpper (_x select 2)) isEqualTo "CLOSED" }
-});
+private _casreqCompleted = [] call ARC_fnc_casreqCompletedCount;
 
 // ── Lead actions ───────────────────────────────────────────────────────────
 private _leadHistory = ["leadHistory", []] call ARC_fnc_stateGet;

@@ -114,14 +114,10 @@ if ((count _closeIds) > 0) then
         { if ((_x select 0) isEqualTo _tid) exitWith { _wi = _forEachIndex; }; } forEach _worldInfo;
 
         private _stateCapture = "";
-        private _spawned = false;
-        private _objCount = 0;
         if (_wi >= 0) then
         {
             private _wiEntry = _worldInfo select _wi;
             _stateCapture = _wiEntry select 1;
-            _spawned = _wiEntry select 2;
-            _objCount = _wiEntry select 3;
         };
 
         // Stale close detection: if already CLEANED, emit evidence event instead of driving state
@@ -167,11 +163,8 @@ if ((count _closeIds) > 0) then
         {
             [_tid, "CLOSED", _noteStr] call ARC_fnc_threatUpdateState;
 
-            if ((!_spawned) || { _objCount isEqualTo 0 }) then
-            {
-                // No world refs: drive cleanup sync directly
-                [_tid, "INCIDENT_CLOSED"] call ARC_fnc_threatIedCleanupSync;
-            };
+            // Sync checks objects, units AND groups and waits for every live reference.
+            [_tid, "INCIDENT_CLOSED"] call ARC_fnc_threatIedCleanupSync;
         };
     } forEach _closeIds;
 

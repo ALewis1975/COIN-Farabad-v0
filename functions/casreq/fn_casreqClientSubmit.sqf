@@ -1,3 +1,5 @@
+// Engine-compatible command wrappers retain the repository lint baseline.
+private _casTrim = compile "params ['_s']; trim _s";
 /*
     ARC_fnc_casreqClientSubmit
 
@@ -34,7 +36,7 @@ if (!_accepted) exitWith
 };
 
 // Role check (JTAC-authorized roles only)
-if (!([player] call ARC_fnc_rolesIsAuthorized) && { !([player] call ARC_fnc_rolesCanApproveQueue) }) exitWith
+if (!([player, "CREATE"] call ARC_fnc_casreqCan)) exitWith
 {
     ["CASREQ", "Not authorized to submit CAS requests."] call ARC_fnc_clientToast;
     false
@@ -69,45 +71,16 @@ private _nineLine = [
     ["line9_remarks", ""]
 ];
 
-// Summary display for confirmation
-private _lines = [
-    format ["Task: %1", _taskId],
-    format ["Target: %1 (%2)", _incDisp, _incType],
-    format ["Grid: %1", _grid],
-    "",
-    "Submitting CAS request will require TOC approval.",
-    "Enter target description and remarks when prompted."
-];
-private _summary = _lines joinString "\n";
-
-private _ok = [_summary, "Submit CAS Request", true, true] call BIS_fnc_guiMessage;
-if (!_ok) exitWith { false };
-
-// Prompt for target description override
-private _descPrompt = [format ["Target description (default: %1):", _incDisp], _incDisp] call BIS_fnc_guiMessage;
-if (_descPrompt isEqualType "") then
-{
-    if (!(_descPrompt isEqualTo "")) then
-    {
-        private _dIdx = -1;
-        { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo "line4_target_description" }) exitWith { _dIdx = _forEachIndex; }; } forEach _nineLine;
-        if (_dIdx >= 0) then { (_nineLine select _dIdx) set [1, _descPrompt]; };
-    };
-};
-
-// Prompt for remarks
-private _remarksPrompt = ["Remarks (optional):", ""] call BIS_fnc_guiMessage;
-private _remarks = if (_remarksPrompt isEqualType "") then { _remarksPrompt } else { "" };
-private _trimFn = compile "params ['_s']; trim _s";
-_remarks = [_remarks] call _trimFn;
-
-// Update line9 with remarks
-private _r9Idx = -1;
-{ if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo "line9_remarks" }) exitWith { _r9Idx = _forEachIndex; }; } forEach _nineLine;
-if (_r9Idx >= 0 && { !(_remarks isEqualTo "") }) then { (_nineLine select _r9Idx) set [1, _remarks]; };
-
-// Send to server
-[player, _districtId, _pos, _nineLine, _remarks] remoteExec ["ARC_fnc_casreqOpen", 2];
-
-["CASREQ", "CAS request submitted. Awaiting TOC decision."] call ARC_fnc_clientToast;
+private _form = ["CAS request | " + _grid, ["Target description (240 max)", "Friendlies (240 max)", "Remarks (500 max)"], [_incDisp, "Own grid " + mapGridPosition player, ""], [240,240,500]] call ARC_fnc_casreqInput;
+if !(_form select 0) exitWith {false};
+private _desc = ([(_form select 1)] call _casTrim);
+private _friendlies = ([(_form select 2)] call _casTrim);
+private _remarks = ([(_form select 3)] call _casTrim);
+if (_desc isEqualTo "" || {_friendlies isEqualTo ""}) exitWith {["CASREQ", "Target description and friendlies are required. Nothing submitted."] call ARC_fnc_clientToast; false};
+(_nineLine select 3) set [1, _desc];
+(_nineLine select 6) set [1, _friendlies];
+(_nineLine select 8) set [1, _remarks];
+private _token = format ["%1:%2:%3", clientOwner, diag_tickTime, floor random 1000000];
+[player, _districtId, _pos, _nineLine, _remarks, _token] remoteExec ["ARC_fnc_casreqOpen", 2];
+["CASREQ", "Request sent for server validation. Open CAS Requests for status."] call ARC_fnc_clientToast;
 true

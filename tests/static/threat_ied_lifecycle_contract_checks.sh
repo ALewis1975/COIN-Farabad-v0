@@ -66,11 +66,11 @@ check 'class threatIedCleanupSync {}' "config/CfgFunctions.hpp" \
 check '"cleanup_completed"' "functions/threat/fn_threatIedCleanupSync.sqf" \
   "Cleanup sync writes cleanup_completed marker"
 
-check '"cleanup_ts"' "functions/threat/fn_threatIedCleanupSync.sqf" \
-  "Cleanup sync writes cleanup_ts timestamp"
+check '"cleanup_ts"' "functions/threat/fn_threatUpdateState.sqf" \
+  "Successful CLEANED transition writes cleanup_ts timestamp"
 
-check 'THREAT_CLEANUP_STALE' "functions/threat/fn_threatIedCleanupSync.sqf" \
-  "Cleanup sync emits THREAT_CLEANUP_STALE on repeat call"
+check 'if (_state isEqualTo "CLEANED") exitWith {true};' "functions/threat/fn_threatIedCleanupSync.sqf" \
+  "Repeated cleanup returns idempotent success without a duplicate event"
 
 check 'if (!isServer) exitWith' "functions/threat/fn_threatIedCleanupSync.sqf" \
   "Cleanup sync is server-only"

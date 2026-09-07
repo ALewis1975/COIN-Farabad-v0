@@ -24,22 +24,22 @@ if (!(_todPhase isEqualType "")) then { _todPhase = "DAY"; };
 private _objKind = toUpper (["activeObjectiveKind", ""] call ARC_fnc_stateGet);
 if (!(_objKind isEqualTo "VBIED_DRIVEN_CHECKPOINT") && !(_objKind isEqualTo "VBIED_DRIVEN_GATE")) exitWith {false};
 
+private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
+private _threatId = ["activeIedThreatId", ""] call ARC_fnc_stateGet;
+private _kinds = ["VBIED_DRIVEN_CHECKPOINT", "VBIED_DRIVEN_GATE"];
+if !([_taskId, _threatId, _kinds] call ARC_fnc_threatRuntimeIsCurrent) exitWith {false};
+
 // ── Escalation-tier gate (VBIED driven requires tier ≥ 2 / HIGH_RISK) ─────
 // Mirrors fn_threatGovernorCheck line 88: VBIED _tierMin = 2.
 private _districtId = ["activeIncidentCivsubDistrictId", ""] call ARC_fnc_stateGet;
 if (!(_districtId isEqualType "")) then { _districtId = ""; };
-if (!(_districtId isEqualTo "")) then
+private _secLevel = missionNamespace getVariable [format ["ARC_district_%1_secLevel", _districtId], "NORMAL"];
+if (!(_secLevel isEqualType "")) then { _secLevel = "NORMAL"; };
+private _tier = ["NORMAL", "ELEVATED", "HIGH_RISK", "CRITICAL"] find (toUpper _secLevel);
+if (_tier < 2) exitWith
 {
-    private _secLevel = missionNamespace getVariable [format ["ARC_district_%1_secLevel", _districtId], "NORMAL"];
-    if (!(_secLevel isEqualType "")) then { _secLevel = "NORMAL"; };
-    private _tier = 0;
-    if (_secLevel isEqualTo "ELEVATED") then { _tier = 1; };
-    if (_secLevel isEqualTo "HIGH_RISK") then { _tier = 2; };
-    if (_tier < 2) exitWith
-    {
-        diag_log format ["[ARC][THREAT] ARC_fnc_vbiedDrivenSpawnTick: ESCALATION_TIER deny district=%1 tier=%2 required=2", _districtId, _tier];
-        false
-    };
+    diag_log format ["[ARC][THREAT] ARC_fnc_vbiedDrivenSpawnTick: ESCALATION_TIER deny t=%1 actor=SYSTEM task=%2 threat=%3 district=%4 tier=%5 required=2", serverTime, _taskId, _threatId, _districtId, _tier];
+    false
 };
 
 private _enabled = missionNamespace getVariable ["ARC_vbiedDrivenEnabled", true];
@@ -49,6 +49,7 @@ if (!_enabled) exitWith {false};
 // Already spawned this objective?
 private _alreadySpawned = missionNamespace getVariable ["ARC_vbiedDrivenSpawned", false];
 if (_alreadySpawned) exitWith {false};
+if !((missionNamespace getVariable ["threat_v0_drivenPending", []]) isEqualTo []) exitWith {false};
 
 // Get target position (checkpoint or gate marker)
 private _targetMarker = ["activeObjectiveMarker", ""] call ARC_fnc_stateGet;
@@ -73,7 +74,7 @@ private _spawnPos = [_targetPos, 800, 1500, 10, 0, 0.3, 0] call BIS_fnc_findSafe
 if (!(_spawnPos isEqualType []) || {(count _spawnPos) < 2}) then
 {
     private _dir = random 360;
-    _spawnPos = [_targetPos select 0 + 900 * sin _dir, _targetPos select 1 + 900 * cos _dir, 0];
+    _spawnPos = [(_targetPos select 0) + 900 * sin _dir, (_targetPos select 1) + 900 * cos _dir, 0];
 };
 _spawnPos resize 3;
 
@@ -91,9 +92,6 @@ if ((count _nearPlayers) == 0) then
 if ((count _nearPlayers) == 0) exitWith {false};
 
 // Telegraphing: emit STAGED lead before spawning (via lead router)
-private _threatId = ["activeIedThreatId", ""] call ARC_fnc_stateGet;
-if (!(_threatId isEqualType "")) then { _threatId = ""; };
-
 if (!(_threatId isEqualTo "")) then
 {
     [_threatId, "STAGED", "driven_vbied_staged"] call ARC_fnc_threatUpdateState;
@@ -101,18 +99,37 @@ if (!(_threatId isEqualTo "")) then
 
 // Wait 60-120s for fairness telegraph window (non-blocking via spawn)
 private _spawnDelay = 60 + (floor (random 60));
+// Reserve synchronously, before yielding; repeated exec ticks cannot queue workers.
+missionNamespace setVariable ["threat_v0_drivenPending", [_taskId, _threatId], false];
+diag_log format ["[ARC][THREAT] SPAWN_PENDING t=%1 actor=SYSTEM task=%2 threat=%3 grid=%4 delay=%5", serverTime, _taskId, _threatId, mapGridPosition _spawnPos, _spawnDelay];
 
-[_spawnPos, _targetPos, _threatId, _spawnDelay, _todPhase, _todPolicy, _hg] spawn
+private _worker = [_spawnPos, _targetPos, _threatId, _taskId, _spawnDelay, _districtId, _hg] spawn
 {
-    params ["_sp", "_tp", "_tid", "_delay", "_todPhase", "_todPolicy", "_hg"];
+    params ["_sp", "_tp", "_tid", "_task", "_delay", "_district", "_hg"];
     sleep _delay;
 
-    // Validity gate: abort if threat was canceled or objective changed during delay
-    private _activeObjKind = toUpper (["activeObjectiveKind", ""] call ARC_fnc_stateGet);
-    if (!(_activeObjKind isEqualTo "VBIED_DRIVEN_CHECKPOINT") && !(_activeObjKind isEqualTo "VBIED_DRIVEN_GATE")) exitWith
-    {
-        diag_log format ["[ARC][INFO] ARC_fnc_vbiedDrivenSpawnTick: objective changed during delay, aborting spawn tid=%1", _tid];
+    private _kinds = ["VBIED_DRIVEN_CHECKPOINT", "VBIED_DRIVEN_GATE"];
+    private _cancel = {
+        params ["_reason"];
+        if ((missionNamespace getVariable ["threat_v0_drivenPending", []]) isEqualTo [_task, _tid]) then {
+            missionNamespace setVariable ["threat_v0_drivenPending", [], false];
+        };
+        diag_log format ["[ARC][THREAT] SPAWN_CANCELLED t=%1 actor=SYSTEM task=%2 threat=%3 grid=%4 reason=%5", serverTime, _task, _tid, mapGridPosition _sp, _reason];
+        if ([_task, _tid, _kinds] call ARC_fnc_threatRuntimeIsCurrent) then {
+            [_tid, "EXPIRED", _reason] call ARC_fnc_threatUpdateState;
+        };
     };
+    if !((missionNamespace getVariable ["threat_v0_drivenPending", []]) isEqualTo [_task, _tid]) exitWith { ["RESERVATION_CHANGED"] call _cancel; };
+    if !([_task, _tid, _kinds] call ARC_fnc_threatRuntimeIsCurrent) exitWith { ["TASK_CHANGED"] call _cancel; };
+    if (missionNamespace getVariable ["ARC_vbiedDrivenSpawned", false]) exitWith { ["ALREADY_SPAWNED"] call _cancel; };
+    if !(missionNamespace getVariable ["ARC_vbiedDrivenEnabled", true]) exitWith { ["DISABLED"] call _cancel; };
+    private _todPolicy = [] call ARC_fnc_dynamicTodGetPolicy;
+    if !([_todPolicy, "canSpawnThreat", true] call _hg) exitWith { ["TOD_DENIED"] call _cancel; };
+    private _todPhase = [_todPolicy, "phase", "DAY"] call _hg;
+    private _secLevel = missionNamespace getVariable [format ["ARC_district_%1_secLevel", _district], "NORMAL"];
+    if !(_secLevel isEqualType "") then { _secLevel = "NORMAL"; };
+    if ((["NORMAL", "ELEVATED", "HIGH_RISK", "CRITICAL"] find (toUpper _secLevel)) < 2) exitWith { ["TIER_CHANGED"] call _cancel; };
+    if (({alive _x && {!(_x isKindOf "HeadlessClient_F")} && {(_x distance2D _sp) <= 500}} count allPlayers) isEqualTo 0) exitWith { ["NO_PLAYERS_AT_SPAWN"] call _cancel; };
 
     // Fairness check: intel level gate
     private _intelLevel = missionNamespace getVariable ["ARC_vbiedDrivenIntelLevel", 0];
@@ -144,7 +161,7 @@ private _spawnDelay = 60 + (floor (random 60));
     if !(isClass (configFile >> "CfgVehicles" >> _vehClass)) then { _vehClass = "C_Van_01_transport_F"; };
 
     private _veh = createVehicle [_vehClass, _sp, [], 0, "CAN_COLLIDE"];
-    if (isNull _veh) exitWith { diag_log "[ARC][WARN] ARC_fnc_vbiedDrivenSpawnTick: vehicle spawn failed"; };
+    if (isNull _veh) exitWith { ["VEHICLE_SPAWN_FAILED"] call _cancel; };
 
     _veh setPos _sp;
     _veh setVariable ["ARC_isVbiedDrivenActive", true, true];
@@ -155,9 +172,14 @@ private _spawnDelay = 60 + (floor (random 60));
     private _grp = createGroup [east, true];
     _grp setGroupIdGlobal [format ["COBRA VBIED %1", _tid]];
     private _driver = _grp createUnit ["O_Soldier_F", _sp, [], 0, "NONE"];
+    if (isNull _driver) exitWith { deleteVehicle _veh; deleteGroup _grp; ["DRIVER_SPAWN_FAILED"] call _cancel; };
     _driver moveInDriver _veh;
     _driver setVariable ["ARC_dynamic_tod_phase_spawn", _todPhase, true];
     _driver setVariable ["ARC_dynamic_tod_profile_spawn", [_todPolicy, "profile", "STANDARD"] call _hg, true];
+
+    if !([_tid, _task, [_veh], [_driver]] call ARC_fnc_threatRegisterWorld) exitWith {
+        deleteVehicle _driver; deleteVehicle _veh; deleteGroup _grp; ["WORLD_REGISTRATION_FAILED"] call _cancel;
+    };
 
     // Assign route waypoints toward target
     private _wp1 = _grp addWaypoint [_tp, 0];
@@ -170,7 +192,8 @@ private _spawnDelay = 60 + (floor (random 60));
 
     // Store active driven vehicle for tracking
     missionNamespace setVariable ["ARC_vbiedDrivenNetId", netId _veh, true];
-    missionNamespace setVariable ["ARC_vbiedDrivenSpawned", true];
+    missionNamespace setVariable ["ARC_vbiedDrivenSpawned", true, true];
+    missionNamespace setVariable ["threat_v0_drivenPending", [], false];
 
     diag_log format ["[ARC][INFO] ARC_fnc_vbiedDrivenSpawnTick: spawned veh=%1 driver=%2 target=%3", netId _veh, name _driver, mapGridPosition _tp];
 
@@ -178,23 +201,25 @@ private _spawnDelay = 60 + (floor (random 60));
     while { !isNull _veh && alive _veh && alive _driver } do
     {
         sleep 3;
+        if !([_task, _tid, _kinds] call ARC_fnc_threatRuntimeIsCurrent) exitWith {};
         private _dist = _veh distance2D _tp;
         if (_dist <= 50) then
         {
             // Trigger detonation
             private _vNid = netId _veh;
             diag_log format ["[ARC][INFO] ARC_fnc_vbiedDrivenSpawnTick: proximity trigger dist=%1 → detonating", _dist];
-            [_vNid] remoteExec ["ARC_fnc_vbiedServerDetonate", 2];
+            [_vNid] call ARC_fnc_vbiedServerDetonate;
             break;
         };
     };
 
     // Driver killed = also detonate
-    if (!isNull _veh && { alive _veh } && { !alive _driver }) then
+    if (!isNull _veh && { alive _veh } && { !alive _driver } && {[_task, _tid, _kinds] call ARC_fnc_threatRuntimeIsCurrent}) then
     {
         private _vNid = netId _veh;
-        [_vNid] remoteExec ["ARC_fnc_vbiedServerDetonate", 2];
+        [_vNid] call ARC_fnc_vbiedServerDetonate;
     };
 };
+missionNamespace setVariable ["threat_v0_drivenWorker", _worker, false];
 
 true

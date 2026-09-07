@@ -1907,3 +1907,57 @@ class ARC_RecruitDialog
         };
     };
 };
+
+/* Compact CAS helper dialogs reuse the Console's imported controls. */
+class ARC_CasreqInputDialog
+{
+    idd = 78510;
+    movingEnable = 0;
+    enableSimulation = 1;
+    class controlsBackground
+    {
+        class BG: RscText {idc=-1; x=0.18; y=0.14; w=0.64; h=0.72; colorBackground[]={0,0,0,0.92};};
+    };
+    class controls
+    {
+        class Title: RscText {idc=1000; x=0.20; y=0.16; w=0.60; h=0.04; text="Request details";};
+        class Label1: RscText {idc=1100; x=0.20; y=0.22; w=0.60; h=0.04;};
+        class Label2: RscText {idc=1101; x=0.20; y=0.36; w=0.60; h=0.04;};
+        class Label3: RscText {idc=1102; x=0.20; y=0.50; w=0.60; h=0.04;};
+        class Field1: RscEdit {idc=1400; style=16; x=0.20; y=0.26; w=0.60; h=0.09;};
+        class Field2: RscEdit {idc=1401; style=16; x=0.20; y=0.40; w=0.60; h=0.09;};
+        class Field3: RscEdit {idc=1402; style=16; x=0.20; y=0.54; w=0.60; h=0.20;};
+        class Submit: RscButton
+        {
+            idc=1600; text="Continue"; x=0.20; y=0.78; w=0.28; h=0.05;
+            action="private _d=findDisplay 78510; uiNamespace setVariable ['ARC_casreqInput_result',[true,ctrlText (_d displayCtrl 1400),ctrlText (_d displayCtrl 1401),ctrlText (_d displayCtrl 1402)]]; closeDialog 1;";
+        };
+        class Cancel: RscButton {idc=1601; text="Cancel"; x=0.52; y=0.78; w=0.28; h=0.05; action="closeDialog 2;";};
+    };
+};
+class ARC_CasreqInboxDialog
+{
+    idd = 78520;
+    movingEnable = 0;
+    enableSimulation = 1;
+    class controlsBackground
+    {
+        class BG: RscText {idc=-1; x=0.08; y=0.08; w=0.84; h=0.86; colorBackground[]={0,0,0,0.94};};
+    };
+    class controls
+    {
+        class Title: RscText {idc=1000; text="CAS Requests | server inbox"; x=0.10; y=0.10; w=0.80; h=0.04;};
+        class Requests: RscListbox {idc=1500; x=0.10; y=0.16; w=0.28; h=0.58; onLBSelChanged="['SELECT'] call ARC_fnc_casreqInboxAction;";};
+        class Details: RscEdit {idc=1400; style=16; canModify=0; x=0.40; y=0.16; w=0.50; h=0.39;};
+        class AircraftLabel: RscText {idc=-1; text="Assign occupied attack aircraft (approval):"; x=0.40; y=0.56; w=0.50; h=0.03;};
+        class Aircraft: RscCombo {idc=2100; x=0.40; y=0.59; w=0.50; h=0.04;};
+        class NotesLabel: RscText {idc=-1; text="Decision / BDA / abort notes (500 max):"; x=0.40; y=0.64; w=0.50; h=0.03;};
+        class Notes: RscEdit {idc=1401; style=16; x=0.40; y=0.67; w=0.50; h=0.11;};
+        class Approve: RscButton {idc=1600; text="Approve"; x=0.10; y=0.80; w=0.15; h=0.045; action="['APPROVED'] call ARC_fnc_casreqInboxAction;";};
+        class Deny: RscButton {idc=1601; text="Deny"; x=0.265; y=0.80; w=0.15; h=0.045; action="['DENIED'] call ARC_fnc_casreqInboxAction;";};
+        class Execute: RscButton {idc=1602; text="Execute"; x=0.43; y=0.80; w=0.15; h=0.045; action="['EXECUTING'] call ARC_fnc_casreqInboxAction;";};
+        class Complete: RscButton {idc=1603; text="BDA / Complete"; x=0.59; y=0.80; w=0.15; h=0.045; action="['COMPLETE'] call ARC_fnc_casreqInboxAction;";};
+        class Abort: RscButton {idc=1604; text="Abort"; x=0.75; y=0.80; w=0.15; h=0.045; action="['ABORT'] call ARC_fnc_casreqInboxAction;";};
+        class Close: RscButton {idc=1605; text="Close"; x=0.65; y=0.87; w=0.25; h=0.045; action="closeDialog 0;";};
+    };
+};

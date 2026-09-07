@@ -53,6 +53,9 @@ if (!(_snaps isEqualType []) || { (count _snaps) isEqualTo 0 }) then
     [] call ARC_fnc_intelMetricsTick;
 };
 
+// Reconstruct accepted views without replaying acceptance/closeout.
+[] call ARC_fnc_intelOrderRehydrate;
+
 // Publish now (JIP-safe)
 [] call ARC_fnc_intelQueueBroadcast;
 [] call ARC_fnc_intelOrderBroadcast;

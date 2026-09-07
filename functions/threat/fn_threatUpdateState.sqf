@@ -198,6 +198,8 @@ if (_stateToU isEqualTo "CLEANED") then
     _world = [_world, "objects_net_ids", []] call _kvSet;
     _world = [_world, "groups_net_ids", []] call _kvSet;
     _world = [_world, "units_net_ids", []] call _kvSet;
+    _world = [_world, "cleanup_completed", true] call _kvSet;
+    _world = [_world, "cleanup_ts", _now] call _kvSet;
     _rec = [_rec, "world", _world] call _kvSet;
 };
 

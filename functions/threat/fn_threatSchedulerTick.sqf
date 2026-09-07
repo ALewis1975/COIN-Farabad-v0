@@ -29,12 +29,15 @@ private _lastTs = ["threat_v0_scheduler_last_ts", -1] call ARC_fnc_stateGet;
 if (!(_lastTs isEqualType 0)) then { _lastTs = -1; };
 
 // ── Daily budget reset (TEA-F5 fix) ────────────────────────────────────────
-// A "day" is measured as a floor(serverTime / 86400) epoch. On rollover the
-// per-district spent_today counters are reset to 0 so each day gets a fresh budget.
-private _lastResetDay = ["threat_v0_budget_last_reset_day", -1] call ARC_fnc_stateGet;
-if (!(_lastResetDay isEqualType 0)) then { _lastResetDay = -1; };
+// Persist remaining time across restart; uptime epoch changes cannot grant budgets.
+private _nextReset = ["threat_v0_budget_next_reset_ts", -1] call ARC_fnc_stateGet;
+if (!(_nextReset isEqualType 0)) then { _nextReset = -1; };
+if (_nextReset < 0) then {
+    _nextReset = serverTime + 86400;
+    ["threat_v0_budget_next_reset_ts", _nextReset] call ARC_fnc_stateSet;
+};
 private _todayDay = floor (serverTime / 86400);
-if (_todayDay != _lastResetDay) then
+if (serverTime >= _nextReset) then
 {
     private _budgetMap = ["threat_v0_attack_budget", createHashMap] call ARC_fnc_stateGet;
     if (!(_budgetMap isEqualType createHashMap)) then { _budgetMap = createHashMap; };
@@ -55,6 +58,7 @@ if (_todayDay != _lastResetDay) then
     } forEach _distReset;
     ["threat_v0_attack_budget", _budgetMap] call ARC_fnc_stateSet;
     ["threat_v0_budget_last_reset_day", _todayDay] call ARC_fnc_stateSet;
+    ["threat_v0_budget_next_reset_ts", serverTime + 86400] call ARC_fnc_stateSet;
     diag_log format ["[ARC][THREAT] ARC_fnc_threatSchedulerTick: daily budget reset day=%1", _todayDay];
 };
 
@@ -66,6 +70,9 @@ if (_lastTs > 0 && { (_now - _lastTs) < _intervalS }) exitWith {false};
 private _enabled = ["threat_v0_enabled", true] call ARC_fnc_stateGet;
 if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabled = true; };
 if (!_enabled) exitWith {false};
+
+// Retire invisible latent reservations before rebuilding district admission.
+[] call ARC_fnc_threatMaintenanceTick;
 
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
 private _clampScore = {

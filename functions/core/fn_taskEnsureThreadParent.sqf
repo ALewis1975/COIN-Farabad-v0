@@ -38,6 +38,14 @@ if (_idx == 0) then
 };
 private _parentTaskId = format ["ARC_case_%1", _suffix];
 
+// Controlled removal of the unused parallel CASE alias from the previous helper.
+private _alias = "CASE:" + _threadId;
+if ([_alias] call BIS_fnc_taskExists) then
+{
+    [_alias, true, true] call BIS_fnc_deleteTask;
+    diag_log format ["[ARC][TASKENG] TASKENG_PARENT_ALIAS_REMOVED thread=%1 old=%2 canonical=%3 ts=%4", _threadId, _alias, _parentTaskId, serverTime];
+};
+
 // If the task exists already, nothing to do.
 if ([_parentTaskId] call BIS_fnc_taskExists) exitWith { _parentTaskId };
 

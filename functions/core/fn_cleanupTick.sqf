@@ -63,6 +63,16 @@ private _new = [];
         continue;
     };
 
+    // Registered threat actors retain the existing objective lifetime until
+    // this exact task closes. Foreign/new tasks cannot extend that lifetime.
+    private _deferTaskId = _obj getVariable ["ARC_cleanupDeferTaskId", ""];
+    if (!_force && {_deferTaskId isEqualType ""} && {!(_deferTaskId isEqualTo "")} &&
+        {(["activeTaskId", ""] call ARC_fnc_stateGet) isEqualTo _deferTaskId}) then
+    {
+        _new pushBack _x;
+        continue;
+    };
+
 
     // Persistent AO compositions (ex: checkpoints) should never be deleted by deferred cleanup.
     private _persist = _obj getVariable ["ARC_persistInAO", false];

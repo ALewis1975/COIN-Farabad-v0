@@ -23,7 +23,7 @@ params [
 ];
 
 // RemoteExec-only validation path: requires remoteExecutedOwner context.
-private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+private _reoOwner = remoteExecutedOwner;
 if (!([_acceptor, "ARC_fnc_intelOrderAccept", "Order acceptance rejected: sender verification failed.", "TOC_ORDER_ACCEPT_SECURITY_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 if (isNull _acceptor) exitWith {false};
@@ -211,38 +211,7 @@ switch (_type) do
 
         private _taskId = format ["%1_task", _orderId];
 
-        private _note   = [_meta, "note", ""] call _getPair;
-
         private _title = format ["RTB: %1 (%2)", _destLbl, _purpose];
-
-        private _extra = if (toUpper _purpose isEqualTo "INTEL") then
-        {
-            "\n\nOn arrival, use the Intel Debrief station to submit your debrief and complete the order."
-        }
-        else
-        {
-            ""
-        };
-
-        private _desc = format [
-            "Return to %1 to %2.%3%4%5", 
-            _destLbl,
-            _purpose,
-            if (_note isEqualTo "") then { "" } else { format ["\n\nTOC Note: %1", _note] },
-            "\n\nTip: If you only need ammo/fuel/medical, consider requesting resupply in-place via support modules/vehicles instead of RTB.",
-            _extra
-        ];
-
-        [group _acceptor, _taskId, [[_desc], _title, ""], _destPos, "ASSIGNED", 1, true, "MOVE", false] call BIS_fnc_taskCreate;
-
-        // Ensure the group UI focuses the newly assigned RTB task (Assigned Task helper).
-        {
-            if (isPlayer _x) then
-            {
-                [_taskId, [["kind","ORDER"],["title",_title],["pos",_destPos]]] remoteExec ["ARC_fnc_clientSetCurrentTask", _x];
-            };
-        } forEach (units (group _acceptor));
-
 
         _data = [_data, "taskId", _taskId] call _setPair;
         _data = [_data, "destPos", _destPos] call _setPair;
@@ -263,28 +232,9 @@ switch (_type) do
 
     case "HOLD":
     {
-        private _note   = [_meta, "note", ""] call _getPair;
-
         private _holdPos = getPosATL _acceptor;
         private _holdRad = 40;
         private _taskId = format ["%1_task", _orderId];
-
-        private _title = "HOLD: Maintain Position";
-        private _desc = format [
-            "Hold at current position until further notice.%1",
-            if (_note isEqualTo "") then { "" } else { format ["\n\nTOC Note: %1", _note] }
-        ];
-
-        [group _acceptor, _taskId, [[_desc], _title, ""], _holdPos, "ASSIGNED", 1, true, "HOLD", false] call BIS_fnc_taskCreate;
-
-        // Ensure the group UI focuses the newly assigned HOLD task (Assigned Task helper).
-        {
-            if (isPlayer _x) then
-            {
-                [_taskId, [["kind","ORDER"],["title",_title],["pos",_holdPos]]] remoteExec ["ARC_fnc_clientSetCurrentTask", _x];
-            };
-        } forEach (units (group _acceptor));
-
 
         _data = [_data, "taskId", _taskId] call _setPair;
         _data = [_data, "holdPos", _holdPos] call _setPair;
@@ -391,6 +341,7 @@ switch (_type) do
 // Save back
 _orders set [_idx, _ord];
 ["tocOrders", _orders] call ARC_fnc_stateSet;
+[_ord,true] call ARC_fnc_intelOrderEnsureTask;
 
 [] call ARC_fnc_intelOrderBroadcast;
 [] call ARC_fnc_publicBroadcastState;
