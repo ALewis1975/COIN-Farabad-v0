@@ -28,28 +28,22 @@ private _gid = ["activeIncidentAcceptedByGroup", ""] call ARC_fnc_stateGet;
 if (!(_gid isEqualType "")) then { _gid = ""; };
 if (_gid isEqualTo "") exitWith {false};
 
-if (!isNil "remoteExecutedOwner") then
+private _reoOwner = remoteExecutedOwner;
+private _senderAuthorized = if (isRemoteExecuted && { _reoOwner != 2 }) then
 {
-    private _reo = remoteExecutedOwner;
-    if (_reo > 0) then
-    {
-        private _senderOk = false;
-        {
-            if (!isPlayer _x) then { continue; };
-            if (!((owner _x) isEqualTo _reo)) then { continue; };
-            if ((groupId (group _x)) isEqualTo _gid) exitWith { _senderOk = true; };
-        } forEach allPlayers;
-
-        if (!_senderOk) exitWith
-        {
-            diag_log format ["[ARC][SEC] ARC_fnc_iedServerRequestDisposition: denied sender-owner/group mismatch reo=%1 taskId=%2 group=%3 req=%4", _reo, _taskId, _gid, _req];
-            false
-        };
-    };
+    private _caller = objNull;
+    { if (isPlayer _x && { (owner _x) isEqualTo _reoOwner }) exitWith { _caller = _x; }; } forEach allPlayers;
+    if (!([_caller, "ARC_fnc_iedServerRequestDisposition", "Disposition rejected: sender mismatch.", "IED_DISPOSITION_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith { false };
+    (groupId (group _caller)) isEqualTo _gid
+} else { true };
+if (!_senderAuthorized) exitWith
+{
+    diag_log format ["[ARC][SEC] IED_DISPOSITION_DENIED owner=%1 taskId=%2 group=%3 req=%4 ts=%5", _reoOwner, _taskId, _gid, _req, serverTime];
+    false
 };
 
 private _hasApproval = false;
-private _appr = missionNamespace getVariable ["ARC_pub_eodDispoApprovals", []];
+private _appr = ["eodDispoApprovals", []] call ARC_fnc_stateGet;
 if (!(_appr isEqualType [])) then { _appr = []; };
 
 {
@@ -61,7 +55,7 @@ if (!(_appr isEqualType [])) then { _appr = []; };
     if (!((toUpper ([_rt] call _trimFn)) isEqualTo _req)) then { continue; };
     private _exp = _x select 5;
     if (!(_exp isEqualType 0)) then { _exp = -1; };
-    if (_exp >= 0 && { serverTime > _exp }) then { continue; };
+    if (_exp < 0 || { serverTime > _exp }) then { continue; };
     _hasApproval = true;
     break;
 } forEach _appr;

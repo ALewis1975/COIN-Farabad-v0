@@ -27,19 +27,8 @@ if (isNull _civ) exitWith {false};
 if (isNull _actor) exitWith {false};
 
 // Dedicated MP hardening: bind actor identity to network sender.
-if (!isNil "remoteExecutedOwner") then
-{
-    private _reo = remoteExecutedOwner;
-    if (_reo > 0) then
-    {
-        if ((owner _actor) != _reo) exitWith
-        {
-            diag_log format ["[CIVSUB][SEC] %1 denied: sender-owner mismatch reo=%2 actorOwner=%3 actor=%4",
-                "ARC_fnc_civsubInteractOrderStop", _reo, owner _actor, name _actor];
-            false
-        };
-    };
-};
+private _reoOwner = remoteExecutedOwner;
+if (!([_actor, "ARC_fnc_civsubInteractOrderStop", "Request rejected: sender verification failed.", "CIVSUBINTERACTORDERSTOP_SECURITY_DENIED", false, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 if !(_civ getVariable ["civsub_v1_isCiv", false]) exitWith {false};
 

@@ -104,8 +104,13 @@ check 'activeVbiedTowRequested' "functions/ied/fn_iedServerRequestDisposition.sq
 check 'ARC_fnc_iedServerCheckDisposal' "functions/ied/fn_iedServerRequestDisposition.sqf" \
   "RTB_IED request invokes disposal-site logistics check"
 
-check 'sender-owner/group mismatch' "functions/ied/fn_iedServerRequestDisposition.sqf" \
-  "Disposition RPC validates sender ownership/group"
+check 'call ARC_fnc_rpcValidateSender' "functions/ied/fn_iedServerRequestDisposition.sqf" \
+  "Disposition RPC uses authoritative sender validator"
+check '(groupId (group _caller)) isEqualTo _gid' "functions/ied/fn_iedServerRequestDisposition.sqf" \
+  "Disposition RPC binds accepting group"
+check 'if (!_senderAuthorized) exitWith' "functions/ied/fn_iedServerRequestDisposition.sqf" \
+  "Disposition denial exits before lifecycle mutation"
+python3 tests/static/security_rejection_flow_checks.py
 
 # --- Advanced IED objective production ---
 check 'VBIED_DRIVEN_CHECKPOINT' "functions/core/fn_execInitActive.sqf" \

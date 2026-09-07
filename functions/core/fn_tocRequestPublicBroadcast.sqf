@@ -11,10 +11,10 @@ params [
     ["_requester", objNull, [objNull]]
 ];
 
-private _owner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { 0 };
+private _owner = remoteExecutedOwner;
 private _requesterObj = _requester;
 
-if (_owner > 0) then
+private _rpcAuthorized = if (isRemoteExecuted || { !isNull _requesterObj }) then
 {
     if (isNull _requesterObj) then
     {
@@ -116,7 +116,10 @@ if (_owner > 0) then
         _lastByOwner pushBack [_owner, _now];
     };
     missionNamespace setVariable ["ARC_tocPublicBroadcastLastByOwner", _lastByOwner, false];
-};
+
+    true
+} else { true };
+if (!_rpcAuthorized) exitWith { false };
 
 diag_log format ["[ARC][INFO] ARC_fnc_tocRequestPublicBroadcast: accepted owner=%1 caller=%2", _owner, if (isNull _requesterObj) then { "<server>" } else { name _requesterObj }];
 

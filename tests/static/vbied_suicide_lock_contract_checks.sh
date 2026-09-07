@@ -138,8 +138,10 @@ check 'ARC_fnc_vbiedServerOnDestroyed' functions/ied/fn_vbiedSpawnTick.sqf \
 # RemoteExec allowlist (server-targeted only)
 check 'ARC_fnc_vbiedServerDetonate           { allowedTargets = 2; }' config/CfgRemoteExec.hpp \
   "vbiedServerDetonate allowlisted server-only"
-check 'ARC_fnc_suicideBomberOnDetonate       { allowedTargets = 2; }' config/CfgRemoteExec.hpp \
-  "suicideBomberOnDetonate allowlisted server-only"
+check_absent 'class ARC_fnc_suicideBomberOnDetonate' config/CfgRemoteExec.hpp \
+  "suicide detonation is internal-only (no client RPC surface)"
+check_absent 'class BIS_fnc_holdActionAdd' config/CfgRemoteExec.hpp \
+  "code-bearing holdActionAdd is not exposed to client senders"
 
 # --- Lead emission tuning -------------------------------------------------------
 check 'case "VBIED": { \[_rec, _transition\] call ARC_fnc_vbiedEmitLeads }' functions/threat/fn_threatLeadEmitFromOutcome.sqf \

@@ -23,38 +23,51 @@ params [
 if (!(_deviceId isEqualType "")) then { _deviceId = ""; };
 if (_deviceId isEqualTo "") exitWith {false};
 
-// Dedicated MP hardening: log remote invocation source.
-if (!isNil "remoteExecutedOwner") then
+private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
+private _threatId = ["activeIedThreatId", ""] call ARC_fnc_stateGet;
+private _currentId = ["activeVbiedDeviceId", ""] call ARC_fnc_stateGet;
+private _parkedNid = ["activeVbiedVehicleNetId", ""] call ARC_fnc_stateGet;
+private _drivenNid = missionNamespace getVariable ["ARC_vbiedDrivenNetId", ""];
+private _isDriven = !(_drivenNid isEqualTo "") && { _deviceId isEqualTo _drivenNid };
+private _vehicleNid = if (_isDriven) then { _drivenNid } else { _parkedNid };
+private _vehicle = objectFromNetId _vehicleNid;
+private _validDevice = !(_taskId isEqualTo "") && { !isNull _vehicle } &&
+    { _isDriven || { !(_currentId isEqualTo "") && { _deviceId isEqualTo _currentId } } } &&
+    { (_vehicle getVariable ["ARC_threatTaskId", ""]) isEqualTo _taskId } &&
+    { (_vehicle getVariable ["ARC_threatId", ""]) isEqualTo _threatId };
+if (!_validDevice) exitWith
 {
-    private _reo = remoteExecutedOwner;
-    if (_reo > 0) then
+    diag_log format ["[ARC][SEC] VBIED_DETONATE_DENIED stale device/task id=%1 task=%2 owner=%3 ts=%4", _deviceId, _taskId, remoteExecutedOwner, serverTime];
+    false
+};
+// Server-local triggers retain their authority. Remote clients must own a
+// real accepting-group player and the current, unexpired server approval.
+private _reoOwner = remoteExecutedOwner;
+private _remoteClient = isRemoteExecuted && { _reoOwner != 2 };
+private _detonationAuthorized = if (_remoteClient) then
+{
+    private _caller = objNull;
+    { if (isPlayer _x && { (owner _x) isEqualTo _reoOwner }) exitWith { _caller = _x; }; } forEach allPlayers;
+    if (!([_caller, "ARC_fnc_vbiedServerDetonate", "Detonation rejected: sender mismatch.", "VBIED_DETONATE_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith { false };
+    private _groupId = groupId (group _caller);
+    private _acceptedGroup = ["activeIncidentAcceptedByGroup", ""] call ARC_fnc_stateGet;
+    if (_groupId isEqualTo "" || { !(_groupId isEqualTo _acceptedGroup) }) exitWith { false };
+    private _appr = ["eodDispoApprovals", []] call ARC_fnc_stateGet;
+    if (!(_appr isEqualType [])) exitWith { false };
+    private _approved = false;
     {
-        diag_log format ["[ARC][SEC] ARC_fnc_vbiedServerDetonate: invoked via remoteExec from owner=%1 deviceId=%2", _reo, _deviceId];
-
-        // S1 + S3: client-driven detonate must correspond to a TOC-approved EOD disposition
-        // for the active task. Server-internal callers (proximity tick, driven-spawn tick)
-        // have no remoteExecutedOwner and bypass this gate.
-        private _activeTaskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
-        if (!(_activeTaskId isEqualType "")) then { _activeTaskId = ""; };
-        private _appr = missionNamespace getVariable ["ARC_pub_eodDispoApprovals", []];
-        if (!(_appr isEqualType [])) then { _appr = []; };
-        private _approved = false;
-        {
-            if (!(_x isEqualType []) || { (count _x) < 3 }) then { continue; };
-            private _aTask = _x select 0;
-            private _aReq  = _x select 2;
-            if (!(_aTask isEqualType "") || { !(_aReq isEqualType "") }) then { continue; };
-            if (!(_aTask isEqualTo _activeTaskId)) then { continue; };
-            if (!((toUpper _aReq) isEqualTo "DET_IN_PLACE")) then { continue; };
-            _approved = true;
-        } forEach _appr;
-        if (!_approved) exitWith
-        {
-            diag_log format ["[ARC][SEC] ARC_fnc_vbiedServerDetonate: VBIED_DETONATE_DENIED no TOC EOD approval for active task. owner=%1 taskId=%2 deviceId=%3",
-                _reo, _activeTaskId, _deviceId];
-            false
-        };
-    };
+        if (!(_x isEqualType []) || { (count _x) < 6 }) then { continue; };
+        _x params ["_aTask", "_aGroup", "_aReq", "", "", "_expires"];
+        if (!(_aReq isEqualType "") || { !(_expires isEqualType 0) }) then { continue; };
+        if (_aTask isEqualTo _taskId && { _aGroup isEqualTo _groupId } && { (toUpper _aReq) isEqualTo "DET_IN_PLACE" } && { _expires >= serverTime }) exitWith { _approved = true; };
+    } forEach _appr;
+    _approved
+} else { true };
+if (!_detonationAuthorized) exitWith
+{
+    diag_log format ["[ARC][SEC] ARC_fnc_vbiedServerDetonate: VBIED_DETONATE_DENIED owner=%1 taskId=%2 deviceId=%3 ts=%4", _reoOwner, _taskId, _deviceId, serverTime];
+    ["ARC_fnc_vbiedServerDetonate", "VBIED_DETONATE_DENIED", _reoOwner] call ARC_fnc_securityDenyRecord;
+    false
 };
 
 private _done = ["activeVbiedDetonated", false] call ARC_fnc_stateGet;
@@ -67,35 +80,10 @@ if (!(_safe isEqualType true) && !(_safe isEqualType false)) then { _safe = fals
 if (_safe) exitWith {true};
 
 
-// Resolve detonation pos — prefer the live VBIED vehicle position (driven VBIEDs
-// move; the stored objective pos can be stale by up to the trigger radius).
-private _pos = [];
-private _vehNidCands = [_deviceId];
-private _parkedNid = ["activeVbiedVehicleNetId", ""] call ARC_fnc_stateGet;
-if (_parkedNid isEqualType "" && { !(_parkedNid isEqualTo "") }) then { _vehNidCands pushBack _parkedNid; };
-private _drivenNid = missionNamespace getVariable ["ARC_vbiedDrivenNetId", ""];
-if (_drivenNid isEqualType "" && { !(_drivenNid isEqualTo "") }) then { _vehNidCands pushBack _drivenNid; };
-{
-    if (_x isEqualType "" && { !(_x isEqualTo "") }) then
-    {
-        private _vehCand = objectFromNetId _x;
-        if (!isNull _vehCand && { (_pos isEqualTo []) }) then { _pos = getPosATL _vehCand; };
-    };
-} forEach _vehNidCands;
-
-// Fallback: stored objective pos, then device record
-if (!(_pos isEqualType []) || { (count _pos) < 2 }) then
-{
-    _pos = ["activeObjectivePos", []] call ARC_fnc_stateGet;
-};
-if (!(_pos isEqualType []) || { (count _pos) < 2 }) then
-{
-    private _rec = ["activeVbiedDeviceRecord", []] call ARC_fnc_stateGet;
-    if (_rec isEqualType [] && { (count _rec) >= 5 }) then { _pos = _rec select 4; };
-};
-if (!(_pos isEqualType []) || { (count _pos) < 2 }) then { _pos = [0,0,0]; };
+// Position comes only from the validated live vehicle, never an arbitrary input ID.
+private _pos = getPosATL _vehicle;
 _pos = +_pos; _pos resize 3;
-if (!((_pos select 2) isEqualType 0)) then { _pos set [2, 0]; };
+if (isNil { _pos select 2 } || { !((_pos select 2) isEqualType 0) }) then { _pos set [2, 0]; };
 
 // Remove trigger
 private _trgNid = ["activeVbiedTriggerNetId", ""] call ARC_fnc_stateGet;

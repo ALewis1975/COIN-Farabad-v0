@@ -36,11 +36,19 @@ params [
 private _callerUidForGuard = if (isNull _caller) then { "" } else { getPlayerUID _caller };
 private _acceptGuardUid = missionNamespace getVariable ["startdisp_v1_accept_guard_uid", ""];
 if (!(_acceptGuardUid isEqualType "")) then { _acceptGuardUid = ""; };
-private _startdispContinuation = (isNil "remoteExecutedOwner") && { !(_acceptGuardUid isEqualTo "") } && { _acceptGuardUid isEqualTo _callerUidForGuard };
-if (!_startdispContinuation) then
+private _startdispContinuation = (!isRemoteExecuted) && { !(_acceptGuardUid isEqualTo "") } && { _acceptGuardUid isEqualTo _callerUidForGuard };
+private _rpcAuthorized = if (!_startdispContinuation) then
 {
-    private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+    private _reoOwner = remoteExecutedOwner;
     if (!([_caller, "ARC_fnc_tocRequestAcceptIncident", "Incident acceptance rejected: sender verification failed.", "TOC_ACCEPT_INCIDENT_SECURITY_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
+
+    true
+} else { true };
+if (!_rpcAuthorized) exitWith
+{
+    diag_log format ["[ARC][SEC] ARC_fnc_tocRequestAcceptIncident: AUTHORIZATION_DENIED owner=%1 ts=%2", remoteExecutedOwner, serverTime];
+    ["ARC_fnc_tocRequestAcceptIncident", "AUTHORIZATION_DENIED", remoteExecutedOwner] call ARC_fnc_securityDenyRecord;
+    false
 };
 
 // Role-gated task acceptance (RHSUSAF Officer / Squad Leader classnames).

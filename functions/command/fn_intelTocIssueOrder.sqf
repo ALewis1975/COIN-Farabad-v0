@@ -21,6 +21,8 @@
 
 if (!isServer) exitWith {false};
 
+private _compatTrimFn = compile "params ['_s']; trim _s";
+
 params [
     ["_issuer", objNull],
     ["_order", ""],
@@ -31,22 +33,11 @@ params [
 if (isNull _issuer) exitWith {false};
 
 // Dedicated MP hardening: validate sender identity.
-if (!isNil "remoteExecutedOwner") then
-{
-    private _reo = remoteExecutedOwner;
-    if (_reo > 0) then
-    {
-        if ((owner _issuer) != _reo) exitWith
-        {
-            diag_log format ["[ARC][SEC] %1 denied: sender-owner mismatch reo=%2 issuerOwner=%3 issuer=%4",
-                "ARC_fnc_intelTocIssueOrder", _reo, owner _issuer, name _issuer];
-            false
-        };
-    };
-};
+private _reoOwner = remoteExecutedOwner;
+if (!([_issuer, "ARC_fnc_intelTocIssueOrder", "Request rejected: sender verification failed.", "INTELTOCISSUEORDER_SECURITY_DENIED", false, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
-_order = toUpper (trim _order);
-_purpose = toUpper (trim _purpose);
+_order = toUpper (([_order] call _compatTrimFn));
+_purpose = toUpper (([_purpose] call _compatTrimFn));
 
 private _targetGroup = ["activeIncidentAcceptedByGroup", ""] call ARC_fnc_stateGet;
 if (!(_targetGroup isEqualType "") || { _targetGroup isEqualTo "" }) then
@@ -58,7 +49,6 @@ if (!(_targetGroup isEqualType "") || { _targetGroup isEqualTo "" }) then
     _targetGroup = groupId (group _issuer);
 };
 
-private _issuerStr = [_issuer] call ARC_fnc_rolesFormatUnit;
 
 private _orderType = "STANDBY";
 private _payload = [];

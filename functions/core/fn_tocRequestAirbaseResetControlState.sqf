@@ -15,7 +15,7 @@ params [
 ];
 
 private _rpc = "ARC_fnc_tocRequestAirbaseResetControlState";
-private _owner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+private _owner = remoteExecutedOwner;
 private _requestor = _caller;
 
 private _deny = {
@@ -34,14 +34,15 @@ private _deny = {
     };
 };
 
-if (!isNil "remoteExecutedOwner" && { _owner > 0 }) then {
+private _rpcAuthorized = if (isRemoteExecuted || { !isNull _requestor }) then
+{
     if (isNull _requestor) then {
         {
             if (owner _x == _owner) exitWith { _requestor = _x; };
         } forEach allPlayers;
     };
 
-    private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+    private _reoOwner = remoteExecutedOwner;
     if (!([_requestor, _rpc, "AIRBASE reset rejected: sender verification failed.", "TOC_AIRBASE_RESET_SECURITY_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
     private _isOmni = [_requestor, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
@@ -50,6 +51,14 @@ if (!isNil "remoteExecutedOwner" && { _owner > 0 }) then {
         ["ROLE_DENIED", [], "Airbase reset denied: TOC approver or OMNI role required."] call _deny;
         false
     };
+
+    true
+} else { true };
+if (!_rpcAuthorized) exitWith
+{
+    diag_log format ["[ARC][SEC] ARC_fnc_tocRequestAirbaseResetControlState: AUTHORIZATION_DENIED owner=%1 ts=%2", remoteExecutedOwner, serverTime];
+    ["ARC_fnc_tocRequestAirbaseResetControlState", "AUTHORIZATION_DENIED", remoteExecutedOwner] call ARC_fnc_securityDenyRecord;
+    false
 };
 
 if (!(_preserveHistory isEqualType true) && !(_preserveHistory isEqualType false)) then {

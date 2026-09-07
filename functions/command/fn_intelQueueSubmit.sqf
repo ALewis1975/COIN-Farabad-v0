@@ -35,6 +35,8 @@
 
 if (!isServer) exitWith {""};
 
+private _compatTrimFn = compile "params ['_s']; trim _s";
+
 params [
     ["_requestor", objNull],
     ["_kind", ""],
@@ -46,23 +48,12 @@ params [
 ];
 
 if (!(_kind isEqualType "")) then { _kind = ""; };
-_kind = toUpper (trim _kind);
+_kind = toUpper (([_kind] call _compatTrimFn));
 if (_kind isEqualTo "") exitWith {""};
 
 // Dedicated MP hardening: validate sender when requestor is provided.
-if (!isNil "remoteExecutedOwner" && { !isNull _requestor }) then
-{
-    private _reo = remoteExecutedOwner;
-    if (_reo > 0) then
-    {
-        if ((owner _requestor) != _reo) exitWith
-        {
-            diag_log format ["[ARC][SEC] %1 denied: sender-owner mismatch reo=%2 requestorOwner=%3 requestor=%4",
-                "ARC_fnc_intelQueueSubmit", _reo, owner _requestor, name _requestor];
-            ""
-        };
-    };
-};
+private _reoOwner = remoteExecutedOwner;
+if (!([_requestor, "ARC_fnc_intelQueueSubmit", "Request rejected: sender verification failed.", "INTELQUEUESUBMIT_SECURITY_DENIED", false, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {""};
 
 if (!(_payload isEqualType [])) then { _payload = []; };
 if (!(_summary isEqualType "")) then { _summary = ""; };
@@ -100,7 +91,7 @@ private _meta = [
 {
     if (_x isEqualType [] && { (count _x) >= 2 }) then
     {
-        _meta pushBack [_x # 0, _x # 1];
+        _meta pushBack [_x select 0, _x select 1];
     };
 } forEach _metaExtra;
 
@@ -110,7 +101,7 @@ private _getP =
     params ["_pairs", "_k", "_d"];
     private _v = _d;
     {
-        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _v = _x # 1; };
+        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _v = _x select 1; };
     } forEach _pairs;
     _v
 };
@@ -120,7 +111,7 @@ if (_kind isEqualTo "LEAD_ISSUE_REQUEST") then
     // Validate that the referenced lead exists in the pool.
     private _leadId = [_payload, "leadId", ""] call _getP;
     if (!(_leadId isEqualType "")) then { _leadId = ""; };
-    _leadId = trim _leadId;
+    _leadId = ([_leadId] call _compatTrimFn);
 
     if (_leadId isEqualTo "") exitWith
     {
@@ -144,7 +135,7 @@ if (_kind isEqualTo "LEAD_ISSUE_REQUEST") then
     if (!(_pool isEqualType [])) then { _pool = []; };
 
     private _found = false;
-    { if (_x isEqualType [] && { (count _x) >= 1 } && { (_x # 0) isEqualTo _leadId }) exitWith { _found = true; }; } forEach _pool;
+    { if (_x isEqualType [] && { (count _x) >= 1 } && { (_x select 0) isEqualTo _leadId }) exitWith { _found = true; }; } forEach _pool;
 
     if (!_found) exitWith
     {
@@ -199,8 +190,8 @@ if (_kind isEqualTo "FOLLOWON_REQUEST") then
     {
         if (_x isEqualType [] && { (count _x) >= 7 }) then
         {
-            private _st = toUpper (_x # 2);
-            private _tgt = _x # 4;
+            private _st = toUpper (_x select 2);
+            private _tgt = _x select 4;
             if (_st isEqualTo "ISSUED" && { _tgt isEqualTo _fromGroup }) exitWith { _pending = true; };
         };
     } forEach _orders;
@@ -230,22 +221,22 @@ if (_kind isEqualTo "EOD_DISPO_REQUEST") then
     // Require an active IED incident matching the request payload.
     private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
     if (!(_taskId isEqualType "")) then { _taskId = ""; };
-    _taskId = trim _taskId;
+    _taskId = ([_taskId] call _compatTrimFn);
 
     private _typ = ["activeIncidentType", ""] call ARC_fnc_stateGet;
     if (!(_typ isEqualType "")) then { _typ = ""; };
-    _typ = toUpper (trim _typ);
+    _typ = toUpper (([_typ] call _compatTrimFn));
 
     private _reqTask = [_payload, "taskId", ""] call _getP;
     if (!(_reqTask isEqualType "")) then { _reqTask = ""; };
-    _reqTask = trim _reqTask;
+    _reqTask = ([_reqTask] call _compatTrimFn);
 
     private _reqType = [_payload, "requestType", "DET_IN_PLACE"] call _getP;
     if (!(_reqType isEqualType "")) then { _reqType = "DET_IN_PLACE"; };
-    _reqType = toUpper (trim _reqType);
+    _reqType = toUpper (([_reqType] call _compatTrimFn));
     if !(_reqType in ["DET_IN_PLACE","RTB_IED","TOW_VBIED"]) then { _reqType = "DET_IN_PLACE"; };
 
-    if (_taskId isEqualTo "" || { _reqTask isEqualTo "" } || { _reqTask isNotEqualTo _taskId } || { _typ isNotEqualTo "IED" }) exitWith
+    if (_taskId isEqualTo "" || { _reqTask isEqualTo "" } || { _reqTask != _taskId } || { _typ != "IED" }) exitWith
     {
         if (!isNull _requestor) then
         {
@@ -282,8 +273,8 @@ private _item = [
     _fromGroup,
     _fromUID,
     _posATL,
-    trim _summary,
-    trim _details,
+    ([_summary] call _compatTrimFn),
+    ([_details] call _compatTrimFn),
     _payload,
     _meta,
     []

@@ -45,9 +45,11 @@ check 'class securityDenyRecord' "config/CfgFunctions.hpp" "securityDenyRecord r
 
 # Validator records all three deny reasons.
 check 'ARC_fnc_securityDenyRecord' "$VALIDATOR" "rpcValidateSender wired to securityDenyRecord"
-check '"MISSING_REMOTE_CONTEXT", -1\] call ARC_fnc_securityDenyRecord' "$VALIDATOR" "MISSING_REMOTE_CONTEXT strict denial recorded"
-check '"NULL_OBJECT", _actualOwner\] call ARC_fnc_securityDenyRecord' "$VALIDATOR" "NULL_OBJECT denial recorded"
-check '"OWNER_MISMATCH", _actualOwner\] call ARC_fnc_securityDenyRecord' "$VALIDATOR" "OWNER_MISMATCH denial recorded"
+check '_reason = "MISSING_REMOTE_CONTEXT"' "$VALIDATOR" "MISSING_REMOTE_CONTEXT strict denial classified"
+check '_reason = "NULL_OBJECT"' "$VALIDATOR" "NULL_OBJECT denial classified"
+check '_reason = "OWNER_MISMATCH"' "$VALIDATOR" "OWNER_MISMATCH denial classified"
+check '\[_rpc, _reason, _actualOwner\] call ARC_fnc_securityDenyRecord' "$VALIDATOR" "All classified denials reach the shared bounded recorder"
+python3 tests/static/security_rejection_flow_checks.py
 
 # --- Track 3.2: passive client deny toast watcher ---
 check 'if (!hasInterface) exitWith { false };' "$WATCHER" "deny watcher is client-only"

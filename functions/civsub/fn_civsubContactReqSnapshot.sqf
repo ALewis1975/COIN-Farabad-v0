@@ -19,6 +19,9 @@
 */
 
 if (!isServer) exitWith {false};
+
+private _compatGetDefault = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k,_d]";
+private _compatKeys = compile "params ['_h']; keys _h";
 if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {false};
 
 params [
@@ -35,23 +38,8 @@ if !(_civ getVariable ["civsub_v1_isCiv", false]) exitWith {false};
 
 private _hmCreate = compile "params ['_a']; createHashMapFromArray _a";
 
-if (!isNil "remoteExecutedOwner") then
-{
-    private _reo = remoteExecutedOwner;
-    if (_reo > 0) then
-    {
-        if ((owner _actor) != _reo) exitWith
-        {
-            diag_log format ["[CIVSUB][SEC] SNAPSHOT denied: sender-owner mismatch reo=%1 actorOwner=%2 actor=%3 civ=%4",
-                _reo,
-                owner _actor,
-                name _actor,
-                _civ getVariable ["civ_uid", ""]
-            ];
-            false
-        };
-    };
-};
+private _reoOwner = remoteExecutedOwner;
+if (!([_actor, "ARC_fnc_civsubContactReqSnapshot", "Request rejected: sender verification failed.", "CIVSUBCONTACTREQSNAPSHOT_SECURITY_DENIED", false, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 private _did = _civ getVariable ["civsub_districtId", ""];
 private _civUid = _civ getVariable ["civ_uid", ""]; // assigned at spawn
@@ -61,16 +49,16 @@ if !(_civUid isEqualTo "") then {
     _rec = [_civUid] call ARC_fnc_civsubIdentityGet;
 };
 
-private _known = (_rec isEqualType createHashMap) && {(count (keys _rec)) > 0};
+private _known = (_rec isEqualType createHashMap) && {(count (([_rec] call _compatKeys))) > 0};
 private _detained = false;
 private _nameDisplay = "Unknown";
 private _serial = "";
 
 if (_known) then {
-    private _first = _rec getOrDefault ["first_name", ""];
-    private _last  = _rec getOrDefault ["last_name", ""];
-    _serial = _rec getOrDefault ["passport_serial", ""];
-    _detained = _rec getOrDefault ["status_detained", false];
+    private _first = [_rec,"first_name",""] call _compatGetDefault;
+    private _last  = [_rec,"last_name",""] call _compatGetDefault;
+    _serial = [_rec,"passport_serial",""] call _compatGetDefault;
+    _detained = [_rec,"status_detained",false] call _compatGetDefault;
 
     private _nm = format ["%1 %2", _first, _last];
     _nameDisplay = if (_nm isEqualTo " ") then {"Unknown"} else {_nm};

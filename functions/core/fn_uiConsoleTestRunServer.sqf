@@ -22,7 +22,7 @@ params [
 
 private _owner = 0;
 if (!isNull _requester) then { _owner = owner _requester; };
-if (_owner <= 0 && { !isNil "remoteExecutedOwner" }) then { _owner = remoteExecutedOwner; };
+if (isRemoteExecuted) then { _owner = remoteExecutedOwner; };
 
 private _testRunEnabled = missionNamespace getVariable ["ARC_testRunEnabled", false];
 if (!(_testRunEnabled isEqualType true) && !(_testRunEnabled isEqualType false)) then { _testRunEnabled = false; };
@@ -41,14 +41,14 @@ if (!_testRunEnabled && { !_devMode }) exitWith
 };
 
 // S1 + S3: sender validation and HQ role gate (test runner is approver-only).
-if (!isNil "remoteExecutedOwner" && { _owner > 0 }) then
+private _rpcAuthorized = if (isRemoteExecuted || { !isNull _requester }) then
 {
     private _requestor = _requester;
     if (isNull _requestor) then
     {
         { if (owner _x == _owner) exitWith { _requestor = _x; }; } forEach allPlayers;
     };
-    private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+    private _reoOwner = remoteExecutedOwner;
     if (!([_requestor, "ARC_fnc_uiConsoleTestRunServer", "Test run denied: sender verification failed.", "TEST_RUN_SECURITY_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
     private _isOmni = [_requestor, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
     private _can = _isOmni || { [_requestor] call ARC_fnc_rolesCanApproveQueue };
@@ -59,6 +59,14 @@ if (!isNil "remoteExecutedOwner" && { _owner > 0 }) then
         };
         false
     };
+
+    true
+} else { true };
+if (!_rpcAuthorized) exitWith
+{
+    diag_log format ["[ARC][SEC] ARC_fnc_uiConsoleTestRunServer: AUTHORIZATION_DENIED owner=%1 ts=%2", remoteExecutedOwner, serverTime];
+    ["ARC_fnc_uiConsoleTestRunServer", "AUTHORIZATION_DENIED", remoteExecutedOwner] call ARC_fnc_securityDenyRecord;
+    false
 };
 
 private _runInProgress = missionNamespace getVariable ["ARC_testRun_inProgress", false];

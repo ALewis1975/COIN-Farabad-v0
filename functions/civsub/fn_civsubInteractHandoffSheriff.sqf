@@ -29,19 +29,8 @@ if (isNull _actor || {isNull _civ}) exitWith {false};
 if !(isPlayer _actor) exitWith {false};
 
 // Dedicated MP hardening: bind actor identity to network sender.
-if (!isNil "remoteExecutedOwner") then
-{
-    private _reo = remoteExecutedOwner;
-    if (_reo > 0) then
-    {
-        if ((owner _actor) != _reo) exitWith
-        {
-            diag_log format ["[CIVSUB][SEC] %1 denied: sender-owner mismatch reo=%2 actorOwner=%3 actor=%4",
-                "ARC_fnc_civsubInteractHandoffSheriff", _reo, owner _actor, name _actor];
-            false
-        };
-    };
-};
+private _reoOwner = remoteExecutedOwner;
+if (!([_actor, "ARC_fnc_civsubInteractHandoffSheriff", "Request rejected: sender verification failed.", "CIVSUBINTERACTHANDOFFSHERIFF_SECURITY_DENIED", false, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 private _resolveMarker = {
     params ["_name"];
@@ -141,7 +130,7 @@ if (vehicle _civ != _civ) then {
 // Mark handoff in identity state + district counters
 _rec set ["status_handedOff", true];
 _rec set ["status_handedOffAt", serverTime];
-_rec set ["status_handedOffTo", "SHERIFF"]; 
+_rec set ["status_handedOffTo", "SHERIFF"];
 [_civUid, _rec] call ARC_fnc_civsubIdentitySet;
 
 private _bundle = [_did, "DETENTION_HANDOFF", "IDENTITY", [[["civ_uid", _civUid], ["to", "SHERIFF"], ["wanted_level", _wl]]] call _hmCreate, _actorUid] call ARC_fnc_civsubEmitDelta;
@@ -187,7 +176,7 @@ _transferDelay = (_transferDelay max 30) min 3600;
 
 // Deferred transfer to EPW holding + camp behavior
 [_civ, _transferDelay] spawn {
-    params ["_u", "_delay"]; 
+    params ["_u", "_delay"];
     sleep _delay;
 
     if (isNull _u) exitWith {};
@@ -258,7 +247,7 @@ _transferDelay = (_transferDelay max 30) min 3600;
     _delay2 = (_delay2 max 60) min 21600;
 
     [_u, _delay2] spawn {
-        params ["_uu", "_d2"]; 
+        params ["_uu", "_d2"];
         sleep _d2;
         if (isNull _uu) exitWith {};
         if (!alive _uu) exitWith {};
