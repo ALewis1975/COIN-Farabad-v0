@@ -11,6 +11,16 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-09-06 — Critical repair deployment fixture (Mode G)
+
+**Branch/Commit:** `repair/critical-review-2026-09-06` @ `0151396c811939aa45a1190510d32605f18f4c7f` (base; working tree contains repairs).
+
+**Command:** PowerShell `& ./tests/deployment_copy_regression.ps1`.
+
+**Result: PASS — 10 cases.** Actual sync tool, disposable GUID-named temp directory: fresh nested data/docs copy, root docs/tests exclusion, existing-destination refresh, stale-file removal, clean verification, deliberate drift detection, same/nested/ancestor root rejection. No live Arma mission path used. Runtime dedicated/JIP validation remains BLOCKED (Arma engine unavailable).
+
+---
+
 ## 2026-07-02 01:47 UTC — Preflight compat-scan fix for marker alias HashMap literal (Mode A)
 
 **Branch/Commit:** `copilot/fix-github-actions-preflight-job-again` @ `2f3f65db556bc30ca240b51f485708cacce0d6ac` (base before this fix; working tree includes this TEST-LOG update)
