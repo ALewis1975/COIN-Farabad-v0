@@ -25,23 +25,8 @@ if !(isPlayer _actor) exitWith {false};
 
 // Dedicated MP hardening:
 // If invoked via remoteExec, bind actor identity to network sender.
-if (!isNil "remoteExecutedOwner") then
-{
-    private _reo = remoteExecutedOwner;
-    if (_reo > 0) then
-    {
-        if ((owner _actor) != _reo) exitWith
-        {
-            diag_log format ["[CIVSUB][SEC] %1 denied: sender-owner mismatch reo=%2 actorOwner=%3 actor=%4",
-                "ARC_fnc_civsubInteractDetain",
-                _reo,
-                owner _actor,
-                name _actor
-            ];
-            false
-        };
-    };
-};
+private _reoOwner = remoteExecutedOwner;
+if (!([_actor, "ARC_fnc_civsubInteractDetain", "Request rejected: sender verification failed.", "CIVSUBINTERACTDETAIN_SECURITY_DENIED", false, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 private _did = _civ getVariable ["civsub_districtId", ""];
 if (_did isEqualTo "") exitWith {false};

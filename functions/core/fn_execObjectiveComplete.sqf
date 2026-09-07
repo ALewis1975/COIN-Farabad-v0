@@ -38,19 +38,8 @@ if (!isPlayer _caller) exitWith {false};
 private _trimFn = compile "params ['_s']; trim _s";
 
 // Dedicated MP hardening: validate sender identity.
-if (!isNil "remoteExecutedOwner") then
-{
-    private _reo = remoteExecutedOwner;
-    if (_reo > 0) then
-    {
-        if ((owner _caller) != _reo) exitWith
-        {
-            diag_log format ["[ARC][SEC] %1 denied: sender-owner mismatch reo=%2 callerOwner=%3 caller=%4",
-                "ARC_fnc_execObjectiveComplete", _reo, owner _caller, name _caller];
-            false
-        };
-    };
-};
+private _reoOwner = remoteExecutedOwner;
+if (!([_caller, "ARC_fnc_execObjectiveComplete", "Request rejected: sender verification failed.", "EXECOBJECTIVECOMPLETE_SECURITY_DENIED", false, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 private _stageU = toUpper ([_stage] call _trimFn);
 // IED/VBIED suspicious-object objectives support a "scan" discovery stage.
@@ -201,6 +190,31 @@ if (_kindU in ["IED_DEVICE", "VBIED_VEHICLE"]) then
 // ---------------------------------------------------------------------------
 // COMPLETE stage: normal completion + close-ready recommendation
 // ---------------------------------------------------------------------------
+
+// The VBIED hold action is client UI only. Recheck its kit/proximity and
+// current object on the server before changing the authoritative safe state.
+if (_kindU isEqualTo "VBIED_VEHICLE") then
+{
+    private _workDistance = missionNamespace getVariable ["ARC_vbiedDefuseWorkDistanceM", 4];
+    if (!(_workDistance isEqualType 0)) then { _workDistance = 4; };
+    _workDistance = (_workDistance max 2) min 8;
+    private _kit = ("ToolKit" in items _caller) || { "ACE_DefusalKit" in items _caller };
+    private _canDefuse = alive _caller && { _kit } && { (_caller distance2D _target) <= _workDistance } &&
+        { !(_activeNet isEqualTo "") && { (netId _target) isEqualTo _activeNet } };
+    if (!_canDefuse) exitWith { _stageU = "DENIED"; };
+};
+if (_stageU isEqualTo "DENIED") exitWith
+{
+    diag_log format ["[ARC][SEC] VBIED_DEFUSE_DENIED task=%1 caller=%2 target=%3 ts=%4", _taskId, getPlayerUID _caller, netId _target, serverTime];
+    false
+};
+if (_kindU isEqualTo "VBIED_VEHICLE") then
+{
+    ["activeVbiedSafe", true] call ARC_fnc_stateSet;
+    ["activeVbiedTriggerEnabled", false] call ARC_fnc_stateSet;
+    missionNamespace setVariable ["ARC_activeVbiedSafe", true, true];
+    _target setVariable ["ARC_vbiedDefused", true, true];
+};
 
 // Basic idempotence for single-object objectives (prevents double-click / two-player spam).
 // CACHE_SEARCH is special and must not be blocked here.

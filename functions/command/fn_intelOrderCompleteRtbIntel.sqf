@@ -16,6 +16,8 @@
 
 if (!isServer) exitWith {false};
 
+private _compatTrimFn = compile "params ['_s']; trim _s";
+
 params [
     ["_caller", objNull],
     ["_summary", ""],
@@ -28,10 +30,8 @@ if (isNull _caller) exitWith {false};
 if (!isPlayer _caller) exitWith {false};
 
 // RemoteExec anti-spoof (best effort)
-if (!isNil "remoteExecutedOwner") then
-{
-    if (remoteExecutedOwner != owner _caller) exitWith {false};
-};
+private _reoOwner = remoteExecutedOwner;
+if (!([_caller, "ARC_fnc_intelOrderCompleteRtbIntel", "Request rejected: sender verification failed.", "INTELORDERCOMPLETERTBINTEL_SECURITY_DENIED", false, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 private _g = group _caller;
 if (isNull _g) exitWith {false};
@@ -50,10 +50,11 @@ if (_forceConsole) then
 private _getPair = {
     params ["_pairs", "_k", "_d"];
     if (!(_pairs isEqualType [])) exitWith { _d };
+    private _value = _d;
     {
-        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x # 0) isEqualTo _k }) exitWith { _x # 1 };
+        if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _k }) exitWith { _value = _x select 1; };
     } forEach _pairs;
-    _d
+    _value
 };
 
 private _setPair = {
@@ -62,8 +63,8 @@ private _setPair = {
     private _found = false;
     for "_i" from 0 to ((count _pairs) - 1) do
     {
-        private _p = _pairs # _i;
-        if (_p isEqualType [] && { (count _p) >= 2 } && { (_p # 0) isEqualTo _k }) exitWith
+        private _p = _pairs select _i;
+        if (_p isEqualType [] && { (count _p) >= 2 } && { (_p select 0) isEqualTo _k }) exitWith
         {
             _pairs set [_i, [_k, _v]];
             _found = true;
@@ -74,7 +75,7 @@ private _setPair = {
 };
 
 private _orderIdO = "";
-if (_orderIdOverride isEqualType "") then { _orderIdO = trim _orderIdOverride; };
+if (_orderIdOverride isEqualType "") then { _orderIdO = ([_orderIdOverride] call _compatTrimFn); };
 
 private _orders = ["tocOrders", []] call ARC_fnc_stateGet;
 if (!(_orders isEqualType [])) then { _orders = []; };
@@ -82,35 +83,36 @@ if (!(_orders isEqualType [])) then { _orders = []; };
 private _idx = -1;
 private _ord = [];
 
-if (_orderIdO isNotEqualTo "") then
+private _selectionAllowed = if (_orderIdO != "") then
 {
     if (!_canForce) exitWith {false};
 
     _idx = -1;
-    { if ((_x isEqualType []) && { (count _x) >= 7 } && { (_x # 0) isEqualTo _orderIdO }) exitWith { _idx = _forEachIndex; }; } forEach _orders;
-    if (_idx >= 0) then { _ord = _orders # _idx; };
+    { if ((_x isEqualType []) && { (count _x) >= 7 } && { (_x select 0) isEqualTo _orderIdO }) exitWith { _idx = _forEachIndex; }; } forEach _orders;
+    if (_idx >= 0) then { _ord = _orders select _idx; };
     if (_idx < 0 || {_ord isEqualTo []}) exitWith {false};
 
-    _ord params ["_orderId", "_issuedAt", "_status", "_orderType", "_targetGroup", "_data", "_meta"]; 
+    _ord params ["", "", "_status", "_orderType", "", "_data", ""];
 
-    if ((toUpper _status) isNotEqualTo "ACCEPTED") exitWith {false};
-    if ((toUpper _orderType) isNotEqualTo "RTB") exitWith {false};
+    if ((toUpper _status) != "ACCEPTED") exitWith {false};
+    if ((toUpper _orderType) != "RTB") exitWith {false};
 
     private _purposeO = toUpper ([_data, "purpose", "REFIT"] call _getPair);
-    if (_purposeO isNotEqualTo "INTEL") exitWith {false};
+    if (_purposeO != "INTEL") exitWith {false};
+    true
 }
 else
 {
     for "_i" from 0 to ((count _orders) - 1) do
     {
-        private _o = _orders # _i;
+        private _o = _orders select _i;
         if (!(_o isEqualType [] && { (count _o) >= 7 })) then { continue; };
 
-        _o params ["_orderId", "_issuedAt", "_status", "_orderType", "_targetGroup", "_data", "_meta"];
+        _o params ["", "", "_status", "_orderType", "_targetGroup", "_data", ""];
 
-        if ((toUpper _status) isNotEqualTo "ACCEPTED") then { continue; };
-        if ((toUpper _orderType) isNotEqualTo "RTB") then { continue; };
-        if (_targetGroup isNotEqualTo _gidCaller) then { continue; };
+        if ((toUpper _status) != "ACCEPTED") then { continue; };
+        if ((toUpper _orderType) != "RTB") then { continue; };
+        if (_targetGroup != _gidCaller) then { continue; };
 
         private _purpose = toUpper ([_data, "purpose", "REFIT"] call _getPair);
         if (_purpose isEqualTo "INTEL") exitWith
@@ -121,7 +123,9 @@ else
     };
 
     if (_idx < 0 || {_ord isEqualTo []}) exitWith {false};
+    true
 };
+if (!_selectionAllowed) exitWith {false};
 
 _ord params ["_orderId", "_issuedAt", "_status", "_orderType", "_targetGroup", "_data", "_meta"];
 
@@ -134,20 +138,22 @@ private _destRad = [_data, "destRadius", 30] call _getPair;
 if (!(_destRad isEqualType 0)) then { _destRad = 30; };
 _destRad = (_destRad max 8) min 500;
 
-// Validate caller is near the intended destination unless this is a TOC-authorized
-// console debrief request.
-if (!_canForce) then
+// Recheck the saved destination and the documented privileged arrival gate.
+private _atDestination = false;
+if (_destPos isEqualType [] && {count _destPos >= 2}) then
 {
-    if (_destPos isEqualType [] && { (count _destPos) >= 2 }) then
-    {
-        private _p = +_destPos; _p resize 3;
-        if ((_caller distance2D _p) > (_destRad + 10)) exitWith
-        {
-            ["You are not at the Intel Debrief point. Move closer and try again."] remoteExec ["ARC_fnc_intelClientNotify", _caller];
-            false
-        };
-    };
+    private _p = +_destPos; _p resize 3;
+    _atDestination = (_caller distance2D _p) <= (_destRad + 10);
 };
+private _arrivedAt = [_meta,"arrivedAt",-1] call _getPair;
+private _completionAllowed = _atDestination || {_canForce && {_arrivedAt isEqualType 0} && {_arrivedAt >= 0}};
+if (!_completionAllowed) exitWith
+{
+    diag_log format ["[ARC][ORDER] RTB_COMPLETION_DENIED order=%1 group=%2 reason=NOT_AT_DESTINATION ts=%3",_orderId,_gidCaller,serverTime];
+    ["Move to the processing point, or wait for the order's arrival to be recorded."] remoteExec ["ARC_fnc_intelClientNotify",_caller];
+    false
+};
+
 // Update order status + metadata
 _status = "COMPLETED";
 _meta = [_meta, "completedAt", serverTime] call _setPair;
@@ -158,7 +164,7 @@ _orders set [_idx, [_orderId, _issuedAt, _status, _orderType, _targetGroup, _dat
 ["tocOrders", _orders] call ARC_fnc_stateSet;
 
 // Complete the RTB task if present
-if (_taskId isNotEqualTo "") then
+if (_taskId != "") then
 {
     if ([_taskId] call BIS_fnc_taskExists) then
     {
@@ -170,8 +176,8 @@ if (_taskId isNotEqualTo "") then
 private _pos = if (_destPos isEqualType [] && { (count _destPos) >= 2 }) then { +_destPos } else { getPosATL _caller };
 _pos resize 3;
 
-private _sum = trim _summary;
-private _det = trim _details;
+private _sum = ([_summary] call _compatTrimFn);
+private _det = ([_details] call _compatTrimFn);
 if (_sum isEqualTo "") then { _sum = "Intel debrief delivered."; };
 
 private _iMeta = [
@@ -181,7 +187,7 @@ private _iMeta = [
     ["targetGroup", _gidTarget],
     ["caller", name _caller]
 ];
-if (_det isNotEqualTo "") then { _iMeta pushBack ["details", _det]; };
+if (_det != "") then { _iMeta pushBack ["details", _det]; };
 
 ["DEBRIEF", _sum, _pos, _iMeta] call ARC_fnc_intelLog;
 

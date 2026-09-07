@@ -19,7 +19,7 @@ params [
 ];
 
 private _rpc = "ARC_fnc_tocRequestCivsubSave";
-private _owner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+private _owner = remoteExecutedOwner;
 
 if (!(_requester isEqualType objNull)) then {
     _requester = objNull;
@@ -41,7 +41,7 @@ private _deny = {
     };
 };
 
-if (!isNil "remoteExecutedOwner" && { _owner > 0 }) then
+private _rpcAuthorized = if (isRemoteExecuted || { !isNull _requester }) then
 {
     if (isNull _requester) then
     {
@@ -50,7 +50,7 @@ if (!isNil "remoteExecutedOwner" && { _owner > 0 }) then
         } forEach allPlayers;
     };
 
-    private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+    private _reoOwner = remoteExecutedOwner;
     if (!([_requester, _rpc, "CIVSUB save rejected: sender verification failed.", "TOC_CIVSUB_SAVE_SECURITY_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
     private _isOmni = [_requester, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
@@ -59,6 +59,14 @@ if (!isNil "remoteExecutedOwner" && { _owner > 0 }) then
         ["ROLE_DENIED", [], "CIVSUB save denied: TOC approver or OMNI role required."] call _deny;
         false
     };
+
+    true
+} else { true };
+if (!_rpcAuthorized) exitWith
+{
+    diag_log format ["[ARC][SEC] ARC_fnc_tocRequestCivsubSave: AUTHORIZATION_DENIED owner=%1 ts=%2", remoteExecutedOwner, serverTime];
+    ["ARC_fnc_tocRequestCivsubSave", "AUTHORIZATION_DENIED", remoteExecutedOwner] call ARC_fnc_securityDenyRecord;
+    false
 };
 
 if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {

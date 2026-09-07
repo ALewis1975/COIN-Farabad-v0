@@ -11,6 +11,22 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-09-06 — Critical endpoint repairs (Mode I)
+
+**Branch/Commit:** `repair/critical-review-2026-09-06` @ `0151396c811939aa45a1190510d32605f18f4c7f` (review base; repair working tree, deployment-only parent ab040bd).
+
+**Commands/results:**
+
+- `python tests/static/security_rejection_flow_checks.py --sqfvm <SQF-VM executable>`: **PASS**, 38 structural endpoint checks, 38 production-body/block VM cases, and five removed-guard mutants rejected. Includes reset/save/rebuild denial tripwires and RTB(INTEL/EPW) lookup, explicit selection, destination and privileged recorded-arrival gates.
+- Existing RPC owner-capture, remote-exec, dedicated-observability and updated disposition/security contracts: **PASS**. The source checks follow the shared validator; no permission assertion was removed to hide a failure.
+- Changed SQF strict compatibility, `sqflint 0.3.2 -e w` and SQF-VM parse-only: **PASS** in the combined repair analysis; security/command owner independently verified 58 files. Existing shorthand in touched files was translated to equivalent expressions for the unchanged CI rules.
+- `git diff --check`: **PASS** after removing three trailing spaces in RTB parameter declarations.
+- Arma engine `tests/security_rejection_behavior.sqf`, dedicated sender identity/ownership, JIP and world-object effects: **BLOCKED**, no Arma runtime/server connection in this task.
+
+VM fixtures explicitly adapt unsupported host commands and replace external mutation/transport dependencies with tripwires. They test production control flow, not real network authority. Review of the actual sender helper found no additional critical regression; real remote-context evidence remains an engine gate. No live campaign was reset or deployed.
+
+---
+
 ## 2026-09-06 — Critical repair deployment fixture (Mode G)
 
 **Branch/Commit:** `repair/critical-review-2026-09-06` @ `0151396c811939aa45a1190510d32605f18f4c7f` (base; working tree contains repairs).

@@ -32,8 +32,8 @@ params [
 
 // S1 + S3: sender validation and HQ role gate (audit tools are approver-only).
 // Server-internal invocations (no remoteExecutedOwner) bypass the gate.
-private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { 0 };
-if (_reoOwner > 0) then
+private _reoOwner = remoteExecutedOwner;
+private _rpcAuthorized = if (isRemoteExecuted || { !isNull _requester }) then
 {
     private _requestor = _requester;
     if (isNull _requestor) then
@@ -47,6 +47,14 @@ if (_reoOwner > 0) then
         diag_log format ["[ARC][SEC] ARC_fnc_uiCoverageAuditServer: COVERAGE_AUDIT_DENIED unauthorized caller owner=%1 name=%2 uid=%3", _reoOwner, name _requestor, getPlayerUID _requestor];
         false
     };
+
+    true
+} else { true };
+if (!_rpcAuthorized) exitWith
+{
+    diag_log format ["[ARC][SEC] ARC_fnc_uiCoverageAuditServer: AUTHORIZATION_DENIED owner=%1 ts=%2", remoteExecutedOwner, serverTime];
+    ["ARC_fnc_uiCoverageAuditServer", "AUTHORIZATION_DENIED", remoteExecutedOwner] call ARC_fnc_securityDenyRecord;
+    false
 };
 
 private _now = diag_tickTime;

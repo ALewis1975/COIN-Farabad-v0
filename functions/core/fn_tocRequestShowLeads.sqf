@@ -11,26 +11,32 @@ if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compil
 // Optional: explicit calling unit (preferred). Fallback maps remote owner.
 params [ ["_caller", objNull, [objNull]] ];
 
-if (!isNil "remoteExecutedOwner") then
+private _rpcAuthorized = if (isRemoteExecuted || { !isNull _caller }) then
 {
     private _reo = remoteExecutedOwner;
-    if (_reo > 0) then
+
+    if (isNull _caller) then
     {
-        if (isNull _caller) then
         {
-            {
-                if (owner _x == _reo) exitWith { _caller = _x; };
-            } forEach allPlayers;
-        };
-
-        // RemoteExec-only validation path: requires remoteExecutedOwner context.
-        private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
-        if (!([_caller, "ARC_fnc_tocRequestShowLeads", "Show leads rejected: sender verification failed.", "TOC_SHOW_LEADS_SECURITY_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
-
-        private _isOmni = [_caller, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
-        private _can = _isOmni || { [_caller] call ARC_fnc_rolesCanApproveQueue } || { [_caller] call ARC_fnc_rolesIsTocS2 } || { [_caller] call ARC_fnc_rolesIsTocCommand };
-        if (!_can) exitWith {false};
+            if (owner _x == _reo) exitWith { _caller = _x; };
+        } forEach allPlayers;
     };
+
+    // RemoteExec-only validation path: requires remoteExecutedOwner context.
+    private _reoOwner = remoteExecutedOwner;
+    if (!([_caller, "ARC_fnc_tocRequestShowLeads", "Show leads rejected: sender verification failed.", "TOC_SHOW_LEADS_SECURITY_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
+
+    private _isOmni = [_caller, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
+    private _can = _isOmni || { [_caller] call ARC_fnc_rolesCanApproveQueue } || { [_caller] call ARC_fnc_rolesIsTocS2 } || { [_caller] call ARC_fnc_rolesIsTocCommand };
+    if (!_can) exitWith {false};
+
+    true
+} else { true };
+if (!_rpcAuthorized) exitWith
+{
+    diag_log format ["[ARC][SEC] ARC_fnc_tocRequestShowLeads: AUTHORIZATION_DENIED owner=%1 ts=%2", remoteExecutedOwner, serverTime];
+    ["ARC_fnc_tocRequestShowLeads", "AUTHORIZATION_DENIED", remoteExecutedOwner] call ARC_fnc_securityDenyRecord;
+    false
 };
 
 [] call ARC_fnc_leadPrune;
@@ -48,7 +54,7 @@ else
 {
     _txt = "Lead Pool:\n";
     {
-        _x params ["_id", "_type", "_disp", "_pos", ["_strength", 0.5], ["_createdAt", -1], ["_expiresAt", -1], ["_srcTask", ""], ["_srcType", ""], ["_threadId", ""], ["_tag", ""]];
+        _x params ["_id", "_type", "_disp", "_pos", ["_strength", 0.5], "", ["_expiresAt", -1], "", "", ["_threadId", ""], ["_tag", ""]];
 
         private _grid = if (_pos isEqualType [] && { (count _pos) >= 2 }) then { mapGridPosition _pos } else { "????" };
 
@@ -67,8 +73,7 @@ else
 };
 
 // Send hint to the requesting client only.
-// NOTE: In hosted/SP testing, remoteExecutedOwner can be -1 because the code isn't truly "remote".
-// Fall back to broadcasting to clients in that case, so the operator still sees the output.
+// Server-local calls without a player retain the existing broadcast fallback.
 private _owner = if (!isNull _caller) then { owner _caller } else { remoteExecutedOwner };
 
 // Defensive fallback: if we couldn't resolve a sane client owner ID, broadcast to all clients.

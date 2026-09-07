@@ -16,13 +16,15 @@ params [
 ];
 
 // Tests may pass _callerOwner explicitly; live RemoteExec context always wins.
-private _owner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { _callerOwner };
+private _owner = remoteExecutedOwner;
 private _requestor = _caller;
 
 private _testMode = missionNamespace getVariable ["ARC_TEST_mode", false];
 if (!(_testMode isEqualType true)) then { _testMode = false; };
+_testMode = _testMode && { !isRemoteExecuted };
+if (_testMode && { _callerOwner > 0 }) then { _owner = _callerOwner; };
 
-if (_owner > 0) then
+private _rpcAuthorized = if (isRemoteExecuted || { _owner > 0 } || { !isNull _requestor }) then
 {
     if (isNull _requestor) then
     {
@@ -70,6 +72,14 @@ if (_owner > 0) then
         ["Rebuild active incident rejected: insufficient privileges."] remoteExec ["ARC_fnc_clientHint", _owner];
         false
     };
+
+    true
+} else { true };
+if (!_rpcAuthorized) exitWith
+{
+    diag_log format ["[ARC][SEC] ARC_fnc_tocRequestRebuildActive: AUTHORIZATION_DENIED owner=%1 ts=%2", remoteExecutedOwner, serverTime];
+    ["ARC_fnc_tocRequestRebuildActive", "AUTHORIZATION_DENIED", remoteExecutedOwner] call ARC_fnc_securityDenyRecord;
+    false
 };
 
 private _dryRun = if (_testMode) then { missionNamespace getVariable ["ARC_TEST_tocDryRun", false] } else { false };

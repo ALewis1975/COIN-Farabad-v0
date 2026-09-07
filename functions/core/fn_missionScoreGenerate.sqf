@@ -29,14 +29,19 @@ if (!isServer) exitWith {[]};
 params [["_unit", objNull, [objNull]]];
 
 private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
+private _hkeys = compile "params ['_h']; keys _h";
 
 
 // Validate sender when invoked via RPC.
-if (!isNull _unit) then
+private _rpcAuthorized = if (isRemoteExecuted || { !isNull _unit }) then
 {
-    private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
-    if (!([_unit, "ARC_fnc_missionScoreGenerate", "Score generate rejected: sender mismatch.", "SCORE_GEN_SEC_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith { [] };
-};
+    private _reoOwner = remoteExecutedOwner;
+    if (!([_unit, "ARC_fnc_missionScoreGenerate", "Score generate rejected: sender mismatch.", "SCORE_GEN_SEC_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith { false };
+    if (!([_unit] call ARC_fnc_rolesCanApproveQueue) && { !([_unit, "OMNI"] call ARC_fnc_rolesHasGroupIdToken) }) exitWith { false };
+
+    true
+} else { true };
+if (!_rpcAuthorized) exitWith { [] };
 
 private _now = serverTime;
 
@@ -105,7 +110,7 @@ if (missionNamespace getVariable ["civsub_v1_enabled", false]) then
     {
         {
             private _did   = _x;
-            private _d     = _y;
+            private _d     = [_districts, _did, createHashMap] call _hg;
             if (!(_d isEqualType createHashMap)) then { continue; };
             private _r = [_d, "R", 35] call _hg;
             private _g = [_d, "G", 35] call _hg;
@@ -114,7 +119,7 @@ if (missionNamespace getVariable ["civsub_v1_enabled", false]) then
             if (!(_g isEqualType 0)) then { _g = 35; };
             if (!(_w isEqualType 0)) then { _w = 30; };
             _districtDeltas pushBack [_did, _r, _g, _w];
-        } forEach _districts;
+        } forEach ([_districts] call _hkeys);
     };
 };
 

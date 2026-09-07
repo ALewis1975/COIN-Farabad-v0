@@ -30,19 +30,8 @@ params [
 if (isNull _issuer) exitWith {false};
 
 // Dedicated MP hardening: validate sender identity.
-if (!isNil "remoteExecutedOwner") then
-{
-    private _reo = remoteExecutedOwner;
-    if (_reo > 0) then
-    {
-        if ((owner _issuer) != _reo) exitWith
-        {
-            diag_log format ["[ARC][SEC] ARC_fnc_intelTocIssueLead: sender-owner mismatch reo=%1 issuerOwner=%2 issuer=%3",
-                _reo, owner _issuer, name _issuer];
-            false
-        };
-    };
-};
+private _reoOwner = remoteExecutedOwner;
+if (!([_issuer, "ARC_fnc_intelTocIssueLead", "Request rejected: sender verification failed.", "INTELTOCISSUELEAD_SECURITY_DENIED", false, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
 
 if (!(_leadId isEqualType "")) then { _leadId = ""; };
 private _trimFn = compile "params ['_s']; trim _s";

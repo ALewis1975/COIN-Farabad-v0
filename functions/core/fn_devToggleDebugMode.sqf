@@ -23,8 +23,8 @@ params [
 
 // S1 + S3: sender validation and HQ role gate (debug toggle is admin-only).
 // Server-internal invocations (no remoteExecutedOwner) bypass the gate.
-private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { 0 };
-if (_reoOwner > 0) then
+private _reoOwner = remoteExecutedOwner;
+private _rpcAuthorized = if (isRemoteExecuted || { !isNull _requester }) then
 {
     private _requestor = _requester;
     if (isNull _requestor) then
@@ -38,6 +38,14 @@ if (_reoOwner > 0) then
         diag_log format ["[ARC][SEC] ARC_fnc_devToggleDebugMode: DEBUG_TOGGLE_DENIED unauthorized caller owner=%1 name=%2 uid=%3", _reoOwner, name _requestor, getPlayerUID _requestor];
         false
     };
+
+    true
+} else { true };
+if (!_rpcAuthorized) exitWith
+{
+    diag_log format ["[ARC][SEC] ARC_fnc_devToggleDebugMode: AUTHORIZATION_DENIED owner=%1 ts=%2", remoteExecutedOwner, serverTime];
+    ["ARC_fnc_devToggleDebugMode", "AUTHORIZATION_DENIED", remoteExecutedOwner] call ARC_fnc_securityDenyRecord;
+    false
 };
 
 // Current state: check if debug is currently on
@@ -78,7 +86,7 @@ diag_log format [
 // Notify the requesting client
 private _owner = 0;
 if (!isNull _requester) then { _owner = owner _requester; };
-if (_owner <= 0 && { !isNil "remoteExecutedOwner" }) then { _owner = remoteExecutedOwner; };
+if (isRemoteExecuted) then { _owner = remoteExecutedOwner; };
 
 if (_owner > 0) then {
     private _msg = format ["Debug mode is now %1.", if (_newState) then { "ON (all debug flags enabled, FARABAD log level=DEBUG)" } else { "OFF (all debug flags disabled, FARABAD log level=INFO)" }];

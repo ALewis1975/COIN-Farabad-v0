@@ -21,23 +21,31 @@ params [
     ["_bomberNetId", "", [""]]
 ];
 
-// Sender validation
-if (!isNil "remoteExecutedOwner") then
+// Only server-local monitors (or server-origin remote calls) may invoke this.
+if (isRemoteExecuted && { remoteExecutedOwner != 2 }) exitWith
 {
-    private _reo = remoteExecutedOwner;
-    if (_reo > 0) then
-    {
-        // Only accept from server-side spawned monitor (reo == 2 or local execution)
-        // Log all remote invocations for security audit
-        diag_log format ["[ARC][SEC] ARC_fnc_suicideBomberOnDetonate: invoked reo=%1 threatId=%2 bomberNetId=%3", _reo, _threatId, _bomberNetId];
-    };
+    diag_log format ["[ARC][SEC] SB_DETONATE_DENIED owner=%1 threat=%2 object=%3 ts=%4", remoteExecutedOwner, _threatId, _bomberNetId, serverTime];
+    ["ARC_fnc_suicideBomberOnDetonate", "SB_DETONATE_DENIED", remoteExecutedOwner] call ARC_fnc_securityDenyRecord;
+    false
+};
+private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
+private _activeThreat = ["activeIedThreatId", ""] call ARC_fnc_stateGet;
+private _activeBomber = missionNamespace getVariable ["ARC_suicideBomberNetId", ""];
+private _bomber = objectFromNetId _bomberNetId;
+if (_taskId isEqualTo "" || { _threatId isEqualTo "" } || { !(_threatId isEqualTo _activeThreat) } ||
+    { _bomberNetId isEqualTo "" } || { !(_bomberNetId isEqualTo _activeBomber) } || { isNull _bomber } ||
+    { !(_bomber getVariable ["ARC_isSuicideBomber", false]) } ||
+    { !((_bomber getVariable ["ARC_threatTaskId", ""]) isEqualTo _taskId) } ||
+    { !((_bomber getVariable ["ARC_threatId", ""]) isEqualTo _threatId) }) exitWith
+{
+    diag_log format ["[ARC][SEC] SB_DETONATE_DENIED stale association task=%1 threat=%2 object=%3 ts=%4", _taskId, _threatId, _bomberNetId, serverTime];
+    false
 };
 
 // Deduplicate (guard against double-fire)
 if (missionNamespace getVariable ["ARC_suicideBomberDetonated", false]) exitWith {false};
 missionNamespace setVariable ["ARC_suicideBomberDetonated", true];
 
-private _bomber = objectFromNetId _bomberNetId;
 private _pos = if (!isNull _bomber) then { getPosATL _bomber } else { ["activeExecPos", []] call ARC_fnc_stateGet };
 if (!(_pos isEqualType []) || {(count _pos) < 2}) then { _pos = [0,0,0]; };
 _pos = +_pos; _pos resize 3; _pos set [2, 0];

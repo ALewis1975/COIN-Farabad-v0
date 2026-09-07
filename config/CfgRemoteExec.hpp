@@ -85,7 +85,7 @@ class CfgRemoteExec
         class ARC_fnc_iedServerDetonate             { allowedTargets = 2; };
         class ARC_fnc_iedServerRequestDisposition   { allowedTargets = 2; };
         class ARC_fnc_vbiedServerDetonate           { allowedTargets = 2; };
-        class ARC_fnc_suicideBomberOnDetonate       { allowedTargets = 2; };
+        // Suicide detonation is server-internal; no client RPC capability.
 
         // CASREQ RPCs
         class ARC_fnc_casreqOpen                    { allowedTargets = 2; };
@@ -138,7 +138,8 @@ class CfgRemoteExec
 
         // BIS functions invoked via remoteExec as functions.
         class BIS_fnc_explosionEffects              { allowedTargets = 0; };
-        class BIS_fnc_holdActionAdd                 { allowedTargets = 0; jip = 1; };
+        // BIS_fnc_holdActionAdd carries executable callbacks: server-origin only.
+        // Server remote execution (including object-keyed JIP) is exempt from this client allowlist.
         class BIS_fnc_holdActionRemove              { allowedTargets = 0; };
     };
 

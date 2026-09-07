@@ -15,27 +15,32 @@ params [
 // Dedicated MP hardening:
 // If remotely requested, bind request to sender-owner and require the same
 // role family the Intel UI exposes for admin refresh tools (S2/CMD/OMNI).
-private _isRemoteRpc = !isNil "remoteExecutedOwner";
-if (_isRemoteRpc) then
+private _rpcAuthorized = if (isRemoteExecuted || { !isNull _caller }) then
 {
     private _reo = remoteExecutedOwner;
-    if (_reo > 0) then
+
+    if (isNull _caller) then
     {
-        if (isNull _caller) then
         {
-            {
-                if (owner _x == _reo) exitWith { _caller = _x; };
-            } forEach allPlayers;
-        };
-
-        // RemoteExec-only validation path: requires remoteExecutedOwner context.
-        private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
-        if (!([_caller, "ARC_fnc_tocRequestRefreshIntel", "Intel refresh rejected: sender verification failed.", "TOC_REFRESH_INTEL_SECURITY_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
-
-        private _isOmni = [_caller, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
-        private _canRefresh = _isOmni || { [_caller] call ARC_fnc_rolesIsTocS2 } || { [_caller] call ARC_fnc_rolesIsTocCommand };
-        if (!_canRefresh) exitWith {false};
+            if (owner _x == _reo) exitWith { _caller = _x; };
+        } forEach allPlayers;
     };
+
+    // RemoteExec-only validation path: requires remoteExecutedOwner context.
+    private _reoOwner = remoteExecutedOwner;
+    if (!([_caller, "ARC_fnc_tocRequestRefreshIntel", "Intel refresh rejected: sender verification failed.", "TOC_REFRESH_INTEL_SECURITY_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
+
+    private _isOmni = [_caller, "OMNI"] call ARC_fnc_rolesHasGroupIdToken;
+    private _canRefresh = _isOmni || { [_caller] call ARC_fnc_rolesIsTocS2 } || { [_caller] call ARC_fnc_rolesIsTocCommand };
+    if (!_canRefresh) exitWith {false};
+
+    true
+} else { true };
+if (!_rpcAuthorized) exitWith
+{
+    diag_log format ["[ARC][SEC] ARC_fnc_tocRequestRefreshIntel: AUTHORIZATION_DENIED owner=%1 ts=%2", remoteExecutedOwner, serverTime];
+    ["ARC_fnc_tocRequestRefreshIntel", "AUTHORIZATION_DENIED", remoteExecutedOwner] call ARC_fnc_securityDenyRecord;
+    false
 };
 
 // Keep broadcast order explicit and stable:
