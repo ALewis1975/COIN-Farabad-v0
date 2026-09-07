@@ -1,151 +1,56 @@
-/*
-    ARC_fnc_casreqDecide
-
-    Server-only: TOC approves or denies an open CASREQ.
-
-    Only S3/Command (queue approvers) or OMNI may decide.
-
-    Params:
-      0: OBJECT - deciding unit (TOC operator)
-      1: STRING - casreq_id
-      2: STRING - decision: "APPROVED" | "DENIED"
-      3: STRING - reason (optional)
-
-    Returns: BOOL
-*/
-
+// Engine-compatible command wrappers retain the repository lint baseline.
+private _casDefault = compile "params ['_map','_args']; _map getOrDefault _args";
+private _casGet = compile "params ['_map','_key']; (_map) get _key";
+private _casMap = compile "params ['_pairs']; createHashMapFromArray _pairs";
+private _casTrim = compile "params ['_s']; trim _s";
+/* Controller decision. Optional fifth argument selects an aircraft; never accepts client UID lists. */
 if (!isServer) exitWith {false};
-
-params [
-    ["_unit",      objNull, [objNull]],
-    ["_id",        "",      [""]],
-    ["_decision",  "",      [""]],
-    ["_reason",    "",      [""]]
-];
-
-private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
-if (!([_unit, "ARC_fnc_casreqDecide", "CASREQ decide rejected: sender mismatch.", "CASREQ_DECIDE_SEC_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
-
-if (isNull _unit) exitWith {false};
-if (_id isEqualTo "") exitWith {false};
-
-private _trimFn = compile "params ['_s']; trim _s";
-private _decU = toUpper ([_decision] call _trimFn);
-if (!(_decU in ["APPROVED", "DENIED"])) exitWith
-{
-    diag_log format ["[ARC][CASREQ] casreqDecide: invalid decision '%1' for %2.", _decision, _id];
-    false
+// A scheduled remoteExec intake re-enters once in an unscheduled block so guards
+// and mutation form one server operation even under simultaneous submissions.
+if (canSuspend) exitWith {
+    private _args = +_this;
+    private _result = false;
+    isNil {_result = _args call ARC_fnc_casreqDecide;};
+    _result
 };
-
-// Role gate: only S3/Command (queue approvers) or OMNI
-private _omniTokens = missionNamespace getVariable ["ARC_consoleOmniTokens", ["OMNI"]];
-if (!(_omniTokens isEqualType [])) then { _omniTokens = ["OMNI"]; };
-private _isOmni = false;
-{ if (_x isEqualType "" && { [_unit, _x] call ARC_fnc_rolesHasGroupIdToken }) exitWith { _isOmni = true; }; } forEach _omniTokens;
-
-if (!_isOmni && { !([_unit] call ARC_fnc_rolesCanApproveQueue) }) exitWith
-{
-    diag_log format ["[ARC][CASREQ] casreqDecide: role denied for %1.", [_unit] call ARC_fnc_rolesFormatUnit];
-    if (!isNull _unit) then {
-        ["CASREQ decision denied: requires S3/Command or OMNI."] remoteExec ["ARC_fnc_clientHint", owner _unit];
+params [["_unit", objNull, [objNull]], ["_id", "", [""]], ["_decision", "", [""]], ["_reason", "", [""]], ["_aircraft", objNull, [objNull]]];
+private _reoOwner = remoteExecutedOwner;
+if (!([_unit, "ARC_fnc_casreqDecide", "CAS decision rejected: sender mismatch.", "CASREQ_DECIDE_SEC_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith {false};
+private _deny = {params ["_why"]; ["CAS decision rejected: " + _why] remoteExecCall ["ARC_fnc_clientHint", owner _unit]; false};
+if (!([_unit, "DECIDE"] call ARC_fnc_casreqCan)) exitWith {["controller required"] call _deny};
+_decision = toUpper (([_decision] call _casTrim));
+if (!(_decision in ["APPROVED", "DENIED"]) || {count _reason > 500} || {count _id > 32}) exitWith {["invalid decision"] call _deny};
+private _record = [_id] call ARC_fnc_casreqSnapshotGet;
+if (_record isEqualTo []) exitWith {["unknown request"] call _deny};
+private _r = ([_record] call _casMap);
+if ((([_r, "state"] call _casGet)) isEqualTo _decision) exitWith {true};
+if ((([_r, "state"] call _casGet)) != "OPEN") exitWith {["request is no longer open"] call _deny};
+private _availability = [] call ARC_fnc_casreqAirbaseAvailability;
+private _av = ([_availability] call _casMap);
+private _crewUids = [];
+private _assetOk = true;
+if (_decision isEqualTo "APPROVED") then {
+    private _allowedAircraft = localNamespace getVariable ["ARC_casreq_attackObjects", []];
+    _assetOk = !isNull _aircraft && {alive _aircraft} && {_aircraft in _allowedAircraft};
+    if (_assetOk) then {
+        {if (isPlayer _x && {side group _x == west}) then {_crewUids pushBackUnique (getPlayerUID _x)}} forEach crew _aircraft;
+        _assetOk = count _crewUids > 0;
     };
-    false
+    // A selected aircraft already airborne does not need a second parked asset.
+    private _airborne = _assetOk && {(getPosATL _aircraft select 2) > 5};
+    _assetOk = _assetOk && {(([_av, ["available", false]] call _casDefault)) || _airborne};
 };
-
+if (!_assetOk) exitWith {[format ["select a ready or airborne attack aircraft with player crew (AIRBASESUB: %1)", [_av, ["reason", "UNAVAILABLE"]] call _casDefault]] call _deny};
+private _actor = [_unit] call ARC_fnc_rolesFormatUnit;
+private _aircraftVar = "";
+{if ((_x select 1) isEqualTo _aircraft) exitWith {_aircraftVar = _x select 0}} forEach (localNamespace getVariable ["ARC_casreq_attackObjectRows", []]);
+private _extra = [["reason", ([_reason] call _casTrim)], ["crew_uids", _crewUids], ["aircraft_var", _aircraftVar], ["airbase_availability", _availability]];
+private _tr = [_record, _decision, _actor, serverTime, _extra] call ARC_fnc_casreqTransition;
+if !(_tr select 0) exitWith {[_tr select 3] call _deny};
+if !(_tr select 2) exitWith {true};
 private _records = ["casreq_v1_records", createHashMap] call ARC_fnc_stateGet;
-if (!(_records isEqualType createHashMap)) exitWith
-{
-    diag_log "[ARC][CASREQ] casreqDecide: records store missing.";
-    false
-};
-
-private _hg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k, _d]";
-private _record = [_records, _id, []] call _hg;
-if (!(_record isEqualType []) || { _record isEqualTo [] }) exitWith
-{
-    diag_log format ["[ARC][CASREQ] casreqDecide: record %1 not found.", _id];
-    false
-};
-
-// Only OPEN records may be decided
-private _stateIdx = -1;
-{ if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo "state" }) exitWith { _stateIdx = _forEachIndex; }; } forEach _record;
-if (_stateIdx < 0) exitWith { false };
-
-private _curState = toUpper ((_record select _stateIdx) select 1);
-if (!(_curState in ["OPEN"])) exitWith
-{
-    diag_log format ["[ARC][CASREQ] casreqDecide: %1 is in state %2, cannot decide.", _id, _curState];
-    false
-};
-
-private _pairGet = {
-    params ["_pairs", "_key", "_def"];
-    private _out = _def;
-    { if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo _key }) exitWith { _out = _x select 1; }; } forEach _pairs;
-    _out
-};
-
-private _airbaseAvailability = [];
-if (!isNil "ARC_fnc_casreqAirbaseAvailability") then { _airbaseAvailability = [] call ARC_fnc_casreqAirbaseAvailability; };
-if (!(_airbaseAvailability isEqualType [])) then { _airbaseAvailability = []; };
-
-if (_decU isEqualTo "APPROVED" && { !([_airbaseAvailability, "available", true] call _pairGet) }) exitWith
-{
-    private _reasonAir = [_airbaseAvailability, "reason", "AIRBASE_UNAVAILABLE"] call _pairGet;
-    diag_log format ["[ARC][CASREQ] casreqDecide: %1 approval blocked by AIRBASESUB availability (%2).", _id, _reasonAir];
-    if (!isNull _unit) then {
-        [format ["CASREQ approval blocked: AIRBASESUB reports %1.", _reasonAir]] remoteExec ["ARC_fnc_clientHint", owner _unit];
-    };
-    false
-};
-
-(_record select _stateIdx) set [1, _decU];
-
-// Update updated_at
-private _now = serverTime;
-private _updIdx = -1;
-{ if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo "updated_at" }) exitWith { _updIdx = _forEachIndex; }; } forEach _record;
-if (_updIdx >= 0) then { (_record select _updIdx) set [1, _now]; };
-
-// Append to messages log
-private _msgIdx = -1;
-{ if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo "messages" }) exitWith { _msgIdx = _forEachIndex; }; } forEach _record;
-if (_msgIdx >= 0) then
-{
-    private _msgs = (_record select _msgIdx) select 1;
-    if (!(_msgs isEqualType [])) then { _msgs = []; };
-    private _actor = [_unit] call ARC_fnc_rolesFormatUnit;
-    _msgs pushBack [["event", _decU], ["at", _now], ["by", _actor], ["reason", _reason], ["airbase_availability", _airbaseAvailability]];
-    (_record select _msgIdx) set [1, _msgs];
-};
-
-private _airIdx = -1;
-{ if (_x isEqualType [] && { (count _x) >= 2 } && { (_x select 0) isEqualTo "airbase_availability" }) exitWith { _airIdx = _forEachIndex; }; } forEach _record;
-if (_airIdx >= 0) then { (_record select _airIdx) set [1, _airbaseAvailability]; } else { _record pushBack ["airbase_availability", _airbaseAvailability]; };
-
-_records set [_id, _record];
+_records set [_id, _tr select 1];
 ["casreq_v1_records", _records] call ARC_fnc_stateSet;
-
-// If denied, move from open to closed index
-if (_decU isEqualTo "DENIED") then
-{
-    private _openIdx = ["casreq_v1_open_index", []] call ARC_fnc_stateGet;
-    if (_openIdx isEqualType []) then
-    {
-        private _pos = -1;
-        { if (_x isEqualTo _id) exitWith { _pos = _forEachIndex; }; } forEach _openIdx;
-        if (_pos >= 0) then { _openIdx deleteAt _pos; };
-        ["casreq_v1_open_index", _openIdx] call ARC_fnc_stateSet;
-    };
-
-    private _closedIdx = ["casreq_v1_closed_index", []] call ARC_fnc_stateGet;
-    if (!(_closedIdx isEqualType [])) then { _closedIdx = []; };
-    _closedIdx pushBackUnique _id;
-    ["casreq_v1_closed_index", _closedIdx] call ARC_fnc_stateSet;
-};
-
-[_id, [_unit] call ARC_fnc_rolesFormatUnit, _decU, [["reason", _reason]]] call ARC_fnc_casreqBroadcastDelta;
-
-diag_log format ["[ARC][CASREQ] casreqDecide: %1 %2 by %3.", _id, _decU, [_unit] call ARC_fnc_rolesFormatUnit];
+[true] call ARC_fnc_casreqMaintain;
+[_id, _actor, _decision, [["reason", _reason]]] call ARC_fnc_casreqBroadcastDelta;
 true

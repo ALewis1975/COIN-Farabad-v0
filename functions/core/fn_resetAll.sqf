@@ -56,6 +56,11 @@ if (_hist isEqualType []) then
     } forEach _hist;
 };
 
+// Follow-on orders own standalone tasks, including terminal history views.
+private _oldOrders = ["tocOrders", []] call ARC_fnc_stateGet;
+if (!(_oldOrders isEqualType [])) then { _oldOrders = []; };
+{ [_x] call _pushId; } forEach ([_oldOrders] call ARC_fnc_resetOrderTaskIds);
+
 // Case-file parent tasks (threads)
 private _threads = ["threads", []] call ARC_fnc_stateGet;
 if (_threads isEqualType []) then
@@ -66,7 +71,16 @@ if (_threads isEqualType []) then
         private _parent = "";
         if ((count _thr) > 13) then { _parent = _thr select 13; };
         [_parent] call _pushId;
+        ["CASE:" + (_thr select 0)] call _pushId;
     } forEach _threads;
+};
+
+// The former parallel helper also wrote CASE IDs into this rev4 mirror.
+private _resetMapKeys = compile "params ['_h']; keys _h";
+private _oldThreadStore = ["taskeng_v0_thread_store", createHashMap] call ARC_fnc_stateGet;
+if (_oldThreadStore isEqualType createHashMap) then
+{
+    { if (_x isEqualType "" && { !(_x isEqualTo "") }) then { ["CASE:" + _x] call _pushId; }; } forEach ([_oldThreadStore] call _resetMapKeys);
 };
 
 // Brute cleanup for legacy case-file IDs that may not be present in the thread array
@@ -138,6 +152,11 @@ missionNamespace setVariable ["ARC_persistentCheckpointNetIds", []];
 missionNamespace setVariable ["ARC_persistentCheckpointSites", []];
 missionNamespace setVariable ["ARC_persistentRouteSupportSites", []];
 
+
+// Reset also clears persistence clock quarantine from an obsolete save.
+missionProfileNamespace setVariable ["ARC_state_preClockV1", nil];
+missionNamespace setVariable ["ARC_persistenceClockBlocked", false];
+missionNamespace setVariable ["ARC_persistenceClockSnapshot", []];
 
 // Reset the authoritative persisted blob back to the current versioned defaults first.
 // Follow-on writes below preserve existing reset-specific rerolls/reseeds while ensuring
@@ -403,6 +422,11 @@ missionNamespace setVariable ["airbase_v1_notifyState", createHashMap, false];
 ["casreq_v1_open_index", []] call ARC_fnc_stateSet;
 ["casreq_v1_closed_index", []] call ARC_fnc_stateSet;
 ["casreq_v1_seq", 0] call ARC_fnc_stateSet;
+["casreq_v1_archived_completed", 0] call ARC_fnc_stateSet;
+missionNamespace setVariable ["ARC_pub_casreqInbox", [], true];
+localNamespace setVariable ["ARC_casreq_inboxSignature", []];
+localNamespace setVariable ["ARC_casreq_submitCooldowns", []];
+missionNamespace setVariable ["ARC_casreq_lastMaintenanceAt", -30];
 private _casreqRev = missionNamespace getVariable ["ARC_casreq_rev", 0];
 if (!(_casreqRev isEqualType 0)) then { _casreqRev = 0; };
 missionNamespace setVariable ["ARC_casreq_rev", _casreqRev + 1, true];
@@ -421,6 +445,7 @@ missionNamespace setVariable ["ARC_pub_s1_registryUpdatedAt", serverTime, true];
 ["threat_v0_records", []] call ARC_fnc_stateSet;
 ["threat_v0_open_index", []] call ARC_fnc_stateSet;
 ["threat_v0_closed_index", []] call ARC_fnc_stateSet;
+missionNamespace setVariable ["threat_v0_drivenPending", []];
 
 // SHERIFF/SSE Unified Dossier v0: reset dossier store (persistence-safe)
 ["dossier_v0_seq", 0] call ARC_fnc_stateSet;

@@ -391,7 +391,7 @@ else
                     // authorization or queue-approver role and CASREQ subsystem enabled.
                     private _casreqSysEnabled = missionNamespace getVariable ["casreq_v1_enabled", true];
                     if (!(_casreqSysEnabled isEqualType true) && !(_casreqSysEnabled isEqualType false)) then { _casreqSysEnabled = true; };
-                    private _canCasreq = _casreqSysEnabled && { _isAuth || { [player] call ARC_fnc_rolesCanApproveQueue } };
+                    private _canCasreq = _casreqSysEnabled && { [player, "CREATE"] call ARC_fnc_casreqCan };
                     _secondaryLabel = "REQUEST CAS";
                     _secondaryEnabled = _canCasreq;
 

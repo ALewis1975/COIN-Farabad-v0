@@ -24,12 +24,16 @@ private _attackReady = 0;
 private _attackQueued = 0;
 private _attackActive = 0;
 private _assetRows = [];
+private _attackObjects = [];
+private _attackObjectRows = [];
 
 {
     private _vehVar = [_x, "vehVar", ""] call _hg;
     if (!(_vehVar isEqualType "") || { !(_vehVar in _attackVehVars) }) then { continue; };
 
     _attackTotal = _attackTotal + 1;
+    private _veh = [_x, "veh", objNull] call _hg;
+    if (!isNull _veh) then {_attackObjects pushBackUnique _veh; _attackObjectRows pushBack [_vehVar, _veh]};
 
     private _assetId = [_x, "id", _vehVar] call _hg;
     private _state = toUpper ([_x, "state", "PARKED"] call _hg);
@@ -46,6 +50,12 @@ private _assetRows = [];
 
     _assetRows pushBack [_assetId, _vehVar, _state, _activeFlight, _availableAt];
 } forEach _assets;
+// AIRBASE recreates ramp assets with createVehicle, which does not emit EntityRespawned.
+// Refresh from its server runtime record so CAS follows the existing cleanup owner.
+if (_attackTotal > 0) then {
+    localNamespace setVariable ["ARC_casreq_attackObjects", _attackObjects];
+    localNamespace setVariable ["ARC_casreq_attackObjectRows", _attackObjectRows];
+};
 
 private _holdDepartures = ["airbase_v1_holdDepartures", false] call ARC_fnc_stateGet;
 if (!(_holdDepartures isEqualType true) && !(_holdDepartures isEqualType false)) then { _holdDepartures = false; };

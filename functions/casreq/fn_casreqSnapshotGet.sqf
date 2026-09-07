@@ -16,7 +16,8 @@ private _records = ["casreq_v1_records", createHashMap] call ARC_fnc_stateGet;
 if !(_records isEqualType createHashMap) exitWith { [] };
 
 private _snapshot = [_records, _casreqId, []] call _hg;
-if !(_snapshot isEqualType []) then { _snapshot = []; };
+if !(_snapshot isEqualType [] && {!(_snapshot isEqualTo [])}) exitWith {[]};
+_snapshot = +_snapshot;
 
 private _requiredKeys = [
     "casreq_id",

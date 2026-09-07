@@ -1,3 +1,5 @@
+// Engine-compatible command wrappers retain the repository lint baseline.
+private _casTrim = compile "params ['_s']; trim _s";
 /*
     ARC_fnc_intelShadowLeadBridge
 
@@ -129,44 +131,15 @@ private _summaryText = _lines joinString "\n";
 private _ok = [_summaryText, "SHADOW ISR Lead", true, true] call BIS_fnc_guiMessage;
 if (!_ok) exitWith { false };
 
-// Editable default: lead type.
-private _trimFn = compile "params ['_s']; trim _s";
-private _typePrompt = [format ["Lead type (default: %1):", _leadType], _leadType] call BIS_fnc_guiMessage;
-if (_typePrompt isEqualType "") then
-{
-    private _typeTrim = [_typePrompt] call _trimFn;
-    if (!(_typeTrim isEqualTo "")) then { _leadType = _typeTrim; };
-};
-_leadType = toUpper ([_leadType] call _trimFn);
-if (_leadType isEqualTo "") then { _leadType = "RECON"; };
-
-// Editable default: confidence (LOW / MED / HIGH).
-private _conf = "MED";
-private _confPrompt = ["Confidence LOW / MED / HIGH (default: MED):", _conf] call BIS_fnc_guiMessage;
-if (_confPrompt isEqualType "") then
-{
-    private _cU = toUpper ([_confPrompt] call _trimFn);
-    if (_cU find "LOW" >= 0) then { _conf = "LOW"; };
-    if (_cU find "HIGH" >= 0) then { _conf = "HIGH"; };
-    if (_cU find "MED" >= 0) then { _conf = "MED"; };
-};
-
-private _strength = switch (_conf) do
-{
-    case "LOW":  { 0.35 };
-    case "HIGH": { 0.75 };
-    default      { 0.55 };
-};
-private _pri = switch (_conf) do
-{
-    case "HIGH": { 1 };
-    case "LOW":  { 4 };
-    default      { 3 };
-};
-
-// Remarks (optional).
-private _remarksPrompt = ["Remarks (optional):", ""] call BIS_fnc_guiMessage;
-private _remarks = if (_remarksPrompt isEqualType "") then { [_remarksPrompt] call _trimFn } else { "" };
+// Actual editable form; cancellation/invalid choices never reach queue submission.
+private _form = ["SHADOW ISR | " + _grid, ["Type: RECON / PATROL / CHECKPOINT / CIVIL / IED", "Confidence (LOW / MED / HIGH)", "Remarks (500 max)"], [_leadType, "MED", ""], [16,4,500]] call ARC_fnc_casreqInput;
+if !(_form select 0) exitWith {false};
+_leadType = toUpper (([(_form select 1)] call _casTrim));
+private _conf = toUpper (([(_form select 2)] call _casTrim));
+private _remarks = ([(_form select 3)] call _casTrim);
+if (!(_leadType in ["RECON", "PATROL", "CHECKPOINT", "CIVIL", "IED"]) || {!(_conf in ["LOW", "MED", "HIGH"])}) exitWith {["ISR", "Choose a listed lead type and confidence. Nothing submitted."] call ARC_fnc_clientToast; false};
+private _strength = switch (_conf) do {case "LOW": {0.35}; case "HIGH": {0.75}; default {0.55}};
+private _pri = switch (_conf) do {case "HIGH": {1}; case "LOW": {4}; default {3}};
 
 private _ttl = 3600;
 

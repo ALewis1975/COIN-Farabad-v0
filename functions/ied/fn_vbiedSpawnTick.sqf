@@ -25,24 +25,20 @@ private _objKind = ["activeObjectiveKind", ""] call ARC_fnc_stateGet;
 if (!(_objKind isEqualType "")) then { _objKind = ""; };
 if (!((toUpper _objKind) isEqualTo "VBIED_VEHICLE")) exitWith {false};
 
-// ── Escalation-tier gate (VBIED requires tier ≥ 2 / HIGH_RISK) ────────────
-// Mirrors fn_threatGovernorCheck line 88: VBIED _tierMin = 2.
-// Prevents execution-layer bypass if an incident reaches this path without
-// passing through the scheduler (e.g. direct mission event or debug spawn).
+private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
+private _threatId = ["activeIedThreatId", ""] call ARC_fnc_stateGet;
+if !([_taskId, _threatId, ["VBIED_VEHICLE"]] call ARC_fnc_threatRuntimeIsCurrent) exitWith {false};
+private _alreadyArmed = !((["activeVbiedDeviceId", ""] call ARC_fnc_stateGet) isEqualTo "");
+// Escalation gates admission only; an armed device still monitors every tick.
 private _districtId = ["activeIncidentCivsubDistrictId", ""] call ARC_fnc_stateGet;
 if (!(_districtId isEqualType "")) then { _districtId = ""; };
-if (!(_districtId isEqualTo "")) then
+private _secLevel = missionNamespace getVariable [format ["ARC_district_%1_secLevel", _districtId], "NORMAL"];
+if (!(_secLevel isEqualType "")) then { _secLevel = "NORMAL"; };
+private _tier = ["NORMAL", "ELEVATED", "HIGH_RISK", "CRITICAL"] find (toUpper _secLevel);
+if (!_alreadyArmed && {_tier < 2}) exitWith
 {
-    private _secLevel = missionNamespace getVariable [format ["ARC_district_%1_secLevel", _districtId], "NORMAL"];
-    if (!(_secLevel isEqualType "")) then { _secLevel = "NORMAL"; };
-    private _tier = 0;
-    if (_secLevel isEqualTo "ELEVATED") then { _tier = 1; };
-    if (_secLevel isEqualTo "HIGH_RISK") then { _tier = 2; };
-    if (_tier < 2) exitWith
-    {
-        diag_log format ["[ARC][THREAT] ARC_fnc_vbiedSpawnTick: ESCALATION_TIER deny district=%1 tier=%2 required=2", _districtId, _tier];
-        false
-    };
+    diag_log format ["[ARC][THREAT] ARC_fnc_vbiedSpawnTick: ESCALATION_TIER deny t=%1 actor=SYSTEM task=%2 threat=%3 district=%4 tier=%5 required=2", serverTime, _taskId, _threatId, _districtId, _tier];
+    false
 };
 
 private _vehNid = ["activeObjectiveNetId", ""] call ARC_fnc_stateGet;
@@ -79,7 +75,7 @@ _cool = (_cool max 60) min 21600;
 
 private _last = ["activeVbiedLastArmedAt", -1] call ARC_fnc_stateGet;
 if (!(_last isEqualType 0)) then { _last = -1; };
-if (_last >= 0 && { (serverTime - _last) < _cool }) exitWith {false};
+if (!_alreadyArmed && {_last >= 0} && { (serverTime - _last) < _cool }) exitWith {false};
 
 // State guards
 private _safe = ["activeVbiedSafe", false] call ARC_fnc_stateGet;
@@ -115,6 +111,8 @@ private _pos = getPosATL _veh; _pos = +_pos; _pos resize 3;
 _pos set [2, 0];
 
 // Ensure device id
+private _needsWorldBinding = !_alreadyArmed || {!((_veh getVariable ["ARC_threatId", ""]) isEqualTo _threatId)};
+if (_needsWorldBinding && {!([_threatId, _taskId, [_veh], []] call ARC_fnc_threatRegisterWorld)}) exitWith {false};
 private _id = ["activeVbiedDeviceId", ""] call ARC_fnc_stateGet;
 if (!(_id isEqualType "")) then { _id = ""; };
 if (_id isEqualTo "") then
@@ -129,7 +127,11 @@ if (_id isEqualTo "") then
 ["activeVbiedVehicleNetId", _vehNid] call ARC_fnc_stateSet;
 ["activeVbiedTriggerEnabled", true] call ARC_fnc_stateSet;
 ["activeVbiedTriggerRadiusM", _outerR] call ARC_fnc_stateSet;
-["activeVbiedLastArmedAt", serverTime] call ARC_fnc_stateSet;
+if (!_alreadyArmed) then
+{
+    ["activeVbiedLastArmedAt", serverTime] call ARC_fnc_stateSet;
+    ["activeVbiedElapsedBeforeLoad", 0] call ARC_fnc_stateSet;
+};
 
 // Publish a compact device record once (debug/history)
 private _rec0 = ["activeVbiedDeviceRecord", []] call ARC_fnc_stateGet;
@@ -149,7 +151,7 @@ if !(_rec0 isEqualType [] && { (count _rec0) >= 5 }) then
     missionNamespace setVariable ["ARC_vbiedPhase3_deviceRecords", _arr, true];
 };
 
-// If client-side defuse action sets this flag, mark safe (server authoritative enough for PvE)
+// Only the validated server objective-completion endpoint sets this flag.
 private _defused = _veh getVariable ["ARC_vbiedDefused", false];
 if (!(_defused isEqualType true) && !(_defused isEqualType false)) then { _defused = false; };
 if (_defused) exitWith
@@ -186,7 +188,6 @@ if (_enableDef) then
             // completion: mark defused (broadcast) and mark the objective complete (server-authoritative close-ready)
             {
                 params ["_target", "_caller"];
-                _target setVariable ["ARC_vbiedDefused", true, true];
                 ["VBIED_VEHICLE", _target, _caller, "Suspicious vehicle rendered safe.", "", "COMPLETE"] remoteExec ["ARC_fnc_execObjectiveComplete", 2];
             },
             {},
@@ -234,6 +235,7 @@ if (!(_t0 isEqualType 0)) then { _t0 = -1; };
 
 if (!_alert) then
 {
+    ["activeVbiedElapsedBeforeLoad", 0] call ARC_fnc_stateSet;
     ["activeVbiedAlerted", true] call ARC_fnc_stateSet;
     ["activeVbiedAlertAt", serverTime] call ARC_fnc_stateSet;
     ["activeVbiedPauseAccum", 0] call ARC_fnc_stateSet;
@@ -269,6 +271,9 @@ else
 
 private _elapsed = (serverTime - _t0) - _pauseAccum;
 if (_pauseSince >= 0) then { _elapsed = (serverTime - _t0) - (_pauseAccum + (serverTime - _pauseSince)); };
+private _elapsedCarry = ["activeVbiedElapsedBeforeLoad", 0] call ARC_fnc_stateGet;
+if !(_elapsedCarry isEqualType 0) then { _elapsedCarry = 0; };
+_elapsed = _elapsed + (_elapsedCarry max 0);
 
 private _remain = _win - _elapsed;
 ["activeVbiedWindowRemaining", _remain] call ARC_fnc_stateSet;

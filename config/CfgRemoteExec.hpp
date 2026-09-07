@@ -89,7 +89,10 @@ class CfgRemoteExec
 
         // CASREQ RPCs
         class ARC_fnc_casreqOpen                    { allowedTargets = 2; };
-        // ARC_fnc_casreqDecide / casreqExecute / casreqClose: no live remoteExec callsites (server-local call only); removed from allowlist (issue #642)
+        // Fixed, authenticated compact lifecycle actions from the CAS inbox.
+        class ARC_fnc_casreqDecide                  { allowedTargets = 2; };
+        class ARC_fnc_casreqExecute                 { allowedTargets = 2; };
+        class ARC_fnc_casreqClose                   { allowedTargets = 2; };
 
         // CASEVAC RPC (Item 5 — client → server request)
         class ARC_fnc_medicalCasevacRequest         { allowedTargets = 2; };

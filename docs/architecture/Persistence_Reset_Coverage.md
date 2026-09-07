@@ -17,6 +17,17 @@ This inventory documents every top-level key declared by `functions/core/fn_stat
 
 ## Key inventory
 
+Clock repair additions (2026-09-06):
+
+| Key | Owner and version | Load/save/reset contract |
+|---|---|---|
+| `persistenceClock` | Core envelope clock v1: `[1,savedServerTime,UTC,"FREEZE_OFFLINE"]` | Save exact uptime; load deep-copies and translates the explicit timestamp manifest. Current legacy saves use their exact `s1RegistryUpdatedAt`; earlier unanchored core saves/future clock schemas stop before writers. Reset clears migration state and saves a new anchor. |
+| `threat_v0_budget_next_reset_ts` | Threat economy deadline | Preserve remaining daily budget period across restart; scheduler grants at most one due reset; reset default -1 seeds a new 86400s period. |
+| `activeVbiedElapsedBeforeLoad` | VBIED elapsed duration | Preserve unpaused elapsed time lost when sentinel-dependent alert/pause anchors clamp to the new process clock. Never timestamp-shift this duration. New device, cleanup and reset clear it. |
+| `casreq_v1_archived_completed` | CASREQ compact v1 cumulative counter | Closed-history pruning retains completed-sortie totals; loaded by default merge, saved in ARC_state, reset to zero with CAS records/inbox. |
+
+CIVSUB's existing `FARABAD_CIVSUB_V1_STATE` serialized tuple payload receives the same independent `persistenceClock` pair; profile version is `1.1.0-clock1`. The district/identity/crime tuple shapes and influence math are unchanged. Unanchored legacy CIVSUB cooldowns are conservatively bounded to 3600/1800s and logged. One pre-clock backup is held at `FARABAD_CIVSUB_V1_PRE_CLOCK_BACKUP`; core holds `ARC_state_preClockV1`. Explicit reset clears the matching backup. Unsupported clock versions preserve the profile and stop that owner's writes. See the critical repair contract for migration, diagnostics and rollback.
+
 | Key | Subsystem | Init | Load | Save | Reset |
 |---|---|---|---|---|---|
 | `version` | Core system | `fn_stateInit.sqf:9` | `fn_stateLoad.sqf` default merge | `fn_stateSave.sqf` whole-blob save | Default reset via `resetAll`; subsystem-specific overrides where applicable. |

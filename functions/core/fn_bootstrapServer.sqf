@@ -428,7 +428,9 @@ if (_safeModeEnabled) then
 [] call ARC_fnc_worldInit;
 
 // Load persistent COIN state
-[] call ARC_fnc_stateLoad;
+if !([] call ARC_fnc_stateLoad) exitWith {
+    diag_log "[ARC][BOOT][ERROR] Campaign load failed; bootstrap stopped before campaign writers start.";
+};
 
 // SUPPLYLEDGER v1 mirrors the legacy baseFuel/baseAmmo/baseMed compatibility keys.
 [] call ARC_fnc_supplyInit;

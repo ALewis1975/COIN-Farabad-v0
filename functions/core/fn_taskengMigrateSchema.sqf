@@ -14,9 +14,8 @@
       rev 3 → rev 4 : populate taskeng_v0_thread_store HASHMAP from threads array
       rev 4          : no-op (already current)
 
-    After migration the canonical store is taskeng_v0_thread_store. The legacy
-    threads array is preserved as a deprecated fallback read for one release cycle
-    so that in-progress saves are not lost before the next breaking change.
+    The existing runtime still owns the threads tuple array. Rev4 mirrors those
+    tuples; promotion to a fully canonical TASKENG store remains a separate migration.
 
     Returns: NUMBER — the schema rev after migration
 */
@@ -25,6 +24,30 @@ if (!isServer) exitWith {0};
 
 private _rev = ["taskeng_v0_schema_rev", 0] call ARC_fnc_stateGet;
 if (!(_rev isEqualType 0) || { _rev < 0 }) then { _rev = 0; };
+
+// Repair the previous creator's string values to the existing rev4 tuple shape.
+// Keep valid mirror records and let the runtime-authoritative threads refresh them.
+private _repairThreadMirror = {
+    private _threads = ["threads",[]] call ARC_fnc_stateGet;
+    private _store = ["taskeng_v0_thread_store",createHashMap] call ARC_fnc_stateGet;
+    private _repaired = createHashMap;
+    private _get = compile "params ['_h','_k']; (_h) get _k";
+    private _keys = compile "params ['_h']; keys _h";
+    if (_store isEqualType createHashMap) then
+    {
+        {
+            private _record = [_store,_x] call _get;
+            if (_x isEqualType "" && {_record isEqualType []} && {count _record >= 14} && {(_record select 0) isEqualTo _x}) then
+            {_repaired set [_x,+_record];};
+        } forEach ([_store] call _keys);
+    };
+    if (_threads isEqualType []) then
+    {
+        {if (_x isEqualType [] && {count _x >= 14} && {(_x select 0) isEqualType ""}) then {_repaired set [_x select 0,+_x];};} forEach _threads;
+    };
+    ["taskeng_v0_thread_store",_repaired] call ARC_fnc_stateSet;
+};
+if (_rev isEqualTo 4) then {[] call _repairThreadMirror;};
 
 if (_rev >= 4) exitWith
 {
@@ -97,6 +120,7 @@ if (_rev < 4) then
     diag_log format ["[ARC][TASKENG] taskengMigrateSchema: rev 3 → 4 (migrated %1 thread(s) to HASHMAP store).", _migrated];
 };
 
+[] call _repairThreadMirror;
 ["taskeng_v0_schema_rev", _rev] call ARC_fnc_stateSet;
 diag_log format ["[ARC][TASKENG] taskengMigrateSchema: migration complete, schema rev = %1.", _rev];
 

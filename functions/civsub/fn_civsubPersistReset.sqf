@@ -17,6 +17,9 @@ private _enabled = missionNamespace getVariable ["civsub_v1_enabled", false];
 if (!(_enabled isEqualType true) && !(_enabled isEqualType false)) then { _enabled = false; };
 
 // Clear persisted blob
+missionNamespace setVariable ["civsub_v1_clockBlocked", false];
+missionNamespace setVariable ["civsub_v1_clockSnapshot", []];
+profileNamespace setVariable ["FARABAD_CIVSUB_V1_PRE_CLOCK_BACKUP", nil];
 profileNamespace setVariable ["FARABAD_CIVSUB_V1_STATE", ""];
 
 // New campaign id
@@ -45,6 +48,7 @@ missionNamespace setVariable ["civsub_v1_identity_seq", 0, true];
 // Save immediately so reset survives a restart
 [] call ARC_fnc_civsubPersistSave;
 
-diag_log format ["[CIVSUB][PERSIST] Reset complete. campaign_id=%1 districts=%2", _cid, count (keys _districts)];
+private _clockKeys = compile "params ['_h']; keys _h";
+diag_log format ["[CIVSUB][PERSIST] Reset complete. campaign_id=%1 districts=%2", _cid, count ([_districts] call _clockKeys)];
 
 true

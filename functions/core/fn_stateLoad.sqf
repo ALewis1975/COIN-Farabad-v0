@@ -64,6 +64,56 @@ if (!_rawOk) then {
 	    };
 	} forEach _raw;
 
+// Clock v1: freeze offline progression and translate into this process clock.
+// The current legacy saver stamps s1RegistryUpdatedAt on every write, so it is
+// an exact legacy anchor, not an inferred activity timestamp.
+private _clockIndex = -1;
+{ if ((_x select 0) isEqualTo "persistenceClock") exitWith { _clockIndex = _forEachIndex; }; } forEach _clean;
+private _clock = if (_clockIndex < 0) then {[]} else {(_clean select _clockIndex) select 1};
+private _hasClock = !(_clock isEqualTo []);
+private _clockOk = !_hasClock || {
+    _clock isEqualType [] && {count _clock >= 4} && {(_clock select 0) isEqualTo 1} &&
+    {(_clock select 1) isEqualType 0} && {(_clock select 1) >= 0} &&
+    {(_clock select 3) isEqualTo "FREEZE_OFFLINE"}
+};
+if (!_clockOk) exitWith {
+    missionNamespace setVariable ["ARC_persistenceClockBlocked", true];
+    diag_log "[ARC][PERSIST][ERROR] Unsupported clock schema; campaign load/save blocked; profile preserved.";
+    false
+};
+private _now = serverTime;
+private _savedAt = if (_hasClock) then {_clock select 1} else {-1};
+if (_savedAt < 0) then {
+    private _legacyIndex = -1;
+    { if ((_x select 0) isEqualTo "s1RegistryUpdatedAt") exitWith { _legacyIndex = _forEachIndex; }; } forEach _clean;
+    if (_legacyIndex >= 0) then {
+        private _candidate = (_clean select _legacyIndex) select 1;
+        if (_candidate isEqualType 0 && {_candidate >= 0}) then {_savedAt = _candidate};
+    };
+};
+// Older-than-current saves without any anchor cannot be translated honestly.
+// Preserve their data for an explicit operator migration instead of inventing time.
+if (_savedAt < 0 && {count _clean > 0}) exitWith {
+    missionNamespace setVariable ["ARC_persistenceClockBlocked", true];
+    diag_log "[ARC][PERSIST][ERROR] Legacy ARC_state lacks a save-clock anchor; profile preserved; supply a verified persistenceClock before loading.";
+    false
+};
+if (_savedAt < 0) then {_savedAt = _now};
+if (!_hasClock && {count _clean > 0} && {isNil {missionProfileNamespace getVariable "ARC_state_preClockV1"}}) then {
+    missionProfileNamespace setVariable ["ARC_state_preClockV1", _raw];
+};
+_clean = [_clean, _savedAt, _now] call ARC_fnc_stateRebaseClock;
+missionNamespace setVariable ["ARC_persistenceClockBlocked", false];
+// Runtime workers never survive a restore; new work must reserve current IDs.
+{
+    private _worker = missionNamespace getVariable [_x, scriptNull];
+    if (_worker isEqualType scriptNull && {!scriptDone _worker}) then {terminate _worker};
+    missionNamespace setVariable [_x, scriptNull];
+} forEach ["threat_v0_drivenWorker", "threat_v0_suicideWorker"];
+missionNamespace setVariable ["threat_v0_drivenPending", []];
+missionNamespace setVariable ["ARC_persistenceClockSnapshot", [1, _savedAt, _now, "FREEZE_OFFLINE", !_hasClock]];
+diag_log format ["[ARC][PERSIST] ts=%1 actor=SERVER id=ARC_state grid=N/A clock=1 savedAt=%2 policy=FREEZE_OFFLINE legacy=%3", _now, _savedAt, !_hasClock];
+
 // Merge: start with defaults, then apply overrides from _clean
 private _merged = +_defaults;
 	{
@@ -102,8 +152,7 @@ missionNamespace setVariable ["ARC_state", _merged];
 	        ["storageKey", "ARC_state"]
 	    ] call ARC_fnc_farabadWarn;
 
-	    missionProfileNamespace setVariable ["ARC_state", _merged];
-	    saveMissionProfileNamespace;
+	    [] call ARC_fnc_stateSave;
 	};
 
 if (missionNamespace getVariable ["ARC_debugState", false]) then

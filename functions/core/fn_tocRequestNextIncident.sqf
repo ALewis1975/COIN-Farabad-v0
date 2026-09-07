@@ -15,10 +15,9 @@ if (isNil "ARC_fnc_rpcValidateSender") then { ARC_fnc_rpcValidateSender = compil
 
 params [ ["_caller", objNull, [objNull]] ];
 
-private _owner = -1;
-if (!isNil "remoteExecutedOwner") then { _owner = remoteExecutedOwner; };
+private _owner = remoteExecutedOwner;
 
-private _remoteOwnerDbg = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+private _remoteOwnerDbg = remoteExecutedOwner;
 diag_log format [
     "[ARC][RPCDBG] NextIncident callerNull=%1 caller=%2 isPlayer=%3 callerOwner=%4 remoteExecutedOwner=%5 uid=%6",
     isNull _caller,
@@ -61,7 +60,7 @@ private _trimFn = compile "params ['_s']; trim _s";
 };
 
 // RemoteExec-only validation path: requires remoteExecutedOwner context.
-private _reoOwner = if (!isNil "remoteExecutedOwner") then { remoteExecutedOwner } else { -1 };
+private _reoOwner = remoteExecutedOwner;
 if (!([_caller, "ARC_fnc_tocRequestNextIncident", "Incident generation rejected: sender verification failed.", "TOC_NEXT_INCIDENT_SECURITY_DENIED", true, _reoOwner] call ARC_fnc_rpcValidateSender)) exitWith
 {
     if (_owner > 0) then
@@ -79,16 +78,21 @@ if (!([_caller, "ARC_fnc_tocRequestNextIncident", "Incident generation rejected:
     false
 };
 
-private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
+// Match the existing Console's S3/Command/OMNI issue permission on the server.
+if (!([_caller] call ARC_fnc_rolesCanApproveQueue) && { !([_caller, "OMNI"] call ARC_fnc_rolesHasGroupIdToken) }) exitWith
+{
+    ["ARC_fnc_tocRequestNextIncident", "NOT_AUTHORIZED", _owner] call ARC_fnc_securityDenyRecord;
+    [_owner,"NOT_AUTHORIZED","Incident generation blocked","TOC (S3/Command) or OMNI authority is required.",false] call _publishResult;
+    false
+};
 
-// Manual override: ensure auto-incident suppression doesn't block deliberate testing.
-["autoIncidentSuspendUntil", -1] call ARC_fnc_stateSet;
+private _taskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
 
 if (_taskId isEqualTo "") then
 {
     private _allowDuringRtb = missionNamespace getVariable ["ARC_allowIncidentDuringAcceptedRtb", false];
 
-    if (!_allowDuringRtb) then
+    private _generationAllowed = if (!_allowDuringRtb) then
     {
         private _lastG = ["lastTaskingGroup", ""] call ARC_fnc_stateGet;
         private _orders = ["tocOrders", []] call ARC_fnc_stateGet;
@@ -182,7 +186,12 @@ if (_taskId isEqualTo "") then
 
             false
         };
-    };
+        true
+    } else { true };
+    if (!_generationAllowed) exitWith { false };
+
+    // A denied request must not change automatic generation policy.
+    ["autoIncidentSuspendUntil", -1] call ARC_fnc_stateSet;
 
     // Consume the highest-priority approved lead from the TOC Queue (backlog) to
     // seed the next incident. The pop happens here, AFTER all blocking guards
@@ -206,7 +215,12 @@ if (_taskId isEqualTo "") then
         };
     };
 
-    [_seedLeadId] call ARC_fnc_incidentCreate;
+    private _created = [_seedLeadId] call ARC_fnc_incidentCreate;
+    if (!(_created isEqualType true) || { !_created }) exitWith
+    {
+        [_owner,"CREATE_FAILED","Incident generation blocked","The server could not create an incident; check the OPS log.",false] call _publishResult;
+        false
+    };
 
     if (_owner > 0) then
     {

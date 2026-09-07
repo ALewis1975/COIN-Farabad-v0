@@ -21,6 +21,15 @@ params [["_mode", "IMMEDIATE"]];
 private _m = toUpper _mode;
 private _defer = (_m in ["DEFER", "DEFERRED"]);
 
+// Cancel delayed/monitor workers before touching world actors or task state.
+private _closingTaskId = ["activeExecTaskId", ["activeTaskId", ""] call ARC_fnc_stateGet] call ARC_fnc_stateGet;
+missionNamespace setVariable ["threat_v0_drivenPending", [], false];
+{
+    private _worker = missionNamespace getVariable [_x, scriptNull];
+    if (_worker isEqualType scriptNull && {!scriptDone _worker}) then { terminate _worker; };
+    missionNamespace setVariable [_x, scriptNull, false];
+} forEach ["threat_v0_drivenWorker", "threat_v0_suicideWorker"];
+
 // Anchor for deferred cleanup (prefer exec AO position)
 private _anchor = ["activeExecPos", []] call ARC_fnc_stateGet;
 if (!(_anchor isEqualType []) || { (count _anchor) < 2 }) then
@@ -38,6 +47,38 @@ if (!(_minDelay isEqualType 0)) then { _minDelay = 25; };
 _minDelay = (_minDelay max 0) min 600;
 
 private _debug = missionNamespace getVariable ["ARC_debugCleanup", false];
+
+// Dynamic threat actors use the same deferred bubble policy as other objectives.
+// Stable ownership avoids deleting a replacement task's actor through a stale mirror.
+{
+    private _actor = objectFromNetId (missionNamespace getVariable [_x, ""]);
+    if (!isNull _actor && {(_actor getVariable ["ARC_threatTaskId", ""]) isEqualTo _closingTaskId}) then
+    {
+        private _actors = [_actor];
+        if !(_actor isKindOf "Man") then { _actors append (crew _actor); };
+        _actors = _actors select {!isNull _x && {!isPlayer _x}};
+        { _x setVariable ["ARC_cleanupDeferTaskId", "", false]; } forEach _actors;
+        private _label = _actor getVariable ["ARC_threatCleanupLabel", "objective"];
+        if (_defer || {({isPlayer _x} count (crew _actor)) > 0}) then
+        {
+            [_actors, _anchor, _radius, _minDelay, _label] call ARC_fnc_cleanupRegister;
+        }
+        else
+        {
+            private _groups = [];
+            { if (_x isKindOf "Man") then { _groups pushBackUnique (group _x); }; } forEach _actors;
+            private _deleteOrder = +_actors;
+            reverse _deleteOrder;
+            { deleteVehicle _x; } forEach _deleteOrder;
+            { if (!isNull _x && {(count units _x) isEqualTo 0}) then { deleteGroup _x; }; } forEach _groups;
+        };
+        diag_log format ["[ARC][THREAT] WORLD_RELEASE time=%1 actor=SYSTEM task=%2 label=%3 mode=%4", serverTime, _closingTaskId, _label, _m];
+    };
+    missionNamespace setVariable [_x, "", true];
+} forEach ["ARC_vbiedDrivenNetId", "ARC_suicideBomberNetId"];
+missionNamespace setVariable ["ARC_vbiedDrivenSpawned", false, true];
+missionNamespace setVariable ["ARC_suicideBomberSpawned", false, true];
+missionNamespace setVariable ["ARC_suicideBomberDetonated", false, true];
 
 private _deleteVehicleWithCrew = {
     params ["_veh"];
@@ -66,7 +107,8 @@ if (!(_nid isEqualTo "")) then
     private _obj = objectFromNetId _nid;
     if (!isNull _obj) then
     {
-        if (_defer) then
+        _obj setVariable ["ARC_cleanupDeferTaskId", "", false];
+        if (_defer || {isPlayer _obj} || {({isPlayer _x} count (crew _obj)) > 0}) then
         {
             // Register for cleanup once players leave the AO.
             // Anchor defaults to AO; if missing, anchor will fall back to object position.
@@ -190,6 +232,15 @@ if (_vTrgNid isEqualType "" && { !(_vTrgNid isEqualTo "") }) then
 ["activeVbiedLastArmedAt", -1] call ARC_fnc_stateSet;
 ["activeVbiedDetonated", false] call ARC_fnc_stateSet;
 ["activeVbiedDetonatedAt", -1] call ARC_fnc_stateSet;
+["activeVbiedSafe", false] call ARC_fnc_stateSet;
+["activeVbiedAlerted", false] call ARC_fnc_stateSet;
+["activeVbiedAlertAt", -1] call ARC_fnc_stateSet;
+["activeVbiedPauseAccum", 0] call ARC_fnc_stateSet;
+["activeVbiedPauseSince", -1] call ARC_fnc_stateSet;
+["activeVbiedWindowRemaining", 0] call ARC_fnc_stateSet;
+["activeVbiedElapsedBeforeLoad", 0] call ARC_fnc_stateSet;
+["activeVbiedDetCause", ""] call ARC_fnc_stateSet;
+missionNamespace setVariable ["ARC_activeVbiedSafe", false, true];
 
 
 missionNamespace setVariable ["ARC_exec_lastTick", nil];

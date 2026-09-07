@@ -4,6 +4,9 @@
 */
 
 if (!isServer) exitWith {false};
+if (missionNamespace getVariable ["ARC_persistenceClockBlocked", false]) exitWith {false};
+
+["persistenceClock", [1, serverTime, systemTimeUTC, "FREEZE_OFFLINE"]] call ARC_fnc_stateSet;
 
 // Ensure server-owned mirrors are serialized in the same persistence write.
 private _s1Registry = missionNamespace getVariable ["ARC_s1_registry", []];
@@ -20,7 +23,10 @@ _state = _stateCheck param [1, []];
 if (!_stateOk) then {
     ["STATE", format ["stateSave guard: code=%1 msg=%2", _stateCheck param [2, "ARC_ASSERT_UNKNOWN"], _stateCheck param [3, "ARC_state invalid"]], ["code", _stateCheck param [2, "ARC_ASSERT_UNKNOWN"], "guard", "stateSave", "key", "ARC_state"]] call ARC_fnc_farabadWarn;
 };
-missionProfileNamespace setVariable ["ARC_state", _state];
+// Copy nested HashMaps too: later live mutations must not alter this save anchor.
+private _savedAt = serverTime;
+private _snapshot = [_state, _savedAt, _savedAt] call ARC_fnc_stateRebaseClock;
+missionProfileNamespace setVariable ["ARC_state", _snapshot];
 
 private _op = "stateSave";
 private _criticalKeys = ["ARC_state"];

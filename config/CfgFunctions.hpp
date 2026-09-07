@@ -19,6 +19,7 @@ class CfgFunctions
             class paramAssert {};
             class stateInit {};
             class stateLoad {};
+            class stateRebaseClock {};
             class stateSave {};
             class stateGet {};
             class stateSet {};
@@ -119,6 +120,7 @@ class CfgFunctions
 
             // Leads
             class leadCreate {};
+            class leadDecay {};
             class leadPrune {};
             class leadConsumeNext {};
             class leadConsumeById {};
@@ -225,6 +227,7 @@ class CfgFunctions
             class tocShowLeadPoolLocal {};
             class tocShowThreadsLocal {};
             class resetAll {};
+            class resetOrderTaskIds {};
             class tocRequestResetAll {};
             class tocRequestAirbaseResetControlState {};
             class clientPurgeArcTasks {};
@@ -349,6 +352,14 @@ class CfgFunctions
             class casreqClientSubmit {};
             class casreqJtacPrefill {};
             class casreqAirbaseAvailability {};
+            class casreqCan {};
+            class casreqTransition {};
+            class casreqMaintain {};
+            class casreqInboxPublish {};
+            class casreqCompletedCount {};
+            class casreqInput {};
+            class casreqClientInbox {};
+            class casreqInboxAction {};
         };
 
         class Dossier
@@ -386,6 +397,7 @@ class CfgFunctions
             class civsubBundleToPairs {};
 
             class civsubPersistLoad {};
+            class civsubPersistRebaseClock {};
             class civsubPersistSave {};
             class civsubPersistMigrateIfNeeded {};
             class civsubPersistReset {};
@@ -539,6 +551,10 @@ class CfgFunctions
             class intelResolveRtbDestination {};
 
             class intelOrderIssue {};
+            class intelOrderReserveSlot {};
+            class intelOrderTaskSpec {};
+            class intelOrderEnsureTask {};
+            class intelOrderRehydrate {};
             class intelOrderAccept {};
             class intelOrderBroadcast {};
             class intelOrderTick {};
@@ -741,6 +757,9 @@ class CfgFunctions
         class Threat
         {
             file = "functions\threat";
+            class threatRuntimeIsCurrent {};
+            class threatRegisterWorld {};
+            class threatMaintenanceTick {};
 
             class threatInit {};
             class threatInferFamily {};

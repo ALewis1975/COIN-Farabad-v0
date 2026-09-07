@@ -435,8 +435,7 @@ missionNamespace setVariable ["ARC_activeIncidentMettTcAssessment", [], true];
 ["activeThreadId", _threadId] call ARC_fnc_stateSet;
 ["activeLeadTag", _leadTag] call ARC_fnc_stateSet;
 
-// TASKENG (#6): ensure a CASE parent task exists for thread-driven incidents
-// so related child tasks are grouped under CASE:<threadId> in the task system.
+// Compatibility hook delegates to the same ARC_case parent used by child creation.
 if (!(_threadId isEqualTo "")) then
 {
     [_threadId] call ARC_fnc_taskengEnsureParentCaseTask;

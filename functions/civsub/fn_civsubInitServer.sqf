@@ -110,6 +110,11 @@ if (_persist) then {
 
 private _ok = false;
 if (_persist) then { _ok = [] call ARC_fnc_civsubPersistLoad; };
+if (missionNamespace getVariable ["civsub_v1_clockBlocked", false]) exitWith {
+    missionNamespace setVariable ["civsub_v1_enabled", false, true];
+    diag_log "[CIVSUB][INIT][ERROR] Persistence clock rejected; subsystem stopped before defaults/ticks.";
+    false
+};
 if (!_ok) then
 {
     private _districts = [] call ARC_fnc_civsubDistrictsCreateDefaults;

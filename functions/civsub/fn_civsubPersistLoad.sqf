@@ -1,3 +1,5 @@
+private _clockHg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k,_d]";
+private _clockTrim = compile "params ['_s']; trim _s";
 /*
     ARC_fnc_civsubPersistLoad
 
@@ -19,11 +21,30 @@ if (_blob isEqualTo "") exitWith {false};
 private _parsed = parseSimpleArray _blob;
 if !(_parsed isEqualType []) exitWith {false};
 
+private _clockIndex = -1;
+
+{ if (_x isEqualType [] && {count _x >= 2} && {(_x select 0) isEqualTo "persistenceClock"}) exitWith { _clockIndex = _forEachIndex; }; } forEach _parsed;
+private _legacyClock = _clockIndex < 0;
+private _rebased = [_parsed, serverTime] call ARC_fnc_civsubPersistRebaseClock;
+if (_rebased isEqualTo []) exitWith {
+    missionNamespace setVariable ["civsub_v1_clockBlocked", true];
+    diag_log "[CIVSUB][PERSIST][ERROR] Unsupported clock schema; profile preserved and save blocked.";
+    false
+};
+if (_legacyClock && {isNil {profileNamespace getVariable "FARABAD_CIVSUB_V1_PRE_CLOCK_BACKUP"}}) then {
+    profileNamespace setVariable ["FARABAD_CIVSUB_V1_PRE_CLOCK_BACKUP", _blob];
+    saveProfileNamespace;
+};
+_parsed = _rebased;
+missionNamespace setVariable ["civsub_v1_clockBlocked", false];
+missionNamespace setVariable ["civsub_v1_clockSnapshot", [1, serverTime, "FREEZE_OFFLINE", _legacyClock]];
+diag_log format ["[CIVSUB][PERSIST] ts=%1 actor=SERVER id=CIVSUB_V1 grid=N/A clock=1 policy=FREEZE_OFFLINE legacyCooldownClamp=%2", serverTime, _legacyClock];
+
 // _parsed is an array of [key,value] pairs
 private _hm = [_parsed] call _hmCreate;
 
 // --- Districts ---
-private _districtRows = _hm getOrDefault ["districts", []];
+private _districtRows = ([_hm, "districts", []] call _clockHg);
 if !(_districtRows isEqualType []) exitWith {false};
 
 private _districts = createHashMap;
@@ -31,37 +52,37 @@ private _districts = createHashMap;
     if !(_x isEqualType []) then { continue; };
     if ((count _x) < 16) then { continue; };
 
-    private _id = _x # 0;
+    private _id = (_x select 0);
     if !(_id isEqualType "") then { _id = ""; };
-    _id = toUpper (trim _id);
+    _id = toUpper (([_id] call _clockTrim));
     if !([_id] call ARC_fnc_worldIsValidDistrictId) then { continue; };
-    private _centroid = _x # 1;
-    private _radius = _x # 2;
-    private _pop = _x # 3;
+    private _centroid = (_x select 1);
+    private _radius = (_x select 2);
+    private _pop = (_x select 3);
 
-    private _w = _x # 4;
-    private _r = _x # 5;
-    private _g = _x # 6;
+    private _w = (_x select 4);
+    private _r = (_x select 5);
+    private _g = (_x select 6);
 
-    private _wb = _x # 7;
-    private _rb = _x # 8;
-    private _gb = _x # 9;
+    private _wb = (_x select 7);
+    private _rb = (_x select 8);
+    private _gb = (_x select 9);
 
-    private _food = _x # 10;
-    private _water = _x # 11;
-    private _fear = _x # 12;
+    private _food = (_x select 10);
+    private _water = (_x select 11);
+    private _fear = (_x select 12);
 
-    private _cdLead = _x # 13;
-    private _cdAtk = _x # 14;
-    private _lastTouch = _x # 15;
+    private _cdLead = (_x select 13);
+    private _cdAtk = (_x select 14);
+    private _lastTouch = (_x select 15);
 
     // Phase 6 counters (baseline A.6). Backward compatible with older saves (no counters).
-    private _kia = if ((count _x) > 16) then { _x # 16 } else { 0 };
-    private _wia = if ((count _x) > 17) then { _x # 17 } else { 0 };
-    private _crimeHits = if ((count _x) > 18) then { _x # 18 } else { 0 };
-    private _detInit = if ((count _x) > 19) then { _x # 19 } else { 0 };
-    private _detHand = if ((count _x) > 20) then { _x # 20 } else { 0 };
-    private _aid = if ((count _x) > 21) then { _x # 21 } else { 0 };
+    private _kia = if ((count _x) > 16) then { (_x select 16) } else { 0 };
+    private _wia = if ((count _x) > 17) then { (_x select 17) } else { 0 };
+    private _crimeHits = if ((count _x) > 18) then { (_x select 18) } else { 0 };
+    private _detInit = if ((count _x) > 19) then { (_x select 19) } else { 0 };
+    private _detHand = if ((count _x) > 20) then { (_x select 20) } else { 0 };
+    private _aid = if ((count _x) > 21) then { (_x select 21) } else { 0 };
 
     private _d = [[
         ["id", _id],
@@ -100,52 +121,52 @@ private _districts = createHashMap;
 
 // --- Identities ---
 private _ids = createHashMap;
-private _idRows = _hm getOrDefault ["identities", []];
+private _idRows = ([_hm, "identities", []] call _clockHg);
 if (_idRows isEqualType []) then {
     {
         if !(_x isEqualType []) then { continue; };
         if ((count _x) < 17) then { continue; };
 
-        private _civUid = _x # 0;
-        private _first = _x # 1;
-        private _last = _x # 2;
-        private _sex = _x # 3;
-        private _dob = _x # 4;
-        private _nat = _x # 5;
-        private _homeDid = _x # 6;
+        private _civUid = (_x select 0);
+        private _first = (_x select 1);
+        private _last = (_x select 2);
+        private _sex = (_x select 3);
+        private _dob = (_x select 4);
+        private _nat = (_x select 5);
+        private _homeDid = (_x select 6);
         if !(_homeDid isEqualType "") then { _homeDid = ""; };
-        _homeDid = toUpper (trim _homeDid);
+        _homeDid = toUpper (([_homeDid] call _clockTrim));
         if !([_homeDid] call ARC_fnc_worldIsValidDistrictId) then { _homeDid = ""; };
-        private _homePos = _x # 7;
-        private _occ = _x # 8;
-        private _bg = _x # 9;
-        private _ps = _x # 10;
-        private _pe = _x # 11;
-        private _isP = _x # 12;
-        private _flags = _x # 13;
-        private _wanted = _x # 14;
-        private _seenRows = _x # 15;
-        private _lastTs = _x # 16;
+        private _homePos = (_x select 7);
+        private _occ = (_x select 8);
+        private _bg = (_x select 9);
+        private _ps = (_x select 10);
+        private _pe = (_x select 11);
+        private _isP = (_x select 12);
+        private _flags = (_x select 13);
+        private _wanted = (_x select 14);
+        private _seenRows = (_x select 15);
+        private _lastTs = (_x select 16);
 
         // Phase 7 optional fields (backward compatible)
-        private _detained = if ((count _x) > 17) then { _x # 17 } else { false };
-        private _detainedAt = if ((count _x) > 18) then { _x # 18 } else { 0 };
-        private _detainedDid = if ((count _x) > 19) then { _x # 19 } else { "" };
+        private _detained = if ((count _x) > 17) then { (_x select 17) } else { false };
+        private _detainedAt = if ((count _x) > 18) then { (_x select 18) } else { 0 };
+        private _detainedDid = if ((count _x) > 19) then { (_x select 19) } else { "" };
         if !(_detainedDid isEqualType "") then { _detainedDid = ""; };
-        _detainedDid = toUpper (trim _detainedDid);
+        _detainedDid = toUpper (([_detainedDid] call _clockTrim));
         if !([_detainedDid] call ARC_fnc_worldIsValidDistrictId) then { _detainedDid = ""; };
-        private _handedOff = if ((count _x) > 20) then { _x # 20 } else { false };
-        private _handedOffAt = if ((count _x) > 21) then { _x # 21 } else { 0 };
-        private _handedOffTo = if ((count _x) > 22) then { _x # 22 } else { "" };
-        private _releasedAt = if ((count _x) > 23) then { _x # 23 } else { 0 };
-        private _poiId = if ((count _x) > 24) then { _x # 24 } else { "" };
-        private _charges = if ((count _x) > 25) then { _x # 25 } else { [] };
+        private _handedOff = if ((count _x) > 20) then { (_x select 20) } else { false };
+        private _handedOffAt = if ((count _x) > 21) then { (_x select 21) } else { 0 };
+        private _handedOffTo = if ((count _x) > 22) then { (_x select 22) } else { "" };
+        private _releasedAt = if ((count _x) > 23) then { (_x select 23) } else { 0 };
+        private _poiId = if ((count _x) > 24) then { (_x select 24) } else { "" };
+        private _charges = if ((count _x) > 25) then { (_x select 25) } else { [] };
 
         private _seen = createHashMap;
         if (_seenRows isEqualType []) then {
             {
                 if (_x isEqualType [] && {count _x >= 4}) then {
-                    _seen set [_x # 0, [_x # 1, _x # 2, _x # 3]];
+                    _seen set [(_x select 0), [(_x select 1), (_x select 2), (_x select 3)]];
                 };
             } forEach _seenRows;
         };
@@ -185,23 +206,23 @@ if (_idRows isEqualType []) then {
 
 // --- Crime DB ---
 private _db = createHashMap;
-private _crimeRows = _hm getOrDefault ["crimedb", []];
+private _crimeRows = ([_hm, "crimedb", []] call _clockHg);
 if (_crimeRows isEqualType []) then {
     {
         if !(_x isEqualType []) then { continue; };
         if ((count _x) < 8) then { continue; };
 
-        private _poiId = _x # 0;
-        private _cat = _x # 1;
-        private _did = _x # 2;
+        private _poiId = (_x select 0);
+        private _cat = (_x select 1);
+        private _did = (_x select 2);
         if !(_did isEqualType "") then { _did = ""; };
-        _did = toUpper (trim _did);
+        _did = toUpper (([_did] call _clockTrim));
         if !([_did] call ARC_fnc_worldIsValidDistrictId) then { _did = ""; };
-        private _ps = _x # 3;
-        private _isHvt = _x # 4;
-        private _st = _x # 5;
-        private _ts = _x # 6;
-        private _hist = _x # 7;
+        private _ps = (_x select 3);
+        private _isHvt = (_x select 4);
+        private _st = (_x select 5);
+        private _ts = (_x select 6);
+        private _hist = (_x select 7);
 
         private _rec = [[
             ["poi_id", _poiId],
@@ -222,11 +243,11 @@ missionNamespace setVariable ["civsub_v1_districts", _districts, true];
 missionNamespace setVariable ["civsub_v1_identities", _ids, true];
 missionNamespace setVariable ["civsub_v1_crimedb", _db, true];
 
-private _ver = _hm getOrDefault ["version", missionNamespace getVariable ["civsub_v1_version", 1]];
+private _ver = ([_hm, "version", missionNamespace getVariable ["civsub_v1_version", 1]] call _clockHg);
 missionNamespace setVariable ["civsub_v1_version", _ver, true];
 
-missionNamespace setVariable ["civsub_v1_seed", _hm getOrDefault ["seed", missionNamespace getVariable ["civsub_v1_seed", 1337]], true];
-missionNamespace setVariable ["civsub_v1_identity_seq", _hm getOrDefault ["identity_seq", missionNamespace getVariable ["civsub_v1_identity_seq", 0]], true];
+missionNamespace setVariable ["civsub_v1_seed", ([_hm, "seed", missionNamespace getVariable ["civsub_v1_seed", 1337]] call _clockHg), true];
+missionNamespace setVariable ["civsub_v1_identity_seq", ([_hm, "identity_seq", missionNamespace getVariable ["civsub_v1_identity_seq", 0]] call _clockHg), true];
 
 // Enforce identity cap after load
 [500] call ARC_fnc_civsubIdentityEvictIfNeeded;

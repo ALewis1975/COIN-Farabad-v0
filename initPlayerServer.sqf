@@ -33,3 +33,14 @@ if (!isNil "ARC_fnc_farabadInfo") then {
 } else {
     diag_log format ["[ARC][LIFECYCLE][INFO] initPlayerServer join name=%1 uid=%2 didJIP=%3 owner=%4", _name, _uid, _didJIP, owner _player];
 };
+
+// Restore this joiner's order view once authoritative load finishes. The existing
+// order tick remains a retry path if startup/group availability exceeds the bound.
+[_player] spawn
+{
+    params ["_joining"];
+    private _until = diag_tickTime + 60;
+    waitUntil { sleep 0.5; isNull _joining || {missionNamespace getVariable ["ARC_serverReady",false]} || {diag_tickTime >= _until} };
+    if (isNull _joining || {!(missionNamespace getVariable ["ARC_serverReady",false])}) exitWith {};
+    [_joining] call ARC_fnc_intelOrderRehydrate;
+};

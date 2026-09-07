@@ -1,3 +1,4 @@
+private _clockTrim = compile "params ['_s']; trim _s";
 /*
     Prune expired leads from the lead pool, and apply time-based confidence
     (strength) decay to non-expired leads.
@@ -27,10 +28,10 @@ private _expiredIds = [];
 {
     if (_x isEqualType [] && { (count _x) >= 7 }) then
     {
-        private _expiresAt = _x # 6;
+        private _expiresAt = (_x select 6);
         if (_expiresAt isEqualType 0 && { _expiresAt > 0 } && { _expiresAt <= _now }) then
         {
-            _expiredIds pushBack (_x # 0);
+            _expiredIds pushBack ((_x select 0));
         };
     };
 } forEach _leads;
@@ -38,7 +39,7 @@ private _expiredIds = [];
 // Keep anything with no expiry, or expiry in the future.
 _leads = _leads select
 {
-    _x params ["_id", "_type", "_disp", "_pos", ["_strength", 0.5], ["_createdAt", -1], ["_expiresAt", -1]];
+    private _expiresAt = _x param [6, -1, [0]];
     (_expiresAt <= 0) || { _expiresAt > _now }
 };
 if (!(_leads isEqualType [])) then
@@ -66,39 +67,9 @@ if (_decayEnabled) then
     private _decayChanged = false;
     _leads = _leads apply
     {
-        private _entry = _x;
-        if (!(_entry isEqualType []) || { (count _entry) < 7 }) exitWith { _entry };
-
-        private _strength   = _entry # 4;
-        private _createdAt  = _entry # 5;
-        private _expiresAt  = _entry # 6;
-
-        if (!(_strength  isEqualType 0) || !(_createdAt isEqualType 0) || !(_expiresAt isEqualType 0)) exitWith { _entry };
-        if (_expiresAt <= 0) exitWith { _entry };
-
-        private _ttl = _expiresAt - _createdAt;
-        if (_ttl <= 0) exitWith { _entry };
-
-        private _age = _now - _createdAt;
-        if (_age <= 0) exitWith { _entry };
-
-        // ageFraction: 0 at creation → 1 at expiry
-        private _ageFrac = (_age / _ttl) min 1;
-
-        // strength decay: linear from original down to floor scaled by decayRate
-        // At expiry: min_strength = original * (1 - decayRate)
-        private _minStrength  = (_strength * (1 - _decayRate)) max _decayFloor;
-        private _newStrength  = _strength - ((_strength - _minStrength) * _ageFrac);
-        _newStrength = (_newStrength max _decayFloor) min _strength;
-
-        if (abs (_newStrength - _strength) > 0.005) then
-        {
-            private _updated = +_entry;
-            _updated set [4, _newStrength];
-            _decayChanged = true;
-            _updated
-        }
-        else { _entry };
+        private _updated = [_x, _now, _decayRate, _decayFloor] call ARC_fnc_leadDecay;
+        if !(_updated isEqualTo _x) then { _decayChanged = true; };
+        _updated
     };
     if (!(_leads isEqualType [])) then
     {
@@ -115,11 +86,11 @@ if (_decayEnabled) then
 if (!(_leads isEqualType [])) then { _leads = []; };
 {
     if (!(_x isEqualType []) || { (count _x) < 11 }) then { continue; };
-    private _id = _x # 0;
-    private _tag = _x # 10;
+    private _id = (_x select 0);
+    private _tag = (_x select 10);
     if (!(_tag isEqualType "")) then { continue; };
 
-    private _tU = toUpper (trim _tag);
+    private _tU = toUpper (([_tag] call _clockTrim));
     if (_tU find "SUS_" != 0) then { continue; };
 
     private _exp = missionNamespace getVariable [format ["ARC_leadCircleExpiresAt_%1", _id], -1];
@@ -149,7 +120,7 @@ if (_removed > 0) then
 } forEach _expiredIds;
 
     // Lead end-state: expired (never actioned) — emit "window missed" intel log
-    if (_expiredIds isNotEqualTo []) then
+    if !(_expiredIds isEqualTo []) then
     {
         private _lh = ["leadHistory", []] call ARC_fnc_stateGet;
         if (!(_lh isEqualType [])) then { _lh = []; };

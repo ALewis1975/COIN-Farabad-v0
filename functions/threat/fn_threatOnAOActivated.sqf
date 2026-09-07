@@ -229,7 +229,9 @@ if (_recs2 isEqualType []) then
 if (!(_cur isEqualType "")) then { _cur = ""; };
 _cur = toUpper ([_cur] call _trimFn);
 
-if (_cur in ["", "CREATED"]) then
+// Dynamic families stage only after their admission and fairness gates pass.
+private _dynamicKind = _objKindForSubtype in ["VBIED_DRIVEN_CHECKPOINT", "VBIED_DRIVEN_GATE", "SB_MARKET_APPROACH", "SB_CHECKPOINT_APPROACH", "SB_SHURA_APPROACH"];
+if (_cur in ["", "CREATED"] && {!_dynamicKind}) then
 {
     [_tid, "ACTIVE", _note] call ARC_fnc_threatUpdateState;
 };

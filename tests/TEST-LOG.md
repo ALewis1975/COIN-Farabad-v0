@@ -11,6 +11,29 @@ Contributor rule: committed entries must never use `<pending>` for commit refere
 
 ---
 
+## 2026-09-06 — Critical mission behavior integration (Mode A)
+
+**Branch/Commit:** `repair/critical-review-2026-09-06` @ `f7a2988` (security parent; working tree contains behavior repairs), review baseline `0151396c811939aa45a1190510d32605f18f4c7f`.
+
+| Check / command or step | Result | Evidence and limits |
+|---|---|---|
+| Initial existing-suite pass: all tests/static/*.sh, state/marker validation and three development contracts | FAIL, 40/45 | Five assertions documented superseded owner/allowlist/response behavior or missing new reset coverage. Updated only those explicit contracts. |
+| Initial full changed-file compatibility + sqflint | FAIL | Existing shorthand and unused locals in touched files rejected by strict CI. Replaced with equivalent expressions; RTB review also caught and repaired actual selection/proximity fall-through. |
+| Final existing suite: `python scripts/dev/validate_state_migrations.py`; `python scripts/dev/validate_marker_index.py`; every `tests/static/*.sh`; `scripts/dev/check_console_conflicts.sh`, `check_remoteexec_contract.sh`, `check_test_log_commits.sh`; `git diff --check` | PASS, 45/45 | All 44 logic/config checks passed in final full pass. Its only remaining failure was three trailing spaces, removed and diff-check rerun successfully. No CI rule relaxed. |
+| `python scripts/dev/sqflint_compat_scan.py --strict <all 117 changed SQF files>`; `sqflint -e w <each file>`; SQF-VM `--parse-only --input-sqf <each file>` | PASS, 117/117 each | Last compatibility finding was a compiled lookup needing parentheses; corrected and rechecked. Parsing is not engine execution. |
+| `python tests/static/casreq_critical_repairs.py --sqfvm ../sqfvm-runtime/sqfvm_windows_x64/sqfvm.exe` | PASS | 11 integration checks +25 actual pure transition assertions. Includes parent reset and registration hooks. |
+| `python tests/static/command_critical_flow_checks.py --sqfvm ../sqfvm-runtime/sqfvm_windows_x64/sqfvm.exe` | PASS | 17 pure command assertions +6 actual next-incident control-flow cases; removed policy guard correctly fails. |
+| `python tests/static/critical_threat_lifecycle_checks.py --sqfvm ../sqfvm-runtime/sqfvm_windows_x64/sqfvm.exe` | PASS | 31 source checks +19 lifecycle assertions +20 extracted production reconstruction assertions. Constructor/world/clock host adapters are explicit. |
+| SQF-VM `--automated --suppress-welcome --no-work-print --input-sqf tests/persistence_clock_regression.sqf` | PASS, 21 | Core/CIV clock translation, sentinels, elapsed pause carry, immutable input, legacy/future format and repeated restart. Completion marker: CLOCK REGRESSION COMPLETE. |
+| Same SQF-VM invocation for `tests/lead_decay_regression.sqf` | PASS, 12 | Same-age and cadence invariance, 12-slot tuple, legacy adoption, restart and original floor balancing. Completion marker: LEAD REGRESSION COMPLETE. |
+| CI config sanity routine for changed CfgFunctions/CfgRemoteExec/CfgDialogs; complete registry inventory | PASS | 629 registered functions, no missing body or duplicate registration; all new helpers registered. mission.sqm unchanged. |
+| Independent security/clock source review and restart reconstruction review | PASS | No additional unresolved critical defect. Reconstruction preserves saved progress and completed objectives do not respawn. |
+| Dedicated MP, JIP, reconnect/respawn, live save/restart, cleanup/physics and visual forms | BLOCKED | Arma server/runtime inaccessible. Run the ten-minute smoke and subsystem annexes before release; local VM checks do not establish these properties. |
+
+The local regression aggregator initially looked for the wrong completion text on the clock/lead scripts; inspection of their complete clean logs verified their real success markers (21/12). No production assertion failed in those runs. All raw evidence is retained in the task's `repairs/evidence/` folder. Primary coverage/migration/rollback: `docs/qa/Critical_Repairs_Result_2026-09-06.md` and contract annexes. Lower-priority F21/F22/F23/F27 remain outside the critical scope. No live campaign/profile deployment or main-branch merge occurred.
+
+---
+
 ## 2026-09-06 — Critical endpoint repairs (Mode I)
 
 **Branch/Commit:** `repair/critical-review-2026-09-06` @ `0151396c811939aa45a1190510d32605f18f4c7f` (review base; repair working tree, deployment-only parent ab040bd).

@@ -15,7 +15,8 @@ require_grep() {
 
 require_grep 'class casreqAirbaseAvailability' config/CfgFunctions.hpp "CASREQ airbase availability function is registered"
 require_grep 'ARC_fnc_casreqAirbaseAvailability' functions/casreq/fn_casreqDecide.sqf "CASREQ approval checks AIRBASESUB availability"
-require_grep 'approval blocked by AIRBASESUB availability' functions/casreq/fn_casreqDecide.sqf "CASREQ approval has operator-facing AIRBASESUB block"
+require_grep 'if \(!_assetOk\) exitWith.*AIRBASESUB:.*call _deny' functions/casreq/fn_casreqDecide.sqf "CASREQ approval rejects unavailable assignment with AIRBASESUB reason"
+require_grep 'private _deny.*ARC_fnc_clientHint.*owner _unit' functions/casreq/fn_casreqDecide.sqf "CASREQ approval denial reaches the requesting operator"
 require_grep 'ARC_fnc_casreqAirbaseAvailability' functions/casreq/fn_casreqExecute.sqf "CASREQ execute re-checks AIRBASESUB availability"
 require_grep 'airbase_availability' functions/core/fn_publicBroadcastState.sqf "Public CASREQ snapshot surfaces AIRBASESUB availability"
 

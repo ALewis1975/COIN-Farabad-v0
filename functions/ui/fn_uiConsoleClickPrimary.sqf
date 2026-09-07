@@ -39,6 +39,12 @@ switch (_tab) do
 
                 switch (_data) do
                 {
+                    case "CAS_INBOX":
+                    {
+                        _handled = true;
+                        closeDialog 0;
+                        [] spawn ARC_fnc_casreqClientInbox;
+                    };
                     case "FIELD_JTAC_CAS":
                     {
                         _handled = true;

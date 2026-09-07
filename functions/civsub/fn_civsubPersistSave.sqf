@@ -1,3 +1,6 @@
+private _clockHg = compile "params ['_h','_k','_d']; (_h) getOrDefault [_k,_d]";
+private _clockGet = compile "params ['_h','_k']; (_h) get _k";
+private _clockKeys = compile "params ['_h']; keys _h";
 /*
     ARC_fnc_civsubPersistSave
 
@@ -14,6 +17,7 @@
 */
 
 if (!isServer) exitWith {false};
+if (missionNamespace getVariable ["civsub_v1_clockBlocked", false]) exitWith {false};
 if !(missionNamespace getVariable ["civsub_v1_persist", true]) exitWith {true};
 
 if !(missionNamespace getVariable ["civsub_v1_enabled", false]) exitWith {false};
@@ -33,115 +37,116 @@ if !(_db isEqualType createHashMap) then { _db = createHashMap; };
 // Serialize districts as fixed-order arrays for persistence stability.
 private _districtArr = [];
 {
-    private _d = _districts get _x;
+    private _d = ([_districts, _x] call _clockGet);
     if !(_d isEqualType createHashMap) then { continue; };
 
-    private _centroid = _d getOrDefault ["centroid", [0,0]];
+    private _centroid = ([_d, "centroid", [0,0]] call _clockHg);
     private _row = [
-        _d getOrDefault ["id", _x],
+        ([_d, "id", _x] call _clockHg),
         _centroid,
-        _d getOrDefault ["radius_m", 0],
-        _d getOrDefault ["pop_total", 0],
+        ([_d, "radius_m", 0] call _clockHg),
+        ([_d, "pop_total", 0] call _clockHg),
 
-        _d getOrDefault ["W_EFF_U", 0],
-        _d getOrDefault ["R_EFF_U", 0],
-        _d getOrDefault ["G_EFF_U", 0],
+        ([_d, "W_EFF_U", 0] call _clockHg),
+        ([_d, "R_EFF_U", 0] call _clockHg),
+        ([_d, "G_EFF_U", 0] call _clockHg),
 
-        _d getOrDefault ["W_BASE_U", 45],
-        _d getOrDefault ["R_BASE_U", 55],
-        _d getOrDefault ["G_BASE_U", 35],
+        ([_d, "W_BASE_U", 45] call _clockHg),
+        ([_d, "R_BASE_U", 55] call _clockHg),
+        ([_d, "G_BASE_U", 35] call _clockHg),
 
-        _d getOrDefault ["food_idx", 50],
-        _d getOrDefault ["water_idx", 50],
-        _d getOrDefault ["fear_idx", 50],
+        ([_d, "food_idx", 50] call _clockHg),
+        ([_d, "water_idx", 50] call _clockHg),
+        ([_d, "fear_idx", 50] call _clockHg),
 
-        _d getOrDefault ["cooldown_nextLead_ts", 0],
-        _d getOrDefault ["cooldown_nextAttack_ts", 0],
-        _d getOrDefault ["last_player_touch_ts", 0]
-        ,_d getOrDefault ["civ_cas_kia", 0]
-        ,_d getOrDefault ["civ_cas_wia", 0]
-        ,_d getOrDefault ["crime_db_hits", 0]
-        ,_d getOrDefault ["detentions_initiated", 0]
-        ,_d getOrDefault ["detentions_handed_off", 0]
-        ,_d getOrDefault ["aid_events", 0]
+        ([_d, "cooldown_nextLead_ts", 0] call _clockHg),
+        ([_d, "cooldown_nextAttack_ts", 0] call _clockHg),
+        ([_d, "last_player_touch_ts", 0] call _clockHg)
+        ,([_d, "civ_cas_kia", 0] call _clockHg)
+        ,([_d, "civ_cas_wia", 0] call _clockHg)
+        ,([_d, "crime_db_hits", 0] call _clockHg)
+        ,([_d, "detentions_initiated", 0] call _clockHg)
+        ,([_d, "detentions_handed_off", 0] call _clockHg)
+        ,([_d, "aid_events", 0] call _clockHg)
     ];
 
     _districtArr pushBack _row;
-} forEach (keys _districts);
+} forEach ([_districts] call _clockKeys);
 
 // Serialize identities (touched-only) as fixed-order arrays.
 private _idArr = [];
 {
-    private _rec = _ids get _x;
+    private _rec = ([_ids, _x] call _clockGet);
     if !(_rec isEqualType createHashMap) then { continue; };
 
-    private _flags = _rec getOrDefault ["flags", []];
+    private _flags = ([_rec, "flags", []] call _clockHg);
     if !(_flags isEqualType []) then { _flags = []; };
 
-    private _seen = _rec getOrDefault ["seen_by", createHashMap];
+    private _seen = ([_rec, "seen_by", createHashMap] call _clockHg);
     private _seenRows = [];
     if (_seen isEqualType createHashMap) then {
         {
-            private _row = _seen get _x;
+            private _row = ([_seen, _x] call _clockGet);
             if (_row isEqualType [] && {count _row >= 3}) then {
-                _seenRows pushBack [_x, _row # 0, _row # 1, _row # 2];
+                _seenRows pushBack [_x, (_row select 0), (_row select 1), (_row select 2)];
             };
-        } forEach (keys _seen);
+        } forEach ([_seen] call _clockKeys);
     };
 
     _idArr pushBack [
-        _rec getOrDefault ["civ_uid", _x],
-        _rec getOrDefault ["first_name", ""],
-        _rec getOrDefault ["last_name", ""],
-        _rec getOrDefault ["sex", ""],
-        _rec getOrDefault ["dob_iso", ""],
-        _rec getOrDefault ["nationality", ""],
-        _rec getOrDefault ["home_district_id", ""],
-        _rec getOrDefault ["home_pos", [0,0,0]],
-        _rec getOrDefault ["occupation", ""],
-        _rec getOrDefault ["background", ""],
-        _rec getOrDefault ["passport_serial", ""],
-        _rec getOrDefault ["passport_expires_iso", ""],
-        _rec getOrDefault ["passport_isPassport", true],
+        ([_rec, "civ_uid", _x] call _clockHg),
+        ([_rec, "first_name", ""] call _clockHg),
+        ([_rec, "last_name", ""] call _clockHg),
+        ([_rec, "sex", ""] call _clockHg),
+        ([_rec, "dob_iso", ""] call _clockHg),
+        ([_rec, "nationality", ""] call _clockHg),
+        ([_rec, "home_district_id", ""] call _clockHg),
+        ([_rec, "home_pos", [0,0,0]] call _clockHg),
+        ([_rec, "occupation", ""] call _clockHg),
+        ([_rec, "background", ""] call _clockHg),
+        ([_rec, "passport_serial", ""] call _clockHg),
+        ([_rec, "passport_expires_iso", ""] call _clockHg),
+        ([_rec, "passport_isPassport", true] call _clockHg),
         _flags,
-        _rec getOrDefault ["wanted_level", 0],
+        ([_rec, "wanted_level", 0] call _clockHg),
         _seenRows,
-        _rec getOrDefault ["last_interaction_ts", 0],
+        ([_rec, "last_interaction_ts", 0] call _clockHg),
         // Phase 7: detention status (optional; backward compatible)
-        _rec getOrDefault ["status_detained", false],
-        _rec getOrDefault ["status_detainedAt", 0],
-        _rec getOrDefault ["status_detainedDistrictId", ""],
-        _rec getOrDefault ["status_handedOff", false],
-        _rec getOrDefault ["status_handedOffAt", 0],
-        _rec getOrDefault ["status_handedOffTo", ""],
-        _rec getOrDefault ["status_releasedAt", 0],
-        _rec getOrDefault ["poi_id", ""],
-        _rec getOrDefault ["charges", []]
+        ([_rec, "status_detained", false] call _clockHg),
+        ([_rec, "status_detainedAt", 0] call _clockHg),
+        ([_rec, "status_detainedDistrictId", ""] call _clockHg),
+        ([_rec, "status_handedOff", false] call _clockHg),
+        ([_rec, "status_handedOffAt", 0] call _clockHg),
+        ([_rec, "status_handedOffTo", ""] call _clockHg),
+        ([_rec, "status_releasedAt", 0] call _clockHg),
+        ([_rec, "poi_id", ""] call _clockHg),
+        ([_rec, "charges", []] call _clockHg)
     ];
-} forEach (keys _ids);
+} forEach ([_ids] call _clockKeys);
 
 // Serialize crime DB records
 private _crimeArr = [];
 {
-    private _rec = _db get _x;
+    private _rec = ([_db, _x] call _clockGet);
     if !(_rec isEqualType createHashMap) then { continue; };
 
-    private _hist = _rec getOrDefault ["status_history", []];
+    private _hist = ([_rec, "status_history", []] call _clockHg);
     if !(_hist isEqualType []) then { _hist = []; };
 
     _crimeArr pushBack [
-        _rec getOrDefault ["poi_id", _x],
-        _rec getOrDefault ["category", ""],
-        _rec getOrDefault ["homeDistrictId", ""],
-        _rec getOrDefault ["passport_serial", ""],
-        _rec getOrDefault ["is_hvt", false],
-        _rec getOrDefault ["status", ""],
-        _rec getOrDefault ["status_ts", 0],
+        ([_rec, "poi_id", _x] call _clockHg),
+        ([_rec, "category", ""] call _clockHg),
+        ([_rec, "homeDistrictId", ""] call _clockHg),
+        ([_rec, "passport_serial", ""] call _clockHg),
+        ([_rec, "is_hvt", false] call _clockHg),
+        ([_rec, "status", ""] call _clockHg),
+        ([_rec, "status_ts", 0] call _clockHg),
         _hist
     ];
-} forEach (keys _db);
+} forEach ([_db] call _clockKeys);
 
 private _state = [
+    ["persistenceClock", [1, serverTime, systemTimeUTC, "FREEZE_OFFLINE"]],
     ["version", missionNamespace getVariable ["civsub_v1_version", 1]],
     ["campaign_id", profileNamespace getVariable ["FARABAD_CIVSUB_V1_CAMPAIGN_ID", ""]],
     ["seed", missionNamespace getVariable ["civsub_v1_seed", 1337]],
@@ -152,6 +157,7 @@ private _state = [
 ];
 
 profileNamespace setVariable ["FARABAD_CIVSUB_V1_STATE", str _state];
+profileNamespace setVariable ["FARABAD_CIVSUB_V1_VERSION", "1.1.0-clock1"];
 saveProfileNamespace;
 
 missionNamespace setVariable ["civsub_v1_lastSave_ts", serverTime, true];

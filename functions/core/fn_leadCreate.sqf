@@ -80,6 +80,9 @@ private _id = format ["ARC_lead_%1", _counter];
 
 private _now = serverTime;
 private _expiresAt = if (_expiresIn > 0) then { _now + _expiresIn } else { -1 };
+// Confidence is evaluated from this immutable basis, never the previous result.
+_missionMeta = _missionMeta select {!(_x isEqualType [] && {count _x >= 1} && {(_x select 0) in ["leadDecayV","leadDecayStrength","leadDecayStartedAt","leadDecayTtl"]})};
+_missionMeta append [["leadDecayV",1],["leadDecayStrength",_strength],["leadDecayStartedAt",_now],["leadDecayTtl",_expiresIn max 0]];
 
 private _leads = ["leadPool", []] call ARC_fnc_stateGet;
 if (!(_leads isEqualType [])) then { _leads = []; };
