@@ -107,6 +107,22 @@ if (_nearPlayers) then
         continue;
     };
 
+    // A later task can reuse a scene actor before its old cleanup entry expires.
+    // Keep the entry until that active owner releases it; explicit reset still wins.
+    if (!_force) then
+    {
+        private _activeTaskId = ["activeTaskId", ""] call ARC_fnc_stateGet;
+        private _ownerTaskIds = [
+            _obj getVariable ["ARC_localSupportTaskId", ""],
+            _obj getVariable ["ARC_overlayTaskId", ""]
+        ];
+        if (_activeTaskId isEqualType "" && { !(_activeTaskId isEqualTo "") } && { _activeTaskId in _ownerTaskIds }) then
+        {
+            _new pushBack [_nid, _objPos, _radius, _earliest, _label];
+            continue;
+        };
+    };
+
     // Vehicles: delete crew first, then the vehicle.
     if (_obj isKindOf "LandVehicle" || { _obj isKindOf "Air" } || { _obj isKindOf "Ship" }) then
     {

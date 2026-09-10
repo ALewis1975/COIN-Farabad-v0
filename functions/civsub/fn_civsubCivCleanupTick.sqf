@@ -27,6 +27,13 @@ if !(_active isEqualType []) then { _active = []; };
 private _q = missionNamespace getVariable ["civsub_v1_civ_despawnQueue", []];
 if !(_q isEqualType []) then { _q = []; };
 
+// Bounded, server-local diagnostic snapshot (replaced each tick; never persisted).
+private _protectedCount = 0;
+private _processedCount = 0;
+private _deletedCount = 0;
+private _retainedCount = 0;
+private _samples = [];
+
 // Scan registry for invalid or out-of-scope
 {
     private _k = _x;
@@ -48,10 +55,10 @@ if !(_q isEqualType []) then { _q = []; };
                 _reg deleteAt _k;
             } else {
                 // If district is no longer active, queue for despawn (living only)
-                if (!(_did in _active)) then {
-                    if (!([_u] call ARC_fnc_civsubCivIsProtected)) then {
-                        _q pushBackUnique _k;
-                    };
+                private _protected = [_u] call ARC_fnc_civsubCivIsProtected;
+                if (_protected) then { _protectedCount = _protectedCount + 1; };
+                if (!(_did in _active) && { !_protected }) then {
+                    _q pushBackUnique _k;
                 };
             };
         };
@@ -70,18 +77,41 @@ if (_n > 0) then
     {
         private _k = _q deleteAt 0;
         private _row = [_reg, _k, createHashMap] call _hg;
+        private _remove = true;
+        _processedCount = _processedCount + 1;
         if (_row isEqualType createHashMap) then {
             private _u = [_row, "unit", objNull] call _hg;
             if (!isNull _u) then {
-                [_u] call ARC_fnc_civsubCivDespawnUnit;
+                private _uid = _u getVariable ["civ_uid", ""];
+                private _localTask = _u getVariable ["ARC_localSupportTaskId", ""];
+                private _overlayTask = _u getVariable ["ARC_overlayTaskId", ""];
+                private _grid = mapGridPosition (getPosATL _u);
+                _remove = [_u] call ARC_fnc_civsubCivDespawnUnit;
+                private _outcome = if (_remove) then { "DELETED" } else { "RETAINED" };
+                _samples pushBack [_k, _outcome, _uid, _localTask, _overlayTask, _grid];
+                if (_remove) then {
+                    _deletedCount = _deletedCount + 1;
+                } else {
+                    _retainedCount = _retainedCount + 1;
+                    diag_log format [
+                        "[CIVSUB][CIVS][CLEANUP] RETAIN ts=%1 actor=SERVER netId=%2 civ_uid=%3 localTask=%4 overlayTask=%5 grid=%6 reason=DELETION_REFUSED",
+                        serverTime, _k, _uid, _localTask, _overlayTask, _grid
+                    ];
+                };
             };
         };
-        _reg deleteAt _k;
+        // Drop the consumed queue entry, but never orphan a retained live actor.
+        if (_remove) then { _reg deleteAt _k; };
     };
 };
 
 missionNamespace setVariable ["civsub_v1_civ_registry", _reg, true];
 missionNamespace setVariable ["civsub_v1_civ_despawnQueue", _q, true];
 missionNamespace setVariable ["civsub_v1_civ_cleanup_last_ts", serverTime, true];
+missionNamespace setVariable [
+    "civsub_v1_civ_cleanup_snapshot",
+    [1, serverTime, count _reg, count _q, _protectedCount, _processedCount, _deletedCount, _retainedCount, _samples],
+    false
+];
 
 true
